@@ -8,3 +8,4 @@ xcffib
 numpy 
 xlrd   
 SQLAlchemy  
+beautifulsoup4
