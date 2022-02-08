@@ -48,8 +48,11 @@ from xml.dom.minidom import Node
 
 import platform
 if platform.system() == 'Windows':
-    import winpaths
-    winpaths_appdata = winpaths.get_appdata()
+    #import winpaths
+    #winpaths_appdata = winpaths.get_appdata()
+    import os
+    winpaths_appdata = os.getenv('APPDATA')
+    print (winpaths_appdata) #debug
 else:
     winpaths_appdata = False
 
