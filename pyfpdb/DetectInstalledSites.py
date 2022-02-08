@@ -49,9 +49,12 @@ import sys
 import Configuration
 
 if platform.system() == 'Windows':
-    import winpaths
-    PROGRAM_FILES = winpaths.get_program_files()
-    LOCAL_APPDATA = winpaths.get_local_appdata()
+    #import winpaths
+    #PROGRAM_FILES = winpaths.get_program_files()
+    #LOCAL_APPDATA = winpaths.get_local_appdata()
+    import os
+    PROGRAM_FILES = os.getenv('ProgramW6432')
+    LOCAL_APPDATA = os.getenv('APPDATA')
 
 class DetectInstalledSites(object):
 
