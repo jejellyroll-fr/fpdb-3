@@ -1,0 +1,5074 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Free Poker Database\n"
+"POT-Creation-Date: 2015-02-05 19:00+ACDT\n"
+"PO-Revision-Date: 2011-05-13 08:55+0000\n"
+"Last-Translator: jax <jax@netmagnet.ro>\n"
+"Language-Team: Romanian (Romania) (http://www.transifex.net/projects/p/fpdb/"
+"team/ro_RO/)\n"
+"Language: ro_RO\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?"
+"2:1))\n"
+
+#: AbsoluteToFpdb.py:155
+msgid "AbsoluteToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: AbsoluteToFpdb.py:209
+#, fuzzy
+msgid ""
+"AbsoluteToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: AbsoluteToFpdb.py:219
+#, fuzzy
+msgid "AbsoluteToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: AbsoluteToFpdb.py:289 CakeToFpdb.py:298 EnetToFpdb.py:307
+#: EverleafToFpdb.py:241 MicrogamingToFpdb.py:242 OnGameToFpdb.py:396
+#: PokerStarsToFpdb.py:461 PokerTrackerToFpdb.py:468
+#: SealsWithClubsToFpdb.py:245 WinamaxToFpdb.py:375
+msgid "reading antes"
+msgstr "citire ante-uri"
+
+#: AbsoluteToFpdb.py:298 BetfairToFpdb.py:160
+msgid "Player bringing in: %s for %s"
+msgstr "Jucatorul aduce: %s for %s"
+
+#: AbsoluteToFpdb.py:301 EverleafToFpdb.py:253
+msgid "No bringin found."
+msgstr "Nu s-a adus nimic."
+
+#: AbsoluteToFpdb.py:308 EverleafToFpdb.py:260
+msgid "No small blind"
+msgstr "Lipsa small blind"
+
+#: AbsoluteToFpdb.py:356 EverleafToFpdb.py:287
+msgid "%s cannot read all stud/razz hands yet."
+msgstr "%s nu poate citi toate miinile stud/razz inca."
+
+#: AbsoluteToFpdb.py:383 BetOnlineToFpdb.py:580 BetfairToFpdb.py:197
+#: BossToFpdb.py:419 BovadaToFpdb.py:561 CakeToFpdb.py:361 EnetToFpdb.py:371
+#: EntractionToFpdb.py:324 EverestToFpdb.py:293 EverestToFpdb.py:294
+#: EverleafToFpdb.py:312 FulltiltToFpdb.py:648 MergeToFpdb.py:641
+#: MicrogamingToFpdb.py:384 OnGameToFpdb.py:458 PacificPokerToFpdb.py:452
+#: PkrToFpdb.py:335 PokerStarsToFpdb.py:543 PokerTrackerToFpdb.py:636
+#: SealsWithClubsToFpdb.py:292 WinamaxToFpdb.py:425 iPokerToFpdb.py:538
+msgid "Unimplemented %s: '%s' '%s'"
+msgstr "Neimplementat %s: '%s' '%s'"
+
+#: Anonymise.py:54
+msgid "Could not find file %s"
+msgstr "Nu se gaseste fisierul %s"
+
+#: Anonymise.py:60
+msgid "Output being written to %s"
+msgstr "Iesirea este scrisa in %s"
+
+#: Aux_Base.py:266
+msgid "Aux_Seats.save_layout called - this shouldn't happen"
+msgstr ""
+
+#: Aux_Base.py:267
+msgid "save_layout method should be handled in the aux"
+msgstr ""
+
+#: Aux_Base.py:316
+#, fuzzy
+msgid "Error finding hero seat."
+msgstr "Eroare la gasirea locului actual.\n"
+
+#: Aux_Hud.py:265
+#, fuzzy
+msgid "All Time"
+msgstr "  De oricind"
+
+#: Aux_Hud.py:265 Aux_Hud.py:266 Aux_Hud.py:267
+msgid "Since:"
+msgstr "De la:"
+
+#: Aux_Hud.py:266
+#, fuzzy
+msgid "Session"
+msgstr "Sesiuni"
+
+#: Aux_Hud.py:267
+#, fuzzy
+msgid "n Days"
+msgstr "  %s Zile"
+
+#: Aux_Hud.py:270
+#, fuzzy
+msgid "Any Number"
+msgstr "  Orice numar"
+
+#: Aux_Hud.py:270 Aux_Hud.py:271 Aux_Hud.py:272
+#, fuzzy
+msgid "Number of Seats:"
+msgstr "Numar de locuri"
+
+#: Aux_Hud.py:271 Aux_Hud.py:305 Aux_Hud.py:322
+#, fuzzy
+msgid "Custom"
+msgstr "  Personalizat"
+
+#: Aux_Hud.py:272
+#, fuzzy
+msgid "Exact"
+msgstr "  Exact"
+
+#: Aux_Hud.py:275
+msgid "For This Blind Level Only"
+msgstr "Pentru acest nivel de blind doar"
+
+#: Aux_Hud.py:276 Aux_Hud.py:277 Aux_Hud.py:278
+#, fuzzy
+msgid "%s to %s * Current Blinds"
+msgstr "  0.1 la 10 x Blindurile actuale"
+
+#: Aux_Hud.py:279
+#, fuzzy
+msgid "All Levels"
+msgstr "  Toate nivelele"
+
+#: Aux_Hud.py:282
+msgid "Force layout"
+msgstr ""
+
+#: Aux_Hud.py:294
+#, fuzzy
+msgid "Restart This HUD"
+msgstr "Opreste acest HUD"
+
+#: Aux_Hud.py:295
+msgid "Save HUD Layout"
+msgstr "Salveaza amplasarea HUD"
+
+#: Aux_Hud.py:296
+#, fuzzy
+msgid "Stop this HUD"
+msgstr "Opreste acest HUD"
+
+#: Aux_Hud.py:297
+msgid "Close"
+msgstr ""
+
+#: Aux_Hud.py:301
+#, fuzzy
+msgid "Show Player Stats for"
+msgstr "Arata Statisticile Jucatorului"
+
+#: Aux_Hud.py:308 Aux_Hud.py:325
+#, fuzzy
+msgid "To"
+msgstr "La:"
+
+#: Aux_Hud.py:318
+#, fuzzy
+msgid "Show Opponent Stats for"
+msgstr "Arata statisticile oponentilor"
+
+#: BetOnlineToFpdb.py:209
+msgid "BetOnlineToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: BetOnlineToFpdb.py:212
+msgid "Partial hand history: 'Player joining table'"
+msgstr ""
+
+#: BetOnlineToFpdb.py:250
+#, fuzzy
+msgid ""
+"BetOnlineToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: BetOnlineToFpdb.py:267
+#, fuzzy
+msgid "BetOnlineToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: BetOnlineToFpdb.py:329
+#, fuzzy
+msgid "BetOnlineToFpdb.readHandInfo: Failed to detect currency."
+msgstr "Nu pot detecta moneda."
+
+#: BetOnlineToFpdb.py:329
+#, fuzzy
+msgid "Hand ID"
+msgstr "Miini"
+
+#: BetOnlineToFpdb.py:360 BovadaToFpdb.py:188
+msgid "Partial hand history"
+msgstr ""
+
+#: BetOnlineToFpdb.py:367 CakeToFpdb.py:266 EnetToFpdb.py:276
+#: EntractionToFpdb.py:242 OnGameToFpdb.py:366 PacificPokerToFpdb.py:310
+#: PartyPokerToFpdb.py:439 PokerStarsToFpdb.py:386 PokerTrackerToFpdb.py:422
+#: SealsWithClubsToFpdb.py:205 WinamaxToFpdb.py:342
+#, fuzzy
+msgid "not found"
+msgstr "Fisierul nu a fost gasit"
+
+#: BetOnlineToFpdb.py:485
+msgid "Partial hand history: 'No blind info'"
+msgstr ""
+
+#: BetOnlineToFpdb.py:580 BetfairToFpdb.py:197 BossToFpdb.py:419
+#: BovadaToFpdb.py:561 CakeToFpdb.py:361 EnetToFpdb.py:371
+#: EntractionToFpdb.py:324 FulltiltToFpdb.py:648 GuiAutoImport.py:157
+#: GuiPositionalStats.py:137 GuiStove.py:218 GuiStove.py:222 GuiStove.py:226
+#: GuiStove.py:230 GuiStove.py:237 GuiStove.py:239 Hand.py:1117
+#: IdentifySite.py:214 ImapFetcher.py:44 ImapFetcher.py:53
+#: MicrogamingToFpdb.py:384 OnGameToFpdb.py:458 PacificPokerToFpdb.py:452
+#: PkrToFpdb.py:335 PokerStarsToFpdb.py:543 PokerTrackerToFpdb.py:636
+#: SealsWithClubsToFpdb.py:292 WinamaxToFpdb.py:425 iPokerToFpdb.py:538
+msgid "DEBUG:"
+msgstr "DEBUG:"
+
+#: BetfairToFpdb.py:76
+msgid "BetfairToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: BetfairToFpdb.py:108
+#, fuzzy
+msgid "BetfairToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: BetfairToFpdb.py:123
+#, fuzzy
+msgid "Less than 2 players found in hand %s."
+msgstr "readPlayerStacks: Mai putin de 2 jucatori intr-o mina"
+
+#: BetfairToFpdb.py:163
+msgid "No bringin found"
+msgstr "Nu s-a adus nimic."
+
+#: BossToFpdb.py:130
+msgid "BossToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: BossToFpdb.py:168
+#, fuzzy
+msgid "BossToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: BossToFpdb.py:182
+#, fuzzy
+msgid "BossToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: BossToFpdb.py:431
+#, fuzzy
+msgid ""
+"BossToFpdb.calculateAntes(): '%s': Major failure while calculating pot: '%s'"
+msgstr "Pot.end(): Esec major in timpul calcularii potului: '%s'"
+
+#: BovadaSummary.py:57
+msgid "BovadaSummary.parseSummary: '%s'"
+msgstr ""
+
+#: BovadaSummary.py:67
+msgid ""
+"BovadaSummary.parseSummary: Text does not appear to be a tournament '%s'"
+msgstr ""
+
+#: BovadaSummary.py:108
+#, fuzzy
+msgid "BovadaSummary.parseSummary: Failed to detect currency"
+msgstr "Nu pot detecta moneda."
+
+#: BovadaToFpdb.py:182
+#, fuzzy
+msgid "BovadaToFpdb.determineGameType: '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: BovadaToFpdb.py:229
+#, fuzzy
+msgid ""
+"BovadaToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: BovadaToFpdb.py:242
+#, fuzzy
+msgid "BovadaToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: BovadaToFpdb.py:277
+#, fuzzy
+msgid "BovadaToFpdb.readHandInfo: Failed to detect currency."
+msgstr "Nu pot detecta moneda."
+
+#: BovadaToFpdb.py:327
+#, fuzzy
+msgid "BovadaToFpdb.readPlayerStacks: '%s'"
+msgstr "readplayerstacks: re este '%s'"
+
+#: BovadaToFpdb.py:335
+#, fuzzy
+msgid "Hand.%s: '%s' unknown player seat from position: '%s'"
+msgstr ""
+"[EROARE] S-a incercat adaugarea cartilor proprii pentru un jucator "
+"necunoscut: %s"
+
+#: CakeToFpdb.py:147
+msgid "CakeToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: CakeToFpdb.py:189
+#, fuzzy
+msgid "CakeToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: CakeToFpdb.py:202
+#, fuzzy
+msgid "CakeToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: CakeToFpdb.py:243
+#, fuzzy
+msgid "CakeToFpdb.readHandInfo: Failed to detect currency."
+msgstr "Nu pot detecta moneda."
+
+#: Card.py:502
+msgid "Convert list ID to card (e.g. 1 to 2h)"
+msgstr ""
+
+#: Card.py:503
+msgid "Convert card to list ID (e.g. 2h to 1)"
+msgstr ""
+
+#: Card.py:507
+msgid "Enter list ID:"
+msgstr ""
+
+#: Card.py:508
+#, fuzzy
+msgid "Card:"
+msgstr "Masa:"
+
+#: Card.py:511
+msgid "Enter card:"
+msgstr ""
+
+#: Card.py:512
+#, fuzzy
+msgid "Encoded card:"
+msgstr "Cartile comune"
+
+#: Card.py:514
+msgid "Please enter 1 or 2"
+msgstr ""
+
+#: Charset.py:46 Charset.py:61 Charset.py:76
+msgid "Could not convert: \"%s\""
+msgstr "Nu pot converti: \"%s\""
+
+#: Charset.py:49 Charset.py:64 Charset.py:79
+msgid "Could not encode: \"%s\""
+msgstr "Nu pot coda: \"%s\""
+
+#: Configuration.py:174 Configuration.py:181 fpdb.pyw:882
+msgid "Config file has been created at %s."
+msgstr "Fisierul de configurare a fost creat ca %s."
+
+#: Configuration.py:194
+#, fuzzy
+msgid "No %r found in \"%r\" or \"%r\"."
+msgstr ""
+"Nu am gasit %s\n"
+"   in %s\n"
+"   sau %s"
+
+#: Configuration.py:195
+#, fuzzy
+msgid "Config file has been created at %r."
+msgstr "Fisierul de configurare a fost creat ca %s."
+
+#: Configuration.py:198 Configuration.py:199
+msgid "Error copying .example config file, cannot fall back. Exiting."
+msgstr ""
+"Eroare la copierea fisierului de configurare .example, nu pot reveni. Iesire."
+
+#: Configuration.py:203
+msgid "No %s found, cannot fall back. Exiting."
+msgstr "Nu s-a gasit %s, nu pot reveni. Iesire."
+
+#: Configuration.py:221
+#, fuzzy
+msgid "Could not setup log file %s"
+msgstr "Nu se gaseste fisierul %s"
+
+#: Configuration.py:231 Database.py:804 Database.py:805
+msgid "Creating directory: '%s'"
+msgstr "Creare director: '%s'"
+
+#: Configuration.py:263
+msgid "Default encoding set to US-ASCII, defaulting to CP1252 instead."
+msgstr "Codarea implicita pentru US-ASCII a fost schimbata cu CP1252."
+
+#: Configuration.py:263
+msgid "Please report this problem."
+msgstr "Va rugam raportati aceasta problema."
+
+#: Configuration.py:647
+msgid "config.general: adding %s = %s"
+msgstr "config.general: adaugare %s = %s"
+
+#: Configuration.py:694 Configuration.py:695
+msgid "bad number in xalignment was ignored"
+msgstr "numarul gresit din xalignment a fost ignorat"
+
+#: Configuration.py:750 Configuration.py:757 Configuration.py:776
+#: Configuration.py:783
+msgid "Invalid config value for %s, defaulting to %s"
+msgstr "Valoare invalida in configurare pentru %s, schimb cu %s"
+
+#: Configuration.py:823 Configuration.py:824
+msgid "Configuration file %s not found. Using defaults."
+msgstr ""
+"Fisierul de configurare %s nu a fost gasit. Folosesc setarile implicite."
+
+#: Configuration.py:850
+msgid "Reading configuration file %s"
+msgstr "Citire fisier de configurare %s"
+
+#: Configuration.py:858
+msgid "Error parsing %s."
+msgstr "Eroare in timpul parcurgerii %s."
+
+#: Configuration.py:858 Configuration.py:984
+msgid "See error log file."
+msgstr "Vezi fisierul jurnal pentru erori."
+
+#: Configuration.py:984
+msgid "Error parsing example configuration file %s."
+msgstr "Eroare in timpul parcurgerii fisierului exemplu de configurare %s."
+
+#: Database.py:69
+msgid "Not using sqlalchemy connection pool."
+msgstr "Nu se foloseste sqlalchemy pentru gama de conexiuni."
+
+#: Database.py:76
+msgid "Not using numpy to define variance in sqlite."
+msgstr "Nu se foloseste numpy pentru a defini variance in sqlite."
+
+#: Database.py:749
+msgid "*** WARNING UNKNOWN MYSQL ERROR:"
+msgstr "*** ATENTIE EROARE MYSQL NECUNOSCUTA:"
+
+#: Database.py:809
+msgid "Connecting to SQLite: %s"
+msgstr "Realizare conexiune spre SQLite: %s"
+
+#: Database.py:822
+msgid "Some database functions will not work without NumPy support"
+msgstr ""
+"Unele functii ale bazei de date nu vor functiona fara suport pentru NumPy"
+
+#: Database.py:848
+msgid "Outdated or too new database version (%s)."
+msgstr "Versiunea bazei de date este prea veche sau prea noua (%s)."
+
+#: Database.py:848 Database.py:859
+msgid "Please recreate tables."
+msgstr "Recreati tabelele."
+
+#: Database.py:854
+msgid "Recreating tables."
+msgstr "Recreare tabele."
+
+#: Database.py:854 Database.py:859
+msgid "Failed to read settings table."
+msgstr "Nu pot citi tabela cu setari"
+
+#: Database.py:880
+msgid "commit %s failed: info=%s value=%s"
+msgstr "comiterea %s a esuat: info=%s valoare=%s"
+
+#: Database.py:884
+msgid "commit failed"
+msgstr "comitere esuata"
+
+#: Database.py:1256
+msgid "ERROR: query %s result does not have player_id as first column"
+msgstr "EROARE: rezultatul cererii %s nu contine player_id ca prima coloana"
+
+#: Database.py:1308
+msgid "getLastInsertId(): problem fetching insert_id? ret=%d"
+msgstr "getLastInsertId(): problema la obtinerea insert_id? ret=%d"
+
+#: Database.py:1320
+msgid "getLastInsertId(%s): problem fetching lastval? row=%d"
+msgstr "getLastInsertId(): problema la obtinerea lastval? coloana=%d"
+
+#: Database.py:1327
+msgid "getLastInsertId(): unknown backend: %d"
+msgstr "getLastInsertId(): backend necunoscut: %d"
+
+#: Database.py:1332
+msgid "*** Database get_last_insert_id error: "
+msgstr "*** Eroare in baza de date la get_last_insert_id: "
+
+#: Database.py:1385
+#, fuzzy
+msgid "warning: drop pg fk %s_%s_fkey failed: %s, continuing ..."
+msgstr ""
+"Renuntarea la cheia straina %s_%s_fkey a esuat: %s, actiunea continua ..."
+
+#: Database.py:1389
+#, fuzzy
+msgid "warning: constraint %s_%s_fkey not dropped: %s, continuing ..."
+msgstr "nu s-a renuntat la constringerea %s_%s_fkey: %s, continuare ..."
+
+#: Database.py:1397
+#, fuzzy
+msgid "dropping mysql index "
+msgstr "Se renunta la index:"
+
+#: Database.py:1403
+#, fuzzy
+msgid "    drop index failed: "
+msgstr "Renuntarea la index a esuat:"
+
+#: Database.py:1408
+#, fuzzy
+msgid "dropping pg index "
+msgstr "Se renunta la index:"
+
+#: Database.py:1421
+#, fuzzy
+msgid "warning: drop index %s_%s_idx failed: %s, continuing ..."
+msgstr "renuntarea la index %s_%s_idx a esuat: %s, actiunea continua..."
+
+#: Database.py:1425
+#, fuzzy
+msgid "warning: index %s_%s_idx not dropped %s, continuing ..."
+msgstr "nu s-a renuntat la indexul %s_%s_idx: %s, actiunea continua..."
+
+#: Database.py:1434
+msgid "prepare import took %s seconds"
+msgstr "pregatirea importarii a durat %s secunde"
+
+#: Database.py:1465 Database.py:1473
+#, fuzzy
+msgid "Creating foreign key "
+msgstr "Creare cheie straina:"
+
+#: Database.py:1471 Database.py:1480 Database.py:1492
+#, fuzzy
+msgid "Create foreign key failed: "
+msgstr "Crearea cheii straine a esuat:"
+
+#: Database.py:1487
+#, fuzzy
+msgid "Creating MySQL index %s %s"
+msgstr "Creare index %s %s"
+
+#: Database.py:1496
+#, fuzzy
+msgid "Creating PostgreSQL index "
+msgstr "Creare index %s %s"
+
+#: Database.py:1501
+#, fuzzy
+msgid "Create index failed: "
+msgstr "Crearea indexului a esuat:"
+
+#: Database.py:1509
+msgid "After import took %s seconds"
+msgstr "Dupa importare a durat %s secunde"
+
+#: Database.py:1543
+msgid "Finished recreating tables"
+msgstr "S-a terminat recrearea tabelelor"
+
+#: Database.py:1626 Database.py:1637
+msgid "***Error dropping tables:"
+msgstr "*** Eroare la stergerea tabelelor:"
+
+#: Database.py:1655
+msgid "Creating index %s %s"
+msgstr "Creare index %s %s"
+
+#: Database.py:1675 Database.py:1682 Database.py:1690
+msgid "Dropping index:"
+msgstr "Se renunta la index:"
+
+#: Database.py:1680 Database.py:1688 Database.py:1695
+msgid "Drop index failed:"
+msgstr "Renuntarea la index a esuat:"
+
+#: Database.py:1710 Database.py:1750
+msgid "set_isolation_level failed:"
+msgstr "set_isolation_level a esuat:"
+
+#: Database.py:1727 Database.py:1735
+msgid "Creating foreign key:"
+msgstr "Creare cheie straina:"
+
+#: Database.py:1733 Database.py:1742
+msgid "Create foreign key failed:"
+msgstr "Crearea cheii straine a esuat:"
+
+#: Database.py:1774 Database.py:1782
+msgid "Dropping foreign key:"
+msgstr "Se renunta la cheia straina:"
+
+#: Database.py:1778 Database.py:1797
+msgid "Drop foreign key %s_%s_fkey failed: %s, continuing ..."
+msgstr ""
+"Renuntarea la cheia straina %s_%s_fkey a esuat: %s, actiunea continua ..."
+
+#: Database.py:1778 Database.py:1797 Database.py:1801 fpdb.pyw:1308
+msgid "Warning:"
+msgstr "Atentie:"
+
+#: Database.py:1794
+msgid "dropped foreign key %s_%s_fkey, continuing ..."
+msgstr "s-a renuntat la cheia straina %s_%s_fkey, actiunea continua ..."
+
+#: Database.py:1801
+msgid "constraint %s_%s_fkey not dropped: %s, continuing ..."
+msgstr "nu s-a renuntat la constringerea %s_%s_fkey: %s, continuare ..."
+
+#: Database.py:2281
+msgid "Error rebuilding hudcache:"
+msgstr "Eroare la recrearea cache-ului pentru hud:"
+
+#: Database.py:2293 Database.py:2299
+msgid "Error during analyze:"
+msgstr "Eroare in timpul analizei:"
+
+#: Database.py:2303
+msgid "Analyze took %.1f seconds"
+msgstr "Analiza a durat %.1f secunde"
+
+#: Database.py:2313 Database.py:2319
+msgid "Error during vacuum:"
+msgstr "Eroare in timpul golirii:"
+
+#: Database.py:2323
+msgid "Vacuum took %.1f seconds"
+msgstr "Golirea a durat %.1f secunde"
+
+#: Database.py:2358
+msgid "Error during lock_for_insert:"
+msgstr "Eroare in timpul lock_for_insert:"
+
+#: Database.py:3811
+msgid "cards ="
+msgstr "carti ="
+
+#: Database.py:3814
+msgid "get_stats took: %4.3f seconds"
+msgstr "get_stats a durat: %4.3f secunde"
+
+#: Database.py:3816
+msgid "Press ENTER to continue."
+msgstr "Apasa ENTER pentru a continua."
+
+#: EnetToFpdb.py:160
+#, fuzzy
+msgid "EnetToFpdb.determineGameType: '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: EnetToFpdb.py:191
+#, fuzzy
+msgid "EnetToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: EnetToFpdb.py:205
+#, fuzzy
+msgid "EnetToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: EnetToFpdb.py:252
+#, fuzzy
+msgid "EnetToFpdb.readHandInfo: Failed to detect currency."
+msgstr "Nu pot detecta moneda."
+
+#: EntractionToFpdb.py:134
+msgid "EntractionToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: EntractionToFpdb.py:165 PokerStarsToFpdb.py:265
+#, fuzzy
+msgid ""
+"PokerStarsToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: EntractionToFpdb.py:184
+#, fuzzy
+msgid "EntractionToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: EntractionToFpdb.py:218
+#, fuzzy
+msgid "EntractionToFpdb.readHandInfo: Failed to detect currency."
+msgstr "Nu pot detecta moneda."
+
+#: EverestToFpdb.py:105
+#, fuzzy
+msgid ""
+"EverestToFpdb.determineGameType: Unable to recognise gametype from: '%s'"
+msgstr "Tip de joc necunoscut in: '%s'"
+
+#: EverestToFpdb.py:166
+#, fuzzy
+msgid "EverestToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: EverleafToFpdb.py:122
+msgid "EverleafToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: EverleafToFpdb.py:157
+#, fuzzy
+msgid ""
+"EverleafToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: EverleafToFpdb.py:170
+#, fuzzy
+msgid "EverleafToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: Filters.py:53
+msgid "Single Draw 2-7 Lowball"
+msgstr ""
+
+#: Filters.py:54
+msgid "Triple Draw 2-7 Lowball"
+msgstr ""
+
+#: Filters.py:55
+msgid "Triple Draw A-5 Lowball"
+msgstr ""
+
+#: Filters.py:56
+msgid "5 Card Stud"
+msgstr ""
+
+#: Filters.py:57
+msgid "Badugi"
+msgstr ""
+
+#: Filters.py:58
+msgid "5 Card Draw"
+msgstr ""
+
+#: Filters.py:59
+msgid "Hold'em"
+msgstr ""
+
+#: Filters.py:60
+msgid "Omaha"
+msgstr ""
+
+#: Filters.py:61
+msgid "Omaha Hi/Lo"
+msgstr ""
+
+#: Filters.py:62
+msgid "Razz"
+msgstr ""
+
+#: Filters.py:63
+msgid "7 Card Stud"
+msgstr ""
+
+#: Filters.py:64
+msgid "7 Card Stud Hi/Lo"
+msgstr ""
+
+#: Filters.py:65
+msgid "5 Card Omaha"
+msgstr ""
+
+#: Filters.py:66
+msgid "5 Card Omaha Hi/Lo"
+msgstr ""
+
+#: Filters.py:67
+msgid "Courchevel"
+msgstr ""
+
+#: Filters.py:68
+msgid "Courchevel Hi/Lo"
+msgstr ""
+
+#: Filters.py:69
+msgid "Double hold'em"
+msgstr ""
+
+#: Filters.py:70
+msgid "Irish"
+msgstr ""
+
+#: Filters.py:71
+msgid "6 Card Omaha"
+msgstr ""
+
+#: Filters.py:74
+msgid "US Dollar"
+msgstr ""
+
+#: Filters.py:75
+msgid "Euro"
+msgstr ""
+
+#: Filters.py:76
+#, fuzzy
+msgid "Tournament Dollar"
+msgstr "Turnee"
+
+#: Filters.py:77
+msgid "Play Money"
+msgstr ""
+
+#: Filters.py:81
+msgid "Show Limits"
+msgstr "Arata Limits"
+
+#: Filters.py:81 Filters.py:82 Filters.py:83 Filters.py:84
+msgid "All"
+msgstr "Tot"
+
+#: Filters.py:81 Filters.py:82 Filters.py:83 Filters.py:84
+msgid "None"
+msgstr "Nimic"
+
+#: Filters.py:85
+msgid "And:"
+msgstr "Si:"
+
+#: Filters.py:85
+msgid "Between:"
+msgstr "Intre:"
+
+#: Filters.py:85
+msgid "Show Number of Players"
+msgstr "Arata Numarul de Jucatori"
+
+#: Filters.py:86
+msgid "Hero:"
+msgstr "Eroul:"
+
+#: Filters.py:86 GuiPrefs.py:32
+msgid "Games"
+msgstr "Jocuri"
+
+#: Filters.py:86 GuiPrefs.py:32
+msgid "Sites"
+msgstr "Site-uri"
+
+#: Filters.py:87
+msgid "Limits:"
+msgstr "Limite:"
+
+#: Filters.py:87
+msgid "Number of Players:"
+msgstr "Numar de jucatori:"
+
+#: Filters.py:87
+#, fuzzy
+msgid "Positions:"
+msgstr "Pozitie"
+
+#: Filters.py:88
+msgid "Grouping:"
+msgstr "Grupare:"
+
+#: Filters.py:88
+msgid "Show Position Stats"
+msgstr "Arata statisticile pozitionale"
+
+#: Filters.py:89
+msgid "Currencies"
+msgstr ""
+
+#: Filters.py:89
+msgid "Date:"
+msgstr "Data:"
+
+#: Filters.py:90
+msgid "All Players"
+msgstr "Toti jucatorii"
+
+#: Filters.py:90 GuiRingPlayerStats.py:39
+#, fuzzy
+msgid "Hole Cards"
+msgstr "Cartile comune"
+
+#: Filters.py:91
+msgid "Ring"
+msgstr "Cash"
+
+#: Filters.py:91
+msgid "Tourney"
+msgstr "Turneu"
+
+#: Filters.py:118
+#, fuzzy
+msgid "Either 0 or more than one site matched for %s"
+msgstr "Fie 0 sau mai mult de un site s-au potrivit (%s) - EEK"
+
+#: Filters.py:173
+msgid "Graphing Options:"
+msgstr "Optiuni de grafica:"
+
+#: Filters.py:418
+msgid "Min # Hands:"
+msgstr "Minim # miini:"
+
+#: Filters.py:446
+msgid "INFO: No tourney types returned from database"
+msgstr "INFO: Nici un tip de turneu returnat de baza de date"
+
+#: Filters.py:447
+msgid "No tourney types returned from database"
+msgstr "Nici un tip de turneu returnat de baza de date"
+
+#: Filters.py:479 Filters.py:652
+msgid "INFO: No games returned from database"
+msgstr "INFO: Nici un joc returnat de baza de date"
+
+#: Filters.py:480 Filters.py:653
+msgid "No games returned from database"
+msgstr "Nici un joc returnat de baza de date"
+
+#: Filters.py:538
+msgid "INFO"
+msgstr ""
+
+#: Filters.py:538 Filters.py:539
+#, fuzzy
+msgid "No positions returned from database"
+msgstr "Nici un joc returnat de baza de date"
+
+#: Filters.py:591
+#, fuzzy
+msgid "No currencies returned from database"
+msgstr "Nici un joc returnat de baza de date"
+
+#: Filters.py:678
+msgid "Show Graph In:"
+msgstr "Arata graficele in:"
+
+#: Filters.py:688
+msgid "Showdown Winnings"
+msgstr "Cistigurile la Showdown"
+
+#: Filters.py:691
+msgid "Non-Showdown Winnings"
+msgstr "Cistigurile fara Showdown"
+
+#: Filters.py:694
+msgid "EV"
+msgstr ""
+
+#: Filters.py:742
+msgid "From:"
+msgstr "De la:"
+
+#: Filters.py:748
+msgid "To:"
+msgstr "La:"
+
+#: Filters.py:863 fpdb.pyw:786
+msgid "Pick a date"
+msgstr "Alege o data"
+
+#: Filters.py:870 fpdb.pyw:793
+msgid "Done"
+msgstr "Gata"
+
+#: FullTiltPokerSummary.py:162 PokerStarsSummary.py:177
+msgid "parseSummary FAIL"
+msgstr ""
+
+#: FullTiltPokerSummary.py:170
+msgid "FullTiltPokerSummary.parseSummaryXLS: '%s' '%s"
+msgstr ""
+
+#: FullTiltPokerSummary.py:207
+msgid "FullTiltPokerSummary.parseSummaryXLS Game '%s' not found"
+msgstr ""
+
+#: FullTiltPokerSummary.py:279
+msgid "FullTiltPokerSummary.parseSummary: '%s'"
+msgstr ""
+
+#: FullTiltPokerSummary.py:383
+msgid "Unable to locate currency"
+msgstr "Nu pot localiza moneda"
+
+#: FulltiltToFpdb.py:218
+msgid "FulltiltToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: FulltiltToFpdb.py:299
+#, fuzzy
+msgid ""
+"FulltiltToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: FulltiltToFpdb.py:312
+#, fuzzy
+msgid "FulltiltToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: FulltiltToFpdb.py:348 PokerStarsToFpdb.py:379 PokerTrackerToFpdb.py:415
+#: PokerTrackerToFpdb.py:435 SealsWithClubsToFpdb.py:195
+msgid "Hand '%s' was cancelled."
+msgstr ""
+
+#: FulltiltToFpdb.py:472 PokerStarsToFpdb.py:391 WinamaxToFpdb.py:308
+msgid "Hand is not cleanly split into pre and post Summary %s."
+msgstr ""
+
+#: FulltiltToFpdb.py:498
+#, fuzzy
+msgid "No players detected in hand %s."
+msgstr "readPlayerStacks: Nu s-au detectat jucatori (mina #%s)"
+
+#: FulltiltToFpdb.py:586
+msgid "%s Failed to detect button (hand #%s cancelled?)"
+msgstr "%s Nu pot detecta buton (mina #%s a fost anulata?)"
+
+#: GuiAutoImport.py:84
+msgid "Time between imports in seconds:"
+msgstr "Timpul dintre importuri in secunde:"
+
+#: GuiAutoImport.py:105 GuiAutoImport.py:147
+msgid "Start Auto Import"
+msgstr "Pornire Auto Importare"
+
+#: GuiAutoImport.py:110
+msgid "Auto Import Ready."
+msgstr "Importul automat e pregatit."
+
+#: GuiAutoImport.py:126 GuiBulkImport.py:120 fpdb.pyw:740
+msgid "Please choose the path that you want to Auto Import"
+msgstr "Alegeti calea dorita pentru Importarea Automata"
+
+#: GuiAutoImport.py:145 GuiAutoImport.py:253
+msgid "Stop Auto Import"
+msgstr "Opreste Auto Import"
+
+#: GuiAutoImport.py:157
+msgid "Detecting hand history directory for site: '%s'"
+msgstr "Detectie a directorului istoricului miinilor pentru: '%s'"
+
+#: GuiAutoImport.py:196
+msgid "Global lock taken ... Auto Import Started."
+msgstr "S-a pornit importarea automata"
+
+#: GuiAutoImport.py:217
+#, fuzzy
+msgid "*** %s was not found"
+msgstr "hud_dict[%s] nu a fost gasit"
+
+#: GuiAutoImport.py:221
+msgid "opening pipe to HUD"
+msgstr "deschidere legatura spre HUD"
+
+#: GuiAutoImport.py:233
+msgid "*** GuiAutoImport Error opening pipe:"
+msgstr "*** GuiAutoImport Eroare la deschiderea legaturii:"
+
+#: GuiAutoImport.py:237
+#, fuzzy
+msgid "Add %s import directory %s"
+msgstr "Creare director '%s'"
+
+#: GuiAutoImport.py:245
+#, fuzzy
+msgid "Auto Import aborted."
+msgstr "Importul automat e pregatit."
+
+#: GuiAutoImport.py:245
+#, fuzzy
+msgid "Global lock not available."
+msgstr ""
+"\n"
+"Siguranta generala luata..."
+
+#: GuiAutoImport.py:251
+#, fuzzy
+msgid "Stopping Auto Import."
+msgstr "Opreste Auto Import"
+
+#: GuiAutoImport.py:251 fpdb.pyw:1010
+#, fuzzy
+msgid "Global lock released."
+msgstr "Siguranta globala eliberata.\n"
+
+#: GuiAutoImport.py:253
+#, fuzzy
+msgid "HUD already terminated."
+msgstr ""
+"\n"
+"* Oprire importare automata: HUD deja oprit"
+
+#: GuiAutoImport.py:272
+msgid "%s auto-import:"
+msgstr "%s auto-import:"
+
+#: GuiAutoImport.py:282
+msgid "Browse..."
+msgstr "Cautare..."
+
+#: GuiBulkImport.py:75
+#, fuzzy
+msgid ""
+"Bulk import done: Stored: %d, Duplicates: %d, Partial: %d, Errors: %d, Time: "
+"%s seconds, Stored/second: %.0f"
+msgstr ""
+"Importare grupata incheiata: S-au stocat: %d    Duplicate: %d  Partial: "
+"%d     Erori: %d in %s secunde - %.0f/sec"
+
+#: GuiBulkImport.py:84
+msgid "bulk import aborted - global lock not available"
+msgstr "importare grupata oprita - siguranta generala nu e disponibila"
+
+#: GuiBulkImport.py:107 GuiTourneyImport.py:134 fpdb.pyw:842 fpdb.pyw:1025
+msgid "Bulk Import"
+msgstr "Importare in Masa"
+
+#: GuiDatabase.py:104
+msgid "Add"
+msgstr "Adaugare"
+
+#: GuiDatabase.py:108 GuiLogView.py:77 GuiPositionalStats.py:59
+msgid "Refresh"
+msgstr "Reincarcare"
+
+#: GuiDatabase.py:112
+msgid "Type"
+msgstr "Tip"
+
+#: GuiDatabase.py:113 GuiTourneyPlayerStats.py:85
+msgid "Name"
+msgstr "Nume"
+
+#: GuiDatabase.py:114
+msgid "Description"
+msgstr "Descriere"
+
+#: GuiDatabase.py:115 GuiDatabase.py:445 GuiImapFetcher.py:106
+msgid "Username"
+msgstr "Nume utilizator"
+
+#: GuiDatabase.py:116 GuiDatabase.py:452 GuiImapFetcher.py:106
+msgid "Password"
+msgstr "Parola"
+
+#: GuiDatabase.py:117
+msgid "Host"
+msgstr "Destinatie"
+
+#: GuiDatabase.py:118
+msgid "Open"
+msgstr "Deschide"
+
+#: GuiDatabase.py:119
+msgid "Status"
+msgstr "Stare"
+
+#: GuiDatabase.py:253
+msgid "Testing database connections ... "
+msgstr "Testez conexiunile bazei de date ..."
+
+#: GuiDatabase.py:280
+msgid "finished."
+msgstr "terminat."
+
+#: GuiDatabase.py:290
+msgid "loadDbs error: "
+msgstr "eroare loadDbs:"
+
+#: GuiDatabase.py:311 GuiDatabase.py:313
+#, fuzzy
+msgid "error"
+msgstr "Eroare:"
+
+#: GuiDatabase.py:358
+msgid "trying to connect to:"
+msgstr "incerc conexiune spre:"
+
+#: GuiDatabase.py:361
+msgid "connected ok"
+msgstr "conexiune buna"
+
+#: GuiDatabase.py:368
+msgid "not connected but no exception"
+msgstr "neconectat dar nici o abatere"
+
+#: GuiDatabase.py:370 fpdb.pyw:938
+msgid ""
+"MySQL Server reports: Access denied. Are your permissions set correctly?"
+msgstr ""
+"raportul serverului MySQL: Acces nepermis. Sunt permisiunile puse corect?"
+
+#: GuiDatabase.py:374 fpdb.pyw:940
+msgid "MySQL client reports: 2002 or 2003 error. Unable to connect - "
+msgstr ""
+"raportul clientului MySQL: eroare 2002 sau 2003. Nu se poate efectua "
+"conectarea - "
+
+#: GuiDatabase.py:375 fpdb.pyw:941
+msgid "Please check that the MySQL service has been started"
+msgstr "Verificati daca serviciul MySQL e pornit"
+
+#: GuiDatabase.py:379 fpdb.pyw:943
+msgid ""
+"PostgreSQL Server reports: Access denied. Are your permissions set correctly?"
+msgstr ""
+"raportul serverului PostgreSQL: Acces nepermis. Sunt permisiunile puse "
+"corect?"
+
+#: GuiDatabase.py:382 fpdb.pyw:945
+msgid "PostgreSQL client reports: Unable to connect - "
+msgstr "raportul clientului PostgreSQL: Nu se poate efectua conectarea -"
+
+#: GuiDatabase.py:383 fpdb.pyw:946
+msgid "Please check that the PostgreSQL service has been started"
+msgstr "Verificati daca serviciul PostgreSQL e pornit"
+
+#: GuiDatabase.py:393
+msgid "db connection to %s, %s, %s, %s, %s failed: %s"
+msgstr "conexiunea spre %s, %s, %s, %s, %s a esuat: %s"
+
+#: GuiDatabase.py:401
+msgid "AddDB starting"
+msgstr "pornire AddDB"
+
+#: GuiDatabase.py:410
+msgid "Add New Database"
+msgstr "Adaugare baza de date noua"
+
+#: GuiDatabase.py:420
+msgid "DB Type"
+msgstr "Tip baza de date"
+
+#: GuiDatabase.py:430
+msgid "DB Name"
+msgstr "Nume baza de date"
+
+#: GuiDatabase.py:438
+msgid "DB Description"
+msgstr "Descriere baza de date"
+
+#: GuiDatabase.py:459
+msgid "Host Computer"
+msgstr "Calculatorul destinatie"
+
+#: GuiDatabase.py:478
+msgid "addDB.run: response is %s, accept is %s"
+msgstr "addDB.run: raspunsul e %s, acceptul e %s"
+
+#: GuiDatabase.py:492
+msgid "start creating new db"
+msgstr "incepere creare baza de date noua"
+
+#: GuiDatabase.py:511
+msgid "tested new db, result=%s"
+msgstr "testare baza noua de date, rezultat=%s"
+
+#: GuiDatabase.py:514
+msgid "Database created"
+msgstr "baza de date creata"
+
+#: GuiDatabase.py:517
+msgid "Database creation failed"
+msgstr "Crearea bazei de date a esuat"
+
+#: GuiDatabase.py:530
+msgid "check_fields: starting"
+msgstr "check_fields: pornire"
+
+#: GuiDatabase.py:536
+msgid "No Database Name given"
+msgstr "Nu s-a dat numele bazei de date"
+
+#: GuiDatabase.py:539
+msgid "No Database Description given"
+msgstr "Nu s-a dat descrierea bazei de date"
+
+#: GuiDatabase.py:542
+msgid "No Username given"
+msgstr "Nu s-a dat numele utilizatorului"
+
+#: GuiDatabase.py:545
+msgid "No Password given"
+msgstr "Nu s-a dat parola"
+
+#: GuiDatabase.py:548
+msgid "No Host given"
+msgstr "Nu s-a dat destinatia"
+
+#: GuiDatabase.py:562
+msgid "Unknown Database Type selected"
+msgstr "Tipul bazei de date e necunoscut"
+
+#: GuiDatabase.py:566
+msgid "check_fields: open dialog"
+msgstr "check_fields: deschidere dialog"
+
+#: GuiDatabase.py:575
+msgid "Do you want to try again?"
+msgstr "Doriti sa reincercati?"
+
+#: GuiDatabase.py:688 GuiDatabase.py:693 fpdb.pyw:292
+msgid "Maintain Databases"
+msgstr "Intretinere Baze de date"
+
+#: GuiGraphViewer.py:41 GuiTourneyGraphViewer.py:43
+msgid ""
+"Failed to load libs for graphing, graphing will not function. Please install "
+"numpy and matplotlib if you want to use graphs."
+msgstr ""
+"Nu se pot incarca librariile pentru grafice, graficele nu vor functiona. "
+"Instalati numpy si matplotlib daca doriti sa folositi grafice."
+
+#: GuiGraphViewer.py:42 GuiTourneyGraphViewer.py:44
+msgid ""
+"This is of no consequence for other parts of the program, e.g. import and "
+"HUD are NOT affected by this problem."
+msgstr ""
+"Aceasta nu are concecinte pentru alte parti din program, de exemplu "
+"importarile si HUD-ul nu sunt afectate."
+
+#: GuiGraphViewer.py:76 GuiTourneyGraphViewer.py:76
+msgid "Refresh Graph"
+msgstr "Reincarcare Graph"
+
+#: GuiGraphViewer.py:78 GuiTourneyGraphViewer.py:78
+msgid "Export to File"
+msgstr "Export spre fisier"
+
+#: GuiGraphViewer.py:144 GuiPositionalStats.py:167 GuiRingPlayerStats.py:228
+#: GuiSessionViewer.py:177 GuiTourneyGraphViewer.py:134
+#: GuiTourneyPlayerStats.py:202
+msgid "No sites selected - defaulting to PokerStars"
+msgstr "Nu s-au selectat site-uri - implicit va fi PokerStars"
+
+#: GuiGraphViewer.py:149 GuiPositionalStats.py:170 GuiRingPlayerStats.py:231
+#: GuiSessionViewer.py:186 GuiTourneyGraphViewer.py:139
+#: GuiTourneyPlayerStats.py:205
+msgid "No player ids found"
+msgstr "Nu gasesc identificatoarele jucatorilor"
+
+#: GuiGraphViewer.py:154 GuiPositionalStats.py:173 GuiRingPlayerStats.py:234
+#: GuiSessionViewer.py:189
+msgid "No limits found"
+msgstr "Nu gasesc limitele"
+
+#: GuiGraphViewer.py:164 GuiTourneyGraphViewer.py:149
+msgid "Graph generated in: %s"
+msgstr "Grafic generat in: %s"
+
+#: GuiGraphViewer.py:167 GuiGraphViewer.py:195 GuiGraphViewer.py:210
+msgid "Hands"
+msgstr "Miini"
+
+#: GuiGraphViewer.py:172 GuiTourneyGraphViewer.py:157
+msgid "No Data for Player(s) Found"
+msgstr "Jucatorul/jucatorii gasiti nu au date"
+
+#: GuiGraphViewer.py:195 GuiGraphViewer.py:210 GuiTourneyGraphViewer.py:166
+#: GuiTourneyGraphViewer.py:176
+#, fuzzy
+msgid "Profit"
+msgstr "Profit total"
+
+#: GuiGraphViewer.py:196 GuiGraphViewer.py:205
+msgid "Showdown"
+msgstr "Showdown"
+
+#: GuiGraphViewer.py:197 GuiGraphViewer.py:207
+msgid "Non-showdown"
+msgstr "Fara-showdown"
+
+#: GuiGraphViewer.py:201
+msgid "Profit graph for ring games"
+msgstr "Graficul profitului in jocuri cash"
+
+#: GuiGraphViewer.py:209
+msgid "All-in EV"
+msgstr ""
+
+#: GuiGraphViewer.py:303 GuiTourneyGraphViewer.py:224
+msgid "Please choose the directory you wish to export to:"
+msgstr "Alegeti directorul in care doriti sa exportati:"
+
+#: GuiGraphViewer.py:317 GuiTourneyGraphViewer.py:237
+msgid "Closed, no graph exported"
+msgstr "Inchis, nici un grafic exportat"
+
+#: GuiGraphViewer.py:331 GuiTourneyGraphViewer.py:255
+msgid "Graph created"
+msgstr "Grafice create"
+
+#: GuiHandViewer.py:76
+#, fuzzy
+msgid "Load Hands"
+msgstr "Miini"
+
+#: GuiImapFetcher.py:36
+msgid "To cancel just close this tab."
+msgstr "Pentru a opri inchideti aceasta fereastra."
+
+#: GuiImapFetcher.py:39
+msgid "Save"
+msgstr "Save"
+
+#: GuiImapFetcher.py:43
+msgid "Import All"
+msgstr "Import toate"
+
+#: GuiImapFetcher.py:47
+msgid "If you change the config you must save before importing"
+msgstr "Daca modificati configurarile trebuie sa salvati inainte de importare"
+
+#: GuiImapFetcher.py:85
+msgid "Starting import. Please wait."
+msgstr "Pornire importare. Rugam asteptati."
+
+#: GuiImapFetcher.py:90
+msgid "Finished import without error."
+msgstr "Importarea s-a incheiat fara erori."
+
+#: GuiImapFetcher.py:93
+msgid ""
+"Login to mailserver failed: please check mailserver, username and password"
+msgstr ""
+"Conectarea la serverul de mail a esuat: rugam verificati serverul de mail, "
+"utilizatorul si parola"
+
+#: GuiImapFetcher.py:96
+msgid ""
+"Could not connect to mailserver: check mailserver and use SSL settings and "
+"internet connectivity"
+msgstr ""
+"Nu se poate efectua conectarea spre serverul de mail: verificati serverul de "
+"mail, conexiunea internet si folositi optiuni SSL"
+
+#: GuiImapFetcher.py:106
+msgid "Fetch Type"
+msgstr "Tip de aducere"
+
+#: GuiImapFetcher.py:106
+msgid "Mail Folder"
+msgstr "Directorul pentru mail"
+
+#: GuiImapFetcher.py:106
+msgid "Mail Server"
+msgstr "Serverul pentru mail"
+
+#: GuiImapFetcher.py:106
+msgid "Use SSL"
+msgstr "Folosire SSL"
+
+#: GuiImapFetcher.py:106 GuiTourneyPlayerStats.py:78 fpdb.pyw:661
+msgid "Site"
+msgstr "Site"
+
+#: GuiImapFetcher.py:138
+msgid "Yes"
+msgstr "Da"
+
+#: GuiImapFetcher.py:139
+msgid "No"
+msgstr "Nu"
+
+#: GuiLogView.py:40
+msgid "Fpdb Errors"
+msgstr "Erori Fpdb"
+
+#: GuiLogView.py:41
+msgid "Fpdb Log"
+msgstr "Jurnal Fpdb"
+
+#: GuiLogView.py:42
+msgid "HUD Errors"
+msgstr "Erori HUD"
+
+#: GuiLogView.py:43
+msgid "HUD Log"
+msgstr "Jurnal HUD"
+
+#: GuiLogView.py:44
+msgid "fpdb.exe log"
+msgstr ""
+
+#: GuiLogView.py:45
+#, fuzzy
+msgid "HUD_main.exe Log"
+msgstr "Jurnal HUD"
+
+#: GuiLogView.py:81
+msgid "Copy to Clipboard"
+msgstr ""
+
+#: GuiLogView.py:119
+msgid "Date/Time"
+msgstr "Data/Ora"
+
+#: GuiLogView.py:119
+msgid "Level"
+msgstr "Nivel"
+
+#: GuiLogView.py:119
+msgid "Module"
+msgstr "Modul"
+
+#: GuiLogView.py:119
+msgid "Text"
+msgstr "Text"
+
+#: GuiPositionalStats.py:137
+msgid "activesite set to %s"
+msgstr "site-ul activ e acum %s"
+
+#: GuiPositionalStats.py:324
+msgid "Positional Stats page displayed in %4.2f seconds"
+msgstr "Statisticile pozitionale afisate in %4.sf secunde"
+
+#: GuiPrefs.py:30
+msgid "Databases"
+msgstr "Baze de date"
+
+#: GuiPrefs.py:30
+msgid "General"
+msgstr "General"
+
+#: GuiPrefs.py:31 fpdb.pyw:819
+msgid "Import"
+msgstr "Importare"
+
+#: GuiPrefs.py:31 fpdb.pyw:820 fpdb.pyw:1016
+msgid "HUD"
+msgstr "HUD"
+
+#: GuiPrefs.py:33
+msgid "Popup Windows"
+msgstr "Ferestre popup"
+
+#: GuiPrefs.py:33
+msgid "Window"
+msgstr "Ferestre"
+
+#: GuiPrefs.py:34
+msgid "Popup Name"
+msgstr "Nume popup"
+
+#: GuiPrefs.py:34
+msgid "Stat"
+msgstr "Statistica"
+
+#: GuiPrefs.py:35 GuiPrefs.py:41
+msgid "Stat Name"
+msgstr "Nume Statistica"
+
+#: GuiPrefs.py:36
+msgid "Auxiliary Windows"
+msgstr "Ferestre suplimentare"
+
+#: GuiPrefs.py:36
+msgid "Stud mucked"
+msgstr "Stud mucked"
+
+#: GuiPrefs.py:37
+msgid "Hand History Converters"
+msgstr "Convertoare pentru istoricul miinilor"
+
+#: GuiPrefs.py:37
+msgid "Mucked"
+msgstr "Mucked"
+
+#: GuiPrefs.py:38
+msgid "Field Type"
+msgstr "Tipul cimpului"
+
+#: GuiPrefs.py:38 fpdb.pyw:848 fpdb.pyw:1044
+msgid "Ring Player Stats"
+msgstr "Statisticile jucatorului cash"
+
+#: GuiPrefs.py:39
+msgid "Column Heading"
+msgstr "Cap de coloana"
+
+#: GuiPrefs.py:39
+msgid "Left/Right Align"
+msgstr "Aliniere stinga/dreapta"
+
+#: GuiPrefs.py:40
+msgid "Show in Position Stats"
+msgstr "Arata in statisticile pozitionale"
+
+#: GuiPrefs.py:40
+msgid "Show in Summaries"
+msgstr "Arata la sumar"
+
+#: GuiPrefs.py:41
+msgid "Format"
+msgstr "Format"
+
+#: GuiPrefs.py:57
+msgid "Setting"
+msgstr "Setari"
+
+#: GuiPrefs.py:57
+msgid "Value (double-click to change)"
+msgstr "Valoare (dublu-clic pentru schimare)"
+
+#: GuiRingPlayerStats.py:38
+msgid "Type of Game"
+msgstr "Tipul jocului"
+
+#: GuiRingPlayerStats.py:40
+msgid "Position"
+msgstr "Pozitie"
+
+#: GuiRingPlayerStats.py:41 Stats.py:271 Stats.py:280
+msgid "Player Name"
+msgstr "Nume jucator"
+
+#: GuiRingPlayerStats.py:42 Stats.py:470 Stats.py:479
+msgid "Number of hands seen"
+msgstr "Numar miini vazute"
+
+#: GuiRingPlayerStats.py:43
+msgid "Number of Seats"
+msgstr "Numar de locuri"
+
+#: GuiRingPlayerStats.py:44 Stats.py:292 Stats.py:299
+msgid "Voluntarily put in preflop/3rd street %"
+msgstr "Pus voluntar inainte de flop/strada a 3-a %"
+
+#: GuiRingPlayerStats.py:45 Stats.py:311 Stats.py:319
+msgid "Preflop/3rd street raise %"
+msgstr "Ridicare inainte de flop/strada a 3-a %"
+
+#: GuiRingPlayerStats.py:46 Stats.py:576 Stats.py:583
+msgid "% 3 bet preflop/3rd street"
+msgstr "% 3bet inainte de flop/strada a 3-a"
+
+#: GuiRingPlayerStats.py:47 Stats.py:594 Stats.py:601
+msgid "% 4 bet preflop/3rd street"
+msgstr "% 4bet inainte de flop/strada a 3-a"
+
+#: GuiRingPlayerStats.py:48 Stats.py:841 Stats.py:848
+msgid "% fold to 3 bet preflop/3rd street"
+msgstr "% fold la 3bet inainte de flop/strada a 3-a"
+
+#: GuiRingPlayerStats.py:49 Stats.py:859 Stats.py:866
+msgid "% fold to 4 bet preflop/3rd street"
+msgstr "% fold la 4bet inainte de flop/strada a 3-a"
+
+#: GuiRingPlayerStats.py:50 Stats.py:998 Stats.py:1005
+msgid "Aggression factor"
+msgstr "Factorul de agresiune"
+
+#: GuiRingPlayerStats.py:51 Stats.py:974 Stats.py:981
+msgid "Post-flop aggression frequency"
+msgstr "Frecventa agresiunii dupa flop"
+
+#: GuiRingPlayerStats.py:52 Stats.py:1041 Stats.py:1048
+msgid "% continuation bet"
+msgstr "% continuare pariere"
+
+#: GuiRingPlayerStats.py:53
+msgid "% Raise First In / % Raise when first to bet"
+msgstr "% Ridicare primul / % Ridicare cind e primul la pariere"
+
+#: GuiRingPlayerStats.py:54 Stats.py:491
+msgid "% steal attempted"
+msgstr "% tentative de furt"
+
+#: GuiRingPlayerStats.py:55 Stats.py:823 Stats.py:830
+msgid "% called a raise preflop"
+msgstr ""
+
+#: GuiRingPlayerStats.py:56 Stats.py:439 Stats.py:448
+msgid "Flop/4th street seen %"
+msgstr "Flop/strada a 4-a vazuta %"
+
+#: GuiRingPlayerStats.py:57
+msgid "Saw Showdown / River"
+msgstr "Vazut showdown/river"
+
+#: GuiRingPlayerStats.py:58 Stats.py:331 Stats.py:339
+msgid "% went to showdown when seen flop/4th street"
+msgstr "% ajuns la showdown dupa ce s-a vazut flop/strada a 4-a"
+
+#: GuiRingPlayerStats.py:59 Stats.py:877 Stats.py:884
+msgid "% won money when seen flop/4th street"
+msgstr "% bani cistigati cu flop vazut/pe strada a 4a"
+
+#: GuiRingPlayerStats.py:60 Stats.py:351 Stats.py:359
+msgid "% won some money at showdown"
+msgstr "% cistig la showdown"
+
+#: GuiRingPlayerStats.py:61 Stats.py:895 Stats.py:902
+msgid "Aggression frequency flop/4th street"
+msgstr "Frecventa agresiunii pe flop/strada a 4-a"
+
+#: GuiRingPlayerStats.py:62 Stats.py:913 Stats.py:920
+msgid "Aggression frequency turn/5th street"
+msgstr "Frecventa agresiunii pe turn/strada a 5-a"
+
+#: GuiRingPlayerStats.py:63 Stats.py:931 Stats.py:938
+msgid "Aggression frequency river/6th street"
+msgstr "Frecventa agresiunii pe river/strada a 6-a"
+
+#: GuiRingPlayerStats.py:65 Stats.py:145 Stats.py:147
+msgid "Total Profit"
+msgstr "Profit total"
+
+#: GuiRingPlayerStats.py:66 Stats.py:395 Stats.py:404
+msgid "Big blinds won per 100 hands"
+msgstr "Blinduri mari cistigate per 100 miini"
+
+#: GuiRingPlayerStats.py:67
+msgid "Amount of rake paid"
+msgstr "Valoare rake platita"
+
+#: GuiRingPlayerStats.py:68
+#, fuzzy
+msgid "Big blinds won per 100 hands when excluding rake"
+msgstr ""
+"Blinduri mari cistigate per 100 miini\n"
+"cind excludem rake"
+
+#: GuiRingPlayerStats.py:69 GuiRingPlayerStats.py:70
+msgid "Measure of uncertainty"
+msgstr ""
+
+#: GuiRingPlayerStats.py:100 GuiSessionViewer.py:85
+msgid "Hand Breakdown for all levels listed above"
+msgstr "Analiza miinilor pentru toate nivelele e aratata mai sus"
+
+#: GuiRingPlayerStats.py:121
+msgid "Filters"
+msgstr "Filters"
+
+#: GuiRingPlayerStats.py:123
+msgid "Refresh Stats"
+msgstr "Refresh Statistici"
+
+#: GuiRingPlayerStats.py:154
+msgid "Pocket pairs"
+msgstr "Perechi in mina"
+
+#: GuiRingPlayerStats.py:155
+msgid "Suited"
+msgstr "In suita"
+
+#: GuiRingPlayerStats.py:156
+msgid "Suited connectors"
+msgstr "Conectori in suita"
+
+#: GuiRingPlayerStats.py:157
+msgid "Offsuit"
+msgstr "Fara suita"
+
+#: GuiRingPlayerStats.py:158
+msgid "Offsuit connectors"
+msgstr "Conectori fara suita"
+
+#: GuiRingPlayerStats.py:274 GuiSessionViewer.py:208
+#: GuiTourneyPlayerStats.py:179
+msgid "Stats page displayed in %4.2f seconds"
+msgstr "Statistici afisate in %4.sf secunde"
+
+#: GuiRingPlayerStats.py:521
+msgid "Detailed Filters"
+msgstr "Filtre detaliate"
+
+#: GuiRingPlayerStats.py:526
+msgid "Hand Filters:"
+msgstr "Filtre miini:"
+
+#: GuiRingPlayerStats.py:535
+msgid "between"
+msgstr "intre"
+
+#: GuiRingPlayerStats.py:536
+msgid "and"
+msgstr "si"
+
+#: GuiRingPlayerStats.py:558
+msgid "Restrict to hand types:"
+msgstr "Restringe la tipurile miinilor:"
+
+#: GuiSessionViewer.py:43
+msgid "Failed to load numpy and/or matplotlib in Session Viewer"
+msgstr "Nu pot incarca numpy si/sau matplotlib in Vizualizare Sesiune"
+
+#: GuiSessionViewer.py:180
+#, fuzzy
+msgid "No games found"
+msgstr "Nu gasesc limitele"
+
+#: GuiSessionViewer.py:183
+#, fuzzy
+msgid "No currencies found"
+msgstr "Nu s-a adus nimic."
+
+#: GuiSessionViewer.py:373
+#, fuzzy
+msgid "all"
+msgstr "Tot"
+
+#: GuiSessionViewer.py:404 fpdb_prerun.py:85
+msgid "Error:"
+msgstr "Eroare:"
+
+#: GuiSessionViewer.py:413
+msgid "Session candlestick graph"
+msgstr "Graficul sesiunii candlestick"
+
+#: GuiSessionViewer.py:416
+msgid "Sessions"
+msgstr "Sesiuni"
+
+#: GuiStove.py:60
+msgid ""
+"Stove is a GUI mockup of a EV calculation page, and completely non "
+"functional."
+msgstr ""
+"Stove este o schita grafica a unei pagini de calculare EV si e complet "
+"nefunctional."
+
+#: GuiStove.py:61
+msgid ""
+"Unless you are interested in developing this feature, please ignore this "
+"page."
+msgstr ""
+"Exceptind cazul in care sunteti interesat in dezvoltarea acestei parti va "
+"rugam sa ignorati pagina curenta."
+
+#: GuiStove.py:62
+msgid ""
+"If you are interested in developing the code further see GuiStove.py and "
+"Stove.py."
+msgstr ""
+"Daca sunteti interesat in dezvoltarea codului vizualizati GuiStove.py si "
+"Stove.py."
+
+#: GuiStove.py:63
+msgid "Thank you"
+msgstr "Multumim"
+
+#: GuiStove.py:67 fpdb.pyw:1297
+msgid "FPDB WARNING"
+msgstr "AVERTISMENT FPDB"
+
+#: GuiStove.py:94
+msgid "Draw"
+msgstr "Tragere"
+
+#: GuiStove.py:101
+msgid "Stud"
+msgstr "Stud"
+
+#: GuiStove.py:112
+msgid "Flop"
+msgstr "Flop"
+
+#: GuiStove.py:131
+msgid "Gametype"
+msgstr "Tip de joc"
+
+#: GuiStove.py:134
+msgid "Players"
+msgstr "Jucatori"
+
+#: GuiStove.py:140
+msgid "Input:"
+msgstr "Intrare:"
+
+#: GuiStove.py:141
+msgid "Output:"
+msgstr "Iesire:"
+
+#: GuiStove.py:167
+msgid "Board:"
+msgstr "Masa:"
+
+#: GuiStove.py:179
+msgid "Player1:"
+msgstr "Jucator1:"
+
+#: GuiStove.py:194
+msgid "Player2:"
+msgstr "Jucator2:"
+
+#: GuiStove.py:208
+msgid "Results"
+msgstr "Rezultate"
+
+#: GuiStove.py:218 GuiStove.py:222 GuiStove.py:226 GuiStove.py:230
+msgid "called"
+msgstr "platit"
+
+#: GuiTourneyGraphViewer.py:153 GuiTourneyGraphViewer.py:166
+#: GuiTourneyGraphViewer.py:176
+msgid "Tournaments"
+msgstr "Turnee"
+
+#: GuiTourneyGraphViewer.py:173
+msgid "Tournament Results"
+msgstr "Rezultate Turnee"
+
+#: GuiTourneyImport.py:70 GuiTourneyImport.py:415
+#, fuzzy
+msgid "Tourney import done: Stored: %d, Errors: %d in %s seconds - %.0f/sec"
+msgstr ""
+"Importarea turneelor efectuata: Stocat: %d        Erori: %d in %s secunde - "
+"%.0f/sec"
+
+#: GuiTourneyImport.py:76
+msgid "tourney import aborted - global lock not available"
+msgstr "importarea turneului oprita - siguranta generala nu e disponibila"
+
+#: GuiTourneyImport.py:105
+msgid "Site filter:"
+msgstr "Filtrul site-ului:"
+
+#: GuiTourneyImport.py:136
+msgid "Import clicked"
+msgstr "S-a selectat importarea"
+
+#: GuiTourneyImport.py:180 Importer.py:242
+msgid "Attempted to add non-directory '%s' as an import directory"
+msgstr ""
+"S-a incercat adaugarea non-directorului '%s' ca si director pentru importare"
+
+#: GuiTourneyImport.py:204
+msgid "Tourney Summary Import started at %s - %d files to import."
+msgstr "Importarea Sumarului Turneului pornit la %s - %d fisiere de importat."
+
+#: GuiTourneyImport.py:249 Importer.py:614
+#, fuzzy
+msgid "TourneyImport: Removing text < 100 characters from end of file"
+msgstr ""
+"TourneyImport: Inlaturare text < 100 caractere de la sfirsitul fisierului"
+
+#: GuiTourneyImport.py:253 Importer.py:618
+#, fuzzy
+msgid "TourneyImport: Removing text < 100 characters from start of file"
+msgstr ""
+"TourneyImport: Inlaturare text < 100 caractere de la inceputul fisierului"
+
+#: GuiTourneyImport.py:263
+msgid "Tourney import parse error in file: %s"
+msgstr ""
+
+#: GuiTourneyImport.py:266 ImapFetcher.py:159 Importer.py:581
+msgid "Finished importing %s/%s tournament summaries"
+msgstr "Importarea sumarului turneelor %s/%s s-a incheiat"
+
+#: GuiTourneyImport.py:311 fpdb.pyw:317
+#, fuzzy
+msgid "Number of Tourneys:"
+msgstr ""
+"\n"
+"Numarul Turneelor:"
+
+#: GuiTourneyImport.py:327 Importer.py:651 Importer.py:661
+msgid "Importing"
+msgstr "Importare"
+
+#: GuiTourneyImport.py:373 ImapFetcher.py:172
+msgid "USAGE:"
+msgstr "UTILIZARE:"
+
+#: GuiTourneyImport.py:374 GuiTourneyImport.py:375 GuiTourneyImport.py:376
+#, fuzzy
+msgid "Filename"
+msgstr "Nume fisier:"
+
+#: GuiTourneyImport.py:392 ImapFetcher.py:176
+msgid "Need to define a converter"
+msgstr "Trebuie definit un convertizor"
+
+#: GuiTourneyImport.py:400
+msgid "Need a filename to import"
+msgstr "Trebuie un nume de fisier pentru importare"
+
+#: GuiTourneyPlayerStats.py:68
+#, fuzzy
+msgid "_Refresh Stats"
+msgstr "Refresh Statistici"
+
+#: GuiTourneyPlayerStats.py:80
+msgid "Cat."
+msgstr "Cat."
+
+#: GuiTourneyPlayerStats.py:81
+msgid "Limit"
+msgstr "Limita"
+
+#: GuiTourneyPlayerStats.py:82
+msgid "Curr."
+msgstr "Moneda."
+
+#: GuiTourneyPlayerStats.py:83
+msgid "BuyIn"
+msgstr "BuyIn"
+
+#: GuiTourneyPlayerStats.py:84
+msgid "Fee"
+msgstr "taxa"
+
+#: GuiTourneyPlayerStats.py:86
+msgid "#"
+msgstr "#"
+
+#: GuiTourneyPlayerStats.py:87
+msgid "ITM%"
+msgstr "ITM%"
+
+#: GuiTourneyPlayerStats.py:88
+msgid "1st"
+msgstr "1st"
+
+#: GuiTourneyPlayerStats.py:89
+msgid "2nd"
+msgstr "2nd"
+
+#: GuiTourneyPlayerStats.py:90
+msgid "3rd"
+msgstr "3rd"
+
+#: GuiTourneyPlayerStats.py:91
+msgid "Rank?"
+msgstr "Clasare?"
+
+#: GuiTourneyPlayerStats.py:92
+msgid "Spent"
+msgstr "Cheltuit"
+
+#: GuiTourneyPlayerStats.py:93
+msgid "Won"
+msgstr "Cistigat"
+
+#: GuiTourneyPlayerStats.py:94
+msgid "ROI%"
+msgstr "ROI%"
+
+#: GuiTourneyPlayerStats.py:95
+msgid "$/Tour"
+msgstr "$/Tour"
+
+#: GuiTourneyViewer.py:35
+msgid "Enter the tourney number you want to display:"
+msgstr "Introduceti numarul turneului care il doriti afisat:"
+
+#: GuiTourneyViewer.py:41
+msgid "Display"
+msgstr "Display"
+
+#: GuiTourneyViewer.py:48
+msgid "Display Player"
+msgstr "Afisare Player"
+
+#: GuiTourneyViewer.py:63
+#, fuzzy
+msgid "Tournament not found."
+msgstr "Nu s-au gasit sumare de turnee"
+
+#: GuiTourneyViewer.py:63 GuiTourneyViewer.py:91
+#, fuzzy
+msgid "Please ensure you imported it and selected the correct site."
+msgstr ""
+"Turneul nu a fost gasit - asigurati-va ca l-ati importat si/sau ati selectat "
+"site-ul corect"
+
+#: GuiTourneyViewer.py:91
+#, fuzzy
+msgid "Player or tournament not found."
+msgstr "Nu s-au gasit sumare de turnee"
+
+#: GuiTourneyViewer.py:105
+msgid "N/A"
+msgstr "N/A"
+
+#: GuiTourneyViewer.py:126
+msgid "invalid entry in tourney number - must enter numbers only"
+msgstr "intrare invalida la numarul turneului - trebuie introduse doar numere"
+
+#: HUD_main.pyw:84
+msgid "Received hand no %s"
+msgstr "Primit mina numarul %s"
+
+#: HUD_main.pyw:95 HUD_main.pyw:103 HUD_run_me.py:45
+msgid "HUD_main starting"
+msgstr "Pornire HUD_main"
+
+#: HUD_main.pyw:95 HUD_run_me.py:51 TournamentTracker.py:307
+msgid "Using db name = %s"
+msgstr "Folosirea bd numita = %s"
+
+#: HUD_main.pyw:99 TournamentTracker.py:39 fpdb.pyw:1192
+#, fuzzy
+msgid "Note: error output is being diverted to %s."
+msgstr "Nota: eroarea de iesire este redirectionata spre:"
+
+#: HUD_main.pyw:100 TournamentTracker.py:40 fpdb.pyw:1193
+msgid "Any major error will be reported there _only_."
+msgstr "Orice eroare majora va fi raportata _doar_ acolo."
+
+#: HUD_main.pyw:134 HUD_run_me.py:62
+msgid "Closing this window will exit from the HUD."
+msgstr "Inchiderea aceste ferestre va cauza iesirea din HUD."
+
+#: HUD_main.pyw:156
+msgid "client_moved event"
+msgstr ""
+
+#: HUD_main.pyw:160
+msgid "client_resized event"
+msgstr ""
+
+#: HUD_main.pyw:164
+msgid "client_destroyed event"
+msgstr ""
+
+#: HUD_main.pyw:171
+msgid "Table title changed, killing current hud"
+msgstr ""
+
+#: HUD_main.pyw:175
+msgid "Moved to a new table, killing current hud"
+msgstr ""
+
+#: HUD_main.pyw:179 fpdb.pyw:987
+msgid "Quitting normally"
+msgstr "Iesire normala"
+
+#: HUD_main.pyw:183
+msgid "kill_hud event"
+msgstr ""
+
+#: HUD_main.pyw:187
+msgid "blacklist_hud event"
+msgstr ""
+
+#: HUD_main.pyw:222
+#, fuzzy
+msgid "No enabled sites found"
+msgstr "Nu gasesc limitele"
+
+#: HUD_main.pyw:230
+msgid "Aux disabled for site %s"
+msgstr ""
+
+#: HUD_main.pyw:263
+#, fuzzy
+msgid "database error: skipping %s"
+msgstr "eroare bd: ignorare %s"
+
+#: HUD_main.pyw:346
+#, fuzzy
+msgid "%s was not found"
+msgstr "hud_dict[%s] nu a fost gasit"
+
+#: HUD_main.pyw:347
+msgid "will not send hand"
+msgstr "nu voi trimite mina"
+
+#: HUD_main.pyw:374
+msgid "hud not created yet, because hero is not seated for this hand"
+msgstr ""
+
+#: HUD_main.pyw:384
+msgid "HUD create: table name %s not found, skipping."
+msgstr "create HUD: tabela numita %s nu a fost gasita, ignor."
+
+#: HUD_main.pyw:396
+msgid "Table \"%s\" no longer exists"
+msgstr "Tabela \"%s\" nu mai exista"
+
+#: HUD_main.pyw:420
+msgid "Error resizing HUD for table: %s."
+msgstr "Eroare la redimensionarea HUD pentru tabela: %s."
+
+#: HUD_main.pyw:427
+#, fuzzy
+msgid "Error moving HUD for table: %s."
+msgstr "Eroare la oprirea HUD pentru tabela: %s."
+
+#: HUD_main.pyw:439
+msgid "Error killing HUD for table: %s."
+msgstr "Eroare la oprirea HUD pentru tabela: %s."
+
+#: HUD_main.pyw:457
+msgid "Error creating HUD for hand %s."
+msgstr "Eroare la crearea HUD pentru mina %s."
+
+#: HUD_main.pyw:464
+msgid "Error updating HUD for hand %s."
+msgstr "Eroare la actualizarea HUD pentru mina %s."
+
+#: HUD_run_me.py:66
+msgid "HUD Main Window"
+msgstr "HUD Fereastra Principala"
+
+#: Hand.py:174
+msgid "BB"
+msgstr "BB"
+
+#: Hand.py:175
+msgid "SB"
+msgstr "SB"
+
+#: Hand.py:176
+#, fuzzy
+msgid "BUTTON POS"
+msgstr "POZBUTON"
+
+#: Hand.py:177
+msgid "HAND NO."
+msgstr "MINA NR."
+
+#: Hand.py:178 TourneySummary.py:157
+msgid "SITE"
+msgstr "SITE"
+
+#: Hand.py:179
+msgid "TABLE NAME"
+msgstr "NUME TABELA"
+
+#: Hand.py:180 TourneySummary.py:167
+msgid "HERO"
+msgstr "EROU"
+
+#: Hand.py:181 TourneySummary.py:168
+#, fuzzy
+msgid "MAX SEATS"
+msgstr "LOCURIMAX"
+
+#: Hand.py:182
+msgid "LEVEL"
+msgstr "NIVEL"
+
+#: Hand.py:183 TourneySummary.py:173
+msgid "MIXED"
+msgstr "AMESTECAT"
+
+#: Hand.py:184
+#, fuzzy
+msgid "LAST BET"
+msgstr "ULTIMPARIU"
+
+#: Hand.py:185
+msgid "ACTION STREETS"
+msgstr "ACTIUNE STRAZI"
+
+#: Hand.py:186
+msgid "STREETS"
+msgstr "STRAZI"
+
+#: Hand.py:187
+msgid "ALL STREETS"
+msgstr "TOATE STRAZILE"
+
+#: Hand.py:188
+msgid "COMMUNITY STREETS"
+msgstr "STRAZI COMUNE"
+
+#: Hand.py:189
+msgid "HOLE STREETS"
+msgstr "STRAZI PROPRII"
+
+#: Hand.py:190
+msgid "COUNTED SEATS"
+msgstr "LOCURI NUMARATE"
+
+#: Hand.py:191
+msgid "DEALT"
+msgstr "IMPARTIT"
+
+#: Hand.py:192
+msgid "SHOWN"
+msgstr "ARATAT"
+
+#: Hand.py:193
+msgid "MUCKED"
+msgstr "MUCKED"
+
+#: Hand.py:194
+msgid "TOTAL POT"
+msgstr "POT TOTAL"
+
+#: Hand.py:195
+msgid "TOTAL COLLECTED"
+msgstr "TOTAL COLECTAT"
+
+#: Hand.py:196
+msgid "RAKE"
+msgstr "COMISION"
+
+#: Hand.py:197 TourneySummary.py:158
+msgid "START TIME"
+msgstr "ORA DE INCEPUT"
+
+#: Hand.py:198
+msgid "TOURNAMENT NO"
+msgstr "TURNEU NR"
+
+#: Hand.py:199 TourneySummary.py:163
+msgid "TOURNEY ID"
+msgstr "ID TURNEU"
+
+#: Hand.py:200 TourneySummary.py:162
+msgid "TOURNEY TYPE ID"
+msgstr "ID-UL TIPULUI DE TURNEU"
+
+#: Hand.py:201 TourneySummary.py:164
+msgid "BUYIN"
+msgstr "BUYIN"
+
+#: Hand.py:202
+msgid "BUYIN CURRENCY"
+msgstr "MONEDA BUYIN"
+
+#: Hand.py:203
+msgid "BUYIN CHIPS"
+msgstr "JETOANE BUYIN"
+
+#: Hand.py:204 TourneySummary.py:165
+msgid "FEE"
+msgstr "TAXA"
+
+#: Hand.py:205
+msgid "IS REBUY"
+msgstr "ESTE REBUY"
+
+#: Hand.py:206
+msgid "IS ADDON"
+msgstr "ESTE ADDON"
+
+#: Hand.py:207
+msgid "IS KO"
+msgstr "ESTE KO"
+
+#: Hand.py:208 TourneySummary.py:185
+msgid "KO BOUNTY"
+msgstr "KO BOUNTY"
+
+#: Hand.py:209
+msgid "IS MATRIX"
+msgstr "ESTE MATRIX"
+
+#: Hand.py:210
+msgid "IS SHOOTOUT"
+msgstr "ESTE SHOOTOUT"
+
+#: Hand.py:213 TourneySummary.py:197
+msgid "PLAYERS"
+msgstr "JUCATORI"
+
+#: Hand.py:214
+msgid "STACKS"
+msgstr "STACKS"
+
+#: Hand.py:215
+msgid "POSTED"
+msgstr "PUS"
+
+#: Hand.py:216
+msgid "POT"
+msgstr "POT"
+
+#: Hand.py:217
+msgid "SEATING"
+msgstr "IN ASEZARE"
+
+#: Hand.py:218
+msgid "GAMETYPE"
+msgstr "TIP JOC"
+
+#: Hand.py:219
+msgid "ACTION"
+msgstr "ACTIUNE"
+
+#: Hand.py:220
+msgid "COLLECTEES"
+msgstr "COLLECTEES"
+
+#: Hand.py:221
+msgid "BETS"
+msgstr "PARIURI"
+
+#: Hand.py:222
+msgid "BOARD"
+msgstr "MASA"
+
+#: Hand.py:223
+msgid "DISCARDS"
+msgstr "RENUNTARI"
+
+#: Hand.py:224
+msgid "HOLECARDS"
+msgstr "CARTI PROPRII"
+
+#: Hand.py:225
+msgid "TOURNEYS PLAYER IDS"
+msgstr "ID-URILE TURNEELOR JUCATORULUI"
+
+#: Hand.py:257
+msgid "Hand.addHoleCards: '%s': Major failure while adding holecards: '%s'"
+msgstr ""
+
+#: Hand.py:600
+msgid "First 100 characters: %s"
+msgstr ""
+
+#: Hand.py:600
+#, fuzzy
+msgid "Streets didn't match - Assuming hand '%s' was cancelled."
+msgstr "markstreets nu s-a potrivit - se presupune ca mina %s a fost anulata"
+
+#: Hand.py:609
+#, fuzzy
+msgid "Hand.%s: '%s' unknown player: '%s'"
+msgstr ""
+"[EROARE] S-a incercat adaugarea cartilor proprii pentru un jucator "
+"necunoscut: %s"
+
+#: Hand.py:706
+msgid "%s %s calls %s"
+msgstr "%s %s cheama %s"
+
+#: Hand.py:785
+msgid "%s %s raise %s"
+msgstr "%s %s ridica %s"
+
+#: Hand.py:794
+msgid "%s %s bets %s"
+msgstr "%s %s pariaza %s"
+
+#: Hand.py:814
+msgid "%s %s folds"
+msgstr "%s %s renunta"
+
+#: Hand.py:821
+msgid "%s %s checks"
+msgstr "%s %s pas"
+
+#: Hand.py:863
+#, fuzzy
+msgid "Less than 2 players - Assuming hand '%s' was cancelled."
+msgstr "markstreets nu s-a potrivit - se presupune ca mina %s a fost anulata"
+
+#: Hand.py:1030
+msgid ""
+"*** ERROR - HAND: calling writeGameLine with unexpected STARTTIME value, "
+"expecting datetime.date object, received:"
+msgstr ""
+"*** EROARE - MINA: apelare writeGameLine cu valoare neasteptata pentru "
+"STARTTIME, se astepta datetime.date, s-a primit:"
+
+#: Hand.py:1031
+msgid ""
+"*** Make sure your HandHistoryConverter is setting hand.startTime properly!"
+msgstr "*** Verificati ca HandHistoryConverter seteaza hand.startTime corect!"
+
+#: Hand.py:1032
+msgid "*** Game String:"
+msgstr "*** Serie joc:"
+
+#: Hand.py:1117
+#, fuzzy
+msgid "HoldemOmaha hand initialised for %s"
+msgstr "Jurnalizarea implicita s-a initializat pentru %s"
+
+#: Hand.py:1120
+#, fuzzy
+msgid "Neither HHC nor DB+handID provided"
+msgstr "HoldemOmahaHand.__init__:Nici HHC sau DB+handid furnizate"
+
+#: Hand.py:1310
+#, fuzzy
+msgid "Street 'DEAL' is empty. Was hand '%s' cancelled?"
+msgstr "DrawHand.__init__: strada 'DEAL' e goala. Mina anulata? HandID: '%s'"
+
+#: Hand.py:1564
+msgid "%s %s completes %s"
+msgstr "%s %s completeaza %s"
+
+#: Hand.py:1580
+msgid "Bringin: %s, %s"
+msgstr "Bringin: %s, %s"
+
+#: Hand.py:1766
+msgid ""
+"join_holecards: # of holecards should be either < 4, 4 or 7 - 5 and 6 should "
+"be impossible for anyone who is not a hero"
+msgstr ""
+"join_holecards: # cartilor proprii trebuie sa fie fie < 4, 4 sau 7 - 5 si 6 "
+"ar fi imposibil pentru altcineva decit Hero"
+
+#: Hand.py:1769
+msgid "join_holecards: Player '%s' appears not to have been dealt a card"
+msgstr "join_holecards: Jucatorul '%s' pare a nu fi avut carti impartite"
+
+#: Hand.py:1842 Hand.py:1858 Hand.py:1871
+#, fuzzy
+msgid "Pot.end(): '%s': Major failure while calculating pot: '%s'"
+msgstr "Pot.end(): Esec major in timpul calcularii potului: '%s'"
+
+#: Hand.py:1887
+msgid "Error in printing Hand object"
+msgstr "Eroare la afisarea obiectului Hand"
+
+#: HandHistoryConverter.py:126
+msgid "Failed sanity check"
+msgstr "Esuare la verificarea inregritatii"
+
+#: HandHistoryConverter.py:135
+#, fuzzy
+msgid "Hands list is:"
+msgstr "handList este"
+
+#: HandHistoryConverter.py:136
+msgid "Parsing %d hands"
+msgstr ""
+
+#: HandHistoryConverter.py:155
+#, fuzzy
+msgid "FpdbParseError for file '%s'"
+msgstr "Cresc FpdbParseError pentru fisierul '%s'"
+
+#: HandHistoryConverter.py:165
+msgid "Removing partially written hand & resetting index"
+msgstr ""
+
+#: HandHistoryConverter.py:168
+msgid "Read %d hands (%d failed) in %.3f seconds"
+msgstr "Citire %d miini (%d a esuat) in %.3f secunde"
+
+#: HandHistoryConverter.py:174
+#, fuzzy
+msgid "Summary file '%s' correctly parsed (took %.3f seconds)"
+msgstr "Fisierul sumar '%s' a fost parcurs cu succes (a durat %.3f secunde)"
+
+#: HandHistoryConverter.py:176
+msgid "Error converting summary file '%s' (took %.3f seconds)"
+msgstr "Eroare la convertirea fisierului sumar '%s' (durata %.3f secunde)"
+
+#: HandHistoryConverter.py:215
+#, fuzzy
+msgid "Read no hands from file: '%s'"
+msgstr "Citire fisier de configurare %s"
+
+#: HandHistoryConverter.py:226
+#, fuzzy
+msgid "Removing text < 50 characters & resetting index"
+msgstr "Eliminare text < 50 caractere"
+
+#: HandHistoryConverter.py:231
+#, fuzzy
+msgid "Could not identify as a %s hand"
+msgstr "Nu se gaseste fisierul %s"
+
+#: HandHistoryConverter.py:265 HandHistoryConverter.py:272
+#, fuzzy
+msgid "%s Unsupported game type: %s"
+msgstr "Tip de joc neacceptat: %s"
+
+#: HandHistoryConverter.py:430
+msgid "hhc.getRake(): '%s': Amount collected (%s) is greater than the pot (%s)"
+msgstr ""
+
+#: HandHistoryConverter.py:433
+msgid "hhc.getRake(): '%s': Suspiciously high rake (%s) > 25 pct of pot (%s)"
+msgstr ""
+
+#: HandHistoryConverter.py:446
+#, fuzzy
+msgid "Output and input files are the same, check config."
+msgstr ""
+"HH Verificare Integritate: fisierele de intrare si iesire sunt identice, "
+"verificati configurarea"
+
+#: HandHistoryConverter.py:479
+msgid "unable to read file with any codec in list!"
+msgstr "nu se poate citi fisierul cu nici un codec din lista!"
+
+#: HandHistoryConverter.py:556 HandHistoryConverter.py:557
+#, fuzzy
+msgid "Unsupported target timezone: "
+msgstr "Tip de joc neacceptat: %s"
+
+#: HandHistoryConverter.py:638
+msgid "Timezone conversion not supported"
+msgstr ""
+
+#: HandHistoryConverter.py:718 HandHistoryConverter.py:719
+msgid "Unable to create output directory %s for HHC!"
+msgstr "Nu pot crea directorul de iesire %s pentru HHC!"
+
+#: HandHistoryConverter.py:721
+msgid "Created directory '%s'"
+msgstr "Creare director '%s'"
+
+#: HandHistoryConverter.py:725
+#, fuzzy
+msgid "Output path %s couldn't be opened."
+msgstr "out_path %s nu a putut fi deschis"
+
+#: Hud.py:87
+#, fuzzy
+msgid "No <game_stat_set> found for %s games for type %s.\n"
+msgstr "Nici o amplasare gasita pentru jocuri cu maxim %d pe site-ul %s\n"
+
+#: Hud.py:91
+#, fuzzy
+msgid "No layout found for %s games for site %s.\n"
+msgstr "Nici o amplasare gasita pentru jocuri cu maxim %d pe site-ul %s\n"
+
+#: Hud.py:95
+#, fuzzy
+msgid "No layout found for %d-max %s games for site %s.\n"
+msgstr "Nici o amplasare gasita pentru jocuri cu maxim %d pe site-ul %s\n"
+
+#: Hud.py:185
+#, fuzzy
+msgid "Creating hud from hand "
+msgstr "Creare hud din mina"
+
+#: IdentifySite.py:214
+msgid "siteId Failed for: %s"
+msgstr ""
+
+#: ImapFetcher.py:44 ImapFetcher.py:53
+#, fuzzy
+msgid "Could not split tourneys"
+msgstr "nu se gaseste turneul: ignorare"
+
+#: ImapFetcher.py:83
+#, fuzzy
+msgid "Found %s eMails to fetch"
+msgstr "ImapFetcher: Gasite %s mesaje pentru aducere"
+
+#: ImapFetcher.py:103
+#, fuzzy
+msgid "Finished downloading emails."
+msgstr "S-a terminat recrearea tabelelor"
+
+#: ImapFetcher.py:109
+msgid "No Tournament summaries found."
+msgstr "Nu s-au gasit sumare de turnee"
+
+#: ImapFetcher.py:111
+#, fuzzy
+msgid "Errors:"
+msgstr "Eroare:"
+
+#: Importer.py:196
+msgid "Database ID for %s not found"
+msgstr "ID-ul bazei de date pentru %s nu a fost gasit"
+
+#: Importer.py:198
+#, fuzzy
+msgid "More than 1 Database ID found for %s"
+msgstr "Nu sunt carti proprii pentru %s"
+
+#: Importer.py:250
+msgid "Started at %s -- %d files to import. indexes: %s"
+msgstr "Pornit la %s -- %d fisiere de importat. indexuri: %s"
+
+#: Importer.py:419
+msgid "Converting %s"
+msgstr "Convertire %s"
+
+#: Importer.py:500
+msgid "Importer._import_hh_file: '%r' Fatal error: '%r'"
+msgstr ""
+
+#: Importer.py:501
+msgid "'%r'"
+msgstr ""
+
+#: Importer.py:531
+msgid "fpdb_import: sending hand to hud"
+msgstr "fpdb_import: trimitere mina spre hud"
+
+#: Importer.py:534
+msgid "Failed to send hand to HUD: %s"
+msgstr "Nu se poate trimite mina la HUD: %s"
+
+#: Importer.py:578
+msgid "Summary import parse error in file: %s"
+msgstr ""
+
+#: Importer.py:647 fpdb.pyw:316
+#, fuzzy
+msgid "Number of Hands:"
+msgstr "Numarul Miinilor:"
+
+#: Importer.py:647 fpdb.pyw:319
+msgid "Database Statistics"
+msgstr "Statisticile Bazei de date"
+
+#: MergeSummary.py:121
+#, fuzzy
+msgid "The tournament was not found or is invalid"
+msgstr "Nu s-au gasit sumare de turnee"
+
+#: MergeSummary.py:135 MergeSummary.py:166
+#, fuzzy
+msgid "MergeSummary.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: MergeSummary.py:154
+msgid "MergeSummary.determineGameType: HORSE found, unsupported"
+msgstr ""
+
+#: MergeSummary.py:190
+msgid "MergeSummary.determineGameType: No match in SnG_Structures"
+msgstr ""
+
+#: MergeSummary.py:216
+msgid "MergeSummary.determineGameType: Muli-table SnG found, unsupported"
+msgstr ""
+
+#: MergeSummary.py:402
+msgid "MergeSummary.parseSummaryFile: Could not parse summary file"
+msgstr ""
+
+#: MergeToFpdb.py:198
+msgid "MergeToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: MergeToFpdb.py:258
+#, fuzzy
+msgid "MergeToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: MergeToFpdb.py:267 MergeToFpdb.py:531
+#, fuzzy
+msgid "MergeToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: MergeToFpdb.py:353
+msgid "MergeToFpdb.readPlayerStacks: '%s' Seat:%s acts but not listed"
+msgstr ""
+
+#: MergeToFpdb.py:539
+#, fuzzy
+msgid "MergeToFpdb.determineGameType: Multigametypes has no lookup for '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: MergeToFpdb.py:670
+msgid "Found %s. Hand missing information."
+msgstr ""
+
+#: MergeToFpdb.py:673
+msgid "Found LEAVE. Player left table before hand completed"
+msgstr ""
+
+#: MergeToFpdb.py:676
+msgid "Found CANCELLED"
+msgstr ""
+
+#: MergeToFpdb.py:678
+#, fuzzy
+msgid "Failed to identify all streets"
+msgstr "Nu se recunoaste informatia turneului: '%s'"
+
+#: MergeToFpdb.py:680
+msgid "END_OF_HAND not found. No obvious reason"
+msgstr ""
+
+#: MicrogamingToFpdb.py:113
+msgid "MicrogamingToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: MicrogamingToFpdb.py:158
+#, fuzzy
+msgid "MicrogamingToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: Mucked.py:280
+msgid "No Name"
+msgstr "Fara nume"
+
+#: OnGameToFpdb.py:191
+msgid "OnGameToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: OnGameToFpdb.py:215
+msgid "OnGameToFpdb.determineGameType: Limit not found in '%s'"
+msgstr ""
+
+#: OnGameToFpdb.py:236
+#, fuzzy
+msgid ""
+"OnGameToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: OnGameToFpdb.py:249
+#, fuzzy
+msgid "OnGameToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: OnGameToFpdb.py:270 WinamaxToFpdb.py:214
+msgid "DATETIME not matched: '%s'"
+msgstr "DATETIME nu se potriveste: '%s'"
+
+#: OnGameToFpdb.py:385 WinamaxToFpdb.py:362
+#, fuzzy
+msgid "No small blinds found."
+msgstr "Lipsa small blind"
+
+#: Options.py:31
+#, fuzzy
+msgid "Send error messages to the console rather than the log file."
+msgstr "Daca trece, mesajul de eroare va fi afisat pe consola decit pe ."
+
+#: Options.py:34
+#, fuzzy
+msgid "Specifies a database name."
+msgstr "Rescrie numele implicit al bazei de date"
+
+#: Options.py:37
+#, fuzzy
+msgid "Specifies the full path to a configuration file."
+msgstr "Specifica un fisier de configurare."
+
+#: Options.py:40
+msgid ""
+"Indicates program was restarted with a different path (only allowed once)."
+msgstr ""
+"Indica faptul ca programul a fost repornit cu o cale diferita (permis doar o "
+"data)."
+
+#: Options.py:43
+msgid "Module name for Hand History Converter"
+msgstr "Nume de modul pentru Convertorul Istoricului Miinilor"
+
+#: Options.py:46
+msgid "A sitename"
+msgstr "Un nume de site"
+
+#: Options.py:50
+msgid "Error logging level:"
+msgstr "Nivelul jurnalizarii erorii:"
+
+#: Options.py:53
+msgid "Print version information and exit."
+msgstr "Afiseaza informatii despre versiune la iesire."
+
+#: Options.py:55
+msgid "Force initial-run dialog"
+msgstr ""
+
+#: Options.py:57
+msgid "Print some useful one liners"
+msgstr "Afiseaza citeva informatii utile"
+
+#: Options.py:60
+msgid "Input file"
+msgstr "Fisierul sursa"
+
+#: Options.py:62
+msgid "Input directory"
+msgstr "Directorul intrare"
+
+#: Options.py:64
+#, fuzzy
+msgid "Out path in quiet mode"
+msgstr "Introduceti calea de iesire in modul silentios"
+
+#: Options.py:66
+msgid "File to be split is a PokerStars or Full Tilt Poker archive file"
+msgstr ""
+"Fisierul care trebuie impartit e o arhiva a PokerStars sau Full Tilt Poker"
+
+#: Options.py:68
+msgid "Developer option to print regression test data"
+msgstr ""
+
+#: Options.py:70
+msgid "How many hands do you want saved to each file. Default is 100"
+msgstr "Cite miini doriti salvate in fiecare fisier. Valoarea implicita e 100"
+
+#: Options.py:72
+msgid "X location to open window"
+msgstr "locatia X de deschis fereastra"
+
+#: Options.py:74
+#, fuzzy
+msgid "Y location to open window"
+msgstr "locatia X de deschis fereastra"
+
+#: Options.py:76
+msgid "Auto-start Auto-import"
+msgstr "Pornire automata Importare automata"
+
+#: Options.py:78
+msgid "Start Minimized"
+msgstr "Pornire minimizata"
+
+#: Options.py:80
+msgid "Start Hidden"
+msgstr "Pornire ascunsa"
+
+#: Options.py:127
+msgid "Alias '%s' unknown"
+msgstr "Alias '%s' necunoscut"
+
+#: Options.py:137
+msgid "press enter to end"
+msgstr "apasa enter pentru a termina"
+
+#: P5sResultsParser.py:10
+msgid "You need to manually enter the playername"
+msgstr "Trebuie introdus manual numele jucatorului"
+
+#: PacificPokerSummary.py:83
+msgid "PacificPokerSummary.parseSummary: '%s'"
+msgstr ""
+
+#: PacificPokerToFpdb.py:192
+msgid "PacificPokerToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: PacificPokerToFpdb.py:245
+#, fuzzy
+msgid "PacificPokerToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: PacificPokerToFpdb.py:280
+#, fuzzy
+msgid "PacificPokerToFpdb.readHandInfo: Failed to detect currency."
+msgstr "Nu pot detecta moneda."
+
+#: PartyPokerToFpdb.py:242
+msgid "Player Disconnected"
+msgstr ""
+
+#: PartyPokerToFpdb.py:246
+#, fuzzy
+msgid "Table Closed"
+msgstr "hud_main: Joc schimbat."
+
+#: PartyPokerToFpdb.py:250
+msgid "Game start line"
+msgstr ""
+
+#: PartyPokerToFpdb.py:254
+msgid "Preliminary hand"
+msgstr ""
+
+#: PartyPokerToFpdb.py:257
+msgid "PartyPokerToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: PartyPokerToFpdb.py:284
+#, fuzzy
+msgid ""
+"PartyPokerToFpdb.determineGameType: NLim_Blinds_20bb has no lookup for '%s' "
+"- '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: PartyPokerToFpdb.py:293 PartyPokerToFpdb.py:327
+#, fuzzy
+msgid ""
+"PartyPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: PartyPokerToFpdb.py:350
+#, fuzzy
+msgid "PartyPokerToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: PartyPokerToFpdb.py:419
+msgid ""
+"PartyPokerToFpdb.readHandInfo: Failed to detect currency Hand ID: '%s' - '%s'"
+msgstr ""
+
+#: PartyPokerToFpdb.py:667
+#, fuzzy
+msgid "PartyPokerToFpdb: Unimplemented %s: '%s' '%s'"
+msgstr "Neimplementat %s: '%s' '%s'"
+
+#: PkrToFpdb.py:141
+msgid "PkrToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: PkrToFpdb.py:173
+#, fuzzy
+msgid "PkrToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: PokerStarsSummary.py:180
+msgid ""
+"PokerStarsSummary.parseSummaryHtml: This file format is not yet supported"
+msgstr ""
+
+#: PokerStarsSummary.py:205
+msgid "PokerStarsSummary.parseSummaryXLS: '%s' '%s"
+msgstr ""
+
+#: PokerStarsSummary.py:214
+msgid "PokerStarsSummary.parseSummaryXLS Game '%s' not found"
+msgstr ""
+
+#: PokerStarsSummary.py:226
+msgid "PokerStarsSummary.parseSummaryHtml: '%s' '%s"
+msgstr ""
+
+#: PokerStarsSummary.py:335
+msgid "PokerStarsSummary.parseSummary: '%s'"
+msgstr ""
+
+#: PokerStarsToFpdb.py:219
+msgid "PokerStarsToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: PokerStarsToFpdb.py:279
+#, fuzzy
+msgid "PokerStarsToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: PokerStarsToFpdb.py:326
+#, fuzzy
+msgid "PokerStarsToFpdb.readHandInfo: Failed to detect currency."
+msgstr "Nu pot detecta moneda."
+
+#: PokerTrackerSummary.py:81
+msgid "PokerTrackerSummary.parseSummary: '%s'"
+msgstr ""
+
+#: PokerTrackerSummary.py:92
+msgid "PokerTrackerSummary.parseSummary: Unsupported site summary '%s'"
+msgstr ""
+
+#: PokerTrackerToFpdb.py:219 PokerTrackerToFpdb.py:234
+#, fuzzy
+msgid "PokerTrackerToFpdb.determineGameType: '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: PokerTrackerToFpdb.py:278
+#, fuzzy
+msgid ""
+"PokerTrackerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - "
+"'%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: PokerTrackerToFpdb.py:303
+#, fuzzy
+msgid "PokerTrackerToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: PokerTrackerToFpdb.py:375
+#, fuzzy
+msgid "PokerTrackerToFpdb.readHandInfo: Failed to detect currency."
+msgstr "Nu pot detecta moneda."
+
+#: SealsWithClubsToFpdb.py:106
+#, fuzzy
+msgid "SealsWithClubsToFpdb.determineGameType: '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: SealsWithClubsToFpdb.py:138
+#, fuzzy
+msgid "SealsWithClubsToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: SitenameSummary.py:84 SitenameSummary.py:86
+msgid "Unable to recognise Tourney Info: '%s'"
+msgstr "Nu se recunoaste informatia turneului: '%s'"
+
+#: SitenameSummary.py:85
+msgid "Raising FpdbParseError"
+msgstr "Plusare FpdbParseError"
+
+#: SplitHandHistory.py:76 fpdb_prerun.py:60
+msgid "File not found"
+msgstr "Fisierul nu a fost gasit"
+
+#: SplitHandHistory.py:86
+msgid "%s processed"
+msgstr "%s procesate"
+
+#: SplitHandHistory.py:105
+msgid "Invalid file number"
+msgstr ""
+
+#: SplitHandHistory.py:126
+msgid "Unexpected error processing file"
+msgstr "Eroare neasteptata la procesarea fisierului"
+
+#: SplitHandHistory.py:165
+msgid "End of file reached"
+msgstr "S-a ajuns la sfirsitul fisierului"
+
+#: Stats.py:156 Stats.py:163
+#, fuzzy
+msgid "Player name"
+msgstr "Nume jucator"
+
+#: Stats.py:212 Stats.py:232
+msgid "M ratio"
+msgstr ""
+
+#: Stats.py:245 Stats.py:264
+msgid "bb stack"
+msgstr ""
+
+#: Stats.py:373 Stats.py:382
+msgid "Profit per 100 hands"
+msgstr "Profit per 100 miini"
+
+#: Stats.py:376 Stats.py:398 Stats.py:420
+#, fuzzy
+msgid "exception calculating %s"
+msgstr "abatere la calcularea bb/100:"
+
+#: Stats.py:417 Stats.py:426
+msgid "Big bets won per 100 hands"
+msgstr "Pariuri mari cistigate per 100 miini"
+
+#: Stats.py:505
+msgid "% steal success"
+msgstr "% succes la furat"
+
+#: Stats.py:519 Stats.py:526
+msgid "% folded SB to steal"
+msgstr "% aruncare SB la furt"
+
+#: Stats.py:537 Stats.py:544
+msgid "% folded BB to steal"
+msgstr "% aruncare BB la furt"
+
+#: Stats.py:558 Stats.py:565
+msgid "% folded blind to steal"
+msgstr "% aruncat blind la furt"
+
+#: Stats.py:612 Stats.py:619
+msgid "% cold 4 bet preflop/3rd street"
+msgstr "% cold 4 bet inainte de flop/pe strada a 3a"
+
+#: Stats.py:632 Stats.py:639
+msgid "4 bet range"
+msgstr ""
+
+#: Stats.py:651 Stats.py:658
+msgid "% call 3 bet"
+msgstr ""
+
+#: Stats.py:670 Stats.py:677
+#, fuzzy
+msgid "% DonkBetAndRaise flop/4th street"
+msgstr "% pariul de continuare pe flop/strada a 4a"
+
+#: Stats.py:689 Stats.py:696
+#, fuzzy
+msgid "% DonkBetAndRaise turn/5th street"
+msgstr "%pariu de continuare pe turn/strada a 5a"
+
+#: Stats.py:708 Stats.py:715
+#, fuzzy
+msgid "% DonkBetAndRaise river/6th street"
+msgstr "% pariul de continuare pe river/strada a 6a"
+
+#: Stats.py:728
+#, fuzzy
+msgid "% Fold to DonkBetAndRaise flop/4th street"
+msgstr "% pariul de continuare pe flop/strada a 4a"
+
+#: Stats.py:735
+#, fuzzy
+msgid "% Fold DonkBetAndRaise flop/4th street"
+msgstr "% pariul de continuare pe flop/strada a 4a"
+
+#: Stats.py:747
+msgid "% Fold to DonkBetAndRaise turn"
+msgstr ""
+
+#: Stats.py:754
+msgid "% Fold DonkBetAndRaise turn"
+msgstr ""
+
+#: Stats.py:767
+msgid "% Fold to DonkBetAndRaise river"
+msgstr ""
+
+#: Stats.py:774
+msgid "% Fold DonkBetAndRaise river"
+msgstr ""
+
+#: Stats.py:786 Stats.py:793
+msgid "% squeeze preflop"
+msgstr "% stoarcere inainte de flop"
+
+#: Stats.py:805 Stats.py:812
+msgid "% raise to steal"
+msgstr "% ridicare la furt"
+
+#: Stats.py:949 Stats.py:956
+msgid "Aggression frequency 7th street"
+msgstr "Frecventa agresiunii pe strada a 7a"
+
+#: Stats.py:1021 Stats.py:1028
+#, fuzzy
+msgid "Aggression factor pct"
+msgstr "Factorul de agresiune"
+
+#: Stats.py:1059 Stats.py:1066
+msgid "% continuation bet flop/4th street"
+msgstr "% pariul de continuare pe flop/strada a 4a"
+
+#: Stats.py:1077 Stats.py:1084
+msgid "% continuation bet turn/5th street"
+msgstr "%pariu de continuare pe turn/strada a 5a"
+
+#: Stats.py:1095 Stats.py:1102
+msgid "% continuation bet river/6th street"
+msgstr "% pariul de continuare pe river/strada a 6a"
+
+#: Stats.py:1113 Stats.py:1120
+msgid "% continuation bet 7th street"
+msgstr "% pariu de continuare pe strada a 7a"
+
+#: Stats.py:1131 Stats.py:1138
+msgid "% fold frequency flop/4th street"
+msgstr "% frecventa aruncarii pe flop/strada a 4a"
+
+#: Stats.py:1149 Stats.py:1156
+msgid "% fold frequency turn/5th street"
+msgstr "% frecventa aruncarii pe turn/strada a 5a"
+
+#: Stats.py:1167 Stats.py:1174
+msgid "% fold frequency river/6th street"
+msgstr "% frecventa aruncarii pe river/strada a 6a"
+
+#: Stats.py:1185 Stats.py:1192
+msgid "% fold frequency 7th street"
+msgstr "% frecventa aruncarii pe strada a 7a"
+
+#: Stats.py:1203 Stats.py:1210
+#, fuzzy
+msgid "% fold to continuation bet flop/4th street"
+msgstr "% pariul de continuare pe flop/strada a 4a"
+
+#: Stats.py:1221 Stats.py:1228
+#, fuzzy
+msgid "% fold to continuation bet turn/5th street"
+msgstr "%pariu de continuare pe turn/strada a 5a"
+
+#: Stats.py:1239 Stats.py:1246
+#, fuzzy
+msgid "% fold to continuation bet river/6th street"
+msgstr "% pariul de continuare pe river/strada a 6a"
+
+#: Stats.py:1257 Stats.py:1264
+#, fuzzy
+msgid "% fold to continuation bet 7th street"
+msgstr "% pariu de continuare pe strada a 7a"
+
+#: Stats.py:1275 Stats.py:1282
+#, fuzzy
+msgid "% check-raise flop/4th street"
+msgstr "% pariul de continuare pe flop/strada a 4a"
+
+#: Stats.py:1293 Stats.py:1300
+#, fuzzy
+msgid "% check-raise turn/5th street"
+msgstr "%pariu de continuare pe turn/strada a 5a"
+
+#: Stats.py:1311 Stats.py:1318
+#, fuzzy
+msgid "% check-raise river/6th street"
+msgstr "% pariul de continuare pe river/strada a 6a"
+
+#: Stats.py:1329 Stats.py:1336
+#, fuzzy
+msgid "% check-raise 7th street"
+msgstr "% ridicare la furt"
+
+#: Stats.py:1374 Stats.py:1377
+msgid "Game abbreviation"
+msgstr ""
+
+#: Stats.py:1389
+msgid "Hands seen at this table"
+msgstr ""
+
+#: Stats.py:1487
+msgid "Hands seen at this table\n"
+msgstr ""
+
+#: Stats.py:1526
+#, fuzzy
+msgid "Example stats. Player = %s, Hand = %s:"
+msgstr "Exemplu de statistici, jucator = %s  mina = %s:"
+
+#: Stats.py:1532
+#, fuzzy
+msgid "Legal stats:"
+msgstr ""
+"\n"
+"\n"
+"Statistici legale:"
+
+#: Stats.py:1533
+#, fuzzy
+msgid ""
+"(add _0 to name to display with 0 decimal places, _1 to display with 1, etc)"
+msgstr ""
+"(adauga _0 la nume pentru a afisa cu 0 decimale, _1 entru a afisa cu 1, "
+"etc)\n"
+
+#: Stove.py:307
+msgid "No board given. Using Monte-Carlo simulation..."
+msgstr "Nu s-a dat nici o masa. Se foloseste simularea Monte-Carlo..."
+
+#: TableWindow.py:121
+msgid "Can't find table \"%s\" with search string \"%s\""
+msgstr ""
+
+#: TournamentTracker.py:104
+msgid "FPDB Tournament Entry"
+msgstr "FPDB Inscriere Turneu"
+
+#: TournamentTracker.py:144
+msgid "Closing this window will stop the Tournament Tracker"
+msgstr "Inchiderea acestei ferestre va opri Trackerul de Turneu"
+
+#: TournamentTracker.py:146
+#, fuzzy
+msgid "Add Tournament"
+msgstr "Turnee"
+
+#: TournamentTracker.py:151
+msgid "FPDB Tournament Tracker"
+msgstr "FPDB Tracker de Turneu"
+
+#: TournamentTracker.py:162
+msgid "Edit"
+msgstr "Editare"
+
+#: TournamentTracker.py:165
+msgid "Rebuy"
+msgstr "Rebuy"
+
+#: TournamentTracker.py:266
+#, fuzzy
+msgid "Database error %s in hand %d. Skipping."
+msgstr "Eroare a bazei de date %s in mina %d. Ignorare.\n"
+
+#: TournamentTracker.py:276
+#, fuzzy
+msgid "Could not find tournament %d in hand %d. Skipping."
+msgstr "Nu se poate gasi turneul %d in mina %d. Ignorare.\n"
+
+#: TournamentTracker.py:299
+#, fuzzy
+msgid "Table name %s not found, skipping."
+msgstr "masa cu numele %s nu a fost gasita, se ignora.\n"
+
+#: TournamentTracker.py:306
+msgid "Tournament tracker starting"
+msgstr "Pornire Tracker de turneu"
+
+#: TourneySummary.py:49
+msgid "xlrd not found. Required for importing Excel tourney results files"
+msgstr ""
+
+#: TourneySummary.py:159
+msgid "END TIME"
+msgstr "TIMP SFIRSIT"
+
+#: TourneySummary.py:160
+msgid "TOURNEY NAME"
+msgstr "NUME TURNEU"
+
+#: TourneySummary.py:161
+msgid "TOURNEY NO"
+msgstr "NUMAR TURNEU"
+
+#: TourneySummary.py:166
+msgid "CURRENCY"
+msgstr "MONEDA"
+
+#: TourneySummary.py:169
+msgid "ENTRIES"
+msgstr "INTRARI"
+
+#: TourneySummary.py:170
+msgid "SPEED"
+msgstr "VITEZA"
+
+#: TourneySummary.py:171
+msgid "PRIZE POOL"
+msgstr "FOND PREMIERE"
+
+#: TourneySummary.py:172
+msgid "STARTING CHIP COUNT"
+msgstr "INCEPUT NUMARATOARE JETOANE"
+
+#: TourneySummary.py:174
+msgid "REBUY"
+msgstr "REBUY"
+
+#: TourneySummary.py:175
+msgid "ADDON"
+msgstr "ADDON"
+
+#: TourneySummary.py:176
+msgid "KO"
+msgstr "KO"
+
+#: TourneySummary.py:177
+msgid "MATRIX"
+msgstr "MATRICE"
+
+#: TourneySummary.py:178
+msgid "SHOOTOUT"
+msgstr "SHOOTOUT"
+
+#: TourneySummary.py:179
+msgid "REBUY CHIPS"
+msgstr "JETOANE la REBUY"
+
+#: TourneySummary.py:180
+msgid "ADDON CHIPS"
+msgstr "JETOANE la ADDON"
+
+#: TourneySummary.py:181
+msgid "REBUY COST"
+msgstr "COST REBUY"
+
+#: TourneySummary.py:182
+msgid "ADDON COST"
+msgstr "COST ADDON"
+
+#: TourneySummary.py:183
+msgid "TOTAL REBUYS"
+msgstr "TOTAL REBUY-uri"
+
+#: TourneySummary.py:184
+msgid "TOTAL ADDONS"
+msgstr "TOTAL ADDON-uri"
+
+#: TourneySummary.py:186
+msgid "SNG"
+msgstr "SNG"
+
+#: TourneySummary.py:187
+msgid "SATELLITE"
+msgstr "SATELIT"
+
+#: TourneySummary.py:188
+msgid "DOUBLE OR NOTHING"
+msgstr "DUBLU SAU NIMIC"
+
+#: TourneySummary.py:189
+msgid "GUARANTEE"
+msgstr "GARANTAT"
+
+#: TourneySummary.py:190
+msgid "ADDED"
+msgstr "ADAUGAT"
+
+#: TourneySummary.py:191
+msgid "ADDED CURRENCY"
+msgstr "MONEDA ADAUGATA"
+
+#: TourneySummary.py:192
+msgid "COMMENT"
+msgstr "COMENTARIU"
+
+#: TourneySummary.py:193
+msgid "COMMENT TIMESTAMP"
+msgstr "ORA COMENTARIU"
+
+#: TourneySummary.py:196
+msgid "PLAYER IDS"
+msgstr "ID-uri JUCATORI"
+
+#: TourneySummary.py:198
+msgid "TOURNEYS PLAYERS IDS"
+msgstr "ID-uri JUCATORI TURNEU"
+
+#: TourneySummary.py:199
+msgid "RANKS"
+msgstr "POZITII"
+
+#: TourneySummary.py:200
+msgid "WINNINGS"
+msgstr "CISTIGURI"
+
+#: TourneySummary.py:201
+msgid "WINNINGS CURRENCY"
+msgstr "MONEDA CISTIGURI"
+
+#: TourneySummary.py:202
+msgid "COUNT REBUYS"
+msgstr "NUMARA REBUY-uri"
+
+#: TourneySummary.py:203
+msgid "COUNT ADDONS"
+msgstr "NUMARA ADDON-uri"
+
+#: TourneySummary.py:204
+#, fuzzy
+msgid "COUNT KO"
+msgstr "NUMARA ADDON-uri"
+
+#: TourneySummary.py:258
+msgid "Tourney Insert/Update done"
+msgstr "Adaugare/modificare de turneu facuta"
+
+#: TreeViewTooltips.py:108
+msgid ""
+"This module was developed and tested with version 2.8.18 of gtk.  You are "
+"using version %d.%d.%d.  Your milage may vary."
+msgstr ""
+"Acest modul a fost dezvoltat si testat cu versiunea 2.8.18 de gtk. Folositi "
+"versiunea %d.%d.%d. ..."
+
+#: WinTables.py:80
+msgid "Window %s not found. Skipping."
+msgstr "Fereastra %s nu a fost gasita. Ignorare."
+
+#: WinamaxSummary.py:143 WinamaxSummary.py:200
+msgid "WinamaxSummary.parseSummary: Gametype unknown defaulting to NLHE"
+msgstr ""
+
+#: WinamaxSummary.py:186
+msgid "WinamaxSummary.parseSummaryFromFile: '%s'"
+msgstr ""
+
+#: WinamaxToFpdb.py:162
+msgid "WinamaxToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: WinamaxToFpdb.py:182
+msgid "WinamaxToFpdb.determineGameType: Limit not found in %s."
+msgstr ""
+
+#: WinamaxToFpdb.py:202
+#, fuzzy
+msgid "WinamaxToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: WinamaxToFpdb.py:330
+msgid "Failed to add streets. handtext=%s"
+msgstr "Nu pot adauga strazi. handtext=%s"
+
+#: WinamaxToFpdb.py:394
+msgid "No hole cards found for %s"
+msgstr "Nu sunt carti proprii pentru %s"
+
+#: WinamaxToFpdb.py:400
+msgid "Hero cards %s: %s"
+msgstr "Cartile eroului %s: %s"
+
+#: WinamaxToFpdb.py:444
+msgid "Read shown cards: %s"
+msgstr "Citire carti aratate: %s"
+
+#: XTables.py:73
+msgid "No match in XTables for table '%s'."
+msgstr "Nepotrivire in XTables pentru tabela '%s'."
+
+#: fpdb.pyw:79
+msgid "GuiStove not found. If you want to use it please install pypoker-eval."
+msgstr ""
+"GuiStove nu a fost gasit. Daca doriti sa fie folosit va rugam instalati "
+"pypoker-eval."
+
+#: fpdb.pyw:216 fpdb.pyw:223
+msgid ""
+"You are free to change, and distribute original or changed versions of fpdb "
+"within the rules set out by the license"
+msgstr ""
+"Sunteti liber sa schimbati si distribuiti versiuni originale sau modificate "
+"ale fpdb in cadrul regulilor stabilite de licenta"
+
+#: fpdb.pyw:218 fpdb.pyw:263
+msgid "Your config file is: "
+msgstr "Fisierul de configurare este:"
+
+#: fpdb.pyw:224
+#, fuzzy
+msgid "Please see the help screen for license information"
+msgstr ""
+"Va rugam cititi ecranul de pornire al fpdb pentru informatii despre licenta"
+
+#: fpdb.pyw:229
+#, fuzzy
+msgid "... and others."
+msgstr "si altii"
+
+#: fpdb.pyw:229
+msgid "See contributors.txt"
+msgstr ""
+
+#: fpdb.pyw:241
+msgid "Operating System"
+msgstr "Sistem de operare"
+
+#: fpdb.pyw:248
+msgid "fpdb version"
+msgstr "versiune fpdb"
+
+#: fpdb.pyw:249
+msgid "database used"
+msgstr "baza de date folosita"
+
+#: fpdb.pyw:250
+msgid "language"
+msgstr "limba"
+
+#: fpdb.pyw:251
+msgid "character encoding"
+msgstr "encodare de caractere"
+
+#: fpdb.pyw:268
+msgid "Version Information:"
+msgstr "Informatii despre versiune:"
+
+#: fpdb.pyw:275
+msgid "Threads: "
+msgstr "Procese:"
+
+#: fpdb.pyw:302
+msgid "saving updated db data"
+msgstr "salvarea datelor modificate in bd"
+
+#: fpdb.pyw:313 fpdb.pyw:539 fpdb.pyw:587 fpdb.pyw:614
+msgid ""
+"Cannot open Database Maintenance window because other windows have been "
+"opened. Re-start fpdb to use this option."
+msgstr ""
+"Nu se poate deschide Intretinerea Bazei de Date pentru ca au fost deschise "
+"alte ferestre. Reporniti fpdb pentru a folosi aceasta optiune."
+
+#: fpdb.pyw:318
+#, fuzzy
+msgid "Number of TourneyTypes:"
+msgstr ""
+"\n"
+"Numarul TourneyTypes:"
+
+#: fpdb.pyw:329
+msgid "HUD Preferences - choose category"
+msgstr "HUD Preferinte - alegeti categoria"
+
+#: fpdb.pyw:335
+#, fuzzy
+msgid ""
+"Note that this does not load existing settings, but overwrites them (if you "
+"click save)."
+msgstr "Notati ca aceasta nu setarile curente, ci le rescrie."
+
+#: fpdb.pyw:339
+msgid ""
+"Please select the game category for which you want to configure HUD stats:"
+msgstr ""
+"Rugam alegeti categoria de joc pentru care doriti configurarea statisticilor "
+"HUD:"
+
+#: fpdb.pyw:393
+msgid "HUD Preferences - please choose your stats"
+msgstr "HUD Preferinte - alegeti statisticile"
+
+#: fpdb.pyw:399
+msgid "Please choose the stats you wish to use in the below table."
+msgstr "Rugam alegeti statisticile ce le doriti folosite in tabela de mai jos."
+
+#: fpdb.pyw:411
+msgid ""
+"To configure things like colouring you will still have to use the Advanced "
+"Preferences dialogue or manually edit your HUD_config.xml."
+msgstr ""
+"Pentru a configura lucruri ca si culorile trebuie sa folositi Preferinte "
+"Avansate sau sa editati manual fisierul HUD_config.xml."
+
+#: fpdb.pyw:521
+msgid "Confirm deleting and recreating tables"
+msgstr "Confirmati stergerea si recrearea tabelelor"
+
+#: fpdb.pyw:522
+msgid "Please confirm that you want to (re-)create the tables."
+msgstr "Rugam confirmati (re)crearea tabelelor."
+
+#: fpdb.pyw:523
+#, fuzzy
+msgid ""
+"If there already are tables in the database %s on %s they will be deleted "
+"and you will have to re-import your histories."
+msgstr ""
+" Daca sunt deja tabele in baza de date %s pe %s ele vor fi sterse si va "
+"trebui sa va reimportati istoricul.\n"
+
+#: fpdb.pyw:524
+msgid "This may take a while."
+msgstr "S-ar putea sa dureze putin."
+
+#: fpdb.pyw:537
+msgid "User cancelled recreating tables"
+msgstr "Utilizatorul a anulat recrearea tabelelor"
+
+#: fpdb.pyw:546
+msgid "Please confirm that you want to re-create the HUD cache."
+msgstr "Rugam confirmati ca doriti sa recreati cache-ul pentru HUD."
+
+#: fpdb.pyw:550
+msgid " Hero's cache starts: "
+msgstr " Cache-ul Eroului:"
+
+#: fpdb.pyw:562
+msgid " Villains' cache starts: "
+msgstr " Cache-ul Dusmanuli:"
+
+#: fpdb.pyw:579
+msgid " Rebuilding HUD Cache ... "
+msgstr " Recladire Cache HUD..."
+
+#: fpdb.pyw:583
+msgid "User cancelled rebuilding hud cache"
+msgstr "Utilizatorul a intrerupt recladirea cache-ului pentru hud"
+
+#: fpdb.pyw:593
+msgid "Confirm rebuilding database indexes"
+msgstr "Confirmati recladirea indexurilor in baza de date"
+
+#: fpdb.pyw:596
+msgid "Please confirm that you want to rebuild the database indexes."
+msgstr "Rugam confirmati ca doriti sa recladiti indexurile bazei de date."
+
+#: fpdb.pyw:601
+msgid " Rebuilding Indexes ... "
+msgstr " Recladire Indexuri ..."
+
+#: fpdb.pyw:604
+msgid " Cleaning Database ... "
+msgstr " Curatare Baza de date ..."
+
+#: fpdb.pyw:607
+msgid " Analyzing Database ... "
+msgstr " Analiza Baza de Date ..."
+
+#: fpdb.pyw:610
+msgid "User cancelled rebuilding db indexes"
+msgstr "Utilizatorul a anulat recladirea indexurilor bd"
+
+#: fpdb.pyw:645
+msgid "Site Preferences"
+msgstr "Preferite Site"
+
+#: fpdb.pyw:647
+msgid "Please select which sites you play on and enter your usernames."
+msgstr ""
+"Rugam selectati care site-uri jucati si introduceti pe fiecare numele de "
+"utilizator"
+
+#: fpdb.pyw:661
+#, fuzzy
+msgid "Hand History Path"
+msgstr "Cale Istoric"
+
+#: fpdb.pyw:661
+msgid "Screen Name"
+msgstr "Nume Afisat"
+
+#: fpdb.pyw:661
+#, fuzzy
+msgid "Tournament Summary Path"
+msgstr "Turnee"
+
+#: fpdb.pyw:661 fpdb.pyw:714
+msgid "Detect"
+msgstr "Detectare"
+
+#: fpdb.pyw:760
+msgid "Click OK to close Fpdb"
+msgstr ""
+
+#: fpdb.pyw:760
+msgid ""
+"Configuration settings have been updated, Fpdb needs to be restarted now"
+msgstr ""
+
+#: fpdb.pyw:763
+msgid "Re-start fpdb to load them."
+msgstr "Reporniti fpdb pentru a le incarca."
+
+#: fpdb.pyw:763
+msgid "Updated preferences have not been loaded because windows are open."
+msgstr ""
+"Preferintele modificate nu au fost incarcate deoarece sunt ferestre deschise."
+
+#: fpdb.pyw:818
+#, fuzzy
+msgid "Configure"
+msgstr "Fisier configurare"
+
+#: fpdb.pyw:821
+msgid "Cash"
+msgstr ""
+
+#: fpdb.pyw:822
+#, fuzzy
+msgid "Tournament"
+msgstr "Turnee"
+
+#: fpdb.pyw:823
+msgid "Maintenance"
+msgstr ""
+
+#: fpdb.pyw:824 fpdb.pyw:1092
+msgid "Help"
+msgstr "Ajutor"
+
+#: fpdb.pyw:835
+#, fuzzy
+msgid "Site Settings"
+msgstr "Setari"
+
+#: fpdb.pyw:836
+#, fuzzy
+msgid "Preferences"
+msgstr "Preferinte HUD"
+
+#: fpdb.pyw:840
+msgid "Quit"
+msgstr "Iesire"
+
+#: fpdb.pyw:845
+#, fuzzy
+msgid "HUD and Auto Import"
+msgstr "Importare Automata"
+
+#: fpdb.pyw:847 fpdb.pyw:1098
+msgid "Graphs"
+msgstr "Grafice"
+
+#: fpdb.pyw:849 fpdb.pyw:1071
+#, fuzzy
+msgid "Hand Viewer"
+msgstr "Vizitatori"
+
+#: fpdb.pyw:851 fpdb.pyw:1066
+msgid "Session Stats"
+msgstr "Statistici Sesiune"
+
+#: fpdb.pyw:854 fpdb.pyw:1104
+msgid "Tourney Graphs"
+msgstr "Grafice Turneu"
+
+#: fpdb.pyw:855 fpdb.pyw:1049
+msgid "Tourney Stats"
+msgstr "Statistici Turneu"
+
+#: fpdb.pyw:858
+msgid "Statistics"
+msgstr "Statistici"
+
+#: fpdb.pyw:859
+msgid "Create or Recreate Tables"
+msgstr "Creare sau recreare Tabele"
+
+#: fpdb.pyw:860
+msgid "Rebuild HUD Cache"
+msgstr "Recladire cache HUD"
+
+#: fpdb.pyw:861
+msgid "Rebuild DB Indexes"
+msgstr "Recladire Indexuri BD"
+
+#: fpdb.pyw:862
+msgid "Dump Database to Textfile (takes ALOT of time)"
+msgstr "Varza Baza de date in fisier text (dureaza MULT timp)"
+
+#: fpdb.pyw:864
+msgid "Log Messages"
+msgstr "Jurnalizare Mesaje"
+
+#: fpdb.pyw:865
+#, fuzzy
+msgid "Help Tab"
+msgstr "Ajutor"
+
+#: fpdb.pyw:867
+msgid "About, License, Copying"
+msgstr "Despre, Licentiere, Copiere"
+
+#: fpdb.pyw:873
+#, fuzzy
+msgid "There is an error in your config file %s"
+msgstr "Exista o eroare in fisierul de configurare\n"
+
+#: fpdb.pyw:875
+msgid "CONFIG FILE ERROR"
+msgstr "EROARE FISIER CONFIGURARE"
+
+#: fpdb.pyw:879
+#, fuzzy
+msgid "Logfile is %s"
+msgstr "Fisierul jurnal este %s\n"
+
+#: fpdb.pyw:881
+msgid "Config file"
+msgstr "Fisier configurare"
+
+#: fpdb.pyw:883
+#, fuzzy
+msgid ""
+"Enter your screen_name and hand history path in the Site Preferences window "
+"(Main menu) before trying to import hands."
+msgstr ""
+"Modificati numele de afisare si calea spre istoricul miinilor in sectiunea "
+"site-uri_suportate din fereastra Preferinte Avansate (Meniu Principal) "
+"nainte de a incerca sa importati miini."
+
+#: fpdb.pyw:887
+#, fuzzy
+msgid "Strong Warning - Local configuration out of date"
+msgstr "Eroare in timpul parcurgerii fisierului exemplu de configurare %s."
+
+#: fpdb.pyw:890
+msgid "Your local configuration file needs to be updated."
+msgstr ""
+
+#: fpdb.pyw:893
+#, fuzzy
+msgid ""
+"This error is not necessarily fatal but it is strongly recommended that you "
+"update the configuration."
+msgstr ""
+"Aceasta eroare nu e neaparat fatala dar e foarte recomandat sa recreati "
+"tabelele folosind meniul Daza de date"
+
+#: fpdb.pyw:896
+msgid ""
+"To create a new configuration, see fpdb.sourceforge.net/apps/mediawiki/fpdb/"
+"index.php?title=Reset_Configuration"
+msgstr ""
+
+#: fpdb.pyw:899
+msgid ""
+"A new configuration will destroy all personal settings (hud layout, site "
+"folders, screennames, favourite seats)"
+msgstr ""
+
+#: fpdb.pyw:902
+msgid "To keep existing personal settings, you must edit the local file."
+msgstr ""
+
+#: fpdb.pyw:905
+msgid "See the release note for information about the edits needed"
+msgstr ""
+
+#: fpdb.pyw:936
+msgid "Connected to SQLite: %s"
+msgstr "Conectat la SQLite: %s"
+
+#: fpdb.pyw:954
+msgid "An invalid DB version or missing tables have been detected."
+msgstr "S-a detectat a versiune invalida a BD sau tabele lipsa"
+
+#: fpdb.pyw:954
+msgid "Strong Warning - Invalid database version"
+msgstr "Avertizare serioasa - Versiune invalida a bazei de date"
+
+#: fpdb.pyw:955
+msgid ""
+"This error is not necessarily fatal but it is strongly recommended that you "
+"recreate the tables by using the Database menu."
+msgstr ""
+"Aceasta eroare nu e neaparat fatala dar e foarte recomandat sa recreati "
+"tabelele folosind meniul Daza de date"
+
+#: fpdb.pyw:956
+msgid ""
+"Not doing this will likely lead to misbehaviour including fpdb crashes, "
+"corrupt data etc."
+msgstr ""
+"Daca nu faceti asta cel mai probabil va apare un comportament gresit al "
+"fpdb, blocari, date corupte, etc."
+
+#: fpdb.pyw:959
+msgid "Status: Connected to %s database named %s on host %s"
+msgstr "Statut: Conectat la baza de date %s numita %s pe %s"
+
+#: fpdb.pyw:974
+#, fuzzy
+msgid "Global lock taken by %s"
+msgstr ""
+"\n"
+"Siguranta globala luata de %s"
+
+#: fpdb.pyw:977
+#, fuzzy
+msgid "Failed to get global lock, it is currently held by %s"
+msgstr ""
+"\n"
+"Nu se poate lua siguranta globala, e detinuta de %s"
+
+#: fpdb.pyw:1032
+msgid "Tournament Results Import"
+msgstr "Importare Rezultate Turneu"
+
+#: fpdb.pyw:1038
+msgid "eMail Import"
+msgstr "Importare eMail"
+
+#: fpdb.pyw:1055
+msgid "Tourney Viewer"
+msgstr "Vizualizare Turneu"
+
+#: fpdb.pyw:1061
+msgid "Positional Stats"
+msgstr "Statistici Pozitionale"
+
+#: fpdb.pyw:1075
+msgid ""
+"Fpdb needs translators!\n"
+"If you speak another language and have a few minutes or more to spare get in "
+"touch by emailing steffen@schaumburger.info\n"
+"\n"
+"Welcome to Fpdb!\n"
+"To be notified of new snapshots and releases go to https://lists.sourceforge."
+"net/lists/listinfo/fpdb-announce and subscribe.\n"
+"If you want to follow development more closely go to https://lists."
+"sourceforge.net/lists/listinfo/fpdb-main and subscribe.\n"
+"\n"
+"This program is currently in an alpha-state, so our database format is still "
+"sometimes changed.\n"
+"You should therefore always keep your hand history files so that you can re-"
+"import after an update, if necessary.\n"
+"\n"
+"For documentation please visit our website/wiki at http://fpdb.sourceforge."
+"net/.\n"
+"If you need help click on Contact - Get Help on our website.\n"
+"Please note that default.conf is no longer needed nor used, all "
+"configuration now happens in HUD_config.xml.\n"
+"\n"
+"This program is free/libre open source software licensed partially under the "
+"AGPL3, and partially under GPL2 or later.\n"
+"The Windows installer package includes code licensed under the MIT license.\n"
+"You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0."
+"txt and mit.txt in the fpdb installation directory."
+msgstr ""
+"Fpdb are nevoie de translatori!\n"
+"Daca vorbiti o alta limba si aveti citeva minute sau mai mult la dispozitie "
+"contactati-ne prin e-mail la steffen@schaumburger.info\n"
+"\n"
+"Bine ati venit la Fpdb!\n"
+"Pentru a fi notificat despre noi versiuni va rugam sa va inscrieti in "
+"https://lists.sourceforge.net/lists/listinfo/fpdb-announce.\n"
+"Daca doriti sa urmariti indeaproape dezvoltarea inscrieti-va la https://"
+"lists.sourceforge.net/lists/listinfo/fpdb-main.\n"
+"\n"
+"Acest program e intr-un mod alfa, deci formatul bazei de date e inca uneori "
+"schimbat.\n"
+"Asta inseamna ca ar fi bine sa va pastrati fisierele cu istoricul miinilor "
+"pentru a le reimporta dupa un update, daca e necesar.\n"
+"\n"
+"Pentru documentare vizitati website-ul/wiki-ul de la  http://fpdb."
+"sourceforge.net/.\n"
+"Daca aveti nevoie de ajutor accesati Contact - Primeste Ajutor in site-ul "
+"nostru.\n"
+"Va rugam luati aminte ca default.conf nu mai este necesar sau folosit, toate "
+"configurarile sunt acum, in HUD_config.xml.\n"
+"\n"
+"Acest program este un software cu sursa deschisa/libera si partial sub "
+"licenta AGPL3 si GPL2 sau mai nou.\n"
+"Pachetul de instalare include cod licentiat sub licenta MIT.\n"
+"Puteti gasi textele integrale ale licentelor in agpl-3.0.txt, gpl-2.0.txt, "
+"gpl-3.0.txt si mit.txt in directorul de instalare al fpdb."
+
+#: fpdb.pyw:1111
+msgid "Stove"
+msgstr "Stove"
+
+#: fpdb.pyw:1220
+msgid "fpdb starting ..."
+msgstr "pornire fpdb ..."
+
+#: fpdb.pyw:1307
+msgid "Unknown Site"
+msgstr "Site Necunoscut"
+
+#: fpdb.pyw:1308
+#, fuzzy
+msgid "Unable to find site '%s'"
+msgstr "Nu pot gasit site-ul '%s'"
+
+#: fpdb_prerun.py:62
+msgid ""
+"We appear to be running in Windows, but the Windows Python Extensions are "
+"not loading. Please install the PYWIN32 package from http://sourceforge.net/"
+"projects/pywin32/"
+msgstr ""
+"Se pare ca rulam in Windows, dar Extensiile Python din Windows nu sunt "
+"incarcate. Rugam instalati pachetul PYWIN32 de la http://sourceforge.net/"
+"projects/pywin32/"
+
+#: fpdb_prerun.py:64
+#, fuzzy
+msgid ""
+"Unable to import PYTZ library. Please install PYTZ from http://pypi.python."
+"org/pypi/pytz/"
+msgstr ""
+"Eroare de Import: Nu se poate importa libraria PYTZ. Rugam instalati PYTZ de "
+"la http://pypi.python.org/"
+
+#: fpdb_prerun.py:155
+#, fuzzy
+msgid "Python 2.6-2.7 not found, please install python 2.6 or 2.7 for fpdb."
+msgstr ""
+"\n"
+"python 2.6-2.7 nu a fost gasit, rugam instalati python 2.6 sau 2.7 pentru "
+"fpdb\n"
+
+#: iPokerSummary.py:99
+msgid "iPokerSummary.determineGameType: '%s'"
+msgstr ""
+
+#: iPokerSummary.py:107 iPokerSummary.py:183
+msgid ""
+"iPokerSummary.determineGameType: Text does not appear to be a tournament '%s'"
+msgstr ""
+
+#: iPokerToFpdb.py:209
+msgid "iPokerToFpdb.determineGameType: '%s'"
+msgstr ""
+
+#: iPokerToFpdb.py:294
+#, fuzzy
+msgid ""
+"iPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'"
+msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#: iPokerToFpdb.py:303
+#, fuzzy
+msgid "iPokerToFpdb.readHandInfo: '%s'"
+msgstr "Nepotrivire in readHandInfo: '%s'"
+
+#: interlocks.py:52
+msgid "lock already held by:"
+msgstr "siguranta e deja detinuta de:"
+
+#: windows_make_bats.py:30
+#, fuzzy
+msgid "This script is only for Windows."
+msgstr ""
+"\n"
+"Acest script este doar pentru windows\n"
+
+#: windows_make_bats.py:57
+#, fuzzy
+msgid "Install gtk or edit the path manually."
+msgstr ""
+"\n"
+"nu s-au gasit directoare pentru gtk - instalati gtk sau editati manual "
+"calea\n"
+
+#: windows_make_bats.py:57
+msgid "No gtk directories found in your path."
+msgstr ""
+
+#, fuzzy
+#~ msgid ""
+#~ "AbsoluteToFpdb.readHandInfo: File name didn't match re_*InfoFromFilename"
+#~ msgstr "Numele fisierului nu e potrivit pentru re_*InfoFromFilename"
+
+#~ msgid "Creating Database instance, sql = %s"
+#~ msgstr "Creez sesiunea de baza de date, sql = %s"
+
+#, fuzzy
+#~ msgid "%s and %s"
+#~ msgstr "%s a fost schimbat %s"
+
+#, fuzzy
+#~ msgid ""
+#~ "EverestToFpdb.determineGameType: Unable to recognise hand info from: '%s'"
+#~ msgstr "Nu se recunoaste informatia miinii din: '%s'"
+
+#~ msgid "self.sites[%s] set to %s"
+#~ msgstr "self.sites[%s] asignat ca %s"
+
+#~ msgid "self.limit[%s] set to %s"
+#~ msgstr "self.limit[%s] setat ca %s"
+
+#~ msgid "self.seats[%s] set to %s"
+#~ msgstr "self.seats[%s] setat ca %s"
+
+#~ msgid "self.groups[%s] set to %s"
+#~ msgstr "self.groups[%s] setat ca %s"
+
+#~ msgid "hide"
+#~ msgstr "ascunde"
+
+#, fuzzy
+#~ msgid "hide all"
+#~ msgstr "ascunde"
+
+#, fuzzy
+#~ msgid "show all"
+#~ msgstr "arata"
+
+#~ msgid "show"
+#~ msgstr "arata"
+
+#~ msgid "Unable to get a valid Tournament ID -- File rejected"
+#~ msgstr "Nu gasesc un identificator valid de turneu -- Fisier respins"
+
+#~ msgid ""
+#~ "Conflict between buyins read in top line (%s) and in BuyIn field (%s)"
+#~ msgstr "Conflict intre buyins in prima linie (%s) si cimpul BuyIn (%s)"
+
+#~ msgid "Conflict between fees read in top line (%s) and in Fee field (%s)"
+#~ msgstr "Conflict intre fee-uri in prima linie (%s) si cimpul Fee (%s)"
+
+#~ msgid "Unable to detect a buyin to this tournament : assume it's a freeroll"
+#~ msgstr "Nu pot detecta buyin-ul turneului: consider ca fiind freeroll"
+
+#~ msgid "Player finishing stats unreadable : %s"
+#~ msgstr "Statisticile finale ale jucatorului nu pot fi citite: %s"
+
+#~ msgid "Parsed finish position incoherent : %s / %s"
+#~ msgstr "Analiza pozitiei finale e incoerenta: %s / %s"
+
+#~ msgid "Detect Directories"
+#~ msgstr "Detecteaza directoare"
+
+#~ msgid "Auto Import Running"
+#~ msgstr "Auto Import in desfasurare"
+
+#~ msgid "Please select site"
+#~ msgstr "Selectati site-ul"
+
+#~ msgid "Import Complete"
+#~ msgstr "Importare completa"
+
+#~ msgid "Print Start/Stop Info"
+#~ msgstr "Afiseaza Informatii despre Pornire/Oprire"
+
+#~ msgid "Hands/status print:"
+#~ msgstr "Imprimare miini/stare:"
+
+#~ msgid "Number of threads:"
+#~ msgstr "Numarul executii:"
+
+#~ msgid "Archive File"
+#~ msgstr "Fisierul arhiva"
+
+#~ msgid "Hands/file:"
+#~ msgstr "Miini/fisier:"
+
+#~ msgid "Drop indexes:"
+#~ msgstr "Renuntare la indexuri:"
+
+#~ msgid "auto"
+#~ msgstr "auto"
+
+#~ msgid "don't drop"
+#~ msgstr "nu renunta"
+
+#~ msgid "drop"
+#~ msgstr "renunta"
+
+#~ msgid "HUD Test mode"
+#~ msgstr "HUD Mod de testare"
+
+#~ msgid "Drop HudCache:"
+#~ msgstr "Renuntare la HudCache:"
+
+#~ msgid "Waiting..."
+#~ msgstr "In asteptare..."
+
+#~ msgid ""
+#~ "If this option is used it quits with an extended error message if it "
+#~ "encounters any error"
+#~ msgstr ""
+#~ "Daca e folosita aceasta optiune in cazul unei erori se va afisa un mesaj "
+#~ "de eroare extins"
+
+#~ msgid ""
+#~ "Do the required conversion for %s archive format (ie. as provided by "
+#~ "support)"
+#~ msgstr ""
+#~ "Solicita conversia ceruta pentru formatul arhivei %s (ex: furnizat de "
+#~ "suport)"
+
+#~ msgid "Generate and print test data for regression testing"
+#~ msgstr "Genereaza si imprima datele de test pentru testarea in regresie"
+
+#~ msgid "converter"
+#~ msgstr "convertizor"
+
+#~ msgid "You have to select a site with the -c parameter. E.g.:"
+#~ msgstr "Trebuie selectat un site cu parametrul -c. Ex:"
+
+#~ msgid "Log Viewer"
+#~ msgstr "Vizualizare jurnal"
+
+#~ msgid "Advanced Preferences"
+#~ msgstr "Preferinte avansate"
+
+#~ msgid "Error initializing main_window"
+#~ msgstr "Eroare la initializarea main_window"
+
+#, fuzzy
+#~ msgid "Game changed."
+#~ msgstr "hud_main: Joc schimbat."
+
+#, fuzzy
+#~ msgid "Table changed"
+#~ msgstr "hud_main: Joc schimbat."
+
+#, fuzzy
+#~ msgid "Hand processing starting."
+#~ msgstr "HUD_main.read_stdin: incepe procesarea miinii..."
+
+#~ msgid "TOURNEY COMMENT"
+#~ msgstr "COMENTARIU TURNEU"
+
+#~ msgid "Reposition StatWindows"
+#~ msgstr "Repozitioneaza StatWindows"
+
+#~ msgid "For Multiple Blind Levels:"
+#~ msgstr "Pentru nivele de blind multiple:"
+
+#, fuzzy
+#~ msgid "Debug Statistics Windows"
+#~ msgstr "Debug StatWindows"
+
+#~ msgid "Set max seats"
+#~ msgstr "Seteaza maxim locuri"
+
+#~ msgid "Updating config file"
+#~ msgstr "Actualizare fisier de configurare"
+
+#~ msgid "Exception in %s"
+#~ msgstr "Exceptie in %s"
+
+#, fuzzy
+#~ msgid "PacificPokerToFpdb.markStreets: Unable to recognise streets"
+#~ msgstr "Nu se recunoaste informatia turneului: '%s'"
+
+#, fuzzy
+#~ msgid "PokerTrackerToFpdb.determineGameType: Microgaming not yet supported"
+#~ msgstr "Lim_Blinds nu are lookup pentru '%s'"
+
+#~ msgid "Can't find table %s"
+#~ msgstr "Nu pot gasi masa %s"
+
+#~ msgid "Fake HUD Main Window"
+#~ msgstr "Fereastra principala HUD falsa"
+
+#~ msgid "enter table name to find: "
+#~ msgstr "introdu numele mesei pentru cautare:"
+
+#~ msgid "Sites:"
+#~ msgstr "Site-uri:"
+
+#~ msgid "Tourney Type"
+#~ msgstr "Tip Turneu"
+
+#~ msgid "MATRIX ID PROCESSED"
+#~ msgstr "ID-ul MATRICII PROCESAT"
+
+#~ msgid "MATRIX MATCH ID"
+#~ msgstr "MATRICEA POTRIVESTE ID"
+
+#~ msgid "SUB TOURNEY BUY IN"
+#~ msgstr "BUYIN SUB TURNEU"
+
+#~ msgid "SUB TOURNEY FEE"
+#~ msgstr "TAXA SUB TURNEU"
+
+#, fuzzy
+#~ msgid "TourneySummary: Tried to add info for unknown player: '%s'"
+#~ msgstr ""
+#~ "[EROARE] S-a incercat adaugarea cartilor proprii pentru un jucator "
+#~ "necunoscut: %s"
+
+#, fuzzy
+#~ msgid "%s doesn't exist."
+#~ msgstr "self.window nu exista? de ce?"
+
+#~ msgid ""
+#~ "Note that you may not select any stat more than once or it will crash."
+#~ msgstr ""
+#~ "Luati nota de faptul ca nu puteti selecta orice statistica mai mult decit "
+#~ "o data ori se va bloca."
+
+#~ msgid ""
+#~ "It is not currently possible to select \"empty\" or anything else to that "
+#~ "end."
+#~ msgstr ""
+#~ "Nu este posibil a se selecta \"gol\" sau orice altceva pina la sfirsit."
+
+#~ msgid ""
+#~ "If you had previously opened any tabs they cannot use the new settings "
+#~ "without restart."
+#~ msgstr ""
+#~ "Daca ati deschis deja alte tab-uri ele nu pot folosi noile setari fara "
+#~ "repornire."
+
+#~ msgid "Main"
+#~ msgstr "Principal"
+
+#~ msgid "<control>F"
+#~ msgstr "<control>F"
+
+#~ msgid "<control>B"
+#~ msgstr "<control>B"
+
+#~ msgid "<control>R"
+#~ msgstr "<control>R"
+
+#~ msgid "<control>I"
+#~ msgstr "<control>I"
+
+#~ msgid "Import through eMail/IMAP"
+#~ msgstr "Importare prin eMail/IMAP"
+
+#~ msgid "Viewers"
+#~ msgstr "Vizitatori"
+
+#~ msgid "<control>A"
+#~ msgstr "<control>A"
+
+#~ msgid "Auto Import and HUD"
+#~ msgstr "Importare automata si HUD"
+
+#~ msgid "<control>H"
+#~ msgstr "<control>H"
+
+#~ msgid "<control>G"
+#~ msgstr "<control>G"
+
+#~ msgid "Stove (preview)"
+#~ msgstr "Stove (previzualizare)"
+
+#~ msgid "<control>P"
+#~ msgstr "<control>P"
+
+#~ msgid "<control>T"
+#~ msgstr "<control>T"
+
+#~ msgid "<control>O"
+#~ msgstr "<control>O"
+
+#~ msgid "Positional Stats (tabulated view)"
+#~ msgstr "Statistici Pozitionale (vedere tabelara)"
+
+#, fuzzy
+#~ msgid "<control>S"
+#~ msgstr "<control>F"
+
+#~ msgid "Database"
+#~ msgstr "Baza de date"
+
+#~ msgid "writers finished already"
+#~ msgstr "scrierile s-au terminat deja"
+
+#~ msgid "waiting for writers to finish ..."
+#~ msgstr "se asteapta sa termine scrierile ..."
+
+#, fuzzy
+#~ msgid "... writers finished"
+#~ msgstr "scrierile s-au terminat deja"
+
+#~ msgid "No need to rebuild hudcache."
+#~ msgstr "Nu e necesara recladirea cache-ului hud."
+
+#, fuzzy
+#~ msgid "Unknown filter name %s in filter %s."
+#~ msgstr "Filtru necunoscut: '%s' in filtru: '%s'"
+
+#~ msgid "CLI for importing hands is GuiBulkImport.py"
+#~ msgstr "CLI pentru importarea miinilor este GuiBulkImport.py"
+
+#~ msgid ""
+#~ "Unable to load PyGTK modules required for GUI. Please install PyCairo, "
+#~ "PyGObject, and PyGTK from www.pygtk.org."
+#~ msgstr ""
+#~ "Nu se poate incarca modulul PyGTK necesar pentru GUI. Instalati PyCairo, "
+#~ "PyGObject si PyGTK de la www.pygtk.org."
+
+#~ msgid "File name: %s"
+#~ msgstr "Denumire fisier: %s"
+
+#~ msgid "Didn't match re_*InfoFromFilename: '%s'"
+#~ msgstr "Nepotrivire re_*InfoFromFilename: '%s'"
+
+#, fuzzy
+#~ msgid "No community cards found on this street"
+#~ msgstr "Nu sunt carti proprii pentru %s"
+
+#~ msgid "queue empty too long - writer stopping ..."
+#~ msgstr "coada fara continut de prea mult timp - se opreste scrierea ..."
+
+#~ msgid "writer stopping, error reading queue:"
+#~ msgstr "scriere oprita, eroare la citirea cozii:"
+
+#~ msgid "deadlock detected - trying again ..."
+#~ msgstr "detectare punct mort - se reincearca ..."
+
+#~ msgid "Too many deadlocks - failed to store hand"
+#~ msgstr "Prea multe puncte moarte - eroare la inregistrarea miinii"
+
+#~ msgid "***Error storing hand:"
+#~ msgstr "*** Eroare la inregistrarea miinii:"
+
+#~ msgid "db writer finished: stored %d hands (%d fails) in %.1f seconds"
+#~ msgstr ""
+#~ "scrierea in baza de date s-a incheiat: s-au salvat %d miini (%d esecuri) "
+#~ "in %.1f secunde"
+
+#~ msgid "***Error sending finish:"
+#~ msgstr "*** Eroare la incheiere:"
+
+#~ msgid "%s error: %s"
+#~ msgstr "%s eroare: %s"
+
+#~ msgid "No bringin found, handid =%s"
+#~ msgstr "Nu s-a gasit bringin, id mina=%s"
+
+#, fuzzy
+#~ msgid "'%s' fail on hand number %s"
+#~ msgstr "%s esueaza la mina numarul %s"
+
+#, fuzzy
+#~ msgid "Tried to add holecards for unknown player: %s"
+#~ msgstr ""
+#~ "[EROARE] S-a incercat adaugarea cartilor proprii pentru un jucator "
+#~ "necunoscut: %s"
+
+#, fuzzy
+#~ msgid "Limit not found in %s."
+#~ msgstr "%s nu a fost gasit in %s..."
+
+#~ msgid "No need to drop indexes."
+#~ msgstr "Nu e nevoie sa se renunte la indexuri."
+
+#~ msgid "No need to rebuild indexes."
+#~ msgstr "Nu e nevesara recladirea indexurilor."
+
+#, fuzzy
+#~ msgid "INFO: No positions returned from database"
+#~ msgstr "INFO: Nici un joc returnat de baza de date"
+
+#~ msgid "Hand ID: %s: '%s'"
+#~ msgstr "ID-ul miinii: %s: '%s'"
+
+#~ msgid "Hole cards"
+#~ msgstr "Cartile comune"
+
+#, fuzzy
+#~ msgid "Rebuild hudcache(cash) took %.1f seconds"
+#~ msgstr "Recrearea cache-ul pentru hub a durat %.1f secunde"
+
+#~ msgid "Rebuild hudcache took %.1f seconds"
+#~ msgstr "Recrearea cache-ul pentru hub a durat %.1f secunde"
+
+#~ msgid "%s was toggled %s"
+#~ msgstr "%s a fost schimbat %s"
+
+#~ msgid "OFF"
+#~ msgstr "OPRIT"
+
+#~ msgid "ON"
+#~ msgstr "PORNIT"
+
+#~ msgid "Could not retrieve XID from table xwininfo. xwininfo is %s"
+#~ msgstr "Nu pot regasi XID din tabela xwininfo. xwininfo este %s"
+
+#~ msgid "Hand Replayer (not working yet)"
+#~ msgstr "Rejucare Mina (inca nefunctional)"
+
+#~ msgid "Hand Replayer"
+#~ msgstr "Rejucare Mina"
+
+#~ msgid "guidb response was "
+#~ msgstr "raspunsul guidb a fost"
+
+#~ msgid "%s not found in %s..."
+#~ msgstr "%s nu a fost gasit in %s..."
+
+#~ msgid "[ERROR] Tried to add holecards for unknown player: %s"
+#~ msgstr ""
+#~ "[EROARE] S-a incercat adaugarea cartilor proprii pentru un jucator "
+#~ "necunoscut: %s"
+
+#~ msgid "Either 0 or more than one site matched (%s) - EEK"
+#~ msgstr "Fie 0 sau mai mult de un site s-au potrivit (%s) - EEK"
+
+#, fuzzy
+#~ msgid "Error is:"
+#~ msgstr ""
+#~ "\n"
+#~ "\n"
+#~ "Eroarea este:"
+
+#~ msgid "readButton: button on pos %d"
+#~ msgstr "readButton: butonul e in pozitia %d"
+
+#~ msgid "sending finish message queue length ="
+#~ msgstr "lungimea cozii pentru trimiterea mesaje de sfirsit = "
+
+#, fuzzy
+#~ msgid "Add player: rank: %s name: %s winnings: %s"
+#~ msgstr "addPlayer: pozitia: %s - nume: '%s' - Cistiguri (%s)"
+
+#, fuzzy
+#~ msgid "Increment player winnings: name: %s, add winnings: %s"
+#~ msgstr "incrementPlayerWinnings: nume: '%s' - Cistiguri adaugate (%s)"
+
+#~ msgid "NB OF KO"
+#~ msgstr "NR DE KO"
+
+#~ msgid "tournament edit window="
+#~ msgstr "turneu editare fereastra="
+
+#~ msgid "Enter Tournament"
+#~ msgstr "Introdu Turneu"
+
+#~ msgid ""
+#~ "Note: error output is being diverted to fpdb-error-log.txt and HUD-error."
+#~ "txt. Any major error will be reported there _only_."
+#~ msgstr ""
+#~ "Nota: iesirea de eroare e redirectionata spre fpdb-error-log.txt si HUD-"
+#~ "error.txt. Orice eroare majora va fi raportata _doar_ acolo."
+
+#, fuzzy
+#~ msgid ""
+#~ "Note: error output is being diverted to fpdb-errors.txt and HUD-errors."
+#~ "txt in: %s"
+#~ msgstr ""
+#~ "\n"
+#~ "Nota: iesirea de eroare este redirectionata spre fpdb-errors.txt si HUD-"
+#~ "errors.txt in: %s"
+
+#~ msgid "No match in markStreets"
+#~ msgstr "Nici o potrivire in markStree"
+
+#~ msgid "Nope, will not work (fileno=%d)"
+#~ msgstr "Nu, nu va functiona (fileno=%d)"
+
+#~ msgid "exception calculating p/100: 100 * %d / %d"
+#~ msgstr "abatere la calcularea p/100: 100 * %d / %d"
+
+#~ msgid "exception calculating BB/100: "
+#~ msgstr "abatere la calcularea BB/100:"
+
+#~ msgid "readBlinds in noSB exception - no SB created"
+#~ msgstr "readBlinds in noSB exceptie - nu s-a creat SB"
+
+#~ msgid "re_SplitTourneys isn't matching"
+#~ msgstr "re_SplitTurneys nu se potriveste"
+
+#~ msgid ""
+#~ "KeyError at the start of the for loop in update in hud_main. How this can "
+#~ "possibly happen is totally beyond my comprehension. Your HUD may be about "
+#~ "to get really weird. -Eric"
+#~ msgstr ""
+#~ "KeyError la inceputul buclei for la actualizarea hud_main. Cum se poate "
+#~ "asta intimpla e peste capacitatea mea de intelegere. HUD-ul dumneavoastra "
+#~ "s-ar putea sa se comporte ciudat. -Eric"
+
+#~ msgid "(btw, the key was %s and statd is %s"
+#~ msgstr "(a propos, cheia a fost %s si statd este %s"
+
+#~ msgid "response to logging in: "
+#~ msgstr "raspuns la logare:"
+
+#~ msgid "Completed retrieving IMAP messages, closing server connection"
+#~ msgstr "Gasirea mesajelor IMAP completa, inchidere conexiune server"
+
+#~ msgid "Errors: %s"
+#~ msgstr "Erori: %s"
+
+#~ msgid "limit not found in self.limits(%s). hand: '%s'"
+#~ msgstr "limita nu a fost gasita in self.limits(%s). mina: '%s'"
+
+#, fuzzy
+#~ msgid "Python %s found."
+#~ msgstr "Nu gasesc limitele"
+
+#, fuzzy
+#~ msgid ""
+#~ "Python 2.5-2.7 not found, please install python 2.5, 2.6 or 2.7 for fpdb."
+#~ msgstr ""
+#~ "\n"
+#~ "python 2.5-2.7 nu a fost gasit, rugam instalati python 2.5, 2.6 sau 2.7 "
+#~ "pentru fpdb.\n"
+
+#~ msgid "  Session"
+#~ msgstr "  Sesiune"
+
+#~ msgid "  0.5 to 2.0 x Current Blinds"
+#~ msgstr "  0.5 la 2.0 x Blindurile actuale"
+
+#~ msgid "  0.33 to 3.0 x Current Blinds"
+#~ msgstr "  0.33 la 3.0 x Blindurile actuale"
+
+#~ msgid "raw time:"
+#~ msgstr "timp brut:"
+
+#~ msgid "changeTimeZone: offset="
+#~ msgstr "changeTimeZone: ofset="
+
+#~ msgid "utcTime:"
+#~ msgstr "utcTime:"
+
+#~ msgid "*** ERROR: UNABLE TO CREATE OUTPUT DIRECTORY"
+#~ msgstr "*** EROARE: NU SE POATE CREA DIRECTORUL DE IESIRE"
+
+#~ msgid "call Pot.end() before printing pot total"
+#~ msgstr "chemare Pot.end() inaintea afisarii totalului potului"
+
+#~ msgid "HHC.start(): processHand failed: Exception msg: '%s'"
+#~ msgstr "HHC.start(): processHand a esuat: mesajul exceptiei: '%s'"
+
+#~ msgid "Converting starsArchive format to readable"
+#~ msgstr "Convertire format starsArchive in lizibil"
+
+#~ msgid "Converting ftpArchive format to readable"
+#~ msgstr "Convertire format ftpArchive in lizibil"
+
+#~ msgid " given TZ:"
+#~ msgstr " dat TZ:"
+
+#~ msgid "join_holcards: holecards(%s): %s"
+#~ msgstr "join_holcards: holecards(%s): %s"
+
+#~ msgid ""
+#~ "[ERROR] More than 1 Database ID found for %s - Multiple currencies not "
+#~ "implemented yet"
+#~ msgstr ""
+#~ "[EROARE] Mai mult de 1 ID Baza de date a fost gasit pentru %s - Moneda "
+#~ "multipla nu e inca implementata"
+
+#~ msgid "Testing variance function"
+#~ msgstr "Testare functii de variatie"
+
+#~ msgid "result: %s expecting: 0.666666 (result-expecting ~= 0.0): %s"
+#~ msgstr "rezultat: %s asteptare: 0.666666 (rezultat-asteptare ~= 0.0) : %s"
+
+#, fuzzy
+#~ msgid "The lower, the more stable the amounts won"
+#~ msgstr ""
+#~ "Masura a incertitudinii\n"
+#~ "Cu cit mai mica, cu atit sunt mai stabile valorile cistigate"
+
+#~ msgid "######## Hands ##########"
+#~ msgstr "######## Miini ##########"
+
+#~ msgid "###### End Hands ########"
+#~ msgstr "##### Sfirsit Miini #####"
+
+#~ msgid "######## Gametype ##########"
+#~ msgstr "####### Tip de joc #########"
+
+#~ msgid "###### End Gametype ########"
+#~ msgstr "#### Sfisit tip de joc #####"
+
+#, fuzzy
+#~ msgid "######## TourneyType ##########"
+#~ msgstr "####### Tip de joc #########"
+
+#, fuzzy
+#~ msgid "###### End TourneyType ########"
+#~ msgstr "#### Sfisit tip de joc #####"
+
+#, fuzzy
+#~ msgid "######## Tourneys ##########"
+#~ msgstr "######## Miini ##########"
+
+#, fuzzy
+#~ msgid "###### End Tourneys ########"
+#~ msgstr "##### Sfirsit Miini #####"
+
+#~ msgid "markStreets appeared to fail: First 100 chars: '%s'"
+#~ msgstr "markStreets pare a esua: Primele 100 caractere: '%s'"
+
+#~ msgid "Import database module: MySQLdb not found"
+#~ msgstr "Importare modul baza de date: MySQLdb nu a fost gasit"
+
+#~ msgid "Import database module: psycopg2 not found"
+#~ msgstr "Importare modul baza de date: psycopg2 nu a fost gasit"
+
+#~ msgid ""
+#~ "Error No.%s please send the hand causing this to fpdb-main@lists."
+#~ "sourceforge.net so we can fix the problem."
+#~ msgstr ""
+#~ "Eroare nr.%s rugam trimiteti mina ce cauzeaza asta la fpdb-main@lists."
+#~ "sourceforge.net pentru a putea remedia problema."
+
+#~ msgid ""
+#~ "Here is the first line of the hand so you can identify it. Please mention "
+#~ "that the error was a ValueError:"
+#~ msgstr ""
+#~ "Aici e prima linie a miinii pentru a o putea identifica. Rugam mentionati "
+#~ "ca eroarea a fost ValueError:"
+
+#~ msgid "Hand logged to hand-errors.txt"
+#~ msgstr "Mina jurnalizata in hand-errors.txt"
+
+#~ msgid ""
+#~ "Copyright 2008-2011, Steffen, Eratosthenes, Carl Gherardi, Eric Blade, "
+#~ "_mt, sqlcoder, Bostik, and others"
+#~ msgstr ""
+#~ "Copyright 2008-2011, Steffen, Eratosthenes, Carl Gherardi, Eric Blade, "
+#~ "_mt, sqlcoder, Bostik, si altii"
+
+#, fuzzy
+#~ msgid "Finished importing %s/%s summaries"
+#~ msgstr "S-a terminat importarea sumarelor %s/%s PS"
+
+#, fuzzy
+#~ msgid "For Number of Seats:"
+#~ msgstr "Numar de locuri"
+
+#, fuzzy
+#~ msgid "filename"
+#~ msgstr "Nume fisier:"
+
+#~ msgid "For #Seats:"
+#~ msgstr "Pentru #Locuri:"
+
+#~ msgid " - press return to continue\n"
+#~ msgstr " - apasa enter pentru a continua\n"
+
+#~ msgid "creating Hello"
+#~ msgstr "creare Salut"
+
+#~ msgid "Hello World"
+#~ msgstr "Salut Lume"
+
+#~ msgid "site ="
+#~ msgstr "site ="
+
+#~ msgid "YOUR NAME HERE"
+#~ msgstr "NUMELE DVS"
+
+#~ msgid ""
+#~ "Hello %s\n"
+#~ "You have played %d hands\n"
+#~ " on %s."
+#~ msgstr ""
+#~ "Salut %s\n"
+#~ "Ai jucat %d miini\n"
+#~ " pe %s"
+
+#~ msgid ""
+#~ "Hands: %d\n"
+#~ "Profit: (%s): %.2f"
+#~ msgstr ""
+#~ "Miini: %d\n"
+#~ "Profit: (%s): %.2f"
+
+#, fuzzy
+#~ msgid ""
+#~ "Hands: %d\n"
+#~ "Profit: %.2f"
+#~ msgstr ""
+#~ "Miini: %d\n"
+#~ "Profit: (%s): %.2f"
+
+#~ msgid "Tailing '%s'"
+#~ msgstr "Afisare sfirsitul '%s'"
+
+#~ msgid "HHC.start(follow): processHand failed: Exception msg: '%s'"
+#~ msgstr "HHC.start(follow): processHand a esuat. mesajul exceptiei: '%s'"
+
+#~ msgid "Error converting '%s'"
+#~ msgstr "Eroare la covertirea '%s'"
+
+#~ msgid "%s changed inode numbers from %d to %d"
+#~ msgstr "%s schimbare numar inod din %d in %d"
+
+#~ msgid "Read no hands."
+#~ msgstr "Nu s-au citit miini."
+
+#~ msgid "Reading stdin with %s"
+#~ msgstr "Citire stdin cu %s"
+
+#~ msgid "MAXSEATS"
+#~ msgstr "LOCURIMAX"
+
+#, fuzzy
+#~ msgid "using db name = %s"
+#~ msgstr "Folosirea bd numita = %s"
+
+#~ msgid "Global lock released.\n"
+#~ msgstr "Siguranta globala eliberata.\n"
+
+#~ msgid ""
+#~ "\n"
+#~ "Auto Import aborted - global lock not available"
+#~ msgstr ""
+#~ "\n"
+#~ "Importarea automata oprita - siguranta generala nu e disponibila"
+
+#~ msgid ""
+#~ "\n"
+#~ "Stopping Auto Import - global lock released."
+#~ msgstr ""
+#~ "\n"
+#~ "Oprire importare automata - siguranta generala deblocata."
+
+#~ msgid "  Start Auto Import  "
+#~ msgstr "  Pornire Auto Import"
+
+#~ msgid "db error: skipping "
+#~ msgstr "eroare bd: ignorare"
+
+#~ msgid "addShownCards %s hole=%s all=%s"
+#~ msgstr "addShownCards %s proprie=%s toate=%s"
+
+#~ msgid "                              ... writers finished"
+#~ msgstr "                              ... scrierile s-au terminat"
+
+#~ msgid " "
+#~ msgstr " "
+
+#~ msgid "Y location to open Window"
+#~ msgstr "locatia Y de deschis fereastra"
+
+#~ msgid ""
+#~ "\n"
+#~ "Any major error will be reported there _only_.\n"
+#~ msgstr ""
+#~ "\n"
+#~ "Orice eroare majora va fi raportata _doar_ acolo.\n"
+
+#~ msgid "HUD_main starting: using db name = %s"
+#~ msgstr "pornire HUD_main: se foloseste baza de date = %s"
+
+#~ msgid ""
+#~ "Player or tourney not found - please ensure you imported it and selected "
+#~ "the correct site"
+#~ msgstr ""
+#~ "Jucatorul sau turneul nu a fost gasit - asigurati-va ca l-ati importat si/"
+#~ "sau ati ales site-ul corect"
+
+#~ msgid "Number of Hands: "
+#~ msgstr "Numarul Miinilor:"
+
+#~ msgid ""
+#~ "\n"
+#~ "Number of Tourneys: "
+#~ msgstr ""
+#~ "\n"
+#~ "Numarul Turneelor:"
+
+#~ msgid "Importing..."
+#~ msgstr "Importare..."
+
+#~ msgid "GTI.readFile: '%s'"
+#~ msgstr "GTI.readFile: '%s'"
+
+#~ msgid ""
+#~ "Tournaments: %d\n"
+#~ "Profit: $%.2f"
+#~ msgstr ""
+#~ "Turnee: %d\n"
+#~ "Profit: $%.2f"
+
+#~ msgid "***sortCols error: "
+#~ msgstr "*** eroare sortCols:"
+
+#~ msgid "sortCols error: "
+#~ msgstr "eroare sortCols:"
+
+#~ msgid "***sortnums error: "
+#~ msgstr "*** eroare sortnums:"
+
+#~ msgid "***sortcols error: "
+#~ msgstr "*** eroare sortcols:"
+
+#~ msgid ""
+#~ "Coming Soon\n"
+#~ "Total % agression"
+#~ msgstr ""
+#~ "In curind\n"
+#~ "Total % agresiune"
+
+#~ msgid "readButton: not found"
+#~ msgstr "readButton: nu a fost gasit"
+
+#~ msgid "*** Database Error: "
+#~ msgstr "*** Eroare in baza de date: "
+
+#~ msgid "Database: n hands ago the date was:"
+#~ msgstr "Baza de date: cu n miini in urma data era:"
+
+#~ msgid "***Error creating tables:"
+#~ msgstr "*** Eroare la crearea tabelelor:"
+
+#~ msgid "*** Error unable to get databasecursor"
+#~ msgstr "*** Eroare la databasecursor"
+
+#~ msgid "*** Error in committing table drop"
+#~ msgstr "*** Eroare la comiterea pentru stergerea tabelei"
+
+#~ msgid "Error creating indexes:"
+#~ msgstr "Eroare la crearea indexurilor:"
+
+#~ msgid "self.games[%s] set to %s"
+#~ msgstr "self.games[%s] setat ca %s"
+
+#~ msgid "Clear Dates"
+#~ msgstr "Goleste datele"
+
+#~ msgid ""
+#~ "Session Viewer is proof of concept code only, and contains many bugs.\n"
+#~ msgstr ""
+#~ "Vizualizarea Sesiunii e doar o schita si poate contine multe greseli.\n"
+
+#~ msgid ""
+#~ "Feel free to use the viewer, but there is no guarantee that the data is "
+#~ "accurate.\n"
+#~ msgstr ""
+#~ "Folositi vizualizorul fara a avea insa o garantie asupra acuitatii "
+#~ "datelor.\n"
+
+#~ msgid ""
+#~ "If you are interested in developing the code further please contact us "
+#~ "via the usual channels.\n"
+#~ msgstr ""
+#~ "Daca sunteti interesat sa continuati dezvoltarea codului va rugam sa ne "
+#~ "contactati.\n"
+
+#~ msgid "%s plus git"
+#~ msgstr "%s plus git"
+
+#~ msgid "setting numTourneys:"
+#~ msgstr "setare numTurneys:"
+
+#~ msgid "fpdb card encoding(same as pokersource)"
+#~ msgstr "encodarea fpdb a miinilor (la fel ca pokersource)"
+
+#~ msgid "invalid source in %s"
+#~ msgstr "sursa invalida in %s"
