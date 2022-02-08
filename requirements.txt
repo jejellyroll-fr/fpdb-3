@@ -1,0 +1,10 @@
+configparser    
+future          
+matplotlib      
+mplfinance      
+PyQt5           
+pytz            
+xcffib
+numpy 
+xlrd   
+SQLAlchemy  
