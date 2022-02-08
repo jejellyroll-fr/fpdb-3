@@ -446,7 +446,7 @@ class PacificPoker(HandHistoryConverter):
                 elif action.group('ATYPE') == ' stands pat':
                     hand.addStandsPat( street, action.group('PNAME'))
                 else:
-                    log.debug(("DEBUG:") + " " + "Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
+                    log.debug(("DEBUG:") + " " + "Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE'))
                 
                 if action.group('ATYPE') not in (' checks', ' folds'):
                     if not hand.allInBlind:
