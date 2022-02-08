@@ -43,7 +43,14 @@ class InterProcessLockBase(object):
         self.heldBy = None
 
     def getHashedName(self):
-        return base64.b64encode(self.name).replace('=','')
+        print (self.name) #debug
+        test = base64.b64encode(self.name.encode())
+        print (test)
+        test = test.replace(b'=',b'')
+        print(test)
+        test = test.decode()
+        print (test)
+        return test
 
     def acquire_impl(self, wait): abstract
         
