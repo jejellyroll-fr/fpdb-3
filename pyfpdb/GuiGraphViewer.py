@@ -222,7 +222,8 @@ class GuiGraphViewer(QSplitter):
             labels = labels[-1:]+labels[:-1]
 
             legend = self.ax.legend(handles, labels, loc='upper left', fancybox=True, shadow=True, prop=FontProperties(size='smaller'))
-            legend.draggable(True)
+            #legend.draggable(True)
+            legend.set_draggable(state= 1)
             self.graphBox.addWidget(self.canvas)
             self.canvas.draw()
             #self.exportButton.set_sensitive(True)
