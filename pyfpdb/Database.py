@@ -112,6 +112,9 @@ def adapt_decimal(d):
     return str(d)
 
 def convert_decimal(s):
+    print('convertvalue')
+    print(s)
+    s = s.decode()
     return Decimal(s)
     
     
