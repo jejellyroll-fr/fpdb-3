@@ -220,7 +220,9 @@ class GuiReplayer(QWidget):
         self.currency = hand.sym
 
         self.states = []
+        print (hand)
         state = TableState(hand)
+        print (state)
         seenStreets = []
         for street in hand.allStreets:
             if state.called > 0:
@@ -352,7 +354,6 @@ class TableState(object):
         #print icm.equities
 
         self.players = {}
-
         for seat, name, chips, pos in hand.players:
             self.players[name] = Player(hand, name, chips, seat)
 

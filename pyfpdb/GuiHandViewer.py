@@ -296,9 +296,13 @@ class GuiHandViewer(QSplitter):
 
     def row_activated(self, index):
         handlist = list(sorted(self.hands.keys()))
+        print('handlist:')
+        print(handlist)
         self.replayer = GuiReplayer.GuiReplayer(self.config, self.sql, self.main_window, handlist)
-
-        self.replayer.play_hand(handlist.index(int(index.sibling(index.row(), self.colnum['HandId']).data())))
+        index =  handlist.index(int(index.sibling(index.row(), self.colnum['HandId']).data()))
+        print('index:')
+        print (index)
+        self.replayer.play_hand(index)
 
     def importhand(self, handid=1):
         # Fetch hand info

@@ -1308,9 +1308,9 @@ You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt an
                 dia.run()
                 dia.destroy()
 
-    def main(self):
-        gtk.main()
-        return 0
+#    def main(self):
+#        gtk.main()
+#        return 0
 
 
 if __name__ == "__main__":
