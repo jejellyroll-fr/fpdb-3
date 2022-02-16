@@ -23,8 +23,8 @@ from builtins import str
 from builtins import range
 from builtins import object
 from past.utils import old_div
-import L10n
-_ = L10n.get_translation()
+# import L10n
+# _ = L10n.get_translation()
 
 #    Standard Library modules
 
@@ -41,9 +41,13 @@ from PyQt5.QtWidgets import QProgressBar, QLabel, QDialog, QVBoxLayout
 from PyQt5.QtCore import QCoreApplication
 
 #    fpdb/FreePokerTools modules
+
 import Database
+
 import Configuration
+
 import IdentifySite
+
 from Exceptions import FpdbParseError, FpdbHandDuplicate, FpdbHandPartial
 
 try:

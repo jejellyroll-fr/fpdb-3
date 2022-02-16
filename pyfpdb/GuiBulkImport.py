@@ -18,8 +18,8 @@
 from __future__ import print_function
 from __future__ import division
 from past.utils import old_div
-import L10n
-_ = L10n.get_translation()
+# import L10n
+# _ = L10n.get_translation()
 
 #    Standard Library modules
 import os
@@ -31,9 +31,13 @@ import traceback
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QFileDialog
 
 #    fpdb/FreePokerTools modules
+
 import Options
+
 import Importer
+
 import Configuration
+
 import Exceptions
 
 import logging
@@ -135,14 +139,14 @@ if __name__ == '__main__':
     settings.update(config.get_db_parameters())
     settings.update(config.get_import_parameters())
     settings.update(config.get_default_paths())
-    import interlocks, string
+    import interlocks
     settings['global_lock'] = interlocks.InterProcessLock(name="fpdb_global_lock")
     settings['cl_options'] = '.'.join(sys.argv[1:])
 
-    from PyQt5.QtWidgets import QApplication, QMainWindow
-    app = QApplication([])
-    main_window = QMainWindow()
-    main_window.setCentralWidget(GuiBulkImport(settings, config))
-    main_window.show()
-    main_window.resize(600, 100)
-    app.exec_()
+    # from PyQt5.QtWidgets import QApplication, QMainWindow
+    # app = QApplication(sys.argv)
+    # main_window = QMainWindow()
+    # main_window.setCentralWidget(GuiBulkImport(settings, config))
+    # main_window.show()
+    # main_window.resize(600, 100)
+    # app.exec_()

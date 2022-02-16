@@ -29,8 +29,8 @@ from builtins import str
 from builtins import range
 from past.utils import old_div
 from builtins import object
-import L10n
-_ = L10n.get_translation()
+# import L10n
+# _ = L10n.get_translation()
 
 ########################################################################
 
@@ -47,6 +47,7 @@ import sys
 import traceback
 from datetime import datetime, date, time, timedelta
 from time import time, strftime, sleep
+
 from decimal_wrapper import Decimal
 import string
 import re
@@ -62,10 +63,15 @@ re_char = re.compile('[^a-zA-Z]')
 re_insert = re.compile(r"insert\sinto\s(?P<TABLENAME>[A-Za-z]+)\s(?P<COLUMNS>\(.+?\))\s+values", re.DOTALL)
 
 #    FreePokerTools modules
+
 import SQL
+
 import Card
+
 import Charset
+
 from Exceptions import *
+
 import Configuration
 
 if __name__ == "__main__":
