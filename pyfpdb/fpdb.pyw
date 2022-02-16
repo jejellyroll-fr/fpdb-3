@@ -21,7 +21,7 @@ import os
 import sys
 import re
 import queue
-
+import qdarkstyle
 if os.name == 'nt':
     import win32api
     import win32con
@@ -97,6 +97,7 @@ except:
 
 
 class fpdb(QMainWindow):
+
     def tab_clicked(self, widget, tab_name):
         """called when a tab button is clicked to activate that tab"""
         self.display_tab(tab_name)
@@ -1134,7 +1135,8 @@ You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt an
                 options.yloc = 0
             self.move(options.xloc, options.yloc)
         
-        self.setWindowTitle("Free Poker DB - v%s" % (VERSION, ))
+        self.setWindowTitle("Free Poker DB 3")
+        
 
         # set a default x/y size for the window
         defx, defy = 900, 720
@@ -1315,5 +1317,6 @@ You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt an
 
 if __name__ == "__main__":
     app = QApplication([])
+    app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
     me = fpdb()
     app.exec_()

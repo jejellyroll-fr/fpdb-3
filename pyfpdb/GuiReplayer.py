@@ -59,7 +59,7 @@ class GuiReplayer(QWidget):
         self.conf = config
         self.main_window = mainwin
         self.sql = querylist
-
+        
         self.db = Database.Database(self.conf, sql=self.sql)
         self.states = [] # List with all table states.
         self.handlist = handlist
@@ -68,6 +68,7 @@ class GuiReplayer(QWidget):
         self.setWindowTitle("FPDB Hand Replayer")
         
         self.replayBox = QVBoxLayout()
+        
         self.setLayout(self.replayBox)
 
         self.replayBox.addStretch()
@@ -115,7 +116,7 @@ class GuiReplayer(QWidget):
         if self.tableImage is None or self.playerBackdrop is None:
             try:
                 self.playerBackdrop = QImage(os.path.join(self.conf.graphics_path, u"playerbackdrop.png"))
-                self.tableImage = QImage(os.path.join(self.conf.graphics_path, u"Table.png"))
+                self.tableImage = QImage(os.path.join(self.conf.graphics_path, u"TableR.png"))
             except:
                 return
         if self.cardImages is None:
