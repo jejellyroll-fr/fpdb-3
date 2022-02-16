@@ -22,6 +22,8 @@ from __future__ import division
 from builtins import str
 from builtins import range
 from builtins import object
+from collections import defaultdict
+from unicodedata import name
 from past.utils import old_div
 import L10n
 _ = L10n.get_translation()
@@ -354,8 +356,23 @@ class TableState(object):
         #print icm.equities
 
         self.players = {}
-        for seat, name, chips, pos in hand.players:
-            self.players[name] = Player(hand, name, chips, seat)
+        print ('hand.players', hand.players)
+        print (type(hand.players))
+        print (type(self.players))
+        # for name, chips, seat in hand.players[-1]:
+        #     self.players.append(Player(name, chips, seat))
+        #     #  self.players[name] = Player(hand, name, chips, seat)
+        for items in hand.players:
+            print (items)
+            print ('type', (type(items)))
+            print (items[0])
+            print (items[1])
+            print (items[2])
+            print (items[3])
+            
+            self.players[items[1]] = Player(hand, items[1],items[2],int(items[0]))
+            print (self.players[items[1]])
+
 
     def startPhase(self, phase):
         self.street = phase
