@@ -22,11 +22,11 @@ import sys
 sys.path[0] = sys.path[0]+os.sep+"pyfpdb"
 # cd to pyfpdb subdir
 os.chdir(sys.path[0])
-#print ("sys.path[0] =", sys.path[0], "cwd =", os.getcwd())
-
+print ("sys.path[0] =", sys.path[0], "cwd =", os.getcwd())
+print (str(os.name))
 if os.name=='nt':
-    os.execvpe('pythonw.exe', list(('pythonw.exe', 'fpdb_prerun.py'))+sys.argv[1:], os.environ)
-   
+    os.execvpe('pythonw.exe', list(('pythonw.exe', 'fpdb_prerun.py')) + sys.argv[1:], os.environ)
+    
 else:
     os.execvpe('python', list(('python', 'fpdb_prerun.py'))+sys.argv[1:], os.environ)
     

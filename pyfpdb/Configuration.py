@@ -32,8 +32,8 @@ from __future__ import print_function
 from builtins import str
 from builtins import range
 from builtins import object
-import L10n
-_ = L10n.get_translation()
+# import L10n
+# _ = L10n.get_translation()
 
 import codecs
 import os
@@ -47,6 +47,8 @@ import xml.dom.minidom
 from xml.dom.minidom import Node
 
 import platform
+
+from sqlalchemy import false
 if platform.system() == 'Windows':
     #import winpaths
     #winpaths_appdata = winpaths.get_appdata()
@@ -152,18 +154,24 @@ def get_config(file_name, fallback = True):
     config_found,example_found,example_copy = False,False,False
     config_path, example_path = None,None
 
-    config_path = os.path.join(FPDB_ROOT_PATH, 'pyfpdb', file_name)
+    config_path = os.path.join(CONFIG_PATH, file_name)
     
-    #print "config_path=", config_path
+    print ("config_path=", config_path)
     if os.path.exists(config_path):    # there is a file in the cwd
-        config_found = True            # so we use it
+        print(os.path.exists(config_path))
+        config_found = True 
+        print (config_found) 
+        fallback = False
+        print(fallback)          # so we use it
     else: # no file in the cwd, look where it should be in the first place
         config_path = os.path.join(CONFIG_PATH, file_name)
-        #print "config path 2=", config_path
+        print ("config path 2=", config_path)
         if os.path.exists(config_path):
             config_found = True
-    #TODO: clean up the example path loading to ensure it behaves the same on all OSs
-    # Example configuration for debian package
+            print (config_found)
+            fallback = False
+            print(fallback)
+
     if POSIX:
         # If we're on linux, try to copy example from the place
         # debian package puts it; get_default_config_path() creates
@@ -192,10 +200,11 @@ def get_config(file_name, fallback = True):
                     pass
 
 #    OK, fall back to the .example file, should be in the start dir
-    elif os.path.exists(os.path.join(PYFPDB_PATH, file_name + '.example')):
+    elif os.path.exists(os.path.join(CONFIG_PATH, file_name + '.example')):
         try:
             #print ""
-            example_path = os.path.join(PYFPDB_PATH, file_name + '.example')
+            example_path = os.path.join(CONFIG_PATH, file_name + '.example')
+            print ('exemple_path:', example_path)
             if not config_found and fallback:
                 shutil.copyfile(example_path, config_path)
                 example_copy = True
@@ -208,10 +217,11 @@ def get_config(file_name, fallback = True):
             sys.stderr.write( str(sys.exc_info()) )
             sys.exit()
     elif fallback:
+        print(fallback)
         sys.stderr.write((("No %s found, cannot fall back. Exiting.") % file_name) + "\n")
         sys.exit()
 
-    #print "get_config: returning "+str( (config_path,example_copy,example_path) )
+    print ("get_config: returning "+str( (config_path,example_copy,example_path) ))
     return (config_path,example_copy,example_path)
 
 def set_logfile(file_name):
@@ -271,6 +281,7 @@ if LOCALE_ENCODING in ("US-ASCII", "", None):
         print((("Default encoding set to US-ASCII, defaulting to CP1252 instead."), ("Please report this problem.")))
     
 # needs LOCALE_ENCODING (above), imported for sqlite setup in Config class below
+
 import Charset
 
 
@@ -860,7 +871,7 @@ class Config(object):
         while added > 0 and n < 2:
             n = n + 1
             log.info("Reading configuration file %s" % file)
-            #print (("\n"+("Reading configuration file %s")+"\n") % file)
+            print (("\n"+("Reading configuration file %s")+"\n") % file)
             try:
                 doc = xml.dom.minidom.parse(file)
                 self.doc = doc

@@ -1,222 +1,231 @@
-# ///////////////////////////////////////////////////////////////
-#
-# BY: WANDERSON M.PIMENTA
-# PROJECT MADE WITH: Qt Designer and PySide6
-# V: 1.0.0
-#
-# This project can be used freely for all uses, as long as they maintain the
-# respective credits only in the Python scripts, any information in the visual
-# interface (GUI) can be modified without any implication.
-#
-# There are limitations on Qt licenses if you want to use your products
-# commercially, I recommend reading them on the official website:
-# https://doc.qt.io/qtforpython/licenses.html
-#
-# ///////////////////////////////////////////////////////////////
-
-# IMPORT PACKAGES AND MODULES
-# ///////////////////////////////////////////////////////////////
-from gui.uis.windows.main_window.functions_main_window import *
+################################################################################
+##
+## BY: WANDERSON M.PIMENTA
+## PROJECT MADE WITH: Qt Designer and PyQt5
+## V: 1.0.0
+##
+## This project can be used freely for all uses, as long as they maintain the
+## respective credits only in the Python scripts, any information in the visual
+## interface (GUI) can be modified without any implication.
+##
+## There are limitations on Qt licenses if you want to use your products
+## commercially, I recommend reading them on the official website:
+## https://doc.qt.io/qtforpython/licenses.html
+##
+################################################################################
 import sys
-import os
+import platform
 
-# IMPORT QT CORE
-# ///////////////////////////////////////////////////////////////
-from qt_core import *
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect, QSize, QTime, QUrl, Qt, QEvent)
+from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
+from PyQt5.QtWidgets import *
 
-# IMPORT SETTINGS
-# ///////////////////////////////////////////////////////////////
-from gui.core.json_settings import Settings
+# GUI FILE
+from app_modules import *
 
-# IMPORT PY ONE DARK WINDOWS
-# ///////////////////////////////////////////////////////////////
-# MAIN WINDOW
-from gui.uis.windows.main_window import *
-
-# IMPORT PY ONE DARK WIDGETS
-# ///////////////////////////////////////////////////////////////
-from gui.widgets import *
-
-# ADJUST QT FONT DPI FOR HIGHT SCALE AN 4K MONITOR
-# ///////////////////////////////////////////////////////////////
-os.environ["QT_FONT_DPI"] = "96"
-# IF IS 4K MONITOR ENABLE 'os.environ["QT_SCALE_FACTOR"] = "2"'
-
-# MAIN WINDOW
-# ///////////////////////////////////////////////////////////////
 class MainWindow(QMainWindow):
     def __init__(self):
-        super().__init__()
+        QMainWindow.__init__(self)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
 
-        # SETUP MAIN WINDOw
-        # Load widgets from "gui\uis\main_window\ui_main.py"
-        # ///////////////////////////////////////////////////////////////
-        self.ui = UI_MainWindow()
-        self.ui.setup_ui(self)
+        ## PRINT ==> SYSTEM
+        print('System: ' + platform.system())
+        print('Version: ' +platform.release())
 
-        # LOAD SETTINGS
-        # ///////////////////////////////////////////////////////////////
-        settings = Settings()
-        self.settings = settings.items
+        ########################################################################
+        ## START - WINDOW ATTRIBUTES
+        ########################################################################
 
-        # SETUP MAIN WINDOW
-        # ///////////////////////////////////////////////////////////////
-        self.hide_grips = True # Show/Hide resize grips
-        SetupMainWindow.setup_gui(self)
+        ## REMOVE ==> STANDARD TITLE BAR
+        UIFunctions.removeTitleBar(True)
+        ## ==> END ##
 
-        # SHOW MAIN WINDOW
-        # ///////////////////////////////////////////////////////////////
+        ## SET ==> WINDOW TITLE
+        self.setWindowTitle('Main Window - Python Base')
+        UIFunctions.labelTitle(self, 'Main Window - Python Base')
+        UIFunctions.labelDescription(self, 'Set text')
+        ## ==> END ##
+
+        ## WINDOW SIZE ==> DEFAULT SIZE
+        startSize = QSize(1000, 720)
+        self.resize(startSize)
+        self.setMinimumSize(startSize)
+        # UIFunctions.enableMaximumSize(self, 500, 720)
+        ## ==> END ##
+
+        ## ==> CREATE MENUS
+        ########################################################################
+
+        ## ==> TOGGLE MENU SIZE
+        self.ui.btn_toggle_menu.clicked.connect(lambda: UIFunctions.toggleMenu(self, 220, True))
+        ## ==> END ##
+
+        ## ==> ADD CUSTOM MENUS
+        self.ui.stackedWidget.setMinimumWidth(20)
+        UIFunctions.addNewMenu(self, "HOME", "btn_home", "url(:/16x16/icons/16x16/cil-home.png)", True)
+        UIFunctions.addNewMenu(self, "Import", "btn_import", "url(:/16x16/icons/16x16/cil-wrap-text.png)", True)
+        UIFunctions.addNewMenu(self, "Add User", "btn_new_user", "url(:/16x16/icons/16x16/cil-user-follow.png)", True)
+        UIFunctions.addNewMenu(self, "Custom Widgets", "btn_widgets", "url(:/16x16/icons/16x16/cil-equalizer.png)", False)
+
+        ## ==> END ##
+
+        # START MENU => SELECTION
+        UIFunctions.selectStandardMenu(self, "btn_home")
+        ## ==> END ##
+
+        ## ==> START PAGE
+        self.ui.stackedWidget.setCurrentWidget(self.ui.page_home)
+        ## ==> END ##
+
+        ## USER ICON ==> SHOW HIDE
+        UIFunctions.userIcon(self, "WM", "", True)
+        ## ==> END ##
+
+
+        ## ==> MOVE WINDOW / MAXIMIZE / RESTORE
+        ########################################################################
+        def moveWindow(event):
+            # IF MAXIMIZED CHANGE TO NORMAL
+            if UIFunctions.returStatus() == 1:
+                UIFunctions.maximize_restore(self)
+
+            # MOVE WINDOW
+            if event.buttons() == Qt.LeftButton:
+                self.move(self.pos() + event.globalPos() - self.dragPos)
+                self.dragPos = event.globalPos()
+                event.accept()
+
+        # WIDGET TO MOVE
+        self.ui.frame_label_top_btns.mouseMoveEvent = moveWindow
+        ## ==> END ##
+
+        ## ==> LOAD DEFINITIONS
+        ########################################################################
+        UIFunctions.uiDefinitions(self)
+        ## ==> END ##
+
+        ########################################################################
+        ## END - WINDOW ATTRIBUTES
+        ############################## ---/--/--- ##############################
+
+
+
+
+        ########################################################################
+        #                                                                      #
+        ## START -------------- WIDGETS FUNCTIONS/PARAMETERS ---------------- ##
+        #                                                                      #
+        ## ==> USER CODES BELLOW                                              ##
+        ########################################################################
+
+
+
+        ## ==> QTableWidget RARAMETERS
+        ########################################################################
+        self.ui.tableWidget.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+        ## ==> END ##
+
+
+
+        ########################################################################
+        #                                                                      #
+        ## END --------------- WIDGETS FUNCTIONS/PARAMETERS ----------------- ##
+        #                                                                      #
+        ############################## ---/--/--- ##############################
+
+
+        ## SHOW ==> MAIN WINDOW
+        ########################################################################
         self.show()
+        ## ==> END ##
 
-    # LEFT MENU BTN IS CLICKED
-    # Run function when btn is clicked
-    # Check funtion by object name / btn_id
-    # ///////////////////////////////////////////////////////////////
-    def btn_clicked(self):
+    ########################################################################
+    ## MENUS ==> DYNAMIC MENUS FUNCTIONS
+    ########################################################################
+    def Button(self):
         # GET BT CLICKED
-        btn = SetupMainWindow.setup_btns(self)
+        btnWidget = self.sender()
 
-        # Remove Selection If Clicked By "btn_close_left_column"
-        if btn.objectName() != "btn_settings":
-            self.ui.left_menu.deselect_all_tab()
+        # PAGE HOME
+        if btnWidget.objectName() == "btn_home":
+            self.ui.stackedWidget.setCurrentWidget(self.ui.page_home)
+            UIFunctions.resetStyle(self, "btn_home")
+            UIFunctions.labelPage(self, "Home")
+            btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
 
-        # Get Title Bar Btn And Reset Active         
-        top_settings = MainFunctions.get_title_bar_btn(self, "btn_top_settings")
-        top_settings.set_active(False)
+        # PAGE import
+        if btnWidget.objectName() == "btn_import":
+            self.ui.stackedWidget.setCurrentWidget(self.ui.page_home)
+            UIFunctions.resetStyle(self, "btn_import")
+            UIFunctions.labelPage(self, "Import")
+            btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
 
-        # LEFT MENU
-        # ///////////////////////////////////////////////////////////////
-        
-        # HOME BTN
-        if btn.objectName() == "btn_home":
-            # Select Menu
-            self.ui.left_menu.select_only_one(btn.objectName())
+        # PAGE NEW USER
+        if btnWidget.objectName() == "btn_new_user":
+            self.ui.stackedWidget.setCurrentWidget(self.ui.page_home)
+            UIFunctions.resetStyle(self, "btn_new_user")
+            UIFunctions.labelPage(self, "New User")
+            btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
 
-            # Load Page 1
-            MainFunctions.set_page(self, self.ui.load_pages.page_1)
+        # PAGE WIDGETS
+        if btnWidget.objectName() == "btn_widgets":
+            self.ui.stackedWidget.setCurrentWidget(self.ui.page_widgets)
+            UIFunctions.resetStyle(self, "btn_widgets")
+            UIFunctions.labelPage(self, "Custom Widgets")
+            btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
 
-        # WIDGETS BTN
-        if btn.objectName() == "btn_widgets":
-            # Select Menu
-            self.ui.left_menu.select_only_one(btn.objectName())
 
-            # Load Page 2
-            MainFunctions.set_page(self, self.ui.load_pages.page_2)
 
-        # LOAD USER PAGE
-        if btn.objectName() == "btn_add_user":
-            # Select Menu
-            self.ui.left_menu.select_only_one(btn.objectName())
+    ## ==> END ##
 
-            # Load Page 3 
-            MainFunctions.set_page(self, self.ui.load_pages.page_3)
+    ########################################################################
+    ## START ==> APP EVENTS
+    ########################################################################
 
-        # BOTTOM INFORMATION
-        if btn.objectName() == "btn_info":
-            # CHECK IF LEFT COLUMN IS VISIBLE
-            if not MainFunctions.left_column_is_visible(self):
-                self.ui.left_menu.select_only_one_tab(btn.objectName())
+    ## EVENT ==> MOUSE DOUBLE CLICK
+    ########################################################################
+    def eventFilter(self, watched, event):
+        if watched == self.le and event.type() == QtCore.QEvent.MouseButtonDblClick:
+            print("pos: ", event.pos())
+    ## ==> END ##
 
-                # Show / Hide
-                MainFunctions.toggle_left_column(self)
-                self.ui.left_menu.select_only_one_tab(btn.objectName())
-            else:
-                if btn.objectName() == "btn_close_left_column":
-                    self.ui.left_menu.deselect_all_tab()
-                    # Show / Hide
-                    MainFunctions.toggle_left_column(self)
-                
-                self.ui.left_menu.select_only_one_tab(btn.objectName())
-
-            # Change Left Column Menu
-            if btn.objectName() != "btn_close_left_column":
-                MainFunctions.set_left_column_menu(
-                    self, 
-                    menu = self.ui.left_column.menus.menu_2,
-                    title = "Info tab",
-                    icon_path = Functions.set_svg_icon("icon_info.svg")
-                )
-
-        # SETTINGS LEFT
-        if btn.objectName() == "btn_settings" or btn.objectName() == "btn_close_left_column":
-            # CHECK IF LEFT COLUMN IS VISIBLE
-            if not MainFunctions.left_column_is_visible(self):
-                # Show / Hide
-                MainFunctions.toggle_left_column(self)
-                self.ui.left_menu.select_only_one_tab(btn.objectName())
-            else:
-                if btn.objectName() == "btn_close_left_column":
-                    self.ui.left_menu.deselect_all_tab()
-                    # Show / Hide
-                    MainFunctions.toggle_left_column(self)
-                self.ui.left_menu.select_only_one_tab(btn.objectName())
-
-            # Change Left Column Menu
-            if btn.objectName() != "btn_close_left_column":
-                MainFunctions.set_left_column_menu(
-                    self, 
-                    menu = self.ui.left_column.menus.menu_1,
-                    title = "Settings Left Column",
-                    icon_path = Functions.set_svg_icon("icon_settings.svg")
-                )
-        
-        # TITLE BAR MENU
-        # ///////////////////////////////////////////////////////////////
-        
-        # SETTINGS TITLE BAR
-        if btn.objectName() == "btn_top_settings":
-            # Toogle Active
-            if not MainFunctions.right_column_is_visible(self):
-                btn.set_active(True)
-
-                # Show / Hide
-                MainFunctions.toggle_right_column(self)
-            else:
-                btn.set_active(False)
-
-                # Show / Hide
-                MainFunctions.toggle_right_column(self)
-
-            # Get Left Menu Btn            
-            top_settings = MainFunctions.get_left_menu_btn(self, "btn_settings")
-            top_settings.set_active_tab(False)            
-
-        # DEBUG
-        print(f"Button {btn.objectName()}, clicked!")
-
-    # LEFT MENU BTN IS RELEASED
-    # Run function when btn is released
-    # Check funtion by object name / btn_id
-    # ///////////////////////////////////////////////////////////////
-    def btn_released(self):
-        # GET BT CLICKED
-        btn = SetupMainWindow.setup_btns(self)
-
-        # DEBUG
-        print(f"Button {btn.objectName()}, released!")
-
-    # RESIZE EVENT
-    # ///////////////////////////////////////////////////////////////
-    def resizeEvent(self, event):
-        SetupMainWindow.resize_grips(self)
-
-    # MOUSE CLICK EVENTS
-    # ///////////////////////////////////////////////////////////////
+    ## EVENT ==> MOUSE CLICK
+    ########################################################################
     def mousePressEvent(self, event):
-        # SET DRAG POS WINDOW
         self.dragPos = event.globalPos()
+        if event.buttons() == Qt.LeftButton:
+            print('Mouse click: LEFT CLICK')
+        if event.buttons() == Qt.RightButton:
+            print('Mouse click: RIGHT CLICK')
+        if event.buttons() == Qt.MidButton:
+            print('Mouse click: MIDDLE BUTTON')
+    ## ==> END ##
 
+    ## EVENT ==> KEY PRESSED
+    ########################################################################
+    def keyPressEvent(self, event):
+        print('Key: ' + str(event.key()) + ' | Text Press: ' + str(event.text()))
+    ## ==> END ##
 
-# SETTINGS WHEN TO START
-# Set the initial class and also additional parameters of the "QApplication" class
-# ///////////////////////////////////////////////////////////////
+    ## EVENT ==> RESIZE EVENT
+    ########################################################################
+    def resizeEvent(self, event):
+        self.resizeFunction()
+        return super(MainWindow, self).resizeEvent(event)
+
+    def resizeFunction(self):
+        print('Height: ' + str(self.height()) + ' | Width: ' + str(self.width()))
+    ## ==> END ##
+
+    ########################################################################
+    ## END ==> APP EVENTS
+    ############################## ---/--/--- ##############################
+
 if __name__ == "__main__":
-    # APPLICATION
-    # ///////////////////////////////////////////////////////////////
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon("icon.ico"))
+    QtGui.QFontDatabase.addApplicationFont('fonts/segoeui.ttf')
+    QtGui.QFontDatabase.addApplicationFont('fonts/segoeuib.ttf')
     window = MainWindow()
-
-    # EXEC APP
-    # ///////////////////////////////////////////////////////////////
     sys.exit(app.exec_())
