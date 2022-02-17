@@ -102,6 +102,7 @@ class GuiReplayer(QWidget):
 
         self.tableImage = None
         self.playerBackdrop = None
+        
         self.cardImages = None
         self.deck_inst = Deck.Deck(self.conf, height=CARD_HEIGHT, width=CARD_WIDTH)
         self.show()
@@ -115,8 +116,8 @@ class GuiReplayer(QWidget):
     def paintEvent(self, event):
         if self.tableImage is None or self.playerBackdrop is None:
             try:
-                self.playerBackdrop = QImage(os.path.join(self.conf.graphics_path, u"playerbackdrop.png"))
-                self.tableImage = QImage(os.path.join(self.conf.graphics_path, u"TableR.png"))
+                self.playerBackdrop = QImage(os.path.join(self.conf.graphics_path, "playerbackdrop.png"))
+                self.tableImage = QImage(os.path.join(self.conf.graphics_path, "TableR.png"))
             except:
                 return
         if self.cardImages is None:
@@ -135,7 +136,10 @@ class GuiReplayer(QWidget):
             return
 
         painter = QPainter(self)
+       
         painter.drawImage(QPoint(0,0), self.tableImage)
+        
+        
 
         if len(self.states) == 0:
             return
@@ -152,8 +156,9 @@ class GuiReplayer(QWidget):
             playerx = convertx(player.x)
             playery = converty(player.y)
             painter.drawImage(QPoint(playerx - old_div(self.playerBackdrop.width(), 2), playery - 3), self.playerBackdrop)
+            
             if player.action=="folds":
-                painter.setPen(QColor("grey"))
+                painter.setPen(QColor("red"))
             else:
                 painter.setPen(QColor("white"))
                 x = playerx - self.cardwidth * len(player.holecards) / 2
