@@ -24,8 +24,9 @@ _ = L10n.get_translation()
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel, QScrollArea, QSizePolicy,
-                             QSplitter, QVBoxLayout, QWidget)
+                             QSplitter, QVBoxLayout, QWidget, QFileDialog, QMessageBox)
 import sys
+import os
 from time import time
 
 import Database
@@ -323,46 +324,21 @@ class GuiGraphViewer(QSplitter):
         orangeline = cumsum(orange)
         return (old_div(greenline,100), old_div(blueline,100), old_div(redline,100), old_div(orangeline,100))
 
-    def exportGraph (self, widget, data):
+    def exportGraph (self):
         if self.fig is None:
             return # Might want to disable export button until something has been generated.
-
-        png_filter = gtk.FileFilter()
-        png_filter.add_pattern('*.png')
-        dia_chooser = gtk.FileChooserDialog(title=("Please choose the directory you wish to export to:"),
-                                            action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                            buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OK,gtk.RESPONSE_OK))
-        dia_chooser.set_filter(png_filter)
-        dia_chooser.set_destroy_with_parent(True)
-        dia_chooser.set_transient_for(self.parent)
-        if self.exportFile is not None:
-            dia_chooser.set_filename(self.exportFile) # use previously chosen export path as default
         else:
-            dia_chooser.set_current_name('fpdbgraph.png')
-
-        response = dia_chooser.run()
-        
-        if response != gtk.RESPONSE_OK:
-            print(('Closed, no graph exported'))
-            dia_chooser.destroy()
-            return
-            
-        self.exportFile = dia_chooser.get_filename()
-        dia_chooser.destroy()
-        
-        self.fig.savefig(self.exportFile, format="png")
-
-        # Display info box to confirm graph created.
-        diainfo = gtk.MessageDialog(parent=self.parent,
-                                flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                                type=gtk.MESSAGE_INFO,
-                                buttons=gtk.BUTTONS_OK,
-                                message_format=("Graph created"))
-        diainfo.format_secondary_text(self.exportFile)          
-        diainfo.run()
-        diainfo.destroy()
-        
-    #end of def exportGraph
+            path = os.getcwd()
+            print (path)
+            path = path+'/graph.png'
+            print (path)
+            self.fig.savefig(path) 
+            msg = QMessageBox()
+            msg.setWindowTitle("FPDB 3 info")
+            mess = "Your graph is saved in "+path
+            msg.setText(mess)
+            msg.exec()
+    #end of def exportGraph TO DO more if needed
 
 if __name__ == "__main__":
     import Configuration
