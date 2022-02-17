@@ -91,7 +91,9 @@ class GuiGraphViewer(QSplitter):
         self.addWidget(scroll)
 
         frame = QFrame()
+        frame.setStyleSheet('background-color: #19232D ')
         self.graphBox = QVBoxLayout()
+        
         frame.setLayout(self.graphBox)
         self.addWidget(frame)
         self.setStretchFactor(0, 0)
@@ -115,10 +117,12 @@ class GuiGraphViewer(QSplitter):
         if self.fig != None:
             self.fig.clear()
         self.fig = Figure(figsize=(5.0,4.0), dpi=100)
+        self.fig.patch.set_facecolor('#19232D')
         if self.canvas is not None:
             self.canvas.destroy()
 
         self.canvas = FigureCanvas(self.fig)
+        
         self.canvas.setParent(self)
 
     def generateGraph(self, widget):
@@ -163,17 +167,26 @@ class GuiGraphViewer(QSplitter):
             return
 
         #Set graph properties
+        
         self.ax = self.fig.add_subplot(111)
-
+        
         #Get graph data from DB
         starttime = time()
         (green, blue, red, orange) = self.getRingProfitGraph(playerids, sitenos, limits, games, currencies, display_in)
         print(("Graph generated in: %s") %(time() - starttime))
 
         #Set axis labels and grid overlay properites
-        self.ax.set_xlabel(("Hands"))
+        self.ax.set_xlabel(("Hands"),color='#9DA9B5')
+        self.ax.set_facecolor('#19232D')
+        self.ax.tick_params(axis='x', colors='#9DA9B5') 
+        self.ax.tick_params(axis='y', colors='#9DA9B5') 
+        self.ax.spines['left'].set_color('#9DA9B5') 
+        self.ax.spines['right'].set_color('#9DA9B5')
+        self.ax.spines['top'].set_color('#9DA9B5')
+        self.ax.spines['bottom'].set_color('#9DA9B5')
+        
         # SET LABEL FOR X AXIS
-        self.ax.set_ylabel(display_in)
+        self.ax.set_ylabel(display_in, color='#9DA9B5')
         self.ax.grid(color='g', linestyle=':', linewidth=0.2)
         if green is None or len(green) == 0:
             self.ax.set_title(("No Data for Player(s) Found"))
@@ -205,7 +218,7 @@ class GuiGraphViewer(QSplitter):
             self.graphBox.addWidget(self.canvas)
             self.canvas.draw()
         else:
-            self.ax.set_title((("Profit graph for ring games")+names))
+            self.ax.set_title((("Profit graph for ring games")+names), color='#9DA9B5')
 
             #Draw plot
             if 'showdown' in graphops:
@@ -218,12 +231,16 @@ class GuiGraphViewer(QSplitter):
 
             # order legend, greenline on top
             handles, labels = self.ax.get_legend_handles_labels()
+            
             handles = handles[-1:]+handles[:-1]
             labels = labels[-1:]+labels[:-1]
-
-            legend = self.ax.legend(handles, labels, loc='upper left', fancybox=True, shadow=True, prop=FontProperties(size='smaller'))
+            
+            legend = self.ax.legend(handles, labels, loc='upper left', fancybox=True, shadow=True, prop=FontProperties(size='smaller'), facecolor="#19232D", labelcolor='#9DA9B5')
             #legend.draggable(True)
+          
+
             legend.set_draggable(state= 1)
+            
             self.graphBox.addWidget(self.canvas)
             self.canvas.draw()
             #self.exportButton.set_sensitive(True)

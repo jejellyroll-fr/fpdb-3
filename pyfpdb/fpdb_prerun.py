@@ -222,7 +222,7 @@ if config.install_method == "exe":
 #
 import os
 os.chdir(os.path.join(config.fpdb_root_path, u"pyfpdb"))
-
+print (config.os_family)
 if config.os_family in ("XP", "Win7"):
     os.execvpe('pythonw.exe', list(('pythonw.exe', 'fpdb.pyw', initial_run, '-r'))+sys.argv[1:], os.environ)
 else:
