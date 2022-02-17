@@ -308,11 +308,15 @@ class GuiGraphViewer(QSplitter):
 
         if len(winnings) == 0:
             return (None, None, None, None)
-
-        green = [float(x[1]) for x in winnings]
-        blue  = [float(x[1]) if x[2] == True  else 0.0 for x in winnings]
-        red   = [float(x[1]) if x[2] == False else 0.0 for x in winnings]
-        orange = [float(x[3]) for x in winnings]
+        green = [0]
+        green.extend([float(x[1]) for x in winnings])
+        #print (green)
+        blue = [0]
+        blue.extend([float(x[1]) if x[2] == True  else 0.0 for x in winnings])
+        red = [0]
+        red.extend([float(x[1]) if x[2] == False else 0.0 for x in winnings])
+        orange = [0]
+        orange.extend([float(x[3]) for x in winnings])
         greenline = cumsum(green)
         blueline  = cumsum(blue)
         redline   = cumsum(red)
