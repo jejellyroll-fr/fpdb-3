@@ -185,15 +185,43 @@ class GuiReplayer(QWidget):
                                  '%s%.2f' % (self.currency, player.chips))
 
         painter.setPen(QColor("white"))
-
-        if state.pot > 0:
+        percent = '%'
+        pot_odds = 0
+        if state.pot > 0  and player.action=='bets':
+            state.pot = state.pot+player.chips
             painter.drawText(QRect(old_div(self.tableImage.width(), 2) - 100,
                                    old_div(self.tableImage.height(), 2) - 20,
                                    200,
                                    40),
                              Qt.AlignCenter,
-                             '%s%.2f' % (self.currency, state.pot))
-
+                             'Pot: %s%.2f' % (self.currency, state.pot))
+            if player.chips > 0:
+                pot_odds = (1/(((state.pot+player.chips)/player.chips)+1))*100
+                painter.drawText(QRect(old_div(self.tableImage.width(), 2) - 100,
+                                   old_div(self.tableImage.height(), 2) - 20,
+                                   200,
+                                   70),
+                             Qt.AlignCenter,
+                             'Pot odds: %s%.2f' % (percent, pot_odds))
+            
+        else:
+            state.pot = state.pot
+            painter.drawText(QRect(old_div(self.tableImage.width(), 2) - 100,
+                                   old_div(self.tableImage.height(), 2) - 20,
+                                   200,
+                                   40),
+                             Qt.AlignCenter,
+                             'Pot: %s%.2f' % (self.currency, state.pot))
+            if player.chips > 0:
+                pot_odds = (1/(((state.pot+player.chips)/player.chips)+1))*100
+                painter.drawText(QRect(old_div(self.tableImage.width(), 2) - 100,
+                                   old_div(self.tableImage.height(), 2) - 20,
+                                   200,
+                                   70),
+                             Qt.AlignCenter,
+                             'Pot odds: %s%.2f' % (percent, pot_odds))
+        print ('pot:', state.pot, player.chips, pot_odds)
+            
         for street in state.renderBoard:
             x = communityLeft
             if street.startswith('TURN'):
