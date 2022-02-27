@@ -19,6 +19,7 @@
 
 from __future__ import print_function
 from __future__ import division
+from ast import Return
 from builtins import str
 from builtins import range
 from builtins import object
@@ -30,6 +31,7 @@ _ = L10n.get_translation()
 
 from functools import partial
 
+import json
 import Hand
 import Card
 import Configuration
@@ -113,7 +115,11 @@ class GuiReplayer(QWidget):
             painter.drawPixmap(QPoint(x, y), self.cardImages[cardIndex])
             x += self.cardwidth
 
+    
     def paintEvent(self, event):
+        pot_odds = 0
+        new_pot = 0
+        percent = '%'
         if self.tableImage is None or self.playerBackdrop is None:
             try:
                 self.playerBackdrop = QImage(os.path.join(self.conf.graphics_path, "playerbackdrop.png"))
@@ -154,7 +160,9 @@ class GuiReplayer(QWidget):
 
         for player in list(state.players.values()):
             playerx = convertx(player.x)
+           
             playery = converty(player.y)
+            
             painter.drawImage(QPoint(playerx - old_div(self.playerBackdrop.width(), 2), playery - 3), self.playerBackdrop)
             
             if player.action=="folds":
@@ -173,6 +181,13 @@ class GuiReplayer(QWidget):
 
             if player.justacted:
                 painter.setPen(QColor("yellow"))
+                new_pot= new_pot+player.chips
+                painter.drawText(QRect(old_div(self.tableImage.width(), 2) - 100,
+                                       old_div(self.tableImage.height(), 2) - 20,
+                                       200,
+                                       40),
+                                 Qt.AlignCenter,
+                                'Pot: %s%.2f' % (self.currency, new_pot))
                 painter.drawText(QRect(playerx - 50, playery + 15, 100, 20), Qt.AlignCenter, player.action)
             else:
                 painter.setPen(QColor("white"))
@@ -187,54 +202,37 @@ class GuiReplayer(QWidget):
         painter.setPen(QColor("white"))
         
 
-        for player in list(state.players.values()): 
-            pot_odds = 0
-            new_pot = 0
-            percent = '%'
-            if  player.action=='small blind' and player.justacted==True :
-                new_pot = state.pot+player.chips
-                painter.drawText(QRect(old_div(self.tableImage.width(), 2) - 100,
-                                   old_div(self.tableImage.height(), 2) - 20,
-                                   200,
-                                   40),
-                             Qt.AlignCenter,
-                             'Pot: %s%.2f' % (self.currency, new_pot))
-                print ('1-pot state:', new_pot,'player action:', player.name,  player.action, 'player chips:', player.chips, player.stack, player.justacted, 'pot odds:' ,pot_odds)  
+         
 
-            elif  player.action=='big blind' and player.justacted==True :
-                new_pot = new_pot+player.chips
-                painter.drawText(QRect(old_div(self.tableImage.width(), 2) - 100,
-                                   old_div(self.tableImage.height(), 2) - 20,
-                                   200,
-                                   40),
-                             Qt.AlignCenter,
-                             'Pot: %s%.2f' % (self.currency, new_pot))
-                print ('2-pot state:', new_pot,'player action:', player.name,  player.action, 'player chips:', player.chips, player.stack, player.justacted,'pot odds:' ,pot_odds)   
-            
-            elif player.action=='bets' and player.justacted==True :
-                new_pot = new_pot+player.chips
-                painter.drawText(QRect(old_div(self.tableImage.width(), 2) - 100,
-                                   old_div(self.tableImage.height(), 2) - 20,
-                                   200,
-                                   40),
-                             Qt.AlignCenter,
-                             'Pot: %s%.2f' % (self.currency, new_pot))
-                print ('3-pot state:', new_pot,'player action:', player.name,  player.action, 'player chips:', player.chips, player.stack, player.justacted,'pot odds:' ,pot_odds) 
 
-                if player.action=='bets' or player.action=='raises' and player.justacted==True:
-                    pot_odds = (1/(((state.pot+player.chips)/player.chips)+1))*100
-                    painter.drawText(QRect(old_div(self.tableImage.width(), 2) - 100,
-                                   old_div(self.tableImage.height(), 2) - 20,
-                                   200,
-                                   70),
-                             Qt.AlignCenter,
-                             'Pot odds: %s%.2f' % (percent, pot_odds))
-                    print ('4-pot state:', new_pot,'player chips:', player.chips, player.stack, player.justacted,'pot odds:' ,pot_odds)
-            else:
-                new_pot = new_pot
- 
+
+
                 
-        
+            # new_pot = state.pot
+            # print (state.pot)
+            # if  player.chips != 0 :
+            #     print ('init', new_pot)
+            #     new_pot = new_pot + player.chips
+            #     painter.drawText(QRect(old_div(self.tableImage.width(), 2) - 100,
+            #                        old_div(self.tableImage.height(), 2) - 20,
+            #                        200,
+            #                        40),
+            #                  Qt.AlignCenter,
+            #                  'Pot: %s%.2f' % (self.currency, new_pot))
+            #     print ('1-pot state:', new_pot,'player action:', player.name,  player.action, 'player chips:', player.chips, player.stack, player.justacted, 'pot odds:' ,pot_odds)  
+                
+            #     print ('act', new_pot)  
+            #     if player.action=='bets' or player.action=='raises' :
+            #         pot_odds = (1/(((new_pot+player.chips)/player.chips)+1))*100
+            #         painter.drawText(QRect(old_div(self.tableImage.width(), 2) - 100,
+            #                        old_div(self.tableImage.height(), 2) - 20,
+            #                        200,
+            #                        70),
+            #                  Qt.AlignCenter,
+            #                  'Pot odds: %s%.2f' % (percent, pot_odds))
+            #         print ('2-pot state:', new_pot,'player chips:', player.chips, player.stack, player.justacted,'pot odds:' ,pot_odds)
+            # state.pot = new_pot    
+                
             
         for street in state.renderBoard:
             x = communityLeft
@@ -374,6 +372,7 @@ class ICM(object):
         total = sum(self.stacks)
         for k in self.stacks:
             self.equities.append(round(Decimal(str(self.getEquities(total, k, 0))), 4))
+   
     def getEquities(self, total, player, depth):
         D = Decimal
         eq = D(self.stacks[player]) / total * D(str(self.payouts[depth]))
@@ -404,19 +403,19 @@ class TableState(object):
         #print icm.equities
 
         self.players = {}
-        print ('hand.players', hand.players)
-        print (type(hand.players))
-        print (type(self.players))
+        # print ('hand.players', hand.players)
+        # print (type(hand.players))
+        # print (type(self.players))
         # for name, chips, seat in hand.players[-1]:
         #     self.players.append(Player(name, chips, seat))
         #     #  self.players[name] = Player(hand, name, chips, seat)
         for items in hand.players:
-            print (items)
-            print ('type', (type(items)))
-            print (items[0])
-            print (items[1])
-            print (items[2])
-            print (items[3])
+            # print (items)
+            # print ('type', (type(items)))
+            # print (items[0])
+            # print (items[1])
+            # print (items[2])
+            # print (items[3])
             
             self.players[items[1]] = Player(hand, items[1],items[2],int(items[0]))
             print (self.players[items[1]])
