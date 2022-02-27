@@ -27,7 +27,7 @@ global_modules_to_test =   ["PyQt5",
                             "matplotlib",
                             "mplfinance",
                             "numpy",
-                            "pylab",
+                            
                             "sqlite3",
                             "pytz"]
 
@@ -222,8 +222,12 @@ if config.install_method == "exe":
 #
 import os
 os.chdir(os.path.join(config.fpdb_root_path, u"pyfpdb"))
-print (config.os_family)
+# print('config', config.fpdb_root_path)
+# print(os.path.join(config.fpdb_root_path, u"pyfpdb"))
+# print (config.os_family)
 if config.os_family in ("XP", "Win7"):
+    #print(sys.argv)
+    #print(os.environ)
     os.execvpe('pythonw.exe', list(('pythonw.exe', 'fpdb.pyw', initial_run, '-r'))+sys.argv[1:], os.environ)
 else:
     os.execvpe('python', list(('python', 'fpdb.pyw', initial_run, '-r'))+sys.argv[1:], os.environ)
