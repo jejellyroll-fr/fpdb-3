@@ -27,7 +27,7 @@ global_modules_to_test =   ["PyQt5",
                             "matplotlib",
                             "mplfinance",
                             "numpy",
-                            "pylab",
+                            
                             "sqlite3",
                             "pytz"]
 
