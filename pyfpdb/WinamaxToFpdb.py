@@ -22,6 +22,7 @@ from __future__ import print_function
 from __future__ import division
 from builtins import map
 from builtins import str
+import builtins
 from past.utils import old_div
 import L10n
 _ = L10n.get_translation()
@@ -415,6 +416,7 @@ class Winamax(HandHistoryConverter):
         if not self.re_DenySB.search(hand.handText):
             try:
                 m = self.re_PostSB.search(hand.handText)
+                print ('m:', m)
                 hand.addBlind(m.group('PNAME'), 'small blind', m.group('SB'))
             except builtins.AttributeError: # no small blind
                 log.warning( ("No small blinds found.")+str(sys.exc_info()) )
