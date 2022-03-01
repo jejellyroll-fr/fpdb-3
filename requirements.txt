@@ -10,3 +10,4 @@ xlrd
 SQLAlchemy  
 beautifulsoup4
 pokereval
+requests
