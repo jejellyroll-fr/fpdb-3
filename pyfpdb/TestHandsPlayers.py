@@ -35,7 +35,7 @@ import pytz
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
-DEBUG = False
+DEBUG = True
 
 class FpdbError(object):
     expected = {   # Site     : { path: (stored, dups, partial, errs) }
@@ -287,9 +287,14 @@ def compare(leaf, importer, errors, site):
 def walk_testfiles(dir, function, importer, errors, site):
     """Walks a directory, and executes a callback on each file """
     dir = os.path.abspath(dir)
+    
+    print('dir:', dir)
+    
     try:
-        for file in [file for file in os.listdir(dir) if not file in [".",".."]]:
+        for file in [file for file in os.walk(dir) if not file in [".",".."]]:
+            print('files:', os.walk(dir))
             nfile = os.path.join(dir,file)
+            print(nfile)
             if os.path.isdir(nfile):
                 walk_testfiles(nfile, compare, importer, errors, site)
             else:
