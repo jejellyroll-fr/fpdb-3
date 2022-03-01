@@ -26,8 +26,8 @@
 #
 # 
 import sys
-_pokereval = __import__('_pokereval_' + sys.version[0] + '_' + sys.version[2])
-#_pokereval = __import__('_pokereval_' )
+#_pokereval = __import__('_pokereval_' + sys.version[0] + '_' + sys.version[2])
+_pokereval = __import__('_pokereval_' )
 from types import *
 
 class PokerEval:

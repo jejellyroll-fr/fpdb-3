@@ -24,7 +24,7 @@ import os
 import sys
 
 import Charset
-import Stove
+#import Stove
 
 DEBUG = False
 
