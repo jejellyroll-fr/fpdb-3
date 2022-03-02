@@ -129,18 +129,18 @@ class fpdb(QMainWindow):
         self.nb_tab_names.append(new_tab_name)
         self.nb.setCurrentIndex(index)
 
-    # def display_tab(self, new_tab_name):
-    #     """displays the indicated tab"""
-    #     tab_no = -1
-    #     for i, name in enumerate(self.nb_tab_names):
-    #         if new_tab_name == name:
-    #             tab_no = i
-    #             break
+    def display_tab(self, new_tab_name):
+        """displays the indicated tab"""
+        tab_no = -1
+        for i, name in enumerate(self.nb_tab_names):
+            if new_tab_name == name:
+                tab_no = i
+                break
 
-    #     if tab_no < 0 or tab_no >= self.nb.count():
-    #         raise FpdbError("invalid tab_no " + str(tab_no))
-    #     else:
-    #         self.nb.setCurrentIndex(tab_no)
+        if tab_no < 0 or tab_no >= self.nb.count():
+            raise FpdbError("invalid tab_no " + str(tab_no))
+        else:
+            self.nb.setCurrentIndex(tab_no)
 
     # def switch_to_tab(self, accel_group, acceleratable, keyval, modifier):
     #     tab = keyval - ord('0')
