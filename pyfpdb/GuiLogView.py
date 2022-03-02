@@ -82,7 +82,7 @@ class GuiLogView(QWidget):
         refreshbutton.clicked.connect(self.refresh)
         hb2.addWidget(refreshbutton)
         
-        copybutton = QPushButton(("Copy to Clipboard"))
+        copybutton = QPushButton(("Selection Copy to Clipboard"))
         copybutton.clicked.connect(self.copy_to_clipboard)
         hb2.addWidget(copybutton)
         
@@ -97,6 +97,7 @@ class GuiLogView(QWidget):
         text = ""
         for row, indexes in groupby(self.listview.selectedIndexes(), lambda i:i.row()):
             text += " ".join([i.data() for i in indexes]) + "\n"
+        print(text)
         QApplication.clipboard().setText(text)
             
     def __set_logfile(self, checkState, filename):
