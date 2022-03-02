@@ -488,8 +488,8 @@ class Winamax(HandHistoryConverter):
         streetsplit = hand.streets[street].split('*** SUMMARY ***')
         m = self.re_Action.finditer(streetsplit[0])
         for action in m:
-            #acts = action.groupdict()
-            #print "DEBUG: acts: %s" % acts
+            acts = action.groupdict()
+            print ("DEBUG: acts: %s" % acts)
             if action.group('ATYPE') == ' folds':
                 hand.addFold( street, action.group('PNAME'))
             elif action.group('ATYPE') == ' checks':
