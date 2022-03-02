@@ -19,9 +19,17 @@ from bs4 import BeautifulSoup
 
 class OddsCalc:
     def __init__(self, game, board, hero, vilain1, vilain2) -> None:
-        url = 'http://www.propokertools.com/simulations/show?'
-        params = {'g': game, 's': 'generic', 'b': board ,'h1':  hero, 'h2': vilain1}
+  
+        self.game = game
+        self.board = board
+        self.hero= hero
+        self.vilain1 = vilain1
+        self.vilain2 = vilain2
+       
 
+    def calcBaseHoldem(self):
+        url = 'http://www.propokertools.com/simulations/show?'
+        params = {'g': self.game, 's': 'generic', 'b': self.board ,'h1':  self.hero, 'h2': self.vilain1, 'h3': self.vilain2}
         response = requests.post(url, params=params)
         response.status_code
         html_doc= response.text
@@ -31,4 +39,5 @@ class OddsCalc:
         result = [dict(zip(h, i)) for i in d]
         print(result)
         
-odd = OddsCalc('he', 'As8s4d9d', 'AA', 'QQ','')
+odd1 = OddsCalc('oh','As8s4d9d','AK','89','')        
+odd1.calcBaseHoldem()
