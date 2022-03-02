@@ -213,7 +213,7 @@ class fpdb(QMainWindow):
     #     self.remove_tab(None, (self.nb, self.nb_tab_names[self.nb.get_current_page()]))
 
     def dia_about(self, widget, data=None):
-        QMessageBox.about(self, "Free Poker Database (FPDB)","\n".join([str(VERSION),"Copyright 2008-2013. See contributors.txt for details",("You are free to change, and distribute original or changed versions of fpdb within the rules set out by the license"),"http://fpdb.sourceforge.net/",("Your config file is: ") + self.config.file]))
+        QMessageBox.about(self, "FPDB"+str(VERSION),"Copyright 2008-2022. See contributors.txt for details"+"You are free to change, and distribute original or changed versions of fpdb within the rules set out by the license"+"http://fpdb.sourceforge.net/"+"\n"+"Your config file is: "+ self.config.file)
         return
 
         # dia.set_copyright("Copyright 2008-2013. See contributors.txt for details")   #do not translate copyright message
