@@ -14,6 +14,9 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with this program. If not, see <http://www.gnu.org/licenses/>.
 #In the "official" distribution you can find the license in agpl-3.0.txt.
+
+
+
 import L10n
 _ = L10n.init_translation()
 
@@ -98,9 +101,9 @@ except:
 
 class fpdb(QMainWindow):
 
-    def tab_clicked(self, widget, tab_name):
-        """called when a tab button is clicked to activate that tab"""
-        self.display_tab(tab_name)
+    # def tab_clicked(self, widget, tab_name):
+    #     """called when a tab button is clicked to activate that tab"""
+    #     self.display_tab(tab_name)
 
     def add_and_display_tab(self, new_page, new_tab_name):
         """adds a tab, namely creates the button and displays it and appends all the relevant arrays"""
@@ -126,154 +129,149 @@ class fpdb(QMainWindow):
         self.nb_tab_names.append(new_tab_name)
         self.nb.setCurrentIndex(index)
 
-    def display_tab(self, new_tab_name):
-        """displays the indicated tab"""
-        tab_no = -1
-        for i, name in enumerate(self.nb_tab_names):
-            if new_tab_name == name:
-                tab_no = i
-                break
+    # def display_tab(self, new_tab_name):
+    #     """displays the indicated tab"""
+    #     tab_no = -1
+    #     for i, name in enumerate(self.nb_tab_names):
+    #         if new_tab_name == name:
+    #             tab_no = i
+    #             break
 
-        if tab_no < 0 or tab_no >= self.nb.count():
-            raise FpdbError("invalid tab_no " + str(tab_no))
-        else:
-            self.nb.setCurrentIndex(tab_no)
+    #     if tab_no < 0 or tab_no >= self.nb.count():
+    #         raise FpdbError("invalid tab_no " + str(tab_no))
+    #     else:
+    #         self.nb.setCurrentIndex(tab_no)
 
-    def switch_to_tab(self, accel_group, acceleratable, keyval, modifier):
-        tab = keyval - ord('0')
-        if (tab == 0): tab = 10
-        tab = tab - 1
-        if (tab < len(self.nb_tab_names)):
-            self.display_tab(self.nb_tab_names[tab])
+    # def switch_to_tab(self, accel_group, acceleratable, keyval, modifier):
+    #     tab = keyval - ord('0')
+    #     if (tab == 0): tab = 10
+    #     tab = tab - 1
+    #     if (tab < len(self.nb_tab_names)):
+    #         self.display_tab(self.nb_tab_names[tab])
 
-    def create_custom_tab(self, text, nb):
-        #create a custom tab for notebook containing a
-        #label and a button with STOCK_ICON
-        eventBox = gtk.EventBox()
-        tabBox = gtk.HBox(False, 2)
-        tabLabel = QLabel(text)
-        tabBox.pack_start(tabLabel, False)
-        eventBox.add(tabBox)
+    # def create_custom_tab(self, text, nb):
+    #     #create a custom tab for notebook containing a
+    #     #label and a button with STOCK_ICON
+    #     eventBox = gtk.EventBox()
+    #     tabBox = gtk.HBox(False, 2)
+    #     tabLabel = QLabel(text)
+    #     tabBox.pack_start(tabLabel, False)
+    #     eventBox.add(tabBox)
 
-        # NOTE: look at git annotate of this line to see when the revert of:
-        #
-        # force background state to fix problem where STATE_ACTIVE
-        # tab labels are black in some gtk themes, and therefore unreadable
-        # This behaviour is probably a bug in libwimp.dll or pygtk, but
-        # need to force background to avoid issues with menu labels being
-        # unreadable
-        #
-        # was removed. Removing to fix http://sourceforge.net/apps/mantisbt/fpdb/view.php?id=123
+    #     # NOTE: look at git annotate of this line to see when the revert of:
+    #     #
+    #     # force background state to fix problem where STATE_ACTIVE
+    #     # tab labels are black in some gtk themes, and therefore unreadable
+    #     # This behaviour is probably a bug in libwimp.dll or pygtk, but
+    #     # need to force background to avoid issues with menu labels being
+    #     # unreadable
+    #     #
+    #     # was removed. Removing to fix http://sourceforge.net/apps/mantisbt/fpdb/view.php?id=123
 
-        tabButton = QPushButton()
-        tabButton.connect('clicked', self.remove_tab, (nb, text))
-        #Add a picture on a button
-        self.add_icon_to_button(tabButton)
-        tabBox.pack_start(tabButton, False)
+    #     tabButton = QPushButton()
+    #     tabButton.connect('clicked', self.remove_tab, (nb, text))
+    #     #Add a picture on a button
+    #     self.add_icon_to_button(tabButton)
+    #     tabBox.pack_start(tabButton, False)
 
-        # needed, otherwise even calling show_all on the notebook won't
-        # make the hbox contents appear.
-        tabBox.show_all()
-        return eventBox
+    #     # needed, otherwise even calling show_all on the notebook won't
+    #     # make the hbox contents appear.
+    #     tabBox.show_all()
+    #     return eventBox
 
-    def add_icon_to_button(self, button):
-        iconBox = gtk.HBox(False, 0)
-        image = gtk.Image()
-        image.set_from_stock(gtk.STOCK_CLOSE, gtk.ICON_SIZE_SMALL_TOOLBAR)
-        gtk.Button.set_relief(button, gtk.RELIEF_NONE)
-        settings = gtk.Widget.get_settings(button)
-        (w, h) = gtk.icon_size_lookup_for_settings(settings, gtk.ICON_SIZE_SMALL_TOOLBAR)
-        gtk.Widget.set_size_request(button, w + 4, h + 4)
-        image.show()
-        iconBox.pack_start(image, True, False, 0)
-        button.add(iconBox)
-        iconBox.show()
+    # def add_icon_to_button(self, button):
+    #     iconBox = gtk.HBox(False, 0)
+    #     image = gtk.Image()
+    #     image.set_from_stock(gtk.STOCK_CLOSE, gtk.ICON_SIZE_SMALL_TOOLBAR)
+    #     gtk.Button.set_relief(button, gtk.RELIEF_NONE)
+    #     settings = gtk.Widget.get_settings(button)
+    #     (w, h) = gtk.icon_size_lookup_for_settings(settings, gtk.ICON_SIZE_SMALL_TOOLBAR)
+    #     gtk.Widget.set_size_request(button, w + 4, h + 4)
+    #     image.show()
+    #     iconBox.pack_start(image, True, False, 0)
+    #     button.add(iconBox)
+    #     iconBox.show()
 
     # Remove a page from the notebook
-    def remove_tab(self, button, data):
-        (nb, text) = data
-        page = -1
-        #print "\n remove_tab: start", text
-        for i, tab in enumerate(self.nb_tab_names):
-            if text == tab:
-                page = i
-        #print "   page =", page
-        if page >= 0 and page < self.nb.get_n_pages():
-            #print "   removing page", page
-            del self.nb_tab_names[page]
-            nb.remove_page(page)
-        # Need to refresh the widget --
-        # This forces the widget to redraw itself.
-        #nb.queue_draw_area(0,0,-1,-1) needed or not??
+    # def remove_tab(self, button, data):
+    #     (nb, text) = data
+    #     page = -1
+    #     #print "\n remove_tab: start", text
+    #     for i, tab in enumerate(self.nb_tab_names):
+    #         if text == tab:
+    #             page = i
+    #     #print "   page =", page
+    #     if page >= 0 and page < self.nb.get_n_pages():
+    #         #print "   removing page", page
+    #         del self.nb_tab_names[page]
+    #         nb.remove_page(page)
+    #     # Need to refresh the widget --
+    #     # This forces the widget to redraw itself.
+    #     #nb.queue_draw_area(0,0,-1,-1) needed or not??
 
-    def remove_current_tab(self, accel_group, acceleratable, keyval, modifier):
-        self.remove_tab(None, (self.nb, self.nb_tab_names[self.nb.get_current_page()]))
+    # def remove_current_tab(self, accel_group, acceleratable, keyval, modifier):
+    #     self.remove_tab(None, (self.nb, self.nb_tab_names[self.nb.get_current_page()]))
 
     def dia_about(self, widget, data=None):
-        QMessageBox.about(self, "Free Poker Database (FPDB)",
-                          "\n".join([VERSION,
-                                     "Copyright 2008-2013. See contributors.txt for details",
-                                     ("You are free to change, and distribute original or changed versions of fpdb within the rules set out by the license"),
-                                     "http://fpdb.sourceforge.net/",
-                                     ("Your config file is: ") + self.config.file]))
+        QMessageBox.about(self, "Free Poker Database (FPDB)","\n".join([str(VERSION),"Copyright 2008-2013. See contributors.txt for details",("You are free to change, and distribute original or changed versions of fpdb within the rules set out by the license"),"http://fpdb.sourceforge.net/",("Your config file is: ") + self.config.file]))
         return
 
-        dia.set_copyright("Copyright 2008-2013. See contributors.txt for details")   #do not translate copyright message
-        dia.set_comments(("You are free to change, and distribute original or changed versions of fpdb within the rules set out by the license"))
-        dia.set_license(("Please see the help screen for license information"))
-        dia.set_website("http://fpdb.sourceforge.net/")
+        # dia.set_copyright("Copyright 2008-2013. See contributors.txt for details")   #do not translate copyright message
+        # dia.set_comments(("You are free to change, and distribute original or changed versions of fpdb within the rules set out by the license"))
+        # dia.set_license(("Please see the help screen for license information"))
+        # dia.set_website("http://fpdb.sourceforge.net/")
 
-        dia.set_authors(['Steffen', 'Eratosthenes', 'Carl Gherardi',
-            'Eric Blade', '_mt', 'sqlcoder', 'Bostik', 'gimick', 'Chaz',
-            ('... and others.'), ("See contributors.txt")])
-        dia.set_program_name("Free Poker Database (FPDB)")
+        # dia.set_authors(['Steffen', 'Eratosthenes', 'Carl Gherardi',
+        #     'Eric Blade', '_mt', 'sqlcoder', 'Bostik', 'gimick', 'Chaz',
+        #     ('... and others.'), ("See contributors.txt")])
+        # dia.set_program_name("Free Poker Database (FPDB)")
         
-        if (os.name=="posix"):
-            os_text=str(os.uname())
-        elif (os.name=="nt"):
-            import platform
-            os_text=("Windows" + " " + str(platform.win32_ver()))
-        else:
-            os_text="Unknown"
+        # if (os.name=="posix"):
+        #     os_text=str(os.uname())
+        # elif (os.name=="nt"):
+        #     import platform
+        #     os_text=("Windows" + " " + str(platform.win32_ver()))
+        # else:
+        #     os_text="Unknown"
         
-        import locale
-        nums = [(('Operating System'), os_text),
-                ('Python',           sys.version[0:3]),
-                ('GTK+',             '.'.join([str(x) for x in gtk.gtk_version])),
-                ('PyGTK',            '.'.join([str(x) for x in gtk.pygtk_version])),
-                ('matplotlib',       matplotlib_version),
-                ('numpy',            numpy_version),
-                ('sqlite',           sqlite_version),
-                (('fpdb version'),  VERSION),
-                (('database used'), self.settings['db-server']),
-                (('language'),      locale.getdefaultlocale()[0]),
-                (('character encoding'), locale.getdefaultlocale()[1])
-               ]
-        versions = gtk.TextBuffer()
-        w = 20  # width used for module names and version numbers
-        versions.set_text('\n'.join([x[0].rjust(w) + ': ' + x[1].ljust(w) for x in nums]))
-        view = gtk.TextView(versions)
-        view.set_editable(False)
-        view.set_justification(gtk.JUSTIFY_CENTER)
-        view.modify_font(pango.FontDescription('monospace 10'))
-        view.show()
-        dia.vbox.pack_end(view, True, True, 2)
+        # import locale
+        # nums = [(('Operating System'), os_text),
+        #         ('Python',           sys.version[0:3]),
+        #         ('GTK+',             '.'.join([str(x) for x in gtk.gtk_version])),
+        #         ('PyGTK',            '.'.join([str(x) for x in gtk.pygtk_version])),
+        #         ('matplotlib',       matplotlib_version),
+        #         ('numpy',            numpy_version),
+        #         ('sqlite',           sqlite_version),
+        #         (('fpdb version'),  VERSION),
+        #         (('database used'), self.settings['db-server']),
+        #         (('language'),      locale.getdefaultlocale()[0]),
+        #         (('character encoding'), locale.getdefaultlocale()[1])
+        #        ]
+        # versions = gtk.TextBuffer()
+        # w = 20  # width used for module names and version numbers
+        # versions.set_text('\n'.join([x[0].rjust(w) + ': ' + x[1].ljust(w) for x in nums]))
+        # view = gtk.TextView(versions)
+        # view.set_editable(False)
+        # view.set_justification(gtk.JUSTIFY_CENTER)
+        # view.modify_font(pango.FontDescription('monospace 10'))
+        # view.show()
+        # dia.vbox.pack_end(view, True, True, 2)
 
-        l = QLabel(("Your config file is: ") + self.config.file)
-        l.set_alignment(0.5, 0.5)
-        l.show()
-        dia.vbox.pack_end(l, True, True, 2)
+        # l = QLabel(("Your config file is: ") + self.config.file)
+        # l.set_alignment(0.5, 0.5)
+        # l.show()
+        # dia.vbox.pack_end(l, True, True, 2)
 
-        l = QLabel(('Version Information:'))
-        l.set_alignment(0.5, 0.5)
-        l.show()
-        dia.vbox.pack_end(l, True, True, 2)
+        # l = QLabel(('Version Information:'))
+        # l.set_alignment(0.5, 0.5)
+        # l.show()
+        # dia.vbox.pack_end(l, True, True, 2)
 
-        dia.run()
-        dia.destroy()
-        log.debug(("Threads: "))
-        for t in self.threads:
-            log.debug("........." + str(t.__class__))
+        # dia.run()
+        # dia.destroy()
+        # log.debug(("Threads: "))
+        # for t in self.threads:
+        #     log.debug("........." + str(t.__class__))
 
     def dia_advanced_preferences(self, widget, data=None):
         #force reload of prefs from xml file - needed because HUD could
@@ -284,32 +282,32 @@ class fpdb(QMainWindow):
             self.config.save()
             self.reload_config()
 
-    def dia_maintain_dbs(self, widget, data=None):
-        if len(self.tab_names) == 1:
-            if self.obtain_global_lock("dia_maintain_dbs"):  # returns true if successful
-                # only main tab has been opened, open dialog
-                dia = gtk.Dialog(("Maintain Databases"),
-                                 self.window,
-                                 gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                                 (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
-                                  gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
-                dia.set_default_size(700, 320)
+    # def dia_maintain_dbs(self, widget, data=None):
+    #     if len(self.tab_names) == 1:
+    #         if self.obtain_global_lock("dia_maintain_dbs"):  # returns true if successful
+    #             # only main tab has been opened, open dialog
+    #             dia = gtk.Dialog(("Maintain Databases"),
+    #                              self.window,
+    #                              gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+    #                              (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
+    #                               gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
+    #             dia.set_default_size(700, 320)
 
-                prefs = GuiDatabase.GuiDatabase(self.config, self.window, dia)
-                response = dia.run()
-                if response == gtk.RESPONSE_ACCEPT:
-                    log.info(('saving updated db data'))
-                    # save updated config
-                    self.config.save()
-                    self.load_profile()
-                    #for name in self.config.supported_databases:  # db_ip/db_user/db_pass/db_server
-                    #    log.debug('fpdb: name,desc=' + name + ',' + self.config.supported_databases[name].db_desc)
+    #             prefs = GuiDatabase.GuiDatabase(self.config, self.window, dia)
+    #             response = dia.run()
+    #             if response == gtk.RESPONSE_ACCEPT:
+    #                 log.info(('saving updated db data'))
+    #                 # save updated config
+    #                 self.config.save()
+    #                 self.load_profile()
+    #                 #for name in self.config.supported_databases:  # db_ip/db_user/db_pass/db_server
+    #                 #    log.debug('fpdb: name,desc=' + name + ',' + self.config.supported_databases[name].db_desc)
 
-                self.release_global_lock()
+    #             self.release_global_lock()
 
-            dia.destroy()
-        else:
-            self.warning_box(("Cannot open Database Maintenance window because other windows have been opened. Re-start fpdb to use this option."))
+    #         dia.destroy()
+    #     else:
+    #         self.warning_box(("Cannot open Database Maintenance window because other windows have been opened. Re-start fpdb to use this option."))
 
     def dia_database_stats(self, widget, data=None):
         self.warning_box(string=("Number of Hands:") + " " + str(self.db.getHandCount()) +
@@ -318,61 +316,61 @@ class fpdb(QMainWindow):
                     diatitle=("Database Statistics"))
     #end def dia_database_stats
 
-    def dia_hud_preferences(self, widget, data=None):
-        """Opens dialog to set parameters (game category, row count, column count) for HUD preferences"""
-        #Note: No point in working on this until the new HUD configuration system is in place
-        self.hud_preferences_rows = None
-        self.hud_preferences_columns = None
-        self.hud_preferences_game = None
+    # def dia_hud_preferences(self, widget, data=None):
+    #     """Opens dialog to set parameters (game category, row count, column count) for HUD preferences"""
+    #     #Note: No point in working on this until the new HUD configuration system is in place
+    #     self.hud_preferences_rows = None
+    #     self.hud_preferences_columns = None
+    #     self.hud_preferences_game = None
 
-        diaSelections = gtk.Dialog(("HUD Preferences - choose category"),
-                                 self.window,
-                                 gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                                 (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
-                                  gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT))
+    #     diaSelections = gtk.Dialog(("HUD Preferences - choose category"),
+    #                              self.window,
+    #                              gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+    #                              (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+    #                               gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT))
 
-        label = QLabel(("Note that this does not load existing settings, but overwrites them (if you click save)."))
-        diaSelections.vbox.add(label)
-        label.show()
+    #     label = QLabel(("Note that this does not load existing settings, but overwrites them (if you click save)."))
+    #     diaSelections.vbox.add(label)
+    #     label.show()
 
-        label = QLabel(("Please select the game category for which you want to configure HUD stats:"))
-        diaSelections.vbox.add(label)
-        label.show()
+    #     label = QLabel(("Please select the game category for which you want to configure HUD stats:"))
+    #     diaSelections.vbox.add(label)
+    #     label.show()
 
-        comboGame = gtk.combo_box_new_text()
-        comboGame.connect("changed", self.hud_preferences_combo_selection)
-        diaSelections.vbox.add(comboGame)
-        games = self.config.get_stat_sets()
-        for game in games:
-            comboGame.append_text(game)
-        comboGame.set_active(0)
-        comboGame.show()
+    #     comboGame = gtk.combo_box_new_text()
+    #     comboGame.connect("changed", self.hud_preferences_combo_selection)
+    #     diaSelections.vbox.add(comboGame)
+    #     games = self.config.get_stat_sets()
+    #     for game in games:
+    #         comboGame.append_text(game)
+    #     comboGame.set_active(0)
+    #     comboGame.show()
 
-        comboRows = gtk.combo_box_new_text()
-        comboRows.connect("changed", self.hud_preferences_combo_selection)
-        diaSelections.vbox.add(comboRows)
-        for i in range(1, 8):
-            comboRows.append_text(str(i) + " rows")
-        comboRows.set_active(0)
-        comboRows.show()
+    #     comboRows = gtk.combo_box_new_text()
+    #     comboRows.connect("changed", self.hud_preferences_combo_selection)
+    #     diaSelections.vbox.add(comboRows)
+    #     for i in range(1, 8):
+    #         comboRows.append_text(str(i) + " rows")
+    #     comboRows.set_active(0)
+    #     comboRows.show()
 
-        comboColumns = gtk.combo_box_new_text()
-        comboColumns.connect("changed", self.hud_preferences_combo_selection)
-        diaSelections.vbox.add(comboColumns)
-        for i in range(1, 8):
-            comboColumns.append_text(str(i) + " columns")
-        comboColumns.set_active(0)
-        comboColumns.show()
+    #     comboColumns = gtk.combo_box_new_text()
+    #     comboColumns.connect("changed", self.hud_preferences_combo_selection)
+    #     diaSelections.vbox.add(comboColumns)
+    #     for i in range(1, 8):
+    #         comboColumns.append_text(str(i) + " columns")
+    #     comboColumns.set_active(0)
+    #     comboColumns.show()
 
-        self.load_profile()
-        response = diaSelections.run()
-        diaSelections.destroy()
+    #     self.load_profile()
+    #     response = diaSelections.run()
+    #     diaSelections.destroy()
 
-        if (response == gtk.RESPONSE_ACCEPT and
-            self.hud_preferences_rows != None and
-            self.hud_preferences_columns != None and
-            self.hud_preferences_game != None):
-            self.dia_hud_preferences_table()
+    #     if (response == gtk.RESPONSE_ACCEPT and
+    #         self.hud_preferences_rows != None and
+    #         self.hud_preferences_columns != None and
+    #         self.hud_preferences_game != None):
+    #         self.dia_hud_preferences_table()
     #end def dia_hud_preferences
 
     def hud_preferences_combo_selection(self, widget):
@@ -462,24 +460,24 @@ class fpdb(QMainWindow):
             self.storeNewHudStatConfig(statDict)
     #end def dia_hud_preferences_table
 
-    def storeNewHudStatConfig(self, stat_dict):
-        """stores selections made in dia_hud_preferences_table"""
-        self.obtain_global_lock("dia_hud_preferences")
-        statTable = []
-        for row in self.hud_preferences_table_contents:
-            newRow = []
-            for column in row:
-                new_field = column.get_active_text()
-                for attr in stat_dict: #very inefficient, but who cares
-                    if new_field == stat_dict[attr]:
-                        newRow.append(attr)
-                        break
-            statTable.append(newRow)
+    # def storeNewHudStatConfig(self, stat_dict):
+    #     """stores selections made in dia_hud_preferences_table"""
+    #     self.obtain_global_lock("dia_hud_preferences")
+    #     statTable = []
+    #     for row in self.hud_preferences_table_contents:
+    #         newRow = []
+    #         for column in row:
+    #             new_field = column.get_active_text()
+    #             for attr in stat_dict: #very inefficient, but who cares
+    #                 if new_field == stat_dict[attr]:
+    #                     newRow.append(attr)
+    #                     break
+    #         statTable.append(newRow)
 
-        self.config.editStats(self.hud_preferences_game, statTable)
-        self.config.save()  # TODO: make it not store in horrible formatting
-        self.reload_config(None)
-        self.release_global_lock()
+    #     self.config.editStats(self.hud_preferences_game, statTable)
+    #     self.config.save()  # TODO: make it not store in horrible formatting
+    #     self.reload_config(None)
+    #     self.release_global_lock()
     #end def storeNewHudStatConfig
 
     def dia_import_filters(self, checkState):
@@ -752,19 +750,19 @@ class fpdb(QMainWindow):
             if detector.sitestatusdict[site_name]['tspath']:
                 entry_summary_path.setText(detector.sitestatusdict[site_name]['tspath'])
     
-    def reload_config(self):
-        if len(self.nb_tab_names) == 1:
-            # only main tab open, reload profile
-            self.load_profile()
-            self.warning_box(("Configuration settings have been updated, Fpdb needs to be restarted now")+"\n\n"+("Click OK to close Fpdb"))
-            sys.exit()
-        else:
-            self.warning_box(("Updated preferences have not been loaded because windows are open.")+" "+("Re-start fpdb to load them."))
+    # def reload_config(self):
+    #     if len(self.nb_tab_names) == 1:
+    #         # only main tab open, reload profile
+    #         self.load_profile()
+    #         self.warning_box(("Configuration settings have been updated, Fpdb needs to be restarted now")+"\n\n"+("Click OK to close Fpdb"))
+    #         sys.exit()
+    #     else:
+    #         self.warning_box(("Updated preferences have not been loaded because windows are open.")+" "+("Re-start fpdb to load them."))
     
-    def addLogText(self, text):
-        end_iter = self.logbuffer.get_end_iter()
-        self.logbuffer.insert(end_iter, text)
-        self.logview.scroll_to_mark(self.logbuffer.get_insert(), 0)
+    # def addLogText(self, text):
+    #     end_iter = self.logbuffer.get_end_iter()
+    #     self.logbuffer.insert(end_iter, text)
+    #     self.logview.scroll_to_mark(self.logbuffer.get_insert(), 0)
 
     def process_close_messages(self):
         # check for close messages
@@ -797,20 +795,20 @@ class fpdb(QMainWindow):
         d.exec_()
         return
 
-    def __get_dates(self):
-        t1 = self.h_start_date.get_text()
-        if t1 == '':
-            t1 = '1970-01-01'
-        t2 = self.start_date.get_text()
-        if t2 == '':
-            t2 = '1970-01-01'
-        return (t1, t2)
+    # def __get_dates(self):
+    #     t1 = self.h_start_date.get_text()
+    #     if t1 == '':
+    #         t1 = '1970-01-01'
+    #     t2 = self.start_date.get_text()
+    #     if t2 == '':
+    #         t2 = '1970-01-01'
+    #     return (t1, t2)
 
-    def __get_date(self, widget, calendar, entry, win):
-        newDate = calendar.selectedDate()
-        entry.setDate(newDate)
+    # def __get_date(self, widget, calendar, entry, win):
+    #     newDate = calendar.selectedDate()
+    #     entry.setDate(newDate)
 
-        win.accept()
+    #     win.accept()
 
     def createMenuBar(self):
         mb = self.menuBar()
@@ -1023,12 +1021,12 @@ class fpdb(QMainWindow):
         self.threads.append(new_import_thread)
         self.add_and_display_tab(new_import_thread, ("Bulk Import"))
 
-    def tab_tourney_import(self, widget, data=None):
-        """opens a tab for bulk importing tournament summaries"""
-        new_import_thread = GuiTourneyImport.GuiTourneyImport(self.settings, self.config, self.sql, self.window)
-        self.threads.append(new_import_thread)
-        bulk_tab=new_import_thread.get_vbox()
-        self.add_and_display_tab(bulk_tab, ("Tournament Results Import"))
+    # def tab_tourney_import(self, widget, data=None):
+    #     """opens a tab for bulk importing tournament summaries"""
+    #     new_import_thread = GuiTourneyImport.GuiTourneyImport(self.settings, self.config, self.sql, self.window)
+    #     self.threads.append(new_import_thread)
+    #     bulk_tab=new_import_thread.get_vbox()
+    #     self.add_and_display_tab(bulk_tab, ("Tournament Results Import"))
 
     def tab_imap_import(self, widget, data=None):
         new_thread = GuiImapFetcher.GuiImapFetcher(self.config, self.db, self.sql, self.window)
@@ -1222,71 +1220,71 @@ You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt an
         if options.autoimport:
             self.tab_auto_import(None)
             
-    def addImageToTrayMenu(self, image, event=None):
-        menuItem = gtk.ImageMenuItem(image)
-        if event is not None:
-            menuItem.connect('activate', event)
-        self.statusMenu.append(menuItem)
-        menuItem.show()
-        return menuItem
+    # def addImageToTrayMenu(self, image, event=None):
+    #     menuItem = gtk.ImageMenuItem(image)
+    #     if event is not None:
+    #         menuItem.connect('activate', event)
+    #     self.statusMenu.append(menuItem)
+    #     menuItem.show()
+    #     return menuItem
         
-    def addLabelToTrayMenu(self, label, event=None):
-        menuItem = gtk.MenuItem(label)
-        if event is not None:
-            menuItem.connect('activate', event)
-        self.statusMenu.append(menuItem)
-        menuItem.show()
-        return menuItem
+    # def addLabelToTrayMenu(self, label, event=None):
+    #     menuItem = gtk.MenuItem(label)
+    #     if event is not None:
+    #         menuItem.connect('activate', event)
+    #     self.statusMenu.append(menuItem)
+    #     menuItem.show()
+    #     return menuItem
     
-    def removeFromTrayMenu(self, menuItem):
-        menuItem.destroy()
-        menuItem = None
+    # def removeFromTrayMenu(self, menuItem):
+    #     menuItem.destroy()
+    #     menuItem = None
 
-    def __iconify(self):
-        self.visible = False
-        self.window.set_skip_taskbar_hint(True)
-        self.window.set_skip_pager_hint(True)
+    # def __iconify(self):
+    #     self.visible = False
+    #     self.window.set_skip_taskbar_hint(True)
+    #     self.window.set_skip_pager_hint(True)
 
-    def __deiconify(self):
-        self.visible = True
-        self.window.set_skip_taskbar_hint(False)
-        self.window.set_skip_pager_hint(False)
+    # def __deiconify(self):
+    #     self.visible = True
+    #     self.window.set_skip_taskbar_hint(False)
+    #     self.window.set_skip_pager_hint(False)
 
-    def window_state_event_cb(self, window, event):
-        # Deal with iconification first
-        if event.changed_mask & gtk.gdk.WINDOW_STATE_ICONIFIED:
-            if event.new_window_state & gtk.gdk.WINDOW_STATE_ICONIFIED:
-                self.__iconify()
-            else:
-                self.__deiconify()
-            if not event.new_window_state & gtk.gdk.WINDOW_STATE_WITHDRAWN:
-                return True
-        # And then the tray icon click
-        if event.new_window_state & gtk.gdk.WINDOW_STATE_WITHDRAWN:
-            self.__iconify()
-        else:
-            self.__deiconify()
-        # Tell GTK not to propagate this signal any further
-        return True
+    # def window_state_event_cb(self, window, event):
+    #     # Deal with iconification first
+    #     if event.changed_mask & gtk.gdk.WINDOW_STATE_ICONIFIED:
+    #         if event.new_window_state & gtk.gdk.WINDOW_STATE_ICONIFIED:
+    #             self.__iconify()
+    #         else:
+    #             self.__deiconify()
+    #         if not event.new_window_state & gtk.gdk.WINDOW_STATE_WITHDRAWN:
+    #             return True
+    #     # And then the tray icon click
+    #     if event.new_window_state & gtk.gdk.WINDOW_STATE_WITHDRAWN:
+    #         self.__iconify()
+    #     else:
+    #         self.__deiconify()
+    #     # Tell GTK not to propagate this signal any further
+    #     return True
 
-    def statusicon_menu(self, widget, button, time, data=None):
-        # we don't need to pass data here, since we do keep track of most all
-        # our variables .. the example code that i looked at for this
-        # didn't use any long scope variables.. which might be an alright
-        # idea too sometime
-        if button == 3:
-            if data:
-                data.show_all()
-                data.popup(None, None, None, 3, time)
-        pass
+    # def statusicon_menu(self, widget, button, time, data=None):
+    #     # we don't need to pass data here, since we do keep track of most all
+    #     # our variables .. the example code that i looked at for this
+    #     # didn't use any long scope variables.. which might be an alright
+    #     # idea too sometime
+    #     if button == 3:
+    #         if data:
+    #             data.show_all()
+    #             data.popup(None, None, None, 3, time)
+    #     pass
 
-    def statusicon_activate(self, widget, data=None):
-        # Let's allow the tray icon to toggle window visibility, the way
-        # most other apps work
-        if self.visible:
-            self.window.hide()
-        else:
-            self.window.present()
+    # def statusicon_activate(self, widget, data=None):
+    #     # Let's allow the tray icon to toggle window visibility, the way
+    #     # most other apps work
+    #     if self.visible:
+    #         self.window.hide()
+    #     else:
+    #         self.window.present()
 
     def info_box(self, str1, str2):
         diapath = QMessageBox(self)
