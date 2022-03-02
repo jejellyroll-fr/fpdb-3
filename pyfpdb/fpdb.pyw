@@ -830,11 +830,11 @@ class fpdb(QMainWindow):
             return action
 
         configMenu.addAction(makeAction(('Site Settings'), self.dia_site_preferences))
-        configMenu.addAction(makeAction(('Preferences'), self.dia_advanced_preferences, tip='Edit your preferences'))
+        configMenu.addAction(makeAction(('Adv Preferences'), self.dia_advanced_preferences, tip='Edit your preferences'))
         #configMenu.addAction(makeAction(('HUD Stats Settings'), self.dia_hud_preferences))
         configMenu.addAction(makeAction('Import filters', self.dia_import_filters))
         configMenu.addSeparator()
-        configMenu.addAction(makeAction(('Quit'), self.quit, 'Ctrl+Q', 'Quit the Program'))
+        configMenu.addAction(makeAction(('Close Fpdb'), self.quit, 'Ctrl+Q', 'Quit the Program'))
 
         importMenu.addAction(makeAction(('Bulk Import'), self.tab_bulk_import, 'Ctrl+B'))
         #importMenu.addAction(makeAction(('_Import through eMail/IMAP'), self.tab_imap_import))
@@ -861,7 +861,7 @@ class fpdb(QMainWindow):
         helpMenu.addAction(makeAction(('Log Messages'), self.dia_logs, 'Log and Debug Messages'))
         helpMenu.addAction(makeAction(('Help Tab'), self.tab_main_help))
         helpMenu.addSeparator()
-        helpMenu.addAction(makeAction(('About, License, Copying'), self.dia_about, 'About the program'))
+        helpMenu.addAction(makeAction(('Infos'), self.dia_about, 'About the program'))
 
     def load_profile(self, create_db=False):
         """Loads profile from the provided path name."""
