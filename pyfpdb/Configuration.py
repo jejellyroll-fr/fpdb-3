@@ -111,18 +111,18 @@ elif sysPlatform == 'Windows':
 else:
     OS_FAMILY = False
 
-GRAPHICS_PATH = os.path.join(FPDB_ROOT_PATH, u"gfx")
-PYFPDB_PATH = os.path.join(FPDB_ROOT_PATH, u"pyfpdb")
+GRAPHICS_PATH = os.path.join(FPDB_ROOT_PATH, "gfx")
+PYFPDB_PATH = os.path.join(FPDB_ROOT_PATH, "pyfpdb")
 
 if OS_FAMILY in ['XP', 'Win7']:
     APPDATA_PATH = winpaths_appdata
-    CONFIG_PATH = os.path.join(APPDATA_PATH, u"fpdb")
+    CONFIG_PATH = os.path.join(APPDATA_PATH, "fpdb")
 elif OS_FAMILY == 'Mac':
     APPDATA_PATH = os.getenv("HOME")
-    CONFIG_PATH = os.path.join(APPDATA_PATH, u".fpdb")
+    CONFIG_PATH = os.path.join(APPDATA_PATH, ".fpdb")
 elif OS_FAMILY == 'Linux':
     APPDATA_PATH = os.path.expanduser(u"~")
-    CONFIG_PATH = os.path.join(APPDATA_PATH, u".fpdb")
+    CONFIG_PATH = os.path.join(APPDATA_PATH, ".fpdb")
 else:
     APPDATA_PATH = False
     CONFIG_PATH = False
@@ -225,9 +225,9 @@ def get_config(file_name, fallback = True):
     return (config_path,example_copy,example_path)
 
 def set_logfile(file_name):
-    (conf_file,copied,example_file) = get_config(u"logging.conf", fallback = False)
+    (conf_file,copied,example_file) = get_config("logging.conf", fallback = False)
 
-    log_dir = os.path.join(CONFIG_PATH, u'log')
+    log_dir = os.path.join(CONFIG_PATH, 'log')
     check_dir(log_dir)
     log_file = os.path.join(log_dir, file_name)
 
@@ -723,33 +723,33 @@ class GUICashStats(list):
     def get_defaults(self):
         """A list of defaults to be called, should there be no entry in config"""
         # SQL column name, display title, display all, display positional, format, type, alignment
-        defaults = [   [u'game', u'Game', True, True, u'%s', u'str', 0.0],       
-            [u'hand', u'Hand', False, False, u'%s', u'str', 0.0],
-            [u'plposition', u'Posn', False, False, u'%s', u'str', 1.0],
-            [u'pname', u'Name', False, False, u'%s', u'str', 0.0],
-            [u'n', u'Hds', True, True, u'%1.0f', u'str', 1.0],
-            [u'avgseats', u'Seats', False, False, u'%3.1f', u'str', 1.0],
-            [u'vpip', u'VPIP', True, True, u'%3.1f', u'str', 1.0],
-            [u'pfr', u'PFR', True, True, u'%3.1f', u'str', 1.0],
-            [u'pf3', u'PF3', True, True, u'%3.1f', u'str', 1.0],
-            [u'aggfac', u'AggFac', True, True, u'%2.2f', u'str', 1.0],
-            [u'aggfrq', u'AggFreq', True, True, u'%3.1f', u'str', 1.0],
-            [u'conbet', u'ContBet', True, True, u'%3.1f', u'str', 1.0],
-            [u'rfi', u'RFI', True, True, u'%3.1f', u'str', 1.0],
-            [u'steals', u'Steals', True, True, u'%3.1f', u'str', 1.0],
-            [u'saw_f', u'Saw_F', True, True, u'%3.1f', u'str', 1.0],
-            [u'sawsd', u'SawSD', True, True, u'%3.1f', u'str', 1.0],
-            [u'wtsdwsf', u'WtSDwsF', True, True, u'%3.1f', u'str', 1.0],
-            [u'wmsd', u'W$SD', True, True, u'%3.1f', u'str', 1.0],
-            [u'flafq', u'FlAFq', True, True, u'%3.1f', u'str', 1.0],
-            [u'tuafq', u'TuAFq', True, True, u'%3.1f', u'str', 1.0],
-            [u'rvafq', u'RvAFq', True, True, u'%3.1f', u'str', 1.0],
-            [u'pofafq', u'PoFAFq', False, False, u'%3.1f', u'str', 1.0],
-            [u'net', u'Net($)', True, True, u'%6.2f', u'cash', 1.0],
-            [u'bbper100', u'bb/100', True, True, u'%4.2f', u'str', 1.0],
-            [u'rake', u'Rake($)', True, True, u'%6.2f', u'cash', 1.0],
-            [u'bb100xr', u'bbxr/100', True, True, u'%4.2f', u'str', 1.0],
-            [u'stddev', u'Standard Deviation', True, True, u'%5.2f', u'str', 1.0]
+        defaults = [   ['game', 'Game', True, True, '%s', 'str', 0.0],       
+            ['hand', 'Hand', False, False, '%s', 'str', 0.0],
+            ['plposition', 'Posn', False, False, '%s', 'str', 1.0],
+            ['pname', 'Name', False, False, '%s', 'str', 0.0],
+            ['n', 'Hds', True, True, '%1.0f', 'str', 1.0],
+            ['avgseats', 'Seats', False, False, '%3.1f', 'str', 1.0],
+            ['vpip', 'VPIP', True, True, '%3.1f', 'str', 1.0],
+            ['pfr', 'PFR', True, True, '%3.1f', 'str', 1.0],
+            ['pf3', 'PF3', True, True, '%3.1f', 'str', 1.0],
+            ['aggfac', 'AggFac', True, True, '%2.2f', 'str', 1.0],
+            ['aggfrq', 'AggFreq', True, True, '%3.1f', 'str', 1.0],
+            ['conbet', 'ContBet', True, True, '%3.1f', 'str', 1.0],
+            ['rfi', 'RFI', True, True, '%3.1f', 'str', 1.0],
+            ['steals', 'Steals', True, True, '%3.1f', 'str', 1.0],
+            ['saw_f', 'Saw_F', True, True, '%3.1f', 'str', 1.0],
+            ['sawsd', 'SawSD', True, True, '%3.1f', 'str', 1.0],
+            ['wtsdwsf', 'WtSDwsF', True, True, '%3.1f', 'str', 1.0],
+            ['wmsd', 'W$SD', True, True, '%3.1f', 'str', 1.0],
+            ['flafq', 'FlAFq', True, True, '%3.1f', 'str', 1.0],
+            ['tuafq', 'TuAFq', True, True, '%3.1f', 'str', 1.0],
+            ['rvafq', 'RvAFq', True, True, '%3.1f', 'str', 1.0],
+            ['pofafq', 'PoFAFq', False, False, '%3.1f', 'str', 1.0],
+            ['net', 'Net($)', True, True, '%6.2f', 'cash', 1.0],
+            ['bbper100', 'bb/100', True, True, '%4.2f', 'str', 1.0],
+            ['rake', 'Rake($)', True, True, '%6.2f', 'cash', 1.0],
+            ['bb100xr', 'bbxr/100', True, True, '%4.2f', 'str', 1.0],
+            ['stddev', 'Standard Deviation', True, True, '%5.2f', 'str', 1.0]
             ]
         for col in defaults:
             self.append (col)
@@ -831,8 +831,8 @@ class Config(object):
         if custom_log_dir and os.path.exists(custom_log_dir):
             self.dir_log = str(custom_log_dir, "utf8")
         else:
-            self.dir_log = os.path.join(CONFIG_PATH, u'log')
-        self.log_file = os.path.join(self.dir_log, u'fpdb-log.txt')
+            self.dir_log = os.path.join(CONFIG_PATH, 'log')
+        self.log_file = os.path.join(self.dir_log, 'fpdb-log.txt')
         log = logging.getLogger("config")
 
 #    "file" is a path to an xml file with the fpdb/HUD configuration
@@ -848,7 +848,7 @@ class Config(object):
                 file = None
 
         self.example_copy,example_file = True,None
-        if file is None: (file,self.example_copy,example_file) = get_config(u"HUD_config.xml", True)
+        if file is None: (file,self.example_copy,example_file) = get_config("HUD_config.xml", True)
 
         self.file = file
                     
@@ -981,7 +981,7 @@ class Config(object):
                 self.set_db_parameters(db_name = 'fpdb', db_ip = df_parms['db-host'],
                                      db_user = df_parms['db-user'],
                                      db_pass = df_parms['db-password'])
-                self.save(file=os.path.join(CONFIG_PATH, u"HUD_config.xml"))
+                self.save(file=os.path.join(CONFIG_PATH, "HUD_config.xml"))
         
         if doc.getElementsByTagName("raw_hands") == []:
             self.raw_hands = RawHands()
@@ -1032,7 +1032,7 @@ class Config(object):
 
     def find_default_conf(self):
         if CONFIG_PATH:
-            config_file = os.path.join(CONFIG_PATH, u'default.conf')
+            config_file = os.path.join(CONFIG_PATH, 'default.conf')
         else: config_file = False
 
         if config_file and os.path.exists(config_file):
@@ -1409,10 +1409,10 @@ class Config(object):
         except: hui['card_wd']        = 30
         
         try:    hui['deck_type']      = str(self.ui.deck_type)
-        except: hui['deck_type']        = u'colour'
+        except: hui['deck_type']        = 'colour'
         
         try:    hui['card_back']      = str(self.ui.card_back)
-        except: hui['card_back']        = u'back04'
+        except: hui['card_back']        = 'back04'
                 
         try:    hui['stat_range']        = self.ui.stat_range
         except: hui['stat_range']        = 'A'  # default is show stats for All-time, also S(session) and T(ime)
@@ -1717,7 +1717,7 @@ class Config(object):
         return( self.gui_cash_stats )
 
 if __name__== "__main__":
-    set_logfile(u"fpdb-log.txt")
+    set_logfile("fpdb-log.txt")
     c = Config()
     
     print("\n----------- GENERAL -----------")
