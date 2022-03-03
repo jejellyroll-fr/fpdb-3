@@ -37,7 +37,8 @@ class OddsCalc:
         s = BeautifulSoup(html_doc, 'html.parser').table
         h, [_, *d] = [i.text for i in s.tr.find_all('th')], [[i.text for i in b.find_all('td')] for b in s.find_all('tr')]
         result = [dict(zip(h, i)) for i in d]
-        print(result)
-        
-odd1 = OddsCalc('oh','As8s4d9d','AK','89','')        
-odd1.calcBaseHoldem()
+        #print(result)
+        return result
+
+# odd1 = OddsCalc('oh','As8s4d9d','AK','89','')        
+# odd1.calcBaseHoldem()

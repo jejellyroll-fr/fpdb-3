@@ -18,6 +18,7 @@
 
 
 import L10n
+
 _ = L10n.init_translation()
 
 import os
@@ -76,6 +77,7 @@ import GuiGraphViewer
 import GuiTourneyGraphViewer
 import GuiSessionViewer
 import GuiHandViewer
+import GuiOddsCalc
 try:
     import GuiStove
 except:
@@ -818,6 +820,7 @@ class fpdb(QMainWindow):
         cashMenu = mb.addMenu(('Cash'))
         tournamentMenu = mb.addMenu(('Tournament'))
         maintenanceMenu = mb.addMenu(('Maintenance'))
+        toolsMenu = mb.addMenu(('Tools'))
         helpMenu = mb.addMenu(('Help'))
         # Create actions
         def makeAction(name, callback, shortcut=None, tip=None):
@@ -857,6 +860,8 @@ class fpdb(QMainWindow):
         maintenanceMenu.addAction(makeAction(('Rebuild HUD Cache'), self.dia_recreate_hudcache))
         maintenanceMenu.addAction(makeAction(('Rebuild DB Indexes'), self.dia_rebuild_indexes))
         maintenanceMenu.addAction(makeAction(('Dump Database to Textfile (takes ALOT of time)'), self.dia_dump_db))
+        
+        toolsMenu.addAction(makeAction(('Odds Calc'), self.tab_odds_calc))
 
         helpMenu.addAction(makeAction(('Log Messages'), self.dia_logs, 'Log and Debug Messages'))
         helpMenu.addAction(makeAction(('Help Tab'), self.tab_main_help))
@@ -1020,6 +1025,12 @@ class fpdb(QMainWindow):
         new_import_thread = GuiBulkImport.GuiBulkImport(self.settings, self.config, self.sql, self)
         self.threads.append(new_import_thread)
         self.add_and_display_tab(new_import_thread, ("Bulk Import"))
+
+    def tab_odds_calc(self, widget, data=None):
+        """opens a tab for bulk importing"""
+        new_import_thread = GuiOddsCalc.GuiOddsCalc(self)
+        self.threads.append(new_import_thread)
+        self.add_and_display_tab(new_import_thread, ("Odds Calc"))
 
     # def tab_tourney_import(self, widget, data=None):
     #     """opens a tab for bulk importing tournament summaries"""
