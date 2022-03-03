@@ -29,7 +29,7 @@ if os.name == 'nt':
     import win32api
     import win32con
 
-print ("Python " + sys.version[0:3] + '...')
+print (("Python " + sys.version[0:3] + '...'))
 
 import codecs
 import traceback
@@ -384,18 +384,18 @@ class fpdb(QMainWindow):
             self.hud_preferences_game = result
     #end def hud_preferences_combo_selection
 
-    def dia_hud_preferences_table(self):
-        """shows dialogue with Table of ComboBoxes to allow choosing of HUD stats"""
-        #TODO: show explanation of what each stat means
-        diaHudTable = gtk.Dialog(("HUD Preferences - please choose your stats"),
-                                 self.window,
-                                 gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                                 (gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT,
-                                  gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT))
+    # def dia_hud_preferences_table(self):
+    #     """shows dialogue with Table of ComboBoxes to allow choosing of HUD stats"""
+    #     #TODO: show explanation of what each stat means
+    #     diaHudTable = gtk.Dialog(("HUD Preferences - please choose your stats"),
+    #                              self.window,
+    #                              gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+    #                              (gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT,
+    #                               gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT))
 
-        label = QLabel(("Please choose the stats you wish to use in the below table."))
-        diaHudTable.vbox.add(label)
-        label.show()
+    #     label = QLabel(("Please choose the stats you wish to use in the below table."))
+    #     diaHudTable.vbox.add(label)
+    #     label.show()
 
         #label = QLabel(("Note that you may not select any stat more than once or it will crash."))
         #diaHudTable.vbox.add(label)
@@ -405,59 +405,59 @@ class fpdb(QMainWindow):
         #diaHudTable.vbox.add(label)
         #label.show()
 
-        label = QLabel(("To configure things like colouring you will still have to use the Advanced Preferences dialogue or manually edit your HUD_config.xml."))
-        diaHudTable.vbox.add(label)
-        label.show()
+        # label = QLabel(("To configure things like colouring you will still have to use the Advanced Preferences dialogue or manually edit your HUD_config.xml."))
+        # diaHudTable.vbox.add(label)
+        # label.show()
 
-        self.hud_preferences_table_contents = []
-        table = gtk.Table(rows=self.hud_preferences_rows + 1, columns=self.hud_preferences_columns + 1, homogeneous=True)
+        # self.hud_preferences_table_contents = []
+        # table = gtk.Table(rows=self.hud_preferences_rows + 1, columns=self.hud_preferences_columns + 1, homogeneous=True)
 
-        statDict = Stats.get_valid_stats()
+        # statDict = Stats.get_valid_stats()
 
-        for rowNumber in range(self.hud_preferences_rows + 1):
-            newRow = []
-            for columnNumber in range(self.hud_preferences_columns + 1):
-                if rowNumber == 0:
-                    if columnNumber == 0:
-                        pass
-                    else:
-                        label = QLabel("column " + str(columnNumber))
-                        table.attach(child=label, left_attach=columnNumber,
-                                     right_attach=columnNumber + 1,
-                                     top_attach=rowNumber,
-                                     bottom_attach=rowNumber + 1)
-                        label.show()
-                elif columnNumber == 0:
-                    label = QLabel("row " + str(rowNumber))
-                    table.attach(child=label, left_attach=columnNumber,
-                                 right_attach=columnNumber + 1,
-                                 top_attach=rowNumber,
-                                 bottom_attach=rowNumber + 1)
-                    label.show()
-                else:
-                    comboBox = gtk.combo_box_new_text()
+        # for rowNumber in range(self.hud_preferences_rows + 1):
+        #     newRow = []
+        #     for columnNumber in range(self.hud_preferences_columns + 1):
+        #         if rowNumber == 0:
+        #             if columnNumber == 0:
+        #                 pass
+        #             else:
+        #                 label = QLabel("column " + str(columnNumber))
+        #                 table.attach(child=label, left_attach=columnNumber,
+        #                              right_attach=columnNumber + 1,
+        #                              top_attach=rowNumber,
+        #                              bottom_attach=rowNumber + 1)
+        #                 label.show()
+        #         elif columnNumber == 0:
+        #             label = QLabel("row " + str(rowNumber))
+        #             table.attach(child=label, left_attach=columnNumber,
+        #                          right_attach=columnNumber + 1,
+        #                          top_attach=rowNumber,
+        #                          bottom_attach=rowNumber + 1)
+        #             label.show()
+        #         else:
+        #             comboBox = gtk.combo_box_new_text()
 
-                    for stat in sorted(statDict.values()):
-                        comboBox.append_text(stat)
-                    comboBox.set_active(0)
+        #             for stat in sorted(statDict.values()):
+        #                 comboBox.append_text(stat)
+        #             comboBox.set_active(0)
 
-                    newRow.append(comboBox)
-                    table.attach(child=comboBox, left_attach=columnNumber,
-                                 right_attach=columnNumber + 1,
-                                 top_attach=rowNumber,
-                                 bottom_attach=rowNumber + 1)
+        #             newRow.append(comboBox)
+        #             table.attach(child=comboBox, left_attach=columnNumber,
+        #                          right_attach=columnNumber + 1,
+        #                          top_attach=rowNumber,
+        #                          bottom_attach=rowNumber + 1)
 
-                    comboBox.show()
-            if rowNumber != 0:
-                self.hud_preferences_table_contents.append(newRow)
-        diaHudTable.vbox.add(table)
-        table.show()
+        #             comboBox.show()
+        #     if rowNumber != 0:
+        #         self.hud_preferences_table_contents.append(newRow)
+        # diaHudTable.vbox.add(table)
+        # table.show()
 
-        response = diaHudTable.run()
-        diaHudTable.destroy()
+        # response = diaHudTable.run()
+        # diaHudTable.destroy()
 
-        if response == gtk.RESPONSE_ACCEPT:
-            self.storeNewHudStatConfig(statDict)
+        # if response == gtk.RESPONSE_ACCEPT:
+        #     self.storeNewHudStatConfig(statDict)
     #end def dia_hud_preferences_table
 
     # def storeNewHudStatConfig(self, stat_dict):
@@ -497,7 +497,7 @@ class fpdb(QMainWindow):
         btns.rejected.connect(dia.reject)
         if dia.exec_():
             filterGames = []
-            for game, cb in checkboxes.items():
+            for game, cb in list(checkboxes.items()):
                 if cb.isChecked():
                     filterGames.append(game)
             self.config.editImportFilters(",".join(filterGames))
@@ -750,14 +750,14 @@ class fpdb(QMainWindow):
             if detector.sitestatusdict[site_name]['tspath']:
                 entry_summary_path.setText(detector.sitestatusdict[site_name]['tspath'])
     
-    # def reload_config(self):
-    #     if len(self.nb_tab_names) == 1:
-    #         # only main tab open, reload profile
-    #         self.load_profile()
-    #         self.warning_box(("Configuration settings have been updated, Fpdb needs to be restarted now")+"\n\n"+("Click OK to close Fpdb"))
-    #         sys.exit()
-    #     else:
-    #         self.warning_box(("Updated preferences have not been loaded because windows are open.")+" "+("Re-start fpdb to load them."))
+    def reload_config(self):
+        if len(self.nb_tab_names) == 1:
+            # only main tab open, reload profile
+            self.load_profile()
+            self.warning_box(("Configuration settings have been updated, Fpdb needs to be restarted now")+"\n\n"+("Click OK to close Fpdb"))
+            sys.exit()
+        else:
+            self.warning_box(("Updated preferences have not been loaded because windows are open.")+" "+("Re-start fpdb to load them."))
     
     # def addLogText(self, text):
     #     end_iter = self.logbuffer.get_end_iter()
@@ -873,7 +873,7 @@ class fpdb(QMainWindow):
             sys.exit()
 
         log = logging.getLogger("fpdb")
-        print (("Logfile is %s") % os.path.join(self.config.dir_log, self.config.log_file))
+        print ((("Logfile is %s") % os.path.join(self.config.dir_log, self.config.log_file)))
         if self.config.example_copy or self.display_config_created_dialogue:
             self.info_box(("Config file"),
                           ("Config file has been created at %s.") % self.config.file + " "
@@ -930,7 +930,7 @@ class fpdb(QMainWindow):
             self.db = Database.Database(self.config, sql=self.sql)
             if self.db.get_backend_name() == 'SQLite':
                 # tell sqlite users where the db file is
-                print (("Connected to SQLite: %s") % self.db.db_path)
+                print ((("Connected to SQLite: %s") % self.db.db_path))
         except Exceptions.FpdbMySQLAccessDenied:
             err_msg = ("MySQL Server reports: Access denied. Are your permissions set correctly?")
         except Exceptions.FpdbMySQLNoDatabase:
@@ -968,10 +968,10 @@ class fpdb(QMainWindow):
     def obtain_global_lock(self, source):
         ret = self.lock.acquire(source=source)  # will return false if lock is already held
         if ret:
-            print (("Global lock taken by %s") % source)
+            print ((("Global lock taken by %s") % source))
             self.lockTakenBy=source
         else:
-            print (("Failed to get global lock, it is currently held by %s") % source)
+            print ((("Failed to get global lock, it is currently held by %s") % source))
         return ret
         # need to release it later:
         # self.lock.release()
@@ -1172,7 +1172,7 @@ You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt an
         self.load_profile(create_db=True)
         
         if self.config.install_method == 'app':
-            for site in self.config.supported_sites.values():
+            for site in list(self.config.supported_sites.values()):
                 if site.screen_name != "YOUR SCREEN NAME HERE":
                     break
             else: # No site has a screen name set
@@ -1187,8 +1187,8 @@ You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt an
         # setup error logging
         if not options.errorsToConsole:
             fileName = os.path.join(self.config.dir_log, 'fpdb-errors.txt')
-            print((("Note: error output is being diverted to %s.") % self.config.dir_log) + " " +
-                  ("Any major error will be reported there _only_."))
+            print(((("Note: error output is being diverted to %s.") % self.config.dir_log) + " " +
+                  ("Any major error will be reported there _only_.")))
             errorFile = codecs.open(fileName, 'w', 'utf-8')
             sys.stderr = errorFile
 
