@@ -221,7 +221,7 @@ if config.install_method == "exe":
 # finally, invoke fpdb
 #
 import os
-os.chdir(os.path.join(config.fpdb_root_path, u"pyfpdb"))
+os.chdir(os.path.join(config.fpdb_root_path, "pyfpdb"))
 # print('config', config.fpdb_root_path)
 # print(os.path.join(config.fpdb_root_path, u"pyfpdb"))
 # print (config.os_family)
