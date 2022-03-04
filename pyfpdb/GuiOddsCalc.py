@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit,QLabel, QPushButton, QFileDialog, QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit,QLabel, QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QComboBox
 
 import OddsCalc
 
@@ -12,7 +12,14 @@ class GuiOddsCalc(QWidget):
         self.setLayout(QVBoxLayout())
 
         self.QLgame = QLabel("Game")
-        self.QLEgame = QLineEdit()
+        self.QLEgame = QComboBox()
+        self.QLEgame.insertItem(1, 'he')
+        self.QLEgame.insertItem(2, 'oh')
+        self.QLEgame.insertItem(3, 'oh5')
+        self.QLEgame.insertItem(4, 'o85')
+        self.QLEgame.setMinimumWidth(300)
+        self.QLdeadcard = QLabel("Dead Card")
+        self.QLEdeadcard = QLineEdit()        
         self.QLboard = QLabel("Board")
         self.QLEboard = QLineEdit()
         self.QLhero = QLabel("Hero")
@@ -21,18 +28,46 @@ class GuiOddsCalc(QWidget):
         self.QLEvilain1 = QLineEdit()
         self.QLvilain2 = QLabel("Vilain2")
         self.QLEvilain2 = QLineEdit()
+        self.QLvilain3 = QLabel("Vilain3")
+        self.QLEvilain3 = QLineEdit()
+        self.QLvilain4 = QLabel("Vilain4")
+        self.QLEvilain4 = QLineEdit()
+        self.QLvilain5 = QLabel("Vilain5")
+        self.QLEvilain5 = QLineEdit()
+        
         hbox = QHBoxLayout()
         hbox.addWidget(self.QLgame)
         hbox.addWidget(self.QLEgame)
-        hbox.addWidget(self.QLboard)
-        hbox.addWidget(self.QLEboard)
-        hbox.addWidget(self.QLhero)
-        hbox.addWidget(self.QLEhero)
-        hbox.addWidget(self.QLvilain1)
-        hbox.addWidget(self.QLEvilain1)
-        hbox.addWidget(self.QLvilain2)
-        hbox.addWidget(self.QLEvilain2)
+        hbox.addWidget(self.QLdeadcard)
+        hbox.addWidget(self.QLEdeadcard)
+        self.QLEdeadcard.setEnabled(False)
+        if self.QLEgame.currentIndexChanged and self.QLEgame.currentIndex==1:
+            self.QLEdeadcard.setEnabled(True)
+        elif self.QLEgame.currentIndexChanged and self.QLEgame.currentIndex==2:
+            self.QLEdeadcard.setEnabled(False)
         self.layout().addLayout(hbox)
+
+        hbox2 = QHBoxLayout()
+        
+        hbox2.addWidget(self.QLboard)
+        hbox2.addWidget(self.QLEboard)
+        self.layout().addLayout(hbox2)
+        
+        hbox3 = QHBoxLayout()
+        hbox3.addWidget(self.QLhero)
+        hbox3.addWidget(self.QLEhero)
+        hbox3.addWidget(self.QLvilain1)
+        hbox3.addWidget(self.QLEvilain1)
+        hbox3.addWidget(self.QLvilain2)
+        hbox3.addWidget(self.QLEvilain2)
+        hbox3.addWidget(self.QLvilain3)
+        hbox3.addWidget(self.QLEvilain3)
+        hbox3.addWidget(self.QLvilain4)
+        hbox3.addWidget(self.QLEvilain4)
+        hbox3.addWidget(self.QLvilain5)
+        hbox3.addWidget(self.QLEvilain5)
+        self.layout().addLayout(hbox3)
+
 
         self.load_button = QPushButton(('Odds Calculate'))
         self.load_button.clicked.connect(self.load_result)
@@ -45,9 +80,9 @@ class GuiOddsCalc(QWidget):
 
 
     def load_result(self):
-        game = self.QLEgame.text()
+        game = self.QLEgame.currentText()
         print(game)
-        odd1 = OddsCalc.OddsCalc(str(game),'As8s4d9d','AK','89','') 
+        odd1 = OddsCalc.OddsCalc(str(game),'','As8s4d9d','AK','89','','','','') 
         
         result_brut = odd1.calcBaseHoldem()
         row_count = (len(result_brut))

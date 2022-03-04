@@ -18,18 +18,22 @@ from bs4 import BeautifulSoup
 #'h1' to h6 : 'hand' or range
 
 class OddsCalc:
-    def __init__(self, game, board, hero, vilain1, vilain2) -> None:
+    def __init__(self, game, dead, board, hero, vilain1, vilain2,vilain3,vilain4,vilain5) -> None:
   
         self.game = game
         self.board = board
+        self.dead = dead
         self.hero= hero
         self.vilain1 = vilain1
         self.vilain2 = vilain2
+        self.vilain3 = vilain3
+        self.vilain4 = vilain4
+        self.vilain5 = vilain5
        
 
     def calcBaseHoldem(self):
         url = 'http://www.propokertools.com/simulations/show?'
-        params = {'g': self.game, 's': 'generic', 'b': self.board ,'h1':  self.hero, 'h2': self.vilain1, 'h3': self.vilain2}
+        params = {'g': self.game, 's': 'generic','d': self.dead, 'b': self.board ,'h1':  self.hero, 'h2': self.vilain1, 'h3': self.vilain2,'h4':  self.vilain3, 'h5': self.vilain4, 'h5': self.vilain5}
         response = requests.post(url, params=params)
         response.status_code
         html_doc= response.text
