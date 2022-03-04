@@ -53,6 +53,7 @@ from PyQt5.QtWidgets import (QAction, QApplication, QCalendarWidget,
                              QTabWidget, QVBoxLayout)
 
 import interlocks
+from Exceptions import *
 
 # these imports not required in this module, imported here to report version in About dialog
 import numpy

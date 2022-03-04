@@ -567,7 +567,7 @@ class Importer(object):
             if self.caller: self.progressNotify()
             summaryTexts = self.readFile(obj, fpdbfile.path, fpdbfile.site.name)
             if summaryTexts is None:
-                log.error("Found: '%s' with 0 characters... skipping" % fpbdfile.path)
+                log.error("Found: '%s' with 0 characters... skipping" %fpbdfile .path)
                 return (0, 0, 0, 0, 1, time()) # File had 0 characters
             ####Lock Placeholder####
             for j, summaryText in enumerate(summaryTexts, start=1):

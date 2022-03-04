@@ -14,7 +14,6 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with this program. If not, see <http://www.gnu.org/licenses/>.
 #In the "official" distribution you can find the license in agpl-3.0.txt.
-
 from __future__ import print_function
 from __future__ import division
 from builtins import input
@@ -65,7 +64,12 @@ games = {              # base, category
            'fivedraw' : ('draw','holdem', 'h', {'DEAL':0, 'DRAWONE':1}, 'DRAWONE', [(0,5),(5,10)]),
              'badugi' : ('draw', None, 'l', {'DEAL':0, 'DRAWONE':1, 'DRAWTWO':2, 'DRAWTHREE':3}, 'DRAWTHREE', [(0,4),(5,9),(10,14),(15,19)]),
            '27_1draw' : ('draw','lowball27', 'r', {'DEAL':0, 'DRAWONE':1},'DRAWONE', [(0,5),(5,10)]),
-           'a5_3draw' : ('draw', 'lowball', 'l', {'DEAL':0, 'DRAWONE':1, 'DRAWTWO':2, 'DRAWTHREE':3}, 'DRAWTHREE', [(0,5),(5,10),(10,15),(15,20)])
+           'a5_3draw' : ('draw', 'lowball', 'l', {'DEAL':0, 'DRAWONE':1, 'DRAWTWO':2, 'DRAWTHREE':3}, 'DRAWTHREE', [(0,5),(5,10),(10,15),(15,20)]),
+           'a5_1draw' : ('draw', 'lowball', 'l', {'DEAL':0, 'DRAWONE':1},'DRAWONE', [(0,5),(5,10)]),
+            '27_razz' : ('stud', 'lowball27', 'l', {'THIRD': 0,'FOURTH': 1,'FIFTH': 2,'SIXTH': 3,'SEVENTH': 4}, 'SEVENTH', [(0,3),(0,4),(0,5),(0,6),(0,7)]), 
+            'badacey' : ('draw', None, 's', {'DEAL':0, 'DRAWONE':1, 'DRAWTWO':2, 'DRAWTHREE':3}, 'DRAWTHREE', [(0,5),(5,10),(10,15),(15,20)]),
+           'badeucey' : ('draw', None, 's', {'DEAL':0, 'DRAWONE':1, 'DRAWTWO':2, 'DRAWTHREE':3}, 'DRAWTHREE', [(0,5),(5,10),(10,15),(15,20)]),
+           'drawmaha' : ('draw', None, 's', {'DEAL':0, 'DRAWONE':1, 'DRAWTWO':2, 'DRAWTHREE':3}, 'DRAWTHREE', [(0,5),(5,10),(10,15),(15,20)]),
        }
 
 hands = {   'Nothing' : (1, None),
@@ -105,7 +109,7 @@ iter = {0: 50000,
 def decodeStartHandValue(game, value):
     if game in ('holdem', '6_holdem'):
         return twoStartCardString(value)
-    elif game == "razz":
+    elif game in ("razz", "27_razz"):
         return decodeRazzStartHand(value)
     else:
         return "xx"
@@ -116,7 +120,7 @@ def calcStartCards(hand, player):
         value1 = card_map.get(hcs[0][0])
         value2 = card_map.get(hcs[1][0])
         return twoStartCards(value1, hcs[0][1], value2, hcs[1][1])
-    elif hand.gametype['category'] == 'razz':
+    elif hand.gametype['category'] in ('razz', '27_razz'):
         idx = encodeRazzStartHand(hcs)
         return idx + 184
     else:
@@ -197,7 +201,7 @@ def twoStartCardString(card):
     ret = 'xx'
     if card > 0 and card < 170:
         s = ('2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A')
-        x = old_div((card-1), 13)
+        x = (card-1) / 13
         y = (card-1) - 13 * x
         if x == y:  ret = s[x] + s[y]
         elif x > y: ret = s[x] + s[y] + 's'

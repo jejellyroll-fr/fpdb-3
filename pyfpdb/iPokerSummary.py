@@ -28,7 +28,7 @@ from TourneySummary import *
 
 class iPokerSummary(TourneySummary):
     substitutions = {
-                     'LS'  : u"\$|€|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|",
+                     'LS'  : u"\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|",
                      'PLYR': r'(?P<PNAME>[^"]+)',
                      'NUM' : r'.,0-9',
                     }
@@ -83,7 +83,7 @@ class iPokerSummary(TourneySummary):
     re_TourNo = re.compile(r'\(\#(?P<TOURNO>\d+)\)', re.MULTILINE)
     re_TotalBuyin = re.compile(r"""(?P<BUYIN>(?P<BIAMT>[%(LS)s%(NUM)s]+)\s\+\s?(?P<BIRAKE>[%(LS)s%(NUM)s]+)?)""" % substitutions, re.MULTILINE|re.VERBOSE)
     re_DateTime1 = re.compile("""(?P<D>[0-9]{2})\-(?P<M>[a-zA-Z]{3})\-(?P<Y>[0-9]{4})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
-    re_DateTime2 = re.compile("""(?P<D>[0-9]{2})\/(?P<M>[0-9]{2})\/(?P<Y>[0-9]{4})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
+    re_DateTime2 = re.compile("""(?P<D>[0-9]{2})[\/\.](?P<M>[0-9]{2})[\/\.](?P<Y>[0-9]{4})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
     re_DateTime3 = re.compile("""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
     re_Place     = re.compile("\d+")
     re_FPP       = re.compile(r'Pts\s')
@@ -100,7 +100,7 @@ class iPokerSummary(TourneySummary):
         m = self.re_GameType.search(self.summaryText)
         if not m:
             tmp = self.summaryText[0:200]
-            log.error(("iPokerSummary.determineGameType: '%s'") % tmp)
+            log.error(_("iPokerSummary.determineGameType: '%s'") % tmp)
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -108,7 +108,7 @@ class iPokerSummary(TourneySummary):
 
         if 'SB' in mg and mg['SB'] != None:
             tmp = self.summaryText[0:200]
-            log.error(("iPokerSummary.parseSummary: Text does not appear to be a tournament '%s'") % tmp)
+            log.error(_("iPokerSummary.parseSummary: Text does not appear to be a tournament '%s'") % tmp)
             raise FpdbParseError
         else:
             tourney = True
@@ -133,16 +133,16 @@ class iPokerSummary(TourneySummary):
             try:
                 self.startTime = datetime.datetime.strptime(mg['DATETIME'], '%Y-%m-%d %H:%M:%S')
             except ValueError:
-                datestr = '%d/%m/%Y %H:%M:%S'
                 date_match = self.re_DateTime2.search(mg['DATETIME'])
                 if date_match != None:
+                    datestr = '%d/%m/%Y %H:%M:%S' if '/' in mg['DATETIME'] else '%d.%m.%Y %H:%M:%S'
                     if date_match.group('S') == None:
                         datestr = '%d/%m/%Y %H:%M'
                 else:
                     date_match1 = self.re_DateTime3.search(mg['DATETIME'])
                     datestr = '%Y/%m/%d %H:%M:%S'
                     if date_match1 == None:
-                        log.error(("iPokerSummary.parseSummary Could not read datetime"))
+                        log.error(_("iPokerSummary.parseSummary Could not read datetime"))
                         raise FpdbParseError
                     if date_match1.group('S') == None:
                         datestr = '%Y/%m/%d %H:%M'
@@ -204,11 +204,11 @@ class iPokerSummary(TourneySummary):
             else:
                 raise FpdbHandPartial(hid=self.tourNo)
             if self.tourNo is None:
-                log.error(("iPokerSummary.parseSummary: Could Not Parse tourNo"))
+                log.error(_("iPokerSummary.parseSummary: Could Not Parse tourNo"))
                 raise FpdbParseError
         else:
             tmp = self.summaryText[0:200]
-            log.error(("iPokerSummary.determineGameType: Text does not appear to be a tournament '%s'") % tmp)
+            log.error(_("iPokerSummary.determineGameType: Text does not appear to be a tournament '%s'") % tmp)
             raise FpdbParseError
 
 

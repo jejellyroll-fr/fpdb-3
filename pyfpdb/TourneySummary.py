@@ -16,12 +16,7 @@
 #In the "official" distribution you can find the license in agpl-3.0.txt.
 
 """parses and stores summary sections from e.g. eMail or summary files"""
-from __future__ import print_function
 
-from builtins import zip
-from builtins import str
-from builtins import range
-from builtins import object
 import L10n
 _ = L10n.get_translation()
 
@@ -51,7 +46,7 @@ try:
     import xlrd
 except:
     xlrd = None
-    log.info(("xlrd not found. Required for importing Excel tourney results files"))
+    log.info(_("xlrd not found. Required for importing Excel tourney results files"))
 
 class TourneySummary(object):
 
@@ -65,7 +60,7 @@ class TourneySummary(object):
                'UltimateBet':6, 'Betfair':7, 'Absolute':8, 'PartyPoker':9, 'PacificPoker':10,
                'Partouche':11, 'Merge':12, 'PKR':13, 'iPoker':14, 'Winamax':15, 'Everest':16,
                'Cake':17, 'Entraction':18, 'BetOnline':19, 'Microgaming':20, 'Bovada':21, 'Enet':22,
-               'SealsWithClubs': 23, 'WinningPoker': 24}
+               'SealsWithClubs': 23, 'WinningPoker': 24, 'Run It Once Poker': 26}
 
 
     def __init__(self, db, config, siteName, summaryText, in_path='-', builtFrom="HHC", header=""):
@@ -163,54 +158,54 @@ class TourneySummary(object):
 
     def __str__(self):
         #TODO : Update
-        vars = ((("SITE"), self.siteName),
-                 (("START TIME"), self.startTime),
-                 (("END TIME"), self.endTime),
-                 (("TOURNEY NAME"), self.tourneyName),
-                 (("TOURNEY NO"), self.tourNo),
-                 (("TOURNEY TYPE ID"), self.tourneyTypeId),
-                 (("TOURNEY ID"), self.tourneyId),
-                 (("BUYIN"), self.buyin),
-                 (("FEE"), self.fee),
-                 (("CURRENCY"), self.currency),
-                 (("HERO"), self.hero),
-                 (("MAX SEATS"), self.maxseats),
-                 (("ENTRIES"), self.entries),
-                 (("SPEED"), self.speed),
-                 (("PRIZE POOL"), self.prizepool),
-                 (("STARTING CHIP COUNT"), self.buyInChips),
-                 (("MIXED"), self.mixed),
-                 (("REBUY"), self.isRebuy),
-                 (("ADDON"), self.isAddOn),
-                 (("KO"), self.isKO),
-                 (("MATRIX"), self.isMatrix),
-                 (("SHOOTOUT"), self.isShootout),
-                 (("REBUY CHIPS"), self.rebuyChips),
-                 (("ADDON CHIPS"), self.addOnChips),
-                 (("REBUY COST"), self.rebuyCost),
-                 (("ADDON COST"), self.addOnCost),
-                 (("TOTAL REBUYS"), self.totalRebuyCount),
-                 (("TOTAL ADDONS"), self.totalAddOnCount),
-                 (("KO BOUNTY"), self.koBounty),
-                 (("SNG"), self.isSng),
-                 (("SATELLITE"), self.isSatellite),
-                 (("DOUBLE OR NOTHING"), self.isDoubleOrNothing),
-                 (("GUARANTEEAMT"), self.guaranteeAmt),
-                 (("ADDED"), self.added),
-                 (("ADDED CURRENCY"), self.addedCurrency),
-                 (("COMMENT"), self.comment),
-                 (("COMMENT TIMESTAMP"), self.commentTs)
+        vars = ((_("SITE"), self.siteName),
+                 (_("START TIME"), self.startTime),
+                 (_("END TIME"), self.endTime),
+                 (_("TOURNEY NAME"), self.tourneyName),
+                 (_("TOURNEY NO"), self.tourNo),
+                 (_("TOURNEY TYPE ID"), self.tourneyTypeId),
+                 (_("TOURNEY ID"), self.tourneyId),
+                 (_("BUYIN"), self.buyin),
+                 (_("FEE"), self.fee),
+                 (_("CURRENCY"), self.currency),
+                 (_("HERO"), self.hero),
+                 (_("MAX SEATS"), self.maxseats),
+                 (_("ENTRIES"), self.entries),
+                 (_("SPEED"), self.speed),
+                 (_("PRIZE POOL"), self.prizepool),
+                 (_("STARTING CHIP COUNT"), self.buyInChips),
+                 (_("MIXED"), self.mixed),
+                 (_("REBUY"), self.isRebuy),
+                 (_("ADDON"), self.isAddOn),
+                 (_("KO"), self.isKO),
+                 (_("MATRIX"), self.isMatrix),
+                 (_("SHOOTOUT"), self.isShootout),
+                 (_("REBUY CHIPS"), self.rebuyChips),
+                 (_("ADDON CHIPS"), self.addOnChips),
+                 (_("REBUY COST"), self.rebuyCost),
+                 (_("ADDON COST"), self.addOnCost),
+                 (_("TOTAL REBUYS"), self.totalRebuyCount),
+                 (_("TOTAL ADDONS"), self.totalAddOnCount),
+                 (_("KO BOUNTY"), self.koBounty),
+                 (_("SNG"), self.isSng),
+                 (_("SATELLITE"), self.isSatellite),
+                 (_("DOUBLE OR NOTHING"), self.isDoubleOrNothing),
+                 (_("GUARANTEEAMT"), self.guaranteeAmt),
+                 (_("ADDED"), self.added),
+                 (_("ADDED CURRENCY"), self.addedCurrency),
+                 (_("COMMENT"), self.comment),
+                 (_("COMMENT TIMESTAMP"), self.commentTs)
         )
  
-        structs = ((("PLAYER IDS"), self.playerIds),
-                    (("PLAYERS"), self.players),
-                    (("TOURNEYS PLAYERS IDS"), self.tourneysPlayersIds),
-                    (("RANKS"), self.ranks),
-                    (("WINNINGS"), self.winnings),
-                    (("WINNINGS CURRENCY"), self.winningsCurrency),
-                    (("COUNT REBUYS"), self.rebuyCounts),
-                    (("COUNT ADDONS"), self.addOnCounts),
-                    (("COUNT KO"), self.koCounts)
+        structs = ((_("PLAYER IDS"), self.playerIds),
+                    (_("PLAYERS"), self.players),
+                    (_("TOURNEYS PLAYERS IDS"), self.tourneysPlayersIds),
+                    (_("RANKS"), self.ranks),
+                    (_("WINNINGS"), self.winnings),
+                    (_("WINNINGS CURRENCY"), self.winningsCurrency),
+                    (_("COUNT REBUYS"), self.rebuyCounts),
+                    (_("COUNT ADDONS"), self.addOnCounts),
+                    (_("COUNT KO"), self.koCounts)
         )
         str = ''
         for (name, var) in vars:
@@ -248,7 +243,7 @@ class TourneySummary(object):
         # Note: If the TourneyNo could be a unique id .... this would really be a relief to deal with matrix matches ==> Ask on the IRC / Ask Fulltilt ??
         self.db.set_printdata(printtest)
         
-        self.playerIds = self.db.getSqlPlayerIDs(list(self.players.keys()), self.siteId, self.hero)
+        self.playerIds = self.db.getSqlPlayerIDs(self.players.keys(), self.siteId, self.hero)
         #for player in self.players:
         #    id=self.db.get_player_id(self.config, self.siteName, player)
         #    if not id:
@@ -264,7 +259,7 @@ class TourneySummary(object):
         self.db.createOrUpdateTourneysPlayers(self)
         self.db.commit()
         
-        logging.debug(("Tourney Insert/Update done"))
+        logging.debug(_("Tourney Insert/Update done"))
         
         # TO DO : Return what has been done (tourney created, updated, nothing)
         # ?? stored = 1 if tourney is fully created / duplicates = 1, if everything was already here and correct / partial=1 if some things were already here (between tourney, tourneysPlayers and handsPlayers)
@@ -277,7 +272,7 @@ class TourneySummary(object):
         return (stored, duplicates, partial, errors, ttime)
 
 
-    def addPlayer(self, rank, name, winnings, winningsCurrency, rebuyCount, addOnCount, koCount, entryId=1):
+    def addPlayer(self, rank, name, winnings, winningsCurrency, rebuyCount, addOnCount, koCount, entryId=None):
         """\
 Adds a player to the tourney, and initialises data structures indexed by player.
 rank        (int) indicating the finishing rank (can be -1 if unknown)
@@ -286,9 +281,11 @@ winnings    (int) the money the player ended the tourney with (can be 0, or -1 i
 """
         log.debug("addPlayer: rank:%s - name : '%s' - Winnings (%s)" % (rank, name, winnings))
         if self.players.get(name) != None:
-            if entryId in self.players[name]:
+            if entryId is None:
                 entries = self.players[name][-1]
                 self.players[name].append(entries + 1)
+            elif entryId in self.players[name]:
+                return None
             else:
                 self.players[name].append(entryId)
             if rank:
@@ -303,7 +300,7 @@ winnings    (int) the money the player ended the tourney with (can be 0, or -1 i
             self.addOnCounts[name].append(None)
             self.koCounts[name].append(None)
         else:
-            self.players[name] = [entryId]
+            self.players[name] = [entryId if entryId is not None else 1]
             if rank:
                 self.ranks.update({ name : [rank] })
                 self.winnings.update({ name : [winnings] })
@@ -318,7 +315,7 @@ winnings    (int) the money the player ended the tourney with (can be 0, or -1 i
     #end def addPlayer
 
     def writeSummary(self, fh=sys.__stdout__):
-        print("Override me", file=fh)
+        print >> fh, "Override me"
 
     def printSummary(self):
         self.writeSummary(sys.stdout)
@@ -336,13 +333,13 @@ winnings    (int) the money the player ended the tourney with (can be 0, or -1 i
             elif keys!=None:
                 rows.append([str(c).encode('utf-8') for c in sh.row_values(rownum)])
         for row in rows:
-            data = dict(list(zip(keys, row)))
+            data = dict(zip(keys, row))
             data['header'] = header
             if len(data[tourNoField])>0:
                 if entries.get(data[tourNoField])==None:
                     entries[data[tourNoField]] = []
                 entries[data[tourNoField]].append(data)
-        for k, item in list(entries.items()):
+        for k, item in entries.iteritems():
             summaryTexts.append(item)
         return summaryTexts
 

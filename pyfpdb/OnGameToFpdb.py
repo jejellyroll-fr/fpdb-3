@@ -19,7 +19,8 @@
 ########################################################################
 
 from __future__ import division
-from builtins import str
+
+import builtins
 from past.utils import old_div
 import L10n
 _ = L10n.get_translation()

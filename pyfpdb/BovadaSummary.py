@@ -32,6 +32,7 @@ class BovadaSummary(TourneySummary):
                          'LEGAL_ISO' : "USD",      # legal ISO currency codes
                                 'LS' : u"\$|", # legal currency symbols - Euro(cp1252, utf-8)
                                'PLYR': r'(?P<PNAME>.+?)',
+                               'PLYR1': r'(?P<PNAME1>.+?)',
                                 'CUR': u"(\$|)",
                                 'NUM' :u".,\d",
                         }
@@ -40,8 +41,8 @@ class BovadaSummary(TourneySummary):
     re_Identify = re.compile(u'(Ignition|Bovada|Bodog(\.eu|\sUK|\sCanada|88)?)\sHand')
     re_AddOn = re.compile(r"^%(PLYR)s  ?\[ME\] : Addon (?P<ADDON>[%(NUM)s]+)" % substitutions, re.MULTILINE)
     re_Rebuyin = re.compile(r"%(PLYR)s  ?\[ME\] : Rebuyin (?P<REBUY>[%(NUM)s]+)" % substitutions, re.MULTILINE)
-    re_Ranking = re.compile(r"%(PLYR)s  ?\[ME\] : Ranking (?P<RANK>[%(NUM)s]+)" % substitutions, re.MULTILINE)
-    re_Winnings = re.compile(r"%(PLYR)s  ?\[ME\] : Prize Cash \[(?P<WINNINGS>%(CUR)s[%(NUM)s]+)\]" % substitutions, re.MULTILINE)   
+    re_Ranking = re.compile(r"%(PLYR)s  ?\[ME\] : Ranking (?P<RANK>[%(NUM)s]+)(\s+?%(PLYR1)s  ?\[ME\] : Prize Cash \[(?P<WINNINGS>%(CUR)s[%(NUM)s]+)\])?" % substitutions, re.MULTILINE)
+    re_Stand = re.compile(r"%(PLYR)s  ?\[ME\] : Stand" % substitutions, re.MULTILINE)
     
     @staticmethod
     def getSplitRe(self, head):
@@ -54,7 +55,7 @@ class BovadaSummary(TourneySummary):
         m = hhc.re_GameInfo.search(self.summaryText)
         if m == None:
             tmp = self.summaryText[0:200]
-            log.error(("BovadaSummary.parseSummary: '%s'") % tmp)
+            log.error(_("BovadaSummary.parseSummary: '%s'") % tmp)
             raise FpdbParseError
         
         info = {}
@@ -64,7 +65,7 @@ class BovadaSummary(TourneySummary):
         
         if info['TOURNO'] is None:
             tmp = self.summaryText[0:200]
-            log.error(("BovadaSummary.parseSummary: Text does not appear to be a tournament '%s'") % tmp)
+            log.error(_("BovadaSummary.parseSummary: Text does not appear to be a tournament '%s'") % tmp)
             raise FpdbParseError
         else:
             self.tourNo = info['TOURNO']
@@ -105,19 +106,23 @@ class BovadaSummary(TourneySummary):
                     elif re.match("^[0-9+]*$", info['BUYIN']):
                         self.buyinCurrency="play"
                     else:
-                        log.error(("BovadaSummary.parseSummary: Failed to detect currency"))
+                        log.error(_("BovadaSummary.parseSummary: Failed to detect currency"))
                         raise FpdbParseError
                     self.currency = self.buyinCurrency
 
-                    info['BIAMT'] = info['BIAMT'].strip(u'$')
+                    info['BIAMT'] = hhc.clearMoneyString(info['BIAMT'].strip(u'$'))
                     
                     if info['BIRAKE']:
-                        info['BIRAKE'] = info['BIRAKE'].strip(u'$')
+                        info['BIRAKE'] = hhc.clearMoneyString(info['BIRAKE'].strip(u'$'))
                     else:
                         info['BIRAKE'] = '0'
-
-                    self.buyin = int(100*Decimal(info['BIAMT']))
-                    self.fee = int(100*Decimal(info['BIRAKE']))
+                    
+                    if info['TICKET'] == None:
+                        self.buyin = int(100*Decimal(info['BIAMT']))
+                        self.fee = int(100*Decimal(info['BIRAKE']))
+                    else:
+                        self.buyin = 0
+                        self.fee = 0
                     
                     if info['TOURNAME'] is not None:
                         tourneyNameFull = info['TOURNAME'] + ' - ' + info['BIAMT'] + '+' + info['BIRAKE']
@@ -128,20 +133,19 @@ class BovadaSummary(TourneySummary):
                             self.rebuyCost = self.buyin
                             self.addOnCost = self.buyin
             
-            rank, winnings, rebuys, addons = None, None, None, None
-            
-            m = self.re_Ranking.search(self.summaryText)
-            if m and m.group('RANK') is not None: 
-                rank = int(m.group('RANK'))
-                winnings = 0
-                
-            m = self.re_Winnings.search(self.summaryText)
-            if m and m.group('WINNINGS') is not None: 
-                if m.group('WINNINGS').find("$")!=-1:
-                    self.currency="USD"
-                elif re.match("^[0-9+]*$", m.group('WINNINGS')):
-                    self.currency="play"
-                winnings = int(100*Decimal(self.clearMoneyString(m.group('WINNINGS'))))
+            rebuys, addons, winnings = None, None, []
+            i = 0
+            m = self.re_Ranking.finditer(self.summaryText)
+            for a in m:
+                mg = a.groupdict()
+                winnings.append([int(mg['RANK']), 0])
+                if mg['WINNINGS'] is not None: 
+                    if mg['WINNINGS'].find("$")!=-1:
+                        self.currency="USD"
+                    elif re.match("^[0-9+]*$", mg['WINNINGS']):
+                        self.currency="play"
+                    winnings[i][1] = int(100*Decimal(self.clearMoneyString(mg['WINNINGS'])))
+                i+=1
                 
             m = self.re_Rebuyin.finditer(self.summaryText)
             for a in m: 
@@ -154,6 +158,16 @@ class BovadaSummary(TourneySummary):
                 if addons == None:
                     addons = 0
                 addons += 1
-                            
-            self.addPlayer(rank, 'Hero', winnings, self.currency, rebuys, addons, None)
+            
+            i = 0
+            for win in winnings:
+                if len(win)>1:
+                    rankId = (i+1)
+                else:
+                    rankId = None
+                if i == 0:
+                    self.addPlayer(win[0], 'Hero', win[1], self.currency, rebuys, addons, rankId)
+                else:
+                    self.addPlayer(win[0], 'Hero', win[1], self.currency, 0, 0, rankId)
+                i+=1
         

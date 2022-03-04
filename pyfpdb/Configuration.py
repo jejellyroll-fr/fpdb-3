@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Configuration.py
-
-Handles fpdb/fpdb-hud configuration files.
-"""
+# Configuration####
+#Handles fpdb/fpdb-hud configuration files.
 #    Copyright 2008-2012,  Ray E. Barker
-
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -1091,7 +1088,7 @@ class Config(object):
                                 
     def get_stat_set_node(self, ss):
         for stat_set_node in self.doc.getElementsByTagName("ss"):
-            if set_node.getAttribute("name") == ss:
+            if os.ST_NODEV.getAttribute("name") == ss:
                 return stat_set_node
 
     def get_db_node(self, db_name):

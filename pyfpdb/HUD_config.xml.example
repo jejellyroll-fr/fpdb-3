@@ -2154,6 +2154,9 @@
         <hhc site="Enet" converter="EnetToFpdb"/>
         <hhc site="SealsWithClubs" converter="SealsWithClubsToFpdb"/>
         <hhc site="WinningPoker" converter="WinningToFpdb" summaryImporter="WinningSummary"/>
+        <hhc site="GGPoker" converter="GGPokerToFpdb"/>
+        <hhc site="KingsClub" converter="KingsClubToFpdb"/>
+        <hhc site="Unibet" converter="UnibetToFpdb"/>
     </hhcs>
 
 
@@ -2165,7 +2168,7 @@
 
     <supported_databases>
         <!-- <database db_server="mysql" db_user="fpdbuser" db_pass="YOUR MYSQL PASSWORD" db_name="fpdb" db_ip="localhost"></database> -->
-             <database db_server="sqlite" db_name="fpdb.db3" db_ip="localhost" db_user="fpdb" db_pass="fpdb" db_path=""/>
+             <database db_server="sqlite" db_name="fpdb.db3" db_ip="localhost" db_user="fpdb" db_pass="fpdb"/>
         <!-- <database db_server="postgresql" db_user="fpdb" db_pass="YOUR POSTGRES PASSWORD" db_name="fpdb" db_ip="localhost" ></database> -->
     </supported_databases>
 </FreePokerToolsConfig>

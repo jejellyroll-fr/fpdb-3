@@ -154,7 +154,7 @@ o.winners(game = 'holdem', pockets = [ [ 'Ks', 'Kd'] ]).
         normalized_pockets = []
         normalized_index = 0
         pockets = kwargs["pockets"][:]
-        for index in xrange(len(pockets)):
+        for index in range(len(pockets)):
             if not kwargs.has_key("fill_pockets"):
                 if 255 in pockets[index] or "__" in pockets[index]:
                     pockets[index] = []
@@ -169,7 +169,7 @@ o.winners(game = 'holdem', pockets = [ [ 'Ks', 'Kd'] ]).
 
         (count, haslopot, hashipot) = results.pop(0)
         winners = { 'low': [], 'hi': [] }
-        for index in xrange(len(pockets)):
+        for index in range(len(pockets)):
             if index2index.has_key(index):
                 result = results[index2index[index]]
                 if result[1] == 1 or result[3] == 1:

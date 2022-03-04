@@ -19,9 +19,6 @@
 
 ########################################################################
 
-from __future__ import division
-from builtins import str
-from past.utils import old_div
 import L10n
 _ = L10n.get_translation()
 
@@ -61,7 +58,7 @@ class iPoker(HandHistoryConverter):
     summaryInFile = True
 
     substitutions = {
-                     'LS'  : u"\$|€|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|",
+                     'LS'  : u"\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|",
                      'PLYR': r'(?P<PNAME>[^"]+)',
                      'NUM' : r'.,\d',
                     }
@@ -166,7 +163,7 @@ class iPoker(HandHistoryConverter):
             """ % substitutions, re.MULTILINE|re.VERBOSE)
     re_Buyin = re.compile(r"""(?P<BUYIN>[%(NUM)s]+)""" % substitutions, re.MULTILINE|re.VERBOSE)
     re_TotalBuyin  = re.compile(r"""(?P<BUYIN>(?P<BIAMT>[%(LS)s%(NUM)s]+)\s\+\s?(?P<BIRAKE>[%(LS)s%(NUM)s]+)?)""" % substitutions, re.MULTILINE|re.VERBOSE)
-    re_HandInfo = re.compile(r'code="(?P<HID>[0-9]+)">\s*?<general>\s*?<startdate>(?P<DATETIME>[a-zA-Z-/: 0-9]+)</startdate>', re.MULTILINE)
+    re_HandInfo = re.compile(r'code="(?P<HID>[0-9]+)">\s*?<general>\s*?<startdate>(?P<DATETIME>[\.a-zA-Z-/: 0-9]+)</startdate>', re.MULTILINE)
     re_PlayerInfo = re.compile(r'<player( (seat="(?P<SEAT>[0-9]+)"|name="%(PLYR)s"|chips="(%(LS)s)(?P<CASH>[%(NUM)s]+)"|dealer="(?P<BUTTONPOS>(0|1))"|win="(%(LS)s)(?P<WIN>[%(NUM)s]+)"|bet="(%(LS)s)(?P<BET>[^"]+)"|addon="\d*"|rebuy="\d*"|merge="\d*"|reg_code="[\d-]*"))+\s*/>' % substitutions, re.MULTILINE)
     re_Board = re.compile(r'<cards( (type="(?P<STREET>Flop|Turn|River)"|player=""))+>(?P<CARDS>.+?)</cards>', re.MULTILINE)
     re_EndOfHand = re.compile(r'<round id="END_OF_GAME"', re.MULTILINE)
@@ -175,13 +172,14 @@ class iPoker(HandHistoryConverter):
     re_Action = re.compile(r'<action ((no="(?P<ACT>[0-9]+)"|player="%(PLYR)s"|(actiontxt="[^"]+" turntime="[^"]+")|type="(?P<ATYPE>\d+)"|sum="(%(LS)s)(?P<BET>[%(NUM)s]+)"|cards="[^"]*") ?)*/>' % substitutions, re.MULTILINE)
     re_SitsOut = re.compile(r'<event sequence="[0-9]+" type="SIT_OUT" player="(?P<PSEAT>[0-9])"/>', re.MULTILINE)
     re_DateTime1 = re.compile("""(?P<D>[0-9]{2})\-(?P<M>[a-zA-Z]{3})\-(?P<Y>[0-9]{4})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
-    re_DateTime2 = re.compile("""(?P<D>[0-9]{2})\/(?P<M>[0-9]{2})\/(?P<Y>[0-9]{4})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
+    re_DateTime2 = re.compile("""(?P<D>[0-9]{2})[\/\.](?P<M>[0-9]{2})[\/\.](?P<Y>[0-9]{4})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
     re_DateTime3 = re.compile("""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
     re_MaxSeats = re.compile(r'(?P<SEATS>[0-9]+) Max', re.MULTILINE)
     re_TourNo = re.compile(r'\(\#(?P<TOURNO>\d+)\)', re.MULTILINE)
     re_non_decimal = re.compile(r'[^\d.,]+')
     re_Partial = re.compile('<startdate>', re.MULTILINE)
     re_UncalledBets = re.compile('<uncalled_bet_enabled>true<\/uncalled_bet_enabled>')
+    re_ClientVersion = re.compile('<client_version>(?P<VERSION>[.\d]+)</client_version>')
     re_FPP = re.compile(r'Pts\s')
     
     def compilePlayerRegexs(self, hand):
@@ -217,7 +215,8 @@ class iPoker(HandHistoryConverter):
                     log.error(("iPokerToFpdb.determineGameType: '%s'") % tmp)
                     raise FpdbParseError
                 else:
-                    raise FpdbHandPartial
+                    message = ("No startdate")
+                    raise FpdbHandPartial("iPoker partial hand history: %s" % message)
         return gametype
 
     def determineGameType(self, handText):
@@ -252,6 +251,11 @@ class iPoker(HandHistoryConverter):
             self.uncalledbets = False
         else:
             self.uncalledbets = True
+            mv = self.re_ClientVersion.search(handText)
+            if mv:
+                major_version = mv.group('VERSION').split('.')[0]
+                if int(major_version) >= 20:
+                    self.uncalledbets = False
 
         if tourney:
             self.info['type'] = 'tour'
@@ -303,7 +307,7 @@ class iPoker(HandHistoryConverter):
             if self.tinfo['buyin'] == 0:
                 self.tinfo['buyinCurrency'] = 'FREE'
             if self.tinfo.get('tourNo') is None:
-                log.error(("iPokerToFpdb.determineGameType: Could Not Parse tourNo"))
+                log.error(_("iPokerToFpdb.determineGameType: Could Not Parse tourNo"))
                 raise FpdbParseError
         else:
             self.info['type'] = 'ring'
@@ -321,7 +325,7 @@ class iPoker(HandHistoryConverter):
                     self.info['bb'] = self.Lim_Blinds[self.clearMoneyString(mg['BB'])][1]
                 except KeyError:
                     tmp = handText[0:200]
-                    log.error(("iPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
+                    log.error(_("iPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
                     raise FpdbParseError
 
         return self.info
@@ -330,7 +334,7 @@ class iPoker(HandHistoryConverter):
         m = self.re_HandInfo.search(hand.handText)
         if m is None:
             tmp = hand.handText[0:200]
-            log.error(("iPokerToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(_("iPokerToFpdb.readHandInfo: '%s'") % tmp)
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -356,14 +360,14 @@ class iPoker(HandHistoryConverter):
             except ValueError:
                 date_match = self.re_DateTime2.search(m.group('DATETIME'))
                 if date_match:
-                    datestr = '%d/%m/%Y %H:%M:%S'
+                    datestr = '%d/%m/%Y %H:%M:%S' if '/' in m.group('DATETIME') else '%d.%m.%Y %H:%M:%S'
                     if date_match.group('S') == None:
                         datestr = '%d/%m/%Y %H:%M'
                 else:
                     date_match1 = self.re_DateTime3.search(m.group('DATETIME'))
                     datestr = '%Y/%m/%d %H:%M:%S'
                     if date_match1 == None:
-                        log.error(("iPokerToFpdb.readHandInfo Could not read datetime: '%s'") % hand.handid)
+                        log.error(_("iPokerToFpdb.readHandInfo Could not read datetime: '%s'") % hand.handid)
                         raise FpdbParseError
                     if date_match1.group('S') == None:
                         datestr = '%Y/%m/%d %H:%M'
@@ -386,7 +390,7 @@ class iPoker(HandHistoryConverter):
                     
         if len(plist)<=1:
             # Hand cancelled
-            log.error(("iPokerToFpdb.readPlayerStacks: '%s'") % hand.handid)
+            log.error(_("iPokerToFpdb.readPlayerStacks: '%s'") % hand.handid)
             raise FpdbParseError
                                 
         # Add remaining players
@@ -435,7 +439,7 @@ class iPoker(HandHistoryConverter):
             cards = [c[1:].replace('10', 'T') + c[0].lower() for c in cards]
             hand.setCommunityCards(street, cards)
         else:
-            log.error(("iPokerToFpdb.readCommunityCards: '%s'") % hand.handid)
+            log.error(_("iPokerToFpdb.readCommunityCards: '%s'") % hand.handid)
             raise FpdbParseError
 
     def readAntes(self, hand):
@@ -460,7 +464,7 @@ class iPoker(HandHistoryConverter):
         for a in m:
             if a.group('ATYPE') == '2':
                 blinds[int(a.group('ACT'))] = a.groupdict()
-        for b in sorted(blinds.keys()):
+        for b in sorted(list(blinds.keys())):
             type = 'big blind'
             blind = blinds[b]
             if not hand.gametype['bb']:
@@ -482,14 +486,14 @@ class iPoker(HandHistoryConverter):
                 hand.gametype['sb'] = "1"
                 hand.gametype['bb'] = "2"
             elif hand.gametype['sb'] == None:
-                hand.gametype['sb'] = str(old_div(int(Decimal(hand.gametype['bb'])),2))
+                hand.gametype['sb'] = str(int(Decimal(hand.gametype['bb']))/2)
             elif hand.gametype['bb'] == None:
                 hand.gametype['bb'] = str(int(Decimal(hand.gametype['sb']))*2)
-            if old_div(int(Decimal(hand.gametype['bb'])),2) != int(Decimal(hand.gametype['sb'])):
-                if old_div(int(Decimal(hand.gametype['bb'])),2) < int(Decimal(hand.gametype['sb'])):
+            if int(Decimal(hand.gametype['bb']))/2 != int(Decimal(hand.gametype['sb'])):
+                if int(Decimal(hand.gametype['bb']))/2 < int(Decimal(hand.gametype['sb'])):
                     hand.gametype['bb'] = str(int(Decimal(hand.gametype['sb']))*2)
                 else:
-                    hand.gametype['sb'] = str(old_div(int(Decimal(hand.gametype['bb'])),2))
+                    hand.gametype['sb'] = str(int(Decimal(hand.gametype['bb']))/2)
 
     def readButton(self, hand):
         # Found in re_Player
@@ -500,7 +504,7 @@ class iPoker(HandHistoryConverter):
 #    we need to grab hero's cards
 
         for street in ('PREFLOP', 'DEAL'):
-            if street in list(hand.streets.keys()):
+            if street in hand.streets.keys():
                 m = self.re_HeroCards.finditer(hand.streets[street])
                 for found in m:
                     player = found.group('PNAME')
@@ -516,24 +520,25 @@ class iPoker(HandHistoryConverter):
             m = self.re_HeroCards.finditer(hand.streets[street])
             for found in m:
                 player = found.group('PNAME')
-                cards = found.group('CARDS').split(' ')
-                
-                if street == 'SEVENTH' and self.hero != player:
-                    newcards = []
-                    oldcards = [c[1:].replace('10', 'T') + c[0].lower() for c in cards if c[0].lower()!='x']
-                else:
-                    newcards = [c[1:].replace('10', 'T') + c[0].lower() for c in cards if c[0].lower()!='x']
-                    oldcards = []
-                if street == 'THIRD' and len(newcards) == 3 and self.hero == player: # hero in stud game
-                    hand.hero = player
-                    hand.dealt.add(player) # need this for stud??
-                    hand.addHoleCards(street, player, closed=newcards[0:2], open=[newcards[2]], shown=True, mucked=False, dealt=False)
-                elif street == 'SECOND' and len(newcards) == 2 and self.hero == player: # hero in stud game
-                    hand.hero = player
-                    hand.dealt.add(player)
-                    hand.addHoleCards(street, player, closed=[newcards[0]], open=[newcards[1]], shown=True, mucked=False, dealt=False)
-                else:
-                    hand.addHoleCards(street, player, open=newcards, closed=oldcards, shown=True, mucked=False, dealt=False)
+                if player is not None:
+                    cards = found.group('CARDS').split(' ')
+                    
+                    if street == 'SEVENTH' and self.hero != player:
+                        newcards = []
+                        oldcards = [c[1:].replace('10', 'T') + c[0].lower() for c in cards if c[0].lower()!='x']
+                    else:
+                        newcards = [c[1:].replace('10', 'T') + c[0].lower() for c in cards if c[0].lower()!='x']
+                        oldcards = []
+                    if street == 'THIRD' and len(newcards) == 3 and self.hero == player: # hero in stud game
+                        hand.hero = player
+                        hand.dealt.add(player) # need this for stud??
+                        hand.addHoleCards(street, player, closed=newcards[0:2], open=[newcards[2]], shown=True, mucked=False, dealt=False)
+                    elif street == 'SECOND' and len(newcards) == 2 and self.hero == player: # hero in stud game
+                        hand.hero = player
+                        hand.dealt.add(player)
+                        hand.addHoleCards(street, player, closed=[newcards[0]], open=[newcards[1]], shown=True, mucked=False, dealt=False)
+                    else:
+                        hand.addHoleCards(street, player, open=newcards, closed=oldcards, shown=True, mucked=False, dealt=False)
 
     def readAction(self, hand, street):
         # HH format doesn't actually print the actions in order!
@@ -541,7 +546,7 @@ class iPoker(HandHistoryConverter):
         actions = {}
         for a in m:
             actions[int(a.group('ACT'))] = a.groupdict()
-        for a in sorted(actions.keys()):
+        for a in sorted(list(actions.keys())):
             action = actions[a]
             atype = action['ATYPE']
             player = action['PNAME']
@@ -571,7 +576,7 @@ class iPoker(HandHistoryConverter):
             elif atype == '9': #FIXME: Sitting out
                 hand.addFold(street, player)
             else:
-                log.error(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action['PNAME'], action['ATYPE']))
+                log.error(_("DEBUG:") + " " + _("Unimplemented %s: '%s' '%s'") % ("readAction", action['PNAME'], action['ATYPE']))
 
     def readShowdownActions(self, hand):
         # Cards lines contain cards

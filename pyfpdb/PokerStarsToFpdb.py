@@ -18,10 +18,6 @@
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
 
-from __future__ import division
-from builtins import map
-from builtins import str
-from past.utils import old_div
 import L10n
 _ = L10n.get_translation()
 
@@ -41,13 +37,13 @@ class PokerStars(HandHistoryConverter):
     filetype = "text"
     codepage = ("utf8", "cp1252", "ISO-8859-1")
     siteId   = 2 # Needs to match id entry in Sites database
-    sym = {'USD': "\$", 'CAD': "\$", 'T$': "", "EUR": "€", "GBP": "\£", "play": "", "INR": "\₹", "CNY": "\¥"}         # ADD Euro, Sterling, etc HERE
+    sym = {'USD': "\$", 'CAD': "\$", 'T$': "", "EUR": "\xe2\x82\xac", "GBP": "\£", "play": "", "INR": "\₹", "CNY": "\¥"}         # ADD Euro, Sterling, etc HERE
     substitutions = {
                      'LEGAL_ISO' : "USD|EUR|GBP|CAD|FPP|SC|INR|CNY",      # legal ISO currency codes
-                            'LS' : u"\$|\€|\£|\₹|\¥|", # legal currency symbols - Euro(cp1252, utf-8)
+                            'LS' : u"\$|\xe2\x82\xac|\u20ac|\£|\u20b9|\¥|", # legal currency symbols - Euro(cp1252, utf-8)
                            'PLYR': r'\s?(?P<PNAME>.+?)',
-                            'CUR': u"(\$|\€|\£|\₹|\¥|)",
-                          'BRKTS': r'(\(button\) |\(small blind\) |\(big blind\) |\(button blind\) |\(button\) \(small blind\) |\(small blind/button\) |\(button\) \(big blind\) )?',
+                            'CUR': u"(\$|\xe2\x82\xac|\u20ac||\£|\u20b9|\¥|)",
+                          'BRKTS': r'(\(button\) |\(small blind\) |\(big blind\) |\(button blind\) |\(button\) \(small blind\) |\(small blind\) \(button\) |\(big blind\) \(button\) |\(small blind/button\) |\(button\) \(big blind\) )?',
                     }
                     
     # translations from captured groups to fpdb info strings
@@ -132,11 +128,12 @@ class PokerStars(HandHistoryConverter):
 
     # Static regexes
     re_GameInfo     = re.compile(u"""
-          (?P<SITE>PokerStars|POKERSTARS|Hive\sPoker|Full\sTilt|PokerMaster|Run\sIt\sOnce\sPoker)(?P<TITLE>\sGame|\sHand|\sHome\sGame|\sHome\sGame\sHand|Game|\s(Zoom|Rush)\sHand|\sGAME)\s\#(?P<HID>[0-9]+):\s+
+          (?P<SITE>PokerStars|POKERSTARS|Hive\sPoker|Full\sTilt|PokerMaster|Run\sIt\sOnce\sPoker|BetOnline|PokerBros)(?P<TITLE>\sGame|\sHand|\sHome\sGame|\sHome\sGame\sHand|Game|\s(Zoom|Rush)\sHand|\sGAME)\s\#(?P<HID>[0-9]+):\s+
           (\{.*\}\s+)?((?P<TOUR>((Zoom|Rush)\s)?(Tournament|TOURNAMENT))\s\#                # open paren of tournament info
           (?P<TOURNO>\d+),\s(Table\s\#(?P<HIVETABLE>\d+),\s)?
           # here's how I plan to use LS
           (?P<BUYIN>(?P<BIAMT>[%(LS)s\d\.]+)?\+?(?P<BIRAKE>[%(LS)s\d\.]+)?\+?(?P<BOUNTY>[%(LS)s\d\.]+)?\s?(?P<TOUR_ISO>%(LEGAL_ISO)s)?|Freeroll|)(\s+)?(-\s)?
+          (\s.+?,)?
           )?
           # close paren of tournament info
           (?P<MIXED>HORSE|8\-Game|8\-GAME|HOSE|Mixed\sOmaha\sH/L|Mixed\sHold\'em|Mixed\sPLH/PLO|Mixed\sNLH/PLO|Mixed\sOmaha|Triple\sStud)?\s?\(?
@@ -169,12 +166,12 @@ class PokerStars(HandHistoryConverter):
 
     re_HandInfo     = re.compile("""
           ^\s?Table\s(ID\s)?\'(?P<TABLE>.+?)\'\s
-          ((?P<MAX>\d+)-max\s)?
+          ((?P<MAX>\d+)-[Mm]ax\s)?
           (?P<PLAY>\(Play\sMoney\)\s)?
           (Seat\s\#(?P<BUTTON>\d+)\sis\sthe\sbutton)?""", 
           re.MULTILINE|re.VERBOSE)
 
-    re_Identify     = re.compile(u'(PokerStars|POKERSTARS|Hive\sPoker|Full\sTilt|PokerMaster|Run\sIt\sOnce\sPoker)(\sGame|\sHand|\sHome\sGame|\sHome\sGame\sHand|Game|\s(Zoom|Rush)\sHand|\sGAME)\s\#\d+:')
+    re_Identify     = re.compile(u'(PokerStars|POKERSTARS|Hive\sPoker|Full\sTilt|PokerMaster|Run\sIt\sOnce\sPoker|BetOnline|PokerBros)(\sGame|\sHand|\sHome\sGame|\sHome\sGame\sHand|Game|\s(Zoom|Rush)\sHand|\sGAME)\s\#\d+:')
     re_SplitHands   = re.compile('(?:\s?\n){2,}')
     re_TailSplitHands   = re.compile('(\n\n\n+)')
     re_Button       = re.compile('Seat #(?P<BUTTON>\d+) is the button', re.MULTILINE)
@@ -243,7 +240,7 @@ class PokerStars(HandHistoryConverter):
             subst = {
                 'PLYR': player_re,
                 'BRKTS': r'(\(button\) |\(small blind\) |\(big blind\) |\(button\) \(small blind\) |\(button\) \(big blind\) )?',
-                'CUR': u"(\$|€||\£|)"
+                'CUR': u"(\$|\xe2\x82\xac|\u20ac||\£|)"
             }
             if self.siteId == 26:
                 self.re_HeroCards = re.compile(r"^Dealt to (?P<PNAME>(?![A-Z][a-z]+\s[A-Z]).+?)(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % subst, re.MULTILINE)
@@ -281,7 +278,7 @@ class PokerStars(HandHistoryConverter):
         m = self.re_GameInfo.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(("PokerStarsToFpdb.determineGameType: '%s'") % tmp)
+            log.error(_("PokerStarsToFpdb.determineGameType: '%s'") % tmp)
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -328,6 +325,12 @@ class PokerStars(HandHistoryConverter):
             elif mg['SITE'] == 'Run It Once Poker':
                 self.sitename = "Run It Once Poker"
                 self.siteId   = 26
+            elif mg['SITE'] == 'BetOnline':
+                self.sitename = 'BetOnline'
+                self.siteId = 19
+            elif mg['SITE'] == 'PokerBros':
+                self.sitename = 'PokerBros'
+                self.siteId = 29
                 
         if 'TOURNO' in mg and mg['TOURNO'] is None:
             info['type'] = 'ring'
@@ -346,10 +349,10 @@ class PokerStars(HandHistoryConverter):
                     info['bb'] = self.Lim_Blinds[mg['BB']][1]
                 except KeyError:
                     tmp = handText[0:200]
-                    log.error(("PokerStarsToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
+                    log.error(_("PokerStarsToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
                     raise FpdbParseError
             else:
-                info['sb'] = str((old_div(Decimal(mg['SB']),2)).quantize(Decimal("0.01")))
+                info['sb'] = str((Decimal(mg['SB'])/2).quantize(Decimal("0.01")))
                 info['bb'] = str(Decimal(mg['SB']).quantize(Decimal("0.01")))    
 
         return info
@@ -357,19 +360,18 @@ class PokerStars(HandHistoryConverter):
     def readHandInfo(self, hand):
         #First check if partial
         if hand.handText.count('*** SUMMARY ***')!=1:
-            raise FpdbHandPartial(("Hand is not cleanly split into pre and post Summary"))
+            raise FpdbHandPartial(_("Hand is not cleanly split into pre and post Summary"))
         
         info = {}
         m  = self.re_HandInfo.search(hand.handText,re.DOTALL)
         m2 = self.re_GameInfo.search(hand.handText)
         if m is None or m2 is None:
             tmp = hand.handText[0:200]
-            log.error(("PokerStarsToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(_("PokerStarsToFpdb.readHandInfo: '%s'") % tmp)
             raise FpdbParseError
 
-        info.update(m2.groupdict())
         info.update(m.groupdict())
-
+        info.update(m2.groupdict())
 
         #log.debug("readHandInfo: %s" % info)
         for key in info:
@@ -396,8 +398,8 @@ class PokerStars(HandHistoryConverter):
                     
             if key == 'HID':
                 hand.handid = info[key]
-            if key == 'TOURNO':
-                hand.tourNo = info[key]
+            if key == 'TOURNO' and info[key]!=None:
+                hand.tourNo = info[key][-18:]
             if key == 'BUYIN':
                 if hand.tourNo!=None:
                     #print "DEBUG: info['BUYIN']: %s" % info['BUYIN']
@@ -431,7 +433,7 @@ class PokerStars(HandHistoryConverter):
                             hand.buyinCurrency="play"
                         else:
                             #FIXME: handle other currencies, play money
-                            log.error(("PokerStarsToFpdb.readHandInfo: Failed to detect currency.") + " Hand ID: %s: '%s'" % (hand.handid, info[key]))
+                            log.error(_("PokerStarsToFpdb.readHandInfo: Failed to detect currency.") + " Hand ID: %s: '%s'" % (hand.handid, info[key]))
                             raise FpdbParseError
 
                         info['BIAMT'] = info['BIAMT'].strip(u'$€£FPPSC₹')
@@ -537,16 +539,22 @@ class PokerStars(HandHistoryConverter):
                        r"(\*\*\* FIRST RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER1>\[\S\S\].+?(?=\*\*\* SECOND RIVER \*\*\*)|.+))?"
                        r"(\*\*\* SECOND RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER2>\[\S\S\].+))?", hand.handText,re.DOTALL)
         elif hand.gametype['base'] in ("hold"):
-            m =  re.search(r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>(.+(?P<FLOPET>\[\S\S\]))?.+(?=\*\*\* (FIRST\s)?FLOP \*\*\*)|.+)"
-                       r"(\*\*\* FLOP \*\*\*(?P<FLOP> (\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\].+(?=\*\*\* (FIRST\s)?TURN \*\*\*)|.+))?"
-                       r"(\*\*\* TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN>\[\S\S\].+(?=\*\*\* (FIRST\s)?RIVER \*\*\*)|.+))?"
-                       r"(\*\*\* RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER>\[\S\S\].+))?"
-                       r"(\*\*\* FIRST FLOP \*\*\*(?P<FLOP1> (\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\].+(?=\*\*\* FIRST TURN \*\*\*)|.+))?"
-                       r"(\*\*\* FIRST TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN1>\[\S\S\].+(?=\*\*\* FIRST RIVER \*\*\*)|.+))?"
-                       r"(\*\*\* FIRST RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER1>\[\S\S\].+?(?=\*\*\* SECOND (FLOP|TURN|RIVER) \*\*\*)|.+))?"
-                       r"(\*\*\* SECOND FLOP \*\*\*(?P<FLOP2> (\[\S\S\] )?\[\S\S ?\S\S \S\S\].+(?=\*\*\* SECOND TURN \*\*\*)|.+))?"
-                       r"(\*\*\* SECOND TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN2>\[\S\S\].+(?=\*\*\* SECOND RIVER \*\*\*)|.+))?"
-                       r"(\*\*\* SECOND RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER2>\[\S\S\].+))?", hand.handText,re.DOTALL)
+            if self.siteId == 19:
+                m =  re.search(r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>(.+(?P<FLOPET>\[\S\S\]))?.+(?=\*\*\* FLOP \*\*\*)|.+)"
+                           r"(\*\*\* FLOP \*\*\*(?P<FLOP> (\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\].+(?=\*\*\* TURN \*\*\*)|.+))?"
+                           r"(\*\*\* TURN \*\*\* \[\S\S \S\S \S\S\] (?P<TURN>\[\S\S\].+(?=\*\*\* RIVER \*\*\*)|.+))?"
+                           r"(\*\*\* RIVER \*\*\* \[\S\S \S\S \S\S\]? \[?\S\S\] (?P<RIVER>\[\S\S\].+))?", hand.handText,re.DOTALL)
+            else:
+                m =  re.search(r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>(.+(?P<FLOPET>\[\S\S\]))?.+(?=\*\*\* (FIRST\s)?FLOP \*\*\*)|.+)"
+                           r"(\*\*\* FLOP \*\*\*(?P<FLOP> (\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\].+(?=\*\*\* (FIRST\s)?TURN \*\*\*)|.+))?"
+                           r"(\*\*\* TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN>\[\S\S\].+(?=\*\*\* (FIRST\s)?RIVER \*\*\*)|.+))?"
+                           r"(\*\*\* RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER>\[\S\S\].+))?"
+                           r"(\*\*\* FIRST FLOP \*\*\*(?P<FLOP1> (\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\].+(?=\*\*\* FIRST TURN \*\*\*)|.+))?"
+                           r"(\*\*\* FIRST TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN1>\[\S\S\].+(?=\*\*\* FIRST RIVER \*\*\*)|.+))?"
+                           r"(\*\*\* FIRST RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER1>\[\S\S\].+?(?=\*\*\* SECOND (FLOP|TURN|RIVER) \*\*\*)|.+))?"
+                           r"(\*\*\* SECOND FLOP \*\*\*(?P<FLOP2> (\[\S\S\] )?\[\S\S ?\S\S \S\S\].+(?=\*\*\* SECOND TURN \*\*\*)|.+))?"
+                           r"(\*\*\* SECOND TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN2>\[\S\S\].+(?=\*\*\* SECOND RIVER \*\*\*)|.+))?"
+                           r"(\*\*\* SECOND RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER2>\[\S\S\].+))?", hand.handText,re.DOTALL)
         elif hand.gametype['base'] in ("stud"):
             m =  re.search(r"(?P<ANTES>.+(?=\*\*\* 3rd STREET \*\*\*)|.+)"
                            r"(\*\*\* 3rd STREET \*\*\*(?P<THIRD>.+(?=\*\*\* 4th STREET \*\*\*)|.+))?"
@@ -579,7 +587,7 @@ class PokerStars(HandHistoryConverter):
             hand.runItTimes = 2
             
     def readSTP(self, hand):
-        log.debug(("read Splash the Pot"))
+        #log.debug(_("read Splash the Pot"))
         m = self.re_STP.search(hand.handText)
         if m:
             hand.addSTP(m.group('AMOUNT'))
@@ -623,7 +631,7 @@ class PokerStars(HandHistoryConverter):
 #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
 #    we need to grab hero's cards
         for street in ('PREFLOP', 'DEAL'):
-            if street in list(hand.streets.keys()):
+            if street in hand.streets.keys():
                 m = self.re_HeroCards.finditer(hand.streets[street])
                 for found in m:
 #                    if m == None:
@@ -685,7 +693,7 @@ class PokerStars(HandHistoryConverter):
             elif action.group('ATYPE') == ' stands pat':
                 hand.addStandsPat( street, action.group('PNAME'), action.group('CARDS'))
             else:
-                log.debug(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
+                log.debug(_("DEBUG:") + " " + _("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
 
 
     def readShowdownActions(self, hand):
@@ -712,13 +720,13 @@ class PokerStars(HandHistoryConverter):
             if m: winner = m.group('PNAME')
             
             if hand.koBounty > 0:
-                for pname, amount in list(koAmounts.items()):
+                for pname, amount in koAmounts.iteritems():
                     if pname == winner:
                         end = (amount + hand.endBounty[pname])
-                        hand.koCounts[pname] = old_div((amount + hand.endBounty[pname]), Decimal(hand.koBounty))
+                        hand.koCounts[pname] = (amount + hand.endBounty[pname]) / Decimal(hand.koBounty)
                     else:
                         end = 0
-                        hand.koCounts[pname] = old_div(amount, Decimal(hand.koBounty))
+                        hand.koCounts[pname] = amount / Decimal(hand.koBounty)
         else:
             for a in self.re_Bounty.finditer(hand.handText):
                 if a.group('SPLIT') == 'split':
@@ -726,7 +734,7 @@ class PokerStars(HandHistoryConverter):
                     for pname in pnames:
                         if pname not in hand.koCounts:
                             hand.koCounts[pname] = 0
-                        hand.koCounts[pname] += (old_div(1, Decimal(len(pnames))))
+                        hand.koCounts[pname] += (1 / Decimal(len(pnames)))
                 else:
                     if a.group('PNAME') not in hand.koCounts:
                         hand.koCounts[a.group('PNAME')] = 0
@@ -744,7 +752,7 @@ class PokerStars(HandHistoryConverter):
                 elif m0 == None:
                     bovadaUncalled_v1 = True
                     has_sb = len([a[2] for a in hand.actions.get('BLINDSANTES') if a[1] == 'small blind']) > 0
-                    adjustment = Decimal(hand.sb) if has_sb else Decimal(hand.bb)
+                    adjustment = (Decimal(hand.bb) - Decimal(hand.sb)) if has_sb else Decimal(hand.bb)
                     blindsantes = sum([a[2] for a in hand.actions.get('BLINDSANTES')]) 
         i=0
         pre, post = hand.handText.split('*** SUMMARY ***')

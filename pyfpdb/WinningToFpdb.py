@@ -18,9 +18,6 @@
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
 
-from __future__ import division
-from builtins import str
-from past.utils import old_div
 import L10n
 _ = L10n.get_translation()
 
@@ -258,6 +255,7 @@ class Winning(HandHistoryConverter):
     
     re_PostSB2       = re.compile(r"^%(PLYR)s posts the small blind %(CUR)s(?P<SB>[,.0-9]+)" %  substitutions, re.MULTILINE)
     re_PostBB2       = re.compile(r"^%(PLYR)s posts the big blind %(CUR)s(?P<BB>[,.0-9]+)" %  substitutions, re.MULTILINE)
+    re_PostBoth2     = re.compile(r"^%(PLYR)s posts dead %(CUR)s(?P<SBBB>[,.0-9]+)" %  substitutions, re.MULTILINE)
     re_Posts2        = re.compile(r"^%(PLYR)s posts %(CUR)s(?P<SBBB>[,.0-9]+)" %  substitutions, re.MULTILINE)
     re_Antes2        = re.compile(r"^%(PLYR)s posts ante %(CUR)s(?P<ANTE>[,.0-9]+)" % substitutions, re.MULTILINE)
     re_BringIn2      = re.compile(r"^%(PLYR)s brings[- ]in( low|) %(CUR)s(?P<BRINGIN>[,.0-9]+)" % substitutions, re.MULTILINE)
@@ -326,6 +324,8 @@ class Winning(HandHistoryConverter):
         """ %  substitutions, 
         re.MULTILINE|re.VERBOSE
     )
+    #AssFungus collected $92.25 from main pot 1
+    re_CollectPot3 = re.compile(r"^%(PLYR)s collected %(CUR)s(?P<POT>[,.\d]+)" %  substitutions, re.MULTILINE)
     
     def compilePlayerRegexs(self,  hand):
         pass
@@ -357,13 +357,13 @@ class Winning(HandHistoryConverter):
         info = {}
         if not self.re_File1.search(self.in_path):
             tmp = "Invalid filename: %s" % self.in_path
-            log.debug(("WinningToFpdb.determineGameType: '%s'") % tmp)
+            log.debug(_("WinningToFpdb.determineGameType: '%s'") % tmp)
             raise FpdbHandPartial(tmp)
             
         m = self.re_GameInfo1.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(("WinningToFpdb.determineGameType: '%s'") % tmp)
+            log.error(_("WinningToFpdb.determineGameType: '%s'") % tmp)
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -415,7 +415,7 @@ class Winning(HandHistoryConverter):
             info['currency'] = 'T$'
 
         if info['limitType'] == 'fl' and info['bb'] is not None:
-            info['sb'] = str((old_div(Decimal(mg['SB']),2)).quantize(Decimal("0.01")))
+            info['sb'] = str((Decimal(mg['SB'])/2).quantize(Decimal("0.01")))
             info['bb'] = str(Decimal(mg['SB']).quantize(Decimal("0.01")))    
 
         return info
@@ -425,7 +425,7 @@ class Winning(HandHistoryConverter):
         m = self.re_GameInfo2.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(("WinningToFpdb._determineGameType2: '%s'") % tmp)
+            log.error(_("WinningToFpdb._determineGameType2: '%s'") % tmp)
             raise FpdbParseError        
         
         mg = m.groupdict()
@@ -458,7 +458,7 @@ class Winning(HandHistoryConverter):
             info['currency'] = 'play'
 
         if info['limitType'] == 'fl' and info['bb'] is not None:
-            info['sb'] = str((old_div(Decimal(mg['SB']),2)).quantize(Decimal("0.01")))
+            info['sb'] = str((Decimal(mg['SB'])/2).quantize(Decimal("0.01")))
             info['bb'] = str(Decimal(mg['SB']).quantize(Decimal("0.01")))
 
         return info
@@ -571,14 +571,14 @@ class Winning(HandHistoryConverter):
     def _readHandInfo2(self, hand):
         #First check if partial
         if hand.handText.count('*** SUMMARY ***')!=1:
-            raise FpdbHandPartial(("Hand is not cleanly split into pre and post Summary"))
+            raise FpdbHandPartial(_("Hand is not cleanly split into pre and post Summary"))
         
         info = {}
         m  = self.re_GameInfo2.search(hand.handText)
         m1 = self.re_HandInfo.search(hand.handText)
         if m is None or m1 is None:
             tmp = hand.handText[0:200]
-            log.error(("WinningToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(_("WinningToFpdb.readHandInfo: '%s'") % tmp)
             raise FpdbParseError
 
         info.update(m.groupdict())
@@ -671,14 +671,14 @@ class Winning(HandHistoryConverter):
         if m:
             hand.buttonpos = int(m.group('BUTTON'))
         else:
-            log.info('readButton: ' + ('not found'))
+            log.info('readButton: ' + _('not found'))
             
     def _readButton2(self, hand):
         m = self.re_Button2.search(hand.handText)
         if m:
             hand.buttonpos = int(m.group('BUTTON'))
         else:
-            log.info('readButton: ' + ('not found'))
+            log.info('readButton: ' + _('not found'))
 
     def readPlayerStacks(self, hand):
         if self.version == 1:
@@ -720,16 +720,16 @@ class Winning(HandHistoryConverter):
         
     def _markStreets2(self, hand):
         if hand.gametype['base'] in ("hold"):
-            m =  re.search(r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>(.+(?P<FLOPET>\[\S\S\]))?.+(?=\*\*\* (FIRST\s)?FLOP \*\*\*)|.+)"
-                       r"(\*\*\* FLOP \*\*\*(?P<FLOP> (\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\].+(?=\*\*\* (FIRST\s)?TURN \*\*\*)|.+))?"
-                       r"(\*\*\* TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN>\[\S\S\].+(?=\*\*\* (FIRST\s)?RIVER \*\*\*)|.+))?"
+            m =  re.search(r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>(.+(?P<FLOPET>\[\S\S\]))?.+(?=\*\*\* (FLOP|FIRST FLOP|FLOP 1) \*\*\*)|.+)"
+                       r"(\*\*\* FLOP \*\*\*(?P<FLOP> (\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\].+(?=\*\*\* (TURN|FIRST TURN|TURN 1) \*\*\*)|.+))?"
+                       r"(\*\*\* TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN>\[\S\S\].+(?=\*\*\* (RIVER|FIRST RIVER|RIVER 1) \*\*\*)|.+))?"
                        r"(\*\*\* RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER>\[\S\S\].+))?"
-                       r"(\*\*\* FIRST FLOP \*\*\*(?P<FLOP1> (\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\].+(?=\*\*\* FIRST TURN \*\*\*)|.+))?"
-                       r"(\*\*\* FIRST TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN1>\[\S\S\].+(?=\*\*\* FIRST RIVER \*\*\*)|.+))?"
-                       r"(\*\*\* FIRST RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER1>\[\S\S\].+?(?=\*\*\* SECOND (FLOP|TURN|RIVER) \*\*\*)|.+))?"
-                       r"(\*\*\* SECOND FLOP \*\*\*(?P<FLOP2> (\[\S\S\] )?\[\S\S ?\S\S \S\S\].+(?=\*\*\* SECOND TURN \*\*\*)|.+))?"
-                       r"(\*\*\* SECOND TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN2>\[\S\S\].+(?=\*\*\* SECOND RIVER \*\*\*)|.+))?"
-                       r"(\*\*\* SECOND RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER2>\[\S\S\].+))?", hand.handText,re.DOTALL)
+                       r"(\*\*\* (FIRST FLOP|FLOP 1) \*\*\*(?P<FLOP1> (\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\].+(?=\*\*\* (FIRST TURN|TURN 1) \*\*\*)|.+))?"
+                       r"(\*\*\* (FIRST TURN|TURN 1) \*\*\* \[\S\S \S\S \S\S] (?P<TURN1>\[\S\S\].+(?=\*\*\* (FIRST RIVER|RIVER 1) \*\*\*)|.+))?"
+                       r"(\*\*\* (FIRST RIVER|RIVER 1) \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER1>\[\S\S\].+?(?=\*\*\* (SECOND (FLOP|TURN|RIVER)|(FLOP|TURN|RIVER) 2) \*\*\*)|.+))?"
+                       r"(\*\*\* (SECOND FLOP|FLOP 2) \*\*\*(?P<FLOP2> (\[\S\S\] )?\[\S\S ?\S\S \S\S\].+(?=\*\*\* (SECOND TURN|TURN 2) \*\*\*)|.+))?"
+                       r"(\*\*\* (SECOND TURN|TURN 2) \*\*\* \[\S\S \S\S \S\S] (?P<TURN2>\[\S\S\].+(?=\*\*\* (SECOND RIVER|RIVER 2) \*\*\*)|.+))?"
+                       r"(\*\*\* (SECOND RIVER|RIVER 2) \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER2>\[\S\S\].+))?", hand.handText,re.DOTALL)
         elif hand.gametype['base'] in ("stud"):
             m =  re.search(r"(?P<ANTES>.+(?=\*\*\* 3rd STREET \*\*\*)|.+)"
                            r"(\*\*\* 3rd STREET \*\*\*(?P<THIRD>.+(?=\*\*\* 4th STREET \*\*\*)|.+))?"
@@ -744,6 +744,8 @@ class Winning(HandHistoryConverter):
             self._readCommunityCards1(hand, street)
         else:
             self._readCommunityCards2(hand, street)
+        if street in ('FLOP1', 'TURN1', 'RIVER1', 'FLOP2', 'TURN2', 'RIVER2'):
+            hand.runItTimes = 2
 
     def _readCommunityCards1(self, hand, street): # street has been matched by markStreets, so exists in this hand
         m = self.re_Board.search(hand.streets[street])
@@ -835,6 +837,8 @@ class Winning(HandHistoryConverter):
                 #hand.addBlind(a.group('PNAME'), 'secondsb', a.group('SB'))
         for a in self.re_PostBB2.finditer(hand.handText):
             hand.addBlind(a.group('PNAME'), 'big blind', a.group('BB'))
+        for a in self.re_PostBoth2.finditer(hand.handText):
+            hand.addBlind(a.group('PNAME'), 'both', self.clearMoneyString(a.group('SBBB')))
         for a in self.re_Posts2.finditer(hand.handText):
             if Decimal(self.clearMoneyString(a.group('SBBB'))) == Decimal(hand.bb):
                 hand.addBlind(a.group('PNAME'), 'big blind', a.group('SBBB'))
@@ -851,7 +855,7 @@ class Winning(HandHistoryConverter):
 #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
 #    we need to grab hero's cards
         for street in ('PREFLOP', 'DEAL'):
-            if street in list(hand.streets.keys()):
+            if street in hand.streets.keys():
                 newcards = []
                 m = self.re_HeroCards1.finditer(hand.streets[street])
                 for found in m:
@@ -890,7 +894,7 @@ class Winning(HandHistoryConverter):
 #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
 #    we need to grab hero's cards
         for street in ('PREFLOP', 'DEAL'):
-            if street in list(hand.streets.keys()):
+            if street in hand.streets.keys():
                 newcards = []
                 m = self.re_HeroCards2.finditer(hand.streets[street])
                 for found in m:
@@ -962,7 +966,7 @@ class Winning(HandHistoryConverter):
                 else:
                     hand.addCallandRaise(street, player, amount)
             else:
-                log.debug(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
+                log.debug(_("DEBUG:") + " " + _("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
                 
     def _readAction2(self, hand, street):
         m = self.re_Action2.finditer(hand.streets[street])
@@ -983,11 +987,13 @@ class Winning(HandHistoryConverter):
             elif action.group('ATYPE') == ' bets':
                 hand.addBet( street, action.group('PNAME'), self.clearMoneyString(action.group('BET')) )
             else:
-                log.debug(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
+                log.debug(_("DEBUG:") + " " + _("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
 
     def readCollectPot(self,hand):
         if self.version == 1:
             self._readCollectPot1(hand)
+        elif hand.runItTimes == 2:
+            self._readCollectPot3(hand)
         else:
             self._readCollectPot2(hand)
     
@@ -1007,7 +1013,7 @@ class Winning(HandHistoryConverter):
             elif m0 == None:
                 bovadaUncalled_v1 = True
                 has_sb = len([a[2] for a in hand.actions.get('BLINDSANTES') if a[1] == 'small blind']) > 0
-                adjustment = Decimal(hand.sb) if has_sb else Decimal(hand.bb)
+                adjustment = (Decimal(hand.bb) - Decimal(hand.sb)) if has_sb else Decimal(hand.bb)
                 blindsantes = sum([a[2] for a in hand.actions.get('BLINDSANTES')])
         else:
             m0 = self.re_Uncalled.search(hand.handText)
@@ -1022,6 +1028,10 @@ class Winning(HandHistoryConverter):
                 hand.addCollectPot(player=m.group('PNAME'),pot=str(Decimal(pot)*2))
             else:
                 hand.addCollectPot(player=m.group('PNAME'),pot=pot)
+    
+    def _readCollectPot3(self,hand):
+        for m in self.re_CollectPot3.finditer(hand.handText):
+            hand.addCollectPot(player=m.group('PNAME'),pot=m.group('POT'))
             
     def readShowdownActions(self, hand):
         # TODO: pick up mucks also??

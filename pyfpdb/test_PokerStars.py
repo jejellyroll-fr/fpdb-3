@@ -23,6 +23,7 @@ import Configuration
 import Database
 import SQL
 import Importer
+import Exceptions
 
 config = Configuration.Config(file = "HUD_config.test.xml")
 db = Database.Database(config)

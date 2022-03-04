@@ -23,7 +23,8 @@ from __future__ import print_function
 import sys
 from imaplib import IMAP4_SSL
 from Summaries import Summaries
-from PokerStarsSummaries import PokerStarsSummaries
+import PokerStarsSummary
+import Exceptions
 
 #TODO: move all these into the config file. until then usage is: ./ImapSummaries.py YourImapHost YourImapUser YourImapPw 
 configHost=sys.argv[1]
@@ -58,7 +59,7 @@ for messageData in neededMessages:
     if response!="OK":
         raise error #TODO: show error message
     if messageData[0]=="PS":
-        tourneys.append(PokerStarsSummaries.PokerStarsSummaries(bodyData))
+        tourneys.append(PokerStarsSummary.PokerStarsSummary(bodyData))
 
 for tourney in tourneys:
     print("tourney:",tourney)
