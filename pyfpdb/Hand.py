@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
-
 from __future__ import print_function
 from builtins import map
 from builtins import str
@@ -29,6 +28,7 @@ _ = L10n.get_translation()
 import sys
 from decimal_wrapper import Decimal
 import datetime
+
 import pprint
 
 import logging
@@ -259,7 +259,7 @@ class Hand(object):
         if mucked: self.mucked.add(player)
 
         for i in range(len(closed)):
-            if closed[i] in ('', 'Xx', 'Null', 'null'):
+            if closed[i] in ('', 'Xx', 'Null', 'null', 'X'):
                 closed[i] = '0x'
 
         try:
@@ -1214,7 +1214,7 @@ class HoldemOmahaHand(Hand):
             print(("Dealt to %s [%s]" %(player, " ".join(self.holecards['PREFLOP'][player][1]))), file=fh)
         if self.hero == "":
             for player in self.shown.difference(self.dealt):
-                print(("Dealt to %s [%s]" %(player, " ".join(self.holecards['PREFLOP'][player][1]))), file=fh)
+                 print(("Dealt to %s [%s]" %(player, " ".join(self.holecards['PREFLOP'][player][1]))), file=fh)
 
         if self.actions['PREFLOP']:
             for act in self.actions['PREFLOP']:
@@ -1224,7 +1224,7 @@ class HoldemOmahaHand(Hand):
             print(("*** FLOP *** [%s]" %( " ".join(self.board['FLOP']))), file=fh)
         if self.actions['FLOP']:
             for act in self.actions['FLOP']:
-                print(self.actionString(act), file=fh)
+                print(("*** FLOP *** [%s]" %( " ".join(self.board['FLOP']))), file=fh)
 
         if self.board['TURN']:
             print(("*** TURN *** [%s] [%s]" %( " ".join(self.board['FLOP']), " ".join(self.board['TURN']))), file=fh)
@@ -1237,6 +1237,7 @@ class HoldemOmahaHand(Hand):
         if self.actions['RIVER']:
             for act in self.actions['RIVER']:
                 print(self.actionString(act), file=fh)
+
 
 
         # Some sites don't have a showdown section so we have to figure out if there should be one
@@ -1308,7 +1309,7 @@ class DrawHand(Hand):
         self.allStreets = ['BLINDSANTES', 'DEAL', 'DRAWONE']
         self.holeStreets = ['DEAL', 'DRAWONE']
         self.actionStreets = ['BLINDSANTES', 'DEAL', 'DRAWONE']
-        if gametype['category'] in ["27_3draw","badugi", "a5_3draw"]:
+        if gametype['category'] in ["27_3draw","badugi", "a5_3draw", "badacey", "badeucey", "drawmaha"]:
             self.streetList += ['DRAWTWO', 'DRAWTHREE']
             self.allStreets += ['DRAWTWO', 'DRAWTHREE']
             self.holeStreets += ['DRAWTWO', 'DRAWTHREE']
@@ -1461,7 +1462,7 @@ class DrawHand(Hand):
                     print((("Dealt to %s [%s] [%s]") % (act[0], " ".join(kc), " ".join(nc))), file=fh)
 
         if 'SHOWDOWN' in self.actions:
-            print(("*** SHOW DOWN ***"), file=fh)
+            print(("*** SHOW DOWN ***"), file=fh)                    
             #TODO: Complete SHOWDOWN
 
         # Current PS format has the lines:
@@ -1908,7 +1909,6 @@ class Pot(object):
         if len(self.pots) < 2:
             return ret;
         ret += " Main pot %s%.2f" % (self.sym, self.pots[0][0])
-
         return ret + ''.join([ (" Side pot %s%.2f." % (self.sym, self.pots[x][0]) ) for x in range(1, len(self.pots)) ])
         
 def hand_factory(hand_id, config, db_connection):

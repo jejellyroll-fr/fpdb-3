@@ -13,6 +13,8 @@ from bs4 import BeautifulSoup
 
 #'s': 'generic'
 
+#'d': 'dead card'
+
 #'b': 'board' flop turn river
 
 #'h1' to h6 : 'hand' or range

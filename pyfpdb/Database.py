@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Database.py
-
-Create and manage the database objects.
-"""
-from __future__ import print_function
-from __future__ import division
-#    Copyright 2008-2011, Ray E. Barker
+# #    Copyright 2008-2011, Ray E. Barker
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -21,7 +15,12 @@ from __future__ import division
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+"""Database.py
 
+Create and manage the database objects.
+"""
+from __future__ import print_function
+from __future__ import division
 from future import standard_library
 standard_library.install_aliases()
 from builtins import zip
@@ -37,7 +36,7 @@ from builtins import object
 # TODO:  - rebuild indexes / vacuum option
 #        - check speed of get_stats_from_hand() - add log info
 #        - check size of db, seems big? (mysql)
-#        - investigate size of mysql db (200K for just 7K hands? 2GB for 140K hands?)
+######### investigate size of mysql db (200K for just 7K hands? 2GB for 140K hands?)
 
 # postmaster -D /var/lib/pgsql/data
 
@@ -47,31 +46,26 @@ import sys
 import traceback
 from datetime import datetime, date, time, timedelta
 from time import time, strftime, sleep
-
 from decimal_wrapper import Decimal
 import string
 import re
 import queue
 import codecs
-import math 
+import math
 import pytz
 import csv
 import logging
 import random
 
+
 re_char = re.compile('[^a-zA-Z]')
 re_insert = re.compile(r"insert\sinto\s(?P<TABLENAME>[A-Za-z]+)\s(?P<COLUMNS>\(.+?\))\s+values", re.DOTALL)
 
 #    FreePokerTools modules
-
 import SQL
-
 import Card
-
 import Charset
-
 from Exceptions import *
-
 import Configuration
 
 if __name__ == "__main__":
@@ -95,7 +89,7 @@ except ImportError:
     use_numpy = False
 
 
-DB_VERSION = 213
+DB_VERSION = 216
 
 # Variance created as sqlite has a bunch of undefined aggregate functions.
 
@@ -789,6 +783,7 @@ class Database(object):
         self.hand_inc   = 1
 
         if backend == Database.MYSQL_INNODB:
+            #####not working mysql connector on py3.9####
             import MySQLdb
             if use_pool:
                 MySQLdb = pool.manage(MySQLdb, pool_size=5)
@@ -1043,8 +1038,7 @@ class Database(object):
         c.execute (q, (hand_id, ))
         row = c.fetchone()
         gameinfo = {'sitename':row[0],'category':row[1],'base':row[2],'type':row[3],'limitType':row[4],
-                'hilo':row[5],'sb':row[6],'bb':row[7], 'sbet':row[8],'bbet':row[9], 'currency':row[10],
-                'gametypeId':row[11], 'split':row[12]}
+                'hilo':row[5],'sb':row[6],'bb':row[7], 'sbet':row[8],'bbet':row[9], 'currency':row[10], 'gametypeId':row[11], 'split':row[12]}
         return gameinfo
         
 #   Query 'get_hand_info' does not exist, so it seems
@@ -1903,6 +1897,10 @@ class Database(object):
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('24', 'WinningPoker', 'WP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('25', 'PokerMaster', 'PM')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('26', 'Run It Once Poker', 'RO')")
+        c.execute("INSERT INTO Sites (id,name,code) VALUES ('27', 'GGPoker', 'GG')")
+        c.execute("INSERT INTO Sites (id,name,code) VALUES ('28', 'KingsClub', 'KC')")
+        c.execute("INSERT INTO Sites (id,name,code) VALUES ('29', 'PokerBros', 'PB')")
+        c.execute("INSERT INTO Sites (id,name,code) VALUES ('30', 'Unibet', 'UN')")
         #Fill Actions
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('1', 'ante', 'A')")
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('2', 'small blind', 'SB')")

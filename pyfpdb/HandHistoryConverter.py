@@ -14,7 +14,7 @@
 #You should have received a copy of the GNU Affero General Public License
 #along with this program. If not, see <http://www.gnu.org/licenses/>.
 #In the "official" distribution you can find the license in agpl-3.0.txt.
-
+# 
 from __future__ import print_function
 from __future__ import division
 from builtins import str
@@ -138,10 +138,10 @@ HandHistoryConverter: '%(sitename)s'
         lastParsed = None
         handsList = self.allHandsAsList()
         log.debug( ("Hands list is:") + str(handsList))
-        log.info(("Parsing %d hands") % len(handsList))
+        log.info(("Parsing %d hands") % len(list(handsList)))
         # Determine if we're dealing with a HH file or a Summary file
         # quick fix : empty files make the handsList[0] fail ==> If empty file, go on with HH parsing
-        if len(handsList) == 0 or self.isSummary(handsList[0]) == False:
+        if len(list(handsList)) == 0 or self.isSummary(handsList[0]) == False:
             self.parsedObjectType = "HH"
             for handText in handsList:
                 try:
@@ -168,7 +168,7 @@ HandHistoryConverter: '%(sitename)s'
                 else:
                     self.numErrors -= 1
                 log.info(("Removing partially written hand & resetting index"))
-            self.numHands = len(handsList)
+            self.numHands = len(list(handsList))
             endtime = time.time()
             log.info(("Read %d hands (%d failed) in %.3f seconds") % (self.numHands, (self.numErrors + self.numPartial), endtime - starttime))
         else:
@@ -423,10 +423,21 @@ or None if we fail to get the info """
     # an inheriting class can calculate it for the specific site if need be.
     def getRake(self, hand):
         hand.rake = hand.totalpot - hand.totalcollected #  * Decimal('0.05') # probably not quite right
-        round = -1 if hand.gametype['type'] == "tour" else -0.01
+        if self.siteId == 9 and hand.gametype['type'] == "tour":
+            round = -5 #round up to 10
+        elif hand.gametype['type'] == "tour":
+            round = -1
+        else:
+            round = -0.01
         if hand.rake < 0 and (not hand.roundPenny or hand.rake < round) and not hand.cashedOut:
-            log.error(("hhc.getRake(): '%s': Amount collected (%s) is greater than the pot (%s)") % (hand.handid,str(hand.totalcollected), str(hand.totalpot)))
-            raise FpdbParseError
+            if (self.siteId == 28 and 
+            ((hand.rake + Decimal(str(hand.sb)) - (0 if hand.rakes.get('rake') is None else hand.rakes['rake'])) == 0 or 
+             (hand.rake + Decimal(str(hand.sb)) + Decimal(str(hand.bb)) - (0 if hand.rakes.get('rake') is None else hand.rakes['rake'])) == 0)
+            ):
+                log.error(("hhc.getRake(): '%s': Missed sb/bb - Amount collected (%s) is greater than the pot (%s)") % (hand.handid,str(hand.totalcollected), str(hand.totalpot)))
+            else:
+                log.error(("hhc.getRake(): '%s': Amount collected (%s) is greater than the pot (%s)") % (hand.handid,str(hand.totalcollected), str(hand.totalpot)))
+                raise FpdbParseError
         elif hand.totalpot > 0 and Decimal(old_div(hand.totalpot,4)) < hand.rake and not hand.fastFold and not hand.cashedOut:
             log.error(("hhc.getRake(): '%s': Suspiciously high rake (%s) > 25 pct of pot (%s)") % (hand.handid,str(hand.rake), str(hand.totalpot)))
             raise FpdbParseError
@@ -512,8 +523,8 @@ or None if we fail to get the info """
     def maxOccSeat(self, hand):
         max = 0
         for player in hand.players:
-            if player[0] > max:
-                max = player[0]
+            if int(player[0]) > max:
+                max = int(player[0])
         return max
 
     def getStatus(self):

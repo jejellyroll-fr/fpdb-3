@@ -52,7 +52,7 @@ def splitFullTiltSummaries(summaryText):#TODO: this needs to go to FTPS.py
 
     if len(splitSummaries) <= 1:
 	    print(("DEBUG:") + " " + ("Could not split tourneys"))
-
+    
     return splitSummaries
 
 def run(config, db):

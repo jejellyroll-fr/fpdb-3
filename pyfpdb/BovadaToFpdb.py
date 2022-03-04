@@ -18,10 +18,6 @@
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
 
-from __future__ import division
-from builtins import map
-from builtins import str
-from past.utils import old_div
 import L10n
 _ = L10n.get_translation()
 
@@ -91,10 +87,10 @@ class Bovada(HandHistoryConverter):
 
     # Static regexes
     re_GameInfo     = re.compile(u"""
-          (Ignition|Bovada|Bodog(\.eu|\sUK|\sCanada|88)?)\sHand\s\#C?(?P<HID>[0-9]+):?\s+
+          (Ignition|Bovada|Bodog(\.com|\.eu|\sUK|\sCanada|88)?)\sHand\s\#C?(?P<HID>[0-9]+):?\s+
           ((?P<ZONE>Zone\sPoker\sID|TBL)\#(?P<TABLE>.+?)\s)?
           (?P<GAME>HOLDEM|OMAHA|OMAHA_HL|7CARD|7CARD\sHiLo|OMAHA\sHiLo|7CARD_HL|HOLDEMZonePoker|OMAHAZonePoker|OMAHA\sHiLoZonePoker)\s+
-          (Tournament\s\#                # open paren of tournament info Tournament #2194767 TBL#1, 
+          (Tournament\s\#(M\-)?                # open paren of tournament info Tournament #2194767 TBL#1, 
           (?P<TOURNO>\d+)\sTBL\#(?P<TABLENO>\d+),
           \s)?
           (?P<HU>1\son\s1\s)? 
@@ -107,6 +103,7 @@ class Bovada(HandHistoryConverter):
           (?P<BB>[,.0-9]+)
           \s?(?P<ISO>%(LEGAL_ISO)s)?
           \))?
+          (\s\[(?P<VERSION>MVS)\])?
           \s-\s
           (?P<DATETIME>.*$)
         """ % substitutions, re.MULTILINE|re.VERBOSE)
@@ -124,7 +121,7 @@ class Bovada(HandHistoryConverter):
          re.MULTILINE|re.VERBOSE)
     
     re_PlayerSeat = re.compile(u"^Seat\+(?P<SEAT>[0-9]+)", re.MULTILINE|re.VERBOSE)
-    re_Identify     = re.compile(u'(Ignition|Bovada|Bodog(\.eu|\sUK|\sCanada|88)?)\sHand')
+    re_Identify     = re.compile(u'(Ignition|Bovada|Bodog(\.com|\.eu|\sUK|\sCanada|88)?)\sHand')
     re_SplitHands   = re.compile('\n\n+')
     re_TailSplitHands   = re.compile('(\n\n\n+)')
     re_Button       = re.compile('Dealer : Set dealer\/Bring in spot \[(?P<BUTTON>\d+)\]', re.MULTILINE)
@@ -138,9 +135,9 @@ class Bovada(HandHistoryConverter):
     # These used to be compiled per player, but regression tests say
     # we don't have to, and it makes life faster.
     re_PostSB           = re.compile(r"^%(PLYR)s (\s?\[ME\]\s)?: (Ante\/Small (B|b)lind|Posts chip|Small (B|b)lind) (?P<CURRENCY>%(CUR)s)(?P<SB>[%(NUM)s]+)" %  substitutions, re.MULTILINE)
-    re_PostBB           = re.compile(r"^%(PLYR)s (\s?\[ME\]\s)?: (Big blind\/Bring in|Big blind) (?P<CURRENCY>%(CUR)s)(?P<BB>[%(NUM)s]+)" %  substitutions, re.MULTILINE)
+    re_PostBB           = re.compile(r"^%(PLYR)s (\s?\[ME\]\s)?: (Big (B|b)lind\/Bring in|Big (B|b)lind) (?P<CURRENCY>%(CUR)s)(?P<BB>[%(NUM)s]+)" %  substitutions, re.MULTILINE)
     re_Antes            = re.compile(r"^%(PLYR)s (\s?\[ME\]\s)?: Ante chip %(CUR)s(?P<ANTE>[%(NUM)s]+)" % substitutions, re.MULTILINE)
-    re_BringIn          = re.compile(r"^%(PLYR)s (\s?\[ME\]\s)?: (Bring_in chip|Big blind\/Bring in|Bring in)\s?(\(timeout\) )?%(CUR)s(?P<BRINGIN>[%(NUM)s]+)" % substitutions, re.MULTILINE)
+    re_BringIn          = re.compile(r"^%(PLYR)s (\s?\[ME\]\s)?: (Bring_in chip|Big (B|b)lind\/Bring in|Bring in)\s?(\(timeout\) )?%(CUR)s(?P<BRINGIN>[%(NUM)s]+)" % substitutions, re.MULTILINE)
     re_PostBoth         = re.compile(r"^%(PLYR)s (\s?\[ME\]\s)?: Posts dead chip %(CUR)s(?P<SBBB>[%(NUM)s]+)" %  substitutions, re.MULTILINE)
     re_HeroCards        = re.compile(r"^%(PLYR)s  ?\[ME\] : Card dealt to a spot \[(?P<NEWCARDS>.+?)\]" % substitutions, re.MULTILINE)
     re_Action           = re.compile(r"""(?P<ACTION>
@@ -152,8 +149,8 @@ class Bovada(HandHistoryConverter):
     re_CollectPot1      = re.compile(r"^%(PLYR)s (\s?\[ME\]\s)?: Hand (R|r)esult(\-Side (P|p)ot)? %(CUR)s(?P<POT1>[%(NUM)s]+)" %  substitutions, re.MULTILINE)
     re_Bounty           = re.compile(r"^%(PLYR)s (\s?\[ME\]\s)?: BOUNTY PRIZE \[%(CUR)s(?P<BOUNTY>[%(NUM)s]+)\]" %  substitutions, re.MULTILINE)
     re_Dealt            = re.compile(r"^%(PLYR)s (\s?\[ME\]\s)?: Card dealt to a spot" % substitutions, re.MULTILINE)
-    re_Buyin            = re.compile(r"(\s-\s\d+\s-\s(?P<TOURNAME>.+?))?\s-\s(?P<BUYIN>(?P<BIAMT>[%(LS)s\d\.]+)-(?P<BIRAKE>[%(LS)s\d\.]+)?)\s-\s" % substitutions)
-    re_Knockout         = re.compile(r"\s\((?P<BOUNTY>[%(LS)s\d\.]+)\sKnockout" % substitutions)
+    re_Buyin            = re.compile(r"(\s-\s\d+\s-\s(?P<TOURNAME>.+?))?\s-\s(?P<BUYIN>(?P<TICKET>TT)?(?P<BIAMT>[%(LS)s\d\.,]+)-(?P<BIRAKE>[%(LS)s\d\.,]+)?)\s-\s" % substitutions)
+    re_Knockout         = re.compile(r"\s\((?P<BOUNTY>[%(LS)s\d\.,]+)\sKnockout" % substitutions)
     re_Stakes           = re.compile(r"(RING|ZONE)\s-\s(?P<CURRENCY>%(LS)s|)?(?P<SB>[%(NUM)s]+)-(%(LS)s)?(?P<BB>[%(NUM)s]+)" % substitutions)
     re_Summary          = re.compile(r"\*\*\*\sSUMMARY\s\*\*\*")
     re_Hole_Third       = re.compile(r"\*\*\*\s(3RD\sSTREET|HOLE\sCARDS)\s\*\*\*")
@@ -193,7 +190,7 @@ class Bovada(HandHistoryConverter):
         if gametype['type'] == 'tour':
             handlist = re.split(self.re_SplitHands,  whole_file)
             result = re.findall(self.re_PlayerSeat, handlist[0])
-            gametype['maxSeats'] = len(result)
+            #gametype['maxSeats'] = len(result)
         return gametype
 
     def determineGameType(self, handText):
@@ -201,7 +198,7 @@ class Bovada(HandHistoryConverter):
         m = self.re_GameInfo.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(("BovadaToFpdb.determineGameType: '%s'") % tmp)
+            log.error(_("BovadaToFpdb.determineGameType: '%s'") % tmp)
             raise FpdbParseError
         
         m1 = self.re_Dealt.search(handText)
@@ -249,10 +246,10 @@ class Bovada(HandHistoryConverter):
                     info['bb'] = self.Lim_Blinds[info['bb']][1]
                 except KeyError:
                     tmp = handText[0:200]
-                    log.error(("BovadaToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
+                    log.error(_("BovadaToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
                     raise FpdbParseError
             else:
-                info['sb'] = str((old_div(Decimal(info['sb']),2)).quantize(Decimal("0.01")))
+                info['sb'] = str((Decimal(info['sb'])/2).quantize(Decimal("0.01")))
                 info['bb'] = str(Decimal(info['sb']).quantize(Decimal("0.01")))   
 
         return info
@@ -262,7 +259,7 @@ class Bovada(HandHistoryConverter):
         m = self.re_GameInfo.search(hand.handText)
         if m is None:
             tmp = hand.handText[0:200]
-            log.error(("BovadaToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(_("BovadaToFpdb.readHandInfo: '%s'") % tmp)
             raise FpdbParseError
         
         info.update(m.groupdict())
@@ -304,25 +301,29 @@ class Bovada(HandHistoryConverter):
                             hand.buyinCurrency="play"
                         else:
                             #FIXME: handle other currencies, play money
-                            log.error(("BovadaToFpdb.readHandInfo: Failed to detect currency.") + " Hand ID: %s: '%s'" % (hand.handid, info[key]))
+                            log.error(_("BovadaToFpdb.readHandInfo: Failed to detect currency.") + " Hand ID: %s: '%s'" % (hand.handid, info[key]))
                             raise FpdbParseError
                     
                         if info.get('BOUNTY') != None:
-                            info['BOUNTY'] = info['BOUNTY'].strip(u'$€£') # Strip here where it isn't 'None'
+                            info['BOUNTY'] = self.clearMoneyString(info['BOUNTY'].strip(u'$')) # Strip here where it isn't 'None'
                             hand.koBounty = int(100*Decimal(info['BOUNTY']))
                             hand.isKO = True
                         else:
                             hand.isKO = False
-
-                        info['BIAMT'] = info['BIAMT'].strip(u'$')
+                            
+                        info['BIAMT'] = self.clearMoneyString(info['BIAMT'].strip(u'$'))
                         
                         if info['BIRAKE']:
-                            info['BIRAKE'] = info['BIRAKE'].strip(u'$')
+                            info['BIRAKE'] = self.clearMoneyString(info['BIRAKE'].strip(u'$'))
                         else:
                             info['BIRAKE'] = '0'
-
-                        hand.buyin = int(100*Decimal(info['BIAMT']))
-                        hand.fee = int(100*Decimal(info['BIRAKE']))
+                        
+                        if info['TICKET'] == None:
+                            hand.buyin = int(100*Decimal(info['BIAMT']))
+                            hand.fee = int(100*Decimal(info['BIRAKE']))
+                        else:
+                            hand.buyin = 0
+                            hand.fee = 0
             if key == 'TABLE':
                 if info.get('TABLENO'):
                     hand.tablename = info.get('TABLENO')
@@ -334,9 +335,14 @@ class Bovada(HandHistoryConverter):
                 hand.maxseats = int(info[key])
             if key == 'HU' and info[key] != None:
                 hand.maxseats = 2
+            if key == 'VERSION':
+                hand.version = info[key]
                 
         if not hand.maxseats:
             hand.maxseats = 9
+            
+        if not hand.version:
+            hand.version = 'LEGACY'
     
     def readButton(self, hand):
         m = self.re_Button.search(hand.handText)
@@ -350,7 +356,7 @@ class Bovada(HandHistoryConverter):
         else:
             m = self.re_PlayerInfo.finditer(hand.handText)
         for a in m:
-            if re.search(r"%s (\s?\[ME\]\s)?: Card dealt to a spot" % re.escape(a.group('PNAME')), hand.handText):
+            if re.search(r"%s (\s?\[ME\]\s)?: Card dealt to a spot" % re.escape(a.group('PNAME')), hand.handText) or hand.version == 'MVS':
                 if not hand.buttonpos and a.group('PNAME')=='Dealer':
                     hand.buttonpos = int(a.group('SEAT'))
                 if a.group('HERO'):
@@ -361,7 +367,7 @@ class Bovada(HandHistoryConverter):
             seatNo += 1
         if len(hand.players)==0:
             tmp = hand.handText[0:200]
-            log.error(("BovadaToFpdb.readPlayerStacks: '%s'") % tmp)
+            log.error(_("BovadaToFpdb.readPlayerStacks: '%s'") % tmp)
             raise FpdbParseError
         elif len(hand.players)==10:
             hand.maxseats = 10
@@ -369,7 +375,7 @@ class Bovada(HandHistoryConverter):
     def playerSeatFromPosition(self, source, handid, position):
         player = self.playersMap.get(position)
         if player is None:
-            log.error(("Hand.%s: '%s' unknown player seat from position: '%s'") % (source, handid, position))
+            log.error(_("Hand.%s: '%s' unknown player seat from position: '%s'") % (source, handid, position))
             raise FpdbParseError
         return player            
 
@@ -540,7 +546,7 @@ class Bovada(HandHistoryConverter):
 #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
 #    we need to grab hero's cards
         for street in ('PREFLOP', 'DEAL'):
-            if street in list(hand.streets.keys()):
+            if street in hand.streets.keys():
                 foundDict = None
                 m = self.re_HeroCards.finditer(hand.handText)
                 for found in m:
@@ -616,7 +622,7 @@ class Bovada(HandHistoryConverter):
                 elif action.group('ATYPE') in (' Card dealt to a spot', ' Big blind/Bring in'):
                     pass
                 else:
-                    log.debug(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
+                    log.debug(_("DEBUG:") + " " + _("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
                 
     def allInBlind(self, hand, street, action, actiontype):
         if street in ('PREFLOP', 'DEAL'):
@@ -638,7 +644,7 @@ class Bovada(HandHistoryConverter):
             re_CollectPot = self.re_CollectPot2
         else:
             re_CollectPot = self.re_CollectPot1
-        for m in re_CollectPot.finditer(hand.handText):
+        for m in re_CollectPot.finditer(hand.handText.replace(" [ME]", "") if hand.version == 'MVS' else hand.handText):# [ME]
             collect, pot = m.groupdict(), 0
             if 'POT1' in collect and collect['POT1']!=None:
                 pot += Decimal(self.clearMoneyString(collect['POT1']))
