@@ -201,12 +201,12 @@ def twoStartCardString(card):
     ret = 'xx'
     if card > 0 and card < 170:
         s = ('2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A')
-        x = (card-1) / 13
+        x = old_div((card-1), 13)
         y = (card-1) - 13 * x
         if x == y:  ret = s[x] + s[y]
         elif x > y: ret = s[x] + s[y] + 's'
         else:       ret = s[y] + s[x] + 'o'
-    #print "twoStartCardString(", card ,") = " + ret
+    print ("twoStartCardString(", card ,") = " + ret)
     return ret
 
 def cardFromValueSuit(value, suit):
