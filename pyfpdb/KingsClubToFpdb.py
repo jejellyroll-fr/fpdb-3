@@ -266,13 +266,13 @@ class KingsClub(HandHistoryConverter):
                     info['sb'] = self.Lim_Blinds[self.clearMoneyString(mg['BB'])][0]
                     info['bb'] = self.Lim_Blinds[self.clearMoneyString(mg['BB'])][1]
                 except KeyError:
-                    info['sb'] = str((Decimal(self.clearMoneyString(mg['SB']))/2).quantize(Decimal("0.01")))
+                    info['sb'] = str((old_div(Decimal(self.clearMoneyString(mg['SB'])),2)).quantize(Decimal("0.01")))
                     info['bb'] = str(Decimal(self.clearMoneyString(mg['SB'])).quantize(Decimal("0.01"))) 
                     #tmp = handText[0:200]
                     #log.error(_("KingsClubToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
                     #raise FpdbParseError
             else:
-                info['sb'] = str((Decimal(self.clearMoneyString(mg['SB']))/2).quantize(Decimal("0.01")))
+                info['sb'] = str((old_div(Decimal(self.clearMoneyString(mg['SB'])),2)).quantize(Decimal("0.01")))
                 info['bb'] = str(Decimal(self.clearMoneyString(mg['SB'])).quantize(Decimal("0.01")))   
 
         return info
@@ -322,14 +322,14 @@ class KingsClub(HandHistoryConverter):
             if key == 'BUTTON':
                 hand.buttonpos = info[key]
         if self.re_Cancelled.search(hand.handText):
-            raise FpdbHandPartial(_("Hand '%s' was cancelled.") % hand.handid)
+            raise FpdbHandPartial(("Hand '%s' was cancelled.") % hand.handid)
     
     def readButton(self, hand):
         m = self.re_Button.search(hand.handText)
         if m:
             hand.buttonpos = int(m.group('BUTTON'))
         else:
-            log.info('readButton: ' + _('not found'))
+            log.info('readButton: ' + ('not found'))
 
     def readPlayerStacks(self, hand):
         pre, post = hand.handText.split('*** SUMMARY ***')
@@ -443,13 +443,13 @@ class KingsClub(HandHistoryConverter):
             hand.runItTimes = 2
             
     def readSTP(self, hand):
-        log.debug(_("read Splash the Pot"))
+        log.debug(("read Splash the Pot"))
         m = self.re_STP.search(hand.handText)
         if m:
             hand.addSTP(m.group('AMOUNT'))
 
     def readAntes(self, hand):
-        log.debug(_("reading antes"))
+        log.debug(("reading antes"))
         m = self.re_Antes.finditer(hand.handText)
         for player in m:
             #~ logging.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
@@ -508,7 +508,7 @@ class KingsClub(HandHistoryConverter):
                         hand.hero = found.group('PNAME')  
                         hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
 
-        for street, text in hand.streets.iteritems():
+        for street, text in list(hand.streets.items()):
             if not text or street in ('PREFLOP', 'DEAL'): continue  # already done these
             m = self.re_HeroCards.finditer(hand.streets[street])
             for found in m:

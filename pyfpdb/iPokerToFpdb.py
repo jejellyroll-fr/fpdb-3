@@ -325,7 +325,7 @@ class iPoker(HandHistoryConverter):
                     self.info['bb'] = self.Lim_Blinds[self.clearMoneyString(mg['BB'])][1]
                 except KeyError:
                     tmp = handText[0:200]
-                    log.error(_("iPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
+                    log.error(("iPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
                     raise FpdbParseError
 
         return self.info
@@ -486,14 +486,14 @@ class iPoker(HandHistoryConverter):
                 hand.gametype['sb'] = "1"
                 hand.gametype['bb'] = "2"
             elif hand.gametype['sb'] == None:
-                hand.gametype['sb'] = str(int(Decimal(hand.gametype['bb']))/2)
+                hand.gametype['sb'] = str(int(old_div(Decimal(hand.gametype['bb'])),2))
             elif hand.gametype['bb'] == None:
                 hand.gametype['bb'] = str(int(Decimal(hand.gametype['sb']))*2)
-            if int(Decimal(hand.gametype['bb']))/2 != int(Decimal(hand.gametype['sb'])):
-                if int(Decimal(hand.gametype['bb']))/2 < int(Decimal(hand.gametype['sb'])):
+            if int(old_div(Decimal(hand.gametype['bb'])),2) != int(Decimal(hand.gametype['sb'])):
+                if int(old_div(Decimal(hand.gametype['bb'])),2) < int(Decimal(hand.gametype['sb'])):
                     hand.gametype['bb'] = str(int(Decimal(hand.gametype['sb']))*2)
                 else:
-                    hand.gametype['sb'] = str(int(Decimal(hand.gametype['bb']))/2)
+                    hand.gametype['sb'] = str(int(old_div(Decimal(hand.gametype['bb'])),2))
 
     def readButton(self, hand):
         # Found in re_Player
