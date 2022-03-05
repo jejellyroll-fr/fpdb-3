@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 188 260" enable-background="new 0 0 188 260" xml:space="preserve">
+<g id="default1_Blue">
+</g>
+<g id="default2_Blue">
+</g>
+<g id="default1_Red">
+</g>
+<g id="default2_Red">
+</g>
+<g id="default1_Green">
+</g>
+<g id="default2_Green">
+</g>
+<g id="default1_Grey">
+</g>
+<g id="default2_Grey">
+</g>
+<g id="western">
+</g>
+<g id="Pool">
+</g>
+<g id="snap">
+</g>
+<g id="Blast">
+</g>
+<g id="pko">
+</g>
+<g id="other">
+	<g id="Layer_15">
+	</g>
+</g>
+<g id="girly">
+	
+		<radialGradient id="SVGID_1_" cx="45.7926" cy="-14.0956" r="267.6952" gradientTransform="matrix(1.0183 0 0 1.0188 45.7517 14.7849)" gradientUnits="userSpaceOnUse">
+		<stop  offset="1.544750e-04" style="stop-color:#FAF9F4"/>
+		<stop  offset="0.67" style="stop-color:#F7F3EA"/>
+		<stop  offset="1" style="stop-color:#E8E1D7"/>
+	</radialGradient>
+	<path fill="url(#SVGID_1_)" d="M173,260H15c-8.3,0-15-6.8-15-15V15C0,6.8,6.8,0,15,0h158c8.3,0,15,6.8,15,15V245
+		C188,253.2,181.3,260,173,260z"/>
+	<path fill="#832185" d="M164.6,246.9h5.4c3.2,0,5.8-2.5,5.8-5.4v-5.3C171.7,239.2,168,243,164.6,246.9z"/>
+	<polygon fill="#F73A6D" points="175.8,110.7 175.8,45.5 143.2,78.1 	"/>
+	
+		<rect x="120" y="87.8" transform="matrix(0.7071 0.7071 -0.7071 0.7071 120.4531 -68.7536)" fill="#FB1A67" width="46.5" height="46.5"/>
+	<polygon fill="#F80265" points="175.8,176.5 175.8,111.3 143.2,143.9 	"/>
+	<polygon fill="#ED7C78" points="143.2,12.4 142.8,11.9 77.9,11.9 77.4,12.4 110.3,45.3 	"/>
+	<path fill="#ED7C78" d="M175.8,45l0-27.6c0-2.8-2.3-5.1-5.3-5.3c-0.2,0-0.3,0-0.5,0l-26.3,0l-0.4,0.4L175.8,45z"/>
+	<path fill="#ED7C78" d="M44.6,45.3l32.9-32.9L77,11.9l-60.1,0c-1.5,0-3,0.6-4.1,1.6c0,0,0,0,0,0L44.6,45.3z"/>
+	
+		<rect x="120" y="22" transform="matrix(0.7071 0.7071 -0.7071 0.7071 73.9459 -88.0175)" fill="#F35872" width="46.5" height="46.5"/>
+	
+		<rect x="54.2" y="22" transform="matrix(0.7071 0.7071 -0.7071 0.7071 54.6819 -41.5103)" fill="#F35872" width="46.5" height="46.5"/>
+	
+		<rect x="87.1" y="54.9" transform="matrix(0.7071 0.7071 -0.7071 0.7071 87.5675 -55.1319)" fill="#F73A6D" width="46.5" height="46.5"/>
+	
+		<rect x="87.1" y="120.7" transform="matrix(0.7071 0.7071 -0.7071 0.7071 134.0748 -35.868)" fill="#F80265" width="46.5" height="46.5"/>
+	
+		<rect x="120" y="153.5" transform="matrix(0.7071 0.7071 -0.7071 0.7071 166.9603 -49.4896)" fill="#D00D70" width="46.5" height="46.5"/>
+	
+		<rect x="54.2" y="153.5" transform="matrix(0.7071 0.7071 -0.7071 0.7071 147.6964 -2.9824)" fill="#D00D70" width="46.5" height="46.5"/>
+	<path fill="#F35872" d="M11.1,17.3l0,60.3l0.5,0.5l32.9-32.9L12.8,13.5C11.7,14.6,11.1,15.9,11.1,17.3z"/>
+	<polygon fill="#D00D70" points="11.1,144.4 11.1,209.1 11.7,209.7 44.6,176.8 11.7,143.9 	"/>
+	
+		<rect x="87.1" y="186.4" transform="matrix(0.7071 0.7071 -0.7071 0.7071 180.582 -16.6041)" fill="#AA177A" width="46.5" height="46.5"/>
+	<path fill="#AA177A" d="M175.7,242.2c0-0.2,0.1-0.5,0.1-0.7l0-64.4l-32.6,32.6L175.7,242.2z"/>
+	
+		<rect x="21.3" y="186.4" transform="matrix(0.7071 0.7071 -0.7071 0.7071 161.3181 29.9032)" fill="#AA177A" width="46.5" height="46.5"/>
+	<polygon fill="#5D2B8F" points="114.7,246.9 110.3,242.5 105.9,246.9 	"/>
+	<polygon fill="#5D2B8F" points="49,246.9 44.6,242.5 40.2,246.9 	"/>
+	
+		<rect x="21.3" y="54.9" transform="matrix(0.7071 0.7071 -0.7071 0.7071 68.3036 -8.6247)" fill="#F73A6D" width="46.5" height="46.5"/>
+	
+		<rect x="54.2" y="87.8" transform="matrix(0.7071 0.7071 -0.7071 0.7071 101.1892 -22.2463)" fill="#FB1A67" width="46.5" height="46.5"/>
+	<polygon fill="#FB1A67" points="11.1,78.7 11.1,143.4 11.7,143.9 44.6,111 11.7,78.1 	"/>
+	
+		<rect x="21.3" y="120.7" transform="matrix(0.7071 0.7071 -0.7071 0.7071 114.8108 10.6392)" fill="#F80265" width="46.5" height="46.5"/>
+	<path fill="#832185" d="M175.8,242.1l-32.5-32.5l-32.9,32.9l4.4,4.4l55.2,0c0.7,0,1.4-0.1,2.1-0.4l3.5-3.5
+		C175.7,242.7,175.7,242.4,175.8,242.1z"/>
+	<polygon fill="#832185" points="110.3,242.5 77.4,209.6 44.6,242.5 49,246.9 105.9,246.9 	"/>
+	<path fill="#832185" d="M11.7,209.6l-0.5,0.5l0,31.4c0,2.8,2.3,5.1,5.3,5.3c0.2,0,0.3,0,0.5,0l23.2,0l4.4-4.4L11.7,209.6z"/>
+</g>
+</svg>
