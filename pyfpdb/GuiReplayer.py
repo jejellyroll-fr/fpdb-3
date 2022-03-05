@@ -50,14 +50,14 @@ from decimal_wrapper import Decimal
 import copy
 import os
 
-CARD_HEIGHT = 42
-CARD_WIDTH = 30
+CARD_HEIGHT = 70
+CARD_WIDTH = 50
 
 class GuiReplayer(QWidget):
     """A Replayer to replay hands."""
     def __init__(self, config, querylist, mainwin, handlist):
         QWidget.__init__(self, None)
-        self.setFixedSize(800, 680)
+        self.setFixedSize(982, 680)
         self.conf = config
         self.main_window = mainwin
         self.sql = querylist
