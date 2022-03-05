@@ -352,7 +352,7 @@ class PartyPoker(HandHistoryConverter):
                     info['buyinType'] = 'shallow'
                 except KeyError:
                     tmp = handText[0:200]
-                    log.error(_("PartyPokerToFpdb.determineGameType: NLim_Blinds_20bb has no lookup for '%s' - '%s'") % (mg['CASHBI'], tmp))
+                    log.error(("PartyPokerToFpdb.determineGameType: NLim_Blinds_20bb has no lookup for '%s' - '%s'") % (mg['CASHBI'], tmp))
                     raise FpdbParseError
             else:
                 try:
@@ -366,7 +366,7 @@ class PartyPoker(HandHistoryConverter):
                     info['bb'] = self.Lim_Blinds[nl_bb][1]
                 except KeyError:
                     tmp = handText[0:200]
-                    log.error(_("PartyPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (nl_bb, tmp))
+                    log.error(("PartyPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (nl_bb, tmp))
                     raise FpdbParseError
         else:
             if info['category'] == '6_holdem':
@@ -407,10 +407,10 @@ class PartyPoker(HandHistoryConverter):
                     info['bb'] = self.Lim_Blinds[mg['BB']][1]
                 except KeyError:
                     tmp = handText[0:200]
-                    log.error(_("PartyPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
+                    log.error(("PartyPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
                     raise FpdbParseError
             else:
-                info['sb'] = str((Decimal(mg['SB'])/2).quantize(Decimal("0.01")))
+                info['sb'] = str((old_div(Decimal(mg['SB']),2)).quantize(Decimal("0.01")))
                 info['bb'] = str(Decimal(mg['SB']).quantize(Decimal("0.01")))
         #print "DEUBG: DGT.info: %s" % info
         return info

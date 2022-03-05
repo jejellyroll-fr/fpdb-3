@@ -269,8 +269,11 @@ class GuiReplayer(QWidget):
 
         self.states = []
         print (hand)
+        print(hand.gametype)
+        print(type(hand.gametype))
+        print(hand.sitename)
         state = TableState(hand)
-        print (state)
+        #print (state)
         seenStreets = []
         for street in hand.allStreets:
             if state.called > 0:

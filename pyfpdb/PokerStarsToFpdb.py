@@ -349,7 +349,7 @@ class PokerStars(HandHistoryConverter):
                     info['bb'] = self.Lim_Blinds[mg['BB']][1]
                 except KeyError:
                     tmp = handText[0:200]
-                    log.error(_("PokerStarsToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
+                    log.error(("PokerStarsToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
                     raise FpdbParseError
             else:
                 info['sb'] = str((Decimal(mg['SB'])/2).quantize(Decimal("0.01")))

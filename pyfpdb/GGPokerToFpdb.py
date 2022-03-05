@@ -301,10 +301,10 @@ class GGPoker(HandHistoryConverter):
                     info['bb'] = self.Lim_Blinds[self.clearMoneyString(mg['BB'])][1]
                 except KeyError:
                     tmp = handText[0:200]
-                    log.error(_("GGPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
+                    log.error(("GGPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
                     raise FpdbParseError
             else:
-                info['sb'] = str((Decimal(self.clearMoneyString(mg['SB']))/2).quantize(Decimal("0.01")))
+                info['sb'] = str((old_div(Decimal(self.clearMoneyString(mg['SB'])),2)).quantize(Decimal("0.01")))
                 info['bb'] = str(Decimal(self.clearMoneyString(mg['SB'])).quantize(Decimal("0.01")))    
 
         return info
@@ -505,7 +505,7 @@ class GGPoker(HandHistoryConverter):
             hand.addSTP(m.group('AMOUNT'))
 
     def readAntes(self, hand):
-        log.debug(_("reading antes"))
+        log.debug(("reading antes"))
         m = self.re_Antes.finditer(hand.handText)
         for player in m:
             #~ logging.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
@@ -537,7 +537,7 @@ class GGPoker(HandHistoryConverter):
                 straddles[a.group('PNAME')] = self.clearMoneyString(a.group('STRADDLE'))
             elif Decimal(straddles[a.group('PNAME')]) < Decimal(self.clearMoneyString(a.group('STRADDLE'))):
                 straddles[a.group('PNAME')] = self.clearMoneyString(a.group('STRADDLE'))
-        for p, amount in straddles.iteritems():
+        for p, amount in list(straddles.items()):
             hand.addBlind(p, 'straddle', amount)
         for a in self.re_PostBB.finditer(hand.handText):
             if straddles.get(a.group('PNAME')) is None:
@@ -560,7 +560,7 @@ class GGPoker(HandHistoryConverter):
                         newcards = found.group('NEWCARDS').split(' ')
                         hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
 
-        for street, text in hand.streets.iteritems():
+        for street, text in list(hand.streets.items()):
             if not text or street in ('PREFLOP', 'DEAL'): continue  # already done these
             m = self.re_HeroCards.finditer(hand.streets[street])
             for found in m:
