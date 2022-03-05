@@ -11,6 +11,7 @@ FPDB is a poker tools - HUD - Replayer
 
 - not working mysql connector on py3.9 -> import MySQLdb
 - mot working translation -> from icu import Locale
+- add odds calc (fast solution-> use Pokerprotools online WIP) 
 
 
 ## Requirement
