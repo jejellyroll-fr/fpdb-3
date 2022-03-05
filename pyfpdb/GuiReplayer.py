@@ -117,9 +117,11 @@ class GuiReplayer(QWidget):
 
     
     def paintEvent(self, event):
+
         pot_odds = 0
         new_pot = 0
         percent = '%'
+
         if self.tableImage is None or self.playerBackdrop is None:
             try:
                 self.playerBackdrop = QImage(os.path.join(self.conf.graphics_path, "playerbackdrop.png"))
@@ -149,7 +151,7 @@ class GuiReplayer(QWidget):
 
         if len(self.states) == 0:
             return
-
+ 
         state = self.states[self.stateSlider.value()]
 
         communityLeft = int(old_div(self.tableImage.width(), 2) - 2.5 * self.cardwidth)
@@ -157,6 +159,8 @@ class GuiReplayer(QWidget):
 
         convertx = lambda x: int(x * self.tableImage.width() * 0.8) + old_div(self.tableImage.width(), 2)
         converty = lambda y: int(y * self.tableImage.height() * 0.6) + old_div(self.tableImage.height(), 2)
+
+        painter.drawText(QRect(-40,0,600,40),Qt.AlignCenter,self.info)
 
         for player in list(state.players.values()):
             playerx = convertx(player.x)
@@ -268,11 +272,83 @@ class GuiReplayer(QWidget):
         self.currency = hand.sym
 
         self.states = []
+
+        #info for drawing (game, limite, site ...)
         print (hand)
         print(hand.gametype)
-        print(type(hand.gametype))
-        print(hand.sitename)
+        info_gen = hand.gametype['category']
+        if info_gen == "omahahilo":
+            info_gen = "Omaha Hi/Lo"
+        elif info_gen == "27_1draw":
+            info_gen = "Single Draw 2-7 Lowball"
+        elif info_gen == "27_3draw":
+            info_gen = "Triple Draw 2-7 Lowball"
+        elif info_gen == "a5_3draw":
+            info_gen = "Triple Draw A-5 Lowball"
+        elif info_gen == "5_studhi":
+            info_gen = "5 Card Stud"   
+        elif info_gen == "badugi":
+            info_gen = "Badugi"
+        elif info_gen == "badacey":
+            info_gen = "Badacey"
+        elif info_gen == "badeucey":
+            info_gen = "Badeucey"
+        elif info_gen == "drawmaha":
+            info_gen = "2-7 Drawmaha"        
+        elif info_gen == "a5_1draw":
+            info_gen = "A-5 Single Draw"
+        elif info_gen == "27_razz":
+            info_gen = "2-7 Razz"
+        elif info_gen == "fivedraw":
+            info_gen = "5 Card Draw"
+        elif info_gen == "holdem":
+            info_gen = "Hold'em"   
+        elif info_gen == "6_holdem":
+            info_gen = "Hold'em"
+        elif info_gen == "omahahi":
+            info_gen = "Omaha"
+        elif info_gen == "razz":
+            info_gen = "Razz"
+        elif info_gen == "studhi":
+            info_gen = "7 Card Stud"  
+        elif info_gen == "studhilo":
+            info_gen = "7 Card Stud Hi/Lo"
+        elif info_gen == "5_omahahi":
+            info_gen = "5 Card Omaha"
+        elif info_gen == "5_omaha8":
+            info_gen = "5 Card Omaha Hi/Lo"
+        elif info_gen == "cour_hi":
+            info_gen = "Courchevel"   
+        elif info_gen == "cour_hilo":
+            info_gen = "Courchevel Hi/Lo"
+        elif info_gen == "2_holdem":
+            info_gen = "Double hold'em"
+        elif info_gen == "irish":
+            info_gen = "Irish"
+        elif info_gen == "6_omahahi":
+            info_gen = "6 Card Omaha"                                               
+        else:
+            info_gen = "unknown"
+        limit_info = hand.gametype['limitType']
+        if limit_info == "fl":
+            limit_info = "Fixed Limit"
+        elif limit_info == "nl":
+            limit_info = "No Limit"
+        elif limit_info == "pl":
+            limit_info = "Pot Limit"
+        elif limit_info == "cn":
+            limit_info = "Cap No Limit"
+        elif limit_info == "cp":
+            limit_info = "Cap Pot Limit"
+        else:
+            limit_info = "unknown"
+        print(limit_info)
+        self.info = str(limit_info)+" "+str(info_gen)+ " "+str(hand.gametype['bb']) + str(hand.gametype['currency']) +" hand played on "+str(hand.sitename)
+
+        
+        
         state = TableState(hand)
+        
         #print (state)
         seenStreets = []
         for street in hand.allStreets:
