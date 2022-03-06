@@ -1,5 +1,5 @@
 # FPDB 3
-starting new project base on fpdb (tx to all contibs)
+starting new project base on fpdb python3 adaptation of MegaphoneJon (tx to all previous contibs)
 ## Updating to python 3.9
 FPDB is a poker tools - HUD - Replayer
 
@@ -8,10 +8,16 @@ FPDB is a poker tools - HUD - Replayer
 - see fpdb.drawio (WIP)
 
 ## to do
-
+database
 - not working mysql connector on py3.9 -> import MySQLdb
+translation
 - mot working translation -> from icu import Locale
+pokerstove
 - add odds calc (fast solution-> use Pokerprotools online WIP) 
+replayer
+- rethink the distribution of players around the table
+import
+- correct bug on winamax (no SB)
 
 
 ## Requirement
