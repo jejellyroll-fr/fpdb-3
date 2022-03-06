@@ -21,7 +21,7 @@ from PyQt5.QtGui import (QPixmap, QPainter)
 from PyQt5.QtSvg import QSvgRenderer
 
 class Deck(object):
-    def __init__(self, config, deck_type=u'momoko', card_back=u'back04', width=30, height=42):
+    def __init__(self, config, deck_type=u'simple', card_back=u'back04', width=30, height=42):
         self.__width = width
         self.__height = height
         self.__cardspath = os.path.join(config.graphics_path, u"cards", deck_type)

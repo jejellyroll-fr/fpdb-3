@@ -50,14 +50,14 @@ from decimal_wrapper import Decimal
 import copy
 import os
 
-CARD_HEIGHT = 70
-CARD_WIDTH = 50
+CARD_HEIGHT = 49
+CARD_WIDTH = 35
 
 class GuiReplayer(QWidget):
     """A Replayer to replay hands."""
     def __init__(self, config, querylist, mainwin, handlist):
         QWidget.__init__(self, None)
-        self.setFixedSize(982, 680)
+        self.setFixedSize(1280, 720)
         self.conf = config
         self.main_window = mainwin
         self.sql = querylist
@@ -145,7 +145,7 @@ class GuiReplayer(QWidget):
 
         painter = QPainter(self)
        
-        painter.drawImage(QPoint(0,0), self.tableImage)
+        painter.drawImage(QPoint(150,30), self.tableImage)
         
         
 
@@ -154,19 +154,22 @@ class GuiReplayer(QWidget):
  
         state = self.states[self.stateSlider.value()]
 
-        communityLeft = int(old_div(self.tableImage.width(), 2) - 2.5 * self.cardwidth)
-        communityTop = int(old_div(self.tableImage.height(), 2) - 1.75 * self.cardheight)
-
-        convertx = lambda x: int(x * self.tableImage.width() * 0.8) + old_div(self.tableImage.width(), 2)
-        converty = lambda y: int(y * self.tableImage.height() * 0.6) + old_div(self.tableImage.height(), 2)
-
+                  
+        communityLeft = int(old_div(self.tableImage.width(), 1.2) - 2.5 * self.cardwidth)
+        communityTop = int(old_div(self.tableImage.height(), 1.2) - 1.75 * self.cardheight)
+        print('cl',communityLeft)
+        print('ct',communityTop)
+        convertx = lambda x: int(x * self.tableImage.width() * 0.9) + old_div(self.tableImage.width(), 1.5)
+        converty = lambda y: int(y * self.tableImage.height() * 0.7) + old_div(self.tableImage.height(), 1.7)
+        print('cx',convertx)
+        print('cy',converty)
         painter.drawText(QRect(-40,0,600,40),Qt.AlignCenter,self.info)
 
         for player in list(state.players.values()):
             playerx = convertx(player.x)
-           
+            print('px',playerx)
             playery = converty(player.y)
-            
+            print('py',playery)
             painter.drawImage(QPoint(playerx - old_div(self.playerBackdrop.width(), 2), playery - 3), self.playerBackdrop)
             
             if player.action=="folds":
