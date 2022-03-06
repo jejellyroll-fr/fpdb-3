@@ -1,0 +1,2114 @@
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6643-1643823268 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:34:28 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: Carlito59350 (2€)
+Seat 2: jelachatte (2€)
+Seat 3: TIKItes26 (3.55€)
+Seat 4: Choupette_64 (2€)
+Seat 5: coreve28 (2€)
+Seat 6: dent95 (1.18€)
+*** ANTE/BLINDS ***
+Carlito59350 posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [2c 7d Ad 5c]
+*** PRE-FLOP *** 
+TIKItes26 calls 0.02€
+Choupette_64 calls 0.02€
+coreve28 calls 0.02€
+dent95 calls 0.02€
+Carlito59350 folds
+jelachatte checks
+*** FLOP *** [3s Ks 3d]
+jelachatte checks
+TIKItes26 checks
+Choupette_64 bets 0.02€
+coreve28 folds
+dent95 folds
+jelachatte folds
+TIKItes26 folds
+Choupette_64 collected 0.12€ from pot
+*** SUMMARY ***
+Total pot 0.12€ | Rake 0.01€
+Board: [3s Ks 3d]
+Seat 4: Choupette_64 won 0.12€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6645-1643823322 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:35:22 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2€)
+Seat 2: Scie Rose (4.93€)
+Seat 3: Carlito59350 (1.95€)
+Seat 4: TIKItes26 (3.53€)
+Seat 5: Epouvantable (6.30€)
+Seat 6: Choupette_64 (2.08€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Scie Rose posts big blind 0.02€
+Dealt to jelachatte [Ad 9s 6c 8d]
+*** PRE-FLOP *** 
+Carlito59350 calls 0.02€
+TIKItes26 folds
+Epouvantable raises 0.07€ to 0.09€
+Choupette_64 calls 0.09€
+jelachatte calls 0.08€
+Scie Rose calls 0.07€
+Carlito59350 calls 0.07€
+*** FLOP *** [7c 6d Kh]
+jelachatte checks
+Scie Rose bets 0.23€
+Carlito59350 calls 0.23€
+Epouvantable raises 0.23€ to 0.46€
+Choupette_64 folds
+jelachatte calls 0.46€
+Scie Rose calls 0.23€
+Carlito59350 calls 0.23€
+*** TURN *** [7c 6d Kh][8s]
+jelachatte bets 1.45€ and is all-in
+Scie Rose calls 1.45€
+Carlito59350 calls 1.40€ and is all-in
+Epouvantable calls 1.45€
+*** RIVER *** [7c 6d Kh 8s][4h]
+Scie Rose checks
+Epouvantable checks
+*** SHOW DOWN ***
+jelachatte shows [Ad 9s 6c 8d] (Two pairs : 8 and 6)
+Scie Rose shows [Kd 7d 7h 6h] (Trips of 7)
+Carlito59350 shows [5d 9h Jc Qh] (Straight 9 high)
+Epouvantable shows [3c Kc Ks Ts] (Trips of Kings)
+Epouvantable collected 0.15€ from side pot 1
+Carlito59350 collected 7.29€ from main pot
+*** SUMMARY ***
+Total pot 7.44€ | Rake 0.70€
+Board: [7c 6d Kh 8s 4h]
+Seat 1: jelachatte (small blind) showed [Ad 9s 6c 8d] and lost with Two pairs : 8 and 6
+Seat 2: Scie Rose (big blind) showed [Kd 7d 7h 6h] and lost with Trips of 7
+Seat 3: Carlito59350 showed [5d 9h Jc Qh] and won 7.29€ with Straight 9 high
+Seat 5: Epouvantable showed [3c Kc Ks Ts] and won 0.15€ with Trips of Kings
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6649-1643823412 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:36:52 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: wmx-ejqewo1 (0.48€)
+Seat 2: FISTEURAGREE (1.98€)
+Seat 3: jelachatte (2€)
+Seat 4: dent95 (1€)
+Seat 5: TIKItes26 (3.52€)
+Seat 6: Scie Rose (2.93€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+wmx-ejqewo1 posts small blind 0.01€
+FISTEURAGREE posts big blind 0.02€
+Dealt to jelachatte [6c Jd 9h 2d]
+*** PRE-FLOP *** 
+jelachatte folds
+dent95 calls 0.02€
+TIKItes26 calls 0.02€
+Scie Rose calls 0.02€
+wmx-ejqewo1 calls 0.01€
+FISTEURAGREE checks
+*** FLOP *** [8c Ks 8h]
+wmx-ejqewo1 bets 0.02€
+FISTEURAGREE folds
+dent95 folds
+TIKItes26 calls 0.02€
+Scie Rose folds
+*** TURN *** [8c Ks 8h][3s]
+wmx-ejqewo1 bets 0.02€
+TIKItes26 raises 0.04€ to 0.06€
+wmx-ejqewo1 calls 0.04€
+*** RIVER *** [8c Ks 8h 3s][5c]
+wmx-ejqewo1 bets 0.02€
+TIKItes26 calls 0.02€
+*** SHOW DOWN ***
+wmx-ejqewo1 shows [5d Ad Ts Td] (Two pairs : Tens and 8)
+TIKItes26 shows [Qd 8s Ac Qh] (Trips of 8)
+TIKItes26 collected 0.37€ from pot
+*** SUMMARY ***
+Total pot 0.37€ | Rake 0.03€
+Board: [8c Ks 8h 3s 5c]
+Seat 1: wmx-ejqewo1 (small blind) showed [5d Ad Ts Td] and lost with Two pairs : Tens and 8
+Seat 5: TIKItes26 showed [Qd 8s Ac Qh] and won 0.37€ with Trips of 8
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6650-1643823429 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:37:09 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: Choupette_64 (2€)
+Seat 2: mjose25 (2.45€)
+Seat 3: Talab 07 (3.04€)
+Seat 4: jelachatte (2€)
+Seat 5: TorviCalls (2.59€)
+Seat 6: Adicte (0.66€)
+*** ANTE/BLINDS ***
+Choupette_64 posts small blind 0.01€
+mjose25 posts big blind 0.02€
+Dealt to jelachatte [Js 9h As Td]
+*** PRE-FLOP *** 
+Talab 07 calls 0.02€
+jelachatte raises 0.07€ to 0.09€
+TorviCalls folds
+Adicte calls 0.09€
+Choupette_64 folds
+mjose25 calls 0.07€
+Talab 07 calls 0.07€
+*** FLOP *** [4h Tc 6d]
+mjose25 checks
+Talab 07 checks
+jelachatte bets 0.19€
+Adicte calls 0.19€
+mjose25 calls 0.19€
+Talab 07 folds
+*** TURN *** [4h Tc 6d][Qh]
+mjose25 checks
+jelachatte bets 0.71€
+Adicte calls 0.38€ and is all-in
+mjose25 calls 0.71€
+*** RIVER *** [4h Tc 6d Qh][Ks]
+mjose25 checks
+jelachatte bets 1.01€ and is all-in
+mjose25 folds
+*** SHOW DOWN ***
+Adicte shows [7h Kd 6c 8h] (Two pairs : Kings and 6)
+jelachatte shows [Js 9h As Td] (Straight Ace high)
+jelachatte collected 3.48€ from pot
+*** SUMMARY ***
+Total pot 3.48€ | Rake 0.27€
+Board: [4h Tc 6d Qh Ks]
+Seat 4: jelachatte showed [Js 9h As Td] and won 3.48€ with Straight Ace high
+Seat 6: Adicte (button) showed [7h Kd 6c 8h] and lost with Two pairs : Kings and 6
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6656-1643823537 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:38:57 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: TIKItes26 (4.11€)
+Seat 2: Choupette_64 (2€)
+Seat 3: TorviCalls (2.52€)
+Seat 4: ---Big-M--- (1.93€)
+Seat 5: FISTEURAGREE (1.94€)
+Seat 6: jelachatte (3.48€)
+*** ANTE/BLINDS ***
+TIKItes26 posts small blind 0.01€
+Choupette_64 posts big blind 0.02€
+Dealt to jelachatte [3c 5h Jh 5s]
+*** PRE-FLOP *** 
+TorviCalls folds
+---Big-M--- folds
+FISTEURAGREE folds
+jelachatte folds
+TIKItes26 folds
+Choupette_64 collected 0.03€ from pot
+*** SUMMARY ***
+Total pot 0.03€ | No rake
+Seat 2: Choupette_64 (big blind) won 0.03€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6655-1643823521 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:38:41 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: TorviCalls (2.53€)
+Seat 2: Talab 07 (2.95€)
+Seat 3: ---Big-M--- (1.93€)
+Seat 4: FISTEURAGREE (1.94€)
+Seat 5: jelachatte (3.48€)
+Seat 6: mjose25 (1.46€)
+*** ANTE/BLINDS ***
+TorviCalls posts small blind 0.01€
+Talab 07 posts big blind 0.02€
+Dealt to jelachatte [4c Ts Jc Kd]
+*** PRE-FLOP *** 
+---Big-M--- folds
+FISTEURAGREE folds
+jelachatte folds
+mjose25 raises 0.02€ to 0.04€
+TorviCalls folds
+Talab 07 calls 0.02€
+*** FLOP *** [5h 3h 2s]
+Talab 07 bets 0.02€
+mjose25 calls 0.02€
+*** TURN *** [5h 3h 2s][6d]
+Talab 07 checks
+mjose25 checks
+*** RIVER *** [5h 3h 2s 6d][Kh]
+Talab 07 bets 0.10€
+mjose25 folds
+Talab 07 collected 0.22€ from pot
+*** SUMMARY ***
+Total pot 0.22€ | Rake 0.01€
+Board: [5h 3h 2s 6d Kh]
+Seat 2: Talab 07 (big blind) won 0.22€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6658-1643823555 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:39:15 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (3.48€)
+Seat 2: FISTEURAGREE (1.94€)
+Seat 3: Carlito59350 (7.35€)
+Seat 4: Choupette_64 (2.01€)
+Seat 5: wmx-ejqewo1 (0.50€)
+Seat 6: ---Big-M--- (1.93€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+FISTEURAGREE posts big blind 0.02€
+Dealt to jelachatte [9d 4h 3h Ts]
+*** PRE-FLOP *** 
+Carlito59350 raises 0.05€ to 0.07€
+Choupette_64 calls 0.07€
+wmx-ejqewo1 calls 0.07€
+---Big-M--- raises 0.28€ to 0.35€
+jelachatte folds
+FISTEURAGREE folds
+Carlito59350 calls 0.28€
+Choupette_64 calls 0.28€
+wmx-ejqewo1 raises 0.15€ to 0.50€ and is all-in
+---Big-M--- calls 0.15€
+Carlito59350 calls 0.15€
+Choupette_64 calls 0.15€
+*** FLOP *** [7c 6h Js]
+Carlito59350 bets 2.13€
+Choupette_64 folds
+---Big-M--- calls 1.43€ and is all-in
+*** TURN *** [7c 6h Js][5s]
+*** RIVER *** [7c 6h Js 5s][6d]
+*** SHOW DOWN ***
+wmx-ejqewo1 shows [Qs 3c Th Qc] (Two pairs : Queens and 6)
+---Big-M--- shows [4s 7d Kd Ks] (Two pairs : Kings and 6)
+Carlito59350 shows [Jd 5d Jh 9s] (Full of Jacks and 6)
+Carlito59350 collected 5.20€ from pot
+*** SUMMARY ***
+Total pot 5.20€ | Rake 0.49€
+Board: [7c 6h Js 5s 6d]
+Seat 3: Carlito59350 showed [Jd 5d Jh 9s] and won 5.20€ with Full of Jacks and 6
+Seat 5: wmx-ejqewo1 showed [Qs 3c Th Qc] and lost with Two pairs : Queens and 6
+Seat 6: ---Big-M--- (button) showed [4s 7d Kd Ks] and lost with Two pairs : Kings and 6
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6659-1643823576 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:39:36 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: FISTEURAGREE (1.92€)
+Seat 2: TorviCalls (2.52€)
+Seat 3: jelachatte (3.47€)
+Seat 4: TIKItes26 (4.08€)
+Seat 5: coreve28 (1.41€)
+Seat 6: Scie Rose (3.10€)
+*** ANTE/BLINDS ***
+FISTEURAGREE posts small blind 0.01€
+TorviCalls posts big blind 0.02€
+Dealt to jelachatte [Th Kc 4s 6s]
+*** PRE-FLOP *** 
+jelachatte folds
+TIKItes26 calls 0.02€
+coreve28 calls 0.02€
+Scie Rose calls 0.02€
+FISTEURAGREE calls 0.01€
+TorviCalls raises 0.06€ to 0.08€
+TIKItes26 calls 0.06€
+coreve28 calls 0.06€
+Scie Rose calls 0.06€
+FISTEURAGREE calls 0.06€
+*** FLOP *** [Tc Td Qs]
+FISTEURAGREE checks
+TorviCalls checks
+TIKItes26 checks
+coreve28 bets 0.02€
+Scie Rose folds
+FISTEURAGREE folds
+TorviCalls calls 0.02€
+TIKItes26 folds
+*** TURN *** [Tc Td Qs][9d]
+TorviCalls checks
+coreve28 bets 0.02€
+TorviCalls raises 0.23€ to 0.25€
+coreve28 folds
+TorviCalls collected 0.66€ from pot
+*** SUMMARY ***
+Total pot 0.66€ | Rake 0.05€
+Board: [Tc Td Qs 9d]
+Seat 2: TorviCalls (big blind) won 0.66€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6661-1643823623 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:40:23 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: Carlito59350 (9.92€)
+Seat 2: Scie Rose (3.02€)
+Seat 3: FISTEURAGREE (1.84€)
+Seat 4: jelachatte (3.45€)
+Seat 5: Epouvantable (4.31€)
+Seat 6: TIKItes26 (4€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+Carlito59350 posts small blind 0.01€
+Scie Rose posts big blind 0.02€
+Dealt to jelachatte [6h 3s 7c Ac]
+*** PRE-FLOP *** 
+FISTEURAGREE folds
+jelachatte folds
+Epouvantable raises 0.05€ to 0.07€
+TIKItes26 folds
+Carlito59350 calls 0.06€
+Scie Rose folds
+*** FLOP *** [Th Qc 5h]
+Carlito59350 bets 0.02€
+Epouvantable calls 0.02€
+*** TURN *** [Th Qc 5h][2d]
+Carlito59350 bets 0.02€
+Epouvantable calls 0.02€
+*** RIVER *** [Th Qc 5h 2d][7h]
+Carlito59350 bets 0.34€
+Epouvantable folds
+Carlito59350 collected 0.66€ from pot
+*** SUMMARY ***
+Total pot 0.66€ | Rake 0.02€
+Board: [Th Qc 5h 2d 7h]
+Seat 1: Carlito59350 (small blind) won 0.66€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6662-1643823644 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:40:44 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: Scie Rose (3€)
+Seat 2: TIKItes26 (4€)
+Seat 3: TorviCalls (2.83€)
+Seat 4: coreve28 (1.29€)
+Seat 5: jelachatte (3.45€)
+Seat 6: FISTEURAGREE (1.84€)
+*** ANTE/BLINDS ***
+Scie Rose posts small blind 0.01€
+TIKItes26 posts big blind 0.02€
+Dealt to jelachatte [Qh Td 7h Jc]
+*** PRE-FLOP *** 
+TorviCalls folds
+coreve28 calls 0.02€
+jelachatte raises 0.07€ to 0.09€
+FISTEURAGREE folds
+Scie Rose folds
+TIKItes26 folds
+coreve28 calls 0.07€
+*** FLOP *** [7d 6s 3c]
+coreve28 checks
+jelachatte bets 0.11€
+coreve28 folds
+jelachatte collected 0.30€ from pot
+*** SUMMARY ***
+Total pot 0.30€ | Rake 0.02€
+Board: [7d 6s 3c]
+Seat 5: jelachatte won 0.30€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6660-1643823602 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:40:02 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: Talab 07 (3.01€)
+Seat 2: jelachatte (3.47€)
+Seat 3: Epouvantable (4.31€)
+Seat 4: dent95 (1.36€)
+Seat 5: mjose25 (1.40€)
+Seat 6: Choupette_64 (2€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+Talab 07 posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [2s 3h Qh 5c]
+*** PRE-FLOP *** 
+Epouvantable folds
+dent95 calls 0.02€
+mjose25 calls 0.02€
+Choupette_64 raises 0.02€ to 0.04€
+Talab 07 calls 0.03€
+jelachatte folds
+dent95 calls 0.02€
+mjose25 raises 0.02€ to 0.06€
+Choupette_64 calls 0.02€
+Talab 07 calls 0.02€
+dent95 calls 0.02€
+*** FLOP *** [Kd Th Qs]
+Talab 07 checks
+dent95 checks
+mjose25 bets 0.02€
+Choupette_64 calls 0.02€
+Talab 07 calls 0.02€
+dent95 folds
+*** TURN *** [Kd Th Qs][8s]
+Talab 07 bets 0.02€
+mjose25 folds
+Choupette_64 calls 0.02€
+*** RIVER *** [Kd Th Qs 8s][Ac]
+Talab 07 bets 0.02€
+Choupette_64 calls 0.02€
+*** SHOW DOWN ***
+Choupette_64 shows [7d 5s Js Jd] (One pair : Jacks)
+Talab 07 shows [9s Tc Ks 4h] (Two pairs : Kings and Tens)
+Talab 07 collected 0.46€ from pot
+*** SUMMARY ***
+Total pot 0.46€ | Rake 0.04€
+Board: [Kd Th Qs 8s Ac]
+Seat 1: Talab 07 (small blind) showed [9s Tc Ks 4h] and won 0.46€ with Two pairs : Kings and Tens
+Seat 6: Choupette_64 (button) showed [7d 5s Js Jd] and lost with One pair : Jacks
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6666-1643823733 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:42:13 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: Christelniel (0.46€)
+Seat 2: Epouvantable (4.18€)
+Seat 3: TIKItes26 (3.96€)
+Seat 4: Scie Rose (3.30€)
+Seat 5: dent95 (1.09€)
+Seat 6: jelachatte (3.07€)
+*** ANTE/BLINDS ***
+Christelniel posts small blind 0.01€
+Epouvantable posts big blind 0.02€
+Dealt to jelachatte [7s Ac 9h Ts]
+*** PRE-FLOP *** 
+TIKItes26 folds
+Scie Rose folds
+dent95 calls 0.02€
+jelachatte calls 0.02€
+Christelniel raises 0.08€ to 0.10€
+Epouvantable calls 0.08€
+dent95 calls 0.08€
+jelachatte calls 0.08€
+*** FLOP *** [Jc 6h 6d]
+Christelniel bets 0.36€ and is all-in
+Epouvantable raises 0.36€ to 0.72€
+dent95 folds
+jelachatte folds
+*** TURN *** [Jc 6h 6d][6c]
+*** RIVER *** [Jc 6h 6d 6c][8d]
+*** SHOW DOWN ***
+Christelniel shows [Js Ad Kh Td] (Trips of 6)
+Epouvantable shows [6s Jh 4h Jd] (Quads of 6)
+Epouvantable collected 1.37€ from pot
+*** SUMMARY ***
+Total pot 1.37€ | Rake 0.11€
+Board: [Jc 6h 6d 6c 8d]
+Seat 1: Christelniel (small blind) showed [Js Ad Kh Td] and lost with Trips of 6
+Seat 2: Epouvantable (big blind) showed [6s Jh 4h Jd] and won 1.37€ with Quads of 6
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6668-1643823772 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:42:52 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: glesjetons39 (2€)
+Seat 2: celisem (0.50€)
+Seat 3: jelachatte (2.97€)
+Seat 4: TIKItes26 (3.96€)
+Seat 5: Scie Rose (3.30€)
+Seat 6: dent95 (0.99€)
+Hold-up to Pot: total 0.20€
+*** ANTE/BLINDS ***
+glesjetons39 posts small blind 0.01€
+celisem posts big blind 0.02€
+Dealt to jelachatte [Qd 3d 5h Ac]
+*** PRE-FLOP *** 
+jelachatte folds
+TIKItes26 calls 0.02€
+Scie Rose folds
+dent95 calls 0.02€
+glesjetons39 calls 0.01€
+celisem checks
+*** FLOP *** [4h 9c Ah]
+glesjetons39 checks
+celisem bets 0.28€
+TIKItes26 folds
+dent95 folds
+glesjetons39 folds
+celisem collected 0.55€ from pot
+*** SUMMARY ***
+Total pot 0.55€ | Rake 0.01€
+Board: [4h 9c Ah]
+Seat 2: celisem (big blind) won 0.55€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6669-1643823792 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:43:12 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2.97€)
+Seat 2: Scie Rose (3.30€)
+Seat 3: Christelniel (0.50€)
+Seat 4: Epouvantable (4.73€)
+Seat 5: Choupette_64 (2.13€)
+Seat 6: TIKItes26 (3.94€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Scie Rose posts big blind 0.02€
+Dealt to jelachatte [9d 4s Qd Ad]
+*** PRE-FLOP *** 
+Christelniel calls 0.02€
+Epouvantable raises 0.02€ to 0.04€
+Choupette_64 calls 0.04€
+TIKItes26 folds
+jelachatte calls 0.03€
+Scie Rose folds
+Christelniel calls 0.02€
+*** FLOP *** [3h 6c 7h]
+jelachatte checks
+Christelniel checks
+Epouvantable checks
+Choupette_64 bets 0.18€
+jelachatte folds
+Christelniel folds
+Epouvantable folds
+Choupette_64 collected 0.34€ from pot
+*** SUMMARY ***
+Total pot 0.34€ | Rake 0.02€
+Board: [3h 6c 7h]
+Seat 5: Choupette_64 won 0.34€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6671-1643823824 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:43:44 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: TIKItes26 (3.94€)
+Seat 2: jelachatte (2.93€)
+Seat 3: Choupette_64 (2.25€)
+Seat 4: Epouvantable (4.69€)
+Seat 5: TorviCalls (3.72€)
+Seat 6: Talab 07 (3.29€)
+*** ANTE/BLINDS ***
+TIKItes26 posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Td 6s 8c Js]
+*** PRE-FLOP *** 
+Choupette_64 calls 0.02€
+Epouvantable raises 0.07€ to 0.09€
+TorviCalls calls 0.09€
+Talab 07 folds
+TIKItes26 folds
+jelachatte calls 0.07€
+Choupette_64 calls 0.07€
+*** FLOP *** [Kh Qd 2d]
+jelachatte checks
+Choupette_64 checks
+Epouvantable bets 0.02€
+TorviCalls calls 0.02€
+jelachatte calls 0.02€
+Choupette_64 calls 0.02€
+*** TURN *** [Kh Qd 2d][Qc]
+jelachatte checks
+Choupette_64 checks
+Epouvantable checks
+TorviCalls checks
+*** RIVER *** [Kh Qd 2d Qc][7c]
+jelachatte checks
+Choupette_64 bets 0.45€
+Epouvantable folds
+TorviCalls folds
+jelachatte folds
+Choupette_64 collected 0.85€ from pot
+*** SUMMARY ***
+Total pot 0.85€ | Rake 0.05€
+Board: [Kh Qd 2d Qc 7c]
+Seat 3: Choupette_64 won 0.85€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6664-1643823674 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:41:14 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: FISTEURAGREE (1.84€)
+Seat 2: Salim771 (3.13€)
+Seat 3: coreve28 (1.20€)
+Seat 4: Carlito59350 (10.13€)
+Seat 5: mjose25 (1.32€)
+Seat 6: jelachatte (3.55€)
+*** ANTE/BLINDS ***
+FISTEURAGREE posts small blind 0.01€
+Salim771 posts big blind 0.02€
+Dealt to jelachatte [2d 3s Ad 3d]
+*** PRE-FLOP *** 
+coreve28 folds
+Carlito59350 calls 0.02€
+mjose25 calls 0.02€
+jelachatte raises 0.09€ to 0.11€
+FISTEURAGREE calls 0.10€
+Salim771 raises 0.37€ to 0.48€
+Carlito59350 calls 0.46€
+mjose25 calls 0.46€
+jelachatte calls 0.37€
+FISTEURAGREE calls 0.37€
+*** FLOP *** [Kd Jc 5c]
+FISTEURAGREE checks
+Salim771 bets 2.40€
+Carlito59350 folds
+mjose25 folds
+jelachatte folds
+FISTEURAGREE calls 1.36€ and is all-in
+*** TURN *** [Kd Jc 5c][7h]
+*** RIVER *** [Kd Jc 5c 7h][3c]
+*** SHOW DOWN ***
+FISTEURAGREE shows [Kc 2h 6h Tc] (Flush King high)
+Salim771 shows [Jh Ah Qd 4s] (One pair : Jacks)
+Salim771 collected 1.04€ from side pot 1
+FISTEURAGREE collected 4.61€ from main pot
+*** SUMMARY ***
+Total pot 5.65€ | Rake 0.51€
+Board: [Kd Jc 5c 7h 3c]
+Seat 1: FISTEURAGREE (small blind) showed [Kc 2h 6h Tc] and won 4.61€ with Flush King high
+Seat 2: Salim771 (big blind) showed [Jh Ah Qd 4s] and won 1.04€ with One pair : Jacks
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6673-1643823881 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:44:41 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: Epouvantable (4.58€)
+Seat 2: TIKItes26 (3.93€)
+Seat 3: Scie Rose (3.20€)
+Seat 4: celisem (0.69€)
+Seat 5: jelachatte (2.82€)
+Seat 6: Christelniel (0.64€)
+*** ANTE/BLINDS ***
+Epouvantable posts small blind 0.01€
+TIKItes26 posts big blind 0.02€
+Dealt to jelachatte [5h 2c Td Th]
+*** PRE-FLOP *** 
+Scie Rose calls 0.02€
+celisem calls 0.02€
+jelachatte folds
+Christelniel calls 0.02€
+Epouvantable raises 0.08€ to 0.10€
+TIKItes26 folds
+Scie Rose calls 0.08€
+celisem calls 0.08€
+Christelniel folds
+*** FLOP *** [Js 2d Jd]
+Epouvantable checks
+Scie Rose checks
+celisem checks
+*** TURN *** [Js 2d Jd][8s]
+Epouvantable checks
+Scie Rose checks
+celisem checks
+*** RIVER *** [Js 2d Jd 8s][3c]
+Epouvantable checks
+Scie Rose checks
+celisem checks
+*** SHOW DOWN ***
+Scie Rose shows [As 9s Kc 9d] (Two pairs : Jacks and 9)
+celisem shows [6h Ah 6s 5c] (Two pairs : Jacks and 6)
+Epouvantable shows [Qc Qh 8c 7d] (Two pairs : Queens and Jacks)
+Epouvantable collected 0.31€ from pot
+*** SUMMARY ***
+Total pot 0.31€ | Rake 0.03€
+Board: [Js 2d Jd 8s 3c]
+Seat 1: Epouvantable (small blind) showed [Qc Qh 8c 7d] and won 0.31€ with Two pairs : Queens and Jacks
+Seat 3: Scie Rose showed [As 9s Kc 9d] and lost with Two pairs : Jacks and 9
+Seat 4: celisem showed [6h Ah 6s 5c] and lost with Two pairs : Jacks and 6
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6674-1643823890 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:44:50 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: TIKItes26 (3.91€)
+Seat 2: TorviCalls (3.61€)
+Seat 3: Talab 07 (3.29€)
+Seat 4: jelachatte (2.82€)
+Seat 5: Choupette_64 (2.54€)
+Seat 6: coreve28 (2.07€)
+*** ANTE/BLINDS ***
+TIKItes26 posts small blind 0.01€
+TorviCalls posts big blind 0.02€
+Dealt to jelachatte [Jc 8d Js 8c]
+*** PRE-FLOP *** 
+Talab 07 calls 0.02€
+jelachatte raises 0.07€ to 0.09€
+Choupette_64 calls 0.09€
+coreve28 calls 0.09€
+TIKItes26 folds
+TorviCalls folds
+Talab 07 calls 0.07€
+*** FLOP *** [7h 8h Kc]
+Talab 07 checks
+jelachatte bets 0.29€
+Choupette_64 folds
+coreve28 folds
+Talab 07 raises 0.29€ to 0.58€
+jelachatte raises 1.55€ to 2.13€
+Talab 07 calls 1.55€
+*** TURN *** [7h 8h Kc][6c]
+Talab 07 bets 1.07€ and is all-in
+jelachatte calls 0.60€ and is all-in
+*** RIVER *** [7h 8h Kc 6c][Qs]
+*** SHOW DOWN ***
+Talab 07 shows [6d 4d Kh 6h] (Trips of 6)
+jelachatte shows [Jc 8d Js 8c] (Trips of 8)
+jelachatte collected 5.26€ from main pot
+Talab 07 collected 0.47€ from side pot 1
+*** SUMMARY ***
+Total pot 5.73€ | Rake 0.59€
+Board: [7h 8h Kc 6c Qs]
+Seat 3: Talab 07 showed [6d 4d Kh 6h] and won 0.47€ with Trips of 6
+Seat 4: jelachatte showed [Jc 8d Js 8c] and won 5.26€ with Trips of 8
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6678-1643823962 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:46:02 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: Choupette_64 (2.45€)
+Seat 2: Talab 07 (0.47€)
+Seat 3: TorviCalls (3.51€)
+Seat 4: Salim771 (1.49€)
+Seat 5: TIKItes26 (3.88€)
+Seat 6: jelachatte (5.26€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+Choupette_64 posts small blind 0.01€
+Talab 07 posts big blind 0.02€
+Dealt to jelachatte [3s 9d Qd 3d]
+*** PRE-FLOP *** 
+TorviCalls folds
+Salim771 raises 0.02€ to 0.04€
+TIKItes26 calls 0.04€
+jelachatte folds
+Choupette_64 calls 0.03€
+Talab 07 calls 0.02€
+*** FLOP *** [Ts Kd Tc]
+Choupette_64 checks
+Talab 07 checks
+Salim771 bets 0.26€
+TIKItes26 folds
+Choupette_64 calls 0.26€
+Talab 07 raises 0.17€ to 0.43€ and is all-in
+Salim771 calls 0.17€
+Choupette_64 calls 0.17€
+*** TURN *** [Ts Kd Tc][5d]
+Choupette_64 checks
+Salim771 checks
+*** RIVER *** [Ts Kd Tc 5d][Ad]
+Choupette_64 bets 1.55€
+Salim771 calls 1.02€ and is all-in
+*** SHOW DOWN ***
+Talab 07 shows [Th 8s 7h 2h] (Trips of Tens)
+Salim771 shows [6h Kc Qh 6d] (Two pairs : Kings and Tens)
+Choupette_64 shows [Ks 6c Kh 4d] (Full of Kings and Tens)
+Choupette_64 collected 3.77€ from pot
+*** SUMMARY ***
+Total pot 3.77€ | Rake 0.35€
+Board: [Ts Kd Tc 5d Ad]
+Seat 1: Choupette_64 (small blind) showed [Ks 6c Kh 4d] and won 3.77€ with Full of Kings and Tens
+Seat 2: Talab 07 (big blind) showed [Th 8s 7h 2h] and lost with Trips of Tens
+Seat 4: Salim771 showed [6h Kc Qh 6d] and lost with Two pairs : Kings and Tens
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6679-1643823981 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:46:21 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: Christelniel (0.53€)
+Seat 2: TorviCalls (3.51€)
+Seat 3: jelachatte (5.26€)
+Seat 4: Scie Rose (3.08€)
+Seat 5: Epouvantable (4.80€)
+Seat 6: celisem (0.52€)
+*** ANTE/BLINDS ***
+Christelniel posts small blind 0.01€
+TorviCalls posts big blind 0.02€
+Dealt to jelachatte [2d 8s 5s Tc]
+*** PRE-FLOP *** 
+jelachatte folds
+Scie Rose folds
+Epouvantable raises 0.02€ to 0.04€
+celisem folds
+Christelniel calls 0.03€
+TorviCalls raises 0.09€ to 0.13€
+Epouvantable calls 0.09€
+Christelniel folds
+*** FLOP *** [7d Kc 9h]
+TorviCalls bets 0.15€
+Epouvantable folds
+TorviCalls collected 0.42€ from pot
+*** SUMMARY ***
+Total pot 0.42€ | Rake 0.03€
+Board: [7d Kc 9h]
+Seat 2: TorviCalls (big blind) won 0.42€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6680-1643824083 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:48:03 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (5.26€)
+Seat 2: Choupette_64 (4.20€)
+Seat 3: FISTEURAGREE (4.53€)
+Seat 4: coreve28 (2.06€)
+Seat 5: TIKItes26 (3.84€)
+Seat 6: Scie Rose (3.08€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Choupette_64 posts big blind 0.02€
+Dealt to jelachatte [4d Ks Jd 4c]
+*** PRE-FLOP *** 
+FISTEURAGREE folds
+coreve28 folds
+TIKItes26 calls 0.02€
+Scie Rose folds
+jelachatte folds
+Choupette_64 checks
+*** FLOP *** [6c 8h 2c]
+Choupette_64 checks
+TIKItes26 checks
+*** TURN *** [6c 8h 2c][2d]
+Choupette_64 bets 0.05€
+TIKItes26 calls 0.05€
+*** RIVER *** [6c 8h 2c 2d][2h]
+Choupette_64 bets 0.15€
+TIKItes26 folds
+Choupette_64 collected 0.28€ from pot
+*** SUMMARY ***
+Total pot 0.28€ | Rake 0.02€
+Board: [6c 8h 2c 2d 2h]
+Seat 2: Choupette_64 (big blind) won 0.28€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6681-1643824111 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:48:31 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: coreve28 (2.06€)
+Seat 2: Chaves1212 (1.15€)
+Seat 3: Christelniel (0.49€)
+Seat 4: jelachatte (5.25€)
+Seat 5: Scie Rose (3.08€)
+Seat 6: Epouvantable (4.67€)
+*** ANTE/BLINDS ***
+coreve28 posts small blind 0.01€
+Chaves1212 posts big blind 0.02€
+Dealt to jelachatte [5c As 3d Ad]
+*** PRE-FLOP *** 
+Christelniel folds
+jelachatte raises 0.05€ to 0.07€
+Scie Rose folds
+Epouvantable raises 0.05€ to 0.12€
+coreve28 folds
+Chaves1212 folds
+jelachatte calls 0.05€
+*** FLOP *** [7h 8s 9s]
+jelachatte checks
+Epouvantable bets 0.27€
+jelachatte folds
+Epouvantable collected 0.51€ from pot
+*** SUMMARY ***
+Total pot 0.51€ | Rake 0.03€
+Board: [7h 8s 9s]
+Seat 6: Epouvantable (button) won 0.51€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6686-1643824264 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:51:04 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: CHILLMAP (0.77€)
+Seat 2: aalopeciaa (2€)
+Seat 3: Christelniel (0.47€)
+Seat 4: TorviCalls (3.76€)
+Seat 5: jelachatte (5.13€)
+Seat 6: Choupette_64 (4.22€)
+*** ANTE/BLINDS ***
+CHILLMAP posts small blind 0.01€
+aalopeciaa posts big blind 0.02€
+Dealt to jelachatte [3d 5c Kh 4h]
+*** PRE-FLOP *** 
+Christelniel calls 0.02€
+TorviCalls folds
+jelachatte folds
+Choupette_64 calls 0.02€
+CHILLMAP raises 0.02€ to 0.04€
+aalopeciaa calls 0.02€
+Christelniel calls 0.02€
+Choupette_64 calls 0.02€
+*** FLOP *** [6d 4s 2d]
+CHILLMAP bets 0.02€
+aalopeciaa folds
+Christelniel raises 0.10€ to 0.12€
+Choupette_64 folds
+CHILLMAP raises 0.40€ to 0.52€
+Christelniel calls 0.31€ and is all-in
+*** TURN *** [6d 4s 2d][7d]
+*** RIVER *** [6d 4s 2d 7d][Qs]
+*** SHOW DOWN ***
+CHILLMAP shows [Ad 3h 6s As] (One pair : Aces)
+Christelniel shows [2s Qc 2c Ah] (Trips of 2)
+Christelniel collected 0.92€ from main pot
+CHILLMAP collected 0.09€ from side pot 1
+*** SUMMARY ***
+Total pot 1.01€ | Rake 0.10€
+Board: [6d 4s 2d 7d Qs]
+Seat 1: CHILLMAP (small blind) showed [Ad 3h 6s As] and won 0.09€ with One pair : Aces
+Seat 3: Christelniel showed [2s Qc 2c Ah] and won 0.92€ with Trips of 2
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6687-1643824313 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:51:53 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: aalopeciaa (1.96€)
+Seat 2: jelachatte (5.13€)
+Seat 3: CHILLMAP (0.30€)
+Seat 4: TIKItes26 (3.73€)
+Seat 5: TorviCalls (3.76€)
+Seat 6: Choupette_64 (4.18€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+aalopeciaa posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Tc Ac 5h Js]
+*** PRE-FLOP *** 
+CHILLMAP calls 0.02€
+TIKItes26 calls 0.02€
+TorviCalls raises 0.09€ to 0.11€
+Choupette_64 calls 0.11€
+aalopeciaa calls 0.10€
+jelachatte calls 0.09€
+CHILLMAP calls 0.09€
+TIKItes26 calls 0.09€
+*** FLOP *** [9s 8h Ad]
+aalopeciaa bets 0.76€
+jelachatte calls 0.76€
+CHILLMAP folds
+TIKItes26 folds
+TorviCalls calls 0.76€
+Choupette_64 folds
+*** TURN *** [9s 8h Ad][4d]
+aalopeciaa bets 1.09€ and is all-in
+jelachatte folds
+TorviCalls calls 1.09€
+*** RIVER *** [9s 8h Ad 4d][5c]
+*** SHOW DOWN ***
+TorviCalls shows [Jh 5d As Qh] (Two pairs : Aces and 5)
+aalopeciaa shows [Kh Qc 8d Ah] (Two pairs : Aces and 8)
+aalopeciaa collected 4.71€ from pot
+*** SUMMARY ***
+Total pot 4.71€ | Rake 0.51€
+Board: [9s 8h Ad 4d 5c]
+Seat 1: aalopeciaa (small blind) showed [Kh Qc 8d Ah] and won 4.71€ with Two pairs : Aces and 8
+Seat 5: TorviCalls showed [Jh 5d As Qh] and lost with Two pairs : Aces and 5
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6689-1643824371 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:52:51 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: Christelniel (0.92€)
+Seat 2: coreve28 (2.03€)
+Seat 3: R CAPABLANCA (1.99€)
+Seat 4: jelachatte (4.26€)
+Seat 5: TIKItes26 (3.62€)
+Seat 6: Choupette_64 (4.05€)
+*** ANTE/BLINDS ***
+Christelniel posts small blind 0.01€
+coreve28 posts big blind 0.02€
+Dealt to jelachatte [5c As 9s 7c]
+*** PRE-FLOP *** 
+R CAPABLANCA calls 0.02€
+jelachatte raises 0.07€ to 0.09€
+TIKItes26 folds
+Choupette_64 folds
+Christelniel folds
+coreve28 calls 0.07€
+R CAPABLANCA calls 0.07€
+*** FLOP *** [9c 2c Ah]
+coreve28 checks
+R CAPABLANCA checks
+jelachatte bets 0.21€
+coreve28 folds
+R CAPABLANCA folds
+jelachatte collected 0.46€ from pot
+*** SUMMARY ***
+Total pot 0.46€ | Rake 0.03€
+Board: [9c 2c Ah]
+Seat 4: jelachatte won 0.46€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6692-1643824434 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:53:54 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (4.42€)
+Seat 2: TIKItes26 (3.58€)
+Seat 3: ---Big-M--- (1.99€)
+Seat 4: Christelniel (0.98€)
+Seat 5: TorviCalls (1.76€)
+Seat 6: Scie Rose (4.79€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+TIKItes26 posts big blind 0.02€
+Dealt to jelachatte [8c 5d 4s 3h]
+*** PRE-FLOP *** 
+---Big-M--- raises 0.05€ to 0.07€
+Christelniel calls 0.07€
+TorviCalls calls 0.07€
+Scie Rose calls 0.07€
+jelachatte folds
+TIKItes26 calls 0.05€
+*** FLOP *** [8s Qd 6c]
+TIKItes26 checks
+---Big-M--- bets 0.46€
+Christelniel folds
+TorviCalls folds
+Scie Rose calls 0.46€
+TIKItes26 raises 1.84€ to 2.30€
+---Big-M--- calls 1.46€ and is all-in
+Scie Rose calls 1.84€
+*** TURN *** [8s Qd 6c][Kc]
+TIKItes26 bets 1.21€ and is all-in
+Scie Rose calls 1.21€
+*** RIVER *** [8s Qd 6c Kc][Td]
+*** SHOW DOWN ***
+---Big-M--- shows [6d Tc 8d Ac] (Two pairs : Tens and 8)
+Scie Rose shows [6s 2d 6h 9s] (Trips of 6)
+TIKItes26 shows [8h 2h Qc Qs] (Trips of Queens)
+TIKItes26 collected 8.70€ from pot
+*** SUMMARY ***
+Total pot 8.70€ | Rake 0.70€
+Board: [8s Qd 6c Kc Td]
+Seat 2: TIKItes26 (big blind) showed [8h 2h Qc Qs] and won 8.70€ with Trips of Queens
+Seat 3: ---Big-M--- showed [6d Tc 8d Ac] and lost with Two pairs : Tens and 8
+Seat 6: Scie Rose (button) showed [6s 2d 6h 9s] and lost with Trips of 6
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6693-1643824463 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:54:23 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: coreve28 (2.78€)
+Seat 2: damedepike19 (0.93€)
+Seat 3: TorviCalls (1.69€)
+Seat 4: aalopeciaa (4.46€)
+Seat 5: jelachatte (4.41€)
+Seat 6: Christelniel (0.91€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+coreve28 posts small blind 0.01€
+damedepike19 posts big blind 0.02€
+Dealt to jelachatte [3s As 8c Ah]
+*** PRE-FLOP *** 
+TorviCalls folds
+aalopeciaa folds
+jelachatte raises 0.05€ to 0.07€
+Christelniel folds
+coreve28 calls 0.06€
+damedepike19 calls 0.05€
+*** FLOP *** [4h 2h Ts]
+coreve28 checks
+damedepike19 checks
+jelachatte bets 0.16€
+coreve28 folds
+damedepike19 folds
+jelachatte collected 0.45€ from pot
+*** SUMMARY ***
+Total pot 0.45€ | Rake 0.02€
+Board: [4h 2h Ts]
+Seat 5: jelachatte won 0.45€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6695-1643824551 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:55:51 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: damedepike19 (0.86€)
+Seat 2: Djedai2 (2€)
+Seat 3: jelachatte (4.63€)
+Seat 4: TorviCalls (1.69€)
+Seat 5: ---Big-M--- (2€)
+Seat 6: TIKItes26 (8.68€)
+*** ANTE/BLINDS ***
+damedepike19 posts small blind 0.01€
+Djedai2 posts big blind 0.02€
+Dealt to jelachatte [Ks 6d Kd Jh]
+*** PRE-FLOP *** 
+jelachatte raises 0.05€ to 0.07€
+TorviCalls folds
+---Big-M--- raises 0.17€ to 0.24€
+TIKItes26 folds
+damedepike19 calls 0.23€
+Djedai2 raises 0.17€ to 0.41€
+jelachatte calls 0.34€
+---Big-M--- raises 1.47€ to 1.88€
+damedepike19 calls 0.62€ and is all-in
+Djedai2 raises 0.12€ to 2€ and is all-in
+jelachatte raises 2.63€ to 4.63€ and is all-in
+---Big-M--- calls 0.12€ and is all-in
+*** FLOP *** [9h Jc 2c]
+*** TURN *** [9h Jc 2c][8d]
+*** RIVER *** [9h Jc 2c 8d][Ac]
+*** SHOW DOWN ***
+damedepike19 shows [Kh Qh Ah 9s] (Two pairs : Aces and 9)
+Djedai2 shows [Ad 8s 2d Jd] (Two pairs : Aces and Jacks)
+jelachatte shows [Ks 6d Kd Jh] (One pair : Kings)
+---Big-M--- shows [Kc Th 3c As] (Flush Ace high)
+---Big-M--- collected 6.17€ from main pot
+jelachatte collected 2.63€ from side pot 1
+*** SUMMARY ***
+Total pot 8.80€ | Rake 0.69€
+Board: [9h Jc 2c 8d Ac]
+Seat 1: damedepike19 (small blind) showed [Kh Qh Ah 9s] and lost with Two pairs : Aces and 9
+Seat 2: Djedai2 (big blind) showed [Ad 8s 2d Jd] and lost with Two pairs : Aces and Jacks
+Seat 3: jelachatte showed [Ks 6d Kd Jh] and won 2.63€ with One pair : Kings
+Seat 5: ---Big-M--- showed [Kc Th 3c As] and won 6.17€ with Flush Ace high
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6697-1643824627 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 17:57:07 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: TIKItes26 (8.68€)
+Seat 2: Jassan77 (0.44€)
+Seat 3: TorviCalls (1.69€)
+Seat 4: coreve28 (3.68€)
+Seat 5: jelachatte (2.63€)
+Seat 6: ---Big-M--- (6.17€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+TIKItes26 posts small blind 0.01€
+Jassan77 posts big blind 0.02€
+Dealt to jelachatte [Qh 7h Jc Kh]
+*** PRE-FLOP *** 
+TorviCalls raises 0.03€ to 0.05€
+coreve28 folds
+jelachatte calls 0.05€
+---Big-M--- folds
+TIKItes26 folds
+Jassan77 folds
+*** FLOP *** [Td 7c 9c]
+TorviCalls checks
+jelachatte bets 0.12€
+TorviCalls folds
+jelachatte collected 0.34€ from pot
+*** SUMMARY ***
+Total pot 0.34€ | Rake 0.01€
+Board: [Td 7c 9c]
+Seat 5: jelachatte won 0.34€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6699-1643824812 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:00:12 UTC
+Table: 'Bucarest' 6-max (real money) Seat #6 is the button
+Seat 1: Beuh-beuh470 (1.72€)
+Seat 2: TorviCalls (1.64€)
+Seat 3: prince1706 (2.15€)
+Seat 4: ---Big-M--- (5.86€)
+Seat 5: coreve28 (4.23€)
+Seat 6: jelachatte (2.80€)
+*** ANTE/BLINDS ***
+Beuh-beuh470 posts small blind 0.01€
+TorviCalls posts big blind 0.02€
+Dealt to jelachatte [Ah 3c 3d Ac]
+*** PRE-FLOP *** 
+prince1706 folds
+---Big-M--- raises 0.05€ to 0.07€
+coreve28 folds
+jelachatte raises 0.17€ to 0.24€
+Beuh-beuh470 calls 0.23€
+TorviCalls calls 0.22€
+---Big-M--- calls 0.17€
+*** FLOP *** [Jc 2h 2d]
+Beuh-beuh470 checks
+TorviCalls checks
+---Big-M--- checks
+jelachatte bets 0.48€
+Beuh-beuh470 folds
+TorviCalls folds
+---Big-M--- calls 0.48€
+*** TURN *** [Jc 2h 2d][Jh]
+---Big-M--- checks
+jelachatte bets 1.44€
+---Big-M--- raises 1.44€ to 2.88€
+jelachatte calls 0.64€ and is all-in
+*** RIVER *** [Jc 2h 2d Jh][Qh]
+*** SHOW DOWN ***
+jelachatte shows [Ah 3c 3d Ac] (Two pairs : Aces and Jacks)
+---Big-M--- shows [Kc 4d Qd Js] (Full of Jacks and Queens)
+---Big-M--- collected 6.27€ from pot
+*** SUMMARY ***
+Total pot 6.27€ | Rake 0.61€
+Board: [Jc 2h 2d Jh Qh]
+Seat 4: ---Big-M--- showed [Kc 4d Qd Js] and won 6.27€ with Full of Jacks and Queens
+Seat 6: jelachatte (button) showed [Ah 3c 3d Ac] and lost with Two pairs : Aces and Jacks
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6701-1643825004 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:03:24 UTC
+Table: 'Bucarest' 6-max (real money) Seat #4 is the button
+Seat 1: ---Big-M--- (10.43€)
+Seat 2: Beuh-beuh470 (1.15€)
+Seat 3: prince1706 (2.15€)
+Seat 4: jelachatte (2€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+---Big-M--- posts small blind 0.01€
+Beuh-beuh470 posts big blind 0.02€
+Dealt to jelachatte [Ks 8s Kc Tc]
+*** PRE-FLOP *** 
+prince1706 calls 0.02€
+jelachatte raises 0.07€ to 0.09€
+---Big-M--- calls 0.08€
+Beuh-beuh470 calls 0.07€
+prince1706 calls 0.07€
+*** FLOP *** [5s 9h 2h]
+---Big-M--- checks
+Beuh-beuh470 checks
+prince1706 checks
+jelachatte bets 0.35€
+---Big-M--- raises 0.35€ to 0.70€
+Beuh-beuh470 folds
+prince1706 calls 0.70€
+jelachatte raises 1.21€ to 1.91€ and is all-in
+---Big-M--- raises 1.21€ to 3.12€
+prince1706 calls 1.36€ and is all-in
+*** TURN *** [5s 9h 2h][Th]
+*** RIVER *** [5s 9h 2h Th][3c]
+*** SHOW DOWN ***
+prince1706 shows [Js 7c Jc 9c] (One pair : Jacks)
+jelachatte shows [Ks 8s Kc Tc] (One pair : Kings)
+---Big-M--- shows [8h 4d 5d 5c] (Trips of 5)
+---Big-M--- collected 6.95€ from pot
+*** SUMMARY ***
+Total pot 6.95€ | Rake 0.60€
+Board: [5s 9h 2h Th 3c]
+Seat 1: ---Big-M--- (small blind) showed [8h 4d 5d 5c] and won 6.95€ with Trips of 5
+Seat 3: prince1706 showed [Js 7c Jc 9c] and lost with One pair : Jacks
+Seat 4: jelachatte (button) showed [Ks 8s Kc Tc] and lost with One pair : Kings
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6703-1643825111 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:05:11 UTC
+Table: 'Bucarest' 6-max (real money) Seat #3 is the button
+Seat 1: ---Big-M--- (14.05€)
+Seat 2: Beuh-beuh470 (1.16€)
+Seat 3: jelachatte (2€)
+Hold-up to Pot: total 0.20€
+*** ANTE/BLINDS ***
+---Big-M--- posts small blind 0.01€
+Beuh-beuh470 posts big blind 0.02€
+Dealt to jelachatte [4d Jd Ad 7d]
+*** PRE-FLOP *** 
+jelachatte raises 0.05€ to 0.07€
+---Big-M--- calls 0.06€
+Beuh-beuh470 calls 0.05€
+*** FLOP *** [Td 4c As]
+---Big-M--- checks
+Beuh-beuh470 checks
+jelachatte bets 0.31€
+---Big-M--- calls 0.31€
+Beuh-beuh470 folds
+*** TURN *** [Td 4c As][6h]
+---Big-M--- checks
+jelachatte bets 1.03€
+---Big-M--- folds
+jelachatte collected 1.98€ from pot
+*** SUMMARY ***
+Total pot 1.98€ | Rake 0.08€
+Board: [Td 4c As 6h]
+Seat 3: jelachatte (button) won 1.98€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6704-1643825164 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:06:04 UTC
+Table: 'Bucarest' 6-max (real money) Seat #3 is the button
+Seat 1: Beuh-beuh470 (1.09€)
+Seat 2: jelachatte (2.57€)
+Seat 3: ---Big-M--- (13.67€)
+*** ANTE/BLINDS ***
+Beuh-beuh470 posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Td 3h Kd Ac]
+*** PRE-FLOP *** 
+---Big-M--- raises 0.02€ to 0.04€
+Beuh-beuh470 calls 0.03€
+jelachatte calls 0.02€
+*** FLOP *** [7c 2s 4c]
+Beuh-beuh470 bets 0.06€
+jelachatte folds
+---Big-M--- calls 0.06€
+*** TURN *** [7c 2s 4c][Js]
+Beuh-beuh470 checks
+---Big-M--- checks
+*** RIVER *** [7c 2s 4c Js][Qd]
+Beuh-beuh470 checks
+---Big-M--- bets 0.24€
+Beuh-beuh470 folds
+---Big-M--- collected 0.46€ from pot
+*** SUMMARY ***
+Total pot 0.46€ | Rake 0.02€
+Board: [7c 2s 4c Js Qd]
+Seat 3: ---Big-M--- (button) won 0.46€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6705-1643825216 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:06:56 UTC
+Table: 'Bucarest' 6-max (real money) Seat #4 is the button
+Seat 1: n13tless (2€)
+Seat 2: ---Big-M--- (13.79€)
+Seat 3: Beuh-beuh470 (0.99€)
+Seat 4: jelachatte (2.53€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+n13tless posts small blind 0.01€
+---Big-M--- posts big blind 0.02€
+Dealt to jelachatte [9s Ah 6c 8c]
+*** PRE-FLOP *** 
+Beuh-beuh470 raises 0.05€ to 0.07€
+jelachatte folds
+n13tless calls 0.06€
+---Big-M--- calls 0.05€
+*** FLOP *** [9d 5c 2s]
+n13tless checks
+---Big-M--- checks
+Beuh-beuh470 bets 0.16€
+n13tless calls 0.16€
+---Big-M--- calls 0.16€
+*** TURN *** [9d 5c 2s][7d]
+n13tless checks
+---Big-M--- checks
+Beuh-beuh470 bets 0.40€
+n13tless folds
+---Big-M--- raises 0.40€ to 0.80€
+Beuh-beuh470 calls 0.36€ and is all-in
+*** RIVER *** [9d 5c 2s 7d][As]
+*** SHOW DOWN ***
+Beuh-beuh470 shows [Ad 5d Tc Ac] (Trips of Aces)
+---Big-M--- shows [6s Qs 6d 8d] (Straight 9 high)
+---Big-M--- collected 2.13€ from pot
+*** SUMMARY ***
+Total pot 2.13€ | Rake 0.22€
+Board: [9d 5c 2s 7d As]
+Seat 2: ---Big-M--- (big blind) showed [6s Qs 6d 8d] and won 2.13€ with Straight 9 high
+Seat 3: Beuh-beuh470 showed [Ad 5d Tc Ac] and lost with Trips of Aces
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6706-1643825271 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:07:51 UTC
+Table: 'Bucarest' 6-max (real money) Seat #3 is the button
+Seat 1: jelachatte (2.53€)
+Seat 2: n13tless (2€)
+Seat 3: ---Big-M--- (14.89€)
+Hold-up to Pot: total 0.20€
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+n13tless posts big blind 0.02€
+Dealt to jelachatte [2h 8h Js 7h]
+*** PRE-FLOP *** 
+---Big-M--- raises 0.05€ to 0.07€
+jelachatte calls 0.06€
+n13tless raises 0.21€ to 0.28€
+---Big-M--- raises 0.63€ to 0.91€
+jelachatte calls 0.84€
+n13tless raises 1.09€ to 2€ and is all-in
+---Big-M--- raises 1.09€ to 3.09€
+jelachatte calls 1.62€ and is all-in
+*** FLOP *** [5c 4c Jh]
+*** TURN *** [5c 4c Jh][8d]
+*** RIVER *** [5c 4c Jh 8d][8c]
+*** SHOW DOWN ***
+n13tless shows [4d 5s 9d 8s] (Full of 8 and 5)
+jelachatte shows [2h 8h Js 7h] (Full of 8 and Jacks)
+---Big-M--- shows [Ts As Ah 4s] (Two pairs : Aces and 8)
+---Big-M--- collected 0.56€ from side pot 1
+jelachatte collected 6.76€ from main pot
+*** SUMMARY ***
+Total pot 7.32€ | Rake 0.50€
+Board: [5c 4c Jh 8d 8c]
+Seat 1: jelachatte (small blind) showed [2h 8h Js 7h] and won 6.76€ with Full of 8 and Jacks
+Seat 2: n13tless (big blind) showed [4d 5s 9d 8s] and lost with Full of 8 and 5
+Seat 3: ---Big-M--- (button) showed [Ts As Ah 4s] and won 0.56€ with Two pairs : Aces and 8
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6707-1643825301 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:08:21 UTC
+Table: 'Bucarest' 6-max (real money) Seat #1 is the button
+Seat 1: ---Big-M--- (12.36€)
+Seat 2: jelachatte (6.76€)
+*** ANTE/BLINDS ***
+---Big-M--- posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Ad Qc 3d 5d]
+*** PRE-FLOP *** 
+---Big-M--- raises 0.02€ to 0.04€
+jelachatte calls 0.02€
+*** FLOP *** [9s Qs 7h]
+jelachatte checks
+---Big-M--- bets 0.08€
+jelachatte folds
+---Big-M--- collected 0.15€ from pot
+*** SUMMARY ***
+Total pot 0.15€ | Rake 0.01€
+Board: [9s Qs 7h]
+Seat 1: ---Big-M--- (small blind) (button) won 0.15€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6708-1643825319 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:08:39 UTC
+Table: 'Bucarest' 6-max (real money) Seat #1 is the button
+Seat 1: ---Big-M--- (12.39€)
+Seat 2: jelachatte (6.72€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+---Big-M--- posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Qc 8d Ts Jc]
+*** PRE-FLOP *** 
+---Big-M--- calls 0.01€
+jelachatte raises 0.04€ to 0.06€
+---Big-M--- raises 0.12€ to 0.18€
+jelachatte calls 0.12€
+*** FLOP *** [6d 8s 7d]
+jelachatte checks
+---Big-M--- bets 0.46€
+jelachatte calls 0.46€
+*** TURN *** [6d 8s 7d][Ks]
+jelachatte checks
+---Big-M--- bets 1.38€
+jelachatte calls 1.38€
+*** RIVER *** [6d 8s 7d Ks][Qh]
+jelachatte checks
+---Big-M--- bets 2.76€
+jelachatte calls 2.76€
+*** SHOW DOWN ***
+jelachatte shows [Qc 8d Ts Jc] (Two pairs : Queens and 8)
+---Big-M--- shows [5h 4d 3d Qd] (Straight 8 high)
+---Big-M--- collected 9.26€ from pot
+*** SUMMARY ***
+Total pot 9.26€ | Rake 0.40€
+Board: [6d 8s 7d Ks Qh]
+Seat 1: ---Big-M--- (small blind) (button) showed [5h 4d 3d Qd] and won 9.26€ with Straight 8 high
+Seat 2: jelachatte (big blind) showed [Qc 8d Ts Jc] and lost with Two pairs : Queens and 8
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6709-1643825360 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:09:20 UTC
+Table: 'Bucarest' 6-max (real money) Seat #1 is the button
+Seat 1: jelachatte (2€)
+Seat 2: ---Big-M--- (16.87€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+---Big-M--- posts big blind 0.02€
+Dealt to jelachatte [Js 6c 9d 2d]
+*** PRE-FLOP *** 
+jelachatte folds
+---Big-M--- collected 0.03€ from pot
+*** SUMMARY ***
+Total pot 0.03€ | No rake
+Seat 2: ---Big-M--- (big blind) won 0.03€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6710-1643825366 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:09:26 UTC
+Table: 'Bucarest' 6-max (real money) Seat #1 is the button
+Seat 1: ---Big-M--- (16.88€)
+Seat 2: jelachatte (2€)
+*** ANTE/BLINDS ***
+---Big-M--- posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [5c 3h 7s 8c]
+*** PRE-FLOP *** 
+---Big-M--- raises 0.04€ to 0.06€
+jelachatte raises 0.12€ to 0.18€
+---Big-M--- calls 0.12€
+*** FLOP *** [2h 6h Jc]
+jelachatte checks
+---Big-M--- bets 0.36€
+jelachatte folds
+---Big-M--- collected 0.68€ from pot
+*** SUMMARY ***
+Total pot 0.68€ | Rake 0.04€
+Board: [2h 6h Jc]
+Seat 1: ---Big-M--- (small blind) (button) won 0.68€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6711-1643825382 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:09:42 UTC
+Table: 'Bucarest' 6-max (real money) Seat #1 is the button
+Seat 1: ---Big-M--- (17.02€)
+Seat 2: jelachatte (2€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+---Big-M--- posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [5s 5d Jh Ts]
+*** PRE-FLOP *** 
+---Big-M--- raises 0.02€ to 0.04€
+jelachatte raises 0.08€ to 0.12€
+---Big-M--- calls 0.08€
+*** FLOP *** [5h 5c Ad]
+jelachatte bets 0.34€
+---Big-M--- folds
+jelachatte collected 0.66€ from pot
+*** SUMMARY ***
+Total pot 0.66€ | Rake 0.02€
+Board: [5h 5c Ad]
+Seat 2: jelachatte (big blind) won 0.66€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6712-1643825399 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:09:59 UTC
+Table: 'Bucarest' 6-max (real money) Seat #1 is the button
+Seat 1: jelachatte (2.20€)
+Seat 2: ---Big-M--- (16.90€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+---Big-M--- posts big blind 0.02€
+Dealt to jelachatte [6s Jc Ks 2s]
+*** PRE-FLOP *** 
+jelachatte raises 0.04€ to 0.06€
+---Big-M--- calls 0.04€
+*** FLOP *** [3d 9h Ah]
+---Big-M--- checks
+jelachatte bets 0.09€
+---Big-M--- calls 0.09€
+*** TURN *** [3d 9h Ah][7h]
+---Big-M--- checks
+jelachatte checks
+*** RIVER *** [3d 9h Ah 7h][3s]
+---Big-M--- checks
+jelachatte folds
+---Big-M--- collected 0.27€ from pot
+*** SUMMARY ***
+Total pot 0.27€ | Rake 0.03€
+Board: [3d 9h Ah 7h 3s]
+Seat 2: ---Big-M--- (big blind) won 0.27€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6713-1643825437 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:10:37 UTC
+Table: 'Bucarest' 6-max (real money) Seat #1 is the button
+Seat 1: ---Big-M--- (17.02€)
+Seat 2: jelachatte (2.05€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+---Big-M--- posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [9c 5c 4s 4h]
+*** PRE-FLOP *** 
+---Big-M--- raises 0.02€ to 0.04€
+jelachatte calls 0.02€
+*** FLOP *** [Js As Qd]
+jelachatte checks
+---Big-M--- bets 0.18€
+jelachatte folds
+---Big-M--- collected 0.35€ from pot
+*** SUMMARY ***
+Total pot 0.35€ | Rake 0.01€
+Board: [Js As Qd]
+Seat 1: ---Big-M--- (small blind) (button) won 0.35€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6714-1643825450 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:10:50 UTC
+Table: 'Bucarest' 6-max (real money) Seat #1 is the button
+Seat 1: jelachatte (2.01€)
+Seat 2: ---Big-M--- (17.15€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+---Big-M--- posts big blind 0.02€
+Dealt to jelachatte [As 8c Ks Jc]
+*** PRE-FLOP *** 
+jelachatte raises 0.04€ to 0.06€
+---Big-M--- calls 0.04€
+*** FLOP *** [3s 6h 2s]
+---Big-M--- checks
+jelachatte bets 0.12€
+---Big-M--- raises 0.36€ to 0.48€
+jelachatte raises 1.08€ to 1.56€
+---Big-M--- raises 1.08€ to 2.64€
+jelachatte calls 0.39€ and is all-in
+*** TURN *** [3s 6h 2s][8h]
+*** RIVER *** [3s 6h 2s 8h][Kc]
+*** SHOW DOWN ***
+jelachatte shows [As 8c Ks Jc] (Two pairs : Kings and 8)
+---Big-M--- shows [3c 2c 7d 2h] (Trips of 2)
+---Big-M--- collected 4.31€ from pot
+*** SUMMARY ***
+Total pot 4.31€ | Rake 0.40€
+Board: [3s 6h 2s 8h Kc]
+Seat 1: jelachatte (small blind) (button) showed [As 8c Ks Jc] and lost with Two pairs : Kings and 8
+Seat 2: ---Big-M--- (big blind) showed [3c 2c 7d 2h] and won 4.31€ with Trips of 2
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6716-1643825501 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:11:41 UTC
+Table: 'Bucarest' 6-max (real money) Seat #3 is the button
+Seat 1: jelachatte (2€)
+Seat 2: Epouvantable (1.92€)
+Seat 3: ---Big-M--- (18.68€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Epouvantable posts big blind 0.02€
+Dealt to jelachatte [Qh 7c 5c 9h]
+*** PRE-FLOP *** 
+---Big-M--- folds
+jelachatte raises 0.04€ to 0.06€
+Epouvantable calls 0.04€
+*** FLOP *** [Tc Jc 7d]
+jelachatte bets 0.12€
+Epouvantable folds
+jelachatte collected 0.23€ from pot
+*** SUMMARY ***
+Total pot 0.23€ | Rake 0.01€
+Board: [Tc Jc 7d]
+Seat 1: jelachatte (small blind) won 0.23€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6717-1643825529 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:12:09 UTC
+Table: 'Bucarest' 6-max (real money) Seat #3 is the button
+Seat 1: jelachatte (2.05€)
+Seat 2: Un delire (2.25€)
+Seat 3: Epouvantable (1.86€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Un delire posts big blind 0.02€
+Dealt to jelachatte [2d Ks 2s Qc]
+*** PRE-FLOP *** 
+Epouvantable folds
+jelachatte calls 0.01€
+Un delire raises 0.02€ to 0.04€
+jelachatte calls 0.02€
+*** FLOP *** [7d Qh 8s]
+jelachatte checks
+Un delire bets 0.08€
+jelachatte calls 0.08€
+*** TURN *** [7d Qh 8s][5s]
+jelachatte checks
+Un delire checks
+*** RIVER *** [7d Qh 8s 5s][Kc]
+jelachatte bets 0.18€
+Un delire calls 0.18€
+*** SHOW DOWN ***
+jelachatte shows [2d Ks 2s Qc] (Two pairs : Kings and Queens)
+Un delire shows [7c Qs 3h Qd] (Trips of Queens)
+Un delire collected 0.54€ from pot
+*** SUMMARY ***
+Total pot 0.54€ | Rake 0.06€
+Board: [7d Qh 8s 5s Kc]
+Seat 1: jelachatte (small blind) showed [2d Ks 2s Qc] and lost with Two pairs : Kings and Queens
+Seat 2: Un delire (big blind) showed [7c Qs 3h Qd] and won 0.54€ with Trips of Queens
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6719-1643825576 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:12:56 UTC
+Table: 'Bucarest' 6-max (real money) Seat #4 is the button
+Seat 1: Epouvantable (1.82€)
+Seat 2: Un delire (2.54€)
+Seat 3: ---Big-M--- (1.98€)
+Seat 4: jelachatte (2€)
+*** ANTE/BLINDS ***
+Epouvantable posts small blind 0.01€
+Un delire posts big blind 0.02€
+Dealt to jelachatte [7s Ah 2s 9h]
+*** PRE-FLOP *** 
+---Big-M--- folds
+jelachatte raises 0.05€ to 0.07€
+Epouvantable calls 0.06€
+Un delire calls 0.05€
+*** FLOP *** [Qh 4d Jh]
+Epouvantable checks
+Un delire checks
+jelachatte bets 0.11€
+Epouvantable folds
+Un delire calls 0.11€
+*** TURN *** [Qh 4d Jh][Qc]
+Un delire checks
+jelachatte checks
+*** RIVER *** [Qh 4d Jh Qc][6s]
+Un delire checks
+jelachatte bets 0.32€
+Un delire calls 0.32€
+*** SHOW DOWN ***
+jelachatte shows [7s Ah 2s 9h] (One pair : Queens)
+Un delire shows [Jc 2c 9c Kc] (Two pairs : Queens and Jacks)
+Un delire collected 0.96€ from pot
+*** SUMMARY ***
+Total pot 0.96€ | Rake 0.11€
+Board: [Qh 4d Jh Qc 6s]
+Seat 2: Un delire (big blind) showed [Jc 2c 9c Kc] and won 0.96€ with Two pairs : Queens and Jacks
+Seat 4: jelachatte (button) showed [7s Ah 2s 9h] and lost with One pair : Queens
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6721-1643825681 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:14:41 UTC
+Table: 'Bucarest' 6-max (real money) Seat #1 is the button
+Seat 1: jelachatte (2€)
+Seat 2: Epouvantable (1.69€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Epouvantable posts big blind 0.02€
+Dealt to jelachatte [8h 9s Td 4s]
+*** PRE-FLOP *** 
+jelachatte calls 0.01€
+Epouvantable checks
+*** FLOP *** [Js 9d Qs]
+Epouvantable bets 0.04€
+jelachatte raises 0.12€ to 0.16€
+Epouvantable raises 0.12€ to 0.28€
+jelachatte raises 0.60€ to 0.88€
+Epouvantable raises 0.60€ to 1.48€
+jelachatte raises 0.50€ to 1.98€ and is all-in
+Epouvantable calls 0.19€ and is all-in
+*** TURN *** [Js 9d Qs][8d]
+*** RIVER *** [Js 9d Qs 8d][5h]
+*** SHOW DOWN ***
+jelachatte shows [8h 9s Td 4s] (Straight Queen high)
+Epouvantable shows [2s 8c Th Jh] (Straight Queen high)
+Epouvantable collected 1.52€ from main pot
+jelachatte collected 1.83€ from side pot 1
+*** SUMMARY ***
+Total pot 3.35€ | Rake 0.34€
+Board: [Js 9d Qs 8d 5h]
+Seat 1: jelachatte (small blind) (button) showed [8h 9s Td 4s] and won 1.83€ with Straight Queen high
+Seat 2: Epouvantable (big blind) showed [2s 8c Th Jh] and won 1.52€ with Straight Queen high
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6723-1643825726 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:15:26 UTC
+Table: 'Bucarest' 6-max (real money) Seat #3 is the button
+Seat 1: la volubile (2.01€)
+Seat 2: jelachatte (2€)
+Seat 3: Epouvantable (1.51€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+la volubile posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [8h 4c Kd 7s]
+*** PRE-FLOP *** 
+Epouvantable calls 0.02€
+la volubile calls 0.01€
+jelachatte checks
+*** FLOP *** [Kh Ts Qh]
+la volubile checks
+jelachatte checks
+Epouvantable checks
+*** TURN *** [Kh Ts Qh][Jh]
+la volubile checks
+jelachatte checks
+Epouvantable checks
+*** RIVER *** [Kh Ts Qh Jh][7h]
+la volubile checks
+jelachatte checks
+Epouvantable checks
+*** SHOW DOWN ***
+la volubile shows [7c 8c 6h Qd] (Two pairs : Queens and 7)
+jelachatte shows [8h 4c Kd 7s] (Two pairs : Kings and 7)
+Epouvantable shows [9s 8d 7d 5d] (Straight Queen high)
+Epouvantable collected 0.15€ from pot
+*** SUMMARY ***
+Total pot 0.15€ | Rake 0.01€
+Board: [Kh Ts Qh Jh 7h]
+Seat 1: la volubile (small blind) showed [7c 8c 6h Qd] and lost with Two pairs : Queens and 7
+Seat 2: jelachatte (big blind) showed [8h 4c Kd 7s] and lost with Two pairs : Kings and 7
+Seat 3: Epouvantable (button) showed [9s 8d 7d 5d] and won 0.15€ with Straight Queen high
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6725-1643825782 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:16:22 UTC
+Table: 'Bucarest' 6-max (real money) Seat #3 is the button
+Seat 1: Epouvantable (1.60€)
+Seat 2: jelachatte (2€)
+Seat 3: la volubile (2.02€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+Epouvantable posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [5c Tc 7h 2c]
+*** PRE-FLOP *** 
+la volubile calls 0.02€
+Epouvantable raises 0.02€ to 0.04€
+jelachatte calls 0.02€
+la volubile calls 0.02€
+*** FLOP *** [2s 9d 3h]
+Epouvantable bets 0.22€
+jelachatte calls 0.22€
+la volubile folds
+*** TURN *** [2s 9d 3h][5s]
+Epouvantable bets 0.66€
+jelachatte raises 1.08€ to 1.74€ and is all-in
+Epouvantable calls 0.68€ and is all-in
+*** RIVER *** [2s 9d 3h 5s][Js]
+*** SHOW DOWN ***
+Epouvantable shows [9s Kc 3d 9h] (Trips of 9)
+jelachatte shows [5c Tc 7h 2c] (Two pairs : 5 and 2)
+jelachatte collected 0.40€ from side pot 1
+Epouvantable collected 3.02€ from main pot
+*** SUMMARY ***
+Total pot 3.42€ | Rake 0.32€
+Board: [2s 9d 3h 5s Js]
+Seat 1: Epouvantable (small blind) showed [9s Kc 3d 9h] and won 3.02€ with Trips of 9
+Seat 2: jelachatte (big blind) showed [5c Tc 7h 2c] and won 0.40€ with Two pairs : 5 and 2
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6727-1643825841 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:17:21 UTC
+Table: 'Bucarest' 6-max (real money) Seat #3 is the button
+Seat 1: Epouvantable (3.17€)
+Seat 2: jelachatte (2€)
+Seat 3: la volubile (1.92€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+Epouvantable posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [3h Ac Th 4d]
+*** PRE-FLOP *** 
+la volubile calls 0.02€
+Epouvantable calls 0.01€
+jelachatte checks
+*** FLOP *** [Ad 9c 7s]
+Epouvantable checks
+jelachatte checks
+la volubile checks
+*** TURN *** [Ad 9c 7s][6d]
+Epouvantable bets 0.16€
+jelachatte folds
+la volubile folds
+Epouvantable collected 0.31€ from pot
+*** SUMMARY ***
+Total pot 0.31€ | Rake 0.01€
+Board: [Ad 9c 7s 6d]
+Seat 1: Epouvantable (small blind) won 0.31€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6728-1643825870 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:17:50 UTC
+Table: 'Bucarest' 6-max (real money) Seat #3 is the button
+Seat 1: Epouvantable (3.30€)
+Seat 2: jelachatte (2€)
+Seat 3: la volubile (1.90€)
+*** ANTE/BLINDS ***
+Epouvantable posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [4s 8s 2c 5c]
+*** PRE-FLOP *** 
+la volubile folds
+Epouvantable raises 0.04€ to 0.06€
+jelachatte calls 0.04€
+*** FLOP *** [7h Ac 3d]
+Epouvantable bets 0.02€
+jelachatte raises 0.16€ to 0.18€
+Epouvantable raises 0.16€ to 0.34€
+jelachatte calls 0.16€
+*** TURN *** [7h Ac 3d][3c]
+Epouvantable checks
+jelachatte checks
+*** RIVER *** [7h Ac 3d 3c][4c]
+Epouvantable checks
+jelachatte bets 0.80€
+Epouvantable folds
+jelachatte collected 1.52€ from pot
+*** SUMMARY ***
+Total pot 1.52€ | Rake 0.08€
+Board: [7h Ac 3d 3c 4c]
+Seat 2: jelachatte (big blind) won 1.52€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6729-1643825903 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:18:23 UTC
+Table: 'Bucarest' 6-max (real money) Seat #3 is the button
+Seat 1: Epouvantable (2.90€)
+Seat 2: jelachatte (2.32€)
+Seat 3: la volubile (1.90€)
+Hold-up to Pot: total 0.20€
+*** ANTE/BLINDS ***
+Epouvantable posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [8c 3h Ad 7c]
+*** PRE-FLOP *** 
+la volubile calls 0.02€
+Epouvantable calls 0.01€
+jelachatte checks
+*** FLOP *** [Ac 5s Ts]
+Epouvantable checks
+jelachatte checks
+la volubile checks
+*** TURN *** [Ac 5s Ts][Kc]
+Epouvantable bets 0.26€
+jelachatte calls 0.26€
+la volubile folds
+*** RIVER *** [Ac 5s Ts Kc][8h]
+Epouvantable bets 0.02€
+jelachatte calls 0.02€
+*** SHOW DOWN ***
+jelachatte shows [8c 3h Ad 7c] (Two pairs : Aces and 8)
+Epouvantable shows [Qd 6h 9d Jc] (Straight Ace high)
+Epouvantable collected 0.76€ from pot
+*** SUMMARY ***
+Total pot 0.76€ | Rake 0.06€
+Board: [Ac 5s Ts Kc 8h]
+Seat 1: Epouvantable (small blind) showed [Qd 6h 9d Jc] and won 0.76€ with Straight Ace high
+Seat 2: jelachatte (big blind) showed [8c 3h Ad 7c] and lost with Two pairs : Aces and 8
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6730-1643825934 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:18:54 UTC
+Table: 'Bucarest' 6-max (real money) Seat #3 is the button
+Seat 1: jelachatte (2.02€)
+Seat 2: Epouvantable (3.36€)
+Seat 3: la volubile (1.88€)
+Hold-up to Pot: total 0.20€
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Epouvantable posts big blind 0.02€
+Dealt to jelachatte [6c 8s 5h Ad]
+*** PRE-FLOP *** 
+la volubile calls 0.02€
+jelachatte folds
+Epouvantable raises 0.02€ to 0.04€
+la volubile calls 0.02€
+*** FLOP *** [Kd 6d 5s]
+Epouvantable bets 0.02€
+la volubile calls 0.02€
+*** TURN *** [Kd 6d 5s][3d]
+Epouvantable bets 0.33€
+la volubile folds
+Epouvantable collected 0.65€ from pot
+*** SUMMARY ***
+Total pot 0.65€ | Rake 0.01€
+Board: [Kd 6d 5s 3d]
+Seat 2: Epouvantable (big blind) won 0.65€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6731-1643825962 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:19:22 UTC
+Table: 'Bucarest' 6-max (real money) Seat #3 is the button
+Seat 1: Epouvantable (3.62€)
+Seat 2: la volubile (1.82€)
+Seat 3: jelachatte (2.01€)
+*** ANTE/BLINDS ***
+Epouvantable posts small blind 0.01€
+la volubile posts big blind 0.02€
+Dealt to jelachatte [7h Tc Ad 2s]
+*** PRE-FLOP *** 
+jelachatte folds
+Epouvantable raises 0.04€ to 0.06€
+la volubile calls 0.04€
+*** FLOP *** [Ks 7c Th]
+Epouvantable bets 0.12€
+la volubile folds
+Epouvantable collected 0.23€ from pot
+*** SUMMARY ***
+Total pot 0.23€ | Rake 0.01€
+Board: [Ks 7c Th]
+Seat 1: Epouvantable (small blind) won 0.23€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6732-1643825978 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:19:38 UTC
+Table: 'Bucarest' 6-max (real money) Seat #3 is the button
+Seat 1: la volubile (1.76€)
+Seat 2: jelachatte (2.01€)
+Seat 3: Epouvantable (3.67€)
+*** ANTE/BLINDS ***
+la volubile posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [4s 7s 8h 9d]
+*** PRE-FLOP *** 
+Epouvantable calls 0.02€
+la volubile calls 0.01€
+jelachatte raises 0.06€ to 0.08€
+Epouvantable calls 0.06€
+la volubile calls 0.06€
+*** FLOP *** [Jd 6c 2c]
+la volubile checks
+jelachatte bets 0.12€
+Epouvantable calls 0.12€
+la volubile calls 0.12€
+*** TURN *** [Jd 6c 2c][3c]
+la volubile checks
+jelachatte checks
+Epouvantable checks
+*** RIVER *** [Jd 6c 2c 3c][3d]
+la volubile checks
+jelachatte bets 0.45€
+Epouvantable raises 1.50€ to 1.95€
+la volubile folds
+jelachatte folds
+Epouvantable collected 2.85€ from pot
+*** SUMMARY ***
+Total pot 2.85€ | Rake 0.15€
+Board: [Jd 6c 2c 3c 3d]
+Seat 3: Epouvantable (button) won 2.85€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6733-1643826021 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:20:21 UTC
+Table: 'Bucarest' 6-max (real money) Seat #3 is the button
+Seat 1: Epouvantable (4.37€)
+Seat 2: jelachatte (2€)
+Seat 3: la volubile (1.56€)
+*** ANTE/BLINDS ***
+Epouvantable posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [5s Ks 7h 3c]
+*** PRE-FLOP *** 
+la volubile calls 0.02€
+Epouvantable raises 0.02€ to 0.04€
+jelachatte calls 0.02€
+la volubile calls 0.02€
+*** FLOP *** [Th Qh Qs]
+Epouvantable checks
+jelachatte checks
+la volubile checks
+*** TURN *** [Th Qh Qs][2c]
+Epouvantable checks
+jelachatte checks
+la volubile checks
+*** RIVER *** [Th Qh Qs 2c][Ad]
+Epouvantable checks
+jelachatte checks
+la volubile checks
+*** SHOW DOWN ***
+jelachatte shows [5s Ks 7h 3c] (One pair : Queens)
+la volubile shows [8s Kc 2s Tc] (Two pairs : Queens and Tens)
+Epouvantable shows [2h 9s Kd Ac] (Two pairs : Aces and Queens)
+Epouvantable collected 0.11€ from pot
+*** SUMMARY ***
+Total pot 0.11€ | Rake 0.01€
+Board: [Th Qh Qs 2c Ad]
+Seat 1: Epouvantable (small blind) showed [2h 9s Kd Ac] and won 0.11€ with Two pairs : Aces and Queens
+Seat 2: jelachatte (big blind) showed [5s Ks 7h 3c] and lost with One pair : Queens
+Seat 3: la volubile (button) showed [8s Kc 2s Tc] and lost with Two pairs : Queens and Tens
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6735-1643826060 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:21:00 UTC
+Table: 'Bucarest' 6-max (real money) Seat #3 is the button
+Seat 1: Epouvantable (4.46€)
+Seat 2: jelachatte (2€)
+Seat 3: la volubile (1.50€)
+Hold-up to Pot: total 0.20€
+*** ANTE/BLINDS ***
+Epouvantable posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [9c Jd 3h 4c]
+*** PRE-FLOP *** 
+la volubile calls 0.02€
+Epouvantable calls 0.01€
+jelachatte checks
+*** FLOP *** [9h 2h Kc]
+Epouvantable bets 0.26€
+jelachatte folds
+la volubile raises 0.43€ to 0.69€
+Epouvantable raises 0.43€ to 1.12€
+la volubile calls 0.43€
+*** TURN *** [9h 2h Kc][Qd]
+Epouvantable bets 0.02€
+la volubile calls 0.02€
+*** RIVER *** [9h 2h Kc Qd][Td]
+Epouvantable bets 0.02€
+la volubile calls 0.02€
+*** SHOW DOWN ***
+Epouvantable shows [8s 2s 2d 8c] (Trips of 2)
+la volubile shows [Ah Qh Qs 3c] (Trips of Queens)
+la volubile collected 2.34€ from pot
+*** SUMMARY ***
+Total pot 2.34€ | Rake 0.24€
+Board: [9h 2h Kc Qd Td]
+Seat 1: Epouvantable (small blind) showed [8s 2s 2d 8c] and lost with Trips of 2
+Seat 3: la volubile (button) showed [Ah Qh Qs 3c] and won 2.34€ with Trips of Queens
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6736-1643826096 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:21:36 UTC
+Table: 'Bucarest' 6-max (real money) Seat #4 is the button
+Seat 1: jelachatte (2€)
+Seat 2: DF_King22 (2€)
+Seat 3: Epouvantable (3.28€)
+Seat 4: la volubile (2.66€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+DF_King22 posts big blind 0.02€
+Dealt to jelachatte [Ks 3c 9c 8c]
+*** PRE-FLOP *** 
+Epouvantable folds
+la volubile calls 0.02€
+jelachatte folds
+DF_King22 checks
+*** FLOP *** [2h Qc 4c]
+DF_King22 bets 0.02€
+la volubile folds
+DF_King22 collected 0.06€ from pot
+*** SUMMARY ***
+Total pot 0.06€ | Rake 0.01€
+Board: [2h Qc 4c]
+Seat 2: DF_King22 (big blind) won 0.06€
+
+
+Winamax Poker - Go Fast "Bucarest" - HandId: #16870380-6737-1643826112 - Omaha pot limit (0.01€/0.02€) - 2022/02/02 18:21:52 UTC
+Table: 'Bucarest' 6-max (real money) Seat #4 is the button
+Seat 1: DF_King22 (2.02€)
+Seat 2: jelachatte (2€)
+Seat 3: Epouvantable (3.28€)
+Seat 4: la volubile (2.64€)
+*** ANTE/BLINDS ***
+DF_King22 posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Jd Ah Kh 9h]
+*** PRE-FLOP *** 
+Epouvantable folds
+la volubile calls 0.02€
+DF_King22 calls 0.01€
+jelachatte raises 0.06€ to 0.08€
+la volubile calls 0.06€
+DF_King22 calls 0.06€
+*** FLOP *** [4c 7c 9s]
+DF_King22 checks
+jelachatte checks
+la volubile bets 0.12€
+DF_King22 folds
+jelachatte calls 0.12€
+*** TURN *** [4c 7c 9s][Ac]
+jelachatte checks
+la volubile bets 0.24€
+jelachatte calls 0.24€
+*** RIVER *** [4c 7c 9s Ac][Qh]
+jelachatte checks
+la volubile bets 0.48€
+jelachatte raises 1.08€ to 1.56€ and is all-in
+la volubile calls 1.08€
+*** SHOW DOWN ***
+jelachatte shows [Jd Ah Kh 9h] (Two pairs : Aces and 9)
+la volubile shows [9c 8c Tc Qd] (Flush Ace high)
+la volubile collected 3.67€ from pot
+*** SUMMARY ***
+Total pot 3.67€ | Rake 0.41€
+Board: [4c 7c 9s Ac Qh]
+Seat 2: jelachatte (big blind) showed [Jd Ah Kh 9h] and lost with Two pairs : Aces and 9
+Seat 4: la volubile (button) showed [9c 8c Tc Qd] and won 3.67€ with Flush Ace high
+
+
