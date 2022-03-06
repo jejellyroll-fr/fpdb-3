@@ -416,13 +416,7 @@ class Winamax(HandHistoryConverter):
         else:
             log.debug(("No small blind"))
             hand.addBlind(None, None, None)
-        for a in self.re_PostBB.finditer(hand.handText):
-            hand.addBlind(a.group('PNAME'), 'big blind', a.group('BB'))
-            hand.setUncalledBets(True)
-            found_big = True
-        for a in self.re_Post.finditer(hand.handText):
-            hand.addBlind(a.group('PNAME'), 'big blind', a.group('BB'))
-            found_big = True
+
                 
         for a in self.re_PostBB.finditer(hand.handText):
             hand.addBlind(a.group('PNAME'), 'big blind', a.group('BB'))
