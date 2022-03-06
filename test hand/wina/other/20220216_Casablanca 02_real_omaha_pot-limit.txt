@@ -1,0 +1,762 @@
+Winamax Poker - CashGame - HandId: #16963803-289-1645043944 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:39:04 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #6 is the button
+Seat 1: POULBOT 75 (1.78€)
+Seat 2: jelachatte (2€)
+Seat 3: Asman72 (1.86€)
+Seat 4: NBAJUNKIE (2€)
+Seat 5: .Fiyah. (1.86€)
+Seat 6: Jacquouille8 (1.05€)
+*** ANTE/BLINDS ***
+POULBOT 75 posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [8d Qs 4h 9d]
+*** PRE-FLOP *** 
+Asman72 raises 0.05€ to 0.07€
+.Fiyah. folds
+Jacquouille8 calls 0.07€
+POULBOT 75 folds
+jelachatte folds
+*** FLOP *** [8c 9s Js]
+Asman72 bets 0.17€
+Jacquouille8 calls 0.17€
+*** TURN *** [8c 9s Js][Jc]
+Asman72 checks
+Jacquouille8 bets 0.34€
+Asman72 calls 0.34€
+*** RIVER *** [8c 9s Js Jc][3s]
+Asman72 checks
+Jacquouille8 bets 0.47€ and is all-in
+Asman72 calls 0.47€
+*** SHOW DOWN ***
+Asman72 shows [Ts Ad As 8s] (Flush Ace high)
+Jacquouille8 shows [Jd Ac 8h 9c] (Full of Jacks and 9)
+Jacquouille8 collected 2.01€ from pot
+*** SUMMARY ***
+Total pot 2.01€ | Rake 0.12€
+Board: [8c 9s Js Jc 3s]
+Seat 3: Asman72 showed [Ts Ad As 8s] and lost with Flush Ace high
+Seat 6: Jacquouille8 (button) showed [Jd Ac 8h 9c] and won 2.01€ with Full of Jacks and 9
+
+
+Winamax Poker - CashGame - HandId: #16963803-290-1645043995 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:39:55 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #1 is the button
+Seat 1: POULBOT 75 (1.77€)
+Seat 2: jelachatte (2€)
+Seat 3: Asman72 (0.81€)
+Seat 4: NBAJUNKIE (2€)
+Seat 5: .Fiyah. (1.86€)
+Seat 6: Jacquouille8 (2.01€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Asman72 posts big blind 0.02€
+Dealt to jelachatte [4h 5s 7h 9c]
+*** PRE-FLOP *** 
+.Fiyah. calls 0.02€
+Jacquouille8 calls 0.02€
+POULBOT 75 raises 0.02€ to 0.04€
+jelachatte folds
+Asman72 folds
+.Fiyah. calls 0.02€
+Jacquouille8 calls 0.02€
+*** FLOP *** [Jh 5h Kc]
+.Fiyah. checks
+Jacquouille8 checks
+POULBOT 75 checks
+*** TURN *** [Jh 5h Kc][6s]
+.Fiyah. checks
+Jacquouille8 bets 0.15€
+POULBOT 75 folds
+.Fiyah. folds
+Jacquouille8 collected 0.29€ from pot
+*** SUMMARY ***
+Total pot 0.29€ | Rake 0.01€
+Board: [Jh 5h Kc 6s]
+Seat 6: Jacquouille8 won 0.29€
+
+
+Winamax Poker - CashGame - HandId: #16963803-291-1645044057 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:40:57 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #2 is the button
+Seat 1: POULBOT 75 (1.73€)
+Seat 2: jelachatte (2€)
+Seat 4: NBAJUNKIE (2€)
+Seat 5: .Fiyah. (1.82€)
+Seat 6: Jacquouille8 (2.11€)
+*** ANTE/BLINDS ***
+NBAJUNKIE posts big blind 0.02€
+Dealt to jelachatte [As 5c Jc 8s]
+*** PRE-FLOP *** 
+.Fiyah. folds
+Jacquouille8 folds
+POULBOT 75 calls 0.02€
+jelachatte raises 0.06€ to 0.08€
+NBAJUNKIE folds
+POULBOT 75 calls 0.06€
+*** FLOP *** [Jh 2d 2s]
+POULBOT 75 checks
+jelachatte bets 0.09€
+POULBOT 75 folds
+jelachatte collected 0.26€ from pot
+*** SUMMARY ***
+Total pot 0.26€ | Rake 0.01€
+Board: [Jh 2d 2s]
+Seat 2: jelachatte (button) won 0.26€
+
+
+Winamax Poker - CashGame - HandId: #16963803-292-1645044105 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:41:45 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #3 is the button
+Seat 1: POULBOT 75 (1.65€)
+Seat 2: jelachatte (2.09€)
+Seat 4: NBAJUNKIE (1.98€)
+Seat 5: .Fiyah. (1.82€)
+Seat 6: Jacquouille8 (2.11€)
+*** ANTE/BLINDS ***
+NBAJUNKIE posts small blind 0.01€
+.Fiyah. posts big blind 0.02€
+Dealt to jelachatte [3s Qs 4s 9c]
+*** PRE-FLOP *** 
+Jacquouille8 calls 0.02€
+POULBOT 75 folds
+jelachatte folds
+NBAJUNKIE folds
+.Fiyah. checks
+*** FLOP *** [Ks 4d 5d]
+.Fiyah. checks
+Jacquouille8 bets 0.05€
+.Fiyah. calls 0.05€
+*** TURN *** [Ks 4d 5d][2h]
+.Fiyah. checks
+Jacquouille8 bets 0.15€
+.Fiyah. calls 0.15€
+*** RIVER *** [Ks 4d 5d 2h][7h]
+.Fiyah. checks
+Jacquouille8 checks
+*** SHOW DOWN ***
+.Fiyah. shows [Jc 2d Qc 3d] (One pair : 2)
+Jacquouille8 shows [9h Kh Kd 8c] (Trips of Kings)
+Jacquouille8 collected 0.42€ from pot
+*** SUMMARY ***
+Total pot 0.42€ | Rake 0.03€
+Board: [Ks 4d 5d 2h 7h]
+Seat 5: .Fiyah. (big blind) showed [Jc 2d Qc 3d] and lost with One pair : 2
+Seat 6: Jacquouille8 showed [9h Kh Kd 8c] and won 0.42€ with Trips of Kings
+
+
+Winamax Poker - CashGame - HandId: #16963803-293-1645044142 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:42:22 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #4 is the button
+Seat 1: POULBOT 75 (1.65€)
+Seat 2: jelachatte (2.09€)
+Seat 4: NBAJUNKIE (1.97€)
+Seat 5: .Fiyah. (1.60€)
+Seat 6: Jacquouille8 (2.31€)
+*** ANTE/BLINDS ***
+.Fiyah. posts small blind 0.01€
+Jacquouille8 posts big blind 0.02€
+Dealt to jelachatte [Kd Ah Qh 6s]
+*** PRE-FLOP *** 
+POULBOT 75 calls 0.02€
+jelachatte raises 0.07€ to 0.09€
+NBAJUNKIE folds
+.Fiyah. folds
+Jacquouille8 folds
+POULBOT 75 calls 0.07€
+*** FLOP *** [9h 3d 2s]
+POULBOT 75 checks
+jelachatte bets 0.11€
+POULBOT 75 folds
+jelachatte collected 0.31€ from pot
+*** SUMMARY ***
+Total pot 0.31€ | Rake 0.01€
+Board: [9h 3d 2s]
+Seat 2: jelachatte won 0.31€
+
+
+Winamax Poker - CashGame - HandId: #16963803-294-1645044167 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:42:47 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #5 is the button
+Seat 1: POULBOT 75 (1.56€)
+Seat 2: jelachatte (2.20€)
+Seat 4: NBAJUNKIE (1.97€)
+Seat 5: .Fiyah. (1.59€)
+Seat 6: Jacquouille8 (2.29€)
+*** ANTE/BLINDS ***
+Jacquouille8 posts small blind 0.01€
+POULBOT 75 posts big blind 0.02€
+Dealt to jelachatte [Jc 6c 2s 7s]
+*** PRE-FLOP *** 
+jelachatte folds
+NBAJUNKIE folds
+.Fiyah. calls 0.02€
+Jacquouille8 folds
+POULBOT 75 checks
+*** FLOP *** [4c 6h 9s]
+POULBOT 75 checks
+.Fiyah. bets 0.03€
+POULBOT 75 calls 0.03€
+*** TURN *** [4c 6h 9s][5h]
+POULBOT 75 checks
+.Fiyah. bets 0.06€
+POULBOT 75 folds
+.Fiyah. collected 0.16€ from pot
+*** SUMMARY ***
+Total pot 0.16€ | Rake 0.01€
+Board: [4c 6h 9s 5h]
+Seat 5: .Fiyah. (button) won 0.16€
+
+
+Winamax Poker - CashGame - HandId: #16963803-295-1645044200 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:43:20 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #6 is the button
+Seat 1: POULBOT 75 (1.51€)
+Seat 2: jelachatte (2.20€)
+Seat 4: NBAJUNKIE (1.97€)
+Seat 5: .Fiyah. (1.64€)
+Seat 6: Jacquouille8 (2.28€)
+*** ANTE/BLINDS ***
+POULBOT 75 posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Qs Js 9s Kd]
+*** PRE-FLOP *** 
+NBAJUNKIE folds
+.Fiyah. calls 0.02€
+Jacquouille8 folds
+POULBOT 75 calls 0.01€
+jelachatte raises 0.06€ to 0.08€
+.Fiyah. folds
+POULBOT 75 calls 0.06€
+*** FLOP *** [8d 2s Th]
+POULBOT 75 checks
+jelachatte bets 0.09€
+POULBOT 75 calls 0.09€
+*** TURN *** [8d 2s Th][Qh]
+POULBOT 75 checks
+jelachatte bets 0.28€
+POULBOT 75 raises 0.28€ to 0.56€
+jelachatte calls 0.28€
+*** RIVER *** [8d 2s Th Qh][2d]
+POULBOT 75 bets 0.78€ and is all-in
+jelachatte calls 0.78€
+*** SHOW DOWN ***
+POULBOT 75 shows [9c Ac Jh 5h] (Straight Queen high)
+jelachatte shows [Qs Js 9s Kd] (Straight Queen high)
+jelachatte collected 1.44€ from pot
+POULBOT 75 collected 1.43€ from pot
+*** SUMMARY ***
+Total pot 2.87€ | Rake 0.17€
+Board: [8d 2s Th Qh 2d]
+Seat 1: POULBOT 75 (small blind) showed [9c Ac Jh 5h] and won 1.43€ with Straight Queen high
+Seat 2: jelachatte (big blind) showed [Qs Js 9s Kd] and won 1.44€ with Straight Queen high
+
+
+Winamax Poker - CashGame - HandId: #16963803-296-1645044251 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:44:11 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #1 is the button
+Seat 1: POULBOT 75 (1.43€)
+Seat 2: jelachatte (2.13€)
+Seat 4: NBAJUNKIE (1.97€)
+Seat 5: .Fiyah. (1.62€)
+Seat 6: Jacquouille8 (2.28€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+NBAJUNKIE posts big blind 0.02€
+Dealt to jelachatte [4d Ts Qc 9s]
+*** PRE-FLOP *** 
+.Fiyah. calls 0.02€
+Jacquouille8 calls 0.02€
+POULBOT 75 raises 0.02€ to 0.04€
+jelachatte folds
+NBAJUNKIE folds
+.Fiyah. calls 0.02€
+Jacquouille8 calls 0.02€
+*** FLOP *** [5c 3c 7h]
+.Fiyah. checks
+Jacquouille8 bets 0.15€
+POULBOT 75 folds
+.Fiyah. calls 0.15€
+*** TURN *** [5c 3c 7h][Js]
+.Fiyah. checks
+Jacquouille8 bets 0.45€
+.Fiyah. calls 0.45€
+*** RIVER *** [5c 3c 7h Js][Jh]
+.Fiyah. checks
+Jacquouille8 checks
+*** SHOW DOWN ***
+.Fiyah. shows [Kh Kd 7d 3h] (Two pairs : Kings and Jacks)
+Jacquouille8 shows [Ad 4c Td 6d] (Straight 7 high)
+Jacquouille8 collected 1.27€ from pot
+*** SUMMARY ***
+Total pot 1.27€ | Rake 0.08€
+Board: [5c 3c 7h Js Jh]
+Seat 5: .Fiyah. showed [Kh Kd 7d 3h] and lost with Two pairs : Kings and Jacks
+Seat 6: Jacquouille8 showed [Ad 4c Td 6d] and won 1.27€ with Straight 7 high
+
+
+Winamax Poker - CashGame - HandId: #16963803-297-1645044299 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:44:59 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #2 is the button
+Seat 1: POULBOT 75 (2€)
+Seat 2: jelachatte (2.12€)
+Seat 4: NBAJUNKIE (1.95€)
+Seat 5: .Fiyah. (0.98€)
+Seat 6: Jacquouille8 (2.91€)
+*** ANTE/BLINDS ***
+NBAJUNKIE posts small blind 0.01€
+.Fiyah. posts big blind 0.02€
+Dealt to jelachatte [9s 4s Ks 3s]
+*** PRE-FLOP *** 
+Jacquouille8 calls 0.02€
+POULBOT 75 calls 0.02€
+jelachatte folds
+NBAJUNKIE folds
+.Fiyah. checks
+*** FLOP *** [3h 2h 5s]
+.Fiyah. checks
+Jacquouille8 checks
+POULBOT 75 bets 0.07€
+.Fiyah. folds
+Jacquouille8 folds
+POULBOT 75 collected 0.14€ from pot
+*** SUMMARY ***
+Total pot 0.14€ | No rake
+Board: [3h 2h 5s]
+Seat 1: POULBOT 75 won 0.14€
+
+
+Winamax Poker - CashGame - HandId: #16963803-298-1645044340 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:45:40 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #4 is the button
+Seat 1: POULBOT 75 (2.05€)
+Seat 2: jelachatte (2.12€)
+Seat 3: edache (0.61€)
+Seat 4: NBAJUNKIE (1.94€)
+Seat 5: .Fiyah. (0.96€)
+Seat 6: Jacquouille8 (2.89€)
+*** ANTE/BLINDS ***
+.Fiyah. posts small blind 0.01€
+Jacquouille8 posts big blind 0.02€
+edache posts big blind 0.02€ out of position
+Dealt to jelachatte [Qc Jd 9s 9d]
+*** PRE-FLOP *** 
+POULBOT 75 calls 0.02€
+jelachatte folds
+edache checks
+NBAJUNKIE folds
+.Fiyah. calls 0.01€
+Jacquouille8 checks
+*** FLOP *** [Th Kd 5c]
+.Fiyah. checks
+Jacquouille8 checks
+POULBOT 75 bets 0.04€
+edache calls 0.04€
+.Fiyah. calls 0.04€
+Jacquouille8 folds
+*** TURN *** [Th Kd 5c][Tc]
+.Fiyah. checks
+POULBOT 75 bets 0.10€
+edache folds
+.Fiyah. calls 0.10€
+*** RIVER *** [Th Kd 5c Tc][5s]
+.Fiyah. checks
+POULBOT 75 checks
+*** SHOW DOWN ***
+.Fiyah. shows [As 3h Jc 8c] (One pair : Tens)
+POULBOT 75 shows [Kh Ac 8h 6h] (Two pairs : Kings and Tens)
+POULBOT 75 collected 0.38€ from pot
+*** SUMMARY ***
+Total pot 0.38€ | Rake 0.02€
+Board: [Th Kd 5c Tc 5s]
+Seat 1: POULBOT 75 showed [Kh Ac 8h 6h] and won 0.38€ with Two pairs : Kings and Tens
+Seat 5: .Fiyah. (small blind) showed [As 3h Jc 8c] and lost with One pair : Tens
+
+
+Winamax Poker - CashGame - HandId: #16963803-299-1645044429 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:47:09 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #5 is the button
+Seat 1: POULBOT 75 (2.27€)
+Seat 2: jelachatte (2.12€)
+Seat 3: edache (0.55€)
+Seat 4: NBAJUNKIE (1.94€)
+Seat 5: .Fiyah. (0.80€)
+Seat 6: Jacquouille8 (2.87€)
+*** ANTE/BLINDS ***
+Jacquouille8 posts small blind 0.01€
+POULBOT 75 posts big blind 0.02€
+Dealt to jelachatte [Td Ah 9s Kc]
+*** PRE-FLOP *** 
+jelachatte folds
+edache folds
+NBAJUNKIE folds
+.Fiyah. calls 0.02€
+Jacquouille8 calls 0.01€
+POULBOT 75 checks
+*** FLOP *** [Th 4d 6c]
+Jacquouille8 checks
+POULBOT 75 checks
+.Fiyah. bets 0.03€
+Jacquouille8 folds
+POULBOT 75 calls 0.03€
+*** TURN *** [Th 4d 6c][Kd]
+POULBOT 75 checks
+.Fiyah. bets 0.06€
+POULBOT 75 folds
+.Fiyah. collected 0.17€ from pot
+*** SUMMARY ***
+Total pot 0.17€ | Rake 0.01€
+Board: [Th 4d 6c Kd]
+Seat 5: .Fiyah. (button) won 0.17€
+
+
+Winamax Poker - CashGame - HandId: #16963803-300-1645044492 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:48:12 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #6 is the button
+Seat 1: POULBOT 75 (2.22€)
+Seat 2: jelachatte (2.12€)
+Seat 3: edache (0.55€)
+Seat 4: NBAJUNKIE (1.94€)
+Seat 5: .Fiyah. (0.86€)
+Seat 6: Jacquouille8 (2.85€)
+*** ANTE/BLINDS ***
+POULBOT 75 posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [3s Ad 5c 8d]
+*** PRE-FLOP *** 
+edache folds
+NBAJUNKIE folds
+.Fiyah. calls 0.02€
+Jacquouille8 folds
+POULBOT 75 calls 0.01€
+jelachatte checks
+*** FLOP *** [Ac 4s 5d]
+POULBOT 75 checks
+jelachatte bets 0.03€
+.Fiyah. folds
+POULBOT 75 calls 0.03€
+*** TURN *** [Ac 4s 5d][As]
+POULBOT 75 bets 0.06€
+jelachatte calls 0.06€
+*** RIVER *** [Ac 4s 5d As][9d]
+POULBOT 75 checks
+jelachatte bets 0.16€
+POULBOT 75 folds
+jelachatte collected 0.39€ from pot
+*** SUMMARY ***
+Total pot 0.39€ | Rake 0.01€
+Board: [Ac 4s 5d As 9d]
+Seat 2: jelachatte (big blind) won 0.39€
+
+
+Winamax Poker - CashGame - HandId: #16963803-301-1645044555 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:49:15 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #1 is the button
+Seat 1: POULBOT 75 (2.11€)
+Seat 2: jelachatte (2.24€)
+Seat 3: edache (0.55€)
+Seat 4: NBAJUNKIE (1.94€)
+Seat 5: .Fiyah. (0.84€)
+Seat 6: Jacquouille8 (2.85€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+edache posts big blind 0.02€
+Dealt to jelachatte [5h Kd 4d Jc]
+*** PRE-FLOP *** 
+NBAJUNKIE raises 0.05€ to 0.07€
+.Fiyah. calls 0.07€
+Jacquouille8 folds
+POULBOT 75 calls 0.07€
+jelachatte folds
+edache folds
+*** FLOP *** [Qs Td 2c]
+NBAJUNKIE checks
+.Fiyah. bets 0.12€
+POULBOT 75 folds
+NBAJUNKIE raises 0.25€ to 0.37€
+.Fiyah. raises 0.40€ to 0.77€ and is all-in
+NBAJUNKIE calls 0.40€
+*** TURN *** [Qs Td 2c][3s]
+*** RIVER *** [Qs Td 2c 3s][Ah]
+*** SHOW DOWN ***
+.Fiyah. shows [Js 2d Ts Qh] (Two pairs : Queens and Tens)
+NBAJUNKIE shows [2h Ks Jh 2s] (Straight Ace high)
+NBAJUNKIE collected 1.68€ from pot
+*** SUMMARY ***
+Total pot 1.68€ | Rake 0.10€
+Board: [Qs Td 2c 3s Ah]
+Seat 4: NBAJUNKIE showed [2h Ks Jh 2s] and won 1.68€ with Straight Ace high
+Seat 5: .Fiyah. showed [Js 2d Ts Qh] and lost with Two pairs : Queens and Tens
+
+
+Winamax Poker - CashGame - HandId: #16963803-302-1645044646 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:50:46 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #2 is the button
+Seat 1: POULBOT 75 (2.04€)
+Seat 2: jelachatte (2.23€)
+Seat 3: edache (0.53€)
+Seat 4: NBAJUNKIE (2.78€)
+Seat 5: .Fiyah. (0€)
+Seat 6: Jacquouille8 (2.85€)
+*** ANTE/BLINDS ***
+edache posts small blind 0.01€
+NBAJUNKIE posts big blind 0.02€
+Dealt to jelachatte [6d 8c 3s 4d]
+*** PRE-FLOP *** 
+Jacquouille8 folds
+POULBOT 75 folds
+jelachatte folds
+edache calls 0.01€
+NBAJUNKIE checks
+*** FLOP *** [Td 7c 5s]
+edache checks
+NBAJUNKIE bets 0.02€
+edache calls 0.02€
+*** TURN *** [Td 7c 5s][2d]
+edache checks
+NBAJUNKIE bets 0.06€
+edache calls 0.06€
+*** RIVER *** [Td 7c 5s 2d][Th]
+edache checks
+NBAJUNKIE bets 0.12€
+edache folds
+NBAJUNKIE collected 0.31€ from pot
+*** SUMMARY ***
+Total pot 0.31€ | Rake 0.01€
+Board: [Td 7c 5s 2d Th]
+Seat 4: NBAJUNKIE (big blind) won 0.31€
+
+
+Winamax Poker - CashGame - HandId: #16963803-303-1645044697 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:51:37 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #3 is the button
+Seat 1: POULBOT 75 (2.04€)
+Seat 2: jelachatte (2.23€)
+Seat 3: edache (0.43€)
+Seat 4: NBAJUNKIE (2.87€)
+Seat 6: Jacquouille8 (2.85€)
+*** ANTE/BLINDS ***
+NBAJUNKIE posts small blind 0.01€
+Jacquouille8 posts big blind 0.02€
+Dealt to jelachatte [Qd 4c 9d 5c]
+*** PRE-FLOP *** 
+POULBOT 75 raises 0.02€ to 0.04€
+jelachatte folds
+edache calls 0.04€
+NBAJUNKIE folds
+Jacquouille8 folds
+*** FLOP *** [8h 6s 8d]
+POULBOT 75 bets 0.06€
+edache calls 0.06€
+*** TURN *** [8h 6s 8d][Ac]
+POULBOT 75 bets 0.12€
+edache folds
+POULBOT 75 collected 0.34€ from pot
+*** SUMMARY ***
+Total pot 0.34€ | Rake 0.01€
+Board: [8h 6s 8d Ac]
+Seat 1: POULBOT 75 won 0.34€
+
+
+Winamax Poker - CashGame - HandId: #16963803-304-1645044739 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:52:19 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #4 is the button
+Seat 1: POULBOT 75 (2.16€)
+Seat 2: jelachatte (2.23€)
+Seat 3: edache (0.33€)
+Seat 4: NBAJUNKIE (2.86€)
+Seat 6: Jacquouille8 (2.83€)
+*** ANTE/BLINDS ***
+Jacquouille8 posts small blind 0.01€
+POULBOT 75 posts big blind 0.02€
+Dealt to jelachatte [Kc 9d 2d Ah]
+*** PRE-FLOP *** 
+jelachatte folds
+edache calls 0.02€
+NBAJUNKIE raises 0.07€ to 0.09€
+Jacquouille8 calls 0.08€
+POULBOT 75 folds
+edache calls 0.07€
+*** FLOP *** [Kd Qs 4h]
+Jacquouille8 checks
+edache bets 0.24€ and is all-in
+NBAJUNKIE calls 0.24€
+Jacquouille8 folds
+*** TURN *** [Kd Qs 4h][Tc]
+*** RIVER *** [Kd Qs 4h Tc][3s]
+*** SHOW DOWN ***
+NBAJUNKIE shows [5d Jc Qc 7d] (One pair : Queens)
+edache shows [Kh 9h Qd 4d] (Two pairs : Kings and Queens)
+edache collected 0.73€ from pot
+*** SUMMARY ***
+Total pot 0.73€ | Rake 0.04€
+Board: [Kd Qs 4h Tc 3s]
+Seat 3: edache showed [Kh 9h Qd 4d] and won 0.73€ with Two pairs : Kings and Queens
+Seat 4: NBAJUNKIE (button) showed [5d Jc Qc 7d] and lost with One pair : Queens
+
+
+Winamax Poker - CashGame - HandId: #16963803-305-1645044785 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:53:05 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #6 is the button
+Seat 1: POULBOT 75 (2.14€)
+Seat 2: jelachatte (2.23€)
+Seat 3: edache (0.73€)
+Seat 4: NBAJUNKIE (2.53€)
+Seat 6: Jacquouille8 (2.74€)
+*** ANTE/BLINDS ***
+POULBOT 75 posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [6d 9c Jh 4d]
+*** PRE-FLOP *** 
+edache calls 0.02€
+NBAJUNKIE raises 0.07€ to 0.09€
+Jacquouille8 folds
+POULBOT 75 folds
+jelachatte folds
+edache calls 0.07€
+*** FLOP *** [5d Kd Qc]
+edache checks
+NBAJUNKIE checks
+*** TURN *** [5d Kd Qc][6c]
+edache bets 0.21€
+NBAJUNKIE calls 0.21€
+*** RIVER *** [5d Kd Qc 6c][5c]
+edache bets 0.43€ and is all-in
+NBAJUNKIE calls 0.43€
+*** SHOW DOWN ***
+NBAJUNKIE shows [8c 9d 2s Ac] (Flush Ace high)
+edache shows [Kh Ah Ks 3d] (Full of Kings and 5)
+edache collected 1.40€ from pot
+*** SUMMARY ***
+Total pot 1.40€ | Rake 0.09€
+Board: [5d Kd Qc 6c 5c]
+Seat 3: edache showed [Kh Ah Ks 3d] and won 1.40€ with Full of Kings and 5
+Seat 4: NBAJUNKIE showed [8c 9d 2s Ac] and lost with Flush Ace high
+
+
+Winamax Poker - CashGame - HandId: #16963803-306-1645044824 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:53:44 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #1 is the button
+Seat 1: POULBOT 75 (2.13€)
+Seat 2: jelachatte (2.21€)
+Seat 3: edache (1.40€)
+Seat 4: NBAJUNKIE (1.80€)
+Seat 6: Jacquouille8 (2.74€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+edache posts big blind 0.02€
+Dealt to jelachatte [4s Td 2h 5s]
+*** PRE-FLOP *** 
+NBAJUNKIE folds
+Jacquouille8 calls 0.02€
+POULBOT 75 folds
+jelachatte folds
+edache checks
+*** FLOP *** [Jc Kc 9s]
+edache checks
+Jacquouille8 checks
+*** TURN *** [Jc Kc 9s][Ts]
+edache checks
+Jacquouille8 checks
+*** RIVER *** [Jc Kc 9s Ts][Qd]
+edache checks
+Jacquouille8 checks
+*** SHOW DOWN ***
+Jacquouille8 shows [8h Kh 6c 2c] (One pair : Kings)
+edache shows [9c 8s 6h 5d] (Straight Queen high)
+edache collected 0.05€ from pot
+*** SUMMARY ***
+Total pot 0.05€ | No rake
+Board: [Jc Kc 9s Ts Qd]
+Seat 3: edache (big blind) showed [9c 8s 6h 5d] and won 0.05€ with Straight Queen high
+Seat 6: Jacquouille8 showed [8h Kh 6c 2c] and lost with One pair : Kings
+
+
+Winamax Poker - CashGame - HandId: #16963803-307-1645044877 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:54:37 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #2 is the button
+Seat 1: POULBOT 75 (2.13€)
+Seat 2: jelachatte (2.20€)
+Seat 3: edache (1.43€)
+Seat 4: NBAJUNKIE (1.80€)
+Seat 5: Choupette_64 (2€)
+Seat 6: Jacquouille8 (2.72€)
+*** ANTE/BLINDS ***
+edache posts small blind 0.01€
+NBAJUNKIE posts big blind 0.02€
+Dealt to jelachatte [Jc 2s 8s Th]
+*** PRE-FLOP *** 
+Jacquouille8 folds
+POULBOT 75 calls 0.02€
+jelachatte folds
+edache calls 0.01€
+NBAJUNKIE checks
+*** FLOP *** [As 6d Qh]
+edache checks
+NBAJUNKIE checks
+POULBOT 75 checks
+*** TURN *** [As 6d Qh][Ah]
+edache checks
+NBAJUNKIE checks
+POULBOT 75 checks
+*** RIVER *** [As 6d Qh Ah][7h]
+edache checks
+NBAJUNKIE checks
+POULBOT 75 checks
+*** SHOW DOWN ***
+POULBOT 75 shows [9d 8d Js 3d] (One pair : Aces)
+NBAJUNKIE shows [5c 5d Jd 6h] (Two pairs : Aces and 6)
+edache shows [2c Td Ts 7s] (Two pairs : Aces and Tens)
+edache collected 0.06€ from pot
+*** SUMMARY ***
+Total pot 0.06€ | No rake
+Board: [As 6d Qh Ah 7h]
+Seat 1: POULBOT 75 showed [9d 8d Js 3d] and lost with One pair : Aces
+Seat 3: edache (small blind) showed [2c Td Ts 7s] and won 0.06€ with Two pairs : Aces and Tens
+Seat 4: NBAJUNKIE (big blind) showed [5c 5d Jd 6h] and lost with Two pairs : Aces and 6
+
+
+Winamax Poker - CashGame - HandId: #16963803-308-1645044922 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:55:22 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #3 is the button
+Seat 1: POULBOT 75 (2.11€)
+Seat 2: jelachatte (2.20€)
+Seat 3: edache (1.47€)
+Seat 4: NBAJUNKIE (1.78€)
+Seat 5: Choupette_64 (2€)
+Seat 6: Jacquouille8 (2.72€)
+*** ANTE/BLINDS ***
+NBAJUNKIE posts small blind 0.01€
+Choupette_64 posts big blind 0.02€
+Dealt to jelachatte [9s 5s 5d 9c]
+*** PRE-FLOP *** 
+Jacquouille8 calls 0.02€
+POULBOT 75 raises 0.02€ to 0.04€
+jelachatte folds
+edache folds
+NBAJUNKIE folds
+Choupette_64 calls 0.02€
+Jacquouille8 calls 0.02€
+*** FLOP *** [3s 8c 4s]
+Choupette_64 checks
+Jacquouille8 bets 0.07€
+POULBOT 75 folds
+Choupette_64 folds
+Jacquouille8 collected 0.19€ from pot
+*** SUMMARY ***
+Total pot 0.19€ | Rake 0.01€
+Board: [3s 8c 4s]
+Seat 6: Jacquouille8 won 0.19€
+
+
+Winamax Poker - CashGame - HandId: #16963803-310-1645045028 - Omaha pot limit (0.01€/0.02€) - 2022/02/16 20:57:08 UTC
+Table: 'Casablanca 02' 6-max (real money) Seat #5 is the button
+Seat 1: POULBOT 75 (2.37€)
+Seat 2: jelachatte (2.20€)
+Seat 3: edache (1.38€)
+Seat 4: NBAJUNKIE (1.54€)
+Seat 5: Choupette_64 (1.95€)
+*** ANTE/BLINDS ***
+POULBOT 75 posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Jd Jh 3h 2c]
+*** PRE-FLOP *** 
+edache calls 0.02€
+NBAJUNKIE raises 0.07€ to 0.09€
+Choupette_64 calls 0.09€
+POULBOT 75 folds
+jelachatte calls 0.07€
+edache calls 0.07€
+*** FLOP *** [5c Qh Ts]
+jelachatte checks
+edache bets 0.37€
+NBAJUNKIE folds
+Choupette_64 folds
+jelachatte folds
+edache collected 0.72€ from pot
+*** SUMMARY ***
+Total pot 0.72€ | Rake 0.02€
+Board: [5c Qh Ts]
+Seat 3: edache won 0.72€
+
+

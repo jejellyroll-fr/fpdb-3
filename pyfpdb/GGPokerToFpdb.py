@@ -312,14 +312,14 @@ class GGPoker(HandHistoryConverter):
     def readHandInfo(self, hand):
         #First check if partial
         if hand.handText.count('*** SUMMARY ***')!=1:
-            raise FpdbHandPartial(_("Hand is not cleanly split into pre and post Summary"))
+            raise FpdbHandPartial(("Hand is not cleanly split into pre and post Summary"))
         
         info = {}
         m  = self.re_HandInfo.search(hand.handText,re.DOTALL)
         m2 = self.re_GameInfo.search(hand.handText)
         if m is None or m2 is None:
             tmp = hand.handText[0:200]
-            log.error(_("GGPokerToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(("GGPokerToFpdb.readHandInfo: '%s'") % tmp)
             raise FpdbParseError
 
         info.update(m.groupdict())
