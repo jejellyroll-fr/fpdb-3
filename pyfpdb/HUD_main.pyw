@@ -105,9 +105,7 @@ class HUD_main(QObject):
         self.hud_dict = {}
         self.blacklist = [] #a list of blacklisted table numbers (handles)
         self.hud_params = self.config.get_hud_ui_parameters()
-        self.deck = Deck.Deck(self.config,
-            deck_type=self.hud_params["deck_type"], card_back=self.hud_params["card_back"],
-            width=self.hud_params['card_wd'], height=self.hud_params['card_ht'])
+        self.deck = Deck.Deck(self.config,deck_type=self.hud_params["deck_type"], card_back=self.hud_params["card_back"],width=self.hud_params['card_wd'], height=self.hud_params['card_ht'])
 
         # a thread to read stdin
         self.stdinThread = QThread()
@@ -338,7 +336,7 @@ class HUD_main(QObject):
             # get stats using hud's specific params and get cards
             self.db_connection.init_hud_stat_vars( self.hud_dict[temp_key].hud_params['hud_days']
                                                  , self.hud_dict[temp_key].hud_params['h_hud_days'])
-            #print("update an existing hud ", temp_key, self.hud_dict[temp_key].hud_params)
+            print("update an existing hud ", temp_key, self.hud_dict[temp_key].hud_params)
             stat_dict = self.db_connection.get_stats_from_hand(new_hand_id, type, self.hud_dict[temp_key].hud_params,
                                                                self.hero_ids[site_id], num_seats)
 

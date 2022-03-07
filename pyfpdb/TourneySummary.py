@@ -259,7 +259,7 @@ class TourneySummary(object):
         self.db.createOrUpdateTourneysPlayers(self)
         self.db.commit()
         
-        logging.debug(_("Tourney Insert/Update done"))
+        logging.debug(("Tourney Insert/Update done"))
         
         # TO DO : Return what has been done (tourney created, updated, nothing)
         # ?? stored = 1 if tourney is fully created / duplicates = 1, if everything was already here and correct / partial=1 if some things were already here (between tourney, tourneysPlayers and handsPlayers)

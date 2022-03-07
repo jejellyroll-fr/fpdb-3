@@ -103,7 +103,7 @@ class Importer(object):
         self.writerdbs = []
         self.settings.setdefault("threads", 1) # value set by GuiBulkImport
         for i in range(self.settings['threads']):
-            self.writerdbs.append( Database.Database(self.config, sql = self.sql) )
+            self.writerdbs.append(Database.Database(self.config, sql = self.sql) )
 
 
     #Set functions
@@ -183,7 +183,7 @@ class Importer(object):
             
     #Add an individual file to filelist
     def addImportFile(self, filename, site = "auto"):
-        #print "addimportfile: filename is a", filename.__class__
+        print("addimportfile: filename is a", filename.__class__)
         # filename not guaranteed to be unicode
         if self.filelist.get(filename)!=None or not os.path.exists(filename):
             return False
@@ -392,6 +392,8 @@ class Importer(object):
                         try:
                             if not os.path.isdir(f):
                                 self.caller.addText("\n"+os.path.basename(f))
+                                print("self.caller:", self.caller)
+                                print(os.path.basename(f))
                         except KeyError:
                             log.error("File '%s' seems to have disappeared" % f)
                         (stored, duplicates, partial, skipped, errors, ttime) = self._import_despatch(self.filelist[f])
@@ -400,6 +402,7 @@ class Importer(object):
                         try:
                             if not os.path.isdir(f): # Note: This assumes that whatever calls us has an "addText" func
                                 self.caller.addText(" %d stored, %d duplicates, %d partial, %d skipped, %d errors (time = %f)" % (stored, duplicates, partial, skipped, errors, ttime))
+                                print("self.caller2:",self.caller)
                         except KeyError: # TODO: Again, what error happens here? fix when we find out ..
                             pass
                         self.updatedsize[f] = stat_info.st_size
@@ -530,8 +533,15 @@ class Importer(object):
 
                 #pipe the Hands.id out to the HUD
                 if self.callHud:
-                    for hid in to_hud:
+                    print(self.callHud)
+                    print(self.caller)
+                    for hid in list(to_hud):
                         try:
+                            print(os.linesep)
+                            print(type(to_hud))
+                            print(hid)
+                            print(self.caller.pipe_to_hud)
+                            print(self.caller.pipe_to_hud.stdin.write)
                             print(("fpdb_import: sending hand to hud"), hid, "pipe =", self.caller.pipe_to_hud)
                             self.caller.pipe_to_hud.stdin.write("%s" % (hid) + os.linesep)
                         except IOError as e:

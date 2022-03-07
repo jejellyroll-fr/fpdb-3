@@ -1,32 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-#Copyright 2008-2011 Steffen Schaumburg
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, version 3 of the License.
-#
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#GNU General Public License for more details.
-#
-#You should have received a copy of the GNU Affero General Public License
-#along with this program. If not, see <http://www.gnu.org/licenses/>.
-#In the "official" distribution you can find the license in agpl-3.0.txt.
-
 from __future__ import print_function
 import L10n
 _ = L10n.get_translation()
-
 import subprocess
 import traceback
-
 import os
 import sys
-
 import logging
-
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QPushButton, QLineEdit, QTextEdit, QCheckBox, QFileDialog
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QTextCursor
@@ -34,7 +13,7 @@ from PyQt5.QtGui import QTextCursor
 import Importer
 from optparse import OptionParser
 import Configuration
-import string
+
 import interlocks
 
 if __name__ == "__main__":
@@ -113,19 +92,17 @@ class GuiAutoImport(QWidget):
     def addText(self, text):
         self.textview.moveCursor(QTextCursor.End)
         self.textview.insertPlainText(text)
+#   end of GuiAutoImport.__init__
 
-
-    #end of GuiAutoImport.__init__
     def browseClicked(self):
-        """runs when user clicks one of the browse buttons in the auto import tab"""
+#   runs when user clicks one of the browse buttons in the auto import tab"""
 #       Browse is not valid while hud is running, so return immediately
         if (self.pipe_to_hud):
             return
         data = self.sender().hackdata
-        current_path=data[1].text()
+        current_path = data[1].text()
 
-        newdir = QFileDialog.getExistingDirectory(self, caption=("Please choose the path that you want to Auto Import"),
-                                        directory=current_path)
+        newdir = QFileDialog.getExistingDirectory(self, caption=("Please choose the path that you want to Auto Import"),directory=current_path)
         if newdir:
             #print dia_chooser.get_filename(), 'selected'
             data[1].setText(newdir)
@@ -155,7 +132,7 @@ class GuiAutoImport(QWidget):
         for site in the_sites:
             params = self.config.get_site_parameters(site)
             if params['enabled'] == True:
-                print (("DEBUG:") + " " + ("Detecting hand history directory for site: '%s'") % site)
+                print(("DEBUG:") + " " + ("Detecting hand history directory for site: '%s'") % site)
                 if os.name == 'posix':
                     if self.posix_detect_hh_dirs(site):
                         #data[1].set_text(dia_chooser.get_filename())

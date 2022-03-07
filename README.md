@@ -18,6 +18,10 @@ replayer
 - rethink the distribution of players around the table
 import
 - correct bug on winamax (no SB)->Fixed
+- correct bug go fast (adding oldhup, error collected pot>total pot)->fixed
+hud
+-windows and mac not appear
+-linuc disappear behind the table
 
 
 ## Requirement
