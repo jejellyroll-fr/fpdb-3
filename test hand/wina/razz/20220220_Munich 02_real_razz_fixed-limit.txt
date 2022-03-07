@@ -1,0 +1,763 @@
+Winamax Poker - CashGame - HandId: #16976649-1-1645388957 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:29:17 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2€)
+Seat 2: jelachatte (2€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 2h]
+Dealt to jelachatte [Ac 9c 4s]
+jelachatte brings in 0.02€
+SoGood36 calls 0.02€
+*** 4th STREET ***
+Dealt to SoGood36 [X X 2h] [5c]
+Dealt to jelachatte [Ac 9c 4s] [7s]
+SoGood36 checks
+jelachatte checks
+*** 5th STREET ***
+Dealt to SoGood36 [X X 2h 5c] [5s]
+Dealt to jelachatte [Ac 9c 4s 7s] [Jh]
+jelachatte checks
+SoGood36 bets 0.10€
+jelachatte calls 0.10€
+*** 6th STREET ***
+Dealt to jelachatte [Ac 9c 4s 7s Jh] [6d]
+Dealt to SoGood36 [X X 2h 5c 5s] [3h]
+jelachatte checks
+SoGood36 bets 0.10€
+jelachatte folds
+SoGood36 collected 0.35€ from pot
+*** SUMMARY ***
+Total pot 0.35€ | Rake 0.01€
+Seat 1: SoGood36 won 0.35€
+
+
+Winamax Poker - CashGame - HandId: #16976649-2-1645389014 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:30:14 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.12€)
+Seat 2: jelachatte (2€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 3c]
+Dealt to jelachatte [6h 6d Th]
+jelachatte brings in 0.02€
+SoGood36 raises 0.03€ to 0.05€
+jelachatte folds
+SoGood36 collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 1: SoGood36 won 0.09€
+
+
+Winamax Poker - CashGame - HandId: #16976649-3-1645389023 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:30:23 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.15€)
+Seat 2: jelachatte (2€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X Jc]
+Dealt to jelachatte [6d Qh 6c]
+SoGood36 brings in 0.02€
+jelachatte raises 0.03€ to 0.05€
+SoGood36 folds
+jelachatte collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 2: jelachatte won 0.09€
+
+
+Winamax Poker - CashGame - HandId: #16976649-4-1645389030 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:30:30 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.12€)
+Seat 2: jelachatte (2.03€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 5d]
+Dealt to jelachatte [4c Ad 9s]
+jelachatte brings in 0.02€
+SoGood36 calls 0.02€
+*** 4th STREET ***
+Dealt to SoGood36 [X X 5d] [5h]
+Dealt to jelachatte [4c Ad 9s] [Kd]
+jelachatte checks
+SoGood36 checks
+*** 5th STREET ***
+Dealt to jelachatte [4c Ad 9s Kd] [Jh]
+Dealt to SoGood36 [X X 5d 5h] [8h]
+jelachatte checks
+SoGood36 bets 0.10€
+jelachatte folds
+SoGood36 collected 0.16€ from pot
+*** SUMMARY ***
+Total pot 0.16€ | No rake
+Seat 1: SoGood36 won 0.16€
+
+
+Winamax Poker - CashGame - HandId: #16976649-5-1645389044 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:30:44 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.15€)
+Seat 2: jelachatte (2€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 5c]
+Dealt to jelachatte [4s Qc Ah]
+SoGood36 brings in 0.02€
+jelachatte raises 0.03€ to 0.05€
+SoGood36 calls 0.03€
+*** 4th STREET ***
+Dealt to jelachatte [4s Qc Ah] [Qd]
+Dealt to SoGood36 [X X 5c] [As]
+SoGood36 bets 0.05€
+jelachatte calls 0.05€
+*** 5th STREET ***
+Dealt to SoGood36 [X X 5c As] [Jd]
+Dealt to jelachatte [4s Qc Ah Qd] [3s]
+SoGood36 checks
+jelachatte bets 0.10€
+SoGood36 calls 0.10€
+*** 6th STREET ***
+Dealt to SoGood36 [X X 5c As Jd] [8s]
+Dealt to jelachatte [4s Qc Ah Qd 3s] [6c]
+SoGood36 checks
+jelachatte bets 0.10€
+SoGood36 calls 0.10€
+*** 7th STREET ***
+Dealt to SoGood36 [X X 5c As Jd 8s] [X]
+Dealt to jelachatte [4s Qc Ah Qd 3s 6c] [9c]
+SoGood36 bets 0.10€
+jelachatte calls 0.10€
+*** SHOW DOWN ***
+jelachatte shows [4s Qc Ah Qd 3s 6c 9c] (High card : 9)
+SoGood36 shows [4h Kh 5c As Jd 8s 2d] (High card : 8)
+SoGood36 collected 0.77€ from pot
+*** SUMMARY ***
+Total pot 0.77€ | Rake 0.05€
+Seat 1: SoGood36 showed [4h Kh 5c As Jd 8s 2d] and won 0.77€ with High card : 8
+Seat 2: jelachatte showed [4s Qc Ah Qd 3s 6c 9c] and lost with High card : 9
+
+
+Winamax Poker - CashGame - HandId: #16976649-6-1645389070 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:31:10 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.51€)
+Seat 2: jelachatte (2€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X Kh]
+Dealt to jelachatte [2h 4c 8d]
+SoGood36 brings in 0.02€
+jelachatte raises 0.03€ to 0.05€
+SoGood36 folds
+jelachatte collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 2: jelachatte won 0.09€
+
+
+Winamax Poker - CashGame - HandId: #16976649-7-1645389080 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:31:20 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.48€)
+Seat 2: jelachatte (2.03€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 2s]
+Dealt to jelachatte [5d 5s Js]
+jelachatte brings in 0.02€
+SoGood36 raises 0.03€ to 0.05€
+jelachatte folds
+SoGood36 collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 1: SoGood36 won 0.09€
+
+
+Winamax Poker - CashGame - HandId: #16976649-8-1645389088 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:31:28 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.51€)
+Seat 2: jelachatte (2€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X Kd]
+Dealt to jelachatte [Td 8s 3s]
+SoGood36 brings in 0.02€
+jelachatte raises 0.03€ to 0.05€
+SoGood36 folds
+jelachatte collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 2: jelachatte won 0.09€
+
+
+Winamax Poker - CashGame - HandId: #16976649-9-1645389096 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:31:36 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.48€)
+Seat 2: jelachatte (2.03€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 7c]
+Dealt to jelachatte [5h Jh 9d]
+jelachatte brings in 0.02€
+SoGood36 calls 0.02€
+*** 4th STREET ***
+Dealt to SoGood36 [X X 7c] [6d]
+Dealt to jelachatte [5h Jh 9d] [Jc]
+SoGood36 bets 0.05€
+jelachatte folds
+SoGood36 collected 0.11€ from pot
+*** SUMMARY ***
+Total pot 0.11€ | No rake
+Seat 1: SoGood36 won 0.11€
+
+
+Winamax Poker - CashGame - HandId: #16976649-10-1645389118 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:31:58 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.51€)
+Seat 2: jelachatte (2€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 7d]
+Dealt to jelachatte [Td 4d 9c]
+jelachatte brings in 0.02€
+SoGood36 calls 0.02€
+*** 4th STREET ***
+Dealt to SoGood36 [X X 7d] [9d]
+Dealt to jelachatte [Td 4d 9c] [Jd]
+SoGood36 checks
+jelachatte checks
+*** 5th STREET ***
+Dealt to SoGood36 [X X 7d 9d] [Ts]
+Dealt to jelachatte [Td 4d 9c Jd] [3d]
+SoGood36 checks
+jelachatte checks
+*** 6th STREET ***
+Dealt to SoGood36 [X X 7d 9d Ts] [7s]
+Dealt to jelachatte [Td 4d 9c Jd 3d] [Ad]
+jelachatte checks
+SoGood36 checks
+*** 7th STREET ***
+Dealt to jelachatte [Td 4d 9c Jd 3d Ad] [9s]
+Dealt to SoGood36 [X X 7d 9d Ts 7s] [X]
+jelachatte bets 0.10€
+SoGood36 calls 0.10€
+*** SHOW DOWN ***
+jelachatte shows [Td 4d 9c Jd 3d Ad 9s] (High card : Ten)
+SoGood36 shows [4c 5h 7d 9d Ts 7s 8d] (High card : 9)
+SoGood36 collected 0.25€ from pot
+*** SUMMARY ***
+Total pot 0.25€ | Rake 0.01€
+Seat 1: SoGood36 showed [4c 5h 7d 9d Ts 7s 8d] and won 0.25€ with High card : 9
+Seat 2: jelachatte showed [Td 4d 9c Jd 3d Ad 9s] and lost with High card : Ten
+
+
+Winamax Poker - CashGame - HandId: #16976649-11-1645389136 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:32:16 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.63€)
+Seat 2: jelachatte (2€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 9c]
+Dealt to jelachatte [Jh 2h 9s]
+jelachatte brings in 0.02€
+SoGood36 calls 0.02€
+*** 4th STREET ***
+Dealt to SoGood36 [X X 9c] [Ah]
+Dealt to jelachatte [Jh 2h 9s] [4h]
+SoGood36 checks
+jelachatte bets 0.05€
+SoGood36 calls 0.05€
+*** 5th STREET ***
+Dealt to SoGood36 [X X 9c Ah] [3h]
+Dealt to jelachatte [Jh 2h 9s 4h] [7c]
+SoGood36 checks
+jelachatte bets 0.10€
+SoGood36 calls 0.10€
+*** 6th STREET ***
+Dealt to SoGood36 [X X 9c Ah 3h] [Qd]
+Dealt to jelachatte [Jh 2h 9s 4h 7c] [7s]
+SoGood36 checks
+jelachatte bets 0.10€
+SoGood36 calls 0.10€
+*** 7th STREET ***
+Dealt to SoGood36 [X X 9c Ah 3h Qd] [X]
+Dealt to jelachatte [Jh 2h 9s 4h 7c 7s] [Tc]
+SoGood36 checks
+jelachatte bets 0.10€
+SoGood36 calls 0.10€
+*** SHOW DOWN ***
+jelachatte shows [Jh 2h 9s 4h 7c 7s Tc] (High card : Ten)
+SoGood36 shows [Ks 5c 9c Ah 3h Qd 8d] (High card : 9)
+SoGood36 collected 0.72€ from pot
+*** SUMMARY ***
+Total pot 0.72€ | Rake 0.04€
+Seat 1: SoGood36 showed [Ks 5c 9c Ah 3h Qd 8d] and won 0.72€ with High card : 9
+Seat 2: jelachatte showed [Jh 2h 9s 4h 7c 7s Tc] and lost with High card : Ten
+
+
+Winamax Poker - CashGame - HandId: #16976649-12-1645389161 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:32:41 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.97€)
+Seat 2: jelachatte (2€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X Qs]
+Dealt to jelachatte [3c 7s Js]
+SoGood36 brings in 0.02€
+jelachatte calls 0.02€
+*** 4th STREET ***
+Dealt to jelachatte [3c 7s Js] [5d]
+Dealt to SoGood36 [X X Qs] [8c]
+jelachatte bets 0.05€
+SoGood36 folds
+jelachatte collected 0.11€ from pot
+*** SUMMARY ***
+Total pot 0.11€ | No rake
+Seat 2: jelachatte won 0.11€
+
+
+Winamax Poker - CashGame - HandId: #16976649-13-1645389178 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:32:58 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.94€)
+Seat 2: jelachatte (2.03€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X Kc]
+Dealt to jelachatte [9s Jd 5s]
+SoGood36 brings in 0.02€
+jelachatte raises 0.03€ to 0.05€
+SoGood36 folds
+jelachatte collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 2: jelachatte won 0.09€
+
+
+Winamax Poker - CashGame - HandId: #16976649-14-1645389187 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:33:07 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.91€)
+Seat 2: jelachatte (2.06€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X Kh]
+Dealt to jelachatte [6c Ah 8s]
+SoGood36 brings in 0.02€
+jelachatte raises 0.03€ to 0.05€
+SoGood36 folds
+jelachatte collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 2: jelachatte won 0.09€
+
+
+Winamax Poker - CashGame - HandId: #16976649-15-1645389195 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:33:15 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.88€)
+Seat 2: jelachatte (2.09€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X Jc]
+Dealt to jelachatte [3h 9h 8c]
+SoGood36 brings in 0.02€
+jelachatte calls 0.02€
+*** 4th STREET ***
+Dealt to jelachatte [3h 9h 8c] [Kd]
+Dealt to SoGood36 [X X Jc] [4s]
+SoGood36 bets 0.05€
+jelachatte folds
+SoGood36 collected 0.11€ from pot
+*** SUMMARY ***
+Total pot 0.11€ | No rake
+Seat 1: SoGood36 won 0.11€
+
+
+Winamax Poker - CashGame - HandId: #16976649-16-1645389214 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:33:34 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.91€)
+Seat 2: jelachatte (2.06€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 3c]
+Dealt to jelachatte [4h 3d 8c]
+jelachatte bets 0.05€
+SoGood36 calls 0.05€
+*** 4th STREET ***
+Dealt to SoGood36 [X X 3c] [6c]
+Dealt to jelachatte [4h 3d 8c] [Qs]
+SoGood36 checks
+jelachatte checks
+*** 5th STREET ***
+Dealt to SoGood36 [X X 3c 6c] [7c]
+Dealt to jelachatte [4h 3d 8c Qs] [4s]
+SoGood36 checks
+jelachatte checks
+*** 6th STREET ***
+Dealt to SoGood36 [X X 3c 6c 7c] [Jd]
+Dealt to jelachatte [4h 3d 8c Qs 4s] [2h]
+SoGood36 checks
+jelachatte checks
+*** 7th STREET ***
+Dealt to SoGood36 [X X 3c 6c 7c Jd] [X]
+Dealt to jelachatte [4h 3d 8c Qs 4s 2h] [6h]
+SoGood36 bets 0.10€
+jelachatte raises 0.10€ to 0.20€
+SoGood36 folds
+jelachatte collected 0.40€ from pot
+*** SUMMARY ***
+Total pot 0.40€ | Rake 0.02€
+Seat 2: jelachatte won 0.40€
+
+
+Winamax Poker - CashGame - HandId: #16976649-17-1645389235 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:33:55 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.75€)
+Seat 2: jelachatte (2.20€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 6s]
+Dealt to jelachatte [7h Qs Td]
+jelachatte brings in 0.02€
+SoGood36 calls 0.02€
+*** 4th STREET ***
+Dealt to SoGood36 [X X 6s] [9h]
+Dealt to jelachatte [7h Qs Td] [4s]
+SoGood36 bets 0.05€
+jelachatte folds
+SoGood36 collected 0.11€ from pot
+*** SUMMARY ***
+Total pot 0.11€ | No rake
+Seat 1: SoGood36 won 0.11€
+
+
+Winamax Poker - CashGame - HandId: #16976649-18-1645389248 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:34:08 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.78€)
+Seat 2: jelachatte (2.17€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 3h]
+Dealt to jelachatte [3s 5h 8d]
+jelachatte brings in 0.02€
+SoGood36 calls 0.02€
+*** 4th STREET ***
+Dealt to SoGood36 [X X 3h] [7d]
+Dealt to jelachatte [3s 5h 8d] [3c]
+SoGood36 checks
+jelachatte checks
+*** 5th STREET ***
+Dealt to SoGood36 [X X 3h 7d] [Qs]
+Dealt to jelachatte [3s 5h 8d 3c] [4s]
+jelachatte bets 0.10€
+SoGood36 folds
+jelachatte collected 0.16€ from pot
+*** SUMMARY ***
+Total pot 0.16€ | No rake
+Seat 2: jelachatte won 0.16€
+
+
+Winamax Poker - CashGame - HandId: #16976649-19-1645389268 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:34:28 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.75€)
+Seat 2: jelachatte (2.20€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 5h]
+Dealt to jelachatte [8c Qc 6d]
+jelachatte brings in 0.02€
+SoGood36 calls 0.02€
+*** 4th STREET ***
+Dealt to SoGood36 [X X 5h] [8d]
+Dealt to jelachatte [8c Qc 6d] [8h]
+SoGood36 checks
+jelachatte checks
+*** 5th STREET ***
+Dealt to SoGood36 [X X 5h 8d] [Td]
+Dealt to jelachatte [8c Qc 6d 8h] [Kd]
+SoGood36 bets 0.10€
+jelachatte folds
+SoGood36 collected 0.16€ from pot
+*** SUMMARY ***
+Total pot 0.16€ | No rake
+Seat 1: SoGood36 won 0.16€
+
+
+Winamax Poker - CashGame - HandId: #16976649-20-1645389285 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:34:45 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.78€)
+Seat 2: jelachatte (2.17€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 8s]
+Dealt to jelachatte [9s 2c 8c]
+SoGood36 brings in 0.02€
+jelachatte calls 0.02€
+*** 4th STREET ***
+Dealt to jelachatte [9s 2c 8c] [7c]
+Dealt to SoGood36 [X X 8s] [2d]
+SoGood36 checks
+jelachatte checks
+*** 5th STREET ***
+Dealt to SoGood36 [X X 8s 2d] [Ah]
+Dealt to jelachatte [9s 2c 8c 7c] [3c]
+SoGood36 checks
+jelachatte checks
+*** 6th STREET ***
+Dealt to SoGood36 [X X 8s 2d Ah] [4h]
+Dealt to jelachatte [9s 2c 8c 7c 3c] [6d]
+SoGood36 checks
+jelachatte checks
+*** 7th STREET ***
+Dealt to SoGood36 [X X 8s 2d Ah 4h] [X]
+Dealt to jelachatte [9s 2c 8c 7c 3c 6d] [As]
+SoGood36 bets 0.10€
+jelachatte raises 0.10€ to 0.20€
+SoGood36 calls 0.10€
+*** SHOW DOWN ***
+SoGood36 shows [Jc Td 8s 2d Ah 4h 7s] (High card : 8)
+jelachatte shows [9s 2c 8c 7c 3c 6d As] (High card : 7)
+jelachatte collected 0.43€ from pot
+*** SUMMARY ***
+Total pot 0.43€ | Rake 0.03€
+Seat 1: SoGood36 showed [Jc Td 8s 2d Ah 4h 7s] and lost with High card : 8
+Seat 2: jelachatte showed [9s 2c 8c 7c 3c 6d As] and won 0.43€ with High card : 7
+
+
+Winamax Poker - CashGame - HandId: #16976649-21-1645389307 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:35:07 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.55€)
+Seat 2: jelachatte (2.37€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 6h]
+Dealt to jelachatte [Jh 6c As]
+SoGood36 brings in 0.02€
+jelachatte calls 0.02€
+*** 4th STREET ***
+Dealt to jelachatte [Jh 6c As] [6s]
+Dealt to SoGood36 [X X 6h] [Jd]
+jelachatte checks
+SoGood36 checks
+*** 5th STREET ***
+Dealt to jelachatte [Jh 6c As 6s] [Jc]
+Dealt to SoGood36 [X X 6h Jd] [2c]
+jelachatte checks
+SoGood36 checks
+*** 6th STREET ***
+Dealt to jelachatte [Jh 6c As 6s Jc] [7h]
+Dealt to SoGood36 [X X 6h Jd 2c] [8c]
+jelachatte checks
+SoGood36 checks
+*** 7th STREET ***
+Dealt to jelachatte [Jh 6c As 6s Jc 7h] [Td]
+Dealt to SoGood36 [X X 6h Jd 2c 8c] [X]
+jelachatte checks
+SoGood36 checks
+*** SHOW DOWN ***
+jelachatte shows [Jh 6c As 6s Jc 7h Td] (High card : Jack)
+SoGood36 shows [5h Kh 6h Jd 2c 8c 9h] (High card : 9)
+SoGood36 collected 0.06€ from pot
+*** SUMMARY ***
+Total pot 0.06€ | No rake
+Seat 1: SoGood36 showed [5h Kh 6h Jd 2c 8c 9h] and won 0.06€ with High card : 9
+Seat 2: jelachatte showed [Jh 6c As 6s Jc 7h Td] and lost with High card : Jack
+
+
+Winamax Poker - CashGame - HandId: #16976649-22-1645389340 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:35:40 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.58€)
+Seat 2: jelachatte (2.34€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 5c]
+Dealt to jelachatte [Tc As Qd]
+jelachatte brings in 0.02€
+SoGood36 raises 0.03€ to 0.05€
+jelachatte folds
+SoGood36 collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 1: SoGood36 won 0.09€
+
+
+Winamax Poker - CashGame - HandId: #16976649-23-1645389356 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:35:56 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.61€)
+Seat 2: jelachatte (2.31€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X Ad]
+Dealt to jelachatte [5c 2c 5d]
+jelachatte brings in 0.02€
+SoGood36 calls 0.02€
+*** 4th STREET ***
+Dealt to SoGood36 [X X Ad] [6h]
+Dealt to jelachatte [5c 2c 5d] [Th]
+SoGood36 checks
+jelachatte checks
+*** 5th STREET ***
+Dealt to SoGood36 [X X Ad 6h] [2s]
+Dealt to jelachatte [5c 2c 5d Th] [6d]
+SoGood36 checks
+jelachatte checks
+*** 6th STREET ***
+Dealt to SoGood36 [X X Ad 6h 2s] [8s]
+Dealt to jelachatte [5c 2c 5d Th 6d] [Js]
+SoGood36 checks
+jelachatte checks
+*** 7th STREET ***
+Dealt to SoGood36 [X X Ad 6h 2s 8s] [X]
+Dealt to jelachatte [5c 2c 5d Th 6d Js] [2d]
+SoGood36 bets 0.10€
+jelachatte folds
+SoGood36 collected 0.16€ from pot
+*** SUMMARY ***
+Total pot 0.16€ | No rake
+Seat 1: SoGood36 won 0.16€
+
+
+Winamax Poker - CashGame - HandId: #16976649-24-1645389376 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:36:16 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.64€)
+Seat 2: jelachatte (2.28€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 9h]
+Dealt to jelachatte [Td 2s Qd]
+jelachatte brings in 0.02€
+SoGood36 raises 0.03€ to 0.05€
+jelachatte folds
+SoGood36 collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 1: SoGood36 won 0.09€
+
+
+Winamax Poker - CashGame - HandId: #16976649-25-1645389398 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:36:38 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.67€)
+Seat 2: jelachatte (2.25€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X Ac]
+Dealt to jelachatte [Td 9c 3c]
+jelachatte brings in 0.02€
+SoGood36 calls 0.02€
+*** 4th STREET ***
+Dealt to SoGood36 [X X Ac] [Js]
+Dealt to jelachatte [Td 9c 3c] [6h]
+jelachatte bets 0.05€
+SoGood36 folds
+jelachatte collected 0.11€ from pot
+*** SUMMARY ***
+Total pot 0.11€ | No rake
+Seat 2: jelachatte won 0.11€
+
+
+Winamax Poker - CashGame - HandId: #16976649-26-1645389416 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:36:56 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.64€)
+Seat 2: jelachatte (2.28€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X As]
+Dealt to jelachatte [9d 2d Qc]
+jelachatte brings in 0.02€
+SoGood36 raises 0.03€ to 0.05€
+jelachatte folds
+SoGood36 collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 1: SoGood36 won 0.09€
+
+
+Winamax Poker - CashGame - HandId: #16976649-27-1645389425 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:37:05 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.67€)
+Seat 2: jelachatte (2.25€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 5c]
+Dealt to jelachatte [Ad 2c 4s]
+SoGood36 brings in 0.02€
+jelachatte raises 0.03€ to 0.05€
+SoGood36 calls 0.03€
+*** 4th STREET ***
+Dealt to jelachatte [Ad 2c 4s] [6s]
+Dealt to SoGood36 [X X 5c] [Kc]
+jelachatte bets 0.05€
+SoGood36 calls 0.05€
+*** 5th STREET ***
+Dealt to jelachatte [Ad 2c 4s 6s] [9h]
+Dealt to SoGood36 [X X 5c Kc] [6h]
+jelachatte bets 0.10€
+SoGood36 calls 0.10€
+*** 6th STREET ***
+Dealt to jelachatte [Ad 2c 4s 6s 9h] [As]
+Dealt to SoGood36 [X X 5c Kc 6h] [7h]
+jelachatte bets 0.10€
+SoGood36 calls 0.10€
+*** 7th STREET ***
+Dealt to jelachatte [Ad 2c 4s 6s 9h As] [8c]
+Dealt to SoGood36 [X X 5c Kc 6h 7h] [X]
+jelachatte bets 0.10€
+SoGood36 calls 0.10€
+*** SHOW DOWN ***
+SoGood36 shows [3c 8s 5c Kc 6h 7h 3h] (High card : 8)
+jelachatte shows [Ad 2c 4s 6s 9h As 8c] (High card : 8)
+jelachatte collected 0.77€ from pot
+*** SUMMARY ***
+Total pot 0.77€ | Rake 0.05€
+Seat 1: SoGood36 showed [3c 8s 5c Kc 6h 7h 3h] and lost with High card : 8
+Seat 2: jelachatte showed [Ad 2c 4s 6s 9h As 8c] and won 0.77€ with High card : 8
+
+

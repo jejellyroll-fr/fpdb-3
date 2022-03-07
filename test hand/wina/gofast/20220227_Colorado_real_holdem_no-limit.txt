@@ -1,0 +1,2532 @@
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114626-1645974566 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:09:26 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Broke-even (2.91€)
+Seat 2: jelachatte (2€)
+Seat 3: parkchanwook (2€)
+Seat 4: Hisokill (1.74€)
+Seat 5: Hyuga_Kojiro (3.44€)
+Seat 6: Sappho34 (0.97€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+Broke-even posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [3h 2d]
+*** PRE-FLOP *** 
+parkchanwook folds
+Hisokill calls 0.02€
+Hyuga_Kojiro folds
+Sappho34 folds
+Broke-even raises 0.11€ to 0.13€
+jelachatte folds
+Hisokill folds
+Broke-even collected 0.27€ from pot
+*** SUMMARY ***
+Total pot 0.27€ | No rake
+Seat 1: Broke-even (small blind) won 0.27€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114689-1645974599 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:09:59 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: kRaSsNy (2.88€)
+Seat 2: Melielvir (2.38€)
+Seat 3: Stan3March3 (6.66€)
+Seat 4: Scaivy (2.02€)
+Seat 5: jelachatte (2€)
+Seat 6: avatar00 (0.45€)
+*** ANTE/BLINDS ***
+kRaSsNy posts small blind 0.01€
+Melielvir posts big blind 0.02€
+Dealt to jelachatte [4d Jc]
+*** PRE-FLOP *** 
+Stan3March3 folds
+Scaivy folds
+jelachatte folds
+avatar00 folds
+kRaSsNy raises 0.03€ to 0.05€
+Melielvir folds
+kRaSsNy collected 0.07€ from pot
+*** SUMMARY ***
+Total pot 0.07€ | No rake
+Seat 1: kRaSsNy (small blind) won 0.07€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114674-1645974592 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:09:52 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: oliveponcar (2€)
+Seat 2: 14cruyff14 (0.32€)
+Seat 3: oTo_Ab (1.36€)
+Seat 4: jelachatte (2€)
+Seat 5: squidos1 (4.12€)
+Seat 6: BLACK..HAND (2€)
+*** ANTE/BLINDS ***
+oliveponcar posts small blind 0.01€
+14cruyff14 posts big blind 0.02€
+Dealt to jelachatte [Kh Jd]
+*** PRE-FLOP *** 
+oTo_Ab raises 0.02€ to 0.04€
+jelachatte folds
+squidos1 calls 0.04€
+BLACK..HAND folds
+oliveponcar folds
+14cruyff14 folds
+*** FLOP *** [7h 8h 6d]
+oTo_Ab bets 0.16€
+squidos1 folds
+oTo_Ab collected 0.26€ from pot
+*** SUMMARY ***
+Total pot 0.26€ | Rake 0.01€
+Board: [7h 8h 6d]
+Seat 3: oTo_Ab won 0.26€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114694-1645974601 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:10:01 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Paipepcho (3.89€)
+Seat 2: lucho01 (4.12€)
+Seat 3: Damso88210 (0.30€)
+Seat 4: Scaivy (3.37€)
+Seat 5: salesp84 (2€)
+Seat 6: jelachatte (2€)
+*** ANTE/BLINDS ***
+Paipepcho posts small blind 0.01€
+lucho01 posts big blind 0.02€
+Dealt to jelachatte [8c Qh]
+*** PRE-FLOP *** 
+Damso88210 folds
+Scaivy raises 0.04€ to 0.06€
+salesp84 folds
+jelachatte folds
+Paipepcho folds
+lucho01 folds
+Scaivy collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 4: Scaivy won 0.09€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114670-1645974590 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:09:50 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Hyuga_Kojiro (2.56€)
+Seat 2: DauradeDu34 (5.29€)
+Seat 3: jelachatte (2€)
+Seat 4: Hisokill (1.72€)
+Seat 5: PtybeN (1.54€)
+Seat 6: JeTILTunMAX (27.95€)
+*** ANTE/BLINDS ***
+Hyuga_Kojiro posts small blind 0.01€
+DauradeDu34 posts big blind 0.02€
+Dealt to jelachatte [4s 8s]
+*** PRE-FLOP *** 
+jelachatte folds
+Hisokill raises 0.05€ to 0.07€
+PtybeN folds
+JeTILTunMAX calls 0.07€
+Hyuga_Kojiro folds
+DauradeDu34 folds
+*** FLOP *** [5s Ts 3c]
+Hisokill bets 0.17€
+JeTILTunMAX folds
+Hisokill collected 0.32€ from pot
+*** SUMMARY ***
+Total pot 0.32€ | Rake 0.02€
+Board: [5s Ts 3c]
+Seat 4: Hisokill won 0.32€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114699-1645974604 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:10:04 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Choupette_64 (1.77€)
+Seat 2: HellDracOnyX (1.91€)
+Seat 3: jelachatte (2€)
+Seat 4: Vivii 1610 (0.59€)
+Seat 5: Sappho34 (0.94€)
+Seat 6: abraam99 (3.29€)
+*** ANTE/BLINDS ***
+Choupette_64 posts small blind 0.01€
+HellDracOnyX posts big blind 0.02€
+Dealt to jelachatte [8h 8c]
+*** PRE-FLOP *** 
+jelachatte raises 0.04€ to 0.06€
+Vivii 1610 calls 0.06€
+Sappho34 folds
+abraam99 folds
+Choupette_64 calls 0.05€
+HellDracOnyX folds
+*** FLOP *** [Js 7d 7c]
+Choupette_64 checks
+jelachatte checks
+Vivii 1610 checks
+*** TURN *** [Js 7d 7c][Kh]
+Choupette_64 checks
+jelachatte checks
+Vivii 1610 checks
+*** RIVER *** [Js 7d 7c Kh][2d]
+Choupette_64 checks
+jelachatte checks
+Vivii 1610 bets 0.20€
+Choupette_64 folds
+jelachatte folds
+Vivii 1610 collected 0.38€ from pot
+*** SUMMARY ***
+Total pot 0.38€ | Rake 0.02€
+Board: [Js 7d 7c Kh 2d]
+Seat 4: Vivii 1610 won 0.38€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114769-1645974641 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:10:41 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2€)
+Seat 2: DARENS (1.66€)
+Seat 3: R1V3R15M4G1C (1.96€)
+Seat 4: Chilou17 (2.31€)
+Seat 5: Adamaii (3.86€)
+Seat 6: AAlbator (2.12€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+DARENS posts big blind 0.02€
+Dealt to jelachatte [4c 3s]
+*** PRE-FLOP *** 
+R1V3R15M4G1C folds
+Chilou17 folds
+Adamaii folds
+AAlbator raises 0.04€ to 0.06€
+jelachatte folds
+DARENS folds
+AAlbator collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 6: AAlbator (button) won 0.09€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114758-1645974633 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:10:33 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Hafyou (4.50€)
+Seat 2: jelachatte (2€)
+Seat 3: -Sentenza (2.58€)
+Seat 4: oliveponcar (2€)
+Seat 5: master NSO (1.20€)
+Seat 6: MC keke (2€)
+*** ANTE/BLINDS ***
+Hafyou posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [8d Ad]
+*** PRE-FLOP *** 
+-Sentenza raises 0.02€ to 0.04€
+oliveponcar folds
+master NSO raises 0.16€ to 0.20€
+MC keke folds
+Hafyou raises 0.16€ to 0.36€
+jelachatte folds
+-Sentenza folds
+master NSO raises 0.84€ to 1.20€ and is all-in
+Hafyou calls 0.84€
+*** FLOP *** [8s 3c Ah]
+*** TURN *** [8s 3c Ah][Tc]
+*** RIVER *** [8s 3c Ah Tc][8c]
+*** SHOW DOWN ***
+Hafyou shows [Ks Qs] (One pair : 8)
+master NSO shows [Th Td] (Full of Tens and 8)
+master NSO collected 2.21€ from pot
+*** SUMMARY ***
+Total pot 2.21€ | Rake 0.25€
+Board: [8s 3c Ah Tc 8c]
+Seat 1: Hafyou (small blind) showed [Ks Qs] and lost with One pair : 8
+Seat 5: master NSO showed [Th Td] and won 2.21€ with Full of Tens and 8
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114779-1645974648 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:10:48 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Reylanz (1.87€)
+Seat 2: JustYass (2.90€)
+Seat 3: JeTILTunMAX (27.84€)
+Seat 4: R1V3R15M4G1C (1.96€)
+Seat 5: DauradeDu34 (5.26€)
+Seat 6: jelachatte (2€)
+*** ANTE/BLINDS ***
+Reylanz posts small blind 0.01€
+JustYass posts big blind 0.02€
+Dealt to jelachatte [Ah 2h]
+*** PRE-FLOP *** 
+JeTILTunMAX folds
+R1V3R15M4G1C folds
+DauradeDu34 folds
+jelachatte raises 0.04€ to 0.06€
+Reylanz folds
+JustYass folds
+jelachatte collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 6: jelachatte (button) won 0.09€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114776-1645974645 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:10:45 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: 69LAKEUTRI (2.89€)
+Seat 2: oliveponcar (2€)
+Seat 3: Guy_23 (4.13€)
+Seat 4: Richard Reuk (2.20€)
+Seat 5: jelachatte (2€)
+Seat 6: salesp84 (2€)
+*** ANTE/BLINDS ***
+69LAKEUTRI posts small blind 0.01€
+oliveponcar posts big blind 0.02€
+Dealt to jelachatte [Ac 4h]
+*** PRE-FLOP *** 
+Guy_23 folds
+Richard Reuk folds
+jelachatte folds
+salesp84 folds
+69LAKEUTRI raises 0.03€ to 0.05€
+oliveponcar folds
+69LAKEUTRI collected 0.07€ from pot
+*** SUMMARY ***
+Total pot 0.07€ | No rake
+Seat 1: 69LAKEUTRI (small blind) won 0.07€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114805-1645974661 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:11:01 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: DARENS (1.64€)
+Seat 2: nanardu44 (3.42€)
+Seat 3: jelachatte (2.03€)
+Seat 4: jeffjoel59 (5.91€)
+Seat 5: iam_cid (2.08€)
+Seat 6: Rougegorge35 (1.01€)
+*** ANTE/BLINDS ***
+DARENS posts small blind 0.01€
+nanardu44 posts big blind 0.02€
+Dealt to jelachatte [4c As]
+*** PRE-FLOP *** 
+jelachatte folds
+jeffjoel59 folds
+iam_cid folds
+Rougegorge35 folds
+DARENS folds
+nanardu44 collected 0.03€ from pot
+*** SUMMARY ***
+Total pot 0.03€ | No rake
+Seat 2: nanardu44 (big blind) won 0.03€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114663-1645974588 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:09:48 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2€)
+Seat 2: buzneit (5.11€)
+Seat 3: salesp84 (2.04€)
+Seat 4: La GrinDta (2.37€)
+Seat 5: Pokerspie1 (1.80€)
+Seat 6: ATeyssier (1.28€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+buzneit posts big blind 0.02€
+Dealt to jelachatte [6s Qc]
+*** PRE-FLOP *** 
+salesp84 folds
+La GrinDta raises 0.04€ to 0.06€
+Pokerspie1 calls 0.06€
+ATeyssier calls 0.06€
+jelachatte folds
+buzneit calls 0.04€
+*** FLOP *** [Js 9c Ah]
+buzneit checks
+La GrinDta checks
+Pokerspie1 checks
+ATeyssier checks
+*** TURN *** [Js 9c Ah][9h]
+buzneit bets 0.17€
+La GrinDta calls 0.17€
+Pokerspie1 calls 0.17€
+ATeyssier folds
+*** RIVER *** [Js 9c Ah 9h][9s]
+buzneit checks
+La GrinDta bets 0.66€
+Pokerspie1 calls 0.66€
+buzneit folds
+*** SHOW DOWN ***
+Pokerspie1 shows [5h Jh] (Full of 9 and Jacks)
+La GrinDta shows [7d 9d] (Quads of 9)
+La GrinDta collected 1.87€ from pot
+*** SUMMARY ***
+Total pot 1.87€ | Rake 0.21€
+Board: [Js 9c Ah 9h 9s]
+Seat 4: La GrinDta showed [7d 9d] and won 1.87€ with Quads of 9
+Seat 5: Pokerspie1 showed [5h Jh] and lost with Full of 9 and Jacks
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114811-1645974663 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:11:03 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: salesp84 (2€)
+Seat 2: jelachatte (2.03€)
+Seat 3: AdriPoPoKer (2.79€)
+Seat 4: BeuzBeynie (0.49€)
+Seat 5: R1V3R15M4G1C (1.96€)
+Seat 6: bellic59 (3.45€)
+*** ANTE/BLINDS ***
+salesp84 posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [3s Ah]
+*** PRE-FLOP *** 
+AdriPoPoKer folds
+BeuzBeynie calls 0.02€
+R1V3R15M4G1C folds
+bellic59 folds
+salesp84 folds
+jelachatte checks
+*** FLOP *** [4s 4c 3c]
+jelachatte bets 0.02€
+BeuzBeynie calls 0.02€
+*** TURN *** [4s 4c 3c][Ad]
+jelachatte bets 0.07€
+BeuzBeynie folds
+jelachatte collected 0.15€ from pot
+*** SUMMARY ***
+Total pot 0.15€ | Rake 0.01€
+Board: [4s 4c 3c Ad]
+Seat 2: jelachatte (big blind) won 0.15€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114772-1645974643 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:10:43 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: lehouf (1.99€)
+Seat 2: Hyuga_Kojiro (7.73€)
+Seat 3: oliveponcar (2€)
+Seat 4: jelachatte (2€)
+Seat 5: Chilou17 (2.31€)
+Seat 6: iam_cid (2.08€)
+*** ANTE/BLINDS ***
+lehouf posts small blind 0.01€
+Hyuga_Kojiro posts big blind 0.02€
+Dealt to jelachatte [6c Ah]
+*** PRE-FLOP *** 
+oliveponcar folds
+jelachatte folds
+Chilou17 folds
+iam_cid folds
+lehouf calls 0.01€
+Hyuga_Kojiro checks
+*** FLOP *** [5h 7c Qd]
+lehouf checks
+Hyuga_Kojiro bets 0.03€
+lehouf calls 0.03€
+*** TURN *** [5h 7c Qd][8c]
+lehouf checks
+Hyuga_Kojiro checks
+*** RIVER *** [5h 7c Qd 8c][3h]
+lehouf checks
+Hyuga_Kojiro bets 0.08€
+lehouf folds
+Hyuga_Kojiro collected 0.17€ from pot
+*** SUMMARY ***
+Total pot 0.17€ | Rake 0.01€
+Board: [5h 7c Qd 8c 3h]
+Seat 2: Hyuga_Kojiro (big blind) won 0.17€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114850-1645974681 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:11:21 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2.07€)
+Seat 2: BeuzBeynie (0.45€)
+Seat 3: ziczac36 (2€)
+Seat 4: JustYass (2.43€)
+Seat 5: lucho01 (4.23€)
+Seat 6: Realwild21 (2.59€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+BeuzBeynie posts big blind 0.02€
+Dealt to jelachatte [7c Tc]
+*** PRE-FLOP *** 
+ziczac36 calls 0.02€
+JustYass folds
+lucho01 folds
+Realwild21 folds
+jelachatte calls 0.01€
+BeuzBeynie checks
+*** FLOP *** [Ad Qd 6s]
+jelachatte checks
+BeuzBeynie checks
+ziczac36 checks
+*** TURN *** [Ad Qd 6s][Ts]
+jelachatte checks
+BeuzBeynie checks
+ziczac36 checks
+*** RIVER *** [Ad Qd 6s Ts][3s]
+jelachatte checks
+BeuzBeynie checks
+ziczac36 checks
+*** SHOW DOWN ***
+BeuzBeynie shows [Kd 2s] (High card : Ace)
+ziczac36 shows [2c 2d] (One pair : 2)
+jelachatte shows [7c Tc] (One pair : Tens)
+jelachatte collected 0.05€ from pot
+*** SUMMARY ***
+Total pot 0.05€ | Rake 0.01€
+Board: [Ad Qd 6s Ts 3s]
+Seat 1: jelachatte (small blind) showed [7c Tc] and won 0.05€ with One pair : Tens
+Seat 2: BeuzBeynie (big blind) showed [Kd 2s] and lost with High card : Ace
+Seat 3: ziczac36 showed [2c 2d] and lost with One pair : 2
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114938-1645974719 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:11:59 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: BeuzBeynie (0.43€)
+Seat 2: LAArbitre (2.07€)
+Seat 3: oliveponcar (2€)
+Seat 4: ziczac36 (1.98€)
+Seat 5: jelachatte (2.10€)
+Seat 6: Realwild21 (3.17€)
+*** ANTE/BLINDS ***
+BeuzBeynie posts small blind 0.01€
+LAArbitre posts big blind 0.02€
+Dealt to jelachatte [Ah Td]
+*** PRE-FLOP *** 
+oliveponcar folds
+ziczac36 folds
+jelachatte raises 0.04€ to 0.06€
+Realwild21 calls 0.06€
+BeuzBeynie folds
+LAArbitre folds
+*** FLOP *** [Jd 9c Jh]
+jelachatte checks
+Realwild21 checks
+*** TURN *** [Jd 9c Jh][7h]
+jelachatte bets 0.05€
+Realwild21 folds
+jelachatte collected 0.18€ from pot
+*** SUMMARY ***
+Total pot 0.18€ | Rake 0.02€
+Board: [Jd 9c Jh 7h]
+Seat 5: jelachatte won 0.18€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114982-1645974746 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:12:26 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: squidos1 (3.12€)
+Seat 2: Electra30 (2.80€)
+Seat 3: HISO-KK-AA (2.28€)
+Seat 4: Richard Reuk (2.15€)
+Seat 5: DuG_RaDiAnCe (2.08€)
+Seat 6: jelachatte (2.17€)
+*** ANTE/BLINDS ***
+squidos1 posts small blind 0.01€
+Electra30 posts big blind 0.02€
+Dealt to jelachatte [Ac Qs]
+*** PRE-FLOP *** 
+HISO-KK-AA folds
+Richard Reuk folds
+DuG_RaDiAnCe folds
+jelachatte raises 0.04€ to 0.06€
+squidos1 folds
+Electra30 folds
+jelachatte collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 6: jelachatte (button) won 0.09€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6114979-1645974744 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:12:24 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: AAlbator (2.45€)
+Seat 2: lehouf (1.89€)
+Seat 3: Ffjjce (4.63€)
+Seat 4: jelachatte (2.17€)
+Seat 5: knary_island (4.53€)
+Seat 6: Adamaii (3.86€)
+*** ANTE/BLINDS ***
+AAlbator posts small blind 0.01€
+lehouf posts big blind 0.02€
+Dealt to jelachatte [6c 9c]
+*** PRE-FLOP *** 
+Ffjjce folds
+jelachatte folds
+knary_island folds
+Adamaii folds
+AAlbator raises 0.04€ to 0.06€
+lehouf folds
+AAlbator collected 0.08€ from pot
+*** SUMMARY ***
+Total pot 0.08€ | No rake
+Seat 1: AAlbator (small blind) won 0.08€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115014-1645974764 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:12:44 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2.20€)
+Seat 2: parkchanwook (2.11€)
+Seat 3: lehouf (1.86€)
+Seat 4: fab.djass (2.55€)
+Seat 5: Vendredi--13 (2€)
+Seat 6: IFY93 (2.09€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+parkchanwook posts big blind 0.02€
+Dealt to jelachatte [9s 6d]
+*** PRE-FLOP *** 
+lehouf folds
+fab.djass folds
+Vendredi--13 folds
+IFY93 folds
+jelachatte folds
+parkchanwook collected 0.03€ from pot
+*** SUMMARY ***
+Total pot 0.03€ | No rake
+Seat 2: parkchanwook (big blind) won 0.03€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115017-1645974765 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:12:45 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: AAlbator (2.79€)
+Seat 2: avatar00 (0.50€)
+Seat 3: jelachatte (2.19€)
+Seat 4: squidos1 (4.27€)
+Seat 5: yhzzzz (2€)
+Seat 6: djipipi (0.50€)
+*** ANTE/BLINDS ***
+AAlbator posts small blind 0.01€
+avatar00 posts big blind 0.02€
+Dealt to jelachatte [7c Js]
+*** PRE-FLOP *** 
+jelachatte folds
+squidos1 folds
+yhzzzz raises 0.04€ to 0.06€
+djipipi calls 0.06€
+AAlbator folds
+avatar00 folds
+*** FLOP *** [6h Ah 7h]
+yhzzzz checks
+djipipi bets 0.15€
+yhzzzz folds
+djipipi collected 0.28€ from pot
+*** SUMMARY ***
+Total pot 0.28€ | Rake 0.02€
+Board: [6h Ah 7h]
+Seat 6: djipipi (button) won 0.28€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115021-1645974767 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:12:47 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Ausartak (2.28€)
+Seat 2: jelachatte (2.19€)
+Seat 3: Midnight83 (1.91€)
+Seat 4: DARENS (4.93€)
+Seat 5: Vendredi--13 (2.04€)
+Seat 6: fab.djass (2.55€)
+*** ANTE/BLINDS ***
+Ausartak posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [2c 6c]
+*** PRE-FLOP *** 
+Midnight83 folds
+DARENS folds
+Vendredi--13 folds
+fab.djass raises 0.04€ to 0.06€
+Ausartak folds
+jelachatte calls 0.04€
+*** FLOP *** [7s Ts Qd]
+jelachatte checks
+fab.djass checks
+*** TURN *** [7s Ts Qd][5h]
+jelachatte checks
+fab.djass checks
+*** RIVER *** [7s Ts Qd 5h][Qs]
+jelachatte checks
+fab.djass bets 0.07€
+jelachatte folds
+fab.djass collected 0.19€ from pot
+*** SUMMARY ***
+Total pot 0.19€ | Rake 0.01€
+Board: [7s Ts Qd 5h Qs]
+Seat 6: fab.djass (button) won 0.19€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115082-1645974801 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:13:21 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Alonz62 (2.05€)
+Seat 2: ziczac36 (2€)
+Seat 3: Knzo91 (4.24€)
+Seat 4: jelachatte (2.13€)
+Seat 5: Nawfal1300 (0.71€)
+Seat 6: salesp84 (3.29€)
+*** ANTE/BLINDS ***
+Alonz62 posts small blind 0.01€
+ziczac36 posts big blind 0.02€
+Dealt to jelachatte [2d Qs]
+*** PRE-FLOP *** 
+Knzo91 calls 0.02€
+jelachatte folds
+Nawfal1300 folds
+salesp84 folds
+Alonz62 folds
+ziczac36 checks
+*** FLOP *** [Th Td Ks]
+ziczac36 checks
+Knzo91 bets 0.74€
+ziczac36 folds
+Knzo91 collected 0.78€ from pot
+*** SUMMARY ***
+Total pot 0.78€ | Rake 0.01€
+Board: [Th Td Ks]
+Seat 3: Knzo91 won 0.78€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115085-1645974803 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:13:23 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: fuego17 (2.04€)
+Seat 2: djipipi (0.57€)
+Seat 3: Melielvir (1.91€)
+Seat 4: Scaivy (2.03€)
+Seat 5: T.REx. (2.19€)
+Seat 6: jelachatte (2.13€)
+*** ANTE/BLINDS ***
+fuego17 posts small blind 0.01€
+djipipi posts big blind 0.02€
+Dealt to jelachatte [Ac Ah]
+*** PRE-FLOP *** 
+Melielvir folds
+Scaivy folds
+T.REx. folds
+jelachatte raises 0.04€ to 0.06€
+fuego17 calls 0.05€
+djipipi folds
+*** FLOP *** [9s 5d 2h]
+fuego17 checks
+jelachatte bets 0.07€
+fuego17 folds
+jelachatte collected 0.20€ from pot
+*** SUMMARY ***
+Total pot 0.20€ | Rake 0.01€
+Board: [9s 5d 2h]
+Seat 6: jelachatte (button) won 0.20€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115182-1645974851 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:14:11 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Philfeed (2.01€)
+Seat 2: Sadhukid (0.41€)
+Seat 3: parkchanwook (2.55€)
+Seat 4: djipipi (0.50€)
+Seat 5: jelachatte (2.20€)
+Seat 6: 7_BuZiTo_7 (0.29€)
+*** ANTE/BLINDS ***
+Philfeed posts small blind 0.01€
+Sadhukid posts big blind 0.02€
+Dealt to jelachatte [2d 9c]
+*** PRE-FLOP *** 
+parkchanwook folds
+djipipi folds
+jelachatte folds
+7_BuZiTo_7 calls 0.02€
+Philfeed folds
+Sadhukid checks
+*** FLOP *** [2s 7h Td]
+Sadhukid checks
+7_BuZiTo_7 checks
+*** TURN *** [2s 7h Td][8d]
+Sadhukid checks
+7_BuZiTo_7 checks
+*** RIVER *** [2s 7h Td 8d][7d]
+Sadhukid checks
+7_BuZiTo_7 checks
+*** SHOW DOWN ***
+7_BuZiTo_7 shows [Jc Kh] (One pair : 7)
+Sadhukid shows [Ad 3c] (One pair : 7)
+Sadhukid collected 0.04€ from pot
+*** SUMMARY ***
+Total pot 0.04€ | Rake 0.01€
+Board: [2s 7h Td 8d 7d]
+Seat 2: Sadhukid (big blind) showed [Ad 3c] and won 0.04€ with One pair : 7
+Seat 6: 7_BuZiTo_7 (button) showed [Jc Kh] and lost with One pair : 7
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115187-1645974853 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:14:13 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: buzneit (3.87€)
+Seat 2: AAlbator (2.02€)
+Seat 3: LAArbitre (2.10€)
+Seat 4: jelachatte (2.20€)
+Seat 5: HellDracOnyX (1.97€)
+Seat 6: Riverbastard (2.07€)
+*** ANTE/BLINDS ***
+buzneit posts small blind 0.01€
+AAlbator posts big blind 0.02€
+Dealt to jelachatte [Qc Qh]
+*** PRE-FLOP *** 
+LAArbitre folds
+jelachatte raises 0.04€ to 0.06€
+HellDracOnyX folds
+Riverbastard folds
+buzneit raises 0.18€ to 0.24€
+AAlbator folds
+jelachatte raises 1.96€ to 2.20€ and is all-in
+buzneit folds
+jelachatte collected 2.46€ from pot
+*** SUMMARY ***
+Total pot 2.46€ | No rake
+Seat 4: jelachatte won 2.46€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115262-1645974897 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:14:57 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2.46€)
+Seat 2: Boubou1427 (2.34€)
+Seat 3: pasquale202a (1.22€)
+Seat 4: Hyuga_Kojiro (3.96€)
+Seat 5: squidos1 (2.95€)
+Seat 6: Richard Reuk (2€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Boubou1427 posts big blind 0.02€
+Dealt to jelachatte [3h 7h]
+*** PRE-FLOP *** 
+pasquale202a folds
+Hyuga_Kojiro folds
+squidos1 folds
+Richard Reuk raises 0.03€ to 0.05€
+jelachatte folds
+Boubou1427 calls 0.03€
+*** FLOP *** [8s 9s 6d]
+Boubou1427 bets 0.07€
+Richard Reuk folds
+Boubou1427 collected 0.17€ from pot
+*** SUMMARY ***
+Total pot 0.17€ | Rake 0.01€
+Board: [8s 9s 6d]
+Seat 2: Boubou1427 (big blind) won 0.17€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115267-1645974900 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:15:00 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: fuego17 (2€)
+Seat 2: jelachatte (2.45€)
+Seat 3: ATeyssier (0.99€)
+Seat 4: knary_island (4.57€)
+Seat 5: MC keke (2.01€)
+Seat 6: squidos1 (2.95€)
+*** ANTE/BLINDS ***
+fuego17 posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [7d 7c]
+*** PRE-FLOP *** 
+ATeyssier calls 0.02€
+knary_island folds
+MC keke folds
+squidos1 folds
+fuego17 folds
+jelachatte checks
+*** FLOP *** [9s As 3h]
+jelachatte checks
+ATeyssier checks
+*** TURN *** [9s As 3h][Td]
+jelachatte checks
+ATeyssier checks
+*** RIVER *** [9s As 3h Td][Jc]
+jelachatte checks
+ATeyssier bets 0.02€
+jelachatte calls 0.02€
+*** SHOW DOWN ***
+jelachatte shows [7d 7c] (One pair : 7)
+ATeyssier shows [Th Kd] (One pair : Tens)
+ATeyssier collected 0.08€ from pot
+*** SUMMARY ***
+Total pot 0.08€ | Rake 0.01€
+Board: [9s As 3h Td Jc]
+Seat 2: jelachatte (big blind) showed [7d 7c] and lost with One pair : 7
+Seat 3: ATeyssier showed [Th Kd] and won 0.08€ with One pair : Tens
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115332-1645974935 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:15:35 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: MC keke (2.41€)
+Seat 2: Erbav (2.06€)
+Seat 3: OZMYN (0.82€)
+Seat 4: LAArbitre (1.84€)
+Seat 5: jelachatte (2.41€)
+Seat 6: buzneit (6.20€)
+*** ANTE/BLINDS ***
+MC keke posts small blind 0.01€
+Erbav posts big blind 0.02€
+Dealt to jelachatte [Ad 2d]
+*** PRE-FLOP *** 
+OZMYN folds
+LAArbitre folds
+jelachatte raises 0.04€ to 0.06€
+buzneit calls 0.06€
+MC keke calls 0.05€
+Erbav folds
+*** FLOP *** [2h Kh 9h]
+MC keke checks
+jelachatte checks
+buzneit checks
+*** TURN *** [2h Kh 9h][8h]
+MC keke bets 0.08€
+jelachatte folds
+buzneit folds
+MC keke collected 0.26€ from pot
+*** SUMMARY ***
+Total pot 0.26€ | Rake 0.02€
+Board: [2h Kh 9h 8h]
+Seat 1: MC keke (small blind) won 0.26€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115411-1645974975 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:16:15 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Electra30 (2.92€)
+Seat 2: squidos1 (4.24€)
+Seat 3: Philfeed (2.10€)
+Seat 4: OZMYN (0.82€)
+Seat 5: yhzzzz (2€)
+Seat 6: jelachatte (2.35€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+Electra30 posts small blind 0.01€
+squidos1 posts big blind 0.02€
+Dealt to jelachatte [7h 4c]
+*** PRE-FLOP *** 
+Philfeed folds
+OZMYN folds
+yhzzzz folds
+jelachatte folds
+Electra30 folds
+squidos1 collected 0.13€ from pot
+*** SUMMARY ***
+Total pot 0.13€ | No rake
+Seat 2: squidos1 (big blind) won 0.13€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115327-1645974933 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:15:33 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: yhzzzz (1.85€)
+Seat 2: Hyuga_Kojiro (7.71€)
+Seat 3: jelachatte (2.41€)
+Seat 4: Hafyou (3.63€)
+Seat 5: ATeyssier (1.03€)
+Seat 6: oliveponcar (3.03€)
+*** ANTE/BLINDS ***
+yhzzzz posts small blind 0.01€
+Hyuga_Kojiro posts big blind 0.02€
+Dealt to jelachatte [7h 5d]
+*** PRE-FLOP *** 
+jelachatte folds
+Hafyou calls 0.02€
+ATeyssier calls 0.02€
+oliveponcar folds
+yhzzzz folds
+Hyuga_Kojiro checks
+*** FLOP *** [Qs 7s 4h]
+Hyuga_Kojiro checks
+Hafyou checks
+ATeyssier bets 0.02€
+Hyuga_Kojiro folds
+Hafyou calls 0.02€
+*** TURN *** [Qs 7s 4h][Kh]
+Hafyou bets 0.06€
+ATeyssier calls 0.06€
+*** RIVER *** [Qs 7s 4h Kh][3d]
+Hafyou bets 0.23€
+ATeyssier folds
+Hafyou collected 0.44€ from pot
+*** SUMMARY ***
+Total pot 0.44€ | Rake 0.02€
+Board: [Qs 7s 4h Kh 3d]
+Seat 4: Hafyou won 0.44€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115421-1645974980 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:16:20 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: james68120 (0.13€)
+Seat 2: MC keke (2.53€)
+Seat 3: Alonz62 (1.72€)
+Seat 4: LAArbitre (2.74€)
+Seat 5: jelachatte (2.35€)
+Seat 6: DARENS (1.67€)
+*** ANTE/BLINDS ***
+james68120 posts small blind 0.01€
+MC keke posts big blind 0.02€
+Dealt to jelachatte [4s 6c]
+*** PRE-FLOP *** 
+Alonz62 raises 0.02€ to 0.04€
+LAArbitre calls 0.04€
+jelachatte folds
+DARENS folds
+james68120 calls 0.03€
+MC keke raises 0.12€ to 0.16€
+Alonz62 folds
+LAArbitre folds
+james68120 folds
+MC keke collected 0.28€ from pot
+*** SUMMARY ***
+Total pot 0.28€ | No rake
+Seat 2: MC keke (big blind) won 0.28€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115446-1645974992 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:16:32 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2.35€)
+Seat 2: salesp84 (2€)
+Seat 3: lazettte (1.35€)
+Seat 4: AAlbator (6.80€)
+Seat 5: Rougegorge35 (0.86€)
+Seat 6: Realwild21 (2.45€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+salesp84 posts big blind 0.02€
+Dealt to jelachatte [4d Ad]
+*** PRE-FLOP *** 
+lazettte folds
+AAlbator folds
+Rougegorge35 folds
+Realwild21 folds
+jelachatte calls 0.01€
+salesp84 checks
+*** FLOP *** [4h Jd 6h]
+jelachatte checks
+salesp84 bets 0.04€
+jelachatte folds
+salesp84 collected 0.08€ from pot
+*** SUMMARY ***
+Total pot 0.08€ | No rake
+Board: [4h Jd 6h]
+Seat 2: salesp84 (big blind) won 0.08€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115483-1645975013 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:16:53 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: OZMYN (0.80€)
+Seat 2: jelachatte (2.33€)
+Seat 3: DuG_RaDiAnCe (2.09€)
+Seat 4: jeffjoel59 (7.48€)
+Seat 5: Oiryx (1.80€)
+Seat 6: wax94 (1.84€)
+*** ANTE/BLINDS ***
+OZMYN posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [5d Jd]
+*** PRE-FLOP *** 
+DuG_RaDiAnCe folds
+jeffjoel59 folds
+Oiryx calls 0.02€
+wax94 folds
+OZMYN calls 0.01€
+jelachatte checks
+*** FLOP *** [3d Tc Qs]
+OZMYN checks
+jelachatte checks
+Oiryx checks
+*** TURN *** [3d Tc Qs][Kc]
+OZMYN bets 0.06€
+jelachatte calls 0.06€
+Oiryx calls 0.06€
+*** RIVER *** [3d Tc Qs Kc][7h]
+OZMYN bets 0.16€
+jelachatte folds
+Oiryx calls 0.16€
+*** SHOW DOWN ***
+Oiryx shows [Ts Jh] (One pair : Tens)
+OZMYN shows [3h Qh] (Two pairs : Queens and 3)
+OZMYN collected 0.50€ from pot
+*** SUMMARY ***
+Total pot 0.50€ | Rake 0.06€
+Board: [3d Tc Qs Kc 7h]
+Seat 1: OZMYN (small blind) showed [3h Qh] and won 0.50€ with Two pairs : Queens and 3
+Seat 5: Oiryx showed [Ts Jh] and lost with One pair : Tens
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115562-1645975059 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:17:39 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Wailhart (2€)
+Seat 2: Realwild21 (2.76€)
+Seat 3: Adamaii (2.78€)
+Seat 4: MC keke (2€)
+Seat 5: jelachatte (2.25€)
+Seat 6: AAlbator (2.04€)
+*** ANTE/BLINDS ***
+Wailhart posts small blind 0.01€
+Realwild21 posts big blind 0.02€
+Dealt to jelachatte [Qc 8d]
+*** PRE-FLOP *** 
+Adamaii raises 0.04€ to 0.06€
+MC keke folds
+jelachatte folds
+AAlbator folds
+Wailhart folds
+Realwild21 folds
+Adamaii collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 3: Adamaii won 0.09€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115568-1645975062 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:17:42 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Dexter1971 (2.06€)
+Seat 2: 7_BuZiTo_7 (0.19€)
+Seat 3: Hyuga_Kojiro (5.08€)
+Seat 4: Vinvin62 (0.44€)
+Seat 5: jelachatte (2.25€)
+Seat 6: Towhite (2.05€)
+*** ANTE/BLINDS ***
+Dexter1971 posts small blind 0.01€
+7_BuZiTo_7 posts big blind 0.02€
+Dealt to jelachatte [Ah 7s]
+*** PRE-FLOP *** 
+Hyuga_Kojiro folds
+Vinvin62 folds
+jelachatte raises 0.04€ to 0.06€
+Towhite folds
+Dexter1971 folds
+7_BuZiTo_7 folds
+jelachatte collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 5: jelachatte won 0.09€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115566-1645975061 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:17:41 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Jr27120 (2.04€)
+Seat 2: MC keke (2€)
+Seat 3: jelachatte (2.25€)
+Seat 4: RverMagcWina (3.76€)
+Seat 5: salesp84 (2.52€)
+Seat 6: OZMYN (0.80€)
+*** ANTE/BLINDS ***
+Jr27120 posts small blind 0.01€
+MC keke posts big blind 0.02€
+Dealt to jelachatte [Qc 4d]
+*** PRE-FLOP *** 
+jelachatte folds
+RverMagcWina folds
+salesp84 folds
+OZMYN folds
+Jr27120 raises 0.02€ to 0.04€
+MC keke folds
+Jr27120 collected 0.06€ from pot
+*** SUMMARY ***
+Total pot 0.06€ | No rake
+Seat 1: Jr27120 (small blind) won 0.06€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115549-1645975051 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:17:31 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Reylanz (2.52€)
+Seat 2: djipipi (0.53€)
+Seat 3: jelachatte (2.25€)
+Seat 4: hnjkmm (2.23€)
+Seat 5: toyototototo (0.77€)
+Seat 6: Luluberluc (4.67€)
+*** ANTE/BLINDS ***
+Reylanz posts small blind 0.01€
+djipipi posts big blind 0.02€
+Dealt to jelachatte [8c 6s]
+*** PRE-FLOP *** 
+jelachatte folds
+hnjkmm raises 0.05€ to 0.07€
+toyototototo folds
+Luluberluc folds
+Reylanz calls 0.06€
+djipipi folds
+*** FLOP *** [5d 2s 7h]
+Reylanz checks
+hnjkmm checks
+*** TURN *** [5d 2s 7h][Kh]
+Reylanz checks
+hnjkmm checks
+*** RIVER *** [5d 2s 7h Kh][5c]
+Reylanz checks
+hnjkmm checks
+*** SHOW DOWN ***
+Reylanz shows [Qc 9s] (One pair : 5)
+hnjkmm shows [7s Ac] (Two pairs : 7 and 5)
+hnjkmm collected 0.14€ from pot
+*** SUMMARY ***
+Total pot 0.14€ | Rake 0.02€
+Board: [5d 2s 7h Kh 5c]
+Seat 1: Reylanz (small blind) showed [Qc 9s] and lost with One pair : 5
+Seat 4: hnjkmm showed [7s Ac] and won 0.14€ with Two pairs : 7 and 5
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115554-1645975055 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:17:35 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Choupette_64 (1.02€)
+Seat 2: La GrinDta (7.25€)
+Seat 3: Hyuga_Kojiro (5.08€)
+Seat 4: jelachatte (2.25€)
+Seat 5: iam_cid (2.66€)
+Seat 6: LAArbitre (2.76€)
+*** ANTE/BLINDS ***
+Choupette_64 posts small blind 0.01€
+La GrinDta posts big blind 0.02€
+Dealt to jelachatte [2d 8c]
+*** PRE-FLOP *** 
+Hyuga_Kojiro folds
+jelachatte folds
+iam_cid folds
+LAArbitre folds
+Choupette_64 calls 0.01€
+La GrinDta checks
+*** FLOP *** [Kd Jh 8s]
+Choupette_64 checks
+La GrinDta checks
+*** TURN *** [Kd Jh 8s][5s]
+Choupette_64 checks
+La GrinDta bets 0.02€
+Choupette_64 folds
+La GrinDta collected 0.06€ from pot
+*** SUMMARY ***
+Total pot 0.06€ | No rake
+Board: [Kd Jh 8s 5s]
+Seat 2: La GrinDta (big blind) won 0.06€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115623-1645975090 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:18:10 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: pasquale202a (0.74€)
+Seat 2: salesp84 (2€)
+Seat 3: yhzzzz (2.35€)
+Seat 4: jelachatte (2.26€)
+Seat 5: La GrinDta (7.27€)
+Seat 6: Alonz62 (2.35€)
+*** ANTE/BLINDS ***
+pasquale202a posts small blind 0.01€
+salesp84 posts big blind 0.02€
+Dealt to jelachatte [Jh 4s]
+*** PRE-FLOP *** 
+yhzzzz folds
+jelachatte folds
+La GrinDta folds
+Alonz62 folds
+pasquale202a folds
+salesp84 collected 0.03€ from pot
+*** SUMMARY ***
+Total pot 0.03€ | No rake
+Seat 2: salesp84 (big blind) won 0.03€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115630-1645975093 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:18:13 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2.26€)
+Seat 2: iam_cid (2.71€)
+Seat 3: BB_Mister65 (1€)
+Seat 4: wax94 (2.01€)
+Seat 5: Realwild21 (2.73€)
+Seat 6: HellDracOnyX (2.01€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+iam_cid posts big blind 0.02€
+Dealt to jelachatte [9d 4c]
+*** PRE-FLOP *** 
+BB_Mister65 raises 0.08€ to 0.10€
+wax94 folds
+Realwild21 folds
+HellDracOnyX folds
+jelachatte folds
+iam_cid folds
+BB_Mister65 collected 0.13€ from pot
+*** SUMMARY ***
+Total pot 0.13€ | No rake
+Seat 3: BB_Mister65 won 0.13€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115588-1645975072 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:17:52 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: knary_island (4.54€)
+Seat 2: jelachatte (2.28€)
+Seat 3: Ausartak (2.72€)
+Seat 4: Alonz62 (2.27€)
+Seat 5: Realwild21 (2.74€)
+Seat 6: AAlbator (2.04€)
+Hold-up to Pot: total 0.20€
+*** ANTE/BLINDS ***
+knary_island posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [2c 8h]
+*** PRE-FLOP *** 
+Ausartak folds
+Alonz62 folds
+Realwild21 folds
+AAlbator raises 0.04€ to 0.06€
+knary_island raises 0.18€ to 0.24€
+jelachatte folds
+AAlbator folds
+knary_island collected 0.52€ from pot
+*** SUMMARY ***
+Total pot 0.52€ | No rake
+Seat 1: knary_island (small blind) won 0.52€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115744-1645975146 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:19:06 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2.21€)
+Seat 2: salesp84 (3.34€)
+Seat 3: Juju8569 (0.50€)
+Seat 4: Ffjjce (5.22€)
+Seat 5: Bestofplus (2.73€)
+Seat 6: wmx-ezm17vk (0.53€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+salesp84 posts big blind 0.02€
+Dealt to jelachatte [Ad Ah]
+*** PRE-FLOP *** 
+Juju8569 folds
+Ffjjce folds
+Bestofplus raises 0.04€ to 0.06€
+wmx-ezm17vk folds
+jelachatte raises 0.12€ to 0.18€
+salesp84 folds
+Bestofplus folds
+jelachatte collected 0.26€ from pot
+*** SUMMARY ***
+Total pot 0.26€ | No rake
+Seat 1: jelachatte (small blind) won 0.26€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115634-1645975095 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:18:15 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: 7_BuZiTo_7 (0.31€)
+Seat 2: wax94 (2.01€)
+Seat 3: Damso88210 (1.05€)
+Seat 4: Jr27120 (2.09€)
+Seat 5: parkchanwook (2.33€)
+Seat 6: jelachatte (2.25€)
+*** ANTE/BLINDS ***
+7_BuZiTo_7 posts small blind 0.01€
+wax94 posts big blind 0.02€
+Dealt to jelachatte [8s Ts]
+*** PRE-FLOP *** 
+Damso88210 raises 0.02€ to 0.04€
+Jr27120 calls 0.04€
+parkchanwook folds
+jelachatte calls 0.04€
+7_BuZiTo_7 calls 0.03€
+wax94 calls 0.02€
+*** FLOP *** [7h 3s Ac]
+7_BuZiTo_7 checks
+wax94 checks
+Damso88210 checks
+Jr27120 checks
+jelachatte checks
+*** TURN *** [7h 3s Ac][4h]
+7_BuZiTo_7 checks
+wax94 checks
+Damso88210 checks
+Jr27120 checks
+jelachatte checks
+*** RIVER *** [7h 3s Ac 4h][6c]
+7_BuZiTo_7 checks
+wax94 checks
+Damso88210 checks
+Jr27120 bets 0.09€
+jelachatte folds
+7_BuZiTo_7 folds
+wax94 folds
+Damso88210 folds
+Jr27120 collected 0.27€ from pot
+*** SUMMARY ***
+Total pot 0.27€ | Rake 0.02€
+Board: [7h 3s Ac 4h 6c]
+Seat 4: Jr27120 won 0.27€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115773-1645975160 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:19:20 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: salesp84 (3.32€)
+Seat 2: 69LAKEUTRI (4.80€)
+Seat 3: jelachatte (2.29€)
+Seat 4: Acedo Calcio (4.07€)
+Seat 5: jeffjoel59 (5.09€)
+Seat 6: 7_BuZiTo_7 (0.27€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+salesp84 posts small blind 0.01€
+69LAKEUTRI posts big blind 0.02€
+Dealt to jelachatte [7d 5d]
+*** PRE-FLOP *** 
+jelachatte folds
+Acedo Calcio calls 0.02€
+jeffjoel59 calls 0.02€
+7_BuZiTo_7 raises 0.25€ to 0.27€ and is all-in
+salesp84 folds
+69LAKEUTRI folds
+Acedo Calcio raises 0.25€ to 0.52€
+jeffjoel59 calls 0.50€
+*** FLOP *** [2s 3d Ks]
+Acedo Calcio bets 3.55€ and is all-in
+jeffjoel59 raises 1.02€ to 4.57€ and is all-in
+*** TURN *** [2s 3d Ks][Ac]
+*** RIVER *** [2s 3d Ks Ac][8c]
+*** SHOW DOWN ***
+Acedo Calcio shows [Tc Js] (High card : Ace)
+7_BuZiTo_7 shows [4s 4d] (One pair : 4)
+jeffjoel59 shows [Kh Th] (One pair : Kings)
+jeffjoel59 collected 8.86€ from pot
+*** SUMMARY ***
+Total pot 8.86€ | Rake 0.70€
+Board: [2s 3d Ks Ac 8c]
+Seat 4: Acedo Calcio showed [Tc Js] and lost with High card : Ace
+Seat 5: jeffjoel59 showed [Kh Th] and won 8.86€ with One pair : Kings
+Seat 6: 7_BuZiTo_7 (button) showed [4s 4d] and lost with One pair : 4
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115780-1645975165 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:19:25 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: NaiSsaWaiSsa (1.36€)
+Seat 2: jelachatte (2.29€)
+Seat 3: fuego17 (2.47€)
+Seat 4: vyanzo (2.82€)
+Seat 5: Jr27120 (2.23€)
+Seat 6: kikibowl (3.44€)
+*** ANTE/BLINDS ***
+NaiSsaWaiSsa posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Js 8d]
+*** PRE-FLOP *** 
+fuego17 raises 0.04€ to 0.06€
+vyanzo folds
+Jr27120 folds
+kikibowl folds
+NaiSsaWaiSsa folds
+jelachatte calls 0.04€
+*** FLOP *** [4d 3h 5s]
+jelachatte checks
+fuego17 checks
+*** TURN *** [4d 3h 5s][8c]
+jelachatte bets 0.07€
+fuego17 folds
+jelachatte collected 0.19€ from pot
+*** SUMMARY ***
+Total pot 0.19€ | Rake 0.01€
+Board: [4d 3h 5s 8c]
+Seat 2: jelachatte (big blind) won 0.19€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115874-1645975213 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:20:13 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Wraththekid (2.06€)
+Seat 2: Hyuga_Kojiro (3.85€)
+Seat 3: MC keke (2€)
+Seat 4: Pokerspie1 (0.68€)
+Seat 5: bellic59 (3.59€)
+Seat 6: jelachatte (2.35€)
+*** ANTE/BLINDS ***
+Wraththekid posts small blind 0.01€
+Hyuga_Kojiro posts big blind 0.02€
+Dealt to jelachatte [Jc Qd]
+*** PRE-FLOP *** 
+MC keke folds
+Pokerspie1 folds
+bellic59 folds
+jelachatte raises 0.04€ to 0.06€
+Wraththekid folds
+Hyuga_Kojiro folds
+jelachatte collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 6: jelachatte (button) won 0.09€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115861-1645975208 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:20:08 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: salesp84 (2.51€)
+Seat 2: wax94 (1.94€)
+Seat 3: Philogone (2.01€)
+Seat 4: jelachatte (2.35€)
+Seat 5: Nani666 (3.25€)
+Seat 6: alaporke (1.92€)
+*** ANTE/BLINDS ***
+salesp84 posts small blind 0.01€
+wax94 posts big blind 0.02€
+Dealt to jelachatte [Jd 5s]
+*** PRE-FLOP *** 
+Philogone folds
+jelachatte folds
+Nani666 folds
+alaporke folds
+salesp84 folds
+wax94 collected 0.03€ from pot
+*** SUMMARY ***
+Total pot 0.03€ | No rake
+Seat 2: wax94 (big blind) won 0.03€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115869-1645975212 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:20:12 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: 69LAKEUTRI (4.82€)
+Seat 2: buzneit (4.49€)
+Seat 3: Philfeed (2.53€)
+Seat 4: Nani666 (3.25€)
+Seat 5: Vinvin62 (0.32€)
+Seat 6: jelachatte (2.35€)
+*** ANTE/BLINDS ***
+69LAKEUTRI posts small blind 0.01€
+buzneit posts big blind 0.02€
+Dealt to jelachatte [Kd 5c]
+*** PRE-FLOP *** 
+Philfeed folds
+Nani666 calls 0.02€
+Vinvin62 folds
+jelachatte folds
+69LAKEUTRI calls 0.01€
+buzneit checks
+*** FLOP *** [9h 7d Jh]
+69LAKEUTRI checks
+buzneit checks
+Nani666 bets 0.02€
+69LAKEUTRI folds
+buzneit folds
+Nani666 collected 0.07€ from pot
+*** SUMMARY ***
+Total pot 0.07€ | Rake 0.01€
+Board: [9h 7d Jh]
+Seat 4: Nani666 won 0.07€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115865-1645975210 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:20:10 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: ForzaMios (2.18€)
+Seat 2: Melielvir (1.66€)
+Seat 3: squidos1 (2.90€)
+Seat 4: fuego17 (2.07€)
+Seat 5: jelachatte (2.35€)
+Seat 6: Nani666 (3.25€)
+*** ANTE/BLINDS ***
+ForzaMios posts small blind 0.01€
+Melielvir posts big blind 0.02€
+Dealt to jelachatte [6c 4s]
+*** PRE-FLOP *** 
+squidos1 folds
+fuego17 folds
+jelachatte folds
+Nani666 folds
+ForzaMios calls 0.01€
+Melielvir checks
+*** FLOP *** [5c Th 3d]
+ForzaMios checks
+Melielvir checks
+*** TURN *** [5c Th 3d][9d]
+ForzaMios checks
+Melielvir bets 0.03€
+ForzaMios folds
+Melielvir collected 0.07€ from pot
+*** SUMMARY ***
+Total pot 0.07€ | No rake
+Board: [5c Th 3d 9d]
+Seat 2: Melielvir (big blind) won 0.07€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115900-1645975226 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:20:26 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2.38€)
+Seat 2: kikibowl (3.38€)
+Seat 3: Oiryx (1.59€)
+Seat 4: squidos1 (2.64€)
+Seat 5: DuG_RaDiAnCe (2.07€)
+Seat 6: Scaivy (4.38€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+kikibowl posts big blind 0.02€
+Dealt to jelachatte [8c 5h]
+*** PRE-FLOP *** 
+Oiryx folds
+squidos1 folds
+DuG_RaDiAnCe raises 0.04€ to 0.06€
+Scaivy folds
+jelachatte folds
+kikibowl folds
+DuG_RaDiAnCe collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 5: DuG_RaDiAnCe won 0.09€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115903-1645975228 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:20:28 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Vendredi--13 (2€)
+Seat 2: Lomic (0.95€)
+Seat 3: jelachatte (2.37€)
+Seat 4: JeTILTunMAX (27.35€)
+Seat 5: vyanzo (2.90€)
+Seat 6: yhzzzz (2.34€)
+*** ANTE/BLINDS ***
+Vendredi--13 posts small blind 0.01€
+Lomic posts big blind 0.02€
+Dealt to jelachatte [Ac Kc]
+*** PRE-FLOP *** 
+jelachatte raises 0.04€ to 0.06€
+JeTILTunMAX folds
+vyanzo calls 0.06€
+yhzzzz calls 0.06€
+Vendredi--13 folds
+Lomic folds
+*** FLOP *** [Js 2h 6d]
+jelachatte bets 0.11€
+vyanzo calls 0.11€
+yhzzzz folds
+*** TURN *** [Js 2h 6d][Qc]
+jelachatte checks
+vyanzo checks
+*** RIVER *** [Js 2h 6d Qc][5d]
+jelachatte checks
+vyanzo bets 0.25€
+jelachatte folds
+vyanzo collected 0.64€ from pot
+*** SUMMARY ***
+Total pot 0.64€ | Rake 0.04€
+Board: [Js 2h 6d Qc 5d]
+Seat 5: vyanzo won 0.64€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6115994-1645975273 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:21:13 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: AAlbator (2.39€)
+Seat 2: jelachatte (2.20€)
+Seat 3: AdriPoPoKer (2.79€)
+Seat 4: oliveponcar (2.96€)
+Seat 5: Jr27120 (2.33€)
+Seat 6: toyototototo (1.94€)
+*** ANTE/BLINDS ***
+AAlbator posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [8s Ad]
+*** PRE-FLOP *** 
+AdriPoPoKer folds
+oliveponcar folds
+Jr27120 raises 0.04€ to 0.06€
+toyototototo folds
+AAlbator folds
+jelachatte calls 0.04€
+*** FLOP *** [Js 6d 2s]
+jelachatte checks
+Jr27120 bets 0.09€
+jelachatte folds
+Jr27120 collected 0.21€ from pot
+*** SUMMARY ***
+Total pot 0.21€ | Rake 0.01€
+Board: [Js 6d 2s]
+Seat 5: Jr27120 won 0.21€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116051-1645975305 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:21:45 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: fuego17 (2.12€)
+Seat 2: wax94 (1.90€)
+Seat 3: MC keke (2€)
+Seat 4: Choupette_64 (1.30€)
+Seat 5: Tehufred (2.14€)
+Seat 6: jelachatte (2.14€)
+*** ANTE/BLINDS ***
+fuego17 posts small blind 0.01€
+wax94 posts big blind 0.02€
+Dealt to jelachatte [8s 4h]
+*** PRE-FLOP *** 
+MC keke folds
+Choupette_64 raises 0.03€ to 0.05€
+Tehufred folds
+jelachatte folds
+fuego17 folds
+wax94 folds
+Choupette_64 collected 0.08€ from pot
+*** SUMMARY ***
+Total pot 0.08€ | No rake
+Seat 4: Choupette_64 won 0.08€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116025-1645975292 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:21:32 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Reylanz (1.25€)
+Seat 2: Kingchav (0.93€)
+Seat 3: Bapt794 (2.77€)
+Seat 4: jelachatte (2.14€)
+Seat 5: oliveponcar (2.20€)
+Seat 6: salesp84 (2.44€)
+*** ANTE/BLINDS ***
+Reylanz posts small blind 0.01€
+Kingchav posts big blind 0.02€
+Dealt to jelachatte [Qh 3s]
+*** PRE-FLOP *** 
+Bapt794 folds
+jelachatte folds
+oliveponcar folds
+salesp84 folds
+Reylanz calls 0.01€
+Kingchav raises 0.06€ to 0.08€
+Reylanz calls 0.06€
+*** FLOP *** [Js 5c Td]
+Reylanz checks
+Kingchav bets 0.08€
+Reylanz calls 0.08€
+*** TURN *** [Js 5c Td][2d]
+Reylanz checks
+Kingchav bets 0.16€
+Reylanz calls 0.16€
+*** RIVER *** [Js 5c Td 2d][8s]
+Reylanz checks
+Kingchav checks
+*** SHOW DOWN ***
+Reylanz shows [Ad 4s] (High card : Ace)
+Kingchav shows [Qs Qd] (One pair : Queens)
+Kingchav collected 0.58€ from pot
+*** SUMMARY ***
+Total pot 0.58€ | Rake 0.06€
+Board: [Js 5c Td 2d 8s]
+Seat 1: Reylanz (small blind) showed [Ad 4s] and lost with High card : Ace
+Seat 2: Kingchav (big blind) showed [Qs Qd] and won 0.58€ with One pair : Queens
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116075-1645975318 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:21:58 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2.14€)
+Seat 2: Philogone (2€)
+Seat 3: Tehufred (2.12€)
+Seat 4: Ger7 (0.32€)
+Seat 5: Erbav (1.80€)
+Seat 6: Jr27120 (2.36€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Philogone posts big blind 0.02€
+Dealt to jelachatte [9c As]
+*** PRE-FLOP *** 
+Tehufred folds
+Ger7 folds
+Erbav raises 0.04€ to 0.06€
+Jr27120 folds
+jelachatte calls 0.05€
+Philogone calls 0.04€
+*** FLOP *** [Qd Qc Ah]
+jelachatte checks
+Philogone checks
+Erbav checks
+*** TURN *** [Qd Qc Ah][8d]
+jelachatte bets 0.09€
+Philogone folds
+Erbav folds
+jelachatte collected 0.25€ from pot
+*** SUMMARY ***
+Total pot 0.25€ | Rake 0.02€
+Board: [Qd Qc Ah 8d]
+Seat 1: jelachatte (small blind) won 0.25€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116120-1645975340 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:22:20 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: MC keke (2.16€)
+Seat 2: bubbleman00 (2.31€)
+Seat 3: jelachatte (2.24€)
+Seat 4: Robh973 (2€)
+Seat 5: DARENS (1.75€)
+Seat 6: Philfeed (2.32€)
+*** ANTE/BLINDS ***
+MC keke posts small blind 0.01€
+bubbleman00 posts big blind 0.02€
+Dealt to jelachatte [5h Ac]
+*** PRE-FLOP *** 
+jelachatte folds
+Robh973 raises 0.03€ to 0.05€
+DARENS folds
+Philfeed folds
+MC keke folds
+bubbleman00 folds
+Robh973 collected 0.08€ from pot
+*** SUMMARY ***
+Total pot 0.08€ | No rake
+Seat 4: Robh973 won 0.08€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116071-1645975316 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:21:56 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: 69LAKEUTRI (4.69€)
+Seat 2: Melielvir (1.69€)
+Seat 3: Tehufred (2.12€)
+Seat 4: jelachatte (2.14€)
+Seat 5: salesp84 (2.01€)
+Seat 6: jeffjoel59 (7.08€)
+*** ANTE/BLINDS ***
+69LAKEUTRI posts small blind 0.01€
+Melielvir posts big blind 0.02€
+Dealt to jelachatte [7h Ks]
+*** PRE-FLOP *** 
+Tehufred folds
+jelachatte folds
+salesp84 folds
+jeffjoel59 raises 0.03€ to 0.05€
+69LAKEUTRI calls 0.04€
+Melielvir folds
+*** FLOP *** [4d 7d 5h]
+69LAKEUTRI checks
+jeffjoel59 bets 0.03€
+69LAKEUTRI raises 0.13€ to 0.16€
+jeffjoel59 calls 0.13€
+*** TURN *** [4d 7d 5h][3h]
+69LAKEUTRI checks
+jeffjoel59 bets 0.44€
+69LAKEUTRI folds
+jeffjoel59 collected 0.84€ from pot
+*** SUMMARY ***
+Total pot 0.84€ | Rake 0.04€
+Board: [4d 7d 5h 3h]
+Seat 6: jeffjoel59 (button) won 0.84€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116124-1645975343 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:22:23 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Paipepcho (5.70€)
+Seat 2: jelachatte (2.24€)
+Seat 3: JeTILTunMAX (27.42€)
+Seat 4: chabacano (1.85€)
+Seat 5: yhzzzz (2.58€)
+Seat 6: Realwild21 (4.15€)
+*** ANTE/BLINDS ***
+Paipepcho posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Ts 5c]
+*** PRE-FLOP *** 
+JeTILTunMAX folds
+chabacano calls 0.02€
+yhzzzz folds
+Realwild21 folds
+Paipepcho folds
+jelachatte checks
+*** FLOP *** [Ks 7c 8s]
+jelachatte checks
+chabacano checks
+*** TURN *** [Ks 7c 8s][Ad]
+jelachatte checks
+chabacano bets 0.02€
+jelachatte folds
+chabacano collected 0.06€ from pot
+*** SUMMARY ***
+Total pot 0.06€ | Rake 0.01€
+Board: [Ks 7c 8s Ad]
+Seat 4: chabacano won 0.06€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116172-1645975368 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:22:48 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Hisokill (1.47€)
+Seat 2: Brethart (2.58€)
+Seat 3: fuego17 (2€)
+Seat 4: MC keke (2.13€)
+Seat 5: jelachatte (2.22€)
+Seat 6: yhzzzz (1.88€)
+*** ANTE/BLINDS ***
+Hisokill posts small blind 0.01€
+Brethart posts big blind 0.02€
+Dealt to jelachatte [Qs 8h]
+*** PRE-FLOP *** 
+fuego17 folds
+MC keke folds
+jelachatte folds
+yhzzzz folds
+Hisokill folds
+Brethart collected 0.03€ from pot
+*** SUMMARY ***
+Total pot 0.03€ | No rake
+Seat 2: Brethart (big blind) won 0.03€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116176-1645975369 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:22:49 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: oliveponcar (2.36€)
+Seat 2: AAlbator (4€)
+Seat 3: Rougegorge35 (0.77€)
+Seat 4: Hisokill (1.46€)
+Seat 5: DuG_RaDiAnCe (2.18€)
+Seat 6: jelachatte (2.22€)
+*** ANTE/BLINDS ***
+oliveponcar posts small blind 0.01€
+AAlbator posts big blind 0.02€
+Dealt to jelachatte [4d 3d]
+*** PRE-FLOP *** 
+Rougegorge35 raises 0.02€ to 0.04€
+Hisokill folds
+DuG_RaDiAnCe folds
+jelachatte folds
+oliveponcar folds
+AAlbator folds
+Rougegorge35 collected 0.07€ from pot
+*** SUMMARY ***
+Total pot 0.07€ | No rake
+Seat 3: Rougegorge35 won 0.07€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116178-1645975370 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:22:50 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Sadhukid (2.76€)
+Seat 2: caron10 (2€)
+Seat 3: Elesoujeanne (1.69€)
+Seat 4: vyanzo (2.77€)
+Seat 5: jelachatte (2.22€)
+Seat 6: buzneit (2.01€)
+*** ANTE/BLINDS ***
+Sadhukid posts small blind 0.01€
+caron10 posts big blind 0.02€
+Dealt to jelachatte [Ks 7s]
+*** PRE-FLOP *** 
+Elesoujeanne folds
+vyanzo calls 0.02€
+jelachatte folds
+buzneit folds
+Sadhukid folds
+caron10 raises 0.08€ to 0.10€
+vyanzo calls 0.08€
+*** FLOP *** [5d Ts Th]
+caron10 checks
+vyanzo checks
+*** TURN *** [5d Ts Th][4h]
+caron10 bets 0.07€
+vyanzo folds
+caron10 collected 0.26€ from pot
+*** SUMMARY ***
+Total pot 0.26€ | Rake 0.02€
+Board: [5d Ts Th 4h]
+Seat 2: caron10 (big blind) won 0.26€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116182-1645975372 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:22:52 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: .La Force. (1.95€)
+Seat 2: jelachatte (2.22€)
+Seat 3: OZMYN (0.82€)
+Seat 4: R1V3R15M4G1C (3.52€)
+Seat 5: salesp84 (2€)
+Seat 6: Bestofplus (2.53€)
+*** ANTE/BLINDS ***
+.La Force. posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Ts 8h]
+*** PRE-FLOP *** 
+OZMYN folds
+R1V3R15M4G1C folds
+salesp84 folds
+Bestofplus folds
+.La Force. raises 0.06€ to 0.08€
+jelachatte calls 0.06€
+*** FLOP *** [7s Td Jc]
+.La Force. bets 0.12€
+jelachatte calls 0.12€
+*** TURN *** [7s Td Jc][5c]
+.La Force. bets 0.30€
+jelachatte folds
+.La Force. collected 0.66€ from pot
+*** SUMMARY ***
+Total pot 0.66€ | Rake 0.04€
+Board: [7s Td Jc 5c]
+Seat 1: .La Force. (small blind) won 0.66€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116288-1645975420 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:23:40 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: MC keke (4.19€)
+Seat 2: KhaLel279 (6.32€)
+Seat 3: jelachatte (2.01€)
+Seat 4: Adamaii (2.80€)
+Seat 5: LEBEAUF57 (2.12€)
+Seat 6: Midnight83 (2.01€)
+*** ANTE/BLINDS ***
+MC keke posts small blind 0.01€
+KhaLel279 posts big blind 0.02€
+Dealt to jelachatte [Ac 6d]
+*** PRE-FLOP *** 
+jelachatte folds
+Adamaii folds
+LEBEAUF57 folds
+Midnight83 folds
+MC keke folds
+KhaLel279 collected 0.03€ from pot
+*** SUMMARY ***
+Total pot 0.03€ | No rake
+Seat 2: KhaLel279 (big blind) won 0.03€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116292-1645975422 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:23:42 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Ausartak (2.55€)
+Seat 2: AAlbator (6.26€)
+Seat 3: fuego17 (2.47€)
+Seat 4: bob1608 (2.18€)
+Seat 5: jelachatte (2.01€)
+Seat 6: tazman86 (1.04€)
+*** ANTE/BLINDS ***
+Ausartak posts small blind 0.01€
+AAlbator posts big blind 0.02€
+Dealt to jelachatte [Th 6d]
+*** PRE-FLOP *** 
+fuego17 folds
+bob1608 folds
+jelachatte folds
+tazman86 folds
+Ausartak folds
+AAlbator collected 0.03€ from pot
+*** SUMMARY ***
+Total pot 0.03€ | No rake
+Seat 2: AAlbator (big blind) won 0.03€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116295-1645975424 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:23:44 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Elesoujeanne (1.67€)
+Seat 2: fab.djass (2.03€)
+Seat 3: Robh973 (2€)
+Seat 4: jelachatte (2.01€)
+Seat 5: yhzzzz (2€)
+Seat 6: 69LAKEUTRI (4.57€)
+*** ANTE/BLINDS ***
+Elesoujeanne posts small blind 0.01€
+fab.djass posts big blind 0.02€
+Dealt to jelachatte [Qd Js]
+*** PRE-FLOP *** 
+Robh973 folds
+jelachatte calls 0.02€
+yhzzzz folds
+69LAKEUTRI folds
+Elesoujeanne folds
+fab.djass checks
+*** FLOP *** [8h 3s 6d]
+fab.djass checks
+jelachatte checks
+*** TURN *** [8h 3s 6d][2s]
+fab.djass bets 0.05€
+jelachatte folds
+fab.djass collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | Rake 0.01€
+Board: [8h 3s 6d 2s]
+Seat 2: fab.djass (big blind) won 0.09€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116284-1645975419 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:23:39 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2.02€)
+Seat 2: MArAbou85 (0.90€)
+Seat 3: AAlbator (6.26€)
+Seat 4: yhzzzz (2€)
+Seat 5: Carly1978 (2.02€)
+Seat 6: Hyuga_Kojiro (5.29€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+MArAbou85 posts big blind 0.02€
+Dealt to jelachatte [4c 7s]
+*** PRE-FLOP *** 
+AAlbator folds
+yhzzzz folds
+Carly1978 folds
+Hyuga_Kojiro raises 0.03€ to 0.05€
+jelachatte folds
+MArAbou85 calls 0.03€
+*** FLOP *** [6d Jd 6s]
+MArAbou85 checks
+Hyuga_Kojiro checks
+*** TURN *** [6d Jd 6s][Js]
+MArAbou85 checks
+Hyuga_Kojiro checks
+*** RIVER *** [6d Jd 6s Js][2h]
+MArAbou85 checks
+Hyuga_Kojiro bets 0.02€
+MArAbou85 folds
+Hyuga_Kojiro collected 0.12€ from pot
+*** SUMMARY ***
+Total pot 0.12€ | Rake 0.01€
+Board: [6d Jd 6s Js 2h]
+Seat 6: Hyuga_Kojiro (button) won 0.12€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116348-1645975448 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:24:08 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: NaiSsaWaiSsa (0.48€)
+Seat 2: Rougegorge35 (1.39€)
+Seat 3: Juju8569 (0.35€)
+Seat 4: parkchanwook (2.06€)
+Seat 5: alexisilafam (2.14€)
+Seat 6: jelachatte (2€)
+*** ANTE/BLINDS ***
+NaiSsaWaiSsa posts small blind 0.01€
+Rougegorge35 posts big blind 0.02€
+Dealt to jelachatte [7s Kd]
+*** PRE-FLOP *** 
+Juju8569 folds
+parkchanwook folds
+alexisilafam folds
+jelachatte folds
+NaiSsaWaiSsa raises 0.04€ to 0.06€
+Rougegorge35 folds
+NaiSsaWaiSsa collected 0.08€ from pot
+*** SUMMARY ***
+Total pot 0.08€ | No rake
+Seat 1: NaiSsaWaiSsa (small blind) won 0.08€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116360-1645975453 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:24:13 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Pokerspie1 (0.60€)
+Seat 2: jelachatte (2€)
+Seat 3: LEBEAUF57 (2.12€)
+Seat 4: yvonter (2€)
+Seat 5: DARENS (1.70€)
+Seat 6: oliveponcar (3.07€)
+*** ANTE/BLINDS ***
+Pokerspie1 posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [As Qd]
+*** PRE-FLOP *** 
+LEBEAUF57 raises 0.03€ to 0.05€
+yvonter calls 0.05€
+DARENS folds
+oliveponcar folds
+Pokerspie1 calls 0.04€
+jelachatte calls 0.03€
+*** FLOP *** [Jc 8c 5s]
+Pokerspie1 checks
+jelachatte checks
+LEBEAUF57 bets 0.15€
+yvonter folds
+Pokerspie1 folds
+jelachatte folds
+LEBEAUF57 collected 0.33€ from pot
+*** SUMMARY ***
+Total pot 0.33€ | Rake 0.02€
+Board: [Jc 8c 5s]
+Seat 3: LEBEAUF57 won 0.33€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116430-1645975481 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:24:41 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: wmx-ezm17vk (0.58€)
+Seat 2: bob1608 (2.11€)
+Seat 3: kahlenberg10 (1.46€)
+Seat 4: jelachatte (2€)
+Seat 5: 69LAKEUTRI (4.51€)
+Seat 6: buzneit (5.91€)
+*** ANTE/BLINDS ***
+wmx-ezm17vk posts small blind 0.01€
+bob1608 posts big blind 0.02€
+Dealt to jelachatte [8d 5c]
+*** PRE-FLOP *** 
+kahlenberg10 folds
+jelachatte folds
+69LAKEUTRI folds
+buzneit folds
+wmx-ezm17vk folds
+bob1608 collected 0.03€ from pot
+*** SUMMARY ***
+Total pot 0.03€ | No rake
+Seat 2: bob1608 (big blind) won 0.03€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116425-1645975479 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:24:39 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2€)
+Seat 2: yhzzzz (2.88€)
+Seat 3: fuego17 (2€)
+Seat 4: Knzo91 (3.52€)
+Seat 5: Hisokill (1.32€)
+Seat 6: Sadhukid (2.79€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+yhzzzz posts big blind 0.02€
+Dealt to jelachatte [6h 9h]
+*** PRE-FLOP *** 
+fuego17 folds
+Knzo91 folds
+Hisokill raises 0.08€ to 0.10€
+Sadhukid calls 0.10€
+jelachatte folds
+yhzzzz folds
+*** FLOP *** [8h 2d 2h]
+Hisokill bets 0.23€
+Sadhukid folds
+Hisokill collected 0.44€ from pot
+*** SUMMARY ***
+Total pot 0.44€ | Rake 0.02€
+Board: [8h 2d 2h]
+Seat 5: Hisokill won 0.44€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116356-1645975451 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:24:11 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Sadhukid (1.21€)
+Seat 2: Juju8569 (0.34€)
+Seat 3: jelachatte (2€)
+Seat 4: cLePieD (1.97€)
+Seat 5: LeGaulois 83 (1.58€)
+Seat 6: Brethart (2€)
+*** ANTE/BLINDS ***
+Sadhukid posts small blind 0.01€
+Juju8569 posts big blind 0.02€
+Dealt to jelachatte [Qh 4s]
+*** PRE-FLOP *** 
+jelachatte folds
+cLePieD folds
+LeGaulois 83 raises 0.04€ to 0.06€
+Brethart folds
+Sadhukid folds
+Juju8569 calls 0.04€
+*** FLOP *** [As Kc Td]
+Juju8569 checks
+LeGaulois 83 bets 0.06€
+Juju8569 calls 0.06€
+*** TURN *** [As Kc Td][3c]
+Juju8569 checks
+LeGaulois 83 bets 0.17€
+Juju8569 folds
+LeGaulois 83 collected 0.39€ from pot
+*** SUMMARY ***
+Total pot 0.39€ | Rake 0.03€
+Board: [As Kc Td 3c]
+Seat 5: LeGaulois 83 won 0.39€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116433-1645975483 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:24:43 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Pokerspie1 (0.55€)
+Seat 2: Brethart (2€)
+Seat 3: fuego17 (2€)
+Seat 4: hervodjuma (1.11€)
+Seat 5: cLePieD (1.97€)
+Seat 6: jelachatte (2€)
+*** ANTE/BLINDS ***
+Pokerspie1 posts small blind 0.01€
+Brethart posts big blind 0.02€
+Dealt to jelachatte [5c 5h]
+*** PRE-FLOP *** 
+fuego17 folds
+hervodjuma folds
+cLePieD folds
+jelachatte raises 0.04€ to 0.06€
+Pokerspie1 calls 0.05€
+Brethart folds
+*** FLOP *** [Ac Qd Ad]
+Pokerspie1 checks
+jelachatte bets 0.07€
+Pokerspie1 calls 0.07€
+*** TURN *** [Ac Qd Ad][5d]
+Pokerspie1 checks
+jelachatte bets 0.21€
+Pokerspie1 calls 0.21€
+*** RIVER *** [Ac Qd Ad 5d][6s]
+Pokerspie1 checks
+jelachatte bets 0.56€
+Pokerspie1 calls 0.21€ and is all-in
+*** SHOW DOWN ***
+Pokerspie1 shows [Jd 7d] (Flush Ace high)
+jelachatte shows [5c 5h] (Full of 5 and Aces)
+jelachatte collected 1.36€ from pot
+*** SUMMARY ***
+Total pot 1.36€ | Rake 0.11€
+Board: [Ac Qd Ad 5d 6s]
+Seat 1: Pokerspie1 (small blind) showed [Jd 7d] and lost with Flush Ace high
+Seat 6: jelachatte (button) showed [5c 5h] and won 1.36€ with Full of 5 and Aces
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116627-1645975565 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:26:05 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: cLePieD (1.90€)
+Seat 2: DARENS (1.79€)
+Seat 3: parkchanwook (2.02€)
+Seat 4: jelachatte (2.44€)
+Seat 5: MC keke (2€)
+Seat 6: JeTILTunMAX (28.41€)
+*** ANTE/BLINDS ***
+cLePieD posts small blind 0.01€
+DARENS posts big blind 0.02€
+Dealt to jelachatte [2c 4d]
+*** PRE-FLOP *** 
+parkchanwook folds
+jelachatte folds
+MC keke folds
+JeTILTunMAX folds
+cLePieD raises 0.04€ to 0.06€
+DARENS folds
+cLePieD collected 0.08€ from pot
+*** SUMMARY ***
+Total pot 0.08€ | No rake
+Seat 1: cLePieD (small blind) won 0.08€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116631-1645975566 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:26:06 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: LEBEAUF57 (2.01€)
+Seat 2: jelachatte (2.44€)
+Seat 3: Philogone (2.01€)
+Seat 4: JeTILTunMAX (28.41€)
+Seat 5: iam_cid (5.13€)
+Seat 6: wax94 (1.85€)
+Hold-up to Pot: total 0.10€
+*** ANTE/BLINDS ***
+LEBEAUF57 posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Ah 8c]
+*** PRE-FLOP *** 
+Philogone raises 0.07€ to 0.09€
+JeTILTunMAX folds
+iam_cid calls 0.09€
+wax94 folds
+LEBEAUF57 folds
+jelachatte folds
+*** FLOP *** [Kd 6d 3d]
+Philogone bets 0.16€
+iam_cid folds
+Philogone collected 0.45€ from pot
+*** SUMMARY ***
+Total pot 0.45€ | Rake 0.02€
+Board: [Kd 6d 3d]
+Seat 3: Philogone won 0.45€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116673-1645975582 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:26:22 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Scaivy (3.04€)
+Seat 2: Juju8569 (0.84€)
+Seat 3: Tamonas (2.34€)
+Seat 4: Hisokill (1.40€)
+Seat 5: jelachatte (2.41€)
+Seat 6: Jep39 (0.34€)
+*** ANTE/BLINDS ***
+Scaivy posts small blind 0.01€
+Juju8569 posts big blind 0.02€
+Dealt to jelachatte [Jd 2c]
+*** PRE-FLOP *** 
+Tamonas raises 0.03€ to 0.05€
+Hisokill folds
+jelachatte folds
+Jep39 folds
+Scaivy folds
+Juju8569 folds
+Tamonas collected 0.08€ from pot
+*** SUMMARY ***
+Total pot 0.08€ | No rake
+Seat 3: Tamonas won 0.08€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116671-1645975581 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:26:21 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: OZMYN (1.31€)
+Seat 2: wax94 (1.84€)
+Seat 3: Sadhukid (1.28€)
+Seat 4: fuego17 (2.45€)
+Seat 5: jelachatte (2.41€)
+Seat 6: Realwild21 (4.34€)
+*** ANTE/BLINDS ***
+OZMYN posts small blind 0.01€
+wax94 posts big blind 0.02€
+Dealt to jelachatte [7c 9h]
+*** PRE-FLOP *** 
+Sadhukid folds
+fuego17 raises 0.04€ to 0.06€
+jelachatte folds
+Realwild21 folds
+OZMYN folds
+wax94 folds
+fuego17 collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 4: fuego17 won 0.09€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116563-1645975536 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:25:36 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Tacapas (1.71€)
+Seat 2: Rougegorge35 (1.28€)
+Seat 3: jelachatte (2.46€)
+Seat 4: PeakyBoo (2€)
+Seat 5: MC keke (4.07€)
+Seat 6: Bennnou_ (2.04€)
+*** ANTE/BLINDS ***
+Tacapas posts small blind 0.01€
+Rougegorge35 posts big blind 0.02€
+Dealt to jelachatte [5d Ad]
+*** PRE-FLOP *** 
+jelachatte calls 0.02€
+PeakyBoo raises 0.12€ to 0.14€
+MC keke folds
+Bennnou_ calls 0.14€
+Tacapas folds
+Rougegorge35 folds
+jelachatte folds
+*** FLOP *** [5s 4c 2h]
+PeakyBoo bets 0.25€
+Bennnou_ calls 0.25€
+*** TURN *** [5s 4c 2h][8h]
+PeakyBoo bets 0.42€
+Bennnou_ raises 1.23€ to 1.65€ and is all-in
+PeakyBoo calls 1.19€ and is all-in
+*** RIVER *** [5s 4c 2h 8h][4h]
+*** SHOW DOWN ***
+PeakyBoo shows [Qh As] (One pair : 4)
+Bennnou_ shows [Th Tc] (Two pairs : Tens and 4)
+Bennnou_ collected 3.68€ from pot
+*** SUMMARY ***
+Total pot 3.68€ | Rake 0.41€
+Board: [5s 4c 2h 8h 4h]
+Seat 4: PeakyBoo showed [Qh As] and lost with One pair : 4
+Seat 6: Bennnou_ (button) showed [Th Tc] and won 3.68€ with Two pairs : Tens and 4
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116667-1645975580 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:26:20 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2.42€)
+Seat 2: Ezioooo (1€)
+Seat 3: LEBEAUF57 (2€)
+Seat 4: Choupette_64 (1.41€)
+Seat 5: chabacano (1.91€)
+Seat 6: wax94 (1.84€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Ezioooo posts big blind 0.02€
+Dealt to jelachatte [9d 3c]
+*** PRE-FLOP *** 
+LEBEAUF57 folds
+Choupette_64 raises 0.03€ to 0.05€
+chabacano raises 0.08€ to 0.13€
+wax94 folds
+jelachatte folds
+Ezioooo calls 0.11€
+Choupette_64 calls 0.08€
+*** FLOP *** [9c 2h 6h]
+Ezioooo checks
+Choupette_64 bets 0.02€
+chabacano calls 0.02€
+Ezioooo folds
+*** TURN *** [9c 2h 6h][Kc]
+Choupette_64 bets 0.02€
+chabacano calls 0.02€
+*** RIVER *** [9c 2h 6h Kc][3d]
+Choupette_64 bets 0.02€
+chabacano raises 0.34€ to 0.36€
+Choupette_64 calls 0.34€
+*** SHOW DOWN ***
+chabacano shows [Ad Qs] (High card : Ace)
+Choupette_64 shows [Kh Th] (One pair : Kings)
+Choupette_64 collected 1.08€ from pot
+*** SUMMARY ***
+Total pot 1.08€ | Rake 0.12€
+Board: [9c 2h 6h Kc 3d]
+Seat 4: Choupette_64 showed [Kh Th] and won 1.08€ with One pair : Kings
+Seat 5: chabacano showed [Ad Qs] and lost with High card : Ace
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116779-1645975630 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:27:10 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: djipipi (0.50€)
+Seat 2: iam_cid (2.22€)
+Seat 3: jelachatte (2.36€)
+Seat 4: salesp84 (3.83€)
+Seat 5: Vendredi--13 (2.24€)
+Seat 6: kahlenberg10 (1.35€)
+*** ANTE/BLINDS ***
+djipipi posts small blind 0.01€
+iam_cid posts big blind 0.02€
+Dealt to jelachatte [9c 5s]
+*** PRE-FLOP *** 
+jelachatte folds
+salesp84 folds
+Vendredi--13 raises 0.04€ to 0.06€
+kahlenberg10 folds
+djipipi folds
+iam_cid folds
+Vendredi--13 collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 5: Vendredi--13 won 0.09€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116692-1645975590 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:26:30 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2.41€)
+Seat 2: Meiko (2.10€)
+Seat 3: RverMagcWina (3.08€)
+Seat 4: Juju8569 (0.82€)
+Seat 5: Scaivy (2.32€)
+Seat 6: salesp84 (3.23€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Meiko posts big blind 0.02€
+Dealt to jelachatte [8s As]
+*** PRE-FLOP *** 
+RverMagcWina raises 0.03€ to 0.05€
+Juju8569 calls 0.05€
+Scaivy folds
+salesp84 folds
+jelachatte calls 0.04€
+Meiko folds
+*** FLOP *** [3c 7c Kh]
+jelachatte checks
+RverMagcWina bets 0.11€
+Juju8569 folds
+jelachatte folds
+RverMagcWina collected 0.26€ from pot
+*** SUMMARY ***
+Total pot 0.26€ | Rake 0.02€
+Board: [3c 7c Kh]
+Seat 3: RverMagcWina won 0.26€
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116684-1645975586 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:26:26 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: jeffjoel59 (7.06€)
+Seat 2: IneedMoneyLH (3.27€)
+Seat 3: .La Force. (2.01€)
+Seat 4: Rougegorge35 (1.25€)
+Seat 5: Johnbedoin18 (1.44€)
+Seat 6: jelachatte (2.41€)
+*** ANTE/BLINDS ***
+jeffjoel59 posts small blind 0.01€
+IneedMoneyLH posts big blind 0.02€
+Dealt to jelachatte [4c 3d]
+*** PRE-FLOP *** 
+.La Force. raises 0.03€ to 0.05€
+Rougegorge35 calls 0.05€
+Johnbedoin18 folds
+jelachatte folds
+jeffjoel59 folds
+IneedMoneyLH calls 0.03€
+*** FLOP *** [6h Qd 6s]
+IneedMoneyLH checks
+.La Force. bets 0.12€
+Rougegorge35 folds
+IneedMoneyLH calls 0.12€
+*** TURN *** [6h Qd 6s][2s]
+IneedMoneyLH checks
+.La Force. bets 0.20€
+IneedMoneyLH calls 0.20€
+*** RIVER *** [6h Qd 6s 2s][Qc]
+IneedMoneyLH checks
+.La Force. bets 1.64€ and is all-in
+IneedMoneyLH calls 1.64€
+*** SHOW DOWN ***
+IneedMoneyLH shows [7s As] (Two pairs : Queens and 6)
+.La Force. shows [Ac Qh] (Full of Queens and 6)
+.La Force. collected 3.67€ from pot
+*** SUMMARY ***
+Total pot 3.67€ | Rake 0.41€
+Board: [6h Qd 6s 2s Qc]
+Seat 2: IneedMoneyLH (big blind) showed [7s As] and lost with Two pairs : Queens and 6
+Seat 3: .La Force. showed [Ac Qh] and won 3.67€ with Full of Queens and 6
+
+
+Winamax Poker - Go Fast "Colorado" - HandId: #16870328-6116784-1645975632 - Holdem no limit (0.01€/0.02€) - 2022/02/27 15:27:12 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Scaivy (2.99€)
+Seat 2: Zoup Zoup (2€)
+Seat 3: djipipi (0.50€)
+Seat 4: jelachatte (2.36€)
+Seat 5: oliveponcar (2€)
+Seat 6: Yon Ander 69 (1.03€)
+*** ANTE/BLINDS ***
+Scaivy posts small blind 0.01€
+Zoup Zoup posts big blind 0.02€
+Dealt to jelachatte [5s 9d]
+*** PRE-FLOP *** 
+djipipi folds
+jelachatte folds
+oliveponcar folds
+Yon Ander 69 folds
+Scaivy raises 0.04€ to 0.06€
+Zoup Zoup calls 0.04€
+*** FLOP *** [7d Js 6h]
+Scaivy bets 0.04€
+Zoup Zoup folds
+Scaivy collected 0.15€ from pot
+*** SUMMARY ***
+Total pot 0.15€ | Rake 0.01€
+Board: [7d Js 6h]
+Seat 1: Scaivy (small blind) won 0.15€
+
+
