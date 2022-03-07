@@ -54,14 +54,14 @@ deck = None
 
 class Aux_Window(object):
     def __init__(self, hud, params, config):
-        self.hud     = hud
-        self.params  = params
-        self.config  = config
+        self.hud = hud
+        self.params = params
+        self.config = config
 
 #   Override these methods as needed
     def update_data(self, *args): pass
-    def update_gui(self, *args):  pass
-    def create(self, *args):      pass
+    def update_gui(self, *args): pass
+    def create(self, *args): pass
     def save_layout(self, *args): pass
     def move_windows(self, *args): pass
     def destroy(self):
@@ -127,7 +127,7 @@ class Seat_Window(QWidget):
     def button_press_left(self, event):
         self.lastPos = event.globalPos()
     def button_press_middle(self, event): pass #subclass will define this
-    def button_press_right(self, event):  pass #subclass will define this
+    def button_press_right(self, event): pass #subclass will define this
 
     def mouseMoveEvent(self, event):
         if self.lastPos is not None:
@@ -138,7 +138,7 @@ class Seat_Window(QWidget):
         self.lastPos = None
         self.aw.configure_event_cb(self, self.seat)
     def button_release_middle(self, event): pass #subclass will define this
-    def button_release_right(self, event):  pass #subclass will define this
+    def button_release_right(self, event): pass #subclass will define this
     
     def create_contents(self, *args): pass
     def update_contents(self, *args): pass
@@ -172,17 +172,12 @@ class Aux_Seats(Aux_Window):
 
     def move_windows(self):
         for i in (list(range(1, self.hud.max + 1))):
-            self.m_windows[i].move(self.positions[i][0] + self.hud.table.x,
-                            self.positions[i][1] + self.hud.table.y)
-
-        self.m_windows["common"].move(self.hud.layout.common[0] + self.hud.table.x,
-                                self.hud.layout.common[1] + self.hud.table.y)
+            self.m_windows[i].move(self.positions[i][0] + self.hud.table.x,self.positions[i][1] + self.hud.table.y)
+        self.m_windows["common"].move(self.hud.layout.common[0] + self.hud.table.x,self.hud.layout.common[1] + self.hud.table.y)
         
-    def create(self):
-        
+    def create(self):        
         self.adj = self.adj_seats()
         self.m_windows = {}      # windows to put the card/hud items in
-
         for i in (list(range(1, self.hud.max + 1)) + ['common']):   
             if i == 'common':
                 #    The common window is different from the others. Note that it needs to 
@@ -196,8 +191,7 @@ class Aux_Seats(Aux_Window):
                 (x, y) = self.hud.layout.location[self.adj[i]]
                 self.m_windows[i] = self.aw_class_window(self, i)
                 self.positions[i] = self.create_scale_position(x, y)
-                self.m_windows[i].move(self.positions[i][0] + self.hud.table.x,
-                                self.positions[i][1] + self.hud.table.y)
+                self.m_windows[i].move(self.positions[i][0] + self.hud.table.x,self.positions[i][1] + self.hud.table.y)
                 self.hud.layout.location[self.adj[i]] = self.positions[i]
                 if 'opacity' in self.params:
                     self.m_windows[i].setWindowOpacity(float(self.params['opacity']))

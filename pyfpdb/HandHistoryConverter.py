@@ -422,6 +422,10 @@ or None if we fail to get the info """
     # Some sites don't report the rake. This will be called at the end of the hand after the pot total has been calculated
     # an inheriting class can calculate it for the specific site if need be.
     def getRake(self, hand):
+        print('total pot', hand.totalpot)
+        print('collected pot', hand.totalcollected)
+        if hand.totalcollected>hand.totalpot:
+            print("collected pot>total pot")
         hand.rake = hand.totalpot - hand.totalcollected #  * Decimal('0.05') # probably not quite right
         if self.siteId == 9 and hand.gametype['type'] == "tour":
             round = -5 #round up to 10
@@ -429,6 +433,9 @@ or None if we fail to get the info """
             round = -1
         else:
             round = -0.01
+        if self.siteId == 15 and hand.totalcollected>hand.totalpot:
+            hand.rake = old_div(hand.totalpot, 10)   
+            print(hand.rake) 
         if hand.rake < 0 and (not hand.roundPenny or hand.rake < round) and not hand.cashedOut:
             if (self.siteId == 28 and 
             ((hand.rake + Decimal(str(hand.sb)) - (0 if hand.rakes.get('rake') is None else hand.rakes['rake'])) == 0 or 

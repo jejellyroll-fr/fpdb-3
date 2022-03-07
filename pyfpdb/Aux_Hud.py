@@ -51,27 +51,25 @@ class Simple_HUD(Aux_Base.Aux_Seats):
     """A simple HUD class based on the Aux_Window interface."""
 
     def __init__(self, hud, config, aux_params):
-        super(Simple_HUD, self).__init__(hud, config, aux_params)
-        
         #    Save everything you need to know about the hud as attrs.
         #    That way a subclass doesn't have to grab them.
         #    Also, the subclass can override any of these attributes
-
-        self.poker_game  = self.hud.poker_game
+        super(Simple_HUD, self).__init__(hud, config, aux_params)
+        self.poker_game = self.hud.poker_game
         self.site_params = self.hud.site_parameters
-        self.aux_params  = aux_params
+        self.aux_params = aux_params
         self.game_params = self.hud.supported_games_parameters["game_stat_set"]
-        self.max         = self.hud.max
-        self.nrows       = self.game_params.rows
-        self.ncols       = self.game_params.cols
-        self.xpad        = self.game_params.xpad
-        self.ypad        = self.game_params.ypad
-        self.xshift      = self.site_params['hud_menu_xshift']
-        self.yshift      = self.site_params['hud_menu_yshift']
-        self.fgcolor     = self.aux_params["fgcolor"]
-        self.bgcolor     = self.aux_params["bgcolor"]
-        self.opacity     = self.aux_params["opacity"]
-        self.font        = QFont(self.aux_params["font"], int(self.aux_params["font_size"]))
+        self.max = self.hud.max
+        self.nrows = self.game_params.rows
+        self.ncols = self.game_params.cols
+        self.xpad = self.game_params.xpad
+        self.ypad = self.game_params.ypad
+        self.xshift = self.site_params['hud_menu_xshift']
+        self.yshift = self.site_params['hud_menu_yshift']
+        self.fgcolor = self.aux_params["fgcolor"]
+        self.bgcolor = self.aux_params["bgcolor"]
+        self.opacity = self.aux_params["opacity"]
+        self.font = QFont(self.aux_params["font"], int(self.aux_params["font_size"]))
         
         #store these class definitions for use elsewhere
         # this is needed to guarantee that the classes in _this_ module
@@ -86,9 +84,9 @@ class Simple_HUD(Aux_Base.Aux_Seats):
         #    retrieve the contents of the stats. popup and tips elements
         #    for future use do this here so that subclasses don't have to bother
         
-        self.stats  = [ [None]*self.ncols for i in range(self.nrows) ]
-        self.popups = [ [None]*self.ncols for i in range(self.nrows) ]
-        self.tips   = [ [None]*self.ncols for i in range(self.nrows) ]
+        self.stats  = [[None]*self.ncols for i in range(self.nrows)]
+        self.popups = [[None]*self.ncols for i in range(self.nrows)]
+        self.tips   = [[None]*self.ncols for i in range(self.nrows)]
 
         for stat in self.game_params.stats:
             self.stats[self.game_params.stats[stat].rowcol[0]][self.game_params.stats[stat].rowcol[1]] \

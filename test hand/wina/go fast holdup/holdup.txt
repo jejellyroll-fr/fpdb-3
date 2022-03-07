@@ -1,0 +1,29 @@
+Winamax Poker - Go Fast "Colorado" - HandId: #17016363-572754-1646643412 - Holdem no limit (0.01€/0.02€) - 2022/03/07 08:56:52 UTC
+Table: 'Colorado' 6-max (real money) Seat #6 is the button
+Seat 1: Don Malarkey (2.29€)
+Seat 2: Bernito77 (2.02€)
+Seat 3: Mister&Croco (3.34€)
+Seat 4: hervodjuma (2.17€)
+Seat 5: packymaitre (2.49€)
+Seat 6: jelachatte (2.07€)
+Hold-up to Pot: total 0.20€
+*** ANTE/BLINDS ***
+Don Malarkey posts small blind 0.01€
+Bernito77 posts big blind 0.02€
+Dealt to jelachatte [Td 5s]
+*** PRE-FLOP *** 
+Mister&Croco folds
+hervodjuma folds
+packymaitre folds
+jelachatte folds
+Don Malarkey raises 0.04€ to 0.06€
+Bernito77 calls 0.04€
+*** FLOP *** [4h Ts Th]
+Don Malarkey checks
+Bernito77 bets 0.21€
+Don Malarkey folds
+Bernito77 collected 0.52€ from pot
+*** SUMMARY ***
+Total pot 0.52€ | Rake 0.01€
+Board: [4h Ts Th]
+Seat 2: Bernito77 (big blind) won 0.52€
