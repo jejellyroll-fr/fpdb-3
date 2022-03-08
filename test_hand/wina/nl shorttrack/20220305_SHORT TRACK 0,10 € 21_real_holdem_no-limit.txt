@@ -1,0 +1,905 @@
+Winamax Poker - CashGame - HandId: #17024182-53-1646500865 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:21:05 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #3 is the button
+Seat 1: Holelock (0.10€)
+Seat 2: HouidjAAAA (0.07€)
+Seat 3: greg_kpc (0.15€)
+Seat 4: 61. 2 BB (0.35€)
+Seat 5: jelachatte (0.10€)
+*** ANTE/BLINDS ***
+61. 2 BB posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [7c Qs]
+*** PRE-FLOP *** 
+Holelock folds
+HouidjAAAA folds
+greg_kpc folds
+61. 2 BB raises 0.33€ to 0.35€ and is all-in
+jelachatte calls 0.08€ and is all-in
+*** FLOP *** [Jh Th Tc]
+*** TURN *** [Jh Th Tc][6h]
+*** RIVER *** [Jh Th Tc 6h][5h]
+*** SHOW DOWN ***
+jelachatte shows [7c Qs] (One pair : Tens)
+61. 2 BB shows [Ac 5c] (Two pairs : Tens and 5)
+61. 2 BB collected 0.44€ from pot
+*** SUMMARY ***
+Total pot 0.44€ | Rake 0.01€
+Board: [Jh Th Tc 6h 5h]
+Seat 4: 61. 2 BB (small blind) showed [Ac 5c] and won 0.44€ with Two pairs : Tens and 5
+Seat 5: jelachatte (big blind) showed [7c Qs] and lost with One pair : Tens
+
+
+Winamax Poker - CashGame - HandId: #17024182-54-1646500887 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:21:27 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #4 is the button
+Seat 1: Holelock (0.10€)
+Seat 2: HouidjAAAA (0.07€)
+Seat 3: greg_kpc (0.15€)
+Seat 4: 61. 2 BB (0.44€)
+Seat 5: jelachatte (0.10€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Holelock posts big blind 0.02€
+Dealt to jelachatte [Qd Ts]
+*** PRE-FLOP *** 
+HouidjAAAA raises 0.05€ to 0.07€ and is all-in
+greg_kpc calls 0.07€
+61. 2 BB folds
+jelachatte raises 0.03€ to 0.10€ and is all-in
+Holelock folds
+greg_kpc calls 0.03€
+*** FLOP *** [Tc Ks 2s]
+*** TURN *** [Tc Ks 2s][7s]
+*** RIVER *** [Tc Ks 2s 7s][4c]
+*** SHOW DOWN ***
+HouidjAAAA shows [5d 5h] (One pair : 5)
+jelachatte shows [Qd Ts] (One pair : Tens)
+greg_kpc shows [7h Kh] (Two pairs : Kings and 7)
+greg_kpc collected 0.27€ from pot
+*** SUMMARY ***
+Total pot 0.27€ | Rake 0.02€
+Board: [Tc Ks 2s 7s 4c]
+Seat 2: HouidjAAAA showed [5d 5h] and lost with One pair : 5
+Seat 3: greg_kpc showed [7h Kh] and won 0.27€ with Two pairs : Kings and 7
+Seat 5: jelachatte (small blind) showed [Qd Ts] and lost with One pair : Tens
+
+
+Winamax Poker - CashGame - HandId: #17024182-55-1646500910 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:21:50 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #5 is the button
+Seat 1: Holelock (0.08€)
+Seat 2: HouidjAAAA (0€)
+Seat 3: greg_kpc (0.32€)
+Seat 4: 61. 2 BB (0.44€)
+Seat 5: jelachatte (0.10€)
+*** ANTE/BLINDS ***
+Holelock posts small blind 0.01€
+greg_kpc posts big blind 0.02€
+Dealt to jelachatte [4h 9c]
+*** PRE-FLOP *** 
+61. 2 BB folds
+jelachatte folds
+Holelock calls 0.01€
+greg_kpc checks
+*** FLOP *** [Qh 9h 2d]
+Holelock checks
+greg_kpc checks
+*** TURN *** [Qh 9h 2d][7h]
+Holelock checks
+greg_kpc checks
+*** RIVER *** [Qh 9h 2d 7h][3s]
+Holelock checks
+greg_kpc checks
+*** SHOW DOWN ***
+Holelock shows [4c Ac] (High card : Ace)
+greg_kpc shows [8s 7c] (One pair : 7)
+greg_kpc collected 0.04€ from pot
+*** SUMMARY ***
+Total pot 0.04€ | No rake
+Board: [Qh 9h 2d 7h 3s]
+Seat 1: Holelock (small blind) showed [4c Ac] and lost with High card : Ace
+Seat 3: greg_kpc (big blind) showed [8s 7c] and won 0.04€ with One pair : 7
+
+
+Winamax Poker - CashGame - HandId: #17024182-56-1646500931 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:22:11 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #1 is the button
+Seat 1: Holelock (0.06€)
+Seat 2: HouidjAAAA (0€)
+Seat 3: greg_kpc (0.34€)
+Seat 4: 61. 2 BB (0.44€)
+Seat 5: jelachatte (0.10€)
+*** ANTE/BLINDS ***
+greg_kpc posts small blind 0.01€
+61. 2 BB posts big blind 0.02€
+Dealt to jelachatte [8h Jh]
+*** PRE-FLOP *** 
+jelachatte raises 0.08€ to 0.10€ and is all-in
+Holelock calls 0.06€ and is all-in
+greg_kpc folds
+61. 2 BB folds
+*** FLOP *** [Qd 6s Kd]
+*** TURN *** [Qd 6s Kd][7h]
+*** RIVER *** [Qd 6s Kd 7h][3h]
+*** SHOW DOWN ***
+Holelock shows [9c 8c] (High card : King)
+jelachatte shows [8h Jh] (High card : King)
+jelachatte collected 0.18€ from pot
+*** SUMMARY ***
+Total pot 0.18€ | Rake 0.01€
+Board: [Qd 6s Kd 7h 3h]
+Seat 1: Holelock (button) showed [9c 8c] and lost with High card : King
+Seat 5: jelachatte showed [8h Jh] and won 0.18€ with High card : King
+
+
+Winamax Poker - CashGame - HandId: #17024182-57-1646500964 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:22:44 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #4 is the button
+Seat 1: Holelock (0.10€)
+Seat 2: Jehannus (0.10€)
+Seat 4: 61. 2 BB (0.42€)
+Seat 5: jelachatte (0.18€)
+*** ANTE/BLINDS ***
+61. 2 BB posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [2d 7d]
+*** PRE-FLOP *** 
+61. 2 BB raises 0.03€ to 0.05€
+jelachatte folds
+61. 2 BB collected 0.07€ from pot
+*** SUMMARY ***
+Total pot 0.07€ | No rake
+Seat 4: 61. 2 BB (small blind) (button) won 0.07€
+
+
+Winamax Poker - CashGame - HandId: #17024182-58-1646500974 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:22:54 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #4 is the button
+Seat 1: Holelock (0.10€)
+Seat 2: Jehannus (0.10€)
+Seat 3: cuss25000 (0€)
+Seat 4: 61. 2 BB (0.44€)
+Seat 5: jelachatte (0.16€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Holelock posts big blind 0.02€
+Jehannus posts big blind 0.02€ out of position
+Dealt to jelachatte [Js 3s]
+*** PRE-FLOP *** 
+Jehannus checks
+61. 2 BB folds
+jelachatte folds
+Holelock checks
+*** FLOP *** [4h 4d Kc]
+Holelock checks
+Jehannus checks
+*** TURN *** [4h 4d Kc][Jh]
+Holelock checks
+Jehannus checks
+*** RIVER *** [4h 4d Kc Jh][Qd]
+Holelock checks
+Jehannus checks
+*** SHOW DOWN ***
+Holelock shows [3d 5h] (One pair : 4)
+Jehannus shows [2d 6h] (One pair : 4)
+Jehannus collected 0.03€ from pot
+Holelock collected 0.02€ from pot
+*** SUMMARY ***
+Total pot 0.05€ | No rake
+Board: [4h 4d Kc Jh Qd]
+Seat 1: Holelock (big blind) showed [3d 5h] and won 0.02€ with One pair : 4
+Seat 2: Jehannus showed [2d 6h] and won 0.03€ with One pair : 4
+
+
+Winamax Poker - CashGame - HandId: #17024182-59-1646500993 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:23:13 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #5 is the button
+Seat 1: Holelock (0.10€)
+Seat 2: Jehannus (0.11€)
+Seat 3: cuss25000 (0.10€)
+Seat 4: 61. 2 BB (0.44€)
+Seat 5: jelachatte (0.15€)
+*** ANTE/BLINDS ***
+Holelock posts small blind 0.01€
+Jehannus posts big blind 0.02€
+cuss25000 posts big blind 0.02€ out of position
+Dealt to jelachatte [Ah 2s]
+*** PRE-FLOP *** 
+cuss25000 raises 0.08€ to 0.10€ and is all-in
+61. 2 BB raises 0.34€ to 0.44€ and is all-in
+jelachatte folds
+Holelock folds
+Jehannus folds
+*** FLOP *** [Jd 4h 2h]
+*** TURN *** [Jd 4h 2h][4d]
+*** RIVER *** [Jd 4h 2h 4d][3s]
+*** SHOW DOWN ***
+cuss25000 shows [8s Ad] (One pair : 4)
+61. 2 BB shows [Jc Qc] (Two pairs : Jacks and 4)
+61. 2 BB collected 0.56€ from pot
+*** SUMMARY ***
+Total pot 0.56€ | Rake 0.01€
+Board: [Jd 4h 2h 4d 3s]
+Seat 3: cuss25000 showed [8s Ad] and lost with One pair : 4
+Seat 4: 61. 2 BB showed [Jc Qc] and won 0.56€ with Two pairs : Jacks and 4
+
+
+Winamax Poker - CashGame - HandId: #17024182-60-1646501027 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:23:47 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #1 is the button
+Seat 1: Holelock (0.09€)
+Seat 2: Jehannus (0.09€)
+Seat 3: cuss25000 (0.10€)
+Seat 4: 61. 2 BB (0.56€)
+Seat 5: jelachatte (0.15€)
+*** ANTE/BLINDS ***
+Jehannus posts small blind 0.01€
+cuss25000 posts big blind 0.02€
+Dealt to jelachatte [8d 9d]
+*** PRE-FLOP *** 
+61. 2 BB raises 0.02€ to 0.04€
+jelachatte folds
+Holelock calls 0.04€
+Jehannus calls 0.03€
+cuss25000 calls 0.02€
+*** FLOP *** [6s 8h Tc]
+Jehannus checks
+cuss25000 checks
+61. 2 BB bets 0.12€
+Holelock calls 0.05€ and is all-in
+Jehannus folds
+cuss25000 folds
+*** TURN *** [6s 8h Tc][9h]
+*** RIVER *** [6s 8h Tc 9h][Ad]
+*** SHOW DOWN ***
+Holelock shows [Ah Qd] (One pair : Aces)
+61. 2 BB shows [6c Kc] (One pair : 6)
+61. 2 BB collected 0.07€ from side pot 1
+Holelock collected 0.25€ from main pot
+*** SUMMARY ***
+Total pot 0.32€ | Rake 0.01€
+Board: [6s 8h Tc 9h Ad]
+Seat 1: Holelock (button) showed [Ah Qd] and won 0.25€ with One pair : Aces
+Seat 4: 61. 2 BB showed [6c Kc] and won 0.07€ with One pair : 6
+
+
+Winamax Poker - CashGame - HandId: #17024182-61-1646501078 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:24:38 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #2 is the button
+Seat 1: Holelock (0.25€)
+Seat 2: Jehannus (0.05€)
+Seat 3: cuss25000 (0.06€)
+Seat 4: 61. 2 BB (0.47€)
+Seat 5: jelachatte (0.15€)
+*** ANTE/BLINDS ***
+cuss25000 posts small blind 0.01€
+61. 2 BB posts big blind 0.02€
+Dealt to jelachatte [Jc 2s]
+*** PRE-FLOP *** 
+jelachatte folds
+Holelock folds
+Jehannus raises 0.02€ to 0.04€
+cuss25000 folds
+61. 2 BB calls 0.02€
+*** FLOP *** [6s 2c 9c]
+61. 2 BB bets 0.07€
+Jehannus calls 0.01€ and is all-in
+*** TURN *** [6s 2c 9c][Ts]
+*** RIVER *** [6s 2c 9c Ts][7d]
+*** SHOW DOWN ***
+Jehannus shows [9s 9h] (Trips of 9)
+61. 2 BB shows [3c Ks] (High card : King)
+61. 2 BB collected 0.06€ from side pot 1
+Jehannus collected 0.10€ from main pot
+*** SUMMARY ***
+Total pot 0.16€ | Rake 0.01€
+Board: [6s 2c 9c Ts 7d]
+Seat 2: Jehannus (button) showed [9s 9h] and won 0.10€ with Trips of 9
+Seat 4: 61. 2 BB (big blind) showed [3c Ks] and won 0.06€ with High card : King
+
+
+Winamax Poker - CashGame - HandId: #17024182-62-1646501121 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:25:21 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #3 is the button
+Seat 2: Jehannus (0.10€)
+Seat 3: cuss25000 (0.05€)
+Seat 4: 61. 2 BB (0.42€)
+Seat 5: jelachatte (0.15€)
+*** ANTE/BLINDS ***
+61. 2 BB posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [4h 7c]
+*** PRE-FLOP *** 
+Jehannus folds
+cuss25000 raises 0.03€ to 0.05€ and is all-in
+61. 2 BB raises 0.37€ to 0.42€ and is all-in
+jelachatte folds
+*** FLOP *** [Qh 6s 8c]
+*** TURN *** [Qh 6s 8c][Tc]
+*** RIVER *** [Qh 6s 8c Tc][As]
+*** SHOW DOWN ***
+cuss25000 shows [Kd 7d] (High card : Ace)
+61. 2 BB shows [5d 5h] (One pair : 5)
+61. 2 BB collected 0.48€ from pot
+*** SUMMARY ***
+Total pot 0.48€ | Rake 0.01€
+Board: [Qh 6s 8c Tc As]
+Seat 3: cuss25000 (button) showed [Kd 7d] and lost with High card : Ace
+Seat 4: 61. 2 BB (small blind) showed [5d 5h] and won 0.48€ with One pair : 5
+
+
+Winamax Poker - CashGame - HandId: #17024182-63-1646501143 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:25:43 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #4 is the button
+Seat 1: Paysangiste (0€)
+Seat 2: Jehannus (0.10€)
+Seat 3: cuss25000 (0.10€)
+Seat 4: 61. 2 BB (0.48€)
+Seat 5: jelachatte (0.13€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Jehannus posts big blind 0.02€
+Dealt to jelachatte [Jh Qd]
+*** PRE-FLOP *** 
+cuss25000 folds
+61. 2 BB raises 0.46€ to 0.48€ and is all-in
+jelachatte calls 0.12€ and is all-in
+Jehannus folds
+*** FLOP *** [9d Jc 5s]
+*** TURN *** [9d Jc 5s][4d]
+*** RIVER *** [9d Jc 5s 4d][Qs]
+*** SHOW DOWN ***
+jelachatte shows [Jh Qd] (Two pairs : Queens and Jacks)
+61. 2 BB shows [Kd Td] (Straight King high)
+61. 2 BB collected 0.61€ from pot
+*** SUMMARY ***
+Total pot 0.61€ | Rake 0.02€
+Board: [9d Jc 5s 4d Qs]
+Seat 4: 61. 2 BB (button) showed [Kd Td] and won 0.61€ with Straight King high
+Seat 5: jelachatte (small blind) showed [Jh Qd] and lost with Two pairs : Queens and Jacks
+
+
+Winamax Poker - CashGame - HandId: #17024182-64-1646501159 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:25:59 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #5 is the button
+Seat 1: Paysangiste (0.10€)
+Seat 2: Jehannus (0.08€)
+Seat 3: cuss25000 (0.10€)
+Seat 4: 61. 2 BB (0.61€)
+Seat 5: jelachatte (0.10€)
+*** ANTE/BLINDS ***
+Jehannus posts small blind 0.01€
+cuss25000 posts big blind 0.02€
+Dealt to jelachatte [3s Jd]
+*** PRE-FLOP *** 
+61. 2 BB folds
+jelachatte folds
+Jehannus folds
+cuss25000 shows [As Ad] (One pair : Aces)
+cuss25000 collected 0.03€ from pot
+*** SUMMARY ***
+Total pot 0.03€ | No rake
+Seat 3: cuss25000 (big blind) showed [As Ad] and won 0.03€ with One pair : Aces
+
+
+Winamax Poker - CashGame - HandId: #17024182-65-1646501168 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:26:08 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #2 is the button
+Seat 1: Paysangiste (0.10€)
+Seat 2: Jehannus (0.07€)
+Seat 3: cuss25000 (0.11€)
+Seat 4: 61. 2 BB (0.61€)
+Seat 5: jelachatte (0.10€)
+*** ANTE/BLINDS ***
+cuss25000 posts small blind 0.01€
+61. 2 BB posts big blind 0.02€
+Paysangiste posts big blind 0.02€ out of position
+Dealt to jelachatte [5c 8c]
+*** PRE-FLOP *** 
+jelachatte folds
+Paysangiste raises 0.08€ to 0.10€ and is all-in
+Jehannus folds
+cuss25000 calls 0.09€
+61. 2 BB folds
+*** FLOP *** [9h Ah 4c]
+*** TURN *** [9h Ah 4c][Kh]
+*** RIVER *** [9h Ah 4c Kh][7s]
+*** SHOW DOWN ***
+Paysangiste shows [5s 9d] (One pair : 9)
+cuss25000 shows [7c As] (Two pairs : Aces and 7)
+cuss25000 collected 0.21€ from pot
+*** SUMMARY ***
+Total pot 0.21€ | Rake 0.01€
+Board: [9h Ah 4c Kh 7s]
+Seat 1: Paysangiste showed [5s 9d] and lost with One pair : 9
+Seat 3: cuss25000 (small blind) showed [7c As] and won 0.21€ with Two pairs : Aces and 7
+
+
+Winamax Poker - CashGame - HandId: #17024182-66-1646501200 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:26:40 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #3 is the button
+Seat 1: Paysangiste (0.10€)
+Seat 2: Jehannus (0.07€)
+Seat 3: cuss25000 (0.22€)
+Seat 4: 61. 2 BB (0.59€)
+Seat 5: jelachatte (0.10€)
+*** ANTE/BLINDS ***
+61. 2 BB posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Ks Kd]
+*** PRE-FLOP *** 
+Paysangiste raises 0.08€ to 0.10€ and is all-in
+Jehannus folds
+cuss25000 calls 0.10€
+61. 2 BB raises 0.20€ to 0.30€
+jelachatte calls 0.08€ and is all-in
+cuss25000 calls 0.12€ and is all-in
+*** FLOP *** [2s Qh 2h]
+*** TURN *** [2s Qh 2h][4h]
+*** RIVER *** [2s Qh 2h 4h][Jh]
+*** SHOW DOWN ***
+Paysangiste shows [5d Ac] (One pair : 2)
+cuss25000 shows [Qd As] (Two pairs : Queens and 2)
+jelachatte shows [Ks Kd] (Two pairs : Kings and 2)
+61. 2 BB shows [Jd Jc] (Full of Jacks and 2)
+61. 2 BB collected 0.68€ from pot
+*** SUMMARY ***
+Total pot 0.68€ | Rake 0.04€
+Board: [2s Qh 2h 4h Jh]
+Seat 1: Paysangiste showed [5d Ac] and lost with One pair : 2
+Seat 3: cuss25000 (button) showed [Qd As] and lost with Two pairs : Queens and 2
+Seat 4: 61. 2 BB (small blind) showed [Jd Jc] and won 0.68€ with Full of Jacks and 2
+Seat 5: jelachatte (big blind) showed [Ks Kd] and lost with Two pairs : Kings and 2
+
+
+Winamax Poker - CashGame - HandId: #17024182-67-1646501221 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:27:01 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #4 is the button
+Seat 1: Paysangiste (0.10€)
+Seat 2: Jehannus (0.07€)
+Seat 3: cuss25000 (0€)
+Seat 4: 61. 2 BB (0.97€)
+Seat 5: jelachatte (0.10€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Paysangiste posts big blind 0.02€
+Dealt to jelachatte [2d 2h]
+*** PRE-FLOP *** 
+Jehannus folds
+61. 2 BB raises 0.02€ to 0.04€
+jelachatte raises 0.06€ to 0.10€ and is all-in
+Paysangiste calls 0.08€ and is all-in
+61. 2 BB calls 0.06€
+*** FLOP *** [7c Jd As]
+*** TURN *** [7c Jd As][Ad]
+*** RIVER *** [7c Jd As Ad][Kd]
+*** SHOW DOWN ***
+Paysangiste shows [2s Td] (One pair : Aces)
+jelachatte shows [2d 2h] (Two pairs : Aces and 2)
+61. 2 BB shows [2c Ks] (Two pairs : Aces and Kings)
+61. 2 BB collected 0.28€ from pot
+*** SUMMARY ***
+Total pot 0.28€ | Rake 0.02€
+Board: [7c Jd As Ad Kd]
+Seat 1: Paysangiste (big blind) showed [2s Td] and lost with One pair : Aces
+Seat 4: 61. 2 BB (button) showed [2c Ks] and won 0.28€ with Two pairs : Aces and Kings
+Seat 5: jelachatte (small blind) showed [2d 2h] and lost with Two pairs : Aces and 2
+
+
+Winamax Poker - CashGame - HandId: #17024182-68-1646501243 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:27:23 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #5 is the button
+Seat 1: Paysangiste (0.10€)
+Seat 2: Jehannus (0.07€)
+Seat 3: cuss25000 (0.10€)
+Seat 4: 61. 2 BB (1.15€)
+Seat 5: jelachatte (0.10€)
+*** ANTE/BLINDS ***
+Paysangiste posts small blind 0.01€
+Jehannus posts big blind 0.02€
+Dealt to jelachatte [3s 8h]
+*** PRE-FLOP *** 
+cuss25000 folds
+61. 2 BB folds
+jelachatte folds
+Paysangiste raises 0.08€ to 0.10€ and is all-in
+Jehannus folds
+Paysangiste collected 0.12€ from pot
+*** SUMMARY ***
+Total pot 0.12€ | No rake
+Seat 1: Paysangiste (small blind) won 0.12€
+
+
+Winamax Poker - CashGame - HandId: #17024182-69-1646501255 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:27:35 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #1 is the button
+Seat 1: Paysangiste (0.12€)
+Seat 2: Jehannus (0.05€)
+Seat 3: cuss25000 (0.10€)
+Seat 4: 61. 2 BB (1.15€)
+Seat 5: jelachatte (0.10€)
+*** ANTE/BLINDS ***
+Jehannus posts small blind 0.01€
+cuss25000 posts big blind 0.02€
+Dealt to jelachatte [Kh Kc]
+*** PRE-FLOP *** 
+61. 2 BB folds
+jelachatte raises 0.08€ to 0.10€ and is all-in
+Paysangiste raises 0.02€ to 0.12€ and is all-in
+Jehannus folds
+cuss25000 calls 0.08€ and is all-in
+*** FLOP *** [Jc 7s 9d]
+*** TURN *** [Jc 7s 9d][Kd]
+*** RIVER *** [Jc 7s 9d Kd][4s]
+*** SHOW DOWN ***
+cuss25000 shows [7c 4c] (Two pairs : 7 and 4)
+Paysangiste shows [5h Ks] (One pair : Kings)
+jelachatte shows [Kh Kc] (Trips of Kings)
+jelachatte collected 0.29€ from main pot
+Paysangiste collected 0.02€ from side pot 1
+*** SUMMARY ***
+Total pot 0.31€ | Rake 0.02€
+Board: [Jc 7s 9d Kd 4s]
+Seat 1: Paysangiste (button) showed [5h Ks] and won 0.02€ with One pair : Kings
+Seat 3: cuss25000 (big blind) showed [7c 4c] and lost with Two pairs : 7 and 4
+Seat 5: jelachatte showed [Kh Kc] and won 0.29€ with Trips of Kings
+
+
+Winamax Poker - CashGame - HandId: #17024182-70-1646501274 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:27:54 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #2 is the button
+Seat 1: Paysangiste (0.10€)
+Seat 2: Jehannus (0.04€)
+Seat 3: cuss25000 (0.10€)
+Seat 4: 61. 2 BB (1.15€)
+Seat 5: jelachatte (0.29€)
+*** ANTE/BLINDS ***
+cuss25000 posts small blind 0.01€
+61. 2 BB posts big blind 0.02€
+Dealt to jelachatte [8c 4c]
+*** PRE-FLOP *** 
+jelachatte folds
+Paysangiste raises 0.08€ to 0.10€ and is all-in
+Jehannus folds
+cuss25000 folds
+61. 2 BB calls 0.08€
+*** FLOP *** [Jh Kh Ah]
+*** TURN *** [Jh Kh Ah][Kc]
+*** RIVER *** [Jh Kh Ah Kc][3h]
+*** SHOW DOWN ***
+Paysangiste shows [3d As] (Two pairs : Aces and Kings)
+61. 2 BB shows [Td Ac] (Two pairs : Aces and Kings)
+61. 2 BB collected 0.10€ from pot
+Paysangiste collected 0.10€ from pot
+*** SUMMARY ***
+Total pot 0.20€ | Rake 0.01€
+Board: [Jh Kh Ah Kc 3h]
+Seat 1: Paysangiste showed [3d As] and won 0.10€ with Two pairs : Aces and Kings
+Seat 4: 61. 2 BB (big blind) showed [Td Ac] and won 0.10€ with Two pairs : Aces and Kings
+
+
+Winamax Poker - CashGame - HandId: #17024182-71-1646501290 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:28:10 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #3 is the button
+Seat 1: Paysangiste (0.10€)
+Seat 2: Jehannus (0.04€)
+Seat 3: cuss25000 (0.09€)
+Seat 4: 61. 2 BB (1.15€)
+Seat 5: jelachatte (0.29€)
+*** ANTE/BLINDS ***
+61. 2 BB posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Qd 7c]
+*** PRE-FLOP *** 
+Paysangiste raises 0.08€ to 0.10€ and is all-in
+Jehannus folds
+cuss25000 folds
+61. 2 BB calls 0.09€
+jelachatte folds
+*** FLOP *** [5c 8s 6s]
+*** TURN *** [5c 8s 6s][3c]
+*** RIVER *** [5c 8s 6s 3c][Qc]
+*** SHOW DOWN ***
+Paysangiste shows [5s Ad] (One pair : 5)
+61. 2 BB shows [Ac 6c] (Flush Ace high)
+61. 2 BB collected 0.21€ from pot
+*** SUMMARY ***
+Total pot 0.21€ | Rake 0.01€
+Board: [5c 8s 6s 3c Qc]
+Seat 1: Paysangiste showed [5s Ad] and lost with One pair : 5
+Seat 4: 61. 2 BB (small blind) showed [Ac 6c] and won 0.21€ with Flush Ace high
+
+
+Winamax Poker - CashGame - HandId: #17024182-72-1646501322 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:28:42 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #4 is the button
+Seat 1: Paysangiste (0.10€)
+Seat 2: Jehannus (0.04€)
+Seat 3: cuss25000 (0.09€)
+Seat 4: 61. 2 BB (1.26€)
+Seat 5: jelachatte (0.27€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Paysangiste posts big blind 0.02€
+Dealt to jelachatte [Qs 9h]
+*** PRE-FLOP *** 
+Jehannus folds
+cuss25000 folds
+61. 2 BB raises 0.02€ to 0.04€
+jelachatte folds
+Paysangiste raises 0.06€ to 0.10€ and is all-in
+61. 2 BB calls 0.06€
+*** FLOP *** [5d 7d Jc]
+*** TURN *** [5d 7d Jc][3h]
+*** RIVER *** [5d 7d Jc 3h][Ah]
+*** SHOW DOWN ***
+61. 2 BB shows [3s Kh] (One pair : 3)
+Paysangiste shows [2d 4c] (Straight 5 high)
+Paysangiste collected 0.20€ from pot
+*** SUMMARY ***
+Total pot 0.20€ | Rake 0.01€
+Board: [5d 7d Jc 3h Ah]
+Seat 1: Paysangiste (big blind) showed [2d 4c] and won 0.20€ with Straight 5 high
+Seat 4: 61. 2 BB (button) showed [3s Kh] and lost with One pair : 3
+
+
+Winamax Poker - CashGame - HandId: #17024182-73-1646501346 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:29:06 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #5 is the button
+Seat 1: Paysangiste (0.20€)
+Seat 2: Jehannus (0.04€)
+Seat 3: cuss25000 (0.09€)
+Seat 4: 61. 2 BB (1.16€)
+Seat 5: jelachatte (0.26€)
+*** ANTE/BLINDS ***
+Paysangiste posts small blind 0.01€
+Jehannus posts big blind 0.02€
+Dealt to jelachatte [4c Td]
+*** PRE-FLOP *** 
+cuss25000 folds
+61. 2 BB folds
+jelachatte folds
+Paysangiste raises 0.18€ to 0.20€ and is all-in
+Jehannus calls 0.02€ and is all-in
+*** FLOP *** [Ts 8d Kc]
+*** TURN *** [Ts 8d Kc][Qh]
+*** RIVER *** [Ts 8d Kc Qh][8c]
+*** SHOW DOWN ***
+Paysangiste shows [Qc 2h] (Two pairs : Queens and 8)
+Jehannus shows [7h Kd] (Two pairs : Kings and 8)
+Jehannus collected 0.08€ from main pot
+Paysangiste collected 0.16€ from side pot 1
+*** SUMMARY ***
+Total pot 0.24€ | No rake
+Board: [Ts 8d Kc Qh 8c]
+Seat 1: Paysangiste (small blind) showed [Qc 2h] and won 0.16€ with Two pairs : Queens and 8
+Seat 2: Jehannus (big blind) showed [7h Kd] and won 0.08€ with Two pairs : Kings and 8
+
+
+Winamax Poker - CashGame - HandId: #17024182-74-1646501377 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:29:37 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #1 is the button
+Seat 1: Paysangiste (0.16€)
+Seat 2: Jehannus (0.08€)
+Seat 3: cuss25000 (0.09€)
+Seat 4: 61. 2 BB (1.16€)
+Seat 5: jelachatte (0.26€)
+*** ANTE/BLINDS ***
+Jehannus posts small blind 0.01€
+cuss25000 posts big blind 0.02€
+Dealt to jelachatte [Kh Qd]
+*** PRE-FLOP *** 
+61. 2 BB folds
+jelachatte calls 0.02€
+Paysangiste raises 0.14€ to 0.16€ and is all-in
+Jehannus calls 0.07€ and is all-in
+cuss25000 folds
+jelachatte calls 0.14€
+*** FLOP *** [8d 6s 3s]
+*** TURN *** [8d 6s 3s][5c]
+*** RIVER *** [8d 6s 3s 5c][5d]
+*** SHOW DOWN ***
+Jehannus shows [Kc Ad] (One pair : 5)
+jelachatte shows [Kh Qd] (One pair : 5)
+Paysangiste shows [9c 7s] (Straight 9 high)
+Paysangiste collected 0.40€ from pot
+*** SUMMARY ***
+Total pot 0.40€ | Rake 0.02€
+Board: [8d 6s 3s 5c 5d]
+Seat 1: Paysangiste (button) showed [9c 7s] and won 0.40€ with Straight 9 high
+Seat 2: Jehannus (small blind) showed [Kc Ad] and lost with One pair : 5
+Seat 5: jelachatte showed [Kh Qd] and lost with One pair : 5
+
+
+Winamax Poker - CashGame - HandId: #17024182-75-1646501406 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:30:06 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #2 is the button
+Seat 1: Paysangiste (0.40€)
+Seat 2: Jehannus (0€)
+Seat 3: cuss25000 (0.07€)
+Seat 4: 61. 2 BB (1.16€)
+Seat 5: jelachatte (0.10€)
+*** ANTE/BLINDS ***
+cuss25000 posts small blind 0.01€
+61. 2 BB posts big blind 0.02€
+Dealt to jelachatte [Jd Ts]
+*** PRE-FLOP *** 
+jelachatte folds
+Paysangiste raises 0.38€ to 0.40€ and is all-in
+cuss25000 calls 0.06€ and is all-in
+61. 2 BB folds
+*** FLOP *** [Jh 7s Ah]
+*** TURN *** [Jh 7s Ah][Kh]
+*** RIVER *** [Jh 7s Ah Kh][4h]
+*** SHOW DOWN ***
+cuss25000 shows [7h 5c] (Flush Ace high)
+Paysangiste shows [8h 2d] (Flush Ace high)
+Paysangiste collected 0.48€ from pot
+*** SUMMARY ***
+Total pot 0.48€ | Rake 0.01€
+Board: [Jh 7s Ah Kh 4h]
+Seat 1: Paysangiste showed [8h 2d] and won 0.48€ with Flush Ace high
+Seat 3: cuss25000 (small blind) showed [7h 5c] and lost with Flush Ace high
+
+
+Winamax Poker - CashGame - HandId: #17024182-76-1646501424 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:30:24 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #3 is the button
+Seat 1: Paysangiste (0.48€)
+Seat 2: Jehannus (0€)
+Seat 3: cuss25000 (0.10€)
+Seat 4: 61. 2 BB (1.14€)
+Seat 5: jelachatte (0.10€)
+*** ANTE/BLINDS ***
+61. 2 BB posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Ts 6d]
+*** PRE-FLOP *** 
+Paysangiste raises 0.46€ to 0.48€ and is all-in
+cuss25000 folds
+61. 2 BB folds
+jelachatte folds
+Paysangiste collected 0.51€ from pot
+*** SUMMARY ***
+Total pot 0.51€ | No rake
+Seat 1: Paysangiste won 0.51€
+
+
+Winamax Poker - CashGame - HandId: #17024182-77-1646501447 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:30:47 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #4 is the button
+Seat 1: Paysangiste (0.51€)
+Seat 3: cuss25000 (0.10€)
+Seat 4: 61. 2 BB (1.13€)
+Seat 5: jelachatte (0.10€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Paysangiste posts big blind 0.02€
+Dealt to jelachatte [2d 9c]
+*** PRE-FLOP *** 
+cuss25000 folds
+61. 2 BB raises 0.02€ to 0.04€
+jelachatte folds
+Paysangiste raises 0.47€ to 0.51€ and is all-in
+61. 2 BB folds
+Paysangiste collected 0.56€ from pot
+*** SUMMARY ***
+Total pot 0.56€ | No rake
+Seat 1: Paysangiste (big blind) won 0.56€
+
+
+Winamax Poker - CashGame - HandId: #17024182-78-1646501466 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:31:06 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #5 is the button
+Seat 1: Paysangiste (0.56€)
+Seat 2: juliek66 (0.10€)
+Seat 3: cuss25000 (0.10€)
+Seat 4: 61. 2 BB (1.09€)
+Seat 5: jelachatte (0.10€)
+*** ANTE/BLINDS ***
+Paysangiste posts small blind 0.01€
+juliek66 posts big blind 0.02€
+Dealt to jelachatte [9s Ts]
+*** PRE-FLOP *** 
+cuss25000 folds
+61. 2 BB folds
+jelachatte folds
+Paysangiste raises 0.54€ to 0.56€ and is all-in
+juliek66 folds
+Paysangiste collected 0.58€ from pot
+*** SUMMARY ***
+Total pot 0.58€ | No rake
+Seat 1: Paysangiste (small blind) won 0.58€
+
+
+Winamax Poker - CashGame - HandId: #17024182-79-1646501488 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:31:28 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #1 is the button
+Seat 1: Paysangiste (0.58€)
+Seat 2: juliek66 (0.08€)
+Seat 3: cuss25000 (0.10€)
+Seat 4: 61. 2 BB (1.09€)
+Seat 5: jelachatte (0.10€)
+*** ANTE/BLINDS ***
+juliek66 posts small blind 0.01€
+cuss25000 posts big blind 0.02€
+Dealt to jelachatte [Ah Kh]
+*** PRE-FLOP *** 
+61. 2 BB folds
+jelachatte raises 0.08€ to 0.10€ and is all-in
+Paysangiste raises 0.48€ to 0.58€ and is all-in
+juliek66 calls 0.07€ and is all-in
+cuss25000 calls 0.08€ and is all-in
+*** FLOP *** [8h 4d Kc]
+*** TURN *** [8h 4d Kc][4h]
+*** RIVER *** [8h 4d Kc 4h][Qh]
+*** SHOW DOWN ***
+juliek66 shows [Jc 4c] (Trips of 4)
+cuss25000 shows [Jd Kd] (Two pairs : Kings and 4)
+Paysangiste shows [6c 2d] (One pair : 4)
+jelachatte shows [Ah Kh] (Flush Ace high)
+jelachatte collected 0.36€ from main pot
+Paysangiste collected 0.48€ from side pot 1
+*** SUMMARY ***
+Total pot 0.84€ | Rake 0.02€
+Board: [8h 4d Kc 4h Qh]
+Seat 1: Paysangiste (button) showed [6c 2d] and won 0.48€ with One pair : 4
+Seat 2: juliek66 (small blind) showed [Jc 4c] and lost with Trips of 4
+Seat 3: cuss25000 (big blind) showed [Jd Kd] and lost with Two pairs : Kings and 4
+Seat 5: jelachatte showed [Ah Kh] and won 0.36€ with Flush Ace high
+
+
+Winamax Poker - CashGame - HandId: #17024182-80-1646501513 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:31:53 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #2 is the button
+Seat 1: Paysangiste (0.48€)
+Seat 2: juliek66 (0€)
+Seat 3: cuss25000 (0.10€)
+Seat 4: 61. 2 BB (1.09€)
+Seat 5: jelachatte (0.36€)
+*** ANTE/BLINDS ***
+cuss25000 posts small blind 0.01€
+61. 2 BB posts big blind 0.02€
+Dealt to jelachatte [4s 2s]
+*** PRE-FLOP *** 
+jelachatte folds
+Paysangiste raises 0.46€ to 0.48€ and is all-in
+cuss25000 calls 0.09€ and is all-in
+61. 2 BB folds
+*** FLOP *** [6h 8d Qd]
+*** TURN *** [6h 8d Qd][Jc]
+*** RIVER *** [6h 8d Qd Jc][7h]
+*** SHOW DOWN ***
+cuss25000 shows [Jh 3h] (One pair : Jacks)
+Paysangiste shows [8s 7s] (Two pairs : 8 and 7)
+Paysangiste collected 0.59€ from pot
+*** SUMMARY ***
+Total pot 0.59€ | Rake 0.01€
+Board: [6h 8d Qd Jc 7h]
+Seat 1: Paysangiste showed [8s 7s] and won 0.59€ with Two pairs : 8 and 7
+Seat 3: cuss25000 (small blind) showed [Jh 3h] and lost with One pair : Jacks
+
+
+Winamax Poker - CashGame - HandId: #17024182-81-1646501530 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:32:10 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #3 is the button
+Seat 1: Paysangiste (0.59€)
+Seat 2: juliek66 (0€)
+Seat 3: cuss25000 (0.10€)
+Seat 4: 61. 2 BB (1.07€)
+Seat 5: jelachatte (0.36€)
+*** ANTE/BLINDS ***
+61. 2 BB posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [4d 6s]
+*** PRE-FLOP *** 
+Paysangiste raises 0.57€ to 0.59€ and is all-in
+cuss25000 calls 0.10€ and is all-in
+61. 2 BB folds
+jelachatte folds
+*** FLOP *** [7h Kd 3d]
+*** TURN *** [7h Kd 3d][9h]
+*** RIVER *** [7h Kd 3d 9h][7d]
+*** SHOW DOWN ***
+cuss25000 shows [Ts Qs] (One pair : 7)
+Paysangiste shows [9d 4c] (Two pairs : 9 and 7)
+Paysangiste collected 0.71€ from pot
+*** SUMMARY ***
+Total pot 0.71€ | Rake 0.01€
+Board: [7h Kd 3d 9h 7d]
+Seat 1: Paysangiste showed [9d 4c] and won 0.71€ with Two pairs : 9 and 7
+Seat 3: cuss25000 (button) showed [Ts Qs] and lost with One pair : 7
+
+
+Winamax Poker - CashGame - HandId: #17024182-82-1646501544 - Holdem no limit (0.01€/0.02€) - 2022/03/05 17:32:24 UTC
+Table: 'SHORT TRACK 0,10 € 21' 5-max (real money) Seat #4 is the button
+Seat 1: Paysangiste (0.71€)
+Seat 2: juliek66 (0€)
+Seat 3: cuss25000 (0€)
+Seat 4: 61. 2 BB (1.06€)
+Seat 5: jelachatte (0.34€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Paysangiste posts big blind 0.02€
+Dealt to jelachatte [Jh Ts]
+*** PRE-FLOP *** 
+61. 2 BB folds
+jelachatte folds
+Paysangiste collected 0.03€ from pot
+*** SUMMARY ***
+Total pot 0.03€ | No rake
+Seat 1: Paysangiste (big blind) won 0.03€
+
+

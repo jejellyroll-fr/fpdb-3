@@ -19,6 +19,7 @@ replayer
 import
 - correct bug on winamax (no SB)->Fixed
 - correct bug go fast (adding oldhup, error collected pot>total pot)->fixed
+- correct bug starting  hand razz guiringcashplayer
 hud
 -windows and mac not appear
 -linuc disappear behind the table
