@@ -179,15 +179,7 @@ class PokerTracker(HandHistoryConverter):
     re_PostBoth2         = re.compile(r"^%(PLYR)s:? posted to play \- %(CUR)s(?P<SBBB>[%(NUM)s]+)" %  substitutions, re.MULTILINE)
     re_HeroCards1        = re.compile(r"^Dealt to %(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % substitutions, re.MULTILINE)
     re_HeroCards2        = re.compile(r"rd(s)? to %(PLYR)s: (?P<OLDCARDS>NONE)?(?P<NEWCARDS>.+)\n" % substitutions, re.MULTILINE)
-    re_Action1           = re.compile(r"""
-                        ^%(PLYR)s:?(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sBet|\sCheck|\sRaise(\sto)?|\sCall|\sFold|\sAllin)
-                        (?P<RAISETO>\s\(NF\))?
-                        (\sto)?(\s%(CUR)s(?P<BET>[%(NUM)s]+))?  # the number discarded goes in <BET>
-                        \s*(and\sis\sall.in)?
-                        (and\shas\sreached\sthe\s[%(CUR)s\d\.,]+\scap)?
-                        (\son|\scards?)?
-                        (\s\[(?P<CARDS>.+?)\])?\s*$"""
-                         %  substitutions, re.MULTILINE|re.VERBOSE)
+    re_Action1           = re.compile(r"""^%(PLYR)s:?(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sBet|\sCheck|\sRaise(\sto)?|\sCall|\sFold|\sAllin)(?P<RAISETO>\s\(NF\))?(\sto)?(\s%(CUR)s(?P<BET>[%(NUM)s]+))?\s*(and\sis\sall.in)?(and\shas\sreached\sthe\s\[%(CUR)s\d\.,]+\scap)?(\son|\scards?)?(\s\[(?P<CARDS>.+?)\])?\s*$"""%  substitutions, re.MULTILINE|re.VERBOSE)
     re_Action2           = re.compile(r"""
                         ^%(PLYR)s(?P<ATYPE>\sbet|\schecked|\sraised(\sto)?|\scalled|\sfolded|\swent\sall\-in)
                         (\s(\-\s)?%(CUR)s(?P<BET>[%(NUM)s]+))?\s*$"""
