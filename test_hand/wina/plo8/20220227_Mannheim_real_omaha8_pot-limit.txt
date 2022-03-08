@@ -1,0 +1,641 @@
+Winamax Poker - CashGame - HandId: #16999921-1065-1645972898 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:41:38 UTC
+Table: 'Mannheim' 6-max (real money) Seat #2 is the button
+Seat 1: Salomon526 (0.87€)
+Seat 2: philide (2.97€)
+Seat 3: coeurdebleu (3.68€)
+Seat 4: Gapdal (0€)
+Seat 5: jelachatte (2€)
+Seat 6: Vertugo (0€)
+*** ANTE/BLINDS ***
+coeurdebleu posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [4h Ts 9c 6d]
+*** PRE-FLOP *** 
+Salomon526 raises 0.02€ to 0.04€
+philide folds
+coeurdebleu folds
+jelachatte folds
+Salomon526 collected 0.07€ from pot
+*** SUMMARY ***
+Total pot 0.07€ | No rake
+Seat 1: Salomon526 won 0.07€
+
+
+Winamax Poker - CashGame - HandId: #16999921-1066-1645972923 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:42:03 UTC
+Table: 'Mannheim' 6-max (real money) Seat #3 is the button
+Seat 1: Salomon526 (0.90€)
+Seat 2: philide (2.97€)
+Seat 3: coeurdebleu (3.67€)
+Seat 5: jelachatte (2€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Salomon526 posts big blind 0.02€
+Dealt to jelachatte [6s 2s 6h 8c]
+*** PRE-FLOP *** 
+philide raises 0.03€ to 0.05€
+coeurdebleu raises 0.03€ to 0.08€
+jelachatte folds
+Salomon526 calls 0.06€
+philide calls 0.03€
+*** FLOP *** [Jh 5h 9c]
+Salomon526 bets 0.05€
+philide folds
+coeurdebleu folds
+Salomon526 collected 0.29€ from pot
+*** SUMMARY ***
+Total pot 0.29€ | Rake 0.01€
+Board: [Jh 5h 9c]
+Seat 1: Salomon526 (big blind) won 0.29€
+
+
+Winamax Poker - CashGame - HandId: #16999921-1067-1645972973 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:42:53 UTC
+Table: 'Mannheim' 6-max (real money) Seat #5 is the button
+Seat 1: Salomon526 (1.06€)
+Seat 2: philide (2.89€)
+Seat 3: coeurdebleu (3.59€)
+Seat 5: jelachatte (2€)
+*** ANTE/BLINDS ***
+Salomon526 posts small blind 0.01€
+philide posts big blind 0.02€
+Dealt to jelachatte [9s Ts As 9h]
+*** PRE-FLOP *** 
+coeurdebleu calls 0.02€
+jelachatte calls 0.02€
+Salomon526 calls 0.01€
+philide checks
+*** FLOP *** [8h 6c 5c]
+Salomon526 checks
+philide checks
+coeurdebleu checks
+jelachatte checks
+*** TURN *** [8h 6c 5c][Jc]
+Salomon526 checks
+philide checks
+coeurdebleu checks
+jelachatte checks
+*** RIVER *** [8h 6c 5c Jc][Tc]
+Salomon526 checks
+philide checks
+coeurdebleu checks
+jelachatte checks
+*** SHOW DOWN ***
+philide shows [Kd 2s 7h 6d] (One pair : 6)
+jelachatte shows [9s Ts As 9h] (One pair : Tens)
+Salomon526 shows [Js 5h 8d 9d] (Two pairs : Jacks and 8)
+coeurdebleu shows [Qd 4d Kh 3c] (High card : 8)
+coeurdebleu collected 0.04€ from pot(LO)
+Salomon526 collected 0.04€ from pot(HI)
+*** SUMMARY ***
+Total pot 0.08€ | No rake
+Board: [8h 6c 5c Jc Tc]
+Seat 1: Salomon526 (small blind) showed [Js 5h 8d 9d] and won 0.04€ with HI : Two pairs : Jacks and 8
+Seat 2: philide (big blind) showed [Kd 2s 7h 6d] and lost with HI : One pair : 6
+Seat 3: coeurdebleu showed [Qd 4d Kh 3c] and won 0.04€ with LO : High card : 8
+Seat 5: jelachatte (button) showed [9s Ts As 9h] and lost with HI : One pair : Tens
+
+
+Winamax Poker - CashGame - HandId: #16999921-1068-1645973068 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:44:28 UTC
+Table: 'Mannheim' 6-max (real money) Seat #1 is the button
+Seat 1: Salomon526 (1.08€)
+Seat 2: philide (2.87€)
+Seat 3: coeurdebleu (3.61€)
+Seat 5: jelachatte (2€)
+Seat 6: x CarlosD x (1€)
+*** ANTE/BLINDS ***
+philide posts small blind 0.01€
+coeurdebleu posts big blind 0.02€
+x CarlosD x posts big blind 0.02€ out of position
+Dealt to jelachatte [Jd 6s 5h 2d]
+*** PRE-FLOP *** 
+jelachatte folds
+x CarlosD x checks
+Salomon526 raises 0.02€ to 0.04€
+philide folds
+coeurdebleu folds
+x CarlosD x calls 0.02€
+*** FLOP *** [6c Kh Td]
+x CarlosD x bets 0.03€
+Salomon526 calls 0.03€
+*** TURN *** [6c Kh Td][8s]
+x CarlosD x bets 0.03€
+Salomon526 calls 0.03€
+*** RIVER *** [6c Kh Td 8s][3s]
+x CarlosD x bets 0.06€
+Salomon526 raises 0.06€ to 0.12€
+x CarlosD x calls 0.06€
+*** SHOW DOWN ***
+Salomon526 shows [2h 4c Ts 3c] (High card : 8)
+x CarlosD x shows [Ac 9d Ks Th] (Two pairs : Kings and Tens)
+x CarlosD x collected 0.22€ from pot(HI)
+Salomon526 collected 0.22€ from pot(LO)
+*** SUMMARY ***
+Total pot 0.44€ | Rake 0.03€
+Board: [6c Kh Td 8s 3s]
+Seat 1: Salomon526 (button) showed [2h 4c Ts 3c] and won 0.22€ with LO : High card : 8
+Seat 6: x CarlosD x showed [Ac 9d Ks Th] and won 0.22€ with HI : Two pairs : Kings and Tens
+
+
+Winamax Poker - CashGame - HandId: #16999921-1069-1645973118 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:45:18 UTC
+Table: 'Mannheim' 6-max (real money) Seat #2 is the button
+Seat 1: Salomon526 (1.08€)
+Seat 2: philide (2.86€)
+Seat 3: coeurdebleu (3.59€)
+Seat 5: jelachatte (2€)
+Seat 6: x CarlosD x (1€)
+*** ANTE/BLINDS ***
+coeurdebleu posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [4d 3s 8d Qc]
+*** PRE-FLOP *** 
+x CarlosD x folds
+Salomon526 folds
+philide folds
+coeurdebleu folds
+jelachatte collected 0.03€ from pot
+*** SUMMARY ***
+Total pot 0.03€ | No rake
+Seat 5: jelachatte (big blind) won 0.03€
+
+
+Winamax Poker - CashGame - HandId: #16999921-1070-1645973127 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:45:27 UTC
+Table: 'Mannheim' 6-max (real money) Seat #3 is the button
+Seat 1: Salomon526 (1.08€)
+Seat 2: philide (2.86€)
+Seat 3: coeurdebleu (3.58€)
+Seat 5: jelachatte (2.01€)
+Seat 6: x CarlosD x (1€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+x CarlosD x posts big blind 0.02€
+Dealt to jelachatte [9c 2c Ks 3s]
+*** PRE-FLOP *** 
+Salomon526 folds
+philide folds
+coeurdebleu folds
+jelachatte calls 0.01€
+x CarlosD x checks
+*** FLOP *** [Tc 6s 7d]
+jelachatte checks
+x CarlosD x bets 0.02€
+jelachatte folds
+x CarlosD x collected 0.06€ from pot
+*** SUMMARY ***
+Total pot 0.06€ | No rake
+Board: [Tc 6s 7d]
+Seat 6: x CarlosD x (big blind) won 0.06€
+
+
+Winamax Poker - CashGame - HandId: #16999921-1071-1645973178 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:46:18 UTC
+Table: 'Mannheim' 6-max (real money) Seat #5 is the button
+Seat 1: Salomon526 (1.08€)
+Seat 2: philide (2.86€)
+Seat 3: coeurdebleu (3.58€)
+Seat 5: jelachatte (2€)
+Seat 6: x CarlosD x (1.02€)
+*** ANTE/BLINDS ***
+x CarlosD x posts small blind 0.01€
+Salomon526 posts big blind 0.02€
+Dealt to jelachatte [4h 2c Qs 7h]
+*** PRE-FLOP *** 
+philide folds
+coeurdebleu folds
+jelachatte folds
+x CarlosD x raises 0.04€ to 0.06€
+Salomon526 calls 0.04€
+*** FLOP *** [9c 5h 3c]
+x CarlosD x bets 0.08€
+Salomon526 calls 0.08€
+*** TURN *** [9c 5h 3c][6h]
+x CarlosD x bets 0.10€
+Salomon526 calls 0.10€
+*** RIVER *** [9c 5h 3c 6h][Td]
+x CarlosD x bets 0.17€
+Salomon526 folds
+x CarlosD x collected 0.62€ from pot
+*** SUMMARY ***
+Total pot 0.62€ | Rake 0.03€
+Board: [9c 5h 3c 6h Td]
+Seat 6: x CarlosD x (small blind) won 0.62€
+
+
+Winamax Poker - CashGame - HandId: #16999921-1072-1645973232 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:47:12 UTC
+Table: 'Mannheim' 6-max (real money) Seat #6 is the button
+Seat 1: Salomon526 (0.84€)
+Seat 2: philide (2.86€)
+Seat 3: coeurdebleu (3.58€)
+Seat 5: jelachatte (2€)
+Seat 6: x CarlosD x (1.23€)
+*** ANTE/BLINDS ***
+Salomon526 posts small blind 0.01€
+philide posts big blind 0.02€
+Dealt to jelachatte [Td 5h Ks 5c]
+*** PRE-FLOP *** 
+coeurdebleu folds
+jelachatte folds
+x CarlosD x folds
+Salomon526 calls 0.01€
+philide checks
+*** FLOP *** [Qd Qs 6c]
+Salomon526 bets 0.02€
+philide folds
+Salomon526 collected 0.06€ from pot
+*** SUMMARY ***
+Total pot 0.06€ | No rake
+Board: [Qd Qs 6c]
+Seat 1: Salomon526 (small blind) won 0.06€
+
+
+Winamax Poker - CashGame - HandId: #16999921-1073-1645973285 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:48:05 UTC
+Table: 'Mannheim' 6-max (real money) Seat #1 is the button
+Seat 1: Salomon526 (0.86€)
+Seat 2: philide (2.84€)
+Seat 3: coeurdebleu (3.58€)
+Seat 5: jelachatte (2€)
+Seat 6: x CarlosD x (1.23€)
+*** ANTE/BLINDS ***
+philide posts small blind 0.01€
+coeurdebleu posts big blind 0.02€
+Dealt to jelachatte [Kd 3h Kh 7h]
+*** PRE-FLOP *** 
+jelachatte raises 0.05€ to 0.07€
+x CarlosD x calls 0.07€
+Salomon526 calls 0.07€
+philide folds
+coeurdebleu folds
+*** FLOP *** [Qc 5d Js]
+jelachatte bets 0.12€
+x CarlosD x folds
+Salomon526 calls 0.12€
+*** TURN *** [Qc 5d Js][As]
+jelachatte bets 0.24€
+Salomon526 calls 0.24€
+*** RIVER *** [Qc 5d Js As][Qh]
+jelachatte bets 0.72€
+Salomon526 calls 0.43€ and is all-in
+*** SHOW DOWN ***
+Salomon526 shows [4c 3c Qs 6h] (Trips of Queens)
+jelachatte shows [Kd 3h Kh 7h] (Two pairs : Kings and Queens)
+jelachatte collected 0.29€ from side pot 1
+Salomon526 collected 1.72€ from main pot
+*** SUMMARY ***
+Total pot 2.01€ | Rake 0.10€
+Board: [Qc 5d Js As Qh]
+Seat 1: Salomon526 (button) showed [4c 3c Qs 6h] and won 1.72€ with Trips of Queens
+Seat 5: jelachatte showed [Kd 3h Kh 7h] and won 0.29€ with Two pairs : Kings and Queens
+
+
+Winamax Poker - CashGame - HandId: #16999921-1074-1645973338 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:48:58 UTC
+Table: 'Mannheim' 6-max (real money) Seat #2 is the button
+Seat 1: Salomon526 (1.72€)
+Seat 2: philide (2.83€)
+Seat 3: coeurdebleu (3.56€)
+Seat 5: jelachatte (2€)
+Seat 6: x CarlosD x (1.16€)
+*** ANTE/BLINDS ***
+coeurdebleu posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Td 4c 5h Ac]
+*** PRE-FLOP *** 
+x CarlosD x raises 0.02€ to 0.04€
+Salomon526 calls 0.04€
+philide folds
+coeurdebleu folds
+jelachatte calls 0.02€
+*** FLOP *** [5s Kh Jc]
+jelachatte checks
+x CarlosD x checks
+Salomon526 checks
+*** TURN *** [5s Kh Jc][5c]
+jelachatte bets 0.10€
+x CarlosD x calls 0.10€
+Salomon526 calls 0.10€
+*** RIVER *** [5s Kh Jc 5c][6s]
+jelachatte checks
+x CarlosD x bets 0.28€
+Salomon526 folds
+jelachatte calls 0.28€
+*** SHOW DOWN ***
+jelachatte shows [Td 4c 5h Ac] (Trips of 5)
+x CarlosD x shows [6c 8c 4d 5d] (Full of 5 and 6)
+x CarlosD x collected 0.93€ from pot
+*** SUMMARY ***
+Total pot 0.93€ | Rake 0.06€
+Board: [5s Kh Jc 5c 6s]
+Seat 5: jelachatte (big blind) showed [Td 4c 5h Ac] and lost with Trips of 5
+Seat 6: x CarlosD x showed [6c 8c 4d 5d] and won 0.93€ with Full of 5 and 6
+
+
+Winamax Poker - CashGame - HandId: #16999921-1075-1645973420 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:50:20 UTC
+Table: 'Mannheim' 6-max (real money) Seat #3 is the button
+Seat 1: Salomon526 (1.58€)
+Seat 2: philide (2.83€)
+Seat 3: coeurdebleu (3.55€)
+Seat 5: jelachatte (2€)
+Seat 6: x CarlosD x (1.67€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+x CarlosD x posts big blind 0.02€
+Dealt to jelachatte [Td 9h 3d 4h]
+*** PRE-FLOP *** 
+Salomon526 raises 0.02€ to 0.04€
+philide folds
+coeurdebleu folds
+jelachatte calls 0.03€
+x CarlosD x calls 0.02€
+*** FLOP *** [Ad 5d 4s]
+jelachatte checks
+x CarlosD x bets 0.04€
+Salomon526 calls 0.04€
+jelachatte folds
+*** TURN *** [Ad 5d 4s][Kh]
+x CarlosD x bets 0.07€
+Salomon526 calls 0.07€
+*** RIVER *** [Ad 5d 4s Kh][6c]
+x CarlosD x checks
+Salomon526 checks
+*** SHOW DOWN ***
+Salomon526 shows [Ac 6h 6d Kc] (Trips of 6)
+x CarlosD x shows [Jc 8c 2d 8d] (High card : 8)
+x CarlosD x collected 0.16€ from pot(LO)
+Salomon526 collected 0.16€ from pot(HI)
+*** SUMMARY ***
+Total pot 0.32€ | Rake 0.02€
+Board: [Ad 5d 4s Kh 6c]
+Seat 1: Salomon526 showed [Ac 6h 6d Kc] and won 0.16€ with HI : Trips of 6
+Seat 6: x CarlosD x (big blind) showed [Jc 8c 2d 8d] and won 0.16€ with LO : High card : 8
+
+
+Winamax Poker - CashGame - HandId: #16999921-1076-1645973470 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:51:10 UTC
+Table: 'Mannheim' 6-max (real money) Seat #5 is the button
+Seat 1: Salomon526 (1.59€)
+Seat 2: philide (2.83€)
+Seat 3: coeurdebleu (3.55€)
+Seat 5: jelachatte (2€)
+Seat 6: x CarlosD x (1.68€)
+*** ANTE/BLINDS ***
+x CarlosD x posts small blind 0.01€
+Salomon526 posts big blind 0.02€
+Dealt to jelachatte [Kh 3d 3s 7s]
+*** PRE-FLOP *** 
+philide folds
+coeurdebleu folds
+jelachatte folds
+x CarlosD x calls 0.01€
+Salomon526 checks
+*** FLOP *** [Ac 7h 7c]
+x CarlosD x bets 0.02€
+Salomon526 folds
+x CarlosD x collected 0.06€ from pot
+*** SUMMARY ***
+Total pot 0.06€ | No rake
+Board: [Ac 7h 7c]
+Seat 6: x CarlosD x (small blind) won 0.06€
+
+
+Winamax Poker - CashGame - HandId: #16999921-1077-1645973495 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:51:35 UTC
+Table: 'Mannheim' 6-max (real money) Seat #6 is the button
+Seat 1: Salomon526 (1.57€)
+Seat 2: philide (2.83€)
+Seat 3: coeurdebleu (3.55€)
+Seat 5: jelachatte (2€)
+Seat 6: x CarlosD x (1.70€)
+*** ANTE/BLINDS ***
+Salomon526 posts small blind 0.01€
+philide posts big blind 0.02€
+Dealt to jelachatte [3d Jc 9d 9s]
+*** PRE-FLOP *** 
+coeurdebleu folds
+jelachatte folds
+x CarlosD x calls 0.02€
+Salomon526 raises 0.06€ to 0.08€
+philide folds
+x CarlosD x calls 0.06€
+*** FLOP *** [Kh Ks 2s]
+Salomon526 bets 0.05€
+x CarlosD x calls 0.05€
+*** TURN *** [Kh Ks 2s][5c]
+Salomon526 bets 0.18€
+x CarlosD x folds
+Salomon526 collected 0.44€ from pot
+*** SUMMARY ***
+Total pot 0.44€ | Rake 0.02€
+Board: [Kh Ks 2s 5c]
+Seat 1: Salomon526 (small blind) won 0.44€
+
+
+Winamax Poker - CashGame - HandId: #16999921-1083-1645973718 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:55:18 UTC
+Table: 'Mannheim' 6-max (real money) Seat #2 is the button
+Seat 1: Salomon526 (1.76€)
+Seat 2: philide (2.85€)
+Seat 3: coeurdebleu (3.48€)
+Seat 5: jelachatte (2€)
+*** ANTE/BLINDS ***
+coeurdebleu posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [3s Qc Jd Qs]
+*** PRE-FLOP *** 
+Salomon526 raises 0.05€ to 0.07€
+philide folds
+coeurdebleu folds
+jelachatte calls 0.05€
+*** FLOP *** [6d 5h Js]
+jelachatte bets 0.12€
+Salomon526 calls 0.12€
+*** TURN *** [6d 5h Js][7c]
+jelachatte checks
+Salomon526 checks
+*** RIVER *** [6d 5h Js 7c][Qh]
+jelachatte bets 0.29€
+Salomon526 calls 0.29€
+*** SHOW DOWN ***
+Salomon526 shows [8h 6s 3h As] (High card : 7)
+jelachatte shows [3s Qc Jd Qs] (Trips of Queens)
+jelachatte collected 0.46€ from pot(HI)
+Salomon526 collected 0.45€ from pot(LO)
+*** SUMMARY ***
+Total pot 0.91€ | Rake 0.06€
+Board: [6d 5h Js 7c Qh]
+Seat 1: Salomon526 showed [8h 6s 3h As] and won 0.45€ with LO : High card : 7
+Seat 5: jelachatte (big blind) showed [3s Qc Jd Qs] and won 0.46€ with HI : Trips of Queens
+
+
+Winamax Poker - CashGame - HandId: #16999921-1084-1645973751 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:55:51 UTC
+Table: 'Mannheim' 6-max (real money) Seat #3 is the button
+Seat 1: Salomon526 (1.73€)
+Seat 2: philide (2.85€)
+Seat 3: coeurdebleu (3.47€)
+Seat 5: jelachatte (2€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Salomon526 posts big blind 0.02€
+Dealt to jelachatte [Jh 4c Ts 4d]
+*** PRE-FLOP *** 
+philide raises 0.03€ to 0.05€
+coeurdebleu folds
+jelachatte folds
+Salomon526 raises 0.07€ to 0.12€
+philide calls 0.07€
+*** FLOP *** [Kd Ah Qc]
+Salomon526 bets 0.05€
+philide calls 0.05€
+*** TURN *** [Kd Ah Qc][Jd]
+Salomon526 bets 0.02€
+philide calls 0.02€
+*** RIVER *** [Kd Ah Qc Jd][2c]
+Salomon526 checks
+philide checks
+*** SHOW DOWN ***
+Salomon526 shows [8s 5c 2h As] (Two pairs : Aces and 2)
+philide shows [Kh 2s 7s Ac] (Two pairs : Aces and Kings)
+philide collected 0.37€ from pot
+*** SUMMARY ***
+Total pot 0.37€ | Rake 0.02€
+Board: [Kd Ah Qc Jd 2c]
+Seat 1: Salomon526 (big blind) showed [8s 5c 2h As] and lost with Two pairs : Aces and 2
+Seat 2: philide showed [Kh 2s 7s Ac] and won 0.37€ with Two pairs : Aces and Kings
+
+
+Winamax Poker - CashGame - HandId: #16999921-1085-1645973789 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:56:29 UTC
+Table: 'Mannheim' 6-max (real money) Seat #5 is the button
+Seat 1: Salomon526 (1.54€)
+Seat 2: philide (3.03€)
+Seat 3: coeurdebleu (3.47€)
+Seat 5: jelachatte (2€)
+*** ANTE/BLINDS ***
+Salomon526 posts small blind 0.01€
+philide posts big blind 0.02€
+Dealt to jelachatte [Qc 5c 5d Qs]
+*** PRE-FLOP *** 
+coeurdebleu folds
+jelachatte raises 0.05€ to 0.07€
+Salomon526 raises 0.16€ to 0.23€
+philide folds
+jelachatte calls 0.16€
+*** FLOP *** [5s 7d Ts]
+Salomon526 bets 0.48€
+jelachatte raises 1.29€ to 1.77€ and is all-in
+Salomon526 calls 0.83€ and is all-in
+*** TURN *** [5s 7d Ts][Kc]
+*** RIVER *** [5s 7d Ts Kc][Kh]
+*** SHOW DOWN ***
+Salomon526 shows [Ah Kd 8s Ac] (Trips of Kings)
+jelachatte shows [Qc 5c 5d Qs] (Full of 5 and Kings)
+jelachatte collected 3.38€ from pot
+*** SUMMARY ***
+Total pot 3.38€ | Rake 0.18€
+Board: [5s 7d Ts Kc Kh]
+Seat 1: Salomon526 (small blind) showed [Ah Kd 8s Ac] and lost with Trips of Kings
+Seat 5: jelachatte (button) showed [Qc 5c 5d Qs] and won 3.38€ with Full of 5 and Kings
+
+
+Winamax Poker - CashGame - HandId: #16999921-1086-1645973836 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:57:16 UTC
+Table: 'Mannheim' 6-max (real money) Seat #1 is the button
+Seat 1: Salomon526 (0€)
+Seat 2: philide (3.01€)
+Seat 3: coeurdebleu (3.47€)
+Seat 5: jelachatte (3.38€)
+*** ANTE/BLINDS ***
+philide posts small blind 0.01€
+coeurdebleu posts big blind 0.02€
+Dealt to jelachatte [Ts Kc 8d 4c]
+*** PRE-FLOP *** 
+jelachatte folds
+philide calls 0.01€
+coeurdebleu raises 0.04€ to 0.06€
+philide folds
+coeurdebleu collected 0.08€ from pot
+*** SUMMARY ***
+Total pot 0.08€ | No rake
+Seat 3: coeurdebleu (big blind) won 0.08€
+
+
+Winamax Poker - CashGame - HandId: #16999921-1087-1645973864 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:57:44 UTC
+Table: 'Mannheim' 6-max (real money) Seat #2 is the button
+Seat 1: Salomon526 (0.58€)
+Seat 2: philide (2.99€)
+Seat 3: coeurdebleu (3.49€)
+Seat 5: jelachatte (3.38€)
+*** ANTE/BLINDS ***
+coeurdebleu posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Kh 5c 7h 2s]
+*** PRE-FLOP *** 
+Salomon526 calls 0.02€
+philide folds
+coeurdebleu raises 0.06€ to 0.08€
+jelachatte folds
+Salomon526 calls 0.06€
+*** FLOP *** [Js 5h 8d]
+coeurdebleu bets 0.18€
+Salomon526 folds
+coeurdebleu collected 0.35€ from pot
+*** SUMMARY ***
+Total pot 0.35€ | Rake 0.01€
+Board: [Js 5h 8d]
+Seat 3: coeurdebleu (small blind) won 0.35€
+
+
+Winamax Poker - CashGame - HandId: #16999921-1088-1645973914 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:58:34 UTC
+Table: 'Mannheim' 6-max (real money) Seat #3 is the button
+Seat 1: Salomon526 (0.50€)
+Seat 2: philide (2.99€)
+Seat 3: coeurdebleu (3.58€)
+Seat 5: jelachatte (3.36€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+Salomon526 posts big blind 0.02€
+Dealt to jelachatte [Qh 3h Ad 7s]
+*** PRE-FLOP *** 
+philide folds
+coeurdebleu calls 0.02€
+jelachatte calls 0.01€
+Salomon526 checks
+*** FLOP *** [Td 7c 9d]
+jelachatte checks
+Salomon526 bets 0.06€
+coeurdebleu folds
+jelachatte folds
+Salomon526 collected 0.12€ from pot
+*** SUMMARY ***
+Total pot 0.12€ | No rake
+Board: [Td 7c 9d]
+Seat 1: Salomon526 (big blind) won 0.12€
+
+
+Winamax Poker - CashGame - HandId: #16999921-1089-1645973956 - Omaha Hi/Lo pot limit (0.01€/0.02€) - 2022/02/27 14:59:16 UTC
+Table: 'Mannheim' 6-max (real money) Seat #5 is the button
+Seat 1: Salomon526 (0.54€)
+Seat 2: philide (2.99€)
+Seat 3: coeurdebleu (3.56€)
+Seat 5: jelachatte (3.34€)
+*** ANTE/BLINDS ***
+Salomon526 posts small blind 0.01€
+philide posts big blind 0.02€
+Dealt to jelachatte [5s Ah 7c Kh]
+*** PRE-FLOP *** 
+coeurdebleu folds
+jelachatte calls 0.02€
+Salomon526 raises 0.06€ to 0.08€
+philide folds
+jelachatte calls 0.06€
+*** FLOP *** [6h 4d 7h]
+Salomon526 bets 0.18€
+jelachatte raises 0.54€ to 0.72€
+Salomon526 calls 0.28€ and is all-in
+*** TURN *** [6h 4d 7h][9s]
+*** RIVER *** [6h 4d 7h 9s][Th]
+*** SHOW DOWN ***
+Salomon526 shows [6c Ac Qh 3c] (High card : 7)
+jelachatte shows [5s Ah 7c Kh] (Flush Ace high)
+jelachatte shows [5s Ah 7c Kh] (High card : 7)
+jelachatte collected 0.65€ from side pot 1(HI)
+jelachatte collected 0.13€ from side pot 1(LO)
+Salomon526 collected 0.52€ from main pot(LO)
+*** SUMMARY ***
+Total pot 1.30€ | Rake 0.06€
+Board: [6h 4d 7h 9s Th]
+Seat 1: Salomon526 (small blind) showed [6c Ac Qh 3c] and won 0.52€ with LO : High card : 7
+Seat 5: jelachatte (button) showed [5s Ah 7c Kh] and won 0.65€ with HI : Flush Ace high
+Seat 5: jelachatte (button) showed [5s Ah 7c Kh] and won 0.13€ with LO : High card : 7
+
+

@@ -1,0 +1,125 @@
+Winamax Poker - CashGame - HandId: #17032064-4-1646691225 - Omaha Hi/Lo fixed limit (0.05€/0.10€) - 2022/03/07 22:13:45 UTC
+Table: 'Opole 02' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2€)
+Seat 6: PYGUARGE_FR (2€)
+*** ANTE/BLINDS ***
+PYGUARGE_FR posts small blind 0.02€
+jelachatte posts big blind 0.05€
+Dealt to jelachatte [6h Js 2c 7c]
+*** PRE-FLOP *** 
+PYGUARGE_FR calls 0.03€
+jelachatte checks
+*** FLOP *** [3d Qc 5h]
+jelachatte checks
+PYGUARGE_FR checks
+*** TURN *** [3d Qc 5h][3c]
+jelachatte checks
+PYGUARGE_FR checks
+*** RIVER *** [3d Qc 5h 3c][8c]
+jelachatte checks
+PYGUARGE_FR checks
+*** SHOW DOWN ***
+jelachatte shows [6h Js 2c 7c] (Flush Queen high)
+PYGUARGE_FR shows [4s 7d 2d 4d] (High card : 8)
+PYGUARGE_FR collected 0.04€ from pot(LO)
+jelachatte collected 0.05€ from pot(HI)
+*** SUMMARY ***
+Total pot 0.09€ | Rake 0.01€
+Board: [3d Qc 5h 3c 8c]
+Seat 1: jelachatte (big blind) showed [6h Js 2c 7c] and won 0.05€ with HI : Flush Queen high
+Seat 6: PYGUARGE_FR (small blind) (button) showed [4s 7d 2d 4d] and won 0.04€ with LO : High card : 8
+
+
+Winamax Poker - CashGame - HandId: #17032064-5-1646691391 - Omaha Hi/Lo fixed limit (0.05€/0.10€) - 2022/03/07 22:16:31 UTC
+Table: 'Opole 02' 6-max (real money) Seat #1 is the button
+Seat 1: jelachatte (2€)
+Seat 6: PYGUARGE_FR (2€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.02€
+PYGUARGE_FR posts big blind 0.05€
+Dealt to jelachatte [6h 9s Ks 3s]
+*** PRE-FLOP *** 
+jelachatte calls 0.03€
+PYGUARGE_FR raises 0.05€ to 0.10€
+jelachatte calls 0.05€
+*** FLOP *** [6s 3d 8s]
+PYGUARGE_FR checks
+jelachatte bets 0.05€
+PYGUARGE_FR calls 0.05€
+*** TURN *** [6s 3d 8s][Qs]
+PYGUARGE_FR checks
+jelachatte bets 0.10€
+PYGUARGE_FR folds
+jelachatte collected 0.38€ from pot
+*** SUMMARY ***
+Total pot 0.38€ | Rake 0.02€
+Board: [6s 3d 8s Qs]
+Seat 1: jelachatte (small blind) (button) won 0.38€
+
+
+Winamax Poker - CashGame - HandId: #17032064-6-1646691433 - Omaha Hi/Lo fixed limit (0.05€/0.10€) - 2022/03/07 22:17:13 UTC
+Table: 'Opole 02' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2.13€)
+Seat 6: PYGUARGE_FR (2€)
+*** ANTE/BLINDS ***
+PYGUARGE_FR posts small blind 0.02€
+jelachatte posts big blind 0.05€
+Dealt to jelachatte [8c 3c 9h 9s]
+*** PRE-FLOP *** 
+PYGUARGE_FR calls 0.03€
+jelachatte checks
+*** FLOP *** [2d Qd 4c]
+jelachatte checks
+PYGUARGE_FR checks
+*** TURN *** [2d Qd 4c][Td]
+jelachatte checks
+PYGUARGE_FR checks
+*** RIVER *** [2d Qd 4c Td][Jd]
+jelachatte checks
+PYGUARGE_FR bets 0.10€
+jelachatte folds
+PYGUARGE_FR collected 0.19€ from pot
+*** SUMMARY ***
+Total pot 0.19€ | Rake 0.01€
+Board: [2d Qd 4c Td Jd]
+Seat 6: PYGUARGE_FR (small blind) (button) won 0.19€
+
+
+Winamax Poker - CashGame - HandId: #17032064-7-1646691487 - Omaha Hi/Lo fixed limit (0.05€/0.10€) - 2022/03/07 22:18:07 UTC
+Table: 'Opole 02' 6-max (real money) Seat #1 is the button
+Seat 1: jelachatte (2.08€)
+Seat 6: PYGUARGE_FR (2.04€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.02€
+PYGUARGE_FR posts big blind 0.05€
+Dealt to jelachatte [4s 7s Ks 9d]
+*** PRE-FLOP *** 
+jelachatte folds
+PYGUARGE_FR collected 0.07€ from pot
+*** SUMMARY ***
+Total pot 0.07€ | No rake
+Seat 6: PYGUARGE_FR (big blind) won 0.07€
+
+
+Winamax Poker - CashGame - HandId: #17032064-8-1646691510 - Omaha Hi/Lo fixed limit (0.05€/0.10€) - 2022/03/07 22:18:30 UTC
+Table: 'Opole 02' 6-max (real money) Seat #6 is the button
+Seat 1: jelachatte (2.06€)
+Seat 6: PYGUARGE_FR (2.06€)
+*** ANTE/BLINDS ***
+PYGUARGE_FR posts small blind 0.02€
+jelachatte posts big blind 0.05€
+Dealt to jelachatte [8s 4h 5s 6s]
+*** PRE-FLOP *** 
+PYGUARGE_FR calls 0.03€
+jelachatte checks
+*** FLOP *** [Tc Ks 2c]
+jelachatte checks
+PYGUARGE_FR bets 0.05€
+jelachatte folds
+PYGUARGE_FR collected 0.14€ from pot
+*** SUMMARY ***
+Total pot 0.14€ | Rake 0.01€
+Board: [Tc Ks 2c]
+Seat 6: PYGUARGE_FR (small blind) (button) won 0.14€
+
+

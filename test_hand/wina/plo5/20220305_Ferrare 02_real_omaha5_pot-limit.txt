@@ -1,0 +1,222 @@
+Winamax Poker - CashGame - HandId: #17022705-481-1646501007 - 5 Card Omaha pot limit (0.01€/0.02€) - 2022/03/05 17:23:27 UTC
+Table: 'Ferrare 02' 6-max (real money) Seat #2 is the button
+Seat 1: showadp34 (2.50€)
+Seat 2: horscontrole (1.97€)
+Seat 3: sanslgs (3.20€)
+Seat 4: jelachatte (2€)
+Seat 5: bluffdeouf83 (1.90€)
+Seat 6: AAdamaSS (4.49€)
+*** ANTE/BLINDS ***
+sanslgs posts small blind 0.01€
+jelachatte posts big blind 0.02€
+Dealt to jelachatte [Td Qc Ad 4c Qs]
+*** PRE-FLOP *** 
+bluffdeouf83 calls 0.02€
+AAdamaSS folds
+showadp34 calls 0.02€
+horscontrole calls 0.02€
+sanslgs calls 0.01€
+jelachatte checks
+*** FLOP *** [Ac Jd 3s]
+sanslgs checks
+jelachatte bets 0.05€
+bluffdeouf83 calls 0.05€
+showadp34 folds
+horscontrole folds
+sanslgs calls 0.05€
+*** TURN *** [Ac Jd 3s][9d]
+sanslgs checks
+jelachatte bets 0.17€
+bluffdeouf83 calls 0.17€
+sanslgs folds
+*** RIVER *** [Ac Jd 3s 9d][Js]
+jelachatte checks
+bluffdeouf83 checks
+*** SHOW DOWN ***
+bluffdeouf83 shows [4s 8s 2d Qd 3h] (Two pairs : Jacks and 3)
+jelachatte shows [Td Qc Ad 4c Qs] (Two pairs : Aces and Jacks)
+jelachatte collected 0.56€ from pot
+*** SUMMARY ***
+Total pot 0.56€ | Rake 0.03€
+Board: [Ac Jd 3s 9d Js]
+Seat 4: jelachatte (big blind) showed [Td Qc Ad 4c Qs] and won 0.56€ with Two pairs : Aces and Jacks
+Seat 5: bluffdeouf83 showed [4s 8s 2d Qd 3h] and lost with Two pairs : Jacks and 3
+
+
+Winamax Poker - CashGame - HandId: #17022705-482-1646501103 - 5 Card Omaha pot limit (0.01€/0.02€) - 2022/03/05 17:25:03 UTC
+Table: 'Ferrare 02' 6-max (real money) Seat #3 is the button
+Seat 1: showadp34 (2.48€)
+Seat 2: horscontrole (1.95€)
+Seat 3: sanslgs (3.13€)
+Seat 4: jelachatte (2.32€)
+Seat 5: bluffdeouf83 (1.66€)
+Seat 6: AAdamaSS (4.49€)
+*** ANTE/BLINDS ***
+jelachatte posts small blind 0.01€
+bluffdeouf83 posts big blind 0.02€
+Dealt to jelachatte [2d 3h 5s 9d 7s]
+*** PRE-FLOP *** 
+AAdamaSS folds
+showadp34 calls 0.02€
+horscontrole calls 0.02€
+sanslgs calls 0.02€
+jelachatte folds
+bluffdeouf83 checks
+*** FLOP *** [6d Ah 2c]
+bluffdeouf83 checks
+showadp34 checks
+horscontrole checks
+sanslgs bets 0.09€
+bluffdeouf83 folds
+showadp34 folds
+horscontrole folds
+sanslgs collected 0.17€ from pot
+*** SUMMARY ***
+Total pot 0.17€ | Rake 0.01€
+Board: [6d Ah 2c]
+Seat 3: sanslgs (button) won 0.17€
+
+
+Winamax Poker - CashGame - HandId: #17022705-483-1646501173 - 5 Card Omaha pot limit (0.01€/0.02€) - 2022/03/05 17:26:13 UTC
+Table: 'Ferrare 02' 6-max (real money) Seat #4 is the button
+Seat 1: showadp34 (2.46€)
+Seat 2: horscontrole (1.93€)
+Seat 3: sanslgs (3.19€)
+Seat 4: jelachatte (2.31€)
+Seat 5: bluffdeouf83 (1.64€)
+Seat 6: AAdamaSS (4.49€)
+*** ANTE/BLINDS ***
+bluffdeouf83 posts small blind 0.01€
+AAdamaSS posts big blind 0.02€
+Dealt to jelachatte [4s 7h 8d 2d Qs]
+*** PRE-FLOP *** 
+showadp34 calls 0.02€
+horscontrole calls 0.02€
+sanslgs calls 0.02€
+jelachatte folds
+bluffdeouf83 calls 0.01€
+AAdamaSS checks
+*** FLOP *** [7s Kc 2h]
+bluffdeouf83 checks
+AAdamaSS checks
+showadp34 checks
+horscontrole checks
+sanslgs checks
+*** TURN *** [7s Kc 2h][3s]
+bluffdeouf83 checks
+AAdamaSS checks
+showadp34 checks
+horscontrole checks
+sanslgs checks
+*** RIVER *** [7s Kc 2h 3s][Td]
+bluffdeouf83 checks
+AAdamaSS checks
+showadp34 checks
+horscontrole checks
+sanslgs checks
+*** SHOW DOWN ***
+showadp34 shows [8c 2s Qh 5s Jc] (One pair : 2)
+sanslgs shows [As 5h Ts Ks Js] (Two pairs : Kings and Tens)
+bluffdeouf83 shows [Kh 2c 9c Qc 4c] (Two pairs : Kings and 2)
+AAdamaSS shows [3h 6c 6d 5d 8s] (One pair : 6)
+horscontrole shows [3c Ad Tc 3d Jh] (Trips of 3)
+horscontrole collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | Rake 0.01€
+Board: [7s Kc 2h 3s Td]
+Seat 1: showadp34 showed [8c 2s Qh 5s Jc] and lost with One pair : 2
+Seat 2: horscontrole showed [3c Ad Tc 3d Jh] and won 0.09€ with Trips of 3
+Seat 3: sanslgs showed [As 5h Ts Ks Js] and lost with Two pairs : Kings and Tens
+Seat 5: bluffdeouf83 (small blind) showed [Kh 2c 9c Qc 4c] and lost with Two pairs : Kings and 2
+Seat 6: AAdamaSS (big blind) showed [3h 6c 6d 5d 8s] and lost with One pair : 6
+
+
+Winamax Poker - CashGame - HandId: #17022705-484-1646501333 - 5 Card Omaha pot limit (0.01€/0.02€) - 2022/03/05 17:28:53 UTC
+Table: 'Ferrare 02' 6-max (real money) Seat #5 is the button
+Seat 1: showadp34 (2.44€)
+Seat 2: horscontrole (2€)
+Seat 3: sanslgs (3.17€)
+Seat 4: jelachatte (2.31€)
+Seat 5: bluffdeouf83 (1.62€)
+Seat 6: AAdamaSS (4.47€)
+*** ANTE/BLINDS ***
+AAdamaSS posts small blind 0.01€
+showadp34 posts big blind 0.02€
+Dealt to jelachatte [Js 2d Ks Kh Td]
+*** PRE-FLOP *** 
+horscontrole calls 0.02€
+sanslgs folds
+jelachatte calls 0.02€
+bluffdeouf83 calls 0.02€
+AAdamaSS folds
+showadp34 checks
+*** FLOP *** [4s 5d Jc]
+showadp34 checks
+horscontrole checks
+jelachatte checks
+bluffdeouf83 checks
+*** TURN *** [4s 5d Jc][8h]
+showadp34 bets 0.02€
+horscontrole calls 0.02€
+jelachatte calls 0.02€
+bluffdeouf83 calls 0.02€
+*** RIVER *** [4s 5d Jc 8h][5c]
+showadp34 bets 0.17€
+horscontrole folds
+jelachatte folds
+bluffdeouf83 calls 0.17€
+*** SHOW DOWN ***
+bluffdeouf83 shows [7s Th Ad 6h 3s] (Straight 8 high)
+showadp34 shows [Kd 9d 8d Kc 8s] (Full of 8 and 5)
+showadp34 collected 0.48€ from pot
+*** SUMMARY ***
+Total pot 0.48€ | Rake 0.03€
+Board: [4s 5d Jc 8h 5c]
+Seat 1: showadp34 (big blind) showed [Kd 9d 8d Kc 8s] and won 0.48€ with Full of 8 and 5
+Seat 5: bluffdeouf83 (button) showed [7s Th Ad 6h 3s] and lost with Straight 8 high
+
+
+Winamax Poker - CashGame - HandId: #17022705-485-1646501442 - 5 Card Omaha pot limit (0.01€/0.02€) - 2022/03/05 17:30:42 UTC
+Table: 'Ferrare 02' 6-max (real money) Seat #6 is the button
+Seat 1: showadp34 (2.71€)
+Seat 2: horscontrole (1.96€)
+Seat 3: sanslgs (3.17€)
+Seat 4: jelachatte (2.27€)
+Seat 5: bluffdeouf83 (1.41€)
+Seat 6: AAdamaSS (4.46€)
+*** ANTE/BLINDS ***
+showadp34 posts small blind 0.01€
+horscontrole posts big blind 0.02€
+Dealt to jelachatte [Kc 3h 2h 8d 6c]
+*** PRE-FLOP *** 
+sanslgs folds
+jelachatte folds
+bluffdeouf83 calls 0.02€
+AAdamaSS folds
+showadp34 calls 0.01€
+horscontrole checks
+*** FLOP *** [Js 8h Ad]
+showadp34 bets 0.02€
+horscontrole calls 0.02€
+bluffdeouf83 calls 0.02€
+*** TURN *** [Js 8h Ad][8s]
+showadp34 checks
+horscontrole checks
+bluffdeouf83 checks
+*** RIVER *** [Js 8h Ad 8s][Kd]
+showadp34 checks
+horscontrole checks
+bluffdeouf83 checks
+*** SHOW DOWN ***
+horscontrole shows [6s 7h Ac 4d 4c] (Two pairs : Aces and 8)
+bluffdeouf83 shows [4s 5c Kh As 7s] (Two pairs : Aces and Kings)
+showadp34 shows [Jh Ah 5d Qh Th] (Straight Ace high)
+showadp34 collected 0.11€ from pot
+*** SUMMARY ***
+Total pot 0.11€ | Rake 0.01€
+Board: [Js 8h Ad 8s Kd]
+Seat 1: showadp34 (small blind) showed [Jh Ah 5d Qh Th] and won 0.11€ with Straight Ace high
+Seat 2: horscontrole (big blind) showed [6s 7h Ac 4d 4c] and lost with Two pairs : Aces and 8
+Seat 5: bluffdeouf83 showed [4s 5c Kh As 7s] and lost with Two pairs : Aces and Kings
+
+

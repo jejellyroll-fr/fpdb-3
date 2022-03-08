@@ -1,0 +1,619 @@
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 10 - HandId: #2261080310298968326-60-1645561480 - Holdem no limit (60/250/500) - 2022/02/22 20:24:40 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #2 is the button
+Seat 1: Tony_Bk95 (12419)
+Seat 2: Cordoba SR (10085)
+Seat 3: Rohnie75 (33871)
+Seat 4: jelachatte (20544)
+Seat 5: Magichris (23180)
+Seat 6: audsid (19901)
+*** ANTE/BLINDS ***
+Rohnie75 posts ante 60
+jelachatte posts ante 60
+Tony_Bk95 posts ante 60
+Cordoba SR posts ante 60
+Magichris posts ante 60
+audsid posts ante 60
+Rohnie75 posts small blind 250
+jelachatte posts big blind 500
+Dealt to jelachatte [2h Td]
+*** PRE-FLOP *** 
+Magichris folds
+audsid folds
+Tony_Bk95 calls 500
+Cordoba SR folds
+Rohnie75 calls 250
+jelachatte checks
+*** FLOP *** [7s Jc 4d]
+Rohnie75 checks
+jelachatte checks
+Tony_Bk95 bets 500
+Rohnie75 folds
+jelachatte folds
+Tony_Bk95 collected 2360 from pot
+*** SUMMARY ***
+Total pot 2360 | No rake
+Board: [7s Jc 4d]
+Seat 1: Tony_Bk95 won 2360
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 10 - HandId: #2261080310298968326-61-1645561565 - Holdem no limit (60/250/500) - 2022/02/22 20:26:05 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #3 is the button
+Seat 1: Tony_Bk95 (13719)
+Seat 2: Cordoba SR (10025)
+Seat 3: Rohnie75 (33311)
+Seat 4: jelachatte (19984)
+Seat 5: Magichris (23120)
+Seat 6: audsid (19841)
+*** ANTE/BLINDS ***
+jelachatte posts ante 60
+Magichris posts ante 60
+Tony_Bk95 posts ante 60
+Cordoba SR posts ante 60
+Rohnie75 posts ante 60
+audsid posts ante 60
+jelachatte posts small blind 250
+Magichris posts big blind 500
+Dealt to jelachatte [5d Ad]
+*** PRE-FLOP *** 
+audsid folds
+Tony_Bk95 folds
+Cordoba SR folds
+Rohnie75 raises 500 to 1000
+jelachatte raises 2580 to 3580
+Magichris folds
+Rohnie75 folds
+jelachatte collected 5440 from pot
+*** SUMMARY ***
+Total pot 5440 | No rake
+Seat 4: jelachatte (small blind) won 5440
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 11 - HandId: #2261080310298968326-62-1645561599 - Holdem no limit (70/300/600) - 2022/02/22 20:26:39 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #4 is the button
+Seat 1: Tony_Bk95 (13659)
+Seat 2: Cordoba SR (9965)
+Seat 3: Rohnie75 (32251)
+Seat 4: jelachatte (21784)
+Seat 5: Magichris (22560)
+Seat 6: audsid (19781)
+*** ANTE/BLINDS ***
+Magichris posts ante 70
+audsid posts ante 70
+Tony_Bk95 posts ante 70
+Cordoba SR posts ante 70
+Rohnie75 posts ante 70
+jelachatte posts ante 70
+Magichris posts small blind 300
+audsid posts big blind 600
+Dealt to jelachatte [Th 2d]
+*** PRE-FLOP *** 
+Tony_Bk95 folds
+Cordoba SR folds
+Rohnie75 raises 600 to 1200
+jelachatte folds
+Magichris folds
+audsid folds
+Rohnie75 collected 2520 from pot
+*** SUMMARY ***
+Total pot 2520 | No rake
+Seat 3: Rohnie75 won 2520
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 11 - HandId: #2261080310298968326-63-1645561629 - Holdem no limit (70/300/600) - 2022/02/22 20:27:09 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #5 is the button
+Seat 1: Tony_Bk95 (13589)
+Seat 2: Cordoba SR (9895)
+Seat 3: Rohnie75 (33501)
+Seat 4: jelachatte (21714)
+Seat 5: Magichris (22190)
+Seat 6: audsid (19111)
+*** ANTE/BLINDS ***
+audsid posts ante 70
+Tony_Bk95 posts ante 70
+Cordoba SR posts ante 70
+Rohnie75 posts ante 70
+jelachatte posts ante 70
+Magichris posts ante 70
+audsid posts small blind 300
+Tony_Bk95 posts big blind 600
+Dealt to jelachatte [Kh Jd]
+*** PRE-FLOP *** 
+Cordoba SR folds
+Rohnie75 folds
+jelachatte raises 900 to 1500
+Magichris raises 2400 to 3900
+audsid folds
+Tony_Bk95 folds
+jelachatte calls 2400
+*** FLOP *** [2h As 9d]
+jelachatte checks
+Magichris checks
+*** TURN *** [2h As 9d][Qh]
+jelachatte checks
+Magichris bets 3010
+jelachatte calls 3010
+*** RIVER *** [2h As 9d Qh][4d]
+jelachatte checks
+Magichris checks
+*** SHOW DOWN ***
+jelachatte shows [Kh Jd] (High card : Ace)
+Magichris shows [5d Ad] (One pair : Aces)
+Magichris collected 15140 from pot
+*** SUMMARY ***
+Total pot 15140 | No rake
+Board: [2h As 9d Qh 4d]
+Seat 4: jelachatte showed [Kh Jd] and lost with High card : Ace
+Seat 5: Magichris (button) showed [5d Ad] and won 15140 with One pair : Aces
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 11 - HandId: #2261080310298968326-64-1645561687 - Holdem no limit (70/300/600) - 2022/02/22 20:28:07 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #6 is the button
+Seat 1: Tony_Bk95 (12919)
+Seat 2: Cordoba SR (9825)
+Seat 3: Rohnie75 (33431)
+Seat 4: jelachatte (14734)
+Seat 5: Magichris (30350)
+Seat 6: audsid (18741)
+*** ANTE/BLINDS ***
+Tony_Bk95 posts ante 70
+Cordoba SR posts ante 70
+Rohnie75 posts ante 70
+jelachatte posts ante 70
+Magichris posts ante 70
+audsid posts ante 70
+Tony_Bk95 posts small blind 300
+Cordoba SR posts big blind 600
+Dealt to jelachatte [4s Td]
+*** PRE-FLOP *** 
+Rohnie75 raises 600 to 1200
+jelachatte folds
+Magichris calls 1200
+audsid folds
+Tony_Bk95 folds
+Cordoba SR folds
+*** FLOP *** [Ad Ah Th]
+Rohnie75 checks
+Magichris checks
+*** TURN *** [Ad Ah Th][4d]
+Rohnie75 checks
+Magichris checks
+*** RIVER *** [Ad Ah Th 4d][5h]
+Rohnie75 checks
+Magichris bets 1500
+Rohnie75 folds
+Magichris collected 5220 from pot
+*** SUMMARY ***
+Total pot 5220 | No rake
+Board: [Ad Ah Th 4d 5h]
+Seat 5: Magichris won 5220
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 11 - HandId: #2261080310298968326-65-1645561775 - Holdem no limit (70/300/600) - 2022/02/22 20:29:35 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #1 is the button
+Seat 1: Tony_Bk95 (12549)
+Seat 2: Cordoba SR (9155)
+Seat 3: Rohnie75 (32161)
+Seat 4: jelachatte (14664)
+Seat 5: Magichris (32800)
+Seat 6: audsid (18671)
+*** ANTE/BLINDS ***
+Cordoba SR posts ante 70
+Rohnie75 posts ante 70
+Tony_Bk95 posts ante 70
+jelachatte posts ante 70
+Magichris posts ante 70
+audsid posts ante 70
+Cordoba SR posts small blind 300
+Rohnie75 posts big blind 600
+Dealt to jelachatte [2s 7s]
+*** PRE-FLOP *** 
+jelachatte folds
+Magichris folds
+audsid folds
+Tony_Bk95 folds
+Cordoba SR raises 8485 to 9085 and is all-in
+Rohnie75 calls 8485
+*** FLOP *** [Kc Tc 6c]
+*** TURN *** [Kc Tc 6c][Jc]
+*** RIVER *** [Kc Tc 6c Jc][5s]
+*** SHOW DOWN ***
+Cordoba SR shows [Jd 5d] (Two pairs : Jacks and 5)
+Rohnie75 shows [Kd Ks] (Trips of Kings)
+Rohnie75 collected 18590 from pot
+*** SUMMARY ***
+Total pot 18590 | No rake
+Board: [Kc Tc 6c Jc 5s]
+Seat 2: Cordoba SR (small blind) showed [Jd 5d] and lost with Two pairs : Jacks and 5
+Seat 3: Rohnie75 (big blind) showed [Kd Ks] and won 18590 with Trips of Kings
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 11 - HandId: #2261080310298968326-66-1645561810 - Holdem no limit (70/300/600) - 2022/02/22 20:30:10 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #2 is the button
+Seat 1: Tony_Bk95 (12479)
+Seat 3: Rohnie75 (41596)
+Seat 4: jelachatte (14594)
+Seat 5: Magichris (32730)
+Seat 6: audsid (18601)
+*** ANTE/BLINDS ***
+Rohnie75 posts ante 70
+jelachatte posts ante 70
+Tony_Bk95 posts ante 70
+Magichris posts ante 70
+audsid posts ante 70
+Rohnie75 posts small blind 300
+jelachatte posts big blind 600
+Dealt to jelachatte [Qs Td]
+*** PRE-FLOP *** 
+Magichris raises 708 to 1308
+audsid folds
+Tony_Bk95 folds
+Rohnie75 folds
+jelachatte calls 708
+*** FLOP *** [8d Qh Ac]
+jelachatte checks
+Magichris checks
+*** TURN *** [8d Qh Ac][As]
+jelachatte checks
+Magichris checks
+*** RIVER *** [8d Qh Ac As][3h]
+jelachatte checks
+Magichris checks
+*** SHOW DOWN ***
+Magichris shows [9c 9s] (Two pairs : Aces and 9)
+jelachatte shows [Qs Td] (Two pairs : Aces and Queens)
+jelachatte collected 3266 from pot
+*** SUMMARY ***
+Total pot 3266 | No rake
+Board: [8d Qh Ac As 3h]
+Seat 4: jelachatte (big blind) showed [Qs Td] and won 3266 with Two pairs : Aces and Queens
+Seat 5: Magichris showed [9c 9s] and lost with Two pairs : Aces and 9
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 11 - HandId: #2261080310298968326-67-1645561869 - Holdem no limit (70/300/600) - 2022/02/22 20:31:09 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #3 is the button
+Seat 1: Tony_Bk95 (12409)
+Seat 2: Bookyto (24237)
+Seat 3: Rohnie75 (41226)
+Seat 4: jelachatte (16482)
+Seat 5: Magichris (31352)
+Seat 6: audsid (18531)
+*** ANTE/BLINDS ***
+jelachatte posts ante 70
+Magichris posts ante 70
+Tony_Bk95 posts ante 70
+Bookyto posts ante 70
+Rohnie75 posts ante 70
+audsid posts ante 70
+jelachatte posts small blind 300
+Magichris posts big blind 600
+Dealt to jelachatte [4c Qd]
+*** PRE-FLOP *** 
+audsid folds
+Tony_Bk95 folds
+Bookyto calls 600
+Rohnie75 raises 900 to 1500
+jelachatte folds
+Magichris folds
+Bookyto calls 900
+*** FLOP *** [Ks 2c 4h]
+Bookyto checks
+Rohnie75 bets 1800
+Bookyto folds
+Rohnie75 collected 6120 from pot
+*** SUMMARY ***
+Total pot 6120 | No rake
+Board: [Ks 2c 4h]
+Seat 3: Rohnie75 (button) won 6120
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 12 - HandId: #2261080310298968326-68-1645561911 - Holdem no limit (80/350/700) - 2022/02/22 20:31:51 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #4 is the button
+Seat 1: Tony_Bk95 (12339)
+Seat 2: Bookyto (22667)
+Seat 3: Rohnie75 (43976)
+Seat 4: jelachatte (16112)
+Seat 5: Magichris (30682)
+Seat 6: audsid (18461)
+*** ANTE/BLINDS ***
+Magichris posts ante 80
+audsid posts ante 80
+Tony_Bk95 posts ante 80
+Bookyto posts ante 80
+Rohnie75 posts ante 80
+jelachatte posts ante 80
+Magichris posts small blind 350
+audsid posts big blind 700
+Dealt to jelachatte [Ah Th]
+*** PRE-FLOP *** 
+Tony_Bk95 folds
+Bookyto calls 700
+Rohnie75 folds
+jelachatte raises 1806 to 2506
+Magichris folds
+audsid folds
+Bookyto calls 1806
+*** FLOP *** [5c 9c 6h]
+Bookyto checks
+jelachatte bets 3271
+Bookyto calls 3271
+*** TURN *** [5c 9c 6h][3h]
+Bookyto checks
+jelachatte bets 10255 and is all-in
+Bookyto calls 10255
+*** RIVER *** [5c 9c 6h 3h][Jd]
+*** SHOW DOWN ***
+Bookyto shows [Ad 7h] (High card : Ace)
+jelachatte shows [Ah Th] (High card : Ace)
+jelachatte collected 33594 from pot
+*** SUMMARY ***
+Total pot 33594 | No rake
+Board: [5c 9c 6h 3h Jd]
+Seat 2: Bookyto showed [Ad 7h] and lost with High card : Ace
+Seat 4: jelachatte (button) showed [Ah Th] and won 33594 with High card : Ace
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 12 - HandId: #2261080310298968326-69-1645561977 - Holdem no limit (80/350/700) - 2022/02/22 20:32:57 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #5 is the button
+Seat 1: Tony_Bk95 (12259)
+Seat 2: Bookyto (6555)
+Seat 3: Rohnie75 (43896)
+Seat 4: jelachatte (33594)
+Seat 5: Magichris (30252)
+Seat 6: audsid (17681)
+*** ANTE/BLINDS ***
+audsid posts ante 80
+Tony_Bk95 posts ante 80
+Bookyto posts ante 80
+Rohnie75 posts ante 80
+jelachatte posts ante 80
+Magichris posts ante 80
+audsid posts small blind 350
+Tony_Bk95 posts big blind 700
+Dealt to jelachatte [6d Ks]
+*** PRE-FLOP *** 
+Bookyto folds
+Rohnie75 folds
+jelachatte folds
+Magichris folds
+audsid raises 16901 to 17601 and is all-in
+Tony_Bk95 folds
+audsid collected 18781 from pot
+*** SUMMARY ***
+Total pot 18781 | No rake
+Seat 6: audsid (small blind) won 18781
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 12 - HandId: #2261080310298968326-70-1645562006 - Holdem no limit (80/350/700) - 2022/02/22 20:33:26 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #6 is the button
+Seat 1: Tony_Bk95 (11479)
+Seat 2: Bookyto (6475)
+Seat 3: Rohnie75 (43816)
+Seat 4: jelachatte (33514)
+Seat 5: Magichris (30172)
+Seat 6: audsid (18781)
+*** ANTE/BLINDS ***
+Tony_Bk95 posts ante 80
+Bookyto posts ante 80
+Rohnie75 posts ante 80
+jelachatte posts ante 80
+Magichris posts ante 80
+audsid posts ante 80
+Tony_Bk95 posts small blind 350
+Bookyto posts big blind 700
+Dealt to jelachatte [9c 8h]
+*** PRE-FLOP *** 
+Rohnie75 raises 700 to 1400
+jelachatte folds
+Magichris folds
+audsid folds
+Tony_Bk95 folds
+Bookyto calls 700
+*** FLOP *** [5d 7d 2d]
+Bookyto checks
+Rohnie75 checks
+*** TURN *** [5d 7d 2d][6h]
+Bookyto checks
+Rohnie75 checks
+*** RIVER *** [5d 7d 2d 6h][3d]
+Bookyto bets 4995 and is all-in
+Rohnie75 folds
+Bookyto collected 8625 from pot
+*** SUMMARY ***
+Total pot 8625 | No rake
+Board: [5d 7d 2d 6h 3d]
+Seat 2: Bookyto (big blind) won 8625
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 12 - HandId: #2261080310298968326-71-1645562045 - Holdem no limit (80/350/700) - 2022/02/22 20:34:05 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #1 is the button
+Seat 1: Tony_Bk95 (11049)
+Seat 2: Bookyto (8625)
+Seat 3: Rohnie75 (42336)
+Seat 4: jelachatte (33434)
+Seat 5: Magichris (30092)
+Seat 6: audsid (18701)
+*** ANTE/BLINDS ***
+Bookyto posts ante 80
+Rohnie75 posts ante 80
+Tony_Bk95 posts ante 80
+jelachatte posts ante 80
+Magichris posts ante 80
+audsid posts ante 80
+Bookyto posts small blind 350
+Rohnie75 posts big blind 700
+Dealt to jelachatte [Ah 6s]
+*** PRE-FLOP *** 
+jelachatte folds
+Magichris folds
+audsid folds
+Tony_Bk95 folds
+Bookyto folds
+Rohnie75 collected 1530 from pot
+*** SUMMARY ***
+Total pot 1530 | No rake
+Seat 3: Rohnie75 (big blind) won 1530
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 12 - HandId: #2261080310298968326-72-1645562060 - Holdem no limit (80/350/700) - 2022/02/22 20:34:20 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #2 is the button
+Seat 1: Tony_Bk95 (10969)
+Seat 2: Bookyto (8195)
+Seat 3: Rohnie75 (43086)
+Seat 4: jelachatte (33354)
+Seat 5: Magichris (30012)
+Seat 6: audsid (18621)
+*** ANTE/BLINDS ***
+Rohnie75 posts ante 80
+jelachatte posts ante 80
+Tony_Bk95 posts ante 80
+Bookyto posts ante 80
+Magichris posts ante 80
+audsid posts ante 80
+Rohnie75 posts small blind 350
+jelachatte posts big blind 700
+Dealt to jelachatte [Kd 2h]
+*** PRE-FLOP *** 
+Magichris folds
+audsid folds
+Tony_Bk95 raises 700 to 1400
+Bookyto folds
+Rohnie75 folds
+jelachatte folds
+Tony_Bk95 collected 2930 from pot
+*** SUMMARY ***
+Total pot 2930 | No rake
+Seat 1: Tony_Bk95 won 2930
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 12 - HandId: #2261080310298968326-73-1645562081 - Holdem no limit (80/350/700) - 2022/02/22 20:34:41 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #3 is the button
+Seat 1: Tony_Bk95 (12419)
+Seat 2: Bookyto (8115)
+Seat 3: Rohnie75 (42656)
+Seat 4: jelachatte (32574)
+Seat 5: Magichris (29932)
+Seat 6: audsid (18541)
+*** ANTE/BLINDS ***
+jelachatte posts ante 80
+Magichris posts ante 80
+Tony_Bk95 posts ante 80
+Bookyto posts ante 80
+Rohnie75 posts ante 80
+audsid posts ante 80
+jelachatte posts small blind 350
+Magichris posts big blind 700
+Dealt to jelachatte [Jd 7h]
+*** PRE-FLOP *** 
+audsid folds
+Tony_Bk95 folds
+Bookyto calls 700
+Rohnie75 folds
+jelachatte folds
+Magichris raises 29152 to 29852 and is all-in
+Bookyto folds
+Magichris collected 31382 from pot
+*** SUMMARY ***
+Total pot 31382 | No rake
+Seat 5: Magichris (big blind) won 31382
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 12 - HandId: #2261080310298968326-74-1645562122 - Holdem no limit (80/350/700) - 2022/02/22 20:35:22 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #4 is the button
+Seat 1: Tony_Bk95 (12339)
+Seat 2: Bookyto (7335)
+Seat 3: Rohnie75 (42576)
+Seat 4: jelachatte (32144)
+Seat 5: Magichris (31382)
+Seat 6: audsid (18461)
+*** ANTE/BLINDS ***
+Magichris posts ante 80
+audsid posts ante 80
+Tony_Bk95 posts ante 80
+Bookyto posts ante 80
+Rohnie75 posts ante 80
+jelachatte posts ante 80
+Magichris posts small blind 350
+audsid posts big blind 700
+Dealt to jelachatte [7c Ts]
+*** PRE-FLOP *** 
+Tony_Bk95 raises 1400 to 2100
+Bookyto raises 5155 to 7255 and is all-in
+Rohnie75 folds
+jelachatte folds
+Magichris folds
+audsid folds
+Tony_Bk95 calls 5155
+*** FLOP *** [Th 5c Qd]
+*** TURN *** [Th 5c Qd][Tc]
+*** RIVER *** [Th 5c Qd Tc][Jc]
+*** SHOW DOWN ***
+Bookyto shows [Ah 7h] (One pair : Tens)
+Tony_Bk95 shows [As Kd] (Straight Ace high)
+Tony_Bk95 collected 16040 from pot
+*** SUMMARY ***
+Total pot 16040 | No rake
+Board: [Th 5c Qd Tc Jc]
+Seat 1: Tony_Bk95 showed [As Kd] and won 16040 with Straight Ace high
+Seat 2: Bookyto showed [Ah 7h] and lost with One pair : Tens
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 12 - HandId: #2261080310298968326-75-1645562160 - Holdem no limit (80/350/700) - 2022/02/22 20:36:00 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #5 is the button
+Seat 1: Tony_Bk95 (21044)
+Seat 3: Rohnie75 (42496)
+Seat 4: jelachatte (32064)
+Seat 5: Magichris (30952)
+Seat 6: audsid (17681)
+*** ANTE/BLINDS ***
+audsid posts ante 80
+Tony_Bk95 posts ante 80
+Rohnie75 posts ante 80
+jelachatte posts ante 80
+Magichris posts ante 80
+audsid posts small blind 350
+Tony_Bk95 posts big blind 700
+Dealt to jelachatte [Jd 7s]
+*** PRE-FLOP *** 
+Rohnie75 folds
+jelachatte folds
+Magichris folds
+audsid folds
+Tony_Bk95 collected 1450 from pot
+*** SUMMARY ***
+Total pot 1450 | No rake
+Seat 1: Tony_Bk95 (big blind) won 1450
+
+
+Winamax Poker - Tournament "KING 5 - Stade 1D" buyIn: 0€ + 0€ level: 12 - HandId: #2261080310298968326-76-1645562180 - Holdem no limit (80/350/700) - 2022/02/22 20:36:20 UTC
+Table: 'KING 5 - Stade 1D(526448784)#0261' 6-max (real money) Seat #6 is the button
+Seat 1: Tony_Bk95 (21714)
+Seat 3: Rohnie75 (42416)
+Seat 4: jelachatte (31984)
+Seat 5: Magichris (30872)
+Seat 6: audsid (17251)
+*** ANTE/BLINDS ***
+Tony_Bk95 posts ante 80
+Rohnie75 posts ante 80
+jelachatte posts ante 80
+Magichris posts ante 80
+audsid posts ante 80
+Tony_Bk95 posts small blind 350
+Rohnie75 posts big blind 700
+Dealt to jelachatte [8c Ac]
+*** PRE-FLOP *** 
+jelachatte raises 1050 to 1750
+Magichris folds
+audsid folds
+Tony_Bk95 folds
+Rohnie75 calls 1050
+*** FLOP *** [Ah 5s 7c]
+Rohnie75 checks
+jelachatte bets 2125
+Rohnie75 folds
+jelachatte collected 6375 from pot
+*** SUMMARY ***
+Total pot 6375 | No rake
+Board: [Ah 5s 7c]
+Seat 4: jelachatte won 6375
+
+

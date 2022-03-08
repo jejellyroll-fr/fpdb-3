@@ -1,0 +1,17 @@
+Winamax Poker - CashGame - HandId: #16976649-2-1645389014 - Razz fixed limit (0.01€/0.05€/0.10€) - 2022/02/20 20:30:14 UTC
+Table: 'Munich 02' 6-max (real money) 
+Seat 1: SoGood36 (2.12€)
+Seat 2: jelachatte (2€)
+*** ANTE/BLINDS ***
+SoGood36 posts ante 0.01€
+jelachatte posts ante 0.01€
+*** 3rd STREET ***
+Dealt to SoGood36 [X X 3c]
+Dealt to jelachatte [6h 6d Th]
+jelachatte brings in 0.02€
+SoGood36 raises 0.03€ to 0.05€
+jelachatte folds
+SoGood36 collected 0.09€ from pot
+*** SUMMARY ***
+Total pot 0.09€ | No rake
+Seat 1: SoGood36 won 0.09€

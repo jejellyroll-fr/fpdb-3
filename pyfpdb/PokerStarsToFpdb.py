@@ -278,7 +278,7 @@ class PokerStars(HandHistoryConverter):
         m = self.re_GameInfo.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(_("PokerStarsToFpdb.determineGameType: '%s'") % tmp)
+            log.error(("PokerStarsToFpdb.determineGameType: '%s'") % tmp)
             raise FpdbParseError
 
         mg = m.groupdict()

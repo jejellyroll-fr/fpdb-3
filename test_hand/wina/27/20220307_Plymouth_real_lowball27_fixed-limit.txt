@@ -1,0 +1,54 @@
+Winamax Poker - CashGame - HandId: #17028487-878-1646691380 - 2-7 Triple Draw fixed limit (0.05€/0.10€) - 2022/03/07 22:16:20 UTC
+Table: 'Plymouth' 6-max (real money) Seat #3 is the button
+Seat 1: Kurcias. (2.32€)
+Seat 2: SorryGuyyys (2€)
+Seat 3: Baltik23 (3.48€)
+Seat 4: Dragon2940 (1.73€)
+Seat 5: G0tDaNuts (4.18€)
+Seat 6: jelachatte (2€)
+*** ANTE/BLINDS ***
+G0tDaNuts posts small blind 0.02€
+jelachatte posts big blind 0.05€
+*** FIRST-BET ***
+Dealt to Kurcias. [X X X X X]
+Dealt to SorryGuyyys [X X X X X]
+Dealt to Baltik23 [X X X X X]
+Dealt to G0tDaNuts [X X X X X]
+Dealt to jelachatte [Js 7c 6d 4h 6h]
+Kurcias. calls 0.05€
+SorryGuyyys folds
+Baltik23 calls 0.05€
+G0tDaNuts raises 0.05€ to 0.10€
+jelachatte folds
+Kurcias. calls 0.05€
+Baltik23 calls 0.05€
+*** FIRST-DRAW ***
+G0tDaNuts stands pat [X X X X X]
+Kurcias. stands pat [X X X X X]
+Baltik23 stands pat [X X X X X]
+*** SECOND-BET ***
+G0tDaNuts bets 0.05€
+Kurcias. calls 0.05€
+Baltik23 calls 0.05€
+*** SECOND-DRAW ***
+G0tDaNuts stands pat [X X X X X]
+Kurcias. stands pat [X X X X X]
+Baltik23 stands pat [X X X X X]
+*** THIRD-BET ***
+G0tDaNuts bets 0.10€
+Kurcias. calls 0.10€
+Baltik23 calls 0.10€
+*** THIRD-DRAW ***
+G0tDaNuts stands pat [X X X X X]
+Kurcias. stands pat [X X X X X]
+Baltik23 stands pat [X X X X X]
+*** FOURTH-BET ***
+G0tDaNuts bets 0.10€
+Kurcias. folds
+Baltik23 folds
+G0tDaNuts collected 0.85€ from pot
+*** SUMMARY ***
+Total pot 0.85€ | Rake 0.05€
+Seat 5: G0tDaNuts (small blind) won 0.85€
+
+
