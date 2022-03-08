@@ -1,0 +1,31 @@
+﻿PokerStars Hand #234640053783:  Fusion Pot Limit (�0.01/�0.02 EUR) - 2022/03/08 0:02:56 CET [2022/03/07 18:02:56 ET]
+Table 'Brown II' 6-max Seat #5 is the button
+Seat 2: akiko75 (�2.09 in chips) 
+Seat 3: jeje_sat (�2 in chips) 
+Seat 4: legrandip (�3.42 in chips) 
+Seat 5: dakan59650 (�2.09 in chips) 
+akiko75: posts small blind �0.01
+jeje_sat: posts big blind �0.02
+*** HOLE CARDS ***
+Dealt to jeje_sat [As 9s]
+legrandip: folds 
+dakan59650: folds 
+akiko75: calls �0.01
+jeje_sat: raises �0.04 to �0.06
+akiko75: calls �0.04
+*** FLOP *** [3s Kc 8s]
+Dealt to jeje_sat [As 9s] [5d]
+akiko75 has timed out
+akiko75: checks 
+jeje_sat: bets �0.06
+akiko75: folds 
+Uncalled bet (�0.06) returned to jeje_sat
+jeje_sat collected �0.11 from pot
+jeje_sat: doesn't show hand 
+*** SUMMARY ***
+Total pot �0.12 | Rake �0.01 
+Board [3s Kc 8s]
+Seat 2: akiko75 (small blind) folded on the Flop
+Seat 3: jeje_sat (big blind) collected (�0.11)
+Seat 4: legrandip folded before Flop (didn't bet)
+Seat 5: dakan59650 (button) folded before Flop (didn't bet)
