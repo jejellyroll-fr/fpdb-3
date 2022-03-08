@@ -1,0 +1,46 @@
+
+
+
+PokerStars Hand #234640075145:  Fusion Pot Limit (Ä0.01/Ä0.02 EUR) - 2022/03/08 0:03:50 CET [2022/03/07 18:03:50 ET]
+Table 'Brown II' 6-max Seat #2 is the button
+Seat 2: akiko75 (Ä2.03 in chips) 
+Seat 3: jeje_sat (Ä2.05 in chips) 
+Seat 4: legrandip (Ä3.42 in chips) 
+Seat 5: dakan59650 (Ä2.09 in chips) 
+jeje_sat: posts small blind Ä0.01
+legrandip: posts big blind Ä0.02
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c 7h]
+dakan59650: folds 
+akiko75: raises Ä0.02 to Ä0.04
+jeje_sat: calls Ä0.03
+legrandip: calls Ä0.02
+*** FLOP *** [Kd 7d Ts]
+Dealt to jeje_sat [6c 7h] [2c]
+jeje_sat: checks 
+legrandip: checks 
+akiko75: checks 
+*** TURN *** [Kd 7d Ts] [Kc]
+Dealt to jeje_sat [6c 7h 2c] [9h]
+jeje_sat: checks 
+legrandip: checks 
+akiko75: checks 
+*** RIVER *** [Kd 7d Ts Kc] [Jd]
+jeje_sat: checks 
+legrandip: checks 
+akiko75: checks 
+*** SHOW DOWN ***
+jeje_sat: shows [6c 7h 2c 9h] (two pair, Kings and Sevens)
+legrandip: shows [9d 9s Ac 8h] (a straight, Seven to Jack)
+akiko75: shows [Ah 6d Qh Jh] (a straight, Ten to Ace)
+akiko75 collected Ä0.11 from pot
+*** SUMMARY ***
+Total pot Ä0.12 | Rake Ä0.01 
+Board [Kd 7d Ts Kc Jd]
+Seat 2: akiko75 (button) showed [Ah 6d Qh Jh] and won (Ä0.11) with a straight, Ten to Ace
+Seat 3: jeje_sat (small blind) showed [6c 7h 2c 9h] and lost with two pair, Kings and Sevens
+Seat 4: legrandip (big blind) showed [9d 9s Ac 8h] and lost with a straight, Seven to Jack
+Seat 5: dakan59650 folded before Flop (didn't bet)
+
+
+
