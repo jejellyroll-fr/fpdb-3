@@ -1,6 +1,7 @@
 # FPDB 3
 
-starting new project base on fpdb python3 adaptation of MegaphoneJon (tx to all previous contribs)
+starting new project base on fpdb python3 adaptation of MegaphoneJon and update from ChazDazzle 
+(tx to all previous contribs)
 
 ## Updating to python 3.9
 
