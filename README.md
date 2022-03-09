@@ -1,13 +1,17 @@
 # FPDB 3
+
 starting new project base on fpdb python3 adaptation of MegaphoneJon (tx to all previous contibs)
+
 ## Updating to python 3.9
+
 FPDB is a poker tools - HUD - Replayer
 
 ## understand architecture soft
 
 - see fpdb.drawio (WIP)
 
-## to do
+## To do
+
 >database
 - not working mysql connector on py3.9 -> import MySQLdb
 >translation
@@ -19,57 +23,46 @@ FPDB is a poker tools - HUD - Replayer
 - rethink the distribution of players around the table
 >import
 - correct bug on winamax (no SB)->Fixed
-- correct bug go fast (adding oldhup, error collected pot>total pot)->fixed
+- correct bug go fast (adding holdhup(extra cash->special rakr 10%), error collected pot>total pot)->fixed
 - correct bug starting  hand razz guiringcashplayer
 >hud
 - windows and mac not appear
 - linuc disappear behind the table
+>ui
+- dark theme
+- more modern
+>language
+- not working
 
 
-## Requirement
+## Requirement for dev 
+
 ```sh
-cd dillinger
-npm i
-node app
+pip install -r requirements.txt
 ```
 
 
 ## Installation
 
-
-Install the dependencies and devDependencies and start the server.
-
+Install the dependencies and devDependencies .
+ Use anaconda Python 3.9
 ```sh
-cd dillinger
-npm i
-node app
+conda activate
 ```
 
-For production environments...
-
-```sh
-npm install --production
-NODE_ENV=production node app
-```
 
 ## Plugins
-
-
 
 |  |  |
 |  | |
 
-
 ## Development
-
 
 
 #### Building for source
 
 
 ## Docker
-
-
 
 > Note: `--capt-add=SYS-ADMIN` is required for PDF rendering.
 
