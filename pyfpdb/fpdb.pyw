@@ -880,6 +880,9 @@ class fpdb(QMainWindow):
 
         log = logging.getLogger("fpdb")
         print ((("Logfile is %s") % os.path.join(self.config.dir_log, self.config.log_file)))
+        print("load profiles", self.config.example_copy)
+        print(self.display_config_created_dialogue)
+        print(self.config.wrongConfigVersion)
         if self.config.example_copy or self.display_config_created_dialogue:
             self.info_box(("Config file"),
                           ("Config file has been created at %s.") % self.config.file + " "

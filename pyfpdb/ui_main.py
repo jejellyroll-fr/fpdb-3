@@ -22,7 +22,8 @@ from PyQt5.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
     QRadialGradient)
 from PyQt5.QtWidgets import *
 
-import files_rc
+import files_rc as files_rc
+import ui_sites_settings
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -698,6 +699,14 @@ class Ui_MainWindow(object):
         self.stackedWidget = QStackedWidget(self.frame_content)
         self.stackedWidget.setObjectName(u"stackedWidget")
         self.stackedWidget.setStyleSheet(u"background: transparent;")
+
+
+
+    ########################################################################
+    ## Pages ==> Home page
+    ########################################################################
+
+
         self.page_home = QWidget()
         self.page_home.setObjectName(u"page_home")
         self.verticalLayout_10 = QVBoxLayout(self.page_home)
@@ -734,6 +743,22 @@ class Ui_MainWindow(object):
         self.verticalLayout_10.addWidget(self.label_7)
 
         self.stackedWidget.addWidget(self.page_home)
+    ########################################################################
+    ## Pages ==> End Home page
+    ########################################################################
+    ########################################################################
+    ## Pages ==> site setting
+    ########################################################################
+
+
+        page_setting = ui_sites_settings.Ui_Sites_setting.sitesUi(self)
+        
+        self.stackedWidget.addWidget(page_setting)
+    ########################################################################
+    ## Pages ==> widgets page
+    ########################################################################
+
+
         self.page_widgets = QWidget()
         self.page_widgets.setObjectName(u"page_widgets")
         self.verticalLayout_6 = QVBoxLayout(self.page_widgets)
