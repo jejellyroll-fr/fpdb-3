@@ -17,7 +17,7 @@ FPDB is a poker tools - HUD - Replayer
 >replayer
 - not working ->fixed
 - rethink the distribution of players around the table
->>import
+>import
 - correct bug on winamax (no SB)->Fixed
 - correct bug go fast (adding oldhup, error collected pot>total pot)->fixed
 - correct bug starting  hand razz guiringcashplayer
