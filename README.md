@@ -8,19 +8,20 @@ FPDB is a poker tools - HUD - Replayer
 - see fpdb.drawio (WIP)
 
 ## to do
-database
+>database
 - not working mysql connector on py3.9 -> import MySQLdb
-translation
+>translation
 - mot working translation -> from icu import Locale
-pokerstove
+>pokerstove
 - add odds calc (fast solution-> use Pokerprotools online WIP) 
-replayer
+>replayer
+- not working ->fixed
 - rethink the distribution of players around the table
-import
+>>import
 - correct bug on winamax (no SB)->Fixed
 - correct bug go fast (adding oldhup, error collected pot>total pot)->fixed
 - correct bug starting  hand razz guiringcashplayer
-hud
+>hud
 -windows and mac not appear
 -linuc disappear behind the table
 
