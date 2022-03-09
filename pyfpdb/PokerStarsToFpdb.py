@@ -344,7 +344,7 @@ class PokerStars(HandHistoryConverter):
                     log.error(("PokerStarsToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
                     raise FpdbParseError
             else:
-                info['sb'] = str((Decimal(mg['SB'])/2).quantize(Decimal("0.01")))
+                info['sb'] = str(old_div((Decimal(mg['SB']),2)).quantize(Decimal("0.01")))
                 info['bb'] = str(Decimal(mg['SB']).quantize(Decimal("0.01")))    
 
         return info
@@ -425,7 +425,7 @@ class PokerStars(HandHistoryConverter):
                             hand.buyinCurrency="play"
                         else:
                             #FIXME: handle other currencies, play money
-                            log.error(_("PokerStarsToFpdb.readHandInfo: Failed to detect currency.") + " Hand ID: %s: '%s'" % (hand.handid, info[key]))
+                            log.error(("PokerStarsToFpdb.readHandInfo: Failed to detect currency.") + " Hand ID: %s: '%s'" % (hand.handid, info[key]))
                             raise FpdbParseError
 
                         info['BIAMT'] = info['BIAMT'].strip(u'$€£FPPSC₹')
@@ -715,10 +715,10 @@ class PokerStars(HandHistoryConverter):
                 for pname, amount in koAmounts.iteritems():
                     if pname == winner:
                         end = (amount + hand.endBounty[pname])
-                        hand.koCounts[pname] = (amount + hand.endBounty[pname]) / Decimal(hand.koBounty)
+                        hand.koCounts[pname] = old_div((amount + hand.endBounty[pname]) , Decimal(hand.koBounty))
                     else:
                         end = 0
-                        hand.koCounts[pname] = amount / Decimal(hand.koBounty)
+                        hand.koCounts[pname] = old_div(amount , (Decimal(hand.koBounty)))
         else:
             for a in self.re_Bounty.finditer(hand.handText):
                 if a.group('SPLIT') == 'split':
@@ -726,7 +726,7 @@ class PokerStars(HandHistoryConverter):
                     for pname in pnames:
                         if pname not in hand.koCounts:
                             hand.koCounts[pname] = 0
-                        hand.koCounts[pname] += (1 / Decimal(len(pnames)))
+                        hand.koCounts[pname] += old_div(1 , (Decimal(len(pnames))))
                 else:
                     if a.group('PNAME') not in hand.koCounts:
                         hand.koCounts[a.group('PNAME')] = 0
