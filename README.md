@@ -22,8 +22,8 @@ FPDB is a poker tools - HUD - Replayer
 - correct bug go fast (adding oldhup, error collected pot>total pot)->fixed
 - correct bug starting  hand razz guiringcashplayer
 >hud
--windows and mac not appear
--linuc disappear behind the table
+- windows and mac not appear
+- linuc disappear behind the table
 
 
 ## Requirement
