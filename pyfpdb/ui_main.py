@@ -750,10 +750,15 @@ class Ui_MainWindow(object):
     ## Pages ==> site setting
     ########################################################################
 
-
-        page_setting = ui_sites_settings.Ui_Sites_setting.sitesUi(self)
+        ui_sites_settings.Ui_Sites_setting.sitesUi(self)
+        # self.page_sites_settings = QWidget()
+        # self.page_sites_settings.setObjectName(u"page_sites_settings")
+        # self.verticalLayout_sites_settings= QVBoxLayout(self.page_sites_settings)
+        # self.verticalLayout_sites_settings.setObjectName(u"verticalLayout_sites_settings")
+        # self.label_sites_settings = QLabel(("Please select which sites you play on and enter your usernames."))
+        #self.verticalLayout_sites_settings.addWidget(self.label_sites_settings)
         
-        self.stackedWidget.addWidget(page_setting)
+        self.stackedWidget.addWidget(self.page_sites_settings)
     ########################################################################
     ## Pages ==> widgets page
     ########################################################################

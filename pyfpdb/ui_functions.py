@@ -24,7 +24,7 @@ GLOBAL_TITLE_BAR = True
 ## ==> COUT INITIAL MENU
 count = 1
 
-class UIFunctions(MainWindow):
+class UIFunctions(object):
 
     ## ==> GLOBALS
     GLOBAL_STATE = 0
