@@ -58,7 +58,7 @@ class GuiHandViewer(QSplitter):
 
         
         filters_display = { "Heroes"    : True,
-                    "Sites"     : True,
+                    "Sites"     : False,
                     "Games"     : True,
                     "Currencies": False,
                     "Limits"    : True,
@@ -69,7 +69,7 @@ class GuiHandViewer(QSplitter):
                     "Seats"     : False,
                     "SeatSep"   : False,
                     "Dates"     : True,
-                    "Cards"     : True,
+                    "Cards"     : False,
                     "Groups"    : False,
                     "GroupsAll" : False,
                     "Button1"   : True,
@@ -121,7 +121,7 @@ class GuiHandViewer(QSplitter):
         self.view.setModel(self.filterModel)
         self.view.verticalHeader().hide()
         self.model.setHorizontalHeaderLabels(
-            ['Stakes', 'Pos', 'Street0', 'Action0', 'Street1-4', 'Action1-4',
+            ['Stakes', 'Position', 'Hands', 'Preflop Action', 'Board', 'Postflop Action',
              'Won', 'Bet', 'Net', 'Game', 'HandId'])
 
         self.view.doubleClicked.connect(self.row_activated)
