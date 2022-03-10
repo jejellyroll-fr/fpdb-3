@@ -23,13 +23,15 @@ from builtins import range
 from past.utils import old_div
 import L10n
 _ = L10n.get_translation()
+import pathlib
 
+from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QDate, QDateTime
 from PyQt5.QtWidgets import (QCalendarWidget, QCheckBox, QCompleter,
                              QDateEdit, QDialog, QGridLayout,
                              QGroupBox, QHBoxLayout, QLabel,
                              QLineEdit, QPushButton, QRadioButton,
-                             QSpinBox, QVBoxLayout, QWidget)
+                             QSpinBox, QVBoxLayout, QWidget, QComboBox)
 
 from time import gmtime, mktime, strftime, strptime
 from functools import partial
@@ -409,13 +411,25 @@ class Filters(QWidget):
         vbox = QVBoxLayout()
         frame.setLayout(vbox)
 
-        for site in self.conf.get_supported_sites():
+        self.heroList = QComboBox()
+        current_directory = str(pathlib.Path(__file__).parent.absolute())
+        
+        for count,site in enumerate(self.conf.get_supported_sites(), start=1):
             player = self.conf.supported_sites[site].screen_name
             _pname = player
-            vbox.addWidget(QLabel(site +" id:"))
+            #vbox.addWidget(QLabel(site +" id:"))
 
             self.leHeroes[site] = QLineEdit(_pname)
-            vbox.addWidget(self.leHeroes[site])
+            if site == "PokerStars":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon('ps.ico'),completPlayer)
+            if site == "Winamax":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon('wina.ico'),completPlayer)
+            else:
+                completPlayer = _pname+" on "+site
+                self.heroList.insertItem(count,completPlayer)
+            vbox.addWidget(self.heroList)
 
             names = self.db.get_player_names(self.conf, self.siteid[site])
             completer = QCompleter([n[0] for n in names])
