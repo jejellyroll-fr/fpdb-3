@@ -13,10 +13,16 @@ class GuiOddsCalc(QWidget):
 
         self.QLgame = QLabel("Game")
         self.QLEgame = QComboBox()
-        self.QLEgame.insertItem(1, 'he')
-        self.QLEgame.insertItem(2, 'oh')
-        self.QLEgame.insertItem(3, 'oh5')
-        self.QLEgame.insertItem(4, 'o85')
+        he = "hold'em"
+        self.QLEgame.insertItem(1, he)
+        oh = "Omaha"
+        self.QLEgame.insertItem(2, oh)
+        oh5 = "5 card Omaha"
+        self.QLEgame.insertItem(3, oh5)
+        o85 = "5 card Omaha Hi/Lo"
+        self.QLEgame.insertItem(4, o85)
+        o8 = "Omaha Hi/Lo"
+        self.QLEgame.insertItem(5, o8)
         self.QLEgame.setMinimumWidth(300)
         self.QLdeadcard = QLabel("Dead Card")
         self.QLEdeadcard = QLineEdit()        
@@ -81,10 +87,28 @@ class GuiOddsCalc(QWidget):
 
     def load_result(self):
         game = self.QLEgame.currentText()
+        if game == "hold'em":
+            game = 'he'
+        elif game == "Omaha":
+            game = 'oh'
+        elif game == "5 card Omaha":
+            game = 'oh5'
+        elif game == "5 card Omaha Hi/Lo":
+            game = 'o85'
+        elif game == "Omaha Hi/Lo":
+            game = 'o8'
         print(game)
-        odd1 = OddsCalc.OddsCalc(str(game),'','As8s4d9d','AK','89','','','','') 
+        board = self.QLEboard.text()
+        hero = self.QLEhero.text()
+        vilain1 = self.QLEvilain1.text()
+        vilain2 = self.QLEvilain2.text()
+        vilain3 = self.QLEvilain3.text()
+        vilain4 = self.QLEvilain4.text()
+        vilain5 = self.QLEvilain5.text()     
+        odd1 = OddsCalc.OddsCalc(str(game),'',str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5)) 
         
         result_brut = odd1.calcBaseHoldem()
+        print(result_brut)
         row_count = (len(result_brut))
         column_count = (len(result_brut[0]))
         self.QTcalc.setColumnCount(column_count) 
