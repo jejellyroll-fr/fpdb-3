@@ -643,7 +643,7 @@ class fpdb(QMainWindow):
     def dia_site_preferences(self, widget, data=None):
         dia = QDialog(self)
         dia.setWindowTitle(("Site Preferences"))
-        dia.resize(950,550)
+        dia.resize(1600,900)
         label = QLabel(("Please select which sites you play on and enter your usernames."))
         dia.setLayout(QVBoxLayout())
         dia.layout().addWidget(label)
@@ -1152,7 +1152,7 @@ You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt an
         
 
         # set a default x/y size for the window
-        defx, defy = 900, 720
+        defx, defy = 1920, 1080
         sg = QApplication.primaryScreen().availableGeometry()
         if sg.width() < defx:
             defx = sg.width()
