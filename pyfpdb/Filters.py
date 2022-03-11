@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
+
 from __future__ import print_function
 from __future__ import division
 from builtins import map
@@ -24,6 +25,8 @@ from past.utils import old_div
 import L10n
 _ = L10n.get_translation()
 import pathlib
+import os
+
 
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QDate, QDateTime
@@ -420,12 +423,19 @@ class Filters(QWidget):
             #vbox.addWidget(QLabel(site +" id:"))
 
             self.leHeroes[site] = QLineEdit(_pname)
+            if os.name == 'nt' :
+                icoPath = os.path.dirname(__file__)
+                
+                icoPath = icoPath+"\\"
+                print(icoPath)
+            else:
+                icoPath = "" 
             if site == "PokerStars":  
                 completPlayer = _pname  
-                self.heroList.addItem(QIcon('ps.ico'),completPlayer)
-            if site == "Winamax":  
+                self.heroList.addItem(QIcon(icoPath +'ps.ico'),completPlayer)
+            elif site == "Winamax":  
                 completPlayer = _pname  
-                self.heroList.addItem(QIcon('wina.ico'),completPlayer)
+                self.heroList.addItem(QIcon(icoPath +'wina.ico'),completPlayer)
             else:
                 completPlayer = _pname+" on "+site
                 self.heroList.insertItem(count,completPlayer)
