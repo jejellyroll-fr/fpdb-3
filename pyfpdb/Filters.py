@@ -415,6 +415,7 @@ class Filters(QWidget):
         frame.setLayout(vbox)
 
         self.heroList = QComboBox()
+        self.heroList.setStyleSheet("background-color: #455364")
         current_directory = str(pathlib.Path(__file__).parent.absolute())
         
         for count,site in enumerate(self.conf.get_supported_sites(), start=1):
@@ -432,19 +433,70 @@ class Filters(QWidget):
                 icoPath = "" 
             if site == "PokerStars":  
                 completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'ps.ico'),completPlayer)
+                self.heroList.addItem(QIcon(icoPath +'ps.svg'),completPlayer)
             elif site == "Full Tilt Poker":  
                 completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'ft.png'),completPlayer)
+                self.heroList.addItem(QIcon(icoPath +'ft.svg'),completPlayer)
             elif site == "Everleaf":  
                 completPlayer = _pname  
                 self.heroList.addItem(QIcon(icoPath +'everleaf.png'),completPlayer)
             elif site == "Boss":  
                 completPlayer = _pname  
                 self.heroList.addItem(QIcon(icoPath +'boss.ico'),completPlayer)    
+            elif site == "Absolute":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'absolute.png'),completPlayer)  
+            elif site == "PartyPoker":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'party.png'),completPlayer)    
+            elif site == "Merge":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'merge.png'),completPlayer)     
+            elif site == "PKR":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'pkr.png'),completPlayer)  
+            elif site == "iPoker":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'ipoker.png'),completPlayer)
+            elif site == "Cake":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'cake.png'),completPlayer)  
+            elif site == "Entraction":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'entraction.png'),completPlayer) 
+            elif site == "BetOnline":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'betonline.png'),completPlayer) 
+            elif site == "Microgaming":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'microgaming.png'),completPlayer)  
+            elif site == "Bovada":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'bovada.png'),completPlayer) 
+            elif site == "Enet":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'enet.png'),completPlayer)  
+            elif site == "SealsWithClubs":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'swc.png'),completPlayer) 
+            elif site == "WinningPoker":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'winning.png'),completPlayer)    
+            elif site == "GGPoker":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'gg.png'),completPlayer)              
+            elif site == "Pacific":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'pacific.png'),completPlayer) 
+            elif site == "KingsClub":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'kingsclub.png'),completPlayer)  
+            elif site == "Unibet":  
+                completPlayer = _pname  
+                self.heroList.addItem(QIcon(icoPath +'unibet.png'),completPlayer)                                                                                  
             elif site == "Winamax":  
                 completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'wina.ico'),completPlayer)
+                self.heroList.addItem(QIcon(icoPath +'wina.svg'),completPlayer)
             else:
                 completPlayer = _pname+" on "+site
                 self.heroList.insertItem(count,completPlayer)

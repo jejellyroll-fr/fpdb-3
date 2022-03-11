@@ -43,7 +43,7 @@ cl_options = '.'.join(sys.argv[1:])
 import logging
 
 from PyQt5.QtCore import (QCoreApplication, QDate, Qt)
-from PyQt5.QtGui import (QScreen,)
+from PyQt5.QtGui import (QScreen,QIcon)
 from PyQt5.QtWidgets import (QAction, QApplication, QCalendarWidget,
                              QCheckBox, QDateEdit, QDialog,
                              QDialogButtonBox, QFileDialog,
@@ -1124,6 +1124,7 @@ You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt an
 
     def __init__(self):
         QMainWindow.__init__(self)
+        self.setWindowIcon(QIcon('tribal.jpg'))
         # no more than 1 process can this lock at a time:
         self.lock = interlocks.InterProcessLock(name="fpdb_global_lock")
         self.db = None
