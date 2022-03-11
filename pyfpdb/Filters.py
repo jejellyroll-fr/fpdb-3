@@ -21,6 +21,7 @@ from __future__ import division
 from builtins import map
 from builtins import str
 from builtins import range
+from dataclasses import replace
 from past.utils import old_div
 import L10n
 _ = L10n.get_translation()
@@ -549,6 +550,18 @@ class Filters(QWidget):
 
         self.cursor.execute(self.sql.query['getGames'])
         result = self.db.cursor.fetchall()
+        print(result)
+        self.gameList = QComboBox()
+        self.gameList.setStyleSheet("background-color: #455364")   
+        for count,game in enumerate(result, start=0):
+            game = str(result[count])
+            game = game.replace("(","")
+            game = game.replace(",","")
+            game = game.replace(")","")
+            print(game)
+            self.gameList.insertItem(count,game)
+        #vbox1.addWidget(self.gameList)
+
         if len(result) >= 1:
             for line in sorted(result, key = lambda game: self.gameName[game[0]]):
                 self.cbGames[line[0]] = QCheckBox(self.gameName[line[0]])
