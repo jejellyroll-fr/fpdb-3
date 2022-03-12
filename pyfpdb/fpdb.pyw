@@ -855,6 +855,7 @@ class fpdb(QMainWindow):
         tournamentMenu.addAction(makeAction(('Tourney Graphs'), self.tabTourneyGraphViewer))
         tournamentMenu.addAction(makeAction(('Tourney Stats'), self.tab_tourney_player_stats, 'Ctrl+T'))
         #tournamentMenu.addAction(makeAction(('Tourney Viewer'), self.tab_tourney_viewer_stats))
+        tournamentMenu.addAction(makeAction(('Tourney Viewer'), self.tab_tourney_viewer_stats))
 
         maintenanceMenu.addAction(makeAction(('Statistics'), self.dia_database_stats, 'View Database Statistics'))
         maintenanceMenu.addAction(makeAction(('Create or Recreate Tables'), self.dia_recreate_tables))
@@ -1036,15 +1037,15 @@ class fpdb(QMainWindow):
         self.threads.append(new_import_thread)
         self.add_and_display_tab(new_import_thread, ("Odds Calc"))
 
-    # def tab_tourney_import(self, widget, data=None):
-    #     """opens a tab for bulk importing tournament summaries"""
-    #     new_import_thread = GuiTourneyImport.GuiTourneyImport(self.settings, self.config, self.sql, self.window)
-    #     self.threads.append(new_import_thread)
-    #     bulk_tab=new_import_thread.get_vbox()
-    #     self.add_and_display_tab(bulk_tab, ("Tournament Results Import"))
+    def tab_tourney_import(self, widget, data=None):
+        """opens a tab for bulk importing tournament summaries"""
+        new_import_thread = GuiTourneyImport.GuiTourneyImport(self.settings, self.config, self.sql, self.window)
+        self.threads.append(new_import_thread)
+        bulk_tab=new_import_thread.get_vbox()
+        self.add_and_display_tab(bulk_tab, ("Tournament Results Import"))
 
     def tab_imap_import(self, widget, data=None):
-        new_thread = GuiImapFetcher.GuiImapFetcher(self.config, self.db, self.sql, self.window)
+        new_thread = GuiImapFetcher.GuiImapFetcher(self.config, self.db, self.sql, self)
         self.threads.append(new_thread)
         tab=new_thread.get_vbox()
         self.add_and_display_tab(tab, ("eMail Import"))
@@ -1061,10 +1062,9 @@ class fpdb(QMainWindow):
         self.add_and_display_tab(new_ps_thread, ("Tourney Stats"))
 
     def tab_tourney_viewer_stats(self, widget, data=None):
-        new_thread = GuiTourneyViewer.GuiTourneyViewer(self.config, self.db, self.sql, self.window)
-        self.threads.append(new_thread)
-        tab=new_thread.get_vbox()
-        self.add_and_display_tab(tab, ("Tourney Viewer"))
+        new_thread = GuiTourneyViewer.GuiTourneyViewer(self.config, self.db, self.sql, self)
+        self.threads.append(new_thread)       
+        self.add_and_display_tab(new_thread, ("Tourney Viewer"))
 
     def tab_positional_stats(self, widget, data=None):
         new_ps_thread = GuiPositionalStats.GuiPositionalStats(self.config, self.sql)

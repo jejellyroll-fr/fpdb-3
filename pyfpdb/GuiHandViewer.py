@@ -55,7 +55,6 @@ class GuiHandViewer(QSplitter):
         self.replayer = None
 
         self.db = Database.Database(self.config, sql=self.sql)
-
         
         filters_display = { "Heroes"    : True,
                     "Sites"     : False,
