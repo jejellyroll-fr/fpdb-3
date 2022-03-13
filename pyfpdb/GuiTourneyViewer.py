@@ -81,7 +81,7 @@ class GuiTourneyViewer(QWidget):
         # self.table = gtk.Table(columns=10, rows=9)
         
         self.table = QGridLayout()
-        self.setLayout(self.table)
+        
         
         # self.mainVBox.show_all()
     #end def __init__
@@ -90,7 +90,7 @@ class GuiTourneyViewer(QWidget):
         if self.prepare(10, 9):
             result = self.db.getTourneyInfo(self.siteName, self.tourneyNo)
             if result[1] == None:
-                # self.table.destroy()
+                self.table.destroyed()
                 self.errorLabel = QLabel.setText(("Tournament not found.") + " " + ("Please ensure you imported it and selected the correct site."))
                 self.interfaceHBox.addWidget(self.errorLabel)
             else:
@@ -118,7 +118,7 @@ class GuiTourneyViewer(QWidget):
         if self.prepare(4, 5):
             result=self.db.getTourneyPlayerInfo(self.siteName, self.tourneyNo, self.playerName)
             if result[1] == None:
-                #self.table.destroy()
+                self.table.destroyed()
                 self.errorLabel=QLabel.setText(("Player or tournament not found.") + " " + ("Please ensure you imported it and selected the correct site."))
                 self.interfaceHBox.addWidget(self.errorLabel)
             else:
@@ -158,10 +158,10 @@ class GuiTourneyViewer(QWidget):
             self.errorLabel.setText("invalid entry in tourney number - must enter numbers only")
             self.interfaceHBox.addWidget(self.errorLabel)
             return False
-        self.siteName=self.siteBox.itemText()
+        self.siteName=self.siteBox.currentText
         self.playerName=self.entryPlayer.text()
         
-        #self.table.destroy()
+        self.table.destroyed()
         self.table=QGridLayout()
         
         return True
