@@ -79,10 +79,8 @@ import GuiTourneyGraphViewer
 import GuiSessionViewer
 import GuiHandViewer
 import GuiOddsCalc
-try:
-    import GuiStove
-except:
-    print ("GuiStove not found. If you want to use it please install pypoker-eval.")
+import GuiStove
+
 import SQL
 import Database
 import Configuration
@@ -850,7 +848,7 @@ class fpdb(QMainWindow):
         cashMenu.addAction(makeAction(('Hand Viewer'), self.tab_hand_viewer))
         #cashMenu.addAction(makeAction(('Positional Stats (tabulated view)'), self.tab_positional_stats))
         cashMenu.addAction(makeAction(('Session Stats'), self.tab_session_stats, 'Ctrl+S'))
-        #cashMenu.addAction(makeAction(('Stove (preview)'), self.tabStove))
+        cashMenu.addAction(makeAction(('Stove (preview)'), self.tabStove))
 
         tournamentMenu.addAction(makeAction(('Tourney Graphs'), self.tabTourneyGraphViewer))
         tournamentMenu.addAction(makeAction(('Tourney Stats'), self.tab_tourney_player_stats, 'Ctrl+T'))
@@ -1117,10 +1115,10 @@ You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt an
 
     def tabStove(self, widget, data=None):
         """opens a tab for poker stove"""
-        thread = GuiStove.GuiStove(self.config, self.window)
+        thread = GuiStove.GuiStove(self.config, self)
         self.threads.append(thread)
-        tab = thread.get_vbox()
-        self.add_and_display_tab(tab, ("Stove"))
+        #tab = thread.get_vbox()
+        self.add_and_display_tab(thread, ("Stove"))
 
     def __init__(self):
         QMainWindow.__init__(self)

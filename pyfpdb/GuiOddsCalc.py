@@ -41,38 +41,35 @@ class GuiOddsCalc(QWidget):
         self.QLvilain5 = QLabel("Vilain5")
         self.QLEvilain5 = QLineEdit()
         
-        hbox = QHBoxLayout()
-        hbox.addWidget(self.QLgame)
-        hbox.addWidget(self.QLEgame)
-        hbox.addWidget(self.QLdeadcard)
-        hbox.addWidget(self.QLEdeadcard)
-        self.QLEdeadcard.setEnabled(False)
-        if self.QLEgame.currentIndexChanged and self.QLEgame.currentIndex==1:
-            self.QLEdeadcard.setEnabled(True)
-        elif self.QLEgame.currentIndexChanged and self.QLEgame.currentIndex==2:
-            self.QLEdeadcard.setEnabled(False)
-        self.layout().addLayout(hbox)
+        
+        self.hbox = QHBoxLayout()
+        self.hbox.addWidget(self.QLgame)
+        self.hbox.addWidget(self.QLEgame)
+        self.hbox.addWidget(self.QLdeadcard)
+        self.hbox.addWidget(self.QLEdeadcard)
+        
+        self.layout().addLayout(self.hbox)
 
-        hbox2 = QHBoxLayout()
+        self.hbox2 = QHBoxLayout()
         
-        hbox2.addWidget(self.QLboard)
-        hbox2.addWidget(self.QLEboard)
-        self.layout().addLayout(hbox2)
+        self.hbox2.addWidget(self.QLboard)
+        self.hbox2.addWidget(self.QLEboard)
+        self.layout().addLayout(self.hbox2)
         
-        hbox3 = QHBoxLayout()
-        hbox3.addWidget(self.QLhero)
-        hbox3.addWidget(self.QLEhero)
-        hbox3.addWidget(self.QLvilain1)
-        hbox3.addWidget(self.QLEvilain1)
-        hbox3.addWidget(self.QLvilain2)
-        hbox3.addWidget(self.QLEvilain2)
-        hbox3.addWidget(self.QLvilain3)
-        hbox3.addWidget(self.QLEvilain3)
-        hbox3.addWidget(self.QLvilain4)
-        hbox3.addWidget(self.QLEvilain4)
-        hbox3.addWidget(self.QLvilain5)
-        hbox3.addWidget(self.QLEvilain5)
-        self.layout().addLayout(hbox3)
+        self.hbox3 = QHBoxLayout()
+        self.hbox3.addWidget(self.QLhero)
+        self.hbox3.addWidget(self.QLEhero)
+        self.hbox3.addWidget(self.QLvilain1)
+        self.hbox3.addWidget(self.QLEvilain1)
+        self.hbox3.addWidget(self.QLvilain2)
+        self.hbox3.addWidget(self.QLEvilain2)
+        self.hbox3.addWidget(self.QLvilain3)
+        self.hbox3.addWidget(self.QLEvilain3)
+        self.hbox3.addWidget(self.QLvilain4)
+        self.hbox3.addWidget(self.QLEvilain4)
+        self.hbox3.addWidget(self.QLvilain5)
+        self.hbox3.addWidget(self.QLEvilain5)
+        self.layout().addLayout(self.hbox3)
 
 
         self.load_button = QPushButton(('Odds Calculate'))
@@ -89,8 +86,15 @@ class GuiOddsCalc(QWidget):
         game = self.QLEgame.currentText()
         if game == "hold'em":
             game = 'he'
+            
+            self.Lreq = QLabel("Required")
+            self.Lreq.setStyleSheet("QLabel { background-color : red; color : blue; }")
+            self.hbox.addWidget(self.Lreq)
         elif game == "Omaha":
             game = 'oh'
+            self.Lreq = QLabel("Required")
+            self.Lreq.setStyleSheet("QLabel { background-color : blue; color : red; }")
+            self.hbox.addWidget(self.Lreq)
         elif game == "5 card Omaha":
             game = 'oh5'
         elif game == "5 card Omaha Hi/Lo":
