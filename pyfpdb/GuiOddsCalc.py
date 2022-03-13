@@ -40,14 +40,19 @@ class GuiOddsCalc(QWidget):
         self.QLEvilain4 = QLineEdit()
         self.QLvilain5 = QLabel("Vilain5")
         self.QLEvilain5 = QLineEdit()
+        self.Lreq = QLabel()
+
         
         
         self.hbox = QHBoxLayout()
         self.hbox.addWidget(self.QLgame)
         self.hbox.addWidget(self.QLEgame)
         self.hbox.addWidget(self.QLdeadcard)
+        self.hbox.addWidget(self.Lreq)
         self.hbox.addWidget(self.QLEdeadcard)
         
+        self.Lreq.setText("Not Required")
+        self.Lreq.setStyleSheet("QLabel { color : green; }")        
         self.layout().addLayout(self.hbox)
 
         self.hbox2 = QHBoxLayout()
@@ -70,7 +75,7 @@ class GuiOddsCalc(QWidget):
         self.hbox3.addWidget(self.QLvilain5)
         self.hbox3.addWidget(self.QLEvilain5)
         self.layout().addLayout(self.hbox3)
-
+        self.QLEgame.activated[str].connect(self.index_changed)
 
         self.load_button = QPushButton(('Odds Calculate'))
         self.load_button.clicked.connect(self.load_result)
@@ -80,21 +85,23 @@ class GuiOddsCalc(QWidget):
         hbox_result = QHBoxLayout()
         hbox_result.addWidget(self.QTcalc)
         self.layout().addLayout(hbox_result)
+        
 
+    def index_changed(self):
+        if self.QLEgame.currentText() == "hold'em":
+            self.Lreq.setText("Not Required")
+            self.Lreq.setStyleSheet("QLabel { color : green; }")
+        else:
+            self.Lreq.setText("Required")
+            self.Lreq.setStyleSheet("QLabel { color : red; }")       
 
     def load_result(self):
         game = self.QLEgame.currentText()
         if game == "hold'em":
             game = 'he'
-            
-            self.Lreq = QLabel("Required")
-            self.Lreq.setStyleSheet("QLabel { background-color : red; color : blue; }")
-            self.hbox.addWidget(self.Lreq)
         elif game == "Omaha":
             game = 'oh'
-            self.Lreq = QLabel("Required")
-            self.Lreq.setStyleSheet("QLabel { background-color : blue; color : red; }")
-            self.hbox.addWidget(self.Lreq)
+
         elif game == "5 card Omaha":
             game = 'oh5'
         elif game == "5 card Omaha Hi/Lo":
