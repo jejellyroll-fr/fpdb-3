@@ -39,6 +39,7 @@ class OddsCalc:
         response = requests.post(url, params=params)
         response.status_code
         html_doc= response.text
+        print(html_doc)
 
         s = BeautifulSoup(html_doc, 'html.parser').table
         h, [_, *d] = [i.text for i in s.tr.find_all('th')], [[i.text for i in b.find_all('td')] for b in s.find_all('tr')]
