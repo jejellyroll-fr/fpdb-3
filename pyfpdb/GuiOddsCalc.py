@@ -1,6 +1,11 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit,QLabel, QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QComboBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit,QLabel, QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QComboBox, QMessageBox
+from sqlalchemy import null
+
 
 import OddsCalc
+
+
+    
 
 class GuiOddsCalc(QWidget):
     def get_vbox(self):
@@ -23,6 +28,9 @@ class GuiOddsCalc(QWidget):
         self.QLEgame.insertItem(4, o85)
         o8 = "Omaha Hi/Lo"
         self.QLEgame.insertItem(5, o8)
+        rz = "Razz"
+        self.QLEgame.insertItem(6, rz)
+        
         self.QLEgame.setMinimumWidth(300)
         self.QLdeadcard = QLabel("Dead Card")
         self.QLEdeadcard = QLineEdit()        
@@ -78,6 +86,9 @@ class GuiOddsCalc(QWidget):
         self.QLEgame.activated[str].connect(self.index_changed)
 
         self.load_button = QPushButton(('Odds Calculate'))
+
+            
+        
         self.load_button.clicked.connect(self.load_result)
         self.layout().addWidget(self.load_button)
 
@@ -86,6 +97,8 @@ class GuiOddsCalc(QWidget):
         hbox_result.addWidget(self.QTcalc)
         self.layout().addLayout(hbox_result)
         
+    def warning_box(self, string, diatitle=("FPDB WARNING")):
+        return QMessageBox(QMessageBox.Warning, diatitle, string).exec_()
 
     def index_changed(self):
         if self.QLEgame.currentText() == "hold'em":
@@ -96,43 +109,46 @@ class GuiOddsCalc(QWidget):
             self.Lreq.setStyleSheet("QLabel { color : red; }")       
 
     def load_result(self):
-        game = self.QLEgame.currentText()
-        if game == "hold'em":
-            game = 'he'
-        elif game == "Omaha":
-            game = 'oh'
+        if self.QLEhero.text() == "" and self.QLEvilain1.text() == "":
+            self.warning_box("you must enter hero and vilain1 hands")
+        else:
+            game = self.QLEgame.currentText()
+            if game == "hold'em":
+                game = 'he'
+            elif game == "Omaha":
+                game = 'oh'
 
-        elif game == "5 card Omaha":
-            game = 'oh5'
-        elif game == "5 card Omaha Hi/Lo":
-            game = 'o85'
-        elif game == "Omaha Hi/Lo":
-            game = 'o8'
-        print(game)
-        board = self.QLEboard.text()
-        hero = self.QLEhero.text()
-        vilain1 = self.QLEvilain1.text()
-        vilain2 = self.QLEvilain2.text()
-        vilain3 = self.QLEvilain3.text()
-        vilain4 = self.QLEvilain4.text()
-        vilain5 = self.QLEvilain5.text()     
-        odd1 = OddsCalc.OddsCalc(str(game),'',str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5)) 
+            elif game == "5 card Omaha":
+                game = 'oh5'
+            elif game == "5 card Omaha Hi/Lo":
+                game = 'o85'
+            elif game == "Omaha Hi/Lo":
+                game = 'o8'
+            print(game)
+            board = self.QLEboard.text()
+            hero = self.QLEhero.text()
+            vilain1 = self.QLEvilain1.text()
+            vilain2 = self.QLEvilain2.text()
+            vilain3 = self.QLEvilain3.text()
+            vilain4 = self.QLEvilain4.text()
+            vilain5 = self.QLEvilain5.text()     
+            odd1 = OddsCalc.OddsCalc(str(game),'',str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5)) 
         
-        result_brut = odd1.calcBaseHoldem()
-        print(result_brut)
-        row_count = (len(result_brut))
-        column_count = (len(result_brut[0]))
-        self.QTcalc.setColumnCount(column_count) 
-        self.QTcalc.setRowCount(row_count)
+            result_brut = odd1.calcBaseHoldem()
+            print(result_brut)
+            row_count = (len(result_brut))
+            column_count = (len(result_brut[0]))
+            self.QTcalc.setColumnCount(column_count) 
+            self.QTcalc.setRowCount(row_count)
 
-        self.QTcalc.setHorizontalHeaderLabels((list(result_brut[0].keys())))
+            self.QTcalc.setHorizontalHeaderLabels((list(result_brut[0].keys())))
 
-        for row in range(row_count):  # add items from array to QTableWidget
-            for column in range(column_count):
-                item = (list(result_brut[row].values())[column])
-                print (type(row))
-                print (type(column))
-                print (type(item))
-                self.QTcalc.setItem(row, column, QTableWidgetItem(item))
+            for row in range(row_count):  # add items from array to QTableWidget
+                for column in range(column_count):
+                    item = (list(result_brut[row].values())[column])
+                    print (type(row))
+                    print (type(column))
+                    print (type(item))
+                    self.QTcalc.setItem(row, column, QTableWidgetItem(item))
     
         
