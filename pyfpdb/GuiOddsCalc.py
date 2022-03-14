@@ -30,7 +30,10 @@ class GuiOddsCalc(QWidget):
         self.QLEgame.insertItem(5, o8)
         rz = "Razz"
         self.QLEgame.insertItem(6, rz)
-        
+        st = "Stud"
+        self.QLEgame.insertItem(7, st)
+        s8 = "Stud Hi/Lo"
+        self.QLEgame.insertItem(8, s8)                
         self.QLEgame.setMinimumWidth(300)
         self.QLdeadcard = QLabel("Dead Card")
         self.QLEdeadcard = QLineEdit()        
@@ -104,9 +107,28 @@ class GuiOddsCalc(QWidget):
         if self.QLEgame.currentText() == "hold'em":
             self.Lreq.setText("Not Required")
             self.Lreq.setStyleSheet("QLabel { color : green; }")
-        else:
+        elif self.QLEgame.currentText() == "Omaha":
+            self.Lreq.setText("Not Required")
+            self.Lreq.setStyleSheet("QLabel { color : green; }")    
+        elif self.QLEgame.currentText() == "5 card Omaha":
+            self.Lreq.setText("Not Required")
+            self.Lreq.setStyleSheet("QLabel { color : green; }") 
+        elif self.QLEgame.currentText() == "5 card Omaha Hi/Lo":
+            self.Lreq.setText("Not Required")
+            self.Lreq.setStyleSheet("QLabel { color : green; }")    
+        elif self.QLEgame.currentText() == "Omaha Hi/Lo":
+            self.Lreq.setText("Not Required")
+            self.Lreq.setStyleSheet("QLabel { color : green; }")   
+        elif self.QLEgame.currentText() == "Razz":
             self.Lreq.setText("Required")
-            self.Lreq.setStyleSheet("QLabel { color : red; }")       
+            self.Lreq.setStyleSheet("QLabel { color : red; }")     
+        elif self.QLEgame.currentText() == "Stud":
+            self.Lreq.setText("Required")
+            self.Lreq.setStyleSheet("QLabel { color : red; }") 
+        elif self.QLEgame.currentText() == "Stud Hi/Lo":
+            self.Lreq.setText("Required")
+            self.Lreq.setStyleSheet("QLabel { color : red; }")                                          
+   
 
     def load_result(self):
         if self.QLEhero.text() == "" and self.QLEvilain1.text() == "":
@@ -117,22 +139,31 @@ class GuiOddsCalc(QWidget):
                 game = 'he'
             elif game == "Omaha":
                 game = 'oh'
-
             elif game == "5 card Omaha":
                 game = 'oh5'
             elif game == "5 card Omaha Hi/Lo":
                 game = 'o85'
             elif game == "Omaha Hi/Lo":
                 game = 'o8'
+            elif game == "Razz":
+                game = 'rz'
+            elif game == "Stud":
+                game = 'st'
+            elif game == "Stud Hi/Lo":
+                game = 's8'
             print(game)
             board = self.QLEboard.text()
+            dead = self.QLEdeadcard.text()
             hero = self.QLEhero.text()
             vilain1 = self.QLEvilain1.text()
             vilain2 = self.QLEvilain2.text()
             vilain3 = self.QLEvilain3.text()
             vilain4 = self.QLEvilain4.text()
-            vilain5 = self.QLEvilain5.text()     
-            odd1 = OddsCalc.OddsCalc(str(game),'',str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5)) 
+            vilain5 = self.QLEvilain5.text()
+            if game == 's8' or game == 'st' or game == 'rz':      
+                odd1 = OddsCalc.OddsCalc(str(game),str(dead),str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5))
+            else:
+                odd1 = OddsCalc.OddsCalc(str(game),str(dead),str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5))
         
             result_brut = odd1.calcBaseHoldem()
             print(result_brut)
