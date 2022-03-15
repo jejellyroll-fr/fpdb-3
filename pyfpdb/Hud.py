@@ -185,6 +185,7 @@ class Hud(object):
         self.hand_instance = Hand.hand_factory(hand, config, self.db_hud_connection)
         self.db_hud_connection.connection.rollback()
         log.info(('Creating hud from hand ')+str(hand))
+        print((('Creating hud from hand ')+str(hand)))
 
 
     def update(self, hand, config):
