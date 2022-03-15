@@ -80,6 +80,7 @@ class Reader(QObject):
                             # at tables where a bunch of hands have already been played
                             # with the HUD switched off.
             new_hand_id = sys.stdin.readline().rstrip()
+            print((("Received hand no %s") % new_hand_id))
             log.debug(("Received hand no %s") % new_hand_id)
             self.handRead.emit(new_hand_id)
 
@@ -465,7 +466,7 @@ def idle_update(hud_main, new_hand_id, table_name, config):
 
 def idle_check_tables(hud_main):
     try:
-        for tablename, hud in hud_main.hud_dict.items():
+        for tablename, hud in list(hud_main.hud_dict.items()):
             status = hud.table.check_table()
             if status == "client_destroyed":
                 hud_main.client_destroyed(None, hud)
