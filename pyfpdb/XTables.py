@@ -64,6 +64,8 @@ class Table(Table_Window):
         for win in wins:
             w_title = xconn.core.GetProperty(False, win, wnameatom, utf8atom, 0, (2**32) - 1).reply().value.to_string()
             if re.search(self.search_string, w_title, re.I):
+                print(self.search_string)
+                print(w_title)
                 log.info('"%s" matches: "%s"', w_title, self.search_string)
                 title = w_title.replace('"', '')
                 if self.check_bad_words(title): continue
