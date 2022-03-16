@@ -51,19 +51,29 @@ class Table(Table_Window):
         self.number = None
         WinList = CGWindowListCreate(0,0)
         WinListDict = CGWindowListCreateDescriptionFromArray(WinList)
+        #print(WinListDict)
 
-        for d in WinListDict:
-            if re.search(self.search_string, d.get(kCGWindowName, ""), re.I):
-                title = d[kCGWindowName]
-                if self.check_bad_words(title): continue
-                self.number = int(d[kCGWindowNumber])
-                self.title = title
-                return self.title
-        if self.number is None:
-            return None
+        for index in range(len(WinListDict)):
+            for d in WinListDict[index]:
+                print("iterate",WinListDict[index]['kCGWindowName'])
+                
+                # print("iterate",WinListDict[index][d])
+                # print("search",self.search_string)
+                
+                
+            #     if re.search(self.search_string, d.get(kCGWindowName, ""), re.I):
+            #         print(WinListDict[index][d])
+            #         title = d[kCGWindowName]
+            #         print(title)
+            #         if self.check_bad_words(title): continue
+            #         self.number = int(d[kCGWindowNumber])
+            #         self.title = title
+            #         return self.title
+            # if self.number is None:
+            #     return None
   
     def get_geometry(self):
-        WinListDict = CGWindowListCreateDescriptionFromArray((self.number,))
+        WinListDict = CGWindowListCreateDescriptionFromArray((self.number))
 
         for d in WinListDict:
             if d[kCGWindowNumber] == self.number:
@@ -75,7 +85,7 @@ class Table(Table_Window):
         return None
 
     def get_window_title(self):
-        WinListDict = CGWindowListCreateDescriptionFromArray((self.number,))
+        WinListDict = CGWindowListCreateDescriptionFromArray((self.number))
 
         for d in WinListDict:
             if d[kCGWindowNumber] == self.number:
