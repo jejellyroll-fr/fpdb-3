@@ -31,11 +31,11 @@ import ctypes
 
 import AppKit # Work around some pyinstaller weirdness.
 
-from AppKit import NSView, NSWindowAbove
+from AppKit import NSView, NSWindowAbove, NSWorkspace
 from Quartz.CoreGraphics import (CGWindowListCreate,
-                                 CGWindowListCreateDescriptionFromArray,
-                                 kCGWindowBounds, kCGWindowName,
-                                 kCGWindowNumber)
+                                 CGWindowListCreateDescriptionFromArray,kCGWindowOwnerName,
+                                 kCGWindowBounds, kCGWindowName,CGWindowListCopyWindowInfo,kCGNullWindowID,
+                                 kCGWindowNumber,kCGWindowListExcludeDesktopElements,kCGWindowListOptionOnScreenOnly)
 
 #    FPDB modules
 from TableWindow import Table_Window
@@ -51,29 +51,37 @@ class Table(Table_Window):
         self.number = None
         WinList = CGWindowListCreate(0,0)
         WinListDict = CGWindowListCreateDescriptionFromArray(WinList)
-        #print(WinListDict)
+        windows = CGWindowListCopyWindowInfo(kCGWindowListExcludeDesktopElements|kCGWindowListOptionOnScreenOnly,kCGNullWindowID)
+        
 
-        for index in range(len(WinListDict)):
-            for d in WinListDict[index]:
-                print("iterate",WinListDict[index]['kCGWindowName'])
-                
-                # print("iterate",WinListDict[index][d])
-                # print("search",self.search_string)
-                
-                
-            #     if re.search(self.search_string, d.get(kCGWindowName, ""), re.I):
-            #         print(WinListDict[index][d])
-            #         title = d[kCGWindowName]
-            #         print(title)
-            #         if self.check_bad_words(title): continue
-            #         self.number = int(d[kCGWindowNumber])
-            #         self.title = title
-            #         return self.title
-            # if self.number is None:
-            #     return None
+        # for index in range(len(WinListDict)):
+        #     for d in WinListDict[index]:
+        curr_app = NSWorkspace.sharedWorkspace().runningApplications()
+        curr_pid = NSWorkspace.sharedWorkspace().activeApplication()['NSApplicationProcessIdentifier']
+        #curr_app_name = curr_app.localizedName()
+        options = kCGWindowListOptionOnScreenOnly
+        windowList = CGWindowListCopyWindowInfo(options, kCGNullWindowID)
+        for window in windowList:
+            pid = window['kCGWindowOwnerPID']
+            windowNumber = window['kCGWindowNumber']
+            ownerName = window['kCGWindowOwnerName']
+            geometry = window['kCGWindowBounds']
+            windowTitle = window.get('kCGWindowName', self.search_string)
+            if curr_pid == pid:
+                print("%s - %s (PID: %d, WID: %d): %s" % (ownerName, windowTitle, pid, windowNumber, geometry))
+
+     
+           
+                title = windowTitle
+                if self.check_bad_words(title): continue
+                self.number = int(windowNumber)
+                self.title = title
+                return self.title
+        if self.number is None:
+            return None
   
     def get_geometry(self):
-        WinListDict = CGWindowListCreateDescriptionFromArray((self.number))
+        WinListDict = CGWindowListCreateDescriptionFromArray((self.number,))
 
         for d in WinListDict:
             if d[kCGWindowNumber] == self.number:
@@ -85,7 +93,7 @@ class Table(Table_Window):
         return None
 
     def get_window_title(self):
-        WinListDict = CGWindowListCreateDescriptionFromArray((self.number))
+        WinListDict = CGWindowListCreateDescriptionFromArray((self.number,))
 
         for d in WinListDict:
             if d[kCGWindowNumber] == self.number:
