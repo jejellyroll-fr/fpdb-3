@@ -93,6 +93,7 @@ class PokerStars(HandHistoryConverter):
                               "HOLD'EM" : ('hold','holdem'), 
                            "6+ Hold'em" : ('hold','6_holdem'),
                                 'Omaha' : ('hold','omahahi'),
+                                'Fusion': ('hold', 'fusion'),
                                 'OMAHA' : ('hold','omahahi'),
                           'Omaha Hi/Lo' : ('hold','omahahilo'),
                           'OMAHA HI/LO' : ('hold','omahahilo'),
@@ -138,7 +139,7 @@ class PokerStars(HandHistoryConverter):
           # close paren of tournament info
           (?P<MIXED>HORSE|8\-Game|8\-GAME|HOSE|Mixed\sOmaha\sH/L|Mixed\sHold\'em|Mixed\sPLH/PLO|Mixed\sNLH/PLO|Mixed\sOmaha|Triple\sStud)?\s?\(?
           (?P<SPLIT>Split)?\s?
-          (?P<GAME>Hold\'em|HOLD\'EM|Hold\'em|6\+\sHold\'em|Razz|RAZZ|7\sCard\sStud|7\sCARD\sSTUD|7\sCard\sStud\sHi/Lo|7\sCARD\sSTUD\sHI/LO|Omaha|OMAHA|Omaha\sHi/Lo|OMAHA\sHI/LO|Badugi|Triple\sDraw\s2\-7\sLowball|Single\sDraw\s2\-7\sLowball|5\sCard\sDraw|(5|6)\sCard\sOmaha(\sHi/Lo)?|Courchevel(\sHi/Lo)?)\s
+          (?P<GAME>Hold\'em|HOLD\'EM|Hold\'em|6\+\sHold\'em|Razz|RAZZ|Fusion|7\sCard\sStud|7\sCARD\sSTUD|7\sCard\sStud\sHi/Lo|7\sCARD\sSTUD\sHI/LO|Omaha|OMAHA|Omaha\sHi/Lo|OMAHA\sHI/LO|Badugi|Triple\sDraw\s2\-7\sLowball|Single\sDraw\s2\-7\sLowball|5\sCard\sDraw|(5|6)\sCard\sOmaha(\sHi/Lo)?|Courchevel(\sHi/Lo)?)\s
           (?P<LIMIT>No\sLimit|NO\sLIMIT|Fixed\sLimit|Limit|LIMIT|Pot\sLimit|POT\sLIMIT|Pot\sLimit\sPre\-Flop,\sNo\sLimit\sPost\-Flop)\)?,?\s
           (-\s)?
           (?P<SHOOTOUT>Match.*,\s)?
@@ -191,7 +192,15 @@ class PokerStars(HandHistoryConverter):
     re_BringIn          = re.compile(r"^%(PLYR)s: brings[- ]in( low|) for %(CUR)s(?P<BRINGIN>[,.0-9]+)" % substitutions, re.MULTILINE)
     re_PostBoth         = re.compile(r"^%(PLYR)s: posts small \& big blinds %(CUR)s(?P<SBBB>[,.0-9]+)" %  substitutions, re.MULTILINE)
     re_PostStraddle     = re.compile(r"^%(PLYR)s: posts straddle %(CUR)s(?P<STRADDLE>[,.0-9]+)" %  substitutions, re.MULTILINE)
-    re_Action           = re.compile(r"""^%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)(\s%(CUR)s(?P<BET>\[,.\d]+))?(\sto\s%(CUR)s(?P<BETTO>\[,.\d]+))?\s*(and\sis\sall.in)?(and\shas\sreached\sthe\s\[%(CUR)s\d\.,]+\scap)?(\son|\scards?)?(\s\(disconnect\))?(\s\[(?P<CARDS>.+?)\])?\s*$"""%  substitutions, re.MULTILINE|re.VERBOSE)
+    re_Action           = re.compile(r"""
+                        ^%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)
+                        (\s%(CUR)s(?P<BET>[,.\d]+))?(\sto\s%(CUR)s(?P<BETTO>[,.\d]+))?  # the number discarded goes in <BET>
+                        \s*(and\sis\sall.in)?
+                        (and\shas\sreached\sthe\s[%(CUR)s\d\.,]+\scap)?
+                        (\son|\scards?)?
+                        (\s\(disconnect\))?
+                        (\s\[(?P<CARDS>.+?)\])?\s*$"""
+                         %  substitutions, re.MULTILINE|re.VERBOSE)
     re_ShowdownAction   = re.compile(r"^%s: shows \[(?P<CARDS>.*)\]" % substitutions['PLYR'], re.MULTILINE)
     re_sitsOut          = re.compile("^%s sits out" %  substitutions['PLYR'], re.MULTILINE)
     #re_ShownCards       = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % substitutions, re.MULTILINE)
@@ -344,7 +353,7 @@ class PokerStars(HandHistoryConverter):
                     log.error(("PokerStarsToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
                     raise FpdbParseError
             else:
-                info['sb'] = str(old_div((Decimal(mg['SB']),2)).quantize(Decimal("0.01")))
+                info['sb'] = str((Decimal(mg['SB'])/2).quantize(Decimal("0.01")))
                 info['bb'] = str(Decimal(mg['SB']).quantize(Decimal("0.01")))    
 
         return info
@@ -485,7 +494,7 @@ class PokerStars(HandHistoryConverter):
         if m:
             hand.buttonpos = int(m.group('BUTTON'))
         else:
-            log.info('readButton: ' + ('not found'))
+            log.info('readButton: ' + _('not found'))
 
     def readPlayerStacks(self, hand):
         pre, post = hand.handText.split('*** SUMMARY ***')
@@ -685,7 +694,7 @@ class PokerStars(HandHistoryConverter):
             elif action.group('ATYPE') == ' stands pat':
                 hand.addStandsPat( street, action.group('PNAME'), action.group('CARDS'))
             else:
-                log.debug(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
+                log.debug(("DEBUG:") + " " + _("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
 
 
     def readShowdownActions(self, hand):
@@ -712,13 +721,13 @@ class PokerStars(HandHistoryConverter):
             if m: winner = m.group('PNAME')
             
             if hand.koBounty > 0:
-                for pname, amount in koAmounts.iteritems():
+                for pname, amount in list(koAmounts.items()):
                     if pname == winner:
                         end = (amount + hand.endBounty[pname])
-                        hand.koCounts[pname] = old_div((amount + hand.endBounty[pname]) , Decimal(hand.koBounty))
+                        hand.koCounts[pname] = (amount + hand.endBounty[pname]) / Decimal(hand.koBounty)
                     else:
                         end = 0
-                        hand.koCounts[pname] = old_div(amount , (Decimal(hand.koBounty)))
+                        hand.koCounts[pname] = amount / Decimal(hand.koBounty)
         else:
             for a in self.re_Bounty.finditer(hand.handText):
                 if a.group('SPLIT') == 'split':
@@ -726,7 +735,7 @@ class PokerStars(HandHistoryConverter):
                     for pname in pnames:
                         if pname not in hand.koCounts:
                             hand.koCounts[pname] = 0
-                        hand.koCounts[pname] += old_div(1 , (Decimal(len(pnames))))
+                        hand.koCounts[pname] += (1 / Decimal(len(pnames)))
                 else:
                     if a.group('PNAME') not in hand.koCounts:
                         hand.koCounts[a.group('PNAME')] = 0

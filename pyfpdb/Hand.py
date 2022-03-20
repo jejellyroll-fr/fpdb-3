@@ -896,8 +896,10 @@ class Hand(object):
 
         # This gives us the total amount put in the pot
         if self.totalpot is None:
+            print("totalpot",self.totalpot )
             self.pot.end()
             self.totalpot = self.pot.total
+            print("totalpot2",self.totalpot )
         
         if self.adjustCollected:
             self.stats.awardPots(self)
@@ -933,6 +935,7 @@ class Hand(object):
         # currently it appears to be something like ["ring", "hold", "nl", sb, bb]:
         gs = {"holdem"     : "Hold'em",
               "omahahi"    : "Omaha",
+              "fusion"     : "Fusion",
               "omahahilo"  : "Omaha Hi/Lo",
               "razz"       : "Razz",
               "studhi"     : "7 Card Stud",
@@ -1144,6 +1147,7 @@ class HoldemOmahaHand(Hand):
             hhc.readShownCards(self)
             self.pot.handid = self.handid # This is only required so Pot can throw it in totalPot
             self.totalPot() # finalise it (total the pot)
+            print("self.totalpot",self.totalPot())
             hhc.getRake(self)
             if self.maxseats is None:
                 self.maxseats = hhc.guessMaxSeats(self)
@@ -1882,11 +1886,13 @@ class Pot(object):
         try:
             while len(commitsall) > 0:
                 commitslive = [(v,k) for (v,k) in commitsall if k in self.contenders]
+                print('commitslive', commitslive)
                 v1 = commitslive[0][0]
                 self.pots += [(sum([min(v,v1) for (v,k) in commitsall]), set(k for (v,k) in commitsall if k in self.contenders))]
                 commitsall = [((v-v1),k) for (v,k) in commitsall if v-v1 >0]
         except IndexError as e:
             log.error(("Pot.end(): '%s': Major failure while calculating pot: '%s'"), self.handid, e)
+            print(("Pot.end(): '%s': Major failure while calculating pot: '%s'"), self.handid, e)
             raise FpdbParseError
         
 

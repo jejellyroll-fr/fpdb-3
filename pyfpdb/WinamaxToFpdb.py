@@ -188,7 +188,7 @@ class Winamax(HandHistoryConverter):
         m = self.re_HandInfo.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(_("WinamaxToFpdb.determineGameType: '%s'") % tmp)
+            log.error(("WinamaxToFpdb.determineGameType: '%s'") % tmp)
             raise FpdbParseError
 
         mg = m.groupdict()

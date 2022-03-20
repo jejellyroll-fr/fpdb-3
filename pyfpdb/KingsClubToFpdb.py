@@ -233,7 +233,7 @@ class KingsClub(HandHistoryConverter):
         m = self.re_GameInfo.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(_("KingsClubToFpdb.determineGameType: '%s'") % tmp)
+            log.error(("KingsClubToFpdb.determineGameType: '%s'") % tmp)
             raise FpdbParseError
 
         mg = m.groupdict()

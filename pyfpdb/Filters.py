@@ -76,6 +76,7 @@ class Filters(QWidget):
                         ,"holdem"    : ("Hold'em")
                         ,"6_holdem"    : ("Hold'em")
                         ,"omahahi"   : ("Omaha")
+                        ,"fusion"    : ("Fusion")
                         ,"omahahilo" : ("Omaha Hi/Lo")
                         ,"razz"      : ("Razz")
                         ,"studhi"    : ("7 Card Stud")
@@ -286,12 +287,16 @@ class Filters(QWidget):
         return self.siteid
 
     def getHeroes(self):
-        return dict([(site, str(self.leHeroes[site].text())) for site in self.leHeroes])
-
+        print(dict([(site, str(self.heroList.currentText())) for site in self.leHeroes]))
+        
+        return dict([(site, str(self.heroList.currentText())) for site in self.leHeroes])
+    
     def getGraphOps(self):
+        
         return [g for g in self.cbGraphops if self.cbGraphops[g].isChecked()]
 
     def getLimits(self):
+        print([l for l in self.cbLimits if self.cbLimits[l].isChecked()])
         return [l for l in self.cbLimits if self.cbLimits[l].isChecked()]
 
     def getType(self):
