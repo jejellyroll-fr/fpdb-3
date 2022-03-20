@@ -293,7 +293,7 @@ HandHistoryConverter: '%(sitename)s'
     'type'       in ('ring', 'tour')
     'limitType'  in ('nl', 'cn', 'pl', 'cp', 'fl')
     'base'       in ('hold', 'stud', 'draw')
-    'category'   in ('holdem', 'omahahi', omahahilo', 'razz', 'studhi', 'studhilo', 'fivedraw', '27_1draw', '27_3draw', 'badugi')
+    'category'   in ('holdem', 'omahahi', omahahilo', 'fusion', 'razz', 'studhi', 'studhilo', 'fivedraw', '27_1draw', '27_3draw', 'badugi')
     'hilo'       in ('h','l','s')
     'mix'        in (site specific, or 'none')
     'smallBlind' int?
