@@ -183,11 +183,17 @@ class GuiAutoImport(QWidget):
                         command = os.path.join(sys.path[0], "HUD_main")
                         bs = 1
                     elif os.name == 'nt':
-                        path = sys.path[0].replace('\\','\\\\')
+                        path = sys.path[0]
+                        
+                        print("path", path)
+                        path2 = os.getcwd()
+                        print("path2", path2)
                         if win32console.GetConsoleWindow() == 0:
-                            command = 'pythonw "'+path+'\\HUD_main.pyw" ' + self.settings['cl_options']
+                            command = 'pythonw "'+path+'\HUD_main.pyw" ' + self.settings['cl_options']
+                            print("comand1", command)
                         else:
-                            command = 'python "'+path+'\\HUD_main.pyw" ' + self.settings['cl_options']
+                            command = 'python "'+path+'\HUD_main.pyw" ' + self.settings['cl_options']
+                            print("comand2", command)
                         bs = 0
                     else:
                         command = os.path.join(sys.path[0], 'HUD_main.pyw')

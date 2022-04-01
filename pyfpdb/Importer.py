@@ -23,8 +23,8 @@ from builtins import str
 from builtins import range
 from builtins import object
 from past.utils import old_div
-# import L10n
-# _ = L10n.get_translation()
+import L10n
+_ = L10n.get_translation()
 
 #    Standard Library modules
 
@@ -392,6 +392,7 @@ class Importer(object):
                         try:
                             if not os.path.isdir(f):
                                 self.caller.addText("\n"+os.path.basename(f))
+                                print("os.path.basename",os.path.basename(f) )
                                 print("self.caller:", self.caller)
                                 print(os.path.basename(f))
                         except KeyError:

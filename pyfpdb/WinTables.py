@@ -53,7 +53,9 @@ class Table(Table_Window):
         """Finds poker client window with the given table name."""
         titles = {}
         win32gui.EnumWindows(win_enum_handler, titles)
+        print (win32gui.EnumWindows(win_enum_handler, titles))
         for hwnd in titles:
+            print("hwnd",hwnd)
             if titles[hwnd] == "":
                 continue
             # if window not visible, probably not a table
@@ -63,7 +65,9 @@ class Table(Table_Window):
             if win32gui.GetParent(hwnd) != 0:
                 continue
             HasNoOwner = win32gui.GetWindow(hwnd, win32con.GW_OWNER) == 0
+            print("HasNoOwner",HasNoOwner)
             WindowStyle = win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)
+            print("WindowStyle",WindowStyle)
             if HasNoOwner and WindowStyle & win32con.WS_EX_TOOLWINDOW != 0:
                 continue
             if not HasNoOwner and WindowStyle & win32con.WS_EX_APPWINDOW == 0:
@@ -72,15 +76,18 @@ class Table(Table_Window):
             if re.search(self.search_string, titles[hwnd], re.I):
                 if self.check_bad_words(titles[hwnd]):
                     continue
-
+                    
                 self.number = hwnd
+                print("self.number", self.number)
                 break
 
         if self.number is None:
+            print(("Window %s not found. Skipping."), self.search_string)
             log.error(("Window %s not found. Skipping."), self.search_string)
             return
 
         self.title = titles[self.number]
+        print("self.title", self.title)
         self.hud = None
         self.gdkhandle = QWindow.fromWinId(self.number)
 
@@ -123,6 +130,7 @@ class Table(Table_Window):
             return None
 
     def get_window_title(self):
+        print("title",win32gui.GetWindowText(self.number))
         return win32gui.GetWindowText(self.number)
 
     def topify(self, window):
