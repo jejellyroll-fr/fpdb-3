@@ -17,8 +17,8 @@
 
 from builtins import str
 from builtins import range
-# import L10n
-# _ = L10n.get_translation()
+import L10n
+_ = L10n.get_translation()
 
 import xml.dom.minidom
 from xml.dom.minidom import Node
