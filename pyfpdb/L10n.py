@@ -113,7 +113,7 @@ def get_installed_translations():
     la_dict = {}
     la_co_dict = {}
     try:
-        from icu import Locale
+        import icu 
         for code in la_list:
             la_dict[code] = Locale.getDisplayName(Locale(code))
         for code in la_co_list:

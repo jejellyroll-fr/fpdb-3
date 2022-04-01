@@ -322,8 +322,9 @@ class PartyPoker(HandHistoryConverter):
         
         if 'SITE' in mg and mg['SITE'] != None:
             self.sitename = self.sites[mg['SITE']][0]
-            self.siteId   = self.sites[mg['SITE']][1] # Needs to match id entry in Sites database
-
+            self.siteId   = self.sites[mg['SITE']][1]# Needs to match id entry in Sites database
+            print('self.siteId', self.siteId)
+            print('self.sitename', self.sitename)
         if 'LIMIT' in mg and mg['LIMIT'] != None:
             info['limitType'] = self.limits[mg['LIMIT']]
         if 'LIMIT2' in mg and mg['LIMIT2'] != None:
