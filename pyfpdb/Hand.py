@@ -1166,8 +1166,12 @@ class HoldemOmahaHand(Hand):
             if shown:  self.shown.add(player)
             if mucked: self.mucked.add(player)
         else:
-            if len(cards) in (2, 3, 4, 6) or self.gametype['category'] in ('5_omahahi', '5_omaha8', 'cour_hi', 'cour_hilo'):  # avoid adding board by mistake (Everleaf problem)
+            if len(cards) in (2, 3, 4, 6) or self.gametype['category'] in ('5_omahahi', '5_omaha8', 'cour_hi', 'cour_hilo', 'fusion'):  # avoid adding board by mistake (Everleaf problem)
                 self.addHoleCards('PREFLOP', player, open=[], closed=cards, shown=shown, mucked=mucked, dealt=dealt)
+                if self.gametype['category'] in ('fusion'):  # add fusion
+                    self.addHoleCards('FLOP', player, open=[], closed=cards[0:3], shown=shown, mucked=mucked, dealt=dealt)
+                    self.addHoleCards('TURN', player, open=[], closed=cards[0:4],  shown=shown, mucked=mucked, dealt=dealt)
+                    self.addHoleCards('RIVER', player, open=[], closed=cards[0:4], shown=shown, mucked=mucked)
             elif len(cards) == 5:     # cards holds a winning hand, not hole cards
                 # filter( lambda x: x not in b, a )             # calcs a - b where a and b are lists
                 # so diff is set to the winning hand minus the board cards, if we're lucky that leaves the hole cards

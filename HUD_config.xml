@@ -2024,13 +2024,16 @@
             <stat _rowcol="(3,2)" _stat_name="ffreq1" popup="default" tip="" click=""/>
         </ss>
         
-        <ss name="omaha_default" rows="3" cols="2" xpad="1" ypad="0">
+        <ss name="omaha_default" rows="3" cols="3" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="playershort" popup="default" tip="" click="" hudcolor="#98FFB0" hudprefix="" hudsuffix=""/>
             <stat _rowcol="(1,2)" _stat_name="n" popup="default" tip="" click=""/>
+            <stat _rowcol="(1,3)" _stat_name="totalprofit" popup="default" tip="" click=""/>
             <stat _rowcol="(2,1)" _stat_name="vpip" popup="default" tip="" click="" stat_loth="20" stat_locolor="#408000" stat_hith="40" stat_hicolor="#F05000"/>
             <stat _rowcol="(2,2)" _stat_name="pfr" popup="default" tip="" click=""/>
-            <stat _rowcol="(3,1)" _stat_name="saw_f" popup="default" tip="" click=""/>
-            <stat _rowcol="(3,2)" _stat_name="ffreq1" popup="default" tip="" click=""/>
+            <stat _rowcol="(2,3)" _stat_name="three_B_0" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,1)" _stat_name="cb_1" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,2)" _stat_name="cb_2" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,2)" _stat_name="cb_3" popup="default" tip="" click=""/>
         </ss>
         
         <ss name="holdem_default" rows="3" cols="3" xpad="1" ypad="0">
