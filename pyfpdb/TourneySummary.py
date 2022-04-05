@@ -46,7 +46,7 @@ try:
     import xlrd
 except:
     xlrd = None
-    log.info(_("xlrd not found. Required for importing Excel tourney results files"))
+    log.info(("xlrd not found. Required for importing Excel tourney results files"))
 
 class TourneySummary(object):
 

@@ -24,6 +24,8 @@ log = logging.getLogger("importer")
 if os.name == "nt":
     import win32console
 
+def to_raw(string):
+    return fr"{string}"
 
 class GuiAutoImport(QWidget):
     def __init__(self, settings, config, sql = None, parent = None, cli = False):
@@ -152,6 +154,8 @@ class GuiAutoImport(QWidget):
                 print(file)
         return False
 
+
+
     def startClicked(self):
         """runs when user clicks start on auto import tab"""
 
@@ -183,7 +187,7 @@ class GuiAutoImport(QWidget):
                         command = os.path.join(sys.path[0], "HUD_main")
                         bs = 1
                     elif os.name == 'nt':
-                        path = sys.path[0]
+                        path = to_raw(sys.path[0])
                         
                         print("path", path)
                         path2 = os.getcwd()
