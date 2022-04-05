@@ -140,6 +140,9 @@ LOGLEVEL = {'DEBUG'   : logging.DEBUG,
             'ERROR'   : logging.ERROR,
             'CRITICAL': logging.CRITICAL}
 
+def to_raw(string):
+    return fr"{string}"
+
 def get_config(file_name, fallback = True):
     """Looks in cwd and in self.default_config_path for a config file."""
     
@@ -151,9 +154,9 @@ def get_config(file_name, fallback = True):
     config_found,example_found,example_copy = False,False,False
     config_path, example_path = None,None
 
-    config_path = os.path.join(CONFIG_PATH, file_name)
+    config_path = to_raw(os.path.join(CONFIG_PATH, file_name))
     
-    print ("config_path=", config_path)
+    print ("config_path raw=", config_path)
     if os.path.exists(config_path):    # there is a file in the cwd
         print(os.path.exists(config_path))
         config_found = True 
@@ -161,7 +164,7 @@ def get_config(file_name, fallback = True):
         fallback = False
         print(fallback)          # so we use it
     else: # no file in the cwd, look where it should be in the first place
-        config_path = os.path.join(CONFIG_PATH, file_name)
+        config_path = to_raw(os.path.join(CONFIG_PATH, file_name))
         print ("config path 2=", config_path)
         if os.path.exists(config_path):
             config_found = True
@@ -200,7 +203,7 @@ def get_config(file_name, fallback = True):
     elif os.path.exists(os.path.join(CONFIG_PATH, file_name + '.example')):
         try:
             #print ""
-            example_path = os.path.join(CONFIG_PATH, file_name + '.example')
+            example_path = to_raw(os.path.join(CONFIG_PATH, file_name + '.example'))
             print ('exemple_path:', example_path)
             if not config_found and fallback:
                 shutil.copyfile(example_path, config_path)
@@ -218,7 +221,7 @@ def get_config(file_name, fallback = True):
         sys.stderr.write((("No %s found, cannot fall back. Exiting.") % file_name) + "\n")
         sys.exit()
 
-    print ("get_config: returning "+str( (config_path,example_copy,example_path) ))
+    print ("get_config: returning "+to_raw((config_path,example_copy,example_path)))
     return (config_path,example_copy,example_path)
 
 def set_logfile(file_name):

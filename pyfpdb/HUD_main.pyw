@@ -67,7 +67,7 @@ elif c.os_family in ('XP', 'Win7'):
 
 class Reader(QObject):
     handRead = pyqtSignal(str)
-
+    print('handread',handRead )
     def readStdin(self):
         while 1:    # wait for a new hand number on stdin
             time.sleep(0.45) # pause an arbitrary amount of time
@@ -205,14 +205,18 @@ class HUD_main(QObject):
         self.hud_dict[temp_key].hud_params['new_max_seats'] = None #trigger for seat layout change
         #fixme - passing self.db_connection into another thread
         # is probably pointless.
+        print('new_hand_id in create hud', new_hand_id)
+
         [aw.update_data(new_hand_id, self.db_connection) for aw in self.hud_dict[temp_key].aux_windows]
         idle_create(self, new_hand_id, table, temp_key, max, poker_game, type, stat_dict, cards)
 
     def update_HUD(self, new_hand_id, table_name, config):
         """Update a HUD gui from inside the non-gui read_stdin thread."""
+        print('new_hand_id in update hud', new_hand_id)
         idle_update(self, new_hand_id, table_name, config)
 
     def read_stdin(self, new_hand_id):
+        print('new_hand_id in read_stdin', new_hand_id)
 #       get hero's screen names and player ids
         self.hero, self.hero_ids = {}, {}
         found = False
@@ -256,6 +260,7 @@ class HUD_main(QObject):
 #        get basic info about the new hand from the db
 #        if there is a db error, complain, skip hand, and proceed
         #log.info("HUD_main.read_stdin: " + ("Hand processing starting."))
+        print("HUD_main.read_stdin: " + ("Hand processing starting."))
         try:
             (table_name, max, poker_game, type, fast, site_id, site_name, num_seats, tour_number, tab_number) = \
                             self.db_connection.get_table_info(new_hand_id)
@@ -279,6 +284,7 @@ class HUD_main(QObject):
             temp_key = "%s Table %s" % (tour_number, tab_number)
         else:
             temp_key = table_name
+            print('temp_key', temp_key)
 
         if type == "tour":
             #

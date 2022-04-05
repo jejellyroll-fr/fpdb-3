@@ -379,7 +379,7 @@ class GuiSessionViewer(QSplitter):
         global_etime = etime
         results.append([''] * 11)
         results.append([("all"), total_hands, global_stime, global_etime,
-                        total_hands * 60 / total_time,
+                        total_hands * 60 // total_time,
                         "%.2f" % global_open,
                         "%.2f" % global_close,
                         "%.2f" % global_lwm,

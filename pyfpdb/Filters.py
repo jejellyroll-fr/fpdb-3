@@ -522,7 +522,7 @@ class Filters(QWidget):
             hbox.addWidget(lbl)
 
             self.phands = QSpinBox()
-            self.phands.setMaximum(1e5)
+            self.phands.setMaximum(int(1e5))
             hbox.addWidget(self.phands)
 
     def fillSitesFrame(self, frame):

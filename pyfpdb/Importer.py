@@ -534,15 +534,15 @@ class Importer(object):
 
                 #pipe the Hands.id out to the HUD
                 if self.callHud:
-                    print(self.callHud)
-                    print(self.caller)
+                    print('self.callHud',self.callHud)
+                    print('self.caller',self.caller)
                     for hid in list(to_hud):
                         try:
-                            print(os.linesep)
+                            print('os.linesep',os.linesep)
                             print(type(to_hud))
-                            print(hid)
-                            print(self.caller.pipe_to_hud)
-                            print(self.caller.pipe_to_hud.stdin.write)
+                            print('hid',hid)
+                            print('self.caller.pipe_to_hud',self.caller.pipe_to_hud)
+                            print('self.caller.pipe_to_hud.stdin.write',self.caller.pipe_to_hud.stdin.write)
                             print(("fpdb_import: sending hand to hud"), hid, "pipe =", self.caller.pipe_to_hud)
                             self.caller.pipe_to_hud.stdin.write("%s" % (hid) + os.linesep)
                         except IOError as e:

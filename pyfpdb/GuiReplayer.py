@@ -173,7 +173,7 @@ class GuiReplayer(QWidget):
                 painter.setPen(QColor("red"))
             else:
                 painter.setPen(QColor("white"))
-                x = playerx - self.cardwidth * len(player.holecards) / 2
+                x = playerx - self.cardwidth * len(player.holecards) // 2
                 self.renderCards(painter, player.holecards,
                                  x, playery - self.cardheight)
 
@@ -454,7 +454,7 @@ class ICM(object):
    
     def getEquities(self, total, player, depth):
         D = Decimal
-        eq = D(self.stacks[player]) / total * D(str(self.payouts[depth]))
+        eq = D(self.stacks[player]) // total * D(str(self.payouts[depth]))
         if(depth + 1 < len(self.payouts)):
             i=0
             for stack in self.stacks:
@@ -601,8 +601,8 @@ class Player(object):
             for i, street in enumerate(hand.actionStreets[1:]):
                 self.streetcards[street] = self.holecards[:i + 3]
             self.holecards = self.streetcards[hand.actionStreets[1]]
-        self.x         = 0.5 * math.cos(2 * self.seat * math.pi / hand.maxseats)
-        self.y         = 0.5 * math.sin(2 * self.seat * math.pi / hand.maxseats)
+        self.x         = 0.5 * math.cos(2 * self.seat * math.pi // hand.maxseats)
+        self.y         = 0.5 * math.sin(2 * self.seat * math.pi // hand.maxseats)
 
 if __name__ == '__main__':
     config = Configuration.Config()
