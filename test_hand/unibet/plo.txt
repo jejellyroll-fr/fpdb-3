@@ -1,47 +1,45 @@
-Partie 643536107 : Table €4 PL - 0.02/0.04 - Limite du pot Omaha - 15:03:01 2022/04/06
-*** Joueurs assis ***
-Siège 1: sniper97320 (€4.80)
-Siège 2: jAKamLeRouge (€5.05)
-Siège 3: Gaboche1977 (€2.35)
-Siège 4: POLO47 (€0.94)
-Siège 5: ExtremeBleu (€5.15)
-Siège 6: HGJJGHJGJHG (€2.55)
-*** Blinds et bouton ***
-sniper97320 possède le bouton
-jAKamLeRouge place le petit blind €0.02
-Gaboche1977 place le gros blind €0.04
-*** Cartes fermées ***
-A distribué les cartes à jAKamLeRouge
-A distribué les cartes à Gaboche1977
-A distribué les cartes à POLO47
-A distribué les cartes à ExtremeBleu
-Distribué à HGJJGHJGJHG [8Pi 10Co 9Tr VPi]
-A distribué les cartes à sniper97320
-*** Préflop ***
-POLO47 relance de €0.14 à €0.14
-ExtremeBleu suit à €0.14
-HGJJGHJGJHG suit à €0.14
-sniper97320 se couche
-jAKamLeRouge se couche
-Gaboche1977 suit à €0.10
-*** Flop *** [4Ca 1Ca 8Ca]
-Gaboche1977 checke
-POLO47 mise €0.04
-ExtremeBleu se couche
-HGJJGHJGJHG se couche
-Gaboche1977 suit à €0.04
-*** Turn *** [4Ca 1Ca 8Ca] [7Ca]
-Gaboche1977 checke
-POLO47 checke
-*** River *** [4Ca 1Ca 8Ca] [7Ca] [DPi]
-Gaboche1977 mise €0.21
-POLO47 se couche
-Mise non suivie rendue à Gaboche1977 : €0.21
-Gaboche1977 remporte €0.62
-*** Sommaire ***
-Totale pot €0.66 Rake €0.04
-Place 2 : jAKamLeRouge : a misé €0.02 et gagné €0, résultat net : €-0.02
-Place 3 : Gaboche1977 : a misé €0.39 et gagné €0.83, résultat net : €0.44
-Place 4 : POLO47 : a misé €0.18 et gagné €0, résultat net : €-0.18
-Place 5 : ExtremeBleu : a misé €0.14 et gagné €0, résultat net : €-0.14
-Place 6 : HGJJGHJGJHG : a misé €0.14 et gagné €0, résultat net : €-0.14
+Game #643794271: Table €4 PL - 0.02/0.04 - Pot Limit Omaha - 21:43:44 2022/04/06
+*** Seated players ***
+Seat 1: Nonodiinho (€3.04)
+Seat 2: lava (€4.07)
+Seat 3: ExtremeBleu (€4.20)
+Seat 4: Cheytan (€3.57)
+Seat 5: HGJJGHJGJHG (€9.34)
+Seat 6: albanmuller (€2.48) (sitting out)
+*** Blinds and button ***
+lava has the button
+ExtremeBleu posts small blind €0.02
+Cheytan posts big blind €0.04
+*** Hole cards ***
+Dealt in ExtremeBleu
+Dealt in Cheytan
+Dealt to HGJJGHJGJHG [Ah 3c As 8h]
+Dealt in Nonodiinho
+Dealt to lava [Ac Ks Kh 8c]
+*** Preflop ***
+HGJJGHJGJHG raises €0.14 to €0.14
+Nonodiinho calls €0.14
+lava raises €0.62 to €0.62
+ExtremeBleu folds
+Cheytan folds
+HGJJGHJGJHG raises €1.92 to €2.06
+Nonodiinho folds
+lava calls €1.44
+*** Flop *** [3h Th 6h]
+HGJJGHJGJHG bets €4.03
+lava calls €2.01, and is all-in
+Uncalled bet returned to HGJJGHJGJHG: €2.02
+*** Showdown ***
+*** Turn *** [3h Th 6h] [8d]
+*** River *** [3h Th 6h] [8d] [2s]
+lava shows [Ac Ks Kh 8c], A Pair of Kings
+HGJJGHJGJHG shows [Ah 3c As 8h], A Flush
+HGJJGHJGJHG wins €7.79
+*** Summary ***
+Total pot €8.34 Rake €0.55
+Seat 1: Nonodiinho: bet €0.14 and won €0, net result: €-0.14
+Seat 2: lava: bet €4.07 and won €0, net result: €-4.07
+Seat 3: ExtremeBleu: bet €0.02 and won €0, net result: €-0.02
+Seat 4: Cheytan: bet €0.04 and won €0, net result: €-0.04
+Seat 5: HGJJGHJGJHG: bet €6.09 and won €9.81, net result: €3.72
+

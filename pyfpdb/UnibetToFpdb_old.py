@@ -93,7 +93,31 @@ class Unibet(HandHistoryConverter):
 
     # Static regexes
     re_GameInfo     = re.compile(u"""
-          Game\s\#(?P<HID>[0-9]+):\s+Table\s(?P<CURRENCY>€|$|£)[0-9]+\s(?P<LIMIT>PL|NL|FL)\s-\s(?P<SB>[.0-9]+)/(?P<BB>[.0-9]+)\s-\s(?P<GAME>Pot\sLimit\sOmaha|No\sLimit\sHold\'Em\sBanzai)\s-\s(?P<DATETIME>.*$)
+          Game\s\#(?P<HID>[0-9]+):\s+Table
+          (\{.*\}\s+)?((?P<TOUR>((Zoom|Rush)\s)?(Tournament|TOURNAMENT))\s\#                # open paren of tournament info
+          (?P<TOURNO>\d+),\s(Table\s\#(?P<HIVETABLE>\d+),\s)?
+          # here's how I plan to use LS
+          (?P<BUYIN>(?P<BIAMT>[%(LS)s\d\.]+)?\+?(?P<BIRAKE>[%(LS)s\d\.]+)?\+?(?P<BOUNTY>[%(LS)s\d\.]+)?\s?(?P<TOUR_ISO>%(LEGAL_ISO)s)?|Freeroll|)(\s+)?(-\s)?
+          (\s.+?,)?
+          )?
+          # close paren of tournament info
+          (?P<MIXED>HORSE|8\-Game|8\-GAME|HOSE|Mixed\sOmaha\sH/L|Mixed\sHold\'em|Mixed\sPLH/PLO|Mixed\sNLH/PLO|Mixed\sOmaha|Triple\sStud)?\s?\(?
+          (?P<SPLIT>Split)?\s?
+          (?P<GAME>Hold\'em|HOLD\'EM|Hold\'em|6\+\sHold\'em|Razz|RAZZ|7\sCard\sStud|7\sCARD\sSTUD|7\sCard\sStud\sHi/Lo|7\sCARD\sSTUD\sHI/LO|Omaha|OMAHA|Omaha\sHi/Lo|OMAHA\sHI/LO|Badugi|Triple\sDraw\s2\-7\sLowball|Single\sDraw\s2\-7\sLowball|5\sCard\sDraw|(5|6)\sCard\sOmaha(\sHi/Lo)?|Courchevel(\sHi/Lo)?)\s
+          (?P<LIMIT>No\sLimit|NO\sLIMIT|Fixed\sLimit|Limit|LIMIT|Pot\sLimit|POT\sLIMIT|Pot\sLimit\sPre\-Flop,\sNo\sLimit\sPost\-Flop)\)?,?\s
+          (-\s)?
+          (?P<SHOOTOUT>Match.*,\s)?
+          ((Level|LEVEL)\s(?P<LEVEL>[IVXLC\d]+)\s)?
+          \(?                            # open paren of the stakes
+          (?P<CURRENCY>%(LS)s|)?
+          (ante\s\d+,\s)?
+          ((?P<SB>[.0-9]+)/(%(LS)s)?(?P<BB>[.0-9]+)|Button\sBlind\s(?P<CURRENCY1>%(LS)s|)(?P<BUB>[.0-9]+)\s\-\sAnte\s(%(LS)s)?[.0-9]+\s)
+          (?P<CAP>\s-\s[%(LS)s]?(?P<CAPAMT>[.0-9]+)\sCap\s-\s)?        # Optional Cap part
+          \s?(?P<ISO>%(LEGAL_ISO)s)?
+          \)                        # close paren of the stakes
+          (?P<BLAH2>\s\[AAMS\sID:\s[A-Z0-9]+\])?         # AAMS ID: in .it HH's
+          \s-\s
+          (?P<DATETIME>.*$)
         """ % substitutions, re.MULTILINE|re.VERBOSE)
 
     re_PlayerInfo   = re.compile(u"""
@@ -136,7 +160,7 @@ class Unibet(HandHistoryConverter):
                         ^%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)
                         (\s%(CUR)s(?P<BET>[,.\d]+))?(\sto\s%(CUR)s(?P<BETTO>[,.\d]+))?  # the number discarded goes in <BET>
                         \s*(and\sis\sall.in)?
-                        (and\shas\sreached\sthe\s[%(CUR)s\d\.,]+\scap)?
+                        (and\shas\sreached\sthe\s\[%(CUR)s\d\.,]+\scap)?
                         (\son|\scards?)?
                         (\s\(disconnect\))?
                         (\s\[(?P<CARDS>.+?)\])?\s*$"""
@@ -224,21 +248,9 @@ class Unibet(HandHistoryConverter):
 
         mg = m.groupdict()
         if 'LIMIT' in mg:
-            #print(mg['LIMIT'])
-            if mg['LIMIT'] == 'NL':
-                info['limitType'] = 'nl'
-            elif mg['LIMIT'] == 'PL':
-                info['limitType'] = 'pl'
-            elif mg['LIMIT'] == 'FL':
-                info['limitType'] = 'fl'
-            #info['limitType'] = self.limits[mg['LIMIT']]
+            info['limitType'] = self.limits[mg['LIMIT']]
         if 'GAME' in mg:
-            print(mg['GAME'])
-            if mg['GAME'] == 'Holdem':          
-                (info['base'], info['category'])  = "hold", "nl"
-            elif mg['GAME'] == 'Omaha':
-                (info['base'], info['category'])  = "hold", "pl"
-            #(info['base'], info['category']) = self.games[mg['GAME']]
+            (info['base'], info['category']) = self.games[mg['GAME']]
         if 'SB' in mg and mg['SB'] is not None:
             info['sb'] = mg['SB']
         if 'BB' in mg and mg['BB'] is not None:
@@ -311,20 +323,20 @@ class Unibet(HandHistoryConverter):
     def readHandInfo(self, hand):
         #First check if partial
         if hand.handText.count('*** SUMMARY ***')!=1:
-            raise FpdbHandPartial(("Hand is not cleanly split into pre and post Summary"))
+            raise FpdbHandPartial(_("Hand is not cleanly split into pre and post Summary"))
         
         info = {}
         m  = self.re_HandInfo.search(hand.handText,re.DOTALL)
         m2 = self.re_GameInfo.search(hand.handText)
         if m is None or m2 is None:
             tmp = hand.handText[0:200]
-            log.error(("UnibetToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(_("UnibetToFpdb.readHandInfo: '%s'") % tmp)
             raise FpdbParseError
 
         info.update(m.groupdict())
         info.update(m2.groupdict())
 
-        log.debug("readHandInfo: %s" % info)
+        #log.debug("readHandInfo: %s" % info)
         for key in info:
             if key == 'DATETIME':
                 #2008/11/12 10:00:48 CET [2008/11/12 4:00:48 ET] # (both dates are parsed so ET date overrides the other)
@@ -335,15 +347,15 @@ class Unibet(HandHistoryConverter):
                     m2 = self.re_DateTime2.finditer(info[key])
                     for a in m2:
                         datetimestr = "%s/%s/%s %s:%s:%s" % (a.group('Y'), a.group('M'),a.group('D'),a.group('H'),a.group('MIN'),'00')
-                        tz = a.group('TZ')  # just assume ET??
-                        print ("   tz = ", tz, " datetime =", datetimestr)
+                        #tz = a.group('TZ')  # just assume ET??
+                        #print "   tz = ", tz, " datetime =", datetimestr
                     hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S") # also timezone at end, e.g. " ET"
                 else:
                     m1 = self.re_DateTime1.finditer(info[key])
                     for a in m1:
                         datetimestr = "%s/%s/%s %s:%s:%s" % (a.group('Y'), a.group('M'),a.group('D'),a.group('H'),a.group('MIN'),a.group('S'))
-                        tz = a.group('TZ')  # just assume ET??
-                        print ("   tz = ", tz, " datetime =", datetimestr)
+                        #tz = a.group('TZ')  # just assume ET??
+                        #print "   tz = ", tz, " datetime =", datetimestr
                     hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S") # also timezone at end, e.g. " ET"
                     hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
                     
@@ -353,10 +365,10 @@ class Unibet(HandHistoryConverter):
                 hand.tourNo = info[key]
             if key == 'BUYIN':
                 if hand.tourNo!=None:
-                    print ("DEBUG: info['BUYIN']: %s" % info['BUYIN'])
-                    print ("DEBUG: info['BIAMT']: %s" % info['BIAMT'])
-                    print ("DEBUG: info['BIRAKE']: %s" % info['BIRAKE'])
-                    print ("DEBUG: info['BOUNTY']: %s" % info['BOUNTY'])
+                    #print "DEBUG: info['BUYIN']: %s" % info['BUYIN']
+                    #print "DEBUG: info['BIAMT']: %s" % info['BIAMT']
+                    #print "DEBUG: info['BIRAKE']: %s" % info['BIRAKE']
+                    #print "DEBUG: info['BOUNTY']: %s" % info['BOUNTY']
                     if info[key].strip() == 'Freeroll':
                         hand.buyin = 0
                         hand.fee = 0
@@ -384,7 +396,7 @@ class Unibet(HandHistoryConverter):
                             hand.buyinCurrency="play"
                         else:
                             #FIXME: handle other currencies, play money
-                            log.error(("UnibetToFpdb.readHandInfo: Failed to detect currency.") + " Hand ID: %s: '%s'" % (hand.handid, info[key]))
+                            log.error(_("UnibetToFpdb.readHandInfo: Failed to detect currency.") + " Hand ID: %s: '%s'" % (hand.handid, info[key]))
                             raise FpdbParseError
 
                         info['BIAMT'] = info['BIAMT'].strip(u'$€£FPPSC₹')
@@ -434,14 +446,14 @@ class Unibet(HandHistoryConverter):
                 hand.maxseats = int(info[key])
                 
         if self.re_Cancelled.search(hand.handText):
-            raise FpdbHandPartial(("Hand '%s' was cancelled.") % hand.handid)
+            raise FpdbHandPartial(_("Hand '%s' was cancelled.") % hand.handid)
     
     def readButton(self, hand):
         m = self.re_Button.search(hand.handText)
         if m:
             hand.buttonpos = int(m.group('BUTTON'))
         else:
-            log.info('readButton: ' + ('not found'))
+            log.info('readButton: ' + _('not found'))
 
     def readPlayerStacks(self, hand):
         pre, post = hand.handText.split('*** Summary ***')
@@ -478,13 +490,13 @@ class Unibet(HandHistoryConverter):
         log.debug(_("reading antes"))
         m = self.re_Antes.finditer(hand.handText)
         for player in m:
-            logging.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
+            #~ logging.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
             hand.addAnte(player.group('PNAME'), self.clearMoneyString(player.group('ANTE')))
     
     def readBringIn(self, hand):
         m = self.re_BringIn.search(hand.handText,re.DOTALL)
         if m:
-            logging.debug("readBringIn: %s for %s" %(m.group('PNAME'),  m.group('BRINGIN')))
+            #~ logging.debug("readBringIn: %s for %s" %(m.group('PNAME'),  m.group('BRINGIN')))
             hand.addBringIn(m.group('PNAME'),  self.clearMoneyString(m.group('BRINGIN')))
         
     def readBlinds(self, hand):
@@ -528,7 +540,7 @@ class Unibet(HandHistoryConverter):
         m = self.re_Action.finditer(hand.streets[s])
         for action in m:
             acts = action.groupdict()
-            log.error("DEBUG: %s acts: %s" % (street, acts))
+            #log.error("DEBUG: %s acts: %s" % (street, acts))
             if action.group('ATYPE') == ' folds':
                 hand.addFold( street, action.group('PNAME'))
             elif action.group('ATYPE') == ' checks':
@@ -547,7 +559,7 @@ class Unibet(HandHistoryConverter):
             elif action.group('ATYPE') == ' stands pat':
                 hand.addStandsPat( street, action.group('PNAME'), action.group('CARDS'))
             else:
-                log.debug(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
+                log.debug(_("DEBUG:") + " " + _("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
 
 
     def readShowdownActions(self, hand):
