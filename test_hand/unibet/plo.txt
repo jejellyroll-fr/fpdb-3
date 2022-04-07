@@ -1,0 +1,47 @@
+Partie 643536107 : Table €4 PL - 0.02/0.04 - Limite du pot Omaha - 15:03:01 2022/04/06
+*** Joueurs assis ***
+Siège 1: sniper97320 (€4.80)
+Siège 2: jAKamLeRouge (€5.05)
+Siège 3: Gaboche1977 (€2.35)
+Siège 4: POLO47 (€0.94)
+Siège 5: ExtremeBleu (€5.15)
+Siège 6: HGJJGHJGJHG (€2.55)
+*** Blinds et bouton ***
+sniper97320 possède le bouton
+jAKamLeRouge place le petit blind €0.02
+Gaboche1977 place le gros blind €0.04
+*** Cartes fermées ***
+A distribué les cartes à jAKamLeRouge
+A distribué les cartes à Gaboche1977
+A distribué les cartes à POLO47
+A distribué les cartes à ExtremeBleu
+Distribué à HGJJGHJGJHG [8Pi 10Co 9Tr VPi]
+A distribué les cartes à sniper97320
+*** Préflop ***
+POLO47 relance de €0.14 à €0.14
+ExtremeBleu suit à €0.14
+HGJJGHJGJHG suit à €0.14
+sniper97320 se couche
+jAKamLeRouge se couche
+Gaboche1977 suit à €0.10
+*** Flop *** [4Ca 1Ca 8Ca]
+Gaboche1977 checke
+POLO47 mise €0.04
+ExtremeBleu se couche
+HGJJGHJGJHG se couche
+Gaboche1977 suit à €0.04
+*** Turn *** [4Ca 1Ca 8Ca] [7Ca]
+Gaboche1977 checke
+POLO47 checke
+*** River *** [4Ca 1Ca 8Ca] [7Ca] [DPi]
+Gaboche1977 mise €0.21
+POLO47 se couche
+Mise non suivie rendue à Gaboche1977 : €0.21
+Gaboche1977 remporte €0.62
+*** Sommaire ***
+Totale pot €0.66 Rake €0.04
+Place 2 : jAKamLeRouge : a misé €0.02 et gagné €0, résultat net : €-0.02
+Place 3 : Gaboche1977 : a misé €0.39 et gagné €0.83, résultat net : €0.44
+Place 4 : POLO47 : a misé €0.18 et gagné €0, résultat net : €-0.18
+Place 5 : ExtremeBleu : a misé €0.14 et gagné €0, résultat net : €-0.14
+Place 6 : HGJJGHJGJHG : a misé €0.14 et gagné €0, résultat net : €-0.14
