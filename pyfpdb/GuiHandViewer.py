@@ -108,6 +108,8 @@ class GuiHandViewer(QSplitter):
                   'Net'          : 8,
                   'Game'         : 9,
                   'HandId'       : 10,
+                  'Total Pot'    : 11,
+                  'Rake'         : 12
                  }
         self.view = QTableView()
         self.view.setSelectionBehavior(QTableView.SelectRows)
@@ -121,7 +123,7 @@ class GuiHandViewer(QSplitter):
         self.view.verticalHeader().hide()
         self.model.setHorizontalHeaderLabels(
             ['Stakes', 'Position', 'Hands', 'Preflop Action', 'Board', 'Postflop Action',
-             'Won', 'Bet', 'Net', 'Game', 'HandId'])
+             'Won', 'Bet', 'Net', 'Game', 'HandId', 'Total Pot', 'Rake'])
 
         self.view.doubleClicked.connect(self.row_activated)
         self.view.contextMenuEvent = self.contextMenu
@@ -209,6 +211,8 @@ class GuiHandViewer(QSplitter):
         pos = hand.get_player_position(hero)
         gt =  hand.gametype['category']
         row = []
+        totalpot = hand.totalpot
+        rake = hand.rake
         if hand.gametype['base'] == 'hold':
             board =  []
             board.extend(hand.board['FLOP'])
@@ -221,7 +225,7 @@ class GuiHandViewer(QSplitter):
                 post_actions = hand.get_actions_short_streets(hero, 'FLOP', 'TURN', 'RIVER')
 
             row = [hand.getStakesAsString(), pos, hand.join_holecards(hero), pre_actions, ' '.join(board), post_actions, str(won), str(bet), 
-                   str(net), gt, str(handid)]
+                   str(net), gt, str(handid), str(totalpot), str(rake)]
         elif hand.gametype['base'] == 'stud':
             third = " ".join(hand.holecards['THIRD'][hero][0]) + " " + " ".join(hand.holecards['THIRD'][hero][1]) 
             # ugh - fix the stud join_holecards function so we can retrieve sanely
@@ -237,10 +241,10 @@ class GuiHandViewer(QSplitter):
                 post_actions = hand.get_actions_short_streets(hero, 'FOURTH', 'FIFTH', 'SIXTH', 'SEVENTH')
 
             row = [hand.getStakesAsString(), pos, third, pre_actions, ' '.join(later_streets), post_actions, str(won), str(bet), str(net), 
-                   gt, str(handid)]
+                   gt, str(handid), str(totalpot), str(rake)]
         elif hand.gametype['base'] == 'draw':
             row = [hand.getStakesAsString(), pos, hand.join_holecards(hero,street='DEAL'), hand.get_actions_short(hero, 'DEAL'), None, None, 
-                   str(won), str(bet), str(net), gt, str(handid)]
+                   str(won), str(bet), str(net), gt, str(handid), str(totalpot), str(rake)]
 
         modelrow = [QStandardItem(r) for r in row]
         for index, item in enumerate(modelrow):

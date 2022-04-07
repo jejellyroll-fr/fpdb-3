@@ -24,7 +24,7 @@ from builtins import str
 from builtins import range
 from builtins import object
 from collections import defaultdict
-from unicodedata import name
+from unicodedata import decimal, name
 from past.utils import old_div
 import L10n
 _ = L10n.get_translation()
@@ -61,7 +61,7 @@ class GuiReplayer(QWidget):
         self.conf = config
         self.main_window = mainwin
         self.sql = querylist
-        
+        self.newpot = Decimal()
         self.db = Database.Database(self.conf, sql=self.sql)
         self.states = [] # List with all table states.
         self.handlist = handlist
@@ -118,9 +118,7 @@ class GuiReplayer(QWidget):
     
     def paintEvent(self, event):
 
-        pot_odds = 0
-        new_pot = 0
-        percent = '%'
+        
 
         if self.tableImage is None or self.playerBackdrop is None:
             try:
@@ -153,7 +151,7 @@ class GuiReplayer(QWidget):
             return
  
         state = self.states[self.stateSlider.value()]
-
+        
         communityLeft = int(old_div(self.tableImage.width(), 2) - 2.5 * self.cardwidth)
         communityTop = int(old_div(self.tableImage.height(), 2) - 1.75 * self.cardheight)
 
@@ -161,8 +159,9 @@ class GuiReplayer(QWidget):
         converty = lambda y: int(y * self.tableImage.height() * 0.6) + old_div(self.tableImage.height(), 2)
 
         painter.drawText(QRect(-40,0,600,40),Qt.AlignCenter,self.info)
-
+        
         for player in list(state.players.values()):
+            
             playerx = convertx(player.x)
            
             playery = converty(player.y)
@@ -184,15 +183,16 @@ class GuiReplayer(QWidget):
                                             player.stack))
 
             if player.justacted:
+                
                 painter.setPen(QColor("yellow"))
-                new_pot= new_pot+player.chips
+                
+                painter.drawText(QRect(playerx - 50, playery + 15, 100, 20), Qt.AlignCenter, player.action)
                 painter.drawText(QRect(old_div(self.tableImage.width(), 2) - 100,
                                        old_div(self.tableImage.height(), 2) - 20,
                                        200,
                                        40),
                                  Qt.AlignCenter,
-                                'Pot: %s%.2f' % (self.currency, new_pot))
-                painter.drawText(QRect(playerx - 50, playery + 15, 100, 20), Qt.AlignCenter, player.action)
+                                'Pot: %s%.2f' % (self.currency, state.newpot)) 
             else:
                 painter.setPen(QColor("white"))
             if player.chips != 0:
@@ -202,6 +202,9 @@ class GuiReplayer(QWidget):
                                        20),
                                  Qt.AlignCenter,
                                  '%s%.2f' % (self.currency, player.chips))
+                
+            
+                            
 
         painter.setPen(QColor("white"))
         
@@ -367,6 +370,7 @@ class GuiReplayer(QWidget):
                 state = copy.deepcopy(state)
                 state.updateForAction(action)
                 self.states.append(state)
+                
         state = copy.deepcopy(state)
         state.endHand(hand.collectees, hand.pot.returned)
         self.states.append(state)
@@ -477,6 +481,7 @@ class TableState(object):
         self.gamebase = hand.gametype['base']
         self.allin = False
         self.allinThisStreet = False
+        self.newpot = Decimal()
         # NOTE: Need a useful way to grab payouts
         #self.icm = ICM(stacks,payouts)
         #print icm.equities
@@ -502,6 +507,7 @@ class TableState(object):
 
     def startPhase(self, phase):
         self.street = phase
+        self.newpot = self.newpot
         if phase in ("BLINDSANTES", "PREFLOP", "DEAL"):
             return
 
@@ -513,6 +519,7 @@ class TableState(object):
                 player.stack += player.chips - self.called
                 player.chips = self.called
             self.pot += player.chips
+            
             player.chips = Decimal(0)
             if phase in ("THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"):
                 player.holecards = player.streetcards[self.street]
@@ -538,20 +545,25 @@ class TableState(object):
             self.bet += action[2]
             player.chips += action[2] + diff
             player.stack -= action[2] + diff
+            self.newpot += action[2] + diff
         elif action[1] == "big blind":
             self.bet = action[2]
             player.chips += action[2]
             player.stack -= action[2]
+            self.newpot += action[2]
         elif action[1] == "calls" or action[1] == "small blind" or action[1] == "secondsb":
             player.chips += action[2]
             player.stack -= action[2]
             self.called = max(self.called, player.chips)
+            self.newpot += action[2] 
         elif action[1] == "both":
             player.chips += action[2]
             player.stack -= action[2]
+            self.newpot += action[2] 
         elif action[1] == "ante":
             self.pot += action[2]
             player.stack -= action[2]
+            self.newpot += action[2]
         elif action[1] == "discards":
             player.action += " " + str(action[2])
             if len(action) > 3:
@@ -562,6 +574,7 @@ class TableState(object):
         elif action[1] == "bringin":
             player.chips += action[2]
             player.stack -= action[2]
+            self.newpot += action[2]
         else:
             print("unhandled action: " + str(action))
 
