@@ -106,10 +106,7 @@ class Unibet(HandHistoryConverter):
           re.MULTILINE|re.VERBOSE)
 
     re_HandInfo     = re.compile("""
-          ^\s?Table\s(ID\s)?\'(?P<TABLE>.+?)\'\s
-          ((?P<MAX>\d+)-max\s)?
-          (?P<PLAY>\(Play\sMoney\)\s)?
-          (Seat\s\#(?P<BUTTON>\d+)\sis\sthe\sbutton)?""", 
+          (?P<TABLE>\sTable\s(€|$|£)[0-9]+\s(PL|NL|FL))""", 
           re.MULTILINE|re.VERBOSE)
 
     re_Identify     = re.compile(u'^Game\s\#\d+:\sTable')
@@ -226,18 +223,23 @@ class Unibet(HandHistoryConverter):
         if 'LIMIT' in mg:
             #print(mg['LIMIT'])
             if mg['LIMIT'] == 'NL':
-                info['limitType'] = 'nl'
+                info['limitType'] = self.limits['No Limit']
             elif mg['LIMIT'] == 'PL':
-                info['limitType'] = 'pl'
-            elif mg['LIMIT'] == 'FL':
-                info['limitType'] = 'fl'
+                info['limitType'] = self.limits['Pot Limit']
+
             #info['limitType'] = self.limits[mg['LIMIT']]
         if 'GAME' in mg:
             print(mg['GAME'])
-            if mg['GAME'] == 'Holdem':          
-                (info['base'], info['category'])  = "hold", "nl"
-            elif mg['GAME'] == 'Omaha':
-                (info['base'], info['category'])  = "hold", "pl"
+            if mg['GAME'] == 'No Limit Hold\'Em Banzai':          
+                info['base']  = 'hold'
+                info['category']  = 'holdem'
+                info['type']  = 'ring'  
+                info['split'] = False
+            elif mg['GAME'] == 'Pot Limit Omaha':
+                info['base']  = 'hold'
+                info['category']  = 'omahahi'
+                info['type']  = 'ring' 
+                info['split'] = False
             #(info['base'], info['category']) = self.games[mg['GAME']]
         if 'SB' in mg and mg['SB'] is not None:
             info['sb'] = mg['SB']
@@ -250,45 +252,46 @@ class Unibet(HandHistoryConverter):
             info['currency'] = self.currencies[mg['CURRENCY1']]
         elif 'CURRENCY' in mg:
             info['currency'] = self.currencies[mg['CURRENCY']]
-        if 'Zoom' in mg['TITLE'] or 'Rush' in mg['TITLE']:
-            info['fast'] = True
-        else:
-            info['fast'] = False
-        if 'Home' in mg['TITLE']:
-            info['homeGame'] = True
-        else:
-            info['homeGame'] = False
-        if 'CAP' in mg and mg['CAP'] is not None:
-            info['buyinType'] = 'cap'
-        else:
-            info['buyinType'] = 'regular'
-        if 'SPLIT' in mg and mg['SPLIT'] == 'Split':
-            info['split'] = True
-        else:
-            info['split'] = False
-        if 'SITE' in mg:
-            if mg['SITE'] == 'PokerMaster':
-                self.sitename = "PokerMaster"
-                self.siteId   = 25 
-                m1  = self.re_HandInfo.search(handText,re.DOTALL)
-                if m1 and '_5Cards_' in m1.group('TABLE'):
-                    info['category'] = '5_omahahi'
-            elif mg['SITE'] == 'Run It Once Poker':
-                self.sitename = "Run It Once Poker"
-                self.siteId   = 26
-            elif mg['SITE'] == 'BetOnline':
-                self.sitename = 'BetOnline'
-                self.siteId = 19
-            elif mg['SITE'] == 'PokerBros':
-                self.sitename = 'PokerBros'
-                self.siteId = 29
+        
+        # if 'Zoom' in mg['TITLE'] or 'Rush' in mg['TITLE']:
+        #     info['fast'] = True
+        # else:
+        #     info['fast'] = False
+        # if 'Home' in mg['TITLE']:
+        #     info['homeGame'] = True
+        # else:
+        #     info['homeGame'] = False
+        # if 'CAP' in mg and mg['CAP'] is not None:
+        #     info['buyinType'] = 'cap'
+        # else:
+        #     info['buyinType'] = 'regular'
+        # if 'SPLIT' in mg and mg['SPLIT'] == 'Split':
+        #     info['split'] = True
+        # else:
+        #     info['split'] = False
+        # if 'SITE' in mg:
+        #     if mg['SITE'] == 'PokerMaster':
+        #         self.sitename = "PokerMaster"
+        #         self.siteId   = 25 
+        #         m1  = self.re_HandInfo.search(handText,re.DOTALL)
+        #         if m1 and '_5Cards_' in m1.group('TABLE'):
+        #             info['category'] = '5_omahahi'
+        #     elif mg['SITE'] == 'Run It Once Poker':
+        #         self.sitename = "Run It Once Poker"
+        #         self.siteId   = 26
+        #     elif mg['SITE'] == 'BetOnline':
+        #         self.sitename = 'BetOnline'
+        #         self.siteId = 19
+        #     elif mg['SITE'] == 'PokerBros':
+        #         self.sitename = 'PokerBros'
+        #         self.siteId = 29
                 
-        if 'TOURNO' in mg and mg['TOURNO'] is None:
-            info['type'] = 'ring'
-        else:
-            info['type'] = 'tour'
-            if 'ZOOM' in mg['TOUR']:
-                info['fast'] = True
+        # if 'TOURNO' in mg and mg['TOURNO'] is None:
+        #     info['type'] = 'ring'
+        # else:
+        #     info['type'] = 'tour'
+        #     if 'ZOOM' in mg['TOUR']:
+        #         info['fast'] = True
         
         if info.get('currency') in ('T$', None) and info['type']=='ring':
             info['currency'] = 'play'
@@ -310,7 +313,7 @@ class Unibet(HandHistoryConverter):
 
     def readHandInfo(self, hand):
         #First check if partial
-        if hand.handText.count('*** SUMMARY ***')!=1:
+        if hand.handText.count('*** Summary ***')!=1:
             raise FpdbHandPartial(("Hand is not cleanly split into pre and post Summary"))
         
         info = {}
@@ -421,13 +424,13 @@ class Unibet(HandHistoryConverter):
             if key == 'SHOOTOUT' and info[key] != None:
                 hand.isShootout = True
             if key == 'TABLE':
-                tablesplit = re.split(" ", info[key])
-                if info['TOURNO'] is not None and info['HIVETABLE'] is not None:
-                    hand.tablename = info['HIVETABLE']
-                elif hand.tourNo != None and len(tablesplit)>1:
-                    hand.tablename = tablesplit[1]
-                else:
-                    hand.tablename = info[key]
+                hand.tablename = info[key]
+                # if info['TOURNO'] is not None and info['HIVETABLE'] is not None:
+                #     hand.tablename = info['HIVETABLE']
+                # elif hand.tourNo != None and len(tablesplit)>1:
+                #     hand.tablename = tablesplit[1]
+                # else:
+                #     hand.tablename = info[key]
             if key == 'BUTTON':
                 hand.buttonpos = info[key]
             if key == 'MAX' and info[key] != None:

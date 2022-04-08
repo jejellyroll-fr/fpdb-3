@@ -162,7 +162,7 @@ def compare_gametypes_file(filename, importer, errors):
     for hand in handlist:
         ghash = hand.gametyperow
         for i in range(len(ghash)):
-            #print "DEBUG: about to compare: '%s' and '%s'" %(ghash[i], testhash[i])
+            print ("DEBUG: about to compare: '%s' and '%s'" %(ghash[i], testhash[i]))
             if ghash[i] == testhash[i]:
                 # The stats match - continue
                 pass
@@ -186,11 +186,11 @@ def compare_handsplayers_file(filename, importer, errors):
     for hand in handlist:
         ghash = hand.stats.getHandsPlayers()
         for p in ghash:
-            #print "DEBUG: player: '%s'" % p
+            print ("DEBUG: player: '%s'" % p)
             pstat = ghash[p]
             teststat = testhash[p]
             for stat in pstat:
-                #print "pstat[%s][%s]: %s == %s" % (p, stat, pstat[stat], teststat[stat])
+                print ("pstat[%s][%s]: %s == %s" % (p, stat, pstat[stat], teststat[stat]))
                 try:
                     if pstat[stat] == teststat[stat]:
                         # The stats match - continue
@@ -229,7 +229,7 @@ def compare_hands_file(filename, importer, errors):
             pass
         del ghash['boards']
         for datum in ghash:
-            #print "DEBUG: hand: '%s'" % datum
+            print ("DEBUG: hand: '%s'" % datum)
             try:
                 if ghash[datum] == testhash[datum]:
                     # The stats match - continue
@@ -245,7 +245,7 @@ def compare_hands_file(filename, importer, errors):
                         or datum == 'fileId'
                         or datum == 'runItTwice'):
                         # Not an error. gametypeIds are dependent on the order added to the db.
-                        #print "DEBUG: Skipping mismatched gamtypeId"
+                        print ("DEBUG: Skipping mismatched gamtypeId")
                         pass
                     else:
                         errors.error_report(filename, hand, datum, ghash, testhash, None)
@@ -255,7 +255,7 @@ def compare_hands_file(filename, importer, errors):
 
 def compare(leaf, importer, errors, site):
     filename = leaf
-    #print "DEBUG: fileanme: %s" % filename
+    print ("DEBUG: fileanme: %s" % filename)
 
     # Test if this is a hand history file
     if filename.endswith('.txt') or filename.endswith('.xml'):
@@ -547,8 +547,8 @@ def main(argv=None):
     print("---------------------")
     print("Errors by stat:")
     print("---------------------")
-    #for stat in statdict:
-    #    print "(%3d) : %s" %(statdict[stat], stat)
+    for stat in statdict:
+        print ("(%3d) : %s" %(statdict[stat], stat))
 
     sortedstats = sorted([(value,key) for (key,value) in list(statdict.items())])
     for num, stat in sortedstats:

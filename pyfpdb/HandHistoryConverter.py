@@ -236,6 +236,8 @@ HandHistoryConverter: '%(sitename)s'
             # TODO: not ideal, just trying to not error. Throw ParseException?
             self.numErrors += 1
         else:
+            print(gametype)
+            print('gametypecategory',gametype['category'])
             if gametype['category'] in self.import_parameters['importFilters']:
                 raise FpdbHandSkipped("Skipped %s hand" % gametype['type'])
             # See if gametype is supported.
