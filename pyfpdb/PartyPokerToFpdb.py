@@ -102,6 +102,7 @@ class PartyPoker(HandHistoryConverter):
                   'PokerMaster' : ('PokerMaster', 25),
                        'IPoker' : ('iPoker', 14),
                         'Party' : ('PartyPoker', 9),
+                        'PMU Poker' : ('PMU Poker', 31),
                       'Pacific' : ('PacificPoker', 10),
                           'WPN' : ('WinningPoker', 24),
                     'PokerBros' : ('PokerBros', 29)
@@ -302,18 +303,18 @@ class PartyPoker(HandHistoryConverter):
         if not m:
             m = self.re_Disconnected.search(handText)
             if m:
-                message = _("Player Disconnected")
+                message = ("Player Disconnected")
                 raise FpdbHandPartial("Partial hand history: %s" % message)
             m = self.re_Cancelled.search(handText)
             if m:
-                message = _("Table Closed")
+                message = ("Table Closed")
                 raise FpdbHandPartial("Partial hand history: %s" % message)
             m = self.re_GameStartLine.match(handText)
             if m and len(handText)<50:
-                message = _("Game start line")
+                message = ("Game start line")
                 raise FpdbHandPartial("Partial hand history: %s" % message)
             tmp = handText[0:200]
-            log.error(_("PartyPokerToFpdb.determineGameType: '%s'") % tmp)
+            log.error(("PartyPokerToFpdb.determineGameType: '%s'") % tmp)
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -441,7 +442,7 @@ class PartyPoker(HandHistoryConverter):
                     type3 = True
         if m is None or m2 is None:
             tmp = hand.handText[0:200]
-            log.error(_("PartyPokerToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(("PartyPokerToFpdb.readHandInfo: '%s'") % tmp)
             raise FpdbParseError
         info.update(m.groupdict())
         info.update(m2.groupdict())
@@ -519,7 +520,7 @@ class PartyPoker(HandHistoryConverter):
                     elif info[key].find(u"€")!=-1:
                         hand.buyinCurrency="EUR"
                     else:
-                        log.error(_("PartyPokerToFpdb.readHandInfo: Failed to detect currency Hand ID: '%s' - '%s'") % (hand.handid, info[key]))
+                        log.error(("PartyPokerToFpdb.readHandInfo: Failed to detect currency Hand ID: '%s' - '%s'") % (hand.handid, info[key]))
                         raise FpdbParseError
                     info[key] = self.clearMoneyString(info[key].strip(u'$€'))
                     hand.buyin = int(100*Decimal(info[key]))
@@ -545,7 +546,7 @@ class PartyPoker(HandHistoryConverter):
         if m:
             hand.buttonpos = int(m.group('BUTTON'))
         else:
-            log.info('readButton: ' + _('not found'))
+            log.info('readButton: ' + ('not found'))
 
     def readPlayerStacks(self, hand):
         log.debug("readPlayerStacks")
@@ -788,7 +789,7 @@ class PartyPoker(HandHistoryConverter):
                 if amount:
                     hand.addAllIn(street, playerName, amount)
             else:
-                log.error((_("PartyPokerToFpdb: Unimplemented %s: '%s' '%s'") + " hid:%s") % ("readAction", playerName, actionType, hand.handid))
+                log.error((("PartyPokerToFpdb: Unimplemented %s: '%s' '%s'") + " hid:%s") % ("readAction", playerName, actionType, hand.handid))
                 raise FpdbParseError
 
     def readShowdownActions(self, hand):
