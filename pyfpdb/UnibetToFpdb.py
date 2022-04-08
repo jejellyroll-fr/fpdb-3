@@ -97,25 +97,24 @@ class Unibet(HandHistoryConverter):
         """ % substitutions, re.MULTILINE|re.VERBOSE)
 
     re_PlayerInfo   = re.compile(u"""
-          ^\s?Seat\s(?P<SEAT>[0-9]+):\s
-          (?P<PNAME>.*)\s
-          \((%(LS)s)?(?P<CASH>[,.0-9]+)\sin\schips
-          (,\s(%(LS)s)?(?P<BOUNTY>[,.0-9]+)\sbounty)?
-          \)
-          (?P<SITOUT>\sis\ssitting\sout)?""" % substitutions, 
+          Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>\w+)\s\((€|$|£)(?P<CASH>[,.0-9]+)\)""" % substitutions, 
+          re.MULTILINE|re.VERBOSE)
+
+    re_PlayerInfo2   = re.compile(u"""
+          (?P<SITOUT>\w+)\s\((€|$|£)[,.0-9]+\)\s\(sitting\sout\)""" % substitutions, 
           re.MULTILINE|re.VERBOSE)
 
     re_HandInfo     = re.compile("""
           (?P<TABLE>\sTable\s(€|$|£)[0-9]+\s(PL|NL|FL))""", 
           re.MULTILINE|re.VERBOSE)
 
-    re_Identify     = re.compile(u'^Game\s\#\d+:\sTable')
+    re_Identify     = re.compile(u'Game\s\#\d+:\sTable\s(€|$|£)[0-9]+\s(PL|NL|FL)')
     re_SplitHands   = re.compile('(?:\s?\n){2,}')
     re_TailSplitHands   = re.compile('(\n\n\n+)')
-    re_Button       = re.compile('Seat #(?P<BUTTON>\d+) is the button', re.MULTILINE)
+    re_Button       = re.compile('(?P<BUTTON>\w+)\shas\sthe\sbutton', re.MULTILINE)
     re_Board        = re.compile(r"\[(?P<CARDS>.+)\]")
     re_Board2       = re.compile(r"\[(?P<C1>\S\S)\] \[(\S\S)?(?P<C2>\S\S) (?P<C3>\S\S)\]")
-    re_DateTime1     = re.compile("""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)""", re.MULTILINE)
+    re_DateTime1     = re.compile("""(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)\s(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})""", re.MULTILINE)
     re_DateTime2     = re.compile("""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+)""", re.MULTILINE)
     # revised re including timezone (not currently used):
     #re_DateTime     = re.compile("""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+) \(?(?P<TZ>[A-Z0-9]+)""", re.MULTILINE)
@@ -131,7 +130,7 @@ class Unibet(HandHistoryConverter):
     re_PostStraddle     = re.compile(r"^%(PLYR)s: posts straddle %(CUR)s(?P<STRADDLE>[,.0-9]+)" %  substitutions, re.MULTILINE)
     re_Action           = re.compile(r"""
                         ^%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)
-                        (\s%(CUR)s(?P<BET>[,.\d]+))?(\sto\s%(CUR)s(?P<BETTO>[,.\d]+))?  # the number discarded goes in <BET>
+                        (\s%(CUR)s(?P<BET>[,.\d]+))?(\sto\s%(CUR)s(?P<BETTO>[,.\d]+))? 
                         \s*(and\sis\sall.in)?
                         (and\shas\sreached\sthe\s[%(CUR)s\d\.,]+\scap)?
                         (\son|\scards?)?
@@ -333,22 +332,21 @@ class Unibet(HandHistoryConverter):
                 #2008/11/12 10:00:48 CET [2008/11/12 4:00:48 ET] # (both dates are parsed so ET date overrides the other)
                 #2008/08/17 - 01:14:43 (ET)
                 #2008/09/07 06:23:14 ET                
-                datetimestr = "2000/01/01 00:00:00"  # default used if time not found
+                datetimestr = "00:00:00 2000/01/01"  # default used if time not found
                 if self.siteId == 26:
                     m2 = self.re_DateTime2.finditer(info[key])
-                    for a in m2:
-                        datetimestr = "%s/%s/%s %s:%s:%s" % (a.group('Y'), a.group('M'),a.group('D'),a.group('H'),a.group('MIN'),'00')
-                        tz = a.group('TZ')  # just assume ET??
-                        print ("   tz = ", tz, " datetime =", datetimestr)
-                    hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S") # also timezone at end, e.g. " ET"
+                    
                 else:
                     m1 = self.re_DateTime1.finditer(info[key])
                     for a in m1:
-                        datetimestr = "%s/%s/%s %s:%s:%s" % (a.group('Y'), a.group('M'),a.group('D'),a.group('H'),a.group('MIN'),a.group('S'))
-                        tz = a.group('TZ')  # just assume ET??
-                        print ("   tz = ", tz, " datetime =", datetimestr)
+                        datetimestr1 = str(a.group('H'))+":"+str(a.group('MIN'))+":"+str(a.group('S'))
+                        datetimestr2 = str(a.group('Y'))+"/"+str(a.group('M'))+"/"+str(a.group('D'))
+                        datetimestr = datetimestr2+" "+datetimestr1
+                        print('datetimestr',datetimestr)
+                        #tz = a.group('TZ')  # just assume ET??
+                        #print ("   tz = ", tz, " datetime =", datetimestr)
                     hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S") # also timezone at end, e.g. " ET"
-                    hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
+                    #hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
                     
             if key == 'HID':
                 hand.handid = info[key]
@@ -440,23 +438,31 @@ class Unibet(HandHistoryConverter):
             raise FpdbHandPartial(("Hand '%s' was cancelled.") % hand.handid)
     
     def readButton(self, hand):
+        pre, post = hand.handText.split('*** Summary ***')
         m = self.re_Button.search(hand.handText)
+        m2 = self.re_PlayerInfo.finditer(pre)
         if m:
-            hand.buttonpos = int(m.group('BUTTON'))
+            for b in m2:
+                if b.group('PNAME') == m.group('BUTTON'):
+                   hand.buttonpos = int(b.group('SEAT'))
         else:
             log.info('readButton: ' + ('not found'))
 
     def readPlayerStacks(self, hand):
         pre, post = hand.handText.split('*** Summary ***')
         m = self.re_PlayerInfo.finditer(pre)
+        m2 = self.re_PlayerInfo2.finditer(pre)
+        print('m',m)
+        print('m2',m2)
         for a in m:
-            hand.addPlayer(
-                int(a.group('SEAT')), 
-                a.group('PNAME'), 
-                self.clearMoneyString(a.group('CASH')), 
-                None, 
-                a.group('SITOUT'),
-                self.clearMoneyString(a.group('BOUNTY'))
+            for b in m2:
+                hand.addPlayer(
+                    int(a.group('SEAT')), 
+                    a.group('PNAME'), 
+                    self.clearMoneyString(a.group('CASH')), 
+                    None, 
+                    b.group('SITOUT')
+                    #self.clearMoneyString(a.group('BOUNTY'))
             )
 
     def markStreets(self, hand):
@@ -467,10 +473,10 @@ class Unibet(HandHistoryConverter):
         # Attempt to fix by inserting a DRAW marker into the hand text attribute
         # PREFLOP = ** Dealing down cards **
         # This re fails if,  say, river is missing; then we don't get the ** that starts the river.
-        m =  re.search(r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>(.+(?P<FLOPET>\[\S\S\]))?.+(?=\*\*\* FLOP \*\*\*)|.+)"
-                   r"(\*\*\* FLOP \*\*\*(?P<FLOP> (\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\].+(?=\*\*\* TURN \*\*\*)|.+))?"
-                   r"(\*\*\* TURN \*\*\* \[\S\S \S\S \S\S\] (?P<TURN>\[\S\S\].+(?=\*\*\* RIVER \*\*\*)|.+))?"
-                   r"(\*\*\* RIVER \*\*\* \[\S\S \S\S \S\S\]? \[?\S\S\] (?P<RIVER>\[\S\S\].+))?", hand.handText,re.DOTALL)
+        m =  re.search(r"\*\*\*\sHole\scards\s\*\*\*(?P<PREFLOP>(.+(?P<FLOPET>\[\S\S\]))?.+(?=\*\*\*\sFlop\s\*\*\*)|.+)"
+                   r"(\*\*\*\sFlop\s\*\*\*(?P<FLOP>(\[\S\S\s])?\[(\S\S?)?\S\S\S\S\].+(?=\*\*\*\sTurn\s\*\*\*)|.+))?"
+                   r"(\*\*\*\sTurn\s\*\*\*\s\[\S\S \S\S \S\S\](?P<TURN>\[\S\S\].+(?=\*\*\*\sRiver\s\*\*\*)|.+))?"
+                   r"(\*\*\*\sRiver\s\*\*\*\s\[\S\S \S\S \S\S\]?\s\[?\S\S\]\s(?P<RIVER>\[\S\S\].+))?", hand.handText,re.DOTALL)
         hand.addStreets(m)
 
     def readCommunityCards(self, hand, street): # street has been matched by markStreets, so exists in this hand
@@ -478,7 +484,7 @@ class Unibet(HandHistoryConverter):
         hand.setCommunityCards(street, m.group('CARDS').split(' '))
 
     def readAntes(self, hand):
-        log.debug(_("reading antes"))
+        log.debug(("reading antes"))
         m = self.re_Antes.finditer(hand.handText)
         for player in m:
             logging.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
