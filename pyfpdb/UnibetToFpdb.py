@@ -176,15 +176,12 @@ class Unibet(HandHistoryConverter):
             player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
             subst = {
                 'PLYR': player_re,
-                'BRKTS': r'(\(button\) |\(small blind\) |\(big blind\) |\(button\) \(small blind\) |\(button\) \(big blind\) )?',
+                'BRKTS': r'(\(button\) |\(small\sblind\) |\(big\blind\) |\(button\) \(small\sblind\) |\(button\) \(big\sblind\) )?',
                 'CUR': u"(\$|\xe2\x82\xac|\u20ac||\£|)"
             }
-            if self.siteId == 26:
-                self.re_HeroCards = re.compile(r"^Dealt to (?P<PNAME>(?![A-Z][a-z]+\s[A-Z]).+?)(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % subst, re.MULTILINE)
-                self.re_ShownCards = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) %(CUR)s(?P<POT>[,\.\d]+) with (?P<STRING>.+?))(,\sand\s(lost|won\s%(CUR)s[\.\d]+\swith\s(?P<STRING2>.*)))?)?$" % subst, re.MULTILINE)
-            else: 
-                self.re_HeroCards = re.compile(r"^Dealt to %(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % subst, re.MULTILINE)
-                self.re_ShownCards = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % subst, re.MULTILINE)   
+
+            self.re_HeroCards = re.compile(r"^Dealt\sto\s%(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % subst, re.MULTILINE)
+            self.re_ShownCards = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % subst, re.MULTILINE)   
 
     def readSupportedGames(self):
         return [["ring", "hold", "nl"],
@@ -455,14 +452,19 @@ class Unibet(HandHistoryConverter):
         print('m',m)
         print('m2',m2)
         for a in m:
-            for b in m2:
-                hand.addPlayer(
+            hand.addPlayer(
                     int(a.group('SEAT')), 
                     a.group('PNAME'), 
                     self.clearMoneyString(a.group('CASH')), 
                     None, 
                     b.group('SITOUT')
                     #self.clearMoneyString(a.group('BOUNTY'))
+            )
+            for b in m2:
+                hand.addPlayer.updatePlayer(
+                    
+                    b.group('SITOUT')
+                    
             )
 
     def markStreets(self, hand):
