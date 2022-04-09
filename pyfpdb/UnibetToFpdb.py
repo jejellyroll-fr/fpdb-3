@@ -534,6 +534,12 @@ class Unibet(HandHistoryConverter):
                         hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
 
     def readAction(self, hand, street):
+        if hand.gametype['split'] and street in hand.communityStreets:
+            s = street + '2'
+        else:
+            s = street
+        if not hand.streets[s]:
+            return
         m = self.re_Action.finditer(hand.streets[s])
         for action in m:
             acts = action.groupdict()
