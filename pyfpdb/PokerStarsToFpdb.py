@@ -494,7 +494,7 @@ class PokerStars(HandHistoryConverter):
         if m:
             hand.buttonpos = int(m.group('BUTTON'))
         else:
-            log.info('readButton: ' + _('not found'))
+            log.info('readButton: ' + ('not found'))
 
     def readPlayerStacks(self, hand):
         pre, post = hand.handText.split('*** SUMMARY ***')
