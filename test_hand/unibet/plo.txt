@@ -1,45 +1,37 @@
-Game #643794271: Table €4 PL - 0.02/0.04 - Pot Limit Omaha - 21:43:44 2022/04/06
+Game #642631542: Table €4 PL - 0.02/0.04 - Pot Limit Omaha - 21:54:43 2022/04/04
 *** Seated players ***
-Seat 1: Nonodiinho (€3.04)
-Seat 2: lava (€4.07)
-Seat 3: ExtremeBleu (€4.20)
-Seat 4: Cheytan (€3.57)
-Seat 5: HGJJGHJGJHG (€9.34)
-Seat 6: albanmuller (€2.48) (sitting out)
+Seat 1: dirty3 (€2.67)
+Seat 3: HGJJGHJGJHG (€7.63)
+Seat 4: Deenka (€2.56)
+Seat 5: Tounsi44 (€0.62)
 *** Blinds and button ***
-lava has the button
-ExtremeBleu posts small blind €0.02
-Cheytan posts big blind €0.04
+dirty3 has the button
+HGJJGHJGJHG posts small blind €0.02
+Deenka posts big blind €0.04
 *** Hole cards ***
-Dealt in ExtremeBleu
-Dealt in Cheytan
-Dealt to HGJJGHJGJHG [Ah 3c As 8h]
-Dealt in Nonodiinho
-Dealt to lava [Ac Ks Kh 8c]
+Dealt to HGJJGHJGJHG [9c 7d 5h Jc]
+Dealt in Deenka
+Dealt in Tounsi44
+Dealt in dirty3
 *** Preflop ***
-HGJJGHJGJHG raises €0.14 to €0.14
-Nonodiinho calls €0.14
-lava raises €0.62 to €0.62
-ExtremeBleu folds
-Cheytan folds
-HGJJGHJGJHG raises €1.92 to €2.06
-Nonodiinho folds
-lava calls €1.44
-*** Flop *** [3h Th 6h]
-HGJJGHJGJHG bets €4.03
-lava calls €2.01, and is all-in
-Uncalled bet returned to HGJJGHJGJHG: €2.02
-*** Showdown ***
-*** Turn *** [3h Th 6h] [8d]
-*** River *** [3h Th 6h] [8d] [2s]
-lava shows [Ac Ks Kh 8c], A Pair of Kings
-HGJJGHJGJHG shows [Ah 3c As 8h], A Flush
-HGJJGHJGJHG wins €7.79
+Tounsi44 calls €0.04
+dirty3 calls €0.04
+HGJJGHJGJHG calls €0.02
+Deenka checks
+*** Flop *** [Js 8d 6h]
+HGJJGHJGJHG bets €0.07
+Deenka folds
+Tounsi44 calls €0.07
+dirty3 calls €0.07
+*** Turn *** [Js 8d 6h] [4h]
+HGJJGHJGJHG bets €0.26
+Tounsi44 folds
+dirty3 folds
+Uncalled bet returned to HGJJGHJGJHG: €0.26
+HGJJGHJGJHG wins €0.35
 *** Summary ***
-Total pot €8.34 Rake €0.55
-Seat 1: Nonodiinho: bet €0.14 and won €0, net result: €-0.14
-Seat 2: lava: bet €4.07 and won €0, net result: €-4.07
-Seat 3: ExtremeBleu: bet €0.02 and won €0, net result: €-0.02
-Seat 4: Cheytan: bet €0.04 and won €0, net result: €-0.04
-Seat 5: HGJJGHJGJHG: bet €6.09 and won €9.81, net result: €3.72
-
+Total pot €0.37 Rake €0.02
+Seat 1: dirty3: bet €0.11 and won €0, net result: €-0.11
+Seat 3: HGJJGHJGJHG: bet €0.37 and won €0.61, net result: €0.24
+Seat 4: Deenka: bet €0.04 and won €0, net result: €-0.04
+Seat 5: Tounsi44: bet €0.11 and won €0, net result: €-0.11
