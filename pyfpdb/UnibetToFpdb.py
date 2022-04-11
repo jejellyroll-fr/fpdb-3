@@ -121,15 +121,15 @@ class Unibet(HandHistoryConverter):
 
     # These used to be compiled per player, but regression tests say
     # we don't have to, and it makes life faster.
-    re_PostSB           = re.compile(r"^%(PLYR)s: posts small blind %(CUR)s(?P<SB>[,.0-9]+)" %  substitutions, re.MULTILINE)
-    re_PostBB           = re.compile(r"^%(PLYR)s: posts big blind %(CUR)s(?P<BB>[,.0-9]+)" %  substitutions, re.MULTILINE)
-    re_PostBUB          = re.compile(r"^%(PLYR)s: posts button blind %(CUR)s(?P<BUB>[,.0-9]+)" %  substitutions, re.MULTILINE)
-    re_Antes            = re.compile(r"^%(PLYR)s: posts the ante %(CUR)s(?P<ANTE>[,.0-9]+)" % substitutions, re.MULTILINE)
-    re_BringIn          = re.compile(r"^%(PLYR)s: brings[- ]in( low|) for %(CUR)s(?P<BRINGIN>[,.0-9]+)" % substitutions, re.MULTILINE)
-    re_PostBoth         = re.compile(r"^%(PLYR)s: posts small \& big blinds %(CUR)s(?P<SBBB>[,.0-9]+)" %  substitutions, re.MULTILINE)
-    re_PostStraddle     = re.compile(r"^%(PLYR)s: posts straddle %(CUR)s(?P<STRADDLE>[,.0-9]+)" %  substitutions, re.MULTILINE)
+    re_PostSB           = re.compile(r"%(PLYR)s:\sposts\ssmall\sblind\s%(CUR)s(?P<SB>[,.0-9]+)" %  substitutions, re.MULTILINE)
+    re_PostBB           = re.compile(r"%(PLYR)s:\sposts\sbig\sblind\s%(CUR)s(?P<BB>[,.0-9]+)" %  substitutions, re.MULTILINE)
+    re_PostBUB          = re.compile(r"%(PLYR)s:\sposts\sbutton\sblind\s%(CUR)s(?P<BUB>[,.0-9]+)" %  substitutions, re.MULTILINE)
+    re_Antes            = re.compile(r"%(PLYR)s:\sposts\sthe\sant\s%(CUR)s(?P<ANTE>[,.0-9]+)" % substitutions, re.MULTILINE)
+    re_BringIn          = re.compile(r"%(PLYR)s:\sbrings[- ]in(\slow|)\sfo/%(CUR)s(?P<BRINGIN>[,.0-9]+)" % substitutions, re.MULTILINE)
+    re_PostBoth         = re.compile(r"%(PLYR)s:\sposts\ssmall\s\&\sbig\sblinds\s%(CUR)s(?P<SBBB>[,.0-9]+)" %  substitutions, re.MULTILINE)
+    re_PostStraddle     = re.compile(r"%(PLYR)s:\sposts\sstraddle\s%(CUR)s(?P<STRADDLE>[,.0-9]+)" %  substitutions, re.MULTILINE)
     re_Action           = re.compile(r"""
-                        ^%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)
+                        %(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)
                         (\s%(CUR)s(?P<BET>[,.\d]+))?(\sto\s%(CUR)s(?P<BETTO>[,.\d]+))? 
                         \s*(and\sis\sall.in)?
                         (and\shas\sreached\sthe\s[%(CUR)s\d\.,]+\scap)?
@@ -137,27 +137,27 @@ class Unibet(HandHistoryConverter):
                         (\s\(disconnect\))?
                         (\s\[(?P<CARDS>.+?)\])?\s*$"""
                          %  substitutions, re.MULTILINE|re.VERBOSE)
-    re_ShowdownAction   = re.compile(r"^%s: shows \[(?P<CARDS>.*)\]" % substitutions['PLYR'], re.MULTILINE)
+    re_ShowdownAction   = re.compile(r"%s: shows \[(?P<CARDS>.*)\]" % substitutions['PLYR'], re.MULTILINE)
     re_sitsOut          = re.compile("^%s sits out" %  substitutions['PLYR'], re.MULTILINE)
     #re_ShownCards       = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % substitutions, re.MULTILINE)
     re_CollectPot       = re.compile(r"Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(collected|showed \[.*\] and (won|collected)) \(?%(CUR)s(?P<POT>[,.\d]+)\)?(, mucked| with.*|)" %  substitutions, re.MULTILINE)
     #Vinsand88 cashed out the hand for $2.19 | Cash Out Fee $0.02
-    re_CollectPot2      = re.compile(r"^%(PLYR)s (collected|cashed out the hand for) %(CUR)s(?P<POT>[,.\d]+)" %  substitutions, re.MULTILINE)
+    re_CollectPot2      = re.compile(r"%(PLYR)s (collected|cashed out the hand for) %(CUR)s(?P<POT>[,.\d]+)" %  substitutions, re.MULTILINE)
     re_CashedOut        = re.compile(r"cashed\sout\sthe\shand")
-    re_WinningRankOne   = re.compile(u"^%(PLYR)s wins the tournament and receives %(CUR)s(?P<AMT>[,\.0-9]+) - congratulations!$" %  substitutions, re.MULTILINE)
-    re_WinningRankOther = re.compile(u"^%(PLYR)s finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place and received %(CUR)s(?P<AMT>[,.0-9]+)\.$" %  substitutions, re.MULTILINE)
-    re_RankOther        = re.compile(u"^%(PLYR)s finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place$" %  substitutions, re.MULTILINE)
+    re_WinningRankOne   = re.compile(u"%(PLYR)s wins the tournament and receives %(CUR)s(?P<AMT>[,\.0-9]+) - congratulations!$" %  substitutions, re.MULTILINE)
+    re_WinningRankOther = re.compile(u"%(PLYR)s finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place and received %(CUR)s(?P<AMT>[,.0-9]+)\.$" %  substitutions, re.MULTILINE)
+    re_RankOther        = re.compile(u"%(PLYR)s finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place$" %  substitutions, re.MULTILINE)
     re_Cancelled        = re.compile('Hand\scancelled', re.MULTILINE)
-    re_Uncalled         = re.compile('Uncalled bet \(%(CUR)s(?P<BET>[,.\d]+)\) returned to' %  substitutions, re.MULTILINE)
+    re_Uncalled         = re.compile('Uncalled\sbet\s\(%(CUR)s(?P<BET>[,.\d]+)\)\sreturned\sto' %  substitutions, re.MULTILINE)
     #APTEM-89 wins the $0.27 bounty for eliminating Hero
     #ChazDazzle wins the 22000 bounty for eliminating berkovich609
     #JKuzja, vecenta split the $50 bounty for eliminating ODYSSES
-    re_Bounty           = re.compile(u"^%(PLYR)s (?P<SPLIT>split|wins) the %(CUR)s(?P<AMT>[,\.0-9]+) bounty for eliminating (?P<ELIMINATED>.+?)$" %  substitutions, re.MULTILINE)
+    re_Bounty           = re.compile(u"%(PLYR)s (?P<SPLIT>split|wins) the %(CUR)s(?P<AMT>[,\.0-9]+) bounty for eliminating (?P<ELIMINATED>.+?)$" %  substitutions, re.MULTILINE)
     #Amsterdam71 wins $19.90 for eliminating MuKoJla and their own bounty increases by $19.89 to $155.32
     #Amsterdam71 wins $4.60 for splitting the elimination of Frimble11 and their own bounty increases by $4.59 to $41.32    
     #Amsterdam71 wins the tournament and receives $230.36 - congratulations!
     re_Progressive      = re.compile(u"""
-                        ^%(PLYR)s\swins\s%(CUR)s(?P<AMT>[,\.0-9]+)\s
+                        %(PLYR)s\swins\s%(CUR)s(?P<AMT>[,\.0-9]+)\s
                         for\s(splitting\sthe\selimination\sof|eliminating)\s(?P<ELIMINATED>.+?)\s
                         and\stheir\sown\sbounty\sincreases\sby\s%(CUR)s(?P<INCREASE>[\.0-9]+)\sto\s%(CUR)s(?P<ENDAMT>[\.0-9]+)$"""
                          %  substitutions, re.MULTILINE|re.VERBOSE)
@@ -180,8 +180,8 @@ class Unibet(HandHistoryConverter):
                 'CUR': u"(\$|\xe2\x82\xac|\u20ac||\£|)"
             }
 
-            self.re_HeroCards = re.compile(r"^Dealt\sto\s%(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % subst, re.MULTILINE)
-            self.re_ShownCards = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % subst, re.MULTILINE)   
+            self.re_HeroCards = re.compile(r"Dealt\sto\s%(PLYR)s\s(?:\[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % subst, re.MULTILINE)
+            self.re_ShownCards = re.compile("Seat\s(?P<SEAT>[0-9]+):\s%(PLYR)s\s%(BRKTS)s(?P<SHOWED>showed|mucked)\s\[(?P<CARDS>.*)\](\sand\s(lost|(won|collected)\s \(%(CUR)s(?P<POT>[,\.\d]+)\))\swith\s(?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % subst, re.MULTILINE)   
 
     def readSupportedGames(self):
         return [["ring", "hold", "nl"],
@@ -442,6 +442,7 @@ class Unibet(HandHistoryConverter):
             for b in m2:
                 if b.group('PNAME') == m.group('BUTTON'):
                    hand.buttonpos = int(b.group('SEAT'))
+                   log.debug("readHandInfo: %s" % hand.buttonpos)
         else:
             log.info('readButton: ' + ('not found'))
 
@@ -449,23 +450,30 @@ class Unibet(HandHistoryConverter):
         pre, post = hand.handText.split('*** Summary ***')
         m = self.re_PlayerInfo.finditer(pre)
         m2 = self.re_PlayerInfo2.finditer(pre)
-        print('m',m)
-        print('m2',m2)
-        for a in m:
-            hand.addPlayer(
-                    int(a.group('SEAT')), 
-                    a.group('PNAME'), 
-                    self.clearMoneyString(a.group('CASH')), 
-                    None, 
-                    b.group('SITOUT')
+        for b in m2:
+            
+            for a in m:
+               
+                if a.group('PNAME') == b.group('SITOUT'):
+                        hand.addPlayer(
+                            int(a.group('SEAT')), 
+                            a.group('PNAME'), 
+                            self.clearMoneyString(a.group('CASH')), 
+                            None, 
+                            int(a.group('SEAT'))
                     #self.clearMoneyString(a.group('BOUNTY'))
-            )
-            for b in m2:
-                hand.addPlayer.updatePlayer(
+                    )
+                        break
+                elif a.group('PNAME') != b.group('SITOUT'):
+                    hand.addPlayer(
+                            int(a.group('SEAT')), 
+                            a.group('PNAME'), 
+                            self.clearMoneyString(a.group('CASH')), 
+                            None,
                     
-                    b.group('SITOUT')
-                    
-            )
+                       )
+        log.debug("hand.addPlayer: %s" % hand.addPlayer)
+
 
     def markStreets(self, hand):
 
@@ -525,7 +533,9 @@ class Unibet(HandHistoryConverter):
 #    we need to grab hero's cards
         for street in ('PREFLOP', 'DEAL'):
             if street in hand.streets.keys():
+                print(street)
                 m = self.re_HeroCards.finditer(hand.streets[street])
+                print(m)
                 for found in m:
 #                    if m == None:
 #                        hand.involved = False
