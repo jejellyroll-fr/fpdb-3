@@ -1,0 +1,912 @@
+﻿PokerStars Hand #230304815282: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/10/02 23:00:58 CET [2021/10/02 17:00:58 ET]
+Table '3276130281 1' 3-max Seat #1 is the button
+Seat 1: dyane 6-400 (500 in chips)
+Seat 2: jeje_sat (500 in chips)
+Seat 3: molina39t (500 in chips)
+jeje_sat: posts small blind 10
+molina39t: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [9h 3c Ks Ah]
+dyane 6-400: folds
+jeje_sat: calls 10
+molina39t: checks
+*** FLOP *** [2c 8h Ad]
+jeje_sat: bets 20
+molina39t: folds
+Uncalled bet (20) returned to jeje_sat
+jeje_sat collected 40 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Board [2c 8h Ad]
+Seat 1: dyane 6-400 (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) collected (40)
+Seat 3: molina39t (big blind) folded on the Flop
+
+
+PokerStars Hand #230304823972: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/10/02 23:01:20 CET [2021/10/02 17:01:20 ET]
+Table '3276130281 1' 3-max Seat #2 is the button
+Seat 1: dyane 6-400 (500 in chips)
+Seat 2: jeje_sat (520 in chips)
+Seat 3: molina39t (480 in chips)
+molina39t: posts small blind 10
+dyane 6-400: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jh Kh 5d 7d]
+jeje_sat: calls 20
+molina39t: calls 10
+dyane 6-400: checks
+*** FLOP *** [Jd 8h Qc]
+molina39t: bets 20
+dyane 6-400: calls 20
+jeje_sat: folds
+*** TURN *** [Jd 8h Qc] [3d]
+molina39t: bets 20
+dyane 6-400: calls 20
+*** RIVER *** [Jd 8h Qc 3d] [Ad]
+molina39t: bets 20
+dyane 6-400: raises 180 to 200
+molina39t: folds
+Uncalled bet (180) returned to dyane 6-400
+dyane 6-400 collected 180 from pot
+dyane 6-400: doesn't show hand
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Board [Jd 8h Qc 3d Ad]
+Seat 1: dyane 6-400 (big blind) collected (180)
+Seat 2: jeje_sat (button) folded on the Flop
+Seat 3: molina39t (small blind) folded on the River
+
+
+PokerStars Hand #230304836752: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/10/02 23:01:49 CET [2021/10/02 17:01:49 ET]
+Table '3276130281 1' 3-max Seat #3 is the button
+Seat 1: dyane 6-400 (600 in chips)
+Seat 2: jeje_sat (500 in chips)
+Seat 3: molina39t (400 in chips)
+dyane 6-400: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 6h 5h Jc]
+molina39t: calls 20
+dyane 6-400: calls 10
+jeje_sat: checks
+*** FLOP *** [5s 4c Ts]
+dyane 6-400: checks
+jeje_sat: bets 30
+molina39t: folds
+dyane 6-400: calls 30
+*** TURN *** [5s 4c Ts] [5c]
+dyane 6-400: checks
+jeje_sat: bets 60
+dyane 6-400: calls 60
+*** RIVER *** [5s 4c Ts 5c] [4h]
+dyane 6-400: checks
+jeje_sat: bets 180
+dyane 6-400: folds
+Uncalled bet (180) returned to jeje_sat
+jeje_sat collected 240 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Board [5s 4c Ts 5c 4h]
+Seat 1: dyane 6-400 (small blind) folded on the River
+Seat 2: jeje_sat (big blind) collected (240)
+Seat 3: molina39t (button) folded on the Flop
+
+
+PokerStars Hand #230304866577: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/10/02 23:02:53 CET [2021/10/02 17:02:53 ET]
+Table '3276130281 1' 3-max Seat #1 is the button
+Seat 1: dyane 6-400 (490 in chips)
+Seat 2: jeje_sat (630 in chips)
+Seat 3: molina39t (380 in chips)
+jeje_sat: posts small blind 10
+molina39t: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qh 2d 3d Td]
+dyane 6-400: calls 20
+jeje_sat: calls 10
+molina39t: checks
+*** FLOP *** [6h 2h 9c]
+jeje_sat: checks
+molina39t: checks
+dyane 6-400: checks
+*** TURN *** [6h 2h 9c] [4s]
+jeje_sat: checks
+molina39t: checks
+dyane 6-400: bets 60
+jeje_sat: folds
+molina39t: calls 60
+*** RIVER *** [6h 2h 9c 4s] [Jd]
+molina39t: checks
+dyane 6-400: bets 180
+molina39t: folds
+Uncalled bet (180) returned to dyane 6-400
+dyane 6-400 collected 180 from pot
+dyane 6-400: doesn't show hand
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Board [6h 2h 9c 4s Jd]
+Seat 1: dyane 6-400 (button) collected (180)
+Seat 2: jeje_sat (small blind) folded on the Turn
+Seat 3: molina39t (big blind) folded on the River
+
+
+PokerStars Hand #230304883834: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/10/02 23:03:31 CET [2021/10/02 17:03:31 ET]
+Table '3276130281 1' 3-max Seat #2 is the button
+Seat 1: dyane 6-400 (590 in chips)
+Seat 2: jeje_sat (610 in chips)
+Seat 3: molina39t (300 in chips)
+molina39t: posts small blind 10
+dyane 6-400: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [7d Kd 4h 5c]
+jeje_sat: folds
+molina39t: calls 10
+dyane 6-400: checks
+*** FLOP *** [9s 5s Qs]
+molina39t: checks
+dyane 6-400: checks
+*** TURN *** [9s 5s Qs] [2c]
+molina39t: checks
+dyane 6-400: bets 20
+molina39t: folds
+Uncalled bet (20) returned to dyane 6-400
+dyane 6-400 collected 40 from pot
+dyane 6-400: doesn't show hand
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Board [9s 5s Qs 2c]
+Seat 1: dyane 6-400 (big blind) collected (40)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: molina39t (small blind) folded on the Turn
+
+
+PokerStars Hand #230304890666: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/10/02 23:03:46 CET [2021/10/02 17:03:46 ET]
+Table '3276130281 1' 3-max Seat #3 is the button
+Seat 1: dyane 6-400 (610 in chips)
+Seat 2: jeje_sat (610 in chips)
+Seat 3: molina39t (280 in chips)
+dyane 6-400: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h 9c As Td]
+molina39t: calls 20
+dyane 6-400: calls 10
+jeje_sat: checks
+*** FLOP *** [9h Ad Ac]
+dyane 6-400: checks
+jeje_sat: bets 30
+molina39t: folds
+dyane 6-400: folds
+Uncalled bet (30) returned to jeje_sat
+jeje_sat collected 60 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Board [9h Ad Ac]
+Seat 1: dyane 6-400 (small blind) folded on the Flop
+Seat 2: jeje_sat (big blind) collected (60)
+Seat 3: molina39t (button) folded on the Flop
+
+
+PokerStars Hand #230304899426: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/10/02 23:04:06 CET [2021/10/02 17:04:06 ET]
+Table '3276130281 1' 3-max Seat #1 is the button
+Seat 1: dyane 6-400 (590 in chips)
+Seat 2: jeje_sat (650 in chips)
+Seat 3: molina39t (260 in chips)
+jeje_sat: posts small blind 15
+molina39t: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h 8d Qd 3s]
+dyane 6-400: folds
+jeje_sat: calls 15
+molina39t is disconnected
+molina39t has timed out while disconnected
+molina39t: checks
+*** FLOP *** [3c 8s Jd]
+jeje_sat: bets 30
+molina39t is connected
+molina39t: calls 30
+*** TURN *** [3c 8s Jd] [5h]
+jeje_sat: bets 60
+molina39t: folds
+Uncalled bet (60) returned to jeje_sat
+jeje_sat collected 120 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [3c 8s Jd 5h]
+Seat 1: dyane 6-400 (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) collected (120)
+Seat 3: molina39t (big blind) folded on the Turn
+
+
+PokerStars Hand #230304924407: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/10/02 23:05:00 CET [2021/10/02 17:05:00 ET]
+Table '3276130281 1' 3-max Seat #2 is the button
+Seat 1: dyane 6-400 (590 in chips)
+Seat 2: jeje_sat (710 in chips)
+Seat 3: molina39t (200 in chips)
+molina39t: posts small blind 15
+dyane 6-400: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th Qs Kd Ah]
+jeje_sat: raises 75 to 105
+molina39t: folds
+dyane 6-400: calls 75
+*** FLOP *** [Qc 3s 8h]
+dyane 6-400: checks
+jeje_sat: bets 113
+dyane 6-400: folds
+Uncalled bet (113) returned to jeje_sat
+jeje_sat collected 225 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 225 | Rake 0
+Board [Qc 3s 8h]
+Seat 1: dyane 6-400 (big blind) folded on the Flop
+Seat 2: jeje_sat (button) collected (225)
+Seat 3: molina39t (small blind) folded before Flop
+
+
+PokerStars Hand #230304938141: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/10/02 23:05:31 CET [2021/10/02 17:05:31 ET]
+Table '3276130281 1' 3-max Seat #3 is the button
+Seat 1: dyane 6-400 (485 in chips)
+Seat 2: jeje_sat (830 in chips)
+Seat 3: molina39t (185 in chips)
+dyane 6-400: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Tc 5d 2d As]
+molina39t: calls 30
+dyane 6-400: calls 15
+jeje_sat: checks
+*** FLOP *** [8s 4d 9d]
+dyane 6-400: checks
+jeje_sat: checks
+molina39t: checks
+*** TURN *** [8s 4d 9d] [Jd]
+dyane 6-400: checks
+jeje_sat: checks
+molina39t: checks
+*** RIVER *** [8s 4d 9d Jd] [Qd]
+dyane 6-400: checks
+jeje_sat: checks
+molina39t: checks
+*** SHOW DOWN ***
+dyane 6-400: shows [5h 3s Ac 6h] (high card Ace)
+jeje_sat: shows [Tc 5d 2d As] (a flush, Queen high)
+molina39t: mucks hand
+jeje_sat collected 90 from pot
+*** SUMMARY ***
+Total pot 90 | Rake 0
+Board [8s 4d 9d Jd Qd]
+Seat 1: dyane 6-400 (small blind) showed [5h 3s Ac 6h] and lost with high card Ace
+Seat 2: jeje_sat (big blind) showed [Tc 5d 2d As] and won (90) with a flush, Queen high
+Seat 3: molina39t (button) mucked [7c Qs Js 5s]
+
+
+PokerStars Hand #230304955319: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/10/02 23:06:09 CET [2021/10/02 17:06:09 ET]
+Table '3276130281 1' 3-max Seat #1 is the button
+Seat 1: dyane 6-400 (455 in chips)
+Seat 2: jeje_sat (890 in chips)
+Seat 3: molina39t (155 in chips)
+jeje_sat: posts small blind 15
+molina39t: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h Tc Qd 4d]
+dyane 6-400: folds
+jeje_sat: calls 15
+molina39t: checks
+*** FLOP *** [8d 2c 6s]
+jeje_sat: checks
+molina39t: checks
+*** TURN *** [8d 2c 6s] [Jd]
+jeje_sat: bets 30
+molina39t: calls 30
+*** RIVER *** [8d 2c 6s Jd] [6h]
+jeje_sat: bets 30
+molina39t: folds
+Uncalled bet (30) returned to jeje_sat
+jeje_sat collected 120 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [8d 2c 6s Jd 6h]
+Seat 1: dyane 6-400 (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) collected (120)
+Seat 3: molina39t (big blind) folded on the River
+
+
+PokerStars Hand #230304966362: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/10/02 23:06:33 CET [2021/10/02 17:06:33 ET]
+Table '3276130281 1' 3-max Seat #2 is the button
+Seat 1: dyane 6-400 (455 in chips)
+Seat 2: jeje_sat (950 in chips)
+Seat 3: molina39t (95 in chips)
+molina39t: posts small blind 15
+dyane 6-400: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kh 9c 6h Td]
+jeje_sat: calls 30
+molina39t: calls 15
+dyane 6-400: checks
+*** FLOP *** [9d 7c 5s]
+molina39t: checks
+dyane 6-400: bets 30
+jeje_sat: calls 30
+molina39t: calls 30
+*** TURN *** [9d 7c 5s] [Ad]
+molina39t: checks
+dyane 6-400: bets 30
+jeje_sat: folds
+molina39t: folds
+Uncalled bet (30) returned to dyane 6-400
+dyane 6-400 collected 180 from pot
+dyane 6-400: doesn't show hand
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Board [9d 7c 5s Ad]
+Seat 1: dyane 6-400 (big blind) collected (180)
+Seat 2: jeje_sat (button) folded on the Turn
+Seat 3: molina39t (small blind) folded on the Turn
+
+
+PokerStars Hand #230304981981: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level III (20/40) - 2021/10/02 23:07:08 CET [2021/10/02 17:07:08 ET]
+Table '3276130281 1' 3-max Seat #3 is the button
+Seat 1: dyane 6-400 (575 in chips)
+Seat 2: jeje_sat (890 in chips)
+Seat 3: molina39t (35 in chips)
+dyane 6-400: posts small blind 20
+jeje_sat: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 4d Qc 6c]
+molina39t: calls 35 and is all-in
+dyane 6-400: calls 20
+jeje_sat: checks
+*** FLOP *** [4c 2d 9c]
+dyane 6-400: checks
+jeje_sat: bets 115
+dyane 6-400: calls 115
+*** TURN *** [4c 2d 9c] [3s]
+dyane 6-400: checks
+jeje_sat: bets 345
+dyane 6-400: raises 75 to 420 and is all-in
+jeje_sat: calls 75
+*** RIVER *** [4c 2d 9c 3s] [7h]
+*** SHOW DOWN ***
+dyane 6-400: shows [Tc 6h 5c 9d] (a straight, Three to Seven)
+jeje_sat: shows [4s 4d Qc 6c] (three of a kind, Fours)
+dyane 6-400 collected 1080 from side pot
+molina39t: shows [7c Ks 3h 6s] (two pair, Sevens and Threes)
+dyane 6-400 collected 105 from main pot
+molina39t finished the tournament in 3rd place
+*** SUMMARY ***
+Total pot 1185 Main pot 105. Side pot 1080. | Rake 0
+Board [4c 2d 9c 3s 7h]
+Seat 1: dyane 6-400 (small blind) showed [Tc 6h 5c 9d] and won (1185) with a straight, Three to Seven
+Seat 2: jeje_sat (big blind) showed [4s 4d Qc 6c] and lost with three of a kind, Fours
+Seat 3: molina39t (button) showed [7c Ks 3h 6s] and lost with two pair, Sevens and Threes
+
+
+PokerStars Hand #230304996819: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level III (20/40) - 2021/10/02 23:07:41 CET [2021/10/02 17:07:41 ET]
+Table '3276130281 1' 3-max Seat #2 is the button
+Seat 1: dyane 6-400 (1185 in chips)
+Seat 2: jeje_sat (315 in chips)
+jeje_sat: posts small blind 20
+dyane 6-400: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qd 7c Th 3c]
+jeje_sat: calls 20
+dyane 6-400: checks
+*** FLOP *** [9s 3s 5s]
+dyane 6-400: checks
+jeje_sat: checks
+*** TURN *** [9s 3s 5s] [3h]
+dyane 6-400: checks
+jeje_sat: bets 80
+dyane 6-400: folds
+Uncalled bet (80) returned to jeje_sat
+jeje_sat collected 80 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 80 | Rake 0
+Board [9s 3s 5s 3h]
+Seat 1: dyane 6-400 (big blind) folded on the Turn
+Seat 2: jeje_sat (button) (small blind) collected (80)
+
+
+PokerStars Hand #230305013022: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level III (20/40) - 2021/10/02 23:08:17 CET [2021/10/02 17:08:17 ET]
+Table '3276130281 1' 3-max Seat #1 is the button
+Seat 1: dyane 6-400 (1145 in chips)
+Seat 2: jeje_sat (355 in chips)
+dyane 6-400: posts small blind 20
+jeje_sat: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d Th 2h 9d]
+dyane 6-400: calls 20
+jeje_sat: checks
+*** FLOP *** [4h 3d 7d]
+jeje_sat: checks
+dyane 6-400: checks
+*** TURN *** [4h 3d 7d] [Jd]
+jeje_sat: checks
+dyane 6-400: bets 80
+jeje_sat: folds
+Uncalled bet (80) returned to dyane 6-400
+dyane 6-400 collected 80 from pot
+dyane 6-400: doesn't show hand
+*** SUMMARY ***
+Total pot 80 | Rake 0
+Board [4h 3d 7d Jd]
+Seat 1: dyane 6-400 (button) (small blind) collected (80)
+Seat 2: jeje_sat (big blind) folded on the Turn
+
+
+PokerStars Hand #230305024010: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level III (20/40) - 2021/10/02 23:08:42 CET [2021/10/02 17:08:42 ET]
+Table '3276130281 1' 3-max Seat #2 is the button
+Seat 1: dyane 6-400 (1185 in chips)
+Seat 2: jeje_sat (315 in chips)
+jeje_sat: posts small blind 20
+dyane 6-400: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [7s 4s 8h Js]
+jeje_sat: calls 20
+dyane 6-400: checks
+*** FLOP *** [Td 3s 6s]
+dyane 6-400: checks
+jeje_sat: bets 80
+dyane 6-400: raises 240 to 320
+jeje_sat: calls 195 and is all-in
+Uncalled bet (45) returned to dyane 6-400
+*** TURN *** [Td 3s 6s] [As]
+*** RIVER *** [Td 3s 6s As] [Kd]
+*** SHOW DOWN ***
+dyane 6-400: shows [6d 6h 5d Jd] (three of a kind, Sixes)
+jeje_sat: shows [7s 4s 8h Js] (a flush, Ace high)
+jeje_sat collected 630 from pot
+*** SUMMARY ***
+Total pot 630 | Rake 0
+Board [Td 3s 6s As Kd]
+Seat 1: dyane 6-400 (big blind) showed [6d 6h 5d Jd] and lost with three of a kind, Sixes
+Seat 2: jeje_sat (button) (small blind) showed [7s 4s 8h Js] and won (630) with a flush, Ace high
+
+
+PokerStars Hand #230305036837: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level III (20/40) - 2021/10/02 23:09:10 CET [2021/10/02 17:09:10 ET]
+Table '3276130281 1' 3-max Seat #1 is the button
+Seat 1: dyane 6-400 (870 in chips)
+Seat 2: jeje_sat (630 in chips)
+dyane 6-400: posts small blind 20
+jeje_sat: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qh 3h Ts Jc]
+dyane 6-400: folds
+Uncalled bet (20) returned to jeje_sat
+jeje_sat collected 40 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Seat 1: dyane 6-400 (button) (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (40)
+
+
+PokerStars Hand #230305039330: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level III (20/40) - 2021/10/02 23:09:16 CET [2021/10/02 17:09:16 ET]
+Table '3276130281 1' 3-max Seat #2 is the button
+Seat 1: dyane 6-400 (850 in chips)
+Seat 2: jeje_sat (650 in chips)
+jeje_sat: posts small blind 20
+dyane 6-400: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s Td 4s 9h]
+jeje_sat: calls 20
+dyane 6-400: checks
+*** FLOP *** [6h Ks 2s]
+dyane 6-400: checks
+jeje_sat: checks
+*** TURN *** [6h Ks 2s] [5d]
+dyane 6-400: checks
+jeje_sat: checks
+*** RIVER *** [6h Ks 2s 5d] [3d]
+dyane 6-400: checks
+jeje_sat: checks
+*** SHOW DOWN ***
+dyane 6-400: shows [7h Jd 9s 7s] (a pair of Sevens)
+jeje_sat: mucks hand
+dyane 6-400 collected 80 from pot
+*** SUMMARY ***
+Total pot 80 | Rake 0
+Board [6h Ks 2s 5d 3d]
+Seat 1: dyane 6-400 (big blind) showed [7h Jd 9s 7s] and won (80) with a pair of Sevens
+Seat 2: jeje_sat (button) (small blind) mucked [8s Td 4s 9h]
+
+
+PokerStars Hand #230305050665: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level III (20/40) - 2021/10/02 23:09:37 CET [2021/10/02 17:09:37 ET]
+Table '3276130281 1' 3-max Seat #1 is the button
+Seat 1: dyane 6-400 (890 in chips)
+Seat 2: jeje_sat (610 in chips)
+dyane 6-400: posts small blind 20
+jeje_sat: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qc 6c Kh 6h]
+dyane 6-400: raises 40 to 80
+jeje_sat: calls 40
+*** FLOP *** [7d 2h 5s]
+jeje_sat: checks
+dyane 6-400: checks
+*** TURN *** [7d 2h 5s] [7s]
+jeje_sat: checks
+dyane 6-400: checks
+*** RIVER *** [7d 2h 5s 7s] [4h]
+jeje_sat: checks
+dyane 6-400: bets 160
+jeje_sat: folds
+Uncalled bet (160) returned to dyane 6-400
+dyane 6-400 collected 160 from pot
+dyane 6-400: doesn't show hand
+*** SUMMARY ***
+Total pot 160 | Rake 0
+Board [7d 2h 5s 7s 4h]
+Seat 1: dyane 6-400 (button) (small blind) collected (160)
+Seat 2: jeje_sat (big blind) folded on the River
+
+
+PokerStars Hand #230305060137: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level III (20/40) - 2021/10/02 23:09:58 CET [2021/10/02 17:09:58 ET]
+Table '3276130281 1' 3-max Seat #2 is the button
+Seat 1: dyane 6-400 (970 in chips)
+Seat 2: jeje_sat (530 in chips)
+jeje_sat: posts small blind 20
+dyane 6-400: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c 6d 8c 9h]
+jeje_sat: calls 20
+dyane 6-400: raises 80 to 120
+jeje_sat: calls 80
+*** FLOP *** [4d 3s Qh]
+dyane 6-400: bets 240
+jeje_sat: folds
+Uncalled bet (240) returned to dyane 6-400
+dyane 6-400 collected 240 from pot
+dyane 6-400: doesn't show hand
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Board [4d 3s Qh]
+Seat 1: dyane 6-400 (big blind) collected (240)
+Seat 2: jeje_sat (button) (small blind) folded on the Flop
+
+
+PokerStars Hand #230305067877: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/10/02 23:10:16 CET [2021/10/02 17:10:16 ET]
+Table '3276130281 1' 3-max Seat #1 is the button
+Seat 1: dyane 6-400 (1090 in chips)
+Seat 2: jeje_sat (410 in chips)
+dyane 6-400: posts small blind 30
+jeje_sat: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [5c Kh 3h Js]
+dyane 6-400: calls 30
+jeje_sat: checks
+*** FLOP *** [2h 6c Tc]
+jeje_sat: checks
+dyane 6-400: checks
+*** TURN *** [2h 6c Tc] [3d]
+jeje_sat: checks
+dyane 6-400: checks
+*** RIVER *** [2h 6c Tc 3d] [6h]
+jeje_sat: checks
+dyane 6-400: bets 120
+jeje_sat: folds
+Uncalled bet (120) returned to dyane 6-400
+dyane 6-400 collected 120 from pot
+dyane 6-400: doesn't show hand
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [2h 6c Tc 3d 6h]
+Seat 1: dyane 6-400 (button) (small blind) collected (120)
+Seat 2: jeje_sat (big blind) folded on the River
+
+
+PokerStars Hand #230305078800: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/10/02 23:10:40 CET [2021/10/02 17:10:40 ET]
+Table '3276130281 1' 3-max Seat #2 is the button
+Seat 1: dyane 6-400 (1150 in chips)
+Seat 2: jeje_sat (350 in chips)
+jeje_sat: posts small blind 30
+dyane 6-400: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [3s Ah Kd 3d]
+jeje_sat: raises 120 to 180
+dyane 6-400: calls 120
+*** FLOP *** [4d 2d Kh]
+dyane 6-400: bets 360
+jeje_sat: calls 170 and is all-in
+Uncalled bet (190) returned to dyane 6-400
+*** TURN *** [4d 2d Kh] [Qh]
+*** RIVER *** [4d 2d Kh Qh] [7d]
+*** SHOW DOWN ***
+dyane 6-400: shows [Ks 5h 4s Qs] (two pair, Kings and Queens)
+jeje_sat: shows [3s Ah Kd 3d] (a flush, King high)
+jeje_sat collected 700 from pot
+*** SUMMARY ***
+Total pot 700 | Rake 0
+Board [4d 2d Kh Qh 7d]
+Seat 1: dyane 6-400 (big blind) showed [Ks 5h 4s Qs] and lost with two pair, Kings and Queens
+Seat 2: jeje_sat (button) (small blind) showed [3s Ah Kd 3d] and won (700) with a flush, King high
+
+
+PokerStars Hand #230305087014: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/10/02 23:10:59 CET [2021/10/02 17:10:59 ET]
+Table '3276130281 1' 3-max Seat #1 is the button
+Seat 1: dyane 6-400 (800 in chips)
+Seat 2: jeje_sat (700 in chips)
+dyane 6-400: posts small blind 30
+jeje_sat: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [3d 7s Ad Ah]
+dyane 6-400: raises 120 to 180
+jeje_sat: raises 360 to 540
+dyane 6-400: raises 260 to 800 and is all-in
+jeje_sat: calls 160 and is all-in
+Uncalled bet (100) returned to dyane 6-400
+*** FLOP *** [As 5h 7c]
+*** TURN *** [As 5h 7c] [3h]
+*** RIVER *** [As 5h 7c 3h] [7h]
+*** SHOW DOWN ***
+jeje_sat: shows [3d 7s Ad Ah] (a full house, Aces full of Sevens)
+dyane 6-400: shows [Qh 2c Ac 9s] (two pair, Aces and Sevens)
+jeje_sat collected 1400 from pot
+*** SUMMARY ***
+Total pot 1400 | Rake 0
+Board [As 5h 7c 3h 7h]
+Seat 1: dyane 6-400 (button) (small blind) showed [Qh 2c Ac 9s] and lost with two pair, Aces and Sevens
+Seat 2: jeje_sat (big blind) showed [3d 7s Ad Ah] and won (1400) with a full house, Aces full of Sevens
+
+
+PokerStars Hand #230305094797: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/10/02 23:11:16 CET [2021/10/02 17:11:16 ET]
+Table '3276130281 1' 3-max Seat #2 is the button
+Seat 1: dyane 6-400 (100 in chips)
+Seat 2: jeje_sat (1400 in chips)
+jeje_sat: posts small blind 30
+dyane 6-400: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [8h 5d 2h 6s]
+jeje_sat: calls 30
+dyane 6-400: checks
+*** FLOP *** [Qs 5h 9d]
+dyane 6-400: checks
+jeje_sat: checks
+*** TURN *** [Qs 5h 9d] [9s]
+dyane 6-400: checks
+jeje_sat: checks
+*** RIVER *** [Qs 5h 9d 9s] [Kc]
+dyane 6-400: bets 40 and is all-in
+jeje_sat: folds
+Uncalled bet (40) returned to dyane 6-400
+dyane 6-400 collected 120 from pot
+dyane 6-400: doesn't show hand
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [Qs 5h 9d 9s Kc]
+Seat 1: dyane 6-400 (big blind) collected (120)
+Seat 2: jeje_sat (button) (small blind) folded on the River
+
+
+PokerStars Hand #230305107150: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/10/02 23:11:44 CET [2021/10/02 17:11:44 ET]
+Table '3276130281 1' 3-max Seat #1 is the button
+Seat 1: dyane 6-400 (160 in chips)
+Seat 2: jeje_sat (1340 in chips)
+dyane 6-400: posts small blind 30
+jeje_sat: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [2d Tc 7s Kd]
+dyane 6-400: raises 100 to 160 and is all-in
+jeje_sat: calls 100
+*** FLOP *** [7h As 9c]
+*** TURN *** [7h As 9c] [Ts]
+*** RIVER *** [7h As 9c Ts] [9s]
+*** SHOW DOWN ***
+jeje_sat: shows [2d Tc 7s Kd] (two pair, Tens and Nines)
+dyane 6-400: shows [3s Jc Js 5d] (a flush, Ace high)
+dyane 6-400 collected 320 from pot
+*** SUMMARY ***
+Total pot 320 | Rake 0
+Board [7h As 9c Ts 9s]
+Seat 1: dyane 6-400 (button) (small blind) showed [3s Jc Js 5d] and won (320) with a flush, Ace high
+Seat 2: jeje_sat (big blind) showed [2d Tc 7s Kd] and lost with two pair, Tens and Nines
+
+
+PokerStars Hand #230305116697: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/10/02 23:12:05 CET [2021/10/02 17:12:05 ET]
+Table '3276130281 1' 3-max Seat #2 is the button
+Seat 1: dyane 6-400 (320 in chips)
+Seat 2: jeje_sat (1180 in chips)
+jeje_sat: posts small blind 30
+dyane 6-400: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [9s Ac Ah 8s]
+jeje_sat: raises 120 to 180
+dyane 6-400: folds
+Uncalled bet (120) returned to jeje_sat
+jeje_sat collected 120 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Seat 1: dyane 6-400 (big blind) folded before Flop
+Seat 2: jeje_sat (button) (small blind) collected (120)
+
+
+PokerStars Hand #230305120839: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/10/02 23:12:15 CET [2021/10/02 17:12:15 ET]
+Table '3276130281 1' 3-max Seat #1 is the button
+Seat 1: dyane 6-400 (260 in chips)
+Seat 2: jeje_sat (1240 in chips)
+dyane 6-400: posts small blind 30
+jeje_sat: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [6d 8d 3h 6s]
+dyane 6-400: calls 30
+jeje_sat: checks
+*** FLOP *** [5s Qc 8h]
+jeje_sat: bets 120
+dyane 6-400: raises 80 to 200 and is all-in
+jeje_sat: calls 80
+*** TURN *** [5s Qc 8h] [9c]
+*** RIVER *** [5s Qc 8h 9c] [Qs]
+*** SHOW DOWN ***
+jeje_sat: shows [6d 8d 3h 6s] (two pair, Queens and Eights)
+dyane 6-400: shows [Ad Jc 3c Tc] (a straight, Eight to Queen)
+dyane 6-400 collected 520 from pot
+*** SUMMARY ***
+Total pot 520 | Rake 0
+Board [5s Qc 8h 9c Qs]
+Seat 1: dyane 6-400 (button) (small blind) showed [Ad Jc 3c Tc] and won (520) with a straight, Eight to Queen
+Seat 2: jeje_sat (big blind) showed [6d 8d 3h 6s] and lost with two pair, Queens and Eights
+
+
+PokerStars Hand #230305130435: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/10/02 23:12:36 CET [2021/10/02 17:12:36 ET]
+Table '3276130281 1' 3-max Seat #2 is the button
+Seat 1: dyane 6-400 (520 in chips)
+Seat 2: jeje_sat (980 in chips)
+jeje_sat: posts small blind 30
+dyane 6-400: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [9s 4c Tc 7h]
+jeje_sat: calls 30
+dyane 6-400: checks
+*** FLOP *** [Js 7c Jd]
+dyane 6-400: checks
+jeje_sat: bets 60
+dyane 6-400: calls 60
+*** TURN *** [Js 7c Jd] [Qd]
+dyane 6-400: checks
+jeje_sat: checks
+*** RIVER *** [Js 7c Jd Qd] [2d]
+dyane 6-400: checks
+jeje_sat: checks
+*** SHOW DOWN ***
+dyane 6-400: shows [9c 9d Ts 2c] (two pair, Jacks and Nines)
+jeje_sat: mucks hand
+dyane 6-400 collected 240 from pot
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Board [Js 7c Jd Qd 2d]
+Seat 1: dyane 6-400 (big blind) showed [9c 9d Ts 2c] and won (240) with two pair, Jacks and Nines
+Seat 2: jeje_sat (button) (small blind) mucked [9s 4c Tc 7h]
+
+
+PokerStars Hand #230305147979: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level V (40/80) - 2021/10/02 23:13:16 CET [2021/10/02 17:13:16 ET]
+Table '3276130281 1' 3-max Seat #1 is the button
+Seat 1: dyane 6-400 (640 in chips)
+Seat 2: jeje_sat (860 in chips)
+dyane 6-400: posts small blind 40
+jeje_sat: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [8c Qd 6h 8h]
+dyane 6-400: folds
+Uncalled bet (40) returned to jeje_sat
+jeje_sat collected 80 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 80 | Rake 0
+Seat 1: dyane 6-400 (button) (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (80)
+
+
+PokerStars Hand #230305151354: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level V (40/80) - 2021/10/02 23:13:23 CET [2021/10/02 17:13:23 ET]
+Table '3276130281 1' 3-max Seat #2 is the button
+Seat 1: dyane 6-400 (600 in chips)
+Seat 2: jeje_sat (900 in chips)
+jeje_sat: posts small blind 40
+dyane 6-400: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [5s Qs 6h 3d]
+jeje_sat: calls 40
+dyane 6-400: checks
+*** FLOP *** [5h Tc 2h]
+dyane 6-400: checks
+jeje_sat: checks
+*** TURN *** [5h Tc 2h] [4d]
+dyane 6-400: checks
+jeje_sat: bets 160
+dyane 6-400: calls 160
+*** RIVER *** [5h Tc 2h 4d] [Td]
+dyane 6-400: checks
+jeje_sat: bets 480
+dyane 6-400: folds
+Uncalled bet (480) returned to jeje_sat
+jeje_sat collected 480 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 480 | Rake 0
+Board [5h Tc 2h 4d Td]
+Seat 1: dyane 6-400 (big blind) folded on the River
+Seat 2: jeje_sat (button) (small blind) collected (480)
+
+
+PokerStars Hand #230305167595: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level V (40/80) - 2021/10/02 23:14:00 CET [2021/10/02 17:14:00 ET]
+Table '3276130281 1' 3-max Seat #1 is the button
+Seat 1: dyane 6-400 (360 in chips)
+Seat 2: jeje_sat (1140 in chips)
+dyane 6-400: posts small blind 40
+jeje_sat: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c Qc Qd 2d]
+dyane 6-400: calls 40
+jeje_sat: raises 160 to 240
+dyane 6-400: folds
+Uncalled bet (160) returned to jeje_sat
+jeje_sat collected 160 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 160 | Rake 0
+Seat 1: dyane 6-400 (button) (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (160)
+
+
+PokerStars Hand #230305172640: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level V (40/80) - 2021/10/02 23:14:12 CET [2021/10/02 17:14:12 ET]
+Table '3276130281 1' 3-max Seat #2 is the button
+Seat 1: dyane 6-400 (280 in chips)
+Seat 2: jeje_sat (1220 in chips)
+jeje_sat: posts small blind 40
+dyane 6-400: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [7h 3h 8h 7s]
+jeje_sat: calls 40
+dyane 6-400: checks
+*** FLOP *** [Kd Qs 3s]
+dyane 6-400: checks
+jeje_sat has timed out
+jeje_sat: checks
+*** TURN *** [Kd Qs 3s] [6c]
+dyane 6-400: bets 160
+jeje_sat: folds
+Uncalled bet (160) returned to dyane 6-400
+dyane 6-400 collected 160 from pot
+dyane 6-400: doesn't show hand
+*** SUMMARY ***
+Total pot 160 | Rake 0
+Board [Kd Qs 3s 6c]
+Seat 1: dyane 6-400 (big blind) collected (160)
+Seat 2: jeje_sat (button) (small blind) folded on the Turn
+
+
+PokerStars Hand #230305187403: Tournament #3276130281, €0.23+€0.02 EUR Omaha Pot Limit - Level V (40/80) - 2021/10/02 23:14:45 CET [2021/10/02 17:14:45 ET]
+Table '3276130281 1' 3-max Seat #1 is the button
+Seat 1: dyane 6-400 (360 in chips)
+Seat 2: jeje_sat (1140 in chips)
+dyane 6-400: posts small blind 40
+jeje_sat: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kd 6d Ac 8c]
+dyane 6-400: calls 40
+jeje_sat: raises 160 to 240
+dyane 6-400: calls 160
+*** FLOP *** [3d 4h 6s]
+jeje_sat: bets 480
+dyane 6-400: calls 120 and is all-in
+Uncalled bet (360) returned to jeje_sat
+*** TURN *** [3d 4h 6s] [6h]
+*** RIVER *** [3d 4h 6s 6h] [7c]
+*** SHOW DOWN ***
+jeje_sat: shows [Kd 6d Ac 8c] (three of a kind, Sixes)
+dyane 6-400: shows [Qs Td 4s 9s] (two pair, Sixes and Fours)
+jeje_sat collected 720 from pot
+*** SUMMARY ***
+Total pot 720 | Rake 0
+Board [3d 4h 6s 6h 7c]
+Seat 1: dyane 6-400 (button) (small blind) showed [Qs Td 4s 9s] and lost with two pair, Sixes and Fours
+Seat 2: jeje_sat (big blind) showed [Kd 6d Ac 8c] and won (720) with three of a kind, Sixes
+
+

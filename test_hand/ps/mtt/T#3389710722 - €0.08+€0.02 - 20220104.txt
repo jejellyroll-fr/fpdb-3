@@ -1,0 +1,1076 @@
+﻿PokerStars Home Game Hand #235190062192: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level I (15/30) - 2022/04/01 17:30:00 CET [2022/04/01 11:30:00 ET]
+Table '3389710722 1' 6-max Seat #1 is the button
+Seat 1: jeje_sat (10000 in chips)
+Seat 2: MERIK44 (10000 in chips)
+Seat 3: Anthomerce (10000 in chips)
+Seat 4: stephoumOPC (10000 in chips)
+MERIK44: posts small blind 15
+Anthomerce: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h Ts 7s Qc]
+stephoumOPC: calls 30
+jeje_sat: folds
+MERIK44: calls 15
+Anthomerce: checks
+*** FLOP *** [Ad 7d Jc]
+MERIK44: checks
+Anthomerce: checks
+stephoumOPC: checks
+*** TURN *** [Ad 7d Jc] [3d]
+MERIK44: checks
+Anthomerce: bets 68
+stephoumOPC: folds
+MERIK44: folds
+Uncalled bet (68) returned to Anthomerce
+Anthomerce collected 90 from pot
+Anthomerce: doesn't show hand
+*** SUMMARY ***
+Total pot 90 | Rake 0
+Board [Ad 7d Jc 3d]
+Seat 1: jeje_sat (button) folded before Flop (didn't bet)
+Seat 2: MERIK44 (small blind) folded on the Turn
+Seat 3: Anthomerce (big blind) collected (90)
+Seat 4: stephoumOPC folded on the Turn
+
+
+PokerStars Home Game Hand #235190083026: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level I (15/30) - 2022/04/01 17:31:05 CET [2022/04/01 11:31:05 ET]
+Table '3389710722 1' 6-max Seat #2 is the button
+Seat 1: jeje_sat (10000 in chips)
+Seat 2: MERIK44 (9970 in chips)
+Seat 3: Anthomerce (10060 in chips)
+Seat 4: stephoumOPC (9970 in chips)
+Anthomerce: posts small blind 15
+stephoumOPC: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jd As 5d Kc]
+jeje_sat: folds
+MERIK44: folds
+Anthomerce: calls 15
+stephoumOPC: checks
+*** FLOP *** [2c 9h 5s]
+Anthomerce: bets 45
+stephoumOPC: folds
+Uncalled bet (45) returned to Anthomerce
+Anthomerce collected 60 from pot
+Anthomerce: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Board [2c 9h 5s]
+Seat 1: jeje_sat folded before Flop (didn't bet)
+Seat 2: MERIK44 (button) folded before Flop (didn't bet)
+Seat 3: Anthomerce (small blind) collected (60)
+Seat 4: stephoumOPC (big blind) folded on the Flop
+
+
+PokerStars Home Game Hand #235190091150: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level I (15/30) - 2022/04/01 17:31:31 CET [2022/04/01 11:31:31 ET]
+Table '3389710722 1' 6-max Seat #3 is the button
+Seat 1: jeje_sat (10000 in chips)
+Seat 2: MERIK44 (9970 in chips)
+Seat 3: Anthomerce (10090 in chips)
+Seat 4: stephoumOPC (9940 in chips)
+stephoumOPC: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [2c 7c 4d 8c]
+MERIK44: folds
+Anthomerce: raises 60 to 90
+stephoumOPC: folds
+jeje_sat: folds
+Uncalled bet (60) returned to Anthomerce
+Anthomerce collected 75 from pot
+Anthomerce: doesn't show hand
+*** SUMMARY ***
+Total pot 75 | Rake 0
+Seat 1: jeje_sat (big blind) folded before Flop
+Seat 2: MERIK44 folded before Flop (didn't bet)
+Seat 3: Anthomerce (button) collected (75)
+Seat 4: stephoumOPC (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235190103411: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level I (15/30) - 2022/04/01 17:32:09 CET [2022/04/01 11:32:09 ET]
+Table '3389710722 1' 6-max Seat #4 is the button
+Seat 1: jeje_sat (9970 in chips)
+Seat 2: MERIK44 (9970 in chips)
+Seat 3: Anthomerce (10135 in chips)
+Seat 4: stephoumOPC (9925 in chips)
+jeje_sat: posts small blind 15
+MERIK44: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [8c 4d 9h 4s]
+Anthomerce: raises 60 to 90
+stephoumOPC: folds
+jeje_sat: folds
+MERIK44: folds
+Uncalled bet (60) returned to Anthomerce
+Anthomerce collected 75 from pot
+Anthomerce: doesn't show hand
+*** SUMMARY ***
+Total pot 75 | Rake 0
+Seat 1: jeje_sat (small blind) folded before Flop
+Seat 2: MERIK44 (big blind) folded before Flop
+Seat 3: Anthomerce collected (75)
+Seat 4: stephoumOPC (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235190115768: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level I (15/30) - 2022/04/01 17:32:48 CET [2022/04/01 11:32:48 ET]
+Table '3389710722 1' 6-max Seat #1 is the button
+Seat 1: jeje_sat (9955 in chips)
+Seat 2: MERIK44 (9940 in chips)
+Seat 3: Anthomerce (10180 in chips)
+Seat 4: stephoumOPC (9925 in chips)
+MERIK44: posts small blind 15
+Anthomerce: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h 8h 8d 9s]
+stephoumOPC: calls 30
+jeje_sat: folds
+MERIK44: folds
+Anthomerce: checks
+*** FLOP *** [5c Ac 3h]
+Anthomerce: checks
+stephoumOPC: bets 60
+Anthomerce: calls 60
+*** TURN *** [5c Ac 3h] [7d]
+Anthomerce: checks
+stephoumOPC: bets 120
+Anthomerce: folds
+Uncalled bet (120) returned to stephoumOPC
+stephoumOPC collected 195 from pot
+stephoumOPC: doesn't show hand
+*** SUMMARY ***
+Total pot 195 | Rake 0
+Board [5c Ac 3h 7d]
+Seat 1: jeje_sat (button) folded before Flop (didn't bet)
+Seat 2: MERIK44 (small blind) folded before Flop
+Seat 3: Anthomerce (big blind) folded on the Turn
+Seat 4: stephoumOPC collected (195)
+
+
+PokerStars Home Game Hand #235190128526: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level I (15/30) - 2022/04/01 17:33:28 CET [2022/04/01 11:33:28 ET]
+Table '3389710722 1' 6-max Seat #2 is the button
+Seat 1: jeje_sat (9955 in chips)
+Seat 2: MERIK44 (9925 in chips)
+Seat 3: Anthomerce (10090 in chips)
+Seat 4: stephoumOPC (10030 in chips)
+Anthomerce: posts small blind 15
+stephoumOPC: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jd Ah As Ac]
+jeje_sat: folds
+MERIK44: raises 45 to 75
+Anthomerce: folds
+stephoumOPC: calls 45
+*** FLOP *** [5h 8h 5c]
+stephoumOPC: checks
+MERIK44: checks
+*** TURN *** [5h 8h 5c] [Ts]
+stephoumOPC: checks
+MERIK44: bets 60
+stephoumOPC: raises 105 to 165
+MERIK44: folds
+Uncalled bet (105) returned to stephoumOPC
+stephoumOPC collected 285 from pot
+stephoumOPC: doesn't show hand
+*** SUMMARY ***
+Total pot 285 | Rake 0
+Board [5h 8h 5c Ts]
+Seat 1: jeje_sat folded before Flop (didn't bet)
+Seat 2: MERIK44 (button) folded on the Turn
+Seat 3: Anthomerce (small blind) folded before Flop
+Seat 4: stephoumOPC (big blind) collected (285)
+
+
+PokerStars Home Game Hand #235190144780: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level I (15/30) - 2022/04/01 17:34:19 CET [2022/04/01 11:34:19 ET]
+Table '3389710722 1' 6-max Seat #3 is the button
+Seat 1: jeje_sat (9955 in chips)
+Seat 2: MERIK44 (9790 in chips)
+Seat 3: Anthomerce (10075 in chips)
+Seat 4: stephoumOPC (10180 in chips)
+stephoumOPC: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [5s Ad 3s 2h]
+MERIK44: folds
+Anthomerce: raises 60 to 90
+stephoumOPC: calls 75
+jeje_sat: folds
+*** FLOP *** [Ah 2s 4h]
+stephoumOPC: checks
+Anthomerce: bets 71
+stephoumOPC: folds
+Uncalled bet (71) returned to Anthomerce
+Anthomerce collected 210 from pot
+Anthomerce: doesn't show hand
+*** SUMMARY ***
+Total pot 210 | Rake 0
+Board [Ah 2s 4h]
+Seat 1: jeje_sat (big blind) folded before Flop
+Seat 2: MERIK44 folded before Flop (didn't bet)
+Seat 3: Anthomerce (button) collected (210)
+Seat 4: stephoumOPC (small blind) folded on the Flop
+
+
+PokerStars Home Game Hand #235190155768: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level I (15/30) - 2022/04/01 17:34:54 CET [2022/04/01 11:34:54 ET]
+Table '3389710722 1' 6-max Seat #4 is the button
+Seat 1: jeje_sat (9925 in chips)
+Seat 2: MERIK44 (9790 in chips)
+Seat 3: Anthomerce (10195 in chips)
+Seat 4: stephoumOPC (10090 in chips)
+jeje_sat: posts small blind 15
+MERIK44: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d 9s 7s Ah]
+Anthomerce: raises 45 to 75
+stephoumOPC: folds
+jeje_sat: folds
+MERIK44: folds
+Uncalled bet (45) returned to Anthomerce
+Anthomerce collected 75 from pot
+Anthomerce: doesn't show hand
+*** SUMMARY ***
+Total pot 75 | Rake 0
+Seat 1: jeje_sat (small blind) folded before Flop
+Seat 2: MERIK44 (big blind) folded before Flop
+Seat 3: Anthomerce collected (75)
+Seat 4: stephoumOPC (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235190163177: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level II (25/50) - 2022/04/01 17:35:15 CET [2022/04/01 11:35:15 ET]
+Table '3389710722 1' 6-max Seat #1 is the button
+Seat 1: jeje_sat (9910 in chips)
+Seat 2: MERIK44 (9760 in chips)
+Seat 3: Anthomerce (10240 in chips)
+Seat 4: stephoumOPC (10090 in chips)
+MERIK44: posts small blind 25
+Anthomerce: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [As 2h 2c 7c]
+stephoumOPC: raises 50 to 100
+jeje_sat: folds
+MERIK44: folds
+Anthomerce: calls 50
+*** FLOP *** [3d Th 4h]
+Anthomerce: checks
+stephoumOPC: bets 100
+Anthomerce: folds
+Uncalled bet (100) returned to stephoumOPC
+stephoumOPC collected 225 from pot
+stephoumOPC: doesn't show hand
+*** SUMMARY ***
+Total pot 225 | Rake 0
+Board [3d Th 4h]
+Seat 1: jeje_sat (button) folded before Flop (didn't bet)
+Seat 2: MERIK44 (small blind) folded before Flop
+Seat 3: Anthomerce (big blind) folded on the Flop
+Seat 4: stephoumOPC collected (225)
+
+
+PokerStars Home Game Hand #235190171707: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level II (25/50) - 2022/04/01 17:35:41 CET [2022/04/01 11:35:41 ET]
+Table '3389710722 1' 6-max Seat #2 is the button
+Seat 1: jeje_sat (9910 in chips)
+Seat 2: MERIK44 (9735 in chips)
+Seat 3: Anthomerce (10140 in chips)
+Seat 4: stephoumOPC (10215 in chips)
+Anthomerce: posts small blind 25
+stephoumOPC: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d Td 8c 6h]
+jeje_sat: folds
+MERIK44: raises 100 to 150
+Anthomerce: folds
+stephoumOPC: folds
+Uncalled bet (100) returned to MERIK44
+MERIK44 collected 125 from pot
+MERIK44: doesn't show hand
+*** SUMMARY ***
+Total pot 125 | Rake 0
+Seat 1: jeje_sat folded before Flop (didn't bet)
+Seat 2: MERIK44 (button) collected (125)
+Seat 3: Anthomerce (small blind) folded before Flop
+Seat 4: stephoumOPC (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235190178006: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level II (25/50) - 2022/04/01 17:36:01 CET [2022/04/01 11:36:01 ET]
+Table '3389710722 1' 6-max Seat #3 is the button
+Seat 1: jeje_sat (9910 in chips)
+Seat 2: MERIK44 (9810 in chips)
+Seat 3: Anthomerce (10115 in chips)
+Seat 4: stephoumOPC (10165 in chips)
+stephoumOPC: posts small blind 25
+jeje_sat: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h Ah 2c 7h]
+MERIK44: folds
+Anthomerce: raises 125 to 175
+stephoumOPC: folds
+jeje_sat: calls 125
+*** FLOP *** [Jd Tc 7d]
+jeje_sat: checks
+Anthomerce: bets 281
+jeje_sat: folds
+Uncalled bet (281) returned to Anthomerce
+Anthomerce collected 375 from pot
+Anthomerce: doesn't show hand
+*** SUMMARY ***
+Total pot 375 | Rake 0
+Board [Jd Tc 7d]
+Seat 1: jeje_sat (big blind) folded on the Flop
+Seat 2: MERIK44 folded before Flop (didn't bet)
+Seat 3: Anthomerce (button) collected (375)
+Seat 4: stephoumOPC (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235190186384: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level II (25/50) - 2022/04/01 17:36:28 CET [2022/04/01 11:36:28 ET]
+Table '3389710722 1' 6-max Seat #4 is the button
+Seat 1: jeje_sat (9735 in chips)
+Seat 2: MERIK44 (9810 in chips)
+Seat 3: Anthomerce (10315 in chips)
+Seat 4: stephoumOPC (10140 in chips)
+jeje_sat: posts small blind 25
+MERIK44: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kc 6s 7c Kh]
+Anthomerce: folds
+stephoumOPC: raises 75 to 125
+jeje_sat: raises 300 to 425
+MERIK44: folds
+stephoumOPC: calls 300
+*** FLOP *** [3s 7d As]
+jeje_sat: bets 550
+stephoumOPC: calls 550
+*** TURN *** [3s 7d As] [Jc]
+jeje_sat: bets 1500
+stephoumOPC: raises 5000 to 6500
+jeje_sat: folds
+Uncalled bet (5000) returned to stephoumOPC
+stephoumOPC collected 5000 from pot
+stephoumOPC: doesn't show hand
+*** SUMMARY ***
+Total pot 5000 | Rake 0
+Board [3s 7d As Jc]
+Seat 1: jeje_sat (small blind) folded on the Turn
+Seat 2: MERIK44 (big blind) folded before Flop
+Seat 3: Anthomerce folded before Flop (didn't bet)
+Seat 4: stephoumOPC (button) collected (5000)
+
+
+PokerStars Home Game Hand #235190202901: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level II (25/50) - 2022/04/01 17:37:20 CET [2022/04/01 11:37:20 ET]
+Table '3389710722 1' 6-max Seat #1 is the button
+Seat 1: jeje_sat (7260 in chips)
+Seat 2: MERIK44 (9760 in chips)
+Seat 3: Anthomerce (10315 in chips)
+Seat 4: stephoumOPC (12665 in chips)
+MERIK44: posts small blind 25
+Anthomerce: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [4c Kh 9d 8h]
+stephoumOPC: raises 50 to 100
+jeje_sat: folds
+MERIK44: folds
+Anthomerce: calls 50
+*** FLOP *** [6h 2s 6c]
+Anthomerce: checks
+stephoumOPC: checks
+*** TURN *** [6h 2s 6c] [3s]
+Anthomerce: bets 77
+stephoumOPC: folds
+Uncalled bet (77) returned to Anthomerce
+Anthomerce collected 225 from pot
+Anthomerce: doesn't show hand
+*** SUMMARY ***
+Total pot 225 | Rake 0
+Board [6h 2s 6c 3s]
+Seat 1: jeje_sat (button) folded before Flop (didn't bet)
+Seat 2: MERIK44 (small blind) folded before Flop
+Seat 3: Anthomerce (big blind) collected (225)
+Seat 4: stephoumOPC folded on the Turn
+
+
+PokerStars Home Game Hand #235190214746: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level II (25/50) - 2022/04/01 17:37:56 CET [2022/04/01 11:37:56 ET]
+Table '3389710722 1' 6-max Seat #2 is the button
+Seat 1: jeje_sat (7260 in chips)
+Seat 2: MERIK44 (9735 in chips)
+Seat 3: Anthomerce (10440 in chips)
+Seat 4: stephoumOPC (12565 in chips)
+Seat 6: NHBROOO (10000 in chips)
+Anthomerce: posts small blind 25
+stephoumOPC: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c 5s Ks 3d]
+NHBROOO: folds
+jeje_sat: folds
+MERIK44: folds
+Anthomerce: raises 100 to 150
+stephoumOPC: calls 100
+*** FLOP *** [2s Js 9d]
+Anthomerce: bets 150
+stephoumOPC: folds
+Uncalled bet (150) returned to Anthomerce
+Anthomerce collected 300 from pot
+Anthomerce: doesn't show hand
+*** SUMMARY ***
+Total pot 300 | Rake 0
+Board [2s Js 9d]
+Seat 1: jeje_sat folded before Flop (didn't bet)
+Seat 2: MERIK44 (button) folded before Flop (didn't bet)
+Seat 3: Anthomerce (small blind) collected (300)
+Seat 4: stephoumOPC (big blind) folded on the Flop
+Seat 6: NHBROOO folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235190223968: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level II (25/50) - 2022/04/01 17:38:25 CET [2022/04/01 11:38:25 ET]
+Table '3389710722 1' 6-max Seat #3 is the button
+Seat 1: jeje_sat (7260 in chips)
+Seat 2: MERIK44 (9735 in chips)
+Seat 3: Anthomerce (10590 in chips)
+Seat 4: stephoumOPC (12415 in chips)
+Seat 6: NHBROOO (10000 in chips)
+stephoumOPC: posts small blind 25
+NHBROOO: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [Td Kh 6s 7c]
+jeje_sat: folds
+MERIK44: folds
+Anthomerce: folds
+stephoumOPC: folds
+Uncalled bet (25) returned to NHBROOO
+NHBROOO collected 50 from pot
+NHBROOO: doesn't show hand
+*** SUMMARY ***
+Total pot 50 | Rake 0
+Seat 1: jeje_sat folded before Flop (didn't bet)
+Seat 2: MERIK44 folded before Flop (didn't bet)
+Seat 3: Anthomerce (button) folded before Flop (didn't bet)
+Seat 4: stephoumOPC (small blind) folded before Flop
+Seat 6: NHBROOO (big blind) collected (50)
+
+
+PokerStars Home Game Hand #235190228166: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level II (25/50) - 2022/04/01 17:38:38 CET [2022/04/01 11:38:38 ET]
+Table '3389710722 1' 6-max Seat #4 is the button
+Seat 1: jeje_sat (7260 in chips)
+Seat 2: MERIK44 (9735 in chips)
+Seat 3: Anthomerce (10590 in chips)
+Seat 4: stephoumOPC (12390 in chips)
+Seat 6: NHBROOO (10025 in chips)
+NHBROOO: posts small blind 25
+jeje_sat: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [7h 6h 5d 7c]
+MERIK44: raises 100 to 150
+Anthomerce: calls 150
+stephoumOPC: folds
+NHBROOO: folds
+jeje_sat: calls 100
+*** FLOP *** [Tc 2h Qd]
+jeje_sat: checks
+MERIK44: checks
+Anthomerce: bets 238
+jeje_sat: folds
+MERIK44: folds
+Uncalled bet (238) returned to Anthomerce
+Anthomerce collected 475 from pot
+Anthomerce: doesn't show hand
+*** SUMMARY ***
+Total pot 475 | Rake 0
+Board [Tc 2h Qd]
+Seat 1: jeje_sat (big blind) folded on the Flop
+Seat 2: MERIK44 folded on the Flop
+Seat 3: Anthomerce collected (475)
+Seat 4: stephoumOPC (button) folded before Flop (didn't bet)
+Seat 6: NHBROOO (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235190242230: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level II (25/50) - 2022/04/01 17:39:22 CET [2022/04/01 11:39:22 ET]
+Table '3389710722 1' 6-max Seat #6 is the button
+Seat 1: jeje_sat (7110 in chips)
+Seat 2: MERIK44 (9585 in chips)
+Seat 3: Anthomerce (10915 in chips)
+Seat 4: stephoumOPC (12390 in chips)
+Seat 6: NHBROOO (10000 in chips)
+jeje_sat: posts small blind 25
+MERIK44: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc Ah 2c Qs]
+Anthomerce: folds
+stephoumOPC: raises 50 to 100
+NHBROOO: raises 275 to 375
+jeje_sat: folds
+MERIK44: folds
+stephoumOPC: folds
+Uncalled bet (275) returned to NHBROOO
+NHBROOO collected 275 from pot
+NHBROOO: doesn't show hand
+*** SUMMARY ***
+Total pot 275 | Rake 0
+Seat 1: jeje_sat (small blind) folded before Flop
+Seat 2: MERIK44 (big blind) folded before Flop
+Seat 3: Anthomerce folded before Flop (didn't bet)
+Seat 4: stephoumOPC folded before Flop
+Seat 6: NHBROOO (button) collected (275)
+
+
+PokerStars Home Game Hand #235190250712: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level II (25/50) - 2022/04/01 17:39:48 CET [2022/04/01 11:39:48 ET]
+Table '3389710722 1' 6-max Seat #1 is the button
+Seat 1: jeje_sat (7085 in chips)
+Seat 2: MERIK44 (9535 in chips)
+Seat 3: Anthomerce (10915 in chips)
+Seat 4: stephoumOPC (12290 in chips)
+Seat 6: NHBROOO (10175 in chips)
+MERIK44: posts small blind 25
+Anthomerce: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ah 8c Ts 7c]
+stephoumOPC: folds
+NHBROOO: calls 50
+jeje_sat: raises 175 to 225
+MERIK44: folds
+Anthomerce: folds
+NHBROOO: folds
+Uncalled bet (175) returned to jeje_sat
+jeje_sat collected 175 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 175 | Rake 0
+Seat 1: jeje_sat (button) collected (175)
+Seat 2: MERIK44 (small blind) folded before Flop
+Seat 3: Anthomerce (big blind) folded before Flop
+Seat 4: stephoumOPC folded before Flop (didn't bet)
+Seat 6: NHBROOO folded before Flop
+
+
+PokerStars Home Game Hand #235190261445: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level III (35/70) - 2022/04/01 17:40:21 CET [2022/04/01 11:40:21 ET]
+Table '3389710722 1' 6-max Seat #2 is the button
+Seat 1: jeje_sat (7210 in chips)
+Seat 2: MERIK44 (9510 in chips)
+Seat 3: Anthomerce (10865 in chips)
+Seat 4: stephoumOPC (12290 in chips)
+Seat 6: NHBROOO (10125 in chips)
+Anthomerce: posts small blind 35
+stephoumOPC: posts big blind 70
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th 6d 5c 8h]
+NHBROOO: raises 175 to 245
+jeje_sat: calls 245
+MERIK44: folds
+Anthomerce: folds
+stephoumOPC: calls 175
+*** FLOP *** [7s 7d 9c]
+stephoumOPC: checks
+NHBROOO: bets 539
+jeje_sat: raises 1848 to 2387
+stephoumOPC: folds
+NHBROOO: folds
+Uncalled bet (1848) returned to jeje_sat
+jeje_sat collected 1848 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1848 | Rake 0
+Board [7s 7d 9c]
+Seat 1: jeje_sat collected (1848)
+Seat 2: MERIK44 (button) folded before Flop (didn't bet)
+Seat 3: Anthomerce (small blind) folded before Flop
+Seat 4: stephoumOPC (big blind) folded on the Flop
+Seat 6: NHBROOO folded on the Flop
+
+
+PokerStars Home Game Hand #235190275479: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level III (35/70) - 2022/04/01 17:40:57 CET [2022/04/01 11:40:57 ET]
+Table '3389710722 1' 6-max Seat #3 is the button
+Seat 1: jeje_sat (8274 in chips)
+Seat 2: MERIK44 (9510 in chips)
+Seat 3: Anthomerce (10830 in chips)
+Seat 4: stephoumOPC (12045 in chips)
+Seat 6: NHBROOO (9341 in chips)
+stephoumOPC: posts small blind 35
+NHBROOO: posts big blind 70
+*** HOLE CARDS ***
+Dealt to jeje_sat [Td 8h Kc Ks]
+jeje_sat: folds
+MERIK44: folds
+Anthomerce: raises 105 to 175
+stephoumOPC: calls 140
+NHBROOO: calls 105
+*** FLOP *** [5c 9h 6d]
+stephoumOPC: checks
+NHBROOO: checks
+Anthomerce: checks
+*** TURN *** [5c 9h 6d] [4c]
+stephoumOPC: checks
+NHBROOO: bets 368
+Anthomerce: folds
+stephoumOPC: folds
+Uncalled bet (368) returned to NHBROOO
+NHBROOO collected 525 from pot
+NHBROOO: doesn't show hand
+*** SUMMARY ***
+Total pot 525 | Rake 0
+Board [5c 9h 6d 4c]
+Seat 1: jeje_sat folded before Flop (didn't bet)
+Seat 2: MERIK44 folded before Flop (didn't bet)
+Seat 3: Anthomerce (button) folded on the Turn
+Seat 4: stephoumOPC (small blind) folded on the Turn
+Seat 6: NHBROOO (big blind) collected (525)
+
+
+PokerStars Home Game Hand #235190286766: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level III (35/70) - 2022/04/01 17:41:33 CET [2022/04/01 11:41:33 ET]
+Table '3389710722 1' 6-max Seat #4 is the button
+Seat 1: jeje_sat (8274 in chips)
+Seat 2: MERIK44 (9510 in chips)
+Seat 3: Anthomerce (10655 in chips)
+Seat 4: stephoumOPC (11870 in chips)
+Seat 6: NHBROOO (9691 in chips)
+NHBROOO: posts small blind 35
+jeje_sat: posts big blind 70
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks 4s Ac Js]
+MERIK44: raises 70 to 140
+Anthomerce: calls 140
+stephoumOPC: folds
+NHBROOO: calls 105
+jeje_sat: calls 70
+*** FLOP *** [2s Jc Jh]
+NHBROOO: checks
+jeje_sat: checks
+MERIK44: checks
+Anthomerce: checks
+*** TURN *** [2s Jc Jh] [9h]
+NHBROOO: checks
+jeje_sat: bets 420
+MERIK44: calls 420
+Anthomerce: folds
+NHBROOO: folds
+*** RIVER *** [2s Jc Jh 9h] [Jd]
+jeje_sat: bets 1400
+MERIK44: folds
+Uncalled bet (1400) returned to jeje_sat
+jeje_sat collected 1400 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1400 | Rake 0
+Board [2s Jc Jh 9h Jd]
+Seat 1: jeje_sat (big blind) collected (1400)
+Seat 2: MERIK44 folded on the River
+Seat 3: Anthomerce folded on the Turn
+Seat 4: stephoumOPC (button) folded before Flop (didn't bet)
+Seat 6: NHBROOO (small blind) folded on the Turn
+
+
+PokerStars Home Game Hand #235190313922: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level III (35/70) - 2022/04/01 17:42:58 CET [2022/04/01 11:42:58 ET]
+Table '3389710722 1' 6-max Seat #6 is the button
+Seat 1: jeje_sat (9114 in chips)
+Seat 2: MERIK44 (8950 in chips)
+Seat 3: Anthomerce (10515 in chips)
+Seat 4: stephoumOPC (11870 in chips)
+Seat 6: NHBROOO (9551 in chips)
+jeje_sat: posts small blind 35
+MERIK44: posts big blind 70
+*** HOLE CARDS ***
+Dealt to jeje_sat [6s 4c Jc Th]
+Anthomerce: raises 105 to 175
+stephoumOPC: calls 175
+NHBROOO: calls 175
+jeje_sat: folds
+MERIK44: folds
+*** FLOP *** [4d 7h Ks]
+Anthomerce: checks
+stephoumOPC: checks
+NHBROOO: bets 441
+Anthomerce: folds
+stephoumOPC: folds
+Uncalled bet (441) returned to NHBROOO
+NHBROOO collected 630 from pot
+NHBROOO: doesn't show hand
+*** SUMMARY ***
+Total pot 630 | Rake 0
+Board [4d 7h Ks]
+Seat 1: jeje_sat (small blind) folded before Flop
+Seat 2: MERIK44 (big blind) folded before Flop
+Seat 3: Anthomerce folded on the Flop
+Seat 4: stephoumOPC folded on the Flop
+Seat 6: NHBROOO (button) collected (630)
+
+
+PokerStars Home Game Hand #235190329145: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level III (35/70) - 2022/04/01 17:43:45 CET [2022/04/01 11:43:45 ET]
+Table '3389710722 1' 6-max Seat #1 is the button
+Seat 1: jeje_sat (9079 in chips)
+Seat 2: MERIK44 (8880 in chips)
+Seat 3: Anthomerce (10340 in chips)
+Seat 4: stephoumOPC (11695 in chips)
+Seat 6: NHBROOO (10006 in chips)
+MERIK44: posts small blind 35
+Anthomerce: posts big blind 70
+*** HOLE CARDS ***
+Dealt to jeje_sat [3s 6d 9h 8c]
+stephoumOPC: folds
+NHBROOO: calls 70
+jeje_sat: folds
+MERIK44: raises 105 to 175
+Anthomerce: calls 105
+NHBROOO: calls 105
+*** FLOP *** [Ad Qh 5c]
+MERIK44: bets 420
+Anthomerce: folds
+NHBROOO: folds
+Uncalled bet (420) returned to MERIK44
+MERIK44 collected 525 from pot
+MERIK44: doesn't show hand
+*** SUMMARY ***
+Total pot 525 | Rake 0
+Board [Ad Qh 5c]
+Seat 1: jeje_sat (button) folded before Flop (didn't bet)
+Seat 2: MERIK44 (small blind) collected (525)
+Seat 3: Anthomerce (big blind) folded on the Flop
+Seat 4: stephoumOPC folded before Flop (didn't bet)
+Seat 6: NHBROOO folded on the Flop
+
+
+PokerStars Home Game Hand #235190341944: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level III (35/70) - 2022/04/01 17:44:25 CET [2022/04/01 11:44:25 ET]
+Table '3389710722 1' 6-max Seat #2 is the button
+Seat 1: jeje_sat (9079 in chips)
+Seat 2: MERIK44 (9230 in chips)
+Seat 3: Anthomerce (10165 in chips)
+Seat 4: stephoumOPC (11695 in chips)
+Seat 6: NHBROOO (9831 in chips)
+Anthomerce: posts small blind 35
+stephoumOPC: posts big blind 70
+*** HOLE CARDS ***
+Dealt to jeje_sat [3d Ad 7h 4c]
+NHBROOO: calls 70
+jeje_sat: raises 245 to 315
+MERIK44: folds
+Anthomerce: folds
+stephoumOPC: calls 245
+NHBROOO: calls 245
+*** FLOP *** [9d 9s 9h]
+stephoumOPC: checks
+NHBROOO: checks
+jeje_sat: bets 490
+stephoumOPC: folds
+NHBROOO: calls 490
+*** TURN *** [9d 9s 9h] [5d]
+NHBROOO: checks
+jeje_sat: bets 1400
+NHBROOO: folds
+Uncalled bet (1400) returned to jeje_sat
+jeje_sat collected 1960 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1960 | Rake 0
+Board [9d 9s 9h 5d]
+Seat 1: jeje_sat collected (1960)
+Seat 2: MERIK44 (button) folded before Flop (didn't bet)
+Seat 3: Anthomerce (small blind) folded before Flop
+Seat 4: stephoumOPC (big blind) folded on the Flop
+Seat 6: NHBROOO folded on the Turn
+
+
+PokerStars Home Game Hand #235190362135: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/01 17:45:28 CET [2022/04/01 11:45:28 ET]
+Table '3389710722 1' 6-max Seat #3 is the button
+Seat 1: jeje_sat (10234 in chips)
+Seat 2: MERIK44 (9230 in chips)
+Seat 3: Anthomerce (10130 in chips)
+Seat 4: stephoumOPC (11380 in chips)
+Seat 6: NHBROOO (9026 in chips)
+stephoumOPC: posts small blind 50
+NHBROOO: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ah Qh 5c Qs]
+jeje_sat: raises 250 to 350
+MERIK44: calls 350
+Anthomerce: folds
+stephoumOPC: folds
+NHBROOO: calls 250
+*** FLOP *** [9h 5h Ks]
+NHBROOO: checks
+jeje_sat: bets 550
+MERIK44: calls 550
+NHBROOO: raises 2750 to 3300
+jeje_sat: raises 6584 to 9884 and is all-in
+MERIK44: folds
+NHBROOO: calls 5376 and is all-in
+Uncalled bet (1208) returned to jeje_sat
+*** TURN *** [9h 5h Ks] [2d]
+*** RIVER *** [9h 5h Ks 2d] [Td]
+*** SHOW DOWN ***
+NHBROOO: shows [Kc 6d 9d 7c] (two pair, Kings and Nines)
+jeje_sat: shows [Ah Qh 5c Qs] (a pair of Queens)
+NHBROOO collected 19002 from pot
+*** SUMMARY ***
+Total pot 19002 | Rake 0
+Board [9h 5h Ks 2d Td]
+Seat 1: jeje_sat showed [Ah Qh 5c Qs] and lost with a pair of Queens
+Seat 2: MERIK44 folded on the Flop
+Seat 3: Anthomerce (button) folded before Flop (didn't bet)
+Seat 4: stephoumOPC (small blind) folded before Flop
+Seat 6: NHBROOO (big blind) showed [Kc 6d 9d 7c] and won (19002) with two pair, Kings and Nines
+
+
+PokerStars Home Game Hand #235190378085: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/01 17:46:18 CET [2022/04/01 11:46:18 ET]
+Table '3389710722 1' 6-max Seat #4 is the button
+Seat 1: jeje_sat (1208 in chips)
+Seat 2: MERIK44 (8330 in chips)
+Seat 3: Anthomerce (10130 in chips)
+Seat 4: stephoumOPC (11330 in chips)
+Seat 5: pokerman3820 (10000 in chips) out of hand (moved from another table into small blind)
+Seat 6: NHBROOO (19002 in chips)
+pokerman3820 will be allowed to play after the button
+NHBROOO: posts small blind 50
+jeje_sat: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [8d Tc 6d 3h]
+MERIK44: raises 200 to 300
+Anthomerce: raises 600 to 900
+stephoumOPC: folds
+NHBROOO: calls 850
+jeje_sat: folds
+MERIK44: calls 600
+*** FLOP *** [2s 2h 4c]
+NHBROOO: checks
+MERIK44: bets 2800
+Anthomerce: folds
+NHBROOO: raises 8400 to 11200
+MERIK44: calls 4630 and is all-in
+Uncalled bet (3770) returned to NHBROOO
+*** TURN *** [2s 2h 4c] [7c]
+*** RIVER *** [2s 2h 4c 7c] [Ks]
+*** SHOW DOWN ***
+NHBROOO: shows [6h 2d Js Jd] (three of a kind, Deuces)
+MERIK44: shows [As 2c Ah 3s] (three of a kind, Deuces - Ace kicker)
+MERIK44 collected 17660 from pot
+*** SUMMARY ***
+Total pot 17660 | Rake 0
+Board [2s 2h 4c 7c Ks]
+Seat 1: jeje_sat (big blind) folded before Flop
+Seat 2: MERIK44 showed [As 2c Ah 3s] and won (17660) with three of a kind, Deuces
+Seat 3: Anthomerce folded on the Flop
+Seat 4: stephoumOPC (button) folded before Flop (didn't bet)
+Seat 6: NHBROOO (small blind) showed [6h 2d Js Jd] and lost with three of a kind, Deuces
+
+
+PokerStars Home Game Hand #235190399157: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/01 17:47:24 CET [2022/04/01 11:47:24 ET]
+Table '3389710722 1' 6-max Seat #6 is the button
+Seat 1: jeje_sat (1108 in chips)
+Seat 2: MERIK44 (17660 in chips)
+Seat 3: Anthomerce (9230 in chips)
+Seat 4: stephoumOPC (11330 in chips)
+Seat 5: pokerman3820 (10000 in chips)
+Seat 6: NHBROOO (10672 in chips)
+jeje_sat: posts small blind 50
+MERIK44: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc 6s Ah 5d]
+Anthomerce: folds
+stephoumOPC: folds
+pokerman3820: folds
+NHBROOO: calls 100
+jeje_sat: folds
+MERIK44: checks
+*** FLOP *** [6h Kd Td]
+MERIK44: bets 200
+NHBROOO: folds
+Uncalled bet (200) returned to MERIK44
+MERIK44 collected 250 from pot
+MERIK44: doesn't show hand
+*** SUMMARY ***
+Total pot 250 | Rake 0
+Board [6h Kd Td]
+Seat 1: jeje_sat (small blind) folded before Flop
+Seat 2: MERIK44 (big blind) collected (250)
+Seat 3: Anthomerce folded before Flop (didn't bet)
+Seat 4: stephoumOPC folded before Flop (didn't bet)
+Seat 5: pokerman3820 folded before Flop (didn't bet)
+Seat 6: NHBROOO (button) folded on the Flop
+
+
+PokerStars Home Game Hand #235190409514: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/01 17:47:56 CET [2022/04/01 11:47:56 ET]
+Table '3389710722 1' 6-max Seat #1 is the button
+Seat 1: jeje_sat (1058 in chips)
+Seat 2: MERIK44 (17810 in chips)
+Seat 3: Anthomerce (9230 in chips)
+Seat 4: stephoumOPC (11330 in chips)
+Seat 5: pokerman3820 (10000 in chips)
+Seat 6: NHBROOO (10572 in chips)
+MERIK44: posts small blind 50
+Anthomerce: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 8s 4h 6d]
+stephoumOPC: folds
+pokerman3820: folds
+NHBROOO: folds
+jeje_sat: folds
+MERIK44: folds
+Uncalled bet (50) returned to Anthomerce
+Anthomerce collected 100 from pot
+Anthomerce: doesn't show hand
+*** SUMMARY ***
+Total pot 100 | Rake 0
+Seat 1: jeje_sat (button) folded before Flop (didn't bet)
+Seat 2: MERIK44 (small blind) folded before Flop
+Seat 3: Anthomerce (big blind) collected (100)
+Seat 4: stephoumOPC folded before Flop (didn't bet)
+Seat 5: pokerman3820 folded before Flop (didn't bet)
+Seat 6: NHBROOO folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235190418361: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/01 17:48:23 CET [2022/04/01 11:48:23 ET]
+Table '3389710722 1' 6-max Seat #2 is the button
+Seat 1: jeje_sat (1058 in chips)
+Seat 2: MERIK44 (17760 in chips)
+Seat 3: Anthomerce (9280 in chips)
+Seat 4: stephoumOPC (11330 in chips)
+Seat 5: pokerman3820 (10000 in chips)
+Seat 6: NHBROOO (10572 in chips)
+Anthomerce: posts small blind 50
+stephoumOPC: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [7s Js Ts 9s]
+pokerman3820: folds
+NHBROOO: folds
+jeje_sat: raises 250 to 350
+MERIK44: folds
+Anthomerce: folds
+stephoumOPC: folds
+Uncalled bet (250) returned to jeje_sat
+jeje_sat collected 250 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 250 | Rake 0
+Seat 1: jeje_sat collected (250)
+Seat 2: MERIK44 (button) folded before Flop (didn't bet)
+Seat 3: Anthomerce (small blind) folded before Flop
+Seat 4: stephoumOPC (big blind) folded before Flop
+Seat 5: pokerman3820 folded before Flop (didn't bet)
+Seat 6: NHBROOO folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235190423344: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/01 17:48:39 CET [2022/04/01 11:48:39 ET]
+Table '3389710722 1' 6-max Seat #3 is the button
+Seat 1: jeje_sat (1208 in chips)
+Seat 2: MERIK44 (17760 in chips)
+Seat 3: Anthomerce (9230 in chips)
+Seat 4: stephoumOPC (11230 in chips)
+Seat 5: pokerman3820 (10000 in chips)
+Seat 6: NHBROOO (10572 in chips)
+stephoumOPC: posts small blind 50
+pokerman3820: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [6s 3d 4d 7c]
+NHBROOO: calls 100
+jeje_sat: folds
+MERIK44: folds
+Anthomerce: raises 300 to 400
+stephoumOPC: calls 350
+pokerman3820: calls 300
+NHBROOO: calls 300
+*** FLOP *** [Qc 3s Jc]
+stephoumOPC: checks
+pokerman3820: checks
+NHBROOO: checks
+Anthomerce: bets 1200
+stephoumOPC: folds
+pokerman3820: folds
+NHBROOO: folds
+Uncalled bet (1200) returned to Anthomerce
+Anthomerce collected 1600 from pot
+Anthomerce: doesn't show hand
+*** SUMMARY ***
+Total pot 1600 | Rake 0
+Board [Qc 3s Jc]
+Seat 1: jeje_sat folded before Flop (didn't bet)
+Seat 2: MERIK44 folded before Flop (didn't bet)
+Seat 3: Anthomerce (button) collected (1600)
+Seat 4: stephoumOPC (small blind) folded on the Flop
+Seat 5: pokerman3820 (big blind) folded on the Flop
+Seat 6: NHBROOO folded on the Flop
+
+
+PokerStars Home Game Hand #235190445218: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/01 17:49:46 CET [2022/04/01 11:49:46 ET]
+Table '3389710722 1' 6-max Seat #4 is the button
+Seat 1: jeje_sat (1208 in chips)
+Seat 2: MERIK44 (17760 in chips)
+Seat 3: Anthomerce (10430 in chips)
+Seat 4: stephoumOPC (10830 in chips)
+Seat 5: pokerman3820 (9600 in chips)
+Seat 6: NHBROOO (10172 in chips)
+pokerman3820: posts small blind 50
+NHBROOO: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [2s 2h 4s Qs]
+jeje_sat: folds
+MERIK44: folds
+Anthomerce: folds
+stephoumOPC: folds
+pokerman3820: calls 50
+NHBROOO: checks
+*** FLOP *** [5c 7h 8c]
+pokerman3820: checks
+NHBROOO: checks
+*** TURN *** [5c 7h 8c] [9h]
+pokerman3820: bets 200
+NHBROOO: calls 200
+*** RIVER *** [5c 7h 8c 9h] [As]
+pokerman3820: bets 400
+NHBROOO: folds
+Uncalled bet (400) returned to pokerman3820
+pokerman3820 collected 600 from pot
+*** SUMMARY ***
+Total pot 600 | Rake 0
+Board [5c 7h 8c 9h As]
+Seat 1: jeje_sat folded before Flop (didn't bet)
+Seat 2: MERIK44 folded before Flop (didn't bet)
+Seat 3: Anthomerce folded before Flop (didn't bet)
+Seat 4: stephoumOPC (button) folded before Flop (didn't bet)
+Seat 5: pokerman3820 (small blind) collected (600)
+Seat 6: NHBROOO (big blind) folded on the River
+
+
+PokerStars Home Game Hand #235190468712: {Club #4837790} Tournament #3389710722, €0.08+€0.02 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/01 17:50:59 CET [2022/04/01 11:50:59 ET]
+Table '3389710722 1' 6-max Seat #5 is the button
+Seat 1: jeje_sat (1208 in chips)
+Seat 2: MERIK44 (17760 in chips)
+Seat 3: Anthomerce (10430 in chips)
+Seat 4: stephoumOPC (10830 in chips)
+Seat 5: pokerman3820 (9900 in chips)
+Seat 6: NHBROOO (9872 in chips)
+NHBROOO: posts small blind 75
+jeje_sat: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [4c 2c Jd 9c]
+MERIK44: folds
+Anthomerce: folds
+stephoumOPC: folds
+pokerman3820: raises 180 to 330
+NHBROOO: calls 255
+jeje_sat: raises 878 to 1208 and is all-in
+pokerman3820: calls 878
+NHBROOO: calls 878
+*** FLOP *** [Qs Ac Js]
+NHBROOO: checks
+pokerman3820: bets 525
+NHBROOO: calls 525
+*** TURN *** [Qs Ac Js] [3d]
+NHBROOO: checks
+pokerman3820: bets 825
+NHBROOO: raises 2087 to 2912
+pokerman3820: calls 2087
+*** RIVER *** [Qs Ac Js 3d] [As]
+NHBROOO: bets 5227 and is all-in
+pokerman3820: calls 5227
+*** SHOW DOWN ***
+NHBROOO: shows [Ts Td 6s 5c] (a flush, Ace high)
+pokerman3820: shows [2h Ad Ah 7d] (four of a kind, Aces)
+pokerman3820 collected 17328 from side pot
+jeje_sat: shows [4c 2c Jd 9c] (two pair, Aces and Jacks)
+pokerman3820 collected 3624 from main pot
+NHBROOO finished the tournament
+jeje_sat finished the tournament
+*** SUMMARY ***
+Total pot 20952 Main pot 3624. Side pot 17328. | Rake 0
+Board [Qs Ac Js 3d As]
+Seat 1: jeje_sat (big blind) showed [4c 2c Jd 9c] and lost with two pair, Aces and Jacks
+Seat 2: MERIK44 folded before Flop (didn't bet)
+Seat 3: Anthomerce folded before Flop (didn't bet)
+Seat 4: stephoumOPC folded before Flop (didn't bet)
+Seat 5: pokerman3820 (button) showed [2h Ad Ah 7d] and won (20952) with four of a kind, Aces
+Seat 6: NHBROOO (small blind) showed [Ts Td 6s 5c] and lost with a flush, Ace high
+
+

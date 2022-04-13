@@ -1,0 +1,33 @@
+PokerTracker 4 Tournament Summary
+Site: PokerStars
+Game: Holdem
+Tournament #: 3259378559
+Started: 2021/09/09 19:02:29
+Finished: 2021/09/09 19:20:03
+Buyin: €0.45
+Bounty: €0.45
+BountyVal: €0.45
+Fee: €0.10
+Prize Pool: €0.00
+Table Type: MTT Turbo PROGBOUNT
+Tourney Type: No Limit
+Players: 514
+
+Place: 0, Player: scoubidou57, Won: €0.00,
+Place: 0, Player: Celpix, Won: €0.00,
+Place: 0, Player: jandira7, Won: €0.00,
+Place: 0, Player: GALACTIKCOCO, Won: €0.00,
+Place: 0, Player: manel273, Won: €0.00,
+Place: 0, Player: shinigami660, Won: €0.00,
+Place: 0, Player: jeje_sat, Won: €0.00,
+Place: 0, Player: _syllvain24, Won: €0.00,
+Place: 0, Player: capi-chulo69, Won: €0.00,
+Place: 0, Player: DrBlochleng, Won: €0.00,
+Place: 0, Player: ocsur, Won: €0.00,
+Place: 0, Player: monoe34, Won: €0.00,
+Place: 0, Player: EdgarAlex7, Won: €0.00,
+Place: 0, Player: Raphy1968, Won: €0.00,
+Place: 0, Player: YNWA/DM, Won: €0.00,
+Place: 443, Player: Seth259, Won: €0.00,
+Place: 490, Player: rolfito100, Won: €0.00,
+Place: 514, Player: Ooomince2, Won: €0.00,

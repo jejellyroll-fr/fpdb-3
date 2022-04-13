@@ -1,0 +1,474 @@
+﻿PokerStars Hand #230135566818: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/26 1:24:17 CET [2021/09/25 19:24:17 ET]
+Table '3272318156 1' 3-max Seat #1 is the button
+Seat 1: Toñindarrusa (500 in chips)
+Seat 2: tapo66 (500 in chips)
+Seat 3: jeje_sat (500 in chips)
+tapo66: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 7c Td Kc]
+Toñindarrusa: calls 20
+tapo66: calls 10
+jeje_sat: checks
+*** FLOP *** [5d Jc Ad]
+tapo66: checks
+jeje_sat: checks
+Toñindarrusa: checks
+*** TURN *** [5d Jc Ad] [4c]
+tapo66: bets 20
+jeje_sat: calls 20
+Toñindarrusa: calls 20
+*** RIVER *** [5d Jc Ad 4c] [9c]
+tapo66: bets 20
+jeje_sat: raises 160 to 180
+Toñindarrusa: calls 180
+tapo66: folds
+*** SHOW DOWN ***
+jeje_sat: shows [4s 7c Td Kc] (a flush, King high)
+Toñindarrusa: mucks hand
+jeje_sat collected 500 from pot
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Board [5d Jc Ad 4c 9c]
+Seat 1: Toñindarrusa (button) mucked [Tc 7d As 2c]
+Seat 2: tapo66 (small blind) folded on the River
+Seat 3: jeje_sat (big blind) showed [4s 7c Td Kc] and won (500) with a flush, King high
+
+
+PokerStars Hand #230135579112: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/26 1:24:56 CET [2021/09/25 19:24:56 ET]
+Table '3272318156 1' 3-max Seat #2 is the button
+Seat 1: Toñindarrusa (280 in chips)
+Seat 2: tapo66 (440 in chips)
+Seat 3: jeje_sat (780 in chips)
+jeje_sat: posts small blind 10
+Toñindarrusa: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [6d Tc Ad Qc]
+tapo66: calls 20
+jeje_sat: raises 60 to 80
+Toñindarrusa: calls 60
+tapo66: calls 60
+*** FLOP *** [Qh 5c Th]
+jeje_sat: bets 240
+Toñindarrusa: calls 200 and is all-in
+tapo66: raises 120 to 360 and is all-in
+jeje_sat: calls 120
+*** TURN *** [Qh 5c Th] [3s]
+*** RIVER *** [Qh 5c Th 3s] [2h]
+*** SHOW DOWN ***
+jeje_sat: shows [6d Tc Ad Qc] (two pair, Queens and Tens)
+tapo66: shows [Jd 8s Kh 9h] (a flush, King high)
+tapo66 collected 320 from side pot
+Toñindarrusa: shows [4h 3h 4c Kc] (a flush, Queen high)
+tapo66 collected 840 from main pot
+Toñindarrusa finished the tournament in 3rd place
+*** SUMMARY ***
+Total pot 1160 Main pot 840. Side pot 320. | Rake 0
+Board [Qh 5c Th 3s 2h]
+Seat 1: Toñindarrusa (big blind) showed [4h 3h 4c Kc] and lost with a flush, Queen high
+Seat 2: tapo66 (button) showed [Jd 8s Kh 9h] and won (1160) with a flush, King high
+Seat 3: jeje_sat (small blind) showed [6d Tc Ad Qc] and lost with two pair, Queens and Tens
+
+
+PokerStars Hand #230135588430: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/26 1:25:26 CET [2021/09/25 19:25:26 ET]
+Table '3272318156 1' 3-max Seat #3 is the button
+Seat 2: tapo66 (1160 in chips)
+Seat 3: jeje_sat (340 in chips)
+jeje_sat: posts small blind 10
+tapo66: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qs 9s Jc 6c]
+jeje_sat: raises 40 to 60
+tapo66: calls 40
+*** FLOP *** [4c 3c Ad]
+tapo66: checks
+jeje_sat: bets 120
+tapo66: folds
+Uncalled bet (120) returned to jeje_sat
+jeje_sat collected 120 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [4c 3c Ad]
+Seat 2: tapo66 (big blind) folded on the Flop
+Seat 3: jeje_sat (button) (small blind) collected (120)
+
+
+PokerStars Hand #230135592542: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/26 1:25:39 CET [2021/09/25 19:25:39 ET]
+Table '3272318156 1' 3-max Seat #2 is the button
+Seat 2: tapo66 (1100 in chips)
+Seat 3: jeje_sat (400 in chips)
+tapo66: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d 7s 3c 4s]
+tapo66: calls 10
+jeje_sat: checks
+*** FLOP *** [Jd Td Qs]
+jeje_sat: checks
+tapo66: bets 40
+jeje_sat: folds
+Uncalled bet (40) returned to tapo66
+tapo66 collected 40 from pot
+tapo66: doesn't show hand
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Board [Jd Td Qs]
+Seat 2: tapo66 (button) (small blind) collected (40)
+Seat 3: jeje_sat (big blind) folded on the Flop
+
+
+PokerStars Hand #230135596447: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/26 1:25:51 CET [2021/09/25 19:25:51 ET]
+Table '3272318156 1' 3-max Seat #3 is the button
+Seat 2: tapo66 (1120 in chips)
+Seat 3: jeje_sat (380 in chips)
+jeje_sat: posts small blind 10
+tapo66: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [8h 2d 9s 5c]
+jeje_sat: folds
+Uncalled bet (10) returned to tapo66
+tapo66 collected 20 from pot
+tapo66: doesn't show hand
+*** SUMMARY ***
+Total pot 20 | Rake 0
+Seat 2: tapo66 (big blind) collected (20)
+Seat 3: jeje_sat (button) (small blind) folded before Flop
+
+
+PokerStars Hand #230135597862: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/26 1:25:56 CET [2021/09/25 19:25:56 ET]
+Table '3272318156 1' 3-max Seat #2 is the button
+Seat 2: tapo66 (1130 in chips)
+Seat 3: jeje_sat (370 in chips)
+tapo66: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qc 7c Kh 3s]
+tapo66: calls 10
+jeje_sat: checks
+*** FLOP *** [5d 6d Ah]
+jeje_sat: checks
+tapo66: bets 20
+jeje_sat: folds
+Uncalled bet (20) returned to tapo66
+tapo66 collected 40 from pot
+tapo66: doesn't show hand
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Board [5d 6d Ah]
+Seat 2: tapo66 (button) (small blind) collected (40)
+Seat 3: jeje_sat (big blind) folded on the Flop
+
+
+PokerStars Hand #230135601736: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/26 1:26:08 CET [2021/09/25 19:26:08 ET]
+Table '3272318156 1' 3-max Seat #3 is the button
+Seat 2: tapo66 (1150 in chips)
+Seat 3: jeje_sat (350 in chips)
+jeje_sat: posts small blind 10
+tapo66: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 7h 8s Jd]
+jeje_sat: calls 10
+tapo66: checks
+*** FLOP *** [8d Tc 7d]
+tapo66: checks
+jeje_sat: bets 40
+tapo66: folds
+Uncalled bet (40) returned to jeje_sat
+jeje_sat collected 40 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Board [8d Tc 7d]
+Seat 2: tapo66 (big blind) folded on the Flop
+Seat 3: jeje_sat (button) (small blind) collected (40)
+
+
+PokerStars Hand #230135605660: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/26 1:26:20 CET [2021/09/25 19:26:20 ET]
+Table '3272318156 1' 3-max Seat #2 is the button
+Seat 2: tapo66 (1130 in chips)
+Seat 3: jeje_sat (370 in chips)
+tapo66: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qs Kc 6h Ad]
+tapo66: calls 10
+jeje_sat: checks
+*** FLOP *** [3d 7s Th]
+jeje_sat: checks
+tapo66: checks
+*** TURN *** [3d 7s Th] [7d]
+jeje_sat: checks
+tapo66: checks
+*** RIVER *** [3d 7s Th 7d] [Js]
+jeje_sat: checks
+tapo66: bets 20
+jeje_sat: folds
+Uncalled bet (20) returned to tapo66
+tapo66 collected 40 from pot
+tapo66: doesn't show hand
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Board [3d 7s Th 7d Js]
+Seat 2: tapo66 (button) (small blind) collected (40)
+Seat 3: jeje_sat (big blind) folded on the River
+
+
+PokerStars Hand #230135610788: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/26 1:26:37 CET [2021/09/25 19:26:37 ET]
+Table '3272318156 1' 3-max Seat #3 is the button
+Seat 2: tapo66 (1150 in chips)
+Seat 3: jeje_sat (350 in chips)
+jeje_sat: posts small blind 10
+tapo66: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h 8h 3d 9h]
+jeje_sat: calls 10
+tapo66: checks
+*** FLOP *** [9c Tc 2h]
+tapo66: checks
+jeje_sat: bets 20
+tapo66: folds
+Uncalled bet (20) returned to jeje_sat
+jeje_sat collected 40 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Board [9c Tc 2h]
+Seat 2: tapo66 (big blind) folded on the Flop
+Seat 3: jeje_sat (button) (small blind) collected (40)
+
+
+PokerStars Hand #230135613954: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/26 1:26:47 CET [2021/09/25 19:26:47 ET]
+Table '3272318156 1' 3-max Seat #2 is the button
+Seat 2: tapo66 (1130 in chips)
+Seat 3: jeje_sat (370 in chips)
+tapo66: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h Ah 6s Ac]
+tapo66: calls 10
+jeje_sat: raises 40 to 60
+tapo66: calls 40
+*** FLOP *** [7s Td 6h]
+jeje_sat: bets 120
+tapo66: folds
+Uncalled bet (120) returned to jeje_sat
+jeje_sat collected 120 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [7s Td 6h]
+Seat 2: tapo66 (button) (small blind) folded on the Flop
+Seat 3: jeje_sat (big blind) collected (120)
+
+
+PokerStars Hand #230135619734: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/26 1:27:05 CET [2021/09/25 19:27:05 ET]
+Table '3272318156 1' 3-max Seat #3 is the button
+Seat 2: tapo66 (1070 in chips)
+Seat 3: jeje_sat (430 in chips)
+jeje_sat: posts small blind 10
+tapo66: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [As 9h 4s Ad]
+jeje_sat: raises 40 to 60
+tapo66: calls 40
+*** FLOP *** [4d 4c 5h]
+tapo66: checks
+jeje_sat: bets 120
+tapo66: folds
+Uncalled bet (120) returned to jeje_sat
+jeje_sat collected 120 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [4d 4c 5h]
+Seat 2: tapo66 (big blind) folded on the Flop
+Seat 3: jeje_sat (button) (small blind) collected (120)
+
+
+PokerStars Hand #230135623209: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/26 1:27:16 CET [2021/09/25 19:27:16 ET]
+Table '3272318156 1' 3-max Seat #2 is the button
+Seat 2: tapo66 (1010 in chips)
+Seat 3: jeje_sat (490 in chips)
+tapo66: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kd 3d Ac Kh]
+tapo66: calls 10
+jeje_sat: raises 40 to 60
+tapo66: calls 40
+*** FLOP *** [Tc Jc Js]
+jeje_sat: bets 120
+tapo66: folds
+Uncalled bet (120) returned to jeje_sat
+jeje_sat collected 120 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [Tc Jc Js]
+Seat 2: tapo66 (button) (small blind) folded on the Flop
+Seat 3: jeje_sat (big blind) collected (120)
+
+
+PokerStars Hand #230135627934: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/26 1:27:31 CET [2021/09/25 19:27:31 ET]
+Table '3272318156 1' 3-max Seat #3 is the button
+Seat 2: tapo66 (950 in chips)
+Seat 3: jeje_sat (550 in chips)
+jeje_sat: posts small blind 15
+tapo66: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c 6d Ts 2h]
+jeje_sat: calls 15
+tapo66: checks
+*** FLOP *** [Kh 4d 8s]
+tapo66: bets 30
+jeje_sat: folds
+Uncalled bet (30) returned to tapo66
+tapo66 collected 60 from pot
+tapo66: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Board [Kh 4d 8s]
+Seat 2: tapo66 (big blind) collected (60)
+Seat 3: jeje_sat (button) (small blind) folded on the Flop
+
+
+PokerStars Hand #230135631217: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/26 1:27:42 CET [2021/09/25 19:27:42 ET]
+Table '3272318156 1' 3-max Seat #2 is the button
+Seat 2: tapo66 (980 in chips)
+Seat 3: jeje_sat (520 in chips)
+tapo66: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks 5s 7c Ad]
+tapo66: calls 15
+jeje_sat: raises 60 to 90
+tapo66: calls 60
+*** FLOP *** [Kd 9s Jc]
+jeje_sat: bets 90
+tapo66: calls 90
+*** TURN *** [Kd 9s Jc] [Ac]
+jeje_sat: bets 340 and is all-in
+tapo66: calls 340
+*** RIVER *** [Kd 9s Jc Ac] [5d]
+*** SHOW DOWN ***
+jeje_sat: shows [Ks 5s 7c Ad] (two pair, Aces and Kings)
+tapo66: shows [Th As 3d 3h] (a pair of Aces)
+jeje_sat collected 1040 from pot
+*** SUMMARY ***
+Total pot 1040 | Rake 0
+Board [Kd 9s Jc Ac 5d]
+Seat 2: tapo66 (button) (small blind) showed [Th As 3d 3h] and lost with a pair of Aces
+Seat 3: jeje_sat (big blind) showed [Ks 5s 7c Ad] and won (1040) with two pair, Aces and Kings
+
+
+PokerStars Hand #230135638304: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/26 1:28:05 CET [2021/09/25 19:28:05 ET]
+Table '3272318156 1' 3-max Seat #3 is the button
+Seat 2: tapo66 (460 in chips)
+Seat 3: jeje_sat (1040 in chips)
+jeje_sat: posts small blind 15
+tapo66: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks 7d 4h 6h]
+jeje_sat: calls 15
+tapo66: checks
+*** FLOP *** [4d Ts 9d]
+tapo66: checks
+jeje_sat: checks
+*** TURN *** [4d Ts 9d] [9h]
+tapo66: bets 30
+jeje_sat: calls 30
+*** RIVER *** [4d Ts 9d 9h] [Kh]
+tapo66: bets 30
+jeje_sat: raises 180 to 210
+tapo66: calls 180
+*** SHOW DOWN ***
+jeje_sat: shows [Ks 7d 4h 6h] (two pair, Kings and Nines)
+tapo66: shows [6d 8s 6s 9s] (three of a kind, Nines)
+tapo66 collected 540 from pot
+*** SUMMARY ***
+Total pot 540 | Rake 0
+Board [4d Ts 9d 9h Kh]
+Seat 2: tapo66 (big blind) showed [6d 8s 6s 9s] and won (540) with three of a kind, Nines
+Seat 3: jeje_sat (button) (small blind) showed [Ks 7d 4h 6h] and lost with two pair, Kings and Nines
+
+
+PokerStars Hand #230135644979: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/26 1:28:26 CET [2021/09/25 19:28:26 ET]
+Table '3272318156 1' 3-max Seat #2 is the button
+Seat 2: tapo66 (730 in chips)
+Seat 3: jeje_sat (770 in chips)
+tapo66: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc 2s Kh Kc]
+tapo66: calls 15
+jeje_sat: raises 60 to 90
+tapo66: calls 60
+*** FLOP *** [Kd Jh 4c]
+jeje_sat: bets 180
+tapo66: calls 180
+*** TURN *** [Kd Jh 4c] [6d]
+jeje_sat: bets 500 and is all-in
+tapo66: calls 460 and is all-in
+Uncalled bet (40) returned to jeje_sat
+*** RIVER *** [Kd Jh 4c 6d] [9d]
+*** SHOW DOWN ***
+jeje_sat: shows [Jc 2s Kh Kc] (three of a kind, Kings)
+tapo66: shows [Qs 8s 2h Tc] (a straight, Nine to King)
+tapo66 collected 1460 from pot
+*** SUMMARY ***
+Total pot 1460 | Rake 0
+Board [Kd Jh 4c 6d 9d]
+Seat 2: tapo66 (button) (small blind) showed [Qs 8s 2h Tc] and won (1460) with a straight, Nine to King
+Seat 3: jeje_sat (big blind) showed [Jc 2s Kh Kc] and lost with three of a kind, Kings
+
+
+PokerStars Hand #230135651196: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/26 1:28:46 CET [2021/09/25 19:28:46 ET]
+Table '3272318156 1' 3-max Seat #3 is the button
+Seat 2: tapo66 (1460 in chips)
+Seat 3: jeje_sat (40 in chips)
+jeje_sat: posts small blind 15
+tapo66: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Td 4d 9h Ks]
+jeje_sat: raises 10 to 40 and is all-in
+tapo66: calls 10
+*** FLOP *** [8d 4s 4c]
+*** TURN *** [8d 4s 4c] [3d]
+*** RIVER *** [8d 4s 4c 3d] [9d]
+*** SHOW DOWN ***
+tapo66: shows [As Ac Tc Ad] (two pair, Aces and Fours)
+jeje_sat: shows [Td 4d 9h Ks] (a full house, Fours full of Nines)
+jeje_sat collected 80 from pot
+*** SUMMARY ***
+Total pot 80 | Rake 0
+Board [8d 4s 4c 3d 9d]
+Seat 2: tapo66 (big blind) showed [As Ac Tc Ad] and lost with two pair, Aces and Fours
+Seat 3: jeje_sat (button) (small blind) showed [Td 4d 9h Ks] and won (80) with a full house, Fours full of Nines
+
+
+PokerStars Hand #230135655282: Tournament #3272318156, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/26 1:29:00 CET [2021/09/25 19:29:00 ET]
+Table '3272318156 1' 3-max Seat #2 is the button
+Seat 2: tapo66 (1420 in chips)
+Seat 3: jeje_sat (80 in chips)
+tapo66: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [7d 5c 8c 2c]
+tapo66: calls 15
+jeje_sat: raises 50 to 80 and is all-in
+tapo66: calls 50
+*** FLOP *** [7s Kd Ts]
+*** TURN *** [7s Kd Ts] [Js]
+*** RIVER *** [7s Kd Ts Js] [6c]
+*** SHOW DOWN ***
+jeje_sat: shows [7d 5c 8c 2c] (a pair of Sevens)
+tapo66: shows [Kh Th 7h 4c] (two pair, Kings and Tens)
+tapo66 collected 160 from pot
+*** SUMMARY ***
+Total pot 160 | Rake 0
+Board [7s Kd Ts Js 6c]
+Seat 2: tapo66 (button) (small blind) showed [Kh Th 7h 4c] and won (160) with two pair, Kings and Tens
+Seat 3: jeje_sat (big blind) showed [7d 5c 8c 2c] and lost with a pair of Sevens
+
+

@@ -17,11 +17,21 @@
 
 # Note that this now contains the replayer only! The list of hands has been moved to GuiHandViewer by zarturo.
 
+from __future__ import print_function
+from __future__ import division
+from ast import Return
+from builtins import str
+from builtins import range
+from builtins import object
+from collections import defaultdict
+from unicodedata import decimal, name
+from past.utils import old_div
 import L10n
 _ = L10n.get_translation()
 
 from functools import partial
 
+import json
 import Hand
 import Card
 import Configuration
@@ -34,9 +44,10 @@ from PyQt5.QtGui import (QColor, QImage, QPainter)
 from PyQt5.QtWidgets import (QHBoxLayout, QPushButton, QSlider, QVBoxLayout,
                              QWidget)
 
-import math
+from math import pi, cos, sin
 from decimal_wrapper import Decimal
-
+import numpy as np
+from matplotlib import pyplot as plt
 import copy
 import os
 
@@ -47,11 +58,11 @@ class GuiReplayer(QWidget):
     """A Replayer to replay hands."""
     def __init__(self, config, querylist, mainwin, handlist):
         QWidget.__init__(self, None)
-        self.setFixedSize(982, 680)
+        self.setFixedSize(1080, 720)
         self.conf = config
         self.main_window = mainwin
         self.sql = querylist
-
+        self.newpot = Decimal()
         self.db = Database.Database(self.conf, sql=self.sql)
         self.states = [] # List with all table states.
         self.handlist = handlist
@@ -60,6 +71,7 @@ class GuiReplayer(QWidget):
         self.setWindowTitle("FPDB Hand Replayer")
         
         self.replayBox = QVBoxLayout()
+        
         self.setLayout(self.replayBox)
 
         self.replayBox.addStretch()
@@ -93,6 +105,7 @@ class GuiReplayer(QWidget):
 
         self.tableImage = None
         self.playerBackdrop = None
+        
         self.cardImages = None
         self.deck_inst = Deck.Deck(self.conf, height=CARD_HEIGHT, width=CARD_WIDTH)
         self.show()
@@ -103,11 +116,15 @@ class GuiReplayer(QWidget):
             painter.drawPixmap(QPoint(x, y), self.cardImages[cardIndex])
             x += self.cardwidth
 
+    
     def paintEvent(self, event):
+
+        
+
         if self.tableImage is None or self.playerBackdrop is None:
             try:
-                self.playerBackdrop = QImage(os.path.join(self.conf.graphics_path, u"playerbackdrop.png"))
-                self.tableImage = QImage(os.path.join(self.conf.graphics_path, u"TableR.png"))
+                self.playerBackdrop = QImage(os.path.join(self.conf.graphics_path, "playerbackdrop.png"))
+                self.tableImage = QImage(os.path.join(self.conf.graphics_path, "TableR.png"))
             except:
                 return
         if self.cardImages is None:
@@ -126,25 +143,37 @@ class GuiReplayer(QWidget):
             return
 
         painter = QPainter(self)
+       
         painter.drawImage(QPoint(0,0), self.tableImage)
+        
+        
 
         if len(self.states) == 0:
             return
-
+ 
         state = self.states[self.stateSlider.value()]
 
-        communityLeft = int(self.tableImage.width() / 2 - 2.5 * self.cardwidth)
-        communityTop = int(self.tableImage.height() / 2 - 1.75 * self.cardheight)
 
-        convertx = lambda x: int(x * self.tableImage.width() * 0.8) + self.tableImage.width() // 2
-        converty = lambda y: int(y * self.tableImage.height() * 0.6) + self.tableImage.height() // 2
+        communityLeft = int(old_div(self.tableImage.width(), 2) - 2.5 * self.cardwidth)
+        communityTop = int(old_div(self.tableImage.height(), 2) - 1.75 * self.cardheight)
+   
 
-        for player in state.players.values():
+        convertx = lambda x: int(x * self.tableImage.width() * 0.8) + old_div(self.tableImage.width(), 2)
+        converty = lambda y: int(y * self.tableImage.height() * 0.6) + old_div(self.tableImage.height(), 2)
+
+        painter.drawText(QRect(-40,0,600,40),Qt.AlignCenter,self.info)
+        
+        for player in list(state.players.values()):
+            print(len(list(state.players.values())))
             playerx = convertx(player.x)
+            
             playery = converty(player.y)
-            painter.drawImage(QPoint(playerx - self.playerBackdrop.width() //2 , playery - 3), self.playerBackdrop)
+            print('playerx',playerx,'playery',playery, player.name)
+            
+            painter.drawImage(QPoint(playerx - old_div(self.playerBackdrop.width(), 2), playery - 3), self.playerBackdrop)
+            
             if player.action=="folds":
-                painter.setPen(QColor("grey"))
+                painter.setPen(QColor("red"))
             else:
                 painter.setPen(QColor("white"))
                 x = playerx - self.cardwidth * len(player.holecards) // 2
@@ -158,8 +187,16 @@ class GuiReplayer(QWidget):
                                             player.stack))
 
             if player.justacted:
+                
                 painter.setPen(QColor("yellow"))
+                
                 painter.drawText(QRect(playerx - 50, playery + 15, 100, 20), Qt.AlignCenter, player.action)
+                painter.drawText(QRect(old_div(self.tableImage.width(), 2) - 100,
+                                       old_div(self.tableImage.height(), 2) - 20,
+                                       200,
+                                       40),
+                                 Qt.AlignCenter,
+                                'Pot: %s%.2f' % (self.currency, state.newpot)) 
             else:
                 painter.setPen(QColor("white"))
             if player.chips != 0:
@@ -169,17 +206,45 @@ class GuiReplayer(QWidget):
                                        20),
                                  Qt.AlignCenter,
                                  '%s%.2f' % (self.currency, player.chips))
+                
+            
+                            
 
         painter.setPen(QColor("white"))
+        
 
-        if state.pot > 0:
-            painter.drawText(QRect(self.tableImage.width() // 2 - 100,
-                                   self.tableImage.height()// 2 - 20,
-                                   200,
-                                   40),
-                             Qt.AlignCenter,
-                             '%s%.2f' % (self.currency, state.pot))
+         
 
+
+
+
+                
+            # new_pot = state.pot
+            # print (state.pot)
+            # if  player.chips != 0 :
+            #     print ('init', new_pot)
+            #     new_pot = new_pot + player.chips
+            #     painter.drawText(QRect(old_div(self.tableImage.width(), 2) - 100,
+            #                        old_div(self.tableImage.height(), 2) - 20,
+            #                        200,
+            #                        40),
+            #                  Qt.AlignCenter,
+            #                  'Pot: %s%.2f' % (self.currency, new_pot))
+            #     print ('1-pot state:', new_pot,'player action:', player.name,  player.action, 'player chips:', player.chips, player.stack, player.justacted, 'pot odds:' ,pot_odds)  
+                
+            #     print ('act', new_pot)  
+            #     if player.action=='bets' or player.action=='raises' :
+            #         pot_odds = (1/(((new_pot+player.chips)/player.chips)+1))*100
+            #         painter.drawText(QRect(old_div(self.tableImage.width(), 2) - 100,
+            #                        old_div(self.tableImage.height(), 2) - 20,
+            #                        200,
+            #                        70),
+            #                  Qt.AlignCenter,
+            #                  'Pot odds: %s%.2f' % (percent, pot_odds))
+            #         print ('2-pot state:', new_pot,'player chips:', player.chips, player.stack, player.justacted,'pot odds:' ,pot_odds)
+            # state.pot = new_pot    
+                
+            
         for street in state.renderBoard:
             x = communityLeft
             if street.startswith('TURN'):
@@ -214,11 +279,88 @@ class GuiReplayer(QWidget):
         self.currency = hand.sym
 
         self.states = []
+
+        #info for drawing (game, limite, site ...)
+        print (hand)
+        print(hand.gametype)
+        info_gen = hand.gametype['category']
+        if info_gen == "omahahilo":
+            info_gen = "Omaha Hi/Lo"
+        elif info_gen == "27_1draw":
+            info_gen = "Single Draw 2-7 Lowball"
+        elif info_gen == "27_3draw":
+            info_gen = "Triple Draw 2-7 Lowball"
+        elif info_gen == "a5_3draw":
+            info_gen = "Triple Draw A-5 Lowball"
+        elif info_gen == "5_studhi":
+            info_gen = "5 Card Stud"   
+        elif info_gen == "badugi":
+            info_gen = "Badugi"
+        elif info_gen == "badacey":
+            info_gen = "Badacey"
+        elif info_gen == "badeucey":
+            info_gen = "Badeucey"
+        elif info_gen == "drawmaha":
+            info_gen = "2-7 Drawmaha"        
+        elif info_gen == "a5_1draw":
+            info_gen = "A-5 Single Draw"
+        elif info_gen == "27_razz":
+            info_gen = "2-7 Razz"
+        elif info_gen == "fivedraw":
+            info_gen = "5 Card Draw"
+        elif info_gen == "holdem":
+            info_gen = "Hold'em"   
+        elif info_gen == "6_holdem":
+            info_gen = "Hold'em"
+        elif info_gen == "omahahi":
+            info_gen = "Omaha"
+        elif info_gen == "razz":
+            info_gen = "Razz"
+        elif info_gen == "studhi":
+            info_gen = "7 Card Stud"  
+        elif info_gen == "studhilo":
+            info_gen = "7 Card Stud Hi/Lo"
+        elif info_gen == "5_omahahi":
+            info_gen = "5 Card Omaha"
+        elif info_gen == "5_omaha8":
+            info_gen = "5 Card Omaha Hi/Lo"
+        elif info_gen == "cour_hi":
+            info_gen = "Courchevel"   
+        elif info_gen == "cour_hilo":
+            info_gen = "Courchevel Hi/Lo"
+        elif info_gen == "2_holdem":
+            info_gen = "Double hold'em"
+        elif info_gen == "irish":
+            info_gen = "Irish"
+        elif info_gen == "6_omahahi":
+            info_gen = "6 Card Omaha"                                               
+        else:
+            info_gen = "unknown"
+        limit_info = hand.gametype['limitType']
+        if limit_info == "fl":
+            limit_info = "Fixed Limit"
+        elif limit_info == "nl":
+            limit_info = "No Limit"
+        elif limit_info == "pl":
+            limit_info = "Pot Limit"
+        elif limit_info == "cn":
+            limit_info = "Cap No Limit"
+        elif limit_info == "cp":
+            limit_info = "Cap Pot Limit"
+        else:
+            limit_info = "unknown"
+        print(limit_info)
+        self.info = str(limit_info)+" "+str(info_gen)+ " "+str(hand.gametype['bb']) + str(hand.gametype['currency']) +" hand played on "+str(hand.sitename)
+
+        
+        
         state = TableState(hand)
+        
+        #print (state)
         seenStreets = []
         for street in hand.allStreets:
             if state.called > 0:
-                for player in state.players.values():
+                for player in list(state.players.values()):
                     if player.stack == 0:
                         state.allin = True
                         break
@@ -232,12 +374,13 @@ class GuiReplayer(QWidget):
                 state = copy.deepcopy(state)
                 state.updateForAction(action)
                 self.states.append(state)
+                
         state = copy.deepcopy(state)
         state.endHand(hand.collectees, hand.pot.returned)
         self.states.append(state)
 
         # Clear and repopulate the row of buttons
-        for idx in reversed(range(self.buttonBox.count())):
+        for idx in reversed(list(range(self.buttonBox.count()))):
             self.buttonBox.takeAt(idx).widget().setParent(None)
         self.buttonBox.addWidget(self.prevButton)
         self.prevButton.setEnabled(self.handidx > 0)
@@ -306,7 +449,7 @@ class GuiReplayer(QWidget):
 # ICM code originally grabbed from http://svn.gna.org/svn/pokersource/trunk/icm-calculator/icm-webservice.py
 # Copyright (c) 2008 Thomas Johnson <tomfmason@gmail.com>
 
-class ICM:
+class ICM(object):
     def __init__(self, stacks, payouts):
         self.stacks = stacks
         self.payouts = payouts
@@ -316,6 +459,7 @@ class ICM:
         total = sum(self.stacks)
         for k in self.stacks:
             self.equities.append(round(Decimal(str(self.getEquities(total, k, 0))), 4))
+   
     def getEquities(self, total, player, depth):
         D = Decimal
         eq = D(self.stacks[player]) / total * D(str(self.payouts[depth]))
@@ -324,12 +468,12 @@ class ICM:
             for stack in self.stacks:
                 if i != player and stack > 0.0:
                     self.stacks[i] = 0.0
-                    eq += self.getEquities((total - stack), player, (depth + 1)) * (stack / D(total))
+                    eq += self.getEquities((total - stack), player, (depth + 1)) * (old_div(stack, D(total)))
                     self.stacks[i] = stack
                 i += 1
         return eq
 
-class TableState:
+class TableState(object):
     def __init__(self, hand):
         self.pot = Decimal(0)
         self.street = None
@@ -341,12 +485,18 @@ class TableState:
         self.gamebase = hand.gametype['base']
         self.allin = False
         self.allinThisStreet = False
+        self.newpot = Decimal()
         # NOTE: Need a useful way to grab payouts
         #self.icm = ICM(stacks,payouts)
         #print icm.equities
 
         self.players = {}
-
+        # print ('hand.players', hand.players)
+        # print (type(hand.players))
+        # print (type(self.players))
+        # for name, chips, seat in hand.players[-1]:
+        #     self.players.append(Player(name, chips, seat))
+        #     #  self.players[name] = Player(hand, name, chips, seat)
         for items in hand.players:
             # print (items)
             # print ('type', (type(items)))
@@ -358,19 +508,22 @@ class TableState:
             self.players[items[1]] = Player(hand, items[1],items[2],int(items[0]))
             print (self.players[items[1]])
 
+
     def startPhase(self, phase):
         self.street = phase
+        self.newpot = self.newpot
         if phase in ("BLINDSANTES", "PREFLOP", "DEAL"):
             return
 
         self.renderBoard.add(phase)
 
-        for player in self.players.values():
+        for player in list(self.players.values()):
             player.justacted = False
             if player.chips > self.called:
                 player.stack += player.chips - self.called
                 player.chips = self.called
             self.pot += player.chips
+            
             player.chips = Decimal(0)
             if phase in ("THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"):
                 player.holecards = player.streetcards[self.street]
@@ -379,7 +532,7 @@ class TableState:
         self.allinThisStreet = False
 
     def updateForAction(self, action):
-        for player in self.players.values():
+        for player in list(self.players.values()):
             player.justacted = False
 
         player = self.players[action[0]]
@@ -396,20 +549,25 @@ class TableState:
             self.bet += action[2]
             player.chips += action[2] + diff
             player.stack -= action[2] + diff
+            self.newpot += action[2] + diff
         elif action[1] == "big blind":
             self.bet = action[2]
             player.chips += action[2]
             player.stack -= action[2]
+            self.newpot += action[2]
         elif action[1] == "calls" or action[1] == "small blind" or action[1] == "secondsb":
             player.chips += action[2]
             player.stack -= action[2]
             self.called = max(self.called, player.chips)
+            self.newpot += action[2] 
         elif action[1] == "both":
             player.chips += action[2]
             player.stack -= action[2]
+            self.newpot += action[2] 
         elif action[1] == "ante":
             self.pot += action[2]
             player.stack -= action[2]
+            self.newpot += action[2]
         elif action[1] == "discards":
             player.action += " " + str(action[2])
             if len(action) > 3:
@@ -420,28 +578,29 @@ class TableState:
         elif action[1] == "bringin":
             player.chips += action[2]
             player.stack -= action[2]
+            self.newpot += action[2]
         else:
-            print ("unhandled action: " + str(action))
+            print("unhandled action: " + str(action))
 
         if player.stack == 0:
             self.allinThisStreet = True
 
     def endHand(self, collectees, returned):
         self.pot = Decimal(0)
-        for player in self.players.values():
+        for player in list(self.players.values()):
             player.justacted = False
             player.chips = Decimal(0)
             if self.gamebase == 'draw':
                 player.holecards = player.streetcards[self.street]
-        for name,amount in collectees.items():
+        for name,amount in list(collectees.items()):
             player = self.players[name]
             player.chips += amount
             player.action = "collected"
             player.justacted = True
-        for name, amount in returned.items():
+        for name, amount in list(returned.items()):
             self.players[name].stack += amount
 
-class Player:
+class Player(object):
     def __init__(self, hand, name, stack, seat):
         self.stack     = Decimal(stack)
         self.chips     = Decimal(0)
@@ -459,8 +618,9 @@ class Player:
             for i, street in enumerate(hand.actionStreets[1:]):
                 self.streetcards[street] = self.holecards[:i + 3]
             self.holecards = self.streetcards[hand.actionStreets[1]]
-        self.x         = 0.5 * math.cos(2 * self.seat * math.pi / hand.maxseats)
-        self.y         = 0.7 * math.sin(2 * self.seat * math.pi / hand.maxseats)
+        print('seat',seat)
+        self.x         = 0.5 * cos(2 * self.seat * pi / hand.maxseats)
+        self.y         = 0.8 * sin(2 * self.seat * pi / hand.maxseats)
 
 if __name__ == '__main__':
     config = Configuration.Config()

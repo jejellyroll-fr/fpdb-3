@@ -28,7 +28,7 @@ from PyQt5.QtCore import QCoreApplication, QSortFilterProxyModel, Qt
 from PyQt5.QtGui import (QPainter, QPixmap, QStandardItem, QStandardItemModel)
 from PyQt5.QtWidgets import (QApplication, QFrame, QMenu,
                              QProgressDialog, QScrollArea, QSplitter,
-                             QTableView, QVBoxLayout, QComboBox,QHBoxLayout,QLabel, QLineEdit, QPushButton,QGridLayout,QWidget)
+                             QTableView, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,QGridLayout ,QWidget ,QTableWidget ,QTableWidgetItem,QComboBox, QMessageBox)
 
 class GuiTourneyViewer(QWidget):
     def __init__(self, config, db, sql, mainwin):
@@ -62,83 +62,98 @@ class GuiTourneyViewer(QWidget):
         self.interfaceHBox.addWidget(self.entryTourney)
         
         #self.displayButton = gtk.Button(("Display"))
-        self.displayButton = QPushButton()
-        self.displayButton.setText("Display")
-        self.displayButton.clicked.connect(self.displayClicked)
-
-        self.interfaceHBox.addWidget(self.displayButton)
         
+
+        
+        self.label_Player = QLabel()
+        self.label_Player.setText("Enter the player you want to display:")
+        self.interfaceHBox.addWidget(self.label_Player)
         #self.entryPlayer = gtk.Entry()
         self.entryPlayer = QLineEdit()
         self.interfaceHBox.addWidget(self.entryPlayer)
         
         #self.playerButton = gtk.Button(("Display Player"))
-        self.playerButton = QPushButton()
-        self.playerButton.setText("Display Player")
-        self.playerButton.clicked.connect(self.displayPlayerClicked)
-        self.interfaceHBox.addWidget(self.playerButton)
-        
+        # self.playerButton = QPushButton()
+        # self.playerButton.setText("Display Player")
+        # self.playerButton.clicked.connect(self.displayPlayerClicked)
+        # self.interfaceHBox.addWidget(self.playerButton)
+        self.displayButton = QPushButton()
+        self.displayButton.setText("Display")
+        self.interfaceHBox.addWidget(self.displayButton)
+        self.displayButton.clicked.connect(self.displayClicked)
         # self.table = gtk.Table(columns=10, rows=9)
         
-        self.table = QGridLayout()
-        
+        self.table = QTableWidget()
+        self.interfaceHBox.addWidget(self.table)
+
+
+
         
         # self.mainVBox.show_all()
     #end def __init__
-    
+    def warning_box(self, string, diatitle=("FPDB WARNING")):
+        return QMessageBox(QMessageBox.Warning, diatitle, string).exec_()   
+
     def displayClicked(self, widget, data=None):
-        if self.prepare(10, 9):
+        if self.siteBox.currentText() == "" or self.entryPlayer.text() == "" or self.entryTourney.text() == "":
+            self.warning_box("you must enter Site Name, player Name and Tourney Number")
+        else:
+            self.siteName = self.siteBox.currentText()
+            self.playerName = self.entryPlayer.text()   
+            self.tourneyNo = int(self.entryTourney.text())                 
             result = self.db.getTourneyInfo(self.siteName, self.tourneyNo)
+            rows = len(result)
+            columns  = len(result[0])
+            self.table.setColumnCount(columns) 
+            self.table.setRowCount(rows)
+        
             if result[1] == None:
-                self.table.destroyed()
+                
                 self.errorLabel = QLabel.setText(("Tournament not found.") + " " + ("Please ensure you imported it and selected the correct site."))
                 self.interfaceHBox.addWidget(self.errorLabel)
             else:
-                x=0
-                y=0
-                for i in range(1,len(result[0])):
-                    if y==9:
-                        x+=2
-                        y=0
+                for row in range(rows):  # add items from array to QTableWidget
+                    for column in range(columns):
+                        if column == 0:
+                            item = QTableWidgetItem(str(result[row][column]))
+                        else:
+                            item = QTableWidgetItem(str(result[row][column]))   
+                            print(type(row))
+                            print(type(column))
+                            print(type(item))
+                            self.table.setItem(row, column, QTableWidgetItem(item))
             
-                    label=QLabel.setText(result[0][i])
-                    self.table(label,x,x+1,y,y+1)
-            
-                    if result[1][i]==None:
-                        label=QLabel.setText("N/A")
-                    else:
-                        label=QLabel.setText(result[1][i])
-                    self.table(label,x+1,x+2,y,y+1)
-            
-                    y+=1
+                    
         #self.mainVBox.show_all()
     #def displayClicked
     
-    def displayPlayerClicked(self, widget, data=None):
-        if self.prepare(4, 5):
-            result=self.db.getTourneyPlayerInfo(self.siteName, self.tourneyNo, self.playerName)
-            if result[1] == None:
-                self.table.destroyed()
-                self.errorLabel=QLabel.setText(("Player or tournament not found.") + " " + ("Please ensure you imported it and selected the correct site."))
-                self.interfaceHBox.addWidget(self.errorLabel)
-            else:
-                x=0
-                y=0
-                for i in range(1,len(result[0])):
-                    if y==5:
-                        x+=2
-                        y=0
+    # def displayPlayerClicked(self, widget, data=None):
+    #     self.siteName = self.siteBox.currentText()
+    #     self.playerName = self.entryPlayer.text()   
+    #     self.tourneyNo = int(self.entryTourney.text())        
+    #     result=self.db.getTourneyPlayerInfo(self.siteName, self.tourneyNo, self.playerName)
+    #     rows = len(result)
+    #     columns  = len(result[0])
+    #     self.table.setColumnCount(columns) 
+    #     self.table.setRowCount(rows)
+        
+    #     if result[1] == None:
                 
-                    label=QLabel.setText(result[0][i])
-                    self.table(label,x,x+1,y,y+1)
+    #         self.errorLabel = QLabel.setText(("Tournament not found.") + " " + ("Please ensure you imported it and selected the correct site."))
+    #         self.interfaceHBox.addWidget(self.errorLabel)
+    #     else:
+    #         for row in range(rows):  # add items from array to QTableWidget
+    #             for column in range(columns):
+    #                 if column == 0:
+    #                     item = QTableWidgetItem(str(result[row][column]))
+    #                 else:
+    #                     item = QTableWidgetItem(str(result[row][column]))   
+    #                     print(type(row))
+    #                     print(type(column))
+    #                     print(type(item))
+    #                     self.table.setItem(row, column, QTableWidgetItem(item))
                 
-                    if result[1][i]==None:
-                        label=QLabel.setText(("N/A"))
-                    else:
-                        label=QLabel.setText(result[1][i])
-                    self.table(label,x+1,x+2,y,y+1)
-                
-                    y+=1
+                    
         #self.mainVBox.show_all()
     #def displayPlayerClicked
     
@@ -158,10 +173,10 @@ class GuiTourneyViewer(QWidget):
             self.errorLabel.setText("invalid entry in tourney number - must enter numbers only")
             self.interfaceHBox.addWidget(self.errorLabel)
             return False
-        self.siteName=self.siteBox.currentText
+        self.siteName=self.siteBox.currentText()
         self.playerName=self.entryPlayer.text()
         
-        self.table.destroyed()
+        #self.table.destroyed()
         self.table=QGridLayout()
         
         return True

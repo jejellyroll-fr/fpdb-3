@@ -1,0 +1,26 @@
+PokerTracker 4 Tournament Summary
+Site: PokerStars
+Game: Omaha Hi
+Tournament #: 3390798823
+Started: 2022/04/03 15:03:18
+Finished: 2022/04/03 16:28:33
+Buyin: €0.08
+Fee: €0.02
+Prize Pool: €0.00
+Rebuy: €0.10
+Addon: €0.08
+Table Type: MTT (6 max) Turbo REBUY
+Tourney Type: Pot Limit
+Players: 14
+
+Place: 1, Player: jeje_sat, Won: €0.77,
+Place: 2, Player: phoud02, Won: €0.45,
+Place: 3, Player: jamesHRoss, Won: €0.30,
+Place: 4, Player: Eyvan972, Won: €0.00,
+Place: 5, Player: tinluu, Won: €0.00,
+Place: 6, Player: CallAuQQ, Won: €0.00,
+Place: 7, Player: stephoumOPC, Won: €0.00,
+Place: 8, Player: CoucouRico24, Won: €0.00,
+Place: 10, Player: NHBROOO, Won: €0.00, Rebuys: 1,
+Place: 12, Player: macfly33185, Won: €0.00,
+Place: 14, Player: xmasilliax, Won: €0.00,

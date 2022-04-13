@@ -1,0 +1,69 @@
+﻿PokerStars Hand #229707072911: Tournament #3262713876, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 9:29:34 CET [2021/09/09 3:29:34 ET]
+Table '3262713876 1' 3-max Seat #1 is the button
+Seat 1: jeje_sat (500 in chips)
+Seat 2: chacueka.n1 (500 in chips)
+Seat 3: choco34440c (500 in chips)
+chacueka.n1: posts small blind 10
+choco34440c: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h 2c Qd Jd]
+jeje_sat: calls 20
+chacueka.n1: calls 10
+choco34440c: raises 60 to 80
+jeje_sat: calls 60
+chacueka.n1: calls 60
+*** FLOP *** [4s 9d 2h]
+chacueka.n1: checks
+choco34440c: bets 240
+jeje_sat: folds
+chacueka.n1: raises 180 to 420 and is all-in
+choco34440c: calls 180 and is all-in
+*** TURN *** [4s 9d 2h] [8d]
+*** RIVER *** [4s 9d 2h 8d] [8c]
+*** SHOW DOWN ***
+chacueka.n1: shows [6d 7d 9h 4c] (two pair, Nines and Eights)
+choco34440c: shows [Qc Qh Kh Kd] (two pair, Kings and Eights)
+choco34440c collected 1080 from pot
+chacueka.n1 finished the tournament in 3rd place
+*** SUMMARY ***
+Total pot 1080 | Rake 0
+Board [4s 9d 2h 8d 8c]
+Seat 1: jeje_sat (button) folded on the Flop
+Seat 2: chacueka.n1 (small blind) showed [6d 7d 9h 4c] and lost with two pair, Nines and Eights
+Seat 3: choco34440c (big blind) showed [Qc Qh Kh Kd] and won (1080) with two pair, Kings and Eights
+
+
+PokerStars Hand #229707078364: Tournament #3262713876, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 9:30:11 CET [2021/09/09 3:30:11 ET]
+Table '3262713876 1' 3-max Seat #3 is the button
+Seat 1: jeje_sat (420 in chips)
+Seat 3: choco34440c (1080 in chips)
+choco34440c: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [2c 6s 3d 5c]
+choco34440c: raises 40 to 60
+jeje_sat: calls 40
+*** FLOP *** [7d 2h 8h]
+jeje_sat: checks
+choco34440c: bets 120
+jeje_sat: calls 120
+*** TURN *** [7d 2h 8h] [Td]
+jeje_sat: checks
+choco34440c: bets 20
+jeje_sat: calls 20
+*** RIVER *** [7d 2h 8h Td] [Jh]
+jeje_sat: checks
+choco34440c: bets 20
+jeje_sat: raises 200 to 220 and is all-in
+choco34440c: calls 200
+*** SHOW DOWN ***
+jeje_sat: shows [2c 6s 3d 5c] (a pair of Deuces)
+choco34440c: shows [Qc Jc 5s Ah] (a pair of Jacks)
+choco34440c collected 840 from pot
+*** SUMMARY ***
+Total pot 840 | Rake 0
+Board [7d 2h 8h Td Jh]
+Seat 1: jeje_sat (big blind) showed [2c 6s 3d 5c] and lost with a pair of Deuces
+Seat 3: choco34440c (button) (small blind) showed [Qc Jc 5s Ah] and won (840) with a pair of Jacks
+
+

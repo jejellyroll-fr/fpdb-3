@@ -1,0 +1,32 @@
+﻿PokerStars Hand #229721604101: Tournament #3263042055, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 21:56:39 CET [2021/09/09 15:56:39 ET]
+Table '3263042055 1' 3-max Seat #1 is the button
+Seat 1: thierry/coco (500 in chips)
+Seat 2: jeje_sat (500 in chips)
+Seat 3: javiwatio (500 in chips)
+jeje_sat: posts small blind 10
+javiwatio: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [As 3c Ad Jh]
+thierry/coco: calls 20
+jeje_sat: raises 60 to 80
+javiwatio: raises 180 to 260
+thierry/coco: calls 240
+jeje_sat: raises 240 to 500 and is all-in
+javiwatio: calls 240 and is all-in
+thierry/coco: calls 240 and is all-in
+*** FLOP *** [8c Kc 9s]
+*** TURN *** [8c Kc 9s] [Kd]
+*** RIVER *** [8c Kc 9s Kd] [5c]
+*** SHOW DOWN ***
+jeje_sat: shows [As 3c Ad Jh] (two pair, Aces and Kings)
+javiwatio: shows [Qd Ah 6s 7s] (a straight, Five to Nine)
+thierry/coco: shows [3h 5h Kh 9h] (a full house, Kings full of Nines)
+thierry/coco collected 1500 from pot
+*** SUMMARY ***
+Total pot 1500 | Rake 0
+Board [8c Kc 9s Kd 5c]
+Seat 1: thierry/coco (button) showed [3h 5h Kh 9h] and won (1500) with a full house, Kings full of Nines
+Seat 2: jeje_sat (small blind) showed [As 3c Ad Jh] and lost with two pair, Aces and Kings
+Seat 3: javiwatio (big blind) showed [Qd Ah 6s 7s] and lost with a straight, Five to Nine
+
+

@@ -1,0 +1,4709 @@
+﻿PokerStars Hand #235309488715: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level I (10/20) - 2022/04/06 21:00:13 CET [2022/04/06 15:00:13 ET]
+Table '3388263971 5' 6-max Seat #1 is the button
+Seat 1: eliefedida (3000 in chips)
+Seat 2: philo naz (3000 in chips)
+Seat 3: captainzizou (3000 in chips)
+Seat 4: tontonfranz6 (3000 in chips)
+Seat 5: jeje_sat (3000 in chips)
+Seat 6: ESFANJAARA (3000 in chips)
+philo naz: posts small blind 10
+captainzizou: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [7h 2s 3d 3c]
+tontonfranz6: folds
+jeje_sat: folds
+ESFANJAARA: calls 20
+eliefedida: calls 20
+philo naz: calls 10
+captainzizou: checks
+*** FLOP *** [9h Th 5h]
+philo naz: bets 20
+captainzizou: calls 20
+ESFANJAARA: folds
+eliefedida: calls 20
+*** TURN *** [9h Th 5h] [Ks]
+philo naz: checks
+captainzizou: checks
+eliefedida: bets 80
+philo naz: folds
+captainzizou: calls 80
+*** RIVER *** [9h Th 5h Ks] [Qc]
+captainzizou: checks
+eliefedida: checks
+*** SHOW DOWN ***
+captainzizou: shows [9d 5s Jh Ah] (a flush, Ace high)
+eliefedida: mucks hand
+captainzizou collected 300 from pot
+*** SUMMARY ***
+Total pot 300 | Rake 0
+Board [9h Th 5h Ks Qc]
+Seat 1: eliefedida (button) mucked [Tc 7d 6s Ts]
+Seat 2: philo naz (small blind) folded on the Turn
+Seat 3: captainzizou (big blind) showed [9d 5s Jh Ah] and won (300) with a flush, Ace high
+Seat 4: tontonfranz6 folded before Flop (didn't bet)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded on the Flop
+
+
+PokerStars Hand #235309520880: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level I (10/20) - 2022/04/06 21:01:51 CET [2022/04/06 15:01:51 ET]
+Table '3388263971 5' 6-max Seat #2 is the button
+Seat 1: eliefedida (2880 in chips)
+Seat 2: philo naz (2960 in chips)
+Seat 3: captainzizou (3180 in chips)
+Seat 5: jeje_sat (3000 in chips)
+Seat 6: ESFANJAARA (2980 in chips)
+captainzizou: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc 9s 7h 8c]
+ESFANJAARA: folds
+eliefedida: calls 20
+philo naz: calls 20
+captainzizou: raises 80 to 100
+jeje_sat: calls 80
+eliefedida: calls 80
+philo naz: calls 80
+*** FLOP *** [4s Qs 2s]
+captainzizou: checks
+jeje_sat: checks
+eliefedida: bets 400
+philo naz: folds
+captainzizou: calls 400
+jeje_sat: folds
+*** TURN *** [4s Qs 2s] [3c]
+captainzizou: checks
+eliefedida: bets 600
+captainzizou: raises 2080 to 2680 and is all-in
+eliefedida: calls 1780 and is all-in
+Uncalled bet (300) returned to captainzizou
+*** RIVER *** [4s Qs 2s 3c] [8d]
+*** SHOW DOWN ***
+captainzizou: shows [Ac As Th Ks] (a flush, Ace high)
+eliefedida: shows [5d 4c 5s Qd] (two pair, Queens and Fours)
+captainzizou collected 5960 from pot
+eliefedida finished the tournament
+*** SUMMARY ***
+Total pot 5960 | Rake 0
+Board [4s Qs 2s 3c 8d]
+Seat 1: eliefedida showed [5d 4c 5s Qd] and lost with two pair, Queens and Fours
+Seat 2: philo naz (button) folded on the Flop
+Seat 3: captainzizou (small blind) showed [Ac As Th Ks] and won (5960) with a flush, Ace high
+Seat 5: jeje_sat (big blind) folded on the Flop
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235309561280: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level I (10/20) - 2022/04/06 21:03:16 CET [2022/04/06 15:03:16 ET]
+Table '3388263971 5' 6-max Seat #3 is the button
+Seat 2: philo naz (2860 in chips)
+Seat 3: captainzizou (6260 in chips)
+Seat 5: jeje_sat (2900 in chips)
+Seat 6: ESFANJAARA (2980 in chips)
+jeje_sat: posts small blind 10
+ESFANJAARA: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [6d 9h Js 3h]
+philo naz: calls 20
+captainzizou has timed out
+captainzizou: folds
+captainzizou is sitting out
+jeje_sat: folds
+ESFANJAARA: checks
+*** FLOP *** [Qs 3c Qd]
+captainzizou has returned
+ESFANJAARA: checks
+philo naz: bets 50
+ESFANJAARA: folds
+Uncalled bet (50) returned to philo naz
+philo naz collected 50 from pot
+philo naz: doesn't show hand
+Matyrina has returned
+*** SUMMARY ***
+Total pot 50 | Rake 0
+Board [Qs 3c Qd]
+Seat 2: philo naz collected (50)
+Seat 3: captainzizou (button) folded before Flop (didn't bet)
+Seat 5: jeje_sat (small blind) folded before Flop
+Seat 6: ESFANJAARA (big blind) folded on the Flop
+
+
+PokerStars Hand #235309580792: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level I (10/20) - 2022/04/06 21:04:06 CET [2022/04/06 15:04:06 ET]
+Table '3388263971 5' 6-max Seat #5 is the button
+Seat 1: Matyrina (2910 in chips)
+Seat 2: philo naz (2890 in chips)
+Seat 3: captainzizou (6260 in chips)
+Seat 5: jeje_sat (2890 in chips)
+Seat 6: ESFANJAARA (2960 in chips)
+ESFANJAARA: posts small blind 10
+Matyrina: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [As 6c 4c 6d]
+philo naz: folds
+captainzizou: folds
+jeje_sat: folds
+ESFANJAARA: calls 10
+Matyrina: checks
+*** FLOP *** [Qd Kd 9h]
+ESFANJAARA: checks
+Matyrina: checks
+*** TURN *** [Qd Kd 9h] [Qs]
+ESFANJAARA: checks
+Matyrina: checks
+*** RIVER *** [Qd Kd 9h Qs] [4d]
+ESFANJAARA: checks
+Matyrina: checks
+*** SHOW DOWN ***
+ESFANJAARA: shows [5d Js 7s 6s] (a pair of Queens)
+Matyrina: shows [5s 6h Ac 4h] (two pair, Queens and Fours)
+Matyrina collected 40 from pot
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Board [Qd Kd 9h Qs 4d]
+Seat 1: Matyrina (big blind) showed [5s 6h Ac 4h] and won (40) with two pair, Queens and Fours
+Seat 2: philo naz folded before Flop (didn't bet)
+Seat 3: captainzizou folded before Flop (didn't bet)
+Seat 5: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ESFANJAARA (small blind) showed [5d Js 7s 6s] and lost with a pair of Queens
+
+
+PokerStars Hand #235309612518: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level I (10/20) - 2022/04/06 21:05:25 CET [2022/04/06 15:05:25 ET]
+Table '3388263971 5' 6-max Seat #6 is the button
+Seat 1: Matyrina (2930 in chips)
+Seat 2: philo naz (2890 in chips)
+Seat 3: captainzizou (6260 in chips)
+Seat 4: cianciana (3000 in chips)
+Seat 5: jeje_sat (2890 in chips)
+Seat 6: ESFANJAARA (2940 in chips)
+Matyrina: posts small blind 10
+philo naz: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ad Kc Ah 3h]
+captainzizou: calls 20
+cianciana: calls 20
+jeje_sat: raises 90 to 110
+ESFANJAARA: folds
+Matyrina: folds
+philo naz: folds
+captainzizou: folds
+cianciana: folds
+Uncalled bet (90) returned to jeje_sat
+jeje_sat collected 90 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 90 | Rake 0
+Seat 1: Matyrina (small blind) folded before Flop
+Seat 2: philo naz (big blind) folded before Flop
+Seat 3: captainzizou folded before Flop
+Seat 4: cianciana folded before Flop
+Seat 5: jeje_sat collected (90)
+Seat 6: ESFANJAARA (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235309633341: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level I (10/20) - 2022/04/06 21:06:17 CET [2022/04/06 15:06:17 ET]
+Table '3388263971 5' 6-max Seat #1 is the button
+Seat 1: Matyrina (2920 in chips)
+Seat 2: philo naz (2870 in chips)
+Seat 3: captainzizou (6240 in chips)
+Seat 4: cianciana (2980 in chips)
+Seat 5: jeje_sat (2960 in chips)
+Seat 6: ESFANJAARA (2940 in chips)
+philo naz: posts small blind 10
+captainzizou: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ac 3d 7h 8h]
+cianciana: calls 20
+jeje_sat: folds
+ESFANJAARA: raises 70 to 90
+Matyrina: folds
+philo naz: folds
+captainzizou: folds
+cianciana: calls 70
+*** FLOP *** [Qs 3s Ad]
+cianciana: checks
+ESFANJAARA: checks
+*** TURN *** [Qs 3s Ad] [9c]
+cianciana: bets 126
+ESFANJAARA: calls 126
+*** RIVER *** [Qs 3s Ad 9c] [Js]
+cianciana: bets 416
+ESFANJAARA: folds
+Uncalled bet (416) returned to cianciana
+cianciana collected 462 from pot
+*** SUMMARY ***
+Total pot 462 | Rake 0
+Board [Qs 3s Ad 9c Js]
+Seat 1: Matyrina (button) folded before Flop (didn't bet)
+Seat 2: philo naz (small blind) folded before Flop
+Seat 3: captainzizou (big blind) folded before Flop
+Seat 4: cianciana collected (462)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded on the River
+
+
+PokerStars Hand #235309675293: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level I (10/20) - 2022/04/06 21:07:55 CET [2022/04/06 15:07:55 ET]
+Table '3388263971 5' 6-max Seat #2 is the button
+Seat 1: Matyrina (2920 in chips)
+Seat 2: philo naz (2860 in chips)
+Seat 3: captainzizou (6220 in chips)
+Seat 4: cianciana (3226 in chips)
+Seat 5: jeje_sat (2960 in chips)
+Seat 6: ESFANJAARA (2724 in chips)
+captainzizou: posts small blind 10
+cianciana: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [9s 4h 4s Th]
+jeje_sat: folds
+ESFANJAARA: folds
+Matyrina: calls 20
+philo naz: calls 20
+captainzizou: folds
+cianciana: checks
+*** FLOP *** [Qd 5d Qc]
+cianciana: checks
+Matyrina: checks
+philo naz: bets 70
+cianciana: folds
+Matyrina has timed out
+Matyrina: folds
+Matyrina is sitting out
+Uncalled bet (70) returned to philo naz
+philo naz collected 70 from pot
+philo naz: doesn't show hand
+*** SUMMARY ***
+Total pot 70 | Rake 0
+Board [Qd 5d Qc]
+Seat 1: Matyrina folded on the Flop
+Seat 2: philo naz (button) collected (70)
+Seat 3: captainzizou (small blind) folded before Flop
+Seat 4: cianciana (big blind) folded on the Flop
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235309708729: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level II (15/30) - 2022/04/06 21:09:17 CET [2022/04/06 15:09:17 ET]
+Table '3388263971 5' 6-max Seat #3 is the button
+Seat 1: Matyrina (2900 in chips) is sitting out
+Seat 2: philo naz (2910 in chips)
+Seat 3: captainzizou (6210 in chips)
+Seat 4: cianciana (3206 in chips)
+Seat 5: jeje_sat (2960 in chips)
+Seat 6: ESFANJAARA (2724 in chips)
+cianciana: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s 2h Js 8d]
+ESFANJAARA: folds
+Matyrina: folds
+philo naz: folds
+captainzizou: calls 30
+cianciana: calls 15
+Matyrina has returned
+jeje_sat: checks
+*** FLOP *** [Jd Ac 7c]
+cianciana: checks
+jeje_sat: checks
+captainzizou: checks
+*** TURN *** [Jd Ac 7c] [Ts]
+cianciana: checks
+jeje_sat: checks
+captainzizou: checks
+*** RIVER *** [Jd Ac 7c Ts] [Qh]
+cianciana: checks
+jeje_sat: checks
+captainzizou: checks
+*** SHOW DOWN ***
+cianciana: shows [2d 4h 5c 8h] (high card Ace)
+jeje_sat: shows [8s 2h Js 8d] (a pair of Jacks)
+captainzizou: mucks hand
+jeje_sat collected 90 from pot
+*** SUMMARY ***
+Total pot 90 | Rake 0
+Board [Jd Ac 7c Ts Qh]
+Seat 1: Matyrina folded before Flop (didn't bet)
+Seat 2: philo naz folded before Flop (didn't bet)
+Seat 3: captainzizou (button) mucked [5s 6s 3s 5h]
+Seat 4: cianciana (small blind) showed [2d 4h 5c 8h] and lost with high card Ace
+Seat 5: jeje_sat (big blind) showed [8s 2h Js 8d] and won (90) with a pair of Jacks
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235309739599: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level II (15/30) - 2022/04/06 21:10:33 CET [2022/04/06 15:10:33 ET]
+Table '3388263971 5' 6-max Seat #4 is the button
+Seat 1: Matyrina (2900 in chips)
+Seat 2: philo naz (2910 in chips)
+Seat 3: captainzizou (6180 in chips)
+Seat 4: cianciana (3176 in chips)
+Seat 5: jeje_sat (3020 in chips)
+Seat 6: ESFANJAARA (2724 in chips)
+jeje_sat: posts small blind 15
+ESFANJAARA: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [5s Qd 5c Kd]
+Matyrina: folds
+philo naz: folds
+captainzizou: calls 30
+cianciana: raises 45 to 75
+jeje_sat: folds
+ESFANJAARA: calls 45
+captainzizou: calls 45
+*** FLOP *** [7h 8h 3s]
+ESFANJAARA: checks
+captainzizou: checks
+cianciana: bets 144
+ESFANJAARA: calls 144
+captainzizou: calls 144
+*** TURN *** [7h 8h 3s] [Js]
+ESFANJAARA: checks
+captainzizou: checks
+cianciana: bets 470
+ESFANJAARA: folds
+captainzizou: raises 1612 to 2082
+cianciana: raises 875 to 2957 and is all-in
+captainzizou: calls 875
+*** RIVER *** [7h 8h 3s Js] [6c]
+*** SHOW DOWN ***
+captainzizou: shows [7d Td 8s 9d] (a straight, Seven to Jack)
+cianciana: shows [9s 3c Th Ah] (a straight, Seven to Jack)
+captainzizou collected 3293 from pot
+cianciana collected 3293 from pot
+*** SUMMARY ***
+Total pot 6586 | Rake 0
+Board [7h 8h 3s Js 6c]
+Seat 1: Matyrina folded before Flop (didn't bet)
+Seat 2: philo naz folded before Flop (didn't bet)
+Seat 3: captainzizou showed [7d Td 8s 9d] and won (3293) with a straight, Seven to Jack
+Seat 4: cianciana (button) showed [9s 3c Th Ah] and won (3293) with a straight, Seven to Jack
+Seat 5: jeje_sat (small blind) folded before Flop
+Seat 6: ESFANJAARA (big blind) folded on the Turn
+
+
+PokerStars Hand #235309791343: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level II (15/30) - 2022/04/06 21:12:39 CET [2022/04/06 15:12:39 ET]
+Table '3388263971 5' 6-max Seat #5 is the button
+Seat 1: Matyrina (2900 in chips)
+Seat 2: philo naz (2910 in chips)
+Seat 3: captainzizou (6297 in chips)
+Seat 4: cianciana (3293 in chips)
+Seat 5: jeje_sat (3005 in chips)
+Seat 6: ESFANJAARA (2505 in chips)
+ESFANJAARA: posts small blind 15
+Matyrina: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [4h 8s 5d 7c]
+philo naz: calls 30
+captainzizou: calls 30
+cianciana: calls 30
+jeje_sat: folds
+ESFANJAARA: calls 15
+Matyrina: checks
+*** FLOP *** [2s 2c 6c]
+ESFANJAARA: checks
+Matyrina: bets 75
+philo naz: raises 75 to 150
+captainzizou: folds
+cianciana: folds
+ESFANJAARA: folds
+Matyrina: raises 75 to 225
+philo naz: calls 75
+*** TURN *** [2s 2c 6c] [7s]
+Matyrina: bets 600
+philo naz: calls 600
+*** RIVER *** [2s 2c 6c 7s] [7h]
+Matyrina: bets 1800
+philo naz: folds
+Uncalled bet (1800) returned to Matyrina
+Matyrina collected 1800 from pot
+*** SUMMARY ***
+Total pot 1800 | Rake 0
+Board [2s 2c 6c 7s 7h]
+Seat 1: Matyrina (big blind) collected (1800)
+Seat 2: philo naz folded on the River
+Seat 3: captainzizou folded on the Flop
+Seat 4: cianciana folded on the Flop
+Seat 5: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ESFANJAARA (small blind) folded on the Flop
+
+
+PokerStars Hand #235309827979: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level II (15/30) - 2022/04/06 21:14:07 CET [2022/04/06 15:14:07 ET]
+Table '3388263971 5' 6-max Seat #6 is the button
+Seat 1: Matyrina (3845 in chips)
+Seat 2: philo naz (2055 in chips)
+Seat 3: captainzizou (6267 in chips)
+Seat 4: cianciana (3263 in chips)
+Seat 5: jeje_sat (3005 in chips)
+Seat 6: ESFANJAARA (2475 in chips)
+Matyrina: posts small blind 15
+philo naz: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jd Jh 7c 6c]
+captainzizou has timed out
+captainzizou: folds
+captainzizou is sitting out
+cianciana: raises 30 to 60
+jeje_sat: calls 60
+captainzizou has returned
+ESFANJAARA: calls 60
+Matyrina: calls 45
+philo naz: calls 30
+*** FLOP *** [Qh 8s 2d]
+Matyrina: checks
+philo naz: checks
+cianciana: checks
+jeje_sat: checks
+ESFANJAARA: checks
+*** TURN *** [Qh 8s 2d] [2h]
+Matyrina: checks
+philo naz: checks
+cianciana: checks
+jeje_sat: checks
+ESFANJAARA: checks
+*** RIVER *** [Qh 8s 2d 2h] [5c]
+Matyrina: checks
+philo naz: checks
+cianciana: checks
+jeje_sat: checks
+ESFANJAARA: checks
+*** SHOW DOWN ***
+Matyrina: shows [6d Qs Ts 5d] (two pair, Queens and Fives)
+philo naz: mucks hand
+cianciana: mucks hand
+jeje_sat: mucks hand
+ESFANJAARA: mucks hand
+Matyrina collected 300 from pot
+*** SUMMARY ***
+Total pot 300 | Rake 0
+Board [Qh 8s 2d 2h 5c]
+Seat 1: Matyrina (small blind) showed [6d Qs Ts 5d] and won (300) with two pair, Queens and Fives
+Seat 2: philo naz (big blind) mucked [9s Ac 9c 6h]
+Seat 3: captainzizou folded before Flop (didn't bet)
+Seat 4: cianciana mucked [7d Kh Td Jc]
+Seat 5: jeje_sat mucked [Jd Jh 7c 6c]
+Seat 6: ESFANJAARA (button) mucked [3c Th Kc As]
+
+
+PokerStars Hand #235309903283: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level III (25/50) - 2022/04/06 21:16:56 CET [2022/04/06 15:16:56 ET]
+Table '3388263971 5' 6-max Seat #1 is the button
+Seat 1: Matyrina (4085 in chips)
+Seat 2: philo naz (1995 in chips)
+Seat 3: captainzizou (6267 in chips)
+Seat 4: cianciana (3203 in chips)
+Seat 5: jeje_sat (2945 in chips)
+Seat 6: ESFANJAARA (2415 in chips)
+philo naz: posts small blind 25
+captainzizou: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jh Qs 4h 8h]
+cianciana: calls 50
+jeje_sat: folds
+ESFANJAARA: folds
+Matyrina: folds
+philo naz: folds
+captainzizou: checks
+*** FLOP *** [6c Qc Kd]
+captainzizou: checks
+cianciana: bets 75
+captainzizou: calls 75
+*** TURN *** [6c Qc Kd] [Kh]
+captainzizou: checks
+cianciana: checks
+*** RIVER *** [6c Qc Kd Kh] [7d]
+captainzizou: checks
+cianciana: checks
+*** SHOW DOWN ***
+captainzizou: shows [3h 5c Ah Jd] (a pair of Kings)
+cianciana: shows [Ac Jc Qd 8c] (two pair, Kings and Queens)
+cianciana collected 275 from pot
+*** SUMMARY ***
+Total pot 275 | Rake 0
+Board [6c Qc Kd Kh 7d]
+Seat 1: Matyrina (button) folded before Flop (didn't bet)
+Seat 2: philo naz (small blind) folded before Flop
+Seat 3: captainzizou (big blind) showed [3h 5c Ah Jd] and lost with a pair of Kings
+Seat 4: cianciana showed [Ac Jc Qd 8c] and won (275) with two pair, Kings and Queens
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235309944570: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level III (25/50) - 2022/04/06 21:18:35 CET [2022/04/06 15:18:35 ET]
+Table '3388263971 5' 6-max Seat #2 is the button
+Seat 1: Matyrina (4085 in chips)
+Seat 2: philo naz (1970 in chips)
+Seat 3: captainzizou (6142 in chips)
+Seat 4: cianciana (3353 in chips)
+Seat 5: jeje_sat (2945 in chips)
+Seat 6: ESFANJAARA (2415 in chips)
+captainzizou: posts small blind 25
+cianciana: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [6s 9h 4d 7c]
+jeje_sat: folds
+ESFANJAARA: folds
+Matyrina: folds
+philo naz: folds
+captainzizou: folds
+Uncalled bet (25) returned to cianciana
+cianciana collected 50 from pot
+*** SUMMARY ***
+Total pot 50 | Rake 0
+Seat 1: Matyrina folded before Flop (didn't bet)
+Seat 2: philo naz (button) folded before Flop (didn't bet)
+Seat 3: captainzizou (small blind) folded before Flop
+Seat 4: cianciana (big blind) collected (50)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235309962784: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level III (25/50) - 2022/04/06 21:19:19 CET [2022/04/06 15:19:19 ET]
+Table '3388263971 5' 6-max Seat #3 is the button
+Seat 1: Matyrina (4085 in chips)
+Seat 2: philo naz (1970 in chips)
+Seat 3: captainzizou (6117 in chips)
+Seat 4: cianciana (3378 in chips)
+Seat 5: jeje_sat (2945 in chips)
+Seat 6: ESFANJAARA (2415 in chips)
+cianciana: posts small blind 25
+jeje_sat: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [2s 3c Th 8c]
+ESFANJAARA: folds
+Matyrina: calls 50
+philo naz: calls 50
+captainzizou: folds
+cianciana: calls 25
+jeje_sat: checks
+*** FLOP *** [4h 4d 6h]
+cianciana: bets 140
+jeje_sat: folds
+Matyrina: folds
+philo naz: folds
+Uncalled bet (140) returned to cianciana
+cianciana collected 200 from pot
+*** SUMMARY ***
+Total pot 200 | Rake 0
+Board [4h 4d 6h]
+Seat 1: Matyrina folded on the Flop
+Seat 2: philo naz folded on the Flop
+Seat 3: captainzizou (button) folded before Flop (didn't bet)
+Seat 4: cianciana (small blind) collected (200)
+Seat 5: jeje_sat (big blind) folded on the Flop
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235309980999: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level III (25/50) - 2022/04/06 21:20:03 CET [2022/04/06 15:20:03 ET]
+Table '3388263971 5' 6-max Seat #4 is the button
+Seat 1: Matyrina (4035 in chips)
+Seat 2: philo naz (1920 in chips)
+Seat 3: captainzizou (6117 in chips)
+Seat 4: cianciana (3528 in chips)
+Seat 5: jeje_sat (2895 in chips)
+Seat 6: ESFANJAARA (2415 in chips)
+jeje_sat: posts small blind 25
+ESFANJAARA: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [7s Qs Ks 4d]
+Matyrina: calls 50
+philo naz: folds
+captainzizou: folds
+cianciana: calls 50
+jeje_sat: folds
+ESFANJAARA: checks
+*** FLOP *** [8c Td Qh]
+ESFANJAARA: checks
+Matyrina: checks
+cianciana: checks
+*** TURN *** [8c Td Qh] [5c]
+ESFANJAARA: bets 175
+Matyrina: folds
+cianciana: calls 175
+*** RIVER *** [8c Td Qh 5c] [6h]
+ESFANJAARA: bets 525
+cianciana: calls 525
+*** SHOW DOWN ***
+ESFANJAARA: shows [2s Js 6s 9s] (a straight, Eight to Queen)
+cianciana: shows [5s 8d 3c 7d] (two pair, Eights and Fives)
+ESFANJAARA collected 1575 from pot
+*** SUMMARY ***
+Total pot 1575 | Rake 0
+Board [8c Td Qh 5c 6h]
+Seat 1: Matyrina folded on the Turn
+Seat 2: philo naz folded before Flop (didn't bet)
+Seat 3: captainzizou folded before Flop (didn't bet)
+Seat 4: cianciana (button) showed [5s 8d 3c 7d] and lost with two pair, Eights and Fives
+Seat 5: jeje_sat (small blind) folded before Flop
+Seat 6: ESFANJAARA (big blind) showed [2s Js 6s 9s] and won (1575) with a straight, Eight to Queen
+
+
+PokerStars Hand #235310028832: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level III (25/50) - 2022/04/06 21:21:37 CET [2022/04/06 15:21:37 ET]
+Table '3388263971 5' 6-max Seat #5 is the button
+Seat 1: Matyrina (3985 in chips)
+Seat 2: philo naz (1920 in chips)
+Seat 3: captainzizou (6117 in chips)
+Seat 4: cianciana (2778 in chips)
+Seat 5: jeje_sat (2870 in chips)
+Seat 6: ESFANJAARA (3240 in chips)
+ESFANJAARA: posts small blind 25
+Matyrina: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [Td Ac 7h Tc]
+philo naz: folds
+captainzizou: calls 50
+cianciana: folds
+jeje_sat: raises 175 to 225
+ESFANJAARA: folds
+Matyrina: folds
+captainzizou: folds
+Uncalled bet (175) returned to jeje_sat
+jeje_sat collected 175 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 175 | Rake 0
+Seat 1: Matyrina (big blind) folded before Flop
+Seat 2: philo naz folded before Flop (didn't bet)
+Seat 3: captainzizou folded before Flop
+Seat 4: cianciana folded before Flop (didn't bet)
+Seat 5: jeje_sat (button) collected (175)
+Seat 6: ESFANJAARA (small blind) folded before Flop
+
+
+PokerStars Hand #235310042263: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level III (25/50) - 2022/04/06 21:22:09 CET [2022/04/06 15:22:09 ET]
+Table '3388263971 5' 6-max Seat #6 is the button
+Seat 1: Matyrina (3935 in chips)
+Seat 2: philo naz (1920 in chips)
+Seat 3: captainzizou (6067 in chips)
+Seat 4: cianciana (2778 in chips)
+Seat 5: jeje_sat (2995 in chips)
+Seat 6: ESFANJAARA (3215 in chips)
+Matyrina: posts small blind 25
+philo naz: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [8h Ts 8d 3c]
+captainzizou: calls 50
+cianciana: folds
+jeje_sat: folds
+ESFANJAARA: folds
+Matyrina: calls 25
+philo naz: checks
+*** FLOP *** [Ac 3d 6c]
+Matyrina has timed out
+Matyrina: checks
+philo naz: checks
+captainzizou: checks
+*** TURN *** [Ac 3d 6c] [3h]
+Matyrina: checks
+philo naz: checks
+captainzizou: checks
+*** RIVER *** [Ac 3d 6c 3h] [Td]
+Matyrina: checks
+philo naz: checks
+captainzizou: checks
+*** SHOW DOWN ***
+Matyrina: shows [Jh 5d Qd 3s] (three of a kind, Threes)
+philo naz: mucks hand
+captainzizou: mucks hand
+Matyrina collected 150 from pot
+*** SUMMARY ***
+Total pot 150 | Rake 0
+Board [Ac 3d 6c 3h Td]
+Seat 1: Matyrina (small blind) showed [Jh 5d Qd 3s] and won (150) with three of a kind, Threes
+Seat 2: philo naz (big blind) mucked [6d 9s 8c Kd]
+Seat 3: captainzizou mucked [4h Ad Jd 2s]
+Seat 4: cianciana folded before Flop (didn't bet)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310079923: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level III (25/50) - 2022/04/06 21:23:40 CET [2022/04/06 15:23:40 ET]
+Table '3388263971 5' 6-max Seat #1 is the button
+Seat 1: Matyrina (4035 in chips)
+Seat 2: philo naz (1870 in chips)
+Seat 3: captainzizou (6017 in chips)
+Seat 4: cianciana (2778 in chips)
+Seat 5: jeje_sat (2995 in chips)
+Seat 6: ESFANJAARA (3215 in chips)
+philo naz: posts small blind 25
+captainzizou: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d Ad 2h 4s]
+cianciana: folds
+jeje_sat: folds
+ESFANJAARA: folds
+Matyrina: folds
+philo naz: raises 50 to 100
+captainzizou: folds
+Uncalled bet (50) returned to philo naz
+philo naz collected 100 from pot
+philo naz: doesn't show hand
+*** SUMMARY ***
+Total pot 100 | Rake 0
+Seat 1: Matyrina (button) folded before Flop (didn't bet)
+Seat 2: philo naz (small blind) collected (100)
+Seat 3: captainzizou (big blind) folded before Flop
+Seat 4: cianciana folded before Flop (didn't bet)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310098667: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/06 21:24:26 CET [2022/04/06 15:24:26 ET]
+Table '3388263971 5' 6-max Seat #2 is the button
+Seat 1: Matyrina (4035 in chips)
+Seat 2: philo naz (1920 in chips)
+Seat 3: captainzizou (5967 in chips)
+Seat 4: cianciana (2778 in chips)
+Seat 5: jeje_sat (2995 in chips)
+Seat 6: ESFANJAARA (3215 in chips)
+captainzizou: posts small blind 50
+cianciana: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c 5s 9d Th]
+jeje_sat: folds
+ESFANJAARA: folds
+Matyrina: folds
+philo naz: folds
+captainzizou: folds
+Uncalled bet (50) returned to cianciana
+cianciana collected 100 from pot
+*** SUMMARY ***
+Total pot 100 | Rake 0
+Seat 1: Matyrina folded before Flop (didn't bet)
+Seat 2: philo naz (button) folded before Flop (didn't bet)
+Seat 3: captainzizou (small blind) folded before Flop
+Seat 4: cianciana (big blind) collected (100)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310105925: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/06 21:24:44 CET [2022/04/06 15:24:44 ET]
+Table '3388263971 5' 6-max Seat #3 is the button
+Seat 1: Matyrina (4035 in chips)
+Seat 2: philo naz (1920 in chips)
+Seat 3: captainzizou (5917 in chips)
+Seat 4: cianciana (2828 in chips)
+Seat 5: jeje_sat (2995 in chips)
+Seat 6: ESFANJAARA (3215 in chips)
+cianciana: posts small blind 50
+jeje_sat: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [3d 9s 5c Ah]
+ESFANJAARA: folds
+Matyrina: folds
+philo naz: folds
+captainzizou: folds
+cianciana: calls 50
+jeje_sat: checks
+*** FLOP *** [7s Ks 7c]
+cianciana: checks
+jeje_sat: checks
+*** TURN *** [7s Ks 7c] [Jh]
+cianciana: checks
+jeje_sat: checks
+*** RIVER *** [7s Ks 7c Jh] [As]
+cianciana: checks
+jeje_sat: checks
+*** SHOW DOWN ***
+cianciana: shows [Tc 9h Jc Ac] (two pair, Aces and Jacks)
+jeje_sat: mucks hand
+cianciana collected 200 from pot
+*** SUMMARY ***
+Total pot 200 | Rake 0
+Board [7s Ks 7c Jh As]
+Seat 1: Matyrina folded before Flop (didn't bet)
+Seat 2: philo naz folded before Flop (didn't bet)
+Seat 3: captainzizou (button) folded before Flop (didn't bet)
+Seat 4: cianciana (small blind) showed [Tc 9h Jc Ac] and won (200) with two pair, Aces and Jacks
+Seat 5: jeje_sat (big blind) mucked [3d 9s 5c Ah]
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310141545: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/06 21:26:12 CET [2022/04/06 15:26:12 ET]
+Table '3388263971 5' 6-max Seat #4 is the button
+Seat 1: Matyrina (4035 in chips)
+Seat 2: philo naz (1920 in chips)
+Seat 3: captainzizou (5917 in chips)
+Seat 4: cianciana (2928 in chips)
+Seat 5: jeje_sat (2895 in chips)
+Seat 6: ESFANJAARA (3215 in chips)
+jeje_sat: posts small blind 50
+ESFANJAARA: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [7d 3c 8s Ts]
+Matyrina has timed out
+Matyrina: folds
+Matyrina is sitting out
+philo naz: folds
+captainzizou: calls 100
+Matyrina has returned
+cianciana: folds
+jeje_sat: folds
+ESFANJAARA: checks
+*** FLOP *** [8c 4h Tc]
+ESFANJAARA: checks
+captainzizou: checks
+*** TURN *** [8c 4h Tc] [Kh]
+ESFANJAARA: checks
+captainzizou: checks
+*** RIVER *** [8c 4h Tc Kh] [Th]
+ESFANJAARA: checks
+captainzizou: checks
+*** SHOW DOWN ***
+ESFANJAARA: shows [Js 3h 4c Ac] (two pair, Tens and Fours)
+captainzizou: shows [6d 6s Ad Ks] (two pair, Kings and Tens)
+captainzizou collected 250 from pot
+*** SUMMARY ***
+Total pot 250 | Rake 0
+Board [8c 4h Tc Kh Th]
+Seat 1: Matyrina folded before Flop (didn't bet)
+Seat 2: philo naz folded before Flop (didn't bet)
+Seat 3: captainzizou showed [6d 6s Ad Ks] and won (250) with two pair, Kings and Tens
+Seat 4: cianciana (button) folded before Flop (didn't bet)
+Seat 5: jeje_sat (small blind) folded before Flop
+Seat 6: ESFANJAARA (big blind) showed [Js 3h 4c Ac] and lost with two pair, Tens and Fours
+
+
+PokerStars Hand #235310175615: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/06 21:27:35 CET [2022/04/06 15:27:35 ET]
+Table '3388263971 5' 6-max Seat #5 is the button
+Seat 1: Matyrina (4035 in chips)
+Seat 2: philo naz (1920 in chips)
+Seat 3: captainzizou (6067 in chips)
+Seat 4: cianciana (2928 in chips)
+Seat 5: jeje_sat (2845 in chips)
+Seat 6: ESFANJAARA (3115 in chips)
+ESFANJAARA: posts small blind 50
+Matyrina: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [5d As Td 5s]
+philo naz: folds
+captainzizou: calls 100
+cianciana: calls 100
+jeje_sat: raises 450 to 550
+ESFANJAARA: folds
+Matyrina: folds
+captainzizou: folds
+cianciana: calls 450
+*** FLOP *** [4s 8h 7c]
+cianciana: checks
+jeje_sat: bets 1350
+cianciana: folds
+Uncalled bet (1350) returned to jeje_sat
+jeje_sat collected 1350 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1350 | Rake 0
+Board [4s 8h 7c]
+Seat 1: Matyrina (big blind) folded before Flop
+Seat 2: philo naz folded before Flop (didn't bet)
+Seat 3: captainzizou folded before Flop
+Seat 4: cianciana folded on the Flop
+Seat 5: jeje_sat (button) collected (1350)
+Seat 6: ESFANJAARA (small blind) folded before Flop
+
+
+PokerStars Hand #235310200957: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/06 21:28:37 CET [2022/04/06 15:28:37 ET]
+Table '3388263971 5' 6-max Seat #6 is the button
+Seat 1: Matyrina (3935 in chips)
+Seat 2: philo naz (1920 in chips)
+Seat 3: captainzizou (5967 in chips)
+Seat 4: cianciana (2378 in chips)
+Seat 5: jeje_sat (3645 in chips)
+Seat 6: ESFANJAARA (3065 in chips)
+Matyrina: posts small blind 50
+philo naz: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [7s 3h 7h 6h]
+captainzizou: calls 100
+cianciana: folds
+jeje_sat: folds
+ESFANJAARA: folds
+Matyrina: calls 50
+philo naz: checks
+*** FLOP *** [2h Kh Kd]
+Matyrina: checks
+philo naz: bets 300
+captainzizou: folds
+Matyrina: folds
+Uncalled bet (300) returned to philo naz
+philo naz collected 300 from pot
+philo naz: doesn't show hand
+*** SUMMARY ***
+Total pot 300 | Rake 0
+Board [2h Kh Kd]
+Seat 1: Matyrina (small blind) folded on the Flop
+Seat 2: philo naz (big blind) collected (300)
+Seat 3: captainzizou folded on the Flop
+Seat 4: cianciana folded before Flop (didn't bet)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310226934: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/06 21:29:41 CET [2022/04/06 15:29:41 ET]
+Table '3388263971 5' 6-max Seat #1 is the button
+Seat 1: Matyrina (3835 in chips)
+Seat 2: philo naz (2120 in chips)
+Seat 3: captainzizou (5867 in chips)
+Seat 4: cianciana (2378 in chips)
+Seat 5: jeje_sat (3645 in chips)
+Seat 6: ESFANJAARA (3065 in chips)
+philo naz: posts small blind 50
+captainzizou: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [2s 3d 5d 7d]
+cianciana: raises 100 to 200
+jeje_sat: folds
+ESFANJAARA: folds
+Matyrina: calls 200
+philo naz: calls 150
+captainzizou: calls 100
+*** FLOP *** [8h 7c 9d]
+philo naz: bets 800
+captainzizou: raises 1200 to 2000
+cianciana: folds
+Matyrina: folds
+philo naz: calls 1120 and is all-in
+Uncalled bet (80) returned to captainzizou
+*** TURN *** [8h 7c 9d] [6h]
+*** RIVER *** [8h 7c 9d 6h] [7s]
+*** SHOW DOWN ***
+philo naz: shows [Jh 9h 8c Ts] (a straight, Seven to Jack)
+captainzizou: shows [Qc Th Ac Jd] (a straight, Seven to Jack)
+philo naz collected 2320 from pot
+captainzizou collected 2320 from pot
+*** SUMMARY ***
+Total pot 4640 | Rake 0
+Board [8h 7c 9d 6h 7s]
+Seat 1: Matyrina (button) folded on the Flop
+Seat 2: philo naz (small blind) showed [Jh 9h 8c Ts] and won (2320) with a straight, Seven to Jack
+Seat 3: captainzizou (big blind) showed [Qc Th Ac Jd] and won (2320) with a straight, Seven to Jack
+Seat 4: cianciana folded on the Flop
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310273731: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/06 21:31:36 CET [2022/04/06 15:31:36 ET]
+Table '3388263971 5' 6-max Seat #2 is the button
+Seat 1: Matyrina (3635 in chips)
+Seat 2: philo naz (2320 in chips)
+Seat 3: captainzizou (6067 in chips)
+Seat 4: cianciana (2178 in chips)
+Seat 5: jeje_sat (3645 in chips)
+Seat 6: ESFANJAARA (3065 in chips)
+captainzizou: posts small blind 50
+cianciana: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 5s 6h 4c]
+jeje_sat: folds
+ESFANJAARA: folds
+Matyrina: calls 100
+philo naz: calls 100
+captainzizou: calls 50
+cianciana: checks
+*** FLOP *** [7d 7c 5d]
+captainzizou: checks
+cianciana: checks
+Matyrina: checks
+philo naz: checks
+*** TURN *** [7d 7c 5d] [Jd]
+captainzizou: checks
+cianciana: checks
+Matyrina: bets 200
+philo naz: folds
+captainzizou: folds
+cianciana: folds
+Uncalled bet (200) returned to Matyrina
+Matyrina collected 400 from pot
+*** SUMMARY ***
+Total pot 400 | Rake 0
+Board [7d 7c 5d Jd]
+Seat 1: Matyrina collected (400)
+Seat 2: philo naz (button) folded on the Turn
+Seat 3: captainzizou (small blind) folded on the Turn
+Seat 4: cianciana (big blind) folded on the Turn
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310309265: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 21:33:02 CET [2022/04/06 15:33:02 ET]
+Table '3388263971 5' 6-max Seat #3 is the button
+Seat 1: Matyrina (3935 in chips)
+Seat 2: philo naz (2220 in chips)
+Seat 3: captainzizou (5967 in chips)
+Seat 4: cianciana (2078 in chips)
+Seat 5: jeje_sat (3645 in chips)
+Seat 6: ESFANJAARA (3065 in chips)
+cianciana: posts small blind 75
+jeje_sat: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jd 4d 2c 3s]
+ESFANJAARA: folds
+Matyrina: calls 150
+philo naz: raises 525 to 675
+captainzizou: folds
+cianciana: raises 1403 to 2078 and is all-in
+jeje_sat: folds
+Matyrina: folds
+philo naz: calls 1403
+*** FLOP *** [5s 3c 6s]
+*** TURN *** [5s 3c 6s] [Qs]
+*** RIVER *** [5s 3c 6s Qs] [7s]
+*** SHOW DOWN ***
+cianciana: shows [4h Ts 8h Ks] (a flush, King high)
+philo naz: shows [Ad Kc Js As] (a flush, Ace high)
+philo naz collected 4456 from pot
+cianciana finished the tournament
+*** SUMMARY ***
+Total pot 4456 | Rake 0
+Board [5s 3c 6s Qs 7s]
+Seat 1: Matyrina folded before Flop
+Seat 2: philo naz showed [Ad Kc Js As] and won (4456) with a flush, Ace high
+Seat 3: captainzizou (button) folded before Flop (didn't bet)
+Seat 4: cianciana (small blind) showed [4h Ts 8h Ks] and lost with a flush, King high
+Seat 5: jeje_sat (big blind) folded before Flop
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310327035: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 21:33:46 CET [2022/04/06 15:33:46 ET]
+Table '3388263971 5' 6-max Seat #5 is the button
+Seat 1: Matyrina (3785 in chips)
+Seat 2: philo naz (4598 in chips)
+Seat 3: captainzizou (5967 in chips)
+Seat 5: jeje_sat (3495 in chips)
+Seat 6: ESFANJAARA (3065 in chips)
+ESFANJAARA: posts small blind 75
+Matyrina: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [9s 2c Ks Js]
+philo naz: folds
+captainzizou: folds
+jeje_sat: folds
+ESFANJAARA: calls 75
+Matyrina: checks
+*** FLOP *** [3s As 7h]
+ESFANJAARA: checks
+Matyrina: checks
+*** TURN *** [3s As 7h] [9c]
+ESFANJAARA: checks
+Matyrina: checks
+*** RIVER *** [3s As 7h 9c] [Ts]
+ESFANJAARA: checks
+Matyrina: checks
+*** SHOW DOWN ***
+ESFANJAARA: shows [Th 8d 9h Jc] (a straight, Seven to Jack)
+Matyrina: mucks hand
+ESFANJAARA collected 300 from pot
+*** SUMMARY ***
+Total pot 300 | Rake 0
+Board [3s As 7h 9c Ts]
+Seat 1: Matyrina (big blind) mucked [5h 5s 3h Td]
+Seat 2: philo naz folded before Flop (didn't bet)
+Seat 3: captainzizou folded before Flop (didn't bet)
+Seat 5: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ESFANJAARA (small blind) showed [Th 8d 9h Jc] and won (300) with a straight, Seven to Jack
+
+
+PokerStars Hand #235310356103: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 21:34:55 CET [2022/04/06 15:34:55 ET]
+Table '3388263971 5' 6-max Seat #6 is the button
+Seat 1: Matyrina (3635 in chips)
+Seat 2: philo naz (4598 in chips)
+Seat 3: captainzizou (5967 in chips)
+Seat 5: jeje_sat (3495 in chips)
+Seat 6: ESFANJAARA (3215 in chips)
+Matyrina: posts small blind 75
+philo naz: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 3h 5h Kh]
+captainzizou: folds
+jeje_sat: folds
+ESFANJAARA: raises 150 to 300
+Matyrina: folds
+philo naz: folds
+Uncalled bet (150) returned to ESFANJAARA
+ESFANJAARA collected 375 from pot
+ESFANJAARA: doesn't show hand
+*** SUMMARY ***
+Total pot 375 | Rake 0
+Seat 1: Matyrina (small blind) folded before Flop
+Seat 2: philo naz (big blind) folded before Flop
+Seat 3: captainzizou folded before Flop (didn't bet)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA (button) collected (375)
+
+
+PokerStars Hand #235310369502: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 21:35:27 CET [2022/04/06 15:35:27 ET]
+Table '3388263971 5' 6-max Seat #1 is the button
+Seat 1: Matyrina (3560 in chips)
+Seat 2: philo naz (4448 in chips)
+Seat 3: captainzizou (5967 in chips)
+Seat 5: jeje_sat (3495 in chips)
+Seat 6: ESFANJAARA (3440 in chips)
+philo naz: posts small blind 75
+captainzizou: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d 5s Ks 7s]
+jeje_sat: folds
+ESFANJAARA: folds
+Matyrina: folds
+philo naz: folds
+Uncalled bet (75) returned to captainzizou
+captainzizou collected 150 from pot
+*** SUMMARY ***
+Total pot 150 | Rake 0
+Seat 1: Matyrina (button) folded before Flop (didn't bet)
+Seat 2: philo naz (small blind) folded before Flop
+Seat 3: captainzizou (big blind) collected (150)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310378280: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 21:35:49 CET [2022/04/06 15:35:49 ET]
+Table '3388263971 5' 6-max Seat #2 is the button
+Seat 1: Matyrina (3560 in chips)
+Seat 2: philo naz (4373 in chips)
+Seat 3: captainzizou (6042 in chips)
+Seat 5: jeje_sat (3495 in chips)
+Seat 6: ESFANJAARA (3440 in chips)
+captainzizou: posts small blind 75
+jeje_sat: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h 8s Qs 2c]
+ESFANJAARA: folds
+Matyrina: folds
+philo naz: calls 150
+captainzizou: calls 75
+jeje_sat: checks
+*** FLOP *** [Ks 4s 8h]
+captainzizou: checks
+jeje_sat: checks
+philo naz: checks
+*** TURN *** [Ks 4s 8h] [Jh]
+captainzizou: checks
+jeje_sat: checks
+philo naz: checks
+*** RIVER *** [Ks 4s 8h Jh] [5h]
+captainzizou: checks
+jeje_sat: checks
+philo naz: checks
+*** SHOW DOWN ***
+captainzizou: shows [Qh 3s Qc Td] (a pair of Queens)
+jeje_sat: mucks hand
+philo naz: shows [Ad 5s Tc 5c] (three of a kind, Fives)
+philo naz collected 450 from pot
+*** SUMMARY ***
+Total pot 450 | Rake 0
+Board [Ks 4s 8h Jh 5h]
+Seat 1: Matyrina folded before Flop (didn't bet)
+Seat 2: philo naz (button) showed [Ad 5s Tc 5c] and won (450) with three of a kind, Fives
+Seat 3: captainzizou (small blind) showed [Qh 3s Qc Td] and lost with a pair of Queens
+Seat 5: jeje_sat (big blind) mucked [2h 8s Qs 2c]
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310420777: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 21:37:32 CET [2022/04/06 15:37:32 ET]
+Table '3388263971 5' 6-max Seat #3 is the button
+Seat 1: Matyrina (3560 in chips)
+Seat 2: philo naz (4673 in chips)
+Seat 3: captainzizou (5892 in chips)
+Seat 5: jeje_sat (3345 in chips)
+Seat 6: ESFANJAARA (3440 in chips)
+jeje_sat: posts small blind 75
+ESFANJAARA: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th 8c Ah 9h]
+Matyrina: folds
+philo naz: folds
+captainzizou: folds
+jeje_sat: raises 300 to 450
+ESFANJAARA: folds
+Uncalled bet (300) returned to jeje_sat
+jeje_sat collected 300 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 300 | Rake 0
+Seat 1: Matyrina folded before Flop (didn't bet)
+Seat 2: philo naz folded before Flop (didn't bet)
+Seat 3: captainzizou (button) folded before Flop (didn't bet)
+Seat 5: jeje_sat (small blind) collected (300)
+Seat 6: ESFANJAARA (big blind) folded before Flop
+
+
+PokerStars Hand #235310432179: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 21:38:00 CET [2022/04/06 15:38:00 ET]
+Table '3388263971 5' 6-max Seat #5 is the button
+Seat 1: Matyrina (3560 in chips)
+Seat 2: philo naz (4673 in chips)
+Seat 3: captainzizou (5892 in chips)
+Seat 5: jeje_sat (3495 in chips)
+Seat 6: ESFANJAARA (3290 in chips)
+ESFANJAARA: posts small blind 75
+Matyrina: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts Js 5s 7h]
+philo naz: raises 375 to 525
+captainzizou: folds
+jeje_sat: calls 525
+ESFANJAARA: folds
+Matyrina: folds
+*** FLOP *** [5h 5c 4s]
+philo naz: bets 1275
+jeje_sat: raises 1695 to 2970 and is all-in
+philo naz: calls 1695
+*** TURN *** [5h 5c 4s] [4h]
+*** RIVER *** [5h 5c 4s 4h] [Kc]
+*** SHOW DOWN ***
+philo naz: shows [8d Qs Ah As] (two pair, Aces and Fives)
+jeje_sat: shows [Ts Js 5s 7h] (three of a kind, Fives)
+jeje_sat collected 7215 from pot
+*** SUMMARY ***
+Total pot 7215 | Rake 0
+Board [5h 5c 4s 4h Kc]
+Seat 1: Matyrina (big blind) folded before Flop
+Seat 2: philo naz showed [8d Qs Ah As] and lost with two pair, Aces and Fives
+Seat 3: captainzizou folded before Flop (didn't bet)
+Seat 5: jeje_sat (button) showed [Ts Js 5s 7h] and won (7215) with three of a kind, Fives
+Seat 6: ESFANJAARA (small blind) folded before Flop
+
+
+PokerStars Hand #235310457746: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 21:38:47 CET [2022/04/06 15:38:47 ET]
+Table '3388263971 5' 6-max Seat #6 is the button
+Seat 1: Matyrina (3410 in chips)
+Seat 2: philo naz (1178 in chips)
+Seat 3: captainzizou (5892 in chips)
+Seat 5: jeje_sat (7215 in chips)
+Seat 6: ESFANJAARA (3215 in chips)
+Matyrina: posts small blind 75
+philo naz: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kh 3d 9d 4d]
+captainzizou: folds
+jeje_sat: folds
+ESFANJAARA: folds
+Matyrina: calls 75
+philo naz: raises 300 to 450
+Matyrina: calls 300
+*** FLOP *** [Ah Td 4c]
+Matyrina: checks
+philo naz: bets 728 and is all-in
+Matyrina: calls 728
+*** TURN *** [Ah Td 4c] [5s]
+*** RIVER *** [Ah Td 4c 5s] [6h]
+*** SHOW DOWN ***
+Matyrina: shows [7h 8h 7c Ad] (a straight, Four to Eight)
+philo naz: shows [Th Ac Js Kd] (two pair, Aces and Tens)
+Matyrina collected 2356 from pot
+philo naz finished the tournament
+*** SUMMARY ***
+Total pot 2356 | Rake 0
+Board [Ah Td 4c 5s 6h]
+Seat 1: Matyrina (small blind) showed [7h 8h 7c Ad] and won (2356) with a straight, Four to Eight
+Seat 2: philo naz (big blind) showed [Th Ac Js Kd] and lost with two pair, Aces and Tens
+Seat 3: captainzizou folded before Flop (didn't bet)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310477059: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 21:39:33 CET [2022/04/06 15:39:33 ET]
+Table '3388263971 5' 6-max Seat #1 is the button
+Seat 1: Matyrina (4588 in chips)
+Seat 3: captainzizou (5892 in chips)
+Seat 4: ElkYX (2721 in chips)
+Seat 5: jeje_sat (7215 in chips)
+Seat 6: ESFANJAARA (3215 in chips)
+captainzizou: posts small blind 75
+ElkYX: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks 5c Th 6c]
+jeje_sat: folds
+ESFANJAARA: folds
+Matyrina: folds
+captainzizou: calls 75
+ElkYX: checks
+*** FLOP *** [4h Ah Td]
+captainzizou: checks
+ElkYX: checks
+*** TURN *** [4h Ah Td] [8c]
+captainzizou: bets 150
+ElkYX: calls 150
+*** RIVER *** [4h Ah Td 8c] [Kd]
+captainzizou: bets 600
+ElkYX: folds
+Uncalled bet (600) returned to captainzizou
+captainzizou collected 600 from pot
+*** SUMMARY ***
+Total pot 600 | Rake 0
+Board [4h Ah Td 8c Kd]
+Seat 1: Matyrina (button) folded before Flop (didn't bet)
+Seat 3: captainzizou (small blind) collected (600)
+Seat 4: ElkYX (big blind) folded on the River
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310503813: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 21:40:39 CET [2022/04/06 15:40:39 ET]
+Table '3388263971 5' 6-max Seat #3 is the button
+Seat 1: Matyrina (4588 in chips)
+Seat 3: captainzizou (6192 in chips)
+Seat 4: ElkYX (2421 in chips)
+Seat 5: jeje_sat (7215 in chips)
+Seat 6: ESFANJAARA (3215 in chips)
+ElkYX: posts small blind 100
+jeje_sat: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [2c Jd 4c 7s]
+ESFANJAARA: folds
+Matyrina: folds
+captainzizou: folds
+ElkYX: calls 100
+jeje_sat: checks
+*** FLOP *** [Qs 8h Kd]
+ElkYX: checks
+jeje_sat: checks
+*** TURN *** [Qs 8h Kd] [8d]
+ElkYX: checks
+jeje_sat: checks
+*** RIVER *** [Qs 8h Kd 8d] [Qh]
+ElkYX: checks
+jeje_sat: checks
+*** SHOW DOWN ***
+ElkYX: shows [6c 7d 3s Ah] (a pair of Queens)
+jeje_sat: mucks hand
+ElkYX collected 400 from pot
+*** SUMMARY ***
+Total pot 400 | Rake 0
+Board [Qs 8h Kd 8d Qh]
+Seat 1: Matyrina folded before Flop (didn't bet)
+Seat 3: captainzizou (button) folded before Flop (didn't bet)
+Seat 4: ElkYX (small blind) showed [6c 7d 3s Ah] and won (400) with a pair of Queens
+Seat 5: jeje_sat (big blind) mucked [2c Jd 4c 7s]
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310530378: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 21:41:45 CET [2022/04/06 15:41:45 ET]
+Table '3388263971 5' 6-max Seat #4 is the button
+Seat 1: Matyrina (4588 in chips)
+Seat 3: captainzizou (6192 in chips)
+Seat 4: ElkYX (2621 in chips)
+Seat 5: jeje_sat (7015 in chips)
+Seat 6: ESFANJAARA (3215 in chips)
+jeje_sat: posts small blind 100
+ESFANJAARA: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [3s 7d 9c 8c]
+Matyrina: calls 200
+captainzizou: folds
+ElkYX: calls 200
+jeje_sat: folds
+ESFANJAARA: checks
+*** FLOP *** [Qc Kc Jh]
+ESFANJAARA: checks
+Matyrina: bets 350
+ElkYX: folds
+ESFANJAARA: folds
+Uncalled bet (350) returned to Matyrina
+Matyrina collected 700 from pot
+*** SUMMARY ***
+Total pot 700 | Rake 0
+Board [Qc Kc Jh]
+Seat 1: Matyrina collected (700)
+Seat 3: captainzizou folded before Flop (didn't bet)
+Seat 4: ElkYX (button) folded on the Flop
+Seat 5: jeje_sat (small blind) folded before Flop
+Seat 6: ESFANJAARA (big blind) folded on the Flop
+
+
+PokerStars Hand #235310552935: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 21:42:41 CET [2022/04/06 15:42:41 ET]
+Table '3388263971 5' 6-max Seat #5 is the button
+Seat 1: Matyrina (5088 in chips)
+Seat 3: captainzizou (6192 in chips)
+Seat 4: ElkYX (2421 in chips)
+Seat 5: jeje_sat (6915 in chips)
+Seat 6: ESFANJAARA (3015 in chips)
+ESFANJAARA: posts small blind 100
+Matyrina: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Td 2s Kh Jh]
+captainzizou: folds
+ElkYX: folds
+jeje_sat: raises 500 to 700
+ESFANJAARA: folds
+Matyrina: folds
+Uncalled bet (500) returned to jeje_sat
+jeje_sat collected 500 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: Matyrina (big blind) folded before Flop
+Seat 3: captainzizou folded before Flop (didn't bet)
+Seat 4: ElkYX folded before Flop (didn't bet)
+Seat 5: jeje_sat (button) collected (500)
+Seat 6: ESFANJAARA (small blind) folded before Flop
+
+
+PokerStars Hand #235310567964: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 21:43:18 CET [2022/04/06 15:43:18 ET]
+Table '3388263971 5' 6-max Seat #6 is the button
+Seat 1: Matyrina (4888 in chips)
+Seat 3: captainzizou (6192 in chips)
+Seat 4: ElkYX (2421 in chips)
+Seat 5: jeje_sat (7215 in chips)
+Seat 6: ESFANJAARA (2915 in chips)
+Matyrina: posts small blind 100
+captainzizou: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h Ah 5h 2s]
+ElkYX: folds
+jeje_sat: raises 500 to 700
+ESFANJAARA: folds
+Matyrina: folds
+captainzizou: folds
+Uncalled bet (500) returned to jeje_sat
+jeje_sat collected 500 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: Matyrina (small blind) folded before Flop
+Seat 3: captainzizou (big blind) folded before Flop
+Seat 4: ElkYX folded before Flop (didn't bet)
+Seat 5: jeje_sat collected (500)
+Seat 6: ESFANJAARA (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310581444: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 21:43:52 CET [2022/04/06 15:43:52 ET]
+Table '3388263971 5' 6-max Seat #1 is the button
+Seat 1: Matyrina (4788 in chips)
+Seat 3: captainzizou (5992 in chips)
+Seat 4: ElkYX (2421 in chips)
+Seat 5: jeje_sat (7515 in chips)
+Seat 6: ESFANJAARA (2915 in chips)
+captainzizou: posts small blind 100
+ElkYX: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c Th Ac Ks]
+jeje_sat: folds
+ESFANJAARA: folds
+Matyrina: folds
+captainzizou: calls 100
+ElkYX: raises 332 to 532
+captainzizou: calls 332
+*** FLOP *** [3h 9h 5c]
+captainzizou: checks
+ElkYX: bets 1064
+captainzizou: raises 3192 to 4256
+ElkYX: calls 825 and is all-in
+Uncalled bet (2367) returned to captainzizou
+*** TURN *** [3h 9h 5c] [Ad]
+*** RIVER *** [3h 9h 5c Ad] [9s]
+*** SHOW DOWN ***
+captainzizou: shows [8d Jh 2d Ah] (two pair, Aces and Nines)
+ElkYX: shows [Kh Qd 4d Kd] (two pair, Kings and Nines)
+captainzizou collected 4842 from pot
+ElkYX finished the tournament
+*** SUMMARY ***
+Total pot 4842 | Rake 0
+Board [3h 9h 5c Ad 9s]
+Seat 1: Matyrina (button) folded before Flop (didn't bet)
+Seat 3: captainzizou (small blind) showed [8d Jh 2d Ah] and won (4842) with two pair, Aces and Nines
+Seat 4: ElkYX (big blind) showed [Kh Qd 4d Kd] and lost with two pair, Kings and Nines
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310600128: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 21:44:38 CET [2022/04/06 15:44:38 ET]
+Table '3388263971 5' 6-max Seat #3 is the button
+Seat 1: Matyrina (4788 in chips)
+Seat 3: captainzizou (8413 in chips)
+Seat 5: jeje_sat (7515 in chips)
+Seat 6: ESFANJAARA (2915 in chips)
+jeje_sat: posts small blind 100
+ESFANJAARA: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [8d As 5d 6d]
+Matyrina: folds
+captainzizou: folds
+jeje_sat: calls 100
+ESFANJAARA: checks
+*** FLOP *** [3d Jc 9s]
+jeje_sat: checks
+ESFANJAARA: bets 200
+jeje_sat: folds
+Uncalled bet (200) returned to ESFANJAARA
+ESFANJAARA collected 400 from pot
+ESFANJAARA: doesn't show hand
+*** SUMMARY ***
+Total pot 400 | Rake 0
+Board [3d Jc 9s]
+Seat 1: Matyrina folded before Flop (didn't bet)
+Seat 3: captainzizou (button) folded before Flop (didn't bet)
+Seat 5: jeje_sat (small blind) folded on the Flop
+Seat 6: ESFANJAARA (big blind) collected (400)
+
+
+PokerStars Hand #235310611800: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 21:45:07 CET [2022/04/06 15:45:07 ET]
+Table '3388263971 5' 6-max Seat #5 is the button
+Seat 1: Matyrina (4788 in chips)
+Seat 3: captainzizou (8413 in chips)
+Seat 4: gexi060 (5633 in chips)
+Seat 5: jeje_sat (7315 in chips)
+Seat 6: ESFANJAARA (3115 in chips)
+ESFANJAARA: posts small blind 100
+Matyrina: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h As 5s Td]
+captainzizou: calls 200
+gexi060: raises 700 to 900
+jeje_sat: calls 900
+ESFANJAARA: folds
+Matyrina has timed out
+Matyrina: folds
+Matyrina is sitting out
+captainzizou: calls 700
+*** FLOP *** [2c 4d Ts]
+captainzizou: checks
+Matyrina has returned
+gexi060: bets 3000
+jeje_sat: raises 3415 to 6415 and is all-in
+captainzizou: folds
+gexi060: calls 1733 and is all-in
+Uncalled bet (1682) returned to jeje_sat
+*** TURN *** [2c 4d Ts] [6c]
+*** RIVER *** [2c 4d Ts 6c] [3d]
+*** SHOW DOWN ***
+gexi060: shows [Jc Ah 8d Ad] (a pair of Aces)
+jeje_sat: shows [2h As 5s Td] (a straight, Deuce to Six)
+jeje_sat collected 12466 from pot
+gexi060 finished the tournament
+*** SUMMARY ***
+Total pot 12466 | Rake 0
+Board [2c 4d Ts 6c 3d]
+Seat 1: Matyrina (big blind) folded before Flop
+Seat 3: captainzizou folded on the Flop
+Seat 4: gexi060 showed [Jc Ah 8d Ad] and lost with a pair of Aces
+Seat 5: jeje_sat (button) showed [2h As 5s Td] and won (12466) with a straight, Deuce to Six
+Seat 6: ESFANJAARA (small blind) folded before Flop
+
+
+PokerStars Hand #235310647773: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 21:46:36 CET [2022/04/06 15:46:36 ET]
+Table '3388263971 5' 6-max Seat #6 is the button
+Seat 1: Matyrina (4588 in chips)
+Seat 3: captainzizou (7513 in chips)
+Seat 5: jeje_sat (14148 in chips)
+Seat 6: ESFANJAARA (3015 in chips)
+Matyrina: posts small blind 100
+captainzizou: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc 5d 9c Ks]
+jeje_sat: folds
+ESFANJAARA: folds
+Matyrina: folds
+Uncalled bet (100) returned to captainzizou
+captainzizou collected 200 from pot
+*** SUMMARY ***
+Total pot 200 | Rake 0
+Seat 1: Matyrina (small blind) folded before Flop
+Seat 3: captainzizou (big blind) collected (200)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310653280: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 21:46:50 CET [2022/04/06 15:46:50 ET]
+Table '3388263971 5' 6-max Seat #1 is the button
+Seat 1: Matyrina (4488 in chips)
+Seat 3: captainzizou (7613 in chips)
+Seat 4: AAfreddyAA (3000 in chips)
+Seat 5: jeje_sat (14148 in chips)
+Seat 6: ESFANJAARA (3015 in chips)
+captainzizou: posts small blind 100
+AAfreddyAA: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [3s 6s 7s 9h]
+jeje_sat: folds
+ESFANJAARA: folds
+Matyrina: raises 200 to 400
+captainzizou: calls 300
+AAfreddyAA: folds
+*** FLOP *** [Td 7d 3h]
+captainzizou: checks
+Matyrina: checks
+*** TURN *** [Td 7d 3h] [Tc]
+captainzizou: checks
+Matyrina: bets 200
+captainzizou: folds
+Uncalled bet (200) returned to Matyrina
+Matyrina collected 1000 from pot
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Board [Td 7d 3h Tc]
+Seat 1: Matyrina (button) collected (1000)
+Seat 3: captainzizou (small blind) folded on the Turn
+Seat 4: AAfreddyAA (big blind) folded before Flop
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310669026: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 21:47:28 CET [2022/04/06 15:47:28 ET]
+Table '3388263971 5' 6-max Seat #3 is the button
+Seat 1: Matyrina (5088 in chips)
+Seat 2: rolgus77 (3000 in chips)
+Seat 3: captainzizou (7213 in chips)
+Seat 4: AAfreddyAA (2800 in chips)
+Seat 5: jeje_sat (14148 in chips)
+Seat 6: ESFANJAARA (3015 in chips)
+AAfreddyAA: posts small blind 100
+jeje_sat: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qd Ah 4c 9d]
+ESFANJAARA: folds
+Matyrina: raises 200 to 400
+rolgus77: folds
+captainzizou: folds
+AAfreddyAA: folds
+jeje_sat: folds
+Uncalled bet (200) returned to Matyrina
+Matyrina collected 500 from pot
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: Matyrina collected (500)
+Seat 2: rolgus77 folded before Flop (didn't bet)
+Seat 3: captainzizou (button) folded before Flop (didn't bet)
+Seat 4: AAfreddyAA (small blind) folded before Flop
+Seat 5: jeje_sat (big blind) folded before Flop
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310696024: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 21:48:36 CET [2022/04/06 15:48:36 ET]
+Table '3388263971 5' 6-max Seat #4 is the button
+Seat 1: Matyrina (5388 in chips)
+Seat 2: rolgus77 (3000 in chips)
+Seat 4: AAfreddyAA (2700 in chips)
+Seat 5: jeje_sat (13948 in chips)
+Seat 6: ESFANJAARA (3015 in chips)
+jeje_sat: posts small blind 125
+ESFANJAARA: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [8c Jh Ad Qs]
+Matyrina: folds
+rolgus77: folds
+AAfreddyAA: folds
+jeje_sat: folds
+Uncalled bet (125) returned to ESFANJAARA
+ESFANJAARA collected 250 from pot
+ESFANJAARA: doesn't show hand
+*** SUMMARY ***
+Total pot 250 | Rake 0
+Seat 1: Matyrina folded before Flop (didn't bet)
+Seat 2: rolgus77 folded before Flop (didn't bet)
+Seat 4: AAfreddyAA (button) folded before Flop (didn't bet)
+Seat 5: jeje_sat (small blind) folded before Flop
+Seat 6: ESFANJAARA (big blind) collected (250)
+
+
+PokerStars Hand #235310702353: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 21:48:51 CET [2022/04/06 15:48:51 ET]
+Table '3388263971 5' 6-max Seat #5 is the button
+Seat 1: Matyrina (5388 in chips)
+Seat 2: rolgus77 (3000 in chips)
+Seat 4: AAfreddyAA (2700 in chips)
+Seat 5: jeje_sat (13823 in chips)
+Seat 6: ESFANJAARA (3140 in chips)
+ESFANJAARA: posts small blind 125
+Matyrina: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 7h 8s 7s]
+rolgus77: folds
+AAfreddyAA: folds
+jeje_sat: folds
+ESFANJAARA: folds
+Uncalled bet (125) returned to Matyrina
+Matyrina collected 250 from pot
+*** SUMMARY ***
+Total pot 250 | Rake 0
+Seat 1: Matyrina (big blind) collected (250)
+Seat 2: rolgus77 folded before Flop (didn't bet)
+Seat 4: AAfreddyAA folded before Flop (didn't bet)
+Seat 5: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ESFANJAARA (small blind) folded before Flop
+
+
+PokerStars Hand #235310712323: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 21:49:16 CET [2022/04/06 15:49:16 ET]
+Table '3388263971 5' 6-max Seat #6 is the button
+Seat 1: Matyrina (5513 in chips)
+Seat 2: rolgus77 (3000 in chips)
+Seat 4: AAfreddyAA (2700 in chips)
+Seat 5: jeje_sat (13823 in chips)
+Seat 6: ESFANJAARA (3015 in chips)
+Matyrina: posts small blind 125
+rolgus77: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d Js 7d 6d]
+AAfreddyAA: folds
+jeje_sat: raises 500 to 750
+ESFANJAARA: folds
+Matyrina: calls 625
+rolgus77: folds
+*** FLOP *** [Jd 4c Jh]
+Matyrina: checks
+jeje_sat: bets 875
+Matyrina: calls 875
+*** TURN *** [Jd 4c Jh] [Qc]
+Matyrina: checks
+jeje_sat: bets 3500
+Matyrina: raises 388 to 3888 and is all-in
+jeje_sat: calls 388
+*** RIVER *** [Jd 4c Jh Qc] [3s]
+*** SHOW DOWN ***
+Matyrina: shows [Kc Kd 3c 6c] (two pair, Kings and Jacks)
+jeje_sat: shows [9d Js 7d 6d] (three of a kind, Jacks)
+jeje_sat collected 11276 from pot
+Matyrina finished the tournament
+*** SUMMARY ***
+Total pot 11276 | Rake 0
+Board [Jd 4c Jh Qc 3s]
+Seat 1: Matyrina (small blind) showed [Kc Kd 3c 6c] and lost with two pair, Kings and Jacks
+Seat 2: rolgus77 (big blind) folded before Flop
+Seat 4: AAfreddyAA folded before Flop (didn't bet)
+Seat 5: jeje_sat showed [9d Js 7d 6d] and won (11276) with three of a kind, Jacks
+Seat 6: ESFANJAARA (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310737956: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 21:50:19 CET [2022/04/06 15:50:19 ET]
+Table '3388263971 5' 6-max Seat #2 is the button
+Seat 2: rolgus77 (2750 in chips)
+Seat 3: Pumg (6640 in chips) out of hand (moved from another table into small blind)
+Seat 4: AAfreddyAA (2700 in chips)
+Seat 5: jeje_sat (19586 in chips)
+Seat 6: ESFANJAARA (3015 in chips)
+Pumg will be allowed to play after the button
+AAfreddyAA: posts small blind 125
+jeje_sat: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [6d 5s Ah 2s]
+ESFANJAARA: folds
+rolgus77: calls 250
+AAfreddyAA: folds
+jeje_sat: checks
+*** FLOP *** [6h Jd Ad]
+jeje_sat: checks
+rolgus77: checks
+*** TURN *** [6h Jd Ad] [2h]
+jeje_sat: bets 313
+rolgus77: calls 313
+*** RIVER *** [6h Jd Ad 2h] [6s]
+jeje_sat: bets 1251
+rolgus77: folds
+Uncalled bet (1251) returned to jeje_sat
+jeje_sat collected 1251 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1251 | Rake 0
+Board [6h Jd Ad 2h 6s]
+Seat 2: rolgus77 (button) folded on the River
+Seat 4: AAfreddyAA (small blind) folded before Flop
+Seat 5: jeje_sat (big blind) collected (1251)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310783671: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 21:51:57 CET [2022/04/06 15:51:57 ET]
+Table '3388263971 5' 6-max Seat #4 is the button
+Seat 1: BluntBeer (9155 in chips)
+Seat 2: rolgus77 (2187 in chips)
+Seat 3: Pumg (6640 in chips)
+Seat 4: AAfreddyAA (2575 in chips)
+Seat 5: jeje_sat (20274 in chips)
+Seat 6: ESFANJAARA (3015 in chips)
+jeje_sat: posts small blind 125
+ESFANJAARA: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [7c 9h 4d Td]
+BluntBeer: calls 250
+rolgus77: folds
+Pumg: folds
+AAfreddyAA: folds
+jeje_sat: calls 125
+ESFANJAARA: checks
+*** FLOP *** [Th Qs 3h]
+jeje_sat: checks
+ESFANJAARA: checks
+BluntBeer: bets 750
+jeje_sat: folds
+ESFANJAARA: folds
+Uncalled bet (750) returned to BluntBeer
+BluntBeer collected 750 from pot
+*** SUMMARY ***
+Total pot 750 | Rake 0
+Board [Th Qs 3h]
+Seat 1: BluntBeer collected (750)
+Seat 2: rolgus77 folded before Flop (didn't bet)
+Seat 3: Pumg folded before Flop (didn't bet)
+Seat 4: AAfreddyAA (button) folded before Flop (didn't bet)
+Seat 5: jeje_sat (small blind) folded on the Flop
+Seat 6: ESFANJAARA (big blind) folded on the Flop
+
+
+PokerStars Hand #235310798705: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 21:52:33 CET [2022/04/06 15:52:33 ET]
+Table '3388263971 5' 6-max Seat #5 is the button
+Seat 1: BluntBeer (9655 in chips)
+Seat 2: rolgus77 (2187 in chips)
+Seat 3: Pumg (6640 in chips)
+Seat 4: AAfreddyAA (2575 in chips)
+Seat 5: jeje_sat (20024 in chips)
+Seat 6: ESFANJAARA (2765 in chips)
+ESFANJAARA: posts small blind 125
+BluntBeer: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks 5c 7d 4c]
+rolgus77: calls 250
+Pumg: folds
+AAfreddyAA: folds
+jeje_sat: folds
+ESFANJAARA: folds
+BluntBeer: checks
+*** FLOP *** [8d 9d Jc]
+BluntBeer: checks
+rolgus77: checks
+*** TURN *** [8d 9d Jc] [Jh]
+BluntBeer: checks
+rolgus77: checks
+*** RIVER *** [8d 9d Jc Jh] [As]
+BluntBeer: checks
+rolgus77: checks
+*** SHOW DOWN ***
+BluntBeer: shows [Kc Qc 5h 7s] (a pair of Jacks)
+rolgus77: shows [6h 6s Qs Ah] (two pair, Aces and Jacks)
+rolgus77 collected 625 from pot
+*** SUMMARY ***
+Total pot 625 | Rake 0
+Board [8d 9d Jc Jh As]
+Seat 1: BluntBeer (big blind) showed [Kc Qc 5h 7s] and lost with a pair of Jacks
+Seat 2: rolgus77 showed [6h 6s Qs Ah] and won (625) with two pair, Aces and Jacks
+Seat 3: Pumg folded before Flop (didn't bet)
+Seat 4: AAfreddyAA folded before Flop (didn't bet)
+Seat 5: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ESFANJAARA (small blind) folded before Flop
+
+
+PokerStars Hand #235310818545: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 21:53:21 CET [2022/04/06 15:53:21 ET]
+Table '3388263971 5' 6-max Seat #6 is the button
+Seat 1: BluntBeer (9405 in chips)
+Seat 2: rolgus77 (2562 in chips)
+Seat 3: Pumg (6640 in chips)
+Seat 4: AAfreddyAA (2575 in chips)
+Seat 5: jeje_sat (20024 in chips)
+Seat 6: ESFANJAARA (2640 in chips)
+BluntBeer: posts small blind 125
+rolgus77: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kc 5s 7c 2h]
+Pumg has timed out
+Pumg: folds
+Pumg is sitting out
+AAfreddyAA: folds
+Pumg has returned
+jeje_sat: folds
+ESFANJAARA: folds
+BluntBeer: raises 500 to 750
+rolgus77: folds
+Uncalled bet (500) returned to BluntBeer
+BluntBeer collected 500 from pot
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: BluntBeer (small blind) collected (500)
+Seat 2: rolgus77 (big blind) folded before Flop
+Seat 3: Pumg folded before Flop (didn't bet)
+Seat 4: AAfreddyAA folded before Flop (didn't bet)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310834643: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 21:54:00 CET [2022/04/06 15:54:00 ET]
+Table '3388263971 5' 6-max Seat #1 is the button
+Seat 1: BluntBeer (9655 in chips)
+Seat 2: rolgus77 (2312 in chips)
+Seat 3: Pumg (6640 in chips)
+Seat 4: AAfreddyAA (2575 in chips)
+Seat 5: jeje_sat (20024 in chips)
+Seat 6: ESFANJAARA (2640 in chips)
+rolgus77: posts small blind 125
+Pumg: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jh 8s Kc 5h]
+AAfreddyAA: raises 250 to 500
+jeje_sat: folds
+ESFANJAARA: folds
+BluntBeer: calls 500
+rolgus77: folds
+Pumg: calls 250
+*** FLOP *** [4h 6h 8h]
+Pumg: checks
+AAfreddyAA: bets 536
+BluntBeer: folds
+Pumg: folds
+Uncalled bet (536) returned to AAfreddyAA
+AAfreddyAA collected 1625 from pot
+AAfreddyAA: doesn't show hand
+*** SUMMARY ***
+Total pot 1625 | Rake 0
+Board [4h 6h 8h]
+Seat 1: BluntBeer (button) folded on the Flop
+Seat 2: rolgus77 (small blind) folded before Flop
+Seat 3: Pumg (big blind) folded on the Flop
+Seat 4: AAfreddyAA collected (1625)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310855904: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 21:54:52 CET [2022/04/06 15:54:52 ET]
+Table '3388263971 5' 6-max Seat #2 is the button
+Seat 1: BluntBeer (9155 in chips)
+Seat 2: rolgus77 (2187 in chips)
+Seat 3: Pumg (6140 in chips)
+Seat 4: AAfreddyAA (3700 in chips)
+Seat 5: jeje_sat (20024 in chips)
+Seat 6: ESFANJAARA (2640 in chips)
+Pumg: posts small blind 125
+AAfreddyAA: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [7s 2d Qc 6h]
+jeje_sat: folds
+ESFANJAARA: folds
+BluntBeer: raises 625 to 875
+rolgus77: folds
+Pumg: folds
+AAfreddyAA: folds
+Uncalled bet (625) returned to BluntBeer
+BluntBeer collected 625 from pot
+*** SUMMARY ***
+Total pot 625 | Rake 0
+Seat 1: BluntBeer collected (625)
+Seat 2: rolgus77 (button) folded before Flop (didn't bet)
+Seat 3: Pumg (small blind) folded before Flop
+Seat 4: AAfreddyAA (big blind) folded before Flop
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235310983861: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 22:01:28 CET [2022/04/06 16:01:28 ET]
+Table '3388263971 5' 6-max Seat #3 is the button
+Seat 1: BluntBeer (9530 in chips)
+Seat 2: rolgus77 (2187 in chips)
+Seat 3: Pumg (6015 in chips)
+Seat 4: AAfreddyAA (3450 in chips)
+Seat 5: jeje_sat (20024 in chips)
+Seat 6: ESFANJAARA (2640 in chips)
+AAfreddyAA: posts small blind 125
+jeje_sat: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [3s 5d Qd 7s]
+ESFANJAARA: raises 625 to 875
+BluntBeer: calls 875
+rolgus77: folds
+Pumg has timed out
+Pumg: folds
+Pumg is sitting out
+Pumg has returned
+AAfreddyAA: folds
+jeje_sat: folds
+*** FLOP *** [Jd Tc Ah]
+ESFANJAARA: bets 1765 and is all-in
+BluntBeer: folds
+Uncalled bet (1765) returned to ESFANJAARA
+ESFANJAARA collected 2125 from pot
+ESFANJAARA: doesn't show hand
+*** SUMMARY ***
+Total pot 2125 | Rake 0
+Board [Jd Tc Ah]
+Seat 1: BluntBeer folded on the Flop
+Seat 2: rolgus77 folded before Flop (didn't bet)
+Seat 3: Pumg (button) folded before Flop (didn't bet)
+Seat 4: AAfreddyAA (small blind) folded before Flop
+Seat 5: jeje_sat (big blind) folded before Flop
+Seat 6: ESFANJAARA collected (2125)
+
+
+PokerStars Hand #235311014439: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 22:02:44 CET [2022/04/06 16:02:44 ET]
+Table '3388263971 5' 6-max Seat #4 is the button
+Seat 1: BluntBeer (8655 in chips)
+Seat 2: rolgus77 (2187 in chips)
+Seat 3: Pumg (6015 in chips)
+Seat 4: AAfreddyAA (3325 in chips)
+Seat 5: jeje_sat (19774 in chips)
+Seat 6: ESFANJAARA (3890 in chips)
+jeje_sat: posts small blind 150
+ESFANJAARA: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [5s 2s Th 8h]
+BluntBeer: raises 750 to 1050
+rolgus77: folds
+Pumg has timed out
+Pumg: folds
+Pumg is sitting out
+Pumg has returned
+AAfreddyAA: calls 1050
+jeje_sat: folds
+ESFANJAARA: folds
+*** FLOP *** [8c 8d Kh]
+BluntBeer: bets 2550
+AAfreddyAA: calls 2275 and is all-in
+Uncalled bet (275) returned to BluntBeer
+*** TURN *** [8c 8d Kh] [2c]
+*** RIVER *** [8c 8d Kh 2c] [4h]
+*** SHOW DOWN ***
+BluntBeer: shows [Qc 5d 7c Ah] (a pair of Eights)
+AAfreddyAA: shows [3h Kd Qs As] (two pair, Kings and Eights)
+AAfreddyAA collected 7100 from pot
+*** SUMMARY ***
+Total pot 7100 | Rake 0
+Board [8c 8d Kh 2c 4h]
+Seat 1: BluntBeer showed [Qc 5d 7c Ah] and lost with a pair of Eights
+Seat 2: rolgus77 folded before Flop (didn't bet)
+Seat 3: Pumg folded before Flop (didn't bet)
+Seat 4: AAfreddyAA (button) showed [3h Kd Qs As] and won (7100) with two pair, Kings and Eights
+Seat 5: jeje_sat (small blind) folded before Flop
+Seat 6: ESFANJAARA (big blind) folded before Flop
+
+
+PokerStars Hand #235311041682: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 22:03:51 CET [2022/04/06 16:03:51 ET]
+Table '3388263971 5' 6-max Seat #5 is the button
+Seat 1: BluntBeer (5330 in chips)
+Seat 2: rolgus77 (2187 in chips)
+Seat 4: AAfreddyAA (7100 in chips)
+Seat 5: jeje_sat (19624 in chips)
+Seat 6: ESFANJAARA (3590 in chips)
+ESFANJAARA: posts small blind 150
+BluntBeer: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 4h 7c 7h]
+rolgus77 has timed out
+rolgus77: folds
+rolgus77 is sitting out
+AAfreddyAA: folds
+rolgus77 has returned
+jeje_sat: folds
+ESFANJAARA: raises 600 to 900
+BluntBeer: raises 1800 to 2700
+ESFANJAARA: raises 890 to 3590 and is all-in
+BluntBeer: calls 890
+*** FLOP *** [Kd As 5s]
+*** TURN *** [Kd As 5s] [8c]
+*** RIVER *** [Kd As 5s 8c] [3h]
+*** SHOW DOWN ***
+ESFANJAARA: shows [3d Qh 6h Ac] (two pair, Aces and Threes)
+BluntBeer: shows [9h Jd 4c Js] (a pair of Jacks)
+ESFANJAARA collected 7180 from pot
+*** SUMMARY ***
+Total pot 7180 | Rake 0
+Board [Kd As 5s 8c 3h]
+Seat 1: BluntBeer (big blind) showed [9h Jd 4c Js] and lost with a pair of Jacks
+Seat 2: rolgus77 folded before Flop (didn't bet)
+Seat 4: AAfreddyAA folded before Flop (didn't bet)
+Seat 5: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ESFANJAARA (small blind) showed [3d Qh 6h Ac] and won (7180) with two pair, Aces and Threes
+
+
+PokerStars Hand #235311083018: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 22:05:14 CET [2022/04/06 16:05:14 ET]
+Table '3388263971 5' 6-max Seat #6 is the button
+Seat 1: BluntBeer (1740 in chips)
+Seat 2: rolgus77 (2187 in chips)
+Seat 3: tranquille41 (2078 in chips)
+Seat 4: AAfreddyAA (7100 in chips)
+Seat 5: jeje_sat (19624 in chips)
+Seat 6: ESFANJAARA (7180 in chips)
+BluntBeer: posts small blind 150
+rolgus77: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th Ts 7c Jd]
+tranquille41: folds
+AAfreddyAA: raises 300 to 600
+jeje_sat: folds
+ESFANJAARA: folds
+BluntBeer: raises 1140 to 1740 and is all-in
+rolgus77: folds
+AAfreddyAA: calls 1140
+*** FLOP *** [Tc 6d Kh]
+*** TURN *** [Tc 6d Kh] [2d]
+*** RIVER *** [Tc 6d Kh 2d] [Ad]
+*** SHOW DOWN ***
+BluntBeer: shows [3d 6s As 4d] (a flush, Ace high)
+AAfreddyAA: shows [Ah 9d Js 3h] (a pair of Aces)
+BluntBeer collected 3780 from pot
+*** SUMMARY ***
+Total pot 3780 | Rake 0
+Board [Tc 6d Kh 2d Ad]
+Seat 1: BluntBeer (small blind) showed [3d 6s As 4d] and won (3780) with a flush, Ace high
+Seat 2: rolgus77 (big blind) folded before Flop
+Seat 3: tranquille41 folded before Flop (didn't bet)
+Seat 4: AAfreddyAA showed [Ah 9d Js 3h] and lost with a pair of Aces
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311115168: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 22:06:31 CET [2022/04/06 16:06:31 ET]
+Table '3388263971 5' 6-max Seat #1 is the button
+Seat 1: BluntBeer (3780 in chips)
+Seat 2: rolgus77 (1887 in chips)
+Seat 3: tranquille41 (2078 in chips)
+Seat 4: AAfreddyAA (5360 in chips)
+Seat 5: jeje_sat (19624 in chips)
+Seat 6: ESFANJAARA (7180 in chips)
+rolgus77: posts small blind 150
+tranquille41: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [6d Td 9c 4s]
+AAfreddyAA: folds
+jeje_sat: folds
+ESFANJAARA: folds
+BluntBeer: folds
+rolgus77: calls 150
+tranquille41: checks
+*** FLOP *** [Tc 9s Js]
+rolgus77: checks
+tranquille41: checks
+*** TURN *** [Tc 9s Js] [2d]
+rolgus77: checks
+tranquille41: checks
+*** RIVER *** [Tc 9s Js 2d] [3d]
+rolgus77: bets 300
+tranquille41: calls 300
+*** SHOW DOWN ***
+rolgus77: shows [Ac Kc 6h 6s] (a pair of Sixes)
+tranquille41: shows [3c Kh Ah 9h] (two pair, Nines and Threes)
+tranquille41 collected 1200 from pot
+*** SUMMARY ***
+Total pot 1200 | Rake 0
+Board [Tc 9s Js 2d 3d]
+Seat 1: BluntBeer (button) folded before Flop (didn't bet)
+Seat 2: rolgus77 (small blind) showed [Ac Kc 6h 6s] and lost with a pair of Sixes
+Seat 3: tranquille41 (big blind) showed [3c Kh Ah 9h] and won (1200) with two pair, Nines and Threes
+Seat 4: AAfreddyAA folded before Flop (didn't bet)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311134378: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 22:07:18 CET [2022/04/06 16:07:18 ET]
+Table '3388263971 5' 6-max Seat #2 is the button
+Seat 1: BluntBeer (3780 in chips)
+Seat 2: rolgus77 (1287 in chips)
+Seat 3: tranquille41 (2678 in chips)
+Seat 4: AAfreddyAA (5360 in chips)
+Seat 5: jeje_sat (19624 in chips)
+Seat 6: ESFANJAARA (7180 in chips)
+tranquille41: posts small blind 150
+AAfreddyAA: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [9h 5c 9c As]
+jeje_sat has timed out
+jeje_sat: folds
+jeje_sat is sitting out
+ESFANJAARA: folds
+BluntBeer: folds
+rolgus77: calls 300
+tranquille41: folds
+AAfreddyAA: checks
+*** FLOP *** [5h Ac Qd]
+AAfreddyAA: checks
+rolgus77: checks
+*** TURN *** [5h Ac Qd] [Jh]
+AAfreddyAA: checks
+rolgus77: checks
+*** RIVER *** [5h Ac Qd Jh] [3c]
+AAfreddyAA: checks
+rolgus77: checks
+*** SHOW DOWN ***
+AAfreddyAA: shows [6c Ks 7d Ad] (a pair of Aces)
+rolgus77: mucks hand
+AAfreddyAA collected 750 from pot
+*** SUMMARY ***
+Total pot 750 | Rake 0
+Board [5h Ac Qd Jh 3c]
+Seat 1: BluntBeer folded before Flop (didn't bet)
+Seat 2: rolgus77 (button) mucked [5d Th 9s Ts]
+Seat 3: tranquille41 (small blind) folded before Flop
+Seat 4: AAfreddyAA (big blind) showed [6c Ks 7d Ad] and won (750) with a pair of Aces
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311166963: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 22:08:36 CET [2022/04/06 16:08:36 ET]
+Table '3388263971 5' 6-max Seat #3 is the button
+Seat 1: BluntBeer (3780 in chips)
+Seat 2: rolgus77 (987 in chips)
+Seat 3: tranquille41 (2528 in chips)
+Seat 4: AAfreddyAA (5810 in chips)
+Seat 5: jeje_sat (19624 in chips) is sitting out
+Seat 6: ESFANJAARA (7180 in chips)
+AAfreddyAA: posts small blind 150
+jeje_sat: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [9c Jd 7s 6c]
+ESFANJAARA: folds
+BluntBeer: raises 750 to 1050
+rolgus77: calls 987 and is all-in
+tranquille41: folds
+AAfreddyAA: raises 3387 to 4437
+jeje_sat: folds
+BluntBeer: calls 2730 and is all-in
+Uncalled bet (657) returned to AAfreddyAA
+*** FLOP *** [Ts 5s Tc]
+*** TURN *** [Ts 5s Tc] [3h]
+*** RIVER *** [Ts 5s Tc 3h] [Th]
+*** SHOW DOWN ***
+AAfreddyAA: shows [6h 5c As Ac] (a full house, Tens full of Aces)
+BluntBeer: shows [4h 3c Qh 7c] (three of a kind, Tens)
+AAfreddyAA collected 5586 from side pot
+rolgus77: shows [Td Js Ad 9d] (four of a kind, Tens)
+rolgus77 collected 3261 from main pot
+BluntBeer finished the tournament in 54th place
+*** SUMMARY ***
+Total pot 8847 Main pot 3261. Side pot 5586. | Rake 0
+Board [Ts 5s Tc 3h Th]
+Seat 1: BluntBeer showed [4h 3c Qh 7c] and lost with three of a kind, Tens
+Seat 2: rolgus77 showed [Td Js Ad 9d] and won (3261) with four of a kind, Tens
+Seat 3: tranquille41 (button) folded before Flop (didn't bet)
+Seat 4: AAfreddyAA (small blind) showed [6h 5c As Ac] and won (5586) with a full house, Tens full of Aces
+Seat 5: jeje_sat (big blind) folded before Flop
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311182651: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 22:09:15 CET [2022/04/06 16:09:15 ET]
+Table '3388263971 5' 6-max Seat #4 is the button
+Seat 2: rolgus77 (3261 in chips)
+Seat 3: tranquille41 (2528 in chips)
+Seat 4: AAfreddyAA (7616 in chips)
+Seat 5: jeje_sat (19324 in chips) is sitting out
+Seat 6: ESFANJAARA (7180 in chips)
+jeje_sat: posts small blind 150
+ESFANJAARA: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d 7c Tc Kd]
+rolgus77: calls 300
+tranquille41: folds
+AAfreddyAA: folds
+jeje_sat: folds
+ESFANJAARA: checks
+*** FLOP *** [2d Kh 3s]
+ESFANJAARA: checks
+rolgus77: checks
+*** TURN *** [2d Kh 3s] [8c]
+ESFANJAARA: checks
+rolgus77: checks
+*** RIVER *** [2d Kh 3s 8c] [4c]
+ESFANJAARA: checks
+rolgus77: checks
+*** SHOW DOWN ***
+ESFANJAARA: shows [Td 9c 2h Jh] (a pair of Deuces)
+rolgus77: shows [2c 6c Js As] (a pair of Deuces - Ace kicker)
+rolgus77 collected 750 from pot
+*** SUMMARY ***
+Total pot 750 | Rake 0
+Board [2d Kh 3s 8c 4c]
+Seat 2: rolgus77 showed [2c 6c Js As] and won (750) with a pair of Deuces
+Seat 3: tranquille41 folded before Flop (didn't bet)
+Seat 4: AAfreddyAA (button) folded before Flop (didn't bet)
+Seat 5: jeje_sat (small blind) folded before Flop
+Seat 6: ESFANJAARA (big blind) showed [Td 9c 2h Jh] and lost with a pair of Deuces
+
+
+PokerStars Hand #235311204180: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 22:10:07 CET [2022/04/06 16:10:07 ET]
+Table '3388263971 5' 6-max Seat #5 is the button
+Seat 2: rolgus77 (3711 in chips)
+Seat 3: tranquille41 (2528 in chips)
+Seat 4: AAfreddyAA (7616 in chips)
+Seat 5: jeje_sat (19174 in chips) is sitting out
+Seat 6: ESFANJAARA (6880 in chips)
+ESFANJAARA: posts small blind 150
+rolgus77: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [5s 2s 8h Kd]
+jeje_sat has returned
+tranquille41: calls 300
+AAfreddyAA: raises 300 to 600
+jeje_sat: folds
+ESFANJAARA: folds
+rolgus77: folds
+tranquille41: calls 300
+*** FLOP *** [Jc 4h 3s]
+tranquille41: checks
+AAfreddyAA: checks
+*** TURN *** [Jc 4h 3s] [7s]
+tranquille41: checks
+AAfreddyAA: checks
+*** RIVER *** [Jc 4h 3s 7s] [7d]
+tranquille41: checks
+AAfreddyAA: checks
+*** SHOW DOWN ***
+tranquille41: shows [5h Th 3d Ts] (two pair, Tens and Sevens)
+AAfreddyAA: shows [Jd 9h As Ks] (two pair, Jacks and Sevens)
+AAfreddyAA collected 1650 from pot
+*** SUMMARY ***
+Total pot 1650 | Rake 0
+Board [Jc 4h 3s 7s 7d]
+Seat 2: rolgus77 (big blind) folded before Flop
+Seat 3: tranquille41 showed [5h Th 3d Ts] and lost with two pair, Tens and Sevens
+Seat 4: AAfreddyAA showed [Jd 9h As Ks] and won (1650) with two pair, Jacks and Sevens
+Seat 5: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ESFANJAARA (small blind) folded before Flop
+
+
+PokerStars Hand #235311241630: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 22:11:37 CET [2022/04/06 16:11:37 ET]
+Table '3388263971 5' 6-max Seat #6 is the button
+Seat 2: rolgus77 (3411 in chips)
+Seat 3: tranquille41 (1928 in chips)
+Seat 4: AAfreddyAA (8666 in chips)
+Seat 5: jeje_sat (19174 in chips)
+Seat 6: ESFANJAARA (6730 in chips)
+rolgus77: posts small blind 200
+tranquille41: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [7c Kc 2s Ks]
+AAfreddyAA: folds
+jeje_sat: raises 1000 to 1400
+ESFANJAARA: folds
+rolgus77: folds
+tranquille41: folds
+Uncalled bet (1000) returned to jeje_sat
+jeje_sat collected 1000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Seat 2: rolgus77 (small blind) folded before Flop
+Seat 3: tranquille41 (big blind) folded before Flop
+Seat 4: AAfreddyAA folded before Flop (didn't bet)
+Seat 5: jeje_sat collected (1000)
+Seat 6: ESFANJAARA (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311253961: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 22:12:07 CET [2022/04/06 16:12:07 ET]
+Table '3388263971 5' 6-max Seat #2 is the button
+Seat 2: rolgus77 (3211 in chips)
+Seat 3: tranquille41 (1528 in chips)
+Seat 4: AAfreddyAA (8666 in chips)
+Seat 5: jeje_sat (19774 in chips)
+Seat 6: ESFANJAARA (6730 in chips)
+tranquille41: posts small blind 200
+AAfreddyAA: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ac 5h 9s 9h]
+jeje_sat: folds
+ESFANJAARA: folds
+rolgus77: folds
+tranquille41: raises 800 to 1200
+AAfreddyAA: folds
+Uncalled bet (800) returned to tranquille41
+tranquille41 collected 800 from pot
+*** SUMMARY ***
+Total pot 800 | Rake 0
+Seat 2: rolgus77 (button) folded before Flop (didn't bet)
+Seat 3: tranquille41 (small blind) collected (800)
+Seat 4: AAfreddyAA (big blind) folded before Flop
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311265747: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 22:12:36 CET [2022/04/06 16:12:36 ET]
+Table '3388263971 5' 6-max Seat #3 is the button
+Seat 1: bobaice (4700 in chips)
+Seat 2: rolgus77 (3211 in chips)
+Seat 3: tranquille41 (1928 in chips)
+Seat 4: AAfreddyAA (8266 in chips)
+Seat 5: jeje_sat (19774 in chips)
+Seat 6: ESFANJAARA (6730 in chips)
+AAfreddyAA: posts small blind 200
+jeje_sat: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [2c 6d As 2h]
+ESFANJAARA: folds
+bobaice: folds
+rolgus77: folds
+tranquille41: folds
+AAfreddyAA: folds
+Uncalled bet (200) returned to jeje_sat
+jeje_sat collected 400 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 400 | Rake 0
+Seat 1: bobaice folded before Flop (didn't bet)
+Seat 2: rolgus77 folded before Flop (didn't bet)
+Seat 3: tranquille41 (button) folded before Flop (didn't bet)
+Seat 4: AAfreddyAA (small blind) folded before Flop
+Seat 5: jeje_sat (big blind) collected (400)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311277104: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 22:13:04 CET [2022/04/06 16:13:04 ET]
+Table '3388263971 5' 6-max Seat #4 is the button
+Seat 1: bobaice (4700 in chips)
+Seat 2: rolgus77 (3211 in chips)
+Seat 3: tranquille41 (1928 in chips)
+Seat 4: AAfreddyAA (8066 in chips)
+Seat 5: jeje_sat (19974 in chips)
+Seat 6: ESFANJAARA (6730 in chips)
+jeje_sat: posts small blind 200
+ESFANJAARA: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [2c Jd 5d Qh]
+bobaice has timed out
+bobaice: folds
+bobaice is sitting out
+rolgus77: folds
+bobaice has returned
+tranquille41: folds
+AAfreddyAA: folds
+jeje_sat: folds
+Uncalled bet (200) returned to ESFANJAARA
+ESFANJAARA collected 400 from pot
+ESFANJAARA: doesn't show hand
+*** SUMMARY ***
+Total pot 400 | Rake 0
+Seat 1: bobaice folded before Flop (didn't bet)
+Seat 2: rolgus77 folded before Flop (didn't bet)
+Seat 3: tranquille41 folded before Flop (didn't bet)
+Seat 4: AAfreddyAA (button) folded before Flop (didn't bet)
+Seat 5: jeje_sat (small blind) folded before Flop
+Seat 6: ESFANJAARA (big blind) collected (400)
+
+
+PokerStars Hand #235311291473: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 22:13:39 CET [2022/04/06 16:13:39 ET]
+Table '3388263971 5' 6-max Seat #5 is the button
+Seat 1: bobaice (4700 in chips)
+Seat 2: rolgus77 (3211 in chips)
+Seat 3: tranquille41 (1928 in chips)
+Seat 4: AAfreddyAA (8066 in chips)
+Seat 5: jeje_sat (19774 in chips)
+Seat 6: ESFANJAARA (6930 in chips)
+ESFANJAARA: posts small blind 200
+bobaice: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h 9d Js Ad]
+rolgus77: folds
+tranquille41: folds
+AAfreddyAA: folds
+jeje_sat: raises 1000 to 1400
+ESFANJAARA: folds
+bobaice: folds
+Uncalled bet (1000) returned to jeje_sat
+jeje_sat collected 1000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Seat 1: bobaice (big blind) folded before Flop
+Seat 2: rolgus77 folded before Flop (didn't bet)
+Seat 3: tranquille41 folded before Flop (didn't bet)
+Seat 4: AAfreddyAA folded before Flop (didn't bet)
+Seat 5: jeje_sat (button) collected (1000)
+Seat 6: ESFANJAARA (small blind) folded before Flop
+
+
+PokerStars Hand #235311307557: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 22:14:18 CET [2022/04/06 16:14:18 ET]
+Table '3388263971 5' 6-max Seat #6 is the button
+Seat 1: bobaice (4300 in chips)
+Seat 2: rolgus77 (3211 in chips)
+Seat 3: tranquille41 (1928 in chips)
+Seat 4: AAfreddyAA (8066 in chips)
+Seat 5: jeje_sat (20374 in chips)
+Seat 6: ESFANJAARA (6730 in chips)
+bobaice: posts small blind 200
+rolgus77: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [9h Th 4c 8d]
+tranquille41: folds
+AAfreddyAA: folds
+jeje_sat: folds
+ESFANJAARA: folds
+bobaice: raises 800 to 1200
+rolgus77: calls 800
+*** FLOP *** [9d 6h 2d]
+bobaice: checks
+rolgus77: checks
+*** TURN *** [9d 6h 2d] [Ks]
+bobaice: bets 800
+rolgus77: calls 800
+*** RIVER *** [9d 6h 2d Ks] [5h]
+bobaice: bets 1600
+rolgus77: calls 1211 and is all-in
+Uncalled bet (389) returned to bobaice
+*** SHOW DOWN ***
+bobaice: shows [2s 2h As Jd] (three of a kind, Deuces)
+rolgus77: shows [Kd 5c 5d 2c] (three of a kind, Fives)
+rolgus77 collected 6422 from pot
+*** SUMMARY ***
+Total pot 6422 | Rake 0
+Board [9d 6h 2d Ks 5h]
+Seat 1: bobaice (small blind) showed [2s 2h As Jd] and lost with three of a kind, Deuces
+Seat 2: rolgus77 (big blind) showed [Kd 5c 5d 2c] and won (6422) with three of a kind, Fives
+Seat 3: tranquille41 folded before Flop (didn't bet)
+Seat 4: AAfreddyAA folded before Flop (didn't bet)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311335768: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 22:15:26 CET [2022/04/06 16:15:26 ET]
+Table '3388263971 5' 6-max Seat #1 is the button
+Seat 1: bobaice (1089 in chips)
+Seat 2: rolgus77 (6422 in chips)
+Seat 3: tranquille41 (1928 in chips)
+Seat 4: AAfreddyAA (8066 in chips)
+Seat 5: jeje_sat (20374 in chips)
+Seat 6: ESFANJAARA (6730 in chips)
+rolgus77: posts small blind 200
+tranquille41: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [8d Qd 6d 7s]
+AAfreddyAA: folds
+jeje_sat: folds
+ESFANJAARA: folds
+bobaice: raises 689 to 1089 and is all-in
+rolgus77: calls 889
+tranquille41: folds
+*** FLOP *** [Jh 5d 7d]
+*** TURN *** [Jh 5d 7d] [7h]
+*** RIVER *** [Jh 5d 7d 7h] [5s]
+*** SHOW DOWN ***
+rolgus77: shows [8h 9h Th 8s] (two pair, Eights and Sevens)
+bobaice: shows [Qs As Ad 6h] (two pair, Aces and Sevens)
+bobaice collected 2578 from pot
+*** SUMMARY ***
+Total pot 2578 | Rake 0
+Board [Jh 5d 7d 7h 5s]
+Seat 1: bobaice (button) showed [Qs As Ad 6h] and won (2578) with two pair, Aces and Sevens
+Seat 2: rolgus77 (small blind) showed [8h 9h Th 8s] and lost with two pair, Eights and Sevens
+Seat 3: tranquille41 (big blind) folded before Flop
+Seat 4: AAfreddyAA folded before Flop (didn't bet)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311354480: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 22:16:10 CET [2022/04/06 16:16:10 ET]
+Table '3388263971 5' 6-max Seat #2 is the button
+Seat 1: bobaice (2578 in chips)
+Seat 2: rolgus77 (5333 in chips)
+Seat 3: tranquille41 (1528 in chips)
+Seat 4: AAfreddyAA (8066 in chips)
+Seat 5: jeje_sat (20374 in chips)
+Seat 6: ESFANJAARA (6730 in chips)
+tranquille41: posts small blind 200
+AAfreddyAA: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qc Jh 3c Td]
+jeje_sat: folds
+ESFANJAARA: folds
+bobaice: calls 400
+rolgus77: raises 1400 to 1800
+tranquille41: folds
+AAfreddyAA: folds
+bobaice: raises 778 to 2578 and is all-in
+rolgus77: calls 778
+*** FLOP *** [2c 9s Qd]
+*** TURN *** [2c 9s Qd] [6d]
+*** RIVER *** [2c 9s Qd 6d] [8h]
+*** SHOW DOWN ***
+bobaice: shows [5c Ks Ts Qh] (a pair of Queens)
+rolgus77: shows [6s Ac Ah Kh] (a pair of Aces)
+rolgus77 collected 5756 from pot
+bobaice finished the tournament in 43rd place
+*** SUMMARY ***
+Total pot 5756 | Rake 0
+Board [2c 9s Qd 6d 8h]
+Seat 1: bobaice showed [5c Ks Ts Qh] and lost with a pair of Queens
+Seat 2: rolgus77 (button) showed [6s Ac Ah Kh] and won (5756) with a pair of Aces
+Seat 3: tranquille41 (small blind) folded before Flop
+Seat 4: AAfreddyAA (big blind) folded before Flop
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: ESFANJAARA folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311376468: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 22:17:02 CET [2022/04/06 16:17:02 ET]
+Table '3388263971 10' 6-max Seat #6 is the button
+Seat 1: ~tony.v~111 (2944 in chips)
+Seat 2: jeje_sat (20374 in chips)
+Seat 3: lecoupeur67 (7072 in chips)
+Seat 4: mickamanon91 (11201 in chips)
+Seat 5: sebix25 (12778 in chips)
+Seat 6: captainzizou (12313 in chips)
+~tony.v~111: posts small blind 200
+jeje_sat: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [2c 5d 7s 7d]
+lecoupeur67: raises 800 to 1200
+mickamanon91: folds
+sebix25: folds
+captainzizou: folds
+~tony.v~111: folds
+jeje_sat: folds
+Uncalled bet (800) returned to lecoupeur67
+lecoupeur67 collected 1000 from pot
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Seat 1: ~tony.v~111 (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 3: lecoupeur67 collected (1000)
+Seat 4: mickamanon91 folded before Flop (didn't bet)
+Seat 5: sebix25 folded before Flop (didn't bet)
+Seat 6: captainzizou (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311391017: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 22:17:36 CET [2022/04/06 16:17:36 ET]
+Table '3388263971 10' 6-max Seat #1 is the button
+Seat 1: ~tony.v~111 (2744 in chips)
+Seat 2: jeje_sat (19974 in chips)
+Seat 3: lecoupeur67 (7672 in chips)
+Seat 4: mickamanon91 (11201 in chips)
+Seat 5: sebix25 (12778 in chips)
+Seat 6: captainzizou (12313 in chips)
+jeje_sat: posts small blind 200
+lecoupeur67: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th Ad Qh 7c]
+mickamanon91: folds
+sebix25: folds
+captainzizou: folds
+~tony.v~111: calls 400
+jeje_sat: calls 200
+lecoupeur67: checks
+*** FLOP *** [Js 8h 8c]
+jeje_sat: checks
+lecoupeur67: checks
+~tony.v~111: bets 400
+jeje_sat: folds
+lecoupeur67: folds
+Uncalled bet (400) returned to ~tony.v~111
+~tony.v~111 collected 1200 from pot
+*** SUMMARY ***
+Total pot 1200 | Rake 0
+Board [Js 8h 8c]
+Seat 1: ~tony.v~111 (button) collected (1200)
+Seat 2: jeje_sat (small blind) folded on the Flop
+Seat 3: lecoupeur67 (big blind) folded on the Flop
+Seat 4: mickamanon91 folded before Flop (didn't bet)
+Seat 5: sebix25 folded before Flop (didn't bet)
+Seat 6: captainzizou folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311417173: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level X (300/600) - 2022/04/06 22:18:38 CET [2022/04/06 16:18:38 ET]
+Table '3388263971 10' 6-max Seat #2 is the button
+Seat 1: ~tony.v~111 (3544 in chips)
+Seat 2: jeje_sat (19574 in chips)
+Seat 3: lecoupeur67 (7272 in chips)
+Seat 4: mickamanon91 (11201 in chips)
+Seat 5: sebix25 (12778 in chips)
+Seat 6: captainzizou (12313 in chips)
+lecoupeur67: posts small blind 300
+mickamanon91: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks Ac Qs Th]
+sebix25: raises 600 to 1200
+captainzizou: folds
+~tony.v~111: folds
+jeje_sat: raises 3300 to 4500
+lecoupeur67: folds
+mickamanon91: folds
+sebix25: folds
+Uncalled bet (3300) returned to jeje_sat
+jeje_sat collected 3300 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 3300 | Rake 0
+Seat 1: ~tony.v~111 folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) collected (3300)
+Seat 3: lecoupeur67 (small blind) folded before Flop
+Seat 4: mickamanon91 (big blind) folded before Flop
+Seat 5: sebix25 folded before Flop
+Seat 6: captainzizou folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311431946: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level X (300/600) - 2022/04/06 22:19:13 CET [2022/04/06 16:19:13 ET]
+Table '3388263971 10' 6-max Seat #3 is the button
+Seat 1: ~tony.v~111 (3544 in chips)
+Seat 2: jeje_sat (21674 in chips)
+Seat 3: lecoupeur67 (6972 in chips)
+Seat 4: mickamanon91 (10601 in chips)
+Seat 5: sebix25 (11578 in chips)
+Seat 6: captainzizou (12313 in chips)
+mickamanon91: posts small blind 300
+sebix25: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kh Qh Js 2h]
+captainzizou: calls 600
+~tony.v~111: folds
+jeje_sat: folds
+lecoupeur67: raises 2100 to 2700
+mickamanon91: folds
+sebix25: folds
+captainzizou: folds
+Uncalled bet (2100) returned to lecoupeur67
+lecoupeur67 collected 2100 from pot
+*** SUMMARY ***
+Total pot 2100 | Rake 0
+Seat 1: ~tony.v~111 folded before Flop (didn't bet)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: lecoupeur67 (button) collected (2100)
+Seat 4: mickamanon91 (small blind) folded before Flop
+Seat 5: sebix25 (big blind) folded before Flop
+Seat 6: captainzizou folded before Flop
+
+
+PokerStars Hand #235311449455: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level X (300/600) - 2022/04/06 22:19:54 CET [2022/04/06 16:19:54 ET]
+Table '3388263971 10' 6-max Seat #4 is the button
+Seat 1: ~tony.v~111 (3544 in chips)
+Seat 2: jeje_sat (21674 in chips)
+Seat 3: lecoupeur67 (8472 in chips)
+Seat 4: mickamanon91 (10301 in chips)
+Seat 5: sebix25 (10978 in chips)
+Seat 6: captainzizou (11713 in chips)
+sebix25: posts small blind 300
+captainzizou: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [As 7d Kc Kh]
+~tony.v~111: folds
+jeje_sat: raises 1500 to 2100
+lecoupeur67: folds
+mickamanon91: calls 2100
+sebix25: folds
+captainzizou: folds
+*** FLOP *** [9d 9s 3s]
+jeje_sat: bets 2550
+mickamanon91: folds
+Uncalled bet (2550) returned to jeje_sat
+jeje_sat collected 5100 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 5100 | Rake 0
+Board [9d 9s 3s]
+Seat 1: ~tony.v~111 folded before Flop (didn't bet)
+Seat 2: jeje_sat collected (5100)
+Seat 3: lecoupeur67 folded before Flop (didn't bet)
+Seat 4: mickamanon91 (button) folded on the Flop
+Seat 5: sebix25 (small blind) folded before Flop
+Seat 6: captainzizou (big blind) folded before Flop
+
+
+PokerStars Hand #235311474223: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level X (300/600) - 2022/04/06 22:20:53 CET [2022/04/06 16:20:53 ET]
+Table '3388263971 10' 6-max Seat #5 is the button
+Seat 1: ~tony.v~111 (3544 in chips)
+Seat 2: jeje_sat (24674 in chips)
+Seat 3: lecoupeur67 (8472 in chips)
+Seat 4: mickamanon91 (8201 in chips)
+Seat 5: sebix25 (10678 in chips)
+Seat 6: captainzizou (11113 in chips)
+captainzizou: posts small blind 300
+~tony.v~111: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts Jc 4d 6c]
+jeje_sat: folds
+lecoupeur67: raises 1500 to 2100
+mickamanon91: folds
+sebix25: folds
+captainzizou: folds
+~tony.v~111: folds
+Uncalled bet (1500) returned to lecoupeur67
+lecoupeur67 collected 1500 from pot
+*** SUMMARY ***
+Total pot 1500 | Rake 0
+Seat 1: ~tony.v~111 (big blind) folded before Flop
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: lecoupeur67 collected (1500)
+Seat 4: mickamanon91 folded before Flop (didn't bet)
+Seat 5: sebix25 (button) folded before Flop (didn't bet)
+Seat 6: captainzizou (small blind) folded before Flop
+
+
+PokerStars Hand #235311484062: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level X (300/600) - 2022/04/06 22:21:15 CET [2022/04/06 16:21:15 ET]
+Table '3388263971 10' 6-max Seat #6 is the button
+Seat 1: ~tony.v~111 (2944 in chips)
+Seat 2: jeje_sat (24674 in chips)
+Seat 3: lecoupeur67 (9372 in chips)
+Seat 4: mickamanon91 (8201 in chips)
+Seat 5: sebix25 (10678 in chips)
+Seat 6: captainzizou (10813 in chips)
+~tony.v~111: posts small blind 300
+jeje_sat: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [8h 6s Jd 5s]
+lecoupeur67: folds
+mickamanon91: raises 600 to 1200
+sebix25: folds
+captainzizou: folds
+~tony.v~111: calls 900
+jeje_sat: folds
+*** FLOP *** [Td Ts 7h]
+~tony.v~111: checks
+mickamanon91: bets 1500
+~tony.v~111: calls 1500
+*** TURN *** [Td Ts 7h] [8s]
+~tony.v~111: checks
+mickamanon91: bets 3000
+~tony.v~111: calls 244 and is all-in
+Uncalled bet (2756) returned to mickamanon91
+*** RIVER *** [Td Ts 7h 8s] [Kc]
+*** SHOW DOWN ***
+~tony.v~111: shows [Qd Jh 3h Qc] (two pair, Queens and Tens)
+mickamanon91: shows [Ad 6d 3c As] (two pair, Aces and Tens)
+mickamanon91 collected 6488 from pot
+~tony.v~111 finished the tournament in 37th place
+*** SUMMARY ***
+Total pot 6488 | Rake 0
+Board [Td Ts 7h 8s Kc]
+Seat 1: ~tony.v~111 (small blind) showed [Qd Jh 3h Qc] and lost with two pair, Queens and Tens
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 3: lecoupeur67 folded before Flop (didn't bet)
+Seat 4: mickamanon91 showed [Ad 6d 3c As] and won (6488) with two pair, Aces and Tens
+Seat 5: sebix25 folded before Flop (didn't bet)
+Seat 6: captainzizou (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311529890: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level X (300/600) - 2022/04/06 22:23:04 CET [2022/04/06 16:23:04 ET]
+Table '3388263971 7' 6-max Seat #6 is the button
+Seat 1: sam_lion2850 (6398 in chips)
+Seat 2: jazz27220 (12109 in chips)
+Seat 3: noydufccg53 (12054 in chips)
+Seat 4: nAAbila (22761 in chips)
+Seat 5: jeje_sat (24074 in chips)
+Seat 6: fastshedy (16552 in chips)
+sam_lion2850: posts small blind 300
+jazz27220: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s Td Tc 5h]
+noydufccg53: folds
+nAAbila: raises 600 to 1200
+jeje_sat: folds
+fastshedy: folds
+sam_lion2850: folds
+jazz27220: folds
+Uncalled bet (600) returned to nAAbila
+nAAbila collected 1500 from pot
+*** SUMMARY ***
+Total pot 1500 | Rake 0
+Seat 1: sam_lion2850 (small blind) folded before Flop
+Seat 2: jazz27220 (big blind) folded before Flop
+Seat 3: noydufccg53 folded before Flop (didn't bet)
+Seat 4: nAAbila collected (1500)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: fastshedy (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311554401: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level X (300/600) - 2022/04/06 22:24:02 CET [2022/04/06 16:24:02 ET]
+Table '3388263971 7' 6-max Seat #1 is the button
+Seat 1: sam_lion2850 (6098 in chips)
+Seat 2: jazz27220 (11509 in chips)
+Seat 3: noydufccg53 (12054 in chips)
+Seat 4: nAAbila (23661 in chips)
+Seat 5: jeje_sat (24074 in chips)
+Seat 6: fastshedy (16552 in chips)
+jazz27220: posts small blind 300
+noydufccg53: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [5c Ts Kh 6c]
+nAAbila: folds
+jeje_sat: folds
+fastshedy: calls 600
+sam_lion2850: folds
+jazz27220: folds
+noydufccg53: checks
+*** FLOP *** [Kc 4d 2h]
+noydufccg53: bets 675
+fastshedy: calls 675
+*** TURN *** [Kc 4d 2h] [As]
+noydufccg53: bets 1283
+fastshedy: folds
+Uncalled bet (1283) returned to noydufccg53
+noydufccg53 collected 2850 from pot
+noydufccg53: doesn't show hand
+*** SUMMARY ***
+Total pot 2850 | Rake 0
+Board [Kc 4d 2h As]
+Seat 1: sam_lion2850 (button) folded before Flop (didn't bet)
+Seat 2: jazz27220 (small blind) folded before Flop
+Seat 3: noydufccg53 (big blind) collected (2850)
+Seat 4: nAAbila folded before Flop (didn't bet)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: fastshedy folded on the Turn
+
+
+PokerStars Hand #235311576901: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level X (300/600) - 2022/04/06 22:24:56 CET [2022/04/06 16:24:56 ET]
+Table '3388263971 7' 6-max Seat #2 is the button
+Seat 1: sam_lion2850 (6098 in chips)
+Seat 2: jazz27220 (11209 in chips)
+Seat 3: noydufccg53 (13629 in chips)
+Seat 4: nAAbila (23661 in chips)
+Seat 5: jeje_sat (24074 in chips)
+Seat 6: fastshedy (15277 in chips)
+noydufccg53: posts small blind 300
+nAAbila: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th 8d 6c 5d]
+jeje_sat: raises 1200 to 1800
+fastshedy: folds
+sam_lion2850: folds
+jazz27220: folds
+noydufccg53: folds
+nAAbila: folds
+Uncalled bet (1200) returned to jeje_sat
+jeje_sat collected 1500 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1500 | Rake 0
+Seat 1: sam_lion2850 folded before Flop (didn't bet)
+Seat 2: jazz27220 (button) folded before Flop (didn't bet)
+Seat 3: noydufccg53 (small blind) folded before Flop
+Seat 4: nAAbila (big blind) folded before Flop
+Seat 5: jeje_sat collected (1500)
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311591835: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level X (300/600) - 2022/04/06 22:25:24 CET [2022/04/06 16:25:24 ET]
+Table '3388263971 7' 6-max Seat #3 is the button
+Seat 1: sam_lion2850 (6098 in chips)
+Seat 2: jazz27220 (11209 in chips)
+Seat 3: noydufccg53 (13329 in chips)
+Seat 4: nAAbila (23061 in chips)
+Seat 5: jeje_sat (24974 in chips)
+Seat 6: fastshedy (15277 in chips)
+nAAbila: posts small blind 300
+jeje_sat: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qc 7c 8h Js]
+fastshedy: folds
+sam_lion2850: folds
+jazz27220: folds
+noydufccg53: calls 600
+nAAbila: folds
+jeje_sat: checks
+*** FLOP *** [Ks Qd 6h]
+jeje_sat: checks
+noydufccg53: bets 1050
+jeje_sat: folds
+Uncalled bet (1050) returned to noydufccg53
+noydufccg53 collected 1500 from pot
+noydufccg53: doesn't show hand
+*** SUMMARY ***
+Total pot 1500 | Rake 0
+Board [Ks Qd 6h]
+Seat 1: sam_lion2850 folded before Flop (didn't bet)
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 3: noydufccg53 (button) collected (1500)
+Seat 4: nAAbila (small blind) folded before Flop
+Seat 5: jeje_sat (big blind) folded on the Flop
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311607331: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level X (300/600) - 2022/04/06 22:26:00 CET [2022/04/06 16:26:00 ET]
+Table '3388263971 7' 6-max Seat #4 is the button
+Seat 1: sam_lion2850 (6098 in chips)
+Seat 2: jazz27220 (11209 in chips)
+Seat 3: noydufccg53 (14229 in chips)
+Seat 4: nAAbila (22761 in chips)
+Seat 5: jeje_sat (24374 in chips)
+Seat 6: fastshedy (15277 in chips)
+jeje_sat: posts small blind 300
+fastshedy: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [4c 5s 4h Ad]
+sam_lion2850: folds
+jazz27220: folds
+noydufccg53: raises 600 to 1200
+nAAbila: calls 1200
+jeje_sat: folds
+fastshedy: calls 600
+*** FLOP *** [Tc Qd Kc]
+fastshedy: checks
+noydufccg53: checks
+nAAbila: bets 3900
+fastshedy: calls 3900
+noydufccg53: folds
+*** TURN *** [Tc Qd Kc] [Qh]
+fastshedy: bets 600
+nAAbila: calls 600
+*** RIVER *** [Tc Qd Kc Qh] [9s]
+fastshedy: bets 600
+nAAbila: calls 600
+*** SHOW DOWN ***
+fastshedy: shows [Js 4s 9d 7h] (a straight, Nine to King)
+nAAbila: shows [Jh Ac Th 2d] (a straight, Ten to Ace)
+nAAbila collected 14100 from pot
+*** SUMMARY ***
+Total pot 14100 | Rake 0
+Board [Tc Qd Kc Qh 9s]
+Seat 1: sam_lion2850 folded before Flop (didn't bet)
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 3: noydufccg53 folded on the Flop
+Seat 4: nAAbila (button) showed [Jh Ac Th 2d] and won (14100) with a straight, Ten to Ace
+Seat 5: jeje_sat (small blind) folded before Flop
+Seat 6: fastshedy (big blind) showed [Js 4s 9d 7h] and lost with a straight, Nine to King
+
+
+PokerStars Hand #235311640647: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XI (400/800) - 2022/04/06 22:27:20 CET [2022/04/06 16:27:20 ET]
+Table '3388263971 7' 6-max Seat #5 is the button
+Seat 1: sam_lion2850 (6098 in chips)
+Seat 2: jazz27220 (11209 in chips)
+Seat 3: noydufccg53 (13029 in chips)
+Seat 4: nAAbila (30561 in chips)
+Seat 5: jeje_sat (24074 in chips)
+Seat 6: fastshedy (8977 in chips)
+fastshedy: posts small blind 400
+sam_lion2850: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [5c 9h 3d 8s]
+jazz27220: raises 1600 to 2400
+noydufccg53: folds
+nAAbila: folds
+jeje_sat: folds
+fastshedy: folds
+sam_lion2850: folds
+Uncalled bet (1600) returned to jazz27220
+jazz27220 collected 2000 from pot
+jazz27220: doesn't show hand
+*** SUMMARY ***
+Total pot 2000 | Rake 0
+Seat 1: sam_lion2850 (big blind) folded before Flop
+Seat 2: jazz27220 collected (2000)
+Seat 3: noydufccg53 folded before Flop (didn't bet)
+Seat 4: nAAbila folded before Flop (didn't bet)
+Seat 5: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: fastshedy (small blind) folded before Flop
+
+
+PokerStars Hand #235311651376: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XI (400/800) - 2022/04/06 22:27:46 CET [2022/04/06 16:27:46 ET]
+Table '3388263971 7' 6-max Seat #6 is the button
+Seat 1: sam_lion2850 (5298 in chips)
+Seat 2: jazz27220 (12409 in chips)
+Seat 3: noydufccg53 (13029 in chips)
+Seat 4: nAAbila (30561 in chips)
+Seat 5: jeje_sat (24074 in chips)
+Seat 6: fastshedy (8577 in chips)
+sam_lion2850: posts small blind 400
+jazz27220: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc Ks 2c 3c]
+noydufccg53: folds
+nAAbila: raises 800 to 1600
+jeje_sat: folds
+fastshedy: calls 1600
+sam_lion2850: folds
+jazz27220: folds
+*** FLOP *** [Th 7s 7d]
+nAAbila: bets 2200
+fastshedy: raises 4200 to 6400
+nAAbila: folds
+Uncalled bet (4200) returned to fastshedy
+fastshedy collected 8800 from pot
+fastshedy: doesn't show hand
+*** SUMMARY ***
+Total pot 8800 | Rake 0
+Board [Th 7s 7d]
+Seat 1: sam_lion2850 (small blind) folded before Flop
+Seat 2: jazz27220 (big blind) folded before Flop
+Seat 3: noydufccg53 folded before Flop (didn't bet)
+Seat 4: nAAbila folded on the Flop
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: fastshedy (button) collected (8800)
+
+
+PokerStars Hand #235311674335: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XI (400/800) - 2022/04/06 22:28:42 CET [2022/04/06 16:28:42 ET]
+Table '3388263971 7' 6-max Seat #1 is the button
+Seat 1: sam_lion2850 (4898 in chips)
+Seat 2: jazz27220 (11609 in chips)
+Seat 3: noydufccg53 (13029 in chips)
+Seat 4: nAAbila (26761 in chips)
+Seat 5: jeje_sat (24074 in chips)
+Seat 6: fastshedy (13577 in chips)
+jazz27220: posts small blind 400
+noydufccg53: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [7c 4c Ad 8c]
+nAAbila: folds
+jeje_sat: folds
+fastshedy: folds
+sam_lion2850: folds
+jazz27220: calls 400
+noydufccg53: checks
+*** FLOP *** [Qs 4d 3h]
+jazz27220: checks
+noydufccg53: checks
+*** TURN *** [Qs 4d 3h] [9s]
+jazz27220: bets 1600
+noydufccg53: calls 1600
+*** RIVER *** [Qs 4d 3h 9s] [Qh]
+jazz27220: checks
+noydufccg53: checks
+*** SHOW DOWN ***
+jazz27220: shows [6c Tc 6s Ks] (two pair, Queens and Sixes)
+noydufccg53: mucks hand
+jazz27220 collected 4800 from pot
+*** SUMMARY ***
+Total pot 4800 | Rake 0
+Board [Qs 4d 3h 9s Qh]
+Seat 1: sam_lion2850 (button) folded before Flop (didn't bet)
+Seat 2: jazz27220 (small blind) showed [6c Tc 6s Ks] and won (4800) with two pair, Queens and Sixes
+Seat 3: noydufccg53 (big blind) mucked [2d Jd 5h Kh]
+Seat 4: nAAbila folded before Flop (didn't bet)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311704970: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XI (400/800) - 2022/04/06 22:29:47 CET [2022/04/06 16:29:47 ET]
+Table '3388263971 7' 6-max Seat #2 is the button
+Seat 1: sam_lion2850 (4898 in chips)
+Seat 2: jazz27220 (14009 in chips)
+Seat 3: noydufccg53 (10629 in chips)
+Seat 4: nAAbila (26761 in chips)
+Seat 5: jeje_sat (24074 in chips)
+Seat 6: fastshedy (13577 in chips)
+noydufccg53: posts small blind 400
+nAAbila: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [Js 8h Ad Qh]
+jeje_sat: folds
+fastshedy: calls 800
+sam_lion2850 has timed out
+sam_lion2850: folds
+sam_lion2850 is sitting out
+jazz27220: folds
+noydufccg53: folds
+sam_lion2850 has returned
+nAAbila: checks
+*** FLOP *** [Tc 4h 3d]
+nAAbila: checks
+fastshedy: checks
+*** TURN *** [Tc 4h 3d] [6h]
+nAAbila: bets 1000
+fastshedy: calls 1000
+*** RIVER *** [Tc 4h 3d 6h] [3c]
+nAAbila: bets 2000
+fastshedy: folds
+Uncalled bet (2000) returned to nAAbila
+nAAbila collected 4000 from pot
+nAAbila: doesn't show hand
+*** SUMMARY ***
+Total pot 4000 | Rake 0
+Board [Tc 4h 3d 6h 3c]
+Seat 1: sam_lion2850 folded before Flop (didn't bet)
+Seat 2: jazz27220 (button) folded before Flop (didn't bet)
+Seat 3: noydufccg53 (small blind) folded before Flop
+Seat 4: nAAbila (big blind) collected (4000)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: fastshedy folded on the River
+
+
+PokerStars Hand #235311736935: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XI (400/800) - 2022/04/06 22:31:03 CET [2022/04/06 16:31:03 ET]
+Table '3388263971 7' 6-max Seat #3 is the button
+Seat 1: sam_lion2850 (4898 in chips)
+Seat 2: jazz27220 (14009 in chips)
+Seat 3: noydufccg53 (10229 in chips)
+Seat 4: nAAbila (28961 in chips)
+Seat 5: jeje_sat (24074 in chips)
+Seat 6: fastshedy (11777 in chips)
+nAAbila: posts small blind 400
+jeje_sat: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [7c Kc As 5h]
+fastshedy: folds
+sam_lion2850: folds
+jazz27220: folds
+noydufccg53: folds
+nAAbila: raises 1600 to 2400
+jeje_sat: folds
+Uncalled bet (1600) returned to nAAbila
+nAAbila collected 1600 from pot
+*** SUMMARY ***
+Total pot 1600 | Rake 0
+Seat 1: sam_lion2850 folded before Flop (didn't bet)
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 3: noydufccg53 (button) folded before Flop (didn't bet)
+Seat 4: nAAbila (small blind) collected (1600)
+Seat 5: jeje_sat (big blind) folded before Flop
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311755865: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XI (400/800) - 2022/04/06 22:31:48 CET [2022/04/06 16:31:48 ET]
+Table '3388263971 7' 6-max Seat #4 is the button
+Seat 1: sam_lion2850 (4898 in chips)
+Seat 2: jazz27220 (14009 in chips)
+Seat 3: noydufccg53 (10229 in chips)
+Seat 4: nAAbila (29761 in chips)
+Seat 5: jeje_sat (23274 in chips)
+Seat 6: fastshedy (11777 in chips)
+jeje_sat: posts small blind 400
+fastshedy: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 2s Ts Ad]
+sam_lion2850: folds
+jazz27220: folds
+noydufccg53: folds
+nAAbila: folds
+jeje_sat: raises 1600 to 2400
+fastshedy: folds
+Uncalled bet (1600) returned to jeje_sat
+jeje_sat collected 1600 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1600 | Rake 0
+Seat 1: sam_lion2850 folded before Flop (didn't bet)
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 3: noydufccg53 folded before Flop (didn't bet)
+Seat 4: nAAbila (button) folded before Flop (didn't bet)
+Seat 5: jeje_sat (small blind) collected (1600)
+Seat 6: fastshedy (big blind) folded before Flop
+
+
+PokerStars Hand #235311779402: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XI (400/800) - 2022/04/06 22:32:44 CET [2022/04/06 16:32:44 ET]
+Table '3388263971 7' 6-max Seat #5 is the button
+Seat 1: sam_lion2850 (4898 in chips)
+Seat 2: jazz27220 (14009 in chips)
+Seat 3: noydufccg53 (10229 in chips)
+Seat 4: nAAbila (29761 in chips)
+Seat 5: jeje_sat (24074 in chips)
+Seat 6: fastshedy (10977 in chips)
+fastshedy: posts small blind 400
+sam_lion2850: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [5d 6s 8c 9d]
+jazz27220: folds
+noydufccg53: folds
+nAAbila: folds
+jeje_sat: raises 2000 to 2800
+fastshedy: folds
+sam_lion2850: calls 2000
+*** FLOP *** [7c 6d 2h]
+sam_lion2850: checks
+jeje_sat: bets 6000
+sam_lion2850: calls 2098 and is all-in
+Uncalled bet (3902) returned to jeje_sat
+*** TURN *** [7c 6d 2h] [Js]
+*** RIVER *** [7c 6d 2h Js] [4h]
+*** SHOW DOWN ***
+sam_lion2850: shows [Jc Qc Td Jd] (three of a kind, Jacks)
+jeje_sat: shows [5d 6s 8c 9d] (a straight, Four to Eight)
+jeje_sat collected 10196 from pot
+sam_lion2850 finished the tournament in 28th place
+*** SUMMARY ***
+Total pot 10196 | Rake 0
+Board [7c 6d 2h Js 4h]
+Seat 1: sam_lion2850 (big blind) showed [Jc Qc Td Jd] and lost with three of a kind, Jacks
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 3: noydufccg53 folded before Flop (didn't bet)
+Seat 4: nAAbila folded before Flop (didn't bet)
+Seat 5: jeje_sat (button) showed [5d 6s 8c 9d] and won (10196) with a straight, Four to Eight
+Seat 6: fastshedy (small blind) folded before Flop
+
+
+PokerStars Hand #235311803408: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XI (400/800) - 2022/04/06 22:33:42 CET [2022/04/06 16:33:42 ET]
+Table '3388263971 7' 6-max Seat #6 is the button
+Seat 2: jazz27220 (14009 in chips)
+Seat 3: noydufccg53 (10229 in chips)
+Seat 4: nAAbila (29761 in chips)
+Seat 5: jeje_sat (29372 in chips)
+Seat 6: fastshedy (10577 in chips)
+jazz27220: posts small blind 400
+noydufccg53: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [7s Ac Qd 9c]
+nAAbila: folds
+jeje_sat: raises 1600 to 2400
+fastshedy: folds
+jazz27220: folds
+noydufccg53: folds
+Uncalled bet (1600) returned to jeje_sat
+jeje_sat collected 2000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2000 | Rake 0
+Seat 2: jazz27220 (small blind) folded before Flop
+Seat 3: noydufccg53 (big blind) folded before Flop
+Seat 4: nAAbila folded before Flop (didn't bet)
+Seat 5: jeje_sat collected (2000)
+Seat 6: fastshedy (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311823016: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XI (400/800) - 2022/04/06 22:34:29 CET [2022/04/06 16:34:29 ET]
+Table '3388263971 7' 6-max Seat #2 is the button
+Seat 2: jazz27220 (13609 in chips)
+Seat 3: noydufccg53 (9429 in chips)
+Seat 4: nAAbila (29761 in chips)
+Seat 5: jeje_sat (30572 in chips)
+Seat 6: fastshedy (10577 in chips)
+noydufccg53: posts small blind 400
+nAAbila: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [2d 7d 4h 4c]
+jeje_sat: folds
+fastshedy: folds
+jazz27220 has timed out
+jazz27220: folds
+jazz27220 is sitting out
+jazz27220 has returned
+noydufccg53: calls 400
+nAAbila: raises 1600 to 2400
+noydufccg53: calls 1600
+*** FLOP *** [As 4d 7c]
+noydufccg53: checks
+nAAbila: bets 4800
+noydufccg53: folds
+Uncalled bet (4800) returned to nAAbila
+nAAbila collected 4800 from pot
+*** SUMMARY ***
+Total pot 4800 | Rake 0
+Board [As 4d 7c]
+Seat 2: jazz27220 (button) folded before Flop (didn't bet)
+Seat 3: noydufccg53 (small blind) folded on the Flop
+Seat 4: nAAbila (big blind) collected (4800)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311851054: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XII (500/1000) - 2022/04/06 22:35:37 CET [2022/04/06 16:35:37 ET]
+Table '3388263971 7' 6-max Seat #3 is the button
+Seat 2: jazz27220 (13609 in chips)
+Seat 3: noydufccg53 (7029 in chips)
+Seat 4: nAAbila (32161 in chips)
+Seat 5: jeje_sat (30572 in chips)
+Seat 6: fastshedy (10577 in chips)
+nAAbila: posts small blind 500
+jeje_sat: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [7c 3s Kh 6h]
+fastshedy: folds
+jazz27220: folds
+noydufccg53: folds
+nAAbila: folds
+Uncalled bet (500) returned to jeje_sat
+jeje_sat collected 1000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 3: noydufccg53 (button) folded before Flop (didn't bet)
+Seat 4: nAAbila (small blind) folded before Flop
+Seat 5: jeje_sat (big blind) collected (1000)
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311865247: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XII (500/1000) - 2022/04/06 22:36:11 CET [2022/04/06 16:36:11 ET]
+Table '3388263971 7' 6-max Seat #4 is the button
+Seat 2: jazz27220 (13609 in chips)
+Seat 3: noydufccg53 (7029 in chips)
+Seat 4: nAAbila (31661 in chips)
+Seat 5: jeje_sat (31072 in chips)
+Seat 6: fastshedy (10577 in chips)
+jeje_sat: posts small blind 500
+fastshedy: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [3d 4c Ah 7d]
+jazz27220: folds
+noydufccg53: folds
+nAAbila: raises 2500 to 3500
+jeje_sat: folds
+fastshedy: folds
+Uncalled bet (2500) returned to nAAbila
+nAAbila collected 2500 from pot
+*** SUMMARY ***
+Total pot 2500 | Rake 0
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 3: noydufccg53 folded before Flop (didn't bet)
+Seat 4: nAAbila (button) collected (2500)
+Seat 5: jeje_sat (small blind) folded before Flop
+Seat 6: fastshedy (big blind) folded before Flop
+
+
+PokerStars Hand #235311881186: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XII (500/1000) - 2022/04/06 22:36:51 CET [2022/04/06 16:36:51 ET]
+Table '3388263971 7' 6-max Seat #5 is the button
+Seat 2: jazz27220 (13609 in chips)
+Seat 3: noydufccg53 (7029 in chips)
+Seat 4: nAAbila (33161 in chips)
+Seat 5: jeje_sat (30572 in chips)
+Seat 6: fastshedy (9577 in chips)
+fastshedy: posts small blind 500
+jazz27220: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d Th 2h Qh]
+noydufccg53: folds
+nAAbila: folds
+jeje_sat: raises 2000 to 3000
+fastshedy: folds
+jazz27220: folds
+Uncalled bet (2000) returned to jeje_sat
+jeje_sat collected 2500 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2500 | Rake 0
+Seat 2: jazz27220 (big blind) folded before Flop
+Seat 3: noydufccg53 folded before Flop (didn't bet)
+Seat 4: nAAbila folded before Flop (didn't bet)
+Seat 5: jeje_sat (button) collected (2500)
+Seat 6: fastshedy (small blind) folded before Flop
+
+
+PokerStars Hand #235311897247: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XII (500/1000) - 2022/04/06 22:37:30 CET [2022/04/06 16:37:30 ET]
+Table '3388263971 7' 6-max Seat #6 is the button
+Seat 2: jazz27220 (12609 in chips)
+Seat 3: noydufccg53 (7029 in chips)
+Seat 4: nAAbila (33161 in chips)
+Seat 5: jeje_sat (32072 in chips)
+Seat 6: fastshedy (9077 in chips)
+jazz27220: posts small blind 500
+noydufccg53: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [6s 4c Th 9c]
+nAAbila: calls 1000
+jeje_sat: folds
+fastshedy: folds
+jazz27220: calls 500
+noydufccg53: checks
+*** FLOP *** [2h Js 5s]
+jazz27220: bets 3000
+noydufccg53: folds
+nAAbila: raises 9000 to 12000
+jazz27220: calls 8609 and is all-in
+Uncalled bet (391) returned to nAAbila
+*** TURN *** [2h Js 5s] [Ac]
+*** RIVER *** [2h Js 5s Ac] [3s]
+*** SHOW DOWN ***
+jazz27220: shows [6d Jd 5h Jc] (three of a kind, Jacks)
+nAAbila: shows [8h 5c 5d Qd] (three of a kind, Fives)
+jazz27220 collected 26218 from pot
+*** SUMMARY ***
+Total pot 26218 | Rake 0
+Board [2h Js 5s Ac 3s]
+Seat 2: jazz27220 (small blind) showed [6d Jd 5h Jc] and won (26218) with three of a kind, Jacks
+Seat 3: noydufccg53 (big blind) folded on the Flop
+Seat 4: nAAbila showed [8h 5c 5d Qd] and lost with three of a kind, Fives
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: fastshedy (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311914511: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XII (500/1000) - 2022/04/06 22:38:12 CET [2022/04/06 16:38:12 ET]
+Table '3388263971 7' 6-max Seat #2 is the button
+Seat 2: jazz27220 (26218 in chips)
+Seat 3: noydufccg53 (6029 in chips)
+Seat 4: nAAbila (20552 in chips)
+Seat 5: jeje_sat (32072 in chips)
+Seat 6: fastshedy (9077 in chips)
+noydufccg53: posts small blind 500
+nAAbila: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h Kc As 9d]
+jeje_sat: folds
+fastshedy: folds
+jazz27220: folds
+noydufccg53: folds
+Uncalled bet (500) returned to nAAbila
+nAAbila collected 1000 from pot
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Seat 2: jazz27220 (button) folded before Flop (didn't bet)
+Seat 3: noydufccg53 (small blind) folded before Flop
+Seat 4: nAAbila (big blind) collected (1000)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311925658: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XII (500/1000) - 2022/04/06 22:38:40 CET [2022/04/06 16:38:40 ET]
+Table '3388263971 7' 6-max Seat #3 is the button
+Seat 2: jazz27220 (26218 in chips)
+Seat 3: noydufccg53 (5529 in chips)
+Seat 4: nAAbila (21052 in chips)
+Seat 5: jeje_sat (32072 in chips)
+Seat 6: fastshedy (9077 in chips)
+nAAbila: posts small blind 500
+jeje_sat: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h 5d 5c 4c]
+fastshedy: folds
+jazz27220: folds
+noydufccg53: folds
+nAAbila: calls 500
+jeje_sat: checks
+*** FLOP *** [Jd 2s Qs]
+nAAbila: bets 1000
+jeje_sat: folds
+Uncalled bet (1000) returned to nAAbila
+nAAbila collected 2000 from pot
+*** SUMMARY ***
+Total pot 2000 | Rake 0
+Board [Jd 2s Qs]
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 3: noydufccg53 (button) folded before Flop (didn't bet)
+Seat 4: nAAbila (small blind) collected (2000)
+Seat 5: jeje_sat (big blind) folded on the Flop
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235311949224: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XII (500/1000) - 2022/04/06 22:39:38 CET [2022/04/06 16:39:38 ET]
+Table '3388263971 7' 6-max Seat #4 is the button
+Seat 1: Mcfish29 (13028 in chips)
+Seat 2: jazz27220 (26218 in chips)
+Seat 3: noydufccg53 (5529 in chips)
+Seat 4: nAAbila (22052 in chips)
+Seat 5: jeje_sat (31072 in chips)
+Seat 6: fastshedy (9077 in chips)
+jeje_sat: posts small blind 500
+fastshedy: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h 2d As Jd]
+Mcfish29: folds
+jazz27220: folds
+noydufccg53: folds
+nAAbila: folds
+jeje_sat: calls 500
+fastshedy: checks
+*** FLOP *** [Qh 4s 3h]
+jeje_sat: checks
+fastshedy: checks
+*** TURN *** [Qh 4s 3h] [6d]
+jeje_sat: bets 2000
+fastshedy: folds
+Uncalled bet (2000) returned to jeje_sat
+jeje_sat collected 2000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2000 | Rake 0
+Board [Qh 4s 3h 6d]
+Seat 1: Mcfish29 folded before Flop (didn't bet)
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 3: noydufccg53 folded before Flop (didn't bet)
+Seat 4: nAAbila (button) folded before Flop (didn't bet)
+Seat 5: jeje_sat (small blind) collected (2000)
+Seat 6: fastshedy (big blind) folded on the Turn
+
+
+PokerStars Hand #235311983896: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XII (500/1000) - 2022/04/06 22:40:50 CET [2022/04/06 16:40:50 ET]
+Table '3388263971 7' 6-max Seat #5 is the button
+Seat 1: Mcfish29 (13028 in chips)
+Seat 2: jazz27220 (26218 in chips)
+Seat 3: noydufccg53 (5529 in chips)
+Seat 4: nAAbila (22052 in chips)
+Seat 5: jeje_sat (32072 in chips)
+Seat 6: fastshedy (8077 in chips)
+fastshedy: posts small blind 500
+Mcfish29: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h Kh 7c 4c]
+jazz27220: folds
+noydufccg53: folds
+nAAbila: raises 1000 to 2000
+jeje_sat: folds
+fastshedy: folds
+Mcfish29: calls 1000
+*** FLOP *** [4d 7s 2c]
+Mcfish29: checks
+nAAbila: bets 1000
+Mcfish29: folds
+Uncalled bet (1000) returned to nAAbila
+nAAbila collected 4500 from pot
+*** SUMMARY ***
+Total pot 4500 | Rake 0
+Board [4d 7s 2c]
+Seat 1: Mcfish29 (big blind) folded on the Flop
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 3: noydufccg53 folded before Flop (didn't bet)
+Seat 4: nAAbila collected (4500)
+Seat 5: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: fastshedy (small blind) folded before Flop
+
+
+PokerStars Hand #235312012203: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XII (500/1000) - 2022/04/06 22:41:38 CET [2022/04/06 16:41:38 ET]
+Table '3388263971 7' 6-max Seat #6 is the button
+Seat 1: Mcfish29 (11028 in chips)
+Seat 2: jazz27220 (26218 in chips)
+Seat 3: noydufccg53 (5529 in chips)
+Seat 4: nAAbila (24552 in chips)
+Seat 5: jeje_sat (32072 in chips)
+Seat 6: fastshedy (7577 in chips)
+Mcfish29: posts small blind 500
+jazz27220: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qs Ah 9s Jc]
+noydufccg53: folds
+nAAbila: raises 1000 to 2000
+jeje_sat: folds
+fastshedy: folds
+Mcfish29: folds
+jazz27220: calls 1000
+*** FLOP *** [6c 7s 6h]
+jazz27220: checks
+nAAbila: checks
+*** TURN *** [6c 7s 6h] [5d]
+jazz27220: checks
+nAAbila: bets 2250
+jazz27220: calls 2250
+*** RIVER *** [6c 7s 6h 5d] [8s]
+jazz27220: checks
+nAAbila: bets 4500
+jazz27220: calls 4500
+*** SHOW DOWN ***
+nAAbila: shows [3d 6d 8d 6s] (four of a kind, Sixes)
+jazz27220: mucks hand
+nAAbila collected 18000 from pot
+*** SUMMARY ***
+Total pot 18000 | Rake 0
+Board [6c 7s 6h 5d 8s]
+Seat 1: Mcfish29 (small blind) folded before Flop
+Seat 2: jazz27220 (big blind) mucked [Qh Qd 9d 7h]
+Seat 3: noydufccg53 folded before Flop (didn't bet)
+Seat 4: nAAbila showed [3d 6d 8d 6s] and won (18000) with four of a kind, Sixes
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: fastshedy (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312040584: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIII (600/1200) - 2022/04/06 22:42:48 CET [2022/04/06 16:42:48 ET]
+Table '3388263971 7' 6-max Seat #1 is the button
+Seat 1: Mcfish29 (10528 in chips)
+Seat 2: jazz27220 (17468 in chips)
+Seat 3: noydufccg53 (5529 in chips)
+Seat 4: nAAbila (33802 in chips)
+Seat 5: jeje_sat (32072 in chips)
+Seat 6: fastshedy (7577 in chips)
+jazz27220: posts small blind 600
+noydufccg53: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc Js 4h 7d]
+nAAbila: folds
+jeje_sat: folds
+fastshedy: calls 1200
+Mcfish29: folds
+jazz27220: folds
+noydufccg53: checks
+*** FLOP *** [Th Jd Kc]
+noydufccg53: checks
+fastshedy: bets 2400
+noydufccg53: folds
+Uncalled bet (2400) returned to fastshedy
+fastshedy collected 3000 from pot
+fastshedy: doesn't show hand
+*** SUMMARY ***
+Total pot 3000 | Rake 0
+Board [Th Jd Kc]
+Seat 1: Mcfish29 (button) folded before Flop (didn't bet)
+Seat 2: jazz27220 (small blind) folded before Flop
+Seat 3: noydufccg53 (big blind) folded on the Flop
+Seat 4: nAAbila folded before Flop (didn't bet)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: fastshedy collected (3000)
+
+
+PokerStars Hand #235312065752: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIII (600/1200) - 2022/04/06 22:43:52 CET [2022/04/06 16:43:52 ET]
+Table '3388263971 7' 6-max Seat #2 is the button
+Seat 1: Mcfish29 (10528 in chips)
+Seat 2: jazz27220 (16868 in chips)
+Seat 3: noydufccg53 (4329 in chips)
+Seat 4: nAAbila (33802 in chips)
+Seat 5: jeje_sat (32072 in chips)
+Seat 6: fastshedy (9377 in chips)
+noydufccg53: posts small blind 600
+nAAbila: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ad Tc Jc 9s]
+jeje_sat: raises 2400 to 3600
+fastshedy: folds
+Mcfish29: folds
+jazz27220: folds
+noydufccg53: folds
+nAAbila: folds
+Uncalled bet (2400) returned to jeje_sat
+jeje_sat collected 3000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 3000 | Rake 0
+Seat 1: Mcfish29 folded before Flop (didn't bet)
+Seat 2: jazz27220 (button) folded before Flop (didn't bet)
+Seat 3: noydufccg53 (small blind) folded before Flop
+Seat 4: nAAbila (big blind) folded before Flop
+Seat 5: jeje_sat collected (3000)
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312085839: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIII (600/1200) - 2022/04/06 22:44:42 CET [2022/04/06 16:44:42 ET]
+Table '3388263971 7' 6-max Seat #3 is the button
+Seat 1: Mcfish29 (10528 in chips)
+Seat 2: jazz27220 (16868 in chips)
+Seat 3: noydufccg53 (3729 in chips)
+Seat 4: nAAbila (32602 in chips)
+Seat 5: jeje_sat (33872 in chips)
+Seat 6: fastshedy (9377 in chips)
+nAAbila: posts small blind 600
+jeje_sat: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Js 8c Ts 4d]
+fastshedy: folds
+Mcfish29: folds
+jazz27220: folds
+noydufccg53: folds
+nAAbila: folds
+Uncalled bet (600) returned to jeje_sat
+jeje_sat collected 1200 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1200 | Rake 0
+Seat 1: Mcfish29 folded before Flop (didn't bet)
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 3: noydufccg53 (button) folded before Flop (didn't bet)
+Seat 4: nAAbila (small blind) folded before Flop
+Seat 5: jeje_sat (big blind) collected (1200)
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312110988: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIII (600/1200) - 2022/04/06 22:45:45 CET [2022/04/06 16:45:45 ET]
+Table '3388263971 7' 6-max Seat #4 is the button
+Seat 1: Mcfish29 (10528 in chips)
+Seat 2: jazz27220 (16868 in chips)
+Seat 3: noydufccg53 (3729 in chips)
+Seat 4: nAAbila (32002 in chips)
+Seat 5: jeje_sat (34472 in chips)
+Seat 6: fastshedy (9377 in chips)
+jeje_sat: posts small blind 600
+fastshedy: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Tc 3d Ac 6c]
+Mcfish29: folds
+jazz27220: folds
+noydufccg53: folds
+nAAbila: folds
+jeje_sat: raises 2400 to 3600
+fastshedy: folds
+Uncalled bet (2400) returned to jeje_sat
+jeje_sat collected 2400 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2400 | Rake 0
+Seat 1: Mcfish29 folded before Flop (didn't bet)
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 3: noydufccg53 folded before Flop (didn't bet)
+Seat 4: nAAbila (button) folded before Flop (didn't bet)
+Seat 5: jeje_sat (small blind) collected (2400)
+Seat 6: fastshedy (big blind) folded before Flop
+
+
+PokerStars Hand #235312140372: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIII (600/1200) - 2022/04/06 22:46:58 CET [2022/04/06 16:46:58 ET]
+Table '3388263971 7' 6-max Seat #5 is the button
+Seat 1: Mcfish29 (10528 in chips)
+Seat 2: jazz27220 (16868 in chips)
+Seat 3: noydufccg53 (3729 in chips)
+Seat 4: nAAbila (32002 in chips)
+Seat 5: jeje_sat (35672 in chips)
+Seat 6: fastshedy (8177 in chips)
+fastshedy: posts small blind 600
+Mcfish29: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s As 4c 9s]
+jazz27220: folds
+noydufccg53: folds
+nAAbila: folds
+jeje_sat: raises 3000 to 4200
+fastshedy: folds
+Mcfish29: calls 3000
+*** FLOP *** [7s 3h Jd]
+Mcfish29: bets 6328 and is all-in
+jeje_sat: folds
+Uncalled bet (6328) returned to Mcfish29
+Mcfish29 collected 9000 from pot
+Mcfish29: doesn't show hand
+*** SUMMARY ***
+Total pot 9000 | Rake 0
+Board [7s 3h Jd]
+Seat 1: Mcfish29 (big blind) collected (9000)
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 3: noydufccg53 folded before Flop (didn't bet)
+Seat 4: nAAbila folded before Flop (didn't bet)
+Seat 5: jeje_sat (button) folded on the Flop
+Seat 6: fastshedy (small blind) folded before Flop
+
+
+PokerStars Hand #235312170511: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIII (600/1200) - 2022/04/06 22:48:14 CET [2022/04/06 16:48:14 ET]
+Table '3388263971 7' 6-max Seat #6 is the button
+Seat 1: Mcfish29 (15328 in chips)
+Seat 2: jazz27220 (16868 in chips)
+Seat 3: noydufccg53 (3729 in chips)
+Seat 4: nAAbila (32002 in chips)
+Seat 5: jeje_sat (31472 in chips)
+Seat 6: fastshedy (7577 in chips)
+Mcfish29: posts small blind 600
+jazz27220: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [7s Kc 2d 2c]
+noydufccg53: folds
+nAAbila: raises 2400 to 3600
+jeje_sat: folds
+fastshedy: calls 3600
+Mcfish29: folds
+jazz27220: folds
+*** FLOP *** [Ks 9c Jc]
+nAAbila: bets 4500
+fastshedy: calls 3977 and is all-in
+Uncalled bet (523) returned to nAAbila
+*** TURN *** [Ks 9c Jc] [9h]
+*** RIVER *** [Ks 9c Jc 9h] [Td]
+*** SHOW DOWN ***
+nAAbila: shows [Ad Jh Js 4h] (a full house, Jacks full of Nines)
+fastshedy: shows [Th 9d 8d 9s] (four of a kind, Nines)
+fastshedy collected 16954 from pot
+*** SUMMARY ***
+Total pot 16954 | Rake 0
+Board [Ks 9c Jc 9h Td]
+Seat 1: Mcfish29 (small blind) folded before Flop
+Seat 2: jazz27220 (big blind) folded before Flop
+Seat 3: noydufccg53 folded before Flop (didn't bet)
+Seat 4: nAAbila showed [Ad Jh Js 4h] and lost with a full house, Jacks full of Nines
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: fastshedy (button) showed [Th 9d 8d 9s] and won (16954) with four of a kind, Nines
+
+
+PokerStars Hand #235312190763: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIII (600/1200) - 2022/04/06 22:49:04 CET [2022/04/06 16:49:04 ET]
+Table '3388263971 7' 6-max Seat #1 is the button
+Seat 1: Mcfish29 (14728 in chips)
+Seat 2: jazz27220 (15668 in chips)
+Seat 3: noydufccg53 (3729 in chips)
+Seat 4: nAAbila (24425 in chips)
+Seat 5: jeje_sat (31472 in chips)
+Seat 6: fastshedy (16954 in chips)
+jazz27220: posts small blind 600
+noydufccg53: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s Td Th Kd]
+nAAbila: folds
+jeje_sat: raises 2400 to 3600
+fastshedy: folds
+Mcfish29: folds
+jazz27220: folds
+noydufccg53: raises 129 to 3729 and is all-in
+jeje_sat: calls 129
+*** FLOP *** [7c 8c 7d]
+*** TURN *** [7c 8c 7d] [Qc]
+*** RIVER *** [7c 8c 7d Qc] [2h]
+*** SHOW DOWN ***
+noydufccg53: shows [9c 9h Kh Qh] (two pair, Queens and Sevens)
+jeje_sat: shows [8s Td Th Kd] (two pair, Tens and Sevens)
+noydufccg53 collected 8058 from pot
+*** SUMMARY ***
+Total pot 8058 | Rake 0
+Board [7c 8c 7d Qc 2h]
+Seat 1: Mcfish29 (button) folded before Flop (didn't bet)
+Seat 2: jazz27220 (small blind) folded before Flop
+Seat 3: noydufccg53 (big blind) showed [9c 9h Kh Qh] and won (8058) with two pair, Queens and Sevens
+Seat 4: nAAbila folded before Flop (didn't bet)
+Seat 5: jeje_sat showed [8s Td Th Kd] and lost with two pair, Tens and Sevens
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312203714: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIII (600/1200) - 2022/04/06 22:49:37 CET [2022/04/06 16:49:37 ET]
+Table '3388263971 7' 6-max Seat #2 is the button
+Seat 1: Mcfish29 (14728 in chips)
+Seat 2: jazz27220 (15068 in chips)
+Seat 3: noydufccg53 (8058 in chips)
+Seat 4: nAAbila (24425 in chips)
+Seat 5: jeje_sat (27743 in chips)
+Seat 6: fastshedy (16954 in chips)
+noydufccg53: posts small blind 600
+nAAbila: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jd Jc As 6s]
+jeje_sat: raises 3000 to 4200
+fastshedy: folds
+Mcfish29: folds
+jazz27220: folds
+noydufccg53: folds
+nAAbila: folds
+Uncalled bet (3000) returned to jeje_sat
+jeje_sat collected 3000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 3000 | Rake 0
+Seat 1: Mcfish29 folded before Flop (didn't bet)
+Seat 2: jazz27220 (button) folded before Flop (didn't bet)
+Seat 3: noydufccg53 (small blind) folded before Flop
+Seat 4: nAAbila (big blind) folded before Flop
+Seat 5: jeje_sat collected (3000)
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312220356: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIII (600/1200) - 2022/04/06 22:50:18 CET [2022/04/06 16:50:18 ET]
+Table '3388263971 7' 6-max Seat #3 is the button
+Seat 1: Mcfish29 (14728 in chips)
+Seat 2: jazz27220 (15068 in chips)
+Seat 3: noydufccg53 (7458 in chips)
+Seat 4: nAAbila (23225 in chips)
+Seat 5: jeje_sat (29543 in chips)
+Seat 6: fastshedy (16954 in chips)
+nAAbila: posts small blind 600
+jeje_sat: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h 4h 8h 3s]
+fastshedy: calls 1200
+Mcfish29: folds
+jazz27220: folds
+noydufccg53: folds
+nAAbila: folds
+jeje_sat: checks
+*** FLOP *** [6c Ah 5d]
+jeje_sat: checks
+fastshedy: checks
+*** TURN *** [6c Ah 5d] [Ks]
+jeje_sat: checks
+fastshedy: bets 1200
+jeje_sat: calls 1200
+*** RIVER *** [6c Ah 5d Ks] [6d]
+jeje_sat: checks
+fastshedy: checks
+*** SHOW DOWN ***
+jeje_sat: shows [3h 4h 8h 3s] (two pair, Sixes and Threes)
+fastshedy: shows [7c 7d 9c 9d] (two pair, Nines and Sixes)
+fastshedy collected 5400 from pot
+*** SUMMARY ***
+Total pot 5400 | Rake 0
+Board [6c Ah 5d Ks 6d]
+Seat 1: Mcfish29 folded before Flop (didn't bet)
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 3: noydufccg53 (button) folded before Flop (didn't bet)
+Seat 4: nAAbila (small blind) folded before Flop
+Seat 5: jeje_sat (big blind) showed [3h 4h 8h 3s] and lost with two pair, Sixes and Threes
+Seat 6: fastshedy showed [7c 7d 9c 9d] and won (5400) with two pair, Nines and Sixes
+
+
+PokerStars Hand #235312240309: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIV (800/1600) - 2022/04/06 22:51:09 CET [2022/04/06 16:51:09 ET]
+Table '3388263971 7' 6-max Seat #4 is the button
+Seat 1: Mcfish29 (14728 in chips)
+Seat 2: jazz27220 (15068 in chips)
+Seat 3: noydufccg53 (7458 in chips)
+Seat 4: nAAbila (22625 in chips)
+Seat 5: jeje_sat (27143 in chips)
+Seat 6: fastshedy (19954 in chips)
+jeje_sat: posts small blind 800
+fastshedy: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc Js Tc 5c]
+Mcfish29: folds
+jazz27220: folds
+noydufccg53: raises 1920 to 3520
+nAAbila: calls 3520
+jeje_sat: calls 2720
+fastshedy: calls 1920
+*** FLOP *** [7c 8d Ac]
+jeje_sat: checks
+fastshedy: checks
+noydufccg53: bets 3938 and is all-in
+nAAbila: calls 3938
+jeje_sat: raises 19685 to 23623 and is all-in
+fastshedy: folds
+nAAbila: folds
+Uncalled bet (19685) returned to jeje_sat
+*** TURN *** [7c 8d Ac] [2h]
+*** RIVER *** [7c 8d Ac 2h] [Jh]
+*** SHOW DOWN ***
+jeje_sat: shows [Jc Js Tc 5c] (three of a kind, Jacks)
+noydufccg53: shows [9d Qd 8s Qc] (a pair of Queens)
+jeje_sat collected 25894 from pot
+noydufccg53 finished the tournament in 22nd place and received €4.66.
+*** SUMMARY ***
+Total pot 25894 | Rake 0
+Board [7c 8d Ac 2h Jh]
+Seat 1: Mcfish29 folded before Flop (didn't bet)
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 3: noydufccg53 showed [9d Qd 8s Qc] and lost with a pair of Queens
+Seat 4: nAAbila (button) folded on the Flop
+Seat 5: jeje_sat (small blind) showed [Jc Js Tc 5c] and won (25894) with three of a kind, Jacks
+Seat 6: fastshedy (big blind) folded on the Flop
+
+
+PokerStars Hand #235312267014: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIV (800/1600) - 2022/04/06 22:52:16 CET [2022/04/06 16:52:16 ET]
+Table '3388263971 7' 6-max Seat #5 is the button
+Seat 1: Mcfish29 (14728 in chips)
+Seat 2: jazz27220 (15068 in chips)
+Seat 4: nAAbila (15167 in chips)
+Seat 5: jeje_sat (45579 in chips)
+Seat 6: fastshedy (16434 in chips)
+fastshedy: posts small blind 800
+Mcfish29: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Tc Ac 8c Ts]
+jazz27220: folds
+nAAbila: folds
+jeje_sat: raises 4000 to 5600
+fastshedy: folds
+Mcfish29: folds
+Uncalled bet (4000) returned to jeje_sat
+jeje_sat collected 4000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 4000 | Rake 0
+Seat 1: Mcfish29 (big blind) folded before Flop
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 4: nAAbila folded before Flop (didn't bet)
+Seat 5: jeje_sat (button) collected (4000)
+Seat 6: fastshedy (small blind) folded before Flop
+
+
+PokerStars Hand #235312278418: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIV (800/1600) - 2022/04/06 22:52:38 CET [2022/04/06 16:52:38 ET]
+Table '3388263971 7' 6-max Seat #6 is the button
+Seat 1: Mcfish29 (13128 in chips)
+Seat 2: jazz27220 (15068 in chips)
+Seat 4: nAAbila (15167 in chips)
+Seat 5: jeje_sat (47979 in chips)
+Seat 6: fastshedy (15634 in chips)
+Mcfish29: posts small blind 800
+jazz27220: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [3d 9s 5s Ad]
+nAAbila: raises 1600 to 3200
+jeje_sat: folds
+fastshedy: folds
+Mcfish29: folds
+jazz27220: folds
+Uncalled bet (1600) returned to nAAbila
+nAAbila collected 4000 from pot
+*** SUMMARY ***
+Total pot 4000 | Rake 0
+Seat 1: Mcfish29 (small blind) folded before Flop
+Seat 2: jazz27220 (big blind) folded before Flop
+Seat 4: nAAbila collected (4000)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: fastshedy (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312294867: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIV (800/1600) - 2022/04/06 22:53:19 CET [2022/04/06 16:53:19 ET]
+Table '3388263971 7' 6-max Seat #1 is the button
+Seat 1: Mcfish29 (12328 in chips)
+Seat 2: jazz27220 (13468 in chips)
+Seat 4: nAAbila (17567 in chips)
+Seat 5: jeje_sat (47979 in chips)
+Seat 6: fastshedy (15634 in chips)
+jazz27220: posts small blind 800
+nAAbila: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kd 5c 8c 5d]
+jeje_sat: folds
+fastshedy: folds
+Mcfish29 has timed out
+Mcfish29: folds
+Mcfish29 is sitting out
+Mcfish29 has returned
+jazz27220: folds
+Uncalled bet (800) returned to nAAbila
+nAAbila collected 1600 from pot
+*** SUMMARY ***
+Total pot 1600 | Rake 0
+Seat 1: Mcfish29 (button) folded before Flop (didn't bet)
+Seat 2: jazz27220 (small blind) folded before Flop
+Seat 4: nAAbila (big blind) collected (1600)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312313027: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIV (800/1600) - 2022/04/06 22:54:05 CET [2022/04/06 16:54:05 ET]
+Table '3388263971 7' 6-max Seat #2 is the button
+Seat 1: Mcfish29 (12328 in chips)
+Seat 2: jazz27220 (12668 in chips)
+Seat 4: nAAbila (18367 in chips)
+Seat 5: jeje_sat (47979 in chips)
+Seat 6: fastshedy (15634 in chips)
+nAAbila: posts small blind 800
+jeje_sat: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [7h Jh Ad Ah]
+fastshedy: folds
+Mcfish29: folds
+jazz27220: folds
+nAAbila: raises 1600 to 3200
+jeje_sat: raises 6400 to 9600
+nAAbila: folds
+Uncalled bet (6400) returned to jeje_sat
+jeje_sat collected 6400 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 6400 | Rake 0
+Seat 1: Mcfish29 folded before Flop (didn't bet)
+Seat 2: jazz27220 (button) folded before Flop (didn't bet)
+Seat 4: nAAbila (small blind) folded before Flop
+Seat 5: jeje_sat (big blind) collected (6400)
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312323926: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIV (800/1600) - 2022/04/06 22:54:33 CET [2022/04/06 16:54:33 ET]
+Table '3388263971 7' 6-max Seat #4 is the button
+Seat 1: Mcfish29 (12328 in chips)
+Seat 2: jazz27220 (12668 in chips)
+Seat 4: nAAbila (15167 in chips)
+Seat 5: jeje_sat (51179 in chips)
+Seat 6: fastshedy (15634 in chips)
+jeje_sat: posts small blind 800
+fastshedy: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [5d 8s 9h Td]
+Mcfish29: folds
+jazz27220: folds
+nAAbila: folds
+jeje_sat: folds
+Uncalled bet (800) returned to fastshedy
+fastshedy collected 1600 from pot
+fastshedy: doesn't show hand
+*** SUMMARY ***
+Total pot 1600 | Rake 0
+Seat 1: Mcfish29 folded before Flop (didn't bet)
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 4: nAAbila (button) folded before Flop (didn't bet)
+Seat 5: jeje_sat (small blind) folded before Flop
+Seat 6: fastshedy (big blind) collected (1600)
+
+
+PokerStars Hand #235312335403: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIV (800/1600) - 2022/04/06 22:55:02 CET [2022/04/06 16:55:02 ET]
+Table '3388263971 7' 6-max Seat #5 is the button
+Seat 1: Mcfish29 (12328 in chips)
+Seat 2: jazz27220 (12668 in chips)
+Seat 4: nAAbila (15167 in chips)
+Seat 5: jeje_sat (50379 in chips)
+Seat 6: fastshedy (16434 in chips)
+fastshedy: posts small blind 800
+Mcfish29: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [4c 5c Ah Kh]
+jazz27220: folds
+nAAbila: raises 1600 to 3200
+jeje_sat: calls 3200
+fastshedy: folds
+Mcfish29: calls 1600
+*** FLOP *** [5h Qs Ts]
+Mcfish29: checks
+nAAbila: bets 5200
+jeje_sat: folds
+Zz62480 is sitting out
+Zz62480 has returned
+Mcfish29: raises 3928 to 9128 and is all-in
+nAAbila: calls 3928
+*** TURN *** [5h Qs Ts] [4s]
+*** RIVER *** [5h Qs Ts 4s] [Ks]
+*** SHOW DOWN ***
+Mcfish29: shows [5s 9c Th 7c] (two pair, Tens and Fives)
+nAAbila: shows [As 2s 8c 9h] (a flush, Ace high)
+nAAbila collected 28656 from pot
+Mcfish29 finished the tournament in 18th place and received €4.66.
+*** SUMMARY ***
+Total pot 28656 | Rake 0
+Board [5h Qs Ts 4s Ks]
+Seat 1: Mcfish29 (big blind) showed [5s 9c Th 7c] and lost with two pair, Tens and Fives
+Seat 2: jazz27220 folded before Flop (didn't bet)
+Seat 4: nAAbila showed [As 2s 8c 9h] and won (28656) with a flush, Ace high
+Seat 5: jeje_sat (button) folded on the Flop
+Seat 6: fastshedy (small blind) folded before Flop
+
+
+PokerStars Hand #235312440622: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIV (800/1600) - 2022/04/06 23:00:44 CET [2022/04/06 17:00:44 ET]
+Table '3388263971 7' 6-max Seat #6 is the button
+Seat 2: jazz27220 (12668 in chips)
+Seat 3: Zz62480 (12304 in chips)
+Seat 4: nAAbila (31495 in chips)
+Seat 5: jeje_sat (47179 in chips)
+Seat 6: fastshedy (15634 in chips)
+jazz27220: posts small blind 800
+Zz62480: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [4h Ts Ah Kd]
+nAAbila: folds
+jeje_sat: raises 4000 to 5600
+fastshedy has timed out
+fastshedy: folds
+fastshedy is sitting out
+jazz27220: folds
+fastshedy has returned
+Zz62480 has timed out
+Zz62480: folds
+Zz62480 is sitting out
+Uncalled bet (4000) returned to jeje_sat
+jeje_sat collected 4000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 4000 | Rake 0
+Seat 2: jazz27220 (small blind) folded before Flop
+Seat 3: Zz62480 (big blind) folded before Flop
+Seat 4: nAAbila folded before Flop (didn't bet)
+Seat 5: jeje_sat collected (4000)
+Seat 6: fastshedy (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312460988: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIV (800/1600) - 2022/04/06 23:01:40 CET [2022/04/06 17:01:40 ET]
+Table '3388263971 7' 6-max Seat #2 is the button
+Seat 2: jazz27220 (11868 in chips)
+Seat 3: Zz62480 (10704 in chips) is sitting out
+Seat 4: nAAbila (31495 in chips)
+Seat 5: jeje_sat (49579 in chips)
+Seat 6: fastshedy (15634 in chips)
+Zz62480: posts small blind 800
+nAAbila: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [9c Ks 7c 6c]
+jeje_sat: folds
+Zz62480 has returned
+fastshedy: folds
+jazz27220: folds
+Zz62480: calls 800
+nAAbila: checks
+*** FLOP *** [2c Ac 9h]
+Zz62480: checks
+nAAbila: checks
+*** TURN *** [2c Ac 9h] [2h]
+Zz62480: checks
+nAAbila: bets 1600
+Zz62480: folds
+Uncalled bet (1600) returned to nAAbila
+nAAbila collected 3200 from pot
+*** SUMMARY ***
+Total pot 3200 | Rake 0
+Board [2c Ac 9h 2h]
+Seat 2: jazz27220 (button) folded before Flop (didn't bet)
+Seat 3: Zz62480 (small blind) folded on the Turn
+Seat 4: nAAbila (big blind) collected (3200)
+Seat 5: jeje_sat folded before Flop (didn't bet)
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312482026: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIV (800/1600) - 2022/04/06 23:02:33 CET [2022/04/06 17:02:33 ET]
+Table '3388263971 7' 6-max Seat #3 is the button
+Seat 2: jazz27220 (11868 in chips)
+Seat 3: Zz62480 (9104 in chips)
+Seat 4: nAAbila (33095 in chips)
+Seat 5: jeje_sat (49579 in chips)
+Seat 6: fastshedy (15634 in chips)
+nAAbila: posts small blind 800
+jeje_sat: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [8c 5d 7s 2d]
+fastshedy: folds
+jazz27220: raises 4000 to 5600
+Zz62480: folds
+nAAbila: raises 12800 to 18400
+jeje_sat: folds
+jazz27220: calls 6268 and is all-in
+Uncalled bet (6532) returned to nAAbila
+*** FLOP *** [8s 7h 8h]
+*** TURN *** [8s 7h 8h] [4h]
+*** RIVER *** [8s 7h 8h 4h] [Ad]
+*** SHOW DOWN ***
+nAAbila: shows [Ac Kh 2h Ah] (a full house, Aces full of Eights)
+jazz27220: shows [As Qc Tc Kd] (two pair, Aces and Eights)
+nAAbila collected 25336 from pot
+jazz27220 finished the tournament in 15th place and received €5.91.
+*** SUMMARY ***
+Total pot 25336 | Rake 0
+Board [8s 7h 8h 4h Ad]
+Seat 2: jazz27220 showed [As Qc Tc Kd] and lost with two pair, Aces and Eights
+Seat 3: Zz62480 (button) folded before Flop (didn't bet)
+Seat 4: nAAbila (small blind) showed [Ac Kh 2h Ah] and won (25336) with a full house, Aces full of Eights
+Seat 5: jeje_sat (big blind) folded before Flop
+Seat 6: fastshedy folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312496077: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIV (800/1600) - 2022/04/06 23:03:09 CET [2022/04/06 17:03:09 ET]
+Table '3388263971 7' 6-max Seat #4 is the button
+Seat 3: Zz62480 (9104 in chips)
+Seat 4: nAAbila (46563 in chips)
+Seat 5: jeje_sat (47979 in chips)
+Seat 6: fastshedy (15634 in chips)
+jeje_sat: posts small blind 800
+fastshedy: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [6s Ah 7d 2h]
+Zz62480: folds
+nAAbila: folds
+jeje_sat: raises 3200 to 4800
+fastshedy: calls 3200
+*** FLOP *** [2d Tc Ad]
+jeje_sat: bets 9600
+fastshedy: raises 1234 to 10834 and is all-in
+jeje_sat: calls 1234
+*** TURN *** [2d Tc Ad] [5h]
+*** RIVER *** [2d Tc Ad 5h] [Kc]
+*** SHOW DOWN ***
+jeje_sat: shows [6s Ah 7d 2h] (two pair, Aces and Deuces)
+fastshedy: shows [6d Jc Kd 6c] (a pair of Kings)
+jeje_sat collected 31268 from pot
+fastshedy finished the tournament in 14th place and received €7.28.
+*** SUMMARY ***
+Total pot 31268 | Rake 0
+Board [2d Tc Ad 5h Kc]
+Seat 3: Zz62480 folded before Flop (didn't bet)
+Seat 4: nAAbila (button) folded before Flop (didn't bet)
+Seat 5: jeje_sat (small blind) showed [6s Ah 7d 2h] and won (31268) with two pair, Aces and Deuces
+Seat 6: fastshedy (big blind) showed [6d Jc Kd 6c] and lost with a pair of Kings
+
+
+PokerStars Hand #235312513625: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XIV (800/1600) - 2022/04/06 23:03:52 CET [2022/04/06 17:03:52 ET]
+Table '3388263971 7' 6-max Seat #5 is the button
+Seat 3: Zz62480 (9104 in chips)
+Seat 4: nAAbila (46563 in chips)
+Seat 5: jeje_sat (63613 in chips)
+Zz62480: posts small blind 800
+nAAbila: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th Jd 5c 9s]
+jeje_sat: folds
+Zz62480: folds
+Uncalled bet (800) returned to nAAbila
+nAAbila collected 1600 from pot
+*** SUMMARY ***
+Total pot 1600 | Rake 0
+Seat 3: Zz62480 (small blind) folded before Flop
+Seat 4: nAAbila (big blind) collected (1600)
+Seat 5: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312534111: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XV (1000/2000) - 2022/04/06 23:04:20 CET [2022/04/06 17:04:20 ET]
+Table '3388263971 7' 6-max Seat #3 is the button
+Seat 1: PawnChess (3747 in chips)
+Seat 3: Zz62480 (8304 in chips)
+Seat 4: nAAbila (47363 in chips)
+Seat 5: jeje_sat (63613 in chips)
+nAAbila: posts small blind 1000
+jeje_sat: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to jeje_sat [8c 4c Qd 4d]
+PawnChess: raises 1747 to 3747 and is all-in
+Zz62480: folds
+nAAbila: calls 2747
+jeje_sat: calls 1747
+*** FLOP *** [7c 8h Jc]
+nAAbila: bets 2000
+jeje_sat: calls 2000
+*** TURN *** [7c 8h Jc] [Jh]
+nAAbila: bets 2000
+jeje_sat: calls 2000
+*** RIVER *** [7c 8h Jc Jh] [6c]
+nAAbila: bets 9621
+jeje_sat: calls 9621
+*** SHOW DOWN ***
+nAAbila: shows [Ac Ks 7h Js] (a full house, Jacks full of Sevens)
+jeje_sat: mucks hand
+nAAbila collected 27242 from side pot
+PawnChess: mucks hand
+nAAbila collected 11241 from main pot
+PawnChess finished the tournament in 13th place and received €7.28.
+*** SUMMARY ***
+Total pot 38483 Main pot 11241. Side pot 27242. | Rake 0
+Board [7c 8h Jc Jh 6c]
+Seat 1: PawnChess mucked [As Kc Td 7d]
+Seat 3: Zz62480 (button) folded before Flop (didn't bet)
+Seat 4: nAAbila (small blind) showed [Ac Ks 7h Js] and won (38483) with a full house, Jacks full of Sevens
+Seat 5: jeje_sat (big blind) mucked [8c 4c Qd 4d]
+
+
+PokerStars Hand #235312587592: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XV (1000/2000) - 2022/04/06 23:06:30 CET [2022/04/06 17:06:30 ET]
+Table '3388263971 13' 6-max Seat #1 is the button
+Seat 1: rolgus77 (6811 in chips)
+Seat 2: angelina0294 (62420 in chips)
+Seat 4: nAAbila (50978 in chips)
+Seat 5: NIGHT4NURSE (45460 in chips)
+Seat 6: jeje_sat (46245 in chips)
+angelina0294: posts small blind 1000
+nAAbila: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to jeje_sat [9c 8c 2d Qs]
+NIGHT4NURSE: folds
+jeje_sat: folds
+rolgus77: calls 2000
+angelina0294: calls 1000
+nAAbila: checks
+*** FLOP *** [6c Qh As]
+angelina0294: checks
+nAAbila: checks
+rolgus77: bets 4811 and is all-in
+angelina0294: calls 4811
+nAAbila: folds
+*** TURN *** [6c Qh As] [5c]
+*** RIVER *** [6c Qh As 5c] [7c]
+*** SHOW DOWN ***
+angelina0294: shows [Kd Qc Jh 6s] (two pair, Queens and Sixes)
+rolgus77: shows [Qd 5d Ac 2c] (a flush, Ace high)
+rolgus77 collected 15622 from pot
+*** SUMMARY ***
+Total pot 15622 | Rake 0
+Board [6c Qh As 5c 7c]
+Seat 1: rolgus77 (button) showed [Qd 5d Ac 2c] and won (15622) with a flush, Ace high
+Seat 2: angelina0294 (small blind) showed [Kd Qc Jh 6s] and lost with two pair, Queens and Sixes
+Seat 4: nAAbila (big blind) folded on the Flop
+Seat 5: NIGHT4NURSE folded before Flop (didn't bet)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312621300: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XV (1000/2000) - 2022/04/06 23:07:53 CET [2022/04/06 17:07:53 ET]
+Table '3388263971 13' 6-max Seat #2 is the button
+Seat 1: rolgus77 (15622 in chips)
+Seat 2: angelina0294 (55609 in chips)
+Seat 4: nAAbila (48978 in chips)
+Seat 5: NIGHT4NURSE (45460 in chips)
+Seat 6: jeje_sat (46245 in chips)
+nAAbila: posts small blind 1000
+NIGHT4NURSE: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to jeje_sat [9c Jd Js Qd]
+jeje_sat: raises 5000 to 7000
+rolgus77: folds
+angelina0294: calls 7000
+nAAbila: folds
+NIGHT4NURSE: calls 5000
+*** FLOP *** [6c Kh 2c]
+NIGHT4NURSE: checks
+jeje_sat: checks
+angelina0294: checks
+*** TURN *** [6c Kh 2c] [Qs]
+NIGHT4NURSE: bets 2000
+jeje_sat: calls 2000
+angelina0294: raises 28000 to 30000
+NIGHT4NURSE: folds
+jeje_sat: folds
+Uncalled bet (28000) returned to angelina0294
+angelina0294 collected 28000 from pot
+angelina0294: doesn't show hand
+*** SUMMARY ***
+Total pot 28000 | Rake 0
+Board [6c Kh 2c Qs]
+Seat 1: rolgus77 folded before Flop (didn't bet)
+Seat 2: angelina0294 (button) collected (28000)
+Seat 4: nAAbila (small blind) folded before Flop
+Seat 5: NIGHT4NURSE (big blind) folded on the Turn
+Seat 6: jeje_sat folded on the Turn
+
+
+PokerStars Hand #235312644533: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XV (1000/2000) - 2022/04/06 23:08:50 CET [2022/04/06 17:08:50 ET]
+Table '3388263971 13' 6-max Seat #4 is the button
+Seat 1: rolgus77 (15622 in chips)
+Seat 2: angelina0294 (74609 in chips)
+Seat 4: nAAbila (47978 in chips)
+Seat 5: NIGHT4NURSE (36460 in chips)
+Seat 6: jeje_sat (37245 in chips)
+NIGHT4NURSE: posts small blind 1000
+jeje_sat: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th 7c 5h Js]
+rolgus77: folds
+angelina0294: calls 2000
+nAAbila: folds
+NIGHT4NURSE: calls 1000
+jeje_sat: checks
+*** FLOP *** [2c 2h 3h]
+NIGHT4NURSE: bets 6000
+jeje_sat: folds
+angelina0294: folds
+Uncalled bet (6000) returned to NIGHT4NURSE
+NIGHT4NURSE collected 6000 from pot
+*** SUMMARY ***
+Total pot 6000 | Rake 0
+Board [2c 2h 3h]
+Seat 1: rolgus77 folded before Flop (didn't bet)
+Seat 2: angelina0294 folded on the Flop
+Seat 4: nAAbila (button) folded before Flop (didn't bet)
+Seat 5: NIGHT4NURSE (small blind) collected (6000)
+Seat 6: jeje_sat (big blind) folded on the Flop
+
+
+PokerStars Hand #235312660586: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XV (1000/2000) - 2022/04/06 23:09:29 CET [2022/04/06 17:09:29 ET]
+Table '3388263971 13' 6-max Seat #5 is the button
+Seat 1: rolgus77 (15622 in chips)
+Seat 2: angelina0294 (72609 in chips)
+Seat 4: nAAbila (47978 in chips)
+Seat 5: NIGHT4NURSE (40460 in chips)
+Seat 6: jeje_sat (35245 in chips)
+jeje_sat: posts small blind 1000
+rolgus77: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c 5h 2s Kd]
+angelina0294: folds
+nAAbila: raises 5000 to 7000
+NIGHT4NURSE: folds
+jeje_sat: folds
+rolgus77: folds
+Uncalled bet (5000) returned to nAAbila
+nAAbila collected 5000 from pot
+*** SUMMARY ***
+Total pot 5000 | Rake 0
+Seat 1: rolgus77 (big blind) folded before Flop
+Seat 2: angelina0294 folded before Flop (didn't bet)
+Seat 4: nAAbila collected (5000)
+Seat 5: NIGHT4NURSE (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Hand #235312673325: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XV (1000/2000) - 2022/04/06 23:10:01 CET [2022/04/06 17:10:01 ET]
+Table '3388263971 13' 6-max Seat #6 is the button
+Seat 1: rolgus77 (13622 in chips)
+Seat 2: angelina0294 (72609 in chips)
+Seat 4: nAAbila (50978 in chips)
+Seat 5: NIGHT4NURSE (40460 in chips)
+Seat 6: jeje_sat (34245 in chips)
+rolgus77: posts small blind 1000
+angelina0294: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h 4d 3s 7c]
+nAAbila: folds
+NIGHT4NURSE: calls 2000
+jeje_sat: folds
+rolgus77: folds
+angelina0294: checks
+*** FLOP *** [Kc 5c 4c]
+angelina0294: checks
+NIGHT4NURSE: bets 2500
+angelina0294: calls 2500
+*** TURN *** [Kc 5c 4c] [Qc]
+angelina0294: checks
+NIGHT4NURSE: checks
+*** RIVER *** [Kc 5c 4c Qc] [2d]
+angelina0294: checks
+NIGHT4NURSE: checks
+*** SHOW DOWN ***
+angelina0294: shows [4h Jc 5d 5s] (three of a kind, Fives)
+NIGHT4NURSE: mucks hand
+angelina0294 collected 10000 from pot
+*** SUMMARY ***
+Total pot 10000 | Rake 0
+Board [Kc 5c 4c Qc 2d]
+Seat 1: rolgus77 (small blind) folded before Flop
+Seat 2: angelina0294 (big blind) showed [4h Jc 5d 5s] and won (10000) with three of a kind, Fives
+Seat 4: nAAbila folded before Flop (didn't bet)
+Seat 5: NIGHT4NURSE mucked [6h 9c Qd Ks]
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312695478: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XV (1000/2000) - 2022/04/06 23:10:55 CET [2022/04/06 17:10:55 ET]
+Table '3388263971 13' 6-max Seat #1 is the button
+Seat 1: rolgus77 (12622 in chips)
+Seat 2: angelina0294 (78109 in chips)
+Seat 4: nAAbila (50978 in chips)
+Seat 5: NIGHT4NURSE (35960 in chips)
+Seat 6: jeje_sat (34245 in chips)
+angelina0294: posts small blind 1000
+nAAbila: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to jeje_sat [7c Qs 8s 6c]
+NIGHT4NURSE: folds
+jeje_sat: folds
+rolgus77: folds
+angelina0294: folds
+Uncalled bet (1000) returned to nAAbila
+nAAbila collected 2000 from pot
+*** SUMMARY ***
+Total pot 2000 | Rake 0
+Seat 1: rolgus77 (button) folded before Flop (didn't bet)
+Seat 2: angelina0294 (small blind) folded before Flop
+Seat 4: nAAbila (big blind) collected (2000)
+Seat 5: NIGHT4NURSE folded before Flop (didn't bet)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312704475: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XV (1000/2000) - 2022/04/06 23:11:17 CET [2022/04/06 17:11:17 ET]
+Table '3388263971 13' 6-max Seat #2 is the button
+Seat 1: rolgus77 (12622 in chips)
+Seat 2: angelina0294 (77109 in chips)
+Seat 4: nAAbila (51978 in chips)
+Seat 5: NIGHT4NURSE (35960 in chips)
+Seat 6: jeje_sat (34245 in chips)
+nAAbila: posts small blind 1000
+NIGHT4NURSE: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to jeje_sat [7h 8h 6d 2h]
+jeje_sat: folds
+rolgus77: folds
+angelina0294: calls 2000
+nAAbila: folds
+NIGHT4NURSE: raises 5000 to 7000
+angelina0294: calls 5000
+*** FLOP *** [2s 9h Tc]
+NIGHT4NURSE: bets 15000
+angelina0294: raises 45000 to 60000
+NIGHT4NURSE: calls 13960 and is all-in
+Uncalled bet (31040) returned to angelina0294
+*** TURN *** [2s 9h Tc] [2c]
+*** RIVER *** [2s 9h Tc 2c] [6h]
+*** SHOW DOWN ***
+NIGHT4NURSE: shows [8d Qs Ah Ad] (two pair, Aces and Deuces)
+angelina0294: shows [Js 8s Ts Td] (a full house, Tens full of Deuces)
+angelina0294 collected 72920 from pot
+NIGHT4NURSE finished the tournament in 10th place and received €8.80.
+*** SUMMARY ***
+Total pot 72920 | Rake 0
+Board [2s 9h Tc 2c 6h]
+Seat 1: rolgus77 folded before Flop (didn't bet)
+Seat 2: angelina0294 (button) showed [Js 8s Ts Td] and won (72920) with a full house, Tens full of Deuces
+Seat 4: nAAbila (small blind) folded before Flop
+Seat 5: NIGHT4NURSE (big blind) showed [8d Qs Ah Ad] and lost with two pair, Aces and Deuces
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312726476: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XVI (1250/2500) - 2022/04/06 23:12:12 CET [2022/04/06 17:12:12 ET]
+Table '3388263971 13' 6-max Seat #4 is the button
+Seat 1: rolgus77 (12622 in chips)
+Seat 2: angelina0294 (114069 in chips)
+Seat 4: nAAbila (50978 in chips)
+Seat 6: jeje_sat (34245 in chips)
+jeje_sat: posts small blind 1250
+rolgus77: posts big blind 2500
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h 3d 4d 9s]
+angelina0294: folds
+nAAbila: folds
+jeje_sat: folds
+Uncalled bet (1250) returned to rolgus77
+rolgus77 collected 2500 from pot
+rolgus77: doesn't show hand
+*** SUMMARY ***
+Total pot 2500 | Rake 0
+Seat 1: rolgus77 (big blind) collected (2500)
+Seat 2: angelina0294 folded before Flop (didn't bet)
+Seat 4: nAAbila (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Hand #235312733170: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XVI (1250/2500) - 2022/04/06 23:12:28 CET [2022/04/06 17:12:28 ET]
+Table '3388263971 13' 6-max Seat #6 is the button
+Seat 1: rolgus77 (13872 in chips)
+Seat 2: angelina0294 (114069 in chips)
+Seat 4: nAAbila (50978 in chips)
+Seat 6: jeje_sat (32995 in chips)
+rolgus77: posts small blind 1250
+angelina0294: posts big blind 2500
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qh 5s 2c Jd]
+nAAbila: folds
+jeje_sat: folds
+rolgus77: calls 1250
+angelina0294: checks
+*** FLOP *** [4d Qd Ks]
+rolgus77: checks
+angelina0294: checks
+*** TURN *** [4d Qd Ks] [5d]
+rolgus77: checks
+angelina0294: checks
+*** RIVER *** [4d Qd Ks 5d] [4c]
+rolgus77: bets 2500
+angelina0294: calls 2500
+*** SHOW DOWN ***
+rolgus77: shows [Qs 5c 6c Ts] (two pair, Queens and Fives)
+angelina0294: shows [9s 8c 2d 4h] (three of a kind, Fours)
+angelina0294 collected 10000 from pot
+*** SUMMARY ***
+Total pot 10000 | Rake 0
+Board [4d Qd Ks 5d 4c]
+Seat 1: rolgus77 (small blind) showed [Qs 5c 6c Ts] and lost with two pair, Queens and Fives
+Seat 2: angelina0294 (big blind) showed [9s 8c 2d 4h] and won (10000) with three of a kind, Fours
+Seat 4: nAAbila folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #235312748126: Tournament #3388263971, €0.90+€0.10 EUR Omaha Pot Limit - Level XVI (1250/2500) - 2022/04/06 23:13:06 CET [2022/04/06 17:13:06 ET]
+Table '3388263971 13' 6-max Seat #1 is the button
+Seat 1: rolgus77 (8872 in chips)
+Seat 2: angelina0294 (119069 in chips)
+Seat 4: nAAbila (50978 in chips)
+Seat 6: jeje_sat (32995 in chips)
+angelina0294: posts small blind 1250
+nAAbila: posts big blind 2500
+*** HOLE CARDS ***
+Dealt to jeje_sat [9c Th Ac 7c]
+jeje_sat: raises 6250 to 8750
+rolgus77: folds
+angelina0294: calls 7500
+nAAbila: folds
+*** FLOP *** [7h 2c Qd]
+angelina0294: checks
+jeje_sat: bets 20000
+angelina0294: raises 60000 to 80000
+jeje_sat: calls 4245 and is all-in
+Uncalled bet (55755) returned to angelina0294
+*** TURN *** [7h 2c Qd] [Jc]
+*** RIVER *** [7h 2c Qd Jc] [4h]
+*** SHOW DOWN ***
+angelina0294: shows [Jd 2s Jh 2h] (three of a kind, Jacks)
+jeje_sat: shows [9c Th Ac 7c] (a pair of Sevens)
+angelina0294 collected 68490 from pot
+jeje_sat finished the tournament in 9th place and received €10.54.
+*** SUMMARY ***
+Total pot 68490 | Rake 0
+Board [7h 2c Qd Jc 4h]
+Seat 1: rolgus77 (button) folded before Flop (didn't bet)
+Seat 2: angelina0294 (small blind) showed [Jd 2s Jh 2h] and won (68490) with three of a kind, Jacks
+Seat 4: nAAbila (big blind) folded before Flop
+Seat 6: jeje_sat showed [9c Th Ac 7c] and lost with a pair of Sevens
+
+

@@ -1,0 +1,258 @@
+﻿PokerStars Hand #229722692012: Tournament #3263061134, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:30:45 CET [2021/09/09 16:30:45 ET]
+Table '3263061134 1' 3-max Seat #1 is the button
+Seat 1: zizou93524 (500 in chips)
+Seat 2: 17elias17 (500 in chips)
+Seat 3: jeje_sat (500 in chips)
+17elias17: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c 7s Jc 5h]
+zizou93524: calls 20
+17elias17: calls 10
+jeje_sat: checks
+*** FLOP *** [4d 3d Kh]
+17elias17: checks
+jeje_sat: checks
+zizou93524: checks
+*** TURN *** [4d 3d Kh] [7d]
+17elias17: bets 50
+jeje_sat: folds
+zizou93524: folds
+Uncalled bet (50) returned to 17elias17
+17elias17 collected 60 from pot
+17elias17: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Board [4d 3d Kh 7d]
+Seat 1: zizou93524 (button) folded on the Turn
+Seat 2: 17elias17 (small blind) collected (60)
+Seat 3: jeje_sat (big blind) folded on the Turn
+
+
+PokerStars Hand #229722721377: Tournament #3263061134, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:31:32 CET [2021/09/09 16:31:32 ET]
+Table '3263061134 1' 3-max Seat #2 is the button
+Seat 1: zizou93524 (480 in chips)
+Seat 2: 17elias17 (540 in chips)
+Seat 3: jeje_sat (480 in chips)
+jeje_sat: posts small blind 10
+zizou93524: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d 9d Qc 6c]
+17elias17: calls 20
+jeje_sat: calls 10
+zizou93524: checks
+*** FLOP *** [2c 4s 6s]
+jeje_sat: checks
+zizou93524: checks
+17elias17: bets 20
+jeje_sat: calls 20
+zizou93524: calls 20
+*** TURN *** [2c 4s 6s] [2s]
+jeje_sat: checks
+zizou93524: checks
+17elias17: bets 40
+jeje_sat: folds
+zizou93524: raises 200 to 240
+17elias17: calls 200
+*** RIVER *** [2c 4s 6s 2s] [Tc]
+zizou93524: bets 200 and is all-in
+17elias17: folds
+Uncalled bet (200) returned to zizou93524
+zizou93524 collected 600 from pot
+*** SUMMARY ***
+Total pot 600 | Rake 0
+Board [2c 4s 6s 2s Tc]
+Seat 1: zizou93524 (big blind) collected (600)
+Seat 2: 17elias17 (button) folded on the River
+Seat 3: jeje_sat (small blind) folded on the Turn
+
+
+PokerStars Hand #229722759945: Tournament #3263061134, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:32:42 CET [2021/09/09 16:32:42 ET]
+Table '3263061134 1' 3-max Seat #3 is the button
+Seat 1: zizou93524 (800 in chips)
+Seat 2: 17elias17 (260 in chips)
+Seat 3: jeje_sat (440 in chips)
+zizou93524: posts small blind 10
+17elias17: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c Js Ks 9d]
+jeje_sat: calls 20
+zizou93524: calls 10
+17elias17: checks
+*** FLOP *** [Jc 3h 8h]
+zizou93524: checks
+17elias17: bets 60
+jeje_sat: calls 60
+zizou93524: folds
+*** TURN *** [Jc 3h 8h] [6d]
+17elias17: bets 180 and is all-in
+jeje_sat: calls 180
+*** RIVER *** [Jc 3h 8h 6d] [Qd]
+*** SHOW DOWN ***
+17elias17: shows [4h 5s Ad 2s] (high card Ace)
+jeje_sat: shows [3c Js Ks 9d] (two pair, Jacks and Threes)
+jeje_sat collected 540 from pot
+17elias17 finished the tournament in 3rd place
+*** SUMMARY ***
+Total pot 540 | Rake 0
+Board [Jc 3h 8h 6d Qd]
+Seat 1: zizou93524 (small blind) folded on the Flop
+Seat 2: 17elias17 (big blind) showed [4h 5s Ad 2s] and lost with high card Ace
+Seat 3: jeje_sat (button) showed [3c Js Ks 9d] and won (540) with two pair, Jacks and Threes
+
+
+PokerStars Hand #229722775473: Tournament #3263061134, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:33:11 CET [2021/09/09 16:33:11 ET]
+Table '3263061134 1' 3-max Seat #1 is the button
+Seat 1: zizou93524 (780 in chips)
+Seat 3: jeje_sat (720 in chips)
+zizou93524: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qh Ac As 9h]
+zizou93524: calls 10
+jeje_sat: raises 40 to 60
+zizou93524: calls 40
+*** FLOP *** [8d Ts 3c]
+jeje_sat: bets 60
+zizou93524: calls 60
+*** TURN *** [8d Ts 3c] [5c]
+jeje_sat: bets 120
+zizou93524: calls 120
+*** RIVER *** [8d Ts 3c 5c] [8s]
+jeje_sat: bets 480 and is all-in
+zizou93524: folds
+Uncalled bet (480) returned to jeje_sat
+jeje_sat collected 480 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 480 | Rake 0
+Board [8d Ts 3c 5c 8s]
+Seat 1: zizou93524 (button) (small blind) folded on the River
+Seat 3: jeje_sat (big blind) collected (480)
+
+
+PokerStars Hand #229722790060: Tournament #3263061134, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:33:37 CET [2021/09/09 16:33:37 ET]
+Table '3263061134 1' 3-max Seat #3 is the button
+Seat 1: zizou93524 (540 in chips)
+Seat 3: jeje_sat (960 in chips)
+jeje_sat: posts small blind 10
+zizou93524: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h 7h 4s 6h]
+jeje_sat: raises 40 to 60
+zizou93524: calls 40
+*** FLOP *** [Td 9s Tc]
+zizou93524: checks
+jeje_sat: checks
+*** TURN *** [Td 9s Tc] [Ks]
+zizou93524: checks
+jeje_sat has timed out
+jeje_sat: checks
+*** RIVER *** [Td 9s Tc Ks] [Qs]
+zizou93524: bets 60
+jeje_sat: folds
+Uncalled bet (60) returned to zizou93524
+zizou93524 collected 120 from pot
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [Td 9s Tc Ks Qs]
+Seat 1: zizou93524 (big blind) collected (120)
+Seat 3: jeje_sat (button) (small blind) folded on the River
+
+
+PokerStars Hand #229722815959: Tournament #3263061134, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:34:25 CET [2021/09/09 16:34:25 ET]
+Table '3263061134 1' 3-max Seat #1 is the button
+Seat 1: zizou93524 (600 in chips)
+Seat 3: jeje_sat (900 in chips)
+zizou93524: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qc Jc 7d Kc]
+zizou93524: calls 15
+jeje_sat: raises 60 to 90
+zizou93524: folds
+Uncalled bet (60) returned to jeje_sat
+jeje_sat collected 60 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Seat 1: zizou93524 (button) (small blind) folded before Flop
+Seat 3: jeje_sat (big blind) collected (60)
+
+
+PokerStars Hand #229722822054: Tournament #3263061134, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:34:37 CET [2021/09/09 16:34:37 ET]
+Table '3263061134 1' 3-max Seat #3 is the button
+Seat 1: zizou93524 (570 in chips)
+Seat 3: jeje_sat (930 in chips)
+jeje_sat: posts small blind 15
+zizou93524: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [4c Qd 8c Ac]
+jeje_sat: raises 60 to 90
+zizou93524: calls 60
+*** FLOP *** [3c 6c 8d]
+zizou93524: checks
+jeje_sat: bets 180
+zizou93524: calls 180
+*** TURN *** [3c 6c 8d] [2c]
+zizou93524: checks
+jeje_sat: checks
+*** RIVER *** [3c 6c 8d 2c] [Qc]
+zizou93524: checks
+jeje_sat: bets 540
+zizou93524: folds
+Uncalled bet (540) returned to jeje_sat
+jeje_sat collected 540 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 540 | Rake 0
+Board [3c 6c 8d 2c Qc]
+Seat 1: zizou93524 (big blind) folded on the River
+Seat 3: jeje_sat (button) (small blind) collected (540)
+
+
+PokerStars Hand #229722835799: Tournament #3263061134, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:35:02 CET [2021/09/09 16:35:02 ET]
+Table '3263061134 1' 3-max Seat #1 is the button
+Seat 1: zizou93524 (300 in chips)
+Seat 3: jeje_sat (1200 in chips)
+zizou93524: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks 3c 6d Kc]
+zizou93524: folds
+Uncalled bet (15) returned to jeje_sat
+jeje_sat collected 30 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 30 | Rake 0
+Seat 1: zizou93524 (button) (small blind) folded before Flop
+Seat 3: jeje_sat (big blind) collected (30)
+
+
+PokerStars Hand #229722839026: Tournament #3263061134, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:35:08 CET [2021/09/09 16:35:08 ET]
+Table '3263061134 1' 3-max Seat #3 is the button
+Seat 1: zizou93524 (285 in chips)
+Seat 3: jeje_sat (1215 in chips)
+jeje_sat: posts small blind 15
+zizou93524: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ah 9s Jc Qh]
+jeje_sat: raises 60 to 90
+zizou93524: raises 180 to 270
+jeje_sat: calls 180
+*** FLOP *** [Jh Tc 7s]
+zizou93524: bets 15 and is all-in
+jeje_sat: calls 15
+*** TURN *** [Jh Tc 7s] [Th]
+*** RIVER *** [Jh Tc 7s Th] [8s]
+*** SHOW DOWN ***
+zizou93524: shows [Ac 2s Kd Qc] (a pair of Tens)
+jeje_sat: shows [Ah 9s Jc Qh] (a straight, Eight to Queen)
+jeje_sat collected 570 from pot
+*** SUMMARY ***
+Total pot 570 | Rake 0
+Board [Jh Tc 7s Th 8s]
+Seat 1: zizou93524 (big blind) showed [Ac 2s Kd Qc] and lost with a pair of Tens
+Seat 3: jeje_sat (button) (small blind) showed [Ah 9s Jc Qh] and won (570) with a straight, Eight to Queen
+
+

@@ -1,0 +1,88 @@
+﻿PokerStars Hand #230305206435: Tournament #3276140983, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/10/02 23:15:28 CET [2021/10/02 17:15:28 ET]
+Table '3276140983 1' 3-max Seat #1 is the button
+Seat 1: melvos (500 in chips)
+Seat 2: jeje_sat (500 in chips)
+Seat 3: dyane 6-400 (500 in chips)
+jeje_sat: posts small blind 10
+dyane 6-400: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Js 9d 3s Jh]
+melvos: calls 20
+jeje_sat: raises 60 to 80
+dyane 6-400: calls 60
+melvos: calls 60
+*** FLOP *** [3c Kh 2s]
+jeje_sat: checks
+dyane 6-400: bets 240
+melvos: folds
+jeje_sat: folds
+Uncalled bet (240) returned to dyane 6-400
+dyane 6-400 collected 240 from pot
+dyane 6-400: doesn't show hand
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Board [3c Kh 2s]
+Seat 1: melvos (button) folded on the Flop
+Seat 2: jeje_sat (small blind) folded on the Flop
+Seat 3: dyane 6-400 (big blind) collected (240)
+
+
+PokerStars Hand #230305223053: Tournament #3276140983, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/10/02 23:16:05 CET [2021/10/02 17:16:05 ET]
+Table '3276140983 1' 3-max Seat #2 is the button
+Seat 1: melvos (420 in chips)
+Seat 2: jeje_sat (420 in chips)
+Seat 3: dyane 6-400 (660 in chips)
+dyane 6-400: posts small blind 10
+melvos: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [8h 3c 3s 3d]
+jeje_sat: folds
+dyane 6-400: raises 40 to 60
+melvos: raises 120 to 180
+dyane 6-400: raises 360 to 540
+melvos: calls 240 and is all-in
+Uncalled bet (120) returned to dyane 6-400
+*** FLOP *** [Ah Qc Jc]
+*** TURN *** [Ah Qc Jc] [Jd]
+*** RIVER *** [Ah Qc Jc Jd] [Kc]
+*** SHOW DOWN ***
+dyane 6-400: shows [Qh Ad Qs Ks] (a full house, Queens full of Jacks)
+melvos: shows [Th 9d 4c 5d] (a straight, Nine to King)
+dyane 6-400 collected 840 from pot
+melvos finished the tournament in 3rd place
+*** SUMMARY ***
+Total pot 840 | Rake 0
+Board [Ah Qc Jc Jd Kc]
+Seat 1: melvos (big blind) showed [Th 9d 4c 5d] and lost with a straight, Nine to King
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: dyane 6-400 (small blind) showed [Qh Ad Qs Ks] and won (840) with a full house, Queens full of Jacks
+
+
+PokerStars Hand #230305241898: Tournament #3276140983, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/10/02 23:16:29 CET [2021/10/02 17:16:29 ET]
+Table '3276140983 1' 3-max Seat #3 is the button
+Seat 2: jeje_sat (420 in chips)
+Seat 3: dyane 6-400 (1080 in chips)
+dyane 6-400: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d 4s 3h Ts]
+dyane 6-400: raises 40 to 60
+jeje_sat: calls 40
+*** FLOP *** [8c 9c 7d]
+jeje_sat: checks
+dyane 6-400: bets 120
+jeje_sat: raises 240 to 360 and is all-in
+dyane 6-400: calls 240
+*** TURN *** [8c 9c 7d] [5h]
+*** RIVER *** [8c 9c 7d 5h] [6h]
+*** SHOW DOWN ***
+jeje_sat: shows [9d 4s 3h Ts] (a straight, Six to Ten)
+dyane 6-400: shows [2h Js Td As] (a straight, Seven to Jack)
+dyane 6-400 collected 840 from pot
+*** SUMMARY ***
+Total pot 840 | Rake 0
+Board [8c 9c 7d 5h 6h]
+Seat 2: jeje_sat (big blind) showed [9d 4s 3h Ts] and lost with a straight, Six to Ten
+Seat 3: dyane 6-400 (button) (small blind) showed [2h Js Td As] and won (840) with a straight, Seven to Jack
+
+

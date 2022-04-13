@@ -1,0 +1,26 @@
+PokerTracker 4 Tournament Summary
+Site: PokerStars
+Game: Holdem
+Tournament #: 3391322540
+Started: 2022/04/04 15:30:00
+Finished: 2022/04/04 16:32:35
+Buyin: €0.13
+Bounty: €0.05
+Fee: €0.02
+Prize Pool: €0.00
+Rebuy: €0.20
+Addon: €0.13
+Table Type: MTT (6 max) Turbo REBUY PROGBOUNT
+Tourney Type: No Limit
+Players: 10
+
+Place: 0, Player: tinluu, Won: €0.00,
+Place: 0, Player: jeannono24, Won: €0.00,
+Place: 0, Player: jamesHRoss, Won: €0.00,
+Place: 0, Player: sygowin, Won: €0.00,
+Place: 0, Player: RIZCHOU, Won: €0.00,
+Place: 0, Player: LDM54, Won: €0.00,
+Place: 0, Player: CoucouRico24, Won: €0.00,
+Place: 8, Player: jeje_sat, Won: €0.00,
+Place: 10, Player: Reyzous, Won: €0.00,
+Place: 12, Player: stephoumOPC, Won: €0.00,

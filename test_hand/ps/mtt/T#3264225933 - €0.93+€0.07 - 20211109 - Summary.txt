@@ -1,0 +1,16 @@
+PokerTracker 4 Tournament Summary
+Site: PokerStars
+Game: Omaha Hi
+Tournament #: 3264225933
+Started: 2021/09/11 19:48:17
+Finished: 2021/09/11 19:54:31
+Buyin: €0.93
+Fee: €0.07
+Prize Pool: €2.79
+Table Type: STT (3 max) Hyper-Turbo SNG LOTTERY
+Tourney Type: Pot Limit
+Players: 3
+
+Place: 1, Player: jeje_sat, Won: €2.79,
+Place: 2, Player: Antoine69ant, Won: €0.00,
+Place: 3, Player: khillo29, Won: €0.00,
