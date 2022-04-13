@@ -1,0 +1,258 @@
+﻿PokerStars Hand #229722525126: Tournament #3263059439, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:25:44 CET [2021/09/09 16:25:44 ET]
+Table '3263059439 1' 3-max Seat #1 is the button
+Seat 1: JJPOL55 (500 in chips)
+Seat 2: jeja1210 (500 in chips)
+Seat 3: jeje_sat (500 in chips)
+jeja1210: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qs 6c Qc As]
+JJPOL55: calls 20
+jeja1210: calls 10
+jeje_sat: raises 60 to 80
+JJPOL55: folds
+jeja1210: folds
+Uncalled bet (60) returned to jeje_sat
+jeje_sat collected 60 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Seat 1: JJPOL55 (button) folded before Flop
+Seat 2: jeja1210 (small blind) folded before Flop
+Seat 3: jeje_sat (big blind) collected (60)
+
+
+PokerStars Hand #229722537185: Tournament #3263059439, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:26:05 CET [2021/09/09 16:26:05 ET]
+Table '3263059439 1' 3-max Seat #2 is the button
+Seat 1: JJPOL55 (480 in chips)
+Seat 2: jeja1210 (480 in chips)
+Seat 3: jeje_sat (540 in chips)
+jeje_sat: posts small blind 10
+JJPOL55: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [7c Ks As 7s]
+jeja1210: folds
+jeje_sat: raises 40 to 60
+JJPOL55: calls 40
+*** FLOP *** [Qc Jd Qs]
+jeje_sat: checks
+JJPOL55: bets 20
+jeje_sat: calls 20
+*** TURN *** [Qc Jd Qs] [4s]
+jeje_sat: checks
+JJPOL55: checks
+*** RIVER *** [Qc Jd Qs 4s] [4d]
+jeje_sat: checks
+JJPOL55: checks
+*** SHOW DOWN ***
+jeje_sat: shows [7c Ks As 7s] (two pair, Queens and Sevens)
+JJPOL55: mucks hand
+jeje_sat collected 160 from pot
+*** SUMMARY ***
+Total pot 160 | Rake 0
+Board [Qc Jd Qs 4s 4d]
+Seat 1: JJPOL55 (big blind) mucked [Th 3c 3s 9c]
+Seat 2: jeja1210 (button) folded before Flop (didn't bet)
+Seat 3: jeje_sat (small blind) showed [7c Ks As 7s] and won (160) with two pair, Queens and Sevens
+
+
+PokerStars Hand #229722552555: Tournament #3263059439, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:26:33 CET [2021/09/09 16:26:33 ET]
+Table '3263059439 1' 3-max Seat #3 is the button
+Seat 1: JJPOL55 (400 in chips)
+Seat 2: jeja1210 (480 in chips)
+Seat 3: jeje_sat (620 in chips)
+JJPOL55: posts small blind 10
+jeja1210: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [2c 7h Th 9h]
+jeje_sat: folds
+JJPOL55: calls 10
+jeja1210: checks
+*** FLOP *** [8h 6s 7c]
+JJPOL55: bets 20
+jeja1210: raises 20 to 40
+JJPOL55: raises 20 to 60
+jeja1210: calls 20
+*** TURN *** [8h 6s 7c] [8s]
+JJPOL55: bets 160
+jeja1210: calls 160
+*** RIVER *** [8h 6s 7c 8s] [5c]
+JJPOL55: bets 160 and is all-in
+jeja1210: calls 160
+*** SHOW DOWN ***
+JJPOL55: shows [6d 6c 3d Tc] (a full house, Sixes full of Eights)
+jeja1210: shows [Ts Kd 9c Td] (a straight, Six to Ten)
+JJPOL55 collected 800 from pot
+*** SUMMARY ***
+Total pot 800 | Rake 0
+Board [8h 6s 7c 8s 5c]
+Seat 1: JJPOL55 (small blind) showed [6d 6c 3d Tc] and won (800) with a full house, Sixes full of Eights
+Seat 2: jeja1210 (big blind) showed [Ts Kd 9c Td] and lost with a straight, Six to Ten
+Seat 3: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #229722571085: Tournament #3263059439, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:27:07 CET [2021/09/09 16:27:07 ET]
+Table '3263059439 1' 3-max Seat #1 is the button
+Seat 1: JJPOL55 (800 in chips)
+Seat 2: jeja1210 (80 in chips)
+Seat 3: jeje_sat (620 in chips)
+jeja1210: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [As Ah Th 8d]
+JJPOL55: calls 20
+jeja1210: raises 60 to 80 and is all-in
+jeje_sat: raises 180 to 260
+JJPOL55: folds
+Uncalled bet (180) returned to jeje_sat
+*** FLOP *** [2d 9d Jd]
+*** TURN *** [2d 9d Jd] [Qs]
+*** RIVER *** [2d 9d Jd Qs] [Qh]
+*** SHOW DOWN ***
+jeja1210: shows [3s 2h 3d Jc] (two pair, Queens and Jacks)
+jeje_sat: shows [As Ah Th 8d] (a straight, Eight to Queen)
+jeje_sat collected 180 from pot
+jeja1210 finished the tournament in 3rd place
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Board [2d 9d Jd Qs Qh]
+Seat 1: JJPOL55 (button) folded before Flop
+Seat 2: jeja1210 (small blind) showed [3s 2h 3d Jc] and lost with two pair, Queens and Jacks
+Seat 3: jeje_sat (big blind) showed [As Ah Th 8d] and won (180) with a straight, Eight to Queen
+
+
+PokerStars Hand #229722597909: Tournament #3263059439, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:27:55 CET [2021/09/09 16:27:55 ET]
+Table '3263059439 1' 3-max Seat #3 is the button
+Seat 1: JJPOL55 (780 in chips)
+Seat 3: jeje_sat (720 in chips)
+jeje_sat: posts small blind 10
+JJPOL55: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h 5c 6h Jh]
+jeje_sat: calls 10
+JJPOL55: checks
+*** FLOP *** [Qd 6c Ts]
+JJPOL55 has timed out
+JJPOL55: checks
+jeje_sat: checks
+*** TURN *** [Qd 6c Ts] [8c]
+JJPOL55: checks
+jeje_sat: checks
+*** RIVER *** [Qd 6c Ts 8c] [4c]
+JJPOL55: checks
+jeje_sat: checks
+*** SHOW DOWN ***
+JJPOL55: shows [3s 2d Qc 7s] (a pair of Queens)
+jeje_sat: mucks hand
+JJPOL55 collected 40 from pot
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Board [Qd 6c Ts 8c 4c]
+Seat 1: JJPOL55 (big blind) showed [3s 2d Qc 7s] and won (40) with a pair of Queens
+Seat 3: jeje_sat (button) (small blind) mucked [3h 5c 6h Jh]
+
+
+PokerStars Hand #229722627892: Tournament #3263059439, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:28:48 CET [2021/09/09 16:28:48 ET]
+Table '3263059439 1' 3-max Seat #1 is the button
+Seat 1: JJPOL55 (800 in chips)
+Seat 3: jeje_sat (700 in chips)
+JJPOL55: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h 3c Ts Qd]
+JJPOL55: folds
+Uncalled bet (15) returned to jeje_sat
+jeje_sat collected 30 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 30 | Rake 0
+Seat 1: JJPOL55 (button) (small blind) folded before Flop
+Seat 3: jeje_sat (big blind) collected (30)
+
+
+PokerStars Hand #229722631190: Tournament #3263059439, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:28:54 CET [2021/09/09 16:28:54 ET]
+Table '3263059439 1' 3-max Seat #3 is the button
+Seat 1: JJPOL55 (785 in chips)
+Seat 3: jeje_sat (715 in chips)
+jeje_sat: posts small blind 15
+JJPOL55: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s 5h Ah 7s]
+jeje_sat: raises 60 to 90
+JJPOL55: calls 60
+*** FLOP *** [5c 9c 3d]
+JJPOL55: checks
+jeje_sat: checks
+*** TURN *** [5c 9c 3d] [7d]
+JJPOL55: checks
+jeje_sat: bets 90
+JJPOL55: calls 90
+*** RIVER *** [5c 9c 3d 7d] [4h]
+JJPOL55: bets 30
+jeje_sat: calls 30
+*** SHOW DOWN ***
+JJPOL55: shows [Ad Jd Kd 2c] (a straight, Ace to Five)
+jeje_sat: mucks hand
+JJPOL55 collected 420 from pot
+*** SUMMARY ***
+Total pot 420 | Rake 0
+Board [5c 9c 3d 7d 4h]
+Seat 1: JJPOL55 (big blind) showed [Ad Jd Kd 2c] and won (420) with a straight, Ace to Five
+Seat 3: jeje_sat (button) (small blind) mucked [8s 5h Ah 7s]
+
+
+PokerStars Hand #229722649467: Tournament #3263059439, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:29:27 CET [2021/09/09 16:29:27 ET]
+Table '3263059439 1' 3-max Seat #1 is the button
+Seat 1: JJPOL55 (995 in chips)
+Seat 3: jeje_sat (505 in chips)
+JJPOL55: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d 7s 5c 4s]
+JJPOL55: calls 15
+jeje_sat: checks
+*** FLOP *** [5h Jh 7c]
+jeje_sat: bets 60
+JJPOL55: calls 60
+*** TURN *** [5h Jh 7c] [6s]
+jeje_sat: bets 180
+JJPOL55: folds
+Uncalled bet (180) returned to jeje_sat
+jeje_sat collected 180 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Board [5h Jh 7c 6s]
+Seat 1: JJPOL55 (button) (small blind) folded on the Turn
+Seat 3: jeje_sat (big blind) collected (180)
+
+
+PokerStars Hand #229722665370: Tournament #3263059439, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:29:56 CET [2021/09/09 16:29:56 ET]
+Table '3263059439 1' 3-max Seat #3 is the button
+Seat 1: JJPOL55 (905 in chips)
+Seat 3: jeje_sat (595 in chips)
+jeje_sat: posts small blind 15
+JJPOL55: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [5d Qd 6c 6d]
+jeje_sat: calls 15
+JJPOL55: checks
+*** FLOP *** [Td 6h Ah]
+JJPOL55: bets 30
+jeje_sat: raises 120 to 150
+JJPOL55: raises 360 to 510
+jeje_sat: raises 55 to 565 and is all-in
+JJPOL55: calls 55
+*** TURN *** [Td 6h Ah] [7s]
+*** RIVER *** [Td 6h Ah 7s] [2h]
+*** SHOW DOWN ***
+JJPOL55: shows [3h Tc Kd Th] (a flush, Ace high)
+jeje_sat: shows [5d Qd 6c 6d] (three of a kind, Sixes)
+JJPOL55 collected 1190 from pot
+*** SUMMARY ***
+Total pot 1190 | Rake 0
+Board [Td 6h Ah 7s 2h]
+Seat 1: JJPOL55 (big blind) showed [3h Tc Kd Th] and won (1190) with a flush, Ace high
+Seat 3: jeje_sat (button) (small blind) showed [5d Qd 6c 6d] and lost with three of a kind, Sixes
+
+

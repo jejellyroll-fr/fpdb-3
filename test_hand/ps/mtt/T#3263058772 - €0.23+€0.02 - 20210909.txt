@@ -1,0 +1,788 @@
+﻿PokerStars Hand #229722115747: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:13:41 CET [2021/09/09 16:13:41 ET]
+Table '3263058772 1' 3-max Seat #1 is the button
+Seat 1: Ladykellyone (500 in chips)
+Seat 2: jeje_sat (500 in chips)
+Seat 3: JJPOL55 (500 in chips)
+jeje_sat: posts small blind 10
+JJPOL55: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qd Qh Jc 9s]
+Ladykellyone: calls 20
+jeje_sat: raises 60 to 80
+JJPOL55: folds
+Ladykellyone: folds
+Uncalled bet (60) returned to jeje_sat
+jeje_sat collected 60 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Seat 1: Ladykellyone (button) folded before Flop
+Seat 2: jeje_sat (small blind) collected (60)
+Seat 3: JJPOL55 (big blind) folded before Flop
+
+
+PokerStars Hand #229722122752: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:13:54 CET [2021/09/09 16:13:54 ET]
+Table '3263058772 1' 3-max Seat #2 is the button
+Seat 1: Ladykellyone (480 in chips)
+Seat 2: jeje_sat (540 in chips)
+Seat 3: JJPOL55 (480 in chips)
+JJPOL55: posts small blind 10
+Ladykellyone: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [4c Ah 6c Qc]
+jeje_sat: folds
+JJPOL55: calls 10
+Ladykellyone: checks
+*** FLOP *** [3d Td 9s]
+JJPOL55: checks
+Ladykellyone: checks
+*** TURN *** [3d Td 9s] [6s]
+JJPOL55: checks
+Ladykellyone: checks
+*** RIVER *** [3d Td 9s 6s] [Kd]
+JJPOL55: checks
+Ladykellyone: checks
+*** SHOW DOWN ***
+JJPOL55: shows [8h 8c Kc 3h] (two pair, Kings and Threes)
+Ladykellyone: shows [2c Ks 7s 9d] (two pair, Kings and Nines)
+Ladykellyone collected 40 from pot
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Board [3d Td 9s 6s Kd]
+Seat 1: Ladykellyone (big blind) showed [2c Ks 7s 9d] and won (40) with two pair, Kings and Nines
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: JJPOL55 (small blind) showed [8h 8c Kc 3h] and lost with two pair, Kings and Threes
+
+
+PokerStars Hand #229722139316: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:14:25 CET [2021/09/09 16:14:25 ET]
+Table '3263058772 1' 3-max Seat #3 is the button
+Seat 1: Ladykellyone (500 in chips)
+Seat 2: jeje_sat (540 in chips)
+Seat 3: JJPOL55 (460 in chips)
+Ladykellyone: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c 3s Th 2d]
+JJPOL55: folds
+Ladykellyone: folds
+Uncalled bet (10) returned to jeje_sat
+jeje_sat collected 20 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 20 | Rake 0
+Seat 1: Ladykellyone (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (20)
+Seat 3: JJPOL55 (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #229722143878: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:14:34 CET [2021/09/09 16:14:34 ET]
+Table '3263058772 1' 3-max Seat #1 is the button
+Seat 1: Ladykellyone (490 in chips)
+Seat 2: jeje_sat (550 in chips)
+Seat 3: JJPOL55 (460 in chips)
+jeje_sat: posts small blind 10
+JJPOL55: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th 5s 5c 8c]
+Ladykellyone: folds
+jeje_sat: folds
+Uncalled bet (10) returned to JJPOL55
+JJPOL55 collected 20 from pot
+*** SUMMARY ***
+Total pot 20 | Rake 0
+Seat 1: Ladykellyone (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 3: JJPOL55 (big blind) collected (20)
+
+
+PokerStars Hand #229722148031: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:14:42 CET [2021/09/09 16:14:42 ET]
+Table '3263058772 1' 3-max Seat #2 is the button
+Seat 1: Ladykellyone (490 in chips)
+Seat 2: jeje_sat (540 in chips)
+Seat 3: JJPOL55 (470 in chips)
+JJPOL55: posts small blind 10
+Ladykellyone: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Tc 3d 7c 2c]
+jeje_sat: folds
+JJPOL55: calls 10
+Ladykellyone: checks
+*** FLOP *** [Qh Th 5d]
+JJPOL55: checks
+Ladykellyone: checks
+*** TURN *** [Qh Th 5d] [5s]
+JJPOL55: checks
+Ladykellyone: checks
+*** RIVER *** [Qh Th 5d 5s] [4c]
+JJPOL55: checks
+Ladykellyone: bets 40
+JJPOL55: calls 40
+*** SHOW DOWN ***
+Ladykellyone: shows [6d 4h Ts 4s] (a full house, Fours full of Fives)
+JJPOL55: mucks hand
+Ladykellyone collected 120 from pot
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [Qh Th 5d 5s 4c]
+Seat 1: Ladykellyone (big blind) showed [6d 4h Ts 4s] and won (120) with a full house, Fours full of Fives
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: JJPOL55 (small blind) mucked [Ad Qs Ks 6h]
+
+
+PokerStars Hand #229722167899: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:15:18 CET [2021/09/09 16:15:18 ET]
+Table '3263058772 1' 3-max Seat #3 is the button
+Seat 1: Ladykellyone (550 in chips)
+Seat 2: jeje_sat (540 in chips)
+Seat 3: JJPOL55 (410 in chips)
+Ladykellyone: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [4c Kh 9d Jc]
+JJPOL55: calls 20
+Ladykellyone: calls 10
+jeje_sat: checks
+*** FLOP *** [3s Qd 4s]
+Ladykellyone: bets 20
+jeje_sat: folds
+JJPOL55: calls 20
+*** TURN *** [3s Qd 4s] [2h]
+Ladykellyone: checks
+JJPOL55: checks
+*** RIVER *** [3s Qd 4s 2h] [Jh]
+Ladykellyone: checks
+JJPOL55: checks
+*** SHOW DOWN ***
+Ladykellyone: shows [Ad 7c Qs 6s] (a pair of Queens)
+JJPOL55: mucks hand
+Ladykellyone collected 100 from pot
+*** SUMMARY ***
+Total pot 100 | Rake 0
+Board [3s Qd 4s 2h Jh]
+Seat 1: Ladykellyone (small blind) showed [Ad 7c Qs 6s] and won (100) with a pair of Queens
+Seat 2: jeje_sat (big blind) folded on the Flop
+Seat 3: JJPOL55 (button) mucked [Tc Th Ac 3c]
+
+
+PokerStars Hand #229722192905: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:15:58 CET [2021/09/09 16:15:58 ET]
+Table '3263058772 1' 3-max Seat #1 is the button
+Seat 1: Ladykellyone (610 in chips)
+Seat 2: jeje_sat (520 in chips)
+Seat 3: JJPOL55 (370 in chips)
+jeje_sat: posts small blind 10
+JJPOL55: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kd 6h Qh Ah]
+Ladykellyone: raises 20 to 40
+jeje_sat: calls 30
+JJPOL55: folds
+*** FLOP *** [4s 5c 4h]
+jeje_sat: checks
+Ladykellyone: checks
+*** TURN *** [4s 5c 4h] [8c]
+jeje_sat: checks
+Ladykellyone: checks
+*** RIVER *** [4s 5c 4h 8c] [7s]
+jeje_sat: checks
+Ladykellyone: checks
+*** SHOW DOWN ***
+jeje_sat: shows [Kd 6h Qh Ah] (a pair of Fours)
+Ladykellyone: shows [Kc 6d 6s Kh] (two pair, Kings and Fours)
+Ladykellyone collected 100 from pot
+*** SUMMARY ***
+Total pot 100 | Rake 0
+Board [4s 5c 4h 8c 7s]
+Seat 1: Ladykellyone (button) showed [Kc 6d 6s Kh] and won (100) with two pair, Kings and Fours
+Seat 2: jeje_sat (small blind) showed [Kd 6h Qh Ah] and lost with a pair of Fours
+Seat 3: JJPOL55 (big blind) folded before Flop
+
+
+PokerStars Hand #229722206544: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:16:22 CET [2021/09/09 16:16:22 ET]
+Table '3263058772 1' 3-max Seat #2 is the button
+Seat 1: Ladykellyone (670 in chips)
+Seat 2: jeje_sat (480 in chips)
+Seat 3: JJPOL55 (350 in chips)
+JJPOL55: posts small blind 10
+Ladykellyone: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qh 3s Jd 9s]
+jeje_sat: folds
+JJPOL55: calls 10
+Ladykellyone: checks
+*** FLOP *** [2h Js Ah]
+JJPOL55: checks
+Ladykellyone: checks
+*** TURN *** [2h Js Ah] [4h]
+JJPOL55: checks
+Ladykellyone: checks
+*** RIVER *** [2h Js Ah 4h] [Th]
+JJPOL55: checks
+Ladykellyone: checks
+*** SHOW DOWN ***
+JJPOL55: shows [8c Qd Jh Tc] (two pair, Jacks and Tens)
+Ladykellyone: mucks hand
+JJPOL55 collected 40 from pot
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Board [2h Js Ah 4h Th]
+Seat 1: Ladykellyone (big blind) mucked [7c 6s 5c 7h]
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: JJPOL55 (small blind) showed [8c Qd Jh Tc] and won (40) with two pair, Jacks and Tens
+
+
+PokerStars Hand #229722228015: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:17:00 CET [2021/09/09 16:17:00 ET]
+Table '3263058772 1' 3-max Seat #3 is the button
+Seat 1: Ladykellyone (650 in chips)
+Seat 2: jeje_sat (480 in chips)
+Seat 3: JJPOL55 (370 in chips)
+Ladykellyone: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [8c Kh Ts 3d]
+JJPOL55: folds
+Ladykellyone: folds
+Uncalled bet (15) returned to jeje_sat
+jeje_sat collected 30 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 30 | Rake 0
+Seat 1: Ladykellyone (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (30)
+Seat 3: JJPOL55 (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #229722231971: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:17:07 CET [2021/09/09 16:17:07 ET]
+Table '3263058772 1' 3-max Seat #1 is the button
+Seat 1: Ladykellyone (635 in chips)
+Seat 2: jeje_sat (495 in chips)
+Seat 3: JJPOL55 (370 in chips)
+jeje_sat: posts small blind 15
+JJPOL55: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts 7h 4s 9c]
+Ladykellyone: raises 30 to 60
+jeje_sat: calls 45
+JJPOL55: calls 30
+*** FLOP *** [6c Td 2c]
+jeje_sat: checks
+JJPOL55: checks
+Ladykellyone: bets 60
+jeje_sat: folds
+JJPOL55: calls 60
+*** TURN *** [6c Td 2c] [4c]
+JJPOL55: bets 30
+Ladykellyone: calls 30
+*** RIVER *** [6c Td 2c 4c] [Qc]
+JJPOL55: bets 30
+Ladykellyone: calls 30
+*** SHOW DOWN ***
+JJPOL55: shows [Ad Jd 3d 5c] (a straight, Deuce to Six)
+Ladykellyone: mucks hand
+JJPOL55 collected 420 from pot
+*** SUMMARY ***
+Total pot 420 | Rake 0
+Board [6c Td 2c 4c Qc]
+Seat 1: Ladykellyone (button) mucked [Kc 9d Ks 2s]
+Seat 2: jeje_sat (small blind) folded on the Flop
+Seat 3: JJPOL55 (big blind) showed [Ad Jd 3d 5c] and won (420) with a straight, Deuce to Six
+
+
+PokerStars Hand #229722266415: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:18:08 CET [2021/09/09 16:18:08 ET]
+Table '3263058772 1' 3-max Seat #2 is the button
+Seat 1: Ladykellyone (455 in chips)
+Seat 2: jeje_sat (435 in chips)
+Seat 3: JJPOL55 (610 in chips)
+JJPOL55: posts small blind 15
+Ladykellyone: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jd 6c 3s Ah]
+jeje_sat: folds
+JJPOL55: folds
+Uncalled bet (15) returned to Ladykellyone
+Ladykellyone collected 30 from pot
+Ladykellyone: doesn't show hand
+*** SUMMARY ***
+Total pot 30 | Rake 0
+Seat 1: Ladykellyone (big blind) collected (30)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: JJPOL55 (small blind) folded before Flop
+
+
+PokerStars Hand #229722269252: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:18:13 CET [2021/09/09 16:18:13 ET]
+Table '3263058772 1' 3-max Seat #3 is the button
+Seat 1: Ladykellyone (470 in chips)
+Seat 2: jeje_sat (435 in chips)
+Seat 3: JJPOL55 (595 in chips)
+Ladykellyone: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qd 7d 2c 5h]
+JJPOL55: calls 30
+Ladykellyone: raises 30 to 60
+jeje_sat: folds
+JJPOL55: calls 30
+*** FLOP *** [Qc 9d 4s]
+Ladykellyone: checks
+JJPOL55: bets 30
+Ladykellyone: calls 30
+*** TURN *** [Qc 9d 4s] [2s]
+Ladykellyone: checks
+JJPOL55: bets 30
+Ladykellyone: calls 30
+*** RIVER *** [Qc 9d 4s 2s] [Th]
+Ladykellyone: bets 270
+JJPOL55: calls 270
+*** SHOW DOWN ***
+Ladykellyone: shows [8d Ts Tc 9s] (three of a kind, Tens)
+JJPOL55: mucks hand
+Ladykellyone collected 810 from pot
+*** SUMMARY ***
+Total pot 810 | Rake 0
+Board [Qc 9d 4s 2s Th]
+Seat 1: Ladykellyone (small blind) showed [8d Ts Tc 9s] and won (810) with three of a kind, Tens
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 3: JJPOL55 (button) mucked [4c Td 8c 4d]
+
+
+PokerStars Hand #229722294471: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:18:58 CET [2021/09/09 16:18:58 ET]
+Table '3263058772 1' 3-max Seat #1 is the button
+Seat 1: Ladykellyone (890 in chips)
+Seat 2: jeje_sat (405 in chips)
+Seat 3: JJPOL55 (205 in chips)
+jeje_sat: posts small blind 15
+JJPOL55: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qd Jh 3d 9s]
+Ladykellyone: raises 75 to 105
+jeje_sat: folds
+JJPOL55: calls 75
+*** FLOP *** [7d Qc 6d]
+JJPOL55: checks
+Ladykellyone: bets 105
+JJPOL55: folds
+Uncalled bet (105) returned to Ladykellyone
+Ladykellyone collected 225 from pot
+Ladykellyone: doesn't show hand
+*** SUMMARY ***
+Total pot 225 | Rake 0
+Board [7d Qc 6d]
+Seat 1: Ladykellyone (button) collected (225)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 3: JJPOL55 (big blind) folded on the Flop
+
+
+PokerStars Hand #229722307044: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:19:21 CET [2021/09/09 16:19:21 ET]
+Table '3263058772 1' 3-max Seat #2 is the button
+Seat 1: Ladykellyone (1010 in chips)
+Seat 2: jeje_sat (390 in chips)
+Seat 3: JJPOL55 (100 in chips)
+JJPOL55: posts small blind 15
+Ladykellyone: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h 6d Jd Qc]
+jeje_sat: folds
+JJPOL55: folds
+Uncalled bet (15) returned to Ladykellyone
+Ladykellyone collected 30 from pot
+Ladykellyone: doesn't show hand
+*** SUMMARY ***
+Total pot 30 | Rake 0
+Seat 1: Ladykellyone (big blind) collected (30)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: JJPOL55 (small blind) folded before Flop
+
+
+PokerStars Hand #229722315594: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:19:36 CET [2021/09/09 16:19:36 ET]
+Table '3263058772 1' 3-max Seat #3 is the button
+Seat 1: Ladykellyone (1025 in chips)
+Seat 2: jeje_sat (390 in chips)
+Seat 3: JJPOL55 (85 in chips)
+Ladykellyone: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h 3h Qs 8s]
+JJPOL55 has timed out
+JJPOL55: folds
+JJPOL55 is sitting out
+Ladykellyone: calls 15
+JJPOL55 has returned
+jeje_sat: checks
+*** FLOP *** [8d 7d 5d]
+Ladykellyone: checks
+jeje_sat: checks
+*** TURN *** [8d 7d 5d] [9c]
+Ladykellyone: checks
+jeje_sat: checks
+*** RIVER *** [8d 7d 5d 9c] [9d]
+Ladykellyone: checks
+jeje_sat: checks
+*** SHOW DOWN ***
+Ladykellyone: shows [4c Ts 3d 9h] (three of a kind, Nines)
+jeje_sat: mucks hand
+Ladykellyone collected 60 from pot
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Board [8d 7d 5d 9c 9d]
+Seat 1: Ladykellyone (small blind) showed [4c Ts 3d 9h] and won (60) with three of a kind, Nines
+Seat 2: jeje_sat (big blind) mucked [2h 3h Qs 8s]
+Seat 3: JJPOL55 (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #229722337703: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level III (20/40) - 2021/09/09 22:20:16 CET [2021/09/09 16:20:16 ET]
+Table '3263058772 1' 3-max Seat #1 is the button
+Seat 1: Ladykellyone (1055 in chips)
+Seat 2: jeje_sat (360 in chips)
+Seat 3: JJPOL55 (85 in chips)
+jeje_sat: posts small blind 20
+JJPOL55: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc Qd 3h 5d]
+Ladykellyone: raises 100 to 140
+jeje_sat: folds
+JJPOL55: folds
+Uncalled bet (100) returned to Ladykellyone
+Ladykellyone collected 100 from pot
+Ladykellyone: doesn't show hand
+*** SUMMARY ***
+Total pot 100 | Rake 0
+Seat 1: Ladykellyone (button) collected (100)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 3: JJPOL55 (big blind) folded before Flop
+
+
+PokerStars Hand #229722342133: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level III (20/40) - 2021/09/09 22:20:24 CET [2021/09/09 16:20:24 ET]
+Table '3263058772 1' 3-max Seat #2 is the button
+Seat 1: Ladykellyone (1115 in chips)
+Seat 2: jeje_sat (340 in chips)
+Seat 3: JJPOL55 (45 in chips)
+JJPOL55: posts small blind 20
+Ladykellyone: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ah 2s As 7s]
+jeje_sat: raises 100 to 140
+JJPOL55: calls 25 and is all-in
+Ladykellyone: calls 100
+*** FLOP *** [Qs 4h 3d]
+Ladykellyone: bets 60
+jeje_sat: raises 140 to 200 and is all-in
+Ladykellyone: calls 140
+*** TURN *** [Qs 4h 3d] [Jd]
+*** RIVER *** [Qs 4h 3d Jd] [Jc]
+*** SHOW DOWN ***
+Ladykellyone: shows [Qd 8d 7h 7d] (two pair, Queens and Jacks)
+jeje_sat: shows [Ah 2s As 7s] (two pair, Aces and Jacks)
+jeje_sat collected 590 from side pot
+JJPOL55: shows [2c 9d Qc Kd] (two pair, Queens and Jacks)
+jeje_sat collected 135 from main pot
+JJPOL55 finished the tournament in 3rd place
+*** SUMMARY ***
+Total pot 725 Main pot 135. Side pot 590. | Rake 0
+Board [Qs 4h 3d Jd Jc]
+Seat 1: Ladykellyone (big blind) showed [Qd 8d 7h 7d] and lost with two pair, Queens and Jacks
+Seat 2: jeje_sat (button) showed [Ah 2s As 7s] and won (725) with two pair, Aces and Jacks
+Seat 3: JJPOL55 (small blind) showed [2c 9d Qc Kd] and lost with two pair, Queens and Jacks
+
+
+PokerStars Hand #229722364894: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level III (20/40) - 2021/09/09 22:21:05 CET [2021/09/09 16:21:05 ET]
+Table '3263058772 1' 3-max Seat #1 is the button
+Seat 1: Ladykellyone (775 in chips)
+Seat 2: jeje_sat (725 in chips)
+Ladykellyone: posts small blind 20
+jeje_sat: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qc Td 9d Ah]
+Ladykellyone: calls 20
+jeje_sat: raises 80 to 120
+Ladykellyone: calls 80
+*** FLOP *** [4h 9s 8h]
+jeje_sat: bets 240
+Ladykellyone: folds
+Uncalled bet (240) returned to jeje_sat
+jeje_sat collected 240 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Board [4h 9s 8h]
+Seat 1: Ladykellyone (button) (small blind) folded on the Flop
+Seat 2: jeje_sat (big blind) collected (240)
+
+
+PokerStars Hand #229722380806: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level III (20/40) - 2021/09/09 22:21:33 CET [2021/09/09 16:21:33 ET]
+Table '3263058772 1' 3-max Seat #2 is the button
+Seat 1: Ladykellyone (655 in chips)
+Seat 2: jeje_sat (845 in chips)
+jeje_sat: posts small blind 20
+Ladykellyone: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [7h 7s Jd 5s]
+jeje_sat: calls 20
+Ladykellyone: raises 80 to 120
+jeje_sat: calls 80
+*** FLOP *** [Ts 8c Tc]
+Ladykellyone: checks
+jeje_sat: checks
+*** TURN *** [Ts 8c Tc] [Jh]
+Ladykellyone: checks
+jeje_sat: bets 240
+Ladykellyone: folds
+Uncalled bet (240) returned to jeje_sat
+jeje_sat collected 240 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Board [Ts 8c Tc Jh]
+Seat 1: Ladykellyone (big blind) folded on the Turn
+Seat 2: jeje_sat (button) (small blind) collected (240)
+
+
+PokerStars Hand #229722402077: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level III (20/40) - 2021/09/09 22:22:11 CET [2021/09/09 16:22:11 ET]
+Table '3263058772 1' 3-max Seat #1 is the button
+Seat 1: Ladykellyone (535 in chips)
+Seat 2: jeje_sat (965 in chips)
+Ladykellyone: posts small blind 20
+jeje_sat: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jh 8h Qh 8d]
+Ladykellyone: calls 20
+jeje_sat: raises 80 to 120
+Ladykellyone: calls 80
+*** FLOP *** [3s Kc 5c]
+jeje_sat: checks
+Ladykellyone: bets 240
+jeje_sat: folds
+Uncalled bet (240) returned to Ladykellyone
+Ladykellyone collected 240 from pot
+Ladykellyone: doesn't show hand
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Board [3s Kc 5c]
+Seat 1: Ladykellyone (button) (small blind) collected (240)
+Seat 2: jeje_sat (big blind) folded on the Flop
+
+
+PokerStars Hand #229722411936: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level III (20/40) - 2021/09/09 22:22:29 CET [2021/09/09 16:22:29 ET]
+Table '3263058772 1' 3-max Seat #2 is the button
+Seat 1: Ladykellyone (655 in chips)
+Seat 2: jeje_sat (845 in chips)
+jeje_sat: posts small blind 20
+Ladykellyone: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h 9h 2c Tc]
+jeje_sat: calls 20
+Ladykellyone: checks
+*** FLOP *** [Qc 3c 7d]
+Ladykellyone: checks
+jeje_sat: bets 40
+Ladykellyone: calls 40
+*** TURN *** [Qc 3c 7d] [5c]
+Ladykellyone: checks
+jeje_sat: bets 80
+Ladykellyone: folds
+Uncalled bet (80) returned to jeje_sat
+jeje_sat collected 160 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 160 | Rake 0
+Board [Qc 3c 7d 5c]
+Seat 1: Ladykellyone (big blind) folded on the Turn
+Seat 2: jeje_sat (button) (small blind) collected (160)
+
+
+PokerStars Hand #229722433453: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/09/09 22:22:58 CET [2021/09/09 16:22:58 ET]
+Table '3263058772 1' 3-max Seat #1 is the button
+Seat 1: Ladykellyone (575 in chips)
+Seat 2: jeje_sat (925 in chips)
+Ladykellyone: posts small blind 30
+jeje_sat: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc 6d 8c 2c]
+Ladykellyone: folds
+Uncalled bet (30) returned to jeje_sat
+jeje_sat collected 60 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Seat 1: Ladykellyone (button) (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (60)
+
+
+PokerStars Hand #229722436779: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/09/09 22:23:04 CET [2021/09/09 16:23:04 ET]
+Table '3263058772 1' 3-max Seat #2 is the button
+Seat 1: Ladykellyone (545 in chips)
+Seat 2: jeje_sat (955 in chips)
+jeje_sat: posts small blind 30
+Ladykellyone: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [3d 4s 3s 7d]
+jeje_sat: calls 30
+Ladykellyone: checks
+*** FLOP *** [Ac Qd Tc]
+Ladykellyone: checks
+jeje_sat: checks
+*** TURN *** [Ac Qd Tc] [Qc]
+Ladykellyone: bets 120
+jeje_sat: folds
+Uncalled bet (120) returned to Ladykellyone
+Ladykellyone collected 120 from pot
+Ladykellyone: doesn't show hand
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [Ac Qd Tc Qc]
+Seat 1: Ladykellyone (big blind) collected (120)
+Seat 2: jeje_sat (button) (small blind) folded on the Turn
+
+
+PokerStars Hand #229722446838: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/09/09 22:23:22 CET [2021/09/09 16:23:22 ET]
+Table '3263058772 1' 3-max Seat #1 is the button
+Seat 1: Ladykellyone (605 in chips)
+Seat 2: jeje_sat (895 in chips)
+Ladykellyone: posts small blind 30
+jeje_sat: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d 9c 3c 8c]
+Ladykellyone: calls 30
+jeje_sat: checks
+*** FLOP *** [2h Jd 8s]
+jeje_sat: checks
+Ladykellyone: checks
+*** TURN *** [2h Jd 8s] [Kd]
+jeje_sat: checks
+Ladykellyone: checks
+*** RIVER *** [2h Jd 8s Kd] [5h]
+jeje_sat: checks
+Ladykellyone: checks
+*** SHOW DOWN ***
+jeje_sat: shows [4d 9c 3c 8c] (a pair of Eights)
+Ladykellyone: mucks hand
+jeje_sat collected 120 from pot
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [2h Jd 8s Kd 5h]
+Seat 1: Ladykellyone (button) (small blind) mucked [5s As Th 3d]
+Seat 2: jeje_sat (big blind) showed [4d 9c 3c 8c] and won (120) with a pair of Eights
+
+
+PokerStars Hand #229722460315: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/09/09 22:23:47 CET [2021/09/09 16:23:47 ET]
+Table '3263058772 1' 3-max Seat #2 is the button
+Seat 1: Ladykellyone (545 in chips)
+Seat 2: jeje_sat (955 in chips)
+jeje_sat: posts small blind 30
+Ladykellyone: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks 6c 2d Kc]
+jeje_sat: raises 120 to 180
+Ladykellyone: calls 120
+*** FLOP *** [2h 9s 7c]
+Ladykellyone: checks
+jeje_sat: bets 360
+Ladykellyone: folds
+Uncalled bet (360) returned to jeje_sat
+jeje_sat collected 360 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 360 | Rake 0
+Board [2h 9s 7c]
+Seat 1: Ladykellyone (big blind) folded on the Flop
+Seat 2: jeje_sat (button) (small blind) collected (360)
+
+
+PokerStars Hand #229722468558: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/09/09 22:24:02 CET [2021/09/09 16:24:02 ET]
+Table '3263058772 1' 3-max Seat #1 is the button
+Seat 1: Ladykellyone (365 in chips)
+Seat 2: jeje_sat (1135 in chips)
+Ladykellyone: posts small blind 30
+jeje_sat: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h Ah Qs 9c]
+Ladykellyone: raises 120 to 180
+jeje_sat: raises 360 to 540
+Ladykellyone: calls 185 and is all-in
+Uncalled bet (175) returned to jeje_sat
+*** FLOP *** [6d Tc 7h]
+*** TURN *** [6d Tc 7h] [4c]
+*** RIVER *** [6d Tc 7h 4c] [Jd]
+*** SHOW DOWN ***
+jeje_sat: shows [6h Ah Qs 9c] (a pair of Sixes)
+Ladykellyone: shows [Ks 5s Kd Kc] (a pair of Kings)
+Ladykellyone collected 730 from pot
+*** SUMMARY ***
+Total pot 730 | Rake 0
+Board [6d Tc 7h 4c Jd]
+Seat 1: Ladykellyone (button) (small blind) showed [Ks 5s Kd Kc] and won (730) with a pair of Kings
+Seat 2: jeje_sat (big blind) showed [6h Ah Qs 9c] and lost with a pair of Sixes
+
+
+PokerStars Hand #229722481985: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/09/09 22:24:26 CET [2021/09/09 16:24:26 ET]
+Table '3263058772 1' 3-max Seat #2 is the button
+Seat 1: Ladykellyone (730 in chips)
+Seat 2: jeje_sat (770 in chips)
+jeje_sat: posts small blind 30
+Ladykellyone: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [6s 7c 6d As]
+jeje_sat: raises 120 to 180
+Ladykellyone: calls 120
+*** FLOP *** [8c 7s Qh]
+Ladykellyone: bets 360
+jeje_sat: raises 230 to 590 and is all-in
+Ladykellyone: calls 190 and is all-in
+Uncalled bet (40) returned to jeje_sat
+*** TURN *** [8c 7s Qh] [2d]
+*** RIVER *** [8c 7s Qh 2d] [Kc]
+*** SHOW DOWN ***
+Ladykellyone: shows [Jh Qc Ac Kh] (two pair, Kings and Queens)
+jeje_sat: shows [6s 7c 6d As] (a pair of Sevens)
+Ladykellyone collected 1460 from pot
+*** SUMMARY ***
+Total pot 1460 | Rake 0
+Board [8c 7s Qh 2d Kc]
+Seat 1: Ladykellyone (big blind) showed [Jh Qc Ac Kh] and won (1460) with two pair, Kings and Queens
+Seat 2: jeje_sat (button) (small blind) showed [6s 7c 6d As] and lost with a pair of Sevens
+
+
+PokerStars Hand #229722496041: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/09/09 22:24:52 CET [2021/09/09 16:24:52 ET]
+Table '3263058772 1' 3-max Seat #1 is the button
+Seat 1: Ladykellyone (1460 in chips)
+Seat 2: jeje_sat (40 in chips)
+Ladykellyone: posts small blind 30
+jeje_sat: posts big blind 40 and is all-in
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qc 5c Kd 8c]
+Ladykellyone: calls 10
+*** FLOP *** [5d 6c 7s]
+*** TURN *** [5d 6c 7s] [4d]
+*** RIVER *** [5d 6c 7s 4d] [6d]
+*** SHOW DOWN ***
+jeje_sat: shows [Qc 5c Kd 8c] (a straight, Four to Eight)
+Ladykellyone: shows [Qd Ah 7c Js] (two pair, Sevens and Sixes)
+jeje_sat collected 80 from pot
+*** SUMMARY ***
+Total pot 80 | Rake 0
+Board [5d 6c 7s 4d 6d]
+Seat 1: Ladykellyone (button) (small blind) showed [Qd Ah 7c Js] and lost with two pair, Sevens and Sixes
+Seat 2: jeje_sat (big blind) showed [Qc 5c Kd 8c] and won (80) with a straight, Four to Eight
+
+
+PokerStars Hand #229722502581: Tournament #3263058772, €0.23+€0.02 EUR Omaha Pot Limit - Level IV (30/60) - 2021/09/09 22:25:03 CET [2021/09/09 16:25:03 ET]
+Table '3263058772 1' 3-max Seat #2 is the button
+Seat 1: Ladykellyone (1420 in chips)
+Seat 2: jeje_sat (80 in chips)
+jeje_sat: posts small blind 30
+Ladykellyone: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [3s 9h 7d 7h]
+jeje_sat: raises 20 to 80 and is all-in
+Ladykellyone: calls 20
+*** FLOP *** [Qd Js Tc]
+*** TURN *** [Qd Js Tc] [2c]
+*** RIVER *** [Qd Js Tc 2c] [Ac]
+*** SHOW DOWN ***
+Ladykellyone: shows [8d Kd 9d As] (a straight, Ten to Ace)
+jeje_sat: shows [3s 9h 7d 7h] (a pair of Sevens)
+Ladykellyone collected 160 from pot
+*** SUMMARY ***
+Total pot 160 | Rake 0
+Board [Qd Js Tc 2c Ac]
+Seat 1: Ladykellyone (big blind) showed [8d Kd 9d As] and won (160) with a straight, Ten to Ace
+Seat 2: jeje_sat (button) (small blind) showed [3s 9h 7d 7h] and lost with a pair of Sevens
+
+

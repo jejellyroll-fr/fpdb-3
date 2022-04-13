@@ -1,0 +1,1818 @@
+﻿PokerStars Hand #231293622633: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level III (20/40) - 2021/11/10 18:53:24 CET [2021/11/10 12:53:24 ET]
+Table '3295312832 2' 6-max Seat #2 is the button
+Seat 1: GareDappel (5975 in chips)
+Seat 2: manoliyo53 (2070 in chips)
+Seat 3: zekikinio (3500 in chips)
+Seat 4: BlauGrana169 (3809 in chips)
+Seat 6: jeje_sat (6855 in chips) is sitting out
+zekikinio: posts small blind 20
+BlauGrana169: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [8h 7c Kd 2h]
+jeje_sat: folds
+GareDappel: raises 80 to 120
+manoliyo53: calls 120
+zekikinio: calls 100
+BlauGrana169: folds
+*** FLOP *** [Jh 4s 9h]
+zekikinio: checks
+GareDappel: checks
+jeje_sat has returned
+manoliyo53: checks
+*** TURN *** [Jh 4s 9h] [2c]
+zekikinio: checks
+GareDappel: bets 320
+manoliyo53: folds
+zekikinio: folds
+Uncalled bet (320) returned to GareDappel
+GareDappel collected 400 from pot
+*** SUMMARY ***
+Total pot 400 | Rake 0
+Board [Jh 4s 9h 2c]
+Seat 1: GareDappel collected (400)
+Seat 2: manoliyo53 (button) folded on the Turn
+Seat 3: zekikinio (small blind) folded on the Turn
+Seat 4: BlauGrana169 (big blind) folded before Flop
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #231293659124: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level III (20/40) - 2021/11/10 18:54:46 CET [2021/11/10 12:54:46 ET]
+Table '3295312832 2' 6-max Seat #3 is the button
+Seat 1: GareDappel (6255 in chips)
+Seat 2: manoliyo53 (1950 in chips)
+Seat 3: zekikinio (3380 in chips)
+Seat 4: BlauGrana169 (3769 in chips)
+Seat 6: jeje_sat (6855 in chips)
+BlauGrana169: posts small blind 20
+jeje_sat: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts 5c 6s Js]
+GareDappel: calls 40
+manoliyo53: folds
+zekikinio: calls 40
+BlauGrana169: calls 20
+jeje_sat: checks
+*** FLOP *** [9h Th 4s]
+BlauGrana169: checks
+jeje_sat: bets 40
+GareDappel: calls 40
+zekikinio: calls 40
+BlauGrana169: folds
+*** TURN *** [9h Th 4s] [As]
+jeje_sat: bets 140
+GareDappel: calls 140
+zekikinio: folds
+*** RIVER *** [9h Th 4s As] [9c]
+jeje_sat: checks
+GareDappel: checks
+*** SHOW DOWN ***
+jeje_sat: shows [Ts 5c 6s Js] (two pair, Tens and Nines)
+GareDappel: shows [5s Jh Ks Ah] (two pair, Aces and Nines)
+GareDappel collected 560 from pot
+*** SUMMARY ***
+Total pot 560 | Rake 0
+Board [9h Th 4s As 9c]
+Seat 1: GareDappel showed [5s Jh Ks Ah] and won (560) with two pair, Aces and Nines
+Seat 2: manoliyo53 folded before Flop (didn't bet)
+Seat 3: zekikinio (button) folded on the Turn
+Seat 4: BlauGrana169 (small blind) folded on the Flop
+Seat 6: jeje_sat (big blind) showed [Ts 5c 6s Js] and lost with two pair, Tens and Nines
+
+
+PokerStars Hand #231293796539: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level III (20/40) - 2021/11/10 19:01:13 CET [2021/11/10 13:01:13 ET]
+Table '3295312832 2' 6-max Seat #4 is the button
+Seat 1: GareDappel (6595 in chips)
+Seat 2: manoliyo53 (1950 in chips)
+Seat 3: zekikinio (3300 in chips)
+Seat 4: BlauGrana169 (3729 in chips)
+Seat 5: igordom27 (3000 in chips) out of hand (moved from another table into small blind)
+Seat 6: jeje_sat (6635 in chips)
+igordom27 will be allowed to play after the button
+jeje_sat: posts small blind 20
+GareDappel: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [7h 2c Qs 9s]
+manoliyo53: calls 40
+zekikinio: folds
+BlauGrana169: calls 40
+jeje_sat: folds
+GareDappel: checks
+*** FLOP *** [Qh 8c Kc]
+GareDappel: checks
+manoliyo53: bets 140
+BlauGrana169: calls 140
+GareDappel: calls 140
+*** TURN *** [Qh 8c Kc] [5s]
+GareDappel: checks
+manoliyo53: bets 560
+BlauGrana169: calls 560
+GareDappel: folds
+*** RIVER *** [Qh 8c Kc 5s] [6s]
+manoliyo53: checks
+BlauGrana169: bets 1160
+manoliyo53: folds
+Uncalled bet (1160) returned to BlauGrana169
+BlauGrana169 collected 1680 from pot
+BlauGrana169: doesn't show hand
+*** SUMMARY ***
+Total pot 1680 | Rake 0
+Board [Qh 8c Kc 5s 6s]
+Seat 1: GareDappel (big blind) folded on the Turn
+Seat 2: manoliyo53 folded on the River
+Seat 3: zekikinio folded before Flop (didn't bet)
+Seat 4: BlauGrana169 (button) collected (1680)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Hand #231293842530: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level IV (25/50) - 2021/11/10 19:02:53 CET [2021/11/10 13:02:53 ET]
+Table '3295312832 2' 6-max Seat #6 is the button
+Seat 1: GareDappel (6415 in chips)
+Seat 2: manoliyo53 (1210 in chips)
+Seat 3: zekikinio (3300 in chips)
+Seat 4: BlauGrana169 (4669 in chips)
+Seat 5: igordom27 (3000 in chips)
+Seat 6: jeje_sat (6615 in chips)
+GareDappel: posts small blind 25
+manoliyo53: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [2s 3c Jd 7c]
+zekikinio: folds
+BlauGrana169: folds
+igordom27: folds
+jeje_sat: folds
+GareDappel: calls 25
+manoliyo53: checks
+*** FLOP *** [4c Td 2d]
+GareDappel: checks
+manoliyo53: checks
+*** TURN *** [4c Td 2d] [Ad]
+GareDappel: checks
+manoliyo53: checks
+*** RIVER *** [4c Td 2d Ad] [9s]
+GareDappel: checks
+manoliyo53: bets 100
+GareDappel: folds
+Uncalled bet (100) returned to manoliyo53
+manoliyo53 collected 100 from pot
+manoliyo53: doesn't show hand
+*** SUMMARY ***
+Total pot 100 | Rake 0
+Board [4c Td 2d Ad 9s]
+Seat 1: GareDappel (small blind) folded on the River
+Seat 2: manoliyo53 (big blind) collected (100)
+Seat 3: zekikinio folded before Flop (didn't bet)
+Seat 4: BlauGrana169 folded before Flop (didn't bet)
+Seat 5: igordom27 folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #231293880897: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level IV (25/50) - 2021/11/10 19:04:18 CET [2021/11/10 13:04:18 ET]
+Table '3295312832 2' 6-max Seat #1 is the button
+Seat 1: GareDappel (6365 in chips)
+Seat 2: manoliyo53 (1260 in chips)
+Seat 3: zekikinio (3300 in chips)
+Seat 4: BlauGrana169 (4669 in chips)
+Seat 5: igordom27 (3000 in chips)
+Seat 6: jeje_sat (6615 in chips)
+manoliyo53: posts small blind 25
+zekikinio: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [9h 3s 5d 8s]
+BlauGrana169: calls 50
+igordom27: calls 50
+jeje_sat: folds
+GareDappel: folds
+manoliyo53: calls 25
+zekikinio: checks
+*** FLOP *** [Ac 8c Jd]
+manoliyo53: bets 200
+zekikinio: calls 200
+BlauGrana169: folds
+igordom27: calls 200
+*** TURN *** [Ac 8c Jd] [Jc]
+manoliyo53: bets 100
+zekikinio: folds
+igordom27: calls 100
+*** RIVER *** [Ac 8c Jd Jc] [8h]
+manoliyo53: checks
+igordom27: bets 200
+manoliyo53: folds
+Uncalled bet (200) returned to igordom27
+igordom27 collected 1000 from pot
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Board [Ac 8c Jd Jc 8h]
+Seat 1: GareDappel (button) folded before Flop (didn't bet)
+Seat 2: manoliyo53 (small blind) folded on the River
+Seat 3: zekikinio (big blind) folded on the Turn
+Seat 4: BlauGrana169 folded on the Flop
+Seat 5: igordom27 collected (1000)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #231293939431: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level IV (25/50) - 2021/11/10 19:06:26 CET [2021/11/10 13:06:26 ET]
+Table '3295312832 2' 6-max Seat #2 is the button
+Seat 1: GareDappel (6365 in chips)
+Seat 2: manoliyo53 (910 in chips)
+Seat 3: zekikinio (3050 in chips)
+Seat 4: BlauGrana169 (4619 in chips)
+Seat 5: igordom27 (3650 in chips)
+Seat 6: jeje_sat (6615 in chips)
+zekikinio: posts small blind 25
+BlauGrana169: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c 6d 3d Jc]
+igordom27: raises 50 to 100
+jeje_sat: folds
+GareDappel: calls 100
+manoliyo53: calls 100
+zekikinio: folds
+BlauGrana169: calls 50
+*** FLOP *** [2c 8c 4h]
+BlauGrana169: checks
+igordom27: checks
+GareDappel: bets 300
+manoliyo53: folds
+BlauGrana169: folds
+igordom27: folds
+Uncalled bet (300) returned to GareDappel
+GareDappel collected 425 from pot
+*** SUMMARY ***
+Total pot 425 | Rake 0
+Board [2c 8c 4h]
+Seat 1: GareDappel collected (425)
+Seat 2: manoliyo53 (button) folded on the Flop
+Seat 3: zekikinio (small blind) folded before Flop
+Seat 4: BlauGrana169 (big blind) folded on the Flop
+Seat 5: igordom27 folded on the Flop
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #231293970176: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level IV (25/50) - 2021/11/10 19:07:33 CET [2021/11/10 13:07:33 ET]
+Table '3295312832 2' 6-max Seat #3 is the button
+Seat 1: GareDappel (6690 in chips)
+Seat 2: manoliyo53 (810 in chips)
+Seat 3: zekikinio (3025 in chips)
+Seat 4: BlauGrana169 (4519 in chips)
+Seat 6: jeje_sat (6615 in chips)
+BlauGrana169: posts small blind 25
+jeje_sat: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s 2h 5h Ac]
+GareDappel: raises 100 to 150
+manoliyo53: folds
+zekikinio: calls 150
+BlauGrana169: calls 125
+jeje_sat: calls 100
+*** FLOP *** [8c 4c Qs]
+BlauGrana169: checks
+jeje_sat: checks
+GareDappel: bets 350
+zekikinio: calls 350
+BlauGrana169: folds
+jeje_sat: folds
+*** TURN *** [8c 4c Qs] [Jd]
+GareDappel: bets 1250
+zekikinio: folds
+Uncalled bet (1250) returned to GareDappel
+GareDappel collected 1300 from pot
+*** SUMMARY ***
+Total pot 1300 | Rake 0
+Board [8c 4c Qs Jd]
+Seat 1: GareDappel collected (1300)
+Seat 2: manoliyo53 folded before Flop (didn't bet)
+Seat 3: zekikinio (button) folded on the Turn
+Seat 4: BlauGrana169 (small blind) folded on the Flop
+Seat 6: jeje_sat (big blind) folded on the Flop
+
+
+PokerStars Hand #231294025464: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level IV (25/50) - 2021/11/10 19:09:35 CET [2021/11/10 13:09:35 ET]
+Table '3295312832 2' 6-max Seat #4 is the button
+Seat 1: GareDappel (7490 in chips)
+Seat 2: manoliyo53 (810 in chips)
+Seat 3: zekikinio (2525 in chips)
+Seat 4: BlauGrana169 (4369 in chips)
+Seat 6: jeje_sat (6465 in chips)
+jeje_sat: posts small blind 25
+GareDappel: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d As 9d Ks]
+manoliyo53: calls 50
+zekikinio: folds
+BlauGrana169: folds
+jeje_sat: calls 25
+GareDappel: checks
+*** FLOP *** [3c 4c 7h]
+jeje_sat: checks
+GareDappel: checks
+manoliyo53: checks
+*** TURN *** [3c 4c 7h] [Kc]
+jeje_sat: checks
+GareDappel: checks
+manoliyo53: checks
+*** RIVER *** [3c 4c 7h Kc] [Td]
+jeje_sat: checks
+GareDappel: checks
+manoliyo53: checks
+*** SHOW DOWN ***
+jeje_sat: shows [4d As 9d Ks] (two pair, Kings and Fours)
+GareDappel: mucks hand
+manoliyo53: mucks hand
+jeje_sat collected 150 from pot
+*** SUMMARY ***
+Total pot 150 | Rake 0
+Board [3c 4c 7h Kc Td]
+Seat 1: GareDappel (big blind) mucked [8s Ah 9h 2d]
+Seat 2: manoliyo53 mucked [8d 9s Th 3d]
+Seat 3: zekikinio folded before Flop (didn't bet)
+Seat 4: BlauGrana169 (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) showed [4d As 9d Ks] and won (150) with two pair, Kings and Fours
+
+
+PokerStars Hand #231294065667: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level IV (25/50) - 2021/11/10 19:11:02 CET [2021/11/10 13:11:02 ET]
+Table '3295312832 2' 6-max Seat #6 is the button
+Seat 1: GareDappel (7440 in chips)
+Seat 2: manoliyo53 (760 in chips)
+Seat 3: zekikinio (2525 in chips)
+Seat 4: BlauGrana169 (4369 in chips)
+Seat 6: jeje_sat (6565 in chips)
+GareDappel: posts small blind 25
+manoliyo53: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [9s Js Ks Td]
+zekikinio: folds
+BlauGrana169: folds
+jeje_sat: raises 125 to 175
+GareDappel: folds
+manoliyo53: calls 125
+*** FLOP *** [6s 5h Qs]
+manoliyo53: bets 375
+jeje_sat: calls 375
+*** TURN *** [6s 5h Qs] [4d]
+manoliyo53: bets 210 and is all-in
+jeje_sat: calls 210
+*** RIVER *** [6s 5h Qs 4d] [Ac]
+*** SHOW DOWN ***
+manoliyo53: shows [Ah Jh 4h Qd] (two pair, Aces and Queens)
+jeje_sat: shows [9s Js Ks Td] (high card Ace)
+manoliyo53 collected 1545 from pot
+*** SUMMARY ***
+Total pot 1545 | Rake 0
+Board [6s 5h Qs 4d Ac]
+Seat 1: GareDappel (small blind) folded before Flop
+Seat 2: manoliyo53 (big blind) showed [Ah Jh 4h Qd] and won (1545) with two pair, Aces and Queens
+Seat 3: zekikinio folded before Flop (didn't bet)
+Seat 4: BlauGrana169 folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) showed [9s Js Ks Td] and lost with high card Ace
+
+
+PokerStars Hand #231294087922: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level IV (25/50) - 2021/11/10 19:11:51 CET [2021/11/10 13:11:51 ET]
+Table '3295312832 2' 6-max Seat #1 is the button
+Seat 1: GareDappel (7415 in chips)
+Seat 2: manoliyo53 (1545 in chips)
+Seat 3: zekikinio (2525 in chips)
+Seat 4: BlauGrana169 (4369 in chips)
+Seat 6: jeje_sat (5805 in chips)
+manoliyo53: posts small blind 25
+zekikinio: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [3d 2h Ad 5h]
+BlauGrana169: raises 50 to 100
+jeje_sat: raises 275 to 375
+GareDappel: folds
+manoliyo53: folds
+zekikinio: folds
+BlauGrana169: calls 275
+*** FLOP *** [6s Qc Ks]
+BlauGrana169: checks
+jeje_sat: checks
+*** TURN *** [6s Qc Ks] [Qh]
+BlauGrana169: bets 300
+jeje_sat: folds
+Uncalled bet (300) returned to BlauGrana169
+BlauGrana169 collected 825 from pot
+BlauGrana169: doesn't show hand
+*** SUMMARY ***
+Total pot 825 | Rake 0
+Board [6s Qc Ks Qh]
+Seat 1: GareDappel (button) folded before Flop (didn't bet)
+Seat 2: manoliyo53 (small blind) folded before Flop
+Seat 3: zekikinio (big blind) folded before Flop
+Seat 4: BlauGrana169 collected (825)
+Seat 6: jeje_sat folded on the Turn
+
+
+PokerStars Hand #231294112596: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level IV (25/50) - 2021/11/10 19:12:44 CET [2021/11/10 13:12:44 ET]
+Table '3295312832 2' 6-max Seat #2 is the button
+Seat 1: GareDappel (7415 in chips)
+Seat 2: manoliyo53 (1520 in chips)
+Seat 3: zekikinio (2475 in chips)
+Seat 4: BlauGrana169 (4819 in chips)
+Seat 6: jeje_sat (5430 in chips)
+zekikinio: posts small blind 25
+BlauGrana169: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ah 2s Qd 4d]
+jeje_sat: folds
+GareDappel: raises 50 to 100
+manoliyo53: calls 100
+zekikinio: folds
+BlauGrana169: folds
+*** FLOP *** [Ts 6h 3s]
+GareDappel: bets 150
+manoliyo53: folds
+Uncalled bet (150) returned to GareDappel
+GareDappel collected 275 from pot
+*** SUMMARY ***
+Total pot 275 | Rake 0
+Board [Ts 6h 3s]
+Seat 1: GareDappel collected (275)
+Seat 2: manoliyo53 (button) folded on the Flop
+Seat 3: zekikinio (small blind) folded before Flop
+Seat 4: BlauGrana169 (big blind) folded before Flop
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #231294130537: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level IV (25/50) - 2021/11/10 19:13:23 CET [2021/11/10 13:13:23 ET]
+Table '3295312832 2' 6-max Seat #3 is the button
+Seat 1: GareDappel (7590 in chips)
+Seat 2: manoliyo53 (1420 in chips)
+Seat 3: zekikinio (2450 in chips)
+Seat 4: BlauGrana169 (4769 in chips)
+Seat 6: jeje_sat (5430 in chips)
+BlauGrana169: posts small blind 25
+jeje_sat: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [8d 7s Kd 7h]
+GareDappel: calls 50
+manoliyo53: calls 50
+zekikinio: calls 50
+BlauGrana169: calls 25
+jeje_sat: checks
+*** FLOP *** [4s 6c 5c]
+BlauGrana169: checks
+jeje_sat: bets 250
+GareDappel: folds
+manoliyo53: raises 750 to 1000
+zekikinio: folds
+BlauGrana169: raises 2500 to 3500
+jeje_sat: raises 1880 to 5380 and is all-in
+manoliyo53: calls 370 and is all-in
+BlauGrana169: calls 1219 and is all-in
+Uncalled bet (661) returned to jeje_sat
+*** TURN *** [4s 6c 5c] [As]
+*** RIVER *** [4s 6c 5c As] [Td]
+*** SHOW DOWN ***
+BlauGrana169: shows [6s Kc 4d Jc] (two pair, Sixes and Fours)
+jeje_sat: shows [8d 7s Kd 7h] (a straight, Four to Eight)
+jeje_sat collected 6698 from side pot
+manoliyo53: shows [5h 3c 7d 8h] (a straight, Four to Eight)
+jeje_sat collected 2180 from main pot
+manoliyo53 collected 2180 from main pot
+BlauGrana169 finished the tournament
+*** SUMMARY ***
+Total pot 11058 Main pot 4360. Side pot 6698. | Rake 0
+Board [4s 6c 5c As Td]
+Seat 1: GareDappel folded on the Flop
+Seat 2: manoliyo53 showed [5h 3c 7d 8h] and won (2180) with a straight, Four to Eight
+Seat 3: zekikinio (button) folded on the Flop
+Seat 4: BlauGrana169 (small blind) showed [6s Kc 4d Jc] and lost with two pair, Sixes and Fours
+Seat 6: jeje_sat (big blind) showed [8d 7s Kd 7h] and won (8878) with a straight, Four to Eight
+
+
+PokerStars Hand #231294167801: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level IV (25/50) - 2021/11/10 19:14:43 CET [2021/11/10 13:14:43 ET]
+Table '3295312832 2' 6-max Seat #6 is the button
+Seat 1: GareDappel (7540 in chips)
+Seat 2: manoliyo53 (2180 in chips)
+Seat 3: zekikinio (2400 in chips)
+Seat 6: jeje_sat (9539 in chips)
+GareDappel: posts small blind 25
+manoliyo53: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ah 7c 5h Js]
+zekikinio: folds
+jeje_sat: raises 100 to 150
+GareDappel: folds
+manoliyo53: calls 100
+*** FLOP *** [Qs 7s 5d]
+manoliyo53: checks
+jeje_sat: bets 163
+manoliyo53: folds
+Uncalled bet (163) returned to jeje_sat
+jeje_sat collected 325 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 325 | Rake 0
+Board [Qs 7s 5d]
+Seat 1: GareDappel (small blind) folded before Flop
+Seat 2: manoliyo53 (big blind) folded on the Flop
+Seat 3: zekikinio folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) collected (325)
+
+
+PokerStars Hand #231294190800: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level IV (25/50) - 2021/11/10 19:15:32 CET [2021/11/10 13:15:32 ET]
+Table '3295312832 2' 6-max Seat #1 is the button
+Seat 1: GareDappel (7515 in chips)
+Seat 2: manoliyo53 (2030 in chips)
+Seat 3: zekikinio (2400 in chips)
+Seat 6: jeje_sat (9714 in chips)
+manoliyo53: posts small blind 25
+zekikinio: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th Jd 8h Kc]
+jeje_sat: raises 125 to 175
+GareDappel: folds
+manoliyo53: calls 150
+zekikinio: folds
+*** FLOP *** [Ks 3s 9c]
+manoliyo53: checks
+jeje_sat: checks
+*** TURN *** [Ks 3s 9c] [Js]
+manoliyo53: checks
+jeje_sat: checks
+*** RIVER *** [Ks 3s 9c Js] [4c]
+manoliyo53: checks
+jeje_sat: checks
+*** SHOW DOWN ***
+manoliyo53: shows [Jh 7d 6h 8d] (a pair of Jacks)
+jeje_sat: shows [Th Jd 8h Kc] (two pair, Kings and Jacks)
+jeje_sat collected 400 from pot
+*** SUMMARY ***
+Total pot 400 | Rake 0
+Board [Ks 3s 9c Js 4c]
+Seat 1: GareDappel (button) folded before Flop (didn't bet)
+Seat 2: manoliyo53 (small blind) showed [Jh 7d 6h 8d] and lost with a pair of Jacks
+Seat 3: zekikinio (big blind) folded before Flop
+Seat 6: jeje_sat showed [Th Jd 8h Kc] and won (400) with two pair, Kings and Jacks
+
+
+PokerStars Hand #231294219225: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level V (30/60) - 2021/11/10 19:16:34 CET [2021/11/10 13:16:34 ET]
+Table '3295312832 2' 6-max Seat #2 is the button
+Seat 1: GareDappel (7515 in chips)
+Seat 2: manoliyo53 (1855 in chips)
+Seat 3: zekikinio (2350 in chips)
+Seat 6: jeje_sat (9939 in chips)
+zekikinio: posts small blind 30
+jeje_sat: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d 4s 7s 4c]
+GareDappel: calls 60
+manoliyo53: calls 60
+zekikinio: folds
+jeje_sat: checks
+*** FLOP *** [2d Ah 6d]
+jeje_sat: checks
+GareDappel: checks
+manoliyo53: bets 210
+jeje_sat: folds
+GareDappel: folds
+Uncalled bet (210) returned to manoliyo53
+manoliyo53 collected 210 from pot
+manoliyo53: doesn't show hand
+*** SUMMARY ***
+Total pot 210 | Rake 0
+Board [2d Ah 6d]
+Seat 1: GareDappel folded on the Flop
+Seat 2: manoliyo53 (button) collected (210)
+Seat 3: zekikinio (small blind) folded before Flop
+Seat 6: jeje_sat (big blind) folded on the Flop
+
+
+PokerStars Hand #231294276503: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level V (30/60) - 2021/11/10 19:18:38 CET [2021/11/10 13:18:38 ET]
+Table '3295312832 2' 6-max Seat #3 is the button
+Seat 1: GareDappel (7455 in chips)
+Seat 2: manoliyo53 (2005 in chips)
+Seat 3: zekikinio (2320 in chips)
+Seat 5: abubauti90 (3000 in chips) out of hand (moved from another table into small blind)
+Seat 6: jeje_sat (9879 in chips)
+abubauti90 will be allowed to play after the button
+jeje_sat: posts small blind 30
+GareDappel: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h Qc 8c 3d]
+manoliyo53: folds
+zekikinio: folds
+jeje_sat: folds
+Uncalled bet (30) returned to GareDappel
+GareDappel collected 60 from pot
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Seat 1: GareDappel (big blind) collected (60)
+Seat 2: manoliyo53 folded before Flop (didn't bet)
+Seat 3: zekikinio (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Hand #231294286667: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level V (30/60) - 2021/11/10 19:18:59 CET [2021/11/10 13:18:59 ET]
+Table '3295312832 2' 6-max Seat #6 is the button
+Seat 1: GareDappel (7485 in chips)
+Seat 2: manoliyo53 (2005 in chips)
+Seat 3: zekikinio (2320 in chips)
+Seat 5: abubauti90 (3000 in chips)
+Seat 6: jeje_sat (9849 in chips)
+GareDappel: posts small blind 30
+manoliyo53: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kh 8c Kc 2h]
+zekikinio: folds
+abubauti90: calls 60
+jeje_sat has timed out
+jeje_sat: folds
+jeje_sat is sitting out
+GareDappel: calls 30
+jeje_sat has returned
+manoliyo53: checks
+*** FLOP *** [7c 9d Ac]
+GareDappel: checks
+manoliyo53: checks
+abubauti90: checks
+*** TURN *** [7c 9d Ac] [6s]
+GareDappel: checks
+manoliyo53: checks
+abubauti90: checks
+*** RIVER *** [7c 9d Ac 6s] [8s]
+GareDappel: checks
+manoliyo53: bets 180
+abubauti90: folds
+GareDappel: folds
+Uncalled bet (180) returned to manoliyo53
+manoliyo53 collected 180 from pot
+manoliyo53: doesn't show hand
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Board [7c 9d Ac 6s 8s]
+Seat 1: GareDappel (small blind) folded on the River
+Seat 2: manoliyo53 (big blind) collected (180)
+Seat 3: zekikinio folded before Flop (didn't bet)
+Seat 5: abubauti90 folded on the River
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #231294317387: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level V (30/60) - 2021/11/10 19:20:06 CET [2021/11/10 13:20:06 ET]
+Table '3295312832 2' 6-max Seat #1 is the button
+Seat 1: GareDappel (7425 in chips)
+Seat 2: manoliyo53 (2125 in chips)
+Seat 3: zekikinio (2320 in chips)
+Seat 5: abubauti90 (2940 in chips)
+Seat 6: jeje_sat (9849 in chips)
+manoliyo53: posts small blind 30
+zekikinio: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jd 6h 7d Js]
+abubauti90: raises 150 to 210
+jeje_sat: calls 210
+GareDappel: folds
+manoliyo53: calls 180
+zekikinio: folds
+*** FLOP *** [4d 8s 2c]
+manoliyo53: checks
+abubauti90: bets 690
+jeje_sat: calls 690
+manoliyo53: folds
+*** TURN *** [4d 8s 2c] [2h]
+abubauti90: bets 2040 and is all-in
+jeje_sat: folds
+Uncalled bet (2040) returned to abubauti90
+abubauti90 collected 2070 from pot
+*** SUMMARY ***
+Total pot 2070 | Rake 0
+Board [4d 8s 2c 2h]
+Seat 1: GareDappel (button) folded before Flop (didn't bet)
+Seat 2: manoliyo53 (small blind) folded on the Flop
+Seat 3: zekikinio (big blind) folded before Flop
+Seat 5: abubauti90 collected (2070)
+Seat 6: jeje_sat folded on the Turn
+
+
+PokerStars Hand #231294356412: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level V (30/60) - 2021/11/10 19:21:12 CET [2021/11/10 13:21:12 ET]
+Table '3295312832 2' 6-max Seat #2 is the button
+Seat 1: GareDappel (7425 in chips)
+Seat 2: manoliyo53 (1915 in chips)
+Seat 3: zekikinio (2260 in chips)
+Seat 5: abubauti90 (4110 in chips)
+Seat 6: jeje_sat (8949 in chips)
+zekikinio: posts small blind 30
+abubauti90: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [6s 4s 8h Th]
+jeje_sat: folds
+GareDappel: folds
+manoliyo53: calls 60
+zekikinio: folds
+abubauti90: checks
+*** FLOP *** [5s Ks Ts]
+abubauti90: bets 150
+manoliyo53: folds
+Uncalled bet (150) returned to abubauti90
+abubauti90 collected 150 from pot
+*** SUMMARY ***
+Total pot 150 | Rake 0
+Board [5s Ks Ts]
+Seat 1: GareDappel folded before Flop (didn't bet)
+Seat 2: manoliyo53 (button) folded on the Flop
+Seat 3: zekikinio (small blind) folded before Flop
+Seat 5: abubauti90 (big blind) collected (150)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #231294371003: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level V (30/60) - 2021/11/10 19:21:44 CET [2021/11/10 13:21:44 ET]
+Table '3295312832 2' 6-max Seat #3 is the button
+Seat 1: GareDappel (7425 in chips)
+Seat 2: manoliyo53 (1855 in chips)
+Seat 3: zekikinio (2230 in chips)
+Seat 5: abubauti90 (4200 in chips)
+Seat 6: jeje_sat (8949 in chips)
+abubauti90: posts small blind 30
+jeje_sat: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [6d 7h Jd 5s]
+GareDappel: folds
+manoliyo53: calls 60
+zekikinio: folds
+abubauti90: calls 30
+jeje_sat: checks
+*** FLOP *** [Ah 4c Jc]
+abubauti90: checks
+jeje_sat: checks
+manoliyo53: checks
+*** TURN *** [Ah 4c Jc] [Qs]
+abubauti90: checks
+jeje_sat: checks
+manoliyo53: checks
+*** RIVER *** [Ah 4c Jc Qs] [Qc]
+abubauti90: checks
+jeje_sat: checks
+manoliyo53: checks
+*** SHOW DOWN ***
+abubauti90: shows [2c 6s Kh 8c] (a flush, Queen high)
+jeje_sat: mucks hand
+manoliyo53: mucks hand
+abubauti90 collected 180 from pot
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Board [Ah 4c Jc Qs Qc]
+Seat 1: GareDappel folded before Flop (didn't bet)
+Seat 2: manoliyo53 mucked [4d Js 6h 8d]
+Seat 3: zekikinio (button) folded before Flop (didn't bet)
+Seat 5: abubauti90 (small blind) showed [2c 6s Kh 8c] and won (180) with a flush, Queen high
+Seat 6: jeje_sat (big blind) mucked [6d 7h Jd 5s]
+
+
+PokerStars Hand #231294405059: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level V (30/60) - 2021/11/10 19:22:55 CET [2021/11/10 13:22:55 ET]
+Table '3295312832 2' 6-max Seat #5 is the button
+Seat 1: GareDappel (7425 in chips)
+Seat 2: manoliyo53 (1795 in chips)
+Seat 3: zekikinio (2230 in chips)
+Seat 4: ranchim (3000 in chips)
+Seat 5: abubauti90 (4320 in chips)
+Seat 6: jeje_sat (8889 in chips)
+jeje_sat: posts small blind 30
+GareDappel: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jh 8d Jc 4h]
+manoliyo53: folds
+zekikinio: folds
+ranchim: calls 60
+abubauti90: folds
+jeje_sat: raises 180 to 240
+GareDappel: folds
+ranchim: calls 180
+*** FLOP *** [9h 2d Qd]
+jeje_sat: checks
+ranchim: checks
+*** TURN *** [9h 2d Qd] [Js]
+jeje_sat: bets 270
+ranchim: raises 1080 to 1350
+jeje_sat: calls 1080
+*** RIVER *** [9h 2d Qd Js] [8h]
+jeje_sat: checks
+ranchim: bets 1410 and is all-in
+jeje_sat: folds
+Uncalled bet (1410) returned to ranchim
+ranchim collected 3240 from pot
+ranchim: doesn't show hand
+*** SUMMARY ***
+Total pot 3240 | Rake 0
+Board [9h 2d Qd Js 8h]
+Seat 1: GareDappel (big blind) folded before Flop
+Seat 2: manoliyo53 folded before Flop (didn't bet)
+Seat 3: zekikinio folded before Flop (didn't bet)
+Seat 4: ranchim collected (3240)
+Seat 5: abubauti90 (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded on the River
+
+
+PokerStars Hand #231294433167: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level V (30/60) - 2021/11/10 19:23:55 CET [2021/11/10 13:23:55 ET]
+Table '3295312832 2' 6-max Seat #6 is the button
+Seat 1: GareDappel (7365 in chips)
+Seat 2: manoliyo53 (1795 in chips)
+Seat 3: zekikinio (2230 in chips)
+Seat 4: ranchim (4650 in chips)
+Seat 5: abubauti90 (4320 in chips)
+Seat 6: jeje_sat (7299 in chips)
+GareDappel: posts small blind 30
+manoliyo53: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [3d 2s 8c Js]
+zekikinio: calls 60
+ranchim: folds
+abubauti90: calls 60
+jeje_sat: folds
+GareDappel: calls 30
+manoliyo53: raises 240 to 300
+zekikinio: calls 240
+abubauti90: calls 240
+GareDappel: folds
+*** FLOP *** [2h 7c 4d]
+manoliyo53: bets 960
+zekikinio: folds
+abubauti90: folds
+Uncalled bet (960) returned to manoliyo53
+manoliyo53 collected 960 from pot
+manoliyo53: doesn't show hand
+*** SUMMARY ***
+Total pot 960 | Rake 0
+Board [2h 7c 4d]
+Seat 1: GareDappel (small blind) folded before Flop
+Seat 2: manoliyo53 (big blind) collected (960)
+Seat 3: zekikinio folded on the Flop
+Seat 4: ranchim folded before Flop (didn't bet)
+Seat 5: abubauti90 folded on the Flop
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #231294461401: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level V (30/60) - 2021/11/10 19:24:56 CET [2021/11/10 13:24:56 ET]
+Table '3295312832 2' 6-max Seat #1 is the button
+Seat 1: GareDappel (7305 in chips)
+Seat 2: manoliyo53 (2455 in chips)
+Seat 3: zekikinio (1930 in chips)
+Seat 4: ranchim (4650 in chips)
+Seat 5: abubauti90 (4020 in chips)
+Seat 6: jeje_sat (7299 in chips)
+manoliyo53: posts small blind 30
+zekikinio: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kc 2h Th 7d]
+ranchim: folds
+abubauti90: folds
+jeje_sat: folds
+GareDappel: folds
+manoliyo53: calls 30
+zekikinio: checks
+*** FLOP *** [Qc Tc 9d]
+manoliyo53: checks
+zekikinio: checks
+*** TURN *** [Qc Tc 9d] [6c]
+manoliyo53: checks
+zekikinio: checks
+*** RIVER *** [Qc Tc 9d 6c] [8c]
+manoliyo53: checks
+zekikinio: checks
+*** SHOW DOWN ***
+manoliyo53: shows [5s Ts Ah Jh] (a straight, Eight to Queen)
+zekikinio: mucks hand
+manoliyo53 collected 120 from pot
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [Qc Tc 9d 6c 8c]
+Seat 1: GareDappel (button) folded before Flop (didn't bet)
+Seat 2: manoliyo53 (small blind) showed [5s Ts Ah Jh] and won (120) with a straight, Eight to Queen
+Seat 3: zekikinio (big blind) mucked [3s 4s 4d 5c]
+Seat 4: ranchim folded before Flop (didn't bet)
+Seat 5: abubauti90 folded before Flop (didn't bet)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #231294503815: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level V (30/60) - 2021/11/10 19:26:27 CET [2021/11/10 13:26:27 ET]
+Table '3295312832 2' 6-max Seat #2 is the button
+Seat 1: GareDappel (7305 in chips)
+Seat 2: manoliyo53 (2515 in chips)
+Seat 3: zekikinio (1870 in chips)
+Seat 4: ranchim (4650 in chips)
+Seat 5: kanika3pa (3000 in chips)
+Seat 6: jeje_sat (7299 in chips)
+zekikinio: posts small blind 30
+ranchim: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qs 4c Jc Kd]
+kanika3pa: calls 60
+jeje_sat: folds
+GareDappel: folds
+manoliyo53: calls 60
+zekikinio: calls 30
+ranchim: checks
+*** FLOP *** [4d 7d 5s]
+zekikinio: checks
+ranchim: bets 60
+kanika3pa: calls 60
+manoliyo53: folds
+zekikinio: calls 60
+*** TURN *** [4d 7d 5s] [Ts]
+zekikinio: checks
+ranchim: checks
+kanika3pa: bets 210
+zekikinio: calls 210
+ranchim: calls 210
+*** RIVER *** [4d 7d 5s Ts] [Kc]
+zekikinio: checks
+ranchim: bets 300
+kanika3pa: folds
+zekikinio: folds
+Uncalled bet (300) returned to ranchim
+ranchim collected 1050 from pot
+ranchim: doesn't show hand
+*** SUMMARY ***
+Total pot 1050 | Rake 0
+Board [4d 7d 5s Ts Kc]
+Seat 1: GareDappel folded before Flop (didn't bet)
+Seat 2: manoliyo53 (button) folded on the Flop
+Seat 3: zekikinio (small blind) folded on the River
+Seat 4: ranchim (big blind) collected (1050)
+Seat 5: kanika3pa folded on the River
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #231294557859: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level V (30/60) - 2021/11/10 19:28:05 CET [2021/11/10 13:28:05 ET]
+Table '3295312832 2' 6-max Seat #3 is the button
+Seat 1: GareDappel (7305 in chips)
+Seat 2: manoliyo53 (2455 in chips)
+Seat 3: zekikinio (1540 in chips)
+Seat 4: ranchim (5370 in chips)
+Seat 5: kanika3pa (2670 in chips)
+Seat 6: jeje_sat (7299 in chips)
+ranchim: posts small blind 30
+kanika3pa: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [9c 4d 4h As]
+jeje_sat: folds
+GareDappel: folds
+manoliyo53: folds
+zekikinio: folds
+ranchim: calls 30
+kanika3pa: checks
+*** FLOP *** [3d 6h Qs]
+ranchim: checks
+kanika3pa: bets 60
+ranchim: folds
+Uncalled bet (60) returned to kanika3pa
+kanika3pa collected 120 from pot
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [3d 6h Qs]
+Seat 1: GareDappel folded before Flop (didn't bet)
+Seat 2: manoliyo53 folded before Flop (didn't bet)
+Seat 3: zekikinio (button) folded before Flop (didn't bet)
+Seat 4: ranchim (small blind) folded on the Flop
+Seat 5: kanika3pa (big blind) collected (120)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #231294584541: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level V (30/60) - 2021/11/10 19:29:02 CET [2021/11/10 13:29:02 ET]
+Table '3295312832 2' 6-max Seat #4 is the button
+Seat 1: GareDappel (7305 in chips)
+Seat 2: manoliyo53 (2455 in chips)
+Seat 3: zekikinio (1540 in chips)
+Seat 4: ranchim (5310 in chips)
+Seat 5: kanika3pa (2730 in chips)
+Seat 6: jeje_sat (7299 in chips)
+kanika3pa: posts small blind 30
+jeje_sat: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ac Jc 8s Ts]
+GareDappel: folds
+manoliyo53: calls 60
+zekikinio: folds
+ranchim: calls 60
+kanika3pa: calls 30
+jeje_sat: raises 240 to 300
+manoliyo53: folds
+ranchim: folds
+kanika3pa: folds
+Uncalled bet (240) returned to jeje_sat
+jeje_sat collected 240 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Seat 1: GareDappel folded before Flop (didn't bet)
+Seat 2: manoliyo53 folded before Flop
+Seat 3: zekikinio folded before Flop (didn't bet)
+Seat 4: ranchim (button) folded before Flop
+Seat 5: kanika3pa (small blind) folded before Flop
+Seat 6: jeje_sat (big blind) collected (240)
+
+
+PokerStars Hand #231294607019: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level V (30/60) - 2021/11/10 19:29:50 CET [2021/11/10 13:29:50 ET]
+Table '3295312832 2' 6-max Seat #5 is the button
+Seat 1: GareDappel (7305 in chips)
+Seat 2: manoliyo53 (2395 in chips)
+Seat 3: zekikinio (1540 in chips)
+Seat 4: ranchim (5250 in chips)
+Seat 5: kanika3pa (2670 in chips)
+Seat 6: jeje_sat (7479 in chips)
+jeje_sat: posts small blind 30
+GareDappel: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [9h Ad 9d 8c]
+manoliyo53: calls 60
+zekikinio: folds
+ranchim: folds
+kanika3pa: raises 60 to 120
+jeje_sat: calls 90
+GareDappel: calls 60
+manoliyo53: calls 60
+*** FLOP *** [8h 9s Qh]
+jeje_sat: checks
+GareDappel: checks
+manoliyo53: checks
+kanika3pa: bets 420
+jeje_sat: calls 420
+GareDappel: folds
+manoliyo53: folds
+*** TURN *** [8h 9s Qh] [6d]
+jeje_sat: checks
+kanika3pa: bets 1320
+jeje_sat: calls 1320
+*** RIVER *** [8h 9s Qh 6d] [7d]
+jeje_sat: checks
+kanika3pa: bets 810 and is all-in
+jeje_sat: folds
+Uncalled bet (810) returned to kanika3pa
+kanika3pa collected 3960 from pot
+*** SUMMARY ***
+Total pot 3960 | Rake 0
+Board [8h 9s Qh 6d 7d]
+Seat 1: GareDappel (big blind) folded on the Flop
+Seat 2: manoliyo53 folded on the Flop
+Seat 3: zekikinio folded before Flop (didn't bet)
+Seat 4: ranchim folded before Flop (didn't bet)
+Seat 5: kanika3pa (button) collected (3960)
+Seat 6: jeje_sat (small blind) folded on the River
+
+
+PokerStars Hand #231294649052: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level V (30/60) - 2021/11/10 19:31:18 CET [2021/11/10 13:31:18 ET]
+Table '3295312832 2' 6-max Seat #6 is the button
+Seat 1: GareDappel (7185 in chips)
+Seat 2: manoliyo53 (2275 in chips)
+Seat 3: zekikinio (1540 in chips)
+Seat 4: ranchim (5250 in chips)
+Seat 5: kanika3pa (4770 in chips)
+Seat 6: jeje_sat (5619 in chips)
+GareDappel: posts small blind 30
+manoliyo53: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [9c 5d 3s 8c]
+zekikinio: calls 60
+ranchim: raises 210 to 270
+kanika3pa: folds
+jeje_sat: folds
+GareDappel: folds
+manoliyo53: folds
+zekikinio: calls 210
+*** FLOP *** [Qc 5c Qs]
+zekikinio: checks
+ranchim: bets 630
+zekikinio: folds
+Uncalled bet (630) returned to ranchim
+ranchim collected 630 from pot
+ranchim: doesn't show hand
+*** SUMMARY ***
+Total pot 630 | Rake 0
+Board [Qc 5c Qs]
+Seat 1: GareDappel (small blind) folded before Flop
+Seat 2: manoliyo53 (big blind) folded before Flop
+Seat 3: zekikinio folded on the Flop
+Seat 4: ranchim collected (630)
+Seat 5: kanika3pa folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #231294677257: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VI (40/80) - 2021/11/10 19:32:16 CET [2021/11/10 13:32:16 ET]
+Table '3295312832 2' 6-max Seat #1 is the button
+Seat 1: GareDappel (7155 in chips)
+Seat 2: manoliyo53 (2215 in chips)
+Seat 3: zekikinio (1270 in chips)
+Seat 4: ranchim (5610 in chips)
+Seat 5: kanika3pa (4770 in chips)
+Seat 6: jeje_sat (5619 in chips)
+manoliyo53: posts small blind 40
+zekikinio: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kh 6c 3h Kc]
+ranchim: folds
+kanika3pa: calls 80
+jeje_sat: raises 80 to 160
+GareDappel: calls 160
+manoliyo53: calls 120
+zekikinio: folds
+kanika3pa: calls 80
+*** FLOP *** [5h Qs 3d]
+manoliyo53: checks
+kanika3pa: checks
+jeje_sat: bets 360
+GareDappel: folds
+manoliyo53: folds
+kanika3pa: calls 360
+*** TURN *** [5h Qs 3d] [4d]
+kanika3pa: checks
+jeje_sat: checks
+*** RIVER *** [5h Qs 3d 4d] [Ac]
+kanika3pa: checks
+jeje_sat: checks
+*** SHOW DOWN ***
+kanika3pa: shows [Th 9c Ah Ts] (a pair of Aces)
+jeje_sat: mucks hand
+kanika3pa collected 1440 from pot
+*** SUMMARY ***
+Total pot 1440 | Rake 0
+Board [5h Qs 3d 4d Ac]
+Seat 1: GareDappel (button) folded on the Flop
+Seat 2: manoliyo53 (small blind) folded on the Flop
+Seat 3: zekikinio (big blind) folded before Flop
+Seat 4: ranchim folded before Flop (didn't bet)
+Seat 5: kanika3pa showed [Th 9c Ah Ts] and won (1440) with a pair of Aces
+Seat 6: jeje_sat mucked [Kh 6c 3h Kc]
+
+
+PokerStars Hand #231294721530: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VI (40/80) - 2021/11/10 19:33:48 CET [2021/11/10 13:33:48 ET]
+Table '3295312832 2' 6-max Seat #2 is the button
+Seat 1: GareDappel (6995 in chips)
+Seat 2: manoliyo53 (2055 in chips)
+Seat 3: zekikinio (1190 in chips)
+Seat 4: ranchim (5610 in chips)
+Seat 5: kanika3pa (5690 in chips)
+Seat 6: jeje_sat (5099 in chips)
+zekikinio: posts small blind 40
+ranchim: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h 9d 2h 8s]
+kanika3pa: calls 80
+jeje_sat: folds
+GareDappel: calls 80
+manoliyo53: calls 80
+zekikinio: folds
+ranchim: raises 120 to 200
+kanika3pa: calls 120
+GareDappel: calls 120
+manoliyo53: calls 120
+*** FLOP *** [Jd Ts 4d]
+ranchim: checks
+kanika3pa: checks
+GareDappel: checks
+manoliyo53: checks
+*** TURN *** [Jd Ts 4d] [Jc]
+ranchim: bets 320
+kanika3pa: folds
+GareDappel: folds
+manoliyo53: folds
+Uncalled bet (320) returned to ranchim
+ranchim collected 840 from pot
+ranchim: doesn't show hand
+*** SUMMARY ***
+Total pot 840 | Rake 0
+Board [Jd Ts 4d Jc]
+Seat 1: GareDappel folded on the Turn
+Seat 2: manoliyo53 (button) folded on the Turn
+Seat 3: zekikinio (small blind) folded before Flop
+Seat 4: ranchim (big blind) collected (840)
+Seat 5: kanika3pa folded on the Turn
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #231294760766: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VI (40/80) - 2021/11/10 19:35:09 CET [2021/11/10 13:35:09 ET]
+Table '3295312832 2' 6-max Seat #3 is the button
+Seat 1: GareDappel (6795 in chips)
+Seat 2: manoliyo53 (1855 in chips)
+Seat 3: zekikinio (1150 in chips)
+Seat 4: ranchim (6250 in chips)
+Seat 5: kanika3pa (5490 in chips)
+Seat 6: jeje_sat (5099 in chips)
+ranchim: posts small blind 40
+kanika3pa: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [4h 7s 9c 6h]
+jeje_sat: folds
+GareDappel: calls 80
+manoliyo53: calls 80
+zekikinio: folds
+ranchim: calls 40
+kanika3pa: checks
+*** FLOP *** [9s 8c 7h]
+ranchim: bets 80
+kanika3pa: calls 80
+GareDappel: raises 400 to 480
+manoliyo53: folds
+ranchim: folds
+kanika3pa: raises 400 to 880
+GareDappel: calls 400
+*** TURN *** [9s 8c 7h] [Qs]
+kanika3pa: bets 2160
+GareDappel: raises 3675 to 5835 and is all-in
+kanika3pa: calls 2370 and is all-in
+Uncalled bet (1305) returned to GareDappel
+*** RIVER *** [9s 8c 7h Qs] [Kh]
+*** SHOW DOWN ***
+kanika3pa: shows [2d 8d 7c 8s] (three of a kind, Eights)
+GareDappel: shows [Ts 3h Jd Js] (a straight, Nine to King)
+GareDappel collected 11220 from pot
+kanika3pa finished the tournament
+*** SUMMARY ***
+Total pot 11220 | Rake 0
+Board [9s 8c 7h Qs Kh]
+Seat 1: GareDappel showed [Ts 3h Jd Js] and won (11220) with a straight, Nine to King
+Seat 2: manoliyo53 folded on the Flop
+Seat 3: zekikinio (button) folded before Flop (didn't bet)
+Seat 4: ranchim (small blind) folded on the Flop
+Seat 5: kanika3pa (big blind) showed [2d 8d 7c 8s] and lost with three of a kind, Eights
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #231294805471: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VI (40/80) - 2021/11/10 19:36:42 CET [2021/11/10 13:36:42 ET]
+Table '3295312832 2' 6-max Seat #4 is the button
+Seat 1: GareDappel (12525 in chips)
+Seat 2: manoliyo53 (1775 in chips)
+Seat 3: zekikinio (1150 in chips)
+Seat 4: ranchim (6090 in chips)
+Seat 6: jeje_sat (5099 in chips)
+jeje_sat: posts small blind 40
+GareDappel: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [2d Kd Td 8s]
+manoliyo53: calls 80
+zekikinio: folds
+ranchim: raises 120 to 200
+jeje_sat: folds
+GareDappel: calls 120
+manoliyo53: calls 120
+*** FLOP *** [8h 6h Jc]
+GareDappel: checks
+manoliyo53: checks
+ranchim: checks
+*** TURN *** [8h 6h Jc] [5h]
+GareDappel: checks
+manoliyo53: bets 160
+ranchim: folds
+GareDappel: calls 160
+*** RIVER *** [8h 6h Jc 5h] [Kc]
+GareDappel: checks
+manoliyo53: bets 320
+GareDappel: folds
+Uncalled bet (320) returned to manoliyo53
+manoliyo53 collected 960 from pot
+manoliyo53: doesn't show hand
+*** SUMMARY ***
+Total pot 960 | Rake 0
+Board [8h 6h Jc 5h Kc]
+Seat 1: GareDappel (big blind) folded on the River
+Seat 2: manoliyo53 collected (960)
+Seat 3: zekikinio folded before Flop (didn't bet)
+Seat 4: ranchim (button) folded on the Turn
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Hand #231294853725: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VI (40/80) - 2021/11/10 19:38:13 CET [2021/11/10 13:38:13 ET]
+Table '3295312832 2' 6-max Seat #6 is the button
+Seat 1: GareDappel (12165 in chips)
+Seat 2: manoliyo53 (2375 in chips)
+Seat 3: zekikinio (1150 in chips)
+Seat 4: ranchim (5890 in chips)
+Seat 6: jeje_sat (5059 in chips)
+GareDappel: posts small blind 40
+manoliyo53: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [7d 4s Jc 9h]
+zekikinio: folds
+ranchim: calls 80
+jeje_sat: folds
+GareDappel: calls 40
+manoliyo53: checks
+*** FLOP *** [6c 8s 8d]
+GareDappel: bets 160
+manoliyo53: calls 160
+ranchim: calls 160
+*** TURN *** [6c 8s 8d] [Ks]
+GareDappel: bets 400
+manoliyo53: folds
+ranchim: folds
+Uncalled bet (400) returned to GareDappel
+GareDappel collected 720 from pot
+*** SUMMARY ***
+Total pot 720 | Rake 0
+Board [6c 8s 8d Ks]
+Seat 1: GareDappel (small blind) collected (720)
+Seat 2: manoliyo53 (big blind) folded on the Turn
+Seat 3: zekikinio folded before Flop (didn't bet)
+Seat 4: ranchim folded on the Turn
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #231294880923: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VI (40/80) - 2021/11/10 19:39:10 CET [2021/11/10 13:39:10 ET]
+Table '3295312832 2' 6-max Seat #1 is the button
+Seat 1: GareDappel (12645 in chips)
+Seat 2: manoliyo53 (2135 in chips)
+Seat 3: zekikinio (1150 in chips)
+Seat 4: ranchim (5650 in chips)
+Seat 6: jeje_sat (5059 in chips)
+manoliyo53: posts small blind 40
+zekikinio: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks Jd 6c 4h]
+ranchim: folds
+jeje_sat: folds
+GareDappel: raises 120 to 200
+manoliyo53: folds
+zekikinio: folds
+Uncalled bet (120) returned to GareDappel
+GareDappel collected 200 from pot
+*** SUMMARY ***
+Total pot 200 | Rake 0
+Seat 1: GareDappel (button) collected (200)
+Seat 2: manoliyo53 (small blind) folded before Flop
+Seat 3: zekikinio (big blind) folded before Flop
+Seat 4: ranchim folded before Flop (didn't bet)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #231294896993: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VI (40/80) - 2021/11/10 19:39:43 CET [2021/11/10 13:39:43 ET]
+Table '3295312832 2' 6-max Seat #2 is the button
+Seat 1: GareDappel (12765 in chips)
+Seat 2: manoliyo53 (2095 in chips)
+Seat 3: zekikinio (1070 in chips)
+Seat 5: zecarlos1910 (3000 in chips)
+Seat 6: jeje_sat (5059 in chips)
+zekikinio: posts small blind 40
+zecarlos1910: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h 8d 5d 4d]
+jeje_sat has timed out
+jeje_sat: folds
+jeje_sat is sitting out
+jeje_sat has returned
+GareDappel: calls 80
+manoliyo53: calls 80
+zekikinio: folds
+zecarlos1910: checks
+*** FLOP *** [8c Kc Ad]
+zecarlos1910: checks
+GareDappel: checks
+manoliyo53: checks
+*** TURN *** [8c Kc Ad] [Qc]
+zecarlos1910: checks
+GareDappel: bets 160
+manoliyo53: calls 160
+zecarlos1910: calls 160
+*** RIVER *** [8c Kc Ad Qc] [Qh]
+zecarlos1910: checks
+GareDappel: checks
+manoliyo53: bets 760
+zecarlos1910: folds
+GareDappel: folds
+Uncalled bet (760) returned to manoliyo53
+manoliyo53 collected 760 from pot
+manoliyo53: doesn't show hand
+*** SUMMARY ***
+Total pot 760 | Rake 0
+Board [8c Kc Ad Qc Qh]
+Seat 1: GareDappel folded on the River
+Seat 2: manoliyo53 (button) collected (760)
+Seat 3: zekikinio (small blind) folded before Flop
+Seat 5: zecarlos1910 (big blind) folded on the River
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #231294930045: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VI (40/80) - 2021/11/10 19:40:52 CET [2021/11/10 13:40:52 ET]
+Table '3295312832 2' 6-max Seat #3 is the button
+Seat 1: GareDappel (12525 in chips)
+Seat 2: manoliyo53 (2615 in chips)
+Seat 3: zekikinio (1030 in chips)
+Seat 5: zecarlos1910 (2760 in chips)
+Seat 6: jeje_sat (5059 in chips)
+zecarlos1910: posts small blind 40
+jeje_sat: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c 9d Jh 3c]
+GareDappel: folds
+manoliyo53: folds
+zekikinio: calls 80
+zecarlos1910: calls 40
+jeje_sat: checks
+*** FLOP *** [9s 6h 7h]
+zecarlos1910: bets 240
+jeje_sat: folds
+zekikinio: folds
+Uncalled bet (240) returned to zecarlos1910
+zecarlos1910 collected 240 from pot
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Board [9s 6h 7h]
+Seat 1: GareDappel folded before Flop (didn't bet)
+Seat 2: manoliyo53 folded before Flop (didn't bet)
+Seat 3: zekikinio (button) folded on the Flop
+Seat 5: zecarlos1910 (small blind) collected (240)
+Seat 6: jeje_sat (big blind) folded on the Flop
+
+
+PokerStars Hand #231294946448: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VI (40/80) - 2021/11/10 19:41:27 CET [2021/11/10 13:41:27 ET]
+Table '3295312832 2' 6-max Seat #5 is the button
+Seat 1: GareDappel (12525 in chips)
+Seat 2: manoliyo53 (2615 in chips)
+Seat 3: zekikinio (950 in chips)
+Seat 5: zecarlos1910 (2920 in chips)
+Seat 6: jeje_sat (4979 in chips)
+jeje_sat: posts small blind 40
+GareDappel: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [8c 6h Jh Jd]
+manoliyo53: calls 80
+zekikinio: folds
+zecarlos1910: calls 80
+jeje_sat: raises 320 to 400
+GareDappel: folds
+manoliyo53: calls 320
+zecarlos1910: calls 320
+*** FLOP *** [2c 3d Qc]
+jeje_sat: checks
+manoliyo53: checks
+zecarlos1910: checks
+*** TURN *** [2c 3d Qc] [6c]
+jeje_sat: checks
+manoliyo53: bets 560
+zecarlos1910: folds
+jeje_sat: folds
+Uncalled bet (560) returned to manoliyo53
+manoliyo53 collected 1280 from pot
+manoliyo53: doesn't show hand
+*** SUMMARY ***
+Total pot 1280 | Rake 0
+Board [2c 3d Qc 6c]
+Seat 1: GareDappel (big blind) folded before Flop
+Seat 2: manoliyo53 collected (1280)
+Seat 3: zekikinio folded before Flop (didn't bet)
+Seat 5: zecarlos1910 (button) folded on the Turn
+Seat 6: jeje_sat (small blind) folded on the Turn
+
+
+PokerStars Hand #231294985401: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VI (40/80) - 2021/11/10 19:42:47 CET [2021/11/10 13:42:47 ET]
+Table '3295312832 2' 6-max Seat #6 is the button
+Seat 1: GareDappel (12445 in chips)
+Seat 2: manoliyo53 (3495 in chips)
+Seat 3: zekikinio (950 in chips)
+Seat 5: zecarlos1910 (2520 in chips)
+Seat 6: jeje_sat (4579 in chips)
+GareDappel: posts small blind 40
+manoliyo53: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [2c 8h 2d 9c]
+zekikinio: folds
+zecarlos1910: raises 200 to 280
+jeje_sat: folds
+GareDappel: folds
+manoliyo53: calls 200
+*** FLOP *** [6s Ac 7d]
+manoliyo53: checks
+zecarlos1910: bets 600
+manoliyo53: raises 1800 to 2400
+zecarlos1910: calls 1640 and is all-in
+Uncalled bet (160) returned to manoliyo53
+*** TURN *** [6s Ac 7d] [8d]
+*** RIVER *** [6s Ac 7d 8d] [Jh]
+*** SHOW DOWN ***
+manoliyo53: shows [7s Kh 7h Td] (three of a kind, Sevens)
+zecarlos1910: shows [7c 6h 5c Qh] (two pair, Sevens and Sixes)
+manoliyo53 collected 5080 from pot
+zecarlos1910 finished the tournament
+*** SUMMARY ***
+Total pot 5080 | Rake 0
+Board [6s Ac 7d 8d Jh]
+Seat 1: GareDappel (small blind) folded before Flop
+Seat 2: manoliyo53 (big blind) showed [7s Kh 7h Td] and won (5080) with three of a kind, Sevens
+Seat 3: zekikinio folded before Flop (didn't bet)
+Seat 5: zecarlos1910 showed [7c 6h 5c Qh] and lost with two pair, Sevens and Sixes
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #231295007156: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VI (40/80) - 2021/11/10 19:43:32 CET [2021/11/10 13:43:32 ET]
+Table '3295312832 2' 6-max Seat #1 is the button
+Seat 1: GareDappel (12405 in chips)
+Seat 2: manoliyo53 (6055 in chips)
+Seat 3: zekikinio (950 in chips)
+Seat 6: jeje_sat (4579 in chips)
+manoliyo53: posts small blind 40
+zekikinio: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th 3c Jh 4d]
+jeje_sat: folds
+GareDappel: calls 80
+manoliyo53: calls 40
+zekikinio: checks
+*** FLOP *** [9h 4c Jc]
+manoliyo53: checks
+zekikinio: bets 80
+GareDappel: calls 80
+manoliyo53: calls 80
+*** TURN *** [9h 4c Jc] [6h]
+manoliyo53: checks
+zekikinio: bets 160
+GareDappel: calls 160
+manoliyo53: calls 160
+*** RIVER *** [9h 4c Jc 6h] [6d]
+manoliyo53: bets 640
+zekikinio: folds
+GareDappel: folds
+Uncalled bet (640) returned to manoliyo53
+manoliyo53 collected 960 from pot
+manoliyo53: doesn't show hand
+*** SUMMARY ***
+Total pot 960 | Rake 0
+Board [9h 4c Jc 6h 6d]
+Seat 1: GareDappel (button) folded on the River
+Seat 2: manoliyo53 (small blind) collected (960)
+Seat 3: zekikinio (big blind) folded on the River
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #231295032835: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VI (40/80) - 2021/11/10 19:44:25 CET [2021/11/10 13:44:25 ET]
+Table '3295312832 2' 6-max Seat #2 is the button
+Seat 1: GareDappel (12085 in chips)
+Seat 2: manoliyo53 (6695 in chips)
+Seat 3: zekikinio (630 in chips)
+Seat 6: jeje_sat (4579 in chips)
+zekikinio: posts small blind 40
+jeje_sat: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h 8h Jh Ah]
+GareDappel: folds
+manoliyo53: calls 80
+zekikinio: raises 240 to 320
+jeje_sat: calls 240
+manoliyo53: folds
+*** FLOP *** [2s 4d Kd]
+zekikinio: bets 310 and is all-in
+jeje_sat: folds
+Uncalled bet (310) returned to zekikinio
+zekikinio collected 720 from pot
+*** SUMMARY ***
+Total pot 720 | Rake 0
+Board [2s 4d Kd]
+Seat 1: GareDappel folded before Flop (didn't bet)
+Seat 2: manoliyo53 (button) folded before Flop
+Seat 3: zekikinio (small blind) collected (720)
+Seat 6: jeje_sat (big blind) folded on the Flop
+
+
+PokerStars Hand #231295055266: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VI (40/80) - 2021/11/10 19:45:12 CET [2021/11/10 13:45:12 ET]
+Table '3295312832 2' 6-max Seat #3 is the button
+Seat 1: GareDappel (12085 in chips)
+Seat 2: manoliyo53 (6615 in chips)
+Seat 3: zekikinio (1030 in chips)
+Seat 4: dani06071997 (8920 in chips) out of hand (moved from another table into small blind)
+Seat 6: jeje_sat (4259 in chips)
+dani06071997 will be allowed to play after the button
+jeje_sat: posts small blind 40
+GareDappel: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jh 9h 3d Kc]
+manoliyo53: calls 80
+zekikinio: folds
+jeje_sat: folds
+GareDappel: checks
+*** FLOP *** [2s 7c 6d]
+GareDappel: checks
+manoliyo53: bets 160
+GareDappel: folds
+Uncalled bet (160) returned to manoliyo53
+manoliyo53 collected 200 from pot
+manoliyo53: doesn't show hand
+*** SUMMARY ***
+Total pot 200 | Rake 0
+Board [2s 7c 6d]
+Seat 1: GareDappel (big blind) folded on the Flop
+Seat 2: manoliyo53 collected (200)
+Seat 3: zekikinio (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Hand #231295069748: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VI (40/80) - 2021/11/10 19:45:42 CET [2021/11/10 13:45:42 ET]
+Table '3295312832 2' 6-max Seat #6 is the button
+Seat 1: GareDappel (12005 in chips)
+Seat 2: manoliyo53 (6735 in chips)
+Seat 3: zekikinio (1030 in chips)
+Seat 4: dani06071997 (8920 in chips)
+Seat 6: jeje_sat (4219 in chips)
+GareDappel: posts small blind 40
+manoliyo53: posts big blind 80
+*** HOLE CARDS ***
+Dealt to jeje_sat [8c 9c 2s 8d]
+zekikinio: folds
+dani06071997: calls 80
+jeje_sat: folds
+GareDappel: calls 40
+manoliyo53: checks
+*** FLOP *** [Ah Tc Kh]
+GareDappel: checks
+manoliyo53: checks
+dani06071997: checks
+*** TURN *** [Ah Tc Kh] [3h]
+GareDappel: checks
+manoliyo53: checks
+dani06071997: checks
+*** RIVER *** [Ah Tc Kh 3h] [Jd]
+GareDappel: checks
+manoliyo53: checks
+dani06071997: checks
+*** SHOW DOWN ***
+GareDappel: shows [7h Ac 4d 2d] (a pair of Aces)
+manoliyo53: shows [Jc 6d Th 7s] (two pair, Jacks and Tens)
+dani06071997: mucks hand
+manoliyo53 collected 240 from pot
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Board [Ah Tc Kh 3h Jd]
+Seat 1: GareDappel (small blind) showed [7h Ac 4d 2d] and lost with a pair of Aces
+Seat 2: manoliyo53 (big blind) showed [Jc 6d Th 7s] and won (240) with two pair, Jacks and Tens
+Seat 3: zekikinio folded before Flop (didn't bet)
+Seat 4: dani06071997 mucked [Ts 8s 4c 6s]
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #231295101828: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VII (50/100) - 2021/11/10 19:46:49 CET [2021/11/10 13:46:49 ET]
+Table '3295312832 2' 6-max Seat #1 is the button
+Seat 1: GareDappel (11925 in chips)
+Seat 2: manoliyo53 (6895 in chips)
+Seat 3: zekikinio (1030 in chips)
+Seat 4: dani06071997 (8840 in chips)
+Seat 6: jeje_sat (4219 in chips)
+manoliyo53: posts small blind 50
+zekikinio: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [3s 3h 8c Ad]
+dani06071997: folds
+jeje_sat: folds
+GareDappel: folds
+manoliyo53: calls 50
+zekikinio: checks
+*** FLOP *** [Ks Jh 6s]
+manoliyo53: checks
+zekikinio: bets 100
+manoliyo53: folds
+Uncalled bet (100) returned to zekikinio
+zekikinio collected 200 from pot
+*** SUMMARY ***
+Total pot 200 | Rake 0
+Board [Ks Jh 6s]
+Seat 1: GareDappel (button) folded before Flop (didn't bet)
+Seat 2: manoliyo53 (small blind) folded on the Flop
+Seat 3: zekikinio (big blind) collected (200)
+Seat 4: dani06071997 folded before Flop (didn't bet)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #231295131614: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VII (50/100) - 2021/11/10 19:47:51 CET [2021/11/10 13:47:51 ET]
+Table '3295312832 2' 6-max Seat #2 is the button
+Seat 1: GareDappel (11925 in chips)
+Seat 2: manoliyo53 (6795 in chips)
+Seat 3: zekikinio (1130 in chips)
+Seat 5: minamila (3000 in chips)
+Seat 6: jeje_sat (4219 in chips)
+zekikinio: posts small blind 50
+minamila: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [6d Qc Td 6h]
+jeje_sat: folds
+GareDappel: folds
+manoliyo53: folds
+zekikinio: raises 200 to 300
+minamila: folds
+Uncalled bet (200) returned to zekikinio
+zekikinio collected 200 from pot
+*** SUMMARY ***
+Total pot 200 | Rake 0
+Seat 1: GareDappel folded before Flop (didn't bet)
+Seat 2: manoliyo53 (button) folded before Flop (didn't bet)
+Seat 3: zekikinio (small blind) collected (200)
+Seat 5: minamila (big blind) folded before Flop
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Hand #231295178955: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VII (50/100) - 2021/11/10 19:49:29 CET [2021/11/10 13:49:29 ET]
+Table '3295312832 8' 6-max Seat #2 is the button
+Seat 1: beinks666 (2960 in chips)
+Seat 2: dani06071997 (8790 in chips)
+Seat 3: igordom27 (3877 in chips)
+Seat 4: jeje_sat (4219 in chips)
+Seat 5: Niketo (4019 in chips)
+Seat 6: LIONEL3271 (3000 in chips)
+igordom27: posts small blind 50
+jeje_sat: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [9c Ks 5c 3c]
+Niketo: calls 100
+LIONEL3271: folds
+beinks666: calls 100
+dani06071997: folds
+igordom27: folds
+jeje_sat: checks
+*** FLOP *** [6s Qc Ad]
+jeje_sat: checks
+Niketo: checks
+beinks666: checks
+*** TURN *** [6s Qc Ad] [Kd]
+jeje_sat: bets 100
+Niketo: calls 100
+beinks666: folds
+*** RIVER *** [6s Qc Ad Kd] [9h]
+jeje_sat: checks
+Niketo: bets 300
+jeje_sat: calls 300
+*** SHOW DOWN ***
+Niketo: shows [Js 7c Ts Th] (a straight, Ten to Ace)
+jeje_sat: mucks hand
+Niketo collected 1150 from pot
+*** SUMMARY ***
+Total pot 1150 | Rake 0
+Board [6s Qc Ad Kd 9h]
+Seat 1: beinks666 folded on the Turn
+Seat 2: dani06071997 (button) folded before Flop (didn't bet)
+Seat 3: igordom27 (small blind) folded before Flop
+Seat 4: jeje_sat (big blind) mucked [9c Ks 5c 3c]
+Seat 5: Niketo showed [Js 7c Ts Th] and won (1150) with a straight, Ten to Ace
+Seat 6: LIONEL3271 folded before Flop (didn't bet)
+
+
+PokerStars Hand #231295222131: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VII (50/100) - 2021/11/10 19:50:59 CET [2021/11/10 13:50:59 ET]
+Table '3295312832 8' 6-max Seat #3 is the button
+Seat 1: beinks666 (2860 in chips)
+Seat 2: dani06071997 (8790 in chips)
+Seat 3: igordom27 (3827 in chips)
+Seat 4: jeje_sat (3719 in chips)
+Seat 5: Niketo (4669 in chips)
+Seat 6: LIONEL3271 (3000 in chips)
+jeje_sat: posts small blind 50
+Niketo: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qc Kd 9d 8c]
+LIONEL3271: raises 250 to 350
+beinks666: folds
+dani06071997: folds
+igordom27: folds
+jeje_sat: calls 300
+Niketo: folds
+*** FLOP *** [Jh 6s 7h]
+jeje_sat: bets 400
+LIONEL3271: raises 1600 to 2000
+jeje_sat: raises 1369 to 3369 and is all-in
+LIONEL3271: calls 650 and is all-in
+Uncalled bet (719) returned to jeje_sat
+*** TURN *** [Jh 6s 7h] [Qd]
+*** RIVER *** [Jh 6s 7h Qd] [4h]
+*** SHOW DOWN ***
+jeje_sat: shows [Qc Kd 9d 8c] (a pair of Queens)
+LIONEL3271: shows [Ts 8h 3s Qh] (a flush, Queen high)
+LIONEL3271 collected 6100 from pot
+*** SUMMARY ***
+Total pot 6100 | Rake 0
+Board [Jh 6s 7h Qd 4h]
+Seat 1: beinks666 folded before Flop (didn't bet)
+Seat 2: dani06071997 folded before Flop (didn't bet)
+Seat 3: igordom27 (button) folded before Flop (didn't bet)
+Seat 4: jeje_sat (small blind) showed [Qc Kd 9d 8c] and lost with a pair of Queens
+Seat 5: Niketo (big blind) folded before Flop
+Seat 6: LIONEL3271 showed [Ts 8h 3s Qh] and won (6100) with a flush, Queen high
+
+
+PokerStars Hand #231295249364: Tournament #3295312832, €1.80+€0.20 EUR Omaha Pot Limit - Level VII (50/100) - 2021/11/10 19:51:57 CET [2021/11/10 13:51:57 ET]
+Table '3295312832 8' 6-max Seat #4 is the button
+Seat 1: beinks666 (2860 in chips)
+Seat 2: dani06071997 (8790 in chips)
+Seat 3: igordom27 (3827 in chips)
+Seat 4: jeje_sat (719 in chips)
+Seat 5: Niketo (4569 in chips)
+Seat 6: LIONEL3271 (6100 in chips)
+Niketo: posts small blind 50
+LIONEL3271: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ah 8s Qh Ts]
+beinks666: raises 100 to 200
+dani06071997: folds
+igordom27: folds
+jeje_sat: raises 519 to 719 and is all-in
+Niketo: folds
+LIONEL3271: folds
+beinks666: calls 519
+*** FLOP *** [2d 2c 3h]
+*** TURN *** [2d 2c 3h] [3s]
+*** RIVER *** [2d 2c 3h 3s] [Kh]
+*** SHOW DOWN ***
+beinks666: shows [Tc 7d Kd Js] (two pair, Kings and Threes)
+jeje_sat: shows [Ah 8s Qh Ts] (a pair of Threes)
+beinks666 collected 1588 from pot
+*** SUMMARY ***
+Total pot 1588 | Rake 0
+Board [2d 2c 3h 3s Kh]
+Seat 1: beinks666 showed [Tc 7d Kd Js] and won (1588) with two pair, Kings and Threes
+Seat 2: dani06071997 folded before Flop (didn't bet)
+Seat 3: igordom27 folded before Flop (didn't bet)
+Seat 4: jeje_sat (button) showed [Ah 8s Qh Ts] and lost with a pair of Threes
+Seat 5: Niketo (small blind) folded before Flop
+Seat 6: LIONEL3271 (big blind) folded before Flop
+
+

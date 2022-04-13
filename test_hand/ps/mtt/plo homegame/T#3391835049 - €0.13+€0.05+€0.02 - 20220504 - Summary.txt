@@ -1,0 +1,21 @@
+PokerTracker 4 Tournament Summary
+Site: PokerStars
+Game: Omaha Hi
+Tournament #: 3391835049
+Started: 2022/04/05 16:18:54
+Finished: 2022/04/05 16:46:40
+Buyin: €0.13
+Bounty: €0.05
+Fee: €0.02
+Prize Pool: €0.00
+Table Type: MTT (6 max) Turbo PROGBOUNT
+Tourney Type: Pot Limit
+Players: 8
+
+Place: 0, Player: stephoumOPC, Won: €0.00,
+Place: 0, Player: phoud02, Won: €0.00,
+Place: 0, Player: NHBROOO, Won: €0.00, Bounties: 3,
+Place: 4, Player: jeje_sat, Won: €0.26,
+Place: 5, Player: RIZCHOU, Won: €0.00,
+Place: 6, Player: Crakdeck, Won: €0.00,
+Place: 8, Player: Tuche37300, Won: €0.00,

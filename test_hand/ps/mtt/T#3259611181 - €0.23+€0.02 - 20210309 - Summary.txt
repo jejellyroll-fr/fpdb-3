@@ -1,0 +1,16 @@
+PokerTracker 4 Tournament Summary
+Site: PokerStars
+Game: Holdem
+Tournament #: 3259611181
+Started: 2021/09/03 19:00:12
+Finished: 2021/09/03 19:07:43
+Buyin: €0.23
+Fee: €0.02
+Prize Pool: €0.69
+Table Type: STT (3 max) Hyper-Turbo SNG LOTTERY
+Tourney Type: No Limit
+Players: 3
+
+Place: 1, Player: jeje_sat, Won: €0.69,
+Place: 2, Player: henriryan, Won: €0.00,
+Place: 3, Player: Styx06, Won: €0.00,

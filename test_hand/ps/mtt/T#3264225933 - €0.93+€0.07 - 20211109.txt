@@ -1,0 +1,585 @@
+﻿PokerStars Hand #229773671387: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 21:48:17 CET [2021/09/11 15:48:17 ET]
+Table '3264225933 1' 3-max Seat #1 is the button
+Seat 1: jeje_sat (500 in chips)
+Seat 2: Antoine69ant (500 in chips)
+Seat 3: khillo29 (500 in chips)
+Antoine69ant: posts small blind 10
+khillo29: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c Kc 2d 4s]
+jeje_sat: folds
+Antoine69ant: calls 10
+khillo29: checks
+*** FLOP *** [Th Td Ac]
+Antoine69ant: checks
+khillo29: checks
+*** TURN *** [Th Td Ac] [9h]
+Antoine69ant: checks
+khillo29: checks
+*** RIVER *** [Th Td Ac 9h] [9s]
+Antoine69ant: checks
+khillo29: checks
+*** SHOW DOWN ***
+Antoine69ant: shows [5s Qh 3c Jc] (a pair of Tens)
+khillo29: mucks hand
+Antoine69ant collected 40 from pot
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Board [Th Td Ac 9h 9s]
+Seat 1: jeje_sat (button) folded before Flop (didn't bet)
+Seat 2: Antoine69ant (small blind) showed [5s Qh 3c Jc] and won (40) with a pair of Tens
+Seat 3: khillo29 (big blind) mucked [8d 6h 4c 2c]
+
+
+PokerStars Hand #229773688785: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 21:48:47 CET [2021/09/11 15:48:47 ET]
+Table '3264225933 1' 3-max Seat #2 is the button
+Seat 1: jeje_sat (500 in chips)
+Seat 2: Antoine69ant (520 in chips)
+Seat 3: khillo29 (480 in chips)
+khillo29: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kd 7c Qd Qc]
+Antoine69ant: calls 20
+khillo29: calls 10
+jeje_sat: raises 60 to 80
+Antoine69ant: calls 60
+khillo29: folds
+*** FLOP *** [8c Td 8d]
+jeje_sat: bets 180
+Antoine69ant: folds
+Uncalled bet (180) returned to jeje_sat
+jeje_sat collected 180 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Board [8c Td 8d]
+Seat 1: jeje_sat (big blind) collected (180)
+Seat 2: Antoine69ant (button) folded on the Flop
+Seat 3: khillo29 (small blind) folded before Flop
+
+
+PokerStars Hand #229773699271: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 21:49:07 CET [2021/09/11 15:49:07 ET]
+Table '3264225933 1' 3-max Seat #3 is the button
+Seat 1: jeje_sat (600 in chips)
+Seat 2: Antoine69ant (440 in chips)
+Seat 3: khillo29 (460 in chips)
+jeje_sat: posts small blind 10
+Antoine69ant: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d 6d As Ah]
+khillo29: raises 40 to 60
+jeje_sat: raises 140 to 200
+Antoine69ant: folds
+khillo29: raises 260 to 460 and is all-in
+jeje_sat: calls 260
+*** FLOP *** [7c Qc 3c]
+*** TURN *** [7c Qc 3c] [5h]
+*** RIVER *** [7c Qc 3c 5h] [4h]
+*** SHOW DOWN ***
+jeje_sat: shows [4d 6d As Ah] (a straight, Three to Seven)
+khillo29: shows [Qd Kd 3h Qh] (three of a kind, Queens)
+jeje_sat collected 940 from pot
+khillo29 finished the tournament in 3rd place
+*** SUMMARY ***
+Total pot 940 | Rake 0
+Board [7c Qc 3c 5h 4h]
+Seat 1: jeje_sat (small blind) showed [4d 6d As Ah] and won (940) with a straight, Three to Seven
+Seat 2: Antoine69ant (big blind) folded before Flop
+Seat 3: khillo29 (button) showed [Qd Kd 3h Qh] and lost with three of a kind, Queens
+
+
+PokerStars Hand #229773712108: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 21:49:32 CET [2021/09/11 15:49:32 ET]
+Table '3264225933 1' 3-max Seat #2 is the button
+Seat 1: jeje_sat (1080 in chips)
+Seat 2: Antoine69ant (420 in chips)
+Antoine69ant: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts Qh Kc Jd]
+Antoine69ant: calls 10
+jeje_sat: raises 40 to 60
+Antoine69ant: calls 40
+*** FLOP *** [Ac 8c Qs]
+jeje_sat: bets 60
+Antoine69ant: folds
+Uncalled bet (60) returned to jeje_sat
+jeje_sat collected 120 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [Ac 8c Qs]
+Seat 1: jeje_sat (big blind) collected (120)
+Seat 2: Antoine69ant (button) (small blind) folded on the Flop
+
+
+PokerStars Hand #229773721185: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 21:49:49 CET [2021/09/11 15:49:49 ET]
+Table '3264225933 1' 3-max Seat #1 is the button
+Seat 1: jeje_sat (1140 in chips)
+Seat 2: Antoine69ant (360 in chips)
+jeje_sat: posts small blind 10
+Antoine69ant: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c Td Th Kd]
+jeje_sat: raises 40 to 60
+Antoine69ant: calls 40
+*** FLOP *** [Jh Js Qs]
+Antoine69ant: checks
+jeje_sat: checks
+*** TURN *** [Jh Js Qs] [Qh]
+Antoine69ant: bets 60
+jeje_sat: folds
+Uncalled bet (60) returned to Antoine69ant
+Antoine69ant collected 120 from pot
+Antoine69ant: doesn't show hand
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [Jh Js Qs Qh]
+Seat 1: jeje_sat (button) (small blind) folded on the Turn
+Seat 2: Antoine69ant (big blind) collected (120)
+
+
+PokerStars Hand #229773729832: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 21:50:06 CET [2021/09/11 15:50:06 ET]
+Table '3264225933 1' 3-max Seat #2 is the button
+Seat 1: jeje_sat (1080 in chips)
+Seat 2: Antoine69ant (420 in chips)
+Antoine69ant: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [6d 2c 5h 5d]
+Antoine69ant: calls 10
+jeje_sat: checks
+*** FLOP *** [4s 2h 9s]
+jeje_sat: checks
+Antoine69ant: checks
+*** TURN *** [4s 2h 9s] [6c]
+jeje_sat: bets 20
+Antoine69ant: calls 20
+*** RIVER *** [4s 2h 9s 6c] [8h]
+jeje_sat: checks
+Antoine69ant: bets 80
+jeje_sat: folds
+Uncalled bet (80) returned to Antoine69ant
+Antoine69ant collected 80 from pot
+Antoine69ant: doesn't show hand
+*** SUMMARY ***
+Total pot 80 | Rake 0
+Board [4s 2h 9s 6c 8h]
+Seat 1: jeje_sat (big blind) folded on the River
+Seat 2: Antoine69ant (button) (small blind) collected (80)
+
+
+PokerStars Hand #229773741342: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 21:50:28 CET [2021/09/11 15:50:28 ET]
+Table '3264225933 1' 3-max Seat #1 is the button
+Seat 1: jeje_sat (1040 in chips)
+Seat 2: Antoine69ant (460 in chips)
+jeje_sat: posts small blind 10
+Antoine69ant: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kd Kh 8s 7d]
+jeje_sat: raises 40 to 60
+Antoine69ant: calls 40
+*** FLOP *** [6c 2c 8c]
+Antoine69ant: checks
+jeje_sat: checks
+*** TURN *** [6c 2c 8c] [Qs]
+Antoine69ant: checks
+jeje_sat: checks
+*** RIVER *** [6c 2c 8c Qs] [4d]
+Antoine69ant: checks
+jeje_sat: checks
+*** SHOW DOWN ***
+Antoine69ant: shows [Ah 5s As Ad] (a pair of Aces)
+jeje_sat: mucks hand
+Antoine69ant collected 120 from pot
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [6c 2c 8c Qs 4d]
+Seat 1: jeje_sat (button) (small blind) mucked [Kd Kh 8s 7d]
+Seat 2: Antoine69ant (big blind) showed [Ah 5s As Ad] and won (120) with a pair of Aces
+
+
+PokerStars Hand #229773753174: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 21:50:51 CET [2021/09/11 15:50:51 ET]
+Table '3264225933 1' 3-max Seat #2 is the button
+Seat 1: jeje_sat (980 in chips)
+Seat 2: Antoine69ant (520 in chips)
+Antoine69ant: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [7c 5d 8h Ac]
+Antoine69ant: calls 10
+jeje_sat: checks
+*** FLOP *** [Jh Tc 5h]
+jeje_sat: checks
+Antoine69ant: bets 40
+jeje_sat: folds
+Uncalled bet (40) returned to Antoine69ant
+Antoine69ant collected 40 from pot
+Antoine69ant: doesn't show hand
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Board [Jh Tc 5h]
+Seat 1: jeje_sat (big blind) folded on the Flop
+Seat 2: Antoine69ant (button) (small blind) collected (40)
+
+
+PokerStars Hand #229773760571: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 21:51:05 CET [2021/09/11 15:51:05 ET]
+Table '3264225933 1' 3-max Seat #1 is the button
+Seat 1: jeje_sat (960 in chips)
+Seat 2: Antoine69ant (540 in chips)
+jeje_sat: posts small blind 10
+Antoine69ant: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jd 6h Tc 8c]
+jeje_sat: raises 40 to 60
+Antoine69ant: folds
+Uncalled bet (40) returned to jeje_sat
+jeje_sat collected 40 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Seat 1: jeje_sat (button) (small blind) collected (40)
+Seat 2: Antoine69ant (big blind) folded before Flop
+
+
+PokerStars Hand #229773763983: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 21:51:11 CET [2021/09/11 15:51:11 ET]
+Table '3264225933 1' 3-max Seat #2 is the button
+Seat 1: jeje_sat (980 in chips)
+Seat 2: Antoine69ant (520 in chips)
+Antoine69ant: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks Qd 5h Tc]
+Antoine69ant: calls 10
+jeje_sat: checks
+*** FLOP *** [3c 8s 9d]
+jeje_sat: checks
+Antoine69ant: checks
+*** TURN *** [3c 8s 9d] [Kh]
+jeje_sat: bets 20
+Antoine69ant: calls 20
+*** RIVER *** [3c 8s 9d Kh] [7d]
+jeje_sat: checks
+Antoine69ant: checks
+*** SHOW DOWN ***
+jeje_sat: shows [Ks Qd 5h Tc] (a pair of Kings)
+Antoine69ant: mucks hand
+jeje_sat collected 80 from pot
+*** SUMMARY ***
+Total pot 80 | Rake 0
+Board [3c 8s 9d Kh 7d]
+Seat 1: jeje_sat (big blind) showed [Ks Qd 5h Tc] and won (80) with a pair of Kings
+Seat 2: Antoine69ant (button) (small blind) mucked [6s Jh 8h 6d]
+
+
+PokerStars Hand #229773776888: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/11 21:51:36 CET [2021/09/11 15:51:36 ET]
+Table '3264225933 1' 3-max Seat #1 is the button
+Seat 1: jeje_sat (1020 in chips)
+Seat 2: Antoine69ant (480 in chips)
+jeje_sat: posts small blind 15
+Antoine69ant: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qh Tc 3s 5d]
+jeje_sat: folds
+Uncalled bet (15) returned to Antoine69ant
+Antoine69ant collected 30 from pot
+Antoine69ant: doesn't show hand
+*** SUMMARY ***
+Total pot 30 | Rake 0
+Seat 1: jeje_sat (button) (small blind) folded before Flop
+Seat 2: Antoine69ant (big blind) collected (30)
+
+
+PokerStars Hand #229773779066: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/11 21:51:40 CET [2021/09/11 15:51:40 ET]
+Table '3264225933 1' 3-max Seat #2 is the button
+Seat 1: jeje_sat (1005 in chips)
+Seat 2: Antoine69ant (495 in chips)
+Antoine69ant: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [9h Js 5s Kd]
+Antoine69ant: folds
+Uncalled bet (15) returned to jeje_sat
+jeje_sat collected 30 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 30 | Rake 0
+Seat 1: jeje_sat (big blind) collected (30)
+Seat 2: Antoine69ant (button) (small blind) folded before Flop
+
+
+PokerStars Hand #229773782561: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/11 21:51:47 CET [2021/09/11 15:51:47 ET]
+Table '3264225933 1' 3-max Seat #1 is the button
+Seat 1: jeje_sat (1020 in chips)
+Seat 2: Antoine69ant (480 in chips)
+jeje_sat: posts small blind 15
+Antoine69ant: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Js 3h Tc Qs]
+jeje_sat: calls 15
+Antoine69ant: checks
+*** FLOP *** [5h 4s 2h]
+Antoine69ant: bets 60
+jeje_sat: folds
+Uncalled bet (60) returned to Antoine69ant
+Antoine69ant collected 60 from pot
+Antoine69ant: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Board [5h 4s 2h]
+Seat 1: jeje_sat (button) (small blind) folded on the Flop
+Seat 2: Antoine69ant (big blind) collected (60)
+
+
+PokerStars Hand #229773790846: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/11 21:52:03 CET [2021/09/11 15:52:03 ET]
+Table '3264225933 1' 3-max Seat #2 is the button
+Seat 1: jeje_sat (990 in chips)
+Seat 2: Antoine69ant (510 in chips)
+Antoine69ant: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h 5s 8d 3c]
+Antoine69ant: calls 15
+jeje_sat: checks
+*** FLOP *** [9d As 7h]
+jeje_sat: checks
+Antoine69ant: bets 60
+jeje_sat: calls 60
+*** TURN *** [9d As 7h] [6d]
+jeje_sat: bets 180
+Antoine69ant: folds
+Uncalled bet (180) returned to jeje_sat
+jeje_sat collected 180 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Board [9d As 7h 6d]
+Seat 1: jeje_sat (big blind) collected (180)
+Seat 2: Antoine69ant (button) (small blind) folded on the Turn
+
+
+PokerStars Hand #229773801223: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/11 21:52:22 CET [2021/09/11 15:52:22 ET]
+Table '3264225933 1' 3-max Seat #1 is the button
+Seat 1: jeje_sat (1080 in chips)
+Seat 2: Antoine69ant (420 in chips)
+jeje_sat: posts small blind 15
+Antoine69ant: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [6d Qs As 4d]
+jeje_sat: raises 60 to 90
+Antoine69ant: calls 60
+*** FLOP *** [2s 4h 9d]
+Antoine69ant: checks
+jeje_sat: checks
+*** TURN *** [2s 4h 9d] [6s]
+Antoine69ant: bets 30
+jeje_sat: raises 240 to 270
+Antoine69ant: folds
+Uncalled bet (240) returned to jeje_sat
+jeje_sat collected 240 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Board [2s 4h 9d 6s]
+Seat 1: jeje_sat (button) (small blind) collected (240)
+Seat 2: Antoine69ant (big blind) folded on the Turn
+
+
+PokerStars Hand #229773811741: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/11 21:52:43 CET [2021/09/11 15:52:43 ET]
+Table '3264225933 1' 3-max Seat #2 is the button
+Seat 1: jeje_sat (1200 in chips)
+Seat 2: Antoine69ant (300 in chips)
+Antoine69ant: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jd 5s 8h Qs]
+Antoine69ant: folds
+Uncalled bet (15) returned to jeje_sat
+jeje_sat collected 30 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 30 | Rake 0
+Seat 1: jeje_sat (big blind) collected (30)
+Seat 2: Antoine69ant (button) (small blind) folded before Flop
+
+
+PokerStars Hand #229773814708: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/11 21:52:48 CET [2021/09/11 15:52:48 ET]
+Table '3264225933 1' 3-max Seat #1 is the button
+Seat 1: jeje_sat (1215 in chips)
+Seat 2: Antoine69ant (285 in chips)
+jeje_sat: posts small blind 15
+Antoine69ant: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [8c Jc 2d Kc]
+jeje_sat: calls 15
+Antoine69ant: checks
+*** FLOP *** [Ts 6c Ks]
+Antoine69ant: bets 60
+jeje_sat: folds
+Uncalled bet (60) returned to Antoine69ant
+Antoine69ant collected 60 from pot
+Antoine69ant: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Board [Ts 6c Ks]
+Seat 1: jeje_sat (button) (small blind) folded on the Flop
+Seat 2: Antoine69ant (big blind) collected (60)
+
+
+PokerStars Hand #229773822226: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/11 21:53:02 CET [2021/09/11 15:53:02 ET]
+Table '3264225933 1' 3-max Seat #2 is the button
+Seat 1: jeje_sat (1185 in chips)
+Seat 2: Antoine69ant (315 in chips)
+Antoine69ant: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [7s As Qs 4c]
+Antoine69ant: calls 15
+jeje_sat: checks
+*** FLOP *** [2c 2s Ks]
+jeje_sat: bets 30
+Antoine69ant: folds
+Uncalled bet (30) returned to jeje_sat
+jeje_sat collected 60 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Board [2c 2s Ks]
+Seat 1: jeje_sat (big blind) collected (60)
+Seat 2: Antoine69ant (button) (small blind) folded on the Flop
+
+
+PokerStars Hand #229773827704: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/11 21:53:13 CET [2021/09/11 15:53:13 ET]
+Table '3264225933 1' 3-max Seat #1 is the button
+Seat 1: jeje_sat (1215 in chips)
+Seat 2: Antoine69ant (285 in chips)
+jeje_sat: posts small blind 15
+Antoine69ant: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kc 6s 8h 4c]
+jeje_sat: calls 15
+Antoine69ant: checks
+*** FLOP *** [Th Kd 5h]
+Antoine69ant: bets 60
+jeje_sat: folds
+Uncalled bet (60) returned to Antoine69ant
+Antoine69ant collected 60 from pot
+Antoine69ant: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Board [Th Kd 5h]
+Seat 1: jeje_sat (button) (small blind) folded on the Flop
+Seat 2: Antoine69ant (big blind) collected (60)
+
+
+PokerStars Hand #229773834689: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/11 21:53:26 CET [2021/09/11 15:53:26 ET]
+Table '3264225933 1' 3-max Seat #2 is the button
+Seat 1: jeje_sat (1185 in chips)
+Seat 2: Antoine69ant (315 in chips)
+Antoine69ant: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d Td 5c As]
+Antoine69ant: calls 15
+jeje_sat: checks
+*** FLOP *** [Ac 4c 5h]
+jeje_sat: checks
+Antoine69ant: bets 60
+jeje_sat: folds
+Uncalled bet (60) returned to Antoine69ant
+Antoine69ant collected 60 from pot
+Antoine69ant: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Board [Ac 4c 5h]
+Seat 1: jeje_sat (big blind) folded on the Flop
+Seat 2: Antoine69ant (button) (small blind) collected (60)
+
+
+PokerStars Hand #229773842211: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/11 21:53:41 CET [2021/09/11 15:53:41 ET]
+Table '3264225933 1' 3-max Seat #1 is the button
+Seat 1: jeje_sat (1155 in chips)
+Seat 2: Antoine69ant (345 in chips)
+jeje_sat: posts small blind 15
+Antoine69ant: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [8d 3h 7h 6c]
+jeje_sat: calls 15
+Antoine69ant: checks
+*** FLOP *** [5d Ad 7c]
+Antoine69ant: bets 30
+jeje_sat: calls 30
+*** TURN *** [5d Ad 7c] [As]
+Antoine69ant: bets 30
+jeje_sat: folds
+Uncalled bet (30) returned to Antoine69ant
+Antoine69ant collected 120 from pot
+Antoine69ant: doesn't show hand
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [5d Ad 7c As]
+Seat 1: jeje_sat (button) (small blind) folded on the Turn
+Seat 2: Antoine69ant (big blind) collected (120)
+
+
+PokerStars Hand #229773852864: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/11 21:54:01 CET [2021/09/11 15:54:01 ET]
+Table '3264225933 1' 3-max Seat #2 is the button
+Seat 1: jeje_sat (1095 in chips)
+Seat 2: Antoine69ant (405 in chips)
+Antoine69ant: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h Qh 5s Kh]
+Antoine69ant: calls 15
+jeje_sat: checks
+*** FLOP *** [4h Jd 9c]
+jeje_sat: checks
+Antoine69ant: checks
+*** TURN *** [4h Jd 9c] [3s]
+jeje_sat: checks
+Antoine69ant: checks
+*** RIVER *** [4h Jd 9c 3s] [Td]
+jeje_sat: bets 60
+Antoine69ant: folds
+Uncalled bet (60) returned to jeje_sat
+jeje_sat collected 60 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Board [4h Jd 9c 3s Td]
+Seat 1: jeje_sat (big blind) collected (60)
+Seat 2: Antoine69ant (button) (small blind) folded on the River
+
+
+PokerStars Hand #229773868219: Tournament #3264225933, €0.93+€0.07 EUR Omaha Pot Limit - Level III (20/40) - 2021/09/11 21:54:31 CET [2021/09/11 15:54:31 ET]
+Table '3264225933 1' 3-max Seat #1 is the button
+Seat 1: jeje_sat (1125 in chips)
+Seat 2: Antoine69ant (375 in chips)
+jeje_sat: posts small blind 20
+Antoine69ant: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d 4h 7d 6s]
+jeje_sat: calls 20
+Antoine69ant: checks
+*** FLOP *** [Kc 4c 5c]
+Antoine69ant: bets 40
+jeje_sat: calls 40
+*** TURN *** [Kc 4c 5c] [Td]
+Antoine69ant: bets 40
+jeje_sat: calls 40
+*** RIVER *** [Kc 4c 5c Td] [Ts]
+Antoine69ant: bets 40
+jeje_sat: raises 320 to 360
+Antoine69ant: calls 215 and is all-in
+Uncalled bet (105) returned to jeje_sat
+*** SHOW DOWN ***
+jeje_sat: shows [4d 4h 7d 6s] (a full house, Fours full of Tens)
+Antoine69ant: shows [6c 3s 8c Jd] (a flush, King high)
+jeje_sat collected 750 from pot
+*** SUMMARY ***
+Total pot 750 | Rake 0
+Board [Kc 4c 5c Td Ts]
+Seat 1: jeje_sat (button) (small blind) showed [4d 4h 7d 6s] and won (750) with a full house, Fours full of Tens
+Seat 2: Antoine69ant (big blind) showed [6c 3s 8c Jd] and lost with a flush, King high
+
+

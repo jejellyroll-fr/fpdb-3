@@ -184,7 +184,7 @@ class GuiTourneyGraphViewer(QSplitter):
             self.ax.plot(green, color='green', label=('Tournaments') + ': %d\n' % len(green) + ('Profit') + ': $%.2f' % green[-1])
 
             legend = self.ax.legend(loc='upper left', fancybox=True, shadow=True, prop=FontProperties(size='smaller'))
-            legend.draggable(True)
+            #legend.draggable(True)
             
             self.graphBox.addWidget(self.canvas)
             self.canvas.draw()

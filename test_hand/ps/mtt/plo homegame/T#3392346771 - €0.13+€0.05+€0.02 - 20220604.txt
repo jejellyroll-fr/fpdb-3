@@ -1,0 +1,4883 @@
+﻿PokerStars Home Game Hand #235305287632: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level III (35/70) - 2022/04/06 17:44:22 CET [2022/04/06 11:44:22 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: xmasilliax (5512 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (5030 in chips, €0.05 bounty)
+Seat 4: tapitra (4930 in chips, €0.05 bounty)
+Seat 6: jeje_sat (4691 in chips, €0.05 bounty) is sitting out
+tapitra: posts small blind 35
+jeje_sat: posts big blind 70
+*** HOLE CARDS ***
+Dealt to jeje_sat [5c 9s 3h 2s]
+xmasilliax: folds
+jeje_sat has returned
+RIZCHOU: folds
+tapitra: raises 140 to 210
+jeje_sat: folds
+Uncalled bet (140) returned to tapitra
+tapitra collected 140 from pot
+tapitra: doesn't show hand
+*** SUMMARY ***
+Total pot 140 | Rake 0
+Seat 1: xmasilliax folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 4: tapitra (small blind) collected (140)
+Seat 6: jeje_sat (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235305292952: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level III (35/70) - 2022/04/06 17:44:39 CET [2022/04/06 11:44:39 ET]
+Table '3392346771 2' 6-max Seat #4 is the button
+Seat 1: xmasilliax (5512 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (5030 in chips, €0.05 bounty)
+Seat 4: tapitra (5000 in chips, €0.05 bounty)
+Seat 6: jeje_sat (4621 in chips, €0.05 bounty)
+jeje_sat: posts small blind 35
+xmasilliax: posts big blind 70
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 5d 8d 4h]
+RIZCHOU: raises 175 to 245
+tapitra: folds
+jeje_sat: folds
+xmasilliax: folds
+Uncalled bet (175) returned to RIZCHOU
+RIZCHOU collected 175 from pot
+RIZCHOU: doesn't show hand
+*** SUMMARY ***
+Total pot 175 | Rake 0
+Seat 1: xmasilliax (big blind) folded before Flop
+Seat 3: RIZCHOU collected (175)
+Seat 4: tapitra (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235305297971: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level III (35/70) - 2022/04/06 17:44:55 CET [2022/04/06 11:44:55 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: xmasilliax (5442 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (5135 in chips, €0.05 bounty)
+Seat 4: tapitra (5000 in chips, €0.05 bounty)
+Seat 6: jeje_sat (4586 in chips, €0.05 bounty)
+xmasilliax: posts small blind 35
+RIZCHOU: posts big blind 70
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h 4c 5h 9s]
+tapitra: folds
+jeje_sat: raises 175 to 245
+xmasilliax: folds
+RIZCHOU: calls 175
+*** FLOP *** [3c 7c 2d]
+RIZCHOU: checks
+jeje_sat: bets 263
+RIZCHOU: calls 263
+*** TURN *** [3c 7c 2d] [Jc]
+RIZCHOU: checks
+jeje_sat: checks
+*** RIVER *** [3c 7c 2d Jc] [7s]
+RIZCHOU: checks
+jeje_sat: bets 1051
+RIZCHOU: folds
+Uncalled bet (1051) returned to jeje_sat
+jeje_sat collected 1051 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1051 | Rake 0
+Board [3c 7c 2d Jc 7s]
+Seat 1: xmasilliax (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) folded on the River
+Seat 4: tapitra folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) collected (1051)
+
+
+PokerStars Home Game Hand #235305313252: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/06 17:45:44 CET [2022/04/06 11:45:44 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: xmasilliax (5407 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4627 in chips, €0.05 bounty)
+Seat 4: tapitra (5000 in chips, €0.05 bounty)
+Seat 6: jeje_sat (5129 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 50
+tapitra: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [9s 3s 2s 6h]
+jeje_sat: folds
+xmasilliax: folds
+RIZCHOU: folds
+Uncalled bet (50) returned to tapitra
+tapitra collected 100 from pot
+tapitra: doesn't show hand
+*** SUMMARY ***
+Total pot 100 | Rake 0
+Seat 1: xmasilliax (button) folded before Flop (didn't bet)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 4: tapitra (big blind) collected (100)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305319283: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/06 17:46:03 CET [2022/04/06 11:46:03 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: xmasilliax (5407 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4577 in chips, €0.05 bounty)
+Seat 4: tapitra (5050 in chips, €0.05 bounty)
+Seat 6: jeje_sat (5129 in chips, €0.05 bounty)
+tapitra: posts small blind 50
+jeje_sat: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d As 9c Tc]
+xmasilliax: folds
+RIZCHOU: folds
+tapitra: raises 200 to 300
+jeje_sat: folds
+Uncalled bet (200) returned to tapitra
+tapitra collected 200 from pot
+tapitra: doesn't show hand
+*** SUMMARY ***
+Total pot 200 | Rake 0
+Seat 1: xmasilliax folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 4: tapitra (small blind) collected (200)
+Seat 6: jeje_sat (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235305324839: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/06 17:46:21 CET [2022/04/06 11:46:21 ET]
+Table '3392346771 2' 6-max Seat #4 is the button
+Seat 1: xmasilliax (5407 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4577 in chips, €0.05 bounty)
+Seat 4: tapitra (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (5029 in chips, €0.05 bounty)
+jeje_sat: posts small blind 50
+xmasilliax: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [As 9h 9d 8c]
+RIZCHOU: folds
+tapitra: folds
+jeje_sat: folds
+Uncalled bet (50) returned to xmasilliax
+xmasilliax collected 100 from pot
+*** SUMMARY ***
+Total pot 100 | Rake 0
+Seat 1: xmasilliax (big blind) collected (100)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 4: tapitra (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235305331066: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/06 17:46:41 CET [2022/04/06 11:46:41 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: xmasilliax (5457 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4577 in chips, €0.05 bounty)
+Seat 4: tapitra (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (4979 in chips, €0.05 bounty)
+xmasilliax: posts small blind 50
+RIZCHOU: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [9h 4h 6d 3d]
+tapitra: folds
+jeje_sat: raises 250 to 350
+xmasilliax: raises 800 to 1150
+RIZCHOU: folds
+jeje_sat: calls 800
+*** FLOP *** [Ts 6s As]
+xmasilliax: checks
+jeje_sat: checks
+*** TURN *** [Ts 6s As] [Qs]
+xmasilliax: checks
+jeje_sat: checks
+*** RIVER *** [Ts 6s As Qs] [Ah]
+xmasilliax: checks
+jeje_sat: bets 1800
+xmasilliax: folds
+Uncalled bet (1800) returned to jeje_sat
+jeje_sat collected 2400 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2400 | Rake 0
+Board [Ts 6s As Qs Ah]
+Seat 1: xmasilliax (small blind) folded on the River
+Seat 3: RIZCHOU (big blind) folded before Flop
+Seat 4: tapitra folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) collected (2400)
+
+
+PokerStars Home Game Hand #235305353007: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/06 17:47:50 CET [2022/04/06 11:47:50 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: xmasilliax (4307 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4477 in chips, €0.05 bounty)
+Seat 4: tapitra (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (6229 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 50
+tapitra: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h Ad 6d 8c]
+jeje_sat: raises 200 to 300
+xmasilliax: calls 300
+RIZCHOU: folds
+tapitra: folds
+*** FLOP *** [Qd Ts 8d]
+jeje_sat: checks
+xmasilliax: checks
+*** TURN *** [Qd Ts 8d] [4s]
+jeje_sat: checks
+xmasilliax: checks
+*** RIVER *** [Qd Ts 8d 4s] [6h]
+jeje_sat: checks
+xmasilliax: checks
+*** SHOW DOWN ***
+jeje_sat: shows [2h Ad 6d 8c] (two pair, Eights and Sixes)
+xmasilliax: mucks hand
+jeje_sat collected 750 from pot
+*** SUMMARY ***
+Total pot 750 | Rake 0
+Board [Qd Ts 8d 4s 6h]
+Seat 1: xmasilliax (button) mucked [Kh 2s Kc As]
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 4: tapitra (big blind) folded before Flop
+Seat 6: jeje_sat showed [2h Ad 6d 8c] and won (750) with two pair, Eights and Sixes
+
+
+PokerStars Home Game Hand #235305367636: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/06 17:48:36 CET [2022/04/06 11:48:36 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: xmasilliax (4007 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4427 in chips, €0.05 bounty)
+Seat 4: tapitra (5050 in chips, €0.05 bounty)
+Seat 6: jeje_sat (6679 in chips, €0.05 bounty)
+tapitra: posts small blind 50
+jeje_sat: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [6s 8s Qd 9c]
+xmasilliax: folds
+RIZCHOU: folds
+tapitra: calls 50
+jeje_sat: checks
+*** FLOP *** [Qc 6d Ad]
+tapitra: checks
+jeje_sat: bets 100
+tapitra: folds
+Uncalled bet (100) returned to jeje_sat
+jeje_sat collected 200 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 200 | Rake 0
+Board [Qc 6d Ad]
+Seat 1: xmasilliax folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 4: tapitra (small blind) folded on the Flop
+Seat 6: jeje_sat (big blind) collected (200)
+
+
+PokerStars Home Game Hand #235305378486: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level IV (50/100) - 2022/04/06 17:49:10 CET [2022/04/06 11:49:10 ET]
+Table '3392346771 2' 6-max Seat #4 is the button
+Seat 1: xmasilliax (4007 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4427 in chips, €0.05 bounty)
+Seat 4: tapitra (4950 in chips, €0.05 bounty)
+Seat 6: jeje_sat (6779 in chips, €0.05 bounty)
+jeje_sat: posts small blind 50
+xmasilliax: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kd Ad 5c 7d]
+RIZCHOU: raises 250 to 350
+tapitra: folds
+jeje_sat: calls 300
+xmasilliax: folds
+*** FLOP *** [6c 5s As]
+jeje_sat: checks
+RIZCHOU: checks
+*** TURN *** [6c 5s As] [4s]
+jeje_sat: checks
+RIZCHOU: bets 200
+jeje_sat: calls 200
+*** RIVER *** [6c 5s As 4s] [Jd]
+jeje_sat: bets 800
+RIZCHOU: calls 800
+*** SHOW DOWN ***
+jeje_sat: shows [Kd Ad 5c 7d] (two pair, Aces and Fives)
+RIZCHOU: shows [Qc Qs 8c Js] (a flush, Ace high)
+RIZCHOU collected 2800 from pot
+*** SUMMARY ***
+Total pot 2800 | Rake 0
+Board [6c 5s As 4s Jd]
+Seat 1: xmasilliax (big blind) folded before Flop
+Seat 3: RIZCHOU showed [Qc Qs 8c Js] and won (2800) with a flush, Ace high
+Seat 4: tapitra (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) showed [Kd Ad 5c 7d] and lost with two pair, Aces and Fives
+
+
+PokerStars Home Game Hand #235305405457: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 17:50:36 CET [2022/04/06 11:50:36 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: xmasilliax (3907 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (5877 in chips, €0.05 bounty)
+Seat 4: tapitra (4950 in chips, €0.05 bounty)
+Seat 6: jeje_sat (5429 in chips, €0.05 bounty)
+xmasilliax: posts small blind 75
+RIZCHOU: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c 3s Kh 5s]
+tapitra: raises 375 to 525
+jeje_sat: folds
+xmasilliax: folds
+RIZCHOU: folds
+Uncalled bet (375) returned to tapitra
+tapitra collected 375 from pot
+tapitra: doesn't show hand
+*** SUMMARY ***
+Total pot 375 | Rake 0
+Seat 1: xmasilliax (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) folded before Flop
+Seat 4: tapitra collected (375)
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305409811: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 17:50:49 CET [2022/04/06 11:50:49 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: xmasilliax (3832 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (5727 in chips, €0.05 bounty)
+Seat 4: tapitra (5175 in chips, €0.05 bounty)
+Seat 6: jeje_sat (5429 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 75
+tapitra: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h 4h Jd Qd]
+jeje_sat: folds
+xmasilliax: raises 225 to 375
+RIZCHOU: folds
+tapitra: calls 225
+*** FLOP *** [2c 5h 2h]
+tapitra: checks
+xmasilliax: checks
+*** TURN *** [2c 5h 2h] [5c]
+tapitra: checks
+xmasilliax: checks
+*** RIVER *** [2c 5h 2h 5c] [Tc]
+tapitra: checks
+xmasilliax: checks
+*** SHOW DOWN ***
+tapitra: shows [Kd 9d 3d 9c] (two pair, Nines and Fives)
+xmasilliax: shows [5d 6c Ks Kh] (three of a kind, Fives)
+xmasilliax collected 825 from pot
+*** SUMMARY ***
+Total pot 825 | Rake 0
+Board [2c 5h 2h 5c Tc]
+Seat 1: xmasilliax (button) showed [5d 6c Ks Kh] and won (825) with three of a kind, Fives
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 4: tapitra (big blind) showed [Kd 9d 3d 9c] and lost with two pair, Nines and Fives
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305421556: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 17:51:26 CET [2022/04/06 11:51:26 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: xmasilliax (4282 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (5652 in chips, €0.05 bounty)
+Seat 4: tapitra (4800 in chips, €0.05 bounty)
+Seat 6: jeje_sat (5429 in chips, €0.05 bounty)
+tapitra: posts small blind 75
+jeje_sat: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [2d 2c 5d 5c]
+xmasilliax: folds
+RIZCHOU: raises 375 to 525
+tapitra: calls 450
+jeje_sat: calls 375
+*** FLOP *** [9h 3s 4h]
+tapitra: checks
+jeje_sat: checks
+RIZCHOU: bets 394
+tapitra: folds
+jeje_sat: calls 394
+*** TURN *** [9h 3s 4h] [7s]
+jeje_sat: checks
+RIZCHOU: checks
+*** RIVER *** [9h 3s 4h 7s] [Js]
+jeje_sat: bets 2363
+RIZCHOU: folds
+Uncalled bet (2363) returned to jeje_sat
+jeje_sat collected 2363 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2363 | Rake 0
+Board [9h 3s 4h 7s Js]
+Seat 1: xmasilliax folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded on the River
+Seat 4: tapitra (small blind) folded on the Flop
+Seat 6: jeje_sat (big blind) collected (2363)
+
+
+PokerStars Home Game Hand #235305443562: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 17:52:36 CET [2022/04/06 11:52:36 ET]
+Table '3392346771 2' 6-max Seat #4 is the button
+Seat 1: xmasilliax (4282 in chips, €0.05 bounty)
+Seat 2: ralbol (7057 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4733 in chips, €0.05 bounty)
+Seat 4: tapitra (4275 in chips, €0.05 bounty)
+Seat 6: jeje_sat (6873 in chips, €0.05 bounty)
+jeje_sat: posts small blind 75
+xmasilliax: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [7h Th 7c 2c]
+ralbol: folds
+RIZCHOU: folds
+tapitra: folds
+jeje_sat: folds
+Uncalled bet (75) returned to xmasilliax
+xmasilliax collected 150 from pot
+*** SUMMARY ***
+Total pot 150 | Rake 0
+Seat 1: xmasilliax (big blind) collected (150)
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 4: tapitra (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235305447208: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 17:52:48 CET [2022/04/06 11:52:48 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: xmasilliax (4357 in chips, €0.05 bounty)
+Seat 2: ralbol (7057 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4733 in chips, €0.05 bounty)
+Seat 4: tapitra (4275 in chips, €0.05 bounty)
+Seat 6: jeje_sat (6798 in chips, €0.05 bounty)
+xmasilliax: posts small blind 75
+ralbol: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d 8s 7h Ts]
+RIZCHOU: folds
+tapitra: folds
+jeje_sat: raises 375 to 525
+xmasilliax: folds
+ralbol: folds
+Uncalled bet (375) returned to jeje_sat
+jeje_sat collected 375 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 375 | Rake 0
+Seat 1: xmasilliax (small blind) folded before Flop
+Seat 2: ralbol (big blind) folded before Flop
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 4: tapitra folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) collected (375)
+
+
+PokerStars Home Game Hand #235305459770: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 17:53:28 CET [2022/04/06 11:53:28 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: xmasilliax (4282 in chips, €0.05 bounty)
+Seat 2: ralbol (6907 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4733 in chips, €0.05 bounty)
+Seat 4: tapitra (4275 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7023 in chips, €0.05 bounty)
+ralbol: posts small blind 75
+RIZCHOU: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h Ah Ad 2d]
+tapitra: folds
+jeje_sat: raises 375 to 525
+xmasilliax: folds
+ralbol: folds
+RIZCHOU: folds
+Uncalled bet (375) returned to jeje_sat
+jeje_sat collected 375 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 375 | Rake 0
+Seat 1: xmasilliax (button) folded before Flop (didn't bet)
+Seat 2: ralbol (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) folded before Flop
+Seat 4: tapitra folded before Flop (didn't bet)
+Seat 6: jeje_sat collected (375)
+
+
+PokerStars Home Game Hand #235305466760: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 17:53:50 CET [2022/04/06 11:53:50 ET]
+Table '3392346771 2' 6-max Seat #2 is the button
+Seat 1: xmasilliax (4282 in chips, €0.05 bounty)
+Seat 2: ralbol (6832 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4583 in chips, €0.05 bounty)
+Seat 4: tapitra (4275 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7248 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 75
+tapitra: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [2s Kc 8d 2d]
+jeje_sat: folds
+xmasilliax: folds
+ralbol: folds
+RIZCHOU: folds
+Uncalled bet (75) returned to tapitra
+tapitra collected 150 from pot
+tapitra: doesn't show hand
+*** SUMMARY ***
+Total pot 150 | Rake 0
+Seat 1: xmasilliax folded before Flop (didn't bet)
+Seat 2: ralbol (button) folded before Flop (didn't bet)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 4: tapitra (big blind) collected (150)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305482349: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level V (75/150) - 2022/04/06 17:54:08 CET [2022/04/06 11:54:08 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: xmasilliax (4282 in chips, €0.05 bounty)
+Seat 2: ralbol (6832 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4508 in chips, €0.05 bounty)
+Seat 4: tapitra (4350 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7248 in chips, €0.05 bounty)
+tapitra: posts small blind 75
+jeje_sat: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jd 5s Jh Qc]
+xmasilliax: folds
+ralbol: folds
+RIZCHOU: raises 375 to 525
+tapitra: folds
+jeje_sat: calls 375
+*** FLOP *** [As Th 8d]
+jeje_sat: checks
+RIZCHOU: checks
+*** TURN *** [As Th 8d] [7c]
+jeje_sat: bets 563
+RIZCHOU: calls 563
+*** RIVER *** [As Th 8d 7c] [Qh]
+jeje_sat: checks
+RIZCHOU: checks
+*** SHOW DOWN ***
+jeje_sat: shows [Jd 5s Jh Qc] (a pair of Queens)
+RIZCHOU: shows [Ks 7d 7s Qd] (three of a kind, Sevens)
+RIZCHOU collected 2251 from pot
+*** SUMMARY ***
+Total pot 2251 | Rake 0
+Board [As Th 8d 7c Qh]
+Seat 1: xmasilliax folded before Flop (didn't bet)
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) showed [Ks 7d 7s Qd] and won (2251) with three of a kind, Sevens
+Seat 4: tapitra (small blind) folded before Flop
+Seat 6: jeje_sat (big blind) showed [Jd 5s Jh Qc] and lost with a pair of Queens
+
+
+PokerStars Home Game Hand #235305602170: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 18:01:01 CET [2022/04/06 12:01:01 ET]
+Table '3392346771 2' 6-max Seat #4 is the button
+Seat 2: ralbol (6832 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (5671 in chips, €0.05 bounty)
+Seat 4: tapitra (4275 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5000 in chips) out of hand (moved from another table into small blind)
+Seat 6: jeje_sat (6160 in chips, €0.05 bounty)
+DrLetstry will be allowed to play after the button
+jeje_sat: posts small blind 100
+ralbol: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d Jd 5h 7s]
+RIZCHOU: folds
+tapitra: folds
+jeje_sat: folds
+Uncalled bet (100) returned to ralbol
+ralbol collected 200 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 200 | Rake 0
+Seat 2: ralbol (big blind) collected (200)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 4: tapitra (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235305607623: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 18:01:20 CET [2022/04/06 12:01:20 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (4777 in chips) out of hand (moved from another table into small blind)
+Seat 2: ralbol (6932 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (5671 in chips, €0.05 bounty)
+Seat 4: tapitra (4275 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5000 in chips, €0.05 bounty)
+Seat 6: jeje_sat (6060 in chips, €0.05 bounty)
+Tuche37300 will be allowed to play after the button
+ralbol: posts small blind 100
+RIZCHOU: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th Ts 4s Kc]
+tapitra: folds
+DrLetstry: folds
+jeje_sat: raises 500 to 700
+ralbol: folds
+RIZCHOU: calls 500
+*** FLOP *** [8c Kh Kd]
+RIZCHOU: checks
+jeje_sat: bets 750
+RIZCHOU: folds
+Uncalled bet (750) returned to jeje_sat
+jeje_sat collected 1500 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1500 | Rake 0
+Board [8c Kh Kd]
+Seat 2: ralbol (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) folded on the Flop
+Seat 4: tapitra folded before Flop (didn't bet)
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) collected (1500)
+
+
+PokerStars Home Game Hand #235305624264: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 18:02:15 CET [2022/04/06 12:02:15 ET]
+Table '3392346771 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (4777 in chips, €0.05 bounty)
+Seat 2: ralbol (6832 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4971 in chips, €0.05 bounty)
+Seat 4: tapitra (4275 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5000 in chips, €0.05 bounty)
+Seat 6: jeje_sat (6860 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 100
+tapitra: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [2c 3d 4s 8d]
+DrLetstry: folds
+jeje_sat: folds
+Tuche37300: raises 500 to 700
+ralbol: folds
+RIZCHOU: folds
+tapitra: calls 500
+*** FLOP *** [Qc Ah 8h]
+tapitra: checks
+Tuche37300: bets 1500
+tapitra: folds
+Uncalled bet (1500) returned to Tuche37300
+Tuche37300 collected 1500 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 1500 | Rake 0
+Board [Qc Ah 8h]
+Seat 1: Tuche37300 collected (1500)
+Seat 2: ralbol (button) folded before Flop (didn't bet)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 4: tapitra (big blind) folded on the Flop
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305640879: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 18:03:08 CET [2022/04/06 12:03:08 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (5577 in chips, €0.05 bounty)
+Seat 2: ralbol (6832 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4871 in chips, €0.05 bounty)
+Seat 4: tapitra (3575 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5000 in chips, €0.05 bounty)
+Seat 6: jeje_sat (6860 in chips, €0.05 bounty)
+tapitra: posts small blind 100
+DrLetstry: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ad Ah Kd 4d]
+jeje_sat: raises 500 to 700
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: calls 700
+tapitra: folds
+DrLetstry: folds
+*** FLOP *** [Ac 6c 3s]
+jeje_sat: bets 1700
+RIZCHOU: folds
+Uncalled bet (1700) returned to jeje_sat
+jeje_sat collected 1700 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1700 | Rake 0
+Board [Ac 6c 3s]
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded on the Flop
+Seat 4: tapitra (small blind) folded before Flop
+Seat 5: DrLetstry (big blind) folded before Flop
+Seat 6: jeje_sat collected (1700)
+
+
+PokerStars Home Game Hand #235305652597: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 18:03:46 CET [2022/04/06 12:03:46 ET]
+Table '3392346771 2' 6-max Seat #4 is the button
+Seat 1: Tuche37300 (5577 in chips, €0.05 bounty)
+Seat 2: ralbol (6832 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4171 in chips, €0.05 bounty)
+Seat 4: tapitra (3475 in chips, €0.05 bounty)
+Seat 5: DrLetstry (4800 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7860 in chips, €0.05 bounty)
+DrLetstry: posts small blind 100
+jeje_sat: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c 5c 3s 9s]
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+tapitra: folds
+DrLetstry: calls 100
+jeje_sat: checks
+*** FLOP *** [2c Ac 5d]
+DrLetstry: checks
+jeje_sat: checks
+*** TURN *** [2c Ac 5d] [6d]
+DrLetstry: checks
+jeje_sat: bets 200
+DrLetstry: calls 200
+*** RIVER *** [2c Ac 5d 6d] [As]
+DrLetstry: checks
+jeje_sat: bets 600
+DrLetstry: calls 600
+*** SHOW DOWN ***
+jeje_sat: shows [6c 5c 3s 9s] (two pair, Aces and Sixes)
+DrLetstry: shows [Kd Jd 9d 6h] (two pair, Aces and Sixes - King kicker)
+DrLetstry collected 2000 from pot
+*** SUMMARY ***
+Total pot 2000 | Rake 0
+Board [2c Ac 5d 6d As]
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 4: tapitra (button) folded before Flop (didn't bet)
+Seat 5: DrLetstry (small blind) showed [Kd Jd 9d 6h] and won (2000) with two pair, Aces and Sixes
+Seat 6: jeje_sat (big blind) showed [6c 5c 3s 9s] and lost with two pair, Aces and Sixes
+
+
+PokerStars Home Game Hand #235305668605: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 18:04:37 CET [2022/04/06 12:04:37 ET]
+Table '3392346771 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (5577 in chips, €0.05 bounty)
+Seat 2: ralbol (6832 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4171 in chips, €0.05 bounty)
+Seat 4: tapitra (3475 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5800 in chips, €0.05 bounty)
+Seat 6: jeje_sat (6860 in chips, €0.05 bounty)
+jeje_sat: posts small blind 100
+Tuche37300: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [9h Td 3s Jc]
+ralbol: folds
+RIZCHOU: raises 500 to 700
+tapitra: folds
+DrLetstry: folds
+jeje_sat: folds
+Tuche37300: folds
+Uncalled bet (500) returned to RIZCHOU
+RIZCHOU collected 500 from pot
+RIZCHOU: doesn't show hand
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: Tuche37300 (big blind) folded before Flop
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU collected (500)
+Seat 4: tapitra folded before Flop (didn't bet)
+Seat 5: DrLetstry (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235305681722: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 18:05:18 CET [2022/04/06 12:05:18 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (5377 in chips, €0.05 bounty)
+Seat 2: ralbol (6832 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4471 in chips, €0.05 bounty)
+Seat 4: tapitra (3475 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5800 in chips, €0.05 bounty)
+Seat 6: jeje_sat (6760 in chips, €0.05 bounty)
+Tuche37300: posts small blind 100
+ralbol: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th 7s 6s Td]
+RIZCHOU: folds
+tapitra: folds
+DrLetstry: folds
+jeje_sat: raises 500 to 700
+Tuche37300: folds
+ralbol: folds
+Uncalled bet (500) returned to jeje_sat
+jeje_sat collected 500 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: ralbol (big blind) folded before Flop
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 4: tapitra folded before Flop (didn't bet)
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) collected (500)
+
+
+PokerStars Home Game Hand #235305686580: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VI (100/200) - 2022/04/06 18:05:33 CET [2022/04/06 12:05:33 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (5277 in chips, €0.05 bounty)
+Seat 2: ralbol (6632 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4471 in chips, €0.05 bounty)
+Seat 4: tapitra (3475 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5800 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7060 in chips, €0.05 bounty)
+ralbol: posts small blind 100
+RIZCHOU: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jh 7s Jd 3s]
+tapitra: folds
+DrLetstry: raises 200 to 400
+jeje_sat: calls 400
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: calls 200
+*** FLOP *** [Js As 2s]
+RIZCHOU: checks
+DrLetstry: checks
+jeje_sat: checks
+*** TURN *** [Js As 2s] [Ad]
+RIZCHOU: checks
+DrLetstry: checks
+jeje_sat: bets 650
+RIZCHOU: folds
+DrLetstry: folds
+Uncalled bet (650) returned to jeje_sat
+jeje_sat collected 1300 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1300 | Rake 0
+Board [Js As 2s Ad]
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: ralbol (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) folded on the Turn
+Seat 4: tapitra folded before Flop (didn't bet)
+Seat 5: DrLetstry folded on the Turn
+Seat 6: jeje_sat collected (1300)
+
+
+PokerStars Home Game Hand #235305700930: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 18:06:19 CET [2022/04/06 12:06:19 ET]
+Table '3392346771 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (5277 in chips, €0.05 bounty)
+Seat 2: ralbol (6532 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4071 in chips, €0.05 bounty)
+Seat 4: tapitra (3475 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5400 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7960 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 125
+tapitra: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c Ks 6s 7h]
+DrLetstry: folds
+jeje_sat: folds
+Tuche37300: raises 625 to 875
+ralbol: folds
+RIZCHOU: folds
+tapitra: folds
+Uncalled bet (625) returned to Tuche37300
+Tuche37300 collected 625 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 625 | Rake 0
+Seat 1: Tuche37300 collected (625)
+Seat 2: ralbol (button) folded before Flop (didn't bet)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 4: tapitra (big blind) folded before Flop
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305716500: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 18:06:47 CET [2022/04/06 12:06:47 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (5652 in chips, €0.05 bounty)
+Seat 2: ralbol (6532 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3946 in chips, €0.05 bounty)
+Seat 4: tapitra (3225 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5400 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7960 in chips, €0.05 bounty)
+tapitra: posts small blind 125
+DrLetstry: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [6d Ad 9h Td]
+jeje_sat: folds
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+tapitra: folds
+Uncalled bet (125) returned to DrLetstry
+DrLetstry collected 250 from pot
+*** SUMMARY ***
+Total pot 250 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 4: tapitra (small blind) folded before Flop
+Seat 5: DrLetstry (big blind) collected (250)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305723552: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 18:07:09 CET [2022/04/06 12:07:09 ET]
+Table '3392346771 2' 6-max Seat #4 is the button
+Seat 1: Tuche37300 (5652 in chips, €0.05 bounty)
+Seat 2: ralbol (6532 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3946 in chips, €0.05 bounty)
+Seat 4: tapitra (3100 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5525 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7960 in chips, €0.05 bounty)
+DrLetstry: posts small blind 125
+jeje_sat: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h Th 3s Jd]
+Tuche37300: calls 250
+ralbol: folds
+RIZCHOU: folds
+tapitra: folds
+DrLetstry: folds
+jeje_sat: checks
+*** FLOP *** [Ac Js 4d]
+jeje_sat: checks
+Tuche37300: checks
+*** TURN *** [Ac Js 4d] [Ks]
+jeje_sat: checks
+Tuche37300: checks
+*** RIVER *** [Ac Js 4d Ks] [As]
+jeje_sat: checks
+Tuche37300: bets 313
+jeje_sat: folds
+Uncalled bet (313) returned to Tuche37300
+Tuche37300 collected 625 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 625 | Rake 0
+Board [Ac Js 4d Ks As]
+Seat 1: Tuche37300 collected (625)
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 4: tapitra (button) folded before Flop (didn't bet)
+Seat 5: DrLetstry (small blind) folded before Flop
+Seat 6: jeje_sat (big blind) folded on the River
+
+
+PokerStars Home Game Hand #235305740662: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 18:08:02 CET [2022/04/06 12:08:02 ET]
+Table '3392346771 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (6027 in chips, €0.05 bounty)
+Seat 2: ralbol (6532 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3946 in chips, €0.05 bounty)
+Seat 4: tapitra (3100 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5400 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7710 in chips, €0.05 bounty)
+jeje_sat: posts small blind 125
+Tuche37300: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h 7c 4h Ks]
+ralbol: folds
+RIZCHOU: raises 625 to 875
+tapitra: folds
+DrLetstry: folds
+jeje_sat: folds
+Tuche37300: folds
+Uncalled bet (625) returned to RIZCHOU
+RIZCHOU collected 625 from pot
+RIZCHOU: doesn't show hand
+*** SUMMARY ***
+Total pot 625 | Rake 0
+Seat 1: Tuche37300 (big blind) folded before Flop
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU collected (625)
+Seat 4: tapitra folded before Flop (didn't bet)
+Seat 5: DrLetstry (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235305749267: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 18:08:29 CET [2022/04/06 12:08:29 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (5777 in chips, €0.05 bounty)
+Seat 2: ralbol (6532 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4321 in chips, €0.05 bounty)
+Seat 4: tapitra (3100 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5400 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7585 in chips, €0.05 bounty)
+Tuche37300: posts small blind 125
+ralbol: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c Ks 9d 2c]
+RIZCHOU: folds
+tapitra: folds
+DrLetstry: folds
+jeje_sat: folds
+Tuche37300: folds
+Uncalled bet (125) returned to ralbol
+ralbol collected 250 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 250 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: ralbol (big blind) collected (250)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 4: tapitra folded before Flop (didn't bet)
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305752482: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 18:08:39 CET [2022/04/06 12:08:39 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (5652 in chips, €0.05 bounty)
+Seat 2: ralbol (6657 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4321 in chips, €0.05 bounty)
+Seat 4: tapitra (3100 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5400 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7585 in chips, €0.05 bounty)
+ralbol: posts small blind 125
+RIZCHOU: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [2c Ks 9c Qd]
+tapitra: folds
+DrLetstry: folds
+jeje_sat: folds
+Tuche37300: folds
+ralbol: folds
+Uncalled bet (125) returned to RIZCHOU
+RIZCHOU collected 250 from pot
+RIZCHOU: doesn't show hand
+*** SUMMARY ***
+Total pot 250 | Rake 0
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: ralbol (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) collected (250)
+Seat 4: tapitra folded before Flop (didn't bet)
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305755897: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 18:08:50 CET [2022/04/06 12:08:50 ET]
+Table '3392346771 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (5652 in chips, €0.05 bounty)
+Seat 2: ralbol (6532 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4446 in chips, €0.05 bounty)
+Seat 4: tapitra (3100 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5400 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7585 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 125
+tapitra: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h Td 9h Ks]
+DrLetstry: folds
+jeje_sat: folds
+Tuche37300: folds
+ralbol: raises 625 to 875
+RIZCHOU: folds
+tapitra: calls 625
+*** FLOP *** [8s 3d 9s]
+tapitra: checks
+ralbol: bets 938
+tapitra: folds
+Uncalled bet (938) returned to ralbol
+ralbol collected 1875 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 1875 | Rake 0
+Board [8s 3d 9s]
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol (button) collected (1875)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 4: tapitra (big blind) folded on the Flop
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305771376: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 18:09:38 CET [2022/04/06 12:09:38 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (5652 in chips, €0.05 bounty)
+Seat 2: ralbol (7532 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4321 in chips, €0.05 bounty)
+Seat 4: tapitra (2225 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5400 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7585 in chips, €0.05 bounty)
+tapitra: posts small blind 125
+DrLetstry: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c Qh Jc 7s]
+jeje_sat: folds
+Tuche37300: raises 625 to 875
+ralbol: folds
+RIZCHOU: folds
+tapitra: raises 1350 to 2225 and is all-in
+DrLetstry: folds
+Tuche37300: calls 1350
+*** FLOP *** [Ad 5d Td]
+*** TURN *** [Ad 5d Td] [Kc]
+*** RIVER *** [Ad 5d Td Kc] [4c]
+*** SHOW DOWN ***
+tapitra: shows [Qc 9c Js 8s] (a straight, Ten to Ace)
+Tuche37300: shows [Kd Ks 3d 2c] (a flush, Ace high)
+Tuche37300 collected 4700 from pot
+Tuche37300 wins €0.03 for eliminating tapitra and their own bounty increases by €0.02 to €0.07
+tapitra finished the tournament in 12th place
+*** SUMMARY ***
+Total pot 4700 | Rake 0
+Board [Ad 5d Td Kc 4c]
+Seat 1: Tuche37300 showed [Kd Ks 3d 2c] and won (4700) with a flush, Ace high
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 4: tapitra (small blind) showed [Qc 9c Js 8s] and lost with a straight, Ten to Ace
+Seat 5: DrLetstry (big blind) folded before Flop
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305781795: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 18:10:10 CET [2022/04/06 12:10:10 ET]
+Table '3392346771 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (8127 in chips, €0.07 bounty)
+Seat 2: ralbol (7532 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4321 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7585 in chips, €0.05 bounty)
+jeje_sat: posts small blind 125
+Tuche37300: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qh Qc 7h 4s]
+ralbol: folds
+RIZCHOU: folds
+DrLetstry: folds
+jeje_sat: raises 500 to 750
+Tuche37300: folds
+Uncalled bet (500) returned to jeje_sat
+jeje_sat collected 500 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: Tuche37300 (big blind) folded before Flop
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 5: DrLetstry (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) collected (500)
+
+
+PokerStars Home Game Hand #235305787572: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 18:10:29 CET [2022/04/06 12:10:29 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (7877 in chips, €0.07 bounty)
+Seat 2: ralbol (7532 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4321 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7835 in chips, €0.05 bounty)
+Tuche37300: posts small blind 125
+ralbol: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks Kh 4c 9s]
+RIZCHOU: folds
+DrLetstry: folds
+jeje_sat: raises 625 to 875
+Tuche37300: folds
+ralbol: folds
+Uncalled bet (625) returned to jeje_sat
+jeje_sat collected 625 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 625 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: ralbol (big blind) folded before Flop
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) collected (625)
+
+
+PokerStars Home Game Hand #235305793475: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VII (125/250) - 2022/04/06 18:10:48 CET [2022/04/06 12:10:48 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (7752 in chips, €0.07 bounty)
+Seat 2: ralbol (7282 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4321 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (8210 in chips, €0.05 bounty)
+ralbol: posts small blind 125
+RIZCHOU: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [3s As 2d Qc]
+DrLetstry: folds
+jeje_sat: raises 625 to 875
+Tuche37300: folds
+ralbol: calls 750
+RIZCHOU: calls 625
+*** FLOP *** [Ah 9c 3c]
+ralbol: checks
+RIZCHOU: checks
+jeje_sat: bets 2625
+ralbol: folds
+RIZCHOU: folds
+Uncalled bet (2625) returned to jeje_sat
+jeje_sat collected 2625 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2625 | Rake 0
+Board [Ah 9c 3c]
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: ralbol (small blind) folded on the Flop
+Seat 3: RIZCHOU (big blind) folded on the Flop
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat collected (2625)
+
+
+PokerStars Home Game Hand #235305805530: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 18:11:25 CET [2022/04/06 12:11:25 ET]
+Table '3392346771 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (7752 in chips, €0.07 bounty)
+Seat 2: ralbol (6407 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3446 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (9960 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 150
+DrLetstry: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [As Jh Th 7d]
+jeje_sat: folds
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+Uncalled bet (150) returned to DrLetstry
+DrLetstry collected 300 from pot
+*** SUMMARY ***
+Total pot 300 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol (button) folded before Flop (didn't bet)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 5: DrLetstry (big blind) collected (300)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305810406: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 18:11:41 CET [2022/04/06 12:11:41 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (7752 in chips, €0.07 bounty)
+Seat 2: ralbol (6407 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3296 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5300 in chips, €0.05 bounty)
+Seat 6: jeje_sat (9960 in chips, €0.05 bounty)
+DrLetstry: posts small blind 150
+jeje_sat: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [Td Js Qh Ad]
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+DrLetstry: folds
+Uncalled bet (150) returned to jeje_sat
+jeje_sat collected 300 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 300 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 5: DrLetstry (small blind) folded before Flop
+Seat 6: jeje_sat (big blind) collected (300)
+
+
+PokerStars Home Game Hand #235305817656: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 18:12:04 CET [2022/04/06 12:12:04 ET]
+Table '3392346771 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (7752 in chips, €0.07 bounty)
+Seat 2: ralbol (6407 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3296 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (10110 in chips, €0.05 bounty)
+jeje_sat: posts small blind 150
+Tuche37300: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qs 6c 4h 9d]
+ralbol: folds
+RIZCHOU: raises 750 to 1050
+DrLetstry: folds
+jeje_sat: folds
+Tuche37300: folds
+Uncalled bet (750) returned to RIZCHOU
+RIZCHOU collected 750 from pot
+RIZCHOU: doesn't show hand
+*** SUMMARY ***
+Total pot 750 | Rake 0
+Seat 1: Tuche37300 (big blind) folded before Flop
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU collected (750)
+Seat 5: DrLetstry (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235305822099: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 18:12:18 CET [2022/04/06 12:12:18 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (7452 in chips, €0.07 bounty)
+Seat 2: ralbol (6407 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3746 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (9960 in chips, €0.05 bounty)
+Tuche37300: posts small blind 150
+ralbol: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kh 2h Jh 9h]
+RIZCHOU: folds
+DrLetstry: folds
+jeje_sat: folds
+Tuche37300: folds
+Uncalled bet (150) returned to ralbol
+ralbol collected 300 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 300 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: ralbol (big blind) collected (300)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305825326: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 18:12:28 CET [2022/04/06 12:12:28 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (7302 in chips, €0.07 bounty)
+Seat 2: ralbol (6557 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3746 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (9960 in chips, €0.05 bounty)
+ralbol: posts small blind 150
+RIZCHOU: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc Js Ad 6c]
+DrLetstry: folds
+jeje_sat: raises 750 to 1050
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+Uncalled bet (750) returned to jeje_sat
+jeje_sat collected 750 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 750 | Rake 0
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: ralbol (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) folded before Flop
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat collected (750)
+
+
+PokerStars Home Game Hand #235305833506: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 18:12:53 CET [2022/04/06 12:12:53 ET]
+Table '3392346771 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (7302 in chips, €0.07 bounty)
+Seat 2: ralbol (6407 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3446 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (10410 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 150
+DrLetstry: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks 4h 3s As]
+jeje_sat: folds
+Tuche37300: folds
+ralbol: raises 750 to 1050
+RIZCHOU: folds
+DrLetstry: folds
+Uncalled bet (750) returned to ralbol
+ralbol collected 750 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 750 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol (button) collected (750)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 5: DrLetstry (big blind) folded before Flop
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305838488: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 18:13:09 CET [2022/04/06 12:13:09 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (7302 in chips, €0.07 bounty)
+Seat 2: ralbol (6857 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3296 in chips, €0.05 bounty)
+Seat 5: DrLetstry (4850 in chips, €0.05 bounty)
+Seat 6: jeje_sat (10410 in chips, €0.05 bounty)
+DrLetstry: posts small blind 150
+jeje_sat: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [As 9d 2d Qc]
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: raises 750 to 1050
+DrLetstry: folds
+jeje_sat: folds
+Uncalled bet (750) returned to RIZCHOU
+RIZCHOU collected 750 from pot
+RIZCHOU: doesn't show hand
+*** SUMMARY ***
+Total pot 750 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) collected (750)
+Seat 5: DrLetstry (small blind) folded before Flop
+Seat 6: jeje_sat (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235305846069: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 18:13:33 CET [2022/04/06 12:13:33 ET]
+Table '3392346771 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (7302 in chips, €0.07 bounty)
+Seat 2: ralbol (6857 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3746 in chips, €0.05 bounty)
+Seat 5: DrLetstry (4700 in chips, €0.05 bounty)
+Seat 6: jeje_sat (10110 in chips, €0.05 bounty)
+jeje_sat: posts small blind 150
+Tuche37300: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [2d 9h Ad Kc]
+ralbol: folds
+RIZCHOU: folds
+DrLetstry: folds
+jeje_sat: raises 600 to 900
+Tuche37300: folds
+Uncalled bet (600) returned to jeje_sat
+jeje_sat collected 600 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 600 | Rake 0
+Seat 1: Tuche37300 (big blind) folded before Flop
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 5: DrLetstry (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) collected (600)
+
+
+PokerStars Home Game Hand #235305852780: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 18:13:54 CET [2022/04/06 12:13:54 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (7002 in chips, €0.07 bounty)
+Seat 2: ralbol (6857 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3746 in chips, €0.05 bounty)
+Seat 5: DrLetstry (4700 in chips, €0.05 bounty)
+Seat 6: jeje_sat (10410 in chips, €0.05 bounty)
+Tuche37300: posts small blind 150
+ralbol: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [2s 2h 9c Qs]
+RIZCHOU: folds
+DrLetstry: raises 300 to 600
+jeje_sat: folds
+Tuche37300: folds
+ralbol: folds
+Uncalled bet (300) returned to DrLetstry
+DrLetstry collected 750 from pot
+*** SUMMARY ***
+Total pot 750 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: ralbol (big blind) folded before Flop
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 5: DrLetstry collected (750)
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305857247: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 18:14:08 CET [2022/04/06 12:14:08 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (6852 in chips, €0.07 bounty)
+Seat 2: ralbol (6557 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3746 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (10410 in chips, €0.05 bounty)
+ralbol: posts small blind 150
+RIZCHOU: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ac 4s 5c Jh]
+DrLetstry: folds
+jeje_sat: raises 750 to 1050
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+Uncalled bet (750) returned to jeje_sat
+jeje_sat collected 750 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 750 | Rake 0
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: ralbol (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) folded before Flop
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat collected (750)
+
+
+PokerStars Home Game Hand #235305862727: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 18:14:25 CET [2022/04/06 12:14:25 ET]
+Table '3392346771 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (6852 in chips, €0.07 bounty)
+Seat 2: ralbol (6407 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3446 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (10860 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 150
+DrLetstry: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts Kh 6h Ah]
+jeje_sat: folds
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+Uncalled bet (150) returned to DrLetstry
+DrLetstry collected 300 from pot
+*** SUMMARY ***
+Total pot 300 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol (button) folded before Flop (didn't bet)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 5: DrLetstry (big blind) collected (300)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305869103: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 18:14:45 CET [2022/04/06 12:14:45 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (6852 in chips, €0.07 bounty)
+Seat 2: ralbol (6407 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3296 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5300 in chips, €0.05 bounty)
+Seat 6: jeje_sat (10860 in chips, €0.05 bounty)
+DrLetstry: posts small blind 150
+jeje_sat: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qs Ac 6d 6c]
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+DrLetstry: folds
+Uncalled bet (150) returned to jeje_sat
+jeje_sat collected 300 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 300 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 5: DrLetstry (small blind) folded before Flop
+Seat 6: jeje_sat (big blind) collected (300)
+
+
+PokerStars Home Game Hand #235305875679: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level VIII (150/300) - 2022/04/06 18:15:06 CET [2022/04/06 12:15:06 ET]
+Table '3392346771 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (6852 in chips, €0.07 bounty)
+Seat 2: ralbol (6407 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3296 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (11010 in chips, €0.05 bounty)
+jeje_sat: posts small blind 150
+Tuche37300: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [5c 4c 2s 3c]
+ralbol: folds
+RIZCHOU: raises 750 to 1050
+DrLetstry: folds
+jeje_sat: calls 900
+Tuche37300: folds
+*** FLOP *** [5s 9s 3s]
+jeje_sat: bets 2400
+RIZCHOU: folds
+Uncalled bet (2400) returned to jeje_sat
+jeje_sat collected 2400 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2400 | Rake 0
+Board [5s 9s 3s]
+Seat 1: Tuche37300 (big blind) folded before Flop
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU folded on the Flop
+Seat 5: DrLetstry (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) collected (2400)
+
+
+PokerStars Home Game Hand #235305894945: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 18:16:06 CET [2022/04/06 12:16:06 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (6552 in chips, €0.07 bounty)
+Seat 2: ralbol (6407 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (2246 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (12360 in chips, €0.05 bounty)
+Tuche37300: posts small blind 200
+ralbol: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kh Jh Th 5d]
+RIZCHOU: folds
+DrLetstry: folds
+jeje_sat: folds
+Tuche37300: raises 800 to 1200
+ralbol: folds
+Uncalled bet (800) returned to Tuche37300
+Tuche37300 collected 800 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 800 | Rake 0
+Seat 1: Tuche37300 (small blind) collected (800)
+Seat 2: ralbol (big blind) folded before Flop
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305900066: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 18:16:22 CET [2022/04/06 12:16:22 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (6952 in chips, €0.07 bounty)
+Seat 2: ralbol (6007 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (2246 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5150 in chips, €0.05 bounty)
+Seat 6: jeje_sat (12360 in chips, €0.05 bounty)
+ralbol: posts small blind 200
+RIZCHOU: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qs 7s 8s 3s]
+DrLetstry: calls 400
+jeje_sat: folds
+Tuche37300: folds
+ralbol: calls 200
+RIZCHOU: checks
+*** FLOP *** [9h 5h 2s]
+ralbol: checks
+RIZCHOU: checks
+DrLetstry: checks
+*** TURN *** [9h 5h 2s] [5s]
+ralbol: checks
+RIZCHOU: checks
+DrLetstry: bets 1200
+ralbol: folds
+RIZCHOU: folds
+Uncalled bet (1200) returned to DrLetstry
+DrLetstry collected 1200 from pot
+*** SUMMARY ***
+Total pot 1200 | Rake 0
+Board [9h 5h 2s 5s]
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: ralbol (small blind) folded on the Turn
+Seat 3: RIZCHOU (big blind) folded on the Turn
+Seat 5: DrLetstry collected (1200)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305916584: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 18:17:13 CET [2022/04/06 12:17:13 ET]
+Table '3392346771 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (6952 in chips, €0.07 bounty)
+Seat 2: ralbol (5607 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (1846 in chips, €0.05 bounty)
+Seat 5: DrLetstry (5950 in chips, €0.05 bounty)
+Seat 6: jeje_sat (12360 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 200
+DrLetstry: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [2d Kc 4s 5c]
+jeje_sat: folds
+Tuche37300: folds
+ralbol: calls 400
+RIZCHOU: folds
+DrLetstry: checks
+*** FLOP *** [Qs 3c 8c]
+DrLetstry: checks
+ralbol: checks
+*** TURN *** [Qs 3c 8c] [8d]
+DrLetstry: checks
+ralbol: checks
+*** RIVER *** [Qs 3c 8c 8d] [As]
+DrLetstry: checks
+ralbol: checks
+*** SHOW DOWN ***
+DrLetstry: shows [Kh Qh 4c 8h] (a full house, Eights full of Queens)
+ralbol: mucks hand
+DrLetstry collected 1000 from pot
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Board [Qs 3c 8c 8d As]
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol (button) mucked [2s Ac Kd Tc]
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 5: DrLetstry (big blind) showed [Kh Qh 4c 8h] and won (1000) with a full house, Eights full of Queens
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305932057: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 18:18:02 CET [2022/04/06 12:18:02 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (6952 in chips, €0.07 bounty)
+Seat 2: ralbol (5207 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (1646 in chips, €0.05 bounty)
+Seat 5: DrLetstry (6550 in chips, €0.05 bounty)
+Seat 6: jeje_sat (12360 in chips, €0.05 bounty)
+DrLetstry: posts small blind 200
+jeje_sat: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks Kh Jd 8s]
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+DrLetstry said, "ba value ton as"
+DrLetstry said, "hihi"
+DrLetstry: calls 200
+jeje_sat: raises 800 to 1200
+DrLetstry: raises 2400 to 3600
+jeje_sat said, "NYBR?"
+jeje_sat: raises 7200 to 10800
+DrLetstry: calls 2950 and is all-in
+Uncalled bet (4250) returned to jeje_sat
+*** FLOP *** [3s Jc Ts]
+*** TURN *** [3s Jc Ts] [9d]
+*** RIVER *** [3s Jc Ts 9d] [3d]
+*** SHOW DOWN ***
+DrLetstry: shows [Qh Qs 3h 5d] (three of a kind, Threes)
+jeje_sat: shows [Ks Kh Jd 8s] (two pair, Kings and Threes)
+DrLetstry collected 13100 from pot
+*** SUMMARY ***
+Total pot 13100 | Rake 0
+Board [3s Jc Ts 9d 3d]
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 5: DrLetstry (small blind) showed [Qh Qs 3h 5d] and won (13100) with three of a kind, Threes
+Seat 6: jeje_sat (big blind) showed [Ks Kh Jd 8s] and lost with two pair, Kings and Threes
+
+
+PokerStars Home Game Hand #235305952379: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 18:19:06 CET [2022/04/06 12:19:06 ET]
+Table '3392346771 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (6952 in chips, €0.07 bounty)
+Seat 2: ralbol (5207 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (1646 in chips, €0.05 bounty)
+Seat 5: DrLetstry (13100 in chips, €0.05 bounty)
+Seat 6: jeje_sat (5810 in chips, €0.05 bounty)
+jeje_sat: posts small blind 200
+Tuche37300: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qh Ad As 5c]
+ralbol: folds
+RIZCHOU: folds
+DrLetstry: folds
+jeje_sat: raises 800 to 1200
+Tuche37300: calls 800
+*** FLOP *** [9s 4c Qd]
+jeje_sat: bets 2400
+Tuche37300: folds
+Uncalled bet (2400) returned to jeje_sat
+jeje_sat collected 2400 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2400 | Rake 0
+Board [9s 4c Qd]
+Seat 1: Tuche37300 (big blind) folded on the Flop
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 5: DrLetstry (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) collected (2400)
+
+
+PokerStars Home Game Hand #235305961032: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 18:19:32 CET [2022/04/06 12:19:32 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (5752 in chips, €0.07 bounty)
+Seat 2: ralbol (5207 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (1646 in chips, €0.05 bounty)
+Seat 5: DrLetstry (13100 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7010 in chips, €0.05 bounty)
+Tuche37300: posts small blind 200
+ralbol: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ad Ts Ah 8c]
+RIZCHOU: folds
+DrLetstry: raises 400 to 800
+jeje_sat: raises 2200 to 3000
+Tuche37300: folds
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (2200) returned to jeje_sat
+jeje_sat collected 2200 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2200 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: ralbol (big blind) folded before Flop
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 5: DrLetstry folded before Flop
+Seat 6: jeje_sat (button) collected (2200)
+
+
+PokerStars Home Game Hand #235305969164: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 18:19:58 CET [2022/04/06 12:19:58 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (5552 in chips, €0.07 bounty)
+Seat 2: ralbol (4807 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (1646 in chips, €0.05 bounty)
+Seat 5: DrLetstry (12300 in chips, €0.05 bounty)
+Seat 6: jeje_sat (8410 in chips, €0.05 bounty)
+ralbol: posts small blind 200
+RIZCHOU: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h 7d Ks 5h]
+DrLetstry: folds
+jeje_sat: folds
+Tuche37300: raises 1000 to 1400
+ralbol: folds
+RIZCHOU: raises 246 to 1646 and is all-in
+Tuche37300: calls 246
+*** FLOP *** [4c 2h 3h]
+*** TURN *** [4c 2h 3h] [5c]
+*** RIVER *** [4c 2h 3h 5c] [9d]
+*** SHOW DOWN ***
+RIZCHOU: shows [Kd 8h Qs 8c] (a pair of Eights)
+Tuche37300: shows [Kc 6c Jd As] (high card Ace)
+RIZCHOU collected 3492 from pot
+*** SUMMARY ***
+Total pot 3492 | Rake 0
+Board [4c 2h 3h 5c 9d]
+Seat 1: Tuche37300 (button) showed [Kc 6c Jd As] and lost with high card Ace
+Seat 2: ralbol (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) showed [Kd 8h Qs 8c] and won (3492) with a pair of Eights
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305980590: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level IX (200/400) - 2022/04/06 18:20:34 CET [2022/04/06 12:20:34 ET]
+Table '3392346771 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (3906 in chips, €0.07 bounty)
+Seat 2: ralbol (4607 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3492 in chips, €0.05 bounty)
+Seat 5: DrLetstry (12300 in chips, €0.05 bounty)
+Seat 6: jeje_sat (8410 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 200
+DrLetstry: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h Qh 8d 8c]
+jeje_sat: folds
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+Uncalled bet (200) returned to DrLetstry
+DrLetstry collected 400 from pot
+*** SUMMARY ***
+Total pot 400 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol (button) folded before Flop (didn't bet)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 5: DrLetstry (big blind) collected (400)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235305987570: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level X (250/500) - 2022/04/06 18:20:56 CET [2022/04/06 12:20:56 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (3906 in chips, €0.07 bounty)
+Seat 2: ralbol (4607 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3292 in chips, €0.05 bounty)
+Seat 5: DrLetstry (12500 in chips, €0.05 bounty)
+Seat 6: jeje_sat (8410 in chips, €0.05 bounty)
+DrLetstry: posts small blind 250
+jeje_sat: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [2d 2h 6d 8c]
+Tuche37300: raises 1250 to 1750
+ralbol: folds
+RIZCHOU: folds
+DrLetstry: folds
+jeje_sat: folds
+Uncalled bet (1250) returned to Tuche37300
+Tuche37300 collected 1250 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 1250 | Rake 0
+Seat 1: Tuche37300 collected (1250)
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 5: DrLetstry (small blind) folded before Flop
+Seat 6: jeje_sat (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235305998379: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level X (250/500) - 2022/04/06 18:21:30 CET [2022/04/06 12:21:30 ET]
+Table '3392346771 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (4656 in chips, €0.07 bounty)
+Seat 2: ralbol (4607 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3292 in chips, €0.05 bounty)
+Seat 5: DrLetstry (12250 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7910 in chips, €0.05 bounty)
+jeje_sat: posts small blind 250
+Tuche37300: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [6s 7d 7c Tc]
+ralbol: folds
+RIZCHOU: raises 1250 to 1750
+DrLetstry: folds
+jeje_sat: folds
+Tuche37300: folds
+Uncalled bet (1250) returned to RIZCHOU
+RIZCHOU collected 1250 from pot
+RIZCHOU: doesn't show hand
+*** SUMMARY ***
+Total pot 1250 | Rake 0
+Seat 1: Tuche37300 (big blind) folded before Flop
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU collected (1250)
+Seat 5: DrLetstry (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306003588: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level X (250/500) - 2022/04/06 18:21:46 CET [2022/04/06 12:21:46 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (4156 in chips, €0.07 bounty)
+Seat 2: ralbol (4607 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4042 in chips, €0.05 bounty)
+Seat 5: DrLetstry (12250 in chips, €0.05 bounty)
+Seat 6: jeje_sat (7660 in chips, €0.05 bounty)
+Tuche37300: posts small blind 250
+ralbol: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ah Kd As 3h]
+RIZCHOU: folds
+DrLetstry: raises 500 to 1000
+jeje_sat: raises 2750 to 3750
+Tuche37300: folds
+ralbol: folds
+DrLetstry: raises 8250 to 12000
+jeje_sat: calls 3910 and is all-in
+Uncalled bet (4340) returned to DrLetstry
+*** FLOP *** [3s 6h 6d]
+*** TURN *** [3s 6h 6d] [Th]
+*** RIVER *** [3s 6h 6d Th] [2c]
+*** SHOW DOWN ***
+DrLetstry: shows [Ad Jh Qd Qc] (two pair, Queens and Sixes)
+jeje_sat: shows [Ah Kd As 3h] (two pair, Aces and Sixes)
+jeje_sat collected 16070 from pot
+*** SUMMARY ***
+Total pot 16070 | Rake 0
+Board [3s 6h 6d Th 2c]
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: ralbol (big blind) folded before Flop
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 5: DrLetstry showed [Ad Jh Qd Qc] and lost with two pair, Queens and Sixes
+Seat 6: jeje_sat (button) showed [Ah Kd As 3h] and won (16070) with two pair, Aces and Sixes
+
+
+PokerStars Home Game Hand #235306016175: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level X (250/500) - 2022/04/06 18:22:26 CET [2022/04/06 12:22:26 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (3906 in chips, €0.07 bounty)
+Seat 2: ralbol (4107 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4042 in chips, €0.05 bounty)
+Seat 5: DrLetstry (4590 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16070 in chips, €0.05 bounty)
+ralbol: posts small blind 250
+RIZCHOU: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [5d 2h Ah Tc]
+DrLetstry: folds
+jeje_sat: folds
+Tuche37300: calls 500
+ralbol: folds
+RIZCHOU: checks
+*** FLOP *** [9h 5c 3s]
+RIZCHOU: checks
+Tuche37300: bets 1250
+RIZCHOU: folds
+Uncalled bet (1250) returned to Tuche37300
+Tuche37300 collected 1250 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 1250 | Rake 0
+Board [9h 5c 3s]
+Seat 1: Tuche37300 (button) collected (1250)
+Seat 2: ralbol (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) folded on the Flop
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306027814: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level X (250/500) - 2022/04/06 18:23:03 CET [2022/04/06 12:23:03 ET]
+Table '3392346771 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (4656 in chips, €0.07 bounty)
+Seat 2: ralbol (3857 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3542 in chips, €0.05 bounty)
+Seat 5: DrLetstry (4590 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16070 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 250
+DrLetstry: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h Ah As 7s]
+jeje_sat has timed out
+jeje_sat: folds
+jeje_sat is sitting out
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+Uncalled bet (250) returned to DrLetstry
+DrLetstry collected 500 from pot
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol (button) folded before Flop (didn't bet)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 5: DrLetstry (big blind) collected (500)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306037594: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level X (250/500) - 2022/04/06 18:23:33 CET [2022/04/06 12:23:33 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (4656 in chips, €0.07 bounty)
+Seat 2: ralbol (3857 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3292 in chips, €0.05 bounty)
+Seat 5: DrLetstry (4840 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16070 in chips, €0.05 bounty) is sitting out
+DrLetstry: posts small blind 250
+jeje_sat: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [2c Th Ks 2h]
+jeje_sat has returned
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+DrLetstry: folds
+Uncalled bet (250) returned to jeje_sat
+jeje_sat collected 500 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 5: DrLetstry (small blind) folded before Flop
+Seat 6: jeje_sat (big blind) collected (500)
+
+
+PokerStars Home Game Hand #235306043209: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level X (250/500) - 2022/04/06 18:23:51 CET [2022/04/06 12:23:51 ET]
+Table '3392346771 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (4656 in chips, €0.07 bounty)
+Seat 2: ralbol (3857 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3292 in chips, €0.05 bounty)
+Seat 5: DrLetstry (4590 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16320 in chips, €0.05 bounty)
+jeje_sat: posts small blind 250
+Tuche37300: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [2c 3h Qc Td]
+ralbol: folds
+RIZCHOU: folds
+DrLetstry: folds
+jeje_sat: folds
+Uncalled bet (250) returned to Tuche37300
+Tuche37300 collected 500 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: Tuche37300 (big blind) collected (500)
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 5: DrLetstry (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306046355: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level X (250/500) - 2022/04/06 18:24:00 CET [2022/04/06 12:24:00 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (4906 in chips, €0.07 bounty)
+Seat 2: ralbol (3857 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3292 in chips, €0.05 bounty)
+Seat 5: DrLetstry (4590 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16070 in chips, €0.05 bounty)
+Tuche37300: posts small blind 250
+ralbol: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h Th 6d 9s]
+RIZCHOU: raises 1250 to 1750
+DrLetstry: folds
+jeje_sat: folds
+Tuche37300: folds
+ralbol: folds
+Uncalled bet (1250) returned to RIZCHOU
+RIZCHOU collected 1250 from pot
+RIZCHOU: doesn't show hand
+*** SUMMARY ***
+Total pot 1250 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: ralbol (big blind) folded before Flop
+Seat 3: RIZCHOU collected (1250)
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306049465: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level X (250/500) - 2022/04/06 18:24:10 CET [2022/04/06 12:24:10 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (4656 in chips, €0.07 bounty)
+Seat 2: ralbol (3357 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4042 in chips, €0.05 bounty)
+Seat 5: DrLetstry (4590 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16070 in chips, €0.05 bounty)
+ralbol: posts small blind 250
+RIZCHOU: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [3d 5c 7d Jc]
+DrLetstry: folds
+jeje_sat: folds
+Tuche37300: calls 500
+ralbol: folds
+RIZCHOU: checks
+*** FLOP *** [3c Kd Qc]
+RIZCHOU: checks
+Tuche37300: bets 625
+RIZCHOU: calls 625
+*** TURN *** [3c Kd Qc] [3h]
+RIZCHOU: checks
+Tuche37300: bets 1250
+RIZCHOU: folds
+Uncalled bet (1250) returned to Tuche37300
+Tuche37300 collected 2500 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 2500 | Rake 0
+Board [3c Kd Qc 3h]
+Seat 1: Tuche37300 (button) collected (2500)
+Seat 2: ralbol (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) folded on the Turn
+Seat 5: DrLetstry folded before Flop (didn't bet)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306066921: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level X (250/500) - 2022/04/06 18:25:05 CET [2022/04/06 12:25:05 ET]
+Table '3392346771 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (6031 in chips, €0.07 bounty)
+Seat 2: ralbol (3107 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (2917 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16070 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 250
+jeje_sat: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [8h Jd Js 6c]
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+Uncalled bet (250) returned to jeje_sat
+jeje_sat collected 500 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol (button) folded before Flop (didn't bet)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 6: jeje_sat (big blind) collected (500)
+
+
+PokerStars Home Game Hand #235306070139: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level X (250/500) - 2022/04/06 18:25:15 CET [2022/04/06 12:25:15 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (6031 in chips, €0.07 bounty)
+Seat 2: ralbol (3107 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (2667 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16320 in chips, €0.05 bounty)
+jeje_sat: posts small blind 250
+Tuche37300: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jh Kd 6d 4h]
+ralbol: folds
+RIZCHOU: folds
+jeje_sat: raises 1000 to 1500
+Tuche37300: folds
+Uncalled bet (1000) returned to jeje_sat
+jeje_sat collected 1000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Seat 1: Tuche37300 (big blind) folded before Flop
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) collected (1000)
+
+
+PokerStars Home Game Hand #235306078336: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level X (250/500) - 2022/04/06 18:25:40 CET [2022/04/06 12:25:40 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (5531 in chips, €0.07 bounty)
+Seat 2: ralbol (3107 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (2667 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16820 in chips, €0.05 bounty)
+Tuche37300: posts small blind 250
+ralbol: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [2d 8s Kh 2s]
+RIZCHOU: folds
+jeje_sat: folds
+Tuche37300: folds
+Uncalled bet (250) returned to ralbol
+ralbol collected 500 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: ralbol (big blind) collected (500)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306084595: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:25:58 CET [2022/04/06 12:25:58 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (5281 in chips, €0.07 bounty)
+Seat 2: ralbol (3357 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (2667 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16820 in chips, €0.05 bounty)
+ralbol: posts small blind 300
+RIZCHOU: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [7s Jd Ks 5s]
+jeje_sat: folds
+Tuche37300: raises 1500 to 2100
+ralbol: folds
+RIZCHOU: folds
+Uncalled bet (1500) returned to Tuche37300
+Tuche37300 collected 1500 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 1500 | Rake 0
+Seat 1: Tuche37300 (button) collected (1500)
+Seat 2: ralbol (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) folded before Flop
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306089767: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:26:14 CET [2022/04/06 12:26:14 ET]
+Table '3392346771 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (6181 in chips, €0.07 bounty)
+Seat 2: ralbol (3057 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (2067 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16820 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 300
+jeje_sat: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c 8d 5s As]
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+Uncalled bet (300) returned to jeje_sat
+jeje_sat collected 600 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 600 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol (button) folded before Flop (didn't bet)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 6: jeje_sat (big blind) collected (600)
+
+
+PokerStars Home Game Hand #235306094234: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:26:27 CET [2022/04/06 12:26:27 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (6181 in chips, €0.07 bounty)
+Seat 2: ralbol (3057 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (1767 in chips, €0.05 bounty)
+Seat 6: jeje_sat (17120 in chips, €0.05 bounty)
+jeje_sat: posts small blind 300
+Tuche37300: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kh 5h 9d 9h]
+ralbol: folds
+RIZCHOU: folds
+jeje_sat: folds
+Uncalled bet (300) returned to Tuche37300
+Tuche37300 collected 600 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 600 | Rake 0
+Seat 1: Tuche37300 (big blind) collected (600)
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306098568: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:26:40 CET [2022/04/06 12:26:40 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (6481 in chips, €0.07 bounty)
+Seat 2: ralbol (3057 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (1767 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16820 in chips, €0.05 bounty)
+Tuche37300: posts small blind 300
+ralbol: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h 5d 3h Tc]
+RIZCHOU: folds
+jeje_sat: folds
+Tuche37300: raises 600 to 1200
+ralbol: raises 1857 to 3057 and is all-in
+Tuche37300: folds
+Uncalled bet (1857) returned to ralbol
+ralbol collected 2400 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 2400 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: ralbol (big blind) collected (2400)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306104143: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:26:57 CET [2022/04/06 12:26:57 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (5281 in chips, €0.07 bounty)
+Seat 2: ralbol (4257 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (1767 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16820 in chips, €0.05 bounty)
+ralbol: posts small blind 300
+RIZCHOU: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c Tc 3h 8h]
+jeje_sat: folds
+Tuche37300: calls 600
+ralbol: folds
+RIZCHOU: checks
+*** FLOP *** [2s Qh 7d]
+RIZCHOU: checks
+Tuche37300: bets 1500
+RIZCHOU: folds
+Uncalled bet (1500) returned to Tuche37300
+Tuche37300 collected 1500 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 1500 | Rake 0
+Board [2s Qh 7d]
+Seat 1: Tuche37300 (button) collected (1500)
+Seat 2: ralbol (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) folded on the Flop
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306114902: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:27:29 CET [2022/04/06 12:27:29 ET]
+Table '3392346771 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (6181 in chips, €0.07 bounty)
+Seat 2: ralbol (3957 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (1167 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16820 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 300
+jeje_sat: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d 2s Ah Ks]
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+Uncalled bet (300) returned to jeje_sat
+jeje_sat collected 600 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 600 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol (button) folded before Flop (didn't bet)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 6: jeje_sat (big blind) collected (600)
+
+
+PokerStars Home Game Hand #235306118236: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:27:39 CET [2022/04/06 12:27:39 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (6181 in chips, €0.07 bounty)
+Seat 2: ralbol (3957 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (867 in chips, €0.05 bounty)
+Seat 6: jeje_sat (17120 in chips, €0.05 bounty)
+jeje_sat: posts small blind 300
+Tuche37300: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s 2d Qc 6s]
+ralbol: folds
+RIZCHOU: raises 267 to 867 and is all-in
+jeje_sat: folds
+Tuche37300: calls 267
+*** FLOP *** [5c 9h 9d]
+*** TURN *** [5c 9h 9d] [6h]
+*** RIVER *** [5c 9h 9d 6h] [2h]
+*** SHOW DOWN ***
+Tuche37300: shows [Th 7c Kd 6c] (two pair, Nines and Sixes)
+RIZCHOU: shows [Qd Js Qs Jc] (two pair, Queens and Nines)
+RIZCHOU collected 2034 from pot
+*** SUMMARY ***
+Total pot 2034 | Rake 0
+Board [5c 9h 9d 6h 2h]
+Seat 1: Tuche37300 (big blind) showed [Th 7c Kd 6c] and lost with two pair, Nines and Sixes
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) showed [Qd Js Qs Jc] and won (2034) with two pair, Queens and Nines
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306126235: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:28:03 CET [2022/04/06 12:28:03 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (5314 in chips, €0.07 bounty)
+Seat 2: ralbol (3957 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (2034 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16820 in chips, €0.05 bounty)
+Tuche37300: posts small blind 300
+ralbol: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ac Kc 3s 8c]
+RIZCHOU: folds
+jeje_sat: raises 1500 to 2100
+Tuche37300: folds
+ralbol: folds
+Uncalled bet (1500) returned to jeje_sat
+jeje_sat collected 1500 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1500 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: ralbol (big blind) folded before Flop
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) collected (1500)
+
+
+PokerStars Home Game Hand #235306130789: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:28:16 CET [2022/04/06 12:28:16 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (5014 in chips, €0.07 bounty)
+Seat 2: ralbol (3357 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (2034 in chips, €0.05 bounty)
+Seat 6: jeje_sat (17720 in chips, €0.05 bounty)
+ralbol: posts small blind 300
+RIZCHOU: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [7c Qh 5h Td]
+jeje_sat: folds
+Tuche37300: folds
+ralbol: folds
+Uncalled bet (300) returned to RIZCHOU
+RIZCHOU collected 600 from pot
+RIZCHOU: doesn't show hand
+*** SUMMARY ***
+Total pot 600 | Rake 0
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: ralbol (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) collected (600)
+Seat 6: jeje_sat folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306136442: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:28:33 CET [2022/04/06 12:28:33 ET]
+Table '3392346771 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (5014 in chips, €0.07 bounty)
+Seat 2: ralbol (3057 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (2334 in chips, €0.05 bounty)
+Seat 6: jeje_sat (17720 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 300
+jeje_sat: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kh 8s 8h As]
+Tuche37300: raises 600 to 1200
+ralbol: raises 1857 to 3057 and is all-in
+RIZCHOU: folds
+jeje_sat: raises 7614 to 10671
+Tuche37300: folds
+Uncalled bet (7614) returned to jeje_sat
+*** FLOP *** [7h Js 6d]
+*** TURN *** [7h Js 6d] [Ad]
+*** RIVER *** [7h Js 6d Ad] [3d]
+*** SHOW DOWN ***
+jeje_sat: shows [Kh 8s 8h As] (a pair of Aces)
+ralbol: shows [Jd Kc Ac 2h] (two pair, Aces and Jacks)
+ralbol collected 7614 from pot
+*** SUMMARY ***
+Total pot 7614 | Rake 0
+Board [7h Js 6d Ad 3d]
+Seat 1: Tuche37300 folded before Flop
+Seat 2: ralbol (button) showed [Jd Kc Ac 2h] and won (7614) with two pair, Aces and Jacks
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 6: jeje_sat (big blind) showed [Kh 8s 8h As] and lost with a pair of Aces
+
+
+PokerStars Home Game Hand #235306148501: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:29:09 CET [2022/04/06 12:29:09 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (3814 in chips, €0.07 bounty)
+Seat 2: ralbol (7614 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (2034 in chips, €0.05 bounty)
+Seat 6: jeje_sat (14663 in chips, €0.05 bounty)
+jeje_sat: posts small blind 300
+Tuche37300: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [7d Tc 4d 5h]
+ralbol: folds
+RIZCHOU: folds
+jeje_sat: raises 1200 to 1800
+Tuche37300: folds
+Uncalled bet (1200) returned to jeje_sat
+jeje_sat collected 1200 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1200 | Rake 0
+Seat 1: Tuche37300 (big blind) folded before Flop
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) collected (1200)
+
+
+PokerStars Home Game Hand #235306152694: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:29:22 CET [2022/04/06 12:29:22 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (3214 in chips, €0.07 bounty)
+Seat 2: ralbol (7614 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (2034 in chips, €0.05 bounty)
+Seat 6: jeje_sat (15263 in chips, €0.05 bounty)
+Tuche37300: posts small blind 300
+ralbol: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts 6h Ks Jh]
+RIZCHOU: folds
+jeje_sat: raises 1500 to 2100
+Tuche37300: folds
+ralbol: folds
+Uncalled bet (1500) returned to jeje_sat
+jeje_sat collected 1500 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1500 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: ralbol (big blind) folded before Flop
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 6: jeje_sat (button) collected (1500)
+
+
+PokerStars Home Game Hand #235306156657: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:29:33 CET [2022/04/06 12:29:33 ET]
+Table '3392346771 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (2914 in chips, €0.07 bounty)
+Seat 2: ralbol (7014 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (2034 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16163 in chips, €0.05 bounty)
+ralbol: posts small blind 300
+RIZCHOU: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th Ah 5d 2h]
+jeje_sat: raises 1500 to 2100
+Tuche37300: folds
+ralbol: folds
+RIZCHOU: folds
+Uncalled bet (1500) returned to jeje_sat
+jeje_sat collected 1500 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1500 | Rake 0
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: ralbol (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) folded before Flop
+Seat 6: jeje_sat collected (1500)
+
+
+PokerStars Home Game Hand #235306164123: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:29:55 CET [2022/04/06 12:29:55 ET]
+Table '3392346771 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (2914 in chips, €0.07 bounty)
+Seat 2: ralbol (6714 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (1434 in chips, €0.05 bounty)
+Seat 6: jeje_sat (17063 in chips, €0.05 bounty)
+RIZCHOU: posts small blind 300
+jeje_sat: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c 5d Jh As]
+Tuche37300: folds
+ralbol: raises 1500 to 2100
+RIZCHOU: folds
+jeje_sat: folds
+Uncalled bet (1500) returned to ralbol
+ralbol collected 1500 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 1500 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: ralbol (button) collected (1500)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 6: jeje_sat (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306170780: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:30:14 CET [2022/04/06 12:30:14 ET]
+Table '3392346771 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (2914 in chips, €0.07 bounty)
+Seat 2: ralbol (7614 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (1134 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16463 in chips, €0.05 bounty)
+jeje_sat: posts small blind 300
+Tuche37300: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [8c 6h 4s 2h]
+ralbol: folds
+RIZCHOU: folds
+jeje_sat: folds
+Uncalled bet (300) returned to Tuche37300
+Tuche37300 collected 600 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 600 | Rake 0
+Seat 1: Tuche37300 (big blind) collected (600)
+Seat 2: ralbol folded before Flop (didn't bet)
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 6: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306174884: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XI (300/600) - 2022/04/06 18:30:26 CET [2022/04/06 12:30:26 ET]
+Table '3392346771 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (3214 in chips, €0.07 bounty)
+Seat 2: ralbol (7614 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (1134 in chips, €0.05 bounty)
+Seat 6: jeje_sat (16163 in chips, €0.05 bounty)
+Tuche37300: posts small blind 300
+ralbol: posts big blind 600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qc 8s 2h 6d]
+RIZCHOU: raises 534 to 1134 and is all-in
+jeje_sat: folds
+Tuche37300: raises 2080 to 3214 and is all-in
+ralbol: calls 2614
+*** FLOP *** [9h 2s 5d]
+*** TURN *** [9h 2s 5d] [5c]
+*** RIVER *** [9h 2s 5d 5c] [3h]
+*** SHOW DOWN ***
+Tuche37300: shows [Ah Qs Jh 7c] (a pair of Fives)
+ralbol: shows [Qh Kc Kd Ad] (two pair, Kings and Fives)
+ralbol collected 4160 from side pot
+RIZCHOU: shows [As 2c 3s 2d] (a full house, Deuces full of Fives)
+RIZCHOU collected 3402 from main pot
+ralbol wins €0.04 for eliminating Tuche37300 and their own bounty increases by €0.03 to €0.08
+Tuche37300 finished the tournament in 7th place
+*** SUMMARY ***
+Total pot 7562 Main pot 3402. Side pot 4160. | Rake 0
+Board [9h 2s 5d 5c 3h]
+Seat 1: Tuche37300 (small blind) showed [Ah Qs Jh 7c] and lost with a pair of Fives
+Seat 2: ralbol (big blind) showed [Qh Kc Kd Ad] and won (4160) with two pair, Kings and Fives
+Seat 3: RIZCHOU showed [As 2c 3s 2d] and won (3402) with a full house, Deuces full of Fives
+Seat 6: jeje_sat (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306184605: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XII (350/700) - 2022/04/06 18:30:55 CET [2022/04/06 12:30:55 ET]
+Table '3392346771 4' 6-max Seat #5 is the button
+Seat 1: DrLetstry (23931 in chips, €0.10 bounty)
+Seat 2: jeje_sat (16163 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (3402 in chips, €0.05 bounty)
+Seat 4: Ainemm (6180 in chips, €0.05 bounty)
+Seat 5: LDM54 (6764 in chips, €0.07 bounty)
+Seat 6: ralbol (8560 in chips) out of hand (moved from another table into small blind)
+ralbol will be allowed to play after the button
+DrLetstry: posts small blind 350
+jeje_sat: posts big blind 700
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c 2s 9d Js]
+RIZCHOU: raises 1750 to 2450
+Ainemm: folds
+LDM54: folds
+DrLetstry: folds
+jeje_sat: folds
+Uncalled bet (1750) returned to RIZCHOU
+RIZCHOU collected 1750 from pot
+RIZCHOU: doesn't show hand
+*** SUMMARY ***
+Total pot 1750 | Rake 0
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 3: RIZCHOU collected (1750)
+Seat 4: Ainemm folded before Flop (didn't bet)
+Seat 5: LDM54 (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306191139: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XII (350/700) - 2022/04/06 18:31:14 CET [2022/04/06 12:31:14 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (23581 in chips, €0.10 bounty)
+Seat 2: jeje_sat (15463 in chips, €0.05 bounty)
+Seat 3: RIZCHOU (4452 in chips, €0.05 bounty)
+Seat 4: Ainemm (6180 in chips, €0.05 bounty)
+Seat 5: LDM54 (6764 in chips, €0.07 bounty)
+Seat 6: ralbol (8560 in chips, €0.08 bounty)
+jeje_sat: posts small blind 350
+RIZCHOU: posts big blind 700
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c 2h Ad 7d]
+Ainemm: folds
+LDM54: folds
+ralbol: folds
+DrLetstry: folds
+jeje_sat: raises 1400 to 2100
+RIZCHOU: raises 2352 to 4452 and is all-in
+jeje_sat: calls 2352
+*** FLOP *** [9d As Th]
+*** TURN *** [9d As Th] [2c]
+*** RIVER *** [9d As Th 2c] [6h]
+*** SHOW DOWN ***
+jeje_sat: shows [6c 2h Ad 7d] (two pair, Aces and Sixes)
+RIZCHOU: shows [4d 8c 8s Jc] (a pair of Eights)
+jeje_sat collected 8904 from pot
+jeje_sat wins €0.03 for eliminating RIZCHOU and their own bounty increases by €0.02 to €0.07
+RIZCHOU finished the tournament in 6th place
+*** SUMMARY ***
+Total pot 8904 | Rake 0
+Board [9d As Th 2c 6h]
+Seat 1: DrLetstry (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) showed [6c 2h Ad 7d] and won (8904) with two pair, Aces and Sixes
+Seat 3: RIZCHOU (big blind) showed [4d 8c 8s Jc] and lost with a pair of Eights
+Seat 4: Ainemm folded before Flop (didn't bet)
+Seat 5: LDM54 folded before Flop (didn't bet)
+Seat 6: ralbol folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306201897: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XII (350/700) - 2022/04/06 18:31:45 CET [2022/04/06 12:31:45 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (23581 in chips, €0.10 bounty)
+Seat 2: jeje_sat (19915 in chips, €0.07 bounty)
+Seat 4: Ainemm (6180 in chips, €0.05 bounty)
+Seat 5: LDM54 (6764 in chips, €0.07 bounty)
+Seat 6: ralbol (8560 in chips, €0.08 bounty)
+Ainemm: posts small blind 350
+LDM54: posts big blind 700
+*** HOLE CARDS ***
+Dealt to jeje_sat [8c 7d 8d Qd]
+ralbol: folds
+DrLetstry: folds
+jeje_sat: folds
+Ainemm: raises 700 to 1400
+LDM54: folds
+Uncalled bet (700) returned to Ainemm
+Ainemm collected 1400 from pot
+Ainemm: doesn't show hand
+*** SUMMARY ***
+Total pot 1400 | Rake 0
+Seat 1: DrLetstry folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 4: Ainemm (small blind) collected (1400)
+Seat 5: LDM54 (big blind) folded before Flop
+Seat 6: ralbol folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306207873: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XII (350/700) - 2022/04/06 18:32:02 CET [2022/04/06 12:32:02 ET]
+Table '3392346771 4' 6-max Seat #4 is the button
+Seat 1: DrLetstry (23581 in chips, €0.10 bounty)
+Seat 2: jeje_sat (19915 in chips, €0.07 bounty)
+Seat 4: Ainemm (6880 in chips, €0.05 bounty)
+Seat 5: LDM54 (6064 in chips, €0.07 bounty)
+Seat 6: ralbol (8560 in chips, €0.08 bounty)
+LDM54: posts small blind 350
+ralbol: posts big blind 700
+*** HOLE CARDS ***
+Dealt to jeje_sat [6s 6c Ac 9s]
+DrLetstry: raises 700 to 1400
+jeje_sat: calls 1400
+Ainemm: folds
+LDM54: folds
+ralbol: folds
+*** FLOP *** [9c Ts Jc]
+DrLetstry: checks
+jeje_sat: checks
+*** TURN *** [9c Ts Jc] [9d]
+DrLetstry: checks
+jeje_sat: bets 1925
+DrLetstry: calls 1925
+*** RIVER *** [9c Ts Jc 9d] [Ah]
+DrLetstry: checks
+jeje_sat: bets 4900
+DrLetstry: folds
+Uncalled bet (4900) returned to jeje_sat
+jeje_sat collected 7700 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 7700 | Rake 0
+Board [9c Ts Jc 9d Ah]
+Seat 1: DrLetstry folded on the River
+Seat 2: jeje_sat collected (7700)
+Seat 4: Ainemm (button) folded before Flop (didn't bet)
+Seat 5: LDM54 (small blind) folded before Flop
+Seat 6: ralbol (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306240254: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XII (350/700) - 2022/04/06 18:33:36 CET [2022/04/06 12:33:36 ET]
+Table '3392346771 4' 6-max Seat #5 is the button
+Seat 1: DrLetstry (20256 in chips, €0.10 bounty)
+Seat 2: jeje_sat (24290 in chips, €0.07 bounty)
+Seat 4: Ainemm (6880 in chips, €0.05 bounty)
+Seat 5: LDM54 (5714 in chips, €0.07 bounty)
+Seat 6: ralbol (7860 in chips, €0.08 bounty)
+ralbol: posts small blind 350
+DrLetstry: posts big blind 700
+*** HOLE CARDS ***
+Dealt to jeje_sat [7d 5s Qs 3h]
+jeje_sat: folds
+Ainemm: folds
+LDM54: folds
+ralbol: folds
+Uncalled bet (350) returned to DrLetstry
+DrLetstry collected 700 from pot
+*** SUMMARY ***
+Total pot 700 | Rake 0
+Seat 1: DrLetstry (big blind) collected (700)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 4: Ainemm folded before Flop (didn't bet)
+Seat 5: LDM54 (button) folded before Flop (didn't bet)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306246084: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XII (350/700) - 2022/04/06 18:33:53 CET [2022/04/06 12:33:53 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (20606 in chips, €0.10 bounty)
+Seat 2: jeje_sat (24290 in chips, €0.07 bounty)
+Seat 4: Ainemm (6880 in chips, €0.05 bounty)
+Seat 5: LDM54 (5714 in chips, €0.07 bounty)
+Seat 6: ralbol (7510 in chips, €0.08 bounty)
+DrLetstry: posts small blind 350
+jeje_sat: posts big blind 700
+*** HOLE CARDS ***
+Dealt to jeje_sat [4h 7s 6h 9h]
+Ainemm: raises 700 to 1400
+LDM54: folds
+ralbol: folds
+DrLetstry: folds
+jeje_sat: calls 700
+*** FLOP *** [Jd 7h As]
+jeje_sat: checks
+Ainemm: bets 1040
+jeje_sat: folds
+Uncalled bet (1040) returned to Ainemm
+Ainemm collected 3150 from pot
+Ainemm: doesn't show hand
+*** SUMMARY ***
+Total pot 3150 | Rake 0
+Board [Jd 7h As]
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) folded on the Flop
+Seat 4: Ainemm collected (3150)
+Seat 5: LDM54 folded before Flop (didn't bet)
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306257480: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XII (350/700) - 2022/04/06 18:34:26 CET [2022/04/06 12:34:26 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (20256 in chips, €0.10 bounty)
+Seat 2: jeje_sat (22890 in chips, €0.07 bounty)
+Seat 4: Ainemm (8630 in chips, €0.05 bounty)
+Seat 5: LDM54 (5714 in chips, €0.07 bounty)
+Seat 6: ralbol (7510 in chips, €0.08 bounty)
+jeje_sat: posts small blind 350
+Ainemm: posts big blind 700
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s 6c 5s 8d]
+LDM54: folds
+ralbol: folds
+DrLetstry: folds
+jeje_sat: raises 1400 to 2100
+Ainemm: folds
+Uncalled bet (1400) returned to jeje_sat
+jeje_sat collected 1400 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1400 | Rake 0
+Seat 1: DrLetstry (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) collected (1400)
+Seat 4: Ainemm (big blind) folded before Flop
+Seat 5: LDM54 folded before Flop (didn't bet)
+Seat 6: ralbol folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306264389: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XII (350/700) - 2022/04/06 18:34:46 CET [2022/04/06 12:34:46 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (20256 in chips, €0.10 bounty)
+Seat 2: jeje_sat (23590 in chips, €0.07 bounty)
+Seat 4: Ainemm (7930 in chips, €0.05 bounty)
+Seat 5: LDM54 (5714 in chips, €0.07 bounty)
+Seat 6: ralbol (7510 in chips, €0.08 bounty)
+Ainemm: posts small blind 350
+LDM54: posts big blind 700
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qs 4c Ts Td]
+ralbol: folds
+DrLetstry: folds
+jeje_sat: raises 1750 to 2450
+Ainemm: folds
+LDM54: folds
+Uncalled bet (1750) returned to jeje_sat
+jeje_sat collected 1750 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1750 | Rake 0
+Seat 1: DrLetstry folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) collected (1750)
+Seat 4: Ainemm (small blind) folded before Flop
+Seat 5: LDM54 (big blind) folded before Flop
+Seat 6: ralbol folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306268622: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XII (350/700) - 2022/04/06 18:34:58 CET [2022/04/06 12:34:58 ET]
+Table '3392346771 4' 6-max Seat #4 is the button
+Seat 1: DrLetstry (20256 in chips, €0.10 bounty)
+Seat 2: jeje_sat (24640 in chips, €0.07 bounty)
+Seat 4: Ainemm (7580 in chips, €0.05 bounty)
+Seat 5: LDM54 (5014 in chips, €0.07 bounty)
+Seat 6: ralbol (7510 in chips, €0.08 bounty)
+LDM54: posts small blind 350
+ralbol: posts big blind 700
+*** HOLE CARDS ***
+Dealt to jeje_sat [5c Qs 9d Th]
+DrLetstry: folds
+jeje_sat: folds
+Ainemm: folds
+LDM54: folds
+Uncalled bet (350) returned to ralbol
+ralbol collected 700 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 700 | Rake 0
+Seat 1: DrLetstry folded before Flop (didn't bet)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 4: Ainemm (button) folded before Flop (didn't bet)
+Seat 5: LDM54 (small blind) folded before Flop
+Seat 6: ralbol (big blind) collected (700)
+
+
+PokerStars Home Game Hand #235306272263: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XII (350/700) - 2022/04/06 18:35:09 CET [2022/04/06 12:35:09 ET]
+Table '3392346771 4' 6-max Seat #5 is the button
+Seat 1: DrLetstry (20256 in chips, €0.10 bounty)
+Seat 2: jeje_sat (24640 in chips, €0.07 bounty)
+Seat 4: Ainemm (7580 in chips, €0.05 bounty)
+Seat 5: LDM54 (4664 in chips, €0.07 bounty)
+Seat 6: ralbol (7860 in chips, €0.08 bounty)
+ralbol: posts small blind 350
+DrLetstry: posts big blind 700
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 5d Jh Ad]
+jeje_sat: folds
+Ainemm: folds
+LDM54: folds
+ralbol: folds
+Uncalled bet (350) returned to DrLetstry
+DrLetstry collected 700 from pot
+*** SUMMARY ***
+Total pot 700 | Rake 0
+Seat 1: DrLetstry (big blind) collected (700)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 4: Ainemm folded before Flop (didn't bet)
+Seat 5: LDM54 (button) folded before Flop (didn't bet)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306275360: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XII (350/700) - 2022/04/06 18:35:18 CET [2022/04/06 12:35:18 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (20606 in chips, €0.10 bounty)
+Seat 2: jeje_sat (24640 in chips, €0.07 bounty)
+Seat 4: Ainemm (7580 in chips, €0.05 bounty)
+Seat 5: LDM54 (4664 in chips, €0.07 bounty)
+Seat 6: ralbol (7510 in chips, €0.08 bounty)
+DrLetstry: posts small blind 350
+jeje_sat: posts big blind 700
+*** HOLE CARDS ***
+Dealt to jeje_sat [6s 7s 7c 4c]
+Ainemm: folds
+LDM54: folds
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (350) returned to jeje_sat
+jeje_sat collected 700 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 700 | Rake 0
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (700)
+Seat 4: Ainemm folded before Flop (didn't bet)
+Seat 5: LDM54 folded before Flop (didn't bet)
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306278847: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XII (350/700) - 2022/04/06 18:35:28 CET [2022/04/06 12:35:28 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (20256 in chips, €0.10 bounty)
+Seat 2: jeje_sat (24990 in chips, €0.07 bounty)
+Seat 4: Ainemm (7580 in chips, €0.05 bounty)
+Seat 5: LDM54 (4664 in chips, €0.07 bounty)
+Seat 6: ralbol (7510 in chips, €0.08 bounty)
+jeje_sat: posts small blind 350
+Ainemm: posts big blind 700
+*** HOLE CARDS ***
+Dealt to jeje_sat [5c 3c 2c Ah]
+LDM54: folds
+ralbol: folds
+DrLetstry: folds
+jeje_sat: raises 1400 to 2100
+Ainemm: folds
+Uncalled bet (1400) returned to jeje_sat
+jeje_sat collected 1400 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1400 | Rake 0
+Seat 1: DrLetstry (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) collected (1400)
+Seat 4: Ainemm (big blind) folded before Flop
+Seat 5: LDM54 folded before Flop (didn't bet)
+Seat 6: ralbol folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306287493: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIII (400/800) - 2022/04/06 18:35:53 CET [2022/04/06 12:35:53 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (20256 in chips, €0.10 bounty)
+Seat 2: jeje_sat (25690 in chips, €0.07 bounty)
+Seat 4: Ainemm (6880 in chips, €0.05 bounty)
+Seat 5: LDM54 (4664 in chips, €0.07 bounty)
+Seat 6: ralbol (7510 in chips, €0.08 bounty)
+Ainemm: posts small blind 400
+LDM54: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [Td Ks Js Jd]
+ralbol: folds
+DrLetstry: folds
+jeje_sat: raises 2000 to 2800
+Ainemm: folds
+LDM54: folds
+Uncalled bet (2000) returned to jeje_sat
+jeje_sat collected 2000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2000 | Rake 0
+Seat 1: DrLetstry folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) collected (2000)
+Seat 4: Ainemm (small blind) folded before Flop
+Seat 5: LDM54 (big blind) folded before Flop
+Seat 6: ralbol folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306295029: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIII (400/800) - 2022/04/06 18:36:15 CET [2022/04/06 12:36:15 ET]
+Table '3392346771 4' 6-max Seat #4 is the button
+Seat 1: DrLetstry (20256 in chips, €0.10 bounty)
+Seat 2: jeje_sat (26890 in chips, €0.07 bounty)
+Seat 4: Ainemm (6480 in chips, €0.05 bounty)
+Seat 5: LDM54 (3864 in chips, €0.07 bounty)
+Seat 6: ralbol (7510 in chips, €0.08 bounty)
+LDM54: posts small blind 400
+ralbol: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h 5d 2d As]
+DrLetstry: folds
+jeje_sat: folds
+Ainemm: folds
+LDM54: folds
+Uncalled bet (400) returned to ralbol
+ralbol collected 800 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 800 | Rake 0
+Seat 1: DrLetstry folded before Flop (didn't bet)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 4: Ainemm (button) folded before Flop (didn't bet)
+Seat 5: LDM54 (small blind) folded before Flop
+Seat 6: ralbol (big blind) collected (800)
+
+
+PokerStars Home Game Hand #235306299681: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIII (400/800) - 2022/04/06 18:36:28 CET [2022/04/06 12:36:28 ET]
+Table '3392346771 4' 6-max Seat #5 is the button
+Seat 1: DrLetstry (20256 in chips, €0.10 bounty)
+Seat 2: jeje_sat (26890 in chips, €0.07 bounty)
+Seat 4: Ainemm (6480 in chips, €0.05 bounty)
+Seat 5: LDM54 (3464 in chips, €0.07 bounty)
+Seat 6: ralbol (7910 in chips, €0.08 bounty)
+ralbol: posts small blind 400
+DrLetstry: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [8d 4h 3h Qs]
+jeje_sat: folds
+Ainemm: folds
+LDM54: folds
+ralbol: folds
+Uncalled bet (400) returned to DrLetstry
+DrLetstry collected 800 from pot
+*** SUMMARY ***
+Total pot 800 | Rake 0
+Seat 1: DrLetstry (big blind) collected (800)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 4: Ainemm folded before Flop (didn't bet)
+Seat 5: LDM54 (button) folded before Flop (didn't bet)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306304134: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIII (400/800) - 2022/04/06 18:36:41 CET [2022/04/06 12:36:41 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (20656 in chips, €0.10 bounty)
+Seat 2: jeje_sat (26890 in chips, €0.07 bounty)
+Seat 4: Ainemm (6480 in chips, €0.05 bounty)
+Seat 5: LDM54 (3464 in chips, €0.07 bounty)
+Seat 6: ralbol (7510 in chips, €0.08 bounty)
+DrLetstry: posts small blind 400
+jeje_sat: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [7s 7c Ah Th]
+Ainemm: folds
+LDM54: folds
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (400) returned to jeje_sat
+jeje_sat collected 800 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 800 | Rake 0
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (800)
+Seat 4: Ainemm folded before Flop (didn't bet)
+Seat 5: LDM54 folded before Flop (didn't bet)
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306311205: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIII (400/800) - 2022/04/06 18:37:01 CET [2022/04/06 12:37:01 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (20256 in chips, €0.10 bounty)
+Seat 2: jeje_sat (27290 in chips, €0.07 bounty)
+Seat 4: Ainemm (6480 in chips, €0.05 bounty)
+Seat 5: LDM54 (3464 in chips, €0.07 bounty)
+Seat 6: ralbol (7510 in chips, €0.08 bounty)
+jeje_sat: posts small blind 400
+Ainemm: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [As 5h Ts 8s]
+LDM54: raises 2000 to 2800
+ralbol: folds
+DrLetstry: folds
+jeje_sat: calls 2400
+Ainemm: folds
+*** FLOP *** [Ad 3c Jd]
+jeje_sat: bets 800
+LDM54: calls 664 and is all-in
+Uncalled bet (136) returned to jeje_sat
+*** TURN *** [Ad 3c Jd] [Ah]
+*** RIVER *** [Ad 3c Jd Ah] [6h]
+*** SHOW DOWN ***
+jeje_sat: shows [As 5h Ts 8s] (three of a kind, Aces)
+LDM54: shows [Js Kc Kd 9s] (two pair, Aces and Kings)
+jeje_sat collected 7728 from pot
+jeje_sat wins €0.04 for eliminating LDM54 and their own bounty increases by €0.03 to €0.10
+LDM54 finished the tournament in 5th place
+*** SUMMARY ***
+Total pot 7728 | Rake 0
+Board [Ad 3c Jd Ah 6h]
+Seat 1: DrLetstry (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) showed [As 5h Ts 8s] and won (7728) with three of a kind, Aces
+Seat 4: Ainemm (big blind) folded before Flop
+Seat 5: LDM54 showed [Js Kc Kd 9s] and lost with two pair, Aces and Kings
+Seat 6: ralbol folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306323904: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIII (400/800) - 2022/04/06 18:37:38 CET [2022/04/06 12:37:38 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (20256 in chips, €0.10 bounty)
+Seat 2: jeje_sat (31554 in chips, €0.10 bounty)
+Seat 4: Ainemm (5680 in chips, €0.05 bounty)
+Seat 6: ralbol (7510 in chips, €0.08 bounty)
+Ainemm: posts small blind 400
+ralbol: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s 5h 2s 4d]
+DrLetstry: folds
+jeje_sat: folds
+Ainemm: folds
+Uncalled bet (400) returned to ralbol
+ralbol collected 800 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 800 | Rake 0
+Seat 1: DrLetstry folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 4: Ainemm (small blind) folded before Flop
+Seat 6: ralbol (big blind) collected (800)
+
+
+PokerStars Home Game Hand #235306328635: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIII (400/800) - 2022/04/06 18:37:51 CET [2022/04/06 12:37:51 ET]
+Table '3392346771 4' 6-max Seat #4 is the button
+Seat 1: DrLetstry (20256 in chips, €0.10 bounty)
+Seat 2: jeje_sat (31554 in chips, €0.10 bounty)
+Seat 4: Ainemm (5280 in chips, €0.05 bounty)
+Seat 6: ralbol (7910 in chips, €0.08 bounty)
+ralbol: posts small blind 400
+DrLetstry: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [6d 9c 3d Qs]
+jeje_sat: folds
+Ainemm: folds
+ralbol: raises 1600 to 2400
+DrLetstry: folds
+Uncalled bet (1600) returned to ralbol
+ralbol collected 1600 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 1600 | Rake 0
+Seat 1: DrLetstry (big blind) folded before Flop
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 4: Ainemm (button) folded before Flop (didn't bet)
+Seat 6: ralbol (small blind) collected (1600)
+
+
+PokerStars Home Game Hand #235306335692: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIII (400/800) - 2022/04/06 18:38:12 CET [2022/04/06 12:38:12 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (19456 in chips, €0.10 bounty)
+Seat 2: jeje_sat (31554 in chips, €0.10 bounty)
+Seat 4: Ainemm (5280 in chips, €0.05 bounty)
+Seat 6: ralbol (8710 in chips, €0.08 bounty)
+DrLetstry: posts small blind 400
+jeje_sat: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [7d 4d 3c 8h]
+Ainemm: folds
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (400) returned to jeje_sat
+jeje_sat collected 800 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 800 | Rake 0
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (800)
+Seat 4: Ainemm folded before Flop (didn't bet)
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306341315: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIII (400/800) - 2022/04/06 18:38:28 CET [2022/04/06 12:38:28 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (19056 in chips, €0.10 bounty)
+Seat 2: jeje_sat (31954 in chips, €0.10 bounty)
+Seat 4: Ainemm (5280 in chips, €0.05 bounty)
+Seat 6: ralbol (8710 in chips, €0.08 bounty)
+jeje_sat: posts small blind 400
+Ainemm: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qc 3d 7s Js]
+ralbol: folds
+DrLetstry: raises 800 to 1600
+jeje_sat: folds
+Ainemm: folds
+Uncalled bet (800) returned to DrLetstry
+DrLetstry collected 2000 from pot
+*** SUMMARY ***
+Total pot 2000 | Rake 0
+Seat 1: DrLetstry (button) collected (2000)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 4: Ainemm (big blind) folded before Flop
+Seat 6: ralbol folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306347531: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIII (400/800) - 2022/04/06 18:38:46 CET [2022/04/06 12:38:46 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (20256 in chips, €0.10 bounty)
+Seat 2: jeje_sat (31554 in chips, €0.10 bounty)
+Seat 4: Ainemm (4480 in chips, €0.05 bounty)
+Seat 6: ralbol (8710 in chips, €0.08 bounty)
+Ainemm: posts small blind 400
+ralbol: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d 2c 8s Td]
+DrLetstry: raises 800 to 1600
+jeje_sat has timed out
+jeje_sat: folds
+jeje_sat is sitting out
+jeje_sat has returned
+Ainemm: raises 2880 to 4480 and is all-in
+ralbol: folds
+DrLetstry: calls 2880
+*** FLOP *** [As Js Kd]
+*** TURN *** [As Js Kd] [Qc]
+*** RIVER *** [As Js Kd Qc] [8c]
+*** SHOW DOWN ***
+Ainemm: shows [Ad 2d Qh Kh] (two pair, Aces and Kings)
+DrLetstry: shows [Jd Qs Tc 9h] (a straight, Ten to Ace)
+DrLetstry collected 9760 from pot
+DrLetstry wins €0.03 for eliminating Ainemm and their own bounty increases by €0.02 to €0.12
+Ainemm finished the tournament in 4th place
+*** SUMMARY ***
+Total pot 9760 | Rake 0
+Board [As Js Kd Qc 8c]
+Seat 1: DrLetstry showed [Jd Qs Tc 9h] and won (9760) with a straight, Ten to Ace
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 4: Ainemm (small blind) showed [Ad 2d Qh Kh] and lost with two pair, Aces and Kings
+Seat 6: ralbol (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306372769: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIII (400/800) - 2022/04/06 18:39:48 CET [2022/04/06 12:39:48 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (25536 in chips, €0.12 bounty)
+Seat 2: jeje_sat (31554 in chips, €0.10 bounty)
+Seat 6: ralbol (7910 in chips, €0.08 bounty)
+DrLetstry: posts small blind 400
+jeje_sat: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h Jd 6s 7h]
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (400) returned to jeje_sat
+jeje_sat collected 800 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 800 | Rake 0
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (800)
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306376093: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIII (400/800) - 2022/04/06 18:39:58 CET [2022/04/06 12:39:58 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (25136 in chips, €0.12 bounty)
+Seat 2: jeje_sat (31954 in chips, €0.10 bounty)
+Seat 6: ralbol (7910 in chips, €0.08 bounty)
+jeje_sat: posts small blind 400
+ralbol: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [8h 2d 7d Ac]
+DrLetstry: raises 800 to 1600
+jeje_sat: folds
+ralbol: calls 800
+*** FLOP *** [Qd 7h 3c]
+ralbol: checks
+DrLetstry: bets 800
+ralbol: folds
+Uncalled bet (800) returned to DrLetstry
+DrLetstry collected 3600 from pot
+*** SUMMARY ***
+Total pot 3600 | Rake 0
+Board [Qd 7h 3c]
+Seat 1: DrLetstry (button) collected (3600)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 6: ralbol (big blind) folded on the Flop
+
+
+PokerStars Home Game Hand #235306382006: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIII (400/800) - 2022/04/06 18:40:15 CET [2022/04/06 12:40:15 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (27136 in chips, €0.12 bounty)
+Seat 2: jeje_sat (31554 in chips, €0.10 bounty)
+Seat 6: ralbol (6310 in chips, €0.08 bounty)
+ralbol: posts small blind 400
+DrLetstry: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [5s Jd 4s Ac]
+jeje_sat: folds
+ralbol: folds
+Uncalled bet (400) returned to DrLetstry
+DrLetstry collected 800 from pot
+*** SUMMARY ***
+Total pot 800 | Rake 0
+Seat 1: DrLetstry (big blind) collected (800)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306385127: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIII (400/800) - 2022/04/06 18:40:24 CET [2022/04/06 12:40:24 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (27536 in chips, €0.12 bounty)
+Seat 2: jeje_sat (31554 in chips, €0.10 bounty)
+Seat 6: ralbol (5910 in chips, €0.08 bounty)
+DrLetstry: posts small blind 400
+jeje_sat: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [5s 8h Tc 3h]
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (400) returned to jeje_sat
+jeje_sat collected 800 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 800 | Rake 0
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (800)
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306387493: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIII (400/800) - 2022/04/06 18:40:31 CET [2022/04/06 12:40:31 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (27136 in chips, €0.12 bounty)
+Seat 2: jeje_sat (31954 in chips, €0.10 bounty)
+Seat 6: ralbol (5910 in chips, €0.08 bounty)
+jeje_sat: posts small blind 400
+ralbol: posts big blind 800
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks 2c 2h 5h]
+DrLetstry: raises 800 to 1600
+jeje_sat: folds
+ralbol: folds
+Uncalled bet (800) returned to DrLetstry
+DrLetstry collected 2000 from pot
+*** SUMMARY ***
+Total pot 2000 | Rake 0
+Seat 1: DrLetstry (button) collected (2000)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 6: ralbol (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306395135: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:40:53 CET [2022/04/06 12:40:53 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (28336 in chips, €0.12 bounty)
+Seat 2: jeje_sat (31554 in chips, €0.10 bounty)
+Seat 6: ralbol (5110 in chips, €0.08 bounty)
+ralbol: posts small blind 500
+DrLetstry: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [8d 5s 9h 5h]
+jeje_sat: raises 2500 to 3500
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (2500) returned to jeje_sat
+jeje_sat collected 2500 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2500 | Rake 0
+Seat 1: DrLetstry (big blind) folded before Flop
+Seat 2: jeje_sat (button) collected (2500)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306398963: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:41:04 CET [2022/04/06 12:41:04 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (27336 in chips, €0.12 bounty)
+Seat 2: jeje_sat (33054 in chips, €0.10 bounty)
+Seat 6: ralbol (4610 in chips, €0.08 bounty)
+DrLetstry: posts small blind 500
+jeje_sat: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [4c Js 6d 8c]
+ralbol: folds
+DrLetstry: calls 500
+jeje_sat: checks
+*** FLOP *** [Kc 8d Ac]
+DrLetstry: checks
+jeje_sat: checks
+*** TURN *** [Kc 8d Ac] [Qc]
+DrLetstry: checks
+jeje_sat: checks
+*** RIVER *** [Kc 8d Ac Qc] [6c]
+DrLetstry: bets 1000
+jeje_sat: calls 1000
+*** SHOW DOWN ***
+DrLetstry: shows [Qd 2c 8s 9s] (two pair, Queens and Eights)
+jeje_sat: shows [4c Js 6d 8c] (a flush, Ace high)
+jeje_sat collected 4000 from pot
+*** SUMMARY ***
+Total pot 4000 | Rake 0
+Board [Kc 8d Ac Qc 6c]
+Seat 1: DrLetstry (small blind) showed [Qd 2c 8s 9s] and lost with two pair, Queens and Eights
+Seat 2: jeje_sat (big blind) showed [4c Js 6d 8c] and won (4000) with a flush, Ace high
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306415680: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:41:51 CET [2022/04/06 12:41:51 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (25336 in chips, €0.12 bounty)
+Seat 2: jeje_sat (35054 in chips, €0.10 bounty)
+Seat 6: ralbol (4610 in chips, €0.08 bounty)
+jeje_sat: posts small blind 500
+ralbol: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c 9h 3h 2h]
+DrLetstry: folds
+jeje_sat: folds
+Uncalled bet (500) returned to ralbol
+ralbol collected 1000 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Seat 1: DrLetstry (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 6: ralbol (big blind) collected (1000)
+
+
+PokerStars Home Game Hand #235306418743: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:42:00 CET [2022/04/06 12:42:00 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (25336 in chips, €0.12 bounty)
+Seat 2: jeje_sat (34554 in chips, €0.10 bounty)
+Seat 6: ralbol (5110 in chips, €0.08 bounty)
+ralbol: posts small blind 500
+DrLetstry: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kc 5s Jh 6d]
+jeje_sat: folds
+ralbol: folds
+Uncalled bet (500) returned to DrLetstry
+DrLetstry collected 1000 from pot
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Seat 1: DrLetstry (big blind) collected (1000)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306421051: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:42:07 CET [2022/04/06 12:42:07 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (25836 in chips, €0.12 bounty)
+Seat 2: jeje_sat (34554 in chips, €0.10 bounty)
+Seat 6: ralbol (4610 in chips, €0.08 bounty)
+DrLetstry: posts small blind 500
+jeje_sat: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h 7c 9c 4s]
+ralbol: raises 2500 to 3500
+DrLetstry: folds
+jeje_sat: folds
+Uncalled bet (2500) returned to ralbol
+ralbol collected 2500 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 2500 | Rake 0
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 6: ralbol (button) collected (2500)
+
+
+PokerStars Home Game Hand #235306424544: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:42:17 CET [2022/04/06 12:42:17 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (25336 in chips, €0.12 bounty)
+Seat 2: jeje_sat (33554 in chips, €0.10 bounty)
+Seat 6: ralbol (6110 in chips, €0.08 bounty)
+jeje_sat: posts small blind 500
+ralbol: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h Ad 9h Qd]
+DrLetstry: folds
+jeje_sat: raises 2000 to 3000
+ralbol: folds
+Uncalled bet (2000) returned to jeje_sat
+jeje_sat collected 2000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2000 | Rake 0
+Seat 1: DrLetstry (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) collected (2000)
+Seat 6: ralbol (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306427327: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:42:25 CET [2022/04/06 12:42:25 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (25336 in chips, €0.12 bounty)
+Seat 2: jeje_sat (34554 in chips, €0.10 bounty)
+Seat 6: ralbol (5110 in chips, €0.08 bounty)
+ralbol: posts small blind 500
+DrLetstry: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts 9h Qs 3d]
+jeje_sat: folds
+ralbol: folds
+Uncalled bet (500) returned to DrLetstry
+DrLetstry collected 1000 from pot
+DrLetstry: shows [Ad Ac]
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Seat 1: DrLetstry (big blind) collected (1000)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306431261: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:42:36 CET [2022/04/06 12:42:36 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (25836 in chips, €0.12 bounty)
+Seat 2: jeje_sat (34554 in chips, €0.10 bounty)
+Seat 6: ralbol (4610 in chips, €0.08 bounty)
+DrLetstry: posts small blind 500
+jeje_sat: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h 6c 5c 3h]
+ralbol: raises 2500 to 3500
+DrLetstry: folds
+jeje_sat: calls 2500
+*** FLOP *** [Jd Qh 3c]
+jeje_sat: bets 2000
+ralbol: calls 1110 and is all-in
+Uncalled bet (890) returned to jeje_sat
+*** TURN *** [Jd Qh 3c] [Ts]
+*** RIVER *** [Jd Qh 3c Ts] [4s]
+*** SHOW DOWN ***
+jeje_sat: shows [6h 6c 5c 3h] (a pair of Sixes)
+ralbol: shows [Ks Ad 8c Ac] (a straight, Ten to Ace)
+ralbol collected 9720 from pot
+*** SUMMARY ***
+Total pot 9720 | Rake 0
+Board [Jd Qh 3c Ts 4s]
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) showed [6h 6c 5c 3h] and lost with a pair of Sixes
+Seat 6: ralbol (button) showed [Ks Ad 8c Ac] and won (9720) with a straight, Ten to Ace
+
+
+PokerStars Home Game Hand #235306441669: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:43:06 CET [2022/04/06 12:43:06 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (25336 in chips, €0.12 bounty)
+Seat 2: jeje_sat (29944 in chips, €0.10 bounty)
+Seat 6: ralbol (9720 in chips, €0.08 bounty)
+jeje_sat: posts small blind 500
+ralbol: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [2c Ts Js 2d]
+DrLetstry: raises 1000 to 2000
+jeje_sat: folds
+ralbol: folds
+Uncalled bet (1000) returned to DrLetstry
+DrLetstry collected 2500 from pot
+*** SUMMARY ***
+Total pot 2500 | Rake 0
+Seat 1: DrLetstry (button) collected (2500)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 6: ralbol (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306445058: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:43:16 CET [2022/04/06 12:43:16 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (26836 in chips, €0.12 bounty)
+Seat 2: jeje_sat (29444 in chips, €0.10 bounty)
+Seat 6: ralbol (8720 in chips, €0.08 bounty)
+ralbol: posts small blind 500
+DrLetstry: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [Tc 4h 6d Kh]
+jeje_sat: folds
+ralbol: folds
+Uncalled bet (500) returned to DrLetstry
+DrLetstry collected 1000 from pot
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Seat 1: DrLetstry (big blind) collected (1000)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306448077: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:43:25 CET [2022/04/06 12:43:25 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (27336 in chips, €0.12 bounty)
+Seat 2: jeje_sat (29444 in chips, €0.10 bounty)
+Seat 6: ralbol (8220 in chips, €0.08 bounty)
+DrLetstry: posts small blind 500
+jeje_sat: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ah 3c 9c Qh]
+ralbol: folds
+DrLetstry: calls 500
+jeje_sat: checks
+*** FLOP *** [8c 3d 5s]
+DrLetstry: checks
+jeje_sat: checks
+*** TURN *** [8c 3d 5s] [Js]
+DrLetstry: bets 2000
+jeje_sat: folds
+Uncalled bet (2000) returned to DrLetstry
+DrLetstry collected 2000 from pot
+*** SUMMARY ***
+Total pot 2000 | Rake 0
+Board [8c 3d 5s Js]
+Seat 1: DrLetstry (small blind) collected (2000)
+Seat 2: jeje_sat (big blind) folded on the Turn
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306463650: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:44:09 CET [2022/04/06 12:44:09 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (28336 in chips, €0.12 bounty)
+Seat 2: jeje_sat (28444 in chips, €0.10 bounty)
+Seat 6: ralbol (8220 in chips, €0.08 bounty)
+jeje_sat: posts small blind 500
+ralbol: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [3s Qc Qs Tc]
+DrLetstry: folds
+jeje_sat: raises 2000 to 3000
+ralbol: folds
+Uncalled bet (2000) returned to jeje_sat
+jeje_sat collected 2000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2000 | Rake 0
+Seat 1: DrLetstry (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) collected (2000)
+Seat 6: ralbol (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306470423: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:44:29 CET [2022/04/06 12:44:29 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (28336 in chips, €0.12 bounty)
+Seat 2: jeje_sat (29444 in chips, €0.10 bounty)
+Seat 6: ralbol (7220 in chips, €0.08 bounty)
+ralbol: posts small blind 500
+DrLetstry: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qc 3c 7c 9s]
+jeje_sat: folds
+ralbol: folds
+Uncalled bet (500) returned to DrLetstry
+DrLetstry collected 1000 from pot
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Seat 1: DrLetstry (big blind) collected (1000)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306473904: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:44:39 CET [2022/04/06 12:44:39 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (28836 in chips, €0.12 bounty)
+Seat 2: jeje_sat (29444 in chips, €0.10 bounty)
+Seat 6: ralbol (6720 in chips, €0.08 bounty)
+DrLetstry: posts small blind 500
+jeje_sat: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kd 8d Js 9d]
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (500) returned to jeje_sat
+jeje_sat collected 1000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (1000)
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306477265: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:44:49 CET [2022/04/06 12:44:49 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (28336 in chips, €0.12 bounty)
+Seat 2: jeje_sat (29944 in chips, €0.10 bounty)
+Seat 6: ralbol (6720 in chips, €0.08 bounty)
+jeje_sat: posts small blind 500
+ralbol: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [9s 9d 6h 2d]
+DrLetstry: folds
+jeje_sat: folds
+Uncalled bet (500) returned to ralbol
+ralbol collected 1000 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Seat 1: DrLetstry (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 6: ralbol (big blind) collected (1000)
+
+
+PokerStars Home Game Hand #235306480060: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:44:57 CET [2022/04/06 12:44:57 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (28336 in chips, €0.12 bounty)
+Seat 2: jeje_sat (29444 in chips, €0.10 bounty)
+Seat 6: ralbol (7220 in chips, €0.08 bounty)
+ralbol: posts small blind 500
+DrLetstry: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [5c 2h 8d 9c]
+jeje_sat: folds
+ralbol: folds
+Uncalled bet (500) returned to DrLetstry
+DrLetstry collected 1000 from pot
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Seat 1: DrLetstry (big blind) collected (1000)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306482336: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:45:03 CET [2022/04/06 12:45:03 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (28836 in chips, €0.12 bounty)
+Seat 2: jeje_sat (29444 in chips, €0.10 bounty)
+Seat 6: ralbol (6720 in chips, €0.08 bounty)
+DrLetstry: posts small blind 500
+jeje_sat: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [9c 4c 9s Js]
+ralbol: folds
+DrLetstry: raises 2000 to 3000
+jeje_sat: folds
+Uncalled bet (2000) returned to DrLetstry
+DrLetstry collected 2000 from pot
+*** SUMMARY ***
+Total pot 2000 | Rake 0
+Seat 1: DrLetstry (small blind) collected (2000)
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306490800: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XIV (500/1000) - 2022/04/06 18:45:27 CET [2022/04/06 12:45:27 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (29836 in chips, €0.12 bounty)
+Seat 2: jeje_sat (28444 in chips, €0.10 bounty)
+Seat 6: ralbol (6720 in chips, €0.08 bounty)
+jeje_sat: posts small blind 500
+ralbol: posts big blind 1000
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks 9s 9h 8h]
+DrLetstry: raises 1000 to 2000
+jeje_sat: folds
+ralbol: raises 4500 to 6500
+DrLetstry: raises 4500 to 11000
+ralbol: calls 220 and is all-in
+Uncalled bet (4280) returned to DrLetstry
+*** FLOP *** [7s 5d Jd]
+*** TURN *** [7s 5d Jd] [Ah]
+*** RIVER *** [7s 5d Jd Ah] [Qh]
+*** SHOW DOWN ***
+ralbol: shows [8s 6s 9d 7d] (a pair of Sevens)
+DrLetstry: shows [Td 2c 8d 9c] (high card Ace)
+ralbol collected 13940 from pot
+*** SUMMARY ***
+Total pot 13940 | Rake 0
+Board [7s 5d Jd Ah Qh]
+Seat 1: DrLetstry (button) showed [Td 2c 8d 9c] and lost with high card Ace
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 6: ralbol (big blind) showed [8s 6s 9d 7d] and won (13940) with a pair of Sevens
+
+
+PokerStars Home Game Hand #235306500775: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:45:56 CET [2022/04/06 12:45:56 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (23116 in chips, €0.12 bounty)
+Seat 2: jeje_sat (27944 in chips, €0.10 bounty)
+Seat 6: ralbol (13940 in chips, €0.08 bounty)
+ralbol: posts small blind 600
+DrLetstry: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [7c 9s Kh 5c]
+jeje_sat: folds
+ralbol: folds
+Uncalled bet (600) returned to DrLetstry
+DrLetstry collected 1200 from pot
+*** SUMMARY ***
+Total pot 1200 | Rake 0
+Seat 1: DrLetstry (big blind) collected (1200)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306504490: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:46:07 CET [2022/04/06 12:46:07 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (23716 in chips, €0.12 bounty)
+Seat 2: jeje_sat (27944 in chips, €0.10 bounty)
+Seat 6: ralbol (13340 in chips, €0.08 bounty)
+DrLetstry: posts small blind 600
+jeje_sat: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 3s 5d Td]
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (600) returned to jeje_sat
+jeje_sat collected 1200 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1200 | Rake 0
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (1200)
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306508390: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:46:18 CET [2022/04/06 12:46:18 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (23116 in chips, €0.12 bounty)
+Seat 2: jeje_sat (28544 in chips, €0.10 bounty)
+Seat 6: ralbol (13340 in chips, €0.08 bounty)
+jeje_sat: posts small blind 600
+ralbol: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts Kc Qs 6c]
+DrLetstry: raises 1200 to 2400
+jeje_sat: calls 1800
+ralbol: folds
+*** FLOP *** [Qc Jd 4c]
+jeje_sat: checks
+DrLetstry: checks
+*** TURN *** [Qc Jd 4c] [7s]
+jeje_sat: checks
+DrLetstry: checks
+*** RIVER *** [Qc Jd 4c 7s] [3c]
+jeje_sat: checks
+DrLetstry: checks
+*** SHOW DOWN ***
+jeje_sat: shows [Ts Kc Qs 6c] (a flush, King high)
+DrLetstry: mucks hand
+jeje_sat collected 6000 from pot
+*** SUMMARY ***
+Total pot 6000 | Rake 0
+Board [Qc Jd 4c 7s 3c]
+Seat 1: DrLetstry (button) mucked [8s 9c 6d 5s]
+Seat 2: jeje_sat (small blind) showed [Ts Kc Qs 6c] and won (6000) with a flush, King high
+Seat 6: ralbol (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306517393: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:46:44 CET [2022/04/06 12:46:44 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (20716 in chips, €0.12 bounty)
+Seat 2: jeje_sat (32144 in chips, €0.10 bounty)
+Seat 6: ralbol (12140 in chips, €0.08 bounty)
+ralbol: posts small blind 600
+DrLetstry: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [9c 5c Th 3h]
+DrLetstry said, "tkt pas les slowplay"
+jeje_sat: folds
+ralbol: folds
+Uncalled bet (600) returned to DrLetstry
+DrLetstry said, "hihi"
+DrLetstry collected 1200 from pot
+*** SUMMARY ***
+Total pot 1200 | Rake 0
+Seat 1: DrLetstry (big blind) collected (1200)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306521630: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:46:56 CET [2022/04/06 12:46:56 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (21316 in chips, €0.12 bounty)
+Seat 2: jeje_sat (32144 in chips, €0.10 bounty)
+Seat 6: ralbol (11540 in chips, €0.08 bounty)
+DrLetstry: posts small blind 600
+jeje_sat: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [2d 4c 7c 9s]
+ralbol: folds
+DrLetstry: calls 600
+jeje_sat: checks
+*** FLOP *** [5d 2h Qs]
+DrLetstry: checks
+jeje_sat: checks
+*** TURN *** [5d 2h Qs] [3c]
+DrLetstry: checks
+jeje_sat: checks
+*** RIVER *** [5d 2h Qs 3c] [4h]
+DrLetstry: bets 2400
+jeje_sat: folds
+Uncalled bet (2400) returned to DrLetstry
+DrLetstry collected 2400 from pot
+*** SUMMARY ***
+Total pot 2400 | Rake 0
+Board [5d 2h Qs 3c 4h]
+Seat 1: DrLetstry (small blind) collected (2400)
+Seat 2: jeje_sat (big blind) folded on the River
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306533551: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:47:30 CET [2022/04/06 12:47:30 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (22516 in chips, €0.12 bounty)
+Seat 2: jeje_sat (30944 in chips, €0.10 bounty)
+Seat 6: ralbol (11540 in chips, €0.08 bounty)
+jeje_sat: posts small blind 600
+ralbol: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d Qd Ts 2s]
+DrLetstry: folds
+jeje_sat: calls 600
+ralbol: checks
+*** FLOP *** [7h 8d 3d]
+jeje_sat: checks
+ralbol: checks
+*** TURN *** [7h 8d 3d] [8h]
+jeje_sat: bets 1200
+ralbol: folds
+Uncalled bet (1200) returned to jeje_sat
+jeje_sat collected 2400 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2400 | Rake 0
+Board [7h 8d 3d 8h]
+Seat 1: DrLetstry (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) collected (2400)
+Seat 6: ralbol (big blind) folded on the Turn
+
+
+PokerStars Home Game Hand #235306541516: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:47:53 CET [2022/04/06 12:47:53 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (22516 in chips, €0.12 bounty)
+Seat 2: jeje_sat (32144 in chips, €0.10 bounty)
+Seat 6: ralbol (10340 in chips, €0.08 bounty)
+ralbol: posts small blind 600
+DrLetstry: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qd Qc 9s 6h]
+jeje_sat: raises 3000 to 4200
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (3000) returned to jeje_sat
+jeje_sat collected 3000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 3000 | Rake 0
+Seat 1: DrLetstry (big blind) folded before Flop
+Seat 2: jeje_sat (button) collected (3000)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306545546: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:48:05 CET [2022/04/06 12:48:05 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (21316 in chips, €0.12 bounty)
+Seat 2: jeje_sat (33944 in chips, €0.10 bounty)
+Seat 6: ralbol (9740 in chips, €0.08 bounty)
+DrLetstry: posts small blind 600
+jeje_sat: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ac 6d 9s 9h]
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (600) returned to jeje_sat
+jeje_sat collected 1200 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1200 | Rake 0
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (1200)
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306548448: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:48:13 CET [2022/04/06 12:48:13 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (20716 in chips, €0.12 bounty)
+Seat 2: jeje_sat (34544 in chips, €0.10 bounty)
+Seat 6: ralbol (9740 in chips, €0.08 bounty)
+jeje_sat: posts small blind 600
+ralbol: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [As 8h Td 8c]
+DrLetstry: raises 1200 to 2400
+jeje_sat: folds
+ralbol: folds
+Uncalled bet (1200) returned to DrLetstry
+DrLetstry collected 3000 from pot
+*** SUMMARY ***
+Total pot 3000 | Rake 0
+Seat 1: DrLetstry (button) collected (3000)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 6: ralbol (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306554735: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:48:28 CET [2022/04/06 12:48:28 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (22516 in chips, €0.12 bounty)
+Seat 2: jeje_sat (33944 in chips, €0.10 bounty)
+Seat 6: ralbol (8540 in chips, €0.08 bounty)
+ralbol: posts small blind 600
+DrLetstry: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [8c 2d 7h 3h]
+jeje_sat: folds
+ralbol: raises 2400 to 3600
+DrLetstry: raises 7200 to 10800
+ralbol: calls 4940 and is all-in
+Uncalled bet (2260) returned to DrLetstry
+*** FLOP *** [6c 5h 9c]
+*** TURN *** [6c 5h 9c] [Qd]
+*** RIVER *** [6c 5h 9c Qd] [Kc]
+*** SHOW DOWN ***
+ralbol: shows [Ac Jc Ad 9h] (a flush, Ace high)
+DrLetstry: shows [Kh Ah Jd 5s] (two pair, Kings and Fives)
+ralbol collected 17080 from pot
+*** SUMMARY ***
+Total pot 17080 | Rake 0
+Board [6c 5h 9c Qd Kc]
+Seat 1: DrLetstry (big blind) showed [Kh Ah Jd 5s] and lost with two pair, Kings and Fives
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ralbol (small blind) showed [Ac Jc Ad 9h] and won (17080) with a flush, Ace high
+
+
+PokerStars Home Game Hand #235306567082: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:49:03 CET [2022/04/06 12:49:03 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (13976 in chips, €0.12 bounty)
+Seat 2: jeje_sat (33944 in chips, €0.10 bounty)
+Seat 6: ralbol (17080 in chips, €0.08 bounty)
+DrLetstry: posts small blind 600
+jeje_sat: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c 5s 5d 7c]
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (600) returned to jeje_sat
+jeje_sat collected 1200 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1200 | Rake 0
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (1200)
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306573922: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:49:23 CET [2022/04/06 12:49:23 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (13376 in chips, €0.12 bounty)
+Seat 2: jeje_sat (34544 in chips, €0.10 bounty)
+Seat 6: ralbol (17080 in chips, €0.08 bounty)
+jeje_sat: posts small blind 600
+ralbol: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [8h Ks 5s Td]
+DrLetstry: folds
+jeje_sat: folds
+Uncalled bet (600) returned to ralbol
+ralbol collected 1200 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 1200 | Rake 0
+Seat 1: DrLetstry (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 6: ralbol (big blind) collected (1200)
+
+
+PokerStars Home Game Hand #235306577583: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:49:34 CET [2022/04/06 12:49:34 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (13376 in chips, €0.12 bounty)
+Seat 2: jeje_sat (33944 in chips, €0.10 bounty)
+Seat 6: ralbol (17680 in chips, €0.08 bounty)
+ralbol: posts small blind 600
+DrLetstry: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s Ac 5s Js]
+jeje_sat: folds
+ralbol: folds
+Uncalled bet (600) returned to DrLetstry
+DrLetstry collected 1200 from pot
+*** SUMMARY ***
+Total pot 1200 | Rake 0
+Seat 1: DrLetstry (big blind) collected (1200)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306582767: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:49:48 CET [2022/04/06 12:49:48 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (13976 in chips, €0.12 bounty)
+Seat 2: jeje_sat (33944 in chips, €0.10 bounty)
+Seat 6: ralbol (17080 in chips, €0.08 bounty)
+DrLetstry: posts small blind 600
+jeje_sat: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ad 5h Ks 6h]
+ralbol: raises 1200 to 2400
+DrLetstry: folds
+jeje_sat: calls 1200
+*** FLOP *** [6s 2s 9s]
+jeje_sat: checks
+ralbol: bets 1782
+jeje_sat: folds
+Uncalled bet (1782) returned to ralbol
+ralbol collected 5400 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 5400 | Rake 0
+Board [6s 2s 9s]
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) folded on the Flop
+Seat 6: ralbol (button) collected (5400)
+
+
+PokerStars Home Game Hand #235306594001: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:50:21 CET [2022/04/06 12:50:21 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (13376 in chips, €0.12 bounty)
+Seat 2: jeje_sat (31544 in chips, €0.10 bounty)
+Seat 6: ralbol (20080 in chips, €0.08 bounty)
+jeje_sat: posts small blind 600
+ralbol: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [9s Ad Kh 8h]
+DrLetstry: folds
+jeje_sat: raises 2400 to 3600
+ralbol: folds
+Uncalled bet (2400) returned to jeje_sat
+jeje_sat collected 2400 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2400 | Rake 0
+Seat 1: DrLetstry (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) collected (2400)
+Seat 6: ralbol (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306597107: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XV (600/1200) - 2022/04/06 18:50:30 CET [2022/04/06 12:50:30 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (13376 in chips, €0.12 bounty)
+Seat 2: jeje_sat (32744 in chips, €0.10 bounty)
+Seat 6: ralbol (18880 in chips, €0.08 bounty)
+ralbol: posts small blind 600
+DrLetstry: posts big blind 1200
+*** HOLE CARDS ***
+Dealt to jeje_sat [6d Ah 5d 2h]
+jeje_sat: raises 3000 to 4200
+ralbol: folds
+DrLetstry: raises 9000 to 13200
+jeje_sat: raises 9000 to 22200
+DrLetstry: calls 176 and is all-in
+Uncalled bet (8824) returned to jeje_sat
+*** FLOP *** [5h Qd 6c]
+*** TURN *** [5h Qd 6c] [Td]
+*** RIVER *** [5h Qd 6c Td] [Th]
+*** SHOW DOWN ***
+DrLetstry: shows [7s 4d As Ad] (two pair, Aces and Tens)
+jeje_sat: shows [6d Ah 5d 2h] (two pair, Tens and Sixes)
+DrLetstry collected 27352 from pot
+*** SUMMARY ***
+Total pot 27352 | Rake 0
+Board [5h Qd 6c Td Th]
+Seat 1: DrLetstry (big blind) showed [7s 4d As Ad] and won (27352) with two pair, Aces and Tens
+Seat 2: jeje_sat (button) showed [6d Ah 5d 2h] and lost with two pair, Tens and Sixes
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306611093: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVI (700/1400) - 2022/04/06 18:51:10 CET [2022/04/06 12:51:10 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (27352 in chips, €0.12 bounty)
+Seat 2: jeje_sat (19368 in chips, €0.10 bounty)
+Seat 6: ralbol (18280 in chips, €0.08 bounty)
+DrLetstry: posts small blind 700
+jeje_sat: posts big blind 1400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qs 8s Kd 3d]
+ralbol: folds
+DrLetstry: calls 700
+jeje_sat: raises 2800 to 4200
+DrLetstry: calls 2800
+*** FLOP *** [Qh Ad Qc]
+DrLetstry: checks
+jeje_sat: bets 4200
+DrLetstry: folds
+Uncalled bet (4200) returned to jeje_sat
+jeje_sat collected 8400 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 8400 | Rake 0
+Board [Qh Ad Qc]
+Seat 1: DrLetstry (small blind) folded on the Flop
+Seat 2: jeje_sat (big blind) collected (8400)
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306626337: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVI (700/1400) - 2022/04/06 18:51:54 CET [2022/04/06 12:51:54 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (23152 in chips, €0.12 bounty)
+Seat 2: jeje_sat (23568 in chips, €0.10 bounty)
+Seat 6: ralbol (18280 in chips, €0.08 bounty)
+jeje_sat: posts small blind 700
+ralbol: posts big blind 1400
+*** HOLE CARDS ***
+Dealt to jeje_sat [5c 8c 6s Js]
+DrLetstry: raises 1400 to 2800
+jeje_sat: folds
+ralbol: folds
+Uncalled bet (1400) returned to DrLetstry
+DrLetstry collected 3500 from pot
+*** SUMMARY ***
+Total pot 3500 | Rake 0
+Seat 1: DrLetstry (button) collected (3500)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 6: ralbol (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306630318: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVI (700/1400) - 2022/04/06 18:52:06 CET [2022/04/06 12:52:06 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (25252 in chips, €0.12 bounty)
+Seat 2: jeje_sat (22868 in chips, €0.10 bounty)
+Seat 6: ralbol (16880 in chips, €0.08 bounty)
+ralbol: posts small blind 700
+DrLetstry: posts big blind 1400
+*** HOLE CARDS ***
+Dealt to jeje_sat [5d Kd 2h Ks]
+jeje_sat: raises 3500 to 4900
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (3500) returned to jeje_sat
+jeje_sat collected 3500 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 3500 | Rake 0
+Seat 1: DrLetstry (big blind) folded before Flop
+Seat 2: jeje_sat (button) collected (3500)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306635960: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVI (700/1400) - 2022/04/06 18:52:22 CET [2022/04/06 12:52:22 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (23852 in chips, €0.12 bounty)
+Seat 2: jeje_sat (24968 in chips, €0.10 bounty)
+Seat 6: ralbol (16180 in chips, €0.08 bounty)
+DrLetstry: posts small blind 700
+jeje_sat: posts big blind 1400
+*** HOLE CARDS ***
+Dealt to jeje_sat [6s 6c Qs 5d]
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (700) returned to jeje_sat
+jeje_sat collected 1400 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1400 | Rake 0
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (1400)
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306640539: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVI (700/1400) - 2022/04/06 18:52:35 CET [2022/04/06 12:52:35 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (23152 in chips, €0.12 bounty)
+Seat 2: jeje_sat (25668 in chips, €0.10 bounty)
+Seat 6: ralbol (16180 in chips, €0.08 bounty)
+jeje_sat: posts small blind 700
+ralbol: posts big blind 1400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kc Qh 9h Ah]
+DrLetstry: folds
+jeje_sat: raises 2800 to 4200
+ralbol: calls 2800
+*** FLOP *** [Kh Th 9s]
+jeje_sat: bets 8400
+ralbol: folds
+Uncalled bet (8400) returned to jeje_sat
+jeje_sat collected 8400 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 8400 | Rake 0
+Board [Kh Th 9s]
+Seat 1: DrLetstry (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) collected (8400)
+Seat 6: ralbol (big blind) folded on the Flop
+
+
+PokerStars Home Game Hand #235306646727: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVI (700/1400) - 2022/04/06 18:52:53 CET [2022/04/06 12:52:53 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (23152 in chips, €0.12 bounty)
+Seat 2: jeje_sat (29868 in chips, €0.10 bounty)
+Seat 6: ralbol (11980 in chips, €0.08 bounty)
+ralbol: posts small blind 700
+DrLetstry: posts big blind 1400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Tc 9s 8d 6s]
+jeje_sat: raises 3500 to 4900
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (3500) returned to jeje_sat
+jeje_sat collected 3500 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 3500 | Rake 0
+Seat 1: DrLetstry (big blind) folded before Flop
+Seat 2: jeje_sat (button) collected (3500)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306649783: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVI (700/1400) - 2022/04/06 18:53:02 CET [2022/04/06 12:53:02 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (21752 in chips, €0.12 bounty)
+Seat 2: jeje_sat (31968 in chips, €0.10 bounty)
+Seat 6: ralbol (11280 in chips, €0.08 bounty)
+DrLetstry: posts small blind 700
+jeje_sat: posts big blind 1400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks Ad 2h 3h]
+ralbol: folds
+DrLetstry: folds
+Uncalled bet (700) returned to jeje_sat
+jeje_sat collected 1400 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1400 | Rake 0
+Seat 1: DrLetstry (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (1400)
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306655398: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVI (700/1400) - 2022/04/06 18:53:18 CET [2022/04/06 12:53:18 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (21052 in chips, €0.12 bounty)
+Seat 2: jeje_sat (32668 in chips, €0.10 bounty)
+Seat 6: ralbol (11280 in chips, €0.08 bounty)
+jeje_sat: posts small blind 700
+ralbol: posts big blind 1400
+*** HOLE CARDS ***
+Dealt to jeje_sat [4h Kh 9h 2d]
+DrLetstry: folds
+jeje_sat: folds
+Uncalled bet (700) returned to ralbol
+ralbol collected 1400 from pot
+ralbol: doesn't show hand
+*** SUMMARY ***
+Total pot 1400 | Rake 0
+Seat 1: DrLetstry (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 6: ralbol (big blind) collected (1400)
+
+
+PokerStars Home Game Hand #235306664048: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVI (700/1400) - 2022/04/06 18:53:43 CET [2022/04/06 12:53:43 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (21052 in chips, €0.12 bounty)
+Seat 2: jeje_sat (31968 in chips, €0.10 bounty)
+Seat 6: ralbol (11980 in chips, €0.08 bounty)
+ralbol: posts small blind 700
+DrLetstry: posts big blind 1400
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h 6s Jc Qh]
+jeje_sat: folds
+ralbol: folds
+Uncalled bet (700) returned to DrLetstry
+DrLetstry collected 1400 from pot
+*** SUMMARY ***
+Total pot 1400 | Rake 0
+Seat 1: DrLetstry (big blind) collected (1400)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 6: ralbol (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306666333: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVI (700/1400) - 2022/04/06 18:53:49 CET [2022/04/06 12:53:49 ET]
+Table '3392346771 4' 6-max Seat #6 is the button
+Seat 1: DrLetstry (21752 in chips, €0.12 bounty)
+Seat 2: jeje_sat (31968 in chips, €0.10 bounty)
+Seat 6: ralbol (11280 in chips, €0.08 bounty)
+DrLetstry: posts small blind 700
+jeje_sat: posts big blind 1400
+*** HOLE CARDS ***
+Dealt to jeje_sat [7h 5s 9d 6d]
+ralbol: folds
+DrLetstry: calls 700
+jeje_sat: raises 2800 to 4200
+DrLetstry: calls 2800
+*** FLOP *** [6s 7c As]
+DrLetstry: checks
+jeje_sat: bets 8400
+DrLetstry said, "glgl"
+DrLetstry: raises 9152 to 17552 and is all-in
+jeje_sat: calls 9152
+*** TURN *** [6s 7c As] [Ad]
+*** RIVER *** [6s 7c As Ad] [Ts]
+*** SHOW DOWN ***
+DrLetstry: shows [2s 5d Td 9s] (a flush, Ace high)
+jeje_sat: shows [7h 5s 9d 6d] (two pair, Aces and Sevens)
+DrLetstry collected 43504 from pot
+*** SUMMARY ***
+Total pot 43504 | Rake 0
+Board [6s 7c As Ad Ts]
+Seat 1: DrLetstry (small blind) showed [2s 5d Td 9s] and won (43504) with a flush, Ace high
+Seat 2: jeje_sat (big blind) showed [7h 5s 9d 6d] and lost with two pair, Aces and Sevens
+Seat 6: ralbol (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235306684181: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVI (700/1400) - 2022/04/06 18:54:33 CET [2022/04/06 12:54:33 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (43504 in chips, €0.12 bounty)
+Seat 2: jeje_sat (10216 in chips, €0.10 bounty)
+Seat 6: ralbol (11280 in chips, €0.08 bounty)
+jeje_sat: posts small blind 700
+ralbol: posts big blind 1400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Td 8c 3h Qs]
+DrLetstry: raises 3500 to 4900
+jeje_sat: folds
+ralbol: raises 6380 to 11280 and is all-in
+DrLetstry: calls 6380
+*** FLOP *** [3c 5s 2c]
+*** TURN *** [3c 5s 2c] [2d]
+*** RIVER *** [3c 5s 2c 2d] [Js]
+*** SHOW DOWN ***
+ralbol: shows [3d Qh Ac Kd] (two pair, Threes and Deuces)
+DrLetstry: shows [9d Jd 8s Ts] (two pair, Jacks and Deuces)
+DrLetstry collected 23260 from pot
+DrLetstry wins €0.04 for eliminating ralbol and their own bounty increases by €0.04 to €0.16
+ralbol finished the tournament in 3rd place and received €0.33.
+*** SUMMARY ***
+Total pot 23260 | Rake 0
+Board [3c 5s 2c 2d Js]
+Seat 1: DrLetstry (button) showed [9d Jd 8s Ts] and won (23260) with two pair, Jacks and Deuces
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 6: ralbol (big blind) showed [3d Qh Ac Kd] and lost with two pair, Threes and Deuces
+
+
+PokerStars Home Game Hand #235306789665: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVI (700/1400) - 2022/04/06 19:00:15 CET [2022/04/06 13:00:15 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (55484 in chips, €0.16 bounty)
+Seat 2: jeje_sat (9516 in chips, €0.10 bounty)
+jeje_sat: posts small blind 700
+DrLetstry: posts big blind 1400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qd 7h Tc 2d]
+jeje_sat: folds
+Uncalled bet (700) returned to DrLetstry
+DrLetstry collected 1400 from pot
+*** SUMMARY ***
+Total pot 1400 | Rake 0
+Seat 1: DrLetstry (big blind) collected (1400)
+Seat 2: jeje_sat (button) (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306792164: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVI (700/1400) - 2022/04/06 19:00:24 CET [2022/04/06 13:00:24 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (56184 in chips, €0.16 bounty)
+Seat 2: jeje_sat (8816 in chips, €0.10 bounty)
+DrLetstry: posts small blind 700
+jeje_sat: posts big blind 1400
+*** HOLE CARDS ***
+Dealt to jeje_sat [9h 7c 4d 7d]
+DrLetstry: calls 700
+jeje_sat: checks
+*** FLOP *** [8h 3c Tc]
+jeje_sat: checks
+DrLetstry: checks
+*** TURN *** [8h 3c Tc] [2s]
+jeje_sat: checks
+DrLetstry: checks
+*** RIVER *** [8h 3c Tc 2s] [As]
+jeje_sat: checks
+DrLetstry: checks
+*** SHOW DOWN ***
+jeje_sat: shows [9h 7c 4d 7d] (a pair of Sevens)
+DrLetstry: shows [8d 9s 6s Kh] (a pair of Eights)
+DrLetstry collected 2800 from pot
+*** SUMMARY ***
+Total pot 2800 | Rake 0
+Board [8h 3c Tc 2s As]
+Seat 1: DrLetstry (button) (small blind) showed [8d 9s 6s Kh] and won (2800) with a pair of Eights
+Seat 2: jeje_sat (big blind) showed [9h 7c 4d 7d] and lost with a pair of Sevens
+
+
+PokerStars Home Game Hand #235306802101: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:00:58 CET [2022/04/06 13:00:58 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (57584 in chips, €0.16 bounty)
+Seat 2: jeje_sat (7416 in chips, €0.10 bounty)
+jeje_sat: posts small blind 800
+DrLetstry: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h Kd 5c As]
+jeje_sat: raises 3200 to 4800
+DrLetstry: folds
+Uncalled bet (3200) returned to jeje_sat
+jeje_sat collected 3200 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 3200 | Rake 0
+Seat 1: DrLetstry (big blind) folded before Flop
+Seat 2: jeje_sat (button) (small blind) collected (3200)
+
+
+PokerStars Home Game Hand #235306804637: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:01:06 CET [2022/04/06 13:01:06 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (55984 in chips, €0.16 bounty)
+Seat 2: jeje_sat (9016 in chips, €0.10 bounty)
+DrLetstry: posts small blind 800
+jeje_sat: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [3d 9s 2h Ah]
+DrLetstry: raises 3200 to 4800
+jeje_sat: raises 4216 to 9016 and is all-in
+DrLetstry: calls 4216
+*** FLOP *** [Ks 4c 5h]
+*** TURN *** [Ks 4c 5h] [2d]
+*** RIVER *** [Ks 4c 5h 2d] [5c]
+*** SHOW DOWN ***
+jeje_sat: shows [3d 9s 2h Ah] (a straight, Ace to Five)
+DrLetstry: shows [6h 2c 4h 9c] (two pair, Fives and Fours)
+jeje_sat collected 18032 from pot
+*** SUMMARY ***
+Total pot 18032 | Rake 0
+Board [Ks 4c 5h 2d 5c]
+Seat 1: DrLetstry (button) (small blind) showed [6h 2c 4h 9c] and lost with two pair, Fives and Fours
+Seat 2: jeje_sat (big blind) showed [3d 9s 2h Ah] and won (18032) with a straight, Ace to Five
+
+
+PokerStars Home Game Hand #235306810442: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:01:23 CET [2022/04/06 13:01:23 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (46968 in chips, €0.16 bounty)
+Seat 2: jeje_sat (18032 in chips, €0.10 bounty)
+jeje_sat: posts small blind 800
+DrLetstry: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [4h Kd 5h 7s]
+jeje_sat: folds
+Uncalled bet (800) returned to DrLetstry
+DrLetstry collected 1600 from pot
+*** SUMMARY ***
+Total pot 1600 | Rake 0
+Seat 1: DrLetstry (big blind) collected (1600)
+Seat 2: jeje_sat (button) (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306812622: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:01:30 CET [2022/04/06 13:01:30 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (47768 in chips, €0.16 bounty)
+Seat 2: jeje_sat (17232 in chips, €0.10 bounty)
+DrLetstry: posts small blind 800
+jeje_sat: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [9h 9d Ks 3h]
+DrLetstry: calls 800
+jeje_sat: checks
+*** FLOP *** [5s Qh Ts]
+jeje_sat: checks
+DrLetstry: checks
+*** TURN *** [5s Qh Ts] [3s]
+jeje_sat: checks
+DrLetstry: checks
+*** RIVER *** [5s Qh Ts 3s] [3d]
+jeje_sat: checks
+DrLetstry: bets 3200
+jeje_sat: raises 9600 to 12800
+DrLetstry: folds
+Uncalled bet (9600) returned to jeje_sat
+jeje_sat collected 9600 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 9600 | Rake 0
+Board [5s Qh Ts 3s 3d]
+Seat 1: DrLetstry (button) (small blind) folded on the River
+Seat 2: jeje_sat (big blind) collected (9600)
+
+
+PokerStars Home Game Hand #235306821599: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:01:58 CET [2022/04/06 13:01:58 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (42968 in chips, €0.16 bounty)
+Seat 2: jeje_sat (22032 in chips, €0.10 bounty)
+jeje_sat: posts small blind 800
+DrLetstry: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [8h Ks Jd 9d]
+jeje_sat: raises 3200 to 4800
+DrLetstry: folds
+Uncalled bet (3200) returned to jeje_sat
+jeje_sat collected 3200 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 3200 | Rake 0
+Seat 1: DrLetstry (big blind) folded before Flop
+Seat 2: jeje_sat (button) (small blind) collected (3200)
+
+
+PokerStars Home Game Hand #235306828017: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:02:16 CET [2022/04/06 13:02:16 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (41368 in chips, €0.16 bounty)
+Seat 2: jeje_sat (23632 in chips, €0.10 bounty)
+DrLetstry: posts small blind 800
+jeje_sat: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [3d 8c 4d Td]
+DrLetstry: calls 800
+jeje_sat: checks
+*** FLOP *** [Kc Ac Jh]
+jeje_sat: checks
+DrLetstry: checks
+*** TURN *** [Kc Ac Jh] [Qh]
+jeje_sat: checks
+DrLetstry: checks
+*** RIVER *** [Kc Ac Jh Qh] [3s]
+jeje_sat: checks
+DrLetstry: checks
+*** SHOW DOWN ***
+jeje_sat: shows [3d 8c 4d Td] (a pair of Threes)
+DrLetstry: shows [6h 5c Jd 6s] (a pair of Jacks)
+DrLetstry collected 3200 from pot
+*** SUMMARY ***
+Total pot 3200 | Rake 0
+Board [Kc Ac Jh Qh 3s]
+Seat 1: DrLetstry (button) (small blind) showed [6h 5c Jd 6s] and won (3200) with a pair of Jacks
+Seat 2: jeje_sat (big blind) showed [3d 8c 4d Td] and lost with a pair of Threes
+
+
+PokerStars Home Game Hand #235306835976: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:02:38 CET [2022/04/06 13:02:38 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (42968 in chips, €0.16 bounty)
+Seat 2: jeje_sat (22032 in chips, €0.10 bounty)
+jeje_sat: posts small blind 800
+DrLetstry: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qc Th Qh Js]
+jeje_sat: raises 3200 to 4800
+DrLetstry: folds
+Uncalled bet (3200) returned to jeje_sat
+jeje_sat collected 3200 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 3200 | Rake 0
+Seat 1: DrLetstry (big blind) folded before Flop
+Seat 2: jeje_sat (button) (small blind) collected (3200)
+
+
+PokerStars Home Game Hand #235306840232: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:02:50 CET [2022/04/06 13:02:50 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (41368 in chips, €0.16 bounty)
+Seat 2: jeje_sat (23632 in chips, €0.10 bounty)
+DrLetstry: posts small blind 800
+jeje_sat: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [2s 3h Qs Js]
+DrLetstry: folds
+Uncalled bet (800) returned to jeje_sat
+jeje_sat collected 1600 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1600 | Rake 0
+Seat 1: DrLetstry (button) (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (1600)
+
+
+PokerStars Home Game Hand #235306841836: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:02:55 CET [2022/04/06 13:02:55 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (40568 in chips, €0.16 bounty)
+Seat 2: jeje_sat (24432 in chips, €0.10 bounty)
+jeje_sat: posts small blind 800
+DrLetstry: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [4h Kd Kc Ah]
+jeje_sat: raises 3200 to 4800
+DrLetstry: folds
+Uncalled bet (3200) returned to jeje_sat
+jeje_sat collected 3200 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 3200 | Rake 0
+Seat 1: DrLetstry (big blind) folded before Flop
+Seat 2: jeje_sat (button) (small blind) collected (3200)
+
+
+PokerStars Home Game Hand #235306844786: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:03:03 CET [2022/04/06 13:03:03 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (38968 in chips, €0.16 bounty)
+Seat 2: jeje_sat (26032 in chips, €0.10 bounty)
+DrLetstry: posts small blind 800
+jeje_sat: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d 3d 4c Qh]
+DrLetstry: calls 800
+jeje_sat: checks
+*** FLOP *** [5c 9h 8s]
+jeje_sat: checks
+DrLetstry: checks
+*** TURN *** [5c 9h 8s] [7d]
+jeje_sat: checks
+DrLetstry: checks
+*** RIVER *** [5c 9h 8s 7d] [8d]
+jeje_sat: checks
+DrLetstry: checks
+*** SHOW DOWN ***
+jeje_sat: shows [9d 3d 4c Qh] (two pair, Nines and Eights)
+DrLetstry: mucks hand
+jeje_sat collected 3200 from pot
+*** SUMMARY ***
+Total pot 3200 | Rake 0
+Board [5c 9h 8s 7d 8d]
+Seat 1: DrLetstry (button) (small blind) mucked [Kd 2d As 5h]
+Seat 2: jeje_sat (big blind) showed [9d 3d 4c Qh] and won (3200) with two pair, Nines and Eights
+
+
+PokerStars Home Game Hand #235306861256: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:03:49 CET [2022/04/06 13:03:49 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (37368 in chips, €0.16 bounty)
+Seat 2: jeje_sat (27632 in chips, €0.10 bounty)
+jeje_sat: posts small blind 800
+DrLetstry: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [9h 6s 6d 2h]
+jeje_sat: folds
+Uncalled bet (800) returned to DrLetstry
+DrLetstry collected 1600 from pot
+*** SUMMARY ***
+Total pot 1600 | Rake 0
+Seat 1: DrLetstry (big blind) collected (1600)
+Seat 2: jeje_sat (button) (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306863510: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:03:56 CET [2022/04/06 13:03:56 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (38168 in chips, €0.16 bounty)
+Seat 2: jeje_sat (26832 in chips, €0.10 bounty)
+DrLetstry: posts small blind 800
+jeje_sat: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d 6d 5d Qs]
+DrLetstry: calls 800
+jeje_sat: checks
+*** FLOP *** [5h 4s Js]
+jeje_sat: checks
+DrLetstry: bets 2400
+jeje_sat: folds
+Uncalled bet (2400) returned to DrLetstry
+DrLetstry collected 3200 from pot
+*** SUMMARY ***
+Total pot 3200 | Rake 0
+Board [5h 4s Js]
+Seat 1: DrLetstry (button) (small blind) collected (3200)
+Seat 2: jeje_sat (big blind) folded on the Flop
+
+
+PokerStars Home Game Hand #235306873118: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:04:23 CET [2022/04/06 13:04:23 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (39768 in chips, €0.16 bounty)
+Seat 2: jeje_sat (25232 in chips, €0.10 bounty)
+jeje_sat: posts small blind 800
+DrLetstry: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [2s 7d Th 8s]
+jeje_sat: raises 3200 to 4800
+DrLetstry: calls 3200
+*** FLOP *** [2d 8d Kc]
+DrLetstry: checks
+jeje_sat: bets 9600
+DrLetstry: folds
+Uncalled bet (9600) returned to jeje_sat
+jeje_sat collected 9600 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 9600 | Rake 0
+Board [2d 8d Kc]
+Seat 1: DrLetstry (big blind) folded on the Flop
+Seat 2: jeje_sat (button) (small blind) collected (9600)
+
+
+PokerStars Home Game Hand #235306879065: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:04:40 CET [2022/04/06 13:04:40 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (34968 in chips, €0.16 bounty)
+Seat 2: jeje_sat (30032 in chips, €0.10 bounty)
+DrLetstry: posts small blind 800
+jeje_sat: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c 6d Kh 3h]
+DrLetstry: calls 800
+jeje_sat: checks
+*** FLOP *** [7d 4d 8d]
+jeje_sat: checks
+DrLetstry: checks
+*** TURN *** [7d 4d 8d] [Ad]
+jeje_sat: checks
+DrLetstry: checks
+*** RIVER *** [7d 4d 8d Ad] [2d]
+jeje_sat: checks
+DrLetstry: checks
+*** SHOW DOWN ***
+jeje_sat: shows [3c 6d Kh 3h] (a pair of Threes)
+DrLetstry: shows [Ah 7c 5h 9d] (two pair, Aces and Sevens)
+DrLetstry collected 3200 from pot
+*** SUMMARY ***
+Total pot 3200 | Rake 0
+Board [7d 4d 8d Ad 2d]
+Seat 1: DrLetstry (button) (small blind) showed [Ah 7c 5h 9d] and won (3200) with two pair, Aces and Sevens
+Seat 2: jeje_sat (big blind) showed [3c 6d Kh 3h] and lost with a pair of Threes
+
+
+PokerStars Home Game Hand #235306890673: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:05:12 CET [2022/04/06 13:05:12 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (36568 in chips, €0.16 bounty)
+Seat 2: jeje_sat (28432 in chips, €0.10 bounty)
+jeje_sat: posts small blind 800
+DrLetstry: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jh 5c 5s 6h]
+jeje_sat: folds
+Uncalled bet (800) returned to DrLetstry
+DrLetstry collected 1600 from pot
+*** SUMMARY ***
+Total pot 1600 | Rake 0
+Seat 1: DrLetstry (big blind) collected (1600)
+Seat 2: jeje_sat (button) (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235306893030: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:05:18 CET [2022/04/06 13:05:18 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (37368 in chips, €0.16 bounty)
+Seat 2: jeje_sat (27632 in chips, €0.10 bounty)
+DrLetstry: posts small blind 800
+jeje_sat: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s 5h 4s Jd]
+DrLetstry: calls 800
+jeje_sat: checks
+*** FLOP *** [Jc 3s Ah]
+jeje_sat: checks
+DrLetstry: bets 1600
+jeje_sat: folds
+Uncalled bet (1600) returned to DrLetstry
+DrLetstry collected 3200 from pot
+*** SUMMARY ***
+Total pot 3200 | Rake 0
+Board [Jc 3s Ah]
+Seat 1: DrLetstry (button) (small blind) collected (3200)
+Seat 2: jeje_sat (big blind) folded on the Flop
+
+
+PokerStars Home Game Hand #235306898852: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:05:35 CET [2022/04/06 13:05:35 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (38968 in chips, €0.16 bounty)
+Seat 2: jeje_sat (26032 in chips, €0.10 bounty)
+jeje_sat: posts small blind 800
+DrLetstry: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Js Th 2d Jd]
+jeje_sat: raises 3200 to 4800
+DrLetstry: folds
+Uncalled bet (3200) returned to jeje_sat
+jeje_sat collected 3200 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 3200 | Rake 0
+Seat 1: DrLetstry (big blind) folded before Flop
+Seat 2: jeje_sat (button) (small blind) collected (3200)
+
+
+PokerStars Home Game Hand #235306901536: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVII (800/1600) - 2022/04/06 19:05:42 CET [2022/04/06 13:05:42 ET]
+Table '3392346771 4' 6-max Seat #1 is the button
+Seat 1: DrLetstry (37368 in chips, €0.16 bounty)
+Seat 2: jeje_sat (27632 in chips, €0.10 bounty)
+DrLetstry: posts small blind 800
+jeje_sat: posts big blind 1600
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc 8d Js 2s]
+DrLetstry: raises 1600 to 3200
+jeje_sat: calls 1600
+*** FLOP *** [Qs 3d Jd]
+jeje_sat: checks
+DrLetstry: bets 4800
+jeje_sat: raises 16000 to 20800
+DrLetstry: raises 13368 to 34168 and is all-in
+jeje_sat: calls 3632 and is all-in
+Uncalled bet (9736) returned to DrLetstry
+*** TURN *** [Qs 3d Jd] [Qd]
+*** RIVER *** [Qs 3d Jd Qd] [Kc]
+*** SHOW DOWN ***
+jeje_sat: shows [Jc 8d Js 2s] (a full house, Jacks full of Queens)
+DrLetstry: shows [Ad Kh 5c Td] (a flush, Ace high)
+jeje_sat collected 55264 from pot
+*** SUMMARY ***
+Total pot 55264 | Rake 0
+Board [Qs 3d Jd Qd Kc]
+Seat 1: DrLetstry (button) (small blind) showed [Ad Kh 5c Td] and lost with a flush, Ace high
+Seat 2: jeje_sat (big blind) showed [Jc 8d Js 2s] and won (55264) with a full house, Jacks full of Queens
+
+
+PokerStars Home Game Hand #235306915584: {Club #4837790} Tournament #3392346771, €0.13+€0.05+€0.02 EUR Omaha Pot Limit - Level XVIII (1000/2000) - 2022/04/06 19:06:21 CET [2022/04/06 13:06:21 ET]
+Table '3392346771 4' 6-max Seat #2 is the button
+Seat 1: DrLetstry (9736 in chips, €0.16 bounty)
+Seat 2: jeje_sat (55264 in chips, €0.10 bounty)
+jeje_sat: posts small blind 1000
+DrLetstry: posts big blind 2000
+*** HOLE CARDS ***
+Dealt to jeje_sat [5s Kh 9c 8h]
+jeje_sat: raises 4000 to 6000
+DrLetstry: raises 3736 to 9736 and is all-in
+jeje_sat: calls 3736
+*** FLOP *** [Ah 7h 8s]
+*** TURN *** [Ah 7h 8s] [7s]
+*** RIVER *** [Ah 7h 8s 7s] [6c]
+*** SHOW DOWN ***
+DrLetstry: shows [2s Js Qh Ts] (a pair of Sevens)
+jeje_sat: shows [5s Kh 9c 8h] (a straight, Five to Nine)
+jeje_sat collected 19472 from pot
+jeje_sat wins €0.08 for eliminating DrLetstry and their own bounty increases by €0.08 to €0.18
+DrLetstry finished the tournament in 2nd place and received €0.50.
+jeje_sat wins the tournament and receives €0.86 - congratulations!
+*** SUMMARY ***
+Total pot 19472 | Rake 0
+Board [Ah 7h 8s 7s 6c]
+Seat 1: DrLetstry (big blind) showed [2s Js Qh Ts] and lost with a pair of Sevens
+Seat 2: jeje_sat (button) (small blind) showed [5s Kh 9c 8h] and won (19472) with a straight, Five to Nine
+
+

@@ -1,0 +1,220 @@
+﻿PokerStars Hand #229721624418: Tournament #3263043070, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 21:57:34 CET [2021/09/09 15:57:34 ET]
+Table '3263043070 1' 3-max Seat #1 is the button
+Seat 1: jeje_sat (500 in chips)
+Seat 2: cuartacopa (500 in chips)
+Seat 3: basclar (500 in chips)
+cuartacopa: posts small blind 10
+basclar: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [6s 8c 4d 5s]
+jeje_sat: raises 50 to 70
+cuartacopa: folds
+basclar: calls 50
+*** FLOP *** [3c Jd 9s]
+basclar: checks
+jeje_sat: bets 75
+basclar: calls 75
+*** TURN *** [3c Jd 9s] [Ac]
+basclar: checks
+jeje_sat: checks
+*** RIVER *** [3c Jd 9s Ac] [Qd]
+basclar: checks
+jeje_sat: bets 300
+basclar: folds
+Uncalled bet (300) returned to jeje_sat
+jeje_sat collected 300 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 300 | Rake 0
+Board [3c Jd 9s Ac Qd]
+Seat 1: jeje_sat (button) collected (300)
+Seat 2: cuartacopa (small blind) folded before Flop
+Seat 3: basclar (big blind) folded on the River
+
+
+PokerStars Hand #229721640371: Tournament #3263043070, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 21:58:17 CET [2021/09/09 15:58:17 ET]
+Table '3263043070 1' 3-max Seat #2 is the button
+Seat 1: jeje_sat (655 in chips)
+Seat 2: cuartacopa (490 in chips)
+Seat 3: basclar (355 in chips)
+basclar: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qc 9s 9d 3s]
+cuartacopa: calls 20
+basclar: calls 10
+jeje_sat: checks
+*** FLOP *** [Kh 7s Ts]
+basclar: checks
+jeje_sat: checks
+cuartacopa: checks
+*** TURN *** [Kh 7s Ts] [Ac]
+basclar: checks
+jeje_sat: checks
+cuartacopa: checks
+*** RIVER *** [Kh 7s Ts Ac] [8s]
+basclar: checks
+jeje_sat: bets 20
+cuartacopa: raises 80 to 100
+basclar: folds
+jeje_sat: folds
+Uncalled bet (80) returned to cuartacopa
+cuartacopa collected 100 from pot
+cuartacopa: doesn't show hand
+*** SUMMARY ***
+Total pot 100 | Rake 0
+Board [Kh 7s Ts Ac 8s]
+Seat 1: jeje_sat (big blind) folded on the River
+Seat 2: cuartacopa (button) collected (100)
+Seat 3: basclar (small blind) folded on the River
+
+
+PokerStars Hand #229721662272: Tournament #3263043070, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 21:59:17 CET [2021/09/09 15:59:17 ET]
+Table '3263043070 1' 3-max Seat #3 is the button
+Seat 1: jeje_sat (615 in chips)
+Seat 2: cuartacopa (550 in chips)
+Seat 3: basclar (335 in chips)
+jeje_sat: posts small blind 10
+cuartacopa: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [5c 7h 4c Ac]
+basclar: raises 50 to 70
+jeje_sat: calls 60
+cuartacopa: folds
+*** FLOP *** [8s Ad Qc]
+jeje_sat: checks
+basclar: checks
+*** TURN *** [8s Ad Qc] [2c]
+jeje_sat: bets 160
+basclar: calls 160
+*** RIVER *** [8s Ad Qc 2c] [4s]
+jeje_sat: bets 385 and is all-in
+basclar: folds
+Uncalled bet (385) returned to jeje_sat
+jeje_sat collected 480 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 480 | Rake 0
+Board [8s Ad Qc 2c 4s]
+Seat 1: jeje_sat (small blind) collected (480)
+Seat 2: cuartacopa (big blind) folded before Flop
+Seat 3: basclar (button) folded on the River
+
+
+PokerStars Hand #229721677677: Tournament #3263043070, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 21:59:59 CET [2021/09/09 15:59:59 ET]
+Table '3263043070 1' 3-max Seat #1 is the button
+Seat 1: jeje_sat (865 in chips)
+Seat 2: cuartacopa (530 in chips)
+Seat 3: basclar (105 in chips)
+cuartacopa: posts small blind 10
+basclar: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th Ks Js 4d]
+jeje_sat: calls 20
+cuartacopa: calls 10
+basclar: raises 60 to 80
+jeje_sat: calls 60
+cuartacopa: folds
+*** FLOP *** [7d Jc 7c]
+basclar: bets 25 and is all-in
+jeje_sat: calls 25
+*** TURN *** [7d Jc 7c] [6c]
+*** RIVER *** [7d Jc 7c 6c] [2h]
+*** SHOW DOWN ***
+basclar: shows [5h Ac 4c 9c] (a flush, Ace high)
+jeje_sat: shows [Th Ks Js 4d] (two pair, Jacks and Sevens)
+basclar collected 230 from pot
+*** SUMMARY ***
+Total pot 230 | Rake 0
+Board [7d Jc 7c 6c 2h]
+Seat 1: jeje_sat (button) showed [Th Ks Js 4d] and lost with two pair, Jacks and Sevens
+Seat 2: cuartacopa (small blind) folded before Flop
+Seat 3: basclar (big blind) showed [5h Ac 4c 9c] and won (230) with a flush, Ace high
+
+
+PokerStars Hand #229721688098: Tournament #3263043070, €0.23+€0.02 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/09 22:00:26 CET [2021/09/09 16:00:26 ET]
+Table '3263043070 1' 3-max Seat #2 is the button
+Seat 1: jeje_sat (760 in chips)
+Seat 2: cuartacopa (510 in chips)
+Seat 3: basclar (230 in chips)
+basclar: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [2c Qs 3d 7d]
+cuartacopa: folds
+basclar: raises 40 to 60
+jeje_sat: folds
+Uncalled bet (40) returned to basclar
+basclar collected 40 from pot
+basclar: doesn't show hand
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Seat 1: jeje_sat (big blind) folded before Flop
+Seat 2: cuartacopa (button) folded before Flop (didn't bet)
+Seat 3: basclar (small blind) collected (40)
+
+
+PokerStars Hand #229721694301: Tournament #3263043070, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:00:41 CET [2021/09/09 16:00:41 ET]
+Table '3263043070 1' 3-max Seat #3 is the button
+Seat 1: jeje_sat (740 in chips)
+Seat 2: cuartacopa (510 in chips)
+Seat 3: basclar (250 in chips)
+jeje_sat: posts small blind 15
+cuartacopa: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc 4d 9c 9d]
+basclar: raises 75 to 105
+jeje_sat: folds
+cuartacopa: calls 75
+*** FLOP *** [Qd 7d Kh]
+cuartacopa: checks
+basclar: bets 145 and is all-in
+cuartacopa: calls 145
+*** TURN *** [Qd 7d Kh] [4h]
+*** RIVER *** [Qd 7d Kh 4h] [2c]
+*** SHOW DOWN ***
+cuartacopa: shows [Ac Tc 8c 7s] (a pair of Sevens)
+basclar: shows [Qs 3d 3h Qh] (three of a kind, Queens)
+basclar collected 515 from pot
+*** SUMMARY ***
+Total pot 515 | Rake 0
+Board [Qd 7d Kh 4h 2c]
+Seat 1: jeje_sat (small blind) folded before Flop
+Seat 2: cuartacopa (big blind) showed [Ac Tc 8c 7s] and lost with a pair of Sevens
+Seat 3: basclar (button) showed [Qs 3d 3h Qh] and won (515) with three of a kind, Queens
+
+
+PokerStars Hand #229721708379: Tournament #3263043070, €0.23+€0.02 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/09 22:01:13 CET [2021/09/09 16:01:13 ET]
+Table '3263043070 1' 3-max Seat #1 is the button
+Seat 1: jeje_sat (725 in chips)
+Seat 2: cuartacopa (260 in chips)
+Seat 3: basclar (515 in chips)
+cuartacopa: posts small blind 15
+basclar: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jd 6h 8h 9s]
+jeje_sat: raises 60 to 90
+cuartacopa: calls 75
+basclar: calls 60
+*** FLOP *** [7d 5h 6c]
+cuartacopa: bets 170 and is all-in
+basclar: calls 170
+jeje_sat: raises 465 to 635 and is all-in
+basclar: calls 255 and is all-in
+Uncalled bet (210) returned to jeje_sat
+*** TURN *** [7d 5h 6c] [3c]
+*** RIVER *** [7d 5h 6c 3c] [Td]
+*** SHOW DOWN ***
+basclar: shows [6s 4s 7s 4h] (a straight, Three to Seven)
+jeje_sat: shows [Jd 6h 8h 9s] (a straight, Six to Ten)
+jeje_sat collected 510 from side pot
+cuartacopa: shows [3h 7c Th Ts] (three of a kind, Tens)
+jeje_sat collected 780 from main pot
+*** SUMMARY ***
+Total pot 1290 Main pot 780. Side pot 510. | Rake 0
+Board [7d 5h 6c 3c Td]
+Seat 1: jeje_sat (button) showed [Jd 6h 8h 9s] and won (1290) with a straight, Six to Ten
+Seat 2: cuartacopa (small blind) showed [3h 7c Th Ts] and lost with three of a kind, Tens
+Seat 3: basclar (big blind) showed [6s 4s 7s 4h] and lost with a straight, Three to Seven
+
+

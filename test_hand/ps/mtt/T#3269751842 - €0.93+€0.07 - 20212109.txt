@@ -1,0 +1,583 @@
+﻿PokerStars Hand #230025243771: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/21 16:53:12 CET [2021/09/21 10:53:12 ET]
+Table '3269751842 1' 3-max Seat #1 is the button
+Seat 1: touzay (500 in chips)
+Seat 2: jeje_sat (500 in chips)
+Seat 3: Carpiste523 (500 in chips)
+jeje_sat: posts small blind 10
+Carpiste523: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kc 5s Ah Js]
+touzay: calls 20
+jeje_sat: calls 10
+Carpiste523: raises 30 to 50
+touzay: calls 30
+jeje_sat: calls 30
+*** FLOP *** [9d 8s 5h]
+jeje_sat: checks
+Carpiste523: checks
+touzay: checks
+*** TURN *** [9d 8s 5h] [Qh]
+jeje_sat: checks
+Carpiste523: bets 68
+touzay: folds
+jeje_sat: folds
+Uncalled bet (68) returned to Carpiste523
+Carpiste523 collected 150 from pot
+Carpiste523: doesn't show hand
+*** SUMMARY ***
+Total pot 150 | Rake 0
+Board [9d 8s 5h Qh]
+Seat 1: touzay (button) folded on the Turn
+Seat 2: jeje_sat (small blind) folded on the Turn
+Seat 3: Carpiste523 (big blind) collected (150)
+
+
+PokerStars Hand #230025252623: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/21 16:53:39 CET [2021/09/21 10:53:39 ET]
+Table '3269751842 1' 3-max Seat #2 is the button
+Seat 1: touzay (450 in chips)
+Seat 2: jeje_sat (450 in chips)
+Seat 3: Carpiste523 (600 in chips)
+Carpiste523: posts small blind 10
+touzay: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [2s 7h 2h Tc]
+jeje_sat: calls 20
+Carpiste523: raises 30 to 50
+touzay: calls 30
+jeje_sat: calls 30
+*** FLOP *** [6h 9c Th]
+Carpiste523: bets 68
+touzay: calls 68
+jeje_sat: raises 332 to 400 and is all-in
+Carpiste523: raises 150 to 550 and is all-in
+touzay: folds
+Uncalled bet (150) returned to Carpiste523
+*** TURN *** [6h 9c Th] [Qh]
+*** RIVER *** [6h 9c Th Qh] [Jc]
+*** SHOW DOWN ***
+Carpiste523: shows [Jd 8d Ah 7d] (a straight, Eight to Queen)
+jeje_sat: shows [2s 7h 2h Tc] (a flush, Queen high)
+jeje_sat collected 1018 from pot
+*** SUMMARY ***
+Total pot 1018 | Rake 0
+Board [6h 9c Th Qh Jc]
+Seat 1: touzay (big blind) folded on the Flop
+Seat 2: jeje_sat (button) showed [2s 7h 2h Tc] and won (1018) with a flush, Queen high
+Seat 3: Carpiste523 (small blind) showed [Jd 8d Ah 7d] and lost with a straight, Eight to Queen
+
+
+PokerStars Hand #230025263050: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/21 16:54:11 CET [2021/09/21 10:54:11 ET]
+Table '3269751842 1' 3-max Seat #3 is the button
+Seat 1: touzay (332 in chips)
+Seat 2: jeje_sat (1018 in chips)
+Seat 3: Carpiste523 (150 in chips)
+touzay: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [8d Kc 4d 4h]
+Carpiste523: raises 50 to 70
+touzay: raises 160 to 230
+jeje_sat: folds
+Carpiste523: calls 80 and is all-in
+Uncalled bet (80) returned to touzay
+*** FLOP *** [9h 7d 3d]
+*** TURN *** [9h 7d 3d] [5h]
+*** RIVER *** [9h 7d 3d 5h] [Kd]
+*** SHOW DOWN ***
+touzay: shows [6h Ts Qd Tc] (a pair of Tens)
+Carpiste523: shows [7h Js Qs 3c] (two pair, Sevens and Threes)
+Carpiste523 collected 320 from pot
+*** SUMMARY ***
+Total pot 320 | Rake 0
+Board [9h 7d 3d 5h Kd]
+Seat 1: touzay (small blind) showed [6h Ts Qd Tc] and lost with a pair of Tens
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 3: Carpiste523 (button) showed [7h Js Qs 3c] and won (320) with two pair, Sevens and Threes
+
+
+PokerStars Hand #230025269969: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/21 16:54:32 CET [2021/09/21 10:54:32 ET]
+Table '3269751842 1' 3-max Seat #1 is the button
+Seat 1: touzay (182 in chips)
+Seat 2: jeje_sat (998 in chips)
+Seat 3: Carpiste523 (320 in chips)
+jeje_sat: posts small blind 10
+Carpiste523: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 7h 2h 5h]
+touzay: raises 50 to 70
+jeje_sat: calls 60
+Carpiste523: raises 210 to 280
+touzay: calls 112 and is all-in
+jeje_sat: calls 210
+*** FLOP *** [8s 8d Qh]
+jeje_sat: bets 371
+Carpiste523: calls 40 and is all-in
+Uncalled bet (331) returned to jeje_sat
+*** TURN *** [8s 8d Qh] [Th]
+*** RIVER *** [8s 8d Qh Th] [Td]
+*** SHOW DOWN ***
+jeje_sat: shows [4s 7h 2h 5h] (a pair of Tens)
+Carpiste523: shows [6s Jc As Ad] (two pair, Aces and Tens)
+Carpiste523 collected 276 from side pot
+touzay: shows [Ac 3d Ts 8h] (a full house, Tens full of Eights)
+touzay collected 546 from main pot
+*** SUMMARY ***
+Total pot 822 Main pot 546. Side pot 276. | Rake 0
+Board [8s 8d Qh Th Td]
+Seat 1: touzay (button) showed [Ac 3d Ts 8h] and won (546) with a full house, Tens full of Eights
+Seat 2: jeje_sat (small blind) showed [4s 7h 2h 5h] and lost with a pair of Tens
+Seat 3: Carpiste523 (big blind) showed [6s Jc As Ad] and won (276) with two pair, Aces and Tens
+
+
+PokerStars Hand #230025278800: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/21 16:54:59 CET [2021/09/21 10:54:59 ET]
+Table '3269751842 1' 3-max Seat #2 is the button
+Seat 1: touzay (546 in chips)
+Seat 2: jeje_sat (678 in chips)
+Seat 3: Carpiste523 (276 in chips)
+Carpiste523: posts small blind 10
+touzay: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [4c Ks Qd 5h]
+jeje_sat: calls 20
+Carpiste523: raises 60 to 80
+touzay: folds
+jeje_sat: calls 60
+*** FLOP *** [2d 4h Jd]
+Carpiste523: bets 180
+jeje_sat: calls 180
+*** TURN *** [2d 4h Jd] [8d]
+Carpiste523: bets 16 and is all-in
+jeje_sat: calls 16
+*** RIVER *** [2d 4h Jd 8d] [7d]
+*** SHOW DOWN ***
+Carpiste523: shows [Kc Ad Qc 3h] (high card Ace)
+jeje_sat: shows [4c Ks Qd 5h] (a pair of Fours)
+jeje_sat collected 572 from pot
+Carpiste523 finished the tournament in 3rd place
+*** SUMMARY ***
+Total pot 572 | Rake 0
+Board [2d 4h Jd 8d 7d]
+Seat 1: touzay (big blind) folded before Flop
+Seat 2: jeje_sat (button) showed [4c Ks Qd 5h] and won (572) with a pair of Fours
+Seat 3: Carpiste523 (small blind) showed [Kc Ad Qc 3h] and lost with high card Ace
+
+
+PokerStars Hand #230025286293: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/21 16:55:24 CET [2021/09/21 10:55:24 ET]
+Table '3269751842 1' 3-max Seat #1 is the button
+Seat 1: touzay (526 in chips)
+Seat 2: jeje_sat (974 in chips)
+touzay: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [3s Kd Js Ts]
+touzay: calls 10
+jeje_sat: raises 40 to 60
+touzay: calls 40
+*** FLOP *** [5d 4s As]
+jeje_sat: bets 120
+touzay: folds
+Uncalled bet (120) returned to jeje_sat
+jeje_sat collected 120 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [5d 4s As]
+Seat 1: touzay (button) (small blind) folded on the Flop
+Seat 2: jeje_sat (big blind) collected (120)
+
+
+PokerStars Hand #230025290500: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/21 16:55:40 CET [2021/09/21 10:55:40 ET]
+Table '3269751842 1' 3-max Seat #2 is the button
+Seat 1: touzay (466 in chips)
+Seat 2: jeje_sat (1034 in chips)
+jeje_sat: posts small blind 10
+touzay: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ah Qs 8d 7s]
+jeje_sat: calls 10
+touzay: checks
+*** FLOP *** [4c 3c 2s]
+touzay: checks
+jeje_sat: checks
+*** TURN *** [4c 3c 2s] [Tc]
+touzay: checks
+jeje_sat: checks
+*** RIVER *** [4c 3c 2s Tc] [5h]
+touzay: bets 20
+jeje_sat: folds
+Uncalled bet (20) returned to touzay
+touzay collected 40 from pot
+touzay: doesn't show hand
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Board [4c 3c 2s Tc 5h]
+Seat 1: touzay (big blind) collected (40)
+Seat 2: jeje_sat (button) (small blind) folded on the River
+
+
+PokerStars Hand #230025296445: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/21 16:56:02 CET [2021/09/21 10:56:02 ET]
+Table '3269751842 1' 3-max Seat #1 is the button
+Seat 1: touzay (486 in chips)
+Seat 2: jeje_sat (1014 in chips)
+touzay: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qd 7c Ad Qc]
+touzay: calls 10
+jeje_sat: raises 40 to 60
+touzay: raises 120 to 180
+jeje_sat: raises 360 to 540
+touzay: calls 306 and is all-in
+Uncalled bet (54) returned to jeje_sat
+*** FLOP *** [3s 2s 4s]
+*** TURN *** [3s 2s 4s] [Jh]
+*** RIVER *** [3s 2s 4s Jh] [9d]
+*** SHOW DOWN ***
+jeje_sat: shows [Qd 7c Ad Qc] (a pair of Queens)
+touzay: shows [Kd 3d Tc Kh] (a pair of Kings)
+touzay collected 972 from pot
+*** SUMMARY ***
+Total pot 972 | Rake 0
+Board [3s 2s 4s Jh 9d]
+Seat 1: touzay (button) (small blind) showed [Kd 3d Tc Kh] and won (972) with a pair of Kings
+Seat 2: jeje_sat (big blind) showed [Qd 7c Ad Qc] and lost with a pair of Queens
+
+
+PokerStars Hand #230025302408: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/21 16:56:24 CET [2021/09/21 10:56:24 ET]
+Table '3269751842 1' 3-max Seat #2 is the button
+Seat 1: touzay (972 in chips)
+Seat 2: jeje_sat (528 in chips)
+jeje_sat: posts small blind 15
+touzay: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kd Jh 4h 8h]
+jeje_sat: raises 60 to 90
+touzay: calls 60
+*** FLOP *** [9d 7h Th]
+touzay: checks
+jeje_sat: bets 180
+touzay: raises 180 to 360
+jeje_sat: raises 78 to 438 and is all-in
+touzay: calls 78
+*** TURN *** [9d 7h Th] [6c]
+*** RIVER *** [9d 7h Th 6c] [5h]
+*** SHOW DOWN ***
+touzay: shows [8s 8d 7c 7s] (a straight, Six to Ten)
+jeje_sat: shows [Kd Jh 4h 8h] (a flush, Jack high)
+jeje_sat collected 1056 from pot
+*** SUMMARY ***
+Total pot 1056 | Rake 0
+Board [9d 7h Th 6c 5h]
+Seat 1: touzay (big blind) showed [8s 8d 7c 7s] and lost with a straight, Six to Ten
+Seat 2: jeje_sat (button) (small blind) showed [Kd Jh 4h 8h] and won (1056) with a flush, Jack high
+
+
+PokerStars Hand #230025307991: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/21 16:56:45 CET [2021/09/21 10:56:45 ET]
+Table '3269751842 1' 3-max Seat #1 is the button
+Seat 1: touzay (444 in chips)
+Seat 2: jeje_sat (1056 in chips)
+touzay: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [7h 9d Jh 2s]
+touzay: raises 60 to 90
+jeje_sat: calls 60
+*** FLOP *** [Ac 4s 8d]
+jeje_sat: checks
+touzay: bets 120
+jeje_sat: folds
+Uncalled bet (120) returned to touzay
+touzay collected 180 from pot
+touzay: doesn't show hand
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Board [Ac 4s 8d]
+Seat 1: touzay (button) (small blind) collected (180)
+Seat 2: jeje_sat (big blind) folded on the Flop
+
+
+PokerStars Hand #230025313071: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/21 16:57:03 CET [2021/09/21 10:57:03 ET]
+Table '3269751842 1' 3-max Seat #2 is the button
+Seat 1: touzay (534 in chips)
+Seat 2: jeje_sat (966 in chips)
+jeje_sat: posts small blind 15
+touzay: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [4c Js Td 3c]
+jeje_sat: calls 15
+touzay: checks
+*** FLOP *** [5c 9d 2h]
+touzay: checks
+jeje_sat: bets 30
+touzay: calls 30
+*** TURN *** [5c 9d 2h] [Ac]
+touzay: checks
+jeje_sat: bets 120
+touzay: calls 120
+*** RIVER *** [5c 9d 2h Ac] [Ts]
+touzay: checks
+jeje_sat: bets 360
+touzay: folds
+Uncalled bet (360) returned to jeje_sat
+jeje_sat collected 360 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 360 | Rake 0
+Board [5c 9d 2h Ac Ts]
+Seat 1: touzay (big blind) folded on the River
+Seat 2: jeje_sat (button) (small blind) collected (360)
+
+
+PokerStars Hand #230025320621: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/21 16:57:31 CET [2021/09/21 10:57:31 ET]
+Table '3269751842 1' 3-max Seat #1 is the button
+Seat 1: touzay (354 in chips)
+Seat 2: jeje_sat (1146 in chips)
+touzay: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th As 4d Ts]
+touzay: calls 15
+jeje_sat: raises 60 to 90
+touzay: calls 60
+*** FLOP *** [8c 8d 4s]
+jeje_sat: bets 180
+touzay: folds
+Uncalled bet (180) returned to jeje_sat
+jeje_sat collected 180 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Board [8c 8d 4s]
+Seat 1: touzay (button) (small blind) folded on the Flop
+Seat 2: jeje_sat (big blind) collected (180)
+
+
+PokerStars Hand #230025324149: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/21 16:57:44 CET [2021/09/21 10:57:44 ET]
+Table '3269751842 1' 3-max Seat #2 is the button
+Seat 1: touzay (264 in chips)
+Seat 2: jeje_sat (1236 in chips)
+jeje_sat: posts small blind 15
+touzay: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h 6s Qs 3d]
+jeje_sat: calls 15
+touzay: checks
+*** FLOP *** [Ad 2d 6c]
+touzay: checks
+jeje_sat: checks
+*** TURN *** [Ad 2d 6c] [Qc]
+touzay: checks
+jeje_sat: bets 60
+touzay: calls 60
+*** RIVER *** [Ad 2d 6c Qc] [9s]
+touzay: checks
+jeje_sat: bets 180
+touzay: folds
+Uncalled bet (180) returned to jeje_sat
+jeje_sat collected 180 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Board [Ad 2d 6c Qc 9s]
+Seat 1: touzay (big blind) folded on the River
+Seat 2: jeje_sat (button) (small blind) collected (180)
+
+
+PokerStars Hand #230025334560: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/21 16:58:22 CET [2021/09/21 10:58:22 ET]
+Table '3269751842 1' 3-max Seat #1 is the button
+Seat 1: touzay (174 in chips)
+Seat 2: jeje_sat (1326 in chips)
+touzay: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ac 7d 2h Ad]
+touzay: raises 60 to 90
+jeje_sat: raises 180 to 270
+touzay: calls 84 and is all-in
+Uncalled bet (96) returned to jeje_sat
+*** FLOP *** [5h 4h Ks]
+*** TURN *** [5h 4h Ks] [3c]
+*** RIVER *** [5h 4h Ks 3c] [3s]
+*** SHOW DOWN ***
+jeje_sat: shows [Ac 7d 2h Ad] (a straight, Ace to Five)
+touzay: shows [7s 6h As Jh] (a straight, Three to Seven)
+touzay collected 348 from pot
+*** SUMMARY ***
+Total pot 348 | Rake 0
+Board [5h 4h Ks 3c 3s]
+Seat 1: touzay (button) (small blind) showed [7s 6h As Jh] and won (348) with a straight, Three to Seven
+Seat 2: jeje_sat (big blind) showed [Ac 7d 2h Ad] and lost with a straight, Ace to Five
+
+
+PokerStars Hand #230025338938: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/21 16:58:38 CET [2021/09/21 10:58:38 ET]
+Table '3269751842 1' 3-max Seat #2 is the button
+Seat 1: touzay (348 in chips)
+Seat 2: jeje_sat (1152 in chips)
+jeje_sat: posts small blind 15
+touzay: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qc Td Ks Ah]
+jeje_sat: raises 60 to 90
+touzay: calls 60
+*** FLOP *** [8d Kc Ts]
+touzay: checks
+jeje_sat: bets 180
+touzay: folds
+Uncalled bet (180) returned to jeje_sat
+jeje_sat collected 180 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Board [8d Kc Ts]
+Seat 1: touzay (big blind) folded on the Flop
+Seat 2: jeje_sat (button) (small blind) collected (180)
+
+
+PokerStars Hand #230025342607: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level II (15/30) - 2021/09/21 16:58:51 CET [2021/09/21 10:58:51 ET]
+Table '3269751842 1' 3-max Seat #1 is the button
+Seat 1: touzay (258 in chips)
+Seat 2: jeje_sat (1242 in chips)
+touzay: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c 7c 5s Jc]
+touzay: calls 15
+jeje_sat: raises 60 to 90
+touzay: calls 60
+*** FLOP *** [7h 7d Qc]
+jeje_sat: bets 180
+touzay: calls 168 and is all-in
+Uncalled bet (12) returned to jeje_sat
+*** TURN *** [7h 7d Qc] [5d]
+*** RIVER *** [7h 7d Qc 5d] [5c]
+*** SHOW DOWN ***
+jeje_sat: shows [3c 7c 5s Jc] (a full house, Sevens full of Fives)
+touzay: shows [9s 4h Qh 7s] (a full house, Sevens full of Queens)
+touzay collected 516 from pot
+*** SUMMARY ***
+Total pot 516 | Rake 0
+Board [7h 7d Qc 5d 5c]
+Seat 1: touzay (button) (small blind) showed [9s 4h Qh 7s] and won (516) with a full house, Sevens full of Queens
+Seat 2: jeje_sat (big blind) showed [3c 7c 5s Jc] and lost with a full house, Sevens full of Fives
+
+
+PokerStars Hand #230025350309: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level III (20/40) - 2021/09/21 16:59:20 CET [2021/09/21 10:59:20 ET]
+Table '3269751842 1' 3-max Seat #2 is the button
+Seat 1: touzay (516 in chips)
+Seat 2: jeje_sat (984 in chips)
+jeje_sat: posts small blind 20
+touzay: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th 4s 5c 2h]
+jeje_sat: calls 20
+touzay: checks
+*** FLOP *** [Qd Qc 5s]
+touzay: checks
+jeje_sat: bets 80
+touzay: folds
+Uncalled bet (80) returned to jeje_sat
+jeje_sat collected 80 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 80 | Rake 0
+Board [Qd Qc 5s]
+Seat 1: touzay (big blind) folded on the Flop
+Seat 2: jeje_sat (button) (small blind) collected (80)
+
+
+PokerStars Hand #230025355518: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level III (20/40) - 2021/09/21 16:59:39 CET [2021/09/21 10:59:39 ET]
+Table '3269751842 1' 3-max Seat #1 is the button
+Seat 1: touzay (476 in chips)
+Seat 2: jeje_sat (1024 in chips)
+touzay: posts small blind 20
+jeje_sat: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [6s 6c 7c 4d]
+touzay: calls 20
+jeje_sat: raises 80 to 120
+touzay: calls 80
+*** FLOP *** [3s 9d Qs]
+jeje_sat: bets 120
+touzay: raises 120 to 240
+jeje_sat: folds
+Uncalled bet (120) returned to touzay
+touzay collected 480 from pot
+touzay: doesn't show hand
+*** SUMMARY ***
+Total pot 480 | Rake 0
+Board [3s 9d Qs]
+Seat 1: touzay (button) (small blind) collected (480)
+Seat 2: jeje_sat (big blind) folded on the Flop
+
+
+PokerStars Hand #230025360626: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level III (20/40) - 2021/09/21 16:59:58 CET [2021/09/21 10:59:58 ET]
+Table '3269751842 1' 3-max Seat #2 is the button
+Seat 1: touzay (716 in chips)
+Seat 2: jeje_sat (784 in chips)
+jeje_sat: posts small blind 20
+touzay: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [9h 8h As 2c]
+jeje_sat: raises 80 to 120
+touzay: calls 80
+*** FLOP *** [9d Ac Tc]
+touzay: checks
+jeje_sat: bets 240
+touzay: folds
+Uncalled bet (240) returned to jeje_sat
+jeje_sat collected 240 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Board [9d Ac Tc]
+Seat 1: touzay (big blind) folded on the Flop
+Seat 2: jeje_sat (button) (small blind) collected (240)
+
+
+PokerStars Hand #230025364362: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level III (20/40) - 2021/09/21 17:00:12 CET [2021/09/21 11:00:12 ET]
+Table '3269751842 1' 3-max Seat #1 is the button
+Seat 1: touzay (596 in chips)
+Seat 2: jeje_sat (904 in chips)
+touzay: posts small blind 20
+jeje_sat: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qh Jh 8c 8d]
+touzay: folds
+Uncalled bet (20) returned to jeje_sat
+jeje_sat collected 40 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Seat 1: touzay (button) (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (40)
+
+
+PokerStars Hand #230025365559: Tournament #3269751842, €0.93+€0.07 EUR Omaha Pot Limit - Level III (20/40) - 2021/09/21 17:00:16 CET [2021/09/21 11:00:16 ET]
+Table '3269751842 1' 3-max Seat #2 is the button
+Seat 1: touzay (576 in chips)
+Seat 2: jeje_sat (924 in chips)
+jeje_sat: posts small blind 20
+touzay: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d 9c 3d 2h]
+jeje_sat: calls 20
+touzay: raises 40 to 80
+jeje_sat: calls 40
+*** FLOP *** [5d 2c Jh]
+touzay: bets 120
+jeje_sat: raises 400 to 520
+touzay: calls 376 and is all-in
+Uncalled bet (24) returned to jeje_sat
+*** TURN *** [5d 2c Jh] [6s]
+*** RIVER *** [5d 2c Jh 6s] [4s]
+*** SHOW DOWN ***
+touzay: shows [Tc Kc Td Qh] (a pair of Tens)
+jeje_sat: shows [4d 9c 3d 2h] (a straight, Deuce to Six)
+jeje_sat collected 1152 from pot
+*** SUMMARY ***
+Total pot 1152 | Rake 0
+Board [5d 2c Jh 6s 4s]
+Seat 1: touzay (big blind) showed [Tc Kc Td Qh] and lost with a pair of Tens
+Seat 2: jeje_sat (button) (small blind) showed [4d 9c 3d 2h] and won (1152) with a straight, Deuce to Six
+
+

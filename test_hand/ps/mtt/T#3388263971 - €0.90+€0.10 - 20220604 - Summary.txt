@@ -1,0 +1,43 @@
+PokerTracker 4 Tournament Summary
+Site: PokerStars
+Game: Omaha Hi
+Tournament #: 3388263971
+Started: 2022/04/06 19:00:13
+Finished: 2022/04/06 21:13:06
+Buyin: €0.90
+Fee: €0.10
+Prize Pool: €0.00
+Table Type: MTT (6 max) 
+Tourney Type: Pot Limit
+Players: 70
+
+Place: 0, Player: nAAbila, Won: €0.00,
+Place: 0, Player: philo naz, Won: €0.00,
+Place: 0, Player: captainzizou, Won: €0.00,
+Place: 0, Player: tontonfranz6, Won: €0.00,
+Place: 0, Player: angelina0294, Won: €0.00,
+Place: 0, Player: lecoupeur67, Won: €0.00,
+Place: 0, Player: mickamanon91, Won: €0.00,
+Place: 0, Player: sebix25, Won: €0.00,
+Place: 0, Player: Zz62480, Won: €0.00,
+Place: 0, Player: Matyrina, Won: €0.00,
+Place: 0, Player: ESFANJAARA, Won: €0.00,
+Place: 0, Player: gexi060, Won: €0.00,
+Place: 0, Player: AAfreddyAA, Won: €0.00,
+Place: 0, Player: eliefedida, Won: €0.00,
+Place: 0, Player: cianciana, Won: €0.00,
+Place: 0, Player: Pumg, Won: €0.00,
+Place: 0, Player: ElkYX, Won: €0.00,
+Place: 0, Player: rolgus77, Won: €0.00,
+Place: 0, Player: tranquille41, Won: €0.00,
+Place: 9, Player: jeje_sat, Won: €10.54,
+Place: 10, Player: NIGHT4NURSE, Won: €8.80,
+Place: 13, Player: PawnChess, Won: €7.28,
+Place: 14, Player: fastshedy, Won: €7.28,
+Place: 15, Player: jazz27220, Won: €5.91,
+Place: 18, Player: Mcfish29, Won: €4.66,
+Place: 22, Player: noydufccg53, Won: €4.66,
+Place: 28, Player: sam_lion2850, Won: €0.00,
+Place: 37, Player: ~tony.v~111, Won: €0.00,
+Place: 43, Player: bobaice, Won: €0.00,
+Place: 54, Player: BluntBeer, Won: €0.00,

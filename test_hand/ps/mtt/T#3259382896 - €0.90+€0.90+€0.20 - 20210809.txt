@@ -1,0 +1,451 @@
+﻿PokerStars Hand #229696481737: Tournament #3259382896, €0.90+€0.90+€0.20 EUR Hold'em No Limit - Level IV (25/50) - 2021/09/08 22:20:18 CET [2021/09/08 16:20:18 ET]
+Table '3259382896 5' 9-max Seat #6 is the button
+Seat 1: aghero (2638 in chips, €0.90 bounty)
+Seat 2: fjmolina (2890 in chips, €0.90 bounty)
+Seat 3: majoyjose (2405 in chips, €0.90 bounty)
+Seat 4: jeje_sat (3000 in chips, €0.90 bounty)
+Seat 5: romdom50 (2840 in chips, €0.90 bounty)
+Seat 6: LSPORTINGD (7387 in chips, €1.35 bounty)
+Seat 7: frelator (3205 in chips, €0.90 bounty)
+Seat 8: brugger355 (6848 in chips, €1.35 bounty)
+Seat 9: Stringsbreaker (3293 in chips, €0.90 bounty)
+aghero: posts the ante 5
+fjmolina: posts the ante 5
+majoyjose: posts the ante 5
+jeje_sat: posts the ante 5
+romdom50: posts the ante 5
+LSPORTINGD: posts the ante 5
+frelator: posts the ante 5
+brugger355: posts the ante 5
+Stringsbreaker: posts the ante 5
+frelator: posts small blind 25
+brugger355: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [5d As]
+Stringsbreaker: raises 100 to 150
+aghero: folds
+fjmolina: folds
+majoyjose: folds
+jeje_sat: calls 150
+romdom50: folds
+LSPORTINGD: folds
+frelator: folds
+brugger355: folds
+*** FLOP *** [Th Ts Ks]
+Stringsbreaker: bets 139
+jeje_sat: folds
+Uncalled bet (139) returned to Stringsbreaker
+Stringsbreaker collected 420 from pot
+Stringsbreaker: doesn't show hand
+*** SUMMARY ***
+Total pot 420 | Rake 0
+Board [Th Ts Ks]
+Seat 1: aghero folded before Flop (didn't bet)
+Seat 2: fjmolina folded before Flop (didn't bet)
+Seat 3: majoyjose folded before Flop (didn't bet)
+Seat 4: jeje_sat folded on the Flop
+Seat 5: romdom50 folded before Flop (didn't bet)
+Seat 6: LSPORTINGD (button) folded before Flop (didn't bet)
+Seat 7: frelator (small blind) folded before Flop
+Seat 8: brugger355 (big blind) folded before Flop
+Seat 9: Stringsbreaker collected (420)
+
+
+PokerStars Hand #229696502814: Tournament #3259382896, €0.90+€0.90+€0.20 EUR Hold'em No Limit - Level IV (25/50) - 2021/09/08 22:20:55 CET [2021/09/08 16:20:55 ET]
+Table '3259382896 5' 9-max Seat #7 is the button
+Seat 1: aghero (2633 in chips, €0.90 bounty)
+Seat 2: fjmolina (2885 in chips, €0.90 bounty)
+Seat 4: jeje_sat (2845 in chips, €0.90 bounty)
+Seat 5: romdom50 (2835 in chips, €0.90 bounty)
+Seat 6: LSPORTINGD (7382 in chips, €1.35 bounty)
+Seat 7: frelator (3175 in chips, €0.90 bounty)
+Seat 8: brugger355 (6793 in chips, €1.35 bounty)
+Seat 9: Stringsbreaker (3558 in chips, €0.90 bounty)
+aghero: posts the ante 5
+fjmolina: posts the ante 5
+jeje_sat: posts the ante 5
+romdom50: posts the ante 5
+LSPORTINGD: posts the ante 5
+frelator: posts the ante 5
+brugger355: posts the ante 5
+Stringsbreaker: posts the ante 5
+brugger355: posts small blind 25
+Stringsbreaker: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [4c 4s]
+aghero: folds
+fjmolina: folds
+jeje_sat: raises 100 to 150
+romdom50: folds
+LSPORTINGD: folds
+frelator: folds
+brugger355: calls 125
+Stringsbreaker: folds
+*** FLOP *** [5d 6s 4h]
+brugger355: bets 100
+jeje_sat: raises 2590 to 2690 and is all-in
+brugger355: folds
+Uncalled bet (2590) returned to jeje_sat
+jeje_sat collected 590 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 590 | Rake 0
+Board [5d 6s 4h]
+Seat 1: aghero folded before Flop (didn't bet)
+Seat 2: fjmolina folded before Flop (didn't bet)
+Seat 4: jeje_sat collected (590)
+Seat 5: romdom50 folded before Flop (didn't bet)
+Seat 6: LSPORTINGD folded before Flop (didn't bet)
+Seat 7: frelator (button) folded before Flop (didn't bet)
+Seat 8: brugger355 (small blind) folded on the Flop
+Seat 9: Stringsbreaker (big blind) folded before Flop
+
+
+PokerStars Hand #229696527461: Tournament #3259382896, €0.90+€0.90+€0.20 EUR Hold'em No Limit - Level IV (25/50) - 2021/09/08 22:21:41 CET [2021/09/08 16:21:41 ET]
+Table '3259382896 5' 9-max Seat #8 is the button
+Seat 1: aghero (2628 in chips, €0.90 bounty)
+Seat 2: fjmolina (2880 in chips, €0.90 bounty)
+Seat 4: jeje_sat (3180 in chips, €0.90 bounty)
+Seat 5: romdom50 (2830 in chips, €0.90 bounty)
+Seat 6: LSPORTINGD (7377 in chips, €1.35 bounty)
+Seat 7: frelator (3170 in chips, €0.90 bounty)
+Seat 8: brugger355 (6538 in chips, €1.35 bounty)
+Seat 9: Stringsbreaker (3503 in chips, €0.90 bounty)
+aghero: posts the ante 5
+fjmolina: posts the ante 5
+jeje_sat: posts the ante 5
+romdom50: posts the ante 5
+LSPORTINGD: posts the ante 5
+frelator: posts the ante 5
+brugger355: posts the ante 5
+Stringsbreaker: posts the ante 5
+Stringsbreaker: posts small blind 25
+aghero: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [4h Kc]
+fjmolina: folds
+jeje_sat: folds
+romdom50: folds
+LSPORTINGD: folds
+frelator: folds
+brugger355: folds
+Stringsbreaker: raises 100 to 150
+aghero: calls 100
+*** FLOP *** [9h 4c 8c]
+Stringsbreaker: bets 300
+aghero: raises 2173 to 2473 and is all-in
+Stringsbreaker: calls 2173
+*** TURN *** [9h 4c 8c] [Qh]
+*** RIVER *** [9h 4c 8c Qh] [Td]
+*** SHOW DOWN ***
+Stringsbreaker: shows [As 9d] (a pair of Nines)
+aghero: shows [Tc Qc] (two pair, Queens and Tens)
+aghero collected 5286 from pot
+*** SUMMARY ***
+Total pot 5286 | Rake 0
+Board [9h 4c 8c Qh Td]
+Seat 1: aghero (big blind) showed [Tc Qc] and won (5286) with two pair, Queens and Tens
+Seat 2: fjmolina folded before Flop (didn't bet)
+Seat 4: jeje_sat folded before Flop (didn't bet)
+Seat 5: romdom50 folded before Flop (didn't bet)
+Seat 6: LSPORTINGD folded before Flop (didn't bet)
+Seat 7: frelator folded before Flop (didn't bet)
+Seat 8: brugger355 (button) folded before Flop (didn't bet)
+Seat 9: Stringsbreaker (small blind) showed [As 9d] and lost with a pair of Nines
+
+
+PokerStars Hand #229696563334: Tournament #3259382896, €0.90+€0.90+€0.20 EUR Hold'em No Limit - Level IV (25/50) - 2021/09/08 22:22:48 CET [2021/09/08 16:22:48 ET]
+Table '3259382896 5' 9-max Seat #9 is the button
+Seat 1: aghero (5286 in chips, €0.90 bounty)
+Seat 2: fjmolina (2875 in chips, €0.90 bounty)
+Seat 4: jeje_sat (3175 in chips, €0.90 bounty)
+Seat 5: romdom50 (2825 in chips, €0.90 bounty)
+Seat 6: LSPORTINGD (7372 in chips, €1.35 bounty)
+Seat 7: frelator (3165 in chips, €0.90 bounty)
+Seat 8: brugger355 (6533 in chips, €1.35 bounty)
+Seat 9: Stringsbreaker (875 in chips, €0.90 bounty)
+aghero: posts the ante 5
+fjmolina: posts the ante 5
+jeje_sat: posts the ante 5
+romdom50: posts the ante 5
+LSPORTINGD: posts the ante 5
+frelator: posts the ante 5
+brugger355: posts the ante 5
+Stringsbreaker: posts the ante 5
+aghero: posts small blind 25
+fjmolina: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [Tc Qc]
+jeje_sat: raises 100 to 150
+romdom50: folds
+LSPORTINGD: folds
+frelator: folds
+brugger355: folds
+Stringsbreaker: folds
+aghero: folds
+fjmolina: calls 100
+*** FLOP *** [2s Ac 8h]
+fjmolina: checks
+jeje_sat: bets 183
+fjmolina: folds
+Uncalled bet (183) returned to jeje_sat
+jeje_sat collected 365 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 365 | Rake 0
+Board [2s Ac 8h]
+Seat 1: aghero (small blind) folded before Flop
+Seat 2: fjmolina (big blind) folded on the Flop
+Seat 4: jeje_sat collected (365)
+Seat 5: romdom50 folded before Flop (didn't bet)
+Seat 6: LSPORTINGD folded before Flop (didn't bet)
+Seat 7: frelator folded before Flop (didn't bet)
+Seat 8: brugger355 folded before Flop (didn't bet)
+Seat 9: Stringsbreaker (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #229696588507: Tournament #3259382896, €0.90+€0.90+€0.20 EUR Hold'em No Limit - Level IV (25/50) - 2021/09/08 22:23:36 CET [2021/09/08 16:23:36 ET]
+Table '3259382896 5' 9-max Seat #1 is the button
+Seat 1: aghero (5256 in chips, €0.90 bounty)
+Seat 2: fjmolina (2720 in chips, €0.90 bounty)
+Seat 3: senandvik (3000 in chips, €0.90 bounty)
+Seat 4: jeje_sat (3385 in chips, €0.90 bounty)
+Seat 5: romdom50 (2820 in chips, €0.90 bounty)
+Seat 6: LSPORTINGD (7367 in chips, €1.35 bounty)
+Seat 8: brugger355 (6528 in chips, €1.35 bounty)
+Seat 9: Stringsbreaker (870 in chips, €0.90 bounty)
+aghero: posts the ante 5
+fjmolina: posts the ante 5
+senandvik: posts the ante 5
+jeje_sat: posts the ante 5
+romdom50: posts the ante 5
+LSPORTINGD: posts the ante 5
+brugger355: posts the ante 5
+Stringsbreaker: posts the ante 5
+fjmolina: posts small blind 25
+senandvik: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kd 8s]
+jeje_sat: folds
+romdom50: folds
+LSPORTINGD: folds
+brugger355: folds
+Stringsbreaker: folds
+aghero: raises 50 to 100
+fjmolina: folds
+senandvik: folds
+Uncalled bet (50) returned to aghero
+aghero collected 165 from pot
+aghero: doesn't show hand
+*** SUMMARY ***
+Total pot 165 | Rake 0
+Seat 1: aghero (button) collected (165)
+Seat 2: fjmolina (small blind) folded before Flop
+Seat 3: senandvik (big blind) folded before Flop
+Seat 4: jeje_sat folded before Flop (didn't bet)
+Seat 5: romdom50 folded before Flop (didn't bet)
+Seat 6: LSPORTINGD folded before Flop (didn't bet)
+Seat 8: brugger355 folded before Flop (didn't bet)
+Seat 9: Stringsbreaker folded before Flop (didn't bet)
+
+
+PokerStars Hand #229696625834: Tournament #3259382896, €0.90+€0.90+€0.20 EUR Hold'em No Limit - Level IV (25/50) - 2021/09/08 22:24:46 CET [2021/09/08 16:24:46 ET]
+Table '3259382896 5' 9-max Seat #2 is the button
+Seat 1: aghero (5366 in chips, €0.90 bounty)
+Seat 2: fjmolina (2690 in chips, €0.90 bounty)
+Seat 3: senandvik (2945 in chips, €0.90 bounty)
+Seat 4: jeje_sat (3380 in chips, €0.90 bounty)
+Seat 5: romdom50 (2815 in chips, €0.90 bounty)
+Seat 6: LSPORTINGD (7362 in chips, €1.35 bounty)
+Seat 8: brugger355 (6523 in chips, €1.35 bounty)
+Seat 9: Stringsbreaker (865 in chips, €0.90 bounty)
+aghero: posts the ante 5
+fjmolina: posts the ante 5
+senandvik: posts the ante 5
+jeje_sat: posts the ante 5
+romdom50: posts the ante 5
+LSPORTINGD: posts the ante 5
+brugger355: posts the ante 5
+Stringsbreaker: posts the ante 5
+senandvik: posts small blind 25
+jeje_sat: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [2d 9c]
+romdom50: folds
+LSPORTINGD: folds
+brugger355: folds
+Stringsbreaker: folds
+aghero: raises 50 to 100
+fjmolina: folds
+senandvik: folds
+jeje_sat: folds
+Uncalled bet (50) returned to aghero
+aghero collected 165 from pot
+aghero: doesn't show hand
+*** SUMMARY ***
+Total pot 165 | Rake 0
+Seat 1: aghero collected (165)
+Seat 2: fjmolina (button) folded before Flop (didn't bet)
+Seat 3: senandvik (small blind) folded before Flop
+Seat 4: jeje_sat (big blind) folded before Flop
+Seat 5: romdom50 folded before Flop (didn't bet)
+Seat 6: LSPORTINGD folded before Flop (didn't bet)
+Seat 8: brugger355 folded before Flop (didn't bet)
+Seat 9: Stringsbreaker folded before Flop (didn't bet)
+
+
+PokerStars Hand #229696635411: Tournament #3259382896, €0.90+€0.90+€0.20 EUR Hold'em No Limit - Level IV (25/50) - 2021/09/08 22:25:04 CET [2021/09/08 16:25:04 ET]
+Table '3259382896 5' 9-max Seat #3 is the button
+Seat 1: aghero (5476 in chips, €0.90 bounty)
+Seat 2: fjmolina (2685 in chips, €0.90 bounty)
+Seat 3: senandvik (2915 in chips, €0.90 bounty)
+Seat 4: jeje_sat (3325 in chips, €0.90 bounty)
+Seat 5: romdom50 (2810 in chips, €0.90 bounty)
+Seat 6: LSPORTINGD (7357 in chips, €1.35 bounty)
+Seat 8: brugger355 (6518 in chips, €1.35 bounty)
+Seat 9: Stringsbreaker (860 in chips, €0.90 bounty)
+aghero: posts the ante 5
+fjmolina: posts the ante 5
+senandvik: posts the ante 5
+jeje_sat: posts the ante 5
+romdom50: posts the ante 5
+LSPORTINGD: posts the ante 5
+brugger355: posts the ante 5
+Stringsbreaker: posts the ante 5
+jeje_sat: posts small blind 25
+romdom50: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s 4c]
+LSPORTINGD: folds
+brugger355: folds
+Stringsbreaker: folds
+aghero: raises 50 to 100
+fjmolina: folds
+senandvik: folds
+jeje_sat: folds
+romdom50: folds
+Uncalled bet (50) returned to aghero
+aghero collected 165 from pot
+aghero: doesn't show hand
+*** SUMMARY ***
+Total pot 165 | Rake 0
+Seat 1: aghero collected (165)
+Seat 2: fjmolina folded before Flop (didn't bet)
+Seat 3: senandvik (button) folded before Flop (didn't bet)
+Seat 4: jeje_sat (small blind) folded before Flop
+Seat 5: romdom50 (big blind) folded before Flop
+Seat 6: LSPORTINGD folded before Flop (didn't bet)
+Seat 8: brugger355 folded before Flop (didn't bet)
+Seat 9: Stringsbreaker folded before Flop (didn't bet)
+
+
+PokerStars Hand #229696654247: Tournament #3259382896, €0.90+€0.90+€0.20 EUR Hold'em No Limit - Level IV (25/50) - 2021/09/08 22:25:40 CET [2021/09/08 16:25:40 ET]
+Table '3259382896 5' 9-max Seat #4 is the button
+Seat 1: aghero (5586 in chips, €0.90 bounty)
+Seat 2: fjmolina (2680 in chips, €0.90 bounty)
+Seat 3: senandvik (2910 in chips, €0.90 bounty)
+Seat 4: jeje_sat (3295 in chips, €0.90 bounty)
+Seat 5: romdom50 (2755 in chips, €0.90 bounty)
+Seat 6: LSPORTINGD (7352 in chips, €1.35 bounty)
+Seat 8: brugger355 (6513 in chips, €1.35 bounty)
+Seat 9: Stringsbreaker (855 in chips, €0.90 bounty)
+aghero: posts the ante 5
+fjmolina: posts the ante 5
+senandvik: posts the ante 5
+jeje_sat: posts the ante 5
+romdom50: posts the ante 5
+LSPORTINGD: posts the ante 5
+brugger355: posts the ante 5
+Stringsbreaker: posts the ante 5
+romdom50: posts small blind 25
+LSPORTINGD: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d 7s]
+brugger355: folds
+Stringsbreaker: folds
+aghero: raises 50 to 100
+fjmolina: calls 100
+senandvik: folds
+jeje_sat: folds
+romdom50: folds
+LSPORTINGD: folds
+*** FLOP *** [Qh Jd Qd]
+aghero: checks
+fjmolina: checks
+*** TURN *** [Qh Jd Qd] [Ac]
+aghero: checks
+fjmolina: bets 95
+aghero: raises 293 to 388
+fjmolina: folds
+Uncalled bet (293) returned to aghero
+aghero collected 505 from pot
+aghero: doesn't show hand
+*** SUMMARY ***
+Total pot 505 | Rake 0
+Board [Qh Jd Qd Ac]
+Seat 1: aghero collected (505)
+Seat 2: fjmolina folded on the Turn
+Seat 3: senandvik folded before Flop (didn't bet)
+Seat 4: jeje_sat (button) folded before Flop (didn't bet)
+Seat 5: romdom50 (small blind) folded before Flop
+Seat 6: LSPORTINGD (big blind) folded before Flop
+Seat 8: brugger355 folded before Flop (didn't bet)
+Seat 9: Stringsbreaker folded before Flop (didn't bet)
+
+
+PokerStars Hand #229696688639: Tournament #3259382896, €0.90+€0.90+€0.20 EUR Hold'em No Limit - Level IV (25/50) - 2021/09/08 22:26:30 CET [2021/09/08 16:26:30 ET]
+Table '3259382896 5' 9-max Seat #5 is the button
+Seat 1: aghero (5891 in chips, €0.90 bounty)
+Seat 2: fjmolina (2480 in chips, €0.90 bounty)
+Seat 3: senandvik (2905 in chips, €0.90 bounty)
+Seat 4: jeje_sat (3290 in chips, €0.90 bounty)
+Seat 5: romdom50 (2725 in chips, €0.90 bounty)
+Seat 6: LSPORTINGD (7297 in chips, €1.35 bounty)
+Seat 8: brugger355 (6508 in chips, €1.35 bounty)
+Seat 9: Stringsbreaker (850 in chips, €0.90 bounty)
+aghero: posts the ante 5
+fjmolina: posts the ante 5
+senandvik: posts the ante 5
+jeje_sat: posts the ante 5
+romdom50: posts the ante 5
+LSPORTINGD: posts the ante 5
+brugger355: posts the ante 5
+Stringsbreaker: posts the ante 5
+LSPORTINGD: posts small blind 25
+brugger355: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ad Ah]
+Stringsbreaker: folds
+aghero: folds
+fjmolina: folds
+senandvik: folds
+jeje_sat: raises 100 to 150
+romdom50: folds
+LSPORTINGD: folds
+brugger355: calls 100
+*** FLOP *** [Th 6d 9h]
+brugger355: checks
+jeje_sat: bets 183
+brugger355: calls 183
+*** TURN *** [Th 6d 9h] [Ks]
+brugger355: bets 1600
+jeje_sat: raises 1352 to 2952 and is all-in
+brugger355: calls 1352
+*** RIVER *** [Th 6d 9h Ks] [4s]
+*** SHOW DOWN ***
+brugger355: shows [Jh Qc] (a straight, Nine to King)
+jeje_sat: shows [Ad Ah] (a pair of Aces)
+brugger355 collected 6635 from pot
+*** SUMMARY ***
+Total pot 6635 | Rake 0
+Board [Th 6d 9h Ks 4s]
+Seat 1: aghero folded before Flop (didn't bet)
+Seat 2: fjmolina folded before Flop (didn't bet)
+Seat 3: senandvik folded before Flop (didn't bet)
+Seat 4: jeje_sat showed [Ad Ah] and lost with a pair of Aces
+Seat 5: romdom50 (button) folded before Flop (didn't bet)
+Seat 6: LSPORTINGD (small blind) folded before Flop
+Seat 8: brugger355 (big blind) showed [Jh Qc] and won (6635) with a straight, Nine to King
+Seat 9: Stringsbreaker folded before Flop (didn't bet)
+
+

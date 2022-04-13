@@ -1,0 +1,212 @@
+﻿PokerStars Hand #229774538829: Tournament #3264238088, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 22:17:16 CET [2021/09/11 16:17:16 ET]
+Table '3264238088 1' 3-max Seat #1 is the button
+Seat 1: Badabamax (500 in chips)
+Seat 2: kirie26 (500 in chips)
+Seat 3: jeje_sat (500 in chips)
+kirie26: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [9c 3c 6c 5h]
+Badabamax has timed out
+Badabamax: folds
+Badabamax is sitting out
+kirie26: calls 10
+jeje_sat: checks
+*** FLOP *** [5s 3s Ad]
+kirie26: checks
+jeje_sat: checks
+*** TURN *** [5s 3s Ad] [6h]
+kirie26: checks
+jeje_sat: bets 20
+kirie26: calls 20
+*** RIVER *** [5s 3s Ad 6h] [Qd]
+kirie26: checks
+jeje_sat: checks
+*** SHOW DOWN ***
+kirie26: shows [4h 8d 9d Tc] (high card Ace)
+jeje_sat: shows [9c 3c 6c 5h] (two pair, Sixes and Fives)
+jeje_sat collected 80 from pot
+*** SUMMARY ***
+Total pot 80 | Rake 0
+Board [5s 3s Ad 6h Qd]
+Seat 1: Badabamax (button) folded before Flop (didn't bet)
+Seat 2: kirie26 (small blind) showed [4h 8d 9d Tc] and lost with high card Ace
+Seat 3: jeje_sat (big blind) showed [9c 3c 6c 5h] and won (80) with two pair, Sixes and Fives
+
+
+PokerStars Hand #229774561784: Tournament #3264238088, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 22:17:58 CET [2021/09/11 16:17:58 ET]
+Table '3264238088 1' 3-max Seat #2 is the button
+Seat 1: Badabamax (500 in chips) is sitting out
+Seat 2: kirie26 (460 in chips)
+Seat 3: jeje_sat (540 in chips)
+jeje_sat: posts small blind 10
+Badabamax: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jh 6h Td 4s]
+kirie26: calls 20
+jeje_sat: folds
+Badabamax: folds
+kirie26 collected 50 from pot
+kirie26: doesn't show hand
+*** SUMMARY ***
+Total pot 50 | Rake 0
+Seat 1: Badabamax (big blind) folded before Flop
+Seat 2: kirie26 (button) collected (50)
+Seat 3: jeje_sat (small blind) folded before Flop
+
+
+PokerStars Hand #229774566993: Tournament #3264238088, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 22:18:08 CET [2021/09/11 16:18:08 ET]
+Table '3264238088 1' 3-max Seat #3 is the button
+Seat 1: Badabamax (480 in chips) is sitting out
+Seat 2: kirie26 (490 in chips)
+Seat 3: jeje_sat (530 in chips)
+Badabamax: posts small blind 10
+kirie26: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts Jc 6s 4c]
+Badabamax has returned
+jeje_sat: calls 20
+Badabamax: calls 10
+kirie26: checks
+*** FLOP *** [Js 3h 9s]
+Badabamax: checks
+kirie26: bets 20
+jeje_sat: calls 20
+Badabamax: calls 20
+*** TURN *** [Js 3h 9s] [4h]
+Badabamax: checks
+kirie26: checks
+jeje_sat: bets 120
+Badabamax: calls 120
+kirie26: folds
+*** RIVER *** [Js 3h 9s 4h] [5d]
+Badabamax: checks
+jeje_sat: checks
+*** SHOW DOWN ***
+Badabamax: shows [2c 6h Ks 4s] (a straight, Deuce to Six)
+jeje_sat: mucks hand
+Badabamax collected 360 from pot
+*** SUMMARY ***
+Total pot 360 | Rake 0
+Board [Js 3h 9s 4h 5d]
+Seat 1: Badabamax (small blind) showed [2c 6h Ks 4s] and won (360) with a straight, Deuce to Six
+Seat 2: kirie26 (big blind) folded on the Turn
+Seat 3: jeje_sat (button) mucked [Ts Jc 6s 4c]
+
+
+PokerStars Hand #229774582627: Tournament #3264238088, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 22:18:37 CET [2021/09/11 16:18:37 ET]
+Table '3264238088 1' 3-max Seat #1 is the button
+Seat 1: Badabamax (680 in chips)
+Seat 2: kirie26 (450 in chips)
+Seat 3: jeje_sat (370 in chips)
+kirie26: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [3s Jc Tc Qd]
+Badabamax: calls 20
+kirie26: calls 10
+jeje_sat: checks
+*** FLOP *** [8d Jd 7s]
+kirie26: checks
+jeje_sat: checks
+Badabamax: checks
+*** TURN *** [8d Jd 7s] [Kc]
+kirie26: checks
+jeje_sat: bets 30
+Badabamax: calls 30
+kirie26: raises 30 to 60
+jeje_sat: calls 30
+Badabamax: calls 30
+*** RIVER *** [8d Jd 7s Kc] [7d]
+kirie26: bets 80
+jeje_sat: folds
+Badabamax: folds
+Uncalled bet (80) returned to kirie26
+kirie26 collected 240 from pot
+kirie26: doesn't show hand
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Board [8d Jd 7s Kc 7d]
+Seat 1: Badabamax (button) folded on the River
+Seat 2: kirie26 (small blind) collected (240)
+Seat 3: jeje_sat (big blind) folded on the River
+
+
+PokerStars Hand #229774602244: Tournament #3264238088, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 22:19:13 CET [2021/09/11 16:19:13 ET]
+Table '3264238088 1' 3-max Seat #2 is the button
+Seat 1: Badabamax (600 in chips)
+Seat 2: kirie26 (610 in chips)
+Seat 3: jeje_sat (290 in chips)
+jeje_sat: posts small blind 10
+Badabamax: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [7d 9d Jd 4h]
+kirie26: raises 20 to 40
+jeje_sat: calls 30
+Badabamax: calls 20
+*** FLOP *** [7h 6c 5s]
+jeje_sat: checks
+Badabamax: checks
+kirie26: checks
+*** TURN *** [7h 6c 5s] [6h]
+jeje_sat: checks
+Badabamax: checks
+kirie26: checks
+*** RIVER *** [7h 6c 5s 6h] [2h]
+jeje_sat: checks
+Badabamax: checks
+kirie26: bets 60
+jeje_sat: folds
+Badabamax: calls 60
+*** SHOW DOWN ***
+kirie26: shows [2s Qd 2c 8d] (a full house, Deuces full of Sixes)
+Badabamax: mucks hand
+kirie26 collected 240 from pot
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Board [7h 6c 5s 6h 2h]
+Seat 1: Badabamax (big blind) mucked [Qh Jc 5h Ad]
+Seat 2: kirie26 (button) showed [2s Qd 2c 8d] and won (240) with a full house, Deuces full of Sixes
+Seat 3: jeje_sat (small blind) folded on the River
+
+
+PokerStars Hand #229774623676: Tournament #3264238088, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/11 22:19:53 CET [2021/09/11 16:19:53 ET]
+Table '3264238088 1' 3-max Seat #3 is the button
+Seat 1: Badabamax (500 in chips)
+Seat 2: kirie26 (750 in chips)
+Seat 3: jeje_sat (250 in chips)
+Badabamax: posts small blind 10
+kirie26: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [As Kc Qc Qd]
+jeje_sat: raises 50 to 70
+Badabamax: calls 60
+kirie26: raises 90 to 160
+jeje_sat: raises 90 to 250 and is all-in
+Badabamax: calls 180
+kirie26: raises 90 to 340
+Badabamax: calls 90
+*** FLOP *** [Jh 6d Th]
+Badabamax: checks
+kirie26: checks
+*** TURN *** [Jh 6d Th] [3h]
+Badabamax: checks
+kirie26: checks
+*** RIVER *** [Jh 6d Th 3h] [5h]
+Badabamax: checks
+kirie26: bets 410 and is all-in
+Badabamax: folds
+Uncalled bet (410) returned to kirie26
+*** SHOW DOWN ***
+kirie26: shows [8h Kd Kh 4d] (a flush, King high)
+kirie26 collected 180 from side pot
+jeje_sat: shows [As Kc Qc Qd] (a pair of Queens)
+kirie26 collected 750 from main pot
+*** SUMMARY ***
+Total pot 930 Main pot 750. Side pot 180. | Rake 0
+Board [Jh 6d Th 3h 5h]
+Seat 1: Badabamax (small blind) folded on the River
+Seat 2: kirie26 (big blind) showed [8h Kd Kh 4d] and won (930) with a flush, King high
+Seat 3: jeje_sat (button) showed [As Kc Qc Qd] and lost with a pair of Queens
+
+

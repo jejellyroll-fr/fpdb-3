@@ -1,0 +1,23 @@
+PokerTracker 4 Tournament Summary
+Site: PokerStars
+Game: Holdem
+Tournament #: 3255385918
+Started: 2021/09/11 19:15:11
+Finished: 2021/09/11 19:30:44
+Buyin: $0.00
+Fee: $0.00
+Prize Pool: $0.00
+Table Type: MTT Super-Turbo 
+Tourney Type: No Limit
+Players: 10
+
+Place: 0, Player: Alfil58, Won: $0.00,
+Place: 0, Player: mo1012, Won: $0.00,
+Place: 0, Player: Wolfhall, Won: $0.00,
+Place: 0, Player: Mmgoncalo, Won: $0.00,
+Place: 0, Player: titi_titel88, Won: $0.00,
+Place: 0, Player: Blackmamba1878, Won: $0.00,
+Place: 0, Player: Devilhead68, Won: $0.00,
+Place: 8, Player: kato2011974, Won: $0.00,
+Place: 9, Player: jeje_sat, Won: $0.00,
+Place: 10, Player: pennsylvanius, Won: $0.00,

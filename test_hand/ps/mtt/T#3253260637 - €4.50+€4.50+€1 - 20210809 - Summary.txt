@@ -1,0 +1,35 @@
+PokerTracker 4 Tournament Summary
+Site: PokerStars
+Game: Holdem
+Tournament #: 3253260637
+Started: 2021/09/08 19:03:02
+Finished: 2021/09/08 20:15:26
+Buyin: €4.50
+Bounty: €4.50
+BountyVal: €4.50
+Fee: €1.00
+Prize Pool: €0.00
+Table Type: MTT PROGBOUNT
+Tourney Type: No Limit
+Players: 20
+
+Place: 0, Player: rogernu7, Won: €0.00,
+Place: 0, Player: Aymeric 6186, Won: €0.00,
+Place: 0, Player: jeje_sat, Won: €0.00, Bounties: 1,
+Place: 0, Player: Troll-In1990, Won: €0.00, Bounties: 1,
+Place: 0, Player: saperevedere, Won: €0.00,
+Place: 0, Player: mateuss771, Won: €0.00,
+Place: 0, Player: savin.hsp, Won: €0.00,
+Place: 0, Player: RafaPradoQJ, Won: €0.00,
+Place: 0, Player: CHIPSCRAZYYY, Won: €0.00,
+Place: 0, Player: roby664, Won: €0.00,
+Place: 0, Player: kerrlos, Won: €0.00, Bounties: 1,
+Place: 0, Player: actezer, Won: €0.00,
+Place: 0, Player: lorenx666, Won: €0.00,
+Place: 0, Player: 1881285, Won: €0.00,
+Place: 0, Player: Tio Dany77, Won: €0.00,
+Place: 0, Player: Brainkiiller, Won: €0.00,
+Place: 0, Player: ghaspareed, Won: €0.00,
+Place: 0, Player: ilyleya, Won: €0.00,
+Place: 0, Player: cokinhagelada, Won: €0.00,
+Place: 0, Player: cara do bem, Won: €0.00,

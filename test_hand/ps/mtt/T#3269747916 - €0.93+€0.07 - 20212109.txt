@@ -1,0 +1,100 @@
+﻿PokerStars Hand #230025113577: Tournament #3269747916, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/21 16:46:32 CET [2021/09/21 10:46:32 ET]
+Table '3269747916 1' 3-max Seat #1 is the button
+Seat 1: ArgusAss (500 in chips)
+Seat 2: coolops66 (500 in chips)
+Seat 3: jeje_sat (500 in chips)
+coolops66: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [7s 7c 2s Tc]
+ArgusAss: calls 20
+coolops66: raises 40 to 60
+jeje_sat: calls 40
+ArgusAss: calls 40
+*** FLOP *** [6h 9d 4c]
+coolops66: bets 90
+jeje_sat: folds
+ArgusAss: calls 90
+*** TURN *** [6h 9d 4c] [Kd]
+coolops66: bets 350 and is all-in
+ArgusAss: folds
+Uncalled bet (350) returned to coolops66
+coolops66 collected 360 from pot
+coolops66: doesn't show hand
+*** SUMMARY ***
+Total pot 360 | Rake 0
+Board [6h 9d 4c Kd]
+Seat 1: ArgusAss (button) folded on the Turn
+Seat 2: coolops66 (small blind) collected (360)
+Seat 3: jeje_sat (big blind) folded on the Flop
+
+
+PokerStars Hand #230025125169: Tournament #3269747916, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/21 16:47:08 CET [2021/09/21 10:47:08 ET]
+Table '3269747916 1' 3-max Seat #2 is the button
+Seat 1: ArgusAss (350 in chips)
+Seat 2: coolops66 (710 in chips)
+Seat 3: jeje_sat (440 in chips)
+jeje_sat: posts small blind 10
+ArgusAss: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s 3d Ts Ks]
+coolops66: calls 20
+jeje_sat: calls 10
+ArgusAss: checks
+*** FLOP *** [Tc 4c 2s]
+jeje_sat: checks
+ArgusAss: checks
+coolops66: checks
+*** TURN *** [Tc 4c 2s] [6d]
+jeje_sat: bets 20
+ArgusAss: calls 20
+coolops66: calls 20
+*** RIVER *** [Tc 4c 2s 6d] [5s]
+jeje_sat: checks
+ArgusAss: checks
+coolops66: checks
+*** SHOW DOWN ***
+jeje_sat: shows [8s 3d Ts Ks] (a pair of Tens)
+ArgusAss: mucks hand
+coolops66: shows [8c 6c Qc 5d] (two pair, Sixes and Fives)
+coolops66 collected 120 from pot
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [Tc 4c 2s 6d 5s]
+Seat 1: ArgusAss (big blind) mucked [Js 7c 9d 5c]
+Seat 2: coolops66 (button) showed [8c 6c Qc 5d] and won (120) with two pair, Sixes and Fives
+Seat 3: jeje_sat (small blind) showed [8s 3d Ts Ks] and lost with a pair of Tens
+
+
+PokerStars Hand #230025139149: Tournament #3269747916, €0.93+€0.07 EUR Omaha Pot Limit - Level I (10/20) - 2021/09/21 16:47:51 CET [2021/09/21 10:47:51 ET]
+Table '3269747916 1' 3-max Seat #3 is the button
+Seat 1: ArgusAss (310 in chips)
+Seat 2: coolops66 (790 in chips)
+Seat 3: jeje_sat (400 in chips)
+ArgusAss: posts small blind 10
+coolops66: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th Ks Kd 5d]
+jeje_sat: raises 50 to 70
+ArgusAss: folds
+coolops66: calls 50
+*** FLOP *** [5h 7h Qs]
+coolops66: checks
+jeje_sat: bets 75
+coolops66: raises 75 to 150
+jeje_sat: raises 180 to 330 and is all-in
+coolops66: calls 180
+*** TURN *** [5h 7h Qs] [Ah]
+*** RIVER *** [5h 7h Qs Ah] [9d]
+*** SHOW DOWN ***
+coolops66: shows [4h Jd 7s 7d] (three of a kind, Sevens)
+jeje_sat: shows [Th Ks Kd 5d] (a pair of Kings)
+coolops66 collected 810 from pot
+*** SUMMARY ***
+Total pot 810 | Rake 0
+Board [5h 7h Qs Ah 9d]
+Seat 1: ArgusAss (small blind) folded before Flop
+Seat 2: coolops66 (big blind) showed [4h Jd 7s 7d] and won (810) with three of a kind, Sevens
+Seat 3: jeje_sat (button) showed [Th Ks Kd 5d] and lost with a pair of Kings
+
+

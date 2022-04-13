@@ -141,7 +141,8 @@ class Unibet(HandHistoryConverter):
     re_sitsOut          = re.compile("^%s sits out" %  substitutions['PLYR'], re.MULTILINE)
     re_HeroCards = re.compile(r"Dealt\sto\s%(PLYR)s\s(?:\[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % substitutions, re.MULTILINE)
     #re_ShownCards       = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % substitutions, re.MULTILINE)
-    re_CollectPot       = re.compile(r"Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(collected|showed \[.*\] and (won|collected)) \(?%(CUR)s(?P<POT>[,.\d]+)\)?(, mucked| with.*|)" %  substitutions, re.MULTILINE)
+    #re_CollectPot       = re.compile(r"Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(collected|showed \[.*\] and (won|collected)) \(?%(CUR)s(?P<POT>[,.\d]+)\)?(, mucked| with.*|)" %  substitutions, re.MULTILINE)
+    re_CollectPot       = re.compile(r"Seat (?P<SEAT>[0-9]+):\s%(PLYR)s:\sbet\s(€|$|£)(?P<BET>[,.\d]+)\sand\swon\s(€|$|£)[\.0-9]+\W\snet\sresult:\s(€|$|£)(?P<POT>[,.\d]+)" %  substitutions, re.MULTILINE)
     #Vinsand88 cashed out the hand for $2.19 | Cash Out Fee $0.02
     re_CollectPot2      = re.compile(u"%(PLYR)s (collected|cashed out the hand for) %(CUR)s(?P<POT>[,.\d]+)" %  substitutions, re.MULTILINE)
     re_CashedOut        = re.compile(r"cashed\sout\sthe\shand")
@@ -305,7 +306,7 @@ class Unibet(HandHistoryConverter):
             else:
                 info['sb'] = str((Decimal(mg['SB'])/2).quantize(Decimal("0.01")))
                 info['bb'] = str(Decimal(mg['SB']).quantize(Decimal("0.01")))    
-
+        log.info(("UnibetToFpdb.determineGameType: '%s'") % info)
         return info
 
     def readHandInfo(self, hand):
@@ -431,7 +432,7 @@ class Unibet(HandHistoryConverter):
                 hand.buttonpos = info[key]
             if key == 'MAX' and info[key] != None:
                 hand.maxseats = int(info[key])
-                
+        log.info("readHandInfo.hand: %s" % hand)        
         if self.re_Cancelled.search(hand.handText):
             raise FpdbHandPartial(("Hand '%s' was cancelled.") % hand.handid)
     
@@ -443,7 +444,7 @@ class Unibet(HandHistoryConverter):
             for b in m2:
                 if b.group('PNAME') == m.group('BUTTON'):
                    hand.buttonpos = int(b.group('SEAT'))
-                   log.debug("readHandInfo: %s" % hand.buttonpos)
+                   log.info("readHandInfo.readbutton: %s" % int(b.group('SEAT')))
         else:
             log.info('readButton: ' + ('not found'))
 
@@ -463,7 +464,8 @@ class Unibet(HandHistoryConverter):
                             None, 
                             int(a.group('SEAT'))
                     #self.clearMoneyString(a.group('BOUNTY'))
-                    )
+                    )   
+                        log.info("readPlayerStacks: '%s' '%s' '%s' '%s' '%s'" % int(a.group('SEAT')), a.group('PNAME'), self.clearMoneyString(a.group('CASH')), None, int(a.group('SEAT')))
                         break
                 elif a.group('PNAME') != b.group('SITOUT'):
                     hand.addPlayer(
@@ -473,7 +475,8 @@ class Unibet(HandHistoryConverter):
                             None,
                     
                        )
-        log.debug("hand.addPlayer: %s" % hand.addPlayer)
+                    log.info("readPlayerStacks: '%s' '%s' '%s' '%s' '%s'" % int(a.group('SEAT')), a.group('PNAME'), self.clearMoneyString(a.group('CASH')), None)
+        
 
 
     def markStreets(self, hand):
@@ -489,22 +492,29 @@ class Unibet(HandHistoryConverter):
                    r"(\*\*\*\sTurn\s\*\*\*\s\[\S\S \S\S \S\S\](?P<TURN>\[\S\S\].+(?=\*\*\*\sRiver\s\*\*\*)|.+))?"
                    r"(\*\*\*\sRiver\s\*\*\*\s\[\S\S \S\S \S\S\]?\s\[?\S\S\]\s(?P<RIVER>\[\S\S\].+))?", hand.handText,re.DOTALL)
         hand.addStreets(m)
+        log.info("markStreets.handaddstreets: %s" % hand)
 
     def readCommunityCards(self, hand, street): # street has been matched by markStreets, so exists in this hand
         m = self.re_Board.search(hand.streets[street])
-        hand.setCommunityCards(street, m.group('CARDS').split(' '))
+        if m:
+            hand.setCommunityCards(street, m.group('CARDS').split(' '))
+            log.info("readCommunityCards.setCommunityCards:' %s' " % street)
+        else:   
+            log.error("readCommunityCards.setCommunityCards: none")
+               
 
+        
     def readAntes(self, hand):
         log.debug(("reading antes"))
         m = self.re_Antes.finditer(hand.handText)
         for player in m:
-            logging.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
+            logging.info("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
             hand.addAnte(player.group('PNAME'), self.clearMoneyString(player.group('ANTE')))
     
     def readBringIn(self, hand):
         m = self.re_BringIn.search(hand.handText,re.DOTALL)
         if m:
-            logging.debug("readBringIn: %s for %s" %(m.group('PNAME'),  m.group('BRINGIN')))
+            logging.info("readBringIn: %s for %s" %(m.group('PNAME'),  m.group('BRINGIN')))
             hand.addBringIn(m.group('PNAME'),  self.clearMoneyString(m.group('BRINGIN')))
         
     def readBlinds(self, hand):
@@ -512,22 +522,30 @@ class Unibet(HandHistoryConverter):
         for a in self.re_PostSB.finditer(hand.handText):
             if liveBlind:
                 hand.addBlind(a.group('PNAME'), 'small blind', self.clearMoneyString(a.group('SB')))
+                logging.info("readBlinds: '%s' for '%s'" %(a.group('PNAME'),  self.clearMoneyString(a.group('SB'))))
                 liveBlind = False
             else:
                 names = [p[1] for p in hand.players]
                 if "Big Blind" in names or "Small Blind" in names or "Dealer" in names:
                     hand.addBlind(a.group('PNAME'), 'small blind', self.clearMoneyString(a.group('SB')))
+                    logging.info("readBlinds: '%s' for '%s'" %(a.group('PNAME'),  self.clearMoneyString(a.group('SB'))))
                 else:
                     # Post dead blinds as ante
                     hand.addBlind(a.group('PNAME'), 'secondsb', self.clearMoneyString(a.group('SB')))
+                    logging.info("readBlinds: '%s' for '%s'" %(a.group('PNAME'),  self.clearMoneyString(a.group('SB'))))
         for a in self.re_PostBB.finditer(hand.handText):
             hand.addBlind(a.group('PNAME'), 'big blind', self.clearMoneyString(a.group('BB')))
+            logging.info("readBlinds: '%s' for '%s'" %(a.group('PNAME'),  self.clearMoneyString(a.group('BB'))))
         for a in self.re_PostBoth.finditer(hand.handText):
             hand.addBlind(a.group('PNAME'), 'both', self.clearMoneyString(a.group('SBBB')))
+            logging.info("readBlinds: '%s' for '%s'" %(a.group('PNAME'),  self.clearMoneyString(a.group('SBBB'))))
+
         for a in self.re_PostStraddle.finditer(hand.handText):
             hand.addBlind(a.group('PNAME'), 'straddle', self.clearMoneyString(a.group('STRADDLE')))
+            logging.info("readBlinds: '%s' for '%s'" %(a.group('PNAME'),  self.clearMoneyString(a.group('STRADDLE'))))
         for a in self.re_PostBUB.finditer(hand.handText):
             hand.addBlind(a.group('PNAME'), 'button blind', self.clearMoneyString(a.group('BUB')))
+            logging.info("readBlinds: '%s' for '%s'" %(a.group('PNAME'),  self.clearMoneyString(a.group('BUB'))))
 
     def readHoleCards(self, hand):
 #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
@@ -542,6 +560,7 @@ class Unibet(HandHistoryConverter):
 #                        hand.involved = False
 #                    else:
                     hand.hero = found.group('PNAME')
+                    logging.info("readHoleCards: '%s'" %(found.group('PNAME')))
                     if 'cards' not in found.group('NEWCARDS'):
                         newcards = found.group('NEWCARDS').split(' ')
                         hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
@@ -579,20 +598,27 @@ class Unibet(HandHistoryConverter):
             elif action.group('ATYPE') == ' stands pat':
                 hand.addStandsPat( street, action.group('PNAME'), action.group('CARDS'))
             else:
-                log.debug(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
+                log.info(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
 
 
     def readShowdownActions(self, hand):
       for shows in self.re_ShowdownAction.finditer(hand.handText):            
             cards = shows.group('CARDS').split(' ')
+            logging.debug("hand.readShowdownActions('%s','%s')" % cards, shows.group('PNAME'))
             hand.addShownCards(cards, shows.group('PNAME')) 
-
+            logging.info("hand.readShowdownActions('%s','%s')" % cards, shows.group('PNAME'))
+     
     def readTourneyResults(self, hand):
         """Reads knockout bounties and add them to the koCounts dict"""
         pass      
 
     def readCollectPot(self,hand):
-        pass
+        hand.setUncalledBets(True)
+        for m in self.re_CollectPot.finditer(hand.handText):
+            
+            hand.addCollectPot(player=m.group('PNAME'), pot=str(Decimal((m.group('POT')))))
+            logging.info("readCollectPot: '%s' for '%s'" %(m.group('PNAME'),  str(Decimal((m.group('POT'))))))
+            
 
     def readShownCards(self,hand):
         pass

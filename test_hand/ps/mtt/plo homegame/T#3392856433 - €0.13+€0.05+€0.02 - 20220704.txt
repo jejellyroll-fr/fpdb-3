@@ -1,0 +1,3294 @@
+﻿PokerStars Home Game Hand #235326790419: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level I (15/30) - 2022/04/07 17:30:00 CET [2022/04/07 11:30:00 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 2: jeje_sat (5000 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (5000 in chips, €0.05 bounty)
+Seat 6: tinluu (5000 in chips, €0.05 bounty)
+jeje_sat: posts the ante 4
+Mariusjacob84: posts the ante 4
+tinluu: posts the ante 4
+Mariusjacob84: posts small blind 15
+tinluu: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [5c Qd]
+jeje_sat: folds
+Mariusjacob84: raises 60 to 90
+tinluu: folds
+Uncalled bet (60) returned to Mariusjacob84
+Mariusjacob84 collected 72 from pot
+Mariusjacob84: doesn't show hand
+*** SUMMARY ***
+Total pot 72 | Rake 0
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 4: Mariusjacob84 (small blind) collected (72)
+Seat 6: tinluu (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235326801259: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level I (15/30) - 2022/04/07 17:30:33 CET [2022/04/07 11:30:33 ET]
+Table '3392856433 2' 6-max Seat #4 is the button
+Seat 2: jeje_sat (4996 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (5038 in chips, €0.05 bounty)
+Seat 6: tinluu (4966 in chips, €0.05 bounty)
+jeje_sat: posts the ante 4
+Mariusjacob84: posts the ante 4
+tinluu: posts the ante 4
+tinluu: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [3d 4d]
+Mariusjacob84: raises 45 to 75
+tinluu: folds
+jeje_sat: folds
+Uncalled bet (45) returned to Mariusjacob84
+Mariusjacob84 collected 87 from pot
+Mariusjacob84: doesn't show hand
+*** SUMMARY ***
+Total pot 87 | Rake 0
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 4: Mariusjacob84 (button) collected (87)
+Seat 6: tinluu (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235326806742: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level I (15/30) - 2022/04/07 17:30:50 CET [2022/04/07 11:30:50 ET]
+Table '3392856433 2' 6-max Seat #6 is the button
+Seat 2: jeje_sat (4962 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (5091 in chips, €0.05 bounty)
+Seat 6: tinluu (4947 in chips, €0.05 bounty)
+jeje_sat: posts the ante 4
+Mariusjacob84: posts the ante 4
+tinluu: posts the ante 4
+jeje_sat: posts small blind 15
+Mariusjacob84: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [2s Qs]
+tinluu: folds
+jeje_sat said, "'estreflow des puce bga ;)"
+jeje_sat: folds
+Uncalled bet (15) returned to Mariusjacob84
+Mariusjacob84 collected 42 from pot
+Mariusjacob84: doesn't show hand
+*** SUMMARY ***
+Total pot 42 | Rake 0
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 4: Mariusjacob84 (big blind) collected (42)
+Seat 6: tinluu (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235326813342: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level I (15/30) - 2022/04/07 17:31:10 CET [2022/04/07 11:31:10 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 2: jeje_sat (4943 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (5114 in chips, €0.05 bounty)
+Seat 6: tinluu (4943 in chips, €0.05 bounty)
+jeje_sat: posts the ante 4
+Mariusjacob84: posts the ante 4
+tinluu: posts the ante 4
+Mariusjacob84: posts small blind 15
+tinluu: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [8c 7h]
+jeje_sat: folds
+Mariusjacob84: folds
+Uncalled bet (15) returned to tinluu
+tinluu collected 42 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 42 | Rake 0
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 4: Mariusjacob84 (small blind) folded before Flop
+Seat 6: tinluu (big blind) collected (42)
+
+
+PokerStars Home Game Hand #235326825953: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level I (15/30) - 2022/04/07 17:31:49 CET [2022/04/07 11:31:49 ET]
+Table '3392856433 2' 6-max Seat #4 is the button
+Seat 2: jeje_sat (4939 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (5095 in chips, €0.05 bounty)
+Seat 6: tinluu (4966 in chips, €0.05 bounty)
+jeje_sat: posts the ante 4
+Mariusjacob84: posts the ante 4
+tinluu: posts the ante 4
+tinluu: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kd 3c]
+Mariusjacob84: folds
+tinluu: calls 15
+jeje_sat: checks
+*** FLOP *** [6c 9h Js]
+tinluu: checks
+jeje_sat: checks
+*** TURN *** [6c 9h Js] [Kh]
+tinluu: bets 60
+jeje_sat: calls 60
+*** RIVER *** [6c 9h Js Kh] [7c]
+tinluu: bets 210
+jeje_sat: calls 210
+*** SHOW DOWN ***
+tinluu: shows [7d Kc] (two pair, Kings and Sevens)
+jeje_sat: mucks hand
+tinluu collected 612 from pot
+*** SUMMARY ***
+Total pot 612 | Rake 0
+Board [6c 9h Js Kh 7c]
+Seat 2: jeje_sat (big blind) mucked [Kd 3c]
+Seat 4: Mariusjacob84 (button) folded before Flop (didn't bet)
+Seat 6: tinluu (small blind) showed [7d Kc] and won (612) with two pair, Kings and Sevens
+
+
+PokerStars Home Game Hand #235326837477: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level I (15/30) - 2022/04/07 17:32:23 CET [2022/04/07 11:32:23 ET]
+Table '3392856433 2' 6-max Seat #6 is the button
+Seat 2: jeje_sat (4635 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (5091 in chips, €0.05 bounty)
+Seat 6: tinluu (5274 in chips, €0.05 bounty)
+jeje_sat: posts the ante 4
+Mariusjacob84: posts the ante 4
+tinluu: posts the ante 4
+jeje_sat: posts small blind 15
+Mariusjacob84: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s 7d]
+tinluu: folds
+jeje_sat: raises 60 to 90
+Mariusjacob84: folds
+Uncalled bet (60) returned to jeje_sat
+jeje_sat collected 72 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 72 | Rake 0
+Seat 2: jeje_sat (small blind) collected (72)
+Seat 4: Mariusjacob84 (big blind) folded before Flop
+Seat 6: tinluu (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235326841741: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level I (15/30) - 2022/04/07 17:32:36 CET [2022/04/07 11:32:36 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 2: jeje_sat (4673 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (5057 in chips, €0.05 bounty)
+Seat 6: tinluu (5270 in chips, €0.05 bounty)
+jeje_sat: posts the ante 4
+Mariusjacob84: posts the ante 4
+tinluu: posts the ante 4
+Mariusjacob84: posts small blind 15
+tinluu: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kc 7h]
+jeje_sat: raises 60 to 90
+Mariusjacob84: calls 75
+tinluu: raises 300 to 390
+jeje_sat: folds
+Mariusjacob84: folds
+Uncalled bet (300) returned to tinluu
+tinluu collected 282 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 282 | Rake 0
+Seat 2: jeje_sat (button) folded before Flop
+Seat 4: Mariusjacob84 (small blind) folded before Flop
+Seat 6: tinluu (big blind) collected (282)
+
+
+PokerStars Home Game Hand #235326847777: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level I (15/30) - 2022/04/07 17:32:55 CET [2022/04/07 11:32:55 ET]
+Table '3392856433 2' 6-max Seat #4 is the button
+Seat 2: jeje_sat (4579 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (4963 in chips, €0.05 bounty)
+Seat 6: tinluu (5458 in chips, €0.05 bounty)
+jeje_sat: posts the ante 4
+Mariusjacob84: posts the ante 4
+tinluu: posts the ante 4
+tinluu: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [9h 8s]
+Mariusjacob84: raises 45 to 75
+tinluu: raises 225 to 300
+jeje_sat: folds
+Mariusjacob84: folds
+Uncalled bet (225) returned to tinluu
+tinluu collected 192 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 192 | Rake 0
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 4: Mariusjacob84 (button) folded before Flop
+Seat 6: tinluu (small blind) collected (192)
+
+
+PokerStars Home Game Hand #235326855423: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level I (15/30) - 2022/04/07 17:33:18 CET [2022/04/07 11:33:18 ET]
+Table '3392856433 2' 6-max Seat #6 is the button
+Seat 2: jeje_sat (4545 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (4884 in chips, €0.05 bounty)
+Seat 6: tinluu (5571 in chips, €0.05 bounty)
+jeje_sat: posts the ante 4
+Mariusjacob84: posts the ante 4
+tinluu: posts the ante 4
+jeje_sat: posts small blind 15
+Mariusjacob84: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [7s 6d]
+tinluu: raises 36 to 66
+jeje_sat: raises 174 to 240
+Mariusjacob84: folds
+tinluu: calls 174
+*** FLOP *** [9h 6c 3h]
+jeje_sat: bets 261
+tinluu: folds
+Uncalled bet (261) returned to jeje_sat
+jeje_sat collected 522 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 522 | Rake 0
+Board [9h 6c 3h]
+Seat 2: jeje_sat (small blind) collected (522)
+Seat 4: Mariusjacob84 (big blind) folded before Flop
+Seat 6: tinluu (button) folded on the Flop
+
+
+PokerStars Home Game Hand #235326864654: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level I (15/30) - 2022/04/07 17:33:46 CET [2022/04/07 11:33:46 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 2: jeje_sat (4823 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (4850 in chips, €0.05 bounty)
+Seat 6: tinluu (5327 in chips, €0.05 bounty)
+jeje_sat: posts the ante 4
+Mariusjacob84: posts the ante 4
+tinluu: posts the ante 4
+Mariusjacob84: posts small blind 15
+tinluu: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kh Qc]
+jeje_sat: raises 60 to 90
+Mariusjacob84: folds
+tinluu: calls 60
+*** FLOP *** [2c Tc 5h]
+tinluu: checks
+jeje_sat: checks
+*** TURN *** [2c Tc 5h] [4h]
+tinluu: bets 60
+jeje_sat: calls 60
+*** RIVER *** [2c Tc 5h 4h] [Th]
+tinluu: bets 90
+jeje_sat: raises 507 to 597
+tinluu: folds
+Uncalled bet (507) returned to jeje_sat
+jeje_sat collected 507 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 507 | Rake 0
+Board [2c Tc 5h 4h Th]
+Seat 2: jeje_sat (button) collected (507)
+Seat 4: Mariusjacob84 (small blind) folded before Flop
+Seat 6: tinluu (big blind) folded on the River
+
+
+PokerStars Home Game Hand #235326881075: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level I (15/30) - 2022/04/07 17:34:36 CET [2022/04/07 11:34:36 ET]
+Table '3392856433 2' 6-max Seat #4 is the button
+Seat 1: Tuche37300 (5000 in chips, €0.05 bounty)
+Seat 2: jeje_sat (5086 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (4831 in chips, €0.05 bounty)
+Seat 6: tinluu (5083 in chips, €0.05 bounty)
+Tuche37300: posts the ante 4
+jeje_sat: posts the ante 4
+Mariusjacob84: posts the ante 4
+tinluu: posts the ante 4
+tinluu: posts small blind 15
+Tuche37300: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h 6d]
+jeje_sat: folds
+Mariusjacob84: raises 45 to 75
+tinluu: folds
+Tuche37300: folds
+Uncalled bet (45) returned to Mariusjacob84
+Mariusjacob84 collected 91 from pot
+Mariusjacob84: doesn't show hand
+*** SUMMARY ***
+Total pot 91 | Rake 0
+Seat 1: Tuche37300 (big blind) folded before Flop
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 4: Mariusjacob84 (button) collected (91)
+Seat 6: tinluu (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235326887624: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level I (15/30) - 2022/04/07 17:34:56 CET [2022/04/07 11:34:56 ET]
+Table '3392856433 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (4966 in chips, €0.05 bounty)
+Seat 2: jeje_sat (5082 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (4888 in chips, €0.05 bounty)
+Seat 6: tinluu (5064 in chips, €0.05 bounty)
+Tuche37300: posts the ante 4
+jeje_sat: posts the ante 4
+Mariusjacob84: posts the ante 4
+tinluu: posts the ante 4
+Tuche37300: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 4d]
+Mariusjacob84: raises 45 to 75
+tinluu: folds
+Tuche37300: folds
+jeje_sat: calls 45
+*** FLOP *** [7h 4h Qh]
+jeje_sat: checks
+Mariusjacob84: bets 91
+jeje_sat: calls 91
+*** TURN *** [7h 4h Qh] [2s]
+jeje_sat: bets 270
+Mariusjacob84: calls 270
+*** RIVER *** [7h 4h Qh 2s] [Ac]
+jeje_sat: checks
+Mariusjacob84: bets 510
+jeje_sat: calls 510
+*** SHOW DOWN ***
+Mariusjacob84: shows [2c 2h] (three of a kind, Deuces)
+jeje_sat: shows [4s 4d] (three of a kind, Fours)
+jeje_sat collected 1923 from pot
+*** SUMMARY ***
+Total pot 1923 | Rake 0
+Board [7h 4h Qh 2s Ac]
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) showed [4s 4d] and won (1923) with three of a kind, Fours
+Seat 4: Mariusjacob84 showed [2c 2h] and lost with three of a kind, Deuces
+Seat 6: tinluu (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235326911495: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level II (25/50) - 2022/04/07 17:36:07 CET [2022/04/07 11:36:07 ET]
+Table '3392856433 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (4947 in chips, €0.05 bounty)
+Seat 2: jeje_sat (6055 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3938 in chips, €0.05 bounty)
+Seat 6: tinluu (5060 in chips, €0.05 bounty)
+Tuche37300: posts the ante 6
+jeje_sat: posts the ante 6
+Mariusjacob84: posts the ante 6
+tinluu: posts the ante 6
+jeje_sat: posts small blind 25
+Mariusjacob84: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [4c Qh]
+tinluu: raises 60 to 110
+Tuche37300: folds
+jeje_sat: folds
+Mariusjacob84: folds
+Uncalled bet (60) returned to tinluu
+tinluu collected 149 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 149 | Rake 0
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 4: Mariusjacob84 (big blind) folded before Flop
+Seat 6: tinluu collected (149)
+
+
+PokerStars Home Game Hand #235326916978: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level II (25/50) - 2022/04/07 17:36:24 CET [2022/04/07 11:36:24 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (4941 in chips, €0.05 bounty)
+Seat 2: jeje_sat (6024 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3882 in chips, €0.05 bounty)
+Seat 6: tinluu (5153 in chips, €0.05 bounty)
+Tuche37300: posts the ante 6
+jeje_sat: posts the ante 6
+Mariusjacob84: posts the ante 6
+tinluu: posts the ante 6
+Mariusjacob84: posts small blind 25
+tinluu: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s Kd]
+Tuche37300: folds
+jeje_sat: folds
+Mariusjacob84: calls 25
+tinluu: raises 150 to 200
+Mariusjacob84: folds
+Uncalled bet (150) returned to tinluu
+tinluu collected 124 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 124 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 4: Mariusjacob84 (small blind) folded before Flop
+Seat 6: tinluu (big blind) collected (124)
+
+
+PokerStars Home Game Hand #235326930235: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level II (25/50) - 2022/04/07 17:37:04 CET [2022/04/07 11:37:04 ET]
+Table '3392856433 2' 6-max Seat #4 is the button
+Seat 1: Tuche37300 (4935 in chips, €0.05 bounty)
+Seat 2: jeje_sat (6018 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3826 in chips, €0.05 bounty)
+Seat 6: tinluu (5221 in chips, €0.05 bounty)
+Tuche37300: posts the ante 6
+jeje_sat: posts the ante 6
+Mariusjacob84: posts the ante 6
+tinluu: posts the ante 6
+tinluu: posts small blind 25
+Tuche37300: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [2s 9d]
+jeje_sat: folds
+Mariusjacob84: folds
+tinluu: raises 150 to 200
+Tuche37300: calls 150
+*** FLOP *** [7d 5c Kh]
+tinluu: bets 150
+Tuche37300: calls 150
+*** TURN *** [7d 5c Kh] [5d]
+tinluu: checks
+Tuche37300: bets 262
+tinluu: folds
+Uncalled bet (262) returned to Tuche37300
+Tuche37300 collected 724 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 724 | Rake 0
+Board [7d 5c Kh 5d]
+Seat 1: Tuche37300 (big blind) collected (724)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 4: Mariusjacob84 (button) folded before Flop (didn't bet)
+Seat 6: tinluu (small blind) folded on the Turn
+
+
+PokerStars Home Game Hand #235326940270: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level II (25/50) - 2022/04/07 17:37:33 CET [2022/04/07 11:37:33 ET]
+Table '3392856433 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (5303 in chips, €0.05 bounty)
+Seat 2: jeje_sat (6012 in chips, €0.05 bounty)
+Seat 3: NHBROOO (5000 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3820 in chips, €0.05 bounty)
+Seat 6: tinluu (4865 in chips, €0.05 bounty)
+Tuche37300: posts the ante 6
+jeje_sat: posts the ante 6
+NHBROOO: posts the ante 6
+Mariusjacob84: posts the ante 6
+tinluu: posts the ante 6
+Tuche37300: posts small blind 25
+jeje_sat: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts Tc]
+NHBROOO: folds
+Mariusjacob84: folds
+tinluu: raises 150 to 200
+Tuche37300: folds
+jeje_sat: raises 350 to 550
+tinluu: calls 350
+*** FLOP *** [6h 5s 2d]
+jeje_sat: checks
+tinluu: bets 554
+jeje_sat: raises 4902 to 5456 and is all-in
+tinluu: calls 3755 and is all-in
+Uncalled bet (1147) returned to jeje_sat
+*** TURN *** [6h 5s 2d] [7h]
+*** RIVER *** [6h 5s 2d 7h] [Qc]
+*** SHOW DOWN ***
+jeje_sat: shows [Ts Tc] (a pair of Tens)
+tinluu: shows [Ad Jd] (high card Ace)
+jeje_sat collected 9773 from pot
+jeje_sat wins €0.03 for eliminating tinluu and their own bounty increases by €0.02 to €0.07
+tinluu finished the tournament
+*** SUMMARY ***
+Total pot 9773 | Rake 0
+Board [6h 5s 2d 7h Qc]
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) showed [Ts Tc] and won (9773) with a pair of Tens
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 4: Mariusjacob84 folded before Flop (didn't bet)
+Seat 6: tinluu (button) showed [Ad Jd] and lost with high card Ace
+
+
+PokerStars Home Game Hand #235326956614: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level II (25/50) - 2022/04/07 17:38:22 CET [2022/04/07 11:38:22 ET]
+Table '3392856433 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (5272 in chips, €0.05 bounty)
+Seat 2: jeje_sat (10920 in chips, €0.07 bounty)
+Seat 3: NHBROOO (4994 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3814 in chips, €0.05 bounty)
+Tuche37300: posts the ante 6
+jeje_sat: posts the ante 6
+NHBROOO: posts the ante 6
+Mariusjacob84: posts the ante 6
+jeje_sat: posts small blind 25
+NHBROOO: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qd Qh]
+Mariusjacob84: folds
+Tuche37300: folds
+jeje_sat said, "mdr"
+jeje_sat: raises 10864 to 10914 and is all-in
+NHBROOO: folds
+Uncalled bet (10864) returned to jeje_sat
+jeje_sat collected 124 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 124 | Rake 0
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) collected (124)
+Seat 3: NHBROOO (big blind) folded before Flop
+Seat 4: Mariusjacob84 folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235326967604: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level II (25/50) - 2022/04/07 17:38:55 CET [2022/04/07 11:38:55 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (5266 in chips, €0.05 bounty)
+Seat 2: jeje_sat (10988 in chips, €0.07 bounty)
+Seat 3: NHBROOO (4938 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3808 in chips, €0.05 bounty)
+Seat 5: tinluu (5000 in chips, €0.05 bounty)
+Tuche37300: posts the ante 6
+jeje_sat: posts the ante 6
+NHBROOO: posts the ante 6
+Mariusjacob84: posts the ante 6
+tinluu: posts the ante 6
+NHBROOO: posts small blind 25
+Mariusjacob84: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [4h 6c]
+tinluu: raises 76 to 126
+Tuche37300: calls 126
+jeje_sat: folds
+NHBROOO: folds
+Mariusjacob84: folds
+*** FLOP *** [Ac Js 3s]
+tinluu: checks
+Tuche37300: bets 100
+tinluu: folds
+Uncalled bet (100) returned to Tuche37300
+Tuche37300 collected 357 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 357 | Rake 0
+Board [Ac Js 3s]
+Seat 1: Tuche37300 collected (357)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: NHBROOO (small blind) folded before Flop
+Seat 4: Mariusjacob84 (big blind) folded before Flop
+Seat 5: tinluu folded on the Flop
+
+
+PokerStars Home Game Hand #235326975169: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level II (25/50) - 2022/04/07 17:39:17 CET [2022/04/07 11:39:17 ET]
+Table '3392856433 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (5491 in chips, €0.05 bounty)
+Seat 2: jeje_sat (10982 in chips, €0.07 bounty)
+Seat 3: NHBROOO (4907 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3752 in chips, €0.05 bounty)
+Seat 5: tinluu (4868 in chips, €0.05 bounty)
+Tuche37300: posts the ante 6
+jeje_sat: posts the ante 6
+NHBROOO: posts the ante 6
+Mariusjacob84: posts the ante 6
+tinluu: posts the ante 6
+Mariusjacob84: posts small blind 25
+tinluu: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [Td 3s]
+Tuche37300: folds
+jeje_sat: folds
+NHBROOO: raises 100 to 150
+Mariusjacob84: folds
+tinluu: folds
+Uncalled bet (100) returned to NHBROOO
+NHBROOO collected 155 from pot
+NHBROOO: doesn't show hand
+*** SUMMARY ***
+Total pot 155 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO (button) collected (155)
+Seat 4: Mariusjacob84 (small blind) folded before Flop
+Seat 5: tinluu (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235326984183: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level II (25/50) - 2022/04/07 17:39:44 CET [2022/04/07 11:39:44 ET]
+Table '3392856433 2' 6-max Seat #4 is the button
+Seat 1: Tuche37300 (5485 in chips, €0.05 bounty)
+Seat 2: jeje_sat (10976 in chips, €0.07 bounty)
+Seat 3: NHBROOO (5006 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3721 in chips, €0.05 bounty)
+Seat 5: tinluu (4812 in chips, €0.05 bounty)
+Tuche37300: posts the ante 6
+jeje_sat: posts the ante 6
+NHBROOO: posts the ante 6
+Mariusjacob84: posts the ante 6
+tinluu: posts the ante 6
+tinluu: posts small blind 25
+Tuche37300: posts big blind 50
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s 8h]
+jeje_sat: raises 100 to 150
+NHBROOO: folds
+Mariusjacob84: folds
+tinluu: folds
+Tuche37300: calls 100
+*** FLOP *** [Kc Jc 3h]
+Tuche37300: checks
+jeje_sat: bets 178
+Tuche37300: folds
+Uncalled bet (178) returned to jeje_sat
+jeje_sat collected 355 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 355 | Rake 0
+Board [Kc Jc 3h]
+Seat 1: Tuche37300 (big blind) folded on the Flop
+Seat 2: jeje_sat collected (355)
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 4: Mariusjacob84 (button) folded before Flop (didn't bet)
+Seat 5: tinluu (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327011004: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level III (35/70) - 2022/04/07 17:41:03 CET [2022/04/07 11:41:03 ET]
+Table '3392856433 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (5329 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11175 in chips, €0.07 bounty)
+Seat 3: NHBROOO (5000 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3715 in chips, €0.05 bounty)
+Seat 5: tinluu (4781 in chips, €0.05 bounty)
+Tuche37300: posts the ante 9
+jeje_sat: posts the ante 9
+NHBROOO: posts the ante 9
+Mariusjacob84: posts the ante 9
+tinluu: posts the ante 9
+Tuche37300: posts small blind 35
+jeje_sat: posts big blind 70
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d As]
+NHBROOO: folds
+Mariusjacob84: raises 105 to 175
+tinluu: folds
+Tuche37300: folds
+jeje_sat: folds
+Uncalled bet (105) returned to Mariusjacob84
+Mariusjacob84 collected 220 from pot
+Mariusjacob84: doesn't show hand
+*** SUMMARY ***
+Total pot 220 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 4: Mariusjacob84 collected (220)
+Seat 5: tinluu (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327016568: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level III (35/70) - 2022/04/07 17:41:19 CET [2022/04/07 11:41:19 ET]
+Table '3392856433 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (5285 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11096 in chips, €0.07 bounty)
+Seat 3: NHBROOO (4991 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3856 in chips, €0.05 bounty)
+Seat 5: tinluu (4772 in chips, €0.05 bounty)
+Tuche37300: posts the ante 9
+jeje_sat: posts the ante 9
+NHBROOO: posts the ante 9
+Mariusjacob84: posts the ante 9
+tinluu: posts the ante 9
+jeje_sat: posts small blind 35
+NHBROOO: posts big blind 70
+*** HOLE CARDS ***
+Dealt to jeje_sat [8c 3s]
+Mariusjacob84: folds
+tinluu: raises 133 to 203
+Tuche37300 has timed out
+Tuche37300: folds
+Tuche37300 is sitting out
+Tuche37300 has returned
+jeje_sat: folds
+NHBROOO: folds
+Uncalled bet (133) returned to tinluu
+tinluu collected 220 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 220 | Rake 0
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 3: NHBROOO (big blind) folded before Flop
+Seat 4: Mariusjacob84 folded before Flop (didn't bet)
+Seat 5: tinluu collected (220)
+
+
+PokerStars Home Game Hand #235327042624: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level III (35/70) - 2022/04/07 17:42:37 CET [2022/04/07 11:42:37 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (5276 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11052 in chips, €0.07 bounty)
+Seat 3: NHBROOO (4912 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3847 in chips, €0.05 bounty)
+Seat 5: tinluu (4913 in chips, €0.05 bounty)
+Tuche37300: posts the ante 9
+jeje_sat: posts the ante 9
+NHBROOO: posts the ante 9
+Mariusjacob84: posts the ante 9
+tinluu: posts the ante 9
+NHBROOO: posts small blind 35
+Mariusjacob84: posts big blind 70
+*** HOLE CARDS ***
+Dealt to jeje_sat [8h Td]
+tinluu: raises 106 to 176
+Tuche37300 has timed out
+Tuche37300: folds
+Tuche37300 is sitting out
+jeje_sat: folds
+NHBROOO: folds
+Mariusjacob84: calls 106
+*** FLOP *** [Tc 5s 4c]
+Mariusjacob84: checks
+tinluu: checks
+*** TURN *** [Tc 5s 4c] [Qh]
+Tuche37300 has returned
+Mariusjacob84: checks
+tinluu: checks
+*** RIVER *** [Tc 5s 4c Qh] [Qs]
+Mariusjacob84: checks
+tinluu: checks
+*** SHOW DOWN ***
+Mariusjacob84: shows [2d Jd] (a pair of Queens)
+tinluu: shows [Js Kh] (a pair of Queens - King kicker)
+jeje_sat is sitting out
+tinluu collected 432 from pot
+*** SUMMARY ***
+Total pot 432 | Rake 0
+Board [Tc 5s 4c Qh Qs]
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: NHBROOO (small blind) folded before Flop
+Seat 4: Mariusjacob84 (big blind) showed [2d Jd] and lost with a pair of Queens
+Seat 5: tinluu showed [Js Kh] and won (432) with a pair of Queens
+
+
+PokerStars Home Game Hand #235327067813: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level III (35/70) - 2022/04/07 17:43:52 CET [2022/04/07 11:43:52 ET]
+Table '3392856433 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (5267 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11043 in chips, €0.07 bounty) is sitting out
+Seat 3: NHBROOO (4868 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3662 in chips, €0.05 bounty)
+Seat 5: tinluu (5160 in chips, €0.05 bounty)
+Tuche37300: posts the ante 9
+jeje_sat: posts the ante 9
+NHBROOO: posts the ante 9
+Mariusjacob84: posts the ante 9
+tinluu: posts the ante 9
+Mariusjacob84: posts small blind 35
+tinluu: posts big blind 70
+*** HOLE CARDS ***
+Dealt to jeje_sat [Tc Th]
+jeje_sat has returned
+Tuche37300: calls 70
+jeje_sat: raises 210 to 280
+NHBROOO: folds
+Mariusjacob84: folds
+tinluu: folds
+Tuche37300: folds
+Uncalled bet (210) returned to jeje_sat
+jeje_sat collected 290 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 290 | Rake 0
+Seat 1: Tuche37300 folded before Flop
+Seat 2: jeje_sat collected (290)
+Seat 3: NHBROOO (button) folded before Flop (didn't bet)
+Seat 4: Mariusjacob84 (small blind) folded before Flop
+Seat 5: tinluu (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327096895: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IV (50/100) - 2022/04/07 17:45:05 CET [2022/04/07 11:45:05 ET]
+Table '3392856433 2' 6-max Seat #4 is the button
+Seat 1: Tuche37300 (5188 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11254 in chips, €0.07 bounty)
+Seat 3: NHBROOO (4859 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3618 in chips, €0.05 bounty)
+Seat 5: tinluu (5081 in chips, €0.05 bounty)
+Tuche37300: posts the ante 12
+jeje_sat: posts the ante 12
+NHBROOO: posts the ante 12
+Mariusjacob84: posts the ante 12
+tinluu: posts the ante 12
+tinluu: posts small blind 50
+Tuche37300: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [4h Jh]
+jeje_sat: folds
+jeje_sat is sitting out
+NHBROOO: raises 200 to 300
+Mariusjacob84: folds
+tinluu: folds
+Tuche37300: calls 200
+*** FLOP *** [6h 4s 4c]
+Tuche37300: checks
+NHBROOO: bets 455
+Tuche37300: folds
+Uncalled bet (455) returned to NHBROOO
+NHBROOO collected 710 from pot
+NHBROOO: doesn't show hand
+*** SUMMARY ***
+Total pot 710 | Rake 0
+Board [6h 4s 4c]
+Seat 1: Tuche37300 (big blind) folded on the Flop
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO collected (710)
+Seat 4: Mariusjacob84 (button) folded before Flop (didn't bet)
+Seat 5: tinluu (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327110700: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IV (50/100) - 2022/04/07 17:45:46 CET [2022/04/07 11:45:46 ET]
+Table '3392856433 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (4876 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11242 in chips, €0.07 bounty) is sitting out
+Seat 3: NHBROOO (5257 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3606 in chips, €0.05 bounty)
+Seat 5: tinluu (5019 in chips, €0.05 bounty)
+Tuche37300: posts the ante 12
+jeje_sat: posts the ante 12
+NHBROOO: posts the ante 12
+Mariusjacob84: posts the ante 12
+tinluu: posts the ante 12
+Tuche37300: posts small blind 50
+jeje_sat: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kc 9h]
+NHBROOO: folds
+Mariusjacob84: raises 150 to 250
+tinluu: folds
+Tuche37300: calls 200
+jeje_sat: folds
+*** FLOP *** [4s Tc As]
+Tuche37300: checks
+Mariusjacob84: checks
+*** TURN *** [4s Tc As] [5s]
+Tuche37300: checks
+Mariusjacob84: bets 330
+Tuche37300: folds
+Uncalled bet (330) returned to Mariusjacob84
+Mariusjacob84 collected 660 from pot
+Mariusjacob84: doesn't show hand
+*** SUMMARY ***
+Total pot 660 | Rake 0
+Board [4s Tc As 5s]
+Seat 1: Tuche37300 (small blind) folded on the Turn
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 4: Mariusjacob84 collected (660)
+Seat 5: tinluu (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327124099: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IV (50/100) - 2022/04/07 17:46:25 CET [2022/04/07 11:46:25 ET]
+Table '3392856433 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (4614 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11130 in chips, €0.07 bounty) is sitting out
+Seat 3: NHBROOO (5245 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (4004 in chips, €0.05 bounty)
+Seat 5: tinluu (5007 in chips, €0.05 bounty)
+Tuche37300: posts the ante 12
+jeje_sat: posts the ante 12
+NHBROOO: posts the ante 12
+Mariusjacob84: posts the ante 12
+tinluu: posts the ante 12
+jeje_sat: posts small blind 50
+NHBROOO: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ah 7h]
+Mariusjacob84: folds
+jeje_sat has returned
+tinluu: folds
+Tuche37300: folds
+jeje_sat: raises 200 to 300
+NHBROOO: folds
+Uncalled bet (200) returned to jeje_sat
+jeje_sat collected 260 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 260 | Rake 0
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) collected (260)
+Seat 3: NHBROOO (big blind) folded before Flop
+Seat 4: Mariusjacob84 folded before Flop (didn't bet)
+Seat 5: tinluu folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327135625: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IV (50/100) - 2022/04/07 17:46:59 CET [2022/04/07 11:46:59 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (4602 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11278 in chips, €0.07 bounty)
+Seat 3: NHBROOO (5133 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3992 in chips, €0.05 bounty)
+Seat 5: tinluu (4995 in chips, €0.05 bounty)
+Tuche37300: posts the ante 12
+jeje_sat: posts the ante 12
+NHBROOO: posts the ante 12
+Mariusjacob84: posts the ante 12
+tinluu: posts the ante 12
+NHBROOO: posts small blind 50
+Mariusjacob84: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [7d 8s]
+tinluu: folds
+Tuche37300: raises 100 to 200
+jeje_sat: folds
+NHBROOO: folds
+Mariusjacob84: folds
+Uncalled bet (100) returned to Tuche37300
+Tuche37300 collected 310 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 310 | Rake 0
+Seat 1: Tuche37300 collected (310)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: NHBROOO (small blind) folded before Flop
+Seat 4: Mariusjacob84 (big blind) folded before Flop
+Seat 5: tinluu folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327140807: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IV (50/100) - 2022/04/07 17:47:15 CET [2022/04/07 11:47:15 ET]
+Table '3392856433 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (4800 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11266 in chips, €0.07 bounty)
+Seat 3: NHBROOO (5071 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3880 in chips, €0.05 bounty)
+Seat 5: tinluu (4983 in chips, €0.05 bounty)
+Tuche37300: posts the ante 12
+jeje_sat: posts the ante 12
+NHBROOO: posts the ante 12
+Mariusjacob84: posts the ante 12
+tinluu: posts the ante 12
+Mariusjacob84: posts small blind 50
+tinluu: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [Td Kh]
+Tuche37300: folds
+jeje_sat: raises 200 to 300
+NHBROOO: folds
+Mariusjacob84: folds
+tinluu: folds
+Uncalled bet (200) returned to jeje_sat
+jeje_sat collected 310 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 310 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat collected (310)
+Seat 3: NHBROOO (button) folded before Flop (didn't bet)
+Seat 4: Mariusjacob84 (small blind) folded before Flop
+Seat 5: tinluu (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327149707: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IV (50/100) - 2022/04/07 17:47:40 CET [2022/04/07 11:47:40 ET]
+Table '3392856433 2' 6-max Seat #4 is the button
+Seat 1: Tuche37300 (4788 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11464 in chips, €0.07 bounty)
+Seat 3: NHBROOO (5059 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3818 in chips, €0.05 bounty)
+Seat 5: tinluu (4871 in chips, €0.05 bounty)
+Tuche37300: posts the ante 12
+jeje_sat: posts the ante 12
+NHBROOO: posts the ante 12
+Mariusjacob84: posts the ante 12
+tinluu: posts the ante 12
+tinluu: posts small blind 50
+Tuche37300: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h 4s]
+jeje_sat: folds
+NHBROOO: folds
+Mariusjacob84: folds
+tinluu: folds
+Uncalled bet (50) returned to Tuche37300
+Tuche37300 collected 160 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 160 | Rake 0
+Seat 1: Tuche37300 (big blind) collected (160)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 4: Mariusjacob84 (button) folded before Flop (didn't bet)
+Seat 5: tinluu (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327160767: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IV (50/100) - 2022/04/07 17:48:13 CET [2022/04/07 11:48:13 ET]
+Table '3392856433 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (4886 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11452 in chips, €0.07 bounty)
+Seat 3: NHBROOO (5047 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3806 in chips, €0.05 bounty)
+Seat 5: tinluu (4809 in chips, €0.05 bounty)
+Tuche37300: posts the ante 12
+jeje_sat: posts the ante 12
+NHBROOO: posts the ante 12
+Mariusjacob84: posts the ante 12
+tinluu: posts the ante 12
+Tuche37300: posts small blind 50
+jeje_sat: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc 2d]
+NHBROOO: folds
+Mariusjacob84: raises 150 to 250
+tinluu: folds
+Tuche37300: folds
+jeje_sat: folds
+Uncalled bet (150) returned to Mariusjacob84
+Mariusjacob84 collected 310 from pot
+Mariusjacob84: doesn't show hand
+*** SUMMARY ***
+Total pot 310 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 4: Mariusjacob84 collected (310)
+Seat 5: tinluu (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327170341: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IV (50/100) - 2022/04/07 17:48:41 CET [2022/04/07 11:48:41 ET]
+Table '3392856433 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (4824 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11340 in chips, €0.07 bounty)
+Seat 3: NHBROOO (5035 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (4004 in chips, €0.05 bounty)
+Seat 5: tinluu (4797 in chips, €0.05 bounty)
+Tuche37300: posts the ante 12
+jeje_sat: posts the ante 12
+NHBROOO: posts the ante 12
+Mariusjacob84: posts the ante 12
+tinluu: posts the ante 12
+jeje_sat: posts small blind 50
+NHBROOO: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [2s 5c]
+Mariusjacob84: folds
+tinluu: folds
+Tuche37300: folds
+jeje_sat: folds
+Uncalled bet (50) returned to NHBROOO
+NHBROOO collected 160 from pot
+NHBROOO: doesn't show hand
+*** SUMMARY ***
+Total pot 160 | Rake 0
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 3: NHBROOO (big blind) collected (160)
+Seat 4: Mariusjacob84 folded before Flop (didn't bet)
+Seat 5: tinluu folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327175638: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IV (50/100) - 2022/04/07 17:48:56 CET [2022/04/07 11:48:56 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (4812 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11278 in chips, €0.07 bounty)
+Seat 3: NHBROOO (5133 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3992 in chips, €0.05 bounty)
+Seat 5: tinluu (4785 in chips, €0.05 bounty)
+Tuche37300: posts the ante 12
+jeje_sat: posts the ante 12
+NHBROOO: posts the ante 12
+Mariusjacob84: posts the ante 12
+tinluu: posts the ante 12
+NHBROOO: posts small blind 50
+Mariusjacob84: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qh 8c]
+tinluu: folds
+Tuche37300: folds
+jeje_sat: raises 200 to 300
+NHBROOO: folds
+Mariusjacob84: folds
+Uncalled bet (200) returned to jeje_sat
+jeje_sat collected 310 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 310 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) collected (310)
+Seat 3: NHBROOO (small blind) folded before Flop
+Seat 4: Mariusjacob84 (big blind) folded before Flop
+Seat 5: tinluu folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327183141: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IV (50/100) - 2022/04/07 17:49:18 CET [2022/04/07 11:49:18 ET]
+Table '3392856433 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (4800 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11476 in chips, €0.07 bounty)
+Seat 3: NHBROOO (5071 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3880 in chips, €0.05 bounty)
+Seat 5: tinluu (4773 in chips, €0.05 bounty)
+Tuche37300: posts the ante 12
+jeje_sat: posts the ante 12
+NHBROOO: posts the ante 12
+Mariusjacob84: posts the ante 12
+tinluu: posts the ante 12
+Mariusjacob84: posts small blind 50
+tinluu: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [Td Kc]
+Tuche37300: folds
+jeje_sat: raises 200 to 300
+NHBROOO: folds
+Mariusjacob84: folds
+tinluu: folds
+Uncalled bet (200) returned to jeje_sat
+jeje_sat collected 310 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 310 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat collected (310)
+Seat 3: NHBROOO (button) folded before Flop (didn't bet)
+Seat 4: Mariusjacob84 (small blind) folded before Flop
+Seat 5: tinluu (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327191067: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IV (50/100) - 2022/04/07 17:49:42 CET [2022/04/07 11:49:42 ET]
+Table '3392856433 2' 6-max Seat #4 is the button
+Seat 1: Tuche37300 (4788 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11674 in chips, €0.07 bounty)
+Seat 3: NHBROOO (5059 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3818 in chips, €0.05 bounty)
+Seat 5: tinluu (4661 in chips, €0.05 bounty)
+Tuche37300: posts the ante 12
+jeje_sat: posts the ante 12
+NHBROOO: posts the ante 12
+Mariusjacob84: posts the ante 12
+tinluu: posts the ante 12
+tinluu: posts small blind 50
+Tuche37300: posts big blind 100
+*** HOLE CARDS ***
+Dealt to jeje_sat [3d 2c]
+jeje_sat: folds
+NHBROOO: folds
+Mariusjacob84: folds
+tinluu: folds
+Uncalled bet (50) returned to Tuche37300
+Tuche37300 collected 160 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 160 | Rake 0
+Seat 1: Tuche37300 (big blind) collected (160)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 4: Mariusjacob84 (button) folded before Flop (didn't bet)
+Seat 5: tinluu (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327199773: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level V (75/150) - 2022/04/07 17:50:07 CET [2022/04/07 11:50:07 ET]
+Table '3392856433 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (4886 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11662 in chips, €0.07 bounty)
+Seat 3: NHBROOO (5047 in chips, €0.05 bounty)
+Seat 4: Mariusjacob84 (3806 in chips, €0.05 bounty)
+Seat 5: tinluu (4599 in chips, €0.05 bounty)
+Tuche37300: posts the ante 20
+jeje_sat: posts the ante 20
+NHBROOO: posts the ante 20
+Mariusjacob84: posts the ante 20
+tinluu: posts the ante 20
+Tuche37300: posts small blind 75
+jeje_sat: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [Td 4d]
+NHBROOO: raises 300 to 450
+Mariusjacob84: raises 3336 to 3786 and is all-in
+tinluu: folds
+Tuche37300: folds
+jeje_sat: folds
+NHBROOO: calls 3336
+*** FLOP *** [5d Kh Qc]
+*** TURN *** [5d Kh Qc] [4c]
+*** RIVER *** [5d Kh Qc 4c] [As]
+*** SHOW DOWN ***
+NHBROOO: shows [Kd Ah] (two pair, Aces and Kings)
+Mariusjacob84: shows [6c 6h] (a pair of Sixes)
+NHBROOO collected 7897 from pot
+NHBROOO wins €0.03 for eliminating Mariusjacob84 and their own bounty increases by €0.02 to €0.07
+Mariusjacob84 finished the tournament
+*** SUMMARY ***
+Total pot 7897 | Rake 0
+Board [5d Kh Qc 4c As]
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 3: NHBROOO showed [Kd Ah] and won (7897) with two pair, Aces and Kings
+Seat 4: Mariusjacob84 showed [6c 6h] and lost with a pair of Sixes
+Seat 5: tinluu (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327210414: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level V (75/150) - 2022/04/07 17:50:39 CET [2022/04/07 11:50:39 ET]
+Table '3392856433 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (4791 in chips, €0.05 bounty)
+Seat 2: jeje_sat (11492 in chips, €0.07 bounty)
+Seat 3: NHBROOO (9138 in chips, €0.07 bounty)
+Seat 5: tinluu (4579 in chips, €0.05 bounty)
+Tuche37300: posts the ante 20
+jeje_sat: posts the ante 20
+NHBROOO: posts the ante 20
+tinluu: posts the ante 20
+jeje_sat: posts small blind 75
+NHBROOO: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts Jd]
+tinluu: folds
+Tuche37300: calls 150
+jeje_sat: calls 75
+NHBROOO: checks
+*** FLOP *** [5h 9c 7d]
+jeje_sat: checks
+NHBROOO: checks
+Tuche37300: bets 265
+jeje_sat: calls 265
+NHBROOO: folds
+*** TURN *** [5h 9c 7d] [Kc]
+jeje_sat: checks
+Tuche37300: bets 530
+jeje_sat: calls 530
+*** RIVER *** [5h 9c 7d Kc] [2h]
+jeje_sat: checks
+Tuche37300: checks
+*** SHOW DOWN ***
+jeje_sat: shows [Ts Jd] (high card King)
+Tuche37300: shows [9d 8c] (a pair of Nines)
+Tuche37300 collected 2120 from pot
+*** SUMMARY ***
+Total pot 2120 | Rake 0
+Board [5h 9c 7d Kc 2h]
+Seat 1: Tuche37300 (button) showed [9d 8c] and won (2120) with a pair of Nines
+Seat 2: jeje_sat (small blind) showed [Ts Jd] and lost with high card King
+Seat 3: NHBROOO (big blind) folded on the Flop
+Seat 5: tinluu folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327227341: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level V (75/150) - 2022/04/07 17:51:29 CET [2022/04/07 11:51:29 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (5946 in chips, €0.05 bounty)
+Seat 2: jeje_sat (10527 in chips, €0.07 bounty)
+Seat 3: NHBROOO (8968 in chips, €0.07 bounty)
+Seat 5: tinluu (4559 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (5000 in chips, €0.05 bounty)
+Tuche37300: posts the ante 20
+jeje_sat: posts the ante 20
+NHBROOO: posts the ante 20
+tinluu: posts the ante 20
+Mariusjacob84: posts the ante 20
+NHBROOO: posts small blind 75
+tinluu: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jd Qs]
+Mariusjacob84: calls 150
+Tuche37300: folds
+jeje_sat: raises 450 to 600
+NHBROOO: folds
+tinluu: folds
+Mariusjacob84: raises 4380 to 4980 and is all-in
+jeje_sat: folds
+Uncalled bet (4380) returned to Mariusjacob84
+Mariusjacob84 said, "limp shove"
+Mariusjacob84 collected 1525 from pot
+Mariusjacob84: doesn't show hand
+*** SUMMARY ***
+Total pot 1525 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) folded before Flop
+Seat 3: NHBROOO (small blind) folded before Flop
+Seat 5: tinluu (big blind) folded before Flop
+Seat 6: Mariusjacob84 collected (1525)
+
+
+PokerStars Home Game Hand #235327241912: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level V (75/150) - 2022/04/07 17:52:11 CET [2022/04/07 11:52:11 ET]
+Table '3392856433 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (5926 in chips, €0.05 bounty)
+Seat 2: jeje_sat (9907 in chips, €0.07 bounty)
+Seat 3: NHBROOO (8873 in chips, €0.07 bounty)
+Seat 5: tinluu (4389 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (5905 in chips, €0.05 bounty)
+Tuche37300: posts the ante 20
+jeje_sat: posts the ante 20
+NHBROOO: posts the ante 20
+tinluu: posts the ante 20
+Mariusjacob84: posts the ante 20
+tinluu: posts small blind 75
+Mariusjacob84: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h 3s]
+Mariusjacob84 said, "66"
+Tuche37300: folds
+jeje_sat: folds
+NHBROOO: folds
+jeje_sat said, "aa"
+tinluu: raises 300 to 450
+Mariusjacob84: folds
+Uncalled bet (300) returned to tinluu
+tinluu collected 400 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 400 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO (button) folded before Flop (didn't bet)
+Seat 5: tinluu (small blind) collected (400)
+Seat 6: Mariusjacob84 (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327250480: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level V (75/150) - 2022/04/07 17:52:37 CET [2022/04/07 11:52:37 ET]
+Table '3392856433 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (5906 in chips, €0.05 bounty)
+Seat 2: jeje_sat (9887 in chips, €0.07 bounty)
+Seat 3: NHBROOO (8853 in chips, €0.07 bounty)
+Seat 5: tinluu (4619 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (5735 in chips, €0.05 bounty)
+Tuche37300: posts the ante 20
+jeje_sat: posts the ante 20
+NHBROOO: posts the ante 20
+tinluu: posts the ante 20
+Mariusjacob84: posts the ante 20
+Mariusjacob84: posts small blind 75
+Tuche37300: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [3s 7s]
+jeje_sat: folds
+NHBROOO: folds
+tinluu: folds
+Mariusjacob84 said, "66"
+Mariusjacob84: raises 150 to 300
+Tuche37300: folds
+Uncalled bet (150) returned to Mariusjacob84
+Mariusjacob84 collected 400 from pot
+Mariusjacob84: doesn't show hand
+*** SUMMARY ***
+Total pot 400 | Rake 0
+Seat 1: Tuche37300 (big blind) folded before Flop
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 5: tinluu (button) folded before Flop (didn't bet)
+Seat 6: Mariusjacob84 (small blind) collected (400)
+
+
+PokerStars Home Game Hand #235327256725: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level V (75/150) - 2022/04/07 17:52:55 CET [2022/04/07 11:52:55 ET]
+Table '3392856433 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (5736 in chips, €0.05 bounty)
+Seat 2: jeje_sat (9867 in chips, €0.07 bounty)
+Seat 3: NHBROOO (8833 in chips, €0.07 bounty)
+Seat 5: tinluu (4599 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (5965 in chips, €0.05 bounty)
+Tuche37300: posts the ante 20
+jeje_sat: posts the ante 20
+NHBROOO: posts the ante 20
+tinluu: posts the ante 20
+Mariusjacob84: posts the ante 20
+Tuche37300: posts small blind 75
+jeje_sat: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s Qd]
+NHBROOO: raises 300 to 450
+tinluu: folds
+Mariusjacob84: folds
+Tuche37300: folds
+jeje_sat: folds
+Uncalled bet (300) returned to NHBROOO
+NHBROOO collected 475 from pot
+NHBROOO: doesn't show hand
+*** SUMMARY ***
+Total pot 475 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 3: NHBROOO collected (475)
+Seat 5: tinluu folded before Flop (didn't bet)
+Seat 6: Mariusjacob84 (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327262593: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level V (75/150) - 2022/04/07 17:53:12 CET [2022/04/07 11:53:12 ET]
+Table '3392856433 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (5641 in chips, €0.05 bounty)
+Seat 2: jeje_sat (9697 in chips, €0.07 bounty)
+Seat 3: NHBROOO (9138 in chips, €0.07 bounty)
+Seat 5: tinluu (4579 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (5945 in chips, €0.05 bounty)
+Tuche37300: posts the ante 20
+jeje_sat: posts the ante 20
+NHBROOO: posts the ante 20
+tinluu: posts the ante 20
+Mariusjacob84: posts the ante 20
+jeje_sat: posts small blind 75
+NHBROOO: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [8c 7s]
+tinluu: raises 228 to 378
+Mariusjacob84: calls 378
+Tuche37300: folds
+jeje_sat: folds
+NHBROOO: folds
+*** FLOP *** [4d 8s Jd]
+tinluu: bets 450
+Mariusjacob84: calls 450
+*** TURN *** [4d 8s Jd] [Ts]
+tinluu: checks
+Mariusjacob84: bets 450
+tinluu: calls 450
+*** RIVER *** [4d 8s Jd Ts] [8h]
+tinluu: checks
+Mariusjacob84: checks
+*** SHOW DOWN ***
+tinluu: shows [6d 6h] (two pair, Eights and Sixes)
+Mariusjacob84: mucks hand
+tinluu collected 2881 from pot
+*** SUMMARY ***
+Total pot 2881 | Rake 0
+Board [4d 8s Jd Ts 8h]
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 3: NHBROOO (big blind) folded before Flop
+Seat 5: tinluu showed [6d 6h] and won (2881) with two pair, Eights and Sixes
+Seat 6: Mariusjacob84 mucked [5h 5s]
+
+
+PokerStars Home Game Hand #235327277274: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level V (75/150) - 2022/04/07 17:53:55 CET [2022/04/07 11:53:55 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (5621 in chips, €0.05 bounty)
+Seat 2: jeje_sat (9602 in chips, €0.07 bounty)
+Seat 3: NHBROOO (8968 in chips, €0.07 bounty)
+Seat 5: tinluu (6162 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (4647 in chips, €0.05 bounty)
+Tuche37300: posts the ante 20
+jeje_sat: posts the ante 20
+NHBROOO: posts the ante 20
+tinluu: posts the ante 20
+Mariusjacob84: posts the ante 20
+NHBROOO: posts small blind 75
+tinluu: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [5s Ac]
+Mariusjacob84: folds
+Tuche37300: folds
+jeje_sat: raises 300 to 450
+Mariusjacob84 said, "3:)"
+NHBROOO: calls 375
+tinluu: folds
+*** FLOP *** [Kd As 6d]
+NHBROOO: checks
+jeje_sat: bets 575
+NHBROOO: folds
+Uncalled bet (575) returned to jeje_sat
+jeje_sat collected 1150 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1150 | Rake 0
+Board [Kd As 6d]
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) collected (1150)
+Seat 3: NHBROOO (small blind) folded on the Flop
+Seat 5: tinluu (big blind) folded before Flop
+Seat 6: Mariusjacob84 folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327288608: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level V (75/150) - 2022/04/07 17:54:29 CET [2022/04/07 11:54:29 ET]
+Table '3392856433 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (5601 in chips, €0.05 bounty)
+Seat 2: jeje_sat (10282 in chips, €0.07 bounty)
+Seat 3: NHBROOO (8498 in chips, €0.07 bounty)
+Seat 5: tinluu (5992 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (4627 in chips, €0.05 bounty)
+Tuche37300: posts the ante 20
+jeje_sat: posts the ante 20
+NHBROOO: posts the ante 20
+tinluu: posts the ante 20
+Mariusjacob84: posts the ante 20
+tinluu: posts small blind 75
+Mariusjacob84: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ad 6h]
+Tuche37300: folds
+jeje_sat: folds
+NHBROOO: folds
+tinluu: folds
+Uncalled bet (75) returned to Mariusjacob84
+Mariusjacob84 collected 250 from pot
+Mariusjacob84: doesn't show hand
+*** SUMMARY ***
+Total pot 250 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO (button) folded before Flop (didn't bet)
+Seat 5: tinluu (small blind) folded before Flop
+Seat 6: Mariusjacob84 (big blind) collected (250)
+
+
+PokerStars Home Game Hand #235327292947: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level V (75/150) - 2022/04/07 17:54:41 CET [2022/04/07 11:54:41 ET]
+Table '3392856433 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (5581 in chips, €0.05 bounty)
+Seat 2: jeje_sat (10262 in chips, €0.07 bounty)
+Seat 3: NHBROOO (8478 in chips, €0.07 bounty)
+Seat 5: tinluu (5897 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (4782 in chips, €0.05 bounty)
+Tuche37300: posts the ante 20
+jeje_sat: posts the ante 20
+NHBROOO: posts the ante 20
+tinluu: posts the ante 20
+Mariusjacob84: posts the ante 20
+Mariusjacob84: posts small blind 75
+Tuche37300: posts big blind 150
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c 4d]
+jeje_sat: folds
+NHBROOO: folds
+tinluu: raises 228 to 378
+Mariusjacob84: folds
+Tuche37300: calls 228
+*** FLOP *** [Qs 8s 2h]
+Tuche37300: checks
+tinluu: bets 447
+Tuche37300: folds
+Uncalled bet (447) returned to tinluu
+tinluu collected 931 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 931 | Rake 0
+Board [Qs 8s 2h]
+Seat 1: Tuche37300 (big blind) folded on the Flop
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 5: tinluu (button) collected (931)
+Seat 6: Mariusjacob84 (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327301292: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VI (100/200) - 2022/04/07 17:55:06 CET [2022/04/07 11:55:06 ET]
+Table '3392856433 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (5183 in chips, €0.05 bounty)
+Seat 2: jeje_sat (10242 in chips, €0.07 bounty)
+Seat 3: NHBROOO (8458 in chips, €0.07 bounty)
+Seat 5: tinluu (6430 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (4687 in chips, €0.05 bounty)
+Tuche37300: posts the ante 25
+jeje_sat: posts the ante 25
+NHBROOO: posts the ante 25
+tinluu: posts the ante 25
+Mariusjacob84: posts the ante 25
+Tuche37300: posts small blind 100
+jeje_sat: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [3h 2d]
+NHBROOO: raises 200 to 400
+tinluu: folds
+Mariusjacob84: folds
+Tuche37300: raises 200 to 600
+jeje_sat: folds
+NHBROOO: calls 200
+*** FLOP *** [Ad Td Ac]
+Tuche37300: checks
+NHBROOO: checks
+*** TURN *** [Ad Td Ac] [2c]
+Tuche37300: bets 400
+NHBROOO: calls 400
+*** RIVER *** [Ad Td Ac 2c] [Kh]
+Tuche37300: bets 2325
+NHBROOO: folds
+Uncalled bet (2325) returned to Tuche37300
+Tuche37300 collected 2325 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 2325 | Rake 0
+Board [Ad Td Ac 2c Kh]
+Seat 1: Tuche37300 (small blind) collected (2325)
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 3: NHBROOO folded on the River
+Seat 5: tinluu folded before Flop (didn't bet)
+Seat 6: Mariusjacob84 (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327396314: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VI (100/200) - 2022/04/07 18:01:16 CET [2022/04/07 12:01:16 ET]
+Table '3392856433 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (6483 in chips, €0.05 bounty)
+Seat 2: jeje_sat (10017 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7433 in chips, €0.07 bounty)
+Seat 5: tinluu (6405 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (4662 in chips, €0.05 bounty)
+Tuche37300: posts the ante 25
+jeje_sat: posts the ante 25
+NHBROOO: posts the ante 25
+tinluu: posts the ante 25
+Mariusjacob84: posts the ante 25
+jeje_sat: posts small blind 100
+NHBROOO: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [4c 3s]
+tinluu: raises 304 to 504
+Mariusjacob84: folds
+Tuche37300 has timed out
+Tuche37300: folds
+Tuche37300 is sitting out
+jeje_sat: folds
+NHBROOO: folds
+Uncalled bet (304) returned to tinluu
+tinluu collected 625 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 625 | Rake 0
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 3: NHBROOO (big blind) folded before Flop
+Seat 5: tinluu collected (625)
+Seat 6: Mariusjacob84 folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327407552: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VI (100/200) - 2022/04/07 18:01:51 CET [2022/04/07 12:01:51 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (6458 in chips, €0.05 bounty) is sitting out
+Seat 2: jeje_sat (9892 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7208 in chips, €0.07 bounty)
+Seat 5: tinluu (6805 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (4637 in chips, €0.05 bounty)
+Tuche37300: posts the ante 25
+jeje_sat: posts the ante 25
+NHBROOO: posts the ante 25
+tinluu: posts the ante 25
+Mariusjacob84: posts the ante 25
+NHBROOO: posts small blind 100
+tinluu: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jh 5c]
+Mariusjacob84: raises 200 to 400
+Tuche37300: folds
+jeje_sat: folds
+NHBROOO: folds
+tinluu: calls 200
+*** FLOP *** [Kh 4s 8c]
+tinluu: checks
+Mariusjacob84: bets 513
+tinluu: folds
+Uncalled bet (513) returned to Mariusjacob84
+Mariusjacob84 collected 1025 from pot
+Mariusjacob84: doesn't show hand
+*** SUMMARY ***
+Total pot 1025 | Rake 0
+Board [Kh 4s 8c]
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: NHBROOO (small blind) folded before Flop
+Seat 5: tinluu (big blind) folded on the Flop
+Seat 6: Mariusjacob84 collected (1025)
+
+
+PokerStars Home Game Hand #235327419415: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VI (100/200) - 2022/04/07 18:02:28 CET [2022/04/07 12:02:28 ET]
+Table '3392856433 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (6433 in chips, €0.05 bounty) is sitting out
+Seat 2: jeje_sat (9867 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7083 in chips, €0.07 bounty)
+Seat 5: tinluu (6380 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (5237 in chips, €0.05 bounty)
+Tuche37300: posts the ante 25
+jeje_sat: posts the ante 25
+NHBROOO: posts the ante 25
+tinluu: posts the ante 25
+Mariusjacob84: posts the ante 25
+tinluu: posts small blind 100
+Mariusjacob84: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ac 3d]
+Tuche37300: folds
+jeje_sat: folds
+NHBROOO: raises 400 to 600
+tinluu: folds
+Mariusjacob84: folds
+Uncalled bet (400) returned to NHBROOO
+NHBROOO collected 625 from pot
+NHBROOO: doesn't show hand
+*** SUMMARY ***
+Total pot 625 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO (button) collected (625)
+Seat 5: tinluu (small blind) folded before Flop
+Seat 6: Mariusjacob84 (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327428483: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VI (100/200) - 2022/04/07 18:02:54 CET [2022/04/07 12:02:54 ET]
+Table '3392856433 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (6408 in chips, €0.05 bounty) is sitting out
+Seat 2: jeje_sat (9842 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7483 in chips, €0.07 bounty)
+Seat 5: tinluu (6255 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (5012 in chips, €0.05 bounty)
+Tuche37300: posts the ante 25
+jeje_sat: posts the ante 25
+NHBROOO: posts the ante 25
+tinluu: posts the ante 25
+Mariusjacob84: posts the ante 25
+Mariusjacob84: posts small blind 100
+Tuche37300: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [As 6h]
+jeje_sat: folds
+NHBROOO: folds
+tinluu: raises 304 to 504
+Mariusjacob84: calls 404
+Tuche37300: folds
+*** FLOP *** [Td 9c 6d]
+Mariusjacob84: checks
+tinluu: bets 640
+Mariusjacob84: calls 640
+*** TURN *** [Td 9c 6d] [Qd]
+Mariusjacob84: checks
+tinluu: checks
+*** RIVER *** [Td 9c 6d Qd] [Js]
+Mariusjacob84: checks
+tinluu: bets 800
+Mariusjacob84: folds
+Uncalled bet (800) returned to tinluu
+tinluu collected 2613 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 2613 | Rake 0
+Board [Td 9c 6d Qd Js]
+Seat 1: Tuche37300 (big blind) folded before Flop
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 5: tinluu (button) collected (2613)
+Seat 6: Mariusjacob84 (small blind) folded on the River
+
+
+PokerStars Home Game Hand #235327453158: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VI (100/200) - 2022/04/07 18:04:05 CET [2022/04/07 12:04:05 ET]
+Table '3392856433 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (6183 in chips, €0.05 bounty) is sitting out
+Seat 2: jeje_sat (9817 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7458 in chips, €0.07 bounty)
+Seat 5: tinluu (7699 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (3843 in chips, €0.05 bounty)
+Tuche37300: posts the ante 25
+jeje_sat: posts the ante 25
+NHBROOO: posts the ante 25
+tinluu: posts the ante 25
+Mariusjacob84: posts the ante 25
+Tuche37300: posts small blind 100
+jeje_sat: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [4c Qc]
+Tuche37300 has returned
+NHBROOO: folds
+tinluu: folds
+Mariusjacob84: raises 200 to 400
+Tuche37300: calls 300
+jeje_sat: folds
+*** FLOP *** [7s 8d Qd]
+Tuche37300: checks
+Mariusjacob84: checks
+*** TURN *** [7s 8d Qd] [4s]
+Tuche37300: checks
+Mariusjacob84: checks
+*** RIVER *** [7s 8d Qd 4s] [6c]
+Tuche37300: bets 1125
+Mariusjacob84: folds [3s 3c]
+Uncalled bet (1125) returned to Tuche37300
+Tuche37300 collected 1125 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 1125 | Rake 0
+Board [7s 8d Qd 4s 6c]
+Seat 1: Tuche37300 (small blind) collected (1125)
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 5: tinluu folded before Flop (didn't bet)
+Seat 6: Mariusjacob84 (button) folded on the River
+
+
+PokerStars Home Game Hand #235327468199: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VI (100/200) - 2022/04/07 18:04:48 CET [2022/04/07 12:04:48 ET]
+Table '3392856433 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (6883 in chips, €0.05 bounty)
+Seat 2: jeje_sat (9592 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7433 in chips, €0.07 bounty)
+Seat 5: tinluu (7674 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (3418 in chips, €0.05 bounty)
+Tuche37300: posts the ante 25
+jeje_sat: posts the ante 25
+NHBROOO: posts the ante 25
+tinluu: posts the ante 25
+Mariusjacob84: posts the ante 25
+jeje_sat: posts small blind 100
+NHBROOO: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [8h Ac]
+tinluu: folds
+Mariusjacob84: folds
+Tuche37300: raises 200 to 400
+jeje_sat: calls 300
+NHBROOO: folds
+*** FLOP *** [3h Qh 7d]
+jeje_sat: checks
+Tuche37300: bets 562
+jeje_sat: folds
+Uncalled bet (562) returned to Tuche37300
+Tuche37300 collected 1125 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 1125 | Rake 0
+Board [3h Qh 7d]
+Seat 1: Tuche37300 (button) collected (1125)
+Seat 2: jeje_sat (small blind) folded on the Flop
+Seat 3: NHBROOO (big blind) folded before Flop
+Seat 5: tinluu folded before Flop (didn't bet)
+Seat 6: Mariusjacob84 folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327476044: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VI (100/200) - 2022/04/07 18:05:11 CET [2022/04/07 12:05:11 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (7583 in chips, €0.05 bounty)
+Seat 2: jeje_sat (9167 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7208 in chips, €0.07 bounty)
+Seat 5: tinluu (7649 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (3393 in chips, €0.05 bounty)
+Tuche37300: posts the ante 25
+jeje_sat: posts the ante 25
+NHBROOO: posts the ante 25
+tinluu: posts the ante 25
+Mariusjacob84: posts the ante 25
+NHBROOO: posts small blind 100
+tinluu: posts big blind 200
+*** HOLE CARDS ***
+Dealt to jeje_sat [9h 6s]
+Mariusjacob84: raises 300 to 500
+Tuche37300: folds
+jeje_sat: folds
+NHBROOO: folds
+tinluu: calls 300
+*** FLOP *** [3c Jh 8d]
+tinluu: checks
+Mariusjacob84: checks
+*** TURN *** [3c Jh 8d] [Kh]
+tinluu: checks
+Mariusjacob84: bets 800
+tinluu: folds
+Uncalled bet (800) returned to Mariusjacob84
+Mariusjacob84 collected 1225 from pot
+Mariusjacob84: doesn't show hand
+*** SUMMARY ***
+Total pot 1225 | Rake 0
+Board [3c Jh 8d Kh]
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: NHBROOO (small blind) folded before Flop
+Seat 5: tinluu (big blind) folded on the Turn
+Seat 6: Mariusjacob84 collected (1225)
+
+
+PokerStars Home Game Hand #235327514259: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VII (125/250) - 2022/04/07 18:06:25 CET [2022/04/07 12:06:25 ET]
+Table '3392856433 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (7558 in chips, €0.05 bounty)
+Seat 2: jeje_sat (9142 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7083 in chips, €0.07 bounty)
+Seat 5: tinluu (7124 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (4093 in chips, €0.05 bounty)
+Tuche37300: posts the ante 30
+jeje_sat: posts the ante 30
+NHBROOO: posts the ante 30
+tinluu: posts the ante 30
+Mariusjacob84: posts the ante 30
+tinluu: posts small blind 125
+Mariusjacob84: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ah 5d]
+Tuche37300: folds
+jeje_sat: raises 500 to 750
+NHBROOO: folds
+tinluu: folds
+Mariusjacob84: calls 500
+*** FLOP *** [3s 9s Js]
+Mariusjacob84: checks
+jeje_sat: checks
+*** TURN *** [3s 9s Js] [5h]
+Mariusjacob84: checks
+jeje_sat: bets 1000
+Mariusjacob84: folds
+Uncalled bet (1000) returned to jeje_sat
+jeje_sat collected 1775 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1775 | Rake 0
+Board [3s 9s Js 5h]
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat collected (1775)
+Seat 3: NHBROOO (button) folded before Flop (didn't bet)
+Seat 5: tinluu (small blind) folded before Flop
+Seat 6: Mariusjacob84 (big blind) folded on the Turn
+
+
+PokerStars Home Game Hand #235327530713: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VII (125/250) - 2022/04/07 18:07:13 CET [2022/04/07 12:07:13 ET]
+Table '3392856433 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (7528 in chips, €0.05 bounty)
+Seat 2: jeje_sat (10137 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7053 in chips, €0.07 bounty)
+Seat 5: tinluu (6969 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (3313 in chips, €0.05 bounty)
+Tuche37300: posts the ante 30
+jeje_sat: posts the ante 30
+NHBROOO: posts the ante 30
+tinluu: posts the ante 30
+Mariusjacob84: posts the ante 30
+Mariusjacob84: posts small blind 125
+Tuche37300: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jh 4h]
+jeje_sat: folds
+NHBROOO: raises 250 to 500
+tinluu: folds
+Mariusjacob84: folds
+Tuche37300: calls 250
+*** FLOP *** [Jd Ad Qd]
+Tuche37300: checks
+NHBROOO: bets 887
+Tuche37300: folds
+Uncalled bet (887) returned to NHBROOO
+NHBROOO collected 1275 from pot
+NHBROOO: doesn't show hand
+*** SUMMARY ***
+Total pot 1275 | Rake 0
+Board [Jd Ad Qd]
+Seat 1: Tuche37300 (big blind) folded on the Flop
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO collected (1275)
+Seat 5: tinluu (button) folded before Flop (didn't bet)
+Seat 6: Mariusjacob84 (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327547279: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VII (125/250) - 2022/04/07 18:08:00 CET [2022/04/07 12:08:00 ET]
+Table '3392856433 2' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (6998 in chips, €0.05 bounty)
+Seat 2: jeje_sat (10107 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7798 in chips, €0.07 bounty)
+Seat 5: tinluu (6939 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (3158 in chips, €0.05 bounty)
+Tuche37300: posts the ante 30
+jeje_sat: posts the ante 30
+NHBROOO: posts the ante 30
+tinluu: posts the ante 30
+Mariusjacob84: posts the ante 30
+Tuche37300: posts small blind 125
+jeje_sat: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts Qd]
+NHBROOO: folds
+tinluu: folds
+Mariusjacob84: folds
+Tuche37300: raises 500 to 750
+jeje_sat: calls 500
+*** FLOP *** [4c 7h Kh]
+Tuche37300: bets 575
+jeje_sat: folds
+Uncalled bet (575) returned to Tuche37300
+Tuche37300 collected 1650 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 1650 | Rake 0
+Board [4c 7h Kh]
+Seat 1: Tuche37300 (small blind) collected (1650)
+Seat 2: jeje_sat (big blind) folded on the Flop
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 5: tinluu folded before Flop (didn't bet)
+Seat 6: Mariusjacob84 (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327557363: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VII (125/250) - 2022/04/07 18:08:30 CET [2022/04/07 12:08:30 ET]
+Table '3392856433 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (7868 in chips, €0.05 bounty)
+Seat 2: jeje_sat (9327 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7768 in chips, €0.07 bounty)
+Seat 5: tinluu (6909 in chips, €0.05 bounty)
+Seat 6: Mariusjacob84 (3128 in chips, €0.05 bounty)
+Tuche37300: posts the ante 30
+jeje_sat: posts the ante 30
+NHBROOO: posts the ante 30
+tinluu: posts the ante 30
+Mariusjacob84: posts the ante 30
+jeje_sat: posts small blind 125
+NHBROOO: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d Kc]
+tinluu: folds
+Mariusjacob84: raises 2848 to 3098 and is all-in
+Tuche37300: raises 4740 to 7838 and is all-in
+jeje_sat: folds
+NHBROOO: folds
+Uncalled bet (4740) returned to Tuche37300
+*** FLOP *** [2h Th 6d]
+*** TURN *** [2h Th 6d] [4d]
+*** RIVER *** [2h Th 6d 4d] [Td]
+*** SHOW DOWN ***
+Mariusjacob84: shows [Ac 3c] (a pair of Tens)
+Tuche37300: shows [As Ad] (two pair, Aces and Tens)
+Tuche37300 collected 6721 from pot
+Tuche37300 wins €0.03 for eliminating Mariusjacob84 and their own bounty increases by €0.02 to €0.07
+Mariusjacob84 finished the tournament in 11th place
+*** SUMMARY ***
+Total pot 6721 | Rake 0
+Board [2h Th 6d 4d Td]
+Seat 1: Tuche37300 (button) showed [As Ad] and won (6721) with two pair, Aces and Tens
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 3: NHBROOO (big blind) folded before Flop
+Seat 5: tinluu folded before Flop (didn't bet)
+Seat 6: Mariusjacob84 showed [Ac 3c] and lost with a pair of Tens
+
+
+PokerStars Home Game Hand #235327569092: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VII (125/250) - 2022/04/07 18:09:04 CET [2022/04/07 12:09:04 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (11461 in chips, €0.07 bounty)
+Seat 2: jeje_sat (9172 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7488 in chips, €0.07 bounty)
+Seat 5: tinluu (6879 in chips, €0.05 bounty)
+Tuche37300: posts the ante 30
+jeje_sat: posts the ante 30
+NHBROOO: posts the ante 30
+tinluu: posts the ante 30
+NHBROOO: posts small blind 125
+tinluu: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h Qs]
+Tuche37300: folds
+jeje_sat: folds
+NHBROOO: folds
+Uncalled bet (125) returned to tinluu
+tinluu collected 370 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 370 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: NHBROOO (small blind) folded before Flop
+Seat 5: tinluu (big blind) collected (370)
+
+
+PokerStars Home Game Hand #235327578272: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VII (125/250) - 2022/04/07 18:09:30 CET [2022/04/07 12:09:30 ET]
+Table '3392856433 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (11431 in chips, €0.07 bounty)
+Seat 2: jeje_sat (9142 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7333 in chips, €0.07 bounty)
+Seat 5: tinluu (7094 in chips, €0.05 bounty)
+Tuche37300: posts the ante 30
+jeje_sat: posts the ante 30
+NHBROOO: posts the ante 30
+tinluu: posts the ante 30
+tinluu: posts small blind 125
+Tuche37300: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d 6s]
+jeje_sat: folds
+NHBROOO: folds
+tinluu: raises 750 to 1000
+Tuche37300: folds
+Uncalled bet (750) returned to tinluu
+tinluu collected 620 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 620 | Rake 0
+Seat 1: Tuche37300 (big blind) folded before Flop
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO (button) folded before Flop (didn't bet)
+Seat 5: tinluu (small blind) collected (620)
+
+
+PokerStars Home Game Hand #235327583986: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VII (125/250) - 2022/04/07 18:09:47 CET [2022/04/07 12:09:47 ET]
+Table '3392856433 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (11151 in chips, €0.07 bounty)
+Seat 2: jeje_sat (9112 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7303 in chips, €0.07 bounty)
+Seat 5: tinluu (7434 in chips, €0.05 bounty)
+Tuche37300: posts the ante 30
+jeje_sat: posts the ante 30
+NHBROOO: posts the ante 30
+tinluu: posts the ante 30
+Tuche37300: posts small blind 125
+jeje_sat: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h 4h]
+NHBROOO: raises 250 to 500
+tinluu: folds
+Tuche37300: folds
+jeje_sat: calls 250
+*** FLOP *** [2d 7h 8c]
+jeje_sat: checks
+NHBROOO: bets 872
+jeje_sat: folds
+Uncalled bet (872) returned to NHBROOO
+NHBROOO collected 1245 from pot
+NHBROOO: doesn't show hand
+*** SUMMARY ***
+Total pot 1245 | Rake 0
+Board [2d 7h 8c]
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) folded on the Flop
+Seat 3: NHBROOO collected (1245)
+Seat 5: tinluu (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327599375: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VII (125/250) - 2022/04/07 18:10:31 CET [2022/04/07 12:10:31 ET]
+Table '3392856433 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (10996 in chips, €0.07 bounty)
+Seat 2: jeje_sat (8582 in chips, €0.07 bounty)
+Seat 3: NHBROOO (8018 in chips, €0.07 bounty)
+Seat 4: phoud02 (2909 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (7404 in chips, €0.05 bounty)
+Tuche37300: posts the ante 30
+jeje_sat: posts the ante 30
+NHBROOO: posts the ante 30
+phoud02: posts the ante 30
+tinluu: posts the ante 30
+jeje_sat: posts small blind 125
+NHBROOO: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h 6h]
+phoud02: folds
+tinluu: raises 300 to 550
+Tuche37300: folds
+jeje_sat: calls 425
+NHBROOO: folds
+*** FLOP *** [Ks 6s Jc]
+jeje_sat: checks
+tinluu: bets 450
+jeje_sat: folds
+Uncalled bet (450) returned to tinluu
+tinluu collected 1500 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 1500 | Rake 0
+Board [Ks 6s Jc]
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) folded on the Flop
+Seat 3: NHBROOO (big blind) folded before Flop
+Seat 4: phoud02 folded before Flop (didn't bet)
+Seat 5: tinluu collected (1500)
+
+
+PokerStars Home Game Hand #235327611195: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VII (125/250) - 2022/04/07 18:11:06 CET [2022/04/07 12:11:06 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (10966 in chips, €0.07 bounty)
+Seat 2: jeje_sat (8002 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7738 in chips, €0.07 bounty)
+Seat 4: phoud02 (2879 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (8324 in chips, €0.05 bounty)
+Tuche37300: posts the ante 30
+jeje_sat: posts the ante 30
+NHBROOO: posts the ante 30
+phoud02: posts the ante 30
+tinluu: posts the ante 30
+NHBROOO: posts small blind 125
+phoud02: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ad Ac]
+tinluu: folds
+Tuche37300: folds
+jeje_sat: raises 500 to 750
+NHBROOO: raises 500 to 1250
+phoud02: folds
+jeje_sat: raises 6722 to 7972 and is all-in
+NHBROOO: folds
+Uncalled bet (6722) returned to jeje_sat
+jeje_sat collected 2900 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2900 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) collected (2900)
+Seat 3: NHBROOO (small blind) folded before Flop
+Seat 4: phoud02 (big blind) folded before Flop
+Seat 5: tinluu folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327622342: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VIII (150/300) - 2022/04/07 18:11:39 CET [2022/04/07 12:11:39 ET]
+Table '3392856433 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (10936 in chips, €0.07 bounty)
+Seat 2: jeje_sat (9622 in chips, €0.07 bounty)
+Seat 3: NHBROOO (6458 in chips, €0.07 bounty)
+Seat 4: phoud02 (2599 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (8294 in chips, €0.05 bounty)
+Tuche37300: posts the ante 40
+jeje_sat: posts the ante 40
+NHBROOO: posts the ante 40
+phoud02: posts the ante 40
+tinluu: posts the ante 40
+phoud02: posts small blind 150
+tinluu: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [7h Kd]
+Tuche37300: folds
+jeje_sat: folds
+NHBROOO: folds
+phoud02: folds
+Uncalled bet (150) returned to tinluu
+tinluu collected 500 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO (button) folded before Flop (didn't bet)
+Seat 4: phoud02 (small blind) folded before Flop
+Seat 5: tinluu (big blind) collected (500)
+
+
+PokerStars Home Game Hand #235327629030: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VIII (150/300) - 2022/04/07 18:11:58 CET [2022/04/07 12:11:58 ET]
+Table '3392856433 2' 6-max Seat #4 is the button
+Seat 1: Tuche37300 (10896 in chips, €0.07 bounty)
+Seat 2: jeje_sat (9582 in chips, €0.07 bounty)
+Seat 3: NHBROOO (6418 in chips, €0.07 bounty)
+Seat 4: phoud02 (2409 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (8604 in chips, €0.05 bounty)
+Tuche37300: posts the ante 40
+jeje_sat: posts the ante 40
+NHBROOO: posts the ante 40
+phoud02: posts the ante 40
+tinluu: posts the ante 40
+tinluu: posts small blind 150
+Tuche37300: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [9s Kd]
+jeje_sat: folds
+NHBROOO: folds
+phoud02: folds
+tinluu: folds
+Uncalled bet (150) returned to Tuche37300
+Tuche37300 collected 500 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: Tuche37300 (big blind) collected (500)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 4: phoud02 (button) folded before Flop (didn't bet)
+Seat 5: tinluu (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327634970: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VIII (150/300) - 2022/04/07 18:12:15 CET [2022/04/07 12:12:15 ET]
+Table '3392856433 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (11206 in chips, €0.07 bounty)
+Seat 2: jeje_sat (9542 in chips, €0.07 bounty)
+Seat 3: NHBROOO (6378 in chips, €0.07 bounty)
+Seat 4: phoud02 (2369 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (8414 in chips, €0.05 bounty)
+Tuche37300: posts the ante 40
+jeje_sat: posts the ante 40
+NHBROOO: posts the ante 40
+phoud02: posts the ante 40
+tinluu: posts the ante 40
+Tuche37300: posts small blind 150
+jeje_sat: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jh 7s]
+NHBROOO: folds
+phoud02: folds
+tinluu: folds
+Tuche37300: calls 150
+jeje_sat: checks
+*** FLOP *** [Kc Jc 9d]
+Tuche37300: checks
+jeje_sat: bets 400
+Tuche37300: calls 400
+*** TURN *** [Kc Jc 9d] [5c]
+Tuche37300: checks
+jeje_sat: checks
+*** RIVER *** [Kc Jc 9d 5c] [7h]
+Tuche37300: bets 800
+jeje_sat: calls 800
+*** SHOW DOWN ***
+Tuche37300: shows [Qd 5s] (a pair of Fives)
+jeje_sat: shows [Jh 7s] (two pair, Jacks and Sevens)
+jeje_sat collected 3200 from pot
+*** SUMMARY ***
+Total pot 3200 | Rake 0
+Board [Kc Jc 9d 5c 7h]
+Seat 1: Tuche37300 (small blind) showed [Qd 5s] and lost with a pair of Fives
+Seat 2: jeje_sat (big blind) showed [Jh 7s] and won (3200) with two pair, Jacks and Sevens
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 4: phoud02 folded before Flop (didn't bet)
+Seat 5: tinluu (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327646669: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VIII (150/300) - 2022/04/07 18:12:49 CET [2022/04/07 12:12:49 ET]
+Table '3392856433 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (9666 in chips, €0.07 bounty)
+Seat 2: jeje_sat (11202 in chips, €0.07 bounty)
+Seat 3: NHBROOO (6338 in chips, €0.07 bounty)
+Seat 4: phoud02 (2329 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (8374 in chips, €0.05 bounty)
+Tuche37300: posts the ante 40
+jeje_sat: posts the ante 40
+NHBROOO: posts the ante 40
+phoud02: posts the ante 40
+tinluu: posts the ante 40
+jeje_sat: posts small blind 150
+NHBROOO: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [4c 7c]
+phoud02: folds
+tinluu: folds
+Tuche37300: folds
+jeje_sat: folds
+Uncalled bet (150) returned to NHBROOO
+NHBROOO collected 500 from pot
+NHBROOO: doesn't show hand
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 3: NHBROOO (big blind) collected (500)
+Seat 4: phoud02 folded before Flop (didn't bet)
+Seat 5: tinluu folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327654454: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VIII (150/300) - 2022/04/07 18:13:11 CET [2022/04/07 12:13:11 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (9626 in chips, €0.07 bounty)
+Seat 2: jeje_sat (11012 in chips, €0.07 bounty)
+Seat 3: NHBROOO (6648 in chips, €0.07 bounty)
+Seat 4: phoud02 (2289 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (8334 in chips, €0.05 bounty)
+Tuche37300: posts the ante 40
+jeje_sat: posts the ante 40
+NHBROOO: posts the ante 40
+phoud02: posts the ante 40
+tinluu: posts the ante 40
+NHBROOO: posts small blind 150
+phoud02: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts Kc]
+tinluu: folds
+Tuche37300: folds
+jeje_sat: raises 600 to 900
+NHBROOO: raises 5708 to 6608 and is all-in
+phoud02: folds
+jeje_sat: folds
+Uncalled bet (5708) returned to NHBROOO
+NHBROOO collected 2300 from pot
+NHBROOO: doesn't show hand
+*** SUMMARY ***
+Total pot 2300 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) folded before Flop
+Seat 3: NHBROOO (small blind) collected (2300)
+Seat 4: phoud02 (big blind) folded before Flop
+Seat 5: tinluu folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327669931: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VIII (150/300) - 2022/04/07 18:13:56 CET [2022/04/07 12:13:56 ET]
+Table '3392856433 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (9586 in chips, €0.07 bounty)
+Seat 2: jeje_sat (10072 in chips, €0.07 bounty)
+Seat 3: NHBROOO (8008 in chips, €0.07 bounty)
+Seat 4: phoud02 (1949 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (8294 in chips, €0.05 bounty)
+Tuche37300: posts the ante 40
+jeje_sat: posts the ante 40
+NHBROOO: posts the ante 40
+phoud02: posts the ante 40
+tinluu: posts the ante 40
+phoud02: posts small blind 150
+tinluu: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ah 3s]
+Tuche37300 has timed out
+Tuche37300: folds
+Tuche37300 is sitting out
+jeje_sat: raises 600 to 900
+Tuche37300 has returned
+NHBROOO: folds
+phoud02: folds
+tinluu: calls 600
+*** FLOP *** [Td Qd Th]
+tinluu: checks
+jeje_sat: checks
+*** TURN *** [Td Qd Th] [Qc]
+tinluu: bets 1800
+jeje_sat: folds
+Uncalled bet (1800) returned to tinluu
+tinluu collected 2150 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 2150 | Rake 0
+Board [Td Qd Th Qc]
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat folded on the Turn
+Seat 3: NHBROOO (button) folded before Flop (didn't bet)
+Seat 4: phoud02 (small blind) folded before Flop
+Seat 5: tinluu (big blind) collected (2150)
+
+
+PokerStars Home Game Hand #235327688665: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VIII (150/300) - 2022/04/07 18:14:50 CET [2022/04/07 12:14:50 ET]
+Table '3392856433 2' 6-max Seat #4 is the button
+Seat 1: Tuche37300 (9546 in chips, €0.07 bounty)
+Seat 2: jeje_sat (9132 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7968 in chips, €0.07 bounty)
+Seat 4: phoud02 (1759 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (9504 in chips, €0.05 bounty)
+Tuche37300: posts the ante 40
+jeje_sat: posts the ante 40
+NHBROOO: posts the ante 40
+phoud02: posts the ante 40
+tinluu: posts the ante 40
+tinluu: posts small blind 150
+Tuche37300: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [Td Js]
+jeje_sat: folds
+NHBROOO: folds
+phoud02: folds
+tinluu: folds
+Uncalled bet (150) returned to Tuche37300
+Tuche37300 collected 500 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 500 | Rake 0
+Seat 1: Tuche37300 (big blind) collected (500)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 4: phoud02 (button) folded before Flop (didn't bet)
+Seat 5: tinluu (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327698248: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level VIII (150/300) - 2022/04/07 18:15:17 CET [2022/04/07 12:15:17 ET]
+Table '3392856433 2' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (9856 in chips, €0.07 bounty)
+Seat 2: jeje_sat (9092 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7928 in chips, €0.07 bounty)
+Seat 4: phoud02 (1719 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (9314 in chips, €0.05 bounty)
+Tuche37300: posts the ante 40
+jeje_sat: posts the ante 40
+NHBROOO: posts the ante 40
+phoud02: posts the ante 40
+tinluu: posts the ante 40
+Tuche37300: posts small blind 150
+jeje_sat: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h As]
+NHBROOO: folds
+phoud02: folds
+tinluu: raises 360 to 660
+Tuche37300 has timed out
+Tuche37300: folds
+Tuche37300 is sitting out
+Tuche37300 has returned
+jeje_sat: raises 1140 to 1800
+tinluu: folds
+Uncalled bet (1140) returned to jeje_sat
+jeje_sat collected 1670 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1670 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (1670)
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 4: phoud02 folded before Flop (didn't bet)
+Seat 5: tinluu (button) folded before Flop
+
+
+PokerStars Home Game Hand #235327716730: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IX (200/400) - 2022/04/07 18:16:10 CET [2022/04/07 12:16:10 ET]
+Table '3392856433 2' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (9666 in chips, €0.07 bounty)
+Seat 2: jeje_sat (10062 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7888 in chips, €0.07 bounty)
+Seat 4: phoud02 (1679 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (8614 in chips, €0.05 bounty)
+Tuche37300: posts the ante 50
+jeje_sat: posts the ante 50
+NHBROOO: posts the ante 50
+phoud02: posts the ante 50
+tinluu: posts the ante 50
+jeje_sat: posts small blind 200
+NHBROOO: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc 6c]
+phoud02: folds
+tinluu: folds
+Tuche37300: raises 400 to 800
+jeje_sat: folds
+NHBROOO: folds
+Uncalled bet (400) returned to Tuche37300
+Tuche37300 collected 1250 from pot
+Tuche37300: doesn't show hand
+*** SUMMARY ***
+Total pot 1250 | Rake 0
+Seat 1: Tuche37300 (button) collected (1250)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 3: NHBROOO (big blind) folded before Flop
+Seat 4: phoud02 folded before Flop (didn't bet)
+Seat 5: tinluu folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327728266: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IX (200/400) - 2022/04/07 18:16:43 CET [2022/04/07 12:16:43 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (10466 in chips, €0.07 bounty)
+Seat 2: jeje_sat (9812 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7438 in chips, €0.07 bounty)
+Seat 4: phoud02 (1629 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (8564 in chips, €0.05 bounty)
+Tuche37300: posts the ante 50
+jeje_sat: posts the ante 50
+NHBROOO: posts the ante 50
+phoud02: posts the ante 50
+tinluu: posts the ante 50
+NHBROOO: posts small blind 200
+phoud02: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h 5c]
+tinluu: folds
+Tuche37300: folds
+jeje_sat: raises 800 to 1200
+NHBROOO: folds
+phoud02: folds
+Uncalled bet (800) returned to jeje_sat
+jeje_sat collected 1250 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1250 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) collected (1250)
+Seat 3: NHBROOO (small blind) folded before Flop
+Seat 4: phoud02 (big blind) folded before Flop
+Seat 5: tinluu folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327732797: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IX (200/400) - 2022/04/07 18:16:56 CET [2022/04/07 12:16:56 ET]
+Table '3392856433 2' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (10416 in chips, €0.07 bounty)
+Seat 2: jeje_sat (10612 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7188 in chips, €0.07 bounty)
+Seat 4: phoud02 (1179 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (8514 in chips, €0.05 bounty)
+Tuche37300: posts the ante 50
+jeje_sat: posts the ante 50
+NHBROOO: posts the ante 50
+phoud02: posts the ante 50
+tinluu: posts the ante 50
+phoud02: posts small blind 200
+tinluu: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [5c Jc]
+Tuche37300: folds
+jeje_sat: folds
+NHBROOO: folds
+phoud02: folds
+Uncalled bet (200) returned to tinluu
+tinluu collected 650 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 650 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: NHBROOO (button) folded before Flop (didn't bet)
+Seat 4: phoud02 (small blind) folded before Flop
+Seat 5: tinluu (big blind) collected (650)
+
+
+PokerStars Home Game Hand #235327737465: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IX (200/400) - 2022/04/07 18:17:09 CET [2022/04/07 12:17:09 ET]
+Table '3392856433 2' 6-max Seat #4 is the button
+Seat 2: jeje_sat (10562 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7138 in chips, €0.07 bounty)
+Seat 4: phoud02 (929 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (8914 in chips, €0.05 bounty)
+jeje_sat: posts the ante 50
+NHBROOO: posts the ante 50
+phoud02: posts the ante 50
+tinluu: posts the ante 50
+tinluu: posts small blind 200
+jeje_sat: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d Jd]
+NHBROOO: folds
+phoud02: folds
+tinluu: calls 200
+jeje_sat: checks
+*** FLOP *** [Kh 6s 2s]
+tinluu: checks
+jeje_sat: checks
+*** TURN *** [Kh 6s 2s] [2h]
+tinluu: checks
+jeje_sat: checks
+*** RIVER *** [Kh 6s 2s 2h] [Qc]
+tinluu: bets 480
+jeje_sat: folds
+Uncalled bet (480) returned to tinluu
+tinluu collected 1000 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Board [Kh 6s 2s 2h Qc]
+Seat 2: jeje_sat (big blind) folded on the River
+Seat 3: NHBROOO folded before Flop (didn't bet)
+Seat 4: phoud02 (button) folded before Flop (didn't bet)
+Seat 5: tinluu (small blind) collected (1000)
+
+
+PokerStars Home Game Hand #235327753554: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IX (200/400) - 2022/04/07 18:17:55 CET [2022/04/07 12:17:55 ET]
+Table '3392856433 2' 6-max Seat #5 is the button
+Seat 2: jeje_sat (10112 in chips, €0.07 bounty)
+Seat 3: NHBROOO (7088 in chips, €0.07 bounty)
+Seat 4: phoud02 (879 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (9464 in chips, €0.05 bounty)
+jeje_sat: posts the ante 50
+NHBROOO: posts the ante 50
+phoud02: posts the ante 50
+tinluu: posts the ante 50
+jeje_sat: posts small blind 200
+NHBROOO: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts Ad]
+phoud02: folds
+tinluu: folds
+jeje_sat: raises 800 to 1200
+NHBROOO: folds
+Uncalled bet (800) returned to jeje_sat
+jeje_sat collected 1000 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Seat 2: jeje_sat (small blind) collected (1000)
+Seat 3: NHBROOO (big blind) folded before Flop
+Seat 4: phoud02 folded before Flop (didn't bet)
+Seat 5: tinluu (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327761215: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IX (200/400) - 2022/04/07 18:18:16 CET [2022/04/07 12:18:16 ET]
+Table '3392856433 2' 6-max Seat #2 is the button
+Seat 2: jeje_sat (10662 in chips, €0.07 bounty)
+Seat 3: NHBROOO (6638 in chips, €0.07 bounty)
+Seat 4: phoud02 (829 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (9414 in chips, €0.05 bounty)
+jeje_sat: posts the ante 50
+NHBROOO: posts the ante 50
+phoud02: posts the ante 50
+tinluu: posts the ante 50
+NHBROOO: posts small blind 200
+phoud02: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [4d Qh]
+tinluu: raises 608 to 1008
+jeje_sat: folds
+NHBROOO: raises 5580 to 6588 and is all-in
+phoud02: folds
+tinluu: calls 5580
+*** FLOP *** [Qs 5c Kd]
+*** TURN *** [Qs 5c Kd] [Ad]
+*** RIVER *** [Qs 5c Kd Ad] [7c]
+*** SHOW DOWN ***
+NHBROOO: shows [Ks Js] (a pair of Kings)
+tinluu: shows [Ac Jc] (a pair of Aces)
+tinluu collected 13776 from pot
+tinluu wins €0.04 for eliminating NHBROOO and their own bounty increases by €0.03 to €0.08
+NHBROOO finished the tournament in 8th place
+*** SUMMARY ***
+Total pot 13776 | Rake 0
+Board [Qs 5c Kd Ad 7c]
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: NHBROOO (small blind) showed [Ks Js] and lost with a pair of Kings
+Seat 4: phoud02 (big blind) folded before Flop
+Seat 5: tinluu showed [Ac Jc] and won (13776) with a pair of Aces
+
+
+PokerStars Home Game Hand #235327771303: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IX (200/400) - 2022/04/07 18:18:37 CET [2022/04/07 12:18:37 ET]
+Table '3392856433 2' 6-max Seat #4 is the button
+Seat 2: jeje_sat (10612 in chips, €0.07 bounty)
+Seat 4: phoud02 (379 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (16552 in chips, €0.08 bounty)
+jeje_sat: posts the ante 50
+phoud02: posts the ante 50
+tinluu: posts the ante 50
+tinluu: posts small blind 200
+jeje_sat: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [7c 3c]
+phoud02: folds
+tinluu: raises 800 to 1200
+jeje_sat: folds
+Uncalled bet (800) returned to tinluu
+tinluu collected 950 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 950 | Rake 0
+Seat 2: jeje_sat (big blind) folded before Flop
+Seat 4: phoud02 (button) folded before Flop (didn't bet)
+Seat 5: tinluu (small blind) collected (950)
+
+
+PokerStars Home Game Hand #235327775828: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IX (200/400) - 2022/04/07 18:18:50 CET [2022/04/07 12:18:50 ET]
+Table '3392856433 2' 6-max Seat #5 is the button
+Seat 2: jeje_sat (10162 in chips, €0.07 bounty)
+Seat 4: phoud02 (329 in chips, €0.05 bounty) is sitting out
+Seat 5: tinluu (17052 in chips, €0.08 bounty)
+jeje_sat: posts the ante 50
+phoud02: posts the ante 50
+tinluu: posts the ante 50
+jeje_sat: posts small blind 200
+phoud02: posts big blind 279 and is all-in
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ks 6s]
+tinluu: raises 521 to 800
+jeje_sat: folds
+phoud02: folds
+Uncalled bet (521) returned to tinluu
+tinluu collected 908 from pot
+tinluu wins €0.03 for eliminating phoud02 and their own bounty increases by €0.02 to €0.10
+phoud02 finished the tournament in 7th place
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 908 | Rake 0
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 4: phoud02 (big blind) folded before Flop
+Seat 5: tinluu (button) collected (908)
+
+
+PokerStars Home Game Hand #235327784851: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IX (200/400) - 2022/04/07 18:19:15 CET [2022/04/07 12:19:15 ET]
+Table '3392856433 1' 6-max Seat #4 is the button
+Seat 1: Tuche37300 (9066 in chips, €0.07 bounty) is sitting out
+Seat 2: jeje_sat (9912 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (11935 in chips, €0.07 bounty)
+Seat 4: LDM54 (12336 in chips, €0.07 bounty)
+Seat 5: MERIK44 (4120 in chips, €0.05 bounty)
+Seat 6: tinluu (17631 in chips, €0.10 bounty)
+Tuche37300: posts the ante 50
+jeje_sat: posts the ante 50
+RIZCHOU: posts the ante 50
+LDM54: posts the ante 50
+MERIK44: posts the ante 50
+tinluu: posts the ante 50
+MERIK44: posts small blind 200
+tinluu: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jh 5d]
+Tuche37300: folds
+jeje_sat: folds
+RIZCHOU: folds
+LDM54: folds
+MERIK44: raises 3670 to 4070 and is all-in
+tinluu: folds
+Uncalled bet (3670) returned to MERIK44
+MERIK44 collected 1100 from pot
+MERIK44: doesn't show hand
+*** SUMMARY ***
+Total pot 1100 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 4: LDM54 (button) folded before Flop (didn't bet)
+Seat 5: MERIK44 (small blind) collected (1100)
+Seat 6: tinluu (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327794291: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IX (200/400) - 2022/04/07 18:19:42 CET [2022/04/07 12:19:42 ET]
+Table '3392856433 1' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (9016 in chips, €0.07 bounty) is sitting out
+Seat 2: jeje_sat (9862 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (11885 in chips, €0.07 bounty)
+Seat 4: LDM54 (12286 in chips, €0.07 bounty)
+Seat 5: MERIK44 (4770 in chips, €0.05 bounty)
+Seat 6: tinluu (17181 in chips, €0.10 bounty)
+Tuche37300: posts the ante 50
+jeje_sat: posts the ante 50
+RIZCHOU: posts the ante 50
+LDM54: posts the ante 50
+MERIK44: posts the ante 50
+tinluu: posts the ante 50
+tinluu: posts small blind 200
+Tuche37300: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h 3c]
+jeje_sat said, "par an c'est good"
+jeje_sat: folds
+RIZCHOU: folds
+LDM54: folds
+MERIK44: raises 400 to 800
+tinluu: folds
+Tuche37300: folds
+Uncalled bet (400) returned to MERIK44
+MERIK44 collected 1300 from pot
+MERIK44: doesn't show hand
+*** SUMMARY ***
+Total pot 1300 | Rake 0
+Seat 1: Tuche37300 (big blind) folded before Flop
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 4: LDM54 folded before Flop (didn't bet)
+Seat 5: MERIK44 (button) collected (1300)
+Seat 6: tinluu (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327808969: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IX (200/400) - 2022/04/07 18:20:24 CET [2022/04/07 12:20:24 ET]
+Table '3392856433 1' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (8566 in chips, €0.07 bounty) is sitting out
+Seat 2: jeje_sat (9812 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (11835 in chips, €0.07 bounty)
+Seat 4: LDM54 (12236 in chips, €0.07 bounty)
+Seat 5: MERIK44 (5620 in chips, €0.05 bounty)
+Seat 6: tinluu (16931 in chips, €0.10 bounty)
+Tuche37300: posts the ante 50
+jeje_sat: posts the ante 50
+RIZCHOU: posts the ante 50
+LDM54: posts the ante 50
+MERIK44: posts the ante 50
+tinluu: posts the ante 50
+Tuche37300: posts small blind 200
+jeje_sat: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [5d Jc]
+RIZCHOU: folds
+LDM54: folds
+MERIK44: folds
+tinluu: folds
+Tuche37300: folds
+Uncalled bet (200) returned to jeje_sat
+jeje_sat collected 700 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 700 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (700)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 4: LDM54 folded before Flop (didn't bet)
+Seat 5: MERIK44 folded before Flop (didn't bet)
+Seat 6: tinluu (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327813840: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IX (200/400) - 2022/04/07 18:20:37 CET [2022/04/07 12:20:37 ET]
+Table '3392856433 1' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (8316 in chips, €0.07 bounty) is sitting out
+Seat 2: jeje_sat (10262 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (11785 in chips, €0.07 bounty)
+Seat 4: LDM54 (12186 in chips, €0.07 bounty)
+Seat 5: MERIK44 (5570 in chips, €0.05 bounty)
+Seat 6: tinluu (16881 in chips, €0.10 bounty)
+Tuche37300: posts the ante 50
+jeje_sat: posts the ante 50
+RIZCHOU: posts the ante 50
+LDM54: posts the ante 50
+MERIK44: posts the ante 50
+tinluu: posts the ante 50
+jeje_sat: posts small blind 200
+RIZCHOU: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h Th]
+LDM54: folds
+MERIK44: raises 400 to 800
+tinluu: folds
+Tuche37300: folds
+jeje_sat: folds
+RIZCHOU: folds
+Uncalled bet (400) returned to MERIK44
+MERIK44 collected 1300 from pot
+MERIK44: doesn't show hand
+*** SUMMARY ***
+Total pot 1300 | Rake 0
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) folded before Flop
+Seat 4: LDM54 folded before Flop (didn't bet)
+Seat 5: MERIK44 collected (1300)
+Seat 6: tinluu folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327819064: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IX (200/400) - 2022/04/07 18:20:52 CET [2022/04/07 12:20:52 ET]
+Table '3392856433 1' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (8266 in chips, €0.07 bounty) is sitting out
+Seat 2: jeje_sat (10012 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (11335 in chips, €0.07 bounty)
+Seat 4: LDM54 (12136 in chips, €0.07 bounty)
+Seat 5: MERIK44 (6420 in chips, €0.05 bounty)
+Seat 6: tinluu (16831 in chips, €0.10 bounty)
+Tuche37300: posts the ante 50
+jeje_sat: posts the ante 50
+RIZCHOU: posts the ante 50
+LDM54: posts the ante 50
+MERIK44: posts the ante 50
+tinluu: posts the ante 50
+RIZCHOU: posts small blind 200
+LDM54: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s Qc]
+MERIK44: folds
+tinluu: folds
+Tuche37300: folds
+jeje_sat: folds
+RIZCHOU: folds
+Uncalled bet (200) returned to LDM54
+LDM54 collected 700 from pot
+*** SUMMARY ***
+Total pot 700 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 4: LDM54 (big blind) collected (700)
+Seat 5: MERIK44 folded before Flop (didn't bet)
+Seat 6: tinluu folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327823098: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level IX (200/400) - 2022/04/07 18:21:04 CET [2022/04/07 12:21:04 ET]
+Table '3392856433 1' 6-max Seat #3 is the button
+Seat 1: Tuche37300 (8216 in chips, €0.07 bounty) is sitting out
+Seat 2: jeje_sat (9962 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (11085 in chips, €0.07 bounty)
+Seat 4: LDM54 (12586 in chips, €0.07 bounty)
+Seat 5: MERIK44 (6370 in chips, €0.05 bounty)
+Seat 6: tinluu (16781 in chips, €0.10 bounty)
+Tuche37300: posts the ante 50
+jeje_sat: posts the ante 50
+RIZCHOU: posts the ante 50
+LDM54: posts the ante 50
+MERIK44: posts the ante 50
+tinluu: posts the ante 50
+LDM54: posts small blind 200
+MERIK44: posts big blind 400
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts 9d]
+tinluu: folds
+Tuche37300: folds
+jeje_sat: raises 800 to 1200
+RIZCHOU: folds
+LDM54: folds
+MERIK44: raises 5120 to 6320 and is all-in
+jeje_sat: folds
+Uncalled bet (5120) returned to MERIK44
+MERIK44 collected 2900 from pot
+MERIK44: doesn't show hand
+*** SUMMARY ***
+Total pot 2900 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat folded before Flop
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 4: LDM54 (small blind) folded before Flop
+Seat 5: MERIK44 (big blind) collected (2900)
+Seat 6: tinluu folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327834660: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level X (250/500) - 2022/04/07 18:21:37 CET [2022/04/07 12:21:37 ET]
+Table '3392856433 1' 6-max Seat #4 is the button
+Seat 1: Tuche37300 (8166 in chips, €0.07 bounty) is sitting out
+Seat 2: jeje_sat (8712 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (11035 in chips, €0.07 bounty)
+Seat 4: LDM54 (12336 in chips, €0.07 bounty)
+Seat 5: MERIK44 (8020 in chips, €0.05 bounty)
+Seat 6: tinluu (16731 in chips, €0.10 bounty)
+Tuche37300: posts the ante 65
+jeje_sat: posts the ante 65
+RIZCHOU: posts the ante 65
+LDM54: posts the ante 65
+MERIK44: posts the ante 65
+tinluu: posts the ante 65
+MERIK44: posts small blind 250
+tinluu: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [4h Ad]
+Tuche37300: folds
+jeje_sat: folds
+RIZCHOU: raises 750 to 1250
+LDM54: folds
+MERIK44: folds
+tinluu: folds
+Uncalled bet (750) returned to RIZCHOU
+RIZCHOU collected 1640 from pot
+RIZCHOU: doesn't show hand
+*** SUMMARY ***
+Total pot 1640 | Rake 0
+Seat 1: Tuche37300 folded before Flop (didn't bet)
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: RIZCHOU collected (1640)
+Seat 4: LDM54 (button) folded before Flop (didn't bet)
+Seat 5: MERIK44 (small blind) folded before Flop
+Seat 6: tinluu (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327841448: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level X (250/500) - 2022/04/07 18:21:57 CET [2022/04/07 12:21:57 ET]
+Table '3392856433 1' 6-max Seat #5 is the button
+Seat 1: Tuche37300 (8101 in chips, €0.07 bounty) is sitting out
+Seat 2: jeje_sat (8647 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (12110 in chips, €0.07 bounty)
+Seat 4: LDM54 (12271 in chips, €0.07 bounty)
+Seat 5: MERIK44 (7705 in chips, €0.05 bounty)
+Seat 6: tinluu (16166 in chips, €0.10 bounty)
+Tuche37300: posts the ante 65
+jeje_sat: posts the ante 65
+RIZCHOU: posts the ante 65
+LDM54: posts the ante 65
+MERIK44: posts the ante 65
+tinluu: posts the ante 65
+tinluu: posts small blind 250
+Tuche37300: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c 4c]
+jeje_sat: folds
+RIZCHOU: raises 750 to 1250
+LDM54: folds
+MERIK44: calls 1250
+tinluu: folds
+Tuche37300: folds
+*** FLOP *** [Qs 6d 8d]
+RIZCHOU: bets 10795 and is all-in
+MERIK44: calls 6390 and is all-in
+Uncalled bet (4405) returned to RIZCHOU
+*** TURN *** [Qs 6d 8d] [2c]
+*** RIVER *** [Qs 6d 8d 2c] [6s]
+Tuche37300 has returned
+*** SHOW DOWN ***
+RIZCHOU: shows [Js Qh] (two pair, Queens and Sixes)
+MERIK44: shows [Jd Kd] (a pair of Sixes)
+RIZCHOU collected 16420 from pot
+RIZCHOU wins €0.03 for eliminating MERIK44 and their own bounty increases by €0.02 to €0.09
+MERIK44 finished the tournament in 6th place
+*** SUMMARY ***
+Total pot 16420 | Rake 0
+Board [Qs 6d 8d 2c 6s]
+Seat 1: Tuche37300 (big blind) folded before Flop
+Seat 2: jeje_sat folded before Flop (didn't bet)
+Seat 3: RIZCHOU showed [Js Qh] and won (16420) with two pair, Queens and Sixes
+Seat 4: LDM54 folded before Flop (didn't bet)
+Seat 5: MERIK44 (button) showed [Jd Kd] and lost with a pair of Sixes
+Seat 6: tinluu (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327857691: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level X (250/500) - 2022/04/07 18:22:43 CET [2022/04/07 12:22:43 ET]
+Table '3392856433 1' 6-max Seat #6 is the button
+Seat 1: Tuche37300 (7536 in chips, €0.07 bounty)
+Seat 2: jeje_sat (8582 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (20825 in chips, €0.09 bounty)
+Seat 4: LDM54 (12206 in chips, €0.07 bounty)
+Seat 6: tinluu (15851 in chips, €0.10 bounty)
+Tuche37300: posts the ante 65
+jeje_sat: posts the ante 65
+RIZCHOU: posts the ante 65
+LDM54: posts the ante 65
+tinluu: posts the ante 65
+Tuche37300: posts small blind 250
+jeje_sat: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc Ah]
+RIZCHOU: folds
+LDM54: folds
+tinluu: folds
+Tuche37300: folds
+Uncalled bet (250) returned to jeje_sat
+jeje_sat collected 825 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 825 | Rake 0
+Seat 1: Tuche37300 (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (825)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 4: LDM54 folded before Flop (didn't bet)
+Seat 6: tinluu (button) folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327862227: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level X (250/500) - 2022/04/07 18:22:56 CET [2022/04/07 12:22:56 ET]
+Table '3392856433 1' 6-max Seat #1 is the button
+Seat 1: Tuche37300 (7221 in chips, €0.07 bounty)
+Seat 2: jeje_sat (9092 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (20760 in chips, €0.09 bounty)
+Seat 4: LDM54 (12141 in chips, €0.07 bounty)
+Seat 6: tinluu (15786 in chips, €0.10 bounty)
+Tuche37300: posts the ante 65
+jeje_sat: posts the ante 65
+RIZCHOU: posts the ante 65
+LDM54: posts the ante 65
+tinluu: posts the ante 65
+jeje_sat: posts small blind 250
+RIZCHOU: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [7s 5c]
+LDM54: folds
+tinluu: raises 600 to 1100
+Tuche37300: folds
+jeje_sat: folds
+RIZCHOU: calls 600
+*** FLOP *** [9h Js 8h]
+RIZCHOU: checks
+tinluu: checks
+*** TURN *** [9h Js 8h] [2h]
+RIZCHOU: checks
+tinluu: bets 1332
+RIZCHOU: folds
+Uncalled bet (1332) returned to tinluu
+tinluu collected 2775 from pot
+tinluu: doesn't show hand
+*** SUMMARY ***
+Total pot 2775 | Rake 0
+Board [9h Js 8h 2h]
+Seat 1: Tuche37300 (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 3: RIZCHOU (big blind) folded on the Turn
+Seat 4: LDM54 folded before Flop (didn't bet)
+Seat 6: tinluu collected (2775)
+
+
+PokerStars Home Game Hand #235327871861: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level X (250/500) - 2022/04/07 18:23:24 CET [2022/04/07 12:23:24 ET]
+Table '3392856433 1' 6-max Seat #2 is the button
+Seat 1: Tuche37300 (7156 in chips, €0.07 bounty)
+Seat 2: jeje_sat (8777 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (19595 in chips, €0.09 bounty)
+Seat 4: LDM54 (12076 in chips, €0.07 bounty)
+Seat 6: tinluu (17396 in chips, €0.10 bounty)
+Tuche37300: posts the ante 65
+jeje_sat: posts the ante 65
+RIZCHOU: posts the ante 65
+LDM54: posts the ante 65
+tinluu: posts the ante 65
+RIZCHOU: posts small blind 250
+LDM54: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [6d 7h]
+tinluu: raises 600 to 1100
+Tuche37300: raises 5991 to 7091 and is all-in
+jeje_sat: folds
+RIZCHOU: folds
+LDM54: folds
+tinluu: calls 5991
+*** FLOP *** [Tc 4c 4d]
+*** TURN *** [Tc 4c 4d] [Td]
+*** RIVER *** [Tc 4c 4d Td] [Jc]
+*** SHOW DOWN ***
+tinluu: shows [9s 9h] (two pair, Tens and Nines)
+Tuche37300: shows [Kd Ac] (two pair, Tens and Fours)
+tinluu collected 15257 from pot
+tinluu wins €0.04 for eliminating Tuche37300 and their own bounty increases by €0.03 to €0.13
+Tuche37300 finished the tournament in 5th place
+*** SUMMARY ***
+Total pot 15257 | Rake 0
+Board [Tc 4c 4d Td Jc]
+Seat 1: Tuche37300 showed [Kd Ac] and lost with two pair, Tens and Fours
+Seat 2: jeje_sat (button) folded before Flop (didn't bet)
+Seat 3: RIZCHOU (small blind) folded before Flop
+Seat 4: LDM54 (big blind) folded before Flop
+Seat 6: tinluu showed [9s 9h] and won (15257) with two pair, Tens and Nines
+
+
+PokerStars Home Game Hand #235327884644: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level X (250/500) - 2022/04/07 18:24:01 CET [2022/04/07 12:24:01 ET]
+Table '3392856433 1' 6-max Seat #3 is the button
+Seat 2: jeje_sat (8712 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (19280 in chips, €0.09 bounty)
+Seat 4: LDM54 (11511 in chips, €0.07 bounty)
+Seat 6: tinluu (25497 in chips, €0.13 bounty)
+jeje_sat: posts the ante 65
+RIZCHOU: posts the ante 65
+LDM54: posts the ante 65
+tinluu: posts the ante 65
+LDM54: posts small blind 250
+tinluu: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ad 5s]
+jeje_sat: raises 1000 to 1500
+RIZCHOU: folds
+LDM54: folds
+tinluu: folds
+Uncalled bet (1000) returned to jeje_sat
+jeje_sat collected 1510 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 1510 | Rake 0
+Seat 2: jeje_sat collected (1510)
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 4: LDM54 (small blind) folded before Flop
+Seat 6: tinluu (big blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327889883: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level X (250/500) - 2022/04/07 18:24:16 CET [2022/04/07 12:24:16 ET]
+Table '3392856433 1' 6-max Seat #4 is the button
+Seat 2: jeje_sat (9657 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (19215 in chips, €0.09 bounty)
+Seat 4: LDM54 (11196 in chips, €0.07 bounty)
+Seat 6: tinluu (24932 in chips, €0.13 bounty)
+jeje_sat: posts the ante 65
+RIZCHOU: posts the ante 65
+LDM54: posts the ante 65
+tinluu: posts the ante 65
+tinluu: posts small blind 250
+jeje_sat: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc 6c]
+RIZCHOU: folds
+LDM54: folds
+tinluu: folds
+Uncalled bet (250) returned to jeje_sat
+jeje_sat collected 760 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 760 | Rake 0
+Seat 2: jeje_sat (big blind) collected (760)
+Seat 3: RIZCHOU folded before Flop (didn't bet)
+Seat 4: LDM54 (button) folded before Flop (didn't bet)
+Seat 6: tinluu (small blind) folded before Flop
+
+
+PokerStars Home Game Hand #235327893937: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level X (250/500) - 2022/04/07 18:24:28 CET [2022/04/07 12:24:28 ET]
+Table '3392856433 1' 6-max Seat #6 is the button
+Seat 2: jeje_sat (10102 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (19150 in chips, €0.09 bounty)
+Seat 4: LDM54 (11131 in chips, €0.07 bounty)
+Seat 6: tinluu (24617 in chips, €0.13 bounty)
+jeje_sat: posts the ante 65
+RIZCHOU: posts the ante 65
+LDM54: posts the ante 65
+tinluu: posts the ante 65
+jeje_sat: posts small blind 250
+RIZCHOU: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [As Kh]
+LDM54: folds
+tinluu: raises 600 to 1100
+jeje_sat: raises 8937 to 10037 and is all-in
+RIZCHOU: folds
+tinluu: folds
+Uncalled bet (8937) returned to jeje_sat
+jeje_sat collected 2960 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 2960 | Rake 0
+Seat 2: jeje_sat (small blind) collected (2960)
+Seat 3: RIZCHOU (big blind) folded before Flop
+Seat 4: LDM54 folded before Flop (didn't bet)
+Seat 6: tinluu (button) folded before Flop
+
+
+PokerStars Home Game Hand #235327900154: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level X (250/500) - 2022/04/07 18:24:45 CET [2022/04/07 12:24:45 ET]
+Table '3392856433 1' 6-max Seat #2 is the button
+Seat 2: jeje_sat (11897 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (18585 in chips, €0.09 bounty)
+Seat 4: LDM54 (11066 in chips, €0.07 bounty)
+Seat 6: tinluu (23452 in chips, €0.13 bounty)
+jeje_sat: posts the ante 65
+RIZCHOU: posts the ante 65
+LDM54: posts the ante 65
+tinluu: posts the ante 65
+RIZCHOU: posts small blind 250
+LDM54: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [6h 7h]
+tinluu: folds
+jeje_sat: raises 1000 to 1500
+RIZCHOU: raises 17020 to 18520 and is all-in
+LDM54: folds
+jeje_sat: folds
+Uncalled bet (17020) returned to RIZCHOU
+RIZCHOU collected 3760 from pot
+RIZCHOU: doesn't show hand
+*** SUMMARY ***
+Total pot 3760 | Rake 0
+Seat 2: jeje_sat (button) folded before Flop
+Seat 3: RIZCHOU (small blind) collected (3760)
+Seat 4: LDM54 (big blind) folded before Flop
+Seat 6: tinluu folded before Flop (didn't bet)
+
+
+PokerStars Home Game Hand #235327907270: {Club #4837790} Tournament #3392856433, €0.13+€0.05+€0.02 EUR Hold'em No Limit - Level X (250/500) - 2022/04/07 18:25:06 CET [2022/04/07 12:25:06 ET]
+Table '3392856433 1' 6-max Seat #3 is the button
+Seat 2: jeje_sat (10332 in chips, €0.07 bounty)
+Seat 3: RIZCHOU (20780 in chips, €0.09 bounty)
+Seat 4: LDM54 (10501 in chips, €0.07 bounty)
+Seat 6: tinluu (23387 in chips, €0.13 bounty)
+jeje_sat: posts the ante 65
+RIZCHOU: posts the ante 65
+LDM54: posts the ante 65
+tinluu: posts the ante 65
+LDM54: posts small blind 250
+tinluu: posts big blind 500
+*** HOLE CARDS ***
+Dealt to jeje_sat [9s As]
+jeje_sat: raises 1000 to 1500
+RIZCHOU: folds
+LDM54: folds
+tinluu: calls 1000
+*** FLOP *** [Th 4h 8h]
+tinluu: checks
+jeje_sat: checks
+*** TURN *** [Th 4h 8h] [4s]
+tinluu: bets 1500
+jeje_sat: raises 7267 to 8767 and is all-in
+tinluu: calls 7267
+*** RIVER *** [Th 4h 8h 4s] [7s]
+*** SHOW DOWN ***
+tinluu: shows [4c 7c] (a full house, Fours full of Sevens)
+jeje_sat: shows [9s As] (a pair of Fours)
+tinluu collected 21044 from pot
+tinluu wins €0.04 for eliminating jeje_sat and their own bounty increases by €0.03 to €0.16
+jeje_sat finished the tournament in 4th place
+*** SUMMARY ***
+Total pot 21044 | Rake 0
+Board [Th 4h 8h 4s 7s]
+Seat 2: jeje_sat showed [9s As] and lost with a pair of Fours
+Seat 3: RIZCHOU (button) folded before Flop (didn't bet)
+Seat 4: LDM54 (small blind) folded before Flop
+Seat 6: tinluu (big blind) showed [4c 7c] and won (21044) with a full house, Fours full of Sevens
+
+

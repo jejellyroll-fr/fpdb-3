@@ -1,0 +1,754 @@
+﻿PokerStars Hand #229563174576: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level I (10/20) - 2021/09/03 21:00:12 CET [2021/09/03 15:00:12 ET]
+Table '3259611181 1' 3-max Seat #1 is the button
+Seat 1: Styx06 (500 in chips)
+Seat 2: jeje_sat (500 in chips)
+Seat 3: henriryan (500 in chips)
+jeje_sat: posts small blind 10
+henriryan: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [9c Qd]
+Styx06: calls 20
+jeje_sat: calls 10
+henriryan: checks
+*** FLOP *** [3d Ah Jd]
+jeje_sat: checks
+henriryan: checks
+Styx06: bets 30
+jeje_sat: folds
+henriryan: folds
+Uncalled bet (30) returned to Styx06
+Styx06 collected 60 from pot
+Styx06: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Board [3d Ah Jd]
+Seat 1: Styx06 (button) collected (60)
+Seat 2: jeje_sat (small blind) folded on the Flop
+Seat 3: henriryan (big blind) folded on the Flop
+
+
+PokerStars Hand #229563183762: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level I (10/20) - 2021/09/03 21:00:39 CET [2021/09/03 15:00:39 ET]
+Table '3259611181 1' 3-max Seat #2 is the button
+Seat 1: Styx06 (540 in chips)
+Seat 2: jeje_sat (480 in chips)
+Seat 3: henriryan (480 in chips)
+henriryan: posts small blind 10
+Styx06: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 4d]
+jeje_sat: calls 20
+henriryan: calls 10
+Styx06: checks
+*** FLOP *** [5d Th Jd]
+henriryan: checks
+Styx06: checks
+jeje_sat: bets 20
+henriryan: folds
+Styx06: folds
+Uncalled bet (20) returned to jeje_sat
+jeje_sat collected 60 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Board [5d Th Jd]
+Seat 1: Styx06 (big blind) folded on the Flop
+Seat 2: jeje_sat (button) collected (60)
+Seat 3: henriryan (small blind) folded on the Flop
+
+
+PokerStars Hand #229563189418: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level I (10/20) - 2021/09/03 21:00:55 CET [2021/09/03 15:00:55 ET]
+Table '3259611181 1' 3-max Seat #3 is the button
+Seat 1: Styx06 (520 in chips)
+Seat 2: jeje_sat (520 in chips)
+Seat 3: henriryan (460 in chips)
+Styx06: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [5h Qc]
+henriryan: folds
+Styx06: folds
+Uncalled bet (10) returned to jeje_sat
+jeje_sat collected 20 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 20 | Rake 0
+Seat 1: Styx06 (small blind) folded before Flop
+Seat 2: jeje_sat (big blind) collected (20)
+Seat 3: henriryan (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #229563191402: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level I (10/20) - 2021/09/03 21:01:00 CET [2021/09/03 15:01:00 ET]
+Table '3259611181 1' 3-max Seat #1 is the button
+Seat 1: Styx06 (510 in chips)
+Seat 2: jeje_sat (530 in chips)
+Seat 3: henriryan (460 in chips)
+jeje_sat: posts small blind 10
+henriryan: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [3s Jd]
+Styx06: raises 50 to 70
+jeje_sat: folds
+henriryan: folds
+Uncalled bet (50) returned to Styx06
+Styx06 collected 50 from pot
+Styx06: doesn't show hand
+*** SUMMARY ***
+Total pot 50 | Rake 0
+Seat 1: Styx06 (button) collected (50)
+Seat 2: jeje_sat (small blind) folded before Flop
+Seat 3: henriryan (big blind) folded before Flop
+
+
+PokerStars Hand #229563196107: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level I (10/20) - 2021/09/03 21:01:13 CET [2021/09/03 15:01:13 ET]
+Table '3259611181 1' 3-max Seat #2 is the button
+Seat 1: Styx06 (540 in chips)
+Seat 2: jeje_sat (520 in chips)
+Seat 3: henriryan (440 in chips)
+henriryan: posts small blind 10
+Styx06: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [2s Js]
+jeje_sat: calls 20
+henriryan: calls 10
+Styx06: checks
+*** FLOP *** [Kd Tc 7d]
+henriryan: checks
+Styx06: checks
+jeje_sat: checks
+*** TURN *** [Kd Tc 7d] [8d]
+henriryan: checks
+Styx06: checks
+jeje_sat: checks
+*** RIVER *** [Kd Tc 7d 8d] [4c]
+henriryan: checks
+Styx06: checks
+jeje_sat: checks
+*** SHOW DOWN ***
+henriryan: shows [As 4d] (a pair of Fours)
+Styx06: mucks hand
+jeje_sat: mucks hand
+henriryan collected 60 from pot
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Board [Kd Tc 7d 8d 4c]
+Seat 1: Styx06 (big blind) mucked [5d 3c]
+Seat 2: jeje_sat (button) mucked [2s Js]
+Seat 3: henriryan (small blind) showed [As 4d] and won (60) with a pair of Fours
+
+
+PokerStars Hand #229563205870: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level I (10/20) - 2021/09/03 21:01:37 CET [2021/09/03 15:01:37 ET]
+Table '3259611181 1' 3-max Seat #3 is the button
+Seat 1: Styx06 (520 in chips)
+Seat 2: jeje_sat (500 in chips)
+Seat 3: henriryan (480 in chips)
+Styx06: posts small blind 10
+jeje_sat: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [7c Js]
+henriryan: folds
+Styx06: raises 20 to 40
+jeje_sat: calls 20
+*** FLOP *** [8s Td Ts]
+Styx06: checks
+jeje_sat: bets 20
+Styx06: calls 20
+*** TURN *** [8s Td Ts] [5d]
+Styx06: checks
+jeje_sat: bets 20
+Styx06: calls 20
+*** RIVER *** [8s Td Ts 5d] [9h]
+Styx06: bets 160
+jeje_sat: raises 260 to 420 and is all-in
+Styx06: calls 260
+*** SHOW DOWN ***
+jeje_sat: shows [7c Js] (a straight, Seven to Jack)
+Styx06: shows [Ah Th] (three of a kind, Tens)
+jeje_sat collected 1000 from pot
+*** SUMMARY ***
+Total pot 1000 | Rake 0
+Board [8s Td Ts 5d 9h]
+Seat 1: Styx06 (small blind) showed [Ah Th] and lost with three of a kind, Tens
+Seat 2: jeje_sat (big blind) showed [7c Js] and won (1000) with a straight, Seven to Jack
+Seat 3: henriryan (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #229563220942: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level I (10/20) - 2021/09/03 21:02:12 CET [2021/09/03 15:02:12 ET]
+Table '3259611181 1' 3-max Seat #1 is the button
+Seat 1: Styx06 (20 in chips)
+Seat 2: jeje_sat (1000 in chips)
+Seat 3: henriryan (480 in chips)
+jeje_sat: posts small blind 10
+henriryan: posts big blind 20
+*** HOLE CARDS ***
+Dealt to jeje_sat [8s Ts]
+Styx06: folds
+jeje_sat: calls 10
+henriryan: checks
+*** FLOP *** [Jc Qs Ah]
+jeje_sat: checks
+henriryan: checks
+*** TURN *** [Jc Qs Ah] [Th]
+jeje_sat: bets 20
+henriryan: calls 20
+*** RIVER *** [Jc Qs Ah Th] [Ad]
+jeje_sat: bets 20
+henriryan: calls 20
+*** SHOW DOWN ***
+jeje_sat: shows [8s Ts] (two pair, Aces and Tens)
+henriryan: shows [Td 4d] (two pair, Aces and Tens)
+jeje_sat collected 60 from pot
+henriryan collected 60 from pot
+*** SUMMARY ***
+Total pot 120 | Rake 0
+Board [Jc Qs Ah Th Ad]
+Seat 1: Styx06 (button) folded before Flop (didn't bet)
+Seat 2: jeje_sat (small blind) showed [8s Ts] and won (60) with two pair, Aces and Tens
+Seat 3: henriryan (big blind) showed [Td 4d] and won (60) with two pair, Aces and Tens
+
+
+PokerStars Hand #229563235387: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level II (15/30) - 2021/09/03 21:02:44 CET [2021/09/03 15:02:44 ET]
+Table '3259611181 1' 3-max Seat #2 is the button
+Seat 1: Styx06 (20 in chips)
+Seat 2: jeje_sat (1000 in chips)
+Seat 3: henriryan (480 in chips)
+henriryan: posts small blind 15
+Styx06: posts big blind 20 and is all-in
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ac 2d]
+jeje_sat: calls 30
+henriryan: calls 15
+*** FLOP *** [6c Ah 4h]
+henriryan: checks
+jeje_sat: bets 30
+henriryan: folds
+Uncalled bet (30) returned to jeje_sat
+*** TURN *** [6c Ah 4h] [3s]
+*** RIVER *** [6c Ah 4h 3s] [Ts]
+*** SHOW DOWN ***
+jeje_sat: shows [Ac 2d] (a pair of Aces)
+jeje_sat collected 20 from side pot
+Styx06: shows [Kd 5d] (high card Ace)
+jeje_sat collected 60 from main pot
+Styx06 finished the tournament in 3rd place
+*** SUMMARY ***
+Total pot 80 Main pot 60. Side pot 20. | Rake 0
+Board [6c Ah 4h 3s Ts]
+Seat 1: Styx06 (big blind) showed [Kd 5d] and lost with high card Ace
+Seat 2: jeje_sat (button) showed [Ac 2d] and won (80) with a pair of Aces
+Seat 3: henriryan (small blind) folded on the Flop
+
+
+PokerStars Hand #229563244389: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level II (15/30) - 2021/09/03 21:03:04 CET [2021/09/03 15:03:04 ET]
+Table '3259611181 1' 3-max Seat #3 is the button
+Seat 2: jeje_sat (1050 in chips)
+Seat 3: henriryan (450 in chips)
+henriryan: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [7s 4c]
+henriryan: folds
+Uncalled bet (15) returned to jeje_sat
+jeje_sat collected 30 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 30 | Rake 0
+Seat 2: jeje_sat (big blind) collected (30)
+Seat 3: henriryan (button) (small blind) folded before Flop
+
+
+PokerStars Hand #229563248263: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level II (15/30) - 2021/09/03 21:03:13 CET [2021/09/03 15:03:13 ET]
+Table '3259611181 1' 3-max Seat #2 is the button
+Seat 2: jeje_sat (1065 in chips)
+Seat 3: henriryan (435 in chips)
+jeje_sat: posts small blind 15
+henriryan: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ts Kd]
+jeje_sat: calls 15
+henriryan: raises 60 to 90
+jeje_sat: calls 60
+*** FLOP *** [3s 8d 9s]
+henriryan: bets 180
+jeje_sat: folds
+Uncalled bet (180) returned to henriryan
+henriryan collected 180 from pot
+henriryan: doesn't show hand
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Board [3s 8d 9s]
+Seat 2: jeje_sat (button) (small blind) folded on the Flop
+Seat 3: henriryan (big blind) collected (180)
+
+
+PokerStars Hand #229563258494: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level II (15/30) - 2021/09/03 21:03:35 CET [2021/09/03 15:03:35 ET]
+Table '3259611181 1' 3-max Seat #3 is the button
+Seat 2: jeje_sat (975 in chips)
+Seat 3: henriryan (525 in chips)
+henriryan: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jd 4d]
+henriryan: folds
+Uncalled bet (15) returned to jeje_sat
+jeje_sat collected 30 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 30 | Rake 0
+Seat 2: jeje_sat (big blind) collected (30)
+Seat 3: henriryan (button) (small blind) folded before Flop
+
+
+PokerStars Hand #229563261290: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level II (15/30) - 2021/09/03 21:03:41 CET [2021/09/03 15:03:41 ET]
+Table '3259611181 1' 3-max Seat #2 is the button
+Seat 2: jeje_sat (990 in chips)
+Seat 3: henriryan (510 in chips)
+jeje_sat: posts small blind 15
+henriryan: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [2s Kc]
+jeje_sat: calls 15
+henriryan: raises 60 to 90
+jeje_sat: calls 60
+*** FLOP *** [Qh 8c Ts]
+henriryan: bets 90
+jeje_sat: folds
+Uncalled bet (90) returned to henriryan
+henriryan collected 180 from pot
+henriryan: doesn't show hand
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Board [Qh 8c Ts]
+Seat 2: jeje_sat (button) (small blind) folded on the Flop
+Seat 3: henriryan (big blind) collected (180)
+
+
+PokerStars Hand #229563268108: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level II (15/30) - 2021/09/03 21:03:56 CET [2021/09/03 15:03:56 ET]
+Table '3259611181 1' 3-max Seat #3 is the button
+Seat 2: jeje_sat (900 in chips)
+Seat 3: henriryan (600 in chips)
+henriryan: posts small blind 15
+jeje_sat: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [4h 2d]
+henriryan: folds
+Uncalled bet (15) returned to jeje_sat
+jeje_sat collected 30 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 30 | Rake 0
+Seat 2: jeje_sat (big blind) collected (30)
+Seat 3: henriryan (button) (small blind) folded before Flop
+
+
+PokerStars Hand #229563270151: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level II (15/30) - 2021/09/03 21:04:00 CET [2021/09/03 15:04:00 ET]
+Table '3259611181 1' 3-max Seat #2 is the button
+Seat 2: jeje_sat (915 in chips)
+Seat 3: henriryan (585 in chips)
+jeje_sat: posts small blind 15
+henriryan: posts big blind 30
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jd Qc]
+jeje_sat: calls 15
+henriryan: checks
+*** FLOP *** [Td 6s 2c]
+henriryan: checks
+jeje_sat: bets 30
+henriryan: folds
+Uncalled bet (30) returned to jeje_sat
+jeje_sat collected 60 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 60 | Rake 0
+Board [Td 6s 2c]
+Seat 2: jeje_sat (button) (small blind) collected (60)
+Seat 3: henriryan (big blind) folded on the Flop
+
+
+PokerStars Hand #229563280311: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level III (20/40) - 2021/09/03 21:04:22 CET [2021/09/03 15:04:22 ET]
+Table '3259611181 1' 3-max Seat #3 is the button
+Seat 2: jeje_sat (945 in chips)
+Seat 3: henriryan (555 in chips)
+henriryan: posts small blind 20
+jeje_sat: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [8h 3s]
+henriryan: folds
+Uncalled bet (20) returned to jeje_sat
+jeje_sat collected 40 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Seat 2: jeje_sat (big blind) collected (40)
+Seat 3: henriryan (button) (small blind) folded before Flop
+
+
+PokerStars Hand #229563282338: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level III (20/40) - 2021/09/03 21:04:27 CET [2021/09/03 15:04:27 ET]
+Table '3259611181 1' 3-max Seat #2 is the button
+Seat 2: jeje_sat (965 in chips)
+Seat 3: henriryan (535 in chips)
+jeje_sat: posts small blind 20
+henriryan: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [9c 7s]
+jeje_sat: calls 20
+henriryan: checks
+*** FLOP *** [6d 2s 2h]
+henriryan: bets 40
+jeje_sat: folds
+Uncalled bet (40) returned to henriryan
+henriryan collected 80 from pot
+henriryan: doesn't show hand
+*** SUMMARY ***
+Total pot 80 | Rake 0
+Board [6d 2s 2h]
+Seat 2: jeje_sat (button) (small blind) folded on the Flop
+Seat 3: henriryan (big blind) collected (80)
+
+
+PokerStars Hand #229563286725: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level III (20/40) - 2021/09/03 21:04:36 CET [2021/09/03 15:04:36 ET]
+Table '3259611181 1' 3-max Seat #3 is the button
+Seat 2: jeje_sat (925 in chips)
+Seat 3: henriryan (575 in chips)
+henriryan: posts small blind 20
+jeje_sat: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [9c 6h]
+henriryan: calls 20
+jeje_sat: checks
+*** FLOP *** [5d 9d As]
+jeje_sat: bets 40
+henriryan: folds
+Uncalled bet (40) returned to jeje_sat
+jeje_sat collected 80 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 80 | Rake 0
+Board [5d 9d As]
+Seat 2: jeje_sat (big blind) collected (80)
+Seat 3: henriryan (button) (small blind) folded on the Flop
+
+
+PokerStars Hand #229563291403: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level III (20/40) - 2021/09/03 21:04:46 CET [2021/09/03 15:04:46 ET]
+Table '3259611181 1' 3-max Seat #2 is the button
+Seat 2: jeje_sat (965 in chips)
+Seat 3: henriryan (535 in chips)
+jeje_sat: posts small blind 20
+henriryan: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [2h 8d]
+jeje_sat: calls 20
+henriryan: checks
+*** FLOP *** [3d 4c 6d]
+henriryan: bets 40
+jeje_sat: folds
+Uncalled bet (40) returned to henriryan
+henriryan collected 80 from pot
+henriryan: doesn't show hand
+*** SUMMARY ***
+Total pot 80 | Rake 0
+Board [3d 4c 6d]
+Seat 2: jeje_sat (button) (small blind) folded on the Flop
+Seat 3: henriryan (big blind) collected (80)
+
+
+PokerStars Hand #229563296006: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level III (20/40) - 2021/09/03 21:04:56 CET [2021/09/03 15:04:56 ET]
+Table '3259611181 1' 3-max Seat #3 is the button
+Seat 2: jeje_sat (925 in chips)
+Seat 3: henriryan (575 in chips)
+henriryan: posts small blind 20
+jeje_sat: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [4h Kc]
+henriryan: raises 40 to 80
+jeje_sat: calls 40
+*** FLOP *** [9s 3d 5c]
+jeje_sat: checks
+henriryan: bets 160
+jeje_sat: folds
+Uncalled bet (160) returned to henriryan
+henriryan collected 160 from pot
+henriryan: doesn't show hand
+*** SUMMARY ***
+Total pot 160 | Rake 0
+Board [9s 3d 5c]
+Seat 2: jeje_sat (big blind) folded on the Flop
+Seat 3: henriryan (button) (small blind) collected (160)
+
+
+PokerStars Hand #229563302470: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level III (20/40) - 2021/09/03 21:05:10 CET [2021/09/03 15:05:10 ET]
+Table '3259611181 1' 3-max Seat #2 is the button
+Seat 2: jeje_sat (845 in chips)
+Seat 3: henriryan (655 in chips)
+jeje_sat: posts small blind 20
+henriryan: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [5c Kh]
+jeje_sat: calls 20
+henriryan: raises 80 to 120
+jeje_sat: calls 80
+*** FLOP *** [4d 9s 7s]
+henriryan: bets 240
+jeje_sat: folds
+Uncalled bet (240) returned to henriryan
+henriryan collected 240 from pot
+henriryan: doesn't show hand
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Board [4d 9s 7s]
+Seat 2: jeje_sat (button) (small blind) folded on the Flop
+Seat 3: henriryan (big blind) collected (240)
+
+
+PokerStars Hand #229563309153: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level III (20/40) - 2021/09/03 21:05:24 CET [2021/09/03 15:05:24 ET]
+Table '3259611181 1' 3-max Seat #3 is the button
+Seat 2: jeje_sat (725 in chips)
+Seat 3: henriryan (775 in chips)
+henriryan: posts small blind 20
+jeje_sat: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ac 9h]
+henriryan: calls 20
+jeje_sat: checks
+*** FLOP *** [Tc 3d 2s]
+jeje_sat: checks
+henriryan: checks
+*** TURN *** [Tc 3d 2s] [Ad]
+jeje_sat: bets 40
+henriryan: folds
+Uncalled bet (40) returned to jeje_sat
+jeje_sat collected 80 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 80 | Rake 0
+Board [Tc 3d 2s Ad]
+Seat 2: jeje_sat (big blind) collected (80)
+Seat 3: henriryan (button) (small blind) folded on the Turn
+
+
+PokerStars Hand #229563317009: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level III (20/40) - 2021/09/03 21:05:40 CET [2021/09/03 15:05:40 ET]
+Table '3259611181 1' 3-max Seat #2 is the button
+Seat 2: jeje_sat (765 in chips)
+Seat 3: henriryan (735 in chips)
+jeje_sat: posts small blind 20
+henriryan: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [Th Td]
+jeje_sat: calls 20
+henriryan: checks
+*** FLOP *** [4h 8s Ad]
+henriryan: bets 40
+jeje_sat: calls 40
+*** TURN *** [4h 8s Ad] [7d]
+henriryan: bets 40
+jeje_sat: calls 40
+*** RIVER *** [4h 8s Ad 7d] [Kd]
+henriryan: checks
+jeje_sat: checks
+*** SHOW DOWN ***
+henriryan: shows [2c 5d] (high card Ace)
+jeje_sat: shows [Th Td] (a pair of Tens)
+jeje_sat collected 240 from pot
+*** SUMMARY ***
+Total pot 240 | Rake 0
+Board [4h 8s Ad 7d Kd]
+Seat 2: jeje_sat (button) (small blind) showed [Th Td] and won (240) with a pair of Tens
+Seat 3: henriryan (big blind) showed [2c 5d] and lost with high card Ace
+
+
+PokerStars Hand #229563326455: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level III (20/40) - 2021/09/03 21:06:00 CET [2021/09/03 15:06:00 ET]
+Table '3259611181 1' 3-max Seat #3 is the button
+Seat 2: jeje_sat (885 in chips)
+Seat 3: henriryan (615 in chips)
+henriryan: posts small blind 20
+jeje_sat: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [6d 4c]
+henriryan: folds
+Uncalled bet (20) returned to jeje_sat
+jeje_sat collected 40 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Seat 2: jeje_sat (big blind) collected (40)
+Seat 3: henriryan (button) (small blind) folded before Flop
+
+
+PokerStars Hand #229563329372: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level III (20/40) - 2021/09/03 21:06:06 CET [2021/09/03 15:06:06 ET]
+Table '3259611181 1' 3-max Seat #2 is the button
+Seat 2: jeje_sat (905 in chips)
+Seat 3: henriryan (595 in chips)
+jeje_sat: posts small blind 20
+henriryan: posts big blind 40
+*** HOLE CARDS ***
+Dealt to jeje_sat [6s 2c]
+jeje_sat: calls 20
+henriryan: checks
+*** FLOP *** [Kh 7h 5c]
+henriryan: checks
+jeje_sat: bets 40
+henriryan: calls 40
+*** TURN *** [Kh 7h 5c] [Qd]
+henriryan: checks
+jeje_sat: bets 40
+henriryan: folds
+Uncalled bet (40) returned to jeje_sat
+jeje_sat collected 160 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 160 | Rake 0
+Board [Kh 7h 5c Qd]
+Seat 2: jeje_sat (button) (small blind) collected (160)
+Seat 3: henriryan (big blind) folded on the Turn
+
+
+PokerStars Hand #229563341088: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level IV (30/60) - 2021/09/03 21:06:31 CET [2021/09/03 15:06:31 ET]
+Table '3259611181 1' 3-max Seat #3 is the button
+Seat 2: jeje_sat (985 in chips)
+Seat 3: henriryan (515 in chips)
+henriryan: posts small blind 30
+jeje_sat: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [8d 4c]
+henriryan: raises 60 to 120
+jeje_sat: calls 60
+*** FLOP *** [3s 7d Jc]
+jeje_sat: checks
+henriryan: checks
+*** TURN *** [3s 7d Jc] [Kc]
+jeje_sat: bets 60
+henriryan: calls 60
+*** RIVER *** [3s 7d Jc Kc] [Qd]
+jeje_sat: bets 60
+henriryan: raises 60 to 120
+jeje_sat: folds
+Uncalled bet (60) returned to henriryan
+henriryan collected 480 from pot
+henriryan: doesn't show hand
+*** SUMMARY ***
+Total pot 480 | Rake 0
+Board [3s 7d Jc Kc Qd]
+Seat 2: jeje_sat (big blind) folded on the River
+Seat 3: henriryan (button) (small blind) collected (480)
+
+
+PokerStars Hand #229563353173: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level IV (30/60) - 2021/09/03 21:06:56 CET [2021/09/03 15:06:56 ET]
+Table '3259611181 1' 3-max Seat #2 is the button
+Seat 2: jeje_sat (745 in chips)
+Seat 3: henriryan (755 in chips)
+jeje_sat: posts small blind 30
+henriryan: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [Qd Ac]
+jeje_sat: calls 30
+henriryan: raises 120 to 180
+jeje_sat: raises 565 to 745 and is all-in
+henriryan: calls 565
+*** FLOP *** [Ts 9c 3c]
+*** TURN *** [Ts 9c 3c] [7s]
+*** RIVER *** [Ts 9c 3c 7s] [3s]
+*** SHOW DOWN ***
+henriryan: shows [5c As] (a pair of Threes)
+jeje_sat: shows [Qd Ac] (a pair of Threes - Ace+Queen kicker)
+jeje_sat collected 1490 from pot
+*** SUMMARY ***
+Total pot 1490 | Rake 0
+Board [Ts 9c 3c 7s 3s]
+Seat 2: jeje_sat (button) (small blind) showed [Qd Ac] and won (1490) with a pair of Threes
+Seat 3: henriryan (big blind) showed [5c As] and lost with a pair of Threes
+
+
+PokerStars Hand #229563362905: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level IV (30/60) - 2021/09/03 21:07:13 CET [2021/09/03 15:07:13 ET]
+Table '3259611181 1' 3-max Seat #3 is the button
+Seat 2: jeje_sat (1490 in chips)
+Seat 3: henriryan (10 in chips)
+henriryan: posts small blind 10 and is all-in
+jeje_sat: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [7c 9s]
+Uncalled bet (50) returned to jeje_sat
+*** FLOP *** [8s 3d 5h]
+*** TURN *** [8s 3d 5h] [Qs]
+*** RIVER *** [8s 3d 5h Qs] [Td]
+*** SHOW DOWN ***
+jeje_sat: shows [7c 9s] (high card Queen)
+henriryan: shows [Jc Qh] (a pair of Queens)
+henriryan collected 20 from pot
+*** SUMMARY ***
+Total pot 20 | Rake 0
+Board [8s 3d 5h Qs Td]
+Seat 2: jeje_sat (big blind) showed [7c 9s] and lost with high card Queen
+Seat 3: henriryan (button) (small blind) showed [Jc Qh] and won (20) with a pair of Queens
+
+
+PokerStars Hand #229563366892: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level IV (30/60) - 2021/09/03 21:07:22 CET [2021/09/03 15:07:22 ET]
+Table '3259611181 1' 3-max Seat #2 is the button
+Seat 2: jeje_sat (1480 in chips)
+Seat 3: henriryan (20 in chips)
+jeje_sat: posts small blind 30
+henriryan: posts big blind 20 and is all-in
+*** HOLE CARDS ***
+Dealt to jeje_sat [3c Ks]
+Uncalled bet (10) returned to jeje_sat
+*** FLOP *** [Tc Th 7d]
+*** TURN *** [Tc Th 7d] [Qc]
+*** RIVER *** [Tc Th 7d Qc] [6h]
+*** SHOW DOWN ***
+henriryan: shows [Kd Ts] (three of a kind, Tens)
+jeje_sat: shows [3c Ks] (a pair of Tens)
+henriryan collected 40 from pot
+*** SUMMARY ***
+Total pot 40 | Rake 0
+Board [Tc Th 7d Qc 6h]
+Seat 2: jeje_sat (button) (small blind) showed [3c Ks] and lost with a pair of Tens
+Seat 3: henriryan (big blind) showed [Kd Ts] and won (40) with three of a kind, Tens
+
+
+PokerStars Hand #229563370838: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level IV (30/60) - 2021/09/03 21:07:30 CET [2021/09/03 15:07:30 ET]
+Table '3259611181 1' 3-max Seat #3 is the button
+Seat 2: jeje_sat (1460 in chips)
+Seat 3: henriryan (40 in chips)
+henriryan: posts small blind 30
+jeje_sat: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [Kd Jc]
+henriryan: calls 10 and is all-in
+Uncalled bet (20) returned to jeje_sat
+*** FLOP *** [4h 5c Qc]
+*** TURN *** [4h 5c Qc] [Ah]
+*** RIVER *** [4h 5c Qc Ah] [9h]
+*** SHOW DOWN ***
+jeje_sat: shows [Kd Jc] (high card Ace)
+henriryan: shows [Tc 4d] (a pair of Fours)
+henriryan collected 80 from pot
+*** SUMMARY ***
+Total pot 80 | Rake 0
+Board [4h 5c Qc Ah 9h]
+Seat 2: jeje_sat (big blind) showed [Kd Jc] and lost with high card Ace
+Seat 3: henriryan (button) (small blind) showed [Tc 4d] and won (80) with a pair of Fours
+
+
+PokerStars Hand #229563376796: Tournament #3259611181, €0.23+€0.02 EUR Hold'em No Limit - Level IV (30/60) - 2021/09/03 21:07:43 CET [2021/09/03 15:07:43 ET]
+Table '3259611181 1' 3-max Seat #2 is the button
+Seat 2: jeje_sat (1420 in chips)
+Seat 3: henriryan (80 in chips)
+jeje_sat: posts small blind 30
+henriryan: posts big blind 60
+*** HOLE CARDS ***
+Dealt to jeje_sat [9d Qd]
+jeje_sat: raises 1360 to 1420 and is all-in
+henriryan: calls 20 and is all-in
+Uncalled bet (1340) returned to jeje_sat
+*** FLOP *** [Kh 2s Jh]
+*** TURN *** [Kh 2s Jh] [Ts]
+*** RIVER *** [Kh 2s Jh Ts] [4h]
+*** SHOW DOWN ***
+henriryan: shows [3d Qc] (high card King)
+jeje_sat: shows [9d Qd] (a straight, Nine to King)
+jeje_sat collected 160 from pot
+*** SUMMARY ***
+Total pot 160 | Rake 0
+Board [Kh 2s Jh Ts 4h]
+Seat 2: jeje_sat (button) (small blind) showed [9d Qd] and won (160) with a straight, Nine to King
+Seat 3: henriryan (big blind) showed [3d Qc] and lost with high card King
+
+

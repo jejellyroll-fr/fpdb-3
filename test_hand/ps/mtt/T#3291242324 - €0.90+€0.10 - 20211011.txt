@@ -1,0 +1,220 @@
+﻿PokerStars Hand #231298820707: Tournament #3291242324, €0.90+€0.10 EUR Omaha Pot Limit - Level VII (125/250) - 2021/11/10 21:51:43 CET [2021/11/10 15:51:43 ET]
+Table '3291242324 10' 6-max Seat #6 is the button
+Seat 1: noydufccg53 (5245 in chips)
+Seat 2: taupemodel75 (4150 in chips)
+Seat 3: jeje_sat (3711 in chips)
+Seat 4: crapuloz (6146 in chips)
+Seat 5: Oxyde44 (1792 in chips)
+Seat 6: froggy601 (9878 in chips)
+noydufccg53: posts small blind 125
+taupemodel75: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [6c 3h 2s 9h]
+jeje_sat has timed out while disconnected
+jeje_sat: folds
+jeje_sat is sitting out
+crapuloz: folds
+Oxyde44: calls 250
+froggy601: calls 250
+noydufccg53: folds
+taupemodel75: checks
+*** FLOP *** [Qh Js 9c]
+jeje_sat has returned
+taupemodel75: checks
+Oxyde44: checks
+froggy601: bets 250
+taupemodel75: folds
+Oxyde44: calls 250
+*** TURN *** [Qh Js 9c] [8s]
+Oxyde44: checks
+froggy601: bets 250
+Oxyde44: folds
+Uncalled bet (250) returned to froggy601
+froggy601 collected 1375 from pot
+*** SUMMARY ***
+Total pot 1375 | Rake 0
+Board [Qh Js 9c 8s]
+Seat 1: noydufccg53 (small blind) folded before Flop
+Seat 2: taupemodel75 (big blind) folded on the Flop
+Seat 3: jeje_sat folded before Flop (didn't bet)
+Seat 4: crapuloz folded before Flop (didn't bet)
+Seat 5: Oxyde44 folded on the Turn
+Seat 6: froggy601 (button) collected (1375)
+
+
+PokerStars Hand #231298887406: Tournament #3291242324, €0.90+€0.10 EUR Omaha Pot Limit - Level VII (125/250) - 2021/11/10 21:53:54 CET [2021/11/10 15:53:54 ET]
+Table '3291242324 10' 6-max Seat #2 is the button
+Seat 1: noydufccg53 (5120 in chips)
+Seat 2: taupemodel75 (5150 in chips)
+Seat 3: jeje_sat (3461 in chips) is sitting out
+Seat 4: crapuloz (6146 in chips)
+Seat 5: Oxyde44 (1292 in chips)
+Seat 6: froggy601 (9753 in chips)
+jeje_sat: posts small blind 125
+crapuloz: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jc Ad Js Kd]
+Oxyde44: folds
+froggy601: folds
+noydufccg53: folds
+taupemodel75: calls 250
+jeje_sat: folds
+crapuloz: checks
+*** FLOP *** [Tc 5c 6c]
+crapuloz: checks
+taupemodel75: checks
+*** TURN *** [Tc 5c 6c] [Qd]
+crapuloz: checks
+taupemodel75: checks
+*** RIVER *** [Tc 5c 6c Qd] [Jh]
+crapuloz: bets 313
+taupemodel75: folds
+Uncalled bet (313) returned to crapuloz
+crapuloz collected 625 from pot
+crapuloz: doesn't show hand
+*** SUMMARY ***
+Total pot 625 | Rake 0
+Board [Tc 5c 6c Qd Jh]
+Seat 1: noydufccg53 folded before Flop (didn't bet)
+Seat 2: taupemodel75 (button) folded on the River
+Seat 3: jeje_sat (small blind) folded before Flop
+Seat 4: crapuloz (big blind) collected (625)
+Seat 5: Oxyde44 folded before Flop (didn't bet)
+Seat 6: froggy601 folded before Flop (didn't bet)
+
+
+PokerStars Hand #231299048757: Tournament #3291242324, €0.90+€0.10 EUR Omaha Pot Limit - Level VII (125/250) - 2021/11/10 22:00:33 CET [2021/11/10 16:00:33 ET]
+Table '3291242324 10' 6-max Seat #3 is the button
+Seat 1: noydufccg53 (5120 in chips)
+Seat 3: jeje_sat (3336 in chips)
+Seat 4: crapuloz (6521 in chips)
+Seat 5: Oxyde44 (1292 in chips)
+Seat 6: froggy601 (9753 in chips)
+crapuloz: posts small blind 125
+Oxyde44: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [4s 5c 9d Qd]
+froggy601: raises 250 to 500
+noydufccg53 has timed out
+noydufccg53: folds
+noydufccg53 is sitting out
+jeje_sat: folds
+crapuloz: folds
+noydufccg53 has returned
+Oxyde44: raises 792 to 1292 and is all-in
+froggy601: calls 792
+*** FLOP *** [2s Qh 5d]
+*** TURN *** [2s Qh 5d] [3s]
+*** RIVER *** [2s Qh 5d 3s] [6d]
+*** SHOW DOWN ***
+Oxyde44: shows [Ks Kd 7h As] (a pair of Kings)
+froggy601: shows [Td Jh 9h Ad] (high card Ace)
+Oxyde44 collected 2709 from pot
+*** SUMMARY ***
+Total pot 2709 | Rake 0
+Board [2s Qh 5d 3s 6d]
+Seat 1: noydufccg53 folded before Flop (didn't bet)
+Seat 3: jeje_sat (button) folded before Flop (didn't bet)
+Seat 4: crapuloz (small blind) folded before Flop
+Seat 5: Oxyde44 (big blind) showed [Ks Kd 7h As] and won (2709) with a pair of Kings
+Seat 6: froggy601 showed [Td Jh 9h Ad] and lost with high card Ace
+
+
+PokerStars Hand #231299075285: Tournament #3291242324, €0.90+€0.10 EUR Omaha Pot Limit - Level VII (125/250) - 2021/11/10 22:01:21 CET [2021/11/10 16:01:21 ET]
+Table '3291242324 10' 6-max Seat #4 is the button
+Seat 1: noydufccg53 (5120 in chips)
+Seat 3: jeje_sat (3336 in chips)
+Seat 4: crapuloz (6396 in chips)
+Seat 5: Oxyde44 (2709 in chips)
+Seat 6: froggy601 (8461 in chips)
+Oxyde44: posts small blind 125
+froggy601: posts big blind 250
+*** HOLE CARDS ***
+Dealt to jeje_sat [Ad Ac 7s Jc]
+noydufccg53: folds
+jeje_sat: raises 625 to 875
+crapuloz: folds
+Oxyde44: folds
+froggy601 has timed out
+froggy601: folds
+froggy601 is sitting out
+Uncalled bet (625) returned to jeje_sat
+jeje_sat collected 625 from pot
+jeje_sat: doesn't show hand
+*** SUMMARY ***
+Total pot 625 | Rake 0
+Seat 1: noydufccg53 folded before Flop (didn't bet)
+Seat 3: jeje_sat collected (625)
+Seat 4: crapuloz (button) folded before Flop (didn't bet)
+Seat 5: Oxyde44 (small blind) folded before Flop
+Seat 6: froggy601 (big blind) folded before Flop
+
+
+PokerStars Hand #231299101475: Tournament #3291242324, €0.90+€0.10 EUR Omaha Pot Limit - Level VIII (150/300) - 2021/11/10 22:02:15 CET [2021/11/10 16:02:15 ET]
+Table '3291242324 10' 6-max Seat #5 is the button
+Seat 1: noydufccg53 (5120 in chips)
+Seat 3: jeje_sat (3711 in chips)
+Seat 4: crapuloz (6396 in chips)
+Seat 5: Oxyde44 (2584 in chips)
+Seat 6: froggy601 (8211 in chips) is sitting out
+froggy601: posts small blind 150
+noydufccg53: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [Jd 5d Kh 6d]
+jeje_sat: folds
+crapuloz: folds
+Oxyde44: folds
+froggy601: folds
+Uncalled bet (150) returned to noydufccg53
+noydufccg53 collected 300 from pot
+noydufccg53: doesn't show hand
+*** SUMMARY ***
+Total pot 300 | Rake 0
+Seat 1: noydufccg53 (big blind) collected (300)
+Seat 3: jeje_sat folded before Flop (didn't bet)
+Seat 4: crapuloz folded before Flop (didn't bet)
+Seat 5: Oxyde44 (button) folded before Flop (didn't bet)
+Seat 6: froggy601 (small blind) folded before Flop
+
+
+PokerStars Hand #231299107366: Tournament #3291242324, €0.90+€0.10 EUR Omaha Pot Limit - Level VIII (150/300) - 2021/11/10 22:02:27 CET [2021/11/10 16:02:27 ET]
+Table '3291242324 10' 6-max Seat #6 is the button
+Seat 1: noydufccg53 (5270 in chips)
+Seat 3: jeje_sat (3711 in chips)
+Seat 4: crapuloz (6396 in chips)
+Seat 5: Oxyde44 (2584 in chips)
+Seat 6: froggy601 (8061 in chips) is sitting out
+noydufccg53: posts small blind 150
+jeje_sat: posts big blind 300
+*** HOLE CARDS ***
+Dealt to jeje_sat [9c Jh 3h Kd]
+crapuloz: folds
+Oxyde44: folds
+froggy601: folds
+noydufccg53: calls 150
+jeje_sat: checks
+*** FLOP *** [Ac 3c Kh]
+noydufccg53: checks
+jeje_sat: bets 600
+noydufccg53: calls 600
+*** TURN *** [Ac 3c Kh] [Ts]
+noydufccg53: checks
+jeje_sat: bets 1800
+noydufccg53: raises 2570 to 4370 and is all-in
+jeje_sat: calls 1011 and is all-in
+Uncalled bet (1559) returned to noydufccg53
+*** RIVER *** [Ac 3c Kh Ts] [Ad]
+*** SHOW DOWN ***
+noydufccg53: shows [5c 4s Qc Js] (a straight, Ten to Ace)
+jeje_sat: shows [9c Jh 3h Kd] (two pair, Aces and Kings)
+noydufccg53 collected 7422 from pot
+*** SUMMARY ***
+Total pot 7422 | Rake 0
+Board [Ac 3c Kh Ts Ad]
+Seat 1: noydufccg53 (small blind) showed [5c 4s Qc Js] and won (7422) with a straight, Ten to Ace
+Seat 3: jeje_sat (big blind) showed [9c Jh 3h Kd] and lost with two pair, Aces and Kings
+Seat 4: crapuloz folded before Flop (didn't bet)
+Seat 5: Oxyde44 folded before Flop (didn't bet)
+Seat 6: froggy601 (button) folded before Flop (didn't bet)
+
+
