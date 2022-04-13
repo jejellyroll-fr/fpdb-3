@@ -102,7 +102,7 @@ class Filters(QWidget):
                           ,'positionsall':('All'), 'positionsnone':('None')
                           ,'currenciesall':('All'), 'currenciesnone':('None')
                           ,'seatsbetween':('Between:'), 'seatsand':('And:'), 'seatsshow':('Show Number of Players')
-                          ,'playerstitle':('Hero:'), 'sitestitle':(('Sites')+':'), 'gamestitle':(('Games')+':')
+                          ,'playerstitle':('Hero:'), 'sitestitle':(('Sites')+':'), 'gamestitle':(('Games')+':'), 'tourneytitle':(('Tourney')+':')
                           ,'limitstitle':('Limits:'), 'positionstitle':('Positions:'), 'seatstitle':('Number of Players:')
                           ,'groupstitle':('Grouping:'), 'posnshow':('Show Position Stats')
                           ,'datestitle':('Date:'), 'currenciestitle':(('Currencies')+':')
@@ -163,6 +163,13 @@ class Filters(QWidget):
         self.cbGames = {}
 
         self.fillGamesFrame(gamesFrame)
+
+        # Tourney types
+        tourneyFrame = QGroupBox(self.filterText['tourneytitle'])
+        self.layout().addWidget(tourneyFrame)
+        self.cbTourney = {}
+
+        self.fillTourneyFrame(gamesFrame)
 
         # Currencies
         currenciesFrame = QGroupBox(self.filterText['currenciestitle'])
@@ -272,7 +279,7 @@ class Filters(QWidget):
         return [p for p in self.cbPositions if self.cbPositions[p].isChecked()]
 
     def getTourneyTypes(self):
-        return []
+        return [g for g in self.cbTourney if self.cbTourney[g].isChecked()]
 
     def getGames(self):
         return [g for g in self.cbGames if self.cbGames[g].isChecked()]
@@ -593,7 +600,31 @@ class Filters(QWidget):
         else:
             print(("INFO: No games returned from database"))
             log.info(("No games returned from database"))
-    
+
+    def fillTourneyFrame(self, frame):
+        vbox1 = QVBoxLayout()
+        frame.setLayout(vbox1)
+
+        self.cursor.execute(self.sql.query['getTourneyNames'])
+        result = self.db.cursor.fetchall()
+        print(result)
+        self.gameList = QComboBox()
+        self.gameList.setStyleSheet("background-color: #455364")   
+        for count,game in enumerate(result, start=0):
+            game = str(result[count])
+            game = game.replace("(","")
+            game = game.replace(",","")
+            game = game.replace(")","")
+            #print(game)
+            self.gameList.insertItem(count,game)
+            self.cbTourney.addItem(game)
+        print(type(self.cbTourney))
+        #vbox1.addWidget(self.gameList)
+
+
+
+
+
     def fillPositionsFrame(self, frame, display):
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)

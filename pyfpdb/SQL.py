@@ -98,6 +98,8 @@ class Sql(object):
 
         self.query['getTourneyTypesIds'] = "SELECT id FROM TourneyTypes"
 
+        self.query['getTourneyNames'] = "SELECT tourneyName FROM Tourneys"
+
         ################################
         # Create Settings
         ################################
