@@ -28,7 +28,7 @@ import traceback
 from time import *
 from datetime import datetime
 
-from PyQt5.QtWidgets import (QFrame, QScrollArea, QSplitter, QVBoxLayout)
+from PyQt5.QtWidgets import (QFrame, QScrollArea, QSplitter, QVBoxLayout,QMessageBox)
 
 import Database
 import Filters
@@ -64,10 +64,10 @@ class GuiTourneyGraphViewer(QSplitter):
 
 
         filters_display = { "Heroes"    : True,
-                            "Sites"     : True,
-                            "Games"     : False,
+                            "Sites"     : False,
+                            "Games"     : True,
                             "Currencies": True,
-                            "Limits"    : False,
+                            "Limits"    : True,
                             "LimitSep"  : False,
                             "LimitType" : False,
                             "Type"      : False,
@@ -91,6 +91,7 @@ class GuiTourneyGraphViewer(QSplitter):
         self.addWidget(scroll)
 
         frame = QFrame()
+        frame.setStyleSheet('background-color: #19232D ')
         self.graphBox = QVBoxLayout()
         frame.setLayout(self.graphBox)
         self.addWidget(frame)
@@ -113,6 +114,7 @@ class GuiTourneyGraphViewer(QSplitter):
         if self.fig is not None:
             self.fig.clear()
         self.fig = Figure(figsize=(5,4), dpi=100)
+        self.fig.patch.set_facecolor('#19232D')
         if self.canvas is not None:
             self.canvas.destroy()
 
@@ -128,6 +130,10 @@ class GuiTourneyGraphViewer(QSplitter):
         sites   = self.filters.getSites()
         heroes  = self.filters.getHeroes()
         siteids = self.filters.getSiteIds()
+ 
+        games   = self.filters.getGames()
+
+        names   = ""
 
         # Which sites are selected?
         for site in sites:
@@ -136,6 +142,7 @@ class GuiTourneyGraphViewer(QSplitter):
             result = self.db.get_player_id(self.conf, site, _hname)
             if result is not None:
                 playerids.append(int(result))
+                names = names + "\n"+_hname + " on "+site
 
         if not sitenos:
             #Should probably pop up here.
@@ -148,18 +155,27 @@ class GuiTourneyGraphViewer(QSplitter):
             self.db.rollback()
             return
 
+
+
         #Set graph properties
         self.ax = self.fig.add_subplot(111)
 
         #Get graph data from DB
         starttime = time()
-        green = self.getData(playerids, sitenos)
+        green = self.getData(playerids, sitenos, games)
         print(("Graph generated in: %s") %(time() - starttime))
 
 
         #Set axis labels and grid overlay properites
-        self.ax.set_xlabel(("Tournaments"), fontsize = 12)
-        self.ax.set_ylabel("$", fontsize = 12)
+        self.ax.set_xlabel(("Tournaments"),color='#9DA9B5')
+        self.ax.set_facecolor('#19232D')
+        self.ax.tick_params(axis='x', colors='#9DA9B5') 
+        self.ax.tick_params(axis='y', colors='#9DA9B5') 
+        self.ax.spines['left'].set_color('#9DA9B5') 
+        self.ax.spines['right'].set_color('#9DA9B5')
+        self.ax.spines['top'].set_color('#9DA9B5')
+        self.ax.spines['bottom'].set_color('#9DA9B5')
+        self.ax.set_ylabel("$", color='#9DA9B5')
         self.ax.grid(color='g', linestyle=':', linewidth=0.2)
         if green is None or len(green) == 0:
             self.ax.set_title(("No Data for Player(s) Found"))
@@ -178,19 +194,19 @@ class GuiTourneyGraphViewer(QSplitter):
 
             #TODO: Do something useful like alert user
         else:
-            self.ax.set_title(("Tournament Results")+" (USD)")
+            self.ax.set_title((("Tournament Results")+names), color='#9DA9B5')
 
             #Draw plot
             self.ax.plot(green, color='green', label=('Tournaments') + ': %d\n' % len(green) + ('Profit') + ': $%.2f' % green[-1])
 
-            legend = self.ax.legend(loc='upper left', fancybox=True, shadow=True, prop=FontProperties(size='smaller'))
+            legend = self.ax.legend(loc='upper left', fancybox=True, shadow=True, prop=FontProperties(size='smaller'), facecolor="#19232D", labelcolor='#9DA9B5')
             #legend.draggable(True)
             
             self.graphBox.addWidget(self.canvas)
             self.canvas.draw()
             #self.exportButton.set_sensitive(True)
 
-    def getData(self, names, sites):
+    def getData(self, names, sites, games,):
         tmp = self.sql.query['tourneyGraph']
         start_date, end_date = self.filters.getDates()
 
@@ -236,43 +252,18 @@ class GuiTourneyGraphViewer(QSplitter):
         if self.fig is None:
             return # Might want to disable export button until something has been generated.
 
-        dia_chooser = gtk.FileChooserDialog(title=("Please choose the directory you wish to export to:"),
-                                            action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                                            buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OK,gtk.RESPONSE_OK))
-        dia_chooser.set_destroy_with_parent(True)
-        dia_chooser.set_transient_for(self.parent)
-        try: 
-            dia_chooser.set_filename(self.exportFile) # use previously chosen export path as default
-        except:
-            pass
-
-        response = dia_chooser.run()
-        
-        if response != gtk.RESPONSE_OK:
-            print(('Closed, no graph exported'))
-            dia_chooser.destroy()
-            return
-            
-        # generate a unique filename for export
-        now = datetime.now()
-        now_formatted = now.strftime("%Y%m%d%H%M%S")
-        self.exportFile = dia_chooser.get_filename() + "/fpdb" + now_formatted + ".png"
-        dia_chooser.destroy()
-        
-        #print "DEBUG: self.exportFile = %s" %(self.exportFile)
-        self.fig.savefig(self.exportFile, format="png")
-
-        #display info box to confirm graph created
-        diainfo = gtk.MessageDialog(parent=self.parent,
-                                flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                                type=gtk.MESSAGE_INFO,
-                                buttons=gtk.BUTTONS_OK,
-                                message_format=("Graph created"))
-        diainfo.format_secondary_text(self.exportFile)          
-        diainfo.run()
-        diainfo.destroy()
-        
-    #end of def exportGraph
+        else:
+            path = os.getcwd()
+            print (path)
+            path = path+'/graph.png'
+            print (path)
+            self.fig.savefig(path) 
+            msg = QMessageBox()
+            msg.setWindowTitle("FPDB 3 info")
+            mess = "Your graph is saved in "+path
+            msg.setText(mess)
+            msg.exec()
+    #end of def exportGraph TO DO more if needed
 
 if __name__ == "__main__":
     import Configuration
