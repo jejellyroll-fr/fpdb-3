@@ -846,7 +846,7 @@ class fpdb(QMainWindow):
         cashMenu.addAction(makeAction(('Hand Viewer'), self.tab_hand_viewer))
         #cashMenu.addAction(makeAction(('Positional Stats (tabulated view)'), self.tab_positional_stats))
         cashMenu.addAction(makeAction(('Session Stats'), self.tab_session_stats, 'Ctrl+S'))
-        cashMenu.addAction(makeAction(('Stove (preview)'), self.tabStove))
+        #cashMenu.addAction(makeAction(('Stove (preview)'), self.tabStove))
 
         tournamentMenu.addAction(makeAction(('Tourney Graphs'), self.tabTourneyGraphViewer))
         tournamentMenu.addAction(makeAction(('Tourney Stats'), self.tab_tourney_player_stats, 'Ctrl+T'))
