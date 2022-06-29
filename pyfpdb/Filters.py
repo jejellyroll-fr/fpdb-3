@@ -617,7 +617,7 @@ class Filters(QWidget):
             game = game.replace(")","")
             #print(game)
             self.gameList.insertItem(count,game)
-            self.cbTourney.addItem(game)
+            #self.cbTourney.addItem(game)
         print(type(self.cbTourney))
         #vbox1.addWidget(self.gameList)
 

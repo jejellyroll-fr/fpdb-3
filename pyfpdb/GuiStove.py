@@ -140,7 +140,7 @@ class GuiStove(QWidget):
 
         ddbox = QHBoxLayout()
         
-        self.notebook.addTab(label)
+        self.notebook.addTab(self, label)
 
         ddhbox = QHBoxLayout()
         gamehbox = QHBoxLayout()
