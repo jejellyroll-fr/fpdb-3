@@ -171,12 +171,14 @@ class GuiGraphViewer(QSplitter):
         
         self.ax = self.fig.add_subplot(111)
         
+        
         #Get graph data from DB
         starttime = time()
         (green, blue, red, orange) = self.getRingProfitGraph(playerids, sitenos, limits, games, currencies, display_in)
         print(("Graph generated in: %s") %(time() - starttime))
 
         #Set axis labels and grid overlay properites
+        
         self.ax.set_xlabel(("Hands"),color='#9DA9B5')
         self.ax.set_facecolor('#19232D')
         self.ax.tick_params(axis='x', colors='#9DA9B5') 
@@ -185,6 +187,13 @@ class GuiGraphViewer(QSplitter):
         self.ax.spines['right'].set_color('#9DA9B5')
         self.ax.spines['top'].set_color('#9DA9B5')
         self.ax.spines['bottom'].set_color('#9DA9B5')
+        self.ax.spines.left.set_position(('data',0))
+        self.ax.spines.top.set_color('none')
+        self.ax.spines.right.set_color('none')
+        self.ax.spines.bottom.set_position(('data',0))
+        self.ax.xaxis.set_ticks_position('bottom')
+        self.ax.yaxis.set_ticks_position('left')
+       
         
         # SET LABEL FOR X AXIS
         self.ax.set_ylabel(display_in, color='#9DA9B5')
@@ -213,7 +222,10 @@ class GuiGraphViewer(QSplitter):
                         0.,   500.,  1000.,   900.,   800.,   700.,   600.,   500.,
                         400.,   300.,   200.,   100.,     0.,   500.,  1000.,  1000.])
 
-            self.ax.plot(green, color='green', label=('Hands') + ': %d\n' % len(green) + ('Profit') + ': %.2f' % green[-1])
+        #Plot the graph
+            
+            
+            self.ax.plot(green, color='green', linewidth = 0.5, label=('Hands') + ': %d\n' % len(green) + ('Profit') + ': %.2f' % green[-1])
             self.ax.plot(blue, color='blue', label=('Showdown') + ': $%.2f' %(blue[-1]))
             self.ax.plot(red, color='red', label=('Non-showdown') + ': $%.2f' %(red[-1]))
             self.graphBox.addWidget(self.canvas)
@@ -223,7 +235,9 @@ class GuiGraphViewer(QSplitter):
 
             #Draw plot
             if 'showdown' in graphops:
-                self.ax.plot(blue, color='blue', label=('Showdown') + ' (%s): %.2f' %(display_in, blue[-1]))
+                self.ax.plot(blue, color='blue' , label=('Showdown') + ' (%s): %.2f' %(display_in, blue[-1]))
+                
+                
             if 'nonshowdown' in graphops:
                 self.ax.plot(red, color='red', label=('Non-showdown') + ' (%s): %.2f' %(display_in, red[-1]))
             if 'ev'in graphops:
