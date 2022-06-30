@@ -64,13 +64,14 @@ class GuiTourneyGraphViewer(QSplitter):
 
 
         filters_display = { "Heroes"    : True,
-                            "Sites"     : False,
+                            "Sites"     : True,
                             "Games"     : True,
                             "Currencies": True,
-                            "Limits"    : True,
+                            "buyIn"     : True,
+                            "Limits"    : False,
                             "LimitSep"  : False,
                             "LimitType" : False,
-                            "Type"      : False,
+                            "Type"      : True,
                             "UseType"   : 'tour',
                             "Seats"     : False,
                             "SeatSep"   : False,
@@ -111,9 +112,9 @@ class GuiTourneyGraphViewer(QSplitter):
         except:
             pass
 
-        if self.fig is not None:
+        if self.fig != None:
             self.fig.clear()
-        self.fig = Figure(figsize=(5,4), dpi=100)
+        self.fig = Figure(figsize=(5.0,4.0), dpi=100)
         self.fig.patch.set_facecolor('#19232D')
         if self.canvas is not None:
             self.canvas.destroy()
@@ -130,9 +131,9 @@ class GuiTourneyGraphViewer(QSplitter):
         sites   = self.filters.getSites()
         heroes  = self.filters.getHeroes()
         siteids = self.filters.getSiteIds()
- 
+        
         games   = self.filters.getGames()
-
+        currencies = { '€':'EUR', '$':'USD', '':'T$'}
         names   = ""
 
         # Which sites are selected?
@@ -210,7 +211,7 @@ class GuiTourneyGraphViewer(QSplitter):
         tmp = self.sql.query['tourneyGraph']
         start_date, end_date = self.filters.getDates()
 
-        currencies = self.filters.getCurrencies()
+        currencies = { 'EUR':'EUR', 'USD':'USD', '':'T$'}
         currencytest = str(tuple(currencies))
         currencytest = currencytest.replace(",)",")")
         currencytest = currencytest.replace("u'","'")
@@ -230,7 +231,7 @@ class GuiTourneyGraphViewer(QSplitter):
         tmp = tmp.replace("<currency_test>", currencytest)
         tmp = tmp.replace(",)", ")")
 
-        #print "DEBUG: sql query:", tmp
+        print( "DEBUG: sql query:", tmp)
 
         self.db.cursor.execute(tmp)
         #returns (HandId,Winnings,Costs,Profit)
