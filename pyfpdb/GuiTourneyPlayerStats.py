@@ -79,7 +79,7 @@ class GuiTourneyPlayerStats(QSplitter):
         # columns to display, keys match column name returned by sql, values in tuple are:
         #     is column displayed, column heading, xalignment, formatting, celltype
         self.columns = [ ["siteName",       True,  ("Site"),    0.0, "%s", "str"]
-                       #,["tourney",        False, ("Tourney"), 0.0, "%s", "str"]   # true not allowed for this line
+                       ,["tourney",         False, ("Tourney"), 0.0, "%s", "str"]   # true not allowed for this line
                        , ["category",       True,  ("Cat."),    0.0, "%s", "str"]
                        , ["limitType",      True,  ("Limit"),   0.0, "%s", "str"]
                        , ["currency",       True,  ("Curr."),   0.0, "%s", "str"]
