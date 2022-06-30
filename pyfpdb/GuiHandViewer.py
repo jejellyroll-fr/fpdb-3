@@ -109,7 +109,8 @@ class GuiHandViewer(QSplitter):
                   'Game'         : 9,
                   'HandId'       : 10,
                   'Total Pot'    : 11,
-                  'Rake'         : 12
+                  'Rake'         : 12,
+                  'SiteHandNo'   : 13
                  }
         self.view = QTableView()
         self.view.setSelectionBehavior(QTableView.SelectRows)
@@ -123,7 +124,7 @@ class GuiHandViewer(QSplitter):
         self.view.verticalHeader().hide()
         self.model.setHorizontalHeaderLabels(
             ['Stakes', 'Position', 'Hands', 'Preflop Action', 'Board', 'Postflop Action',
-             'Won', 'Bet', 'Net', 'Game', 'HandId', 'Total Pot', 'Rake'])
+             'Won', 'Bet', 'Net', 'Game', 'HandId', 'Total Pot', 'Rake', 'SiteHandId'])
 
         self.view.doubleClicked.connect(self.row_activated)
         self.view.contextMenuEvent = self.contextMenu
@@ -213,6 +214,7 @@ class GuiHandViewer(QSplitter):
         row = []
         totalpot = hand.totalpot
         rake = hand.rake
+        sitehandid = hand.handid
         if hand.gametype['base'] == 'hold':
             board =  []
             board.extend(hand.board['FLOP'])
@@ -225,7 +227,7 @@ class GuiHandViewer(QSplitter):
                 post_actions = hand.get_actions_short_streets(hero, 'FLOP', 'TURN', 'RIVER')
 
             row = [hand.getStakesAsString(), pos, hand.join_holecards(hero), pre_actions, ' '.join(board), post_actions, str(won), str(bet), 
-                   str(net), gt, str(handid), str(totalpot), str(rake)]
+                   str(net), gt, str(handid), str(totalpot), str(rake), str(sitehandid)]
         elif hand.gametype['base'] == 'stud':
             third = " ".join(hand.holecards['THIRD'][hero][0]) + " " + " ".join(hand.holecards['THIRD'][hero][1]) 
             # ugh - fix the stud join_holecards function so we can retrieve sanely
