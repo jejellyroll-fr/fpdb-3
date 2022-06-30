@@ -3,7 +3,7 @@
 starting new project base on fpdb python3 adaptation of MegaphoneJon and update from ChazDazzle 
 (tx to all previous contribs)
 
-## Updating to python 3.9
+## Updating to python 3.10
 
 FPDB is a poker tools - HUD - Replayer
 
@@ -14,7 +14,7 @@ FPDB is a poker tools - HUD - Replayer
 ## To do
 
 >database
-- not working mysql connector on py3.9 -> import MySQLdb
+- not working mysql connector on py3.10 -> import MySQLdb
 >translation
 - mot working translation -> from icu import Locale
 >pokerstove
@@ -24,11 +24,12 @@ FPDB is a poker tools - HUD - Replayer
 - rethink the distribution of players around the table
 >import
 - correct bug on winamax (no SB)->Fixed
-- correct bug go fast (adding holdhup(extra cash->special rakr 10%), error collected pot>total pot)->fixed
+- correct bug go fast (adding holdhup(extra cash->special rake 10%), error collected pot>total pot)->fixed
 - correct bug starting  hand razz guiringcashplayer
 >hud
-- windows and mac not appear
-- linuc disappear behind the table
+- windows not working (error)
+- mac disappear behind the table
+- linux disappear behind the table
 >ui
 - dark theme
 - more modern
@@ -46,7 +47,7 @@ pip install -r requirements.txt
 ## Installation
 
 Install the dependencies and devDependencies .
- Use anaconda Python 3.9
+ Use anaconda Python 3.10
 ```sh
 conda activate
 ```
@@ -54,8 +55,7 @@ conda activate
 
 ## Plugins
 
-|  |  |
-|  | |
+
 
 ## Development
 
@@ -63,15 +63,6 @@ conda activate
 #### Building for source
 
 
-## Docker
-
-> Note: `--capt-add=SYS-ADMIN` is required for PDF rendering.
-
-Verify the deployment by navigating to your server address in
-your preferred browser.
-
-```sh
-127.0.0.1:8000
 ```
 
 ## License
