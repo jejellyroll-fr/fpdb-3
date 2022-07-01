@@ -146,6 +146,7 @@ class GuiSessionViewer(QSplitter):
         self.main_vbox = QSplitter(Qt.Vertical)
 
         self.graphBox = QFrame()
+        self.graphBox.setStyleSheet('background-color: #19232D')
         self.graphBox.setLayout(QVBoxLayout())
 
         self.addWidget(scroll)
@@ -402,6 +403,7 @@ class GuiSessionViewer(QSplitter):
             if self.fig is not None:
                 self.fig.clear()
             self.fig = Figure(figsize=(5,4), dpi=100)
+            self.fig.patch.set_facecolor('#19232D')
             if self.canvas is not None:
                 self.canvas.destroy()
 
@@ -415,14 +417,55 @@ class GuiSessionViewer(QSplitter):
 
     def generateGraph(self, quotes):
         self.clearGraphData()
+        sitenos = []
+        playerids = []
+
+        sites   = self.filters.getSites()
+        heroes  = self.filters.getHeroes()
+        siteids = self.filters.getSiteIds()
+        limits  = self.filters.getLimits()
+
+        graphops = self.filters.getGraphOps()
+
+        names   = ""
+
+        # Which sites are selected?
+        for site in sites:
+            sitenos.append(siteids[site])
+            _hname = Charset.to_utf8(heroes[site])
+            result = self.db.get_player_id(self.conf, site, _hname)
+            if result is not None:
+                playerids.append(int(result))
+                names = names + "\n"+_hname + " on "+site
+
+        if not sitenos:
+            #Should probably pop up here.
+            print(("No sites selected - defaulting to PokerStars"))
+            self.db.rollback()
+            return
+
+        if not playerids:
+            print(("No player ids found"))
+            self.db.rollback()
+            return
+
+        if not limits:
+            print(("No limits found"))
+            self.db.rollback()
+            return
 
         self.ax = self.fig.add_subplot(111)
-
-        self.ax.set_title(("Session candlestick graph"))
-
+        self.ax.tick_params(axis='x', colors='#9DA9B5') 
+        self.ax.tick_params(axis='y', colors='#9DA9B5') 
+        self.ax.spines['left'].set_color('#9DA9B5') 
+        self.ax.spines['right'].set_color('#9DA9B5')
+        self.ax.spines['top'].set_color('#9DA9B5')
+        self.ax.spines['bottom'].set_color('#9DA9B5')
+        self.ax.set_title((("Session graph for ring games")+names), color='#9DA9B5')
+        self.ax.set_facecolor('#19232D')
         #Set axis labels and grid overlay properites
         self.ax.set_xlabel(("Sessions"), fontsize = 12)
-        self.ax.set_ylabel("$", fontsize = 12)
+        self.ax.set_ylabel("$", color='#9DA9B5')
         self.ax.grid(color='g', linestyle=':', linewidth=0.2)
 
         candlestick_ochl(self.ax, quotes, width=0.50, colordown='r', colorup='g', alpha=1.00)
