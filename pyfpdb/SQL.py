@@ -6131,6 +6131,16 @@ class Sql(object):
                 <position_test>"""
 
         ####################################
+        # Querry to get all hands in a date range for cash games session
+        ####################################
+        self.query['handsInRangeSession'] = """
+            select h.id
+                from Hands h
+                
+            where h.startTime <datetest>
+               """
+
+        ####################################
         # Query to get a single hand for the replayer
         ####################################
         self.query['singleHand'] = """

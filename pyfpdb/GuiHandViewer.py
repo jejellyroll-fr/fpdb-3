@@ -154,10 +154,11 @@ class GuiHandViewer(QSplitter):
         self.reload_hands(hand_ids)
 
     def get_hand_ids_from_date_range(self, start, end):
-        q = self.db.sql.query['handsInRange']
+        q = self.db.sql.query['handsInRangeSession']
         q = q.replace('<datetest>', "between '" + start + "' and '" + end + "'")
-        q = self.filters.replace_placeholders_with_filter_values(q)
 
+        q = self.filters.replace_placeholders_with_filter_values(q)
+        print(q)
         c = self.db.get_cursor()
 
         c.execute(q)

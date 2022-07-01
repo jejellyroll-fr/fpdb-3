@@ -466,6 +466,7 @@ class GuiSessionViewer(QSplitter):
             # Optionally the end date in the call below, which is a Long gets a '+1'.
             reformat = lambda t: strftime("%Y-%m-%d %H:%M:%S+00:00", gmtime(t))
             handids = replayer.get_hand_ids_from_date_range(reformat(self.times[index.row()][0]), reformat(self.times[index.row()][1]))
+            print('handids:', handids)
             replayer.reload_hands(handids)
 
 if __name__ == '__main__':
