@@ -98,17 +98,24 @@ class Table_Window(object):
         self.number = None
         if tournament is not None and table_number is not None:
             self.tournament = int(tournament)
+            print('table_number tournement:')
+            print(type(table_number))
             self.table = int(table_number)
             self.name = "%s - %s" % (self.tournament, self.table)
             self.type = "tour"
             table_kwargs = dict(tournament = self.tournament, table_number = self.table)
             self.tableno_re = getTableNoRe(self.config, self.site, tournament = self.tournament)
         elif table_name is not None:
+            print('table_number cash:')
+            print(type(table_name))
+            print((table_name))
             self.name = table_name
             self.type = "cash"
             self.tournament = None
             table_kwargs = dict(table_name = table_name)
-
+            print('table_kwarg cash:')
+            print(type(table_kwargs))
+            print((table_kwargs))
         else:
             return None
 
