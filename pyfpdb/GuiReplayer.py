@@ -41,7 +41,7 @@ import Deck
 
 from PyQt5.QtCore import (QPoint, QRect, Qt, QTimer)
 from PyQt5.QtGui import (QColor, QImage, QPainter)
-from PyQt5.QtWidgets import (QHBoxLayout, QPushButton, QSlider, QVBoxLayout,
+from PyQt5.QtWidgets import (QHBoxLayout, QPushButton, QSlider, QVBoxLayout,QCheckBox,
                              QWidget)
 
 from math import pi, cos, sin
@@ -75,8 +75,10 @@ class GuiReplayer(QWidget):
         self.setLayout(self.replayBox)
 
         self.replayBox.addStretch()
-
+        self.buttonBox2 = QHBoxLayout()
         self.buttonBox = QHBoxLayout()
+        self.showCards = QCheckBox("Hide Cards")
+        self.buttonBox2.addWidget(self.showCards)
         self.prevButton = QPushButton("Prev")
         self.prevButton.clicked.connect(self.prev_clicked)
         self.prevButton.setFocusPolicy(Qt.NoFocus)
@@ -94,7 +96,9 @@ class GuiReplayer(QWidget):
         self.nextButton.setFocusPolicy(Qt.NoFocus)
 
         self.replayBox.addLayout(self.buttonBox)
-
+        self.replayBox.addLayout(self.buttonBox2)
+        
+        
         self.stateSlider = QSlider(Qt.Horizontal)
         self.stateSlider.valueChanged.connect(self.slider_changed)
         self.stateSlider.setFocusPolicy(Qt.NoFocus)
