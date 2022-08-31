@@ -97,10 +97,20 @@ class Table_Window(object):
         self.gdkhandle = None
         self.number = None
         if tournament is not None and table_number is not None:
+            print(tournament)
             self.tournament = int(tournament)
-            print('table_number tournement:')
+            print(' tournement:')
+            print(self.tournament)
+            print('table_number:')
             print(type(table_number))
+            print(table_number)
+            #temp bug correction for stars must investigate 
+            table_number = table_number.rsplit(' ',1)[-1]
+            print('table_number:')
+            print(type(table_number))
+            print(table_number)
             self.table = int(table_number)
+            print(self.table)
             self.name = "%s - %s" % (self.tournament, self.table)
             self.type = "tour"
             table_kwargs = dict(tournament = self.tournament, table_number = self.table)

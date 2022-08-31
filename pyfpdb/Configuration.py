@@ -51,6 +51,7 @@ if platform.system() == 'Windows':
     #winpaths_appdata = winpaths.get_appdata()
     import os
     winpaths_appdata = os.getenv('APPDATA')
+    print ('winpaths_appdata:') #debug
     print (winpaths_appdata) #debug
 else:
     winpaths_appdata = False
