@@ -48,5 +48,5 @@ class OddsCalc:
         print (type(result))
         return result
 
-# odd1 = OddsCalc('oh','As8s4d9d','AK','89','')        
-# odd1.calcBaseHoldem()
+#odd1 = OddsCalc('oh','As8s4d9d','AK','89','','','','','')        
+#odd1.calcBaseHoldem()
