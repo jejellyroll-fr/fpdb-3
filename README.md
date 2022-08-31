@@ -18,7 +18,7 @@ FPDB is a poker tools - HUD - Replayer
 >translation
 - mot working translation -> from icu import Locale
 >pokerstove
-- add odds calc (fast solution-> use Pokerprotools online WIP) 
+- add odds calc (fast solution-> use Pokerprotools online WIP) -> prokerprotool is down (other option install on pc WIP)
 >replayer
 - not working ->fixed
 - rethink the distribution of players around the table
@@ -27,9 +27,9 @@ FPDB is a poker tools - HUD - Replayer
 - correct bug go fast (adding holdhup(extra cash->special rake 10%), error collected pot>total pot)->fixed
 - correct bug starting  hand razz guiringcashplayer
 >hud
-- windows not working (error)
-- mac disappear behind the table
-- linux disappear behind the table
+- windows not working (error) (windows 11)
+- mac disappear behind the table (Big sur)
+- linux disappear behind the table (ubuntu) -> no french rooms working anymore with wine
 >ui
 - dark theme
 - more modern
@@ -53,17 +53,11 @@ conda activate
 ```
 
 
-## Plugins
+## Images
+![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/tribal.jpg)
 
 
 
-## Development
-
-
-#### Building for source
-
-
-```
 
 ## License
 
