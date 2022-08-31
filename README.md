@@ -54,10 +54,14 @@ conda activate
 
 
 ## Images
-![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/tribal.jpg)
-
-
-
+![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpdb3_home.png)
+![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpdb3_grahspin.png)
+![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpdb3_graphcg.png)
+![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpdb3_handreplayer.png)
+![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpdb3_session_stats.png)
+![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpdb3_session_stats.png)
+![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpd3_handviever.png)
+![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpdb3_oddcalc.png)
 
 ## License
 
