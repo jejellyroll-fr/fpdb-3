@@ -1,0 +1,14 @@
+2022-08-31 17:52:10,813 - ppt.OddsOracle.pql - DEBUG - Executed PQL: 
+
+            select count(inRange(PLAYER_1,'AA')),
+              count(inRange(PLAYER_1,'AK,KK'))
+            from game='omahahi', syntax='Generic',
+                 board='Ad Ks 3s',
+                 PLAYER_1='10%',
+                 PLAYER_2='Qs Ts Jd 2d'
+ 
+Got result: 
+COUNT 1 = 23.8710% (23871)
+COUNT 2 = 38.2570% (38257)
+100000 trials
+
