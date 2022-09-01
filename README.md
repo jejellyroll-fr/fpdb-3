@@ -26,16 +26,21 @@ FPDB is a poker tools - HUD - Replayer
 - correct bug on winamax (no SB)->Fixed
 - correct bug go fast (adding holdhup(extra cash->special rake 10%), error collected pot>total pot)->fixed
 - correct bug starting  hand razz guiringcashplayer
+- PMU not working siteid error
 >hud
-- windows not working (error) (windows 11)
-- mac disappear behind the table (Big sur)
+- windows not working (error) -> partial fixed -> deck not working (windows 11)
+- mac disappear behind the table -> fixed(Big sur)
 - linux disappear behind the table (ubuntu) -> no french rooms working anymore with wine
 >ui
 - dark theme
 - more modern
 >language
 - not working
-
+>site hud
+- pokerstars working
+- new winamax not working
+- betclic.fr working
+- PMU not working
 
 ## Requirement for dev 
 
