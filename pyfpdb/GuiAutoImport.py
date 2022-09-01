@@ -179,25 +179,31 @@ class GuiAutoImport(QWidget):
                 self.doAutoImportBool = True
                 self.intervalEntry.setEnabled(False)
                 if self.pipe_to_hud is None:
+                    print('start hud- pipe_to_hud is none:')
                     if self.config.install_method == "exe":    # if py2exe, run hud_main.exe
+                        print('start hud- true1:')
                         path = self.config.pyfpdb_path
+                        print('start hud path:')
+                        print(path)
                         command = "HUD_main.exe"
                         bs = 0
                     elif self.config.install_method == "app":
+                        print('start hud- true1:')
                         command = os.path.join(sys.path[0], "HUD_main")
                         bs = 1
                     elif os.name == 'nt':
+                        print('start hud- true1:')
                         path = to_raw(sys.path[0])
                         
-                        print("path", path)
+                        print("start hud- path", path)
                         path2 = os.getcwd()
-                        print("path2", path2)
+                        print("start hud- path2", path2)
                         if win32console.GetConsoleWindow() == 0:
                             command = 'pythonw "'+path+'\HUD_main.pyw" ' + self.settings['cl_options']
-                            print("comand1", command)
+                            print("start hud-comand1", command)
                         else:
                             command = 'python "'+path+'\HUD_main.pyw" ' + self.settings['cl_options']
-                            print("comand2", command)
+                            print("start hud-comand2", command)
                         bs = 0
                     else:
                         command = os.path.join(sys.path[0], 'HUD_main.pyw')
@@ -209,6 +215,8 @@ class GuiAutoImport(QWidget):
                         print(("opening pipe to HUD"))
                     try:
                         if self.config.install_method == "exe" or (os.name == "nt" and win32console.GetConsoleWindow() == 0):
+                            print('start hud methode install exe:')
+                            print(command)
                             self.pipe_to_hud = subprocess.Popen(command, bufsize=bs,
                                                                 stdin=subprocess.PIPE,
                                                                 stdout=subprocess.PIPE,  # needed for pythonw / py2exe
@@ -217,6 +225,9 @@ class GuiAutoImport(QWidget):
                                                                )
                         else:
                             self.pipe_to_hud = subprocess.Popen(command, bufsize=bs, stdin=subprocess.PIPE, universal_newlines=True)
+                            print('start hud methode install other:')
+                            print(command)
+                            
                     except:
                         self.addText("\n" + ("*** GuiAutoImport Error opening pipe:") + " " + traceback.format_exc() )
                     else:
@@ -241,7 +252,7 @@ class GuiAutoImport(QWidget):
                 self.addText("\n * " + ("Stop Auto Import") + ": " + ("HUD already terminated."))
             else:
                 self.pipe_to_hud.terminate()
-                #print >>self.pipe_to_hud.stdin, "\n"
+                print (self.pipe_to_hud.stdin, "\n")
                 # self.pipe_to_hud.communicate('\n') # waits for process to terminate
             self.pipe_to_hud = None
             self.intervalEntry.setEnabled(True)
