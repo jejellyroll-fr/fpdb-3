@@ -101,7 +101,7 @@ class Aux_Window(object):
         
 class Seat_Window(QWidget):
     def __init__(self, aw = None, seat = None):
-        super(Seat_Window, self).__init__(None, Qt.Window | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus) # FIXME acceptfocus?  splashscreen?
+        super(Seat_Window, self).__init__(None, Qt.Window | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus  | Qt.WindowStaysOnTopHint) # FIXME acceptfocus?  splashscreen?
         self.lastPos = None
         self.aw = aw
         self.seat = seat

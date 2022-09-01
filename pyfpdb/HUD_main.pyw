@@ -36,6 +36,7 @@ import os
 import _thread
 import time
 import logging
+import win32gui
 
 from PyQt5.QtCore import (QCoreApplication, QMetaObject, QObject, Qt,
                           QThread, pyqtSignal)
@@ -117,7 +118,7 @@ class HUD_main(QObject):
         self.stdinThread.start()
 
         # a main window
-        self.main_window = QWidget(None, Qt.Dialog)
+        self.main_window = QWidget(None, Qt.Dialog  | Qt.WindowStaysOnTopHint)
 
         if options.xloc is not None or options.yloc is not None:
             if options.xloc is None:
@@ -136,9 +137,10 @@ class HUD_main(QObject):
         cards = os.path.join(self.config.graphics_path,'fpdb-cards.png')
         if os.path.exists(cards):
             self.main_window.setWindowIcon(QIcon(cards))
-
+        
         self.startTimer(800)
         self.main_window.show()
+        
 
     def timerEvent(self, event):
         self.check_tables()
@@ -205,7 +207,7 @@ class HUD_main(QObject):
         self.hud_dict[temp_key].hud_params['new_max_seats'] = None #trigger for seat layout change
         #fixme - passing self.db_connection into another thread
         # is probably pointless.
-        print('new_hand_id in create hud', new_hand_id)
+        print('new_hand_id in create hud1', new_hand_id)
 
         [aw.update_data(new_hand_id, self.db_connection) for aw in self.hud_dict[temp_key].aux_windows]
         idle_create(self, new_hand_id, table, temp_key, max, poker_game, type, stat_dict, cards)
@@ -216,28 +218,31 @@ class HUD_main(QObject):
         idle_update(self, new_hand_id, table_name, config)
 
     def read_stdin(self, new_hand_id):
-        print('new_hand_id in read_stdin', new_hand_id)
+        print('new_hand_id in read_stdin2', new_hand_id)
 #       get hero's screen names and player ids
         self.hero, self.hero_ids = {}, {}
         found = False
         
         enabled_sites = self.config.get_supported_sites()
         if not enabled_sites:
+            print('new_hand_id in read_stdin2 not enabled site')
             log.exception(("No enabled sites found"))
             self.db_connection.connection.rollback()
             self.destroy()
             return
         
         aux_disabled_sites = []
+        print('new_hand_id in read_stdin2 enabled site')
         for i in enabled_sites:
             if not c.get_site_parameters(i)['aux_enabled']:
+                print('new_hand_id in read_stdin2 test4')
                 log.info(("Aux disabled for site %s") % i)
                 aux_disabled_sites.append(i)
 
         self.db_connection.connection.rollback() # release lock from previous iteration
         if new_hand_id == "":           # blank line means quit
             self.db_connection.connection.rollback()
-            sys.exit()
+            #sys.exit()
 
 #    The following block cannot be hoisted outside the while loop, because it would
 #    cause a problem when auto importing into an empty db.
@@ -340,6 +345,7 @@ class HUD_main(QObject):
 
 #        Update an existing HUD
         if temp_key in self.hud_dict:
+            print('update hud')
             # get stats using hud's specific params and get cards
             self.db_connection.init_hud_stat_vars( self.hud_dict[temp_key].hud_params['hud_days']
                                                  , self.hud_dict[temp_key].hud_params['h_hud_days'])
@@ -363,7 +369,7 @@ class HUD_main(QObject):
 #        Or create a new HUD
         else:
             # get stats using default params--also get cards
-
+            print('create new hud')
             self.db_connection.init_hud_stat_vars( self.hud_params['hud_days'], self.hud_params['h_hud_days'] )
             stat_dict = self.db_connection.get_stats_from_hand(new_hand_id, type, self.hud_params,
                                                                self.hero_ids[site_id], num_seats)
@@ -385,6 +391,7 @@ class HUD_main(QObject):
             table_kwargs = dict(table_name=table_name, tournament=tour_number, table_number=tab_number)
             tablewindow = Tables.Table(self.config, site_name, **table_kwargs)
             if tablewindow.number is None:
+                print('tablewindow.number is none')
 #        If no client window is found on the screen, complain and continue
                 if type == "tour":
                     table_name = "%s %s" % (tour_number, tab_number)
@@ -393,11 +400,13 @@ class HUD_main(QObject):
             elif tablewindow.number in self.blacklist:
                 return    #no hud please, we are blacklisted
             else:
+                print('tablewindow.number is not none')
                 tablewindow.key = temp_key
                 tablewindow.max = max
                 tablewindow.site = site_name
                 # Test that the table window still exists
                 if hasattr(tablewindow, 'number'):
+                    print('table window still exists')
                     self.create_HUD(new_hand_id, tablewindow, temp_key, max, poker_game, type, stat_dict, cards)
                 else:
                     log.error(('Table "%s" no longer exists') % table_name)
@@ -457,6 +466,8 @@ def idle_create(hud_main, new_hand_id, table, temp_key, max, poker_game, type, s
         hud_main.hud_dict[temp_key].create(new_hand_id, hud_main.config, stat_dict)
         for m in hud_main.hud_dict[temp_key].aux_windows:
             m.create() # create method of aux_window class (generally Mucked.aux_seats.create)
+            print('idle_create new_hand_id')
+            print(new_hand_id)
             m.update_gui(new_hand_id)
 
 
