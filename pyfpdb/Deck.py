@@ -25,7 +25,9 @@ class Deck(object):
         self.__width = width
         self.__height = height
         self.__cardspath = os.path.join(config.graphics_path, u"cards", deck_type)
+        self.__cardspath = self.__cardspath.replace('\\', '/')
         self.__backfile = os.path.join(config.graphics_path, u"cards", u"backs", (card_back + u".svg"))
+        self.__backfile = self.__backfile.replace('\\', '/')
         self.__cards = dict({ 's': None, 'h': None, 'd': None, 'c': None })
         self.__card_back = None
         self.__rank_vals = dict()
@@ -55,19 +57,19 @@ class Deck(object):
     def __load_suit(self, suit_key):
         sd = dict()
         _p = self.__cardspath
-        sd[2]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '2' + '.svg')))
-        sd[3]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '3' + '.svg')))
-        sd[4]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '4' + '.svg')))
-        sd[5]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '5' + '.svg')))
-        sd[6]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '6' + '.svg')))
-        sd[7]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '7' + '.svg')))
-        sd[8]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '8' + '.svg')))
-        sd[9]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '9' + '.svg')))
-        sd[10]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '10' + '.svg')))
-        sd[11]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + 'j' + '.svg')))
-        sd[12]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + 'q' + '.svg')))
-        sd[13]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + 'k' + '.svg')))
-        sd[14]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + 'a' + '.svg')))
+        sd[2]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '2' + '.svg')).replace('\\', '/'))
+        sd[3]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '3' + '.svg')).replace('\\', '/'))
+        sd[4]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '4' + '.svg')).replace('\\', '/'))
+        sd[5]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '5' + '.svg')).replace('\\', '/'))
+        sd[6]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '6' + '.svg')).replace('\\', '/'))
+        sd[7]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '7' + '.svg')).replace('\\', '/'))
+        sd[8]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '8' + '.svg')).replace('\\', '/'))
+        sd[9]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '9' + '.svg')).replace('\\', '/'))
+        sd[10]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + '10' + '.svg')).replace('\\', '/'))
+        sd[11]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + 'j' + '.svg')).replace('\\', '/'))
+        sd[12]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + 'q' + '.svg')).replace('\\', '/'))
+        sd[13]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + 'k' + '.svg')).replace('\\', '/'))
+        sd[14]   = self.__load_svg(os.path.join(_p, (suit_key + '_' + 'a' + '.svg')).replace('\\', '/'))
         self.__cards[suit_key] = sd
         
 
