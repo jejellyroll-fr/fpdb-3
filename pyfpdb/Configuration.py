@@ -51,6 +51,8 @@ if platform.system() == 'Windows':
     #winpaths_appdata = winpaths.get_appdata()
     import os
     winpaths_appdata = os.getenv('APPDATA')
+    #winpaths_appdata = os.getcwd()
+    winpaths_appdata = winpaths_appdata.replace("\\", "/")
     print ('winpaths_appdata:') #debug
     print (winpaths_appdata) #debug
 else:
@@ -88,13 +90,20 @@ if hasattr(sys, "frozen"):
 else:
     INSTALL_METHOD = "source"
 
-if INSTALL_METHOD == "exe" or INSTALL_METHOD == "app":
-    FPDB_ROOT_PATH = os.path.dirname(sys.executable) # should be exe path to \fpdbroot\pyfpdb
+if INSTALL_METHOD == "exe" :
+    FPDB_ROOT_PATH = os.path.dirname(sys.executable)
+    
+    FPDB_ROOT_PATH = FPDB_ROOT_PATH.replace("\\", "/")
+     # should be exe path to \fpdbroot\pyfpdb
+elif INSTALL_METHOD == "app":
+    FPDB_ROOT_PATH = os.path.dirname(sys.executable)
 elif sys.path[0] == "": # we are probably running directly (>>>import Configuration)
     temp = os.getcwd() # should be ./pyfpdb
+    print(temp)
     FPDB_ROOT_PATH = os.path.join(temp, os.pardir)   # go up one level (to fpdbroot)
 else: # all other cases
-    FPDB_ROOT_PATH = os.path.dirname(sys.path[0])  # should be source path to /fpdbroot
+    #FPDB_ROOT_PATH = os.path.dirname(sys.path[0])  # should be source path to /fpdbroot
+    FPDB_ROOT_PATH = os.getcwd()
 
 sysPlatform = platform.system()  #Linux, Windows, Darwin
 if sysPlatform[0:5] == 'Linux':
@@ -109,18 +118,29 @@ elif sysPlatform == 'Windows':
 else:
     OS_FAMILY = False
 
-GRAPHICS_PATH = os.path.join(FPDB_ROOT_PATH, "gfx")
-PYFPDB_PATH = os.path.join(FPDB_ROOT_PATH, "pyfpdb")
+#GRAPHICS_PATH = os.path.join(FPDB_ROOT_PATH, "gfx")
+#PYFPDB_PATH = os.path.join(FPDB_ROOT_PATH, "pyfpdb")
 
 if OS_FAMILY in ['XP', 'Win7']:
     APPDATA_PATH = winpaths_appdata
     CONFIG_PATH = os.path.join(APPDATA_PATH, "fpdb")
+    CONFIG_PATH = CONFIG_PATH.replace("\\", "/")
+    FPDB_ROOT_PATH = os.path.dirname(sys.executable)
+    FPDB_ROOT_PATH = FPDB_ROOT_PATH.replace("\\", "/")
+    GRAPHICS_PATH = os.path.join(FPDB_ROOT_PATH, "gfx")
+    GRAPHICS_PATH = GRAPHICS_PATH.replace("\\", "/")
+    PYFPDB_PATH = os.path.join(FPDB_ROOT_PATH, "pyfpdb")
+    PYFPDB_PATH = PYFPDB_PATH.replace("\\", "/")
 elif OS_FAMILY == 'Mac':
     APPDATA_PATH = os.getenv("HOME")
     CONFIG_PATH = os.path.join(APPDATA_PATH, ".fpdb")
+    GRAPHICS_PATH = os.path.join(FPDB_ROOT_PATH, "gfx")
+    PYFPDB_PATH = os.path.join(FPDB_ROOT_PATH, "pyfpdb")
 elif OS_FAMILY == 'Linux':
     APPDATA_PATH = os.path.expanduser(u"~")
     CONFIG_PATH = os.path.join(APPDATA_PATH, ".fpdb")
+    GRAPHICS_PATH = os.path.join(FPDB_ROOT_PATH, "gfx")
+    PYFPDB_PATH = os.path.join(FPDB_ROOT_PATH, "pyfpdb")
 else:
     APPDATA_PATH = False
     CONFIG_PATH = False
@@ -154,9 +174,20 @@ def get_config(file_name, fallback = True):
     # look for example file even if not used here, path is returned to caller
     config_found,example_found,example_copy = False,False,False
     config_path, example_path = None,None
-
-    config_path = to_raw(os.path.join(CONFIG_PATH, file_name))
-    
+    if sysPlatform == 'Windows':
+        print('windows TRUE1')
+        if platform.release() != 'XP':
+           OS_FAMILY = 'Win7' #Vista and win7
+           print('windows TRUE2')
+    else:
+        OS_FAMILY = 'XP'
+        print('windows TRUE3')
+    if OS_FAMILY == 'XP' or 'Win7':
+       print('windows TRUE4')
+       config_path = os.path.join(CONFIG_PATH, file_name)
+       config_path = config_path.replace("\\", "/")
+    else:
+       config_path = os.path.join(CONFIG_PATH, file_name)
     print ("config_path raw=", config_path)
     if os.path.exists(config_path):    # there is a file in the cwd
         print(os.path.exists(config_path))
@@ -165,7 +196,8 @@ def get_config(file_name, fallback = True):
         fallback = False
         print(fallback)          # so we use it
     else: # no file in the cwd, look where it should be in the first place
-        config_path = to_raw(os.path.join(CONFIG_PATH, file_name))
+        config_path = os.path.join(CONFIG_PATH, file_name)
+        config_path = config_path.replace("\\", "/")
         print ("config path 2=", config_path)
         if os.path.exists(config_path):
             config_found = True
@@ -201,10 +233,11 @@ def get_config(file_name, fallback = True):
                     pass
 
 #    OK, fall back to the .example file, should be in the start dir
-    elif os.path.exists(os.path.join(CONFIG_PATH, file_name + '.example')):
+
+    elif os.path.exists(os.path.join(CONFIG_PATH, file_name + '.example').replace("\\", "/")):
         try:
-            #print ""
-            example_path = to_raw(os.path.join(CONFIG_PATH, file_name + '.example'))
+            print("exemple path ok") 
+            example_path = os.path.join(CONFIG_PATH, file_name + '.example').replace("\\", "/")
             print ('exemple_path:', example_path)
             if not config_found and fallback:
                 shutil.copyfile(example_path, config_path)
@@ -228,13 +261,13 @@ def get_config(file_name, fallback = True):
 def set_logfile(file_name):
     (conf_file,copied,example_file) = get_config("logging.conf", fallback = False)
 
-    log_dir = os.path.join(CONFIG_PATH, 'log')
+    log_dir = os.path.join(CONFIG_PATH, 'log').replace('\\', '/')
     check_dir(log_dir)
-    log_file = os.path.join(log_dir, file_name)
+    log_file = os.path.join(log_dir, file_name).replace('\\', '/')
 
     if conf_file:
         try:
-            log_file = log_file.replace('\\', '\\\\')  # replace each \ with \\
+            log_file = log_file.replace('\\', '/')  # replace each \ with \\
             logging.config.fileConfig(conf_file, {"logFile":log_file})
         except:
             sys.stderr.write(("Could not setup log file %s") % file_name)
@@ -247,6 +280,7 @@ def check_dir(path, create = True):
         else:
             return False
     if create:
+        path = path.replace('\\', '/')
         msg = ("Creating directory: '%s'") % (path)
         print(msg)
         log.info(msg)
@@ -832,7 +866,12 @@ class Config(object):
         if custom_log_dir and os.path.exists(custom_log_dir):
             self.dir_log = str(custom_log_dir, "utf8")
         else:
-            self.dir_log = os.path.join(CONFIG_PATH, 'log')
+            if OS_FAMILY == 'XP' or 'Win7':
+                print('windows TRUE5')
+                self.dir_log = os.path.join(CONFIG_PATH, 'log')
+                self.dir_log = self.dir_log.replace("\\", "/")
+            else:
+                self.dir_log = os.path.join(CONFIG_PATH, 'log')
         self.log_file = os.path.join(self.dir_log, 'fpdb-log.txt')
         log = logging.getLogger("config")
 
