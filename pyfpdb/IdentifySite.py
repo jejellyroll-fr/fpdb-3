@@ -182,6 +182,8 @@ class IdentifySite(object):
             whole_file, kodec = self.read_file(path)
             if whole_file:
                 fobj = self.idSite(path, whole_file, kodec)
+                print('siteid')
+                print(fobj)
                 if fobj == False: # Site id failed
                     log.debug(("DEBUG:") + " " + ("siteId Failed for: %s") % path)
                 else:

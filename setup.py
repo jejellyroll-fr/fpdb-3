@@ -67,7 +67,7 @@ commands = {
 
 setup(name = 'fpdb',
     description = 'Free Poker Database',
-    version = '0.27',
+    version = '3',
     author = 'FPDB team',
     author_email = 'fpdb-main@lists.sourceforge.net',
     packages = ['fpdb'],
