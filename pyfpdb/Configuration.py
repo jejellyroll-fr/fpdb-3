@@ -57,7 +57,7 @@ else:
     winpaths_appdata = False
 
 import logging, logging.config
-import configparser
+
 
 # config version is used to flag a warning at runtime if the users config is
 #  out of date.
