@@ -19,8 +19,7 @@
 
 # This code once was in GuiReplayer.py and was split up in this and the former by zarturo.
 
-from future import standard_library
-standard_library.install_aliases()
+
 
 
 import L10n

@@ -16,8 +16,7 @@
 #In the "official" distribution you can find the license in agpl-3.0.txt.
 
 from __future__ import division
-from future import standard_library
-standard_library.install_aliases()
+
 from past.utils import old_div
 import L10n
 _ = L10n.get_translation()

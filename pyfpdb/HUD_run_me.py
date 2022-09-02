@@ -15,8 +15,7 @@
 #along with this program. If not, see <http://www.gnu.org/licenses/>.
 #In the "official" distribution you can find the license in agpl-3.0.txt.
 
-from future import standard_library
-standard_library.install_aliases()
+
 import sys
 import os
 
