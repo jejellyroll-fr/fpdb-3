@@ -17,8 +17,7 @@
 
 
 
-import L10n
-_ = L10n.init_translation()
+
 import os
 import sys
 import re
