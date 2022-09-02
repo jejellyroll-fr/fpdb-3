@@ -21,8 +21,8 @@
 
 from future import standard_library
 standard_library.install_aliases()
-from builtins import str
-from builtins import range
+
+
 import L10n
 _ = L10n.get_translation()
 

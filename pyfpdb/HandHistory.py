@@ -23,7 +23,7 @@ from __future__ import print_function
 
 ########################################################################
 #    Standard Library modules
-from builtins import object
+
 import xml.dom.minidom
 from   xml.dom.minidom import Node
 

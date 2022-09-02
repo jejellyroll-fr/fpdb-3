@@ -15,11 +15,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 from __future__ import print_function
-from builtins import map
-from builtins import str
-from builtins import zip
-from builtins import range
-from builtins import object
+
+
+
+
+
 import L10n
 _ = L10n.get_translation()
 

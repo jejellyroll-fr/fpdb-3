@@ -19,9 +19,9 @@ from __future__ import print_function
 from __future__ import division
 from future import standard_library
 standard_library.install_aliases()
-from builtins import str
-from builtins import range
-from builtins import object
+
+
+
 from past.utils import old_div
 import L10n
 _ = L10n.get_translation()

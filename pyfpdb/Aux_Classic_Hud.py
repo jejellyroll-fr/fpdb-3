@@ -34,7 +34,7 @@ multiple-level inheritence in much of this code, class heirarchies
 are not immediately obvious, and there is very close linkage with most of 
 the Hud modules.
 """
-from builtins import str
+
 import L10n
 _ = L10n.get_translation()
 

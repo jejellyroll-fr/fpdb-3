@@ -27,7 +27,7 @@ from __future__ import print_function
 ########################################################################
 
 #    Standard Library modules
-from builtins import object
+
 import re
 
 #    pyGTK modules

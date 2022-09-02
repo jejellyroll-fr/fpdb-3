@@ -18,9 +18,7 @@
 
 from __future__ import print_function
 from __future__ import division
-from builtins import map
-from builtins import str
-from builtins import range
+
 from dataclasses import replace
 from past.utils import old_div
 import L10n

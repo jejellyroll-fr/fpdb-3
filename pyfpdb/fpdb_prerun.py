@@ -18,7 +18,7 @@
 ########################################################################
 
 from __future__ import print_function
-from builtins import object
+
 failure_list = []
 success_list = []
 verbose = False
