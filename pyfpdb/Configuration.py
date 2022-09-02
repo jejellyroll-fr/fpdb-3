@@ -43,7 +43,7 @@ from xml.dom.minidom import Node
 
 import platform
 
-from sqlalchemy import false
+
 if platform.system() == 'Windows':
     #import winpaths
     #winpaths_appdata = winpaths.get_appdata()
