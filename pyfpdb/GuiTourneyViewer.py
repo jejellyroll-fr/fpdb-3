@@ -16,10 +16,10 @@
 #In the "official" distribution you can find the license in agpl-3.0.txt.
 from future import standard_library
 standard_library.install_aliases()
-from builtins import str
 
-from builtins import range
-from builtins import object
+
+
+
 import L10n
 _ = L10n.get_translation()
 

@@ -24,9 +24,9 @@ from __future__ import division
 
 ########################################################################
 
-from builtins import map
-from builtins import range
-from builtins import object
+
+
+
 from past.utils import old_div
 import L10n
 _ = L10n.init_translation()

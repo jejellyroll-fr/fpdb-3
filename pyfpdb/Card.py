@@ -16,7 +16,7 @@
 #In the "official" distribution you can find the license in agpl-3.0.txt.
 from __future__ import print_function
 from __future__ import division
-from builtins import input
+
 from past.utils import old_div
 import sys
 # import L10n

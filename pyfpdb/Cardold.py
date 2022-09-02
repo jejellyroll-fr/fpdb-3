@@ -17,7 +17,7 @@
 
 from __future__ import print_function
 from __future__ import division
-from builtins import input
+
 from past.utils import old_div
 import sys
 # import L10n

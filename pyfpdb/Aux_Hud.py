@@ -4,9 +4,7 @@
 
 Simple HUD display for FreePokerTools/fpdb HUD.
 """
-from builtins import str
-from builtins import range
-from builtins import object
+
 import L10n
 _ = L10n.get_translation()
 #    Copyright 2011-2012,  Ray E. Barker

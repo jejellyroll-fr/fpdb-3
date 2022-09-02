@@ -20,8 +20,7 @@
 
 #Note that this filter also supports UltimateBet, they are both owned by the same company and form the Cereus Network
 
-from builtins import str
-from builtins import map
+
 import L10n
 _ = L10n.get_translation()
 

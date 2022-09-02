@@ -96,8 +96,8 @@ get_tooltip() is implemented).
 from __future__ import division
 
 
-from builtins import str
-from builtins import object
+
+
 from past.utils import old_div
 import pygtk
 pygtk.require('2.0')

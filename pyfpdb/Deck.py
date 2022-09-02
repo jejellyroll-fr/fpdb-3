@@ -13,7 +13,7 @@ Helper class for mucked card display. Loads specified deck from SVG
 images and returns it as a dict of pixbufs.
 """
 
-from builtins import object
+
 import os
 
 from PyQt5.QtCore import QRectF

@@ -26,7 +26,7 @@ from __future__ import division
 #    to do
 
 #    Standard Library modules
-from builtins import range
+
 from past.utils import old_div
 import logging
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:

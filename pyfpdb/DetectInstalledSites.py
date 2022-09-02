@@ -40,8 +40,7 @@ Todo:
     replace hardcoded site list with something more subtle
 
 """
-from builtins import str
-from builtins import object
+
 import platform
 import os
 import sys

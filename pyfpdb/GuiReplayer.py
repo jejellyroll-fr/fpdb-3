@@ -20,9 +20,9 @@
 from __future__ import print_function
 from __future__ import division
 from ast import Return
-from builtins import str
-from builtins import range
-from builtins import object
+
+
+
 from collections import defaultdict
 from unicodedata import decimal, name
 from past.utils import old_div

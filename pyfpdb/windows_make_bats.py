@@ -18,7 +18,7 @@
 # create .bat scripts in windows to try out different gtk dirs
 
 from __future__ import print_function
-from builtins import str
+
 import L10n
 _ = L10n.get_translation()
 
