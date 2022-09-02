@@ -33,7 +33,7 @@ _ = L10n.init_translation()
 import codecs
 import sys
 import os
-import _thread
+
 import time
 import logging
 import win32gui
