@@ -18,8 +18,7 @@
 """A script for adding new stats to the regression test library"""
 from __future__ import print_function
 
-from future import standard_library
-standard_library.install_aliases()
+
 import Options
 
 import logging, os, sys, string
