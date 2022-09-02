@@ -45,7 +45,7 @@ if not options.errorsToConsole:
     errorFile = open('tourneyerror.txt', 'w', 0)
     sys.stderr = errorFile
 
-import _thread
+
 import time
 import string
 import re

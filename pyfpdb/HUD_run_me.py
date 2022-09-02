@@ -19,7 +19,7 @@ from future import standard_library
 standard_library.install_aliases()
 import sys
 import os
-import _thread
+
 import time
 import string
 import re
