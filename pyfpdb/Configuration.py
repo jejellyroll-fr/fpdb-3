@@ -102,8 +102,8 @@ elif sys.path[0] == "": # we are probably running directly (>>>import Configurat
     print(temp)
     FPDB_ROOT_PATH = os.path.join(temp, os.pardir)   # go up one level (to fpdbroot)
 else: # all other cases
-    #FPDB_ROOT_PATH = os.path.dirname(sys.path[0])  # should be source path to /fpdbroot
-    FPDB_ROOT_PATH = os.getcwd()
+    FPDB_ROOT_PATH = os.path.dirname(sys.path[0])  # should be source path to /fpdbroot
+    #FPDB_ROOT_PATH = os.getcwd()
 
 sysPlatform = platform.system()  #Linux, Windows, Darwin
 if sysPlatform[0:5] == 'Linux':
@@ -127,8 +127,15 @@ if OS_FAMILY in ['XP', 'Win7']:
     CONFIG_PATH = CONFIG_PATH.replace("\\", "/")
     FPDB_ROOT_PATH = os.path.dirname(sys.executable)
     FPDB_ROOT_PATH = FPDB_ROOT_PATH.replace("\\", "/")
-    GRAPHICS_PATH = os.path.join(FPDB_ROOT_PATH, "gfx")
-    GRAPHICS_PATH = GRAPHICS_PATH.replace("\\", "/")
+    if INSTALL_METHOD == "source":
+        script = os.path.realpath(__file__)
+        print("SCript path:", script)
+        script = script.replace("\\", "/")
+        script = script.rsplit('/',2)[0]
+        GRAPHICS_PATH = script+'/gfx'
+    else:
+        GRAPHICS_PATH = os.path.join(FPDB_ROOT_PATH, "gfx")
+        GRAPHICS_PATH = GRAPHICS_PATH.replace("\\", "/")
     PYFPDB_PATH = os.path.join(FPDB_ROOT_PATH, "pyfpdb")
     PYFPDB_PATH = PYFPDB_PATH.replace("\\", "/")
 elif OS_FAMILY == 'Mac':
