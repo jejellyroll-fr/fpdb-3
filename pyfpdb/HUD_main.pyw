@@ -36,7 +36,7 @@ import os
 
 import time
 import logging
-import win32gui
+
 
 from PyQt5.QtCore import (QCoreApplication, QMetaObject, QObject, Qt,
                           QThread, pyqtSignal)
