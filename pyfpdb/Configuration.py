@@ -168,8 +168,7 @@ LOGLEVEL = {'DEBUG'   : logging.DEBUG,
             'ERROR'   : logging.ERROR,
             'CRITICAL': logging.CRITICAL}
 
-def to_raw(string):
-    return fr"{string}"
+
 
 def get_config(file_name, fallback = True):
     """Looks in cwd and in self.default_config_path for a config file."""
@@ -262,7 +261,7 @@ def get_config(file_name, fallback = True):
         sys.stderr.write((("No %s found, cannot fall back. Exiting.") % file_name) + "\n")
         sys.exit()
 
-    print ("get_config: returning "+to_raw((config_path,example_copy,example_path)))
+    
     return (config_path,example_copy,example_path)
 
 def set_logfile(file_name):
