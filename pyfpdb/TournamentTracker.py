@@ -22,8 +22,8 @@ from __future__ import print_function
 
 
 
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 #    to do allow window resizing
 #    to do hud to echo, but ignore non numbers

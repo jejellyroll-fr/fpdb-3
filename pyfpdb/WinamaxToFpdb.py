@@ -19,8 +19,8 @@
 ########################################################################
 import sys
 import Exceptions
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 from HandHistoryConverter import *
 from decimal_wrapper import Decimal
 

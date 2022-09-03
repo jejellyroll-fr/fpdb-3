@@ -19,8 +19,8 @@ from __future__ import division
 
 from past.utils import old_div
 import sys
-# import L10n
-# _ = L10n.get_translation()
+# #import L10n
+# #_ = L10n.get_translation()
 
 card_map = { "0": 0, "2": 2, "3" : 3, "4" : 4, "5" : 5, "6" : 6, "7" : 7, "8" : 8,
             "9" : 9, "T" : 10, "J" : 11, "Q" : 12, "K" : 13, "A" : 14}

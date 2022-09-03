@@ -26,8 +26,8 @@ from ast import Return
 from collections import defaultdict
 from unicodedata import decimal, name
 from past.utils import old_div
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 from functools import partial
 

@@ -149,8 +149,8 @@ try:
 except:
     pass
 
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 import Configuration
 config = Configuration.Config()
 

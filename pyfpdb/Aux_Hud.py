@@ -5,8 +5,8 @@
 Simple HUD display for FreePokerTools/fpdb HUD.
 """
 
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 #    Copyright 2011-2012,  Ray E. Barker
 #    
 #    This program is free software; you can redistribute it and/or modify

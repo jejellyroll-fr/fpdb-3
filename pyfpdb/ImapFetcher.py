@@ -20,8 +20,8 @@ from __future__ import print_function
 #see http://docs.python.org/library/imaplib.html for the python interface
 #see http://tools.ietf.org/html/rfc2060#section-6.4.4 for IMAP4 search criteria
 
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 from imaplib import IMAP4, IMAP4_SSL
 import sys

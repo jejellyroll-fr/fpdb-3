@@ -35,8 +35,8 @@ are not immediately obvious, and there is very close linkage with most of
 the Hud modules.
 """
 
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 # to do
 #=======

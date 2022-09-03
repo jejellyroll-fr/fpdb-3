@@ -17,8 +17,8 @@
 
 
 
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 from imaplib import IMAP4
 from socket import gaierror
