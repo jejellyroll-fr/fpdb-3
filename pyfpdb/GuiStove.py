@@ -17,8 +17,8 @@
 
 from __future__ import print_function
 
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 from PyQt5.QtCore import QCoreApplication, QSortFilterProxyModel, Qt
 from PyQt5.QtGui import (QPainter, QPixmap, QStandardItem, QStandardItemModel)

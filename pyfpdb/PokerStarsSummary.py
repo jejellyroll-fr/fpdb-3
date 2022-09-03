@@ -17,8 +17,8 @@
 
 """pokerstars-specific summary parsing code"""
 
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 from decimal_wrapper import Decimal
 import datetime

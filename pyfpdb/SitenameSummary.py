@@ -18,8 +18,8 @@
 """A site template for tourney summary parsing"""
 from __future__ import print_function
 
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 from decimal_wrapper import Decimal
 import datetime

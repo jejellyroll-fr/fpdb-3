@@ -26,8 +26,8 @@
 
 Main for FreePokerTools HUD.
 """
-import L10n
-_ = L10n.init_translation()
+#import L10n
+#_ = L10n.init_translation()
 
 #    Standard Library modules
 import codecs
@@ -288,6 +288,7 @@ class HUD_main(QObject):
         if type == "tour":   # hand is from a tournament
             temp_key = "%s Table %s" % (tour_number, tab_number)
         else:
+
             temp_key = table_name
             print('temp_key', temp_key)
 

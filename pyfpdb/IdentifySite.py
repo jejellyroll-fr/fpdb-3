@@ -18,8 +18,8 @@
 from __future__ import print_function
 
 
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 import re
 import sys

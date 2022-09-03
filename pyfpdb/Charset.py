@@ -16,8 +16,8 @@
 #In the "official" distribution you can find the license in agpl-3.0.txt.
 
 
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 # Error logging
 import sys

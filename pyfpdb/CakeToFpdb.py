@@ -21,8 +21,8 @@
 from __future__ import division
 
 from past.utils import old_div
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 from HandHistoryConverter import *
 from decimal_wrapper import Decimal

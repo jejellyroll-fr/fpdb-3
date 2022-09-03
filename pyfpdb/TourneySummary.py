@@ -17,8 +17,8 @@
 
 """parses and stores summary sections from e.g. eMail or summary files"""
 
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 # TODO: check to keep only the needed modules
 

@@ -19,8 +19,8 @@
 
 ########################################################################
 
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 # This code is based on CarbonToFpdb.py by Matthew Boss
 #

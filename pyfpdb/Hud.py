@@ -27,8 +27,8 @@ Create and manage the hud overlays.
 
 
 
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 #    Standard Library modules
 import logging
