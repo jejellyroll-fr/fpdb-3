@@ -27,8 +27,8 @@ client has been resized, destroyed, etc.
 ########################################################################
 
 
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 #    Standard Library modules
 import re
@@ -116,16 +116,28 @@ class Table_Window(object):
             table_kwargs = dict(tournament = self.tournament, table_number = self.table)
             self.tableno_re = getTableNoRe(self.config, self.site, tournament = self.tournament)
         elif table_name is not None:
-            print('table_number cash:')
-            print(type(table_name))
-            print((table_name))
-            self.name = table_name
-            self.type = "cash"
-            self.tournament = None
-            table_kwargs = dict(table_name = table_name)
-            print('table_kwarg cash:')
-            print(type(table_kwargs))
-            print((table_kwargs))
+            if site == 'Winamax':
+                print('table_number cash:')
+                print(type(table_name))
+                print(('Winamax '+table_name))
+                self.name = 'Winamax '+table_name
+                self.type = "cash"
+                self.tournament = None
+                table_kwargs = dict(table_name = 'Winamax '+table_name)
+                print('table_kwarg cash:')
+                print(type(table_kwargs))
+                print((table_kwargs))
+            else:
+                print('table_number cash:')
+                print(type(table_name))
+                print((table_name))
+                self.name = table_name
+                self.type = "cash"
+                self.tournament = None
+                table_kwargs = dict(table_name = table_name)
+                print('table_kwarg cash:')
+                print(type(table_kwargs))
+                print((table_kwargs))
         else:
             return None
 

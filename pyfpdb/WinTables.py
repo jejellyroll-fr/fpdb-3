@@ -21,8 +21,8 @@
 ########################################################################
 # to do
 # for win7 the fixed b_width and tb_height are not correct - need to discover these from os
-import L10n
-_ = L10n.get_translation()
+#import L10n
+#_ = L10n.get_translation()
 
 #    Standard Library modules
 import re
@@ -55,30 +55,43 @@ class Table(Table_Window):
         win32gui.EnumWindows(win_enum_handler, titles)
         print (win32gui.EnumWindows(win_enum_handler, titles))
         for hwnd in titles:
-            print("hwnd",hwnd)
+            #print("hwnd",hwnd,titles[hwnd])
             if titles[hwnd] == "":
+                #print("hwnd",hwnd,titles[hwnd],"vide")
                 continue
             # if window not visible, probably not a table
             if not win32gui.IsWindowVisible(hwnd): 
+                #print("hwnd",hwnd,titles[hwnd],"not visible")
                 continue
             # if window is a child of another window, probably not a table
             if win32gui.GetParent(hwnd) != 0:
+                #print("hwnd",hwnd,titles[hwnd],"is a child")
                 continue
             HasNoOwner = win32gui.GetWindow(hwnd, win32con.GW_OWNER) == 0
-            print("HasNoOwner",HasNoOwner)
+            
             WindowStyle = win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)
-            print("WindowStyle",WindowStyle)
+            print("hwnd",hwnd,titles[hwnd],HasNoOwner,WindowStyle,self.search_string,re.I )
             if HasNoOwner and WindowStyle & win32con.WS_EX_TOOLWINDOW != 0:
+                #print("hwnd",hwnd,titles[hwnd],"cas 1")
                 continue
             if not HasNoOwner and WindowStyle & win32con.WS_EX_APPWINDOW == 0:
+                #print("hwnd",hwnd,titles[hwnd],"cas 2")
                 continue
-            
+            #temp solution for wina
+            print(titles[hwnd].split(' ',1)[0])
+            if titles[hwnd].split(' ',1)[0] == "Winamax":
+                print(titles[hwnd].split(' ',1)[0])
+                self.search_string = self.search_string.split(' ',3)[0]
+                print('search string',self.search_string)
             if re.search(self.search_string, titles[hwnd], re.I):
+                #print("hwnd",hwnd,titles[hwnd],"re seracj")
                 if self.check_bad_words(titles[hwnd]):
+                    #print("hwnd",hwnd,titles[hwnd],"bad word")
                     continue
                     
                 self.number = hwnd
-                print("self.number", self.number)
+                print("hwnd",hwnd,titles[hwnd],self.number)
+                
                 break
 
         if self.number is None:
