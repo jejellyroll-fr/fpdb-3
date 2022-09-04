@@ -55,7 +55,7 @@ class BovadaSummary(TourneySummary):
         m = hhc.re_GameInfo.search(self.summaryText)
         if m == None:
             tmp = self.summaryText[0:200]
-            log.error(_("BovadaSummary.parseSummary: '%s'") % tmp)
+            log.error(("BovadaSummary.parseSummary: '%s'") % tmp)
             raise FpdbParseError
         
         info = {}
@@ -65,7 +65,7 @@ class BovadaSummary(TourneySummary):
         
         if info['TOURNO'] is None:
             tmp = self.summaryText[0:200]
-            log.error(_("BovadaSummary.parseSummary: Text does not appear to be a tournament '%s'") % tmp)
+            log.error(("BovadaSummary.parseSummary: Text does not appear to be a tournament '%s'") % tmp)
             raise FpdbParseError
         else:
             self.tourNo = info['TOURNO']
@@ -106,7 +106,7 @@ class BovadaSummary(TourneySummary):
                     elif re.match("^[0-9+]*$", info['BUYIN']):
                         self.buyinCurrency="play"
                     else:
-                        log.error(_("BovadaSummary.parseSummary: Failed to detect currency"))
+                        log.error(("BovadaSummary.parseSummary: Failed to detect currency"))
                         raise FpdbParseError
                     self.currency = self.buyinCurrency
 

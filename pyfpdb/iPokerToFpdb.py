@@ -307,7 +307,7 @@ class iPoker(HandHistoryConverter):
             if self.tinfo['buyin'] == 0:
                 self.tinfo['buyinCurrency'] = 'FREE'
             if self.tinfo.get('tourNo') is None:
-                log.error(_("iPokerToFpdb.determineGameType: Could Not Parse tourNo"))
+                log.error(("iPokerToFpdb.determineGameType: Could Not Parse tourNo"))
                 raise FpdbParseError
         else:
             self.info['type'] = 'ring'
@@ -334,7 +334,7 @@ class iPoker(HandHistoryConverter):
         m = self.re_HandInfo.search(hand.handText)
         if m is None:
             tmp = hand.handText[0:200]
-            log.error(_("iPokerToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(("iPokerToFpdb.readHandInfo: '%s'") % tmp)
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -367,7 +367,7 @@ class iPoker(HandHistoryConverter):
                     date_match1 = self.re_DateTime3.search(m.group('DATETIME'))
                     datestr = '%Y/%m/%d %H:%M:%S'
                     if date_match1 == None:
-                        log.error(_("iPokerToFpdb.readHandInfo Could not read datetime: '%s'") % hand.handid)
+                        log.error(("iPokerToFpdb.readHandInfo Could not read datetime: '%s'") % hand.handid)
                         raise FpdbParseError
                     if date_match1.group('S') == None:
                         datestr = '%Y/%m/%d %H:%M'
@@ -390,7 +390,7 @@ class iPoker(HandHistoryConverter):
                     
         if len(plist)<=1:
             # Hand cancelled
-            log.error(_("iPokerToFpdb.readPlayerStacks: '%s'") % hand.handid)
+            log.error(("iPokerToFpdb.readPlayerStacks: '%s'") % hand.handid)
             raise FpdbParseError
                                 
         # Add remaining players
@@ -439,7 +439,7 @@ class iPoker(HandHistoryConverter):
             cards = [c[1:].replace('10', 'T') + c[0].lower() for c in cards]
             hand.setCommunityCards(street, cards)
         else:
-            log.error(_("iPokerToFpdb.readCommunityCards: '%s'") % hand.handid)
+            log.error(("iPokerToFpdb.readCommunityCards: '%s'") % hand.handid)
             raise FpdbParseError
 
     def readAntes(self, hand):
@@ -576,7 +576,7 @@ class iPoker(HandHistoryConverter):
             elif atype == '9': #FIXME: Sitting out
                 hand.addFold(street, player)
             else:
-                log.error(_("DEBUG:") + " " + _("Unimplemented %s: '%s' '%s'") % ("readAction", action['PNAME'], action['ATYPE']))
+                log.error(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action['PNAME'], action['ATYPE']))
 
     def readShowdownActions(self, hand):
         # Cards lines contain cards

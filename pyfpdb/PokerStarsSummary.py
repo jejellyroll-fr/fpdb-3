@@ -174,10 +174,10 @@ class PokerStarsSummary(TourneySummary):
         elif self.hhtype == "hh":
             self.parseSummaryFromHH()
         else:
-            raise FpdbParseError(_("parseSummary FAIL"))
+            raise FpdbParseError(("parseSummary FAIL"))
 
     def parseSummaryFromHH(self):
-        raise FpdbParseError(_("PokerStarsSummary.parseSummaryHtml: This file format is not yet supported"))
+        raise FpdbParseError(("PokerStarsSummary.parseSummaryHtml: This file format is not yet supported"))
         # self.entries   = Unavailable from HH
         # self.prizepool = Unavailable from HH
         # self.startTime = Unreliable from HH (late reg)
@@ -202,7 +202,7 @@ class PokerStarsSummary(TourneySummary):
         if m==None:
             tmp1 = info['header']
             tmp2 = str(info)[0:200]
-            log.error(_("PokerStarsSummary.parseSummaryXLS: '%s' '%s") % (tmp1, tmp2))
+            log.error(("PokerStarsSummary.parseSummaryXLS: '%s' '%s") % (tmp1, tmp2))
             raise FpdbParseError
         info.update(m.groupdict())
         mg = {}
@@ -211,7 +211,7 @@ class PokerStarsSummary(TourneySummary):
                 m1 = self.re_XLSTourneyInfo[k].search(j)
                 if m1: mg.update(m1.groupdict())
                 elif k=='Game':
-                    log.error(_("PokerStarsSummary.parseSummaryXLS Game '%s' not found") % j)
+                    log.error(("PokerStarsSummary.parseSummaryXLS Game '%s' not found") % j)
                     raise FpdbParseError
         info.update(mg)
         self.parseSummaryArchive(info)
@@ -227,7 +227,7 @@ class PokerStarsSummary(TourneySummary):
                 raise FpdbHandPartial
             tmp1 = self.header[0:200] if m1 == None else 'NA'
             tmp2 = self.summaryText if m2 == None else 'NA'
-            log.error(_("PokerStarsSummary.parseSummaryHtml: '%s' '%s") % (tmp1, tmp2))
+            log.error(("PokerStarsSummary.parseSummaryHtml: '%s' '%s") % (tmp1, tmp2))
             raise FpdbParseError
         info.update(m1.groupdict())
         info.update(m2.groupdict())
@@ -364,7 +364,7 @@ class PokerStarsSummary(TourneySummary):
             if self.re_emailHeader.match(self.summaryText):
                 raise FpdbHandPartial
             tmp = self.summaryText[0:200]
-            log.error(_("PokerStarsSummary.parseSummaryFile: '%s'") % self.summaryText)
+            log.error(("PokerStarsSummary.parseSummaryFile: '%s'") % self.summaryText)
             raise FpdbParseError
 
         #print "DEBUG: m.groupdict(): %s" % m.groupdict()        
