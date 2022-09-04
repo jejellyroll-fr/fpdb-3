@@ -178,8 +178,12 @@ class IdentifySite(object):
             return [x]
 
     def processFile(self, path):
+        print('process fill identify',path)
         if path not in self.filelist:
+            print('filelist', self.filelist)
             whole_file, kodec = self.read_file(path)
+            print('whole_file',whole_file)
+            print('kodec',kodec )
             if whole_file:
                 fobj = self.idSite(path, whole_file, kodec)
                 print('siteid')
@@ -212,6 +216,10 @@ class IdentifySite(object):
         """Identifies the site the hh file originated from"""
         f = FPDBFile(path)
         f.kodec = kodec
+        print('idsite path',path )
+        print('idsite f',f,f.ftype,f.site,f.gametype )
+        
+        print('idsite self.sitelist.items',self.sitelist.items())
         for id, site in list(self.sitelist.items()):
             filter_name = site.filter_name
             m = site.re_Identify.search(whole_file[:5000])
