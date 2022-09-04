@@ -157,7 +157,7 @@ class Enet(HandHistoryConverter):
         m = self.re_GameInfo.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(_("EnetToFpdb.determineGameType: '%s'") % tmp)
+            log.error(("EnetToFpdb.determineGameType: '%s'") % tmp)
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -202,7 +202,7 @@ class Enet(HandHistoryConverter):
         m2 = self.re_GameInfo.search(hand.handText)
         if m is None or m2 is None:
             tmp = hand.handText[0:200]
-            log.error(_("EnetToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(("EnetToFpdb.readHandInfo: '%s'") % tmp)
             raise FpdbParseError
 
         info.update(m.groupdict())
@@ -249,7 +249,7 @@ class Enet(HandHistoryConverter):
                             hand.buyinCurrency="play"
                         else:
                             #FIXME: handle other currencies, play money
-                            log.error(_("EnetToFpdb.readHandInfo: Failed to detect currency.") + " Hand ID: %s: '%s'" % (hand.handid, info[key]))
+                            log.error(("EnetToFpdb.readHandInfo: Failed to detect currency.") + " Hand ID: %s: '%s'" % (hand.handid, info[key]))
                             raise FpdbParseError
 
                         info['BIAMT'] = info['BIAMT'].strip(u'$€£')
@@ -273,7 +273,7 @@ class Enet(HandHistoryConverter):
         if m:
             hand.buttonpos = int(m.group('BUTTON'))
         else:
-            log.info('readButton: ' + _('not found'))
+            log.info('readButton: ' + ('not found'))
 
     def readPlayerStacks(self, hand):
         log.debug("readPlayerStacks")
@@ -368,7 +368,7 @@ class Enet(HandHistoryConverter):
             elif action.group('ATYPE') == ' goes all-in':
                 hand.addAllIn(street, action.group('PNAME'), self.clearMoneyString(action.group('BET')) )
             else:
-                log.debug(_("DEBUG:") + " " + _("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
+                log.debug(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
 
 
     def readShowdownActions(self, hand):

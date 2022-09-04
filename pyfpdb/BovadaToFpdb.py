@@ -198,7 +198,7 @@ class Bovada(HandHistoryConverter):
         m = self.re_GameInfo.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(_("BovadaToFpdb.determineGameType: '%s'") % tmp)
+            log.error(("BovadaToFpdb.determineGameType: '%s'") % tmp)
             raise FpdbParseError
         
         m1 = self.re_Dealt.search(handText)
@@ -259,7 +259,7 @@ class Bovada(HandHistoryConverter):
         m = self.re_GameInfo.search(hand.handText)
         if m is None:
             tmp = hand.handText[0:200]
-            log.error(_("BovadaToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(("BovadaToFpdb.readHandInfo: '%s'") % tmp)
             raise FpdbParseError
         
         info.update(m.groupdict())
@@ -301,7 +301,7 @@ class Bovada(HandHistoryConverter):
                             hand.buyinCurrency="play"
                         else:
                             #FIXME: handle other currencies, play money
-                            log.error(_("BovadaToFpdb.readHandInfo: Failed to detect currency.") + " Hand ID: %s: '%s'" % (hand.handid, info[key]))
+                            log.error(("BovadaToFpdb.readHandInfo: Failed to detect currency.") + " Hand ID: %s: '%s'" % (hand.handid, info[key]))
                             raise FpdbParseError
                     
                         if info.get('BOUNTY') != None:
@@ -367,7 +367,7 @@ class Bovada(HandHistoryConverter):
             seatNo += 1
         if len(hand.players)==0:
             tmp = hand.handText[0:200]
-            log.error(_("BovadaToFpdb.readPlayerStacks: '%s'") % tmp)
+            log.error(("BovadaToFpdb.readPlayerStacks: '%s'") % tmp)
             raise FpdbParseError
         elif len(hand.players)==10:
             hand.maxseats = 10
@@ -375,7 +375,7 @@ class Bovada(HandHistoryConverter):
     def playerSeatFromPosition(self, source, handid, position):
         player = self.playersMap.get(position)
         if player is None:
-            log.error(_("Hand.%s: '%s' unknown player seat from position: '%s'") % (source, handid, position))
+            log.error(("Hand.%s: '%s' unknown player seat from position: '%s'") % (source, handid, position))
             raise FpdbParseError
         return player            
 
@@ -622,7 +622,7 @@ class Bovada(HandHistoryConverter):
                 elif action.group('ATYPE') in (' Card dealt to a spot', ' Big blind/Bring in'):
                     pass
                 else:
-                    log.debug(_("DEBUG:") + " " + _("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
+                    log.debug(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
                 
     def allInBlind(self, hand, street, action, actiontype):
         if street in ('PREFLOP', 'DEAL'):

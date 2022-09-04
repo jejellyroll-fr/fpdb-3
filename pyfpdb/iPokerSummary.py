@@ -100,7 +100,7 @@ class iPokerSummary(TourneySummary):
         m = self.re_GameType.search(self.summaryText)
         if not m:
             tmp = self.summaryText[0:200]
-            log.error(_("iPokerSummary.determineGameType: '%s'") % tmp)
+            log.error(("iPokerSummary.determineGameType: '%s'") % tmp)
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -108,7 +108,7 @@ class iPokerSummary(TourneySummary):
 
         if 'SB' in mg and mg['SB'] != None:
             tmp = self.summaryText[0:200]
-            log.error(_("iPokerSummary.parseSummary: Text does not appear to be a tournament '%s'") % tmp)
+            log.error(("iPokerSummary.parseSummary: Text does not appear to be a tournament '%s'") % tmp)
             raise FpdbParseError
         else:
             tourney = True
@@ -142,7 +142,7 @@ class iPokerSummary(TourneySummary):
                     date_match1 = self.re_DateTime3.search(mg['DATETIME'])
                     datestr = '%Y/%m/%d %H:%M:%S'
                     if date_match1 == None:
-                        log.error(_("iPokerSummary.parseSummary Could not read datetime"))
+                        log.error(("iPokerSummary.parseSummary Could not read datetime"))
                         raise FpdbParseError
                     if date_match1.group('S') == None:
                         datestr = '%Y/%m/%d %H:%M'
@@ -204,11 +204,11 @@ class iPokerSummary(TourneySummary):
             else:
                 raise FpdbHandPartial(hid=self.tourNo)
             if self.tourNo is None:
-                log.error(_("iPokerSummary.parseSummary: Could Not Parse tourNo"))
+                log.error(("iPokerSummary.parseSummary: Could Not Parse tourNo"))
                 raise FpdbParseError
         else:
             tmp = self.summaryText[0:200]
-            log.error(_("iPokerSummary.determineGameType: Text does not appear to be a tournament '%s'") % tmp)
+            log.error(("iPokerSummary.determineGameType: Text does not appear to be a tournament '%s'") % tmp)
             raise FpdbParseError
 
 

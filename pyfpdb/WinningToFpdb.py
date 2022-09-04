@@ -425,7 +425,7 @@ class Winning(HandHistoryConverter):
         m = self.re_GameInfo2.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(_("WinningToFpdb._determineGameType2: '%s'") % tmp)
+            log.error(("WinningToFpdb._determineGameType2: '%s'") % tmp)
             raise FpdbParseError        
         
         mg = m.groupdict()
@@ -571,14 +571,14 @@ class Winning(HandHistoryConverter):
     def _readHandInfo2(self, hand):
         #First check if partial
         if hand.handText.count('*** SUMMARY ***')!=1:
-            raise FpdbHandPartial(_("Hand is not cleanly split into pre and post Summary"))
+            raise FpdbHandPartial(("Hand is not cleanly split into pre and post Summary"))
         
         info = {}
         m  = self.re_GameInfo2.search(hand.handText)
         m1 = self.re_HandInfo.search(hand.handText)
         if m is None or m1 is None:
             tmp = hand.handText[0:200]
-            log.error(_("WinningToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(("WinningToFpdb.readHandInfo: '%s'") % tmp)
             raise FpdbParseError
 
         info.update(m.groupdict())
@@ -671,14 +671,14 @@ class Winning(HandHistoryConverter):
         if m:
             hand.buttonpos = int(m.group('BUTTON'))
         else:
-            log.info('readButton: ' + _('not found'))
+            log.info('readButton: ' + ('not found'))
             
     def _readButton2(self, hand):
         m = self.re_Button2.search(hand.handText)
         if m:
             hand.buttonpos = int(m.group('BUTTON'))
         else:
-            log.info('readButton: ' + _('not found'))
+            log.info('readButton: ' + ('not found'))
 
     def readPlayerStacks(self, hand):
         if self.version == 1:
@@ -966,7 +966,7 @@ class Winning(HandHistoryConverter):
                 else:
                     hand.addCallandRaise(street, player, amount)
             else:
-                log.debug(_("DEBUG:") + " " + _("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
+                log.debug(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
                 
     def _readAction2(self, hand, street):
         m = self.re_Action2.finditer(hand.streets[street])
@@ -987,7 +987,7 @@ class Winning(HandHistoryConverter):
             elif action.group('ATYPE') == ' bets':
                 hand.addBet( street, action.group('PNAME'), self.clearMoneyString(action.group('BET')) )
             else:
-                log.debug(_("DEBUG:") + " " + _("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
+                log.debug(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
 
     def readCollectPot(self,hand):
         if self.version == 1:
