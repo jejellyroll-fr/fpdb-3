@@ -42,7 +42,7 @@ class Cake(HandHistoryConverter):
                             'LS' : u"\$|€|", # legal currency symbols - Euro(cp1252, utf-8)
                            'PLYR': r'(?P<PNAME>.+?)',
                             'CUR': u"(\$|€|)",
-                            'NUM' :u".,\d\xa0",
+                            'NUM' :u".(,|\s)\d\xa0",
                     }
                     
     # translations from captured groups to fpdb info strings
@@ -80,15 +80,15 @@ class Cake(HandHistoryConverter):
     # Static regexes
     re_GameInfo     = re.compile(u"""
           Hand\#(?P<HID>[A-Z0-9]+)\s+\-\s+
-          (?P<TABLE>(?P<BUYIN1>(?P<BIAMT1>(%(LS)s)[%(NUM)s]+)\sNLH\s(?P<MAX1>\d+)\smax)?.+?)\s(\((Turbo,\s)?(?P<MAX>\d+)\-[Mm]ax\)\s)?((?P<TOURNO>T\d+)|\d+)\s
-          (\-\-\s(TICKET|CASH|TICKETCASH)\s\-\-\s(?P<BUYIN>(?P<BIAMT>(%(LS)s)[%(NUM)s]+)\s\+\s(?P<BIRAKE>(%(LS)s)[%(NUM)s]+))\s\-\-\s(?P<TMAX>\d+)\sMax\s)?
+          (?P<TABLE>(?P<BUYIN1>(?P<BIAMT1>(%(LS)s)[%(NUM)s]+)\sNLH\s(?P<MAX1>\d+)\smax)?.+?)\s(\((Turbo,\s)?(?P<MAX>\d+)\-+[Mm]ax\)\s)?((?P<TOURNO>T\d+)|\d+)\s
+          (\-\-\s(TICKET|CASH|TICKETCASH|FREEROLL)\s\-\-\s(?P<BUYIN>(?P<BIAMT>(%(LS)s)[%(NUM)s]+)\s(?P<BIRAKE>(%(LS)s)[%(NUM)s]+))\s\-\-\s(?P<TMAX>\d+)\sMax\s)?
           (\-\-\sTable\s(?P<TABLENO>\d+)\s)?\-\-\s
           (?P<CURRENCY>%(LS)s|)?
           (?P<ANTESB>(\-)?[%(NUM)s]+)/(%(LS)s)?
           (?P<SBBB>[%(NUM)s]+)
           (/(%(LS)s)?(?P<BB>[%(NUM)s]+))?\s
           (?P<LIMIT>NL|FL||PL)\s
-          (?P<GAME>Hold\'em|Omaha|Omaha\sHi/Lo|OmahaHiLo)\s--\s
+          (?P<GAME>Hold\'em|Omaha|Omaha\sHi/Lo|OmahaHiLo)\s-\-\s
           (?P<DATETIME>.*$)
           """ % substitutions, re.MULTILINE|re.VERBOSE)
 
