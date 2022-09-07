@@ -28,9 +28,9 @@ FPDB is a poker tools - HUD - Replayer
 - correct bug starting  hand razz guiringcashplayer
 - PMU not working siteid error
 >hud
-- windows not working (error) -> partial fixed -> deck not working (windows 11)
+- windows not working (error) -> Fixed
 - mac disappear behind the table -> fixed(Big sur)
-- linux disappear behind the table (ubuntu) -> no french rooms working anymore with wine
+- linux disappear behind the table (ubuntu) -> Fixed
 >ui
 - dark theme
 - more modern
@@ -41,6 +41,11 @@ FPDB is a poker tools - HUD - Replayer
 - new winamax not working
 - betclic.fr working
 - PMU not working
+>poker rooms on linux with wine (7.16 with winetricks Q4wine)
+- Pokerstars (ok) - install libgl1-mesa-glx:i386, winbind
+- Winamax new soft(ko) - wine wlauncher.exe --mode unattended --unattendedmodeui none --cmdlaunch poker - install libcanberra-gtk-module
+- PMUPoker (ko) - install ole32,vcrun6 corefont with wintricks
+- Unibet - 
 
 ## Requirement for dev 
 
