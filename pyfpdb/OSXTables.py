@@ -33,7 +33,7 @@ import AppKit # Work around some pyinstaller weirdness.
 
 from AppKit import NSView, NSWindowAbove, NSWorkspace
 from Quartz.CoreGraphics import (CGWindowListCreate,
-                                 CGWindowListCreateDescriptionFromArray,kCGWindowOwnerName,
+                                 CGWindowListCreateDescriptionFromArray,kCGWindowOwnerName,NSWorkspace,
                                  kCGWindowBounds, kCGWindowName,CGWindowListCopyWindowInfo,kCGNullWindowID,
                                  kCGWindowNumber,kCGWindowListExcludeDesktopElements,kCGWindowListOptionOnScreenOnly)
 
