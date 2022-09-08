@@ -78,6 +78,7 @@ import GuiHandViewer
 import GuiOddsCalc
 import GuiStove
 
+
 import SQL
 import Database
 import Configuration
@@ -102,6 +103,9 @@ class fpdb(QMainWindow):
     # def tab_clicked(self, widget, tab_name):
     #     """called when a tab button is clicked to activate that tab"""
     #     self.display_tab(tab_name)
+    def launch_ppt(self):
+        subprocess.call(['java', '-jar', './ppt/p2.jar'])
+
 
     def add_and_display_tab(self, new_page, new_tab_name):
         """adds a tab, namely creates the button and displays it and appends all the relevant arrays"""
@@ -859,6 +863,7 @@ class fpdb(QMainWindow):
         maintenanceMenu.addAction(makeAction(('Dump Database to Textfile (takes ALOT of time)'), self.dia_dump_db))
         
         toolsMenu.addAction(makeAction(('Odds Calc'), self.tab_odds_calc))
+        toolsMenu.addAction(makeAction(('PokerProTools'), self.launch_ppt))
 
         helpMenu.addAction(makeAction(('Log Messages'), self.dia_logs, 'Log and Debug Messages'))
         helpMenu.addAction(makeAction(('Help Tab'), self.tab_main_help))
