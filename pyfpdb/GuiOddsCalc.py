@@ -175,26 +175,14 @@ class GuiOddsCalc(QWidget):
             print(row_count)
             column_count = 2 #nb player
             print(column_count)
-            self.QTcalc.setColumnCount(row_count) 
+            self.QTcalc.setColumnCount(int(row_count/2)) 
             self.QTcalc.setRowCount(column_count)
-            name_col = ['Hands', 'Equity', 'Win','Ties', 'Wins count' , 'Ties count']
+            name_col = ['Hands', 'Equity', 'Win','Ties']
             self.QTcalc.setHorizontalHeaderLabels((list(name_col)))
-            i=0 
-            j=0
-            for row in range(row_count):
-                
-                    print(i,j,row)
+
+            for row in range(column_count-1):
+                for col in range(row_count-1):
                     item = list(result_brut.values())
                     print('item value:',item)
-                    print('item value:',item[i])
-                    self.QTcalc.setItem(i, j, QTableWidgetItem(item[i]))
-                    i = i+1
-                    print(i,j)
-                    if i >= row_count:
-                        break
-                    item2 = list(result_brut.values())
-                    print('item value:',item2[i])
-                
-                    self.QTcalc.setItem(i, j, QTableWidgetItem(item2[i])) 
-                    i=i+1
-                    j=j+1
+                    print('item value:',item[col])
+                    self.QTcalc.setItem(row, col, QTableWidgetItem(item[col]))
