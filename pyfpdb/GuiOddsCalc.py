@@ -3,6 +3,7 @@ from sqlalchemy import null
 
 
 import OddsCalc
+import OddsCalcPQL
 
 
     
@@ -161,25 +162,39 @@ class GuiOddsCalc(QWidget):
             vilain4 = self.QLEvilain4.text()
             vilain5 = self.QLEvilain5.text()
             if game == 's8' or game == 'st' or game == 'rz':      
-                odd1 = OddsCalc.OddsCalc(str(game),str(dead),str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5))
+                odd1 = OddsCalcPQL.OddsCalcPQL()
+                #odd1 = OddsCalc.OddsCalc(str(game),str(dead),str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5))
             else:
-                odd1 = OddsCalc.OddsCalc(str(game),str(dead),str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5))
+                odd1 = OddsCalcPQL.OddsCalcPQL()
+                #odd1 = OddsCalc.OddsCalc(str(game),str(dead),str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5))
         
-            result_brut = odd1.calcBaseHoldem()
+            result_brut = odd1.calcBasePQL()
+
             print(result_brut)
-            row_count = (len(result_brut))
-            column_count = (len(result_brut[0]))
-            self.QTcalc.setColumnCount(column_count) 
-            self.QTcalc.setRowCount(row_count)
-
-            self.QTcalc.setHorizontalHeaderLabels((list(result_brut[0].keys())))
-
-            for row in range(row_count):  # add items from array to QTableWidget
-                for column in range(column_count):
-                    item = (list(result_brut[row].values())[column])
-                    print (type(row))
-                    print (type(column))
-                    print (type(item))
-                    self.QTcalc.setItem(row, column, QTableWidgetItem(item))
-    
-        
+            row_count = len(result_brut)
+            print(row_count)
+            column_count = 2 #nb player
+            print(column_count)
+            self.QTcalc.setColumnCount(row_count) 
+            self.QTcalc.setRowCount(column_count)
+            name_col = ['Hands', 'Equity', 'Win','Ties', 'Wins count' , 'Ties count']
+            self.QTcalc.setHorizontalHeaderLabels((list(name_col)))
+            i=0 
+            j=0
+            for row in range(row_count):
+                
+                    print(i,j,row)
+                    item = list(result_brut.values())
+                    print('item value:',item)
+                    print('item value:',item[i])
+                    self.QTcalc.setItem(i, j, QTableWidgetItem(item[i]))
+                    i = i+1
+                    print(i,j)
+                    if i >= row_count:
+                        break
+                    item2 = list(result_brut.values())
+                    print('item value:',item2[i])
+                
+                    self.QTcalc.setItem(i, j, QTableWidgetItem(item2[i])) 
+                    i=i+1
+                    j=j+1
