@@ -160,7 +160,7 @@ patsy==0.5.2
 pep8==1.7.1
 pexpect @ file:///tmp/build/80754af9/pexpect_1605563209008/work
 pickleshare @ file:///tmp/build/80754af9/pickleshare_1606932040724/work
-Pillow==8.4.0
+Pillow>=9.0.1
 pkginfo==1.7.1
 pluggy @ file:///opt/concourse/worker/volumes/live/a2630e20-8422-46fc-7347-f73294368851/volume/pluggy_1615976601840/work
 ply==3.11
