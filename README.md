@@ -2,7 +2,7 @@
 
 starting new project base on fpdb python3 adaptation of MegaphoneJon and update from ChazDazzle 
 (tx to all previous contribs)
-
+got pull
 Feel free to clone it, and to participate to this development.
 
 I'm not an expert python developer, this project, as a poker player, is for me to develop my skills in this language during my free time.
