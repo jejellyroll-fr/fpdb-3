@@ -38,6 +38,7 @@ FPDB is a poker tools - HUD - Replayer
 - windows not working (error) -> Fixed
 - mac disappear behind the table -> fixed(Big sur)
 - linux disappear behind the table (ubuntu) -> Fixed
+- mtt table detection - bug on ipoker, must investigate other rooms
 >ui
 - dark theme
 - more modern (perhaps use pyside6 in the future)
