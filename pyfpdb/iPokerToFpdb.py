@@ -486,11 +486,11 @@ class iPoker(HandHistoryConverter):
                 hand.gametype['sb'] = "1"
                 hand.gametype['bb'] = "2"
             elif hand.gametype['sb'] == None:
-                hand.gametype['sb'] = str(int(old_div(Decimal(hand.gametype['bb'])),2))
+                hand.gametype['sb'] = str(int(old_div(Decimal(hand.gametype['bb']),2)))
             elif hand.gametype['bb'] == None:
                 hand.gametype['bb'] = str(int(Decimal(hand.gametype['sb']))*2)
-            if int(old_div(Decimal(hand.gametype['bb'])),2) != int(Decimal(hand.gametype['sb'])):
-                if int(old_div(Decimal(hand.gametype['bb'])),2) < int(Decimal(hand.gametype['sb'])):
+            if int(old_div(Decimal(hand.gametype['bb']),2)) != int(Decimal(hand.gametype['sb'])):
+                if int(old_div(Decimal(hand.gametype['bb']),2)) < int(Decimal(hand.gametype['sb'])):
                     hand.gametype['bb'] = str(int(Decimal(hand.gametype['sb']))*2)
                 else:
                     hand.gametype['sb'] = str(int(old_div(Decimal(hand.gametype['bb'])),2))
