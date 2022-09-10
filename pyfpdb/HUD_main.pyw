@@ -287,10 +287,11 @@ class HUD_main(QObject):
         # regenerate temp_key for this hand- this is the tablename (+ tablenumber (if mtt))
         if type == "tour":   # hand is from a tournament
             temp_key = "%s Table %s" % (tour_number, tab_number)
+            print("temp_key tour",temp_key)
         else:
 
             temp_key = table_name
-            print('temp_key', temp_key)
+            print('temp_key cash', temp_key)
 
         if type == "tour":
             #

@@ -97,6 +97,8 @@ class Table(Table_Window):
 
         for d in WinListDict:
             if d[kCGWindowNumber] == self.number:
+                print("self number,", self.number)
+                print("d[kCGWindowNumber]", d[kCGWindowNumber])
                 return d[kCGWindowName]
         return None
 
