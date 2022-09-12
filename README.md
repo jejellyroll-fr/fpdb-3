@@ -46,10 +46,10 @@ FPDB is a poker tools - HUD - Replayer
 - not working(TO DO: find solution)
 >site hud
 
-| X      |Os    |MTT| CG|SNG|SPIN|
-|------- |------|---|---|---|----|
-|winamax | win11|   |   |   | ok |
-|        |      |   |   |   |    |
+| X      |Os    |MTT| CG|Fast|SNG|SPIN|
+|------- |------|---|---|----|---|----|
+|winamax | win11|   | OK| KO | OK| OK |
+|Pokerstars| Win11     |   |   |    |   |    |
 
 >poker rooms on linux with wine (7.16 with winetricks Q4wine)
 - Pokerstars (ok) - install libgl1-mesa-glx:i386, winbind
