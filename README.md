@@ -45,7 +45,7 @@ FPDB is a poker tools - HUD - Replayer
 >language
 - not working(TO DO: find solution)
 >site hud
-- details:
+
 | X      |Os    |MTT| CG|SNG|SPIN|
 |------- |------|---|---|---|----|
 |winamax | win11|   |   |   | ok |
