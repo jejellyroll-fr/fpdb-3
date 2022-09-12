@@ -52,7 +52,7 @@ FPDB is a poker tools - HUD - Replayer
 |Pokerstars| Win11| OK  |OK (except Fusion)| KO | OK  | OK   |
 |Betclic| Win11| KO | OK  | X|  KO  | KO   |
 |PMU| Win11| KO | KO  | KO|  KO  | KO   |
-|PMU| no handhistory| X | X  | X|  X  | X   |
+|Unibet| no handhistory| X | X  | X|  X  | X   |
 
 >poker rooms on linux with wine (7.16 with winetricks Q4wine)
 - Pokerstars (ok) - install libgl1-mesa-glx:i386, winbind
