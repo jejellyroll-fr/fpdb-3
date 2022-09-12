@@ -45,10 +45,12 @@ FPDB is a poker tools - HUD - Replayer
 >language
 - not working(TO DO: find solution)
 >site hud
-- pokerstars working
-- new winamax not working-> fixed
-- betclic.fr working
-- PMU not working
+- details:
+| X      |Os    |MTT| CG|SNG|SPIN|
+|------- |------|---|---|---|----|
+|winamax | win11|   |   |   | ok |
+|        |      |   |   |   |    |
+
 >poker rooms on linux with wine (7.16 with winetricks Q4wine)
 - Pokerstars (ok) - install libgl1-mesa-glx:i386, winbind
 - Winamax new soft(ko) - wine wlauncher.exe --mode unattended --unattendedmodeui none --cmdlaunch poker - install libcanberra-gtk-module
