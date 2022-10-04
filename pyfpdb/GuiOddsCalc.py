@@ -168,10 +168,10 @@ class GuiOddsCalc(QWidget):
             vilain4 = self.QLEvilain4.text()
             vilain5 = self.QLEvilain5.text()
             if game == 'stud8' or game == 'studhi' or game == 'razz':      
-                odd1 = OddsCalcPQL.OddsCalcPQL(game)
+                odd1 = OddsCalcPQL.OddsCalcPQL(game,board)
                 #odd1 = OddsCalc.OddsCalc(str(game),str(dead),str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5))
             else:
-                odd1 = OddsCalcPQL.OddsCalcPQL(game)
+                odd1 = OddsCalcPQL.OddsCalcPQL(game,board)
                 #odd1 = OddsCalc.OddsCalc(str(game),str(dead),str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5))
         
             result_brut = odd1.calcBasePQL()
