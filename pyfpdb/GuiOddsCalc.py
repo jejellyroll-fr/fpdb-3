@@ -34,7 +34,9 @@ class GuiOddsCalc(QWidget):
         st = "Stud"
         self.QLEgame.insertItem(7, st)
         s8 = "Stud Hi/Lo"
-        self.QLEgame.insertItem(8, s8)                
+        self.QLEgame.insertItem(8, s8)
+        o6 = "6 card Omaha"
+        self.QLEgame.insertItem(9, o6)                
         self.QLEgame.setMinimumWidth(300)
         self.QLdeadcard = QLabel("Dead Card")
         self.QLEdeadcard = QLineEdit()        
@@ -110,6 +112,8 @@ class GuiOddsCalc(QWidget):
             self.Lreq.setStyleSheet("QLabel { color : green; }")
         elif self.QLEgame.currentText() == "Omaha":
             self.Lreq.setText("Not Required")
+        elif self.QLEgame.currentText() == "6 card Omaha":
+            self.Lreq.setText("Not Required")
             self.Lreq.setStyleSheet("QLabel { color : green; }")    
         elif self.QLEgame.currentText() == "5 card Omaha":
             self.Lreq.setText("Not Required")
@@ -137,21 +141,23 @@ class GuiOddsCalc(QWidget):
         else:
             game = self.QLEgame.currentText()
             if game == "hold'em":
-                game = 'he'
+                game = 'holdem'
             elif game == "Omaha":
-                game = 'oh'
+                game = 'omahahi'
             elif game == "5 card Omaha":
-                game = 'oh5'
+                game = 'omahahi5'
             elif game == "5 card Omaha Hi/Lo":
-                game = 'o85'
+                game = 'omaha85'
             elif game == "Omaha Hi/Lo":
-                game = 'o8'
+                game = 'omaha8'
             elif game == "Razz":
-                game = 'rz'
+                game = 'razz'
             elif game == "Stud":
-                game = 'st'
+                game = 'studhi'
             elif game == "Stud Hi/Lo":
-                game = 's8'
+                game = 'stud8'
+            elif game == "6 card Omaha":
+                game = 'omahahi6'
             print(game)
             board = self.QLEboard.text()
             dead = self.QLEdeadcard.text()
@@ -161,11 +167,11 @@ class GuiOddsCalc(QWidget):
             vilain3 = self.QLEvilain3.text()
             vilain4 = self.QLEvilain4.text()
             vilain5 = self.QLEvilain5.text()
-            if game == 's8' or game == 'st' or game == 'rz':      
-                odd1 = OddsCalcPQL.OddsCalcPQL()
+            if game == 'stud8' or game == 'studhi' or game == 'razz':      
+                odd1 = OddsCalcPQL.OddsCalcPQL(game)
                 #odd1 = OddsCalc.OddsCalc(str(game),str(dead),str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5))
             else:
-                odd1 = OddsCalcPQL.OddsCalcPQL()
+                odd1 = OddsCalcPQL.OddsCalcPQL(game)
                 #odd1 = OddsCalc.OddsCalc(str(game),str(dead),str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5))
         
             result_brut = odd1.calcBasePQL()
