@@ -104,7 +104,9 @@ class fpdb(QMainWindow):
     #     """called when a tab button is clicked to activate that tab"""
     #     self.display_tab(tab_name)
     def launch_ppt(self):
-        subprocess.call(['java', '-jar', './ppt/p2.jar'])
+        path = os.getcwd()
+        pathcomp=path+"\pyfpdb\ppt\p2.jar"
+        subprocess.call(['java', '-jar', pathcomp])
 
 
     def add_and_display_tab(self, new_page, new_tab_name):
