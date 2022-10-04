@@ -23,6 +23,7 @@ import sys
 import re
 import queue
 import qdarkstyle
+
 if os.name == 'nt':
     import win32api
     import win32con
@@ -105,7 +106,10 @@ class fpdb(QMainWindow):
     #     self.display_tab(tab_name)
     def launch_ppt(self):
         path = os.getcwd()
-        pathcomp=path+"\pyfpdb\ppt\p2.jar"
+        if os.name == 'nt':
+            pathcomp=path+"\pyfpdb\ppt\p2.jar"
+        else:
+            pathcomp=path+"/ppt/p2.jar"
         subprocess.call(['java', '-jar', pathcomp])
 
 
