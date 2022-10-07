@@ -1,0 +1,68 @@
+@startuml classes
+set namespaceSeparator none
+class "Fulltilt" as FulltiltToFpdb.Fulltilt {
+  HUSnG_Fee : dict
+  Lim_Blinds : dict
+  Rush_Tables : tuple
+  SnG_Fee : dict
+  chanceCount : int
+  codepage : list
+  compiledPlayers : set
+  filetype : str
+  isChance : bool
+  re_Action
+  re_Antes
+  re_Board
+  re_BringIn
+  re_Button
+  re_Cancelled
+  re_Chance
+  re_CollectPot
+  re_CollectPot2
+  re_CollectSidePot
+  re_DateTime
+  re_EntryNo
+  re_GameInfo
+  re_HandInfo
+  re_HeadsUp
+  re_HeroCards
+  re_Identify
+  re_Max
+  re_Mixed
+  re_PlayerInfo
+  re_PostBB
+  re_PostBoth
+  re_PostDead
+  re_PostSB
+  re_ReturnsAnte
+  re_ShowdownAction
+  re_ShownCards
+  re_SitsOut
+  re_Speed
+  re_SplitHands
+  re_SummarySitout
+  re_TailSplitHands
+  re_TourneyExtraInfo
+  re_buyinType
+  siteId : int
+  sitename : str
+  substitutions : dict
+  compilePlayerRegexs(hand)
+  determineGameType(handText)
+  getTableTitleRe(type, table_name, tournament, table_number)
+  markStreets(hand)
+  readAction(hand, street)
+  readAntes(hand)
+  readBlinds(hand)
+  readBringIn(hand)
+  readButton(hand)
+  readCollectPot(hand)
+  readCommunityCards(hand, street)
+  readHandInfo(hand)
+  readHoleCards(hand)
+  readPlayerStacks(hand)
+  readShowdownActions(hand)
+  readShownCards(hand)
+  readSupportedGames()
+}
+@enduml
