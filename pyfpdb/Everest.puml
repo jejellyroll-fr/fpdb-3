@@ -1,0 +1,48 @@
+@startuml classes
+set namespaceSeparator none
+class "Everest" as EverestToFpdb.Everest {
+  codepage : str
+  copyGameHeader : bool
+  filetype : str
+  info : dict
+  maxseats
+  re_Action
+  re_Antes
+  re_Board
+  re_Button
+  re_CollectPot
+  re_GameInfo
+  re_HandInfo
+  re_HeroCards
+  re_Identify
+  re_PlayerInfo
+  re_PostXB
+  re_Prize
+  re_ShowdownAction
+  re_ShownCards
+  re_SitsOut
+  re_SplitHands
+  re_TailSplitHands
+  siteId : int
+  sitename : str
+  substitutions : dict
+  compilePlayerRegexs(hand)
+  determineGameType(handText)
+  markStreets(hand)
+  parseHeader(handText, whole_file)
+  playerNameFromSeatNo(seatNo, hand)
+  readAction(hand, street)
+  readAntes(hand)
+  readBlinds(hand)
+  readBringIn(hand)
+  readButton(hand)
+  readCollectPot(hand)
+  readCommunityCards(hand, street)
+  readHandInfo(hand)
+  readHoleCards(hand)
+  readPlayerStacks(hand)
+  readShowdownActions(hand)
+  readShownCards(hand)
+  readSupportedGames()
+}
+@enduml

@@ -1,0 +1,41 @@
+@startuml classes
+set namespaceSeparator none
+class "Microgaming" as MicrogamingToFpdb.Microgaming {
+  cid_toval : dict
+  codepage : list
+  filetype : str
+  re_Action
+  re_Board
+  re_Card
+  re_CollectPot
+  re_GameInfo
+  re_HeroCards
+  re_Identify
+  re_PlayerInfo
+  re_ShownCards
+  re_SplitHands
+  re_Table
+  siteId : int
+  sitename : str
+  compilePlayerRegexs(hand)
+  convertMicroCards(card)
+  determineGameType(handText)
+  markStreets(hand)
+  playerNameFromSeatNo(seatNo, hand)
+  readAction(hand, street)
+  readAntes(hand)
+  readBlinds(hand)
+  readBringIn(hand)
+  readButton(hand)
+  readCollectPot(hand)
+  readCommunityCards(hand, street)
+  readDrawCards(hand, street)
+  readHandInfo(hand)
+  readHoleCards(hand)
+  readPlayerStacks(hand)
+  readShowdownActions(hand)
+  readShownCards(hand)
+  readStudPlayerCards(hand, street)
+  readSupportedGames()
+}
+@enduml
