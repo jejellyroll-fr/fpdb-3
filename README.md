@@ -20,7 +20,7 @@ FPDB is a poker tools - HUD - Replayer
 >database
 - not working mysql connector on py3.10 -> import MySQLdb (TO DO: find solution )
 - psql not tested (TO DO)
-- try bdd on containers (TO DO)
+- try bdd on containers (TO DO) 
 >translation
 - mot working translation -> from icu import Locale
 >pokerstove
@@ -34,9 +34,16 @@ FPDB is a poker tools - HUD - Replayer
 - correct bug go fast (adding holdhup(extra cash->special rake 10%), error collected pot>total pot)->fixed
 - correct bug starting  hand razz guiringcashplayer
 - PMU not working siteid error
+- correct bug import from pokertracker summary (TODO)
+>graphviz
+- use more modern lib (plotty ...)
+- improve visualization (TODO)
+>stats
+- to verify
+- add spin stats (TODO)
 >hud
 - windows not working (error) -> Fixed
-- mac disappear behind the table -> fixed(Big sur)
+- mac disappear behind the table -> fixed(Big sur)->regression Bug :( 
 - linux disappear behind the table (ubuntu) -> Fixed
 - mtt table detection - bug on ipoker, must investigate other rooms
 >ui
@@ -60,6 +67,7 @@ FPDB is a poker tools - HUD - Replayer
 - PMUPoker (ko) - install ole32,vcrun6 corefont with wintricks
 - Unibet(ko) -
 - betclic (ko) 
+- try bottles with wine (TODO)
 
 ## Requirement for dev 
 Install the dependencies and devDependencies .
