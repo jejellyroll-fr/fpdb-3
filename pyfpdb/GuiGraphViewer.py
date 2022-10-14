@@ -131,7 +131,7 @@ class GuiGraphViewer(QSplitter):
 
         sitenos = []
         playerids = []
-
+        winnings = []
         sites   = self.filters.getSites()
         heroes  = self.filters.getHeroes()
         siteids = self.filters.getSiteIds()
@@ -175,6 +175,7 @@ class GuiGraphViewer(QSplitter):
         #Get graph data from DB
         starttime = time()
         (green, blue, red, orange) = self.getRingProfitGraph(playerids, sitenos, limits, games, currencies, display_in)
+        
         print(("Graph generated in: %s") %(time() - starttime))
 
         #Set axis labels and grid overlay properites
@@ -193,6 +194,7 @@ class GuiGraphViewer(QSplitter):
         self.ax.spines.bottom.set_position(('data',0))
         self.ax.xaxis.set_ticks_position('bottom')
         self.ax.yaxis.set_ticks_position('left')
+        
        
         
         # SET LABEL FOR X AXIS
@@ -235,6 +237,7 @@ class GuiGraphViewer(QSplitter):
 
             #Draw plot
             if 'showdown' in graphops:
+                print("blue max:", blue.max())
                 self.ax.plot(blue, color='blue' , label=('Showdown') + ' (%s): %.2f' %(display_in, blue[-1]))
                 
                 

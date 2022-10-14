@@ -1,0 +1,6 @@
+@startuml classes
+set namespaceSeparator none
+class "Sql" as SQL.Sql {
+  query : dict
+}
+@enduml
