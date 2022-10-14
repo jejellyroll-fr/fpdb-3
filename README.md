@@ -13,7 +13,7 @@ FPDB is a poker tools - HUD - Replayer
 
 ## understand architecture soft
 
-- see fpdb.drawio (WIP)
+- see fpdb.drawio (WIP) or use puml files
 
 ## To do
 
