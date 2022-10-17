@@ -102,7 +102,7 @@ class PartyPoker(HandHistoryConverter):
                   'PokerMaster' : ('PokerMaster', 25),
                        'IPoker' : ('iPoker', 14),
                         'Party' : ('PartyPoker', 9),
-                        'PMU Poker' : ('PMU Poker', 31),
+                        #'PMU Poker' : ('PMU Poker', 31),
                       'Pacific' : ('PacificPoker', 10),
                           'WPN' : ('WinningPoker', 24),
                     'PokerBros' : ('PokerBros', 29)
@@ -131,7 +131,7 @@ class PartyPoker(HandHistoryConverter):
             """ % substitutions, re.VERBOSE | re.UNICODE)
 
     re_HandInfo     = re.compile(u"""
-            ^Table\s(?P<TABLE>.+?)?\s+
+            Table\s(?P<TABLE>.+?)?\s+
             ((?: \#|\(|)(?P<TABLENO>\d+)\)?\s+)?
             (\(No\sDP\)\s)?
             \(\s?(?P<PLAY>Real|Play)\s+Money\s?\)\s+(--\s*)? # FIXME: check if play money is correct
@@ -193,8 +193,8 @@ class PartyPoker(HandHistoryConverter):
           \(\s*[%(LS)s]?(?P<CASH>[%(NUM)s]+)\s*(?:%(LEGAL_ISO)s|)\s*\)
           """ % substitutions, re.VERBOSE| re.UNICODE)
 
-    re_NewLevel = re.compile(u"^Blinds(-Antes)?\((?P<SB>[%(NUM)s ]+)/(?P<BB>[%(NUM)s ]+)(?:\s*-\s*(?P<ANTE>[%(NUM)s ]+))?\)" % substitutions, re.VERBOSE|re.MULTILINE|re.DOTALL)
-    re_CountedSeats = re.compile("^Total\s+number\s+of\s+players\s*:\s*(?P<COUNTED_SEATS>\d+)", re.MULTILINE)
+    re_NewLevel = re.compile(u"Blinds(-Antes)?\((?P<SB>[%(NUM)s ]+)/(?P<BB>[%(NUM)s ]+)(?:\s*-\s*(?P<ANTE>[%(NUM)s ]+))?\)" % substitutions, re.VERBOSE|re.MULTILINE|re.DOTALL)
+    re_CountedSeats = re.compile("Total\s+number\s+of\s+players\s*:\s*(?P<COUNTED_SEATS>\d+)", re.MULTILINE)
     re_Identify     = re.compile(u'\*{5}\sHand\sHistory\s[fF]or\sGame\s\d+\w+?\s')
     re_SplitHands   = re.compile('\n\n+')
     re_TailSplitHands   = re.compile('(\x00+)')
