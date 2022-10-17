@@ -74,7 +74,9 @@ class FpdbError(object):
                         "regression-test-files/cash/Stars/Flop/LO8-6max-USD-0.05-0.10-20090315.Hand-cancelled.txt":(0,0,1,0),
                         "regression-test-files/cash/Stars/Draw/3-Draw-Limit-USD-1-2-200809.Hand.cancelled.txt":(0,0,1,0),
                                  },
-                   'PokerTracker' : {},
+                   'PokerTracker' : {
+                        "regression-test-files/tour/PokerTracker/Flop/T#3407415859 - €0.23+€0.02 - 20220605 - Summary.txt":(0,0,1,0),
+                   },
                    'Winamax' : {},
                  }
     def __init__(self, sitename):

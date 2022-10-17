@@ -51,7 +51,7 @@ class PokerTrackerSummary(TourneySummary):
     re_TourneyInfo = re.compile(u"""
                         \s(3|4)\sTournament\sSummary\s+
                         Site:\s(?P<SITE>.+?)\s+
-                        Game:\s(?P<GAME>Holdem|Texas\sHold\'em|Omaha|Omaha\sHi|Omaha\sHi/Lo)\s+
+                        Game:\s(?P<GAME>Holdem|Texas\sHold\'em|Omaha|Omaha\sHi|Omaha\sHi\/Lo)\s+
                         Tournament\s\#:\s(?P<TOURNO>[0-9]+)\s+
                         Started:\s(?P<DATETIME>.+?)\s+
                         Finished:\s(?P<DATETIME1>.+?)\s+
@@ -61,8 +61,9 @@ class PokerTrackerSummary(TourneySummary):
                         (Prize\sPool:\s[%(LS)s]?(?P<PRIZEPOOL>[,.0-9]+)\s+)?
                         (Rebuy:\s[%(LS)s]?(?P<REBUYAMT>[,.0-9]+)\s+)?
                         (Addon:\s[%(LS)s]?(?P<ADDON>[,.0-9]+)\s+)?
+                        Initial\sStack:\s(?P<STACK>[0-9]+)\s+
                         Table\sType:\s(?P<TYPE>.+?)\s+
-                        Tourney\sType:\s(?P<LIMIT>No\sLimit|Limit|LIMIT|Pot\sLimit|N/A)\s+
+                        Tourney\sType:\s(?P<LIMIT>No\sLimit|Limit|LIMIT|Pot\sLimit|N\/A)\s+
                         Players:\s(?P<ENTRIES>\d+)\s+
                         """ % substitutions ,re.VERBOSE|re.MULTILINE)
     
@@ -142,19 +143,19 @@ class PokerTrackerSummary(TourneySummary):
             if "SATELLITE" in self.tourneyName:
                 self.isSatellite = True            
         if mg['BUYIN'] != None:
-            self.buyin = int(100*Decimal(self.clearMoneyString(mg['BUYIN'])))
+            self.buyin = int(100*float(self.clearMoneyString(mg['BUYIN'])))
         if mg['FEE'] != None:
-            self.fee   = int(100*Decimal(self.clearMoneyString(mg['FEE'])))
+            self.fee   = int(100*float(self.clearMoneyString(mg['FEE'])))
         if 'REBUYAMT' in mg and mg['REBUYAMT'] != None:
             self.isRebuy   = True
-            self.rebuyCost = int(100*Decimal(self.clearMoneyString(mg['REBUYAMT'])))
+            self.rebuyCost = int(100*float(self.clearMoneyString(mg['REBUYAMT'])))
         if 'PRIZEPOOL' in mg and mg['PRIZEPOOL'] != None:
-            self.prizepool = int(100*Decimal(self.clearMoneyString(mg['PRIZEPOOL'])))
+            self.prizepool = int(100*float(self.clearMoneyString(mg['PRIZEPOOL'])))
         if 'ADDON' in mg and mg['ADDON'] != None:
             self.isAddOn = True
-            self.addOnCost = int(100*Decimal(self.clearMoneyString(mg['ADDON'])))
+            self.addOnCost = int(100*float(self.clearMoneyString(mg['ADDON'])))
         if 'BOUNTY' in mg and mg['BOUNTY'] != None:
-            self.koBounty = int(100*Decimal(self.clearMoneyString(mg['BOUNTY'])))
+            self.koBounty = int(100*float(self.clearMoneyString(mg['BOUNTY'])))
             self.isKO = True
         if 'ENTRIES'   in mg:
             self.entries = mg['ENTRIES']            
@@ -189,7 +190,10 @@ class PokerTrackerSummary(TourneySummary):
             koCount = None
             if len(name)>0:
                 if 'WINNINGS' in mg and mg['WINNINGS'] != None:
-                    winnings = int(100*Decimal(self.clearMoneyString(mg['WINNINGS'])))
+                    winning1 = mg['WINNINGS']
+                    winning2 = self.clearMoneyString(winning1)
+                    winning3 = int(float(winning2))
+                    winnings = int(100*float(self.clearMoneyString(mg['WINNINGS'])))
                     
                 if 'REBUYS' in mg and mg['REBUYS']!=None:
                     rebuyCount = int(mg['REBUYS'])
