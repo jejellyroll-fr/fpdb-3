@@ -88,7 +88,10 @@ class PokerStarsSummary(TourneySummary):
     re_emailHeader = re.compile("Delivered\-To\:\s")
 
     re_TourneyInfo = re.compile(u"""\#(?P<TOURNO>[0-9]+),\s(?P<DESC1>.+?\sSNG\s)?((?P<LIMIT>No\sLimit|NO\sLIMIT|Limit|LIMIT|Pot\sLimit|POT\sLIMIT|Pot\sLimit\sPre\-Flop,\sNo\sLimit\sPost\-Flop)\s)?(?P<SPLIT>Split)?\s?(?P<GAME>Hold\'em|6\+\sHold\'em|Hold\s\'Em|Razz|RAZZ|7\sCard\sStud|7\sCard\sStud\sHi/Lo|Omaha|Omaha\sHi/Lo|Badugi|Triple\sDraw\s2\-7\sLowball|Single\sDraw\s2\-7\sLowball|5\sCard\sDraw|(5|6)\sCard\sOmaha(\sHi/Lo)?|Courchevel(\sHi/Lo)?|HORSE|8\-Game|HOSE|Mixed\sOmaha\sH/L|Mixed\sHold\'em|Mixed\sPLH/PLO|Mixed\sNLH/PLO||Mixed\sOmaha|Triple\sStud)\s+(?P<DESC>[ a-zA-Z]+\s+)?(Buy-In:\s(?P<CURRENCY>\[%(LS)s]?)(?P<BUYIN>[,.0-9]+)(\s(?P<CURRENCY1>(FPP|SC)))?(\/\[%(LS)s]?(?P<FEE>[,.0-9]+))?(\/\[%(LS)s]?(?P<BOUNTY>[,.0-9]+))?(?P<CUR>\s(%(LEGAL_ISO)s))?\s+)?(?P<ENTRIES>[0-9]+)\splayers\s+(\[%(LS)s]?(?P<ADDED>[,.\d]+)(\s(%(LEGAL_ISO)s))?\sadded\sto\sthe\sprize\spool\sby\s(PokerStars|Full\sTilt)(\.com)?\s+)?(Total\sPrize\sPool:\s\[%(LS)s]?(?P<PRIZEPOOL>[,.0-9]+|Sunday\sMillion\s(ticket|biļete))(\s(%(LEGAL_ISO)s))?\s+)?(?P<SATELLITE>Target\sTournament\s\#(?P<TARGTOURNO>[0-9]+)\s+(Buy-In:\s(?P<TARGCURRENCY>\[%(LS)s]?)(?P<TARGBUYIN>[,.0-9]+)(\/\[%(LS)s]?(?P<TARGFEE>[,.0-9]+))?(\/\[%(LS)s]?(?P<TARGBOUNTY>[,.0-9]+))?(?P<TARGCUR>\s(%(LEGAL_ISO)s))?\s+)?)?([0-9]+\stickets?\sto\sthe\starget\stournament\s+)?Tournament\sstarted\s+(-\s)?(?P<DATETIME>.*$)""" % substitutions ,re.VERBOSE|re.MULTILINE)
-    
+    #re_TourneyInfo = re.compile(u"""(?P<TOURNO>[0-9]+),\s(?P<DESC1>.+?\sSNG\s)?((?P<LIMIT>No\sLimit|NO\sLIMIT|Limit|LIMIT|Pot\sLimit|POT\sLIMIT|Pot\sLimit\sPre\-Flop,\sNo\sLimit\sPost\-Flop)\s)?(?P<SPLIT>Split)?\s?(?P<GAME>Hold\'em|6\+\sHold\'em|Hold\s\'Em|Razz|RAZZ|7\sCard\sStud|7\sCard\sStud\sHi\/Lo|Omaha|Omaha\sHi\/Lo|Badugi|Triple\sDraw\s2\-7\sLowball|Single\sDraw\s2\-7\sLowball|5\sCard\sDraw|(5|6)\sCard\sOmaha(\sHi\/Lo)?|Courchevel(\sHi\/Lo)?|HORSE|8\-Game|HOSE|Mixed\sOmaha\sH\/L|Mixed\sHold\'em|Mixed\sPLH\/PLO|Mixed\sNLH\/PLO||Mixed\sOmaha|Triple\sStud)\s+Buy-In:\s(?P<CURRENCY>\[%(LS)s\]?)((?P<BUYIN>[,.0-9]+)/\[%(LS)s\]?(?P<FEE>[,.0-9]+)|(?P<BUYIN2>[,.0-9]+))\s+""" % substitutions ,re.VERBOSE|re.MULTILINE)
+    #re_TourneyInfo2 = re.compile(u"""(?P<ENTRIES>[0-9]+)\splayers\s+""" % substitutions ,re.VERBOSE|re.MULTILINE)
+    #re_TourneyInfo3 = re.compile(u"""Total\sPrize\sPool:\s\[%(LS)s\]?(?P<PRIZEPOOL>[,.0-9]+)\s+""" % substitutions ,re.VERBOSE|re.MULTILINE)
+    #re_TourneyInfo4 = re.compile(u"""Tournament\sstarted\s+(-\s)?(?P<DATETIME>.*$)""" % substitutions ,re.VERBOSE|re.MULTILINE)
     #You made 5 rebuys and 1 addons for a total of USD 3,180.00.
     re_rebuyAddOn = re.compile("""
                         You\smade\s(?P<REBUYCOUNT>\d+)\srebuys\sand\s(?P<ADDONCOUNT>\d+)\saddons\sfor\sa\stotal\sof\s(%(LEGAL_ISO)s)\s(?P<REBUYADDON>[,.0-9]+)
@@ -255,13 +258,13 @@ class PokerStarsSummary(TourneySummary):
             if info['BUYIN']=='Freeroll':
                 self.buyin = 0
             else:
-                self.buyin = int(100*Decimal(self.clearMoneyString(info['BUYIN'].replace(" ", ""))))
+                self.buyin = int(100*float(self.clearMoneyString(info['BUYIN'].replace(" ", ""))))
         if info['FEE'] != None:
-            self.fee   = int(100*Decimal(self.clearMoneyString(info['FEE'].replace(" ", ""))))
-        if (('REBUYADDON' in info and Decimal(self.clearMoneyString(info['REBUYADDON'].replace(" ", "")))>0)):
+            self.fee   = int(100*float(self.clearMoneyString(info['FEE'].replace(" ", ""))))
+        if (('REBUYADDON' in info and float(self.clearMoneyString(info['REBUYADDON'].replace(" ", "")))>0)):
             self.isRebuy   = True
             self.isAddOn   = True            
-            rebuyAddOnAmt = int(100*Decimal(self.clearMoneyString(info['REBUYADDON'].replace(" ", ""))))
+            rebuyAddOnAmt = int(100*float(self.clearMoneyString(info['REBUYADDON'].replace(" ", ""))))
             if self.buyin != 0:
                 rebuys = int(rebuyAddOnAmt / self.buyin)
                 if rebuys != 0:
@@ -317,7 +320,7 @@ class PokerStarsSummary(TourneySummary):
             self.currency = "play"
             
         if self.buyinCurrency not in ('FREE', 'PSFP'):
-            self.prizepool = int(Decimal(self.entries))*self.buyin
+            self.prizepool = int(float(self.entries))*self.buyin
         
         if self.isSng:
             self.lookupStructures(self.endTime)
@@ -332,10 +335,10 @@ class PokerStarsSummary(TourneySummary):
             entryId = 1
             
             if 'WINNINGS' in info and info['WINNINGS'] != None:
-                winnings = int(100*Decimal(self.clearMoneyString(info['WINNINGS'])))
+                winnings = int(100*float(self.clearMoneyString(info['WINNINGS'])))
                 
-            if (('REBUYADDON' in info and Decimal(self.clearMoneyString(info['REBUYADDON'].replace(" ", "")))>0)):
-                rebuyAddOnAmt = int(100*Decimal(self.clearMoneyString(info['REBUYADDON'].replace(" ", ""))))
+            if (('REBUYADDON' in info and float(self.clearMoneyString(info['REBUYADDON'].replace(" ", "")))>0)):
+                rebuyAddOnAmt = int(100*float(self.clearMoneyString(info['REBUYADDON'].replace(" ", ""))))
                 rebuyCount = rebuyAddOnAmt/self.buyin
                 
             # KOs should be exclusively handled in the PokerStars hand history files
@@ -357,7 +360,7 @@ class PokerStarsSummary(TourneySummary):
             self.addPlayer(rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount, entryId)
 
     def parseSummaryFile(self):
-        m = self.re_TourneyInfo.search(self.summaryText.replace('=20', ''))
+        m = self.re_TourneyInfo.search(self.summaryText)
         if m == None:
             if self.re_Header.match(self.summaryText):
                 raise FpdbHandPartial
@@ -366,10 +369,10 @@ class PokerStarsSummary(TourneySummary):
             tmp = self.summaryText[0:200]
             log.error(("PokerStarsSummary.parseSummaryFile: '%s'") % self.summaryText)
             raise FpdbParseError
-
+        #m4 = self.re_TourneyInfo4.search(self.summaryText)
         #print "DEBUG: m.groupdict(): %s" % m.groupdict()        
         mg = m.groupdict()
-            
+        #mg4 = m4.groupdict()    
         if 'DATETIME'  in mg: m1 = self.re_DateTime.finditer(mg['DATETIME'])
         datetimestr = "2000/01/01 00:00:00"  # default used if time not found
         for a in m1:
@@ -394,13 +397,13 @@ class PokerStarsSummary(TourneySummary):
         if 'SPLIT' in mg and mg['SPLIT'] == 'Split':
             self.isSplit = True
         if mg['BOUNTY'] != None and mg['FEE'] != None:
-            self.koBounty = int(100*Decimal(self.clearMoneyString(mg['FEE'])))
+            self.koBounty = int(100*float(self.clearMoneyString(mg['FEE'])))
             self.isKO = True
             mg['FEE'] = mg['BOUNTY']
         if mg['BUYIN'] != None:
-            self.buyin = int(100*Decimal(self.clearMoneyString(mg['BUYIN']))) + self.koBounty
+            self.buyin = int(100*float(self.clearMoneyString(mg['BUYIN']))) + self.koBounty
         if mg['FEE'] != None:
-            self.fee   = int(100*Decimal(self.clearMoneyString(mg['FEE'])))
+            self.fee   = int(100*float(self.clearMoneyString(mg['FEE'])))
             
         m2 = self.re_rebuyAddOn.search(self.summaryText)
         if m2 and m2.group('REBUYCOUNT') != None:
@@ -422,17 +425,17 @@ class PokerStarsSummary(TourneySummary):
                 else:
                     targetBuyin, targetCurrency = 21500, "USD"  
             else:
-                self.prizepool = int(Decimal(self.clearMoneyString(mg['PRIZEPOOL'])))
+                self.prizepool = int(float(self.clearMoneyString(mg['PRIZEPOOL'])))
         if 'ENTRIES'   in mg: self.entries               = int(mg['ENTRIES'])
         if 'SATELLITE' in mg and mg['SATELLITE'] != None:
             self.isSatellite = True
             targetBuyin, targetCurrency = 0, "USD"
             if mg['TARGBUYIN'] != None:
-                targetBuyin += int(100*Decimal(self.clearMoneyString(mg['TARGBUYIN'])))
+                targetBuyin += int(100*float(self.clearMoneyString(mg['TARGBUYIN'])))
             if mg['TARGFEE'] != None:
-                targetBuyin += int(100*Decimal(self.clearMoneyString(mg['TARGFEE'])))
+                targetBuyin += int(100*float(self.clearMoneyString(mg['TARGFEE'])))
             if mg['TARGBOUNTY'] != None:
-                targetBuyin += int(100*Decimal(self.clearMoneyString(mg['TARGBOUNTY'])))
+                targetBuyin += int(100*float(self.clearMoneyString(mg['TARGBOUNTY'])))
             if mg['TARGCUR'] != None:
                 if mg['CUR'] == "$":     targetCurrency="USD"
                 elif mg['CUR'] == u"€":  targetCurrency="EUR"
@@ -477,7 +480,7 @@ class PokerStarsSummary(TourneySummary):
             entryId = 1             
 
             if 'WINNINGS' in mg and mg['WINNINGS'] != None:
-                winnings = int(100*Decimal(self.clearMoneyString(mg['WINNINGS'])))
+                winnings = int(100*float(self.clearMoneyString(mg['WINNINGS'])))
                 
             if 'CUR' in mg and mg['CUR'] != None:
                 if mg['CUR'] == "$":     self.currency="USD"
