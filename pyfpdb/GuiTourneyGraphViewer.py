@@ -104,7 +104,7 @@ class GuiTourneyGraphViewer(QSplitter):
         self.canvas = None
 
         self.db.rollback()
-
+        self.exportFile = None
     def clearGraphData(self):
         try:
             if self.canvas:
@@ -249,7 +249,7 @@ class GuiTourneyGraphViewer(QSplitter):
         #redline   = cumsum(red)
         return (old_div(greenline,100))
 
-    def exportGraph (self, widget, data):
+    def exportGraph (self):
         if self.fig is None:
             return # Might want to disable export button until something has been generated.
 
