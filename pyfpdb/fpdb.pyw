@@ -66,7 +66,7 @@ import GuiLogView
 #import GuiDatabase
 import GuiBulkImport
 import GuiTourneyImport
-import GuiImapFetcher
+
 import GuiRingPlayerStats
 import GuiTourneyPlayerStats
 import GuiTourneyViewer
