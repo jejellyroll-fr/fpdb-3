@@ -220,21 +220,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="Absolute" 
-                enabled="False"
-                screen_name="Hero"
-                site_path=""
-                HH_path=""
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
-            <layout_set game_type="all" ls="default"/>
-            <fav max="2" fav_seat="0"/>
-            <fav max="4" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="7" fav_seat="0"/>
-            <fav max="8" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
+
 
         <site site_name="PartyPoker"
                 enabled="False"
@@ -2046,7 +2032,6 @@
         <hhc site="Full Tilt Poker" converter="FulltiltToFpdb" summaryImporter="FullTiltPokerSummary"/>
         <hhc site="Everleaf" converter="EverleafToFpdb"/>
         <hhc site="Boss" converter="BossToFpdb"/>
-        <hhc site="Absolute" converter="AbsoluteToFpdb"/>
         <hhc site="PartyPoker" converter="PartyPokerToFpdb"/>
         <hhc site="Betfair" converter="BetfairToFpdb"/>
         <hhc site="Merge" converter="MergeToFpdb" summaryImporter="MergeSummary"/>

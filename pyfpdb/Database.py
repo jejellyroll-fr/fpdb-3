@@ -1875,7 +1875,7 @@ class Database(object):
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('5', 'OnGame', 'OG')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('6', 'UltimateBet', 'UB')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('7', 'Betfair', 'BF')")
-        c.execute("INSERT INTO Sites (id,name,code) VALUES ('8', 'Absolute', 'AB')")
+        #c.execute("INSERT INTO Sites (id,name,code) VALUES ('8', 'Absolute', 'AB')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('9', 'PartyPoker', 'PP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('10', 'PacificPoker', 'P8')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('11', 'Partouche', 'PA')")
