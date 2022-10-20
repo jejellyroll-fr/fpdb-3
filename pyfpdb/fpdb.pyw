@@ -648,7 +648,7 @@ class fpdb(QMainWindow):
     def dia_site_preferences(self, widget, data=None):
         dia = QDialog(self)
         dia.setWindowTitle(("Site Preferences"))
-        dia.resize(1600,900)
+        dia.resize(1200,600)
         label = QLabel(("Please select which sites you play on and enter your usernames."))
         dia.setLayout(QVBoxLayout())
         dia.layout().addWidget(label)
@@ -663,7 +663,7 @@ class fpdb(QMainWindow):
             except KeyError:
                 pass
         
-        column_headers=[("Site"), ("Detect"), ("Screen Name"), ("Hand History Path"), "", ("Tournament Summary Path"), ""]  # todo ("HUD")
+        column_headers=[("Site"), ("Detect"), ("Screen Name"), ("Hand History Path"), "", ("Tournament Summary Path"), "", ("Favorite seat")]  # todo ("HUD")
         #HUD column will contain a button that shows favseat and HUD locations. Make it possible to load screenshot to arrange HUD windowlets.
 
         table = QGridLayout()

@@ -113,6 +113,7 @@
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
             <fav max="7" fav_seat="0"/>
             <fav max="8" fav_seat="0"/>
@@ -130,6 +131,7 @@
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
             <fav max="7" fav_seat="0"/>
             <fav max="8" fav_seat="0"/>
@@ -140,7 +142,9 @@
         <site site_name="Merge" enabled="False" HH_path="C:/Program Files/Carbon Poker/HandHistory/YOUR SCREEN NAME HERE/" screen_name="h" site_path="C:/Program Files/Merge/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="merge_default"/>
             <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
             <fav max="7" fav_seat="0"/>
             <fav max="8" fav_seat="0"/>
@@ -170,7 +174,9 @@
         <site site_name="PacificPoker" enabled="False" HH_path="C:/Program Files/PacificPoker/HandHistory/YOUR SCREEN NAME HERE/" screen_name="g" site_path="C:/Program Files/PacificPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="pacific_default"/>
             <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
             <fav max="7" fav_seat="0"/>
             <fav max="8" fav_seat="0"/>
@@ -181,7 +187,9 @@
         <site site_name="Cake" enabled="False" HH_path="C:/Program Files/Cake/HandHistory/YOUR SCREEN NAME HERE/" screen_name="l" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="default"/>
             <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
             <fav max="7" fav_seat="0"/>
             <fav max="8" fav_seat="0"/>
@@ -196,6 +204,7 @@
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
             <fav max="7" fav_seat="0"/>
             <fav max="8" fav_seat="0"/>
@@ -209,6 +218,7 @@
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
             <fav max="7" fav_seat="0"/>
             <fav max="8" fav_seat="0"/>
@@ -222,6 +232,7 @@
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
             <fav max="7" fav_seat="0"/>
             <fav max="8" fav_seat="0"/>
@@ -235,7 +246,9 @@
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="all" ls="sealswithclubs_default"/>
             <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
             <fav max="7" fav_seat="0"/>
             <fav max="8" fav_seat="0"/>
@@ -249,6 +262,7 @@
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
             <fav max="7" fav_seat="0"/>
             <fav max="8" fav_seat="0"/>
@@ -262,6 +276,7 @@
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
             <fav max="7" fav_seat="0"/>
             <fav max="8" fav_seat="0"/>
@@ -275,6 +290,7 @@
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
             <fav max="7" fav_seat="0"/>
             <fav max="8" fav_seat="0"/>
@@ -290,6 +306,7 @@
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
             <fav max="7" fav_seat="0"/>
             <fav max="8" fav_seat="0"/>
@@ -1026,6 +1043,7 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
+
         <ls name="bovada_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -1255,6 +1273,7 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
+
          <ls name="KingsClub_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -1330,6 +1349,7 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
+        
         <ls name="GGPoker_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -1405,6 +1425,7 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
+
         <ls name="Unibet_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
