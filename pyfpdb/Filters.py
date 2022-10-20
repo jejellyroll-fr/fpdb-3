@@ -18,6 +18,7 @@
 
 from __future__ import print_function
 from __future__ import division
+from ast import Pass
 
 from dataclasses import replace
 from past.utils import old_div
@@ -167,7 +168,7 @@ class Filters(QWidget):
         self.layout().addWidget(tourneyFrame)
         self.cbTourney = {}
 
-        self.fillTourneyFrame(gamesFrame)
+        self.fillTourneyTypesFrame(tourneyFrame)
 
         # Currencies
         currenciesFrame = QGroupBox(self.filterText['currenciestitle'])
@@ -238,6 +239,8 @@ class Filters(QWidget):
             sitesFrame.hide()
         if "Games" not in self.display or self.display["Games"] is False:
             gamesFrame.hide()
+        if "Tourney" not in self.display or self.display["Tourney"] is False:
+            tourneyFrame.hide()
         if "Currencies" not in self.display or self.display["Currencies"] is False:
             currenciesFrame.hide()
         if "Limits" not in self.display or self.display["Limits"] is False:
@@ -269,6 +272,8 @@ class Filters(QWidget):
 
     def getNumTourneys(self):
         return 0
+
+    
 
     def getSites(self):
         return [s for s in self.cbSites if self.cbSites[s].isChecked()]
@@ -454,9 +459,6 @@ class Filters(QWidget):
             elif site == "Boss":  
                 completPlayer = _pname  
                 self.heroList.addItem(QIcon(icoPath +'boss.ico'),completPlayer)    
-            elif site == "Absolute":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'absolute.png'),completPlayer)  
             elif site == "PartyPoker":  
                 completPlayer = _pname  
                 self.heroList.addItem(QIcon(icoPath +'party.png'),completPlayer)    
@@ -539,20 +541,40 @@ class Filters(QWidget):
             self.cbSites[site].setChecked(True)
             vbox.addWidget(self.cbSites[site])
 
-    def fillTourneyTypesFrame(self, vbox):
+    def fillTourneyTypesFrame(self, frame):
         vbox1 = QVBoxLayout()
-        vbox.setLayout(vbox1)
-        self.boxes['tourneyTypes'] = vbox1
-
-        result = self.db.getTourneyTypesIds()
+        frame.setLayout(vbox1)
+        
+        req = self.cursor.execute("SELECT DISTINCT tourneyName FROM Tourneys")
+        result = req.fetchall()
+        print(result)
+        self.gameList = QComboBox()
+        self.gameList.setStyleSheet("background-color: #455364")   
+        for count,game in enumerate(result, start=0):
+            game = str(result[count])
+            if game == "(None,)":
+                game = "\'notnone\'"
+            game = game.replace("(","")
+            game = game.replace(",","")
+            game = game.replace(")","")
+            
+            print(game)
+            if game != 'notnone':
+                self.gameList.insertItem(count,game)
+            else:
+                pass
+        #vbox1.addWidget(self.gameList)
+        
         if len(result) >= 1:
             for line in result:
-                hbox = QHBoxLayout()
-                vbox1.addLayout(hbox)
-                self.createTourneyTypeLine(hbox, line[0])
+                self.cbTourney[line[0]] = QCheckBox(line[0])
+                self.cbTourney[line[0]].setChecked(True)
+                vbox1.addWidget(self.cbTourney[line[0]])
+
+
         else:
-            print(("INFO: No tourney types returned from database"))
-            log.info(("No tourney types returned from database"))
+            print(("INFO: No games returned from database"))
+            log.info(("No games returned from database"))
 
     def fillGamesFrame(self, frame):
         vbox1 = QVBoxLayout()
