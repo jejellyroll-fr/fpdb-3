@@ -44,7 +44,7 @@ FPDB is a poker tools - HUD - Replayer
 >hud
 - windows not working (error) -> Fixed
 - mac disappear behind the table -> fixed(Big sur)->regression Bug :( 
-- linux disappear behind the table (ubuntu) -> Fixed
+- linux disappear behind the table (ubuntu) -> Fixed -> not working with bottles
 - mtt table detection - bug on ipoker, must investigate other rooms
 >ui
 - dark theme
@@ -61,13 +61,13 @@ FPDB is a poker tools - HUD - Replayer
 |PMU| Win11| KO | KO  | KO|  KO  | KO   |
 |Unibet| no handhistory| X | X  | X|  X  | X   |
 
->poker rooms on linux with wine (7.16 with winetricks Q4wine)
-- Pokerstars (ok) - install libgl1-mesa-glx:i386, winbind
-- Winamax new soft(ko) - wine wlauncher.exe --mode unattended --unattendedmodeui none --cmdlaunch poker - install libcanberra-gtk-module
-- PMUPoker (ko) - install ole32,vcrun6 corefont with wintricks
-- Unibet(ko) -
-- betclic (ko) 
-- try bottles with wine (TODO)
+>poker rooms on linux with bottles (https://docs.usebottles.com/)
+- Pokerstars.fr (ok) 
+- Winamax new soft(ok)
+- PMUPoker (ok) - must restart install exe
+- Unibet.fr(ko) - must update exe
+- betclic.fr (ko) - installment ko
+
 
 ## Requirement for dev 
 Install the dependencies and devDependencies .
