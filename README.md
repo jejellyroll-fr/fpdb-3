@@ -21,26 +21,26 @@ FPDB is a poker tools - HUD - Replayer
 - not working mysql connector on py3.10 -> import MySQLdb (TO DO: find solution )
 - psql not tested (TO DO)
 - try bdd on containers (TO DO) 
->translation
-- mot working translation -> from icu import Locale
+>translation-language
+- not working translation -> from icu import Locale(TO DO: find better solution)
 >pokerstove
 - add odds calc (fast solution-> use Pokerprotools online WIP) -> prokerprotool is down (TO DO: other option install on pc, or use other lib ploev,treys... WIP)
 >replayer
 - not working ->fixed
-- rethink the distribution of players around the table
+- rethink the distribution of players around the table (TO DO: rework)
 - dev specific web front (TO DO: stay with python, exemple django or other laguage like js, exemple react.js)
 >import
-- correct bug on winamax (no SB)->Fixed
-- correct bug go fast (adding holdhup(extra cash->special rake 10%), error collected pot>total pot)->fixed
+- correct bug on winamax (no SB)->Fixed 
+- correct bug go fast (adding holdhup(extra cash->special rake 10%), error collected pot>total pot)->fixed(TO DO REWORK: include Chaz's methode, better way to do)
 - correct bug starting  hand razz guiringcashplayer
-- PMU not working siteid error
+- PMU not working siteid error(TODO)
 - correct bug import from pokertracker summary (TODO)
 >graphviz
 - use more modern lib (plotty ...)
 - improve visualization (TODO)
 >stats
 - to verify
-- add spin stats (TODO)
+- add spin stats (TODO: CeV depending on calculation )
 >hud
 - windows not working (error) -> Fixed
 - mac disappear behind the table -> fixed(Big sur)->regression Bug :( 
@@ -49,14 +49,13 @@ FPDB is a poker tools - HUD - Replayer
 >ui
 - dark theme
 - more modern (perhaps use pyside6 in the future)
->language
-- not working(TO DO: find solution)
+
 >site hud
 
 | X      |Os    |MTT| CG|Fast|SNG|SPIN|
 |------- |------|---|---|----|---|----|
-|winamax | win11| OK  | OK(except Floop)| KO | OK| OK |
-|Pokerstars| Win11| OK  |OK (except Fusion)| KO | OK  | OK   |
+|winamax | win11| OK  | OK(except Floop-no HH text)| KO | OK| OK |
+|Pokerstars| Win11| OK  |OK (except Fusion-fixed)| KO | OK  | OK   |
 |Betclic| Win11| KO | OK  | X|  KO  | KO   |
 |PMU| Win11| KO | KO  | KO|  KO  | KO   |
 |Unibet| no handhistory| X | X  | X|  X  | X   |
