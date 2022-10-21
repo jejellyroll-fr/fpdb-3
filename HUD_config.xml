@@ -382,6 +382,9 @@
         <game game_name="6_omahahi" aux="Classic_HUD, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
+            <game game_name="fusion" aux="Classic_HUD, mucked">
+            <game_stat_set game_type="all" stat_set="omaha_default"/>
+        </game>
     </supported_games>
 
 
@@ -433,6 +436,14 @@
                 <location seat="2" x="512" y="411"/>
                 <location seat="3" x="162" y="413"/>
                 <location seat="4" x="112" y="41"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
+            <layout max="5" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="512" y="411"/>
+                <location seat="3" x="162" y="413"/>
+                <location seat="4" x="112" y="41"/>
+                <location seat="5" x="32" y="291"/>
                 <location common="1" x="323" y="232"/>
             </layout>
             <layout max="6" height="546" width="792">
@@ -511,6 +522,14 @@
                 <location seat="4" x="112" y="41"/>
                 <location common="1" x="323" y="232"/>
             </layout>
+            <layout max="5" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="512" y="411"/>
+                <location seat="3" x="162" y="413"/>
+                <location seat="4" x="112" y="41"/>
+                <location seat="5" x="32" y="291"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
             <layout max="6" height="546" width="792">
                 <location seat="1" x="663" y="48"/>
                 <location seat="2" x="664" y="293"/>
@@ -541,7 +560,7 @@
                 <location seat="8" x="112" y="41"/>
                 <location common="1" x="323" y="232"/>
             </layout>
-            <layout height="546" max="9" width="792">
+            <layout height="9" max="9" width="792">
                 <location seat="1" x="559" y="0"/>
                 <location seat="2" x="671" y="115"/>
                 <location seat="3" x="679" y="244"/>
@@ -587,6 +606,14 @@
                 <location seat="2" x="512" y="411"/>
                 <location seat="3" x="162" y="413"/>
                 <location seat="4" x="112" y="41"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
+            <layout max="5" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="512" y="411"/>
+                <location seat="3" x="162" y="413"/>
+                <location seat="4" x="112" y="41"/>
+                <location seat="5" x="32" y="291"/>
                 <location common="1" x="323" y="232"/>
             </layout>
             <layout max="6" height="546" width="792">
@@ -665,6 +692,14 @@
                 <location seat="4" x="112" y="41"/>
                 <location common="1" x="323" y="232"/>
             </layout>
+            <layout max="5" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="512" y="411"/>
+                <location seat="3" x="162" y="413"/>
+                <location seat="4" x="112" y="41"/>
+                <location seat="5" x="32" y="291"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
             <layout max="6" height="546" width="792">
                 <location seat="1" hist_seat="1" x="663" y="48"/>
                 <location seat="2" hist_seat="3" x="664" y="293"/>
@@ -735,7 +770,15 @@
                 <location seat="2" x="2" y="221"/>
                 <location seat="3" x="162" y="413"/>
                 <location common="1" x="323" y="232"/>
-            </layout>            
+            </layout> 
+            <layout max="5" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="512" y="411"/>
+                <location seat="3" x="162" y="413"/>
+                <location seat="4" x="112" y="41"/>
+                <location seat="5" x="32" y="291"/>
+                <location common="1" x="323" y="232"/>
+            </layout>           
             <layout max="4" height="546" width="792">
                 <location seat="1" x="573" y="41"/>
                 <location seat="2" x="512" y="411"/>
@@ -819,6 +862,14 @@
                 <location seat="2" x="512" y="411"/>
                 <location seat="3" x="162" y="413"/>
                 <location seat="4" x="112" y="41"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
+            <layout max="5" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="512" y="411"/>
+                <location seat="3" x="162" y="413"/>
+                <location seat="4" x="112" y="41"/>
+                <location seat="5" x="32" y="291"/>
                 <location common="1" x="323" y="232"/>
             </layout>
             <layout max="6" height="546" width="792">
@@ -987,6 +1038,14 @@
                 <location seat="4" x="112" y="41"/>
                 <location common="1" x="323" y="232"/>
             </layout>
+            <layout max="5" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="512" y="411"/>
+                <location seat="3" x="162" y="413"/>
+                <location seat="4" x="112" y="41"/>
+                <location seat="5" x="32" y="291"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
             <layout max="6" height="546" width="792">
                 <location seat="1" x="663" y="48"/>
                 <location seat="2" x="664" y="293"/>
@@ -1063,6 +1122,14 @@
                 <location seat="4" x="112" y="41"/>
                 <location common="1" x="323" y="232"/>
             </layout>
+            <layout max="5" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="512" y="411"/>
+                <location seat="3" x="162" y="413"/>
+                <location seat="4" x="112" y="41"/>
+                <location seat="5" x="32" y="291"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
             <layout max="6" height="546" width="792">
                 <location seat="1" x="663" y="48"/>
                 <location seat="2" x="664" y="293"/>
@@ -1132,6 +1199,14 @@
                 <location seat="1" x="681" y="221"/>
                 <location seat="2" x="2" y="221"/>
                 <location seat="3" x="162" y="413"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
+            <layout max="5" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="512" y="411"/>
+                <location seat="3" x="162" y="413"/>
+                <location seat="4" x="112" y="41"/>
+                <location seat="5" x="32" y="291"/>
                 <location common="1" x="323" y="232"/>
             </layout>            
             <layout max="4" height="546" width="792">
@@ -1217,6 +1292,14 @@
                 <location seat="4" x="112" y="41"/>
                 <location common="1" x="323" y="232"/>
             </layout>
+            <layout max="5" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="512" y="411"/>
+                <location seat="3" x="162" y="413"/>
+                <location seat="4" x="112" y="41"/>
+                <location seat="5" x="32" y="291"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
             <layout max="6" height="546" width="792">
                 <location seat="1" x="663" y="48"/>
                 <location seat="2" x="664" y="293"/>
@@ -1291,6 +1374,14 @@
                 <location seat="2" x="512" y="411"/>
                 <location seat="3" x="162" y="413"/>
                 <location seat="4" x="112" y="41"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
+            <layout max="5" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="512" y="411"/>
+                <location seat="3" x="162" y="413"/>
+                <location seat="4" x="112" y="41"/>
+                <location seat="5" x="32" y="291"/>
                 <location common="1" x="323" y="232"/>
             </layout>
             <layout max="6" height="546" width="792">
@@ -1369,6 +1460,14 @@
                 <location seat="4" x="112" y="41"/>
                 <location common="1" x="323" y="232"/>
             </layout>
+            <layout max="5" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="512" y="411"/>
+                <location seat="3" x="162" y="413"/>
+                <location seat="4" x="112" y="41"/>
+                <location seat="5" x="32" y="291"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
             <layout max="6" height="546" width="792">
                 <location seat="1" x="663" y="48"/>
                 <location seat="2" x="664" y="293"/>
@@ -1443,6 +1542,14 @@
                 <location seat="2" x="512" y="411"/>
                 <location seat="3" x="162" y="413"/>
                 <location seat="4" x="112" y="41"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
+            <layout max="5" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="512" y="411"/>
+                <location seat="3" x="162" y="413"/>
+                <location seat="4" x="112" y="41"/>
+                <location seat="5" x="32" y="291"/>
                 <location common="1" x="323" y="232"/>
             </layout>
             <layout max="6" height="546" width="792">
@@ -1599,7 +1706,6 @@
 
 
     <popup_windows>
-
 
         <pu pu_name="holdring_main" pu_class="Submenu">
             <pu_stat pu_stat_name="playername"/>
