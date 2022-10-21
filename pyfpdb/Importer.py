@@ -182,7 +182,7 @@ class Importer(object):
             
     #Add an individual file to filelist
     def addImportFile(self, filename, site = "auto"):
-        print("addimportfile: filename is a", filename.__class__, filename)
+        #DEBUG->print("addimportfile: filename is a", filename.__class__, filename)
         # filename not guaranteed to be unicode
         if self.filelist.get(filename)!=None or not os.path.exists(filename):
             return False
