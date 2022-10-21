@@ -611,7 +611,9 @@ class Hand(object):
     def addStreets(self, match):
         # go through m and initialise actions to empty list for each street.
         if match:
+            print("if match:",match.groupdict())
             self.streets.update(match.groupdict())
+            print('streets:',str(self.streets))
             log.debug("markStreets:\n"+ str(self.streets))
         else:
             tmp = self.handText[0:100]
