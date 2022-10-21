@@ -575,8 +575,9 @@ class PokerStars(HandHistoryConverter):
                            r"(\*\*\* FIRST DRAW \*\*\*(?P<DRAWONE>.+(?=\*\*\* SECOND DRAW \*\*\*)|.+))?"
                            r"(\*\*\* SECOND DRAW \*\*\*(?P<DRAWTWO>.+(?=\*\*\* THIRD DRAW \*\*\*)|.+))?"
                            r"(\*\*\* THIRD DRAW \*\*\*(?P<DRAWTHREE>.+))?", hand.handText,re.DOTALL)
+        print("type",type(m), m)
         mg = m.groupdict()
-        print(mg)
+        print("type mg" ,type(mg), mg)
         hand.addStreets(m)
 
     def readCommunityCards(self, hand, street): # street has been matched by markStreets, so exists in this hand
@@ -649,7 +650,9 @@ class PokerStars(HandHistoryConverter):
                         hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
 
         for street, text in list(hand.streets.items()):
-            if not text or street in ('PREFLOP', 'DEAL'): continue  # already done these
+            print('text',text)
+            print(list(hand.streets.items()))
+            if not text or street in ('PREFLOP','DEAL'): continue  # already done these
             m = self.re_HeroCards.finditer(hand.streets[street])
             for found in m:
                 player = found.group('PNAME')
