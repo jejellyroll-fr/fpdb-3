@@ -286,6 +286,7 @@ class HUD_main(QObject):
 
         # regenerate temp_key for this hand- this is the tablename (+ tablenumber (if mtt))
         if type == "tour":   # hand is from a tournament
+            tab_number = tab_number.rsplit(' ',1)[-1]
             temp_key = "%s Table %s" % (tour_number, tab_number)
             print("temp_key tour",temp_key)
         else:
@@ -301,10 +302,12 @@ class HUD_main(QObject):
             #  if a hand is received for a "new" table number, clean-up the old one and create a new hud
             #
             if temp_key in self.hud_dict:
+                #debub:print('temp_is in self.hud_dict')
                 # check if our attached window's titlebar has changed, if it has
                 # this method will emit a "table_changed" signal which will trigger
                 # a kill
                 if self.hud_dict[temp_key].table.has_table_title_changed(self.hud_dict[temp_key]):
+                    #debug:print('table has been renamed')
                     #table has been renamed; the idle_kill method will housekeep hud_dict
                     # We will skip this hand, to give time for the idle function
                     # to complete its' work.  Normal service will be resumed on the next hand
@@ -315,6 +318,7 @@ class HUD_main(QObject):
                 #if it is, trigger a hud_kill - we can safely drop through the rest of the code
                 # because this is a brand-new hud being created
                 for k in self.hud_dict:
+                    #debug:print('check if the tournament number is in the hud_dict under a different table')
                     if k.startswith(tour_number):
                         self.table_is_stale(self.hud_dict[k])
                         continue # this cancels the "for k in...." loop, NOT the outer while: loop
@@ -323,6 +327,7 @@ class HUD_main(QObject):
 #       detect maxseats changed in hud
 #       if so, kill and create new hud with specified "max"
         if temp_key in self.hud_dict:
+            #debug:print('temp_is in self.hud_dict2')
             try:
                 newmax = self.hud_dict[temp_key].hud_params['new_max_seats']  # trigger
                 if newmax and self.hud_dict[temp_key].max != newmax:  # max has changed

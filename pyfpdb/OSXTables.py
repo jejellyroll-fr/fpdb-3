@@ -94,12 +94,13 @@ class Table(Table_Window):
 
     def get_window_title(self):
         WinListDict = CGWindowListCreateDescriptionFromArray((self.number,))
-
+        options = kCGWindowListOptionOnScreenOnly
+        #windowList = CGWindowListCopyWindowInfo(options, kCGNullWindowID)
         for d in WinListDict:
-            if d[kCGWindowNumber] == self.number:
-                print("self number,", self.number)
-                print("d[kCGWindowNumber]", d[kCGWindowNumber])
-                return d[kCGWindowName]
+            #for b in windowList:
+            if d[kCGWindowNumber] == self.number:#and b[kCGWindowNumber] == self.number :
+                    #print("kCGWindowName", b.get(kCGWindowName, ''))
+                return d[kCGWindowOwnerName]
         return None
 
     def topify(self, window):

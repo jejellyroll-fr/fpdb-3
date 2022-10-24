@@ -105,7 +105,7 @@ class Table_Window(object):
             print(type(table_number))
             print(table_number)
             #temp bug correction for stars must investigate 
-            table_number = table_number.rsplit(' ',1)[-1]
+            #table_number = table_number.rsplit(' ',1)[-1]
             print('table_number:')
             print(type(table_number))
             print(table_number)
@@ -240,7 +240,9 @@ class Table_Window(object):
 
     def has_table_title_changed(self, hud):
         result = self.get_table_no()
+        print('tb has change nb', result)
         if result is not False and result != self.table:
+            print('compare result and self.table', result, self.table)
             self.table = result
             if hud is not None:
                 return True
