@@ -216,10 +216,10 @@ class IdentifySite(object):
         """Identifies the site the hh file originated from"""
         f = FPDBFile(path)
         f.kodec = kodec
-        print('idsite path',path )
-        print('idsite f',f,f.ftype,f.site,f.gametype )
+        #DEBUG:print('idsite path',path )
+        #DEBUG:print('idsite f',f,f.ftype,f.site,f.gametype )
         
-        print('idsite self.sitelist.items',self.sitelist.items())
+        #DEBUG:print('idsite self.sitelist.items',self.sitelist.items())
         for id, site in list(self.sitelist.items()):
             filter_name = site.filter_name
             m = site.re_Identify.search(whole_file[:5000])

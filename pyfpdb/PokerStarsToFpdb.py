@@ -816,7 +816,7 @@ class PokerStars(HandHistoryConverter):
         regex = re.escape(str(table_name))
         print("regex cash ", regex)
         if type=="tour":
-            regex = re.escape(str(tournament)) + ".* (Table|Tisch) " + re.escape(str(table_number))
+            regex = re.escape(str(tournament)) + " (Table|Tisch) " + re.escape(str(table_number))
             print("regex tour: ", regex)
         log.info("Stars.getTableTitleRe: table_name='%s' tournament='%s' table_number='%s'" % (table_name, tournament, table_number))
         log.info("Stars.getTableTitleRe: returns: '%s'" % (regex))
