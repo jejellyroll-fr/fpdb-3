@@ -6080,6 +6080,7 @@ class Sql(object):
             WHERE pl.id in <player_test>
             AND   pl.siteId in <site_test>
             AND t.tourneyName in <tourney_test>
+            AND tt.category in <tourney_cat>
             AND   (t.startTime > '<startdate_test>' AND t.startTime < '<enddate_test>')
                  <currency_test>
             GROUP BY t.startTime, tp.tourneyId, tp.winningsCurrency,

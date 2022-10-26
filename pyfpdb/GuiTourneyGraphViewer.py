@@ -64,9 +64,10 @@ class GuiTourneyGraphViewer(QSplitter):
 
 
         filters_display = { "Heroes"    : True,
-                            "Sites"     : True,
-                            "Games"     : True,
-                            "Tourney"   : True,
+                            "Sites"     : False,
+                            "Games"     : False,
+                            "Tourney"   : False,
+                            "Tourneys category"   : True,
                             "Currencies": True,
                             "buyIn"     : True,
                             "Limits"    : False,
@@ -212,6 +213,7 @@ class GuiTourneyGraphViewer(QSplitter):
         tmp = self.sql.query['tourneyGraphType']
         start_date, end_date = self.filters.getDates()
         tourneys = self.filters.getTourneyTypes()
+        tourneysCat = self.filters.getTourneyCat()
         currencies = { 'EUR':'EUR', 'USD':'USD', '':'T$'}
         currencytest = str(tuple(currencies))
         currencytest = currencytest.replace(",)",")")
@@ -224,6 +226,7 @@ class GuiTourneyGraphViewer(QSplitter):
         nametest = str(tuple(names))
         sitetest = str(tuple(sites))
         tourneystest = str(tuple(tourneys))
+        tourneysCattest = str(tuple(tourneysCat))
         tourneystest = tourneystest.replace('None', '\"None\"') 
         print(tourneystest)
         #Must be a nicer way to deal with tuples of size 1 ie. (2,) - which makes sql barf
@@ -232,6 +235,7 @@ class GuiTourneyGraphViewer(QSplitter):
         tmp = tmp.replace("<startdate_test>", start_date)
         tmp = tmp.replace("<enddate_test>", end_date)
         tmp = tmp.replace("<currency_test>", currencytest)
+        tmp = tmp.replace("<tourney_cat>", tourneysCattest)
         print(tourneys)
         tmp = tmp.replace("<tourney_test>", tourneystest)
         tmp = tmp.replace(",)", ")")
