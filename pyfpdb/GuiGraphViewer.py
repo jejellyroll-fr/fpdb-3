@@ -63,7 +63,7 @@ class GuiGraphViewer(QSplitter):
 
 
         filters_display = { "Heroes"    : True,
-                            "Sites"     : True,
+                            "Sites"     : False,
                             "Games"     : True,
                             "Currencies": True,
                             "Limits"    : True,
@@ -317,8 +317,8 @@ class GuiGraphViewer(QSplitter):
         tmp = tmp.replace("<currency_test>", currencytest)
         tmp = tmp.replace(",)", ")")
 
-        #print "DEBUG: sql query:"
-        #print tmp
+        print ("DEBUG: sql query:")
+        print( tmp)
         self.db.cursor.execute(tmp)
         #returns (HandId,Winnings,Costs,Profit)
         winnings = self.db.cursor.fetchall()

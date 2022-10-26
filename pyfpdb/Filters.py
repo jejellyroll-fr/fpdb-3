@@ -101,7 +101,7 @@ class Filters(QWidget):
                           ,'positionsall':('All'), 'positionsnone':('None')
                           ,'currenciesall':('All'), 'currenciesnone':('None')
                           ,'seatsbetween':('Between:'), 'seatsand':('And:'), 'seatsshow':('Show Number of Players')
-                          ,'playerstitle':('Hero:'), 'sitestitle':(('Sites')+':'), 'gamestitle':(('Games')+':'), 'tourneytitle':(('Tourney')+':')
+                          ,'playerstitle':('Hero:'), 'sitestitle':(('Sites')+':'), 'gamestitle':(('Games')+':'), 'tourneytitle':(('Tourney')+':'),'tourneycat':(('Tourneys category')+':')
                           ,'limitstitle':('Limits:'), 'positionstitle':('Positions:'), 'seatstitle':('Number of Players:')
                           ,'groupstitle':('Grouping:'), 'posnshow':('Show Position Stats')
                           ,'datestitle':('Date:'), 'currenciestitle':(('Currencies')+':')
@@ -169,6 +169,13 @@ class Filters(QWidget):
         self.cbTourney = {}
 
         self.fillTourneyTypesFrame(tourneyFrame)
+
+        # Tourney category
+        tourneyCatFrame = QGroupBox(self.filterText['tourneycat'])
+        self.layout().addWidget(tourneyCatFrame)
+        self.cbTourneyCat = {}
+
+        self.fillTourneyCatFrame(tourneyCatFrame)
 
         # Currencies
         currenciesFrame = QGroupBox(self.filterText['currenciestitle'])
@@ -241,6 +248,8 @@ class Filters(QWidget):
             gamesFrame.hide()
         if "Tourney" not in self.display or self.display["Tourney"] is False:
             tourneyFrame.hide()
+        if "Tourneys category" not in self.display or self.display["Tourneys category"] is False:
+            tourneyCatFrame.hide()
         if "Currencies" not in self.display or self.display["Currencies"] is False:
             currenciesFrame.hide()
         if "Limits" not in self.display or self.display["Limits"] is False:
@@ -280,6 +289,9 @@ class Filters(QWidget):
     
     def getPositions(self):
         return [p for p in self.cbPositions if self.cbPositions[p].isChecked()]
+
+    def getTourneyCat(self):
+        return [g for g in self.cbTourneyCat if self.cbTourneyCat[g].isChecked()]
 
     def getTourneyTypes(self):
         return [g for g in self.cbTourney if self.cbTourney[g].isChecked()]
@@ -579,6 +591,50 @@ class Filters(QWidget):
                     self.cbTourney[line[0]] = QCheckBox(line[0])
                     self.cbTourney[line[0]].setChecked(True)
                     vbox1.addWidget(self.cbTourney[line[0]])
+
+
+        else:
+            print(("INFO: No games returned from database"))
+            log.info(("No games returned from database"))
+
+    def fillTourneyCatFrame(self, frame):
+        vbox1 = QVBoxLayout()
+        frame.setLayout(vbox1)
+        
+        req = self.cursor.execute("SELECT DISTINCT category FROM TourneyTypes")
+        result = req.fetchall()
+        print(result)
+        self.gameList = QComboBox()
+        self.gameList.setStyleSheet("background-color: #455364")   
+        for count,game in enumerate(result, start=0):
+            game = str(result[count])
+            if game == "(None,)":
+                game = "(\"None\",)"
+                game = game.replace("(","")
+                game = game.replace(",","")
+                game = game.replace(")","")
+            else:
+                game = game.replace("(","")
+                game = game.replace(",","")
+                game = game.replace(")","")
+            
+            print(game)
+            if game != '"None"':
+                self.gameList.insertItem(count,game)
+            else:
+                self.gameList.insertItem(count,game)
+        #vbox1.addWidget(self.gameList)
+        
+        if len(result) >= 1:
+            for line in result:
+                if str(line) == "(None,)":
+                    self.cbTourneyCat[line[0]] = QCheckBox("None")
+                    self.cbTourneyCat[line[0]].setChecked(True)
+                    vbox1.addWidget(self.cbTourneyCat[line[0]])
+                else:
+                    self.cbTourneyCat[line[0]] = QCheckBox(line[0])
+                    self.cbTourneyCat[line[0]].setChecked(True)
+                    vbox1.addWidget(self.cbTourneyCat[line[0]])
 
 
         else:
