@@ -70,7 +70,7 @@ class GuiTourneyGraphViewer(QSplitter):
                             "King of game"   : True,
                             "Betting limit"   : True,
                             "Buyin"   : True,
-                            "Currencies": True,
+                            "Currencies": False,
                             "buyIn"     : True,
                             "Limits"    : False,
                             "LimitSep"  : False,
