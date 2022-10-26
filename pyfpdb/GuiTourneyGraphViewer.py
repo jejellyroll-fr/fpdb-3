@@ -235,6 +235,7 @@ class GuiTourneyGraphViewer(QSplitter):
         tourneysLimtest = str(tuple(tourneysLim))
         tourneysBuyintest = str(tuple(tourneysBuyin))
         tourneystest = tourneystest.replace('None', '\"None\"') 
+        tourneysBuyintest = tourneysBuyintest.replace('None', '\"None\"') 
         print(tourneystest)
         #Must be a nicer way to deal with tuples of size 1 ie. (2,) - which makes sql barf
         tmp = tmp.replace("<player_test>", nametest)
