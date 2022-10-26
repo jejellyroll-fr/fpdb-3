@@ -553,23 +553,32 @@ class Filters(QWidget):
         for count,game in enumerate(result, start=0):
             game = str(result[count])
             if game == "(None,)":
-                game = "\'notnone\'"
-            game = game.replace("(","")
-            game = game.replace(",","")
-            game = game.replace(")","")
+                game = "(\"None\",)"
+                game = game.replace("(","")
+                game = game.replace(",","")
+                game = game.replace(")","")
+            else:
+                game = game.replace("(","")
+                game = game.replace(",","")
+                game = game.replace(")","")
             
             print(game)
-            if game != 'notnone':
+            if game != '"None"':
                 self.gameList.insertItem(count,game)
             else:
-                pass
+                self.gameList.insertItem(count,game)
         #vbox1.addWidget(self.gameList)
         
         if len(result) >= 1:
             for line in result:
-                self.cbTourney[line[0]] = QCheckBox(line[0])
-                self.cbTourney[line[0]].setChecked(True)
-                vbox1.addWidget(self.cbTourney[line[0]])
+                if str(line) == "(None,)":
+                    self.cbTourney[line[0]] = QCheckBox("None")
+                    self.cbTourney[line[0]].setChecked(True)
+                    vbox1.addWidget(self.cbTourney[line[0]])
+                else:
+                    self.cbTourney[line[0]] = QCheckBox(line[0])
+                    self.cbTourney[line[0]].setChecked(True)
+                    vbox1.addWidget(self.cbTourney[line[0]])
 
 
         else:
