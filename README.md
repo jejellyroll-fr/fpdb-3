@@ -46,17 +46,24 @@ FPDB is a poker tools - HUD - Replayer
 - mac disappear behind the table -> fixed(Big sur)->regression Bug :( 
 - linux disappear behind the table (ubuntu) -> Fixed -> not working with bottles
 - mtt table detection - bug on ipoker, must investigate other rooms
+- add ui for seat config per site (TODO)
+- add ui for Hud config per games (TODO)
 >ui
 - dark theme
 - more modern (perhaps use pyside6 in the future)
+>notebook jupyter
+- add some notebooks
 
 >site hud
 
 | X      |Os    |MTT| CG|Fast|SNG|SPIN|
 |------- |------|---|---|----|---|----|
 |winamax | win11| OK  | OK(except Floop-no HH text)| KO | OK| OK |
+|winamax | osx big sur (intel)| OK  | OK(except Floop-no HH text)| KO | OK| OK |
 |Pokerstars| Win11| OK  |OK (except Fusion-fixed)| KO | OK  | OK   |
+|Pokerstars| osx big sur (intel)| OK  |OK (except Fusion-fixed)| KO | OK  | OK   |
 |Betclic| Win11| KO | OK  | X|  KO  | KO   |
+|Betclic| osx no HH| x | x  | X|  x  | x   |
 |PMU| Win11| KO | KO  | KO|  KO  | KO   |
 |Unibet| no handhistory| X | X  | X|  X  | X   |
 
