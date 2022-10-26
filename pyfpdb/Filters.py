@@ -101,9 +101,9 @@ class Filters(QWidget):
                           ,'positionsall':('All'), 'positionsnone':('None')
                           ,'currenciesall':('All'), 'currenciesnone':('None')
                           ,'seatsbetween':('Between:'), 'seatsand':('And:'), 'seatsshow':('Show Number of Players')
-                          ,'playerstitle':('Hero:'), 'sitestitle':(('Sites')+':'), 'gamestitle':(('Games')+':'), 'tourneytitle':(('Tourney')+':'),'tourneycat':(('Tourneys category')+':')
-                          ,'limitstitle':('Limits:'), 'positionstitle':('Positions:'), 'seatstitle':('Number of Players:')
-                          ,'groupstitle':('Grouping:'), 'posnshow':('Show Position Stats')
+                          ,'playerstitle':('Hero:'), 'sitestitle':(('Sites')+':'), 'gamestitle':(('Games')+':'), 'tourneytitle':(('Tourney')+':'),'tourneycat':(('King of game')+':')
+                          ,'limitstitle':('Limits:'), 'positionstitle':('Positions:'), 'seatstitle':('Number of Players:'),'tourneylim':(('Betting limit')+':')
+                          ,'groupstitle':('Grouping:'), 'posnshow':('Show Position Stats'),'tourneybuyin':(('Buyin')+':')
                           ,'datestitle':('Date:'), 'currenciestitle':(('Currencies')+':')
                           ,'groupsall':('All Players'), 'cardstitle':(('Hole Cards')+':')
                           ,'limitsFL':'FL', 'limitsNL':'NL', 'limitsPL':'PL', 'limitsCN':'CAP', 'ring':('Ring'), 'tour':('Tourney'), 'limitsHP':'HP'
@@ -177,6 +177,20 @@ class Filters(QWidget):
 
         self.fillTourneyCatFrame(tourneyCatFrame)
 
+        # Tourney limit
+        tourneyLimFrame = QGroupBox(self.filterText['tourneylim'])
+        self.layout().addWidget(tourneyLimFrame)
+        self.cbTourneyLim = {}
+
+        self.fillTourneyLimFrame(tourneyLimFrame)
+
+        # Tourney buyin
+        tourneyBuyinFrame = QGroupBox(self.filterText['tourneybuyin'])
+        self.layout().addWidget(tourneyBuyinFrame)
+        self.cbTourneyBuyin = {}
+
+        self.fillTourneyBuyinFrame(tourneyBuyinFrame)
+
         # Currencies
         currenciesFrame = QGroupBox(self.filterText['currenciestitle'])
         self.layout().addWidget(currenciesFrame)
@@ -248,8 +262,12 @@ class Filters(QWidget):
             gamesFrame.hide()
         if "Tourney" not in self.display or self.display["Tourney"] is False:
             tourneyFrame.hide()
-        if "Tourneys category" not in self.display or self.display["Tourneys category"] is False:
+        if "King of game" not in self.display or self.display["King of game"] is False:
             tourneyCatFrame.hide()
+        if "Betting limit" not in self.display or self.display["Betting limit"] is False:
+            tourneyLimFrame.hide()
+        if "Buyin" not in self.display or self.display["Buyin"] is False:
+            tourneyBuyinFrame.hide()
         if "Currencies" not in self.display or self.display["Currencies"] is False:
             currenciesFrame.hide()
         if "Limits" not in self.display or self.display["Limits"] is False:
@@ -292,6 +310,12 @@ class Filters(QWidget):
 
     def getTourneyCat(self):
         return [g for g in self.cbTourneyCat if self.cbTourneyCat[g].isChecked()]
+
+    def getTourneyLim(self):
+        return [g for g in self.cbTourneyLim if self.cbTourneyLim[g].isChecked()]
+
+    def getTourneyBuyin(self):
+        return [g for g in self.cbTourneyBuyin if self.cbTourneyBuyin[g].isChecked()]
 
     def getTourneyTypes(self):
         return [g for g in self.cbTourney if self.cbTourney[g].isChecked()]
@@ -635,6 +659,94 @@ class Filters(QWidget):
                     self.cbTourneyCat[line[0]] = QCheckBox(line[0])
                     self.cbTourneyCat[line[0]].setChecked(True)
                     vbox1.addWidget(self.cbTourneyCat[line[0]])
+
+
+        else:
+            print(("INFO: No games returned from database"))
+            log.info(("No games returned from database"))
+
+    def fillTourneyLimFrame(self, frame):
+        vbox1 = QVBoxLayout()
+        frame.setLayout(vbox1)
+        
+        req = self.cursor.execute("SELECT DISTINCT limitType FROM TourneyTypes")
+        result = req.fetchall()
+        print(result)
+        self.gameList = QComboBox()
+        self.gameList.setStyleSheet("background-color: #455364")   
+        for count,game in enumerate(result, start=0):
+            game = str(result[count])
+            if game == "(None,)":
+                game = "(\"None\",)"
+                game = game.replace("(","")
+                game = game.replace(",","")
+                game = game.replace(")","")
+            else:
+                game = game.replace("(","")
+                game = game.replace(",","")
+                game = game.replace(")","")
+            
+            print(game)
+            if game != '"None"':
+                self.gameList.insertItem(count,game)
+            else:
+                self.gameList.insertItem(count,game)
+        #vbox1.addWidget(self.gameList)
+        
+        if len(result) >= 1:
+            for line in result:
+                if str(line) == "(None,)":
+                    self.cbTourneyLim[line[0]] = QCheckBox("None")
+                    self.cbTourneyLim[line[0]].setChecked(True)
+                    vbox1.addWidget(self.cbTourneyLim[line[0]])
+                else:
+                    self.cbTourneyLim[line[0]] = QCheckBox(line[0])
+                    self.cbTourneyLim[line[0]].setChecked(True)
+                    vbox1.addWidget(self.cbTourneyLim[line[0]])
+
+
+        else:
+            print(("INFO: No games returned from database"))
+            log.info(("No games returned from database"))
+
+    def fillTourneyBuyinFrame(self, frame):
+        vbox1 = QVBoxLayout()
+        frame.setLayout(vbox1)
+        
+        req = self.cursor.execute("SELECT DISTINCT buyin FROM TourneyTypes")
+        result = req.fetchall()
+        print(result)
+        self.gameList = QComboBox()
+        self.gameList.setStyleSheet("background-color: #455364")   
+        for count,game in enumerate(result, start=0):
+            game = str(result[count])
+            if game == "(None,)":
+                game = "(\"None\",)"
+                game = game.replace("(","")
+                game = game.replace(",","")
+                game = game.replace(")","")
+            else:
+                game = game.replace("(","")
+                game = game.replace(",","")
+                game = game.replace(")","")
+            
+            print(game)
+            if game != '"None"':
+                self.gameList.insertItem(count,game)
+            else:
+                self.gameList.insertItem(count,game)
+        #vbox1.addWidget(self.gameList)
+        
+        if len(result) >= 1:
+            for line in result:
+                if str(line) == "(None,)":
+                    self.cbTourneyBuyin[line[0]] = QCheckBox("None")
+                    self.cbTourneyBuyin[line[0]].setChecked(True)
+                    vbox1.addWidget(self.cbTourneyBuyin[line[0]])
+                else:
+                    self.cbTourneyBuyin[line[0]] = QCheckBox(str(line[0]*0.01))
+                    self.cbTourneyBuyin[line[0]].setChecked(True)
+                    vbox1.addWidget(self.cbTourneyBuyin[line[0]])
 
 
         else:
