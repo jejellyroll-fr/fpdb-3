@@ -48,7 +48,7 @@ from PyQt5.QtWidgets import (QAction, QApplication, QCalendarWidget,
                              QGridLayout, QHBoxLayout, QInputDialog,
                              QLabel, QLineEdit, QMainWindow,
                              QMessageBox, QPushButton, QScrollArea,
-                             QTabWidget, QVBoxLayout, QWidget)
+                             QTabWidget, QVBoxLayout, QWidget, QComboBox)
 
 import interlocks
 from Exceptions import *
@@ -97,6 +97,8 @@ try:
     VERSION = VERSION[:-1]
 except:
     VERSION = "0.40.4"
+
+
 
 
 class fpdb(QMainWindow):
@@ -344,60 +346,91 @@ class fpdb(QMainWindow):
         dia.setLayout(QVBoxLayout())
     #     label.show()
         dia.layout().addWidget(label)
-        
-    #     label = QLabel(("Please select the game category for which you want to configure HUD stats:"))
+        label2 = QLabel(("Please select the game category for which you want to configure HUD stats:"))
     #     diaSelections.vbox.add(label)
     #     label.show()
-
-    #     comboGame = gtk.combo_box_new_text()
-    #     comboGame.connect("changed", self.hud_preferences_combo_selection)
+        dia.layout().addWidget(label2)
+        comboGame = QComboBox()
+        #comboGame.connect("changed", self.hud_preferences_combo_selection)
     #     diaSelections.vbox.add(comboGame)
-    #     games = self.config.get_stat_sets()
-    #     for game in games:
-    #         comboGame.append_text(game)
-    #     comboGame.set_active(0)
-    #     comboGame.show()
 
-    #     comboRows = gtk.combo_box_new_text()
-    #     comboRows.connect("changed", self.hud_preferences_combo_selection)
-    #     diaSelections.vbox.add(comboRows)
-    #     for i in range(1, 8):
-    #         comboRows.append_text(str(i) + " rows")
-    #     comboRows.set_active(0)
-    #     comboRows.show()
+        games = self.config.get_stat_sets()
+        for game in games:
+            comboGame.addItem(game)
 
-    #     comboColumns = gtk.combo_box_new_text()
-    #     comboColumns.connect("changed", self.hud_preferences_combo_selection)
-    #     diaSelections.vbox.add(comboColumns)
-    #     for i in range(1, 8):
-    #         comboColumns.append_text(str(i) + " columns")
-    #     comboColumns.set_active(0)
-    #     comboColumns.show()
 
-    #     self.load_profile()
-    #     response = diaSelections.run()
-    #     diaSelections.destroy()
+        dia.layout().addWidget(comboGame)
 
-    #     if (response == gtk.RESPONSE_ACCEPT and
-    #         self.hud_preferences_rows != None and
-    #         self.hud_preferences_columns != None and
-    #         self.hud_preferences_game != None):
-    #         self.dia_hud_preferences_table()
-        dia.exec_()
-    #end def dia_hud_preferences
-
-    def hud_preferences_combo_selection(self, widget):
-        #TODO: remove this and handle it directly in dia_hud_preferences
-        result = widget.get_active_text()
+        result = comboGame.currentText()
         if result.endswith(" rows"):
             self.hud_preferences_rows = int(result[0])
+            print(self.hud_preferences_rows)
         elif result.endswith(" columns"):
             self.hud_preferences_columns = int(result[0])
+            print(self.hud_preferences_columns)
         else:
             self.hud_preferences_game = result
-    #end def hud_preferences_combo_selection
+            print(self.hud_preferences_game)
+    #     comboGame.show()
 
-    # def dia_hud_preferences_table(self):
+        comboRows = QComboBox()
+    #     comboRows.connect("changed", self.hud_preferences_combo_selection)
+    #     diaSelections.vbox.add(comboRows)
+        for i in range(1, 8):
+            comboRows.addItem(str(i) + " rows")
+    #     comboRows.set_active(0)
+    #     comboRows.show()
+        dia.layout().addWidget(comboRows)
+
+        result2 = comboRows.currentText()
+        if result2.endswith(" rows"):
+            self.hud_preferences_rows = int(result2[0])
+            print(self.hud_preferences_rows)
+        elif result2.endswith(" columns"):
+            self.hud_preferences_columns = int(result2[0])
+            print(self.hud_preferences_columns)
+        else:
+            self.hud_preferences_game = result2
+            print(self.hud_preferences_game)
+
+        comboColumns = QComboBox()
+    #     comboColumns.connect("changed", self.hud_preferences_combo_selection)
+    #     diaSelections.vbox.add(comboColumns)
+        for i in range(1, 8):
+            comboColumns.addItem(str(i) + " columns")
+    #     comboColumns.set_active(0)
+    #     comboColumns.show()
+        dia.layout().addWidget(comboColumns)
+
+        result3 = comboRows.currentText()
+        if result3.endswith(" rows"):
+            self.hud_preferences_rows = int(result3[0])
+            print(self.hud_preferences_rows)
+        elif result3.endswith(" columns"):
+            self.hud_preferences_columns = int(result3[0])
+            print(self.hud_preferences_columns)
+        else:
+            self.hud_preferences_game = result3
+            print(self.hud_preferences_game)
+
+        self.load_profile()
+
+    #     diaSelections.destroy()
+        btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        dia.layout().addWidget(btns)
+        
+        btns.rejected.connect(dia.reject)
+        btns.accepted.connect(self.dia_hud_preferences_table)
+        dia.exec_()
+        
+            
+
+        
+    #end def dia_hud_preferences
+
+
+
+    def dia_hud_preferences_table(self):
     #     """shows dialogue with Table of ComboBoxes to allow choosing of HUD stats"""
     #     #TODO: show explanation of what each stat means
     #     diaHudTable = gtk.Dialog(("HUD Preferences - please choose your stats"),
@@ -405,27 +438,37 @@ class fpdb(QMainWindow):
     #                              gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
     #                              (gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT,
     #                               gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT))
-
-    #     label = QLabel(("Please choose the stats you wish to use in the below table."))
+        dia = QDialog()
+        dia.setWindowTitle("HUD Preferences - please choose your stats")
+        label = QLabel(("Please choose the stats you wish to use in the below table."))
     #     diaHudTable.vbox.add(label)
     #     label.show()
-
-        #label = QLabel(("Note that you may not select any stat more than once or it will crash."))
+        dia.setLayout(QVBoxLayout())
+        dia.layout().addWidget(label)
+        label2 = QLabel(("Note that you may not select any stat more than once or it will crash."))
+        #diaHudTable.vbox.add(label)
+        #label.show()
+        dia.layout().addWidget(label2)
+        label3 = QLabel(("It is not currently possible to select \"empty\" or anything else to that end."))
         #diaHudTable.vbox.add(label)
         #label.show()
 
-        #label = QLabel(("It is not currently possible to select \"empty\" or anything else to that end."))
-        #diaHudTable.vbox.add(label)
-        #label.show()
-
-        # label = QLabel(("To configure things like colouring you will still have to use the Advanced Preferences dialogue or manually edit your HUD_config.xml."))
+        dia.layout().addWidget(label3)
+        label4 = QLabel(("To configure things like colouring you will still have to use the Advanced Preferences dialogue or manually edit your HUD_config.xml."))
         # diaHudTable.vbox.add(label)
         # label.show()
+        dia.layout().addWidget(label4)
 
-        # self.hud_preferences_table_contents = []
+        self.hud_preferences_table_contents = []
         # table = gtk.Table(rows=self.hud_preferences_rows + 1, columns=self.hud_preferences_columns + 1, homogeneous=True)
+        table = QGridLayout()
+        table.setSpacing(0)
 
-        # statDict = Stats.get_valid_stats()
+        scrolling_frame = QScrollArea(dia)
+        dia.layout().addWidget(scrolling_frame)
+        scrolling_frame.setLayout(table)
+        
+        #statDict = Stats.get_valid_stats()
 
         # for rowNumber in range(self.hud_preferences_rows + 1):
         #     newRow = []
@@ -466,7 +509,8 @@ class fpdb(QMainWindow):
         # diaHudTable.vbox.add(table)
         # table.show()
 
-        # response = diaHudTable.run()
+        dia.exec_()
+        #response = dia.exec_()
         # diaHudTable.destroy()
 
         # if response == gtk.RESPONSE_ACCEPT:
