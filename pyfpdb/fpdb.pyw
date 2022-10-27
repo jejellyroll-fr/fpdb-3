@@ -48,7 +48,7 @@ from PyQt5.QtWidgets import (QAction, QApplication, QCalendarWidget,
                              QGridLayout, QHBoxLayout, QInputDialog,
                              QLabel, QLineEdit, QMainWindow,
                              QMessageBox, QPushButton, QScrollArea,
-                             QTabWidget, QVBoxLayout)
+                             QTabWidget, QVBoxLayout, QWidget)
 
 import interlocks
 from Exceptions import *
@@ -645,6 +645,118 @@ class fpdb(QMainWindow):
         #if lock_set:
         #    self.release_global_lock()
 
+    def dia_site_preferences_seat(self, widget, data=None):
+        dia = QDialog(self)
+        dia.setWindowTitle(("Seat Preferences"))
+        dia.resize(1200,600)
+        label = QLabel(("Please select your prefered seat."))
+        dia.setLayout(QVBoxLayout())
+        dia.layout().addWidget(label)
+        
+        self.load_profile()
+        site_names = self.config.site_ids
+        available_site_names=[]
+        for site_name in site_names:
+            try:
+                tmp = self.config.supported_sites[site_name].enabled
+                available_site_names.append(site_name)
+            except KeyError:
+                pass
+        
+        column_headers=[("Site"), ("2 players"), ("3 players"), ("4 players"), ("5 players"), ("6 players"), ("7 players"), ("8 players"), ("9 players"), ("10 players")]  # todo ("HUD")
+        #HUD column will contain a button that shows favseat and HUD locations. Make it possible to load screenshot to arrange HUD windowlets.
+
+        table = QGridLayout()
+        table.setSpacing(0)
+
+        scrolling_frame = QScrollArea(dia)
+        dia.layout().addWidget(scrolling_frame)
+        scrolling_frame.setLayout(table)
+                
+        for header_number in range (0, len(column_headers)):
+            label = QLabel(column_headers[header_number])
+            label.setAlignment(Qt.AlignCenter)
+            table.addWidget(label, 0, header_number)
+        
+        check_buttons=[]
+        screen_names=[]
+        history_paths=[]
+        summary_paths=[]
+        detector = DetectInstalledSites.DetectInstalledSites()
+              
+        y_pos=1
+        for site_number in range(0, len(available_site_names)):
+            check_button = QCheckBox(available_site_names[site_number])
+            check_button.setChecked(self.config.supported_sites[available_site_names[site_number]].enabled)
+            table.addWidget(check_button, y_pos, 0)
+            check_buttons.append(check_button)
+            
+            hero = QLineEdit()
+            hero.setText(self.config.supported_sites[available_site_names[site_number]].screen_name)
+            table.addWidget(hero, y_pos, 1)
+            screen_names.append(hero)
+            hero.textChanged.connect(partial(self.autoenableSite, checkbox=check_buttons[site_number]))
+            
+            entry = QLineEdit()
+            entry.setText(self.config.supported_sites[available_site_names[site_number]].HH_path)
+            table.addWidget(entry, y_pos, 2)
+            history_paths.append(entry)
+            
+            entry = QLineEdit()
+            entry.setText(self.config.supported_sites[available_site_names[site_number]].HH_path)
+            table.addWidget(entry, y_pos, 3)
+            history_paths.append(entry)
+            
+            entry = QLineEdit()
+            entry.setText(self.config.supported_sites[available_site_names[site_number]].HH_path)
+            table.addWidget(entry, y_pos, 4)
+            history_paths.append(entry)
+            
+            entry = QLineEdit()
+            entry.setText(self.config.supported_sites[available_site_names[site_number]].TS_path)
+            table.addWidget(entry, y_pos, 5)
+            summary_paths.append(entry)
+
+            entry = QLineEdit()
+            entry.setText(self.config.supported_sites[available_site_names[site_number]].TS_path)
+            table.addWidget(entry, y_pos, 6)
+            summary_paths.append(entry)
+
+            entry = QLineEdit()
+            entry.setText(self.config.supported_sites[available_site_names[site_number]].TS_path)
+            table.addWidget(entry, y_pos, 7)
+            summary_paths.append(entry)
+            
+            entry = QLineEdit()
+            entry.setText(self.config.supported_sites[available_site_names[site_number]].TS_path)
+            table.addWidget(entry, y_pos, 8)
+            summary_paths.append(entry)
+
+            entry = QLineEdit()
+            entry.setText(self.config.supported_sites[available_site_names[site_number]].TS_path)
+            table.addWidget(entry, y_pos, 9)
+            summary_paths.append(entry)
+            
+            if available_site_names[site_number] in detector.supportedSites:
+               pass 
+                
+            
+            y_pos+=1
+
+        btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, dia)
+        btns.accepted.connect(dia.accept)
+        btns.rejected.connect(dia.reject)
+        dia.layout().addWidget(btns)
+
+        response = dia.exec_()
+        if response:
+            for site_number in range(0, len(available_site_names)):
+                #print "site %s enabled=%s name=%s" % (available_site_names[site_number], check_buttons[site_number].get_active(), screen_names[site_number].get_text(), history_paths[site_number].get_text())
+                self.config.edit_site(available_site_names[site_number], str(check_buttons[site_number].isChecked()), screen_names[site_number].text(), history_paths[site_number].text(), summary_paths[site_number].text())
+            
+            self.config.save()
+            self.reload_config()
+        
     def dia_site_preferences(self, widget, data=None):
         dia = QDialog(self)
         dia.setWindowTitle(("Site Preferences"))
@@ -714,6 +826,8 @@ class fpdb(QMainWindow):
             choose2 = QPushButton("Browse")
             table.addWidget(choose2, y_pos, 6)
             choose2.clicked.connect(partial(self.browseClicked, parent=dia, path=summary_paths[site_number]))
+
+
             
             if available_site_names[site_number] in detector.supportedSites:
                 button = QPushButton(("Detect"))
@@ -839,6 +953,7 @@ class fpdb(QMainWindow):
             return action
 
         configMenu.addAction(makeAction(('Site Settings'), self.dia_site_preferences))
+        configMenu.addAction(makeAction(('Seat Settings'), self.dia_site_preferences_seat))
         configMenu.addAction(makeAction(('Adv Preferences'), self.dia_advanced_preferences, tip='Edit your preferences'))
         #configMenu.addAction(makeAction(('HUD Stats Settings'), self.dia_hud_preferences))
         configMenu.addAction(makeAction('Import filters', self.dia_import_filters))
