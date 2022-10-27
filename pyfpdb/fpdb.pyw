@@ -324,23 +324,27 @@ class fpdb(QMainWindow):
                     diatitle=("Database Statistics"))
     #end def dia_database_stats
 
-    # def dia_hud_preferences(self, widget, data=None):
+    def dia_hud_preferences(self, widget, data=None):
     #     """Opens dialog to set parameters (game category, row count, column count) for HUD preferences"""
     #     #Note: No point in working on this until the new HUD configuration system is in place
-    #     self.hud_preferences_rows = None
-    #     self.hud_preferences_columns = None
-    #     self.hud_preferences_game = None
-
+        self.hud_preferences_rows = None
+        self.hud_preferences_columns = None
+        self.hud_preferences_game = None
+        dia = QDialog()
+        dia.setWindowTitle("HUD Preferences - choose category")
+         
+         
     #     diaSelections = gtk.Dialog(("HUD Preferences - choose category"),
     #                              self.window,
     #                              gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
     #                              (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
     #                               gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT))
-
-    #     label = QLabel(("Note that this does not load existing settings, but overwrites them (if you click save)."))
+        label = QLabel(("Note that this does not load existing settings, but overwrites them (if you click save)."))
     #     diaSelections.vbox.add(label)
+        dia.setLayout(QVBoxLayout())
     #     label.show()
-
+        dia.layout().addWidget(label)
+        
     #     label = QLabel(("Please select the game category for which you want to configure HUD stats:"))
     #     diaSelections.vbox.add(label)
     #     label.show()
@@ -379,6 +383,7 @@ class fpdb(QMainWindow):
     #         self.hud_preferences_columns != None and
     #         self.hud_preferences_game != None):
     #         self.dia_hud_preferences_table()
+        dia.exec_()
     #end def dia_hud_preferences
 
     def hud_preferences_combo_selection(self, widget):
@@ -960,6 +965,7 @@ class fpdb(QMainWindow):
 
         configMenu.addAction(makeAction(('Site Settings'), self.dia_site_preferences))
         configMenu.addAction(makeAction(('Seat Settings'), self.dia_site_preferences_seat))
+        configMenu.addAction(makeAction(('Hud Settings'), self.dia_hud_preferences))
         configMenu.addAction(makeAction(('Adv Preferences'), self.dia_advanced_preferences, tip='Edit your preferences'))
         #configMenu.addAction(makeAction(('HUD Stats Settings'), self.dia_hud_preferences))
         configMenu.addAction(makeAction('Import filters', self.dia_import_filters))
