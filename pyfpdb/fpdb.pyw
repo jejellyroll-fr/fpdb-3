@@ -663,7 +663,7 @@ class fpdb(QMainWindow):
             except KeyError:
                 pass
         
-        column_headers=[("Site"), ("2 players"), ("3 players"), ("4 players"), ("5 players"), ("6 players"), ("7 players"), ("8 players"), ("9 players"), ("10 players")]  # todo ("HUD")
+        column_headers=[("Site"), ("2 players:\nbetween 0 & 2"), ("3 players:\nbetween 0 & 3 "), ("4 players:\nbetween 0 & 4"), ("5 players:\nbetween 0 & 5"), ("6 players:\nbetween 0 & 6"), ("7 players:\nbetween 0 & 7"), ("8 players::\nbetween 0 & 8"), ("9 players:\nbetween 0 & 9"), ("10 players:\nbetween 0 & 10")]  # todo ("HUD")
         #HUD column will contain a button that shows favseat and HUD locations. Make it possible to load screenshot to arrange HUD windowlets.
 
         table = QGridLayout()
@@ -678,9 +678,10 @@ class fpdb(QMainWindow):
             label.setAlignment(Qt.AlignCenter)
             table.addWidget(label, 0, header_number)
         
+        history_paths=[]
         check_buttons=[]
         screen_names=[]
-        history_paths=[]
+        seat2_dict, seat3_dict, seat4_dict, seat5_dict, seat6_dict, seat7_dict, seat8_dict, seat9_dict, seat10_dict = [], [], [], [], [], [], [], [], []
         summary_paths=[]
         detector = DetectInstalledSites.DetectInstalledSites()
               
@@ -690,52 +691,57 @@ class fpdb(QMainWindow):
             check_button.setChecked(self.config.supported_sites[available_site_names[site_number]].enabled)
             table.addWidget(check_button, y_pos, 0)
             check_buttons.append(check_button)
+            hud_seat = self.config.supported_sites[available_site_names[site_number]].fav_seat[2]
             
-            hero = QLineEdit()
-            hero.setText(self.config.supported_sites[available_site_names[site_number]].screen_name)
-            table.addWidget(hero, y_pos, 1)
-            screen_names.append(hero)
-            hero.textChanged.connect(partial(self.autoenableSite, checkbox=check_buttons[site_number]))
-            
-            entry = QLineEdit()
-            entry.setText(self.config.supported_sites[available_site_names[site_number]].HH_path)
-            table.addWidget(entry, y_pos, 2)
-            history_paths.append(entry)
-            
-            entry = QLineEdit()
-            entry.setText(self.config.supported_sites[available_site_names[site_number]].HH_path)
-            table.addWidget(entry, y_pos, 3)
-            history_paths.append(entry)
-            
-            entry = QLineEdit()
-            entry.setText(self.config.supported_sites[available_site_names[site_number]].HH_path)
-            table.addWidget(entry, y_pos, 4)
-            history_paths.append(entry)
-            
-            entry = QLineEdit()
-            entry.setText(self.config.supported_sites[available_site_names[site_number]].TS_path)
-            table.addWidget(entry, y_pos, 5)
-            summary_paths.append(entry)
 
-            entry = QLineEdit()
-            entry.setText(self.config.supported_sites[available_site_names[site_number]].TS_path)
-            table.addWidget(entry, y_pos, 6)
-            summary_paths.append(entry)
-
-            entry = QLineEdit()
-            entry.setText(self.config.supported_sites[available_site_names[site_number]].TS_path)
-            table.addWidget(entry, y_pos, 7)
-            summary_paths.append(entry)
+            print('hud seat ps:', type(hud_seat), hud_seat)
+            seat2 = QLineEdit()
             
-            entry = QLineEdit()
-            entry.setText(self.config.supported_sites[available_site_names[site_number]].TS_path)
-            table.addWidget(entry, y_pos, 8)
-            summary_paths.append(entry)
+            seat2.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[2]))
+            table.addWidget(seat2, y_pos, 1)
+            seat2_dict.append(seat2)
+            seat2.textChanged.connect(partial(self.autoenableSite, checkbox=check_buttons[site_number]))
+            
+            seat3 = QLineEdit()
+            seat3.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[3]))
+            table.addWidget(seat3, y_pos, 2)
+            seat3_dict.append(seat3)
 
-            entry = QLineEdit()
-            entry.setText(self.config.supported_sites[available_site_names[site_number]].TS_path)
-            table.addWidget(entry, y_pos, 9)
-            summary_paths.append(entry)
+            
+            seat4 = QLineEdit()
+            seat4.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[4]))
+            table.addWidget(seat4, y_pos, 3)
+            seat4_dict.append(seat4)
+            
+            seat5 = QLineEdit()
+            seat5.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[5]))
+            table.addWidget(seat5, y_pos, 4)
+            seat5_dict.append(seat5)
+            
+            seat6 = QLineEdit()
+            seat6.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[6]))
+            table.addWidget(seat6, y_pos, 5)
+            seat6_dict.append(seat6)
+
+            seat7 = QLineEdit()
+            seat7.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[7]))
+            table.addWidget(seat7, y_pos, 6)
+            seat7_dict.append(seat7)
+
+            seat8 = QLineEdit()
+            seat8.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[8]))
+            table.addWidget(seat8, y_pos, 7)
+            seat8_dict.append(seat8)
+            
+            seat9 = QLineEdit()
+            seat9.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[9]))
+            table.addWidget(seat9, y_pos, 8)
+            seat9_dict.append(seat9)
+
+            seat10 = QLineEdit()
+            seat10.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[10]))
+            table.addWidget(seat10, y_pos, 9)
+            seat10_dict.append(seat10)
             
             if available_site_names[site_number] in detector.supportedSites:
                pass 
@@ -752,7 +758,7 @@ class fpdb(QMainWindow):
         if response:
             for site_number in range(0, len(available_site_names)):
                 #print "site %s enabled=%s name=%s" % (available_site_names[site_number], check_buttons[site_number].get_active(), screen_names[site_number].get_text(), history_paths[site_number].get_text())
-                self.config.edit_site(available_site_names[site_number], str(check_buttons[site_number].isChecked()), screen_names[site_number].text(), history_paths[site_number].text(), summary_paths[site_number].text())
+                self.config.edit_fav_seat(available_site_names[site_number], str(check_buttons[site_number].isChecked()), seat2_dict[site_number].text(), seat3_dict[site_number].text(), seat4_dict[site_number].text(), seat5_dict[site_number].text(), seat6_dict[site_number].text(), seat7_dict[site_number].text(), seat8_dict[site_number].text(), seat9_dict[site_number].text(), seat10_dict[site_number].text())
             
             self.config.save()
             self.reload_config()
