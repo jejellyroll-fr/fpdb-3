@@ -346,12 +346,12 @@ class fpdb(QMainWindow):
         result = comboGame.currentText()
         
         self.load_profile()
-        print('resultat', result)
+        #print('resultat', result)
         hud_stats = self.config.stat_sets[result]
         hud_nb_col = self.config.stat_sets[result].cols
         hud_nb_row = self.config.stat_sets[result].rows
         tab_rows = hud_nb_col*hud_nb_row
-        print('stats set',hud_stats )
+        #print('stats set',hud_stats )
 
 
         
@@ -373,48 +373,98 @@ class fpdb(QMainWindow):
         #history_paths=[]
         #check_buttons=[]
         #screen_names=[]
-        seat2_dict, seat3_dict, seat4_dict, seat5_dict, seat6_dict, seat7_dict, seat8_dict, seat9_dict, seat10_dict = [], [], [], [], [], [], [], [], []
+        stat2_dict, stat3_dict, stat4_dict, stat5_dict, stat6_dict, stat7_dict, stat8_dict, stat9_dict, stat10_dict, stat11_dict, stat12_dict, stat13_dict = [],[],[],[], [], [], [], [], [], [], [], []
         #summary_paths=[]
         #detector = DetectInstalledSites.DetectInstalledSites()
-              
-        y_pos=1
-        for site_number in range(0, tab_rows):
-            #check_button = QCheckBox(available_site_names[site_number])
-            #check_button.setChecked(self.config.supported_sites[available_site_names[site_number]].enabled)
-            #table.addWidget(check_button, y_pos, 0)
-            #check_buttons.append(check_button)
-            #hud_seat = self.config.supported_sites[available_site_names[site_number]].fav_seat[2]
-            
 
-            #print('hud seat ps:', type(hud_seat), hud_seat)
-            seat2 = QLineEdit()
-            print(str(self.config.stat_sets[result].stats))
-            print(type(self.config.stat_sets[result].stats))
-            seat2.setText(str(self.config.stat_sets[result].stats))
-            table.addWidget(seat2, y_pos, 1)
-            seat2_dict.append(seat2)
-            #seat2.textChanged.connect(partial(self.autoenableSite, checkbox=check_buttons[site_number]))
-            
-            
-            
+        result2 = list(self.config.stat_sets[result].stats)  
+        result3 = len(self.config.stat_sets[result].stats)
+        #print(self.config.stat_sets[result].stats)
+        #print(result2)
+        #print(result3)
+        y_pos=1
+        for y in range(0, result3):
+            #print(result2[y])
+            stat = result2[y]
+            #print(self.config.stat_sets[result].stats[stat].stat_name)
+            stat2 = QLabel()
+            stat2.setText(str(stat))
+            table.addWidget(stat2, y_pos, 0)
+            stat2_dict.append(stat2)
+
+            stat3 = QLineEdit()
+            stat3.setText(str(self.config.stat_sets[result].stats[stat].stat_name))
+            table.addWidget(stat3, y_pos, 1)
+            stat3_dict.append(stat3)
+
+            stat4 = QLineEdit()
+            stat4.setText(str(self.config.stat_sets[result].stats[stat].click))
+            table.addWidget(stat4, y_pos, 2)
+            stat4_dict.append(stat4)
+
+            stat5 = QLineEdit()
+            stat5.setText(str(self.config.stat_sets[result].stats[stat].hudcolor))
+            table.addWidget(stat5, y_pos, 3)
+            stat5_dict.append(stat5)
+
+            stat6 = QLineEdit()
+            stat6.setText(str(self.config.stat_sets[result].stats[stat].hudprefix))
+            table.addWidget(stat6, y_pos, 4)
+            stat6_dict.append(stat6)
+
+            stat7 = QLineEdit()
+            stat7.setText(str(self.config.stat_sets[result].stats[stat].hudsuffix))
+            table.addWidget(stat7, y_pos, 5)
+            stat7_dict.append(stat7)
+
+            stat8 = QLineEdit()
+            stat8.setText(str(self.config.stat_sets[result].stats[stat].popup))
+            table.addWidget(stat8, y_pos, 6)
+            stat8_dict.append(stat8)
+
+            stat9 = QLineEdit()
+            stat9.setText(str(self.config.stat_sets[result].stats[stat].stat_hicolor))
+            table.addWidget(stat9, y_pos, 7)
+            stat9_dict.append(stat9)
+
+            stat10 = QLineEdit()
+            stat10.setText(str(self.config.stat_sets[result].stats[stat].stat_hith))
+            table.addWidget(stat10, y_pos, 8)
+            stat10_dict.append(stat10)
+
+            stat11 = QLineEdit()
+            stat11.setText(str(self.config.stat_sets[result].stats[stat].stat_locolor))
+            table.addWidget(stat11, y_pos, 9)
+            stat11_dict.append(stat11)
+
+            stat12 = QLineEdit()
+            stat12.setText(str(self.config.stat_sets[result].stats[stat].stat_loth))
+            table.addWidget(stat12, y_pos, 10)
+            stat12_dict.append(stat12)
+
+            stat13 = QLineEdit()
+            stat13.setText(str(self.config.stat_sets[result].stats[stat].tip))
+            table.addWidget(stat13, y_pos, 11)
+            stat13_dict.append(stat13)
             #if available_site_names[site_number] in detector.supportedSites:
                #pass 
                 
             
             y_pos+=1
-            """
+
 
         btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, dia)
         btns.accepted.connect(dia.accept)
         btns.rejected.connect(dia.reject)
-        dia.layout().addWidget(btns)"""
+        dia.layout().addWidget(btns)
 
         response = dia.exec_()
         if response:
-            for site_number in range(0, len(available_site_names)):
+            for y in range(0, result3):
+                print(result, stat2_dict[y].text(),stat3_dict[y].text())
                 #print "site %s enabled=%s name=%s" % (available_site_names[site_number], check_buttons[site_number].get_active(), screen_names[site_number].get_text(), history_paths[site_number].get_text())
-                #self.config.edit_fav_seat(available_site_names[site_number], str(check_buttons[site_number].isChecked()), seat2_dict[site_number].text(), seat3_dict[site_number].text(), seat4_dict[site_number].text(), seat5_dict[site_number].text(), seat6_dict[site_number].text(), seat7_dict[site_number].text(), seat8_dict[site_number].text(), seat9_dict[site_number].text(), seat10_dict[site_number].text())
-                pass
+                #self.config.edit_hud(result, stat2_dict[stat].text(), seat3_dict[site_number].text(), seat4_dict[site_number].text(), seat5_dict[site_number].text(), seat6_dict[site_number].text(), seat7_dict[site_number].text(), seat8_dict[site_number].text(), seat9_dict[site_number].text(), seat10_dict[site_number].text())
+                
             self.config.save()
             self.reload_config()
 
