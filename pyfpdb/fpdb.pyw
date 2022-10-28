@@ -327,215 +327,100 @@ class fpdb(QMainWindow):
     #end def dia_database_stats
 
     def dia_hud_preferences(self, widget, data=None):
-    #     """Opens dialog to set parameters (game category, row count, column count) for HUD preferences"""
-    #     #Note: No point in working on this until the new HUD configuration system is in place
-        self.hud_preferences_rows = None
-        self.hud_preferences_columns = None
-        self.hud_preferences_game = None
-        dia = QDialog()
-        dia.setWindowTitle("HUD Preferences - choose category")
-         
-         
-    #     diaSelections = gtk.Dialog(("HUD Preferences - choose category"),
-    #                              self.window,
-    #                              gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-    #                              (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
-    #                               gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT))
-        label = QLabel(("Note that this does not load existing settings, but overwrites them (if you click save)."))
-    #     diaSelections.vbox.add(label)
+        dia = QDialog(self)
+        dia.setWindowTitle(("Modifying Huds"))
+        dia.resize(1200,600)
+        label = QLabel(("Please edit your huds."))
         dia.setLayout(QVBoxLayout())
-    #     label.show()
         dia.layout().addWidget(label)
         label2 = QLabel(("Please select the game category for which you want to configure HUD stats:"))
-    #     diaSelections.vbox.add(label)
-    #     label.show()
+
         dia.layout().addWidget(label2)
         comboGame = QComboBox()
-        #comboGame.connect("changed", self.hud_preferences_combo_selection)
-    #     diaSelections.vbox.add(comboGame)
 
         games = self.config.get_stat_sets()
         for game in games:
             comboGame.addItem(game)
-
-
         dia.layout().addWidget(comboGame)
-
+        comboGame.setCurrentIndex(1)
         result = comboGame.currentText()
-        if result.endswith(" rows"):
-            self.hud_preferences_rows = int(result[0])
-            print(self.hud_preferences_rows)
-        elif result.endswith(" columns"):
-            self.hud_preferences_columns = int(result[0])
-            print(self.hud_preferences_columns)
-        else:
-            self.hud_preferences_game = result
-            print(self.hud_preferences_game)
-    #     comboGame.show()
-
-        comboRows = QComboBox()
-    #     comboRows.connect("changed", self.hud_preferences_combo_selection)
-    #     diaSelections.vbox.add(comboRows)
-        for i in range(1, 8):
-            comboRows.addItem(str(i) + " rows")
-    #     comboRows.set_active(0)
-    #     comboRows.show()
-        dia.layout().addWidget(comboRows)
-
-        result2 = comboRows.currentText()
-        if result2.endswith(" rows"):
-            self.hud_preferences_rows = int(result2[0])
-            print(self.hud_preferences_rows)
-        elif result2.endswith(" columns"):
-            self.hud_preferences_columns = int(result2[0])
-            print(self.hud_preferences_columns)
-        else:
-            self.hud_preferences_game = result2
-            print(self.hud_preferences_game)
-
-        comboColumns = QComboBox()
-    #     comboColumns.connect("changed", self.hud_preferences_combo_selection)
-    #     diaSelections.vbox.add(comboColumns)
-        for i in range(1, 8):
-            comboColumns.addItem(str(i) + " columns")
-    #     comboColumns.set_active(0)
-    #     comboColumns.show()
-        dia.layout().addWidget(comboColumns)
-
-        result3 = comboRows.currentText()
-        if result3.endswith(" rows"):
-            self.hud_preferences_rows = int(result3[0])
-            print(self.hud_preferences_rows)
-        elif result3.endswith(" columns"):
-            self.hud_preferences_columns = int(result3[0])
-            print(self.hud_preferences_columns)
-        else:
-            self.hud_preferences_game = result3
-            print(self.hud_preferences_game)
-
+        
         self.load_profile()
+        print('resultat', result)
+        hud_stats = self.config.stat_sets[result]
+        hud_nb_col = self.config.stat_sets[result].cols
+        hud_nb_row = self.config.stat_sets[result].rows
+        tab_rows = hud_nb_col*hud_nb_row
+        print('stats set',hud_stats )
 
-    #     diaSelections.destroy()
-        btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        dia.layout().addWidget(btns)
-        
-        btns.rejected.connect(dia.reject)
-        btns.accepted.connect(self.dia_hud_preferences_table)
-        dia.exec_()
-        
-            
 
         
-    #end def dia_hud_preferences
+        column_headers=[("coordonate"), ("stats name"), ("click"), ("hudcolor"), ("hudprefix"), ("hudsuffix"), ("popup"), ("stat_hicolor"), ("stat_hith"), ("stat_locolor"), ("stat_loth"), ("tip")]  # todo ("HUD")
+        #HUD column will contain a button that shows favseat and HUD locations. Make it possible to load screenshot to arrange HUD windowlets.
 
-
-
-    def dia_hud_preferences_table(self):
-    #     """shows dialogue with Table of ComboBoxes to allow choosing of HUD stats"""
-    #     #TODO: show explanation of what each stat means
-    #     diaHudTable = gtk.Dialog(("HUD Preferences - please choose your stats"),
-    #                              self.window,
-    #                              gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-    #                              (gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT,
-    #                               gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT))
-        dia = QDialog()
-        dia.setWindowTitle("HUD Preferences - please choose your stats")
-        label = QLabel(("Please choose the stats you wish to use in the below table."))
-    #     diaHudTable.vbox.add(label)
-    #     label.show()
-        dia.setLayout(QVBoxLayout())
-        dia.layout().addWidget(label)
-        label2 = QLabel(("Note that you may not select any stat more than once or it will crash."))
-        #diaHudTable.vbox.add(label)
-        #label.show()
-        dia.layout().addWidget(label2)
-        label3 = QLabel(("It is not currently possible to select \"empty\" or anything else to that end."))
-        #diaHudTable.vbox.add(label)
-        #label.show()
-
-        dia.layout().addWidget(label3)
-        label4 = QLabel(("To configure things like colouring you will still have to use the Advanced Preferences dialogue or manually edit your HUD_config.xml."))
-        # diaHudTable.vbox.add(label)
-        # label.show()
-        dia.layout().addWidget(label4)
-
-        self.hud_preferences_table_contents = []
-        # table = gtk.Table(rows=self.hud_preferences_rows + 1, columns=self.hud_preferences_columns + 1, homogeneous=True)
         table = QGridLayout()
         table.setSpacing(0)
 
         scrolling_frame = QScrollArea(dia)
         dia.layout().addWidget(scrolling_frame)
         scrolling_frame.setLayout(table)
+                
+        for header_number in range (0, len(column_headers)):
+            label = QLabel(column_headers[header_number])
+            label.setAlignment(Qt.AlignCenter)
+            table.addWidget(label, 0, header_number)
         
-        #statDict = Stats.get_valid_stats()
+        #history_paths=[]
+        #check_buttons=[]
+        #screen_names=[]
+        seat2_dict, seat3_dict, seat4_dict, seat5_dict, seat6_dict, seat7_dict, seat8_dict, seat9_dict, seat10_dict = [], [], [], [], [], [], [], [], []
+        #summary_paths=[]
+        #detector = DetectInstalledSites.DetectInstalledSites()
+              
+        y_pos=1
+        for site_number in range(0, tab_rows):
+            #check_button = QCheckBox(available_site_names[site_number])
+            #check_button.setChecked(self.config.supported_sites[available_site_names[site_number]].enabled)
+            #table.addWidget(check_button, y_pos, 0)
+            #check_buttons.append(check_button)
+            #hud_seat = self.config.supported_sites[available_site_names[site_number]].fav_seat[2]
+            
 
-        # for rowNumber in range(self.hud_preferences_rows + 1):
-        #     newRow = []
-        #     for columnNumber in range(self.hud_preferences_columns + 1):
-        #         if rowNumber == 0:
-        #             if columnNumber == 0:
-        #                 pass
-        #             else:
-        #                 label = QLabel("column " + str(columnNumber))
-        #                 table.attach(child=label, left_attach=columnNumber,
-        #                              right_attach=columnNumber + 1,
-        #                              top_attach=rowNumber,
-        #                              bottom_attach=rowNumber + 1)
-        #                 label.show()
-        #         elif columnNumber == 0:
-        #             label = QLabel("row " + str(rowNumber))
-        #             table.attach(child=label, left_attach=columnNumber,
-        #                          right_attach=columnNumber + 1,
-        #                          top_attach=rowNumber,
-        #                          bottom_attach=rowNumber + 1)
-        #             label.show()
-        #         else:
-        #             comboBox = gtk.combo_box_new_text()
+            #print('hud seat ps:', type(hud_seat), hud_seat)
+            seat2 = QLineEdit()
+            print(str(self.config.stat_sets[result].stats))
+            print(type(self.config.stat_sets[result].stats))
+            seat2.setText(str(self.config.stat_sets[result].stats))
+            table.addWidget(seat2, y_pos, 1)
+            seat2_dict.append(seat2)
+            #seat2.textChanged.connect(partial(self.autoenableSite, checkbox=check_buttons[site_number]))
+            
+            
+            
+            #if available_site_names[site_number] in detector.supportedSites:
+               #pass 
+                
+            
+            y_pos+=1
+            """
 
-        #             for stat in sorted(statDict.values()):
-        #                 comboBox.append_text(stat)
-        #             comboBox.set_active(0)
+        btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, dia)
+        btns.accepted.connect(dia.accept)
+        btns.rejected.connect(dia.reject)
+        dia.layout().addWidget(btns)"""
 
-        #             newRow.append(comboBox)
-        #             table.attach(child=comboBox, left_attach=columnNumber,
-        #                          right_attach=columnNumber + 1,
-        #                          top_attach=rowNumber,
-        #                          bottom_attach=rowNumber + 1)
+        response = dia.exec_()
+        if response:
+            for site_number in range(0, len(available_site_names)):
+                #print "site %s enabled=%s name=%s" % (available_site_names[site_number], check_buttons[site_number].get_active(), screen_names[site_number].get_text(), history_paths[site_number].get_text())
+                #self.config.edit_fav_seat(available_site_names[site_number], str(check_buttons[site_number].isChecked()), seat2_dict[site_number].text(), seat3_dict[site_number].text(), seat4_dict[site_number].text(), seat5_dict[site_number].text(), seat6_dict[site_number].text(), seat7_dict[site_number].text(), seat8_dict[site_number].text(), seat9_dict[site_number].text(), seat10_dict[site_number].text())
+                pass
+            self.config.save()
+            self.reload_config()
 
-        #             comboBox.show()
-        #     if rowNumber != 0:
-        #         self.hud_preferences_table_contents.append(newRow)
-        # diaHudTable.vbox.add(table)
-        # table.show()
 
-        dia.exec_()
-        #response = dia.exec_()
-        # diaHudTable.destroy()
 
-        # if response == gtk.RESPONSE_ACCEPT:
-        #     self.storeNewHudStatConfig(statDict)
-    #end def dia_hud_preferences_table
 
-    # def storeNewHudStatConfig(self, stat_dict):
-    #     """stores selections made in dia_hud_preferences_table"""
-    #     self.obtain_global_lock("dia_hud_preferences")
-    #     statTable = []
-    #     for row in self.hud_preferences_table_contents:
-    #         newRow = []
-    #         for column in row:
-    #             new_field = column.get_active_text()
-    #             for attr in stat_dict: #very inefficient, but who cares
-    #                 if new_field == stat_dict[attr]:
-    #                     newRow.append(attr)
-    #                     break
-    #         statTable.append(newRow)
-
-    #     self.config.editStats(self.hud_preferences_game, statTable)
-    #     self.config.save()  # TODO: make it not store in horrible formatting
-    #     self.reload_config(None)
-    #     self.release_global_lock()
-    #end def storeNewHudStatConfig
 
     def dia_import_filters(self, checkState):
         dia = QDialog()

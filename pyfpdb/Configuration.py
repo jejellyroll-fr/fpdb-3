@@ -457,8 +457,11 @@ class Site(object):
 
 
 class Stat(object):
+    
     def __init__(self, node):
         rowcol         = node.getAttribute("_rowcol")                      # human string "(r,c)" values >0)
+        self.rows  = node.getAttribute("rows")
+        self.cols  = node.getAttribute("cols")
         self.rowcol    = tuple(int(s)-1 for s in rowcol[1:-1].split(',')) # tuple (r-1,c-1)
         self.stat_name = node.getAttribute("_stat_name")
         self.tip     = node.getAttribute("tip")
