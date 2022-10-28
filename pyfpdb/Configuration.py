@@ -1235,6 +1235,31 @@ class Config(object):
             elif fav_seat.getAttribute("max") == "10":
                 fav_seat.setAttribute("fav_seat", seat10_dict)
     #end def
+    
+    def edit_hud(self, result, seat2_dict, seat3_dict, seat4_dict, seat5_dict, seat6_dict, seat7_dict, seat8_dict, seat9_dict, seat10_dict):
+        site_node = self.config.stat_sets[result]
+        
+        
+        for fav_seat in site_node.getElementsByTagName("fav"):
+            if fav_seat.getAttribute("max") == "2":
+                fav_seat.setAttribute("fav_seat", seat2_dict)
+            elif fav_seat.getAttribute("max") == "3":
+                fav_seat.setAttribute("fav_seat", seat3_dict)
+            elif fav_seat.getAttribute("max") == "4":
+                fav_seat.setAttribute("fav_seat", seat4_dict)
+            elif fav_seat.getAttribute("max") == "5":
+                fav_seat.setAttribute("fav_seat", seat5_dict)
+            elif fav_seat.getAttribute("max") == "6":
+                fav_seat.setAttribute("fav_seat", seat6_dict)
+            elif fav_seat.getAttribute("max") == "7":
+                fav_seat.setAttribute("fav_seat", seat7_dict)
+            elif fav_seat.getAttribute("max") == "8":
+                fav_seat.setAttribute("fav_seat", seat8_dict)
+            elif fav_seat.getAttribute("max") == "9":
+                fav_seat.setAttribute("fav_seat", seat9_dict)
+            elif fav_seat.getAttribute("max") == "10":
+                fav_seat.setAttribute("fav_seat", seat10_dict)
+    #end def
 
     def edit_site(self, site_name, enabled, screen_name, history_path, summary_path):
         site_node = self.get_site_node(site_name)
