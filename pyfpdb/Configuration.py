@@ -1236,41 +1236,82 @@ class Config(object):
                 fav_seat.setAttribute("fav_seat", seat10_dict)
     #end def
     
-    def edit_hud(self, result, stat2, stat3):
+    def edit_hud(self, result, stat2, stat3, stat4, stat5, stat6, stat7, stat8, stat9, stat10, stat11, stat12, stat13):
         REPLACEMENTS = [
-                        ("(0,0)", "(1,1)"),
-                        ("(0,1)", "(1,2)"),
-                        ("(0,2)", "(1,3)"),
-                        ("(0,3)", "(1,4)"),
-                        ("(1,0)", "(2,1)"),
-                        ("(1,1)", "(2,2)"),
-                        ("(1,2)", "(2,3)"),
-                        ("(1,3)", "(2,4)"),
-                        ("(2,0)", "(3,1)"),
-                        ("(2,1)", "(3,2)"),
-                        ("(2,2)", "(3,3)"),
-                        ("(2,3)", "(3,4)"),
-                        ("(3,0)", "(4,1)"),
-                        ("(3,1)", "(4,2)"),
-                        ("(3,2)", "(4,3)"),
-                        ("(3,3)", "(4,4)"),
+                        ("(0, 0)", "(1,1)"),
+                        ("(0, 1)", "(1,2)"),
+                        ("(0, 2)", "(1,3)"),
+                        ("(0, 3)", "(1,4)"),
+                        ("(1, 0)", "(2,1)"),
+                        ("(1, 1)", "(2,2)"),
+                        ("(1, 2)", "(2,3)"),
+                        ("(1, 3)", "(2,4)"),
+                        ("(2, 0)", "(3,1)"),
+                        ("(2, 1)", "(3,2)"),
+                        ("(2, 2)", "(3,3)"),
+                        ("(2, 3)", "(3,4)"),
+                        ("(3, 0)", "(4,1)"),
+                        ("(3, 1)", "(4,2)"),
+                        ("(3, 2)", "(4,3)"),
+                        ("(3, 3)", "(4,4)"),
                         ]
             
         
-        for old, new in REPLACEMENTS:
-            transcript = stat2.replace(old, new)
-            print(transcript)
+        
+            #print(transcript)
         for statsetNode in self.doc.getElementsByTagName("ss"):
-            print ("getStatSetNode statsetNode:",statsetNode)
+            #print ("getStatSetNode statsetNode:",statsetNode)
             
             if statsetNode.getAttribute("name") == result:
-                print("true1")
+                #print("true1")
                 for fav_stat in statsetNode.getElementsByTagName("stat"):
-                    print("true2")
-                    
-                    if fav_stat.getAttribute("_rowcol") == transcript:
-                        print(stat3)
-                    
+                    print("type stat2", type(stat2))
+                    print("stat2", (stat2))
+                    print("fav",fav_stat.getAttribute("_rowcol"))
+                    if stat2 == "(0, 0)":
+                        stat2 = "(1,1)"
+                    elif stat2 == "(0, 1)":
+                        stat2 = "(1,2)"  
+                    elif stat2 == "(0, 2)":
+                        stat2 = "(1,3)"  
+                    elif stat2 == "(0, 3)":
+                        stat2 = "(1,4)"  
+                    elif stat2 == "(1, 0)":
+                        stat2 = "(2,1)"
+                    elif stat2 == "(1, 1)":
+                        stat2 = "(2,2)"  
+                    elif stat2 == "(1, 2)":
+                        stat2 = "(2,3)"  
+                    elif stat2 == "(1, 3)":
+                        stat2 = "(2,4)"
+                    elif stat2 == "(2, 0)":
+                        stat2 = "(3,1)"
+                    elif stat2 == "(2, 1)":
+                        stat2 = "(3,2)"  
+                    elif stat2 == "(2, 2)":
+                        stat2 = "(3,3)"  
+                    elif stat2 == "(2, 3)":
+                        stat2 = "(3,4)"
+                    elif stat2 == "(32, 0)":
+                        stat2 = "(4,1)"
+                    elif stat2 == "(3, 1)":
+                        stat2 = "(4,2)"  
+                    elif stat2 == "(3, 2)":
+                        stat2 = "(4,3)"  
+                    elif stat2 == "(3, 3)":
+                        stat2 = "(4,4)"
+                    if fav_stat.getAttribute("_rowcol") == stat2:
+                        fav_stat.setAttribute("_stat_name" ,stat3)
+                        fav_stat.setAttribute("click" ,stat4)
+                        fav_stat.setAttribute("hudcolor" ,stat5)
+                        fav_stat.setAttribute("hudprefix" ,stat6)
+                        fav_stat.setAttribute("hudsuffix" ,stat7)
+                        fav_stat.setAttribute("popup" ,stat8)
+                        fav_stat.setAttribute("stat_hicolor" ,stat9)
+                        fav_stat.setAttribute("stat_hith" ,stat10)                            
+                        fav_stat.setAttribute("stat_locolor" ,stat11)
+                        fav_stat.setAttribute("stat_loth" ,stat12)
+                        fav_stat.setAttribute("tip" ,stat13)
             
     #end def
 
