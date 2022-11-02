@@ -742,6 +742,8 @@ class GUICashStats(list):
     def __init__(self):
         super(GUICashStats, self).__init__()
 
+
+
     def add_elements(self, node):
         # is this needed?
         for child in node.childNodes:
@@ -801,6 +803,47 @@ class GUICashStats(list):
 #        for l in self:
 #            s = s + "    %s = %s\n" % (k, self[k])
 #        return(s)
+class GUITourStats(list):
+    """<gui_tour_stats>
+           <col col_name="game" col_title="Game" disp_all="True" disp_posn="True" field_format="%s" field_type="str" xalignment="0.0" />
+           ...
+       </gui_tour_stats>
+       """
+    def __init__(self):
+        super(GUITourStats, self).__init__()
+
+    def add_elements(self, node):
+        # is this needed?
+        for child in node.childNodes:
+            if child.nodeType == child.ELEMENT_NODE:
+                col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment=None, None, True, True, "%s", "str", 0.0
+                
+                if child.hasAttribute('col_name'):     col_name     = child.getAttribute('col_name')
+                if child.hasAttribute('col_title'):    col_title    = child.getAttribute('col_title')
+                if child.hasAttribute('disp_all'):     disp_all     = string_to_bool(child.getAttribute('disp_all'))
+                if child.hasAttribute('disp_posn'):    disp_posn    = string_to_bool(child.getAttribute('disp_posn'))
+                if child.hasAttribute('field_format'): field_format = child.getAttribute('field_format')
+                if child.hasAttribute('field_type'):   field_type   = child.getAttribute('field_type')
+                try:
+                    if child.hasAttribute('xalignment'):   xalignment   = float(child.getAttribute('xalignment'))
+                except ValueError:
+                    print(("bad number in xalignment was ignored"))
+                    log.info(("bad number in xalignment was ignored"))
+
+                self.append( [col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment] )
+
+
+
+    def get_defaults(self):
+        """A list of defaults to be called, should there be no entry in config"""
+        # SQL column name, display title, display all, display positional, format, type, alignment
+        defaults = [   ['game', 'Game', True, True, '%s', 'str', 0.0],       
+            ['hand', 'Hand', False, False, '%s', 'str', 0.0],
+            ]
+        for col in defaults:
+            self.append (col)
+
+
 
 class RawHands(object):
     def __init__(self, node=None):
@@ -911,6 +954,7 @@ class Config(object):
         self.general = General()
         self.emails = {}
         self.gui_cash_stats = GUICashStats()
+        self.gui_tour_stats = GUITourStats()
         self.site_ids = {}                   # site ID list from the database
 
 
@@ -952,6 +996,13 @@ class Config(object):
             self.gui_cash_stats.get_defaults()
         for gcs_node in doc.getElementsByTagName("gui_cash_stats"):
             self.gui_cash_stats.add_elements(node=gcs_node) # add/overwrite elements in self.gui_cash_stats
+            
+
+        if doc.getElementsByTagName("gui_tour_stats") == []:
+            self.gui_tour_stats.get_defaults()
+        for gcs_node in doc.getElementsByTagName("gui_tour_stats"):
+            self.gui_tour_stats.add_elements(node=gcs_node) # add/overwrite elements in self.gui_cash_stats
+            
 
 #        s_sites = doc.getElementsByTagName("supported_sites")
         for site_node in doc.getElementsByTagName("site"):
@@ -1868,6 +1919,9 @@ class Config(object):
 
     def get_gui_cash_stat_params(self):
         return( self.gui_cash_stats )
+    
+    def get_gui_tour_stat_params(self):
+        return( self.gui_tour_stats )
 
 if __name__== "__main__":
     set_logfile("fpdb-log.txt")

@@ -431,8 +431,10 @@ class fpdb(QMainWindow):
             self.table.addWidget(stat2, y_pos, 0)
             self.stat2_dict.append(stat2)
 
-            stat3 = QLineEdit()
-            stat3.setText(str(self.config.stat_sets[result].stats[stat].stat_name))
+            stat3 = QComboBox()
+            stats = self.config.get_gui_cash_stat_params()
+            print(stats)
+            stat3.setCurrentText(str(self.config.stat_sets[result].stats[stat].stat_name))
             self.table.addWidget(stat3, y_pos, 1)
             self.stat3_dict.append(stat3)
 
