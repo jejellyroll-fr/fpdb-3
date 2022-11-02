@@ -334,13 +334,16 @@ class fpdb(QMainWindow):
         dia.setLayout(QVBoxLayout())
         dia.layout().addWidget(label)
         label2 = QLabel(("Please select the game category for which you want to configure HUD stats:"))
-
+        popups = []
         dia.layout().addWidget(label2)
         self.comboGame = QComboBox()
 
         games = self.config.get_stat_sets()
         for game in games:
             self.comboGame.addItem(game)
+        
+        
+
         dia.layout().addWidget(self.comboGame)
         self.comboGame.setCurrentIndex(1)
         result = self.comboGame.currentText()
@@ -453,8 +456,10 @@ class fpdb(QMainWindow):
             self.table.addWidget(stat7, y_pos, 5)
             self.stat7_dict.append(stat7)
 
-            stat8 = QLineEdit()
-            stat8.setText(str(self.config.stat_sets[result].stats[stat].popup))
+            stat8 = QComboBox()
+            for popup in self.config.popup_windows.keys():
+                stat8.addItem(popup)
+            stat8.setCurrentText(str(self.config.stat_sets[result].stats[stat].popup))
             self.table.addWidget(stat8, y_pos, 6)
             self.stat8_dict.append(stat8)
 

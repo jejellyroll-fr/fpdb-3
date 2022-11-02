@@ -1805,6 +1805,8 @@ class Config(object):
     def get_stat_sets(self):
         """Gets the list of stat block contents in the configuration."""
         return list(self.stat_sets.keys())
+    
+
         
     def get_layout_sets(self):
         """Gets the list of block layouts in the configuration."""
