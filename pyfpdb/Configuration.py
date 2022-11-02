@@ -1236,29 +1236,42 @@ class Config(object):
                 fav_seat.setAttribute("fav_seat", seat10_dict)
     #end def
     
-    def edit_hud(self, result, seat2_dict, seat3_dict, seat4_dict, seat5_dict, seat6_dict, seat7_dict, seat8_dict, seat9_dict, seat10_dict):
-        site_node = self.config.stat_sets[result]
+    def edit_hud(self, result, stat2, stat3):
+        REPLACEMENTS = [
+                        ("(0,0)", "(1,1)"),
+                        ("(0,1)", "(1,2)"),
+                        ("(0,2)", "(1,3)"),
+                        ("(0,3)", "(1,4)"),
+                        ("(1,0)", "(2,1)"),
+                        ("(1,1)", "(2,2)"),
+                        ("(1,2)", "(2,3)"),
+                        ("(1,3)", "(2,4)"),
+                        ("(2,0)", "(3,1)"),
+                        ("(2,1)", "(3,2)"),
+                        ("(2,2)", "(3,3)"),
+                        ("(2,3)", "(3,4)"),
+                        ("(3,0)", "(4,1)"),
+                        ("(3,1)", "(4,2)"),
+                        ("(3,2)", "(4,3)"),
+                        ("(3,3)", "(4,4)"),
+                        ]
+            
         
-        
-        for fav_seat in site_node.getElementsByTagName("fav"):
-            if fav_seat.getAttribute("max") == "2":
-                fav_seat.setAttribute("fav_seat", seat2_dict)
-            elif fav_seat.getAttribute("max") == "3":
-                fav_seat.setAttribute("fav_seat", seat3_dict)
-            elif fav_seat.getAttribute("max") == "4":
-                fav_seat.setAttribute("fav_seat", seat4_dict)
-            elif fav_seat.getAttribute("max") == "5":
-                fav_seat.setAttribute("fav_seat", seat5_dict)
-            elif fav_seat.getAttribute("max") == "6":
-                fav_seat.setAttribute("fav_seat", seat6_dict)
-            elif fav_seat.getAttribute("max") == "7":
-                fav_seat.setAttribute("fav_seat", seat7_dict)
-            elif fav_seat.getAttribute("max") == "8":
-                fav_seat.setAttribute("fav_seat", seat8_dict)
-            elif fav_seat.getAttribute("max") == "9":
-                fav_seat.setAttribute("fav_seat", seat9_dict)
-            elif fav_seat.getAttribute("max") == "10":
-                fav_seat.setAttribute("fav_seat", seat10_dict)
+        for old, new in REPLACEMENTS:
+            transcript = stat2.replace(old, new)
+            print(transcript)
+        for statsetNode in self.doc.getElementsByTagName("ss"):
+            print ("getStatSetNode statsetNode:",statsetNode)
+            
+            if statsetNode.getAttribute("name") == result:
+                print("true1")
+                for fav_stat in statsetNode.getElementsByTagName("stat"):
+                    print("true2")
+                    
+                    if fav_stat.getAttribute("_rowcol") == transcript:
+                        print(stat3)
+                    
+            
     #end def
 
     def edit_site(self, site_name, enabled, screen_name, history_path, summary_path):
