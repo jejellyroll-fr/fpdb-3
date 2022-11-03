@@ -42,6 +42,7 @@ rewrite = { 'general' : ('General'),                   'supported_databases' : (
           , 'col_title' : ('Column Heading'),          'xalignment' : ('Left/Right Align')
           , 'disp_all' : ('Show in Summaries'),        'disp_posn' : ('Show in Position Stats')
           , 'col_name' : ('Stat Name'),                'field_format' : ('Format')
+          , 'gui_tour_stats' : ('Tour Player Stats'),
           }
 
 class GuiPrefs(QDialog):

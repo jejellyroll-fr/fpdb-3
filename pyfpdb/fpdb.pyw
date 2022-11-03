@@ -430,10 +430,22 @@ class fpdb(QMainWindow):
             stat2.setText(str(stat))
             self.table.addWidget(stat2, y_pos, 0)
             self.stat2_dict.append(stat2)
-
+            if os.name == 'nt' :
+                icoPath = os.path.dirname(__file__)
+                
+                icoPath = icoPath+"\\"
+                print(icoPath)
+            else:
+                icoPath = ""
             stat3 = QComboBox()
-            stats = self.config.get_gui_cash_stat_params()
-            print(stats)
+            stats_cash = self.config.get_gui_cash_stat_params()
+            for x in range(0, len(stats_cash)):
+                #print(stats_cash[x][0])
+                stat3.addItem(QIcon(icoPath +'Letter-C-icon.png'),stats_cash[x][0])
+            stats_tour = self.config.get_gui_tour_stat_params()
+            for x in range(0, len(stats_tour)):
+                #print(stats_tour[x][0])
+                stat3.addItem(QIcon(icoPath +'Letter-T-icon.png'),stats_tour[x][0])
             stat3.setCurrentText(str(self.config.stat_sets[result].stats[stat].stat_name))
             self.table.addWidget(stat3, y_pos, 1)
             self.stat3_dict.append(stat3)
@@ -700,7 +712,7 @@ class fpdb(QMainWindow):
             hud_seat = self.config.supported_sites[available_site_names[site_number]].fav_seat[2]
             
 
-            print('hud seat ps:', type(hud_seat), hud_seat)
+            #print('hud seat ps:', type(hud_seat), hud_seat)
             seat2 = QLineEdit()
             
             seat2.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[2]))
