@@ -1918,9 +1918,11 @@ class Config(object):
         return( self.general )
 
     def get_gui_cash_stat_params(self):
+        #print(type(self.gui_cash_stats))
         return( self.gui_cash_stats )
     
     def get_gui_tour_stat_params(self):
+        #print(type(self.gui_tour_stats))
         return( self.gui_tour_stats )
 
 if __name__== "__main__":
