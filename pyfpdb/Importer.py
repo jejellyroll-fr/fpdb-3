@@ -28,7 +28,7 @@ from past.utils import old_div
 #    Standard Library modules
 
 import os  # todo: remove this once import_dir is in fpdb_import
-from time import time, sleep
+from time import time, sleep, process_time
 import datetime
 import queue
 import shutil
@@ -104,6 +104,7 @@ class Importer(object):
         for i in range(self.settings['threads']):
             self.writerdbs.append(Database.Database(self.config, sql = self.sql) )
 
+        process_time() # init clock in windows
 
     #Set functions
     def setMode(self, value):
@@ -315,11 +316,11 @@ class Importer(object):
             if moveimportedfiles and movefailedfiles:
                 try:
                     if moveimportedfiles:
-                        shutil.move(file, "c:\\fpdbimported\\%d-%s" % (filecount, os.path.basename(file[3:]) ) )
+                        shutil.move(f, "c:\\fpdbimported\\%d-%s" % (filecount, os.path.basename(f[3:]) ) )
                 except:
                     fileerrorcount = fileerrorcount + 1
                     if movefailedfiles:
-                        shutil.move(file, "c:\\fpdbfailed\\%d-%s" % (fileerrorcount, os.path.basename(file[3:]) ) )
+                        shutil.move(f, "c:\\fpdbfailed\\%d-%s" % (fileerrorcount, os.path.basename(f[3:]) ) )
             
             self.logImport('bulk', f, stored, duplicates, partial, skipped, errors, ttime, self.filelist[f].fileId)
 
@@ -503,7 +504,7 @@ class Importer(object):
                         for line in formatted_lines:
                             error_trace += line
                         tmp = hand.handText[0:200]
-                        log.error(("Importer._import_hh_file: '%r' Fatal error: '%r'") % (file, error_trace))
+                        log.error(("Importer._import_hh_file: '%r' Fatal error: '%r'") % (fpdbfile.path, error_trace))
                         log.error(("'%r'") % tmp)
                         if (doinsert and ihands): backtrack = True
                     if backtrack: #If last hand in the file is a duplicate this will backtrack and insert the new hand records
@@ -577,7 +578,7 @@ class Importer(object):
             if self.caller: self.progressNotify()
             summaryTexts = self.readFile(obj, fpdbfile.path, fpdbfile.site.name)
             if summaryTexts is None:
-                log.error("Found: '%s' with 0 characters... skipping" %fpbdfile .path)
+                log.error("Found: '%s' with 0 characters... skipping" % fpbdfile.path)
                 return (0, 0, 0, 0, 1, time()) # File had 0 characters
             ####Lock Placeholder####
             for j, summaryText in enumerate(summaryTexts, start=1):
