@@ -268,7 +268,11 @@ def set_logfile(file_name):
     log_dir = os.path.join(CONFIG_PATH, 'log').replace('\\', '/')
     check_dir(log_dir)
     log_file = os.path.join(log_dir, file_name).replace('\\', '/')
-
+    if os.path.isfile(conf_file):
+        print('logging.conf file already exists')
+    else:
+     # create a file
+        print('copying logging.conf file in appdata rooming folder')    
     if conf_file:
         try:
             log_file = log_file.replace('\\', '/')  # replace each \ with \\
@@ -288,7 +292,7 @@ def check_dir(path, create = True):
         msg = ("Creating directory: '%s'") % (path)
         print(msg)
         log.info(msg)
-        os.mkdir(path)#, "utf-8"))
+        os.makedirs(path)#, "utf-8"))
     else:
         return False
 
@@ -911,7 +915,7 @@ class Config(object):
         self.python_version = PYTHON_VERSION
         
         if not os.path.exists(CONFIG_PATH):
-            os.mkdir(CONFIG_PATH)
+            os.makedirs(CONFIG_PATH)
 
         if custom_log_dir and os.path.exists(custom_log_dir):
             self.dir_log = str(custom_log_dir, "utf8")
