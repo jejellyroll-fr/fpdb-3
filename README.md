@@ -7,9 +7,10 @@ Feel free to clone it, and to participate to this development.
 
 I'm not an expert python developer, this project, as a poker player, is for me to develop my skills in this language during my free time.
 
-## Updating to python 3.10
+## Updating to python 3.11
 
 FPDB is a poker tools - HUD - Replayer
+installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_name\AppData\Roaming\fpdb
 
 ## understand architecture soft
 

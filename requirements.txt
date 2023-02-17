@@ -1,3 +1,4 @@
+pywin32
 configparser    
 future          
 matplotlib      
@@ -7,7 +8,7 @@ pytz
 xcffib
 numpy 
 xlrd   
-SQLAlchemy  
+SQLAlchemy==1.4.46
 beautifulsoup4
 pokereval
 requests
