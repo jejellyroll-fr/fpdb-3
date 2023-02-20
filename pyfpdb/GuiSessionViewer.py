@@ -33,6 +33,11 @@ from PyQt5.QtGui import (QStandardItem, QStandardItemModel)
 from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel, QScrollArea,
                              QSplitter, QTableView, QVBoxLayout, QWidget)
 
+import matplotlib
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt5agg import FigureCanvas
+from mplfinance.original_flavor import candlestick_ochl
+from numpy import diff, nonzero, sum, cumsum, max, min, append
 try:
     calluse = not 'matplotlib' in sys.modules
     import matplotlib
