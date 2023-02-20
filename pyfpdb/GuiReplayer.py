@@ -51,8 +51,8 @@ from matplotlib import pyplot as plt
 import copy
 import os
 
-CARD_HEIGHT = 70
-CARD_WIDTH = 50
+CARD_HEIGHT = 90
+CARD_WIDTH = 70
 
 class GuiReplayer(QWidget):
     """A Replayer to replay hands."""
@@ -118,8 +118,13 @@ class GuiReplayer(QWidget):
         for card in cards:
             cardIndex = Card.encodeCard(card)
             painter.drawPixmap(QPoint(x, y), self.cardImages[cardIndex])
-            x += self.cardwidth
+            x += int(self.cardwidth/2)-15
 
+    def renderboardCards(self, painter, cards, x, y):
+        for card in cards:
+            cardIndex = Card.encodeCard(card)
+            painter.drawPixmap(QPoint(x, y), self.cardImages[cardIndex])
+            x += self.cardwidth
     
     def paintEvent(self, event):
 
@@ -166,9 +171,9 @@ class GuiReplayer(QWidget):
         converty = lambda y: int(y * self.tableImage.height() * 0.6) + old_div(self.tableImage.height(), 2)
 
         painter.drawText(QRect(-40,0,600,40),Qt.AlignCenter,self.info)
-        
+        nb_player = len(list(state.players.values()))
         for player in list(state.players.values()):
-            print(len(list(state.players.values())))
+
             playerx = convertx(player.x)
             
             playery = converty(player.y)
@@ -260,7 +265,7 @@ class GuiReplayer(QWidget):
                 y -= 0.5 * self.cardheight
             elif street.endswith('2'):
                 y += 0.5 * self.cardheight
-            self.renderCards(painter, state.board[street], x, y)
+            self.renderboardCards(painter, state.board[street], x, y)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Left:
@@ -290,6 +295,8 @@ class GuiReplayer(QWidget):
         info_gen = hand.gametype['category']
         if info_gen == "omahahilo":
             info_gen = "Omaha Hi/Lo"
+        elif info_gen == "fusion":
+            info_gen = "Fusion"
         elif info_gen == "27_1draw":
             info_gen = "Single Draw 2-7 Lowball"
         elif info_gen == "27_3draw":
@@ -633,7 +640,7 @@ if __name__ == '__main__':
 
     from PyQt5.QtWidgets import QApplication
     app = QApplication([])
-    handlist = [10, 39, 40, 72, 369, 390]
+    handlist = [8830,10, 39, 40, 72, 369, 390]
     replayer = GuiReplayer(config, sql, None, handlist)
     replayer.play_hand(0)
 
