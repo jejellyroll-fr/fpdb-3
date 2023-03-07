@@ -1982,6 +1982,10 @@ if __name__== "__main__":
     print("\n-----------  GUI CASH STATS -----------")
     print("gui_cash_stats =", c.gui_cash_stats)
 
+    print("\n----------- Heroes -----------")
+    for s in list(c.supported_sites.keys()):
+        print(c.supported_sites[s].screen_name)
+
     print("\n----------- ENVIRONMENT CONSTANTS -----------")
     print("Configuration.install_method {source,exe,app} =", INSTALL_METHOD)
     print("Configuration.fpdb_root_path =", FPDB_ROOT_PATH, type(FPDB_ROOT_PATH))

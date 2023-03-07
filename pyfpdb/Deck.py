@@ -24,10 +24,8 @@ class Deck(object):
     def __init__(self, config, deck_type=u'simple', card_back=u'back04', width=30, height=42):
         self.__width = width
         self.__height = height
-        self.__cardspath = os.path.join(config.graphics_path, u"cards", deck_type)
-        self.__cardspath = self.__cardspath.replace('\\', '/')
-        self.__backfile = os.path.join(config.graphics_path, u"cards", u"backs", (card_back + u".svg"))
-        self.__backfile = self.__backfile.replace('\\', '/')
+        self.__cardspath = os.path.join(config.graphics_path, u"cards", deck_type).replace('\\', '/')
+        self.__backfile = os.path.join(config.graphics_path, u"cards", u"backs", (card_back + u".svg")).replace('\\', '/')
         self.__cards = dict({ 's': None, 'h': None, 'd': None, 'c': None })
         self.__card_back = None
         self.__rank_vals = dict()

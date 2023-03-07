@@ -1188,18 +1188,42 @@ class HoldemOmahaHand(Hand):
     def join_holecards(self, player, asList=False):
         holeNo = Card.games[self.gametype['category']][5][0][1]
         hcs = [u'0x'] * holeNo
-        for street in self.holeStreets:
-            if player in list(self.holecards[street].keys()):
-                if len(self.holecards[street][player][1])==1: continue
-                for i in 0,1:
-                    hcs[i] = self.holecards[street][player][1][i]
-                    hcs[i] = hcs[i][0:1].upper()+hcs[i][1:2]
-                try:
-                    for i in range(2, holeNo):
+        if self.gametype['category'] == 'fusion':
+            for street in self.holeStreets:
+                if player in list(self.holecards[street].keys()):
+                    if street == 'PREFLOP':
+                        if len(self.holecards[street][player][1])==1: continue
+                        for i in 0,1:
+                            hcs[i] = self.holecards[street][player][1][i]
+                            hcs[i] = hcs[i][0:1].upper()+hcs[i][1:2]
+                        try:
+                            for i in range(2, holeNo):
+                                hcs[i] = self.holecards[street][player][1][i]
+                                hcs[i] = hcs[i][0:1].upper()+hcs[i][1:2]
+                        except IndexError:
+                            log.debug("Why did we get an indexerror?")
+                    elif street == 'FLOP':
+                        if len(self.holecards[street][player][1])==1: continue
+                        hcs[2] = self.holecards[street][player][0][0]
+                        hcs[2] = hcs[2][0:1].upper()+hcs[2][1:2]
+                    elif street == 'TURN':
+                        if len(self.holecards[street][player][1]) == 1: continue
+                        hcs[3] = self.holecards[street][player][0][0]
+                        hcs[3] = hcs[3][0:1].upper() + hcs[3][1:2]
+
+        else:
+            for street in self.holeStreets:
+                if player in list(self.holecards[street].keys()):
+                    if len(self.holecards[street][player][1])==1: continue
+                    for i in 0,1:
                         hcs[i] = self.holecards[street][player][1][i]
                         hcs[i] = hcs[i][0:1].upper()+hcs[i][1:2]
-                except IndexError:
-                    log.debug("Why did we get an indexerror?")
+                    try:
+                        for i in range(2, holeNo):
+                            hcs[i] = self.holecards[street][player][1][i]
+                            hcs[i] = hcs[i][0:1].upper()+hcs[i][1:2]
+                    except IndexError:
+                        log.debug("Why did we get an indexerror?")
 
         if asList:
             return hcs

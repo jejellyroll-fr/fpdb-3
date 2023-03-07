@@ -857,7 +857,7 @@ class Database(object):
                 if not os.path.isdir(self.config.dir_database) and create:
                     log.info(("Creating directory: '%s'") % (self.config.dir_database))
                     os.makedirs(self.config.dir_database)
-                database = os.path.join(self.config.dir_database, database)
+                database = os.path.join(self.config.dir_database, database).replace("\\","/")
             self.db_path = database
             log.info(("Connecting to SQLite: %s") % self.db_path)
             if os.path.exists(database) or create:
