@@ -333,7 +333,7 @@ class Filters(QWidget):
         return self.siteid
 
     def getHeroes(self):
-        print(dict([(site, str(self.heroList.currentText())) for site in self.leHeroes]))
+        #print(dict([(site, str(self.heroList.currentText())) for site in self.leHeroes]))
         
         return dict([(site, str(self.heroList.currentText())) for site in self.leHeroes])
     

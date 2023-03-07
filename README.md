@@ -26,10 +26,15 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 - not working translation -> from icu import Locale(TO DO: find better solution)
 >pokerstove
 - add odds calc (fast solution-> use Pokerprotools online WIP) -> prokerprotool is down (TO DO: other option install on pc, or use other lib ploev,treys... WIP)
+- update poker-eval lib (https://github.com/jejellyroll-fr/poker-eval)->added 5 cards PLO, 5 card PLO8 and 6 card PLO -> OK
+- update pypoker (https://github.com/jejellyroll-fr/pypoker-eval)->Python 3 ->OK (TO DO: add 6 and 5 cards plo)
 >replayer
 - not working ->fixed
-- rethink the distribution of players around the table (TO DO: rework)
+- rethink the distribution of players around the table (TO DO: WIP)
+- add pot odds and equity(TO DO)
 - dev specific web front (TO DO: stay with python, exemple django or other laguage like js, exemple react.js)
+>handviewer(cash)
+- Filter bug (player and site =not good working)
 >import
 - correct bug on winamax (no SB)->Fixed 
 - correct bug go fast (adding holdhup(extra cash->special rake 10%), error collected pot>total pot)->fixed(TO DO REWORK: include Chaz's methode, better way to do)

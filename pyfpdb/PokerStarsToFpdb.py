@@ -201,7 +201,7 @@ class PokerStars(HandHistoryConverter):
                         (\s\(disconnect\))?
                         (\s\[(?P<CARDS>.+?)\])?\s*$"""
                          %  substitutions, re.MULTILINE|re.VERBOSE)
-    re_ShowdownAction   = re.compile(r"%s: shows \[(?P<CARDS>.*)\]" % substitutions['PLYR'], re.MULTILINE)
+    re_ShowdownAction   = re.compile(r"%s: (shows|mucks|mucked|showed) \[(?P<CARDS>.*)\]" % substitutions['PLYR'], re.MULTILINE)
     re_sitsOut          = re.compile("%s sits out" %  substitutions['PLYR'], re.MULTILINE)
     #re_ShownCards       = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % substitutions, re.MULTILINE)
     re_CollectPot       = re.compile(r"Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(collected|showed \[.*\] and (won|collected)) \(?%(CUR)s(?P<POT>[,.\d]+)\)?(, mucked| with.*|)" %  substitutions, re.MULTILINE)

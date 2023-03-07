@@ -20,10 +20,8 @@
 # This code once was in GuiReplayer.py and was split up in this and the former by zarturo.
 
 
-
-
-#import L10n
-#_ = L10n.get_translation()
+# import L10n
+# _ = L10n.get_translation()
 
 from functools import partial
 
@@ -45,6 +43,7 @@ from io import StringIO
 
 import GuiReplayer
 
+
 class GuiHandViewer(QSplitter):
     def __init__(self, config, querylist, mainwin):
         QSplitter.__init__(self, mainwin)
@@ -54,28 +53,28 @@ class GuiHandViewer(QSplitter):
         self.replayer = None
 
         self.db = Database.Database(self.config, sql=self.sql)
-        
-        filters_display = { "Heroes"    : True,
-                    "Sites"     : False,
-                    "Games"     : True,
-                    "Currencies": False,
-                    "Limits"    : True,
-                    "LimitSep"  : True,
-                    "LimitType" : True,
-                    "Positions" : True,
-                    "Type"      : True,
-                    "Seats"     : False,
-                    "SeatSep"   : False,
-                    "Dates"     : True,
-                    "Cards"     : False,
-                    "Groups"    : False,
-                    "GroupsAll" : False,
-                    "Button1"   : True,
-                    "Button2"   : False
-                  }
-        
-        self.filters = Filters.Filters(self.db, display = filters_display)
-        self.filters.registerButton1Name(("Load Hands"))
+
+        filters_display = {"Heroes": True,
+                           "Sites": True,
+                           "Games": True,
+                           "Currencies": False,
+                           "Limits": True,
+                           "LimitSep": True,
+                           "LimitType": True,
+                           "Positions": True,
+                           "Type": True,
+                           "Seats": False,
+                           "SeatSep": False,
+                           "Dates": True,
+                           "Cards": False,
+                           "Groups": False,
+                           "GroupsAll": False,
+                           "Button1": True,
+                           "Button2": False
+                           }
+
+        self.filters = Filters.Filters(self.db, display=filters_display)
+        self.filters.registerButton1Name("Load Hands")
         self.filters.registerButton1Callback(self.loadHands)
         self.filters.registerCardsCallback(self.filter_cards_cb)
 
@@ -94,23 +93,24 @@ class GuiHandViewer(QSplitter):
         self.deck_instance = Deck.Deck(self.config, height=42, width=30)
         self.cardImages = self.init_card_images()
 
-        # Dict of colnames and their column idx in the model/ListStore
+        # !Dict of colnames and their column idx in the model/ListStore
         self.colnum = {
-                  'Stakes'       : 0,
-                  'Pos'          : 1,
-                  'Street0'      : 2,
-                  'Action0'      : 3,
-                  'Street1-4'    : 4,
-                  'Action1-4'    : 5,
-                  'Won'          : 6,
-                  'Bet'          : 7,
-                  'Net'          : 8,
-                  'Game'         : 9,
-                  'HandId'       : 10,
-                  'Total Pot'    : 11,
-                  'Rake'         : 12,
-                  'SiteHandNo'   : 13
-                 }
+            'Stakes': 0,
+            'Players': 1,
+            'Pos': 2,
+            'Street0': 3,
+            'Action0': 4,
+            'Street1-4': 5,
+            'Action1-4': 6,
+            'Won': 7,
+            'Bet': 8,
+            'Net': 9,
+            'Game': 10,
+            'HandId': 11,
+            'Total Pot': 12,
+            'Rake': 13,
+            'SiteHandNo': 14
+        }
         self.view = QTableView()
         self.view.setSelectionBehavior(QTableView.SelectRows)
         self.handsVBox.addWidget(self.view)
@@ -122,23 +122,23 @@ class GuiHandViewer(QSplitter):
         self.view.setModel(self.filterModel)
         self.view.verticalHeader().hide()
         self.model.setHorizontalHeaderLabels(
-            ['Stakes', 'Position', 'Hands', 'Preflop Action', 'Board', 'Postflop Action',
+            ['Stakes', 'Nb Players', 'Position', 'Hands', 'Preflop Action', 'Board', 'Postflop Action',
              'Won', 'Bet', 'Net', 'Game', 'HandId', 'Total Pot', 'Rake', 'SiteHandId'])
 
         self.view.doubleClicked.connect(self.row_activated)
         self.view.contextMenuEvent = self.contextMenu
-        self.filterModel.rowsInserted.connect(lambda index, start, end: [self.view.resizeRowToContents(r) for r in range(start, end + 1)])
+        self.filterModel.rowsInserted.connect(
+            lambda index, start, end: [self.view.resizeRowToContents(r) for r in range(start, end + 1)])
         self.filterModel.filterAcceptsRow = lambda row, sourceParent: self.is_row_in_card_filter(row)
 
         self.view.resizeColumnsToContents()
         self.view.setSortingEnabled(True)
 
-       
     def init_card_images(self):
         suits = ('s', 'h', 'd', 'c')
         ranks = (14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2)
 
-        card_images = [0]*53
+        card_images = [0] * 53
         for j in range(0, 13):
             for i in range(0, 4):
                 loc = Card.cardFromValueSuit(ranks[j], suits[i])
@@ -150,6 +150,7 @@ class GuiHandViewer(QSplitter):
 
     def loadHands(self, checkState):
         hand_ids = self.get_hand_ids_from_date_range(self.filters.getDates()[0], self.filters.getDates()[1])
+        # ! print(hand_ids)
         self.reload_hands(hand_ids)
 
     def get_hand_ids_from_date_range(self, start, end):
@@ -157,15 +158,17 @@ class GuiHandViewer(QSplitter):
         q = q.replace('<datetest>', "between '" + start + "' and '" + end + "'")
 
         q = self.filters.replace_placeholders_with_filter_values(q)
-        print(q)
+        # ! print(q)
         c = self.db.get_cursor()
 
         c.execute(q)
+
         return [r[0] for r in c.fetchall()]
 
     def rankedhand(self, hand, game):
-        ranks = {'0':0, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9, 'T':10, 'J':11, 'Q':12, 'K':13, 'A':14}
-        suits = {'x':0, 's':1, 'c':2, 'd':3, 'h':4}
+        ranks = {'0': 0, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'T': 10, 'J': 11, 'Q': 12,
+                 'K': 13, 'A': 14}
+        suits = {'x': 0, 's': 1, 'c': 2, 'd': 3, 'h': 4}
 
         if game == 'holdem':
             card1 = ranks[hand[0]]
@@ -194,15 +197,18 @@ class GuiHandViewer(QSplitter):
                 break
             self.hands[handid] = self.importhand(handid)
             self.addHandRow(handid, self.hands[handid])
+
             progress.setValue(idx + 1)
             if idx % 10 == 0:
                 QCoreApplication.processEvents()
                 self.view.resizeColumnsToContents()
         self.view.resizeColumnsToContents()
-    
+
     def addHandRow(self, handid, hand):
         hero = self.filters.getHeroes()[hand.sitename]
         won = 0
+        nbplayers = len(hand.players)
+        print("max seaT: ", hand.maxseats)
         if hero in list(hand.collectees.keys()):
             won = hand.collectees[hero]
         bet = 0
@@ -210,31 +216,32 @@ class GuiHandViewer(QSplitter):
             bet = hand.pot.committed[hero]
         net = won - bet
         pos = hand.get_player_position(hero)
-        gt =  hand.gametype['category']
+        gt = hand.gametype['category']
         row = []
         totalpot = hand.totalpot
         rake = hand.rake
         sitehandid = hand.handid
         if hand.gametype['base'] == 'hold':
-            board =  []
+            board = []
             board.extend(hand.board['FLOP'])
             board.extend(hand.board['TURN'])
             board.extend(hand.board['RIVER'])
 
             pre_actions = hand.get_actions_short(hero, 'PREFLOP')
             post_actions = ''
-            if 'F' not in pre_actions:      #if player hasen't folded preflop
+            if 'F' not in pre_actions:  # if player hasen't folded preflop
                 post_actions = hand.get_actions_short_streets(hero, 'FLOP', 'TURN', 'RIVER')
 
-            row = [hand.getStakesAsString(), pos, hand.join_holecards(hero), pre_actions, ' '.join(board), post_actions, str(won), str(bet), 
+            row = [hand.getStakesAsString(), str(nbplayers), pos, hand.join_holecards(hero), pre_actions, ' '.join(board), post_actions,
+                   str(won), str(bet),
                    str(net), gt, str(handid), str(totalpot), str(rake), str(sitehandid)]
         elif hand.gametype['base'] == 'stud':
-            third = " ".join(hand.holecards['THIRD'][hero][0]) + " " + " ".join(hand.holecards['THIRD'][hero][1]) 
+            third = " ".join(hand.holecards['THIRD'][hero][0]) + " " + " ".join(hand.holecards['THIRD'][hero][1])
             # ugh - fix the stud join_holecards function so we can retrieve sanely
-            later_streets= []
-            later_streets.extend(hand.holecards['FOURTH'] [hero][0])
-            later_streets.extend(hand.holecards['FIFTH']  [hero][0])
-            later_streets.extend(hand.holecards['SIXTH']  [hero][0])
+            later_streets = []
+            later_streets.extend(hand.holecards['FOURTH'][hero][0])
+            later_streets.extend(hand.holecards['FIFTH'][hero][0])
+            later_streets.extend(hand.holecards['SIXTH'][hero][0])
             later_streets.extend(hand.holecards['SEVENTH'][hero][0])
 
             pre_actions = hand.get_actions_short(hero, 'THIRD')
@@ -242,10 +249,12 @@ class GuiHandViewer(QSplitter):
             if 'F' not in pre_actions:
                 post_actions = hand.get_actions_short_streets(hero, 'FOURTH', 'FIFTH', 'SIXTH', 'SEVENTH')
 
-            row = [hand.getStakesAsString(), pos, third, pre_actions, ' '.join(later_streets), post_actions, str(won), str(bet), str(net), 
+            row = [hand.getStakesAsString(), str(nbplayers), pos, third, pre_actions, ' '.join(later_streets), post_actions, str(won),
+                   str(bet), str(net),
                    gt, str(handid), str(totalpot), str(rake)]
         elif hand.gametype['base'] == 'draw':
-            row = [hand.getStakesAsString(), pos, hand.join_holecards(hero,street='DEAL'), hand.get_actions_short(hero, 'DEAL'), None, None, 
+            row = [hand.getStakesAsString(), str(nbplayers), pos, hand.join_holecards(hero, street='DEAL'),
+                   hand.get_actions_short(hero, 'DEAL'), None, None,
                    str(won), str(bet), str(net), gt, str(handid), str(totalpot), str(rake)]
 
         modelrow = [QStandardItem(r) for r in row]
@@ -283,12 +292,12 @@ class GuiHandViewer(QSplitter):
     def is_row_in_card_filter(self, rownum):
         """ Returns true if the cards of the given row are in the card filter """
         # Does work but all cards that should NOT be displayed have to be clicked.
-        card_filter = self.filters.getCards() 
+        card_filter = self.filters.getCards()
         hcs = self.model.data(self.model.index(rownum, self.colnum['Street0']), Qt.UserRole + 1).split(' ')
-        
-        if '0x' in hcs:      #if cards are unknown return True
+
+        if '0x' in hcs:  # if cards are unknown return True
             return True
-        
+
         gt = self.model.data(self.model.index(rownum, self.colnum['Game']))
 
         if gt not in ('holdem', 'omahahi', 'omahahilo'): return True
@@ -304,9 +313,9 @@ class GuiHandViewer(QSplitter):
         print('handlist:')
         print(handlist)
         self.replayer = GuiReplayer.GuiReplayer(self.config, self.sql, self.main_window, handlist)
-        index =  handlist.index(int(index.sibling(index.row(), self.colnum['HandId']).data()))
+        index = handlist.index(int(index.sibling(index.row(), self.colnum['HandId']).data()))
         print('index:')
-        print (index)
+        print(index)
         self.replayer.play_hand(index)
 
     def importhand(self, handid=1):
@@ -321,21 +330,21 @@ class GuiHandViewer(QSplitter):
         return h
 
     def render_cards(self, cardstring):
-        card_width  = 30
+        card_width = 30
         card_height = 42
         if cardstring is None or cardstring == '':
             cardstring = "0x"
-        cardstring = cardstring.replace("'","")
-        cardstring = cardstring.replace("[","")
-        cardstring = cardstring.replace("]","")
-        cardstring = cardstring.replace("'","")
-        cardstring = cardstring.replace(",","")
+        cardstring = cardstring.replace("'", "")
+        cardstring = cardstring.replace("[", "")
+        cardstring = cardstring.replace("]", "")
+        cardstring = cardstring.replace("'", "")
+        cardstring = cardstring.replace(",", "")
         cards = [Card.encodeCard(c) for c in cardstring.split(' ')]
         n_cards = len(cards)
-    
+
         pixbuf = QPixmap(card_width * n_cards, card_height)
         painter = QPainter(pixbuf)
-        x = 0 # x coord where the next card starts in pixbuf
+        x = 0  # x coord where the next card starts in pixbuf
         for card in cards:
             painter.drawPixmap(x, 0, self.cardImages[card])
             x += card_width
@@ -352,6 +361,7 @@ if __name__ == "__main__":
     settings.update(config.get_default_paths())
 
     from PyQt5.QtWidgets import QMainWindow
+
     app = QApplication([])
     sql = SQL.Sql(db_server=settings['db-server'])
     main_window = QMainWindow()
