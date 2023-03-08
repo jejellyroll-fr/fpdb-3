@@ -48,7 +48,7 @@ class Hand(object):
     MS = {'horse' : 'HORSE', '8game' : '8-Game', 'hose'  : 'HOSE', 'ha': 'HA'}
     ACTION = {'ante': 1, 'small blind': 2, 'secondsb': 3, 'big blind': 4, 'both': 5, 'calls': 6, 'raises': 7,
               'bets': 8, 'stands pat': 9, 'folds': 10, 'checks': 11, 'discards': 12, 'bringin': 13, 'completes': 14,
-              'straddle': 15, 'button blind': 16}
+              'straddle': 15, 'button blind': 16, 'cashout': 17}
 
     def __init__(self, config, sitename, gametype, handText, builtFrom = "HHC"):
         self.config = config
@@ -571,6 +571,8 @@ class Hand(object):
                 self.addBlind(name, 'straddle', bet)
             elif act == 16:
                 self.addBlind(name, 'button blind', bet)
+            elif act == 17: # Cashout
+                self.addCashout(street, name)
             else:
                 print("DEBUG: unknown action: '%s'" % act)
 
@@ -852,6 +854,11 @@ class Hand(object):
         self.checkPlayerExists(player, 'addCheck')
         self.actions[street].append((player, 'checks'))
 
+    def addCashout(self, street, player):
+        logging.debug(("%s %s cashout"), street, player)
+        self.checkPlayerExists(player, 'addCashout')
+        self.actions[street].append((player, 'cashout'))
+
     def discardDrawHoleCards(self, cards, player, street):
         log.debug("discardDrawHoleCards '%s' '%s' '%s'", cards, player, street)
         self.discards[street][player] = set([cards])
@@ -971,6 +978,8 @@ class Hand(object):
             return ("%s: folds " %(act[0]))
         elif act[1] == 'checks':
             return ("%s: checks " %(act[0]))
+        elif act[1] == 'cashout':
+            return ("%s: cashout " %(act[0]))
         elif act[1] == 'calls':
             return ("%s: calls %s%s%s" %(act[0], self.sym, act[2], ' and is all-in' if act[3] else ''))
         elif act[1] == 'bets':
@@ -1002,7 +1011,7 @@ class Hand(object):
         
     def get_actions_short(self, player, street):
         """ Returns a string with shortcuts for the actions of the given player and the given street
-            F ... fold, X ... Check, B ...Bet, C ... Call, R ... Raise
+            F ... fold, X ... Check, B ...Bet, C ... Call, R ... Raise, CO ... CashOut
         """
         actions = self.actions[street]
         result = []
@@ -1018,7 +1027,8 @@ class Hand(object):
                     result.append('C')
                 elif action[1] == 'raises':
                     result.append('R')
-                
+                elif action[1] == 'cashout':
+                    result.append('CO')
         return ''.join(result) 
 
     def get_actions_short_streets(self, player, *streets):

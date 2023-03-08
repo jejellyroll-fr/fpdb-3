@@ -40,8 +40,8 @@ import Deck
 import Filters
 import Charset
 
-from PyQt5.QtCore import (QPoint, QRect, Qt, QTimer)
-from PyQt5.QtGui import (QColor, QImage, QPainter)
+from PyQt5.QtCore import (QPoint, QRect, Qt, QTimer, QRectF)
+from PyQt5.QtGui import (QColor, QImage, QPainter, QTextDocument)
 from PyQt5.QtWidgets import (QHBoxLayout, QPushButton, QSlider, QVBoxLayout, QCheckBox,
                              QWidget)
 
@@ -232,7 +232,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(605, 807, 200, 20), Qt.AlignCenter, player.action)
                         # draw pot
-                        painter.drawText(QRect(605, 405, 200, 40), Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40), Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -282,8 +282,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(1070, 507, 200, 20), Qt.AlignCenter, player.action)
                         # draw bet pot
-                        painter.drawText(QRect(605, 405, 200, 40),
-                                         Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40),Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -348,7 +347,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(605, 807, 200, 20), Qt.AlignCenter, player.action)
                         # draw pot
-                        painter.drawText(QRect(605, 405, 200, 40), Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40), Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -400,8 +399,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(1070, 507, 200, 20), Qt.AlignCenter, player.action)
                         # draw bet pot
-                        painter.drawText(QRect(605, 405, 200, 40),
-                                         Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40),Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -454,8 +452,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(140, 507, 200, 20), Qt.AlignCenter, player.action)
                         # draw bet pot
-                        painter.drawText(QRect(605, 405, 200, 40),
-                                         Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40),Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -519,7 +516,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(605, 807, 200, 20), Qt.AlignCenter, player.action)
                         # draw pot
-                        painter.drawText(QRect(605, 405, 200, 40), Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40), Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -573,8 +570,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(1070, 507, 200, 20), Qt.AlignCenter, player.action)
                         # draw bet pot
-                        painter.drawText(QRect(605, 405, 200, 40),
-                                         Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40),Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -628,8 +624,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(605, 237, 200, 20), Qt.AlignCenter, player.action)
                         # draw bet pot
-                        painter.drawText(QRect(605, 405, 200, 40),
-                                         Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40),Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -683,8 +678,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(140, 507, 200, 20), Qt.AlignCenter, player.action)
                         # draw bet pot
-                        painter.drawText(QRect(605, 405, 200, 40),
-                                         Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40),Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -748,7 +742,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(605, 807, 200, 20), Qt.AlignCenter, player.action)
                         # draw pot
-                        painter.drawText(QRect(605, 405, 200, 40), Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40), Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -802,8 +796,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(1070, 507, 200, 20), Qt.AlignCenter, player.action)
                         # draw bet pot
-                        painter.drawText(QRect(605, 405, 200, 40),
-                                         Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40),Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -857,8 +850,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(480, 237, 200, 20), Qt.AlignCenter, player.action)
                         # draw bet pot
-                        painter.drawText(QRect(605, 405, 200, 40),
-                                         Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40),Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -912,8 +904,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(730, 237, 200, 20), Qt.AlignCenter, player.action)
                         # draw bet pot
-                        painter.drawText(QRect(605, 405, 200, 40),
-                                         Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40),Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -967,8 +958,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(140, 507, 200, 20), Qt.AlignCenter, player.action)
                         # draw bet pot
-                        painter.drawText(QRect(605, 405, 200, 40),
-                                         Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40),Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -1032,7 +1022,8 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(730, 807, 200, 20), Qt.AlignCenter, player.action)
                         # draw pot
-                        painter.drawText(QRect(605, 405, 200, 40), Qt.AlignCenter,
+                        
+                        painter.drawText(QRect(380, 480, 200, 40), Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -1086,8 +1077,8 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(1070, 507, 200, 20), Qt.AlignCenter, player.action)
                         # draw bet pot
-                        painter.drawText(QRect(605, 405, 200, 40),
-                                         Qt.AlignCenter,
+                        
+                        painter.drawText(QRect(380, 480, 200, 40),Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -1142,8 +1133,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(480, 237, 200, 20), Qt.AlignCenter, player.action)
                         # draw bet pot
-                        painter.drawText(QRect(605, 405, 200, 40),
-                                         Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40),Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -1198,8 +1188,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(730, 237, 200, 20), Qt.AlignCenter, player.action)
                         # draw bet pot
-                        painter.drawText(QRect(605, 405, 200, 40),
-                                         Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40),Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -1254,8 +1243,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(140, 507, 200, 20), Qt.AlignCenter, player.action)
                         # draw bet pot
-                        painter.drawText(QRect(605, 405, 200, 40),
-                                         Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40),Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -1310,8 +1298,7 @@ class GuiReplayer(QWidget):
                         # draw player's actions
                         painter.drawText(QRect(480, 807, 200, 20), Qt.AlignCenter, player.action)
                         # draw bet pot
-                        painter.drawText(QRect(605, 405, 200, 40),
-                                         Qt.AlignCenter,
+                        painter.drawText(QRect(380, 480, 200, 40),Qt.AlignCenter,
                                          'Pot: %s%.2f' % (self.currency, state.newpot))
                     else:
                         painter.setPen(QColor("white"))
@@ -1337,16 +1324,19 @@ class GuiReplayer(QWidget):
 
         for street in state.renderBoard:
             x = 520
-            y = 455
+            y = 400
             print("street", street, "value street", state.board[street])
             if street == "FLOP" and state.board[street] != []:
                 self.renderboardCards(painter, state.board[street], x, y)
             elif street == "FLOP1" and state.board[street] != []:
-                pass
+                y -= int(self.cardheight / 2)
+                self.renderboardCards(painter, state.board[street], x, y)
             elif street == "FLOP2" and state.board[street] != []:
-                pass
+                y += int(self.cardheight / 2)
+                self.renderboardCards(painter, state.board[street], x, y)
             elif street == "FLOP3" and state.board[street] != []:
-                pass
+                y += self.cardheight + int(self.cardheight / 2)
+                self.renderboardCards(painter, state.board[street], x, y)
             elif street == "TURN" and state.board[street] != []:
                 x += 3 * self.cardwidth
                 self.renderboardCards(painter, state.board[street], x, y)
