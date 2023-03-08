@@ -174,7 +174,7 @@ class GGPoker(HandHistoryConverter):
     re_PostMissed       = re.compile(r"^%(PLYR)s: posts missed blind %(CUR)s(?P<SBBB>[,.0-9]+)" %  substitutions, re.MULTILINE)
     re_PostStraddle     = re.compile(r"^%(PLYR)s: straddle %(CUR)s(?P<STRADDLE>[,.0-9]+)" %  substitutions, re.MULTILINE)
     re_Action           = re.compile(r"""
-                        ^%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)
+                        ^%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat|\sChooses\sto\sEV\sCashout|\sReceives\sCashout)
                         (\s%(CUR)s(?P<BET>[,.\d]+))?(\sto\s%(CUR)s(?P<BETTO>[,.\d]+))?  # the number discarded goes in <BET>
                         \s*(and\sis\sall.in)?
                         (and\shas\sreached\sthe\s[%(CUR)s\d\.,]+\scap)?
@@ -599,6 +599,8 @@ class GGPoker(HandHistoryConverter):
                 hand.addFold( street, action.group('PNAME'))
             elif action.group('ATYPE') == ' checks':
                 hand.addCheck( street, action.group('PNAME'))
+            elif action.group('ATYPE') == ' Chooses to EV Cashout' or action.group('ATYPE') == ' Receives Cashout':
+                hand.addCashout( street, action.group('PNAME'))
             elif action.group('ATYPE') == ' calls':
                 hand.addCall( street, action.group('PNAME'), self.clearMoneyString(action.group('BET')) )
             elif action.group('ATYPE') == ' raises':

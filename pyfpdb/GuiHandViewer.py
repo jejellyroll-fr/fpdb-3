@@ -208,7 +208,7 @@ class GuiHandViewer(QSplitter):
         hero = self.filters.getHeroes()[hand.sitename]
         won = 0
         nbplayers = len(hand.players)
-        print("max seaT: ", hand.maxseats)
+        # ! print("max seaT: ", hand.maxseats)
         if hero in list(hand.collectees.keys()):
             won = hand.collectees[hero]
         bet = 0
@@ -310,12 +310,12 @@ class GuiHandViewer(QSplitter):
 
     def row_activated(self, index):
         handlist = list(sorted(self.hands.keys()))
-        print('handlist:')
-        print(handlist)
+        # ! print('handlist:')
+        # ! print(handlist)
         self.replayer = GuiReplayer.GuiReplayer(self.config, self.sql, self.main_window, handlist)
         index = handlist.index(int(index.sibling(index.row(), self.colnum['HandId']).data()))
-        print('index:')
-        print(index)
+        # ! print('index:')
+        # ! print(index)
         self.replayer.play_hand(index)
 
     def importhand(self, handid=1):
