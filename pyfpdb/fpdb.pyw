@@ -23,6 +23,7 @@ import sys
 import re
 import queue
 import qdarkstyle
+import subprocess
 
 if os.name == 'nt':
     import win32api
@@ -41,7 +42,7 @@ cl_options = '.'.join(sys.argv[1:])
 import logging
 
 from PyQt5.QtCore import (QCoreApplication, QDate, Qt)
-from PyQt5.QtGui import (QScreen,QIcon)
+from PyQt5.QtGui import (QScreen,QIcon, QPixmap)
 from PyQt5.QtWidgets import (QAction, QApplication, QCalendarWidget,
                              QCheckBox, QDateEdit, QDialog,
                              QDialogButtonBox, QFileDialog,
@@ -49,6 +50,9 @@ from PyQt5.QtWidgets import (QAction, QApplication, QCalendarWidget,
                              QLabel, QLineEdit, QMainWindow,
                              QMessageBox, QPushButton, QScrollArea,
                              QTabWidget, QVBoxLayout, QWidget, QComboBox)
+
+
+
 
 import interlocks
 from Exceptions import *
@@ -103,26 +107,49 @@ except:
 
 class fpdb(QMainWindow):
 
-    # def tab_clicked(self, widget, tab_name):
-    #     """called when a tab button is clicked to activate that tab"""
-    #     self.display_tab(tab_name)
     def launch_ppt(self):
+        """
+        Launches p2.jar file using Java subprocess.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        # Get current working directory
         path = os.getcwd()
-        if os.name == 'nt':
-            pathcomp=path+"\pyfpdb\ppt\p2.jar"
-        else:
-            pathcomp=path+"/ppt/p2.jar"
-        subprocess.call(['java', '-jar', pathcomp])
+
+        # Check OS type and set path accordingly
+        pathcomp = os.path.join(path, "ppt", "p2.jar")
+
+        # Launch Java subprocess with p2.jar file
+        subprocess.Popen(['java', '-jar', pathcomp], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+
 
 
     def add_and_display_tab(self, new_page, new_tab_name):
-        """adds a tab, namely creates the button and displays it and appends all the relevant arrays"""
-        for name in self.nb_tab_names:  # todo: check this is valid
+        """
+        Adds a new tab to the notebook and displays it. If the tab already exists, it simply displays it.
+
+        Args:
+            new_page: The page to be added to the new tab.
+            new_tab_name: The name of the new tab.
+
+        Returns:
+            None
+        """
+
+        # Check if the tab already exists
+        for name in self.nb_tab_names:
             if name == new_tab_name:
+                # If so, display the tab and return
                 self.display_tab(new_tab_name)
-                return  # if tab already exists, just go to it
+                return
 
         used_before = False
+        # Check if the tab has been used before
         for i, name in enumerate(self.tab_names):
             if name == new_tab_name:
                 used_before = True
@@ -131,193 +158,182 @@ class fpdb(QMainWindow):
                 break
 
         if not used_before:
+            # If the tab has not been used before, create a new tab page
             page = new_page
             self.pages.append(new_page)
             self.tab_names.append(new_tab_name)
 
+        # Add the tab page to the notebook
         index = self.nb.addTab(page, new_tab_name)
         self.nb_tab_names.append(new_tab_name)
         self.nb.setCurrentIndex(index)
 
-    def display_tab(self, new_tab_name):
-        """displays the indicated tab"""
-        tab_no = -1
-        for i, name in enumerate(self.nb_tab_names):
-            if new_tab_name == name:
-                tab_no = i
-                break
 
-        if tab_no < 0 or tab_no >= self.nb.count():
-            raise FpdbError("invalid tab_no " + str(tab_no))
+
+    def display_tab(self, new_tab_name):
+        """
+        Display a tab with the given name.
+
+        Args:
+            new_tab_name (str): The name of the tab to be displayed.
+
+        Raises:
+            FpdbError: If the tab number is invalid.
+        """
+
+        # Find the index of the tab with the given name.
+        try:
+            tab_no = self.nb_tab_names.index(new_tab_name)
+        except ValueError:
+            raise FpdbError(f"{new_tab_name} tab not found")
+
+        # Raise an error if the tab number is invalid.
+        if tab_no >= self.nb.count():
+            raise FpdbError(f"{new_tab_name} tab index {tab_no} out of range")
         else:
+            # Set the current tab to the one with the given name.
             self.nb.setCurrentIndex(tab_no)
 
-    # def switch_to_tab(self, accel_group, acceleratable, keyval, modifier):
-    #     tab = keyval - ord('0')
-    #     if (tab == 0): tab = 10
-    #     tab = tab - 1
-    #     if (tab < len(self.nb_tab_names)):
-    #         self.display_tab(self.nb_tab_names[tab])
 
-    # def create_custom_tab(self, text, nb):
-    #     #create a custom tab for notebook containing a
-    #     #label and a button with STOCK_ICON
-    #     eventBox = gtk.EventBox()
-    #     tabBox = gtk.HBox(False, 2)
-    #     tabLabel = QLabel(text)
-    #     tabBox.pack_start(tabLabel, False)
-    #     eventBox.add(tabBox)
 
-    #     # NOTE: look at git annotate of this line to see when the revert of:
-    #     #
-    #     # force background state to fix problem where STATE_ACTIVE
-    #     # tab labels are black in some gtk themes, and therefore unreadable
-    #     # This behaviour is probably a bug in libwimp.dll or pygtk, but
-    #     # need to force background to avoid issues with menu labels being
-    #     # unreadable
-    #     #
-    #     # was removed. Removing to fix http://sourceforge.net/apps/mantisbt/fpdb/view.php?id=123
 
-    #     tabButton = QPushButton()
-    #     tabButton.connect('clicked', self.remove_tab, (nb, text))
-    #     #Add a picture on a button
-    #     self.add_icon_to_button(tabButton)
-    #     tabBox.pack_start(tabButton, False)
+    def add_icon_to_button(self, button):
+        """
+        Adds an icon to a button.
 
-    #     # needed, otherwise even calling show_all on the notebook won't
-    #     # make the hbox contents appear.
-    #     tabBox.show_all()
-    #     return eventBox
+        :param button: The button to add the icon to.
+        """
+        # Create a QHBoxLayout to hold the icon and add it to the button.
+        iconBox = QHBoxLayout(button)
 
-    # def add_icon_to_button(self, button):
-    #     iconBox = gtk.HBox(False, 0)
-    #     image = gtk.Image()
-    #     image.set_from_stock(gtk.STOCK_CLOSE, gtk.ICON_SIZE_SMALL_TOOLBAR)
-    #     gtk.Button.set_relief(button, gtk.RELIEF_NONE)
-    #     settings = gtk.Widget.get_settings(button)
-    #     (w, h) = gtk.icon_size_lookup_for_settings(settings, gtk.ICON_SIZE_SMALL_TOOLBAR)
-    #     gtk.Widget.set_size_request(button, w + 4, h + 4)
-    #     image.show()
-    #     iconBox.pack_start(image, True, False, 0)
-    #     button.add(iconBox)
-    #     iconBox.show()
+        # Create a QLabel to hold the image and add it to the iconBox.
+        image = QLabel(button)
+        image.setPixmap(QPixmap.fromTheme("window-close").scaled(16, 16))
+        iconBox.addWidget(image)
 
-    # Remove a page from the notebook
-    # def remove_tab(self, button, data):
-    #     (nb, text) = data
-    #     page = -1
-    #     #print "\n remove_tab: start", text
-    #     for i, tab in enumerate(self.nb_tab_names):
-    #         if text == tab:
-    #             page = i
-    #     #print "   page =", page
-    #     if page >= 0 and page < self.nb.get_n_pages():
-    #         #print "   removing page", page
-    #         del self.nb_tab_names[page]
-    #         nb.remove_page(page)
-    #     # Need to refresh the widget --
-    #     # This forces the widget to redraw itself.
-    #     #nb.queue_draw_area(0,0,-1,-1) needed or not??
+        # Set the button to be flat and give it a fixed size.
+        button.setFlat(True)
+        (w, h) = (16, 16)  # size of the icon
+        button.setFixedSize(w + 4, h + 4)
 
-    # def remove_current_tab(self, accel_group, acceleratable, keyval, modifier):
-    #     self.remove_tab(None, (self.nb, self.nb_tab_names[self.nb.get_current_page()]))
+        # Set the iconBox as the button's layout.
+        button.setLayout(iconBox)
 
-    def dia_about(self, widget, data=None):
-        QMessageBox.about(self, "FPDB"+str(VERSION),"Copyright 2008-2022. See contributors.txt for details"+"You are free to change, and distribute original or changed versions of fpdb within the rules set out by the license"+"http://fpdb.sourceforge.net/"+"\n"+"Your config file is: "+ self.config.file)
-        return
 
-        # dia.set_copyright("Copyright 2008-2013. See contributors.txt for details")   #do not translate copyright message
-        # dia.set_comments(("You are free to change, and distribute original or changed versions of fpdb within the rules set out by the license"))
-        # dia.set_license(("Please see the help screen for license information"))
-        # dia.set_website("http://fpdb.sourceforge.net/")
 
-        # dia.set_authors(['Steffen', 'Eratosthenes', 'Carl Gherardi',
-        #     'Eric Blade', '_mt', 'sqlcoder', 'Bostik', 'gimick', 'Chaz',
-        #     ('... and others.'), ("See contributors.txt")])
-        # dia.set_program_name("Free Poker Database (FPDB)")
-        
-        # if (os.name=="posix"):
-        #     os_text=str(os.uname())
-        # elif (os.name=="nt"):
-        #     import platform
-        #     os_text=("Windows" + " " + str(platform.win32_ver()))
-        # else:
-        #     os_text="Unknown"
-        
-        # import locale
-        # nums = [(('Operating System'), os_text),
-        #         ('Python',           sys.version[0:3]),
-        #         ('GTK+',             '.'.join([str(x) for x in gtk.gtk_version])),
-        #         ('PyGTK',            '.'.join([str(x) for x in gtk.pygtk_version])),
-        #         ('matplotlib',       matplotlib_version),
-        #         ('numpy',            numpy_version),
-        #         ('sqlite',           sqlite_version),
-        #         (('fpdb version'),  VERSION),
-        #         (('database used'), self.settings['db-server']),
-        #         (('language'),      locale.getdefaultlocale()[0]),
-        #         (('character encoding'), locale.getdefaultlocale()[1])
-        #        ]
-        # versions = gtk.TextBuffer()
-        # w = 20  # width used for module names and version numbers
-        # versions.set_text('\n'.join([x[0].rjust(w) + ': ' + x[1].ljust(w) for x in nums]))
-        # view = gtk.TextView(versions)
-        # view.set_editable(False)
-        # view.set_justification(gtk.JUSTIFY_CENTER)
-        # view.modify_font(pango.FontDescription('monospace 10'))
-        # view.show()
-        # dia.vbox.pack_end(view, True, True, 2)
+    
+    def remove_tab(self, button, data):
+        """
+        Remove a tab from the notebook.
 
-        # l = QLabel(("Your config file is: ") + self.config.file)
-        # l.set_alignment(0.5, 0.5)
-        # l.show()
-        # dia.vbox.pack_end(l, True, True, 2)
+        Args:
+            button: The button that triggered the removal.
+            data: The data associated with the tab to remove.
+        """
+        (nb, text) = data
+        page = self.nb_tab_names.index(text) if text in self.nb_tab_names else -1
+        # Check if the tab exists and is within the bounds of the notebook
+        if page >= 0 and page < self.nb.count():
+            # Remove the tab and update the notebook
+            self.nb_tab_names.pop(page)
+            self.nb.removeTab(page)
+            self.nb.update()
 
-        # l = QLabel(('Version Information:'))
-        # l.set_alignment(0.5, 0.5)
-        # l.show()
-        # dia.vbox.pack_end(l, True, True, 2)
 
-        # dia.run()
-        # dia.destroy()
-        # log.debug(("Threads: "))
-        # for t in self.threads:
-        #     log.debug("........." + str(t.__class__))
+
+    def remove_current_tab(self):
+        """
+        Remove the currently active tab from the notebook.
+        """
+        current_page = self.nb.currentIndex()
+        if current_page >= 0 and current_page < self.nb.count():
+            self.nb_tab_names.pop(current_page)
+            self.nb.removeTab(current_page)
+            self.nb.update()
+
+
+
+
+    def dia_about(self):
+        """
+        Show the "About" dialog box.
+        """
+        msg_box = QMessageBox()
+        msg_box.setWindowTitle("FPDB3")
+        msg_box.setText("".join([
+            "Copyright 2008-2023. See contributors.txt for details",
+            "You are free to change, and distribute original or changed versions of fpdb within the rules set out by the license",
+            "Your config file is: ", self.config.file]))
+        msg_box.exec_()
+
+
 
     def dia_advanced_preferences(self, widget, data=None):
-        #force reload of prefs from xml file - needed because HUD could
-        #have changed file contents
+        """
+        Opens the 'Advanced Preferences' dialog, allowing the user to modify
+        various settings for the application.
+
+        Args:
+            widget: The widget that triggered the function.
+            data: Optional data to pass to the function.
+
+        Returns:
+            None
+        """
+
+        # Force reload of preferences from XML file - needed because HUD could
+        # have changed file contents.
         self.load_profile()
+
+        # If the user makes changes to the preferences, save the updated config
+        # and reload the configuration.
         if GuiPrefs.GuiPrefs(self.config, self).exec_():
-            # save updated config
             self.config.save()
             self.reload_config()
 
-    # def dia_maintain_dbs(self, widget, data=None):
-    #     if len(self.tab_names) == 1:
-    #         if self.obtain_global_lock("dia_maintain_dbs"):  # returns true if successful
-    #             # only main tab has been opened, open dialog
-    #             dia = gtk.Dialog(("Maintain Databases"),
-    #                              self.window,
-    #                              gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-    #                              (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
-    #                               gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
-    #             dia.set_default_size(700, 320)
 
-    #             prefs = GuiDatabase.GuiDatabase(self.config, self.window, dia)
-    #             response = dia.run()
-    #             if response == gtk.RESPONSE_ACCEPT:
-    #                 log.info(('saving updated db data'))
-    #                 # save updated config
-    #                 self.config.save()
-    #                 self.load_profile()
-    #                 #for name in self.config.supported_databases:  # db_ip/db_user/db_pass/db_server
-    #                 #    log.debug('fpdb: name,desc=' + name + ',' + self.config.supported_databases[name].db_desc)
 
-    #             self.release_global_lock()
 
-    #         dia.destroy()
-    #     else:
-    #         self.warning_box(("Cannot open Database Maintenance window because other windows have been opened. Re-start fpdb to use this option."))
+    def dia_maintain_dbs(self, widget, data=None):
+        """
+        Opens the 'Maintain Databases' dialog, allowing the user to modify
+        various settings for the application.
+
+        Args:
+            widget: The widget that triggered the function.
+            data: Optional data to pass to the function.
+
+        Returns:
+            None
+        """
+
+        if len(self.tab_names) == 1:
+            if self.obtain_global_lock("dia_maintain_dbs"):
+                # only main tab has been opened, open dialog
+                dia = QDialog(self.window)
+                dia.setWindowTitle("Maintain Databases")
+                dia.setModal(True)
+                dia.setAttribute(Qt.WA_DeleteOnClose)
+                dia.setStandardButtons(QMessageBox.Cancel | QMessageBox.Save)
+                dia.setDefaultButton(QMessageBox.Save)
+                dia.resize(700, 320)
+
+                #prefs = GuiDatabase.GuiDatabase(self.config, self.window, dia)
+                response = dia.exec_()
+                if response == QMessageBox.Save:
+                    log.info('saving updated db data')
+                    # save updated config
+                    self.config.save()
+                    self.load_profile()
+                    # for name in self.config.supported_databases:
+                    #     log.debug('fpdb: name,desc=' + name + ',' + self.config.supported_databases[name].db_desc)
+
+                self.release_global_lock()
+
+                dia.close()
+            else:
+                self.warning_box("Cannot open Database Maintenance window because other windows have been opened. Re-start fpdb to use this option.")
+
 
     def dia_database_stats(self, widget, data=None):
         self.warning_box(string=("Number of Hands:") + " " + str(self.db.getHandCount()) +

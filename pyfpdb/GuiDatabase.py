@@ -17,7 +17,12 @@
 
 from __future__ import print_function
 
-
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import QStandardItemModel
+from PyQt5.QtWidgets import QTreeView, QHeaderView, QAbstractItemView, QStandardItemModel, QStandardItem, QMessageBox
+from PyQt5.QtGui import QPixmap, QFont
+from PyQt5.QtCore import Qt
 
 
 #import L10n
@@ -65,159 +70,303 @@ class GuiDatabase(object):
     COL_DFLT = 6
     COL_ICON = 7
 
+
+
+
+
+class Example(QWidget):
+    """
+    A class representing an example object
+    """
     def __init__(self, config, mainwin, dia):
+        """
+        Initializes the Example object
+
+        :param config: the configuration
+        :param mainwin: the main window
+        :param dia: the dia object
+        """
+        super().__init__()
         self.config = config
         self.main_window = mainwin
         self.dia = dia
 
         try:
-            #self.dia.set_modal(True)
-            self.vbox = self.dia.vbox
-            self.action_area = self.dia.action_area
-            #gtk.Widget.set_size_request(self.vbox, 700, 400);
+            # Set up the dialog
+            self.vbox = QVBoxLayout(self)
+            self.action_area = QDialogButtonBox(Qt.Horizontal)
+            self.vbox.addWidget(self.action_area)
 
-            h = gtk.HBox(False, spacing=3)
-            h.show()
-            self.vbox.pack_start(h, padding=3)
+            # Set up the horizontal box
+            h = QHBoxLayout()
+            self.vbox.addLayout(h)
 
-            vbtn = gtk.VBox(True, spacing=3)
-            vbtn.show()
-            h.pack_start(vbtn, expand=False, fill=False, padding=2)
+            # Set up the vertical box for buttons
+            vbtn = QVBoxLayout()
+            h.addLayout(vbtn)
 
-            # list of databases in self.config.supported_databases:
-            self.liststore = gtk.ListStore(str, str, str, str, str
-                                          ,str, str, str, str, str)
-            #                              dbms, name, comment, user, passwd, host, "", default_icon, status, icon
-            # this is how to add a filter:
-            #
-            # # Creation of the filter, from the model
-            # filter = self.liststore.filter_new()
-            # filter.set_visible_column(1)
-            #
-            # # The TreeView gets the filter as model
-            # self.listview = gtk.TreeView(filter)
-            self.listview = gtk.TreeView(model=self.liststore)
-            self.listview.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_NONE)
-            self.listcols = []
-            self.changes = False
+            # List of databases in self.config.supported_databases:
+            self.liststore = QStandardItemModel(0, 10, self)
+            # dbms, name, comment, user, passwd, host, "", default_icon, status, icon
+            self.listview = QTreeView()
+            self.listview.setModel(self.liststore)
+            self.listview.setRootIsDecorated(False)
+            self.listview.setSortingEnabled(True)
+            self.listview.setSelectionBehavior(QAbstractItemView.SelectRows)
+            self.listview.setSelectionMode(QAbstractItemView.SingleSelection)
+            self.listview.setDragEnabled(False)
+            self.listview.setEditTriggers(QAbstractItemView.NoEditTriggers)
+            h.addWidget(self.listview, 1)
 
-            self.scrolledwindow = gtk.ScrolledWindow()
-            self.scrolledwindow.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-            self.scrolledwindow.add(self.listview)
-            h.pack_start(self.scrolledwindow, expand=True, fill=True, padding=0)
+            # Add buttons
+            add_button = QPushButton("Add")
+            add_button.clicked.connect(self.addDB)
+            vbtn.addWidget(add_button)
 
-            add_button = SideButton(("Add"), gtk.STOCK_ADD)
-            add_button.connect("clicked", self.addDB, None)
-            vbtn.pack_start(add_button, False, False, 3)
+            refresh_button = QPushButton("Refresh")
+            refresh_button.clicked.connect(self.refresh)
+            vbtn.addWidget(refresh_button)
 
-            refresh_button = SideButton(("Refresh"), gtk.STOCK_REFRESH)
-            refresh_button.connect("clicked", self.refresh, None)
-            vbtn.pack_start(refresh_button, False, False, 3)
+            # Add columns
+            self.addTextColumn("Type", 0, False)
+            self.addTextColumn("Name", 1, False)
+            self.addTextColumn("Description", 2, True)
+            self.addTextColumn("Username", 3, True)
+            self.addTextColumn("Password", 4, True)
+            self.addTextColumn("Host", 5, True)
+            self.addTextObjColumn("Open", 6, 6)
+            self.addTextObjColumn("Status", 7, 8)
 
-            col = self.addTextColumn(("Type"), 0, False)
-            col = self.addTextColumn(("Name"), 1, False)
-            col = self.addTextColumn(("Description"), 2, True)
-            col = self.addTextColumn(("Username"), 3, True)
-            col = self.addTextColumn(("Password"), 4, True)
-            col = self.addTextColumn(("Host"), 5, True)
-            col = self.addTextObjColumn(("Open"), 6, 6)
-            col = self.addTextObjColumn(("Status"), 7, 8)
-
-            #self.listview.get_selection().set_mode(gtk.SELECTION_SINGLE)
-            #self.listview.get_selection().connect("changed", self.on_selection_changed)
-            self.listview.add_events(gtk.gdk.BUTTON_PRESS_MASK)
-            self.listview.connect('button_press_event', self.selectTest)
-
-            self.dia.show_all()
+            # Show the dialog and load the databases
+            self.show()
             self.loadDbs()
 
-            #self.dia.connect('response', self.dialog_response_cb)
         except:
+            # Handle any exceptions and print the error
             err = traceback.extract_tb(sys.exc_info()[2])[-1]
-            print('guidbmaint: '+ err[2] + "(" + str(err[1]) + "): " + str(sys.exc_info()[1]))
+            print('guidbmaint: '+ err[2] + "(" + str(err[1]) + "): ")
+
+
+
 
     def dialog_response_cb(self, dialog, response_id):
-        # this is called whether close button is pressed or window is closed
-        log.info('dialog_response_cb: response_id='+str(response_id))
-        #if self.changes:
-        #    self.config.save()
-        dialog.destroy()
-        return(response_id)
+        """
+        Callback function for handling dialog responses.
+
+        Args:
+            dialog: QDialog object that triggered the response.
+            response_id: Response ID of the button that was clicked.
+
+        Returns:
+            The response ID of the button that was clicked.
+        """
+        log.info(f'dialog_response_cb: response_id={response_id}')  # Log the response ID for debugging purposes.
+        dialog.accept()  # Close the dialog.
+        return response_id  # Return the response ID.
 
 
     def get_dialog(self):
+        """
+        Returns the dia parameter.
+        """
         return self.dia
 
+
     def addTextColumn(self, title, n, editable=False):
-        col = gtk.TreeViewColumn(title)
-        self.listview.append_column(col)
+        """
+        Adds a QTreeView column with a QStandardItemModel to the widget.
 
-        cRender = gtk.CellRendererText()
-        cRender.set_property("wrap-mode", pango.WRAP_WORD_CHAR)
-        cRender.set_property('editable', editable)
-        cRender.connect('edited', self.edited_cb, (self.liststore,n))
+        Parameters:
+        title (str): The title of the column.
+        n (int): The number of rows in the column.
+        editable (bool, optional): Whether the column is editable. Defaults to False.
 
-        col.pack_start(cRender, True)
-        col.add_attribute(cRender, 'text', n)
-        col.set_max_width(1000)
-        col.set_spacing(0)  # no effect
+        Returns:
+        QTreeView: The added column.
+        """
+
+        # Create a QTreeView column
+        col = QTreeView()
+
+        # Hide the header
+        col.setHeaderHidden(True)
+
+        # Disable editing
+        col.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
+        # Set selection behavior to select entire rows
+        col.setSelectionBehavior(QAbstractItemView.SelectRows)
+
+        # Enable word wrapping
+        col.setWordWrap(True)
+
+        # Create a QStandardItemModel and set it as the model for the column
+        cRender = QStandardItemModel()
+        col.setModel(cRender)
+
+        # Set the model's editable property
+        cRender.editable = editable
+
+        # Connect the dataChanged signal to the edited_cb slot
+        cRender.dataChanged.connect(self.edited_cb)
+
+        # Set the section resize mode to resize to contents
+        col.header().setSectionResizeMode(QHeaderView.ResizeToContents)
+
+        # Stretch the last section to fill the available space
+        col.header().setStretchLastSection(True)
+
+        # Disable highlighting of sections
+        col.header().setHighlightSections(False)
+
+        # Set the minimum section size to a large value to prevent resizing
+        col.header().setMinimumSectionSize(1000)
+
+        # Set the spacing between sections to 0
+        col.header().setSpacing(0)
+
+        # Allow clicking on the column and connect the clicked signal to the sortCols slot
+        col.setClickable(True)
+        col.clicked.connect(self.sortCols)
+
+        # Append the column to the listview and listcols lists
+        self.listview.append(col)
         self.listcols.append(col)
-        col.set_clickable(True)
-        col.connect("clicked", self.sortCols, n)
 
-        return(col)
+        # Return the added column
+        return col
 
-    def edited_cb(self, cell, path, new_text, user_data):
-        liststore, col = user_data
-        log.info('edited_cb: col = '+str(col))
-        valid = True
-        name = self.liststore[path][self.COL_NAME]
+
+
+    def edited_cb(self, index, new_text):
+        """
+        Callback function that is called when a cell in the table is edited.
+
+        Args:
+            index: QModelIndex of the cell that was edited.
+            new_text: The new text that is in the cell.
+
+        Returns:
+            None
+        """
+        # Get the row and column of the cell that was edited.
+        row = index.row()
+        col = index.column()
+
+        # Get the name of the database from the liststore.
+        name = self.liststore[row][self.COL_NAME]
 
         # Validate new value (only for dbms so far, but dbms now not updateable so no validation at all!)
-        #if col == self.COL_DBMS:
-        #    if new_text not in Configuration.DATABASE_TYPES:
-        #        valid = False
+        if col == self.COL_DBMS:
+            if new_text not in Configuration.DATABASE_TYPES:
+                valid = False
 
+        valid = True
+
+        # If the new value is valid, update the liststore and the database parameters.
         if valid:
-            self.liststore[path][col] = new_text
+            self.liststore[row][col] = new_text
 
-            self.config.set_db_parameters( db_server = self.liststore[path][self.COL_DBMS]
-                                         , db_name = name
-                                         , db_desc = self.liststore[path][self.COL_DESC]
-                                         , db_ip = self.liststore[path][self.COL_HOST]
-                                         , db_user = self.liststore[path][self.COL_USER]
-                                         , db_pass = self.liststore[path][self.COL_PASS] )
+            self.config.set_db_parameters(
+                db_server=self.liststore[row][self.COL_DBMS],
+                db_name=name,
+                db_desc=self.liststore[row][self.COL_DESC],
+                db_ip=self.liststore[row][self.COL_HOST],
+                db_user=self.liststore[row][self.COL_USER],
+                db_pass=self.liststore[row][self.COL_PASS]
+            )
+
+            # Set the changes flag to True.
             self.changes = True
+
         return
 
+
+
     def check_new_name(self, path, new_text):
+        """
+        Check if the new database name is unique. If it is not unique,
+        display a pop-up error message.
+
+        Args:
+            path: The path of the database in the liststore.
+            new_text: The new name that the user wants to give to the database.
+
+        Returns:
+            True if the new name is unique, False otherwise.
+        """
         name_ok = True
-        for i,db in enumerate(self.liststore):
+
+        for i, db in enumerate(self.liststore):
             if i != path and new_text == db[self.COL_NAME]:
                 name_ok = False
-        #TODO: popup an error message telling user names must be unique
+
+        # If the name is not unique, display a pop-up error message.
+        if not name_ok:
+            msg_box = QMessageBox()
+            msg_box.setIcon(QMessageBox.Critical)
+            msg_box.setWindowTitle("Error")
+            msg_box.setText("Database name must be unique.")
+            msg_box.setStandardButtons(QMessageBox.Ok)
+            msg_box.exec_()
+
         return name_ok
 
+
+
+
     def addTextObjColumn(self, title, viewcol, storecol, editable=False):
-        col = gtk.TreeViewColumn(title)
-        self.listview.append_column(col)
+        # Create a new column.
+        col = QTreeView()
+        col.setHeaderHidden(True)
+        col.setUniformRowHeights(True)
+        col.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        col.setSelectionBehavior(QAbstractItemView.SelectRows)
 
-        cRenderT = gtk.CellRendererText()
-        cRenderT.set_property("wrap-mode", pango.WRAP_WORD_CHAR)
-        col.pack_start(cRenderT, False)
-        col.add_attribute(cRenderT, 'text', storecol)
+        # Add the column to the tree view.
+        self.listview.addColumn(col)
 
-        cRenderP = gtk.CellRendererPixbuf()
-        col.pack_start(cRenderP, True)
-        col.add_attribute(cRenderP, 'stock-id', storecol+1)
+        # Create a text cell renderer and add it to the column.
+        cRenderT = QStandardItemModel()
+        cRenderT.setColumnCount(1)
+        cRenderT.setRowCount(len(self.liststore))
+        for i, db in enumerate(self.liststore):
+            item = QStandardItem(db[storecol])
+            item.setEditable(False)
+            cRenderT.setItem(i, 0, item)
 
-        col.set_max_width(1000)
-        col.set_spacing(0)  # no effect
+        col.setModel(cRenderT)
+        col.setItemDelegate(QStyledItemDelegate())
+
+        # Create a pixmap cell renderer and add it to the column.
+        cRenderP = QStandardItemModel()
+        cRenderP.setColumnCount(1)
+        cRenderP.setRowCount(len(self.liststore))
+        for i, db in enumerate(self.liststore):
+            if db[storecol+1] == 'green':
+                pixmap = QPixmap('green.png')
+            else:
+                pixmap = QPixmap('red.png')
+            item = QStandardItem()
+            item.setData(pixmap, Qt.DecorationRole)
+            item.setEditable(False)
+            cRenderP.setItem(i, 0, item)
+
+        col.setModel(cRenderP)
+        col.setItemDelegate(QStyledItemDelegate())
+
+        # Set the maximum width of the column.
+        col.setMaximumWidth(1000)
+
+        # Add the column to the list of columns.
         self.listcols.append(col)
 
-        col.set_clickable(True)
-        col.connect("clicked", self.sortCols, viewcol)
-        return(col)
+        # Enable sorting for the column.
+        col.setSortable(True)
+        col.sortByColumn(viewcol, Qt.AscendingOrder)
+
+        return col
+
 
     def selectTest(self, widget, event):
         if event.button == 1:  # and event.type == gtk.gdk._2BUTTON_PRESS:
@@ -685,26 +834,29 @@ class SideButton(gtk.Button):
 
 
 
-if __name__=="__main__":
 
+if __name__ == '__main__':
     config = Configuration.Config()
 
-    win = gtk.Window(gtk.WINDOW_TOPLEVEL)
-    win.set_title(("Maintain Databases"))
-    win.set_border_width(1)
-    win.set_default_size(600, 500)
-    win.set_resizable(True)
+    app = QApplication(sys.argv)
 
-    dia = gtk.Dialog(("Maintain Databases"),
-                     win,
-                     gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                     (gtk.STOCK_CLOSE, gtk.RESPONSE_OK))
-    dia.set_default_size(500, 500)
-    log = GuiDatabase(config, win, dia)
-    response = dia.run()
-    if response == gtk.RESPONSE_ACCEPT:
-        pass
-    dia.destroy()
+    dia = QDialog()
+    dia.setWindowTitle('Maintain Databases')
+    dia.setFixedSize(500, 500)
+
+    layout = QVBoxLayout()
+
+    button = QPushButton('Close')
+    button.clicked.connect(dia.accept)
+
+    layout.addWidget(button)
+    dia.setLayout(layout)
+
+    log = GuiDatabase(config, None, dia)
+    dia.show()
+
+    sys.exit(app.exec_())
+
 
 
 
