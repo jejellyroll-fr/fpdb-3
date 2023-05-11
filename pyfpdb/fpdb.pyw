@@ -25,6 +25,13 @@ import queue
 import qdarkstyle
 import subprocess
 
+import threading
+
+
+
+
+
+
 if os.name == 'nt':
     import win32api
     import win32con
@@ -41,16 +48,9 @@ cl_options = '.'.join(sys.argv[1:])
 
 import logging
 
-from PyQt5.QtCore import (QCoreApplication, QDate, Qt)
-from PyQt5.QtGui import (QScreen,QIcon, QPixmap)
-from PyQt5.QtWidgets import (QAction, QApplication, QCalendarWidget,
-                             QCheckBox, QDateEdit, QDialog,
-                             QDialogButtonBox, QFileDialog,
-                             QGridLayout, QHBoxLayout, QInputDialog,
-                             QLabel, QLineEdit, QMainWindow,
-                             QMessageBox, QPushButton, QScrollArea,
-                             QTabWidget, QVBoxLayout, QWidget, QComboBox)
-
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 
 
@@ -106,6 +106,98 @@ except:
 
 
 class fpdb(QMainWindow):
+# Initializes the main window of the Free Poker DB application
+
+    def __init__(self):
+        super().__init__()
+
+        # Sets the window icon
+        self.setWindowIcon(QIcon('tribal.jpg'))
+
+        # Initializes instance variables
+        self.lock = QMutex()
+        self.db = None
+        self.status_bar = None
+        self.quitting = False
+        self.visible = False
+        self.threads = []
+        self.closeq = queue.Queue(20)
+
+        # Sets display preferences
+        self.display_config_created_dialogue = options.initialRun
+        self.display_site_preferences = options.initialRun
+
+        # Sets window position if specified in options
+        if options.xloc is not None or options.yloc is not None:
+            options.xloc = options.xloc if options.xloc is not None else 0
+            options.yloc = options.yloc if options.yloc is not None else 0
+            self.move(options.xloc, options.yloc)
+
+        # Sets window title and size
+        self.setWindowTitle("Free Poker DB 3")
+        defx, defy = 1920, 1080
+        sg = QApplication.primaryScreen().availableGeometry()
+        if sg.width() < defx:
+            defx = sg.width()
+        if sg.height() < defy:
+            defy = sg.height()
+        self.resize(defx, defy)
+
+        # Creates the menu bar
+        self.createMenuBar()
+
+        # Initializes the main tab widget
+        self.nb = QTabWidget()
+        self.setCentralWidget(self.nb)
+        self.tabs = [None] * 10
+        self.tab_names = [None] * 10
+        self.pages = [None] * 10
+        self.nb_tab_names = []
+
+        # Creates the main help tab
+        self.tab_main_help(None, None)
+
+        # Shows or hides the window based on options
+        if options.minimized:
+            self.showMinimized()
+        if options.hidden:
+            self.hide()
+        if not options.hidden:
+            self.show()
+            self.visible = True
+
+        # Loads the profile and creates the database if necessary
+        self.load_profile(create_db=True)
+
+        # Displays a configuration created dialogue if necessary
+        if self.config.install_method == 'app':
+            for site in list(self.config.supported_sites.values()):
+                if site.screen_name != "YOUR SCREEN NAME HERE":
+                    break
+            else:
+                options.initialRun = True
+                self.display_config_created_dialogue = True
+                self.display_site_preferences = True
+
+        # Displays the site preferences dialog if necessary
+        if options.initialRun and self.display_site_preferences:
+            self.dia_site_preferences(None, None)
+            self.display_site_preferences = False
+
+        # Redirects error output to the log file if necessary
+        if not options.errorsToConsole:
+            fileName = os.path.join(self.config.dir_log, 'fpdb-errors.txt')
+            print(((("Note: error output is being diverted to %s.") % self.config.dir_log) + " " +
+                ("Any major error will be reported there _only_.")))
+            errorFile = codecs.open(fileName, 'w', 'utf-8')
+            sys.stderr = errorFile
+
+        # Automatically imports hands if necessary
+        if options.autoimport:
+            self.tab_auto_import(None)
+
+
+            
 
     def launch_ppt(self):
         """
@@ -341,7 +433,17 @@ class fpdb(QMainWindow):
         message_box.exec_()
 
     def dia_hud_preferences(self, widget, data=None):
-        """Opens a dialog for modifying HUD preferences"""
+        """
+        Opens a dialog for modifying HUD preferences.
+
+        Args:
+        self: Object instance.
+        widget: Widget instance.
+        data: Optional data.
+
+        Returns:
+        None
+        """
         # Create dialog window
         dia = QDialog(self)
         dia.setWindowTitle(("Modifying Huds"))
@@ -388,12 +490,13 @@ class fpdb(QMainWindow):
         self.comboGame.currentIndexChanged.connect(self.index_changed)
         response = dia.exec_()
         if self.comboGame.currentIndexChanged and response:
-            for y in range(0, result3):
+            for y in range(0, len(self.config.stat_sets[result].stats)):
                 self.config.edit_hud(result, self.stat2_dict[y].text(), self.stat3_dict[y].text(), self.stat4_dict[y].text(), self.stat5_dict[y].text(), self.stat6_dict[y].text(), self.stat7_dict[y].text(), self.stat8_dict[y].text(), self.stat9_dict[y].text(), self.stat10_dict[y].text(), self.stat11_dict[y].text(), self.stat12_dict[y].text(), self.stat13_dict[y].text())
 
             # Save changes and reload config
             self.config.save()
             self.reload_config()
+
 
     def index_changed(self, index):
         # TODO: rewrite this function
@@ -780,122 +883,172 @@ class fpdb(QMainWindow):
 
         Returns: None
         """
+        # Initialize dialog box
         dia = QDialog(self)
-        dia.setWindowTitle(("Seat Preferences"))
-        dia.resize(1200,600)
-        label = QLabel(("Please select your prefered seat."))
+        dia.setWindowTitle("Seat Preferences")
+        dia.resize(1200, 600)
         dia.setLayout(QVBoxLayout())
-        dia.layout().addWidget(label)
-        
-        self.load_profile()
-        site_names = self.config.site_ids
-        available_site_names=[]
-        for site_name in site_names:
-            try:
-                tmp = self.config.supported_sites[site_name].enabled
-                available_site_names.append(site_name)
-            except KeyError:
-                pass
-        
-        column_headers=[("Site"), ("2 players:\nbetween 0 & 2"), ("3 players:\nbetween 0 & 3 "), ("4 players:\nbetween 0 & 4"), ("5 players:\nbetween 0 & 5"), ("6 players:\nbetween 0 & 6"), ("7 players:\nbetween 0 & 7"), ("8 players::\nbetween 0 & 8"), ("9 players:\nbetween 0 & 9"), ("10 players:\nbetween 0 & 10")]  # todo ("HUD")
-        #HUD column will contain a button that shows favseat and HUD locations. Make it possible to load screenshot to arrange HUD windowlets.
 
+        # Add label to dialog box
+        label = QLabel("Please select your preferred seat.")
+        dia.layout().addWidget(label)
+
+        # Load profile and get available sites
+        self.load_profile()
+        available_sites = self.get_available_sites()
+
+        # Define headers for table
+        headers = [
+            "Site", "2 players:\nBetween 0 & 2", "3 players:\nBetween 0 & 3",
+            "4 players:\nBetween 0 & 4", "5 players:\nBetween 0 & 5",
+            "6 players:\nBetween 0 & 6", "7 players:\nBetween 0 & 7",
+            "8 players:\nBetween 0 & 8", "9 players:\nBetween 0 & 9",
+            "10 players:\nBetween 0 & 10"
+        ]
+
+        # Create table layout and add to scrolling frame
         table = QGridLayout()
         table.setSpacing(0)
-
         scrolling_frame = QScrollArea(dia)
         dia.layout().addWidget(scrolling_frame)
         scrolling_frame.setLayout(table)
-                
-        for header_number in range (0, len(column_headers)):
-            label = QLabel(column_headers[header_number])
-            label.setAlignment(Qt.AlignCenter)
-            table.addWidget(label, 0, header_number)
-        
-        history_paths=[]
-        check_buttons=[]
-        screen_names=[]
-        seat2_dict, seat3_dict, seat4_dict, seat5_dict, seat6_dict, seat7_dict, seat8_dict, seat9_dict, seat10_dict = [], [], [], [], [], [], [], [], []
-        summary_paths=[]
-        detector = DetectInstalledSites.DetectInstalledSites()
-              
-        y_pos=1
-        for site_number in range(0, len(available_site_names)):
-            check_button = QCheckBox(available_site_names[site_number])
-            check_button.setChecked(self.config.supported_sites[available_site_names[site_number]].enabled)
-            table.addWidget(check_button, y_pos, 0)
-            check_buttons.append(check_button)
-            hud_seat = self.config.supported_sites[available_site_names[site_number]].fav_seat[2]
-            
 
-            #print('hud seat ps:', type(hud_seat), hud_seat)
-            seat2 = QLineEdit()
-            
-            seat2.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[2]))
-            table.addWidget(seat2, y_pos, 1)
-            seat2_dict.append(seat2)
-            seat2.textChanged.connect(partial(self.autoenableSite, checkbox=check_buttons[site_number]))
-            
-            seat3 = QLineEdit()
-            seat3.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[3]))
-            table.addWidget(seat3, y_pos, 2)
-            seat3_dict.append(seat3)
+        # Add headers to table
+        self.add_headers(table, headers)
 
-            
-            seat4 = QLineEdit()
-            seat4.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[4]))
-            table.addWidget(seat4, y_pos, 3)
-            seat4_dict.append(seat4)
-            
-            seat5 = QLineEdit()
-            seat5.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[5]))
-            table.addWidget(seat5, y_pos, 4)
-            seat5_dict.append(seat5)
-            
-            seat6 = QLineEdit()
-            seat6.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[6]))
-            table.addWidget(seat6, y_pos, 5)
-            seat6_dict.append(seat6)
+        # Add check boxes for seat selection to table
+        check_buttons = []
+        seat_dicts = self.add_seats_to_table(table, available_sites, check_buttons)
 
-            seat7 = QLineEdit()
-            seat7.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[7]))
-            table.addWidget(seat7, y_pos, 6)
-            seat7_dict.append(seat7)
-
-            seat8 = QLineEdit()
-            seat8.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[8]))
-            table.addWidget(seat8, y_pos, 7)
-            seat8_dict.append(seat8)
-            
-            seat9 = QLineEdit()
-            seat9.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[9]))
-            table.addWidget(seat9, y_pos, 8)
-            seat9_dict.append(seat9)
-
-            seat10 = QLineEdit()
-            seat10.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[10]))
-            table.addWidget(seat10, y_pos, 9)
-            seat10_dict.append(seat10)
-            
-            if available_site_names[site_number] in detector.supportedSites:
-               pass 
-                
-            
-            y_pos+=1
-
+        # Add save and cancel buttons to dialog box
         btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, dia)
         btns.accepted.connect(dia.accept)
         btns.rejected.connect(dia.reject)
         dia.layout().addWidget(btns)
 
+        # Display dialog box and save preferences if save button is clicked
         response = dia.exec_()
         if response:
-            for site_number in range(0, len(available_site_names)):
-                #print "site %s enabled=%s name=%s" % (available_site_names[site_number], check_buttons[site_number].get_active(), screen_names[site_number].get_text(), history_paths[site_number].get_text())
-                self.config.edit_fav_seat(available_site_names[site_number], str(check_buttons[site_number].isChecked()), seat2_dict[site_number].text(), seat3_dict[site_number].text(), seat4_dict[site_number].text(), seat5_dict[site_number].text(), seat6_dict[site_number].text(), seat7_dict[site_number].text(), seat8_dict[site_number].text(), seat9_dict[site_number].text(), seat10_dict[site_number].text())
-            
-            self.config.save()
-            self.reload_config()
+            for site_dict in seat_dicts:
+                for site_name, seat_dict in site_dict.items():
+                    site = self.config.supported_sites[site_name]
+                    site.fav_seat = list(seat_dict.values())
+                    site.enabled = self.is_site_enabled(site_name)
+            self.save_profile()
+
+
+    def add_headers(self, table, headers):
+        """
+        Adds headers to a table widget.
+
+        Args:
+            table (QTableWidget): The table widget to add the headers to.
+            headers (list of str): The headers to add to the table widget.
+
+        Returns:
+            None
+        """
+        for i, header in enumerate(headers):
+            # Create a label widget for the header and center the text.
+            label = QLabel(header)
+            label.setAlignment(Qt.AlignCenter)
+
+            # Add the label to the table widget at row 0 and column i.
+            table.addWidget(label, 0, i)
+
+
+    def add_seats_to_table(self, table, available_sites, check_buttons):
+        """
+        Adds seats to a table widget for each available site
+
+        Args:
+            table (QTableWidget): The table widget to add the seats to
+            available_sites (list): A list of available site names
+            check_buttons (list): A list of check box widgets for each site
+
+        Returns:
+            list: A list of seat dictionaries for each site
+        """
+
+        # Initialize an empty list to store the seat dictionaries for each site
+        seat_dicts = []
+
+        # Initialize the vertical position of the table to 1
+        y_pos = 1
+
+        # Loop through each available site
+        for site_name in available_sites:
+
+            # Get the site object from the configuration
+            site = self.config.supported_sites[site_name]
+
+            # Create a check box widget and add it to the table
+            check_button = QCheckBox(site_name)
+            check_button.setChecked(site.enabled)
+            table.addWidget(check_button, y_pos, 0)
+
+            # Add the check box widget to the list of check box widgets
+            check_buttons.append(check_button)
+
+            # Initialize an empty dictionary to store the seat values for the site
+            seat_dict = {}
+
+            # Loop through each seat value for the site
+            for i in range(2, 11):
+
+                # Create a line edit widget with the seat value and add it to the table
+                seat = QLineEdit(str(site.fav_seat[i]))
+                seat.textChanged.connect(partial(self.autoenableSite, checkbox=check_button))
+                table.addWidget(seat, y_pos, i - 1)
+
+                # Add the seat value to the seat dictionary
+                seat_dict[i] = seat.text
+
+            # Add the seat dictionary to the list of seat dictionaries
+            seat_dicts.append({site_name: seat_dict})
+
+            # Increment the vertical position of the table
+            y_pos += 1
+
+        # Return the list of seat dictionaries for each site
+        return seat_dicts
+
+
+    def get_available_sites(self):
+        """
+        Returns a list of names of all supported and enabled sites.
+
+        :return: A list of strings representing site names.
+        """
+        available_site_names = []
+        for site_name, site in self.config.supported_sites.items():
+            # Check if the site is enabled
+            if site.enabled:
+                # Add the site name to the list of available site names
+                available_site_names.append(site_name)
+        return available_site_names
+
+
+    def is_site_enabled(self, site_name):
+        """
+        Check if a site is enabled.
+
+        Args:
+            site_name (str): The name of the site to check.
+
+        Returns:
+            bool: True if the site is enabled, False otherwise.
+        """
+        # Loop through all check buttons to find the button with the matching text
+        for button in self.check_buttons:
+            if button.text() == site_name:
+                # Return the checked status of the button if the text matches
+                return button.isChecked()
+
+        # Return False if no matching button was found
+        return False
+
+
         
     def dia_site_preferences(self, widget, data=None):
         """
@@ -1142,6 +1295,9 @@ class fpdb(QMainWindow):
 
 
     def createMenuBar(self):
+        """
+        Creates the menu bar with various menus and actions.
+        """
         mb = self.menuBar()
         configMenu = mb.addMenu(('Configure'))
         importMenu = mb.addMenu(('Import'))
@@ -1151,8 +1307,21 @@ class fpdb(QMainWindow):
         maintenanceMenu = mb.addMenu(('Maintenance'))
         toolsMenu = mb.addMenu(('Tools'))
         helpMenu = mb.addMenu(('Help'))
+
         # Create actions
         def makeAction(name, callback, shortcut=None, tip=None):
+            """
+            Create a QAction with given name and settings.
+
+            Args:
+                name (str): Name of the action.
+                callback (function): Function to be called when the action is triggered.
+                shortcut (str): Shortcut key for the action.
+                tip (str): Tooltip for the action.
+
+            Returns:
+                QAction: The created action.
+            """
             action = QAction(name, self)
             if shortcut:
                 action.setShortcut(shortcut)
@@ -1161,6 +1330,7 @@ class fpdb(QMainWindow):
             action.triggered.connect(callback)
             return action
 
+        # Add actions to each menu
         configMenu.addAction(makeAction(('Site Settings'), self.dia_site_preferences))
         configMenu.addAction(makeAction(('Seat Settings'), self.dia_site_preferences_seat))
         configMenu.addAction(makeAction(('Hud Settings'), self.dia_hud_preferences))
@@ -1192,7 +1362,8 @@ class fpdb(QMainWindow):
         maintenanceMenu.addAction(makeAction(('Rebuild HUD Cache'), self.dia_recreate_hudcache))
         maintenanceMenu.addAction(makeAction(('Rebuild DB Indexes'), self.dia_rebuild_indexes))
         maintenanceMenu.addAction(makeAction(('Dump Database to Textfile (takes ALOT of time)'), self.dia_dump_db))
-        #maintenanceMenu.addAction(makeAction(('Database'), self.tab_database))
+        #maintenanceMenu.addAction(makeAction(('Database'), self.tab_database
+
         
         toolsMenu.addAction(makeAction(('Odds Calc'), self.tab_odds_calc))
         toolsMenu.addAction(makeAction(('PokerProTools'), self.launch_ppt))
@@ -1377,317 +1548,382 @@ class fpdb(QMainWindow):
 
 
     def release_global_lock(self):
+        """Release the global lock and reset the owner field."""
+        # Release the lock
         self.lock.release()
+        # Reset the owner to None
         self.lockTakenBy = None
-        print ("Global lock released.")
+        # Print a message to indicate that the lock has been released
+        print("Global lock released.")
+
 
     def tab_auto_import(self, widget, data=None):
-        """opens the auto import tab"""
+        """
+        Opens the auto import tab.
+        Args:
+            widget: The widget that triggered the function.
+            data: Additional data passed to the function.
+        """
+        # Create a new GuiAutoImport thread with the necessary arguments.
         new_aimp_thread = GuiAutoImport.GuiAutoImport(self.settings, self.config, self.sql, self)
+
+        # Add the new thread to the list of threads.
         self.threads.append(new_aimp_thread)
+
+        # Add and display the new thread as a tab with the label "HUD".
         self.add_and_display_tab(new_aimp_thread, ("HUD"))
+
+        # Check if the autoimport option is set and start the thread if it is.
         if options.autoimport:
             new_aimp_thread.startClicked(new_aimp_thread.startButton, "autostart")
             options.autoimport = False
 
+
     def tab_bulk_import(self, widget, data=None):
-        """opens a tab for bulk importing"""
+        """
+        Opens a tab for bulk importing.
+
+        Args:
+            widget: The widget that triggered the function.
+            data: Optional data passed to the function.
+        """
+        # Create a new GuiBulkImport thread with the necessary parameters.
         new_import_thread = GuiBulkImport.GuiBulkImport(self.settings, self.config, self.sql, self)
+
+        # Add the new thread to the list of threads.
         self.threads.append(new_import_thread)
+
+        # Add and display the new tab.
         self.add_and_display_tab(new_import_thread, ("Bulk Import"))
 
+
     def tab_database(self, widget, data=None):
-        """opens a tab for databse"""
+        """
+        Opens a tab for database.
+
+        Args:
+            widget: Widget to open the tab in.
+            data: Optional data to pass to the function.
+        """
+        # Create a new instance of GuiDatabase using the config, sql, and self objects.
         new_import_thread = GuiDatabase.GuiDatabase(self.config, self.sql, self)
+        # Append the new_import_thread to the threads list.
         self.threads.append(new_import_thread)
+        # Add and display the new_import_thread in the widget as a tab labeled "Database".
         self.add_and_display_tab(new_import_thread, ("Database"))
 
+
     def tab_odds_calc(self, widget, data=None):
-        """opens a tab for bulk importing"""
+        """
+        Opens a tab for bulk importing.
+
+        Args:
+            widget: The widget object.
+            data: The data object.
+
+        Returns:
+            None.
+        """
+        # Create a new import thread.
         new_import_thread = GuiOddsCalc.GuiOddsCalc(self)
+
+        # Append the new thread to the list of threads.
         self.threads.append(new_import_thread)
+
+        # Add and display the new thread as a tab.
         self.add_and_display_tab(new_import_thread, ("Odds Calc"))
 
-    def tab_tourney_import(self, widget, data=None):
-        """opens a tab for bulk importing tournament summaries"""
-        new_import_thread = GuiTourneyImport.GuiTourneyImport(self.settings, self.config, self.sql, self.window)
-        self.threads.append(new_import_thread)
-        bulk_tab=new_import_thread.get_vbox()
-        self.add_and_display_tab(bulk_tab, ("Tournament Results Import"))
 
-    def tab_imap_import(self, widget, data=None):
-        new_thread = GuiImapFetcher.GuiImapFetcher(self.config, self.db, self.sql, self)
-        self.threads.append(new_thread)
-        tab=new_thread.get_vbox()
-        self.add_and_display_tab(tab, ("eMail Import"))
-    #end def tab_import_imap_summaries
+    def tab_tourney_import(self, widget, data=None):
+        """
+        Opens a tab for bulk importing tournament summaries.
+
+        Args:
+            widget: The widget that triggered the function.
+            data: Additional data to be passed to the function (default None).
+        """
+        # Create a new import thread
+        new_import_thread = GuiTourneyImport.GuiTourneyImport(self.settings, self.config, self.sql, self.window)
+        # Add the new thread to the threads list
+        self.threads.append(new_import_thread)
+        # Get the VBox for the new thread
+        bulk_tab=new_import_thread.get_vbox()
+        # Add and display the bulk tab with the given title
+        self.add_and_display_tab(bulk_tab, "Tournament Results Import")
+
 
     def tab_ring_player_stats(self, widget, data=None):
+        """
+        Create a new thread to display ring player statistics and add that thread as a tab to the main GUI.
+
+        :param widget: The widget that triggered the function.
+        :param data: Any additional data associated with the widget.
+        """
+        # Create a new instance of the GuiRingPlayerStats class
         new_ps_thread = GuiRingPlayerStats.GuiRingPlayerStats(self.config, self.sql, self)
+        # Add the new thread to the list of threads
         self.threads.append(new_ps_thread)
+        # Add the new thread as a tab to the main GUI
         self.add_and_display_tab(new_ps_thread, ("Ring Player Stats"))
 
+
     def tab_tourney_player_stats(self, widget, data=None):
+        """
+        This function creates a new GuiTourneyPlayerStats thread and appends it to the list of threads. 
+        It also adds the thread as a tab with the label "Tourney Stats".
+
+        :param widget: The widget that triggered this function.
+        :param data: Additional data passed to the function (default None).
+        """
+        # Create a new GuiTourneyPlayerStats thread
         new_ps_thread = GuiTourneyPlayerStats.GuiTourneyPlayerStats(self.config, self.db, self.sql, self)
+
+        # Append the new thread to the list of threads
         self.threads.append(new_ps_thread)
+
+        # Add the thread as a tab with the label "Tourney Stats"
         self.add_and_display_tab(new_ps_thread, ("Tourney Stats"))
 
+
     def tab_tourney_viewer_stats(self, widget, data=None):
+        """
+        Opens a new tab with a tournament viewer GUI.
+
+        Args:
+            widget: The widget that triggered this method.
+            data: Optional data to pass to the method.
+        """
+        # Create a new instance of the GuiTourneyViewer class.
         new_thread = GuiTourneyViewer.GuiTourneyViewer(self.config, self.db, self.sql, self)
-        self.threads.append(new_thread)       
+
+        # Add the new thread to the list of threads.
+        self.threads.append(new_thread)
+
+        # Add and display the new tab.
         self.add_and_display_tab(new_thread, ("Tourney Viewer"))
 
+
     def tab_positional_stats(self, widget, data=None):
+        """
+        This method creates a new tab containing positional statistics for the GUI.
+
+        Args:
+            widget: The widget associated with the new tab.
+            data: Optional data to pass to the method.
+
+        Returns:
+            None
+        """
+        # Create a new GuiPositionalStats thread and append it to the threads list.
         new_ps_thread = GuiPositionalStats.GuiPositionalStats(self.config, self.sql)
         self.threads.append(new_ps_thread)
-        ps_tab=new_ps_thread.get_vbox()
+
+        # Get the vbox associated with the new thread.
+        ps_tab = new_ps_thread.get_vbox()
+
+        # Add the new tab to the GUI and display it.
         self.add_and_display_tab(ps_tab, ("Positional Stats"))
 
     def tab_session_stats(self, widget, data=None):
+        """
+        Adds a new tab to the GUI session viewer for session statistics.
+
+        Args:
+            widget: The widget for the tab.
+            data: Optional data for the tab.
+
+        Returns:
+            None
+        """
+        # Create a new instance of the GUI session viewer
         new_ps_thread = GuiSessionViewer.GuiSessionViewer(self.config, self.sql, self, self)
+        # Add the new instance to the threads list
         self.threads.append(new_ps_thread)
+        # Add the new instance to the GUI and display the tab
         self.add_and_display_tab(new_ps_thread, ("Session Stats"))
 
+
     def tab_hand_viewer(self, widget, data=None):
+        """
+        Add a new tab for hand viewer to the GUI.
+
+        Args:
+            widget: The widget to add the tab to.
+            data: Optional data to pass to the function.
+
+        Returns:
+            None
+        """
+        # Create a new GuiHandViewer thread
         new_ps_thread = GuiHandViewer.GuiHandViewer(self.config, self.sql, self)
+
+        # Add the thread to the list of threads
         self.threads.append(new_ps_thread)
+
+        # Add and display the tab for the new thread
         self.add_and_display_tab(new_ps_thread, ("Hand Viewer"))
 
+
     def tab_main_help(self, widget, data=None):
-        """Displays a tab with the main fpdb help screen"""
-        mh_tab=QLabel(("""
-Welcome to Fpdb!
+        """Displays a tab with the main fpdb help screen.
 
-This program is currently in an alpha-state, so our database format is still sometimes changed.
-You should therefore always keep your hand history files so that you can re-import after an update, if necessary.
+        Args:
+            widget: The widget that will contain the help tab.
+            data: Optional data to be passed to the function.
 
-all configuration now happens in HUD_config.xml.
+        Returns:
+            None.
+        """
+        # Help text to be displayed in the tab
+        help_text = """Welcome to Fpdb!
 
-This program is free/libre open source software licensed partially under the AGPL3, and partially under GPL2 or later.
-The Windows installer package includes code licensed under the MIT license.
-You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt and mit.txt in the fpdb installation directory."""))
-        self.add_and_display_tab(mh_tab, ("Help"))
+        This program is currently in an alpha-state, so our database format is still sometimes changed.
+        You should therefore always keep your hand history files so that you can re-import after an update, if necessary.
+
+        all configuration now happens in HUD_config.xml.
+
+        This program is free/libre open source software licensed partially under the AGPL3, and partially under GPL2 or later.
+        The Windows installer package includes code licensed under the MIT license.
+        You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt and mit.txt in the fpdb installation directory."""
+
+        # Create a QLabel containing the help text
+        mh_tab = QLabel(help_text)
+
+        # Add the tab to the widget and display it
+        self.add_and_display_tab(mh_tab, "Help")
+
 
     def tabGraphViewer(self, widget, data=None):
-        """opens a graph viewer tab"""
+        """
+        Opens a graph viewer tab.
+
+        Args:
+            widget: The widget to use for the new tab.
+            data: Optional data to pass to the new graph viewer.
+
+        Returns:
+            None.
+        """
+        # Create a new GuiGraphViewer thread with the given SQL, config, and parent.
         new_gv_thread = GuiGraphViewer.GuiGraphViewer(self.sql, self.config, self)
+
+        # Add the new thread to the list of threads.
         self.threads.append(new_gv_thread)
+
+        # Add the new thread's tab to the display.
         self.add_and_display_tab(new_gv_thread, ("Graphs"))
 
+
     def tabTourneyGraphViewer(self, widget, data=None):
-        """opens a graph viewer tab"""
+        """
+        Open a graph viewer tab.
+
+        Args:
+            widget: The widget to add the tab to.
+            data: Optional data to pass to the function.
+
+        Returns:
+            None
+        """
+        # Create a new instance of GuiTourneyGraphViewer
         new_gv_thread = GuiTourneyGraphViewer.GuiTourneyGraphViewer(self.sql, self.config, self)
+        # Add the new instance to the threads list
         self.threads.append(new_gv_thread)
+        # Add and display the new instance as a tab
         self.add_and_display_tab(new_gv_thread, ("Tourney Graphs"))
 
+
     def tabStove(self, widget, data=None):
-        """opens a tab for poker stove"""
+        """Opens a tab for Poker Stove.
+
+        Args:
+            widget: The widget object.
+            data: Additional data for the function (default None).
+
+        Returns:
+            None
+        """
+        # Create a new thread for the GUI stove
         thread = GuiStove.GuiStove(self.config, self)
+        # Add the thread to the list of threads
         self.threads.append(thread)
-        #tab = thread.get_vbox()
+        # Add and display the tab
         self.add_and_display_tab(thread, ("Stove"))
 
-    def __init__(self):
-        QMainWindow.__init__(self)
-        self.setWindowIcon(QIcon('tribal.jpg'))
-        # no more than 1 process can this lock at a time:
-        self.lock = interlocks.InterProcessLock(name="fpdb_global_lock")
-        self.db = None
-        self.status_bar = None
-        self.quitting = False
-        self.visible = False
-        self.threads = []     # objects used by tabs - no need for threads, gtk handles it
-        self.closeq = queue.Queue(20)  # used to signal ending of a thread (only logviewer for now)
 
-        if options.initialRun:
-            self.display_config_created_dialogue = True
-            self.display_site_preferences = True
-        else:
-            self.display_config_created_dialogue = False
-            self.display_site_preferences = False
-            
-        # create window, move it to specific location on command line
-        if options.xloc is not None or options.yloc is not None:
-            if options.xloc is None:
-                options.xloc = 0
-            if options.yloc is None:
-                options.yloc = 0
-            self.move(options.xloc, options.yloc)
-        
-        self.setWindowTitle("Free Poker DB 3")
-        
 
-        # set a default x/y size for the window
-        defx, defy = 1920, 1080
-        sg = QApplication.primaryScreen().availableGeometry()
-        if sg.width() < defx:
-            defx = sg.width()
-        if sg.height() < defy:
-            defy = sg.height()
-        self.resize(defx, defy)
 
-        # create our Main Menu Bar
-        self.createMenuBar()
-
-        # create a tab bar
-        self.nb = QTabWidget()
-        self.setCentralWidget(self.nb)
-        self.tabs = []          # the event_boxes forming the actual tabs
-        self.tab_names = []     # names of tabs used since program started, not removed if tab is closed
-        self.pages = []         # the contents of the page, not removed if tab is closed
-        self.nb_tab_names = []  # list of tab names currently displayed in notebook
-
-        # create the first tab
-        self.tab_main_help(None, None)
-        
-        # determine window visibility from command line options
-        if options.minimized:
-            self.showMinimized()
-        if options.hidden:
-            self.hide()
-
-        if not options.hidden:
-            self.show()
-            self.visible = True     # Flip on
-            
-        self.load_profile(create_db=True)
-        
-        if self.config.install_method == 'app':
-            for site in list(self.config.supported_sites.values()):
-                if site.screen_name != "YOUR SCREEN NAME HERE":
-                    break
-            else: # No site has a screen name set
-                options.initialRun = True
-                self.display_config_created_dialogue = True
-                self.display_site_preferences = True
-
-        if options.initialRun and self.display_site_preferences:
-            self.dia_site_preferences(None,None)
-            self.display_site_preferences=False
-
-        # setup error logging
-        if not options.errorsToConsole:
-            fileName = os.path.join(self.config.dir_log, 'fpdb-errors.txt')
-            print(((("Note: error output is being diverted to %s.") % self.config.dir_log) + " " +
-                  ("Any major error will be reported there _only_.")))
-            errorFile = codecs.open(fileName, 'w', 'utf-8')
-            sys.stderr = errorFile
-
-        # set up tray-icon and menu
-#        self.statusIcon = gtk.StatusIcon()
-#        cards = os.path.join(self.config.graphics_path, u'fpdb-cards.png')
-#        if os.path.exists(cards):
-#            self.statusIcon.set_from_file(cards)
-#            self.window.set_icon_from_file(cards)
-#        elif os.path.exists('/usr/share/pixmaps/fpdb-cards.png'):
-#            self.statusIcon.set_from_file('/usr/share/pixmaps/fpdb-cards.png')
-#            self.window.set_icon_from_file('/usr/share/pixmaps/fpdb-cards.png')
-#        else:
-#            self.statusIcon.set_from_stock(gtk.STOCK_HOME)
-#        self.statusIcon.set_tooltip("Free Poker Database")
-#        self.statusIcon.connect('activate', self.statusicon_activate)
-#        self.statusMenu = gtk.Menu()
-#
-#        # set default menu options
-#        self.addImageToTrayMenu(gtk.STOCK_ABOUT, self.dia_about)
-#        self.addImageToTrayMenu(gtk.STOCK_QUIT, self.quit)
-#
-#        self.statusIcon.connect('popup-menu', self.statusicon_menu, self.statusMenu)
-#        self.statusIcon.set_visible(True)
-#
-#        self.window.connect('window-state-event', self.window_state_event_cb)
-        sys.stderr.write(("fpdb starting ..."))
-        
-        if options.autoimport:
-            self.tab_auto_import(None)
-            
-    # def addImageToTrayMenu(self, image, event=None):
-    #     menuItem = gtk.ImageMenuItem(image)
-    #     if event is not None:
-    #         menuItem.connect('activate', event)
-    #     self.statusMenu.append(menuItem)
-    #     menuItem.show()
-    #     return menuItem
-        
-    # def addLabelToTrayMenu(self, label, event=None):
-    #     menuItem = gtk.MenuItem(label)
-    #     if event is not None:
-    #         menuItem.connect('activate', event)
-    #     self.statusMenu.append(menuItem)
-    #     menuItem.show()
-    #     return menuItem
-    
-    # def removeFromTrayMenu(self, menuItem):
-    #     menuItem.destroy()
-    #     menuItem = None
-
-    # def __iconify(self):
-    #     self.visible = False
-    #     self.window.set_skip_taskbar_hint(True)
-    #     self.window.set_skip_pager_hint(True)
-
-    # def __deiconify(self):
-    #     self.visible = True
-    #     self.window.set_skip_taskbar_hint(False)
-    #     self.window.set_skip_pager_hint(False)
-
-    # def window_state_event_cb(self, window, event):
-    #     # Deal with iconification first
-    #     if event.changed_mask & gtk.gdk.WINDOW_STATE_ICONIFIED:
-    #         if event.new_window_state & gtk.gdk.WINDOW_STATE_ICONIFIED:
-    #             self.__iconify()
-    #         else:
-    #             self.__deiconify()
-    #         if not event.new_window_state & gtk.gdk.WINDOW_STATE_WITHDRAWN:
-    #             return True
-    #     # And then the tray icon click
-    #     if event.new_window_state & gtk.gdk.WINDOW_STATE_WITHDRAWN:
-    #         self.__iconify()
-    #     else:
-    #         self.__deiconify()
-    #     # Tell GTK not to propagate this signal any further
-    #     return True
-
-    # def statusicon_menu(self, widget, button, time, data=None):
-    #     # we don't need to pass data here, since we do keep track of most all
-    #     # our variables .. the example code that i looked at for this
-    #     # didn't use any long scope variables.. which might be an alright
-    #     # idea too sometime
-    #     if button == 3:
-    #         if data:
-    #             data.show_all()
-    #             data.popup(None, None, None, 3, time)
-    #     pass
-
-    # def statusicon_activate(self, widget, data=None):
-    #     # Let's allow the tray icon to toggle window visibility, the way
-    #     # most other apps work
-    #     if self.visible:
-    #         self.window.hide()
-    #     else:
-    #         self.window.present()
 
     def info_box(self, str1, str2):
+        """
+        This function creates an information box with a title and message.
+
+        Args:
+            self: The object instance.
+            str1 (str): The title of the information box.
+            str2 (str): The message to display in the information box.
+
+        Returns:
+            int: The result of the information box execution.
+        """
+        # Create a QMessageBox object instance
         diapath = QMessageBox(self)
+        # Set the title of the information box
         diapath.setWindowTitle(str1)
+        # Set the message to display in the information box
         diapath.setText(str2)
+        # Execute the information box and return the result
         return diapath.exec_()
 
+
     def warning_box(self, string, diatitle=("FPDB WARNING")):
-        return QMessageBox(QMessageBox.Warning, diatitle, string).exec_()
+        """
+        Create a QMessageBox instance with a warning icon and given title and text.
+
+        Parameters:
+        -----------
+        string : str
+            The text to display in the message box.
+        diatitle : str, optional
+            The title of the message box. Default is "FPDB WARNING".
+
+        Returns:
+        --------
+        int
+            The result of calling `QMessageBox.exec_()`.
+        """
+        # Create a QMessageBox instance with a warning icon, the given title, and text
+        msg_box = QMessageBox(QMessageBox.Warning, diatitle, string)
+        # Execute the message box and return the result
+        return msg_box.exec_()
+
 
     def validate_config(self):
-        # check if sites in config file are in DB
-        for site in self.config.supported_sites:    # get site names from config file
+        """
+        Validates the configuration by checking if sites in the config file are in the database.
+        If a site is missing from the database, a warning message is displayed.
+
+        Args:
+            self (object): The object instance.
+
+        Returns:
+            None.
+        """
+        # Check if sites in config file are in the database
+        for site in self.config.supported_sites:
             try:
-                self.config.get_site_id(site)                     # and check against list from db
+                self.config.get_site_id(site)
             except KeyError as exc:
-                log.warning("site %s missing from db" % site)
-                dia = gtk.MessageDialog(parent=None, flags=0, type=gtk.MESSAGE_WARNING, buttons=(gtk.BUTTONS_OK), message_format=("Unknown Site"))
-                diastring = ("Warning:") +" " + ("Unable to find site '%s'") % site
-                dia.format_secondary_text(diastring)
-                dia.run()
-                dia.destroy()
+                # Log a warning message if the site is missing from the database
+                log.warning("Site %s missing from database" % site)
+
+                # Create a QMessageBox instance with a warning icon, the given title, and text
+                msg_box = QMessageBox(QMessageBox.Warning, "Unknown Site", "Warning: Unable to find site '%s'" % site)
+
+                # Execute the message box and destroy it when closed
+                msg_box.exec_()
+
+
 
 
 

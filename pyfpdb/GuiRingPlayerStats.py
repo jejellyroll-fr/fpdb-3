@@ -183,14 +183,19 @@ class GuiRingPlayerStats(QSplitter):
         hand_column[colshowsumm] = hand_column[colshowposn] = False
 
         # If rfi and steal both on for summaries, turn rfi off.
-        rfi_column = next((x for x in self.columns if x[0] == 'rfi'))
-        steals_column = next((x for x in self.columns if x[0] == 'steals'))
-        if rfi_column[colshowsumm] and steals_column[colshowsumm]:
-            rfi_column[colshowsumm] = False
+        rfi_column = next((x for x in self.columns if x[0] == 'rfi'), None)
+        steals_column = next((x for x in self.columns if x[0] == 'steals'), None)
+
+        if rfi_column and steals_column:
+            if rfi_column[colshowsumm] and steals_column[colshowsumm]:
+                rfi_column[colshowsumm] = False
+
 
         # If rfi and steal both on for position breakdowns, turn steals off.
-        if rfi_column[colshowposn] and steals_column[colshowposn]:
-            steals_column[colshowposn] = False
+        if rfi_column and steals_column:
+            if rfi_column[colshowposn] and steals_column[colshowposn]:
+                steals_column[colshowposn] = False
+
 
     def refreshStats(self, checkState):
         self.liststore = []
