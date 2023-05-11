@@ -67,7 +67,7 @@ sqlite_version = sqlite3.sqlite_version
 import DetectInstalledSites
 import GuiPrefs
 import GuiLogView
-#import GuiDatabase
+import GuiDatabase
 import GuiBulkImport
 import GuiTourneyImport
 
@@ -126,9 +126,6 @@ class fpdb(QMainWindow):
         # Launch Java subprocess with p2.jar file
         subprocess.Popen(['java', '-jar', pathcomp], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-
-
-
     def add_and_display_tab(self, new_page, new_tab_name):
         """
         Adds a new tab to the notebook and displays it. If the tab already exists, it simply displays it.
@@ -168,8 +165,6 @@ class fpdb(QMainWindow):
         self.nb_tab_names.append(new_tab_name)
         self.nb.setCurrentIndex(index)
 
-
-
     def display_tab(self, new_tab_name):
         """
         Display a tab with the given name.
@@ -194,9 +189,6 @@ class fpdb(QMainWindow):
             # Set the current tab to the one with the given name.
             self.nb.setCurrentIndex(tab_no)
 
-
-
-
     def add_icon_to_button(self, button):
         """
         Adds an icon to a button.
@@ -218,10 +210,7 @@ class fpdb(QMainWindow):
 
         # Set the iconBox as the button's layout.
         button.setLayout(iconBox)
-
-
-
-    
+  
     def remove_tab(self, button, data):
         """
         Remove a tab from the notebook.
@@ -239,8 +228,6 @@ class fpdb(QMainWindow):
             self.nb.removeTab(page)
             self.nb.update()
 
-
-
     def remove_current_tab(self):
         """
         Remove the currently active tab from the notebook.
@@ -250,9 +237,6 @@ class fpdb(QMainWindow):
             self.nb_tab_names.pop(current_page)
             self.nb.removeTab(current_page)
             self.nb.update()
-
-
-
 
     def dia_about(self):
         """
@@ -265,8 +249,6 @@ class fpdb(QMainWindow):
             "You are free to change, and distribute original or changed versions of fpdb within the rules set out by the license",
             "Your config file is: ", self.config.file]))
         msg_box.exec_()
-
-
 
     def dia_advanced_preferences(self, widget, data=None):
         """
@@ -290,9 +272,6 @@ class fpdb(QMainWindow):
         if GuiPrefs.GuiPrefs(self.config, self).exec_():
             self.config.save()
             self.reload_config()
-
-
-
 
     def dia_maintain_dbs(self, widget, data=None):
         """
@@ -318,7 +297,7 @@ class fpdb(QMainWindow):
                 dia.setDefaultButton(QMessageBox.Save)
                 dia.resize(700, 320)
 
-                #prefs = GuiDatabase.GuiDatabase(self.config, self.window, dia)
+                prefs = GuiDatabase.GuiDatabase(self.config, self.window, dia)
                 response = dia.exec_()
                 if response == QMessageBox.Save:
                     log.info('saving updated db data')
@@ -334,76 +313,90 @@ class fpdb(QMainWindow):
             else:
                 self.warning_box("Cannot open Database Maintenance window because other windows have been opened. Re-start fpdb to use this option.")
 
-
     def dia_database_stats(self, widget, data=None):
-        self.warning_box(string=("Number of Hands:") + " " + str(self.db.getHandCount()) +
-                    "\n" + ("Number of Tourneys:") + " " + str(self.db.getTourneyCount()) +
-                    "\n" + ("Number of TourneyTypes:") + " " + str(self.db.getTourneyTypeCount()),
-                    diatitle=("Database Statistics"))
-    #end def dia_database_stats
+        """
+        Display a message box with the database statistics.
+
+        Args:
+            widget: The widget to associate with the dialog box.
+            data: Optional data to pass to the function.
+
+        Returns:
+            None
+        """
+        # Create a message box with the database statistics
+        message_box = QMessageBox()
+        message_box.setWindowTitle("Database Statistics")
+
+        # Get the number of hands, tourneys, and tourney types from the database
+        num_hands = self.db.getHandCount()
+        num_tourneys = self.db.getTourneyCount()
+        num_tourney_types = self.db.getTourneyTypeCount()
+
+        # Add the statistics to the message box text
+        message_box.setText("Number of Hands: {}\nNumber of Tourneys: {}\nNumber of TourneyTypes: {}".format(
+            num_hands, num_tourneys, num_tourney_types))
+
+        # Display the message box
+        message_box.exec_()
 
     def dia_hud_preferences(self, widget, data=None):
+        """Opens a dialog for modifying HUD preferences"""
+        # Create dialog window
         dia = QDialog(self)
         dia.setWindowTitle(("Modifying Huds"))
         dia.resize(1200,600)
+
+        # Add labels to dialog window
         label = QLabel(("Please edit your huds."))
         dia.setLayout(QVBoxLayout())
         dia.layout().addWidget(label)
-        label2 = QLabel(("Please select the game category for which you want to configure HUD stats:"))
-        popups = []
-        dia.layout().addWidget(label2)
-        self.comboGame = QComboBox()
 
+        label2 = QLabel(("Please select the game category for which you want to configure HUD stats:"))
+        dia.layout().addWidget(label2)
+
+        # Add drop-down menu for selecting game category
+        self.comboGame = QComboBox()
         games = self.config.get_stat_sets()
         for game in games:
             self.comboGame.addItem(game)
-        
-        
-
         dia.layout().addWidget(self.comboGame)
         self.comboGame.setCurrentIndex(1)
+
+        # Load selected game category's profile
         result = self.comboGame.currentText()
-        
         self.load_profile()
-        #print('resultat', result)
         hud_stats = self.config.stat_sets[result]
         hud_nb_col = self.config.stat_sets[result].cols
         hud_nb_row = self.config.stat_sets[result].rows
         tab_rows = hud_nb_col*hud_nb_row
-        #print('stats set',hud_stats )
-        stat2_dict, stat3_dict, stat4_dict, stat5_dict, stat6_dict, stat7_dict, stat8_dict, stat9_dict, stat10_dict, stat11_dict, stat12_dict, stat13_dict = [], [], [], [], [], [], [], [], [], [], [], []
 
-
-        
-          #HUD column will contain a button that shows favseat and HUD locations. Make it possible to load screenshot to arrange HUD windowlets.
-
+        # Create a scrolling frame for displaying HUD stats
         self.table = QGridLayout()
         self.table.setSpacing(0)
-
         scrolling_frame = QScrollArea(dia)
         dia.layout().addWidget(scrolling_frame)
         scrolling_frame.setLayout(self.table)
 
-        result3 = len(self.config.stat_sets[result].stats)
-
+        # Add buttons for saving or canceling changes
         btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, dia)
         btns.accepted.connect(dia.accept)
         btns.rejected.connect(dia.reject)
         dia.layout().addWidget(btns)
+
+        # Update HUD stats when selected game category changes
         self.comboGame.currentIndexChanged.connect(self.index_changed)
         response = dia.exec_()
         if self.comboGame.currentIndexChanged and response:
             for y in range(0, result3):
-                #print(result, self.stat2_dict[y].text(), self.stat3_dict[y].text(), self.stat4_dict[y].text(), self.stat5_dict[y].text(), self.stat6_dict[y].text(), self.stat7_dict[y].text(), self.stat8_dict[y].text(), self.stat9_dict[y].text(), self.stat10_dict[y].text(), self.stat11_dict[y].text(), self.stat12_dict[y].text(), self.stat13_dict[y].text())
-                #print(self.result, stat2_dict[y].text())
-                #print "site %s enabled=%s name=%s" % (available_site_names[site_number], check_buttons[site_number].get_active(), screen_names[site_number].get_text(), history_paths[site_number].get_text())
                 self.config.edit_hud(result, self.stat2_dict[y].text(), self.stat3_dict[y].text(), self.stat4_dict[y].text(), self.stat5_dict[y].text(), self.stat6_dict[y].text(), self.stat7_dict[y].text(), self.stat8_dict[y].text(), self.stat9_dict[y].text(), self.stat10_dict[y].text(), self.stat11_dict[y].text(), self.stat12_dict[y].text(), self.stat13_dict[y].text())
 
+            # Save changes and reload config
             self.config.save()
             self.reload_config()
 
-
     def index_changed(self, index):
+        # TODO: rewrite this function
         self.comboGame.setCurrentIndex(index)
         result = self.comboGame.currentText()
         for i in reversed(range(self.table.count())):
@@ -523,20 +516,48 @@ class fpdb(QMainWindow):
             y_pos += 1
 
     def dia_import_filters(self, checkState):
+        """
+        Opens a dialog window to allow the user to select which games to skip when importing.
+
+        Args:
+            checkState: The state of the checkbox.
+
+        Returns:
+            None
+        """
+        # Create the dialog window and set its title
         dia = QDialog()
         dia.setWindowTitle("Skip these games when importing")
+
+        # Set the layout of the dialog window to a vertical box layout
         dia.setLayout(QVBoxLayout())
+
+        # Create a dictionary to store the checkboxes for each game
         checkboxes = {}
+
+        # Get the import filters from the config
         filters = self.config.get_import_parameters()['importFilters']
+
+        # Create a checkbox for each game and add it to the dialog window
         for game in Card.games:
             checkboxes[game] = QCheckBox(game)
             dia.layout().addWidget(checkboxes[game])
+
+            # If the game is already in the filters, check the checkbox
             if game in filters:
                 checkboxes[game].setChecked(True)
+
+        # Add "Ok" and "Cancel" buttons to the dialog window
         btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         dia.layout().addWidget(btns)
+
+        # When the "Ok" button is clicked, accept the dialog
         btns.accepted.connect(dia.accept)
+
+        # When the "Cancel" button is clicked, reject the dialog
         btns.rejected.connect(dia.reject)
+
+        # If the dialog is accepted, update the import filters in the config
         if dia.exec_():
             filterGames = []
             for game, cb in list(checkboxes.items()):
@@ -545,49 +566,93 @@ class fpdb(QMainWindow):
             self.config.editImportFilters(",".join(filterGames))
             self.config.save()
 
+
     def dia_dump_db(self, widget, data=None):
+        """
+        Dump the contents of the database to a file.
+
+        Args:
+            widget: The widget that triggered the function.
+            data: Any additional data that may be passed.
+
+        Returns:
+            None.
+        """
+        # Set the filename for the dump file.
         filename = "database-dump.sql"
+
+        # Get the contents of the database.
         result = self.db.dumpDatabase()
 
+        # Open the dump file for writing.
         dumpFile = open(filename, 'w')
+
+        # Write the contents of the database to the dump file.
         dumpFile.write(result)
+
+        # Close the dump file.
         dumpFile.close()
+
     #end def dia_database_stats
 
     def dia_recreate_tables(self, widget, data=None):
-        """Dialogue that asks user to confirm that he wants to delete and recreate the tables"""
-        if self.obtain_global_lock("fpdb.dia_recreate_tables"):  # returns true if successful
+        """
+        Dialogue that asks user to confirm that he wants to delete and recreate the tables.
+        """
+        # Try to obtain the global lock and return true if successful
+        if self.obtain_global_lock("fpdb.dia_recreate_tables"):
+            # Create a warning message box asking the user to confirm deleting and recreating tables
             dia_confirm = QMessageBox(QMessageBox.Warning, "Wipe DB", ("Confirm deleting and recreating tables"), QMessageBox.Yes | QMessageBox.No, self)
+            # Create a string with the message to show in the dialog box
             diastring = ("Please confirm that you want to (re-)create the tables.") \
                         + " " + (("If there already are tables in the database %s on %s they will be deleted and you will have to re-import your histories.") % (self.db.database, self.db.host)) + "\n"\
                         + ("This may take a while.")
+            # Set the informative text of the dialog box to the created string
             dia_confirm.setInformativeText(diastring)  # todo: make above string with bold for db, host and deleted
+            # Show the dialog box and get the response
             response = dia_confirm.exec_()
 
+            # If the user confirmed, recreate the tables and clear the cache in any guibulkimport/guiautoimport windows
             if response == QMessageBox.Yes:
                 self.db.recreate_tables()
-                # find any guibulkimport/guiautoimport windows and clear cache:
                 for t in self.threads:
                     if isinstance(t, GuiBulkImport.GuiBulkImport) or isinstance(t, GuiAutoImport.GuiAutoImport):
                         t.importer.database.resetCache()
+                # Release the global lock
                 self.release_global_lock()
             else:
+                # If the user cancelled, release the global lock and print a message
                 self.release_global_lock()
                 print ('User cancelled recreating tables')
         else:
+            # If the global lock could not be obtained, show a warning box
             self.warning_box(("Cannot open Database Maintenance window because other windows have been opened. Re-start fpdb to use this option."))
 
     def dia_recreate_hudcache(self, widget, data=None):
+        """
+        Function to recreate the HUD cache.
+
+        Parameters:
+            widget (QWidget): The widget to which the dialog box should be attached.
+            data (any): Any additional data that should be passed to the function. Defaults to None.
+
+        Returns:
+            None
+        """
         if self.obtain_global_lock("dia_recreate_hudcache"):
+            # Create a dialog box to confirm recreation of the HUD cache
             self.dia_confirm = QDialog()
             self.dia_confirm.setWindowTitle("Confirm recreating HUD cache")
             self.dia_confirm.setLayout(QVBoxLayout())
+            # Add a label to the dialog box to ask for confirmation
             self.dia_confirm.layout().addWidget(QLabel(("Please confirm that you want to re-create the HUD cache.")))
 
             hb1 = QHBoxLayout()
+            # Create a QDateEdit widget to select the Hero's cache start date
             self.h_start_date = QDateEdit(QDate.fromString(self.db.get_hero_hudcache_start(), "yyyy-MM-dd"))
             lbl = QLabel((" Hero's cache starts: "))
             btn = QPushButton("Cal")
+            # Connect the button to open a calendar dialog when clicked
             btn.clicked.connect(partial(self.__calendar_dialog, entry=self.h_start_date))
 
             hb1.addWidget(lbl)
@@ -597,9 +662,11 @@ class fpdb(QMainWindow):
             self.dia_confirm.layout().addLayout(hb1)
 
             hb2 = QHBoxLayout()
+            # Create a QDateEdit widget to select the Villains' cache start date
             self.start_date = QDateEdit(QDate.fromString(self.db.get_hero_hudcache_start(), "yyyy-MM-dd"))
             lbl = QLabel((" Villains' cache starts: "))
             btn = QPushButton("Cal")
+            # Connect the button to open a calendar dialog when clicked
             btn.clicked.connect(partial(self.__calendar_dialog, entry=self.start_date))
 
             hb2.addWidget(lbl)
@@ -608,78 +675,111 @@ class fpdb(QMainWindow):
             hb2.addWidget(btn)
             self.dia_confirm.layout().addLayout(hb2)
 
+            # Add Yes and No buttons to the dialog box
             btns = QDialogButtonBox(QDialogButtonBox.Yes | QDialogButtonBox.No)
             self.dia_confirm.layout().addWidget(btns)
+            # Connect the buttons to the appropriate functions
             btns.accepted.connect(self.dia_confirm.accept)
             btns.rejected.connect(self.dia_confirm.reject)
 
+            # Display the dialog box and get the user's response
             response = self.dia_confirm.exec_()
+
+            # If the user confirms, rebuild the HUD Cache
             if response:
-                print (" Rebuilding HUD Cache ... ")
-
-                self.db.rebuild_cache(self.h_start_date.date().toString("yyyy-MM-dd"), self.start_date.date().toString("yyyy-MM-dd"))
+                print("Rebuilding HUD Cache...")
+                self.db.rebuild_cache(
+                    self.h_start_date.date().toString("yyyy-MM-dd"),
+                    self.start_date.date().toString("yyyy-MM-dd")
+                )
             else:
-                print ('User cancelled rebuilding hud cache')
+                # Otherwise, print a message indicating the cache will not be rebuilt
+                print('User cancelled rebuilding hud cache')
 
+            # Release the global lock
             self.release_global_lock()
         else:
-            self.warning_box(("Cannot open Database Maintenance window because other windows have been opened. Re-start fpdb to use this option."))
+            # If the global lock cannot be obtained, display a warning box
+            self.warning_box(
+                ("Cannot open Database Maintenance window because other windows have been opened. "
+                "Re-start fpdb to use this option.")
+            )
 
     def dia_rebuild_indexes(self, widget, data=None):
+        """
+        Rebuilds the database indexes and performs maintenance tasks.
+
+        Args:
+            widget: The widget object triggering the function.
+            data: Optional data to be passed.
+
+        Returns:
+            None.
+        """
         if self.obtain_global_lock("dia_rebuild_indexes"):
+            # Display a confirmation dialog.
             self.dia_confirm = QMessageBox(QMessageBox.Warning,
-                                           "Rebuild DB",
-                                           ("Confirm rebuilding database indexes"),
-                                           QMessageBox.Yes | QMessageBox.No,
-                                           self)
+                                        "Rebuild DB",
+                                        ("Confirm rebuilding database indexes"),
+                                        QMessageBox.Yes | QMessageBox.No,
+                                        self)
             diastring = ("Please confirm that you want to rebuild the database indexes.")
             self.dia_confirm.setInformativeText(diastring)
 
             response = self.dia_confirm.exec_()
             if response == QMessageBox.Yes:
+                # Rebuild the database indexes.
                 print (" Rebuilding Indexes ... ")
                 self.db.rebuild_indexes()
 
+                # Clean the database.
                 print (" Cleaning Database ... ")
                 self.db.vacuumDB()
 
+                # Analyze the database.
                 print (" Analyzing Database ... ")
                 self.db.analyzeDB()
             else:
+                # User cancelled rebuilding db indexes.
                 print ('User cancelled rebuilding db indexes')
 
             self.release_global_lock()
         else:
+            # Cannot open Database Maintenance window because other windows have been opened. Re-start fpdb to use this option.
             self.warning_box(("Cannot open Database Maintenance window because other windows have been opened. Re-start fpdb to use this option."))
 
     def dia_logs(self, widget, data=None):
-        """opens the log viewer window"""
-
-        #lock_set = False
-        #if self.obtain_global_lock("dia_logs"):
-        #    lock_set = True
+        """Opens the log viewer window"""
 
         # remove members from self.threads if close messages received
         self.process_close_messages()
 
+        # Search for existing GuiLogView object
         viewer = None
         for i, t in enumerate(self.threads):
             if str(t.__class__) == 'GuiLogView.GuiLogView':
                 viewer = t
                 break
 
+        # If GuiLogView object does not exist, create a new one and append it to self.threads
         if viewer is None:
-            #print "creating new log viewer"
             new_thread = GuiLogView.GuiLogView(self.config, self.window, self.closeq)
             self.threads.append(new_thread)
+        # If GuiLogView object exists, show it
         else:
-            #print "showing existing log viewer"
             viewer.get_dialog().present()
 
-        #if lock_set:
-        #    self.release_global_lock()
 
     def dia_site_preferences_seat(self, widget, data=None):
+        """
+        Opens a dialog box that allows the user to select their preferred seat for each supported site.
+
+        Args:
+        - widget: the widget that triggered the function (unused)
+        - data: optional data to pass to the function (unused)
+
+        Returns: None
+        """
         dia = QDialog(self)
         dia.setWindowTitle(("Seat Preferences"))
         dia.resize(1200,600)
@@ -798,6 +898,12 @@ class fpdb(QMainWindow):
             self.reload_config()
         
     def dia_site_preferences(self, widget, data=None):
+        """
+        Open a dialog for site preferences.
+
+        :param widget: The parent widget.
+        :param data: Optional data.
+        """
         dia = QDialog(self)
         dia.setWindowTitle(("Site Preferences"))
         dia.resize(1200,600)
@@ -867,8 +973,6 @@ class fpdb(QMainWindow):
             table.addWidget(choose2, y_pos, 6)
             choose2.clicked.connect(partial(self.browseClicked, parent=dia, path=summary_paths[site_number]))
 
-
-            
             if available_site_names[site_number] in detector.supportedSites:
                 button = QPushButton(("Detect"))
                 table.addWidget(button, y_pos, 1)
@@ -890,87 +994,152 @@ class fpdb(QMainWindow):
             self.reload_config()
         
     def autoenableSite(self, text, checkbox):
-        #autoactivate site if something gets typed in the screename field
+        """
+        Auto-activates the site if something is typed in the screename field.
+
+        Args:
+            text (str): The text entered into the screename field.
+            checkbox (QCheckBox): The checkbox for site activation.
+
+        Returns:
+            None
+        """
+        # Set the checkbox to checked, indicating site activation
         checkbox.setChecked(True)
+
                 
     def browseClicked(self, widget, parent, path):
-        """runs when user clicks one of the browse buttons for the TS folder"""
+        """
+        Runs when the user clicks one of the browse buttons for the TS folder.
 
+        Args:
+            widget: The widget that was clicked.
+            parent: The parent widget.
+            path: The path to the current folder.
+
+        Returns:
+            None
+        """
+
+        # Open a file dialog to choose the directory to import.
         newpath = QFileDialog.getExistingDirectory(parent, ("Please choose the path that you want to Auto Import"), path.text())
+
+        # If a new path was chosen, update the path.
         if newpath:
             path.setText(newpath)
+
     
     def detect_clicked(self, widget, data):
+        """
+        This function is called when the detect button is clicked.
+        It updates the entry fields with information obtained by the detector.
+
+        :param widget: The widget that triggered the event
+        :type widget: Gtk.Widget
+        :param data: The data associated with the event
+        :type data: tuple
+        """
         detector = data[0]
         site_name = data[1]
         entry_screen_name = data[2]
         entry_history_path = data[3]
         entry_summary_path = data[4]
+
+        # update the entry fields with information obtained by the detector
         if detector.sitestatusdict[site_name]['detected']:
             entry_screen_name.setText(detector.sitestatusdict[site_name]['heroname'])
             entry_history_path.setText(detector.sitestatusdict[site_name]['hhpath'])
             if detector.sitestatusdict[site_name]['tspath']:
                 entry_summary_path.setText(detector.sitestatusdict[site_name]['tspath'])
-    
+
     def reload_config(self):
+        """
+        Reloads the configuration settings for Fpdb.
+        If only the main tab is open, the profile is reloaded and Fpdb is restarted.
+        If other windows are open, a warning message is displayed to re-start Fpdb to load the updated preferences.
+        """
         if len(self.nb_tab_names) == 1:
             # only main tab open, reload profile
             self.load_profile()
             self.warning_box(("Configuration settings have been updated, Fpdb needs to be restarted now")+"\n\n"+("Click OK to close Fpdb"))
             sys.exit()
         else:
+            # other windows are open, display warning message
             self.warning_box(("Updated preferences have not been loaded because windows are open.")+" "+("Re-start fpdb to load them."))
-    
-    # def addLogText(self, text):
-    #     end_iter = self.logbuffer.get_end_iter()
-    #     self.logbuffer.insert(end_iter, text)
-    #     self.logview.scroll_to_mark(self.logbuffer.get_insert(), 0)
+
+    def addLogText(self, text):
+        """
+        Inserts text into the log buffer and scrolls to the bottom of the log view.
+
+        Args:
+            text (str): The text to insert into the log buffer.
+        """
+        # Get the end iterator of the log buffer
+        end_iter = self.logbuffer.get_end_iter()
+
+        # Insert the text at the end iterator
+        self.logbuffer.insert(end_iter, text)
+
+        # Scroll to the bottom of the log view
+        self.logview.scroll_to_mark(self.logbuffer.get_insert(), 0)
+
 
     def process_close_messages(self):
-        # check for close messages
+        """
+        Process close messages from the close queue, and remove any threads that have ended.
+
+        This function loops through the close queue to check for any close messages. If a close message is found, it
+        searches through the list of threads to find the thread with the matching class name, and removes it from the
+        list. If no close messages are found, the function does nothing.
+
+        Args:
+            self: The instance of the class.
+
+        Returns:
+            None
+        """
         try:
+            # Loop through the close queue to check for close messages
             while True:
                 name = self.closeq.get(False)
+                # Search through the list of threads to find the thread with the matching class name
                 for i, t in enumerate(self.threads):
                     if str(t.__class__) == str(name):
-                        # thread has ended so remove from list:
+                        # Thread has ended, so remove it from the list
                         del self.threads[i]
                         break
         except queue.Empty:
-            # no close messages on queue, do nothing
+            # No close messages on queue, do nothing
             pass
 
+
     def __calendar_dialog(self, widget, entry):
-        d = QDialog(self.dia_confirm)
+        """
+        Creates a calendar dialog window for selecting a date.
+
+        Args:
+            widget: The widget that triggered the dialog window.
+            entry: The entry field where the selected date will be displayed.
+
+        Returns:
+            None
+        """
+        d = QDialog(self.dia_confirm)  # Create a new QDialog window.
         d.setWindowTitle(('Pick a date'))
 
-        vb = QVBoxLayout()
-        d.setLayout(vb)
-        cal = QCalendarWidget()
-        vb.addWidget(cal)
+        vb = QVBoxLayout()  # Create a new QVBoxLayout object.
+        d.setLayout(vb)  # Set the layout for the QDialog window.
+        cal = QCalendarWidget()  # Create a new QCalendarWidget object.
+        vb.addWidget(cal)  # Add the calendar widget to the QVBoxLayout.
 
-        btn = QPushButton(('Done'))
-        btn.clicked.connect(partial(self.__get_date, calendar=cal, entry=entry, win=d))
+        btn = QPushButton(('Done'))  # Create a new QPushButton object.
+        btn.clicked.connect(partial(self.__get_date, calendar=cal, entry=entry, win=d))  # Connect the button to a callback.
 
-        vb.addWidget(btn)
+        vb.addWidget(btn)  # Add the button to the QVBoxLayout.
 
-        d.exec_()
+        d.exec_()  # Show the QDialog window.
         return
 
-    # def __get_dates(self):
-    #     t1 = self.h_start_date.get_text()
-    #     if t1 == '':
-    #         t1 = '1970-01-01'
-    #     t2 = self.start_date.get_text()
-    #     if t2 == '':
-    #         t2 = '1970-01-01'
-    #     return (t1, t2)
-
-    # def __get_date(self, widget, calendar, entry, win):
-    #     newDate = calendar.selectedDate()
-    #     entry.setDate(newDate)
-
-    #     win.accept()
 
     def createMenuBar(self):
         mb = self.menuBar()
@@ -1023,6 +1192,7 @@ class fpdb(QMainWindow):
         maintenanceMenu.addAction(makeAction(('Rebuild HUD Cache'), self.dia_recreate_hudcache))
         maintenanceMenu.addAction(makeAction(('Rebuild DB Indexes'), self.dia_rebuild_indexes))
         maintenanceMenu.addAction(makeAction(('Dump Database to Textfile (takes ALOT of time)'), self.dia_dump_db))
+        #maintenanceMenu.addAction(makeAction(('Database'), self.tab_database))
         
         toolsMenu.addAction(makeAction(('Odds Calc'), self.tab_odds_calc))
         toolsMenu.addAction(makeAction(('PokerProTools'), self.launch_ppt))
@@ -1137,26 +1307,55 @@ class fpdb(QMainWindow):
             if not self.db.wrongDbVersion:
                 self.validate_config()
 
-    def obtain_global_lock(self, source):
+
+    def obtain_global_lock(self, source: str) -> bool:
+        """Attempts to obtain a global lock and returns a boolean indicating success.
+
+        Args:
+            source (str): A string identifying the source of the lock request.
+
+        Returns:
+            bool: True if the lock was successfully obtained, False otherwise.
+        """
         ret = self.lock.acquire(source=source)  # will return false if lock is already held
         if ret:
-            print ((("Global lock taken by %s") % source))
-            self.lockTakenBy=source
+            print((("Global lock taken by %s") % source))
+            self.lockTakenBy = source
         else:
-            print ((("Failed to get global lock, it is currently held by %s") % source))
+            print((("Failed to get global lock, it is currently held by %s") % source))
         return ret
         # need to release it later:
         # self.lock.release()
 
+
     def quit(self, widget, data=None):
+        """
+        Function to quit the application.
+
+        Args:
+            widget: The widget that was activated to trigger the quit.
+            data: Optional data that might be associated with the widget.
+
+        Returns:
+            None
+        """
         # TODO: can we get some / all of the stuff done in this function to execute on any kind of abort?
-        #FIXME  get two "quitting normally" messages, following the addition of the self.window.destroy() call
-        #       ... because self.window.destroy() leads to self.destroy() which calls this!
+
+        # Check if the application is already quitting
         if not self.quitting:
-            print ("Quitting normally")
-            self.quitting = True
+            self.quitting = True  # Set the quitting flag
+            print("Quitting normally")
+
+        # TODO: can we get some / all of the stuff done in this function to execute on any kind of abort?
+        # The following code could be called on any kind of abort:
+        # 1. Handle any unsaved changes
+        # 2. Close any open files
+        # 3. Save the current user preferences
+        # 4. Save the current state of any running processes or threads
+
         # TODO: check if current settings differ from profile, if so offer to save or abort
 
+        # Handle database disconnection
         if self.db is not None:
             if self.db.backend == self.db.MYSQL_INNODB:
                 try:
@@ -1170,8 +1369,12 @@ class fpdb(QMainWindow):
                     self.db.disconnect()
         else:
             pass
-        #self.statusIcon.set_visible(False)
+
+        # Quit the application
         QCoreApplication.quit()
+
+
+
 
     def release_global_lock(self):
         self.lock.release()
@@ -1192,6 +1395,12 @@ class fpdb(QMainWindow):
         new_import_thread = GuiBulkImport.GuiBulkImport(self.settings, self.config, self.sql, self)
         self.threads.append(new_import_thread)
         self.add_and_display_tab(new_import_thread, ("Bulk Import"))
+
+    def tab_database(self, widget, data=None):
+        """opens a tab for databse"""
+        new_import_thread = GuiDatabase.GuiDatabase(self.config, self.sql, self)
+        self.threads.append(new_import_thread)
+        self.add_and_display_tab(new_import_thread, ("Database"))
 
     def tab_odds_calc(self, widget, data=None):
         """opens a tab for bulk importing"""
@@ -1480,9 +1689,7 @@ You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt an
                 dia.run()
                 dia.destroy()
 
-#    def main(self):
-#        gtk.main()
-#        return 0
+
 
 
 if __name__ == "__main__":
