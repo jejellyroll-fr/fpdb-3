@@ -353,6 +353,7 @@ class Importer(object):
                 file,
                 fpdbfile.site.name,
                 datetime.datetime.now(datetime.timezone.utc),
+                datetime.datetime.now(datetime.timezone.utc),
                 0,
                 0,
                 0,

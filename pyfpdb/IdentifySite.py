@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Copyright 2010-2011 Chaz Littlejohn
+#Copyright 2008-2011 Steffen Schaumburg
 #This program is free software: you can redistribute it and/or modify
 #it under the terms of the GNU Affero General Public License as published by
 #the Free Software Foundation, version 3 of the License.
@@ -15,110 +15,239 @@
 #along with this program. If not, see <http://www.gnu.org/licenses/>.
 #In the "official" distribution you can find the license in agpl-3.0.txt.
 
+# Modifications made by jejellyroll on 2020-2023:
+# refactor code for python 3
+
+#Import statements come next
+
+
+# Standard library imports
 from __future__ import print_function
-
-
-#import L10n
-#_ = L10n.get_translation()
-
+import codecs
+import logging
+import os
 import re
 import sys
-import os
-from time import time
 from optparse import OptionParser
-import codecs
+from time import time
 
+# fpdb/FreePokerTools modules
+import Configuration
 import Database
 
-import Configuration
-import logging
+# Third-party imports
 try:
     import xlrd
-except:
+except Exception:
     xlrd = None
+
+
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = logging.getLogger("parser")
 
+# Regular expressions for hand history parsing
 re_Divider, re_Head, re_XLS  = {}, {}, {}
+
+# Divider regex for PokerStars hand histories
 re_Divider['PokerStars'] = re.compile(r'^Hand #(\d+)\s*$', re.MULTILINE)
+
+# Divider regex for Full Tilt hand histories
 re_Divider['Fulltilt'] = re.compile(r'\*{20}\s#\s\d+\s\*{15,25}\s?', re.MULTILINE)
+
+# Header regex for Full Tilt hand histories
 re_Head['Fulltilt'] = re.compile(r'^((BEGIN)?\n)?FullTiltPoker.+\n\nSeat', re.MULTILINE)
+
+# Regex for identifying XLS files in PokerStars and Full Tilt hand histories
 re_XLS['PokerStars'] = re.compile(r'Tournaments\splayed\sby\s\'.+?\'')
 re_XLS['Fulltilt'] = re.compile(r'Player\sTournament\sReport\sfor\s.+?\s\(.*\)')
 
-class FPDBFile(object):
-    path = ""
-    ftype = None # Valid: hh, summary, both
-    site = None
-    kodec = None
-    archive = False
-    archiveHead = False
-    archiveDivider = False
-    gametype = False
-    hero = '-'
 
-    def __init__(self, path):
+class FPDBFile(object):
+    """
+    A class that represents a FPDB file.
+
+    Attributes:
+        path (str): The path of the file.
+        ftype (str): The type of file. Can be 'hh', 'summary', 'both' or None.
+        site (str): The name of the poker site. Can be None.
+        kodec (str): The codec used to encode the file. Can be None.
+        archive (bool): Whether the file is an archive or not.
+        archiveHead (bool): Whether the file is an archive head or not.
+        archiveDivider (bool): Whether the file is an archive divider or not.
+        gametype (bool): Whether the file is a game type file or not.
+        hero (str): The hero of the game. Can be '-' or None.
+
+    Methods:
+        __init__(self, path: str): Initializes a new instance of the FPDBFile class.
+
+    """
+
+    def __init__(self, path: str):
+        """
+        Initializes a new instance of the FPDBFile class.
+
+        Parameters:
+            path (str): The path of the file.
+        """
         self.path = path
+        self.ftype = None
+        self.site = None
+        self.kodec = None
+        self.archive = False
+        self.archiveHead = False
+        self.archiveDivider = False
+        self.gametype = False
+        self.hero = '-'
+
 
 class Site(object):
-    
+    """
+    A class that represents a poker site.
+
+    Attributes:
+        name (str): The name of the poker site.
+        hhc_fname (str): The name of the HH converter file.
+        filter_name (str): The name of the filter. Can be renamed to hhc_type.
+        re_SplitHands (re.Pattern): The compiled regular expression pattern to split hands.
+        codepage (str): The codepage used to encode the file.
+        copyGameHeader (bool): Whether the game header should be copied or not.
+        summaryInFile (bool): Whether the summary is included in the file or not.
+        re_Identify (re.Pattern): The compiled regular expression pattern to identify the file.
+        summary (str): The name of the summary file.
+        re_SumIdentify (re.Pattern): The compiled regular expression pattern to identify the summary file.
+        line_delimiter (str): The delimiter used in the file.
+        line_addendum (str): The addendum used in the file.
+        spaces (bool): Whether spaces are used in the file or not.
+
+    Methods:
+        __init__(self, name: str, hhc_fname: str, filter_name: str, summary: str, obj: Any): Initializes a new instance of the Site class.
+        getDelimiter(self, filter_name: str) -> str: Returns the delimiter used in the file.
+        getAddendum(self, filter_name: str) -> str: Returns the addendum used in the file.
+        getHeroRegex(self, obj: Any, filter_name: str): Returns the regular expression pattern for the hero of the game.
+
+    """
+
     def __init__(self, name, hhc_fname, filter_name, summary, obj):
+        """
+        Initializes a new instance of the Site class.
+
+        Args:
+            name (str): The name of the poker site.
+            hhc_fname (str): The name of the HH converter file.
+            filter_name (str): The name of the filter. Can be renamed to hhc_type.
+            summary (str): The name of the summary file.
+            obj (Any): An object containing various settings for the parser.
+        """
+        # Initialize class attributes
         self.name = name
-        # FIXME: rename filter to hhc_fname
         self.hhc_fname = hhc_fname
-        # FIXME: rename filter_name to hhc_type
-        self.filter_name    = filter_name
-        self.re_SplitHands  = obj.re_SplitHands
-        self.codepage       = obj.codepage
+        self.filter_name = filter_name
+        self.re_SplitHands = obj.re_SplitHands
+        self.codepage = obj.codepage
         self.copyGameHeader = obj.copyGameHeader
-        self.summaryInFile  = obj.summaryInFile
-        self.re_Identify    = obj.re_Identify
-        #self.obj            = obj
+        self.summaryInFile = obj.summaryInFile
+        self.re_Identify = obj.re_Identify
+
+        # If summary is provided, set self.summary attribute and get self.re_SumIdentify attribute
         if summary:
             self.summary = summary
             self.re_SumIdentify = getattr(__import__(summary), summary, None).re_Identify
         else:
             self.summary = None
+
+        # Set line_delimiter, line_addendum, and spaces attributes using helper methods
         self.line_delimiter = self.getDelimiter(filter_name)
-        self.line_addendum  = self.getAddendum(filter_name)
-        self.spaces  = filter_name == 'Entraction'
+        self.line_addendum = self.getAddendum(filter_name)
+        self.spaces = filter_name == 'Entraction'
+
+        # Get hero regex using helper method
         self.getHeroRegex(obj, filter_name)
+
         
     def getDelimiter(self, filter_name):
-        line_delimiter =  None
-        if filter_name == 'PokerStars':
-            line_delimiter = '\n\n'
-        elif filter_name == 'Fulltilt' or filter_name == 'PokerTracker':
-            line_delimiter = '\n\n\n'
-        elif self.re_SplitHands.match('\n\n') and filter_name != 'Entraction':
-             line_delimiter = '\n\n'
-        elif self.re_SplitHands.match('\n\n\n'):
-            line_delimiter = '\n\n\n'
-            
+        """
+        Returns the line delimiter for a given filter name.
+        If the filter name is not recognized, returns None.
+
+        Args:
+            filter_name (str): The name of the filter.
+
+        Returns:
+            str: The line delimiter for the filter name.
+        """
+
+        # Define a dictionary of filters
+        filters = {
+            'PokerStars': '\n\n',
+            'Fulltilt': '\n\n\n',
+            'PokerTracker': '\n\n\n',
+            'Entraction': None  # default value
+        }
+
+        # Get the line delimiter for the filter name
+        line_delimiter = filters.get(filter_name)
+
+        # If the line delimiter is not found, try to match it with a regular expression
+        if not line_delimiter:
+            if self.re_SplitHands.match('\n\n'):
+                line_delimiter = '\n\n'
+            elif self.re_SplitHands.match('\n\n\n'):
+                line_delimiter = '\n\n\n'
+
         return line_delimiter
-            
+
+
     def getAddendum(self, filter_name):
+        """
+        Returns a line addendum based on the filter name
+
+        Args:
+            filter_name (str): The name of the filter
+
+        Returns:
+            str: The line addendum
+        """
         line_addendum = ''
         if filter_name == 'OnGame':
-            line_addendum = '*'
+            line_addendum = '*'  # Add a '*' to the end of the line
         elif filter_name == 'Merge':
-            line_addendum = '<'
+            line_addendum = '<'  # Add a '<' to the end of the line
         elif filter_name == 'Entraction':
-            line_addendum = '\n\n'
-            
+            line_addendum = '\n\n'  # Add two newlines to the end of the line
+
         return line_addendum
+
     
     def getHeroRegex(self, obj, filter_name):
-        self.re_HeroCards   = None
-        if hasattr(obj, 're_HeroCards'):
-            if filter_name not in ('Bovada', 'Enet'):
-                self.re_HeroCards = obj.re_HeroCards
+        """Gets a regex pattern for hero cards based on a filter name.
+
+        Args:
+            obj: An object that contains a regex pattern for hero cards.
+            filter_name: A string that specifies the filter to use to get the hero regex pattern.
+
+        Returns:
+            None
+
+        """
+        self.re_HeroCards = None
+        # Check if the object has a regex pattern for hero cards
+        if hasattr(obj, 're_HeroCards') and filter_name not in ('Bovada', 'Enet'):
+            self.re_HeroCards = obj.re_HeroCards
+        # If the filter name is 'PokerTracker', use the regex patterns for hero cards 1 and 2
         if filter_name == 'PokerTracker':
             self.re_HeroCards1 = obj.re_HeroCards1
-            self.re_HeroCards2 = obj.re_HeroCards2 
+            self.re_HeroCards2 = obj.re_HeroCards2
+
 
 class IdentifySite(object):
-    def __init__(self, config, hhcs = None):
+    def __init__(self, config, hhcs=None):
+        """
+        Initializes a new instance of the IdentifySite class.
+
+        Args:
+        config (dict): A dictionary containing configuration settings.
+        hhcs (list): A list of HHC files to process.
+        """
         self.config = config
         self.codepage = ("utf8", "utf-16", "cp1252", "ISO-8859-1")
         self.sitelist = {}
@@ -126,40 +255,71 @@ class IdentifySite(object):
         self.generateSiteList(hhcs)
 
     def scan(self, path):
+        """Scans a file or directory.
+
+        Args:
+            path (str): The path to the file or directory.
+        """
         if os.path.isdir(path):
             self.walkDirectory(path, self.sitelist)
         else:
             self.processFile(path)
             
     def get_fobj(self, file):
+        """
+        Retrieves the file object for the given file from the file list.
+
+        Args:
+            file (str): The name of the file to retrieve the object for.
+
+        Returns:
+            The file object if found, otherwise False.
+        """
         try:
-            fobj = self.filelist[file]
+            fobj = self.filelist[file]  # Attempt to retrieve the file object from the file list.
         except KeyError:
-            return False
-        return fobj
+            return False  # Return False if the file object is not found in the file list.
+        return fobj  # Return the file object if found.
+
 
     def get_filelist(self):
+        """
+        Returns the filelist attribute of the MyClass instance.
+        """
         return self.filelist
     
     def clear_filelist(self):
-        self.filelist = {}
-    
+        """Clears the file list dictionary."""
+        self.filelist = {}  # reset the file list to an empty dictionary
+
+    # WIP # WIP
     def generateSiteList(self, hhcs):
-        """Generates a ordered dictionary of site, filter and filter name for each site in hhcs"""
         if not hhcs:
             hhcs = self.config.hhcs
+
         for site, hhc in list(hhcs.items()):
-            filter = hhc.converter
-            filter_name = filter.replace("ToFpdb", "")
-            summary = hhc.summaryImporter
-            mod = __import__(filter)
-            obj = getattr(mod, filter_name, None)
-            try:
-                self.sitelist[obj.siteId] = Site(site, filter, filter_name, summary, obj)
-            except Exception as e:
-                log.error("Failed to load HH importer: %s.  %s" % (filter_name, e))
-        self.re_Identify_PT = getattr(__import__("PokerTrackerToFpdb"), "PokerTracker", None).re_Identify
-        self.re_SumIdentify_PT = getattr(__import__("PokerTrackerSummary"), "PokerTrackerSummary", None).re_Identify
+            self.addSite(site, hhc)
+
+        self.setRegexPatterns()
+
+    def addSite(self, site, hhc):
+        filter = hhc.converter
+        filter_name = filter.replace("ToFpdb", "")
+        summary = hhc.summaryImporter
+        mod = __import__(filter)
+        obj = getattr(mod, filter_name, None)
+        try:
+            self.sitelist[obj.siteId] = Site(site, filter, filter_name, summary, obj)
+        except Exception as e:
+            log.error(f"Failed to load HH importer: {filter_name}.  {e}")
+
+    def setRegexPatterns(self):
+        pt_module = __import__("PokerTrackerToFpdb")
+        summary_module = __import__("PokerTrackerSummary")
+        self.re_Identify_PT = getattr(pt_module, "PokerTracker", None).re_Identify
+        self.re_SumIdentify_PT = getattr(summary_module, "PokerTrackerSummary", None).re_Identify
+ # WIP # WIP
+
 
     def walkDirectory(self, dir, sitelist):
         """Walks a directory, and executes a callback on each file"""
