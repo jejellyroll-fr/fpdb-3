@@ -37,9 +37,9 @@ import shutil
 import traceback
 from collections import defaultdict
 from typing import Dict
-
 from concurrent.futures import ThreadPoolExecutor
-from past.utils import old_div
+
+# PyQt5 modules
 from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout
 
@@ -48,8 +48,9 @@ try:
     import xlrd
 except ImportError:
     xlrd = None
+from past.utils import old_div
 
-# Local application imports
+# fpdb/FreePokerTools modules
 import Configuration
 import Database
 import IdentifySite

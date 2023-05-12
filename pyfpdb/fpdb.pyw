@@ -43,7 +43,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-# Local modules
+# fpdb/FreePokerTools modules
 import interlocks
 import Options
 cl_options = '.'.join(sys.argv[1:])
