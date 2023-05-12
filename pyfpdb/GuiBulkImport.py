@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-#Copyright 2008-2011 Steffen Schaumburg
 #This program is free software: you can redistribute it and/or modify
 #it under the terms of the GNU Affero General Public License as published by
 #the Free Software Foundation, version 3 of the License.
@@ -15,36 +11,39 @@
 #along with this program. If not, see <http://www.gnu.org/licenses/>.
 #In the "official" distribution you can find the license in agpl-3.0.txt.
 
-from __future__ import print_function
-from __future__ import division
-from past.utils import old_div
-#import L10n
-#_ = L10n.get_translation()
+# Modifications made by jejellyroll on 2020-2023:
+# refactor code for python 3
 
-#    Standard Library modules
+#Import statements come next
+# Standard library imports
+from __future__ import division
+from __future__ import print_function
+
+# Standard Library modules
 import os
 import sys
-from time import time
-from optparse import OptionParser
 import traceback
-from PyQt5.QtWidgets import *
+from optparse import OptionParser
+from time import time
+
+# PyQt5 modules
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import *
 
+# Third-party modules
+from past.utils import old_div
 
-
-#    fpdb/FreePokerTools modules
-
+# fpdb/FreePokerTools modules
+import Configuration
+import Exceptions
+import Importer
 import Options
 
-import Importer
-
-import Configuration
-
-import Exceptions
-
+# Logging
 import logging
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
+
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = logging.getLogger("importer")
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Copyright 2008-2013 Steffen Schaumburg
+#Copyright 2008-2011 Steffen Schaumburg
 #This program is free software: you can redistribute it and/or modify
 #it under the terms of the GNU Affero General Public License as published by
 #the Free Software Foundation, version 3 of the License.
@@ -15,47 +15,68 @@
 #along with this program. If not, see <http://www.gnu.org/licenses/>.
 #In the "official" distribution you can find the license in agpl-3.0.txt.
 
+# Modifications made by jejellyroll on 2020-2023:
+# refactor code for python 3
 
-
-
-import os
-import sys
-import re
-import queue
-import qdarkstyle
-import subprocess
-
-import threading
-
-
-
-
-
-
-if os.name == 'nt':
-    import win32api
-    import win32con
-
-print (("Python " + sys.version[0:3] + '...'))
-
+#Import statements come next
+# Standard library imports
 import codecs
-import traceback
-import Options
-import string
-from functools import partial
-cl_options = '.'.join(sys.argv[1:])
-(options, argv) = Options.fpdb_options()
-
 import logging
+import os
+import queue
+import re
+import string
+import subprocess
+import sys
+import threading
+import traceback
+from functools import partial
 
+
+# Third-party modules
+import numpy
+import qdarkstyle
+import sqlite3
+
+# PyQt5 modules
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-
-
+# Local modules
 import interlocks
-from Exceptions import *
+import Options
+cl_options = '.'.join(sys.argv[1:])
+(options, argv) = Options.fpdb_options()
+import Card
+import Configuration
+import Database
+import DetectInstalledSites
+import Exceptions
+import GuiAutoImport
+import GuiBulkImport
+import GuiDatabase
+import GuiGraphViewer
+import GuiHandViewer
+import GuiLogView
+import GuiOddsCalc
+import GuiPositionalStats
+import GuiPrefs
+import GuiRingPlayerStats
+import GuiSessionViewer
+import GuiStove
+import GuiTourneyGraphViewer
+import GuiTourneyImport
+import GuiTourneyPlayerStats
+import GuiTourneyViewer
+import SQL
+import Stats
+
+# Windows-only modules
+if os.name == 'nt':
+    import win32api
+    import win32con
+
 
 # these imports not required in this module, imported here to report version in About dialog
 import numpy
@@ -63,34 +84,6 @@ numpy_version = numpy.__version__
 import sqlite3
 sqlite3_version = sqlite3.version
 sqlite_version = sqlite3.sqlite_version
-
-import DetectInstalledSites
-import GuiPrefs
-import GuiLogView
-import GuiDatabase
-import GuiBulkImport
-import GuiTourneyImport
-
-import GuiRingPlayerStats
-import GuiTourneyPlayerStats
-import GuiTourneyViewer
-import GuiPositionalStats
-import GuiAutoImport
-import GuiGraphViewer
-import GuiTourneyGraphViewer
-import GuiSessionViewer
-import GuiHandViewer
-import GuiOddsCalc
-import GuiStove
-
-
-import SQL
-import Database
-import Configuration
-import Card
-import Exceptions
-import Stats
-
 Configuration.set_logfile("fpdb-log.txt")
 log = logging.getLogger("fpdb")
 
@@ -99,7 +92,7 @@ try:
     import subprocess
     VERSION = subprocess.Popen(["git", "describe", "--tags", "--dirty"], stdout=subprocess.PIPE).communicate()[0]
     VERSION = VERSION[:-1]
-except:
+except Exception:
     VERSION = "0.40.4"
 
 
