@@ -20,7 +20,7 @@ from __future__ import division
 
 
 
-
+from concurrent.futures import ThreadPoolExecutor
 from past.utils import old_div
 #import L10n
 #_ = L10n.get_translation()
@@ -33,7 +33,7 @@ import datetime
 import queue
 import shutil
 import re
-
+import glob
 import logging, traceback
 
 from PyQt5.QtWidgets import QProgressBar, QLabel, QDialog, QVBoxLayout
@@ -60,36 +60,46 @@ if __name__ == "__main__":
 log = logging.getLogger("importer")
 
 class Importer(object):
-    def __init__(self, caller, settings, config, sql = None, parent = None):
-        """Constructor"""
-        self.settings   = settings
-        self.caller     = caller
-        self.config     = config
-        self.sql        = sql
-        self.parent     = parent
+    def __init__(self, caller, settings, config, sql=None, parent=None):
+        """
+        Constructor for the class.
 
+        Parameters:
+        caller (str): The name of the caller.
+        settings (dict): A dictionary containing settings for the object.
+        config (Config): The configuration object.
+        sql (Optional[SQL]): An SQL object to use for database operations.
+        parent (Optional[object]): The parent object.
+
+        Returns:
+        None
+        """
+        # Assign variables
+        self.settings = settings
+        self.caller = caller
+        self.config = config
+        self.sql = sql
+        self.parent = parent
+
+        # Initialize variables
         self.idsite = IdentifySite.IdentifySite(config)
-
-        self.filelist   = {}
-        self.dirlist    = {}
-        self.siteIds    = {}
+        self.filelist = {}
+        self.dirlist = {}
+        self.siteIds = {}
         self.removeFromFileList = {} # to remove deleted files
-        self.monitor    = False
+        self.monitor = False
         self.updatedsize = {}
         self.updatedtime = {}
-        self.lines      = None
-        self.faobs      = None       # File as one big string
-        self.mode       = None
-        self.pos_in_file = {}        # dict to remember how far we have read in the file
-        #Set defaults
-        self.callHud    = self.config.get_import_parameters().get("callFpdbHud")
+        self.lines = None
+        self.faobs = None # File as one big string
+        self.mode = None
+        self.pos_in_file = {} # dict to remember how far we have read in the file
 
-        # CONFIGURATION OPTIONS
+        # Set defaults
+        self.callHud = self.config.get_import_parameters().get("callFpdbHud")
         self.settings.setdefault("handCount", 0)
-        #self.settings.setdefault("allowHudcacheRebuild", True) # NOT USED NOW
-        #self.settings.setdefault("forceThreads", 2)            # NOT USED NOW
-        self.settings.setdefault("writeQSize", 1000)           # no need to change
-        self.settings.setdefault("writeQMaxWait", 10)          # not used
+        self.settings.setdefault("writeQSize", 1000)
+        self.settings.setdefault("writeQMaxWait", 10)
         self.settings.setdefault("dropIndexes", "don't drop")
         self.settings.setdefault("dropHudCache", "don't drop")
         self.settings.setdefault("starsArchive", False)
@@ -97,173 +107,383 @@ class Importer(object):
         self.settings.setdefault("testData", False)
         self.settings.setdefault("cacheHHC", False)
 
+        # Initialize writeq
         self.writeq = None
-        self.database = Database.Database(self.config, sql = self.sql)
+        self.database = Database.Database(self.config, sql=self.sql)
         self.writerdbs = []
         self.settings.setdefault("threads", 1) # value set by GuiBulkImport
         for i in range(self.settings['threads']):
-            self.writerdbs.append(Database.Database(self.config, sql = self.sql) )
+            self.writerdbs.append(Database.Database(self.config, sql=self.sql))
 
         process_time() # init clock in windows
 
+
     #Set functions
     def setMode(self, value):
+        """
+        Set the mode to the given value.
+
+        Parameters:
+        value (any): The value to set the mode to.
+        """
+        # Set the mode to the given value
         self.mode = value
+
         
     def setCallHud(self, value):
+        """
+        Sets the callHud attribute to the given value.
+
+        Args:
+            value: The value to set callHud to.
+        """
+        # Set the callHud attribute to the given value.
         self.callHud = value
+
         
     def setCacheSessions(self, value):
+        """
+        Setter method for the cacheSessions attribute.
+
+        Args:
+            value (bool): The value to set the cacheSessions attribute to.
+        """
+        # Set the cacheSessions attribute to the given value.
         self.cacheSessions = value
 
     def setHandCount(self, value):
+        """
+        Sets the hand count value in the settings dictionary.
+
+        Args:
+            value (int): The value to set for the hand count.
+        """
         self.settings['handCount'] = int(value)
 
+
     def setQuiet(self, value):
+        """
+        Sets the 'quiet' setting to the given value.
+
+        Args:
+            value (bool): The value to set the 'quiet' setting to.
+
+        Returns:
+            None
+        """
+        # Update the 'quiet' setting with the given value
         self.settings['quiet'] = value
 
+
     def setHandsInDB(self, value):
+        """
+        Sets the value of the 'handsInDB' key in the settings dictionary to the specified value.
+
+        Args:
+            value: The value to set the 'handsInDB' key to.
+        """
         self.settings['handsInDB'] = value
 
+
     def setThreads(self, value):
+        """
+        Sets the number of threads to use for writing to the database.
+
+        Args:
+            value (int): The number of threads to use.
+        """
+        # Update the settings dictionary with the new value.
         self.settings['threads'] = value
+
+        # If the new number of threads is greater than the current number of writer databases,
+        # create new writer databases as needed.
         if self.settings["threads"] > len(self.writerdbs):
-            for i in range(self.settings['threads'] - len(self.writerdbs)):
-                self.writerdbs.append( Database.Database(self.config, sql = self.sql) )
+            # Use a list comprehension to create new Database objects and append them to the writerdbs list.
+            self.writerdbs.extend([Database.Database(self.config, sql=self.sql) for i in range(self.settings['threads'] - len(self.writerdbs))])
+
 
     def setDropIndexes(self, value):
-        self.settings['dropIndexes'] = value
+        """
+        Sets the value of 'dropIndexes' in the settings dictionary to the given value.
+
+        Args:
+            value (bool): The value to set for 'dropIndexes'.
+        """
+        self.settings['dropIndexes'] = value  # Set the value of 'dropIndexes'
+
 
     def setDropHudCache(self, value):
+        """
+        Sets the value of the 'dropHudCache' key in the settings dictionary to the given value.
+
+        Args:
+            value: The value to set the 'dropHudCache' key to.
+        """
+        # Update the 'dropHudCache' key in the settings dictionary
         self.settings['dropHudCache'] = value
 
+
     def setStarsArchive(self, value):
+        """
+        Sets the value of the 'starsArchive' key in the settings dictionary to the given value.
+
+        Args:
+            value: The value to set for the 'starsArchive' key.
+        """
         self.settings['starsArchive'] = value
 
-    def setFTPArchive(self, value):
+
+    def setFtpArchive(self, value):
+        """
+        Sets the value of ftpArchive in the settings dictionary to the given value.
+
+        Args:
+            value: The value to set ftpArchive to.
+        """
         self.settings['ftpArchive'] = value
 
+
     def setPrintTestData(self, value):
+        """
+        Set the value of the 'testData' key in the settings dictionary to the provided value.
+
+        Args:
+            value (any): The value to set for the 'testData' key in the settings dictionary.
+        """
         self.settings['testData'] = value
 
+
     def setFakeCacheHHC(self, value):
+        """
+        Set the value of the 'cacheHHC' key in the 'settings' dictionary to the given value.
+
+        Args:
+            value: The value to set the 'cacheHHC' key to.
+        """
+        # Set the value of the 'cacheHHC' key to the given value.
         self.settings['cacheHHC'] = value
 
+
     def getCachedHHC(self):
+        """
+        Returns the cached hand history converter object.
+        """
         return self.handhistoryconverter
 
-#   def setWatchTime(self):
-#       self.updated = time()
 
     def clearFileList(self):
+        """
+        Removes all entries from the file list and related data structures.
+        """
+        # Clear the dictionaries that store file size, modification time, and position in file list
         self.updatedsize = {}
         self.updatetime = {}
         self.pos_in_file = {}
+
+        # Clear the file list itself
         self.filelist = {}
 
+
+
     def logImport(self, type, file, stored, dups, partial, skipped, errs, ttime, id):
+        """
+        Logs import information to the database.
+
+        Args:
+        - type (str): The type of import.
+        - file (str): The file being imported.
+        - stored (int): The number of stored entries.
+        - dups (int): The number of duplicate entries.
+        - partial (int): The number of partially imported entries.
+        - skipped (int): The number of skipped entries.
+        - errs (int): The number of entries with errors.
+        - ttime (float): The total time taken for import in seconds.
+        - id (int): The ID of the import.
+
+        Returns:
+        - None
+        """
+        # Calculate the total number of handled entries
         hands = stored + dups + partial + skipped + errs
+
+        # Get the current UTC time
         now = datetime.datetime.utcnow()
+
+        # Convert the total import time to hundredths of a second
         ttime100 = ttime * 100
+
+        # Update the file in the database with the import information
         self.database.updateFile([type, now, now, hands, stored, dups, partial, skipped, errs, ttime100, True, id])
+
+        # Commit the changes to the database
         self.database.commit()
+
     
+
     def addFileToList(self, fpdbfile):
-        """FPDBFile"""
+        """
+        Add file to list in database.
+
+        Args:
+            fpdbfile (FPDBFile): Object representing the file to add.
+
+        Returns:
+            None.
+        """
+        # Get the filename without the extension
         file = os.path.splitext(os.path.basename(fpdbfile.path))[0]
-        try: #TODO: this is a dirty hack. GBI needs it, GAI fails with it.
-            file = str(file, "utf8", "replace")
-        except TypeError:
-            pass
-        fpdbfile.fileId = self.database.get_id(file)
-        if not fpdbfile.fileId:
-            now = datetime.datetime.utcnow()
-            fpdbfile.fileId = self.database.storeFile([file, fpdbfile.site.name, now, now, 0, 0, 0, 0, 0, 0, 0, False])
-            self.database.commit()
+
+        # Convert filename to string if necessary
+        if not isinstance(file, str):
+            file = file.decode("utf-8", "replace")
+
+        # Get the file ID from the database, or create a new one if it doesn't exist
+        fpdbfile.fileId = self.database.get_id(file) or self.database.storeFile(
+            [file, fpdbfile.site.name, datetime.datetime.utcnow(), datetime.datetime.utcnow(),
+            0, 0, 0, 0, 0, 0, 0, False])
+        self.database.commit()
+
             
     #Add an individual file to filelist
-    def addImportFile(self, filename, site = "auto"):
+    def addImportFile(self, filename, site="auto"):
+        """
+        Add an import file to the list of files to be processed.
+
+        Args:
+            filename (str): The name of the file to be imported.
+            site (str): The name of the site to which the file belongs. Defaults to "auto".
+
+        Returns:
+            bool: True if the file was successfully added, False otherwise.
+        """
         #DEBUG->print("addimportfile: filename is a", filename.__class__, filename)
-        # filename not guaranteed to be unicode
-        if self.filelist.get(filename)!=None or not os.path.exists(filename):
+
+        # Check if file already exists in the list or if it does not exist in the file system
+        if self.filelist.get(filename) != None or not os.path.exists(filename):
             return False
 
+        # Process the file using the IDSite object
         self.idsite.processFile(filename)
+
+        # If the file object is found in the IDSite object, add it to the list of files
         if self.idsite.get_fobj(filename):
             fpdbfile = self.idsite.filelist[filename]
         else:
             log.error("Importer.addImportFile: siteId Failed for: '%s'" % filename)
             return False
-        
+
         self.addFileToList(fpdbfile)
         self.filelist[filename] = fpdbfile
+
+        # If site is not in the list of siteIds, get the site ID from the database
         if site not in self.siteIds:
-            # Get id from Sites table in DB
             result = self.database.get_site_id(fpdbfile.site.name)
+
+            # If only one site ID is found, add it to the siteIds dictionary
             if len(result) == 1:
                 self.siteIds[fpdbfile.site.name] = result[0][0]
             else:
+                # If site ID is not found or multiple site IDs are found, log an error
                 if len(result) == 0:
                     log.error(("Database ID for %s not found") % fpdbfile.site.name)
                 else:
                     log.error(("More than 1 Database ID found for %s") % fpdbfile.site.name)
 
         return True
+
     # Called from GuiBulkImport to add a file or directory. Bulk import never monitors
-    def addBulkImportImportFileOrDir(self, inputPath, site = "auto"):
-        """Add a file or directory for bulk import"""
-        #for windows platform, force os.walk variable to be unicode
-        # see fpdb-main post 9th July 2011
+
+
+    def addBulkImportImportFileOrDir(self, inputPath, site="auto"):
+        """Add a file or directory for bulk import.
+
+        Args:
+            inputPath (str): The path of the file or directory to add for bulk import.
+            site (str, optional): The site to import to. Defaults to "auto".
+
+        Returns:
+            bool: True if the file or directory was added for bulk import successfully, False otherwise.
+        """
+        # For Windows platform, force os.walk variable to be unicode.
+        # See fpdb-main post 9th July 2011.
         if self.config.posix:
             pass
         else:
             inputPath = str(inputPath)
 
-        # TODO: only add sane files?
+        # TODO: Only add sane files?
         if os.path.isdir(inputPath):
-            for subdir in os.walk(inputPath):
-                for file in subdir[2]:
-                    self.addImportFile(os.path.join(subdir[0], file), site=site)
+            # If inputPath is a directory, add all files inside it for bulk import.
+            for file in glob.iglob(os.path.join(inputPath, '**', '*'), recursive=True):
+                if os.path.isfile(file):
+                    self.addImportFile(file, site=site)
             return True
         else:
+            # If inputPath is a file, add it for bulk import.
             return self.addImportFile(inputPath, site=site)
+
 
     #Add a directory of files to filelist
     #Only one import directory per site supported.
     #dirlist is a hash of lists:
     #dirlist{ 'PokerStars' => ["/path/to/import/", "filtername"] }
-    def addImportDirectory(self,dir,monitor=False, site=("default","hh"), filter="passthrough"):
-        #gets called by GuiAutoImport.
-        #This should really be using os.walk
-        #http://docs.python.org/library/os.html
+
+
+
+
+
+    def addImportDirectory(self, dir, monitor=False, site=("default", "hh"), filter="passthrough"):
+        """
+        Adds a directory to the list of directories to be monitored for auto-imports.
+
+        Args:
+            dir (str): The directory to be added.
+            monitor (bool, optional): To monitor the directory or not. Defaults to False.
+            site (tuple, optional): Site name and hostname. Defaults to ("default", "hh").
+            filter (str, optional): Filter to be applied. Defaults to "passthrough".
+        """
         if os.path.isdir(dir):
-            if monitor == True:
+            if monitor:
                 self.monitor = True
                 self.dirlist[site] = [dir] + [filter]
 
-            #print "addImportDirectory: checking files in", dir
-            for subdir in os.walk(dir):
-                for file in subdir[2]:
-                    filename = os.path.join(subdir[0], file)
-                    if (time() - os.stat(filename).st_mtime)<= 43200: # look all files modded in the last 12 hours
-                                                                    # need long time because FTP in Win does not
-                                                                    # update the timestamp on the HH during session
-                        self.addImportFile(filename, "auto")
+            # Define a function to handle each file
+            def handle_file(filename):
+                # Check if the file was modified in the last 12 hours
+                if (time() - os.stat(filename).st_mtime) <= 43200:
+                    # Add the file to the list of files to be auto-imported
+                    self.addImportFile(filename, "auto")
+
+            # Create a thread pool with 8 workers
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                # Recursively iterate through all sub-directories and files in the given directory
+                for subdir, _, files in os.walk(dir):
+                    # Submit a task for each file to be handled asynchronously
+                    for file in files:
+                        # Generate the absolute path of the file
+                        filename = os.path.join(subdir, file)
+                        executor.submit(handle_file, filename)
         else:
-            log.warning(("Attempted to add non-directory '%s' as an import directory") % str(dir))
+            # Log a warning if the given path is not a directory
+            logging.warning(f"Attempted to add non-directory '{dir}' as an import directory")
 
     def runImport(self):
-        """"Run full import on self.filelist. This is called from GuiBulkImport.py"""
+        """Run full import on self.filelist. This is called from GuiBulkImport.py"""
 
         # Initial setup
         start = datetime.datetime.now()
         starttime = time()
         log.info(("Started at %s -- %d files to import. indexes: %s") % (start, len(self.filelist), self.settings['dropIndexes']))
+
+        # If dropIndexes is set to 'auto', calculate the value using calculate_auto2
         if self.settings['dropIndexes'] == 'auto':
             self.settings['dropIndexes'] = self.calculate_auto2(self.database, 12.0, 500.0)
+
+        # If dropHudCache is set to 'auto', calculate the value using calculate_auto2
         if 'dropHudCache' in self.settings and self.settings['dropHudCache'] == 'auto':
             self.settings['dropHudCache'] = self.calculate_auto2(self.database, 25.0, 500.0)    # returns "drop"/"don't drop"
 
+        # Import files
         (totstored, totdups, totpartial, totskipped, toterrors) = self.importFiles(None)
 
         # Tidying up after import
@@ -275,17 +495,36 @@ class Importer(object):
         self.runPostImport()
         self.database.analyzeDB()
         endtime = time()
+
+        # Return results of import
         return (totstored, totdups, totpartial, totskipped, toterrors, endtime-starttime)
-    # end def runImport
+
     
     def runPostImport(self):
+        """
+        Clean up the database after importing data.
+        """
+        # Clean up tourney types
         self.database.cleanUpTourneyTypes()
+
+        # Clean up weeks and months
         self.database.cleanUpWeeksMonths()
+
+        # Reset clean
         self.database.resetClean()
 
-    def importFiles(self, q):
-        """"Read filenames in self.filelist and pass to despatcher."""
 
+    def importFiles(self, q):
+        """Read filenames in self.filelist and pass to despatcher.
+
+        Args:
+            q: Queue object to enable communication with the GUI.
+
+        Returns:
+            A tuple containing the number of files stored, duplicates, partial, skipped and errors.
+        """
+
+        # Initialize counters
         totstored = 0
         totdups = 0
         totpartial = 0
@@ -294,18 +533,31 @@ class Importer(object):
         tottime = 0
         filecount = 0
         fileerrorcount = 0
-        moveimportedfiles = False #TODO need to wire this into GUI and make it prettier
-        movefailedfiles = False #TODO and this too
-        
-        #prepare progress popup window
+
+        # Initialize flags for moving files
+        moveimportedfiles = True
+        movefailedfiles = True
+
+        # Prepare progress popup window
         ProgressDialog = ImportProgressDialog(len(self.filelist), self.parent)
         ProgressDialog.resize(500, 200)
         ProgressDialog.show()
-        
+
+        # Check if directories exist, create them if they don't
+        imported_path = os.path.join(os.getcwd(), "fpdbimported")
+        if not os.path.exists(imported_path):
+            os.makedirs(imported_path)
+        failed_path = os.path.join(os.getcwd(), "fpdbfailed")
+        if not os.path.exists(failed_path):
+            os.makedirs(failed_path)
+
         for f in self.filelist:
-            filecount = filecount + 1
+            filecount += 1
+
+            # Update progress dialog
             ProgressDialog.progress_update(f, str(self.database.getHandCount()))
 
+            # Import the current file and update the counters
             (stored, duplicates, partial, skipped, errors, ttime) = self._import_despatch(self.filelist[f])
             totstored += stored
             totdups += duplicates
@@ -313,70 +565,114 @@ class Importer(object):
             totskipped += skipped
             toterrors += errors
 
+            # Move the imported and failed files, if applicable
+            # TODO: sub directory named by site name and home directory
             if moveimportedfiles and movefailedfiles:
                 try:
                     if moveimportedfiles:
-                        shutil.move(f, "c:\\fpdbimported\\%d-%s" % (filecount, os.path.basename(f[3:]) ) )
-                except:
-                    fileerrorcount = fileerrorcount + 1
+                        imported_path = os.path.join(os.getcwd(), "fpdbimported", f"{filecount}-{os.path.basename(f)[3:]}")
+                        shutil.move(f, imported_path)
                     if movefailedfiles:
-                        shutil.move(f, "c:\\fpdbfailed\\%d-%s" % (fileerrorcount, os.path.basename(f[3:]) ) )
-            
+                        failed_path = os.path.join(os.getcwd(), "fpdbfailed", f"{fileerrorcount}-{os.path.basename(f)[3:]}")
+                        shutil.move(f, failed_path)
+                except:
+                    fileerrorcount += 1
+
+            # Log the import
             self.logImport('bulk', f, stored, duplicates, partial, skipped, errors, ttime, self.filelist[f].fileId)
 
+        # Close the progress dialog
         ProgressDialog.accept()
         del ProgressDialog
-        
+
+        # Return tuple containing counters
         return (totstored, totdups, totpartial, totskipped, toterrors)
+
+
     # end def importFiles
 
     def _import_despatch(self, fpdbfile):
-        stored, duplicates, partial, skipped, errors, ttime = 0,0,0,0,0,0
+        """
+        Import data from a file and update the database.
+
+        Parameters:
+            fpdbfile (FPDBFile): The file object to import.
+
+        Returns:
+            Tuple: A tuple containing the number of records stored, the number of duplicates found, the number of partially imported records, the number of records skipped, the number of errors encountered, and the time taken for the import.
+        """
+        # Initialize the counters and timer.
+        stored, duplicates, partial, skipped, errors, ttime = 0, 0, 0, 0, 0, 0
+
+        # If the file type is "hh" or "both", import the household file and update the counters and timer.
         if fpdbfile.ftype in ("hh", "both"):
             (stored, duplicates, partial, skipped, errors, ttime) = self._import_hh_file(fpdbfile)
+
+        # If the file type is "summary", import the summary file and update the counters and timer.
         if fpdbfile.ftype == "summary":
             (stored, duplicates, partial, skipped, errors, ttime) = self._import_summary_file(fpdbfile)
+
+        # If the file type is "both" and the file path has not been updated, import the summary file and update the counters and timer.
         if fpdbfile.ftype == "both" and fpdbfile.path not in self.updatedsize:
             self._import_summary_file(fpdbfile)
-        #    pass
+
+        # Print a debug message with the time taken for the import and the file type.
         print("DEBUG: _import_summary_file.ttime: %.3f %s" % (ttime, fpdbfile.ftype))
+
+        # Return the counters and timer.
         return (stored, duplicates, partial, skipped, errors, ttime)
 
 
     def calculate_auto2(self, db, scale, increment):
-        """A second heuristic to determine a reasonable value of drop/don't drop
-           This one adds up size of files to import to guess number of hands in them
-           Example values of scale and increment params might be 10 and 500 meaning
-           roughly: drop if importing more than 10% (100/scale) of hands in db or if
-           less than 500 hands in db"""
-        size_per_hand = 1300.0  # wag based on a PS 6-up FLHE file. Actual value not hugely important
-                                # as values of scale and increment compensate for it anyway.
-                                # decimal used to force float arithmetic
+        """
+        A second heuristic to determine a reasonable value of drop/don't drop
+        This one adds up size of files to import to guess number of hands in them
+        Example values of scale and increment params might be 10 and 500 meaning
+        roughly: drop if importing more than 10% (100/scale) of hands in db or if
+        less than 500 hands in db
 
-        # get number of hands in db
+        Args:
+        - self: the instance of the class
+        - db: the database to connect to
+        - scale: an integer to determine when to drop indexes
+        - increment: an integer to determine when to drop indexes
+
+        Returns:
+        A string "drop" or "don't drop"
+        """
+        # Size per hand estimated based on a PS 6-up FLHE file. Actual value not hugely important
+        # as values of scale and increment compensate for it anyway. Decimal used to force float arithmetic
+        size_per_hand = 1300.0  
+
+        # Get number of hands in the database
         if 'handsInDB' not in self.settings:
             try:
                 tmpcursor = db.get_cursor()
                 tmpcursor.execute("Select count(1) from Hands;")
                 self.settings['handsInDB'] = tmpcursor.fetchone()[0]
             except:
-                pass # if this fails we're probably doomed anyway
+                # If this fails we're probably doomed anyway
+                pass 
 
-        # add up size of import files
+        # Add up size of import files
         total_size = 0.0
         for file in self.filelist:
             if os.path.exists(file):
                 stat_info = os.stat(file)
                 total_size += stat_info.st_size
 
-        # if hands_in_db is zero or very low, we want to drop indexes, otherwise compare
+        # If hands_in_db is zero or very low, we want to drop indexes, otherwise compare
         # import size with db size somehow:
         ret = "don't drop"
         if self.settings['handsInDB'] < scale * (old_div(total_size,size_per_hand)) + increment:
             ret = "drop"
-        #print "auto2: handsindb =", self.settings['handsInDB'], "total_size =", total_size, "size_per_hand =", \
-        #      size_per_hand, "inc =", increment, "return:", ret
+
+        # Debugging line for printing the values of different variables
+        # print "auto2: handsindb =", self.settings['handsInDB'], "total_size =", total_size, "size_per_hand =", \
+        #       size_per_hand, "inc =", increment, "return:", ret
+
         return ret
+
 
     #Run import on updated files, then store latest update time. Called from GuiAutoImport.py
     def runUpdated(self):
