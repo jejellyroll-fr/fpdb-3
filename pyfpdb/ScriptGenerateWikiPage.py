@@ -59,18 +59,11 @@ defaultmask = {   'holdem'   : {   'nl': None,  'pl': None,  'fl': None},
                }
 
 sitemasks = { "PokerStars": copy.deepcopy(defaultmask),
-              "Full Tilt Poker": copy.deepcopy(defaultmask),
-              "Everleaf": copy.deepcopy(defaultmask),
-              "Boss": copy.deepcopy(defaultmask),
-              "Absolute": copy.deepcopy(defaultmask),
               "PartyPoker": copy.deepcopy(defaultmask),
               "Betfair": copy.deepcopy(defaultmask),
               "Merge": copy.deepcopy(defaultmask),
-              "OnGame": copy.deepcopy(defaultmask),
-              "PKR": copy.deepcopy(defaultmask),
               "iPoker": copy.deepcopy(defaultmask),
               "Winamax": copy.deepcopy(defaultmask),
-              "Everest": copy.deepcopy(defaultmask),
               "PacificPoker": copy.deepcopy(defaultmask),
               "Cake": copy.deepcopy(defaultmask),
               "Entraction": copy.deepcopy(defaultmask),
@@ -89,18 +82,6 @@ sitemasks['PartyPoker']['27_3draw'] = {   'nl': False,  'pl': False, 'fl': False
 sitemasks['PartyPoker']['a5_3draw'] = {   'nl': False,  'pl': False, 'fl': False}
 sitemasks['PartyPoker']['badugi']   = {   'nl': False,  'pl': False, 'fl': False}
 sitemasks['PartyPoker']['razz']     = {   'nl': False,  'pl': False, 'fl': False}
-# Everleaf - no draw games
-sitemasks['Everleaf']['fivedraw'] = {   'nl': False,  'pl': False, 'fl': False}
-sitemasks['Everleaf']['27_1draw'] = {   'nl': False,  'pl': False, 'fl': False}
-sitemasks['Everleaf']['27_3draw'] = {   'nl': False,  'pl': False, 'fl': False}
-sitemasks['Everleaf']['a5_3draw'] = {   'nl': False,  'pl': False, 'fl': False}
-sitemasks['Everleaf']['badugi']   = {   'nl': False,  'pl': False, 'fl': False}
-# Everest - no draw games
-sitemasks['Everest']['fivedraw'] = {   'nl': False,  'pl': False, 'fl': False}
-sitemasks['Everest']['27_1draw'] = {   'nl': False,  'pl': False, 'fl': False}
-sitemasks['Everest']['27_3draw'] = {   'nl': False,  'pl': False, 'fl': False}
-sitemasks['Everest']['a5_3draw'] = {   'nl': False,  'pl': False, 'fl': False}
-sitemasks['Everest']['badugi']   = {   'nl': False,  'pl': False, 'fl': False}
 # Cake - Only flop based games
 sitemasks['Cake']['razz'] = {   'nl': False,  'pl': False, 'fl': False}
 sitemasks['Cake']['studhi'] = {   'nl': False,  'pl': False, 'fl': False}
@@ -111,12 +92,6 @@ sitemasks['Cake']['27_1draw'] = {   'nl': False,  'pl': False, 'fl': False}
 sitemasks['Cake']['27_3draw'] = {   'nl': False,  'pl': False, 'fl': False}
 sitemasks['Cake']['a5_3draw'] = {   'nl': False,  'pl': False, 'fl': False}
 sitemasks['Cake']['badugi']   = {   'nl': False,  'pl': False, 'fl': False}
-# Boss -Razz, +5CD, -other draw games
-sitemasks['Boss']['razz']     = {   'nl': False,  'pl': False, 'fl': False}
-sitemasks['Boss']['27_1draw'] = {   'nl': False,  'pl': False, 'fl': False}
-sitemasks['Boss']['27_3draw'] = {   'nl': False,  'pl': False, 'fl': False}
-sitemasks['Boss']['a5_3draw'] = {   'nl': False,  'pl': False, 'fl': False}
-sitemasks['Boss']['badugi']   = {   'nl': False,  'pl': False, 'fl': False}
 # Winamax - Only Omaha and Holdem
 sitemasks['Winamax']['omahahilo'] = {   'nl': False,  'pl': False, 'fl': False}
 sitemasks['Winamax']['razz'] = {   'nl': False,  'pl': False, 'fl': False}
@@ -156,18 +131,11 @@ idsite.fetchGameTypes()
 
 
 sites = { "PokerStars": copy.deepcopy(games),
-          "Full Tilt Poker": copy.deepcopy(games),
-          "Everleaf": copy.deepcopy(games),
-          "Boss": copy.deepcopy(games),
-          "Absolute": copy.deepcopy(games),
           "PartyPoker": copy.deepcopy(games),
           "Betfair": copy.deepcopy(games),
           "Merge": copy.deepcopy(games),
-          "OnGame": copy.deepcopy(games),
-          "PKR": copy.deepcopy(games),
           "iPoker": copy.deepcopy(games),
           "Winamax": copy.deepcopy(games),
-          "Everest": copy.deepcopy(games),
           "PacificPoker": copy.deepcopy(games),
           "Cake": copy.deepcopy(games),
           "Entraction": copy.deepcopy(games),
@@ -187,8 +155,6 @@ for idx, f in list(idsite.filelist.items()):
         if f.gametype['type'] == 'ring':
             ring[c][a][b] = True
         if f.gametype['type'] == 'tour':
-            if f.site.name == "Full Tilt Poker":
-                print("DEBUG: Found FTP: %s" % f.path)
             tour[c][a][b] = True
     else:
         print("Skipping: %s" % f.path)
@@ -240,21 +206,14 @@ print("""{| border=0<br>
 
 
 print_site("PokerStars", ring, sitemasks)
-print_site("Full Tilt Poker", ring, sitemasks)
 print_site("PartyPoker", ring, sitemasks)
-print_site("Everleaf", ring, sitemasks)
-print_site("Boss", ring, sitemasks)
 print_site("Merge", ring, sitemasks)
-print_site("OnGame", ring, sitemasks)
 print_site("iPoker", ring, sitemasks)
 print_site("Winamax", ring, sitemasks)
-print_site("Everest", ring, sitemasks)
 print_site("Cake", ring, sitemasks)
 print_site("Entraction", ring, sitemasks)
 print_site("BetOnline", ring, sitemasks)
-print_site("Absolute", ring, sitemasks)
 print_site("Betfair", ring, sitemasks)
-print_site("PKR", ring, sitemasks)
 print_site("PacificPoker", ring, sitemasks)
 
 print("|}")
@@ -270,21 +229,14 @@ print("""{| border=0<br>
 |-""" % col_colours)
 
 print_site("PokerStars", tour, sitemasks)
-print_site("Full Tilt Poker", tour, sitemasks)
 print_site("PartyPoker", tour, sitemasks)
-print_site("Everleaf", tour, sitemasks)
-print_site("Boss", tour, sitemasks)
 print_site("Merge", tour, sitemasks)
-print_site("OnGame", tour, sitemasks)
 print_site("iPoker", tour, sitemasks)
 print_site("Winamax", tour, sitemasks)
-print_site("Everest", tour, sitemasks)
 print_site("Cake", tour, sitemasks)
 print_site("Entraction", tour, sitemasks)
 print_site("BetOnline", tour, sitemasks)
-print_site("Absolute", tour, sitemasks)
 print_site("Betfair", tour, sitemasks)
-print_site("PKR", tour, sitemasks)
 print_site("PacificPoker", tour, sitemasks)
 
 print("|}")

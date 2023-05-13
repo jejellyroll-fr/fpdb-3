@@ -378,7 +378,7 @@ def usage():
     print(("USAGE:"))
     print("./GuiTourneyImport.py -k <Site> -f <" + ("Filename") + ">")
     print("./GuiTourneyImport.py -k PokerStars -f <" + ("Filename") + ">")
-    print("./GuiTourneyImport.py -k 'Full Tilt Poker' -f <" + ("Filename") + ">")
+
 
 def main(argv=None):
     """main can also be called in the python interpreter, by supplying the command line as the argument."""

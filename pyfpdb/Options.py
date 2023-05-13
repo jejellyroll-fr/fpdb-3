@@ -88,38 +88,25 @@ def site_alias(alias):
     """Function for converting various site aliases to the FPDB name"""
     tmp = alias
     aliases = {
-                "Absolute"       : "Absolute",
-                "AP"             : "Absolute",
                 "Betfair"        : "Betfair",
                 "BetOnline"      : "BetOnline",
-                "Boss"           : "Boss",
                 "Bovada"         : "Bovada",
                 "Cake"           : "Cake",
                 "Enet"           : "Enet",
                 "Entraction"     : "Entraction",
-                "Everest"        : "Everest",
-                "Everleaf"       : "Everleaf",
-                "FTP"            : "Full Tilt Poker",
-                "Full Tilt Poker": "Full Tilt Poker",
                 "iPoker"         : "iPoker",
                 "Merge"          : "Merge",
                 "Microgaming"    : "Microgaming",
-                "OnGame"         : "OnGame",
                 "PacificPoker"   : "PacificPoker",
                 "Pacific"        : "PacificPoker",
                 "Party"          : "PartyPoker",
                 "PartyPoker"     : "PartyPoker",
-                "Pkr"            : "Pkr",
-                "PKR"            : "Pkr",
                 "PokerStars"     : "PokerStars",
                 "SealsWithClubs" : "SealsWithClubs",
                 "Stars"          : "PokerStars",
                 "PT"             : "PokerTracker",
                 "PokerTracker"   : "PokerTracker",
-                "UltimateBet"    : "UltimateBet",
-                "UB"             : "UltimateBet",
                 "Winamax"        : "Winamax",
-                "Win2day"        : "Boss",
               }
     try:
         tmp = aliases[alias]

@@ -82,7 +82,7 @@ class PokerTracker(HandHistoryConverter):
                              'Omaha Hi' : ('hold','omahahi'),
                           'Omaha Hi/Lo' : ('hold','omahahilo')
                }
-    sites = {     'EverestPoker Game #' : ('Everest', 16),
+    sites = {    
                                'GAME #' : ('iPoker', 14),
                          'MERGE_GAME #' : ('Merge', 12),
                          'Merge Game #' : ('Merge', 12),
@@ -221,8 +221,6 @@ class PokerTracker(HandHistoryConverter):
         info = {}
         if self.sitename in ('iPoker', 'Merge'):
             m = self.re_GameInfo1.search(handText)
-        elif self.sitename=='Everest':
-            m = self.re_GameInfo2.search(handText)
         elif self.sitename == 'Microgaming':
             m = self.re_GameInfo3.search(handText)
         if not m:
@@ -289,8 +287,6 @@ class PokerTracker(HandHistoryConverter):
             else:
                 m  = self.re_HandInfo_Cash.search(hand.handText,re.DOTALL)
             m2 = self.re_GameInfo1.search(hand.handText)
-        elif self.sitename=='Everest':
-            m2 = self.re_GameInfo2.search(hand.handText)
         elif self.sitename=='Microgaming':
             m2 = self.re_GameInfo3.search(hand.handText)
         if (m is None and self.sitename not in ('Everest', 'Microgaming')) or m2 is None:
@@ -315,8 +311,6 @@ class PokerTracker(HandHistoryConverter):
                     m1 = self.re_DateTime1.finditer(info[key])
                 elif self.sitename == 'Merge':
                     m1 = self.re_DateTime2.finditer(info[key])
-                elif self.sitename == 'Everest':
-                    m1 = self.re_DateTime3.finditer(info[key])
                 datetimestr = "2000/01/01 00:00:00"  # default used if time not found
                 for a in m1:
                     datetimestr = "%s/%s/%s %s:%s:%s" % (a.group('Y'), a.group('M'),a.group('D'),a.group('H'),a.group('MIN'),a.group('S'))
@@ -324,6 +318,8 @@ class PokerTracker(HandHistoryConverter):
                     #print "   tz = ", tz, " datetime =", datetimestr
                 hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S") # also timezone at end, e.g. " ET"
                 hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
+
+
             if key == 'HID':
                 if self.sitename == 'Merge':
                     hand.handid = info[key][:8] + info[key][9:]

@@ -873,6 +873,11 @@ class Hand(object):
         self.actions[street].append(act)
 
     def addCollectPot(self,player, pot):
+        try:
+            pot = float(pot)
+        except ValueError:
+            log.error("Invalid value for 'pot' in 'addCollectPot', 'pot' must be a float: %s", pot)
+            return
         log.debug("%s collected %s", player, pot)
         self.checkPlayerExists(player, 'addCollectPot')
         self.collected = self.collected + [[player, pot]]

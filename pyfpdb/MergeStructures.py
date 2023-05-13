@@ -20,9 +20,11 @@
 ########################################################################
 
 
-
+import logging
 from datetime import datetime
 import pytz
+log = logging.getLogger("importer")
+
 
 class MergeStructures(object):
     
@@ -452,6 +454,9 @@ class MergeStructures(object):
                             })
         
     def lookupSnG(self, key, startTime):
+        if not isinstance(startTime, datetime):
+            log.error("Parsed start time is not a datetime object: %s", startTime)
+            return
         for i in range(len(self.versions)):
             if startTime < self.versions[i]:
                 struct = self.SnG_Structures[i].get(key)

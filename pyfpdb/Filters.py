@@ -486,24 +486,12 @@ class Filters(QWidget):
             if site == "PokerStars":  
                 completPlayer = _pname  
                 self.heroList.addItem(QIcon(icoPath +'ps.svg'),completPlayer)
-            elif site == "Full Tilt Poker":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'ft.svg'),completPlayer)
-            elif site == "Everleaf":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'everleaf.png'),completPlayer)
-            elif site == "Boss":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'boss.ico'),completPlayer)    
             elif site == "PartyPoker":  
                 completPlayer = _pname  
                 self.heroList.addItem(QIcon(icoPath +'party.png'),completPlayer)    
             elif site == "Merge":  
                 completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'merge.png'),completPlayer)     
-            elif site == "PKR":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'pkr.png'),completPlayer)  
+                self.heroList.addItem(QIcon(icoPath +'merge.png'),completPlayer)      
             elif site == "iPoker":  
                 completPlayer = _pname  
                 self.heroList.addItem(QIcon(icoPath +'ipoker.png'),completPlayer)
