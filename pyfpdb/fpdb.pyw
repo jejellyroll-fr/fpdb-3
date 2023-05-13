@@ -108,7 +108,7 @@ class fpdb(QMainWindow):
         self.setWindowIcon(QIcon('tribal.jpg'))
 
         # Initializes instance variables
-        self.lock = QMutex()
+        self.lock = interlocks.InterProcessLock(name="fpdb_global_lock")
         self.db = None
         self.status_bar = None
         self.quitting = False
