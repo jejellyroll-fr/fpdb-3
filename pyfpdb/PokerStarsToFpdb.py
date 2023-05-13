@@ -26,6 +26,7 @@
 import sys
 from HandHistoryConverter import *
 from decimal_wrapper import Decimal
+import decimal
 
 # PokerStars HH Format
 
@@ -354,8 +355,8 @@ class PokerStars(HandHistoryConverter):
                     log.error(("PokerStarsToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
                     raise FpdbParseError
             else:
-                info['sb'] = str((float(mg['SB'])/2).quantize(float("0.01")))
-                info['bb'] = str(float(mg['SB']).quantize(float("0.01")))    
+                info['sb'] = str((decimal.Decimal(mg['SB']) / decimal.Decimal('2')).quantize(decimal.Decimal('0.01')))
+                info['bb'] = str(decimal.Decimal(mg['SB']).quantize(decimal.Decimal("0.01")))    
 
         return info
 

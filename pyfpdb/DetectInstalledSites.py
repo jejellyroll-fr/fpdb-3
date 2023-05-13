@@ -74,22 +74,13 @@ class DetectInstalledSites(object):
         #is little advantage in querying the sites table at the moment.
         #plus we can run from the command line as no dependencies
         #
-        self.supportedSites = [ "Full Tilt Poker",
-                                "PartyPoker",
+        self.supportedSites = [ "PartyPoker",
                                 "Merge",
                                 "PokerStars"]#,
-                                #"Everleaf",
-                                #"Win2day",
-                                #"OnGame",
-                                #"UltimateBet",
                                 #"Betfair",
-                                #"Absolute",
                                 #"PacificPoker",
-                                #"Partouche",
-                                #"PKR",
                                 #"iPoker",
-                                #"Winamax",
-                                #"Everest" ]
+                                #"Winamax" ]
 
         self.supportedPlatforms = ["Linux", "XP", "Win7"]
 

@@ -57,7 +57,7 @@ import gobject
 #    FreePokerTools modules
 import Configuration
 import Database
-import SummaryEverleaf
+
 
 class Tournament(object):
     """Tournament will hold the information about a tournament, I guess ? Remember I'm new to this language, so I don't know the best ways to do things"""
@@ -81,18 +81,7 @@ class Tournament(object):
         self.players = {} # eventually i'd guess we'd probably want to fill this with playername:playerid's
         self.results = {} # i'd guess we'd want to load this up with playerid's instead of playernames, too, as well, also
 
-        # if site == "Everleaf": # this should be attached to a button that says "retrieve tournament info" or something for sites that we know how to do it for
-        summary = SummaryEverleaf.EverleafSummary()
-        self.site = summary.parser.SiteName
-        self.id = summary.parser.TourneyId
-        self.starttime = summary.parser.TourneyStartTime
-        self.endtime = summary.parser.TourneyEndTime
-        self.game = summary.parser.TourneyGameType
-        self.structure = summary.parser.TourneyStructure
-        self.buyin = summary.parser.TourneyBuyIn # need to remember to parse the Fee out of this and move it to self.fee
-        self.rebuys = (summary.parser.TourneyRebuys == "yes")
-        self.prizepool = summary.parser.TourneyPool
-        self.numplayers = summary.parser.TourneysPlayers
+
 
         self.openwindow() # let's start by getting any info we need.. meh
 

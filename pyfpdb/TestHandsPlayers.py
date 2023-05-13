@@ -39,26 +39,17 @@ DEBUG = True
 
 class FpdbError(object):
     expected = {   # Site     : { path: (stored, dups, partial, errs) }
-                   'Absolute Poker' : {},
                    'Betfair' : {},
                    'BetOnline': {
                         "regression-test-files/cash/BetOnline/Flop/NLHE-10max-USD-0.25-0.05-201108.txt":(19,0,1,0),
                         "regression-test-files/tour/BetOnline/Flop/NLHE-10max-USD-MTT-2011-08.nobuyinfee.txt":(17,0,1,0),
                         "regression-test-files/cash/BetOnline/Flop/NLHE-10max-0.25-0.50-201203.unknown.player.wins.txt":(0,0,0,1), #This file really is broken
                     },
-                   'Boss' : {},
                    'Bovada' : {},
                    'Cake' : {
                         "regression-test-files/tour/Cake/Flop/NLHE-USD-2-STT-201205.thousand.delimiter.txt":(1,0,1,0)},
                    'Enet' : {},
                    'Entraction' : {},
-                   'Everleaf' : {},
-                   'Everest Poker' : {},
-                   'Full Tilt Poker' : {
-                        "regression-test-files/cash/FTP/Draw/3-Draw-Limit-USD-20-40-201101.Partial.txt":(0,0,1,0),
-                        "regression-test-files/cash/FTP/Draw/3-Draw-Limit-USD-10-20-201101.Dead.hand.txt":(0,0,1,0),
-                        "regression-test-files/cash/FTP/Flop/NLHE-6max-USD-25-50.200610.Observed.No.player.stacks.txt":(0,0,1,0),
-                     },
                    'iPoker' : {},
                    'Merge' : {
                         "regression-test-files/cash/Merge/Draw/3-Draw-PL-USD-0.05-0.10-201102.Cancelled.hand.txt":(0,0,1,0),
@@ -66,8 +57,6 @@ class FpdbError(object):
                         "regression-test-files/cash/Merge/Flop/FLHE-9max-USD-0.02-0.04.20110416.xml":(9,0,1,0),
                              },
                    'Microgaming': {},
-                   'OnGame' : {},
-                   'PKR' : {},
                    'PacificPoker' : { "regression-test-files/cash/PacificPoker/Flop/888-LHE-HU-USD-10-20-201202.cancelled.hand.txt":(0,0,1,0), },
                    'Party Poker' : {},
                    'PokerStars': { 
@@ -357,52 +346,38 @@ def main(argv=None):
     importer.setCallHud(False)
     importer.setFakeCacheHHC(True)
 
-    AbsoluteErrors    = FpdbError('Absolute Poker')
     BetfairErrors     = FpdbError('Betfair')
     BetOnlineErrors   = FpdbError('BetOnline')
-    BossErrors        = FpdbError('Boss')
     BovadaErrors      = FpdbError('Bovada')
     CakeErrors        = FpdbError('Cake')
     EnetErrors        = FpdbError('Enet')
     EntractionErrors  = FpdbError('Entraction')
-    EverleafErrors    = FpdbError('Everleaf Poker')
-    EverestErrors     = FpdbError('Everest Poker')
-    FTPErrors         = FpdbError('Full Tilt Poker')
     iPokerErrors      = FpdbError('iPoker')
     MergeErrors      = FpdbError('Merge')
     MicrogamingErrors = FpdbError('Microgaming')
-    OnGameErrors      = FpdbError('OnGame')
     PacificPokerErrors= FpdbError('PacificPoker')
     PartyPokerErrors  = FpdbError('Party Poker')
     PokerStarsErrors  = FpdbError('PokerStars')
-    PKRErrors         = FpdbError('PKR')
     PTErrors          = FpdbError('PokerTracker')
     WinamaxErrors     = FpdbError('Winamax')
 
     ErrorsList = [
-                    AbsoluteErrors, BetfairErrors, BetOnlineErrors, BossErrors, CakeErrors, EntractionErrors,
-                    EverleafErrors, EverestErrors, FTPErrors, iPokerErrors, MergeErrors, MicrogamingErrors,
-                    OnGameErrors, PacificPokerErrors, PartyPokerErrors, PokerStarsErrors, PKRErrors,
+                    BetfairErrors, BetOnlineErrors,  CakeErrors, EntractionErrors,
+                      iPokerErrors, MergeErrors, MicrogamingErrors,
+                    PacificPokerErrors, PartyPokerErrors, PokerStarsErrors, 
                     PTErrors, WinamaxErrors, BovadaErrors, EnetErrors,
                 ]
 
     sites = {
-                'Absolute' : False,
                 'Betfair' : False,
                 'BetOnline': False,
-                'Boss' : False,
                 'Bovada' : False,
                 'Cake' : False,
                 'Enet' : False,
                 'Entraction' : False,
-                'Everleaf' : False,
-                'Everest' : False,
-                'Full Tilt Poker' : False,
                 'iPoker' : False,
                 'Merge' : False,
                 'Microgaming': False,
-                'OnGame' : False,
-                'Pkr' : False,
                 'PacificPoker' : False,
                 'PartyPoker' : False,
                 'PokerStars' : False,
@@ -430,12 +405,7 @@ def main(argv=None):
     elif sites['PokerStars'] == True and single_file_test:
         walk_testfiles(options.filename, compare, importer, PokerStarsErrors, "PokerStars")
 
-    if sites['Full Tilt Poker'] == True and not single_file_test:
-        walk_testfiles("regression-test-files/cash/FTP/", compare, importer, FTPErrors, "Full Tilt Poker")
-        walk_testfiles("regression-test-files/tour/FTP/", compare, importer, FTPErrors, "Full Tilt Poker")
-        walk_testfiles("regression-test-files/summaries/FTP/", compare, importer, FTPErrors, "Full Tilt Poker")
-    elif sites['Full Tilt Poker'] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, FTPErrors, "Full Tilt Poker")
+
     if sites['PartyPoker'] == True and not single_file_test:
         walk_testfiles("regression-test-files/cash/PartyPoker/", compare, importer, PartyPokerErrors, "PartyPoker")
         walk_testfiles("regression-test-files/tour/PartyPoker/", compare, importer, PartyPokerErrors, "PartyPoker")
@@ -445,46 +415,16 @@ def main(argv=None):
         walk_testfiles("regression-test-files/cash/Betfair/", compare, importer, BetfairErrors, "Betfair")
     elif sites['Betfair'] == True and single_file_test:
         walk_testfiles(options.filename, compare, importer, BetfairErrors, "Betfair")
-    if sites['OnGame'] == True and not single_file_test:
-        walk_testfiles("regression-test-files/cash/OnGame/", compare, importer, OnGameErrors, "OnGame")
-        walk_testfiles("regression-test-files/tour/OnGame/", compare, importer, OnGameErrors, "OnGame")
-    elif sites['OnGame'] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, OnGameErrors, "OnGame")
-    if sites['Absolute'] == True and not single_file_test:
-        walk_testfiles("regression-test-files/cash/Absolute/", compare, importer, AbsoluteErrors, "Absolute")
-        walk_testfiles("regression-test-files/tour/Absolute/", compare, importer, AbsoluteErrors, "Absolute")
-    elif sites['Absolute'] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, AbsoluteErrors, "Absolute")
-    if sites['Everleaf'] == True and not single_file_test:
-        walk_testfiles("regression-test-files/cash/Everleaf/", compare, importer, EverleafErrors, "Everleaf")
-        walk_testfiles("regression-test-files/tour/Everleaf/", compare, importer, EverleafErrors, "Everleaf")
-    elif sites['Everleaf'] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, EverleafErrors, "Everleaf")
-    if sites['Everest'] == True and not single_file_test:
-        walk_testfiles("regression-test-files/cash/Everest/", compare, importer, EverestErrors, "Everest")
-        walk_testfiles("regression-test-files/tour/Everest/", compare, importer, EverestErrors, "Everest")
-    elif sites['Everest'] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, EverestErrors, "Everest")
     if sites['Merge'] == True and not single_file_test:
         walk_testfiles("regression-test-files/cash/Merge/", compare, importer, MergeErrors, "Merge")
         walk_testfiles("regression-test-files/tour/Merge/", compare, importer, MergeErrors, "Merge")
     elif sites['Merge'] == True and single_file_test:
         walk_testfiles(options.filename, compare, importer, MergeErrors, "Merge")
-    if sites['Pkr'] == True and not single_file_test:
-        walk_testfiles("regression-test-files/cash/PKR/", compare, importer, PKRErrors, "PKR")
-        walk_testfiles("regression-test-files/tour/PKR/", compare, importer, PKRErrors, "PKR")
-    elif sites['Pkr'] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, PKRErrors, "PKR")
     if sites['iPoker'] == True and not single_file_test:
         walk_testfiles("regression-test-files/cash/iPoker/", compare, importer, iPokerErrors, "iPoker")
         walk_testfiles("regression-test-files/tour/iPoker/", compare, importer, iPokerErrors, "iPoker")
     elif sites['iPoker'] == True and single_file_test:
         walk_testfiles(options.filename, compare, importer, iPokerErrors, "iPoker")
-    if sites['Boss'] == True and not single_file_test:
-        walk_testfiles("regression-test-files/cash/Boss/", compare, importer, BossErrors, "Boss")
-        walk_testfiles("regression-test-files/tour/Boss/", compare, importer, BossErrors, "Boss")
-    elif sites['Boss'] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, BossErrors, "Boss")
     if sites['Entraction'] == True and not single_file_test:
         walk_testfiles("regression-test-files/cash/Entraction/", compare, importer, EntractionErrors, "Entraction")
         walk_testfiles("regression-test-files/tour/Entraction/", compare, importer, EntractionErrors, "Entraction")

@@ -69,11 +69,17 @@ class PacificPokerSummary(TourneySummary):
         return re_SplitTourneys
 
     def parseSummary(self):
+        try:
+            m = self.re_TourneyInfo.search(self.summaryText)
+            if not m:
+                tmp = self.summaryText[0:200]
+                log.error("PacificPokerSummary.parseSummary: '%s'", tmp)
+                return
+        except Exception as e:
+            log.error("An error occurred while parsing the summary text: %s", e)
+            return
         m  = self.re_TourneyInfo.search(self.summaryText)
-        if m == None:
-            tmp = self.summaryText[0:200]
-            log.error(("PacificPokerSummary.parseSummary: '%s'") % tmp)
-            raise FpdbParseError
+        
 
         mg  = m.groupdict()
         #print "DEBUG: m.groupdict(): %s" % mg
