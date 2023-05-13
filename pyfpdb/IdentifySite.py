@@ -24,6 +24,7 @@
 # Standard library imports
 from __future__ import print_function
 import codecs
+import contextlib
 import logging
 import os
 import re
@@ -294,84 +295,169 @@ class IdentifySite(object):
 
     # WIP # WIP
     def generateSiteList(self, hhcs):
+        """
+        Generate a list of sites based on the supplied HHCS dictionary.
+
+        If no dictionary is supplied, uses the dictionary found in the config.
+
+        Args:
+            hhcs (dict): A dictionary of HHCS codes and their corresponding sites.
+
+        Returns:
+            None
+        """
         if not hhcs:
+            # If no HHCS dictionary is supplied, use the one from the config.
             hhcs = self.config.hhcs
 
+        # Add each site to the site list.
         for site, hhc in list(hhcs.items()):
             self.addSite(site, hhc)
 
+        # Set the regex patterns used for parsing.
         self.setRegexPatterns()
 
+
     def addSite(self, site, hhc):
+        """
+        Add a site to the site list.
+
+        Args:
+            site (str): The name of the site.
+            hhc (Hhc): The Hhc object for the site.
+        """
+        # Get the converter filter and name
         filter = hhc.converter
         filter_name = filter.replace("ToFpdb", "")
+
+        # Get the summary importer and import the filter module
         summary = hhc.summaryImporter
         mod = __import__(filter)
+
+        # Get the filter object
         obj = getattr(mod, filter_name, None)
+
         try:
+            # Add the site to the site list
             self.sitelist[obj.siteId] = Site(site, filter, filter_name, summary, obj)
         except Exception as e:
+            # Log an error if the site couldn't be added
             log.error(f"Failed to load HH importer: {filter_name}.  {e}")
 
+
     def setRegexPatterns(self):
+        """
+        Sets the regular expression patterns for identifying PokerTracker hands.
+        """
+        # Import the necessary modules.
         pt_module = __import__("PokerTrackerToFpdb")
         summary_module = __import__("PokerTrackerSummary")
+
+        # Get the regular expression patterns from the imported modules.
         self.re_Identify_PT = getattr(pt_module, "PokerTracker", None).re_Identify
         self.re_SumIdentify_PT = getattr(summary_module, "PokerTrackerSummary", None).re_Identify
- # WIP # WIP
 
 
-    def walkDirectory(self, dir, sitelist):
-        """Walks a directory, and executes a callback on each file"""
-        dir = os.path.abspath(dir)
-        for file in [file for file in os.listdir(dir) if not file in [".",".."]]:
-            nfile = os.path.join(dir,file)
-            if os.path.isdir(nfile):
-                self.walkDirectory(nfile, sitelist)
-            else:
-                self.processFile(nfile)
+
+    def walkDirectory(self, directory, sitelist):
+        """Walks a directory and executes a callback on each file
+
+        Args:
+            directory (str): The directory to walk
+            sitelist (list): A list of file extensions to process
+        """
+        # Walk the directory tree
+        for root, directories, files in os.walk(directory):
+            for file in files:
+                # Skip the current and parent directory links
+                if file not in [".", ".."]:
+                    # Get the full path to the file
+                    file_path = os.path.join(root, file)
+                    # Process the file
+                    self.processFile(file_path)
 
     def __listof(self, x):
-        if isinstance(x, list) or isinstance(x, tuple):
-            return x
-        else:
-            return [x]
+        """
+        Convert a non-list/tuple object to a list.
+
+        Args:
+            x: The object to be converted.
+
+        Returns:
+            A list containing the object if it is not a list or tuple, or the
+            original list or tuple.
+        """
+        return x if isinstance(x, (list, tuple)) else [x]
+
 
     def processFile(self, path):
-        print('process fill identify',path)
-        if path not in self.filelist:
-            print('filelist', self.filelist)
-            whole_file, kodec = self.read_file(path)
-            print('whole_file',whole_file)
-            print('kodec',kodec )
-            if whole_file:
-                fobj = self.idSite(path, whole_file, kodec)
-                print('siteid obj')
-                #print(fobj.path)
-                if fobj == False: # Site id failed
-                    log.debug(("DEBUG:") + " " + ("siteId Failed for: %s") % path)
-                else:
-                    self.filelist[path] = fobj
+        """
+        Process the file given by `path`.
+
+        Args:
+            path (str): The path of the file to process.
+
+        Returns:
+            None
+        """
+        # Check if the file has already been processed, if so, return
+        if path in self.filelist:
+            return
+
+        # Read the file content and detect the encoding
+        whole_file, kodec = self.read_file(path)
+
+        # If the file content exists, create a site id object and add it to the file list
+        if whole_file:
+            if fobj := self.idSite(path, whole_file, kodec):
+                # Add the site id object to the file list
+                self.filelist[path] = fobj
+            else:
+                log.debug("siteId Failed for: %s", path)
+
+
+
+
 
     def read_file(self, in_path):
+        """
+        Reads a file and returns its contents and encoding type
+
+        Args:
+            in_path (str): The path to the file to be read
+
+        Returns:
+            tuple: A tuple containing the contents of the file and its encoding type
+        """
+
+        # If the file is an Excel file, use xlrd to read it
         if in_path.endswith('.xls') or in_path.endswith('.xlsx') and xlrd:
             try:
                 wb = xlrd.open_workbook(in_path)
                 sh = wb.sheet_by_index(0)
                 header = str(sh.cell(0,0).value)
                 return header, 'utf-8'
-            except:
+            except Exception:
                 return None, None
+
+        # Try to read the file with its default encoding
+        with contextlib.suppress(Exception):
+            with open(in_path, 'r') as infile:
+                whole_file = infile.read()
+            return whole_file, 'default'
+        # If the default encoding fails, try different codecs
         for kodec in self.codepage:
             try:
                 infile = codecs.open(in_path, 'r', kodec)
                 whole_file = infile.read()
                 infile.close()
                 return whole_file, kodec
-            except:
+            except Exception:
                 continue
+
+        # If the file cannot be read with any codec, return None
         return None, None
-    
+
     def idSite(self, path, whole_file, kodec):
         """Identifies the site the hh file originated from"""
         f = FPDBFile(path)
