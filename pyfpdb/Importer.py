@@ -490,55 +490,69 @@ class Importer:
 
 
     def runImport(self):
-        """"Run full import on self.filelist. This is called from GuiBulkImport.py"""
+        """Run full import on self.filelist. This is called from GuiBulkImport.py"""
 
         # Initial setup
-        start = datetime.datetime.now()
-        starttime = time.time()
+        start = datetime.datetime.now()  # Get the current datetime
+        starttime = time.time()  # Get the current time
         log.info(("Started at %s -- %d files to import. indexes: %s") % (start, len(self.filelist), self.settings['dropIndexes']))
+
+        # Automatically drop indexes if set to 'auto'
         if self.settings['dropIndexes'] == 'auto':
             self.settings['dropIndexes'] = self.calculate_auto2(self.database, 12.0, 500.0)
+
+        # Automatically drop HUD cache if set to 'auto'
         if 'dropHudCache' in self.settings and self.settings['dropHudCache'] == 'auto':
             self.settings['dropHudCache'] = self.calculate_auto2(self.database, 25.0, 500.0)    # returns "drop"/"don't drop"
 
+        # Import files and get the number of stored, duplicate, partial, skipped, and error files
         (totstored, totdups, totpartial, totskipped, toterrors) = self.importFiles(None)
 
         # Tidying up after import
-        #if 'dropHudCache' in self.settings and self.settings['dropHudCache'] == 'drop':
-        #    log.info(("rebuild_caches"))
-        #    self.database.rebuild_caches()
-        #else:
-        #    log.info(("runPostImport"))
-        self.runPostImport()
-        self.database.analyzeDB()
-        endtime = time.time()
-        return (totstored, totdups, totpartial, totskipped, toterrors, endtime-starttime)
+        self.runPostImport()  # Run post-import tasks
+        self.database.analyzeDB()  # Analyze the database for optimization
+        endtime = time.time()  # Get the current time
+        return (totstored, totdups, totpartial, totskipped, toterrors, endtime-starttime)  # Return results
+
     # end def runImport
     
     def runPostImport(self):
+        """
+        Perform post-import cleanup operations on the database.
+        """
+        # Clean up tourney types
         self.database.cleanUpTourneyTypes()
+
+        # Clean up weeks and months
         self.database.cleanUpWeeksMonths()
+
+        # Reset the clean flag
         self.database.resetClean()
 
-    def importFiles(self, q):
-        """"Read filenames in self.filelist and pass to despatcher."""
 
-        totstored = 0
-        totdups = 0
-        totpartial = 0
-        totskipped = 0
-        toterrors = 0
-        tottime = 0
-        filecount = 0
-        fileerrorcount = 0
-        moveimportedfiles = False #TODO need to wire this into GUI and make it prettier
-        movefailedfiles = False #TODO and this too
-        
-        #prepare progress popup window
+    def importFiles(self, q):
+        """
+        Read filenames in self.filelist and pass to despatcher.
+        :param q: queue
+        :return: tuple of integers (totstored, totdups, totpartial, totskipped, toterrors)
+        """
+
+        totstored = 0  # count of hands stored in the database
+        totdups = 0  # count of hands that are duplicates
+        totpartial = 0  # count of hands that are partially imported
+        totskipped = 0  # count of hands that are skipped
+        toterrors = 0  # count of hands that cause errors
+        tottime = 0  # total time spent importing hands
+        filecount = 0  # count of files processed
+        fileerrorcount = 0  # count of files that caused errors
+        moveimportedfiles = False  # TODO need to wire this into GUI and make it prettier
+        movefailedfiles = False  # TODO and this too
+
+        # prepare progress popup window
         ProgressDialog = ImportProgressDialog(len(self.filelist), self.parent)
         ProgressDialog.resize(500, 200)
         ProgressDialog.show()
-        
+
         for f in self.filelist:
             filecount = filecount + 1
             ProgressDialog.progress_update(f, str(self.database.getHandCount()))
@@ -553,39 +567,70 @@ class Importer:
             if moveimportedfiles and movefailedfiles:
                 try:
                     if moveimportedfiles:
-                        shutil.move(f, "c:\\fpdbimported\\%d-%s" % (filecount, os.path.basename(f[3:]) ) )
+                        shutil.move(f, "c:\\fpdbimported\\%d-%s" % (filecount, os.path.basename(f[3:])))
                 except:
                     fileerrorcount = fileerrorcount + 1
                     if movefailedfiles:
-                        shutil.move(f, "c:\\fpdbfailed\\%d-%s" % (fileerrorcount, os.path.basename(f[3:]) ) )
-            
+                        shutil.move(f, "c:\\fpdbfailed\\%d-%s" % (fileerrorcount, os.path.basename(f[3:])))
+
             self.logImport('bulk', f, stored, duplicates, partial, skipped, errors, ttime, self.filelist[f].fileId)
 
         ProgressDialog.accept()
         del ProgressDialog
-        
+
         return (totstored, totdups, totpartial, totskipped, toterrors)
+
     # end def importFiles
 
     def _import_despatch(self, fpdbfile):
+        """Imports data from a file into the database.
+
+        Args:
+            fpdbfile (File): The file to import.
+
+        Returns:
+            Tuple: A tuple containing the number of stored records, number of duplicates,
+            number of partially imported records, number of skipped records, number of errors,
+            and the total time it took to import the file.
+        """
         stored, duplicates, partial, skipped, errors, ttime = 0,0,0,0,0,0
+
         if fpdbfile.ftype in ("hh", "both"):
+            # Import data from hh file
             (stored, duplicates, partial, skipped, errors, ttime) = self._import_hh_file(fpdbfile)
+
         if fpdbfile.ftype == "summary":
+            # Import data from summary file
             (stored, duplicates, partial, skipped, errors, ttime) = self._import_summary_file(fpdbfile)
+
         if fpdbfile.ftype == "both" and fpdbfile.path not in self.updatedsize:
+            # If file type is both and file path has not been updated, import data from summary file
             self._import_summary_file(fpdbfile)
-        #    pass
+
+        # Print time it took to import the file
         print("DEBUG: _import_summary_file.ttime: %.3f %s" % (ttime, fpdbfile.ftype))
+
+        # Return tuple of import results
         return (stored, duplicates, partial, skipped, errors, ttime)
+
 
 
     def calculate_auto2(self, db, scale, increment):
         """A second heuristic to determine a reasonable value of drop/don't drop
-           This one adds up size of files to import to guess number of hands in them
-           Example values of scale and increment params might be 10 and 500 meaning
-           roughly: drop if importing more than 10% (100/scale) of hands in db or if
-           less than 500 hands in db"""
+        This one adds up size of files to import to guess number of hands in them
+        Example values of scale and increment params might be 10 and 500 meaning
+        roughly: drop if importing more than 10% (100/scale) of hands in db or if
+        less than 500 hands in db
+
+        Args:
+            db: Database object
+            scale: Integer representing the scale parameter
+            increment: Integer representing the increment parameter
+
+        Returns:
+            String representing whether to drop or not drop indexes
+        """
+
         size_per_hand = 1300.0  # wag based on a PS 6-up FLHE file. Actual value not hugely important
                                 # as values of scale and increment compensate for it anyway.
                                 # decimal used to force float arithmetic
@@ -615,53 +660,160 @@ class Importer:
         #      size_per_hand, "inc =", increment, "return:", ret
         return ret
 
+
     #Run import on updated files, then store latest update time. Called from GuiAutoImport.py
     def runUpdated(self):
-        """Check for new files in monitored directories"""
-        for (site,type) in self.dirlist:
-            self.addImportDirectory(self.dirlist[(site,type)][0], False, (site,type), self.dirlist[(site,type)][1])
+        """
+        Check for new files in monitored directories, update the size and time of files, and import them if they have changed.
+        """
+        # Check for new directories to monitor
+        self._check_new_directories()
 
+        # Check for updated files in monitored directories
+        self._check_updated_files()
+
+        # Remove files that have been marked for deletion
+        self._remove_marked_files()
+
+        # Rollback any changes and run post-import actions
+        self._rollback_and_run_post_import()
+
+
+    def _check_new_directories(self):
+        """
+        Check for new directories and add them to the import list.
+
+        This function loops through the `dirlist` attribute, which is a list of tuples containing site and type
+        information. For each tuple, it calls the `addImportDirectory` method of the current object instance to add
+        the directory to the import list.
+
+        Returns:
+            None
+        """
+        for (site, type) in self.dirlist:
+            self.addImportDirectory(
+                self.dirlist[(site, type)][0], 
+                False, 
+                (site, type), 
+                self.dirlist[(site, type)][1]
+            )
+
+
+    def _check_updated_files(self):
+        """Check if any files in the filelist have been updated."""
         for f in self.filelist:
             if os.path.exists(f):
                 stat_info = os.stat(f)
-                if f in self.updatedsize: # we should be able to assume that if we're in size, we're in time as well
-                    if stat_info.st_size > self.updatedsize[f] or stat_info.st_mtime > self.updatedtime[f]:
-                        try:
-                            if not os.path.isdir(f):
-                                self.caller.addText("\n"+os.path.basename(f))
-                                print("os.path.basename",os.path.basename(f) )
-                                print("self.caller:", self.caller)
-                                print(os.path.basename(f))
-                        except KeyError:
-                            log.error("File '%s' seems to have disappeared" % f)
-                        (stored, duplicates, partial, skipped, errors, ttime) = self._import_despatch(self.filelist[f])
-                        self.logImport('auto', f, stored, duplicates, partial, skipped, errors, ttime, self.filelist[f].fileId)
-                        self.database.commit()
-                        try:
-                            if not os.path.isdir(f): # Note: This assumes that whatever calls us has an "addText" func
-                                self.caller.addText(" %d stored, %d duplicates, %d partial, %d skipped, %d errors (time = %f)" % (stored, duplicates, partial, skipped, errors, ttime))
-                                print("self.caller2:",self.caller)
-                        except KeyError: # TODO: Again, what error happens here? fix when we find out ..
-                            pass
-                        self.updatedsize[f] = stat_info.st_size
-                        self.updatedtime[f] = time.time()
+                if f in self.updatedsize:
+                    self._import_file_if_updated(f, stat_info)
                 else:
-                    if os.path.isdir(f) or (time.time() - stat_info.st_mtime) < 60:
-                        self.updatedsize[f] = 0
-                        self.updatedtime[f] = 0
-                    else:
-                        self.updatedsize[f] = stat_info.st_size
-                        self.updatedtime[f] = time.time()
+                    self._add_file_to_updated_list(f, stat_info)
             else:
                 self.removeFromFileList[f] = True
 
+    def _import_file_if_updated(self, f, stat_info):
+        """
+        Import a file only if it has been updated since it was last imported.
+
+        Args:
+            f (str): The filename of the file to import.
+            stat_info (os.stat_result): The result of calling os.stat on the file.
+
+        Returns:
+            None
+        """
+        # Check if the file has been updated since it was last imported
+        if stat_info.st_size > self.updatedsize[f] or stat_info.st_mtime > self.updatedtime[f]:
+            try:
+                self._print_updated_file_name(f)
+            except KeyError:
+                log.error("File '%s' seems to have disappeared" % f)
+
+            # Import the file
+            (stored, duplicates, partial, skipped, errors, ttime) = self._import_despatch(self.filelist[f])
+            self.logImport('auto', f, stored, duplicates, partial, skipped, errors, ttime, self.filelist[f].fileId)
+            self.database.commit()
+
+            # Print the import results
+            try:
+                self._print_import_results(stored, duplicates, partial, skipped, errors, ttime,f)
+            except KeyError:
+                pass
+
+            # Update the size and time of the last import
+            self.updatedsize[f] = stat_info.st_size
+            self.updatedtime[f] = time.time()
+
+
+    def _print_updated_file_name(self, f):
+        """
+        Given a file path, prints the base name of the file.
+
+        Args:
+            f (str): The path to the file.
+        """
+        if not os.path.isdir(f):
+            # Print the base name of the file on a new line
+            self.caller.addText("\n"+os.path.basename(f))
+            print("os.path.basename",os.path.basename(f) )
+            print("self.caller:", self.caller)
+            # Print the base name of the file on the same line as previous output
+            print(os.path.basename(f))
+
+    def _print_import_results(self, stored, duplicates, partial, skipped, errors, ttime, f):
+        """
+        Prints import results.
+
+        Args:
+        stored (int): Number of imports stored.
+        duplicates (int): Number of duplicate imports.
+        partial (int): Number of partially imported modules.
+        skipped (int): Number of skipped imports.
+        errors (int): Number of import errors.
+        ttime (float): Time taken to import.
+        f (str): File path.
+        """
+        # Check if file path is valid
+        if not os.path.isdir(f):
+            # Print import results
+            self.caller.addText(" %d stored, %d duplicates, %d partial, %d skipped, %d errors (time = %f)" % (stored, duplicates, partial, skipped, errors, ttime))
+            print("self.caller2:",self.caller)
+
+    def _add_file_to_updated_list(self, f, stat_info):
+        """
+        Adds a file to the updated list with its size and time if it was modified more than 60 seconds ago.
+        If the file is a directory or was modified less than 60 seconds ago, it is not added to the list.
+
+        Args:
+            f (str): The file to add to the updated list.
+            stat_info (os.stat_result): The stat information of the file.
+
+        Returns:
+            None
+        """
+        if os.path.isdir(f) or (time.time() - stat_info.st_mtime) < 60:
+            # If the file is a directory or was modified less than 60 seconds ago, do not add to the updated list
+            self.updatedsize[f] = 0
+            self.updatedtime[f] = 0
+        else:
+            # Add the file to the updated list with its size and time
+            self.updatedsize[f] = stat_info.st_size
+            self.updatedtime[f] = time.time()
+
+
+    #END Run import on updated files, then store latest update time. Called from GuiAutoImport.py (cut in little functions)
+
+    def _remove_marked_files(self):
         for file in self.removeFromFileList:
             if file in self.filelist:
                 del self.filelist[file]
-
         self.removeFromFileList = {}
+
+    def _rollback_and_run_post_import(self):
         self.database.rollback()
         self.runPostImport()
+
+
 
     def _import_hh_file(self, fpdbfile):
         """Function for actual import of a hh file
