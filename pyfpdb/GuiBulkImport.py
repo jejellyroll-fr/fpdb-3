@@ -128,7 +128,7 @@ class GuiBulkImport(QWidget):
         Returns:
             None
         """
-        if not self.settings['global_lock'].tryLock():
+        if not self.settings['global_lock'].acquire(wait=False, source="GuiBulkImport"):
             # If global lock is not available, print error message and return
             print("bulk import aborted - global lock not available")
             return
@@ -156,7 +156,7 @@ class GuiBulkImport(QWidget):
         log.info(completionMessage)
 
         self.importer.clearFileList()
-        self.settings['global_lock'].unlock()
+        self.settings['global_lock'].release()
 
 
 

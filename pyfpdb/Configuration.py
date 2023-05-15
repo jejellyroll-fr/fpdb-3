@@ -166,141 +166,169 @@ LOGLEVEL = {'DEBUG'   : logging.DEBUG,
             'ERROR'   : logging.ERROR,
             'CRITICAL': logging.CRITICAL}
 
+def get_config(file_name, fallback=True):
+    """
+    Looks in cwd and in CONFIG_PATH for a config file.
+    :param file_name: str - the name of the config file to search for
+    :param fallback: bool - whether or not to fall back to an example file if a config file is not found
+    :return: tuple - (config_path, example_copy, example_path)
+    """
 
+    def get_config_path(file_name):
+        """
+        Returns the path to the config file.
+        :param file_name: str - the name of the config file
+        :return: str - the path to the config file
+        """        
+        if sysPlatform == 'Windows':
+            if platform.release() != 'XP':
+                OS_FAMILY = 'Win7' #Vista and win7
+        else:
+            OS_FAMILY = 'XP'
 
-def get_config(file_name, fallback = True):
-    """Looks in cwd and in self.default_config_path for a config file."""
-    
-    #FIXME
-    # This function has become difficult to understand, plus it no-longer
-    # just looks for a config file, it actually does file copying 
-    
-    # look for example file even if not used here, path is returned to caller
-    config_found,example_found,example_copy = False,False,False
-    config_path, example_path = None,None
-    if sysPlatform == 'Windows':
-        print('windows TRUE1')
-        if platform.release() != 'XP':
-           OS_FAMILY = 'Win7' #Vista and win7
-           print('windows TRUE2')
-    else:
-        OS_FAMILY = 'XP'
-        print('windows TRUE3')
-    if OS_FAMILY == 'XP' or 'Win7':
-       print('windows TRUE4')
-       config_path = os.path.join(CONFIG_PATH, file_name)
-       config_path = config_path.replace("\\", "/")
-    else:
-       config_path = os.path.join(CONFIG_PATH, file_name)
-    print ("config_path raw=", config_path)
-    if os.path.exists(config_path):    # there is a file in the cwd
-        print(os.path.exists(config_path))
-        config_found = True 
-        print (config_found) 
-        fallback = False
-        print(fallback)          # so we use it
-    else: # no file in the cwd, look where it should be in the first place
-        config_path = os.path.join(CONFIG_PATH, file_name)
-        config_path = config_path.replace("\\", "/")
-        print ("config path 2=", config_path)
-        if os.path.exists(config_path):
-            config_found = True
-            print (config_found)
-            fallback = False
-            print(fallback)
+        if OS_FAMILY == 'XP' or 'Win7':
+            return os.path.join(CONFIG_PATH, file_name).replace("\\", "/")
+        else:
+            return os.path.join(CONFIG_PATH, file_name)
 
-    if POSIX:
-        # If we're on linux, try to copy example from the place
-        # debian package puts it; get_default_config_path() creates
-        # the config directory for us so there's no need to check it
-        # again
-        example_path = '/usr/share/python-fpdb/' + file_name + '.example'
-        if not os.path.exists(example_path):
-            if os.path.exists(file_name + '.example'):
-                example_path = file_name + '.example'
-            else:
-                example_path = os.path.join(PYFPDB_PATH, file_name + '.example')
-        if not config_found and fallback:
-            try:
-                shutil.copyfile(example_path, config_path)
-                example_copy = True
-                msg = ("Config file has been created at %s.") % (config_path)
-                log.info(msg)
-            except IOError:
-                try:
-                    example_path = file_name + '.example'
-                    shutil.copyfile(example_path, config_path)
-                    example_copy = True
-                    msg = ("Config file has been created at %s.") % (config_path)
-                    log.info(msg)
-                except IOError:
-                    pass
+    def config_file_exists(config_path):
+        """
+        Checks if the config file exists.
+        :param config_path: str - the path to the config file
+        :return: bool - True if the config file exists, False otherwise
+        """
+        return os.path.exists(config_path)
 
-#    OK, fall back to the .example file, should be in the start dir
-
-    elif os.path.exists(os.path.join(CONFIG_PATH, file_name + '.example').replace("\\", "/")):
+    def copy_example_file(example_path, config_path):
+        """
+        Copies the example file to create a new config file.
+        :param example_path: str - the path to the example file
+        :param config_path: str - the path to the new config file
+        :return: bool - True if the example file was successfully copied, False otherwise
+        """
         try:
-            print("exemple path ok") 
-            example_path = os.path.join(CONFIG_PATH, file_name + '.example').replace("\\", "/")
-            print ('exemple_path:', example_path)
-            if not config_found and fallback:
-                shutil.copyfile(example_path, config_path)
-                example_copy = True
-                log.info (("No %r found in \"%r\" or \"%r\".") % (file_name, FPDB_ROOT_PATH, CONFIG_PATH) \
-                     + " " + ("Config file has been created at %r.") % (config_path+"\n") )
+            shutil.copyfile(example_path, config_path)
+            example_copy = True
+            msg = f"Config file has been created at {config_path}."
+            log.info(msg)
+            return True
+        except IOError:
+            return False
 
-        except:
-            print((("Error copying .example config file, cannot fall back. Exiting."), "\n"))
-            sys.stderr.write(("Error copying .example config file, cannot fall back. Exiting.")+"\n")
-            sys.stderr.write( str(sys.exc_info()) )
+    config_path = get_config_path(file_name)
+    example_found = False
+    example_copy = False
+    example_path = None
+
+    if config_file_exists(config_path):    # there is a file in the cwd
+        fallback = False
+    else: # no file in the cwd, look where it should be in the first place
+        config_path = get_config_path(file_name)
+
+        if config_file_exists(config_path):
+            fallback = False
+        elif POSIX:
+            # If we're on linux, try to copy example from the place
+            # debian package puts it; get_default_config_path() creates
+            # the config directory for us so there's no need to check it
+            # again
+            example_path = f'/usr/share/python-fpdb/{file_name}.example'
+            if os.path.exists(example_path):
+                example_found = True
+            elif os.path.exists(f'{file_name}.example'):
+                example_path = f'{file_name}.example'
+                example_found = True
+            else:
+                example_path = os.path.join(PYFPDB_PATH, f'{file_name}.example')
+
+            if example_found and fallback:
+                example_copy = copy_example_file(example_path, config_path)
+
+        elif fallback:
+            sys.stderr.write(f"No {file_name} found, cannot fall back. Exiting.\n")
             sys.exit()
-    elif fallback:
-        print(fallback)
-        sys.stderr.write((("No %s found, cannot fall back. Exiting.") % file_name) + "\n")
-        sys.exit()
 
-    
-    return (config_path,example_copy,example_path)
+    return (config_path, example_copy, example_path)
+
+
 
 def set_logfile(file_name):
-    (conf_file,copied,example_file) = get_config("logging.conf", fallback = False)
+    """
+    Sets the log file for the application.
 
+    Args:
+        file_name (str): The name of the log file.
+
+    Returns:
+        None
+    """
+    # Get the configuration files
+    (conf_file, copied, example_file) = get_config("logging.conf", fallback=False)
+
+    # Create log directory if it does not exist
     log_dir = os.path.join(CONFIG_PATH, 'log').replace('\\', '/')
     check_dir(log_dir)
+
+    # Set the log file path
     log_file = os.path.join(log_dir, file_name).replace('\\', '/')
+
+    # Check if the configuration file already exists
     if os.path.isfile(conf_file):
         print('logging.conf file already exists')
     else:
-     # create a file
-        print('copying logging.conf file in appdata rooming folder')    
+        # Create a configuration file
+        print('copying logging.conf file in appdata rooming folder')
+
+    # Set up the log file
     if conf_file:
         try:
-            log_file = log_file.replace('\\', '/')  # replace each \ with \\
-            logging.config.fileConfig(conf_file, {"logFile":log_file})
-        except:
-            sys.stderr.write(("Could not setup log file %s") % file_name)
+            log_file = log_file.replace('\\', '/')
+            logging.config.fileConfig(conf_file, {"logFile": log_file})
+        except Exception:
+            sys.stderr.write(f"Could not setup log file {file_name}")
 
 def check_dir(path, create = True):
-    """Check if a dir exists, optionally creates if not."""
+    """
+    Check if a directory exists, optionally creates it if not.
+
+    Args:
+        path (str): path to directory
+        create (bool, optional): whether to create the directory if it doesn't exist. Defaults to True.
+
+    Returns:
+        Union[str, bool]: Returns the path if it exists and is a directory. Returns False if it doesn't exist or isn't a directory and the `create` argument is False.
+    """
+    # Check if the directory already exists
     if os.path.exists(path):
-        if os.path.isdir(path):
-            return path
-        else:
-            return False
+        # If it does, return the path if it's a directory, or False if it's not
+        return path if os.path.isdir(path) else False
+
+    # If the directory doesn't exist and we're allowed to create it
     if create:
+        # Replace any backslashes in the path with forward slashes
         path = path.replace('\\', '/')
-        msg = ("Creating directory: '%s'") % (path)
+        # Log that we're creating the directory
+        msg = f"Creating directory: '{path}'"
         print(msg)
         log.info(msg)
+        # Create the directory
         os.makedirs(path)#, "utf-8"))
     else:
+        # If the directory doesn't exist and we're not allowed to create it, return False
         return False
 
+
 def normalizePath(path):
-    "Normalized existing pathes"
-    if os.path.exists(path):
-        return os.path.abspath(path)
-    return path
+    """
+    Normalize an existing path.
+
+    Args:
+        path (str): The path to normalize.
+
+    Returns:
+        str: The normalized path.
+    """
+    return os.path.abspath(path) if os.path.exists(path) else path
             
 ########################################################################
 # application wide consts
@@ -330,107 +358,173 @@ import Charset
 
         
 ########################################################################
-def string_to_bool(string, default=True):
-    """converts a string representation of a boolean value to boolean True or False
-    @param string: (str) the string to convert
-    @param default: value to return if the string can not be converted to a boolean value
+def string_to_bool(string: str, default: bool = True) -> bool:
     """
+    Converts a string representation of a boolean value to a boolean True or False.
+
+    Args:
+        string (str): The string to convert.
+        default (bool, optional): Value to return if the string cannot be converted to a boolean value. Defaults to True.
+
+    Returns:
+        bool: The converted boolean value.
+    """
+    # Convert the string to lowercase for case-insensitive comparison
     string = string.lower()
     if string in ('1', 'true', 't'):
+        # Return True if the string is '1', 'true', or 't'
         return True
     elif string in ('0', 'false', 'f'):
+        # Return False if the string is '0', 'false', or 'f'
         return False
+    # Return the default value if the string cannot be converted to a boolean value
     return default
 
-class Layout(object):
+class Layout:
+    """
+    A class representing the layout of a poker table.
+
+    Attributes:
+    - max (int): the maximum number of seats at the table
+    - width (int): the width of the table
+    - height (int): the height of the table
+    - location (list): a list representing the locations of each seat at the table
+    - hh_seats (list): a list mapping seat numbers to contiguous integers for display purposes
+    - common (tuple): a tuple representing the location of the common cards on the table
+    """
+
     def __init__(self, node):
+        """
+        Initializes a Layout object from an XML node representing the table layout.
 
-        self.max    = int( node.getAttribute('max') )
-        self.width    = int( node.getAttribute('width') )
-        self.height   = int( node.getAttribute('height') )
+        Args:
+        - node (xml.dom.minidom.Element): an XML node representing the table layout
+        """
+        # Extract attributes from the XML node and store them as instance variables
+        attributes = node.attributes
+        self.max = int(attributes['max'].value)
+        self.width = int(attributes['width'].value)
+        self.height = int(attributes['height'].value)
 
-        self.location = []
-        self.hh_seats = []
-        self.location = [None for x in range(self.max+1)] # fill array with max seats+1 empty entries
-        # hh_seats is used to map the seat numbers specified in hand history files (and stored in db) onto 
-        #   the contiguous integerss, 1 to self.max, used to index hud stat_windows (and aw seat_windows) for display
-        #   For most sites these numbers are the same, but some sites (e.g. iPoker) omit seat numbers in hand histories
-        #   for tables smaller than 10-max.   
-        self.hh_seats= [None for x in range(self.max+1)] # fill array with max seats+1 empty entries
+        # Initialize lists to store location and seat data for each seat at the table
+        self.location = [None] * (self.max + 1)
+        self.hh_seats = [None] * (self.max + 1)
 
+        # Iterate over all location nodes in the XML and extract seat and location data
         for location_node in node.getElementsByTagName('location'):
-            hud_seat = location_node.getAttribute('seat')
-            if hud_seat != "":
-                
-                # if hist_seat for this seat number is specified in the layout, then store it in the hh_seats list
-                hist_seat = location_node.getAttribute('hist_seat') #XXX
-                if hist_seat:
-                    self.hh_seats[int( hud_seat )] = int( hist_seat )
-                else:
-                    # .. otherwise just store the original seat number in the hh_seats list 
-                    self.hh_seats[int( hud_seat )] = int( hud_seat )
-                self.location[int( hud_seat )] = (int( location_node.getAttribute('x') ), int( location_node.getAttribute('y')))
-            elif location_node.getAttribute('common') != "":
-                self.common = (int( location_node.getAttribute('x') ), int( location_node.getAttribute('y')))
+            if hud_seat := location_node.getAttribute('seat'):
+                hist_seat = location_node.getAttribute('hist_seat')
+                seat = int(hud_seat)
+                hist_seat = int(hist_seat) if hist_seat else seat
+                self.hh_seats[seat] = hist_seat
+                self.location[seat] = (int(location_node.getAttribute('x')),
+                                        int(location_node.getAttribute('y')))
+            elif location_node.getAttribute('common'):
+                self.common = (int(location_node.getAttribute('x')), int(location_node.getAttribute('y')))
 
     def __str__(self):
+        """Returns a string representation of the object."""
+
+        # Check if the object has a 'name' attribute
         if hasattr(self, 'name'):
             name = str(self.name)
+
+        # Create a string with the object's max, width, and height attributes
+        # If the object has a 'fav_seat' attribute, add it to the string
         temp = "    Layout = %d max, width= %d, height = %d" % (self.max, self.width, self.height)
-        if hasattr(self, 'fav_seat'): temp = temp + ", fav_seat = %d\n" % self.fav_seat
-        else: temp = temp + "\n"
+        if hasattr(self, 'fav_seat'):
+            temp = temp + ", fav_seat = %d\n" % self.fav_seat
+        else:
+            temp = temp + "\n"
+
+        # If the object has a 'common' attribute, add it to the string
         if hasattr(self, "common"):
             temp = temp + "        Common = (%d, %d)\n" % (self.common[0], self.common[1])
-        temp = temp + "        Locations = "
+
+        # Add the 'Locations' attribute to the string
+        temp = f"{temp}        Locations = "
+
+        # Loop through the location attribute and add each seat to the string
         for i in range(1, len(self.location)):
             temp = temp + "%s:(%d,%d) " % (self.hh_seats[i],self.location[i][0],self.location[i][1])
+
+        # Return the final string
         return temp + "\n"
 
+
 class Email(object):
+    """
+    A class representing a connection to a remote mail server.
+    """
+
     def __init__(self, node):
+        """
+        Constructor for Email class.
+
+        Args:
+            node (xml.dom.minidom.Element): The XML element representing the connection.
+        """
         self.node = node
-        self.host= node.getAttribute("host")
-        self.username = node.getAttribute("username")
-        self.password = node.getAttribute("password")
-        self.useSsl = node.getAttribute("useSsl")
-        self.folder = node.getAttribute("folder")
-        self.fetchType = node.getAttribute("fetchType")
+        self.host= node.getAttribute("host")  # Get the host attribute from the XML element.
+        self.username = node.getAttribute("username")  # Get the username attribute from the XML element.
+        self.password = node.getAttribute("password")  # Get the password attribute from the XML element.
+        self.useSsl = node.getAttribute("useSsl")  # Get the useSsl attribute from the XML element.
+        self.folder = node.getAttribute("folder")  # Get the folder attribute from the XML element.
+        self.fetchType = node.getAttribute("fetchType")  # Get the fetchType attribute from the XML element.
+
         
     def __str__(self):
+        """
+        Returns a string representation of the EmailClient object.
+        """
         return "    email\n        fetchType = %s  host = %s\n        username = %s password = %s\n        useSsl = %s folder = %s" \
-            % (self.fetchType, self.host, self.username, self.password, self.useSsl, self.folder) 
-
+            % (self.fetchType, self.host, self.username, self.password, self.useSsl, self.folder)
 
 class Site(object):
     def __init__(self, node):
-        self.site_name    = node.getAttribute("site_name")
-        self.screen_name  = node.getAttribute("screen_name")
-        self.site_path    = normalizePath(node.getAttribute("site_path"))
-        self.HH_path    = normalizePath(node.getAttribute("HH_path"))
-        self.TS_path    = normalizePath(node.getAttribute("TS_path"))
-        self.enabled    = string_to_bool(node.getAttribute("enabled"), default=True)
-        self.aux_enabled  = string_to_bool(node.getAttribute("aux_enabled"), default=True)
+        """
+        Initialize a new instance of the Site class with the given XML node.
+
+        :param node: An XML node representing the site preferences.
+        """
+        # Extract site name, screen name, and paths from the XML node attributes and normalize the paths
+        self.site_name = node.getAttribute("site_name")
+        self.screen_name = node.getAttribute("screen_name")
+        self.site_path = normalizePath(node.getAttribute("site_path"))
+        self.HH_path = normalizePath(node.getAttribute("HH_path"))
+        self.TS_path = normalizePath(node.getAttribute("TS_path"))
+
+        # Extract boolean flags from the XML node attributes
+        self.enabled = string_to_bool(node.getAttribute("enabled"), default=True)
+        self.aux_enabled = string_to_bool(node.getAttribute("aux_enabled"), default=True)
+
+        # Extract and normalize HUD menu position offsets from the XML node attributes
         self.hud_menu_xshift = node.getAttribute("hud_menu_xshift")
         self.hud_menu_xshift = 1 if self.hud_menu_xshift == "" else int(self.hud_menu_xshift)
         self.hud_menu_yshift = node.getAttribute("hud_menu_yshift")
         self.hud_menu_yshift = 1 if self.hud_menu_yshift == "" else int(self.hud_menu_yshift)
-        if node.hasAttribute("TS_path"):
-            self.TS_path    = normalizePath(node.getAttribute("TS_path"))
-        else:
-            self.TS_path    = ''
 
+        # Set TS_path to an empty string if it's not present in the XML node attributes
+        if node.hasAttribute("TS_path"):
+            self.TS_path = normalizePath(node.getAttribute("TS_path"))
+        else:
+            self.TS_path = ''
+
+        # Extract favorite seat mappings from the XML node and store them in a dictionary
         self.fav_seat = {}
         for fav_node in node.getElementsByTagName('fav'):
             max = int(fav_node.getAttribute("max"))
             fav = int(fav_node.getAttribute("fav_seat"))
             self.fav_seat[max] = fav
 
+        # Extract layout set mappings from the XML node and store them in a dictionary
         self.layout_set = {}
         for site_layout_node in node.getElementsByTagName('layout_set'):
             gt = site_layout_node.getAttribute("game_type")
             ls = site_layout_node.getAttribute("ls")
-            self.layout_set[gt]=ls
-                        
+            self.layout_set[gt] = ls
+
+        # Extract email settings from the XML node and store them in a dictionary
         self.emails = {}
         for email_node in node.getElementsByTagName('email'):
             email = Email(email_node)
@@ -438,31 +532,55 @@ class Site(object):
 
 
     def __str__(self):
-        temp = "Site = " + self.site_name + "\n"
+        """
+        Return a string representation of the object.
+
+        Returns:
+            str: A string representation of the object.
+        """
+        # Initialize the temp variable with the site name
+        temp = f"Site = {self.site_name}" + "\n"
+
+        # Iterate over all the attributes of the object
         for key in dir(self):
+            # Ignore special methods
             if key.startswith('__'): continue
+            # Ignore certain attributes
             if key == 'layout_set':  continue
             if key == 'fav_seat':  continue
             if key == 'emails':  continue
             value = getattr(self, key)
+            # Ignore callable attributes
             if callable(value): continue
-            temp = temp + '    ' + key + " = " + str(value) + "\n"
+            # Append the attribute to the temp variable
+            temp = f'{temp}    {key} = {str(value)}' + "\n"
 
+        # Append the email addresses to the temp variable
         for fetchtype in self.emails:
             temp = temp + str(self.emails[fetchtype]) + "\n"
 
+        # Append the game types and layout sets to the temp variable
         for game_type in self.layout_set:
             temp = temp + "    game_type = %s, layout_set = %s\n" % (game_type, self.layout_set[game_type])
 
+        # Append the favorite seats to the temp variable
         for max in self.fav_seat:
             temp = temp + "    max = %s, fav_seat = %s\n" % (max, self.fav_seat[max])
-            
+
+        # Return the final string representation of the object
         return temp
 
 
-class Stat(object):
-    
+
+class Stat(object):  
+    """A class representing a stat."""
+
     def __init__(self, node):
+        """Initializes an instance of the Stat class with the given node object.
+
+        Args:
+            node (xml.dom.minidom.Element): The node object to initialize the Stat instance with.
+        """
         rowcol         = node.getAttribute("_rowcol")                      # human string "(r,c)" values >0)
         self.rows  = node.getAttribute("rows")
         self.cols  = node.getAttribute("cols")
@@ -480,152 +598,301 @@ class Stat(object):
         self.stat_hicolor = node.getAttribute("stat_hicolor")
 
     def __str__(self):
+        """
+        Returns a string representation of the object.
+
+        Returns:
+            str: A string representation of the object.
+        """
+        # Initialize the temporary string with row and column and status name
         temp = "        _rowcol = %s, _stat_name = %s, \n" % (self.rowcol, self.stat_name)
+        # Iterate through all attributes of the object
         for key in dir(self):
-            if key.startswith('__'): continue
-            if key == '_stat_name':  continue
-            if key == '_rowcol':  continue
+            # Skip attributes that start with "__", "_stat_name", and "_rowcol"
+            if key.startswith('__'):
+                continue
+            if key == '_stat_name':
+                continue
+            if key == '_rowcol':
+                continue
+            # Get the value of the current attribute
             value = getattr(self, key)
-            if callable(value): continue
-            temp = temp + '            ' + key + " = " + str(value) + "\n"
+            # Skip callable attributes
+            if callable(value):
+                continue
+            # Add the current attribute and its value to the temporary string
+            temp = f'{temp}            {key} = {str(value)}' + "\n"
 
         return temp
 
 
 class Stat_sets(object):
-    
+    """
+    A class that represents a set of statistics.
+    """
+
     def __init__(self, node):
-        self.name    = node.getAttribute("name")
-        self.rows    = int( node.getAttribute("rows") )
-        self.cols    = int( node.getAttribute("cols") )
-        self.xpad    = node.getAttribute("xpad")
+        """
+        Initializes the Stat_sets object.
+
+        Args:
+        - node: The XML node to initialize from.
+        """
+        # Set the name attribute.
+        self.name = node.getAttribute("name")
+
+        # Set the rows attribute.
+        self.rows = int(node.getAttribute("rows"))
+
+        # Set the cols attribute.
+        self.cols = int(node.getAttribute("cols"))
+
+        # Set the xpad attribute.
+        self.xpad = node.getAttribute("xpad")
         self.xpad = 0 if self.xpad == "" else int(self.xpad)
-        self.ypad    = node.getAttribute("ypad")
+
+        # Set the ypad attribute.
+        self.ypad = node.getAttribute("ypad")
         self.ypad = 0 if self.ypad == "" else int(self.ypad)
 
-        self.stats    = {}
+        # Initialize the stats dictionary.
+        self.stats = {}
+
+        # Loop through all the stat nodes.
         for stat_node in node.getElementsByTagName('stat'):
             stat = Stat(stat_node)
             self.stats[stat.rowcol] = stat # this is the key!
 
-    def __str__(self):
-        temp = "Name = " + self.name + "\n"
-        temp = temp + "    rows = %d" % self.rows
-        temp = temp + " cols = %d" % self.cols
-        temp = temp + "    xpad = %d" % self.xpad
-        temp = temp + " ypad = %d\n" % self.ypad
 
+    def __str__(self):
+        """
+        Returns a string representation of the class instance.
+
+        Returns:
+        - temp (str): A string containing information about the class instance.
+        """
+        temp = f"Name = {self.name}" + "\n"
+        temp = f"{temp}rows = {self.rows}" + " cols = {self.cols}"
+        temp = f"{temp}    xpad = {self.xpad}" + f" ypad = {self.ypad}\n"
+
+        # Loop through the keys in the dictionary of statistics.
         for stat in list(self.stats.keys()):
-            temp = temp + "%s" % self.stats[stat]
+            temp = f"{temp}{self.stats[stat]}"
 
         return temp
 
 
 class Database(object):
     def __init__(self, node):
-        self.db_name   = node.getAttribute("db_name")
-        self.db_desc   = node.getAttribute("db_desc")
-        self.db_server = node.getAttribute("db_server").lower()
-        self.db_ip    = node.getAttribute("db_ip")
-        self.db_user   = node.getAttribute("db_user")
-        self.db_pass   = node.getAttribute("db_pass")
-        self.db_path   = node.getAttribute("db_path")
-        self.db_selected = string_to_bool(node.getAttribute("default"), default=False)
+        """
+        Initializes a new instance of the DatabaseConnection class.
+        :param node: The XML node containing the database connection information.
+        """
+        # Get the database connection information from the XML node.
+        self.db_name   = node.getAttribute("db_name")   # Name of the database.
+        self.db_desc   = node.getAttribute("db_desc")   # Description of the database.
+        self.db_server = node.getAttribute("db_server").lower() # Server name where the database is hosted.
+        self.db_ip     = node.getAttribute("db_ip")     # IP address of the server.
+        self.db_user   = node.getAttribute("db_user")   # Username for the database connection.
+        self.db_pass   = node.getAttribute("db_pass")   # Password for the database connection.
+        self.db_path   = node.getAttribute("db_path")   # Path to the database file.
+        self.db_selected = string_to_bool(node.getAttribute("default"), default=False) # Whether this database is the default.
+
+        # Log the connection information.
         log.debug("Database db_name:'%(name)s'  db_server:'%(server)s'  db_ip:'%(ip)s'  db_user:'%(user)s'  db_pass (not logged)  selected:'%(sel)s'" \
                 % { 'name':self.db_name, 'server':self.db_server, 'ip':self.db_ip, 'user':self.db_user, 'sel':self.db_selected} )
 
     def __str__(self):
-        temp = 'Database = ' + self.db_name + '\n'
+        """
+        Returns a string representation of the object.
+        """
+        # Initialize the string with the database name.
+        temp = f'Database = {self.db_name}' + '\n'
+
+        # Iterate over all attributes of the object.
         for key in dir(self):
+            # Skip any attributes that start with '__'.
             if key.startswith('__'): continue
+
+            # Get the value of the attribute.
             value = getattr(self, key)
+
+            # Skip any attributes that are callable.
             if callable(value): continue
-            temp = temp + '    ' + key + " = " + repr(value) + "\n"
+
+            # Add the attribute name and value to the string.
+            temp = f'{temp}    {key} = {repr(value)}' + "\n"
+
+        # Return the final string.
         return temp
+
 
 
 class Aux_window(object):
     def __init__(self, node):
+        """
+        Initializes the object with attributes from the given XML node.
+        """
+        # Set each attribute of the object to the corresponding XML attribute value.
         for (name, value) in list(node.attributes.items()):
             setattr(self, name, value)
 
     def __str__(self):
-        temp = 'Aux = ' + self.name + "\n"
-        for key in dir(self):
-            if key.startswith('__'): continue
-            value = getattr(self, key)
-            if callable(value): continue
-            temp = temp + '    ' + key + " = " + value + "\n"
+        """
+        Returns a string representation of the object.
+        """
+        # Initialize the string with the name of the object.
+        temp = f'Aux = {self.name}' + "\n"
 
+        # Iterate over all attributes of the object.
+        for key in dir(self):
+            # Skip any attributes that start with '__'.
+            if key.startswith('__'): continue
+
+            # Get the value of the attribute.
+            value = getattr(self, key)
+
+            # Skip any attributes that are callable.
+            if callable(value): continue
+
+            # Add the attribute name and value to the string.
+            temp = f'{temp}    {key} = {value}' + "\n"
+
+        # Return the final string.
         return temp
+
 
 
 class Supported_games(object):
     def __init__(self, node):
+        """
+        Initializes the object with attributes from the given XML node and creates a dictionary of Game_stat_set objects.
+        """
+        # Set each attribute of the object to the corresponding XML attribute value.
         for (name, value) in list(node.attributes.items()):
             setattr(self, name, value)
 
+        # Initialize an empty dictionary to hold the Game_stat_set objects.
         self.game_stat_set = {}
+
+        # Iterate over all game_stat_set nodes and create a Game_stat_set object for each one.
         for game_stat_set_node in node.getElementsByTagName('game_stat_set'):
             gss = Game_stat_set(game_stat_set_node)
             self.game_stat_set[gss.game_type] = gss
 
     def __str__(self):
-        temp = 'Supported_games = ' + self.game_name + "\n"
+        """
+        Returns a string representation of the object.
+        """
+        # Initialize the string with the name of the object.
+        temp = f'Supported_games = {self.game_name}' + "\n"
+
+        # Iterate over all attributes of the object.
         for key in dir(self):
+            # Skip any attributes that start with '__', 'game_stat_set', or 'game_name'.
             if key.startswith('__'): continue
             if key == 'game_stat_set':  continue
             if key == 'game_name': continue
-            value = getattr(self, key)
-            if callable(value): continue
-            temp = temp + '    ' + key + " = " + value + "\n"
 
+            # Get the value of the attribute.
+            value = getattr(self, key)
+
+            # Skip any attributes that are callable.
+            if callable(value): continue
+
+            # Add the attribute name and value to the string.
+            temp = f'{temp}    {key} = {value}' + "\n"
+
+        # Add the string representations of all Game_stat_set objects to the string.
         for gs in self.game_stat_set:
-            temp = temp + "%s" % str(self.game_stat_set[gs])
+            temp = f"{temp}{str(self.game_stat_set[gs])}"
+
+        # Return the final string.
         return temp
+
 
 
 class Layout_set(object):
     def __init__(self, node):
+        """
+        Initializes the object with attributes from the given XML node and creates a dictionary of Layout objects.
+        """
+        # Set each attribute of the object to the corresponding XML attribute value.
         for (name, value) in list(node.attributes.items()):
             setattr(self, name, value)
 
+        # Initialize an empty dictionary to hold the Layout objects.
         self.layout = {}
+
+        # Iterate over all layout nodes and create a Layout object for each one.
         for layout_node in node.getElementsByTagName('layout'):
             lo = Layout(layout_node)
             self.layout[lo.max] = lo
 
     def __str__(self):
-        temp = 'Layout set = ' + self.name + "\n"
+        """
+        Returns a string representation of the object.
+        """
+        # Initialize the string with the name of the object.
+        temp = f'Layout set = {self.name}' + "\n"
+
+        # Iterate over all attributes of the object.
         for key in dir(self):
+            # Skip any attributes that start with '__', 'layout', or 'name'.
             if key.startswith('__'): continue
             if key == 'layout':  continue
             if key == 'name':  continue
-            value = getattr(self, key)
-            if callable(value): continue
-            temp = temp + '    ' + key + " = " + value + "\n"
 
+            # Get the value of the attribute.
+            value = getattr(self, key)
+
+            # Skip any attributes that are callable.
+            if callable(value): continue
+
+            # Add the attribute name and value to the string.
+            temp = f'{temp}    {key} = {value}' + "\n"
+
+        # Add the string representations of all Layout objects to the string.
         for layout in self.layout:
-            temp = temp + "%s" % self.layout[layout]
+            temp = f"{temp}{self.layout[layout]}"
+
+        # Return the final string.
         return temp
+
 
 
 class Game_stat_set(object):
     def __init__(self, node):
+        """
+        Initializes the object with attributes from the given XML node.
+        """
+        # Set the game_type and stat_set attributes of the object to the corresponding XML attribute values.
         self.game_type       = node.getAttribute("game_type")
         self.stat_set        = node.getAttribute("stat_set")
 
     def __str__(self):
+        """
+        Returns a string representation of the object.
+        """
+        # Return a string showing the game_type and stat_set attributes.
         return "      Game Type: '%s' Stat Set: '%s'\n" % (self.game_type, self.stat_set)
 
         
 class HHC(object):
     def __init__(self, node):
+        """
+        Initializes the object with attributes from the given XML node.
+        """
+        # Set the site, converter, and summaryImporter attributes of the object to the corresponding XML attribute values.
         self.site            = node.getAttribute("site")
         self.converter       = node.getAttribute("converter")
         self.summaryImporter = node.getAttribute("summaryImporter")
 
     def __str__(self):
+        """
+        Returns a string representation of the object.
+        """
+        # Return a string showing the site, converter, and summaryImporter attributes.
         return "%s:\tconverter: '%s' summaryImporter: '%s'" % (self.site, self.converter, self.summaryImporter)
 
 

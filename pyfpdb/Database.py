@@ -654,19 +654,15 @@ class Database(object):
         self.printdata = False
         self.resetCache()
         self.resetBulkCache()
-        
+
         if 'day_start' in gen:
             self.day_start = float(gen['day_start'])
-            
+
         self.sessionTimeout = float(self.import_options['sessionTimeout'])
         self.publicDB = self.import_options['publicDB']
 
         # where possible avoid creating new SQL instance by using the global one passed in
-        if sql is None:
-            self.sql = SQL.Sql(db_server = self.db_server)
-        else:
-            self.sql = sql
-
+        self.sql = SQL.Sql(db_server = self.db_server) if sql is None else sql
         if autoconnect:
             # connect to db
             self.do_connect(c)
@@ -682,7 +678,7 @@ class Database(object):
                 log.info("sqlite/:memory: - creating")
                 self.recreate_tables()
                 self.wrongDbVersion = False
-            
+
             self.gtcache    = None       # GameTypeId cache 
             self.tcache     = None       # TourneyId cache
             self.pcache     = None       # PlayerId cache
@@ -703,7 +699,7 @@ class Database(object):
             self.h_date_ndays_ago = 'd000000'  # date N days ago ('d' + YYMMDD) for hero
             self.date_nhands_ago = {}          # dates N hands ago per player - not used yet
 
-            self.saveActions = False if self.import_options['saveActions'] == False else True
+            self.saveActions = self.import_options['saveActions'] != False
 
             if self.is_connected():
                 if not self.wrongDbVersion:
@@ -712,30 +708,51 @@ class Database(object):
     #end def __init__
 
     def dumpDatabase(self):
-        result="fpdb database dump\nDB version=" + str(DB_VERSION)+"\n\n"
+        """
+        Dumps the database into a string.
 
-        tables=self.cursor.execute(self.sql.query['list_tables'])
-        tables=self.cursor.fetchall()
-        for table in (u'Actions', u'Autorates', u'Backings', u'Gametypes', u'Hands', u'Boards', u'HandsActions', u'HandsPlayers', u'HandsStove', u'Files', u'HudCache', u'Sessions', u'SessionsCache', u'TourneysCache',u'Players', u'RawHands', u'RawTourneys', u'Settings', u'Sites', u'TourneyTypes', u'Tourneys', u'TourneysPlayers'):
-            print("table:", table)
-            result+="###################\nTable "+table+"\n###################\n"
-            rows=self.cursor.execute(self.sql.query['get'+table])
-            rows=self.cursor.fetchall()
-            columnNames=self.cursor.description
-            if not rows:
-                result+="empty table\n"
-            else:
+        Returns:
+            str: A string representation of the database dump.
+        """
+        # Initialize the result with the database name and version.
+        result = ["fpdb database dump", f"DB version={DB_VERSION}\n"]
+
+        # Get a list of all tables in the database.
+        tables = [table[0] for table in self.cursor.execute(self.sql.query['list_tables'])]
+
+        # Loop through each table and add its contents to the result.
+        for table in tables:
+            # Add a header for the table.
+            result.append(f"###################\nTable {table}\n###################\n")
+
+            # Get all rows for the table.
+            if rows := self.cursor.execute(
+                self.sql.query.get(f'get{table}', f'SELECT * FROM {table}')
+            ).fetchall():
+                # Get the column names for the table.
+                columnNames = self.cursor.description
+
+                # Loop through each row and add its columns to the result.
                 for row in rows:
                     for columnNumber in range(len(columnNames)):
-                        if columnNames[columnNumber][0]=="importTime":
-                            result+=("  "+columnNames[columnNumber][0]+"=ignore\n")
-                        elif columnNames[columnNumber][0]=="styleKey":
-                            result+=("  "+columnNames[columnNumber][0]+"=ignore\n")
+                        # Add a special message for certain columns.
+                        if columnNames[columnNumber][0] in [
+                            "importTime",
+                            "styleKey",
+                        ]:
+                            result.append(f"  {columnNames[columnNumber][0]}=ignore\n")
                         else:
-                            result+=("  "+columnNames[columnNumber][0]+"="+str(row[columnNumber])+"\n")
-                    result+="\n"
-            result+="\n"
-        return result
+                            result.append(f"  {columnNames[columnNumber][0]}={row[columnNumber]}\n")
+                    result.append("\n")
+            else:
+                # Add a message for empty tables.
+                result.append("empty table\n")
+            result.append("\n")
+
+        # Join all elements of the result into a single string.
+        return "".join(result)
+
+
     #end def dumpDatabase
 
     # could be used by hud to change hud style

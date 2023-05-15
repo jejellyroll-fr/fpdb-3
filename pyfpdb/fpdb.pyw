@@ -31,7 +31,7 @@ import sys
 import threading
 import traceback
 from functools import partial
-
+import time
 
 # Third-party modules
 import numpy
@@ -103,7 +103,6 @@ class fpdb(QMainWindow):
 
     def __init__(self):
         super().__init__()
-
         # Sets the window icon
         self.setWindowIcon(QIcon('tribal.jpg'))
 

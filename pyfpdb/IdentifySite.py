@@ -540,23 +540,48 @@ class IdentifySite(object):
         return False
 
     def getFilesForSite(self, sitename, ftype):
-        l = []
-        for name, f in list(self.filelist.items()):
-            if f.ftype != None and f.site.name == sitename and f.ftype == "hh":
-                l.append(f)
-        return l
+        """
+        Returns a list of files that belong to the given site and have the given file type.
+
+        Args:
+            sitename (str): The name of the site to search for files.
+            ftype (str): The file type to search for.
+
+        Returns:
+            list: A list of File objects that belong to the given site and have the given file type.
+        """
+        return [
+            f
+            for f in self.filelist.values()
+            if f.ftype is not None and f.site.name == sitename and f.ftype == "hh"
+        ]
+
+
 
     def fetchGameTypes(self):
-        for name, f in list(self.filelist.items()):
-            if f.ftype != None and f.ftype == "hh":
-                try: #TODO: this is a dirty hack. Borrowed from fpdb_import
+        """
+        Fetches the game types from the file list.
+
+        Returns:
+            None.
+        """
+        for name, f in self.filelist.items():
+            # Only process files with type "hh"
+            if f.ftype and f.ftype == "hh":
+                try:
+                    # Convert name to string, replacing any unrecognized characters with "?"
                     name = str(name, "utf8", "replace")
-                except TypeError:
-                    log.error(TypeError)
+                except TypeError as e:
+                    log.error(e)
+                # Import the module that contains the filter class specified in f.site.filter_name
                 mod = __import__(f.site.hhc_fname)
+                # Get the filter class from the module
                 obj = getattr(mod, f.site.filter_name, None)
-                hhc = obj(self.config, in_path = name, sitename = f.site.hhc_fname, autostart = False)
+                # Create an instance of the filter class
+                hhc = obj(self.config, in_path=name, sitename=f.site.hhc_fname, autostart=False)
+                # Read the file contents
                 if hhc.readFile():
+                    # Determine the game type from the file contents
                     f.gametype = hhc.determineGameType(hhc.whole_file)
 
 def main(argv=None):
