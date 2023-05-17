@@ -804,16 +804,34 @@ class Importer:
     #END Run import on updated files, then store latest update time. Called from GuiAutoImport.py (cut in little functions)
 
     def _remove_marked_files(self):
+        """
+        Removes files from `self.filelist` that have been marked for removal in `self.removeFromFileList`.
+
+        :return: None
+        """
         for file in self.removeFromFileList:
+            # Check if the file is in the list of files to be removed
             if file in self.filelist:
+                # Delete the file from the list
                 del self.filelist[file]
+        # Clear the list of files to be removed
         self.removeFromFileList = {}
 
+
     def _rollback_and_run_post_import(self):
+        """
+        Rollback the database transaction and run the post-import function.
+
+        This function first rolls back any changes made to the database during the current
+        transaction, then runs the `runPostImport` function to perform any necessary
+        post-import tasks.
+
+        """
+        # Roll back any changes made during the current transaction
         self.database.rollback()
+
+        # Run the post-import function
         self.runPostImport()
-
-
 
     def _import_hh_file(self, fpdbfile):
         """Function for actual import of a hh file
