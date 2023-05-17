@@ -21,6 +21,8 @@ from __future__ import division
 
 
 
+import importlib
+import itertools
 from past.utils import old_div
 #import L10n
 #_ = L10n.get_translation()
@@ -529,7 +531,7 @@ class Importer:
         # Reset the clean flag
         self.database.resetClean()
 
-
+    #TODO rewrite this function
     def importFiles(self, q):
         """
         Read filenames in self.filelist and pass to despatcher.
@@ -833,6 +835,7 @@ class Importer:
         # Run the post-import function
         self.runPostImport()
 
+#TODO rewrite this function
     def _import_hh_file(self, fpdbfile):
         """Function for actual import of a hh file
             This is now an internal function that should not be called directly."""
@@ -840,7 +843,7 @@ class Importer:
         (stored, duplicates, partial, skipped, errors, ttime) = (0, 0, 0, 0, 0, time.time())
 
         # Load filter, process file, pass returned filename to import_fpdb_file
-        log.info(("Converting %s") % fpdbfile.path)
+        log.info(f"Converting {fpdbfile.path}")
             
         filter_name = fpdbfile.site.filter_name
         mod = __import__(fpdbfile.site.hhc_fname)
@@ -970,12 +973,24 @@ class Importer:
         ttime = time.time() - ttime
         return (stored, duplicates, partial, skipped, errors, ttime)
     
-    def autoSummaryGrab(self, force = False):
+    def autoSummaryGrab(self, force=False):
+        """
+        Fetches summary files for all files in the filelist whose types are "both" and whose mtime is older than 5 minutes (or if force is True).
+
+        Args:
+        - force (bool): whether to force the fetching of summary files regardless of mtime
+
+        Returns:
+        - None
+        """
         for f, fpdbfile in list(self.filelist.items()):
             stat_info = os.stat(f)
             if ((time.time() - stat_info.st_mtime)> 300 or force) and fpdbfile.ftype == "both":
                 self._import_summary_file(fpdbfile)
                 fpdbfile.ftype = "hh"
+
+
+    #TODO rewrite this function
 
     def _import_summary_file(self, fpdbfile):
         (stored, duplicates, partial, skipped, errors, ttime) = (0, 0, 0, 0, 0, time.time())
@@ -1006,11 +1021,33 @@ class Importer:
         ttime = time.time() - ttime
         return (stored - errors - partial, duplicates, partial, skipped, errors, ttime)
 
+
+
+
     def progressNotify(self):
-        "A callback to the interface while events are pending"
-        QCoreApplication.processEvents()
+        """
+        A callback to the interface while events are pending.
+
+        This function processes events in the event queue of the main thread. 
+        This is useful when a long-running operation is being performed in the background, 
+        and you want the GUI to remain responsive and show progress to the user.
+        """
+        QCoreApplication.processEvents()  # Processes all pending events for the calling thread.
+
             
     def readFile(self, obj, filename, site):
+        """
+        Reads a file and returns a list of summary texts.
+
+        Args:
+            obj: the object containing the `summaries_from_excel` and `readFile` methods
+            filename (str): the name of the file to read
+            site (str): the name of the site the file is from
+
+        Returns:
+            A list of summary texts.
+
+        """
         if filename.endswith('.xls') or filename.endswith('.xlsx') and xlrd:
             obj.hhtype = "xls"
             if site=='PokerStars':
@@ -1033,16 +1070,16 @@ class Importer:
                 if len(summaryTexts) > 1 and len(summaryTexts[0]) <= 150:
                     del summaryTexts[0]
                     log.warn(("TourneyImport: Removing text < 150 characters from start of file"))
-                    
+
                 # Sometimes the summary files also have a footer
                 # Remove the last entry if it has < 100 characters   
                 if len(summaryTexts) > 1 and len(summaryTexts[-1]) <= 100:
                     summaryTexts.pop()
                     log.warn(("TourneyImport: Removing text < 100 characters from end of file"))
         return summaryTexts 
+
         
 class ImportProgressDialog(QDialog):
-
     """
     Popup window to show progress
     
@@ -1052,47 +1089,82 @@ class ImportProgressDialog(QDialog):
     """
     
     def __del__(self):
-        
+        """Destructor that destroys the progress bar if it exists."""
         if self.parent:
+            # Destroy the progress bar
             self.progress.destroy()
 
 
     def progress_update(self, filename, handcount):
-            
+        """
+        Updates the progress bar and displays progress information.
+
+        Args:
+            filename (str): The name of the file being processed.
+            handcount (int): The number of hands in the file.
+
+        Returns:
+            None
+        """
         self.fraction += 1
-        #update total if fraction exceeds expected total number of iterations
+
+        # Update total if fraction exceeds expected total number of iterations
         if self.fraction > self.total:
             self.total = self.fraction
-            self.pbar.setRange(0,self.total)
-        
+            self.pbar.setRange(0, self.total)
+
         self.pbar.setValue(self.fraction)
-        
-        self.handcount.setText(("Database Statistics") + " - " + ("Number of Hands:") + " " + handcount)
-        
+
+        # Set the text for the handcount label
+        self.handcount.setText(
+            f"Database Statistics - Number of Hands: {str(handcount)}"
+        )
+
         now = datetime.datetime.now()
         now_formatted = now.strftime("%H:%M:%S")
-        self.progresstext.setText(now_formatted + " - " + ("Importing") + " " +filename+"\n")
+
+        # Set the progress text label
+        self.progresstext.setText(f"{now_formatted} - Importing {filename}" + "\n")
 
 
     def __init__(self, total, parent):
+        """
+        Initializes the ImportDialog.
+
+        Args:
+            total (int): Total number of items to import.
+            parent (QWidget): Parent widget of the dialog.
+        """
+        super().__init__(parent)
+
         if parent is None:
+            # If no parent is provided, return immediately
             return
+
+        # Initialize the QDialog with the parent
         QDialog.__init__(self, parent)
-        
+
+        # Set default values for fraction and total
         self.fraction = 0
         self.total = total
+
+        # Set the window title
         self.setWindowTitle(("Importing"))
 
+        # Set the layout to a QVBoxLayout
         self.setLayout(QVBoxLayout())
 
+        # Add a progress bar to the layout
         self.pbar = QProgressBar()
         self.pbar.setRange(0, total)
         self.layout().addWidget(self.pbar)
 
+        # Add a QLabel for displaying the handcount
         self.handcount = QLabel()
         self.handcount.setWordWrap(True)
         self.layout().addWidget(self.handcount)
 
+        # Add a QLabel for displaying the progress text
         self.progresstext = QLabel()
         self.progresstext.setWordWrap(True)
         self.layout().addWidget(self.progresstext)
