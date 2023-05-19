@@ -8,7 +8,7 @@ from IdentifySite import IdentifySite
 import Configuration
 import sys
 import time
-import WinamaxToFpdb, BetfairToFpdb, BetOnlineToFpdb, BovadaToFpdb, CakeToFpdb, GGPokerToFpdb, iPokerToFpdb, KingsClubToFpdb, MergeToFpdb, PacificPokerToFpdb
+import WinamaxToFpdb, BetfairToFpdb, BetOnlineToFpdb, BovadaToFpdb, CakeToFpdb, GGPokerToFpdb, iPokerToFpdb,KingsClubToFpdb, MergeToFpdb, PacificPokerToFpdb, PartyPokerToFpdb, WinningToFpdb, PokerStarsToFpdb
 import chardet
 
 
@@ -77,7 +77,10 @@ def anonymize_hand_history(file_path, hero_name):
         "iPokerToFpdb": iPokerToFpdb.iPoker.re_PlayerInfo,
         "KingsClubToFpdb": KingsClubToFpdb.KingsClub.re_PlayerInfo,
         "MergeToFpdb": MergeToFpdb.Merge.re_PlayerInfo,
-        "PacificPokerToFpdb": PacificPokerToFpdb.PacificPoker.re_PlayerInfo
+        "PacificPokerToFpdb": PacificPokerToFpdb.PacificPoker.re_PlayerInfo,
+        "PartyPokerToFpdb": PartyPokerToFpdb.PartyPoker.re_PlayerInfo,
+        "PokerStarsToFpdb": PokerStarsToFpdb.PokerStars.re_PlayerInfo,
+        "WinningToFpdb": WinningToFpdb.Winning.re_PlayerInfo1
     }
 
     regex = patterns.get(filter_name)
