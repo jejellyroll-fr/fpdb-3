@@ -556,8 +556,6 @@ class IdentifySite(object):
             if f.ftype is not None and f.site.name == sitename and f.ftype == "hh"
         ]
 
-
-
     def fetchGameTypes(self):
         """
         Fetches the game types from the file list.
@@ -585,36 +583,50 @@ class IdentifySite(object):
                     f.gametype = hhc.determineGameType(hhc.whole_file)
 
 def main(argv=None):
+    """
+    Entry point of the script. Parses command line arguments, sets up logging, reads configuration, scans input directory,
+    identifies sites and their respective files, and prints out the results to the console.
+    :param argv: list of command line arguments
+    :return: None
+    """
     if argv is None:
         argv = sys.argv[1:]
 
+    # Set up logging
     Configuration.set_logfile("fpdb-log.txt")
-    config = Configuration.Config(file = "HUD_config.test.xml")
+
+    # Read configuration
+    config = Configuration.Config(file="HUD_config.test.xml")
+
+    # Scan input directory
     in_path = os.path.abspath('regression-test-files')
     IdSite = IdentifySite(config)
     start = time()
     IdSite.scan(in_path)
     print('duration', time() - start)
 
+    # Print out list of sites
     print("\n----------- SITE LIST -----------")
     for sid, site in list(IdSite.sitelist.items()):
-        print("%2d: Name: %s HHC: %s Summary: %s" %(sid, site.name, site.filter_name, site.summary))
+        print("%2d: Name: %s HHC: %s Summary: %s" % (sid, site.name, site.filter_name, site.summary))
     print("----------- END SITE LIST -----------")
 
+    # Print out list of files identified for each site
     print("\n----------- ID REGRESSION FILES -----------")
     count = 0
     for f, ffile in list(IdSite.filelist.items()):
         tmp = ""
-        tmp += ": Type: %s " % ffile.ftype
+        tmp += f": Type: {ffile.ftype} "
         count += 1
         if ffile.ftype == "hh":
-            tmp += "Conv: %s" % ffile.site.hhc_fname
+            tmp += f"Conv: {ffile.site.hhc_fname}"
         elif ffile.ftype == "summary":
-            tmp += "Conv: %s" % ffile.site.summary
+            tmp += f"Conv: {ffile.site.summary}"
         print(f, tmp)
     print(count, 'files identified')
     print("----------- END ID REGRESSION FILES -----------")
 
+    # Print out list of files identified for a single site
     print("----------- RETRIEVE FOR SINGLE SITE -----------")
     IdSite.getFilesForSite("PokerStars", "hh")
     print("----------- END RETRIEVE FOR SINGLE SITE -----------")

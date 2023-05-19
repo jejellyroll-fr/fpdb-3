@@ -1,12 +1,26 @@
-from py2puml import parser, writer
+import subprocess
 
-input_file = 'importer.py'
-output_file = 'importer.uml'
+# Set the path to the Python module
+MODULE_PATH = "/Users/jdenis/fpdb-3/pyfpdb/*.py"
 
-with open(input_file, 'r') as f:
-    source_code = f.read()
-model = parser.parse_string(source_code)
+# Set the path to the source root directory
+SOURCE_DIR = "/Users/jdenis/fpdb-3/pyfpdb"
 
-with open(output_file, 'w') as f:
-    writer.write(model, f)
+# Define the Pyreverse command to generate the PlantUML output
+COMMAND = f"pyreverse -o puml -p FPDB --source {SOURCE_DIR} {MODULE_PATH}"
+
+# Execute the Pyreverse command and capture its output
+output_bytes = subprocess.check_output(COMMAND, shell=True)
+
+# Decode the output bytes into a string
+output_string = output_bytes.decode()
+
+# Print the PlantUML output
+print(output_string)
+
+
+
+
+
+
 
