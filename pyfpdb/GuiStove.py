@@ -15,17 +15,6 @@
 #along with this program. If not, see <http://www.gnu.org/licenses/>.
 #In the "official" distribution you can find the license in agpl-3.0.txt.
 
-from __future__ import print_function
-
-#import L10n
-#_ = L10n.get_translation()
-
-from PyQt5.QtCore import QCoreApplication, QSortFilterProxyModel, Qt
-from PyQt5.QtGui import (QPainter, QPixmap, QStandardItem, QStandardItemModel)
-from PyQt5.QtWidgets import (QApplication, QFrame, QMenu,QMessageBox,QWidget,
-                             QProgressDialog, QScrollArea, QSplitter,
-                             QTableView, QVBoxLayout, QComboBox,QHBoxLayout,QLabel, QLineEdit, QPushButton,QGridLayout,QWidget,QTabWidget)
-
 
 import os
 import sys
@@ -35,11 +24,18 @@ import Charset
 
 DEBUG = False
 
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTabWidget, QComboBox, \
+    QFrame, QTableWidget, QLineEdit
+from PyQt5.QtGui import QIcon
+import sys
+
+
 class GuiStove(QWidget):
-    def __init__(self, config, parent):
-        QWidget.__init__(self, parent)
+    def __init__(self, config, parent, debug=True):
         """Constructor for GuiStove"""
-        #self.stove = Stove.Stove()
+        super().__init__()
+
+        #self.stove = Stove()
         self.ev = None
         self.boardtext = ""
         self.herorange = ""
@@ -47,243 +43,221 @@ class GuiStove(QWidget):
         self.conf = config
         self.parent = parent
 
-        #self.mainHBox = gtk.HBox(False, 0)
-        self.mainHBox = QVBoxLayout()
-        # hierarchy:  self.mainHBox / self.notebook
+        self.mainHBox = QHBoxLayout()
 
-        #self.notebook = gtk.Notebook()
-        self.notebook = QTabWidget()         
-        # self.notebook.set_tab_pos(gtk.POS_TOP)
-        # self.notebook.set_show_tabs(True)
-        # self.notebook.set_show_border(True)
-        self.notebook.setStyleSheet('''
-        QTabWidget::right-corner {
-            width: 60px;
-            height: 25px;
-            subcontrol-position: left bottom;
-        }''')
+        # hierarchy: self.mainHBox / self.notebook
+
+        self.notebook = QTabWidget()
+        self.notebook.setTabPosition(QTabWidget.TabPosition.North)
+        self.notebook.setTabsClosable(True)
+        self.notebook.setMovable(True)
+
         self.createFlopTab()
-        
         self.createStudTab()
-       
         self.createDrawTab()
-             
-
 
         self.mainHBox.addWidget(self.notebook)
 
-        #self.mainHBox.show_all()
+        self.setLayout(self.mainHBox)
 
-        if DEBUG == False:
-            warning_string = ("Stove is a GUI mockup of a EV calculation page, and completely non functional.") + "\n "
-            warning_string += ("Unless you are interested in developing this feature, please ignore this page.") + "\n "
-            warning_string += ("If you are interested in developing the code further see GuiStove.py and Stove.py.") + "\n "
-            warning_string += ("Thank you")
+        self.setWindowTitle("GuiStove")
+        self.setWindowIcon(QIcon("path/to/icon"))
+
+        self.show()
+
+        if not debug:
+            warning_string = _("Stove is a GUI mockup of a EV calculation page, and completely non functional.") + "\n "
+            warning_string += _("Unless you are interested in developing this feature, please ignore this page.") + "\n "
+            warning_string += _("If you are interested in developing the code further see GuiStove.py and Stove.py.") + "\n "
+            warning_string += _("Thank you")
             self.warning_box(warning_string)
 
 
-    # def warning_box(self, str, diatitle=("FPDB WARNING")):
-    #     diaWarning = gtk.Dialog(title=diatitle, parent=self.parent, flags=gtk.DIALOG_DESTROY_WITH_PARENT, buttons=(gtk.STOCK_OK,gtk.RESPONSE_OK))
 
-    #     label = gtk.Label(str)
-    #     diaWarning.vbox.add(label)
-    #     label.show()
 
-    #     response = diaWarning.run()
-    #     diaWarning.destroy()
-    #     return response
-    def warning_box(self, string, diatitle=("FPDB WARNING")):
-        return QMessageBox(QMessageBox.Warning, diatitle, string).exec_()
+
+
+
+
+
+    def warning_box(self, text, title="FPDB WARNING"):
+        dialog = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, title, text, parent=self.parent)
+        dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        dialog.setDefaultButton(QtWidgets.QMessageBox.Ok)
+        return dialog.exec_()
+
+
 
     def get_active_text(self, combobox):
-        #model = combobox.get_model()
-        model = QComboBox()
-        #active = combobox.get_active()
-        active = QComboBox()
-        if active < 0:
-            return None
-        return model[active][0]
+        model = combobox.model()
+        active = combobox.currentIndex()
+        return None if active < 0 else model.item(active, 0).text()
+
 
     def create_combo_box(self, strings):
         combobox = QComboBox()
         for label in strings:
             combobox.addItem(label)
-        combobox.activated(0)
+        combobox.setCurrentIndex(0)
         return combobox
+
+    def createStudTab(self):
+        tab_title = "Stud"
+        label = QLabel(tab_title)
+
+        widget = QWidget()
+        stud_layout = QVBoxLayout(widget)
+        self.notebook.addTab(widget, tab_title)
+
+        # Add your desired widgets and layout for the Stud tab
+        # Example: Add a label and a button
+        stud_label = QLabel("This is the Stud tab")
+        stud_button = QPushButton("Click me")
+
+        stud_layout.addWidget(stud_label)
+        stud_layout.addWidget(stud_button)
+
+
 
     def createDrawTab(self):
         tab_title = ("Draw")
-        label = QLabel()
-        label.setText(tab_title)
+        label = QLabel(tab_title)
 
-        #ddbox = gtk.VBox(False, 0)
-        ddbox = QHBoxLayout()
+        ddbox = QVBoxLayout()
         self.notebook.addTab(ddbox, label)
 
-    def createStudTab(self):
-        tab_title = ("Stud")
-        label = QLabel()
-        label.setText(tab_title)
+    def createDrawTab(self):
+        tab_title = "Draw"
 
-        #ddbox = gtk.VBox(False, 0)
-        ddbox = QHBoxLayout()
-        self.notebook.addTab(ddbox, label)
+        widget = QWidget()
+        ddbox = QVBoxLayout(widget)
+        self.notebook.addTab(widget, tab_title)
 
     def createFlopTab(self):
-        # hierarchy: hbox / ddbox     / ddhbox / Label + flop_games_cb | label + players_cb
-        #                 / gamehbox / in_frame / table /
-        #                            / out_frame
 
-        tab_title = "Flop"
-        label = QLabel()
-        label.setText(tab_title)
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
 
-        ddbox = QHBoxLayout()
-        
-        self.notebook.addTab(self, label)
-
+        # Top row: Combo boxes
         ddhbox = QHBoxLayout()
-        gamehbox = QHBoxLayout()
+        self.layout.addLayout(ddhbox)
 
-        ddbox.addWidget(ddhbox)
-        ddbox.addWidget(gamehbox)
+        games = ["Holdem", "Omaha", "Omaha 8"]
+        players = ["2", "3", "4", "5", "6", "7", "8", "9", "10"]
 
-        # Combo boxes in the top row
+        flop_games_cb = QComboBox()
+        flop_games_cb.addItems(games)
+        players_cb = QComboBox()
+        players_cb.addItems(players)
 
-        games =   [ "Holdem", "Omaha", "Omaha 8", ]
-        players = [ "2", "3", "4", "5", "6", "7", "8", "9", "10" ]
-        flop_games_cb = self.create_combo_box(games)
-        players_cb = self.create_combo_box(players)
-
-        #label = gtk.Label(("Gametype")+":")
-        label = QLabel()
-        label.setText(("Gametype")+":")
+        label = QLabel("Gametype:")
         ddhbox.addWidget(label)
         ddhbox.addWidget(flop_games_cb)
-        #label = gtk.Label(("Players")+":")
-        label = QLabel()
-        label.setText(("Players")+":")
+        label = QLabel("Players:")
         ddhbox.addWidget(label)
         ddhbox.addWidget(players_cb)
 
         # Frames for Stove input and output
+        gamehbox = QHBoxLayout()
+        self.layout.addLayout(gamehbox)
 
-        in_frame = QFrame(("Input:"))
-        out_frame = QFrame(("Output:"))
+        in_frame = QFrame()
+        in_frame.setFrameShape(QFrame.Box)
+        in_frame.setFrameShadow(QFrame.Raised)
+        out_frame = QFrame()
+        out_frame.setFrameShape(QFrame.Box)
+        out_frame.setFrameShadow(QFrame.Raised)
 
         gamehbox.addWidget(in_frame)
         gamehbox.addWidget(out_frame)
 
         self.outstring = """
 No board given. Using Monte-Carlo simulation...
-Enumerated 2053443 possible plays.
-Your hand: (Ad Ac)
-Against the range: {
-                    AhAd, AhAs, AdAs, KhKd, KhKs, 
-                    KhKc, KdKs, KdKc, KsKc, QhQd, 
-                    QhQs, QhQc, QdQs, QdQc, QsQc, 
-                    JhJd, JhJs, JhJc, JdJs, JdJc, 
-                    JsJc
-                   }
-
-  Win       Lose       Tie
- 69.91%    15.83%    14.26%
-
 """
-        #self.outputlabel = gtk.Label(self.outstring)
-        self.outputlabel = QLabel()
-        label.setText(self.outstring)
-        out_frame.addWidget(self.outputlabel)
+        self.outputlabel = QLabel(self.outstring)
+        out_frame.layout = QVBoxLayout(out_frame)
+        out_frame.layout.addWidget(self.outputlabel)
+        out_frame.setLayout(out_frame.layout)
 
         # Input Frame
-        #table = gtk.Table(4, 5, True)
-        table = QGridLayout()
-        #label = gtk.Label(("Board:"))
-        label = QLabel()
-        label.setText("Board:")
-        #self.board = gtk.Entry()
+        table = QTableWidget(4, 5)
+        table.setHorizontalHeaderLabels(["Board:", "", "", "", ""])
         self.board = QLineEdit()
-        #self.board.connect("changed", self.set_board_flop, self.board)
 
-        #btn1 = gtk.Button()
         btn1 = QPushButton()
-        #btn1.set_image(gtk.image_new_from_stock(gtk.STOCK_INDEX, gtk.ICON_SIZE_BUTTON))
-        #btn.connect('clicked', self._some_function, arg)
-        # table.attach(label, 0, 1, 0, 1, xoptions=gtk.SHRINK, yoptions=gtk.SHRINK)
-        # table.attach(self.board, 1, 2, 0, 1, xoptions=gtk.SHRINK, yoptions=gtk.SHRINK)
-        # table.attach(btn1, 2, 3, 0, 1, xoptions=gtk.SHRINK, yoptions=gtk.SHRINK)
+        btn1.setIcon(QIcon.fromTheme("index"))
 
+        table.setCellWidget(0, 1, self.board)
+        table.setCellWidget(0, 2, btn1)
 
-        #label = gtk.Label(("Player1:"))
-        label = QLabel()
-        label.setText("Player1:")
-        #self.p1_board = gtk.Entry()
         self.p1_board = QLineEdit()
-        #self.p1_board.connect("changed", self.set_hero_cards_flop, self.p1_board)
-        #btn2 = gtk.Button()
         btn2 = QPushButton()
-        #btn2.set_image(gtk.image_new_from_stock(gtk.STOCK_INDEX, gtk.ICON_SIZE_BUTTON))
-        #btn.connect('clicked', self._some_function, arg)
-        #btn3 = gtk.Button()
+        btn2.setIcon(QIcon.fromTheme("index"))
         btn3 = QPushButton()
-        #btn3.set_image(gtk.image_new_from_stock(gtk.STOCK_INDEX, gtk.ICON_SIZE_BUTTON))
-        #btn.connect('clicked', self._some_function, arg)
-        # table.attach(label, 0, 1, 1, 2, xoptions=gtk.SHRINK, yoptions=gtk.SHRINK)
-        # table.attach(self.p1_board, 1, 2, 1, 2, xoptions=gtk.SHRINK, yoptions=gtk.SHRINK)
-        # table.attach(btn2, 2, 3, 1, 2, xoptions=gtk.SHRINK, yoptions=gtk.SHRINK)
-        # table.attach(btn3, 3, 4, 1, 2, xoptions=gtk.SHRINK, yoptions=gtk.SHRINK)
+        btn3.setIcon(QIcon.fromTheme("index"))
 
+        table.setCellWidget(1, 0, QLabel("Player1:"))
+        table.setCellWidget(1, 1, self.p1_board)
+        table.setCellWidget(1, 2, btn2)
+        table.setCellWidget(1, 3, btn3)
 
-        #label = gtk.Label(("Player2:"))
-        label = QLabel()
-        label.setText("Player2:")
         self.p2_board = QLineEdit()
-        #self.p2_board.connect("changed", self.set_villain_cards_flop, self.p2_board)
         btn4 = QPushButton()
-        #btn4.set_image(gtk.image_new_from_stock(gtk.STOCK_INDEX, gtk.ICON_SIZE_BUTTON))
-        #btn.connect('clicked', self._some_function, arg)
+        btn4.setIcon(QIcon.fromTheme("index"))
         btn5 = QPushButton()
-        #btn5.set_image(gtk.image_new_from_stock(gtk.STOCK_INDEX, gtk.ICON_SIZE_BUTTON))
-        #btn.connect('clicked', self._some_function, arg)
-        # table.attach(label, 0, 1, 2, 3, xoptions=gtk.SHRINK, yoptions=gtk.SHRINK)
-        # table.attach(self.p2_board, 1, 2, 2, 3, xoptions=gtk.SHRINK, yoptions=gtk.SHRINK)
-        # table.attach(btn4, 2, 3, 2, 3, xoptions=gtk.SHRINK, yoptions=gtk.SHRINK)
-        # table.attach(btn5, 3, 4, 2, 3, xoptions=gtk.SHRINK, yoptions=gtk.SHRINK)
-        
-        btn6 = QPushButton()
-        btn6.setText("Results")
-        btn6.clicked.connect(self.update_flop_output_pane)
-        #table.attach(btn6, 0, 1, 3, 4, xoptions=gtk.SHRINK, yoptions=gtk.SHRINK)
+        btn5.setIcon(QIcon.fromTheme("index"))
 
-        in_frame.addWidget(table)
+        table.setCellWidget(2, 0, QLabel("Player2:"))
+        table.setCellWidget(2, 1, self.p2_board)
+        table.setCellWidget(2, 2, btn4)
+        table.setCellWidget(2, 3, btn5)
+
+        btn6 = QPushButton("Results")
+        btn6.clicked.connect(self.update_flop_output_pane)
+
+        table.setCellWidget(3, 0, btn6)
+
+        in_frame.layout = QVBoxLayout(in_frame)
+        in_frame.layout.addWidget(table)
+        in_frame.setLayout(in_frame.layout)
+
+
+
 
     def set_output_label(self, string):
         self.outputlabel.setText(string)
 
+
     def set_board_flop(self, caller, widget):
-        print (("DEBUG:") + " " + ("called") + " set_board_flop: '%s' '%s'" % (caller ,widget))
-        self.boardtext = QWidget()
+        debug_msg = f"DEBUG: called set_board_flop: '{caller}' '{widget}'"
+        print(debug_msg)
+        self.boardtext = widget.get_text()
+
+    def tab_changed(self, index):
+        # Get the current tab index and perform any necessary actions
+        print("Tab changed to index:", index)
 
     def set_hero_cards_flop(self, caller, widget):
-        print (("DEBUG:") + " " + ("called") + " set_hero_cards_flop")
-        self.herorange = QWidget()
+        print(("DEBUG:") + " " + ("called") + " set_hero_cards_flop")
+        self.herorange = widget.get_text()
 
-    def set_villain_cards_flop(self, caller, widget):
-        print (("DEBUG:") + " " + ("called") + " set_villain_cards_flop")
-        self.villainrange = QWidget()
+
+    def set_villain_cards_flop(self, widget):
+        print(("DEBUG:") + " " + ("called") + " set_villain_cards_flop")
+        self.villainrange = widget.text()
 
     def update_flop_output_pane(self, caller, widget):
         print (("DEBUG:") + " " + ("called") + " update_flop_output_pane")
 #         self.stove.set_board_string(self.boardtext)
 #         self.stove.set_hero_cards_string(self.herorange)
 #         self.stove.set_villain_range_string(self.villainrange)
-        # self.stove.set_board_string(self.board.get_text())
-        # self.stove.set_hero_cards_string(self.p1_board.get_text())
-        # self.stove.set_villain_range_string(self.p2_board.get_text())
-        # print (("DEBUG:") + ("odds_for_range"))
-        # self.ev = Stove.odds_for_range(self.stove)
-        # print (("DEBUG:") + " " + ("set_output_label"))
-        # self.set_output_label(self.ev.output)
+        self.stove.set_board_string(self.board.get_text())
+        self.stove.set_hero_cards_string(self.p1_board.get_text())
+        self.stove.set_villain_range_string(self.p2_board.get_text())
+        print (("DEBUG:") + ("odds_for_range"))
+        self.ev = Stove.odds_for_range(self.stove)
+        print (("DEBUG:") + " " + ("set_output_label"))
+        self.set_output_label(self.ev.output)
 
 
 
@@ -291,3 +265,9 @@ Against the range: {
         """returns the vbox of this thread"""
         return self.mainHBox
     #end def get_vbox
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    config = {}  # Provide your configuration here
+    parent = None  # Provide the parent widget if applicable, otherwise use None
+    gui_stove = GuiStove(config, parent)
+    sys.exit(app.exec_())

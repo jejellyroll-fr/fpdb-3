@@ -89,35 +89,69 @@ re_Places = re.compile("_[0-9]$")
 # overriding any decimal placements. Copy old ones and recreate the
 # second value in tuple to specified format-
 def __stat_override(decimals, stat_vals):
-    s = '%.*f' % (decimals, 100.0*stat_vals[0])
-    res = (stat_vals[0], s, stat_vals[2],
-            stat_vals[3], stat_vals[4], stat_vals[5])
-    return res
+    """
+    Formats a decimal value from a list of values and returns a tuple of values including the formatted decimal.
+
+    Args:
+    decimals (int): The number of decimal places to format the decimal value to.
+    stat_vals (list): A list of values including the decimal value to format.
+
+    Returns:
+    tuple: A tuple of values including the formatted decimal.
+    """
+
+    # Format the decimal value to the specified number of decimal places
+    formatted_decimal = '%.*f' % (decimals, 100.0 * stat_vals[0])
+
+    # Return a tuple of values that includes the formatted decimal
+    return stat_vals[0], formatted_decimal, stat_vals[2], stat_vals[3], stat_vals[4], stat_vals[5]
 
 
 def do_tip(widget, tip):
+    """
+    Sets the tooltip for the given widget to the specified tip.
+
+    Args:
+        widget: The widget to set the tooltip for.
+        tip (str): The text to display in the tooltip.
+    """
+    # Convert the tip to UTF-8 encoding
     _tip = Charset.to_utf8(tip)
+
+    # Set the tooltip for the widget
     widget.setToolTip(_tip)
 
 
-def do_stat(stat_dict, player = 24, stat = 'vpip', hand_instance = None):
 
-    #hand instance is not needed for many stat functions
-    #so this optional parameter will be stored in a global
-    #to avoid having to conditionally pass the extra value
-    global _global_hand_instance
+import re
+
+def do_stat(stat_dict, player=24, stat='vpip', hand_instance=None):
+    """
+    Calculates a specific statistic for a player.
+
+    Args:
+        stat_dict (dict): A dictionary containing the statistics for the given player.
+        player (int): The player number for whom the statistics are being calculated. Default is 24.
+        stat (str): The statistic to calculate. Default is 'vpip'.
+        hand_instance (object): The hand instance for which the statistic is being calculated. Default is None.
+
+    Returns:
+        The calculated statistic value.
+
+    """
+    global _global_hand_instance   # Hand instance is not always needed, so store it globally to avoid conditional passing.
     _global_hand_instance = hand_instance
-    
+
     statname = stat
     match = re_Places.search(stat)
-    if match:   # override if necessary
-        statname = stat[0:-2]
+    if match:   # Override the stat name if necessary.
+        statname = stat[:-2]
 
     if statname not in STATLIST:
-        return None
+        return None   # If the statname is not valid, return None.
 
     result = eval("%(stat)s(stat_dict, %(player)d)" %
-        {'stat': statname, 'player': player})
+                  {'stat': statname, 'player': player})
 
     # If decimal places have been defined, override result[1]
     # NOTE: decimal place override ALWAYS assumes the raw result is a
@@ -129,6 +163,7 @@ def do_stat(stat_dict, player = 24, stat = 'vpip', hand_instance = None):
         places = int(stat[-1:])
         result = __stat_override(places, result)
     return result
+
 
 #    OK, for reference the tuple returned by the stat is:
 #    0 - The stat, raw, no formating, eg 0.33333333
@@ -143,148 +178,229 @@ def do_stat(stat_dict, player = 24, stat = 'vpip', hand_instance = None):
 
 
 def totalprofit(stat_dict, player):
-    
+    """
+    Calculate the total profit for a given player based on their statistics dictionary.
+
+    Args:
+        stat_dict (dict): A dictionary containing player statistics.
+        player (str): The name of the player to calculate the total profit for.
+
+    Returns:
+        tuple: A tuple containing the total profit as a float, formatted as a string with a dollar sign, 
+        and several other formatted strings. If an exception occurs, returns a tuple of default values.
+    """
     try:
+        # Calculate the total profit as a percentage of the player's net value
         stat = old_div(float(stat_dict[player]['net']), 100)
+
+        # Return the total profit as a float, formatted as a string with a dollar sign, 
+        # and several other formatted strings
         return (old_div(stat,100.0), '$%.2f' % stat, 'tp=$%.2f' % stat, 'tot_prof=$%.2f' % stat, str(stat), ('Total Profit'))
-    except:
+
+    except Exception:
+        # If an exception occurs, return a tuple of default values
         return ('0', '$0.00', 'tp=0', 'totalprofit=0', '0', ('Total Profit'))
 
 def playername(stat_dict, player):
+    """
+    Returns a tuple containing the player's screen name and "Player name".
+    If the player is not found in the stat_dict, returns an empty string for the screen name.
+
+    Args:
+        stat_dict (dict): A dictionary containing player stats.
+        player (str): The player's ID.
+
+    Returns:
+        tuple: A tuple containing the player's screen name and "Player name".
+    """
     try:
+        # Retrieve the player's screen name from the stat_dict
         return (stat_dict[player]['screen_name'],
                 stat_dict[player]['screen_name'],
                 stat_dict[player]['screen_name'],
                 stat_dict[player]['screen_name'],
                 stat_dict[player]['screen_name'],
                 ('Player name'))
-    except:
+    except Exception:
+        # If the player is not found in the stat_dict, return an empty string for the screen name.
         return ("",
                 "",
                 "",
                 "",
                 "",
                 ('Player name'))
+
                 
 def _calculate_end_stack(stat_dict, player, hand_instance):
-    #fixme - move this code into Hands.py - it really belongs there
+    """
+    Calculates the stack size of a player at the end of the hand.
 
-    #To reflect the end-of-hand position, we need a end-stack calculation
-    # fixme, is there an easier way to do this from the hand_instance???
-    # can't seem to find a hand_instance "end_of_hand_stack" attribute
-    
-    #First, find player stack size at the start of the hand
+    Args:
+        stat_dict (dict): A dictionary containing player statistics.
+        player (str): The screen name of the player whose end-of-hand stack is being calculated.
+        hand_instance (Hand): An instance of the Hand class containing information about the hand.
+
+    Returns:
+        float: The stack size of the player at the end of the hand.
+    """
+    # Fixme - move this code into Hands.py - it really belongs there
+
+    # To reflect the end-of-hand position, we need an end-stack calculation
+    # Fixme, is there an easier way to do this from the hand_instance???
+    # Can't seem to find a hand_instance "end_of_hand_stack" attribute
+
+    # First, find player stack size at the start of the hand
     stack = 0.0
     for item in hand_instance.players:
         if item[1] == stat_dict[player]['screen_name']:
             stack = float(item[2])
-            
-    #Next, deduct all action from this player
+
+    # Next, deduct all action from this player
     for street in hand_instance.bets:
         for item in hand_instance.bets[street]:
             if item == stat_dict[player]['screen_name']:
                 for amount in hand_instance.bets[street][stat_dict[player]['screen_name']]:
                     stack -= float(amount)
-    
-    #Next, add back any money returned
+
+    # Next, add back any money returned
     for p in hand_instance.pot.returned:
         if p == stat_dict[player]['screen_name']:
             stack += float(hand_instance.pot.returned[p])
-        
-    #Finally, add back any winnings
+
+    # Finally, add back any winnings
     for item in hand_instance.collectees:
         if item == stat_dict[player]['screen_name']:
             stack += float(hand_instance.collectees[item])
+
     return stack
 
+
 def m_ratio(stat_dict, player):
-    
-    #Tournament M-ratio calculation
+    """
+    Calculate M ratio for a player in a poker tournament.
+
+    Args:
+        stat_dict (dict): A dictionary containing statistics for the player.
+        player (str): The name of the player to calculate M ratio for.
+
+    Returns:
+        A tuple containing M ratio and some labels for the ratio.
+    """
+
+    # Tournament M-ratio calculation
     # Using the end-of-hand stack count vs. that hand's antes/blinds
-    
+
     # sum all blinds/antes
     stat = 0.0
     compulsory_bets = 0.0
     hand_instance=_global_hand_instance
-    
+
     if not hand_instance:
-        return      ((old_div(stat,100.0)),
+        return ((old_div(stat,100.0)),
                 '%d'        % (int(stat)),
                 'M=%d'      % (int(stat)),
                 'M=%d'      % (int(stat)),
                 '(%d)'      % (int(stat)),
                 ('M ratio') )
-                
+
     for p in hand_instance.bets['BLINDSANTES']:
         for i in hand_instance.bets['BLINDSANTES'][p]:
             compulsory_bets += float(i)
     compulsory_bets += float(hand_instance.gametype['sb'])
     compulsory_bets += float(hand_instance.gametype['bb'])
-    
+
     stack = _calculate_end_stack(stat_dict, player, hand_instance)
 
-    if compulsory_bets != 0:
-        stat = old_div(stack, compulsory_bets)
-    else:
-        stat = 0
+    stat = old_div(stack, compulsory_bets) if compulsory_bets != 0 else 0
+    return ((int(stat)),
+            '%d'        % (int(stat)),
+            'M=%d'      % (int(stat)),
+            'M=%d'      % (int(stat)),
+            '(%d)'      % (int(stat)),
+            ('M ratio') )
 
-    return      ((int(stat)),
-                '%d'        % (int(stat)),
-                'M=%d'      % (int(stat)),
-                'M=%d'      % (int(stat)),
-                '(%d)'      % (int(stat)),
-                ('M ratio') )
 
 def bbstack(stat_dict, player):
-    #Tournament Stack calculation in Big Blinds
-    #Result is end of hand stack count / Current Big Blind limit
-    stat=0.0
+    """Calculate tournament stack in Big Blinds.
+
+    Args:
+        stat_dict (dict): dictionary of player statistics
+        player (str): player name
+
+    Returns:
+        Tuple containing stack count in Big Blinds and related stats
+    """
+    stat = 0.0
     hand_instance = _global_hand_instance
+
+    # if no hand is in progress, return not applicable
     if not(hand_instance):
         return (stat,
-                    'NA',
-                    'v=NA',
-                    'vpip=NA',
-                    '(0/0)',
-                    ('bb stack')
-                    )
-    # current big blind limit
+                'NA',
+                'v=NA',
+                'vpip=NA',
+                '(0/0)',
+                ('bb stack')
+               )
 
+    # current big blind limit
     current_bigblindlimit = 0
     current_bigblindlimit += float(hand_instance.gametype['bb'])
-    
+
     stack = _calculate_end_stack(stat_dict, player, hand_instance)
 
     if current_bigblindlimit != 0:
+        # calculate stack in Big Blinds
         stat = old_div(stack, current_bigblindlimit)
     else:
         stat = 0
 
-    return      ((old_div(stat,100.0)),
-                '%d'        % (int(stat)),
-                "bb's=%d"      % (int(stat)),
-                "#bb's=%d"      % (int(stat)),
-                '(%d)'      % (int(stat)),
-                ('bb stack') )
+    return ((old_div(stat,100.0)),
+            '%d' % (int(stat)),
+            "bb's=%d" % (int(stat)),
+            "#bb's=%d" % (int(stat)),
+            '(%d)' % (int(stat)),
+            ('bb stack')
+           )
+
 
 def playershort(stat_dict, player):
+    """
+    Given a dictionary of player statistics and a player name, returns a tuple with the player's screen name
+    shortened to 5 characters if it is longer than 6 characters and the full screen name.
+    If the player name is not in the dictionary, returns a tuple with empty strings and a placeholder for the
+    player name.
+    """
     try:
         r = stat_dict[player]['screen_name']
-    except:
-        return ("","","","","",
-            (("Player Name")+" 1-5")
-            )        
+    except Exception:
+        return ("", "", "", "", "",
+                (("Player Name") + " 1-5")
+                )
     if (len(r) > 6):
-        r = r[:5] + "."
-    return (r,
-            r,
-            r,
-            r,
-            stat_dict[player]['screen_name'],
-            (("Player Name")+" 1-5")
+        r = f"{r[:5]}."
+    return (r,  # shortened screen name
+            r,  # full screen name
+            r,  # repeated shortened screen name
+            r,  # repeated full screen name
+            stat_dict[player]['screen_name'],  # original full screen name
+            (("Player Name") + " 1-5")  # placeholder for player name
             )
+
             
 def vpip(stat_dict, player):
+    """
+    Calculate the Voluntarily Put in Pot (VPIP) statistic for a given player.
+
+    Args:
+        stat_dict (dict): a dictionary containing VPIP statistics for each player
+        player (str): the name of the player to calculate VPIP for
+
+    Returns:
+        A tuple containing the VPIP statistic as a float, as well as several 
+        formatted strings giving the statistic as a percentage and in other 
+        formats.
+    """
     stat = 0.0
     try:
         stat = old_div(float(stat_dict[player]['vpip']),float(stat_dict[player]['vpip_opp']))
@@ -293,28 +409,45 @@ def vpip(stat_dict, player):
                 'v=%3.1f%%'     % (100.0*stat),
                 'vpip=%3.1f%%'  % (100.0*stat),
                 '(%d/%d)'       % (stat_dict[player]['vpip'], stat_dict[player]['vpip_opp']),
-                ('Voluntarily put in preflop/3rd street %')
-                )
-    except: return (stat,
-                    'NA',
-                    'v=NA',
-                    'vpip=NA',
-                    '(0/0)',
-                    ('Voluntarily put in preflop/3rd street %')
-                    )
-
-def pfr(stat_dict, player):
-    stat = 0.0
-    try:
-        stat = old_div(float(stat_dict[player]['pfr']),float(stat_dict[player]['pfr_opp']))
-        return (stat,
-                '%3.1f'         % (100.0*stat),
-                'p=%3.1f%%'     % (100.0*stat),
-                'pfr=%3.1f%%'   % (100.0*stat),
-                '(%d/%d)'    % (stat_dict[player]['pfr'], stat_dict[player]['pfr_opp']),
-                ('Preflop/3rd street raise %')
+                ('Voluntarily put in preflop/3rd street %')  # description of the statistic
                 )
     except: 
+        return (stat,
+                'NA',
+                'v=NA',
+                'vpip=NA',
+                '(0/0)',
+                ('Voluntarily put in preflop/3rd street %')  # description of the statistic
+                )
+
+
+def pfr(stat_dict, player):
+    """
+    Calculates the preflop/3rd street raise percentage (pfr) for a given player based on their stats.
+
+    Args:
+    - stat_dict (dict): A dictionary containing the stats for all players in the game.
+    - player (str): The name of the player for whom we want to calculate the pfr.
+
+    Returns:
+    - A tuple containing the pfr value and several strings with related information.
+    """
+
+    stat = 0.0
+    try:
+        # Calculate the pfr as a float based on the player's stats
+        stat = old_div(float(stat_dict[player]['pfr']),float(stat_dict[player]['pfr_opp']))
+
+        # Return a tuple with the pfr value and several related strings formatted with the pfr value
+        return (stat,
+                '%3.1f'         % (100.0*stat),  # pfr as a percentage with one decimal point
+                'p=%3.1f%%'     % (100.0*stat),  # pfr as a percentage with one decimal point and label
+                'pfr=%3.1f%%'   % (100.0*stat),  # pfr as a percentage with one decimal point and label
+                '(%d/%d)'    % (stat_dict[player]['pfr'], stat_dict[player]['pfr_opp']),  # raw pfr values
+                ('Preflop/3rd street raise %')  # label for the pfr value
+                )
+    except Exception:
+        # If there is an exception (e.g. player not found in stat_dict) return a tuple with 'NA' values
         return (stat,
                 'NA',
                 'p=NA',
@@ -322,6 +455,7 @@ def pfr(stat_dict, player):
                 '(0/0)',
                 ('Preflop/3rd street raise %')
                 )
+
 
 def wtsd(stat_dict, player):
     stat = 0.0
@@ -452,6 +586,8 @@ def saw_f(stat_dict, player):
             ('Flop/4th street seen %')
             )
 
+
+
 def n(stat_dict, player):
     try:
         # If sample is large enough, use X.Yk notation instead
@@ -466,14 +602,15 @@ def n(stat_dict, player):
                 k += 1
                 d = 0
             fmt = '%d.%dk' % (k, d)
-        return (stat_dict[player]['n'],
-                '%s'        % fmt,
-                'n=%d'      % (stat_dict[player]['n']),
-                'n=%d'      % (stat_dict[player]['n']),
-                '(%d)'      % (stat_dict[player]['n']),
-                ('Number of hands seen')
-                )
-    except:
+        return (
+            stat_dict[player]['n'],
+            f'{fmt}',
+            'n=%d' % (stat_dict[player]['n']),
+            'n=%d' % (stat_dict[player]['n']),
+            '(%d)' % (stat_dict[player]['n']),
+            'Number of hands seen',
+        )
+    except Exception:
         # Number of hands shouldn't ever be "NA"; zeroes are better here
         return (0,
                 '%d'        % (0),
