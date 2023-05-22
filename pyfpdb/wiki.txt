@@ -1,0 +1,347 @@
+{| border=0<br>
+|-
+| Site || colspan=3 style='background:grey' | Holdem || colspan=3 style='background:lightgrey' | Omaha || colspan=3 style='background:grey' | O8 || colspan=2 style='background:lightgrey' | 5CS ||           style='background:grey' | 7CS ||           style='background:lightgrey' | 7CS H/L ||           style='background:grey' | Razz || colspan=3 style='background:lightgrey' | 5CD ||           style='background:grey' | 27SD || colspan=2 style='background:lightgrey' | 27TD || colspan=2 style='background:grey' | A5TD || colspan=2 style='background:lightgrey' | Badugi
+|-
+! PokerStars
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | PL || style='background:red' | FL
+|-
+! PartyPoker
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:lightgrey' | FL
+| style='background:lightgrey' | NL || style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | NL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! Merge
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! iPoker
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! Winamax
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | FL
+| style='background:lightgrey' | FL
+| style='background:lightgrey' | FL
+| style='background:lightgrey' | NL || style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | NL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! Cake
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | FL
+| style='background:lightgrey' | FL
+| style='background:lightgrey' | FL
+| style='background:lightgrey' | NL || style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | NL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! Entraction
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! BetOnline
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! Betfair
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! PacificPoker
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! Bovada
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL 
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! Microgaming
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+|}
+###################### Tourney Wiki Table ##############################
+{| border=0<br>
+|-
+| Site || colspan=3 style='background:grey' | Holdem || colspan=3 style='background:lightgrey' | Omaha || colspan=3 style='background:grey' | O8 || colspan=2 style='background:lightgrey' | 5CS ||           style='background:grey' | 7CS ||           style='background:lightgrey' | 7CS H/L ||           style='background:grey' | Razz || colspan=3 style='background:lightgrey' | 5CD ||           style='background:grey' | 27SD || colspan=2 style='background:lightgrey' | 27TD || colspan=2 style='background:grey' | A5TD || colspan=2 style='background:lightgrey' | Badugi
+|-
+! PokerStars
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | PL || style='background:red' | FL
+|-
+! PartyPoker
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:lightgrey' | FL
+| style='background:lightgrey' | NL || style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | NL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! Merge
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! iPoker
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! Winamax
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | FL
+| style='background:lightgrey' | FL
+| style='background:lightgrey' | FL
+| style='background:lightgrey' | NL || style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | NL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! Cake
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | FL
+| style='background:lightgrey' | FL
+| style='background:lightgrey' | FL
+| style='background:lightgrey' | NL || style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | NL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! Entraction
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! BetOnline
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! Betfair
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! PacificPoker
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! Bovada
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+! Microgaming
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | FL
+| style='background:red' | NL || style='background:red' | PL || style='background:red' | FL
+| style='background:red' | NL
+| style='background:lightgrey' | PL || style='background:red' | FL
+| style='background:red' | PL || style='background:red' | FL
+| style='background:lightgrey' | PL || style='background:lightgrey' | FL
+|-
+|}

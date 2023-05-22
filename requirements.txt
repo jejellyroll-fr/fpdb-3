@@ -1,6 +1,6 @@
 pywin32
 configparser    
-future          
+future==0.18.3          
 matplotlib      
 mplfinance      
 PyQt5           

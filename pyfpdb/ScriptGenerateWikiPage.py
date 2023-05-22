@@ -28,15 +28,40 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
 def print_site(name, data, mask):
-    print("! %s" % name)
+    """
+    Prints the site name followed by a table with the game types and their limits. 
+    The table cell background color is determined by whether the limit is active (light green) or not (light grey).
+
+    Args:
+    - name: str, the name of the site
+    - data: dict, a dictionary containing the game types and their limits for the site
+    - mask: dict, a dictionary containing the status (active or inactive) of the limits for each game type and site
+
+    Returns:
+    - None
+    """
+    # Prints the site name
+    print(f"! {name}")
+
+    # Iterates through the game types and their limits to create a table
     for game, limits in gametypes:
         tmp = ""
         for lim in limits:
             style = "red"
-            if mask[name][game][lim] == False: style = "lightgrey"
-            if data[name][game][lim] == True: style = "lightgreen"
-            tmp += "| style='background:%s' | %s |" %(style, lim.upper())
+
+            # Determines the style based on whether the limit is active or not
+            if mask[name][game][lim] == False: 
+                style = "lightgrey"
+            if data[name][game][lim] == True: 
+                style = "lightgreen"
+
+            # Creates the table cell with the determined style
+            tmp += f"| style='background:{style}' | {lim.upper()} |"
+
+        # Prints the completed row of the table
         print(tmp[:-1])
+
+    # Prints a horizontal line to separate the table from the rest of the output
     print("|-")
 
 
@@ -69,6 +94,7 @@ sitemasks = { "PokerStars": copy.deepcopy(defaultmask),
               "Entraction": copy.deepcopy(defaultmask),
               "BetOnline": copy.deepcopy(defaultmask),
               "Microgaming": copy.deepcopy(defaultmask),
+              "Bovada": copy.deepcopy(defaultmask),
         }
 
 # Site specific changes from the defaults
@@ -123,10 +149,10 @@ games = {"27_1draw"  : copy.deepcopy(defaults)
         }
 
 Configuration.set_logfile("fpdb-log.txt")
-config = Configuration.Config(file = "HUD_config.test.xml")
+config = Configuration.Config(file = "HUD_config.xml")
 in_path = os.path.abspath('regression-test-files')
-idsite = IdentifySite.IdentifySite(config, in_path)
-idsite.scan()
+idsite = IdentifySite.IdentifySite(config)
+idsite.scan(in_path)
 idsite.fetchGameTypes()
 
 
@@ -141,6 +167,7 @@ sites = { "PokerStars": copy.deepcopy(games),
           "Entraction": copy.deepcopy(games),
           "BetOnline": copy.deepcopy(games),
           "Microgaming": copy.deepcopy(games),
+          "Bovada": copy.deepcopy(games),
         }
 
 ring = copy.deepcopy(sites)
@@ -157,7 +184,7 @@ for idx, f in list(idsite.filelist.items()):
         if f.gametype['type'] == 'tour':
             tour[c][a][b] = True
     else:
-        print("Skipping: %s" % f.path)
+        print(f"Skipping: {f.path}")
 
 
 gametypes = [ ('holdem',    ['nl','pl','fl']),
@@ -215,6 +242,8 @@ print_site("Entraction", ring, sitemasks)
 print_site("BetOnline", ring, sitemasks)
 print_site("Betfair", ring, sitemasks)
 print_site("PacificPoker", ring, sitemasks)
+print_site("Bovada", ring, sitemasks)
+print_site("Microgaming", ring, sitemasks)
 
 print("|}")
 
@@ -238,6 +267,9 @@ print_site("Entraction", tour, sitemasks)
 print_site("BetOnline", tour, sitemasks)
 print_site("Betfair", tour, sitemasks)
 print_site("PacificPoker", tour, sitemasks)
+print_site("Bovada", tour, sitemasks)
+print_site("Microgaming", tour, sitemasks)
+
 
 print("|}")
 
