@@ -882,10 +882,11 @@ class Hand(object):
         self.checkPlayerExists(player, 'addCollectPot')
         self.collected = self.collected + [[player, pot]]
         if player not in self.collectees:
-            self.collectees[player] = Decimal(pot)
+            self.collectees[player] = float(pot)
+            print(self.collectees[player])
         else:
-            self.collectees[player] += Decimal(pot)
-            
+            self.collectees[player] += float(pot)
+            print(self.collectees[player])
     def sittingOut(self):
         dealtIn = set()
         for street in self.actionStreets:
@@ -924,8 +925,8 @@ class Hand(object):
             (collectedCopy, collecteesCopy, totalcollected) = ([], {}, 0)
             for v in sorted(collected, key=lambda collectee: collectee[1], reverse=True):
                 if Decimal(v[1])!=0:
-                    totalcollected += Decimal(v[1])
-                    collectedCopy.append([v[0], Decimal(v[1])])
+                    totalcollected += Decimal(str(v[1]))
+                    collectedCopy.append([v[0], Decimal(str(v[1]))])
             for k, j in list(collectees.items()):
                 if j!=0: collecteesCopy[k] = j
             return collectedCopy, collecteesCopy, totalcollected
@@ -934,7 +935,7 @@ class Hand(object):
         if (self.uncalledbets or ((self.totalpot - totalcollected < 0) and self.checkForUncalled)):
             for i,v in enumerate(sorted(self.collected, key=lambda collectee: collectee[1], reverse=True)):
                 if v[0] in self.pot.returned: 
-                    collected[i][1] = Decimal(v[1]) - self.pot.returned[v[0]]
+                    collected[i][1] = Decimal(str(v[1])) - self.pot.returned[v[0]]
                     collectees[v[0]] -= self.pot.returned[v[0]]
                     self.pot.returned[v[0]] = 0
             (self.collected, self.collectees, self.totalcollected) = gettempcontainers(collected, collectees)
@@ -944,7 +945,7 @@ class Hand(object):
             self.totalcollected = 0;
             # self.collected looks like [[p1,amount][px,amount]]
             for entry in self.collected:
-                self.totalcollected += Decimal(entry[1])
+                self.totalcollected += Decimal(str(entry[1]))
 
     def getGameTypeAsString(self):
         """ Map the tuple self.gametype onto the pokerstars string describing it """
