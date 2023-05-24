@@ -293,9 +293,7 @@ class Filters(QWidget):
         self.db.rollback()
 
     def getNumHands(self):
-        if self.phands:
-            return self.phands.value()
-        return 0
+        return self.phands.value() if self.phands else 0
 
     def getNumTourneys(self):
         return 0

@@ -131,10 +131,10 @@ class GuiDatabase(QWidget):
             self.show()
             self.loadDbs()
 
-        except:
+        except Exception:
             # Handle any exceptions and print the error
             err = traceback.extract_tb(sys.exc_info()[2])[-1]
-            print('guidbmaint: '+ err[2] + "(" + str(err[1]) + "): ")
+            print(f'guidbmaint: {err[2]}({str(err[1])}): ')
 
 
 

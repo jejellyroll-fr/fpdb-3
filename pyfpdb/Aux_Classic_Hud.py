@@ -35,6 +35,8 @@ are not immediately obvious, and there is very close linkage with most of
 the Hud modules.
 """
 
+
+import contextlib
 #import L10n
 #_ = L10n.get_translation()
 
@@ -56,110 +58,177 @@ import Stats
 
 class Classic_HUD(Aux_Hud.Simple_HUD):
     """
-        There is one instance of this class per poker table
-        the stat_windows for each player are controlled
-        from this class.
+    There is one instance of this class per poker table.
+    The stat_windows for each player are controlled from this class.
     """
 
     def __init__(self, hud, config, params):
+        """
+        Initializes an instance of the Classic_HUD class.
+
+        :param hud: The hud object.
+        :param config: The configuration object.
+        :param params: The parameters object.
+        """
         super(Classic_HUD, self).__init__(hud, config, params)
-        
-        # the following attributes ensure that the correct
+
+        # The following attributes ensure that the correct
         # classes are invoked by the calling modules (aux_hud+mucked)
         
-        self.aw_class_window = Classic_Stat_Window
-        self.aw_class_stat = Classic_stat
-        self.aw_class_table_mw = Classic_table_mw
-        self.aw_class_label = Classic_label
+        self.aw_class_window = Classic_Stat_Window  # Class for auxiliary stat windows
+        self.aw_class_stat = Classic_stat  # Class for auxiliary stats
+        self.aw_class_table_mw = Classic_table_mw  # Class for auxiliary table muck windows
+        self.aw_class_label = Classic_label  # Class for auxiliary labels
+
 
 
 class Classic_Stat_Window(Aux_Hud.Simple_Stat_Window):
-    """Stat windows are the blocks shown continually, 1 for each player."""
+    """
+    Stat windows are the blocks shown continually, one for each player.
+    """
 
     def update_contents(self, i):
+        """
+        Updates the contents of the stat window for a specific player.
+
+        :param i: The seat index of the player.
+        """
         super(Classic_Stat_Window, self).update_contents(i)
-        if i == "common": return
-                
-        # control kill/display of active/inactive player stat blocks
+        
+        if i == "common":
+            return
+
+        # Control kill/display of active/inactive player stat blocks
         if self.aw.get_id_from_seat(i) is None:
-            #no player dealt in this seat for this hand
-            # hide the display
+            # No player dealt in this seat for this hand
+            # Hide the display
             self.hide()
         else:
-            #player dealt-in, force display of stat block
-            #need to call move() to re-establish window position
-            self.move(self.aw.positions[i][0]+self.aw.hud.table.x,
-                        self.aw.positions[i][1]+self.aw.hud.table.y)
+            # Player dealt-in, force display of stat block
+            # Need to call move() to re-establish window position
+            self.move(
+                self.aw.positions[i][0] + self.aw.hud.table.x,
+                self.aw.positions[i][1] + self.aw.hud.table.y
+            )
             self.setWindowOpacity(float(self.aw.params['opacity']))
-            # show item, just in case it was hidden by the user
+            # Show item, just in case it was hidden by the user
             self.show()
+
             
     def button_press_middle(self, event):
+        """
+        This function is called when the middle button is pressed.
+        It hides the current object.
+
+        Args:
+            event: The event object that triggered the function.
+        """
+        # Hide the current object
         self.hide()
 
 
+
 class Classic_stat(Aux_Hud.Simple_stat):
-    """A class to display each individual statistic on the Stat_Window"""
-    
+    """
+    A class to display each individual statistic on the Stat_Window.
+    """
+
     def __init__(self, stat, seat, popup, game_stat_config, aw):
-    
+        """
+        Initializes an instance of the Classic_stat class.
+
+        :param stat: The statistic to display.
+        :param seat: The seat index of the player.
+        :param popup: A flag indicating whether the statistic has a popup.
+        :param game_stat_config: The game statistic configuration.
+        :param aw: The associated Aux_Window instance.
+        """
         super(Classic_stat, self).__init__(stat, seat, popup, game_stat_config, aw)
-        #game_stat_config is the instance of this stat in the supported games stat configuration
-        #use this prefix to directly extract the attributes
-        
+
+        # game_stat_config is the instance of this stat in the supported games stat configuration
+        # use this prefix to directly extract the attributes
         self.popup = game_stat_config.popup
-        self.click = game_stat_config.click # not implemented yet
-        self.tip = game_stat_config.tip     # not implemented yet
+        self.click = game_stat_config.click  # Not implemented yet
+        self.tip = game_stat_config.tip  # Not implemented yet
         self.hudprefix = game_stat_config.hudprefix
         self.hudsuffix = game_stat_config.hudsuffix
-                
-        try: 
+
+        # Set the color attributes, fallback to default values if not provided
+        try:
             self.stat_locolor = game_stat_config.stat_locolor
             self.stat_loth = game_stat_config.stat_loth
-        except: self.stat_locolor=self.stat_loth=""
-        try: 
+        except Exception:
+            self.stat_locolor = self.stat_loth = ""
+        try:
             self.stat_hicolor = game_stat_config.stat_hicolor
             self.stat_hith = game_stat_config.stat_hith
-        except: self.stat_hicolor=self.stat_hith=""   
-        try: self.hudcolor = game_stat_config.hudcolor
-        except: self.hudcolor = aw.params['fgcolor']
+        except Exception:
+            self.stat_hicolor = self.stat_hith = ""
+        try:
+            self.hudcolor = game_stat_config.hudcolor
+        except Exception:
+            self.hudcolor = aw.params['fgcolor']
+
 
     def update(self, player_id, stat_dict):
+        """
+        Update the player's stats with the given dictionary of stats.
+
+        Args:
+            player_id (int): The player's ID.
+            stat_dict (dict): The dictionary of stats to update.
+
+        Returns:
+            bool: True if the stat was updated successfully, False otherwise.
+        """
+        # Call the superclass's update method
         super(Classic_stat, self).update(player_id, stat_dict)
 
-        if not self.number: #stat did not create, so exit now
+        # If the stat was not created, exit the function
+        if not self.number: 
             return False
-            
-        fg=self.hudcolor        
+
+        # Determine the foreground color of the HUD based on the stat's value
+        fg=self.hudcolor
         if self.stat_loth != "":
-            try: # number[1] might not be a numeric (e.g. NA)
+            with contextlib.suppress(Exception):
                 if float(self.number[1]) < float(self.stat_loth):
                     fg=self.stat_locolor
-            except: pass
         if self.stat_hith != "":
-            try: # number[1] might not be a numeric (e.g. NA)
+            with contextlib.suppress(Exception):
                 if float(self.number[1]) > float(self.stat_hith):
                     fg=self.stat_hicolor
-            except: pass
+
+        # Set the HUD color
         self.set_color(fg=fg,bg=None)
-        
-        statstring = "%s%s%s" % (self.hudprefix, str(self.number[1]), self.hudsuffix)
+
+        # Set the text of the HUD to display the stat value
+        statstring = f"{self.hudprefix}{str(self.number[1])}{self.hudsuffix}"
         self.lab.setText(statstring)
-        
+
+        # Set the tooltip text to display the player's name and some stat details
         tip = "%s\n%s\n%s, %s" % (stat_dict[player_id]['screen_name'], self.number[5], self.number[3], self.number[4])
         Stats.do_tip(self.lab, tip)
 
 
-class Classic_label(Aux_Hud.Simple_label): pass
+
+class Classic_label(Aux_Hud.Simple_label):
+    """
+    A class to represent a label in the Classic HUD.
+    Inherits from Aux_Hud.Simple_label.
+    """
+    pass
+
 
 class Classic_table_mw(Aux_Hud.Simple_table_mw):
     """
-    A class normally controlling the table menu for that table
-    Normally a 1:1 relationship with the Classic_HUD class
-    
+    A class normally controlling the table menu for that table.
+    Normally a 1:1 relationship with the Classic_HUD class.
     This is invoked by the create_common method of the Classic/Simple_HUD class
     (although note that the positions of this block are controlled by shiftx/y
-    and NOT by the common position in the layout)
-    Movements of the menu block are handled through Classic_HUD/common methods
+    and NOT by the common position in the layout).
+    Movements of the menu block are handled through Classic_HUD/common methods.
+    Inherits from Aux_Hud.Simple_table_mw.
     """
     pass
+

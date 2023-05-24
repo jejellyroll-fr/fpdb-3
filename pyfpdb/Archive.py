@@ -16,35 +16,48 @@
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 ########################################################################
+#TODO: not usefull actually without implementing
 
-
-import os, sys
+import os
 import re
-from time import time, sleep
-import codecs
 import shutil
 import subprocess
-
+from time import time, sleep
+import codecs
 from IdentifySite import *
+
 
 class FPDBArchive(object):
     def __init__(self, hand):
-        self.hid = hand.dbid_hands
-        self.handText = hand.handText
-        
+        """
+        Initializes an instance of the FPDBArchive class with the given hand object.
+
+        :param hand: A hand object to be stored in the instance.
+        """
+        self.hid = hand.dbid_hands  # The ID of the hand in the database
+        self.handText = hand.handText  # The text representation of the hand
+
+
 class Archive(object):
-    def __init__(self, config=None, path = None, ftype="hh"):
+    def __init__(self, config=None, path=None, ftype="hh"):
+        """
+        Initializes an instance of the Archive class.
+
+        :param config: The configuration object.
+        :param path: The path to the archive.
+        :param ftype: The file type.
+        """
         self.config = config
         self.archivePath = None
         if config:
             self.archivePath = config.imp.archivePath
-        self.path   = path
-        self.ftype  = ftype
+        self.path = path
+        self.ftype = ftype
         self.handList = {}
         self.sessionsArchive = {}
         self.startCardsArchive = {}
         self.positionsArchive = {}
-        
+
     def quickImport(self, userid, filtertype, game, filter, settings, tz): pass
     """Sets up import in 'quick' mode to import the HandsPlayers, HandsActions, and HandsStove records"""
         

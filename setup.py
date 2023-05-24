@@ -31,10 +31,8 @@ def deck_path():
     return '%s/share/python-fpdb'
 """ % _pfx
 
-# Open and rewrite the file
-f = open('pyfpdb/card_path.py', 'w+')
-f.write(CONTENT)
-f.close()
+with open('pyfpdb/card_path.py', 'w+') as f:
+    f.write(CONTENT)
 
 
 # Return to normal distutils flow after the atrocities committed above
@@ -43,7 +41,7 @@ class inst_translations(INST):
 
     # Return triples for installations
     def __locales(self, rootdir):
-        _globstr = '%s/*/*/*.mo' % rootdir
+        _globstr = f'{rootdir}/*/*/*.mo'
         paths = glob.glob(_globstr)
         _locales = []
         for p in paths:
