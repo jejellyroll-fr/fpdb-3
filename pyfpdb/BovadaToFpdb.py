@@ -157,12 +157,31 @@ class Bovada(HandHistoryConverter):
     re_ReturnBet        = re.compile(r"Return\suncalled\sportion", re.MULTILINE)
     #Small Blind : Hand result $19
     
+
     def compilePlayerRegexs(self, hand):
+        """
+        Compiles regex patterns for players and pot collection.
+
+        Args:
+        - hand: the hand to be compiled.
+
+        Returns:
+        None
+        """
+        # Set up substitution values
         subst = self.substitutions
+
+        # Get the set of players and check if it's already compiled
         players = set(self.playersMap.keys())
         if not players <= self.compiledPlayers: # x <= y means 'x is subset of y'
+
+            # If not, set the compiled players to the current set
             self.compiledPlayers = players
+
+            # Compile the player regex pattern
             subst['PLYR'] = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
+
+            # Compile the pot collection regex pattern
             self.re_CollectPot2  = re.compile(u"""
                 Seat[\+ ](?P<SEAT>[0-9]+):\s?%(PLYR)s
                 (\sHI)?\s(%(LS)s)?(?P<POT1>[%(NUM)s]+)?
@@ -171,83 +190,133 @@ class Bovada(HandHistoryConverter):
                 (\sLOW?\s(%(LS)s)?(?P<POT2>[%(NUM)s]+))?
                 """ % subst, re.MULTILINE|re.VERBOSE)
 
+
     def readSupportedGames(self):
-        return [["ring", "hold", "nl"],
-                ["ring", "hold", "pl"],
-                ["ring", "hold", "fl"],
-                
-                ["ring", "stud", "fl"],
-                
-                ["tour", "hold", "nl"],
-                ["tour", "hold", "pl"],
-                ["tour", "hold", "fl"],
-                
-                ["tour", "stud", "fl"],
-                ]
+        """
+        Returns a list of supported games.
+
+        Each game is represented as a list containing its attributes.
+        The attributes are, in order: game type, game mode, and game variant.
+        """
+        return [
+            # Ring games
+            ["ring", "hold", "nl"],  # No Limit Hold'em
+            ["ring", "hold", "pl"],  # Pot Limit Hold'em
+            ["ring", "hold", "fl"],  # Fixed Limit Hold'em
+            ["ring", "stud", "fl"],  # Fixed Limit Stud
+
+            # Tournament games
+            ["tour", "hold", "nl"],  # No Limit Hold'em
+            ["tour", "hold", "pl"],  # Pot Limit Hold'em
+            ["tour", "hold", "fl"],  # Fixed Limit Hold'em
+            ["tour", "stud", "fl"],  # Fixed Limit Stud
+        ]
 
     def parseHeader(self, handText, whole_file):
+        """
+        Parses the header of a poker hand history and returns the game type.
+
+        Args:
+            handText (str): The text of the header.
+            whole_file (str): The entire hand history file.
+
+        Returns:
+            dict: A dictionary containing the game type information.
+        """
         gametype = self.determineGameType(handText)
+
+        # If the game type is a tournament, split the file into hands and find the player seat numbers
         if gametype['type'] == 'tour':
             handlist = re.split(self.re_SplitHands,  whole_file)
             result = re.findall(self.re_PlayerSeat, handlist[0])
             #gametype['maxSeats'] = len(result)
+
         return gametype
 
+
     def determineGameType(self, handText):
-        info = {}            
+        """
+        Analyzes handText to determine the game type and relevant information.
+
+        Args:
+            handText (str): The raw text of the hand history.
+
+        Returns:
+            dict: A dictionary containing information about the game type, stakes, and currency.
+        """
+        info = {}
+
+        # Search for game information
         m = self.re_GameInfo.search(handText)
         if not m:
-            tmp = handText[0:200]
-            log.error(("BovadaToFpdb.determineGameType: '%s'") % tmp)
+            # If game information is not found, raise an error
+            tmp = handText[:200]
+            log.error(f"BovadaToFpdb.determineGameType: '{tmp}'")
             raise FpdbParseError
-        
+
+        # Search for dealt cards, summary of the hand, and hole cards for the third street
         m1 = self.re_Dealt.search(handText)
         m2 = self.re_Summary.split(handText)
         m3 = self.re_Hole_Third.split(handText)
-        if not m1 or len(m2)!=2 or len(m3)>3:
-            raise FpdbHandPartial("BovadaToFpdb.determineGameType: " + ("Partial hand history"))
-        
-        mg = m.groupdict()
-        m = self.re_Stakes.search(self.in_path)
-        if m: mg.update(m.groupdict())
 
+        # If any of the above searches fail, raise a partial hand history error
+        if not m1 or len(m2) != 2 or len(m3) > 3:
+            raise FpdbHandPartial("BovadaToFpdb.determineGameType: " + ("Partial hand history"))
+
+        # Extract game information from the regular expression match
+        mg = m.groupdict()
+
+        # Search for stakes information in the file path
+        if m := self.re_Stakes.search(self.in_path):
+            mg.update(m.groupdict())
+
+        # Determine limit type (no limit, fixed limit, or pot limit)
         if 'LIMIT' in mg:
-            if not mg['LIMIT']:
-                info['limitType'] = 'nl'
-            else:
-                info['limitType'] = self.limits[mg['LIMIT']]
+            info['limitType'] = self.limits[mg['LIMIT']] if mg['LIMIT'] else 'nl'
+
+        # Determine the game type and category (hold'em, omaha, etc.)
         if 'GAME' in mg:
             (info['base'], info['category']) = self.games[mg['GAME']]
-            
+
+        # Determine the small blind amount (if applicable)
         if 'SB' in mg:
             info['sb'] = self.clearMoneyString(mg['SB'])
+
+        # Determine the big blind amount (if applicable)
         if 'BB' in mg:
             info['bb'] = self.clearMoneyString(mg['BB'])
-            
+
+        # Determine the game type (ring or tournament) and currency
         if 'TOURNO' in mg and mg['TOURNO'] is not None:
             info['type'] = 'tour'
             info['currency'] = 'T$'
         else:
             info['type'] = 'ring'
             info['currency'] = 'USD'
-             
+
+        # Determine the currency (if applicable)
         if 'CURRENCY' in mg and mg['CURRENCY'] is not None:
             info['currency'] = self.currencies[mg['CURRENCY']]
-            
+
+        # Determine if the game is a fast-fold variant (e.g. Zone Poker)
         if 'Zone' in mg['GAME']:
             info['fast'] = True
         else:
             info['fast'] = False
-            
+
+        # If the game is fixed limit and a big blind amount is specified, adjust the small and big blind amounts
         if info['limitType'] == 'fl' and info['bb'] is not None:
             if info['type'] == 'ring':
+                # Adjust small and big blind amounts based on the specified big blind amount
                 try:
                     info['sb'] = self.Lim_Blinds[info['bb']][0]
                     info['bb'] = self.Lim_Blinds[info['bb']][1]
-                except KeyError:
-                    tmp = handText[0:200]
-                    log.error(("BovadaToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
-                    raise FpdbParseError
+                except KeyError as e:
+                    tmp = handText[:200]
+                    log.error(
+                        f"BovadaToFpdb.determineGameType: Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'"
+                    )
+                    raise FpdbParseError from e
             else:
                 info['sb'] = str((Decimal(info['sb'])/2).quantize(Decimal("0.01")))
                 info['bb'] = str(Decimal(info['sb']).quantize(Decimal("0.01")))   
@@ -255,150 +324,248 @@ class Bovada(HandHistoryConverter):
         return info
 
     def readHandInfo(self, hand):
+        """
+        Read hand information from a given hand object.
+
+        Args:
+            hand: Hand object to read information from.
+
+        Returns:
+            Dictionary containing parsed information from the hand object.
+
+        Raises:
+            FpdbParseError: If hand information could not be parsed.
+        """
+        # Create empty dictionary to store parsed information
         info = {}
+
+        # Parse game information
         m = self.re_GameInfo.search(hand.handText)
         if m is None:
-            tmp = hand.handText[0:200]
-            log.error(("BovadaToFpdb.readHandInfo: '%s'") % tmp)
+            tmp = hand.handText[:200]
+            log.error(f"BovadaToFpdb.readHandInfo: '{tmp}'")
             raise FpdbParseError
-        
-        info.update(m.groupdict())
-        m = self.re_Buyin.search(self.in_path)
-        if m: info.update(m.groupdict())
+        info |= m.groupdict()
+
+        # Parse buy-in information
+        if m := self.re_Buyin.search(self.in_path):
+            info.update(m.groupdict())
+
+        # Set allInBlind flag to False
         hand.allInBlind = False
-        m2 = self.re_Knockout.search(self.in_path)
-        if m2: info.update(m2.groupdict())
-        
+
+        # Parse knockout information
+        if m2 := self.re_Knockout.search(self.in_path):
+            info.update(m2.groupdict())
+
+        # Set speed based on path
         if "Hyper Turbo" in self.in_path:
             hand.speed = "Hyper"
         elif  "Turbo" in self.in_path:
             hand.speed = "Turbo"
-        
-        for key in info:
-            if key == 'DATETIME':
-                m1 = self.re_DateTime.finditer(info[key])
-                datetimestr = "2000/01/01 00:00:00"  # default used if time not found
-                for a in m1:
-                    datetimestr = "%s/%s/%s %s:%s:%s" % (a.group('Y'), a.group('M'),a.group('D'),a.group('H'),a.group('MIN'),a.group('S'))
-                    #tz = a.group('TZ')  # just assume ET??
-                    #print "   tz = ", tz, " datetime =", datetimestr
-                hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S") # also timezone at end, e.g. " ET"
-                hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
-            if key == 'HID':
-                hand.handid = info[key]
-            if key == 'TOURNO':
-                hand.tourNo = info[key]
+
+        # Parse remaining information from info dictionary
+        for key, value in info.items():
             if key == 'BUYIN':
+                # Parse buy-in amount and currency
                 if info['TOURNO']!=None:
-                    if info[key] == 'Freeroll':
+                    # Handle freerolls
+                    if value == 'Freeroll':
                         hand.buyin = 0
                         hand.fee = 0
                         hand.buyinCurrency = "FREE"
                     else:
+                        # Handle other buy-in amounts and currencies
                         if info[key].find("$")!=-1:
                             hand.buyinCurrency="USD"
                         elif re.match("^[0-9+]*$", info[key]):
                             hand.buyinCurrency="play"
                         else:
                             #FIXME: handle other currencies, play money
-                            log.error(("BovadaToFpdb.readHandInfo: Failed to detect currency.") + " Hand ID: %s: '%s'" % (hand.handid, info[key]))
+                            log.error(
+                                f"BovadaToFpdb.readHandInfo: Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'"
+                            )
                             raise FpdbParseError
-                    
+
+                        # Parse knockout bounty information
                         if info.get('BOUNTY') != None:
-                            info['BOUNTY'] = self.clearMoneyString(info['BOUNTY'].strip(u'$')) # Strip here where it isn't 'None'
+                            info['BOUNTY'] = self.clearMoneyString(info['BOUNTY'].strip(u'$'))
                             hand.koBounty = int(100*Decimal(info['BOUNTY']))
                             hand.isKO = True
                         else:
                             hand.isKO = False
-                            
+
+                        # Parse buy-in amount and rake
                         info['BIAMT'] = self.clearMoneyString(info['BIAMT'].strip(u'$'))
-                        
-                        if info['BIRAKE']:
-                            info['BIRAKE'] = self.clearMoneyString(info['BIRAKE'].strip(u'$'))
-                        else:
-                            info['BIRAKE'] = '0'
-                        
-                        if info['TICKET'] == None:
+
+                        info['BIRAKE'] = (
+                            self.clearMoneyString(info['BIRAKE'].strip(u'$'))
+                            if info['BIRAKE']
+                            else '0'
+                        )
+
+                        # Parse buy-in and fee or ticket
+                        if info['TICKET'] is None:
                             hand.buyin = int(100*Decimal(info['BIAMT']))
                             hand.fee = int(100*Decimal(info['BIRAKE']))
                         else:
                             hand.buyin = 0
                             hand.fee = 0
-            if key == 'TABLE':
+            elif key == 'DATETIME':
+                # Parse date and time information
+                m1 = self.re_DateTime.finditer(info[key])
+                datetimestr = "2000/01/01 00:00:00"  # default used if time not found
+                for a in m1:
+                    datetimestr = f"{a.group('Y')}/{a.group('M')}/{a.group('D')} {a.group('H')}:{a.group('MIN')}:{a.group('S')}"
+                                #tz = a.group('TZ')  # just assume ET??
+                                #print "   tz = ", tz, " datetime =", datetimestr
+                hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S") # also timezone at end, e.g. " ET"
+                hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
+            elif key == 'HID':
+                hand.handid = info[key]
+            elif key == 'TABLE':
                 if info.get('TABLENO'):
                     hand.tablename = info.get('TABLENO')
                 elif info['ZONE'] and 'Zone' in info['ZONE']:
                     hand.tablename = info['ZONE'] + ' ' +info[key]
                 else:
-                    hand.tablename = info[key]        
+                    hand.tablename = info[key]
+            elif key == 'TOURNO':
+                hand.tourNo = info[key]
             if key == 'MAX' and info[key] != None:
                 hand.maxseats = int(info[key])
             if key == 'HU' and info[key] != None:
                 hand.maxseats = 2
             if key == 'VERSION':
                 hand.version = info[key]
-                
+
         if not hand.maxseats:
             hand.maxseats = 9
-            
+
         if not hand.version:
             hand.version = 'LEGACY'
     
     def readButton(self, hand):
-        m = self.re_Button.search(hand.handText)
-        if m:
+        """
+        Parses the hand text to extract the button position and updates the hand object with it.
+
+        Args:
+            self: The current object instance.
+            hand: The Hand object to update.
+        """
+        # Search for the button position using the regex pattern.
+        if m := self.re_Button.search(hand.handText):
+            # If a match is found, update the button position in the hand object.
             hand.buttonpos = int(m.group('BUTTON'))
 
+
     def readPlayerStacks(self, hand):
+        """
+        Reads player stacks from the hand history text and populates the playersMap and hand object.
+
+        Args:
+            hand: Hand object containing hand history text.
+
+        Returns:
+            None
+        """
+        # Initialize playersMap and seatNo
         self.playersMap, seatNo = {}, 1
+
+        # Find player info using appropriate regex
         if hand.gametype['base'] in ("stud"):
             m = self.re_PlayerInfoStud.finditer(hand.handText)
         else:
             m = self.re_PlayerInfo.finditer(hand.handText)
+
+        # Iterate over regex matches and populate playersMap and hand object
         for a in m:
+            # Check if card is dealt to a spot or version is MVS
             if re.search(r"%s (\s?\[ME\]\s)?: Card dealt to a spot" % re.escape(a.group('PNAME')), hand.handText) or hand.version == 'MVS':
+                # Check if current player is the dealer
                 if not hand.buttonpos and a.group('PNAME')=='Dealer':
                     hand.buttonpos = int(a.group('SEAT'))
+                # Check if current player is the hero
                 if a.group('HERO'):
                     self.playersMap[a.group('PNAME')] = 'Hero'
                 else:
-                    self.playersMap[a.group('PNAME')] = 'Seat %s' % a.group('SEAT')
+                    self.playersMap[a.group('PNAME')] = f"Seat {a.group('SEAT')}"
+                # Add player to hand object
                 hand.addPlayer(seatNo, self.playersMap[a.group('PNAME')], self.clearMoneyString(a.group('CASH')))
             seatNo += 1
+
+        # Check if any players were added to the hand object
         if len(hand.players)==0:
-            tmp = hand.handText[0:200]
-            log.error(("BovadaToFpdb.readPlayerStacks: '%s'") % tmp)
+            tmp = hand.handText[:200]
+            log.error(f"BovadaToFpdb.readPlayerStacks: '{tmp}'")
             raise FpdbParseError
+        # Set maxseats to 10 if 10 players were added to the hand object
         elif len(hand.players)==10:
             hand.maxseats = 10
+
         
     def playerSeatFromPosition(self, source, handid, position):
+        """
+        Given a position, returns the player object sitting in that position.
+
+        Args:
+            source (str): The source of the hand.
+            handid (str): The ID of the hand.
+            position (int): The position of the player.
+
+        Returns:
+            Player: The player object sitting in the given position.
+
+        Raises:
+            FpdbParseError: If no player is found in the given position.
+        """
+        # Get the player object from the players map.
         player = self.playersMap.get(position)
+        # If no player is found, log an error and raise an exception.
         if player is None:
-            log.error(("Hand.%s: '%s' unknown player seat from position: '%s'") % (source, handid, position))
+            log.error(
+                f"Hand.{source}: '{handid}' unknown player seat from position: '{position}'"
+            )
             raise FpdbParseError
-        return player            
+        # Return the player object.
+        return player
+          
 
     def markStreets(self, hand):
+        """
+        Mark the streets of the hand with the corresponding actions.
+
+        Args:
+            hand (Hand): The hand to mark the streets for.
+
+        Returns:
+            None
+        """
         # PREFLOP = ** Dealing down cards **
         # This re fails if,  say, river is missing; then we don't get the ** that starts the river.
         if hand.gametype['base'] == "hold":
             street, firststreet = 'PREFLOP', 'PREFLOP'
         else:
-            street, firststreet = 'THIRD', 'THIRD'  
+            street, firststreet = 'THIRD', 'THIRD'
+
+        # Count the number of players who were dealt in and the number of players who went all-in blind
         m = self.re_Action.finditer(self.re_Hole_Third.split(hand.handText)[0])
-        allinblind = 0
-        for action in m:
-            if action.group('ATYPE') == ' All-in':
-                allinblind+=1
+        allinblind = sum(action.group('ATYPE') == ' All-in' for action in m)
         m = self.re_Action.finditer(self.re_Hole_Third.split(hand.handText)[-1])
         dealtIn = len(hand.players) - allinblind
+
+        # Initialize variables
         streetactions, streetno, players, i, contenders, bets, acts = 0, 1, dealtIn, 0, dealtIn, 0, None
+
+        # Iterate through each action in the hand and process it accordingly
         for action in m:
             if action.groupdict()!=acts or streetactions == 0:
                 acts = action.groupdict()
-                #print "DEBUG: %s, %s, %s" % (street, acts['PNAME'], acts['ATYPE']), action.group('BET'), streetactions, players, contenders
+
+                # Determine the player who performed the action
                 player = self.playerSeatFromPosition('BovadaToFpdb.markStreets', hand.handid, action.group('PNAME'))
+
+                # Update the number of contenders based on the current action
                 if action.group('ATYPE') == ' Fold':
                     contenders -= 1
                 elif action.group('ATYPE') in (' Raises', ' raises'):
@@ -413,19 +580,24 @@ class Bovada(HandHistoryConverter):
                     if bets == 0 and streetno>1:
                         streetactions, players, bets = 0, contenders, 1
                     contenders -= 1
-                if action.group('ATYPE') != ' Card dealt to a spot':
-                    if action.group('ATYPE')!=' Big blind/Bring in' or hand.gametype['base'] == 'stud':
-                        streetactions += 1
+
+                # Update the number of actions for the current street and add the action to the hand's streets
+                if action.group('ATYPE') != ' Card dealt to a spot' and (action.group('ATYPE')!=' Big blind/Bring in' or hand.gametype['base'] == 'stud'):
+                    streetactions += 1
                 hand.streets[street] += action.group('ACTION') + '\n'
-                #print street, action.group('PNAME'), action.group('ATYPE'), streetactions, players, contenders
+
+                # Update the street number and street name if all players have acted
                 if streetactions == players:
                     streetno += 1
                     if streetno < len(hand.actionStreets):
                         street = hand.actionStreets[streetno]
                     streetactions, players, bets = 0, contenders, 0
-                
+
+        # If the first street is missing, add the entire hand text to it
         if not hand.streets.get(firststreet):
             hand.streets[firststreet] = hand.handText
+
+        # If the base game is hold'em and the board is not fully known, add the board cards to the corresponding streets
         if hand.gametype['base'] == "hold":
             if hand.gametype['fast']:
                 for street in ('FLOP', 'TURN', 'RIVER'):
@@ -439,108 +611,221 @@ class Bovada(HandHistoryConverter):
                         hand.streets[street] = m1.group(street)
             
 
-    def readCommunityCards(self, hand, street): # street has been matched by markStreets, so exists in this hand
+    def readCommunityCards(self, hand, street):
+        """
+        Read community cards from the hand text for the given street and update the hand object with the cards.
+
+        Args:
+        hand: A Hand object representing the current hand being played.
+        street: A string representing the current street being dealt (e.g. 'FLOP', 'TURN', 'RIVER').
+
+        Returns:
+        None
+        """
+        # If the game is fast, use a regex to match the community cards for the given street and update the hand object.
         if hand.gametype['fast']:
             m = self.re_Board2[street].search(hand.handText)
             if m and m.group('CARDS'):
                 hand.setCommunityCards(street, m.group('CARDS').split(' '))
-        else:
-            if street in ('FLOP','TURN','RIVER'):   # a list of streets which get dealt community cards (i.e. all but PREFLOP)
-                m = self.re_Board1.search(hand.handText)
-                if m and m.group(street):
-                    cards = m.group(street).split(' ')
-                    hand.setCommunityCards(street, cards)
+        # If the game is not fast and the street is one that gets dealt community cards, use a regex to match the community
+        # cards for the given street and update the hand object.
+        elif street in ('FLOP','TURN','RIVER'):   # a list of streets which get dealt community cards (i.e. all but PREFLOP)
+            m = self.re_Board1.search(hand.handText)
+            if m and m.group(street):
+                cards = m.group(street).split(' ')
+                hand.setCommunityCards(street, cards)
+
 
     def readAntes(self, hand):
+        """
+        Extracts the antes from a hand text and adds them to the corresponding players in the Hand object.
+
+        Args:
+            hand (Hand): The Hand object to add the antes to.
+
+        Returns:
+            None
+        """
+
+        # Initialize variables
         antes = None
         m = self.re_Antes.finditer(hand.handText)
+
+        # Iterate over the matches and add the antes to the corresponding players
         for a in m:
-            if a.groupdict()!=antes:
+            # Check if the antes have already been added for this player
+            if a.groupdict() != antes:
+                # Update the value of antes
                 antes = a.groupdict()
+                # Get the player seat from their position
                 player = self.playerSeatFromPosition('BovadaToFpdb.readAntes', hand.handid, antes['PNAME'])
+                # Add the ante to the player's stack
                 hand.addAnte(player, self.clearMoneyString(antes['ANTE']))
-    
+
     def readBringIn(self, hand):
-        m = self.re_BringIn.search(hand.handText,re.DOTALL)
-        if m:
-            #~ logging.debug("readBringIn: %s for %s" %(m.group('PNAME'),  m.group('BRINGIN')))
+        """
+        This function reads the BringIn value from a poker hand and adds it to the corresponding player's hand.
+
+        Args:
+        - self: instance of the class
+        - hand: instance of the Hand class
+
+        Returns: None
+        """
+        if m := self.re_BringIn.search(hand.handText, re.DOTALL):
+            # If there is a match with the BringIn pattern, add the value to the corresponding player's hand
             player = self.playerSeatFromPosition('BovadaToFpdb.readBringIn', hand.handid, m.group('PNAME'))
             hand.addBringIn(player,  self.clearMoneyString(m.group('BRINGIN')))            
-            
-        if hand.gametype['sb'] == None and hand.gametype['bb'] == None:
+
+        # If the small blind and big blind values are not defined, set them to default values
+        if hand.gametype['sb'] is None and hand.gametype['bb'] is None:
             hand.gametype['sb'] = "1"
             hand.gametype['bb'] = "2"
+
         
     def readBlinds(self, hand):
+        """Reads blinds from hand history text and updates the hand object with the blinds information.
+
+        Args:
+            hand (Hand): A Hand object representing the current hand.
+
+        Returns:
+            None
+        """
+        # Initialize variables to keep track of small blind, big blind, and other actions
         sb, bb, acts, postsb, postbb, both = None, None, None, None, None, None
+
+        # Check if there are any uncalled bets in the hand, set the flag in the hand object if there are none
         if not self.re_ReturnBet.search(hand.handText):
             hand.setUncalledBets(True)
+
+        # Find all instances of small blind posts and update the hand object with the small blind information
         for a in self.re_PostSB.finditer(hand.handText):
-            if postsb!=a.groupdict():
+            if postsb != a.groupdict():
                 postsb = a.groupdict()
+                # Get the player's seat number from their position at the table
                 player = self.playerSeatFromPosition('BovadaToFpdb.readBlinds.postSB', hand.handid, postsb['PNAME'])
+                # Add the small blind bet to the hand object for the player
                 hand.addBlind(player, 'small blind', self.clearMoneyString(postsb['SB']))
+                # If the small blind is not set in the game type information, update it with the small blind amount
                 if not hand.gametype['sb']:
                     hand.gametype['sb'] = self.clearMoneyString(postsb['SB'])
+            # Update the small blind variable with the current amount
             sb = self.clearMoneyString(postsb['SB'])
+            # Check if the player is all-in with their blind bet
             self.allInBlind(hand, 'PREFLOP', a, 'small blind')
+
+        # Find all instances of big blind posts and update the hand object with the big blind information
         for a in self.re_PostBB.finditer(hand.handText):
-            if postbb!=a.groupdict():
+            if postbb != a.groupdict():
                 postbb = a.groupdict()
+                # Get the player's seat number from their position at the table
                 player = self.playerSeatFromPosition('BovadaToFpdb.readBlinds.postBB', hand.handid, 'Big Blind')
+                # Add the big blind bet to the hand object for the player
                 hand.addBlind(player, 'big blind', self.clearMoneyString(postbb['BB']))
+                # Check if the player is all-in with their blind bet
                 self.allInBlind(hand, 'PREFLOP', a, 'big blind')
+                # If the big blind is not set in the game type information, update it with the big blind amount
                 if not hand.gametype['bb']:
                     hand.gametype['bb'] = self.clearMoneyString(postbb['BB'])
+                # Update the big blind variable with the current amount
                 bb = self.clearMoneyString(postbb['BB'])
+                # If the currency is not set in the game type information, update it based on the big blind amount
                 if not hand.gametype['currency']:
-                    if postbb['CURRENCY'].find("$")!=-1:
-                        hand.gametype['currency']="USD"
+                    if postbb['CURRENCY'].find("$") != -1:
+                        hand.gametype['currency'] = "USD"
                     elif re.match("^[0-9+]*$", postbb['CURRENCY']):
-                        hand.gametype['currency']="play"
+                        hand.gametype['currency'] = "play"
+
+        # Find all instances of actions before the flop and update the hand object with the relevant information
         for a in self.re_Action.finditer(self.re_Hole_Third.split(hand.handText)[0]):
-            if acts!=a.groupdict():
+            if acts != a.groupdict():
                 acts = a.groupdict()
+                # Check if the action is an all-in bet
                 if acts['ATYPE'] == ' All-in':
-                    re_Ante_Plyr  = re.compile(r"^" + re.escape(acts['PNAME']) + " (\s?\[ME\]\s)?: Ante chip %(CUR)s(?P<ANTE>[%(NUM)s]+)" % self.substitutions, re.MULTILINE)
+                    # Create a regular expression to match the player's ante bet if applicable
+                    re_Ante_Plyr = re.compile(r"^" + re.escape(acts['PNAME']) + " (\s?\[ME\]\s)?: Ante chip %(CUR)s(?P<ANTE>[%(NUM)s]+)" % self.substitutions, re.MULTILINE)
+                    # Search for all instances of antes in the hand history text
                     m = self.re_Antes.search(hand.handText)
+                    # Search for the player's ante bet if applicable
                     m1 = re_Ante_Plyr.search(hand.handText)
+                    # If there are no instances of antes or the player's ante bet is found, update the hand object with the relevant information
                     if (not m or m1):
+                        # Get the player's seat number from their position at the table
                         player = self.playerSeatFromPosition('BovadaToFpdb.readBlinds.postBB', hand.handid, acts['PNAME'])
+                        # If the action is a big blind bet, add the big blind bet to the hand object for the player
                         if acts['PNAME'] == 'Big Blind':
                             hand.addBlind(player, 'big blind', self.clearMoneyString(acts['BET']))
+                            # Check if the player is all-in with their big blind bet
                             self.allInBlind(hand, 'PREFLOP', a, 'big blind')
-                        elif acts['PNAME'] == 'Small Blind' or (acts['PNAME'] == 'Dealer' and len(hand.players)==2):
+                        # If the action is a small blind bet or the dealer is the only other player, add the small blind bet to the hand object for the player
+                        elif acts['PNAME'] == 'Small Blind' or (acts['PNAME'] == 'Dealer' and len(hand.players) == 2):
                             hand.addBlind(player, 'small blind', self.clearMoneyString(acts['BET']))
+                            # Check if the player is all-in with their small blind bet
                             self.allInBlind(hand, 'PREFLOP', a, 'small blind')
-                    elif m:
+                    # If there are instances of antes and the player's ante bet is not found, update the hand object with the player's ante bet
+                    else:
+                        # Get the player's seat number from their position at the table
                         player = self.playerSeatFromPosition('BovadaToFpdb.readAntes', hand.handid, acts['PNAME'])
+                        # Add the ante bet to the hand object for the player
                         hand.addAnte(player, self.clearMoneyString(acts['BET']))
+                        # Check if the player is all-in with their ante bet
                         self.allInBlind(hand, 'PREFLOP', a, 'antes')
+
+        # Fix any issues with the blind information in the hand object
         self.fixBlinds(hand)
+
+        # Find all instances of both players posting a blind and update the hand object with the relevant information
         for a in self.re_PostBoth.finditer(hand.handText):
-            if both!=a.groupdict():
+            if both != a.groupdict():
                 both = a.groupdict()
+                # Get the player's seat number from their position at the table
                 player = self.playerSeatFromPosition('BovadaToFpdb.readBlinds.postBoth', hand.handid, both['PNAME'])
+                # Add the both blind bet to the hand object for the player
                 hand.addBlind(player, 'both', self.clearMoneyString(both['SBBB']))
+                # Check if the player is all-in with their both blind bet
                 self.allInBlind(hand, 'PREFLOP', a, 'both')
-        
-        
-        
+
+
     def fixBlinds(self, hand):
-        if hand.gametype['sb'] == None and hand.gametype['bb'] != None:
+        """
+        Fixes blinds for the given poker hand.
+
+        Args:
+            hand (Hand): The poker hand to fix blinds for.
+
+        Raises:
+            FpdbParseError: If failed to fix blinds.
+        """
+        # If small blind is missing and big blind is present.
+        if hand.gametype['sb'] is None and hand.gametype['bb'] != None:
             BB = str(Decimal(hand.gametype['bb']) * 2)
+            # If the doubled big blind value exists in the Lim_Blinds dictionary.
             if self.Lim_Blinds.get(BB) != None:
+                # Set the small blind value to the first value of the Lim_Blinds dictionary.
                 hand.gametype['sb'] = self.Lim_Blinds.get(BB)[0]
-        elif hand.gametype['bb'] == None and hand.gametype['sb'] != None:
+
+        # If big blind is missing and small blind is present.
+        elif hand.gametype['bb'] is None and hand.gametype['sb'] != None:
+            # Loop through the Lim_Blinds dictionary.
             for k, v in list(self.Lim_Blinds.items()):
+                # If the small blind value matches the first value of the Lim_Blinds dictionary.
                 if hand.gametype['sb'] == v[0]:
+                    # Set the big blind value to the second value of the Lim_Blinds dictionary.
                     hand.gametype['bb'] = v[1]
-        if hand.gametype['sb'] == None or hand.gametype['bb'] == None:
-            log.error(("BovadaToFpdb.fixBlinds: Failed to fix blinds") + " Hand ID: %s" % (hand.handid, ))
+
+        # If either small blind or big blind is missing.
+        if hand.gametype['sb'] is None or hand.gametype['bb'] is None:
+            # Log an error and raise an exception.
+            log.error(
+                f"BovadaToFpdb.fixBlinds: Failed to fix blinds Hand ID: {hand.handid}"
+            )
             raise FpdbParseError
+
+        # Set the small blind and big blind values of the hand.
         hand.sb = hand.gametype['sb']
         hand.bb = hand.gametype['bb']
+
 
     def readHoleCards(self, hand):
 #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
@@ -555,7 +840,7 @@ class Bovada(HandHistoryConverter):
                         hand.hero = 'Hero'
                         newcards = found.group('NEWCARDS').split(' ')
                         hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
-                    
+
         for street, text in list(hand.streets.items()):
             if not text or street in ('PREFLOP', 'DEAL'): continue  # already done these
             m = self.re_ShowdownAction.finditer(hand.streets[street])
@@ -570,11 +855,19 @@ class Bovada(HandHistoryConverter):
                     else:
                         oldcards = found.group('CARDS').split(' ')
                         newcards = []
-    
+
                     if street == 'THIRD' and found.group('HERO'): # hero in stud game
                         hand.hero = 'Hero'
                         hand.dealt.add(player) # need this for stud??
-                        hand.addHoleCards(street, player, closed=newcards[0:2], open=[newcards[2]], shown=False, mucked=False, dealt=False)
+                        hand.addHoleCards(
+                            street,
+                            player,
+                            closed=newcards[:2],
+                            open=[newcards[2]],
+                            shown=False,
+                            mucked=False,
+                            dealt=False,
+                        )
                     else:
                         hand.addHoleCards(street, player, open=newcards, closed=oldcards, shown=False, mucked=False, dealt=False)
 
