@@ -212,12 +212,10 @@ class PartyPoker(HandHistoryConverter):
 
     def allHandsAsList(self):
         list = HandHistoryConverter.allHandsAsList(self)
-        if list is None:
-            return []
-        return filter(lambda text: len(text.strip()), list)
+        return [] if list is None else filter(lambda text: len(text.strip()), list)
 
     def compilePlayerRegexs(self,  hand):
-        players = set([player[1] for player in hand.players])
+        players = {player[1] for player in hand.players}
         if not players <= self.compiledPlayers: # x <= y means 'x is subset of y'
             self.compiledPlayers = players
             player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
