@@ -828,8 +828,16 @@ class Bovada(HandHistoryConverter):
 
 
     def readHoleCards(self, hand):
-#    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
-#    we need to grab hero's cards
+        """
+        Reads the hole cards for each street in the hand and adds them to the Hand object.
+
+        Args:
+        - hand (Hand): A Hand object to which hole cards will be added.
+
+        Returns:
+        - None
+        """
+        # Streets PREFLOP, PREDRAW, and THIRD are special cases because we need to grab hero's cards.
         for street in ('PREFLOP', 'DEAL'):
             if street in hand.streets.keys():
                 foundDict = None
@@ -842,7 +850,8 @@ class Bovada(HandHistoryConverter):
                         hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
 
         for street, text in list(hand.streets.items()):
-            if not text or street in ('PREFLOP', 'DEAL'): continue  # already done these
+            if not text or street in ('PREFLOP', 'DEAL'):
+                continue  # already done these
             m = self.re_ShowdownAction.finditer(hand.streets[street])
             foundDict = None
             for found in m:
@@ -871,91 +880,172 @@ class Bovada(HandHistoryConverter):
                     else:
                         hand.addHoleCards(street, player, open=newcards, closed=oldcards, shown=False, mucked=False, dealt=False)
 
+
     def readAction(self, hand, street):
+        """
+        Reads the actions of the hand and populates the corresponding attributes of the hand object.
+
+        Args:
+        - hand: Hand object representing the current hand being played.
+        - street: String representing the current betting round.
+
+        Returns:
+        - None
+        """
+
         acts = None
         m = self.re_Action.finditer(hand.streets[street])
+
         for action in m:
-            if acts!=action.groupdict():
+            if acts != action.groupdict():
                 acts = action.groupdict()
                 player = self.playerSeatFromPosition('BovadaToFpdb.readAction', hand.handid, action.group('PNAME'))
-                #print "DEBUG: %s, %s, %s, %s, %s" % (street, acts['PNAME'], player, acts['ATYPE'], action.group('BET'))
+
+                # If action is not a check, fold, card dealt to a spot, or big blind/bring in, update uncalled bets
                 if action.group('ATYPE') not in (' Checks', ' Fold', ' Card dealt to a spot', ' Big blind/Bring in') and not hand.allInBlind:
                     hand.setUncalledBets(False)
+
+                # Update hand object based on the type of action
                 if action.group('ATYPE') == ' Fold':
-                    hand.addFold( street, player)
+                    hand.addFold(street, player)
                 elif action.group('ATYPE') == ' Checks':
-                    hand.addCheck( street, player)
-                elif action.group('ATYPE') == ' Calls' or action.group('ATYPE') == ' Call':
+                    hand.addCheck(street, player)
+                elif action.group('ATYPE') in [' Calls', ' Call']:
                     if not action.group('BET'):
-                        log.error("BovadaToFpdb.readAction: Amount not found in Call %s" % hand.handid)
+                        log.error(f"BovadaToFpdb.readAction: Amount not found in Call {hand.handid}")
                         raise FpdbParseError
-                    hand.addCall( street, player, self.clearMoneyString(action.group('BET')) )
+                    hand.addCall(street, player, self.clearMoneyString(action.group('BET')))
                 elif action.group('ATYPE') in (' Raises', ' raises', ' All-in(raise)', ' All-in(raise-timeout)'):
                     if action.group('BETTO'):
                         bet = self.clearMoneyString(action.group('BETTO'))
                     elif action.group('BET'):
                         bet = self.clearMoneyString(action.group('BET'))
                     else:
-                        log.error("BovadaToFpdb.readAction: Amount not found in Raise %s" % hand.handid)
+                        log.error(f"BovadaToFpdb.readAction: Amount not found in Raise {hand.handid}")
                         raise FpdbParseError
-                    hand.addRaiseTo( street, player, bet )
+                    hand.addRaiseTo(street, player, bet)
                 elif action.group('ATYPE') in (' Bets', ' bets', ' Double bets'):
                     if not action.group('BET'):
-                        log.error("BovadaToFpdb.readAction: Amount not found in Bet %s" % hand.handid)
+                        log.error(f"BovadaToFpdb.readAction: Amount not found in Bet {hand.handid}")
                         raise FpdbParseError
-                    hand.addBet( street, player, self.clearMoneyString(action.group('BET')) )
+                    hand.addBet(street, player, self.clearMoneyString(action.group('BET')))
                 elif action.group('ATYPE') == ' All-in':
                     if not action.group('BET'):
-                        log.error("BovadaToFpdb.readAction: Amount not found in All-in %s" % hand.handid)
+                        log.error(f"BovadaToFpdb.readAction: Amount not found in All-in {hand.handid}")
                         raise FpdbParseError
-                    hand.addAllIn( street, player, self.clearMoneyString(action.group('BET')) )
+                    hand.addAllIn(street, player, self.clearMoneyString(action.group('BET')))
                     self.allInBlind(hand, street, action, action.group('ATYPE'))
                 elif action.group('ATYPE') == ' Bring_in chip':
                     pass
-                elif action.group('ATYPE') in (' Card dealt to a spot', ' Big blind/Bring in'):
-                    pass
-                else:
-                    log.debug(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
+                elif action.group('ATYPE') not in (' Card dealt to a spot', ' Big blind/Bring in'):
+                    log.debug(
+                        ("DEBUG:")
+                        + " "
+                        + f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'"
+                    )
+
                 
     def allInBlind(self, hand, street, action, actiontype):
+        """
+        Sets the "all-in blind" flag for a hand if a player goes all-in with a blind bet.
+        Args:
+            hand (Hand): the current hand being played
+            street (str): the current betting round
+            action (str): the action taken by the player
+            actiontype (str): the type of action taken by the player
+        """
+        # Check if the current street is preflop or deal
         if street in ('PREFLOP', 'DEAL'):
+            # Get the player who made the all-in blind bet
             player = self.playerSeatFromPosition('BovadaToFpdb.allInBlind', hand.handid, action.group('PNAME'))
+            # Check if the player's stack is 0 and if they did not return any bet
             if hand.stacks[player]==0 and not self.re_ReturnBet.search(hand.handText):
+                # Set the uncalled bets flag to True and set the all-in blind flag to True
                 hand.setUncalledBets(True)
                 hand.allInBlind = True
 
+
     def readShowdownActions(self, hand):
-# TODO: pick up mucks also??
+        """
+        Parses the handText and adds the shown cards to the corresponding player's hand.
+
+        Args:
+            hand (Hand): The hand object representing the current hand being parsed.
+
+        Returns:
+            None
+        """
+        # TODO: pick up mucks also??
         if hand.gametype['base'] in ("hold"):
-            for shows in self.re_ShowdownAction.finditer(hand.handText):            
+            for shows in self.re_ShowdownAction.finditer(hand.handText):
                 cards = shows.group('CARDS').split(' ')
                 player = self.playerSeatFromPosition('BovadaToFpdb.readShowdownActions', hand.handid, shows.group('PNAME'))
                 hand.addShownCards(cards, player)
 
-    def readCollectPot(self,hand):
+    def readCollectPot(self, hand):
+        """Parses hand text to extract pot information and adds it to the hand object.
+
+        Args:
+            hand: A Hand object containing the hand text to be parsed.
+
+        Returns:
+            None
+        """
+        # Determine which pattern to use for parsing based on hand version
         if self.re_CollectPot2.search(hand.handText):
             re_CollectPot = self.re_CollectPot2
         else:
             re_CollectPot = self.re_CollectPot1
+
+        # Search for pot information using the selected pattern
         for m in re_CollectPot.finditer(hand.handText.replace(" [ME]", "") if hand.version == 'MVS' else hand.handText):# [ME]
             collect, pot = m.groupdict(), 0
-            if 'POT1' in collect and collect['POT1']!=None:
+            if 'POT1' in collect and collect['POT1'] != None:
                 pot += Decimal(self.clearMoneyString(collect['POT1']))
-            if 'POT2' in collect and collect['POT2']!=None:
+            if 'POT2' in collect and collect['POT2'] != None:
                 pot += Decimal(self.clearMoneyString(collect['POT2']))
-            if pot>0: 
+
+            # If pot information was found, add it to the hand object
+            if pot > 0: 
                 player = self.playerSeatFromPosition('BovadaToFpdb.readCollectPot', hand.handid, collect['PNAME'])
-                hand.addCollectPot(player=player,pot=str(pot))
+                hand.addCollectPot(player=player, pot=str(pot))
+
 
     def readShownCards(self,hand):
+        """
+        Reads and returns the cards shown by the dealer.
+
+        Args:
+            hand (list): A list of cards shown by the dealer.
+
+        Returns:
+            list: A list of cards shown by the dealer.
+        """
+        # TODO: Implement the logic for reading shown cards
         pass
     
 
     def readTourneyResults(self, hand):
-        """Reads knockout bounties and add them to the koCounts dict"""
+        """
+        Reads knockout bounties and adds them to the koCounts dict.
+
+        Args:
+            hand (Hand): The hand object to read knockout bounties from.
+
+        Returns:
+            None
+        """
+
+        # Find all the knockout bounties in the hand text
         for a in self.re_Bounty.finditer(hand.handText):
+            # Get the player seat from their position
             player = self.playerSeatFromPosition('BovadaToFpdb.readCollectPot', hand.handid, a.group('PNAME'))
+
+            # Add the player to the koCounts dict if they are not already in it
             if player not in hand.koCounts:
                 hand.koCounts[player] = 0
-            hand.koCounts[player] += 1    
+
+            # Increment the player's knockout count
+            hand.koCounts[player] += 1
+ 
         

@@ -38,12 +38,23 @@ if Configuration.LOCALE_ENCODING == 'UTF8':
     not_needed1, not_needed2, not_needed3 = True, True, True
 
 def to_utf8(s):
-    if not_needed1: return s
+    """
+    Attempts to convert a string to UTF-8 encoding.
+
+    Args:
+        s (str): The string to convert.
+
+    Returns:
+        str: The converted string in UTF-8 encoding.
+
+    Raises:
+        UnicodeDecodeError: If the string cannot be decoded using the locale encoding of the system.
+        UnicodeEncodeError: If the string cannot be encoded using UTF-8 encoding.
+    """
+    if not_needed1: return s # If not_needed1 is true, return the original string
 
     try:
-        #(_out, _len) = encoder_to_utf.encode(s)
-        _out = str(s, Configuration.LOCALE_ENCODING).encode('utf-8')
-        return _out
+        return str(s, Configuration.LOCALE_ENCODING).encode('utf-8') # Attempt to decode the string using the locale encoding and then encode it in UTF-8
     except UnicodeDecodeError:
         sys.stderr.write(('Could not convert: "%s"') % (s+"\n"))
         raise
@@ -53,8 +64,25 @@ def to_utf8(s):
     except TypeError: # TypeError is raised when we give unicode() an already encoded string
         return s
 
+
 def to_db_utf8(s):
-    if not_needed2: return s
+    """Encodes the given string to UTF-8.
+
+    If the string does not need to be encoded, it is returned as-is.
+    If the string cannot be encoded, an error message is printed to stderr and an exception is raised.
+
+    Args:
+        s (str): The string to encode.
+
+    Returns:
+        str: The encoded string.
+
+    Raises:
+        UnicodeDecodeError: If the string cannot be decoded.
+        UnicodeEncodeError: If the string cannot be encoded.
+    """
+    if not_needed2: 
+        return s
 
     try:
         (_out, _len) = encoder_to_utf.encode(str(s))
@@ -66,17 +94,36 @@ def to_db_utf8(s):
         sys.stderr.write(('Could not encode: "%s"') % (s+"\n"))
         raise
 
+
 def to_gui(s):
+    """Encode a string to the system's encoding for displaying in a GUI.
+
+    Args:
+        s (str): The string to encode.
+
+    Returns:
+        str: The encoded string.
+
+    Raises:
+        UnicodeDecodeError: If the string cannot be decoded.
+        UnicodeEncodeError: If the string cannot be encoded.
+    """
+
+    # If the string does not need to be encoded, return it as is
     if not_needed3: return s
 
     try:
-        # we usually don't want to use 'replace' but this is only for displaying
-        # in the gui so it doesn't matter if names are missing an accent or two
+        # Encode the string using the system's encoding
+        # We usually don't want to use 'replace' but this is only for displaying
+        # in the GUI so it doesn't matter if names are missing an accent or two
         (_out, _len) = encoder_to_sys.encode(s, 'replace')
         return _out
     except UnicodeDecodeError:
+        # If the string cannot be decoded, write an error message to stderr and raise an exception
         sys.stderr.write(('Could not convert: "%s"') % (s+"\n"))
         raise
     except UnicodeEncodeError:
+        # If the string cannot be encoded, write an error message to stderr and raise an exception
         sys.stderr.write(('Could not encode: "%s"') % (s+"\n"))
         raise
+

@@ -27,12 +27,23 @@ from TourneySummary import *
 
 
 class iPokerSummary(TourneySummary):
+    """A class to represent iPoker tournament summaries.
+
+    This class inherits from the `TourneySummary` class and adds additional functionality
+    to handle iPoker-specific data.
+
+    Attributes:
+    - substitutions (dict): A dictionary containing regular expressions to clean up the data.
+    - currencies (dict): A dictionary mapping currency symbols to currency codes.
+    """
+
     substitutions = {
-                     'LS'  : u"\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|",
-                     'PLYR': r'(?P<PNAME>[^"]+)',
-                     'NUM' : r'.,0-9',
+                     'LS'  : u"\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|",  # Regex pattern to remove currency symbols.
+                     'PLYR': r'(?P<PNAME>[^"]+)',  # Regex pattern to extract player names.
+                     'NUM' : r'.,0-9',  # Regex pattern to extract numbers.
                     }
-    currencies = { u'€':'EUR', '$':'USD', '':'T$', u'£':'GBP', 'RSD': 'RSD'}
+    currencies = { u'€':'EUR', '$':'USD', '':'T$', u'£':'GBP', 'RSD': 'RSD'} 
+
 
     months = { 'Jan':1, 'Feb':2, 'Mar':3, 'Apr':4, 'May':5, 'Jun':6, 'Jul':7, 'Aug':8, 'Sep':9, 'Oct':10, 'Nov':11, 'Dec':12}
     
@@ -94,11 +105,34 @@ class iPokerSummary(TourneySummary):
 
     @staticmethod
     def getSplitRe(self, head):
-        re_SplitTourneys = re.compile("PokerStars Tournament ")
-        return re_SplitTourneys
+        """
+        Returns a regular expression object that can be used to split tournament
+        information from a iPoker tournament header.
+
+        Args:
+            head (str): The tournament header string.
+
+        Returns:
+            re.Pattern: A compiled regular expression pattern that can be used to
+            split tournament information from the header string.
+        """
+        # Regular expression pattern to split tournament information from header
+        return re.compile("iPoker Tournament ") #not used
+    
 
 
     def parseSummary(self):
+        """
+        Parses summaryText to extract game information.
+
+        Returns:
+            None
+
+        Raises:
+            FpdbParseError: If the summaryText cannot be parsed properly.
+            FpdbHandPartial: If the tournament number cannot be parsed.
+        """
+        # Search for game type
         m = self.re_GameType.search(self.summaryText)
         if not m:
             tmp = self.summaryText[0:200]
@@ -108,13 +142,15 @@ class iPokerSummary(TourneySummary):
         mg = m.groupdict()
         #print "DEBUG: m.groupdict(): %s" % mg
 
+        # Check if it's a tournament
         if 'SB' in mg and mg['SB'] != None:
             tmp = self.summaryText[0:200]
             log.error(("iPokerSummary.parseSummary: Text does not appear to be a tournament '%s'") % tmp)
             raise FpdbParseError
         else:
             tourney = True
-#                self.gametype['limitType'] = 
+
+        # Determine the base and category of the game
         if 'GAME' in mg:
             if mg['CATEGORY'] is None:
                 (self.info['base'], self.info['category']) = ('hold', '5_omahahi') 
@@ -123,6 +159,7 @@ class iPokerSummary(TourneySummary):
         if 'LIMIT' in mg:
             self.gametype['limitType'] = self.limits[mg['LIMIT']]
 
+        # Parse the start time of the game
         m2 = self.re_DateTime1.search(mg['DATETIME'])
         if m2:
             month = self.months[m2.group('M')]
@@ -150,12 +187,14 @@ class iPokerSummary(TourneySummary):
                         datestr = '%Y/%m/%d %H:%M'
                 self.startTime = datetime.datetime.strptime(mg['DATETIME'], datestr)
 
+        # Determine the currency of the game
         if not mg['CURRENCY'] or mg['CURRENCY']=='fun':
             self.buyinCurrency = 'play'
         else:
             self.buyinCurrency = mg['CURRENCY']
         self.currency = self.buyinCurrency
         
+        # Parse the tournament number
         mt = self.re_TourNo.search(mg['TABLE'])
         if mt:
             self.tourNo = mt.group('TOURNO')
@@ -214,12 +253,23 @@ class iPokerSummary(TourneySummary):
             raise FpdbParseError
 
 
-    def convert_to_decimal(self, string):
+    def convert_to_decimal(self, string: str) -> Decimal:
+        """
+        Takes in a string representation of a decimal value and returns a Decimal object.
+
+        Args:
+            string (str): The string representation of the decimal value.
+
+        Returns:
+            Decimal: The converted Decimal object.
+        """
+        # Clear the string of any unwanted characters
         dec = self.clearMoneyString(string)
-        m = self.re_Buyin.search(dec)
-        if m:
-            dec = Decimal(m.group('BUYIN'))
-        else:
-            dec = 0
+
+        # Use regex to extract the 'BUYIN' value from the string and convert it to a Decimal object
+        # If no 'BUYIN' value is found, set the Decimal object to 0
+        dec = Decimal(m.group('BUYIN')) if (m := self.re_Buyin.search(dec)) else 0
+
         return dec
+
 

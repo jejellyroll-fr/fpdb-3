@@ -40,7 +40,7 @@ from PyQt5.QtWidgets import (QApplication, QFrame, QMenu,
                              QTableView, QVBoxLayout)
 
 from io import StringIO
-
+from decimal_wrapper import Decimal
 import GuiReplayer
 
 
@@ -214,7 +214,7 @@ class GuiHandViewer(QSplitter):
         bet = 0
         if hero in list(hand.pot.committed.keys()):
             bet = hand.pot.committed[hero]
-        net = won - bet
+        net = Decimal(str(won)) - bet
         pos = hand.get_player_position(hero)
         gt = hand.gametype['category']
         row = []

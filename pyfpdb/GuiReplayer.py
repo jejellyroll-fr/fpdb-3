@@ -1806,7 +1806,7 @@ class TableState(object):
                 player.holecards = player.streetcards[self.street]
         for name, amount in list(collectees.items()):
             player = self.players[name]
-            player.chips += amount
+            player.chips += Decimal(str(amount))
             player.action = "collected"
             player.justacted = True
         for name, amount in list(returned.items()):
