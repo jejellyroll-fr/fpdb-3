@@ -50,7 +50,12 @@ import Hand
 from Exceptions import *
 import Configuration
 
+
+
 class HandHistoryConverter(object):
+    """
+    Converts hand history files to other formats.
+    """
 
     READ_CHUNK_SIZE = 10000 # bytes to read at a time from file in tail mode
 
@@ -65,24 +70,38 @@ class HandHistoryConverter(object):
     codepage = "cp1252"
 
     re_tzOffset = re.compile('^\w+[+-]\d{4}$')
-    copyGameHeader = False
-    summaryInFile  = False
+
+    copyGameHeader = False # Set to True to copy the game header to the output file.
+
+    summaryInFile  = False # Set to True if the summary should be appended to the output file.
+
+
+
 
     # maybe archive params should be one archive param, then call method in specific converter.   if archive:  convert_archive()
-    def __init__( self, config, in_path = '-', out_path = '-', index=0
-                , autostart=True, starsArchive=False, ftpArchive=False, sitename="PokerStars"):
-        """\
-in_path   (default '-' = sys.stdin)
-out_path  (default '-' = sys.stdout)
-"""
+    def __init__(self, config, in_path='-', out_path='-', index=0, autostart=True, starsArchive=False, ftpArchive=False, sitename="PokerStars"):
+        """Initializes HandHistory object.
+
+        Args:
+            config: Configuration object.
+            in_path: Input file path. Default is '-' which represents sys.stdin.
+            out_path: Output file path. Default is '-' which represents sys.stdout.
+            index: Index of the object.
+            autostart: Boolean value indicating whether to start the object automatically.
+            starsArchive: Boolean value indicating whether to archive stars.
+            ftpArchive: Boolean value indicating whether to archive ftp.
+            sitename: Name of the site.
+        """
 
         self.config = config
         self.import_parameters = self.config.get_import_parameters()
         self.sitename = sitename
-        log.info("HandHistory init - %s site, %s subclass, in_path '%r'; out_path '%r'"
-                 % (self.sitename, self.__class__, in_path, out_path) ) # should use self.filter, not self.sitename
 
-        self.index     = index
+        # Log HandHistory initialization details.
+        log.info("HandHistory init - %s site, %s subclass, in_path '%r'; out_path '%r'"
+                % (self.sitename, self.__class__, in_path, out_path)) # should use self.filter, not self.sitename
+
+        self.index = index
         self.starsArchive = starsArchive
         self.ftpArchive = ftpArchive
 
@@ -98,139 +117,209 @@ out_path  (default '-' = sys.stdout)
         self.isCarraige = False
         self.autoPop = False
 
-        # Tourney object used to store TourneyInfo when called to deal with a Summary file
+        # Tourney object used to store TourneyInfo when called to deal with a Summary file.
         self.tourney = None
 
         if in_path == '-':
             self.in_fh = sys.stdin
         self.out_fh = get_out_fh(out_path, self.import_parameters)
 
-        self.compiledPlayers   = set()
-        self.maxseats  = 0
+        self.compiledPlayers = set()
+        self.maxseats = 0
 
         self.status = True
 
-        self.parsedObjectType = "HH"      #default behaviour : parsing HH files, can be "Summary" if the parsing encounters a Summary File
-        
+        # default behaviour : parsing HH files, can be "Summary" if the parsing encounters a Summary File.
+        self.parsedObjectType = "HH"
 
         if autostart:
             self.start()
 
+
     def __str__(self):
+        """
+        Converts a hand history file from a poker site into a standardized format.
+
+        Returns:
+            A string containing information about the converter's configuration.
+        """
+        # Use string interpolation to create a formatted string containing the converter's configuration.
         return """
-HandHistoryConverter: '%(sitename)s'  
-    filetype    '%(filetype)s'
-    in_path     '%(in_path)s'
-    out_path    '%(out_path)s'
-    """ %  locals()
+        HandHistoryConverter: '%(sitename)s'  
+        filetype    '%(filetype)s'
+        in_path     '%(in_path)s'
+        out_path    '%(out_path)s'
+        """ % locals()
+
 
     def start(self):
         """Process a hand at a time from the input specified by in_path."""
         starttime = time.time()
+        # Perform sanity check
         if not self.sanityCheck():
             log.warning(("Failed sanity check"))
             return
-        
+
+        # Initialize variables
         self.numHands = 0
         self.numPartial = 0
         self.numSkipped = 0
         self.numErrors = 0
         lastParsed = None
         handsList = self.allHandsAsList()
-        log.debug( ("Hands list is:") + str(handsList))
-        log.info(("Parsing %d hands") % len(list(handsList)))
+
+        # Log hands list
+        log.debug(f"Hands list is:{str(handsList)}")
+
         # Determine if we're dealing with a HH file or a Summary file
         # quick fix : empty files make the handsList[0] fail ==> If empty file, go on with HH parsing
         if len(list(handsList)) == 0 or self.isSummary(handsList[0]) == False:
             self.parsedObjectType = "HH"
+            # Loop through hands in handsList
             for handText in handsList:
                 try:
+                    # Process hand and append to processedHands list
                     self.processedHands.append(self.processHand(handText))
                     lastParsed = 'stored'
                 except FpdbHandPartial as e:
+                    # Handle partial hand exception
                     self.numPartial += 1
                     lastParsed = 'partial'
                     log.debug("%s" % e)
                 except FpdbHandSkipped as e:
+                    # Handle skipped hand exception
                     self.numSkipped += 1
                     lastParsed = 'skipped'
                 except FpdbParseError:
+                    # Handle parse error exception
                     self.numErrors += 1
                     lastParsed = 'error'
                     log.error(("FpdbParseError for file '%s'") % self.in_path)
+            # Check if last hand was partially written and autoPop is enabled
             if lastParsed in ('partial', 'error') and self.autoPop:
                 self.index -= len(handsList[-1])
                 if self.isCarraige:
-                     self.index -= handsList[-1].count('\n')
+                    self.index -= handsList[-1].count('\n')
                 handsList.pop()
                 if lastParsed=='partial':
                     self.numPartial -= 1
                 else:
                     self.numErrors -= 1
                 log.info(("Removing partially written hand & resetting index"))
+
+            # Set numHands
             self.numHands = len(list(handsList))
             endtime = time.time()
+
+            # Log successful read of hands
             log.info(("Read %d hands (%d failed) in %.3f seconds") % (self.numHands, (self.numErrors + self.numPartial), endtime - starttime))
         else:
             self.parsedObjectType = "Summary"
+            # Attempt to read summary info
             summaryParsingStatus = self.readSummaryInfo(handsList)
             endtime = time.time()
+            # Log success/failure of summary file parsing
             if summaryParsingStatus :
                 log.info(("Summary file '%s' correctly parsed (took %.3f seconds)") % (self.in_path, endtime - starttime))
             else :
                 log.warning(("Error converting summary file '%s' (took %.3f seconds)") % (self.in_path, endtime - starttime))
-    
+
     def setAutoPop(self, value):
+        """
+        Set the value of autoPop attribute.
+
+        Args:
+            value (bool): The value to set autoPop to.
+        """
+        # Set the autoPop attribute to the given value.
         self.autoPop = value
+
                 
     def allHandsAsList(self):
-        """Return a list of handtexts in the file at self.in_path"""
-        #TODO : any need for this to be generator? e.g. stars support can email one huge file of all hands in a year. Better to read bit by bit than all at once.
+        """
+        Return a list of handtexts in the file at self.in_path.
+        """
+        # Read the file
         self.readFile()
+
+        # Remove trailing whitespace
         lenobs = len(self.obs)
         self.obs = self.obs.rstrip()
+
+        # Update index to reflect changes made to obs
         self.index -= (lenobs - len(self.obs))
+
+        # Remove leading whitespace
         self.obs = self.obs.lstrip()
-        lenobs = len(self.obs)
+
+        # Replace carriage returns and non-breaking spaces
         self.obs = self.obs.replace('\r\n', '\n').replace(u'\xa0', u' ')
+
+        # Check if obs length changed after replacing carriage returns and non-breaking spaces
         if lenobs != len(self.obs):
             self.isCarraige = True
-        # maybe archive params should be one archive param, then call method in specific converter?
-        # if self.archive:
-        #     self.obs = self.convert_archive(self.obs)
+
+        # Remove stars archive if specified
         if self.starsArchive == True:
             m = re.compile('^Hand #\d+', re.MULTILINE)
             self.obs = m.sub('', self.obs)
 
+        # Remove ftp archive if specified
         if self.ftpArchive == True:
-            # Remove  ******************** # 1 *************************
             m = re.compile('\*{20}\s#\s\d+\s\*{20,25}\s+', re.MULTILINE)
             self.obs = m.sub('', self.obs)
-    
+
+        # If obs is empty, return empty list
         if self.obs is None or self.obs == "":
-            log.info(("Read no hands from file: '%s'") % self.in_path)
+            log.info(f"Read no hands from file: '{self.in_path}'")
             return []
+
+        # Split obs into handlist using regex
         handlist = re.split(self.re_SplitHands,  self.obs)
-        # Some HH formats leave dangling text after the split
-        # ie. </game> (split) </session>EOL
-        # Remove this dangler if less than 50 characters and warn in the log
+
+        # Remove dangling text if less than 50 characters and log warning
         if len(handlist[-1]) <= 50:
             self.index -= len(handlist[-1])
             if self.isCarraige:
                 self.index -= handlist[-1].count('\n')
             handlist.pop()
             log.info(("Removing text < 50 characters & resetting index"))
+
+        # Return handlist
         return handlist
 
+
     def processHand(self, handText):
+        """
+        Process a hand of text and return a Hand object.
+
+        Parameters:
+            handText (str): The text of the hand to be processed.
+
+        Returns:
+            Hand: The processed Hand object.
+
+        Raises:
+            FpdbHandPartial: If the handText is partial and cannot be identified as a hand.
+            FpdbHandSkipped: If the gametype of the hand is in the importFilters and should be skipped.
+            FpdbParseError: If the gametype of the hand is not supported.
+        """
+
+        # Check if handText is partial and raise an exception if it is.
         if self.isPartial(handText):
-            raise FpdbHandPartial(("Could not identify as a %s hand") % self.sitename)
+            raise FpdbHandPartial(f"Could not identify as a {self.sitename} hand")
+
+        # Parse the gametype of the hand.
         if self.copyGameHeader:
             gametype = self.parseHeader(handText, self.whole_file.replace('\r\n', '\n').replace(u'\xa0', u' '))
         else:
             gametype = self.determineGameType(handText)
+
+        # Initialize variables.
         hand = None
         l = None
+
+        # If the gametype cannot be determined, set it to "unmatched" and increment numErrors.
         if gametype is None:
             gametype = "unmatched"
             # TODO: not ideal, just trying to not error. Throw ParseException?
@@ -238,9 +327,10 @@ HandHistoryConverter: '%(sitename)s'
         else:
             print(gametype)
             print('gametypecategory',gametype['category'])
+            # If the gametype is in the importFilters, skip it.
             if gametype['category'] in self.import_parameters['importFilters']:
                 raise FpdbHandSkipped("Skipped %s hand" % gametype['type'])
-            # See if gametype is supported.
+            # Set default values for gametype parameters.
             if 'mix' not in gametype: gametype['mix'] = 'none'
             if 'ante' not in gametype: gametype['ante'] = 0
             if 'buyinType' not in gametype: gametype['buyinType'] = 'regular'
@@ -253,6 +343,7 @@ HandHistoryConverter: '%(sitename)s'
             limit = gametype['limitType']
             l = [type] + [base] + [limit]
 
+        # Check if the gametype is supported and create a Hand object if it is.
         if l in self.readSupportedGames():
             if gametype['base'] == 'hold':
                 hand = Hand.HoldemOmahaHand(self.config, self, self.sitename, gametype, handText)
@@ -261,23 +352,34 @@ HandHistoryConverter: '%(sitename)s'
             elif gametype['base'] == 'draw':
                 hand = Hand.DrawHand(self.config, self, self.sitename, gametype, handText)
         else:
-            log.error(("%s Unsupported game type: %s") % (self.sitename, gametype))
+            log.error(f"{self.sitename} Unsupported game type: {gametype}")
             raise FpdbParseError
 
+        # Write the Hand object and return it.
         if hand:
             #hand.writeHand(self.out_fh)
             return hand
         else:
-            log.error(("%s Unsupported game type: %s") % (self.sitename, gametype))
-            # TODO: pity we don't know the HID at this stage. Log the entire hand?
+            log.error(f"{self.sitename} Unsupported game type: {gametype}")
+            # TODO: pity we don't know the HID at this stage.
+
             
+
     def isPartial(self, handText):
-        count = 0
-        for m in self.re_Identify.finditer(handText):
-            count += 1
-        if count!=1:
-            return True
-        return False
+        """
+        Returns whether the given handText contains multiple parts or not.
+
+        Args:
+            handText (str): The text to be checked.
+
+        Returns:
+            bool: True if the text contains multiple parts, False otherwise.
+        """
+        # Count the number of parts in the handText using a regular expression.
+        count = sum(1 for _ in self.re_Identify.finditer(handText))
+        # Return True if the count is not equal to 1, indicating there are multiple parts.
+        return count != 1
+
     
     # These functions are parse actions that may be overridden by the inheriting class
     # This function should return a list of lists looking like:
@@ -290,6 +392,8 @@ HandHistoryConverter: '%(sitename)s'
     #   type  base limit
     # [ ring, hold, nl   , sb, bb ]
     # Valid types specified in docs/tabledesign.html in Gametypes
+    
+    
     def determineGameType(self, handText): abstract
     """return dict with keys/values:
     'type'       in ('ring', 'tour')
@@ -403,14 +507,21 @@ or None if we fail to get the info """
     Pass any play posting both big and small blinds to hand.addBlind(<name>, 'both', <vale>)
     """
     def readSTP(self, hand): pass
+    
     def readAntes(self, hand): abstract
     """Function for reading the antes from the hand history and passing the hand.addAnte"""
     def readBringIn(self, hand): abstract
+    
     def readButton(self, hand): abstract
+    
     def readHoleCards(self, hand): abstract
+    
     def readAction(self, hand, street): abstract
+    
     def readCollectPot(self, hand): abstract
+    
     def readShownCards(self, hand): abstract
+    
     def readTourneyResults(self, hand): 
         """This function is for future use in parsing tourney results directly from a hand"""
         pass
@@ -424,70 +535,130 @@ or None if we fail to get the info """
     # Some sites don't report the rake. This will be called at the end of the hand after the pot total has been calculated
     # an inheriting class can calculate it for the specific site if need be.
     def getRake(self, hand):
+        """
+        Calculates the rake for a given hand object.
+
+        Args:
+            hand: A hand object representing the hand being played.
+
+        Raises:
+            FpdbParseError: If an error occurs when calculating the rake.
+
+        Returns:
+            None
+        """
+        # Print total pot
         print('total pot', hand.totalpot)
+        # Print collected pot
         print('collected pot', hand.totalcollected)
-        if hand.totalcollected>hand.totalpot:
+
+        # Check if collected pot is greater than total pot
+        if hand.totalcollected > hand.totalpot:
             print("collected pot>total pot")
-        hand.rake = hand.totalpot - hand.totalcollected #  * Decimal('0.05') # probably not quite right
+
+        # Calculate rake
+        hand.rake = hand.totalpot - hand.totalcollected  # * Decimal('0.05') # probably not quite right
+
+        # Determine round value based on game type and site ID
         if self.siteId == 9 and hand.gametype['type'] == "tour":
-            round = -5 #round up to 10
+            round = -5  # round up to 10
         elif hand.gametype['type'] == "tour":
             round = -1
         else:
             round = -0.01
-        if self.siteId == 15 and hand.totalcollected>hand.totalpot:
-            hand.rake = old_div(hand.totalpot, 10)   
-            print(hand.rake) 
+
+        # Adjust rake for site ID 15 and total collected greater than total pot
+        if self.siteId == 15 and hand.totalcollected > hand.totalpot:
+            hand.rake = old_div(hand.totalpot, 10)
+            print(hand.rake)
+
+        # Check if rake is negative and if it meets the round value criteria
         if hand.rake < 0 and (not hand.roundPenny or hand.rake < round) and not hand.cashedOut:
-            if (self.siteId == 28 and 
-            ((hand.rake + Decimal(str(hand.sb)) - (0 if hand.rakes.get('rake') is None else hand.rakes['rake'])) == 0 or 
-             (hand.rake + Decimal(str(hand.sb)) + Decimal(str(hand.bb)) - (0 if hand.rakes.get('rake') is None else hand.rakes['rake'])) == 0)
+            if (self.siteId == 28 and
+                    ((hand.rake + Decimal(str(hand.sb)) - (0 if hand.rakes.get('rake') is None else hand.rakes['rake'])) == 0 or
+                    (hand.rake + Decimal(str(hand.sb)) + Decimal(str(hand.bb)) - (0 if hand.rakes.get('rake') is None else hand.rakes['rake'])) == 0)
             ):
-                log.error(("hhc.getRake(): '%s': Missed sb/bb - Amount collected (%s) is greater than the pot (%s)") % (hand.handid,str(hand.totalcollected), str(hand.totalpot)))
+                # Log error if missed sb/bb
+                log.error(
+                    f"hhc.getRake(): '{hand.handid}': Missed sb/bb - Amount collected ({str(hand.totalcollected)}) is greater than the pot ({str(hand.totalpot)})"
+                )
             else:
-                log.error(("hhc.getRake(): '%s': Amount collected (%s) is greater than the pot (%s)") % (hand.handid,str(hand.totalcollected), str(hand.totalpot)))
+                # Log error if collected pot is greater than total pot
+                log.error(
+                    f"hhc.getRake(): '{hand.handid}': Amount collected ({str(hand.totalcollected)}) is greater than the pot ({str(hand.totalpot)})"
+                )
                 raise FpdbParseError
-        elif hand.totalpot > 0 and Decimal(old_div(hand.totalpot,4)) < hand.rake and not hand.fastFold and not hand.cashedOut:
-            log.error(("hhc.getRake(): '%s': Suspiciously high rake (%s) > 25 pct of pot (%s)") % (hand.handid,str(hand.rake), str(hand.totalpot)))
+
+        # Check if rake is suspiciously high
+        elif hand.totalpot > 0 and Decimal(old_div(hand.totalpot, 4)) < hand.rake and not hand.fastFold and not hand.cashedOut:
+            log.error(
+                f"hhc.getRake(): '{hand.handid}': Suspiciously high rake ({str(hand.rake)}) > 25 pct of pot ({str(hand.totalpot)})"
+            )
             raise FpdbParseError
 
+
     def sanityCheck(self):
-        """Check we aren't going to do some stupid things"""
-        sane = False
-        base_w = False
+        """
+        Check if the program is in a sane state.
+        Returns a boolean indicating whether the program is sane or not.
+        """
+        # Initially we assume the program is sane.
+        sane = True
 
-        # Make sure input and output files are different or we'll overwrite the source file
-        if True: # basically.. I don't know
-            sane = True
-
+        # Check if the input and output files are the same.
         if self.in_path != '-' and self.out_path == self.in_path:
-            print(("Output and input files are the same, check config."))
+            print("Output and input files are the same, check config.")
             sane = False
 
         return sane
 
+
     # Functions not necessary to implement in sub class
     def setFileType(self, filetype = "text", codepage='utf8'):
+        """
+        Sets the file type and code page for the current object instance.
+
+        Args:
+            filetype (str): The file type to set (default is "text").
+            codepage (str): The code page to set (default is "utf8").
+        """
         self.filetype = filetype
         self.codepage = codepage
         
     # Import from string
     def setObs(self, text):
+        """Set the observation and update the whole file.
+
+        Args:
+            text (str): The new observation to set.
+        """
         self.obs = text
         self.whole_file = text
 
     def __listof(self, x):
-        if isinstance(x, list) or isinstance(x, tuple):
-            return x
-        else:
-            return [x]
+        """
+        Converts the input to a list if it's not already a list or tuple.
+
+        Args:
+            x: object
+
+        Returns:
+            list: Returns the input as a list if it's not already a list or tuple, otherwise returns the input.
+        """
+        return x if isinstance(x, (list, tuple)) else [x]
 
     def readFile(self):
-        """Open in_path according to self.codepage. Exceptions caught further up"""
+        """
+        Open in_path according to self.codepage. Exceptions caught further up
+
+        Returns:
+        - True if file was read successfully
+        - False otherwise
+        """
 
         if self.filetype == "text":
+            # Try to open the file with each kodec in self.__listof(self.codepage)
             for kodec in self.__listof(self.codepage):
-                #print "trying", kodec
                 try:
                     in_fh = codecs.open(self.in_path, 'r', kodec)
                     self.whole_file = in_fh.read()
@@ -496,66 +667,125 @@ or None if we fail to get the info """
                     self.index = len(self.whole_file)
                     self.kodec = kodec
                     return True
-                except:
+                except Exception:
                     pass
-            else:
-                log.error(("unable to read file with any codec in list!") + " " + self.in_path)
-                self.obs = ""
-                return False
+            # If all koceds fail, log an error and return False
+            log.error(("unable to read file with any codec in list!") + " " + self.in_path)
+            self.obs = ""
+            return False
         elif self.filetype == "xml":
+            # Parse the xml file and store it in self.doc
             doc = xml.dom.minidom.parse(filename)
             self.doc = doc
         elif self.filetype == "":
+            # Do nothing if filetype is not specified
             pass
 
+
     def guessMaxSeats(self, hand):
-        """Return a guess at maxseats when not specified in HH."""
+        """
+        Return a guess at max seats when not specified in HH.
+        If some other code prior to this has already set it, return it.
+
+        Args:
+            hand: An instance of the Hand class.
+
+        Returns:
+            An integer representing the guessed max seats.
+        """
+
         # if some other code prior to this has already set it, return it
-        if not self.copyGameHeader and hand.gametype['type']=='tour':
+        if not self.copyGameHeader and hand.gametype['type'] == 'tour':
             return 10
-            
+
+        # If maxseats is already set, return it.
         if self.maxseats > 1 and self.maxseats < 11:
             return self.maxseats
-        
+
+        # Get the maximum occurrences of a seat
         mo = self.maxOccSeat(hand)
 
-        if mo == 10: return 10 #that was easy
+        # If the max occurrences is already 10, return 10
+        if mo == 10:
+            return 10
 
-        if hand.gametype['base'] == 'stud':
-            if mo <= 8: return 8
+        # If the game type is stud and the max occurrences is less than or equal to 8, return 8
+        if hand.gametype['base'] == 'stud' and mo <= 8:
+            return 8
 
-        if hand.gametype['base'] == 'draw':
-            if mo <= 6: return 6
-            
-        return 10
+        # If the game type is draw and the max occurrences is less than or equal to 6, return 6, else return 10
+        return 6 if hand.gametype['base'] == 'draw' and mo <= 6 else 10
 
     def maxOccSeat(self, hand):
-        max = 0
+        """
+        Finds the maximum occurrence of a seat number in the given hand.
+
+        Args:
+            hand (Hand): The hand to search for the maximum occurrence of seat numbers.
+
+        Returns:
+            int: The maximum occurrence of a seat number in the hand.
+        """
+        max = 0  # initialize the maximum occurrence to 0
         for player in hand.players:
             if int(player[0]) > max:
-                max = int(player[0])
-        return max
+                max = int(player[0])  # update the maximum occurrence if necessary
+        return max  # return the maximum occurrence
+
 
     def getStatus(self):
-        #TODO: Return a status of true if file processed ok
+        """
+        Returns the status of the file processing.
+
+        :return: True if file processed successfully, False otherwise.
+        """
+        # TODO: Return a status of true if file processed ok
         return self.status
 
     def getProcessedHands(self):
-        return self.processedHands
+        """Returns the processed hands."""
+        return self.processedHands # returns the processed hands
+
 
     def getProcessedFile(self):
+        """
+        Returns the output file path
+        """
         return self.out_path
 
     def getLastCharacterRead(self):
+        """
+        Returns the index of the last character read.
+        """
         return self.index
 
     def isSummary(self, topline):
+        """
+        Check if the given string is a summary of a tournament report.
+
+        Args:
+            topline (str): The first line of the tournament report.
+
+        Returns:
+            bool: True if the given string is a summary of a tournament report, False otherwise.
+        """
         return " Tournament Summary " in topline
 
     def getParsedObjectType(self):
+        """Gets the parsed object type.
+
+        Returns:
+            The parsed object type.
+        """
         return self.parsedObjectType
 
     def getBasename(self):
+        """
+        Get the basename of the file without the extension.
+
+        Returns:
+            str: The basename of the file without the extension.
+        """
         head, tail = os.path.split(self.in_path)
         base = tail or os.path.basename(head)
         return base.split('.')[0]
@@ -564,6 +794,11 @@ or None if we fail to get the info """
     def readSummaryInfo(self, summaryInfoList): abstract
 
     def getTourney(self):
+        """
+        Gets the tourney.
+
+        :return: The tourney.
+        """
         return self.tourney
         
     @staticmethod
@@ -578,14 +813,14 @@ or None if we fail to get the info """
         if wantedTimezone=="UTC":
             wantedTimezone = pytz.utc
         else:
-            log.error(("Unsupported target timezone: ") + givenTimezone)
-            raise FpdbParseError(("Unsupported target timezone: ") + givenTimezone)
+            log.error(f"Unsupported target timezone: {givenTimezone}")
+            raise FpdbParseError(f"Unsupported target timezone: {givenTimezone}")
 
         givenTZ = None
         if HandHistoryConverter.re_tzOffset.match(givenTimezone):
             offset = int(givenTimezone[-5:])
-            givenTimezone = givenTimezone[0:-5]
-            #log.debug("changeTimeZone: offset=" + str(offset))
+            givenTimezone = givenTimezone[:-5]
+                #log.debug("changeTimeZone: offset=" + str(offset))
         else: offset=0
 
         if givenTimezone in ("ET", "EST", "EDT"):
@@ -671,25 +906,46 @@ or None if we fail to get the info """
             return givenTZ.localize(time)
 
         localisedTime = givenTZ.localize(time)
-        utcTime = localisedTime.astimezone(wantedTimezone) + datetime.timedelta(seconds=-3600*(old_div(offset,100))-60*(offset%100))
-        #log.debug("utcTime: " + str(utcTime))
-        return utcTime
+        return localisedTime.astimezone(wantedTimezone) + datetime.timedelta(
+            seconds=-3600 * (old_div(offset, 100)) - 60 * (offset % 100)
+        )
     #end @staticmethod def changeTimezone
 
     @staticmethod
-    def getTableTitleRe(type, table_name=None, tournament = None, table_number=None):
-        "Returns string to search in windows titles"
-        if type=="tour":
-            return ( re.escape(str(tournament)) + ".+\\Table " + re.escape(str(table_number)) )
+    def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
+        """Returns a regex string to search in window titles.
+
+        Args:
+            type (str): Type of regex string to return. Either "tour" or anything else.
+            table_name (str, optional): Name of the table. Defaults to None.
+            tournament (str, optional): Name of the tournament. Defaults to None.
+            table_number (int, optional): Number of the table. Defaults to None.
+
+        Returns:
+            str: Regex string to search in window titles.
+        """
+        if type == "tour":
+            # If type is "tour", return a regex string that matches the tournament name,
+            # any characters in between, the word "Table", and the table number.
+            return (re.escape(str(tournament)) + ".+\\Table " + re.escape(str(table_number)))
         else:
+            # If type is anything else, return the escaped table name.
             return re.escape(table_name)
 
     @staticmethod
     def getTableNoRe(tournament):
-        "Returns string to search window title for tournament table no."
-# Full Tilt:  $30 + $3 Tournament (181398949), Table 1 - 600/1200 Ante 100 - Limit Razz
-# PokerStars: WCOOP 2nd Chance 02: $1,050 NLHE - Tournament 307521826 Table 1 - Blinds $30/$60
+        """
+        Returns a regular expression pattern that matches the table number in a tournament window title.
+        :param tournament: The name of the tournament.
+        :return: A regular expression pattern that matches the table number in a tournament window title.
+        """
+        # Example window titles:
+        # Full Tilt:  $30 + $3 Tournament (181398949), Table 1 - 600/1200 Ante 100 - Limit Razz
+        # PokerStars: WCOOP 2nd Chance 02: $1,050 NLHE - Tournament 307521826 Table 1 - Blinds $30/$60
+
+        # The regular expression pattern matches the tournament name followed by "Table" or "Torneo", followed by one or more digits.
         return "%s.+(?:Table|Torneo) (\d+)" % (tournament, )
+
 
     @staticmethod
     def clearMoneyString(money):
@@ -711,61 +967,106 @@ or None if we fail to get the info """
         if len(money) < 3:
             return money # No commas until 0,01 or 1,00
         if money[-3] == ',':
-            money = money[:-3] + '.' + money[-2:]
-            if len(money) > 15:
-                if money[-15] == '.':
-                    money = money[:-15] + ',' + money[-14:]
-            if len(money) > 11:
-                if money[-11] == '.':
-                    money = money[:-11] + ',' + money[-10:]
-            if len(money) > 7:
-                if money[-7] == '.':
-                    money = money[:-7] + ',' + money[-6:]
+            money = f'{money[:-3]}.{money[-2:]}'
+            if len(money) > 15 and money[-15] == '.':
+                money = f'{money[:-15]},{money[-14:]}'
+            if len(money) > 11 and money[-11] == '.':
+                money = f'{money[:-11]},{money[-10:]}'
+            if len(money) > 7 and money[-7] == '.':
+                money = f'{money[:-7]},{money[-6:]}'
         else:
-            if len(money) > 12:
-                if money[-12] == '.':
-                    money = money[:-12] + ',' + money[-11:]
-            if len(money) > 8:
-                if money[-8] == '.':
-                    money = money[:-8] + ',' + money[-7:]
-            if len(money) > 4:
-                if money[-4] == '.':
-                    money = money[:-4] + ',' + money[-3:]
-
+            if len(money) > 12 and money[-12] == '.':
+                money = f'{money[:-12]},{money[-11:]}'
+            if len(money) > 8 and money[-8] == '.':
+                money = f'{money[:-8]},{money[-7:]}'
+            if len(money) > 4 and money[-4] == '.':
+                money = f'{money[:-4]},{money[-3:]}'
         return money.replace(',', '').replace("'", '')
 
 
 def getTableTitleRe(config, sitename, *args, **kwargs):
-    "Returns string to search in windows titles for current site"
+    """
+        Returns a string to search in windows titles for the current site.
+
+        Args:
+            config: Dictionary containing site configuration information.
+            sitename: String representing the name of the current site.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            String to search in windows titles for current site.
+    """
+    # Call getTableTitleRe method of SiteHhc object returned by getSiteHhc function.
     return getSiteHhc(config, sitename).getTableTitleRe(*args, **kwargs)
 
 def getTableNoRe(config, sitename, *args, **kwargs):
-    "Returns string to search window titles for tournament table no."
+    """Returns regex string to search window titles for tournament table number.
+
+    Args:
+        config (str): Configuration string.
+        sitename (str): Name of the site.
+        *args: Variable length argument list.
+        **kwargs: Arbitrary keyword arguments.
+
+    Returns:
+        str: Regex string to search window titles for tournament table number.
+    """
+    # Call getTableNoRe method of SiteHhc object returned by getSiteHhc method
+    # with the given arguments and return its value
     return getSiteHhc(config, sitename).getTableNoRe(*args, **kwargs)
 
 
-
 def getSiteHhc(config, sitename):
-    "Returns HHC class for current site"
+    """
+    Returns HHC class for current site.
+
+    Args:
+        config (dict): Configuration dictionary.
+        sitename (str): Name of the site.
+
+    Returns:
+        class: HHC class for the given site.
+    """
+    # Get the name of the HHC class converter for the given site.
     hhcName = config.hhcs[sitename].converter
+
+    # Dynamically import the module containing the HHC class.
     hhcModule = __import__(hhcName)
+
+    # Return the HHC class by getting the attribute from the module.
+    # We remove the last 6 characters from the name to get the class name.
     return getattr(hhcModule, hhcName[:-6])
 
+
+
 def get_out_fh(out_path, parameters):
-    if out_path == '-':
-        return(sys.stdout)
-    elif parameters['saveStarsHH']:
-        out_dir = os.path.dirname(out_path) 
-        if not os.path.isdir(out_dir) and out_dir != '': 
-            try: 
-                os.makedirs(out_dir) 
-            except: # we get a WindowsError here in Windows.. pretty sure something else for Linux :D 
-                log.error(("Unable to create output directory %s for HHC!") % out_dir) 
-            else: 
-                log.info(("Created directory '%s'") % out_dir) 
-        try: 
-            return(codecs.open(out_path, 'w', 'utf8')) 
-        except: 
-            log.error(("Output path %s couldn't be opened.") % (out_path)) 
-    else:
-        return(sys.stdout)
+    """
+    Returns file handle for output file.
+
+    Args:
+        out_path (str): Path to output file.
+        parameters (dict): A dictionary of parameters.
+
+    Returns:
+        file handle: A file handle for the output file.
+    """
+    # If output path is '-' or saveStarsHH is False return stdout
+    if out_path == '-' or not parameters['saveStarsHH']:
+        return sys.stdout
+
+    # Create output directory if it doesn't exist
+    out_dir = os.path.dirname(out_path)
+    if not os.path.isdir(out_dir) and out_dir != '':
+        try:
+            os.makedirs(out_dir)
+        except Exception:
+            log.error(f"Unable to create output directory {out_dir} for HHC!")
+        else:
+            log.info(f"Created directory '{out_dir}'")
+
+    # Try to open the output file
+    try:
+        return codecs.open(out_path, 'w', 'utf8')
+    except Exception:
+        log.error(f"Output path {out_path} couldn't be opened.")
