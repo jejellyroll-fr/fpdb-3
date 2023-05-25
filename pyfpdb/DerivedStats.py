@@ -293,7 +293,7 @@ class DerivedStats(object):
                     remainder_2 = leftover if remainder_1 == 0 else 0
                 collectee_stats['rake'] = rake + remainder_1 + remainder_2
             else:
-                collectee_stats['rake'] = int(100 *(even_split - winnings))
+                collectee_stats['rake'] = int(100 *(even_split - Decimal(str(winnings))))
             if collectee_stats['street1Seen'] == True:
                 collectee_stats['wonWhenSeenStreet1'] = True
             if collectee_stats['street2Seen'] == True:
