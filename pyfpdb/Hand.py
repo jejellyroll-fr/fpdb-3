@@ -935,8 +935,11 @@ class Hand(object):
         if (self.uncalledbets or ((self.totalpot - totalcollected < 0) and self.checkForUncalled)):
             for i,v in enumerate(sorted(self.collected, key=lambda collectee: collectee[1], reverse=True)):
                 if v[0] in self.pot.returned: 
-                    collected[i][1] = Decimal(str(v[1])) - self.pot.returned[v[0]]
-                    collectees[v[0]] -= self.pot.returned[v[0]]
+                    print(type(self.pot.returned[v[0]]))
+                    print(type(v[0]))
+                    print(type(collectees[v[0]]))
+                    collected[i][1] = Decimal(str(v[1])) - Decimal(str(self.pot.returned[v[0]]))
+                    collectees[v[0]] -= float(self.pot.returned[v[0]])
                     self.pot.returned[v[0]] = 0
             (self.collected, self.collectees, self.totalcollected) = gettempcontainers(collected, collectees)
 
