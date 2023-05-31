@@ -90,7 +90,7 @@ else:
 
 if INSTALL_METHOD == "exe" :
     FPDB_ROOT_PATH = os.path.dirname(sys.executable)
-    
+
     FPDB_ROOT_PATH = FPDB_ROOT_PATH.replace("\\", "/")
      # should be exe path to \fpdbroot\pyfpdb
 elif INSTALL_METHOD == "app":
@@ -104,15 +104,12 @@ else: # all other cases
     #FPDB_ROOT_PATH = os.getcwd()
 
 sysPlatform = platform.system()  #Linux, Windows, Darwin
-if sysPlatform[0:5] == 'Linux':
+if sysPlatform[:5] == 'Linux':
     OS_FAMILY = 'Linux'
 elif sysPlatform == 'Darwin':
     OS_FAMILY = 'Mac'
 elif sysPlatform == 'Windows':
-    if platform.release() != 'XP':
-        OS_FAMILY = 'Win7' #Vista and win7
-    else:
-        OS_FAMILY = 'XP'
+    OS_FAMILY = 'Win7' if platform.release() != 'XP' else 'XP'
 else:
     OS_FAMILY = False
 
@@ -154,9 +151,9 @@ if os.name == 'posix':
     POSIX = True
 else:
     POSIX = False
-    
+
 PYTHON_VERSION = sys.version[:3]
-    
+
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = logging.getLogger("config")
 
@@ -371,10 +368,10 @@ def string_to_bool(string: str, default: bool = True) -> bool:
     """
     # Convert the string to lowercase for case-insensitive comparison
     string = string.lower()
-    if string in ('1', 'true', 't'):
+    if string in {'1', 'true', 't'}:
         # Return True if the string is '1', 'true', or 't'
         return True
-    elif string in ('0', 'false', 'f'):
+    elif string in {'0', 'false', 'f'}:
         # Return False if the string is '0', 'false', or 'f'
         return False
     # Return the default value if the string cannot be converted to a boolean value
@@ -898,39 +895,85 @@ class HHC(object):
 
 class Popup(object):
     def __init__(self, node):
+        """
+        Initializes a Popup object with the given XML node.
+
+        Args:
+        - node: xml.dom.minidom.Node - the XML node representing the Popup
+
+        Attributes:
+        - name: str - the name of the Popup
+        - pu_class: str - the class of the Popup
+        - pu_stats: list[str] - the names of the Popup's stats
+        - pu_stats_submenu: list[(str, str)] - the names and submenus of the Popup's stats
+        """
         self.name  = node.getAttribute("pu_name")
         self.pu_class = node.getAttribute("pu_class")
         self.pu_stats    = []
         self.pu_stats_submenu = []
-        
+
+        # Parse the Popup's stats and submenus
         for stat_node in node.getElementsByTagName('pu_stat'):
             self.pu_stats.append(stat_node.getAttribute("pu_stat_name"))
-            #if stat_node.getAttribute("pu_stat_submenu"):
-            self.pu_stats_submenu.append(
-                tuple(
-                (stat_node.getAttribute("pu_stat_name"),
-                stat_node.getAttribute("pu_stat_submenu"))))
+            if stat_node.hasAttribute("pu_stat_submenu"):
+                self.pu_stats_submenu.append(
+                    (
+                        stat_node.getAttribute("pu_stat_name"),
+                        stat_node.getAttribute("pu_stat_submenu"),
+                    )
+                )
+
             
 
     def __str__(self):
-        temp = "Popup = " + self.name + "  Class = " + self.pu_class + "\n"
+        """
+        Returns a string representation of the Popup object.
+
+        The string includes the Popup's name, class, and stats.
+
+        Returns:
+            str: A string representation of the Popup object.
+        """
+        temp = f"Popup = {self.name}  Class = {self.pu_class}" + "\n"
         for stat in self.pu_stats:
-            temp = temp + " " + stat
+            temp = f"{temp} {stat}"
         return temp + "\n"
+
 
 class Import(object):
     def __init__(self, node):
-        self.node               = node
-        self.interval           = node.getAttribute("interval")
-        self.sessionTimeout     = string_to_bool(node.getAttribute("sessionTimeout")    , default=30)
-        self.ResultsDirectory   = node.getAttribute("ResultsDirectory")
-        self.hhBulkPath         = node.getAttribute("hhBulkPath")
-        self.saveActions        = string_to_bool(node.getAttribute("saveActions")      , default=False)
-        self.cacheSessions      = string_to_bool(node.getAttribute("cacheSessions")    , default=False)
-        self.publicDB           = string_to_bool(node.getAttribute("publicDB")         , default=False)
-        self.callFpdbHud        = string_to_bool(node.getAttribute("callFpdbHud")      , default=False)
-        self.fastStoreHudCache  = string_to_bool(node.getAttribute("fastStoreHudCache"), default=False)
-        self.saveStarsHH        = string_to_bool(node.getAttribute("saveStarsHH")      , default=False)
+        """
+        Initializes an Import object.
+
+        Args:
+            node (xml.dom.minidom.Element): The XML node containing the import settings.
+
+        Attributes:
+            node (xml.dom.minidom.Element): The XML node containing the import settings.
+            interval (str): The interval at which hands are imported.
+            sessionTimeout (bool): Whether the session timeout is enabled.
+            ResultsDirectory (str): The directory where hand history files are stored.
+            hhBulkPath (str): The path to the HHBulk executable.
+            saveActions (bool): Whether actions are saved.
+            cacheSessions (bool): Whether sessions are cached.
+            publicDB (bool): Whether the public database is used.
+            callFpdbHud (bool): Whether the FPDB HUD is called.
+            fastStoreHudCache (bool): Whether the HUD cache is stored quickly.
+            saveStarsHH (bool): Whether Stars hand histories are saved.
+            importFilters (list of str): The filters used when importing hands.
+            timezone (str): The timezone used when importing hands.
+        """
+        self.node = node
+        self.interval = node.getAttribute("interval")
+        self.sessionTimeout = string_to_bool(node.getAttribute("sessionTimeout"), default=30)
+        self.ResultsDirectory = node.getAttribute("ResultsDirectory")
+        self.hhBulkPath = node.getAttribute("hhBulkPath")
+        self.saveActions = string_to_bool(node.getAttribute("saveActions"), default=False)
+        self.cacheSessions = string_to_bool(node.getAttribute("cacheSessions"), default=False)
+        self.publicDB = string_to_bool(node.getAttribute("publicDB"), default=False)
+        self.callFpdbHud = string_to_bool(node.getAttribute("callFpdbHud"), default=False)
+        self.fastStoreHudCache = string_to_bool(node.getAttribute("fastStoreHudCache"), default=False)
+        self.saveStarsHH = string_to_bool(node.getAttribute("saveStarsHH"), default=False)
         if node.getAttribute("importFilters"):
             self.importFilters = node.getAttribute("importFilters").split(",")
         else:
@@ -941,102 +984,220 @@ class Import(object):
             self.timezone = "America/New_York"
 
     def __str__(self):
-        return "    interval = %s\n    callFpdbHud = %s\n    saveActions = %s\n   cacheSessions = %s\n    publicDB = %s\n    sessionTimeout = %s\n    fastStoreHudCache = %s\n    ResultsDirectory = %s" \
-            % (self.interval, self.callFpdbHud, self.saveActions, self.cacheSessions, self.publicDB, self.sessionTimeout, self.fastStoreHudCache, self.ResultsDirectory)
+        """
+        Returns a string representation of the object.
+        """
+        return (
+            "    interval = %s\n"
+            "    callFpdbHud = %s\n"
+            "    saveActions = %s\n"
+            "    cacheSessions = %s\n"
+            "    publicDB = %s\n"
+            "    sessionTimeout = %s\n"
+            "    fastStoreHudCache = %s\n"
+            "    ResultsDirectory = %s"
+            % (
+                self.interval,
+                self.callFpdbHud,
+                self.saveActions,
+                self.cacheSessions,
+                self.publicDB,
+                self.sessionTimeout,
+                self.fastStoreHudCache,
+                self.ResultsDirectory,
+            )
+        )
 
 class HudUI(object):
     def __init__(self, node):
+        """
+        Initializes the HudUI object with information from the given node.
+
+        Args:
+        node (xml.etree.ElementTree.Element): The XML node containing the HudUI information.
+        """
         self.node = node
-        self.label  = node.getAttribute('label')
-        if node.hasAttribute('card_ht'): self.card_ht = node.getAttribute('card_ht')
-        if node.hasAttribute('card_wd'): self.card_wd = node.getAttribute('card_wd')
-        if node.hasAttribute('deck_type'): self.deck_type = node.getAttribute('deck_type')
-        if node.hasAttribute('card_back'): self.card_back = node.getAttribute('card_back')
-        #
-        if node.hasAttribute('stat_range'): self.stat_range = node.getAttribute('stat_range')
-        if node.hasAttribute('stat_days'): self.hud_days = node.getAttribute('stat_days')
-        if node.hasAttribute('aggregation_level_multiplier'): self.agg_bb_mult = node.getAttribute('aggregation_level_multiplier')
-        if node.hasAttribute('seats_style'): self.seats_style = node.getAttribute('seats_style')
-        if node.hasAttribute('seats_cust_nums_low'): self.seats_cust_nums_low = node.getAttribute('seats_cust_nums_low')
-        if node.hasAttribute('seats_cust_nums_high'): self.seats_cust_nums_high = node.getAttribute('seats_cust_nums_high')
-        #
-        if node.hasAttribute('hero_stat_range'): self.h_stat_range = node.getAttribute('hero_stat_range')
-        if node.hasAttribute('hero_stat_days'): self.h_hud_days = node.getAttribute('hero_stat_days')
-        if node.hasAttribute('hero_aggregation_level_multiplier'): self.h_agg_bb_mult = node.getAttribute('hero_aggregation_level_multiplier')
-        if node.hasAttribute('hero_seats_style'): self.h_seats_style = node.getAttribute('hero_seats_style')
-        if node.hasAttribute('hero_seats_cust_nums_low'): self.h_seats_cust_nums_low = node.getAttribute('hero_seats_cust_nums_low')
-        if node.hasAttribute('hero_seats_cust_nums_high'): self.h_seats_cust_nums_high = node.getAttribute('hero_seats_cust_nums_high')
+        self.label = node.getAttribute('label')
+
+        # Optional attributes
+        if node.hasAttribute('card_ht'):
+            self.card_ht = node.getAttribute('card_ht')
+        if node.hasAttribute('card_wd'):
+            self.card_wd = node.getAttribute('card_wd')
+        if node.hasAttribute('deck_type'):
+            self.deck_type = node.getAttribute('deck_type')
+        if node.hasAttribute('card_back'):
+            self.card_back = node.getAttribute('card_back')
+
+        # Additional optional attributes
+        if node.hasAttribute('stat_range'):
+            self.stat_range = node.getAttribute('stat_range')
+        if node.hasAttribute('stat_days'):
+            self.hud_days = node.getAttribute('stat_days')
+        if node.hasAttribute('aggregation_level_multiplier'):
+            self.agg_bb_mult = node.getAttribute('aggregation_level_multiplier')
+        if node.hasAttribute('seats_style'):
+            self.seats_style = node.getAttribute('seats_style')
+        if node.hasAttribute('seats_cust_nums_low'):
+            self.seats_cust_nums_low = node.getAttribute('seats_cust_nums_low')
+        if node.hasAttribute('seats_cust_nums_high'):
+            self.seats_cust_nums_high = node.getAttribute('seats_cust_nums_high')
+
+        # Additional optional attributes for hero stats
+        if node.hasAttribute('hero_stat_range'):
+            self.h_stat_range = node.getAttribute('hero_stat_range')
+        if node.hasAttribute('hero_stat_days'):
+            self.h_hud_days = node.getAttribute('hero_stat_days')
+        if node.hasAttribute('hero_aggregation_level_multiplier'):
+            self.h_agg_bb_mult = node.getAttribute('hero_aggregation_level_multiplier')
+        if node.hasAttribute('hero_seats_style'):
+            self.h_seats_style = node.getAttribute('hero_seats_style')
+        if node.hasAttribute('hero_seats_cust_nums_low'):
+            self.h_seats_cust_nums_low = node.getAttribute('hero_seats_cust_nums_low')
+        if node.hasAttribute('hero_seats_cust_nums_high'):
+            self.h_seats_cust_nums_high = node.getAttribute('hero_seats_cust_nums_high')
+
 
 
     def __str__(self):
+        """
+        Return a string representation of the object.
+        """
         return "    label = %s\n" % self.label
 
 
+
 class General(dict):
-    def __init__(self):
-        super(General, self).__init__()
+    def __str__(self):
+        """
+        Return a string representation of the object.
+        """
+        return "    label = %s\n" % self.label
+
 
     def add_elements(self, node):
-        # day_start    - number n where 0.0 <= n < 24.0 representing start of day for user
-        #                e.g. user could set to 4.0 for day to start at 4am local time
-        # [ HH_bulk_path was here - now moved to import section ]
+        """Add elements to the configuration dictionary.
+
+        Args:
+            node: an XML node containing the configuration information.
+
+        Returns:
+            None
+        """
+        # day_start - number n where 0.0 <= n < 24.0 representing start of day for user.
+        #             e.g. user could set to 4.0 for day to start at 4am local time.
+        #
+        # HH_bulk_path - path to the HH bulk file.
+
+
         for (name, value) in list(node.attributes.items()):
-            log.debug("config.general: adding %s = %s" % (name,value))
+            log.debug(f"config.general: adding {name} = {value}")
             self[name] = value
-        
+
         try:
-            self["version"]=int(self["version"])
+            self["version"] = int(self["version"])
         except KeyError:
-            self["version"]=0
-            self["ui_language"]="system"
-            self["config_difficulty"]="expert"
+            self["version"] = 0
+            self["ui_language"] = "system"
+            self["config_difficulty"] = "expert"
+
             
     def get_defaults(self):
-        self["version"]=0
-        self["ui_language"]="system"
-        self["config_difficulty"]="expert"
-        self["config_wrap_len"]="-1"
-        self["day_start"]="5"
+        """
+        Returns a dictionary object with default configuration settings.
+
+        Returns:
+            dict: Dictionary object with default configuration settings.
+        """
+        self["version"] = 0  # The version of the configuration file.
+        self["ui_language"] = "system"  # The language the user interface should use.
+        self["config_difficulty"] = "expert"  # The difficulty level of the configuration settings.
+        self["config_wrap_len"] = "-1"  # The maximum length of lines in the configuration file.
+
 
     def __str__(self):
+        """
+        Returns a string representation of the dictionary for printing.
+
+        :return: string representation of the dictionary
+        :rtype: str
+        """
         s = ""
         for k in self:
             s = s + "    %s = %s\n" % (k, self[k])
-        return(s)
+        return s
+
 
 class GUICashStats(list):
+    """
+    A class for representing cash statistics of a game.
+    Inherits from the built-in list class.
+
+    Attributes:
+    -----------
+    None
+
+    Methods:
+    --------
+    __init__():
+        Constructs a GUICashStats object which is an empty list.
+
+    """
     """<gui_cash_stats>
            <col col_name="game" col_title="Game" disp_all="True" disp_posn="True" field_format="%s" field_type="str" xalignment="0.0" />
            ...
        </gui_cash_stats>
-       """
+    """
     def __init__(self):
         super(GUICashStats, self).__init__()
 
 
 
+
     def add_elements(self, node):
-        # is this needed?
+        """
+        Adds child nodes to the current node.
+
+        Args:
+            node: The node to add child nodes to.
+        """
         for child in node.childNodes:
             if child.nodeType == child.ELEMENT_NODE:
-                col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment=None, None, True, True, "%s", "str", 0.0
-                
-                if child.hasAttribute('col_name'):     col_name     = child.getAttribute('col_name')
-                if child.hasAttribute('col_title'):    col_title    = child.getAttribute('col_title')
-                if child.hasAttribute('disp_all'):     disp_all     = string_to_bool(child.getAttribute('disp_all'))
-                if child.hasAttribute('disp_posn'):    disp_posn    = string_to_bool(child.getAttribute('disp_posn'))
-                if child.hasAttribute('field_format'): field_format = child.getAttribute('field_format')
-                if child.hasAttribute('field_type'):   field_type   = child.getAttribute('field_type')
+                # Set default values
+                col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment = None, None, True, True, "%s", "str", 0.0
+
+                # Override default values with values from child attributes if present
+                if child.hasAttribute('col_name'):
+                    col_name = child.getAttribute('col_name')
+                if child.hasAttribute('col_title'):
+                    col_title = child.getAttribute('col_title')
+                if child.hasAttribute('disp_all'):
+                    disp_all = string_to_bool(child.getAttribute('disp_all'))
+                if child.hasAttribute('disp_posn'):
+                    disp_posn = string_to_bool(child.getAttribute('disp_posn'))
+                if child.hasAttribute('field_format'):
+                    field_format = child.getAttribute('field_format')
+                if child.hasAttribute('field_type'):
+                    field_type = child.getAttribute('field_type')
                 try:
-                    if child.hasAttribute('xalignment'):   xalignment   = float(child.getAttribute('xalignment'))
+                    if child.hasAttribute('xalignment'):
+                        xalignment = float(child.getAttribute('xalignment'))
                 except ValueError:
                     print(("bad number in xalignment was ignored"))
                     log.info(("bad number in xalignment was ignored"))
 
-                self.append( [col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment] )
+                # Append values to list
+                self.append([col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment])
+
 
     def get_defaults(self):
-        """A list of defaults to be called, should there be no entry in config"""
+        """
+        A list of defaults to be called, should there be no entry in config.
+
+        Returns:
+        defaults: list
+            A list of columns with their properties that are used as defaults.
+        """
         # SQL column name, display title, display all, display positional, format, type, alignment
         defaults = [   ['game', 'Game', True, True, '%s', 'str', 0.0],       
             ['hand', 'Hand', False, False, '%s', 'str', 0.0],
@@ -1075,102 +1236,182 @@ class GUICashStats(list):
 #            s = s + "    %s = %s\n" % (k, self[k])
 #        return(s)
 class GUITourStats(list):
+    """
+    A class representing a list of GUI tour statistics.
+
+    Attributes:
+    Inherits all list attributes.
+
+    Examples:
+    gui_tour_stats = GUITourStats()
+    """
     """<gui_tour_stats>
            <col col_name="game" col_title="Game" disp_all="True" disp_posn="True" field_format="%s" field_type="str" xalignment="0.0" />
            ...
        </gui_tour_stats>
-       """
+    """
+
     def __init__(self):
         super(GUITourStats, self).__init__()
 
+
     def add_elements(self, node):
-        # is this needed?
+        """
+        Adds elements to the node.
+
+        Args:
+            node: The node to add elements to.
+
+        Returns:
+            None
+        """
+        # Loop through each child node of the given node
         for child in node.childNodes:
+            # Check if the child node is an element node
             if child.nodeType == child.ELEMENT_NODE:
+                # Define default values for each column
                 col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment=None, None, True, True, "%s", "str", 0.0
-                
-                if child.hasAttribute('col_name'):     col_name     = child.getAttribute('col_name')
-                if child.hasAttribute('col_title'):    col_title    = child.getAttribute('col_title')
-                if child.hasAttribute('disp_all'):     disp_all     = string_to_bool(child.getAttribute('disp_all'))
-                if child.hasAttribute('disp_posn'):    disp_posn    = string_to_bool(child.getAttribute('disp_posn'))
-                if child.hasAttribute('field_format'): field_format = child.getAttribute('field_format')
-                if child.hasAttribute('field_type'):   field_type   = child.getAttribute('field_type')
+
+                # Check if the child node has a 'col_name' attribute and assign its value to col_name
+                if child.hasAttribute('col_name'):     col_name     = child.getAttribute('col_name')     # Column Name
+                # Check if the child node has a 'col_title' attribute and assign its value to col_title
+                if child.hasAttribute('col_title'):    col_title    = child.getAttribute('col_title')    # Column Title
+                # Check if the child node has a 'disp_all' attribute, convert its value to a boolean and assign it to disp_all
+                if child.hasAttribute('disp_all'):     disp_all     = string_to_bool(child.getAttribute('disp_all'))     # Display All
+                # Check if the child node has a 'disp_posn' attribute, convert its value to a boolean and assign it to disp_posn
+                if child.hasAttribute('disp_posn'):    disp_posn    = string_to_bool(child.getAttribute('disp_posn'))    # Display Position
+                # Check if the child node has a 'field_format' attribute and assign its value to field_format
+                if child.hasAttribute('field_format'): field_format = child.getAttribute('field_format') # Field Format
+                # Check if the child node has a 'field_type' attribute and assign its value to field_type
+                if child.hasAttribute('field_type'):   field_type   = child.getAttribute('field_type')   # Field Type
                 try:
-                    if child.hasAttribute('xalignment'):   xalignment   = float(child.getAttribute('xalignment'))
+                    # Check if the child node has a 'xalignment' attribute, convert its value to a float and assign it to xalignment
+                    if child.hasAttribute('xalignment'):   xalignment   = float(child.getAttribute('xalignment'))   # X Alignment
                 except ValueError:
+                    # If the value of 'xalignment' attribute cannot be converted to a float, log a warning message
                     print(("bad number in xalignment was ignored"))
                     log.info(("bad number in xalignment was ignored"))
 
+                # Append a list of column values to the current object
                 self.append( [col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment] )
 
 
 
+
     def get_defaults(self):
-        """A list of defaults to be called, should there be no entry in config"""
-        # SQL column name, display title, display all, display positional, format, type, alignment
-        defaults = [   ['game', 'Game', True, True, '%s', 'str', 0.0],       
+        """
+        Returns a list of default settings if there are no entries in the config.
+
+        Returns:
+            list: A list of default settings, where each setting is also a list with the following elements:
+                SQL column name, display title, display all, display positional, format, type, alignment
+        """
+        # Define the default settings as a list of lists
+        defaults = [
+            ['game', 'Game', True, True, '%s', 'str', 0.0],
             ['hand', 'Hand', False, False, '%s', 'str', 0.0],
-            ]
+        ]
+        # Iterate over each default setting and append it to the instance of the class
         for col in defaults:
-            self.append (col)
+            self.append(col)
+
 
 
 
 class RawHands(object):
     def __init__(self, node=None):
-        if node==None:
-            self.save="error"
-            self.compression="none"
+        """
+        Initializes an instance of the RawHands class with the given XML node.
+
+        Args:
+            node (xml.dom.minidom.Element): An XML node containing the configuration settings for RawHands. Defaults to None.
+        """
+        if node is None:
+            self.save = "error"
+            self.compression = "none"
             #print ("missing config section raw_hands")
         else:
-            save=node.getAttribute("save")
+            # Get the "save" attribute from the XML node, and set self.save to that value
+            save = node.getAttribute("save")
             if save in ("none", "error", "all"):
-                self.save=save
+                self.save = save
             else:
+                # If the "save" attribute is not valid, print a warning and set self.save to "error"
                 print (("Invalid config value for %s, defaulting to %s") % (raw_hands.save, "\"error\""))
-                self.save="error"
-            
-            compression=node.getAttribute("compression")
-            if save in ("none", "gzip", "bzip2"):
-                self.compression=compression
+                self.save = "error"
+
+            # Get the "compression" attribute from the XML node, and set self.compression to that value
+            compression = node.getAttribute("compression")
+            if compression in ("none", "gzip", "bzip2"):
+                self.compression = compression
             else:
+                # If the "compression" attribute is not valid, print a warning and set self.compression to "none"
                 print (("Invalid config value for %s, defaulting to %s") % (raw_hands.compression, "\"none\""))
-                self.compression="none"
-    #end def __init__
+                self.compression = "none"
 
     def __str__(self):
+        """
+        Returns a string representation of the RawHands instance.
+
+        Returns:
+            str: A string representation of the RawHands instance, in the format "save= <self.save>, compression= <self.compression>\n"
+        """
         return "        save= %s, compression= %s\n" % (self.save, self.compression)
-#end class RawHands
+
 
 class RawTourneys(object):
     def __init__(self, node=None):
-        if node==None:
-            self.save="error"
-            self.compression="none"
+        """
+        Initializes an instance of the RawTourneys class with the given XML node.
+
+        Args:
+            node (xml.dom.minidom.Element): An XML node containing the configuration settings for RawTourneys. Defaults to None.
+        """
+        if node is None:
+            self.save = "error"
+            self.compression = "none"
             #print ("missing config section raw_tourneys")
         else:
-            save=node.getAttribute("save")
+            # Get the "save" attribute from the XML node, and set self.save to that value
+            save = node.getAttribute("save")
             if save in ("none", "error", "all"):
-                self.save=save
+                self.save = save
             else:
+                # If the "save" attribute is not valid, print a warning and set self.save to "error"
                 print (("Invalid config value for %s, defaulting to %s") % (raw_tourneys.save, "\"error\""))
-                self.save="error"
-            
-            compression=node.getAttribute("compression")
-            if save in ("none", "gzip", "bzip2"):
-                self.compression=compression
+                self.save = "error"
+
+            # Get the "compression" attribute from the XML node, and set self.compression to that value
+            compression = node.getAttribute("compression")
+            if compression in ("none", "gzip", "bzip2"):
+                self.compression = compression
             else:
+                # If the "compression" attribute is not valid, print a warning and set self.compression to "none"
                 print (("Invalid config value for %s, defaulting to %s") % (raw_tourneys.compression, "\"none\""))
-                self.compression="none"
-    #end def __init__
+                self.compression = "none"
 
     def __str__(self):
+        """
+        Returns a string representation of the RawTourneys instance.
+
+        Returns:
+            str: A string representation of the RawTourneys instance, in the format "save= <self.save>, compression= <self.compression>\n"
+        """
         return "        save= %s, compression= %s\n" % (self.save, self.compression)
-#end class RawTourneys
+
 
 class Config(object):
-    def __init__(self, file = None, dbname = '', custom_log_dir='', lvl='INFO'):
-        
+    def __init__(self, file=None, dbname='', custom_log_dir='', lvl='INFO'):
+        """
+        Initializes an instance of the Config class with the given parameters.
+
+        Args:
+            file (str): A path to an XML file containing the fpdb/HUD configuration. Defaults to None.
+            dbname (str): The name of the database to use. Defaults to an empty string.
+            custom_log_dir (str): A custom directory for log files. Defaults to an empty string.
+            lvl (str): The level of logging to use. Defaults to 'INFO'.
+        """
+        # Set various paths and properties of the Config instance
         self.install_method = INSTALL_METHOD
         self.fpdb_root_path = FPDB_ROOT_PATH
         self.appdata_path = APPDATA_PATH
@@ -1180,10 +1421,12 @@ class Config(object):
         self.os_family = OS_FAMILY
         self.posix = POSIX
         self.python_version = PYTHON_VERSION
-        
+
+        # Ensure that the CONFIG_PATH directory exists
         if not os.path.exists(CONFIG_PATH):
             os.makedirs(CONFIG_PATH)
 
+        # Set the directory for log files based on the OS family and whether a custom directory was provided
         if custom_log_dir and os.path.exists(custom_log_dir):
             self.dir_log = str(custom_log_dir, "utf8")
         else:
@@ -1212,7 +1455,7 @@ class Config(object):
         if file is None: (file,self.example_copy,example_file) = get_config("HUD_config.xml", True)
 
         self.file = file
-                    
+        # Set up various dictionaries and properties of the Config instance            
         self.supported_sites = {}
         self.supported_games = {}
         self.supported_databases = {}        # databaseName --> Database instance
@@ -1231,6 +1474,7 @@ class Config(object):
 
         added,n = 1,0  # use n to prevent infinite loop if add_missing_elements() fails somehow
         while added > 0 and n < 2:
+            # Attempt to parse the configuration file
             n = n + 1
             log.info("Reading configuration file %s" % file)
             print (("\n"+("Reading configuration file %s")+"\n") % file)
@@ -1253,6 +1497,7 @@ class Config(object):
                 # reads example file and adds missing elements into current config
                 added = self.add_missing_elements(doc, example_file)
 
+        # Add or overwrite elements in the General and GUICashStats instances
         if doc.getElementsByTagName("general") == []:
             self.general.get_defaults()
         for gen_node in doc.getElementsByTagName("general"):
@@ -1340,7 +1585,7 @@ class Config(object):
 
         db = self.get_db_parameters()
         # Set the db path if it's defined in HUD_config.xml (sqlite only), otherwise place in config path.
-        self.dir_database = db['db-path'] if db['db-path'] else os.path.join(CONFIG_PATH, u'database')
+        self.dir_database = db['db-path'] or os.path.join(CONFIG_PATH, u'database')
         if db['db-password'] == 'YOUR MYSQL PASSWORD':
             df_file = self.find_default_conf()
             if df_file is None: # this is bad
@@ -1373,17 +1618,21 @@ class Config(object):
         nodes_added = 0
 
         try:
-            example_doc = xml.dom.minidom.parse(example_file)
+            example_doc = xml.dom.minidom.parse(example_file) #parse the example configuration file
         except:
             log.error((("Error parsing example configuration file %s.") % (example_file)) + ("See error log file."))
             return nodes_added
 
+        # loop through all FreePokerToolsConfig nodes in the document
         for cnode in doc.getElementsByTagName("FreePokerToolsConfig"):
+            # loop through all FreePokerToolsConfig nodes in the example document
             for example_cnode in example_doc.childNodes:
                 if example_cnode.localName == "FreePokerToolsConfig":
+                    # loop through all child nodes of the FreePokerToolsConfig node in the example document
                     for e in example_cnode.childNodes:
-                        #print "nodetype", e.nodeType, "name", e.localName, "found", len(doc.getElementsByTagName(e.localName))
+                        # check if the child node is an element node and if there are no elements with the same name in the config file
                         if e.nodeType == e.ELEMENT_NODE and doc.getElementsByTagName(e.localName) == []:
+                            # import the missing element into the config file
                             new = doc.importNode(e, True)  # True means do deep copy
                             t_node = self.doc.createTextNode("    ")
                             cnode.appendChild(t_node)
@@ -1399,75 +1648,204 @@ class Config(object):
 
         return nodes_added
 
+
     def find_default_conf(self):
+        """Finds the default configuration file path.
+
+        Returns:
+            str: The path of the default configuration file, or None if it doesn't exist.
+        """
+        # Check if CONFIG_PATH is set
         if CONFIG_PATH:
             config_file = os.path.join(CONFIG_PATH, 'default.conf')
-        else: config_file = False
+        else:
+            # If CONFIG_PATH is not set, default configuration file does not exist
+            config_file = None
 
+        # Check if the default configuration file exists
         if config_file and os.path.exists(config_file):
             file = config_file
         else:
             file = None
+
         return file
 
     def get_doc(self):
+        """Returns the document associated with the instance."""
         return self.doc
 
     def get_site_node(self, site):
+        """Get the XML node for a given site."""
+        # Loop through all the "site" nodes in the XML document.
         for site_node in self.doc.getElementsByTagName("site"):
+            # If the "site_name" attribute of the current node matches the given site name,
+            # return the node.
             if site_node.getAttribute("site_name") == site:
                 return site_node
 
+
     def getEmailNode(self, siteName, fetchType):
+        """
+        Returns the email node for a given site name and fetch type.
+
+        Args:
+            siteName (str): The name of the site to search for.
+            fetchType (str): The type of email to search for.
+
+        Returns:
+            The email node if found, else None.
+        """
         siteNode = self.get_site_node(siteName)
+        # Loop through each email node under the site node
         for emailNode in siteNode.getElementsByTagName("email"):
             if emailNode.getAttribute("fetchType") == fetchType:
+                # Return the email node if its fetch type matches the input
                 return emailNode
-                break
-    #end def getEmailNode
+        # If no matching email node was found, return None
+        return None
 
-    def getStatSetNode(self,statsetName):
-        """returns DOM game node for a given game"""
+
+    def getStatSetNode(self, statsetName):
+        """
+        Returns the DOM game node for a given game.
+
+        Args:
+            statsetName (str): The name of the game.
+
+        Returns:
+            The DOM node for the game with the specified name.
+
+        """
+        # Loop through all the statset nodes in the document.
         for statsetNode in self.doc.getElementsByTagName("ss"):
-            #print "getStatSetNode statsetNode:",statsetNode
+            # Check if the name attribute of the current node matches the specified name.
             if statsetNode.getAttribute("name") == statsetName:
+                # If it does, return the node.
                 return statsetNode
+
     
     
-    def getGameNode(self,gameName):
-        """returns DOM game node for a given game"""
+    def getGameNode(self, gameName):
+        """Returns the DOM game node for a given game name.
+
+        Args:
+            gameName (str): The name of the game to search for.
+
+        Returns:
+            The DOM node for the game with the given name, or None if it's not found.
+        """
+        # Loop through all game nodes in the document
         for gameNode in self.doc.getElementsByTagName("game"):
-            #print "getGameNode gameNode:",gameNode
+            # Uncomment this line to help with debugging
+            #print "getGameNode gameNode:", gameNode
+
+            # If this game node has the correct name attribute, return it
             if gameNode.getAttribute("game_name") == gameName:
                 return gameNode
-    #end def getGameNode
+
+        # If we didn't find a matching game node, return None
+        return None
+
 
     
     def get_aux_node(self, aux):
+        """
+        Returns the XML node for the given auxiliary data.
+
+        Args:
+            aux (str): The name of the auxiliary data.
+
+        Returns:
+            The XML node with the matching "name" attribute, or None if not found.
+        """
+        # Loop through all <aw> tags in the XML document
         for aux_node in self.doc.getElementsByTagName("aw"):
+            # If the "name" attribute of the current node matches the given aux name, return it
             if aux_node.getAttribute("name") == aux:
                 return aux_node
+        # If we reach this point, the given aux name was not found in the XML document
+        return None
+
 
     def get_layout_set_node(self, ls):
+        """Return the layout set node with the given name.
+
+        Args:
+            ls (str): The name of the layout set.
+
+        Returns:
+            The layout set node with the given name, or None if not found.
+        """
+        # Iterate through all "ls" nodes in the document.
         for layout_set_node in self.doc.getElementsByTagName("ls"):
+            # If the "name" attribute of the node matches the given name,
+            # return the node.
             if layout_set_node.getAttribute("name") == ls:
                 return layout_set_node
+        # If no matching node was found, return None.
+        return None
+
 
     def get_layout_node(self, ls, max):
+        """
+        This function searches the given xml layout for a node with the specified max attribute value.
+
+        Args:
+            ls (xml.dom.minidom.Document): the xml layout to search
+            max (int): the max attribute value to search for
+
+        Returns:
+            xml.dom.minidom.Element: the layout node with the specified max attribute value, or None if not found
+        """
+        # iterate through each layout node in the xml document
         for layout_node in ls.getElementsByTagName("layout"):
+            # check if the layout node has the specified max attribute value
             if layout_node.getAttribute("max") == str(max):
                 return layout_node
+        # if no layout node with the specified max attribute value is found, return None
+        return None
+
                                 
     def get_stat_set_node(self, ss):
+        """
+        Returns the first `ss` node in the XML document.
+
+        Args:
+            ss (str): The name of the `ss` node to find.
+
+        Returns:
+            xml.dom.minidom.Element: The first `ss` node in the XML document with
+            the given name, or None if no such node exists.
+        """
+        # Iterate over all `ss` nodes in the document.
         for stat_set_node in self.doc.getElementsByTagName("ss"):
-            if os.ST_NODEV.getAttribute("name") == ss:
+            # If the current `ss` node has the given name, return it.
+            if stat_set_node.getAttribute("name") == ss:
                 return stat_set_node
 
-    def get_db_node(self, db_name):
-        for db_node in self.doc.getElementsByTagName("database"):
-            if db_node.getAttribute("db_name") == db_name:
-                return db_node
+        # If no `ss` node with the given name was found, return None.
         return None
+
+
+    def get_db_node(self, db_name):
+        """
+        Returns the XML node corresponding to the given database name, or None if not found.
+
+        Args:
+            db_name (str): The name of the database to search for.
+
+        Returns:
+            xml.dom.Node: The XML node corresponding to the given database name, or None if not found.
+        """
+        # Loop through each "database" node in the XML document
+        for db_node in self.doc.getElementsByTagName("database"):
+            # If the "db_name" attribute of this node matches the given database name
+            if db_node.getAttribute("db_name") == db_name:
+                # Return this node
+                return db_node
+        # If we get here, the database name was not found
+        return None
+
 
 #    def get_layout_node(self, site_node, layout):
 #        for layout_node in site_node.getElementsByTagName("layout"):
@@ -1477,67 +1855,156 @@ class Config(object):
 #                return layout_node
 
     def get_location_node(self, layout_node, seat):
+        """
+        Gets the location node for the given seat in the layout node
+
+        Args:
+            layout_node (xml.dom.minidom.Element): The layout node to search in
+            seat (str): The seat to get the location node for. If "common", returns the common location node
+
+        Returns:
+            xml.dom.minidom.Element: The location node for the given seat, or None if not found
+        """
         if seat == "common":
+            # Look for the common location node
             for location_node in layout_node.getElementsByTagName("location"):
                 if location_node.hasAttribute("common"):
                     return location_node
         else:
+            # Look for the location node with the given seat attribute
             for location_node in layout_node.getElementsByTagName("location"):
-                if int( location_node.getAttribute("seat") ) == int( seat ):
+                if int(location_node.getAttribute("seat")) == int(seat):
                     return location_node
 
-    def save(self, file = None):
+        # If the location node is not found, return None
+        return None
+
+
+    def save(self, file=None):
+        """
+        Saves the XML document to a file.
+
+        Parameters:
+        - file: file path to save the document to. If None, the file path used to read the document is used.
+        """
         if file is None:
             file = self.file
+
+            # Backup the original file before overwriting it
             try:
-                shutil.move(file, file+".backup")
+                shutil.move(file, file + ".backup")
             except:
                 pass
-                
+
+        # Write the XML document to the file
         with codecs.open(file, 'w', 'utf-8') as f:
-            #self.doc.writexml(f)
-            f.write( self.wrap_long_lines( self.doc.toxml() ) )
+            xml_string = self.doc.toxml()
+            formatted_xml_string = self.wrap_long_lines(xml_string)
+            f.write(formatted_xml_string)
 
     def wrap_long_lines(self, s):
-        lines = [ self.wrap_long_line(l) for l in s.splitlines() ]
-        return('\n'.join(lines) + '\n')
+        """
+        Wraps long lines in a string to ensure they are no longer than 66 characters.
+
+        Args:
+            s (str): The input string to wrap.
+
+        Returns:
+            str: The wrapped string.
+        """
+        # Split the input string into separate lines.
+        lines = [self.wrap_long_line(l) for l in s.splitlines()]
+
+        # Join the wrapped lines back together into a single string.
+        return '\n'.join(lines) + '\n'
+
 
     def wrap_long_line(self, l):
+        """
+        Takes a string and wraps it if it is longer than the configured wrap length.
+
+        Args:
+            l (str): The string to wrap.
+
+        Returns:
+            str: The wrapped string.
+        """
+        # Get the configured wrap length, or default to no wrap if it is not set.
         if 'config_wrap_len' in self.general:
             wrap_len = int(self.general['config_wrap_len'])
         else:
             wrap_len = -1    # < 0 means no wrap
 
+        # If the configured wrap length is greater than or equal to 0 and the string is longer than the wrap length,
+        # wrap the string.
         if wrap_len >= 0 and len(l) > wrap_len:
+            # Find the length of the leading whitespace in the string, which will be used to indent the wrapped lines.
             m = re.compile('\s+\S+\s+')
             mo = m.match(l)
             if mo:
                 indent_len = mo.end()
-                #print "indent = %s (%s)" % (indent_len, l[0:indent_len])
                 indent = '\n' + ' ' * indent_len
+
+                # Split the string into multiple parts, with each part being a substring that is wrapped to the
+                # configured wrap length.
                 m = re.compile('(\S+="[^"]+"\s+)')
                 parts = [x for x in m.split(l[indent_len:]) if x]
                 if len(parts) > 1:
-                    #print "parts =", parts
                     l = l[0:indent_len] + indent.join(parts)
             return(l)
         else:
             return(l)
 
+
     def editEmail(self, siteName, fetchType, newEmail):
+        """
+        Edits the email for a given site and fetch type.
+
+        Args:
+            siteName (str): The name of the site.
+            fetchType (str): The type of email fetch.
+            newEmail (Email): The updated email information.
+
+        Returns:
+            None
+        """
+        # Get the email node for the site and fetch type
         emailNode = self.getEmailNode(siteName, fetchType)
+
+        # Update the email attributes with the new information
         emailNode.setAttribute("host", newEmail.host)
         emailNode.setAttribute("username", newEmail.username)
         emailNode.setAttribute("password", newEmail.password)
         emailNode.setAttribute("folder", newEmail.folder)
         emailNode.setAttribute("useSsl", newEmail.useSsl)
+
     #end def editEmail
     
     def edit_fav_seat(self, site_name, enabled, seat2_dict, seat3_dict, seat4_dict, seat5_dict, seat6_dict, seat7_dict, seat8_dict, seat9_dict, seat10_dict):
+        """
+        Edits the favorite seat attribute of a given site node, based on the max attribute of each fav seat node.
+
+        Args:
+            site_name (str): Name of the site to edit.
+            enabled (bool): Whether the site is enabled.
+            seat2_dict (dict): Dictionary with the new favorite seats for max 2.
+            seat3_dict (dict): Dictionary with the new favorite seats for max 3.
+            seat4_dict (dict): Dictionary with the new favorite seats for max 4.
+            seat5_dict (dict): Dictionary with the new favorite seats for max 5.
+            seat6_dict (dict): Dictionary with the new favorite seats for max 6.
+            seat7_dict (dict): Dictionary with the new favorite seats for max 7.
+            seat8_dict (dict): Dictionary with the new favorite seats for max 8.
+            seat9_dict (dict): Dictionary with the new favorite seats for max 9.
+            seat10_dict (dict): Dictionary with the new favorite seats for max 10.
+        """
+        # Get the site node
         site_node = self.get_site_node(site_name)
+        # Set the enabled attribute
         site_node.setAttribute("enabled", enabled)
-        
+
+        # Loop through all the fav seat nodes
         for fav_seat in site_node.getElementsByTagName("fav"):
+            # Set the fav seat attribute based on the max attribute
             if fav_seat.getAttribute("max") == "2":
                 fav_seat.setAttribute("fav_seat", seat2_dict)
             elif fav_seat.getAttribute("max") == "3":
@@ -1556,6 +2023,7 @@ class Config(object):
                 fav_seat.setAttribute("fav_seat", seat9_dict)
             elif fav_seat.getAttribute("max") == "10":
                 fav_seat.setAttribute("fav_seat", seat10_dict)
+
     #end def
     
     def edit_hud(self, result, stat2, stat3, stat4, stat5, stat6, stat7, stat8, stat9, stat10, stat11, stat12, stat13):
