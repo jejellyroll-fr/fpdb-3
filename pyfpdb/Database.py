@@ -90,29 +90,71 @@ DB_VERSION = 216
 
 # Variance created as sqlite has a bunch of undefined aggregate functions.
 
+
 class VARIANCE(object):
     def __init__(self):
-        self.store = []
+        """
+        Initializes an instance of the VARIANCE class.
+        """
+        self.store = []       # list to store values for calculating variance
 
     def step(self, value):
+        """
+        Adds a value to the list of values.
+        """
         self.store.append(value)
 
     def finalize(self):
+        """
+        Calculates the variance of the values in the list.
+        """
         return float(var(self.store))
 
 class sqlitemath(object):
     def mod(self, a, b):
-        return a%b
+        """
+        Returns the remainder of dividing a by b.
+        """
+        return a % b
+
     
     
 def adapt_decimal(d):
-    return str(d)
+    """
+    Converts a decimal to a string representation.
+
+    Args:
+        d (decimal): The decimal to be converted.
+
+    Returns:
+        str: The string representation of the decimal.
+    """
+    return str(d)  # convert the decimal to a string
+
 
 def convert_decimal(s):
+    """
+    Convert a string representation of a decimal number to a Decimal object.
+
+    Args:
+        s (str): A string representation of a decimal number.
+
+    Returns:
+        decimal.Decimal: A Decimal object representing the input string.
+
+    Raises:
+        UnicodeDecodeError: If the input string cannot be decoded.
+    """
+    # Print debug information
     print('convertvalue')
     print(s)
+
+    # Decode input string
     s = s.decode()
+
+    # Return Decimal object
     return Decimal(s)
+
     
     
 # These are for appendStats. Insert new stats at the right place, because
@@ -635,11 +677,17 @@ class Database(object):
     # create index indexname on tablename (col);
 
 
-    def __init__(self, c, sql = None, autoconnect = True):
+    def __init__(self, c, sql=None, autoconnect=True):
+        """
+        Class constructor for DatabaseManager.
+
+        :param c: Configuration object.
+        :param sql: SQL instance.
+        :param autoconnect: Whether to automatically connect to the database.
+        """
         self.config = c
         self.__connected = False
-        self.settings = {}
-        self.settings['os'] = "linuxmac" if os.name != "nt" else "windows"
+        self.settings = {'os': "linuxmac" if os.name != "nt" else "windows"}
         db_params = c.get_db_parameters()
         self.import_options = c.get_import_parameters()
         self.backend = db_params['db-backend']
@@ -662,48 +710,49 @@ class Database(object):
         self.publicDB = self.import_options['publicDB']
 
         # where possible avoid creating new SQL instance by using the global one passed in
-        self.sql = SQL.Sql(db_server = self.db_server) if sql is None else sql
+        self.sql = SQL.Sql(db_server=self.db_server) if sql is None else sql
         if autoconnect:
             # connect to db
             self.do_connect(c)
 
+            # Set isolation levels for Postgres
             if self.backend == self.PGSQL:
                 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT, ISOLATION_LEVEL_READ_COMMITTED, ISOLATION_LEVEL_SERIALIZABLE
                 #ISOLATION_LEVEL_AUTOCOMMIT     = 0
                 #ISOLATION_LEVEL_READ_COMMITTED = 1
                 #ISOLATION_LEVEL_SERIALIZABLE   = 2
 
-
+            # Recreate tables if necessary
             if self.backend == self.SQLITE and self.database == ':memory:' and self.wrongDbVersion and self.is_connected():
                 log.info("sqlite/:memory: - creating")
                 self.recreate_tables()
                 self.wrongDbVersion = False
 
-            self.gtcache    = None       # GameTypeId cache 
-            self.tcache     = None       # TourneyId cache
-            self.pcache     = None       # PlayerId cache
-            self.tpcache    = None       # TourneysPlayersId cache
+            # Initialize caches
+            self.gtcache = None  # GameTypeId cache
+            self.tcache = None  # TourneyId cache
+            self.pcache = None  # PlayerId cache
+            self.tpcache = None  # TourneysPlayersId cache
 
-            # if fastStoreHudCache is true then the hudcache will be build using the limited configuration which ignores date, seats, and position
+            # Set options for building hudcache
             self.build_full_hudcache = not self.import_options['fastStoreHudCache']
             self.cacheSessions = self.import_options['cacheSessions']
             self.callHud = self.import_options['callFpdbHud']
 
-            #self.hud_hero_style = 'T'  # Duplicate set of vars just for hero - not used yet.
-            #self.hud_hero_hands = 2000 # Idea is that you might want all-time stats for others
-            #self.hud_hero_days  = 30   # but last T days or last H hands for yourself
-
             # vars for hand ids or dates fetched according to above config:
-            self.hand_1day_ago = 0             # max hand id more than 24 hrs earlier than now
-            self.date_ndays_ago = 'd000000'    # date N days ago ('d' + YYMMDD)
+            self.hand_1day_ago = 0  # max hand id more than 24 hrs earlier than now
+            self.date_ndays_ago = 'd000000'  # date N days ago ('d' + YYMMDD)
             self.h_date_ndays_ago = 'd000000'  # date N days ago ('d' + YYMMDD) for hero
-            self.date_nhands_ago = {}          # dates N hands ago per player - not used yet
+            self.date_nhands_ago = {}  # dates N hands ago per player - not used yet
 
+            # Save actions if enabled
             self.saveActions = self.import_options['saveActions'] != False
 
+            # Get sites if connected and version is correct
             if self.is_connected():
                 if not self.wrongDbVersion:
                     self.get_sites()
+
                 self.connection.rollback()  # make sure any locks taken so far are released
     #end def __init__
 
@@ -757,14 +806,39 @@ class Database(object):
 
     # could be used by hud to change hud style
     def set_hud_style(self, style):
+        """
+        Sets the style of the HUD.
+
+        Args:
+            style (str): The style to set the HUD to.
+        """
+        # Set the HUD style to the given style.
         self.hud_style = style
 
+
     def do_connect(self, c):
+        """
+        Connect to the database using the provided configuration.
+
+        Args:
+            c (object): Configuration object containing database parameters.
+
+        Raises:
+            FpdbError: If configuration is not defined.
+            Exception: If error occurs during connect.
+
+        Returns:
+            None
+        """
+        # Check if configuration is defined
         if c is None:
             raise FpdbError('Configuration not defined')
 
+        # Get database parameters from configuration
         db = c.get_db_parameters()
+
         try:
+            # Connect to the database
             self.connect(backend=db['db-backend'],
                          host=db['db-host'],
                          database=db['db-databaseName'],
@@ -775,6 +849,7 @@ class Database(object):
             self.__connected = False
             raise
 
+        # Set class variables
         db_params = c.get_db_parameters()
         self.import_options = c.get_import_parameters()
         self.backend = db_params['db-backend']
@@ -782,11 +857,31 @@ class Database(object):
         self.database = db_params['db-databaseName']
         self.host = db_params['db-host']
 
+
     def connect(self, backend=None, host=None, database=None,
                 user=None, password=None, create=False):
-        """Connects a database with the given parameters"""
+        """
+        Connects a database with the given parameters.
+
+        Parameters:
+        backend (str): the database backend, must be one of 'MYSQL_INNODB', 'PGSQL', or 'SQLITE'
+        host (str): the database host
+        database (str): the name of the database
+        user (str): the username for the database
+        password (str): the password for the database
+        create (bool): whether to create the database if it doesn't exist
+
+        Raises:
+        FpdbError: If the backend is not defined or is unrecognized.
+
+        Returns:
+        None
+        """
+        # Check that backend is defined
         if backend is None:
             raise FpdbError('Database backend not defined')
+
+        # Set up database parameters
         self.backend = backend
         self.host = host
         self.user = user
@@ -796,37 +891,45 @@ class Database(object):
         self.cursor     = None
         self.hand_inc   = 1
 
+        # Connect to MySQL database backend
         if backend == Database.MYSQL_INNODB:
             #####not working mysql connector on py3.9####
             import MySQLdb
             if use_pool:
                 MySQLdb = pool.manage(MySQLdb, pool_size=5)
             try:
+                # Connect to the MySQL database with the given parameters
                 self.connection = MySQLdb.connect(host=host
-                                                 ,user=user
-                                                 ,passwd=password
-                                                 ,db=database
-                                                 ,charset='utf8'
-                                                 ,use_unicode=True)
+                                                ,user=user
+                                                ,passwd=password
+                                                ,db=database
+                                                ,charset='utf8'
+                                                ,use_unicode=True)
                 self.__connected = True
-            #TODO: Add port option
             except MySQLdb.Error as ex:
+                # Handle known exceptions
                 if ex.args[0] == 1045:
-                    raise FpdbMySQLAccessDenied(ex.args[0], ex.args[1])
+                    raise FpdbMySQLAccessDenied(ex.args[0], ex.args[1]) from ex
                 elif ex.args[0] == 2002 or ex.args[0] == 2003: # 2002 is no unix socket, 2003 is no tcp socket
-                    raise FpdbMySQLNoDatabase(ex.args[0], ex.args[1])
+                    raise FpdbMySQLNoDatabase(ex.args[0], ex.args[1]) from ex
                 else:
                     print(("*** WARNING UNKNOWN MYSQL ERROR:"), ex)
+
+            # Set hand_inc value
             c = self.get_cursor()
             c.execute("show variables like 'auto_increment_increment'")
             self.hand_inc = int(c.fetchone()[1])
+
+
         elif backend == Database.PGSQL:
+            # Connect to a PostgreSQL database using the given parameters
             import psycopg2
             import psycopg2.extensions
             if use_pool:
                 psycopg2 = pool.manage(psycopg2, pool_size=5)
             psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
             psycopg2.extensions.register_adapter(Decimal, psycopg2._psycopg.Decimal)
+
             # If DB connection is made over TCP, then the variables
             # host, user and password are required
             # For local domain-socket connections, only DB name is
@@ -839,18 +942,20 @@ class Database(object):
                 try:
                     self.connection = psycopg2.connect(database = database)
                     self.__connected = True
-                except:
+                except Exception:
                     # direct connection failed so try user/pass/... version
                     pass
+
+            # If still not connected, try with host, user, password, and database parameters
             if not self.is_connected():
                 try:
-                    #print(host, user, password, database)
                     self.connection = psycopg2.connect(host = host,
-                                               user = user,
-                                               password = password,
-                                               database = database)
+                                                    user = user,
+                                                    password = password,
+                                                    database = database)
                     self.__connected = True
                 except Exception as ex:
+                    # Handle known exceptions
                     if 'Connection refused' in ex.args[0] or ('database "' in ex.args[0] and '" does not exist' in ex.args[0]):
                         # meaning eg. db not running
                         raise FpdbPostgresqlNoDatabase(errmsg = ex.args[0])
@@ -862,6 +967,8 @@ class Database(object):
                         msg = ex.args[0]
                     log.error(msg)
                     raise FpdbError(msg)
+
+                
         elif backend == Database.SQLITE:
             create = True
             import sqlite3
@@ -870,6 +977,7 @@ class Database(object):
             #else:
             #    log.warning("SQLite won't work well without 'sqlalchemy' installed.")
 
+            # Create a SQLite database if it does not exist
             if database != ":memory:":
                 if not os.path.isdir(self.config.dir_database) and create:
                     log.info(("Creating directory: '%s'") % (self.config.dir_database))
@@ -878,6 +986,7 @@ class Database(object):
             self.db_path = database
             log.info(("Connecting to SQLite: %s") % self.db_path)
             if os.path.exists(database) or create:
+                # Connect to the existing or newly created SQLite database
                 self.connection = sqlite3.connect(self.db_path, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES )
                 self.__connected = True
                 sqlite3.register_converter("bool", lambda x: bool(int(x)))
@@ -897,7 +1006,9 @@ class Database(object):
                 self.cursor.execute('PRAGMA journal_mode=WAL')  # use memory for temp tables/indexes
                 self.cursor.execute('PRAGMA synchronous=0') # don't wait for file writes to finish
             else:
+                # Raise an exception if the SQLite database does not exist
                 raise FpdbError("sqlite database "+database+" does not exist")
+
         else:
             raise FpdbError("unrecognised database backend:"+str(backend))
 
@@ -907,76 +1018,143 @@ class Database(object):
             self.check_version(database=database, create=create)
 
     def get_sites(self):
+        """
+        Retrieves the names and IDs of all sites from the database and sets them in the config object.
+        """
+        # Execute the SQL query to select the site names and IDs
         self.cursor.execute("SELECT name,id FROM Sites")
+        # Fetch all the results from the query
         sites = self.cursor.fetchall()
+        # Set the site IDs in the config object
         self.config.set_site_ids(sites)
 
+
     def check_version(self, database, create):
+        """Checks database version and recreates tables if necessary.
+
+        Args:
+            database (str): name of the database.
+            create (bool): whether to create tables if they don't exist.
+        """
+        # Set the flag to False.
         self.wrongDbVersion = False
+
         try:
+            # Try to read the "Settings" table.
             self.cursor.execute("SELECT * FROM Settings")
             settings = self.cursor.fetchone()
+
+            # If the database version is not equal to DB_VERSION, log an error and set the flag to True.
             if settings[0] != DB_VERSION:
-                log.error((("Outdated or too new database version (%s).") % (settings[0])) + " " + ("Please recreate tables."))
+                log.error(
+                    f"Outdated or too new database version ({settings[0]}). Please recreate tables."
+                )
                 self.wrongDbVersion = True
-        except:# _mysql_exceptions.ProgrammingError:
-            if database !=  ":memory:":
-                if create:
-                    #print (("Failed to read settings table.") + " - " + ("Recreating tables."))
-                    log.info(("Failed to read settings table.") + " - " + ("Recreating tables."))
-                    self.recreate_tables()
-                    self.check_version(database=database, create=False)
-                else:
-                    #print (("Failed to read settings table.") + " - " + ("Please recreate tables."))
-                    log.info(("Failed to read settings table.") + " - " + ("Please recreate tables."))
-                    self.wrongDbVersion = True
+        except Exception:
+            # If reading the "Settings" table fails and the database is in memory, set the flag to True.
+            if database == ":memory:":
+                self.wrongDbVersion = True
+
+            # If "create" is True, recreate the tables and call check_version with create=False.
+            elif create:
+                log.info(("Failed to read settings table.") + " - " + ("Recreating tables."))
+                self.recreate_tables()
+                self.check_version(database=database, create=False)
+
+            # If "create" is False, log an error and set the flag to True.
             else:
+                log.info(("Failed to read settings table.") + " - " + ("Please recreate tables."))
                 self.wrongDbVersion = True
+
     #end def connect
 
     def commit(self):
+        """
+        Commits the current transaction on the database connection.
+        If the backend is not SQLite, the connection is simply committed.
+        If the backend is SQLite, the connection is retried up to 5 times
+        in case a shared lock on the database caused the commit to fail.
+        """
         if self.backend != self.SQLITE:
             self.connection.commit()
         else:
-            # sqlite commits can fail because of shared locks on the database (SQLITE_BUSY)
-            # re-try commit if it fails in case this happened
-            maxtimes = 5
-            pause = 1
-            ok = False
+            # SQLite commits can fail because of shared locks on the database (SQLITE_BUSY).
+            # Retry commit if it fails in case this happened.
+            maxtimes = 5  # Maximum number of retries.
+            pause = 1  # Number of seconds to sleep between retries.
+            ok = False  # Whether the commit was successful.
             for i in range(maxtimes):
                 try:
                     ret = self.connection.commit()
-                    #log.debug(("commit finished ok, i = ")+str(i))
+                    # log.debug(("commit finished ok, i = ")+str(i))
                     ok = True
                 except:
-                    log.debug(("commit %s failed: info=%s value=%s") % (str(i), str(sys.exc_info()), str(sys.exc_info()[1])))
+                    log.debug(
+                        f"commit {str(i)} failed: info={str(sys.exc_info())} value={str(sys.exc_info()[1])}"
+                    )
                     sleep(pause)
-                if ok: break
+                if ok:
+                    break
             if not ok:
                 log.debug(("commit failed"))
                 raise FpdbError('sqlite commit failed')
 
+
     def rollback(self):
-        self.connection.rollback()
+        """
+        Roll back the current transaction.
+        """
+        self.connection.rollback()  # Roll back the transaction
+
 
     def connected(self):
-        """ now deprecated, use is_connected() instead """
+        """Return the value of the __connected attribute.
+
+        This method is now deprecated, use is_connected() instead.
+        """
         return self.__connected
 
+
     def is_connected(self):
+        """
+        Check if the connection is currently established.
+
+        :return: True if the connection is established, False otherwise.
+        """
         return self.__connected
 
     def get_cursor(self, connect=False):
+        """Returns a cursor object for the database connection.
+
+        Args:
+            connect (bool): Whether to establish a new database connection or not.
+
+        Returns:
+            cursor: A cursor object for the database connection.
+        """
+        # Check if the backend is MySQL InnoDB and the operating system is Windows.
         if self.backend == Database.MYSQL_INNODB and os.name == 'nt':
+            # Ping the connection to keep it alive.
             self.connection.ping(True)
+        # Return a cursor object for the database connection.
         return self.connection.cursor()
 
+
     def close_connection(self):
-        self.connection.close()
-        self.__connected = False
+        """Closes the connection to the database."""
+        self.connection.close()  # Close the connection
+        self.__connected = False  # Set the 'connected' attribute to False
+
+
 
     def disconnect(self, due_to_error=False):
-        """Disconnects the DB (rolls back if param is true, otherwise commits"""
+        """
+        Disconnect from the database.
+
+        Args:
+            due_to_error (bool): If True, roll back any uncommitted changes before disconnecting.
+                Otherwise, commit any changes and then disconnect.
+        """
         if due_to_error:
             self.connection.rollback()
         else:
@@ -985,52 +1163,137 @@ class Database(object):
         self.connection.close()
         self.__connected = False
 
+
+
     def reconnect(self, due_to_error=False):
-        """Reconnects the DB"""
-        #print "started reconnect"
+        """
+        Reconnect to the database.
+
+        Args:
+            due_to_error (bool): Whether the function is being called due to an error.
+        """
+        # Disconnect from the database.
         self.disconnect(due_to_error)
-        self.connect(self.backend, self.host, self.database, self.user, self.password)
+
+        # Connect to the database with the given parameters.
+        self.connect(
+            self.backend,
+            self.host,
+            self.database,
+            self.user,
+            self.password,
+        )
+
 
     def get_backend_name(self):
-        """Returns the name of the currently used backend"""
-        if self.backend==2:
+        """
+        Returns the name of the currently used backend.
+
+        Args:
+            self: An instance of the class.
+
+        Returns:
+            str: The name of the backend currently being used.
+
+        Raises:
+            FpdbError: If an invalid backend value is encountered.
+        """
+        if self.backend == 2:
             return "MySQL InnoDB"
-        elif self.backend==3:
+        elif self.backend == 3:
             return "PostgreSQL"
-        elif self.backend==4:
+        elif self.backend == 4:
             return "SQLite"
         else:
             raise FpdbError("invalid backend")
 
     def get_db_info(self):
+        """Returns a tuple containing database connection information."""
+        # Extract connection information from the object attributes.
         return (self.host, self.database, self.user, self.password)
 
+
     def get_table_name(self, hand_id):
+        """
+        Retrieves the name of the table associated with the given hand_id.
+
+        Args:
+            hand_id (int): The ID of the hand to retrieve the table name for.
+
+        Returns:
+            str: The name of the table associated with the given hand_id.
+        """
+        # Create a cursor object using the connection obtained from the parent class
         c = self.connection.cursor()
+
+        # Execute the query to retrieve the table name using the given hand_id
         c.execute(self.sql.query['get_table_name'], (hand_id, ))
-        row = c.fetchone()
-        return row
+
+        # Return the first row from the query result
+        return c.fetchone()
+
+
 
     def get_table_info(self, hand_id):
+        """Get information about a poker table based on the given hand ID.
+
+        Args:
+            hand_id (int): The ID of the hand to get information for.
+
+        Returns:
+            list: A list containing information about the table, including the
+            table name, game type (ring or tournament), tournament number (if
+            applicable), and table number (if applicable).
+        """
+        # Create cursor to execute query
         c = self.connection.cursor()
+
+        # Execute query to get table name and game type
         c.execute(self.sql.query['get_table_name'], (hand_id, ))
+
+        # Fetch one row from the query result
         row = c.fetchone()
+
+        # Convert row to list for easier manipulation
         l = list(row)
-        if row[3] == "ring":   # cash game
-            l.append(None)
-            l.append(None)
-            return l
-        else:    # tournament
+
+        # If the game type is a cash game, add None values for tournament number and table number
+        if row[3] == "ring":
+            l.extend((None, None))
+        else:
+            # If the game type is a tournament, extract the tournament number and table number from the table name
             tour_no, tab_no = re.split(" ", row[0], 1)
             l.append(tour_no)
             l.append(tab_no)
-            return l
+
+        # Return the list containing table information
+        return l
+
+
 
     def get_last_hand(self):
+        """
+        Returns the last hand from the database.
+
+        Args:
+            self: The instance of the class.
+
+        Returns:
+            The last hand from the database.
+        """
+        # Create a cursor object from the connection
         c = self.connection.cursor()
+
+        # Execute the SQL query to get the last hand from the database
         c.execute(self.sql.query['get_last_hand'])
+
+        # Get the first row of the result set
         row = c.fetchone()
+
+        # Return the first column of the first row
         return row[0]
+
+
 
     def get_xml(self, hand_id):
         c = self.connection.cursor()

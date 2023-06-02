@@ -2106,81 +2106,148 @@ class Config(object):
     #end def
 
     def edit_site(self, site_name, enabled, screen_name, history_path, summary_path):
+        """
+        Edits the site with the given site_name, setting its attributes to the provided values.
+
+        Args:
+            site_name (str): The name of the site to edit.
+            enabled (bool): Whether the site should be enabled or not.
+            screen_name (str): The screen name of the site.
+            history_path (str): The path to the site's history file.
+            summary_path (str): The path to the site's summary file, if it exists.
+        """
+        # Get the node corresponding to the site_name
         site_node = self.get_site_node(site_name)
+
+        # Set the site's attributes to the provided values
         site_node.setAttribute("enabled", enabled)
         site_node.setAttribute("screen_name", screen_name)
         site_node.setAttribute("HH_path", history_path)
+
+        # If a summary_path was provided, set the site's TS_path attribute to it
         if summary_path:
             site_node.setAttribute("TS_path", summary_path)
+
             
     def editStats(self, statsetName, statArray):
-        """replaces stat selection for the given gameName with the given statArray"""
+        """
+        Replaces stat selection for the given gameName with the given statArray.
+        """
         statsetNode = self.getStatSetNode(statsetName)
         statNodes = statsetNode.getElementsByTagName("stat")
-        
+
+        # Remove existing stats
         for node in statNodes:
             statsetNode.removeChild(node)
-        
+
+        # Set the rows and columns attributes
         statsetNode.setAttribute("rows", str(len(statArray)))
         statsetNode.setAttribute("cols", str(len(statArray[0])))
-        
+
+        # Add new stats
         for rowNumber in range(len(statArray)):
             for columnNumber in range(len(statArray[rowNumber])):
-                newStat=self.doc.createElement("stat")
-                
-                newAttrStatName=self.doc.createAttribute("_stat_name")
+                newStat = self.doc.createElement("stat")
+
+                # Set the _stat_name attribute
+                newAttrStatName = self.doc.createAttribute("_stat_name")
                 newStat.setAttributeNode(newAttrStatName)
                 newStat.setAttribute("_stat_name", statArray[rowNumber][columnNumber])
-                
-                newAttrStatName=self.doc.createAttribute("_rowcol")
+
+                # Set the _rowcol attribute
+                newAttrStatName = self.doc.createAttribute("_rowcol")
                 newStat.setAttributeNode(newAttrStatName)
                 newStat.setAttribute("_rowcol", ("("+str(rowNumber+1)+","+str(columnNumber+1)+")"))
-                
-                newAttrStatName=self.doc.createAttribute("click")
+
+                # Set the click attribute
+                newAttrStatName = self.doc.createAttribute("click")
                 newStat.setAttributeNode(newAttrStatName)
                 newStat.setAttribute("click", "")
-                
-                newAttrStatName=self.doc.createAttribute("popup")
+
+                # Set the popup attribute
+                newAttrStatName = self.doc.createAttribute("popup")
                 newStat.setAttributeNode(newAttrStatName)
                 newStat.setAttribute("popup", "default")
-                
-                newAttrStatName=self.doc.createAttribute("tip")
+
+                # Set the tip attribute
+                newAttrStatName = self.doc.createAttribute("tip")
                 newStat.setAttributeNode(newAttrStatName)
                 newStat.setAttribute("tip", "")
-                
+
                 statsetNode.appendChild(newStat)
-        statNodes = statsetNode.getElementsByTagName("stat") #TODO remove this line?
+
+        # TODO: remove this line?
+        statNodes = statsetNode.getElementsByTagName("stat")
+
     #end def editStats
 
     def editImportFilters(self, games):
+        """
+        Edit the import filters with the given games.
+
+        Args:
+            games (str): A comma-separated list of game names.
+
+        Returns:
+            None
+        """
+        # Update the import filters in the object
         self.imp.importFilters = games
+
+        # Find the last import node in the XML document
         imp_node = self.doc.getElementsByTagName("import")[-1]
+
+        # Update the importFilters attribute of the import node
         imp_node.setAttribute("importFilters", games)
 
+
     def save_layout_set(self, ls, max, locations, width=None, height=None):
+        """
+        Saves the layout set.
+
+        Args:
+            ls (LayoutSet): The layout set to be saved.
+            max (int): The maximum number of windows.
+            locations (dict): A dictionary with window IDs as keys and their positions as values.
+            width (int, optional): The width of the layout set. Defaults to None.
+            height (int, optional): The height of the layout set. Defaults to None.
+        """
         #wid/height normally not specified when saving common from the mucked display
-        
+
+        # Print out some information for debugging purposes
         print("saving layout =", ls.name, " ", str(max), "Max ", str(locations), "size:", str(width), "x", str(height))
+
+        # Get the layout set node and the layout node
         ls_node = self.get_layout_set_node(ls.name)
         layout_node = self.get_layout_node(ls_node, max)
-        if width: layout_node.setAttribute("width", str(width))
-        if height: layout_node.setAttribute("height", str(height))
-        
+
+        # Set the width and height attributes if they are specified
+        if width: 
+            layout_node.setAttribute("width", str(width))
+        if height: 
+            layout_node.setAttribute("height", str(height))
+
+        # Iterate through the locations and set the x and y attributes of each location node in the layout node
         for (i, pos) in list(locations.items()):
             location_node = self.get_location_node(layout_node, i)
-            location_node.setAttribute("x", str( locations[i][0] ))
-            location_node.setAttribute("y", str( locations[i][1] ))
-            #now refresh the live instance of the layout set with the new locations
-            # this is needed because any future windows created after a save layout
+            location_node.setAttribute("x", str(locations[i][0]))
+            location_node.setAttribute("y", str(locations[i][1]))
+
+            # Refresh the live instance of the layout set with the new locations
+            # This is needed because any future windows created after a save layout
             # MUST pickup the new layout
-            #fixme - this is horrid 
+            # Fixme - this is horrid 
             if i == "common":
-                self.layout_sets[ls.name].layout[max].common = ( locations[i][0], locations[i][1] )
+                self.layout_sets[ls.name].layout[max].common = (locations[i][0], locations[i][1])
             else:
-                self.layout_sets[ls.name].layout[max].location[i] = ( locations[i][0], locations[i][1] )
-        # more horridness below, fixme
-        if height: self.layout_sets[ls.name].layout[max].height = height
-        if width: self.layout_sets[ls.name].layout[max].width = width
+                self.layout_sets[ls.name].layout[max].location[i] = (locations[i][0], locations[i][1])
+
+        # More horridness below, fixme
+        if height: 
+            self.layout_sets[ls.name].layout[max].height = height
+        if width: 
+            self.layout_sets[ls.name].layout[max].width = width
+
         
                 
     #NOTE: we got a nice Database class, so why map it again here?
@@ -2191,72 +2258,158 @@ class Config(object):
     #            thus we can drop self.db_selected (holding database name) entirely and replace it with self._active_database = Database, avoiding to define the same
     #            thing multiple times
     def get_db_parameters(self):
+        """
+        Returns a dictionary containing the database parameters for the selected database.
+        """
         db = {}
         name = self.db_selected
+
         # TODO: What's up with all the exception handling here?!
-        try:    db['db-databaseName'] = name
-        except: pass
+        # Set database name
+        try:    
+            db['db-databaseName'] = name
+        except: 
+            pass
 
-        try:    db['db-desc'] = self.supported_databases[name].db_desc
-        except: pass
+        # Set database description
+        try:    
+            db['db-desc'] = self.supported_databases[name].db_desc
+        except: 
+            pass
 
-        try:    db['db-host'] = self.supported_databases[name].db_ip
-        except: pass
+        # Set database host
+        try:    
+            db['db-host'] = self.supported_databases[name].db_ip
+        except: 
+            pass
 
-        try:    db['db-user'] = self.supported_databases[name].db_user
-        except: pass
+        # Set database user
+        try:    
+            db['db-user'] = self.supported_databases[name].db_user
+        except: 
+            pass
 
-        try:    db['db-password'] = self.supported_databases[name].db_pass
-        except: pass
+        # Set database password
+        try:    
+            db['db-password'] = self.supported_databases[name].db_pass
+        except: 
+            pass
 
-        try:    db['db-server'] = self.supported_databases[name].db_server
-        except: pass
+        # Set database server
+        try:    
+            db['db-server'] = self.supported_databases[name].db_server
+        except: 
+            pass
 
-        try:    db['db-path'] = self.supported_databases[name].db_path
-        except: pass
+        # Set database path
+        try:    
+            db['db-path'] = self.supported_databases[name].db_path
+        except: 
+            pass
 
+        # Set database backend
         db['db-backend'] = self.get_backend(self.supported_databases[name].db_server)
 
         return db
 
-    def set_db_parameters(self, db_name = 'fpdb', db_ip = None, db_user = None,
-                          db_pass = None, db_desc = None, db_server = None,
-                          default = "False"):
+
+    def set_db_parameters(self, db_name='fpdb', db_ip=None, db_user=None,
+                        db_pass=None, db_desc=None, db_server=None,
+                        default="False"):
+        """
+        Set the parameters of the database.
+
+        Args:
+            db_name (str): The name of the database.
+            db_ip (str): The IP address of the database.
+            db_user (str): The username to login to the database.
+            db_pass (str): The password to login to the database.
+            db_desc (str): The description of the database.
+            db_server (str): The server of the database.
+            default (str): Whether the database is the default one.
+
+        Returns:
+            None
+        """
+        # Get the node corresponding to the database
         db_node = self.get_db_node(db_name)
+
+        # Convert the default value to a boolean
         default = default.lower()
         defaultb = string_to_bool(default, False)
-        if db_node != None:
-            if db_desc   is not None: db_node.setAttribute("db_desc", db_desc)
-            if db_ip     is not None: db_node.setAttribute("db_ip", db_ip)
-            if db_user   is not None: db_node.setAttribute("db_user", db_user)
-            if db_pass   is not None: db_node.setAttribute("db_pass", db_pass)
-            if db_server is not None: db_node.setAttribute("db_server", db_server)
+
+        # Update the database node attributes if not None
+        if db_node is not None:
+            if db_desc is not None:
+                db_node.setAttribute("db_desc", db_desc)
+            if db_ip is not None:
+                db_node.setAttribute("db_ip", db_ip)
+            if db_user is not None:
+                db_node.setAttribute("db_user", db_user)
+            if db_pass is not None:
+                db_node.setAttribute("db_pass", db_pass)
+            if db_server is not None:
+                db_node.setAttribute("db_server", db_server)
+
+            # Set the default attribute to True if defaultb is True or the database is already selected
             if defaultb or self.db_selected == db_name:
                 db_node.setAttribute("default", "True")
+
+                # Remove the default attribute from other databases
                 for dbn in self.doc.getElementsByTagName("database"):
                     if dbn.getAttribute('db_name') != db_name and dbn.hasAttribute("default"):
                         dbn.removeAttribute("default")
-            elif db_node.hasAttribute("default"): 
+            # Remove the default attribute from the database node
+            elif db_node.hasAttribute("default"):
                 db_node.removeAttribute("default")
+
+        # Update the supported database parameters if not None
         if db_name in self.supported_databases:
-            if db_desc   is not None: self.supported_databases[db_name].dp_desc   = db_desc
-            if db_ip     is not None: self.supported_databases[db_name].dp_ip     = db_ip
-            if db_user   is not None: self.supported_databases[db_name].dp_user   = db_user
-            if db_pass   is not None: self.supported_databases[db_name].dp_pass   = db_pass
-            if db_server is not None: self.supported_databases[db_name].dp_server = db_server
+            if db_desc is not None:
+                self.supported_databases[db_name].dp_desc = db_desc
+            if db_ip is not None:
+                self.supported_databases[db_name].dp_ip = db_ip
+            if db_user is not None:
+                self.supported_databases[db_name].dp_user = db_user
+            if db_pass is not None:
+                self.supported_databases[db_name].dp_pass = db_pass
+            if db_server is not None:
+                self.supported_databases[db_name].dp_server = db_server
             self.supported_databases[db_name].db_selected = defaultb
+
+        # Set the selected database if defaultb is True
         if defaultb:
             self.db_selected = db_name
         return
 
-    def add_db_parameters(self, db_name = 'fpdb', db_ip = None, db_user = None,
-                          db_pass = None, db_desc = None, db_server = None,
-                          default = "False"):
+
+    def add_db_parameters(self, db_name='fpdb', db_ip=None, db_user=None,
+                        db_pass=None, db_desc=None, db_server=None,
+                        default="False"):
+        """
+        Add database parameters to the XML configuration file.
+
+        Args:
+            db_name (str): Name of the database.
+            db_ip (str): IP address of the database.
+            db_user (str): Username for the database.
+            db_pass (str): Password for the database.
+            db_desc (str): Description of the database.
+            db_server (str): Name of the server hosting the database.
+            default (str): Whether or not this is the default database.
+
+        Returns:
+            None
+        """
+        # Convert default to boolean
         default = default.lower()
         defaultb = string_to_bool(default, False)
+
+        # Check for duplicate database names
         if db_name in self.supported_databases:
             raise ValueError("Database names must be unique")
 
+        # Get the database node and create a new one if it doesn't exist
         db_node = self.get_db_node(db_name)
         if db_node is None:
             for db_node in self.doc.getElementsByTagName("supported_databases"):
@@ -2269,28 +2422,45 @@ class Config(object):
             t_node = self.doc.createTextNode("\r\n    ")
             suppdb_node.appendChild(t_node)
             db_node.setAttribute("db_name", db_name)
-            if db_desc   is not None: db_node.setAttribute("db_desc", db_desc)
-            if db_ip     is not None: db_node.setAttribute("db_ip", db_ip)
-            if db_user   is not None: db_node.setAttribute("db_user", db_user)
-            if db_pass   is not None: db_node.setAttribute("db_pass", db_pass)
-            if db_server is not None: db_node.setAttribute("db_server", db_server)
+            if db_desc is not None:
+                db_node.setAttribute("db_desc", db_desc)
+            if db_ip is not None:
+                db_node.setAttribute("db_ip", db_ip)
+            if db_user is not None:
+                db_node.setAttribute("db_user", db_user)
+            if db_pass is not None:
+                db_node.setAttribute("db_pass", db_pass)
+            if db_server is not None:
+                db_node.setAttribute("db_server", db_server)
+
+            # Set as default database if necessary
             if defaultb:
                 db_node.setAttribute("default", "True")
                 for dbn in self.doc.getElementsByTagName("database"):
                     if dbn.getAttribute('db_name') != db_name and dbn.hasAttribute("default"):
                         dbn.removeAttribute("default")
-            elif db_node.hasAttribute("default"): 
+            elif db_node.hasAttribute("default"):
                 db_node.removeAttribute("default")
         else:
-            if db_desc   is not None: db_node.setAttribute("db_desc", db_desc)
-            if db_ip     is not None: db_node.setAttribute("db_ip", db_ip)
-            if db_user   is not None: db_node.setAttribute("db_user", db_user)
-            if db_pass   is not None: db_node.setAttribute("db_pass", db_pass)
-            if db_server is not None: db_node.setAttribute("db_server", db_server)
+            # Update existing database node
+            if db_desc is not None:
+                db_node.setAttribute("db_desc", db_desc)
+            if db_ip is not None:
+                db_node.setAttribute("db_ip", db_ip)
+            if db_user is not None:
+                db_node.setAttribute("db_user", db_user)
+            if db_pass is not None:
+                db_node.setAttribute("db_pass", db_pass)
+            if db_server is not None:
+                db_node.setAttribute("db_server", db_server)
+
+            # Set as default database if necessary
             if defaultb or self.db_selected == db_name:
-                                      db_node.setAttribute("default", "True")
-            elif db_node.hasAttribute("default"): 
-                                      db_node.removeAttribute("default")
+                db_node.setAttribute("default", "True")
+            elif db_node.hasAttribute("default"):
+                db_node.removeAttribute("default")
+
+        # Update supported databases dictionary
 
         if db_name in self.supported_databases:
             if db_desc   is not None: self.supported_databases[db_name].dp_desc   = db_desc
@@ -2308,7 +2478,17 @@ class Config(object):
         return
     
     def get_backend(self, name):
-        """Returns the number of the currently used backend"""
+        """Returns the number of the currently used backend.
+
+        Args:
+            name (str): The name of the database backend.
+
+        Returns:
+            int: The number of the currently used backend.
+
+        Raises:
+            ValueError: If the specified database backend is not supported.
+        """
         if name == DATABASE_TYPE_MYSQL:
             ret = 2
         elif name == DATABASE_TYPE_POSTGRESQL:
@@ -2324,54 +2504,95 @@ class Config(object):
 
         return ret
 
+
     def getDefaultSite(self):
-        "Returns first enabled site or None"
-        for site_name,site in list(self.supported_sites.items()):
+        """Return the name of the first enabled site or None if no sites are enabled."""
+        # Iterate through each supported site and check if it's enabled
+        for site_name, site in list(self.supported_sites.items()):
             if site.enabled:
+                # Return the name of the first enabled site
                 return site_name
+        # Return None if no sites are enabled
         return None
 
     # Allow to change the menu appearance
     def get_hud_ui_parameters(self):
+        """
+        Returns a dictionary of HUD UI parameters.
+        """
         hui = {}
 
+        # Set default text if label is empty
         default_text = 'FPDB Menu - Right click\nLeft-Drag to Move'
+
+        # Try to get label from UI, falling back to default text if it's empty
         try:
             hui['label'] = self.ui.label
-            if self.ui.label == '':    # Empty menu label is a big no-no
+            if self.ui.label == '':
                 hui['label'] = default_text
         except:
             hui['label'] = default_text
 
-        try:    hui['card_ht']        = int(self.ui.card_ht)
-        except: hui['card_ht']        = 42
+        # Try to get card_ht from UI, falling back to default value if it's not an integer
+        try:
+            hui['card_ht'] = int(self.ui.card_ht)
+        except:
+            hui['card_ht'] = 42
 
-        try:    hui['card_wd']        = int(self.ui.card_wd)
-        except: hui['card_wd']        = 30
-        
-        try:    hui['deck_type']      = str(self.ui.deck_type)
-        except: hui['deck_type']        = 'colour'
-        
-        try:    hui['card_back']      = str(self.ui.card_back)
-        except: hui['card_back']        = 'back04'
-                
-        try:    hui['stat_range']        = self.ui.stat_range
-        except: hui['stat_range']        = 'A'  # default is show stats for All-time, also S(session) and T(ime)
+        # Try to get card_wd from UI, falling back to default value if it's not an integer
+        try:
+            hui['card_wd'] = int(self.ui.card_wd)
+        except:
+            hui['card_wd'] = 30
 
-        try:    hui['hud_days']        = int(self.ui.hud_days)
-        except: hui['hud_days']        = 90
+        # Try to get deck_type from UI, falling back to default value if it's not a string
+        try:
+            hui['deck_type'] = str(self.ui.deck_type)
+        except:
+            hui['deck_type'] = 'colour'
 
-        try:    hui['agg_bb_mult']    = int(self.ui.agg_bb_mult)
-        except: hui['agg_bb_mult']    = 1
+        # Try to get card_back from UI, falling back to default value if it's not a string
+        try:
+            hui['card_back'] = str(self.ui.card_back)
+        except:
+            hui['card_back'] = 'back04'
 
-        try:    hui['seats_style']    = self.ui.seats_style
-        except: hui['seats_style']    = 'A'  # A / C / E, use A(ll) / C(ustom) / E(xact) seat numbers
+        # Try to get stat_range from UI, falling back to default value if it's not a string
+        try:
+            hui['stat_range'] = self.ui.stat_range
+        except:
+            hui['stat_range'] = 'A' # default is show stats for All-time, also S(session) and T(ime)
 
-        try:    hui['seats_cust_nums_low']    = int(self.ui.seats_cust_nums_low)
-        except: hui['seats_cust_nums_low']    = 1
-        try:    hui['seats_cust_nums_high']    = int(self.ui.seats_cust_nums_high)
-        except: hui['seats_cust_nums_high']    = 10
-          
+        # Try to get hud_days from UI, falling back to default value if it's not an integer
+        try:
+            hui['hud_days'] = int(self.ui.hud_days)
+        except:
+            hui['hud_days'] = 90
+
+        # Try to get agg_bb_mult from UI, falling back to default value if it's not an integer
+        try:
+            hui['agg_bb_mult'] = int(self.ui.agg_bb_mult)
+        except:
+            hui['agg_bb_mult'] = 1
+
+        # Try to get seats_style from UI, falling back to default value if it's not a string
+        try:
+            hui['seats_style'] = self.ui.seats_style
+        except:
+            hui['seats_style'] = 'A' # A / C / E, use A(ll) / C(ustom) / E(xact) seat numbers
+
+        # Try to get seats_cust_nums_low from UI, falling back to default value if it's not an integer
+        try:
+            hui['seats_cust_nums_low'] = int(self.ui.seats_cust_nums_low)
+        except:
+            hui['seats_cust_nums_low'] = 1
+
+        # Try to get seats_cust_nums_high from UI, falling back to default value if it's not an integer
+        try:
+            hui['seats_cust_nums_high'] = int(self.ui.seats_cust_nums_high)
+        except:
+            hui['seats_cust_nums_high'] = 10
+
         # Hero specific
 
         try:    hui['h_stat_range']    = self.ui.h_stat_range
@@ -2394,69 +2615,136 @@ class Config(object):
 
 
     def get_import_parameters(self):
+        """
+        Returns a dictionary of import parameters based on the current state of the object.
+        """
         imp = {}
-        try:    imp['callFpdbHud']     = self.imp.callFpdbHud
-        except:  imp['callFpdbHud']     = True
 
-        try:    imp['interval']        = self.imp.interval
-        except:  imp['interval']        = 10
+        # Get callFpdbHud parameter
+        try:    
+            imp['callFpdbHud'] = self.imp.callFpdbHud
+        except:  
+            imp['callFpdbHud'] = True
 
-        # ResultsDirectory is the local cache for downloaded results
-        # NOTE: try: except: doesn'tseem to be triggering
+        # Get interval parameter
+        try:    
+            imp['interval'] = self.imp.interval
+        except:  
+            imp['interval'] = 10
+
+        # Get ResultsDirectory parameter
+        # NOTE: try: except: doesn't seem to be triggering
         #       using if instead
         if self.imp.ResultsDirectory != '':
-            imp['ResultsDirectory']    = self.imp.ResultsDirectory
+            imp['ResultsDirectory'] = self.imp.ResultsDirectory
         else:
-            imp['ResultsDirectory']    = "~/.fpdb/Results/"
+            imp['ResultsDirectory'] = "~/.fpdb/Results/"
 
-        # hhBulkPath is the default location for bulk imports (if set)
-        try:    imp['hhBulkPath']    = self.imp.hhBulkPath
-        except:  imp['hhBulkPath']    = ""
+        # Get hhBulkPath parameter
+        try:    
+            imp['hhBulkPath'] = self.imp.hhBulkPath
+        except:  
+            imp['hhBulkPath'] = ""
 
-        try:    imp['saveActions']     = self.imp.saveActions
-        except:  imp['saveActions']     = False
-        
-        try:    imp['cacheSessions']     = self.imp.cacheSessions
-        except:  imp['cacheSessions']     = False
-        
-        try:    imp['publicDB']     = self.imp.publicDB
-        except:  imp['publicDB']     = False
-        
-        try:    imp['sessionTimeout']     = self.imp.sessionTimeout
-        except:  imp['sessionTimeout']     = 30
+        # Get saveActions parameter
+        try:    
+            imp['saveActions'] = self.imp.saveActions
+        except:  
+            imp['saveActions'] = False
 
-        try:    imp['saveStarsHH'] = self.imp.saveStarsHH
-        except:  imp['saveStarsHH'] = False
+        # Get cacheSessions parameter
+        try:    
+            imp['cacheSessions'] = self.imp.cacheSessions
+        except:  
+            imp['cacheSessions'] = False
 
-        try:    imp['fastStoreHudCache'] = self.imp.fastStoreHudCache
-        except:  imp['fastStoreHudCache'] = False
+        # Get publicDB parameter
+        try:    
+            imp['publicDB'] = self.imp.publicDB
+        except:  
+            imp['publicDB'] = False
 
-        try:    imp['importFilters'] = self.imp.importFilters
-        except:  imp['importFilters'] = []
+        # Get sessionTimeout parameter
+        try:    
+            imp['sessionTimeout'] = self.imp.sessionTimeout
+        except:  
+            imp['sessionTimeout'] = 30
 
-        try:    imp['timezone'] = self.imp.timezone
-        except:  imp['timezone'] = "America/New_York"
+        # Get saveStarsHH parameter
+        try:    
+            imp['saveStarsHH'] = self.imp.saveStarsHH
+        except:  
+            imp['saveStarsHH'] = False
+
+        # Get fastStoreHudCache parameter
+        try:    
+            imp['fastStoreHudCache'] = self.imp.fastStoreHudCache
+        except:  
+            imp['fastStoreHudCache'] = False
+
+        # Get importFilters parameter
+        try:    
+            imp['importFilters'] = self.imp.importFilters
+        except:  
+            imp['importFilters'] = []
+
+        # Get timezone parameter
+        try:    
+            imp['timezone'] = self.imp.timezone
+        except:  
+            imp['timezone'] = "America/New_York"
 
         return imp
+
     
     def set_timezone(self, timezone):
-        self.imp.timezone = timezone
+        """
+        Sets the timezone for the object.
 
-    def get_default_paths(self, site = None):
-        if site is None: site = self.getDefaultSite()
+        Args:
+            timezone (str): The timezone to set.
+
+        Returns:
+            None
+        """
+        self.imp.timezone = timezone  # Update the timezone attribute of the object
+
+
+    def get_default_paths(self, site=None):
+        """
+        Returns a dictionary of default paths for a given site.
+
+        Args:
+            site (str): The name of the site for which to retrieve default paths. 
+                        Default is None.
+
+        Returns:
+            dict: A dictionary containing the default paths for a given site.
+                If the path does not exist, an error message is returned instead.
+        """
+        # If site is None, use the default site
+        if site is None: 
+            site = self.getDefaultSite()
         paths = {}
         try:
+            # Get the path for the given site
             path = os.path.expanduser(self.supported_sites[site].HH_path)
-            assert(os.path.isdir(path) or os.path.isfile(path)) # maybe it should try another site?
+            # Check if the path exists as either a directory or file
+            assert(os.path.isdir(path) or os.path.isfile(path))
+            # Set the default path for HUD and bulk import to the path found earlier
             paths['hud-defaultPath'] = paths['bulkImport-defaultPath'] = path
+            # If an hhBulkPath is set, set the bulk import default path to that instead
             if self.imp.hhBulkPath:
                 paths['bulkImport-defaultPath'] = self.imp.hhBulkPath
+            # If a TS_path is set for the site, set the hud-defaultTSPath to that
             if self.supported_sites[site].TS_path != '':
                 tspath = os.path.expanduser(self.supported_sites[site].TS_path)
                 paths['hud-defaultTSPath'] = tspath
         except AssertionError:
+            # If the path does not exist, set the default path for HUD and bulk import to an error message
             paths['hud-defaultPath'] = paths['bulkImport-defaultPath'] = "** ERROR DEFAULT PATH IN CONFIG DOES NOT EXIST **"
         return paths
+
 
 #    def get_frames(self, site = "PokerStars"):
 #        if site not in self.supported_sites: return False
@@ -2489,57 +2777,120 @@ class Config(object):
 #                font_size = site.font_size
 #        return font, font_size
 
-    def get_layout_set_locations(self, set = "mucked", max = "9"):
+    def get_layout_set_locations(self, set="mucked", max="9"):
+        """
+        Returns the locations of the cards in a given layout set.
 
+        Args:
+            set (str): The name of the layout set to use. Defaults to "mucked".
+            max (str): The maximum number of cards in the layout set. Defaults to "9".
+
+        Returns:
+            tuple: A tuple containing the locations of the cards in the layout set.
+        """
         try:
             locations = self.layout_sets[set].layout[max].location
         except:
-            locations = ( (  0,   0), (684,  61), (689, 239), (692, 346),
-                        (586, 393), (421, 440), (267, 440), (  0, 361),
-                        (  0, 280), (121, 280), ( 46,  30) )
+            # If the layout set or maximum number of cards is not found, return default locations.
+            locations = (
+                (0, 0),
+                (684, 61),
+                (689, 239),
+                (692, 346),
+                (586, 393),
+                (421, 440),
+                (267, 440),
+                (0, 361),
+                (0, 280),
+                (121, 280),
+                (46, 30),
+            )
         return locations
+
              
     def get_supported_sites(self, all=False):
-        """Returns the list of supported sites."""
+        """
+        Returns the list of supported sites.
+
+        Args:
+            all (bool): If True, returns the list of all supported sites, including disabled sites.
+
+        Returns:
+            list: A list containing the names of the supported sites.
+        """
         if all:
+            # If the 'all' parameter is True, return the keys of the 'supported_sites' dictionary.
             return list(self.supported_sites.keys())
         else:
+            # Otherwise, return the names of the enabled sites.
             return [site_name for (site_name, site) in list(self.supported_sites.items()) if site.enabled]
 
+
     def get_site_parameters(self, site):
-        """Returns a dict of the site parameters for the specified site"""
+        """
+        Returns a dictionary of the site parameters for the specified site.
+        :param site: name of the site
+        :return: dictionary of site parameters
+        """
+        # initialize an empty dictionary to store site parameters
         parms = {}
-        parms["converter"]    = self.hhcs[site].converter
+        # add site converter to the dictionary
+        parms["converter"] = self.hhcs[site].converter
+        # add site summary importer to the dictionary
         parms["summaryImporter"] = self.hhcs[site].summaryImporter
-        parms["screen_name"]  = self.supported_sites[site].screen_name
-        parms["site_path"]    = self.supported_sites[site].site_path
-        parms["HH_path"]    = self.supported_sites[site].HH_path
-        parms["TS_path"]    = self.supported_sites[site].TS_path
-        parms["site_name"]    = self.supported_sites[site].site_name
-        parms["enabled"]    = self.supported_sites[site].enabled
-        parms["aux_enabled"]    = self.supported_sites[site].aux_enabled
+        # add site screen name to the dictionary
+        parms["screen_name"] = self.supported_sites[site].screen_name
+        # add site path to the dictionary
+        parms["site_path"] = self.supported_sites[site].site_path
+        # add site HH path to the dictionary
+        parms["HH_path"] = self.supported_sites[site].HH_path
+        # add site TS path to the dictionary
+        parms["TS_path"] = self.supported_sites[site].TS_path
+        # add site name to the dictionary
+        parms["site_name"] = self.supported_sites[site].site_name
+        # add site enabled status to the dictionary
+        parms["enabled"] = self.supported_sites[site].enabled
+        # add site aux enabled status to the dictionary
+        parms["aux_enabled"] = self.supported_sites[site].aux_enabled
+        # add site HUD menu X shift to the dictionary
         parms["hud_menu_xshift"] = self.supported_sites[site].hud_menu_xshift
+        # add site HUD menu Y shift to the dictionary
         parms["hud_menu_yshift"] = self.supported_sites[site].hud_menu_yshift        
+        # add site layout set to the dictionary
         parms["layout_set"] = self.supported_sites[site].layout_set
+        # add site emails to the dictionary
         parms["emails"] = self.supported_sites[site].emails
+        # add site favorite seat to the dictionary
         parms["fav_seat"] = self.supported_sites[site].fav_seat
-        
+
+        # return the dictionary of site parameters
         return parms
 
+
     def get_layout(self, site, game_type):
-        
-        # find layouts used at site
-        # locate the one used for this game_type
-        # return that Layout-set() instance 
-        
+        """
+        This method returns a Layout-set() instance for the given site and game type.
+
+        Args:
+            site (str): The name of the site.
+            game_type (str): The type of the game.
+
+        Returns:
+            Layout-set() instance: The Layout-set() instance for the given site and game type.
+            None: If there is no Layout-set() instance for the given site and game type.
+        """
+
+        # Find layouts used at site.
         site_layouts = self.get_site_parameters(site)["layout_set"]
-        
+
+        # Locate the one used for this game_type.
         if game_type in site_layouts:
             return self.layout_sets[site_layouts[game_type]]
         elif "all" in site_layouts:
             return self.layout_sets[site_layouts["all"]]
         else:
             return None
+
 
 #    def set_site_parameters(self, site_name, converter = None, decoder = None,
 #                            hudbgcolor = None, hudfgcolor = None,
@@ -2564,105 +2915,290 @@ class Config(object):
 #            if font_size      is not None: site_node.setAttribute("font_size", font_size)
 #        return
 
-    def set_general(self,lang=None):
+    def set_general(self, lang=None):
+        """
+        Sets the 'ui_language' attribute of all 'general' nodes in the XML document.
 
-       for general_node in self.doc.getElementsByTagName('general'):
-            if lang: general_node.setAttribute("ui_language", lang)
+        Args:
+            lang (str): The language code to set the 'ui_language' attribute to. If not provided, the attribute is not set.
+        """
+        # Loop through all 'general' nodes in the document
+        for general_node in self.doc.getElementsByTagName('general'):
+            if lang:
+                # Set the 'ui_language' attribute to the provided language code
+                general_node.setAttribute("ui_language", lang)
+
 
     def set_site_ids(self, sites):
+        """
+        Sets the site IDs for the current object.
+
+        Args:
+            sites (dict): A dictionary of site IDs.
+
+        Returns:
+            None
+        """
+        # Convert the dictionary to a dictionary with string keys
         self.site_ids = dict(sites)
 
+
     def get_site_id(self, site):
-        return( self.site_ids[site] )
+        """
+        Given a site, return the corresponding site ID from the `site_ids` dictionary.
+
+        Args:
+            site (str): The name of the site for which to retrieve the ID.
+
+        Returns:
+            int: The ID corresponding to the input `site`.
+
+        Raises:
+            KeyError: If the input `site` is not present in the `site_ids` dictionary.
+        """
+        return self.site_ids[site]  # Return the ID corresponding to the input `site`.
+
         
     def get_aux_windows(self):
-        """Gets the list of mucked window formats in the configuration."""
+        """
+        Returns the list of mucked window formats in the configuration.
+
+        Returns:
+            list: A list of mucked window formats.
+        """
+        # Get the keys of the aux_windows dictionary and return them as a list.
         return list(self.aux_windows.keys())
 
+
     def get_aux_parameters(self, name):
-        """Gets a dict of mucked window parameters from the named mw."""
+        """
+        Gets a dictionary of mucked window parameters from the named mw.
+
+        Args:
+            name (str): The name of the window to get parameters for.
+
+        Returns:
+            dict: A dictionary of parameters for the named window, or None if the window does not exist.
+        """
+        # Initialize an empty dictionary to hold the parameters.
         param = {}
+
+        # Check if the named window exists in the aux_windows dictionary.
         if name in self.aux_windows:
+            # Iterate over the properties of the named window.
             for key in dir(self.aux_windows[name]):
+                # Skip any keys that start with '__', as they are special properties.
                 if key.startswith('__'): continue
+
+                # Get the value of the property.
                 value = getattr(self.aux_windows[name], key)
+
+                # Skip any values that are callable, as they are methods.
                 if callable(value): continue
+
+                # Add the key-value pair to the dictionary.
                 param[key] = value
 
+            # Return the dictionary of parameters.
             return param
+
+        # Return None if the named window does not exist.
         return None
+
 
     def get_stat_sets(self):
-        """Gets the list of stat block contents in the configuration."""
+        """Gets the list of stat block contents in the configuration.
+
+        Returns:
+            list: A list of all the stat block contents in the configuration.
+        """
         return list(self.stat_sets.keys())
+
     
 
-        
-    def get_layout_sets(self):
-        """Gets the list of block layouts in the configuration."""
-        return list(self.layout_sets.keys())
         
     def get_layout_set_parameters(self, name):
-        """Gets a dict of parameters from the named ls."""
+        """
+        Gets a dict of parameters from the named layout set.
+
+        Args:
+            name (str): The name of the layout set.
+
+        Returns:
+            dict: A dictionary of parameters from the named layout set.
+                If the named layout set does not exist, returns None.
+        """
+
+        # Create an empty dictionary to hold the layout set parameters.
         param = {}
+
+        # Check if the named layout set exists.
         if name in self.layout_sets:
+
+            # Loop through all the attributes of the layout set.
             for key in dir(self.layout_sets[name]):
-                if key.startswith('__'): continue
+
+                # Skip any attributes that start with '__'.
+                if key.startswith('__'):
+                    continue
+
+                # Get the value of the attribute.
                 value = getattr(self.layout_sets[name], key)
-                if callable(value): continue
+
+                # Skip any attributes that are callable.
+                if callable(value):
+                    continue
+
+                # Add the attribute and its value to the parameter dictionary.
                 param[key] = value
 
+            # Return the parameter dictionary.
             return param
+
+        # If the named layout set does not exist, return None.
         return None
+
+
+        
+    def get_layout_set_parameters(self, name):
+        """Get a dict of parameters from the named layout set.
+
+        Args:
+            name (str): The name of the layout set.
+
+        Returns:
+            dict: A dictionary containing the parameters of the layout set.
+        """
+        # Create an empty dictionary to hold the parameters.
+        param = {}
+
+        # Check if the layout set exists.
+        if name in self.layout_sets:
+            # Get all attributes of the layout set.
+            for key in dir(self.layout_sets[name]):
+                # Skip any attributes that start with '__'.
+                if key.startswith('__'):
+                    continue
+
+                # Get the value of the attribute.
+                value = getattr(self.layout_sets[name], key)
+
+                # Skip any callable attributes.
+                if callable(value):
+                    continue
+
+                # Add the parameter to the dictionary.
+                param[key] = value
+
+            # Return the dictionary of parameters.
+            return param
+
+        # If the layout set does not exist, return None.
+        return None
+
 
     def get_supported_games(self):
-        """Get the list of supported games."""
-        sg = []
+        """Returns the list of supported games.
+
+        Returns:
+            list: A list of supported game names.
+        """
+        supported_games = []
+        # Iterate over the dictionary keys
         for game in list(self.supported_games.keys()):
-            sg.append(self.supported_games[game].game_name)
-        return sg
+            supported_games.append(self.supported_games[game].game_name)
+        return supported_games
+
 
     def get_supported_games_parameters(self, name, game_type):
-        """Gets a dict of parameters from the named gametype."""
+        """Gets a dict of parameters from the named gametype.
+
+        Args:
+        name (str): Name of the supported game.
+        game_type (str): Type of the game.
+
+        Returns:
+        dict: A dictionary of parameters from the named gametype.
+        """
+        # Initialize an empty dictionary to store the parameters.
         param = {}
+
+        # Check if the name is in the list of supported games.
         if name in self.supported_games:
+            # Loop through the keys of the supported game.
             for key in dir(self.supported_games[name]):
-                if key.startswith('__'): continue
-                if key == ('game_stat_set'): continue
-                value = getattr(self.supported_games[name], key)
-                if callable(value): continue
-                param[key] = value
-                
-            #some gymnastics now to load the correct Stats_sets instance
-            # into the game_stat_set key
-            
+                # Skip keys that start with '__' or are callable.
+                if key.startswith('__') or callable(getattr(self.supported_games[name], key)):
+                    continue
+                # Add the key-value pair to the param dictionary.
+                param[key] = getattr(self.supported_games[name], key)
+
+            # Load the correct Stats_sets instance into the game_stat_set key.
             game_stat_set = getattr(self.supported_games[name], 'game_stat_set')
-                
             if game_type in game_stat_set:
+                # If game_type is in the game_stat_set, set the corresponding stat set.
                 param['game_stat_set'] = self.stat_sets[game_stat_set[game_type].stat_set]
             elif "all" in game_stat_set:
+                # If "all" is in the game_stat_set, set the corresponding stat set.
                 param['game_stat_set'] = self.stat_sets[game_stat_set["all"].stat_set]
             else:
+                # If neither game_type nor "all" is in the game_stat_set, return None.
                 return None
 
+            # Return the dictionary of parameters.
             return param
-            
+
+        # If the name is not in the list of supported games, return None.
         return None
+
         
     def execution_path(self, filename):
-        """Join the fpdb path to filename."""
-        return os.path.join(os.path.dirname(inspect.getfile(sys._getframe(0))), filename)
+        """Join the fpdb path to the given filename.
+
+        Args:
+            filename (str): The name of the file to join to the fpdb path.
+
+        Returns:
+            str: The absolute path to the given filename, with the fpdb path as its base.
+        """
+        # Get the path to the current file
+        current_file_path = inspect.getfile(sys._getframe(0))
+
+        # Get the directory of the fpdb package
+        fpdb_dir_path = os.path.dirname(current_file_path)
+
+        # Combine the fpdb directory path with the given filename
+        abs_path = os.path.join(fpdb_dir_path, filename)
+
+        return abs_path
 
     def get_general_params(self):
-        return( self.general )
+        """Returns the general parameters."""
+        return self.general
+
 
     def get_gui_cash_stat_params(self):
+        """
+        Returns the GUI cash statistics parameters.
+
+        Args:
+            self: The object instance.
+
+        Returns:
+            The GUI cash statistics parameters.
+        """
         #print(type(self.gui_cash_stats))
-        return( self.gui_cash_stats )
+        return self.gui_cash_stats
+
     
     def get_gui_tour_stat_params(self):
-        #print(type(self.gui_tour_stats))
-        return( self.gui_tour_stats )
+        """
+        Returns the GUI tour statistics parameters.
+        """
+        # Uncomment the following line if you want to check the type of gui_tour_stats
+        # print(type(self.gui_tour_stats))
+        return self.gui_tour_stats
+
 
 if __name__== "__main__":
     set_logfile("fpdb-log.txt")
