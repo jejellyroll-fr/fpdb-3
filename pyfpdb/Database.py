@@ -1296,27 +1296,81 @@ class Database(object):
 
 
     def get_xml(self, hand_id):
+        """
+        Retrieves XML data from the database for a given hand ID.
+
+        Args:
+            hand_id (int): The ID of the hand for which to retrieve XML data.
+
+        Returns:
+            str: The XML data for the specified hand.
+        """
+        # Create a cursor object
         c = self.connection.cursor()
+
+        # Execute the SQL query to retrieve the XML data for the specified hand ID
         c.execute(self.sql.query['get_xml'], (hand_id))
+
+        # Fetch the first row of the query results
         row = c.fetchone()
+
+        # Return the XML data from the first column of the row
         return row[0]
 
+
     def get_recent_hands(self, last_hand):
+        """
+        Retrieve recent hands from the database
+
+        Args:
+            last_hand (int): the ID of the last hand to retrieve
+
+        Returns:
+            list of tuples: each tuple represents a row in the database result set
+        """
+        # create a cursor object
         c = self.connection.cursor()
+        # execute the query with the provided parameter
         c.execute(self.sql.query['get_recent_hands'], {'last_hand': last_hand})
+        # fetch all the resulting rows
         return c.fetchall()
 
+
     def get_gameinfo_from_hid(self, hand_id):
-        # returns a gameinfo (gametype) dictionary suitable for passing
-        #  to Hand.hand_factory
+        """Returns a gameinfo (gametype) dictionary suitable for passing to Hand.hand_factory.
+
+        Args:
+            hand_id (int): The id of the hand.
+
+        Returns:
+            dict: A dictionary with the gameinfo.
+        """
+        # Get a cursor and prepare the query
         c = self.connection.cursor()
         q = self.sql.query['get_gameinfo_from_hid']
         q = q.replace('%s', self.sql.query['placeholder'])
-        c.execute (q, (hand_id, ))
+
+        # Execute the query and fetch the results
+        c.execute(q, (hand_id, ))
         row = c.fetchone()
-        gameinfo = {'sitename':row[0],'category':row[1],'base':row[2],'type':row[3],'limitType':row[4],
-                'hilo':row[5],'sb':row[6],'bb':row[7], 'sbet':row[8],'bbet':row[9], 'currency':row[10], 'gametypeId':row[11], 'split':row[12]}
-        return gameinfo
+
+        # Create and return the gameinfo dictionary
+        return {
+            'sitename': row[0], # Name of the site where the game was played
+            'category': row[1], # Category of the game (e.g. Texas Holdem)
+            'base': row[2], # Base amount of the game
+            'type': row[3], # Type of game (e.g. No Limit)
+            'limitType': row[4], # Limit type (e.g. Pot Limit)
+            'hilo': row[5], # High/Low
+            'sb': row[6], # Small blind
+            'bb': row[7], # Big blind
+            'sbet': row[8], # Small bet
+            'bbet': row[9], # Big bet
+            'currency': row[10], # Currency used in the game
+            'gametypeId': row[11], # Game type id
+            'split': row[12], # Split game
+        }
+
         
 #   Query 'get_hand_info' does not exist, so it seems
 #    def get_hand_info(self, new_hand_id):
@@ -1325,53 +1379,124 @@ class Database(object):
 #        return c.fetchall()      
 
     def getHandCount(self):
+        """Returns the number of hands in the database.
+
+        Returns:
+            int: The number of hands in the database.
+        """
         c = self.connection.cursor()
+        # Execute the SQL query to get the hand count.
         c.execute(self.sql.query['getHandCount'])
+        # Return the result of the query (the hand count).
         return c.fetchone()[0]
     #end def getHandCount
 
     def getTourneyCount(self):
+        """
+        Retrieves the count of tournaments from the database.
+
+        Returns:
+            int: The count of tournaments.
+        """
+        # Create a cursor object to execute the query.
         c = self.connection.cursor()
+
+        # Execute the query to retrieve the count of tournaments.
         c.execute(self.sql.query['getTourneyCount'])
+
+        # Return the first row of the results, which is the count of tournaments.
         return c.fetchone()[0]
-    #end def getTourneyCount
 
     def getTourneyTypeCount(self):
+        """
+        Retrieves the count of tournament types using a database cursor.
+
+        Returns:
+            int: The count of tournament types.
+        """
+        # Create a cursor object
         c = self.connection.cursor()
+
+        # Execute the SQL query to retrieve the count of tournament types
         c.execute(self.sql.query['getTourneyTypeCount'])
+        # Return the count of tournament types
         return c.fetchone()[0]
     #end def getTourneyCount
 
     def getSiteTourneyNos(self, site):
+        """
+        Returns a list of tournament numbers for a given site.
+
+        Args:
+            site (str): The name of the site.
+
+        Returns:
+            list: A list of tournament numbers.
+        """
+        # Create a cursor object for the database connection
         c = self.connection.cursor()
+
+        # Get the site ID for the given site
         q = self.sql.query['getSiteId']
         q = q.replace('%s', self.sql.query['placeholder'])
         c.execute(q, (site,))
         siteid = c.fetchone()[0]
+
+        # Get the tournament numbers for the given site ID
         q = self.sql.query['getSiteTourneyNos']
         q = q.replace('%s', self.sql.query['placeholder'])
         c.execute(q, (siteid,))
+
+        # Add each tournament number to a list and return the list
         alist = []
         for row in c.fetchall():
             alist.append(row)
         return alist
 
+
     def get_actual_seat(self, hand_id, name):
+        """
+        Returns the actual seat of the player with the given hand_id and name.
+
+        Args:
+            hand_id (int): The hand ID of the player.
+            name (str): The name of the player.
+
+        Returns:
+            int: The actual seat of the player.
+        """
+        # Create a cursor object
         c = self.connection.cursor()
+
+        # Execute the SQL query to get the actual seat of the player
         c.execute(self.sql.query['get_actual_seat'], (hand_id, name))
+
+        # Fetch the result
         row = c.fetchone()
+
+        # Return the actual seat of the player
         return row[0]
 
+
     def get_cards(self, hand):
-        """Get and return the cards for each player in the hand."""
-        cards = {} # dict of cards, the key is the seat number,
-                   # the value is a tuple of the players cards
-                   # example: {1: (0, 0, 20, 21, 22, 0 , 0)}
+        """
+        Get and return the cards for each player in the hand.
+
+        Args:
+            hand (int): The id of the hand to get the cards for.
+
+        Returns:
+            dict: A dictionary of player ids and their corresponding cards.
+        """
+        # Create a cursor to execute SQL queries
         c = self.connection.cursor()
+
+        # Execute the 'get_cards' query with the given hand id
         c.execute(self.sql.query['get_cards'], [hand])
-        for row in c.fetchall():
-            cards[row[0]] = row[1:]
-        return cards
+
+        # Fetch all the results and convert them into a dictionary of player ids and their corresponding cards
+        return {row[0]: row[1:] for row in c.fetchall()}
+
 
     def get_common_cards(self, hand):
         """Get and return the community cards for the specified hand."""

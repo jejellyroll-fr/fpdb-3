@@ -1937,13 +1937,13 @@ class Pot(object):
         try:
             while len(commitsall) > 0:
                 commitslive = [(v,k) for (v,k) in commitsall if k in self.contenders]
-                print('commitslive', commitslive)
+                log.debug('commitslive', commitslive)
                 v1 = commitslive[0][0]
                 self.pots += [(sum([min(v,v1) for (v,k) in commitsall]), set(k for (v,k) in commitsall if k in self.contenders))]
                 commitsall = [((v-v1),k) for (v,k) in commitsall if v-v1 >0]
         except IndexError as e:
             log.error(("Pot.end(): '%s': Major failure while calculating pot: '%s'"), self.handid, e)
-            print(("Pot.end(): '%s': Major failure while calculating pot: '%s'"), self.handid, e)
+            #print(("Pot.end(): '%s': Major failure while calculating pot: '%s'"), self.handid, e)
             raise FpdbParseError
         
 
