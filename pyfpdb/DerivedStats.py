@@ -36,70 +36,77 @@ except:
     pokereval = None
     
 def _buildStatsInitializer():
-    init = {}
-    #Init vars that may not be used, but still need to be inserted.
-    # All stud street4 need this when importing holdem
-    init['effStack']    = 0
-    init['startBounty'] = None
-    init['endBounty']   = None
-    init['common']      = 0
-    init['committed']   = 0
-    init['winnings']    = 0
-    init['rake']        = 0
-    init['rakeDealt']   = 0
-    init['rakeContributed'] = 0
-    init['rakeWeighted'] = 0
-    init['totalProfit'] = 0
-    init['allInEV']     = 0
-    init['showdownWinnings'] = 0
-    init['nonShowdownWinnings'] = 0
-    init['sawShowdown'] = False
-    init['showed']      = False
-    init['wonAtSD']     = False
-    init['startCards']  = 170
-    init['handString']  = None
-    init['position']    = 9 #ANTE ALL IN
-    init['street0CalledRaiseChance'] = 0
-    init['street0CalledRaiseDone'] = 0    
-    init['street0VPIChance']    = True
-    init['street0VPI']          = False
-    init['street0AggrChance']   = True
-    init['street0_2BChance']    = False
-    init['street0_2BDone']      = False
-    init['street0_3BChance']    = False
-    init['street0_3BDone']      = False
-    init['street0_4BChance']    = False
-    init['street0_4BDone']      = False
-    init['street0_C4BChance']   = False
-    init['street0_C4BDone']     = False
-    init['street0_FoldTo2BChance']= False
-    init['street0_FoldTo2BDone']= False
-    init['street0_FoldTo3BChance']= False
-    init['street0_FoldTo3BDone']= False
-    init['street0_FoldTo4BChance']= False
-    init['street0_FoldTo4BDone']= False
-    init['street0_SqueezeChance']= False
-    init['street0_SqueezeDone'] = False
-    init['stealChance']         = False
-    init['stealDone']           = False
-    init['success_Steal']       = False
-    init['raiseToStealChance']  = False
-    init['raiseToStealDone']    = False
-    init['raiseFirstInChance']  = False
-    init['raisedFirstIn']       = False
-    init['foldBbToStealChance'] = False
-    init['foldSbToStealChance'] = False
-    init['foldedSbToSteal']     = False
-    init['foldedBbToSteal']     = False
-    init['tourneyTypeId']       = None
-    init['street1Seen']         = False
-    init['street2Seen']         = False
-    init['street3Seen']         = False
-    init['street4Seen']         = False
-    init['otherRaisedStreet0']       = False
-    init['foldToOtherRaisedStreet0'] = False
-    init['wentAllIn'] = False
+    """
+    Creates and returns a dictionary with initial values for various statistics.
 
+    Returns:
+        A dictionary with initial values for various statistics.
+    """
+    # Create dictionary with initial values for various statistics.
+    # All stud street4 need this when importing holdem
+    init = {
+        'effStack': 0,
+        'startBounty': None,
+        'endBounty': None,
+        'common': 0,
+        'committed': 0,
+        'winnings': 0,
+        'rake': 0,
+        'rakeDealt': 0,
+        'rakeContributed': 0,
+        'rakeWeighted': 0,
+        'totalProfit': 0,
+        'allInEV': 0,
+        'showdownWinnings': 0,
+        'nonShowdownWinnings': 0,
+        'sawShowdown': False,
+        'showed': False,
+        'wonAtSD': False,
+        'startCards': 170,
+        'handString': None,
+        'position': 9,
+        'street0CalledRaiseChance': 0,
+        'street0CalledRaiseDone': 0,
+        'street0VPIChance': True,
+        'street0VPI': False,
+        'street0AggrChance': True,
+        'street0_2BChance': False,
+        'street0_2BDone': False,
+        'street0_3BChance': False,
+        'street0_3BDone': False,
+        'street0_4BChance': False,
+        'street0_4BDone': False,
+        'street0_C4BChance': False,
+        'street0_C4BDone': False,
+        'street0_FoldTo2BChance': False,
+        'street0_FoldTo2BDone': False,
+        'street0_FoldTo3BChance': False,
+        'street0_FoldTo3BDone': False,
+        'street0_FoldTo4BChance': False,
+        'street0_FoldTo4BDone': False,
+        'street0_SqueezeChance': False,
+        'street0_SqueezeDone': False,
+        'stealChance': False,
+        'stealDone': False,
+        'success_Steal': False,
+        'raiseToStealChance': False,
+        'raiseToStealDone': False,
+        'raiseFirstInChance': False,
+        'raisedFirstIn': False,
+        'foldBbToStealChance': False,
+        'foldSbToStealChance': False,
+        'foldedSbToSteal': False,
+        'foldedBbToSteal': False,
+        'tourneyTypeId': None,
+        'street1Seen': False,
+        'street2Seen': False,
+        'street3Seen': False,
+        'street4Seen': False,
+        'otherRaisedStreet0': False,
+        'foldToOtherRaisedStreet0': False,
+        'wentAllIn': False,
+    }
+    # Initialize variables for each street.
     for i in range(5):
         init['street%dCalls' % i] = 0
         init['street%dBets' % i] = 0
@@ -108,10 +115,11 @@ def _buildStatsInitializer():
         init['street%dInPosition' % i] = False
         init['street%dFirstToAct' % i] = False
         init['street%dAllIn' % i] = False
-        
+
+    # Initialize variables for discards on streets 1-3.
     for i in range(1,4):
         init['street%dDiscards' % i] = 0
-        
+
     for i in range(1,5):
         init['street%dCBChance' %i]             = False
         init['street%dCBDone' %i]               = False
@@ -127,78 +135,122 @@ def _buildStatsInitializer():
 
 _INIT_STATS = _buildStatsInitializer()
 
-class DerivedStats(object):
+class DerivedStats:
     def __init__(self):
-        self.hands        = {}
-        self.handsplayers = {}
-        self.handsactions = {}
-        self.handsstove   = []
-        self.handspots    = []
+        """
+        Initializes a new DerivedStats object.
+        """
+        self.hands = {}  # Dictionary of hand histories.
+        self.handsplayers = {}  # Dictionary of players in each hand.
+        self.handsactions = {}  # Dictionary of actions in each hand.
+        self.handsstove = []  # List of hands and their corresponding showdown results.
+        self.handspots = []  # List of hands and the spots players were in at the end of the hand.
+
 
     def getStats(self, hand):
+        """
+        Calculates the statistics of a poker hand.
+
+        Args:
+            hand (PokerHand): An instance of the PokerHand class representing the hand to calculate statistics for.
+
+        Returns:
+            None
+        """
+        # Initialize the stats dictionary for each player in the hand
         for player in hand.players:
             self.handsplayers[player[1]] = _INIT_STATS.copy()
-        
+
+        # Assemble the hands for each player
         self.assembleHands(hand)
+        # Assemble the hands and board for each player
         self.assembleHandsPlayers(hand)
+        # Assemble the actions for each player
         self.assembleHandsActions(hand)
-        
+
+        # If pokereval is installed and the game type is valid, assemble the hands for the stove
         if pokereval and hand.gametype['category'] in Card.games:
             self.assembleHandsStove(hand)
+            # Assemble the pots for each player
             self.assembleHandsPots(hand)
 
     def getHands(self):
+        """
+        Returns the hands of the class instance.
+        """
         return self.hands
 
     def getHandsPlayers(self):
+        """Returns the hands players"""
         return self.handsplayers
 
     def getHandsActions(self):
+        """
+        Returns the hands actions.
+
+        Returns:
+        list: A list of hand actions.
+        """
         return self.handsactions
     
     def getHandsStove(self):
+        """
+        Returns the state of the hands stove.
+        """
         return self.handsstove
     
     def getHandsPots(self):
+        """Get the hand spots."""
         return self.handspots
 
     def assembleHands(self, hand):
-        self.hands['tableName']     = hand.tablename
-        self.hands['siteHandNo']    = hand.handid
-        self.hands['gametypeId']    = None                    # Leave None, handled later after checking db
-        self.hands['sessionId']     = None                    # Leave None, added later if caching sessions
-        self.hands['gameId']        = None                    # Leave None, added later if caching sessions
-        self.hands['startTime']     = hand.startTime          # format this!
-        self.hands['importTime']    = None
-        self.hands['seats']         = self.countPlayers(hand) 
-        self.hands['maxPosition']   = -1
+        """
+        Assemble hand data for insertion into the database
+
+        Args:
+            hand (Hand): Hand object to assemble data from
+
+        Returns:
+            None
+        """
+
+        # Set initial hand data
+        self.hands['tableName'] = hand.tablename
+        self.hands['siteHandNo'] = hand.handid
+        self.hands['gametypeId'] = None  # Leave None, handled later after checking db
+        self.hands['sessionId'] = None  # Leave None, added later if caching sessions
+        self.hands['gameId'] = None  # Leave None, added later if caching sessions
+        self.hands['startTime'] = hand.startTime  # format this!
+        self.hands['importTime'] = None
+        self.hands['seats'] = self.countPlayers(hand)
+        self.hands['maxPosition'] = -1
         #self.hands['maxSeats']      = hand.maxseats
-        self.hands['texture']       = None                    # No calculation done for this yet.
-        self.hands['tourneyId']     = hand.tourneyId
-        
-        self.hands['heroSeat']      = 0
+        self.hands['texture'] = None  # No calculation done for this yet.
+        self.hands['tourneyId'] = hand.tourneyId
+
+        # Set hero seat
+        self.hands['heroSeat'] = 0
         for player in hand.players:
-            if hand.hero==player[1]:
+            if hand.hero == player[1]:
                 self.hands['heroSeat'] = player[0]
-        # This (i think...) is correct for both stud and flop games, as hand.board['street'] disappears, and
-        # those values remain default in stud.
+
+        # Set board cards
         boardcards = []
-        if hand.board.get('FLOPET')!=None:
+        if hand.board.get('FLOPET') != None:
             boardcards += hand.board.get('FLOPET')
         for street in hand.communityStreets:
             boardcards += hand.board[street]
         boardcards += [u'0x', u'0x', u'0x', u'0x', u'0x']
-        cards = [Card.encodeCard(c) for c in boardcards[0:5]]
+        cards = [Card.encodeCard(c) for c in boardcards[:5]]
         self.hands['boardcard1'] = cards[0]
         self.hands['boardcard2'] = cards[1]
         self.hands['boardcard3'] = cards[2]
         self.hands['boardcard4'] = cards[3]
         self.hands['boardcard5'] = cards[4]
-        
-        #print "cards: ",cards
-        
+
+        # Set boards
         self.hands['boards'] = []
-        self.hands['runItTwice'] = False           
+        self.hands['runItTwice'] = False
         for i in range(hand.runItTimes):
             boardcards = []
             for street in hand.communityStreets:
@@ -215,9 +267,10 @@ class DerivedStats(object):
                 cards = [Card.encodeCard(c) for c in boardcards[-5:]]
             self.hands['boards'] += [[boardId] + cards]
 
+        # Set pot data
         #print "DEBUG: %s self.getStreetTotals = (%s, %s, %s, %s, %s, %s)" %  tuple([hand.handid] + list(hand.getStreetTotals()))
         totals = hand.getStreetTotals()
-        totals = [int(100*i) for i in totals]        
+        totals = [int(100*i) for i in totals]
         self.hands['street0Pot']  = totals[0]
         self.hands['street1Pot']  = totals[1]
         self.hands['street2Pot']  = totals[2]
@@ -246,10 +299,7 @@ class DerivedStats(object):
                 player_stats['endBounty'] = int(100 * Decimal(player[4]))
             if player_name in hand.endBounty:
                 player_stats['endBounty'] = int(hand.endBounty.get(player_name))
-            if player_name in hand.sitout:
-                player_stats['sitout'] = True
-            else:
-                player_stats['sitout'] = False
+            player_stats['sitout'] = player_name in hand.sitout
             if hand.gametype["type"]=="tour":
                 player_stats['tourneyTypeId']=hand.tourneyTypeId
                 player_stats['tourneysPlayersId'] = hand.tourneysPlayersIds[player[1]]
@@ -284,7 +334,7 @@ class DerivedStats(object):
             # Gets overwritten when calculating multi-way pots in assembleHandsPots
             if num_collectees == 0:
                 collectee_stats['rake'] = 0
-            elif len(unraked)==0:
+            elif not unraked:
                 rake = old_div(int(100 * hand.rake),num_collectees)
                 remainder_1, remainder_2 = 0, 0
                 if rake > 0 and i==0:
@@ -305,7 +355,7 @@ class DerivedStats(object):
             if collectee_stats['sawShowdown'] == True:
                 collectee_stats['wonAtSD'] = True
             i+=1
-        
+
         contributed, i = [], 0
         for player, money_committed in list(hand.pot.committed.items()):
             committed_player_stats = self.handsplayers.get(player)
@@ -318,12 +368,12 @@ class DerivedStats(object):
             committed_player_stats['rakeWeighted'] = 100 * hand.rake * paid/(100*hand.totalpot) if hand.rake>0 else 0
             if paid > 0: contributed.append(player)
             i+=1
-           
+
         for i, player in enumerate(contributed):
             self.handsplayers[player]['rakeContributed'] = 100 * hand.rake/len(contributed)
 
         self.calcCBets(hand)
-        
+
         # More inner-loop speed hackery.
         encodeCard = Card.encodeCard
         calcStartCards = Card.calcStartCards
@@ -343,7 +393,9 @@ class DerivedStats(object):
             try:
                 player_stats['startCards'] = calcStartCards(hand, player_name)
             except IndexError:
-                log.error("IndexError: string index out of range %s %s" % (hand.handid, hand.in_path))
+                log.error(
+                    f"IndexError: string index out of range {hand.handid} {hand.in_path}"
+                )
 
         self.setPositions(hand)
         self.calcEffectiveStack(hand)
