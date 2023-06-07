@@ -161,7 +161,9 @@ class DetectInstalledSites(object):
             tspFR = os.path.expanduser(LOCAL_APPDATA+"\\PokerStars.FR\\TournSummary\\")
         elif self.Config.os_family == "Mac":
             hhp = os.path.expanduser("~/Library/Application Support/PokerStars/HandHistory/")
+            hhpFR = os.path.expanduser("~/Library/Application Support/PokerStarsFR/HandHistory/")
             tsp = os.path.expanduser("~/Library/Application Support/PokerStars/TournSummary/")
+            tspFR = os.path.expanduser("~/Library/Application Support/PokerStars/TournSummary/")
         else:
             return
 
@@ -180,7 +182,10 @@ class DetectInstalledSites(object):
 
         # Try to get the name of the first hero found in the hand history files and update the paths accordingly
         with contextlib.suppress(Exception):
-            self.herofound = os.listdir(self.hhpathfound)[0]
+            if self.Config.os_family == "Mac":
+                self.herofound = os.listdir(self.hhpathfound)[1]
+            else:
+                self.herofound = os.listdir(self.hhpathfound)[0]
             self.hhpathfound = self.hhpathfound + self.herofound
             if self.tspathfound:
                 self.tspathfound = self.tspathfound + self.herofound
@@ -272,9 +277,9 @@ class DetectInstalledSites(object):
         if self.Config.os_family == "Linux":
             hhp = os.path.expanduser("~/.wine/drive_c/Program Files/Winamax/hand-history/")
             tsp = os.path.expanduser("~/.wine/drive_c/Program Files/Winamax/hand-history/")
-        elif self.Config.os_family == "Darwin":
-            hhp = os.path.expanduser("~/Library/Application Support/Winamax/hand-history/")
-            tsp = os.path.expanduser("~/Library/Application Support/Winamax/hand-history/")
+        elif self.Config.os_family == "Mac":
+            hhp = os.path.expanduser("~/Library/Application Support/Winamax/documents/accounts/")
+            tsp = os.path.expanduser("~/Library/Application Support/Winamax/documents/accounts/")
         elif self.Config.os_family == "Win7":
             hhp = os.path.expanduser(ROAMING_APPDATA+"\\Winamax\\documents\\accounts\\")
             tsp = os.path.expanduser(ROAMING_APPDATA+"\\Winamax\\documents\\accounts\\")
@@ -293,8 +298,13 @@ class DetectInstalledSites(object):
         # Try to get the name of the first hero found in the hand history files and update the paths accordingly
         with contextlib.suppress(Exception):
             self.herofound = os.listdir(self.hhpathfound)[0]
-            self.hhpathfound = self.hhpathfound + self.herofound + "\\history\\"
-            if self.tspathfound:
-                self.tspathfound = self.tspathfound + self.herofound + "\\history\\"
+            if self.Config.os_family == "Mac":
+                self.hhpathfound = self.hhpathfound + self.herofound + "/history/"
+                if self.tspathfound:
+                    self.tspathfound = self.tspathfound + self.herofound + "/history"
+            else:
+                self.hhpathfound = self.hhpathfound + self.herofound + "\\history\\"
+                if self.tspathfound:
+                    self.tspathfound = self.tspathfound + self.herofound + "\\history\\"
 
         return

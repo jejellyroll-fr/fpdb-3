@@ -466,15 +466,11 @@ class Aux_Seats(Aux_Window):
 
 
 #   Methods likely to be useful for mucked card windows (or similar) only
-    def destroy(self):
-        """Destroy all of the seat windows."""
-        with contextlib.suppress(AttributeError):
-            # Loop through the keys of the dictionary of windows
-            for i in list(self.m_windows.keys()):
-                # Destroy the window
-                self.m_windows[i].destroy()
-                # Remove the window from the dictionary
-                del(self.m_windows[i])
+    def hide(self):
+        """Hide the seat windows."""
+        for (i, w) in list(self.m_windows.items()):
+            if w is not None: w.hide()
+        self.displayed = False
 
 
     def save_layout(self, *args):
