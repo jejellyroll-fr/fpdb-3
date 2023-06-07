@@ -41,6 +41,8 @@ Todo:
 
 """
 
+
+import contextlib
 import platform
 import os
 import sys
@@ -53,42 +55,44 @@ if platform.system() == 'Windows':
     #LOCAL_APPDATA = winpaths.get_local_appdata()
     import os
     PROGRAM_FILES = os.getenv('ProgramW6432')
-    LOCAL_APPDATA = os.getenv('APPDATA')
+    ROAMING_APPDATA = os.getenv('APPDATA')
+    LOCAL_APPDATA = os.getenv('LOCALAPPDATA')
 
 class DetectInstalledSites(object):
+    """
+    DetectInstalledSites is a class that detects the installed sites on a system.
 
-    def __init__(self, sitename = "All"):
+    Args:
+        sitename (str): The name of the site to detect. If "All", detects all supported sites.
+    """
 
-        self.Config=Configuration.Config()
-        #
-        # objects returned
-        #
+    def __init__(self, sitename="All"):
+
+        self.Config = Configuration.Config()  # Initializing the Config object
+
+        # Initializing the objects returned
         self.sitestatusdict = {}
         self.sitename = sitename
         self.heroname = ""
         self.hhpath = ""
         self.tspath = ""
         self.detected = ""
-        #
-        #since each site has to be hand-coded in this module, there
-        #is little advantage in querying the sites table at the moment.
-        #plus we can run from the command line as no dependencies
-        #
-        self.supportedSites = [ "PartyPoker",
-                                "Merge",
-                                "PokerStars"]#,
-                                #"Betfair",
-                                #"PacificPoker",
-                                #"iPoker",
-                                #"Winamax" ]
+
+        # Since each site has to be hand-coded in this module, there is little advantage in querying the sites table at the moment.
+        # Plus we can run from the command line as no dependencies.
+        # Initializing the supported sites and platforms
+        self.supportedSites = ["PartyPoker",
+                               "Merge",
+                               "PokerStars",
+                               "Winamax"]
 
         self.supportedPlatforms = ["Linux", "XP", "Win7"]
 
-        if sitename == "All":
+        if sitename == "All":   # Detecting all supported sites
             for siteiter in self.supportedSites:
-                self.sitestatusdict[siteiter]=self.detect(siteiter)
-        else:
-            self.sitestatusdict[sitename]=self.detect(sitename)
+                self.sitestatusdict[siteiter] = self.detect(siteiter)
+        else:   # Detecting the specified site
+            self.sitestatusdict[sitename] = self.detect(sitename)
             self.heroname = self.sitestatusdict[sitename]['heroname']
             self.hhpath = self.sitestatusdict[sitename]['hhpath']
             self.tspath = self.sitestatusdict[sitename]['tspath']
@@ -97,13 +101,24 @@ class DetectInstalledSites(object):
         return
 
     def detect(self, siteToDetect):
+        """
+        Detects the presence of a poker site and returns relevant information.
 
+        Args:
+            siteToDetect (str): The name of the poker site to detect.
+
+        Returns:
+            dict: A dictionary containing the detection status and relevant information.
+
+        """
+        # Initialize variables
         self.hhpathfound = ""
         self.tspathfound = ""
         self.herofound = ""
 
-        if siteToDetect == "Full Tilt Poker":
-            self.detectFullTilt()
+        # Detect the site
+        if siteToDetect == "Winamax":
+            self.detectWinamax()
         elif siteToDetect == "PartyPoker":
             self.detectPartyPoker()
         elif siteToDetect == "PokerStars":
@@ -111,6 +126,7 @@ class DetectInstalledSites(object):
         elif siteToDetect == "Merge":
             self.detectMergeNetwork()
 
+        # Check if all necessary information is found
         if (self.hhpathfound and self.herofound):
             encoding = sys.getfilesystemencoding()
             if type(self.hhpathfound) is not str:
@@ -122,122 +138,163 @@ class DetectInstalledSites(object):
             return {"detected":True, "hhpath":self.hhpathfound, "heroname":self.herofound, "tspath":self.tspathfound}
         else:
             return {"detected":False, "hhpath":u"", "heroname":u"", "tspath":u""}
+    
 
-    def detectFullTilt(self):
-
-        if self.Config.os_family == "Linux":
-            hhp=os.path.expanduser("~/.wine/drive_c/Program Files/Full Tilt Poker/HandHistory/")
-        elif self.Config.os_family == "XP":
-            hhp=os.path.expanduser(PROGRAM_FILES+"\\Full Tilt Poker\\HandHistory\\")
-        elif self.Config.os_family == "Win7":
-            hhp=os.path.expanduser(PROGRAM_FILES+"\\Full Tilt Poker\\HandHistory\\")
-        else:
-            return
-
-        if os.path.exists(hhp):
-            self.hhpathfound = hhp
-        else:
-            return
-
-        try:
-            self.herofound = os.listdir(self.hhpathfound)[0]
-            self.hhpathfound = self.hhpathfound + self.herofound
-        except:
-            pass
-
-        return
         
     def detectPokerStars(self):
+        """
+        Detects the location of the PokerStars hand history files and tournament summary files based on the operating system.
 
+        Returns:
+            None
+        """
+        # Set the paths of the hand history files and tournament summary files based on the operating system
         if self.Config.os_family == "Linux":
-            hhp=os.path.expanduser("~/.wine/drive_c/Program Files/PokerStars/HandHistory/")
-            tsp=os.path.expanduser("~/.wine/drive_c/Program Files/PokerStars/TournSummary/")
-        elif self.Config.os_family == "XP":
-            hhp=os.path.expanduser(PROGRAM_FILES+"\\PokerStars\\HandHistory\\")
-            tsp=os.path.expanduser(PROGRAM_FILES+"\\PokerStars\\TournSummary\\")
+            hhp = os.path.expanduser("~/.wine/drive_c/Program Files/PokerStars/HandHistory/") 
+            hhpFR = os.path.expanduser("~/.wine/drive_c/Program Files/PokerStars.FR/HandHistory/")
+            tsp = os.path.expanduser("~/.wine/drive_c/Program Files/PokerStars/TournSummary/")
+            tspFR = os.path.expanduser("~/.wine/drive_c/Program Files/PokerStars.FR/TournSummary/")
         elif self.Config.os_family == "Win7":
-            hhp=os.path.expanduser(LOCAL_APPDATA+"\\PokerStars\\HandHistory\\")
-            tsp=os.path.expanduser(LOCAL_APPDATA+"\\PokerStars\\TournSummary\\")
+            hhp = os.path.expanduser(LOCAL_APPDATA+"\\PokerStars\\HandHistory\\") 
+            hhpFR = os.path.expanduser(LOCAL_APPDATA+"\\PokerStars.FR\\HandHistory\\")
+            tsp = os.path.expanduser(LOCAL_APPDATA+"\\PokerStars\\TournSummary\\")
+            tspFR = os.path.expanduser(LOCAL_APPDATA+"\\PokerStars.FR\\TournSummary\\")
         elif self.Config.os_family == "Mac":
-            hhp=os.path.expanduser("~/Library/Application Support/PokerStars/HandHistory/")
-            tsp=os.path.expanduser("~/Library/Application Support/PokerStars/TournSummary/")
+            hhp = os.path.expanduser("~/Library/Application Support/PokerStars/HandHistory/")
+            tsp = os.path.expanduser("~/Library/Application Support/PokerStars/TournSummary/")
         else:
             return
 
+        # Check if the hand history files path exists
         if os.path.exists(hhp):
+            # Set the hand history files path and check if the tournament summary files path exists
             self.hhpathfound = hhp
             if os.path.exists(tsp):
                 self.tspathfound = tsp
+        elif os.path.exists(hhpFR):
+            self.hhpathfound = hhpFR
+            if os.path.exists(tspFR):
+                self.tspathfound = tspFR
         else:
             return
 
-        try:
+        # Try to get the name of the first hero found in the hand history files and update the paths accordingly
+        with contextlib.suppress(Exception):
             self.herofound = os.listdir(self.hhpathfound)[0]
             self.hhpathfound = self.hhpathfound + self.herofound
             if self.tspathfound:
                 self.tspathfound = self.tspathfound + self.herofound
-        except:
-            pass
 
         return
 
     def detectPartyPoker(self):
+        """Detect the PartyPoker installation directory."""
 
+        # Set the HandHistory path depending on the operating system
         if self.Config.os_family == "Linux":
-            hhp=os.path.expanduser("~/.wine/drive_c/Program Files/PartyGaming/PartyPoker/HandHistory/")
+            hhp = os.path.expanduser("~/.wine/drive_c/Program Files/PartyGaming/PartyPoker/HandHistory/")
         elif self.Config.os_family == "XP":
-            hhp=os.path.expanduser(PROGRAM_FILES+"\\PartyGaming\\PartyPoker\\HandHistory\\")
+            hhp = os.path.expanduser(PROGRAM_FILES + "\\PartyGaming\\PartyPoker\\HandHistory\\")
         elif self.Config.os_family == "Win7":
-            hhp=os.path.expanduser("c:\\Programs\\PartyGaming\\PartyPoker\\HandHistory\\")
+            hhp = os.path.expanduser("c:\\Programs\\PartyGaming\\PartyPoker\\HandHistory\\")
         else:
             return
 
+        # Check if HandHistory path exists
         if os.path.exists(hhp):
             self.hhpathfound = hhp
         else:
             return
 
+        # Get the list of subdirectories in the HandHistory path
         dirs = os.listdir(self.hhpathfound)
+
+        # Remove XMLHandHistory directory from the list if present
         if "XMLHandHistory" in dirs:
             dirs.remove("XMLHandHistory")
 
-        try:
+        # Try to find the first non-empty directory and set it as hero folder
+        with contextlib.suppress(Exception):
             self.herofound = dirs[0]
             self.hhpathfound = self.hhpathfound + self.herofound
-        except:
-            pass
 
         return
 
+
     def detectMergeNetwork(self):
+        """
+        Detects the Merge network and sets the path to the Carbon poker room.
 
-# Carbon is the principal room on the Merge network but there are many other skins.
+        Carbon is the principal room on the Merge network but there are many other skins.
+        Normally, we understand that a player can only be valid at one room on the Merge network so we will exit once successful.
+        Many thanks to Ilithios for the PlayersOnly information.
+        """
 
-# Normally, we understand that a player can only be valid at one
-# room on the Merge network so we will exit once successful
+        merge_skin_names = [
+            "CarbonPoker",
+            "PlayersOnly",
+            "BlackChipPoker",
+            "RPMPoker",
+            "HeroPoker",
+            "PDCPoker",
+        ]
 
-# Many thanks to Ilithios for the PlayersOnly information
-
-        merge_skin_names = ["CarbonPoker", "PlayersOnly", "BlackChipPoker", "RPMPoker", "HeroPoker",
-                            "PDCPoker", ]
-        
         for skin in merge_skin_names:
+            # Set the path to the history folder for the given skin
             if self.Config.os_family == "Linux":
-                hhp=os.path.expanduser("~/.wine/drive_c/Program Files/"+skin+"/history/")
-            elif self.Config.os_family == "XP":
-                hhp=os.path.expanduser(PROGRAM_FILES+"\\"+skin+"\\history\\")            
-            elif self.Config.os_family == "Win7":
+                hhp = os.path.expanduser(f"~/.wine/drive_c/Program Files/{skin}/history/")
+            elif self.Config.os_family in ["XP", "Win7"]:
                 hhp=os.path.expanduser(PROGRAM_FILES+"\\"+skin+"\\history\\")
             else:
                 return
 
+            # If the history folder exists, set the path to it and try to find the hero file
             if os.path.exists(hhp):
                 self.hhpathfound = hhp
                 try:
                     self.herofound = os.listdir(self.hhpathfound)[0]
                     self.hhpathfound = self.hhpathfound + self.herofound
                     break
-                except:
+                except Exception:
                     continue
+
+        # Return the function once it has successfully found the Merge network
+        return
+
+    def detectWinamax(self):
+        """
+        Detects the location of the Winamax hand history files based on the operating system.
+
+        Returns:
+            None
+        """
+        # Set the path of the hand history files based on the operating system
+        if self.Config.os_family == "Linux":
+            hhp = os.path.expanduser("~/.wine/drive_c/Program Files/Winamax/hand-history/")
+            tsp = os.path.expanduser("~/.wine/drive_c/Program Files/Winamax/hand-history/")
+        elif self.Config.os_family == "Darwin":
+            hhp = os.path.expanduser("~/Library/Application Support/Winamax/hand-history/")
+            tsp = os.path.expanduser("~/Library/Application Support/Winamax/hand-history/")
+        elif self.Config.os_family == "Win7":
+            hhp = os.path.expanduser(ROAMING_APPDATA+"\\Winamax\\documents\\accounts\\")
+            tsp = os.path.expanduser(ROAMING_APPDATA+"\\Winamax\\documents\\accounts\\")
+        else:
+            return None
+
+        # Check if the hand history files path exists
+        if not os.path.exists(hhp):
+            return None
+
+        # Set the hand history files path and check if the tournament summary files path exists
+        self.hhpathfound = hhp
+        if os.path.exists(tsp):
+            self.tspathfound = tsp
+
+        # Try to get the name of the first hero found in the hand history files and update the paths accordingly
+        with contextlib.suppress(Exception):
+            self.herofound = os.listdir(self.hhpathfound)[0]
+            self.hhpathfound = self.hhpathfound + self.herofound + "\\history\\"
+            if self.tspathfound:
+                self.tspathfound = self.tspathfound + self.herofound + "\\history\\"
 
         return

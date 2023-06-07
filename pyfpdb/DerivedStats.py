@@ -32,7 +32,7 @@ log = logging.getLogger("parser")
 try:
     from pokereval import PokerEval
     pokereval = PokerEval()
-except:
+except Exception:
     pokereval = None
     
 def _buildStatsInitializer():
@@ -285,6 +285,15 @@ class DerivedStats:
         self.streetXRaises(hand)
 
     def assembleHandsPlayers(self, hand):
+        """
+        Assembles player stats for a given hand.
+
+        Args:
+            hand: The hand object for which to assemble player stats.
+
+        Returns:
+            None
+        """
         #street0VPI/vpip already called in Hand
         # sawShowdown is calculated in playersAtStreetX, as that calculation gives us a convenient list of names
 
@@ -408,63 +417,90 @@ class DerivedStats:
         # Squeeze, Ratchet?
 
     def assembleHandsActions(self, hand):
+        """
+        Assemble hands actions.
+
+        :param hand: the current hand
+        """
         k = 0
         for i, street in enumerate(hand.actionStreets):
             for j, act in enumerate(hand.actions[street]):
                 k += 1
-                self.handsactions[k] = {}
-                #default values
-                self.handsactions[k]['amount'] = 0
-                self.handsactions[k]['raiseTo'] = 0
-                self.handsactions[k]['amountCalled'] = 0
-                self.handsactions[k]['numDiscarded'] = 0
-                self.handsactions[k]['cardsDiscarded'] = None
-                self.handsactions[k]['allIn'] = False
-                #Insert values from hand.actions
-                self.handsactions[k]['player'] = act[0]
-                self.handsactions[k]['street'] = i-1
-                self.handsactions[k]['actionNo'] = k
-                self.handsactions[k]['streetActionNo'] = (j+1)
-                self.handsactions[k]['actionId'] = hand.ACTION[act[1]]
+                self.handsactions[k] = {
+                    'amount': 0,
+                    'raiseTo': 0,
+                    'amountCalled': 0,
+                    'numDiscarded': 0,
+                    'cardsDiscarded': None,
+                    'allIn': False,
+                    'player': act[0],
+                    'street': i - 1,
+                    'actionNo': k,
+                    'streetActionNo': j + 1,
+                    'actionId': hand.ACTION[act[1]],
+                }
+                # Set amount if not a discard and has an amount
                 if act[1] not in ('discards') and len(act) > 2:
                     self.handsactions[k]['amount'] = int(100 * act[2])
+                # Set raiseTo and amountCalled if raise or complete
                 if act[1] in ('raises', 'completes'):
                     self.handsactions[k]['raiseTo'] = int(100 * act[3])
                     self.handsactions[k]['amountCalled'] = int(100 * act[4])
+                # Set numDiscarded and street discards if discard
                 if act[1] in ('discards'):
                     self.handsactions[k]['numDiscarded'] = int(act[2])
                     self.handsplayers[act[0]]['street%dDiscards' %(i-1)] = int(act[2])
+                # Set cards discarded if discard and has cards
                 if act[1] in ('discards') and len(act) > 3:
                     self.handsactions[k]['cardsDiscarded'] = act[3]
+                # Set allIn if more than 3 elements and not a discard
                 if len(act) > 3 and act[1] not in ('discards'):
                     self.handsactions[k]['allIn'] = act[-1]
                     if act[-1]: 
                         self.handsplayers[act[0]]['wentAllIn'] = True
                         self.handsplayers[act[0]]['street%dAllIn' %(i-1)] = True
+
     
     def assembleHandsStove(self, hand):
+        """
+        Given a hand, assembles the hands stove containing information about the hand's players,
+        hole cards, boards, and their respective evaluation.
+
+        Args:
+            hand: A Hand object.
+
+        Returns:
+            None.
+        """
+
+        # Initializing variables
         category = hand.gametype['category']
         holecards, holeplayers, allInStreets = {}, [], hand.allStreets[1:]
         base, evalgame, hilo, streets, last, hrange = Card.games[category]
         hiLoKey = {'h': [('h', 'hi')], 'l': [('l', 'low')], 's': [('h', 'hi'),('l', 'low')], 'r': [('l', 'hi')]}
-        boards = self.getBoardsDict(hand, base, streets) 
+        boards = self.getBoardsDict(hand, base, streets)
+
+        # Looping through each player in the hand
         for player in hand.players:
             pname = player[1]
             hp = self.handsplayers.get(pname)
+
+            # If it's an evaluation game, evaluate the hole cards for each street
             if evalgame:
-                hcs = hand.join_holecards(pname, asList=True)                          
-                holecards[pname] = {}
-                holecards[pname]['cards'] = []
-                holecards[pname]['eq'] = 0
-                holecards[pname]['committed'] = 0
+                hcs = hand.join_holecards(pname, asList=True)
+                holecards[pname] = {'cards': [], 'eq': 0, 'committed': 0}
                 holeplayers.append(pname)
+
+                # Looping through each street and evaluating if the player qualifies to see the board
                 for street, board in list(boards.items()):
                     streetId = streets[street]
-                    if streetId > 0:
-                        streetSeen = hp['street%sSeen' % str(streetId)]
-                    else: streetSeen = True
+                    streetSeen = hp[f'street{str(streetId)}Seen'] if streetId > 0 else True
                     if ((pname==hand.hero and streetSeen) or (hp['showed'] and streetSeen) or hp['sawShowdown']):
+
+                        # Initializing variables for board evaluation
                         boardId, hl, rankId, value, _cards = 0, 'n', 1, 0, None
+
+                        # Looping through each card in the board and evaluating the cards
                         for n in range(len(board['board'])):
                             streetIdx = -1 if base=='hold' else streetId
                             cards = hcs[hrange[streetIdx][0]:hrange[streetIdx][1]]
@@ -478,47 +514,81 @@ class DerivedStats:
                             notnull  = ('0x' not in cards) and ('0x' not in bcards)
                             postflop = (base=='hold' and len(board['board'][n])>=3)
                             maxcards = (base!='hold' and len(cards)>=5)
+
+                            # Evaluating the cards if they qualify
                             if notnull and (postflop or maxcards):
                                 for hl, side in hiLoKey[hilo]:
                                     value, rank = pokereval.best(side, cards, bcards)
                                     rankId = Card.hands[rank[0]][0]
+
                                     if rank!=None and rank[0] != 'Nothing':
                                         _cards = ''.join([pokereval.card2string(i)[0] for i in rank[1:]])
                                     else:
                                         _cards = None
-                                    self.handsstove.append( [hand.dbid_hands, hand.dbid_pids[pname], streetId, boardId, hl, rankId, value, _cards, 0] )
+
+                                    self.handsstove.append([hand.dbid_hands, hand.dbid_pids[pname], streetId, boardId, hl, rankId, value, _cards, 0])
                             else:
-                                self.handsstove.append( [hand.dbid_hands, hand.dbid_pids[pname], streetId, boardId, 'n', 1, 0, None, 0] )
+                                self.handsstove.append([hand.dbid_hands, hand.dbid_pids[pname], streetId, boardId, 'n', 1, 0, None, 0])
+
+            # If it's not an evaluation game, add the player's hand to the hands stove
             else:
                 hl, streetId = hiLoKey[hilo][0][0], 0
                 if (hp['sawShowdown'] or hp['showed']):
                     hp['handString'] = hand.showdownStrings.get(pname)
                     streetId = streets[last]
-                self.handsstove.append( [hand.dbid_hands, hand.dbid_pids[player[1]], streetId, 0, hl, 1, 0, None, 0] )
-        
+                self.handsstove.append([hand.dbid_hands, hand.dbid_pids[player[1]], streetId, 0, hl, 1, 0, None, 0])
+
+        # If it's a hold'em game and an evaluation game, calculate the all-in EV for each player
         if base=='hold' and evalgame:
             self.getAllInEV(hand, evalgame, holeplayers, boards, streets, holecards)
+
                 
     def getAllInEV(self, hand, evalgame, holeplayers, boards, streets, holecards):
+        """Calculate the all-in expected value for each player based on their hole cards and the board.
+
+        Args:
+            hand (Hand): The current hand being played.
+            evalgame (str): The type of poker being played (e.g. "holdem").
+            holeplayers (List[str]): A list of player IDs still in the hand.
+            boards (Dict[str, Dict]): A dictionary of boards for each street.
+            streets (Dict[str, int]): A dictionary of street names and their corresponding IDs.
+            holecards (Dict[str, Dict]): A dictionary of each player's hole cards.
+
+        Returns:
+            None
+        """
+        # Initialize variables
         startstreet, potId, allInStreets, allplayers = None, 0, hand.allStreets[1:], []
+
+        # Loop through each pot
         for pot, players in hand.pot.pots:
             if potId ==0: pot += (sum(hand.pot.common.values()) + hand.pot.stp)
             potId+=1
+
+            # Loop through each street where all-in has occurred
             for street in allInStreets:
                 board = boards[street]
                 streetId = streets[street]
+
+                # Loop through each board card
                 for n in range(len(board['board'])):
-                    if len(board['board']) > 1: 
-                        boardId = n + 1
-                    else: boardId = n
+                    # Determine board card ID
+                    boardId = n + 1 if len(board['board']) > 1 else n
+
+                    # Determine players with valid hole cards
                     valid = [p for p in players if self.handsplayers[p]['sawShowdown'] and u'0x' not in holecards[p]['cards'][n]]
+
+                    # If it is the first pot, all players are still in and no dead cards
                     if potId == 1:
                         allplayers = valid
                         deadcards, deadplayers = [], []
+                    # Otherwise, determine dead players and cards
                     else:
                         deadplayers = [d for d in allplayers if d not in valid]
                         _deadcards = [holecards[d]['hole'] for d in deadplayers]
                         deadcards = [item for sublist in _deadcards for item in sublist]
+
+                    # If all players are still in, calculate equities
                     if len(players) == len(valid) and (board['allin'] or hand.publicDB):
                         if board['allin'] and not startstreet: startstreet = street
                         if len(valid) > 1:
@@ -532,9 +602,13 @@ class DerivedStats:
                             equities = [e['ev'] for e in evs['eval']]
                         else:
                             equities = [1000]
+
+                        # Divide remaining equity equally among players
                         remainder = old_div((1000 - sum(equities)), Decimal(len(equities)))
                         for i in range(len(equities)):
                             equities[i] += remainder
+
+                            # Update each player's expected value
                             p = valid[i]
                             pid = hand.dbid_pids[p]
                             if street == startstreet:
@@ -544,42 +618,82 @@ class DerivedStats:
                             for j in self.handsstove:
                                 if [pid, streetId, boardId] == j[1:4] and len(valid) == len(hand.pot.contenders):
                                     j[-1] = equities[i]
-        for p in holeplayers:
-            if holecards[p]['committed'] != 0: 
-                self.handsplayers[p]['allInEV'] = holecards[p]['eq'] - holecards[p]['committed']
-    
+
+                        # Update each player's allInEV
+                        for p in holeplayers:
+                            if holecards[p]['committed'] != 0: 
+                                self.handsplayers[p]['allInEV'] = holecards[p]['eq'] - holecards[p]['committed']
+
+
     def getBoardsList(self, hand):
+        """
+        Returns a list of possible board card combinations for a given hand.
+
+        Args:
+            hand (Hand): An instance of the Hand class representing the poker hand.
+
+        Returns:
+            list: A list of lists, where each inner list contains strings representing the cards in a possible board.
+
+        """
         boards, community = [], []
-        if hand.gametype['base']=='hold':
+
+        # If the game type is "hold'em", add the cards from each street to the community cards list.
+        if hand.gametype['base'] == 'hold':
             for s in hand.communityStreets:
                 community += hand.board[s]
+
+            # Generate all possible board card combinations based on the number of times to run the simulation.
             for i in range(hand.runItTimes):
                 boardcards = []
                 for street in hand.communityStreets:
-                    boardId = i+1
+                    boardId = i + 1
                     street_i = street + str(boardId)
                     if street_i in hand.board:
                         boardcards += hand.board[street_i]
                 cards = [str(c) for c in community + boardcards]
                 boards.append(cards)
-        if not boards: 
+
+        # If no board card combinations were generated, use the community cards as the only possible board.
+        if not boards:
             boards = [community]
+
         return boards
+
     
     def getBoardsDict(self, hand, base, streets):
+        """Returns a dictionary of boards for each street in the given hand.
+
+        Args:
+            hand (Hand): The hand object for which to generate boards.
+            base (str): The base game being played ('hold' or 'omaha').
+            streets (list): A list of streets for which to generate boards.
+
+        Returns:
+            dict: A dictionary of boards for each street in the given hand.
+        """
         boards, boardcards, allInStreets, showdown = {}, [], hand.allStreets[1:], False
+
+        # Check if any players saw showdown
         for player in hand.players:
             if (self.handsplayers[player[1]]['sawShowdown']):
                 showdown = True
+
+        # Generate boards for hold'em
         if base == 'hold':
             for s in allInStreets:
                 streetId = streets[s]
                 b = [x for sublist in [hand.board[k] for k in allInStreets[:streetId+1]] for x in sublist]
                 boards[s] = {'board': [b], 'allin': False}
                 boardcards += hand.board[s]
+
+                # Mark the board as all-in if there are no more actions and a player saw showdown
                 if not hand.actions[s] and showdown:
-                    if streetId>0: boards[allInStreets[streetId-1]]['allin'] = True
+                    if streetId > 0:
+                        boards[allInStreets[streetId-1]]['allin'] = True
                     boards[s]['allin'] = True
+
+            # Generate runout boards for each street
             boardStreets = [[], [], []]
             for i in range(hand.runItTimes):
                 runitcards = []
@@ -589,50 +703,63 @@ class DerivedStats:
                         runitcards += hand.board[street_i]
                         sId = len(boardcards + runitcards) - 3
                         boardStreets[sId].append(boardcards + runitcards)
+
+            # Add the generated runout boards to the board dictionary
             for i in range(len(boardStreets)):
                 if boardStreets[i]:
                     boards[allInStreets[i+1]]['board'] = boardStreets[i]
+
+        # Generate boards for omaha
         else:   
             for s in allInStreets:
                 if s in streets:
                     streetId = streets[s]
-                    boards[s] = {}
-                    boards[s]['board'] = [[]]
-                    boards[s]['allin'] = False
+                    boards[s] = {'board': [[]], 'allin': False}
+
         return boards
+
     
     def awardPots(self, hand):
-        holeshow = True        
+        """Distributes the pot(s) to the winning player(s) in the given hand"""
+        # Initialize variables
+        holeshow = True
         base, evalgame, hilo, streets, last, hrange = Card.games[hand.gametype['category']]
-        for pot, players in hand.pot.pots:
-            for p in players:
-                hcs = hand.join_holecards(p, asList=True)
-                holes = [str(c) for c in hcs[hrange[-1][0]:hrange[-1][1]] if Card.encodeCardList.get(c)!=None or c=='0x']
-                #log.error((p, holes))
-                if '0x' in holes: holeshow = False
         factor = 100
+
+        # Check if the pot factor needs to be updated
         if ((hand.gametype["type"]=="tour" or 
             (hand.gametype["type"]=="ring" and 
-             (hand.gametype["currency"]=="play" and 
-              (hand.sitename not in ('Winamax', 'PacificPoker'))))) and
-               (not [n for (n,v) in hand.pot.pots if (n % Decimal('1.00'))!=0])):
-            factor = 1  
-        hiLoKey = {'h':['hi'],'l':['low'],'r':['low'],'s':['hi','low']}
-        #log.error((len(hand.pot.pots)>1, evalgame, holeshow))
+            (hand.gametype["currency"]=="play" and 
+            (hand.sitename not in ('Winamax', 'PacificPoker'))))) and
+            (not [n for (n,v) in hand.pot.pots if (n % Decimal('1.00'))!=0])):
+            factor = 1
+
+        # Check if pokereval is available and if the hand has multiple pots and valid hole cards
         if pokereval and len(hand.pot.pots)>1 and evalgame and holeshow: #hrange
+            # Initialize variables
             hand.collected = [] #list of ?
             hand.collectees = {} # dict from player names to amounts collected (?)
             rakes, totrake, potId = {}, 0, 0
             totalrake = hand.rakes.get('rake')
+
+            # Calculate total rake if it is not already provided
             if not totalrake:
-                totalpot = hand.rakes.get('pot')
-                if totalpot:
+                if totalpot := hand.rakes.get('pot'):
                     totalrake = hand.totalpot - totalpot
                 else:
                     totalrake = 0
+
+            # Set up dictionary for high/low split games
+            hiLoKey = {'h':['hi'],'l':['low'],'r':['low'],'s':['hi','low']}
+
+            # Loop through each pot and its players
             for pot, players in hand.pot.pots:
-                if potId ==0: pot += (sum(hand.pot.common.values()) + hand.pot.stp)
+                # Calculate total pot size for this pot
+                if potId ==0: 
+                    pot += (sum(hand.pot.common.values()) + hand.pot.stp)
                 potId+=1
+
+                # Calculate pot size for each board and if there are multiple boards, adjust pot size for remainder
                 boards, boardId, sumpot = self.getBoardsList(hand), 0, 0
                 for b in boards:
                     boardId += (hand.runItTimes>=2)
@@ -640,27 +767,31 @@ class DerivedStats:
                     modBoard = pot - potBoard*len(boards)
                     if boardId==1: 
                         potBoard+=modBoard
+
+                    # Find valid hole cards for each player
                     holeplayers, holecards = [], []
                     for p in players:
                         hcs = hand.join_holecards(p, asList=True)
                         holes = [str(c) for c in hcs[hrange[-1][0]:hrange[-1][1]] if Card.encodeCardList.get(c)!=None or c=='0x']
                         board = [str(c) for c in b if 'omaha' in evalgame]
                         if 'omaha' not in evalgame:
-                            holes = holes + [str(c) for c in b if base=='hold']
+                            holes += [str(c) for c in b if base=='hold']
                         if '0x' not in holes and '0x' not in board:
                             holecards.append(holes)
                             holeplayers.append(p)
+
+                    # Calculate winners and their pots for high/low split games
                     if len(holecards)>1:
                         try:
                             win = pokereval.winners(game = evalgame, pockets = holecards, board = board)
                         except RuntimeError:
-                            #log.error((evalgame, holecards, board))
-                            log.error("awardPots: error evaluating winners for hand %s %s" % (hand.handid, hand.in_path))
-                            win = {}
-                            win[hiLoKey[hilo][0]] = [0]
+                            log.error(
+                                f"awardPots: error evaluating winners for hand {hand.handid} {hand.in_path}"
+                            )
+                            win = {hiLoKey[hilo][0]: [0]}
                     else:
-                        win = {}
-                        win[hiLoKey[hilo][0]] = [0]
+                        win = {hiLoKey[hilo][0]: [0]}
+
                     for hl in hiLoKey[hilo]:
                         if hl in win and len(win[hl])>0:
                             potHiLo = Decimal(int(potBoard/len(win)*factor))/factor
@@ -669,7 +800,7 @@ class DerivedStats:
                                 potHiLo+=modHiLo
                             potSplit = Decimal(int(potHiLo/len(win[hl])*factor))/factor
                             modSplit = potHiLo - potSplit*len(win[hl])
-                            pnames = players if len(holeplayers)==0 else [holeplayers[w] for w in win[hl]]
+                            pnames = [holeplayers[w] for w in win[hl]] if holeplayers else players
                             for p in pnames:
                                 ppot = potSplit
                                 if modSplit>0:
@@ -677,10 +808,24 @@ class DerivedStats:
                                     ppot += cent
                                     modSplit -= cent
                                 rake = (totalrake * (ppot/hand.totalpot)).quantize(Decimal("0.01"), rounding=ROUND_DOWN)
-                                hand.addCollectPot(player=p,pot=(ppot-rake))                 
+                                hand.addCollectPot(player=p,pot=(ppot-rake))
+
+             
     
     def assembleHandsPots(self, hand):
+        """
+        Assemble pots for a given hand.
+
+        Args:
+            hand: A Hand object.
+
+        Returns:
+            None
+        """
+        # initialize variables
         category, positions, playersPots, potFound, positionDict, showdown = hand.gametype['category'], [], {}, {}, {}, False
+
+        # assign variables for each player in the hand
         for p in hand.players:
             playersPots[p[1]] = [0,[]]
             potFound[p[1]] = [0,0]
@@ -690,25 +835,31 @@ class DerivedStats:
                 showdown = True
         positions.sort(reverse=True)
         factor = 100
+
+        # modify factor if criteria is met
         if ((hand.gametype["type"]=="tour" or 
             (hand.gametype["type"]=="ring" and 
-             (hand.gametype["currency"]=="play" and 
-              (hand.sitename not in ('Winamax', 'PacificPoker'))))) and
-               (not [n for (n,v) in hand.pot.pots if (n % Decimal('1.00'))!=0])):
-            factor = 1  
+            (hand.gametype["currency"]=="play" and 
+            (hand.sitename not in ('Winamax', 'PacificPoker'))))) and
+            (not [n for (n,v) in hand.pot.pots if (n % Decimal('1.00'))!=0])):
+            factor = 1
+
+        # create dictionary of keys and values for each game type
         hiLoKey = {'h':['hi'],'l':['low'],'r':['low'],'s':['hi','low']}
         base, evalgame, hilo, streets, last, hrange = Card.games[category]
+
+        # assemble pots for each player in the hand
         if ((hand.sitename != 'KingsClub' or hand.adjustCollected) and # Can't trust KingsClub draw/stud holecards  
             evalgame and 
             (len(hand.pot.pots)>1 or (showdown and (hilo=='s' or hand.runItTimes>=2)))
             ):
-            #print 'DEBUG hand.collected', hand.collected
-            #print 'DEBUG hand.collectees', hand.collectees
             rakes, totrake, potId = {}, 0, 0
             for pot, players in hand.pot.pots:
                 if potId ==0: pot += (sum(hand.pot.common.values()) + hand.pot.stp)
                 potId+=1
                 boards, boardId, sumpot = self.getBoardsList(hand), 0, 0
+
+                # evaluate pots for each possible board
                 for b in boards:
                     boardId += (hand.runItTimes>=2)
                     potBoard = Decimal(int(pot/len(boards)*factor))/factor
@@ -716,87 +867,105 @@ class DerivedStats:
                     if boardId==1: 
                         potBoard+=modBoard
                     holeplayers, holecards = [], []
+
+                    # assemble holecards for each player in the hand
                     for p in players:
                         hcs = hand.join_holecards(p, asList=True)
                         holes = [str(c) for c in hcs[hrange[-1][0]:hrange[-1][1]] if Card.encodeCardList.get(c)!=None or c=='0x']
                         board = [str(c) for c in b if 'omaha' in evalgame]
                         if 'omaha' not in evalgame:
-                            holes = holes + [str(c) for c in b if base=='hold']
+                            holes += [str(c) for c in b if base=='hold']
                         if '0x' not in holes and '0x' not in board:
                             holecards.append(holes)
                             holeplayers.append(p)
+
+                    # evaluate winners
                     if len(holecards)>1:
                         try:
                             win = pokereval.winners(game = evalgame, pockets = holecards, board = board)
                         except RuntimeError:
-                            log.error("assembleHandsPots: error evaluating winners for hand %s %s" % (hand.handid, hand.in_path))
-                            win = {}
-                            win[hiLoKey[hilo][0]] = [0]
-                    else:
-                        win = {}
-                        win[hiLoKey[hilo][0]] = [0]
-                    for hl in hiLoKey[hilo]:
-                        if hl in win and len(win[hl])>0:
-                            potHiLo = old_div(Decimal(int(potBoard/len(win)*factor)),factor)
-                            modHiLo = potBoard - potHiLo*len(win)
-                            if len(win)==1 or hl=='hi':
-                                potHiLo+=modHiLo
-                                potSplit = old_div(Decimal(int(potHiLo/len(win[hl])*factor)),factor)
-                            modSplit = potHiLo - potSplit*len(win[hl])
-                            pnames = players if len(holeplayers)==0 else [holeplayers[w] for w in win[hl]]
-                            for n in positions:
-                                if positionDict[n] in pnames:
-                                    pname = positionDict[n]
-                                    ppot = potSplit
-                                    if modSplit>0:
-                                        cent = (Decimal('0.01') * (old_div(100,factor)))
-                                        ppot += cent
-                                        modSplit -= cent
-                                    playersPots[pname][0] += ppot
-                                    potFound[pname][0] += ppot
-                                    data = {'potId': potId, 'boardId': boardId, 'hiLo': hl,'ppot':ppot, 'winners': [m for m in pnames if pname!=n], 'mod': ppot>potSplit}
-                                    playersPots[pname][1].append(data)
-                                    self.handsplayers[pname]['rake'] = 0
-        
-            for p, (total, info) in list(playersPots.items()):
-                #log.error((p, (total, info)))
-                if hand.collectees.get(p) and info:
-                    potFound[p][1] = hand.collectees.get(p)
-                    for item in info:
-                        #log.error((str(hand.handid)," winners: ",item['winners']))
-                        split = [n for n in item['winners'] if len(playersPots[n][1])==1 and hand.collectees.get(n)!=None]
-                        if len(info)==1:
-                            ppot = item['ppot']
-                            rake = ppot - hand.collectees[p]
-                            collected = hand.collectees[p]
-                        elif item==info[-1]:
-                            ppot, collected = potFound[p]
-                            rake = ppot - collected
-                        elif len(split)>0 and not item['mod']:
-                            ppot = item['ppot']
-                            collected = min([hand.collectees[s] for s in split] + [ppot])
-                            rake = ppot - collected
-                        else:
-                            ppot = item['ppot']
-                            totalrake = total - hand.collectees[p]
-                            rake = (totalrake * (old_div(ppot,total))).quantize(Decimal("0.01"))
-                            collected = ppot - rake 
-                        potFound[p][0] -= ppot
-                        potFound[p][1] -= collected
-                        insert = [None, item['potId'], item['boardId'], item['hiLo'][0], hand.dbid_pids[p], int(item['ppot']*100), int(collected*100), int(rake*100)]   
-                        self.handspots.append(insert)
-                        self.handsplayers[p]['rake'] += int(rake*100)
+                            # Error handling in case the evaluation of the winners fails
+                            log.error(
+                                f"assembleHandsPots: error evaluating winners for hand {hand.handid} {hand.in_path}"
+                            )
+                            win = {hiLoKey[hilo][0]: [0]}
+
+                        # Loop through the hi-lo keys
+                        for hl in hiLoKey[hilo]:
+                            if hl in win and len(win[hl])>0:
+                                # Calculate the pot amount for the given hi-lo key
+                                potHiLo = old_div(Decimal(int(potBoard/len(win)*factor)),factor)
+                                modHiLo = potBoard - potHiLo*len(win)
+                                if len(win)==1 or hl=='hi':
+                                    potHiLo+=modHiLo
+                                    potSplit = old_div(Decimal(int(potHiLo/len(win[hl])*factor)),factor)
+                                modSplit = potHiLo - potSplit*len(win[hl])
+                                pnames = [holeplayers[w] for w in win[hl]] if holeplayers else players
+
+                                # assign pots to players based on position
+                                for n in positions:
+                                    if positionDict[n] in pnames:
+                                        pname = positionDict[n]
+                                        ppot = potSplit
+                                        if modSplit>0:
+                                            cent = (Decimal('0.01') * (old_div(100,factor)))
+                                            ppot += cent
+                                            modSplit -= cent
+                                        playersPots[pname][0] += ppot
+                                        potFound[pname][0] += ppot
+                                        data = {'potId': potId, 'boardId': boardId, 'hiLo': hl,'ppot':ppot, 'winners': [m for m in pnames if pname!=n], 'mod': ppot>potSplit}
+                                        playersPots[pname][1].append(data)
+                                        self.handsplayers[pname]['rake'] = 0
+
+                        for p, (total, info) in list(playersPots.items()):
+                            if hand.collectees.get(p) and info:
+                                potFound[p][1] = hand.collectees.get(p)
+                                for item in info:
+                                    # Calculate the split pot and rake
+                                    split = [n for n in item['winners'] if len(playersPots[n][1])==1 and hand.collectees.get(n)!=None]
+                                    if len(info)==1:
+                                        ppot = item['ppot']
+                                        rake = ppot - hand.collectees[p]
+                                        collected = hand.collectees[p]
+                                    elif item==info[-1]:
+                                        ppot, collected = potFound[p]
+                                        rake = ppot - collected
+                                    elif len(split)>0 and not item['mod']:
+                                        ppot = item['ppot']
+                                        collected = min([hand.collectees[s] for s in split] + [ppot])
+                                        rake = ppot - collected
+                                    else:
+                                        ppot = item['ppot']
+                                        totalrake = total - hand.collectees[p]
+                                        rake = (totalrake * (old_div(ppot,total))).quantize(Decimal("0.01"))
+                                        collected = ppot - rake 
+                                    potFound[p][0] -= ppot
+                                    potFound[p][1] -= collected
+                                    insert = [None, item['potId'], item['boardId'], item['hiLo'][0], hand.dbid_pids[p], int(item['ppot']*100), int(collected*100), int(rake*100)]   
+                                    # Add the pot information to the handsplayers dictionary and the handspots list
+                                    self.handspots.append(insert)
+                                    self.handsplayers[p]['rake'] += int(rake*100)
+
+
 
     def setPositions(self, hand):
         """Sets the position for each player in HandsPlayers
-            any blinds are negative values, and the last person to act on the
-            first betting round is 0
-            NOTE: HU, both values are negative for non-stud games
-            NOTE2: I've never seen a HU stud match"""
+        any blinds are negative values, and the last person to act on the
+        first betting round is 0
+        NOTE: HU, both values are negative for non-stud games
+        NOTE2: I've never seen a HU stud match
+
+        Args:
+        - self: the object of class that the method belongs to
+        - hand: the Hand object that contains information regarding the current game state
+
+        Returns:
+        - None
+        """
         actions = hand.actions[hand.holeStreets[0]]
         # Note:  pfbao list may not include big blind if all others folded
         players = self.pfbao(actions)
-        
+
         # set blinds first, then others from pfbao list, avoids problem if bb
         # is missing from pfbao list or if there is no small blind
         sb, bb, bi, ub, st = False, False, False, False, False
@@ -822,21 +991,23 @@ class DerivedStats:
         if bb:
             self.handsplayers[bb[0]]['position'] = 'B'
             self.handsplayers[bb[0]]['street0InPosition'] = True
-            if bb[0] in players:  players.remove(bb[0])
+            if bb[0] in players: players.remove(bb[0])
         if sb:
             self.handsplayers[sb[0]]['position'] = 'S'
             self.handsplayers[sb[0]]['street0FirstToAct'] = True
-            if sb[0] in players:  players.remove(sb[0])
+            if sb[0] in players: players.remove(sb[0])
         if bi:
             self.handsplayers[bi[0]]['position'] = 'S'
             self.handsplayers[bi[0]]['street0FirstToAct'] = True
-            if bi[0] in players:  players.remove(bi[0])
+            if bi[0] in players: players.remove(bi[0])
         if st and st[0] in players:
             players.insert(0, players.pop())
 
         #print "DEBUG: actions: '%s'" % actions
         #print "DEBUG: ub: '%s' bb: '%s' sb: '%s' bi: '%s' plyrs: '%s'" %(ub, bb, sb, bi, players)
-        for i,player in enumerate(reversed(players)): 
+
+        # Set the position for each player in `players`
+        for i, player in enumerate(reversed(players)): 
             self.handsplayers[player]['position'] = i
             self.hands['maxPosition'] = i
             if i==0 and hand.gametype['base'] == 'stud':
@@ -850,14 +1021,23 @@ class DerivedStats:
         pass
 
     def vpip(self, hand):
-        vpipers = set()
-        bb = [x[0] for x in hand.actions[hand.actionStreets[0]] if x[1] in ('big blind', 'button blind')]
-        for act in hand.actions[hand.actionStreets[1]]:
-            if act[1] in ('calls','bets', 'raises', 'completes'):
-                vpipers.add(act[0])
+        """
+        Calculates the VPIP (Voluntarily Put money In Pot) statistic for each player in the hand.
 
+        Args:
+            hand (Hand): The current hand being played.
+
+        Returns:
+            None
+        """
+        # Get the players who posted the big blind or button blind
+        bb = [x[0] for x in hand.actions[hand.actionStreets[0]] if x[1] in ('big blind', 'button blind')]
+
+        # Get the players who voluntarily put money in the pot (calls, bets, raises, or completes)
+        vpipers = {act[0] for act in hand.actions[hand.actionStreets[1]] if act[1] in ('calls', 'bets', 'raises', 'completes')}
         self.hands['playersVpi'] = len(vpipers)
 
+        # Set the 'street0VPI' attribute for players who voluntarily put money in the pot and update the respective player's stats
         for player in hand.players:
             pname = player[1]
             player_stats = self.handsplayers.get(pname)
@@ -866,12 +1046,23 @@ class DerivedStats:
             elif pname in hand.sitout:
                 player_stats['street0VPIChance'] = False
                 player_stats['street0AggrChance'] = False
-                
-        if len(vpipers)==0 and bb:
+
+        # If no player voluntarily put money in the pot, set the 'street0VPIChance' and 'street0AggrChance' attributes to False for the big blind player
+        if not vpipers and bb:
             self.handsplayers[bb[0]]['street0VPIChance'] = False
             self.handsplayers[bb[0]]['street0AggrChance'] = False
 
+
     def playersAtStreetX(self, hand):
+        """
+        Calculates the number of players who saw each street and reached the showdown.
+
+        Args:
+            hand (Hand): An object representing the hand being played.
+
+        Returns:
+            None
+        """
         """ playersAtStreet1 SMALLINT NOT NULL,   /* num of players seeing flop/street4/draw1 */"""
         # self.actions[street] is a list of all actions in a tuple, contining the player name first
         # [ (player, action, ....), (player2, action, ...) ]
@@ -881,6 +1072,7 @@ class DerivedStats:
         #     ... new code below hopefully fixes this
         # partly fixed, allins are now set as seeing streets because they never do a fold action
 
+        # Initialize the count of players at each street to 0
         self.hands['playersAtStreet1']  = 0
         self.hands['playersAtStreet2']  = 0
         self.hands['playersAtStreet3']  = 0
@@ -901,16 +1093,18 @@ class DerivedStats:
 #        actions = hand.actions[hand.actionStreets[-1]]
 #        print "p_actions:", self.pfba(actions), "p_folds:", self.pfba(actions, l=('folds',)), "alliners:", alliners
 #        pas = set.union(self.pfba(actions) - self.pfba(actions, l=('folds',)),  alliners)
-        
+
         # hand.players includes people that are sitting out on some sites for cash games
         # actionStreets[1] is 'DEAL', 'THIRD', 'PREFLOP', so any player dealt cards
         # must act on this street if dealt cards. Almost certainly broken for the 'all-in blind' case
         # and right now i don't care - CG
 
-        p_in = set([x[0] for x in hand.actions[hand.actionStreets[1]]])
+        # Get the players who were dealt cards
+        p_in = {x[0] for x in hand.actions[hand.actionStreets[1]]}
+
         #Add in players who were allin blind
-        if hand.pot.pots:
-            if len(hand.pot.pots[0][1])>1: p_in = p_in.union(hand.pot.pots[0][1])
+        if hand.pot.pots and len(hand.pot.pots[0][1])>1:
+            p_in = p_in.union(hand.pot.pots[0][1])
 
         #
         # discover who folded on each street and remove them from p_in
@@ -933,9 +1127,9 @@ class DerivedStats:
         # because the hand is over, this will ensure playersAtStreetx
         # is accurate.
         #
-                    
-        for (i, street) in enumerate(hand.actionStreets):
 
+        # Loop over each street to count the number of players who saw it
+        for (i, street) in enumerate(hand.actionStreets):
             if (i-1) in (1,2,3,4):
                 # p_in stores players with cards at start of this street,
                 # so can set streetxSeen & playersAtStreetx with this information
@@ -944,7 +1138,7 @@ class DerivedStats:
                 # nb i=2=flop=street1Seen, hence i-1 term needed
                 self.hands['playersAtStreet%d' % (i-1)] = len(p_in)
                 for player_with_cards in p_in:
-                    self.handsplayers[player_with_cards]['street%sSeen' % (i-1)] = True
+                    self.handsplayers[player_with_cards][f'street{i - 1}Seen'] = True
 
                 players = self.pfbao(hand.actions[street], f=('discards','stands pat'))
                 if len(players)>0:
@@ -975,16 +1169,33 @@ class DerivedStats:
             self.handsplayers[showdown_player]['sawShowdown'] = True
 
     def streetXRaises(self, hand):
+        """
+        Calculates the number of raises, bets, and completes made in each street of a poker hand and stores
+        the result in the dictionary self.hands.
+
+        Args:
+            hand (Hand): A Hand object representing a completed poker hand.
+
+        Returns:
+            None
+        """
         # self.actions[street] is a list of all actions in a tuple, contining the action as the second element
         # [ (player, action, ....), (player2, action, ...) ]
         # No idea what this value is actually supposed to be
         # In theory its "num small bets paid to see flop/street4, including blind" which makes sense for limit. Not so useful for nl
         # Leaving empty for the moment,
 
-        for i in range(5): self.hands['street%dRaises' % i] = 0
+        # Initialize the number of raises, bets, and completes to 0 for each street
+        for i in range(5):
+            self.hands['street%dRaises' % i] = 0
 
+        # Iterate over each street in the hand except for the first one (pre-flop)
         for (i, street) in enumerate(hand.actionStreets[1:]):
-            self.hands['street%dRaises' % i] = len([action for action in hand.actions[street] if action[1] in ('raises','bets','completes')])
+            # Count the number of raises, bets, and completes made in the current street
+            num_raises_bets_completes = len([action for action in hand.actions[street] if action[1] in ('raises','bets','completes')])
+            # Store the result in the dictionary
+            self.hands['street%dRaises' % i] = num_raises_bets_completes
+
 
     def calcSteals(self, hand):
         """Fills raiseFirstInChance|raisedFirstIn, fold(Bb|Sb)ToSteal(Chance|)
@@ -1045,52 +1256,64 @@ class DerivedStats:
                 break
 
     def calc34BetStreet0(self, hand):
-        """Fills street0_(3|4)B(Chance|Done), other(3|4)BStreet0"""
-        if hand.gametype['base'] == 'stud':
-            bet_level = 0 # bet_level after 3-bet is equal to 3
-        else:
-            bet_level = 1 # bet_level after 3-bet is equal to 3
+        """
+        Fills street0_(3|4)B(Chance|Done), other(3|4)BStreet0
+
+        Args:
+        - hand: object representing the current hand state
+
+        Returns:
+        - None
+        """
+        # Determine bet level based on gametype
+        bet_level = 0 if hand.gametype['base'] == 'stud' else 1
+
+        # Initialize variables for chance of squeeze, chance of raise, action count, and first aggressor
         squeeze_chance, raise_chance, action_cnt, first_agressor = False, True, {}, None
-        p0_in = set([x[0] for x in hand.actions[hand.actionStreets[0]] if not x[-1]])
-        p1_in = set([x[0] for x in hand.actions[hand.actionStreets[1]]])
+
+        # Get set of players who have acted in street 0 and 1
+        p0_in = {x[0] for x in hand.actions[hand.actionStreets[0]] if not x[-1]}
+        p1_in = {x[0] for x in hand.actions[hand.actionStreets[1]]}
         p_in = p1_in.union(p0_in)
-        for p in p_in: action_cnt[p] = 0
+
+        # Initialize action count for each player in p_in
+        for p in p_in: 
+            action_cnt[p] = 0
+
+        # Loop through each action in street 1
         for action in hand.actions[hand.actionStreets[1]]:
             pname, act, aggr, allin = action[0], action[1], action[1] in ('raises', 'bets', 'completes'), False
+
+            # Get player stats and update action count for current player
             player_stats = self.handsplayers.get(pname)
             action_cnt[pname] += 1
+
+            # Check if the current action is an all-in
             if len(action) > 3 and act != 'discards':
                 allin = action[-1]
+
+            # Update raise chance if only one player is left and this is their first action
             if len(p_in)==1 and action_cnt[pname]==1:
                 raise_chance = False
                 player_stats['street0AggrChance'] = raise_chance
+
+            # Remove player from p_in if they have folded, gone all-in, or are sitting out
             if act == 'folds' or allin or player_stats['sitout']:
                 p_in.discard(pname)
-                if player_stats['sitout']: continue
+            if player_stats['sitout']:
+                continue
+
+            # Determine bet level for current action
             if bet_level == 0:
                 if aggr:
-                    if first_agressor == None:
-                        first_agressor = pname            
+                    # Update first aggressor and increase bet level
+                    if first_agressor is None:
+                        first_agressor = pname
                     bet_level += 1
                 continue
             elif bet_level == 1:
+                # Update chance of 2B and mark 2B as done if current player is the first aggressor
                 player_stats['street0_2BChance'] = raise_chance
-                if aggr:
-                    if first_agressor == None:
-                        first_agressor = pname
-                    player_stats['street0_2BDone'] = True
-                    bet_level += 1
-                continue
-            elif bet_level == 2:
-                player_stats['street0_3BChance'] = raise_chance
-                player_stats['street0_SqueezeChance'] = squeeze_chance
-                if pname == first_agressor:
-                    player_stats['street0_FoldTo2BChance'] = True
-                    if act == 'folds':
-                        player_stats['street0_FoldTo2BDone'] = True
-                if not squeeze_chance and act == 'calls':
-                    squeeze_chance = True
-                    continue
                 if aggr:
                     player_stats['street0_3BDone'] = True
                     player_stats['street0_SqueezeDone'] = squeeze_chance
@@ -1099,6 +1322,7 @@ class DerivedStats:
                 continue
             elif bet_level == 3:
                 if pname == first_agressor:
+                    # Update chance of 4B and mark fold-to-3B chance as done if current player is the first aggressor
                     player_stats['street0_4BChance'] = raise_chance
                     player_stats['street0_FoldTo3BChance'] = True
                     if aggr:
@@ -1108,6 +1332,7 @@ class DerivedStats:
                         player_stats['street0_FoldTo3BDone'] = True
                         break
                 else:
+                    # Update chance of capped 4B
                     player_stats['street0_C4BChance'] = raise_chance
                     if aggr:
                         player_stats['street0_C4BDone'] = raise_chance
@@ -1115,38 +1340,55 @@ class DerivedStats:
                 continue
             elif bet_level == 4:
                 if pname != first_agressor: 
+                    # Mark fold-to-4B chance as done if current player is not the first aggressor
                     player_stats['street0_FoldTo4BChance'] = True
                     if act == 'folds':
                         player_stats['street0_FoldTo4BDone'] = True
 
-    def calcCBets(self, hand):
-        """Fill streetXCBChance, streetXCBDone, foldToStreetXCBDone, foldToStreetXCBChance
 
-        Continuation Bet chance, action:
-        Had the last bet (initiative) on previous street, got called, close street action
-        Then no bets before the player with initiatives first action on current street
-        ie. if player on street-1 had initiative and no donkbets occurred
+    def calcCBets(self, hand):
         """
-        # XXX: enumerate(list, start=x) is python 2.6 syntax; 'start'
-        # came there
-        #for i, street in enumerate(hand.actionStreets[2:], start=1):
+        Fill streetXCBChance, streetXCBDone, foldToStreetXCBDone, foldToStreetXCBChance
+
+        Continuation Bet chance and action:
+        - Had the last bet (initiative) on previous street, got called, close street action
+        - Then no bets before the player with initiatives first action on current street
+        - ie. if player on street-1 had initiative and no donkbets occurred
+
+        Args:
+        - hand: Hand object representing a poker hand
+
+        Returns:
+        - None
+        """
+        # XXX: enumerate(list, start=x) is python 2.6 syntax; 'start' came there
+        # Loop through each street of the hand starting from the third street (index 2)
         for i, street in enumerate(hand.actionStreets[2:]):
-            name = self.lastBetOrRaiser(hand.actions, hand.actionStreets[i+1]) # previous street
-            if name:
+            # Check if the last bet or raise was made on the previous street
+            if name := self.lastBetOrRaiser(hand.actions, hand.actionStreets[i + 1]):
+                # Check if there were no bets made before the player with initiatives first action on the current street
                 chance = self.noBetsBefore(hand.actions, hand.actionStreets[i+2], name) # this street
                 if chance == True:
+                    # Get the player's stats
                     player_stats = self.handsplayers.get(name)
-                    player_stats['street%dCBChance' % (i+1)] = True
-                    player_stats['street%dCBDone' % (i+1)] = self.betStreet(hand.actions, hand.actionStreets[i+2], name)
-                    if player_stats['street%dCBDone' % (i+1)]:
+                    # Set the player's chance of making a continuation bet on the current street to True
+                    player_stats[f'street{i+1}CBChance'] = True
+                    # Set the amount of the player's continuation bet on the current street
+                    player_stats[f'street{i+1}CBDone'] = self.betStreet(hand.actions, hand.actionStreets[i+2], name)
+                    # If the player made a continuation bet on the current street
+                    if player_stats[f'street{i+1}CBDone']:
+                        # Loop through each player who folded to the player's continuation bet
                         for pname, folds in list(self.foldTofirstsBetOrRaiser(hand.actions, street, name).items()):
-                            #print "DEBUG:", hand.handid, pname.encode('utf8'), street, folds, '--', name, 'lastbet on ', hand.actionStreets[i+1]
-                            self.handsplayers[pname]['foldToStreet%sCBChance' % (i+1)] = True
-                            self.handsplayers[pname]['foldToStreet%sCBDone' % (i+1)] = folds
+                            # Set the player's chance of folding to a continuation bet on the current street to True
+                            self.handsplayers[pname][f'foldToStreet{i + 1}CBChance'] = True
+                            # Set the amount the player folded to the player's continuation bet on the current street
+                            self.handsplayers[pname][f'foldToStreet{i + 1}CBDone'] = folds
+
 
     def calcCalledRaiseStreet0(self, hand):
         """
         Fill street0CalledRaiseChance, street0CalledRaiseDone
+
         For flop games, go through the preflop actions:
             skip through first raise
             For each subsequent action:
@@ -1158,8 +1400,14 @@ class DerivedStats:
                     player chance + 1
                     player done + 1
                     skip through list to the next raise action
+
+        Parameters:
+        -----------
+        hand : Hand
+            The hand object representing the current hand being analyzed
+
         """
-        
+        # Skip through preflop raises to get to flop actions
         fast_forward = True
         for tupleread in hand.actions[hand.actionStreets[1]]:
             action = tupleread[1]
@@ -1174,8 +1422,10 @@ class DerivedStats:
                     player_stats['street0CalledRaiseDone'] += 1
                     fast_forward = True
 
+
     def calcCheckCallRaise(self, hand):
-        """Fill streetXCheckCallRaiseChance, streetXCheckCallRaiseDone
+        """
+        Fill streetXCheckCallRaiseChance, streetXCheckCallRaiseDone
 
         streetXCheckCallRaiseChance = got raise/bet after check
         streetXCheckCallRaiseDone = checked. got raise/bet. didn't fold
@@ -1183,7 +1433,7 @@ class DerivedStats:
         CG: CheckCall would be a much better name for this.
         """
         # XXX: enumerate(list, start=x) is python 2.6 syntax; 'start'
-        #for i, street in enumerate(hand.actionStreets[2:], start=1):
+        # for i, street in enumerate(hand.actionStreets[2:], start=1):
         for i, street in enumerate(hand.actionStreets[2:]):
             actions = hand.actions[street]
             checkers = set()
@@ -1195,188 +1445,365 @@ class DerivedStats:
                     initial_raiser = pname
                 elif act == 'checks' and initial_raiser is None:
                     checkers.add(pname)
+                # got raise/bet after check
                 elif initial_raiser is not None and pname in checkers and pname not in acted:
                     player_stats = self.handsplayers.get(pname)
-                    player_stats['street%dCheckCallRaiseChance' % (i+1)] = True
-                    player_stats['street%dCheckCallDone' % (i+1)] = act=='calls'
-                    player_stats['street%dCheckRaiseDone' % (i+1)] = act=='raises'
+                    player_stats[f'street{i+1}CheckCallRaiseChance'] = True
+                    player_stats[f'street{i+1}CheckCallDone'] = act == 'calls'
+                    player_stats[f'street{i+1}CheckRaiseDone'] = act == 'raises'
                     acted.add(pname)
 
-    def aggr(self, hand, i):
-        aggrers = set()
-        others = set()
-        # Growl - actionStreets contains 'BLINDSANTES', which isn't actually an action street
 
-        firstAggrMade=False
+    def aggr(self, hand, i):
+        """
+        Given a `hand` and an index `i`, this function identifies the players that made the first aggression in the given street.
+        Then, it sets a flag on the corresponding dictionary for each of those players.
+
+        Args:
+        - self: The object itself.
+        - hand: A dictionary representing a poker hand.
+        - i: An integer that indicates the index of the current street.
+
+        Returns:
+        - None
+        """
+        aggrers = set()   # set of players who made the first aggression
+        others = set()    # set of players who did not make the first aggression
+
+        # Growl - actionStreets contains 'BLINDSANTES', which isn't actually an action street
+        firstAggrMade = False   # flag for whether the first aggression has been made
         for act in hand.actions[hand.actionStreets[i+1]]:
             if firstAggrMade:
-                others.add(act[0])
+                others.add(act[0])   # add the player to others set if they are not the first to make aggression
             if act[1] in ('completes', 'bets', 'raises'):
-                aggrers.add(act[0])
-                firstAggrMade=True
+                aggrers.add(act[0])   # add the player to the aggrers set if they made aggression
+                firstAggrMade = True   # set the flag to true if the first aggression has been made
 
         for player in hand.players:
             if player[1] in aggrers:
-                self.handsplayers[player[1]]['street%sAggr' % i] = True
-                
-        if len(aggrers)>0 and i>0:
-            for playername in others:
-                self.handsplayers[playername]['otherRaisedStreet%s' % i] = True
-                #print "otherRaised detected on handid "+str(hand.handid)+" for "+playername+" on street "+str(i)
+                self.handsplayers[player[1]][f'street{i}Aggr'] = True   # set flag for the player who made aggression
 
-        if i > 0 and len(aggrers) > 0:
+        if aggrers and i > 0:
             for playername in others:
-                self.handsplayers[playername]['otherRaisedStreet%s' % i] = True
-                #print "DEBUG: otherRaised detected on handid %s for %s on actionStreet[%s]: %s" 
+                self.handsplayers[playername][f'otherRaisedStreet{i}'] = True   # set flag for each player in others set
+                # print "otherRaised detected on handid "+str(hand.handid)+" for "+playername+" on street "+str(i)
+
+        if i > 0 and aggrers:
+            for playername in others:
+                self.handsplayers[playername][f'otherRaisedStreet{i}'] = True   # set flag for each player in others set
+                # print "DEBUG: otherRaised detected on handid %s for %s on actionStreet[%s]: %s" 
                 #                           %(hand.handid, playername, hand.actionStreets[i+1], i)
 
+
     def calls(self, hand, i):
+        """
+        Adds +1 to the 'street{i}Calls' stat of players who made a call action on the given street.
+
+        Args:
+            hand (Hand): The current hand being played.
+            i (int): The index of the current street.
+        """
         callers = []
+        # Loop through all actions on the next street
         for act in hand.actions[hand.actionStreets[i+1]]:
+            # If the action is a call
             if act[1] in ('calls'):
+                # Get the player's stats
                 player_stats = self.handsplayers.get(act[0])
-                player_stats['street%sCalls' % i] = 1 + player_stats['street%sCalls' % i]
+                # Increment the 'street{i}Calls' stat
+                player_stats[f'street{i}Calls'] = 1 + player_stats[f'street{i}Calls']
+
 
     def bets(self, hand, i):
+        """
+        Increments the 'street{i}Bets' count for each player that has made a bet on the (i+1)-th street of the hand.
+
+        Args:
+            hand (Hand): the hand being analyzed
+            i (int): the current street being analyzed
+
+        Returns:
+            None
+        """
+        # Loop through each action in the (i+1)-th street of the hand
         for act in hand.actions[hand.actionStreets[i+1]]:
+            # Check if the action is a bet
             if act[1] in ('bets'):
+                # Get the stats for the player that made the bet
                 player_stats = self.handsplayers.get(act[0])
-                player_stats['street%sBets' % i] = 1 + player_stats['street%sBets' % i]
+                # Increment the 'street{i}Bets' count for the player
+                player_stats[f'street{i}Bets'] = 1 + player_stats[f'street{i}Bets']
+
                 
     def raises(self, hand, i):
+        """
+        Increments the 'street{i}Raises' counter for players who raised or completed the current street.
+
+        Args:
+        - hand: Hand object containing information about the current hand.
+        - i: An integer representing the current street.
+
+        Returns:
+        - None
+        """
+        # Iterate over the actions taken by players on the next street after i
         for act in hand.actions[hand.actionStreets[i+1]]:
+            # If the action is a raise or a completion of a bet, increment the 'street{i}Raises' counter for the player
             if act[1] in ('completes', 'raises'):
                 player_stats = self.handsplayers.get(act[0])
-                player_stats['street%sRaises' % i] = 1 + player_stats['street%sRaises' % i]
+                player_stats[f'street{i}Raises'] = 1 + player_stats[f'street{i}Raises']
+
         
     def folds(self, hand, i):
+        """Detects if a player has folded to another player's raise on a given street.
+
+        Args:
+            hand (Hand): The hand being analyzed.
+            i (int): The index of the current street.
+
+        Returns:
+            None
+        """
+        # Iterate through the actions on the next street
         for act in hand.actions[hand.actionStreets[i+1]]:
+            # If a player has folded
             if act[1] in ('folds'):
+                # Get the stats for the player who folded
                 player_stats = self.handsplayers.get(act[0])
-                if player_stats['otherRaisedStreet%s' % i] == True:
-                    player_stats['foldToOtherRaisedStreet%s' % i] = True
-                    #print "DEBUG: fold detected on handid %s for %s on actionStreet[%s]: %s"
-                    #                       %(hand.handid, act[0],hand.actionStreets[i+1], i)
+                # If the player was previously raised by another player on this street
+                if player_stats[f'otherRaisedStreet{i}'] == True:
+                    # Mark that the player folded to the other player's raise
+                    player_stats[f'foldToOtherRaisedStreet{i}'] = True
+                    # Uncomment the following line to print a debug message
+                    # print(f"DEBUG: fold detected on handid {hand.handid} for {act[0]} on actionStreet[{hand.actionStreets[i+1]}]: {i}")
+
 
     def countPlayers(self, hand):
         pass
 
+
     def pfba(self, actions, f=None, l=None):
         """Helper method. Returns set of PlayersFilteredByActions
 
-        f - forbidden actions
-        l - limited to actions
+        Args:
+            actions (list): A list of tuples. Each tuple contains a player and their action.
+            f (list, optional): A list of forbidden actions. Defaults to None.
+            l (list, optional): A list of limited actions. Defaults to None.
+
+        Returns:
+            set: A set of players who performed the filtered actions.
         """
-        players = set()
-        for action in actions:
-            if l is not None and action[1] not in l: continue
-            if f is not None and action[1] in f: continue
-            players.add(action[0])
-        return players
+        players = set()  # Create an empty set to store players who performed the filtered actions
+        for action in actions:  # Iterate over each action in the provided list
+            if l is not None and action[1] not in l:  # If the limited action list is provided and the current action is not in it, skip to the next action
+                continue
+            if f is not None and action[1] in f:  # If the forbidden action list is provided and the current action is in it, skip to the next action
+                continue
+            players.add(action[0])  # Add the player of the current action to the set of players who performed the filtered actions
+        return players  # Return the set of players who performed the filtered actions
+
 
     def pfbao(self, actions, f=None, l=None, unique=True):
-        """Helper method. Returns set of PlayersFilteredByActionsOrdered
+        """
+        Helper method that returns set of PlayersFilteredByActionsOrdered.
 
-        f - forbidden actions
-        l - limited to actions
+        Args:
+            actions (list): List of actions.
+            f (list): List of forbidden actions.
+            l (list): List of allowed actions.
+            unique (bool): Flag to indicate if the returned list should be unique.
+
+        Returns:
+            list: List of players.
+
+        Note:
+            This is an adaptation of function 5 from http://www.peterbe.com/plog/uniqifiers-benchmark
         """
-        # Note, this is an adaptation of function 5 from:
-        # http://www.peterbe.com/plog/uniqifiers-benchmark
-        seen = {}
-        players = []
+        seen = {}           # create an empty dictionary to store seen players
+        players = []        # create an empty list to store players
         for action in actions:
-            if l is not None and action[1] not in l: continue
-            if f is not None and action[1] in f: continue
-            if action[0] in seen and unique: continue
-            seen[action[0]] = 1
-            players.append(action[0])
-        return players
+            if l is not None and action[1] not in l:   # if limited actions are specified and current action is not in them
+                continue                                # skip this iteration and move to the next one
+            if f is not None and action[1] in f:       # if forbidden actions are specified and current action is in them
+                continue                                # skip this iteration and move to the next one
+            if action[0] in seen and unique:           # if the current player has already been seen and unique flag is set to True
+                continue                                # skip this iteration and move to the next one
+            seen[action[0]] = 1                         # mark the current player as seen
+            players.append(action[0])                   # add the current player to the players list
+        return players                                   # return the players list
+
     
-    def calcEffectiveStack(self,hand):
-        """Calculates the effective stack for each player on street 1
+    def calcEffectiveStack(self, hand):
         """
+        Calculates the effective stack for each player on the first street of play.
+
+        Args:
+            hand: An object representing the current state of the hand being played.
+
+        Returns:
+            None.
+        """
+        # Dictionary to keep track of players seen so far
         seen = {}
-        pstacks = {}
+
+        # List of actions taken on the first street of play
         actions = hand.actions[hand.holeStreets[0]]
-        for p in hand.players: 
-            if p[1] not in hand.sitout:
-                pstacks[p[1]] = int(100 * Decimal(p[2]))
+
+        # Dictionary of player stacks, with players who are sitting out excluded
+        pstacks = {
+            p[1]: int(100 * Decimal(p[2]))
+            for p in hand.players
+            if p[1] not in hand.sitout
+        }
+
+        # Iterate through each action taken on the first street of play
         for action in actions:
-            if action[0] in seen: continue
-            if action[0] not in pstacks: continue
+            # If the player has already been seen, skip to the next action
+            if action[0] in seen:
+                continue
+
+            # If the player is not in our list of player stacks, skip to the next action
+            if action[0] not in pstacks:
+                continue
+
+            # Mark the player as seen
             seen[action[0]] = 1
-            oppstacks = [v for (k,v) in list(pstacks.items()) if k != action[0]]
-            if oppstacks:
-                if pstacks[action[0]] > max(oppstacks):
-                    self.handsplayers[action[0]]['effStack'] = max(oppstacks)
-                else:
-                    self.handsplayers[action[0]]['effStack'] = pstacks[action[0]]
-                if action[1] == 'folds':
-                    pstacks[action[0]] = 0
+
+            # Get the stacks of all opponents
+            oppstacks = [
+                v for (k, v) in list(pstacks.items()) if k != action[0]
+            ]
+
+            # Calculate the effective stack for the player
+            self.handsplayers[action[0]]['effStack'] = min(
+                pstacks[action[0]], max(oppstacks)
+            )
+
+            # If the player folded, set their stack to 0
+            if action[1] == 'folds':
+                pstacks[action[0]] = 0
+
 
     def firstsBetOrRaiser(self, actions):
-        """Returns player name that placed the first bet or raise.
-
-        None if there were no bets or raises on that street
         """
-        for act in actions:
-            if act[1] in ('bets', 'raises', 'completes'):
-                return act[0]
-        return None
+        Returns the name of the player who placed the first bet or raise.
+
+        Args:
+            actions (list): A list of tuples representing player's actions.
+
+        Returns:
+            str or None: The name of the player who placed the first bet or raise. None if there were no bets or raises on that street.
+        """
+        return next(
+            (
+                act[0]  # The name of the player
+                for act in actions
+                if act[1] in ('bets', 'raises', 'completes')  # Actions that qualify as a bet or raise
+            ),
+            None,  # Return None if no bet or raise was found
+        )
+
     
     def foldTofirstsBetOrRaiser(self, actions, street, aggressor):
-        """Returns player name that placed the first bet or raise.
-
-        None if there were no bets or raises on that street
         """
+        Returns the name of the first player to place a bet or raise on a given street, or the aggressor in the hand.
+        If there were no bets or raises on that street, return None.
+
+        :param actions: list of actions taken by players in the hand
+        :param street: the current street of the hand
+        :param aggressor: the player who initiated the action preflop, or the player who made the last aggressive action on the previous street
+        :return: the name of the first player to place a bet or raise on a given street, or the aggressor in the hand
+        """
+        # Initialize variables
         i, players = 0, {}
+
+        # Loop through each action on the current street
         for act in actions[street]:
-            if i>1: break
+            # If two players have already acted, break out of the loop
+            if i > 1:
+                break
+            # If the current action is not from the aggressor
             if act[0] != aggressor:
-                if act[1] == 'folds':
-                    players[act[0]] = True
-                else:
-                    players[act[0]] = False
-                if act[1] == 'raises' or act[1] == 'completes': 
+                # Add the player to the dictionary of players who have folded
+                players[act[0]] = act[1] == 'folds'
+                # If the player raised or completed the bet, break out of the loop
+                if act[1] in ['raises', 'completes']:
                     break
-            elif act[1]!='discards':
-                i+=1
+            # If the current action is from the aggressor
+            elif act[1] != 'discards':
+                # Increment the number of aggressive actions on the street
+                i += 1
+        # Return the dictionary of players who have folded
         return players
 
+
     def lastBetOrRaiser(self, actions, street):
-        """Returns player name that placed the last bet or raise for that street.
-            None if there were no bets or raises on that street"""
-        lastbet = None
-        for act in actions[street]:
-            if act[1] in ('bets', 'raises', 'completes'):
-                lastbet = act[0]
-        return lastbet
+        """Returns the name of the player who placed the last bet, raise or completion for a given street.
+
+        Args:
+            actions (list): A list of tuples containing a player's action and the amount.
+            street (str): The current street of the game.
+
+        Returns:
+            str or None: The name of the player who placed the last bet, raise or completion, or None if no bets, raises or completions occurred on the street.
+        """
+
+        lastbet = None   # Initialize variable to keep track of the last bet
+        for act in actions[street]:   # Loop through all actions on the current street
+            if act[1] in ('bets', 'raises', 'completes'):   # Check if the action is a bet, raise or completion
+                lastbet = act[0]   # If it is, update the last bet variable with the player's name
+        return lastbet   # Return the name of the player who made the last bet or raise, or None if there were none
+
 
 
     def noBetsBefore(self, actions, street, player):
-        """Returns true if there were no bets before the specified players turn, false otherwise"""
+        """
+        Returns True if there were no bets before the specified player's turn, False otherwise.
+
+        Parameters:
+        actions (list): The list of actions taken during the game.
+        street (str): The current street of the game.
+        player (int): The player for whom we want to check if there were no bets before their turn.
+
+        Returns:
+        bool: True if there were no bets before the specified player's turn, False otherwise.
+        """
         noBetsBefore = False
+
+        # Loop through each action in the current street
         for act in actions[street]:
-            #Must test for player first in case UTG
+            # Must test for player first in case they are UTG
             if act[0] == player:
                 noBetsBefore = True
                 break
+            # If a bet, raise, or completion is made, then there were bets before the specified player's turn
             if act[1] in ('bets', 'raises', 'completes'):
                 break
+
         return noBetsBefore
 
 
+
     def betStreet(self, actions, street, player):
-        """Returns true if player bet/raised the street as their first action"""
-        betOrRaise = False
-        for act in actions[street]:
-            if act[0] == player and act[1] not in ('discards', 'stands pat'):
-                if act[1] in ('bets', 'raises', 'completes'):
-                    betOrRaise = True
-                else:
-                    # player found but did not bet or raise as their first action
-                    pass
-                break
-            #else:
-                # haven't found player's first action yet
-        return betOrRaise
+        """
+        Returns true if player bet/raised the street as their first action.
+
+        :param actions: A list of tuples representing the actions taken by players.
+        :type actions: list
+        :param street: The current betting round.
+        :type street: str
+        :param player: The player in question.
+        :type player: int
+        :return: True if the player bet/raised the street as their first action, False otherwise.
+        :rtype: bool
+        """
+        betOrRaise = False   # Initializing the variable that keeps track of whether the player bet/raised
+        for act in actions[street]:   # Looping through the actions taken during the current betting round
+            if act[0] == player and act[1] not in ('discards', 'stands pat'):   # Checking if the player took an action and didn't discard or stand pat
+                if act[1] in ('bets', 'raises', 'completes'):   # Checking if the player bet, raised, or completed
+                    betOrRaise = True   # Setting the variable to True if the player bet/raised
+                break   # Exiting the loop after the first action by the player
+                #else:
+                    # haven't found player's first action yet
+        return betOrRaise   # Returning whether the player bet/raised
+

@@ -18,6 +18,7 @@
 
 from __future__ import print_function
 from __future__ import division
+import itertools
 from ast import Pass
 
 from dataclasses import replace
@@ -53,7 +54,31 @@ if __name__ == "__main__":
 log = logging.getLogger("filter")
 
 class Filters(QWidget):
-    def __init__(self, db, display = {}):
+    def __init__(self, db, display=None):
+        """
+        Initializes a Filters widget.
+
+        Args:
+            db (Database): The database object to filter.
+            display (dict): A dictionary of display settings.
+
+        Attributes:
+            db (Database): The database object to filter.
+            cursor (Cursor): The database cursor.
+            sql (SQL): The SQL object for querying the database.
+            conf (Config): The configuration object for the database.
+            display (dict): A dictionary of display settings.
+            gameName (dict): A dictionary of game names.
+            currencyName (dict): A dictionary of currency names.
+            filterText (dict): A dictionary of filter text strings.
+            day_start (float): The start time of the day in hours (e.g. 9.5 for 9:30 AM).
+            callback (dict): A dictionary of callbacks for filter actions.
+
+        Returns:
+            None
+        """
+        if display is None:
+            display = {}
         QWidget.__init__(self, None)
         self.db = db
         self.cursor = db.cursor
@@ -61,6 +86,7 @@ class Filters(QWidget):
         self.conf = db.config
         self.display = display
 
+        # Dictionary of game names
         self.gameName = {"27_1draw"  : ("Single Draw 2-7 Lowball")
                         ,"27_3draw"  : ("Triple Draw 2-7 Lowball")
                         ,"a5_3draw"  : ("Triple Draw A-5 Lowball")
@@ -88,7 +114,7 @@ class Filters(QWidget):
                         ,"irish"     : ("Irish")
                         ,"6_omahahi" : ("6 Card Omaha")
                         }
-
+        # Dictionary of currency names
         self.currencyName = {"USD" : ("US Dollar")
                             ,"EUR" : ("Euro")
                             ,"T$"  : ("Tournament Dollar")
@@ -108,26 +134,40 @@ class Filters(QWidget):
                           ,'groupsall':('All Players'), 'cardstitle':(('Hole Cards')+':')
                           ,'limitsFL':'FL', 'limitsNL':'NL', 'limitsPL':'PL', 'limitsCN':'CAP', 'ring':('Ring'), 'tour':('Tourney'), 'limitsHP':'HP'
                           }
-
+        
+        # Get the general parameters from the configuration object
         gen = self.conf.get_general_params()
         self.day_start = 0
 
+        # Set the day start time to the value specified in the configuration
         if 'day_start' in gen:
             self.day_start = float(gen['day_start'])
 
+        # Set the layout of the widget
         self.setLayout(QVBoxLayout())
 
+        # Set the callback dictionary
         self.callback = {}
 
+        # Set the style sheet for the widget
         self.setStyleSheet("QPushButton {padding-left:5;padding-right:5;padding-top:2;padding-bottom:2;}")
+
+        # Call the make_filter function to create the filter
         self.make_filter()
         
     def make_filter(self):
-        self.siteid = {}
-        self.cards  = {}
+        """
+        Initializes the filter GUI with the appropriate widgets and layouts.
 
+        Returns:
+            None
+        """
+        # Initialize dictionaries
+        self.siteid = {}
+        self.cards = {}
+
+        # Get db site id for filtering later
         for site in self.conf.get_supported_sites():
-            # Get db site id for filtering later
             self.cursor.execute(self.sql.query['getSiteId'], (site,))
             result = self.db.cursor.fetchall()
             if len(result) == 1:
@@ -136,124 +176,110 @@ class Filters(QWidget):
                 log.debug(("Either 0 or more than one site matched for %s"), site)
 
         # For use in date ranges.
-        self.start_date = QDateEdit(QDate(1970,1,1))
-        self.end_date = QDateEdit(QDate(2100,1,1))
+        self.start_date = QDateEdit(QDate(1970, 1, 1))
+        self.end_date = QDateEdit(QDate(2100, 1, 1))
 
         # For use in groups etc
         self.cbGroups = {}
         self.phands = None
 
+        # Initialize playerFrame and fill with widgets
         playerFrame = QGroupBox(self.filterText['playerstitle'])
         self.leHeroes = {}
-
         self.fillPlayerFrame(playerFrame, self.display)
         self.layout().addWidget(playerFrame)
 
-        # Sites
+        # Initialize sitesFrame and fill with widgets
         sitesFrame = QGroupBox(self.filterText['sitestitle'])
         self.cbSites = {}
-
         self.fillSitesFrame(sitesFrame)
         self.layout().addWidget(sitesFrame)
 
-        # Game types
+        # Initialize gamesFrame and fill with widgets
         gamesFrame = QGroupBox(self.filterText['gamestitle'])
         self.layout().addWidget(gamesFrame)
         self.cbGames = {}
-
         self.fillGamesFrame(gamesFrame)
 
-        # Tourney types
+        # Initialize tourneyFrame and fill with widgets
         tourneyFrame = QGroupBox(self.filterText['tourneytitle'])
         self.layout().addWidget(tourneyFrame)
         self.cbTourney = {}
-
         self.fillTourneyTypesFrame(tourneyFrame)
 
-        # Tourney category
+        # Initialize tourneyCatFrame and fill with widgets
         tourneyCatFrame = QGroupBox(self.filterText['tourneycat'])
         self.layout().addWidget(tourneyCatFrame)
         self.cbTourneyCat = {}
-
         self.fillTourneyCatFrame(tourneyCatFrame)
 
-        # Tourney limit
+        # Initialize tourneyLimFrame and fill with widgets
         tourneyLimFrame = QGroupBox(self.filterText['tourneylim'])
         self.layout().addWidget(tourneyLimFrame)
         self.cbTourneyLim = {}
-
         self.fillTourneyLimFrame(tourneyLimFrame)
 
-        # Tourney buyin
+        # Initialize tourneyBuyinFrame and fill with widgets
         tourneyBuyinFrame = QGroupBox(self.filterText['tourneybuyin'])
         self.layout().addWidget(tourneyBuyinFrame)
         self.cbTourneyBuyin = {}
-
         self.fillTourneyBuyinFrame(tourneyBuyinFrame)
 
-        # Currencies
+        # Initialize currenciesFrame and fill with widgets
         currenciesFrame = QGroupBox(self.filterText['currenciestitle'])
         self.layout().addWidget(currenciesFrame)
         self.cbCurrencies = {}
-
         self.fillCurrenciesFrame(currenciesFrame)
 
-        # Limits
+        # Initialize limitsFrame and fill with widgets
         limitsFrame = QGroupBox(self.filterText['limitstitle'])
         self.layout().addWidget(limitsFrame)
         self.cbLimits = {}
-        self.rb = {}     # radio buttons for ring/tour
-        self.type = None # ring/tour
-
+        self.rb = {}  # radio buttons for ring/tour
+        self.type = None  # ring/tour
         self.fillLimitsFrame(limitsFrame, self.display)
-        
-        # Positions
+
+        # Initialize positionsFrame and fill with widgets
         positionsFrame = QGroupBox(self.filterText['positionstitle'])
         self.layout().addWidget(positionsFrame)
-        
         self.cbPositions = {}
-
         self.fillPositionsFrame(positionsFrame, self.display)
 
-        # GraphOps
+        # Initialize graphopsFrame and fill with widgets
         graphopsFrame = QGroupBox(("Graphing Options:"))
         self.layout().addWidget(graphopsFrame)
         self.cbGraphops = {}
 
         self.fillGraphOpsFrame(graphopsFrame)
 
-        # Seats
+        # Initialize seatsFrame and fill with widgets
         seatsFrame = QGroupBox(self.filterText['seatstitle'])
         self.layout().addWidget(seatsFrame)
         self.sbSeats = {}
-
         self.fillSeatsFrame(seatsFrame)
 
-        # Groups
+        # Initialize groupsFrame and fill with widgets
         groupsFrame = QGroupBox(self.filterText['groupstitle'])
         self.layout().addWidget(groupsFrame)
-
         self.fillGroupsFrame(groupsFrame, self.display)
 
-        # Date
+        # Initialize dateFrame and fill with widgets
         dateFrame = QGroupBox(self.filterText['datestitle'])
         self.layout().addWidget(dateFrame)
-
         self.fillDateFrame(dateFrame)
 
-        # Hole cards
+        # Initialize cardsFrame and fill with widgets
         cardsFrame = QGroupBox(self.filterText['cardstitle'])
         self.layout().addWidget(cardsFrame)
-
         self.fillHoleCardsFrame(cardsFrame)
 
-        # Buttons
+        # Initialize Buttons
         self.Button1 = QPushButton("Unnamed 1")
         self.Button2 = QPushButton("Unnamed 2")
         self.layout().addWidget(self.Button1)
         self.layout().addWidget(self.Button2)
 
-        # Should do this cleaner
+        # Hide widgets based on display preferences
         if "Heroes" not in self.display or self.display["Heroes"] is False:
             playerFrame.hide()
         if "Sites" not in self.display or self.display["Sites"] is False:
@@ -289,252 +315,515 @@ class Filters(QWidget):
         if "Button2" not in self.display or self.display["Button2"] is False:
             self.Button2.hide()
 
-        # make sure any locks on db are released:
+        # Release any locks on db
         self.db.rollback()
 
-    def getNumHands(self):
-        return self.phands.value() if self.phands else 0
 
+    def getNumHands(self):
+        """
+        Returns the number of hands.
+
+        If self.phands is not None, returns the value of self.phands.
+        Otherwise, returns 0.
+        """
+        return self.phands.value() if self.phands else 0
     def getNumTourneys(self):
+        """
+        Returns the number of tourneys.
+        """
+        #TODO: implement for mtt
         return 0
+
 
     
 
     def getSites(self):
+        """Returns a list of selected sites.
+
+        This method returns a list of sites that have been selected in the UI.
+
+        Returns:
+            list: A list of selected sites.
+        """
+        # List comprehension to filter selected sites using isChecked() method
         return [s for s in self.cbSites if self.cbSites[s].isChecked()]
+
     
     def getPositions(self):
+        """
+        Returns a list of checked positions from the cbPositions dictionary.
+
+        Args:
+            self: The object instance.
+
+        Returns:
+            A list of positions that have been checked.
+        """
+        # Use a list comprehension to loop through the cbPositions dictionary and return
+        # only the positions where the isChecked() method returns True.
         return [p for p in self.cbPositions if self.cbPositions[p].isChecked()]
 
+
     def getTourneyCat(self):
+        """
+        Returns a list of all checked categories in the self.cbTourneyCat dictionary.
+        """
+        # Create a list comprehension that iterates over all keys in self.cbTourneyCat
+        # and checks if the corresponding value is checked. If it is, add it to the list.
         return [g for g in self.cbTourneyCat if self.cbTourneyCat[g].isChecked()]
 
     def getTourneyLim(self):
-        return [g for g in self.cbTourneyLim if self.cbTourneyLim[g].isChecked()]
+        """Get a list of checked items in the cbTourneyLim checkbox group.
+
+        Returns:
+            A list of the checked items in the cbTourneyLim checkbox group.
+        """
+        # List comprehension that filters items in cbTourneyLim where isChecked is True
+        return [g for g in self.cbTourneyLim if self.cbTourneyLim[g].isChecked()] 
 
     def getTourneyBuyin(self):
+        """
+        Returns a list of selected tournament buy-ins.
+
+        Returns:
+            list: A list of selected tournament buy-ins.
+        """
+        # Get all tournament buy-ins that are checked.
         return [g for g in self.cbTourneyBuyin if self.cbTourneyBuyin[g].isChecked()]
 
     def getTourneyTypes(self):
+        """
+        Get a list of tournament types that are selected in the checkbox group.
+
+        Returns:
+        list: A list of tournament types that are selected in the checkbox group.
+        """
+        # Use a list comprehension to filter the tournament types based on whether their corresponding checkbox is checked
         return [g for g in self.cbTourney if self.cbTourney[g].isChecked()]
 
     def getGames(self):
+        """
+        Returns a list of games that have been selected (checked) in the cbGames dictionary.
+        """
+        # use list comprehension to create a list of checked games
         return [g for g in self.cbGames if self.cbGames[g].isChecked()]
 
+
     def getCards(self):
+        """Returns the list of cards in the deck."""
         return self.cards
 
     def getCurrencies(self):
+        """
+        Returns a list of selected currencies from a list of currencies.
+
+        Args:
+            self: The object instance.
+
+        Returns:
+            A list of selected currencies.
+        """
+        # Get all currencies that are checked
         return [c for c in self.cbCurrencies if self.cbCurrencies[c].isChecked()]
 
+
     def getSiteIds(self):
+        """
+        Returns the site ID of the object.
+        """
         return self.siteid
 
     def getHeroes(self):
+        """
+        Returns a dictionary of hero sites and the currently selected hero from the dropdown menu.
+        """
         #print(dict([(site, str(self.heroList.currentText())) for site in self.leHeroes]))
-        
+        # Return a dictionary with site and currently selected hero for each line edit
         return dict([(site, str(self.heroList.currentText())) for site in self.leHeroes])
     
     def getGraphOps(self):
-        
+        """
+        Returns a list of all checked graph ops from a dictionary of graph ops.
+
+        Args:
+            self (object): The current object.
+
+        Returns:
+            list: A list of all checked graph ops.
+        """
+        # List comprehension to iterate through all graph ops and append any checked ones to a new list
         return [g for g in self.cbGraphops if self.cbGraphops[g].isChecked()]
 
+
     def getLimits(self):
-        print([l for l in self.cbLimits if self.cbLimits[l].isChecked()])
+        """
+        Returns a list of checked limits.
+
+        This method iterates through the dictionary of limit checkboxes and checks which ones are checked.
+        It then returns a list of the names of the checked limits.
+
+        Returns:
+            list: A list of checked limit names.
+        """
+        # Return a list of the names of the checked limits
         return [l for l in self.cbLimits if self.cbLimits[l].isChecked()]
 
     def getType(self):
-        return(self.type)
+        """
+        Returns the type of the object.
+        """
+        return self.type
 
     def getSeats(self):
+        """
+        Returns a dictionary containing the values of the 'from' and 'to' keys from the 'sbSeats' dictionary.
+
+        Args:
+            self (object): The object calling the method.
+
+        Returns:
+            dict: A dictionary containing the values of the 'from' and 'to' keys from the 'sbSeats' dictionary.
+        """
         result = {}
+
+        # Get the value of the 'from' key from the 'sbSeats' dictionary, if it exists.
         if 'from' in self.sbSeats:
             result['from'] = self.sbSeats['from'].value()
+
+        # Get the value of the 'to' key from the 'sbSeats' dictionary, if it exists.
         if 'to' in self.sbSeats:
             result['to'] = self.sbSeats['to'].value()
+
         return result
 
+
     def getGroups(self):
+        """
+        Returns a list of the names of all checked groups.
+
+        :return: A list of strings representing the names of all checked groups.
+        """
+        # List comprehension that filters checked groups and returns their names
         return [g for g in self.cbGroups if self.cbGroups[g].isChecked()]
 
-    def getDates(self):
-        # self.day_start gives user's start of day in hours
-        offset = int(self.day_start * 3600)   # calc day_start in seconds
 
+    def getDates(self):
+        """
+        Returns tuple of adjusted start and end dates as strings in UTC format.
+
+        The adjusted start and end dates have the user-defined start of day offset applied.
+
+        Returns:
+            Tuple of two strings: adjusted start date and adjusted end date.
+        """
+        # Get user-defined start of day in seconds
+        offset = int(self.day_start * 3600)
+
+        # Get start and end dates as date objects
         t1 = self.start_date.date()
         t2 = self.end_date.date()
 
+        # Add offset to start and end dates
         adj_t1 = QDateTime(t1).addSecs(offset)
         adj_t2 = QDateTime(t2).addSecs(offset + 24 * 3600 - 1)
 
+        # Convert adjusted start and end dates to UTC strings
         return (adj_t1.toUTC().toString("yyyy-MM-dd HH:mm:ss"), adj_t2.toUTC().toString("yyyy-MM-dd HH:mm:ss"))
 
     def registerButton1Name(self, title):
+        """
+        Sets the text of Button1 to the given title.
+
+        Args:
+            title (str): The text to set Button1 to.
+        """
+        # Set the text of Button1 to the title argument.
         self.Button1.setText(title)
 
     def registerButton1Callback(self, callback):
+        """
+        Register a callback function for Button1.
+
+        Args:
+            callback: The function to be called when Button1 is clicked.
+        """
+        # Connect the callback to Button1's clicked signal
         self.Button1.clicked.connect(callback)
+
+        # Enable Button1
         self.Button1.setEnabled(True)
+
+        # Store the callback function in the dictionary
         self.callback['button1'] = callback
 
     def registerButton2Name(self, title):
+        """
+        Sets the text of Button2 to the given title.
+
+        Args:
+            title (str): The title to set as the text of Button2.
+        """
+        # Set the text of Button2 to the given title
         self.Button2.setText(title)
 
+
     def registerButton2Callback(self, callback):
+        """
+        Registers a callback function to be called when Button2 is clicked.
+
+        Args:
+            callback: The function to be called when Button2 is clicked.
+        """
+        # Connect the Button2 clicked signal to the provided callback function
         self.Button2.clicked.connect(callback)
+
+        # Enable Button2 to make it clickable
         self.Button2.setEnabled(True)
+
+        # Store the provided callback function in a dictionary for later use
         self.callback['button2'] = callback
 
+
     def registerCardsCallback(self, callback):
+        """
+        Registers a callback function for when new cards are added.
+
+        Args:
+            callback: The function to call when new cards are added.
+        """
+        # Set the callback function for the 'cards' key in the callback dictionary.
         self.callback['cards'] = callback
 
     def __set_tourney_type_select(self, w, tourneyType):
-        self.tourneyTypes[tourneyType] = w.get_active()
-        log.debug("self.tourney_types[%s] set to %s", tourneyType, self.tourneyTypes[tourneyType])
+        """
+        Sets the value of the selected tourney type in the GUI.
+
+        Args:
+            w: A PyQt ComboBox widget.
+            tourneyType: A string representing the selected tourney type.
+        """
+        self.tourneyTypes[tourneyType] = w.get_active()  # Set the selected tourney type in self.tourneyTypes
+        log.debug("self.tourney_types[%s] set to %s", tourneyType, self.tourneyTypes[tourneyType])  # Log the updated value
 
     def createTourneyTypeLine(self, hbox, tourneyType):
+        """
+        Creates a checkbox for the given tourney type and adds it to the given hbox layout.
+        The checkbox is connected to a function that sets the tourney type select.
+
+        :param hbox: The QHBoxLayout to add the checkbox to.
+        :param tourneyType: The tourney type to create a checkbox for.
+        """
+        # Create the checkbox
         cb = QCheckBox(str(tourneyType))
+        # Connect it to the set_tourney_type_select function with the tourneyType argument already set
         cb.clicked.connect(partial(self.__set_tourney_type_select, tourneyType=tourneyType))
+        # Add the checkbox to the hbox layout
         hbox.addWidget(cb)
+        # Set the checkbox to be checked by default
         cb.setChecked(True)
 
+
     def createCardsWidget(self, grid):
+        """
+        Adds card buttons to a grid layout.
+
+        Args:
+            grid: The QGridLayout to add the card buttons to.
+        """
+        # Set spacing to 0 to remove any gaps between the buttons.
         grid.setSpacing(0)
-        for i in range(0,13):
-            for j in range(0,13):
-                abbr = Card.card_map_abbr[j][i]
-                b = QPushButton("")
-                import platform
-                if platform.system == "Darwin":
-                    b.setStyleSheet("QPushButton {border-width:0;margin:6;padding:0;}")
-                else:
-                    b.setStyleSheet("QPushButton {border-width:0;margin:0;padding:0;}")
-                b.clicked.connect(partial(self.__toggle_card_select, widget=b, card=abbr))
-                self.cards[abbr] = False # NOTE: This is flippped in __toggle_card_select below
-                self.__toggle_card_select(False, widget=b, card=abbr)
-                grid.addWidget(b, j, i)
+
+        # Loop through all possible cards on the grid.
+        for i, j in itertools.product(range(13), range(13)):
+            # Get the card abbreviation for the current position.
+            abbr = Card.card_map_abbr[j][i]
+
+            # Create a new button for the card.
+            b = QPushButton("")
+
+            # Set the button style.
+            import platform
+            if platform.system == "Darwin":
+                # On macOS, add a 6 pixel margin to the button to match the system style.
+                b.setStyleSheet("QPushButton {border-width:0;margin:6;padding:0;}")
+            else:
+                # On other platforms, don't add any margin.
+                b.setStyleSheet("QPushButton {border-width:0;margin:0;padding:0;}")
+
+            # Connect the button click event to the __toggle_card_select method.
+            b.clicked.connect(partial(self.__toggle_card_select, widget=b, card=abbr))
+
+            # Initialize the card state to False and toggle it.
+            self.cards[abbr] = False  # NOTE: This is flipped in __toggle_card_select below
+            self.__toggle_card_select(False, widget=b, card=abbr)
+
+            # Add the button to the grid.
+            grid.addWidget(b, j, i)
+
 
     def createCardsControls(self, hbox):
+        """
+        Creates checkboxes for selecting card types and adds them to the given QHBoxLayout.
+
+        Parameters:
+        hbox (QHBoxLayout): The QHBoxLayout to which the checkboxes will be added.
+        """
+
+        # The different types of card selections
         selections = ["All", "Suited", "Off Suit"]
+
+        # Create a checkbox for each selection and add them to the QHBoxLayout
         for s in selections:
             cb = QCheckBox(s)
             cb.clicked.connect(self.__set_cards)
             hbox.addWidget(cb)
 
+
     def __card_select_bgcolor(self, card, selected):
+        """
+        Returns the background color of a card based on whether it is selected or not.
+
+        Args:
+        - card (str): A string representing the card.
+        - selected (bool): A boolean indicating whether the card is selected.
+
+        Returns:
+        - A string representing the background color of the card.
+        """
+        # Define the different colors for each suit and selected/unselected state
         s_on  = "red"
         s_off = "orange"
         o_on  = "white"
         o_off = "lightgrey"
         p_on  = "blue"
         p_off = "lightblue"
-        if len(card) == 2: return p_on if selected else p_off
-        if card[2] == 's': return s_on if selected else s_off
-        if card[2] == 'o': return o_on if selected else o_off
+
+        # Check the suit and length of the card to determine its color
+        if len(card) == 2:
+            return p_on if selected else p_off
+        if card[2] == 's':
+            return s_on if selected else s_off
+        if card[2] == 'o':
+            return o_on if selected else o_off
 
     def __toggle_card_select(self, checkState, widget, card):
+        """
+        Toggles the selection state of a card and updates its font and background color.
+
+        Args:
+        - checkState (int): The new state of the widget (not used in the function).
+        - widget (QtWidgets.QPushButton): The widget to update.
+        - card (str): A string representing the card.
+
+        Returns:
+        - None
+        """
+
+        # Set the font size of the widget to 10 points
         font = widget.font()
         font.setPointSize(10)
         widget.setFont(font)
+
+        # Set the text of the widget to the card string
         widget.setText(card)
 
+        # Toggle the state of the card in the dictionary of cards
         self.cards[card] = not self.cards[card]
 
-#        bg_color = self.__card_select_bgcolor(card, self.cards[card])
+        # Get the background color for the card based on its current state
+        bg_color = self.__card_select_bgcolor(card, self.cards[card])
 
-#        style = w.get_style().copy()
-#        style.bg[gtk.STATE_NORMAL] = w.get_colormap().alloc(bg_color)
-#        w.set_style(style)
+        # Set the background color of the widget to the calculated color
+        widget.setStyleSheet(f"background-color: {bg_color};")
+
+        # If a callback function for cards exists, call it with the card string
         if 'cards' in self.callback:
             self.callback['cards'](card)
 
     def __set_cards(self, checkState):
+        """
+        This method sets the cards for the current game based on the given `checkState`.
+        Args:
+            checkState: A boolean value that determines whether to check if cards are valid or not.
+        """
         pass
 
+
     def __set_checkboxes(self, checkState, checkBoxes, setState):
+        """
+        Check or uncheck all checkboxes in the given dictionary.
+
+        Args:
+            checkState (Qt.CheckState): The state to set the checkboxes to.
+            checkBoxes (dict): A dictionary of checkbox widgets to set the state of.
+            setState (bool): Whether to set the checkboxes to the given state or not.
+        """
+        # Loop over all checkbox widgets in the dictionary
         for checkbox in list(checkBoxes.values()):
+            # Set the checkbox state to the given state
             checkbox.setChecked(setState)
 
+
     def __select_limit(self, checkState, limit):
+        """
+        Selects the checkbox for the given limit.
+
+        Args:
+            checkState: The state to set for the checkbox.
+            limit: The limit for which to select the checkbox.
+        """
+        # Iterate through all the checkbox items.
         for l, checkbox in list(self.cbLimits.items()):
+            # If the limit matches the current checkbox's limit, set its state to the given checkState.
             if l.endswith(limit):
-                checkbox.setChecked(True)
+                checkbox.setChecked(checkState)
+
 
     def fillPlayerFrame(self, frame, display):
-        vbox = QVBoxLayout()
-        frame.setLayout(vbox)
+        vbox = QVBoxLayout(frame)
 
         self.heroList = QComboBox()
         self.heroList.setStyleSheet("background-color: #455364")
-        current_directory = str(pathlib.Path(__file__).parent.absolute())
-        
-        for count,site in enumerate(self.conf.get_supported_sites(), start=1):
+
+        for site in self.conf.get_supported_sites():
             player = self.conf.supported_sites[site].screen_name
             _pname = player
-            #vbox.addWidget(QLabel(site +" id:"))
 
             self.leHeroes[site] = QLineEdit(_pname)
-            if os.name == 'nt' :
+
+            if os.name == 'nt':
                 icoPath = os.path.dirname(__file__)
-                
-                icoPath = icoPath+"\\"
-                print(icoPath)
+                icoPath = icoPath + "\\"
             else:
-                icoPath = "" 
-            if site == "PokerStars":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'ps.svg'),completPlayer)
-            elif site == "PartyPoker":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'party.png'),completPlayer)    
-            elif site == "Merge":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'merge.png'),completPlayer)      
-            elif site == "iPoker":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'ipoker.png'),completPlayer)
-            elif site == "Cake":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'cake.png'),completPlayer)  
-            elif site == "Entraction":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'entraction.png'),completPlayer) 
-            elif site == "BetOnline":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'betonline.png'),completPlayer) 
-            elif site == "Microgaming":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'microgaming.png'),completPlayer)  
-            elif site == "Bovada":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'bovada.png'),completPlayer) 
-            elif site == "Enet":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'enet.png'),completPlayer)  
-            elif site == "SealsWithClubs":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'swc.png'),completPlayer) 
-            elif site == "WinningPoker":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'winning.png'),completPlayer)    
-            elif site == "GGPoker":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'gg.png'),completPlayer)              
-            elif site == "Pacific":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'pacific.png'),completPlayer) 
-            elif site == "KingsClub":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'kingsclub.png'),completPlayer)  
-            elif site == "Unibet":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'unibet.png'),completPlayer)                                                                                  
-            elif site == "Winamax":  
-                completPlayer = _pname  
-                self.heroList.addItem(QIcon(icoPath +'wina.svg'),completPlayer)
+                icoPath = ""
+
+            site_icons = {
+                "PokerStars": 'ps.svg',
+                "PartyPoker": 'party.png',
+                "Merge": 'merge.png',
+                "iPoker": 'ipoker.png',
+                "Cake": 'cake.png',
+                "Entraction": 'entraction.png',
+                "BetOnline": 'betonline.png',
+                "Microgaming": 'microgaming.png',
+                "Bovada": 'bovada.png',
+                "Enet": 'enet.png',
+                "SealsWithClubs": 'swc.png',
+                "WinningPoker": 'winning.png',
+                "GGPoker": 'gg.png',
+                "Pacific": 'pacific.png',
+                "KingsClub": 'kingsclub.png',
+                "Unibet": 'unibet.png',
+                "Winamax": 'wina.svg',
+            }
+
+            if site in site_icons:
+                completPlayer = _pname
+                self.heroList.addItem(QIcon(f'{icoPath}{site_icons[site]}'), completPlayer)
             else:
-                completPlayer = _pname+" on "+site
-                self.heroList.insertItem(count,completPlayer)
+                completPlayer = f"{_pname} on {site}"
+                self.heroList.addItem(completPlayer)
+
             vbox.addWidget(self.heroList)
 
             names = self.db.get_player_names(self.conf, self.siteid[site])
@@ -553,6 +842,7 @@ class Filters(QWidget):
             self.phands = QSpinBox()
             self.phands.setMaximum(int(1e5))
             hbox.addWidget(self.phands)
+
 
     def fillSitesFrame(self, frame):
         vbox = QVBoxLayout()

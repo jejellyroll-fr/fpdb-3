@@ -1591,7 +1591,7 @@ class Database(object):
             self.hand_1day_ago = int(row[0])
 
         # Get the timezone offset
-        tz = datetime.now(timezone.utc) - datetime.now()
+        tz = datetime.now(timezone.utc) - datetime.now(timezone.utc)
         tz_offset = old_div(tz.seconds, 3600)
 
         # Calculate the timezone offset at the start of the day
@@ -3384,7 +3384,7 @@ class Database(object):
         """
         if pdata:   
             # Get timezone offset
-            tz = datetime.now(timezone.utc) - datetime.now()
+            tz = datetime.now(timezone.utc) - datetime.now(timezone.utc)
             tz_offset = old_div(tz.seconds,3600)
             tz_day_start_offset = self.day_start + tz_offset
 
