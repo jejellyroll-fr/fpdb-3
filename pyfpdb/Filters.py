@@ -778,25 +778,51 @@ class Filters(QWidget):
             if l.endswith(limit):
                 checkbox.setChecked(checkState)
 
+    def index_changed(self, index):
+        # Do something when the index of the selected item changes.
+        print("Index changed:", index)
+        for site in self.conf.get_supported_sites():
+            self.cbSites[site] = QCheckBox(site)
+            for site in self.cbSites:
 
+                if self.heroList.currentText() == self.conf.supported_sites[site].screen_name:
+                    self.cbSites[site].setChecked(True)
+                else:
+                    self.cbSites[site].setChecked(False)
+        
     def fillPlayerFrame(self, frame, display):
+        """
+        Adds player frame to the given frame.
+
+        Args:
+            frame (QFrame): The frame to add the player frame to.
+            display (dict): The display settings.
+
+        Returns:
+            None
+        """
         vbox = QVBoxLayout(frame)
 
+        # Create a combo box for selecting a hero
         self.heroList = QComboBox()
         self.heroList.setStyleSheet("background-color: #455364")
 
+        # Add heroes to the combo box
         for site in self.conf.get_supported_sites():
             player = self.conf.supported_sites[site].screen_name
             _pname = player
 
+            # Create a line edit for the hero's name
             self.leHeroes[site] = QLineEdit(_pname)
 
+            # Set the icon path based on OS
             if os.name == 'nt':
                 icoPath = os.path.dirname(__file__)
                 icoPath = icoPath + "\\"
             else:
                 icoPath = ""
 
+            # Site icons
             site_icons = {
                 "PokerStars": 'ps.svg',
                 "PartyPoker": 'party.png',
@@ -817,19 +843,31 @@ class Filters(QWidget):
                 "Winamax": 'wina.svg',
             }
 
+            # Add the hero to the combo box
             if site in site_icons:
+                # Add item with icon
                 completPlayer = _pname
                 self.heroList.addItem(QIcon(f'{icoPath}{site_icons[site]}'), completPlayer)
             else:
+                # Add item without icon
                 completPlayer = f"{_pname} on {site}"
                 self.heroList.addItem(completPlayer)
 
+            # Add the combo box to the frame
             vbox.addWidget(self.heroList)
 
+            # Set up auto-complete for the hero's name
             names = self.db.get_player_names(self.conf, self.siteid[site])
             completer = QCompleter([n[0] for n in names])
             self.leHeroes[site].setCompleter(completer)
 
+        # if the value of self.heroList(QComboBox()) has changed
+        self.heroList.currentIndexChanged.connect(self.index_changed)
+        
+
+
+
+        # Add an option to filter by minimum number of hands played
         if "GroupsAll" in display and display["GroupsAll"]:
             hbox = QHBoxLayout()
             vbox.addLayout(hbox)
@@ -844,43 +882,82 @@ class Filters(QWidget):
             hbox.addWidget(self.phands)
 
 
+
+
+         
+        
+
     def fillSitesFrame(self, frame):
+        """
+        Add checkboxes for each supported site to the given frame.
+
+        Arguments:
+        - frame: The QFrame to which the checkboxes will be added.
+        """
+        # Create a vertical box layout for the frame
         vbox = QVBoxLayout()
         frame.setLayout(vbox)
 
+        # Add a checkbox for each supported site
         for site in self.conf.get_supported_sites():
             self.cbSites[site] = QCheckBox(site)
-            self.cbSites[site].setChecked(True)
+            if self.heroList.currentText() == self.conf.supported_sites[site].screen_name:
+                self.cbSites[site].setChecked(True)
+            else:
+                self.cbSites[site].setChecked(False)
             vbox.addWidget(self.cbSites[site])
 
+
     def fillTourneyTypesFrame(self, frame):
+        """
+        Fills the given frame with a list of tournament types.
+
+        Parameters:
+        frame (QWidget): The frame to fill with tournament types.
+
+        Returns:
+        None
+        """
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
-        
+
+        # Query the database for a list of distinct tournament names
         req = self.cursor.execute("SELECT DISTINCT tourneyName FROM Tourneys")
         result = req.fetchall()
+
+        # Print the list of tournament names for debugging purposes
         print(result)
+
+        # Create a combo box to display the list of games
         self.gameList = QComboBox()
-        self.gameList.setStyleSheet("background-color: #455364")   
-        for count,game in enumerate(result, start=0):
+        self.gameList.setStyleSheet("background-color: #455364")
+
+        # Iterate through the list of tournament names and add them to the combo box
+        for count, game in enumerate(result, start=0):
             game = str(result[count])
+
+            # Handle the special case where the game name is None
             if game == "(None,)":
                 game = "(\"None\",)"
-                game = game.replace("(","")
-                game = game.replace(",","")
-                game = game.replace(")","")
+                game = game.replace("(", "")
+                game = game.replace(",", "")
+                game = game.replace(")", "")
             else:
-                game = game.replace("(","")
-                game = game.replace(",","")
-                game = game.replace(")","")
-            
+                game = game.replace("(", "")
+                game = game.replace(",", "")
+                game = game.replace(")", "")
+
             print(game)
+
             if game != '"None"':
-                self.gameList.insertItem(count,game)
+                self.gameList.insertItem(count, game)
             else:
-                self.gameList.insertItem(count,game)
-        #vbox1.addWidget(self.gameList)
-        
+                self.gameList.insertItem(count, game)
+
+        # Add the combo box to the frame
+        vbox1.addWidget(self.gameList)
+
+        # If there are any tournament names returned from the database, create a checkbox for each one
         if len(result) >= 1:
             for line in result:
                 if str(line) == "(None,)":
@@ -891,40 +968,48 @@ class Filters(QWidget):
                     self.cbTourney[line[0]] = QCheckBox(line[0])
                     self.cbTourney[line[0]].setChecked(True)
                     vbox1.addWidget(self.cbTourney[line[0]])
-
-
         else:
+            # If no tournament names were returned from the database, log an error message
             print(("INFO: No games returned from database"))
             log.info(("No games returned from database"))
 
+
     def fillTourneyCatFrame(self, frame):
-        vbox1 = QVBoxLayout()
-        frame.setLayout(vbox1)
-        
+        """
+        Fill the tournament category frame with checkboxes for each category in the database.
+        :param frame: The frame to fill with checkboxes.
+        """
+        vbox1 = QVBoxLayout()  # Create a vertical box layout
+        frame.setLayout(vbox1)  # Set the layout of the frame to the vertical box layout
+
+        # Get a list of distinct categories from the TourneyTypes table
         req = self.cursor.execute("SELECT DISTINCT category FROM TourneyTypes")
         result = req.fetchall()
-        print(result)
-        self.gameList = QComboBox()
-        self.gameList.setStyleSheet("background-color: #455364")   
-        for count,game in enumerate(result, start=0):
+
+        self.gameList = QComboBox()  # Create a combo box for selecting a game
+        self.gameList.setStyleSheet("background-color: #455364")  # Set the background color of the combo box
+
+        # Iterate over each category and add it to the combo box
+        for count, game in enumerate(result, start=0):
             game = str(result[count])
+
+            # Handle the special case where the category is None
             if game == "(None,)":
                 game = "(\"None\",)"
-                game = game.replace("(","")
-                game = game.replace(",","")
-                game = game.replace(")","")
+                game = game.replace("(", "")
+                game = game.replace(",", "")
+                game = game.replace(")", "")
             else:
-                game = game.replace("(","")
-                game = game.replace(",","")
-                game = game.replace(")","")
-            
-            print(game)
+                game = game.replace("(", "")
+                game = game.replace(",", "")
+                game = game.replace(")", "")
+
             if game != '"None"':
-                self.gameList.insertItem(count,game)
+                self.gameList.insertItem(count, game)
             else:
-                self.gameList.insertItem(count,game)
-        #vbox1.addWidget(self.gameList)
-        
+                self.gameList.insertItem(count, game)
+
+        # Iterate over each category and add a checkbox for it to the frame
         if len(result) >= 1:
             for line in result:
                 if str(line) == "(None,)":
@@ -935,21 +1020,29 @@ class Filters(QWidget):
                     self.cbTourneyCat[line[0]] = QCheckBox(line[0])
                     self.cbTourneyCat[line[0]].setChecked(True)
                     vbox1.addWidget(self.cbTourneyCat[line[0]])
-
-
         else:
             print(("INFO: No games returned from database"))
             log.info(("No games returned from database"))
 
+
     def fillTourneyLimFrame(self, frame):
+        """
+        Fills a frame with checkboxes and a combobox that displays the limit type of a tournament
+
+        Args:
+            frame: The frame to fill with the checkboxes and combobox
+        """
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
-        
+
+        # Execute a SQL query to get the distinct limit types from the TourneyTypes table
         req = self.cursor.execute("SELECT DISTINCT limitType FROM TourneyTypes")
         result = req.fetchall()
         print(result)
+
+        # Create a combobox to display the limit types, and add them to the combobox
         self.gameList = QComboBox()
-        self.gameList.setStyleSheet("background-color: #455364")   
+        self.gameList.setStyleSheet("background-color: #455364")
         for count,game in enumerate(result, start=0):
             game = str(result[count])
             if game == "(None,)":
@@ -961,14 +1054,18 @@ class Filters(QWidget):
                 game = game.replace("(","")
                 game = game.replace(",","")
                 game = game.replace(")","")
-            
+
             print(game)
             if game != '"None"':
                 self.gameList.insertItem(count,game)
             else:
                 self.gameList.insertItem(count,game)
-        #vbox1.addWidget(self.gameList)
-        
+
+        # Add the combobox to the frame
+        vbox1.addWidget(self.gameList)
+
+        # If there are any limit types returned from the SQL query, create a checkbox for each limit type,
+        # otherwise log that there were no games returned from the database
         if len(result) >= 1:
             for line in result:
                 if str(line) == "(None,)":
@@ -979,40 +1076,54 @@ class Filters(QWidget):
                     self.cbTourneyLim[line[0]] = QCheckBox(line[0])
                     self.cbTourneyLim[line[0]].setChecked(True)
                     vbox1.addWidget(self.cbTourneyLim[line[0]])
-
-
         else:
             print(("INFO: No games returned from database"))
             log.info(("No games returned from database"))
 
     def fillTourneyBuyinFrame(self, frame):
+        """
+        Fills a given frame with a list of available buy-ins for tournaments.
+
+        Args:
+            frame (QFrame): The frame to fill.
+
+        Returns:
+            None
+        """
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
-        
+
         req = self.cursor.execute("SELECT DISTINCT buyin FROM TourneyTypes")
         result = req.fetchall()
+
+        # Print the result for debugging purposes
         print(result)
+
         self.gameList = QComboBox()
-        self.gameList.setStyleSheet("background-color: #455364")   
-        for count,game in enumerate(result, start=0):
+        self.gameList.setStyleSheet("background-color: #455364")
+
+        for count, game in enumerate(result, start=0):
             game = str(result[count])
             if game == "(None,)":
                 game = "(\"None\",)"
-                game = game.replace("(","")
-                game = game.replace(",","")
-                game = game.replace(")","")
+                game = game.replace("(", "")
+                game = game.replace(",", "")
+                game = game.replace(")", "")
             else:
-                game = game.replace("(","")
-                game = game.replace(",","")
-                game = game.replace(")","")
-            
+                game = game.replace("(", "")
+                game = game.replace(",", "")
+                game = game.replace(")", "")
+
             print(game)
+
             if game != '"None"':
-                self.gameList.insertItem(count,game)
+                self.gameList.insertItem(count, game)
             else:
-                self.gameList.insertItem(count,game)
-        #vbox1.addWidget(self.gameList)
-        
+                self.gameList.insertItem(count, game)
+
+        # Commented out for now, as it seems to be unused
+        # vbox1.addWidget(self.gameList)
+
         if len(result) >= 1:
             for line in result:
                 if str(line) == "(None,)":
@@ -1020,16 +1131,24 @@ class Filters(QWidget):
                     self.cbTourneyBuyin[line[0]].setChecked(True)
                     vbox1.addWidget(self.cbTourneyBuyin[line[0]])
                 else:
-                    self.cbTourneyBuyin[line[0]] = QCheckBox(str(line[0]*0.01))
+                    self.cbTourneyBuyin[line[0]] = QCheckBox(str(line[0] * 0.01))
                     self.cbTourneyBuyin[line[0]].setChecked(True)
                     vbox1.addWidget(self.cbTourneyBuyin[line[0]])
-
-
         else:
             print(("INFO: No games returned from database"))
             log.info(("No games returned from database"))
 
+
     def fillGamesFrame(self, frame):
+        """
+        Fills the given frame with a list of games obtained from the database.
+
+        Args:
+            frame: The QFrame that will contain the list of games.
+
+        Returns:
+            None.
+        """
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
@@ -1045,23 +1164,26 @@ class Filters(QWidget):
             game = game.replace(")","")
             print(game)
             self.gameList.insertItem(count,game)
-        #vbox1.addWidget(self.gameList)
+
+        # The game list is not added to the frame at this point
 
         if len(result) >= 1:
+            # The games are sorted by name and added to the frame as checkboxes
             for line in sorted(result, key = lambda game: self.gameName[game[0]]):
                 self.cbGames[line[0]] = QCheckBox(self.gameName[line[0]])
                 self.cbGames[line[0]].setChecked(True)
                 vbox1.addWidget(self.cbGames[line[0]])
 
             if len(result) >= 2:
+                # If there are more than one game, buttons to select all or none are added
                 hbox = QHBoxLayout()
                 vbox1.addLayout(hbox)
                 hbox.addStretch()
 
                 btnAll = QPushButton(self.filterText['gamesall'])
                 btnAll.clicked.connect(partial(self.__set_checkboxes,
-                                               checkBoxes=self.cbGames,
-                                               setState=True))
+                                            checkBoxes=self.cbGames,
+                                            setState=True))
                 hbox.addWidget(btnAll)
 
                 btnNone = QPushButton(self.filterText['gamesnone'])
@@ -1075,15 +1197,27 @@ class Filters(QWidget):
             log.info(("No games returned from database"))
 
     def fillTourneyFrame(self, frame):
+        """
+        Fills the tournament frame with a list of games.
+
+        Args:
+            frame (QFrame): The frame to fill with the game list.
+        """
+        # Create a QVBoxLayout and set the layout of the frame to the QVBoxLayout.
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
+        # Execute a SQL query to get the tournament names.
         self.cursor.execute(self.sql.query['getTourneyNames'])
         result = self.db.cursor.fetchall()
         print(result)
+
+        # Create a QComboBox for the game list and set the stylesheet.
         self.gameList = QComboBox()
-        self.gameList.setStyleSheet("background-color: #455364")   
-        for count,game in enumerate(result, start=0):
+        self.gameList.setStyleSheet("background-color: #455364")
+
+        # Loop over the result and add each game to the game list.
+        for count, game in enumerate(result, start=0):
             game = str(result[count])
             game = game.replace("(","")
             game = game.replace(",","")
@@ -1091,6 +1225,7 @@ class Filters(QWidget):
             #print(game)
             self.gameList.insertItem(count,game)
             #self.cbTourney.addItem(game)
+
         print(type(self.cbTourney))
         #vbox1.addWidget(self.gameList)
 
@@ -1099,56 +1234,65 @@ class Filters(QWidget):
 
 
     def fillPositionsFrame(self, frame, display):
-        vbox1 = QVBoxLayout()
-        frame.setLayout(vbox1)
+        """Fill the given frame with position checkboxes
+
+        Args:
+        frame -- QFrame to fill with checkboxes
+        display -- dictionary containing display options
+
+        Returns:
+        None
+        """
+        vbox1 = QVBoxLayout()   # create vertical box layout to hold the checkboxes
+        frame.setLayout(vbox1)  # set the layout of the frame to the vertical box layout
 
         # the following is not the fastest query (as it querys a table with potentialy a lot of data), so dont execute it if not necessary
         if "Positions" not in display or display["Positions"] is False:
             return
-        
+
         #This takes too long if there are a couple of 100k hands in the DB
         #self.cursor.execute(self.sql.query['getPositions'])
         #result = self.db.cursor.fetchall()
-        result = [[0], [1], [2], [3], [4], [5], [6], [7], ['S'], ['B']]
-        res_count = len(result)
-        
+        result = [[0], [1], [2], [3], [4], [5], [6], [7], ['S'], ['B']]  #sample data to use if query is not executed
+        res_count = len(result)   # store the number of results
+
         if res_count > 0:     
-            v_count = 0
-            COL_COUNT = 4           #Number of columns
-            hbox = None
+            v_count = 0   # counter for how many checkboxes are in a row
+            COL_COUNT = 4   # number of columns to display
+            hbox = None   # horizontal box layout for each row
             for line in result:
                 if v_count == 0:    #start a new line when the vertical count is 0
-                    hbox = QHBoxLayout()
-                    vbox1.addLayout(hbox)
-                    
-                line_str = str(line[0])
-                self.cbPositions[line_str] = QCheckBox(line_str)
-                self.cbPositions[line_str].setChecked(True)
-                hbox.addWidget(self.cbPositions[line_str])
-                
-                v_count += 1
+                    hbox = QHBoxLayout()   # create a new horizontal box layout
+                    vbox1.addLayout(hbox)   # add the horizontal layout to the vertical layout
+
+                line_str = str(line[0])   # convert the line to a string
+                self.cbPositions[line_str] = QCheckBox(line_str)   # create the checkbox with the line_str as the label
+                self.cbPositions[line_str].setChecked(True)   # set the checkbox to be checked by default
+                hbox.addWidget(self.cbPositions[line_str])   # add the checkbox to the current horizontal layout
+
+                v_count += 1   # increment the checkbox counter
                 if v_count == COL_COUNT:    #set the counter to 0 if the line is full
                     v_count = 0
-            
-            dif = res_count % COL_COUNT    
-            while dif > 0:          #fill the rest of the line with empy boxes, so that every line contains COL_COUNT elements
-                fillbox = QVBoxLayout()
-                hbox.addLayout(fillbox)
+
+            dif = res_count % COL_COUNT   # calculate how many checkboxes are needed to fill the last row
+            while dif > 0:   #fill the rest of the line with empy boxes, so that every line contains COL_COUNT elements
+                fillbox = QVBoxLayout()   # create a new vertical box layout
+                hbox.addLayout(fillbox)   # add the layout to the current horizontal layout
                 dif -= 1
 
             if res_count > 1:
-                hbox = QHBoxLayout()
-                vbox1.addLayout(hbox)
-                hbox.addStretch()
+                hbox = QHBoxLayout()   # create a new horizontal box layout for the buttons
+                vbox1.addLayout(hbox)   # add the layout to the vertical layout
+                hbox.addStretch()   # add a stretchable space to the left of the buttons
 
-                btnAll = QPushButton(self.filterText['positionsall'])
-                btnAll.clicked.connect(partial(self.__set_checkboxes,
-                                               checkBoxes=self.cbPositions,
-                                               setState=True))
-                hbox.addWidget(btnAll)
+                btnAll = QPushButton(self.filterText['positionsall'])   # create a button with the specified label
+                btnAll.clicked.connect(partial(self.__set_checkboxes,   # connect the button to the __set_checkboxes method with the setState parameter set to True
+                                            checkBoxes=self.cbPositions,
+                                            setState=True))
+                hbox.addWidget(btnAll)   # add the button to the layout
 
-                btnNone = QPushButton(self.filterText['positionsnone'])
-                btnNone.clicked.connect(partial(self.__set_checkboxes,
+                btnNone = QPushButton(self.filterText['positionsnone'])  # create a button with the specified label
+                btnNone.clicked.connect(partial(self.__set_checkboxes,   # connect the button to the __set_checkboxes method with the setState parameter set to False
                                                 checkBoxes=self.cbPositions,
                                                 setState=False))
                 hbox.addWidget(btnNone)
@@ -1158,24 +1302,44 @@ class Filters(QWidget):
             log.info(("No positions returned from database"))
 
     def fillHoleCardsFrame(self, frame):
+        """
+        Given a frame, fills it with a layout containing a grid of cards and additional controls.
+
+        Args:
+            frame (QtGui.QFrame): The frame to fill with the layout.
+        """
+        # Create the layout and set it to the frame
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
+        # Create the grid and add it to the layout
         grid = QGridLayout()
         vbox1.addLayout(grid)
+
+        # Create the cards widget and add it to the grid
         self.createCardsWidget(grid)
 
-        # Additional controls for bulk changing card selection
+        # Create additional controls for bulk changing card selection
         hbox = QHBoxLayout()
         vbox1.addLayout(hbox)
         self.createCardsControls(hbox)
 
+
     def fillCurrenciesFrame(self, frame):
+        """Fill a QFrame with checkboxes for selecting currencies.
+
+        Args:
+        - frame: A QFrame to fill with currency checkboxes.
+        """
+        # Create a QVBoxLayout to add checkboxes to the frame.
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
+        # Get the currencies from the database.
         self.cursor.execute(self.sql.query['getCurrencies'])
         result = self.db.cursor.fetchall()
+
+        # Iterate over the currencies and add a checkbox for each one.
         if len(result) >= 1:
             for line in result:
                 if line[0] in self.currencyName:
@@ -1186,6 +1350,7 @@ class Filters(QWidget):
                 self.cbCurrencies[line[0]].setChecked(True)
                 vbox1.addWidget(self.cbCurrencies[line[0]])
 
+            # If there are more than one currencies, add buttons to select all or none.
             if len(result) >= 2:
                 hbox = QHBoxLayout()
                 vbox1.addLayout(hbox)
@@ -1193,32 +1358,46 @@ class Filters(QWidget):
 
                 btnAll = QPushButton(self.filterText['currenciesall'])
                 btnAll.clicked.connect(partial(self.__set_checkboxes,
-                                                     checkBoxes=self.cbCurrencies,
-                                                     setState=True))
+                                                    checkBoxes=self.cbCurrencies,
+                                                    setState=True))
                 hbox.addWidget(btnAll)
 
                 btnNone = QPushButton(self.filterText['currenciesnone'])
                 btnNone.clicked.connect(partial(self.__set_checkboxes,
-                                                     checkBoxes=self.cbCurrencies,
-                                                     setState=False))
+                                                    checkBoxes=self.cbCurrencies,
+                                                    setState=False))
                 hbox.addWidget(btnNone)
                 hbox.addStretch()
+            # If there is only one currency, select it automatically.
             else:
-                # There is only one currency. Select it, even if it's Play Money.
                 self.cbCurrencies[line[0]].setChecked(True)
         else:
             log.info(("No currencies returned from database"))
 
+
     def fillLimitsFrame(self, frame, display):
+        """
+        This function fills in a frame with cash limit checkboxes.
+
+        Args:
+        - frame: a frame to fill with cash limit checkboxes.
+        - display: a dictionary of display options.
+
+        Returns: None
+        """
+        # Create a vertical box layout and set it as the layout for the frame.
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
+        # Execute a SQL query to get cash limits from a database.
         self.cursor.execute(self.sql.query['getCashLimits'])
-        # selects  limitType, bigBlind
         result = self.db.cursor.fetchall()
+
+        # Keep track of the types and limits found in the query results.
         limits_found = set()
         types_found = set()
 
+        # If there are results from the query, create two vertical box layouts and a horizontal box layout, and add the two vertical layouts to the horizontal layout.
         if len(result) >= 1:
             hbox = QHBoxLayout()
             vbox1.addLayout(hbox)
@@ -1226,100 +1405,119 @@ class Filters(QWidget):
             hbox.addLayout(vbox2)
             vbox3 = QVBoxLayout()
             hbox.addLayout(vbox3)
+
+            # Loop through the results of the query and create a checkbox for each cash limit found. The checkboxes are added to the vertical layouts created earlier.
             for i, line in enumerate(result):
-                if "UseType" in self.display:
-                    if line[0] != self.display["UseType"]:
-                        continue
+                if "UseType" in self.display and line[0] != self.display["UseType"]:
+                    continue
                 hbox = QHBoxLayout()
                 if i < old_div((len(result)+1),2):
                     vbox2.addLayout(hbox)
                 else:
                     vbox3.addLayout(hbox)
-                if True:  #line[0] == 'ring':
+                if True:
+                    # Create a checkbox for the cash limit and add it to the layout.
                     name = str(line[2])+line[1]
                     limits_found.add(line[1])
                     self.cbLimits[name] = QCheckBox(name)
                     self.cbLimits[name].setChecked(True)
                     hbox.addWidget(self.cbLimits[name])
-                types_found.add(line[0])      # type is ring/tour
-                self.type = line[0]        # if only one type, set it now
+                types_found.add(line[0]) # type is ring/tour
+                self.type = line[0] # if only one type, set it now
+
+            # If certain conditions are met, add buttons to the horizontal layout.
             if "LimitSep" in display and display["LimitSep"] and len(result) >= 2:
                 hbox = QHBoxLayout()
                 vbox1.addLayout(hbox)
                 hbox.addStretch()
-
                 btnAll = QPushButton(self.filterText['limitsall'])
-                btnAll.clicked.connect(partial(self.__set_checkboxes,
-                                               checkBoxes=self.cbLimits,
-                                               setState=True))
+                btnAll.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbLimits, setState=True))
                 hbox.addWidget(btnAll)
-
                 btnNone = QPushButton(self.filterText['limitsnone'])
-                btnNone.clicked.connect(partial(self.__set_checkboxes,
-                                                checkBoxes=self.cbLimits,
-                                                setState=False))
+                btnNone.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbLimits, setState=False))
                 hbox.addWidget(btnNone)
-
                 if "LimitType" in display and display["LimitType"] and len(limits_found) > 1:
                     for limit in limits_found:
                         btn = QPushButton(self.filterText['limits' + limit.upper()])
                         btn.clicked.connect(partial(self.__select_limit, limit=limit))
                         hbox.addWidget(btn)
-
                 hbox.addStretch()
-        else:
-            print(("INFO: No games returned from database"))
-            log.info(("No games returned from database"))
+            else:
+                print(("INFO: No games returned from database"))
+                log.info(("No games returned from database"))
 
+        # Set the `type` attribute of the class to the type of the first result from the query.
         if "Type" in display and display["Type"] and 'ring' in types_found and 'tour' in types_found:
-            # rb1 = QRadioButton(frame, self.filterText['ring'])
-            # rb1.clicked.connect(self.__set_limit_select)
-            # rb2 = QRadioButton(frame, self.filterText['tour'])
-            # rb2.clicked.connect(self.__set_limit_select)
-            # top_hbox.addWidget(rb1)
-            # top_hbox.addWidget(rb2)
-            #
-            # self.rb['ring'] = rb1
-            # self.rb['tour'] = rb2
-            # #print "about to set ring to true"
-            # rb1.setChecked(True)
-            # # set_active doesn't seem to call this for some reason so call manually:
-            # self.__set_limit_select(rb1)
             self.type = 'ring'
 
+
     def fillGraphOpsFrame(self, frame):
+        """
+        This function fills the graph operations frame with checkboxes and radio buttons.
+
+        Args:
+        - frame: the frame to be filled
+
+        Returns:
+        - None
+        """
+
+        # Create a vertical box layout and set it as the layout for the frame
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
+        # Create a horizontal box layout and add it to the vertical box layout
         hbox1 = QHBoxLayout()
         vbox1.addLayout(hbox1)
 
+        # Add a label to the horizontal box layout
         label = QLabel(("Show Graph In:"))
         hbox1.addWidget(label)
 
+        # Add a radio button to the horizontal box layout and set it as checked
         self.cbGraphops['$'] = QRadioButton("$$", frame)
         hbox1.addWidget(self.cbGraphops['$'])
         self.cbGraphops['$'].setChecked(True)
 
+        # Add another radio button to the horizontal box layout
         self.cbGraphops['BB'] = QRadioButton("BB", frame)
         hbox1.addWidget(self.cbGraphops['BB'])
 
+        # Add a checkbox for showdown winnings to the vertical box layout
         self.cbGraphops['showdown'] = QCheckBox(("Showdown Winnings"))
         vbox1.addWidget(self.cbGraphops['showdown'])
 
+        # Add a checkbox for non-showdown winnings to the vertical box layout
         self.cbGraphops['nonshowdown'] = QCheckBox(("Non-Showdown Winnings"))
         vbox1.addWidget(self.cbGraphops['nonshowdown'])
 
+        # Add a checkbox for EV to the vertical box layout
         self.cbGraphops['ev'] = QCheckBox(("EV"))
         vbox1.addWidget(self.cbGraphops['ev'])
 
+
     def fillSeatsFrame(self, frame):
+        """
+        This function fills a given frame with a QHBoxLayout that contains:
+        - Two QLabel objects with text 'seatsbetween' and 'seatsand'
+        - Two QSpinBox objects with ranges from 2 to 10 
+        and default values of 2 and 10 respectively
+        - Stretch objects to position the labels and spinboxes
+
+        Args:
+        - frame: A QFrame object that will contain the QHBoxLayout
+
+        Returns:
+        - None
+        """
         hbox = QHBoxLayout()
         frame.setLayout(hbox)
 
+        # Create label objects
         lbl_from = QLabel(self.filterText['seatsbetween'])
         lbl_to   = QLabel(self.filterText['seatsand'])
 
+        # Create spinbox objects
         adj1 = QSpinBox()
         adj1.setRange(2, 10)
         adj1.setValue(2)
@@ -1330,6 +1528,7 @@ class Filters(QWidget):
         adj2.setValue(10)
         adj2.valueChanged.connect(partial(self.__seats_changed, 'to'))
 
+        # Add stretch and widgets to the QHBoxLayout
         hbox.addStretch()
         hbox.addWidget(lbl_from)
         hbox.addWidget(adj1)
@@ -1337,104 +1536,146 @@ class Filters(QWidget):
         hbox.addWidget(adj2)
         hbox.addStretch()
 
+        # Update instance variables with spinbox objects
         self.sbSeats['from'] = adj1
         self.sbSeats['to']   = adj2
 
     def fillGroupsFrame(self, frame, display):
+        """
+        Fills the given QFrame with checkboxes based on the given display parameters.
+
+        Args:
+            frame (QFrame): The QFrame to fill with checkboxes.
+            display (dict): A dictionary containing display parameters.
+
+        Returns:
+            None
+        """
         vbox = QVBoxLayout()
         frame.setLayout(vbox)
 
+        # Create and add the 'limits' checkbox
         self.cbGroups['limits'] = QCheckBox(self.filterText['limitsshow'])
         vbox.addWidget(self.cbGroups['limits'])
 
+        # Create and add the 'posn' checkbox
         self.cbGroups['posn'] = QCheckBox(self.filterText['posnshow'])
         vbox.addWidget(self.cbGroups['posn'])
 
+        # Create and add the 'seats' checkbox if 'SeatSep' is in display and is True
         if "SeatSep" in display and display["SeatSep"]:
             self.cbGroups['seats'] = QCheckBox(self.filterText['seatsshow'])
             vbox.addWidget(self.cbGroups['seats'])
 
+
     def fillDateFrame(self, frame):
+        """
+        Sets up a QGridLayout and sets it as the layout for the given frame.
+        Adds labels, buttons, and date edits for start and end dates to the grid layout.
+
+        Args:
+            frame (QFrame): The QFrame to set the layout for.
+        """
+        # Set up grid layout
         table = QGridLayout()
         frame.setLayout(table)
 
+        # Create start date widgets and add to grid layout
         lbl_start = QLabel(('From:'))
         btn_start = QPushButton("Cal")
         btn_start.clicked.connect(partial(self.__calendar_dialog, dateEdit=self.start_date))
         clr_start = QPushButton("Reset")
         clr_start.clicked.connect(self.__clear_start_date)
-
-        lbl_end = QLabel(('To:'))
-        btn_end = QPushButton("Cal")
-        btn_end.clicked.connect(partial(self.__calendar_dialog, dateEdit=self.end_date))
-        clr_end = QPushButton("Reset")
-        clr_end.clicked.connect(self.__clear_end_date)
-
         table.addWidget(lbl_start, 0, 0)
         table.addWidget(btn_start, 0, 1)
         table.addWidget(self.start_date, 0, 2)
         table.addWidget(clr_start, 0, 3)
 
+        # Create end date widgets and add to grid layout
+        lbl_end = QLabel(('To:'))
+        btn_end = QPushButton("Cal")
+        btn_end.clicked.connect(partial(self.__calendar_dialog, dateEdit=self.end_date))
+        clr_end = QPushButton("Reset")
+        clr_end.clicked.connect(self.__clear_end_date)
         table.addWidget(lbl_end, 1, 0)
         table.addWidget(btn_end, 1, 1)
         table.addWidget(self.end_date, 1, 2)
         table.addWidget(clr_end, 1, 3)
 
+        # Set column stretch for first column
         table.setColumnStretch(0, 1)
 
+
     def get_limits_where_clause(self, limits):
-        """Accepts a list of limits and returns a formatted SQL where clause starting with AND.
-            Sql statement MUST link to gameType table and use the alias gt for that table."""
+        """
+        Accepts a list of limits and returns a formatted SQL where clause starting with AND.
+        Sql statement MUST link to gameType table and use the alias gt for that table.
+        :param limits: list of strings, each ending in either 'fl', 'pl', 'nl', 'cn', or 'hp' and representing a limit
+        :return: string, SQL WHERE clause
+        """
+        # initialize variables
         where = ""
-        lims = [int(x[0:-2]) for x in limits if len(x) > 2 and x[-2:] == 'fl']
-        potlims = [int(x[0:-2]) for x in limits if len(x) > 2 and x[-2:] == 'pl']
-        nolims = [int(x[0:-2]) for x in limits if len(x) > 2 and x[-2:] == 'nl']
-        capnolims = [int(x[0:-2]) for x in limits if len(x) > 2 and x[-2:] == 'cn']
-        hpnolims = [int(x[0:-2]) for x in limits if len(x) > 2 and x[-2:] == 'hp']
+        lims = [int(x[:-2]) for x in limits if len(x) > 2 and x[-2:] == 'fl']
+        potlims = [int(x[:-2]) for x in limits if len(x) > 2 and x[-2:] == 'pl']
+        nolims = [int(x[:-2]) for x in limits if len(x) > 2 and x[-2:] == 'nl']
+        capnolims = [int(x[:-2]) for x in limits if len(x) > 2 and x[-2:] == 'cn']
+        hpnolims = [int(x[:-2]) for x in limits if len(x) > 2 and x[-2:] == 'hp']
 
-        where          = "AND ( "
+        # start building WHERE clause
+        where = "AND ( "
 
-        if lims: 
-            clause = "(gt.limitType = 'fl' and gt.bigBlind in (%s))" % (','.join(map(str, lims)))
+        # handle fixed limit
+        if lims:
+            clause = f"(gt.limitType = 'fl' and gt.bigBlind in ({','.join(map(str, lims))}))"
         else:
             clause = "(gt.limitType = 'fl' and gt.bigBlind in (-1))"
-        where = where + clause
+        where += clause
+
+        # handle pot limit
         if potlims:
-            clause = "or (gt.limitType = 'pl' and gt.bigBlind in (%s))" % (','.join(map(str, potlims)))
+            clause = f"or (gt.limitType = 'pl' and gt.bigBlind in ({','.join(map(str, potlims))}))"
         else:
             clause = "or (gt.limitType = 'pl' and gt.bigBlind in (-1))"
         where = where + clause
+
+        # handle no limit
         if nolims:
-            clause = "or (gt.limitType = 'nl' and gt.bigBlind in (%s))" % (','.join(map(str, nolims)))
+            clause = f"or (gt.limitType = 'nl' and gt.bigBlind in ({','.join(map(str, nolims))}))"
         else:
             clause = "or (gt.limitType = 'nl' and gt.bigBlind in (-1))"
         where = where + clause
+
+        # handle heads-up no limit
         if hpnolims:
-            clause = "or (gt.limitType = 'hp' and gt.bigBlind in (%s))" % (','.join(map(str, hpnolims)))
+            clause = f"or (gt.limitType = 'hp' and gt.bigBlind in ({','.join(map(str, hpnolims))}))"
         else:
             clause = "or (gt.limitType = 'hp' and gt.bigBlind in (-1))"
         where = where + clause
+
+        # handle cap no limit
         if capnolims:
-            clause = "or (gt.limitType = 'cp' and gt.bigBlind in (%s))" % (','.join(map(str, capnolims)))
+            clause = f"or (gt.limitType = 'cp' and gt.bigBlind in ({','.join(map(str, capnolims))}))"
         else:
             clause = "or (gt.limitType = 'cp' and gt.bigBlind in (-1))"
         where = where + clause + ' )'
 
         return where
+
     
     def replace_placeholders_with_filter_values(self, query):
-        """ Returnes given query with replaced placeholders by the filter values from self.
-        
-            List of Placeholders that are replaced and some infos how the statement has to look like:
-            (whole clause means it starts with AND and contains the whole clause)
-        
-            Placeholders      table & alias or field     SQL usage          coresponding filter Name
-            <player_test>     Players.Id                in <player_test>   Heroes
-            <game_test>       GameType gt               whole clause       Game
-            <limit_test>      GameType gt               whole clause       Limits, LimitSep, LimitType
-            <position_test>   HandsPlayers hp           whole clause       Positions
+        """Return given query with replaced placeholders by the filter values from self.
+
+        List of Placeholders that are replaced and some infos how the statement has to look like:
+        (whole clause means it starts with AND and contains the whole clause)
+
+        Placeholders      table & alias or field     SQL usage          corresponding filter Name
+        <player_test>     Players.Id                in <player_test>   Heroes
+        <game_test>       GameType gt               whole clause       Game
+        <limit_test>      GameType gt               whole clause       Limits, LimitSep, LimitType
+        <position_test>   HandsPlayers hp           whole clause       Positions
         """
-        
+
+        # Replace <game_test> placeholder with the appropriate value
         if '<game_test>' in query:
             games = self.getGames()    
 
@@ -1443,17 +1684,19 @@ class Filters(QWidget):
                 gametest = gametest.replace("L", "")
                 gametest = gametest.replace(",)",")")
                 gametest = gametest.replace("u'","'")
-                gametest = "and gt.category in %s" % gametest
+                gametest = f"and gt.category in {gametest}"
             else:
                 gametest = "and gt.category IS NULL"
             query = query.replace('<game_test>', gametest)
-            
-        if '<limit_test>' in query:  #copyed from GuiGraphView
+
+        # Replace <limit_test> placeholder with the appropriate value
+        if '<limit_test>' in query:  # copied from GuiGraphView
             limits = self.getLimits()
             limittest = self.get_limits_where_clause(limits)
             query = query.replace('<limit_test>', limittest)
-            
-        if '<player_test>' in query: #copyed from GuiGraphView
+
+        # Replace <player_test> placeholder with the appropriate value
+        if '<player_test>' in query: # copied from GuiGraphView
             sites = self.getSites()
             heroes = self.getHeroes()
             siteids = self.getSiteIds()
@@ -1466,94 +1709,167 @@ class Filters(QWidget):
                 result = self.db.get_player_id(self.conf, site, _hname)
                 if result is not None:
                     playerids.append(str(result))
-            
+
             query = query.replace('<player_test>', '(' + ','.join(playerids) + ')')
-            
+
+        # Replace <position_test> placeholder with the appropriate value
         if '<position_test>' in query:
             positions = self.getPositions()
-            
+
             positiontest = "AND hp.position in ('" + "','".join(positions) + "')"   #values must be set in '' because they can be strings as well as numbers
             query = query.replace('<position_test>', positiontest)
 
         return query
 
+
     def __calendar_dialog(self, checkState, dateEdit):
-        d = QDialog()
-        d.setWindowTitle(('Pick a date'))
+        """
+        Displays a calendar dialog for selecting a date.
 
-        vb = QVBoxLayout()
-        d.setLayout(vb)
-        cal = QCalendarWidget()
-        vb.addWidget(cal)
+        Args:
+            checkState: The check state.
+            dateEdit: The date edit.
 
-        btn = QPushButton(('Done'))
+        Returns:
+            None
+        """
+        d = QDialog()  # create a new dialog
+        d.setWindowTitle(('Pick a date'))  # set the dialog's title
+
+        vb = QVBoxLayout()  # create a new vertical box layout
+        d.setLayout(vb)  # set the dialog's layout to the vertical box
+
+        cal = QCalendarWidget()  # create a new calendar widget
+        vb.addWidget(cal)  # add the calendar widget to the vertical box layout
+
+        btn = QPushButton(('Done'))  # create a new button with the label 'Done'
+        # connect the button's clicked signal to the __get_date method
         btn.clicked.connect(partial(self.__get_date, dlg=d, calendar=cal, dateEdit=dateEdit))
 
-        vb.addWidget(btn)
+        vb.addWidget(btn)  # add the button to the vertical box layout
 
-        d.exec_()
+        d.exec_()  # execute the dialog
+
 
     def __clear_start_date(self, checkState):
-        self.start_date.setDate(QDate(1970,1,1))
+        """
+        Clears the start date of the calendar.
+
+        Args:
+            checkState: The state of the check box.
+        """
+        # Set the date to January 1st, 1970
+        self.start_date.setDate(
+            QDate(1970, 1, 1)
+        )
+
 
     def __clear_end_date(self, checkState):
-        self.end_date.setDate(QDate(2100,1,1))
+        """
+        Clears the end date by setting it to a very far future date.
+
+        Args:
+            checkState: The state of the checkbox.
+        """
+        # Set the end date to a far future date.
+        self.end_date.setDate(QDate(2100, 1, 1))
+
 
     def __get_date(self, checkState, dlg, calendar, dateEdit):
+        """
+        Updates the selected date based on the user's input and checks if the opposite date needs to be modified.
+
+        Args:
+            checkState: The check state of the date.
+            dlg: The dialog box.
+            calendar: The calendar widget.
+            dateEdit: The date edit widget.
+
+        Returns:
+            None
+        """
+        # Get the newly selected date from the calendar widget
         newDate = calendar.selectedDate()
+        # Update the selected date in the date edit widget
         dateEdit.setDate(newDate)
 
-        # if the opposite date is set, and now the start date is later
-        # than the end date, modify the one we didn't just set to be
-        # the same as the one we did just set
+        # Check if the opposite date needs to be modified
         if dateEdit == self.start_date:
+            # If the start date was just updated, check if it is later than the end date
             end = self.end_date.date()
             if newDate > end:
+                # If the start date is later than the end date, update the end date to match the start date
                 self.end_date.setDate(newDate)
         else:
+            # If the end date was just updated, check if it is earlier than the start date
             start = self.start_date.date()
             if newDate < start:
+                # If the end date is earlier than the start date, update the start date to match the end date
                 self.start_date.setDate(newDate)
+
+        # Close the dialog box
         dlg.accept()
 
+
     def __seats_changed(self, value, which):
+        """
+        Callback function called when the number of seats changes.
+        Adjusts the values of the 'from' and 'to' seat spinboxes
+        to ensure that 'from' is always less than or equal to 'to'.
+
+        Args:
+            value (int): The new value of the seat spinbox.
+            which (str): The name of the seat spinbox that was changed ('from' or 'to').
+        """
         seats_from = self.sbSeats['from'].value()
         seats_to = self.sbSeats['to'].value()
+
+        # Swap values if 'from' is greater than 'to'
         if seats_from > seats_to:
             if which == 'from':
                 self.sbSeats['to'].setValue(seats_from)
             else:
                 self.sbSeats['from'].setValue(seats_to)
 
+
 if __name__ == '__main__':
+    
+    # Create configuration and database objects
     config = Configuration.Config(file = "HUD_config.test.xml")
     db = Database.Database(config)
 
+    # Create SQL query dictionary
     qdict = SQL.Sql(db_server = 'sqlite')
 
-    filters_display = { "Heroes"    : False,
-                        "Sites"     : False,
-                        "Games"     : False,
+    # Set display filters
+    filters_display = { "Heroes"    : True,
+                        "Sites"     : True,
+                        "Games"     : True,
                         "Cards"     : True,
-                        "Currencies": False,
-                        "Limits"    : False,
-                        "LimitSep"  : False,
-                        "LimitType" : False,
-                        "Type"      : False,
+                        "Currencies": True,
+                        "Limits"    : True,
+                        "LimitSep"  : True,
+                        "LimitType" : True,
+                        "Type"      : True,
                         "UseType"   : 'ring',
-                        "Seats"     : False,
-                        "SeatSep"   : False,
-                        "Dates"     : False,
-                        "GraphOps"  : False,
-                        "Groups"    : False,
-                        "Button1"   : False,
-                        "Button2"   : False
+                        "Seats"     : True,
+                        "SeatSep"   : True,
+                        "Dates"     : True,
+                        "GraphOps"  : True,
+                        "Groups"    : True,
+                        "Button1"   : True,
+                        "Button2"   : True
                           }
 
     from PyQt5.QtWidgets import QMainWindow, QApplication
+    # Create application and filters objects
     app = QApplication([])
     i = Filters(db, display = filters_display)
+
+    # Create main window and set central widget
     main_window = QMainWindow()
     main_window.setCentralWidget(i)
+
+    # Display main window and run event loop
     main_window.show()
     app.exec_()
