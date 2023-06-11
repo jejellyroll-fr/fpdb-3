@@ -17,9 +17,14 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 - see fpdb.drawio (WIP) or use puml files
 
 ## To do
+>unit test
+-write unit tests to cover all code
+
+>CI/CD
+-working github actions
 
 >database
-- not working mysql connector on py3.10 -> import MySQLdb (TO DO: find solution )
+- not working mysql connector on py3.1x -> import MySQLdb (TO DO: find solution )
 - psql not tested (TO DO)
 - try bdd on containers (TO DO) 
 >translation-language
