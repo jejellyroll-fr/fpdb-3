@@ -30,11 +30,14 @@ from PyQt5.QtWidgets import (QFrame, QScrollArea, QSplitter,
 
 import Charset
 import Filters
+import GuiHandViewer
+import SQL
+import GuiReplayer
 
 colalias,colshow,colheading,colxalign,colformat,coltype = 0,1,2,3,4,5
 
 class GuiTourneyPlayerStats(QSplitter):
-    def __init__(self, config, db, sql, mainwin, debug=True):
+    def __init__(self, config, db, sql, mainwin,owner, debug=True):
         QSplitter.__init__(self, mainwin)
         self.conf = config
         self.db = db
@@ -42,7 +45,8 @@ class GuiTourneyPlayerStats(QSplitter):
         self.sql = sql
         self.main_window = mainwin
         self.debug = debug
-        
+        self.owner = owner
+
         self.liststore = [] # QStandardItemModel[] stores the contents of the grids
         self.listcols = []
         
@@ -86,7 +90,7 @@ class GuiTourneyPlayerStats(QSplitter):
                        , ["buyIn",          True,  ("BuyIn"),   1.0, "%3.2f", "str"]
                        , ["fee",            True,  ("Fee"),     1.0, "%3.2f", "str"]
                        , ["playerName",     False, ("Name"),    0.0, "%s", "str"]   # true not allowed for this line (set in code)
-                       , ["tourneyCount",   True,  ("#"),       1.0, "%1.0f", "str"]
+                       , ["tourneyCount",   True,  ("tourney Id"),       1.0, "%1.0f", "str"]
                        , ["itm",            True,  ("ITM%"),    1.0, "%3.2f", "str"]
                        , ["_1st",           False, ("1st"),     1.0, "%1.0f", "str"]
                        , ["_2nd",           True,  ("2nd"),     1.0, "%1.0f", "str"]
@@ -127,11 +131,11 @@ class GuiTourneyPlayerStats(QSplitter):
         self.cols_to_show = self.columns #TODO do i need above 2 lines?
         
         assert len(self.liststore) == grid, "len(self.liststore)="+str(len(self.liststore))+" grid-1="+str(grid)
-        view = QTableView()
-        self.liststore.append(QStandardItemModel(0, len(self.cols_to_show), view))
-        view.setModel(self.liststore[grid])
-        view.verticalHeader().hide()
-        vbox.addWidget(view)
+        self.view = QTableView()
+        self.liststore.append(QStandardItemModel(0, len(self.cols_to_show), self.view))
+        self.view.setModel(self.liststore[grid])
+        self.view.verticalHeader().hide()
+        vbox.addWidget(self.view)
         assert len(self.listcols) == grid
         self.listcols.append( [] )
 
@@ -170,8 +174,9 @@ class GuiTourneyPlayerStats(QSplitter):
             self.liststore[grid].appendRow(treerow)
             sqlrow += 1
 
-        view.resizeColumnsToContents()
-        view.setSortingEnabled(True)
+        self.view.resizeColumnsToContents()
+        self.view.setSortingEnabled(True)
+        self.view.doubleClicked.connect(self.row_activated)
 
     def createStatsTable(self, vbox, tourneyTypes, playerids, sitenos, seats):
         startTime = time()
@@ -304,20 +309,53 @@ class GuiTourneyPlayerStats(QSplitter):
     def reset_style_render_func(self, treeviewcolumn, cell, model, iter):
         cell.set_property('foreground', None)
 
-    def sortCols(self, col, nums):
-        #This doesn't actually work yet - clicking heading in top section sorts bottom section :-(
-        (n, grid) = nums
-        if not col.get_sort_indicator() or col.get_sort_order() == gtk.SORT_ASCENDING:
-            col.set_sort_order(gtk.SORT_DESCENDING)
+    def sort_cols(self, col, nums):
+        # This doesn't actually work yet - clicking heading in top section sorts bottom section :-( 
+        # (n, grid) = nums
+        n, grid = nums
+        if not col.sortIndicator() or col.sortOrder() == Qt.AscendingOrder:
+            col.setSortOrder(Qt.DescendingOrder)
         else:
-            col.set_sort_order(gtk.SORT_ASCENDING)
-        self.liststore[grid].set_sort_column_id(n, col.get_sort_order())
-        self.liststore[grid].set_sort_func(n, self.sortnums, (n,grid))
+            col.setSortOrder(Qt.AscendingOrder)
+        self.liststore[grid].sort(n, col.sortOrder())
+        self.liststore[grid].setSortRole(Qt.UserRole)
         for i in range(len(self.listcols[grid])):
-            self.listcols[grid][i].set_sort_indicator(False)
-        self.listcols[grid][n].set_sort_indicator(True)
-        # use this   listcols[col].set_sort_indicator(True)
-        # to turn indicator off for other cols
+            self.listcols[grid][i].setSortIndicator(False)
+        col.setSortIndicator(True)
+        # use this listcols[col].set_sort_indicator(True) to turn indicator off for other cols
+
+
+    def row_activated(self, index):
+        """Handle row activation event."""
+        # Get the model of the QTableView
+        model = self.view.model()
+        # Get the value of the clicked cell
+        value = model.data(index)
+        # Print the value of the clicked cell
+        print("Clicked cell value:", value)
+        #self.query['getAllhandIdsfromtourneyId']"
+        self.cursor.execute(self.sql.query['getAllhandIdsfromtourneyId'], (value))
+        result = self.db.cursor.fetchall()
+        print("ids:", result)
+        print ("type(result):", type(result))
+        handlist = [t[0] for t in result]
+        print('handids:', handlist)
+        # Reload the hands in the hand viewer.
+        replayer = None
+        for tabobject in self.owner.threads:
+            if isinstance(tabobject, GuiHandViewer.GuiHandViewer):
+                replayer = tabobject
+                self.owner.tab_hand_viewer(None)
+                break
+        if replayer is None:
+            self.owner.tab_hand_viewer(None)
+            for tabobject in self.owner.threads:
+                if isinstance(tabobject, GuiHandViewer.GuiHandViewer):
+                    replayer = tabobject
+                    break
+        
+        replayer.reload_hands(handlist)
+        
 
 if __name__ == "__main__":
     import Configuration

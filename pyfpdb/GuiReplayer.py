@@ -1844,7 +1844,7 @@ if __name__ == '__main__':
     from PyQt5.QtWidgets import QApplication
 
     app = QApplication([])
-    handlist = [10, 39, 40]
+    handlist = [3188, 3189, 3190]
     replayer = GuiReplayer(config, sql, None, handlist)
     replayer.play_hand(0)
 

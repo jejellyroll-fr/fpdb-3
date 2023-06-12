@@ -102,6 +102,8 @@ class Sql(object):
 
         self.query['getTourneyNames'] = "SELECT tourneyName FROM Tourneys"
 
+        self.query['getAllhandIdsfromtourneyId'] = """SELECT DISTINCT id FROM Hands WHERE tourneyId = %s"""
+
         ################################
         # Create Settings
         ################################

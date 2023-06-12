@@ -1668,7 +1668,7 @@ class fpdb(QMainWindow):
         :param data: Additional data passed to the function (default None).
         """
         # Create a new GuiTourneyPlayerStats thread
-        new_ps_thread = GuiTourneyPlayerStats.GuiTourneyPlayerStats(self.config, self.db, self.sql, self)
+        new_ps_thread = GuiTourneyPlayerStats.GuiTourneyPlayerStats(self.config, self.db, self.sql, self, self)
 
         # Append the new thread to the list of threads
         self.threads.append(new_ps_thread)
