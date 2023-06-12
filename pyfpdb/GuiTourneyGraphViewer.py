@@ -64,7 +64,7 @@ class GuiTourneyGraphViewer(QSplitter):
 
 
         filters_display = { "Heroes"    : True,
-                            "Sites"     : False,
+                            "Sites"     : True,
                             "Games"     : False,
                             "Tourney"   : False,
                             "King of game"   : True,

@@ -63,7 +63,7 @@ class GuiGraphViewer(QSplitter):
 
 
         filters_display = { "Heroes"    : True,
-                            "Sites"     : False,
+                            "Sites"     : True,
                             "Games"     : True,
                             "Currencies": True,
                             "Limits"    : True,

@@ -781,14 +781,16 @@ class Filters(QWidget):
     def index_changed(self, index):
         # Do something when the index of the selected item changes.
         print("Index changed:", index)
-        for site in self.conf.get_supported_sites():
-            self.cbSites[site] = QCheckBox(site)
-            for site in self.cbSites:
+        
+        # uncheck all checkboxes
+        for i in range(self.vbox.count()):
+            widget = self.vbox.itemAt(i).widget()
+            widget.setChecked(False)
 
-                if self.heroList.currentText() == self.conf.supported_sites[site].screen_name:
-                    self.cbSites[site].setChecked(True)
-                else:
-                    self.cbSites[site].setChecked(False)
+        # check the corresponding checkbox if it exists
+        for site in self.conf.get_supported_sites():
+            if self.heroList.currentText() == self.conf.supported_sites[site].screen_name:
+                self.cbSites[site].setChecked(True)
         
     def fillPlayerFrame(self, frame, display):
         """
@@ -895,8 +897,8 @@ class Filters(QWidget):
         - frame: The QFrame to which the checkboxes will be added.
         """
         # Create a vertical box layout for the frame
-        vbox = QVBoxLayout()
-        frame.setLayout(vbox)
+        self.vbox = QVBoxLayout()
+        frame.setLayout(self.vbox)
 
         # Add a checkbox for each supported site
         for site in self.conf.get_supported_sites():
@@ -905,7 +907,7 @@ class Filters(QWidget):
                 self.cbSites[site].setChecked(True)
             else:
                 self.cbSites[site].setChecked(False)
-            vbox.addWidget(self.cbSites[site])
+            self.vbox.addWidget(self.cbSites[site])
 
 
     def fillTourneyTypesFrame(self, frame):
