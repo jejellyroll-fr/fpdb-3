@@ -34,7 +34,7 @@ QtPy==2.0.1
 requests==2.27.1
 six==1.16.0
 soupsieve==2.3.1
-SQLAlchemy @ file:///tmp/build/80754af9/sqlalchemy_1638277513377/work
+SQLAlchemy==1.4.46
 urllib3==1.26.8
 xcffib==0.11.1
 xlrd==2.0.1
