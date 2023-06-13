@@ -19,7 +19,7 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 ## To do
 >unit test
 -write unit tests to cover all code
-
+![example workflow](https://github.com/jejellyroll-fr/fpdb-3/actions/workflows/fpdb-3.yml/badge.svg)
 >CI/CD
 -working github actions
 
