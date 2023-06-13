@@ -102,10 +102,7 @@ class Sql(object):
 
         self.query['getTourneyNames'] = "SELECT tourneyName FROM Tourneys"
 
-        self.query['getAllhandIdsfromtourneyId'] = """SELECT DISTINCT h.handId
-                                                      FROM Hands h
-                                                      JOIN HandsPlayers hp ON h.handId = hp.handId
-                                                      WHERE h.tourneyId = %s"""
+        self.query['getAllhandIdsfromtourneyId'] = """SELECT DISTINCT id FROM Hands WHERE tourneyId = %s"""
 
         ################################
         # Create Settings
