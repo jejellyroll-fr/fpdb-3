@@ -80,11 +80,24 @@ class GuiStove(QWidget):
 
 
 
-    def warning_box(self, text, title="FPDB WARNING"):
-        dialog = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, title, text, parent=self.parent)
-        dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-        dialog.setDefaultButton(QtWidgets.QMessageBox.Ok)
-        return dialog.exec_()
+def warning_box(self, text, title="FPDB WARNING"):
+    """
+    Display a warning message box with a given text and title.
+
+    Args:
+        text (str): The message to display in the warning box.
+        title (str): The title of the warning box. Defaults to "FPDB WARNING".
+
+    Returns:
+        int: The result of the user's interaction with the warning box (e.g. clicking OK).
+    """
+    # Create a warning message box using the given text and title, with the parent set to self.parent
+    dialog = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, title, text, parent=self.parent)
+    # Set the standard and default buttons to OK
+    dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+    dialog.setDefaultButton(QtWidgets.QMessageBox.Ok)
+    # Execute the warning box and return the result
+    return dialog.exec_()
 
 
 
