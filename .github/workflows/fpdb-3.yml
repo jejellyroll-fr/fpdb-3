@@ -7,7 +7,7 @@ on:
 
 jobs:
     test:
-        run-on: [ubuntu-latest, windows-latest, macos-latest]
+        run-on: ubuntu-latest
         defaults:
             run:
                 working-directory: ./pyfpdb
@@ -21,4 +21,18 @@ jobs:
 
         steps:
             - uses: actions/checkout@v3
+
+            - name: Set up Python
+            - uses: actions/setup-python@v4
+            - with:
+                python-version: ${{matrix.python-version}}
+
+            - name: Install depenencies
+              run: | 
+                python -m pip install --upgrade pip
+                pip install -r ../requirements.txt
+
+            - name: Test FPDB Code
+              run: python ./test_pot.py
+
 
