@@ -5,9 +5,13 @@ on:
         branches:
             - main
 
+    push:
+        branches:
+            - main
+
 jobs:
     test:
-        run-on: ubuntu-latest
+        runs-on: ubuntu-latest
         defaults:
             run:
                 working-directory: ./pyfpdb
