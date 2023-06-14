@@ -397,7 +397,8 @@ def best_five(hand, community):
 
 
 def MCSim(iterations, community, hand1, hand2  ):
-    start = time.time()
+    #start = time.time()
+    start_time = time.perf_counter()
     handnum1 = hand_to_numeric(hand1)
     handnum2 = hand_to_numeric(hand2)
     # Initialize counters
@@ -415,9 +416,12 @@ def MCSim(iterations, community, hand1, hand2  ):
         best_hand1 = best_five(handnum1, community_temp)
         best_hand2 = best_five(handnum2, community_temp)
         totals[compare_hands(best_hand1, best_hand2)] += 1
-    end = time.time()
-    elapsed = end - start
-    print(elapsed)
+    end_time = time.perf_counter()
+    execution_time = end_time - start_time
+    print(f"Execution time: {execution_time} seconds")
+    #end = time.time()
+    #elapsed = end - start
+    #print(elapsed)
     # Print results
     print ("Total Hands: %i" % (iterations))
     print ("Hand1: %i Hand2: %i Ties: %i" % (totals[0], totals[1], totals[2]))
