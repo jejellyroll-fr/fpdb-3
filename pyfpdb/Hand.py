@@ -882,11 +882,10 @@ class Hand(object):
         self.checkPlayerExists(player, 'addCollectPot')
         self.collected = self.collected + [[player, pot]]
         if player not in self.collectees:
-            self.collectees[player] = float(pot)
-            print(self.collectees[player])
+            self.collectees[player] = Decimal(pot)
         else:
-            self.collectees[player] += float(pot)
-            print(self.collectees[player])
+            self.collectees[player] += Decimal(pot)
+            
     def sittingOut(self):
         dealtIn = set()
         for street in self.actionStreets:
@@ -925,8 +924,8 @@ class Hand(object):
             (collectedCopy, collecteesCopy, totalcollected) = ([], {}, 0)
             for v in sorted(collected, key=lambda collectee: collectee[1], reverse=True):
                 if Decimal(v[1])!=0:
-                    totalcollected += Decimal(str(v[1]))
-                    collectedCopy.append([v[0], Decimal(str(v[1]))])
+                    totalcollected += Decimal(v[1])
+                    collectedCopy.append([v[0], Decimal(v[1])])
             for k, j in list(collectees.items()):
                 if j!=0: collecteesCopy[k] = j
             return collectedCopy, collecteesCopy, totalcollected
@@ -935,11 +934,8 @@ class Hand(object):
         if (self.uncalledbets or ((self.totalpot - totalcollected < 0) and self.checkForUncalled)):
             for i,v in enumerate(sorted(self.collected, key=lambda collectee: collectee[1], reverse=True)):
                 if v[0] in self.pot.returned: 
-                    print(type(self.pot.returned[v[0]]))
-                    print(type(v[0]))
-                    print(type(collectees[v[0]]))
-                    collected[i][1] = Decimal(str(v[1])) - Decimal(str(self.pot.returned[v[0]]))
-                    collectees[v[0]] -= float(self.pot.returned[v[0]])
+                    collected[i][1] = Decimal(v[1]) - self.pot.returned[v[0]]
+                    collectees[v[0]] -= self.pot.returned[v[0]]
                     self.pot.returned[v[0]] = 0
             (self.collected, self.collectees, self.totalcollected) = gettempcontainers(collected, collectees)
 
@@ -948,7 +944,7 @@ class Hand(object):
             self.totalcollected = 0;
             # self.collected looks like [[p1,amount][px,amount]]
             for entry in self.collected:
-                self.totalcollected += Decimal(str(entry[1]))
+                self.totalcollected += Decimal(entry[1])
 
     def getGameTypeAsString(self):
         """ Map the tuple self.gametype onto the pokerstars string describing it """
@@ -1937,13 +1933,13 @@ class Pot(object):
         try:
             while len(commitsall) > 0:
                 commitslive = [(v,k) for (v,k) in commitsall if k in self.contenders]
-                log.debug('commitslive', commitslive)
+                print('commitslive', commitslive)
                 v1 = commitslive[0][0]
                 self.pots += [(sum([min(v,v1) for (v,k) in commitsall]), set(k for (v,k) in commitsall if k in self.contenders))]
                 commitsall = [((v-v1),k) for (v,k) in commitsall if v-v1 >0]
         except IndexError as e:
             log.error(("Pot.end(): '%s': Major failure while calculating pot: '%s'"), self.handid, e)
-            #print(("Pot.end(): '%s': Major failure while calculating pot: '%s'"), self.handid, e)
+            print(("Pot.end(): '%s': Major failure while calculating pot: '%s'"), self.handid, e)
             raise FpdbParseError
         
 
@@ -1988,5 +1984,6 @@ def hand_factory(hand_id, config, db_connection):
     hand_instance.handid_selected = hand_id #hand_instance does not supply this, create it here
     
     return hand_instance
+
 
 
