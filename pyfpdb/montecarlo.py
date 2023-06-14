@@ -1,4 +1,3 @@
-#
 # pokersim.py - Runs a Monte Carlo simulation of two Texas Hold'em hands
 #               with user-specified (or random) community cards
 #
@@ -11,6 +10,7 @@
 # Add test cases
 #
 import argparse
+import itertools
 import random
 import time
 
@@ -25,33 +25,15 @@ def readable_hand(cards):
     card_rank = {0: "2", 1: "3", 2: "4", 3: "5", 4: "6", 5: "7", 6: "8",
                  7: "9", 8: "T", 9: "J", 10: "Q", 11: "K", 12: "A", -1: "X"}
     card_suit = {0: "c", 1: "d", 2: "h", 3: "s", -1: "x"}
-    return_string = ""
-    for i in cards:
-        return_string += card_rank[i[0]] + card_suit[i[1]]
-    return return_string
+    return "".join(card_rank[i[0]] + card_suit[i[1]] for i in cards)
 
 
 def hand_copy(cards):
-    #
-    # Returns copy of hand (replaces deepcopy with 20x speed improvement)
-    #
-    results = []
-    for i in cards:
-        results.append(i)
-    return results
+    return list(cards)
 
 
 def legal_hand(cards):
-    #
-    # Returns True if hand is legal
-    # Returns False if hand is illegal
-    #   Case 1: two or more of same card
-    #   Case 2: random card
-    #
-    for i in cards:
-        if cards.count(i) > 1 or cards == [-1, -1]:
-            return False
-    return True
+    return not any(cards.count(i) > 1 or cards == [-1, -1] for i in cards)
 
 
 def valid_card(card):
@@ -60,12 +42,28 @@ def valid_card(card):
     #  suit in (c, d, h, s) or wildcard (Xx)
     # Returns False if card is invalid
     #
-    if card[0] in ("X", "x", "A", "a", "K", "k", "Q", "q", "J", "j",
-                   "T", "t", "9", "8", "7", "6", "5", "4", "3", "2") \
-            and card[1] in ("x", "X", "c", "C", "d", "D", "h", "H", "s", "S"):
-        return True
-    else:
-        return False
+    return card[0] in (
+        "X",
+        "x",
+        "A",
+        "a",
+        "K",
+        "k",
+        "Q",
+        "q",
+        "J",
+        "j",
+        "T",
+        "t",
+        "9",
+        "8",
+        "7",
+        "6",
+        "5",
+        "4",
+        "3",
+        "2",
+    ) and card[1] in ("x", "X", "c", "C", "d", "D", "h", "H", "s", "S")
 
 
 def hand_to_numeric(cards):
@@ -78,9 +76,10 @@ def hand_to_numeric(cards):
                          "t": 8, "j": 9, "q": 10, "k": 11, "a": 12, "x": -1}
     card_suit = {"c": 0, "C": 0, "d": 1, "D": 1, "h": 2, "H": 2,
                  "s": 3, "S": 3, "x": -1, "X": -1}
-    result = []
-    for i in range(len(cards) // 2 + len(cards) % 2):
-        result.append([card_rank[cards[i * 2]], card_suit[cards[i * 2 + 1]]])
+    result = [
+        [card_rank[cards[i * 2]], card_suit[cards[i * 2 + 1]]]
+        for i in range(len(cards) // 2 + len(cards) % 2)
+    ]
     result.sort()
     result.reverse()
     return result
@@ -91,10 +90,7 @@ def check_flush(hand):
     # Returns True if hand is a Flush, otherwise returns False
     #
     hand_suit = [hand[0][1], hand[1][1], hand[2][1], hand[3][1], hand[4][1]]
-    for i in range(4):
-        if hand_suit.count(i) == 5:
-            return True
-    return False
+    return any(hand_suit.count(i) == 5 for i in range(4))
 
 
 def check_straight(hand):
@@ -110,9 +106,7 @@ def check_straight(hand):
 
 def check_straightflush(hand):
     # Return True if hand is a Straight Flush, otherwise returns False
-    if check_flush(hand) and check_straight(hand):
-        return True
-    return False
+    return bool(check_flush(hand) and check_straight(hand))
 
 
 def check_fourofakind(hand):
@@ -145,14 +139,11 @@ def check_threeofakind(hand):
     # Return True if hand is Three-of-a-Kind, otherwise returns False
     # Also returns rank of three of a kind card and remaining two cards
     # (garbage values if no three of a kind)
-    hand_rank = [hand[0][0], hand[1][0], hand[2][0], hand[3][0], hand[4][0]]
+    hand_rank = [card[0] for card in hand]
     for trip_card in range(13):
         if hand_rank.count(trip_card) == 3:
-            for n in range(13):
-                if hand_rank.count(n) == 1:
-                    for m in range(n+1, 13):
-                        if hand_rank.count(m) == 1:
-                            return True, trip_card, [m, n]
+            remaining_cards = sorted(set(hand_rank) - {trip_card})
+            return True, trip_card, remaining_cards
     return False, 13, [13, 13]
 
 
@@ -161,15 +152,19 @@ def check_twopair(hand):
     # Also returns ranks of paired cards and remaining card
     # (garbage values if no two pair)
     hand_rank = [hand[0][0], hand[1][0], hand[2][0], hand[3][0], hand[4][0]]
-    for low_pair_card in range(13):
-        if hand_rank.count(low_pair_card) == 2:
-            for high_pair_card in range(low_pair_card + 1, 13):
-                if hand_rank.count(high_pair_card) == 2:
-                    for kicker in range(13):
-                        if hand_rank.count(kicker) == 1:
-                            return True, [high_pair_card, low_pair_card], \
-                                kicker
-    return False, [13, 13], 13
+    pair_ranks = []
+    kicker_rank = None
+    for rank in set(hand_rank):
+        if hand_rank.count(rank) == 2:
+            pair_ranks.append(rank)
+        elif hand_rank.count(rank) == 1:
+            kicker_rank = rank
+    if len(pair_ranks) == 2:
+        return True, sorted(pair_ranks, reverse=True), kicker_rank
+    else:
+        return False, [13, 13], 13
+
+
 
 
 def check_onepair(hand):
@@ -241,10 +236,11 @@ def compare_hands(hand1, hand2):
     # Check for straight flush
     #
     if check_straightflush(hand1):
-        if check_straightflush(hand2):
-            return(highest_card_straight(hand1, hand2))
-        else:
-            return 0
+        return (
+            (highest_card_straight(hand1, hand2))
+            if check_straightflush(hand2)
+            else 0
+        )
     elif check_straightflush(hand2):
             return 1
     #
@@ -253,19 +249,18 @@ def compare_hands(hand1, hand2):
     result1 = check_fourofakind(hand1)
     result2 = check_fourofakind(hand2)
     if result1[0] == 1:
-        if result2[0] == 1:
-            if result1[1] > result2[1]:
-                return 0
-            elif result1[1] < result2[1]:
-                return 1
-            elif result1[2] > result2[2]:
-                return 0
-            elif result1[2] < result2[2]:
-                return 1
-            else:
-                return 2
-        else:
+        if result2[0] != 1:
             return 0
+        if (
+            result1[1] > result2[1]
+            or result1[1] >= result2[1]
+            and result1[2] > result2[2]
+        ):
+            return 0
+        elif result1[1] < result2[1] or result1[2] < result2[2]:
+            return 1
+        else:
+            return 2
     elif result2[0] == 1:
         return 1
     #
@@ -274,40 +269,32 @@ def compare_hands(hand1, hand2):
     result1 = check_fullhouse(hand1)
     result2 = check_fullhouse(hand2)
     if result1[0] == 1:
-        if result2[0] == 1:
-            if result1[1] > result2[1]:
-                return 0
-            elif result1[1] < result2[1]:
-                return 1
-            elif result1[2] > result2[2]:
-                return 0
-            elif result1[2] < result2[2]:
-                return 1
-            else:
-                return 2
-        else:
+        if result2[0] != 1:
             return 0
+        if (
+            result1[1] > result2[1]
+            or result1[1] >= result2[1]
+            and result1[2] > result2[2]
+        ):
+            return 0
+        elif result1[1] < result2[1] or result1[2] < result2[2]:
+            return 1
+        else:
+            return 2
     elif result2[0] == 1:
         return 1
     #
     # Check for flush
     #
     if check_flush(hand1):
-        if check_flush(hand2):
-            return(highest_card(hand1, hand2))
-        else:
-            return 0
+        return (highest_card(hand1, hand2)) if check_flush(hand2) else 0
     elif check_flush(hand2):
         return 1
     #
     # Check for straight
     #
     if check_straight(hand1):
-        if check_straight(hand2):
-            temp = highest_card_straight(hand1, hand2)
-            return temp
-        else:
-            return 0
+        return highest_card_straight(hand1, hand2) if check_straight(hand2) else 0
     elif check_straight(hand2):
         return 1
     #
@@ -316,19 +303,18 @@ def compare_hands(hand1, hand2):
     result1 = check_threeofakind(hand1)
     result2 = check_threeofakind(hand2)
     if result1[0] == 1:
-        if result2[0] == 1:
-            if result1[1] > result2[1]:
-                return 0
-            elif result1[1] < result2[1]:
-                return 1
-            elif result1[2] > result2[2]:
-                return 0
-            elif result1[2] < result2[2]:
-                return 1
-            else:
-                return 2
-        else:
+        if result2[0] != 1:
             return 0
+        if (
+            result1[1] > result2[1]
+            or result1[1] >= result2[1]
+            and result1[2] > result2[2]
+        ):
+            return 0
+        elif result1[1] < result2[1] or result1[2] < result2[2]:
+            return 1
+        else:
+            return 2
     elif result2[0] == 1:
         return 1
     #
@@ -337,19 +323,18 @@ def compare_hands(hand1, hand2):
     result1 = check_twopair(hand1)
     result2 = check_twopair(hand2)
     if result1[0] == 1:
-        if result2[0] == 1:
-            if result1[1] > result2[1]:
-                return 0
-            elif result1[1] < result2[1]:
-                return 1
-            elif result1[2] > result2[2]:
-                return 0
-            elif result1[2] < result2[2]:
-                return 1
-            else:
-                return 2
-        else:
+        if result2[0] != 1:
             return 0
+        if (
+            result1[1] > result2[1]
+            or result1[1] >= result2[1]
+            and result1[2] > result2[2]
+        ):
+            return 0
+        elif result1[1] < result2[1] or result1[2] < result2[2]:
+            return 1
+        else:
+            return 2
     elif result2[0] == 1:
         return 1
     #
@@ -358,19 +343,18 @@ def compare_hands(hand1, hand2):
     result1 = check_onepair(hand1)
     result2 = check_onepair(hand2)
     if result1[0] == 1:
-        if result2[0] == 1:
-            if result1[1] > result2[1]:
-                return 0
-            elif result1[1] < result2[1]:
-                return 1
-            elif result1[2] > result2[2]:
-                return 0
-            elif result1[2] < result2[2]:
-                return 1
-            else:
-                return 2
-        else:
+        if result2[0] != 1:
             return 0
+        if (
+            result1[1] > result2[1]
+            or result1[1] >= result2[1]
+            and result1[2] > result2[2]
+        ):
+            return 0
+        elif result1[1] < result2[1] or result1[2] < result2[2]:
+            return 1
+        else:
+            return 2
     elif result2[0] == 1:
         return 1
     return (highest_card(hand1, hand2))
@@ -387,14 +371,13 @@ def best_five(hand, community):
     #
     # Compare current best to five cards including only one player card
     #
-    for m in range(2):
-        for n in range(5):
-            comparehand = hand_copy(community)
-            comparehand[n] = hand[m]
-            comparehand.sort()
-            comparehand.reverse()
-            if compare_hands(currentbest, comparehand) == 1:
-                currentbest = hand_copy(comparehand)
+    for m, n in itertools.product(range(2), range(5)):
+        comparehand = hand_copy(community)
+        comparehand[n] = hand[m]
+        comparehand.sort()
+        comparehand.reverse()
+        if compare_hands(currentbest, comparehand) == 1:
+            currentbest = hand_copy(comparehand)
     #
     # Compare current best to five cards including both player cards
     #
@@ -443,5 +426,5 @@ def MCSim(iterations, community, hand1, hand2  ):
          100 * round((totals[1] / (iterations + 0.0)), 4),
          100 * round((totals[2] / (iterations + 0.0)), 4)))
 
-MCSim(1000, "XxXxXxXxXx", "AsAh", "KsKh")
+MCSim(10000, "XxXxXxXxXx", "AsAh", "KsKh")
 
