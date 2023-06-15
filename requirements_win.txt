@@ -12,3 +12,4 @@ SQLAlchemy==1.4.46
 beautifulsoup4
 pokereval
 requests
+QDarkStyle==3.0.3

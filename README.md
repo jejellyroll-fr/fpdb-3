@@ -104,7 +104,7 @@ pip install -r requirements.txt
 ```
 or 
 ```sh
-pip install -r requirements_linux.txt
+pip install -r requirements_win.txt
 ```
 or
 ```sh
