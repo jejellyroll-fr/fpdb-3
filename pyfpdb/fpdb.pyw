@@ -19,6 +19,8 @@
 # refactor code for python 3
 
 #Import statements come next
+import L10n
+_ = L10n.get_translation()
 # Standard library imports
 import codecs
 import logging
