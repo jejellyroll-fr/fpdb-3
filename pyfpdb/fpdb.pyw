@@ -19,8 +19,9 @@
 # refactor code for python 3
 
 #Import statements come next
-import L10n
-_ = L10n.get_translation()
+from L10n import get_translation, set_translation
+
+
 # Standard library imports
 import codecs
 import logging
@@ -73,6 +74,8 @@ import GuiTourneyPlayerStats
 import GuiTourneyViewer
 import SQL
 import Stats
+from Configuration import CONFIG_PATH
+import xml.etree.ElementTree as ET
 
 # Windows-only modules
 if os.name == 'nt':
@@ -101,12 +104,20 @@ except Exception:
 
 
 class fpdb(QMainWindow):
-# Initializes the main window of the Free Poker DB application
-
+    # Initializes the main window of the Free Poker DB application
     def __init__(self):
         super().__init__()
         # Sets the window icon
         self.setWindowIcon(QIcon('tribal.jpg'))
+        tree = ET.parse(f"{CONFIG_PATH}/HUD_config.xml")
+        root = tree.getroot()
+        # Find the 'general' element
+        general_element = root.find('general')
+        # Get the value of the 'ui_language' attribute
+        ui_language = general_element.attrib.get('ui_language')
+        print(ui_language)
+        translation = set_translation(ui_language) # Set the translation based on the UI language
+        # Rest of your code...
 
         # Initializes instance variables
         self.lock = interlocks.InterProcessLock(name="fpdb_global_lock")
@@ -189,6 +200,30 @@ class fpdb(QMainWindow):
         # Automatically imports hands if necessary
         if options.autoimport:
             self.tab_auto_import(None)
+
+
+
+
+
+    def get_ui_language_from_xml(file_path):
+        try:
+            # Parse the XML file
+            tree = ET.parse(file_path)
+            root = tree.getroot()
+
+            # Find the 'general' element
+            general_element = root.find('general')
+
+            # Get the value of the 'ui_language' attribute
+            ui_language = general_element.attrib.get('ui_language')
+
+            return ui_language
+        except FileNotFoundError:
+            print(f"File '{file_path}' not found.")
+        except ET.ParseError:
+            print(f"Error parsing XML file: '{file_path}'.")
+        except AttributeError:
+            print(f"'ui_language' attribute not found in XML file: '{file_path}'.")
 
 
             
@@ -1325,28 +1360,28 @@ class fpdb(QMainWindow):
             return action
 
         # Add actions to each menu
-        configMenu.addAction(makeAction(('Site Settings'), self.dia_site_preferences))
-        configMenu.addAction(makeAction(('Seat Settings'), self.dia_site_preferences_seat))
-        configMenu.addAction(makeAction(('Hud Settings'), self.dia_hud_preferences))
-        configMenu.addAction(makeAction(('Adv Preferences'), self.dia_advanced_preferences, tip='Edit your preferences'))
+        configMenu.addAction(makeAction(_('Site Settings'), self.dia_site_preferences))
+        configMenu.addAction(makeAction(_('Seat Settings'), self.dia_site_preferences_seat))
+        configMenu.addAction(makeAction(_('Hud Settings'), self.dia_hud_preferences))
+        configMenu.addAction(makeAction(_('Adv Preferences'), self.dia_advanced_preferences, tip='Edit your preferences'))
         #configMenu.addAction(makeAction(('HUD Stats Settings'), self.dia_hud_preferences))
-        configMenu.addAction(makeAction('Import filters', self.dia_import_filters))
+        configMenu.addAction(makeAction(_('Import filters'), self.dia_import_filters))
         configMenu.addSeparator()
-        configMenu.addAction(makeAction(('Close Fpdb'), self.quit, 'Ctrl+Q', 'Quit the Program'))
+        configMenu.addAction(makeAction(_('Close Fpdb'), self.quit, 'Ctrl+Q', 'Quit the Program'))
 
-        importMenu.addAction(makeAction(('Bulk Import'), self.tab_bulk_import, 'Ctrl+B'))
+        importMenu.addAction(makeAction(_('Bulk Import'), self.tab_bulk_import, 'Ctrl+B'))
         #importMenu.addAction(makeAction(('_Import through eMail/IMAP'), self.tab_imap_import))
 
-        hudMenu.addAction(makeAction(('HUD and Auto Import'), self.tab_auto_import, 'Ctrl+A'))
+        hudMenu.addAction(makeAction(_('HUD and Auto Import'), self.tab_auto_import, 'Ctrl+A'))
 
-        cashMenu.addAction(makeAction(('Graphs'), self.tabGraphViewer, 'Ctrl+G'))
-        cashMenu.addAction(makeAction(('Ring Player Stats'), self.tab_ring_player_stats, 'Ctrl+P'))
-        cashMenu.addAction(makeAction(('Hand Viewer'), self.tab_hand_viewer))
+        cashMenu.addAction(makeAction(_('Graphs'), self.tabGraphViewer, 'Ctrl+G'))
+        cashMenu.addAction(makeAction(_('Ring Player Stats'), self.tab_ring_player_stats, 'Ctrl+P'))
+        cashMenu.addAction(makeAction(_('Hand Viewer'), self.tab_hand_viewer))
         #cashMenu.addAction(makeAction(('Positional Stats (tabulated view)'), self.tab_positional_stats))
-        cashMenu.addAction(makeAction(('Session Stats'), self.tab_session_stats, 'Ctrl+S'))
-        cashMenu.addAction(makeAction(('Stove (preview)'), self.tabStove))
+        cashMenu.addAction(makeAction(_('Session Stats'), self.tab_session_stats, 'Ctrl+S'))
+        cashMenu.addAction(makeAction(_('Stove (preview)'), self.tabStove))
 
-        tournamentMenu.addAction(makeAction(('Tourney Graphs'), self.tabTourneyGraphViewer))
+        tournamentMenu.addAction(makeAction(_('Tourney Graphs'), self.tabTourneyGraphViewer))
         tournamentMenu.addAction(makeAction(('Tourney Stats'), self.tab_tourney_player_stats, 'Ctrl+T'))
         #tournamentMenu.addAction(makeAction(('Tourney Viewer'), self.tab_tourney_viewer_stats))
         tournamentMenu.addAction(makeAction(('Tourney Viewer'), self.tab_tourney_viewer_stats))

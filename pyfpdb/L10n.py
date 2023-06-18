@@ -20,6 +20,34 @@ import gettext
 import locale
 from PyQt5.QtCore import QTranslator
 
+import subprocess
+import platform
+import locale
+
+
+def get_system_language():
+    system = platform.system()
+    if system == 'Windows':
+        return locale.windows_locale[locale.GetSystemDefaultUILanguage()]
+    elif system == 'Linux':
+        process = subprocess.Popen(['locale', '-b'],
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        output, _ = process.communicate()
+        return output.decode().strip()
+    elif system == 'Darwin':
+        process = subprocess.Popen(['defaults', 'read', '-g', 'AppleLanguages'],
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        output, _ = process.communicate()
+        output = output.decode().strip().replace('\n', '').replace('"', '')
+        return output
+    else:
+        return None
+
+
+
+
 def pass_through(to_translate):
     return to_translate
 
@@ -88,3 +116,6 @@ def get_installed_translations():
             la_co_dict[code] = code
 
     return la_dict, la_co_dict
+
+system_language = get_system_language()
+print(system_language)
