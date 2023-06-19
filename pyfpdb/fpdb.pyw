@@ -19,7 +19,7 @@
 # refactor code for python 3
 
 #Import statements come next
-from L10n import get_translation, set_translation
+from L10n import set_locale_translation
 
 
 # Standard library imports
@@ -109,14 +109,7 @@ class fpdb(QMainWindow):
         super().__init__()
         # Sets the window icon
         self.setWindowIcon(QIcon('tribal.jpg'))
-        tree = ET.parse(f"{CONFIG_PATH}/HUD_config.xml")
-        root = tree.getroot()
-        # Find the 'general' element
-        general_element = root.find('general')
-        # Get the value of the 'ui_language' attribute
-        ui_language = general_element.attrib.get('ui_language')
-        print(ui_language)
-        translation = set_translation(ui_language) # Set the translation based on the UI language
+        set_locale_translation()
         # Rest of your code...
 
         # Initializes instance variables

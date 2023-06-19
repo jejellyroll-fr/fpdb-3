@@ -17,6 +17,12 @@
 
 #You may find http://boodebr.org/main/python/all-about-python-and-unicode helpful
 import gettext
+
+
+from Configuration import GRAPHICS_PATH
+from pathlib import Path
+from Configuration import CONFIG_PATH
+import xml.etree.ElementTree as ET
 import locale
 from PyQt5.QtCore import QTranslator
 
@@ -74,9 +80,9 @@ def init_translation():
     if conf.general['ui_language'] in ("system", ""):
         try:
             (lang, charset) = locale.getdefaultlocale()
-        except:
+        except Exception:
             lang = None
-        if lang == None or lang[:2] == "en":
+        if lang is None or lang[:2] == "en":
             return pass_through
         else:
             return set_translation(lang)
@@ -109,7 +115,7 @@ def get_installed_translations():
             la_dict[code] = Locale.getDisplayName(Locale(code))
         for code in la_co_list:
             la_co_dict[code] = Locale.getDisplayName(Locale(code))
-    except:
+    except Exception:
         for code in la_list:
             la_dict[code] = code
         for code in la_co_list:
@@ -117,5 +123,20 @@ def get_installed_translations():
 
     return la_dict, la_co_dict
 
-system_language = get_system_language()
-print(system_language)
+def set_locale_translation():
+    path = Path(GRAPHICS_PATH)
+    transformed_path = path.parent
+    locale_path = Path(transformed_path, "pyfpdb", "locale")
+    path_string = str(locale_path)
+
+    gettext.bindtextdomain('fpdb', path_string)
+    gettext.textdomain('fpdb')
+
+    tree = ET.parse(f"{CONFIG_PATH}/HUD_config.xml")
+    root = tree.getroot()
+    general_element = root.find('general')
+    ui_language = general_element.attrib.get('ui_language')
+
+    fr_translation = gettext.translation('fpdb', path_string, languages=[ui_language])
+    fr_translation.install()
+
