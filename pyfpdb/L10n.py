@@ -28,7 +28,7 @@ import locale
 def get_system_language():
     system = platform.system()
     if system == 'Windows':
-        return locale.windows_locale[locale.GetSystemDefaultUILanguage()]
+        return locale.getdefaultlocale()[0]
     elif system == 'Linux':
         process = subprocess.Popen(['locale', '-b'],
                                    stdout=subprocess.PIPE,
