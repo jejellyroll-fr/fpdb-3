@@ -10,6 +10,7 @@ import glob
 import os
 import sys
 from setuptools import setup, Command
+from pathlib import Path
 
 _pfx = '/usr/local'
 for a in sys.argv:
@@ -51,6 +52,9 @@ class InstallTranslations(Command):
         paths = glob.glob(os.path.join(rootdir, '*'))
         return [os.path.basename(p) for p in paths]
 
+commands = {
+    'install_data': InstallTranslations
+}
 
 setup(
     name='fpdb',
@@ -61,21 +65,21 @@ setup(
     packages=['fpdb'],
     package_dir={'fpdb': 'pyfpdb'},
     data_files=[
-        ('/usr/share/pixmaps', [
+        (str(Path('usr', 'share', 'pixmaps')), [
             'gfx/fpdb-icon.png',
             'gfx/fpdb-icon2.png',
             'gfx/fpdb-cards.png'
         ]),
-        ('/usr/share/applications', ['files/fpdb.desktop']),
-        ('/usr/share/python-fpdb', [
+        (str(Path('usr', 'share', 'applications')), ['files/fpdb.desktop']),
+        (str(Path('usr', 'share', 'python-fpdb')), [
             'pyfpdb/logging.conf',
             'pyfpdb/HUD_config.xml.example'
         ]),
-        ('/usr/share/python-fpdb/cards/backs/', glob.glob('gfx/cards/backs/*')),
-        ('/usr/share/python-fpdb/cards/bordered/', glob.glob('gfx/cards/bordered/*')),
-        ('/usr/share/python-fpdb/cards/colour/', glob.glob('gfx/cards/colour/*')),
-        ('/usr/share/python-fpdb/cards/simple/', glob.glob('gfx/cards/simple/*')),
-        ('/usr/share/python-fpdb/cards/white/', glob.glob('gfx/cards/white/*')),
+        (str(Path('usr', 'share', 'python-fpdb', 'cards', 'backs')), glob.glob('gfx/cards/backs/*')),
+        (str(Path('usr', 'share', 'python-fpdb', 'cards', 'bordered')), glob.glob('gfx/cards/bordered/*')),
+        (str(Path('usr', 'share', 'python-fpdb', 'cards', 'colour')), glob.glob('gfx/cards/colour/*')),
+        (str(Path('usr', 'share', 'python-fpdb', 'cards', 'simple')), glob.glob('gfx/cards/simple/*')),
+        (str(Path('usr', 'share', 'python-fpdb', 'cards', 'white')), glob.glob('gfx/cards/white/*')),
     ],
     cmdclass={'install_translations': InstallTranslations},
 )
