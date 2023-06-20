@@ -216,25 +216,21 @@ def twoStartCards(value1, suit1, value2, suit2):
     """
     if value1 is None or value1 < 2 or value1 > 14 or value2 is None or value2 < 2 or value2 > 14:
         # Unknown / Illegal cards
-        ret = 170
+        return 170
     elif value1 == value2: # pairs
         # Pairs
-        ret = (13 * (value2-2) + (value2-2) ) + 1
+        return (13 * (value2-2) + (value2-2) ) + 1
     elif suit1 == suit2:
         # Suited
-        if value1 > value2:
-            ret = 13 * (value1-2) + (value2-2) + 1
-        else:
-            ret = 13 * (value2-2) + (value1-2) + 1
+        return (
+            13 * (value1 - 2) + (value2 - 2) + 1
+            if value1 > value2
+            else 13 * (value2 - 2) + (value1 - 2) + 1
+        )
+    elif value1 > value2:
+        return 13 * (value2-2) + (value1-2) + 1
     else:
-        # Unsuited
-        if value1 > value2:
-            ret = 13 * (value2-2) + (value1-2) + 1
-        else:
-            ret = 13 * (value1-2) + (value2-2) + 1
-
-#    print "twoStartCards(", value1, suit1, value2, suit2, ")=", ret
-    return ret
+        return 13 * (value1-2) + (value2-2) + 1
 
 def twoStartCardString(card):
     """
