@@ -161,11 +161,11 @@ _secondcard = f'((hp.startcards - 1) - 13 * {_firstcard})'
 _gap = '(%s - %s = %d)'
 
 DATABASE_FILTERS = {
-    'pair': '%s = %s' % (_firstcard, _secondcard),
-    'suited': '%s > %s' % (_firstcard, _secondcard),
-    'offsuit': '%s < %s' % (_firstcard, _secondcard),
+    'pair': f'{_firstcard} = {_secondcard}',
+    'suited': f'{_firstcard} > {_secondcard}',
+    'offsuit': f'{_firstcard} < {_secondcard}',
     'suited_connectors': _gap % (_firstcard, _secondcard, 1),
-    'offsuit_connectors': _gap % (_secondcard, _firstcard, 1)
+    'offsuit_connectors': _gap % (_secondcard, _firstcard, 1),
 }
 
 def StartCardRank(idx):
