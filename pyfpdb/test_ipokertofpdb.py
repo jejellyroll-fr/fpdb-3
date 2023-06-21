@@ -1,6 +1,7 @@
 import re
 import pytest
 
+
 substitutions = {
     'LS': u"\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|",
           
@@ -28,3 +29,14 @@ def test_re_PlayerInfo7():
     assert match.group('BUTTONPOS') == '0'
     assert match.group('WIN') == '40'
     assert match.group('BET') == '100'
+
+def test_re_PlayerInfo3():
+    text='<player bet="100" reg_code="" win="40" seat="3" dealer="0" rebuy="0" chips="1 480" name="pergerd" addon="0"/><player bet="20" reg_code="5105918454" win="0" seat="10" dealer="1" rebuy="0" chips="20" name="clement10s" addon="0"/>'
+    m = re_PlayerInfo.finditer(text)
+    plist = {}
+    for a in m:
+        ag = a.groupdict()
+        plist[a.group('PNAME')] = [int(a.group('SEAT')), (a.group('CASH')), 
+                                        (a.group('WIN')), False]
+    assert len(plist) == 2  
+    
