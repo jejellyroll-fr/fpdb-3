@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<session sessioncode="5105918454">
+ <general>
+  <client_version>23.3.1.4</client_version>
+  <mode>real</mode>
+  <gametype>Holdem NL</gametype>
+  <tablename>Sit’n’Go Twister 1€, 786601687</tablename>
+  <tournamentcurrency>EUR</tournamentcurrency>
+  <duration>00:07:47</duration>
+  <gamecount>37</gamecount>
+  <startdate>2023-04-28 10:38:18</startdate>
+  <currency>EUR</currency>
+  <nickname>Hero</nickname>
+  <bets>5 760</bets>
+  <wins>2 280</wins>
+  <chipsin>480</chipsin>
+  <chipsout>0</chipsout>
+  <statuspoints>0,56PB</statuspoints>
+  <awardpoints>0PB</awardpoints>
+  <ipoints>0,56PB</ipoints>
+  <tablesize>3</tablesize>
+  <tournamentcode>786601686</tournamentcode>
+  <tournamentname>Sit’n’Go Twister 1€</tournamentname>
+  <rewarddrawn>3€</rewarddrawn>
+  <place>2</place>
+  <buyin>0€ + 0,07€ + 0,93€</buyin>
+  <totalbuyin>1€</totalbuyin>
+  <win>0</win>
+ </general>
+ <game gamecode="6589415296">
+  <general>
+   <startdate>2023-04-28 10:45:55</startdate>
+   <smallblind>50</smallblind>
+   <bigblind>100</bigblind>
+   <players>
+    <player bet="100" reg_code="" win="40" seat="3" dealer="0" rebuy="0" chips="1 480" name="Player" addon="0"/>
+    <player bet="20" reg_code="5105918454" win="0" seat="10" dealer="1" rebuy="0" chips="20" name="Hero" addon="0"/>
+   </players>
+  </general>
+  <round no="0">
+   <action no="1" type="1" player="Hero" sum="20"/>
+   <action no="2" type="2" player="Player" sum="100"/>
+  </round>
+  <round no="1">
+   <cards type="Pocket" player="Player">HQ S8</cards>
+   <cards type="Pocket" player="Hero">HA C10</cards>
+  </round>
+  <round no="2">
+   <cards type="Flop">D9 DK C6</cards>
+  </round>
+  <round no="3">
+   <cards type="Turn">H2</cards>
+  </round>
+  <round no="4">
+   <cards type="River">DQ</cards>
+  </round>
+ </game>
+</session>
