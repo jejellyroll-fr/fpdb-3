@@ -4,7 +4,7 @@
 
 Simple HUD display for FreePokerTools/fpdb HUD.
 """
-
+from L10n import set_locale_translation
 #import L10n
 #_ = L10n.get_translation()
 #    Copyright 2011-2012,  Ray E. Barker
@@ -44,6 +44,7 @@ import Aux_Base
 import Stats
 import Popup
 
+set_locale_translation()
 
 class Simple_HUD(Aux_Base.Aux_Seats):
     """
@@ -458,29 +459,29 @@ class Simple_table_popup_menu(QWidget):
 
         # Combobox - stat range
         stat_range_combo_dict = {
-            0: ("Since: All Time", "A"),
-            1: ("Since: Session", "S"),
-            2: ("Since: n Days - ->", "T"),
+            0: (_("Since: All Time", "A")),
+            1: (_("Since: Session", "S")),
+            2: (_("Since: n Days - ->", "T")),
         }
 
         # Combobox - seats style
         seats_style_combo_dict = {
-            0: ("Number of Seats: Any Number", "A"),
-            1: ("Number of Seats: Custom", "C"),
-            2: ("Number of Seats: Exact", "E"),
+            0: (_("Number of Seats: Any Number", "A")),
+            1: (_("Number of Seats: Custom", "C")),
+            2: (_("Number of Seats: Exact", "E")),
         }
 
         # Combobox - multiplier
         multiplier_combo_dict = {
-            0: ("For This Blind Level Only", 1),
-            1: ("0.5 to 2 * Current Blinds", 2),
-            2: ("0.33 to 3 * Current Blinds", 3),
-            3: ("0.1 to 10 * Current Blinds", 10),
-            4: ("All Levels", 10000),
+            0: (_("For This Blind Level Only", 1)),
+            1: (_("0.5 to 2 * Current Blinds", 2)),
+            2: (_("0.33 to 3 * Current Blinds", 3)),
+            3: (_("0.1 to 10 * Current Blinds", 10)),
+            4: (_("All Levels", 10000)),
         }
 
         # ComboBox - set max seats
-        cb_max_dict = {0: ("Force layout...", None)}
+        cb_max_dict = {0: (_("Force layout...", None))}
         for pos, i in enumerate(sorted(self.parentwin.hud.layout_set.layout), start=1):
             cb_max_dict[pos] = ("%d-max" % i, i)
 
@@ -490,21 +491,21 @@ class Simple_table_popup_menu(QWidget):
         vbox2 = QVBoxLayout()
         vbox3 = QVBoxLayout()
 
-        vbox1.addWidget(self.build_button("Restart This HUD", "kill"))
-        vbox1.addWidget(self.build_button("Save HUD Layout", "save"))
-        vbox1.addWidget(self.build_button("Stop this HUD", "blacklist"))
-        vbox1.addWidget(self.build_button("Close", "close"))
+        vbox1.addWidget(self.build_button(_("Restart This HUD", "kill")))
+        vbox1.addWidget(self.build_button(_("Save HUD Layout", "save")))
+        vbox1.addWidget(self.build_button(_("Stop this HUD", "blacklist")))
+        vbox1.addWidget(self.build_button(_("Close", "close")))
         vbox1.addWidget(QLabel(""))
         vbox1.addWidget(self.build_combo_and_set_active("new_max_seats", cb_max_dict))
 
-        vbox2.addWidget(QLabel("Show Player Stats for"))
+        vbox2.addWidget(QLabel(_("Show Player Stats for")))
         vbox2.addWidget(self.build_combo_and_set_active("h_agg_bb_mult", multiplier_combo_dict))
         vbox2.addWidget(self.build_combo_and_set_active("h_seats_style", seats_style_combo_dict))
         hbox = QHBoxLayout()
-        hbox.addWidget(QLabel("Custom"))
+        hbox.addWidget(QLabel(_("Custom")))
         self.h_nums_low_spinner = self.build_spinner("h_seats_cust_nums_low", 1, 9)
         hbox.addWidget(self.h_nums_low_spinner)
-        hbox.addWidget(QLabel("To"))
+        hbox.addWidget(QLabel(_("To")))
         self.h_nums_high_spinner = self.build_spinner("h_seats_cust_nums_high", 2, 10)
         hbox.addWidget(self.h_nums_high_spinner)
         vbox2.addLayout(hbox)
@@ -514,14 +515,14 @@ class Simple_table_popup_menu(QWidget):
         hbox.addWidget(self.h_hud_days_spinner)
         vbox2.addLayout(hbox)
 
-        vbox3.addWidget(QLabel("Show Opponent Stats for"))
+        vbox3.addWidget(QLabel(_("Show Opponent Stats for")))
         vbox3.addWidget(self.build_combo_and_set_active("agg_bb_mult", multiplier_combo_dict))
         vbox3.addWidget(self.build_combo_and_set_active("seats_style", seats_style_combo_dict))
         hbox = QHBoxLayout()
-        hbox.addWidget(QLabel("Custom"))
+        hbox.addWidget(QLabel(_("Custom")))
         self.nums_low_spinner = self.build_spinner("seats_cust_nums_low", 1, 9)
         hbox.addWidget(self.nums_low_spinner)
-        hbox.addWidget(QLabel("To"))
+        hbox.addWidget(QLabel(_("To")))
         self.nums_high_spinner = self.build_spinner("seats_cust_nums_high", 2, 10)
         hbox.addWidget(self.nums_high_spinner)
         vbox3.addLayout(hbox)

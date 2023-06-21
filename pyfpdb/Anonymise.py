@@ -10,7 +10,7 @@ import sys
 import time
 import WinamaxToFpdb, BetfairToFpdb, BetOnlineToFpdb, BovadaToFpdb, CakeToFpdb, GGPokerToFpdb, iPokerToFpdb,KingsClubToFpdb, MergeToFpdb, PacificPokerToFpdb, PartyPokerToFpdb, WinningToFpdb, PokerStarsToFpdb
 import chardet
-
+from L10n import set_locale_translation
 
 
 def sanitize_filter_name(input_str):
@@ -48,7 +48,7 @@ def anonymize_hand_history(file_path, hero_name):
     # Create an IdentifySite object and process the hand history file
     id_site = IdentifySite(config)
     id_site.processFile(file_path)
-
+    set_locale_translation()
     # Identify the file type and print the file name
     count = 0
     for f, ffile in list(id_site.filelist.items()):
@@ -60,7 +60,7 @@ def anonymize_hand_history(file_path, hero_name):
         elif ffile.ftype == "summary":
             tmp += f" {ffile.site.summary}"
         print(tmp)
-    print(count, 'files identified')
+    print(_(f'{count} files identified'))
 
     # Sanitize the filter name and print it
     filter_name = sanitize_filter_name(tmp)
@@ -97,7 +97,7 @@ def anonymize_hand_history(file_path, hero_name):
             with codecs.open(file_path, 'r', encoding) as in_fh:
                 filecontents = in_fh.read()
     else:
-        print(f"Could not find file {file_path}")
+        print(_(f"Could not find file {file_path}"))
         exit(1)
 
     # Find all occurrences of player names using the regular expression pattern
@@ -105,7 +105,7 @@ def anonymize_hand_history(file_path, hero_name):
 
 
     outfile = f"{file_path}.anon"
-    print(f"Output being written to {outfile}")
+    print(_(f"Output being written to {outfile}"))
 
     savestdout = sys.stdout
     with open(outfile, "w") as fsock:
@@ -126,6 +126,6 @@ def anonymize_hand_history(file_path, hero_name):
 
 
 # Usage example:
-#anonymize_hand_history("C:/MyHandsArchive_H2N/2023/2/21/Ferrare 03.txt", "jejellyroll")
+# anonymize_hand_history("C:/MyHandsArchive_H2N/2023/2/21/Ferrare 03.txt", "jejellyroll")
 
 

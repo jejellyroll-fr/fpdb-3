@@ -35,7 +35,7 @@ are not immediately obvious, and there is very close linkage with most of
 the Hud modules.
 """
 
-
+from L10n import set_locale_translation
 import contextlib
 #import L10n
 #_ = L10n.get_translation()
@@ -55,6 +55,7 @@ log = logging.getLogger("hud")
 import Aux_Hud
 import Stats
 
+set_locale_translation()
 
 class Classic_HUD(Aux_Hud.Simple_HUD):
     """

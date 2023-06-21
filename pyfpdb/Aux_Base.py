@@ -25,10 +25,8 @@ import contextlib
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 ########################################################################
+from L10n import set_locale_translation
 
-#import L10n
-#_ = L10n.get_translation()
-#    to do
 
 #    Standard Library modules
 import logging
@@ -52,6 +50,7 @@ deck = None
 # Aux_Window.get_card_images(), it can add a delay of several seconds.
 # A pre-populated deck on the other hand grants instant access.
 
+set_locale_translation()
 
 class Aux_Window(object):
     def __init__(self, hud, params, config):
@@ -482,8 +481,8 @@ class Aux_Seats(Aux_Window):
         control over all seat and common locations.
         """
         # Log an error message if this method is called, as it should be handled in the aux.
-        log.error("Aux_Seats.save_layout called - this shouldn't happen")
-        log.error("save_layout method should be handled in the aux")
+        log.error(_("Aux_Seats.save_layout called - this shouldn't happen"))
+        log.error(_("save_layout method should be handled in the aux"))
 
 
 
@@ -555,7 +554,7 @@ class Aux_Seats(Aux_Window):
                         break
 
                 if not actual_seat:  # This shouldn't happen because we don't create huds if the hero isn't seated.
-                    log.error(("Error finding hero seat."))
+                    log.error(_("Error finding hero seat."))
                     return adj
 
                 for i in range(self.hud.max + 1):

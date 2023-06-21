@@ -18,7 +18,7 @@
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
 
-
+from L10n import set_locale_translation
 #import L10n
 #_ = L10n.get_translation()
 
@@ -26,6 +26,7 @@ import sys
 from HandHistoryConverter import *
 
 # Betfair HH format
+set_locale_translation()
 class Betfair(HandHistoryConverter):
     """
     A class for converting Betfair hand history files.
@@ -159,7 +160,7 @@ class Betfair(HandHistoryConverter):
         if not m:
             # If no game info is found, log an error and raise an exception
             tmp = handText[:200]
-            log.error(f"BetfairToFpdb.determineGameType: '{tmp}'")
+            log.error(_(f"BetfairToFpdb.determineGameType: '{tmp}'"))
             raise FpdbParseError
 
         # Get the dictionary of named capturing groups from the regex match
@@ -243,7 +244,7 @@ class Betfair(HandHistoryConverter):
         # Check if there are less than two players in the hand.
         # This shouldn't happen, so log a warning if it does.
         if len(hand.players) < 2:
-            log.warning(f"Less than 2 players found in hand {hand.handid}.")
+            log.warning(_(f"Less than 2 players found in hand {hand.handid}."))
 
 
 
@@ -339,7 +340,7 @@ class Betfair(HandHistoryConverter):
         m = self.re_Antes.finditer(hand.handText)
         for player in m:
             # Add the ante for the player to the hand
-            log.debug(f"hand.addAnte({player.group('PNAME')},{player.group('ANTE')})")
+            log.debug(_(f"hand.addAnte({player.group('PNAME')},{player.group('ANTE')})"))
             hand.addAnte(player.group('PNAME'), player.group('ANTE'))
 
 
@@ -420,11 +421,9 @@ class Betfair(HandHistoryConverter):
                 hand.addRaiseTo(street, action.group('PNAME'), action.group('BET'))
             else:
                 # If the action type is not recognized, log a debug message
-                log.debug(
-                    ("DEBUG:") +
-                    " " +
-                    f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'"
-                )
+                log.debug(_(
+                    f"DEBUG: Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'"
+                ))
 
 
     def readShowdownActions(self, hand):

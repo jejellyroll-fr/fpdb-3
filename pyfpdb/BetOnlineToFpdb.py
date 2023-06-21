@@ -19,7 +19,7 @@
 ########################################################################
 
 from __future__ import division
-
+from L10n import set_locale_translation
 from past.utils import old_div
 #import L10n
 #_ = L10n.get_translation()
@@ -31,6 +31,7 @@ from HandHistoryConverter import *
 from decimal_wrapper import Decimal
 
 # BetOnline HH Format
+set_locale_translation()
 class BetOnline(HandHistoryConverter):
     """
     A class for converting hand histories from BetOnline format to a standardized format.
@@ -226,7 +227,7 @@ class BetOnline(HandHistoryConverter):
         if not m:
             # If no game information is found, check if it's a partial hand history where a player is joining the table
             if m2 := self.re_JoinsTable.search(handText):
-                raise FpdbHandPartial("BetOnlineToFpdb.determineGameType: Partial hand history: 'Player joining table'")
+                raise FpdbHandPartial(_("BetOnlineToFpdb.determineGameType: Partial hand history: 'Player joining table'"))
 
             tmp = handText[:200]
             log.error(f"BetOnlineToFpdb.determineGameType: '{tmp}'")
@@ -283,7 +284,7 @@ class BetOnline(HandHistoryConverter):
                     info['bb'] = self.Lim_Blinds[info['BB']][1]
                 except KeyError as e:
                     tmp = handText[:200]
-                    log.error(f"BetOnlineToFpdb.determineGameType: Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'")
+                    log.error(_(f"BetOnlineToFpdb.determineGameType: Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'"))
                     raise FpdbParseError from e
             else:
                 # Calculate the small blind and big blind values for tournament games
@@ -319,7 +320,7 @@ class BetOnline(HandHistoryConverter):
 
         if m is None or m2 is None:
             tmp = hand.handText[:200]
-            log.error(f"BetOnlineToFpdb.readHandInfo: '{tmp}'")
+            log.error(_(f"BetOnlineToFpdb.readHandInfo: '{tmp}'"))
             raise FpdbParseError
 
         # Extract the information using groupdict()
@@ -376,9 +377,9 @@ class BetOnline(HandHistoryConverter):
                         hand.buyinCurrency = "play"
                     else:
                         # FIXME: handle other currencies, play money
-                        raise FpdbParseError(
+                        raise FpdbParseError(_(
                             "BetOnlineToFpdb.readHandInfo: Failed to detect currency. Hand ID: '{hand.handid}': '{info[key]}'"
-                        )
+                        ))
 
                     info['BIAMT'] = info['BIAMT'].strip(u'$€')
                     if info['BOUNTY'] is not None:
@@ -406,7 +407,7 @@ class BetOnline(HandHistoryConverter):
                 hand.maxseats = int(info[key])
 
         if not self.re_Board1.search(hand.handText) and self.skin not in ('ActionPoker', 'GearPoker'):
-            raise FpdbHandPartial("readHandInfo: Partial hand history: '{hand.handid}'")
+            raise FpdbHandPartial(_("readHandInfo: Partial hand history: '{hand.handid}'"))
 
     
     def readButton(self, hand):
@@ -424,7 +425,7 @@ class BetOnline(HandHistoryConverter):
             hand.buttonpos = int(m.group('BUTTON'))
         else:
             # If the button position is not found, log an error message
-            log.info('readButton: ' + ('not found'))
+            log.info(_('readButton: not found'))
 
 
     def readPlayerStacks(self, hand):
@@ -632,7 +633,7 @@ class BetOnline(HandHistoryConverter):
             elif hand.gametype['bb']:
                 bb = hand.gametype['bb']  # If the bb value is set in the gametype, use that value.
             else:
-                raise FpdbHandPartial("BetOnlineToFpdb.readBlinds: " + ("Partial hand history: 'No blind info'"))
+                raise FpdbHandPartial(_("BetOnlineToFpdb.readBlinds: " + ("Partial hand history: 'No blind info'")))
             hand.addBlind(pname, 'big blind', bb)  # Add the big blind to the Hand object.
             # If the bb value is not set in the gametype and the skin is ActionPoker or GearPoker, set the bb value to bb
             if not hand.gametype['bb'] and self.skin in ('ActionPoker', 'GearPoker'):
@@ -812,11 +813,8 @@ class BetOnline(HandHistoryConverter):
             elif action.group("ATYPE") == " stands pat":
                 hand.addStandsPat(street, pname, action.group("CARDS"))
             else:
-                log.debug(
-                    ("DEBUG:")
-                    + " "
-                    + f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'"
-                )
+                log.debug(_(f"DEBUG: Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'"
+                ))
 
     def readShowdownActions(self, hand):
         """Reads and processes the showdown actions in the hand's text.
