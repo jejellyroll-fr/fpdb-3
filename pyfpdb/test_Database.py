@@ -49,7 +49,9 @@ def testSQLiteVarianceFunction():
     result = cur.fetchone()[0]
 
     print ("DEBUG: Testing variance function")
-    print ("DEBUG: result: %s expecting: 0.666666 (result-expecting ~= 0.0): %s" % (result, (result - 0.66666)))
+    print(
+        f"DEBUG: result: {result} expecting: 0.666666 (result-expecting ~= 0.0): {result - 0.66666}"
+    )
     cur.execute("DROP TABLE test")
     assert (result - 0.66666) <= 0.0001
 
@@ -60,10 +62,10 @@ def testSQLiteFloorFunction():
         cur.execute("INSERT INTO test(i) values(%f)" % var)
     cur.execute("SELECT floor(i) from test")
     result = cur.fetchall()
-    print("DEBUG: result: %s" % result)
+    print(f"DEBUG: result: {result}")
     answer = 0
     for i in result:
-        print("DEBUG: int(var): %s" % int(i[0]))
+        print(f"DEBUG: int(var): {int(i[0])}")
         assert answer == int(i[0])
         answer = answer + 1
     cur.execute("DROP TABLE test")
@@ -77,7 +79,7 @@ def testSQLiteModFunction():
     result = cur.fetchall()
     idx = 0
     for i in result:
-        print("DEBUG: int(var): %s" % i[0])
+        print(f"DEBUG: int(var): {i[0]}")
         assert vars[idx]%13 == int(i[0])
         idx = idx+1
 
