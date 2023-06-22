@@ -3,7 +3,7 @@ import pytest
 
 
 substitutions = {
-    'LS': u"\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|",
+    'LS': r"\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|",
           
     'PLYR': r'(?P<PNAME>[^\"]+)',
     'NUM': r'(?:\d+)|(\d+\s\d+)',
@@ -40,3 +40,14 @@ def test_re_PlayerInfo3():
                                         (a.group('WIN')), False]
     assert len(plist) == 2  
     
+
+def test_re_PlayerInfo8():
+    text = '<player bet="740" reg_code="" win="1 480" seat="3" dealer="1" rebuy="0" chips="740" name="pergerd" addon="0"/>'
+    match = re_PlayerInfo.search(text)
+    assert match is not None
+    assert match.group('SEAT') == '3'
+    assert match.group('PNAME') == 'pergerd'
+    assert match.group('CASH') == '740'
+    assert match.group('BUTTONPOS') == '1'
+    assert match.group('WIN') == '1 480'
+    assert match.group('BET') == '740'
