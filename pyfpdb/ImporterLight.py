@@ -608,7 +608,7 @@ class Importer(object):
             self._import_summary_file(fpdbfile)
 
         # Print a debug message with the time taken for the import and the file type.
-        print("DEBUG: _import_summary_file.ttime: %.3f %s" % (ttime, fpdbfile.ftype))
+        #print("DEBUG: _import_summary_file.ttime: %.3f %s" % (ttime, fpdbfile.ftype))
 
         # Return the counters and timer.
         return (stored, duplicates, partial, skipped, errors, ttime)
@@ -679,9 +679,9 @@ class Importer(object):
                         try:
                             if not os.path.isdir(f):
                                 self.caller.addText("\n"+os.path.basename(f))
-                                print("os.path.basename",os.path.basename(f) )
-                                print("self.caller:", self.caller)
-                                print(os.path.basename(f))
+                                #("os.path.basename",os.path.basename(f) )
+                                #print("self.caller:", self.caller)
+                                #print(os.path.basename(f))
                         except KeyError:
                             log.error("File '%s' seems to have disappeared" % f)
                         (stored, duplicates, partial, skipped, errors, ttime) = self._import_despatch(self.filelist[f])
@@ -690,7 +690,7 @@ class Importer(object):
                         try:
                             if not os.path.isdir(f): # Note: This assumes that whatever calls us has an "addText" func
                                 self.caller.addText(" %d stored, %d duplicates, %d partial, %d skipped, %d errors (time = %f)" % (stored, duplicates, partial, skipped, errors, ttime))
-                                print("self.caller2:",self.caller)
+                                #print("self.caller2:",self.caller)
                         except KeyError: # TODO: Again, what error happens here? fix when we find out ..
                             pass
                         self.updatedsize[f] = stat_info.st_size

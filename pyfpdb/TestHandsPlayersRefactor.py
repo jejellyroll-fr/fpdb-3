@@ -129,9 +129,8 @@ def run_Import(filename, site):
         importer.setCallHud(False)
         stored, dups, partial, errs, ttime, *excess = importer.runImport()
 
-        print(
-            f"DEBUG: stored: {stored} dups: {dups} partial: {partial} errs: {errs} ttime: {ttime}"
-        )
+
+        return stored, dups, partial, errs, ttime
         importer.clearFileList()
 
 
@@ -322,16 +321,17 @@ for key, value in subpath.items():
 
 clean_subpath = delete_keys(subpath, delete_path)
 
-for key, value in clean_subpath.items():
-   print(f"Key: {key}, Value: {value}")  
+#for key, value in clean_subpath.items():
+   #print(f"Key: {key}, Value: {value}")
 
 for key, value in clean_subpath.items():
     if list_sites[key] == True:
-        print(f"Key: {key}, Value: {value}")
+        #print(f"Key: {key}, Value: {value}")
         new_dict = get_path_files(value)
 
 
 for key, value in new_dict.items():
-    print(f"Key: {key}, Value: {value}")
-    print(type(value))
-    #test_Import(value, "auto")
+    #print(f"Key: {key}, Value: {value}")
+
+    value = run_Import(value, "auto")
+    print(value)
