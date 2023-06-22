@@ -13,7 +13,7 @@ from Hand import *
 import Configuration
 import Database
 import SQL
-import Importer
+import ImporterLight
 import Exceptions
 
 config = Configuration.Config(file = "HUD_config.test.xml")
@@ -117,17 +117,18 @@ def delete_keys(dict_, keys):
             del dict_[key]
     return dict_
 
-def test_Import(filename, site):
+def run_Import(filename, site):
 
         db.recreate_tables()
-        importer = Importer.Importer(settings,config)
+        importer = ImporterLight.Importer(False, settings, config)
         importer.setDropIndexes("don't drop")
-        importer.setFailOnError(True)
+
         importer.setThreads(-1)
         importer.addBulkImportImportFileOrDir(str(filename), site= str(site))
 
         importer.setCallHud(False)
-        (stored, dups, partial, errs, ttime) = importer.runImport()
+        stored, dups, partial, errs, ttime, *excess = importer.runImport()
+
         print(
             f"DEBUG: stored: {stored} dups: {dups} partial: {partial} errs: {errs} ttime: {ttime}"
         )
@@ -232,7 +233,7 @@ list_sites = {
     'PokerTracker-summaries-Flop': False,
     'PokerTracker-summaries-Draw': False,
     'PokerTracker-summaries-Stud': False,
-    'Winamax-cash-Flop': False,
+    'Winamax-cash-Flop': True,
     'Winamax-cash-Draw': False,
     'Winamax-cash-Stud': False,
     'Winamax-tour-Flop': False,
@@ -316,13 +317,13 @@ delete_path = {
 
 subpath = get_last_level_subpaths(reg_path)
 
-#for key, value in subpath.items():
-#    print(f"Key: {key}, Value: {value}")  
+for key, value in subpath.items():
+    print(f"Key: {key}, Value: {value}")  
 
 clean_subpath = delete_keys(subpath, delete_path)
 
-#for key, value in clean_subpath.items():
-#    print(f"Key: {key}, Value: {value}")  
+for key, value in clean_subpath.items():
+   print(f"Key: {key}, Value: {value}")  
 
 for key, value in clean_subpath.items():
     if list_sites[key] == True:
@@ -332,4 +333,5 @@ for key, value in clean_subpath.items():
 
 for key, value in new_dict.items():
     print(f"Key: {key}, Value: {value}")
-    test_Import(key, "auto")
+    print(type(value))
+    #test_Import(value, "auto")
