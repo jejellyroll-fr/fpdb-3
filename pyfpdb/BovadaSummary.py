@@ -15,6 +15,7 @@
 #along with this program. If not, see <http://www.gnu.org/licenses/>.
 #In the "official" distribution you can find the license in agpl-3.0.txt.
 
+from L10n import set_locale_translation
 #import L10n
 #_ = L10n.get_translation()
 
@@ -26,6 +27,7 @@ from HandHistoryConverter import *
 from TourneySummary import *
 import BovadaToFpdb
 
+set_locale_translation()
 class BovadaSummary(TourneySummary):
     """
     A subclass of TourneySummary that parses Bovada tournament summaries.
@@ -91,7 +93,7 @@ class BovadaSummary(TourneySummary):
         m = hhc.re_GameInfo.search(self.summaryText)
         if m is None:
             tmp = self.summaryText[0:200]
-            log.error(("BovadaSummary.parseSummary: '%s'") % tmp)
+            log.error(_("BovadaSummary.parseSummary: '%s'") % tmp)
             raise FpdbParseError
 
         # Extract relevant information from the game info
@@ -106,7 +108,7 @@ class BovadaSummary(TourneySummary):
         # Check if the summary text corresponds to a tournament
         if info['TOURNO'] is None:
             tmp = self.summaryText[0:200]
-            log.error(("BovadaSummary.parseSummary: Text does not appear to be a tournament '%s'") % tmp)
+            log.error(_("BovadaSummary.parseSummary: Text does not appear to be a tournament '%s'") % tmp)
             raise FpdbParseError
         else:
             self.tourNo = info['TOURNO']
@@ -152,7 +154,7 @@ class BovadaSummary(TourneySummary):
                     elif re.match("^[0-9+]*$", info['BUYIN']):
                         self.buyinCurrency = "play"
                     else:
-                        log.error(("BovadaSummary.parseSummary: Failed to detect currency"))
+                        log.error(_("BovadaSummary.parseSummary: Failed to detect currency"))
                         raise FpdbParseError
                     self.currency = self.buyinCurrency
 
