@@ -1,6 +1,6 @@
 
 import os
-
+import codecs
 from Hand import *
 import Configuration
 
@@ -15,6 +15,8 @@ import Database
 import SQL
 import ImporterLight
 import Exceptions
+
+DEBUG = True
 
 config = Configuration.Config(file = "HUD_config.test.xml")
 db = Database.Database(config)
@@ -133,6 +135,183 @@ def run_Import(filename, site):
         return stored, dups, partial, errs, ttime
         importer.clearFileList()
 
+def walk_testfiles(dir, function, importer, errors, site):
+    """Walks a directory, and executes a callback on each file """
+    dir = os.path.abspath(dir)
+
+    print('dir:', dir)
+
+    try:
+        for file in [file for file in os.walk(dir) if not file in [".", ".."]]:
+            print('files:', os.walk(dir))
+            nfile = os.path.join(dir, ''.join(map(str, file)))
+
+
+
+            print(nfile)
+            if os.path.isdir(nfile):
+                walk_testfiles(nfile, compare, importer, errors, site)
+            else:
+                function(nfile, importer, errors, site)
+    except OSError as xxx_todo_changeme:
+        (errno, strerror) = xxx_todo_changeme.args
+        if errno == 20:
+            # Error 20 is 'not a directory'
+            function(dir, importer, errors, site)
+        else:
+            raise OSError(errno, strerror)
+
+def compare(leaf, importer, errors, site):
+    filename = leaf
+    print("DEBUG: fileanme: %s" % filename)
+
+    # Test if this is a hand history file
+    if filename.endswith('.txt') or filename.endswith('.xml'):
+        # test if there is a .hp version of the file
+        if DEBUG: print("Site: %s" % site)
+        if DEBUG: print("Filename: %s" % filename)
+        file_added = importer.addBulkImportImportFileOrDir(filename, site=site)
+        if not file_added:
+            errors.error_report(filename, (0, 0, 0, 1), "Parse", False, False, False)
+            importer.clearFileList()
+            return False
+
+        (stored, dups, partial, skipped, errs, ttime) = importer.runImport()
+
+        if errs > 0 or partial > 0:
+            errors.error_report(filename, (stored, dups, partial, errs), "Parse", False, False, False)
+        else:
+            if os.path.isfile(filename + '.hp'):
+                compare_handsplayers_file(filename, importer, errors)
+            if os.path.isfile(filename + '.hands'):
+                compare_hands_file(filename, importer, errors)
+            if os.path.isfile(filename + '.gt'):
+                compare_gametypes_file(filename, importer, errors)
+
+        importer.clearFileList()
+
+def compare_gametypes_file(filename, importer, errors):
+    hashfilename = filename + '.gt'
+
+    in_fh = codecs.open(hashfilename, 'r', 'utf8')
+    whole_file = in_fh.read()
+    in_fh.close()
+
+    testhash = eval(whole_file)
+
+    hhc = importer.getCachedHHC()
+    handlist = hhc.getProcessedHands()
+
+    lookup = {
+        0: 'Gametype: siteId',
+        1: 'Gametype: currency',
+        2: 'Gametype: type',
+        3: 'Gametype: base',
+        4: 'Gametype: game',
+        5: 'Gametype: limit',
+        6: 'Gametype: hilo',
+        7: 'Gametype: mix',
+        8: 'Gametype: Small Blind',
+        9: 'Gametype: Big Blind',
+        10: 'Gametype: Small Bet',
+        11: 'Gametype: Big Bet',
+        12: 'Gametype: maxSeats',
+        13: 'Gametype: ante',
+        14: 'Gametype: cap',
+        15: 'Gametype: zoom'
+    }
+
+    for hand in handlist:
+        ghash = hand.gametyperow
+        for i in range(len(ghash)):
+            print("DEBUG: about to compare: '%s' and '%s'" % (ghash[i], testhash[i]))
+            if ghash[i] == testhash[i]:
+                # The stats match - continue
+                pass
+            else:
+                errors.error_report(filename, hand, lookup[i], ghash, testhash, None)
+    pass
+
+def compare_hands_file(filename, importer, errors):
+    hashfilename = filename + '.hands'
+
+    in_fh = codecs.open(hashfilename, 'r', 'utf8')
+    whole_file = in_fh.read()
+    in_fh.close()
+
+    testhash = eval(whole_file)
+
+    hhc = importer.getCachedHHC()
+    handlist = hhc.getProcessedHands()
+
+    for hand in handlist:
+        ghash = hand.stats.getHands()
+        # Delete unused data from hash
+        try:
+            del ghash['gsc']
+            del ghash['sc']
+            del ghash['id']
+        except KeyError:
+            pass
+        del ghash['boards']
+        for datum in ghash:
+            print("DEBUG: hand: '%s'" % datum)
+            try:
+                if ghash[datum] == testhash[datum]:
+                    # The stats match - continue
+                    pass
+                else:
+                    # Stats don't match.
+                    if (datum == "gametypeId"
+                            or datum == 'gameId'
+                            or datum == 'sessionId'
+                            or datum == 'id'
+                            or datum == 'tourneyId'
+                            or datum == 'gameSessionId'
+                            or datum == 'fileId'
+                            or datum == 'runItTwice'):
+                        # Not an error. gametypeIds are dependent on the order added to the db.
+                        print("DEBUG: Skipping mismatched gamtypeId")
+                        pass
+                    else:
+                        errors.error_report(filename, hand, datum, ghash, testhash, None)
+            except KeyError as e:
+                errors.error_report(filename, False, "KeyError: '%s'" % datum, False, False, None)
+
+def compare_handsplayers_file(filename, importer, errors):
+    hashfilename = filename + '.hp'
+
+    in_fh = codecs.open(hashfilename, 'r', 'utf8')
+    whole_file = in_fh.read()
+    in_fh.close()
+
+    testhash = eval(whole_file)
+
+    hhc = importer.getCachedHHC()
+    handlist = hhc.getProcessedHands()
+    # We _really_ only want to deal with a single hand here.
+    for hand in handlist:
+        ghash = hand.stats.getHandsPlayers()
+        for p in ghash:
+            print("DEBUG: player: '%s'" % p)
+            pstat = ghash[p]
+            teststat = testhash[p]
+            for stat in pstat:
+                print("pstat[%s][%s]: %s == %s" % (p, stat, pstat[stat], teststat[stat]))
+                try:
+                    if pstat[stat] == teststat[stat]:
+                        # The stats match - continue
+                        pass
+                    else:
+                        ignorelist = ['tourneyTypeId', 'tourneysPlayersIds']
+                        # 'allInEV', 'street0CalledRaiseDone', 'street0CalledRaiseChance'
+                        if stat in ignorelist:
+                            # Not and error
+                            pass
+                        else:
+                            errors.error_report(filename, hand, stat, ghash, testhash, p)
+                except KeyError as e:
+                    errors.error_report(filename, False, "KeyError: '%s'" % stat, False, False, p)
 
 list_sites = {
     'Betfair-cash-Flop': True,
@@ -324,14 +503,14 @@ clean_subpath = delete_keys(subpath, delete_path)
 #for key, value in clean_subpath.items():
    #print(f"Key: {key}, Value: {value}")
 
+
+new_dict = {}
 for key, value in clean_subpath.items():
     if list_sites[key] == True:
-        #print(f"Key: {key}, Value: {value}")
+        print(f"Key: {key}, Value: {value}")
         new_dict = get_path_files(value)
 
 
 for key, value in new_dict.items():
-    #print(f"Key: {key}, Value: {value}")
+    print(f"Key: {key}, Value: {value}")
 
-    value = run_Import(value, "auto")
-    print(value)
