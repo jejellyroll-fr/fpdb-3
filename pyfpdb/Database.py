@@ -2619,6 +2619,7 @@ class Database(object):
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('14', 'completes', 'P')")
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('15', 'straddle', 'ST')")
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('16', 'button blind', 'BUB')")
+        c.execute("INSERT INTO Actions (id,name,code) VALUES ('17', 'cashout', 'CO')")
 
         #Fill Rank
         c.execute("INSERT INTO Rank (id,name) VALUES ('1', 'Nothing')")

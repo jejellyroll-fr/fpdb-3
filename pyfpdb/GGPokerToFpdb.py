@@ -525,7 +525,18 @@ class GGPoker(HandHistoryConverter):
         else:
             log.info('readButton: ' + ('not found'))
 
-
+    def readPlayerStacks(self, hand):
+        pre, post = hand.handText.split('*** SUMMARY ***')
+        m = self.re_PlayerInfo.finditer(pre)
+        for a in m:
+            hand.addPlayer(
+                int(a.group('SEAT')), 
+                a.group('PNAME'), 
+                self.clearMoneyString(a.group('CASH')), 
+                None, 
+                a.group('SITOUT'),
+                self.clearMoneyString(a.group('BOUNTY'))
+            )
 
     def markStreets(self, hand):
         """

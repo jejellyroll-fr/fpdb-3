@@ -599,7 +599,7 @@ class Bovada(HandHistoryConverter):
 
         # If the base game is hold'em and the board is not fully known, add the board cards to the corresponding streets
         if hand.gametype['base'] == "hold":
-            if hand.gametype['fast']:
+            if True: #hand.gametype['fast']:
                 for street in ('FLOP', 'TURN', 'RIVER'):
                     m1 = self.re_Board2[street].search(hand.handText)
                     if m1 and m1.group('CARDS') and not hand.streets.get(street):
@@ -623,7 +623,7 @@ class Bovada(HandHistoryConverter):
         None
         """
         # If the game is fast, use a regex to match the community cards for the given street and update the hand object.
-        if hand.gametype['fast']:
+        if True: #hand.gametype['fast']:
             m = self.re_Board2[street].search(hand.handText)
             if m and m.group('CARDS'):
                 hand.setCommunityCards(street, m.group('CARDS').split(' '))
