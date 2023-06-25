@@ -854,6 +854,20 @@ class BetOnline(HandHistoryConverter):
                 hand.rakes['pot'] += Decimal(self.clearMoneyString(m.group('POT')))
             else:
                 hand.rakes['pot'] = Decimal(self.clearMoneyString(m.group('POT')))
+                
+    def readShownCards(self,hand):
+        for m in self.re_ShownCards.finditer(hand.handText):
+            if m.group('CARDS') is not None:
+                pname = self.unknownPlayer(hand, m.group('PNAME'))
+                cards = m.group('CARDS')
+                cards = cards.split(' ') # needs to be a list, not a set--stud needs the order
+                cards = [c[:-1].replace('10', 'T') + c[-1].lower() for c in cards if len(c)>0]
+                (shown, mucked) = (False, False)
+                if m.group('SHOWED') == "showed": shown = True
+                elif m.group('SHOWED') == "mucked": mucked = True
+                if hand.gametype['category']=='holdem' and len(cards)>2: continue
+                #print "DEBUG: hand.addShownCards(%s, %s, %s, %s)" %(cards, m.group('PNAME'), shown, mucked)
+                hand.addShownCards(cards=cards, player=pname, shown=shown, mucked=mucked, string=None)
 
 
     @staticmethod
