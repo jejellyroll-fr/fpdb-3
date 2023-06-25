@@ -695,6 +695,7 @@ class Database(object):
         self.db_server = db_params['db-server']
         self.database = db_params['db-databaseName']
         self.host = db_params['db-host']
+        self.port = db_params['db-port']
         self.db_path = ''
         gen = c.get_general_params()
         self.day_start = 0
@@ -842,6 +843,7 @@ class Database(object):
             # Connect to the database
             self.connect(backend=db['db-backend'],
                          host=db['db-host'],
+                         port=db['db-port'],
                          database=db['db-databaseName'],
                          user=db['db-user'],
                          password=db['db-password'])
@@ -857,10 +859,11 @@ class Database(object):
         self.db_server = db_params['db-server']
         self.database = db_params['db-databaseName']
         self.host = db_params['db-host']
+        self.port = db_params['db-port']
 
 
     def connect(self, backend=None, host=None, database=None,
-                user=None, password=None, create=False):
+                user=None, password=None, create=False, port="default_value"):
         """
         Connects a database with the given parameters.
 

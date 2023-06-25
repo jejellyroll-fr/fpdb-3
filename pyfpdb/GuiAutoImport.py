@@ -46,6 +46,7 @@ class GuiAutoImport(QWidget):
         self.importer.setMode('auto')
 
         self.server = settings['db-host']
+        self.port = settings['db-port']
         self.user = settings['db-user']
         self.password = settings['db-password']
         self.database = settings['db-databaseName']

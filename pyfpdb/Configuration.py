@@ -690,6 +690,10 @@ class Database(object):
         self.db_desc   = node.getAttribute("db_desc")   # Description of the database.
         self.db_server = node.getAttribute("db_server").lower() # Server name where the database is hosted.
         self.db_ip     = node.getAttribute("db_ip")     # IP address of the server.
+        if "db_port" in node.attributes:
+            self.db_port = node.getAttribute("db_port")
+        else:
+            self.db_port = 5432  # Default PostgreSQL port number
         self.db_user   = node.getAttribute("db_user")   # Username for the database connection.
         self.db_pass   = node.getAttribute("db_pass")   # Password for the database connection.
         self.db_path   = node.getAttribute("db_path")   # Path to the database file.
@@ -1594,6 +1598,7 @@ class Config(object):
                 df_parms = self.read_default_conf(df_file)
                 self.set_db_parameters(db_name = 'fpdb', db_ip = df_parms['db-host'],
                                      db_user = df_parms['db-user'],
+                                     db_port = df_parms['db-port'],
                                      db_pass = df_parms['db-password'])
                 self.save(file=os.path.join(CONFIG_PATH, "HUD_config.xml"))
         
@@ -2280,6 +2285,12 @@ class Config(object):
         # Set database host
         try:    
             db['db-host'] = self.supported_databases[name].db_ip
+        except: 
+            pass
+                
+        # Set database port
+        try:    
+            db['db-port'] = self.supported_databases[name].db_port
         except: 
             pass
 
