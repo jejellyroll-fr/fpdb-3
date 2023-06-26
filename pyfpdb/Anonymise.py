@@ -8,7 +8,7 @@ from IdentifySite import IdentifySite
 import Configuration
 import sys
 import time
-import WinamaxToFpdb, BetfairToFpdb, BetOnlineToFpdb, BovadaToFpdb, CakeToFpdb, GGPokerToFpdb, iPokerToFpdb,KingsClubToFpdb, MergeToFpdb, PacificPokerToFpdb, PartyPokerToFpdb, WinningToFpdb, PokerStarsToFpdb
+import WinamaxToFpdb, BetfairToFpdb, BovadaToFpdb, CakeToFpdb, GGPokerToFpdb, iPokerToFpdb,KingsClubToFpdb, MergeToFpdb, PacificPokerToFpdb, PartyPokerToFpdb, WinningToFpdb, PokerStarsToFpdb
 import chardet
 from L10n import set_locale_translation
 
@@ -70,7 +70,6 @@ def anonymize_hand_history(file_path, hero_name):
     patterns = {
         "WinamaxToFpdb": WinamaxToFpdb.Winamax.re_PlayerInfo,
         "BetfairToFpdb": BetfairToFpdb.Betfair.re_PlayerInfo,
-        "BetOnlineToFpdb": BetOnlineToFpdb.BetOnline.re_PlayerInfo,
         "BovadaToFpdb": BovadaToFpdb.Bovada.re_PlayerInfo,
         "CakeToFpdb": CakeToFpdb.Cake.re_PlayerInfo,
         "GGPokerToFpdb": GGPokerToFpdb.GGPoker.re_PlayerInfo,

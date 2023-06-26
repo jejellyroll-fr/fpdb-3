@@ -92,7 +92,6 @@ sitemasks = { "PokerStars": copy.deepcopy(defaultmask),
               "PacificPoker": copy.deepcopy(defaultmask),
               "Cake": copy.deepcopy(defaultmask),
               "Entraction": copy.deepcopy(defaultmask),
-              "BetOnline": copy.deepcopy(defaultmask),
               "Microgaming": copy.deepcopy(defaultmask),
               "Bovada": copy.deepcopy(defaultmask),
         }
@@ -165,7 +164,6 @@ sites = { "PokerStars": copy.deepcopy(games),
           "PacificPoker": copy.deepcopy(games),
           "Cake": copy.deepcopy(games),
           "Entraction": copy.deepcopy(games),
-          "BetOnline": copy.deepcopy(games),
           "Microgaming": copy.deepcopy(games),
           "Bovada": copy.deepcopy(games),
         }
@@ -239,7 +237,6 @@ print_site("iPoker", ring, sitemasks)
 print_site("Winamax", ring, sitemasks)
 print_site("Cake", ring, sitemasks)
 print_site("Entraction", ring, sitemasks)
-print_site("BetOnline", ring, sitemasks)
 print_site("Betfair", ring, sitemasks)
 print_site("PacificPoker", ring, sitemasks)
 print_site("Bovada", ring, sitemasks)
@@ -264,7 +261,6 @@ print_site("iPoker", tour, sitemasks)
 print_site("Winamax", tour, sitemasks)
 print_site("Cake", tour, sitemasks)
 print_site("Entraction", tour, sitemasks)
-print_site("BetOnline", tour, sitemasks)
 print_site("Betfair", tour, sitemasks)
 print_site("PacificPoker", tour, sitemasks)
 print_site("Bovada", tour, sitemasks)

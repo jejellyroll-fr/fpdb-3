@@ -832,7 +832,6 @@ class Filters(QWidget):
                 "iPoker": 'ipoker.png',
                 "Cake": 'cake.png',
                 "Entraction": 'entraction.png',
-                "BetOnline": 'betonline.png',
                 "Microgaming": 'microgaming.png',
                 "Bovada": 'bovada.png',
                 "Enet": 'enet.png',

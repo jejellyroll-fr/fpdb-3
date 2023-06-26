@@ -89,7 +89,6 @@ def site_alias(alias):
     tmp = alias
     aliases = {
                 "Betfair"        : "Betfair",
-                "BetOnline"      : "BetOnline",
                 "Bovada"         : "Bovada",
                 "Cake"           : "Cake",
                 "Enet"           : "Enet",
