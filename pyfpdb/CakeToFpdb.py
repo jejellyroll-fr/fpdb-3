@@ -51,12 +51,13 @@ class Cake(HandHistoryConverter):
     siteId   = 17
     sym = {'USD': "\$", 'CAD': "\$", 'T$': "", "EUR": "€", "GBP": "\xa3", "play": ""}
     substitutions = {
-                     'LEGAL_ISO' : "USD|EUR|GBP|CAD|FPP",      # legal ISO currency codes
-                            'LS' : u"\$|€|", # legal currency symbols - Euro(cp1252, utf-8)
-                           'PLYR': r'(?P<PNAME>.+?)',
-                            'CUR': u"(\$|€|)",
-                            'NUM' :u".(,|\s)\d\xa0",
-                    }
+                        'LEGAL_ISO' : "USD|EUR|GBP|CAD|FPP",      # legal ISO currency codes
+                                'LS' : r"\$|€|", # legal currency symbols - Euro(cp1252, utf-8)
+                            'PLYR': r'(?P<PNAME>.+?)',
+                                'CUR': r"(\$|€|)",
+                                'NUM' :r".(,|\s)\d\xa0",
+                                'NUM2': r'\b((?:\d{1,3}(?:\s\d{3})*)|(?:\d+))\b',  # Regex pattern for matching numbers with spaces
+                        }
 
                     
     # translations from captured groups to fpdb info strings
@@ -92,7 +93,7 @@ class Cake(HandHistoryConverter):
     currencies = { u'€':'EUR', '$':'USD', '':'T$' }
 
     # Static regexes
-    re_GameInfo     = re.compile(u"""
+    re_GameInfo     = re.compile(r"""
           Hand\#(?P<HID>[A-Z0-9]+)\s+\-\s+
           (?P<TABLE>(?P<BUYIN1>(?P<BIAMT1>(%(LS)s)[%(NUM)s]+)\sNLH\s(?P<MAX1>\d+)\smax)?.+?)\s(\((Turbo,\s)?(?P<MAX>\d+)\-+[Mm]ax\)\s)?((?P<TOURNO>T\d+)|\d+)\s
           (\-\-\s(TICKET|CASH|TICKETCASH|FREEROLL)\s\-\-\s(?P<BUYIN>(?P<BIAMT>(%(LS)s)[%(NUM)s]+)\s(?P<BIRAKE>(%(LS)s)[%(NUM)s]+))\s\-\-\s(?P<TMAX>\d+)\sMax\s)?
@@ -106,12 +107,12 @@ class Cake(HandHistoryConverter):
           (?P<DATETIME>.*$)
           """ % substitutions, re.MULTILINE|re.VERBOSE)
 
-    re_PlayerInfo   = re.compile(u"""
-          ^Seat\s(?P<SEAT>[0-9]+):\s
-          (?P<PNAME>.+?)\s
-          \((%(LS)s)?(?P<CASH>[%(NUM)s]+)\sin\schips\)
-          (\s\s\(EUR\s(%(CUR)s)?(?P<EUROVALUE>[%(NUM)s]+)\))?""" % substitutions, 
-          re.MULTILINE|re.VERBOSE)
+    re_PlayerInfo   = re.compile(r"""
+            ^Seat\s(?P<SEAT>[0-9]+):\s
+            (?P<PNAME>.+?)\s
+            \((%(LS)s)?(?P<CASH>[%(NUM2)s]+)\sin\schips\)
+            (\s\s\(EUR\s(%(CUR)s)?(?P<EUROVALUE>[%(NUM)s]+)\))?""" % substitutions, 
+            re.MULTILINE|re.VERBOSE)
 
     re_Trim         = re.compile("(Hand\#)")
     re_Identify     = re.compile(u'Hand\#[A-Z0-9]+\s\-\s')
@@ -405,9 +406,17 @@ class Cake(HandHistoryConverter):
             # Check if the stack information has a EUROVALUE and set the roundPenny flag accordingly
             if a.group('EUROVALUE'):
                 hand.roundPenny = True
+            cash_value = a.group('CASH')
+            cash_value = cash_value.encode("utf-8")
+            cash_value = cash_value.replace(b"\xe2\x80\xaf", b"")
+            cash_value = cash_value.decode("utf-8")
+            print("value:",  cash_value)
+            print("type:" , type(cash_value))
+            # Add the player's stack information to the `hand` object
+            hand.addPlayer(int(a.group('SEAT')), a.group('PNAME'), cash_value)
 
             # Add the player's stack information to the `hand` object
-            hand.addPlayer(int(a.group('SEAT')), a.group('PNAME'), self.convertMoneyString('CASH', a))
+            #hand.addPlayer(int(a.group('SEAT')), a.group('PNAME'), self.convertMoneyString('CASH', a))
 
             # If there was a coinflip, add the ante for the player
             if coinflip:
@@ -712,3 +721,17 @@ class Cake(HandHistoryConverter):
             # if no match found, return None
             return None    
 
+    @staticmethod
+    def getTableTitleRe(type, table_name=None, tournament = None, table_number=None):
+        log.info(
+            f"cake.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'"
+        )
+        regex = f""
+        print("regex get table cash title:", regex)
+        if tournament:
+            
+            regex = f"Tournament: {tournament} Buy-In \w : Table {table_number} - \w - \w"
+            #Tournament: 17106061 Buy-In Freeroll : Table 10 - No Limit Holdem - 15/30
+            print("regex get mtt sng expresso cash title:", regex)
+        log.info(f"Seals.getTableTitleRe: returns: '{regex}'")
+        return regex

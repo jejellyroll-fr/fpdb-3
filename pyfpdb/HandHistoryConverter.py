@@ -557,44 +557,45 @@ or None if we fail to get the info """
             print("collected pot>total pot")
 
         # Calculate rake
-        hand.rake = hand.totalpot - hand.totalcollected  # * Decimal('0.05') # probably not quite right
+        if hand.rake is None:
+            hand.rake = hand.totalpot - hand.totalcollected  # * Decimal('0.05') # probably not quite right
 
-        # Determine round value based on game type and site ID
-        if self.siteId == 9 and hand.gametype['type'] == "tour":
-            round = -5  # round up to 10
-        elif hand.gametype['type'] == "tour":
-            round = -1
-        else:
-            round = -0.01
-
-        # Adjust rake for site ID 15 and total collected greater than total pot
-        if self.siteId == 15 and hand.totalcollected > hand.totalpot:
-            hand.rake = old_div(hand.totalpot, 10)
-            print(hand.rake)
-
-        # Check if rake is negative and if it meets the round value criteria
-        if hand.rake < 0 and (not hand.roundPenny or hand.rake < round) and not hand.cashedOut:
-            if (self.siteId == 28 and
-                    ((hand.rake + Decimal(str(hand.sb)) - (0 if hand.rakes.get('rake') is None else hand.rakes['rake'])) == 0 or
-                    (hand.rake + Decimal(str(hand.sb)) + Decimal(str(hand.bb)) - (0 if hand.rakes.get('rake') is None else hand.rakes['rake'])) == 0)
-            ):
-                # Log error if missed sb/bb
-                log.error(
-                    f"hhc.getRake(): '{hand.handid}': Missed sb/bb - Amount collected ({str(hand.totalcollected)}) is greater than the pot ({str(hand.totalpot)})"
-                )
+            # Determine round value based on game type and site ID
+            if self.siteId == 9 and hand.gametype['type'] == "tour":
+                round = -5  # round up to 10
+            elif hand.gametype['type'] == "tour":
+                round = -1
             else:
-                # Log error if collected pot is greater than total pot
+                round = -0.01
+
+            # Adjust rake for site ID 15 and total collected greater than total pot
+            if self.siteId == 15 and hand.totalcollected > hand.totalpot:
+                hand.rake = old_div(hand.totalpot, 10)
+                print(hand.rake)
+
+            # Check if rake is negative and if it meets the round value criteria
+            if hand.rake < 0 and (not hand.roundPenny or hand.rake < round) and not hand.cashedOut:
+                if (self.siteId == 28 and
+                        ((hand.rake + Decimal(str(hand.sb)) - (0 if hand.rakes.get('rake') is None else hand.rakes['rake'])) == 0 or
+                        (hand.rake + Decimal(str(hand.sb)) + Decimal(str(hand.bb)) - (0 if hand.rakes.get('rake') is None else hand.rakes['rake'])) == 0)
+                ):
+                    # Log error if missed sb/bb
+                    log.error(
+                        f"hhc.getRake(): '{hand.handid}': Missed sb/bb - Amount collected ({str(hand.totalcollected)}) is greater than the pot ({str(hand.totalpot)})"
+                    )
+                else:
+                    # Log error if collected pot is greater than total pot
+                    log.error(
+                        f"hhc.getRake(): '{hand.handid}': Amount collected ({str(hand.totalcollected)}) is greater than the pot ({str(hand.totalpot)})"
+                    )
+                    raise FpdbParseError
+
+            # Check if rake is suspiciously high
+            elif hand.totalpot > 0 and Decimal(old_div(hand.totalpot, 4)) < hand.rake and not hand.fastFold and not hand.cashedOut:
                 log.error(
-                    f"hhc.getRake(): '{hand.handid}': Amount collected ({str(hand.totalcollected)}) is greater than the pot ({str(hand.totalpot)})"
+                    f"hhc.getRake(): '{hand.handid}': Suspiciously high rake ({str(hand.rake)}) > 25 pct of pot ({str(hand.totalpot)})"
                 )
                 raise FpdbParseError
-
-        # Check if rake is suspiciously high
-        elif hand.totalpot > 0 and Decimal(old_div(hand.totalpot, 4)) < hand.rake and not hand.fastFold and not hand.cashedOut:
-            log.error(
-                f"hhc.getRake(): '{hand.handid}': Suspiciously high rake ({str(hand.rake)}) > 25 pct of pot ({str(hand.totalpot)})"
-            )
-            raise FpdbParseError
 
 
     def sanityCheck(self):

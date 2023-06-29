@@ -41,3 +41,5 @@ def test_re_PlayerInfo3():
     assert match.group('SEAT') == '1'
     assert match.group('PNAME') == 'joker7'
     assert match.group('CASH') == '1 200'
+
+table_text = "Tournament: 17106061 Buy-In Freeroll : Table 10 - No Limit Holdem - 15/30"
