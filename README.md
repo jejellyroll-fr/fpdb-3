@@ -32,10 +32,10 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 
 >database
 - not working mysql connector on py3.1x -> import MySQLdb (TO DO: find solution )
-- psql not tested (TO DO)
+- psql not tested (Tested OK)
 - try bdd on containers (TO DO) 
 >translation-language
-- not working translation -> from icu import Locale(TO DO: find better solution)
+- not working translation -> from icu import Locale(TO DO: find better solution- rework - need to finish)
 >pokerstove
 - add odds calc (fast solution-> use Pokerprotools online WIP) -> prokerprotool is down (TO DO: other option install on pc, or use other lib ploev,treys... WIP)
 - update poker-eval lib (https://github.com/jejellyroll-fr/poker-eval)->added 5 cards PLO, 5 card PLO8 and 6 card PLO -> OK
@@ -44,7 +44,7 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 - not working ->fixed
 - rethink the distribution of players around the table (TO DO: WIP)
 - add pot odds and equity(TO DO)
-- dev specific web front (TO DO: stay with python, exemple django or other laguage like js, exemple react.js)
+
 >handviewer(cash)
 - Filter bug (player and site =not good working)
 >import
@@ -64,13 +64,17 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 - mac disappear behind the table -> fixed(Big sur)->regression Bug :( 
 - linux disappear behind the table (ubuntu) -> Fixed -> not working with bottles
 - mtt table detection - bug on ipoker, must investigate other rooms
-- add ui for seat config per site (TODO)
-- add ui for Hud config per games (TODO)
+- add ui for seat config per site (DONE)
+- add ui for Hud config per games (DONE)
 >ui
 - dark theme
 - more modern (perhaps use pyside6 in the future)
 >notebook jupyter
 - add some notebooks
+
+>data viz
+- idea sql -> APi -> front web (must POC)
+
 
 >site hud
 
