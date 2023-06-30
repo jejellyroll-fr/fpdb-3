@@ -1,5 +1,9 @@
 # FPDB 3
 
+[![stars](https://custom-icon-badges.demolab.com/github/stars/jejellyroll-fr/fpdb-3?logo=star)](https://github.com/jejellyroll-fr/fpdb-3/stargazers "stars")
+[![issues](https://custom-icon-badges.demolab.com/github/issues-raw/jejellyroll-fr/fpdb-3?logo=issue)](https://github.com/jejellyroll-fr/fpdb-3/issues "issues")
+[![license](https://custom-icon-badges.demolab.com/github/license/jejellyroll-fr/fpdb-3?logo=law&logoColor=white)](https://github.com/jejellyroll-fr/fpdb-3/blob/main/LICENSE?rgh-link-date=2021-08-09T18%3A10%3A26Z "license MIT")
+
 starting new project base on fpdb python3 adaptation of MegaphoneJon and update from ChazDazzle 
 (tx to all previous contribs)
 
@@ -17,9 +21,17 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 - see fpdb.drawio (WIP) or use puml files
 
 ## To do
+>unit test
+-write unit tests to cover all code
+
+![example workflow](https://github.com/jejellyroll-fr/fpdb-3/actions/workflows/fpdb-3.yml/badge.svg)
+
+
+>CI/CD
+-working github actions
 
 >database
-- not working mysql connector on py3.10 -> import MySQLdb (TO DO: find solution )
+- not working mysql connector on py3.1x -> import MySQLdb (TO DO: find solution )
 - psql not tested (TO DO)
 - try bdd on containers (TO DO) 
 >translation-language
@@ -92,7 +104,7 @@ pip install -r requirements.txt
 ```
 or 
 ```sh
-pip install -r requirements_linux.txt
+pip install -r requirements_win.txt
 ```
 or
 ```sh
