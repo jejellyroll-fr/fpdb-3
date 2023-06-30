@@ -2,3 +2,5 @@ pyfpdb/__pycache__/
 .vscode/
 .git/
 .pyc
+.idea
+__pycache__/
