@@ -114,25 +114,20 @@ pip install -r requirements_macos.txt
 ## Installation
 no release yet
 
+## Bugs tracking
+
+on windows:
+- with  winamax, detection position tables if play more than 1.
+- swc tournement error import
+
 ## Bugs report and new hand support
 
 you can report the bugs in the appropriate section
 Specify your Os
 you can send your HH in error by email jejellyroll.fr@gmail.com
 
-## Images
-![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpdb3_home.png)
-![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpdb3_grahspin.png)
-![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpdb3_graphcg.png)
-![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpdb3_handreplayer.png)
-![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpdb3_session_stats.png)
-![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpdb3_session_stats.png)
-![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpd3_handviever.png)
-![alt text](https://github.com/jejellyroll-fr/fpdb-3/blob/main/fpdb3_oddcalc.png)
 
-## License
 
-MIT
 
 **Free Software, Hell Yeah!**
 
