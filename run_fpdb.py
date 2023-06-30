@@ -18,17 +18,22 @@
 import os
 import sys
 
-# sys.path[0] holds the directory run_fpdb.py is in
-sys.path[0] = sys.path[0]+os.sep+"pyfpdb"
-# cd to pyfpdb subdir
-os.chdir(sys.path[0])
 
-if os.name=='nt':
-    print (os.name)
+# Modify sys.path[0] to include the 'pyfpdb' directory
+sys.path[0] = sys.path[0] + os.sep + "pyfpdb"
+print (sys.path[0])
+# Change the current working directory to the 'pyfpdb' subdir
+os.chdir(sys.path[0])
     
-    os.execvpe('pythonw.exe', list(('pythonw.exe', 'fpdb_prerun.py')) + sys.argv[1:], os.environ)
-    
+if os.name == 'nt':
+    # For Windows systems
+    print(os.name)
+    print(sys.argv[1:])
+    # Construct the command to execute
+    command = ['pythonw.exe', 'fpdb_prerun.py'] + sys.argv[1:]
+    # Execute the command using os.system
+    print(command)
+    os.system(' '.join(command))
 else:
-    os.execvpe('python', list(('python', 'fpdb_prerun.py'))+sys.argv[1:], os.environ)
-    
-# first arg is ignored (name of program being run)
+    # For non-Windows systems
+    os.execvpe('python', ['python', 'fpdb_prerun.py'] + sys.argv[1:], os.environ)

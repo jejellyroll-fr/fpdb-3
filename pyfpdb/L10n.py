@@ -16,68 +16,73 @@
 #In the "official" distribution you can find the license in agpl-3.0.txt.
 
 #You may find http://boodebr.org/main/python/all-about-python-and-unicode helpful
+import gettext
+
+
+from Configuration import GRAPHICS_PATH
+from pathlib import Path
+from Configuration import CONFIG_PATH
+import xml.etree.ElementTree as ET
+import locale
+from PyQt5.QtCore import QTranslator
+
+import subprocess
+import platform
+import locale
+
+
+def get_system_language():
+    system = platform.system()
+    if system == 'Windows':
+        return locale.getdefaultlocale()[0]
+    elif system == 'Linux':
+        process = subprocess.Popen(['locale', '-b'],
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        output, _ = process.communicate()
+        return output.decode().strip()
+    elif system == 'Darwin':
+        process = subprocess.Popen(['defaults', 'read', '-g', 'AppleLanguages'],
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        output, _ = process.communicate()
+        output = output.decode().strip().replace('\n', '').replace('"', '')
+        return output
+    else:
+        return None
+
+
+
 
 def pass_through(to_translate):
     return to_translate
 
 def set_translation(to_lang):
-
-    import gettext
-
     try:
         trans = gettext.translation("fpdb", localedir="locale", languages=[to_lang])
-        trans.install(str=True)
-        translation="_"
+        trans.install()
+        translation = QTranslator()
+        translation.load(to_lang, "locale")
     except IOError:
-        translation=pass_through
+        translation = None
     return translation
 
-#def translate(to_translate):
-#        return _(to_translate)
-#       
 def get_translation():
-    # This cannot be done in an in-line function
-    # because importing Configuration in turn calls L10n
-    # which goes wrong because the attribute translation has
-    # yet been set !!!!
-
-    # check if _ or pass_through has already been bound if it has,
-    # return it now and do not bind again.
-    # Otherwise startup will be very slow because L10n is called
-    # multiple times during startup
-
     try:
-        return "_"
-    except:
-        pass
-
-    try:
+        return _
+    except NameError:
         return pass_through
-    except:
-        pass
-    
-    #
-    # shouldn't get this far, but just in case...
-    #
-    return init_translation()
 
 def init_translation():
-    #
-    # set the system language
-    # this function normally called once only per instance
-    # Calling this function again will have no effect because
-    # translations cannot be changed on-the-fly by this function
-    #
     import Configuration
-    conf=Configuration.Config()
-    
+    conf = Configuration.Config()
+
     if conf.general['ui_language'] in ("system", ""):
-        import locale
         try:
             (lang, charset) = locale.getdefaultlocale()
-        except:
+        except Exception:
             lang = None
-        if lang==None or lang[:2]=="en":
+        if lang is None or lang[:2] == "en":
             return pass_through
         else:
             return set_translation(lang)
@@ -87,41 +92,51 @@ def init_translation():
         return set_translation(conf.general['ui_language'])
 
 def get_installed_translations():
-    #
-    # returns a list of translated installed languages, (de, es)...
-    # and a list of lang/country combos for that language (de_DE, de_AT)...
-    #
-    import locale
-    import gettext
     la_list = []
     la_co_list = []
-    
-    for (ident,la_co) in list(locale.windows_locale.items()):
+
+    for (ident, la_co) in locale.windows_locale.items():
         if gettext.find("fpdb", localedir="locale", languages=[la_co]):
             if "_" in la_co:
-                la, co = la_co.split("_",1)
+                la, co = la_co.split("_", 1)
                 la_list.append(la)
             else:
                 la_list.append(la_co)
             la_co_list.append(la_co)
-    #
-    #eliminate dupes
-    #
-    la_set=set(la_list)
-    la_list=list(la_set)
-    
+
+    la_set = set(la_list)
+    la_list = list(la_set)
+
     la_dict = {}
     la_co_dict = {}
     try:
-        import icu 
+        from icu import Locale
         for code in la_list:
             la_dict[code] = Locale.getDisplayName(Locale(code))
         for code in la_co_list:
             la_co_dict[code] = Locale.getDisplayName(Locale(code))
-    except:
+    except Exception:
         for code in la_list:
             la_dict[code] = code
         for code in la_co_list:
             la_co_dict[code] = code
 
     return la_dict, la_co_dict
+
+def set_locale_translation():
+    path = Path(GRAPHICS_PATH)
+    transformed_path = path.parent
+    locale_path = Path(transformed_path, "pyfpdb", "locale")
+    path_string = str(locale_path)
+
+    gettext.bindtextdomain('fpdb', path_string)
+    gettext.textdomain('fpdb')
+
+    tree = ET.parse(f"{CONFIG_PATH}/HUD_config.xml")
+    root = tree.getroot()
+    general_element = root.find('general')
+    ui_language = general_element.attrib.get('ui_language')
+
+    fr_translation = gettext.translation('fpdb', path_string, languages=[ui_language])
+    fr_translation.install()
+

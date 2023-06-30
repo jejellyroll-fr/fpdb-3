@@ -37,7 +37,7 @@ import string
 from functools import partial
 cl_options = '.'.join(sys.argv[1:])
 (options, argv) = Options.fpdb_options()
-
+from L10n import set_locale_translation
 import logging
 
 from PyQt5.QtCore import (QCoreApplication, QDate, Qt)
@@ -985,7 +985,7 @@ class fpdb(QMainWindow):
         configMenu.addSeparator()
         configMenu.addAction(makeAction(('Close Fpdb'), self.quit, 'Ctrl+Q', 'Quit the Program'))
 
-        importMenu.addAction(makeAction(('Bulk Import'), self.tab_bulk_import, 'Ctrl+B'))
+        importMenu.addAction(makeAction(_('Bulk Import'), self.tab_bulk_import, 'Ctrl+B'))
         #importMenu.addAction(makeAction(('_Import through eMail/IMAP'), self.tab_imap_import))
 
         hudMenu.addAction(makeAction(('HUD and Auto Import'), self.tab_auto_import, 'Ctrl+A'))
@@ -1265,6 +1265,7 @@ You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt an
     def __init__(self):
         QMainWindow.__init__(self)
         self.setWindowIcon(QIcon('tribal.jpg'))
+        set_locale_translation()
         # no more than 1 process can this lock at a time:
         self.lock = interlocks.InterProcessLock(name="fpdb_global_lock")
         self.db = None
