@@ -20,7 +20,7 @@ from __future__ import division
 from past.utils import old_div
 #import L10n
 #_ = L10n.get_translation()
-
+from L10n import set_locale_translation
 #    Standard Library modules
 import os
 import sys
