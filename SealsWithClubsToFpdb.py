@@ -260,17 +260,15 @@ class SealsWithClubs(HandHistoryConverter):
         
         
         if hand.gametype['base'] in ("hold"):
-            m =  re.search(r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>(.+(?P<FLOPET>\[\S\S\]))?.+(?=\*\*\* (FIRST\s)?FLOP \*\*\*)|.+)"
-                       r"(\*\*\* FLOP \*\*\*(?P<FLOP>  ?(\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\].+(?=\*\*\* (FIRST\s)?TURN \*\*\*)|.+))?"
-                       r"(\*\*\* TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN>\[\S\S\].+(?=\*\*\* (FIRST\s)?RIVER \*\*\*)|.+))?"
-                       r"(\*\*\* RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER>\[\S\S\].+))?"
-                       r"(\*\*\* FIRST FLOP \*\*\*(?P<FLOP1>  ?(\[\S\S\] )?\[\S\S \S\S \S\S\].+(?=\*\*\* FIRST TURN \*\*\*)|.+))?"
-                       r"(\*\*\* FIRST TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN1>\[\S\S\].+(?=\*\*\* FIRST RIVER \*\*\*)|.+))?"
-                       r"(\*\*\* FIRST RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER1>\[\S\S\].+?(?=\*\*\* SECOND (FLOP|TURN|RIVER) \*\*\*)|.+))?"
-                       r"(\*\*\* SECOND FLOP \*\*\*(?P<FLOP2>  ?(\[\S\S\] )?\[\S\S \S\S \S\S\].+(?=\*\*\* SECOND TURN \*\*\*)|.+))?"
-                       r"(\*\*\* SECOND TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN2>\[\S\S\].+(?=\*\*\* SECOND RIVER \*\*\*)|.+))?"
-                       r"(\*\*\* SECOND RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER2>\[\S\S\].+?(?=\*\*\* THIRD (FLOP|TURN|RIVER) \*\*\*)|.+))?", hand.handText,re.DOTALL)
-        
+            arr = hand.handText.split('*** HOLE CARDS ***')
+            if len(arr) > 1:
+                pre, post = arr
+            else:
+                post = arr[0]
+            m =  re.search(r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>.+(?=\*\*\* FLOP \*\*\*)|.+)"
+                       r"(\*\*\* FLOP \*\*\*(?P<FLOP> \[\S\S\S? \S\S\S? \S\S\S?\].+(?=\*\*\* TURN \*\*\*)|.+))?"
+                       r"(\*\*\* TURN \*\*\* \[\S\S\S? \S\S\S? \S\S\S?](?P<TURN>\[\S\S\S?\].+(?=\*\*\* RIVER \*\*\*)|.+))?"
+                       r"(\*\*\* RIVER \*\*\* \[\S\S\S? \S\S\S? \S\S\S? \S\S\S?](?P<RIVER>\[\S\S\S?\].+))?", hand.handText,re.DOTALL)
         # some hand histories on swc are missing a flop
         if (self.re_Turn.search(hand.handText) and not self.re_Flop.search(hand.handText)):
             raise FpdbParseError
@@ -325,7 +323,7 @@ class SealsWithClubs(HandHistoryConverter):
         m = self.re_Action.finditer(hand.streets[street])
         for action in m:
             acts = action.groupdict()
-            #print "DEBUG: acts: %s" %acts
+            print("DEBUG: acts: %s" % acts)
             if action.group('ATYPE') == ' folds':
                 hand.addFold( street, action.group('PNAME'))
             elif action.group('ATYPE') == ' checks':
@@ -396,21 +394,31 @@ class SealsWithClubs(HandHistoryConverter):
                     rake = rake + Decimal(m.group('RAKE'))
                     totalpot = totalpot + Decimal(m.group('TOTALPOT'))
             #print("rake: ", rake)
-            hand.rake = rake
+            if hand.rake is None:
+                hand.rake = rake            
+            elif hand.rakes.get('rake'):
+                hand.rakes['rake'] += rake
+            else:
+                hand.rakes['rake'] = rake
             hand.totalpot = totalpot
 
         else:
             hand.setUncalledBets(True)
-
+            rake = Decimal(0)
+            totalpot = Decimal(0)
             if self.re_rake.search(hand.handText) is not None:
-                rake = Decimal(0)
-                totalpot = Decimal(0)
+
                 for m in self.re_rake.finditer(hand.handText):
                     #print("rakex: ", Decimal(m.group('RAKE')))
                     rake = rake + Decimal(m.group('RAKE'))
                     totalpot = totalpot + Decimal(m.group('TOTALPOT'))
             #print("rake: ", rake)
-            hand.rake = rake
+            if hand.rake is None:
+                hand.rake = rake            
+            elif hand.rakes.get('rake'):
+                hand.rakes['rake'] += rake
+            else:
+                hand.rakes['rake'] = rake
             hand.totalpot = totalpot
             total = rake + totalpot
             for m in self.re_CollectPot.finditer(hand.handText):
@@ -440,34 +448,6 @@ class SealsWithClubs(HandHistoryConverter):
                         hand.addCollectPot(player=m.group('PNAME'),pot=collectpot)
                     else:
                         hand.addCollectPot(player=m.group('PNAME'),pot=m.group('POT2'))
-
-    def _readCollectPot2(self,hand):
-        pre, post = hand.handText.split('*** SUMMARY ***')        
-        acts, bovadaUncalled_v1, bovadaUncalled_v2, blindsantes, adjustment = hand.actions.get('PREFLOP'), False, False, 0, 0
-        names = [p[1] for p in hand.players]
-        if acts != None and len([a for a in acts if a[1] != 'folds']) == 0:
-            m0 = self.re_Uncalled.search(hand.handText)
-            if Decimal(m0.group('BET')):
-                bovadaUncalled_v2 = True
-                adjustment_uncalled = (m0.group('BET'))
-            elif m0 == None:
-                bovadaUncalled_v1 = True
-                has_sb = len([a[2] for a in hand.actions.get('BLINDSANTES') if a[1] == 'small blind']) > 0
-                adjustment = (Decimal(hand.bb) - Decimal(hand.sb)) if has_sb else Decimal(hand.bb)
-                blindsantes = sum([a[2] for a in hand.actions.get('BLINDSANTES')])
-        else:
-            m0 = self.re_Uncalled.search(hand.handText)
-            if not m0:
-                hand.setUncalledBets(True)
-                
-        for m in self.re_CollectPot.finditer(post):
-            pot = self.clearMoneyString(m.group('POT'))
-            if bovadaUncalled_v1 and Decimal(pot) == (blindsantes):
-                hand.addCollectPot(player=m.group('PNAME'),pot=str(Decimal(pot) - adjustment))
-            elif bovadaUncalled_v2:
-                hand.addCollectPot(player=m.group('PNAME'),pot=str(Decimal(pot)*2))
-            else:
-                hand.addCollectPot(player=m.group('PNAME'),pot=pot)
 
 
 
