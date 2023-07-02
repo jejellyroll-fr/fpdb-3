@@ -70,7 +70,7 @@ class SealsWithClubs(HandHistoryConverter):
     re_Antes            = re.compile(r"^%(PLYR)s: posts the ante (?P<ANTE>[.0-9]+)" % substitutions, re.MULTILINE)
     re_PostBoth         = re.compile(r"^%(PLYR)s: posts small \& big blind (?P<SBBB>[.0-9]+)" %  substitutions, re.MULTILINE)
     re_HeroCards        = re.compile(r"^Dealt to %(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % substitutions, re.MULTILINE)
-    re_Action           = re.compile(r"""^%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)\s(?P<POT>\d{1,3}(,\d{3})*(\.\d+)?)\sto\s(?P<BET>\d{1,3}(,\d{3})*(\.\d+)?)"""
+    re_Action           = re.compile(r"""%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)\s(?P<POT>\d{1,3}(,\d{3})*(\.\d+)?)\sto\s(?P<BET>\d{1,3}(,\d{3})*(\.\d+)?)"""
                          %  substitutions, re.MULTILINE|re.VERBOSE)
     re_ShowdownAction   = re.compile(r"^(?P<PNAME>\w+): (shows \[(?P<CARDS>.*)\]\s\((?P<FHAND>.*?)\)|doesn't show hand|mucks hand)", re.MULTILINE)
     re_CollectPot       = re.compile(r"^Seat (?P<SEAT>[0-9]+): %(PLYR)s ((%(BRKTS)s(((((?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \((?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(\s\sand\s(won\s\([.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$)|collected\s\((?P<POT2>[.\d]+)\)))|folded ((on the (Flop|Turn|River))|before Flop)))|folded before Flop \(didn't bet\))" %  substitutions, re.MULTILINE)
@@ -256,30 +256,43 @@ class SealsWithClubs(HandHistoryConverter):
 
         # PREFLOP = ** Dealing down cards **
         # This re fails if,  say, river is missing; then we don't get the ** that starts the river.
-        
-        
-        
+
+
+
         if hand.gametype['base'] in ("hold"):
             arr = hand.handText.split('*** HOLE CARDS ***')
             if len(arr) > 1:
                 pre, post = arr
             else:
                 post = arr[0]
-            m =  re.search(r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>.+(?=\*\*\* FLOP \*\*\*)|.+)"
-                       r"(\*\*\* FLOP \*\*\*(?P<FLOP> \[\S\S\S? \S\S\S? \S\S\S?\].+(?=\*\*\* TURN \*\*\*)|.+))?"
-                       r"(\*\*\* TURN \*\*\* \[\S\S\S? \S\S\S? \S\S\S?](?P<TURN>\[\S\S\S?\].+(?=\*\*\* RIVER \*\*\*)|.+))?"
-                       r"(\*\*\* RIVER \*\*\* \[\S\S\S? \S\S\S? \S\S\S? \S\S\S?](?P<RIVER>\[\S\S\S?\].+))?", hand.handText,re.DOTALL)
+            pattern_preflop = r"^(?P<PREFLOP>.+(?=\*\*\* FLOP \*\*\*)|.+)"
+            if match := re.search(pattern_preflop, post):
+                preflop = match.group('PREFLOP')
+                print(preflop)
+            pattern_flop = r"^(\*\*\* FLOP \*\*\*(?P<FLOP> \[\S\S\S? \S\S\S? \S\S\S?\].+(?=\*\*\* TURN \*\*\*)|.+))?"
+            if match := re.search(pattern_flop, post):
+                flop = match.group('FLOP')
+                print(flop)
+            pattern_turn = r"^(\*\*\* TURN \*\*\* \[\S\S\S? \S\S\S? \S\S\S?]\s(?P<TURN>\[\S\S\S?\]\s.+(?=\*\*\* RIVER \*\*\*)|.+))?"
+            if match := re.search(pattern_turn, post):
+                turn = match.group('TURN')
+                print(turn)
+            pattern_river = r"^(\*\*\* RIVER \*\*\* \[\S\S\S? \S\S\S? \S\S\S? \S\S\S?]\s(?P<RIVER>\[\S\S\S?\]\s.+(?=\*\*\* SUMMARY \*\*\*)|.+))?"
+            if match := re.search(pattern_river, post):
+                river = match.group('RIVER')
+                print(river)
+
         # some hand histories on swc are missing a flop
         if (self.re_Turn.search(hand.handText) and not self.re_Flop.search(hand.handText)):
             raise FpdbParseError
         if (self.re_River.search(hand.handText) and not self.re_Turn.search(hand.handText)):
             raise FpdbParseError
-        
+
         # some hand histories on swc don't have hole cards either
-        if not m:
+        if not match:
             raise FpdbParseError
-     
-        hand.addStreets(m)
+
+        hand.addStreets(match)
 
 
     def readCommunityCards(self, hand, street): # street has been matched by markStreets, so exists in this hand
