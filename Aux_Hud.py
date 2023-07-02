@@ -229,6 +229,7 @@ class Simple_table_mw(Aux_Base.Seat_Window):
             self.menu_label = ("fpdb menu")
 
         lab = QLabel(self.menu_label)
+
         lab.setStyleSheet("background: %s; color: %s;" % (self.aw.bgcolor, self.aw.fgcolor))
 
         self.setLayout(QVBoxLayout())
