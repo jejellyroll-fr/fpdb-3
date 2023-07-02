@@ -100,8 +100,8 @@ elif sys.path[0] == "": # we are probably running directly (>>>import Configurat
     print(temp)
     FPDB_ROOT_PATH = os.path.join(temp, os.pardir)   # go up one level (to fpdbroot)
 else: # all other cases
-    FPDB_ROOT_PATH = os.path.dirname(sys.path[0])  # should be source path to /fpdbroot
-    #FPDB_ROOT_PATH = os.getcwd()
+    #FPDB_ROOT_PATH = os.path.dirname(sys.path[0])  # should be source path to /fpdbroot
+    FPDB_ROOT_PATH = os.getcwd()
 
 sysPlatform = platform.system()  #Linux, Windows, Darwin
 if sysPlatform[0:5] == 'Linux':
