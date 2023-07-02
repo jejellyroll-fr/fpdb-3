@@ -428,7 +428,8 @@ or None if we fail to get the info """
         print('collected pot', hand.totalcollected)
         if hand.totalcollected>hand.totalpot:
             print("collected pot>total pot")
-        hand.rake = hand.totalpot - hand.totalcollected #  * Decimal('0.05') # probably not quite right
+        if hand.rake is None:
+            hand.rake = hand.totalpot - hand.totalcollected #  * Decimal('0.05') # probably not quite right
         if self.siteId == 9 and hand.gametype['type'] == "tour":
             round = -5 #round up to 10
         elif hand.gametype['type'] == "tour":
