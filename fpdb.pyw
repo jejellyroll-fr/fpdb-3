@@ -1264,7 +1264,9 @@ You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt an
 
     def __init__(self):
         QMainWindow.__init__(self)
-        self.setWindowIcon(QIcon('tribal.jpg'))
+        cards = os.path.join(Configuration.GRAPHICS_PATH,'tribal.jpg')
+        if os.path.exists(cards):
+            self.setWindowIcon(QIcon(cards))
         set_locale_translation()
         # no more than 1 process can this lock at a time:
         self.lock = interlocks.InterProcessLock(name="fpdb_global_lock")

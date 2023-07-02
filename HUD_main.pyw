@@ -134,7 +134,7 @@ class HUD_main(QObject):
         self.main_window.closeEvent = lambda event: sys.exit()
         self.vb.addWidget(self.label)
         self.main_window.setWindowTitle("HUD Main Window")
-        cards = os.path.join(self.config.graphics_path,'fpdb-cards.png')
+        cards = os.path.join(self.config.graphics_path,'tribal.jpg')
         if os.path.exists(cards):
             self.main_window.setWindowIcon(QIcon(cards))
         
