@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hands</title>
+  <!-- Add Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-dark">
+    <div class="container">
+      <h1 class="text-light">Hands</h1>
+      <div class="table-responsive">
+        <table class="table table-dark table-striped">
+            <thead>
+        <tr>
+            <th>ID</th>
+            <th>Table Name</th>
+            <th>Site Hand No</th>
+            <th>Tourney ID</th>
+            <th>Game Type ID</th>
+            <th>Session ID</th>
+            <th>File ID</th>
+            <th>Start Time</th>
+            <th>Import Time</th>
+            <th>Seats</th>
+            <th>Hero Seat</th>
+            <th>Max Position</th>
+            <th>Board Card 1</th>
+            <th>Board Card 2</th>
+            <th>Board Card 3</th>
+            <th>Board Card 4</th>
+            <th>Board Card 5</th>
+            <th>Texture</th>
+            <th>Run It Twice</th>
+            <th>Players VPI</th>
+            <th>Players at Street 1</th>
+            <th>Players at Street 2</th>
+            <th>Players at Street 3</th>
+            <th>Players at Street 4</th>
+            <th>Players at Showdown</th>
+            <th>Street 0 Raises</th>
+            <th>Street 1 Raises</th>
+            <th>Street 2 Raises</th>
+            <th>Street 3 Raises</th>
+            <th>Street 4 Raises</th>
+            <th>Street 0 Pot</th>
+            <th>Street 1 Pot</th>
+            <th>Street 2 Pot</th>
+            <th>Street 3 Pot</th>
+            <th>Street 4 Pot</th>
+            <th>Final Pot</th>
+            <th>Comment</th>
+            <th>Comment TS</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for hand in hands %}
+        <tr>
+            <td>{{ hand[0] }}</td>
+            <td>{{ hand[1] }}</td>
+            <td>{{ hand[2] }}</td>
+            <td>{{ hand[3] }}</td>
+            <td>{{ hand[4] }}</td>
+            <td>{{ hand[5] }}</td>
+            <td>{{ hand[6] }}</td>
+            <td>{{ hand[7] }}</td>
+            <td>{{ hand[8] }}</td>
+            <td>{{ hand[9] }}</td>
+            <td>{{ hand[10] }}</td>
+            <td>{{ hand[11] }}</td>
+            <td>{{ hand[12] }}</td>
+            <td>{{ hand[13] }}</td>
+            <td>{{ hand[14] }}</td>
+            <td>{{ hand[15] }}</td>
+            <td>{{ hand[16] }}</td>
+            <td>{{ hand[17] }}</td>
+            <td>{{ hand[18] }}</td>
+            <td>{{ hand[19] }}</td>
+            <td>{{ hand[20] }}</td>
+            <td>{{ hand[21] }}</td>
+            <td>{{ hand[22] }}</td>
+            <td>{{ hand[23] }}</td>
+            <td>{{ hand[24] }}</td>
+            <td>{{ hand[25] }}</td>
+            <td>{{ hand[26] }}</td>
+            <td>{{ hand[27] }}</td>
+            <td>{{ hand[28] }}</td>
+            <td>{{ hand[29] }}</td>
+            <td>{{ hand[30] }}</td>
+            <td>{{ hand[31] }}</td>
+            <td>{{ hand[32] }}</td>
+            <td>{{ hand[33] }}</td>
+            <td>{{ hand[34] }}</td>
+            <td>{{ hand[35] }}</td>
+            <td>{{ hand[36] }}</td>
+            <td>{{ hand[37] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+</div>
+</body>
+</html>

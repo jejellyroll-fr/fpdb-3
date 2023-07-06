@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Files</title>
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-dark">
+    <div class="container">
+      <h1 class="text-light">Files</h1>
+      <div class="table-responsive">
+        <table class="table table-dark table-striped">
+            <thead>
+        <tr>
+            <th>ID</th>
+            <th>File</th>
+            <th>Site</th>
+            <th>Type</th>
+            <th>Start Time</th>
+            <th>Last Update</th>
+            <th>End Time</th>
+            <th>Hands</th>
+            <th>Stored Hands</th>
+            <th>Duplicates</th>
+            <th>Partial</th>
+            <th>Skipped</th>
+            <th>Errors</th>
+            <th>Total Time 100</th>
+            <th>Finished</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for file in files %}
+        <tr>
+            <td>{{ file[0] }}</td>
+            <td>{{ file[1] }}</td>
+            <td>{{ file[2] }}</td>
+            <td>{{ file[3] }}</td>
+            <td>{{ file[4] }}</td>
+            <td>{{ file[5] }}</td>
+            <td>{{ file[6] }}</td>
+            <td>{{ file[7] }}</td>
+            <td>{{ file[8] }}</td>
+            <td>{{ file[9] }}</td>
+            <td>{{ file[10] }}</td>
+            <td>{{ file[11] }}</td>
+            <td>{{ file[12] }}</td>
+            <td>{{ file[13] }}</td>
+            <td>{{ file[14] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+</div>
+    <!-- Add Bootstrap JS (Optional) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
