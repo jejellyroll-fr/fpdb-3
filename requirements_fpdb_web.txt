@@ -1,0 +1,6 @@
+fastapi
+Flask
+uvicorn
+chardet
+charset-normalizer
+gunicorn
