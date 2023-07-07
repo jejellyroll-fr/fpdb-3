@@ -128,3 +128,60 @@ def get_hands_players(player_id):
     hands_players = cursor.fetchall()
     conn.close()
     return hands_players
+
+def get_handscount():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) AS handCount FROM Hands")
+    handscount = cursor.fetchall()
+    conn.close()
+    return handscount
+
+def get_handscount_cg():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("""SELECT COUNT(*) AS handCount
+                        FROM Hands
+                        WHERE tourneyId IS NULL""")
+    handscount_cg = cursor.fetchall()
+    conn.close()
+    return handscount_cg
+
+def get_handscount_tour():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("""SELECT COUNT(*) AS handCount
+                        FROM Hands
+                        WHERE tourneyId IS NOT NULL""")
+    handscount_tour = cursor.fetchall()
+    conn.close()
+    return handscount_tour
+
+def get_playerscount():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("""SELECT COUNT(DISTINCT playerId) AS distinctPlayerCount FROM HandsPlayers;
+    """)
+    playerscount = cursor.fetchall()
+    conn.close()
+    return playerscount
+
+def get_playerscount_cg():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("""SELECT COUNT(DISTINCT playerId) AS distinctPlayerCount FROM HandsPlayers
+                    WHERE tourneysPlayersId IS NULL 
+                    """)
+    playerscount_cg = cursor.fetchall()
+    conn.close()
+    return playerscount_cg
+
+def get_playerscount_tour():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("""SELECT COUNT(DISTINCT playerId) AS distinctPlayerCount FROM HandsPlayers
+                    WHERE tourneysPlayersId IS NOT NULL
+                    """)
+    playerscount_tour = cursor.fetchall()
+    conn.close()
+    return playerscount_tour
