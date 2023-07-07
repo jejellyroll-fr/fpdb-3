@@ -28,8 +28,15 @@
     <div class="container">
         <h1 class="text-light">Welcome to FPDB 3</h1>
         <div class="table-responsive">
-            <p class="text-light">This is the main page.</p>
+            <p class="text-light"><b>FPDB</b> is a database program to track your online poker games with HUD (heads-up display), the behaviour of the other players and your winnings/losses while you are playing or after you finish in review.
 
+              Supports <i>Holdem, Omaha, Stud and Razz</i> for cash games as well as SnG and MTT tournaments with more possibly coming in the future. The software is currently in alpha status, which means some of the features are not working yet. As it's open source you're free to add any feature you like or modify the existing ones to fit your needs.</p>
+              <p class="text-light"><u>the database contains</u>:<br>
+                 <b>{{ handscount[0][0] }}</b> hands including <b>{{ handscount_cg[0][0] }}</b> <i>cash game</i> hands and <b>{{ handscount_tour[0][0] }}</b> <i>tournament</i> hands<br>
+                 <b>{{ playerscount[0][0] }}</b> players including {{ playerscount_cg[0][0] }} cash game players and {{ playerscount_tour[0][0] }} tournament players</p>
+                 <p class="text-light">You are playing on :<br>
+                  <i>site</i> as <b>heroname</b> including 10 cash game hands and 13 tournament hands<br>
+                  </p>
         </div>
     </div>
     <!-- Add Bootstrap JS -->
