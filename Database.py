@@ -848,10 +848,12 @@ class Database(object):
         elif backend == Database.SQLITE:
             create = True
             import sqlite3
+            from sqlalchemy.pool import QueuePool
+            from sqlalchemy import create_engine
             if use_pool:
-                sqlite3 = pool.manage(sqlite3, pool_size=1)
-            #else:
-            #    log.warning("SQLite won't work well without 'sqlalchemy' installed.")
+                pool = QueuePool
+            else:
+                pool = None
 
             if database != ":memory:":
                 if not os.path.isdir(self.config.dir_database) and create:
@@ -861,24 +863,28 @@ class Database(object):
             self.db_path = database
             log.info(("Connecting to SQLite: %s") % self.db_path)
             if os.path.exists(database) or create:
-                self.connection = sqlite3.connect(self.db_path, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES )
-                self.__connected = True
+                engine = create_engine('sqlite:///' + self.db_path, poolclass=pool)
+                self.connection = engine.connect()
+
+                # Access the underlying SQLite connection
+                sqlite_conn = self.connection.connection
+
                 sqlite3.register_converter("bool", lambda x: bool(int(x)))
                 sqlite3.register_adapter(bool, lambda x: 1 if x else 0)
                 sqlite3.register_converter("decimal", convert_decimal)
                 sqlite3.register_adapter(Decimal, adapt_decimal)
-                self.connection.create_function("floor", 1, math.floor)
-                self.connection.create_function("sqrt", 1, math.sqrt)
+                sqlite_conn.create_function("floor", 1, math.floor)
+                sqlite_conn.create_function("sqrt", 1, math.sqrt)
                 tmp = sqlitemath()
-                self.connection.create_function("mod", 2, tmp.mod)
+                sqlite_conn.create_function("mod", 2, tmp.mod)
                 if use_numpy:
-                    self.connection.create_aggregate("variance", 1, VARIANCE)
+                    sqlite_conn.create_aggregate("variance", 1, VARIANCE)
                 else:
                     log.warning(("Some database functions will not work without NumPy support"))
-                self.cursor = self.connection.cursor()
+                self.cursor = sqlite_conn.cursor()
                 self.cursor.execute('PRAGMA temp_store=2')  # use memory for temp tables/indexes
                 self.cursor.execute('PRAGMA journal_mode=WAL')  # use memory for temp tables/indexes
-                self.cursor.execute('PRAGMA synchronous=0') # don't wait for file writes to finish
+                self.cursor.execute('PRAGMA synchronous=0')  # don't wait for file writes to finish
             else:
                 raise FpdbError("sqlite database "+database+" does not exist")
         else:
