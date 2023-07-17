@@ -4,6 +4,7 @@
   <!-- Add Bootstrap CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="styles.css"> 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 </head>
 <body class="bg-dark">
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -21,20 +22,89 @@
         </div>
     </div>
 </nav>
+<div class="container mt-4">
+
+  <!-- Pagination info -->
+  <p class="text-light">
+    Showing page {{ page }} of {{ total_pages }} pages
+  </p>
+
+<!-- Pagination links -->
+<nav aria-label="Players pagination">
+  <ul class="pagination">
+
+    {% if page > 1 %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page - 1 }}">Prev</a> 
+      </li>
+    {% endif %}
+
+    {% for p in range(1, total_pages + 1) %}
+      <li class="page-item {% if p == page %}active{% endif %}">
+        <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+      </li>
+    {% endfor %}
+
+    {% if page < total_pages %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page + 1 }}">Next</a>
+      </li>
+    {% endif %}
+
+  </ul>
+</nav>
+
+<form class="row row-cols-lg-auto g-3 align-items-center">
+
+  <div class="col-12">
+
+  <input name="name" value="{{selected_name}}" type="text" class="form-control" placeholder="Search player by name..." aria-label="Username" aria-describedby="basic-addon1">
+</div>
+
+  <div class="col-12">
+<button  type="submit" class="btn btn-secondary"><i class="bi bi-search"></i></button>
+
+</div>
+
+<div class="col-12">
+  <select name="site" class="form-select" aria-label="Default select example">
+    <option value="Winamax">Winamax</option>
+    <option value="PokerStars">PokerStars</option>
+    {% for site in sites %}
+    <option value="{{site}}" {% if selected_site == site %}selected{% endif %}>{{site}}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<div class="col-12">
+  <button  type="submit" class="btn btn-secondary">Filter Sites</button>
+</div>  
+<div class="col-12">
+<a href="/players">
+  <button  type="button" class="btn btn-secondary"><i class="bi bi-trash"></i> </button>
+
+</a>
+</div>
+
+</form>
+
+
+
+  <!-- Players table -->
   <div class="container">
     <h1 class="text-light">Players</h1>
     <div class="table-responsive">
       <table class="table table-dark table-striped">
-          <thead>
-        <tr>
+    <thead>
+      <tr>
           <th>Id</th>
           <th>Name</th>
           <th>Sites</th>
           <th>Hero</th>
-          <th>Chars</th>
-          <th>Comments</th>
-          <th>CommentTs</th>
-          <th>Hands</th>
+          <th>Total Hands</th>
+          <th>Total Hands Cash games</th>
+          <th>Total Hands Tournement or SNG</th>
+          <th>Hands Details</th>
         </tr>
       </thead>
       <tbody>

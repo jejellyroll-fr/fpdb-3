@@ -101,17 +101,68 @@ def get_handsStove():
     conn.close()
     return handsStoves
 
-def get_players():
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-    cursor.execute("""
-    SELECT Players.id, Players.name, Sites.name AS site, Players.hero, Players.chars, Players.comment, Players.commentTs
-    FROM Players
-    LEFT JOIN Sites ON Players.siteId = Sites.id;
-    """)
-    players = cursor.fetchall()
-    conn.close()
-    return players
+def get_players(
+  name=None,
+  site=None,
+  page=1,
+  per_page=10
+):
+
+  conn = sqlite3.connect(DATABASE)
+  cursor = conn.cursor()
+
+  # Get total count
+  cursor.execute("SELECT COUNT(*) AS total FROM Players p")
+  total = cursor.fetchone()[0]
+
+  # Calculate offset
+  offset = (page - 1) * per_page
+  
+  # SQL query string
+  sql = """
+        SELECT 
+        p.id, p.name AS player_name , s.name AS site, p.hero,
+        COUNT(hp.id) AS total_hands,
+        SUM(CASE WHEN hp.tourneysPlayersId IS NULL THEN 1 ELSE 0 END) AS cash_hands, 
+        SUM(CASE WHEN hp.tourneysPlayersId IS NOT NULL THEN 1 ELSE 0 END) AS tournament_hands
+        FROM Players p
+        LEFT JOIN Sites s ON p.siteId = s.id 
+        LEFT JOIN HandsPlayers hp ON hp.playerId = p.id
+        WHERE
+        (:name IS NULL OR p.name LIKE :name) 
+        AND
+        (:site IS NULL OR s.name = :site)
+        GROUP BY 
+        p.id, p.name, s.name, p.hero 
+        LIMIT
+        :per_page
+        OFFSET 
+        :offset
+  """
+
+  # Parameters dict
+  params = {
+    'name': name,
+    'site': site,
+    'per_page': per_page,
+    'offset': offset
+  }
+  
+  # Convert dict to string
+  params_str = str(params)
+
+  # Join query string  
+  query = " ".join([sql, params_str])
+
+  # Print formatted query
+  #print(query)
+
+  # Execute query
+  cursor.execute(sql, params)
+
+  players = cursor.fetchall()
+
+  return players, total
 
 def get_hands_players(player_id):
     conn = sqlite3.connect(DATABASE)

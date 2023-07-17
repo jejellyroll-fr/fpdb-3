@@ -144,8 +144,8 @@ elif OS_FAMILY == 'Mac':
 elif OS_FAMILY == 'Linux':
     APPDATA_PATH = os.path.expanduser(u"~")
     CONFIG_PATH = os.path.join(APPDATA_PATH, ".fpdb")
-    GRAPHICS_PATH = os.path.join(FPDB_ROOT_PATH, "gfx")
-    PYFPDB_PATH = os.path.join(FPDB_ROOT_PATH, "pyfpdb")
+    GRAPHICS_PATH = os.path.join(FPDB_ROOT_PATH,"gfx")
+    PYFPDB_PATH = os.path.join(FPDB_ROOT_PATH)
 else:
     APPDATA_PATH = False
     CONFIG_PATH = False
