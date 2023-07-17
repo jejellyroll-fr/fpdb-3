@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from sql_request import *
 from base_model import *
 from typing import List, Optional
+import math
 
 app = FastAPI()
 
@@ -22,10 +23,34 @@ async def get_handsPlayers_api():
 
 
 
-@app.get("/players", response_model=List[Player])
-async def get_players_api():
-    players = get_players()
-    return JSONResponse(content=players)
+@app.get("/players")
+async def get_players_api(
+  name: str = None,
+  site: str = None,
+  page: int = 1, 
+  per_page: int = 10
+):
+
+  # Call get_players() and unpack players and total
+  players, total = get_players(
+    name=name,
+    site=site, 
+    page=page,
+    per_page=per_page
+  )
+
+  # Calculate total pages from total count
+  total_pages = math.ceil(total / per_page)
+
+  return JSONResponse({
+    "data": players,
+    "page": page,
+    "per_page": per_page,
+    "total": total,
+    "total_pages": total_pages,
+    "name": name, 
+    "site": site
+  })
 
 @app.get("/players/{playerId}/hands", response_model=List[HandsPlayer])
 def get_player_hands_api(playerId: int):

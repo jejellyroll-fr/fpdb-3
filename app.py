@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sql_request import *
 from base_model import *
+import math
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -35,10 +36,33 @@ async def get_handsPlayers_api(request: Request):
 
 
 
-@app.get("/players", response_class=HTMLResponse)
-async def get_players_api(request: Request):
-    players = get_players()
-    return templates.TemplateResponse("players.html", {"request": request, "players": players})
+@app.get("/players")
+def get_players_endpoint(request: Request,
+                         name: str = None, 
+                         site: str = None,
+                         page: int = 1,
+                         per_page: int = 10):
+
+  # Call get_players() and unpack players and total  
+  players, total = get_players(
+                               name=name,
+                               site=site,
+                               page=page,
+                               per_page=per_page)
+
+  # Calculate total pages from total count
+  total_pages = math.ceil(total / per_page)
+
+  return templates.TemplateResponse("players.html", {
+    "request": request,
+    "players": players,
+    "page": page, 
+    "per_page": per_page,
+    "total": total,
+    "total_pages": total_pages, 
+    "name": name,
+    "site": site  
+  })
 
 @app.get("/players/{playerId}/hands", response_class=HTMLResponse)
 async def get_hands_players_api(playerId: int, request: Request):
@@ -50,7 +74,7 @@ async def get_hands_players_api(playerId: int, request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=80)
+    uvicorn.run(app, host="127.0.0.1", port=8080)
 
 
 
