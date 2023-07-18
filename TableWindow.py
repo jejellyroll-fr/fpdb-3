@@ -131,7 +131,7 @@ class Table_Window(object):
             return None
 
         self.search_string = getTableTitleRe(self.config, self.site, self.type, **table_kwargs)
-        
+        print("search string:", self.search_string)
         # make a small delay otherwise Xtables.root.get_windows()
         #  returns empty for unknown reasons
         sleep(0.1)

@@ -63,14 +63,18 @@ class Table(Table_Window):
         wins = xconn.core.GetProperty(False, root, nclatom, winatom, 0, (2**32) - 1).reply().value.to_atoms()
         for win in wins:
             w_title = xconn.core.GetProperty(False, win, wnameatom, utf8atom, 0, (2**32) - 1).reply().value.to_string()
+            print("w_title:" , w_title)
+            #escaped_search_string = re.escape(self.search_string)
+            #if re.search(escaped_search_string, w_title, re.I):
             if re.search(self.search_string, w_title, re.I):
-                print(self.search_string)
-                print(w_title)
+                log.debug('%s matches: %s', w_title, self.search_string)
                 log.info('"%s" matches: "%s"', w_title, self.search_string)
                 title = w_title.replace('"', '')
                 if self.check_bad_words(title): continue
                 self.number = win
+                print("self.number:", self.number)
                 self.title = title
+                print("self.title:", self.title)
                 break
 
         if self.number is None:
@@ -87,7 +91,7 @@ class Table(Table_Window):
         try:
             geo = xconn.core.GetGeometry(self.number).reply()
             absxy = xconn.core.TranslateCoordinates(self.number, root, geo.x, geo.y).reply()
-            print('coord:', absxy.dst_x, absxy.dst_y)
+            #print('coord:', absxy.dst_x, absxy.dst_y)
             return {'x'        : absxy.dst_x,
                     'y'        : absxy.dst_y,
                     'width'    : geo.width,
