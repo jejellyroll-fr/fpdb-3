@@ -87,6 +87,7 @@ class Table(Table_Window):
         try:
             geo = xconn.core.GetGeometry(self.number).reply()
             absxy = xconn.core.TranslateCoordinates(self.number, root, geo.x, geo.y).reply()
+            print('coord:', absxy.dst_x, absxy.dst_y)
             return {'x'        : absxy.dst_x,
                     'y'        : absxy.dst_y,
                     'width'    : geo.width,
