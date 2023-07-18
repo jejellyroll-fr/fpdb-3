@@ -31,56 +31,59 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 -working github actions
 
 >database
-- not working mysql connector on py3.1x -> import MySQLdb (TO DO: find solution )
-- psql not tested (Tested OK)
+- not working mysql connector on py3.1x -> will be not support 
+- postgreSQL and SQLite3 tested OK
 - try bdd on containers (TO DO) 
 >translation-language
-- not working translation -> from icu import Locale(TO DO: find better solution- rework - need to finish)
+- not working translation -> from icu import Locale(TO DO: find better solution- OK - need to finish traduction)
 >pokerstove
-- add odds calc (fast solution-> use Pokerprotools online WIP) -> prokerprotool is down (TO DO: other option install on pc, or use other lib ploev,treys... WIP)
-- update poker-eval lib (https://github.com/jejellyroll-fr/poker-eval)->added 5 cards PLO, 5 card PLO8 and 6 card PLO -> OK
-- update pypoker (https://github.com/jejellyroll-fr/pypoker-eval)->Python 3 ->OK (TO DO: add 6 and 5 cards plo)
+- add odds calc (fast solution-> use Pokerprotools online WIP) -> add last version poker-eval and pypoker
+- update poker-eval lib (https://github.com/jejellyroll-fr/poker-eval)->added 5 cards PLO, 5 card PLO8 and 6 card PLO -> OK -> think to add kuhn and short deck nl
+- update pypoker-eval (https://github.com/jejellyroll-fr/pypoker-eval)->Python 3 ->OK (TO DO: add 6 and 5 cards plo)
 >replayer
-- not working ->fixed
 - rethink the distribution of players around the table (TO DO: WIP)
 - add pot odds and equity(TO DO)
+- will probably replace by web version(TO DO)
 
 >handviewer(cash)
 - Filter bug (player and site =not good working)
+- will probably replace by web version(TO DO)
 >import
-- correct bug on winamax (no SB)->Fixed 
-- correct bug go fast (adding holdhup(extra cash->special rake 10%), error collected pot>total pot)->fixed(TO DO REWORK: include Chaz's methode, better way to do)
-- correct bug starting  hand razz guiringcashplayer
 - PMU not working siteid error(TODO)
 - correct bug import from pokertracker summary (TODO)
+- add SWC and so on
+- re add old dead sites
 >graphviz
 - use more modern lib (plotty ...)
 - improve visualization (TODO)
+- will probably replace by web version(TO DO)
 >stats
 - to verify
 - add spin stats (TODO: CeV depending on calculation )
+- will probably replace by web version(TO DO)
 >hud
 - windows not working (error) -> Fixed
-- mac disappear behind the table -> fixed(Big sur)->regression Bug :( 
-- linux disappear behind the table (ubuntu) -> Fixed -> not working with bottles
+- mac disappear behind the table -> fixed
+- linux disappear behind the table (ubuntu) -> Fixed on winamax native linux app and KDE -> to Fix when use bottles
 - mtt table detection - bug on ipoker, must investigate other rooms
 - add ui for seat config per site (DONE)
 - add ui for Hud config per games (DONE)
+- edit config will probably replace by web version(TO DO)
 >ui
 - dark theme
 - more modern (perhaps use pyside6 in the future)
+- add web server Flask+fastapi (WIP)
 >notebook jupyter
 - add some notebooks
 
->data viz
-- idea sql -> APi -> front web (must POC)
+
 
 
 >site hud
 
 | X      |Os    |MTT| CG|Fast|SNG|SPIN|
 |------- |------|---|---|----|---|----|
-|winamax | win11| OK  | OK(except Floop-no HH text)| KO | OK| OK |
+|winamax | win11, osx, linux| OK  | OK(except Floop-no HH text)| KO | OK| OK |
 |winamax | osx big sur (intel)| OK  | OK(except Floop-no HH text)| KO | OK| OK |
 |Pokerstars| Win11| OK  |OK (except Fusion-fixed)| KO | OK  | OK   |
 |Pokerstars| osx big sur (intel)| OK  |OK (except Fusion-fixed)| KO | OK  | OK   |
@@ -91,7 +94,7 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 
 >poker rooms on linux with bottles (https://docs.usebottles.com/)
 - Pokerstars.fr (ok) 
-- Winamax new soft(ok)
+- Winamax new soft(ok with native linux app)
 - PMUPoker (ok) - must restart install exe
 - Unibet.fr(ko) - must update exe
 - betclic.fr (ko) - installment ko
@@ -99,7 +102,7 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 
 ## Requirement for dev 
 Install the dependencies and devDependencies .
-I Use anaconda with Python 3.10
+I Use anaconda with Python 3.11
 
 or Pip
 
@@ -121,7 +124,7 @@ no release yet
 ## Bugs tracking
 
 on windows:
-- with  winamax, detection position tables if play more than 1.
+- with  winamax on windows, detection position tables if play more than 1.
 - swc tournement error import
 
 ## Bugs report and new hand support

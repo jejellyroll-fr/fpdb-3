@@ -288,7 +288,7 @@ class HUD_main(QObject):
         if type == "tour":   # hand is from a tournament
             tab_number = tab_number.rsplit(' ',1)[-1]
             temp_key = "%s Table %s" % (tour_number, tab_number)
-            print("temp_key tour",temp_key)
+            print("temp_key tour:",temp_key)
         else:
 
             temp_key = table_name
@@ -396,6 +396,7 @@ class HUD_main(QObject):
                 
             cards = self.get_cards(new_hand_id, poker_game)
             table_kwargs = dict(table_name=table_name, tournament=tour_number, table_number=tab_number)
+            print("table kwarg:", table_kwargs)
             tablewindow = Tables.Table(self.config, site_name, **table_kwargs)
             if tablewindow.number is None:
                 print('tablewindow.number is none')
