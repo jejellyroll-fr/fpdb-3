@@ -23,7 +23,7 @@ import Exceptions
 #_ = L10n.get_translation()
 from HandHistoryConverter import *
 from decimal_wrapper import Decimal
-
+import platform
     # Winamax HH Format
 
 class Winamax(HandHistoryConverter):
@@ -577,7 +577,11 @@ class Winamax(HandHistoryConverter):
         Freeroll 250€(16362273)#035 - 2,50k-5k (ante 500) NL Holdem  - Buy-in: 0€
         """
         log.info("Winamax.getTableTitleRe: table_name='%s' tournament='%s' table_number='%s'" % (table_name, tournament, table_number))
-        regex = "Winamax %s /" % (table_name)
+        sysPlatform = platform.system()  #Linux, Windows, Darwin
+        if sysPlatform[0:5] == 'Linux':
+            regex = "Winamax %s" % (table_name)
+        else:
+            regex = "Winamax %s /" % (table_name)
         print("regex get table cash title:", regex)
         if tournament:
             #regex = "Winamax \(%s\)#(%s|%02d|%03d|%04d|%05d)" % (tournament, table_number, int(table_number), int(table_number), int(table_number), int(table_number))
