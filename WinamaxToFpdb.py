@@ -584,8 +584,13 @@ class Winamax(HandHistoryConverter):
             regex = "Winamax %s /" % (table_name)
         print("regex get table cash title:", regex)
         if tournament:
+            if table_number > 99:
             #regex = "Winamax \(%s\)#(%s|%02d|%03d|%04d|%05d)" % (tournament, table_number, int(table_number), int(table_number), int(table_number), int(table_number))
-            regex = "Winamax \(%s\)(#%s)" % (tournament, table_number)
+                regex = r"Winamax\s+([^\(]+)\(%s\)\(#%s\)" % (tournament, table_number)
+            elif table_number < 100 and table_number > 9:
+                regex = r"Winamax\s+([^\(]+)\(%s\)\(#0%s\)" % (tournament, table_number)
+            else:
+                regex = r"Winamax\s+([^\(]+)\(%s\)\(#00%s\)" % (tournament, table_number)
            
             print("regex get mtt sng expresso cash title:", regex)
         log.info("Winamax.getTableTitleRe: returns: '%s'" % (regex))
