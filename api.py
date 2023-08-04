@@ -22,6 +22,11 @@ async def get_handsPlayers_api():
     return JSONResponse(content=handsPlayers)
 
 
+@app.get("/heroes", response_model=List[Player])
+async def get_heroes_api():
+    heroes = get_heroes()
+    return JSONResponse(content=heroes)
+
 
 @app.get("/players")
 async def get_players_api(
