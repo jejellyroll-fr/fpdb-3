@@ -164,6 +164,20 @@ def get_players(
 
   return players, total
 
+def get_heroes():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("""
+                        SELECT p.name AS hero_name, s.name AS site_name
+                        FROM Players p
+                        JOIN Sites s ON p.siteId = s.id
+                        WHERE p.hero = 1;
+                      
+                   """)
+    heroes = cursor.fetchall()
+    conn.close()
+    return heroes
+
 def get_hands_players(player_id):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()

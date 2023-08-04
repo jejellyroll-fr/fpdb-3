@@ -18,7 +18,8 @@ async def index(request: Request):
     playerscount = get_playerscount()
     playerscount_cg = get_playerscount_cg()
     playerscount_tour = get_playerscount_tour()
-    return templates.TemplateResponse("index.html", {"request": request, "handscount": handscount, "handscount_cg": handscount_cg, "handscount_tour": handscount_tour, "playerscount": playerscount, "playerscount_cg": playerscount_cg, "playerscount_tour": playerscount_tour})
+    heroes = get_heroes()
+    return templates.TemplateResponse("index.html", {"request": request, "handscount": handscount, "handscount_cg": handscount_cg, "handscount_tour": handscount_tour, "playerscount": playerscount, "playerscount_cg": playerscount_cg, "playerscount_tour": playerscount_tour, "heroes": heroes})
 
 
 

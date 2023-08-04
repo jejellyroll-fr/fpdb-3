@@ -37,7 +37,9 @@
                  <b>{{ handscount[0][0] }}</b> hands including <b>{{ handscount_cg[0][0] }}</b> <i>cash game</i> hands and <b>{{ handscount_tour[0][0] }}</b> <i>tournament</i> hands<br>
                  <b>{{ playerscount[0][0] }}</b> players including {{ playerscount_cg[0][0] }} cash game players and {{ playerscount_tour[0][0] }} tournament players</p>
                  <p class="text-light">You are playing on :<br>
-                  <i>site</i> as <b>heroname</b> including 10 cash game hands and 13 tournament hands<br>
+                    {% for hero in heroes %}
+                  <i>{{ hero[1] }}</i> as <b>{{ hero[0] }}</b> <br>
+                    {% endfor %}
                   </p>
         </div>
     </div>

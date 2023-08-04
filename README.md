@@ -117,6 +117,20 @@ or
 ```sh
 pip install -r requirements_macos.txt
 ```
+or
+```sh
+pip install -r requirements_fpdb_web.txt
+```
+
+## Dev test
+FPDB3
+```Python
+python fpdb.pyw
+```
+FPDB3 web
+```Python
+python start_fpdb_web.py 
+```
 
 ## Installation
 no release yet
