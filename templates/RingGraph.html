@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+              <img src="../static/tribal.jpg" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
+              FPDB 3</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/players">Players</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <title>Ring Graph</title>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+   
+</head>
+<body class="bg-dark">
+    <div class="container">
+        <h1 class="text-light">Ring Profit Graph</h1>
+        <canvas id="ringProfitChart"></canvas>
+        <script>
+        // Retrieve the profits JSON data from the server
+        var profits = {{ profits|tojson|safe }};
+        
+        // Create a Chart.js instance
+        var ctx = document.getElementById('ringProfitChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: profits.map((_, index) => index + 1), // Use index as labels
+                datasets: [
+                    {
+                        label: 'Line 1',
+                        data: calculateCumulativeValues(profits.map(item => item[1])),
+                        borderColor: 'rgba(255, 255, 255, 1)',
+                        borderWidth: 2,
+                        pointStyle: 'line',
+                        fill: true,
+                        backgroundColor: 'rgba(0, 128, 0, 0.2)',
+                        borderColor: 'rgba(0, 128, 0, 1)',
+                        hidden: false // Show Line 1 by default
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'Number of Hands'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return '$' + (value / 100).toFixed(2);
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Profit ($)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                elements: {
+                    point: {
+                        radius: 0 // Hide points
+                    }
+                }
+            }
+        });
+
+        function calculateCumulativeValues(data) {
+            var cumulativeData = [data[0]];
+            for (var i = 1; i < data.length; i++) {
+                cumulativeData.push(cumulativeData[i - 1] + data[i]);
+            }
+            return cumulativeData;
+        }
+
+        // Add event listeners to checkboxes
+        document.getElementById('line1Checkbox').addEventListener('change', updateVisibility);
+
+        function updateVisibility() {
+            myChart.data.datasets[0].hidden = !document.getElementById('line1Checkbox').checked;
+            // Update visibility for other lines
+            myChart.update();
+        }
+        </script>
+    </div>
+</body>
+</html>
+
+
+
+
+
