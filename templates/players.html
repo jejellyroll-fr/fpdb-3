@@ -120,11 +120,11 @@
           <td>{{ player[1] }}</td>
           <td>{{ player[2] }}</td>
           <td>{{ player[3] }}</td>
-          <td>{{ player[4] }}</td>
           <td>{{ player[5] }}</td>
-          <td><a href="/RingProfitAllHandsPlayerIdSite?site={{ player[4] }}&player={{ player[0] }}">view graph</a></td>
           <td>{{ player[6] }}</td>
-          <td><a href="{{ url_for('get_hands_players_api', playerId=player[0]) }}">View Hands</a></td>
+          <td><a href="/RingProfitAllHandsPlayerIdSite?site={{ player[4] }}&player={{ player[0] }}"><i class="bi bi-graph-up"></i></a></td>
+          <td>{{ player[7] }}</td>
+          <td><a href="{{ url_for('get_hands_players_api', playerId=player[0]) }}"><i class="bi bi-eye-fill"></i></a></td>
         </tr>
         {% endfor %}
       </tbody>
