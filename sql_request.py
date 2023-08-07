@@ -174,7 +174,7 @@ def get_players(
   # SQL query string
   sql = """
         SELECT 
-        p.id, p.name AS player_name , s.name AS site, p.hero,
+        p.id, p.name AS player_name , s.name AS site, p.hero, p.siteId,
         COUNT(hp.id) AS total_hands,
         SUM(CASE WHEN hp.tourneysPlayersId IS NULL THEN 1 ELSE 0 END) AS cash_hands, 
         SUM(CASE WHEN hp.tourneysPlayersId IS NOT NULL THEN 1 ELSE 0 END) AS tournament_hands
