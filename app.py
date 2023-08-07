@@ -67,11 +67,38 @@ def get_players_endpoint(request: Request,
 
 @app.get("/players/{playerId}/hands", response_class=HTMLResponse)
 async def get_hands_players_api(playerId: int, request: Request):
-    # Your code to fetch hands for the playerId goes here
+    
     handsPlayers = get_hands_players(playerId)
 
-    # Return the hands_players as a JSON response
+    
     return templates.TemplateResponse("handsPlayers.html", {"request": request, "handsPlayers": handsPlayers})
+
+@app.get("/RingProfitAllHandsPlayerIdSite", response_class=HTMLResponse)
+async def get_ring_profit_all_hands_api(
+    request: Request,
+    site: int = None,
+    player: int = None,
+    limit: str = None,
+    bigBlind: int = None,
+    category: str = None,
+    currency: str = None,
+    startdate: str = None,
+    enddate: str = None # Add this parameter
+):
+
+    # Call get_RingProfitAllHandsPlayerIdSite() and unpack profits
+    profits = get_RingProfitAllHandsPlayerIdSite(
+        site=site,
+        player=player,
+        limit=limit,
+        bigBlind=bigBlind,
+        category=category,
+        currency=currency,
+        startdate=startdate,
+        enddate=enddate
+    )
+
+    return templates.TemplateResponse("RingGraph.html", {"request": request, "profits": profits})
 
 if __name__ == "__main__":
     import uvicorn

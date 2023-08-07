@@ -101,6 +101,59 @@ def get_handsStove():
     conn.close()
     return handsStoves
 
+def get_RingProfitAllHandsPlayerIdSite(
+    site=None,
+    player=None,
+    limit=None,
+    bigBlind=None,
+    currency=None,
+    category=None,
+    startdate=None,
+    enddate=None
+):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+
+    # SQL query string
+    sql = """
+        SELECT hp.handId, hp.totalProfit, hp.sawShowdown, hp.allInEV
+        FROM HandsPlayers hp
+        INNER JOIN Players pl ON (pl.id = hp.playerId)
+        INNER JOIN Hands h ON (h.id = hp.handId)
+        INNER JOIN Gametypes gt ON (gt.id = h.gametypeId)
+        WHERE pl.id IN (:player)
+        AND (:site IS NULL OR pl.siteId = :site)
+        AND (h.startTime > :startdate OR :startdate IS NULL)
+        AND (h.startTime < :enddate OR :enddate IS NULL)
+        AND (gt.limitType = :limit OR :limit IS NULL) 
+        AND (gt.bigBlind IN (:bigBlind) OR :bigBlind IS NULL)
+        AND (gt.category IN (:category) OR :category IS NULL)
+        AND (gt.currency = :currency OR :currency IS NULL)
+        AND hp.tourneysPlayersId IS NULL
+        GROUP BY h.startTime, hp.handId, hp.sawShowdown, hp.totalProfit, hp.allInEV
+        ORDER BY h.startTime
+    """
+
+    # Parameters dict
+    params = {
+        'player': player,
+        'site': site,
+        'limit': limit,
+        'bigBlind': bigBlind,
+        'category': category,
+        'currency': currency,
+        'startdate': startdate,
+        'enddate': enddate
+    }
+
+    # Execute query
+    cursor.execute(sql, params)
+
+    profits = cursor.fetchall()
+
+    return profits
+
+
 def get_players(
   name=None,
   site=None,
@@ -168,7 +221,7 @@ def get_heroes():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     cursor.execute("""
-                        SELECT p.name AS hero_name, s.name AS site_name
+                        SELECT p.name AS hero_name, s.name AS site_name, p.id, p.siteId
                         FROM Players p
                         JOIN Sites s ON p.siteId = s.id
                         WHERE p.hero = 1;

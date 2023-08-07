@@ -28,6 +28,34 @@ async def get_heroes_api():
     return JSONResponse(content=heroes)
 
 
+@app.get("/RingProfitAllHandsPlayerIdSite")
+async def get_ring_profit_all_hands_api(
+    site: int = None,
+    player: int = None,
+    limit: str = None,
+    bigBlind: int = None,
+    category: str = None,
+    currency: str = None,
+    startdate: str = None,
+    enddate: str = None
+):
+
+
+    # Call get_RingProfitAllHandsPlayerIdSite() and unpack profits
+    profits = get_RingProfitAllHandsPlayerIdSite(
+        site=site,
+        player=player,
+        limit=limit,
+        bigBlind=bigBlind,
+        category=category,
+        currency=currency,
+        startdate=startdate,
+        enddate=enddate
+    )
+
+    return JSONResponse(content=profits)
+
+
 @app.get("/players")
 async def get_players_api(
   name: str = None,
