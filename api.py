@@ -129,8 +129,30 @@ async def get_playerscount_tour_api():
     return JSONResponse(content=playerscount_tour)
 
 @app.get("/statsplayers")
-async def get_statsplayers_api():
-    result = get_statsplayers()  # Call the get_statsplayers() function to retrieve the statistics
+async def get_statsplayers_api(
+    site: int = None,
+    player: int = None,
+    limit: str = None,
+    bigBlind: int = None,
+    category: str = None,
+    currency: str = None,
+    startdate: str = None,
+    enddate: str = None
+):
+    
+
+    result = get_statsplayers(
+        site=site,
+        player=player,
+        limit=limit,
+        bigBlind=bigBlind,
+        category=category,
+        currency=currency,
+        startdate=startdate,
+        enddate=enddate
+    )  # Call the get_statsplayers() function to retrieve the statistics
+
+    
     return JSONResponse(content=result)
 
 if __name__ == "__main__":
