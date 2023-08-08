@@ -303,7 +303,16 @@ def get_playerscount_tour():
     conn.close()
     return playerscount_tour
 
-def get_statsplayers():
+def get_statsplayers(
+    site=None,
+    player=None,
+    limit=None,
+    bigBlind=None,
+    currency=None,
+    category=None,
+    startdate=None,
+    enddate=None
+):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
 
@@ -344,25 +353,49 @@ def get_statsplayers():
     INNER JOIN Gametypes gt ON (gt.Id = h.gametypeId)
     INNER JOIN Sites s ON (s.Id = gt.siteId)
     INNER JOIN Players p ON (p.Id = hp.playerId)
-    WHERE hp.playerId IN (5)
-    AND gt.category IN ('omahahi')
-    AND gt.siteId IN (15)
-    AND gt.currency IN ('EUR')
+    WHERE hp.playerId IN (:player)
+    AND (gt.category IN (:category) OR :category IS NULL)
+    AND gt.siteId IN (:site)
+    AND (gt.currency = :currency OR :currency IS NULL)
     AND h.seats BETWEEN 2 AND 10
+    AND (gt.bigBlind IN (:bigBlind) OR :bigBlind IS NULL)
+    AND (gt.limitType = :limit OR :limit IS NULL)
     AND (
-        (gt.limitType = 'fl' AND gt.bigBlind IN (-1))
-        OR (gt.limitType = 'pl' AND gt.bigBlind IN (2))
-        OR (gt.limitType = 'nl' AND gt.bigBlind IN (-1))
-        OR (gt.limitType = 'hp' AND gt.bigBlind IN (-1))
-        OR (gt.limitType = 'cp' AND gt.bigBlind IN (-1))
+    (h.startTime >= :startdate OR :startdate IS NULL)
+    AND
+    (h.startTime <= :enddate OR :enddate IS NULL)
     )
-    AND datetime(h.startTime) BETWEEN '1970-01-01 04:00:00' AND '2100-01-02 03:59:59'
     GROUP BY hgametypeId, hp.playerId, gt.base, gt.category, plposition, upper(gt.limitType), gt.fast, s.name
     HAVING 1 = 1
-    ORDER BY hp.playerId, gt.base, gt.category, CASE gt.base WHEN 'B' THEN 'B' WHEN 'S' THEN 'S' WHEN '0' THEN 'Y' ELSE 'Z'||gt.base END, CASE WHEN floor((hp.startcards-1)/13) >= mod((hp.startcards-1),13) THEN hp.startcards + 0.1 ELSE 13*mod((hp.startcards-1),13) + floor((hp.startcards-1)/13) + 1 END DESC, upper(gt.limitType) DESC, max(gt.bigBlind) DESC, gt.fast, s.name
-    """
+    ORDER BY hp.playerId, gt.base, gt.category,
+         CASE gt.base
+            WHEN 'B' THEN 'B'
+            WHEN 'S' THEN 'S'
+            WHEN '0' THEN 'Y'
+            ELSE 'Z' || gt.base
+         END,
+         CASE
+            WHEN CAST((hp.startcards - 1) / 13 AS INTEGER) >= (hp.startcards - 1) % 13 THEN hp.startcards + 0.1
+            ELSE 13 * ((hp.startcards - 1) % 13) + CAST((hp.startcards - 1) / 13 AS INTEGER) + 1
+         END DESC,
+         upper(gt.limitType) DESC,
+         max(gt.bigBlind) DESC,
+         gt.fast,
+         s.name"""
 
-    cursor.execute(query)
+    # Parameters dict
+    params = {
+        'player': player,
+        'site': site,
+        'limit': limit,
+        'bigBlind': bigBlind,
+        'category': category,
+        'currency': currency,
+        'startdate': startdate,
+        'enddate': enddate
+    }
+
+    cursor.execute(query, params)
     result = cursor.fetchall()
 
     conn.close()
