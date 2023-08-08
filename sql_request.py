@@ -150,9 +150,7 @@ def get_RingProfitAllHandsPlayerIdSite(
     # Execute query
     cursor.execute(sql, params)
 
-    profits = cursor.fetchall()
-
-    return profits
+    return cursor.fetchall()
 
 
 def get_players(
@@ -370,3 +368,11 @@ def get_statsplayers():
     conn.close()
 
     return result
+
+def get_player_name(player_id):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM Players WHERE id = ?", (player_id,))
+    player_name = cursor.fetchone()
+    conn.close()
+    return player_name[0] if player_name else None

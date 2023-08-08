@@ -98,7 +98,10 @@ async def get_ring_profit_all_hands_api(
         enddate=enddate
     )
 
-    return templates.TemplateResponse("RingGraph.html", {"request": request, "profits": profits})
+    # Fetch the player's name from your data source based on the 'player' parameter
+    player_name = get_player_name(player)  
+
+    return templates.TemplateResponse("RingGraph.html", {"request": request, "profits": profits, "player_name": player_name})
 
 if __name__ == "__main__":
     import uvicorn
