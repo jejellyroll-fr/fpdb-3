@@ -28,7 +28,8 @@
 </head>
 <body class="bg-dark">
     <div class="container">
-        <h1 class="text-light">Ring Profit Graph</h1>
+        <h4 class="text-light">Ring Profit Graph: <i>{{ player_name }}</i></h4><br>
+
         <canvas id="ringProfitChart"></canvas>
         <script>
         // Retrieve the profits JSON data from the server
@@ -90,6 +91,14 @@
             }
         });
 
+        // Calculate the cumulative values of an array.
+
+        /**
+         * Calculates the cumulative values of an array.
+         * 
+         * @param {Array} data - The input array.
+         * @returns {Array} cumulativeData - The array containing the cumulative values.
+         */
         function calculateCumulativeValues(data) {
             var cumulativeData = [data[0]];
             for (var i = 1; i < data.length; i++) {
@@ -101,6 +110,7 @@
         // Add event listeners to checkboxes
         document.getElementById('line1Checkbox').addEventListener('change', updateVisibility);
 
+        // Update the visibility of the chart based on the state of the line1Checkbox element.
         function updateVisibility() {
             myChart.data.datasets[0].hidden = !document.getElementById('line1Checkbox').checked;
             // Update visibility for other lines

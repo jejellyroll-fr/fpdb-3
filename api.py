@@ -53,6 +53,10 @@ async def get_ring_profit_all_hands_api(
         enddate=enddate
     )
 
+    if player_name := get_player_name(player):
+        for profit in profits:
+            profit["player_name"] = player_name
+
     return JSONResponse(content=profits)
 
 
