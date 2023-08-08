@@ -2,6 +2,7 @@ import sqlite3
 from base_model import *
 import Configuration
 import pathlib
+import math
 
 DATABASE = pathlib.Path(Configuration.CONFIG_PATH, "database", "fpdb.db3")
 
@@ -303,3 +304,69 @@ def get_playerscount_tour():
     playerscount_tour = cursor.fetchall()
     conn.close()
     return playerscount_tour
+
+def get_statsplayers():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+
+    query = """
+    SELECT h.gametypeId AS hgametypeid, p.name AS pname, gt.base, gt.category AS category, upper(gt.limitType) AS limittype, s.name AS name, min(gt.bigBlind) AS minbigblind, max(gt.bigBlind) AS maxbigblind, gt.ante AS ante, gt.currency AS currency,
+    gt.base AS plposition, gt.fast AS fast, count(1) AS n,
+    case when sum(cast(hp.street0VPIChance as integer)) = 0 then -999 else 100.0*sum(cast(hp.street0VPI as integer))/sum(cast(hp.street0VPIChance as integer)) end AS vpip,
+    case when sum(cast(hp.street0AggrChance as integer)) = 0 then -999 else 100.0*sum(cast(hp.street0Aggr as integer))/sum(cast(hp.street0AggrChance as integer)) end AS pfr,
+    case when sum(cast(hp.street0CalledRaiseChance as integer)) = 0 then -999 else 100.0*sum(cast(hp.street0CalledRaiseDone as integer))/sum(cast(hp.street0CalledRaiseChance as integer)) end AS car0,
+    case when sum(cast(hp.street0_3Bchance as integer)) = 0 then -999 else 100.0*sum(cast(hp.street0_3Bdone as integer))/sum(cast(hp.street0_3Bchance as integer)) end AS pf3,
+    case when sum(cast(hp.street0_4Bchance as integer)) = 0 then -999 else 100.0*sum(cast(hp.street0_4Bdone as integer))/sum(cast(hp.street0_4Bchance as integer)) end AS pf4,
+    case when sum(cast(hp.street0_FoldTo3Bchance as integer)) = 0 then -999 else 100.0*sum(cast(hp.street0_FoldTo3Bdone as integer))/sum(cast(hp.street0_FoldTo3Bchance as integer)) end AS pff3,
+    case when sum(cast(hp.street0_FoldTo4Bchance as integer)) = 0 then -999 else 100.0*sum(cast(hp.street0_FoldTo4Bdone as integer))/sum(cast(hp.street0_FoldTo4Bchance as integer)) end AS pff4,
+    case when sum(cast(hp.raiseFirstInChance as integer)) = 0 then -999 else 100.0*sum(cast(hp.raisedFirstIn as integer))/sum(cast(hp.raiseFirstInChance as integer)) end AS rfi,
+    case when sum(cast(hp.stealChance as integer)) = 0 then -999 else 100.0*sum(cast(hp.stealDone as integer))/sum(cast(hp.stealChance as integer)) end AS steals,
+    case when sum(cast(hp.stealDone as integer)) = 0 then -999 else 100.0*sum(cast(hp.success_Steal as integer))/sum(cast(hp.stealDone as integer)) end AS suc_steal,
+    100.0*sum(cast(hp.street1Seen as integer))/count(1) AS saw_f,
+    100.0*sum(cast(hp.sawShowdown as integer))/count(1) AS sawsd,
+    case when sum(cast(hp.street1Seen as integer)) = 0 then -999 else 100.0*sum(cast(hp.wonWhenSeenStreet1 as integer))/sum(cast(hp.street1Seen as integer)) end AS wmsf,
+    case when sum(cast(hp.street1Seen as integer)) = 0 then -999 else 100.0*sum(cast(hp.sawShowdown as integer))/sum(cast(hp.street1Seen as integer)) end AS wtsdwsf,
+    case when sum(cast(hp.sawShowdown as integer)) = 0 then -999 else 100.0*sum(cast(hp.wonAtSD as integer))/sum(cast(hp.sawShowdown as integer)) end AS wmsd,
+    case when sum(cast(hp.street1Seen as integer)) = 0 then -999 else 100.0*sum(cast(hp.street1Aggr as integer))/sum(cast(hp.street1Seen as integer)) end AS flafq,
+    case when sum(cast(hp.street2Seen as integer)) = 0 then -999 else 100.0*sum(cast(hp.street2Aggr as integer))/sum(cast(hp.street2Seen as integer)) end AS tuafq,
+    case when sum(cast(hp.street3Seen as integer)) = 0 then -999 else 100.0*sum(cast(hp.street3Aggr as integer))/sum(cast(hp.street3Seen as integer)) end AS rvafq,
+    case when sum(cast(hp.street1Seen as integer))+sum(cast(hp.street2Seen as integer))+sum(cast(hp.street3Seen as integer)) = 0 then -999 else 100.0*(sum(cast(hp.street1Aggr as integer))+sum(cast(hp.street2Aggr as integer))+sum(cast(hp.street3Aggr as integer))) / (sum(cast(hp.street1Seen as integer))+sum(cast(hp.street2Seen as integer))+sum(cast(hp.street3Seen as integer))) end AS pofafq,
+    case when sum(cast(hp.street1Calls as integer))+sum(cast(hp.street2Calls as integer))+sum(cast(hp.street3Calls as integer))+sum(cast(hp.street4Calls as integer)) = 0 then -999 else (sum(cast(hp.street1Aggr as integer)) + sum(cast(hp.street2Aggr as integer)) + sum(cast(hp.street3Aggr as integer)) + sum(cast(hp.street4Aggr as integer))) /(0.0+sum(cast(hp.street1Calls as integer))+sum(cast(hp.street2Calls as integer))+sum(cast(hp.street3Calls as integer))+sum(cast(hp.street4Calls as integer))) end AS aggfac,
+    100.0*(sum(cast(hp.street1Aggr as integer)) + sum(cast(hp.street2Aggr as integer)) + sum(cast(hp.street3Aggr as integer)) + sum(cast(hp.street4Aggr as integer))) / ((sum(cast(hp.foldToOtherRaisedStreet1 as integer))+sum(cast(hp.foldToOtherRaisedStreet2 as integer))+sum(cast(hp.foldToOtherRaisedStreet3 as integer))+sum(cast(hp.foldToOtherRaisedStreet4 as integer))) + (sum(cast(hp.street1Calls as integer))+sum(cast(hp.street2Calls as integer))+sum(cast(hp.street3Calls as integer))+sum(cast(hp.street4Calls as integer))) + (sum(cast(hp.street1Aggr as integer)) + sum(cast(hp.street2Aggr as integer)) + sum(cast(hp.street3Aggr as integer)) + sum(cast(hp.street4Aggr as integer)))) AS aggfrq,
+    100.0*(sum(cast(hp.street1CBDone as integer)) + sum(cast(hp.street2CBDone as integer)) + sum(cast(hp.street3CBDone as integer)) + sum(cast(hp.street4CBDone as integer))) / (sum(cast(hp.street1CBChance as integer))+sum(cast(hp.street2CBChance as integer))+sum(cast(hp.street3CBChance as integer))+sum(cast(hp.street4CBChance as integer))) AS conbet,
+    sum(hp.totalProfit)/100.0 AS net,
+    sum(hp.rake)/100.0 AS rake,
+    100.0*avg(hp.totalProfit/(gt.bigBlind+0.0)) AS bbper100,
+    avg(hp.totalProfit)/100.0 AS profitperhand,
+    100.0*avg((hp.totalProfit+hp.rake)/(gt.bigBlind+0.0)) AS bb100xr,
+    avg((hp.totalProfit+hp.rake)/100.0) AS profhndxr,
+    avg(h.seats+0.0) AS avgseats
+    FROM HandsPlayers hp
+    INNER JOIN Hands h ON (h.id = hp.handId)
+    INNER JOIN Gametypes gt ON (gt.Id = h.gametypeId)
+    INNER JOIN Sites s ON (s.Id = gt.siteId)
+    INNER JOIN Players p ON (p.Id = hp.playerId)
+    WHERE hp.playerId IN (5)
+    AND gt.category IN ('omahahi')
+    AND gt.siteId IN (15)
+    AND gt.currency IN ('EUR')
+    AND h.seats BETWEEN 2 AND 10
+    AND (
+        (gt.limitType = 'fl' AND gt.bigBlind IN (-1))
+        OR (gt.limitType = 'pl' AND gt.bigBlind IN (2))
+        OR (gt.limitType = 'nl' AND gt.bigBlind IN (-1))
+        OR (gt.limitType = 'hp' AND gt.bigBlind IN (-1))
+        OR (gt.limitType = 'cp' AND gt.bigBlind IN (-1))
+    )
+    AND datetime(h.startTime) BETWEEN '1970-01-01 04:00:00' AND '2100-01-02 03:59:59'
+    GROUP BY hgametypeId, hp.playerId, gt.base, gt.category, plposition, upper(gt.limitType), gt.fast, s.name
+    HAVING 1 = 1
+    ORDER BY hp.playerId, gt.base, gt.category, CASE gt.base WHEN 'B' THEN 'B' WHEN 'S' THEN 'S' WHEN '0' THEN 'Y' ELSE 'Z'||gt.base END, CASE WHEN floor((hp.startcards-1)/13) >= mod((hp.startcards-1),13) THEN hp.startcards + 0.1 ELSE 13*mod((hp.startcards-1),13) + floor((hp.startcards-1)/13) + 1 END DESC, upper(gt.limitType) DESC, max(gt.bigBlind) DESC, gt.fast, s.name
+    """
+
+    cursor.execute(query)
+    result = cursor.fetchall()
+
+    conn.close()
+
+    return result

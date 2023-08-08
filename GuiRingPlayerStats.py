@@ -527,7 +527,7 @@ class GuiRingPlayerStats(QSplitter):
         else:
             query = query.replace("<position>", "gt.base")
             plposition_column[colshow] = False
-
+        print(query)
         return(query)
 
     def showDetailFilter(self, checkState):

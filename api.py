@@ -124,6 +124,11 @@ async def get_playerscount_tour_api():
     playerscount_tour = get_playerscount_tour()
     return JSONResponse(content=playerscount_tour)
 
+@app.get("/statsplayers")
+async def get_statsplayers_api():
+    result = get_statsplayers()  # Call the get_statsplayers() function to retrieve the statistics
+    return JSONResponse(content=result)
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
