@@ -103,6 +103,33 @@ async def get_ring_profit_all_hands_api(
 
     return templates.TemplateResponse("RingGraph.html", {"request": request, "profits": profits, "player_name": player_name})
 
+@app.get("/statsplayers", response_class=HTMLResponse)
+async def get_statsplayers_api(
+    request: Request,
+    site: int = None,
+    player: int = None,
+    limit: str = None,
+    bigBlind: int = None,
+    category: str = None,
+    currency: str = None,
+    startdate: str = None,
+    enddate: str = None
+):
+    result = get_statsplayers(
+        site=site,
+        player=player,
+        limit=limit,
+        bigBlind=bigBlind,
+        category=category,
+        currency=currency,
+        startdate=startdate,
+        enddate=enddate
+    )  # Call the get_statsplayers() function to retrieve the statistics
+
+    return templates.TemplateResponse("statsplayers.html", {"request": request, "result": result})
+
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8080)
