@@ -24,13 +24,19 @@
     <!-- Add Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
-   
+    <style>
+        .chart-container {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+        }
+      </style>
 </head>
 
 <body class="bg-dark">
     <div class="container">
     <h4 class="text-light">Player Statistics</h4>
-
+<div class="chart-container">
 <!-- Bar Chart: VPIP and PFR Comparison -->
 <div>
     <h5 class="text-light">VPIP and PFR Comparison</h5>
@@ -54,15 +60,15 @@
     <h5 class="text-light">VPIP vs PFR</h5>
     <canvas id="vpip-pfr-scatter-plot" width="30" height="15"></canvas>
 </div>
-
+</div>
     <script>
         // Retrieve player statistics data from the server
         const playerStatistics = JSON.parse('{{ result | tojson | safe }}');
 
         // Extract relevant data for charts
         const playerNames = playerStatistics.map(player => player[1]);
-        const vpipValues = playerStatistics.map(player => player[14]);
-        const pfrValues = playerStatistics.map(player => player[15]);
+        const vpipValues = playerStatistics.map(player => player[13]);
+        const pfrValues = playerStatistics.map(player => player[14]);
         const positions = playerStatistics.map(player => player[11]);
 
         // Bar Chart: VPIP and PFR Comparison
@@ -95,8 +101,8 @@
         });
 
         // Line Chart: Aggression Frequency Over Hands Played
-        const handsPlayed = playerStatistics.map(player => player[13]);
-        const aggfrqValues = playerStatistics.map(player => player[31]);
+        const handsPlayed = playerStatistics.map(player => player[12]);
+        const aggfrqValues = playerStatistics.map(player => player[30]);
         new Chart(document.getElementById("aggfrq-line-chart"), {
             type: 'line',
             data: {
