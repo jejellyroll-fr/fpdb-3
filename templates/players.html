@@ -108,8 +108,9 @@
           <th rowspan="2">Hero</th>
           <th rowspan="2">Total Hands</th>
           <th rowspan="2">Total Hands Cash games</th>
-          <th rowspan="2">graph Cash games</th>
+          <th rowspan="2">Graph Cash games</th>
           <th rowspan="2">Total Hands Tournement or SNG</th>
+          <th rowspan="2">Graph Tournement or SNG</th>
           <th rowspan="2">Hands Details</th>
         </tr>
       </thead>
@@ -124,6 +125,7 @@
           <td>{{ player[6] }}</td>
           <td><a href="/RingProfitAllHandsPlayerIdSite?site={{ player[4] }}&player={{ player[0] }}"><i class="bi bi-graph-up"></i></a></td>
           <td>{{ player[7] }}</td>
+          <td><a href="/TourneysProfitPlayerIdSite?site={{ player[4] }}&player={{ player[0] }}"><i class="bi bi-graph-up"></i></a></td>
           <td><a href="{{ url_for('get_hands_players_api', playerId=player[0]) }}"><i class="bi bi-eye-fill"></i></a></td>
         </tr>
         {% endfor %}
