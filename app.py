@@ -103,6 +103,36 @@ async def get_ring_profit_all_hands_api(
 
     return templates.TemplateResponse("RingGraph.html", {"request": request, "profits": profits, "player_name": player_name})
 
+@app.get("/TourneysProfitPlayerIdSite", response_class=HTMLResponse)
+async def get_torneys_profit_api(
+    request: Request,
+    site: int = None,
+    player: int = None,
+    limit: str = None,
+    buyin: int = None,
+    category: str = None,
+    currency: str = None,
+    startdate: str = None,
+    enddate: str = None # Add this parameter
+):
+
+    # Call get_RingProfitAllHandsPlayerIdSite() and unpack profits
+    profits = get_tourneysProfitPlayerIdSite(
+        site=site,
+        player=player,
+        limit=limit,
+        buyin=buyin,
+        category=category,
+        currency=currency,
+        startdate=startdate,
+        enddate=enddate
+    )
+
+    # Fetch the player's name from your data source based on the 'player' parameter
+    player_name = get_player_name(player)  
+
+    return templates.TemplateResponse("TourneysGraph.html", {"request": request, "profits": profits, "player_name": player_name})
+
 @app.get("/statsplayers", response_class=HTMLResponse)
 async def get_statsplayers_api(
     request: Request,
