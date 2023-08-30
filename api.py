@@ -59,6 +59,39 @@ async def get_ring_profit_all_hands_api(
 
     return JSONResponse(content=profits)
 
+@app.get("/TourneysProfitPlayerIdSite")
+async def get_torneys_profit_api(
+    site: int = None,
+    player: int = None,
+    limit: str = None,
+    buyin: int = None,
+    category: str = None,
+    currency: str = None,
+    startdate: str = None,
+    enddate: str = None
+):
+
+    # Call get_RingProfitAllHandsPlayerIdSite() and unpack profits
+    profits = get_tourneysProfitPlayerIdSite(
+        site=site,
+        player=player,
+        limit=limit,
+        buyin=buyin,
+        category=category,
+        currency=currency,
+        startdate=startdate,
+        enddate=enddate
+    )
+
+    if player_name := get_player_name(player):
+        profits = [list(profit) for profit in profits]  # Convert tuple to list
+        for profit in profits:
+            profit.append(player_name)  # Add player_name to each list
+        profits = [tuple(profit) for profit in profits]  # Convert list back to tuple
+
+    return JSONResponse(content=profits)
+
+
 
 @app.get("/players")
 async def get_players_api(

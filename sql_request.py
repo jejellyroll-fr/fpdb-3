@@ -152,6 +152,58 @@ def get_RingProfitAllHandsPlayerIdSite(
 
     return cursor.fetchall()
 
+def get_tourneysProfitPlayerIdSite(
+    site=None,
+    player=None,
+    limit=None,
+    buyin=None,
+    currency=None,
+    category=None,
+    startdate=None,
+    enddate=None
+):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+
+    # SQL query string
+    sql = """
+            SELECT tp.tourneyId, (coalesce(tp.winnings,0) - coalesce(tt.buyIn,0) - coalesce(tt.fee,0)) as profit, tp.koCount, tp.rebuyCount, tp.addOnCount, tt.buyIn, tt.fee, t.siteTourneyNo
+            FROM TourneysPlayers tp
+            INNER JOIN Players pl      ON  (pl.id = tp.playerId)
+            INNER JOIN Tourneys t         ON  (t.id  = tp.tourneyId)
+            INNER JOIN TourneyTypes tt    ON  (tt.id = t.tourneyTypeId)
+            WHERE pl.id in (:player)
+            AND (:site IS NULL OR pl.siteId = :site)
+            AND (tt.category in (:category) OR :category IS NULL)
+            AND (tt.limitType = :limit OR :limit IS NULL)
+            AND (tt.buyin in (:buyin) OR :buyin IS NULL)
+            AND (t.startTime > :startdate OR :startdate IS NULL)
+            AND (t.startTime < :enddate OR :enddate IS NULL)
+            AND (tt.currency = :currency OR :currency IS NULL)
+            GROUP BY t.startTime, tp.tourneyId, tp.winningsCurrency,
+                     tp.winnings, tp.koCount,
+                     tp.rebuyCount, tp.addOnCount,
+                     tt.buyIn, tt.fee, t.siteTourneyNo
+            ORDER BY t.startTime
+    """
+
+    # Parameters dict
+    params = {
+        'player': player,
+        'site': site,
+        'limit': limit,
+        'buyin': buyin,
+        'category': category,
+        'currency': currency,
+        'startdate': startdate,
+        'enddate': enddate
+    }
+
+    # Execute query
+    cursor.execute(sql, params)
+
+    return cursor.fetchall()
+
 
 def get_players(
   name=None,
