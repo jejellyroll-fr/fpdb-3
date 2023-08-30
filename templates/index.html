@@ -38,7 +38,7 @@
                  <b>{{ playerscount[0][0] }}</b> players including {{ playerscount_cg[0][0] }} cash game players and {{ playerscount_tour[0][0] }} tournament players</p>
                  <p class="text-light">You are playing on :<br>
                     {% for hero in heroes %}
-                  <i>{{ hero[1] }}</i> as <b>{{ hero[0] }}</b> see <a href="/RingProfitAllHandsPlayerIdSite?site={{ hero[3] }}&player={{ hero[2] }}">Ring graph result</a> <br>
+                  <i>{{ hero[1] }}</i> as <b>{{ hero[0] }}</b> see <a href="/RingProfitAllHandsPlayerIdSite?site={{ hero[3] }}&player={{ hero[2] }}">Ring graph result</a> or <a href="/TourneysProfitPlayerIdSite?site={{ hero[3] }}&player={{ hero[2] }}">Tourneys graph result</a><br>
                     {% endfor %}
                   </p>
         </div>
