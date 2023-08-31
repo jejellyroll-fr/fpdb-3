@@ -114,6 +114,18 @@ class fpdb(QMainWindow):
             pathcomp=path+"/ppt/p2.jar"
         subprocess.call(['java', '-jar', pathcomp])
 
+    def launch_dataviz_server(self):
+    
+        # Start the API server (api.py) as a separate process
+        api_process = subprocess.Popen(['python', 'api.py'])
+
+        # Start the Flask app (app.py) as a separate process
+        app_process = subprocess.Popen(['python', 'app.py'])
+
+        # Wait for both processes to complete
+        api_process.wait()
+        app_process.wait()
+
 
     def add_and_display_tab(self, new_page, new_tab_name):
         """adds a tab, namely creates the button and displays it and appends all the relevant arrays"""
@@ -965,6 +977,7 @@ class fpdb(QMainWindow):
         tournamentMenu = mb.addMenu(('Tournament'))
         maintenanceMenu = mb.addMenu(('Maintenance'))
         toolsMenu = mb.addMenu(('Tools'))
+        dataMenu = mb.addMenu(('Dataviz'))
         helpMenu = mb.addMenu(('Help'))
         # Create actions
         def makeAction(name, callback, shortcut=None, tip=None):
@@ -1010,6 +1023,9 @@ class fpdb(QMainWindow):
         
         toolsMenu.addAction(makeAction(('Odds Calc'), self.tab_odds_calc))
         toolsMenu.addAction(makeAction(('PokerProTools'), self.launch_ppt))
+
+        dataMenu.addAction(makeAction(('launch server'), self.launch_dataviz_server))
+        
 
         helpMenu.addAction(makeAction(('Log Messages'), self.dia_logs, 'Log and Debug Messages'))
         helpMenu.addAction(makeAction(('Help Tab'), self.tab_main_help))
