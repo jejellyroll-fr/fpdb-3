@@ -162,14 +162,15 @@ class iPoker(HandHistoryConverter):
             <currency>(?P<CURRENCY>.+)?</currency>\s+?
             <nickname>(?P<HERO>.+)?</nickname>
             """ % substitutions, re.MULTILINE|re.VERBOSE)
-    re_GameInfoTrny = re.compile(r"""(?P<HEAD>
-                (<tour(nament)?code>(?P<TOURNO>\d+)</tour(nament)?code>\s+?)?
-                <tournamentname>(?P<NAME>.+?)</tournamentname>\s*<place>(?P<PLACE>.+?)</place>\s*
-                <buyin>(?P<BUYIN>(?P<BIAMT>.+?)(\+(?P<BIRAKE>.+?))?(\+(?P<BIRAKE1>.+?))?)</buyin>\s+?
-                <totalbuyin>(?P<TOTBUYIN>.*)</totalbuyin>\s+?
-                (<ipoints>.+?</ipoints>\s+?)?
-                <win>(%(LS)s)?(?P<WIN>([%(NUM)s]+)(%(LS)s)?|.+?)</win>\s+?)
-            """ % substitutions, re.MULTILINE|re.VERBOSE)
+    re_GameInfoTrny = re.compile(r"""
+                        (?:(<tour(?:nament)?code>(?P<TOURNO>\d+)</tour(?:nament)?code>))|
+                        (?:(<tournamentname>(?P<NAME>[^<]*)</tournamentname>))|
+                        (?:(<rewarddrawn>(?P<REWARD>[%(NUM2)s%(LS)s]+)</rewarddrawn>))| 
+                        (?:(<place>(?P<PLACE>.+?)</place>))|
+                        (?:(<buyin>(?P<BIAMT>[%(NUM2)s%(LS)s]+)\s\+\s)?(?P<BIRAKE>[%(NUM2)s%(LS)s]+)\s\+\s(?P<BIRAKE2>[%(NUM2)s%(LS)s]+)</buyin>)|
+                        (?:(<totalbuyin>(?P<TOTBUYIN>.*)</totalbuyin>))|
+                        (?:(<win>(%(LS)s)?(?P<WIN>[%(NUM2)s%(LS)s]+)</win>))
+                        """ % substitutions, re.VERBOSE)
     re_Buyin = re.compile(r"""(?P<BUYIN>[%(NUM)s]+)""" % substitutions, re.MULTILINE|re.VERBOSE)
     re_TotalBuyin  = re.compile(r"""(?P<BUYIN>(?P<BIAMT>[%(LS)s%(NUM)s]+)\s\+\s?(?P<BIRAKE>[%(LS)s%(NUM)s]+)?)""" % substitutions, re.MULTILINE|re.VERBOSE)
     re_HandInfo = re.compile(r'code="(?P<HID>[0-9]+)">\s*?<general>\s*?<startdate>(?P<DATETIME>[\.a-zA-Z-/: 0-9]+)</startdate>', re.MULTILINE)
@@ -185,7 +186,7 @@ class iPoker(HandHistoryConverter):
     re_DateTime2 = re.compile("""(?P<D>[0-9]{2})[\/\.](?P<M>[0-9]{2})[\/\.](?P<Y>[0-9]{4})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
     re_DateTime3 = re.compile("""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
     re_MaxSeats = re.compile(r'(?P<SEATS>[0-9]+) Max', re.MULTILINE)
-    re_TourNo = re.compile(r'\(\#(?P<TOURNO>\d+)\)', re.MULTILINE)
+    re_TourNo = re.compile(r'(?P<TOURNO>\d+)$', re.MULTILINE)
     re_non_decimal = re.compile(r'[^\d.,]+')
     re_Partial = re.compile('<startdate>', re.MULTILINE)
     re_UncalledBets = re.compile('<uncalled_bet_enabled>true<\/uncalled_bet_enabled>')
@@ -332,8 +333,9 @@ class iPoker(HandHistoryConverter):
                     if m3:
                         mg = m3.groupdict()
                     elif mg['BIAMT']: mg['BIRAKE'] = '0'
-                if self.re_FPP.match(mg['BIAMT']):
+                if mg['BIAMT'] and self.re_FPP.match(mg['BIAMT']):
                     self.tinfo['buyinCurrency'] = 'FPP'
+
                 if mg['BIRAKE']:
                     #FIXME: tournament no looks liek it is in the table name
                     mg['BIRAKE'] = self.clearMoneyString(self.re_non_decimal.sub('',mg['BIRAKE']))

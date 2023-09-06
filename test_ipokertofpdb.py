@@ -51,3 +51,72 @@ def test_re_PlayerInfo8():
     assert match.group('BUTTONPOS') == '1'
     assert match.group('WIN') == '1 480'
     assert match.group('BET') == '740'
+
+
+
+
+re_GameInfoTrny = re.compile(r"""
+(?:(<tour(?:nament)?code>(?P<TOURNO>\d+)</tour(?:nament)?code>))|
+(?:(<tournamentname>(?P<NAME>[^<]*)</tournamentname>))|
+(?:(<rewarddrawn>(?P<REWARD>[%(NUM2)s%(LS)s]+)</rewarddrawn>))| 
+(?:(<place>(?P<PLACE>.+?)</place>))|
+(?:(<buyin>(?P<BIAMT>[%(NUM2)s%(LS)s]+)\s\+\s)?(?P<BIRAKE>[%(NUM2)s%(LS)s]+)\s\+\s(?P<BIRAKE2>[%(NUM2)s%(LS)s]+)</buyin>)|
+(?:(<totalbuyin>(?P<TOTBUYIN>.*)</totalbuyin>))|
+(?:(<win>(%(LS)s)?(?P<WIN>[%(NUM2)s%(LS)s]+)</win>))
+""" % substitutions, re.VERBOSE)
+
+
+
+def test_re_GameInfoTrny():
+    text = """
+  <tournamentcode>826763510</tournamentcode>
+  <tournamentname>Sit’n’Go Twister 0.20€</tournamentname>
+  <rewarddrawn>0,80€</rewarddrawn>
+  <place>2</place>
+  <buyin>0€ + 0,01€ + 0,19€</buyin>
+  <totalbuyin>0,20€</totalbuyin>
+  <win>0</win>
+"""
+    matches = list(re_GameInfoTrny.finditer(text))
+
+    assert matches[0].group('TOURNO') == '826763510'
+    assert matches[1].group('NAME') == 'Sit’n’Go Twister 0.20€'
+    assert matches[2].group('REWARD') == '0,80€'
+    assert matches[3].group('PLACE') == '2'
+    assert matches[4].group('BIAMT') == '0€'
+    assert matches[4].group('BIRAKE') == '0,01€'
+    assert matches[4].group('BIRAKE2') == '0,19€'
+    assert matches[5].group('TOTBUYIN') == '0,20€'
+    assert matches[6].group('WIN') == '0'
+
+
+def test_re_GameInfoTrnywin():
+    text = """
+  <tournamentcode>829730818</tournamentcode>
+  <tournamentname>Sit’n’Go Twister 0.20€</tournamentname>
+  <rewarddrawn>0,40€</rewarddrawn>
+  <place>1</place>
+  <buyin>0€ + 0,01€ + 0,19€</buyin>
+  <totalbuyin>0,20€</totalbuyin>
+  <win>0,40€</win>
+"""
+    matches = list(re_GameInfoTrny.finditer(text))
+
+    assert matches[0].group('TOURNO') == '829730818'
+    assert matches[1].group('NAME') == 'Sit’n’Go Twister 0.20€'
+    assert matches[2].group('REWARD') == '0,40€'
+    assert matches[3].group('PLACE') == '1'
+    assert matches[4].group('BIAMT') == '0€'
+    assert matches[4].group('BIRAKE') == '0,01€'
+    assert matches[4].group('BIRAKE2') == '0,19€'
+    assert matches[5].group('TOTBUYIN') == '0,20€'
+    assert matches[6].group('WIN') == '0,40€'
+
+
+re_TourNo = re.compile(r'(?P<TOURNO>\d+)$')
+
+
+def test_re_Tourno1():
+    text = 'Sit’n’Go Twister 0.20€, 829730819'
+    match = re_TourNo.search(text)
+    assert match.group('TOURNO') == '829730819'

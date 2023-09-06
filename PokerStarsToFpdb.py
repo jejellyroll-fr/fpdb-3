@@ -40,9 +40,9 @@ class PokerStars(HandHistoryConverter):
     sym = {'USD': "\$", 'CAD': "\$", 'T$': "", "EUR": "\xe2\x82\xac", "GBP": "\£", "play": "", "INR": "\₹", "CNY": "\¥"}         # ADD Euro, Sterling, etc HERE
     substitutions = {
                      'LEGAL_ISO' : "USD|EUR|GBP|CAD|FPP|SC|INR|CNY",      # legal ISO currency codes
-                            'LS' : u"\$|\xe2\x82\xac|\u20ac|\£|\u20b9|\¥|", # legal currency symbols - Euro(cp1252, utf-8)
+                            'LS' : r"\$|\xe2\x82\xac|\u20ac|\£|\u20b9|\¥|", # legal currency symbols - Euro(cp1252, utf-8)
                            'PLYR': r'\s?(?P<PNAME>.+?)',
-                            'CUR': u"(\$|\xe2\x82\xac|\u20ac||\£|\u20b9|\¥|)",
+                            'CUR': r"(\$|\xe2\x82\xac|\u20ac||\£|\u20b9|\¥|)",
                           'BRKTS': r'(\(button\) |\(small blind\) |\(big blind\) |\(button blind\) |\(button\) \(small blind\) |\(small blind\) \(button\) |\(big blind\) \(button\) |\(small blind/button\) |\(button\) \(big blind\) )?',
                     }
                     
@@ -200,29 +200,29 @@ class PokerStars(HandHistoryConverter):
     #Vinsand88 cashed out the hand for $2.19 | Cash Out Fee $0.02
     re_CollectPot2      = re.compile(r"%(PLYR)s (collected|cashed out the hand for) %(CUR)s(?P<POT>[,.\d]+)" %  substitutions, re.MULTILINE)
     re_CashedOut        = re.compile(r"cashed\sout\sthe\shand")
-    re_WinningRankOne   = re.compile(u"%(PLYR)s wins the tournament and receives %(CUR)s(?P<AMT>[,\.0-9]+) - congratulations!$" %  substitutions, re.MULTILINE)
-    re_WinningRankOther = re.compile(u"%(PLYR)s finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place and received %(CUR)s(?P<AMT>[,.0-9]+)\.$" %  substitutions, re.MULTILINE)
-    re_RankOther        = re.compile(u"%(PLYR)s finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place$" %  substitutions, re.MULTILINE)
+    re_WinningRankOne   = re.compile(r"%(PLYR)s wins the tournament and receives %(CUR)s(?P<AMT>[,\.0-9]+) - congratulations!$" %  substitutions, re.MULTILINE)
+    re_WinningRankOther = re.compile(r"%(PLYR)s finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place and received %(CUR)s(?P<AMT>[,.0-9]+)\.$" %  substitutions, re.MULTILINE)
+    re_RankOther        = re.compile(r"%(PLYR)s finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place$" %  substitutions, re.MULTILINE)
     re_Cancelled        = re.compile('Hand\scancelled', re.MULTILINE)
     re_Uncalled         = re.compile('Uncalled bet \(%(CUR)s(?P<BET>[,.\d]+)\) returned to' %  substitutions, re.MULTILINE)
     re_EmptyCard        = re.compile("\[\]", re.MULTILINE)
     #APTEM-89 wins the $0.27 bounty for eliminating Hero
     #ChazDazzle wins the 22000 bounty for eliminating berkovich609
     #JKuzja, vecenta split the $50 bounty for eliminating ODYSSES
-    re_Bounty           = re.compile(u"%(PLYR)s (?P<SPLIT>split|wins) the %(CUR)s(?P<AMT>[,\.0-9]+) bounty for eliminating (?P<ELIMINATED>.+?)$" %  substitutions, re.MULTILINE)
+    re_Bounty           = re.compile(r"%(PLYR)s (?P<SPLIT>split|wins) the %(CUR)s(?P<AMT>[,\.0-9]+) bounty for eliminating (?P<ELIMINATED>.+?)$" %  substitutions, re.MULTILINE)
     #Amsterdam71 wins $19.90 for eliminating MuKoJla and their own bounty increases by $19.89 to $155.32
     #Amsterdam71 wins $4.60 for splitting the elimination of Frimble11 and their own bounty increases by $4.59 to $41.32    
     #Amsterdam71 wins the tournament and receives $230.36 - congratulations!
-    re_Progressive      = re.compile(u"""
+    re_Progressive      = re.compile(r"""
                         %(PLYR)s\swins\s%(CUR)s(?P<AMT>[,\.0-9]+)\s
                         for\s(splitting\sthe\selimination\sof|eliminating)\s(?P<ELIMINATED>.+?)\s
                         and\stheir\sown\sbounty\sincreases\sby\s%(CUR)s(?P<INCREASE>[\.0-9]+)\sto\s%(CUR)s(?P<ENDAMT>[\.0-9]+)$"""
                          %  substitutions, re.MULTILINE|re.VERBOSE)
-    re_Rake             = re.compile(u"""
+    re_Rake             = re.compile(r"""
                         Total\spot\s%(CUR)s(?P<POT>[,\.0-9]+)(.+?)?\s\|\sRake\s%(CUR)s(?P<RAKE>[,\.0-9]+)"""
                          %  substitutions, re.MULTILINE|re.VERBOSE)
     
-    re_STP             = re.compile(u"""
+    re_STP             = re.compile(r"""
                         STP\sadded:\s%(CUR)s(?P<AMOUNT>[,\.0-9]+)"""
                          %  substitutions, re.MULTILINE|re.VERBOSE)
 
