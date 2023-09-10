@@ -46,7 +46,7 @@
 import sys
 from HandHistoryConverter import *
 from decimal_wrapper import Decimal
-
+from TourneySummary import *
 
 class iPoker(HandHistoryConverter):
     """
@@ -171,8 +171,8 @@ class iPoker(HandHistoryConverter):
                         (?:(<totalbuyin>(?P<TOTBUYIN>.*)</totalbuyin>))|
                         (?:(<win>(%(LS)s)?(?P<WIN>[%(NUM2)s%(LS)s]+)</win>))
                         """ % substitutions, re.VERBOSE)
-    re_Buyin = re.compile(r"""(?P<BUYIN>[%(NUM)s]+)""" % substitutions, re.MULTILINE|re.VERBOSE)
-    re_TotalBuyin  = re.compile(r"""(?P<BUYIN>(?P<BIAMT>[%(LS)s%(NUM)s]+)\s\+\s?(?P<BIRAKE>[%(LS)s%(NUM)s]+)?)""" % substitutions, re.MULTILINE|re.VERBOSE)
+    re_Buyin = re.compile(r"""(?:(<totalbuyin>(?P<TOTBUYIN>.*)</totalbuyin>))""" , re.VERBOSE)
+    re_TotalBuyin  = re.compile(r"""(?:(<buyin>(?P<BIAMT>[%(NUM2)s%(LS)s]+)\s\+\s)?(?P<BIRAKE>[%(NUM2)s%(LS)s]+)\s\+\s(?P<BIRAKE2>[%(NUM2)s%(LS)s]+)</buyin>)""" % substitutions, re.VERBOSE)
     re_HandInfo = re.compile(r'code="(?P<HID>[0-9]+)">\s*?<general>\s*?<startdate>(?P<DATETIME>[\.a-zA-Z-/: 0-9]+)</startdate>', re.MULTILINE)
     re_PlayerInfo = re.compile(r'<player( (seat="(?P<SEAT>[0-9]+)"|name="%(PLYR)s"|chips="(%(LS)s)?(?P<CASH>[%(NUM2)s]+)(%(LS)s)?"|dealer="(?P<BUTTONPOS>(0|1))"|win="(%(LS)s)?(?P<WIN>[%(NUM2)s]+)(%(LS)s)?"|bet="(%(LS)s)?(?P<BET>[^"]+)(%(LS)s)?"|addon="\d*"|rebuy="\d*"|merge="\d*"|reg_code="[\d-]*"))+\s*/>' % substitutions, re.MULTILINE)
     re_Board = re.compile(r'<cards( (type="(?P<STREET>Flop|Turn|River)"|player=""))+>(?P<CARDS>.+?)</cards>', re.MULTILINE)
@@ -323,16 +323,36 @@ class iPoker(HandHistoryConverter):
                 self.tinfo['buyinCurrency'] = mg['CURRENCY']
             self.tinfo['buyin'] = 0
             self.tinfo['fee'] = 0
-            m2 = self.re_GameInfoTrny.search(handText)
-            if m2:                
-                mg =  m2.groupdict()
+            matches = list(self.re_GameInfoTrny.finditer(handText))
+            if len(matches) > 0:
+                mg['TOURNO'] = matches[0].group('TOURNO')
+                mg['NAME'] = matches[1].group('NAME') 
+                mg['REWARD'] = matches[2].group('REWARD')
+                mg['PLACE'] = matches[3].group('PLACE') 
+                mg['BIAMT'] = matches[4].group('BIAMT') 
+                mg['BIRAKE'] = matches[4].group('BIRAKE')
+                mg['BIRAKE2'] = matches[4].group('BIRAKE2') 
+                mg['TOTBUYIN'] = matches[5].group('TOTBUYIN') 
+                mg['WIN'] = matches[6].group('WIN') 
+                
                 if mg['TOURNO']:
                     self.tinfo['tourNo'] = mg['TOURNO']
-                if not mg['BIRAKE'] and mg['TOTBUYIN']:
-                    m3 = self.re_TotalBuyin.search(mg['TOTBUYIN'])
+                if mg['PLACE']:
+                    self.tinfo['rank'] = int(mg['PLACE'])
+                if 'winnings' not in self.tinfo:
+                    self.tinfo['winnings'] = 0  # Initialize 'winnings' if it doesn't exist yet
+
+                if mg['WIN']:
+                    self.tinfo['winnings'] += int(100*Decimal(self.clearMoneyString(self.re_non_decimal.sub('',mg['WIN']))))
+                    
+              
+                if not mg['BIRAKE']: #and mg['TOTBUYIN']:
+                    m3 = self.re_TotalBuyin.search(handText)
                     if m3:
                         mg = m3.groupdict()
                     elif mg['BIAMT']: mg['BIRAKE'] = '0'
+
+
                 if mg['BIAMT'] and self.re_FPP.match(mg['BIAMT']):
                     self.tinfo['buyinCurrency'] = 'FPP'
 
@@ -340,13 +360,14 @@ class iPoker(HandHistoryConverter):
                     #FIXME: tournament no looks liek it is in the table name
                     mg['BIRAKE'] = self.clearMoneyString(self.re_non_decimal.sub('',mg['BIRAKE']))
                     mg['BIAMT']  = self.clearMoneyString(self.re_non_decimal.sub('',mg['BIAMT']))
-                    m4 = self.re_Buyin.search(mg['BIAMT'])
+                    if mg['BIRAKE2']:
+                        self.tinfo['buyin'] += int(100*Decimal(self.clearMoneyString(self.re_non_decimal.sub('',mg['BIRAKE2']))))
+                    m4 = self.re_Buyin.search(handText)
                     if m4:
-                        mg['BIAMT'] = m4.group('BUYIN')
+                        
                         self.tinfo['fee']   = int(100*Decimal(self.clearMoneyString(self.re_non_decimal.sub('',mg['BIRAKE']))))
-                        self.tinfo['buyin'] = int(100*Decimal(self.clearMoneyString(self.re_non_decimal.sub('',mg['BIAMT']))))
-                        if 'BIRAKE1' in mg and mg['BIRAKE1']:
-                            self.tinfo['buyin'] += int(100*Decimal(self.clearMoneyString(self.re_non_decimal.sub('',mg['BIRAKE1']))))
+                        self.tinfo['buyin'] = int(100*Decimal(self.clearMoneyString(self.re_non_decimal.sub('',mg['BIRAKE2']))))
+
                     # FIXME: <place> and <win> not parsed at the moment.
                     #  NOTE: Both place and win can have the value N/A
             if self.tinfo['buyin'] == 0:
@@ -374,7 +395,7 @@ class iPoker(HandHistoryConverter):
                         f"iPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'"
                     )
                     raise FpdbParseError from e
-
+        
         return self.info
 
     def readHandInfo(self, hand):
