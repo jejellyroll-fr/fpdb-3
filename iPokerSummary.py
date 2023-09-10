@@ -31,6 +31,7 @@ class iPokerSummary(TourneySummary):
                      'LS'  : u"\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|",
                      'PLYR': r'(?P<PNAME>[^"]+)',
                      'NUM' : r'.,0-9',
+                     'NUM2': r'\b((?:\d{1,3}(?:\s\d{3})*)|(?:\d+))\b',  # Regex pattern for matching numbers with spaces
                     }
     currencies = { u'€':'EUR', '$':'USD', '':'T$', u'£':'GBP', 'RSD': 'RSD'}
 
@@ -83,12 +84,12 @@ class iPokerSummary(TourneySummary):
                     (?:(<win>(%(LS)s)?(?P<WIN>[%(NUM2)s%(LS)s]+)</win>))
                     """ % substitutions, re.VERBOSE)
     re_Buyin = re.compile(r"""(?P<BUYIN>[%(NUM)s]+)""" % substitutions, re.MULTILINE|re.VERBOSE)
-    re_TourNo = re.compile(r'\(\#(?P<TOURNO>\d+)\)', re.MULTILINE)
+    re_TourNo = re.compile(r'(?P<TOURNO>\d+)$', re.MULTILINE)
     re_TotalBuyin = re.compile(r"""(?P<BUYIN>(?P<BIAMT>[%(LS)s%(NUM)s]+)\s\+\s?(?P<BIRAKE>[%(LS)s%(NUM)s]+)?)""" % substitutions, re.MULTILINE|re.VERBOSE)
     re_DateTime1 = re.compile("""(?P<D>[0-9]{2})\-(?P<M>[a-zA-Z]{3})\-(?P<Y>[0-9]{4})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
     re_DateTime2 = re.compile("""(?P<D>[0-9]{2})[\/\.](?P<M>[0-9]{2})[\/\.](?P<Y>[0-9]{4})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
     re_DateTime3 = re.compile("""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
-    re_Place     = re.compile("\d+")
+    re_Place     = re.compile(r"""(?:(<place>(?P<PLACE>.+?)</place>))""" % substitutions, re.VERBOSE)
     re_FPP       = re.compile(r'Pts\s')
     
     codepage = ["utf8", "cp1252"]
@@ -166,9 +167,19 @@ class iPokerSummary(TourneySummary):
                 self.tourNo = tourNo
 
         if tourney:
-            m2 = self.re_GameInfoTrny.search(self.summaryText)
-            if m2:
-                mg2 =  m2.groupdict()
+            matches = list(self.re_GameInfoTrny.finditer(self.summaryText))
+            if len(matches) > 0:
+                mg2 = {'TOURNO': None, 'NAME': None, 'REWARD': None, 'PLACE': None, 'BIAMT': None, 'BIRAKE': None, 'BIRAKE2': None, 'TOTBUYIN': None, 'WIN': None}
+                mg2['TOURNO'] = matches[0].group('TOURNO')
+                mg2['NAME'] = matches[1].group('NAME') 
+                mg2['REWARD'] = matches[2].group('REWARD')
+                mg2['PLACE'] = matches[3].group('PLACE') 
+                mg2['BIAMT'] = matches[4].group('BIAMT') 
+                mg2['BIRAKE'] = matches[4].group('BIRAKE')
+                mg2['BIRAKE2'] = matches[4].group('BIRAKE2') 
+                mg2['TOTBUYIN'] = matches[5].group('TOTBUYIN') 
+                mg2['WIN'] = matches[6].group('WIN')
+
                 self.buyin = 0
                 self.fee   = 0
                 self.prizepool = None
@@ -176,10 +187,10 @@ class iPokerSummary(TourneySummary):
 
                 if mg2['TOURNO']:
                     self.tourNo = mg2['TOURNO']
-                if mg2['CURRENCY']:
-                    self.currency = self.currencies[mg2['CURRENCY']]
+                #if mg2['CURRENCY']:
+                    #self.currency = self.currencies[mg2['CURRENCY']]
                 rank, winnings = None, None
-                if self.re_Place.search(mg2['PLACE']):
+                if 'PLACE' in mg2 and self.re_Place.search(mg2['PLACE']):
                     rank     = int(mg2['PLACE'])
                     winnings = int(100*self.convert_to_decimal(mg2['WIN']))
 
