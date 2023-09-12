@@ -147,8 +147,8 @@ class SealsWithClubs(HandHistoryConverter):
         info = {}
         m = self.re_GameInfo.search(handText)
         if not m:
-            tmp = handText[0:200]
-            log.error(("SealsWithClubsToFpdb.determineGameType: '%s'") % tmp)
+            tmp = handText[:200]
+            log.error(f"SealsWithClubsToFpdb.determineGameType: '{tmp}'")
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -165,9 +165,9 @@ class SealsWithClubs(HandHistoryConverter):
 
 
         info['type'] = 'ring' if 'TOURNO' in mg and mg['TOURNO'] is None else 'tour'
-        
+
         info['currency'] = 'mBTC'
-        
+
 
         if info['limitType'] == 'fl' and info['bb'] is not None:
             info['sb'] = str((Decimal(mg['SB'])/2).quantize(Decimal("0.01")))
@@ -180,7 +180,7 @@ class SealsWithClubs(HandHistoryConverter):
         m  = self.re_HandInfo.search(hand.handText,re.DOTALL)
         m2 = self.re_GameInfo.search(hand.handText)
         if m is None or m2 is None:
-            tmp = hand.handText[0:200]
+            tmp = hand.handText[:200]
             log.error(("SealsWithClubsToFpdb.readHandInfo: '%s'") % tmp)
             raise FpdbParseError
 
@@ -259,28 +259,7 @@ class SealsWithClubs(HandHistoryConverter):
 
 
 
-        if hand.gametype['base'] in ("hold"):
-            arr = hand.handText.split('*** HOLE CARDS ***')
-            if len(arr) > 1:
-                pre, post = arr
-            else:
-                post = arr[0]
-            pattern_preflop = r"^(?P<PREFLOP>.+(?=\*\*\* FLOP \*\*\*)|.+)"
-            if match := re.search(pattern_preflop, post):
-                preflop = match.group('PREFLOP')
-                print(preflop)
-            pattern_flop = r"^(\*\*\* FLOP \*\*\*(?P<FLOP> \[\S\S\S? \S\S\S? \S\S\S?\].+(?=\*\*\* TURN \*\*\*)|.+))?"
-            if match := re.search(pattern_flop, post):
-                flop = match.group('FLOP')
-                print(flop)
-            pattern_turn = r"^(\*\*\* TURN \*\*\* \[\S\S\S? \S\S\S? \S\S\S?]\s(?P<TURN>\[\S\S\S?\]\s.+(?=\*\*\* RIVER \*\*\*)|.+))?"
-            if match := re.search(pattern_turn, post):
-                turn = match.group('TURN')
-                print(turn)
-            pattern_river = r"^(\*\*\* RIVER \*\*\* \[\S\S\S? \S\S\S? \S\S\S? \S\S\S?]\s(?P<RIVER>\[\S\S\S?\]\s.+(?=\*\*\* SUMMARY \*\*\*)|.+))?"
-            if match := re.search(pattern_river, post):
-                river = match.group('RIVER')
-                print(river)
+
 
         # some hand histories on swc are missing a flop
         if (self.re_Turn.search(hand.handText) and not self.re_Flop.search(hand.handText)):
@@ -288,11 +267,17 @@ class SealsWithClubs(HandHistoryConverter):
         if (self.re_River.search(hand.handText) and not self.re_Turn.search(hand.handText)):
             raise FpdbParseError
 
+        m =  re.search(r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>[\s\S]*?(?=\*\*\* FLOP \*\*\*)|.+)"
+                           r"(\*\*\* FLOP \*\*\*(?P<FLOP>[\s\S]*?(?=\*\*\* TURN \*\*\*)|.+))?"
+                           r"(\*\*\* TURN \*\*\*(?P<TURN>[\s\S]*?(?=\*\*\* RIVER \*\*\*)|.+))?"
+                           r"(\*\*\* RIVER \*\*\*(?P<RIVER>[\s\S]*?(?=\*\*\* SHOW DOWN \*\*\*)|.+))?", hand.handText,re.DOTALL)
+
+
         # some hand histories on swc don't have hole cards either
-        if not match:
+        if not m:
             raise FpdbParseError
 
-        hand.addStreets(match)
+        hand.addStreets(m)
 
 
     def readCommunityCards(self, hand, street): # street has been matched by markStreets, so exists in this hand
@@ -336,7 +321,7 @@ class SealsWithClubs(HandHistoryConverter):
         m = self.re_Action.finditer(hand.streets[street])
         for action in m:
             acts = action.groupdict()
-            print("DEBUG: acts: %s" % acts)
+            print(f"DEBUG: acts: {acts}")
             if action.group('ATYPE') == ' folds':
                 hand.addFold( street, action.group('PNAME'))
             elif action.group('ATYPE') == ' checks':
