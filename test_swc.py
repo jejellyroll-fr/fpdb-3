@@ -2,7 +2,7 @@ import re
 import pytest
 
 
-re_GameInfo = re.compile(r"""SwCPoker\sHand\s*\#(?P<HID>\d+):\s((Tournament|Cashgame|sitngo)\s\((.*?)\)\#(?P<TOURNO>\d+),\s(?P<BUYIN>(?P<BIAMT>\d+)\+(?P<BIRAKE>\d+))\s|\s)(?P<GAME>(Hold\'em|Omaha|Omaha\s5\sCards))\s(?P<LIMIT>(NL|PL|Limit|Pot\sLimit|No\sLimit))\s((-\sLevel\s\w+\s)|)\((?P<SB>\d+(\.\d+)?)/(?P<BB>\d+(\.\d+)?)\)\s-\s(?P<DATETIME>.*)""",re.VERBOSE)
+re_GameInfo = re.compile(r"""SwCPoker\sHand\s*\#(?P<HID>\d+):\s((Tournament|Cashgame|sitngo)\s\(((?P<TABLE2>.*?))\)\#(?P<TOURNO>\d+),\s(?P<BUYIN>(?P<BIAMT>\d+(\.\d+)?))\+(?P<BIRAKE>\d+(\.\d+)?)\s|\s)(?P<GAME>(Hold\'em|Omaha|Omaha\s5\sCards))\s(?P<LIMIT>(NL|PL|Limit|Pot\sLimit|No\sLimit))\s((-\sLevel\s\w+\s)|)\((?P<SB>\d+(\.\d+)?)/(?P<BB>\d+(\.\d+)?)\)\s-\s(?P<DATETIME>.*)""",re.VERBOSE)
 
 
 def test_re_GameInfo():
@@ -11,7 +11,8 @@ def test_re_GameInfo():
     assert match is not None
     assert match.group('HID') == '183314831'
     assert match.group('TOURNO') == '183316169'
-    assert match.group('BUYIN') == '0+0'
+    assert match.group('TABLE2') == '5 Card Omaha Freeroll [20 Chips]'
+    assert match.group('BUYIN') == '0'
     assert match.group('BIAMT') == '0'
     assert match.group('BIRAKE') == '0'
     assert match.group('GAME') == 'Omaha 5 Cards'
@@ -267,3 +268,21 @@ def test_re_Action_call():
     assert match.group('ATYPE') == " calls"
     assert match.group('PNAME') == "edinapoker"
     assert match.group('BET') == '0.02'
+
+
+re_rake = re.compile('Total pot (?P<TOTALPOT>\\d{1,3}(,\\d{3})*(\\.\\d+)?)\\s\\|\\sRake\\s(?P<RAKE>\\d{1,3}(,\\d{3})*(\\.\\d+)?)', re.MULTILINE)
+
+
+def test_re_rake():
+    text = """Total pot 1,350 | Rake 0"""
+    match = re_rake.search(text)
+    assert match is not None
+    assert match.group('TOTALPOT') == "1,350"
+    assert match.group('RAKE') == "0"
+
+def test_re_rake2():
+    text = """Total pot 0.57 | Rake 0.03"""
+    match = re_rake.search(text)
+    assert match is not None
+    assert match.group('TOTALPOT') == "0.57"
+    assert match.group('RAKE') == "0.03"  
