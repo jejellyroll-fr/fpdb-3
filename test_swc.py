@@ -40,24 +40,41 @@ def test_re_GameInfo2():
     assert match.group('HID') == '183411639'
 
 
-re_HandInfo = re.compile(r"""^Table\s(?P<TABLE>((\'No-Rake\sMicro\sStakes\s(\#\d+|\w+)\'\(\d+\))|)\s((?P<MAX>\d+)-(max|half|deep)|(?P<HU>HU))\s\(\w+\s\w+\))""",re.MULTILINE)
+re_HandInfo = re.compile(r"""^Table\s'(?P<TABLE>.*?)'\(\d+\)\s(?P<MAX>\d+)-max\s(?:\(Real Money\)\s)?Seat\s\#\d+\sis\sthe\sbutton""")
+
+
 
 def test_re_HandInfo():
     text = """Table 'No-Rake Micro Stakes #1'(28248) 9-max (Real Money) Seat #7 is the button"""
     match = re_HandInfo.search(text)
     assert match is not None
-    assert match.group('TABLE') == """'No-Rake Micro Stakes #1'(28248) 9-max (Real Money)"""
+    assert match.group('TABLE') == """No-Rake Micro Stakes #1"""
     assert match.group('MAX') == "9"
-    assert match.group('HU') is None
+    
 
 def test_re_HandInfo2():
     text = """Table 'No-Rake Micro Stakes PLO'(24812) 9-max (Real Money) Seat #4 is the button"""
     match = re_HandInfo.search(text)
     assert match is not None
-    assert match.group('TABLE') == """'No-Rake Micro Stakes PLO'(24812) 9-max (Real Money)"""
+    assert match.group('TABLE') == """No-Rake Micro Stakes PLO"""
     assert match.group('MAX') == "9"
-    assert match.group('HU') is None
+    
 
+def test_re_HandInfo3():
+    text = """Table 'FunTime #2'(183558223) 6-max (Real Money) Seat #3 is the button"""
+    match = re_HandInfo.search(text)
+    assert match is not None
+    assert match.group('TABLE') == """FunTime #2"""
+    assert match.group('MAX') == "6"
+    
+
+def test_re_HandInfo_mtt():
+    text = """Table '183390848 3'(183387008) 8-max Seat #2 is the button"""
+    match = re_HandInfo.search(text)
+    assert match is not None
+    assert match.group('TABLE') == """183390848 3"""
+    assert match.group('MAX') == "8"
+    
 
 
 re_PlayerInfo   = re.compile(r"""^Seat\s+(?P<SEAT>\d+):\s+(?P<PNAME>\w+)\s+\((?P<CASH>\d{1,3}(,\d{3})*(\.\d+)?)\sin\schips\)""" , re.MULTILINE|re.VERBOSE)

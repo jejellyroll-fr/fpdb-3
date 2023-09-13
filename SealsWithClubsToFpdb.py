@@ -54,7 +54,7 @@ class SealsWithClubs(HandHistoryConverter):
     
     re_PlayerInfo   = re.compile(r"""^Seat\s+(?P<SEAT>\d+):\s+(?P<PNAME>\w+)\s+\((?P<CASH>\d{1,3}(,\d{3})*(\.\d+)?)\sin\schips\)""" , re.MULTILINE|re.VERBOSE)
 
-    re_HandInfo = re.compile(r"""^Table\s(?P<TABLE>((\'No-Rake\sMicro\sStakes\s(\#\d+|\w+)\'\(\d+\))|)\s((?P<MAX>\d+)-(max|half|deep)|(?P<HU>HU))\s\(\w+\s\w+\))""",re.MULTILINE)
+    re_HandInfo = re.compile(r"""^Table\s'(?P<TABLE>.*?)'\(\d+\)\s(?P<MAX>\d+)-max\s(?:\(Real Money\)\s)?Seat\s\#\d+\sis\sthe\sbutton""",re.MULTILINE)
 
     re_Identify     = re.compile(r"SwCPoker\sHand\s")
     re_SplitHands   = re.compile('(?:\s?\n){2,}')
@@ -185,8 +185,7 @@ class SealsWithClubs(HandHistoryConverter):
             raise FpdbParseError
 
         info.update(m.groupdict())
-        if info['TABLE'] == "No Rake Micro Stakes":
-            info['MAX'] = '9'
+        
         info.update(m2.groupdict())
 
         #log.debug("readHandInfo: %s" % info)
@@ -453,17 +452,21 @@ class SealsWithClubs(HandHistoryConverter):
 
 
     @staticmethod
-    def getTableTitleRe(type, table_name=None, tournament = None, table_number=None):
-        log.info(
-            f"Seals.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'"
-        )
-        result = re.findall(r"'(.*?)'", table_name)
-        regex = str(result[0])
-        print("regex cash ", regex)
-        if type=="tour":
+    def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
+        logging.info(f"Seals.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'")
+        if type == "tour":
             regex = f"{re.escape(str(tournament))}#{re.escape(str(table_number))}"
-            print("regex tour: ", regex)
-            print("regex get mtt sng expresso cash title:", regex)
-        log.info(f"Seals.getTableTitleRe: returns: '{regex}'")
-        return regex
+            logging.info(f"Seals.getTableTitleRe: regex='{regex}'")
+            return regex
+        elif table_name is not None:
+            result = re.findall(r"(.*?)", table_name)
+            if not result:
+                logging.warning("Seals.getTableTitleRe: no match found in table_name")
+                return None
+            regex = str(result[0])
+            logging.info(f"Seals.getTableTitleRe: regex='{regex}'")
+            return regex
+        else:
+            logging.warning("Seals.getTableTitleRe: no valid input provided")
+            return None
 
