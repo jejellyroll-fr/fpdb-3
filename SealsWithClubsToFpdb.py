@@ -46,12 +46,13 @@ class SealsWithClubs(HandHistoryConverter):
                               "Hold'em" : ('hold','holdem'),
                                 'Omaha' : ('hold','omahahi'),
                           'Omaha Hi-Lo' : ('hold','omahahilo'),
+                          "Short Deck" : ('hold','6_holdem'),
                           'Omaha 5 Cards' : ('hold','5_omahahi')
                }
 
     # Static regexes
-    re_GameInfo = re.compile(r"""SwCPoker\sHand\s*\#(?P<HID>\d+):\s((Tournament|Cashgame|sitngo)\s\((.*?)\)\#(?P<TOURNO>\d+),\s(?P<BUYIN>(?P<BIAMT>\d+)\+(?P<BIRAKE>\d+))\s|\s)(?P<GAME>(Hold\'em|Omaha|Omaha\s5\sCards))\s(?P<LIMIT>(NL|PL|Limit|Pot\sLimit|No\sLimit))\s((-\sLevel\s\w+\s)|)\((?P<SB>\d+(\.\d+)?)/(?P<BB>\d+(\.\d+)?)\)\s-\s(?P<DATETIME>.*)""",re.VERBOSE)
-    
+    re_GameInfo = re.compile(r"""SwCPoker\sHand\s*\#(?P<HID>\d+):\s((Tournament|Cashgame|sitngo)\s\(((?P<TABLE2>.*?))\)\#(?P<TOURNO>\d+),\s(?P<BUYIN>(?P<BIAMT>\d+(\.\d+)?))\+(?P<BIRAKE>\d+(\.\d+)?)\s|\s)(?P<GAME>(Hold\'em|Omaha|Omaha\s5\sCards))\s(?P<LIMIT>(NL|PL|Limit|Pot\sLimit|No\sLimit))\s((-\sLevel\s\w+\s)|)\((?P<SB>\d+(\.\d+)?)/(?P<BB>\d+(\.\d+)?)\)\s-\s(?P<DATETIME>.*)""",re.VERBOSE)
+
     re_PlayerInfo   = re.compile(r"""^Seat\s+(?P<SEAT>\d+):\s+(?P<PNAME>\w+)\s+\((?P<CASH>\d{1,3}(,\d{3})*(\.\d+)?)\sin\schips\)""" , re.MULTILINE|re.VERBOSE)
 
     re_HandInfo = re.compile(r"""^Table\s'(?P<TABLE>.*?)'\(\d+\)\s(?P<MAX>\d+)-max\s(?:\(Real Money\)\s)?Seat\s\#\d+\sis\sthe\sbutton""",re.MULTILINE)
@@ -79,7 +80,7 @@ class SealsWithClubs(HandHistoryConverter):
     re_Flop             = re.compile('\*\*\* FLOP \*\*\*')
     re_Turn             = re.compile('\*\*\* TURN \*\*\*')
     re_River            = re.compile('\*\*\* RIVER \*\*\*')
-    re_rake             = re.compile('Total pot (?P<TOTALPOT>\d{1,3}(,\d{3})*(\.\d+)?)\s\|\sRake\s(?P<RAKE>\d{1,3}(,\d{3})*(\.\d+)?)' , re.MULTILINE)  
+    re_rake = re.compile('Total pot (?P<TOTALPOT>\\d{1,3}(,\\d{3})*(\\.\\d+)?)\\s\\|\\sRake\\s(?P<RAKE>\\d{1,3}(,\\d{3})*(\\.\\d+)?)', re.MULTILINE)
     re_Mucked           = re.compile("^%(PLYR)s: mucks hand" %  substitutions, re.MULTILINE)
 
     def compilePlayerRegexs(self, hand):
@@ -165,8 +166,10 @@ class SealsWithClubs(HandHistoryConverter):
 
 
         info['type'] = 'ring' if 'TOURNO' in mg and mg['TOURNO'] is None else 'tour'
-
-        info['currency'] = 'mBTC'
+        if info['type'] == 'ring':
+            info['currency'] = 'mBTC'
+        else:
+            info['currency'] = 'mBTC'
 
 
         if info['limitType'] == 'fl' and info['bb'] is not None:
@@ -187,7 +190,11 @@ class SealsWithClubs(HandHistoryConverter):
         info.update(m.groupdict())
         
         info.update(m2.groupdict())
-
+        if info['TOURNO'] is not None:
+            tablesplit = re.split(" ", info['TABLE'])
+            print(tablesplit[1])
+            info['TABLE'] = info['TABLE2'] + ' ' + tablesplit[1]
+            print(info['TABLE'])
         #log.debug("readHandInfo: %s" % info)
         for key in info:
             if key == 'DATETIME':
@@ -203,28 +210,28 @@ class SealsWithClubs(HandHistoryConverter):
                 hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
             if key == 'HID':
                 hand.handid = info[key]
-            #if key == 'TOURNO':
-            #    hand.tourNo = info[key]
-            #if key == 'BUYIN':
-            #    if hand.tourNo!=None:
-                    #print "DEBUG: info['BUYIN']: %s" % info['BUYIN']
-                    #print "DEBUG: info['BIAMT']: %s" % info['BIAMT']
-                    #print "DEBUG: info['BIRAKE']: %s" % info['BIRAKE']
+            if key == 'TOURNO':
+                hand.tourNo = info[key]
+            if key == 'BUYIN':
+                if hand.tourNo!=None:
+                    print("DEBUG: info['BUYIN']: %s" % info['BUYIN'])
+                    print("DEBUG: info['BIAMT']: %s" % info['BIAMT'])
+                    print("DEBUG: info['BIRAKE']: %s" % info['BIRAKE'])
                     
-            #        if info[key] == 'Freeroll':
-            #            hand.buyin = 0
-            #            hand.fee = 0
-            #            hand.buyinCurrency = "FREE"
-            #        else:
+                    if info[key] == 'Freeroll':
+                        hand.buyin = 0
+                        hand.fee = 0
+                        hand.buyinCurrency = "FREE"
+                    else:
                         ##FIXME: currency set as EUR
-            #            hand.buyinCurrency="EUR"
+                        hand.buyinCurrency="mBTC"
                         #info['BIRAKE'] = info['BIRAKE'].strip(u'$€£')
 
-            #            hand.buyin = int(100*Decimal(info['BIAMT']))
-            #            hand.fee = int(100*Decimal(info['BIRAKE']))
+                        hand.buyin = int(100*Decimal(info['BIAMT']))
+                        hand.fee = int(100*Decimal(info['BIRAKE']))
                         
-            #if key == 'LEVEL':
-            #    hand.level = info[key]       
+            if key == 'LEVEL':
+                hand.level = info[key]       
             if key == 'TABLE':
                 tablesplit = re.split(" ", info[key])
                 if hand.tourNo != None and len(tablesplit)>1:
@@ -389,7 +396,13 @@ class SealsWithClubs(HandHistoryConverter):
                 for m in self.re_rake.finditer(hand.handText):
                     #print("rakex: ", Decimal(m.group('RAKE')))
                     rake = rake + Decimal(m.group('RAKE'))
-                    totalpot = totalpot + Decimal(m.group('TOTALPOT'))
+                    print(m.group('TOTALPOT'))
+                    if ',' in m.group('TOTALPOT'):
+                        newtotalpot = m.group('TOTALPOT').replace(',', '')
+                        print(newtotalpot)
+                        totalpot = totalpot + Decimal(newtotalpot)
+                    else:
+                        totalpot = totalpot + Decimal(m.group('TOTALPOT'))
             #print("rake: ", rake)
             if hand.rake is None:
                 hand.rake = rake            
@@ -408,7 +421,13 @@ class SealsWithClubs(HandHistoryConverter):
                 for m in self.re_rake.finditer(hand.handText):
                     #print("rakex: ", Decimal(m.group('RAKE')))
                     rake = rake + Decimal(m.group('RAKE'))
-                    totalpot = totalpot + Decimal(m.group('TOTALPOT'))
+                    print(m.group('TOTALPOT'))
+                    if ',' in m.group('TOTALPOT'):
+                        newtotalpot = m.group('TOTALPOT').replace(',', '')
+                        print(newtotalpot)
+                        totalpot = totalpot + Decimal(newtotalpot)
+                    else:
+                        totalpot = totalpot + Decimal(m.group('TOTALPOT'))
             #print("rake: ", rake)
             if hand.rake is None:
                 hand.rake = rake            
@@ -424,7 +443,13 @@ class SealsWithClubs(HandHistoryConverter):
                         uncalledpot = Decimal(0)
                         for m in self.re_Uncalled.finditer(hand.handText):
                     #print("rakex: ", Decimal(m.group('RAKE')))
-                            uncalledpot = uncalledpot + Decimal(m.group('BET'))
+                            print(m.group('BET'))
+                            if ',' in m.group('BET'):
+                                newbet = m.group('BET').replace(',', '')
+                                print(newbet)
+                                uncalledpot = uncalledpot + Decimal(newbet)
+                            else:
+                                uncalledpot = uncalledpot + Decimal(m.group('BET'))
 
                         collectpot = totalpot - uncalledpot
                         total = total + uncalledpot
@@ -437,7 +462,13 @@ class SealsWithClubs(HandHistoryConverter):
                         uncalledpot = Decimal(0)
                         for m in self.re_Uncalled.finditer(hand.handText):
                     #print("rakex: ", Decimal(m.group('RAKE')))
-                            uncalledpot = uncalledpot + Decimal(m.group('BET'))
+                            print(m.group('BET'))
+                            if ',' in m.group('BET'):
+                                newbet = m.group('BET').replace(',', '')
+                                print(newbet)
+                                uncalledpot = uncalledpot + Decimal(newbet)
+                            else:
+                                uncalledpot = uncalledpot + Decimal(m.group('BET'))
 
                         collectpot = totalpot - uncalledpot
                         total = total + uncalledpot
@@ -455,7 +486,10 @@ class SealsWithClubs(HandHistoryConverter):
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
         logging.info(f"Seals.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'")
         if type == "tour":
-            regex = f"{re.escape(str(tournament))}#{re.escape(str(table_number))}"
+            regex = f"{table_name}"
+            regex = regex.split()
+            regex = ' '.join(regex[1:-1])
+            print(regex)
             logging.info(f"Seals.getTableTitleRe: regex='{regex}'")
             return regex
         elif table_name is not None:
@@ -463,7 +497,7 @@ class SealsWithClubs(HandHistoryConverter):
             if not result:
                 logging.warning("Seals.getTableTitleRe: no match found in table_name")
                 return None
-            regex = str(result[0])
+            regex = f"{table_name}"
             logging.info(f"Seals.getTableTitleRe: regex='{regex}'")
             return regex
         else:
