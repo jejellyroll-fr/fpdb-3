@@ -219,8 +219,9 @@ def test_re_ShowdownAction():
     assert match.group('CARDS') == "5h 5s 6h 3s"
 
 
-re_Action           = re.compile(r"""^%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands pat)(?:\s(?P<POT>\d{1,3}(?:,\d{3})*(\.\d+)?)(?:\sto\s(?P<BET>\d{1,3}(?:,\d{3})*(\.\d+)?))?)?"""
-                         %  substitutions, re.MULTILINE|re.VERBOSE)
+re_Action = re.compile(r"""^%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)(?:\s(?P<BET>\d{1,3}(,\d{3})*(\.\d+)?))?(?:\sto\s(?P<POT>\d{1,3}(,\d{3})*(\.\d+)?))?\s*$""" % substitutions, re.MULTILINE|re.VERBOSE)
+
+
 
 
 
@@ -228,8 +229,8 @@ def test_re_Action():
     text = """cheapsmack: raises 0.06 to 0.08"""
     match = re_Action.search(text)
     assert match is not None
-    assert match.group('POT') == "0.06"
-    assert match.group('BET') == "0.08"
+    assert match.group('POT') == "0.08"
+    assert match.group('BET') == "0.06"
     assert match.group('ATYPE') == " raises"
     assert match.group('PNAME') == "cheapsmack"
 
@@ -241,3 +242,11 @@ def test_re_Action_checks():
     assert match.group('PNAME') == "GER4SOUL"
     assert match.group('POT') is None  # Updated assertion to handle 'POT' being None
     assert match.group('BET') is None  # Updated assertion to handle 'BET' being None
+
+def test_re_Action_call():
+    text = """edinapoker: calls 0.02"""
+    match = re_Action.search(text)
+    assert match is not None
+    assert match.group('ATYPE') == " calls"
+    assert match.group('PNAME') == "edinapoker"
+    assert match.group('BET') == '0.02'
