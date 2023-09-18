@@ -82,11 +82,13 @@ class iPoker(HandHistoryConverter):
     games = {              # base, category
                 '7 Card Stud' : ('stud','studhi'),
           '7 Card Stud Hi-Lo' : ('stud','studhilo'),
+          '7 Card Stud HiLow' : ('stud','studhilo'),
                 '5 Card Stud' : ('stud','5_studhi'),
                      'Holdem' : ('hold','holdem'),
             'Six Plus Holdem' : ('hold','6_holdem'),
                       'Omaha' : ('hold','omahahi'),
                 'Omaha Hi-Lo' : ('hold','omahahilo'),
+                'Omaha HiLow' : ('hold','omahahilo'),
             }
 
     currencies = { u'€':'EUR', '$':'USD', '':'T$', u'£':'GBP', 'RSD': 'RSD'}
@@ -145,12 +147,13 @@ class iPoker(HandHistoryConverter):
     months = { 'Jan':1, 'Feb':2, 'Mar':3, 'Apr':4, 'May':5, 'Jun':6, 'Jul':7, 'Aug':8, 'Sep':9, 'Oct':10, 'Nov':11, 'Dec':12}
 
     # Static regexes
+    re_client = re.compile(r'<client_version>(?P<CLIENT>.*?)</client_version>')
     #re_Identify = re.compile(u"""<\?xml version=\"1\.0\" encoding=\"utf-8\"\?>""")
     re_Identify = re.compile(u"""<game gamecode=\"\d+\">""")
     re_SplitHands = re.compile(r'</game>')
     re_TailSplitHands = re.compile(r'(</game>)')
     re_GameInfo = re.compile(r"""
-            <gametype>(?P<GAME>((?P<CATEGORY>(5|7)\sCard\sStud(\sHi\-Lo)?|(Six\sPlus\s)?Holdem|Omaha(\sHi\-Lo)?)?\s?(?P<LIMIT>NL|SL|L|LZ|PL|БЛ|LP|No\slimit|Pot\slimit|Limit))|LH\s(?P<LSB>[%(NUM)s]+)(%(LS)s)?/(?P<LBB>[%(NUM)s]+)(%(LS)s)?.+?)
+            <gametype>(?P<GAME>((?P<CATEGORY>(5|7)\sCard\sStud(\sHi\-Lo|\sHiLow)?|(Six\sPlus\s)?Holdem|Omaha(\sHi\-Lo|\sHiLow)?)?\s?(?P<LIMIT>NL|SL|L|LZ|PL|БЛ|LP|No\slimit|Pot\slimit|Limit))|LH\s(?P<LSB>[%(NUM)s]+)(%(LS)s)?/(?P<LBB>[%(NUM)s]+)(%(LS)s)?.+?)
             (\s(%(LS)s)?(?P<SB>[%(NUM)s]+)(%(LS)s)?/(%(LS)s)?(?P<BB>[%(NUM)s]+))?(%(LS)s)?(\sAnte\s(%(LS)s)?(?P<ANTE>[%(NUM)s]+)(%(LS)s)?)?</gametype>\s+?
             <tablename>(?P<TABLE>.+)?</tablename>\s+?
             (<(tablecurrency|tournamentcurrency)>(?P<TABLECURRENCY>.*)</(tablecurrency|tournamentcurrency)>\s+?)?
@@ -169,7 +172,15 @@ class iPoker(HandHistoryConverter):
                         (?:(<place>(?P<PLACE>.+?)</place>))|
                         (?:(<buyin>(?P<BIAMT>[%(NUM2)s%(LS)s]+)\s\+\s)?(?P<BIRAKE>[%(NUM2)s%(LS)s]+)\s\+\s(?P<BIRAKE2>[%(NUM2)s%(LS)s]+)</buyin>)|
                         (?:(<totalbuyin>(?P<TOTBUYIN>.*)</totalbuyin>))|
-                        (?:(<win>(%(LS)s)?(?P<WIN>[%(NUM2)s%(LS)s]+)</win>))
+                        (?:(<win>(%(LS)s)?(?P<WIN>.+?|[%(NUM2)s%(LS)s]+)</win>))
+                        """ % substitutions, re.VERBOSE)
+    re_GameInfoTrny2 = re.compile(r"""
+                        (?:(<tour(?:nament)?code>(?P<TOURNO>\d+)</tour(?:nament)?code>))|
+                        (?:(<tournamentname>(?P<NAME>[^<]*)</tournamentname>))|
+                        (?:(<place>(?P<PLACE>.+?)</place>))|
+                        (?:(<buyin>(?P<BIAMT>[%(NUM2)s%(LS)s]+)\s\+\s)?(?P<BIRAKE>[%(NUM2)s%(LS)s]+)</buyin>)|
+                        (?:(<totalbuyin>(?P<TOTBUYIN>[%(NUM2)s%(LS)s]+)</totalbuyin>))|
+                        (?:(<win>(%(LS)s)?(?P<WIN>.+?|[%(NUM2)s%(LS)s]+)</win>))
                         """ % substitutions, re.VERBOSE)
     re_Buyin = re.compile(r"""(?:(<totalbuyin>(?P<TOTBUYIN>.*)</totalbuyin>))""" , re.VERBOSE)
     re_TotalBuyin  = re.compile(r"""(?:(<buyin>(?P<BIAMT>[%(NUM2)s%(LS)s]+)\s\+\s)?(?P<BIRAKE>[%(NUM2)s%(LS)s]+)\s\+\s(?P<BIRAKE2>[%(NUM2)s%(LS)s]+)</buyin>)""" % substitutions, re.VERBOSE)
@@ -323,43 +334,61 @@ class iPoker(HandHistoryConverter):
                 self.tinfo['buyinCurrency'] = mg['CURRENCY']
             self.tinfo['buyin'] = 0
             self.tinfo['fee'] = 0
-            matches = list(self.re_GameInfoTrny.finditer(handText))
-            if len(matches) > 0:
-                mg['TOURNO'] = matches[0].group('TOURNO')
-                mg['NAME'] = matches[1].group('NAME') 
-                mg['REWARD'] = matches[2].group('REWARD')
-                mg['PLACE'] = matches[3].group('PLACE') 
-                mg['BIAMT'] = matches[4].group('BIAMT') 
-                mg['BIRAKE'] = matches[4].group('BIRAKE')
-                mg['BIRAKE2'] = matches[4].group('BIRAKE2') 
-                mg['TOTBUYIN'] = matches[5].group('TOTBUYIN') 
-                mg['WIN'] = matches[6].group('WIN') 
-                
-                if mg['TOURNO']:
-                    self.tinfo['tourNo'] = mg['TOURNO']
-                if mg['PLACE']:
-                    self.tinfo['rank'] = int(mg['PLACE'])
-                if 'winnings' not in self.tinfo:
-                    self.tinfo['winnings'] = 0  # Initialize 'winnings' if it doesn't exist yet
+            client_match =  self.re_client.search(handText)
+            re_client_split = '.'.join(client_match['CLIENT'].split('.')[:2])
+            if re_client_split == '23.5':   #betclic fr
+                matches = list(self.re_GameInfoTrny.finditer(handText))
+                if len(matches) > 0:
+                    mg['TOURNO'] = matches[0].group('TOURNO')
+                    mg['NAME'] = matches[1].group('NAME') 
+                    mg['REWARD'] = matches[2].group('REWARD')
+                    mg['PLACE'] = matches[3].group('PLACE') 
+                    mg['BIAMT'] = matches[4].group('BIAMT') 
+                    mg['BIRAKE'] = matches[4].group('BIRAKE')
+                    mg['BIRAKE2'] = matches[4].group('BIRAKE2') 
+                    mg['TOTBUYIN'] = matches[5].group('TOTBUYIN') 
+                    mg['WIN'] = matches[6].group('WIN') 
 
-                if mg['WIN']:
-                    self.tinfo['winnings'] += int(100*Decimal(self.clearMoneyString(self.re_non_decimal.sub('',mg['WIN']))))
+            else:
+                matches = list(self.re_GameInfoTrny2.finditer(handText))
+                if len(matches) > 0:
+                    mg['TOURNO'] = matches[0].group('TOURNO')
+                    mg['NAME'] = matches[1].group('NAME') 
+                    mg['PLACE'] = matches[2].group('PLACE') 
+                    mg['BIAMT'] = matches[3].group('BIAMT') 
+                    mg['BIRAKE'] = matches[3].group('BIRAKE')
+                    mg['TOTBUYIN'] = matches[4].group('TOTBUYIN') 
+                    mg['WIN'] = matches[5].group('WIN') 
+
+
+            if mg['TOURNO']:
+                self.tinfo['table_name'] = mg['NAME']
+                self.tinfo['tourNo'] = mg['TOURNO']
+            if mg['PLACE'] and mg['PLACE'] != 'N/A':
+                self.tinfo['rank'] = int(mg['PLACE'])
+                
+            if 'winnings' not in self.tinfo:
+                self.tinfo['winnings'] = 0  # Initialize 'winnings' if it doesn't exist yet
+
+            if mg['WIN'] and mg['WIN']  != 'N/A':
+                self.tinfo['winnings'] += int(100*Decimal(self.clearMoneyString(self.re_non_decimal.sub('',mg['WIN']))))
                     
               
-                if not mg['BIRAKE']: #and mg['TOTBUYIN']:
-                    m3 = self.re_TotalBuyin.search(handText)
-                    if m3:
-                        mg = m3.groupdict()
-                    elif mg['BIAMT']: mg['BIRAKE'] = '0'
+            if not mg['BIRAKE']: #and mg['TOTBUYIN']:
+                m3 = self.re_TotalBuyin.search(handText)
+                if m3:
+                    mg = m3.groupdict()
+                elif mg['BIAMT']: mg['BIRAKE'] = '0'
 
 
-                if mg['BIAMT'] and self.re_FPP.match(mg['BIAMT']):
-                    self.tinfo['buyinCurrency'] = 'FPP'
+            if mg['BIAMT'] and self.re_FPP.match(mg['BIAMT']):
+                self.tinfo['buyinCurrency'] = 'FPP'
 
-                if mg['BIRAKE']:
+            if mg['BIRAKE']:
                     #FIXME: tournament no looks liek it is in the table name
-                    mg['BIRAKE'] = self.clearMoneyString(self.re_non_decimal.sub('',mg['BIRAKE']))
-                    mg['BIAMT']  = self.clearMoneyString(self.re_non_decimal.sub('',mg['BIAMT']))
+                mg['BIRAKE'] = self.clearMoneyString(self.re_non_decimal.sub('',mg['BIRAKE']))
+                mg['BIAMT']  = self.clearMoneyString(self.re_non_decimal.sub('',mg['BIAMT']))
+                if re_client_split == '23.5':
                     if mg['BIRAKE2']:
                         self.tinfo['buyin'] += int(100*Decimal(self.clearMoneyString(self.re_non_decimal.sub('',mg['BIRAKE2']))))
                     m4 = self.re_Buyin.search(handText)
@@ -418,9 +447,10 @@ class iPoker(HandHistoryConverter):
             tmp = hand.handText[:200]
             log.error(f"iPokerToFpdb.readHandInfo: '{tmp}'")
             raise FpdbParseError
-
+        
         # Extract the relevant information from the match object
         mg = m.groupdict()
+        
 
         # Set the table name and maximum number of seats for the hand
         hand.tablename = self.tablename
@@ -470,6 +500,7 @@ class iPoker(HandHistoryConverter):
             hand.buyinCurrency = self.tinfo['buyinCurrency']
             hand.buyin = self.tinfo['buyin']
             hand.fee = self.tinfo['fee']
+            hand.tablename = f"{self.tinfo['table_name']} {self.tinfo['tourNo']}"
 
 
     def readPlayerStacks(self, hand):
@@ -871,8 +902,14 @@ class iPoker(HandHistoryConverter):
 
         # Generate the regex pattern based on the input parameters
         regex = f"{table_name}"
-        if tournament:
-            regex = f"{tournament}"
+        
+        if type == "tour":
+            regex = f"{table_name}"
+            regex = regex.split()
+            regex = ' '.join(regex[1:-1])
+            print(regex)
+            
+            return regex
         elif table_name.find('(No DP),') != -1:
             regex = table_name.split('(No DP),')[0]
         elif table_name.find(',') != -1:

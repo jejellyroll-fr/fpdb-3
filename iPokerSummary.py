@@ -59,7 +59,7 @@ class iPokerSummary(TourneySummary):
             }
     
     re_Identify = re.compile(u'<game\sgamecode=')
-
+    re_client = re.compile(r'<client_version>(?P<CLIENT>.*?)</client_version>')
     re_GameType = re.compile(r"""
             <gametype>(?P<GAME>((?P<CATEGORY>(5|7)\sCard\sStud(\sHi\-Lo)?|(Six\sPlus\s)?Holdem|Omaha(\sHi\-Lo)?)?\s?(?P<LIMIT>NL|SL|L|LZ|PL|БЛ|LP|No\slimit|Pot\slimit|Limit))|LH\s(?P<LSB>[%(NUM)s]+)(%(LS)s)?/(?P<LBB>[%(NUM)s]+)(%(LS)s)?.+?)
             (\s(%(LS)s)?(?P<SB>[%(NUM)s]+)(%(LS)s)?/(%(LS)s)?(?P<BB>[%(NUM)s]+))?(%(LS)s)?(\sAnte\s(%(LS)s)?(?P<ANTE>[%(NUM)s]+)(%(LS)s)?)?</gametype>\s+?
@@ -83,6 +83,14 @@ class iPokerSummary(TourneySummary):
                     (?:(<totalbuyin>(?P<TOTBUYIN>.*)</totalbuyin>))|
                     (?:(<win>(%(LS)s)?(?P<WIN>[%(NUM2)s%(LS)s]+)</win>))
                     """ % substitutions, re.VERBOSE)
+    re_GameInfoTrny2 = re.compile(r"""
+                        (?:(<tour(?:nament)?code>(?P<TOURNO>\d+)</tour(?:nament)?code>))|
+                        (?:(<tournamentname>(?P<NAME>[^<]*)</tournamentname>))|
+                        (?:(<place>(?P<PLACE>.+?)</place>))|
+                        (?:(<buyin>(?P<BIAMT>[%(NUM2)s%(LS)s]+)\s\+\s)?(?P<BIRAKE>[%(NUM2)s%(LS)s]+)</buyin>)|
+                        (?:(<totalbuyin>(?P<TOTBUYIN>[%(NUM2)s%(LS)s]+)</totalbuyin>))|
+                        (?:(<win>(%(LS)s)?(?P<WIN>.+?|[%(NUM2)s%(LS)s]+)</win>))
+                        """ % substitutions, re.VERBOSE)
     re_Buyin = re.compile(r"""(?P<BUYIN>[%(NUM)s]+)""" % substitutions, re.MULTILINE|re.VERBOSE)
     re_TourNo = re.compile(r'(?P<TOURNO>\d+)$', re.MULTILINE)
     re_TotalBuyin = re.compile(r"""(?P<BUYIN>(?P<BIAMT>[%(LS)s%(NUM)s]+)\s\+\s?(?P<BIRAKE>[%(LS)s%(NUM)s]+)?)""" % substitutions, re.MULTILINE|re.VERBOSE)
@@ -167,59 +175,116 @@ class iPokerSummary(TourneySummary):
                 self.tourNo = tourNo
 
         if tourney:
-            matches = list(self.re_GameInfoTrny.finditer(self.summaryText))
-            if len(matches) > 0:
-                mg2 = {'TOURNO': None, 'NAME': None, 'REWARD': None, 'PLACE': None, 'BIAMT': None, 'BIRAKE': None, 'BIRAKE2': None, 'TOTBUYIN': None, 'WIN': None}
-                mg2['TOURNO'] = matches[0].group('TOURNO')
-                mg2['NAME'] = matches[1].group('NAME') 
-                mg2['REWARD'] = matches[2].group('REWARD')
-                mg2['PLACE'] = matches[3].group('PLACE') 
-                mg2['BIAMT'] = matches[4].group('BIAMT') 
-                mg2['BIRAKE'] = matches[4].group('BIRAKE')
-                mg2['BIRAKE2'] = matches[4].group('BIRAKE2') 
-                mg2['TOTBUYIN'] = matches[5].group('TOTBUYIN') 
-                mg2['WIN'] = matches[6].group('WIN')
+            re_client_split = '.'.join(self.re_client.split('.')[:2])
+            if re_client_split == '23.5':   #betclic fr
+                matches = list(self.re_GameInfoTrny.finditer(self.summaryText))
+                if len(matches) > 0:
+                    mg2 = {'TOURNO': None, 'NAME': None, 'REWARD': None, 'PLACE': None, 'BIAMT': None, 'BIRAKE': None, 'BIRAKE2': None, 'TOTBUYIN': None, 'WIN': None}
+                    mg2['TOURNO'] = matches[0].group('TOURNO')
+                    mg2['NAME'] = matches[1].group('NAME') 
+                    mg2['REWARD'] = matches[2].group('REWARD')
+                    mg2['PLACE'] = matches[3].group('PLACE') 
+                    mg2['BIAMT'] = matches[4].group('BIAMT') 
+                    mg2['BIRAKE'] = matches[4].group('BIRAKE')
+                    mg2['BIRAKE2'] = matches[4].group('BIRAKE2') 
+                    mg2['TOTBUYIN'] = matches[5].group('TOTBUYIN') 
+                    mg2['WIN'] = matches[6].group('WIN') 
 
-                self.buyin = 0
-                self.fee   = 0
-                self.prizepool = None
-                self.entries   = None
-
-                if mg2['TOURNO']:
-                    self.tourNo = mg2['TOURNO']
-                #if mg2['CURRENCY']:
-                    #self.currency = self.currencies[mg2['CURRENCY']]
-                rank, winnings = None, None
-                if 'PLACE' in mg2 and self.re_Place.search(mg2['PLACE']):
-                    rank     = int(mg2['PLACE'])
-                    winnings = int(100*self.convert_to_decimal(mg2['WIN']))
-
-                self.tourneyName = mg2['NAME'].replace(" " + self.tourNo, "")
-
-                if not mg2['BIRAKE'] and mg2['TOTBUYIN']:
-                    m3 = self.re_TotalBuyin.search(mg2['TOTBUYIN'])
-                    if m3:
-                        mg2 = m3.groupdict()
-                    elif mg2['BIAMT']: mg2['BIRAKE'] = '0'
-                if mg2['BIAMT'] and mg2['BIRAKE']:
-                    self.buyin =  int(100*self.convert_to_decimal(mg2['BIAMT']))
-                    self.fee   =  int(100*self.convert_to_decimal(mg2['BIRAKE']))
-                    if 'BIRAKE1' in mg2 and mg2['BIRAKE1']:
-                        self.buyin += int(100*self.convert_to_decimal(mg2['BIRAKE1']))
-                    if self.re_FPP.match(mg2['BIAMT']):
-                        self.buyinCurrency = 'FPP'
-                else:
                     self.buyin = 0
                     self.fee   = 0
-                if self.buyin == 0:
-                    self.buyinCurrency = 'FREE'
-                hero = mg['HERO']
-                self.addPlayer(rank, hero, winnings, self.currency, None, None, None)
+                    self.prizepool = None
+                    self.entries   = None
+
+                    if mg2['TOURNO']:
+                        self.tourNo = mg2['TOURNO']
+                    #if mg2['CURRENCY']:
+                        #self.currency = self.currencies[mg2['CURRENCY']]
+                    rank, winnings = None, None
+                    if 'PLACE' in mg2 and self.re_Place.search(mg2['PLACE']):
+                        rank     = int(mg2['PLACE'])
+                        winnings = int(100*self.convert_to_decimal(mg2['WIN']))
+
+                    self.tourneyName = mg2['NAME'].replace(" " + self.tourNo, "")
+
+                    if not mg2['BIRAKE'] and mg2['TOTBUYIN']:
+                        m3 = self.re_TotalBuyin.search(mg2['TOTBUYIN'])
+                        if m3:
+                            mg2 = m3.groupdict()
+                        elif mg2['BIAMT']: mg2['BIRAKE'] = '0'
+                    if mg2['BIAMT'] and mg2['BIRAKE']:
+                        self.buyin =  int(100*self.convert_to_decimal(mg2['BIAMT']))
+                        self.fee   =  int(100*self.convert_to_decimal(mg2['BIRAKE']))
+                        if 'BIRAKE1' in mg2 and mg2['BIRAKE1']:
+                            self.buyin += int(100*self.convert_to_decimal(mg2['BIRAKE1']))
+                        if self.re_FPP.match(mg2['BIAMT']):
+                            self.buyinCurrency = 'FPP'
+                    else:
+                        self.buyin = 0
+                        self.fee   = 0
+                    if self.buyin == 0:
+                        self.buyinCurrency = 'FREE'
+                    hero = mg['HERO']
+                    self.addPlayer(rank, hero, winnings, self.currency, None, None, None)
+                else:
+                    raise FpdbHandPartial(hid=self.tourNo)
+                if self.tourNo is None:
+                    log.error(("iPokerSummary.parseSummary: Could Not Parse tourNo"))
+                    raise FpdbParseError
+
             else:
-                raise FpdbHandPartial(hid=self.tourNo)
-            if self.tourNo is None:
-                log.error(("iPokerSummary.parseSummary: Could Not Parse tourNo"))
-                raise FpdbParseError
+                matches = list(self.re_GameInfoTrny2.finditer(self.summaryText))
+                if len(matches) > 0:
+                    mg2 = {'TOURNO': None, 'NAME': None, 'PLACE': None, 'BIAMT': None, 'BIRAKE': None, 'TOTBUYIN': None, 'WIN': None}
+                    mg2['TOURNO'] = matches[0].group('TOURNO')
+                    mg2['NAME'] = matches[1].group('NAME') 
+                    mg2['PLACE'] = matches[2].group('PLACE') 
+                    mg2['BIAMT'] = matches[3].group('BIAMT') 
+                    mg2['BIRAKE'] = matches[3].group('BIRAKE')
+                    mg2['TOTBUYIN'] = matches[4].group('TOTBUYIN') 
+                    mg2['WIN'] = matches[5].group('WIN') 
+
+
+                    self.buyin = 0
+                    self.fee   = 0
+                    self.prizepool = None
+                    self.entries   = None
+
+                    if mg2['TOURNO']:
+                        self.tourNo = mg2['TOURNO']
+                    #if mg2['CURRENCY']:
+                        #self.currency = self.currencies[mg2['CURRENCY']]
+                    rank, winnings = None, None
+                    if 'PLACE' in mg2 and mg2['PLACE'] != 'N/A':
+                        rank     = int(mg2['PLACE'])
+                        if mg2['WIN'] and mg2['WIN']  != 'N/A':
+                            winnings = int(100*self.convert_to_decimal(mg2['WIN']))
+
+                    self.tourneyName = mg2['NAME'].replace(" " + self.tourNo, "")
+
+                    if not mg2['BIRAKE'] and mg2['TOTBUYIN']:
+                        m3 = self.re_TotalBuyin.search(mg2['TOTBUYIN'])
+                        if m3:
+                            mg2 = m3.groupdict()
+                        elif mg2['BIAMT']: mg2['BIRAKE'] = '0'
+                    if mg2['BIAMT'] and mg2['BIRAKE']:
+                        self.buyin =  int(100*self.convert_to_decimal(mg2['BIAMT']))
+                        self.fee   =  int(100*self.convert_to_decimal(mg2['BIRAKE']))
+                        if 'BIRAKE1' in mg2 and mg2['BIRAKE1']:
+                            self.buyin += int(100*self.convert_to_decimal(mg2['BIRAKE1']))
+                        if self.re_FPP.match(mg2['BIAMT']):
+                            self.buyinCurrency = 'FPP'
+                    else:
+                        self.buyin = 0
+                        self.fee   = 0
+                    if self.buyin == 0:
+                        self.buyinCurrency = 'FREE'
+                    hero = mg['HERO']
+                    self.addPlayer(rank, hero, winnings, self.currency, None, None, None)
+                else:
+                    raise FpdbHandPartial(hid=self.tourNo)
+                if self.tourNo is None:
+                    log.error(("iPokerSummary.parseSummary: Could Not Parse tourNo"))
+                    raise FpdbParseError
         else:
             tmp = self.summaryText[0:200]
             log.error(("iPokerSummary.determineGameType: Text does not appear to be a tournament '%s'") % tmp)
