@@ -589,6 +589,8 @@ class Winamax(HandHistoryConverter):
                 regex = r"Winamax\s+([^\(]+)\(%s\)\(#%s\)" % (tournament, table_number)
             elif table_number < 100 and table_number > 9:
                 regex = r"Winamax\s+([^\(]+)\(%s\)\(#0%s\)" % (tournament, table_number)
+            elif table_number == 0:
+                regex = r"Winamax\s+([^\(]+)\(%s\)\(#%s\)" % (tournament, table_number)
             else:
                 regex = r"Winamax\s+([^\(]+)\(%s\)\(#00%s\)" % (tournament, table_number)
            
