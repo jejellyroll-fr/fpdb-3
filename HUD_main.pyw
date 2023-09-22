@@ -288,11 +288,11 @@ class HUD_main(QObject):
         if type == "tour":   # hand is from a tournament
             try:
                 tab_number_test = int(tab_number)
-                print("tab_number before cut for temp key ge:",tab_number)
+                print("cas int:tab_number hud:",tab_number)
                 
                 tab_number = tab_number.rsplit(' ',1)[-1]
-                print("tab_number after cut for temp key ge:",tab_number)
-                print("tab_number for temp key ge:",tab_number)
+                print("tab_number hud after cut:",tab_number)
+                
                 temp_key = "%s Table %s" % (tour_number, tab_number)
                 print("temp_key tour:",temp_key)
             except ValueError:

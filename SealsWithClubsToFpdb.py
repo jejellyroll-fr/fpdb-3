@@ -191,10 +191,13 @@ class SealsWithClubs(HandHistoryConverter):
         
         info.update(m2.groupdict())
         if info['TOURNO'] is not None:
-            tablesplit = re.split(" ", info['TABLE'])
-            print(tablesplit[1])
-            info['TABLE'] = info['TABLE2'] + ' ' + tablesplit[1]
+            #tablesplit = re.split(" ", info['TABLE'])
+            #print(tablesplit[1])
+            words = m['TABLE'].split()
+            new_string = words[1]
+            info['TABLE'] = f"{m2['TABLE2']} {new_string}"
             print(info['TABLE'])
+            hand.tablename = f"{info['TABLE']}"
         #log.debug("readHandInfo: %s" % info)
         for key in info:
             if key == 'DATETIME':
@@ -232,12 +235,12 @@ class SealsWithClubs(HandHistoryConverter):
                         
             if key == 'LEVEL':
                 hand.level = info[key]       
-            if key == 'TABLE':
-                tablesplit = re.split(" ", info[key])
-                if hand.tourNo != None and len(tablesplit)>1:
-                    hand.tablename = tablesplit[1]
-                else:
-                    hand.tablename = info[key] #change table name without '
+            #if key == 'TABLE':
+                #tablesplit = re.split(" ", info[key])
+                #if hand.tourNo != None and len(tablesplit)>1:
+                    #hand.tablename = tablesplit[1]
+                #else:
+                    #hand.tablename = info[key] #change table name without '
             if key == 'MAX' and info[key] != None:
                 hand.maxseats = int(info[key])
             if key == 'HU' and info[key] != None:
@@ -451,7 +454,7 @@ class SealsWithClubs(HandHistoryConverter):
                             else:
                                 uncalledpot = uncalledpot + Decimal(m.group('BET'))
 
-                        collectpot = totalpot - uncalledpot
+                        collectpot = totalpot
                         total = total + uncalledpot
                         hand.totalpot = total
                         hand.addCollectPot(player=m.group('PNAME'),pot=collectpot)
@@ -470,7 +473,7 @@ class SealsWithClubs(HandHistoryConverter):
                             else:
                                 uncalledpot = uncalledpot + Decimal(m.group('BET'))
 
-                        collectpot = totalpot - uncalledpot
+                        collectpot = totalpot
                         total = total + uncalledpot
                         hand.totalpot = total
                         hand.addCollectPot(player=m.group('PNAME'),pot=collectpot)
@@ -485,11 +488,19 @@ class SealsWithClubs(HandHistoryConverter):
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
         logging.info(f"Seals.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'")
+
         if type == "tour":
             regex = f"{table_name}"
-            regex = regex.split()
-            regex = ' '.join(regex[1:-1])
-            print(regex)
+            words = regex.split()
+            regex = ' '.join(words[1:-1])
+            print("regex table tour", regex)
+            logging.info(f"Seals.getTableTitleRe: regex='{regex}'")
+            return regex
+        elif type == "ring":
+            regex = f"{table_name}"
+            words = regex.split()
+            regex = ' '.join(words[1:-1])
+            print("regex table ring",regex)
             logging.info(f"Seals.getTableTitleRe: regex='{regex}'")
             return regex
         elif table_name is not None:
