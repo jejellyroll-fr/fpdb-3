@@ -182,3 +182,11 @@ def test_re_cliento1():
     text = '<client_version>23.5.1.13</client_version>'
     match = re_client.search(text)
     assert match.group('CLIENT') == '23.5.1.13'
+
+
+re_MaxSeats = re.compile(r'<tablesize>(?P<SEATS>[0-9]+)</tablesize>', re.MULTILINE)
+
+def test_MaxSeats1():
+    text = '<tablesize>6</tablesize>'
+    match = re_MaxSeats.search(text)
+    assert match.group('SEATS') == '6'

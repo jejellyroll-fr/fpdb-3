@@ -286,9 +286,31 @@ class HUD_main(QObject):
 
         # regenerate temp_key for this hand- this is the tablename (+ tablenumber (if mtt))
         if type == "tour":   # hand is from a tournament
-            tab_number = tab_number.rsplit(' ',1)[-1]
-            temp_key = "%s Table %s" % (tour_number, tab_number)
-            print("temp_key tour:",temp_key)
+            try:
+                tab_number_test = int(tab_number)
+                print("tab_number before cut for temp key ge:",tab_number)
+                
+                tab_number = tab_number.rsplit(' ',1)[-1]
+                print("tab_number after cut for temp key ge:",tab_number)
+                print("tab_number for temp key ge:",tab_number)
+                temp_key = "%s Table %s" % (tour_number, tab_number)
+                print("temp_key tour:",temp_key)
+            except ValueError:
+                log.error(("tab_number error try tab name") )
+            try:
+                if len(table_name) >= 2 and table_name[-2].endswith(','):
+                    parts = table_name.split(',', 1)
+                else:
+                    parts = table_name.split(' ', 1)
+                    print(table_name)
+                    print(parts)
+                    
+                tab_number = tab_number.rsplit(' ',1)[-1]
+                print("tab_number for temp key ge:",tab_number)
+                temp_key = "%s Table %s" % (tour_number, tab_number)
+                print("temp_key tour:",temp_key)
+            except ValueError:
+                log.error(("both tab_number and table_name not working"))
         else:
 
             temp_key = table_name
