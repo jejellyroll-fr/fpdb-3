@@ -104,9 +104,10 @@ class Table_Window(object):
             print('table_number:')
             print(type(table_number))
             print(table_number)
-            #temp bug correction for stars must investigate 
-            #table_number = table_number.rsplit(' ',1)[-1]
-            print('table_number:')
+            #temp bug correction for ipoker must investigate 
+            #if table_number is not an interger
+
+            print('table_number error:')
             print(type(table_number))
             print(table_number)
             self.table = int(table_number)
@@ -146,10 +147,13 @@ class Table_Window(object):
         self.width  = geo['width']
         self.height = geo['height']
         self.x      = geo['x']
+        print(self.x)
         self.y      = geo['y']
+        print(self.y)
         self.oldx   = self.x # attn ray: remove these two lines and update Hud.py::update_table_position()
+        print(self.oldx)
         self.oldy   = self.y
-
+        print(self.oldy)
         self.game = self.get_game()
 
     def __str__(self):

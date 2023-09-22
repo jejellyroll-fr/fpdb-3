@@ -196,7 +196,8 @@ class iPoker(HandHistoryConverter):
     re_DateTime1 = re.compile("""(?P<D>[0-9]{2})\-(?P<M>[a-zA-Z]{3})\-(?P<Y>[0-9]{4})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
     re_DateTime2 = re.compile("""(?P<D>[0-9]{2})[\/\.](?P<M>[0-9]{2})[\/\.](?P<Y>[0-9]{4})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
     re_DateTime3 = re.compile("""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""", re.MULTILINE)
-    re_MaxSeats = re.compile(r'(?P<SEATS>[0-9]+) Max', re.MULTILINE)
+    re_MaxSeats = re.compile(r'<tablesize>(?P<SEATS>[0-9]+)</tablesize>', re.MULTILINE)
+    re_tablenamemtt = re.compile(r'<tablename>(?P<TABLET>.+?)</tablename>', re.MULTILINE)
     re_TourNo = re.compile(r'(?P<TOURNO>\d+)$', re.MULTILINE)
     re_non_decimal = re.compile(r'[^\d.,]+')
     re_Partial = re.compile('<startdate>', re.MULTILINE)
@@ -279,9 +280,12 @@ class iPoker(HandHistoryConverter):
         """
         m = self.re_GameInfo.search(handText)
         if not m: return None
-
+        m2 = self.re_MaxSeats.search(handText)
+        m3 = self.re_tablenamemtt.search(handText)
         self.info = {}
         mg = m.groupdict()
+        mg2 = m2.groupdict()
+        mg3 = m3.groupdict()
         tourney = False
         #print "DEBUG: m.groupdict(): %s" % mg
         if mg['GAME'][:2]=='LH':
@@ -302,7 +306,9 @@ class iPoker(HandHistoryConverter):
             if not mg['SB']: tourney = True
         if 'BB' in mg:
             self.info['bb'] = self.clearMoneyString(mg['BB'])
-
+        if 'SEATS' in mg2:
+            self.info['seats'] = mg2['SEATS']
+            
         if self.re_UncalledBets.search(handText):
             self.uncalledbets = False
         else:
@@ -315,6 +321,9 @@ class iPoker(HandHistoryConverter):
         if tourney:
             self.info['type'] = 'tour'
             self.info['currency'] = 'T$'
+            if 'TABLET' in mg3:
+                self.info['table_name'] = mg3['TABLET']
+                print(mg3['TABLET'])
             # FIXME: The sb/bb isn't listed in the game header. Fixing to 1/2 for now
             self.tinfo = {} # FIXME?: Full tourney info is only at the top of the file. After the
                             #         first hand in a file, there is no way for auto-import to
@@ -362,7 +371,7 @@ class iPoker(HandHistoryConverter):
 
 
             if mg['TOURNO']:
-                self.tinfo['table_name'] = mg['NAME']
+                self.tinfo['tour_name'] = mg['NAME']
                 self.tinfo['tourNo'] = mg['TOURNO']
             if mg['PLACE'] and mg['PLACE'] != 'N/A':
                 self.tinfo['rank'] = int(mg['PLACE'])
@@ -454,10 +463,9 @@ class iPoker(HandHistoryConverter):
 
         # Set the table name and maximum number of seats for the hand
         hand.tablename = self.tablename
-        if m1 := self.re_MaxSeats.search(self.tablename):
-            seats = int(m1.group('SEATS'))
-            if seats > 1 and seats < 11:
-                hand.maxseats = seats
+        if self.info['seats']:
+            hand.maxseats = int(self.info['seats'])
+
 
         # Set the hand ID for the hand
         hand.handid = m.group('HID')
@@ -500,7 +508,7 @@ class iPoker(HandHistoryConverter):
             hand.buyinCurrency = self.tinfo['buyinCurrency']
             hand.buyin = self.tinfo['buyin']
             hand.fee = self.tinfo['fee']
-            hand.tablename = f"{self.tinfo['table_name']} {self.tinfo['tourNo']}"
+            hand.tablename = f"{self.info['table_name']}"
 
 
     def readPlayerStacks(self, hand):
@@ -904,9 +912,9 @@ class iPoker(HandHistoryConverter):
         regex = f"{table_name}"
         
         if type == "tour":
-            regex = f"{table_name}"
-            regex = regex.split()
-            regex = ' '.join(regex[1:-1])
+            regex = f"([^\(]+)\s{table_number}"
+
+            
             print(regex)
             
             return regex
