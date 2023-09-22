@@ -721,7 +721,7 @@ class Cake(HandHistoryConverter):
         print("regex get table cash title:", regex)
         if tournament:
             
-            regex = f"Tournament: {tournament} Buy-In \w : Table {table_number} - \w - \w"
+            regex = f"Tournament:\s{tournament}\sBuy\-In\s\w+\s:\sTable\s{table_number}"
             #Tournament: 17106061 Buy-In Freeroll : Table 10 - No Limit Holdem - 15/30
             print("regex get mtt sng expresso cash title:", regex)
         log.info(f"Seals.getTableTitleRe: returns: '{regex}'")

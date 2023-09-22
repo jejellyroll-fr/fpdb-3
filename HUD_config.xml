@@ -3,14 +3,14 @@
     <!-- config_wrap_len  is preferred max line length in this file, -1 means no max
          day_start        is time that logical day starts, e.g. 5 means that any play
                           between 00:00 and 04:59:59 counts as being on the previous day -->
-    <general version="83" config_wrap_len="-1" day_start="5" ui_language="fr" config_difficulty="expert"/>
+    <general version="83" config_wrap_len="-1" day_start="5" ui_language="fr_FR" config_difficulty="expert"/>
 
     <import callFpdbHud="True" interval="5" fastStoreHudCache="False" saveActions="True" cacheSessions="False" sessionTimeout="30" publicDB="False"/>
-
+    
     <gui_tour_stats>
-        <col col_name="m_ratio" col_title="M ratio" disp_all="True" disp_posn="True" field_format="%d" field_type="str" xalignment="0.0" />    
-        <col col_name="bbstack" col_title="bb stack" disp_all="True" disp_posn="True" field_format="%d" field_type="str" xalignment="0.0" />
-        <col col_name="blank" col_title="" disp_all="False" disp_posn="False" field_format="" field_type="str" xalignment="0.0" />        
+        <col col_name="m_ratio" col_title="M ratio" disp_all="True" disp_posn="True" field_format="%d" field_type="str" xalignment="0.0"/>    
+        <col col_name="bbstack" col_title="bb stack" disp_all="True" disp_posn="True" field_format="%d" field_type="str" xalignment="0.0"/>
+        <col col_name="blank" col_title="" disp_all="False" disp_posn="False" field_format="" field_type="str" xalignment="0.0"/>        
     </gui_tour_stats>
 
     <gui_cash_stats>
@@ -156,16 +156,16 @@
           16.7 (50 divided by 3) to big blind of 150 (50 times 3) are included
         - To include all levels, use a value of "10000"
 -->
-    <hud_ui stat_range="A" stat_days="90" aggregation_level_multiplier="3" seats_style="A" seats_cust_nums_low="6" seats_cust_nums_high="10" hero_stat_range="A" hero_stat_days="30" hero_aggregation_level_multiplier="1" hero_seats_style="A" hero_seats_cust_nums_low="6" hero_seats_cust_nums_high="10" label="FPDBmenu" card_ht="39" card_wd="28" deck_type="simple" card_back="back03"/>
+    <hud_ui stat_range="A" stat_days="90" aggregation_level_multiplier="3" seats_style="A" seats_cust_nums_low="6" seats_cust_nums_high="10" hero_stat_range="A" hero_stat_days="30" hero_aggregation_level_multiplier="1" hero_seats_style="A" hero_seats_cust_nums_low="6" hero_seats_cust_nums_high="10" label="FPDBmenu" card_ht="78" card_wd="56" deck_type="simple" card_back="back03"/>
 
 
     <supported_sites>
-        <site site_name="PokerStars" enabled="True" screen_name="jeje_sat" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\jeje_sat" TS_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\jeje_sat" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20">
+        <site site_name="PokerStars" enabled="True" screen_name="jeje_sat" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\jeje_sat" TS_path="C:\Users\jd\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="ring" ls="ps_default"/>
             <layout_set game_type="tour" ls="ps_default"/>
-            <fav max="2" fav_seat="0"/>
-            <fav max="3" fav_seat="0"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="3"/>
             <fav max="4" fav_seat="0"/>
             <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
@@ -180,9 +180,9 @@
 
 
 
-        <site site_name="PartyPoker" enabled="True" screen_name="jejesat" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Programs\PMU\PMUPoker\HandHistory" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Programs/PMU/PMUPoker/HandHistory">
+        <site site_name="PartyPoker" enabled="False" screen_name="jejesat" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker">
             <layout_set game_type="all" ls="party_default"/>
-            <fav max="2" fav_seat="0"/>
+            <fav max="2" fav_seat="1"/>
             <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
             <fav max="5" fav_seat="0"/>
@@ -193,7 +193,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="Merge" enabled="False" HH_path="C:/Program Files/Carbon Poker/HandHistory/YOUR SCREEN NAME HERE/" screen_name="h" site_path="C:/Program Files/Merge/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="Merge" enabled="False" HH_path="" screen_name="" site_path="C:/Program Files/Merge/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0">
             <layout_set game_type="all" ls="merge_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -210,10 +210,10 @@
 
 
 
-        <site site_name="Winamax" enabled="True" HH_path="C:\Users\jd\AppData\Roaming\winamax\documents\accounts\jejellyroll\history" screen_name="jejellyroll" site_path="C:/Program Files/Winamax/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Roaming\winamax\documents\accounts\jejellyroll\history">
+        <site site_name="Winamax" enabled="True" HH_path="C:\Users\jd\AppData\Roaming\winamax\documents\accounts\jejellyroll\history" screen_name="jejellyroll" site_path="C:/Program Files/Winamax/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\Red Star Poker\data\edinapoker85\History\Data\Tournaments">
             <layout_set game_type="all" ls="winamax_default"/>
-            <fav max="2" fav_seat="0"/>
-            <fav max="3" fav_seat="0"/>
+            <fav max="2" fav_seat="2"/>
+            <fav max="3" fav_seat="3"/>
             <fav max="4" fav_seat="0"/>
             <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
@@ -225,7 +225,7 @@
 
 
 
-        <site site_name="PacificPoker" enabled="False" HH_path="C:/Program Files/PacificPoker/HandHistory/YOUR SCREEN NAME HERE/" screen_name="g" site_path="C:/Program Files/PacificPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="PacificPoker" enabled="False" HH_path="" screen_name="" site_path="C:/Program Files/PacificPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0">
             <layout_set game_type="all" ls="pacific_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -238,8 +238,8 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="Cake" enabled="False" HH_path="C:/Program Files/Cake/HandHistory/YOUR SCREEN NAME HERE/" screen_name="l" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
-            <layout_set game_type="all" ls="default"/>
+        <site site_name="Cake" enabled="True" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\edinapoker" screen_name="edinapoker" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\edinapoker">
+            <layout_set game_type="all" ls="cake_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
@@ -253,7 +253,7 @@
 
 
 
-        <site site_name="iPoker" enabled="True" HH_path="C:\Users\jd\AppData\Local\Betclic Poker.fr\data\15827462\History\Data\Tables" screen_name="15827462" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="iPoker" enabled="True" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/edinapoker85/History/Data/Tables" screen_name="edinapoker85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/edinapoker85/History/Data/Tournaments">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
@@ -266,21 +266,9 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="BetOnline" enabled="False" screen_name="n" site_path="C:/Program Files/BetOnline/" HH_path="C:/Program Files/BetOnline/HandHistory/Hero/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
-            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
-            <layout_set game_type="all" ls="betonline_default"/>
-            <fav max="2" fav_seat="0"/>
-            <fav max="3" fav_seat="0"/>
-            <fav max="4" fav_seat="0"/>
-            <fav max="5" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="7" fav_seat="0"/>
-            <fav max="8" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
 
-        <site site_name="Bovada" enabled="False" screen_name="o" site_path="C:/Bovada/" HH_path="C:/Bovada/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+
+        <site site_name="Bovada" enabled="False" screen_name="" site_path="C:/Bovada/" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="all" ls="bodova_default"/>
             <fav max="2" fav_seat="0"/>
@@ -296,7 +284,7 @@
         
   
         
-        <site site_name="SealsWithClubs" enabled="False" screen_name="q" site_path="C:/Program Files/SealsWithClubs/handhistories" HH_path="C:/Program Files/SealsWithClubs/handhistories" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="SealsWithClubs" enabled="True" screen_name="edinapoker" site_path="C:/Program Files/SealsWithClubs/handhistories" HH_path="C:\Users\jd\Documents\SwC Poker\Hand History\edinapoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Documents\SwC Poker\Hand History\edinapoker">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="all" ls="sealswithclubs_default"/>
             <fav max="2" fav_seat="0"/>
@@ -310,7 +298,7 @@
             <fav max="10" fav_seat="0"/>
         </site>       
 
-        <site site_name="WinningPoker" enabled="False" screen_name="Hero" site_path="C:/AmericasCardroom/" HH_path="C:\AmericasCardroom" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="WinningPoker" enabled="True" screen_name="edinapoker" site_path="C:/AmericasCardroom/" HH_path="C:\ACR Poker\handHistory\edinapoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\ACR Poker\TournamentSummary">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="all" ls="winning_default"/>
             <fav max="2" fav_seat="0"/>
@@ -324,7 +312,7 @@
             <fav max="10" fav_seat="0"/>
         </site> 
 
-        <site site_name="KingsClub" enabled="False" screen_name="Hero" site_path="C:/AmericasCardroom/" HH_path="C:\AmericasCardroom" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="KingsClub" enabled="False" screen_name="" site_path="C:/AmericasCardroom/" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="all" ls="KingsClub_default"/>
             <fav max="2" fav_seat="0"/>
@@ -338,7 +326,7 @@
             <fav max="10" fav_seat="0"/>
         </site> 
 
-        <site site_name="GGPoker" enabled="True" screen_name="Hero" site_path="C:/AmericasCardroom/" HH_path="C:\AmericasCardroom" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="GGPoker" enabled="False" screen_name="Hero" site_path="C:/AmericasCardroom/" HH_path="C:\Users\jd\Documents\GGpoker\edinapoker85" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="all" ls="GGPoker_default"/>
             <fav max="2" fav_seat="0"/>
@@ -354,7 +342,7 @@
 
 
 
-        <site site_name="Unibet" enabled="True" screen_name="HGJJGHJGJHG" site_path="C:/AmericasCardroom/" HH_path="C:\Users\jd\Documents\GitHub\fpdb-3\test_hand\unibet" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="Unibet" enabled="False" screen_name="" site_path="C:/AmericasCardroom/" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="all" ls="Unibet_default"/>
             <fav max="2" fav_seat="0"/>
@@ -377,7 +365,7 @@
         without changing Configuration.Config()
         -->
         <game game_name="holdem" aux="Classic_HUD, mucked">
-            <game_stat_set game_type="tour" stat_set="holdem_tour"/>
+            <game_stat_set game_type="tour" stat_set="holdem_ring"/>
             <game_stat_set game_type="ring" stat_set="holdem_ring"/>
         </game>
         <game game_name="2_holdem" aux="Classic_HUD, mucked">
@@ -563,11 +551,11 @@
                 <location seat="2" x="2" y="221"/>
                 <location common="1" x="323" y="232"/>
             </layout>
-            <layout max="3" height="546" width="792">
-                <location seat="1" x="681" y="221"/>
-                <location seat="2" x="2" y="221"/>
-                <location seat="3" x="162" y="413"/>
-                <location common="1" x="323" y="232"/>
+            <layout max="3" height="1044" width="1454">
+                <location seat="1" x="1211" y="314"/>
+                <location seat="2" x="97" y="318"/>
+                <location seat="3" x="386" y="710"/>
+                <location common="1" x="592" y="443"/>
             </layout>
             <layout max="4" height="546" width="792">
                 <location seat="1" x="573" y="41"/>
@@ -584,14 +572,14 @@
                 <location seat="5" x="32" y="291"/>
                 <location common="1" x="323" y="232"/>
             </layout>
-            <layout max="6" height="546" width="792">
-                <location seat="1" x="663" y="48"/>
-                <location seat="2" x="664" y="293"/>
-                <location seat="3" x="563" y="402"/>
-                <location seat="4" x="120" y="401"/>
-                <location seat="5" x="32" y="291"/>
-                <location seat="6" x="12" y="46"/>
-                <location common="1" x="323" y="232"/>
+            <layout max="6" height="1044" width="1454">
+                <location seat="1" x="860" y="104"/>
+                <location seat="2" x="1185" y="291"/>
+                <location seat="3" x="1155" y="614"/>
+                <location seat="4" x="460" y="725"/>
+                <location seat="5" x="62" y="602"/>
+                <location seat="6" x="114" y="273"/>
+                <location common="1" x="592" y="443"/>
             </layout>
             <layout max="7" height="546" width="792">
                 <location seat="1" x="643" y="99"/>
@@ -754,14 +742,14 @@
                 <location seat="5" x="32" y="291"/>
                 <location common="1" x="323" y="232"/>
             </layout>
-            <layout max="6" height="546" width="792">
-                <location seat="1" hist_seat="1" x="663" y="48"/>
-                <location seat="2" hist_seat="3" x="664" y="293"/>
-                <location seat="3" hist_seat="5" x="563" y="402"/>
-                <location seat="4" hist_seat="6" x="120" y="401"/>
-                <location seat="5" hist_seat="8" x="32" y="291"/>
-                <location seat="6" hist_seat="10" x="12" y="46"/>
-                <location common="1" x="323" y="232"/>
+            <layout max="6" height="652" width="920">
+                <location seat="1" hist_seat="1" x="65" y="469"/>
+                <location seat="2" hist_seat="3" x="38" y="197"/>
+                <location seat="3" hist_seat="5" x="473" y="128"/>
+                <location seat="4" hist_seat="6" x="749" y="195"/>
+                <location seat="5" hist_seat="8" x="737" y="472"/>
+                <location seat="6" hist_seat="10" x="256" y="474"/>
+                <location common="1" x="375" y="277"/>
             </layout>
             <layout max="7" height="546" width="792">
                 <location seat="1" x="643" y="99"/>
@@ -796,18 +784,18 @@
                 <location seat="9" hist_seat="10" x="10" y="48"/>
                 <location common="1" x="323" y="232"/>
             </layout>
-            <layout max="10" height="546" width="792">
-                <location seat="1" x="531" y="14"/>
-                <location seat="2" x="678" y="66"/>
-                <location seat="3" x="669" y="278"/>
-                <location seat="4" x="682" y="351"/>
-                <location seat="5" x="508" y="411"/>
-                <location seat="6" x="183" y="411"/>
-                <location seat="7" x="11" y="352"/>
-                <location seat="8" x="1" y="277"/>
-                <location seat="9" x="6" y="65"/>
-                <location seat="10" x="159" y="11"/>
-                <location common="1" x="316" y="237"/>
+            <layout max="10" height="103" width="336">
+                <location seat="1" x="1760" y="-271"/>
+                <location seat="2" x="286" y="9"/>
+                <location seat="3" x="1664" y="201"/>
+                <location seat="4" x="288" y="63"/>
+                <location seat="5" x="928" y="188"/>
+                <location seat="6" x="575" y="158"/>
+                <location seat="7" x="3" y="63"/>
+                <location seat="8" x="612" y="-261"/>
+                <location seat="9" x="1" y="8"/>
+                <location seat="10" x="1249" y="-395"/>
+                <location common="1" x="133" y="41"/>
             </layout>
         </ls>
 
@@ -984,7 +972,89 @@
         </ls>
 
 
-
+        <ls name="cake_default">
+            <layout max="2" height="546" width="792">
+                <location seat="1" x="681" y="221"/>
+                <location seat="2" x="2" y="221"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
+            <layout max="3" height="546" width="792">
+                <location seat="1" x="681" y="221"/>
+                <location seat="2" x="2" y="221"/>
+                <location seat="3" x="162" y="413"/>
+                <location common="1" x="323" y="232"/>
+            </layout>            
+            <layout max="4" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="512" y="411"/>
+                <location seat="3" x="162" y="413"/>
+                <location seat="4" x="112" y="41"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
+            <layout max="5" height="546" width="792">
+                <location seat="1" x="663" y="48"/>
+                <location seat="2" x="664" y="293"/>
+                <location seat="3" x="563" y="402"/>
+                <location seat="4" x="120" y="401"/>
+                <location seat="5" x="32" y="291"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
+            <layout max="6" height="792" width="1273">
+                <location seat="1" x="457" y="175"/>
+                <location seat="2" x="815" y="228"/>
+                <location seat="3" x="810" y="574"/>
+                <location seat="4" x="287" y="574"/>
+                <location seat="5" x="79" y="573"/>
+                <location seat="6" x="82" y="244"/>
+                <location common="1" x="519" y="336"/>
+            </layout>
+            <layout max="7" height="546" width="792">
+                <location seat="1" x="643" y="99"/>
+                <location seat="2" x="660" y="290"/>
+                <location seat="3" x="633" y="393"/>
+                <location seat="4" x="427" y="409"/>
+                <location seat="5" x="224" y="393"/>
+                <location seat="6" x="-4" y="290"/>
+                <location seat="7" x="-4" y="100"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
+            <layout max="8" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="681" y="221"/>
+                <location seat="3" x="686" y="338"/>
+                <location seat="4" x="512" y="411"/>
+                <location seat="5" x="162" y="413"/>
+                <location seat="6" x="3" y="339"/>
+                <location seat="7" x="2" y="221"/>
+                <location seat="8" x="112" y="41"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
+            <layout max="9" height="546" width="792">
+                <location seat="1" x="663" y="48"/>
+                <location seat="2" x="694" y="205"/>
+                <location seat="3" x="682" y="325"/>
+                <location seat="4" x="630" y="393"/>
+                <location seat="5" x="429" y="410"/>
+                <location seat="6" x="231" y="392"/>
+                <location seat="7" x="8" y="332"/>
+                <location seat="8" x="10" y="204"/>
+                <location seat="9" x="10" y="48"/>
+                <location common="1" x="323" y="232"/>
+            </layout>
+            <layout max="10" height="546" width="792">
+                <location seat="1" x="531" y="14"/>
+                <location seat="2" x="678" y="66"/>
+                <location seat="3" x="669" y="278"/>
+                <location seat="4" x="682" y="351"/>
+                <location seat="5" x="508" y="411"/>
+                <location seat="6" x="183" y="411"/>
+                <location seat="7" x="11" y="352"/>
+                <location seat="8" x="1" y="277"/>
+                <location seat="9" x="6" y="65"/>
+                <location seat="10" x="159" y="11"/>
+                <location common="1" x="316" y="237"/>
+            </layout>
+        </ls>
 
 
         <ls name="winamax_default">
@@ -1014,14 +1084,14 @@
                 <location seat="5" x="32" y="291"/>
                 <location common="1" x="323" y="232"/>
             </layout>
-            <layout max="6" height="546" width="792">
-                <location seat="1" x="663" y="48"/>
-                <location seat="2" x="664" y="293"/>
-                <location seat="3" x="563" y="402"/>
-                <location seat="4" x="120" y="401"/>
-                <location seat="5" x="32" y="291"/>
-                <location seat="6" x="12" y="46"/>
-                <location common="1" x="323" y="232"/>
+            <layout max="6" height="792" width="1273">
+                <location seat="1" x="457" y="175"/>
+                <location seat="2" x="815" y="228"/>
+                <location seat="3" x="810" y="574"/>
+                <location seat="4" x="287" y="574"/>
+                <location seat="5" x="79" y="573"/>
+                <location seat="6" x="82" y="244"/>
+                <location common="1" x="519" y="336"/>
             </layout>
             <layout max="7" height="546" width="792">
                 <location seat="1" x="643" y="99"/>
@@ -1073,89 +1143,7 @@
 
 
 
-        <ls name="betonline_default">
-            <layout max="2" height="546" width="792">
-                <location seat="1" x="681" y="221"/>
-                <location seat="2" x="2" y="221"/>
-                <location common="1" x="323" y="232"/>
-            </layout>
-            <layout max="3" height="546" width="792">
-                <location seat="1" x="681" y="221"/>
-                <location seat="2" x="2" y="221"/>
-                <location seat="3" x="162" y="413"/>
-                <location common="1" x="323" y="232"/>
-            </layout>            
-            <layout max="4" height="546" width="792">
-                <location seat="1" x="573" y="41"/>
-                <location seat="2" x="512" y="411"/>
-                <location seat="3" x="162" y="413"/>
-                <location seat="4" x="112" y="41"/>
-                <location common="1" x="323" y="232"/>
-            </layout>
-            <layout max="5" height="546" width="792">
-                <location seat="1" x="573" y="41"/>
-                <location seat="2" x="512" y="411"/>
-                <location seat="3" x="162" y="413"/>
-                <location seat="4" x="112" y="41"/>
-                <location seat="5" x="32" y="291"/>
-                <location common="1" x="323" y="232"/>
-            </layout>
-            <layout max="6" height="546" width="792">
-                <location seat="1" x="663" y="48"/>
-                <location seat="2" x="664" y="293"/>
-                <location seat="3" x="563" y="402"/>
-                <location seat="4" x="120" y="401"/>
-                <location seat="5" x="32" y="291"/>
-                <location seat="6" x="12" y="46"/>
-                <location common="1" x="323" y="232"/>
-            </layout>
-            <layout max="7" height="546" width="792">
-                <location seat="1" x="643" y="99"/>
-                <location seat="2" x="660" y="290"/>
-                <location seat="3" x="633" y="393"/>
-                <location seat="4" x="427" y="409"/>
-                <location seat="5" x="224" y="393"/>
-                <location seat="6" x="-4" y="290"/>
-                <location seat="7" x="-4" y="100"/>
-                <location common="1" x="323" y="232"/>
-            </layout>
-            <layout max="8" height="546" width="792">
-                <location seat="1" x="573" y="41"/>
-                <location seat="2" x="681" y="221"/>
-                <location seat="3" x="686" y="338"/>
-                <location seat="4" x="512" y="411"/>
-                <location seat="5" x="162" y="413"/>
-                <location seat="6" x="3" y="339"/>
-                <location seat="7" x="2" y="221"/>
-                <location seat="8" x="112" y="41"/>
-                <location common="1" x="323" y="232"/>
-            </layout>
-            <layout max="9" height="546" width="792">
-                <location seat="1" x="663" y="48"/>
-                <location seat="2" x="694" y="205"/>
-                <location seat="3" x="682" y="325"/>
-                <location seat="4" x="630" y="393"/>
-                <location seat="5" x="429" y="410"/>
-                <location seat="6" x="231" y="392"/>
-                <location seat="7" x="8" y="332"/>
-                <location seat="8" x="10" y="204"/>
-                <location seat="9" x="10" y="48"/>
-                <location common="1" x="323" y="232"/>
-            </layout>
-            <layout max="10" height="546" width="792">
-                <location seat="1" x="531" y="14"/>
-                <location seat="2" x="678" y="66"/>
-                <location seat="3" x="669" y="278"/>
-                <location seat="4" x="682" y="351"/>
-                <location seat="5" x="508" y="411"/>
-                <location seat="6" x="183" y="411"/>
-                <location seat="7" x="11" y="352"/>
-                <location seat="8" x="1" y="277"/>
-                <location seat="9" x="6" y="65"/>
-                <location hist_seat="0" seat="10" x="159" y="11"/>
-                <location common="1" x="316" y="237"/>
-            </layout>
-        </ls>
+
 
         <ls name="bovada_default">
             <layout max="2" height="546" width="792">
@@ -1289,28 +1277,28 @@
                 <location seat="7" x="-4" y="100"/>
                 <location common="1" x="323" y="232"/>
             </layout>
-            <layout max="8" height="546" width="792">
-                <location seat="1" x="573" y="41"/>
-                <location seat="2" x="681" y="221"/>
-                <location seat="3" x="686" y="338"/>
-                <location seat="4" x="512" y="411"/>
-                <location seat="5" x="162" y="413"/>
-                <location seat="6" x="3" y="339"/>
-                <location seat="7" x="2" y="221"/>
-                <location seat="8" x="112" y="41"/>
-                <location common="1" x="323" y="232"/>
+            <layout max="8" height="103" width="336">
+                <location seat="1" x="1225" y="737"/>
+                <location seat="2" x="1055" y="318"/>
+                <location seat="3" x="1156" y="445"/>
+                <location seat="4" x="974" y="540"/>
+                <location seat="5" x="731" y="525"/>
+                <location seat="6" x="521" y="450"/>
+                <location seat="7" x="616" y="303"/>
+                <location seat="8" x="711" y="195"/>
+                <location common="1" x="137" y="41"/>
             </layout>
-            <layout max="9" height="546" width="792">
-                <location seat="1" x="663" y="48"/>
-                <location seat="2" x="694" y="205"/>
-                <location seat="3" x="682" y="325"/>
-                <location seat="4" x="630" y="393"/>
-                <location seat="5" x="429" y="410"/>
-                <location seat="6" x="231" y="392"/>
-                <location seat="7" x="8" y="332"/>
-                <location seat="8" x="10" y="204"/>
-                <location seat="9" x="10" y="48"/>
-                <location common="1" x="323" y="232"/>
+            <layout max="9" height="103" width="336">
+                <location seat="1" x="281" y="6"/>
+                <location seat="2" x="294" y="37"/>
+                <location seat="3" x="289" y="59"/>
+                <location seat="4" x="1079" y="633"/>
+                <location seat="5" x="860" y="670"/>
+                <location seat="6" x="98" y="71"/>
+                <location seat="7" x="413" y="511"/>
+                <location seat="8" x="394" y="208"/>
+                <location seat="9" x="4" y="6"/>
+                <location common="1" x="137" y="41"/>
             </layout>
             <layout max="10" height="546" width="792">
                 <location seat="1" x="531" y="14"/>
@@ -1354,14 +1342,14 @@
                 <location seat="5" x="32" y="291"/>
                 <location common="1" x="323" y="232"/>
             </layout>
-            <layout max="6" height="546" width="792">
-                <location seat="1" x="663" y="48"/>
-                <location seat="2" x="664" y="293"/>
-                <location seat="3" x="563" y="402"/>
-                <location seat="4" x="120" y="401"/>
-                <location seat="5" x="32" y="291"/>
-                <location seat="6" x="12" y="46"/>
-                <location common="1" x="323" y="232"/>
+            <layout max="6" height="520" width="676">
+                <location seat="1" x="579" y="349"/>
+                <location seat="2" x="330" y="437"/>
+                <location seat="3" x="111" y="395"/>
+                <location seat="4" x="411" y="399"/>
+                <location seat="5" x="215" y="58"/>
+                <location seat="6" x="584" y="154"/>
+                <location common="1" x="275" y="220"/>
             </layout>
             <layout max="7" height="546" width="792">
                 <location seat="1" x="643" y="99"/>
@@ -1373,16 +1361,16 @@
                 <location seat="7" x="-4" y="100"/>
                 <location common="1" x="323" y="232"/>
             </layout>
-            <layout max="8" height="546" width="792">
-                <location seat="1" x="573" y="41"/>
-                <location seat="2" x="681" y="221"/>
-                <location seat="3" x="686" y="338"/>
-                <location seat="4" x="512" y="411"/>
-                <location seat="5" x="162" y="413"/>
-                <location seat="6" x="3" y="339"/>
-                <location seat="7" x="2" y="221"/>
-                <location seat="8" x="112" y="41"/>
-                <location common="1" x="323" y="232"/>
+            <layout max="8" height="614" width="798">
+                <location seat="1" x="235" y="464"/>
+                <location seat="2" x="84" y="465"/>
+                <location seat="3" x="691" y="380"/>
+                <location seat="4" x="5" y="180"/>
+                <location seat="5" x="311" y="128"/>
+                <location seat="6" x="595" y="168"/>
+                <location seat="7" x="535" y="293"/>
+                <location seat="8" x="542" y="464"/>
+                <location common="1" x="325" y="260"/>
             </layout>
             <layout max="9" height="546" width="792">
                 <location seat="1" x="663" y="48"/>
@@ -1676,12 +1664,12 @@
         </ss>
         
         <ss name="stud_default" rows="3" cols="2" xpad="1" ypad="0">
-            <stat _rowcol="(1,1)" _stat_name="playershort" popup="default" tip="" click="" hudcolor="#98FFB0" hudprefix="" hudsuffix=""/>
-            <stat _rowcol="(1,2)" _stat_name="n" popup="default" tip="" click=""/>
-            <stat _rowcol="(2,1)" _stat_name="vpip" popup="default" tip="" click="" stat_loth="20" stat_locolor="#408000" stat_hith="40" stat_hicolor="#F05000"/>
-            <stat _rowcol="(2,2)" _stat_name="pfr" popup="default" tip="" click=""/>
-            <stat _rowcol="(3,1)" _stat_name="saw_f" popup="default" tip="" click=""/>
-            <stat _rowcol="(3,2)" _stat_name="ffreq1" popup="default" tip="" click=""/>
+            <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="" click="" hudcolor="" hudprefix="" hudsuffix="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
+            <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="" click="" hudcolor="" hudprefix="" hudsuffix="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
+            <stat _rowcol="(2,1)" _stat_name="ffreq1" popup="default" tip="" click="" stat_loth="" stat_locolor="" stat_hith="" stat_hicolor="" hudcolor="" hudprefix="" hudsuffix=""/>
+            <stat _rowcol="(2,2)" _stat_name="ffreq2" popup="default" tip="" click="" hudcolor="" hudprefix="" hudsuffix="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
+            <stat _rowcol="(3,1)" _stat_name="saw_f" popup="default" tip="" click="" hudcolor="" hudprefix="" hudsuffix="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
+            <stat _rowcol="(3,2)" _stat_name="wtsd" popup="default" tip="" click="" hudcolor="" hudprefix="" hudsuffix="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
         </ss>
         
         <ss name="omaha_default" rows="3" cols="2" xpad="1" ypad="0">
@@ -1722,15 +1710,15 @@
             <stat _rowcol="(1,1)" _stat_name="blank" popup="default"/>
             <stat _rowcol="(1,2)" _stat_name="playershort" hudcolor="#7F9476" hudprefix="" hudsuffix="" popup="holdring_main" tip=""/>
             <stat _rowcol="(1,3)" _stat_name="n" hudcolor="#7F9476" popup="pophands" tip="" hudprefix="(" hudsuffix=")"/>
-            <stat _rowcol="(2,1)" _stat_name="vpip_0" hudcolor="#ECEBD0" popup="poppreflop" stat_hicolor="#D86C1D" stat_hith="40" stat_locolor="#5ec265" stat_loth="25" hudprefix="vpi:" tip=""/>
-            <stat _rowcol="(2,2)" _stat_name="pfr_0" hudcolor="#ECEBD0" popup="poppreflop" stat_hicolor="#D86C1D" stat_hith="35" stat_locolor="#5ec265" stat_loth="20" hudprefix="pfr:" tip=""/>
-            <stat _rowcol="(2,3)" _stat_name="three_B_0" hudcolor="#ECEBD0" popup="pop3bet" stat_hicolor="#D86C1D" stat_hith="13" stat_locolor="#5ec265" stat_loth="4" hudprefix="3bp:" tip=""/>
-            <stat _rowcol="(3,1)" _stat_name="steal_0" hudcolor="#ECEBD0" popup="popsteal" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" hudprefix="st:" tip=""/>
-            <stat _rowcol="(3,2)" _stat_name="f_steal_0" hudcolor="#ECEBD0" popup="popsteal" stat_hicolor="#5EC265" stat_hith="65" stat_locolor="#D86C1D" stat_loth="25" hudprefix="fst:" tip=""/>
-            <stat _rowcol="(3,3)" _stat_name="car0_0" hudcolor="#ECEBD0" popup="popsteal" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" hudprefix="car:" tip=""/>
-            <stat _rowcol="(4,1)" _stat_name="cb1_0" hudcolor="#D86C1D" popup="popcb" stat_hicolor="#D86C1D" stat_hith="75" stat_locolor="#5ec265" stat_loth="35" hudprefix="cbf:" tip=""/>
-            <stat _rowcol="(4,2)" _stat_name="f_cb1_0" hudcolor="#ECEBD0" popup="popsteal" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" hudprefix="fcb:" tip=""/>
-            <stat _rowcol="(4,3)" _stat_name="a_freq_123_0" hudcolor="#ECEBD0" popup="popagg" stat_hicolor="#D86C1D" stat_hith="65" stat_locolor="#5ec265" stat_loth="20" hudprefix="afr:" hudsuffix="%" tip=""/>
+            <stat _rowcol="(2,1)" _stat_name="vpip" hudcolor="#ECEBD0" popup="poppreflop" stat_hicolor="#D86C1D" stat_hith="40" stat_locolor="#5ec265" stat_loth="25" hudprefix="vpi:" tip=""/>
+            <stat _rowcol="(2,2)" _stat_name="pfr" hudcolor="#ECEBD0" popup="poppreflop" stat_hicolor="#D86C1D" stat_hith="35" stat_locolor="#5ec265" stat_loth="20" hudprefix="pfr:" tip=""/>
+            <stat _rowcol="(2,3)" _stat_name="three_B" hudcolor="#ECEBD0" popup="pop3bet" stat_hicolor="#D86C1D" stat_hith="13" stat_locolor="#5ec265" stat_loth="4" hudprefix="3bp:" tip=""/>
+            <stat _rowcol="(3,1)" _stat_name="steal" hudcolor="#ECEBD0" popup="popsteal" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" hudprefix="st:" tip=""/>
+            <stat _rowcol="(3,2)" _stat_name="f_steal" hudcolor="#ECEBD0" popup="popsteal" stat_hicolor="#5EC265" stat_hith="65" stat_locolor="#D86C1D" stat_loth="25" hudprefix="fst:" tip=""/>
+            <stat _rowcol="(3,3)" _stat_name="car0" hudcolor="#ECEBD0" popup="popsteal" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" hudprefix="car:" tip=""/>
+            <stat _rowcol="(4,1)" _stat_name="cb1" hudcolor="#D86C1D" popup="popcb" stat_hicolor="#D86C1D" stat_hith="75" stat_locolor="#5ec265" stat_loth="35" hudprefix="cbf:" tip=""/>
+            <stat _rowcol="(4,2)" _stat_name="f_cb1" hudcolor="#ECEBD0" popup="popsteal" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" hudprefix="fcb:" tip=""/>
+            <stat _rowcol="(4,3)" _stat_name="a_freq_123" hudcolor="#ECEBD0" popup="popagg" stat_hicolor="#D86C1D" stat_hith="65" stat_locolor="#5ec265" stat_loth="20" hudprefix="afr:" hudsuffix="%" tip=""/>
         </ss>
         
         <ss cols="3" name="holdem_tour_classic" rows="3" xpad="1" ypad="0">
@@ -1746,14 +1734,14 @@
         </ss>
 
         <ss cols="3" name="holdem_tour" rows="3" xpad="1" ypad="0">
-            <stat _rowcol="(1,1)" _stat_name="vpip_0" hudcolor="#ECEBD0" popup="poppreflop" hudprefix="vpi:" stat_hicolor="#D86C1D" stat_hith="40" stat_locolor="#5ec265" stat_loth="25" tip=""/>
-            <stat _rowcol="(1,2)" _stat_name="pfr_0" hudcolor="#ECEBD0" popup="poppreflop" hudprefix="pfr:" stat_hicolor="#D86C1D" stat_hith="35" stat_locolor="#5ec265" stat_loth="20" tip=""/>
-            <stat _rowcol="(1,3)" _stat_name="three_B_0" hudcolor="#ECEBD0" popup="pop3bet" hudprefix="3bp:" stat_hicolor="#D86C1D" stat_hith="13" stat_locolor="#5ec265" stat_loth="4" tip=""/>
+            <stat _rowcol="(1,1)" _stat_name="vpip" hudcolor="#ECEBD0" popup="poppreflop" hudprefix="vpi:" stat_hicolor="#D86C1D" stat_hith="40" stat_locolor="#5ec265" stat_loth="25" tip=""/>
+            <stat _rowcol="(1,2)" _stat_name="pfr" hudcolor="#ECEBD0" popup="poppreflop" hudprefix="pfr:" stat_hicolor="#D86C1D" stat_hith="35" stat_locolor="#5ec265" stat_loth="20" tip=""/>
+            <stat _rowcol="(1,3)" _stat_name="three_B" hudcolor="#ECEBD0" popup="pop3bet" hudprefix="3bp:" stat_hicolor="#D86C1D" stat_hith="13" stat_locolor="#5ec265" stat_loth="4" tip=""/>
             <stat _rowcol="(2,1)" _stat_name="n" hudcolor="#7F9476" popup="pophands" hudprefix="(" hudsuffix=")" tip=""/>
             <stat _rowcol="(2,2)" _stat_name="playershort" hudcolor="#7F9476" popup="holdtour_main" hudprefix="" hudsuffix="" tip=""/>
-            <stat _rowcol="(2,3)" _stat_name="cb1_0" hudcolor="#D86C1D" popup="popcb" hudprefix="cbf:" stat_hicolor="#D86C1D" stat_hith="75" stat_locolor="#5ec265" stat_loth="35" tip=""/>
-            <stat _rowcol="(3,1)" _stat_name="wtsd_0" hudcolor="#ECEBD0" popup="popwtsd" hudprefix="wts:" tip=""/>
-            <stat _rowcol="(3,2)" _stat_name="steal_0" hudcolor="#ECEBD0" popup="popsteal" hudprefix="st:" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" tip=""/>
+            <stat _rowcol="(2,3)" _stat_name="cb1" hudcolor="#D86C1D" popup="popcb" hudprefix="cbf:" stat_hicolor="#D86C1D" stat_hith="75" stat_locolor="#5ec265" stat_loth="35" tip=""/>
+            <stat _rowcol="(3,1)" _stat_name="wtsd" hudcolor="#ECEBD0" popup="popwtsd" hudprefix="wts:" tip=""/>
+            <stat _rowcol="(3,2)" _stat_name="steal" hudcolor="#ECEBD0" popup="popsteal" hudprefix="st:" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" tip=""/>
             <stat _rowcol="(3,3)" _stat_name="m_ratio" hudcolor="#FFFC00" hudprefix="M:" stat_hicolor="#5EC265" stat_hith="19.99" stat_locolor="#F33725" stat_loth="9.99" tip=""/>
         </ss>
     </stat_sets>
@@ -1989,7 +1977,6 @@
         <hhc site="Winamax" converter="WinamaxToFpdb" summaryImporter="WinamaxSummary"/>
         <hhc site="PacificPoker" converter="PacificPokerToFpdb" summaryImporter="PacificPokerSummary"/>
         <hhc site="Cake" converter="CakeToFpdb"/>
-        <hhc site="BetOnline" converter="BetOnlineToFpdb"/>
         <hhc site="Bovada" converter="BovadaToFpdb" summaryImporter="BovadaSummary"/>
         <hhc site="SealsWithClubs" converter="SealsWithClubsToFpdb"/>
         <hhc site="WinningPoker" converter="WinningToFpdb" summaryImporter="WinningSummary"/>
