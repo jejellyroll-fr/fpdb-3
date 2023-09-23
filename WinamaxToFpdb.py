@@ -76,36 +76,16 @@ class Winamax(HandHistoryConverter):
 
     # Static regexes
     # ***** End of hand R5-75443872-57 *****
-    re_Identify = re.compile(u'Winamax\sPoker\s\-\s(CashGame|Go\sFast|Tournament\s\")')
+    re_Identify = re.compile(r'Winamax\sPoker\s\-\s(CashGame|Go\sFast|HOLD\-UP|Tournament\s\")')
     re_SplitHands = re.compile(r'\n\n')
 
 
 
 # Winamax Poker - CashGame - HandId: #279823-223-1285031451 - Holdem no limit (0.02€/0.05€) - 2010/09/21 03:10:51 UTC
 # Table: 'Charenton-le-Pont' 9-max (real money) Seat #5 is the button
-    re_HandInfo = re.compile(u"""
-            \s*Winamax\sPoker\s-\s
-            (?P<RING>(CashGame|Go\sFast\s"[^"]+"))?
-            (?P<TOUR>Tournament\s
-            (?P<TOURNAME>.+)?\s
-            buyIn:\s(?P<BUYIN>(?P<BIAMT>[%(LS)s\d\,.]+)?(\s\+?\s|-)(?P<BIRAKE>[%(LS)s\d\,.]+)?\+?(?P<BOUNTY>[%(LS)s\d\.]+)?\s?(?P<TOUR_ISO>%(LEGAL_ISO)s)?|(?P<FREETICKET>[\sa-zA-Z]+))?\s
-            (level:\s(?P<LEVEL>\d+))?
-            .*)?
-            \s-\sHandId:\s\#(?P<HID1>\d+)-(?P<HID2>\d+)-(?P<HID3>\d+)\s-\s  # REB says: HID3 is the correct hand number
-            (?P<GAME>Holdem|Omaha|Omaha5|Omaha8|5\sCard\sOmaha|5\sCard\sOmaha\sHi/Lo|Omaha\sHi/Lo|7\-Card\sStud|7stud|7\-Card\sStud\sHi/Lo|7stud8|Razz|2\-7\sTriple\sDraw|Lowball27)\s
-            (?P<LIMIT>fixed\slimit|no\slimit|pot\slimit)\s
-            \(
-            (((%(LS)s)?(?P<ANTE>[.0-9]+)(%(LS)s)?)/)?
-            ((%(LS)s)?(?P<SB>[.0-9]+)(%(LS)s)?)/
-            ((%(LS)s)?(?P<BB>[.0-9]+)(%(LS)s)?)
-            \)\s-\s
-            (?P<DATETIME>.*)
-            Table:?\s\'(?P<TABLE>[^(]+)
-            (.(?P<TOURNO>\d+).\#(?P<TABLENO>\d+))?.*
-            \'
-            \s(?P<MAXPLAYER>\d+)\-max
-            \s(?P<MONEY>\(real\smoney\))?
-            """ % substitutions, re.MULTILINE|re.DOTALL|re.VERBOSE)
+    re_HandInfo = re.compile(r"""
+                                \s*Winamax\sPoker\s-\s(?P<RING>(CashGame|Go\sFast\s\"[^\"]+\"|HOLD\-UP\s\"[^\"]+\"))?(?P<TOUR>Tournament\s(?P<TOURNAME>.+)?\sbuyIn:\s(?P<BUYIN>(?P<BIAMT>[%(LS)s\d\,.]+)?(\s\+?\s|-)(?P<BIRAKE>[%(LS)s\d\,.]+)?\+?(?P<BOUNTY>[%(LS)s\d\.]+)?\s?(?P<TOUR_ISO>%(LEGAL_ISO)s)?|(?P<FREETICKET>[\sa-zA-Z]+))?\s(level:\s(?P<LEVEL>\d+))?.*)?\s-\sHandId:\s\#(?P<HID1>\d+)-(?P<HID2>\d+)-(?P<HID3>\d+)\s-\s(?P<GAME>Holdem|Omaha|Omaha5|Omaha8|5\sCard\sOmaha|5\sCard\sOmaha\sHi/Lo|Omaha\sHi/Lo|7\-Card\sStud|7stud|7\-Card\sStud\sHi/Lo|7stud8|Razz|2\-7\sTriple\sDraw|Lowball27)\s(?P<LIMIT>fixed\slimit|no\slimit|pot\slimit)\s\((((%(LS)s)?(?P<ANTE>[.0-9]+)(%(LS)s)?)/)?((%(LS)s)?(?P<SB>[.0-9]+)(%(LS)s)?)/((%(LS)s)?(?P<BB>[.0-9]+)(%(LS)s)?)\)\s-\s(?P<DATETIME>.*)(Table:?\s\'(?P<TABLE>[^(]+)(.(?P<TOURNO>\d+).\#(?P<TABLENO>\d+))?.*\'\s(?P<MAXPLAYER>\d+)\-max\s(?P<MONEY>\(real\smoney\)))?
+                            """ % substitutions, re.MULTILINE|re.DOTALL|re.VERBOSE)
 
     re_TailSplitHands = re.compile(r'\n\s*\n')
     re_Button       = re.compile(r'Seat\s#(?P<BUTTON>\d+)\sis\sthe\sbutton')
