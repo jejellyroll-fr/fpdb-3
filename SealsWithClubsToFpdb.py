@@ -51,7 +51,7 @@ class SealsWithClubs(HandHistoryConverter):
                }
 
     # Static regexes
-    re_GameInfo = re.compile(r"""SwCPoker\sHand\s*\#(?P<HID>\d+):\s((Tournament|Cashgame|sitngo)\s\(((?P<TABLE2>.*?))\)\#(?P<TOURNO>\d+),\s(?P<BUYIN>(?P<BIAMT>\d+(\.\d+)?))\+(?P<BIRAKE>\d+(\.\d+)?)\s|\s)(?P<GAME>(Hold\'em|Omaha|Omaha\s5\sCards))\s(?P<LIMIT>(NL|PL|Limit|Pot\sLimit|No\sLimit))\s((-\sLevel\s\w+\s)|)\((?P<SB>\d+(\.\d+)?)/(?P<BB>\d+(\.\d+)?)\)\s-\s(?P<DATETIME>.*)""",re.VERBOSE)
+    re_GameInfo = re.compile(r"""SwCPoker\sHand\s*\#(?P<HID>\d+):\s((Tournament|Cashgame|sitngo)\s\(((?P<TABLE2>.*?))\)\#(?P<TOURNO>\d+),\s(?P<BUYIN>(?P<BIAMT>\d+(\.\d+)?))\+(?P<BIRAKE>\d+(\.\d+)?)\s|\s)(?P<GAME>(Hold\'em|Omaha|Omaha\s5\sCards))\s(?P<LIMIT>(NL|PL|Limit|Pot\sLimit|No\sLimit))\s((-\sLevel\s\w+\s)|)\((?P<SB>\d+(\.\d+)?(\,\d+)?)/(?P<BB>\d+(\.\d+)?(\,\d+)?)\)\s-\s(?P<DATETIME>.*)""",re.VERBOSE)
 
     re_PlayerInfo   = re.compile(r"""^Seat\s+(?P<SEAT>\d+):\s+(?P<PNAME>\w+)\s+\((?P<CASH>\d{1,3}(,\d{3})*(\.\d+)?)\sin\schips\)""" , re.MULTILINE|re.VERBOSE)
 
@@ -158,9 +158,17 @@ class SealsWithClubs(HandHistoryConverter):
         if 'GAME' in mg:
             (info['base'], info['category']) = self.games[mg['GAME']]
         if 'SB' in mg:
-            info['sb'] = mg['SB']
+            if ',' in mg['SB']:
+                mg['SB'] = mg['SB'].replace(',', '')
+                info['sb'] = mg['SB']
+            else:
+                info['sb'] = mg['SB']
         if 'BB' in mg:
-            info['bb'] = mg['BB']
+            if ',' in mg['BB']:
+                mg['BB'] = mg['BB'].replace(',', '')
+                info['bb'] = mg['BB']
+            else:
+                info['bb'] = mg['BB']
         if 'CURRENCY' in mg and mg['CURRENCY'] is not None:
             info['currency'] = self.currencies[mg['CURRENCY']]
 
