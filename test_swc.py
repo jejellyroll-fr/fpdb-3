@@ -1,8 +1,15 @@
 import re
 import pytest
 
+substitutions = {
+                           'PLYR': r'(?P<PNAME>\w+)',
+                          'BRKTS': r'(\(button\) |\(small blind\) |\(big blind\) |\(button\) \(small blind\) |\(button\) \(big blind\)| )?',
+                        'NUM': r'(.,\d+)|(\d+)',  # Regex pattern for matching numbers
+                        'NUM2': r'\b((?:\d{1,3}(?:\s\d{3})*)|(?:\d+))\b',  # Regex pattern for matching numbers with spaces
+                    }
 
-re_GameInfo = re.compile(r"""SwCPoker\sHand\s*\#(?P<HID>\d+):\s((Tournament|Cashgame|sitngo)\s\(((?P<TABLE2>.*?))\)\#(?P<TOURNO>\d+),\s(?P<BUYIN>(?P<BIAMT>\d+(\.\d+)?))\+(?P<BIRAKE>\d+(\.\d+)?)\s|\s)(?P<GAME>(Hold\'em|Omaha|Omaha\s5\sCards))\s(?P<LIMIT>(NL|PL|Limit|Pot\sLimit|No\sLimit))\s((-\sLevel\s\w+\s)|)\((?P<SB>\d+(\.\d+)?)/(?P<BB>\d+(\.\d+)?)\)\s-\s(?P<DATETIME>.*)""",re.VERBOSE)
+
+re_GameInfo = re.compile(r"""SwCPoker\sHand\s*\#(?P<HID>\d+):\s((Tournament|Cashgame|sitngo)\s\(((?P<TABLE2>.*?))\)\#(?P<TOURNO>\d+),\s(?P<BUYIN>(?P<BIAMT>\d+(\.\d+)?))\+(?P<BIRAKE>\d+(\.\d+)?)\s|\s)(?P<GAME>(Hold\'em|Omaha|Omaha\s5\sCards))\s(?P<LIMIT>(NL|PL|Limit|Pot\sLimit|No\sLimit))\s((-\sLevel\s\w+\s)|)\((?P<SB>\d+(\.\d+)?(\,\d+)?)/(?P<BB>\d+(\.\d+)?(\,\d+)?)\)\s-\s(?P<DATETIME>.*)""",re.VERBOSE)
 
 
 def test_re_GameInfo():
@@ -21,20 +28,36 @@ def test_re_GameInfo():
     assert match.group('BB') == '20'
     assert match.group('DATETIME') == '2023/06/26 19:30:22 UTC'
 
+def test_re_GameInfo9():
+    text = "SwCPoker Hand #194644676: Tournament (NLH Freeroll [50 Chips])#194634844, 0+0 Hold'em No Limit - Level XVIII (1,000/2,000) - 2023/09/22 23:06:25 UTC"
+    match = re_GameInfo.search(text)
+    assert match is not None
+    assert match.group('HID') == '194644676'
+    assert match.group('TOURNO') == '194634844'
+    assert match.group('TABLE2') == 'NLH Freeroll [50 Chips]'
+    assert match.group('BUYIN') == '0'
+    assert match.group('BIAMT') == '0'
+    assert match.group('BIRAKE') == '0'
+    assert match.group('GAME') == "Hold'em"
+    assert match.group('LIMIT') == 'No Limit'
+    assert match.group('SB') == '1,000'
+    assert match.group('BB') == '2,000'
+    assert match.group('DATETIME') == '2023/09/22 23:06:25 UTC'
 
-def test_re_GameInfo2():
+
+def test_re_GameInfo3():
     text = 'SwCPoker Hand #183387021: Tournament (NLH Freeroll [30 Chips])#183390848, 0+0 Hold\'em No Limit - Level I (10/20) - 2023/06/27 9:30:26 UTC'
     match = re_GameInfo.search(text)
     assert match is not None
     assert match.group('HID') == '183387021'
 
-def test_re_GameInfo2():
+def test_re_GameInfo4():
     text = 'SwCPoker Hand #183411552:  Omaha Pot Limit (0.02/0.04) - 2023/06/27 14:43:04 UTC'
     match = re_GameInfo.search(text)
     assert match is not None
     assert match.group('HID') == '183411552'
 
-def test_re_GameInfo2():
+def test_re_GameInfo52():
     text = 'SwCPoker Hand #183411639:  Hold\'em No Limit (0.02/0.04) - 2023/06/27 14:47:48 UTC'
     match = re_GameInfo.search(text)
     assert match is not None
@@ -122,10 +145,7 @@ def test_re_ButtonPos():
     assert match is not None
     assert match.group('BUTTON') == "7"
 
-substitutions = {
-                           'PLYR': r'(?P<PNAME>\w+)',
-                          'BRKTS': r'(\(button\) |\(small blind\) |\(big blind\) |\(button\) \(small blind\) |\(button\) \(big blind\)| )?',
-                    }
+
 
 re_CollectPot       = re.compile(r"%(PLYR)s\s+%(BRKTS)s%(BRKTS)s(collected|wins|splits|won)\s+\((?P<POT>\d{1,3}(,\d{3})*(\.\d+)?)\)" %  substitutions, re.MULTILINE)
 re_CollectPot2       = re.compile(r"^Seat (?P<SEAT>[0-9]+): %(PLYR)s ((%(BRKTS)s(((((?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \((?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(\s\sand\s(won\s\([.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$)|collected\s\((?P<POT2>[.\d]+)\)))|folded ((on the (Flop|Turn|River))|before Flop)))|folded before Flop \(didn't bet\))" %  substitutions, re.MULTILINE)
