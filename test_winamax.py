@@ -24,3 +24,15 @@ def test_re_HandInfo():
     text = 'Winamax Poker - HOLD-UP "Colorado" - HandId: #18876587-492053-1695486636 - Holdem no limit (0.01€/0.02€) - 2023/09/23 16:30:36 UTC'
     match = re_HandInfo.search(text)
     assert match is not None
+
+
+re_HUTP = re.compile(r'Hold\-up\sto\sPot:\stotal\s((%(LS)s)?(?P<AMOUNT>[.0-9]+)(%(LS)s)?)' % substitutions, re.MULTILINE|re.VERBOSE)
+
+def test_re_HUTP():
+    text = 'Hold-up to Pot: total 0.20€'
+    match = re_HUTP.search(text)
+    assert match is not None
+    assert match.group('AMOUNT') == '0.20'
+
+
+
