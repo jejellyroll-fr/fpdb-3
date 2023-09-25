@@ -76,7 +76,7 @@ class Winamax(HandHistoryConverter):
 
     # Static regexes
     # ***** End of hand R5-75443872-57 *****
-    re_Identify = re.compile(u'Winamax\sPoker\s\-\s(CashGame|Go\sFast|Tournament\s\")')
+    re_Identify = re.compile(u'Winamax\sPoker\s\-\s(CashGame|Go\sFast|HOLD\-UP|Tournament\s\")')
     re_SplitHands = re.compile(r'\n\n')
 
 
@@ -85,7 +85,7 @@ class Winamax(HandHistoryConverter):
 # Table: 'Charenton-le-Pont' 9-max (real money) Seat #5 is the button
     re_HandInfo = re.compile(u"""
             \s*Winamax\sPoker\s-\s
-            (?P<RING>(CashGame|Go\sFast\s"[^"]+"))?
+            (?P<RING>(CashGame|Go\sFast\s"[^"]+"|HOLD\-UP\s"[^"]+"))?
             (?P<TOUR>Tournament\s
             (?P<TOURNAME>.+)?\s
             buyIn:\s(?P<BUYIN>(?P<BIAMT>[%(LS)s\d\,.]+)?(\s\+?\s|-)(?P<BIRAKE>[%(LS)s\d\,.]+)?\+?(?P<BOUNTY>[%(LS)s\d\.]+)?\s?(?P<TOUR_ISO>%(LEGAL_ISO)s)?|(?P<FREETICKET>[\sa-zA-Z]+))?\s
@@ -112,7 +112,7 @@ class Winamax(HandHistoryConverter):
     re_Board        = re.compile(r"\[(?P<CARDS>.+)\]")
     re_Total        = re.compile(r"Total pot (?P<TOTAL>[\.\d]+).*(No rake|Rake (?P<RAKE>[\.\d]+))" % substitutions)
     re_Mixed        = re.compile(r'_(?P<MIXED>10games|8games|horse)_')
-
+    re_HUTP = re.compile(r'Hold\-up\sto\sPot:\stotal\s((%(LS)s)?(?P<AMOUNT>[.0-9]+)(%(LS)s)?)' % substitutions, re.MULTILINE|re.VERBOSE)
     # 2010/09/21 03:10:51 UTC
     re_DateTime = re.compile("""
             (?P<Y>[0-9]{4})/
@@ -444,6 +444,12 @@ class Winamax(HandHistoryConverter):
         if m:
             logging.debug("readBringIn: %s for %s" %(m.group('PNAME'),  m.group('BRINGIN')))
             hand.addBringIn(m.group('PNAME'),  m.group('BRINGIN'))
+
+    def readSTP(self, hand):
+        #log.debug(_("read Splash the Pot"))
+        m = self.re_HUTP.search(hand.handText)
+        if m:
+            hand.addSTP(m.group('AMOUNT'))
 
     def readHoleCards(self, hand):
         # streets PREFLOP, PREDRAW, and THIRD are special cases beacause
