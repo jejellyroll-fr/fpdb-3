@@ -107,8 +107,8 @@ class Winamax(HandHistoryConverter):
 # Seat 1: some_player (5€)
 # Seat 2: some_other_player21 (6.33€)
 # Seat 6: I want fold (147894, 29.25€ bounty)
-    re_PlayerInfo        = re.compile(u'Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.*)\s\((%(LS)s)?(?P<CASH>[.0-9]+)(%(LS)s)?(,\s(%(LS)s)?(?P<BOUNTY>[.0-9]+)(%(LS)s)?\sbounty)?\)' % substitutions)
-    re_PlayerInfoSummary = re.compile(u'Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.+?)\s' % substitutions)
+    re_PlayerInfo        = re.compile(r"Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.*)\s\((%(LS)s)?(?P<CASH>[.0-9]+)(%(LS)s)?(,\s(%(LS)s)?(?P<BOUNTY>[.0-9]+)(%(LS)s)?\sbounty)?\)" % substitutions)
+    re_PlayerInfoSummary = re.compile(r'Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.+?)\s' % substitutions)
 
     def compilePlayerRegexs(self, hand):
         players = set([player[1] for player in hand.players])
@@ -122,22 +122,22 @@ class Winamax(HandHistoryConverter):
             #helander2222 posts blind ($0.25), lopllopl posts blind ($0.50).
             player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
             subst = {'PLYR': player_re, 'CUR': self.sym[hand.gametype['currency']]}
-            self.re_PostSB    = re.compile('%(PLYR)s posts small blind (%(CUR)s)?(?P<SB>[\.0-9]+)(%(CUR)s)?(?! out of position)' % subst, re.MULTILINE)
-            self.re_PostBB    = re.compile('%(PLYR)s posts big blind (%(CUR)s)?(?P<BB>[\.0-9]+)(%(CUR)s)?' % subst, re.MULTILINE)
-            self.re_DenySB    = re.compile('(?P<PNAME>.*) deny SB' % subst, re.MULTILINE)
+            self.re_PostSB    = re.compile(r"%(PLYR)s\sposts\ssmall\sblind\s(%(CUR)s)?(?P<SB>[\.0-9]+)(%(CUR)s)?(?!\sout\sof\sposition)" % subst, re.MULTILINE)
+            self.re_PostBB    = re.compile(r"%(PLYR)s\sposts\sbig\sblind\s(%(CUR)s)?(?P<BB>[\.0-9]+)(%(CUR)s)?" % subst, re.MULTILINE)
+            self.re_DenySB    = re.compile(r"%(PLYR)s\sdeny\sSB" % subst, re.MULTILINE)
             self.re_Antes     = re.compile(r"^%(PLYR)s posts ante (%(CUR)s)?(?P<ANTE>[\.0-9]+)(%(CUR)s)?" % subst, re.MULTILINE)
             self.re_BringIn   = re.compile(r"^%(PLYR)s (brings in|bring\-in) (%(CUR)s)?(?P<BRINGIN>[\.0-9]+)(%(CUR)s)?" % subst, re.MULTILINE)
-            self.re_PostBoth  = re.compile('(?P<PNAME>.*): posts small \& big blind \( (%(CUR)s)?(?P<SBBB>[\.0-9]+)(%(CUR)s)?\)' % subst)
-            self.re_PostDead  = re.compile('(?P<PNAME>.*) posts dead blind \((%(CUR)s)?(?P<DEAD>[\.0-9]+)(%(CUR)s)?\)' % subst, re.MULTILINE)
-            self.re_PostSecondSB = re.compile('%(PLYR)s posts small blind (%(CUR)s)?(?P<SB>[\.0-9]+)(%(CUR)s)? out of position' % subst, re.MULTILINE)
-            self.re_HeroCards = re.compile('Dealt\sto\s%(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])' % subst)
+            self.re_PostBoth  = re.compile(r"%(PLYR)s\sposts\ssmall\s\&\sbig\sblind\s\((%(CUR)s)?(?P<SBBB>[\.0-9]+)(%(CUR)s)?\)" % subst)
+            self.re_PostDead  = re.compile(r"%(PLYR)s\sposts\sdead\sblind\s\((%(CUR)s)?(?P<DEAD>[\.0-9]+)(%(CUR)s)?\)" % subst, re.MULTILINE)
+            self.re_PostSecondSB = re.compile(r"%(PLYR)s\sposts\ssmall\sblind\s(%(CUR)s)?(?P<SB>[\.0-9]+)(%(CUR)s)?(?!\sout\sof\sposition)" % subst, re.MULTILINE)
+            self.re_HeroCards = re.compile(r"Dealt\sto\s%(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % subst)
 
             # no discards action observed yet
-            self.re_Action = re.compile(r"(,\s)?(?P<PNAME>.*?)(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sstands\spat)(\s\-?(\$|\xe2\x82\xac|\u20ac|)?(?P<BET>[\d\.]+)(\$|\xe2\x82\xac|\u20ac|)?)?(\sto\s(\$|\xe2\x82\xac|\u20ac|)?(?P<BETTO>[\d\.]+)(\$|\xe2\x82\xac|\u20ac|)?)?(\sand\sis\sall-in)?" % subst)
-            self.re_ShowdownAction = re.compile('(?P<PNAME>[^\(\)\n]*) (\((small blind|big blind|button)\) )?shows \[(?P<CARDS>.+)\]')
+            self.re_Action = re.compile(r"(,\s)?%(PLYR)s(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sstands\spat)(\s\-?(\$|\xe2\x82\xac|\u20ac|)?(?P<BET>[\d\.]+)(\$|\xe2\x82\xac|\u20ac|)?)?(\sto\s(\$|\xe2\x82\xac|\u20ac|)?(?P<BETTO>[\d\.]+)(\$|\xe2\x82\xac|\u20ac|)?)?(\sand\sis\sall-in)?" % subst)
+            self.re_ShowdownAction = re.compile(r"%(PLYR)s\s(\((small\sblind|big\sblind|button)\)\s)?shows\s\[(?P<CARDS>.+)\]")
 
-            self.re_CollectPot = re.compile('\s*(?P<PNAME>.*)\scollected\s(%(CUR)s)?(?P<POT>[\.\d]+)(%(CUR)s)?.*' % subst)
-            self.re_ShownCards = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s (\((small blind|big blind|button)\) )?showed \[(?P<CARDS>.*)\].+? with (?P<STRING>.*)" % subst, re.MULTILINE)
+            self.re_CollectPot = re.compile(r"\s*%(PLYR)s\scollected\s(%(CUR)s)?(?P<POT>[\.\d]+)(%(CUR)s)?.*" % subst)
+            self.re_ShownCards = re.compile(r"^Seat\s(?P<SEAT>[0-9]+):\s%(PLYR)s\s(\((small\sblind|big\sblind|button)\)\s)?showed\s\[(?P<CARDS>.*)\].+?\swith\s(?P<STRING>.*)" % subst, re.MULTILINE)
 
     def readSupportedGames(self):
         return [
@@ -226,7 +226,8 @@ class Winamax(HandHistoryConverter):
             raise FpdbParseError
 
         info.update(m.groupdict())
-        if 'Go Fast' or "HOLD\-UP" in m.get('RING'):
+        
+        if m.groupdict()['RING'] is not None and 'Go Fast' or "HOLD\-UP" in m.groupdict()['RING']:
             info['fast'] = True
             m2 = self.re_TableInfo.search(hand.handText)
             mg2 = m2.groupdict()
