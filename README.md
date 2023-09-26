@@ -21,8 +21,12 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 - see fpdb.drawio (WIP) or use puml files
 
 ## To do
+>code improve
+- replace dict['key] per dict.get('key') to prevent crashes
+- replace concatened string by Fstring
+
 >unit test
--write unit tests to cover all code
+- write unit tests to cover all code (POC works need to add more tests)
 
 ![example workflow](https://github.com/jejellyroll-fr/fpdb-3/actions/workflows/fpdb-3.yml/badge.svg)
 
@@ -37,9 +41,10 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 >translation-language
 - not working translation -> from icu import Locale(TO DO: find better solution- OK - need to finish traduction)
 >pokerstove
-- add odds calc (fast solution-> use Pokerprotools online WIP) -> add last version poker-eval and pypoker
+- add odds calc (fast solution-> use Pokerprotools online WIP) -> add last version poker-eval and pypoker (deprecated)
 - update poker-eval lib (https://github.com/jejellyroll-fr/poker-eval)->added 5 cards PLO, 5 card PLO8 and 6 card PLO -> OK -> think to add kuhn and short deck nl
-- update pypoker-eval (https://github.com/jejellyroll-fr/pypoker-eval)->Python 3 ->OK (TO DO: add 6 and 5 cards plo)
+- update pypoker-eval (https://github.com/jejellyroll-fr/pypoker-eval)->Python 3 ->OK (TO DO: add 6 and 5 cards plo) -( will not maintain this wrapper)
+- add POKENUM web api to do it
 >replayer
 - rethink the distribution of players around the table (TO DO: WIP)
 - add pot odds and equity(TO DO)
@@ -49,12 +54,11 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 - Filter bug (player and site =not good working)
 - will probably replace by web version(TO DO)
 >import
-- PMU not working siteid error(TODO)
+- PMU not working siteid error(TODO: WIP)
 - correct bug import from pokertracker summary (TODO)
 - add SWC and so on
 - re add old dead sites
 >graphviz
-- use more modern lib (plotty ...)
 - improve visualization (TODO)
 - will probably replace by web version(TO DO)
 >stats
@@ -70,7 +74,7 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 - add ui for Hud config per games (DONE)
 - edit config will probably replace by web version(TO DO)
 >ui
-- dark theme
+- dark theme(DONE)
 - more modern (perhaps use pyside6 in the future)
 - add web server Flask+fastapi (WIP)
 >notebook jupyter
@@ -87,7 +91,7 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 |winamax | osx big sur (intel)| OK  | OK(except Floop-no HH text)| KO | OK| OK |
 |Pokerstars| Win11| OK  |OK (except Fusion-fixed)| KO | OK  | OK   |
 |Pokerstars| osx big sur (intel)| OK  |OK (except Fusion-fixed)| KO | OK  | OK   |
-|Betclic| Win11| KO | OK  | X|  KO  | KO   |
+|Betclic| Win11| OK | OK  | X|  KO  | KO   |
 |Betclic| osx no HH| x | x  | X|  x  | x   |
 |PMU| Win11| KO | KO  | KO|  KO  | KO   |
 |Unibet| no handhistory| X | X  | X|  X  | X   |
