@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Copyright 2009-2011 Carl Gherardi
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, version 3 of the License.
+# Copyright 2009-2011 Carl Gherardi
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with this program. If not, see <http://www.gnu.org/licenses/>.
-#In the "official" distribution you can find the license in agpl-3.0.txt.
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# In the "official" distribution you can find the license in agpl-3.0.txt.
 
 
 import os
@@ -47,7 +47,6 @@ def sanitize_filter_name(input_str):
     return input_str.strip()
 
 
-
 def anonymize_hand_history(file_path, hero_name):
     """
     This function anonymizes the player names in a hand history file.
@@ -76,12 +75,12 @@ def anonymize_hand_history(file_path, hero_name):
             tmp += f" {ffile.site.hhc_fname}"
         elif ffile.ftype == "summary":
             tmp += f" {ffile.site.summary}"
-        print(tmp)
-    print(_(f'{count} files identified'))
+        # print(tmp)
+    # print(f'{count} files identified')
 
     # Sanitize the filter name and print it
     filter_name = sanitize_filter_name(tmp)
-    print(filter_name)
+    # print(filter_name)
 
     # Choose the appropriate regular expression pattern based on the filter name
     patterns = {
@@ -113,15 +112,14 @@ def anonymize_hand_history(file_path, hero_name):
             with codecs.open(file_path, 'r', encoding) as in_fh:
                 filecontents = in_fh.read()
     else:
-        print(_(f"Could not find file {file_path}"))
+        print(f"Could not find file {file_path}")
         exit(1)
 
     # Find all occurrences of player names using the regular expression pattern
     m = regex.finditer(filecontents)
 
-
     outfile = f"{file_path}.anon"
-    print(_(f"Output being written to {outfile}"))
+    print(f"Output being written to {outfile}")
 
     savestdout = sys.stdout
     with open(outfile, "w") as fsock:
@@ -136,12 +134,12 @@ def anonymize_hand_history(file_path, hero_name):
         for i, name in enumerate(uniq):
                 filecontents = filecontents.replace(name, "Hero" if name == hero_name else f'Player{i}')
 
-        print(filecontents.encode('utf-8').decode())
+        # print(filecontents.encode('utf-8').decode())
 
         sys.stdout = savestdout
 
 
 # Usage example:
-anonymize_hand_history("C:/MyHandsArchive_H2N/2023/2/21/Ferrare 03.txt", "jejellyroll")
+# anonymize_hand_history("C:/MyHandsArchive_H2N/2023/2/21/Ferrare 03.txt", "jejellyroll")
 
 
