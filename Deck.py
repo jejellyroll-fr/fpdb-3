@@ -13,7 +13,6 @@ Helper class for mucked card display. Loads specified deck from SVG
 images and returns it as a dict of pixbufs.
 """
 
-
 import os
 
 from PyQt5.QtCore import QRectF
@@ -29,9 +28,9 @@ class Deck(object):
         self.__backfile = os.path.join(
             config.graphics_path, u"cards", u"backs", f"{card_back}.svg"
         ).replace('\\', '/')
-        self.__cards = dict({ 's': None, 'h': None, 'd': None, 'c': None})
+        self.__cards = dict({'s': None, 'h': None, 'd': None, 'c': None})
         self.__card_back = None
-        self.__rank_vals = dict()
+        self.__rank_vals = {}
 
         for sk in self.__cards:
             self.__load_suit(sk)
@@ -57,57 +56,31 @@ class Deck(object):
     def __load_suit(self, suit_key):
         sd = {}
         _p = self.__cardspath
-        sd[2] = self.__load_svg(
-            os.path.join(_p, f'{suit_key}_2.svg').replace('\\', '/')
-        )
-        sd[3] = self.__load_svg(
-            os.path.join(_p, f'{suit_key}_3.svg').replace('\\', '/')
-        )
-        sd[4] = self.__load_svg(
-            os.path.join(_p, f'{suit_key}_4.svg').replace('\\', '/')
-        )
-        sd[5] = self.__load_svg(
-            os.path.join(_p, f'{suit_key}_5.svg').replace('\\', '/')
-        )
-        sd[6] = self.__load_svg(
-            os.path.join(_p, f'{suit_key}_6.svg').replace('\\', '/')
-        )
-        sd[7] = self.__load_svg(
-            os.path.join(_p, f'{suit_key}_7.svg').replace('\\', '/')
-        )
-        sd[8] = self.__load_svg(
-            os.path.join(_p, f'{suit_key}_8.svg').replace('\\', '/')
-        )
-        sd[9] = self.__load_svg(
-            os.path.join(_p, f'{suit_key}_9.svg').replace('\\', '/')
-        )
-        sd[10] = self.__load_svg(
-            os.path.join(_p, f'{suit_key}_10.svg').replace('\\', '/')
-        )
-        sd[11] = self.__load_svg(
-            os.path.join(_p, f'{suit_key}_j.svg').replace('\\', '/')
-        )
-        sd[12] = self.__load_svg(
-            os.path.join(_p, f'{suit_key}_q.svg').replace('\\', '/')
-        )
-        sd[13] = self.__load_svg(
-            os.path.join(_p, f'{suit_key}_k.svg').replace('\\', '/')
-        )
-        sd[14] = self.__load_svg(
-            os.path.join(_p, f'{suit_key}_a.svg').replace('\\', '/')
-        )
+        sd[2] = self.__load_svg(os.path.join(_p, (suit_key + '_' + '2' + '.svg')).replace('\\', '/'))
+        sd[3] = self.__load_svg(os.path.join(_p, (suit_key + '_' + '3' + '.svg')).replace('\\', '/'))
+        sd[4] = self.__load_svg(os.path.join(_p, (suit_key + '_' + '4' + '.svg')).replace('\\', '/'))
+        sd[5] = self.__load_svg(os.path.join(_p, (suit_key + '_' + '5' + '.svg')).replace('\\', '/'))
+        sd[6] = self.__load_svg(os.path.join(_p, (suit_key + '_' + '6' + '.svg')).replace('\\', '/'))
+        sd[7] = self.__load_svg(os.path.join(_p, (suit_key + '_' + '7' + '.svg')).replace('\\', '/'))
+        sd[8] = self.__load_svg(os.path.join(_p, (suit_key + '_' + '8' + '.svg')).replace('\\', '/'))
+        sd[9] = self.__load_svg(os.path.join(_p, (suit_key + '_' + '9' + '.svg')).replace('\\', '/'))
+        sd[10] = self.__load_svg(os.path.join(_p, (suit_key + '_' + '10' + '.svg')).replace('\\', '/'))
+        sd[11] = self.__load_svg(os.path.join(_p, (suit_key + '_' + 'j' + '.svg')).replace('\\', '/'))
+        sd[12] = self.__load_svg(os.path.join(_p, (suit_key + '_' + 'q' + '.svg')).replace('\\', '/'))
+        sd[13] = self.__load_svg(os.path.join(_p, (suit_key + '_' + 'k' + '.svg')).replace('\\', '/'))
+        sd[14] = self.__load_svg(os.path.join(_p, (suit_key + '_' + 'a' + '.svg')).replace('\\', '/'))
         self.__cards[suit_key] = sd
-        
+
     def card(self, suit=None, rank=0):
         return self.__cards[suit][rank]
 
     def back(self):
         return self.__card_back
-        
+
     def rank(self, token=None):
         key = token.upper()
         return self.__rank_vals[key]
-    
+
     def get_all_card_images(self):
         # returns a 4x13-element dictionary of every card image +
         # index-0 = card back each element is a QPixmap
