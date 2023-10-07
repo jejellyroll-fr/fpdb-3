@@ -33,13 +33,13 @@ class FPDBArchive(object):
         self.handText = hand.handText
         
 class Archive(object):
-    def __init__(self, config=None, path = None, ftype="hh"):
+    def __init__(self, config=None, path=None, ftype="hh"):
         self.config = config
         self.archivePath = None
         if config:
             self.archivePath = config.imp.archivePath
-        self.path   = path
-        self.ftype  = ftype
+        self.path = path
+        self.ftype = ftype
         self.handList = {}
         self.sessionsArchive = {}
         self.startCardsArchive = {}
