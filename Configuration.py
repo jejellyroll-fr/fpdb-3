@@ -272,13 +272,13 @@ def set_logfile(file_name):
         print('logging.conf file already exists')
     else:
      # create a file
-        print('copying logging.conf file in appdata rooming folder')    
+        print('copying logging.conf file in appdata rooming folder')
     if conf_file:
         try:
             log_file = log_file.replace('\\', '/')  # replace each \ with \\
             logging.config.fileConfig(conf_file, {"logFile":log_file})
-        except:
-            sys.stderr.write(("Could not setup log file %s") % file_name)
+        except Exception:
+            sys.stderr.write(f"Could not setup log file {file_name}")
 
 def check_dir(path, create = True):
     """Check if a dir exists, optionally creates if not."""

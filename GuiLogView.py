@@ -25,7 +25,7 @@ import queue
 
 from PyQt5.QtGui import (QStandardItem, QStandardItemModel)
 from PyQt5.QtWidgets import (QApplication, QDialog, QPushButton, QHBoxLayout, QRadioButton,
-                             QTableView, QVBoxLayout, QWidget)
+                             QTableView, QVBoxLayout, QWidget, QCheckBox)
 
 import os
 import traceback
@@ -40,12 +40,13 @@ log = logging.getLogger("logview")
 
 MAX_LINES = 100000         # max lines to display in window
 EST_CHARS_PER_LINE = 150   # used to guesstimate number of lines in log file
-LOGFILES = [ [ ('Fpdb Errors'),        'fpdb-errors.txt',   False, 'log']  # label, filename, start value, path
-           , [ ('Fpdb Log'),           'fpdb-log.txt',      True,  'log']
-           , [ ('HUD Errors'),         'HUD-errors.txt',    False, 'log']
-           , [ ('HUD Log'),            'HUD-log.txt',       False, 'log']
-           , [ ('fpdb.exe log'),       'fpdb.exe.log',      False, 'pyfpdb']
-           , [ ('HUD_main.exe Log'),   'HUD_main.exe.log ', False, 'pyfpdb']
+# label, filename, start value, path
+LOGFILES = [['Fpdb Errors',        'fpdb-errors.txt',   False, 'log'],
+            ['Fpdb Log',           'fpdb-log.txt',      True,  'log'],
+            ['HUD Errors',         'HUD-errors.txt',    False, 'log'],
+            ['HUD Log',            'HUD-log.txt',       False, 'log'],
+            ['fpdb.exe log',       'fpdb.exe.log',      False, 'pyfpdb'],
+            ['HUD_main.exe Log',   'HUD_main.exe.log ', False, 'pyfpdb']
            ]
 
 class GuiLogView(QWidget):
@@ -77,30 +78,62 @@ class GuiLogView(QWidget):
             hb1.addWidget(rb)
             
         hb2 = QHBoxLayout()
-        refreshbutton = QPushButton(("Refresh"))
+        refreshbutton = QPushButton("Refresh")
         refreshbutton.clicked.connect(self.refresh)
         hb2.addWidget(refreshbutton)
         
-        copybutton = QPushButton(("Selection Copy to Clipboard"))
+        copybutton = QPushButton("Selection Copy to Clipboard")
         copybutton.clicked.connect(self.copy_to_clipboard)
         hb2.addWidget(copybutton)
-        
+
+        # Add checkboxes for log levels
+        self.filter_debug = QCheckBox("DEBUG", self)
+        self.filter_info = QCheckBox("INFO", self)
+        self.filter_warning = QCheckBox("WARNING", self)
+        self.filter_error = QCheckBox("ERROR", self)
+
+        # Connect checkboxes to the filter method
+        self.filter_debug.stateChanged.connect(self.filter_log)
+        self.filter_info.stateChanged.connect(self.filter_log)
+        self.filter_warning.stateChanged.connect(self.filter_log)
+        self.filter_error.stateChanged.connect(self.filter_log)
+
+        # Add checkboxes to layout
+        hb3 = QHBoxLayout()
+        hb3.addWidget(self.filter_debug)
+        hb3.addWidget(self.filter_info)
+        hb3.addWidget(self.filter_warning)
+        hb3.addWidget(self.filter_error)
+        self.layout().addLayout(hb3)
+
         self.layout().addLayout(hb1)
         self.layout().addLayout(hb2)
 
         self.loadLog()
         self.show()
 
+    def filter_log(self):
+        selected_levels = []
+        if self.filter_debug.isChecked():
+            selected_levels.append("DEBUG")
+        if self.filter_info.isChecked():
+            selected_levels.append("INFO")
+        if self.filter_warning.isChecked():
+            selected_levels.append("WARNING")
+        if self.filter_error.isChecked():
+            selected_levels.append("ERROR")
+
+        self.loadLog(selected_levels)
     
     def copy_to_clipboard(self, checkState):
         text = ""
-        for row, indexes in groupby(self.listview.selectedIndexes(), lambda i:i.row()):
+        for row, indexes in groupby(self.listview.selectedIndexes(), lambda i: i.row()):
             text += " ".join([i.data() for i in indexes]) + "\n"
-        print(text)
+        # print(text)
         QApplication.clipboard().setText(text)
             
     def __set_logfile(self, checkState, filename):
-        #print "w is", w, "file is", file, "active is", w.get_active()
+        # print "w is", w, "file is", file, "active is", w.get_active()
         if checkState:
             for logf in LOGFILES:
                 if logf[0] == filename:
@@ -118,46 +151,27 @@ class GuiLogView(QWidget):
     def get_dialog(self):
         return self.dia
 
-    def loadLog(self):
+    def loadLog(self, selected_levels=None):
         self.liststore.clear()
-        self.liststore.setHorizontalHeaderLabels([("Date/Time"), ("Module"), ("Level"), ("Text")])
+        self.liststore.setHorizontalHeaderLabels(
+            ["Date/Time", "Functionality", "Level", "Module", "Function", "Message"])
 
-        # guesstimate number of lines in file
         if os.path.exists(self.logfile):
-            stat_info = os.stat(self.logfile)
-            lines = old_div(stat_info.st_size, EST_CHARS_PER_LINE)
+            with open(self.logfile, 'r') as log_file:
+                for line in log_file:
+                    parts = line.strip().split(' - ')
+                    if len(parts) == 6:
+                        date_time, functionality,  level, module, function, message = parts
 
-            # set startline to line number to start display from
-            startline = 0
-            if lines > MAX_LINES:
-                # only display from startline if log file is large
-                startline = lines - MAX_LINES
+                        # Filter log entries based on selected log levels
+                        if selected_levels is None or level in selected_levels:
+                            tablerow = [date_time, functionality,  level, module, function, message]
+                            tablerow = [QStandardItem(i) for i in tablerow]
+                            for item in tablerow:
+                                item.setEditable(False)
+                            self.liststore.appendRow(tablerow)
 
-            l = 0
-            for line in open(self.logfile):
-                # example line in logfile format:
-                # 2009-12-02 15:23:21,716 - config       DEBUG    config logger initialised
-                l = l + 1
-                if l > startline:
-                    # NOTE selecting a sort column and then switching to a log file
-                    # with several thousand rows will send cpu 100% for a prolonged period.
-                    # reason is that the append() method seems to sort every record as it goes, rather than
-                    # pulling in the whole file and sorting at the end.
-                    # one fix is to check if a column sort has been selected, reset to date/time asc
-                    # append all the rows and then reselect the required sort order.
-                    # Note: there is no easy method available to revert the list to an "unsorted" state.
-                    # always defaulting to date/time asc doesn't work, because some rows do not have date/time info
-                    # and would end up sorted out of context.
-                    tablerow = []
-                    if len(line) > 49 and line[23:26] == ' - ' and line[34:39] == '     ':
-                        tablerow = [line[0:23], line[26:32], line[39:46], line[48:].strip()]
-                    else:
-                        tablerow = ['', '', '', line.strip()]
-                    tablerow = [QStandardItem(i) for i in tablerow]
-                    for item in tablerow:
-                        item.setEditable(False)
-                    self.liststore.appendRow(tablerow)
-            self.listview.resizeColumnsToContents()
+        self.listview.resizeColumnsToContents()
 
     def refresh(self, checkState):
         self.loadLog()
