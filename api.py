@@ -123,12 +123,13 @@ async def get_players_api(
   })
 
 @app.get("/players/{playerId}/hands", response_model=List[HandsPlayer])
-def get_player_hands_api(playerId: int):
-    # Your database query logic here to retrieve hands for the player with the given playerId
-    # Replace this with your actual database query code
-    
-    handsPlayers = get_hands_players(playerId)  # Replace with your own function or code to retrieve hands
-    
+def get_player_hands_api(
+    playerId: int,
+    tourney: Optional[bool] = False,  # Default to False
+    cash: Optional[bool] = False,     # Default to False
+    sort_by: str = None     # Default to None
+):
+    handsPlayers = get_hands_players(playerId, tourney=tourney, cash=cash, sort_by=sort_by)
     return JSONResponse(content=handsPlayers)
 
 @app.get("/hands/count")
