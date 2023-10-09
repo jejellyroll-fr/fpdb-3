@@ -282,19 +282,39 @@ def get_heroes():
     conn.close()
     return heroes
 
-def get_hands_players(player_id):
+
+
+def get_hands_players(player_id, tourney=False, cash=False, sort_by=None):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
 
-    cursor.execute("""
-    SELECT *
-    FROM HandsPlayers
-    WHERE playerId = (
-        SELECT id FROM Players WHERE id = ?
-    );
-    """, (player_id,))  # Pass player_id as a parameter to the execute function
+    query = """
+    SELECT
+        HP.*,
+        HA.*,
+        HPots.*,
+        HStove.*,
+        H.*
+    FROM HandsPlayers AS HP
+    LEFT JOIN Hands AS H ON HP.handId = H.id
+    LEFT JOIN HandsActions AS HA ON HP.handId = HA.handId
+    LEFT JOIN HandsPots AS HPots ON HP.handId = HPots.handId
+    LEFT JOIN HandsStove AS HStove ON HP.handId = HStove.handId
+    WHERE HP.playerId = ?
+    """
 
+    if tourney:
+        query += " AND H.tourneyId IS NOT NULL"
+    elif cash:
+        query += " AND H.tourneyId IS NULL"
+
+    if sort_by:
+        query += f" ORDER BY {sort_by}"
+
+    cursor.execute(query, (player_id,))
+    
     hands_players = cursor.fetchall()
+
     conn.close()
     return hands_players
 
@@ -461,3 +481,5 @@ def get_player_name(player_id):
     player_name = cursor.fetchone()
     conn.close()
     return player_name[0] if player_name else None
+
+

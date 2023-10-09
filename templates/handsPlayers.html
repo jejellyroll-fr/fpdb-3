@@ -5,6 +5,41 @@
       <!-- Add Bootstrap CSS -->
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
       <link rel="stylesheet" href="styles.css">
+      <style>
+        .card-images-row {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .card-image {
+            max-width: 30px;
+            margin-right: 5px; /* Add some margin between card images */
+        }
+    </style>
+      <script>
+        var encodeCardList = {
+            '2h': 1, '3h': 2, '4h': 3, '5h': 4, '6h': 5, '7h': 6, '8h': 7, '9h': 8, 'Th': 9, 'Jh': 10, 'Qh': 11, 'Kh': 12, 'Ah': 13,
+            '2d': 14, '3d': 15, '4d': 16, '5d': 17, '6d': 18, '7d': 19, '8d': 20, '9d': 21, 'Td': 22, 'Jd': 23, 'Qd': 24, 'Kd': 25, 'Ad': 26,
+            '2c': 27, '3c': 28, '4c': 29, '5c': 30, '6c': 31, '7c': 32, '8c': 33, '9c': 34, 'Tc': 35, 'Jc': 36, 'Qc': 37, 'Kc': 38, 'Ac': 39,
+            '2s': 40, '3s': 41, '4s': 42, '5s': 43, '6s': 44, '7s': 45, '8s': 46, '9s': 47, 'Ts': 48, 'Js': 49, 'Qs': 50, 'Ks': 51, 'As': 52,
+            '  ': 0
+        };
+        var decodeCardList = {
+            1: '2h',  2: '3h',  3: '4h',  4: '5h',  5: '6h',
+            6: '7h',  7: '8h',  8: '9h',  9: 'Th',  10: 'Jh',
+            11: 'Qh', 12: 'Kh', 13: 'Ah',
+            14: '2d', 15: '3d', 16: '4d', 17: '5d', 18: '6d',
+            19: '7d', 20: '8d', 21: '9d', 22: 'Td', 23: 'Jd',
+            24: 'Qd', 25: 'Kd', 26: 'Ad',
+            27: '2c', 28: '3c', 29: '4c', 30: '5c', 31: '6c',
+            32: '7c', 33: '8c', 34: '9c', 35: 'Tc', 36: 'Jc',
+            37: 'Qc', 38: 'Kc', 39: 'Ac',
+            40: '2s', 41: '3s', 42: '4s', 43: '5s', 44: '6s',
+            45: '7s', 46: '8s', 47: '9s', 48: 'Ts', 49: 'Js',
+            50: 'Qs', 51: 'Ks', 52: 'As',
+            0: '  '
+        };
+    </script>
     </head>
     <body class="bg-dark">
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -25,9 +60,10 @@
         <div class="container">
           <h1 class="text-light">Hands Players</h1>
           <div class="table-responsive">
-            <table class="table table-dark table-striped">
+            <table class="table table-dark table-striped table-sm">
                 <thead>
         <tr>
+            <!-- hansplayers -->
             <th>id</th>
             <th>handId</th>
             <th>playerId</th>
@@ -38,13 +74,7 @@
             <th>position</th>
             <th>seatNo</th>
             <th>sitout</th>
-            <th>card1</th>
-            <th>card2</th>
-            <th>card3</th>
-            <th>card4</th>
-            <th>card5</th>
-            <th>card6</th>
-            <th>card7</th>
+            <th>cards</th>
             <th>card8</th>
             <th>card9</th>
             <th>card10</th>
@@ -193,8 +223,80 @@
             <th>street3Discards</th>
             <th>handString</th>
             <th>actionString</th>
-
-
+            <!-- HandsActions -->
+            <th>id</th>
+            <th>handId</th>
+            <th>playerId</th>
+            <th>street</th>
+            <th>actionNo</th>
+            <th>streetActionNo</th>
+            <th>actionId</th>
+            <th>amount</th>
+            <th>raiseTo</th>
+            <th>amountCalled</th>
+            <th>numDiscarded</th>
+            <th>cardsDiscarded</th>
+            <th>allIn</th>
+            <!-- HandsPots -->
+            <th>id</th>
+            <th>handId</th>
+            <th>potId</th>
+            <th>boardId</th>
+            <th>hiLo</th>
+            <th>playerId</th>
+            <th>pot</th>
+            <th>collected</th>
+            <th>rake</th>
+            <!-- HandsStove -->
+            <th>id</th>
+            <th>handId</th>
+            <th>playerId</th>
+            <th>streetId</th>
+            <th>boardId</th>
+            <th>hiLo</th>
+            <th>rankId</th>
+            <th>value</th>
+            <th>cards</th>
+            <th>ev</th>
+            <!-- HandsStove -->
+            <th>id</th>
+            <th>tableName</th>
+            <th>siteHandNo</th>
+            <th>tourneyId</th>
+            <th>gametypeId</th>
+            <th>sessionId</th>
+            <th>fileId</th>
+            <th>startTime</th>
+            <th>importTime</th>
+            <th>seats</th>
+            <th>heroSeat</th>
+            <th>maxPosition</th>
+            <th>boardCard1</th>
+            <th>boardCard2</th>
+            <th>boardCard3</th>
+            <th>boardCard4</th>
+            <th>boardCard5</th>
+            <th>texture</th>
+            <th>runItTwice</th>
+            <th>playersVPI</th>
+            <th>playersAtStreet1</th>
+            <th>playersAtStreet2</th>
+            <th>playersAtStreet3</th>
+            <th>playersAtStreet4</th>
+            <th>playersAtShowdown</th>
+            <th>street0Raises</th>
+            <th>street1Raises</th>
+            <th>street2Raises</th>
+            <th>street3Raises</th>
+            <th>street4Raises</th>
+            <th>street0Pot</th>
+            <th>street1Pot</th>
+            <th>street2Pot</th>
+            <th>street3Pot</th>
+            <th>street4Pot</th>
+            <th>finalPot</th>
+            <th>comment</th>
+            <th>commentTs</th>
         </tr>
     </thead>
     <tbody> 
@@ -210,13 +312,94 @@
             <td>{{ handsPlayer[7] }}</td>
             <td>{{ handsPlayer[8] }}</td>
             <td>{{ handsPlayer[9] }}</td>
-            <td>{{ handsPlayer[10] }}</td>
-            <td>{{ handsPlayer[11] }}</td>
-            <td>{{ handsPlayer[12] }}</td>
-            <td>{{ handsPlayer[13] }}</td>
-            <td>{{ handsPlayer[14] }}</td>
-            <td>{{ handsPlayer[15] }}</td>
-            <td>{{ handsPlayer[16] }}</td>
+            <td><div class="card-images-row">
+                {% if handsPlayer[10] in decodeCardList %}
+                    {% set card_str = decodeCardList[handsPlayer[10]] %}
+                    {% set rank = card_str[:-1] %}
+                    {% set suit = card_str[-1] %}
+                    
+                    {% set card_image_url10 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                    <img src="{{ card_image_url10 }}" class="card-image" >
+                   
+                {% else %}
+                    
+                {% endif %}
+
+
+                {% if handsPlayer[11] in decodeCardList %}
+                {% set card_str = decodeCardList[handsPlayer[11]] %}
+                {% set rank = card_str[:-1] %}
+                {% set suit = card_str[-1] %}
+                
+                {% set card_image_url11 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                <img src="{{ card_image_url11 }}" class="card-image" >
+
+            {% else %}
+                
+            {% endif %}
+
+                {% if handsPlayer[12] in decodeCardList %}
+                {% set card_str = decodeCardList[handsPlayer[12]] %}
+                {% set rank = card_str[:-1] %}
+                {% set suit = card_str[-1] %}
+                
+                {% set card_image_url12 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                <img src="{{ card_image_url12 }}" class="card-image" >
+
+            {% else %}
+                
+            {% endif %}
+
+                {% if handsPlayer[13] in decodeCardList %}
+                {% set card_str = decodeCardList[handsPlayer[13]] %}
+                {% set rank = card_str[:-1] %}
+                {% set suit = card_str[-1] %}
+                
+                {% set card_image_url13 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                <img src="{{ card_image_url13 }}" class="card-image" >
+
+            {% else %}
+                
+            {% endif %}
+
+                {% if handsPlayer[14] in decodeCardList %}
+                {% set card_str = decodeCardList[handsPlayer[14]] %}
+                {% set rank = card_str[:-1] %}
+                {% set suit = card_str[-1] %}
+                
+                {% set card_image_url14 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                <img src="{{ card_image_url14 }}" class="card-image" >
+
+            {% else %}
+                
+            {% endif %}
+
+            
+                {% if handsPlayer[15] in decodeCardList %}
+                {% set card_str = decodeCardList[handsPlayer[15]] %}
+                {% set rank = card_str[:-1] %}
+                {% set suit = card_str[-1] %}
+                
+                {% set card_image_url15 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                <img src="{{ card_image_url15 }}" class="card-image" >
+
+            {% else %}
+                
+            {% endif %}
+
+                {% if handsPlayer[16] in decodeCardList %}
+                {% set card_str = decodeCardList[handsPlayer[16]] %}
+                {% set rank = card_str[:-1] %}
+                {% set suit = card_str[-1] %}
+                
+                {% set card_image_url = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                <img src="{{ card_image_url16 }}" class="card-image" >
+                
+            {% else %}
+                
+            {% endif %}
+           
+        </div></td>
             <td>{{ handsPlayer[17] }}</td>
             <td>{{ handsPlayer[18] }}</td>
             <td>{{ handsPlayer[19] }}</td>
@@ -365,6 +548,76 @@
             <td>{{ handsPlayer[162] }}</td>
             <td>{{ handsPlayer[163] }}</td>
             <td>{{ handsPlayer[164] }}</td>
+            <td>{{ handsPlayer[165] }}</td>
+            <td>{{ handsPlayer[166] }}</td>
+            <td>{{ handsPlayer[167] }}</td>
+            <td>{{ handsPlayer[168] }}</td>
+            <td>{{ handsPlayer[169] }}</td>
+            <td>{{ handsPlayer[170] }}</td>
+            <td>{{ handsPlayer[171] }}</td>
+            <td>{{ handsPlayer[172] }}</td>
+            <td>{{ handsPlayer[173] }}</td>
+            <td>{{ handsPlayer[174] }}</td>
+            <td>{{ handsPlayer[175] }}</td>
+            <td>{{ handsPlayer[176] }}</td>
+            <td>{{ handsPlayer[177] }}</td>
+            <td>{{ handsPlayer[178] }}</td>
+            <td>{{ handsPlayer[179] }}</td>
+            <td>{{ handsPlayer[180] }}</td>
+            <td>{{ handsPlayer[181] }}</td>
+            <td>{{ handsPlayer[182] }}</td>
+            <td>{{ handsPlayer[183] }}</td>
+            <td>{{ handsPlayer[184] }}</td>
+            <td>{{ handsPlayer[185] }}</td>
+            <td>{{ handsPlayer[186] }}</td>
+            <td>{{ handsPlayer[187] }}</td>
+            <td>{{ handsPlayer[188] }}</td>
+            <td>{{ handsPlayer[189] }}</td>
+            <td>{{ handsPlayer[190] }}</td>
+            <td>{{ handsPlayer[191] }}</td>
+            <td>{{ handsPlayer[192] }}</td>
+            <td>{{ handsPlayer[193] }}</td>
+            <td>{{ handsPlayer[194] }}</td>
+            <td>{{ handsPlayer[195] }}</td>
+            <td>{{ handsPlayer[196] }}</td>
+            <td>{{ handsPlayer[197] }}</td>
+            <td>{{ handsPlayer[198] }}</td>
+            <td>{{ handsPlayer[199] }}</td>
+            <td>{{ handsPlayer[200] }}</td>
+            <td>{{ handsPlayer[201] }}</td>
+            <td>{{ handsPlayer[202] }}</td>
+            <td>{{ handsPlayer[203] }}</td>
+            <td>{{ handsPlayer[204] }}</td>
+            <td>{{ handsPlayer[205] }}</td>
+            <td>{{ handsPlayer[206] }}</td>
+            <td>{{ handsPlayer[207] }}</td>
+            <td>{{ handsPlayer[208] }}</td>
+            <td>{{ handsPlayer[209] }}</td>
+            <td>{{ handsPlayer[210] }}</td>
+            <td>{{ handsPlayer[211] }}</td>
+            <td>{{ handsPlayer[212] }}</td>
+            <td>{{ handsPlayer[213] }}</td>
+            <td>{{ handsPlayer[214] }}</td>
+            <td>{{ handsPlayer[215] }}</td>
+            <td>{{ handsPlayer[216] }}</td>
+            <td>{{ handsPlayer[217] }}</td>
+            <td>{{ handsPlayer[218] }}</td>
+            <td>{{ handsPlayer[219] }}</td>
+            <td>{{ handsPlayer[220] }}</td>
+            <td>{{ handsPlayer[221] }}</td>
+            <td>{{ handsPlayer[222] }}</td>
+            <td>{{ handsPlayer[223] }}</td>
+            <td>{{ handsPlayer[224] }}</td>
+            <td>{{ handsPlayer[225] }}</td>
+            <td>{{ handsPlayer[226] }}</td>
+            <td>{{ handsPlayer[227] }}</td>
+            <td>{{ handsPlayer[228] }}</td>
+            <td>{{ handsPlayer[229] }}</td>
+            <td>{{ handsPlayer[230] }}</td>
+            <td>{{ handsPlayer[231] }}</td>
+            <td>{{ handsPlayer[232] }}</td>
+            <td>{{ handsPlayer[233] }}</td>
+            <td>{{ handsPlayer[234] }}</td>
         </tr>
         {% endfor %}
     </tbody>

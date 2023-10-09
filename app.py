@@ -66,12 +66,42 @@ def get_players_endpoint(request: Request,
   })
 
 @app.get("/players/{playerId}/hands", response_class=HTMLResponse)
-async def get_hands_players_api(playerId: int, request: Request):
-    
-    handsPlayers = get_hands_players(playerId)
-
-    
-    return templates.TemplateResponse("handsPlayers.html", {"request": request, "handsPlayers": handsPlayers})
+async def get_hands_players_api(
+    playerId: int,
+    request: Request,
+    tourney: Optional[bool] = False,
+    cash: Optional[bool] = False,
+    sort_by: str = None,
+):
+    handsPlayers = get_hands_players(playerId, tourney=tourney, cash=cash, sort_by=sort_by)
+    decodeCardList = {
+            1: '2h',  2: '3h',  3: '4h',  4: '5h',  5: '6h',
+            6: '7h',  7: '8h',  8: '9h',  9: 'Th',  10: 'Jh',
+            11: 'Qh', 12: 'Kh', 13: 'Ah',
+            14: '2d', 15: '3d', 16: '4d', 17: '5d', 18: '6d',
+            19: '7d', 20: '8d', 21: '9d', 22: 'Td', 23: 'Jd',
+            24: 'Qd', 25: 'Kd', 26: 'Ad',
+            27: '2c', 28: '3c', 29: '4c', 30: '5c', 31: '6c',
+            32: '7c', 33: '8c', 34: '9c', 35: 'Tc', 36: 'Jc',
+            37: 'Qc', 38: 'Kc', 39: 'Ac',
+            40: '2s', 41: '3s', 42: '4s', 43: '5s', 44: '6s',
+            45: '7s', 46: '8s', 47: '9s', 48: 'Ts', 49: 'Js',
+            50: 'Qs', 51: 'Ks', 52: 'As'
+        }
+    # Define which columns to hide based on conditions
+    hideColumnX = True  # Set to True if you want to hide column X
+    if cash:
+        return templates.TemplateResponse(
+            "handsPlayers_cash.html", {"request": request, "handsPlayers": handsPlayers, "hideColumnX": hideColumnX}
+        )
+    elif tourney:
+        return templates.TemplateResponse(
+            "handsPlayers_tourney.html", {"request": request, "handsPlayers": handsPlayers, "hideColumnX": hideColumnX}
+        )
+    else:
+        return templates.TemplateResponse(
+            "handsPlayers.html", {"request": request, "decodeCardList": decodeCardList , "handsPlayers": handsPlayers, "hideColumnX": hideColumnX}
+        )
 
 @app.get("/RingProfitAllHandsPlayerIdSite", response_class=HTMLResponse)
 async def get_ring_profit_all_hands_api(
