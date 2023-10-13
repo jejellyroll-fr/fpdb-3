@@ -92,11 +92,11 @@ async def get_hands_players_api(
     hideColumnX = True  # Set to True if you want to hide column X
     if cash:
         return templates.TemplateResponse(
-            "handsPlayers_cash.html", {"request": request, "handsPlayers": handsPlayers, "hideColumnX": hideColumnX}
+            "handsPlayers_cash.html", {"request": request,"decodeCardList": decodeCardList , "handsPlayers": handsPlayers, "hideColumnX": hideColumnX}
         )
     elif tourney:
         return templates.TemplateResponse(
-            "handsPlayers_tourney.html", {"request": request, "handsPlayers": handsPlayers, "hideColumnX": hideColumnX}
+            "handsPlayers_tourney.html", {"request": request,"decodeCardList": decodeCardList , "handsPlayers": handsPlayers, "hideColumnX": hideColumnX}
         )
     else:
         return templates.TemplateResponse(

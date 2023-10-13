@@ -3,6 +3,7 @@ from base_model import *
 import Configuration
 import pathlib
 import math
+import itertools
 
 DATABASE = pathlib.Path(Configuration.CONFIG_PATH, "database", "fpdb.db3")
 
@@ -291,13 +292,11 @@ def get_hands_players(player_id, tourney=False, cash=False, sort_by=None):
     query = """
     SELECT
         HP.*,
-        HA.*,
         HPots.*,
         HStove.*,
         H.*
     FROM HandsPlayers AS HP
     LEFT JOIN Hands AS H ON HP.handId = H.id
-    LEFT JOIN HandsActions AS HA ON HP.handId = HA.handId
     LEFT JOIN HandsPots AS HPots ON HP.handId = HPots.handId
     LEFT JOIN HandsStove AS HStove ON HP.handId = HStove.handId
     WHERE HP.playerId = ?
