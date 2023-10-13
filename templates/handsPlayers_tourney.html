@@ -5,6 +5,41 @@
       <!-- Add Bootstrap CSS -->
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
       <link rel="stylesheet" href="styles.css">
+      <style>
+        .card-images-row {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .card-image {
+            max-width: 30px;
+            margin-right: 5px; /* Add some margin between card images */
+        }
+    </style>
+      <script>
+        var encodeCardList = {
+            '2h': 1, '3h': 2, '4h': 3, '5h': 4, '6h': 5, '7h': 6, '8h': 7, '9h': 8, 'Th': 9, 'Jh': 10, 'Qh': 11, 'Kh': 12, 'Ah': 13,
+            '2d': 14, '3d': 15, '4d': 16, '5d': 17, '6d': 18, '7d': 19, '8d': 20, '9d': 21, 'Td': 22, 'Jd': 23, 'Qd': 24, 'Kd': 25, 'Ad': 26,
+            '2c': 27, '3c': 28, '4c': 29, '5c': 30, '6c': 31, '7c': 32, '8c': 33, '9c': 34, 'Tc': 35, 'Jc': 36, 'Qc': 37, 'Kc': 38, 'Ac': 39,
+            '2s': 40, '3s': 41, '4s': 42, '5s': 43, '6s': 44, '7s': 45, '8s': 46, '9s': 47, 'Ts': 48, 'Js': 49, 'Qs': 50, 'Ks': 51, 'As': 52,
+            '  ': 0
+        };
+        var decodeCardList = {
+            1: '2h',  2: '3h',  3: '4h',  4: '5h',  5: '6h',
+            6: '7h',  7: '8h',  8: '9h',  9: 'Th',  10: 'Jh',
+            11: 'Qh', 12: 'Kh', 13: 'Ah',
+            14: '2d', 15: '3d', 16: '4d', 17: '5d', 18: '6d',
+            19: '7d', 20: '8d', 21: '9d', 22: 'Td', 23: 'Jd',
+            24: 'Qd', 25: 'Kd', 26: 'Ad',
+            27: '2c', 28: '3c', 29: '4c', 30: '5c', 31: '6c',
+            32: '7c', 33: '8c', 34: '9c', 35: 'Tc', 36: 'Jc',
+            37: 'Qc', 38: 'Kc', 39: 'Ac',
+            40: '2s', 41: '3s', 42: '4s', 43: '5s', 44: '6s',
+            45: '7s', 46: '8s', 47: '9s', 48: 'Ts', 49: 'Js',
+            50: 'Qs', 51: 'Ks', 52: 'As',
+            0: '  '
+        };
+    </script>
     </head>
     <body class="bg-dark">
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -25,16 +60,231 @@
         <div class="container">
           <h1 class="text-light">Hands Players</h1>
           <div class="table-responsive">
-            <table class="table table-dark table-striped">
+            <table class="table table-dark table-striped table-sm">
                 <thead>
         <tr>
-            <th>tourneyId</th>
+            <!-- hansplayers -->
+            
+            <th>handId</th>
+            
+            <th>position</th>
+
+            <th>cards</th>
+           
+
+            <th>winnings</th>
+
+            <th>siteHandNo</th>
+
+            <th>gametypeId</th>
+
+
+            <th>startTime</th>
+            
+            <th>seats</th>
+           
+            <th>boardCards</th>
+
+
+            <th>runItTwice</th>
+            
+            <th>finalPot</th>
+          
         </tr>
     </thead>
     <tbody> 
         {% for handsPlayer in handsPlayers %}
         <tr>
-            <td>{{ handsPlayer[200] }}</td>
+            
+            <td>{{ handsPlayer[1] }}</td>
+            
+            <td>{{ handsPlayer[7] }}</td>
+
+            <td><div class="card-images-row">
+                {% if handsPlayer[10] in decodeCardList %}
+                        {% set card_str = decodeCardList[handsPlayer[10]] %}
+                        {% set rank = card_str[:-1] %}
+                        {% set suit = card_str[-1] %}
+                    
+                        {% set card_image_url10 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                        <img src="{{ card_image_url10 }}" class="card-image" >
+                   
+                    {% else %}
+                    
+                    {% endif %}
+                
+
+                {% if handsPlayer[11] in decodeCardList %}
+                        {% set card_str = decodeCardList[handsPlayer[11]] %}
+                        {% set rank = card_str[:-1] %}
+                        {% set suit = card_str[-1] %}
+                    
+                        {% set card_image_url11 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                        <img src="{{ card_image_url11 }}" class="card-image" >
+                   
+                    {% else %}
+                    
+                    {% endif %}
+                
+                {% if handsPlayer[12] in decodeCardList %}
+                        {% set card_str = decodeCardList[handsPlayer[12]] %}
+                        {% set rank = card_str[:-1] %}
+                        {% set suit = card_str[-1] %}
+                    
+                        {% set card_image_url12 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                        <img src="{{ card_image_url12 }}" class="card-image" >
+                   
+                    {% else %}
+                    
+                    {% endif %}
+                
+                {% if handsPlayer[13] in decodeCardList %}
+                        {% set card_str = decodeCardList[handsPlayer[13]] %}
+                        {% set rank = card_str[:-1] %}
+                        {% set suit = card_str[-1] %}
+                    
+                        {% set card_image_url13 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                        <img src="{{ card_image_url13 }}" class="card-image" >
+                   
+                    {% else %}
+                    
+                    {% endif %}
+                
+                {% if handsPlayer[14] in decodeCardList %}
+                        {% set card_str = decodeCardList[handsPlayer[14]] %}
+                        {% set rank = card_str[:-1] %}
+                        {% set suit = card_str[-1] %}
+                    
+                        {% set card_image_url14 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                        <img src="{{ card_image_url14 }}" class="card-image" >
+                   
+                    {% else %}
+                    
+                    {% endif %}
+                
+            
+                {% if handsPlayer[15] in decodeCardList %}
+                        {% set card_str = decodeCardList[handsPlayer[15]] %}
+                        {% set rank = card_str[:-1] %}
+                        {% set suit = card_str[-1] %}
+                    
+                        {% set card_image_url15 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                        <img src="{{ card_image_url15 }}" class="card-image" >
+                   
+                    {% else %}
+                    
+                    {% endif %}
+                
+                {% if handsPlayer[16] in decodeCardList %}
+                        {% set card_str = decodeCardList[handsPlayer[16]] %}
+                        {% set rank = card_str[:-1] %}
+                        {% set suit = card_str[-1] %}
+                    
+                        {% set card_image_url = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                        <img src="{{ card_image_url16 }}" class="card-image" >
+                   
+                    {% else %}
+                    
+                    {% endif %}
+                           
+        </div></td>
+          
+
+           
+        <td>{{ handsPlayer[33] / 100 }}</td>
+
+
+
+            
+            <td>{{ handsPlayer[186] }}</td>
+
+            <td>{{ handsPlayer[188] }}</td>
+
+           
+            <td>{{ handsPlayer[191] }}</td>
+           
+            <td>{{ handsPlayer[193] }}</td>
+          
+           
+            <td><div class="card-images-row">
+                {% if handsPlayer[196] in decodeCardList %}
+                        {% set card_str = decodeCardList[handsPlayer[196]] %}
+                        {% set rank = card_str[:-1] %}
+                        {% set suit = card_str[-1] %}
+                    
+                        {% set card_image_url196 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                        <img src="{{ card_image_url196 }}" class="card-image" >
+                   
+                    {% else %}
+                    
+                    {% endif %}
+                {% if handsPlayer[197] in decodeCardList %}
+                    {% set card_str = decodeCardList[handsPlayer[197]] %}
+                    {% set rank = card_str[:-1] %}
+                    {% set suit = card_str[-1] %}
+                
+                    {% set card_image_url197 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                    <img src="{{ card_image_url197 }}" class="card-image" >
+               
+                {% else %}
+                
+                {% endif %}    
+                {% if handsPlayer[198] in decodeCardList %}
+                    {% set card_str = decodeCardList[handsPlayer[198]] %}
+                    {% set rank = card_str[:-1] %}
+                    {% set suit = card_str[-1] %}
+                
+                    {% set card_image_url198 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                    <img src="{{ card_image_url198 }}" class="card-image" >
+               
+                {% else %}
+                
+                {% endif %}                 
+                {% if handsPlayer[199] in decodeCardList %}
+                    {% set card_str = decodeCardList[handsPlayer[199]] %}
+                    {% set rank = card_str[:-1] %}
+                    {% set suit = card_str[-1] %}
+                
+                    {% set card_image_url199 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                    <img src="{{ card_image_url199 }}" class="card-image" >
+               
+                {% else %}
+                
+                {% endif %}                 
+                {% if handsPlayer[200] in decodeCardList %}
+                    {% set card_str = decodeCardList[handsPlayer[200]] %}
+                    {% set rank = card_str[:-1] %}
+                    {% set suit = card_str[-1] %}
+                
+                    {% set card_image_url200 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                    <img src="{{ card_image_url200 }}" class="card-image" >
+               
+                {% else %}
+                
+                {% endif %}                    
+                
+                
+
+            
+            </div></td>
+            
+            
+
+
+
+            <td>
+                {% if handsPlayer[202] == 0 %}
+                    {% set runit = 'No' %}
+                    {{ runit }}
+                {% else %}
+                    {% set runit2 = 'Yes' %}
+                    {{ runit2 }}
+                {% endif %}  
+            </td>
+          
+            <td>{{ handsPlayer[217] / 100}}</td>
+            
+         
         </tr>
         {% endfor %}
     </tbody>
