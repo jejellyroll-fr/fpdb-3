@@ -5,6 +5,31 @@
       <!-- Add Bootstrap CSS -->
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
       <link rel="stylesheet" href="styles.css">
+
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+
+      <script>
+$(document).ready(function() {
+    $('#my-table').DataTable({
+        searching: false,
+        ordering: true,
+        paging: false,
+        lengthChange: true,
+        pageLength: 10,
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'
+        ]
+    });
+});
+
+
+
+
+
+
+    </script>
       <style>
         .card-images-row {
             display: flex;
@@ -60,38 +85,24 @@
         <div class="container">
           <h1 class="text-light">Hands Players</h1>
           <div class="table-responsive">
-            <table class="table table-dark table-striped table-sm">
+            <table class="table table-dark table-striped table-sm" id="my-table" data-table>
                 <thead>
-        <tr>
-            <!-- hansplayers -->
-            
-            <th>handId</th>
-            
-            <th>position</th>
-
-            <th>cards</th>
-           
-
-            <th>winnings</th>
-
-            <th>siteHandNo</th>
-
-            <th>gametypeId</th>
-
-
-            <th>startTime</th>
-            
-            <th>seats</th>
-           
-            <th>boardCards</th>
-
-
-            <th>runItTwice</th>
-            
-            <th>finalPot</th>
-          
-        </tr>
-    </thead>
+                    <tr>
+                        <!-- hansplayers -->
+                        <th data-sortable data-filter>handId </th>
+                        <th data-sortable data-filter>position</th>
+                        <th data-sortable data-filter>cards</th>
+                        <th data-sortable data-filter>winnings</th>
+                        <th data-sortable data-filter>siteHandNo</th>
+                        <th data-sortable data-filter>gametypeId</th>
+                        <th data-sortable data-filter>startTime</th>
+                        <th data-sortable data-filter>seats</th>
+                        <th data-sortable data-filter>boardCards</th>
+                        <th data-sortable data-filter>runItTwice</th>
+                        <th data-sortable data-filter>finalPot</th>
+                    </tr>
+                   
+                </thead>
     <tbody> 
         {% for handsPlayer in handsPlayers %}
         <tr>
