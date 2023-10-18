@@ -98,8 +98,10 @@ class PokerStars(HandHistoryConverter):
                           'Omaha Hi/Lo' : ('hold','omahahilo'),
                           'OMAHA HI/LO' : ('hold','omahahilo'),
                          '5 Card Omaha' : ('hold', '5_omahahi'),
+                         'Omaha 5 Cards': ('hold', '5_omahahi'),
                    '5 Card Omaha Hi/Lo' : ('hold', '5_omaha8'),
                          '6 Card Omaha' : ('hold', '6_omahahi'),
+                         'Omaha 6 Cards': ('hold', '6_omahahi'),
                            'Courchevel' : ('hold', 'cour_hi'),
                      'Courchevel Hi/Lo' : ('hold', 'cour_hilo'),
                                  'Razz' : ('stud','razz'), 
@@ -129,7 +131,7 @@ class PokerStars(HandHistoryConverter):
 
     # Static regexes
     re_GameInfo     = re.compile(u"""
-          (?P<SITE>PokerStars|POKERSTARS|Hive\sPoker|Full\sTilt|PokerMaster|Run\sIt\sOnce\sPoker|BetOnline|PokerBros)(?P<TITLE>\sGame|\sHand|\sHome\sGame|\sHome\sGame\sHand|Game|\s(Zoom|Rush)\sHand|\sGAME)\s\#(?P<HID>[0-9]+):\s+
+          (?P<SITE>PokerStars|POKERSTARS|Hive\sPoker|Full\sTilt|PokerMaster|Run\sIt\sOnce\sPoker|BetOnline|PokerBros|MPLPoker)(?P<TITLE>\sGame|\sHand|\sHome\sGame|\sHome\sGame\sHand|Game|\s(Zoom|Rush)\sHand|\sGAME)\s\#(?P<HID>[0-9]+):\s+
           (\{.*\}\s+)?((?P<TOUR>((Zoom|Rush)\s)?(Tournament|TOURNAMENT))\s\#                # open paren of tournament info
           (?P<TOURNO>\d+),\s(Table\s\#(?P<HIVETABLE>\d+),\s)?
           # here's how I plan to use LS
@@ -139,7 +141,7 @@ class PokerStars(HandHistoryConverter):
           # close paren of tournament info
           (?P<MIXED>HORSE|8\-Game|8\-GAME|HOSE|Mixed\sOmaha\sH/L|Mixed\sHold\'em|Mixed\sPLH/PLO|Mixed\sNLH/PLO|Mixed\sOmaha|Triple\sStud)?\s?\(?
           (?P<SPLIT>Split)?\s?
-          (?P<GAME>Hold\'em|HOLD\'EM|Hold\'em|6\+\sHold\'em|Razz|RAZZ|Fusion|7\sCard\sStud|7\sCARD\sSTUD|7\sCard\sStud\sHi/Lo|7\sCARD\sSTUD\sHI/LO|Omaha|OMAHA|Omaha\sHi/Lo|OMAHA\sHI/LO|Badugi|Triple\sDraw\s2\-7\sLowball|Single\sDraw\s2\-7\sLowball|5\sCard\sDraw|(5|6)\sCard\sOmaha(\sHi/Lo)?|Courchevel(\sHi/Lo)?)\s
+          (?P<GAME>Hold\'em|HOLD\'EM|Hold\'em|6\+\sHold\'em|Razz|RAZZ|Fusion|7\sCard\sStud|7\sCARD\sSTUD|7\sCard\sStud\sHi/Lo|7\sCARD\sSTUD\sHI/LO|Omaha|OMAHA|Omaha\sHi/Lo|OMAHA\sHI/LO|Badugi|Triple\sDraw\s2\-7\sLowball|Single\sDraw\s2\-7\sLowball|5\sCard\sDraw|(5|6)\sCard\sOmaha(\sHi/Lo)?|Omaha\s(5|6)\sCards|Courchevel(\sHi/Lo)?)\s
           (?P<LIMIT>No\sLimit|NO\sLIMIT|Fixed\sLimit|Limit|LIMIT|Pot\sLimit|POT\sLIMIT|Pot\sLimit\sPre\-Flop,\sNo\sLimit\sPost\-Flop)\)?,?\s
           (-\s)?
           (?P<SHOOTOUT>Match.*,\s)?
@@ -166,13 +168,14 @@ class PokerStars(HandHistoryConverter):
           re.MULTILINE|re.VERBOSE)
 
     re_HandInfo     = re.compile("""
-          \s?Table\s(ID\s)?\'(?P<TABLE>.+?)\'\s
+          \s?Table\s(ID\s)?\'(?P<TABLE>.+?)\'(\(\d+\))?\s
           ((?P<MAX>\d+)-[Mm]ax\s)?
           (?P<PLAY>\(Play\sMoney\)\s)?
+          (\(Real\sMoney\)\s)?
           (Seat\s\#(?P<BUTTON>\d+)\sis\sthe\sbutton)?""", 
           re.MULTILINE|re.VERBOSE)
 
-    re_Identify     = re.compile(u'(PokerStars|POKERSTARS|Hive\sPoker|Full\sTilt|PokerMaster|Run\sIt\sOnce\sPoker|BetOnline|PokerBros)(\sGame|\sHand|\sHome\sGame|\sHome\sGame\sHand|Game|\s(Zoom|Rush)\sHand|\sGAME)\s\#\d+:')
+    re_Identify     = re.compile(u'(PokerStars|POKERSTARS|Hive\sPoker|Full\sTilt|PokerMaster|Run\sIt\sOnce\sPoker|BetOnline|PokerBros|MPLPoker)(\sGame|\sHand|\sHome\sGame|\sHome\sGame\sHand|Game|\s(Zoom|Rush)\sHand|\sGAME)\s\#\d+:')
     re_SplitHands   = re.compile('(?:\s?\n){2,}')
     re_TailSplitHands   = re.compile('(\n\n\n+)')
     re_Button       = re.compile('Seat #(?P<BUTTON>\d+) is the button', re.MULTILINE)
