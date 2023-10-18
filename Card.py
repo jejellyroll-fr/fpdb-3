@@ -57,6 +57,7 @@ games = {  # base, category
     '5_omahahi': ('hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]),
     '6_omahahi': ('hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 6)]),
     '5_omaha8': ('hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]),
+    '6_omaha8': ('hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 6)]),
     'cour_hi': ('hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]),
     'cour_hilo': ('hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]),
     '5_studhi': ('stud', 'holdem', 'h', {'SECOND': 0, 'THIRD': 1, 'FOURTH': 2, 'FIFTH': 3}, 'FIFTH',
