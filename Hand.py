@@ -718,7 +718,9 @@ class Hand(object):
                 
             street = 'BLAH'
 
-            if self.gametype['base'] == 'hold':
+            if self.gametype['category'] == 'aof_omaha':
+                street = 'FLOP'
+            elif self.gametype['base'] == 'hold':
                 street = 'PREFLOP'
             elif self.gametype['base'] == 'draw':
                 street = 'DEAL'
@@ -1123,6 +1125,11 @@ class HoldemOmahaHand(Hand):
             self.discardStreets = ['PREFLOP']
         self.communityStreets = ['FLOP', 'TURN', 'RIVER']
         self.actionStreets = ['BLINDSANTES','PREFLOP','FLOP','TURN','RIVER']
+        if gametype['category']=='aof_omaha':
+            self.allStreets = ['BLINDSANTES','FLOP','TURN','RIVER']
+            self.holeStreets = ['FLOP']
+            self.communityStreets = ['FLOP', 'TURN', 'RIVER']
+            self.actionStreets = ['BLINDSANTES','FLOP','TURN','RIVER']
         Hand.__init__(self, self.config, sitename, gametype, handText, builtFrom = "HHC")
         self.sb = gametype['sb']
         self.bb = gametype['bb']
@@ -1183,7 +1190,9 @@ class HoldemOmahaHand(Hand):
             if shown:  self.shown.add(player)
             if mucked: self.mucked.add(player)
         else:
-            if len(cards) in (2, 3, 4, 6) or self.gametype['category'] in ('5_omahahi', '5_omaha8', 'cour_hi', 'cour_hilo', 'fusion'):  # avoid adding board by mistake (Everleaf problem)
+            if self.gametype['category'] == 'aof_omaha':
+                self.addHoleCards('FLOP', player, open=[], closed=cards, shown=shown, mucked=mucked, dealt=dealt)
+            elif len(cards) in (2, 3, 4, 6) or self.gametype['category'] in ('5_omahahi', '5_omaha8', 'cour_hi', 'cour_hilo', 'fusion'):  # avoid adding board by mistake (Everleaf problem)
                 self.addHoleCards('PREFLOP', player, open=[], closed=cards, shown=shown, mucked=mucked, dealt=dealt)
 
             elif len(cards) == 5:     # cards holds a winning hand, not hole cards
