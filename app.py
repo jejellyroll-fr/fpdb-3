@@ -5,6 +5,9 @@ from fastapi.staticfiles import StaticFiles
 from sql_request import *
 from base_model import *
 import math
+import Hand
+import Configuration
+import Database
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -64,6 +67,17 @@ def get_players_endpoint(request: Request,
     "name": name,
     "site": site  
   })
+
+
+@app.get("/hands/{handId}", response_class=HTMLResponse)
+async def replay_hand(request: Request, handId: int):
+    
+    config = Configuration.Config()
+    hand = Hand.hand_factory(handId, config, Database.Database(config, sql=None)) 
+    return templates.TemplateResponse("replayer.html", {"request": request, "hand": hand})
+
+
+
 
 @app.get("/players/{playerId}/hands", response_class=HTMLResponse)
 async def get_hands_players_api(
