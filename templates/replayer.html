@@ -4,24 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Poker Hand Replayer</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Add your CSS styles here -->
+      <!-- Add Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="styles.css"> 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+
 </head>
 <body>
+    {% set table_image_url = "/static/TableR.png" %}
     <div id="poker-table">
+        <img src="{{ table_image_url }}" class="table-image" >
+
+    <div id="hand">
+        {{hand}}
         <!-- Render poker table background and elements here -->
     </div>
-    
-    <div id="player-info">
-        <!-- Render player information, stacks, and actions here -->
-        <!-- Use Jinja templating to loop through players and display their details -->
+
     </div>
-    
     <div id="game-controls">
-        <button id="prev-button">Prev</button>
-        <button id="start-button">Start</button>
-        <button id="end-button">End</button>
-        <button id="play-pause-button">Play/Pause</button>
-        <button id="next-button">Next</button>
+        <button type="submit" class="btn btn-secondary" id="prev-button">Prev</button>
+        <button type="submit" class="btn btn-secondary" id="start-button">Start</button>
+        <button type="submit" class="btn btn-secondary" id="end-button">End</button>
+        <button type="submit" class="btn btn-secondary" id="play-pause-button">Play/Pause</button>
+        <button type="submit" class="btn btn-secondary" id="next-button">Next</button>
     </div>
     
     <div id="show-cards-checkbox">
@@ -30,8 +35,292 @@
     </div>
 
     <script>
-        // JavaScript code for handling user interactions and dynamic updates
-        // Add your JavaScript logic here to control the replayer
+            function renderCards(container, cards, x, y) {
+                // Assuming container is a DOM element where cards will be appended
+                const cardWidth = 100; // Adjust this value based on your card image size
+
+                for (const card of cards) {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.classList.add('card'); // You can define a CSS class for card styling
+                    const cardIndex = encodeCard(card);
+
+                    // Assuming that `this.cardImages[cardIndex]` contains image URLs for each card
+                    cardDiv.style.backgroundImage = `url(${this.cardImages[cardIndex]})`;
+                    cardDiv.style.left = x + 'px';
+                    cardDiv.style.top = y + 'px';
+
+                    // Adjust the positioning based on your requirements
+                    x += cardWidth / 2 - 15;
+
+                    // Append the card element to the specified container
+                    container.appendChild(cardDiv);
+                }
+            }
+
+            
+            class ICM {
+            constructor(stacks, payouts) {
+                this.stacks = stacks;
+                this.payouts = payouts;
+                this.equities = [];
+                this.prepare();
+            }
+
+            prepare() {
+                const total = this.stacks.reduce((acc, stack) => acc + stack, 0);
+
+                for (let i = 0; i < this.stacks.length; i++) {
+                this.equities.push(parseFloat(this.getEquities(total, i, 0).toFixed(4));
+                }
+            }
+
+            getEquities(total, player, depth) {
+                let eq = (this.stacks[player] / total) * this.payouts[depth];
+
+                if (depth + 1 < this.payouts.length) {
+                for (let i = 0; i < this.stacks.length; i++) {
+                    if (i !== player && this.stacks[i] > 0.0) {
+                    this.stacks[i] = 0.0;
+                    eq +=
+                        this.getEquities(total - this.stacks[i], player, depth + 1) *
+                        (this.stacks[i] / total);
+                    this.stacks[i] = this.stacks[i];
+                    }
+                }
+                }
+
+                return eq;
+            }
+            }
+
+
+
+            class TableState {
+            constructor(hand) {
+                this.pot = 0;
+                this.street = null;
+                this.board = hand.board;
+                this.renderBoard = new Set();
+                this.bet = 0;
+                this.called = 0;
+                this.gametype = hand.gametype.category;
+                this.gamebase = hand.gametype.base;
+                this.allin = false;
+                this.allinThisStreet = false;
+                this.newpot = 0;
+
+                this.players = {};
+
+                for (const items of hand.players) {
+                this.players[items[1]] = new Player(hand, items[1], items[2], parseInt(items[0]));
+                }
+            }
+
+            startPhase(phase) {
+                this.street = phase;
+                this.newpot = this.newpot;
+
+                if (phase === 'BLINDSANTES' || phase === 'PREFLOP' || phase === 'DEAL') {
+                return;
+                }
+
+                this.renderBoard.add(phase);
+
+                for (const player of Object.values(this.players)) {
+                player.justacted = false;
+                if (player.chips > this.called) {
+                    player.stack += player.chips - this.called;
+                    player.chips = this.called;
+                }
+
+                this.pot += player.chips;
+                player.chips = 0;
+
+                if (phase === 'THIRD' || phase === 'FOURTH' || phase === 'FIFTH' || phase === 'SIXTH' || phase === 'SEVENTH') {
+                    player.holecards = player.streetcards[this.street];
+                }
+                }
+
+                this.bet = 0;
+                this.called = 0;
+                this.allinThisStreet = false;
+            }
+
+            updateForAction(action) {
+                for (const player of Object.values(this.players)) {
+                player.justacted = false;
+                }
+
+                const player = this.players[action[0]];
+                player.action = action[1];
+                player.justacted = true;
+
+                if (action[1] === 'folds' || action[1] === 'checks') {
+                // Do nothing
+                } else if (action[1] === 'raises' || action[1] === 'bets') {
+                if (this.allinThisStreet) {
+                    this.called = this.bet;
+                } else {
+                    this.called = 0;
+                }
+                const diff = this.bet - player.chips;
+                this.bet += action[2];
+                player.chips += action[2] + diff;
+                player.stack -= action[2] + diff;
+                this.newpot += action[2] + diff;
+                } else if (action[1] === 'big blind') {
+                this.bet = action[2];
+                player.chips += action[2];
+                player.stack -= action[2];
+                this.newpot += action[2];
+                } else if (action[1] === 'calls' || action[1] === 'small blind' || action[1] === 'secondsb') {
+                player.chips += action[2];
+                player.stack -= action[2];
+                this.called = Math.max(this.called, player.chips);
+                this.newpot += action[2];
+                } else if (action[1] === 'both') {
+                player.chips += action[2];
+                player.stack -= action[2];
+                this.newpot += action[2];
+                } else if (action[1] === 'ante') {
+                this.pot += action[2];
+                player.stack -= action[2];
+                this.newpot += action[2];
+                } else if (action[1] === 'discards') {
+                player.action += ' ' + action[2];
+                if (action.length > 3) {
+                    player.holecards = player.streetcards[this.street];
+                }
+                } else if (action[1] === 'stands pat') {
+                // Do nothing
+                } else if (action[1] === 'bringin') {
+                player.chips += action[2];
+                player.stack -= action[2];
+                this.newpot += action[2];
+                } else {
+                console.log('Unhandled action: ' + action);
+                }
+
+                if (player.stack === 0) {
+                this.allinThisStreet = true;
+                }
+            }
+
+            endHand(collectees, returned) {
+                this.pot = 0;
+
+                for (const player of Object.values(this.players)) {
+                player.justacted = false;
+                player.chips = 0;
+
+                if (this.gamebase === 'draw') {
+                    player.holecards = player.streetcards[this.street];
+                }
+                }
+
+                for (const [name, amount] of Object.entries(collectees)) {
+                this.players[name].chips += amount;
+                this.players[name].action = 'collected';
+                this.players[name].justacted = true;
+                }
+
+                for (const [name, amount] of Object.entries(returned)) {
+                this.players[name].stack += amount;
+                }
+            }
+            }
+
+
+            class Player {
+                constructor(hand, name, stack, seat) {
+                    this.stack = parseFloat(stack);
+                    this.chips = 0;
+                    this.seat = seat;
+                    this.name = name;
+                    this.action = null;
+                    this.justacted = false;
+                    this.holecards = hand.join_holecards(name, true);
+                    this.streetcards = {};
+
+                    if (hand.gametype.base === 'draw') {
+                    for (const street of hand.actionStreets.slice(1)) {
+                        this.streetcards[street] = hand.join_holecards(name, true, street);
+                    }
+                    this.holecards = this.streetcards[hand.actionStreets[1]];
+                    } else if (hand.gametype.base === 'stud') {
+                    for (let i = 0; i < hand.actionStreets.slice(1).length; i++) {
+                        this.streetcards[hand.actionStreets[i + 1]] = this.holecards.slice(0, i + 3);
+                    }
+                    this.holecards = this.streetcards[hand.actionStreets[1]];
+                    }
+
+                    this.x = 0.5 * Math.cos((2 * this.seat * Math.PI) / hand.maxseats);
+                    this.y = 0.8 * Math.sin((2 * this.seat * Math.PI) / hand.maxseats);
+                }
+
+                setAction(action) {
+                    for (const player of Object.values(this.players)) {
+                    player.justacted = false;
+                    }
+
+                    this.action = action[1];
+                    this.justacted = true;
+
+                    if (this.action === 'folds' || this.action === 'checks') {
+                    // Do nothing
+                    } else if (this.action === 'raises' || this.action === 'bets') {
+                    if (this.allinThisStreet) {
+                        this.called = this.bet;
+                    } else {
+                        this.called = 0;
+                    }
+                    const diff = this.bet - this.chips;
+                    this.bet += action[2];
+                    this.chips += action[2] + diff;
+                    this.stack -= action[2] + diff;
+                    this.newpot += action[2] + diff;
+                    } else if (this.action === 'big blind') {
+                    this.bet = action[2];
+                    this.chips += action[2];
+                    this.stack -= action[2];
+                    this.newpot += action[2];
+                    } else if (this.action === 'calls' || this.action === 'small blind' || this.action === 'secondsb') {
+                    this.chips += action[2];
+                    this.stack -= action[2];
+                    this.called = Math.max(this.called, this.chips);
+                    this.newpot += action[2];
+                    } else if (this.action === 'both') {
+                    this.chips += action[2];
+                    this.stack -= action[2];
+                    this.newpot += action[2];
+                    } else if (this.action === 'ante') {
+                    this.pot += action[2];
+                    this.stack -= action[2];
+                    this.newpot += action[2];
+                    } else if (this.action === 'discards') {
+                    this.action += ' ' + action[2];
+                    if (action.length > 3) {
+                        // Must be hero as we have discard information.  Update holecards now.
+                        this.holecards = this.streetcards[this.street];
+                    }
+                    } else if (this.action === 'stands pat') {
+                    // Do nothing
+                    } else if (this.action === 'bringin') {
+                    this.chips += action[2];
+                    this.stack -= action[2];
+                    this.newpot += action[2];
+                    } else {
+                    console.log('Unhandled action: ' + action);
+                    }
+
+                    if (this.stack === 0) {
+                    this.allinThisStreet = true;
+                    }
+                }
+                }
+
+
+
     </script>
 </body>
 </html>

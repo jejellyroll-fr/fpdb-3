@@ -75,6 +75,7 @@
   <select name="site" class="form-select" aria-label="Default select example">
     <option value="Winamax">Winamax</option>
     <option value="PokerStars">PokerStars</option>
+    <option value="WinningPoker">WinningPoker</option>
     {% for site in sites %}
     <option value="{{site}}" {% if selected_site == site %}selected{% endif %}>{{site}}</option>
     {% endfor %}
