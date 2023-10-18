@@ -61,7 +61,7 @@ class iPoker(HandHistoryConverter):
     summaryInFile = True
 
     substitutions = {
-        'LS': r"\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|",  # Used to remove currency symbols from the hand history
+        'LS': r"\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|kr|",  # Used to remove currency symbols from the hand history
         'PLYR': r'(?P<PNAME>[^\"]+)',  # Regex pattern for matching player names
         'NUM': r'(.,\d+)|(\d+)',  # Regex pattern for matching numbers
         'NUM2': r'\b((?:\d{1,3}(?:\s\d{3})*)|(?:\d+))\b',  # Regex pattern for matching numbers with spaces
@@ -91,7 +91,7 @@ class iPoker(HandHistoryConverter):
                 'Omaha HiLow' : ('hold','omahahilo'),
             }
 
-    currencies = { u'€':'EUR', '$':'USD', '':'T$', u'£':'GBP', 'RSD': 'RSD'}
+    currencies = { u'€':'EUR', '$':'USD', '':'T$', u'£':'GBP', 'RSD': 'RSD', 'kr': 'SEK'}
     
     # translations from captured groups to fpdb info strings
     Lim_Blinds = {      '0.04': ('0.01', '0.02'),         '0.08': ('0.02', '0.04'),
