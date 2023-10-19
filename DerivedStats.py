@@ -1295,8 +1295,8 @@ class DerivedStats(object):
                     players[act[0]] = False
                 if act[1] == 'raises' or act[1] == 'completes': 
                     break
-            elif act[1]!='discards':
-                i+=1
+            elif act[1] not in ('discards', 'stands pat'):
+                i += 1
         return players
 
     def lastBetOrRaiser(self, actions, street):
