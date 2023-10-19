@@ -285,8 +285,8 @@ class KingsClub(HandHistoryConverter):
 
     def readHandInfo(self, hand):
         #First check if partial
-        if hand.handText.count('*** SUMMARY ***')!=1:
-            raise FpdbHandPartial(("Hand is not cleanly split into pre and post Summary"))
+        if hand.handText.count('*** SUMMARY *') != 1:
+            raise FpdbHandPartial("Hand is not cleanly split into pre and post Summary")
         
         info = {}
         m  = self.re_HandInfo.search(hand.handText,re.DOTALL)
@@ -338,7 +338,7 @@ class KingsClub(HandHistoryConverter):
             log.info('readButton: ' + ('not found'))
 
     def readPlayerStacks(self, hand):
-        pre, post = hand.handText.split('*** SUMMARY ***')
+        pre, post = hand.handText.split('*** SUMMARY *')
         m = self.re_PlayerInfo.finditer(pre)
         for a in m:
             hand.addPlayer(
@@ -423,10 +423,10 @@ class KingsClub(HandHistoryConverter):
                     hand.streets.update({'FLOP1': m1.group('FLOP1'),'FLOP2': m1.group('FLOP2')})
                 if hand.streets.get('TURN') is None:
                     hand.streets.update({'TURN1': m1.group('TURN1'),'TURN2': m1.group('TURN2')})
-                hand.streets.update({'RIVER1': m1.group('RIVER1'),'RIVER2': m1.group('RIVER2')})
+                hand.streets.update({'RIVER1': m1.group('RIVER1'), 'RIVER2': m1.group('RIVER2')})
             else:
-                m2 =  re.search(
-                    r"(\*\*\* RIVER \*\*\* \[(?P<FLOP>\S\S \S\S \S\S) (?P<TURN>\S\S)] (?P<RIVER>\[\S\S\].+(?=\*\*\* SUMMARY \*\*\*)|.+))", post,re.DOTALL)
+                m2 = re.search(
+                    r"(\*\*\* RIVER \*\*\* \[(?P<FLOP>\S\S \S\S \S\S) (?P<TURN>\S\S)] (?P<RIVER>\[\S\S\].+(?=\*\*\* SUMMARY \*\s?\*\*)|.+))", post, re.DOTALL)
                 if m2:
                     if hand.streets.get('FLOP') is None:
                         hand.streets.update({'FLOP': m2.group('FLOP')})
