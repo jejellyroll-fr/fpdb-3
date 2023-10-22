@@ -84,25 +84,27 @@ class KingsClub(HandHistoryConverter):
               'Limit':'fl'
               }
     games = {                          # base, category
-                               'Holdem' : ('hold','holdem'),
-                                'Omaha' : ('hold','omahahi'),
-                          'Omaha Hi-Lo' : ('hold','omahahilo'),
-                                'Big O' : ('hold', '5_omaha8'),
-                         'Omaha 5 Card' : ('hold', '5_omahahi'),
-                         'Omaha 6 Card' : ('hold', '6_omahahi'),
-                                 'Razz' : ('stud','razz'), 
-                      'Seven Card Stud' : ('stud','studhi'),
-                'Seven Card Stud Hi-Lo' : ('stud','studhilo'),
-                               'Badugi' : ('draw','badugi'),
-                      '2-7 Triple Draw' : ('draw','27_3draw'),
-                      '2-7 Single Draw' : ('draw','27_1draw'),
-                          '5 Card Draw' : ('draw','fivedraw'),
-                      'A-5 Triple Draw' : ('draw','a5_3draw'),
-                      'A-5 Single Draw' : ('draw','a5_1draw'),
-                             '2-7 Razz' : ('stud','27_razz'), 
-                              'Badacey' : ('draw','badacey'),
-                             'Badeucey' : ('draw','badeucey'),
-                         '2-7 Drawmaha' : ('draw','drawmaha') 
+                               'Holdem': ('hold', 'holdem'),
+                                'Omaha': ('hold', 'omahahi'),
+                          'Omaha Hi-Lo': ('hold', 'omahahilo'),
+                                'Big O': ('hold', '5_omaha8'),
+                         'Omaha 5 Card': ('hold', '5_omahahi'),
+                         'Omaha 6 Card': ('hold', '6_omahahi'),
+                    'Short Deck Holdem': ('hold', '6_holdem'),
+                                 'Razz': ('stud', 'razz'),
+                      'Seven Card Stud': ('stud', 'studhi'),
+                'Seven Card Stud Hi-Lo': ('stud', 'studhilo'),
+                               'Badugi': ('draw', 'badugi'),
+                      '2-7 Triple Draw': ('draw', '27_3draw'),
+                      '2-7 Single Draw': ('draw', '27_1draw'),
+                          '5 Card Draw': ('draw', 'fivedraw'),
+                      'A-5 Triple Draw': ('draw', 'a5_3draw'),
+                      'A-5 Single Draw': ('draw', 'a5_1draw'),
+                             '2-7 Razz': ('stud', '27_razz'),
+                              'Badacey': ('draw', 'badacey'),
+                             'Badeucey': ('draw', 'badeucey'),
+                         '2-7 Drawmaha': ('draw', 'drawmaha'),
+                             'Captain': ('draw', 'drawmaha')
                }
     mixes = {
                                  'HORSE': 'horse',
@@ -122,7 +124,7 @@ class KingsClub(HandHistoryConverter):
     re_GameInfo     = re.compile(u"""
           \#(?P<HID>[0-9]+):\s+
           (?P<LIMIT>No\sLimit|Limit|Pot\sLimit)\s
-          (?P<GAME>Holdem|Razz|Seven\sCard\sStud|Seven\sCard\sStud\sHi\-Lo|Omaha|Omaha\s(5|6)\sCard|Omaha\sHi\-Lo|Badugi|2\-7\sTriple\sDraw|2\-7\sSingle\sDraw|5\sCard\sDraw|Big\sO|2\-7\sRazz|Badacey|Badeucey|A\-5\sTriple\sDraw|A\-5\sSingle\sDraw|2\-7\sDrawmaha)\s
+          (?P<GAME>Holdem|Short\sDeck\sHoldem|Razz|Seven\sCard\sStud|Seven\sCard\sStud\sHi\-Lo|Omaha|Omaha\s(5|6)\sCard|Omaha\sHi\-Lo|Badugi|2\-7\sTriple\sDraw|2\-7\sSingle\sDraw|5\sCard\sDraw|Big\sO|2\-7\sRazz|Badacey|Badeucey|A\-5\sTriple\sDraw|A\-5\sSingle\sDraw|2\-7\sDrawmaha|Captain)\s
           \-\s(?P<SB>[,.0-9]+)/(?P<BB>[,.0-9]+)
         """ % substitutions, re.MULTILINE|re.VERBOSE)
 
@@ -191,6 +193,7 @@ class KingsClub(HandHistoryConverter):
     
     re_Rake = re.compile(r"^Rake\s(?P<RAKE>[,.0-9]+)$", re.MULTILINE)
     re_Split = re.compile(r"\*\*\* BOARD 1 - FLOP \*\*\*")
+    re_Table = re.compile(r"^\s?Table\s(ID\s)?\'(?P<TABLE>.+?)\'\s", re.MULTILINE|re.VERBOSE)
 
     def compilePlayerRegexs(self,  hand):
         players = set([player[1] for player in hand.players])
@@ -260,6 +263,10 @@ class KingsClub(HandHistoryConverter):
         else:
             info['split'] = False
 
+        m3 = self.re_Table.search(handText)
+        if m3 and 'AOF' in m3.group('TABLE'):
+            info['category'] = 'aof_omaha'
+
         if info['limitType'] == 'fl' and info['bb'] is not None:
             if info['type'] == 'ring':
                 try:
@@ -279,8 +286,8 @@ class KingsClub(HandHistoryConverter):
 
     def readHandInfo(self, hand):
         #First check if partial
-        if hand.handText.count('*** SUMMARY ***')!=1:
-            raise FpdbHandPartial(("Hand is not cleanly split into pre and post Summary"))
+        if hand.handText.count('*** SUMMARY *') != 1:
+            raise FpdbHandPartial("Hand is not cleanly split into pre and post Summary")
         
         info = {}
         m  = self.re_HandInfo.search(hand.handText,re.DOTALL)
@@ -332,7 +339,7 @@ class KingsClub(HandHistoryConverter):
             log.info('readButton: ' + ('not found'))
 
     def readPlayerStacks(self, hand):
-        pre, post = hand.handText.split('*** SUMMARY ***')
+        pre, post = hand.handText.split('*** SUMMARY *')
         m = self.re_PlayerInfo.finditer(pre)
         for a in m:
             hand.addPlayer(
@@ -388,11 +395,20 @@ class KingsClub(HandHistoryConverter):
                        r"(\*\*\* RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER>\[\S\S\].+))?", post,re.DOTALL)
             
         elif hand.gametype['base'] in ("stud"):
-            m =  re.search(r"(?P<THIRD>.+(?=\*\*\* 3RD STREET \*\*\*)|.+)"
-                           r"(\*\*\* 3RD STREET \*\*\*(?P<FOURTH>.+(?=\*\*\* 4TH STREET \*\*\*)|.+))?"
-                           r"(\*\*\* 4TH STREET \*\*\*(?P<FIFTH>.+(?=\*\*\* 5TH STREET \*\*\*)|.+))?"
-                           r"(\*\*\* 5TH STREET \*\*\*(?P<SIXTH>.+(?=\*\*\* 6TH STREET \*\*\*)|.+))?"
-                           r"(\*\*\* 6TH STREET \*\*\*(?P<SEVENTH>.+))?", hand.handText,re.DOTALL)
+            arr = hand.handText.split('*** 3RD STREET ***')
+            if self.re_BringIn.search(arr[0]):
+                m = re.search(r"(?P<THIRD>.+(?=\*\*\* 3RD STREET \*\*\*)|.+)"
+                               r"(\*\*\* 3RD STREET \*\*\*(?P<FOURTH>.+(?=\*\*\* 4TH STREET \*\*\*)|.+))?"
+                               r"(\*\*\* 4TH STREET \*\*\*(?P<FIFTH>.+(?=\*\*\* 5TH STREET \*\*\*)|.+))?"
+                               r"(\*\*\* 5TH STREET \*\*\*(?P<SIXTH>.+(?=\*\*\* 6TH STREET \*\*\*)|.+))?"
+                               r"(\*\*\* 6TH STREET \*\*\*(?P<SEVENTH>.+))?", hand.handText, re.DOTALL)
+            else:
+                m = re.search(r"(?P<ANTES>.+(?=\*\*\* 3RD STREET \*\*\*)|.+)"
+                               r"(\*\*\* 3RD STREET \*\*\*(?P<THIRD>.+(?=\*\*\* 4TH STREET \*\*\*)|.+))?"
+                               r"(\*\*\* 4TH STREET \*\*\*(?P<FOURTH>.+(?=\*\*\* 5TH STREET \*\*\*)|.+))?"
+                               r"(\*\*\* 5TH STREET \*\*\*(?P<FIFTH>.+(?=\*\*\* 6TH STREET \*\*\*)|.+))?"
+                               r"(\*\*\* 6TH STREET \*\*\*(?P<SIXTH>.+(?=\*\*\* 7TH STREET \*\*\*)|.+))?"
+                               r"(\*\*\* 7TH STREET \*\*\*(?P<SEVENTH>.+))?", hand.handText, re.DOTALL)
         elif hand.gametype['base'] in ("draw"):
             if hand.gametype['category'] in ('27_1draw', 'fivedraw'):
                 m =  re.search(r"(?P<PREDEAL>.+(?=\*\*\* 1ST BETTING ROUND \*\*\*)|.+)"
@@ -417,10 +433,10 @@ class KingsClub(HandHistoryConverter):
                     hand.streets.update({'FLOP1': m1.group('FLOP1'),'FLOP2': m1.group('FLOP2')})
                 if hand.streets.get('TURN') is None:
                     hand.streets.update({'TURN1': m1.group('TURN1'),'TURN2': m1.group('TURN2')})
-                hand.streets.update({'RIVER1': m1.group('RIVER1'),'RIVER2': m1.group('RIVER2')})
+                hand.streets.update({'RIVER1': m1.group('RIVER1'), 'RIVER2': m1.group('RIVER2')})
             else:
-                m2 =  re.search(
-                    r"(\*\*\* RIVER \*\*\* \[(?P<FLOP>\S\S \S\S \S\S) (?P<TURN>\S\S)] (?P<RIVER>\[\S\S\].+(?=\*\*\* SUMMARY \*\*\*)|.+))", post,re.DOTALL)
+                m2 = re.search(
+                    r"(\*\*\* RIVER \*\*\* \[(?P<FLOP>\S\S \S\S \S\S) (?P<TURN>\S\S)] (?P<RIVER>\[\S\S\].+(?=\*\*\* SUMMARY \*\s?\*\*)|.+))", post, re.DOTALL)
                 if m2:
                     if hand.streets.get('FLOP') is None:
                         hand.streets.update({'FLOP': m2.group('FLOP')})
@@ -449,19 +465,28 @@ class KingsClub(HandHistoryConverter):
             hand.addSTP(m.group('AMOUNT'))
 
     def readAntes(self, hand):
-        log.debug(("reading antes"))
+        log.debug("reading antes")
         m = self.re_Antes.finditer(hand.handText)
+        pnames = set([])
         for player in m:
             #~ logging.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
-            hand.addAnte(
-                player.group('PNAME'), 
-                str(Decimal(self.clearMoneyString(player.group('ANTE')))*100) if hand.tourNo is not None else self.clearMoneyString(player.group('ANTE'))
-            )
+            if player.group('PNAME') in pnames and hand.gametype['category'] == '6_holdem':
+                hand.addBlind(
+                    player.group('PNAME'),
+                    'button blind',
+                    str(Decimal(self.clearMoneyString(player.group('ANTE')))*100) if hand.tourNo is not None else self.clearMoneyString(player.group('ANTE'))
+                )
+            else:
+                hand.addAnte(
+                    player.group('PNAME'),
+                    str(Decimal(self.clearMoneyString(player.group('ANTE')))*100) if hand.tourNo is not None else self.clearMoneyString(player.group('ANTE'))
+                )
+            pnames.add(player.group('PNAME'))
     
     def readBringIn(self, hand):
         m = self.re_BringIn.search(hand.handText,re.DOTALL)
         if m:
-            #~ logging.debug("readBringIn: %s for %s" %(m.group('PNAME'),  m.group('BRINGIN')))
+            # ~ logging.debug("readBringIn: %s for %s" %(m.group('PNAME'),  m.group('BRINGIN')))
             hand.addBringIn(
                 m.group('PNAME'), 
                 str(Decimal(self.clearMoneyString(m.group('BRINGIN')))*100) if hand.tourNo is not None else self.clearMoneyString(m.group('BRINGIN'))
@@ -505,8 +530,9 @@ class KingsClub(HandHistoryConverter):
 #                    else:
                     newcards = [x for x in found.group('NEWCARDS').split(' ') if x != 'X']
                     if len(newcards)>0: 
-                        hand.hero = found.group('PNAME')  
-                        hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
+                        hand.hero = found.group('PNAME')
+                        _street = 'FLOP' if hand.gametype['category'] == 'aof_omaha' else street
+                        hand.addHoleCards(_street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
 
         for street, text in list(hand.streets.items()):
             if not text or street in ('PREFLOP', 'DEAL'): continue  # already done these
