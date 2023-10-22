@@ -28,12 +28,12 @@ from TourneySummary import *
 
 class iPokerSummary(TourneySummary):
     substitutions = {
-                     'LS'  : u"\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|",
+                     'LS'  : u"\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|kr|",
                      'PLYR': r'(?P<PNAME>[^"]+)',
                      'NUM' : r'.,0-9',
                      'NUM2': r'\b((?:\d{1,3}(?:\s\d{3})*)|(?:\d+))\b',  # Regex pattern for matching numbers with spaces
                     }
-    currencies = { u'€':'EUR', '$':'USD', '':'T$', u'£':'GBP', 'RSD': 'RSD'}
+    currencies = { u'€':'EUR', '$':'USD', '':'T$', u'£':'GBP', 'RSD': 'RSD', 'kr': 'SEK'}
 
     months = { 'Jan':1, 'Feb':2, 'Mar':3, 'Apr':4, 'May':5, 'Jun':6, 'Jul':7, 'Aug':8, 'Sep':9, 'Oct':10, 'Nov':11, 'Dec':12}
     
@@ -51,6 +51,7 @@ class iPokerSummary(TourneySummary):
     games = {              # base, category
                 '7 Card Stud' : ('stud','studhi'),
           '7 Card Stud Hi-Lo' : ('stud','studhilo'),
+            '7 Card Stud HiLow': ('stud', 'studhilo'),
                 '5 Card Stud' : ('stud','5_studhi'),
                      'Holdem' : ('hold','holdem'),
             'Six Plus Holdem' : ('hold','6_holdem'),
@@ -61,7 +62,7 @@ class iPokerSummary(TourneySummary):
     re_Identify = re.compile(u'<game\sgamecode=')
     re_client = re.compile(r'<client_version>(?P<CLIENT>.*?)</client_version>')
     re_GameType = re.compile(r"""
-            <gametype>(?P<GAME>((?P<CATEGORY>(5|7)\sCard\sStud(\sHi\-Lo)?|(Six\sPlus\s)?Holdem|Omaha(\sHi\-Lo)?)?\s?(?P<LIMIT>NL|SL|L|LZ|PL|БЛ|LP|No\slimit|Pot\slimit|Limit))|LH\s(?P<LSB>[%(NUM)s]+)(%(LS)s)?/(?P<LBB>[%(NUM)s]+)(%(LS)s)?.+?)
+            <gametype>(?P<GAME>((?P<CATEGORY>(5|7)\sCard\sStud(\sHi\-Lo)?(\sHiLow)?|(Six\sPlus\s)?Holdem|Omaha(\sHi\-Lo)?(\sHiLow)?)?\s?(?P<LIMIT>NL|SL|L|LZ|PL|БЛ|LP|No\slimit|Pot\slimit|Limit))|LH\s(?P<LSB>[%(NUM)s]+)(%(LS)s)?/(?P<LBB>[%(NUM)s]+)(%(LS)s)?.+?)
             (\s(%(LS)s)?(?P<SB>[%(NUM)s]+)(%(LS)s)?/(%(LS)s)?(?P<BB>[%(NUM)s]+))?(%(LS)s)?(\sAnte\s(%(LS)s)?(?P<ANTE>[%(NUM)s]+)(%(LS)s)?)?</gametype>\s+?
             <tablename>(?P<TABLE>.+)?</tablename>\s+?
             (<(tablecurrency|tournamentcurrency)>.*</(tablecurrency|tournamentcurrency)>\s+?)?

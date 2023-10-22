@@ -37,44 +37,45 @@ class Winning(HandHistoryConverter):
     sitename = "WinningPoker"
     filetype = "text"
     codepage = ("utf-16", "utf8", "cp1252")
-    siteId   = 24 # Needs to match id entry in Sites database
+    siteId = 24  # Needs to match id entry in Sites database
     sym = {
         'USD': "\$", 
         'T$': "", 
         "play": ""
     } 
     substitutions = {
-        'LEGAL_ISO' : "USD|TB|CP",      # legal ISO currency codes
-        'LS' : u"\$|", # legal currency symbols - Euro(cp1252, utf-8)
+        'LEGAL_ISO': "USD|TB|CP",      # legal ISO currency codes
+        'LS': u"\$|",  # legal currency symbols - Euro(cp1252, utf-8)
         'PLYR': r'(?P<PNAME>.+?)',
-        'NUM' :u".,\dK",
+        'NUM':u".,\dK",
         'CUR': u"(\$|)",
         'BRKTS': r'(\(button\)\s|\(small\sblind\)\s|\(big\sblind\)\s|\(button\)\s\(small\sblind\)\s|\(button\)\s\(big\sblind\)\s)?',
     }
     games1 = {# base, category
-        "Hold'em" : ('hold','holdem'),
-        "Six Plus Hold'em" : ('hold','6_holdem'),
-        'Omaha' : ('hold','omahahi'),
-        'Omaha HiLow' : ('hold','omahahilo'),
-        '5Card Omaha H/L' : ('hold', '5_omaha8'),
-        '5Card Omaha' : ('hold', '5_omaha'),
-        'Seven Cards Stud' : ('stud','studhi'),
-        'Seven Cards Stud HiLow' : ('stud','studhilo')
+        "Hold'em": ('hold', 'holdem'),
+        "Six Plus Hold'em": ('hold', '6_holdem'),
+        'Omaha': ('hold', 'omahahi'),
+        'Omaha HiLow': ('hold', 'omahahilo'),
+        '5Card Omaha H/L': ('hold', '5_omaha8'),
+        '5Card Omaha': ('hold', '5_omaha'),
+        'Seven Cards Stud': ('stud', 'studhi'),
+        'Seven Cards Stud HiLow': ('stud', 'studhilo')
     }
     games2 = {# base, category
-        "Holdem" : ('hold','holdem'),
-        'Omaha' : ('hold','omahahi'),
-        'Omaha H/L' : ('hold','omahahilo'),
-        '5Card Omaha H/L' : ('hold', '5_omaha8'),
-        '5Card Omaha' : ('hold', '5_omaha'),
+        "Holdem": ('hold', 'holdem'),
+        'Omaha': ('hold', 'omahahi'),
+        'Omaha H/L': ('hold', 'omahahilo'),
+        '5Card Omaha H/L': ('hold', '5_omaha8'),
+        '5Card Omaha': ('hold', '5_omaha'),
         #"Six Plus Hold'em" : ('hold','6_holdem'),
-        '7Stud' : ('stud','studhi'),
-        '7Stud H/L' : ('stud','studhilo')
+        '7Stud': ('stud', 'studhi'),
+        '7Stud H/L': ('stud', 'studhilo')
     }
     limits = { 
-          'No Limit':'nl', 
-          'Pot Limit':'pl', 
-          'Fixed Limit':'fl'
+          'No Limit': 'nl',
+          'Pot Limit': 'pl',
+          'Fixed Limit': 'fl',
+        'All-in or Fold Limit': 'al'
     }
     speeds = {
         'Turbo': 'Turbo',
@@ -161,7 +162,7 @@ class Winning(HandHistoryConverter):
           )?
           # close paren of tournament info
           (?P<GAME>Holdem|Omaha|Omaha\sH/L|5Card\sOmaha\sH/L|5Card\sOmaha|7Stud|7Stud\sH/L)
-          \((?P<LIMIT>No\sLimit|Fixed\sLimit|Pot\sLimit)\)\s\-\s
+          \((?P<LIMIT>No\sLimit|Fixed\sLimit|Pot\sLimit|All\-in\sor\sFold\sLimit)\)\s\-\s
           (Level\s(?P<LEVEL>[IVXLC\d]+)\s)?
           \(?                            # open paren of the stakes
           (?P<CURRENCY>%(LS)s|)?
@@ -339,12 +340,14 @@ class Winning(HandHistoryConverter):
             ["ring", "hold", "nl"],
             ["ring", "hold", "fl"],
             ["ring", "hold", "pl"],
+            ["ring", "hold", "al"],
 
             ["ring", "stud", "fl"],
             
             ["tour", "hold", "nl"],
             ["tour", "hold", "fl"],
             ["tour", "hold", "pl"],
+            ["tour", "hold", "al"],
             
             ["tour", "stud", "fl"]
         ]

@@ -42,6 +42,7 @@ class PokerStarsSummary(TourneySummary):
                    '5 Card Omaha Hi/Lo' : ('hold', '5_omaha8'),
                      '5 Card Omaha H/L' : ('hold', '5_omaha8'),
                          '6 Card Omaha' : ('hold', '6_omahahi'),
+                    '6 Card Omaha Hi/Lo': ('hold', '6_omaha8'),
                            'Courchevel' : ('hold', 'cour_hi'),
                      'Courchevel Hi/Lo' : ('hold', 'cour_hilo'),
                        'Courchevel H/L' : ('hold', 'cour_hilo'),
@@ -78,7 +79,7 @@ class PokerStarsSummary(TourneySummary):
 
     substitutions = {
                      'LEGAL_ISO' : "USD|EUR|GBP|CAD|FPP|SC|INR|CNY",    # legal ISO currency codes
-                            'LS' : u"\$|\xe2\x82\xac|\u20AC||\£|\u20b9|\¥|" # legal currency symbols - Euro(cp1252, utf-8)
+                            'LS' : u"\$|\xe2\x82\xac|\u20AC||\£|\u20b9|\¥|Rs\.\s|" # legal currency symbols - Euro(cp1252, utf-8)
                     }
     
     re_Identify = re.compile(u'((?P<SITE>PokerStars|Full\sTilt|Run\sIt\sOnce\sPoker)\sTournament\s\#\d+|<title>TOURNEYS:)')
@@ -457,6 +458,7 @@ class PokerStarsSummary(TourneySummary):
                 elif mg['CUR'] == u"€":  targetCurrency="EUR"
                 elif mg['CUR'] == u"£":  targetCurrency="GBP"
                 elif mg['CUR'] == u"₹":  targetCurrency="INR"
+                elif mg['CUR'] == "Rs. ": targetCurrency = "INR"
                 elif mg['CUR'] == u"¥": targetCurrency="CNY"
                 elif mg['CUR'] == "FPP": targetCurrency="PSFP"
                 elif mg['CUR'] == "SC": targetCurrency="PSFP"              
@@ -465,6 +467,7 @@ class PokerStarsSummary(TourneySummary):
         elif mg['CURRENCY'] == u"€":  self.buyinCurrency="EUR"
         elif mg['CURRENCY'] == u"£":  self.buyinCurrency="GBP"
         elif mg['CURRENCY'] == u"₹":  self.buyinCurrency="INR"
+        elif mg['CURRENCY'] == "Rs. ": self.buyinCurrency = "INR"
         elif mg['CURRENCY'] == u"¥":  self.buyinCurrency="CNY"
         elif mg['CURRENCY1'] == "FPP": self.buyinCurrency="PSFP"
         elif mg['CURRENCY1'] == "SC": self.buyinCurrency="PSFP"
@@ -503,6 +506,7 @@ class PokerStarsSummary(TourneySummary):
                 elif mg['CUR'] == u"€":  self.currency="EUR"
                 elif mg['CUR'] == u"£":  self.currency="GBP"
                 elif mg['CUR'] == u"₹":  self.currency="INR"
+                elif mg['CUR'] == "Rs. ": self.currency = "INR"
                 elif mg['CUR'] == u"¥":  self.currency="CNY"
                 elif mg['CUR1'] == "FPP": self.currency="PSFP"
                 elif mg['CUR1'] == "SC": self.currency="PSFP"
