@@ -10,12 +10,16 @@ import Configuration
 import Database
 import json
 from decimal import Decimal
+from datetime import datetime
 
-class DecimalEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Decimal):
-            return str(obj)
-        return super(DecimalEncoder, self).default(obj)
+class CustomEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, Decimal):
+            return str(o)
+        if isinstance(o, datetime):
+            return o.isoformat()
+        return super().default(o)
+
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -81,69 +85,70 @@ def get_players_endpoint(request: Request,
 async def replay_hand(request: Request, handId: int):
     
     config = Configuration.Config()
-    hand = Hand.hand_factory(handId, config, Database.Database(config, sql=None)) 
+    hand = Hand.hand_factory(handId, config, Database.Database(config, sql=None))
+    print(f"hand: {hand}")
     # Create a dictionary representation of the hand
     def hand_to_dict(hand):
         if hand is None:
             return None
         return {
-            "BB": hand.bb,
-            "SB": hand.sb,
-            "BUTTON POS": hand.buttonpos,
-            "HAND NO.": hand.handid,
-            "SITE": hand.sitename,
-            "TABLE NAME": hand.tablename,
-            "HERO": hand.hero,
-            "MAX SEATS": hand.maxseats,
-            "LEVEL": hand.level,
-            "MIXED": hand.mixed,
-            "LAST BET": hand.lastBet,
-            "ACTION STREETS": hand.actionStreets,
-            "STREETS": hand.streets,
-            #"ALL STREETS": hand.allStreets,
-            #"COMMUNITY STREETS": hand.communityStreets,
-            #"HOLE STREETS": hand.holeStreets,
-            #"COUNTED SEATS": hand.counted_seats,
-            #"DEALT": hand.dealt,
-            #"SHOWN": hand.shown,
-            #"MUCKED": hand.mucked,
-            #"TOTAL POT": hand.totalpot,
-            #"TOTAL COLLECTED": hand.totalcollected,
-            #"RAKE": hand.rake,
-            #"START TIME": hand.startTime,
-            #"TOURNAMENT NO": hand.tourNo,
-            #"TOURNEY ID": hand.tourneyId,
-            #"TOURNEY TYPE ID": hand.tourneyTypeId,
-            #"BUYIN": hand.buyin,
-            #"BUYIN CURRENCY": hand.buyinCurrency,
-            #"BUYIN CHIPS": hand.buyInChips,
-            #"FEE": hand.fee,
-            #"IS REBUY": hand.isRebuy,
-            #"IS ADDON": hand.isAddOn,
-            #"IS KO": hand.isKO,
-            #"KO BOUNTY": hand.koBounty,
-            #"IS MATRIX": hand.isMatrix,
-            #"IS SHOOTOUT": hand.isShootout,
-            #"PLAYERS": hand.players,
-            #"STACKS": hand.stacks,
-            #"POSTED": hand.posted,
-            # "POT": hand.pot,
-            #"SEATING": hand.seating,
-            "GAMETYPE": hand.gametype,
-            #"ACTION": hand.actions,
-            #"COLLECTEES": hand.collectees,
-            #"BETS": hand.bets,
-            #"BOARD": hand.board,
-            #"DISCARDS": hand.discards,
-            #"HOLECARDS": hand.holecards,
-            #"TOURNEYS PLAYER IDS": hand.tourneysPlayersIds
+            "bb": hand.bb,
+            "sb": hand.sb,
+            "buttonpos": hand.buttonpos,
+            "handid": hand.handid,
+            "site": hand.sitename,
+            "tablename": hand.tablename,
+            "hero": hand.hero,
+            "maxseats": hand.maxseats,
+            "level": hand.level,
+            "mixed": hand.mixed,
+            "lastBet": hand.lastBet,
+            "actionStreets": hand.actionStreets,
+            "streets": hand.streets,
+            "allStreets": hand.allStreets,
+            "communityStreets": hand.communityStreets,
+            "holeStreets": hand.holeStreets,
+            "counted_seats": hand.counted_seats,
+            "dealt": list(hand.dealt),
+            "shown": list(hand.shown),
+            "mucked": list(hand.mucked),
+            "totalpot": hand.totalpot,
+            "totalcollected": hand.totalcollected,
+            "rake": hand.rake,
+            "startTime": hand.startTime,
+            "tourNo": hand.tourNo,
+            "tourneyId": hand.tourneyId,
+            "tourneyTypeId": hand.tourneyTypeId,
+            "buyin": hand.buyin,
+            "buyinCurrency": hand.buyinCurrency,
+            "buyInChips": hand.buyInChips,
+            "fee": hand.fee,
+            "isRebuy": hand.isRebuy,
+            "isAddOn": hand.isAddOn,
+            "isKO": hand.isKO,
+            "koBounty": hand.koBounty,
+            "isMatrix": hand.isMatrix,
+            "isShootout": hand.isShootout,
+            "players": hand.players,
+            "stacks": hand.stacks,
+            "posted": hand.posted,
+            #"POT": hand.pot,
+            "seating": hand.seating,
+            "gametype": hand.gametype,
+            "actions": hand.actions,
+            "collectees": hand.collectees,
+            "bets": hand.bets,
+            "board": hand.board,
+            "discards": hand.discards,
+            "holecards": hand.holecards,
+            "tourneysPlayersIds": hand.tourneysPlayersIds
         }
 
     # Convert the hand object to a dictionary
     hand_dict = hand_to_dict(hand)
 
     # Serialize the dictionary to JSON
-    hand = json.dumps(hand_dict, cls=DecimalEncoder)
+    hand = json.dumps(hand_dict, cls=CustomEncoder)
     return templates.TemplateResponse("replayer.html", {"request": request, "hand": hand})
 
 

@@ -35,6 +35,111 @@
     </div>
 
     <script>
+
+                    const games = {
+                    'holdem': ['hold', 'holdem', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 2)]],
+                    '2_holdem': ['hold', null, 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 3)]],
+                    '6_holdem': ['hold', null, 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 2)]],
+                    'omahahi': ['hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
+                    'fusion': ['hold', 'fusion', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
+                    'omahahilo': ['hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
+                    'irish': ['hold', null, 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
+                    '5_omahahi': ['hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]],
+                    '6_omahahi': ['hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 6)]],
+                    '5_omaha8': ['hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]],
+                    '6_omaha8': ['hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 6)]],
+                    'cour_hi': ['hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]],
+                    'cour_hilo': ['hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]],
+                    'aof_omaha': ['hold', 'omaha', 'h', {'FLOP': 0, 'TURN': 1, 'RIVER': 2}, 'RIVER', [(0, 4)]],
+                    '5_studhi': ['stud', 'holdem', 'h', {'SECOND': 0, 'THIRD': 1, 'FOURTH': 2, 'FIFTH': 3}, 'FIFTH',
+                                 [(0, 2), (0, 3), (0, 4), (0, 5)]],
+                    'razz': ['stud', null, 'l', {'THIRD': 0, 'FOURTH': 1, 'FIFTH': 2, 'SIXTH': 3, 'SEVENTH': 4}, 'SEVENTH',
+                             [(0, 3), (0, 4), (0, 5), (0, 6), (0, 7)]],
+                    'studhi': ['stud', '7stud', 'h', {'THIRD': 0, 'FOURTH': 1, 'FIFTH': 2, 'SIXTH': 3, 'SEVENTH': 4}, 'SEVENTH',
+                               [(0, 3), (0, 4), (0, 5), (0, 6), (0, 7)]],
+                    'studhilo': ['stud', '7stud8', 's', {'THIRD': 0, 'FOURTH': 1, 'FIFTH': 2, 'SIXTH': 3, 'SEVENTH': 4}, 'SEVENTH',
+                                 [(0, 3), (0, 4), (0, 5), (0, 6), (0, 7)]],
+                    '27_3draw': ['draw', 'lowball27', 'r', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
+                                 [(0, 5), (5, 10), (10, 15), (15, 20)]],
+                    'fivedraw': ['draw', 'holdem', 'h', {'DEAL': 0, 'DRAWONE': 1}, 'DRAWONE', [(0, 5), (5, 10)]],
+                    'badugi': ['draw', null, 'l', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
+                               [(0, 4), (5, 9), (10, 14), (15, 19)]],
+                    '27_1draw': ['draw', 'lowball27', 'r', {'DEAL': 0, 'DRAWONE': 1}, 'DRAWONE', [(0, 5), (5, 10)]],
+                    'a5_3draw': ['draw', 'lowball', 'l', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
+                                 [(0, 5), (5, 10), (10, 15), (15, 20)]],
+                    'a5_1draw': ['draw', 'lowball', 'l', {'DEAL': 0, 'DRAWONE': 1}, 'DRAWONE', [(0, 5), (5, 10)]],
+                    '27_razz': ['stud', 'lowball27', 'l', {'THIRD': 0, 'FOURTH': 1, 'FIFTH': 2, 'SIXTH': 3, 'SEVENTH': 4}, 'SEVENTH',
+                                [(0, 3), (0, 4), (0, 5), (0, 6), (0, 7)]],
+                    'badacey': ['draw', null, 's', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
+                                [(0, 5), (5, 10), (10, 15), (15, 20)]],
+                    'badeucey': ['draw', null, 's', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
+                                 [(0, 5), (5, 10), (10, 15), (15, 20)]],
+                    'drawmaha': ['draw', null, 's', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
+                                 [(0, 5), (5, 10), (10, 15), (15, 20)]]
+                };
+
+
+                function joinHoleCards(player, asList = false) {
+                const holeNo = games[hand.gametype.category][5][0][1];
+                const hcs = new Array(holeNo).fill('0x');
+
+                if (hand.gametype.category === 'fusion') {
+                    for (const street of hand.holeStreets) {
+                        if (player in Object.keys(hand.holecards[street])) {
+                            if (street === 'PREFLOP') {
+                                if (hand.holecards[street][player][1].length === 1) continue;
+                                for (let i = 0; i < 2; i++) {
+                                    hcs[i] = hand.holecards[street][player][1][i];
+                                    hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
+                                }
+                                try {
+                                    for (let i = 2; i < holeNo; i++) {
+                                        hcs[i] = hand.holecards[street][player][1][i];
+                                        hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
+                                    }
+                                } catch (error) {
+                                    console.log("Why did we get an index error?");
+                                }
+                            } else if (street === 'FLOP') {
+                                if (hand.holecards[street][player][1].length === 1) continue;
+                                hcs[2] = hand.holecards[street][player][0][0];
+                                hcs[2] = hcs[2].charAt(0).toUpperCase() + hcs[2].slice(1);
+                            } else if (street === 'TURN') {
+                                if (hand.holecards[street][player][1].length === 1) continue;
+                                hcs[3] = hand.holecards[street][player][0][0];
+                                hcs[3] = hcs[3].charAt(0).toUpperCase() + hcs[3].slice(1);
+                            }
+                        }
+                    }
+                } else {
+                    for (const street of hand.holeStreets) {
+                        if (player in Object.keys(hand.holecards[street])) {
+                            if (hand.holecards[street][player][1].length === 1) continue;
+                            for (let i = 0; i < 2; i++) {
+                                hcs[i] = hand.holecards[street][player][1][i];
+                                hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
+                            }
+                            try {
+                                for (let i = 2; i < holeNo; i++) {
+                                    hcs[i] = hand.holecards[street][player][1][i];
+                                    hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
+                                }
+                            } catch (error) {
+                                console.log("Why did we get an index error?");
+                            }
+                        }
+                    }
+                }
+
+                if (asList) {
+                    return hcs;
+                    consol.log(hcs);
+                } else {
+                    return hcs.join(" ");
+                    consol.log(hcs.join(" "));
+                }
+            }
+
             // Define the Player class
             class Player {
                 constructor(hand, name, stack, seat) {
@@ -44,7 +149,7 @@
                     this.name = name;
                     this.action = null;
                     this.justacted = false;
-                    this.holecards = hand.join_holecards(name, true);
+                    this.holecards = joinHoleCards(name, true);
                     this.streetcards = {};
 
                     if (hand.gametype.base === 'draw') {
@@ -260,9 +365,9 @@
             }
 
             // Create a JavaScript variable using the Python value
-            var handInfo = JSON.parse(document.getElementById("hand").getAttribute("data-hand"));
-            console.log(handInfo);
-            const tableState = new TableState(handInfo)
+            var hand = JSON.parse(document.getElementById("hand").getAttribute("data-hand"));
+            console.log(hand);
+            const tableState = new TableState(hand)
             console.log(tableState);
 
             var message = "Hello from JavaScript";
