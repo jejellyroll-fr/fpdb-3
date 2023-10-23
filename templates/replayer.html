@@ -4,23 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Poker Hand Replayer</title>
-      <!-- Add Bootstrap CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="styles.css"> 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <style>
+        /* Center and style the main content */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
 
+        /* Adjust styles for the poker table and game controls */
+        #poker-table {
+            text-align: center;
+            position: relative;
+        }
+
+        #game-controls {
+            margin-top: 20px;
+        }
+
+        /* Center the player positions */
+        .player {
+            position: absolute;
+            background-color: #007bff;
+            color: #fff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+        }
+    </style>
 </head>
 <body>
     {% set table_image_url = "/static/TableR.png" %}
     <div id="poker-table">
-        <img src="{{ table_image_url }}" class="table-image" >
-
-    <div id="hand" data-hand="{{ hand}}"></div>>
-
-        <!-- Render poker table background and elements here -->
+        <img src="{{ table_image_url }}" class="table-image">
     </div>
 
-    </div>
+    <div id="hand" data-hand="{{ hand }}"></div>
+
+    <!-- Render poker table background and elements here -->
+
     <div id="game-controls">
         <button type="submit" class="btn btn-secondary" id="prev-button">Prev</button>
         <button type="submit" class="btn btn-secondary" id="start-button">Start</button>
@@ -28,15 +58,54 @@
         <button type="submit" class="btn btn-secondary" id="play-pause-button">Play/Pause</button>
         <button type="submit" class="btn btn-secondary" id="next-button">Next</button>
     </div>
-    
+
     <div id="show-cards-checkbox">
         <label>Show Cards</label>
         <input type="checkbox" id="show-cards">
     </div>
 
     <script>
+            function updatePlayerPositions() {
+            // Calculate responsive player positions
+            const numPlayers = Object.keys(tableState.players).length;
+            const pokerTable = document.getElementById("poker-table");
+            const tableWidth = pokerTable.offsetWidth;
+            const tableHeight = pokerTable.offsetHeight;
 
-                    const games = {
+            const playerPositions = players(numPlayers, tableWidth, tableHeight);
+
+            // Loop through the player positions and update the divs
+            for (let i = 1; i <= numPlayers; i++) {
+                const playerDiv = document.querySelector(`#player-${i}`);
+                playerDiv.style.left = `${playerPositions[`x${i}`]}px`;
+                playerDiv.style.top = `${playerPositions[`y${i}`]}px`;
+            }
+        }
+            //create constants to distribute around the table oblong area the player if there are 2 to 10 players
+            const players = (numPlayers) => {
+                const playerPositions = {};
+                const tableWidth = 920; // Adjust the width of your table as needed
+                const tableHeight = 560; // Adjust the height of your table as needed
+
+                for (let i = 1; i <= numPlayers; i++) {
+                    const angle = (i - 1) * (360 / numPlayers);
+                    const radians = (angle * Math.PI) / 180;
+                    const x = tableWidth / 2 + tableWidth / 2 * Math.cos(radians);
+                    const y = tableHeight / 2 + tableHeight / 2 * Math.sin(radians);
+
+                    playerPositions[`x${i}`] = x;
+                    playerPositions[`y${i}`] = y;
+                }
+
+                return playerPositions;
+                };
+
+
+
+
+
+
+            const games = {
                     'holdem': ['hold', 'holdem', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 2)]],
                     '2_holdem': ['hold', null, 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 3)]],
                     '6_holdem': ['hold', null, 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 2)]],
@@ -79,7 +148,7 @@
                 };
 
 
-                function joinHoleCards(player, asList = false) {
+            function joinHoleCards(player, asList = false) {
                 const holeNo = games[hand.gametype.category][5][0][1];
                 const hcs = new Array(holeNo).fill('0x');
 
@@ -367,14 +436,55 @@
             // Create a JavaScript variable using the Python value
             var hand = JSON.parse(document.getElementById("hand").getAttribute("data-hand"));
             console.log(hand);
-            const tableState = new TableState(hand)
+            const tableState = new TableState(hand);
             console.log(tableState);
 
-            var message = "Hello from JavaScript";
-            console.log(message);
+            // Determine the number of players from the players object in tablestate
+            numPlayers = Object.keys(tableState.players).length;
+            console.log(numPlayers);
+            // Find the maximum seat number
+            const maxSeat = Math.max(...Object.values(tableState.players).map(player => player.seat));
+            console.log(maxSeat);
+
+            // Calculate missing seats
+            missing_seats = maxSeat - numPlayers;
+
+            // If there are missing seats, adjust the number of players
+            if (missing_seats > 0) {
+                numPlayers = maxSeat;
+            }
+            
+            playerPositions = players(numPlayers);
+            console.log(playerPositions);
 
 
 
+            // Loop through the player positions and create div elements for each player seat
+            for (let seat = 1; seat <= maxSeat; seat++) {
+                const player = Object.values(tableState.players).find(player => player.seat === seat);
+
+                // Check if a player with the current seat exists
+                if (player) {
+                    const playerDiv = document.createElement("div");
+                    playerDiv.classList.add("player", "position-absolute"); // Use Bootstrap's position-absolute class
+                    playerDiv.style.left = `${playerPositions[`x${seat}`]}px`;
+                    playerDiv.style.top = `${playerPositions[`y${seat}`]}px`;
+                    playerDiv.innerHTML = `<span class="badge bg-primary">${player.name}</span>`; // Display the player's name
+                    const pokerTable = document.getElementById("poker-table");
+                    pokerTable.appendChild(playerDiv);
+                }
+            }
+
+
+
+
+
+
+            // Handle window resize events for responsive player positions
+            window.addEventListener('resize', updatePlayerPositions);
+
+            // Initial call to set player positions
+            updatePlayerPositions();
 
 
 
