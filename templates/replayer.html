@@ -27,6 +27,23 @@
         #game-controls {
             margin-top: 20px;
         }
+        /* Add this CSS for centering cards and player name/stack */
+        .hole-cards-row {
+            display: flex;
+            justify-content: center; /* Center the cards horizontally */
+            align-items: center; /* Center the cards vertically */
+        }
+
+
+        /* Add this CSS to center-align the player's name and stack */
+        .player span.badge {
+            display: flex;
+            justify-content: center; /* Center the cards horizontally */
+            align-items: center; /* Center the cards vertically */
+            width: auto; /* Allow the badge width to adjust based on content */
+            height: auto; /* Allow the badge height to adjust based on content */
+        }
+
 
         /* Center the player positions */
         .player {
@@ -39,9 +56,17 @@
             text-align: center;
             line-height: 30px;
         }
+        .card-image-small {
+            width: 40px; 
+            height: 60px; 
+        }
+        .hole-cards-row {
+            display: flex;
+            gap: 0px;
+        }
     </style>
 </head>
-<body>
+<body class="bg-dark">
     {% set table_image_url = "/static/TableR.png" %}
     <div id="poker-table">
         <img src="{{ table_image_url }}" class="table-image">
@@ -435,16 +460,14 @@
 
             // Create a JavaScript variable using the Python value
             var hand = JSON.parse(document.getElementById("hand").getAttribute("data-hand"));
-            console.log(hand);
             const tableState = new TableState(hand);
-            console.log(tableState);
+            const holecards = hand.holecards;
 
             // Determine the number of players from the players object in tablestate
             numPlayers = Object.keys(tableState.players).length;
-            console.log(numPlayers);
+
             // Find the maximum seat number
             const maxSeat = Math.max(...Object.values(tableState.players).map(player => player.seat));
-            console.log(maxSeat);
 
             // Calculate missing seats
             missing_seats = maxSeat - numPlayers;
@@ -453,27 +476,84 @@
             if (missing_seats > 0) {
                 numPlayers = maxSeat;
             }
-            
+
             playerPositions = players(numPlayers);
-            console.log(playerPositions);
+
+            // Define a mapping of card ranks to values
+            const rankMap = {
+                '2': '2',
+                '3': '3',
+                '4': '4',
+                '5': '5',
+                '6': '6',
+                '7': '7',
+                '8': '8',
+                '9': '9',
+                'T': 't',
+                'J': 'j',
+                'Q': 'q',
+                'K': 'k',
+                'A': 'a'
+            };
 
 
 
-            // Loop through the player positions and create div elements for each player seat
-            for (let seat = 1; seat <= maxSeat; seat++) {
-                const player = Object.values(tableState.players).find(player => player.seat === seat);
+// Loop through the player positions and create div elements for each player seat
+for (let seat = 1; seat <= maxSeat; seat++) {
+    const player = Object.values(tableState.players).find(player => player.seat === seat);
 
-                // Check if a player with the current seat exists
-                if (player) {
-                    const playerDiv = document.createElement("div");
-                    playerDiv.classList.add("player", "position-absolute"); // Use Bootstrap's position-absolute class
-                    playerDiv.style.left = `${playerPositions[`x${seat}`]}px`;
-                    playerDiv.style.top = `${playerPositions[`y${seat}`]}px`;
-                    playerDiv.innerHTML = `<span class="badge bg-primary">${player.name}</span>`; // Display the player's name
-                    const pokerTable = document.getElementById("poker-table");
-                    pokerTable.appendChild(playerDiv);
+    // Check if a player with the current seat exists
+    if (player) {
+        const playerName = player.name;
+        let holeCardsHTML = '';
+
+        if (holecards.PREFLOP && holecards.PREFLOP[playerName]) {
+            // If hole cards are available for this player in PREFLOP
+            const holeCardsArray = holecards.PREFLOP[playerName][1];
+
+            // Convert the cards to images with reduced size
+            const cardImages = holeCardsArray.map(card => {
+                const rank = rankMap[card[0]];
+                const suit = card[1].toLowerCase();
+                const card_image_url = `/static/colour/${suit}_${rank}.svg`;
+                return `<img src="${card_image_url}" class="card-image-small">`; // Add a class for small card images
+            });
+
+            holeCardsHTML = `<div class="hole-cards-row">${cardImages.join('')}</div>`;
+        } else {
+            // If player name not found in holecards
+            let backCardHTML = '';
+            if (tableState.gametype === 'omahahi') {
+                // If game type is omahahi, add 4 back cards
+                backCardHTML = '<div class="hole-cards-row">';
+                for (let i = 0; i < 4; i++) {
+                    backCardHTML += '<img src="/static/backDeck10.svg" class="card-image-small">';
                 }
+                backCardHTML += '</div>';
+            } else {
+                // If game type is not omahahi, add 2 back cards
+                backCardHTML = '<div class="hole-cards-row">';
+                for (let i = 0; i < 2; i++) {
+                    backCardHTML += '<img src="/static/backDeck10.svg" class="card-image-small">';
+                }
+                backCardHTML += '</div>';
             }
+            holeCardsHTML = backCardHTML;
+        }
+
+        const playerDiv = document.createElement("div");
+        playerDiv.classList.add("player", "position-absolute",  "text-center"); // Use Bootstrap's position-absolute class
+        playerDiv.style.left = `${playerPositions[`x${seat}`]}px`;
+        playerDiv.style.top = `${playerPositions[`y${seat}`]}px`;
+        playerDiv.innerHTML = `<div>${holeCardsHTML}</div>`;
+        playerDiv.innerHTML += `<span class="badge bg-primary">${playerName}<br>${player.stack}</span>`;
+
+        const pokerTable = document.getElementById("poker-table");
+        pokerTable.appendChild(playerDiv);
+    }
+}
+
+
 
 
 
