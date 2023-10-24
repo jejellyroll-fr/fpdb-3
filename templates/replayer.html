@@ -65,11 +65,16 @@
             gap: 0px;
         }
     </style>
+
 </head>
 <body class="bg-dark">
+    {% set deck_image_url = "/static/faceDeck1.svg" %}
+    <object id="svgDeck" data={{deck_image_url}} type="image/svg+xml" style="display: none;"></object>
     {% set table_image_url = "/static/TableR.png" %}
+
     <div id="poker-table">
         <img src="{{ table_image_url }}" class="table-image">
+    
     </div>
 
     <div id="hand" data-hand="{{ hand }}"></div>
@@ -85,11 +90,36 @@
     </div>
 
     <div id="show-cards-checkbox">
-        <label>Show Cards</label>
+        <label id="label-show-cards">Show Cards</label>
         <input type="checkbox" id="show-cards">
     </div>
 
     <script>
+            function replaceCard(cardElementId, cardDeckId) {
+                // Get the card element in your application's DOM.
+                const cardElement = document.getElementById(cardElementId);
+
+                // Get the SVG deck.
+                const svgDeck = document.getElementById(cardDeckId);
+
+                // Check if the card element and SVG deck exist.
+                if (cardElement && svgDeck) {
+                    // Get the card from the SVG deck using its ID.
+                    const svgCard = svgDeck.contentDocument.getElementById(cardElementId);
+
+                    if (svgCard) {
+                        // Clone the SVG card to replace the existing card.
+                        const clonedCard = svgCard.cloneNode(true);
+
+                        // Replace the existing card element with the new SVG card.
+                        cardElement.parentNode.replaceChild(clonedCard, cardElement);
+                    }
+                }
+            }
+
+
+
+
             function updatePlayerPositions() {
             // Calculate responsive player positions
             const numPlayers = Object.keys(tableState.players).length;
@@ -515,7 +545,7 @@ for (let seat = 1; seat <= maxSeat; seat++) {
             const cardImages = holeCardsArray.map(card => {
                 const rank = rankMap[card[0]];
                 const suit = card[1].toLowerCase();
-                const card_image_url = `/static/colour/${suit}_${rank}.svg`;
+                const card_image_url = `/static/fourcolor/${rank}_${suit}.svg`;
                 return `<img src="${card_image_url}" class="card-image-small">`; // Add a class for small card images
             });
 
