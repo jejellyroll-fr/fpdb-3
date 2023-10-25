@@ -294,11 +294,13 @@ def get_hands_players(player_id, tourney=False, cash=False, sort_by=None):
         HP.*,
         HPots.*,
         HStove.*,
-        H.*
+        H.*,
+        GT.*
     FROM HandsPlayers AS HP
     LEFT JOIN Hands AS H ON HP.handId = H.id
     LEFT JOIN HandsPots AS HPots ON HP.handId = HPots.handId
     LEFT JOIN HandsStove AS HStove ON HP.handId = HStove.handId
+    LEFT JOIN Gametypes AS GT ON H.gametypeId = GT.id
     WHERE HP.playerId = ?
     """
 
