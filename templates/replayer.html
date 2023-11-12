@@ -24,7 +24,7 @@
             position: relative;
         }
 
-        #game-controls {
+        #controlPanel {
             margin-top: 80px;
         }
 
@@ -85,12 +85,15 @@
 
     <!-- Render poker table background and elements here -->
 
-    <div id="game-controls">
-        <button type="submit" class="btn btn-secondary" id="prev-button">Prev</button>
-        <button type="submit" class="btn btn-secondary" id="start-button">Start</button>
-        <button type="submit" class="btn btn-secondary" id="end-button">End</button>
-        <button type="submit" class="btn btn-secondary" id="play-pause-button">Play/Pause</button>
-        <button type="submit" class="btn btn-secondary" id="next-button">Next</button>
+    <div id="controlPanel">
+        <input type="range" id="stateSlider">
+        <div id="buttonGroup">
+        <button type="submit" class="btn btn-secondary" id="prevButton">Prev</button>
+        <button type="submit" class="btn btn-secondary" id="startButton">Start</button>
+        <button type="submit" class="btn btn-secondary" id="endButton">End</button>
+        <button type="submit" class="btn btn-secondary" id="playPauseButton">Play/Pause</button>
+        <button type="submit" class="btn btn-secondary" id="nextButton">Next</button>
+    </div>
     </div>
 
     <div id="show-cards-checkbox">
@@ -98,437 +101,534 @@
         <input type="checkbox" id="show-cards">
     </div>
 
-    <script>
-            function replaceCard(cardElementId, cardDeckId) {
-                // Get the card element in your application's DOM.
-                const cardElement = document.getElementById(cardElementId);
+    <!-- Importation de votre script JavaScript -->
+    <script >
+// ------------------------
+// Constantes et Configurations
+// ------------------------
 
-                // Get the SVG deck.
-                const svgDeck = document.getElementById(cardDeckId);
+// Mapping des rangs de cartes pour les images
+const rankMap = {
+    '2': '2', '3': '3', '4': '4', '5': '5', '6': '6',
+    '7': '7', '8': '8', '9': '9', 'T': 't',
+    'J': 'j', 'Q': 'q', 'K': 'k', 'A': 'a'
+};
 
-                // Check if the card element and SVG deck exist.
-                if (cardElement && svgDeck) {
-                    // Get the card from the SVG deck using its ID.
-                    const svgCard = svgDeck.contentDocument.getElementById(cardElementId);
+// Configuration des différents types de jeux
+const games = {
+    'holdem': ['hold', 'holdem', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 2)]],
+    '2_holdem': ['hold', null, 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 3)]],
+    '6_holdem': ['hold', null, 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 2)]],
+    'omahahi': ['hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
+    'fusion': ['hold', 'fusion', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
+    'omahahilo': ['hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
+    'irish': ['hold', null, 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
+    '5_omahahi': ['hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]],
+    '6_omahahi': ['hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 6)]],
+    '5_omaha8': ['hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]],
+    '6_omaha8': ['hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 6)]],
+    'cour_hi': ['hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]],
+    'cour_hilo': ['hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]],
+    'aof_omaha': ['hold', 'omaha', 'h', {'FLOP': 0, 'TURN': 1, 'RIVER': 2}, 'RIVER', [(0, 4)]],
+    '5_studhi': ['stud', 'holdem', 'h', {'SECOND': 0, 'THIRD': 1, 'FOURTH': 2, 'FIFTH': 3}, 'FIFTH',
+                 [(0, 2), (0, 3), (0, 4), (0, 5)]],
+    'razz': ['stud', null, 'l', {'THIRD': 0, 'FOURTH': 1, 'FIFTH': 2, 'SIXTH': 3, 'SEVENTH': 4}, 'SEVENTH',
+             [(0, 3), (0, 4), (0, 5), (0, 6), (0, 7)]],
+    'studhi': ['stud', '7stud', 'h', {'THIRD': 0, 'FOURTH': 1, 'FIFTH': 2, 'SIXTH': 3, 'SEVENTH': 4}, 'SEVENTH',
+               [(0, 3), (0, 4), (0, 5), (0, 6), (0, 7)]],
+    'studhilo': ['stud', '7stud8', 's', {'THIRD': 0, 'FOURTH': 1, 'FIFTH': 2, 'SIXTH': 3, 'SEVENTH': 4}, 'SEVENTH',
+                 [(0, 3), (0, 4), (0, 5), (0, 6), (0, 7)]],
+    '27_3draw': ['draw', 'lowball27', 'r', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
+                 [(0, 5), (5, 10), (10, 15), (15, 20)]],
+    'fivedraw': ['draw', 'holdem', 'h', {'DEAL': 0, 'DRAWONE': 1}, 'DRAWONE', [(0, 5), (5, 10)]],
+    'badugi': ['draw', null, 'l', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
+               [(0, 4), (5, 9), (10, 14), (15, 19)]],
+    '27_1draw': ['draw', 'lowball27', 'r', {'DEAL': 0, 'DRAWONE': 1}, 'DRAWONE', [(0, 5), (5, 10)]],
+    'a5_3draw': ['draw', 'lowball', 'l', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
+                 [(0, 5), (5, 10), (10, 15), (15, 20)]],
+    'a5_1draw': ['draw', 'lowball', 'l', {'DEAL': 0, 'DRAWONE': 1}, 'DRAWONE', [(0, 5), (5, 10)]],
+    '27_razz': ['stud', 'lowball27', 'l', {'THIRD': 0, 'FOURTH': 1, 'FIFTH': 2, 'SIXTH': 3, 'SEVENTH': 4}, 'SEVENTH',
+                [(0, 3), (0, 4), (0, 5), (0, 6), (0, 7)]],
+    'badacey': ['draw', null, 's', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
+                [(0, 5), (5, 10), (10, 15), (15, 20)]],
+    'badeucey': ['draw', null, 's', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
+                 [(0, 5), (5, 10), (10, 15), (15, 20)]],
+    'drawmaha': ['draw', null, 's', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
+                 [(0, 5), (5, 10), (10, 15), (15, 20)]]
+};
 
-                    if (svgCard) {
-                        // Clone the SVG card to replace the existing card.
-                        const clonedCard = svgCard.cloneNode(true);
+// ------------------------
+// Fonctions Utilitaires
+// ------------------------
+// Fonctions JavaScript correspondant aux fonctions Python
 
-                        // Replace the existing card element with the new SVG card.
-                        cardElement.parentNode.replaceChild(clonedCard, cardElement);
+// Simulation de la méthode keyPressEvent
+document.addEventListener('keydown', function(event) {
+    const stateSlider = document.getElementById('stateSlider');
+    const sliderValue = stateSlider.value;
+
+    switch (event.key) {
+        case 'ArrowLeft':
+            stateSlider.value = Math.max(0, sliderValue - 1);
+            break;
+        case 'ArrowRight':
+            stateSlider.value = Math.min(stateSlider.max, Number(sliderValue) + 1);
+            break;
+        // Gestion des flèches haut et bas - nécessite une logique supplémentaire
+    }
+});
+
+// Supposons que handData est une variable globale contenant les données JSON
+// transmises de Flask. Par exemple :
+// var handData = {{ hand|tojson|safe }};
+
+function playHand(handIdx) {
+    // Vérifie si l'index de la main est valide
+    if (handIdx < 0 || handIdx >= handData.length) {
+        console.error("Index de la main invalide:", handIdx);
+        return;
+    }
+
+    // Récupère les données de la main spécifique
+    const hand = handData[handIdx];
+
+    // Affiche les informations de base sur la main
+    displayBasicHandInfo(hand);
+
+    // Affiche les actions effectuées pendant la main
+    displayHandActions(hand);
+
+    // D'autres fonctions pour afficher les détails de la main
+    // peuvent être appelées ici
+}
+
+function displayBasicHandInfo(hand) {
+    // Affiche des informations de base comme le numéro de la main, les blinds, etc.
+    document.getElementById('handNumber').textContent = `Hand ID: ${hand.handid}`;
+    document.getElementById('blinds').textContent = `Blinds: ${hand.sb}/${hand.bb}`;
+    // Ajoutez d'autres éléments d'information ici
+}
+
+function displayHandActions(hand) {
+    // Logique pour afficher les actions de la main
+    // Par exemple, parcourir les actions et les afficher dans un élément de l'interface utilisateur
+    hand.actions.PREFLOP.forEach(action => {
+        // Affiche chaque action PREFLOP
+        console.log(action); // Remplacer par une mise à jour de l'interface utilisateur
+    });
+    // Répétez pour d'autres rues comme FLOP, TURN, RIVER
+}
+
+
+// L
+// Remplacement d'une carte
+function replaceCard(cardElementId, cardDeckId) {
+    // Get the card element in your application's DOM.
+    const cardElement = document.getElementById(cardElementId);
+
+    // Get the SVG deck.
+    const svgDeck = document.getElementById(cardDeckId);
+
+    // Check if the card element and SVG deck exist.
+    if (cardElement && svgDeck) {
+        // Get the card from the SVG deck using its ID.
+        const svgCard = svgDeck.contentDocument.getElementById(cardElementId);
+
+        if (svgCard) {
+            // Clone the SVG card to replace the existing card.
+            const clonedCard = svgCard.cloneNode(true);
+
+            // Replace the existing card element with the new SVG card.
+            cardElement.parentNode.replaceChild(clonedCard, cardElement);
+        }
+    }
+}
+
+// Mise à jour des positions des joueurs
+function updatePlayerPositions() {
+    // Calculate responsive player positions
+    const numPlayers = Object.keys(tableState.players).length;
+    const pokerTable = document.getElementById("poker-table");
+    const tableWidth = pokerTable.offsetWidth;
+    const tableHeight = pokerTable.offsetHeight;
+
+    const playerPositions = players(numPlayers, tableWidth, tableHeight);
+
+    // Loop through the player positions and update the divs
+    for (let i = 1; i <= numPlayers; i++) {
+        const playerDiv = document.querySelector(`#player-${i}`);
+        playerDiv.style.left = `${playerPositions[`x${i}`]}px`;
+        playerDiv.style.top = `${playerPositions[`y${i}`]}px`;
+    }
+}
+
+// Calcul des positions des joueurs autour de la table
+const players = (numPlayers) => {
+    const playerPositions = {};
+    const tableWidth = 920; // Adjust the width of your table as needed
+    const tableHeight = 560; // Adjust the height of your table as needed
+
+    for (let i = 1; i <= numPlayers; i++) {
+        const angle = (i - 1) * (360 / numPlayers);
+        const radians = (angle * Math.PI) / 180;
+        const x = tableWidth / 2 + tableWidth / 2 * Math.cos(radians);
+        const y = tableHeight / 2 + tableHeight / 2 * Math.sin(radians);
+
+        playerPositions[`x${i}`] = x;
+        playerPositions[`y${i}`] = y;
+    }
+
+    return playerPositions;
+    };
+
+// Assemblage des cartes cachées d'un joueur
+function joinHoleCards(player, asList = false) {
+    const holeNo = games[hand.gametype.category][5][0][1];
+    const hcs = new Array(holeNo).fill('0x');
+
+    if (hand.gametype.category === 'fusion') {
+        for (const street of hand.holeStreets) {
+            if (player in Object.keys(hand.holecards[street])) {
+                if (street === 'PREFLOP') {
+                    if (hand.holecards[street][player][1].length === 1) continue;
+                    for (let i = 0; i < 2; i++) {
+                        hcs[i] = hand.holecards[street][player][1][i];
+                        hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
                     }
+                    try {
+                        for (let i = 2; i < holeNo; i++) {
+                            hcs[i] = hand.holecards[street][player][1][i];
+                            hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
+                        }
+                    } catch (error) {
+                        console.log("Why did we get an index error?");
+                    }
+                } else if (street === 'FLOP') {
+                    if (hand.holecards[street][player][1].length === 1) continue;
+                    hcs[2] = hand.holecards[street][player][0][0];
+                    hcs[2] = hcs[2].charAt(0).toUpperCase() + hcs[2].slice(1);
+                } else if (street === 'TURN') {
+                    if (hand.holecards[street][player][1].length === 1) continue;
+                    hcs[3] = hand.holecards[street][player][0][0];
+                    hcs[3] = hcs[3].charAt(0).toUpperCase() + hcs[3].slice(1);
                 }
-            }
-
-
-
-
-            function updatePlayerPositions() {
-            // Calculate responsive player positions
-            const numPlayers = Object.keys(tableState.players).length;
-            const pokerTable = document.getElementById("poker-table");
-            const tableWidth = pokerTable.offsetWidth;
-            const tableHeight = pokerTable.offsetHeight;
-
-            const playerPositions = players(numPlayers, tableWidth, tableHeight);
-
-            // Loop through the player positions and update the divs
-            for (let i = 1; i <= numPlayers; i++) {
-                const playerDiv = document.querySelector(`#player-${i}`);
-                playerDiv.style.left = `${playerPositions[`x${i}`]}px`;
-                playerDiv.style.top = `${playerPositions[`y${i}`]}px`;
             }
         }
-            //create constants to distribute around the table oblong area the player if there are 2 to 10 players
-            const players = (numPlayers) => {
-                const playerPositions = {};
-                const tableWidth = 920; // Adjust the width of your table as needed
-                const tableHeight = 560; // Adjust the height of your table as needed
-
-                for (let i = 1; i <= numPlayers; i++) {
-                    const angle = (i - 1) * (360 / numPlayers);
-                    const radians = (angle * Math.PI) / 180;
-                    const x = tableWidth / 2 + tableWidth / 2 * Math.cos(radians);
-                    const y = tableHeight / 2 + tableHeight / 2 * Math.sin(radians);
-
-                    playerPositions[`x${i}`] = x;
-                    playerPositions[`y${i}`] = y;
+    } else {
+        for (const street of hand.holeStreets) {
+            if (player in Object.keys(hand.holecards[street])) {
+                if (hand.holecards[street][player][1].length === 1) continue;
+                for (let i = 0; i < 2; i++) {
+                    hcs[i] = hand.holecards[street][player][1][i];
+                    hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
                 }
-
-                return playerPositions;
-                };
-
-
-
-
-
-
-            const games = {
-                    'holdem': ['hold', 'holdem', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 2)]],
-                    '2_holdem': ['hold', null, 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 3)]],
-                    '6_holdem': ['hold', null, 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 2)]],
-                    'omahahi': ['hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
-                    'fusion': ['hold', 'fusion', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
-                    'omahahilo': ['hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
-                    'irish': ['hold', null, 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
-                    '5_omahahi': ['hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]],
-                    '6_omahahi': ['hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 6)]],
-                    '5_omaha8': ['hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]],
-                    '6_omaha8': ['hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 6)]],
-                    'cour_hi': ['hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]],
-                    'cour_hilo': ['hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]],
-                    'aof_omaha': ['hold', 'omaha', 'h', {'FLOP': 0, 'TURN': 1, 'RIVER': 2}, 'RIVER', [(0, 4)]],
-                    '5_studhi': ['stud', 'holdem', 'h', {'SECOND': 0, 'THIRD': 1, 'FOURTH': 2, 'FIFTH': 3}, 'FIFTH',
-                                 [(0, 2), (0, 3), (0, 4), (0, 5)]],
-                    'razz': ['stud', null, 'l', {'THIRD': 0, 'FOURTH': 1, 'FIFTH': 2, 'SIXTH': 3, 'SEVENTH': 4}, 'SEVENTH',
-                             [(0, 3), (0, 4), (0, 5), (0, 6), (0, 7)]],
-                    'studhi': ['stud', '7stud', 'h', {'THIRD': 0, 'FOURTH': 1, 'FIFTH': 2, 'SIXTH': 3, 'SEVENTH': 4}, 'SEVENTH',
-                               [(0, 3), (0, 4), (0, 5), (0, 6), (0, 7)]],
-                    'studhilo': ['stud', '7stud8', 's', {'THIRD': 0, 'FOURTH': 1, 'FIFTH': 2, 'SIXTH': 3, 'SEVENTH': 4}, 'SEVENTH',
-                                 [(0, 3), (0, 4), (0, 5), (0, 6), (0, 7)]],
-                    '27_3draw': ['draw', 'lowball27', 'r', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
-                                 [(0, 5), (5, 10), (10, 15), (15, 20)]],
-                    'fivedraw': ['draw', 'holdem', 'h', {'DEAL': 0, 'DRAWONE': 1}, 'DRAWONE', [(0, 5), (5, 10)]],
-                    'badugi': ['draw', null, 'l', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
-                               [(0, 4), (5, 9), (10, 14), (15, 19)]],
-                    '27_1draw': ['draw', 'lowball27', 'r', {'DEAL': 0, 'DRAWONE': 1}, 'DRAWONE', [(0, 5), (5, 10)]],
-                    'a5_3draw': ['draw', 'lowball', 'l', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
-                                 [(0, 5), (5, 10), (10, 15), (15, 20)]],
-                    'a5_1draw': ['draw', 'lowball', 'l', {'DEAL': 0, 'DRAWONE': 1}, 'DRAWONE', [(0, 5), (5, 10)]],
-                    '27_razz': ['stud', 'lowball27', 'l', {'THIRD': 0, 'FOURTH': 1, 'FIFTH': 2, 'SIXTH': 3, 'SEVENTH': 4}, 'SEVENTH',
-                                [(0, 3), (0, 4), (0, 5), (0, 6), (0, 7)]],
-                    'badacey': ['draw', null, 's', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
-                                [(0, 5), (5, 10), (10, 15), (15, 20)]],
-                    'badeucey': ['draw', null, 's', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
-                                 [(0, 5), (5, 10), (10, 15), (15, 20)]],
-                    'drawmaha': ['draw', null, 's', {'DEAL': 0, 'DRAWONE': 1, 'DRAWTWO': 2, 'DRAWTHREE': 3}, 'DRAWTHREE',
-                                 [(0, 5), (5, 10), (10, 15), (15, 20)]]
-                };
-
-
-            function joinHoleCards(player, asList = false) {
-                const holeNo = games[hand.gametype.category][5][0][1];
-                const hcs = new Array(holeNo).fill('0x');
-
-                if (hand.gametype.category === 'fusion') {
-                    for (const street of hand.holeStreets) {
-                        if (player in Object.keys(hand.holecards[street])) {
-                            if (street === 'PREFLOP') {
-                                if (hand.holecards[street][player][1].length === 1) continue;
-                                for (let i = 0; i < 2; i++) {
-                                    hcs[i] = hand.holecards[street][player][1][i];
-                                    hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
-                                }
-                                try {
-                                    for (let i = 2; i < holeNo; i++) {
-                                        hcs[i] = hand.holecards[street][player][1][i];
-                                        hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
-                                    }
-                                } catch (error) {
-                                    console.log("Why did we get an index error?");
-                                }
-                            } else if (street === 'FLOP') {
-                                if (hand.holecards[street][player][1].length === 1) continue;
-                                hcs[2] = hand.holecards[street][player][0][0];
-                                hcs[2] = hcs[2].charAt(0).toUpperCase() + hcs[2].slice(1);
-                            } else if (street === 'TURN') {
-                                if (hand.holecards[street][player][1].length === 1) continue;
-                                hcs[3] = hand.holecards[street][player][0][0];
-                                hcs[3] = hcs[3].charAt(0).toUpperCase() + hcs[3].slice(1);
-                            }
-                        }
+                try {
+                    for (let i = 2; i < holeNo; i++) {
+                        hcs[i] = hand.holecards[street][player][1][i];
+                        hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
                     }
-                } else {
-                    for (const street of hand.holeStreets) {
-                        if (player in Object.keys(hand.holecards[street])) {
-                            if (hand.holecards[street][player][1].length === 1) continue;
-                            for (let i = 0; i < 2; i++) {
-                                hcs[i] = hand.holecards[street][player][1][i];
-                                hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
-                            }
-                            try {
-                                for (let i = 2; i < holeNo; i++) {
-                                    hcs[i] = hand.holecards[street][player][1][i];
-                                    hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
-                                }
-                            } catch (error) {
-                                console.log("Why did we get an index error?");
-                            }
-                        }
-                    }
-                }
-
-                if (asList) {
-                    return hcs;
-                    consol.log(hcs);
-                } else {
-                    return hcs.join(" ");
-                    consol.log(hcs.join(" "));
+                } catch (error) {
+                    console.log("Why did we get an index error?");
                 }
             }
+        }
+    }
 
-            // Define the Player class
-            class Player {
-                constructor(hand, name, stack, seat) {
-                    this.stack = parseFloat(stack);
-                    this.chips = 0;
-                    this.seat = seat;
-                    this.name = name;
-                    this.action = null;
-                    this.justacted = false;
-                    this.holecards = joinHoleCards(name, true);
-                    this.streetcards = {};
+    if (asList) {
+        return hcs;
+        consol.log(hcs);
+    } else {
+        return hcs.join(" ");
+        consol.log(hcs.join(" "));
+    }
+}
 
-                    if (hand.gametype.base === 'draw') {
-                    for (const street of hand.actionStreets.slice(1)) {
-                        this.streetcards[street] = hand.join_holecards(name, true, street);
-                    }
-                    this.holecards = this.streetcards[hand.actionStreets[1]];
-                    } else if (hand.gametype.base === 'stud') {
-                    for (let i = 0; i < hand.actionStreets.slice(1).length; i++) {
-                        this.streetcards[hand.actionStreets[i + 1]] = this.holecards.slice(0, i + 3);
-                    }
-                    this.holecards = this.streetcards[hand.actionStreets[1]];
-                    }
+// ------------------------
+// Classes pour la logique du jeu
+// ------------------------
+// Classe ICM
+class ICM {
+    constructor(stacks, payouts) {
+        this.stacks = stacks;
+        this.payouts = payouts;
+        this.equities = [];
+        this.prepare();
+    }
 
-                    this.x = 0.5 * Math.cos((2 * this.seat * Math.PI) / hand.maxseats);
-                    this.y = 0.8 * Math.sin((2 * this.seat * Math.PI) / hand.maxseats);
+    prepare() {
+        const total = this.stacks.reduce((acc, val) => acc + val, 0);
+        this.stacks.forEach((stack, index) => {
+            this.equities.push(Number(this.getEquities(total, index, 0).toFixed(4)));
+        });
+    }
+
+    getEquities(total, player, depth) {
+        let eq = (this.stacks[player] / total) * this.payouts[depth];
+        if (depth + 1 < this.payouts.length) {
+            this.stacks.forEach((stack, i) => {
+                if (i !== player && stack > 0) {
+                    const originalStack = this.stacks[i];
+                    this.stacks[i] = 0;
+                    eq += this.getEquities(total - stack, player, depth + 1) * (stack / total);
+                    this.stacks[i] = originalStack;
                 }
+            });
+        }
+        return eq;
+    }
+}
 
-                setAction(action) {
-                    for (const player of Object.values(this.players)) {
-                    player.justacted = false;
-                    }
 
-                    this.action = action[1];
-                    this.justacted = true;
+// Classe Player
+class Player {
+    constructor(hand, name, stack, seat) {
+        this.stack = parseFloat(stack);
+        this.chips = 0;
+        this.seat = seat;
+        this.name = name;
+        this.action = null;
+        this.justacted = false;
+        this.holecards = joinHoleCards(name, true);
+        this.streetcards = {};
 
-                    if (this.action === 'folds' || this.action === 'checks') {
-                    // Do nothing
-                    } else if (this.action === 'raises' || this.action === 'bets') {
-                    if (this.allinThisStreet) {
-                        this.called = this.bet;
-                    } else {
-                        this.called = 0;
-                    }
-                    const diff = this.bet - this.chips;
-                    this.bet += action[2];
-                    this.chips += action[2] + diff;
-                    this.stack -= action[2] + diff;
-                    this.newpot += action[2] + diff;
-                    } else if (this.action === 'big blind') {
-                    this.bet = action[2];
-                    this.chips += action[2];
-                    this.stack -= action[2];
-                    this.newpot += action[2];
-                    } else if (this.action === 'calls' || this.action === 'small blind' || this.action === 'secondsb') {
-                    this.chips += action[2];
-                    this.stack -= action[2];
-                    this.called = Math.max(this.called, this.chips);
-                    this.newpot += action[2];
-                    } else if (this.action === 'both') {
-                    this.chips += action[2];
-                    this.stack -= action[2];
-                    this.newpot += action[2];
-                    } else if (this.action === 'ante') {
-                    this.pot += action[2];
-                    this.stack -= action[2];
-                    this.newpot += action[2];
-                    } else if (this.action === 'discards') {
-                    this.action += ' ' + action[2];
-                    if (action.length > 3) {
-                        // Must be hero as we have discard information.  Update holecards now.
-                        this.holecards = this.streetcards[this.street];
-                    }
-                    } else if (this.action === 'stands pat') {
-                    // Do nothing
-                    } else if (this.action === 'bringin') {
-                    this.chips += action[2];
-                    this.stack -= action[2];
-                    this.newpot += action[2];
-                    } else {
-                    console.log('Unhandled action: ' + action);
-                    }
+        if (hand.gametype.base === 'draw') {
+        for (const street of hand.actionStreets.slice(1)) {
+            this.streetcards[street] = hand.join_holecards(name, true, street);
+        }
+        this.holecards = this.streetcards[hand.actionStreets[1]];
+        } else if (hand.gametype.base === 'stud') {
+        for (let i = 0; i < hand.actionStreets.slice(1).length; i++) {
+            this.streetcards[hand.actionStreets[i + 1]] = this.holecards.slice(0, i + 3);
+        }
+        this.holecards = this.streetcards[hand.actionStreets[1]];
+        }
 
-                    if (this.stack === 0) {
-                    this.allinThisStreet = true;
-                    }
-                }
-                }
-            // Define the TableState class
-            class TableState {
-            constructor(hand) {
-                this.pot = 0;
-                this.street = null;
-                this.board = hand.board;
-                this.renderBoard = new Set();
-                this.bet = 0;
-                this.called = 0;
-                this.gametype = hand.gametype.category;
-                this.gamebase = hand.gametype.base;
-                this.allin = false;
-                this.allinThisStreet = false;
-                this.newpot = 0;
+        this.x = 0.5 * Math.cos((2 * this.seat * Math.PI) / hand.maxseats);
+        this.y = 0.8 * Math.sin((2 * this.seat * Math.PI) / hand.maxseats);
+    }
 
-                this.players = {};
+    setAction(action) {
+        for (const player of Object.values(this.players)) {
+        player.justacted = false;
+        }
 
-                for (const items of hand.players) {
-                this.players[items[1]] = new Player(hand, items[1], items[2], parseInt(items[0]));
-                }
-            }
+        this.action = action[1];
+        this.justacted = true;
 
-            startPhase(phase) {
-                this.street = phase;
-                this.newpot = this.newpot;
+        if (this.action === 'folds' || this.action === 'checks') {
+        // Do nothing
+        } else if (this.action === 'raises' || this.action === 'bets') {
+        if (this.allinThisStreet) {
+            this.called = this.bet;
+        } else {
+            this.called = 0;
+        }
+        const diff = this.bet - this.chips;
+        this.bet += action[2];
+        this.chips += action[2] + diff;
+        this.stack -= action[2] + diff;
+        this.newpot += action[2] + diff;
+        } else if (this.action === 'big blind') {
+        this.bet = action[2];
+        this.chips += action[2];
+        this.stack -= action[2];
+        this.newpot += action[2];
+        } else if (this.action === 'calls' || this.action === 'small blind' || this.action === 'secondsb') {
+        this.chips += action[2];
+        this.stack -= action[2];
+        this.called = Math.max(this.called, this.chips);
+        this.newpot += action[2];
+        } else if (this.action === 'both') {
+        this.chips += action[2];
+        this.stack -= action[2];
+        this.newpot += action[2];
+        } else if (this.action === 'ante') {
+        this.pot += action[2];
+        this.stack -= action[2];
+        this.newpot += action[2];
+        } else if (this.action === 'discards') {
+        this.action += ' ' + action[2];
+        if (action.length > 3) {
+            // Must be hero as we have discard information.  Update holecards now.
+            this.holecards = this.streetcards[this.street];
+        }
+        } else if (this.action === 'stands pat') {
+        // Do nothing
+        } else if (this.action === 'bringin') {
+        this.chips += action[2];
+        this.stack -= action[2];
+        this.newpot += action[2];
+        } else {
+        console.log('Unhandled action: ' + action);
+        }
 
-                if (phase === 'BLINDSANTES' || phase === 'PREFLOP' || phase === 'DEAL') {
-                return;
-                }
+        if (this.stack === 0) {
+        this.allinThisStreet = true;
+        }
+    }
+    }
 
-                this.renderBoard.add(phase);
+// Classe TableState
+class TableState {
+    constructor(hand) {
+        this.pot = 0;
+        this.street = null;
+        this.board = hand.board;
+        this.renderBoard = new Set();
+        this.bet = 0;
+        this.called = 0;
+        this.gametype = hand.gametype.category;
+        this.gamebase = hand.gametype.base;
+        this.allin = false;
+        this.allinThisStreet = false;
+        this.newpot = 0;
 
-                for (const player of Object.values(this.players)) {
-                player.justacted = false;
-                if (player.chips > this.called) {
-                    player.stack += player.chips - this.called;
-                    player.chips = this.called;
-                }
+        this.players = {};
 
-                this.pot += player.chips;
-                player.chips = 0;
+        for (const items of hand.players) {
+        this.players[items[1]] = new Player(hand, items[1], items[2], parseInt(items[0]));
+        }
+    }
 
-                if (phase === 'THIRD' || phase === 'FOURTH' || phase === 'FIFTH' || phase === 'SIXTH' || phase === 'SEVENTH') {
-                    player.holecards = player.streetcards[this.street];
-                }
-                }
+    startPhase(phase) {
+        this.street = phase;
+        this.newpot = this.newpot;
 
-                this.bet = 0;
-                this.called = 0;
-                this.allinThisStreet = false;
-            }
+        if (phase === 'BLINDSANTES' || phase === 'PREFLOP' || phase === 'DEAL') {
+        return;
+        }
 
-            updateForAction(action) {
-                for (const player of Object.values(this.players)) {
-                player.justacted = false;
-                }
+        this.renderBoard.add(phase);
 
-                const player = this.players[action[0]];
-                player.action = action[1];
-                player.justacted = true;
+        for (const player of Object.values(this.players)) {
+        player.justacted = false;
+        if (player.chips > this.called) {
+            player.stack += player.chips - this.called;
+            player.chips = this.called;
+        }
 
-                if (action[1] === 'folds' || action[1] === 'checks') {
-                // Do nothing
-                } else if (action[1] === 'raises' || action[1] === 'bets') {
-                if (this.allinThisStreet) {
-                    this.called = this.bet;
-                } else {
-                    this.called = 0;
-                }
-                const diff = this.bet - player.chips;
-                this.bet += action[2];
-                player.chips += action[2] + diff;
-                player.stack -= action[2] + diff;
-                this.newpot += action[2] + diff;
-                } else if (action[1] === 'big blind') {
-                this.bet = action[2];
-                player.chips += action[2];
-                player.stack -= action[2];
-                this.newpot += action[2];
-                } else if (action[1] === 'calls' || action[1] === 'small blind' || action[1] === 'secondsb') {
-                player.chips += action[2];
-                player.stack -= action[2];
-                this.called = Math.max(this.called, player.chips);
-                this.newpot += action[2];
-                } else if (action[1] === 'both') {
-                player.chips += action[2];
-                player.stack -= action[2];
-                this.newpot += action[2];
-                } else if (action[1] === 'ante') {
-                this.pot += action[2];
-                player.stack -= action[2];
-                this.newpot += action[2];
-                } else if (action[1] === 'discards') {
-                player.action += ' ' + action[2];
-                if (action.length > 3) {
-                    player.holecards = player.streetcards[this.street];
-                }
-                } else if (action[1] === 'stands pat') {
-                // Do nothing
-                } else if (action[1] === 'bringin') {
-                player.chips += action[2];
-                player.stack -= action[2];
-                this.newpot += action[2];
-                } else {
-                console.log('Unhandled action: ' + action);
-                }
+        this.pot += player.chips;
+        player.chips = 0;
 
-                if (player.stack === 0) {
-                this.allinThisStreet = true;
-                }
-            }
+        if (phase === 'THIRD' || phase === 'FOURTH' || phase === 'FIFTH' || phase === 'SIXTH' || phase === 'SEVENTH') {
+            player.holecards = player.streetcards[this.street];
+        }
+        }
 
-            endHand(collectees, returned) {
-                this.pot = 0;
+        this.bet = 0;
+        this.called = 0;
+        this.allinThisStreet = false;
+    }
 
-                for (const player of Object.values(this.players)) {
-                player.justacted = false;
-                player.chips = 0;
+    updateForAction(action) {
+        for (const player of Object.values(this.players)) {
+        player.justacted = false;
+        }
 
-                if (this.gamebase === 'draw') {
-                    player.holecards = player.streetcards[this.street];
-                }
-                }
+        const player = this.players[action[0]];
+        player.action = action[1];
+        player.justacted = true;
 
-                for (const [name, amount] of Object.entries(collectees)) {
-                this.players[name].chips += amount;
-                this.players[name].action = 'collected';
-                this.players[name].justacted = true;
-                }
+        if (action[1] === 'folds' || action[1] === 'checks') {
+        // Do nothing
+        } else if (action[1] === 'raises' || action[1] === 'bets') {
+        if (this.allinThisStreet) {
+            this.called = this.bet;
+        } else {
+            this.called = 0;
+        }
+        const diff = this.bet - player.chips;
+        this.bet += action[2];
+        player.chips += action[2] + diff;
+        player.stack -= action[2] + diff;
+        this.newpot += action[2] + diff;
+        } else if (action[1] === 'big blind') {
+        this.bet = action[2];
+        player.chips += action[2];
+        player.stack -= action[2];
+        this.newpot += action[2];
+        } else if (action[1] === 'calls' || action[1] === 'small blind' || action[1] === 'secondsb') {
+        player.chips += action[2];
+        player.stack -= action[2];
+        this.called = Math.max(this.called, player.chips);
+        this.newpot += action[2];
+        } else if (action[1] === 'both') {
+        player.chips += action[2];
+        player.stack -= action[2];
+        this.newpot += action[2];
+        } else if (action[1] === 'ante') {
+        this.pot += action[2];
+        player.stack -= action[2];
+        this.newpot += action[2];
+        } else if (action[1] === 'discards') {
+        player.action += ' ' + action[2];
+        if (action.length > 3) {
+            player.holecards = player.streetcards[this.street];
+        }
+        } else if (action[1] === 'stands pat') {
+        // Do nothing
+        } else if (action[1] === 'bringin') {
+        player.chips += action[2];
+        player.stack -= action[2];
+        this.newpot += action[2];
+        } else {
+        console.log('Unhandled action: ' + action);
+        }
 
-                for (const [name, amount] of Object.entries(returned)) {
-                this.players[name].stack += amount;
-                }
-            }
-            }
+        if (player.stack === 0) {
+        this.allinThisStreet = true;
+        }
+    }
 
-            // Create a JavaScript variable using the Python value
-            var hand = JSON.parse(document.getElementById("hand").getAttribute("data-hand"));
-            const tableState = new TableState(hand);
-            const holecards = hand.holecards;
+    endHand(collectees, returned) {
+        this.pot = 0;
 
-            // Determine the number of players from the players object in tablestate
-            numPlayers = Object.keys(tableState.players).length;
+        for (const player of Object.values(this.players)) {
+        player.justacted = false;
+        player.chips = 0;
 
-            // Find the maximum seat number
-            const maxSeat = Math.max(...Object.values(tableState.players).map(player => player.seat));
+        if (this.gamebase === 'draw') {
+            player.holecards = player.streetcards[this.street];
+        }
+        }
 
-            // Calculate missing seats
-            missing_seats = maxSeat - numPlayers;
+        for (const [name, amount] of Object.entries(collectees)) {
+        this.players[name].chips += amount;
+        this.players[name].action = 'collected';
+        this.players[name].justacted = true;
+        }
 
-            // If there are missing seats, adjust the number of players
-            if (missing_seats > 0) {
-                numPlayers = maxSeat;
-            }
+        for (const [name, amount] of Object.entries(returned)) {
+        this.players[name].stack += amount;
+        }
+    }
+    }
 
-            playerPositions = players(numPlayers);
+// ------------------------
+// Initialisation et Logique Principale
+// ------------------------
 
-            // Define a mapping of card ranks to values
-            const rankMap = {
-                '2': '2',
-                '3': '3',
-                '4': '4',
-                '5': '5',
-                '6': '6',
-                '7': '7',
-                '8': '8',
-                '9': '9',
-                'T': 't',
-                'J': 'j',
-                'Q': 'q',
-                'K': 'k',
-                'A': 'a'
-            };
+// Create a JavaScript variable using the Python value
+var hand = JSON.parse(document.getElementById("hand").getAttribute("data-hand"));
+const tableState = new TableState(hand);
+const holecards = hand.holecards;
+
+// Determine the number of players from the players object in tablestate
+numPlayers = Object.keys(tableState.players).length;
+
+// Find the maximum seat number
+const maxSeat = Math.max(...Object.values(tableState.players).map(player => player.seat));
+
+// Calculate missing seats
+missing_seats = maxSeat - numPlayers;
+
+// If there are missing seats, adjust the number of players
+if (missing_seats > 0) {
+    numPlayers = maxSeat;
+    }
+
+playerPositions = players(numPlayers);
+
 
 
 
@@ -587,18 +687,12 @@ for (let seat = 1; seat <= maxSeat; seat++) {
     }
 }
 
+// Gestion des événements de redimensionnement de la fenêtre pour le positionnement des joueurs
+window.addEventListener('resize', updatePlayerPositions);
+updatePlayerPositions(); // Appel initial pour positionner les joueurs
 
 
 
-
-
-
-
-            // Handle window resize events for responsive player positions
-            window.addEventListener('resize', updatePlayerPositions);
-
-            // Initial call to set player positions
-            updatePlayerPositions();
 
 
 
