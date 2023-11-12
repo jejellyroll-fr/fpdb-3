@@ -68,6 +68,7 @@
             display: flex;
             gap: 0px;
         }
+
     </style>
 
 </head>
@@ -75,31 +76,56 @@
     {% set deck_image_url = "/static/faceDeck1.svg" %}
     <object id="svgDeck" data={{deck_image_url}} type="image/svg+xml" style="display: none;"></object>
     {% set table_image_url = "/static/TableR.png" %}
+<!-- En-tête -->
+<div id="header">
+    <!-- Contenu de l'en-tête -->
+</div>
 
-    <div id="poker-table">
-        <img src="{{ table_image_url }}" class="table-image">
-    
+<!-- Section Centrale -->
+<div id="main-section" style="display: flex;">
+
+    <!-- Colonne Gauche (Hand Info) -->
+    <div id="left-column" style="flex: 1;">
+        <div id="handInfo" class="text-light" style="text-align: left;">
+            <span id="heroName">--</span> played Hand n° <span id="handNumber">--</span> on <span id="siteName">--</span> at <span id="tableName">--</span> of <span id="limitType">--</span> <span id="gameType">--</span> with <span id="blinds">--/--</span> <span id="currency">--</span>
+        </div>
     </div>
 
-    <div id="hand" data-hand="{{ hand }}"></div>
-
-    <!-- Render poker table background and elements here -->
-
-    <div id="controlPanel">
-        <input type="range" id="stateSlider">
-        <div id="buttonGroup">
-        <button type="submit" class="btn btn-secondary" id="prevButton">Prev</button>
-        <button type="submit" class="btn btn-secondary" id="startButton">Start</button>
-        <button type="submit" class="btn btn-secondary" id="endButton">End</button>
-        <button type="submit" class="btn btn-secondary" id="playPauseButton">Play/Pause</button>
-        <button type="submit" class="btn btn-secondary" id="nextButton">Next</button>
+    <!-- Colonne Centrale (Table de Poker et Contrôles) -->
+    <div id="center-column" style="flex: 3;">
+        <div id="poker-table">
+            <img src="{{ table_image_url }}" class="table-image">
+        </div>
+        <div id="hand" data-hand="{{ hand }}"></div>
+        <div id="controlPanel">
+            <!-- Boutons et Slider -->
+            <input type="range" id="stateSlider">
+            <div id="buttonGroup">
+                <button type="submit" class="btn btn-secondary" id="prevButton">Prev</button>
+                <button type="submit" class="btn btn-secondary" id="startButton">Start</button>
+                <button type="submit" class="btn btn-secondary" id="endButton">End</button>
+                <button type="submit" class="btn btn-secondary" id="playPauseButton">Play/Pause</button>
+                <button type="submit" class="btn btn-secondary" id="nextButton">Next</button>
+            </div>
+        </div>
+        <div id="show-cards-checkbox">
+            <label id="label-show-cards">Show Cards</label>
+            <input type="checkbox" id="show-cards">
+        </div>
     </div>
+
+    <!-- Colonne Droite (Vide pour l'instant) -->
+    <div id="right-column" style="flex: 1;">
+        <!-- Contenu optionnel -->
     </div>
 
-    <div id="show-cards-checkbox">
-        <label id="label-show-cards">Show Cards</label>
-        <input type="checkbox" id="show-cards">
-    </div>
+</div>
+
+<!-- Pied de page -->
+<div id="footer">
+    <!-- Contenu du pied de page -->
+</div>
+
 
     <!-- Importation de votre script JavaScript -->
     <script >
@@ -178,49 +204,23 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// Supposons que handData est une variable globale contenant les données JSON
-// transmises de Flask. Par exemple :
-// var handData = {{ hand|tojson|safe }};
-
-function playHand(handIdx) {
-    // Vérifie si l'index de la main est valide
-    if (handIdx < 0 || handIdx >= handData.length) {
-        console.error("Index de la main invalide:", handIdx);
-        return;
-    }
-
-    // Récupère les données de la main spécifique
-    const hand = handData[handIdx];
-
-    // Affiche les informations de base sur la main
-    displayBasicHandInfo(hand);
-
-    // Affiche les actions effectuées pendant la main
-    displayHandActions(hand);
-
-    // D'autres fonctions pour afficher les détails de la main
-    // peuvent être appelées ici
-}
-
 function displayBasicHandInfo(hand) {
     // Affiche des informations de base comme le numéro de la main, les blinds, etc.
-    document.getElementById('handNumber').textContent = `Hand ID: ${hand.handid}`;
-    document.getElementById('blinds').textContent = `Blinds: ${hand.sb}/${hand.bb}`;
-    // Ajoutez d'autres éléments d'information ici
-}
-
-function displayHandActions(hand) {
-    // Logique pour afficher les actions de la main
-    // Par exemple, parcourir les actions et les afficher dans un élément de l'interface utilisateur
-    hand.actions.PREFLOP.forEach(action => {
-        // Affiche chaque action PREFLOP
-        console.log(action); // Remplacer par une mise à jour de l'interface utilisateur
-    });
-    // Répétez pour d'autres rues comme FLOP, TURN, RIVER
+    document.getElementById('handNumber').textContent = `${hand.handid}`;
+    document.getElementById('blinds').textContent = `${hand.sb}/${hand.bb}`;
+    document.getElementById('tableName').textContent = `${hand.tablename}`;
+    document.getElementById('siteName').textContent = `${hand.site}`;
+    document.getElementById('heroName').textContent = `${hand.hero || 'N/A'}`;
+    document.getElementById('limitType').textContent = `${hand.gametype.limitType || 'N/A'}`;
+    document.getElementById('gameType').textContent = `${hand.gametype.category || 'N/A'}`;
+    document.getElementById('currency').textContent = `${hand.gametype.currency || 'Play money'}`;
 }
 
 
-// L
+
+
+
+
 // Remplacement d'une carte
 function replaceCard(cardElementId, cardDeckId) {
     // Get the card element in your application's DOM.
@@ -244,23 +244,7 @@ function replaceCard(cardElementId, cardDeckId) {
     }
 }
 
-// Mise à jour des positions des joueurs
-function updatePlayerPositions() {
-    // Calculate responsive player positions
-    const numPlayers = Object.keys(tableState.players).length;
-    const pokerTable = document.getElementById("poker-table");
-    const tableWidth = pokerTable.offsetWidth;
-    const tableHeight = pokerTable.offsetHeight;
 
-    const playerPositions = players(numPlayers, tableWidth, tableHeight);
-
-    // Loop through the player positions and update the divs
-    for (let i = 1; i <= numPlayers; i++) {
-        const playerDiv = document.querySelector(`#player-${i}`);
-        playerDiv.style.left = `${playerPositions[`x${i}`]}px`;
-        playerDiv.style.top = `${playerPositions[`y${i}`]}px`;
-    }
-}
 
 // Calcul des positions des joueurs autour de la table
 const players = (numPlayers) => {
@@ -393,7 +377,7 @@ class Player {
 
         if (hand.gametype.base === 'draw') {
         for (const street of hand.actionStreets.slice(1)) {
-            this.streetcards[street] = hand.join_holecards(name, true, street);
+            this.streetcards[street] = joinHoleCards(name, true, street);
         }
         this.holecards = this.streetcards[hand.actionStreets[1]];
         } else if (hand.gametype.base === 'stud') {
@@ -611,6 +595,7 @@ class TableState {
 // Create a JavaScript variable using the Python value
 var hand = JSON.parse(document.getElementById("hand").getAttribute("data-hand"));
 const tableState = new TableState(hand);
+displayBasicHandInfo(hand)
 const holecards = hand.holecards;
 
 // Determine the number of players from the players object in tablestate
@@ -687,9 +672,7 @@ for (let seat = 1; seat <= maxSeat; seat++) {
     }
 }
 
-// Gestion des événements de redimensionnement de la fenêtre pour le positionnement des joueurs
-window.addEventListener('resize', updatePlayerPositions);
-updatePlayerPositions(); // Appel initial pour positionner les joueurs
+
 
 
 
