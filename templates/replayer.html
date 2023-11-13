@@ -6,7 +6,7 @@
     <title>Poker Hand Replayer</title>
     <!-- Add Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="styles.css">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <style>
         /* Center and style the main content */
@@ -73,7 +73,7 @@
 
 </head>
 <body class="bg-dark">
-    {% set deck_image_url = "/static/faceDeck1.svg" %}
+    {% set deck_image_url = "/static/backDeck10.svg" %}
     <object id="svgDeck" data={{deck_image_url}} type="image/svg+xml" style="display: none;"></object>
     {% set table_image_url = "/static/TableR.png" %}
 <!-- En-tête -->
@@ -129,9 +129,32 @@
 
     <!-- Importation de votre script JavaScript -->
     <script >
-// ------------------------
-// Constantes et Configurations
-// ------------------------
+// constants
+
+/**
+ * Calculates the positions of players around a table based on the number of players.
+ *
+ * @param {number} numPlayers - The number of players.
+ * @returns {Object} - An object containing the x and y positions of each player.
+ */
+ const players_positions = (numPlayers) => {
+    const playerPositions = {};
+    const tableWidth = 920; // Adjust the width of your table as needed
+    const tableHeight = 560; // Adjust the height of your table as needed
+
+    for (let i = 1; i <= numPlayers; i++) {
+        const angle = (i - 1) * (360 / numPlayers);
+        const radians = (angle * Math.PI) / 180;
+        const x = tableWidth / 2 + tableWidth / 2 * Math.cos(radians);
+        const y = tableHeight / 2 + tableHeight / 2 * Math.sin(radians);
+
+        playerPositions[`x${i}`] = x;
+        playerPositions[`y${i}`] = y;
+    }
+
+    return playerPositions;
+}
+
 
 // Mapping des rangs de cartes pour les images
 const rankMap = {
@@ -141,12 +164,12 @@ const rankMap = {
 };
 
 // Configuration des différents types de jeux
-const games = {
+const games_logic = {
     'holdem': ['hold', 'holdem', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 2)]],
     '2_holdem': ['hold', null, 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 3)]],
     '6_holdem': ['hold', null, 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 2)]],
     'omahahi': ['hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
-    'fusion': ['hold', 'fusion', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
+    'fusion': ['hold', 'fusion', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 2), (0, 3), (0, 4)]],
     'omahahilo': ['hold', 'omaha8', 's', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
     'irish': ['hold', null, 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 4)]],
     '5_omahahi': ['hold', 'omaha', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 5)]],
@@ -183,46 +206,17 @@ const games = {
                  [(0, 5), (5, 10), (10, 15), (15, 20)]]
 };
 
-// ------------------------
-// Fonctions Utilitaires
-// ------------------------
-// Fonctions JavaScript correspondant aux fonctions Python
 
-// Simulation de la méthode keyPressEvent
-document.addEventListener('keydown', function(event) {
-    const stateSlider = document.getElementById('stateSlider');
-    const sliderValue = stateSlider.value;
+// functions
 
-    switch (event.key) {
-        case 'ArrowLeft':
-            stateSlider.value = Math.max(0, sliderValue - 1);
-            break;
-        case 'ArrowRight':
-            stateSlider.value = Math.min(stateSlider.max, Number(sliderValue) + 1);
-            break;
-        // Gestion des flèches haut et bas - nécessite une logique supplémentaire
-    }
-});
-
-function displayBasicHandInfo(hand) {
-    // Affiche des informations de base comme le numéro de la main, les blinds, etc.
-    document.getElementById('handNumber').textContent = `${hand.handid}`;
-    document.getElementById('blinds').textContent = `${hand.sb}/${hand.bb}`;
-    document.getElementById('tableName').textContent = `${hand.tablename}`;
-    document.getElementById('siteName').textContent = `${hand.site}`;
-    document.getElementById('heroName').textContent = `${hand.hero || 'N/A'}`;
-    document.getElementById('limitType').textContent = `${hand.gametype.limitType || 'N/A'}`;
-    document.getElementById('gameType').textContent = `${hand.gametype.category || 'N/A'}`;
-    document.getElementById('currency').textContent = `${hand.gametype.currency || 'Play money'}`;
-}
-
-
-
-
-
-
-// Remplacement d'une carte
-function replaceCard(cardElementId, cardDeckId) {
+/**
+ * Replaces a card element with a new SVG card from a deck.
+ *
+ * @param {string} cardElementId - The ID of the card element in the DOM.
+ * @param {string} cardDeckId - The ID of the SVG deck containing the card.
+ * @returns {void}
+ */
+ function replaceCard(cardElementId, cardDeckId) {
     // Get the card element in your application's DOM.
     const cardElement = document.getElementById(cardElementId);
 
@@ -245,60 +239,109 @@ function replaceCard(cardElementId, cardDeckId) {
 }
 
 
-
-// Calcul des positions des joueurs autour de la table
-const players = (numPlayers) => {
-    const playerPositions = {};
-    const tableWidth = 920; // Adjust the width of your table as needed
-    const tableHeight = 560; // Adjust the height of your table as needed
-
-    for (let i = 1; i <= numPlayers; i++) {
-        const angle = (i - 1) * (360 / numPlayers);
-        const radians = (angle * Math.PI) / 180;
-        const x = tableWidth / 2 + tableWidth / 2 * Math.cos(radians);
-        const y = tableHeight / 2 + tableHeight / 2 * Math.sin(radians);
-
-        playerPositions[`x${i}`] = x;
-        playerPositions[`y${i}`] = y;
+/**
+ * Checks the type of a specific game in the games object.
+ *
+ * @param {Object} games - The games object.
+ * @param {string} gameType - The game type to check.
+ * @returns {string} - The type of the game ('array', 'string', 'number', 'object', etc.), or 'undefined' if the game type is not found.
+ */
+ function checkTypeOfGame(games, gameType) {
+    if (!games || !games.hasOwnProperty(gameType)) {
+        console.error(`game type '${gameType}' not found.`);
+        return 'undefined';
     }
 
-    return playerPositions;
-    };
+    const value = games[gameType][5][0];
 
-// Assemblage des cartes cachées d'un joueur
-function joinHoleCards(player, asList = false) {
-    const holeNo = games[hand.gametype.category][5][0][1];
+    if (Array.isArray(value)) {
+        return 'array';
+    } else {
+        console.log(value);
+        return typeof value;  // 'string', 'number', 'object', etc.
+    }
+}
+
+
+/**
+ * Returns the value at position 5 of a specific game type in the games object.
+ *
+ * @param {Object} games - The games object.
+ * @param {string} gameType - The game type to retrieve the value from.
+ * @returns {any} - The value at position 5 of the game type, or null if not found or the structure is not as expected.
+ */
+ function getPositionFiveValue(games, gameType) {
+    if (games && games.hasOwnProperty(gameType)) {
+        const gameTypeInfo = games[gameType];
+        const gamesType = checkTypeOfGame(games, gameType);
+        //console.log("Type de game:", gamesType);
+        //console.log(gamesType.toString)
+        // Vérification si gameTypeInfo est un tableau et contient l'élément en position 5
+        if (Array.isArray(gameTypeInfo) && gameTypeInfo.length > 5) {
+
+            return gameTypeInfo[5][0];
+        } else {
+            console.error(`'${gameType}' found, but its structure is not as expected.`);
+            return null;
+        }
+    } else {
+        console.error(`game type '${gameType}' not found.`);
+        return null;
+    }
+}
+
+
+/**
+ * Joins the hole cards of a player into a string or list format.
+ *
+ * @param {string} player - The player whose hole cards to join.
+ * @param {boolean} [asList=false] - Whether to return the hole cards as a list or a string. Default is false.
+ * @returns {string|Array} - The joined hole cards as a string or a list, depending on the value of `asList`.
+ */
+ function joinHoleCards(player, asList = false) {
+    const holeNo = getPositionFiveValue(games_logic, hand.gametype.category);
+    console.log("holeNo",holeNo)
     const hcs = new Array(holeNo).fill('0x');
 
-    if (hand.gametype.category === 'fusion') {
+    if (hand.gametype.category == 'fusion') {
+        console.log("fusion detected", player);
         for (const street of hand.holeStreets) {
-            if (player in Object.keys(hand.holecards[street])) {
+            console.log("fusion street detected", street);
+            //console.log("holecards", hand.holecards[street][player]);
+            if (hand.holecards[street][player]) {
+                console.log("fusion player detected", player);
+
                 if (street === 'PREFLOP') {
+                    console.log("fusion PREFLOP detected");
                     if (hand.holecards[street][player][1].length === 1) continue;
+                    console.log("fusion PREFLOP detected case 1");
                     for (let i = 0; i < 2; i++) {
                         hcs[i] = hand.holecards[street][player][1][i];
                         hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
                     }
-                    try {
-                        for (let i = 2; i < holeNo; i++) {
-                            hcs[i] = hand.holecards[street][player][1][i];
-                            hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
-                        }
-                    } catch (error) {
-                        console.log("Why did we get an index error?");
-                    }
-                } else if (street === 'FLOP') {
-                    if (hand.holecards[street][player][1].length === 1) continue;
-                    hcs[2] = hand.holecards[street][player][0][0];
-                    hcs[2] = hcs[2].charAt(0).toUpperCase() + hcs[2].slice(1);
-                } else if (street === 'TURN') {
-                    if (hand.holecards[street][player][1].length === 1) continue;
-                    hcs[3] = hand.holecards[street][player][0][0];
+                } 
+                else if (street === 'FLOP') {
+                    if (hand.holecards[street]['PREFLOP'][1].length === 1) continue;
+                        hcs[2] = hand.holecards['PREFLOP'][player][0][0];
+                        hcs[2] = hcs[2].charAt(0).toUpperCase() + hcs[2].slice(1);
+                } 
+                else if (street === 'TURN') {
+                    if (hand.holecards['PREFLOP'][player][1].length === 1) continue;
+                    hcs[3] = hand.holecards['PREFLOP'][player][0][0];
                     hcs[3] = hcs[3].charAt(0).toUpperCase() + hcs[3].slice(1);
                 }
             }
         }
+    } else if (hand.gametype.category === 'fivedraw') {
+        // Pour le 5 card draw, toutes les cartes sont distribuées dans la street 'DEAL'
+        if (player in hand.holecards['DEAL']) {
+            const playerCards = hand.holecards['DEAL'][player][1];
+            for (let i = 0; i < playerCards.length; i++) {
+                hcs[i] = playerCards[i].charAt(0).toUpperCase() + playerCards[i].slice(1);
+            }
+        }
     } else {
+        console.log("game not detected");
         for (const street of hand.holeStreets) {
             if (player in Object.keys(hand.holecards[street])) {
                 if (hand.holecards[street][player][1].length === 1) continue;
@@ -319,48 +362,17 @@ function joinHoleCards(player, asList = false) {
     }
 
     if (asList) {
+        console.log("Hole cards as list: ", hcs);
         return hcs;
-        consol.log(hcs);
-    } else {
+        
+    } 
+    else {
+        console.log("Hole cards as string: ", hcs.join(" "));
         return hcs.join(" ");
-        consol.log(hcs.join(" "));
+        
     }
 }
 
-// ------------------------
-// Classes pour la logique du jeu
-// ------------------------
-// Classe ICM
-class ICM {
-    constructor(stacks, payouts) {
-        this.stacks = stacks;
-        this.payouts = payouts;
-        this.equities = [];
-        this.prepare();
-    }
-
-    prepare() {
-        const total = this.stacks.reduce((acc, val) => acc + val, 0);
-        this.stacks.forEach((stack, index) => {
-            this.equities.push(Number(this.getEquities(total, index, 0).toFixed(4)));
-        });
-    }
-
-    getEquities(total, player, depth) {
-        let eq = (this.stacks[player] / total) * this.payouts[depth];
-        if (depth + 1 < this.payouts.length) {
-            this.stacks.forEach((stack, i) => {
-                if (i !== player && stack > 0) {
-                    const originalStack = this.stacks[i];
-                    this.stacks[i] = 0;
-                    eq += this.getEquities(total - stack, player, depth + 1) * (stack / total);
-                    this.stacks[i] = originalStack;
-                }
-            });
-        }
-        return eq;
-    }
-}
 
 
 // Classe Player
@@ -375,20 +387,9 @@ class Player {
         this.holecards = joinHoleCards(name, true);
         this.streetcards = {};
 
-        if (hand.gametype.base === 'draw') {
-        for (const street of hand.actionStreets.slice(1)) {
-            this.streetcards[street] = joinHoleCards(name, true, street);
-        }
-        this.holecards = this.streetcards[hand.actionStreets[1]];
-        } else if (hand.gametype.base === 'stud') {
-        for (let i = 0; i < hand.actionStreets.slice(1).length; i++) {
-            this.streetcards[hand.actionStreets[i + 1]] = this.holecards.slice(0, i + 3);
-        }
-        this.holecards = this.streetcards[hand.actionStreets[1]];
-        }
 
-        this.x = 0.5 * Math.cos((2 * this.seat * Math.PI) / hand.maxseats);
-        this.y = 0.8 * Math.sin((2 * this.seat * Math.PI) / hand.maxseats);
+
+
     }
 
     setAction(action) {
@@ -452,9 +453,12 @@ class Player {
     }
     }
 
-// Classe TableState
+
+// class TableState
+
 class TableState {
     constructor(hand) {
+        // Initialisations existantes
         this.pot = 0;
         this.street = null;
         this.board = hand.board;
@@ -467,213 +471,145 @@ class TableState {
         this.allinThisStreet = false;
         this.newpot = 0;
 
+        // Création d'objets Player pour chaque joueur dans la main
         this.players = {};
-
         for (const items of hand.players) {
-        this.players[items[1]] = new Player(hand, items[1], items[2], parseInt(items[0]));
+            this.players[items[1]] = new Player(hand, items[1], items[2], parseInt(items[0]));
+            console.log(this.players[items[1]]);
         }
+
+        // Afficher les informations initiales de la main
+        this.displayHandInfo(hand);
     }
 
+    // Méthode pour démarrer une nouvelle phase de jeu
     startPhase(phase) {
         this.street = phase;
         this.newpot = this.newpot;
 
-        if (phase === 'BLINDSANTES' || phase === 'PREFLOP' || phase === 'DEAL') {
-        return;
-        }
+        // Logique pour gérer le début d'une nouvelle phase
+        // ...
 
-        this.renderBoard.add(phase);
-
-        for (const player of Object.values(this.players)) {
-        player.justacted = false;
-        if (player.chips > this.called) {
-            player.stack += player.chips - this.called;
-            player.chips = this.called;
-        }
-
-        this.pot += player.chips;
-        player.chips = 0;
-
-        if (phase === 'THIRD' || phase === 'FOURTH' || phase === 'FIFTH' || phase === 'SIXTH' || phase === 'SEVENTH') {
-            player.holecards = player.streetcards[this.street];
-        }
-        }
-
-        this.bet = 0;
-        this.called = 0;
-        this.allinThisStreet = false;
+        // Afficher les cartes des joueurs pour la phase actuelle
+        this.displayPlayerCards(phase);
     }
 
+    // Méthode pour mettre à jour l'état de la table en fonction des actions des joueurs
     updateForAction(action) {
-        for (const player of Object.values(this.players)) {
-        player.justacted = false;
-        }
+        // Logique pour gérer les actions des joueurs
+        // ...
 
-        const player = this.players[action[0]];
-        player.action = action[1];
-        player.justacted = true;
-
-        if (action[1] === 'folds' || action[1] === 'checks') {
-        // Do nothing
-        } else if (action[1] === 'raises' || action[1] === 'bets') {
-        if (this.allinThisStreet) {
-            this.called = this.bet;
-        } else {
-            this.called = 0;
-        }
-        const diff = this.bet - player.chips;
-        this.bet += action[2];
-        player.chips += action[2] + diff;
-        player.stack -= action[2] + diff;
-        this.newpot += action[2] + diff;
-        } else if (action[1] === 'big blind') {
-        this.bet = action[2];
-        player.chips += action[2];
-        player.stack -= action[2];
-        this.newpot += action[2];
-        } else if (action[1] === 'calls' || action[1] === 'small blind' || action[1] === 'secondsb') {
-        player.chips += action[2];
-        player.stack -= action[2];
-        this.called = Math.max(this.called, player.chips);
-        this.newpot += action[2];
-        } else if (action[1] === 'both') {
-        player.chips += action[2];
-        player.stack -= action[2];
-        this.newpot += action[2];
-        } else if (action[1] === 'ante') {
-        this.pot += action[2];
-        player.stack -= action[2];
-        this.newpot += action[2];
-        } else if (action[1] === 'discards') {
-        player.action += ' ' + action[2];
-        if (action.length > 3) {
-            player.holecards = player.streetcards[this.street];
-        }
-        } else if (action[1] === 'stands pat') {
-        // Do nothing
-        } else if (action[1] === 'bringin') {
-        player.chips += action[2];
-        player.stack -= action[2];
-        this.newpot += action[2];
-        } else {
-        console.log('Unhandled action: ' + action);
-        }
-
-        if (player.stack === 0) {
-        this.allinThisStreet = true;
-        }
+        // Mettre à jour l'affichage après l'action
+        this.updateDisplayAfterAction(action);
     }
 
-    endHand(collectees, returned) {
-        this.pot = 0;
-
-        for (const player of Object.values(this.players)) {
-        player.justacted = false;
-        player.chips = 0;
-
-        if (this.gamebase === 'draw') {
-            player.holecards = player.streetcards[this.street];
-        }
-        }
-
-        for (const [name, amount] of Object.entries(collectees)) {
-        this.players[name].chips += amount;
-        this.players[name].action = 'collected';
-        this.players[name].justacted = true;
-        }
-
-        for (const [name, amount] of Object.entries(returned)) {
-        this.players[name].stack += amount;
-        }
-    }
+    // Méthode pour afficher les informations de base de la main
+    displayHandInfo(hand) {
+        // Affiche des informations de base comme le numéro de la main, les blinds, etc.
+        document.getElementById('handNumber').textContent = `${hand.handid}`;
+        document.getElementById('blinds').textContent = `${hand.sb}/${hand.bb}`;
+        document.getElementById('tableName').textContent = `${hand.tablename}`;
+        document.getElementById('siteName').textContent = `${hand.site}`;
+        document.getElementById('heroName').textContent = `${hand.hero || 'N/A'}`;
+        document.getElementById('limitType').textContent = `${hand.gametype.limitType || 'N/A'}`;
+        document.getElementById('gameType').textContent = `${hand.gametype.category || 'N/A'}`;
+        document.getElementById('currency').textContent = `${hand.gametype.currency || 'Play money'}`;
     }
 
-// ------------------------
-// Initialisation et Logique Principale
-// ------------------------
+    // Méthode pour afficher les cartes des joueurs en fonction de la phase
+    displayPlayerCards(phase) {
 
-// Create a JavaScript variable using the Python value
-var hand = JSON.parse(document.getElementById("hand").getAttribute("data-hand"));
-const tableState = new TableState(hand);
-displayBasicHandInfo(hand)
-const holecards = hand.holecards;
-
-// Determine the number of players from the players object in tablestate
-numPlayers = Object.keys(tableState.players).length;
-
-// Find the maximum seat number
-const maxSeat = Math.max(...Object.values(tableState.players).map(player => player.seat));
-
-// Calculate missing seats
-missing_seats = maxSeat - numPlayers;
-
-// If there are missing seats, adjust the number of players
-if (missing_seats > 0) {
-    numPlayers = maxSeat;
-    }
-
-playerPositions = players(numPlayers);
-
-
-
-
-// Loop through the player positions and create div elements for each player seat
-for (let seat = 1; seat <= maxSeat; seat++) {
-    const player = Object.values(tableState.players).find(player => player.seat === seat);
-
-    // Check if a player with the current seat exists
-    if (player) {
-        const playerName = player.name;
-        let holeCardsHTML = '';
-
-        if (holecards.PREFLOP && holecards.PREFLOP[playerName]) {
-            // If hole cards are available for this player in PREFLOP
-            const holeCardsArray = holecards.PREFLOP[playerName][1];
-
-            // Convert the cards to images with reduced size
-            const cardImages = holeCardsArray.map(card => {
-                const rank = rankMap[card[0]];
-                const suit = card[1].toLowerCase();
-                const card_image_url = `/static/fourcolor/${rank}_${suit}.svg`;
-                return `<img src="${card_image_url}" class="card-image-small">`; // Add a class for small card images
-            });
-
-            holeCardsHTML = `<div class="hole-cards-row">${cardImages.join('')}</div>`;
-        } else {
-            // If player name not found in holecards
-            let backCardHTML = '';
-            if (tableState.gametype === 'omahahi') {
-                // If game type is omahahi, add 4 back cards
-                backCardHTML = '<div class="hole-cards-row">';
-                for (let i = 0; i < 4; i++) {
-                    backCardHTML += '<img src="/static/backDeck10.svg" class="card-image-small">';
-                }
-                backCardHTML += '</div>';
-            } else {
-                // If game type is not omahahi, add 2 back cards
-                backCardHTML = '<div class="hole-cards-row">';
-                for (let i = 0; i < 2; i++) {
-                    backCardHTML += '<img src="/static/backDeck10.svg" class="card-image-small">';
-                }
-                backCardHTML += '</div>';
+        const holecards = hand.holecards;
+        console.log("holecards", holecards);
+        // Determine the number of players from the players object in tablestate
+        console.log("hand.players", hand.players); 
+        const numPlayers = hand.players.length;
+        console.log("numPlayers", numPlayers);
+        // Find the maximum seat number
+        const maxSeat = Math.max(...Object.values(tableState.players).map(player => player.seat));
+        console.log("maxSeat", maxSeat);
+        // Calculate missing seats
+        const missing_seats = maxSeat - numPlayers;
+        console.log("missing_seats", missing_seats);
+        // If there are missing seats, adjust the number of players
+        if (missing_seats > 0) {
+            const numPlayers = maxSeat;
             }
-            holeCardsHTML = backCardHTML;
+
+
+        const playerPositions = players_positions(maxSeat);
+        console.log("playerPositions", playerPositions);    
+        
+        // Loop through each player in tableState.players
+        for (let seat = 1; seat <= maxSeat; seat++) {
+            // Trouver le joueur qui occupe ce siège
+            const player = Object.values(tableState.players).find(p => p.seat === seat);
+            console.log("player", player);
+            if (player === undefined) {
+                console.log(`No player found for seat ${seat}`);
+            }
+            else {
+                let holeCardsHTML = '';
+
+                // Utiliser les holecards du joueur
+                if (player.holecards && player.holecards.length > 0) {
+                    const cardImages = player.holecards.map(card => {
+                        if (card !== '0x') {
+                            const rank = rankMap[card[0]];
+                            const suit = card[1].toLowerCase();
+                            const card_image_url = `/static/fourcolor/${rank}_${suit}.svg`;
+                            return `<img src="${card_image_url}" class="card-image-small">`;
+                        } else {
+                            return '<img src="/static/backDeck10.svg" class="card-image-small">';
+                        }
+                    });
+
+                    holeCardsHTML = `<div class="hole-cards-row">${cardImages.join('')}</div>`;
+                } else {
+                    holeCardsHTML = '<div class="hole-cards-row">';
+                    for (let i = 0; i < (tableState.gametype === 'omahahi' ? 4 : 2); i++) {
+                        holeCardsHTML += '<img src="/static/backDeck10.svg" class="card-image-small">';
+                    }
+                    holeCardsHTML += '</div>';
+                }
+
+                const playerDiv = document.createElement("div");
+                playerDiv.classList.add("player", "position-absolute", "text-center");
+                // Utiliser la position du joueur calculée
+                const positionX = playerPositions[`x${player.seat}`];
+                const positionY = playerPositions[`y${player.seat}`];
+                playerDiv.style.left = `${positionX}px`;
+                playerDiv.style.top = `${positionY}px`;
+                playerDiv.innerHTML = `<div>${holeCardsHTML}</div>`;
+                playerDiv.innerHTML += `<span class="badge bg-primary">${player.name}<br>${player.stack}</span>`;
+
+                const pokerTable = document.getElementById("poker-table");
+                pokerTable.appendChild(playerDiv);
+            }
+        
         }
 
-        const playerDiv = document.createElement("div");
-        playerDiv.classList.add("player", "position-absolute",  "text-center"); // Use Bootstrap's position-absolute class
-        playerDiv.style.left = `${playerPositions[`x${seat}`]}px`;
-        playerDiv.style.top = `${playerPositions[`y${seat}`]}px`;
-        playerDiv.innerHTML = `<div>${holeCardsHTML}</div>`;
-        playerDiv.innerHTML += `<span class="badge bg-primary">${playerName}<br>${player.stack}</span>`;
 
-        const pokerTable = document.getElementById("poker-table");
-        pokerTable.appendChild(playerDiv);
+    }
+
+    // Méthode pour mettre à jour l'affichage après une action
+    updateDisplayAfterAction(action) {
+        // Logique pour mettre à jour l'affichage après une action
+        // ...
     }
 }
 
+// logique du jeu
+// Création de l'objet hand à partir des données du jeu
+var hand = JSON.parse(document.getElementById("hand").getAttribute("data-hand"));
 
+// Initialisation de l'état de la table avec l'objet hand
+const tableState = new TableState(hand);
 
+// Démarrer la première phase du jeu
+tableState.startPhase('PREFLOP');
+
+// Gérer les actions des joueurs (ex : un bouton est cliqué pour effectuer une action)
 
 
 
