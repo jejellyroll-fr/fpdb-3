@@ -69,6 +69,8 @@
             gap: 0px;
         }
 
+
+
     </style>
 
 </head>
@@ -93,13 +95,16 @@
 
     <!-- Colonne Centrale (Table de Poker et Contrôles) -->
     <div id="center-column" style="flex: 3;">
+        <img id="dealerButton" src="/static/dealer.png" alt="Dealer" style="display: none;">
         <div id="poker-table">
             <img src="{{ table_image_url }}" class="table-image">
         </div>
         <div id="hand" data-hand="{{ hand }}"></div>
         <div id="controlPanel">
             <!-- Boutons et Slider -->
-            <input type="range" id="stateSlider">
+            <input type="range" id="stateSlider" min="0" max="4" step="1">
+            <div id="sliderLabel" style="text-align: center; margin-top: 10px;">Current Phase: <span id="currentPhase"></span></div>
+
             <div id="buttonGroup">
                 <button type="submit" class="btn btn-secondary" id="prevButton">Prev</button>
                 <button type="submit" class="btn btn-secondary" id="startButton">Start</button>
@@ -208,6 +213,7 @@ const games_logic = {
 
 
 // functions
+
 
 /**
  * Replaces a card element with a new SVG card from a deck.
@@ -321,7 +327,7 @@ const games_logic = {
                     }
                 } 
                 else if (street === 'FLOP') {
-                    if (hand.holecards[street]['PREFLOP'][1].length === 1) continue;
+                    if (hand.holecards['PREFLOP'][player][1].length === 1) continue;
                         hcs[2] = hand.holecards['PREFLOP'][player][0][0];
                         hcs[2] = hcs[2].charAt(0).toUpperCase() + hcs[2].slice(1);
                 } 
@@ -332,15 +338,184 @@ const games_logic = {
                 }
             }
         }
-    } else if (hand.gametype.category === 'fivedraw') {
+    } else if (hand.gametype.category === 'fivedraw'  ||  hand.gametype.category === '27_1draw' || hand.gametype.category === 'a5_1draw') {
         // Pour le 5 card draw, toutes les cartes sont distribuées dans la street 'DEAL'
         if (player in hand.holecards['DEAL']) {
             const playerCards = hand.holecards['DEAL'][player][1];
             for (let i = 0; i < playerCards.length; i++) {
                 hcs[i] = playerCards[i].charAt(0).toUpperCase() + playerCards[i].slice(1);
             }
+        } else if (player in hand.holecards['DRAWONE']) {
+            const playerCards = hand.holecards['DRAWONE'][player][1];
+            for (let i = 0; i < playerCards.length; i++) {
+                hcs[i] = playerCards[i].charAt(0).toUpperCase() + playerCards[i].slice(1);
+            } 
+        
         }
-    } else {
+    } else if ( hand.gametype.category === '27_3draw' || hand.gametype.category === 'badugi' || hand.gametype.category === 'a5_3draw' || hand.gametype.category === 'badacey' || hand.gametype.category === 'badeucey' || hand.gametype.category === 'drawmaha') {
+        // Pour le 5 card draw, toutes les cartes sont distribuées dans la street 'DEAL'
+        if (player in hand.holecards['DEAL']) {
+            const playerCards = hand.holecards['DEAL'][player][1];
+            for (let i = 0; i < playerCards.length; i++) {
+                hcs[i] = playerCards[i].charAt(0).toUpperCase() + playerCards[i].slice(1);
+            }
+        } else if (player in hand.holecards['DRAWONE']) {
+            const playerCards = hand.holecards['DRAWONE'][player][1];
+            for (let i = 0; i < playerCards.length; i++) {
+                hcs[i] = playerCards[i].charAt(0).toUpperCase() + playerCards[i].slice(1);
+            } 
+        
+        }
+
+    } else if (hand.gametype.category == '6_holdem' || hand.gametype.category == 'holdem') {
+        console.log("shortdeck detected", player);
+        for (const street of hand.holeStreets) {
+            console.log("shortdeck street detected", street);
+            //console.log("holecards", hand.holecards[street][player]);
+            if (hand.holecards[street][player]) {
+                console.log("shortdeck player detected", player);
+
+                if (street === 'PREFLOP') {
+                    console.log("shortdeck PREFLOP detected");
+                    if (hand.holecards[street][player][1].length === 1) continue;
+                    console.log("shortdeck PREFLOP detected case 1");
+                    for (let i = 0; i < 2; i++) {
+                        hcs[i] = hand.holecards[street][player][1][i];
+                        hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
+                    }
+                }
+            }
+        }
+    } else if (hand.gametype.category == '2_holdem' ) {
+        console.log("double holdem detected", player);
+        for (const street of hand.holeStreets) {
+            console.log("double holdem street detected", street);
+            //console.log("holecards", hand.holecards[street][player]);
+            if (hand.holecards[street][player]) {
+                console.log("double holdem player detected", player);
+
+                if (street === 'PREFLOP') {
+                    console.log("double holdem PREFLOP detected");
+                    if (hand.holecards[street][player][1].length === 1) continue;
+                    console.log("double holdemk PREFLOP detected case 1");
+                    for (let i = 0; i < 3; i++) {
+                        hcs[i] = hand.holecards[street][player][1][i];
+                        hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
+                    }
+                }
+            }
+        }
+    } else if (hand.gametype.category == 'omahahi' || hand.gametype.category == 'omahahilo' || hand.gametype.category == 'aof_omaha') {
+        console.log("omaha detected", player);
+        for (const street of hand.holeStreets) {
+            console.log("omaha street detected", street);
+            //console.log("holecards", hand.holecards[street][player]);
+            if (hand.holecards[street][player]) {
+                console.log("omaha player detected", player);
+
+                if (street === 'PREFLOP') {
+                    console.log("omaha PREFLOP detected");
+                    if (hand.holecards[street][player][1].length === 1) continue;
+                    console.log("omaha PREFLOP detected case 1");
+                    for (let i = 0; i < 4; i++) {
+                        hcs[i] = hand.holecards[street][player][1][i];
+                        hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
+                    }
+                }
+            }
+        }
+    } else if (hand.gametype.category == '5_omahahi' || hand.gametype.category == '5_omaha8' || hand.gametype.category == 'cour_hi' || hand.gametype.category == 'cour_hilo') {
+        console.log("omaha 5 cards detected", player);
+        for (const street of hand.holeStreets) {
+            console.log("omaha 5 cards street detected", street);
+            //console.log("holecards", hand.holecards[street][player]);
+            if (hand.holecards[street][player]) {
+                console.log("omaha 5 cards player detected", player);
+
+                if (street === 'PREFLOP') {
+                    console.log("omaha 5 cards PREFLOP detected");
+                    if (hand.holecards[street][player][1].length === 1) continue;
+                    console.log("omaha 5 cards PREFLOP detected case 1");
+                    for (let i = 0; i < 5; i++) {
+                        hcs[i] = hand.holecards[street][player][1][i];
+                        hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
+                    }
+                }
+            }
+        }
+    } else if (hand.gametype.category == '6_omahahi' || hand.gametype.category == '6_omaha8') {
+        console.log("omaha 6 cards detected", player);
+        for (const street of hand.holeStreets) {
+            console.log("omaha 6 cards street detected", street);
+            //console.log("holecards", hand.holecards[street][player]);
+            if (hand.holecards[street][player]) {
+                console.log("omaha 6 cards player detected", player);
+
+                if (street === 'PREFLOP') {
+                    console.log("omaha 6 cards PREFLOP detected");
+                    if (hand.holecards[street][player][1].length === 1) continue;
+                    console.log("omaha 6 cards PREFLOP detected case 1");
+                    for (let i = 0; i < 6; i++) {
+                        hcs[i] = hand.holecards[street][player][1][i];
+                        hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
+                    }
+                }
+            }
+        }
+    } else if (hand.gametype.category == 'studhilo' || hand.gametype.category == 'studhi' || hand.gametype.category == 'razz') {
+        console.log("stud 7 cards detected", player);
+        for (const street of hand.holeStreets) {
+            console.log("stud street detected", street);
+            if (hand.holecards[street][player]) {
+                console.log("stud player detected", player);
+
+                if (street === 'THIRD') {
+                    console.log("stud THIRD detected");
+                    const streetCards = hand.holecards[street][player][0];
+                    if (streetCards.length === 1) {
+                        console.log("stud THIRD detected case 1");
+                        // Assurez-vous que streetCards[0] est une chaîne
+                        if (typeof streetCards[0] === 'string') {
+                            hcs[0] = streetCards[0].charAt(0).toUpperCase() + streetCards[0].slice(1);
+                        }
+                    }
+                    if (hand.holecards[street][player][1].length === 1) continue;
+                    console.log("stud THIRD detected case 2");
+                    for (let i = 1; i < 3; i++) {
+                        hcs[i] = hand.holecards[street][player][1][i-1];
+                        hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
+                    }
+                }
+            }
+        }    
+    } else if (hand.gametype.category == '5_studhi' || hand.gametype.category == '27_razz' ) {
+        console.log("stud 5 cards detected", player);
+        for (const street of hand.holeStreets) {
+            console.log("stud street detected", street);
+            if (hand.holecards[street][player]) {
+                console.log("stud player detected", player);
+
+                if (street === 'THIRD') {
+                    console.log("stud THIRD detected");
+                    const streetCards = hand.holecards[street][player][0];
+                    if (streetCards.length === 1) {
+                        console.log("stud THIRD detected case 1");
+                        // Assurez-vous que streetCards[0] est une chaîne
+                        if (typeof streetCards[0] === 'string') {
+                            hcs[0] = streetCards[0].charAt(0).toUpperCase() + streetCards[0].slice(1);
+                        }
+                    }
+                    if (hand.holecards[street][player][1].length === 1) continue;
+                    console.log("stud THIRD detected case 2");
+                    for (let i = 1; i < 3; i++) {
+                        hcs[i] = hand.holecards[street][player][1][i-1];
+                        hcs[i] = hcs[i].charAt(0).toUpperCase() + hcs[i].slice(1);
+                    }
+                }
+            }
+        }    
+}
+ else {
         console.log("game not detected");
         for (const street of hand.holeStreets) {
             if (player in Object.keys(hand.holecards[street])) {
@@ -382,7 +557,7 @@ class Player {
         this.chips = 0;
         this.seat = seat;
         this.name = name;
-        this.action = null;
+        this.action = {};
         this.justacted = false;
         this.holecards = joinHoleCards(name, true);
         this.streetcards = {};
@@ -392,67 +567,13 @@ class Player {
 
     }
 
-    setAction(action) {
-        for (const player of Object.values(this.players)) {
-        player.justacted = false;
+    setAction(street, actionDetails) {
+        if (!this.action[street]) {
+            this.action[street] = []; // Initialise le tableau pour cette street
         }
-
-        this.action = action[1];
-        this.justacted = true;
-
-        if (this.action === 'folds' || this.action === 'checks') {
-        // Do nothing
-        } else if (this.action === 'raises' || this.action === 'bets') {
-        if (this.allinThisStreet) {
-            this.called = this.bet;
-        } else {
-            this.called = 0;
-        }
-        const diff = this.bet - this.chips;
-        this.bet += action[2];
-        this.chips += action[2] + diff;
-        this.stack -= action[2] + diff;
-        this.newpot += action[2] + diff;
-        } else if (this.action === 'big blind') {
-        this.bet = action[2];
-        this.chips += action[2];
-        this.stack -= action[2];
-        this.newpot += action[2];
-        } else if (this.action === 'calls' || this.action === 'small blind' || this.action === 'secondsb') {
-        this.chips += action[2];
-        this.stack -= action[2];
-        this.called = Math.max(this.called, this.chips);
-        this.newpot += action[2];
-        } else if (this.action === 'both') {
-        this.chips += action[2];
-        this.stack -= action[2];
-        this.newpot += action[2];
-        } else if (this.action === 'ante') {
-        this.pot += action[2];
-        this.stack -= action[2];
-        this.newpot += action[2];
-        } else if (this.action === 'discards') {
-        this.action += ' ' + action[2];
-        if (action.length > 3) {
-            // Must be hero as we have discard information.  Update holecards now.
-            this.holecards = this.streetcards[this.street];
-        }
-        } else if (this.action === 'stands pat') {
-        // Do nothing
-        } else if (this.action === 'bringin') {
-        this.chips += action[2];
-        this.stack -= action[2];
-        this.newpot += action[2];
-        } else {
-        console.log('Unhandled action: ' + action);
-        }
-
-        if (this.stack === 0) {
-        this.allinThisStreet = true;
-        }
+        this.action[street].push(actionDetails); // Ajoute l'action à la bonne street
     }
-    }
-
+}
 
 // class TableState
 
@@ -470,17 +591,27 @@ class TableState {
         this.allin = false;
         this.allinThisStreet = false;
         this.newpot = 0;
+        this.currentStreet = null;
+        this.currentActionIndex = 0;
+        this.initializeReplayer();
 
         // Création d'objets Player pour chaque joueur dans la main
         this.players = {};
         for (const items of hand.players) {
+            console.log("instantiate Player item", items);
+            console.log("instantiate hand Player", hand.players);
             this.players[items[1]] = new Player(hand, items[1], items[2], parseInt(items[0]));
-            console.log(this.players[items[1]]);
+            console.log("instantiate Player", this.players[items[1]]);
         }
 
         // Afficher les informations initiales de la main
         this.displayHandInfo(hand);
     }
+
+
+        
+ 
+
 
     // Méthode pour démarrer une nouvelle phase de jeu
     startPhase(phase) {
@@ -494,13 +625,17 @@ class TableState {
         this.displayPlayerCards(phase);
     }
 
-    // Méthode pour mettre à jour l'état de la table en fonction des actions des joueurs
-    updateForAction(action) {
-        // Logique pour gérer les actions des joueurs
-        // ...
-
-        // Mettre à jour l'affichage après l'action
-        this.updateDisplayAfterAction(action);
+    // Méthode pour mettre à jour l'état de la table en fonction des actions des joueurs    processActions() {
+    processActions(street) {
+        if (hand.actions[street]) {
+            hand.actions[street].forEach(action => {
+                const playerName = action[0];
+                const actionDetails = action.slice(1);
+                if (this.players.hasOwnProperty(playerName)) {
+                    this.players[playerName].setAction(street, actionDetails);
+                }
+            });
+        }
     }
 
     // Méthode pour afficher les informations de base de la main
@@ -575,6 +710,8 @@ class TableState {
 
                 const playerDiv = document.createElement("div");
                 playerDiv.classList.add("player", "position-absolute", "text-center");
+                playerDiv.style.width = "70px"; // Largeur de la div joueur
+                playerDiv.style.height = "30px"; // Hauteur de la div joueur
                 // Utiliser la position du joueur calculée
                 const positionX = playerPositions[`x${player.seat}`];
                 const positionY = playerPositions[`y${player.seat}`];
@@ -582,6 +719,12 @@ class TableState {
                 playerDiv.style.top = `${positionY}px`;
                 playerDiv.innerHTML = `<div>${holeCardsHTML}</div>`;
                 playerDiv.innerHTML += `<span class="badge bg-primary">${player.name}<br>${player.stack}</span>`;
+                // Créer une div pour afficher les actions du joueur
+                const actionDiv = document.createElement("div");
+                actionDiv.classList.add("player-action");
+                actionDiv.style.height = "15px"; // Hauteur de la div action
+                actionDiv.id = `action-${player.name}`; // Identifiant unique pour la div action
+                playerDiv.appendChild(actionDiv); // Ajouter la div d'action à la div du joueur
 
                 const pokerTable = document.getElementById("poker-table");
                 pokerTable.appendChild(playerDiv);
@@ -591,6 +734,150 @@ class TableState {
 
 
     }
+
+    // Dans la méthode displayCurrentAction
+    displayInitialAction() {
+        if (this.currentStreet && this.currentActionIndex < hand.actions[this.currentStreet].length) {
+            const currentAction = hand.actions[this.currentStreet][this.currentActionIndex];
+            const playerName = currentAction[0];
+            const actionDetails = currentAction.slice(1).join(", ");
+            // Afficher l'action (à implémenter selon votre logique d'affichage)
+            console.log(`Player ${playerName} action: ${actionDetails}`);
+            // Trouver la div d'action du joueur et mettre à jour son contenu
+            const actionDiv = document.getElementById(`action-${playerName}`);
+            console.log("actionDiv", actionDiv);
+            if (actionDiv) {
+                actionDiv.textContent = actionDetails;
+            }
+        }
+    }
+    // Dans la méthode displayCurrentAction
+    displayCurrentAction() {
+        if (this.currentStreet && this.currentActionIndex < hand.actions[this.currentStreet].length) {
+            const currentAction = hand.actions[this.currentStreet][this.currentActionIndex];
+            const playerName = currentAction[0];
+            const actionDetails = currentAction.slice(1).join(", ");
+            // Afficher l'action (à implémenter selon votre logique d'affichage)
+            console.log(`Player ${playerName} action: ${actionDetails}`);
+            // Trouver la div d'action du joueur et mettre à jour son contenu
+            const actionDiv = document.getElementById(`action-${playerName}`);
+            console.log("actionDiv", actionDiv);
+            if (actionDiv) {
+                actionDiv.textContent = actionDetails;
+            }
+        }
+    }
+
+
+    // Méthode pour passer à l'action suivante
+    nextAction() {
+        this.clearPlayerActions(); // Effacer les actions précédentes
+        if (this.currentStreet) {
+            this.currentActionIndex++;
+            if (this.currentActionIndex >= hand.actions[this.currentStreet].length) {
+                // Toutes les actions de la street actuelle ont été traitées
+                // Passer à la street suivante
+                console.log(`start Street ${this.currentStreet} completed`);
+                if (this.currentStreet === 'BLINDSANTE') {
+
+                    this.displayCommunityCards(this.currentStreet)
+                    this.moveToNextStreet();
+                } else if (this.currentStreet === 'PREFLOP') {
+
+                    this.displayCommunityCards(this.currentStreet)
+                    this.moveToNextStreet();
+                }   else if (this.currentStreet === 'FLOP') {
+
+                    this.displayCommunityCards(this.currentStreet)
+                    this.moveToNextStreet();
+                } else if (this.currentStreet === 'TURN') {
+
+                    console.log("test turn", this.currentStreet)
+                    this.displayCommunityCards(this.currentStreet)
+                    this.moveToNextStreet();
+                }   else if (this.currentStreet === 'RIVER') {
+
+                    console.log("test river", this.currentStreet)
+                    this.displayCommunityCards(this.currentStreet)
+                    this.moveToNextStreet();
+                } else  {
+                    console.log("no board")
+                    this.moveToNextStreet();
+                }
+                console.log(`Street ${this.currentStreet} started`);    
+                
+            }
+            this.displayCurrentAction();
+        }
+    }
+
+    // Méthode pour passer à la street suivante
+    moveToNextStreet() {
+        const streets = Object.keys(hand.actions); // Obtenez toutes les streets dans l'ordre
+        const currentStreetIndex = streets.indexOf(this.currentStreet);
+        if (currentStreetIndex >= 0 && currentStreetIndex < streets.length - 1) {
+            // Passer à la street suivante
+            this.currentStreet = streets[currentStreetIndex + 1];
+            this.currentActionIndex = 0; // Réinitialiser l'index d'action
+        } else {
+            // Fin du replayer
+            this.currentStreet = null;
+        }
+    }
+
+    // Méthode pour initialiser le replayer
+    initializeReplayer() {
+        // Trouver la première street avec des actions
+        for (const street in hand.actions) {
+            if (hand.actions[street].length > 0) {
+                this.currentStreet = street;
+                this.currentActionIndex = 0;
+                break;
+            }
+        }
+        this.displayCurrentAction();
+    }
+
+    clearPlayerActions() {
+    Object.values(this.players).forEach(player => {
+        const actionDiv = document.getElementById(`action-${player.name}`);
+        if (actionDiv) {
+            actionDiv.textContent = ""; // Effacer le texte de la div d'action
+        }
+    });
+}
+
+    displayCommunityCards(street) {
+        // Extraire les cartes de la rue actuelle
+        const streetCards = hand.board[street] || [];
+        console.log("streetCards", streetCards);
+        // Afficher les cartes de la rue actuelle
+        let boardCardsHTML = '';
+        const cardImages = streetCards.map(card => {
+            if (card && card !== '0x' && card !== '') {
+                const rank = rankMap[card[0]];
+                const suit = card[1].toLowerCase();
+                const card_image_url = `/static/fourcolor/${rank}_${suit}.svg`;
+                console.log("card_image_url", card_image_url);
+                return `<img src="${card_image_url}" class="card-image-small">`;
+            }
+        });
+        boardCardsHTML = `<div class="board-cards-row">${cardImages.join('')}</div>`;
+        // Créer un nouveau div pour les cartes communautaires
+
+        const communityCardsDiv = document.createElement("div");
+        communityCardsDiv.classList.add("community-cards-container", "position-absolute", "text-center")
+        communityCardsDiv.id = 'communityCards'; // Attribuer un ID
+        communityCardsDiv.style.left = `400px`;
+        communityCardsDiv.style.top = `250px`;
+        communityCardsDiv.innerHTML = `<div>${boardCardsHTML}</div>`;
+
+        // Ajouter le div des cartes communautaires à un élément parent sur la page
+        const pokerTable = document.getElementById("poker-table");
+        pokerTable.appendChild(communityCardsDiv);
+    }
+
+
 
     // Méthode pour mettre à jour l'affichage après une action
     updateDisplayAfterAction(action) {
@@ -606,13 +893,40 @@ var hand = JSON.parse(document.getElementById("hand").getAttribute("data-hand"))
 // Initialisation de l'état de la table avec l'objet hand
 const tableState = new TableState(hand);
 
+
+
 // Démarrer la première phase du jeu
-tableState.startPhase('PREFLOP');
+if (tableState.gamebase == "hold") {
+    // Appeler la fonction avec l'objet hand approprié
 
-// Gérer les actions des joueurs (ex : un bouton est cliqué pour effectuer une action)
+    tableState.startPhase('BLINDSANTES');
+    tableState.processActions('BLINDSANTES'); 
+    tableState.displayInitialAction();
+    tableState.startPhase('PREFLOP');
+    tableState.processActions('PREFLOP'); 
+    tableState.startPhase('FLOP');
+    tableState.processActions('FLOP'); 
+    tableState.startPhase('TURN');
+    tableState.processActions('TURN'); 
+    tableState.startPhase('RIVER');
+    tableState.processActions('RIVER');
+}
+else if (tableState.gamebase == "draw") {
+    tableState.startPhase('DEAL');
+    
+} 
+else if (tableState.gamebase == "stud") {
+    tableState.startPhase('BLINDSANTES');
+    tableState.startPhase('THIRD');
+    
+}  
+else {
+    console.log("base game not found");
+}
 
-
-
+document.getElementById("nextButton").addEventListener("click", function() {
+        tableState.nextAction(); // Supposons que tableState est votre instance de TableState
+    });
 
 
     </script>
