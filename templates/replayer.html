@@ -769,44 +769,22 @@ class TableState {
     }
 
 
-    // Méthode pour passer à l'action suivante
+    // Dans la méthode nextAction
     nextAction() {
         this.clearPlayerActions(); // Effacer les actions précédentes
         if (this.currentStreet) {
+            if (this.currentActionIndex === 0) {
+                // Afficher les cartes communautaires au début de la street
+                this.displayCommunityCards(this.currentStreet);
+            }
+
             this.currentActionIndex++;
             if (this.currentActionIndex >= hand.actions[this.currentStreet].length) {
                 // Toutes les actions de la street actuelle ont été traitées
                 // Passer à la street suivante
-                console.log(`start Street ${this.currentStreet} completed`);
-                if (this.currentStreet === 'BLINDSANTE') {
-
-                    this.displayCommunityCards(this.currentStreet)
-                    this.moveToNextStreet();
-                } else if (this.currentStreet === 'PREFLOP') {
-
-                    this.displayCommunityCards(this.currentStreet)
-                    this.moveToNextStreet();
-                }   else if (this.currentStreet === 'FLOP') {
-
-                    this.displayCommunityCards(this.currentStreet)
-                    this.moveToNextStreet();
-                } else if (this.currentStreet === 'TURN') {
-
-                    console.log("test turn", this.currentStreet)
-                    this.displayCommunityCards(this.currentStreet)
-                    this.moveToNextStreet();
-                }   else if (this.currentStreet === 'RIVER') {
-
-                    console.log("test river", this.currentStreet)
-                    this.displayCommunityCards(this.currentStreet)
-                    this.moveToNextStreet();
-                } else  {
-                    console.log("no board")
-                    this.moveToNextStreet();
-                }
-                console.log(`Street ${this.currentStreet} started`);    
-                
+                this.moveToNextStreet();
             }
+
             this.displayCurrentAction();
         }
     }
@@ -819,6 +797,9 @@ class TableState {
             // Passer à la street suivante
             this.currentStreet = streets[currentStreetIndex + 1];
             this.currentActionIndex = 0; // Réinitialiser l'index d'action
+
+            // Afficher les cartes communautaires pour la nouvelle street
+            this.displayCommunityCards(this.currentStreet);
         } else {
             // Fin du replayer
             this.currentStreet = null;
@@ -832,6 +813,7 @@ class TableState {
             if (hand.actions[street].length > 0) {
                 this.currentStreet = street;
                 this.currentActionIndex = 0;
+                this.displayCommunityCards(street); // Afficher les cartes communautaires pour la première street
                 break;
             }
         }
@@ -847,35 +829,51 @@ class TableState {
     });
 }
 
-    displayCommunityCards(street) {
-        // Extraire les cartes de la rue actuelle
-        const streetCards = hand.board[street] || [];
-        console.log("streetCards", streetCards);
-        // Afficher les cartes de la rue actuelle
-        let boardCardsHTML = '';
-        const cardImages = streetCards.map(card => {
-            if (card && card !== '0x' && card !== '') {
-                const rank = rankMap[card[0]];
-                const suit = card[1].toLowerCase();
-                const card_image_url = `/static/fourcolor/${rank}_${suit}.svg`;
-                console.log("card_image_url", card_image_url);
-                return `<img src="${card_image_url}" class="card-image-small">`;
-            }
-        });
-        boardCardsHTML = `<div class="board-cards-row">${cardImages.join('')}</div>`;
-        // Créer un nouveau div pour les cartes communautaires
-
-        const communityCardsDiv = document.createElement("div");
-        communityCardsDiv.classList.add("community-cards-container", "position-absolute", "text-center")
-        communityCardsDiv.id = 'communityCards'; // Attribuer un ID
+displayCommunityCards(street) {
+    let communityCardsDiv = document.getElementById('communityCards');
+    if (!communityCardsDiv) {
+        // Si le div n'existe pas, le créer
+        communityCardsDiv = document.createElement("div");
+        communityCardsDiv.classList.add("community-cards-container", "position-absolute", "text-center");
+        communityCardsDiv.id = 'communityCards';
         communityCardsDiv.style.left = `400px`;
         communityCardsDiv.style.top = `250px`;
-        communityCardsDiv.innerHTML = `<div>${boardCardsHTML}</div>`;
 
         // Ajouter le div des cartes communautaires à un élément parent sur la page
         const pokerTable = document.getElementById("poker-table");
         pokerTable.appendChild(communityCardsDiv);
     }
+
+    // Extraire les cartes de la rue actuelle
+    const streetCards = hand.board[street] || [];
+
+    // Calculer le décalage horizontal des cartes en fonction de la street
+    let xOffset = 0;
+    if (street === 'TURN') {
+        xOffset = 50 * (hand.board['FLOP'].length); // Décaler selon le nombre de cartes au FLOP
+    } else if (street === 'RIVER') {
+        xOffset = 50 * (hand.board['FLOP'].length + (hand.board['TURN'] ? hand.board['TURN'].length : 0)); // Décaler en additionnant les cartes au FLOP et TURN
+    }
+
+    // Afficher les cartes de la rue actuelle
+    streetCards.forEach((card, index) => {
+        if (card && card !== '0x' && card !== '') {
+            const rank = rankMap[card[0]];
+            const suit = card[1].toLowerCase();
+            const card_image_url = `/static/fourcolor/${rank}_${suit}.svg`;
+
+            // Créer un div pour chaque carte avec le décalage approprié
+            const cardDiv = document.createElement("div");
+            cardDiv.classList.add("card", "position-absolute");
+            cardDiv.style.left = `${xOffset + (index * 50)}px`; // Appliquer le décalage
+            cardDiv.innerHTML = `<img src="${card_image_url}" class="card-image-small">`;
+
+            communityCardsDiv.appendChild(cardDiv);
+        }
+    });
+}
+
+
 
 
 
