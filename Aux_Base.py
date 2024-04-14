@@ -6,6 +6,8 @@ Some base classes for Aux_Hud, Mucked, and other aux-handlers.
 These classes were previously in Mucked, and have been split away
 for clarity
 """
+
+import contextlib
 #    Copyright 2008-2012,  Ray E. Barker
 #    
 #    This program is free software; you can redistribute it and/or modify
@@ -65,10 +67,8 @@ class Aux_Window(object):
     def move_windows(self, *args): pass
 
     def destroy(self):
-        try:
+        with contextlib.suppress(Exception):
             self.container.destroy()
-        except Exception:
-            pass
 
 ############################################################################
 #    Some utility routines useful for Aux_Windows
@@ -243,12 +243,10 @@ class Aux_Seats(Aux_Window):
 #   Methods likely to be of use for any Seat_Window implementation
     def destroy(self):
         """Destroy all of the seat windows."""
-        try:
+        with contextlib.suppress(AttributeError):
             for i in list(self.m_windows.keys()):
                 self.m_windows[i].destroy()
                 del(self.m_windows[i])
-        except AttributeError:
-            pass
 
 #   Methods likely to be useful for mucked card windows (or similar) only
     def hide(self):
