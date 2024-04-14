@@ -65,17 +65,13 @@ def anonymize_hand_history(file_path, hero_name):
     id_site = IdentifySite(config)
     id_site.processFile(file_path)
     set_locale_translation()
-    # Identify the file type and print the file name
-    count = 0
     for f, ffile in list(id_site.filelist.items()):
         tmp = ""
         tmp += f"{ffile.ftype} "
-        count += 1
         if ffile.ftype == "hh":
             tmp += f" {ffile.site.hhc_fname}"
         elif ffile.ftype == "summary":
             tmp += f" {ffile.site.summary}"
-        # print(tmp)
     # print(f'{count} files identified')
 
     # Sanitize the filter name and print it
