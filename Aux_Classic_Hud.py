@@ -35,6 +35,8 @@ are not immediately obvious, and there is very close linkage with most of
 the Hud modules.
 """
 
+
+import contextlib
 # import L10n
 # _ = L10n.get_translation()
 
@@ -137,19 +139,15 @@ class Classic_stat(Aux_Hud.Simple_stat):
 
         fg=self.hudcolor
         if self.stat_loth != "":
-            try:
+            with contextlib.suppress(Exception):
                 # number[1] might not be a numeric (e.g. NA)
                 if float(self.number[1]) < float(self.stat_loth):
                     fg = self.stat_locolor
-            except Exception:
-                pass
         if self.stat_hith != "":
-            try:
+            with contextlib.suppress(Exception):
                 # number[1] might not be a numeric (e.g. NA)
                 if float(self.number[1]) > float(self.stat_hith):
                     fg = self.stat_hicolor
-            except Exception:
-                pass
         self.set_color(fg=fg, bg=None)
 
         statstring = f"{self.hudprefix}{str(self.number[1])}{self.hudsuffix}"
