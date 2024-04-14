@@ -641,7 +641,7 @@ class DerivedStats(object):
             playersPots[p[1]] = [0,[]]
             potFound[p[1]] = [0,0]
             positionDict[self.handsplayers[p[1]]['position']] = p[1]
-            positions.append(self.handsplayers[p[1]]['position'])
+            positions.append(str(self.handsplayers[p[1]]['position']))
             if self.handsplayers[p[1]]['sawShowdown']:
                 showdown = True
         positions.sort(reverse=True)
