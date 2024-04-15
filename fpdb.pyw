@@ -39,15 +39,16 @@ cl_options = '.'.join(sys.argv[1:])
 from L10n import set_locale_translation
 import logging
 
-from PyQt5.QtCore import (QCoreApplication, QDate, Qt)
-from PyQt5.QtGui import (QScreen, QIcon)
-from PyQt5.QtWidgets import (QAction, QApplication, QCalendarWidget,
-                             QCheckBox, QDateEdit, QDialog,
-                             QDialogButtonBox, QFileDialog,
-                             QGridLayout, QHBoxLayout, QInputDialog,
-                             QLabel, QLineEdit, QMainWindow,
-                             QMessageBox, QPushButton, QScrollArea,
-                             QTabWidget, QVBoxLayout, QWidget, QComboBox)
+from PySide6.QtCore import QCoreApplication, QDate, Qt
+from PySide6.QtGui import QScreen, QIcon, QAction
+from PySide6.QtWidgets import QApplication, QCalendarWidget, \
+                             QCheckBox, QDateEdit, QDialog, \
+                             QDialogButtonBox, QFileDialog, \
+                             QGridLayout, QHBoxLayout, QInputDialog, \
+                             QLabel, QLineEdit, QMainWindow, \
+                             QMessageBox, QPushButton, QScrollArea, \
+                             QTabWidget, QVBoxLayout, QWidget, QComboBox
+
 
 import interlocks
 from Exceptions import *
