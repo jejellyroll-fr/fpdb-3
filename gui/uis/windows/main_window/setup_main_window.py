@@ -84,6 +84,14 @@ class SetupMainWindow:
             "is_active" : False
         },
         {
+            "btn_icon" : "icon_settings.svg",
+            "btn_id" : "btn_gui_autoimport",
+            "btn_text" : "Auto Import",
+            "btn_tooltip" : "Auto Import",
+            "show_top" : True,
+            "is_active" : False
+        },
+        {
             "btn_icon" : "icon_file.svg",
             "btn_id" : "btn_new_file",
             "btn_text" : "New File",

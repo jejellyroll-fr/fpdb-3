@@ -103,8 +103,17 @@ class MainWindow(QMainWindow):
             # Load Page 2
             MainFunctions.set_page(self, self.ui.load_pages.page_2)
 
-        # LOAD USER PAGE
+        # LOAD gui prefs
         if btn.objectName() == "btn_gui_prefs":
+            # Select Menu
+            self.ui.left_menu.select_only_one(btn.objectName())
+
+            # Load Page 3 
+            MainFunctions.set_page(self, self.ui.load_pages.page_gui_prefs)
+
+
+        # LOAD auto import
+        if btn.objectName() == "btn_gui_autoimport":
             # Select Menu
             self.ui.left_menu.select_only_one(btn.objectName())
 
