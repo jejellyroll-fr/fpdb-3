@@ -67,19 +67,19 @@ class SetupMainWindow:
             "show_top" : True,
             "is_active" : True
         },
+        # {
+        #     "btn_icon" : "icon_widgets.svg",
+        #     "btn_id" : "btn_widgets",
+        #     "btn_text" : "Show Custom Widgets",
+        #     "btn_tooltip" : "Show custom widgets",
+        #     "show_top" : True,
+        #     "is_active" : False
+        # },
         {
-            "btn_icon" : "icon_widgets.svg",
-            "btn_id" : "btn_widgets",
-            "btn_text" : "Show Custom Widgets",
-            "btn_tooltip" : "Show custom widgets",
-            "show_top" : True,
-            "is_active" : False
-        },
-        {
-            "btn_icon" : "icon_add_user.svg",
-            "btn_id" : "btn_add_user",
-            "btn_text" : "Add Users",
-            "btn_tooltip" : "Add users",
+            "btn_icon" : "icon_settings.svg",
+            "btn_id" : "btn_gui_prefs",
+            "btn_text" : "Setup Preferences",
+            "btn_tooltip" : "Setup Preferences",
             "show_top" : True,
             "is_active" : False
         },
@@ -114,15 +114,15 @@ class SetupMainWindow:
             "btn_tooltip" : "Open informations",
             "show_top" : False,
             "is_active" : False
-        },
-        {
-            "btn_icon" : "icon_settings.svg",
-            "btn_id" : "btn_settings",
-            "btn_text" : "Settings",
-            "btn_tooltip" : "Open settings",
-            "show_top" : False,
-            "is_active" : False
-        }
+        }#,
+        # {
+        #     "btn_icon" : "icon_settings.svg",
+        #     "btn_id" : "btn_settings",
+        #     "btn_text" : "Settings",
+        #     "btn_tooltip" : "Open settings",
+        #     "show_top" : False,
+        #     "is_active" : False
+        # }
     ]
 
      # ADD TITLE BAR MENUS
@@ -483,7 +483,7 @@ class SetupMainWindow:
             radius = 8,
             color = self.themes["app_color"]["text_foreground"],
             selection_color = self.themes["app_color"]["context_color"],
-            bg_color = self.themes["app_color"]["bg_two"],
+            bg_color = self.themes["app_color"]["dark_two"],
             header_horizontal_color = self.themes["app_color"]["dark_two"],
             header_vertical_color = self.themes["app_color"]["bg_three"],
             bottom_line_color = self.themes["app_color"]["bg_three"],

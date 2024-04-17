@@ -93,7 +93,7 @@ class MainWindow(QMainWindow):
             self.ui.left_menu.select_only_one(btn.objectName())
 
             # Load Page 1
-            MainFunctions.set_page(self, self.ui.load_pages.page_gui_prefs)
+            MainFunctions.set_page(self, self.ui.load_pages.page_1)
 
         # WIDGETS BTN
         if btn.objectName() == "btn_widgets":
@@ -104,12 +104,12 @@ class MainWindow(QMainWindow):
             MainFunctions.set_page(self, self.ui.load_pages.page_2)
 
         # LOAD USER PAGE
-        if btn.objectName() == "btn_add_user":
+        if btn.objectName() == "btn_gui_prefs":
             # Select Menu
             self.ui.left_menu.select_only_one(btn.objectName())
 
             # Load Page 3 
-            MainFunctions.set_page(self, self.ui.load_pages.page_3)
+            MainFunctions.set_page(self, self.ui.load_pages.page_gui_prefs)
 
         # BOTTOM INFORMATION
         if btn.objectName() == "btn_info":
@@ -204,7 +204,7 @@ class MainWindow(QMainWindow):
     # ///////////////////////////////////////////////////////////////
     def mousePressEvent(self, event):
         # SET DRAG POS WINDOW
-        self.dragPos = event.globalPos()
+        self.dragPos = event.globalPosition().toPoint()
 
 
 # SETTINGS WHEN TO START
