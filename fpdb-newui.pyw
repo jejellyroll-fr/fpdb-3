@@ -86,7 +86,7 @@ class MainWindow(QMainWindow):
 
         # LEFT MENU
         # ///////////////////////////////////////////////////////////////
-        
+
         # HOME BTN
         if btn.objectName() == "btn_home":
             # Select Menu
@@ -128,70 +128,66 @@ class MainWindow(QMainWindow):
 
                 # Show / Hide
                 MainFunctions.toggle_left_column(self)
-                self.ui.left_menu.select_only_one_tab(btn.objectName())
-            else:
-                if btn.objectName() == "btn_close_left_column":
-                    self.ui.left_menu.deselect_all_tab()
-                    # Show / Hide
-                    MainFunctions.toggle_left_column(self)
-                
-                self.ui.left_menu.select_only_one_tab(btn.objectName())
+            elif btn.objectName() == "btn_close_left_column":
+                self.ui.left_menu.deselect_all_tab()
+                # Show / Hide
+                MainFunctions.toggle_left_column(self)
 
+            self.ui.left_menu.select_only_one_tab(btn.objectName())
             # Change Left Column Menu
             if btn.objectName() != "btn_close_left_column":
                 MainFunctions.set_left_column_menu(
                     self, 
                     menu = self.ui.left_column.menus.menu_2,
                     title = "Info tab",
-                    icon_path = Functions.set_svg_icon("icon_info.svg")
+                    icon_path = MainFunctions.set_svg_icon("icon_info.svg")
                 )
 
         # SETTINGS LEFT
-        if btn.objectName() == "btn_settings" or btn.objectName() == "btn_close_left_column":
-            # CHECK IF LEFT COLUMN IS VISIBLE
-            if not MainFunctions.left_column_is_visible(self):
-                # Show / Hide
-                MainFunctions.toggle_left_column(self)
-                self.ui.left_menu.select_only_one_tab(btn.objectName())
-            else:
-                if btn.objectName() == "btn_close_left_column":
-                    self.ui.left_menu.deselect_all_tab()
-                    # Show / Hide
-                    MainFunctions.toggle_left_column(self)
-                self.ui.left_menu.select_only_one_tab(btn.objectName())
-
-            # Change Left Column Menu
-            if btn.objectName() != "btn_close_left_column":
-                MainFunctions.set_left_column_menu(
-                    self, 
-                    menu = self.ui.left_column.menus.menu_1,
-                    title = "Settings Left Column",
-                    icon_path = Functions.set_svg_icon("icon_settings.svg")
-                )
-        
+        if btn.objectName() == "btn_settings":
+            self._extracted_from_btn_clicked_78(btn)
+        elif btn.objectName() == "btn_close_left_column":
+            self._extracted_from_btn_clicked_78(btn)
         # TITLE BAR MENU
         # ///////////////////////////////////////////////////////////////
-        
+
         # SETTINGS TITLE BAR
         if btn.objectName() == "btn_top_settings":
             # Toogle Active
             if not MainFunctions.right_column_is_visible(self):
                 btn.set_active(True)
 
-                # Show / Hide
-                MainFunctions.toggle_right_column(self)
             else:
                 btn.set_active(False)
 
-                # Show / Hide
-                MainFunctions.toggle_right_column(self)
-
+            # Show / Hide
+            MainFunctions.toggle_right_column(self)
             # Get Left Menu Btn            
             top_settings = MainFunctions.get_left_menu_btn(self, "btn_settings")
             top_settings.set_active_tab(False)            
 
         # DEBUG
         print(f"Button {btn.objectName()}, clicked!")
+
+    # TODO Rename this here and in `btn_clicked`
+    def _extracted_from_btn_clicked_78(self, btn):
+            # CHECK IF LEFT COLUMN IS VISIBLE
+        if not MainFunctions.left_column_is_visible(self):
+            # Show / Hide
+            MainFunctions.toggle_left_column(self)
+        elif btn.objectName() == "btn_close_left_column":
+            self.ui.left_menu.deselect_all_tab()
+            # Show / Hide
+            MainFunctions.toggle_left_column(self)
+        self.ui.left_menu.select_only_one_tab(btn.objectName())
+        # Change Left Column Menu
+        if btn.objectName() != "btn_close_left_column":
+            MainFunctions.set_left_column_menu(
+                self, 
+                menu = self.ui.left_column.menus.menu_1,
+                title = "Settings Left Column",
+                icon_path = MainFunctions.set_svg_icon("icon_settings.svg")
+            )
 
     # LEFT MENU BTN IS RELEASED
     # Run function when btn is released

@@ -15,6 +15,9 @@
 # ///////////////////////////////////////////////////////////////
 
 # IMPORT PACKAGES AND MODULES
+# setup_main_window.py
+
+# IMPORT PACKAGES AND MODULES
 # ///////////////////////////////////////////////////////////////
 from gui.widgets.py_table_widget.py_table_widget import PyTableWidget
 from . functions_main_window import *
@@ -39,11 +42,13 @@ from gui.widgets import *
 
 # LOAD UI MAIN
 # ///////////////////////////////////////////////////////////////
-from . ui_main import *
+# Import UI_MainWindow inside the SetupMainWindow class to avoid circular import
+# from . ui_main import *
 
 # MAIN FUNCTIONS 
 # ///////////////////////////////////////////////////////////////
 from . functions_main_window import *
+# from .ui_main import UI_MainWindow
 
 # PY WINDOW
 # ///////////////////////////////////////////////////////////////
@@ -53,6 +58,7 @@ class SetupMainWindow:
         # SETUP MAIN WINDOw
         # Load widgets from "gui\uis\main_window\ui_main.py"
         # ///////////////////////////////////////////////////////////////
+        from .ui_main import UI_MainWindow
         self.ui = UI_MainWindow()
         self.ui.setup_ui(self)
 
@@ -67,14 +73,6 @@ class SetupMainWindow:
             "show_top" : True,
             "is_active" : True
         },
-        # {
-        #     "btn_icon" : "icon_widgets.svg",
-        #     "btn_id" : "btn_widgets",
-        #     "btn_text" : "Show Custom Widgets",
-        #     "btn_tooltip" : "Show custom widgets",
-        #     "show_top" : True,
-        #     "is_active" : False
-        # },
         {
             "btn_icon" : "icon_settings.svg",
             "btn_id" : "btn_gui_prefs",
@@ -122,15 +120,7 @@ class SetupMainWindow:
             "btn_tooltip" : "Open informations",
             "show_top" : False,
             "is_active" : False
-        }#,
-        # {
-        #     "btn_icon" : "icon_settings.svg",
-        #     "btn_id" : "btn_settings",
-        #     "btn_text" : "Settings",
-        #     "btn_tooltip" : "Open settings",
-        #     "show_top" : False,
-        #     "is_active" : False
-        # }
+        }
     ]
 
      # ADD TITLE BAR MENUS
@@ -167,7 +157,7 @@ class SetupMainWindow:
         # APP TITLE
         # ///////////////////////////////////////////////////////////////
         self.setWindowTitle(self.settings["app_name"])
-        
+
         # REMOVE TITLE BAR
         # ///////////////////////////////////////////////////////////////
         if self.settings["custom_title_bar"]:
@@ -526,11 +516,13 @@ class SetupMainWindow:
         for x in range(10):
             row_number = self.table_widget.rowCount()
             self.table_widget.insertRow(row_number) # Insert row
-            self.table_widget.setItem(row_number, 0, QTableWidgetItem(str("Wanderson"))) # Add name
-            self.table_widget.setItem(row_number, 1, QTableWidgetItem(str("vfx_on_fire_" + str(x)))) # Add nick
+            self.table_widget.setItem(row_number, 0, QTableWidgetItem("Jejellyroll"))
+            self.table_widget.setItem(
+                row_number, 1, QTableWidgetItem(str(f"vfx_on_fire_{str(x)}"))
+            )
             self.pass_text = QTableWidgetItem()
             self.pass_text.setTextAlignment(Qt.AlignCenter)
-            self.pass_text.setText("12345" + str(x))
+            self.pass_text.setText(f"12345{str(x)}")
             self.table_widget.setItem(row_number, 2, self.pass_text) # Add pass
             self.table_widget.setRowHeight(row_number, 22)
 
@@ -600,7 +592,7 @@ class SetupMainWindow:
     def resize_grips(self):
         if self.settings["custom_title_bar"]:
             self.left_grip.setGeometry(5, 10, 10, self.height())
-            self.right_grip.setGeometry(self.width() - 15, 10, 10, self.height())
+            self.right_grip.setGeometry(self.width() - 15, 10, self.height())
             self.top_grip.setGeometry(5, 5, self.width() - 10, 10)
             self.bottom_grip.setGeometry(5, self.height() - 15, self.width() - 10, 10)
             self.top_right_grip.setGeometry(self.width() - 20, 5, 15, 15)
