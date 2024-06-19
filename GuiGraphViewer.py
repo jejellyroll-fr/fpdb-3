@@ -2,6 +2,7 @@ from __future__ import print_function
 from __future__ import division
 
 import contextlib
+import os
 from past.utils import old_div
 #import L10n
 #_ = L10n.get_translation()
@@ -251,12 +252,10 @@ class GuiGraphViewer(QSplitter):
     def exportGraph(self):
         if self.fig is None:
             return
-        else:
-            path = os.getcwd()
-            path = path + '/graph.png'
-            self.fig.savefig(path)
-            msg = QMessageBox()
-            msg.setWindowTitle("FPDB 3 info")
-            mess = "Your graph is saved in " + path
-            msg.setText(mess)
-            msg.exec()
+        path = f'{os.getcwd()}/graph.png'
+        self.fig.savefig(path)
+        msg = QMessageBox()
+        msg.setWindowTitle("FPDB 3 info")
+        mess = f"Your graph is saved in {path}"
+        msg.setText(mess)
+        msg.exec()

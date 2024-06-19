@@ -1121,8 +1121,21 @@ class fpdb(QMainWindow):
         self.add_and_display_tab(mh_tab, "Help")
 
     def get_theme_colors(self):
-        # Exemple de récupération des couleurs depuis le thème actuel
-        # Vous devez adapter cela en fonction de votre thème et de la manière dont vous gérez les couleurs
+        """
+        Returns a dictionary containing the theme colors used in the application.
+
+        The dictionary contains the following keys:
+        - "background": the name of the color used for the background.
+        - "foreground": the name of the color used for the foreground.
+        - "grid": the name of the color used for the grid.
+        - "line_showdown": the name of the color used for the showdown line.
+        - "line_nonshowdown": the name of the color used for the non-showdown line.
+        - "line_ev": the name of the color used for the event line.
+        - "line_hands": the name of the color used for the hands line.
+
+        Returns:
+            dict: A dictionary containing the theme colors.
+        """
         return {
             "background": self.palette().color(QPalette.Window).name(),
             "foreground": self.palette().color(QPalette.WindowText).name(),
@@ -1134,7 +1147,7 @@ class fpdb(QMainWindow):
         }
 
     def tabGraphViewer(self, widget, data=None):
-        """ouvre un onglet pour le visualiseur de graphes"""
+        """opens a graph viewer tab"""
         colors = self.get_theme_colors()
         new_gv_thread = GuiGraphViewer.GuiGraphViewer(self.sql, self.config, self, colors=colors)
         self.threads.append(new_gv_thread)
