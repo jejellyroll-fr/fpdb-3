@@ -40,7 +40,7 @@ from L10n import set_locale_translation
 import logging
 
 from PyQt5.QtCore import (QCoreApplication, QDate, Qt)
-from PyQt5.QtGui import (QScreen, QIcon)
+from PyQt5.QtGui import (QScreen, QIcon, QPalette)
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QSizePolicy
 from PyQt5.QtWidgets import (QAction, QApplication, QCalendarWidget,
                              QCheckBox, QDateEdit, QDialog,
@@ -88,6 +88,7 @@ import Card
 import Exceptions
 import Stats
 import api, app
+
 
 Configuration.set_logfile("fpdb-log.txt")
 
@@ -1066,11 +1067,7 @@ class fpdb(QMainWindow):
         bulk_tab = new_import_thread.get_vbox()
         self.add_and_display_tab(bulk_tab, "Tournament Results Import")
 
-    def tab_imap_import(self, widget, data=None):
-        new_thread = GuiImapFetcher.GuiImapFetcher(self.config, self.db, self.sql, self)
-        self.threads.append(new_thread)
-        tab = new_thread.get_vbox()
-        self.add_and_display_tab(tab, "eMail Import")
+
 
     # end def tab_import_imap_summaries
 
@@ -1123,9 +1120,23 @@ class fpdb(QMainWindow):
                         and mit.txt in the fpdb installation directory."""))
         self.add_and_display_tab(mh_tab, "Help")
 
+    def get_theme_colors(self):
+        # Exemple de récupération des couleurs depuis le thème actuel
+        # Vous devez adapter cela en fonction de votre thème et de la manière dont vous gérez les couleurs
+        return {
+            "background": self.palette().color(QPalette.Window).name(),
+            "foreground": self.palette().color(QPalette.WindowText).name(),
+            "grid": "#444444",  # Exemple, vous pouvez ajuster selon le thème
+            "line_showdown": "#0000FF",
+            "line_nonshowdown": "#FF0000",
+            "line_ev": "#FFA500",
+            "line_hands": "#00FF00"
+        }
+
     def tabGraphViewer(self, widget, data=None):
-        """opens a graph viewer tab"""
-        new_gv_thread = GuiGraphViewer.GuiGraphViewer(self.sql, self.config, self)
+        """ouvre un onglet pour le visualiseur de graphes"""
+        colors = self.get_theme_colors()
+        new_gv_thread = GuiGraphViewer.GuiGraphViewer(self.sql, self.config, self, colors=colors)
         self.threads.append(new_gv_thread)
         self.add_and_display_tab(new_gv_thread, "Graphs")
 
