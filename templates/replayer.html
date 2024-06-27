@@ -652,7 +652,7 @@ class TableState {
     }
 
     // Méthode pour afficher les cartes des joueurs en fonction de la phase
-    displayPlayerCards(phase) {
+    displayPlayerCards(phase, showKnownCards = false) {
 
         const holecards = hand.holecards;
         console.log("holecards", holecards);
@@ -675,6 +675,9 @@ class TableState {
         const playerPositions = players_positions(maxSeat);
         console.log("playerPositions", playerPositions);    
         
+        // Check if the show-cards checkbox is checked
+        const showCards = document.getElementById("show-cards").checked;
+        
         // Loop through each player in tableState.players
         for (let seat = 1; seat <= maxSeat; seat++) {
             // Trouver le joueur qui occupe ce siège
@@ -689,7 +692,7 @@ class TableState {
                 // Utiliser les holecards du joueur
                 if (player.holecards && player.holecards.length > 0) {
                     const cardImages = player.holecards.map(card => {
-                        if (card !== '0x') {
+                        if (card !== '0x' && (showCards || player.name === hand.hero || showKnownCards)) { // Show known cards if checkbox is checked, player is hero, or showKnownCards is true
                             const rank = rankMap[card[0]];
                             const suit = card[1].toLowerCase();
                             const card_image_url = `/static/fourcolor/${rank}_${suit}.svg`;
@@ -786,6 +789,9 @@ class TableState {
             }
 
             this.displayCurrentAction();
+        } else {
+            // Fin du replayer
+            this.displayAllKnownHands();
         }
     }
 
@@ -803,6 +809,7 @@ class TableState {
         } else {
             // Fin du replayer
             this.currentStreet = null;
+            this.displayAllKnownHands();
         }
     }
 
@@ -821,61 +828,62 @@ class TableState {
     }
 
     clearPlayerActions() {
-    Object.values(this.players).forEach(player => {
-        const actionDiv = document.getElementById(`action-${player.name}`);
-        if (actionDiv) {
-            actionDiv.textContent = ""; // Effacer le texte de la div d'action
-        }
-    });
-}
-
-displayCommunityCards(street) {
-    let communityCardsDiv = document.getElementById('communityCards');
-    if (!communityCardsDiv) {
-        // Si le div n'existe pas, le créer
-        communityCardsDiv = document.createElement("div");
-        communityCardsDiv.classList.add("community-cards-container", "position-absolute", "text-center");
-        communityCardsDiv.id = 'communityCards';
-        communityCardsDiv.style.left = `400px`;
-        communityCardsDiv.style.top = `250px`;
-
-        // Ajouter le div des cartes communautaires à un élément parent sur la page
-        const pokerTable = document.getElementById("poker-table");
-        pokerTable.appendChild(communityCardsDiv);
+        Object.values(this.players).forEach(player => {
+            const actionDiv = document.getElementById(`action-${player.name}`);
+            if (actionDiv) {
+                actionDiv.textContent = ""; // Effacer le texte de la div d'action
+            }
+        });
     }
 
-    // Extraire les cartes de la rue actuelle
-    const streetCards = hand.board[street] || [];
+    displayCommunityCards(street) {
+        let communityCardsDiv = document.getElementById('communityCards');
+        if (!communityCardsDiv) {
+            // Si le div n'existe pas, le créer
+            communityCardsDiv = document.createElement("div");
+            communityCardsDiv.classList.add("community-cards-container", "position-absolute", "text-center");
+            communityCardsDiv.id = 'communityCards';
+            communityCardsDiv.style.left = `400px`;
+            communityCardsDiv.style.top = `250px`;
 
-    // Calculer le décalage horizontal des cartes en fonction de la street
-    let xOffset = 0;
-    if (street === 'TURN') {
-        xOffset = 50 * (hand.board['FLOP'].length); // Décaler selon le nombre de cartes au FLOP
-    } else if (street === 'RIVER') {
-        xOffset = 50 * (hand.board['FLOP'].length + (hand.board['TURN'] ? hand.board['TURN'].length : 0)); // Décaler en additionnant les cartes au FLOP et TURN
+            // Ajouter le div des cartes communautaires à un élément parent sur la page
+            const pokerTable = document.getElementById("poker-table");
+            pokerTable.appendChild(communityCardsDiv);
+        }
+
+        // Extraire les cartes de la rue actuelle
+        const streetCards = hand.board[street] || [];
+
+        // Calculer le décalage horizontal des cartes en fonction de la street
+        let xOffset = 0;
+        if (street === 'TURN') {
+            xOffset = 50 * (hand.board['FLOP'].length); // Décaler selon le nombre de cartes au FLOP
+        } else if (street === 'RIVER') {
+            xOffset = 50 * (hand.board['FLOP'].length + (hand.board['TURN'] ? hand.board['TURN'].length : 0)); // Décaler en additionnant les cartes au FLOP et TURN
+        }
+
+        // Afficher les cartes de la rue actuelle
+        streetCards.forEach((card, index) => {
+            if (card && card !== '0x' && card !== '') {
+                const rank = rankMap[card[0]];
+                const suit = card[1].toLowerCase();
+                const card_image_url = `/static/fourcolor/${rank}_${suit}.svg`;
+
+                // Créer un div pour chaque carte avec le décalage approprié
+                const cardDiv = document.createElement("div");
+                cardDiv.classList.add("card", "position-absolute");
+                cardDiv.style.left = `${xOffset + (index * 50)}px`; // Appliquer le décalage
+                cardDiv.innerHTML = `<img src="${card_image_url}" class="card-image-small">`;
+
+                communityCardsDiv.appendChild(cardDiv);
+            }
+        });
     }
 
-    // Afficher les cartes de la rue actuelle
-    streetCards.forEach((card, index) => {
-        if (card && card !== '0x' && card !== '') {
-            const rank = rankMap[card[0]];
-            const suit = card[1].toLowerCase();
-            const card_image_url = `/static/fourcolor/${rank}_${suit}.svg`;
-
-            // Créer un div pour chaque carte avec le décalage approprié
-            const cardDiv = document.createElement("div");
-            cardDiv.classList.add("card", "position-absolute");
-            cardDiv.style.left = `${xOffset + (index * 50)}px`; // Appliquer le décalage
-            cardDiv.innerHTML = `<img src="${card_image_url}" class="card-image-small">`;
-
-            communityCardsDiv.appendChild(cardDiv);
-        }
-    });
-}
-
-
-
-
+    displayAllKnownHands() {
+        // Reload the player cards with all known hands shown
+        this.displayPlayerCards(this.street, true);
+    }
 
     // Méthode pour mettre à jour l'affichage après une action
     updateDisplayAfterAction(action) {
@@ -890,8 +898,6 @@ var hand = JSON.parse(document.getElementById("hand").getAttribute("data-hand"))
 
 // Initialisation de l'état de la table avec l'objet hand
 const tableState = new TableState(hand);
-
-
 
 // Démarrer la première phase du jeu
 if (tableState.gamebase == "hold") {
@@ -923,10 +929,13 @@ else {
 }
 
 document.getElementById("nextButton").addEventListener("click", function() {
-        tableState.nextAction(); // Supposons que tableState est votre instance de TableState
-    });
+    tableState.nextAction(); // Supposons que tableState est votre instance de TableState
+});
 
-
+document.getElementById("show-cards").addEventListener("change", function() {
+    // Reload the player cards based on the checkbox state
+    tableState.displayPlayerCards(tableState.street);
+});
     </script>
 </body>
 </html>
