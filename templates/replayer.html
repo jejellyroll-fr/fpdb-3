@@ -114,6 +114,38 @@
 </div>
     <!-- Importation de votre script JavaScript -->
     <script>
+        // Ajoutez ces variables au début du script, juste après la déclaration de `tableState`
+        let isPlaying = false;
+        let playInterval;
+
+        function autoPlay() {
+            if (isPlaying) {
+                tableState.nextAction();
+                if (!tableState.currentStreet) {
+                    stopPlay();
+                }
+            }
+        }
+
+        function startPlay() {
+            isPlaying = true;
+            playInterval = setInterval(autoPlay, 1000); // Ajuste 1000 ms pour changer la vitesse de lecture
+        }
+
+        function stopPlay() {
+            isPlaying = false;
+            clearInterval(playInterval);
+        }
+
+        document.getElementById("playPauseButton").addEventListener("click", function() {
+            if (isPlaying) {
+                stopPlay();
+                this.textContent = "Play";
+            } else {
+                startPlay();
+                this.textContent = "Pause";
+            }
+        });
         // constants
         const players_positions = (numPlayers) => {
             const playerPositions = {};
@@ -572,6 +604,7 @@
                     this.displayCurrentAction();
                 } else {
                     this.displayAllKnownHands();
+                    stopPlay(); // Arrête la lecture automatique quand toutes les actions sont terminées
                 }
             }
 
@@ -644,7 +677,34 @@
             }
 
             displayAllKnownHands() {
-                this.displayPlayerCards(this.street, true);
+                // Ensure board cards are always displayed
+                this.displayCommunityCards('FLOP');
+                this.displayCommunityCards('TURN');
+                this.displayCommunityCards('RIVER');
+
+                // Show all players' hole cards if they reached the showdown
+                Object.values(this.players).forEach(player => {
+                    if (hand.showdown.includes(player.name)) {
+                        const holeCardsHTML = player.holecards.map(card => {
+                            if (card !== '0x') {
+                                const rank = rankMap[card[0]];
+                                const suit = card[1].toLowerCase();
+                                const card_image_url = `/static/fourcolor/${rank}_${suit}.svg`;
+                                return `<img src="${card_image_url}" class="card-image-small">`;
+                            } else {
+                                return '<img src="/static/backDeck10.svg" class="card-image-small">';
+                            }
+                        }).join('');
+
+                        const playerDiv = document.querySelector(`.player span.badge:contains(${player.name})`).parentElement;
+                        if (playerDiv) {
+                            const holeCardsRow = playerDiv.querySelector('.hole-cards-row');
+                            if (holeCardsRow) {
+                                holeCardsRow.innerHTML = holeCardsHTML;
+                            }
+                        }
+                    }
+                });
             }
         }
 
