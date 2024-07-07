@@ -66,20 +66,20 @@
     {% set deck_image_url = "/static/backDeck10.svg" %}
     <object id="svgDeck" data={{deck_image_url}} type="image/svg+xml" style="display: none;"></object>
     {% set table_image_url = "/static/TableR.png" %}
-<!-- En-tête -->
+<!-- header -->
 <div id="header">
-    <!-- Contenu de l'en-tête -->
+    <!-- header's content -->
 </div>
 
-<!-- Section Centrale -->
+<!-- central Section -->
 <div id="main-section" style="display: flex;">
-    <!-- Colonne Gauche (Hand Info) -->
+    <!-- left column (Hand Info) -->
     <div id="left-column" style="flex: 1;">
         <div id="handInfo" class="text-light" style="text-align: left;">
             <span id="heroName">--</span> played Hand n° <span id="handNumber">--</span> on <span id="siteName">--</span> at <span id="tableName">--</span> of <span id="limitType">--</span> <span id="gameType">--</span> with <span id="blinds">--/--</span> <span id="currency">--</span>
         </div>
     </div>
-    <!-- Colonne Centrale (Table de Poker et Contrôles) -->
+    <!-- central column -->
     <div id="center-column" style="flex: 3;">
         <img id="dealerButton" src="/static/dealer.png" alt="Dealer" style="display: none;">
         <div id="poker-table">
@@ -87,7 +87,7 @@
         </div>
         <div id="hand" data-hand="{{ hand }}"></div>
         <div id="controlPanel">
-            <!-- Boutons et Slider -->
+            <!-- Button and Slider -->
             <input type="range" id="stateSlider" min="0" max="4" step="1">
             <div id="sliderLabel" style="text-align: center; margin-top: 10px;">Current Phase: <span id="currentPhase"></span></div>
             <div id="buttonGroup">
@@ -103,18 +103,18 @@
             <input type="checkbox" id="show-cards">
         </div>
     </div>
-    <!-- Colonne Droite (Vide pour l'instant) -->
+    <!-- right column () -->
     <div id="right-column" style="flex: 1;">
-        <!-- Contenu optionnel -->
+        <!-- optional content -->
     </div>
 </div>
-<!-- Pied de page -->
+<!-- footer -->
 <div id="footer">
-    <!-- Contenu du pied de page -->
+    <!-- footer's  content -->
 </div>
-    <!-- Importation de votre script JavaScript -->
+    <!-- import script -->
     <script>
-        // Ajoutez ces variables au début du script, juste après la déclaration de `tableState`
+        // Declare variables
         let isPlaying = false;
         let playInterval;
 
@@ -129,7 +129,7 @@
 
         function startPlay() {
             isPlaying = true;
-            playInterval = setInterval(autoPlay, 1000); // Ajuste 1000 ms pour changer la vitesse de lecture
+            playInterval = setInterval(autoPlay, 1000); 
         }
 
         function stopPlay() {
@@ -162,14 +162,14 @@
             return playerPositions;
         }
 
-        // Mapping des rangs de cartes pour les images
+        // rank Mapping
         const rankMap = {
             '2': '2', '3': '3', '4': '4', '5': '5', '6': '6',
             '7': '7', '8': '8', '9': '9', 'T': 't',
             'J': 'j', 'Q': 'q', 'K': 'k', 'A': 'a'
         };
 
-        // Configuration des différents types de jeux
+        // different poker games
         const games_logic = {
             'holdem': ['hold', 'holdem', 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 2)]],
             '2_holdem': ['hold', null, 'h', {'PREFLOP': 0, 'FLOP': 1, 'TURN': 2, 'RIVER': 3}, 'RIVER', [(0, 3)]],
@@ -434,14 +434,14 @@
                 this.justacted = false;
                 this.holecards = joinHoleCards(name, true);
                 this.streetcards = {};
-                this.folded = false; // Ajout de la propriété 'folded'
+                this.folded = false; // add property for 'folded'
             }
 
             setAction(street, actionDetails) {
                 if (!this.action[street]) {
-                    this.action[street] = []; // Initialise le tableau pour cette street
+                    this.action[street] = []; // Initialise 
                 }
-                this.action[street].push(actionDetails); // Ajoute l'action à la bonne street
+                this.action[street].push(actionDetails); // Add action
 
                 // Check for fold action
                 if (actionDetails[0] === 'fold') {
@@ -604,7 +604,7 @@
                     this.displayCurrentAction();
                 } else {
                     this.displayAllKnownHands();
-                    stopPlay(); // Arrête la lecture automatique quand toutes les actions sont terminées
+                    stopPlay(); // Stop reading actions. 
                 }
             }
 
