@@ -23,8 +23,14 @@
 #_ = L10n.get_translation()
 
 import sys
+import re
+import datetime
+import logging
 from HandHistoryConverter import *
 from decimal_wrapper import Decimal
+
+# Set up debug logging
+logging.basicConfig(level=logging.DEBUG)
 
 # SealsWithClubs HH Format
 
@@ -46,12 +52,12 @@ class SealsWithClubs(HandHistoryConverter):
                               "Hold'em" : ('hold','holdem'),
                                 'Omaha' : ('hold','omahahi'),
                           'Omaha Hi-Lo' : ('hold','omahahilo'),
-                          "Short Deck" : ('hold','6_holdem'),
+                          "Short Deck Hold'em" : ('hold','6_holdem'),
                           'Omaha 5 Cards' : ('hold','5_omahahi')
                }
 
     # Static regexes
-    re_GameInfo = re.compile(r"""SwCPoker\sHand\s*\#(?P<HID>\d+):\s((Tournament|Cashgame|sitngo)\s\(((?P<TABLE2>.*?))\)\#(?P<TOURNO>\d+),\s(?P<BUYIN>(?P<BIAMT>\d+(\.\d+)?))\+(?P<BIRAKE>\d+(\.\d+)?)\s|\s)(?P<GAME>(Hold\'em|Omaha|Omaha\s5\sCards))\s(?P<LIMIT>(NL|PL|Limit|Pot\sLimit|No\sLimit))\s((-\sLevel\s\w+\s)|)\((?P<SB>\d+(\.\d+)?(\,\d+)?)/(?P<BB>\d+(\.\d+)?(\,\d+)?)\)\s-\s(?P<DATETIME>.*)""",re.VERBOSE)
+    re_GameInfo = re.compile(r"""SwCPoker\sHand\s*\#(?P<HID>\d+):\s((Tournament|Cashgame|sitngo)\s\(((?P<TABLE2>.*?))\)\#(?P<TOURNO>\d+),\s(?P<BUYIN>(?P<BIAMT>\d+(\.\d+)?))\+(?P<BIRAKE>\d+(\.\d+)?)\s|\s)(?P<GAME>(Hold\'em|Omaha|Omaha\s5\sCards|Short\sDeck\sHold\'em))\s(?P<LIMIT>(NL|PL|Limit|Pot\sLimit|No\sLimit))\s((-\sLevel\s\w+\s)|)\((?P<SB>\d+(\.\d+)?(\,\d+)?)/(?P<BB>\d+(\.\d+)?(\,\d+)?)\)\s-\s(?P<DATETIME>.*)""",re.VERBOSE)
 
     re_PlayerInfo   = re.compile(r"""^Seat\s+(?P<SEAT>\d+):\s+(?P<PNAME>\w+)\s+\((?P<CASH>\d{1,3}(,\d{3})*(\.\d+)?)\sin\schips\)""" , re.MULTILINE|re.VERBOSE)
 
@@ -93,6 +99,7 @@ class SealsWithClubs(HandHistoryConverter):
 
         Returns: None
         """
+        logging.debug("Compiling player regexes")
         # Get a set of player names in the hand
         players = {player[1] for player in hand.players}
 
@@ -120,8 +127,8 @@ class SealsWithClubs(HandHistoryConverter):
             # The regular expression is of the form "^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$"
             self.re_ShownCards = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % subst, re.MULTILINE)
 
-
     def readSupportedGames(self):
+        logging.debug("Reading supported games")
         return [
                 ["ring", "hold", "fl"],
                 ["ring", "hold", "nl"],
@@ -142,9 +149,11 @@ class SealsWithClubs(HandHistoryConverter):
                 ["tour", "draw", "fl"],
                 ["tour", "draw", "pl"],
                 ["tour", "draw", "nl"],
+                ["tour", "hold", "6_holdem"],
                ]
 
     def determineGameType(self, handText):
+        logging.debug("Determining game type")
         info = {}
         m = self.re_GameInfo.search(handText)
         if not m:
@@ -153,6 +162,7 @@ class SealsWithClubs(HandHistoryConverter):
             raise FpdbParseError
 
         mg = m.groupdict()
+        logging.debug(f"Matched groups: {mg}")
         if 'LIMIT' in mg:
             info['limitType'] = self.limits[mg['LIMIT']]
         if 'GAME' in mg:
@@ -172,21 +182,21 @@ class SealsWithClubs(HandHistoryConverter):
         if 'CURRENCY' in mg and mg['CURRENCY'] is not None:
             info['currency'] = self.currencies[mg['CURRENCY']]
 
-
         info['type'] = 'ring' if 'TOURNO' in mg and mg['TOURNO'] is None else 'tour'
         if info['type'] == 'ring':
             info['currency'] = 'mBTC'
         else:
             info['currency'] = 'mBTC'
 
-
         if info['limitType'] == 'fl' and info['bb'] is not None:
             info['sb'] = str((Decimal(mg['SB'])/2).quantize(Decimal("0.01")))
             info['bb'] = str(Decimal(mg['SB']).quantize(Decimal("0.01")))
 
+        logging.debug(f"Game info: {info}")
         return info
 
     def readHandInfo(self, hand):
+        logging.debug("Reading hand info")
         info = {}
         m  = self.re_HandInfo.search(hand.handText,re.DOTALL)
         m2 = self.re_GameInfo.search(hand.handText)
@@ -196,127 +206,98 @@ class SealsWithClubs(HandHistoryConverter):
             raise FpdbParseError
 
         info.update(m.groupdict())
-        
+        logging.debug(f"HandInfo groups: {m.groupdict()}")
         info.update(m2.groupdict())
+        logging.debug(f"GameInfo groups: {m2.groupdict()}")
         if info['TOURNO'] is not None:
-            #tablesplit = re.split(" ", info['TABLE'])
-            #print(tablesplit[1])
             words = m['TABLE'].split()
             new_string = words[1]
             info['TABLE'] = f"{m2['TABLE2']} {new_string}"
-            print(info['TABLE'])
+            print(f"Table name updated to: {info['TABLE']}")
             hand.tablename = f"{info['TABLE']}"
-        #log.debug("readHandInfo: %s" % info)
         for key in info:
             if key == 'DATETIME':
-                #2013-01-31 05:55:42
-                #2008/09/07 06:23:14 ET
                 m1 = self.re_DateTime.finditer(info[key])
-                datetimestr = "2000-01-01 00:00:00"  # default used if time not found
+                datetimestr = "2000-01-01 00:00:00"
                 for a in m1:
                     datetimestr = "%s-%s-%s %s:%s:%s" % (a.group('Y'), a.group('M'),a.group('D'),a.group('H'),a.group('MIN'),a.group('S'))
-                    #tz = a.group('TZ')  # just assume ET??
-                    #print "   tz = ", tz, " datetime =", datetimestr
-                hand.startTime = datetime.datetime.strptime(datetimestr, "%Y-%m-%d %H:%M:%S") # also timezone at end, e.g. " ET"
+                hand.startTime = datetime.datetime.strptime(datetimestr, "%Y-%m-%d %H:%M:%S")
                 hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
             if key == 'HID':
                 hand.handid = info[key]
             if key == 'TOURNO':
                 hand.tourNo = info[key]
             if key == 'BUYIN':
-                if hand.tourNo!=None:
-                    print("DEBUG: info['BUYIN']: %s" % info['BUYIN'])
-                    print("DEBUG: info['BIAMT']: %s" % info['BIAMT'])
-                    print("DEBUG: info['BIRAKE']: %s" % info['BIRAKE'])
-                    
+                if hand.tourNo is not None:
                     if info[key] == 'Freeroll':
                         hand.buyin = 0
                         hand.fee = 0
                         hand.buyinCurrency = "FREE"
                     else:
-                        ##FIXME: currency set as EUR
-                        hand.buyinCurrency="mBTC"
-                        #info['BIRAKE'] = info['BIRAKE'].strip(u'$€£')
-
+                        hand.buyinCurrency = "mBTC"
                         hand.buyin = int(100*Decimal(info['BIAMT']))
                         hand.fee = int(100*Decimal(info['BIRAKE']))
-                        
             if key == 'LEVEL':
-                hand.level = info[key]       
-            #if key == 'TABLE':
-                #tablesplit = re.split(" ", info[key])
-                #if hand.tourNo != None and len(tablesplit)>1:
-                    #hand.tablename = tablesplit[1]
-                #else:
-                    #hand.tablename = info[key] #change table name without '
-            if key == 'MAX' and info[key] != None:
+                hand.level = info[key]
+            if key == 'MAX' and info[key] is not None:
                 hand.maxseats = int(info[key])
-            if key == 'HU' and info[key] != None:
+            if key == 'HU' and info[key] is not None:
                 hand.maxseats = 2
-                
+
         if self.re_Cancelled.search(hand.handText):
             raise FpdbHandPartial(("Hand '%s' was cancelled.") % hand.handid)
-    
+
     def readButton(self, hand):
+        logging.debug("Reading button position")
         if m := self.re_ButtonPos.search(hand.handText):
-            hand.buttonpos = int(m.group('BUTTON'));
+            hand.buttonpos = int(m.group('BUTTON'))
         else:
-            log.debug('readButton: ' + ('not found'))
+            log.debug('readButton: not found')
 
     def readPlayerStacks(self, hand):
-        log.debug("readPlayerStacks")
+        logging.debug("Reading player stacks")
         m = self.re_PlayerInfo.finditer(hand.handText)
         for a in m:
             hand.addPlayer(int(a.group('SEAT')), a.group('PNAME'), a.group('CASH'), None)
 
     def markStreets(self, hand):
-
-        # PREFLOP = ** Dealing down cards **
-        # This re fails if,  say, river is missing; then we don't get the ** that starts the river.
-
-
-
-
-
-        # some hand histories on swc are missing a flop
-        if (self.re_Turn.search(hand.handText) and not self.re_Flop.search(hand.handText)):
+        logging.debug("Marking streets")
+        if self.re_Turn.search(hand.handText) and not self.re_Flop.search(hand.handText):
             raise FpdbParseError
-        if (self.re_River.search(hand.handText) and not self.re_Turn.search(hand.handText)):
+        if self.re_River.search(hand.handText) and not self.re_Turn.search(hand.handText):
             raise FpdbParseError
 
-        m =  re.search(r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>[\s\S]*?(?=\*\*\* FLOP \*\*\*)|.+)"
-                           r"(\*\*\* FLOP \*\*\*(?P<FLOP>[\s\S]*?(?=\*\*\* TURN \*\*\*)|.+))?"
-                           r"(\*\*\* TURN \*\*\*(?P<TURN>[\s\S]*?(?=\*\*\* RIVER \*\*\*)|.+))?"
-                           r"(\*\*\* RIVER \*\*\*(?P<RIVER>[\s\S]*?(?=\*\*\* SHOW DOWN \*\*\*)|.+))?", hand.handText,re.DOTALL)
+        m = re.search(r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>[\s\S]*?(?=\*\*\* FLOP \*\*\*)|.+)"
+                      r"(\*\*\* FLOP \*\*\*(?P<FLOP>[\s\S]*?(?=\*\*\* TURN \*\*\*)|.+))?"
+                      r"(\*\*\* TURN \*\*\*(?P<TURN>[\s\S]*?(?=\*\*\* RIVER \*\*\*)|.+))?"
+                      r"(\*\*\* RIVER \*\*\*(?P<RIVER>[\s\S]*?(?=\*\*\* SHOW DOWN \*\*\*)|.+))?", hand.handText,re.DOTALL)
 
-
-        # some hand histories on swc don't have hole cards either
         if not m:
             raise FpdbParseError
 
         hand.addStreets(m)
 
-
-    def readCommunityCards(self, hand, street): # street has been matched by markStreets, so exists in this hand
-        if street in ('FLOP','TURN','RIVER'):   # a list of streets which get dealt community cards (i.e. all but PREFLOP)
+    def readCommunityCards(self, hand, street):
+        logging.debug(f"Reading community cards for street: {street}")
+        if street in ('FLOP','TURN','RIVER'):
             m = self.re_Board.search(hand.streets[street])
             hand.setCommunityCards(street, m.group('CARDS').split(' '))
 
     def readAntes(self, hand):
-        log.debug(("reading antes"))
+        logging.debug("Reading antes")
         m = self.re_Antes.finditer(hand.handText)
         for player in m:
-            log.debug(f"hand.addAnte({player.group('PNAME')},{player.group('ANTE')})")
+            logging.debug(f"hand.addAnte({player.group('PNAME')},{player.group('ANTE')})")
             hand.addAnte(player.group('PNAME'), player.group('ANTE'))
-        
+
     def readBlinds(self, hand):
+        logging.debug("Reading blinds")
         liveBlind = True
         for a in self.re_PostSB.finditer(hand.handText):
             if liveBlind:
                 hand.addBlind(a.group('PNAME'), 'small blind', a.group('SB'))
                 liveBlind = False
             else:
-                # Post dead blinds as ante
                 hand.addBlind(a.group('PNAME'), 'secondsb', a.group('SB'))
         for a in self.re_PostBB.finditer(hand.handText):
             hand.addBlind(a.group('PNAME'), 'big blind', a.group('BB'))
@@ -324,8 +305,7 @@ class SealsWithClubs(HandHistoryConverter):
             hand.addBlind(a.group('PNAME'), 'both', a.group('SBBB'))
 
     def readHoleCards(self, hand):
-#    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
-#    we need to grab hero's cards
+        logging.debug("Reading hole cards")
         for street in ('PREFLOP', 'DEAL'):
             if street in list(hand.streets.keys()):
                 m = self.re_HeroCards.finditer(hand.streets[street])
@@ -335,57 +315,43 @@ class SealsWithClubs(HandHistoryConverter):
                     hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
 
     def readAction(self, hand, street):
+        logging.debug(f"Reading actions for street: {street}")
         m = self.re_Action.finditer(hand.streets[street])
         for action in m:
             acts = action.groupdict()
-            print(f"DEBUG: acts: {acts}")
+            logging.debug(f"Action details: {acts}")
             if action.group('ATYPE') == ' folds':
-                hand.addFold( street, action.group('PNAME'))
+                hand.addFold(street, action.group('PNAME'))
             elif action.group('ATYPE') == ' checks':
-                hand.addCheck( street, action.group('PNAME'))
+                hand.addCheck(street, action.group('PNAME'))
             elif action.group('ATYPE') == ' calls':
-                hand.addCall( street, action.group('PNAME'), action.group('BET') )
+                hand.addCall(street, action.group('PNAME'), action.group('BET'))
             elif action.group('ATYPE') == ' raises':
-                hand.addRaiseTo( street, action.group('PNAME'), action.group('BET') )
+                hand.addRaiseTo(street, action.group('PNAME'), action.group('BET'))
             elif action.group('ATYPE') == ' bets':
-                hand.addBet( street, action.group('PNAME'), action.group('BET') )
+                hand.addBet(street, action.group('PNAME'), action.group('BET'))
             else:
-                log.debug(("DEBUG:") + " " + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group('PNAME'), action.group('ATYPE')))
+                log.debug(f"DEBUG: Unimplemented {action.group('ATYPE')}: '{action.group('PNAME')}'")
 
     def readShownCards(self, hand):
-        """
-        This function reads shown cards from a hand and adds them to the hand's attributes.
-        :param self: The object itself.
-        :param hand: The hand object to which the shown cards will be added.
-        """
-        # Find all the shown cards matches in the hand's text
+        logging.debug("Reading shown cards")
         for m in self.re_ShownCards.finditer(hand.handText):
-            # Check if cards were found
             if m.group('CARDS') is not None:
-                # Split the cards into a list
-                cards = m.group('CARDS')
-                cards = cards.split(' ')
-                # Get the string and add the second string if it exists
+                cards = m.group('CARDS').split(' ')
                 string = m.group('STRING')
                 if m.group('STRING2'):
                     string += '|' + m.group('STRING2')
-
-                # Determine if the player showed or mucked their cards
                 (shown, mucked) = (False, False)
                 if m.group('SHOWED') == "showed":
                     shown = True
                 elif m.group('SHOWED') == "mucked":
                     mucked = True
-
-                # Add the shown cards to the hand object
-                # print "DEBUG: hand.addShownCards(%s, %s, %s, %s)" %(cards, m.group('PNAME'), shown, mucked)
                 hand.addShownCards(cards=cards, player=m.group('PNAME'), shown=shown, mucked=mucked, string=string)
 
-
     def readShowdownActions(self, hand):
-
-        for shows in self.re_ShowdownAction.finditer(hand.handText):  
-            if shows.group('CARDS') is not None:          
+        logging.debug("Reading showdown actions")
+        for shows in self.re_ShowdownAction.finditer(hand.handText):
+            if shows.group('CARDS') is not None:
                 cards = shows.group('CARDS').split(' ')
                 hand.addShownCards(cards, shows.group('PNAME'))
         for mucks in self.re_CollectPot.finditer(hand.handText):
@@ -393,28 +359,24 @@ class SealsWithClubs(HandHistoryConverter):
                 cards = mucks.group('CARDS').split(' ')
                 hand.addShownCards(cards, mucks.group('PNAME'))
 
-    def readCollectPot(self,hand):
+    def readCollectPot(self, hand):
+        logging.debug("Reading collected pot")
         if self.re_Uncalled.search(hand.handText) is None:
             rake = Decimal(0)
             totalpot = Decimal(0)
             for m in self.re_CollectPot.finditer(hand.handText):
                 if m.group('POT') is not None:
-                    hand.addCollectPot(player=m.group('PNAME'),pot=m.group('POT'))
+                    hand.addCollectPot(player=m.group('PNAME'), pot=m.group('POT'))
                 elif m.group('POT2') is not None:
-                    hand.addCollectPot(player=m.group('PNAME'),pot=m.group('POT2'))
+                    hand.addCollectPot(player=m.group('PNAME'), pot=m.group('POT2'))
             if self.re_rake.search(hand.handText) is not None:
-
                 for m in self.re_rake.finditer(hand.handText):
-                    #print("rakex: ", Decimal(m.group('RAKE')))
                     rake = rake + Decimal(m.group('RAKE'))
-                    print(m.group('TOTALPOT'))
                     if ',' in m.group('TOTALPOT'):
                         newtotalpot = m.group('TOTALPOT').replace(',', '')
-                        print(newtotalpot)
                         totalpot = totalpot + Decimal(newtotalpot)
                     else:
                         totalpot = totalpot + Decimal(m.group('TOTALPOT'))
-            #print("rake: ", rake)
             if hand.rake is None:
                 hand.rake = rake            
             elif hand.rakes.get('rake'):
@@ -422,24 +384,18 @@ class SealsWithClubs(HandHistoryConverter):
             else:
                 hand.rakes['rake'] = rake
             hand.totalpot = totalpot
-
         else:
             hand.setUncalledBets(True)
             rake = Decimal(0)
             totalpot = Decimal(0)
             if self.re_rake.search(hand.handText) is not None:
-
                 for m in self.re_rake.finditer(hand.handText):
-                    #print("rakex: ", Decimal(m.group('RAKE')))
                     rake = rake + Decimal(m.group('RAKE'))
-                    print(m.group('TOTALPOT'))
                     if ',' in m.group('TOTALPOT'):
                         newtotalpot = m.group('TOTALPOT').replace(',', '')
-                        print(newtotalpot)
                         totalpot = totalpot + Decimal(newtotalpot)
                     else:
                         totalpot = totalpot + Decimal(m.group('TOTALPOT'))
-            #print("rake: ", rake)
             if hand.rake is None:
                 hand.rake = rake            
             elif hand.rakes.get('rake'):
@@ -453,73 +409,60 @@ class SealsWithClubs(HandHistoryConverter):
                     if totalpot == Decimal(m.group('POT')):
                         uncalledpot = Decimal(0)
                         for m in self.re_Uncalled.finditer(hand.handText):
-                    #print("rakex: ", Decimal(m.group('RAKE')))
-                            print(m.group('BET'))
                             if ',' in m.group('BET'):
                                 newbet = m.group('BET').replace(',', '')
-                                print(newbet)
                                 uncalledpot = uncalledpot + Decimal(newbet)
                             else:
                                 uncalledpot = uncalledpot + Decimal(m.group('BET'))
-
                         collectpot = totalpot
                         total = total + uncalledpot
                         hand.totalpot = total
-                        hand.addCollectPot(player=m.group('PNAME'),pot=collectpot)
+                        hand.addCollectPot(player=m.group('PNAME'), pot=collectpot)
                     else:
-                        hand.addCollectPot(player=m.group('PNAME'),pot=m.group('POT'))
+                        hand.addCollectPot(player=m.group('PNAME'), pot=m.group('POT'))
                 elif m.group('POT2') is not None:
                     if totalpot == Decimal(m.group('POT2')):
                         uncalledpot = Decimal(0)
                         for m in self.re_Uncalled.finditer(hand.handText):
-                    #print("rakex: ", Decimal(m.group('RAKE')))
-                            print(m.group('BET'))
                             if ',' in m.group('BET'):
                                 newbet = m.group('BET').replace(',', '')
-                                print(newbet)
                                 uncalledpot = uncalledpot + Decimal(newbet)
                             else:
                                 uncalledpot = uncalledpot + Decimal(m.group('BET'))
-
                         collectpot = totalpot
                         total = total + uncalledpot
                         hand.totalpot = total
-                        hand.addCollectPot(player=m.group('PNAME'),pot=collectpot)
+                        hand.addCollectPot(player=m.group('PNAME'), pot=collectpot)
                     else:
-                        hand.addCollectPot(player=m.group('PNAME'),pot=m.group('POT2'))
-
-
-
-
-
+                        hand.addCollectPot(player=m.group('PNAME'), pot=m.group('POT2'))
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
-        logging.info(f"Seals.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'")
+        print(f"Seals.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'")
+        
+        if not table_name:
+            print("Seals.getTableTitleRe: no valid input provided")
+            return ""
+
+        print(f"Initial table_name: {table_name}")
+
+        regex = f"{table_name}"
+        words = regex.split()
+
+        if type in ["tour", "ring"]:
+            if len(words) > 2:
+                regex = ' '.join(words[1:-1])
+            print(f"Seals.getTableTitleRe: regex after processing='{regex}'")
+            return regex
 
         if type == "tour":
-            regex = f"{table_name}"
-            words = regex.split()
-            regex = ' '.join(words[1:-1])
-            print("regex table tour", regex)
-            logging.info(f"Seals.getTableTitleRe: regex='{regex}'")
-            return regex
-        elif type == "ring":
-            regex = f"{table_name}"
-            words = regex.split()
-            regex = ' '.join(words[1:-1])
-            print("regex table ring",regex)
-            logging.info(f"Seals.getTableTitleRe: regex='{regex}'")
-            return regex
-        elif table_name is not None:
-            result = re.findall(r"(.*?)", table_name)
-            if not result:
-                logging.warning("Seals.getTableTitleRe: no match found in table_name")
-                return None
-            regex = f"{table_name}"
-            logging.info(f"Seals.getTableTitleRe: regex='{regex}'")
-            return regex
-        else:
-            logging.warning("Seals.getTableTitleRe: no valid input provided")
-            return None
+            match = re.match(r"(\d+)\s(.+)\s(\[\d+\sChips\])\s(\d+)", table_name)
+            if match:
+                tournament_id, game_type, chips_info, table_number = match.groups()
+                regex = f"{tournament_id} {game_type} {chips_info} {table_number}"
+                print(f"Seals.getTableTitleRe: regex for tour='{regex}'")
+                return regex
 
+        regex = f"{table_name}"
+        print(f"Seals.getTableTitleRe: regex='{regex}'")
+        return regex
