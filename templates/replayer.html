@@ -504,7 +504,7 @@
 
             displayPlayerCards(phase, showKnownCards = false) {
                 const holecards = hand.holecards;
-                const numPlayers = hand.players.length;
+                let numPlayers = hand.players.length;
                 const maxSeat = Math.max(...Object.values(tableState.players).map(player => player.seat));
                 const missing_seats = maxSeat - numPlayers;
                 if (missing_seats > 0) {
