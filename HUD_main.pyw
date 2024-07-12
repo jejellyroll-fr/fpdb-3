@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """Hud_main.py
 
 Main for FreePokerTools HUD.

@@ -39,7 +39,7 @@ cl_options = '.'.join(sys.argv[1:])
 from L10n import set_locale_translation
 import logging
 
-from PyQt5.QtCore import (QCoreApplication, QDate, Qt)
+from PyQt5.QtCore import (QCoreApplication, QDate, Qt, QPoint)
 from PyQt5.QtGui import (QScreen, QIcon, QPalette)
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QSizePolicy
 from PyQt5.QtWidgets import (QAction, QApplication, QCalendarWidget,
@@ -873,6 +873,7 @@ class fpdb(QMainWindow):
         for theme in themes:
             themeMenu.addAction(QAction(theme, self, triggered=partial(self.change_theme, theme)))
 
+
     def load_profile(self, create_db=False):
         """Loads profile from the provided path name."""
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
@@ -1203,7 +1204,6 @@ class fpdb(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowFlags(Qt.FramelessWindowHint)
         cards = os.path.join(Configuration.GRAPHICS_PATH, 'tribal.jpg')
         if os.path.exists(cards):
             self.setWindowIcon(QIcon(cards))
@@ -1215,6 +1215,7 @@ class fpdb(QMainWindow):
         self.visible = False
         self.threads = []
         self.closeq = queue.Queue(20)
+        self.oldPos = self.pos() 
 
         if options.initialRun:
             self.display_config_created_dialogue = True
@@ -1239,9 +1240,6 @@ class fpdb(QMainWindow):
             defy = sg.height()
         self.resize(defx, defy)
 
-        # Create custom title bar
-        self.custom_title_bar = CustomTitleBar(self)
-
         # Create central widget and layout
         self.central_widget = QWidget(self)
         self.central_layout = QVBoxLayout(self.central_widget)
@@ -1249,9 +1247,9 @@ class fpdb(QMainWindow):
         self.central_layout.setSpacing(0)
 
         # Add title bar and menu bar to layout
+        self.custom_title_bar = CustomTitleBar(self)
         self.central_layout.addWidget(self.custom_title_bar)
-        self.menu_bar = self.menuBar()
-        self.central_layout.setMenuBar(self.menu_bar)
+        self.setMenuBar(self.menuBar())  
 
         self.nb = QTabWidget()
         self.central_layout.addWidget(self.nb)
@@ -1338,8 +1336,6 @@ class CustomTitleBar(QWidget):
         self.setLayout(layout)
 
         self.is_maximized = False
-        self.moving = False
-        self.offset = None
 
     def toggle_maximize_restore(self):
         if self.is_maximized:
@@ -1353,19 +1349,13 @@ class CustomTitleBar(QWidget):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.moving = True
-            self.offset = event.pos()
+            self.main_window.oldPos = event.globalPos()
 
     def mouseMoveEvent(self, event):
-        if self.moving:
-            self.main_window.move(event.globalPos() - self.offset)
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.moving = False
-
-
-
+        if event.buttons() == Qt.LeftButton:
+            delta = QPoint(event.globalPos() - self.main_window.oldPos)
+            self.main_window.move(self.main_window.x() + delta.x(), self.main_window.y() + delta.y())
+            self.main_window.oldPos = event.globalPos()
 
 if __name__ == "__main__":
     from qt_material import apply_stylesheet
