@@ -1204,6 +1204,10 @@ class fpdb(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        if sys.platform == 'darwin':
+            pass
+        else:
+            self.setWindowFlags(Qt.FramelessWindowHint)
         cards = os.path.join(Configuration.GRAPHICS_PATH, 'tribal.jpg')
         if os.path.exists(cards):
             self.setWindowIcon(QIcon(cards))
@@ -1215,7 +1219,10 @@ class fpdb(QMainWindow):
         self.visible = False
         self.threads = []
         self.closeq = queue.Queue(20)
+
         self.oldPos = self.pos() 
+
+        
 
         if options.initialRun:
             self.display_config_created_dialogue = True
@@ -1240,16 +1247,27 @@ class fpdb(QMainWindow):
             defy = sg.height()
         self.resize(defx, defy)
 
+        if sys.platform == 'darwin':
+            pass
+        else:
+            # Create custom title bar
+            self.custom_title_bar = CustomTitleBar(self)
         # Create central widget and layout
         self.central_widget = QWidget(self)
         self.central_layout = QVBoxLayout(self.central_widget)
         self.central_layout.setContentsMargins(0, 0, 0, 0)
         self.central_layout.setSpacing(0)
 
-        # Add title bar and menu bar to layout
-        self.custom_title_bar = CustomTitleBar(self)
-        self.central_layout.addWidget(self.custom_title_bar)
-        self.setMenuBar(self.menuBar())  
+        if sys.platform == 'darwin':
+            # Add title bar and menu bar to layout
+            self.custom_title_bar = CustomTitleBar(self)
+            self.central_layout.addWidget(self.custom_title_bar)
+            self.setMenuBar(self.menuBar())  
+        else:
+            # Add title bar and menu bar to layout
+            self.central_layout.addWidget(self.custom_title_bar)
+            self.menu_bar = self.menuBar()
+            self.central_layout.setMenuBar(self.menu_bar)
 
         self.nb = QTabWidget()
         self.central_layout.addWidget(self.nb)
@@ -1336,6 +1354,11 @@ class CustomTitleBar(QWidget):
         self.setLayout(layout)
 
         self.is_maximized = False
+        if sys.platform == 'darwin':
+            pass
+        else:
+            self.moving = False
+            self.offset = None            
 
     def toggle_maximize_restore(self):
         if self.is_maximized:
@@ -1356,6 +1379,8 @@ class CustomTitleBar(QWidget):
             delta = QPoint(event.globalPos() - self.main_window.oldPos)
             self.main_window.move(self.main_window.x() + delta.x(), self.main_window.y() + delta.y())
             self.main_window.oldPos = event.globalPos()
+
+
 
 if __name__ == "__main__":
     from qt_material import apply_stylesheet
