@@ -267,10 +267,22 @@ class SealsWithClubs(HandHistoryConverter):
             logging.debug('readButton: not found')
 
     def readPlayerStacks(self, hand):
-        logging.debug("Reading player stacks")
-        m = self.re_PlayerInfo.finditer(hand.handText)
+        handsplit = hand.handText.split('*** SUMMARY ***')
+        if len(handsplit) != 2:
+            raise FpdbHandPartial(
+                f"Hand is not cleanly split into pre and post Summary {hand.handid}."
+            )
+        pre, post = handsplit
+        m = self.re_PlayerInfo.finditer(pre)
+        plist = {}
+
         for a in m:
-            hand.addPlayer(int(a.group('SEAT')), a.group('PNAME'), a.group('CASH'), None)
+            if plist.get(a.group('PNAME')) is None:
+                hand.addPlayer(int(a.group('SEAT')), a.group('PNAME'), a.group('CASH'))
+                plist[a.group('PNAME')] = [int(a.group('SEAT')), a.group('CASH')]
+
+        if len(plist.keys()) < 2:
+            raise FpdbHandPartial(f"Less than 2 players in hand! {hand.handid}.")
 
     def markStreets(self, hand):
         logging.debug("Marking streets")
