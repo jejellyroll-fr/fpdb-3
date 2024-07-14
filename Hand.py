@@ -906,40 +906,39 @@ class Hand(object):
                 
     def totalPot(self):
         """ If all bets and blinds have been added, totals up the total pot size"""
-
-        # This gives us the total amount put in the pot
         if self.totalpot is None:
-            print("totalpot",self.totalpot )
-            self.pot.end()
-            self.totalpot = self.pot.total
-            print("totalpot2",self.totalpot )
+            try:
+                self.pot.end()
+                self.totalpot = self.pot.total
+            except FpdbParseError as e:
+                log.error("Error in totalPot calculation: %s", e)
+                self.totalpot = 0
         
         if self.adjustCollected:
             self.stats.awardPots(self)
         
         def gettempcontainers(collected, collectees):
-            (collectedCopy, collecteesCopy, totalcollected) = ([], {}, 0)
+            collectedCopy, collecteesCopy, totalcollected = [], {}, 0
             for v in sorted(collected, key=lambda collectee: collectee[1], reverse=True):
-                if Decimal(v[1])!=0:
+                if Decimal(v[1]) != 0:
                     totalcollected += Decimal(v[1])
                     collectedCopy.append([v[0], Decimal(v[1])])
-            for k, j in list(collectees.items()):
-                if j!=0: collecteesCopy[k] = j
+            for k, j in collectees.items():
+                if j != 0:
+                    collecteesCopy[k] = j
             return collectedCopy, collecteesCopy, totalcollected
         
         collected, collectees, totalcollected = gettempcontainers(self.collected, self.collectees)
         if (self.uncalledbets or ((self.totalpot - totalcollected < 0) and self.checkForUncalled)):
-            for i,v in enumerate(sorted(self.collected, key=lambda collectee: collectee[1], reverse=True)):
-                if v[0] in self.pot.returned: 
+            for i, v in enumerate(sorted(self.collected, key=lambda collectee: collectee[1], reverse=True)):
+                if v[0] in self.pot.returned:
                     collected[i][1] = Decimal(v[1]) - self.pot.returned[v[0]]
                     collectees[v[0]] -= self.pot.returned[v[0]]
                     self.pot.returned[v[0]] = 0
-            (self.collected, self.collectees, self.totalcollected) = gettempcontainers(collected, collectees)
+            self.collected, self.collectees, self.totalcollected = gettempcontainers(collected, collectees)
 
-        # This gives us the amount collected, i.e. after rake
         if self.totalcollected is None:
-            self.totalcollected = 0;
-            # self.collected looks like [[p1,amount][px,amount]]
+            self.totalcollected = 0
             for entry in self.collected:
                 self.totalcollected += Decimal(entry[1])
 
@@ -1903,8 +1902,8 @@ class Pot(object):
         self.total = sum(self.committed.values()) + sum(self.common.values()) + self.stp
 
         # Return any uncalled bet.
-        if sum(self.common.values())>0 and sum(self.common.values())==sum(self.antes.values()):
-            common = sorted([ (v,k) for (k,v) in list(self.common.items())])
+        if sum(self.common.values()) > 0 and sum(self.common.values()) == sum(self.antes.values()):
+            common = sorted([ (v,k) for (k,v) in self.common.items()])
             try:
                 lastcommon = common[-1][0] - common[-2][0]
                 if lastcommon > 0: # uncalled
@@ -1912,14 +1911,10 @@ class Pot(object):
                     self.total -= lastcommon
                     self.common[returntocommon] -= lastcommon
             except IndexError as e:
-                log.error(("Pot.end(): '%s': Major failure while calculating pot: '%s'"), self.handid, e)
-                raise FpdbParseError
+                log.error("Pot.end(): Major failure while calculating pot: %s", e)
+                raise FpdbParseError("Error in pot calculation during common bets handling")
         
-        committed = sorted([ (v,k) for (k,v) in list(self.committed.items())])
-        # ERROR below. lastbet is correct in most cases, but wrong when
-        #              additional money is committed to the pot in cash games
-        #              due to an additional sb being posted. (Speculate that
-        #              posting sb+bb is also potentially wrong)
+        committed = sorted([ (v,k) for (k,v) in self.committed.items() if v > 0])
         try:
             lastbet = committed[-1][0] - committed[-2][0]
             if lastbet > 0: # uncalled
@@ -1928,23 +1923,20 @@ class Pot(object):
                 self.committed[returnto] -= lastbet
                 self.returned[returnto] = lastbet
         except IndexError as e:
-            log.error(("Pot.end(): '%s': Major failure while calculating pot: '%s'"), self.handid, e)
-            raise FpdbParseError
+            log.error("Pot.end(): Major failure while calculating pot: %s", e)
+            raise FpdbParseError("Error in pot calculation during committed bets handling")
 
         # Work out side pots
-        commitsall = sorted([(v,k) for (k,v) in list(self.committed.items()) if v >0])
-
+        commitsall = sorted([(v,k) for (k,v) in self.committed.items() if v > 0])
         try:
             while len(commitsall) > 0:
                 commitslive = [(v,k) for (v,k) in commitsall if k in self.contenders]
-                print('commitslive', commitslive)
                 v1 = commitslive[0][0]
-                self.pots += [(sum([min(v,v1) for (v,k) in commitsall]), set(k for (v,k) in commitsall if k in self.contenders))]
-                commitsall = [((v-v1),k) for (v,k) in commitsall if v-v1 >0]
+                self.pots += [(sum([min(v, v1) for (v, k) in commitsall]), set(k for (v, k) in commitsall if k in self.contenders))]
+                commitsall = [((v - v1), k) for (v, k) in commitsall if v - v1 > 0]
         except IndexError as e:
-            log.error(("Pot.end(): '%s': Major failure while calculating pot: '%s'"), self.handid, e)
-            print(("Pot.end(): '%s': Major failure while calculating pot: '%s'"), self.handid, e)
-            raise FpdbParseError
+            log.error("Pot.end(): Major failure while calculating pot: %s", e)
+            raise FpdbParseError("Error in pot calculation during side pots handling")
         
 
         # TODO: I think rake gets taken out of the pots.
