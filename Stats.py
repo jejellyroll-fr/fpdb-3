@@ -2299,9 +2299,94 @@ def blank(stat_dict, player):
 ################################################################################################
 # NEW STATS
 
+def vpip_pfr_ratio(stat_dict, player):
+    """
+    Calculate the VPIP/PFR ratio for a player.
 
+    This statistic represents the ratio between a player's VPIP (Voluntarily Put money In Pot) 
+    and PFR (Pre-Flop Raise) percentages, which gives an indication of the player's preflop aggression.
+
+    Args:
+        stat_dict (dict): A dictionary containing player statistics.
+        player (int): The player for whom the statistic is calculated.
+
+    Returns:
+        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
+    """
+    try:
+        vpip = float(stat_dict[player]['vpip']) / float(stat_dict[player]['vpip_opp'])
+        pfr = float(stat_dict[player]['pfr']) / float(stat_dict[player]['pfr_opp'])
+        
+        if pfr > 0:
+            stat = vpip / pfr
+        else:
+            stat = float('inf')  # Avoid division by zero
+
+        return (stat,
+                '%2.2f'             % (stat),
+                'v/p=%2.2f'         % (stat),
+                'vpip/pfr=%2.2f'    % (stat),
+                '(%d/%d)/(%d/%d)'   % (stat_dict[player]['vpip'], stat_dict[player]['vpip_opp'],
+                                       stat_dict[player]['pfr'], stat_dict[player]['pfr_opp']),
+                'VPIP/PFR ratio')
+    except:
+        return (float('inf'),
+                'NA',
+                'v/p=NA',
+                'vpip/pfr=NA',
+                '(0/0)/(0/0)',
+                'VPIP/PFR ratio')
     
 
+
+
+def three_bet_range(stat_dict, player):
+    try:
+        pfr = float(stat_dict[player]['pfr']) / float(stat_dict[player]['pfr_opp'])
+        three_bet = float(stat_dict[player]['tb_0']) / float(stat_dict[player]['tb_opp_0'])
+        stat = pfr * three_bet
+        return (stat,
+                '%3.1f'         % (100.0*stat),
+                '3BR=%3.1f%%'   % (100.0*stat),
+                '3BetRange=%3.1f%%' % (100.0*stat),
+                '(%d/%d)*(%d/%d)' % (stat_dict[player]['pfr'], stat_dict[player]['pfr_opp'],
+                                     stat_dict[player]['tb_0'], stat_dict[player]['tb_opp_0']),
+                '3-Bet Range')
+    except:
+        return (0, 'NA', '3BR=NA', '3BetRange=NA', '(0/0)*(0/0)', '3-Bet Range')
+
+
+def check_raise_frequency(stat_dict, player):
+    try:
+        total_cr = (stat_dict[player]['cr_1'] + stat_dict[player]['cr_2'] + 
+                    stat_dict[player]['cr_3'])
+        total_opp = (stat_dict[player]['ccr_opp_1'] + stat_dict[player]['ccr_opp_2'] + 
+                     stat_dict[player]['ccr_opp_3'])
+        stat = float(total_cr) / float(total_opp)
+        return (stat,
+                '%3.1f'         % (100.0*stat),
+                'CRF=%3.1f%%'   % (100.0*stat),
+                'CheckRaiseFreq=%3.1f%%' % (100.0*stat),
+                '(%d/%d)'       % (total_cr, total_opp),
+                'Check-Raise Frequency')
+    except:
+        return (0, 'NA', 'CRF=NA', 'CheckRaiseFreq=NA', '(0/0)', 'Check-Raise Frequency')
+
+
+
+def river_call_efficiency(stat_dict, player):
+    try:
+        river_calls = stat_dict[player]['call_3']
+        showdowns_won = stat_dict[player]['wmsd']
+        stat = float(showdowns_won) / float(river_calls) if river_calls > 0 else 0
+        return (stat,
+                '%3.1f'         % (100.0*stat),
+                'RCE=%3.1f%%'   % (100.0*stat),
+                'RiverCallEff=%3.1f%%' % (100.0*stat),
+                '(%d/%d)'       % (showdowns_won, river_calls),
+                'River Call Efficiency')
+    except:
+        return (0, 'NA', 'RCE=NA', 'RiverCallEff=NA', '(0/0)', 'River Call Efficiency')
 #
 #
 #
