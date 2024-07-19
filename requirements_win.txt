@@ -13,3 +13,6 @@ beautifulsoup4
 pokereval
 requests
 QDarkStyle==3.0.3
+fastapi
+jinja2
+qt_material
