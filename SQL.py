@@ -5014,7 +5014,6 @@ class Sql(object):
         if db_server == 'mysql':
             self.query['tourneyPlayerDetailedStats'] = """
                       select s.name                                                                 AS siteName
-                            ,t.tourneyTypeId                                                        AS tourneyTypeId
                             ,tt.currency                                                            AS currency
                             ,(CASE
                                 WHEN tt.currency = 'play' THEN tt.buyIn
@@ -5058,7 +5057,6 @@ class Sql(object):
             # proper fix should use coalesce() or case ... when ... to work in all circumstances
             self.query['tourneyPlayerDetailedStats'] = """
                       select s.name                                                                 AS "siteName"
-                            ,t.tourneyTypeId                                                        AS "tourneyTypeId"
                             ,tt.currency                                                            AS "currency"
                             ,(CASE
                                 WHEN tt.currency = 'play' THEN tt.buyIn
@@ -5102,7 +5100,6 @@ class Sql(object):
         elif db_server == 'sqlite':
             self.query['tourneyPlayerDetailedStats'] = """
                       select s.name                                                                 AS siteName
-                            ,t.tourneyTypeId                                                        AS tourneyTypeId
                             ,tt.currency                                                            AS currency
                             ,(CASE
                                 WHEN tt.currency = 'play' THEN tt.buyIn
