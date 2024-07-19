@@ -121,20 +121,18 @@ class fpdb(QMainWindow):
                 return  # if tab already exists, just go to it
 
         used_before = False
-        for i, name in enumerate(self.tab_names):
+        for i, name in enumerate(self.nb_tab_names):
             if name == new_tab_name:
                 used_before = True
-                event_box = self.tabs[i]
                 page = self.pages[i]
                 break
 
         if not used_before:
             page = new_page
             self.pages.append(new_page)
-            self.tab_names.append(new_tab_name)
+            self.nb_tab_names.append(new_tab_name)
 
         index = self.nb.addTab(page, new_tab_name)
-        self.nb_tab_names.append(new_tab_name)
         self.nb.setCurrentIndex(index)
 
     def display_tab(self, new_tab_name):
@@ -1202,6 +1200,18 @@ class fpdb(QMainWindow):
         # Apply the stylesheet to the custom title bar
         self.custom_title_bar.update_theme()
 
+    def close_tab(self, index):
+        item = self.nb.widget(index)
+        self.nb.removeTab(index)
+        self.nb_tab_names.pop(index)
+        
+        try:
+            self.threads.remove(item)
+        except ValueError:
+            pass
+        
+        item.deleteLater()
+
     def __init__(self):
         super().__init__()
         if sys.platform == 'darwin':
@@ -1270,13 +1280,13 @@ class fpdb(QMainWindow):
             self.central_layout.setMenuBar(self.menu_bar)
 
         self.nb = QTabWidget()
+        self.nb.setTabsClosable(True)
+        self.nb.tabCloseRequested.connect(self.close_tab)
         self.central_layout.addWidget(self.nb)
         self.setCentralWidget(self.central_widget)
 
         self.createMenuBar()
 
-        self.tabs = []
-        self.tab_names = []
         self.pages = []
         self.nb_tab_names = []
 

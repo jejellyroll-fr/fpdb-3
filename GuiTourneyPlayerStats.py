@@ -79,7 +79,6 @@ class GuiTourneyPlayerStats(QSplitter):
         # columns to display, keys match column name returned by sql, values in tuple are:
         #     is column displayed, column heading, xalignment, formatting, celltype
         self.columns = [ ["siteName",       True,  ("Site"),    0.0, "%s", "str"]
-                       ,["tourney",         False, ("Tourney"), 0.0, "%s", "str"]   # true not allowed for this line
                        , ["category",       True,  ("Cat."),    0.0, "%s", "str"]
                        , ["limitType",      True,  ("Limit"),   0.0, "%s", "str"]
                        , ["currency",       True,  ("Curr."),   0.0, "%s", "str"]
@@ -124,11 +123,10 @@ class GuiTourneyPlayerStats(QSplitter):
         # pre-fetch some constant values:
         #self.cols_to_show = [x for x in self.columns if x[colshow]]
         #htourneytypeid_idx = colnames.index('tourneyTypeId')
-        self.cols_to_show = self.columns #TODO do i need above 2 lines?
         
         assert len(self.liststore) == grid, "len(self.liststore)="+str(len(self.liststore))+" grid-1="+str(grid)
         view = QTableView()
-        self.liststore.append(QStandardItemModel(0, len(self.cols_to_show), view))
+        self.liststore.append(QStandardItemModel(0, len(self.columns), view))
         view.setModel(self.liststore[grid])
         view.verticalHeader().hide()
         vbox.addWidget(view)
@@ -136,7 +134,7 @@ class GuiTourneyPlayerStats(QSplitter):
         self.listcols.append( [] )
 
         # Create header row   eg column: ("game",     True, "Game",     0.0, "%s")
-        for col, column in enumerate(self.cols_to_show):
+        for col, column in enumerate(self.columns):
             if column[colalias] == 'game' and holecards:
                 s = [x for x in self.columns if x[colalias] == 'hand'][0][colheading]
             else:
@@ -148,7 +146,7 @@ class GuiTourneyPlayerStats(QSplitter):
 
         while sqlrow < rows:
             treerow = []
-            for col,column in enumerate(self.cols_to_show):
+            for col,column in enumerate(self.columns):
                 if column[colalias] in colnames:
                     value = result[sqlrow][colnames.index(column[colalias])]
                 else:
