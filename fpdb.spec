@@ -1,44 +1,44 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 
-block_cipher = None
-
-
 a = Analysis(
-    ['pyfpdb\\fpdb.pyw'],
+    ['C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/fpdb.pyw'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Anonymise.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/api.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/app.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Archive.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Aux_Base.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Aux_Classic_Hud.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Aux_Hud.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/base_model.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/BetfairToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/BetOnlineToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/BovadaSummary.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/BovadaToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/bug-1823.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/CakeToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Card.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Cardold.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/card_path.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Charset.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Configuration.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/contributors.txt', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Database.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Databaseold.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/db_sqlite3.md', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/decimal_wrapper.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Deck.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/dependencies.txt', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/DerivedStats.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/DerivedStats_old.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/DetectInstalledSites.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Exceptions.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/files.qrc', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/files_rc.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Filters.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/fpdb.pyw', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/fpdb.toml', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/fpdb_prerun.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GGPokerToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiAutoImport.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiBulkImport.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiDatabase.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiGraphViewer.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiHandViewer.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiLogView.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiOddsCalc.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiPositionalStats.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiPrefs.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiReplayer.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiRingPlayerStats.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiSessionViewer.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiStove.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiTourneyGraphViewer.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiTourneyImport.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiTourneyPlayerStats.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/GuiTourneyViewer.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Hand.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/HandHistory.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/HandHistoryConverter.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Hello.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Hud.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/HUD_config.test.xml', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/HUD_config.xml', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/HUD_config.xml.example', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/HUD_config.xml.exemple', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/HUD_main.pyw', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/HUD_run_me.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/IdentifySite.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Importer-old.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Importer.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/ImporterLight.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/interlocks.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/iPokerSummary.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/iPokerToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/KingsClubToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/L10n.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/LICENSE', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/linux_table_detect.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/logging.conf', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Makefile', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/MergeStructures.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/MergeSummary.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/MergeToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/montecarlo.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Mucked.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/OddsCalc.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/OddsCalcnew.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/OddsCalcNew2.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/OddsCalcPQL.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Options.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/OSXTables.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/P5sResultsParser.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/PacificPokerSummary.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/PacificPokerToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/PartyPokerToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Pokenum_api_call.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/pokenum_example.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/pokereval.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/PokerStarsStructures.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/PokerStarsSummary.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/PokerStarsToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/PokerTrackerSummary.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/PokerTrackerToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Popup.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/ppt.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/ps.ico', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/RazzStartHandGenerator.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/run_fpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/RushNotesAux.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/RushNotesMerge.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/ScriptAddStatToRegression.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/ScriptFetchMergeResults.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/ScriptFetchWinamaxResults.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/ScriptGenerateWikiPage.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/SealsWithClubsToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/settings.json', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/setup.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/sim.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/sim2.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/simulation.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/SitenameSummary.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/SplitHandHistory.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/SQL.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/sql_request.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/start_fpdb_web.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Stats.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Stove.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/Summaries.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/TableWindow.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/TestDetectInstalledSites.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/TestHandsPlayers.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/testodd.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/TournamentTracker.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/TourneySummary.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/TreeViewTooltips.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/UnibetToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/UnibetToFpdb_old.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/upd_indexes.sql', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/wina.ico', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/WinamaxSummary.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/WinamaxToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/windows_make_bats.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/WinningSummary.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/WinningToFpdb.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/WinTables.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/win_table_detect.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/xlib_tester.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/XTables.py', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/_pokereval_3_11.pyd', '.'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/gfx', 'gfx'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/icons', 'icons'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/fonts', 'fonts'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/locale', 'locale'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/ppt', 'ppt'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/static', 'static'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/templates', 'templates'), ('C:\\Users\\jd\\Documents\\GitHub\\fpdb-3/utils', 'utils')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=block_cipher,
     noarchive=False,
+    optimize=0,
 )
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+pyz = PYZ(a.pure)
 
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
     [],
+    exclude_binaries=True,
     name='fpdb',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+)
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name='fpdb',
 )
