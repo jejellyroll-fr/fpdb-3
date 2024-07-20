@@ -63,8 +63,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip setuptools wheel
-          pip install pyinstaller pywin32
+          python -m pip install --upgrade pip setuptools wheel
+          pip install numpy pandas matplotlib==3.4.3
+          pip install pyqt5==5.15.6
+          pip install aiohttp frozenlist greenlet yarl==1.6.3
           pip install -r requirements.txt
 
       - name: Build project
