@@ -67,35 +67,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Miniconda
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-          auto-update-conda: true
-          use-mamba: true
 
-      - name: Create and activate conda environment
+
+      - name: Install Python 3.11 (Windows)
         run: |
-          conda create --name fpdb3-env python=${{ matrix.python-version }} --yes
-          conda activate fpdb3-env
+          choco install python --version=3.11.0 -y
+          echo "C:\Python311\Scripts;C:\Python311" | Set-Content -Path $env:GITHUB_PATH -Encoding utf8 -Append
+          python -m pip install --upgrade pip
 
-      - name: Install system dependencies
-        run: |
-          choco install visualstudio2019buildtools -y
-          choco install freetype -y
-          choco install pkgconfiglite -y
-
-
-      - name: Install additional dependencies with pip
-        run: |
-          conda activate fpdb3-env
-          python -m pip install --upgrade pip setuptools wheel
-          pip install -r requirements.txt
 
       - name: Build project
         shell: bash
         run: |
-          conda activate fpdb3-env
           ./build_fpdb.sh
 
       - name: Archive build artifacts
