@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest]
-        python-version: ["3.11.9"]
+        python-version: ["3.11"]
 
     steps:
       - uses: actions/checkout@v3
@@ -51,7 +51,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest]
-        python-version: ["3.11.9"]
+        python-version: ["3.11"]
 
     steps:
       - uses: actions/checkout@v3
@@ -60,6 +60,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+
+      - name: Install system dependencies
+        run: |
+          choco install visualstudio2019buildtools -y
+          choco install freetype -y
+          choco install pkgconfiglite -y
 
       - name: Install dependencies
         run: |
