@@ -1,35 +1,38 @@
-# Arrête le script si une commande échoue
+# stop on error
 $ErrorActionPreference = "Stop"
 
-# Fonction pour détecter l'OS
+# Function to detect OS
 function Detect-OS {
-    switch ($PSVersionTable.Platform) {
-        "Unix" { "Linux" }
-        "MacOSX" { "MacOS" }
-        "Win32NT" { "Windows" }
-        default { "unknown" }
+    if ($IsWindows) {
+        return "Windows"
+    } elseif ($IsLinux) {
+        return "Linux"
+    } elseif ($IsMacOS) {
+        return "MacOS"
+    } else {
+        return "unknown"
     }
 }
 
 $OS = Detect-OS
 Write-Output "Detected OS: $OS"
 
-# Définir le chemin de base
+# define path to base
 $BASE_PATH = Get-Location
 
-# Chemin de base où se trouvent vos fichiers Python
+# path to base 
 $BASE_PATH2 = $BASE_PATH
 
 Write-Output "Adjusted BASE_PATH2 for OS: $BASE_PATH2"
 
-# Nom du script principal pour lequel générer l'exécutable
+# Name of the main script
 $MAIN_SCRIPT = "fpdb.pyw"
 $SECOND_SCRIPT = "HUD_main.pyw"
 
-# Options de base PyInstaller
+# Options of pyinstaller
 $PYINSTALLER_OPTIONS = "--noconfirm --onedir --windowed --log-level=DEBUG"
 
-# Liste de tous les fichiers et dossiers à ajouter
+# List of all files
 $FILES = @(
     "Anonymise.py",
     "api.py",
@@ -191,7 +194,7 @@ $FOLDERS = @(
     "utils"
 )
 
-# Fonction pour générer la commande PyInstaller avec --add-data
+# Function to generate the pyinstaller command
 function Generate-PyInstallerCommand {
     param (
         [string]$scriptPath
@@ -199,7 +202,7 @@ function Generate-PyInstallerCommand {
 
     $command = "pyinstaller $PYINSTALLER_OPTIONS"
 
-    # Traite les fichiers
+    # process files
     foreach ($file in $FILES) {
         if ($OS -eq "Windows") {
             $command += " --add-data `"$BASE_PATH2\$file;.`""
@@ -208,7 +211,7 @@ function Generate-PyInstallerCommand {
         }
     }
 
-    # Traite les dossiers
+    # process folders
     foreach ($folder in $FOLDERS) {
         if ($OS -eq "Windows") {
             $command += " --add-data `"$BASE_PATH2\$folder;.\$folder`""
@@ -222,7 +225,7 @@ function Generate-PyInstallerCommand {
     return $command
 }
 
-# Fonction pour déplacer les fichiers
+# Function to move files
 function Move-Files {
     param (
         [string]$sourceDir,
@@ -242,7 +245,7 @@ function Move-Files {
     }
 }
 
-# Fonction pour copier et supprimer les dossiers
+# Function to copy and remove folders
 function Copy-And-Remove-Folders {
     param (
         [string]$sourceDir,
@@ -261,7 +264,7 @@ function Copy-And-Remove-Folders {
     }
 }
 
-# Fonction pour copier HUD_main.exe et le dossier _internal sans écraser les fichiers existants
+# Function to copy HUD_main.exe
 function Copy-HUDMain {
     param (
         [string]$sourceDir,
@@ -271,13 +274,13 @@ function Copy-HUDMain {
     $hudMainExe = Join-Path -Path $sourceDir -ChildPath "HUD_main.exe"
     $targetExe = Join-Path -Path $targetDir -ChildPath "HUD_main.exe"
 
-    # Copier HUD_main.exe s'il n'existe pas déjà dans le dossier cible
+
     if (-not (Test-Path -Path $targetExe)) {
         Write-Output "Copie de HUD_main.exe de $hudMainExe à $targetExe"
         Copy-Item -Path $hudMainExe -Destination $targetExe -Force
     }
 
-    # Copier le dossier _internal sans écraser les fichiers existants
+
     $sourceInternal = Join-Path -Path $sourceDir -ChildPath "_internal"
     $targetInternal = Join-Path -Path $targetDir -ChildPath "_internal"
 
@@ -292,33 +295,33 @@ function Copy-HUDMain {
     }
 }
 
-# Générer et exécuter la commande pour le script principal
+# Generate the pyinstaller command for the main script
 $command = Generate-PyInstallerCommand -scriptPath $MAIN_SCRIPT
 Write-Output "Exécution : $command"
 Invoke-Expression $command
 
-# Générer et exécuter la commande pour le second script, si nécessaire
+# Generate the pyinstaller command for the second script
 $command = Generate-PyInstallerCommand -scriptPath $SECOND_SCRIPT
 Write-Output "Exécution : $command"
 Invoke-Expression $command
 
-Write-Output "Build terminé avec succès."
+Write-Output "Build success"
 
-# Chemins de sortie pour fpdb et HUD_main
+
 $fpdbOutputDir = Join-Path -Path $BASE_PATH -ChildPath "dist/fpdb"
 $hudOutputDir = Join-Path -Path $BASE_PATH -ChildPath "dist/HUD_main"
 
-# Chemins internes pour fpdb et HUD_main
+
 $fpdbInternalDir = Join-Path -Path $fpdbOutputDir -ChildPath "_internal"
 $hudInternalDir = Join-Path -Path $hudOutputDir -ChildPath "_internal"
 
-# Déplacer les fichiers nécessaires après le build pour fpdb
+
 Move-Files -sourceDir $fpdbInternalDir -targetDir $fpdbOutputDir
 
-# Copier et supprimer les dossiers nécessaires après le build pour fpdb
+
 Copy-And-Remove-Folders -sourceDir $fpdbInternalDir -targetDir $fpdbOutputDir
 
-# Copier HUD_main.exe et le dossier _internal dans fpdb
+
 Copy-HUDMain -sourceDir $hudOutputDir -targetDir $fpdbOutputDir
 
-Write-Output "Déplacement terminé avec succès."
+Write-Output "Move success"
