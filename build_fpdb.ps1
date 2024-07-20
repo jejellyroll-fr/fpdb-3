@@ -129,7 +129,7 @@ $FILES = @(
     "PartyPokerToFpdb.py",
     "Pokenum_api_call.py",
     "pokenum_example.py",
-    "pokereval.py",
+    #"pokereval.py",
     "PokerStarsStructures.py",
     "PokerStarsSummary.py",
     "PokerStarsToFpdb.py",
@@ -180,7 +180,7 @@ $FILES = @(
     "win_table_detect.py",
     "xlib_tester.py",
     "XTables.py",
-    "_pokereval_3_11.pyd"
+    #"_pokereval_3_11.pyd"
 )
 
 $FOLDERS = @(
