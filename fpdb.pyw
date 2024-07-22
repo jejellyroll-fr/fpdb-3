@@ -78,6 +78,7 @@ import GuiGraphViewer
 import GuiTourneyGraphViewer
 import GuiSessionViewer
 import GuiHandViewer
+import GuiTourHandViewer
 #import GuiOddsCalc
 import GuiStove
 
@@ -848,13 +849,13 @@ class fpdb(QMainWindow):
         cashMenu.addAction(makeAction('Session Stats', self.tab_session_stats, 'Ctrl+S'))
         tournamentMenu.addAction(makeAction('Tourney Graphs', self.tabTourneyGraphViewer))
         tournamentMenu.addAction(makeAction('Tourney Stats', self.tab_tourney_player_stats, 'Ctrl+T'))
-        tournamentMenu.addAction(makeAction('Tourney Viewer', self.tab_tourney_viewer_stats))
+        tournamentMenu.addAction(makeAction('Tourney Hand Viewer', self.tab_tourney_viewer_stats))
         maintenanceMenu.addAction(makeAction('Statistics', self.dia_database_stats, 'View Database Statistics'))
         maintenanceMenu.addAction(makeAction('Create or Recreate Tables', self.dia_recreate_tables))
         maintenanceMenu.addAction(makeAction('Rebuild HUD Cache', self.dia_recreate_hudcache))
         maintenanceMenu.addAction(makeAction('Rebuild DB Indexes', self.dia_rebuild_indexes))
         maintenanceMenu.addAction(makeAction('Dump Database to Textfile (takes ALOT of time)', self.dia_dump_db))
-        toolsMenu.addAction(makeAction('Odds Calc', self.tab_odds_calc))
+        
         toolsMenu.addAction(makeAction('PokerProTools', self.launch_ppt))
         helpMenu.addAction(makeAction('Log Messages', self.dia_logs, 'Log and Debug Messages'))
         helpMenu.addAction(makeAction('Help Tab', self.tab_main_help))
@@ -1053,11 +1054,7 @@ class fpdb(QMainWindow):
         self.threads.append(new_import_thread)
         self.add_and_display_tab(new_import_thread, "Bulk Import")
 
-    def tab_odds_calc(self, widget, data=None):
-        """opens a tab for bulk importing"""
-        new_import_thread = GuiOddsCalc.GuiOddsCalc(self)
-        self.threads.append(new_import_thread)
-        self.add_and_display_tab(new_import_thread, "Odds Calc")
+
 
     def tab_tourney_import(self, widget, data=None):
         """opens a tab for bulk importing tournament summaries"""
@@ -1081,7 +1078,7 @@ class fpdb(QMainWindow):
         self.add_and_display_tab(new_ps_thread, "Tourney Stats")
 
     def tab_tourney_viewer_stats(self, widget, data=None):
-        new_thread = GuiTourneyViewer.GuiTourneyViewer(self.config, self.db, self.sql, self)
+        new_thread = GuiTourHandViewer.TourHandViewer(self.config, self.sql, self)
         self.threads.append(new_thread)
         self.add_and_display_tab(new_thread, "Tourney Viewer")
 
@@ -1092,7 +1089,8 @@ class fpdb(QMainWindow):
         self.add_and_display_tab(ps_tab, "Positional Stats")
 
     def tab_session_stats(self, widget, data=None):
-        new_ps_thread = GuiSessionViewer.GuiSessionViewer(self.config, self.sql, self, self)
+        colors = self.get_theme_colors()
+        new_ps_thread = GuiSessionViewer.GuiSessionViewer(self.config, self.sql, self, self, colors=colors)
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Session Stats")
 
@@ -1138,11 +1136,17 @@ class fpdb(QMainWindow):
         return {
             "background": self.palette().color(QPalette.Window).name(),
             "foreground": self.palette().color(QPalette.WindowText).name(),
-            "grid": "#444444",  # Exemple, vous pouvez ajuster selon le thème
+            "grid": "#444444",  # to customize
             "line_showdown": "#0000FF",
             "line_nonshowdown": "#FF0000",
             "line_ev": "#FFA500",
-            "line_hands": "#00FF00"
+            "line_hands": "#00FF00",
+            'line_up': 'g',
+            'line_down': 'r',
+            'line_showdown': 'b',
+            'line_nonshowdown': 'm',
+            'line_ev': 'orange',
+            'line_hands': 'c'
         }
 
     def tabGraphViewer(self, widget, data=None):
@@ -1154,7 +1158,8 @@ class fpdb(QMainWindow):
 
     def tabTourneyGraphViewer(self, widget, data=None):
         """opens a graph viewer tab"""
-        new_gv_thread = GuiTourneyGraphViewer.GuiTourneyGraphViewer(self.sql, self.config, self)
+        colors = self.get_theme_colors()
+        new_gv_thread = GuiTourneyGraphViewer.GuiTourneyGraphViewer(self.sql, self.config, self, colors=colors)
         self.threads.append(new_gv_thread)
         self.add_and_display_tab(new_gv_thread, "Tourney Graphs")
 

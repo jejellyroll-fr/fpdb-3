@@ -15,21 +15,15 @@
 #along with this program. If not, see <http://www.gnu.org/licenses/>.
 #In the "official" distribution you can find the license in agpl-3.0.txt.
 
+
 from __future__ import print_function
 from __future__ import division
 
 from past.utils import old_div
-#import L10n
-#_ = L10n.get_translation()
-
 import os
 import sys
-import traceback
-from time import *
-from datetime import datetime
-
-from PyQt5.QtWidgets import (QFrame, QScrollArea, QSplitter, QVBoxLayout,QMessageBox)
-
+from time import time
+from PyQt5.QtWidgets import QFrame, QScrollArea, QSplitter, QVBoxLayout, QMessageBox
 import Database
 import Filters
 import Charset
@@ -53,42 +47,42 @@ except ImportError as inst:
 
 class GuiTourneyGraphViewer(QSplitter):
 
-    def __init__(self, querylist, config, parent, debug=True):
+    def __init__(self, querylist, config, parent, colors, debug=True):
         """Constructor for GraphViewer"""
         QSplitter.__init__(self, parent)
         self.sql = querylist
         self.conf = config
         self.debug = debug
         self.parent = parent
+        self.colors = colors
         self.db = Database.Database(self.conf, sql=self.sql)
 
+        filters_display = {
+            "Heroes": True,
+            "Sites": True,
+            "Games": False, # cash game
+            "Tourney": True,
+            "TourneyCat": True,
+            "TourneyLim": True,
+            "TourneyBuyin": True,
+            "Currencies": True,
+            "Limits": False,
+            "LimitSep": True,
+            "LimitType": True,
+            "Type": True,
+            "UseType": 'tour',
+            "Seats": False,
+            "SeatSep": True,
+            "Dates": True,
+            "Groups": False,
+            "Button1": True,
+            "Button2": True
+        }
 
-        filters_display = { "Heroes"    : True,
-                            "Sites"     : False,
-                            "Games"     : False,
-                            "Tourney"   : False,
-                            "King of game"   : True,
-                            "Betting limit"   : True,
-                            "Buyin"   : True,
-                            "Currencies": False,
-                            "buyIn"     : True,
-                            "Limits"    : False,
-                            "LimitSep"  : False,
-                            "LimitType" : False,
-                            "Type"      : True,
-                            "UseType"   : 'tour',
-                            "Seats"     : False,
-                            "SeatSep"   : False,
-                            "Dates"     : True,
-                            "Groups"    : False,
-                            "Button1"   : True,
-                            "Button2"   : True
-                          }
-
-        self.filters = Filters.Filters(self.db, display = filters_display)
-        self.filters.registerButton1Name(("Refresh Graph"))
+        self.filters = Filters.Filters(self.db, display=filters_display)
+        self.filters.registerButton1Name("Refresh Graph")
         self.filters.registerButton1Callback(self.generateGraph)
-        self.filters.registerButton2Name(("Export to File"))
+        self.filters.registerButton2Name("Export to File")
         self.filters.registerButton2Callback(self.exportGraph)
 
         scroll = QScrollArea()
@@ -96,7 +90,7 @@ class GuiTourneyGraphViewer(QSplitter):
         self.addWidget(scroll)
 
         frame = QFrame()
-        frame.setStyleSheet('background-color: #19232D ')
+        frame.setStyleSheet(f'background-color: {self.colors["background"]}')
         self.graphBox = QVBoxLayout()
         frame.setLayout(self.graphBox)
         self.addWidget(frame)
@@ -104,11 +98,11 @@ class GuiTourneyGraphViewer(QSplitter):
         self.setStretchFactor(1, 1)
 
         self.fig = None
-        #self.exportButton.set_sensitive(False)
         self.canvas = None
 
         self.db.rollback()
         self.exportFile = None
+
     def clearGraphData(self):
         try:
             if self.canvas:
@@ -116,10 +110,10 @@ class GuiTourneyGraphViewer(QSplitter):
         except:
             pass
 
-        if self.fig != None:
+        if self.fig is not None:
             self.fig.clear()
-        self.fig = Figure(figsize=(5.0,4.0), dpi=100)
-        self.fig.patch.set_facecolor('#19232D')
+        self.fig = Figure(figsize=(5.0, 4.0), dpi=100)
+        self.fig.patch.set_facecolor(self.colors["background"])
         if self.canvas is not None:
             self.canvas.destroy()
 
@@ -132,84 +126,60 @@ class GuiTourneyGraphViewer(QSplitter):
         sitenos = []
         playerids = []
 
-        sites   = self.filters.getSites()
-        heroes  = self.filters.getHeroes()
+        sites = self.filters.getSites()
+        heroes = self.filters.getHeroes()
         siteids = self.filters.getSiteIds()
-        
-        games   = self.filters.getGames()
-        currencies = { '€':'EUR', '$':'USD', '':'T$'}
-        names   = ""
 
-        # Which sites are selected?
+        games = self.filters.getGames()
+        names = ""
+
         for site in sites:
             sitenos.append(siteids[site])
             _hname = Charset.to_utf8(heroes[site])
             result = self.db.get_player_id(self.conf, site, _hname)
             if result is not None:
                 playerids.append(int(result))
-                names = names + "\n"+_hname + " on "+site
+                names = names + "\n" + _hname + " on " + site
 
         if not sitenos:
-            #Should probably pop up here.
-            print(("No sites selected - defaulting to PokerStars"))
+            print("No sites selected - defaulting to PokerStars")
             self.db.rollback()
             return
 
         if not playerids:
-            print(("No player ids found"))
+            print("No player ids found")
             self.db.rollback()
             return
 
-
-
-        #Set graph properties
         self.ax = self.fig.add_subplot(111)
-
-        #Get graph data from DB
         starttime = time()
         green = self.getData(playerids, sitenos, games)
-        print(("Graph generated in: %s") %(time() - starttime))
+        print("Graph generated in: %s" % (time() - starttime))
 
-
-        #Set axis labels and grid overlay properites
-        self.ax.set_xlabel(("Tournaments"),color='#9DA9B5')
-        self.ax.set_facecolor('#19232D')
-        self.ax.tick_params(axis='x', colors='#9DA9B5') 
-        self.ax.tick_params(axis='y', colors='#9DA9B5') 
-        self.ax.spines['left'].set_color('#9DA9B5') 
-        self.ax.spines['right'].set_color('#9DA9B5')
-        self.ax.spines['top'].set_color('#9DA9B5')
-        self.ax.spines['bottom'].set_color('#9DA9B5')
-        self.ax.set_ylabel("$", color='#9DA9B5')
-        self.ax.grid(color='g', linestyle=':', linewidth=0.2)
+        self.ax.set_xlabel("Tournaments", color=self.colors['foreground'])
+        self.ax.set_facecolor(self.colors['background'])
+        self.ax.tick_params(axis='x', colors=self.colors['foreground'])
+        self.ax.tick_params(axis='y', colors=self.colors['foreground'])
+        self.ax.spines['left'].set_color(self.colors['foreground'])
+        self.ax.spines['right'].set_color(self.colors['foreground'])
+        self.ax.spines['top'].set_color(self.colors['foreground'])
+        self.ax.spines['bottom'].set_color(self.colors['foreground'])
+        self.ax.set_ylabel("$", color=self.colors['foreground'])
+        self.ax.grid(color=self.colors['grid'], linestyle=':', linewidth=0.2)
         if green is None or len(green) == 0:
-            self.ax.set_title(("No Data for Player(s) Found"))
-            green = ([    0.,     0.,     0.,     0.,   500.,  1000.,   900.,   800.,
-                        700.,   600.,   500.,   400.,   300.,   200.,   100.,     0.,
-                        500.,  1000.,  1000.,  1000.,  1000.,  1000.,  1000.,  1000.,
-                        1000., 1000.,  1000.,  1000.,  1000.,  1000.,   875.,   750.,
-                        625.,   500.,   375.,   250.,   125.,     0.,     0.,     0.,
-                        0.,   500.,  1000.,   900.,   800.,   700.,   600.,   500.,
-                        400.,   300.,   200.,   100.,     0.,   500.,  1000.,  1000.])
+            self.ax.set_title("No Data for Player(s) Found", color=self.colors['foreground'])
+            green = ([0., 0., 0., 0., 500., 1000., 900., 800., 700., 600., 500., 400., 300., 200., 100., 0., 500., 1000., 1000., 1000., 1000., 1000., 1000., 1000., 1000., 1000., 1000., 1000., 1000., 1000., 875., 750., 625., 500., 375., 250., 125., 0., 0., 0., 0., 500., 1000., 900., 800., 700., 600., 500., 400., 300., 200., 100., 0., 500., 1000., 1000.])
 
-            self.ax.plot(green, color='green', label=('Tournaments') + ': %d\n' % len(green) + ('Profit') + ': $%.2f' % green[-1])
+            self.ax.plot(green, color='green', label='Tournaments: %d\nProfit: $%.2f' % (len(green), green[-1]))
             self.graphBox.addWidget(self.canvas)
             self.canvas.show()
             self.canvas.draw()
-
-            #TODO: Do something useful like alert user
         else:
-            self.ax.set_title((("Tournament Results")+names), color='#9DA9B5')
-
-            #Draw plot
-            self.ax.plot(green, color='green', label=('Tournaments') + ': %d\n' % len(green) + ('Profit') + ': $%.2f' % green[-1])
-
-            legend = self.ax.legend(loc='upper left', fancybox=True, shadow=True, prop=FontProperties(size='smaller'), facecolor="#19232D", labelcolor='#9DA9B5')
-            #legend.draggable(True)
-            
+            self.ax.set_title("Tournament Results" + names, color=self.colors['foreground'])
+            self.ax.plot(green, color='green', label='Tournaments: %d\nProfit: $%.2f' % (len(green), green[-1]))
+            legend = self.ax.legend(loc='upper left', fancybox=True, shadow=True, prop=FontProperties(size='smaller'), facecolor=self.colors["background"], labelcolor=self.colors['foreground'])
             self.graphBox.addWidget(self.canvas)
             self.canvas.draw()
-            #self.exportButton.set_sensitive(True)
 
     def getData(self, names, sites, Tourneys):
         tmp = self.sql.query['tourneyGraphType']
@@ -219,25 +189,21 @@ class GuiTourneyGraphViewer(QSplitter):
         tourneysLim = self.filters.getTourneyLim()
         tourneysBuyin = self.filters.getTourneyBuyin()
 
-        currencies = { 'EUR':'EUR', 'USD':'USD', '':'T$'}
-        currencytest = str(tuple(currencies))
-        currencytest = currencytest.replace(",)",")")
-        currencytest = currencytest.replace("u'","'")
+        currencies = {'EUR': 'EUR', 'USD': 'USD', '': 'T$'}
+        currencytest = str(tuple(currencies.values()))
+        currencytest = currencytest.replace(",)", ")")
+        currencytest = currencytest.replace("u'", "'")
         currencytest = "AND tt.currency in %s" % currencytest
 
-        #Buggered if I can find a way to do this 'nicely' take a list of integers and longs
-        # and turn it into a tuple readale by sql.
-        # [5L] into (5) not (5,) and [5L, 2829L] into (5, 2829)
         nametest = str(tuple(names))
         sitetest = str(tuple(sites))
         tourneystest = str(tuple(tourneys))
         tourneysCattest = str(tuple(tourneysCat))
         tourneysLimtest = str(tuple(tourneysLim))
-        tourneysBuyintest = str(tuple(tourneysBuyin))
-        tourneystest = tourneystest.replace('None', '\"None\"') 
-        tourneysBuyintest = tourneysBuyintest.replace('None', '\"None\"') 
-        print(tourneystest)
-        #Must be a nicer way to deal with tuples of size 1 ie. (2,) - which makes sql barf
+        tourneysBuyintest = str(tuple(int(buyin.split(',')[0]) for buyin in tourneysBuyin if buyin != "None"))
+        tourneystest = tourneystest.replace('None', '"None"')
+        tourneysBuyintest = tourneysBuyintest.replace('None', '"None"')
+
         tmp = tmp.replace("<player_test>", nametest)
         tmp = tmp.replace("<site_test>", sitetest)
         tmp = tmp.replace("<startdate_test>", start_date)
@@ -246,15 +212,12 @@ class GuiTourneyGraphViewer(QSplitter):
         tmp = tmp.replace("<tourney_cat>", tourneysCattest)
         tmp = tmp.replace("<tourney_lim>", tourneysLimtest)
         tmp = tmp.replace("<tourney_buyin>", tourneysBuyintest)
-        
-        print(tourneys)
         tmp = tmp.replace("<tourney_test>", tourneystest)
         tmp = tmp.replace(",)", ")")
 
-        print( "DEBUG: sql query:", tmp)
+        print("DEBUG: sql query:", tmp)
 
         self.db.cursor.execute(tmp)
-        #returns (HandId,Winnings,Costs,Profit)
         winnings = self.db.cursor.fetchall()
         self.db.rollback()
 
@@ -262,29 +225,24 @@ class GuiTourneyGraphViewer(QSplitter):
             return None
 
         green = [float(x[1]) for x in winnings]
-        #blue  = map(lambda x: float(x[1]) if x[2] == True  else 0.0, winnings)
-        #red   = map(lambda x: float(x[1]) if x[2] == False else 0.0, winnings)
         greenline = cumsum(green)
-        #blueline  = cumsum(blue)
-        #redline   = cumsum(red)
-        return (old_div(greenline,100))
+        return (old_div(greenline, 100))
 
-    def exportGraph (self):
+
+
+    def exportGraph(self):
         if self.fig is None:
-            return # Might want to disable export button until something has been generated.
+            return
 
         else:
             path = os.getcwd()
-            print (path)
-            path = path+'/graph.png'
-            print (path)
-            self.fig.savefig(path) 
+            path = path + '/graph.png'
+            self.fig.savefig(path)
             msg = QMessageBox()
             msg.setWindowTitle("FPDB 3 info")
-            mess = "Your graph is saved in "+path
+            mess = "Your graph is saved in " + path
             msg.setText(mess)
             msg.exec()
-    #end of def exportGraph TO DO more if needed
 
 if __name__ == "__main__":
     import Configuration
@@ -300,7 +258,16 @@ if __name__ == "__main__":
     app = QApplication([])
     import SQL
     sql = SQL.Sql(db_server=settings['db-server'])
-    i = GuiTourneyGraphViewer(sql, config, None, None)
+
+    colors = {
+        'background': '#19232D',
+        'foreground': '#9DA9B5',
+        'grid': '#4D4D4D',
+        'line_up': 'g',
+        'line_down': 'r'
+    }
+
+    i = GuiTourneyGraphViewer(sql, config, None, colors)
     main_window = QMainWindow()
     main_window.setCentralWidget(i)
     main_window.show()
