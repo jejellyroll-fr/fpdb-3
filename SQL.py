@@ -6166,6 +6166,29 @@ class Sql(object):
                 
             where h.startTime <datetest>
                """
+        
+
+        ####################################
+        # Querry to get all hands in a date range for cash games session variation filter
+        ####################################
+        self.query['handsInRangeSessionFilter'] = """
+            select h.id
+            from Hands h
+            join Gametypes gt on h.gametypeId = gt.id
+            join HandsPlayers hp on h.id = hp.handId  -- utilisation de HandsPlayers
+            where h.startTime <datetest>
+            <game_test>
+            <limit_test>
+            <player_test>
+            <position_test>
+        """
+
+        self.query['getPlayerId'] = """
+            SELECT id 
+            FROM Players 
+            WHERE siteId = %s 
+            AND name = %s
+        """
 
         ####################################
         # Query to get a single hand for the replayer

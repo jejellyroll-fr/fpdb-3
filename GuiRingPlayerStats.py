@@ -113,6 +113,7 @@ class GuiRingPlayerStats(QSplitter):
                             "LimitSep"  : True,
                             "LimitType" : True,
                             "Type"      : True,
+                            "UseType": 'ring',
                             "Seats"     : True,
                             "SeatSep"   : True,
                             "Dates"     : True,
