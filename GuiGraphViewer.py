@@ -1,3 +1,27 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# Copyright 2010-2011 Maxime Grandchamp
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# In the "official" distribution you can find the license in agpl-3.0.txt.
+#
+
+
+# This code once was in GuiReplayer.py and was split up in this and the former by zarturo.
+
+
+# import L10n
+# _ = L10n.get_translation()
 from __future__ import print_function
 from __future__ import division
 
@@ -106,6 +130,8 @@ class GuiGraphViewer(QSplitter):
         display_in = "$" if "$" in graphops else "BB"
         names = ""
 
+
+
         for site in sites:
             sitenos.append(siteids[site])
             _hname = Charset.to_utf8(heroes[site])
@@ -128,6 +154,8 @@ class GuiGraphViewer(QSplitter):
             print("No limits found")
             self.db.rollback()
             return
+        #debug
+        #print("currencies selcted:", self.filters.getCurrencies())
 
         self.ax = self.fig.add_subplot(111)
 
@@ -231,12 +259,24 @@ class GuiGraphViewer(QSplitter):
         tmp = tmp.replace("<currency_test>", currencytest)
         tmp = tmp.replace(",)", ")")
 
+        #debug
+        #print("Final SQL Request:")
+        #print(tmp)
+
         self.db.cursor.execute(tmp)
         winnings = self.db.cursor.fetchall()
         self.db.rollback()
 
+        #debug
+        #print("winning data :")
+        #print(winnings)
+
         if len(winnings) == 0:
+            #print("Aucune donnée de gains trouvée")
             return (None, None, None, None)
+        
+
+
         green = [0, *[float(x[1]) for x in winnings]]
         blue = [0, *[float(x[1]) if x[2] == True  else 0.0 for x in winnings]]
         red = [0]
@@ -247,6 +287,19 @@ class GuiGraphViewer(QSplitter):
         blueline = cumsum(blue)
         redline = cumsum(red)
         orangeline = cumsum(orange)
+
+        # print("Data :")
+        # print("Green:", green[:10])  # show only the first 10 results
+        # print("Blue:", blue[:10])
+        # print("Red:", red[:10])
+        # print("Orange:", orange[:10])
+
+        # print("sum :")
+        # print("Greenline:", greenline[:10])
+        # print("Blueline:", blueline[:10])
+        # print("Redline:", redline[:10])
+        # print("Orangeline:", orangeline[:10])
+
         return (greenline / 100, blueline / 100, redline / 100, orangeline / 100)
 
     def exportGraph(self):

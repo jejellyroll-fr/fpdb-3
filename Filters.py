@@ -1246,11 +1246,16 @@ class Filters(QWidget):
             JOIN Hands h ON gt.id = h.gametypeId
             JOIN HandsPlayers hp ON h.id = hp.handId
             JOIN Players p ON hp.playerId = p.id
-            WHERE p.name = ? AND h.siteHandNo LIKE ?
+            WHERE gt.siteId = ? AND p.name = ?
         """
         site_id = self.siteid[site]
-        self.cursor.execute(query, (hero, f"{site_id}%"))
+        #debug
+        #print(f"executed request for {hero} on {site} (site_id: {site_id})")
+        self.cursor.execute(query, (site_id, hero))
         currencies = [row[0] for row in self.cursor.fetchall()]
+        #debug
+        #print(f"currencies found for {hero} on {site}: {currencies}")
+        
         for currency, checkbox in self.cbCurrencies.items():
             if currency in currencies:
                 checkbox.setChecked(True)
@@ -1258,9 +1263,13 @@ class Filters(QWidget):
             else:
                 checkbox.setChecked(False)
                 checkbox.setEnabled(False)
+            
+            # manage tour 'T$' on  'ring'
             if currency == 'T$' and self.getType() == 'ring':
                 checkbox.setChecked(False)
                 checkbox.setEnabled(False)
+            #debug
+            #print(f"Devise {currency} - Checked: {checkbox.isChecked()}, Activated: {checkbox.isEnabled()} on {site}")
 
 if __name__ == '__main__':
     config = Configuration.Config(file="HUD_config.test.xml")
