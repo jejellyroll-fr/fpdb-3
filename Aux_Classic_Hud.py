@@ -57,6 +57,8 @@ import Stats
 from PyQt5.QtWidgets import QInputDialog, QMessageBox
 import SQL
 import Database
+import Configuration
+import os
 
 class Classic_HUD(Aux_Hud.Simple_HUD):
     """
@@ -264,8 +266,10 @@ class Classic_stat(Aux_Hud.Simple_stat):
 
         # Check if the player has a comment and adjust color or add symbol if it's playershort
         if self.stat == "playershort" and self.has_comment(player_id):
-            fg = "#FF0000"  # Red color for players with comments
-            statstring = f"★ {self.hudprefix}{str(self.number[1])}{self.hudsuffix}"  # Add star symbol
+            #fg = "#FF0000"  # Red color for players with comments
+            icon_path = os.path.join(Configuration.GRAPHICS_PATH, 'pencil.png')  # Chemin vers l'image de l'icône
+            icon_img = f'<img src="{icon_path}" width="24" height="24">'  # Ajuster la taille de l'icône
+            statstring = f"{icon_img} {self.hudprefix}{str(self.number[1])}{self.hudsuffix} "  # Add star symbol
 
         self.set_color(fg=fg, bg=None)
         self.lab.setText(statstring)
