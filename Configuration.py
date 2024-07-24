@@ -478,6 +478,7 @@ class Stat(object):
         self.stat_hith = node.getAttribute("stat_hith")
         self.stat_locolor = node.getAttribute("stat_locolor")
         self.stat_hicolor = node.getAttribute("stat_hicolor")
+        self.stat_midcolor = node.getAttribute("stat_midcolor")
 
     def __str__(self):
         temp = "        _rowcol = %s, _stat_name = %s, \n" % (self.rowcol, self.stat_name)
@@ -1291,7 +1292,7 @@ class Config(object):
                 fav_seat.setAttribute("fav_seat", seat10_dict)
     #end def
     
-    def edit_hud(self, result, stat2, stat3, stat4, stat5, stat6, stat7, stat8, stat9, stat10, stat11, stat12, stat13):
+    def edit_hud(self, result, stat2, stat3, stat4, stat5, stat6, stat7, stat8, stat9, stat10, stat11, stat12, stat13, stat14):
         REPLACEMENTS = [
                         ("(0, 0)", "(1,1)"),
                         ("(0, 1)", "(1,2)"),
@@ -1367,6 +1368,7 @@ class Config(object):
                         fav_stat.setAttribute("stat_locolor" ,stat11)
                         fav_stat.setAttribute("stat_loth" ,stat12)
                         fav_stat.setAttribute("tip" ,stat13)
+                        fav_stat.setAttribute("stat_midcolor", stat14)
             
     #end def
 
@@ -1391,32 +1393,30 @@ class Config(object):
         
         for rowNumber in range(len(statArray)):
             for columnNumber in range(len(statArray[rowNumber])):
-                newStat=self.doc.createElement("stat")
+                newStat = self.doc.createElement("stat")
                 
-                newAttrStatName=self.doc.createAttribute("_stat_name")
-                newStat.setAttributeNode(newAttrStatName)
-                newStat.setAttribute("_stat_name", statArray[rowNumber][columnNumber])
+                attributes = {
+                    "_stat_name": statArray[rowNumber][columnNumber],
+                    "_rowcol": f"({rowNumber+1},{columnNumber+1})",
+                    "click": "",
+                    "popup": "default",
+                    "tip": "",
+                    "stat_locolor": "",
+                    "stat_loth": "",
+                    "stat_midcolor": "",  # Add stat_midcolor
+                    "stat_hicolor": "",
+                    "stat_hith": ""
+                }
                 
-                newAttrStatName=self.doc.createAttribute("_rowcol")
-                newStat.setAttributeNode(newAttrStatName)
-                newStat.setAttribute("_rowcol", ("("+str(rowNumber+1)+","+str(columnNumber+1)+")"))
-                
-                newAttrStatName=self.doc.createAttribute("click")
-                newStat.setAttributeNode(newAttrStatName)
-                newStat.setAttribute("click", "")
-                
-                newAttrStatName=self.doc.createAttribute("popup")
-                newStat.setAttributeNode(newAttrStatName)
-                newStat.setAttribute("popup", "default")
-                
-                newAttrStatName=self.doc.createAttribute("tip")
-                newStat.setAttributeNode(newAttrStatName)
-                newStat.setAttribute("tip", "")
+                for attr_name, attr_value in attributes.items():
+                    newAttr = self.doc.createAttribute(attr_name)
+                    newStat.setAttributeNode(newAttr)
+                    newStat.setAttribute(attr_name, attr_value)
                 
                 statsetNode.appendChild(newStat)
+        
         statNodes = statsetNode.getElementsByTagName("stat") #TODO remove this line?
     #end def editStats
-
     def editImportFilters(self, games):
         self.imp.importFilters = games
         imp_node = self.doc.getElementsByTagName("import")[-1]

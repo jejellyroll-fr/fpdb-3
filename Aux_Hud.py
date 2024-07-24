@@ -206,11 +206,13 @@ class Simple_stat(object):
             ss += f"color: {fg};"
         if bg:
             ss += f"background: {bg};"
+        #print(f"Setting style sheet: {ss}")
         self.lab.setStyleSheet(ss + "}")
 
 
 class Simple_label(QLabel):
     pass
+
 
 
 class Simple_table_mw(Aux_Base.Seat_Window):

@@ -593,6 +593,15 @@ class Sql(object):
                             boardcard5 INT)"""
 
 
+
+    
+
+
+
+
+
+
+
      ################################
         # Create TourneyTypes
         ################################
@@ -7621,6 +7630,22 @@ class Sql(object):
                     AND   playerId=%s
                     AND   startCards=%s"""
                    
+
+        ####################################
+        # create comment on players
+        ####################################
+
+        self.query['get_player_comment'] = """
+            SELECT comment FROM Players WHERE id=%s
+        """
+
+        self.query['update_player_comment'] = """
+            UPDATE Players SET comment=%s, commentTs=CURRENT_TIMESTAMP WHERE id=%s
+        """
+        self.query['get_player_name'] = "SELECT name FROM Players WHERE id=%s"
+
+        ####################################
+
         ####################################
         # Queries to insert/update positionscache
         ####################################
