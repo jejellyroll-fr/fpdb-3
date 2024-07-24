@@ -216,6 +216,20 @@ class Classic_stat(Aux_Hud.Simple_stat):
         finally:
             db.close_connection()
 
+    def has_comment(self, player_id):
+        db = Database.Database(self.aw.hud.config)
+        try:
+            q = db.sql.query['get_player_comment']
+            db.cursor.execute(q, (player_id,))
+            result = db.cursor.fetchone()
+            return bool(result and result[0])
+        except Exception as e:
+            print(f"Error checking comment: {e}")
+            return False
+        finally:
+            db.close_connection()
+
+
     def update(self, player_id, stat_dict):
         super(Classic_stat, self).update(player_id, stat_dict)
 
@@ -240,10 +254,14 @@ class Classic_stat(Aux_Hud.Simple_stat):
             except Exception as e:
                 print(f"Error in color selection: {e}")
         
-        print(f"Final color chosen: {fg}")
-        self.set_color(fg=fg, bg=None)
-
         statstring = f"{self.hudprefix}{str(self.number[1])}{self.hudsuffix}"
+
+        # Check if the player has a comment and adjust color or add symbol if it's playershort
+        if self.stat == "playershort" and self.has_comment(player_id):
+            fg = "#FF0000"  # Red color for players with comments
+            statstring = f"★ {self.hudprefix}{str(self.number[1])}{self.hudsuffix}"  # Add star symbol
+
+        self.set_color(fg=fg, bg=None)
         self.lab.setText(statstring)
 
         tip = f"{stat_dict[player_id]['screen_name']}\n{self.number[5]}\n{self.number[3]}, {self.number[4]}"
