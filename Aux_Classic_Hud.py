@@ -123,6 +123,7 @@ class Classic_stat(Aux_Hud.Simple_stat):
         self.aw = aw
         self.popup = game_stat_config.popup
         self.click = game_stat_config.click
+        self.incolor = "rgba(0, 0, 0, 0)"
         if self.click == "open_comment_dialog":
             self.lab.mouseDoubleClickEvent = self.open_comment_dialog
         #print(f"value of self.click in the constructor : {self.click}")  # debug
@@ -241,18 +242,23 @@ class Classic_stat(Aux_Hud.Simple_stat):
         
         if self.stat_loth != "" and self.stat_hith != "" and self.stat_midcolor:
             try:
-                value = float(self.number[1])
-                if value < float(self.stat_loth):
-                    fg = self.stat_locolor
-                    #print(f"Using locolor: {fg}")
-                elif value < float(self.stat_hith):
-                    fg = self.stat_midcolor
-                    #print(f"Using midcolor: {fg}")
+                value_str = self.number[1]
+                if value_str == "NA":
+                    fg = self.incolor   # default color for NA
                 else:
-                    fg = self.stat_hicolor
-                    #print(f"Using hicolor: {fg}")
+                    value = float(value_str)
+                    if value < float(self.stat_loth):
+                        fg = self.stat_locolor
+                        #print(f"Using locolor: {fg}")
+                    elif value < float(self.stat_hith):
+                        fg = self.stat_midcolor
+                        #print(f"Using midcolor: {fg}")
+                    else:
+                        fg = self.stat_hicolor
+                        #print(f"Using hicolor: {fg}")
             except Exception as e:
                 print(f"Error in color selection: {e}")
+
         
         statstring = f"{self.hudprefix}{str(self.number[1])}{self.hudsuffix}"
 
