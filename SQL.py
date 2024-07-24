@@ -373,7 +373,11 @@ class Sql(object):
                         hero BOOLEAN, 
                         chars char(3),
                         comment text,
-                        commentTs DATETIME)
+                        commentTs DATETIME,
+                        profil text,
+                        color_code VARCHAR(7) DEFAULT '#FFFFFF',
+                        symbol VARCHAR(10) DEFAULT '★' 
+                        )
                         ENGINE=INNODB"""
         elif db_server == 'postgresql':
             self.query['createPlayersTable'] = """CREATE TABLE Players (
@@ -383,7 +387,10 @@ class Sql(object):
                         hero BOOLEAN,
                         chars char(3),
                         comment text,
-                        commentTs timestamp without time zone)"""
+                        commentTs timestamp without time zone
+                        profil text,
+                        color_code VARCHAR(7) DEFAULT '#FFFFFF',
+                        symbol VARCHAR(10) DEFAULT '★' )"""
         elif db_server == 'sqlite':
             self.query['createPlayersTable'] = """CREATE TABLE Players (
                         id INTEGER PRIMARY KEY,
@@ -393,6 +400,9 @@ class Sql(object):
                         chars TEXT,
                         comment TEXT,
                         commentTs timestamp,
+                        profil TEXT,
+                        color_code TEXT DEFAULT '#FFFFFF',
+                        symbol TEXT DEFAULT '★',  
                         FOREIGN KEY(siteId) REFERENCES Sites(id) ON DELETE CASCADE)"""
 
 
