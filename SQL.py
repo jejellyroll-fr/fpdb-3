@@ -5042,6 +5042,9 @@ class Sql(object):
                             ,tt.category                                                            AS category
                             ,tt.limitType                                                           AS limitType
                             ,tt.speed                                                                AS speed
+                            ,tt.maxSeats                                                            AS maxSeats
+							,tt.knockout                                                            AS knockout
+							,tt.reEntry                                                             AS reEntry
                             ,p.name                                                                 AS playerName
                             ,COUNT(1)                                                               AS tourneyCount
                             ,SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)                           AS unknownRank
@@ -5049,16 +5052,15 @@ class Sql(object):
                             ,SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END)                              AS _1st
                             ,SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END)                              AS _2nd
                             ,SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END)                              AS _3rd
-                            ,SUM(tp.winnings)/100.0                                                 AS won
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0))/100.0              AS won
                             ,SUM(CASE
                                    WHEN tt.currency = 'play' THEN tt.buyIn
                                    ELSE (tt.buyIn+tt.fee)/100.0
                                  END)                                                               AS spent
-                            ,ROUND(
-                                (CAST(SUM(tp.winnings - tt.buyin - tt.fee) AS SIGNED)/
-                                CAST(SUM(tt.buyin+tt.fee) AS SIGNED))* 100.0
-                             ,2)                                                                    AS roi
-                            ,SUM(tp.winnings-(tt.buyin+tt.fee))/100.0/(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)) AS profitPerTourney
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS net
+                            ,(CAST(SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee) AS SIGNED)/
+                                CAST(SUM(tt.buyin+tt.fee) AS SIGNED))* 100.0                                                                    AS roi
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0/(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)) AS profitPerTourney
                       from TourneysPlayers tp
                            inner join Tourneys t        on  (t.id = tp.tourneyId)
                            inner join TourneyTypes tt   on  (tt.Id = t.tourneyTypeId)
@@ -5085,6 +5087,9 @@ class Sql(object):
                             ,tt.category                                                            AS "category"
                             ,tt.limitType                                                           AS "limitType"
                             ,tt.speed                                                                AS "speed"
+                            ,tt.maxSeats                                                            AS "maxSeats"
+							,tt.knockout                                                            AS "knockout"
+							,tt.reEntry                                                             AS "reEntry"
                             ,p.name                                                                 AS "playerName"
                             ,COUNT(1)                                                               AS "tourneyCount"
                             ,SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)                           AS "unknownRank"
@@ -5092,16 +5097,15 @@ class Sql(object):
                             ,SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END)                              AS "_1st"
                             ,SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END)                              AS "_2nd"
                             ,SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END)                              AS "_3rd"
-                            ,SUM(tp.winnings)/100.0                                                 AS "won"
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0))/100.0              AS "won"
                             ,SUM(CASE
                                    WHEN tt.currency = 'play' THEN tt.buyIn
                                    ELSE (tt.buyIn+tt.fee)/100.0
                                  END)                                                               AS "spent"
-                            ,ROUND(
-                                (CAST(SUM(tp.winnings - tt.buyin - tt.fee) AS BIGINT)/
-                                CAST(SUM(tt.buyin+tt.fee) AS BIGINT))* 100.0
-                             ,2)                                                                    AS "roi"
-                            ,SUM(tp.winnings-(tt.buyin+tt.fee))/100.0
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS "net"
+                            ,(CAST(SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee) AS BIGINT)/
+                                CAST(SUM(tt.buyin+tt.fee) AS BIGINT))* 100.0                                                                    AS "roi"
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0
                              /(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 0 END))               AS "profitPerTourney"
                       from TourneysPlayers tp
                            inner join Tourneys t        on  (t.id = tp.tourneyId)
@@ -5128,6 +5132,9 @@ class Sql(object):
                             ,tt.category                                                            AS category
                             ,tt.limitType                                                           AS limitType
                             ,tt.speed                                                                AS speed
+                            ,tt.maxSeats                                                            AS maxSeats
+							,tt.knockout                                                            AS knockout
+							,tt.reEntry                                                             AS reEntry
                             ,p.name                                                                 AS playerName
                             ,COUNT(1)                                                               AS tourneyCount
                             ,SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)                           AS unknownRank
@@ -5135,16 +5142,15 @@ class Sql(object):
                             ,SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END)                              AS _1st
                             ,SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END)                              AS _2nd
                             ,SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END)                              AS _3rd
-                            ,SUM(tp.winnings)/100.0                                                 AS won
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0))/100.0              AS won
                             ,SUM(CASE
                                    WHEN tt.currency = 'play' THEN tt.buyIn
                                    ELSE (tt.buyIn+tt.fee)/100.0
                                  END)                                                               AS spent
-                            ,ROUND(
-                                (CAST(SUM(tp.winnings - tt.buyin - tt.fee) AS REAL)/
-                                CAST(SUM(tt.buyin+tt.fee) AS REAL))* 100.0
-                             ,2)                                                                    AS roi
-                            ,SUM(tp.winnings-(tt.buyin+tt.fee))/100.0/(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)) AS profitPerTourney
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS net
+                            ,(CAST(SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee) AS REAL)/
+                                CAST(SUM(tt.buyin+tt.fee) AS REAL))* 100.0                                                                    AS roi
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0/(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)) AS profitPerTourney
                       from TourneysPlayers tp
                            inner join Tourneys t        on  (t.id = tp.tourneyId)
                            inner join TourneyTypes tt   on  (tt.Id = t.tourneyTypeId)
