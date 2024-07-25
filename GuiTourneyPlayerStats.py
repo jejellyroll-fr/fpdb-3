@@ -84,6 +84,9 @@ class GuiTourneyPlayerStats(QSplitter):
                        , ["currency",       True,  ("Curr."),   0.0, "%s", "str"]
                        , ["buyIn",          True,  ("BuyIn"),   1.0, "%3.2f", "str"]
                        , ["fee",            True,  ("Fee"),     1.0, "%3.2f", "str"]
+                       , ["maxSeats",       True,  ("Seats"),   0.0, "%s", "str"]
+                       , ["knockout",       True,  ("KO")      ,0.0, "%s", "str"]
+                       , ["reEntry",        True,  ("ReEntry"), 0.0, "%s", "str"]
                        , ["playerName",     False, ("Name"),    0.0, "%s", "str"]   # true not allowed for this line (set in code)
                        , ["tourneyCount",   True,  ("#"),       1.0, "%1.0f", "str"]
                        , ["itm",            True,  ("ITM%"),    1.0, "%3.2f", "str"]
@@ -93,7 +96,8 @@ class GuiTourneyPlayerStats(QSplitter):
                        , ["unknownRank",    True,  ("Rank?"),   1.0, "%1.0f", "str"]
                        , ["spent",          True,  ("Spent"),   1.0, "%3.2f", "str"]
                        , ["won",            True,  ("Won"),     1.0, "%3.2f", "str"]
-                       , ["roi",            True,  ("ROI%"),    1.0, "%3.0f", "str"]
+                       , ["net",            True,  ("Net"),     1.0, "%3.2f", "str"]
+                       , ["roi",            True,  ("ROI%"),    1.0, "%3.2f", "str"]
                        , ["profitPerTourney", True,("$/Tour"),  1.0, "%3.2f", "str"]]
                        
         self.stats_frame = QFrame()
@@ -159,6 +163,11 @@ class GuiTourneyPlayerStats(QSplitter):
                             value = value + ' ' + 'Super Turbo'
                         else:
                             value = value + ' ' + result[sqlrow][colnames.index('speed')]
+                if column[colalias] == 'knockout' or column[colalias] == 'reEntry':
+                    if result[sqlrow][colnames.index(column[colalias])] == 1:
+                        value = 'Yes'
+                    else:
+                        value = 'No'
                 item = QStandardItem('')
                 if value != None and value != -999:
                     item = QStandardItem(column[colformat] % value)
