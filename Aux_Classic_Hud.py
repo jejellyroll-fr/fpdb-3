@@ -54,7 +54,11 @@ log = logging.getLogger("hud")
 #    FreePokerTools modules
 import Aux_Hud
 import Stats
-
+from PyQt5.QtWidgets import QInputDialog, QMessageBox
+import SQL
+import Database
+import Configuration
+import os
 
 class Classic_HUD(Aux_Hud.Simple_HUD):
     """
@@ -110,8 +114,21 @@ class Classic_stat(Aux_Hud.Simple_stat):
         # game_stat_config is the instance of this stat in the supported games stat configuration
         # use this prefix to directly extract the attributes
 
+        # debug
+        # print(f"Initializing Classic_stat for {stat}")
+        # print(f"stat_locolor: {game_stat_config.stat_locolor}")
+        # print(f"stat_loth: {game_stat_config.stat_loth}")
+        # print(f"stat_midcolor: {game_stat_config.stat_midcolor}")
+        # print(f"stat_hicolor: {game_stat_config.stat_hicolor}")
+        # print(f"stat_hith: {game_stat_config.stat_hith}")
+
+        self.aw = aw
         self.popup = game_stat_config.popup
-        self.click = game_stat_config.click  # not implemented yet
+        self.click = game_stat_config.click
+        self.incolor = "rgba(0, 0, 0, 0)"
+        if self.click == "open_comment_dialog":
+            self.lab.mouseDoubleClickEvent = self.open_comment_dialog
+        #print(f"value of self.click in the constructor : {self.click}")  # debug
         self.tip = game_stat_config.tip     # not implemented yet
         self.hudprefix = game_stat_config.hudprefix
         self.hudsuffix = game_stat_config.hudsuffix
@@ -126,10 +143,95 @@ class Classic_stat(Aux_Hud.Simple_stat):
             self.stat_hith = game_stat_config.stat_hith
         except Exception:
             self.stat_hicolor = self.stat_hith = ""
+
+        try:
+            self.stat_midcolor = game_stat_config.stat_midcolor
+        except Exception:
+            self.stat_midcolor = ""
         try:
             self.hudcolor = game_stat_config.hudcolor
         except Exception:
             self.hudcolor = aw.params['fgcolor']
+
+
+    def open_comment_dialog(self, event):
+        if self.stat != "playershort":
+            return
+        
+        player_id = self.get_player_id()
+        if player_id is None:
+            return
+
+        player_name = self.get_player_name(player_id)
+        current_comment = self.get_current_comment(player_id)
+        
+        new_comment, ok = QInputDialog.getMultiLineText(
+            None, 
+            f"Add comment to player: {player_name}",
+            f"Add your comment for {player_name}:",
+            current_comment
+        )
+        if ok:
+            self.save_comment(player_id, new_comment)
+
+    def get_player_id(self):
+        for id, data in self.stat_dict.items():
+            if data['seat'] == self.lab.aw_seat:
+                return id
+        return None
+
+    def get_player_name(self, player_id):
+        db = Database.Database(self.aw.hud.config)
+        try:
+            q = db.sql.query['get_player_name']
+            db.cursor.execute(q, (player_id,))
+            result = db.cursor.fetchone()
+            return result[0] if result else "Unknown Player"
+        except Exception as e:
+            print(f"Error fetching player name: {e}")
+            return "Unknown Player"
+        finally:
+            db.close_connection()
+
+    def get_current_comment(self, player_id):
+        db = Database.Database(self.aw.hud.config)
+        try:
+            q = db.sql.query['get_player_comment']
+            db.cursor.execute(q, (player_id,))
+            result = db.cursor.fetchone()
+            return result[0] if result else ""
+        except Exception as e:
+            print(f"Error fetching comment: {e}")
+            return ""
+        finally:
+            db.close_connection()
+
+    def save_comment(self, player_id, comment):
+        db = Database.Database(self.aw.hud.config)
+        try:
+            q = db.sql.query['update_player_comment']
+            db.cursor.execute(q, (comment, player_id))
+            db.commit()
+            QMessageBox.information(None, "Comment saved", "The comment has been successfully saved.")
+        except Exception as e:
+            print(f"Error saving comment: {e}")
+            QMessageBox.warning(None, "Error", f"An error occurred while saving the comment: {e}")
+        finally:
+            db.close_connection()
+
+    def has_comment(self, player_id):
+        db = Database.Database(self.aw.hud.config)
+        try:
+            q = db.sql.query['get_player_comment']
+            db.cursor.execute(q, (player_id,))
+            result = db.cursor.fetchone()
+            return bool(result and result[0])
+        except Exception as e:
+            print(f"Error checking comment: {e}")
+            return False
+        finally:
+            db.close_connection()
+
 
     def update(self, player_id, stat_dict):
         super(Classic_stat, self).update(player_id, stat_dict)
@@ -137,20 +239,39 @@ class Classic_stat(Aux_Hud.Simple_stat):
         if not self.number:  # stat did not create, so exit now
             return False
 
-        fg=self.hudcolor
-        if self.stat_loth != "":
-            with contextlib.suppress(Exception):
-                # number[1] might not be a numeric (e.g. NA)
-                if float(self.number[1]) < float(self.stat_loth):
-                    fg = self.stat_locolor
-        if self.stat_hith != "":
-            with contextlib.suppress(Exception):
-                # number[1] might not be a numeric (e.g. NA)
-                if float(self.number[1]) > float(self.stat_hith):
-                    fg = self.stat_hicolor
-        self.set_color(fg=fg, bg=None)
+        fg = self.hudcolor
+        #print(f"Updating stat for {self.stat}: value={self.number[1]}, loth={self.stat_loth}, hith={self.stat_hith}")
+        
+        if self.stat_loth != "" and self.stat_hith != "" and self.stat_midcolor:
+            try:
+                value_str = self.number[1]
+                if value_str == "NA":
+                    fg = self.incolor   # default color for NA
+                else:
+                    value = float(value_str)
+                    if value < float(self.stat_loth):
+                        fg = self.stat_locolor
+                        #print(f"Using locolor: {fg}")
+                    elif value < float(self.stat_hith):
+                        fg = self.stat_midcolor
+                        #print(f"Using midcolor: {fg}")
+                    else:
+                        fg = self.stat_hicolor
+                        #print(f"Using hicolor: {fg}")
+            except Exception as e:
+                print(f"Error in color selection: {e}")
 
+        
         statstring = f"{self.hudprefix}{str(self.number[1])}{self.hudsuffix}"
+
+        # Check if the player has a comment and adjust color or add symbol if it's playershort
+        if self.stat == "playershort" and self.has_comment(player_id):
+            #fg = "#FF0000"  # Red color for players with comments
+            icon_path = os.path.join(Configuration.GRAPHICS_PATH, 'pencil.png')  # Chemin vers l'image de l'icône
+            icon_img = f'<img src="{icon_path}" width="24" height="24">'  # Ajuster la taille de l'icône
+            statstring = f"{icon_img} {self.hudprefix}{str(self.number[1])}{self.hudsuffix} "  # Add star symbol
+
+        self.set_color(fg=fg, bg=None)
         self.lab.setText(statstring)
 
         tip = f"{stat_dict[player_id]['screen_name']}\n{self.number[5]}\n{self.number[3]}, {self.number[4]}"

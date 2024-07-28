@@ -373,7 +373,11 @@ class Sql(object):
                         hero BOOLEAN, 
                         chars char(3),
                         comment text,
-                        commentTs DATETIME)
+                        commentTs DATETIME,
+                        profil text,
+                        color_code VARCHAR(7) DEFAULT '#FFFFFF',
+                        symbol VARCHAR(10) DEFAULT '★' 
+                        )
                         ENGINE=INNODB"""
         elif db_server == 'postgresql':
             self.query['createPlayersTable'] = """CREATE TABLE Players (
@@ -383,7 +387,10 @@ class Sql(object):
                         hero BOOLEAN,
                         chars char(3),
                         comment text,
-                        commentTs timestamp without time zone)"""
+                        commentTs timestamp without time zone
+                        profil text,
+                        color_code VARCHAR(7) DEFAULT '#FFFFFF',
+                        symbol VARCHAR(10) DEFAULT '★' )"""
         elif db_server == 'sqlite':
             self.query['createPlayersTable'] = """CREATE TABLE Players (
                         id INTEGER PRIMARY KEY,
@@ -393,6 +400,9 @@ class Sql(object):
                         chars TEXT,
                         comment TEXT,
                         commentTs timestamp,
+                        profil TEXT,
+                        color_code TEXT DEFAULT '#FFFFFF',
+                        symbol TEXT DEFAULT '★',  
                         FOREIGN KEY(siteId) REFERENCES Sites(id) ON DELETE CASCADE)"""
 
 
@@ -591,6 +601,15 @@ class Sql(object):
                             boardcard3 INT,
                             boardcard4 INT,
                             boardcard5 INT)"""
+
+
+
+    
+
+
+
+
+
 
 
      ################################
@@ -5014,7 +5033,6 @@ class Sql(object):
         if db_server == 'mysql':
             self.query['tourneyPlayerDetailedStats'] = """
                       select s.name                                                                 AS siteName
-                            ,t.tourneyTypeId                                                        AS tourneyTypeId
                             ,tt.currency                                                            AS currency
                             ,(CASE
                                 WHEN tt.currency = 'play' THEN tt.buyIn
@@ -5024,6 +5042,9 @@ class Sql(object):
                             ,tt.category                                                            AS category
                             ,tt.limitType                                                           AS limitType
                             ,tt.speed                                                                AS speed
+                            ,tt.maxSeats                                                            AS maxSeats
+							,tt.knockout                                                            AS knockout
+							,tt.reEntry                                                             AS reEntry
                             ,p.name                                                                 AS playerName
                             ,COUNT(1)                                                               AS tourneyCount
                             ,SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)                           AS unknownRank
@@ -5031,16 +5052,15 @@ class Sql(object):
                             ,SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END)                              AS _1st
                             ,SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END)                              AS _2nd
                             ,SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END)                              AS _3rd
-                            ,SUM(tp.winnings)/100.0                                                 AS won
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0))/100.0              AS won
                             ,SUM(CASE
                                    WHEN tt.currency = 'play' THEN tt.buyIn
                                    ELSE (tt.buyIn+tt.fee)/100.0
                                  END)                                                               AS spent
-                            ,ROUND(
-                                (CAST(SUM(tp.winnings - tt.buyin - tt.fee) AS SIGNED)/
-                                CAST(SUM(tt.buyin+tt.fee) AS SIGNED))* 100.0
-                             ,2)                                                                    AS roi
-                            ,SUM(tp.winnings-(tt.buyin+tt.fee))/100.0/(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)) AS profitPerTourney
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS net
+                            ,(CAST(SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee) AS SIGNED)/
+                                CAST(SUM(tt.buyin+tt.fee) AS SIGNED))* 100.0                                                                    AS roi
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0/(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)) AS profitPerTourney
                       from TourneysPlayers tp
                            inner join Tourneys t        on  (t.id = tp.tourneyId)
                            inner join TourneyTypes tt   on  (tt.Id = t.tourneyTypeId)
@@ -5058,7 +5078,6 @@ class Sql(object):
             # proper fix should use coalesce() or case ... when ... to work in all circumstances
             self.query['tourneyPlayerDetailedStats'] = """
                       select s.name                                                                 AS "siteName"
-                            ,t.tourneyTypeId                                                        AS "tourneyTypeId"
                             ,tt.currency                                                            AS "currency"
                             ,(CASE
                                 WHEN tt.currency = 'play' THEN tt.buyIn
@@ -5068,6 +5087,9 @@ class Sql(object):
                             ,tt.category                                                            AS "category"
                             ,tt.limitType                                                           AS "limitType"
                             ,tt.speed                                                                AS "speed"
+                            ,tt.maxSeats                                                            AS "maxSeats"
+							,tt.knockout                                                            AS "knockout"
+							,tt.reEntry                                                             AS "reEntry"
                             ,p.name                                                                 AS "playerName"
                             ,COUNT(1)                                                               AS "tourneyCount"
                             ,SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)                           AS "unknownRank"
@@ -5075,16 +5097,15 @@ class Sql(object):
                             ,SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END)                              AS "_1st"
                             ,SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END)                              AS "_2nd"
                             ,SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END)                              AS "_3rd"
-                            ,SUM(tp.winnings)/100.0                                                 AS "won"
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0))/100.0              AS "won"
                             ,SUM(CASE
                                    WHEN tt.currency = 'play' THEN tt.buyIn
                                    ELSE (tt.buyIn+tt.fee)/100.0
                                  END)                                                               AS "spent"
-                            ,ROUND(
-                                (CAST(SUM(tp.winnings - tt.buyin - tt.fee) AS BIGINT)/
-                                CAST(SUM(tt.buyin+tt.fee) AS BIGINT))* 100.0
-                             ,2)                                                                    AS "roi"
-                            ,SUM(tp.winnings-(tt.buyin+tt.fee))/100.0
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS "net"
+                            ,(CAST(SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee) AS BIGINT)/
+                                CAST(SUM(tt.buyin+tt.fee) AS BIGINT))* 100.0                                                                    AS "roi"
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0
                              /(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 0 END))               AS "profitPerTourney"
                       from TourneysPlayers tp
                            inner join Tourneys t        on  (t.id = tp.tourneyId)
@@ -5102,7 +5123,6 @@ class Sql(object):
         elif db_server == 'sqlite':
             self.query['tourneyPlayerDetailedStats'] = """
                       select s.name                                                                 AS siteName
-                            ,t.tourneyTypeId                                                        AS tourneyTypeId
                             ,tt.currency                                                            AS currency
                             ,(CASE
                                 WHEN tt.currency = 'play' THEN tt.buyIn
@@ -5112,6 +5132,9 @@ class Sql(object):
                             ,tt.category                                                            AS category
                             ,tt.limitType                                                           AS limitType
                             ,tt.speed                                                                AS speed
+                            ,tt.maxSeats                                                            AS maxSeats
+							,tt.knockout                                                            AS knockout
+							,tt.reEntry                                                             AS reEntry
                             ,p.name                                                                 AS playerName
                             ,COUNT(1)                                                               AS tourneyCount
                             ,SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)                           AS unknownRank
@@ -5119,16 +5142,15 @@ class Sql(object):
                             ,SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END)                              AS _1st
                             ,SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END)                              AS _2nd
                             ,SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END)                              AS _3rd
-                            ,SUM(tp.winnings)/100.0                                                 AS won
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0))/100.0              AS won
                             ,SUM(CASE
                                    WHEN tt.currency = 'play' THEN tt.buyIn
                                    ELSE (tt.buyIn+tt.fee)/100.0
                                  END)                                                               AS spent
-                            ,ROUND(
-                                (CAST(SUM(tp.winnings - tt.buyin - tt.fee) AS REAL)/
-                                CAST(SUM(tt.buyin+tt.fee) AS REAL))* 100.0
-                             ,2)                                                                    AS roi
-                            ,SUM(tp.winnings-(tt.buyin+tt.fee))/100.0/(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)) AS profitPerTourney
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS net
+                            ,(CAST(SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee) AS REAL)/
+                                CAST(SUM(tt.buyin+tt.fee) AS REAL))* 100.0                                                                    AS roi
+                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0/(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)) AS profitPerTourney
                       from TourneysPlayers tp
                            inner join Tourneys t        on  (t.id = tp.tourneyId)
                            inner join TourneyTypes tt   on  (tt.Id = t.tourneyTypeId)
@@ -6169,6 +6191,29 @@ class Sql(object):
                 
             where h.startTime <datetest>
                """
+        
+
+        ####################################
+        # Querry to get all hands in a date range for cash games session variation filter
+        ####################################
+        self.query['handsInRangeSessionFilter'] = """
+            select h.id
+            from Hands h
+            join Gametypes gt on h.gametypeId = gt.id
+            join HandsPlayers hp on h.id = hp.handId  -- utilisation de HandsPlayers
+            where h.startTime <datetest>
+            <game_test>
+            <limit_test>
+            <player_test>
+            <position_test>
+        """
+
+        self.query['getPlayerId'] = """
+            SELECT id 
+            FROM Players 
+            WHERE siteId = %s 
+            AND name = %s
+        """
 
         ####################################
         # Query to get a single hand for the replayer
@@ -7601,6 +7646,22 @@ class Sql(object):
                     AND   playerId=%s
                     AND   startCards=%s"""
                    
+
+        ####################################
+        # create comment on players
+        ####################################
+
+        self.query['get_player_comment'] = """
+            SELECT comment FROM Players WHERE id=%s
+        """
+
+        self.query['update_player_comment'] = """
+            UPDATE Players SET comment=%s, commentTs=CURRENT_TIMESTAMP WHERE id=%s
+        """
+        self.query['get_player_name'] = "SELECT name FROM Players WHERE id=%s"
+
+        ####################################
+
         ####################################
         # Queries to insert/update positionscache
         ####################################

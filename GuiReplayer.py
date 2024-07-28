@@ -61,8 +61,8 @@ class GuiReplayer(QWidget):
 
     def __init__(self, config, querylist, mainwin, handlist):
         QWidget.__init__(self, None)
-        self.setFixedSize(1800, 1080)
-        #self.setFixedSize(1080, 720)
+        self.resize(1800, 1080)
+        self.setMinimumSize(800, 600)
         self.conf = config
         self.main_window = mainwin
         self.sql = querylist

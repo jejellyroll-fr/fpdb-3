@@ -20,7 +20,7 @@ import os
 import sys
 import re
 import queue
-import qdarkstyle
+# import qdarkstyle
 import multiprocessing
 import threading
 
@@ -39,8 +39,9 @@ cl_options = '.'.join(sys.argv[1:])
 from L10n import set_locale_translation
 import logging
 
-from PyQt5.QtCore import (QCoreApplication, QDate, Qt)
-from PyQt5.QtGui import (QScreen, QIcon)
+from PyQt5.QtCore import (QCoreApplication, QDate, Qt, QPoint)
+from PyQt5.QtGui import (QScreen, QIcon, QPalette)
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QSizePolicy
 from PyQt5.QtWidgets import (QAction, QApplication, QCalendarWidget,
                              QCheckBox, QDateEdit, QDialog,
                              QDialogButtonBox, QFileDialog,
@@ -77,7 +78,8 @@ import GuiGraphViewer
 import GuiTourneyGraphViewer
 import GuiSessionViewer
 import GuiHandViewer
-import GuiOddsCalc
+import GuiTourHandViewer
+#import GuiOddsCalc
 import GuiStove
 
 import SQL
@@ -87,6 +89,7 @@ import Card
 import Exceptions
 import Stats
 import api, app
+
 
 Configuration.set_logfile("fpdb-log.txt")
 
@@ -119,20 +122,18 @@ class fpdb(QMainWindow):
                 return  # if tab already exists, just go to it
 
         used_before = False
-        for i, name in enumerate(self.tab_names):
+        for i, name in enumerate(self.nb_tab_names):
             if name == new_tab_name:
                 used_before = True
-                event_box = self.tabs[i]
                 page = self.pages[i]
                 break
 
         if not used_before:
             page = new_page
             self.pages.append(new_page)
-            self.tab_names.append(new_tab_name)
+            self.nb_tab_names.append(new_tab_name)
 
         index = self.nb.addTab(page, new_tab_name)
-        self.nb_tab_names.append(new_tab_name)
         self.nb.setCurrentIndex(index)
 
     def display_tab(self, new_tab_name):
@@ -818,8 +819,8 @@ class fpdb(QMainWindow):
         tournamentMenu = mb.addMenu('Tournament')
         maintenanceMenu = mb.addMenu('Maintenance')
         toolsMenu = mb.addMenu('Tools')
-        # dataMenu = mb.addMenu('Dataviz')
         helpMenu = mb.addMenu('Help')
+        themeMenu = mb.addMenu('Themes')
 
         # Create actions
         def makeAction(name, callback, shortcut=None, tip=None):
@@ -836,43 +837,41 @@ class fpdb(QMainWindow):
         configMenu.addAction(makeAction('Hud Settings', self.dia_hud_preferences))
         configMenu.addAction(
             makeAction('Adv Preferences', self.dia_advanced_preferences, tip='Edit your preferences'))
-        # configMenu.addAction(makeAction(('HUD Stats Settings'), self.dia_hud_preferences))
         configMenu.addAction(makeAction('Import filters', self.dia_import_filters))
         configMenu.addSeparator()
         configMenu.addAction(makeAction('Close Fpdb', self.quit, 'Ctrl+Q', 'Quit the Program'))
 
         importMenu.addAction(makeAction('Bulk Import', self.tab_bulk_import, 'Ctrl+B'))
-        # importMenu.addAction(makeAction(('_Import through eMail/IMAP'), self.tab_imap_import))
-
         hudMenu.addAction(makeAction('HUD and Auto Import', self.tab_auto_import, 'Ctrl+A'))
-
         cashMenu.addAction(makeAction('Graphs', self.tabGraphViewer, 'Ctrl+G'))
         cashMenu.addAction(makeAction('Ring Player Stats', self.tab_ring_player_stats, 'Ctrl+P'))
         cashMenu.addAction(makeAction('Hand Viewer', self.tab_hand_viewer))
-        # cashMenu.addAction(makeAction(('Positional Stats (tabulated view)'), self.tab_positional_stats))
         cashMenu.addAction(makeAction('Session Stats', self.tab_session_stats, 'Ctrl+S'))
-        # cashMenu.addAction(makeAction(('Stove (preview)'), self.tabStove))
-
         tournamentMenu.addAction(makeAction('Tourney Graphs', self.tabTourneyGraphViewer))
         tournamentMenu.addAction(makeAction('Tourney Stats', self.tab_tourney_player_stats, 'Ctrl+T'))
-        # tournamentMenu.addAction(makeAction(('Tourney Viewer'), self.tab_tourney_viewer_stats))
-        tournamentMenu.addAction(makeAction('Tourney Viewer', self.tab_tourney_viewer_stats))
-
+        tournamentMenu.addAction(makeAction('Tourney Hand Viewer', self.tab_tourney_viewer_stats))
         maintenanceMenu.addAction(makeAction('Statistics', self.dia_database_stats, 'View Database Statistics'))
         maintenanceMenu.addAction(makeAction('Create or Recreate Tables', self.dia_recreate_tables))
         maintenanceMenu.addAction(makeAction('Rebuild HUD Cache', self.dia_recreate_hudcache))
         maintenanceMenu.addAction(makeAction('Rebuild DB Indexes', self.dia_rebuild_indexes))
         maintenanceMenu.addAction(makeAction('Dump Database to Textfile (takes ALOT of time)', self.dia_dump_db))
-
-        toolsMenu.addAction(makeAction('Odds Calc', self.tab_odds_calc))
+        
         toolsMenu.addAction(makeAction('PokerProTools', self.launch_ppt))
-
-        # dataMenu.addAction(makeAction(('launch server'), self.launch_dataviz_server))
-
         helpMenu.addAction(makeAction('Log Messages', self.dia_logs, 'Log and Debug Messages'))
         helpMenu.addAction(makeAction('Help Tab', self.tab_main_help))
         helpMenu.addSeparator()
         helpMenu.addAction(makeAction('Infos', self.dia_about, 'About the program'))
+
+        themes = [
+            'dark_purple.xml', 'dark_teal.xml', 'dark_blue.xml', 'dark_cyan.xml', 
+            'dark_pink.xml', 'dark_red.xml', 'dark_lime.xml', 'light_purple.xml', 
+            'light_teal.xml', 'light_blue.xml', 'light_cyan.xml', 'light_pink.xml', 
+            'light_red.xml', 'light_lime.xml'
+        ]
+
+        for theme in themes:
+            themeMenu.addAction(QAction(theme, self, triggered=partial(self.change_theme, theme)))
+
 
     def load_profile(self, create_db=False):
         """Loads profile from the provided path name."""
@@ -1055,11 +1054,7 @@ class fpdb(QMainWindow):
         self.threads.append(new_import_thread)
         self.add_and_display_tab(new_import_thread, "Bulk Import")
 
-    def tab_odds_calc(self, widget, data=None):
-        """opens a tab for bulk importing"""
-        new_import_thread = GuiOddsCalc.GuiOddsCalc(self)
-        self.threads.append(new_import_thread)
-        self.add_and_display_tab(new_import_thread, "Odds Calc")
+
 
     def tab_tourney_import(self, widget, data=None):
         """opens a tab for bulk importing tournament summaries"""
@@ -1068,11 +1063,7 @@ class fpdb(QMainWindow):
         bulk_tab = new_import_thread.get_vbox()
         self.add_and_display_tab(bulk_tab, "Tournament Results Import")
 
-    def tab_imap_import(self, widget, data=None):
-        new_thread = GuiImapFetcher.GuiImapFetcher(self.config, self.db, self.sql, self)
-        self.threads.append(new_thread)
-        tab = new_thread.get_vbox()
-        self.add_and_display_tab(tab, "eMail Import")
+
 
     # end def tab_import_imap_summaries
 
@@ -1087,7 +1078,7 @@ class fpdb(QMainWindow):
         self.add_and_display_tab(new_ps_thread, "Tourney Stats")
 
     def tab_tourney_viewer_stats(self, widget, data=None):
-        new_thread = GuiTourneyViewer.GuiTourneyViewer(self.config, self.db, self.sql, self)
+        new_thread = GuiTourHandViewer.TourHandViewer(self.config, self.sql, self)
         self.threads.append(new_thread)
         self.add_and_display_tab(new_thread, "Tourney Viewer")
 
@@ -1098,7 +1089,8 @@ class fpdb(QMainWindow):
         self.add_and_display_tab(ps_tab, "Positional Stats")
 
     def tab_session_stats(self, widget, data=None):
-        new_ps_thread = GuiSessionViewer.GuiSessionViewer(self.config, self.sql, self, self)
+        colors = self.get_theme_colors()
+        new_ps_thread = GuiSessionViewer.GuiSessionViewer(self.config, self.sql, self, self, colors=colors)
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Session Stats")
 
@@ -1125,15 +1117,49 @@ class fpdb(QMainWindow):
                         and mit.txt in the fpdb installation directory."""))
         self.add_and_display_tab(mh_tab, "Help")
 
+    def get_theme_colors(self):
+        """
+        Returns a dictionary containing the theme colors used in the application.
+
+        The dictionary contains the following keys:
+        - "background": the name of the color used for the background.
+        - "foreground": the name of the color used for the foreground.
+        - "grid": the name of the color used for the grid.
+        - "line_showdown": the name of the color used for the showdown line.
+        - "line_nonshowdown": the name of the color used for the non-showdown line.
+        - "line_ev": the name of the color used for the event line.
+        - "line_hands": the name of the color used for the hands line.
+
+        Returns:
+            dict: A dictionary containing the theme colors.
+        """
+        return {
+            "background": self.palette().color(QPalette.Window).name(),
+            "foreground": self.palette().color(QPalette.WindowText).name(),
+            "grid": "#444444",  # to customize
+            "line_showdown": "#0000FF",
+            "line_nonshowdown": "#FF0000",
+            "line_ev": "#FFA500",
+            "line_hands": "#00FF00",
+            'line_up': 'g',
+            'line_down': 'r',
+            'line_showdown': 'b',
+            'line_nonshowdown': 'm',
+            'line_ev': 'orange',
+            'line_hands': 'c'
+        }
+
     def tabGraphViewer(self, widget, data=None):
         """opens a graph viewer tab"""
-        new_gv_thread = GuiGraphViewer.GuiGraphViewer(self.sql, self.config, self)
+        colors = self.get_theme_colors()
+        new_gv_thread = GuiGraphViewer.GuiGraphViewer(self.sql, self.config, self, colors=colors)
         self.threads.append(new_gv_thread)
         self.add_and_display_tab(new_gv_thread, "Graphs")
 
     def tabTourneyGraphViewer(self, widget, data=None):
         """opens a graph viewer tab"""
-        new_gv_thread = GuiTourneyGraphViewer.GuiTourneyGraphViewer(self.sql, self.config, self)
+        colors = self.get_theme_colors()
+        new_gv_thread = GuiTourneyGraphViewer.GuiTourneyGraphViewer(self.sql, self.config, self, colors=colors)
         self.threads.append(new_gv_thread)
         self.add_and_display_tab(new_gv_thread, "Tourney Graphs")
 
@@ -1143,109 +1169,6 @@ class fpdb(QMainWindow):
         self.threads.append(thread)
         # tab = thread.get_vbox()
         self.add_and_display_tab(thread, "Stove")
-
-    def __init__(self):
-        QMainWindow.__init__(self)
-        cards = os.path.join(Configuration.GRAPHICS_PATH, 'tribal.jpg')
-        if os.path.exists(cards):
-            self.setWindowIcon(QIcon(cards))
-        set_locale_translation()
-        # no more than 1 process can this lock at a time:
-        self.lock = interlocks.InterProcessLock(name="fpdb_global_lock")
-        self.db = None
-        self.status_bar = None
-        self.quitting = False
-        self.visible = False
-        self.threads = []  # objects used by tabs - no need for threads, gtk handles it
-        self.closeq = queue.Queue(20)  # used to signal ending of a thread (only logviewer for now)
-
-        if options.initialRun:
-            self.display_config_created_dialogue = True
-            self.display_site_preferences = True
-        else:
-            self.display_config_created_dialogue = False
-            self.display_site_preferences = False
-
-        # create window, move it to specific location on command line
-        if options.xloc is not None or options.yloc is not None:
-            if options.xloc is None:
-                options.xloc = 0
-            if options.yloc is None:
-                options.yloc = 0
-            self.move(options.xloc, options.yloc)
-
-        self.setWindowTitle("Free Poker DB 3")
-
-        # set a default x/y size for the window
-        defx, defy = 1920, 1080
-        sg = QApplication.primaryScreen().availableGeometry()
-        if sg.width() < defx:
-            defx = sg.width()
-        if sg.height() < defy:
-            defy = sg.height()
-        self.resize(defx, defy)
-
-        # create our Main Menu Bar
-        self.createMenuBar()
-
-        # create a tab bar
-        self.nb = QTabWidget()
-        self.setCentralWidget(self.nb)
-        self.tabs = []  # the event_boxes forming the actual tabs
-        self.tab_names = []  # names of tabs used since program started, not removed if tab is closed
-        self.pages = []  # the contents of the page, not removed if tab is closed
-        self.nb_tab_names = []  # list of tab names currently displayed in notebook
-
-        # create the first tab
-        self.tab_main_help(None, None)
-
-        # determine window visibility from command line options
-        if options.minimized:
-            self.showMinimized()
-        if options.hidden:
-            self.hide()
-
-        if not options.hidden:
-            self.show()
-            self.visible = True  # Flip on
-
-        self.load_profile(create_db=True)
-
-        if self.config.install_method == 'app':
-            for site in list(self.config.supported_sites.values()):
-                if site.screen_name != "YOUR SCREEN NAME HERE":
-                    break
-            else:  # No site has a screen name set
-                options.initialRun = True
-                self.display_config_created_dialogue = True
-                self.display_site_preferences = True
-
-        if options.initialRun and self.display_site_preferences:
-            self.dia_site_preferences(None, None)
-            self.display_site_preferences = False
-
-        # setup error logging
-        if not options.errorsToConsole:
-            fileName = os.path.join(self.config.dir_log, 'fpdb-errors.txt')
-            log.info(f"Note: error output is being diverted to {self.config.dir_log}."
-                  f" Any major error will be reported there _only_.")
-
-            errorFile = codecs.open(fileName, 'w', 'utf-8')
-            sys.stderr = errorFile
-
-        sys.stderr.write("fpdb starting ...")
-
-        if options.autoimport:
-            self.tab_auto_import(None)
-
-    def info_box(self, str1, str2):
-        diapath = QMessageBox(self)
-        diapath.setWindowTitle(str1)
-        diapath.setText(str2)
-        return diapath.exec_()
-
-    def warning_box(self, string, diatitle="FPDB WARNING"):
-        return QMessageBox(QMessageBox.Warning, diatitle, string).exec_()
 
     def validate_config(self):
         # check if sites in config file are in DB
@@ -1264,8 +1187,219 @@ class fpdb(QMainWindow):
                 dia.run()
                 dia.destroy()
 
+    def info_box(self, str1, str2):
+        diapath = QMessageBox(self)
+        diapath.setWindowTitle(str1)
+        diapath.setText(str2)
+        return diapath.exec_()
+
+    def warning_box(self, string, diatitle="FPDB WARNING"):
+        return QMessageBox(QMessageBox.Warning, diatitle, string).exec_()
+
+    def change_theme(self, theme):
+        apply_stylesheet(app, theme=theme)
+
+
+
+    def update_title_bar_theme(self):
+        # Apply the stylesheet to the custom title bar
+        self.custom_title_bar.update_theme()
+
+    def close_tab(self, index):
+        item = self.nb.widget(index)
+        self.nb.removeTab(index)
+        self.nb_tab_names.pop(index)
+        
+        try:
+            self.threads.remove(item)
+        except ValueError:
+            pass
+        
+        item.deleteLater()
+
+    def __init__(self):
+        super().__init__()
+        if sys.platform == 'darwin':
+            pass
+        else:
+            self.setWindowFlags(Qt.FramelessWindowHint)
+        cards = os.path.join(Configuration.GRAPHICS_PATH, 'tribal.jpg')
+        if os.path.exists(cards):
+            self.setWindowIcon(QIcon(cards))
+        set_locale_translation()
+        self.lock = interlocks.InterProcessLock(name="fpdb_global_lock")
+        self.db = None
+        self.status_bar = None
+        self.quitting = False
+        self.visible = False
+        self.threads = []
+        self.closeq = queue.Queue(20)
+
+        self.oldPos = self.pos() 
+
+        
+
+        if options.initialRun:
+            self.display_config_created_dialogue = True
+            self.display_site_preferences = True
+        else:
+            self.display_config_created_dialogue = False
+            self.display_site_preferences = False
+
+        if options.xloc is not None or options.yloc is not None:
+            if options.xloc is None:
+                options.xloc = 0
+            if options.yloc is None:
+                options.yloc = 0
+            self.move(options.xloc, options.yloc)
+
+        self.setWindowTitle("Free Poker DB 3")
+        defx, defy = 1920, 1080
+        sg = QApplication.primaryScreen().availableGeometry()
+        if sg.width() < defx:
+            defx = sg.width()
+        if sg.height() < defy:
+            defy = sg.height()
+        self.resize(defx, defy)
+
+        if sys.platform == 'darwin':
+            pass
+        else:
+            # Create custom title bar
+            self.custom_title_bar = CustomTitleBar(self)
+        # Create central widget and layout
+        self.central_widget = QWidget(self)
+        self.central_layout = QVBoxLayout(self.central_widget)
+        self.central_layout.setContentsMargins(0, 0, 0, 0)
+        self.central_layout.setSpacing(0)
+
+        if sys.platform == 'darwin':
+            # Add title bar and menu bar to layout
+            self.custom_title_bar = CustomTitleBar(self)
+            self.central_layout.addWidget(self.custom_title_bar)
+            self.setMenuBar(self.menuBar())  
+        else:
+            # Add title bar and menu bar to layout
+            self.central_layout.addWidget(self.custom_title_bar)
+            self.menu_bar = self.menuBar()
+            self.central_layout.setMenuBar(self.menu_bar)
+
+        self.nb = QTabWidget()
+        self.nb.setTabsClosable(True)
+        self.nb.tabCloseRequested.connect(self.close_tab)
+        self.central_layout.addWidget(self.nb)
+        self.setCentralWidget(self.central_widget)
+
+        self.createMenuBar()
+
+        self.pages = []
+        self.nb_tab_names = []
+
+        self.tab_main_help(None, None)
+
+        if options.minimized:
+            self.showMinimized()
+        if options.hidden:
+            self.hide()
+
+        if not options.hidden:
+            self.show()
+            self.visible = True
+
+        self.load_profile(create_db=True)
+
+        if self.config.install_method == 'app':
+            for site in list(self.config.supported_sites.values()):
+                if site.screen_name != "YOUR SCREEN NAME HERE":
+                    break
+            else:
+                options.initialRun = True
+                self.display_config_created_dialogue = True
+                self.display_site_preferences = True
+
+        if options.initialRun and self.display_site_preferences:
+            self.dia_site_preferences(None, None)
+            self.display_site_preferences = False
+
+        if not options.errorsToConsole:
+            fileName = os.path.join(self.config.dir_log, 'fpdb-errors.txt')
+            log.info(f"Note: error output is being diverted to {self.config.dir_log}. Any major error will be reported there _only_.")
+            errorFile = codecs.open(fileName, 'w', 'utf-8')
+            sys.stderr = errorFile
+
+        sys.stderr.write("fpdb starting ...")
+
+        if options.autoimport:
+            self.tab_auto_import(None)
+
+
+
+class CustomTitleBar(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setAutoFillBackground(True)
+        self.main_window = parent
+
+        self.title = QLabel("Free Poker DB 3")
+        self.title.setAlignment(Qt.AlignCenter)
+
+        self.btn_minimize = QPushButton("-")
+        self.btn_maximize = QPushButton("+")
+        self.btn_close = QPushButton("x")
+
+        button_size = 20
+        self.btn_minimize.setFixedSize(button_size, button_size)
+        self.btn_maximize.setFixedSize(button_size, button_size)
+        self.btn_close.setFixedSize(button_size, button_size)
+
+        self.btn_minimize.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.btn_maximize.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.btn_close.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
+        self.btn_minimize.clicked.connect(parent.showMinimized)
+        self.btn_maximize.clicked.connect(self.toggle_maximize_restore)
+        self.btn_close.clicked.connect(parent.close)
+
+        layout = QHBoxLayout()
+        layout.addWidget(self.title)
+        layout.addStretch()
+        layout.addWidget(self.btn_minimize)
+        layout.addWidget(self.btn_maximize)
+        layout.addWidget(self.btn_close)
+        self.setLayout(layout)
+
+        self.is_maximized = False
+        if sys.platform == 'darwin':
+            pass
+        else:
+            self.moving = False
+            self.offset = None            
+
+    def toggle_maximize_restore(self):
+        if self.is_maximized:
+            self.main_window.showNormal()
+        else:
+            self.main_window.showMaximized()
+        self.is_maximized = not self.is_maximized
+
+    def update_theme(self):
+        self.setStyleSheet(self.main_window.styleSheet())
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.main_window.oldPos = event.globalPos()
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() == Qt.LeftButton:
+            delta = QPoint(event.globalPos() - self.main_window.oldPos)
+            self.main_window.move(self.main_window.x() + delta.x(), self.main_window.y() + delta.y())
+            self.main_window.oldPos = event.globalPos()
+
+
+
 if __name__ == "__main__":
+    from qt_material import apply_stylesheet
     app = QApplication([])
-    app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
+    apply_stylesheet(app, theme='dark_purple.xml')
     me = fpdb()
     app.exec_()
