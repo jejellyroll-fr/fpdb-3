@@ -79,12 +79,14 @@ class GuiTourneyPlayerStats(QSplitter):
         # columns to display, keys match column name returned by sql, values in tuple are:
         #     is column displayed, column heading, xalignment, formatting, celltype
         self.columns = [ ["siteName",       True,  ("Site"),    0.0, "%s", "str"]
-                       ,["tourney",         False, ("Tourney"), 0.0, "%s", "str"]   # true not allowed for this line
                        , ["category",       True,  ("Cat."),    0.0, "%s", "str"]
                        , ["limitType",      True,  ("Limit"),   0.0, "%s", "str"]
                        , ["currency",       True,  ("Curr."),   0.0, "%s", "str"]
                        , ["buyIn",          True,  ("BuyIn"),   1.0, "%3.2f", "str"]
                        , ["fee",            True,  ("Fee"),     1.0, "%3.2f", "str"]
+                       , ["maxSeats",       True,  ("Seats"),   0.0, "%s", "str"]
+                       , ["knockout",       True,  ("KO")      ,0.0, "%s", "str"]
+                       , ["reEntry",        True,  ("ReEntry"), 0.0, "%s", "str"]
                        , ["playerName",     False, ("Name"),    0.0, "%s", "str"]   # true not allowed for this line (set in code)
                        , ["tourneyCount",   True,  ("#"),       1.0, "%1.0f", "str"]
                        , ["itm",            True,  ("ITM%"),    1.0, "%3.2f", "str"]
@@ -94,7 +96,8 @@ class GuiTourneyPlayerStats(QSplitter):
                        , ["unknownRank",    True,  ("Rank?"),   1.0, "%1.0f", "str"]
                        , ["spent",          True,  ("Spent"),   1.0, "%3.2f", "str"]
                        , ["won",            True,  ("Won"),     1.0, "%3.2f", "str"]
-                       , ["roi",            True,  ("ROI%"),    1.0, "%3.0f", "str"]
+                       , ["net",            True,  ("Net"),     1.0, "%3.2f", "str"]
+                       , ["roi",            True,  ("ROI%"),    1.0, "%3.2f", "str"]
                        , ["profitPerTourney", True,("$/Tour"),  1.0, "%3.2f", "str"]]
                        
         self.stats_frame = QFrame()
@@ -124,11 +127,10 @@ class GuiTourneyPlayerStats(QSplitter):
         # pre-fetch some constant values:
         #self.cols_to_show = [x for x in self.columns if x[colshow]]
         #htourneytypeid_idx = colnames.index('tourneyTypeId')
-        self.cols_to_show = self.columns #TODO do i need above 2 lines?
         
         assert len(self.liststore) == grid, "len(self.liststore)="+str(len(self.liststore))+" grid-1="+str(grid)
         view = QTableView()
-        self.liststore.append(QStandardItemModel(0, len(self.cols_to_show), view))
+        self.liststore.append(QStandardItemModel(0, len(self.columns), view))
         view.setModel(self.liststore[grid])
         view.verticalHeader().hide()
         vbox.addWidget(view)
@@ -136,7 +138,7 @@ class GuiTourneyPlayerStats(QSplitter):
         self.listcols.append( [] )
 
         # Create header row   eg column: ("game",     True, "Game",     0.0, "%s")
-        for col, column in enumerate(self.cols_to_show):
+        for col, column in enumerate(self.columns):
             if column[colalias] == 'game' and holecards:
                 s = [x for x in self.columns if x[colalias] == 'hand'][0][colheading]
             else:
@@ -148,7 +150,7 @@ class GuiTourneyPlayerStats(QSplitter):
 
         while sqlrow < rows:
             treerow = []
-            for col,column in enumerate(self.cols_to_show):
+            for col,column in enumerate(self.columns):
                 if column[colalias] in colnames:
                     value = result[sqlrow][colnames.index(column[colalias])]
                 else:
@@ -161,6 +163,11 @@ class GuiTourneyPlayerStats(QSplitter):
                             value = value + ' ' + 'Super Turbo'
                         else:
                             value = value + ' ' + result[sqlrow][colnames.index('speed')]
+                if column[colalias] == 'knockout' or column[colalias] == 'reEntry':
+                    if result[sqlrow][colnames.index(column[colalias])] == 1:
+                        value = 'Yes'
+                    else:
+                        value = 'No'
                 item = QStandardItem('')
                 if value != None and value != -999:
                     item = QStandardItem(column[colformat] % value)

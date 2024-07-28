@@ -636,41 +636,76 @@ class DerivedStats(object):
                                 hand.addCollectPot(player=p,pot=(ppot-rake))                 
     
     def assembleHandsPots(self, hand):
-        category, positions, playersPots, potFound, positionDict, showdown = hand.gametype['category'], [], {}, {}, {}, False
+        # init 
+        category = hand.gametype['category']
+        positions = []
+        playersPots = {}
+        potFound = {}
+        positionDict = {}
+        showdown = False
+
+        #debug
+        #print("start assembleHandsPots", hand.handid)
+
+        # Init player's pot dict
         for p in hand.players:
-            playersPots[p[1]] = [0,[]]
-            potFound[p[1]] = [0,0]
-            positionDict[self.handsplayers[p[1]]['position']] = p[1]
-            positions.append(str(self.handsplayers[p[1]]['position']))
+            playersPots[p[1]] = [0, []]
+            potFound[p[1]] = [0, 0]
+            position = self.handsplayers[p[1]]['position']
+            
+            # check if player has a position
+            if position is None or position == '':
+                #print(f"warning: player {p[1]} has no position")
+                position = 'Unknown'  # default
+            
+            positionDict[str(position)] = p[1]
+            positions.append(str(position))
+            
             if self.handsplayers[p[1]]['sawShowdown']:
                 showdown = True
+
+        #debug
+        #print("positionDict:", positionDict)
+        #print("positions before sort:", positions)
+
+        # sort positions
         positions.sort(reverse=True)
+        #print("positions after sort:", positions)
+
+        # define factor
         factor = 100
-        if ((hand.gametype["type"]=="tour" or 
-            (hand.gametype["type"]=="ring" and 
-             (hand.gametype["currency"]=="play" and 
-              (hand.sitename not in ('Winamax', 'PacificPoker'))))) and
-               (not [n for (n,v) in hand.pot.pots if (n % Decimal('1.00'))!=0])):
-            factor = 1  
-        hiLoKey = {'h':['hi'],'l':['low'],'r':['low'],'s':['hi','low']}
+        if ((hand.gametype["type"] == "tour" or 
+            (hand.gametype["type"] == "ring" and 
+            (hand.gametype["currency"] == "play" and 
+            (hand.sitename not in ('Winamax', 'PacificPoker'))))) and
+            (not [n for (n, v) in hand.pot.pots if (n % Decimal('1.00')) != 0])):
+            factor = 1
+
+        # Config game
+        hiLoKey = {'h': ['hi'], 'l': ['low'], 'r': ['low'], 's': ['hi', 'low']}
         base, evalgame, hilo, streets, last, hrange = Card.games[category]
-        if ((hand.sitename != 'KingsClub' or hand.adjustCollected) and # Can't trust KingsClub draw/stud holecards  
+
+        # process pots
+        if ((hand.sitename != 'KingsClub' or hand.adjustCollected) and 
             evalgame and 
-            (len(hand.pot.pots)>1 or (showdown and (hilo=='s' or hand.runItTimes>=2)))
-            ):
-            #print 'DEBUG hand.collected', hand.collected
-            #print 'DEBUG hand.collectees', hand.collectees
+            (len(hand.pot.pots) > 1 or (showdown and (hilo == 's' or hand.runItTimes >= 2)))):
+            
             rakes, totrake, potId = {}, 0, 0
+
             for pot, players in hand.pot.pots:
-                if potId ==0: pot += (sum(hand.pot.common.values()) + hand.pot.stp)
-                potId+=1
+                if potId == 0:
+                    pot += (sum(hand.pot.common.values()) + hand.pot.stp)
+                potId += 1
+
                 boards, boardId, sumpot = self.getBoardsList(hand), 0, 0
+
                 for b in boards:
-                    boardId += (hand.runItTimes>=2)
-                    potBoard = Decimal(int(pot/len(boards)*factor))/factor
-                    modBoard = pot - potBoard*len(boards)
-                    if boardId==1: 
-                        potBoard+=modBoard
+                    boardId += (hand.runItTimes >= 2)
+                    potBoard = Decimal(int(pot / len(boards) * factor)) / factor
+                    modBoard = pot - potBoard * len(boards)
+                    if boardId == 1:
+                        potBoard += modBoard
+
                     holeplayers, holecards = [], []
                     for p in players:
                         hcs = hand.join_holecards(p, asList=True)
@@ -701,6 +736,7 @@ class DerivedStats(object):
                             modSplit = potHiLo - potSplit*len(win[hl])
                             pnames = players if len(holeplayers)==0 else [holeplayers[w] for w in win[hl]]
                             for n in positions:
+                                #print(f"check position position: {n}")
                                 if positionDict[n] in pnames:
                                     pname = positionDict[n]
                                     ppot = potSplit
@@ -742,6 +778,9 @@ class DerivedStats(object):
                         insert = [None, item['potId'], item['boardId'], item['hiLo'][0], hand.dbid_pids[p], int(item['ppot']*100), int(collected*100), int(rake*100)]   
                         self.handspots.append(insert)
                         self.handsplayers[p]['rake'] += int(rake*100)
+
+        #debug                
+        #print("end assembleHandsPots", hand.handid)
 
     def setPositions(self, hand):
         """Sets the position for each player in HandsPlayers
