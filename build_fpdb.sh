@@ -202,6 +202,9 @@ generate_pyinstaller_command() {
     local script_path=$1
     local command="pyinstaller $PYINSTALLER_OPTIONS"
 
+    # add icon
+    command+=" --icon=\"$BASE_PATH2/gfx/tribal.jpg\""
+
     # process files
     for file in "${FILES[@]}"; do
         if [ "$OS" = "Windows" ]; then
