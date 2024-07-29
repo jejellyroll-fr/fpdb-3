@@ -17,12 +17,12 @@ import os
 import time
 import logging
 
-from qt_material import apply_stylesheet
 from PyQt5.QtCore import (QCoreApplication, QMetaObject, QObject, Qt,
                           QThread, pyqtSignal)
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QApplication, QLabel, QMainWindow,
                              QVBoxLayout, QWidget)
+from qt_material import apply_stylesheet
 
 #    FreePokerTools modules
 import Configuration
@@ -90,7 +90,7 @@ class HUD_main(QObject):
         self.stdinThread.start()
 
         # a main window
-        self.main_window = QWidget(None, Qt.Dialog | Qt.WindowStaysOnTopHint)
+        self.main_window = QWidget(None, Qt.Dialog | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
 
         if options.xloc is not None or options.yloc is not None:
             if options.xloc is None:
