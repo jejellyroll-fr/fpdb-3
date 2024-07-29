@@ -179,7 +179,7 @@ $FILES = @(
     "WinTables.py",
     "win_table_detect.py",
     "xlib_tester.py",
-    "XTables.py",
+    "XTables.py"
     #"_pokereval_3_11.pyd"
 )
 
