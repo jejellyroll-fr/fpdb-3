@@ -457,7 +457,7 @@ class Filters(QWidget):
             self.leHeroes[site] = QLineEdit(_pname)
 
             if os.name == 'nt':
-                icoPath = os.path.dirname(__file__) + "\\"
+                icoPath = os.path.dirname(__file__) + "\\icons\\"
             else:
                 icoPath = ""
 
