@@ -179,7 +179,7 @@ $FILES = @(
     "WinTables.py",
     "win_table_detect.py",
     "xlib_tester.py",
-    "XTables.py",
+    "XTables.py"
     #"_pokereval_3_11.pyd"
 )
 
@@ -201,6 +201,13 @@ function Generate-PyInstallerCommand {
     )
 
     $command = "pyinstaller $PYINSTALLER_OPTIONS"
+
+    # add icon
+    if ($OS -eq "Windows") {
+        $command += " --icon=`"$BASE_PATH2\gfx\tribal.jpg`""
+    } else {
+        $command += " --icon=`"$(Join-Path -Path $BASE_PATH2 -ChildPath gfx\tribal.jpg)`""
+    }
 
     # process files
     foreach ($file in $FILES) {
