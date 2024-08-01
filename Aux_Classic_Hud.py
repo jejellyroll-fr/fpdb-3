@@ -242,7 +242,7 @@ class Classic_stat(Aux_Hud.Simple_stat):
         fg = self.hudcolor
         #print(f"Updating stat for {self.stat}: value={self.number[1]}, loth={self.stat_loth}, hith={self.stat_hith}")
         
-        if self.stat_loth != "" and self.stat_hith != "" and self.stat_midcolor:
+        if self.stat_loth != "" and self.stat_hith != "":
             try:
                 value_str = self.number[1]
                 if value_str == "NA":
