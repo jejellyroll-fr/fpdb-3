@@ -192,6 +192,7 @@ class Simple_stat(object):
         self.widget = self.lab
         self.stat_dict = None
         self.hud = aw.hud
+        self.aux_params = aw.aux_params 
 
     def update(self, player_id, stat_dict):
         self.stat_dict = stat_dict     # So the Simple_stat obj always has a fresh stat_dict
@@ -201,12 +202,12 @@ class Simple_stat(object):
             self.lab.setText(str(self.number[1]))
 
     def set_color(self, fg=None, bg=None):
-        ss = "QLabel{"
+        ss = f"QLabel{{font-family: {self.aux_params['font']};font-size: {self.aux_params['font_size']}pt;"
         if fg:
             ss += f"color: {fg};"
         if bg:
             ss += f"background: {bg};"
-        #print(f"Setting style sheet: {ss}")
+        print(f"Setting style sheet: {ss}")
         self.lab.setStyleSheet(ss + "}")
 
 
