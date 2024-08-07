@@ -51,13 +51,14 @@ jobs:
           brew install pyqt@5
           python -m pip install sip==6.6.2 
           python -m pip install -r requirements_macos.txt
-        - name: List directory contents
-          run: ls -la
-        - name: Make build script executable
-          run: chmod +x ./build_fpdb-osx.sh
-        - name: Run build script
-          run: ./build_fpdb-osx.sh
-      - name: Build project
+          
+      - name: List directory contents
+        run: ls -la
+      - name: Make build script executable
+        run: chmod +x ./build_fpdb-osx.sh
+      - name: Run build script
+        run: ./build_fpdb-osx.sh
+      - name: Build projectS
         shell: bash
         run: |
           ./build_fpdb-osx.sh
