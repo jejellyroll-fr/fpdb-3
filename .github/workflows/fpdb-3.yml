@@ -11,7 +11,7 @@ on:
 
 jobs:
 
-  build:
+  build-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -33,5 +33,49 @@ jobs:
       - name: Archive build artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: build-artifacts
+          name: build-artifacts-windows
+          path: dist/*
+
+  build-macos-intel:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements_macos.txt
+      - name: Build project
+        shell: bash
+        run: |
+          ./build_fpdb-osx.sh
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts-macos-intel
+          path: dist/*
+
+  build-macos-arm:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements_macos.txt
+      - name: Build project
+        shell: bash
+        run: |
+          ./build_fpdb-osx.sh
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts-macos-arm
           path: dist/*
