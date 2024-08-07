@@ -48,7 +48,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip setuptools wheel
           brew info pyqt@5
-          brew install pyqt@5.15
+          brew install pyqt@5
           python -m pip install sip==6.6.2 
           python -m pip install -r requirements_macos.txt
       - name: Build project
@@ -73,7 +73,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip setuptools wheel
           brew info pyqt@5
-          brew install pyqt@5.15
+          brew install pyqt@5
           python -m pip install sip==6.6.2 
           python -m pip install -r requirements_macos.txt
       - name: Build project
