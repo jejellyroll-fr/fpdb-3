@@ -85,6 +85,10 @@ if hasattr(sys, "frozen"):
         INSTALL_METHOD = "exe"
     elif platform.system() == 'Darwin':
         INSTALL_METHOD = "app"
+    elif 'APPDIR' in os.environ:
+        INSTALL_METHOD = "appimage"
+    else:
+        INSTALL_METHOD = "unknown"
 else:
     INSTALL_METHOD = "source"
 
@@ -95,6 +99,8 @@ if INSTALL_METHOD == "exe" :
      # should be exe path to \fpdbroot\pyfpdb
 elif INSTALL_METHOD == "app":
     FPDB_ROOT_PATH = os.path.dirname(sys.executable)
+elif INSTALL_METHOD == "appimage":
+    FPDB_ROOT_PATH = os.environ['APPDIR']
 elif sys.path[0] == "": # we are probably running directly (>>>import Configuration)
     temp = os.getcwd() # should be ./pyfpdb
     print(temp)
