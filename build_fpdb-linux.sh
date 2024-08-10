@@ -184,7 +184,6 @@ FILES=(
     "win_table_detect.py"
     "xlib_tester.py"
     "XTables.py"
-    "hook-xcffib.py"
 )
 
 FOLDERS=(
