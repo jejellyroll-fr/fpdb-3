@@ -88,7 +88,7 @@ import Configuration
 import Card
 import Exceptions
 import Stats
-import api, app
+#import api, app
 
 
 Configuration.set_logfile("fpdb-log.txt")
