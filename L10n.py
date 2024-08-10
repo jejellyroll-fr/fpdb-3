@@ -17,19 +17,13 @@
 
 #You may find http://boodebr.org/main/python/all-about-python-and-unicode helpful
 import gettext
-
-
-from Configuration import GRAPHICS_PATH
-from pathlib import Path
-from Configuration import CONFIG_PATH
-import xml.etree.ElementTree as ET
-import locale
-from PyQt5.QtCore import QTranslator
-
-import subprocess
 import platform
+import subprocess
 import locale
-
+from pathlib import Path
+from Configuration import GRAPHICS_PATH, CONFIG_PATH
+import xml.etree.ElementTree as ET
+from PyQt5.QtCore import QTranslator
 
 def get_system_language():
     system = platform.system()
@@ -50,9 +44,6 @@ def get_system_language():
         return output
     else:
         return None
-
-
-
 
 def pass_through(to_translate):
     return to_translate
@@ -128,7 +119,8 @@ def set_locale_translation():
     transformed_path = path.parent
     locale_path = Path(transformed_path, "locale")
     path_string = str(locale_path)
-    print(path_string)
+    print(f"Locale path: {path_string}")
+
     gettext.bindtextdomain('fpdb', path_string)
     gettext.textdomain('fpdb')
 
@@ -136,7 +128,11 @@ def set_locale_translation():
     root = tree.getroot()
     general_element = root.find('general')
     ui_language = general_element.attrib.get('ui_language')
+    print(f"UI Language: {ui_language}")
 
-    fr_translation = gettext.translation('fpdb', path_string, languages=[ui_language])
-    fr_translation.install()
+    try:
+        fr_translation = gettext.translation('fpdb', path_string, languages=[ui_language])
+        fr_translation.install()
+    except FileNotFoundError:
+        print(f"No translation file found for domain: 'fpdb' in {path_string} for language {ui_language}")
 

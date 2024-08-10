@@ -11,7 +11,7 @@ on:
 
 jobs:
 
-  build:
+  build-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -33,5 +33,107 @@ jobs:
       - name: Archive build artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: build-artifacts
+          name: build-artifacts-windows
           path: dist/*
+
+  build-macos-intel:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          brew info pyqt@5
+          brew install pyqt@5
+          python -m pip install sip==6.6.2 
+          python -m pip install -r requirements_macos.txt
+          
+      - name: List directory contents
+        run: ls -la
+      - name: Make build script executable
+        run: chmod +x ./build_fpdb-osx.sh
+      - name: Run build script
+        run: ./build_fpdb-osx.sh
+
+      - name: Build project
+        shell: bash
+        run: |
+          ./build_fpdb-osx.sh
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts-macos-intel
+          path: dist/*
+
+  build-macos-arm:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          brew info pyqt@5
+          brew install pyqt@5
+          python -m pip install sip==6.6.2 
+          python -m pip install -r requirements_macos.txt
+
+      - name: List directory contents
+        run: ls -la
+      - name: Make build script executable
+        run: chmod +x ./build_fpdb-osx.sh
+      - name: Run build script
+        run: ./build_fpdb-osx.sh
+
+      - name: Build project
+        shell: bash
+        run: |
+          ./build_fpdb-osx.sh
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts-macos-arm
+          path: dist/*
+
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxcb1 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 libxkbcommon-x11-0 libxcb-xfixes0 fuse libfuse2
+          sudo modprobe fuse
+          sudo groupadd fuse
+          sudo usermod -a -G fuse $USER
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -r requirements-linux.txt
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+      - name: Download AppImageTool
+        run: |
+          wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool-x86_64.AppImage
+      - name: Make build script executable
+        run: chmod +x ./build_fpdb-linux.sh
+      - name: Build project
+        run: ./build_fpdb-linux.sh
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts-linux
+          path: fpdb-x86_64.AppImage

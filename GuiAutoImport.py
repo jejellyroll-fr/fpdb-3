@@ -174,88 +174,89 @@ class GuiAutoImport(QWidget):
             # (see comment above about what to do if pipe already open)
             # - Ideally we want to release the lock if the auto-import is killed by some
             # kind of exception - is this possible?
-            if self.settings['global_lock'].acquire(wait=False, source="AutoImport"):   # returns false immediately if lock not acquired
-                self.addText("\n" + ("Global lock taken ... Auto Import Started.")+"\n")
+            if self.settings['global_lock'].acquire(wait=False, source="AutoImport"):
+                self.addText("\n" + ("Global lock taken ... Auto Import Started.") + "\n")
                 self.doAutoImportBool = True
                 self.intervalEntry.setEnabled(False)
                 if self.pipe_to_hud is None:
                     print('start hud- pipe_to_hud is none:')
-                    if self.config.install_method == "exe":    # if py2exe, run hud_main.exe
-                        print('start hud- true1:')
-                        path = self.config.pyfpdb_path
-                        print('start hud path:')
-                        print(path)
-                        command = "HUD_main.exe"
-                        bs = 0
-                    elif self.config.install_method == "app":
-                        print('start hud- true1:')
-                        command = os.path.join(sys.path[0], "HUD_main")
-                        bs = 1
-                    elif os.name == 'nt':
-                        print('start hud- true1:')
-                        path = to_raw(sys.path[0])
-                        
-                        print("start hud- path", path)
-                        path2 = os.getcwd()
-                        print("start hud- path2", path2)
-                        if win32console.GetConsoleWindow() == 0:
-                            command = 'pythonw "'+path+'\HUD_main.pyw" ' + self.settings['cl_options']
-                            print("start hud-comand1", command)
+                    try:
+                        if self.config.install_method == "exe":
+                            print('start hud- true1:')
+                            command = "HUD_main.exe"
+                            bs = 0
+                        elif self.config.install_method == "app":
+                            print('start hud- true1:')
+                            base_path = sys._MEIPASS if getattr(sys, 'frozen', False) else sys.path[0]
+                            command = os.path.join(base_path, "HUD_main")
+                            if not os.path.isfile(command):
+                                raise FileNotFoundError(f"HUD_main not found at {command}")
+                            bs = 1
+                        elif os.name == 'nt':
+                            print('start hud- true1:')
+                            path = to_raw(sys.path[0])
+                            print("start hud- path", path)
+                            path2 = os.getcwd()
+                            print("start hud- path2", path2)
+                            if win32console.GetConsoleWindow() == 0:
+                                command = 'pythonw "' + path + '\HUD_main.pyw" ' + self.settings['cl_options']
+                                print("start hud-comand1", command)
+                            else:
+                                command = 'python "' + path + '\HUD_main.pyw" ' + self.settings['cl_options']
+                                print("start hud-comand2", command)
+                            bs = 0
                         else:
-                            command = 'python "'+path+'\HUD_main.pyw" ' + self.settings['cl_options']
-                            print("start hud-comand2", command)
-                        bs = 0
-                    else:
-                        command = os.path.join(sys.path[0], 'HUD_main.pyw')
-                        if not os.path.isfile(command):
-                            self.addText("\n" + ('*** %s was not found') % (command))
-                        command = [command, ] + str.split(self.settings['cl_options'])
-                        bs = 1
+                            base_path = sys._MEIPASS if getattr(sys, 'frozen', False) else sys.path[0]
+                            command = os.path.join(base_path, 'HUD_main.pyw')
+                            if not os.path.isfile(command):
+                                self.addText("\n" + ('*** %s was not found') % (command))
+                            command = [command, ] + str.split(self.settings['cl_options'])
+                            bs = 1
 
                         print(("opening pipe to HUD"))
-                    try:
                         if self.config.install_method == "exe" or (os.name == "nt" and win32console.GetConsoleWindow() == 0):
                             print('start hud methode install exe:')
                             print(command)
                             self.pipe_to_hud = subprocess.Popen(command, bufsize=bs,
                                                                 stdin=subprocess.PIPE,
-                                                                stdout=subprocess.PIPE,  # needed for pythonw / py2exe
-                                                                stderr=subprocess.PIPE,  # needed for pythonw / py2exe
+                                                                stdout=subprocess.PIPE,
+                                                                stderr=subprocess.PIPE,
                                                                 universal_newlines=True
-                                                               )
+                                                            )
                         else:
                             self.pipe_to_hud = subprocess.Popen(command, bufsize=bs, stdin=subprocess.PIPE, universal_newlines=True)
                             print('start hud methode install other:')
                             print(command)
-                            
-                    except:
-                        self.addText("\n" + ("*** GuiAutoImport Error opening pipe:") + " " + traceback.format_exc() )
+
+                    except Exception as e:
+                        self.addText("\n" + ("*** GuiAutoImport Error opening pipe:") + " " + traceback.format_exc())
                     else:
-                        for (site,type) in self.input_settings:
-                            self.importer.addImportDirectory(self.input_settings[(site,type)][0], monitor = True, site=(site,type))
-                            self.addText("\n * " + ("Add %s import directory %s") % (site, self.input_settings[(site,type)][0]))
+                        for (site, type) in self.input_settings:
+                            self.importer.addImportDirectory(self.input_settings[(site, type)][0], monitor=True, site=(site, type))
+                            self.addText("\n * " + ("Add %s import directory %s") % (site, self.input_settings[(site, type)][0]))
                             self.do_import()
-                    interval = self.intervalEntry.value()
-                    self.importtimer = QTimer()
-                    self.importtimer.timeout.connect(self.do_import)
-                    self.importtimer.start(interval * 1000)
+                        interval = self.intervalEntry.value()
+                        self.importtimer = QTimer()
+                        self.importtimer.timeout.connect(self.do_import)
+                        self.importtimer.start(interval * 1000)
 
             else:
                 self.addText("\n" + ("Auto Import aborted.") + ("Global lock not available."))
-        else: # toggled off
-            self.doAutoImportBool = False # do_import will return this and stop the gobject callback timer
+        else:  # toggled off
+            self.doAutoImportBool = False
             self.importtimer = None
             self.importer.autoSummaryGrab(True)
             self.settings['global_lock'].release()
             self.addText("\n" + ("Stopping Auto Import.") + ("Global lock released."))
-            if self.pipe_to_hud.poll() is not None:
+            if self.pipe_to_hud and self.pipe_to_hud.poll() is not None:
                 self.addText("\n * " + ("Stop Auto Import") + ": " + ("HUD already terminated."))
             else:
-                self.pipe_to_hud.terminate()
-                print (self.pipe_to_hud.stdin, "\n")
-                # self.pipe_to_hud.communicate('\n') # waits for process to terminate
-            self.pipe_to_hud = None
+                if self.pipe_to_hud:
+                    self.pipe_to_hud.terminate()
+                    print(self.pipe_to_hud.stdin, "\n")
+                self.pipe_to_hud = None
             self.intervalEntry.setEnabled(True)
+
 
     #end def GuiAutoImport.startClicked
 
