@@ -58,7 +58,7 @@ jobs:
         run: chmod +x ./build_fpdb-osx.sh
       - name: Run build script
         run: ./build_fpdb-osx.sh
-        
+
       - name: Build project
         shell: bash
         run: |
@@ -101,3 +101,36 @@ jobs:
         with:
           name: build-artifacts-macos-arm
           path: dist/*
+
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxcb1 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 libxkbcommon-x11-0 libxcb-xfixes0
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -r requirements.txt
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+      - name: Download AppImageTool
+        run: |
+          wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool-x86_64.AppImage
+      - name: Make build script executable
+        run: chmod +x ./build_fpdb-linux.sh
+      - name: Build project
+        run: ./build_fpdb-linux.sh
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts-linux
+          path: fpdb-x86_64.AppImage
