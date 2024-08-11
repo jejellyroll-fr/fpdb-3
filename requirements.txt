@@ -60,7 +60,6 @@ parso                     ==0.8.4
 pefile                    ==2023.2.7
 pickleshare               ==0.7.5
 pillow                    ==10.3.0
-pip                       ==24.0
 platformdirs              ==4.2.2
 prompt_toolkit            ==3.0.47
 psutil                    ==6.0.0
