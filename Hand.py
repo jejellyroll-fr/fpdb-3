@@ -1908,17 +1908,19 @@ class Pot(object):
         max_ante = max(self.antes.values())  # max ante
 
         for player, ante in self.antes.items():
-            # calculate reel ante that player can post
-            actual_ante = min(ante, self.common[player])
-            ante_pot += actual_ante
-            
-            if actual_ante < ante:
-                # Log if player can't post complet ante
-                print(f"Player {player} couldn't post full ante: posted {actual_ante} instead of {ante}")
-            
-            if actual_ante < max_ante:
-                # increase test id player's ante is lower to max ante
-                test += 1
+            # only if ante > 0 to prevent players out of pot due to changing table
+            if ante > 0:
+                # calculate reel ante that player can post
+                actual_ante = min(ante, self.common[player])
+                ante_pot += actual_ante
+                
+                if actual_ante < ante:
+                    # Log if player can't post complet ante
+                    print(f"Player {player} couldn't post full ante: posted {actual_ante} instead of {ante}")
+                
+                if actual_ante < max_ante:
+                    # increase test id player's ante is lower to max ante
+                    test += 1
 
         print(f"Ante pot: {ante_pot}")
         print(f"Number of players with ante less than max: {test}")
