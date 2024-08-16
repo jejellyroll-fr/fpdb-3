@@ -11,14 +11,14 @@ Feel free to clone it, and to participate to this development.
 
 I'm not an expert python developer, this project, as a poker player, is for me to develop my skills in this language during my free time.
 
-## Updating to python 3.11
+## Updating to python 3.11.9
 
 FPDB is a poker tools - HUD - Replayer
-installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_name\AppData\Roaming\fpdb
+Download your build directly on this repo: https://github.com/jejellyroll-fr/fpdb-3-builder
 
 ## understand architecture soft
 
-- see fpdb.drawio (WIP) or use puml files
+- see fpdb.drawio (WIP) or use puml files (outdated) will be replace probably by mermais files
 
 ## To do
 >code improve
@@ -42,9 +42,9 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 - not working translation -> from icu import Locale(TO DO: find better solution- OK - need to finish traduction)
 >pokerstove
 - add odds calc (fast solution-> use Pokerprotools online WIP) -> add last version poker-eval and pypoker (deprecated)
-- update poker-eval lib (https://github.com/jejellyroll-fr/poker-eval)->added 5 cards PLO, 5 card PLO8 and 6 card PLO -> OK -> think to add kuhn and short deck nl
-- update pypoker-eval (https://github.com/jejellyroll-fr/pypoker-eval)->Python 3 ->OK (TO DO: add 6 and 5 cards plo) -( will not maintain this wrapper)
-- add POKENUM web api to do it
+- update poker-eval lib (https://github.com/jejellyroll-fr/poker-eval)->added 5 cards PLO, 5 card PLO8 and 6 card PLO -> OK -> think to add short deck nl(done) and rewrie in C hand distributions c++ code from Atim(WIP)
+- update pypoker-eval (https://github.com/jejellyroll-fr/pypoker-eval)->Python 3 ->OK (TO DO: add 6 and 5 cards plo) -( will not maintain this wrapper as is perhaps rewrite directly in cython)
+- add POKENUM web api to do it: https://github.com/jejellyroll-fr/pokenum
 >replayer
 - rethink the distribution of players around the table (TO DO: WIP)
 - add pot odds and equity(TO DO)
@@ -56,11 +56,11 @@ installment bugs -> copy logging.conf,HUD_config.xml ... on C:\Users\your_user_n
 >import
 - PMU not working siteid error(TODO: WIP)
 - correct bug import from pokertracker summary (TODO)
-- add SWC and so on
+- add SWC and so on (done)
 - re add old dead sites
 >graphviz
 - improve visualization (TODO)
-- will probably replace by web version(TO DO)
+- will probably replace by web version(WIP)
 >stats
 - to verify
 - add spin stats (TODO: CeV depending on calculation )
@@ -136,8 +136,6 @@ FPDB3 web
 python start_fpdb_web.py 
 ```
 
-## Installation
-no release yet
 
 ## Bugs tracking
 
