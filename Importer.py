@@ -644,12 +644,6 @@ class ImportProgressDialog(QDialog):
     mode assumed, and does not create a progress bar
     """
     
-    def __del__(self):
-        
-        if self.parent:
-            self.progress.destroy()
-
-
     def progress_update(self, filename, handcount):
             
         self.fraction += 1

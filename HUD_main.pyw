@@ -207,8 +207,9 @@ class HUD_main(QObject):
                 aux_disabled_sites.append(i)
 
         self.db_connection.connection.rollback()  # release lock from previous iteration
-        if new_hand_id == "":  # blank line means quit
-            self.db_connection.connection.rollback()
+        # I don't know what sys.exit() did before, but rollback is already done up here
+        #if new_hand_id == "":  # blank line means quit
+        #    self.db_connection.connection.rollback()
             # sys.exit()
 
         # The following block cannot be hoisted outside the while loop, because it would
@@ -231,169 +232,171 @@ class HUD_main(QObject):
         # get basic info about the new hand from the db
         # if there is a db error, complain, skip hand, and proceed
         # log.info("HUD_main.read_stdin: " + ("Hand processing starting."))
-        print("HUD_main.read_stdin: " + ("Hand processing starting."))
-        try:
-            (table_name, max, poker_game, type, fast, site_id, site_name, num_seats, tour_number, tab_number) = \
-                self.db_connection.get_table_info(new_hand_id)
-        except Exception:
-            log.error(f"database error: skipping {new_hand_id}")
-            return
-
-        if fast:
-            # we are rush/zoom
-            return
-
-        # Do nothing if this site is on the ignore list
-        if site_name in aux_disabled_sites:
-            return
-        # Do nothing if this site is not enabled
-        if site_name not in enabled_sites:
-            return
-
-        # regenerate temp_key for this hand- this is the tablename (+ tablenumber (if mtt))
-        if type == "tour":  # hand is from a tournament
+        if new_hand_id != "": # I don't know why empty hands are received but it's useless to run the code                
+            print("HUD_main.read_stdin: " + ("Hand processing starting."))
             try:
-                tab_number_test = int(tab_number)
-                print("cas int:tab_number hud:", tab_number)
+                (table_name, max, poker_game, type, fast, site_id, site_name, num_seats, tour_number, tab_number) = \
+                    self.db_connection.get_table_info(new_hand_id)
+            except Exception:
+                log.error(f"database error: skipping {new_hand_id}")
+                return
 
-                tab_number = tab_number.rsplit(' ', 1)[-1]
-                print("tab_number hud after cut:", tab_number)
+            if fast:
+                # we are rush/zoom
+                return
 
-                temp_key = f"{tour_number} Table {tab_number}"
-                print("temp_key tour:", temp_key)
-            except ValueError:
-                log.error(("tab_number error try tab name"))
-            try:
-                if len(table_name) >= 2 and table_name[-2].endswith(','):
-                    parts = table_name.split(',', 1)
+            # Do nothing if this site is on the ignore list
+            if site_name in aux_disabled_sites:
+                return
+            # Do nothing if this site is not enabled
+            if site_name not in enabled_sites:
+                return
+
+            # regenerate temp_key for this hand- this is the tablename (+ tablenumber (if mtt))
+            if type == "tour":  # hand is from a tournament
+                # this code is tricky, int(tab_number) always fails and the table is detected below
+                #try:
+                #    #tab_number_test = int(tab_number)
+                #    #print("cas int:tab_number hud:", tab_number)
+                #
+                #    tab_number = tab_number.rsplit(' ', 1)[-1]
+                #    print("tab_number hud after cut:", tab_number)
+                #
+                #    temp_key = f"{tour_number} Table {tab_number}"
+                #    print("temp_key tour:", temp_key)
+                #except ValueError:
+                #    log.error(("tab_number error try tab name"))
+                try:
+                    if len(table_name) >= 2 and table_name[-2].endswith(','):
+                        parts = table_name.split(',', 1)
+                    else:
+                        parts = table_name.split(' ', 1)
+                        print(table_name)
+                        print(parts)
+
+                    tab_number = tab_number.rsplit(' ', 1)[-1]
+                    print("tab_number for temp key ge:", tab_number)
+                    temp_key = f"{tour_number} Table {tab_number}"
+                    print("temp_key tour:", temp_key)
+                except ValueError:
+                    log.error(("both tab_number and table_name not working"))
+            else:
+
+                temp_key = table_name
+                print('temp_key cash', temp_key)
+
+            if type == "tour":
+                #
+                # Has there been a table-change?  if yes, clean-up the current hud
+                # Two checks are needed,
+                #  if a hand is received for an existing table-number, but the table-title has changed,  kill the old hud
+                #  if a hand is received for a "new" table number, clean-up the old one and create a new hud
+                #
+                if temp_key in self.hud_dict:
+                    # debub:print('temp_is in self.hud_dict')
+                    # check if our attached window's titlebar has changed, if it has
+                    # this method will emit a "table_changed" signal which will trigger
+                    # a kill
+                    if self.hud_dict[temp_key].table.has_table_title_changed(self.hud_dict[temp_key]):
+                        # debug:print('table has been renamed')
+                        # table has been renamed; the idle_kill method will housekeep hud_dict
+                        # We will skip this hand, to give time for the idle function
+                        # to complete its' work.  Normal service will be resumed on the next hand
+                        self.table_is_stale(self.hud_dict[temp_key])
+                        return  # abort processing this hand
                 else:
-                    parts = table_name.split(' ', 1)
-                    print(table_name)
-                    print(parts)
+                    # check if the tournament number is in the hud_dict under a different table
+                    # if it is, trigger a hud_kill - we can safely drop through the rest of the code
+                    # because this is a brand-new hud being created
+                    for k in self.hud_dict:
+                        # debug:print('check if the tournament number is in the hud_dict under a different table')
+                        if k.startswith(tour_number):
+                            self.table_is_stale(self.hud_dict[k])
+                            continue  # this cancels the "for k in...." loop, NOT the outer while: loop
 
-                tab_number = tab_number.rsplit(' ', 1)[-1]
-                print("tab_number for temp key ge:", tab_number)
-                temp_key = f"{tour_number} Table {tab_number}"
-                print("temp_key tour:", temp_key)
-            except ValueError:
-                log.error(("both tab_number and table_name not working"))
-        else:
-
-            temp_key = table_name
-            print('temp_key cash', temp_key)
-
-        if type == "tour":
-            #
-            # Has there been a table-change?  if yes, clean-up the current hud
-            # Two checks are needed,
-            #  if a hand is received for an existing table-number, but the table-title has changed,  kill the old hud
-            #  if a hand is received for a "new" table number, clean-up the old one and create a new hud
-            #
+            # detect maxseats changed in hud
+            # if so, kill and create new hud with specified "max"
             if temp_key in self.hud_dict:
-                # debub:print('temp_is in self.hud_dict')
-                # check if our attached window's titlebar has changed, if it has
-                # this method will emit a "table_changed" signal which will trigger
-                # a kill
-                if self.hud_dict[temp_key].table.has_table_title_changed(self.hud_dict[temp_key]):
-                    # debug:print('table has been renamed')
-                    # table has been renamed; the idle_kill method will housekeep hud_dict
-                    # We will skip this hand, to give time for the idle function
-                    # to complete its' work.  Normal service will be resumed on the next hand
-                    self.table_is_stale(self.hud_dict[temp_key])
-                    return  # abort processing this hand
-            else:
-                # check if the tournament number is in the hud_dict under a different table
-                # if it is, trigger a hud_kill - we can safely drop through the rest of the code
-                # because this is a brand-new hud being created
-                for k in self.hud_dict:
-                    # debug:print('check if the tournament number is in the hud_dict under a different table')
-                    if k.startswith(tour_number):
-                        self.table_is_stale(self.hud_dict[k])
-                        continue  # this cancels the "for k in...." loop, NOT the outer while: loop
-
-        # detect maxseats changed in hud
-        # if so, kill and create new hud with specified "max"
-        if temp_key in self.hud_dict:
-            # debug:print('temp_is in self.hud_dict2')
-            with contextlib.suppress(Exception):
-                newmax = self.hud_dict[temp_key].hud_params['new_max_seats']  # trigger
-                if newmax and self.hud_dict[temp_key].max != newmax:  # max has changed
-                    self.kill_hud("activate", temp_key)  # kill everything
-                    while temp_key in self.hud_dict: time.sleep(0.5)  # wait for idle_kill to complete
-                    max = newmax  # "max" localvar used in create_HUD call below
-                self.hud_dict[temp_key].hud_params['new_max_seats'] = None  # reset trigger
-        # detect poker_game changed in latest hand (i.e. mixed game)
-        # if so, kill and create new hud with specified poker_game
-        # Note that this will reset the aggregation params for that table
-        if temp_key in self.hud_dict:
-            if self.hud_dict[temp_key].poker_game != poker_game:
-                print("game changed!:", poker_game)
+                # debug:print('temp_is in self.hud_dict2')
                 with contextlib.suppress(Exception):
-                    self.kill_hud("activate", temp_key)  # kill everything
-                    while temp_key in self.hud_dict: time.sleep(0.5)  # wait for idle_kill to complete
-        # Update an existing HUD
-        if temp_key in self.hud_dict:
-            print('update hud')
-            # get stats using hud's specific params and get cards
-            self.db_connection.init_hud_stat_vars(self.hud_dict[temp_key].hud_params['hud_days']
-                                                  , self.hud_dict[temp_key].hud_params['h_hud_days'])
-            print("update an existing hud ", temp_key, self.hud_dict[temp_key].hud_params)
-            stat_dict = self.db_connection.get_stats_from_hand(new_hand_id, type, self.hud_dict[temp_key].hud_params,
-                                                               self.hero_ids[site_id], num_seats)
+                    newmax = self.hud_dict[temp_key].hud_params['new_max_seats']  # trigger
+                    if newmax and self.hud_dict[temp_key].max != newmax:  # max has changed
+                        self.kill_hud("activate", temp_key)  # kill everything
+                        while temp_key in self.hud_dict: time.sleep(0.5)  # wait for idle_kill to complete
+                        max = newmax  # "max" localvar used in create_HUD call below
+                    self.hud_dict[temp_key].hud_params['new_max_seats'] = None  # reset trigger
+            # detect poker_game changed in latest hand (i.e. mixed game)
+            # if so, kill and create new hud with specified poker_game
+            # Note that this will reset the aggregation params for that table
+            if temp_key in self.hud_dict:
+                if self.hud_dict[temp_key].poker_game != poker_game:
+                    print("game changed!:", poker_game)
+                    with contextlib.suppress(Exception):
+                        self.kill_hud("activate", temp_key)  # kill everything
+                        while temp_key in self.hud_dict: time.sleep(0.5)  # wait for idle_kill to complete
+            # Update an existing HUD
+            if temp_key in self.hud_dict:
+                print('update hud')
+                # get stats using hud's specific params and get cards
+                self.db_connection.init_hud_stat_vars(self.hud_dict[temp_key].hud_params['hud_days']
+                                                      , self.hud_dict[temp_key].hud_params['h_hud_days'])
+                print("update an existing hud ", temp_key, self.hud_dict[temp_key].hud_params)
+                stat_dict = self.db_connection.get_stats_from_hand(new_hand_id, type, self.hud_dict[temp_key].hud_params,
+                                                                   self.hero_ids[site_id], num_seats)
 
-            try:
-                self.hud_dict[temp_key].stat_dict = stat_dict
-            except KeyError:  # HUD instance has been killed off, key is stale
-                log.error(f'{f"hud_dict[{temp_key}]"} was not found')
-                log.error(('will not send hand'))
-                return
-
-            self.hud_dict[temp_key].cards = self.get_cards(new_hand_id, poker_game)
-            # fixme - passing self.db_connection into another thread
-            # is probably pointless
-            [aw.update_data(new_hand_id, self.db_connection) for aw in self.hud_dict[temp_key].aux_windows]
-            self.update_HUD(new_hand_id, temp_key, self.config)
-
-        else:
-            # get stats using default params--also get cards
-            print('create new hud')
-            self.db_connection.init_hud_stat_vars(self.hud_params['hud_days'], self.hud_params['h_hud_days'])
-            stat_dict = self.db_connection.get_stats_from_hand(new_hand_id, type, self.hud_params,
-                                                               self.hero_ids[site_id], num_seats)
-
-            hero_found = any(
-                stat_dict[key]['screen_name'] == self.hero[site_id]
-                for key in stat_dict
-            )
-            if not hero_found:
-                log.info(('hud not created yet, because hero is not seated for this hand'))
-                return
-
-            cards = self.get_cards(new_hand_id, poker_game)
-            table_kwargs = dict(table_name=table_name, tournament=tour_number, table_number=tab_number)
-            print("table kwarg:", table_kwargs)
-            tablewindow = Tables.Table(self.config, site_name, **table_kwargs)
-            if tablewindow.number is None:
-                print('tablewindow.number is none')
-                # If no client window is found on the screen, complain and continue
-                if type == "tour":
-                    table_name = f"{tour_number} {tab_number}"
-                log.error(f"HUD create: table name {table_name} not found, skipping.")
-                return
-            elif tablewindow.number in self.blacklist:
-                return  # no hud please, we are blacklisted
-            else:
-                print('tablewindow.number is not none')
-                tablewindow.key = temp_key
-                tablewindow.max = max
-                tablewindow.site = site_name
-                # Test that the table window still exists
-                if hasattr(tablewindow, 'number'):
-                    print('table window still exists')
-                    self.create_HUD(new_hand_id, tablewindow, temp_key, max, poker_game, type, stat_dict, cards)
-                else:
-                    log.error(f'Table "{table_name}" no longer exists')
+                try:
+                    self.hud_dict[temp_key].stat_dict = stat_dict
+                except KeyError:  # HUD instance has been killed off, key is stale
+                    log.error(f'{f"hud_dict[{temp_key}]"} was not found')
+                    log.error(('will not send hand'))
                     return
+
+                self.hud_dict[temp_key].cards = self.get_cards(new_hand_id, poker_game)
+                # fixme - passing self.db_connection into another thread
+                # is probably pointless
+                [aw.update_data(new_hand_id, self.db_connection) for aw in self.hud_dict[temp_key].aux_windows]
+                self.update_HUD(new_hand_id, temp_key, self.config)
+
+            else:
+                # get stats using default params--also get cards
+                print('create new hud')
+                self.db_connection.init_hud_stat_vars(self.hud_params['hud_days'], self.hud_params['h_hud_days'])
+                stat_dict = self.db_connection.get_stats_from_hand(new_hand_id, type, self.hud_params,
+                                                                   self.hero_ids[site_id], num_seats)
+
+                hero_found = any(
+                    stat_dict[key]['screen_name'] == self.hero[site_id]
+                    for key in stat_dict
+                )
+                if not hero_found:
+                    log.info(('hud not created yet, because hero is not seated for this hand'))
+                    return
+
+                cards = self.get_cards(new_hand_id, poker_game)
+                table_kwargs = dict(table_name=table_name, tournament=tour_number, table_number=tab_number)
+                print("table kwarg:", table_kwargs)
+                tablewindow = Tables.Table(self.config, site_name, **table_kwargs)
+                if tablewindow.number is None:
+                    print('tablewindow.number is none')
+                    # If no client window is found on the screen, complain and continue
+                    if type == "tour":
+                        table_name = f"{tour_number} {tab_number}"
+                    log.error(f"HUD create: table name {table_name} not found, skipping.")
+                    return
+                elif tablewindow.number in self.blacklist:
+                    return  # no hud please, we are blacklisted
+                else:
+                    print('tablewindow.number is not none')
+                    tablewindow.key = temp_key
+                    tablewindow.max = max
+                    tablewindow.site = site_name
+                    # Test that the table window still exists
+                    if hasattr(tablewindow, 'number'):
+                        print('table window still exists')
+                        self.create_HUD(new_hand_id, tablewindow, temp_key, max, poker_game, type, stat_dict, cards)
+                    else:
+                        log.error(f'Table "{table_name}" no longer exists')
+                        return
 
     def get_cards(self, new_hand_id, poker_game):
         cards = self.db_connection.get_cards(new_hand_id)
