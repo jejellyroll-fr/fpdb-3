@@ -5,3 +5,6 @@ pyfpdb/__pycache__/
 .idea
 __pycache__/
 .vs/
+build/
+dist/
+*.spec
