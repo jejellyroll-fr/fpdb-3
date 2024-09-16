@@ -55,15 +55,16 @@ class Reader(QObject):
         while 1:  # wait for a new hand number on stdin
             time.sleep(0.45)  # pause an arbitrary amount of time
             new_hand_id = sys.stdin.readline().rstrip()
-            log.debug(f"Received hand no {new_hand_id}")
-            self.mutex.lock()
-            try:
-                log.debug(f"Emitting handRead signal for hand no {new_hand_id}")
-                self.handRead.emit(new_hand_id)
-            except Exception as e:
-                log.error(f"Error emitting handRead signal: {e}")
-            finally:
-                self.mutex.unlock()
+            if new_hand_id != "":
+                log.debug(f"Received hand no {new_hand_id}")
+                self.mutex.lock()
+                try:
+                    log.debug(f"Emitting handRead signal for hand no {new_hand_id}")
+                    self.handRead.emit(new_hand_id)
+                except Exception as e:
+                    log.error(f"Error emitting handRead signal: {e}")
+                finally:
+                    self.mutex.unlock()
 
 class HUD_main(QObject):
     """A main() object to own both the read_stdin thread and the gui."""
@@ -239,7 +240,7 @@ class HUD_main(QObject):
         # if there is a db error, complain, skip hand, and proceed
         # log.info("HUD_main.read_stdin: " + ("Hand processing starting."))
         if new_hand_id != "": # I don't know why empty hands are received but it's useless to run the code                
-            print("HUD_main.read_stdin: " + ("Hand processing starting."))
+            log.debug("HUD_main.read_stdin: " + ("Hand processing starting."))
             try:
                 (table_name, max, poker_game, type, fast, site_id, site_name, num_seats, tour_number, tab_number) = \
                     self.db_connection.get_table_info(new_hand_id)
@@ -273,6 +274,7 @@ class HUD_main(QObject):
                 #except ValueError:
                 #    log.error(("tab_number error try tab name"))
                 try:
+                    log.debug(f"creating temp_key for tour")
                     if len(table_name) >= 2 and table_name[-2].endswith(','):
                         parts = table_name.split(',', 1)
                     else:
@@ -280,6 +282,7 @@ class HUD_main(QObject):
 
                     tab_number = tab_number.rsplit(' ', 1)[-1]
                     temp_key = f"{tour_number} Table {tab_number}"
+                    log.debug(f"temp_key {temp_key}")
                 except ValueError:
                     log.error("Both tab_number and table_name not working")
             else:
@@ -298,11 +301,12 @@ class HUD_main(QObject):
                     # this method will emit a "table_changed" signal which will trigger
                     # a kill
                     if self.hud_dict[temp_key].table.has_table_title_changed(self.hud_dict[temp_key]):
-                        # debug:print('table has been renamed')
+                        log.debug(f"table has been renamed")
                         # table has been renamed; the idle_kill method will housekeep hud_dict
                         # We will skip this hand, to give time for the idle function
                         # to complete its' work.  Normal service will be resumed on the next hand
                         self.table_is_stale(self.hud_dict[temp_key])
+                        log.debug(f"after table_is_stale")
                         return  # abort processing this hand
                 else:
                     # check if the tournament number is in the hud_dict under a different table
@@ -320,8 +324,11 @@ class HUD_main(QObject):
                 log.debug(f"temp_is in self.hud_dict2")
                 with contextlib.suppress(Exception):
                     newmax = self.hud_dict[temp_key].hud_params['new_max_seats']  # trigger
+                    log.debug(f"newmax {newmax}")
                     if newmax and self.hud_dict[temp_key].max != newmax:  # max has changed
+                        log.debug(f"going to kill_hud")
                         self.kill_hud("activate", temp_key)  # kill everything
+                        log.debug(f"kill_hud done")
                         while temp_key in self.hud_dict: time.sleep(0.5)  # wait for idle_kill to complete
                         max = newmax  # "max" localvar used in create_HUD call below
                     self.hud_dict[temp_key].hud_params['new_max_seats'] = None  # reset trigger
@@ -335,12 +342,13 @@ class HUD_main(QObject):
                         while temp_key in self.hud_dict: time.sleep(0.5)
 
             if temp_key in self.hud_dict:
-                log.debug(f"update hud")
+                log.debug(f"update hud for hand {new_hand_id}")
                 # get stats using hud's specific params and get cards
                 self.db_connection.init_hud_stat_vars(self.hud_dict[temp_key].hud_params['hud_days']
                                                       , self.hud_dict[temp_key].hud_params['h_hud_days'])
                 stat_dict = self.db_connection.get_stats_from_hand(new_hand_id, type, self.hud_dict[temp_key].hud_params,
                                                                    self.hero_ids[site_id], num_seats)
+                log.debug(f"got stats for hand {new_hand_id}")
 
                 try:
                     self.hud_dict[temp_key].stat_dict = stat_dict
@@ -354,12 +362,14 @@ class HUD_main(QObject):
                 # is probably pointless
                 [aw.update_data(new_hand_id, self.db_connection) for aw in self.hud_dict[temp_key].aux_windows]
                 self.update_HUD(new_hand_id, temp_key, self.config)
+                log.debug(f"hud updated for table {temp_key} and hand {new_hand_id}")
             else:
                 # get stats using default params--also get cards
-                log.debug(f"create new hud")
+                log.debug(f"create new hud for hand {new_hand_id}")
                 self.db_connection.init_hud_stat_vars(self.hud_params['hud_days'], self.hud_params['h_hud_days'])
                 stat_dict = self.db_connection.get_stats_from_hand(new_hand_id, type, self.hud_params,
                                                                    self.hero_ids[site_id], num_seats)
+                log.debug(f"got stats for hand {new_hand_id}")
 
                 hero_found = any(
                     stat_dict[key]['screen_name'] == self.hero[site_id]
@@ -439,6 +449,7 @@ def idle_kill(hud_main, table):
 def idle_create(hud_main, new_hand_id, table, temp_key, max, poker_game, type, stat_dict, cards):
     try:
         newlabel = QLabel(f"{table.site} - {temp_key}")
+        log.debug(f"adding label {newlabel.text()}")
         hud_main.vb.addWidget(newlabel)
 
         hud_main.hud_dict[temp_key].tablehudlabel = newlabel
@@ -447,7 +458,7 @@ def idle_create(hud_main, new_hand_id, table, temp_key, max, poker_game, type, s
         hud_main.hud_dict[temp_key].create(new_hand_id, hud_main.config, stat_dict)
         for m in hud_main.hud_dict[temp_key].aux_windows:
             m.create()  # create method of aux_window class (generally Mucked.aux_seats.create)
-            log.debug("idle_create new_hand_id")
+            log.debug(f"idle_create new_hand_id {new_hand_id}")
             m.update_gui(new_hand_id)
 
     except Exception:
@@ -455,7 +466,9 @@ def idle_create(hud_main, new_hand_id, table, temp_key, max, poker_game, type, s
 
 def idle_update(hud_main, new_hand_id, table_name, config):
     try:
+        log.debug(f"idle_update entered for {table_name} {new_hand_id}")
         hud_main.hud_dict[table_name].update(new_hand_id, config)
+        log.debug(f"idle_update update_gui {new_hand_id}")
         [aw.update_gui(new_hand_id) for aw in hud_main.hud_dict[table_name].aux_windows]
     except Exception:
         log.exception(f"Error updating HUD for hand {new_hand_id}.")
