@@ -104,11 +104,23 @@ Download your build directly on this repo: https://github.com/jejellyroll-fr/fpd
 - betclic.fr (ko) - installment ko
 
 
-## Requirement for dev 
-Install the dependencies and devDependencies .
+## Requirement for dev
+
+- mkdir ~/.fpdb
+- cp HUD_config.xml ~/.fpdb
+
+Install the dependencies and devDependencies
+
+### Using anaconda
 I Use anaconda with Python 3.11
 
-or Pip
+### Using UV package manager
+- install [UV](https://docs.astral.sh/uv)
+- `uv run ./fpdb.pyw`
+
+This will create a virtual env (in .venv dir) and run the project.
+
+### Using pip
 
 ```sh
 pip install -r requirements.txt
