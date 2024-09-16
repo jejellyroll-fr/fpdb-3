@@ -1,162 +1,198 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Routines for detecting and handling poker client windows for MS Windows.
-"""
-#    Copyright 2008 - 2010, Ray E. Barker
-
-#    This program is free software; you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program; if not, write to the Free Software
-#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-
-########################################################################
-# to do
-# for win7 the fixed b_width and tb_height are not correct - need to discover these from os
-#import L10n
-#_ = L10n.get_translation()
-
-#    Standard Library modules
+import ctypes
 import re
-
 import logging
-# logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hud")
-
+from ctypes import wintypes
 from PyQt5.QtGui import QWindow
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QApplication
+import sys
+import time
 
-#    Other Library modules
-import win32gui
-import win32api
-import win32con
-
-#    FreePokerTools modules
 from TableWindow import Table_Window
 
-#    We don't know the border width or title bar height
-#    so we guess here. We can probably get these from a windows call.
+app = QApplication(sys.argv)
+
+# logging setup
+log = logging.getLogger("hud")
+
+# Definition of Windows API constants
+GW_OWNER = 4
+GWL_EXSTYLE = -20
+WS_EX_TOOLWINDOW = 0x00000080
+WS_EX_APPWINDOW = 0x00040000
+SM_CXSIZEFRAME = 32
+SM_CYCAPTION = 4
+
+# Windows functions via ctypes
+EnumWindows = ctypes.windll.user32.EnumWindows
+EnumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.wintypes.HWND, ctypes.wintypes.LPARAM)
+GetWindowText = ctypes.windll.user32.GetWindowTextW
+GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
+IsWindowVisible = ctypes.windll.user32.IsWindowVisible
+GetParent = ctypes.windll.user32.GetParent
+GetWindowRect = ctypes.windll.user32.GetWindowRect
+GetWindowLong = ctypes.windll.user32.GetWindowLongW
+GetSystemMetrics = ctypes.windll.user32.GetSystemMetrics
+IsWindow = ctypes.windll.user32.IsWindow
+MoveWindow = ctypes.windll.user32.MoveWindow
+
+# Global variables
 b_width = 3
 tb_height = 29
+
+# Class for temporarily storing securities
+class WindowInfoTemp:
+    def __init__(self):
+        self.titles = {}
+        #print("WindowInfo initialized with an empty dictionary.")
+
+# Function for listing windows and retrieving titles
+def win_enum_handler(hwnd, lParam):
+    #print(f"Handler called for hwnd: {hwnd}")
+    window_info = ctypes.cast(lParam, ctypes.py_object).value
+    length = GetWindowTextLength(hwnd)
+    #print(f"Window text length: {length}")
+    if length > 0:
+        buff = ctypes.create_unicode_buffer(length + 1)
+        GetWindowText(hwnd, buff, length + 1)
+        #print(f"Text retrieved for hwnd {hwnd}: {buff.value}")
+        window_info.titles[hwnd] = buff.value
+    return True
 
 
 class Table(Table_Window):
 
+    # In find_table_parameters of WinTables.py
+
+
     def find_table_parameters(self):
-        """Finds poker client window with the given table name."""
-        titles = {}
-        win32gui.EnumWindows(win_enum_handler, titles)
-        print (win32gui.EnumWindows(win_enum_handler, titles))
-        for hwnd in titles:
-            print("hwnd",hwnd,titles[hwnd])
-            if titles[hwnd] == "":
-                print("hwnd",hwnd,titles[hwnd],"vide")
-                continue
-            # if window not visible, probably not a table
-            if not win32gui.IsWindowVisible(hwnd): 
-                print("hwnd",hwnd,titles[hwnd],"not visible")
-                continue
-            # if window is a child of another window, probably not a table
-            if win32gui.GetParent(hwnd) != 0:
-                print("hwnd",hwnd,titles[hwnd],"is a child")
-                continue
-            HasNoOwner = win32gui.GetWindow(hwnd, win32con.GW_OWNER) == 0
-            
-            WindowStyle = win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)
-            print("hwnd",hwnd,titles[hwnd],HasNoOwner,WindowStyle,self.search_string,re.I )
-            if HasNoOwner and WindowStyle & win32con.WS_EX_TOOLWINDOW != 0:
-                print("hwnd",hwnd,titles[hwnd],"cas 1")
-                continue
-            if not HasNoOwner and WindowStyle & win32con.WS_EX_APPWINDOW == 0:
-                print("hwnd",hwnd,titles[hwnd],"cas 2")
-                continue
-            #temp solution for wina
-            print(titles[hwnd].split(' ',1)[0])
-            if titles[hwnd].split(' ',1)[0] == "Winamax":
-                print(titles[hwnd].split(' ',1)[0])
-                self.search_string = self.search_string.split(' ',3)[0]
-                print('search string',self.search_string)
-            if re.search(self.search_string, titles[hwnd], re.I):
-                print("hwnd",hwnd,titles[hwnd],"re seracj")
-                if self.check_bad_words(titles[hwnd]):
-                    print("hwnd",hwnd,titles[hwnd],"bad word")
-                    continue
-                    
-                self.number = hwnd
-                print("hwnd",hwnd,titles[hwnd],self.number)
-                
+        """Find a poker client window with the given table name."""
+        window_info = WindowInfoTemp()
+
+        try:
+            log.debug(f"before EnumWindows")
+            EnumWindows(EnumWindowsProc(win_enum_handler), ctypes.py_object(window_info))
+            log.debug(f"after EnumWindows found {len(window_info.titles)} windows")
+        except Exception as e:
+            log.error(f"Error during EnumWindows: {e}")
+
+        time_limit = 10  # Limite de temps en secondes
+        start_time = time.time()  # Enregistre l'heure de début
+
+        for hwnd in window_info.titles:
+            log.debug(f"hwnd {hwnd}")
+            log.debug(window_info.titles[hwnd])
+            # Vérification de la durée écoulée
+            if time.time() - start_time > time_limit:
+                log.error(f"Time limit of {time_limit} seconds reached. Exiting loop.")
                 break
 
+            if not window_info.titles[hwnd]:
+                log.debug(f"hwnd {hwnd} title is empty")
+                continue
+
+            if not IsWindowVisible(hwnd):
+                log.debug(f"hwnd {hwnd} not visible")
+                continue
+            if GetParent(hwnd) != 0:
+                log.debug(f"hwnd {hwnd} is a child")
+                continue
+
+            log.debug(f"before GetWindow {hwnd}")
+            HasNoOwner = ctypes.windll.user32.GetWindow(hwnd, GW_OWNER) == 0
+            log.debug(f"after GetWindow {hwnd}")
+            log.debug(f"before GetWindowLong {hwnd}")
+            WindowStyle = GetWindowLong(hwnd, GWL_EXSTYLE)
+            log.debug(f"after GetWindowLong {hwnd}")
+
+            if window_info.titles[hwnd].split(' ', 1)[0] == "Winamax":
+                self.search_string = self.search_string.split(' ', 3)[0]
+
+                if re.search(self.search_string, window_info.titles[hwnd], re.I):
+                    if self.check_bad_words(window_info.titles[hwnd]):
+                        continue
+                    self.number = hwnd
+                    self.title = window_info.titles[hwnd]
+                    break
+            elif re.search(self.search_string, window_info.titles[hwnd], re.I):
+                log.debug(f"hwnd {hwnd} found something")
+                if self.check_bad_words(window_info.titles[hwnd]):
+                    log.debug(f"hwnd {hwnd} has bad words")
+                    continue
+                self.number = hwnd
+                self.title = window_info.titles[hwnd]
+                log.debug(f"found table in hwnd {self.number} title {self.title}")
+                break
+            else:
+                log.debug(f"hwnd {hwnd} not good")
+
         if self.number is None:
-            print(("Window %s not found. Skipping."), self.search_string)
-            log.error(("Window %s not found. Skipping."), self.search_string)
+            log.error(f"Window {self.search_string} not found.")
             return
 
-        self.title = titles[self.number]
-        print("self.title", self.title)
-        self.hud = None
-        self.gdkhandle = QWindow.fromWinId(self.number)
 
+    # In get_geometry of WinTables.py
     def get_geometry(self):
+        """Get the window geometry."""
+        #print(f"Attempting to retrieve geometry for hwnd: {self.number}")
         try:
-            if win32gui.IsWindow(self.number):
-                (x, y, width, height) = win32gui.GetWindowRect(self.number)
-                                
-                # this apparently returns x = far left side of window, width = far right side of window, y = top of window, height = bottom of window
-                # so apparently we have to subtract x from "width" to get actual width, and y from "height" to get actual height ?
-                # it definitely gives slightly different results than the GTK code that does the same thing.
+            rect = wintypes.RECT()
+            if IsWindow(self.number):
+                result = GetWindowRect(self.number, ctypes.byref(rect))
+                if result != 0:
+                    x, y = rect.left, rect.top
+                    width = rect.right - rect.left
+                    height = rect.bottom - rect.top
 
-                # minimised windows are given -32000 (x,y) value,
-                #   so just zeroise to avoid downstream confusion
-                if x < 0: x = 0
-                if y < 0: y = 0
-                
-                width = width - x
-                height = height - y
-                
-                # determine system titlebar and border setting constant values
-                # see http://stackoverflow.com/questions/431470/window-border-width-and-height-in-win32-how-do-i-get-it
-                try:
-                    self.b_width; self.tb_height
-                except:
-                    self.b_width = win32api.GetSystemMetrics(win32con.SM_CXSIZEFRAME) # bordersize
-                    self.tb_height = win32api.GetSystemMetrics(win32con.SM_CYCAPTION) # titlebar height (excl border)
+                    self.b_width = GetSystemMetrics(SM_CXSIZEFRAME)
+                    self.tb_height = GetSystemMetrics(SM_CYCAPTION)
 
-                # fixme - x and y must _not_ be adjusted by the b_width if the window has been maximised
-                return {
-                    'x'      : int(x) + self.b_width,
-                    'y'      : int(y) + self.tb_height + self.b_width,
-                    'height' : int(height),
-                    'width'  : int(width)
-                }
+                    #print(f"Position: ({x}, {y}), Dimensions: {width}x{height}")
+                    #print(f"Border width: {self.b_width}, Title bar height: {self.tb_height}")
+
+                    return {
+                        'x': int(x) + self.b_width,
+                        'y': int(y) + self.tb_height + self.b_width,
+                        'height': int(height) - 2 * self.b_width - self.tb_height,
+                        'width': int(width) - 2 * self.b_width
+                    }
+                else:
+                    log.error(f"Failed to retrieve GetWindowRect for hwnd: {self.number}")
+                    return None
             else:
-                log.debug("newhud - WinTables window not found")
+                log.error(f"The window {self.number} is not valid.")
                 return None
-        except AttributeError:
+        except Exception as e:
+            log.error(f"Error retrieving geometry: {e}")
             return None
 
     def get_window_title(self):
-        print("title",win32gui.GetWindowText(self.number))
-        return win32gui.GetWindowText(self.number)
+        log.debug(f"title for {self.number}")
+        length = GetWindowTextLength(self.number)
+        buff = ctypes.create_unicode_buffer(length + 1)
+        GetWindowText(self.number, buff, length + 1)
+        log.debug(f"title {buff.value}")
+        return buff.value
+
+    def move_and_resize_window(self, x, y, width, height):
+        """Move and resize the specified window."""
+        if self.number:
+            #print(f"Moving and resizing window {self.number}")
+            MoveWindow(self.number, x, y, width, height, True)
+            #print(f"Window moved to ({x}, {y}) with dimensions {width}x{height}")
+        else:
+            log.info("No window to move.")
 
     def topify(self, window):
-        """Set the specified Qt window to stayontop in MS Windows."""
-
-        # self.number is the windows handle
-        # self.gdkhandle is a foreign QWindow associated with the poker client
-        # window is a seat_window object from Mucked (a Qt QWidget)
-        # window.windowHandle() is a QWindow object
-
+        """Make the specified Qt window 'always on top' under Windows."""
         if self.gdkhandle is None:
             self.gdkhandle = QWindow.fromWinId(int(self.number))
-        window.windowHandle().setTransientParent(self.gdkhandle)
 
-def win_enum_handler(hwnd, titles):
-    titles[hwnd] = win32gui.GetWindowText(hwnd)
+        qwindow = (window.windowHandle())
+        qwindow.setTransientParent(self.gdkhandle)
+        qwindow.setFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus | Qt.WindowStaysOnTopHint)
+
+    def check_bad_words(self, title):
+        """Check if the title contains any bad words."""
+        bad_words = ["History for table:", "HUD:", "Chat:", "FPDBHUD", "Lobby"]
+        return any(bad_word in title.lower() for bad_word in bad_words)

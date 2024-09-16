@@ -1957,7 +1957,9 @@ def hand_factory(hand_id, config, db_connection):
     # a factory function to discover the base type of the hand
     # and to return a populated class instance of the correct hand
     
+    log.debug(f"get info from db for hand {hand_id}")
     gameinfo = db_connection.get_gameinfo_from_hid(hand_id)
+    log.debug(f"gameinfo {gameinfo} for hand {hand_id}")
 
     if gameinfo['base'] == 'hold':
         hand_instance = HoldemOmahaHand(config=config, hhc=None, sitename=gameinfo['sitename'],
@@ -1969,9 +1971,9 @@ def hand_factory(hand_id, config, db_connection):
         hand_instance = DrawHand(config=config, hhc=None, sitename=gameinfo['sitename'],
          gametype = gameinfo, handText=None, builtFrom = "DB", handid=hand_id)
 
+    log.debug(f"selecting info from db for hand {hand_id}")
     hand_instance.select(db_connection, hand_id)
     hand_instance.handid_selected = hand_id #hand_instance does not supply this, create it here
+    log.debug(f"exiting hand_factory for hand {hand_id}")
     
     return hand_instance
-
-

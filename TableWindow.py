@@ -132,7 +132,7 @@ class Table_Window(object):
             return None
 
         self.search_string = getTableTitleRe(self.config, self.site, self.type, **table_kwargs)
-        print("search string:", self.search_string)
+        log.debug(f"search string: {self.search_string}")
         # make a small delay otherwise Xtables.root.get_windows()
         #  returns empty for unknown reasons
         sleep(0.1)
@@ -190,13 +190,15 @@ class Table_Window(object):
 
     def get_table_no(self):
         new_title = self.get_window_title()
-        print("new table title:", new_title)
+        log.debug(f"new table title: {new_title}")
         if new_title is None:
             return False
 
         try:
+            log.debug(f"before searching: {new_title}")
             mo = re.search(self.tableno_re, new_title)
         except AttributeError: #'Table' object has no attribute 'tableno_re'
+            log.debug(f"'Table' object has no attribute 'tableno_re'")
             return False
               
         if mo is not None:
@@ -243,13 +245,16 @@ class Table_Window(object):
         return False  # no change
 
     def has_table_title_changed(self, hud):
+        log.debug(f"before get_table_no()")
         result = self.get_table_no()
-        print('tb has change nb', result)
+        log.debug(f"tb has change nb {result}")
         if result is not False and result != self.table:
-            print('compare result and self.table', result, self.table)
+            log.debug(f"compare result and self.table {result} {self.table}")
             self.table = result
             if hud is not None:
+                log.debug(f"return True")
                 return True
+        log.debug(f"return False")
         return False
 
     def check_bad_words(self, title):
