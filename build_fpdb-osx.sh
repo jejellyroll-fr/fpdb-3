@@ -150,7 +150,7 @@ FILES=(
     "ScriptGenerateWikiPage.py"
     "SealsWithClubsToFpdb.py"
     "settings.json"
-    "setup.py"
+    #"setup.py"
     "sim.py"
     "sim2.py"
     "simulation.py"
