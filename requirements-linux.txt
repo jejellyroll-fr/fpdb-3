@@ -1,11 +1,8 @@
 aiohttp
-AppKit
 beautifulsoup4
 chardet
 fastapi
 future
-gobject
-icu
 matplotlib
 mplfinance
 mysqlclient
