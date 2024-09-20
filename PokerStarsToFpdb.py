@@ -196,7 +196,11 @@ class PokerStars(HandHistoryConverter):
     re_BringIn          = re.compile(r"%(PLYR)s: brings[- ]in( low|) for %(CUR)s(?P<BRINGIN>[,.0-9]+)" % substitutions, re.MULTILINE)
     re_PostBoth         = re.compile(r"%(PLYR)s: posts small \& big blinds %(CUR)s(?P<SBBB>[,.0-9]+)" %  substitutions, re.MULTILINE)
     re_PostStraddle     = re.compile(r"%(PLYR)s: posts straddle %(CUR)s(?P<STRADDLE>[,.0-9]+)" %  substitutions, re.MULTILINE)
-    re_Action           = re.compile(r"""%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)(\s%(CUR)s(?P<BET>[,.\d]+))?(\sto\s%(CUR)s(?P<BETTO>[,.\d]+))?\s*(and\sis\sall.in)?(and\shas\sreached\sthe\s[%(CUR)s\d\.,]+\scap)?(\son|\scards?)?(\s\(disconnect\))?(\s\[(?P<CARDS>.+?)\])?\s*$""" %  substitutions, re.MULTILINE|re.VERBOSE)
+    try:
+        re_Action = re.compile(r"""%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)(\s%(CUR)s(?P<BET>[,.\d]+))?(\sto\s%(CUR)s(?P<BETTO>[,.\d]+))?\s*(and\sis\sall.in)?(and\shas\sreached\sthe\s[%(CUR)s\d\.,]+\scap)?(\son|\scards?)?(\s\(disconnect\))?(\s\[(?P<CARDS>.+?)\])?\s*$""" %  substitutions, re.MULTILINE|re.VERBOSE)
+    except Exception as e:
+        print(f"Error compiling re_Action: {e}")
+
     re_ShowdownAction   = re.compile(r"%s: (shows|mucks|mucked|showed) \[(?P<CARDS>.*)\]" % substitutions['PLYR'], re.MULTILINE)
     re_sitsOut          = re.compile("%s sits out" %  substitutions['PLYR'], re.MULTILINE)
     #re_ShownCards       = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % substitutions, re.MULTILINE)

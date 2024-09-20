@@ -80,55 +80,44 @@ class Table(Table_Window):
         start_time = time.time()  # Enregistre l'heure de début
 
         for hwnd in window_info.titles:
-            log.debug(f"hwnd {hwnd}")
-            log.debug(window_info.titles[hwnd])
-            # Vérification de la durée écoulée
-            if time.time() - start_time > time_limit:
-                log.error(f"Time limit of {time_limit} seconds reached. Exiting loop.")
-                break
+            try:
+                if time.time() - start_time > time_limit:
+                    log.error(f"Time limit of {time_limit} seconds reached. Exiting loop.")
+                    break
 
-            if not window_info.titles[hwnd]:
-                log.debug(f"hwnd {hwnd} title is empty")
-                continue
+                title = window_info.titles[hwnd]
+                if not title:
+                    continue
 
-            if not IsWindowVisible(hwnd):
-                log.debug(f"hwnd {hwnd} not visible")
-                continue
-            if GetParent(hwnd) != 0:
-                log.debug(f"hwnd {hwnd} is a child")
-                continue
+                if not IsWindowVisible(hwnd):
+                    continue
+                if GetParent(hwnd) != 0:
+                    continue
 
-            log.debug(f"before GetWindow {hwnd}")
-            HasNoOwner = ctypes.windll.user32.GetWindow(hwnd, GW_OWNER) == 0
-            log.debug(f"after GetWindow {hwnd}")
-            log.debug(f"before GetWindowLong {hwnd}")
-            WindowStyle = GetWindowLong(hwnd, GWL_EXSTYLE)
-            log.debug(f"after GetWindowLong {hwnd}")
+                HasNoOwner = ctypes.windll.user32.GetWindow(hwnd, GW_OWNER) == 0
+                WindowStyle = GetWindowLong(hwnd, GWL_EXSTYLE)
 
-            if window_info.titles[hwnd].split(' ', 1)[0] == "Winamax":
-                self.search_string = self.search_string.split(' ', 3)[0]
+                if title.split(' ', 1)[0] == "Winamax":
+                    self.search_string = self.search_string.split(' ', 3)[0]
 
-                if re.search(self.search_string, window_info.titles[hwnd], re.I):
-                    if self.check_bad_words(window_info.titles[hwnd]):
+                if re.search(self.search_string, title, re.I):
+                    if self.check_bad_words(title):
                         continue
                     self.number = hwnd
-                    self.title = window_info.titles[hwnd]
+                    self.title = title
+                    log.debug(f"Found table in hwnd {self.number} title {self.title}")
                     break
-            elif re.search(self.search_string, window_info.titles[hwnd], re.I):
-                log.debug(f"hwnd {hwnd} found something")
-                if self.check_bad_words(window_info.titles[hwnd]):
-                    log.debug(f"hwnd {hwnd} has bad words")
-                    continue
-                self.number = hwnd
-                self.title = window_info.titles[hwnd]
-                log.debug(f"found table in hwnd {self.number} title {self.title}")
-                break
-            else:
-                log.debug(f"hwnd {hwnd} not good")
+
+            except IOError as e:
+                if "closed file" in str(e):
+                    print(f"Warning: Logging to a closed file for hwnd {hwnd}. Skipping this log entry.")
+                else:
+                    log.error(f"IOError for hwnd {hwnd}: {e}")
+            except Exception as e:
+                log.error(f"Unexpected error for hwnd {hwnd}: {e}")
 
         if self.number is None:
             log.error(f"Window {self.search_string} not found.")
-            return
 
 
     # In get_geometry of WinTables.py
