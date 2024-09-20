@@ -33,6 +33,7 @@ import datetime
 import queue
 import shutil
 import re
+import zmq
 
 import logging, traceback
 
@@ -58,6 +59,27 @@ if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = logging.getLogger("importer")
+
+class ZMQSender:
+    def __init__(self, port="5555"):
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.PUSH)
+        self.socket.bind(f"tcp://127.0.0.1:{port}")
+        log.info(f"ZMQ sender initialized on port {port}")
+
+    def send_hand_id(self, hand_id):
+        try:
+            self.socket.send_string(str(hand_id))
+            log.debug(f"Sent hand ID {hand_id} via ZMQ")
+        except zmq.ZMQError as e:
+            log.error(f"Failed to send hand ID {hand_id}: {e}")
+
+    def close(self):
+        self.socket.close()
+        self.context.term()
+        log.info("ZMQ sender closed")
+
+
 
 class Importer(object):
     def __init__(self, caller, settings, config, sql = None, parent = None):
@@ -103,7 +125,7 @@ class Importer(object):
         self.settings.setdefault("threads", 1) # value set by GuiBulkImport
         for i in range(self.settings['threads']):
             self.writerdbs.append(Database.Database(self.config, sql = self.sql) )
-
+        self.zmq_sender = ZMQSender()
         process_time() # init clock in windows
 
     #Set functions
@@ -536,17 +558,16 @@ class Importer(object):
                 if self.callHud:
                     print('self.callHud',self.callHud)
                     print('self.caller',self.caller)
+
+
                     for hid in list(to_hud):
                         try:
-                            print('os.linesep',os.linesep)
-                            print(type(to_hud))
-                            print('hid',hid)
-                            print('self.caller.pipe_to_hud',self.caller.pipe_to_hud)
-                            print('self.caller.pipe_to_hud.stdin.write',self.caller.pipe_to_hud.stdin.write)
-                            print(("fpdb_import: sending hand to hud"), hid, "pipe =", self.caller.pipe_to_hud)
-                            self.caller.pipe_to_hud.stdin.write("%s" % (hid) + os.linesep)
+                            log.debug(f"Sending hand ID {hid} to HUD via socket")
+                            self.zmq_sender.send_hand_id(hid)
                         except IOError as e:
-                            log.error(("Failed to send hand to HUD: %s") % e)
+                            log.error(f"Failed to send hand ID to HUD via socket: {e}")
+
+                    
                 # Really ugly hack to allow testing Hands within the HHC from someone
                 # with only an Importer objec
                 if self.settings['cacheHHC']:
@@ -633,6 +654,10 @@ class Importer(object):
                     summaryTexts.pop()
                     log.warn(("TourneyImport: Removing text < 100 characters from end of file"))
         return summaryTexts 
+    
+    def __del__(self):
+        if hasattr(self, 'zmq_sender'):
+            self.zmq_sender.close()
         
 class ImportProgressDialog(QDialog):
 

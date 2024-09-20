@@ -67,11 +67,12 @@ class Hud(object):
         self.parent        = parent
         self.table         = table
         self.config        = config
+        self.db_hud_connection = None
         self.poker_game    = poker_game
         self.game_type     = game_type # (ring|tour)
         self.max           = max
-
-                      
+        self.type = game_type
+        self.cards = None                      
         self.site          = table.site
         self.hud_params    = dict.copy(parent.hud_params) # we must dict.copy a fresh hud_params dict
                                                           # because each aux hud can control local hud param 
@@ -180,6 +181,9 @@ class Hud(object):
         #  hud.py and aux handlers, so create a fresh connection in this class
         # if the db connection is made in __init__, then the sqlite db threading will fail
         #  so the db connection is made here instead.
+        if self.db_hud_connection is None:
+            self.db_hud_connection = Database.Database(self.config)
+        self.cards = self.get_cards(hand)
         self.db_hud_connection = Database.Database(self.config)
         # Load a hand instance (factory will load correct type for this hand)
         self.hand_instance = Hand.hand_factory(hand, config, self.db_hud_connection)
@@ -193,3 +197,10 @@ class Hud(object):
         self.hand_instance = Hand.hand_factory(hand, config, self.db_hud_connection)
         log.debug(f"hud update after hand_factory")
         self.db_hud_connection.connection.rollback()
+
+    def get_cards(self, hand):
+        cards = self.db_hud_connection.get_cards(hand)
+        if self.poker_game in ['holdem', 'omahahi', 'omahahilo']:
+            comm_cards = self.db_hud_connection.get_common_cards(hand)
+            cards['common'] = comm_cards['common']
+        return cards

@@ -23,7 +23,7 @@ import queue
 # import qdarkstyle
 import multiprocessing
 import threading
-
+import faulthandler
 if os.name == 'nt':
     import win32api
     import win32con
@@ -89,6 +89,17 @@ import Card
 import Exceptions
 import Stats
 #import api, app
+import cProfile
+import pstats
+import io
+
+
+PROFILE_OUTPUT_DIR = os.path.join(os.path.expanduser("~"), "fpdb_profiles")
+os.makedirs(PROFILE_OUTPUT_DIR, exist_ok=True)
+
+profiler = cProfile.Profile()
+profiler.enable()
+
 
 
 Configuration.set_logfile("fpdb-log.txt")
@@ -1399,7 +1410,24 @@ class CustomTitleBar(QWidget):
 
 if __name__ == "__main__":
     from qt_material import apply_stylesheet
-    app = QApplication([])
-    apply_stylesheet(app, theme='dark_purple.xml')
-    me = fpdb()
-    app.exec_()
+    import time
+    try:
+        app = QApplication([])
+        apply_stylesheet(app, theme='dark_purple.xml')
+        me = fpdb()
+        app.exec_()
+    finally:
+        profiler.disable()
+        s = io.StringIO()
+        ps = pstats.Stats(profiler, stream=s).sort_stats('cumulative')
+        ps.print_stats()
+
+        # Use timestamp or process ID for unique filenames
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        results_file = os.path.join(PROFILE_OUTPUT_DIR, f'fpdb_profile_results_{timestamp}.txt')
+        profile_file = os.path.join(PROFILE_OUTPUT_DIR, f'fpdb_profile_{timestamp}.prof')
+        
+        with open(results_file, 'w') as f:
+            f.write(s.getvalue())
+        
+        profiler.dump_stats(profile_file)
