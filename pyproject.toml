@@ -20,13 +20,14 @@ dependencies = [
     "qt-material==2.14",
     "SQLAlchemy==1.4.46",
     "uvicorn==0.30.1",
+    "xlrd==2.0.1",
 ]
 
 [project.optional-dependencies]
 windows = [
     "pywin32==306",
     "configparser",
-    "xlrd==2.0.1",
+
 ]
 linux = [
     "xcffib==1.5.0",
