@@ -118,7 +118,7 @@ I Use anaconda with Python 3.11
 - install [UV](https://docs.astral.sh/uv)
 - `uv run ./fpdb.pyw`
 
-This will create a virtual env (in .venv dir) and run the project.
+This will create a virtual env (in .venv dir), install all dependencies and run the program.
 
 ### Using pip
 
