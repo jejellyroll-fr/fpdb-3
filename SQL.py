@@ -387,7 +387,7 @@ class Sql(object):
                         hero BOOLEAN,
                         chars char(3),
                         comment text,
-                        commentTs timestamp without time zone
+                        commentTs timestamp without time zone,
                         profil text,
                         color_code VARCHAR(7) DEFAULT '#FFFFFF',
                         symbol VARCHAR(10) DEFAULT '★' )"""
