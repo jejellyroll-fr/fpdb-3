@@ -308,7 +308,7 @@ class HUD_main(QObject):
                 try:
                     table_info = self.db_connection.get_table_info(new_hand_id)
                     self.cache[new_hand_id] = table_info  # Information caching
-                except Exception:
+                except Exception as e:
                     log.error(f"Database error while processing hand {new_hand_id}: {e}", exc_info=True)
                     return
 
