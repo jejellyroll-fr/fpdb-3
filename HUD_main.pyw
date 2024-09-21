@@ -44,7 +44,9 @@ elif c.os_family == 'Mac':
 elif c.os_family in ('XP', 'Win7'):
     import WinTables as Tables
 
-class ZMQWorker(QRunnable):
+class ZMQWorker(QThread):
+    error_occurred = pyqtSignal(str)
+
     def __init__(self, zmq_receiver):
         super().__init__()
         self.zmq_receiver = zmq_receiver
@@ -56,10 +58,12 @@ class ZMQWorker(QRunnable):
                 self.zmq_receiver.process_message()
             except Exception as e:
                 log.error(f"Error in ZMQWorker: {e}")
+                self.error_occurred.emit(str(e))
             time.sleep(0.01)  # Short delay to avoid excessive CPU usage
 
     def stop(self):
         self.is_running = False
+        self.wait()  # Attend que le thread se termine
 
 class ZMQReceiver(QObject):
     message_received = pyqtSignal(str)
@@ -127,12 +131,12 @@ class HUD_main(QObject):
             # Cache initialization
             self.cache = TTLCache(maxsize=1000, ttl=300)  # Cache of 1000 elements with a TTL of 5 minutes
 
-            # Initialisation ZMQ
+            # Initialisation ZMQ avec QThread
             self.zmq_receiver = ZMQReceiver(parent=self)
             self.zmq_receiver.message_received.connect(self.handle_message)
-            self.thread_pool = QThreadPool()
-            self.worker = ZMQWorker(self.zmq_receiver)
-            self.thread_pool.start(self.worker)
+            self.zmq_worker = ZMQWorker(self.zmq_receiver)
+            self.zmq_worker.error_occurred.connect(self.handle_worker_error)
+            self.zmq_worker.start()
 
             # Main window
             self.init_main_window()
@@ -141,6 +145,9 @@ class HUD_main(QObject):
         except Exception as e:
             log.error(f"Error during HUD_main initialization: {e}")
             raise
+
+    def handle_worker_error(self, error_message):
+        log.error(f"ZMQWorker encountered an error: {error_message}")
 
     def init_main_window(self):
         self.main_window = QWidget(None, Qt.Dialog | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
@@ -172,13 +179,13 @@ class HUD_main(QObject):
         # This method will be called in the main thread
         self.read_stdin(hand_id)
 
-    def __del__(self):
-        if hasattr(self, 'db_connection'):
-            self.db_connection.close()
+    def destroy(self, *args):
         if hasattr(self, 'zmq_receiver'):
             self.zmq_receiver.close()
-        if hasattr(self, 'worker'):
-            self.worker.stop()
+        if hasattr(self, 'zmq_worker'):
+            self.zmq_worker.stop()
+        log.info("Quitting normally")
+        QCoreApplication.quit()
 
     def check_tables(self):
         for tablename, hud in list(self.hud_dict.items()):
@@ -302,7 +309,7 @@ class HUD_main(QObject):
                     table_info = self.db_connection.get_table_info(new_hand_id)
                     self.cache[new_hand_id] = table_info  # Information caching
                 except Exception:
-                    log.error(f"Database error: skipping {new_hand_id}")
+                    log.error(f"Database error while processing hand {new_hand_id}: {e}", exc_info=True)
                     return
 
         (table_name, max, poker_game, type, fast, site_id, site_name, num_seats, tour_number, tab_number) = table_info
