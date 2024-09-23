@@ -180,6 +180,11 @@ class fpdb(QMainWindow):
     # end def dia_database_stats
 
     def dia_hud_preferences(self, widget, data=None):
+
+        def get_text(widget: QWidget):
+            """Return text of widget, depending on widget type"""
+            return widget.currentText() if isinstance(widget, QComboBox) else widget.text()
+
         dia = QDialog(self)
         dia.setWindowTitle("Modifying Huds")
         dia.resize(1200, 600)
@@ -222,16 +227,14 @@ class fpdb(QMainWindow):
 
         # Treat dialog closed event
         if self.comboGame.currentIndexChanged and response:
+            selected_hud_name = self.comboGame.currentText()
             # User clicked on "Save"
-            for y in range(0, result3):
-                # print(result, self.stat2_dict[y].text(), self.stat3_dict[y].text(), self.stat4_dict[y].text(), self.stat5_dict[y].text(), self.stat6_dict[y].text(), self.stat7_dict[y].text(), self.stat8_dict[y].text(), self.stat9_dict[y].text(), self.stat10_dict[y].text(), self.stat11_dict[y].text(), self.stat12_dict[y].text(), self.stat13_dict[y].text())
-                # print(self.result, stat2_dict[y].text())
-                # print "site %s enabled=%s name=%s" % (available_site_names[site_number], check_buttons[site_number].get_active(), screen_names[site_number].get_text(), history_paths[site_number].get_text())
-                self.config.edit_hud(result, self.stat2_dict[y].text(), self.stat3_dict[y].text(),
-                                     self.stat4_dict[y].text(), self.stat5_dict[y].text(), self.stat6_dict[y].text(),
-                                     self.stat7_dict[y].text(), self.stat8_dict[y].text(), self.stat9_dict[y].text(),
-                                     self.stat10_dict[y].text(), self.stat11_dict[y].text(), self.stat12_dict[y].text(),
-                                     self.stat13_dict[y].text())
+            for y in range(0, nb_items):
+                self.config.edit_hud(selected_hud_name, get_text(self.stat2_dict[y]), get_text(self.stat3_dict[y]),
+                                    get_text(self.stat4_dict[y]), get_text(self.stat5_dict[y]), get_text(self.stat6_dict[y]),
+                                    get_text(self.stat7_dict[y]), get_text(self.stat8_dict[y]), get_text(self.stat9_dict[y]),
+                                    get_text(self.stat10_dict[y]), get_text(self.stat11_dict[y]), get_text(self.stat12_dict[y]),
+                                    get_text(self.stat13_dict[y]))
 
             self.config.save()
             self.reload_config()
