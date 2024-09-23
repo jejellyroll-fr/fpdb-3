@@ -190,18 +190,18 @@ class fpdb(QMainWindow):
         dia.layout().addWidget(label2)
         self.comboGame = QComboBox()
 
-        games = self.config.get_stat_sets()
-        for game in games:
-            self.comboGame.addItem(game)
+        huds_names = self.config.get_stat_sets()
+        for hud_name in huds_names:
+            self.comboGame.addItem(hud_name)
 
         dia.layout().addWidget(self.comboGame)
         self.comboGame.setCurrentIndex(1)
-        result = self.comboGame.currentText()
+        selected_hud_name = self.comboGame.currentText()
 
-        self.load_profile()
+        self.load_profile()  # => self.[config, settings]
 
         # HUD column will contain a button that shows favseat and HUD locations.
-        # Make it possible to load screenshot to arrange HUD windowlets.
+        # TODO: Make it possible to load screenshot to arrange HUD windowlets.
 
         self.table = QGridLayout()
         self.table.setSpacing(0)
@@ -210,15 +210,19 @@ class fpdb(QMainWindow):
         dia.layout().addWidget(scrolling_frame)
         scrolling_frame.setLayout(self.table)
 
-        result3 = len(self.config.stat_sets[result].stats)
+        nb_items = len(self.config.stat_sets[selected_hud_name].stats)
 
         btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, dia)
         btns.accepted.connect(dia.accept)
         btns.rejected.connect(dia.reject)
         dia.layout().addWidget(btns)
         self.comboGame.currentIndexChanged.connect(self.index_changed)
+        # Launch Dialog
         response = dia.exec_()
+
+        # Treat dialog closed event
         if self.comboGame.currentIndexChanged and response:
+            # User clicked on "Save"
             for y in range(0, result3):
                 # print(result, self.stat2_dict[y].text(), self.stat3_dict[y].text(), self.stat4_dict[y].text(), self.stat5_dict[y].text(), self.stat6_dict[y].text(), self.stat7_dict[y].text(), self.stat8_dict[y].text(), self.stat9_dict[y].text(), self.stat10_dict[y].text(), self.stat11_dict[y].text(), self.stat12_dict[y].text(), self.stat13_dict[y].text())
                 # print(self.result, stat2_dict[y].text())
@@ -233,8 +237,8 @@ class fpdb(QMainWindow):
             self.reload_config()
 
     def index_changed(self, index):
-        self.comboGame.setCurrentIndex(index)
-        result = self.comboGame.currentText()
+        # Called when user changes currently selected HUD
+        selected_hud_name = self.comboGame.currentText()
         for i in reversed(range(self.table.count())):
             self.table.itemAt(i).widget().deleteLater()
 
@@ -255,15 +259,12 @@ class fpdb(QMainWindow):
             self.stat13_dict = [], [], [], [], [], [], [], [], [], [], [], []
 
         self.load_profile()
-        hud_stats = self.config.stat_sets[result]
-
-        result2 = list(self.config.stat_sets[result].stats)
-        result3 = len(self.config.stat_sets[result].stats)
+        hud_stats = self.config.stat_sets[selected_hud_name]  # Configuration.Stat_sets object
         y_pos = 1
-        for y in range(0, result3):
-            stat = result2[y]
+        for position in hud_stats.stats.keys():
+            # Column 1: stat position
             stat2 = QLabel()
-            stat2.setText(str(stat))
+            stat2.setText(str(position))
             self.table.addWidget(stat2, y_pos, 0)
             self.stat2_dict.append(stat2)
 
@@ -276,39 +277,39 @@ class fpdb(QMainWindow):
             else:
                 icoPath = ""
             stat3 = QComboBox()
-            stats_cash = self.config.get_gui_cash_stat_params()
+            stats_cash = self.config.get_gui_cash_stat_params()  # Available stats for cash game
             for x in range(0, len(stats_cash)):
                 # print(stats_cash[x][0])
                 stat3.addItem(QIcon(f"{icoPath}Letter-C-icon.png"), stats_cash[x][0])
-            stats_tour = self.config.get_gui_tour_stat_params()
+            stats_tour = self.config.get_gui_tour_stat_params()  # Available stats for tournament
             for x in range(0, len(stats_tour)):
                 # print(stats_tour[x][0])
                 stat3.addItem(QIcon(f"{icoPath}Letter-T-icon.png"), stats_tour[x][0])
-            stat3.setCurrentText(str(self.config.stat_sets[result].stats[stat].stat_name))
+            stat3.setCurrentText(str(hud_stats.stats[position].stat_name))
             self.table.addWidget(stat3, y_pos, 1)
             self.stat3_dict.append(stat3)
 
             # Column 3: "click"
             stat4 = QLineEdit()
-            stat4.setText(str(self.config.stat_sets[result].stats[stat].click))
+            stat4.setText(str(hud_stats.stats[position].click))
             self.table.addWidget(stat4, y_pos, 2)
             self.stat4_dict.append(stat4)
 
             # Column 4: "hudcolor"
             stat5 = QLineEdit()
-            stat5.setText(str(self.config.stat_sets[result].stats[stat].hudcolor))
+            stat5.setText(str(hud_stats.stats[position].hudcolor))
             self.table.addWidget(stat5, y_pos, 3)
             self.stat5_dict.append(stat5)
 
             # Column 5: "hudprefix"
             stat6 = QLineEdit()
-            stat6.setText(str(self.config.stat_sets[result].stats[stat].hudprefix))
+            stat6.setText(str(hud_stats.stats[position].hudprefix))
             self.table.addWidget(stat6, y_pos, 4)
             self.stat6_dict.append(stat6)
 
             # Column 6: "hudsuffix"
             stat7 = QLineEdit()
-            stat7.setText(str(self.config.stat_sets[result].stats[stat].hudsuffix))
+            stat7.setText(str(hud_stats.stats[position].hudsuffix))
             self.table.addWidget(stat7, y_pos, 5)
             self.stat7_dict.append(stat7)
 
@@ -316,37 +317,37 @@ class fpdb(QMainWindow):
             stat8 = QComboBox()
             for popup in self.config.popup_windows.keys():
                 stat8.addItem(popup)
-            stat8.setCurrentText(str(self.config.stat_sets[result].stats[stat].popup))
+            stat8.setCurrentText(str(hud_stats.stats[position].popup))
             self.table.addWidget(stat8, y_pos, 6)
             self.stat8_dict.append(stat8)
 
             # Column 8: "stat_hicolor"
             stat9 = QLineEdit()
-            stat9.setText(str(self.config.stat_sets[result].stats[stat].stat_hicolor))
+            stat9.setText(str(hud_stats.stats[position].stat_hicolor))
             self.table.addWidget(stat9, y_pos, 7)
             self.stat9_dict.append(stat9)
 
             # Column 9: "stat_hith"
             stat10 = QLineEdit()
-            stat10.setText(str(self.config.stat_sets[result].stats[stat].stat_hith))
+            stat10.setText(str(hud_stats.stats[position].stat_hith))
             self.table.addWidget(stat10, y_pos, 8)
             self.stat10_dict.append(stat10)
 
             # Column 10: "stat_locolor"
             stat11 = QLineEdit()
-            stat11.setText(str(self.config.stat_sets[result].stats[stat].stat_locolor))
+            stat11.setText(str(hud_stats.stats[position].stat_locolor))
             self.table.addWidget(stat11, y_pos, 9)
             self.stat11_dict.append(stat11)
 
             # Column 11: "stat_loth"
             stat12 = QLineEdit()
-            stat12.setText(str(self.config.stat_sets[result].stats[stat].stat_loth))
+            stat12.setText(str(hud_stats.stats[position].stat_loth))
             self.table.addWidget(stat12, y_pos, 10)
             self.stat12_dict.append(stat12)
 
             # Column 12: "tip"
             stat13 = QLineEdit()
-            stat13.setText(str(self.config.stat_sets[result].stats[stat].tip))
+            stat13.setText(str(hud_stats.stats[position].tip))
             self.table.addWidget(stat13, y_pos, 11)
             self.stat13_dict.append(stat13)
             # if available_site_names[site_number] in detector.supportedSites:
