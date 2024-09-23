@@ -187,7 +187,6 @@ class fpdb(QMainWindow):
         dia.setLayout(QVBoxLayout())
         dia.layout().addWidget(label)
         label2 = QLabel("Please select the game category for which you want to configure HUD stats:")
-        popups = []
         dia.layout().addWidget(label2)
         self.comboGame = QComboBox()
 
@@ -200,14 +199,6 @@ class fpdb(QMainWindow):
         result = self.comboGame.currentText()
 
         self.load_profile()
-        # print('resultat', result)
-        hud_stats = self.config.stat_sets[result]
-        hud_nb_col = self.config.stat_sets[result].cols
-        hud_nb_row = self.config.stat_sets[result].rows
-        tab_rows = hud_nb_col * hud_nb_row
-        # print('stats set',hud_stats )
-        stat2_dict, stat3_dict, stat4_dict, stat5_dict, stat6_dict, stat7_dict, stat8_dict, stat9_dict, stat10_dict, \
-            stat11_dict, stat12_dict, stat13_dict = [], [], [], [], [], [], [], [], [], [], [], []
 
         # HUD column will contain a button that shows favseat and HUD locations.
         # Make it possible to load screenshot to arrange HUD windowlets.
@@ -264,23 +255,13 @@ class fpdb(QMainWindow):
             self.stat13_dict = [], [], [], [], [], [], [], [], [], [], [], []
 
         self.load_profile()
-        # print('resultat', result)
         hud_stats = self.config.stat_sets[result]
-        hud_nb_col = self.config.stat_sets[result].cols
-        hud_nb_row = self.config.stat_sets[result].rows
-        tab_rows = hud_nb_col * hud_nb_row
-        # print('stats set',hud_stats )
 
         result2 = list(self.config.stat_sets[result].stats)
         result3 = len(self.config.stat_sets[result].stats)
-        # print(self.config.stat_sets[result].stats)
-        # print(result2)
-        # print(result3)
         y_pos = 1
         for y in range(0, result3):
-            # print(result2[y])
             stat = result2[y]
-            # print(self.config.stat_sets[result].stats[stat].stat_name)
             stat2 = QLabel()
             stat2.setText(str(stat))
             self.table.addWidget(stat2, y_pos, 0)
@@ -292,7 +273,6 @@ class fpdb(QMainWindow):
                 icoPath = os.path.dirname(__file__)
 
                 icoPath = f"{icoPath}\\"
-                # print(icoPath)
             else:
                 icoPath = ""
             stat3 = QComboBox()
