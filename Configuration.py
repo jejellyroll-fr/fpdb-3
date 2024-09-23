@@ -1312,47 +1312,28 @@ class Config(object):
     def edit_hud(self, hud_name, position, stat_name, click, hudcolor, hudprefix, hudsuffix, popup, stat_hicolor, stat_hith, stat_locolor, stat_loth, tip):
         """ Replace given values onto self.doc (XML root node)
         """
+        def increment_position(position: str) -> str:
+            """
+            >>> increment_position('(0,0)')
+            "(1,1)"
+            >>> increment_position('(0, 0)')
+            "(1,1)"
+            >>> increment_position('(2,3)')
+            "(3,4)"
+            """
+            assert position.startswith("(") and position.endswith(")"), position.__repr__()
+            # Remove parentheses and split by comma
+            row, col = map(int, position[1:-1].split(","))
+            # Increment both row and column by 1
+            return f"({row + 1},{col + 1})"
+
         for statsetNode in self.doc.getElementsByTagName("ss"):
             #print ("getStatSetNode statsetNode:",statsetNode)
 
             if statsetNode.getAttribute("name") == hud_name:
                 for fav_stat in statsetNode.getElementsByTagName("stat"):
-                    print("position", (position))
-                    print("fav",fav_stat.getAttribute("_rowcol"))
                     # TODO: why those positions changes ?
-                    if position == "(0, 0)":
-                        position = "(1,1)"
-                    elif position == "(0, 1)":
-                        position = "(1,2)"
-                    elif position == "(0, 2)":
-                        position = "(1,3)"
-                    elif position == "(0, 3)":
-                        position = "(1,4)"
-                    elif position == "(1, 0)":
-                        position = "(2,1)"
-                    elif position == "(1, 1)":
-                        position = "(2,2)"
-                    elif position == "(1, 2)":
-                        position = "(2,3)"
-                    elif position == "(1, 3)":
-                        position = "(2,4)"
-                    elif position == "(2, 0)":
-                        position = "(3,1)"
-                    elif position == "(2, 1)":
-                        position = "(3,2)"
-                    elif position == "(2, 2)":
-                        position = "(3,3)"
-                    elif position == "(2, 3)":
-                        position = "(3,4)"
-                    elif position == "(32, 0)":  # FIXME: there's very probably a bug here
-                        position = "(4,1)"
-                    elif position == "(3, 1)":
-                        position = "(4,2)"
-                    elif position == "(3, 2)":
-                        position = "(4,3)"
-                    elif position == "(3, 3)":
-                        position = "(4,4)"
-                    if fav_stat.getAttribute("_rowcol") == position:
+                    if fav_stat.getAttribute("_rowcol") == increment_position(position):
                         fav_stat.setAttribute("_stat_name", stat_name)
                         fav_stat.setAttribute("click", click)
                         fav_stat.setAttribute("hudcolor", hudcolor)
