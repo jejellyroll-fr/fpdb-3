@@ -258,6 +258,7 @@ class fpdb(QMainWindow):
             label.setAlignment(Qt.AlignCenter)
             self.table.addWidget(label, 0, header_number)
 
+        # Init lists that will contains QWidgets for each column in table ("stat2" will contain the position (ex: "(0,1)"))
         self.stat2_dict, self.stat3_dict, self.stat4_dict, self.stat5_dict, self.stat6_dict, self.stat7_dict, \
             self.stat8_dict, self.stat9_dict, self.stat10_dict, self.stat11_dict, self.stat12_dict, \
             self.stat13_dict = [], [], [], [], [], [], [], [], [], [], [], []
@@ -284,6 +285,9 @@ class fpdb(QMainWindow):
             stat2.setText(str(stat))
             self.table.addWidget(stat2, y_pos, 0)
             self.stat2_dict.append(stat2)
+
+            # Column 2: select stat name (between available stats)
+            # TODO: don't load all stats on each loop !
             if os.name == 'nt':
                 icoPath = os.path.dirname(__file__)
 
@@ -304,26 +308,31 @@ class fpdb(QMainWindow):
             self.table.addWidget(stat3, y_pos, 1)
             self.stat3_dict.append(stat3)
 
+            # Column 3: "click"
             stat4 = QLineEdit()
             stat4.setText(str(self.config.stat_sets[result].stats[stat].click))
             self.table.addWidget(stat4, y_pos, 2)
             self.stat4_dict.append(stat4)
 
+            # Column 4: "hudcolor"
             stat5 = QLineEdit()
             stat5.setText(str(self.config.stat_sets[result].stats[stat].hudcolor))
             self.table.addWidget(stat5, y_pos, 3)
             self.stat5_dict.append(stat5)
 
+            # Column 5: "hudprefix"
             stat6 = QLineEdit()
             stat6.setText(str(self.config.stat_sets[result].stats[stat].hudprefix))
             self.table.addWidget(stat6, y_pos, 4)
             self.stat6_dict.append(stat6)
 
+            # Column 6: "hudsuffix"
             stat7 = QLineEdit()
             stat7.setText(str(self.config.stat_sets[result].stats[stat].hudsuffix))
             self.table.addWidget(stat7, y_pos, 5)
             self.stat7_dict.append(stat7)
 
+            # Column 7: "popup"
             stat8 = QComboBox()
             for popup in self.config.popup_windows.keys():
                 stat8.addItem(popup)
@@ -331,26 +340,31 @@ class fpdb(QMainWindow):
             self.table.addWidget(stat8, y_pos, 6)
             self.stat8_dict.append(stat8)
 
+            # Column 8: "stat_hicolor"
             stat9 = QLineEdit()
             stat9.setText(str(self.config.stat_sets[result].stats[stat].stat_hicolor))
             self.table.addWidget(stat9, y_pos, 7)
             self.stat9_dict.append(stat9)
 
+            # Column 9: "stat_hith"
             stat10 = QLineEdit()
             stat10.setText(str(self.config.stat_sets[result].stats[stat].stat_hith))
             self.table.addWidget(stat10, y_pos, 8)
             self.stat10_dict.append(stat10)
 
+            # Column 10: "stat_locolor"
             stat11 = QLineEdit()
             stat11.setText(str(self.config.stat_sets[result].stats[stat].stat_locolor))
             self.table.addWidget(stat11, y_pos, 9)
             self.stat11_dict.append(stat11)
 
+            # Column 11: "stat_loth"
             stat12 = QLineEdit()
             stat12.setText(str(self.config.stat_sets[result].stats[stat].stat_loth))
             self.table.addWidget(stat12, y_pos, 10)
             self.stat12_dict.append(stat12)
 
+            # Column 12: "tip"
             stat13 = QLineEdit()
             stat13.setText(str(self.config.stat_sets[result].stats[stat].tip))
             self.table.addWidget(stat13, y_pos, 11)
@@ -874,7 +888,12 @@ class fpdb(QMainWindow):
 
 
     def load_profile(self, create_db=False):
-        """Loads profile from the provided path name."""
+        """Loads profile from the provided path name.
+        Set:
+           - self.settings
+           - self.config
+           - self.db
+        """
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
         if self.config.file_error:
             self.warning_box(f"There is an error in your config file"
