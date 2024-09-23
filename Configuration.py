@@ -1335,15 +1335,11 @@ class Config(object):
             
         
         
-            #print(transcript)
         for statsetNode in self.doc.getElementsByTagName("ss"):
             #print ("getStatSetNode statsetNode:",statsetNode)
             
             if statsetNode.getAttribute("name") == result:
-                #print("true1")
                 for fav_stat in statsetNode.getElementsByTagName("stat"):
-                    print("type stat2", type(stat2))
-                    print("stat2", (stat2))
                     print("fav",fav_stat.getAttribute("_rowcol"))
                     if stat2 == "(0, 0)":
                         stat2 = "(1,1)"
