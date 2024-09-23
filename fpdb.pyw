@@ -278,7 +278,7 @@ class fpdb(QMainWindow):
 
                 icoPath = f"{icoPath}\\"
             else:
-                icoPath = ""
+                icoPath = "icons/"
             stat3 = QComboBox()
             stats_cash = self.config.get_gui_cash_stat_params()  # Available stats for cash game
             for x in range(0, len(stats_cash)):
