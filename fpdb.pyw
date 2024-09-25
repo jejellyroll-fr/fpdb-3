@@ -180,6 +180,11 @@ class fpdb(QMainWindow):
     # end def dia_database_stats
 
     def dia_hud_preferences(self, widget, data=None):
+
+        def get_text(widget: QWidget):
+            """Return text of widget, depending on widget type"""
+            return widget.currentText() if isinstance(widget, QComboBox) else widget.text()
+
         dia = QDialog(self)
         dia.setWindowTitle("Modifying Huds")
         dia.resize(1200, 600)
@@ -187,30 +192,21 @@ class fpdb(QMainWindow):
         dia.setLayout(QVBoxLayout())
         dia.layout().addWidget(label)
         label2 = QLabel("Please select the game category for which you want to configure HUD stats:")
-        popups = []
         dia.layout().addWidget(label2)
         self.comboGame = QComboBox()
 
-        games = self.config.get_stat_sets()
-        for game in games:
-            self.comboGame.addItem(game)
+        huds_names = self.config.get_stat_sets()
+        for hud_name in huds_names:
+            self.comboGame.addItem(hud_name)
 
         dia.layout().addWidget(self.comboGame)
         self.comboGame.setCurrentIndex(1)
-        result = self.comboGame.currentText()
+        selected_hud_name = self.comboGame.currentText()
 
-        self.load_profile()
-        # print('resultat', result)
-        hud_stats = self.config.stat_sets[result]
-        hud_nb_col = self.config.stat_sets[result].cols
-        hud_nb_row = self.config.stat_sets[result].rows
-        tab_rows = hud_nb_col * hud_nb_row
-        # print('stats set',hud_stats )
-        stat2_dict, stat3_dict, stat4_dict, stat5_dict, stat6_dict, stat7_dict, stat8_dict, stat9_dict, stat10_dict, \
-            stat11_dict, stat12_dict, stat13_dict = [], [], [], [], [], [], [], [], [], [], [], []
+        self.load_profile()  # => self.[config, settings]
 
         # HUD column will contain a button that shows favseat and HUD locations.
-        # Make it possible to load screenshot to arrange HUD windowlets.
+        # TODO: Make it possible to load screenshot to arrange HUD windowlets.
 
         self.table = QGridLayout()
         self.table.setSpacing(0)
@@ -219,31 +215,33 @@ class fpdb(QMainWindow):
         dia.layout().addWidget(scrolling_frame)
         scrolling_frame.setLayout(self.table)
 
-        result3 = len(self.config.stat_sets[result].stats)
+        nb_items = len(self.config.stat_sets[selected_hud_name].stats)
 
         btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, dia)
         btns.accepted.connect(dia.accept)
         btns.rejected.connect(dia.reject)
         dia.layout().addWidget(btns)
         self.comboGame.currentIndexChanged.connect(self.index_changed)
+        # Launch Dialog
         response = dia.exec_()
+
+        # Treat dialog closed event
         if self.comboGame.currentIndexChanged and response:
-            for y in range(0, result3):
-                # print(result, self.stat2_dict[y].text(), self.stat3_dict[y].text(), self.stat4_dict[y].text(), self.stat5_dict[y].text(), self.stat6_dict[y].text(), self.stat7_dict[y].text(), self.stat8_dict[y].text(), self.stat9_dict[y].text(), self.stat10_dict[y].text(), self.stat11_dict[y].text(), self.stat12_dict[y].text(), self.stat13_dict[y].text())
-                # print(self.result, stat2_dict[y].text())
-                # print "site %s enabled=%s name=%s" % (available_site_names[site_number], check_buttons[site_number].get_active(), screen_names[site_number].get_text(), history_paths[site_number].get_text())
-                self.config.edit_hud(result, self.stat2_dict[y].text(), self.stat3_dict[y].text(),
-                                     self.stat4_dict[y].text(), self.stat5_dict[y].text(), self.stat6_dict[y].text(),
-                                     self.stat7_dict[y].text(), self.stat8_dict[y].text(), self.stat9_dict[y].text(),
-                                     self.stat10_dict[y].text(), self.stat11_dict[y].text(), self.stat12_dict[y].text(),
-                                     self.stat13_dict[y].text())
+            selected_hud_name = self.comboGame.currentText()
+            # User clicked on "Save"
+            for y in range(0, nb_items):
+                self.config.edit_hud(selected_hud_name, get_text(self.stat_position_list[y]), get_text(self.stat_name_list[y]),
+                                    get_text(self.click_list[y]), get_text(self.hudcolor_list[y]), get_text(self.hudprefix_list[y]),
+                                    get_text(self.hudsuffix_list[y]), get_text(self.popup_list[y]), get_text(self.stat_hicolor_list[y]),
+                                    get_text(self.stat_hith_list[y]), get_text(self.stat_locolor_list[y]), get_text(self.stat_loth_list[y]),
+                                    get_text(self.tip_list[y]))
 
             self.config.save()
             self.reload_config()
 
     def index_changed(self, index):
-        self.comboGame.setCurrentIndex(index)
-        result = self.comboGame.currentText()
+        # Called when user changes currently selected HUD
+        selected_hud_name = self.comboGame.currentText()
         for i in reversed(range(self.table.count())):
             self.table.itemAt(i).widget().deleteLater()
 
@@ -258,103 +256,102 @@ class fpdb(QMainWindow):
             label.setAlignment(Qt.AlignCenter)
             self.table.addWidget(label, 0, header_number)
 
-        self.stat2_dict, self.stat3_dict, self.stat4_dict, self.stat5_dict, self.stat6_dict, self.stat7_dict, \
-            self.stat8_dict, self.stat9_dict, self.stat10_dict, self.stat11_dict, self.stat12_dict, \
-            self.stat13_dict = [], [], [], [], [], [], [], [], [], [], [], []
+        # Init lists that will contains QWidgets for each column in table ("stat_position_list" will contain the positions (ex: ["(0,1)", ...]))
+        self.stat_position_list, self.stat_name_list, self.click_list, self.hudcolor_list, self.hudprefix_list, \
+            self.hudsuffix_list, self.popup_list, self.stat_hicolor_list, self.stat_hith_list, self.stat_locolor_list, \
+                self.stat_loth_list, self.tip_list =  [], [], [], [], [], [], [], [], [], [], [], []
 
         self.load_profile()
-        # print('resultat', result)
-        hud_stats = self.config.stat_sets[result]
-        hud_nb_col = self.config.stat_sets[result].cols
-        hud_nb_row = self.config.stat_sets[result].rows
-        tab_rows = hud_nb_col * hud_nb_row
-        # print('stats set',hud_stats )
-
-        result2 = list(self.config.stat_sets[result].stats)
-        result3 = len(self.config.stat_sets[result].stats)
-        # print(self.config.stat_sets[result].stats)
-        # print(result2)
-        # print(result3)
+        hud_stats = self.config.stat_sets[selected_hud_name]  # Configuration.Stat_sets object
         y_pos = 1
-        for y in range(0, result3):
-            # print(result2[y])
-            stat = result2[y]
-            # print(self.config.stat_sets[result].stats[stat].stat_name)
+        for position in hud_stats.stats.keys():
+            # Column 1: stat position
             stat2 = QLabel()
-            stat2.setText(str(stat))
+            stat2.setText(str(position))
             self.table.addWidget(stat2, y_pos, 0)
-            self.stat2_dict.append(stat2)
+            self.stat_position_list.append(stat2)
+
+            # Column 2: select stat name (between available stats)
+            # TODO: don't load all stats on each loop !
             if os.name == 'nt':
                 icoPath = os.path.dirname(__file__)
-
                 icoPath = f"{icoPath}\\"
-                # print(icoPath)
             else:
-                icoPath = ""
+                icoPath = "icons/"
             stat3 = QComboBox()
-            stats_cash = self.config.get_gui_cash_stat_params()
+            stats_cash = self.config.get_gui_cash_stat_params()  # Available stats for cash game
             for x in range(0, len(stats_cash)):
                 # print(stats_cash[x][0])
                 stat3.addItem(QIcon(f"{icoPath}Letter-C-icon.png"), stats_cash[x][0])
-            stats_tour = self.config.get_gui_tour_stat_params()
+            stats_tour = self.config.get_gui_tour_stat_params()  # Available stats for tournament
             for x in range(0, len(stats_tour)):
                 # print(stats_tour[x][0])
                 stat3.addItem(QIcon(f"{icoPath}Letter-T-icon.png"), stats_tour[x][0])
-            stat3.setCurrentText(str(self.config.stat_sets[result].stats[stat].stat_name))
+            stat3.setCurrentText(str(hud_stats.stats[position].stat_name))
             self.table.addWidget(stat3, y_pos, 1)
-            self.stat3_dict.append(stat3)
+            self.stat_name_list.append(stat3)
 
+            # Column 3: "click"
             stat4 = QLineEdit()
-            stat4.setText(str(self.config.stat_sets[result].stats[stat].click))
+            stat4.setText(str(hud_stats.stats[position].click))
             self.table.addWidget(stat4, y_pos, 2)
-            self.stat4_dict.append(stat4)
+            self.click_list.append(stat4)
 
+            # Column 4: "hudcolor"
             stat5 = QLineEdit()
-            stat5.setText(str(self.config.stat_sets[result].stats[stat].hudcolor))
+            stat5.setText(str(hud_stats.stats[position].hudcolor))
             self.table.addWidget(stat5, y_pos, 3)
-            self.stat5_dict.append(stat5)
+            self.hudcolor_list.append(stat5)
 
+            # Column 5: "hudprefix"
             stat6 = QLineEdit()
-            stat6.setText(str(self.config.stat_sets[result].stats[stat].hudprefix))
+            stat6.setText(str(hud_stats.stats[position].hudprefix))
             self.table.addWidget(stat6, y_pos, 4)
-            self.stat6_dict.append(stat6)
+            self.hudprefix_list.append(stat6)
 
+            # Column 6: "hudsuffix"
             stat7 = QLineEdit()
-            stat7.setText(str(self.config.stat_sets[result].stats[stat].hudsuffix))
+            stat7.setText(str(hud_stats.stats[position].hudsuffix))
             self.table.addWidget(stat7, y_pos, 5)
-            self.stat7_dict.append(stat7)
+            self.hudsuffix_list.append(stat7)
 
+            # Column 7: "popup"
             stat8 = QComboBox()
             for popup in self.config.popup_windows.keys():
                 stat8.addItem(popup)
-            stat8.setCurrentText(str(self.config.stat_sets[result].stats[stat].popup))
+            stat8.setCurrentText(str(hud_stats.stats[position].popup))
             self.table.addWidget(stat8, y_pos, 6)
-            self.stat8_dict.append(stat8)
+            self.popup_list.append(stat8)
 
+            # Column 8: "stat_hicolor"
             stat9 = QLineEdit()
-            stat9.setText(str(self.config.stat_sets[result].stats[stat].stat_hicolor))
+            stat9.setText(str(hud_stats.stats[position].stat_hicolor))
             self.table.addWidget(stat9, y_pos, 7)
-            self.stat9_dict.append(stat9)
+            self.stat_hicolor_list.append(stat9)
 
+            # Column 9: "stat_hith"
             stat10 = QLineEdit()
-            stat10.setText(str(self.config.stat_sets[result].stats[stat].stat_hith))
+            stat10.setText(str(hud_stats.stats[position].stat_hith))
             self.table.addWidget(stat10, y_pos, 8)
-            self.stat10_dict.append(stat10)
+            self.stat_hith_list.append(stat10)
 
+            # Column 10: "stat_locolor"
             stat11 = QLineEdit()
-            stat11.setText(str(self.config.stat_sets[result].stats[stat].stat_locolor))
+            stat11.setText(str(hud_stats.stats[position].stat_locolor))
             self.table.addWidget(stat11, y_pos, 9)
-            self.stat11_dict.append(stat11)
+            self.stat_locolor_list.append(stat11)
 
+            # Column 11: "stat_loth"
             stat12 = QLineEdit()
-            stat12.setText(str(self.config.stat_sets[result].stats[stat].stat_loth))
+            stat12.setText(str(hud_stats.stats[position].stat_loth))
             self.table.addWidget(stat12, y_pos, 10)
-            self.stat12_dict.append(stat12)
+            self.stat_loth_list.append(stat12)
 
+            # Column 12: "tip"
             stat13 = QLineEdit()
-            stat13.setText(str(self.config.stat_sets[result].stats[stat].tip))
+            stat13.setText(str(hud_stats.stats[position].tip))
             self.table.addWidget(stat13, y_pos, 11)
-            self.stat13_dict.append(stat13)
+            self.tip_list.append(stat13)
             # if available_site_names[site_number] in detector.supportedSites:
             # pass
 
@@ -855,7 +852,7 @@ class fpdb(QMainWindow):
         maintenanceMenu.addAction(makeAction('Rebuild HUD Cache', self.dia_recreate_hudcache))
         maintenanceMenu.addAction(makeAction('Rebuild DB Indexes', self.dia_rebuild_indexes))
         maintenanceMenu.addAction(makeAction('Dump Database to Textfile (takes ALOT of time)', self.dia_dump_db))
-        
+
         toolsMenu.addAction(makeAction('PokerProTools', self.launch_ppt))
         helpMenu.addAction(makeAction('Log Messages', self.dia_logs, 'Log and Debug Messages'))
         helpMenu.addAction(makeAction('Help Tab', self.tab_main_help))
@@ -863,9 +860,9 @@ class fpdb(QMainWindow):
         helpMenu.addAction(makeAction('Infos', self.dia_about, 'About the program'))
 
         themes = [
-            'dark_purple.xml', 'dark_teal.xml', 'dark_blue.xml', 'dark_cyan.xml', 
-            'dark_pink.xml', 'dark_red.xml', 'dark_lime.xml', 'light_purple.xml', 
-            'light_teal.xml', 'light_blue.xml', 'light_cyan.xml', 'light_pink.xml', 
+            'dark_purple.xml', 'dark_teal.xml', 'dark_blue.xml', 'dark_cyan.xml',
+            'dark_pink.xml', 'dark_red.xml', 'dark_lime.xml', 'light_purple.xml',
+            'light_teal.xml', 'light_blue.xml', 'light_cyan.xml', 'light_pink.xml',
             'light_red.xml', 'light_lime.xml'
         ]
 
@@ -874,7 +871,12 @@ class fpdb(QMainWindow):
 
 
     def load_profile(self, create_db=False):
-        """Loads profile from the provided path name."""
+        """Loads profile from the provided path name.
+        Set:
+           - self.settings
+           - self.config
+           - self.db
+        """
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
         if self.config.file_error:
             self.warning_box(f"There is an error in your config file"
@@ -1103,13 +1105,13 @@ class fpdb(QMainWindow):
         """Displays a tab with the main fpdb help screen"""
         mh_tab = QLabel(("""
                         Welcome to Fpdb!
-                        
+
                         This program is currently in an alpha-state, so our database format is still sometimes changed.
                         You should therefore always keep your hand history files so that you can re-import
                         after an update, if necessary.
-                        
+
                         all configuration now happens in HUD_config.xml.
-                        
+
                         This program is free/libre open source software licensed partially under the AGPL3,
                         and partially under GPL2 or later.
                         The Windows installer package includes code licensed under the MIT license.
@@ -1209,12 +1211,12 @@ class fpdb(QMainWindow):
         item = self.nb.widget(index)
         self.nb.removeTab(index)
         self.nb_tab_names.pop(index)
-        
+
         try:
             self.threads.remove(item)
         except ValueError:
             pass
-        
+
         item.deleteLater()
 
     def __init__(self):
@@ -1235,9 +1237,9 @@ class fpdb(QMainWindow):
         self.threads = []
         self.closeq = queue.Queue(20)
 
-        self.oldPos = self.pos() 
+        self.oldPos = self.pos()
 
-        
+
 
         if options.initialRun:
             self.display_config_created_dialogue = True
@@ -1277,7 +1279,7 @@ class fpdb(QMainWindow):
             # Add title bar and menu bar to layout
             self.custom_title_bar = CustomTitleBar(self)
             self.central_layout.addWidget(self.custom_title_bar)
-            self.setMenuBar(self.menuBar())  
+            self.setMenuBar(self.menuBar())
         else:
             # Add title bar and menu bar to layout
             self.central_layout.addWidget(self.custom_title_bar)
@@ -1373,7 +1375,7 @@ class CustomTitleBar(QWidget):
             pass
         else:
             self.moving = False
-            self.offset = None            
+            self.offset = None
 
     def toggle_maximize_restore(self):
         if self.is_maximized:
