@@ -1309,31 +1309,32 @@ class Config(object):
                 fav_seat.setAttribute("fav_seat", seat10_dict)
     #end def
 
+    def increment_position(self, position: str) -> str:
+        # Adapt defined logic for hus stats form config file
+        # TODO: Probably adapt hud logic instead
+        """
+        >>> self.increment_position('(0,0)')
+        "(1,1)"
+        >>> self.increment_position('(0, 0)')
+        "(1,1)"
+        >>> self.increment_position('(2,3)')
+        "(3,4)"
+        """
+        assert position.startswith("(") and position.endswith(")"), position.__repr__()
+        # Remove parentheses and split by comma
+        row, col = map(int, position[1:-1].split(","))
+        # Check that row and collar are not negative
+        assert row >= 0 and col >= 0, f"Negative values detected: row={row}, col={col}"
+        # Increment both row and column by 1
+        return f"({row + 1},{col + 1})"
+
     def edit_hud(self, hud_name, position, stat_name, click, hudcolor, hudprefix, hudsuffix, popup, stat_hicolor, stat_hith, stat_locolor, stat_loth, tip):
         """ Replace given values onto self.doc (XML root node)
         """
-        def increment_position(position: str) -> str:
-            """
-            >>> increment_position('(0,0)')
-            "(1,1)"
-            >>> increment_position('(0, 0)')
-            "(1,1)"
-            >>> increment_position('(2,3)')
-            "(3,4)"
-            """
-            assert position.startswith("(") and position.endswith(")"), position.__repr__()
-            # Remove parentheses and split by comma
-            row, col = map(int, position[1:-1].split(","))
-            # Increment both row and column by 1
-            return f"({row + 1},{col + 1})"
-
         for statsetNode in self.doc.getElementsByTagName("ss"):
-            #print ("getStatSetNode statsetNode:",statsetNode)
-
             if statsetNode.getAttribute("name") == hud_name:
                 for fav_stat in statsetNode.getElementsByTagName("stat"):
-                    # TODO: why those positions changes ?
-                    if fav_stat.getAttribute("_rowcol") == increment_position(position):
+                    if fav_stat.getAttribute("_rowcol") == self.increment_position(position):
                         fav_stat.setAttribute("_stat_name", stat_name)
                         fav_stat.setAttribute("click", click)
                         fav_stat.setAttribute("hudcolor", hudcolor)
