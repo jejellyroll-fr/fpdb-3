@@ -500,7 +500,16 @@ class Stat(object):
 
 
 class Stat_sets(object):
-    
+    """Representation of a HUD display configuration
+    - stats: Dict of Tuples (position in HUD) -> Configuration.Stat
+             Exemple: {
+                (0,0): Stat(stat_name = 'vpip', stat_hicolor ='#F44336', ...),
+                (0,1): Stat(stat_name = 'pfr', stat_hicolor ='#F44336', ...),
+                ...
+             }
+    - rows, cols: siez of the HUD
+    """
+
     def __init__(self, node):
         self.name    = node.getAttribute("name")
         self.rows    = int( node.getAttribute("rows") )
@@ -509,6 +518,7 @@ class Stat_sets(object):
         self.xpad = 0 if self.xpad == "" else int(self.xpad)
         self.ypad    = node.getAttribute("ypad")
         self.ypad = 0 if self.ypad == "" else int(self.ypad)
+        self.stats = None   #
 
         self.stats    = {}
         for stat_node in node.getElementsByTagName('stat'):
@@ -967,6 +977,7 @@ class Config(object):
         self.gui_cash_stats = GUICashStats()
         self.gui_tour_stats = GUITourStats()
         self.site_ids = {}                   # site ID list from the database
+        self.doc = None                      # Root of XML tree
 
 
         added,n = 1,0  # use n to prevent infinite loop if add_missing_elements() fails somehow
@@ -976,7 +987,7 @@ class Config(object):
             print (("\n"+("Reading configuration file %s")+"\n") % file)
             try:
                 doc = xml.dom.minidom.parse(file)
-                self.doc = doc
+                self.doc = doc  # Root of XML tree
                 self.file_error = None
             except:
                 import traceback
@@ -1297,85 +1308,45 @@ class Config(object):
             elif fav_seat.getAttribute("max") == "10":
                 fav_seat.setAttribute("fav_seat", seat10_dict)
     #end def
-    
-    def edit_hud(self, result, stat2, stat3, stat4, stat5, stat6, stat7, stat8, stat9, stat10, stat11, stat12, stat13, stat14):
-        REPLACEMENTS = [
-                        ("(0, 0)", "(1,1)"),
-                        ("(0, 1)", "(1,2)"),
-                        ("(0, 2)", "(1,3)"),
-                        ("(0, 3)", "(1,4)"),
-                        ("(1, 0)", "(2,1)"),
-                        ("(1, 1)", "(2,2)"),
-                        ("(1, 2)", "(2,3)"),
-                        ("(1, 3)", "(2,4)"),
-                        ("(2, 0)", "(3,1)"),
-                        ("(2, 1)", "(3,2)"),
-                        ("(2, 2)", "(3,3)"),
-                        ("(2, 3)", "(3,4)"),
-                        ("(3, 0)", "(4,1)"),
-                        ("(3, 1)", "(4,2)"),
-                        ("(3, 2)", "(4,3)"),
-                        ("(3, 3)", "(4,4)"),
-                        ]
-            
-        
-        
-            #print(transcript)
+
+    def edit_hud(self, hud_name, position, stat_name, click, hudcolor, hudprefix, hudsuffix, popup, stat_hicolor, stat_hith, stat_locolor, stat_loth, tip):
+        """ Replace given values onto self.doc (XML root node)
+        """
+        def increment_position(position: str) -> str:
+            """
+            >>> increment_position('(0,0)')
+            "(1,1)"
+            >>> increment_position('(0, 0)')
+            "(1,1)"
+            >>> increment_position('(2,3)')
+            "(3,4)"
+            """
+            assert position.startswith("(") and position.endswith(")"), position.__repr__()
+            # Remove parentheses and split by comma
+            row, col = map(int, position[1:-1].split(","))
+            # Increment both row and column by 1
+            return f"({row + 1},{col + 1})"
+
         for statsetNode in self.doc.getElementsByTagName("ss"):
             #print ("getStatSetNode statsetNode:",statsetNode)
-            
-            if statsetNode.getAttribute("name") == result:
-                #print("true1")
+
+            if statsetNode.getAttribute("name") == hud_name:
                 for fav_stat in statsetNode.getElementsByTagName("stat"):
-                    print("type stat2", type(stat2))
-                    print("stat2", (stat2))
-                    print("fav",fav_stat.getAttribute("_rowcol"))
-                    if stat2 == "(0, 0)":
-                        stat2 = "(1,1)"
-                    elif stat2 == "(0, 1)":
-                        stat2 = "(1,2)"  
-                    elif stat2 == "(0, 2)":
-                        stat2 = "(1,3)"  
-                    elif stat2 == "(0, 3)":
-                        stat2 = "(1,4)"  
-                    elif stat2 == "(1, 0)":
-                        stat2 = "(2,1)"
-                    elif stat2 == "(1, 1)":
-                        stat2 = "(2,2)"  
-                    elif stat2 == "(1, 2)":
-                        stat2 = "(2,3)"  
-                    elif stat2 == "(1, 3)":
-                        stat2 = "(2,4)"
-                    elif stat2 == "(2, 0)":
-                        stat2 = "(3,1)"
-                    elif stat2 == "(2, 1)":
-                        stat2 = "(3,2)"  
-                    elif stat2 == "(2, 2)":
-                        stat2 = "(3,3)"  
-                    elif stat2 == "(2, 3)":
-                        stat2 = "(3,4)"
-                    elif stat2 == "(32, 0)":
-                        stat2 = "(4,1)"
-                    elif stat2 == "(3, 1)":
-                        stat2 = "(4,2)"  
-                    elif stat2 == "(3, 2)":
-                        stat2 = "(4,3)"  
-                    elif stat2 == "(3, 3)":
-                        stat2 = "(4,4)"
-                    if fav_stat.getAttribute("_rowcol") == stat2:
-                        fav_stat.setAttribute("_stat_name" ,stat3)
-                        fav_stat.setAttribute("click" ,stat4)
-                        fav_stat.setAttribute("hudcolor" ,stat5)
-                        fav_stat.setAttribute("hudprefix" ,stat6)
-                        fav_stat.setAttribute("hudsuffix" ,stat7)
-                        fav_stat.setAttribute("popup" ,stat8)
-                        fav_stat.setAttribute("stat_hicolor" ,stat9)
-                        fav_stat.setAttribute("stat_hith" ,stat10)                            
-                        fav_stat.setAttribute("stat_locolor" ,stat11)
-                        fav_stat.setAttribute("stat_loth" ,stat12)
-                        fav_stat.setAttribute("tip" ,stat13)
-                        fav_stat.setAttribute("stat_midcolor", stat14)
-            
+                    # TODO: why those positions changes ?
+                    if fav_stat.getAttribute("_rowcol") == increment_position(position):
+                        fav_stat.setAttribute("_stat_name", stat_name)
+                        fav_stat.setAttribute("click", click)
+                        fav_stat.setAttribute("hudcolor", hudcolor)
+                        fav_stat.setAttribute("hudprefix", hudprefix)
+                        fav_stat.setAttribute("hudsuffix", hudsuffix)
+                        fav_stat.setAttribute("popup", popup)
+                        fav_stat.setAttribute("stat_hicolor", stat_hicolor)
+                        fav_stat.setAttribute("stat_hith", stat_hith)
+                        fav_stat.setAttribute("stat_locolor", stat_locolor)
+                        fav_stat.setAttribute("stat_loth", stat_loth)
+                        fav_stat.setAttribute("tip", tip)
+                        # fav_stat.setAttribute("stat_midcolor", stat_midcolor)  # not returned by UI
+
     #end def
 
     def edit_site(self, site_name, enabled, screen_name, history_path, summary_path):
