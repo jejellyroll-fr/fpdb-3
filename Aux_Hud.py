@@ -207,7 +207,7 @@ class Simple_stat(object):
             ss += f"color: {fg};"
         if bg:
             ss += f"background: {bg};"
-        print(f"Setting style sheet: {ss}")
+        #print(f"Setting style sheet: {ss}")
         self.lab.setStyleSheet(ss + "}")
 
 

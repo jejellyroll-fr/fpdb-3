@@ -21,6 +21,9 @@ dependencies = [
     "SQLAlchemy==1.4.46",
     "uvicorn==0.30.1",
     "xlrd==2.0.1",
+    "pyinstaller==6.9.0",
+    "pyzmq==26.0.3",
+    "cachetools==5.5.0"
 ]
 
 [project.optional-dependencies]
