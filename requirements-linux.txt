@@ -27,3 +27,5 @@ uvicorn
 xcffib
 Xlib
 xlrd
+pyzmq==26.0.3
+cachetools==5.5.0

@@ -750,6 +750,7 @@ class Database(object):
         try:
             self.connect(backend=db['db-backend'],
                          host=db['db-host'],
+                         port=db['db-port'],
                          database=db['db-databaseName'],
                          user=db['db-user'],
                          password=db['db-password'])
@@ -764,14 +765,16 @@ class Database(object):
         self.db_server = db_params['db-server']
         self.database = db_params['db-databaseName']
         self.host = db_params['db-host']
+        self.port = db_params['db-port']
 
-    def connect(self, backend=None, host=None, database=None,
+    def connect(self, backend=None, host=None, port=None, database=None,
                 user=None, password=None, create=False):
         """Connects a database with the given parameters"""
         if backend is None:
             raise FpdbError('Database backend not defined')
         self.backend = backend
         self.host = host
+        self.port = port
         self.user = user
         self.password = password
         self.database = database
@@ -810,41 +813,40 @@ class Database(object):
                 psycopg2 = pool.manage(psycopg2, pool_size=5)
             psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
             psycopg2.extensions.register_adapter(Decimal, psycopg2._psycopg.Decimal)
-            # If DB connection is made over TCP, then the variables
-            # host, user and password are required
-            # For local domain-socket connections, only DB name is
-            # needed, and everything else is in fact undefined and/or
-            # flat out wrong
-            # sqlcoder: This database only connect failed in my windows setup??
-            # Modifed it to try the 4 parameter style if the first connect fails - does this work everywhere?
+            
             self.__connected = False
             if self.host == "localhost" or self.host == "127.0.0.1":
                 try:
-                    self.connection = psycopg2.connect(database = database)
+                    self.connection = psycopg2.connect(database=database)
+                    # Forcer l'encodage UTF-8
+                    self.connection.set_client_encoding('UTF8')
                     self.__connected = True
                 except:
                     # direct connection failed so try user/pass/... version
                     pass
+            
             if not self.is_connected():
                 try:
-                    #print(host, user, password, database)
-                    self.connection = psycopg2.connect(host = host,
-                                               user = user,
-                                               password = password,
-                                               database = database)
+                    self.connection = psycopg2.connect(host=host,
+                                                    port=port,
+                                                    user=user,
+                                                    password=password,
+                                                    database=database)
+                    # Forcer l'encodage UTF-8
+                    self.connection.set_client_encoding('UTF8')
                     self.__connected = True
                 except Exception as ex:
                     if 'Connection refused' in ex.args[0] or ('database "' in ex.args[0] and '" does not exist' in ex.args[0]):
-                        # meaning eg. db not running
-                        raise FpdbPostgresqlNoDatabase(errmsg = ex.args[0])
+                        raise FpdbPostgresqlNoDatabase(errmsg=ex.args[0])
                     elif 'password authentication' in ex.args[0]:
-                        raise FpdbPostgresqlAccessDenied(errmsg = ex.args[0])
+                        raise FpdbPostgresqlAccessDenied(errmsg=ex.args[0])
                     elif 'role "' in ex.args[0] and '" does not exist' in ex.args[0]: #role "fpdb" does not exist
-                        raise FpdbPostgresqlAccessDenied(errmsg = ex.args[0])
+                        raise FpdbPostgresqlAccessDenied(errmsg=ex.args[0])
                     else:
                         msg = ex.args[0]
                     log.error(msg)
                     raise FpdbError(msg)
+
         elif backend == Database.SQLITE:
             create = True
             import sqlite3
