@@ -46,9 +46,9 @@ jobs:
         git config --global user.email 'actions@github.com'
         git fetch origin gh-pages
         git checkout gh-pages || git checkout --orphan gh-pages
-        rm -rf coverage # Supprimer les anciennes données de couverture
-        mkdir -p coverage/${{ github.sha }} # Créer un dossier pour ce commit
-        cp -r htmlcov/* coverage/${{ github.sha }}/ # Copier le contenu de htmlcov vers le dossier coverage
+        Remove-Item -Recurse -Force coverage 
+        New-Item -ItemType Directory -Path coverage/${{ github.sha }} 
+        Copy-Item -Recurse htmlcov/* coverage/${{ github.sha }}/ 
         git add coverage
         git commit -m "Deploy coverage report for commit ${{ github.sha }}"
         git push origin gh-pages
