@@ -844,7 +844,7 @@ class fpdb(QMainWindow):
         cashMenu = mb.addMenu('Cash')
         tournamentMenu = mb.addMenu('Tournament')
         maintenanceMenu = mb.addMenu('Maintenance')
-        toolsMenu = mb.addMenu('Tools')
+        #toolsMenu = mb.addMenu('Tools')
         helpMenu = mb.addMenu('Help')
         themeMenu = mb.addMenu('Themes')
 
@@ -882,7 +882,7 @@ class fpdb(QMainWindow):
         maintenanceMenu.addAction(makeAction('Rebuild DB Indexes', self.dia_rebuild_indexes))
         maintenanceMenu.addAction(makeAction('Dump Database to Textfile (takes ALOT of time)', self.dia_dump_db))
 
-        toolsMenu.addAction(makeAction('PokerProTools', self.launch_ppt))
+        #toolsMenu.addAction(makeAction('PokerProTools', self.launch_ppt))
         helpMenu.addAction(makeAction('Log Messages', self.dia_logs, 'Log and Debug Messages'))
         helpMenu.addAction(makeAction('Help Tab', self.tab_main_help))
         helpMenu.addSeparator()
