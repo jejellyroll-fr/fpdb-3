@@ -46,7 +46,7 @@ jobs:
     - name: Run tests with coverage
       run: pytest --cov=. --cov-report=html .\test\
 
-    - name: Vérifier contenu de htmlcov
+    - name: Verify htmlcov content
       run: Get-ChildItem ./htmlcov -Recurse
       
     - name: Deploy coverage to GitHub Pages
@@ -85,8 +85,8 @@ jobs:
           console.log('PR Number:', context.issue.number);
           try {
             const response = await github.rest.issues.createComment({
-              owner: 'jejellyroll-fr',
-              repo: 'fpdb-3',
+              owner: context.repo.owner,
+              repo: context.repo.name,
               issue_number: context.issue.number,
               body: 'Coverage report for this PR: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/coverage/${{ github.sha }}/'
             });
@@ -108,8 +108,8 @@ jobs:
           console.log('Commit SHA:', context.sha);
           try {
             const response = await github.rest.repos.createCommitComment({
-              owner: 'jejellyroll-fr',
-              repo: 'fpdb-3',
+              owner: context.repo.owner,
+              repo: context.repo.name,
               commit_sha: context.sha,
               body: 'Coverage report for this commit: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/coverage/${{ github.sha }}/'
             });
@@ -123,31 +123,31 @@ jobs:
       if: always()
       env:
         GITHUB_CONTEXT: ${{ toJson(github) }}
-      run: echo "$GITHUB_CONTEXT"
+      run: echo "$env:GITHUB_CONTEXT"
 
     - name: Debug - Check job context
       if: always()
       env:
         JOB_CONTEXT: ${{ toJson(job) }}
-      run: echo "$JOB_CONTEXT"
+      run: echo "$env:JOB_CONTEXT"
 
     - name: Debug - Check steps context
       if: always()
       env:
         STEPS_CONTEXT: ${{ toJson(steps) }}
-      run: echo "$STEPS_CONTEXT"
+      run: echo "$env:STEPS_CONTEXT"
 
     - name: Debug - Print GitHub event payload
       if: always()
       run: |
         echo "GitHub Event Payload:"
-        cat $GITHUB_EVENT_PATH
+        Get-Content -Path $env:GITHUB_EVENT_PATH
 
     - name: Debug - Print environment variables
       if: always()
       run: |
         echo "Environment Variables:"
-        env
+        Get-ChildItem env:
 
   build-windows:
     if: github.event_name == 'release'
