@@ -42,7 +42,7 @@ jobs:
         pytest test/  
 
     - name: Run tests with coverage
-      run: pytest -v --cov=. --cov-report=html test/
+      run: pytest --cov=. --cov-report=html .\test\
     - name: Deploy coverage to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
