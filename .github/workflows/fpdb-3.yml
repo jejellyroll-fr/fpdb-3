@@ -79,12 +79,22 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.name,
-            body: 'Coverage report for this PR: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/coverage/${{ github.sha }}/'
-          })
+          console.log('Attempting to create PR comment');
+          console.log('Owner:', context.repo.owner);
+          console.log('Repo:', context.repo.name);
+          console.log('PR Number:', context.issue.number);
+          try {
+            const response = await github.rest.issues.createComment({
+              owner: 'jejellyroll-fr',
+              repo: 'fpdb-3',
+              issue_number: context.issue.number,
+              body: 'Coverage report for this PR: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/coverage/${{ github.sha }}/'
+            });
+            console.log('Comment created successfully:', response.data.html_url);
+          } catch (error) {
+            console.error('Error creating comment:', error);
+            console.error('Error response:', error.response);
+          }
 
     - name: Comment commit with coverage link
       if: github.event_name == 'push'
@@ -92,12 +102,22 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          github.rest.repos.createCommitComment({
-            owner: context.repo.owner,
-            repo: context.repo.name,
-            commit_sha: context.sha,
-            body: 'Coverage report for this commit: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/coverage/${{ github.sha }}/'
-          })
+          console.log('Attempting to create commit comment');
+          console.log('Owner:', context.repo.owner);
+          console.log('Repo:', context.repo.name);
+          console.log('Commit SHA:', context.sha);
+          try {
+            const response = await github.rest.repos.createCommitComment({
+              owner: 'jejellyroll-fr',
+              repo: 'fpdb-3',
+              commit_sha: context.sha,
+              body: 'Coverage report for this commit: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/coverage/${{ github.sha }}/'
+            });
+            console.log('Comment created successfully:', response.data.html_url);
+          } catch (error) {
+            console.error('Error creating comment:', error);
+            console.error('Error response:', error.response);
+          }
 
     - name: Debug - Check GitHub context
       if: always()
@@ -116,6 +136,18 @@ jobs:
       env:
         STEPS_CONTEXT: ${{ toJson(steps) }}
       run: echo "$STEPS_CONTEXT"
+
+    - name: Debug - Print GitHub event payload
+      if: always()
+      run: |
+        echo "GitHub Event Payload:"
+        cat $GITHUB_EVENT_PATH
+
+    - name: Debug - Print environment variables
+      if: always()
+      run: |
+        echo "Environment Variables:"
+        env
 
   build-windows:
     if: github.event_name == 'release'
