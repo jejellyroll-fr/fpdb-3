@@ -7,11 +7,48 @@ on:
   pull_request:
     branches:
       - '**'  # Match any branch
+  release:
+    types: [created]
   workflow_dispatch:
 
 jobs:
+  test-and-coverage:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest pytest-cov pytest-qt
+        pip install -r requirements-linux.txt
+    - name: Run tests with coverage
+      run: pytest -v --cov=. --cov-report=html test/
+    - name: Deploy coverage to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./htmlcov
+        destination_dir: coverage/${{ github.sha }}
+    - name: Comment PR with coverage link
+      uses: actions/github-script@v6
+      if: github.event_name == 'pull_request'
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.name,
+            body: 'Coverage report for this PR: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/coverage/${{ github.sha }}/'
+          })
 
   build-windows:
+    if: github.event_name == 'release'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -37,7 +74,8 @@ jobs:
           path: dist/*
 
   build-macos-intel:
-    runs-on: macos-13
+    if: github.event_name == 'release'
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
@@ -70,6 +108,7 @@ jobs:
           path: dist/*
 
   build-macos-arm:
+    if: github.event_name == 'release'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -104,6 +143,7 @@ jobs:
 
 
   build-linux:
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
