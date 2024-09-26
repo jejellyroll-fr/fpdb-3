@@ -51,7 +51,7 @@ jobs:
         }
         New-Item -ItemType Directory -Path coverage/${{ github.sha }} 
         Copy-Item -Recurse htmlcov/* coverage/${{ github.sha }}/ 
-        git add coverage
+        git add -A coverage/ 
         git commit -m "Deploy coverage report for commit ${{ github.sha }}"
         git push origin gh-pages
 
