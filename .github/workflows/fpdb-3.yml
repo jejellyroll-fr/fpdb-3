@@ -35,6 +35,8 @@ jobs:
       
     - name: Copy HUD_config.xml
       run: |
+        pwd
+        ls
         cp HUD_config.xml C:/Users/runneradmin/AppData/Roaming/fpdb/HUD_config.xml
       
     - name: Run simple tests
@@ -46,9 +48,6 @@ jobs:
 
     - name: Vérifier contenu de htmlcov
       run: Get-ChildItem ./htmlcov -Recurse
-
-    - name: Vérifier contenu du répertoire gh-pages
-      run: Get-ChildItem C:/Users/runneradmin/actions_github_pages_* -Recurse
       
     - name: Deploy coverage to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
@@ -57,6 +56,22 @@ jobs:
         publish_dir: ./htmlcov
         destination_dir: coverage/${{ github.sha }}
         allow_empty_commit: true
+
+    - name: Debug - List contents of actions_github_pages directory
+      run: |
+        $tempDir = Get-ChildItem C:\Users\runneradmin\actions_github_pages_* | Select-Object -First 1
+        if ($tempDir) {
+          Write-Output "Temporary directory found: $($tempDir.FullName)"
+          Get-ChildItem $tempDir.FullName -Recurse
+        } else {
+          Write-Output "No temporary directory found"
+        }
+
+    - name: Debug - List contents of gh-pages branch
+      run: |
+        git fetch origin gh-pages
+        git checkout gh-pages
+        Get-ChildItem -Recurse
 
     - name: Comment PR with coverage link
       if: github.event_name == 'pull_request'
@@ -83,6 +98,24 @@ jobs:
             commit_sha: context.sha,
             body: 'Coverage report for this commit: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/coverage/${{ github.sha }}/'
           })
+
+    - name: Debug - Check GitHub context
+      if: always()
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: echo "$GITHUB_CONTEXT"
+
+    - name: Debug - Check job context
+      if: always()
+      env:
+        JOB_CONTEXT: ${{ toJson(job) }}
+      run: echo "$JOB_CONTEXT"
+
+    - name: Debug - Check steps context
+      if: always()
+      env:
+        STEPS_CONTEXT: ${{ toJson(steps) }}
+      run: echo "$STEPS_CONTEXT"
 
   build-windows:
     if: github.event_name == 'release'
