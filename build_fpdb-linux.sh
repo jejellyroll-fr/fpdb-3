@@ -107,7 +107,6 @@ FILES=(
     "Popup.py"
     "SealsWithClubsToFpdb.py"
     "settings.json"
-    "SitenameSummary.py"
     "SplitHandHistory.py"
     "SQL.py"
     "Stats.py"
