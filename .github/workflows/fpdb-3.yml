@@ -46,7 +46,9 @@ jobs:
         git config --global user.email 'actions@github.com'
         git fetch origin gh-pages
         git checkout gh-pages || git checkout --orphan gh-pages
-        Remove-Item -Recurse -Force coverage 
+        if (Test-Path coverage) {
+          Remove-Item -Recurse -Force coverage
+        }
         New-Item -ItemType Directory -Path coverage/${{ github.sha }} 
         Copy-Item -Recurse htmlcov/* coverage/${{ github.sha }}/ 
         git add coverage
@@ -102,7 +104,6 @@ jobs:
             console.error('Error creating comment:', error);
             console.error('Error response:', error.response);
           }
-
 
 
 
