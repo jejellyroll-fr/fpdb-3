@@ -63,7 +63,6 @@ FILES=(
     "GGPokerToFpdb.py"
     "GuiAutoImport.py"
     "GuiBulkImport.py"
-    "GuiDatabase.py"
     "GuiGraphViewer.py"
     "GuiHandViewer.py"
     "GuiLogView.py"
