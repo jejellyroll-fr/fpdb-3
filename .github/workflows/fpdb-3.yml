@@ -35,8 +35,6 @@ jobs:
       
     - name: Copy HUD_config.xml
       run: |
-        pwd
-        ls
         cp HUD_config.xml C:/Users/runneradmin/AppData/Roaming/fpdb/HUD_config.xml
       
     - name: Run simple tests
@@ -60,11 +58,9 @@ jobs:
         destination_dir: coverage/${{ github.sha }}
         allow_empty_commit: true
 
-
-
     - name: Comment PR with coverage link
+      if: github.event_name == 'pull_request'
       uses: actions/github-script@v6
-      if: github.event_name == 'push' || github.event_name == 'pull_request'
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
@@ -73,6 +69,19 @@ jobs:
             owner: context.repo.owner,
             repo: context.repo.name,
             body: 'Coverage report for this PR: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/coverage/${{ github.sha }}/'
+          })
+
+    - name: Comment commit with coverage link
+      if: github.event_name == 'push'
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          github.rest.repos.createCommitComment({
+            owner: context.repo.owner,
+            repo: context.repo.name,
+            commit_sha: context.sha,
+            body: 'Coverage report for this commit: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/coverage/${{ github.sha }}/'
           })
 
   build-windows:
