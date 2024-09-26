@@ -67,6 +67,7 @@ class ZMQSender:
         self.socket.bind(f"tcp://127.0.0.1:{port}")
         log.info(f"ZMQ sender initialized on port {port}")
 
+
     def send_hand_id(self, hand_id):
         try:
             self.socket.send_string(str(hand_id))
@@ -82,7 +83,7 @@ class ZMQSender:
 
 
 class Importer(object):
-    def __init__(self, caller, settings, config, sql = None, parent = None):
+    def __init__(self, caller, settings, config, sql=None, parent=None, zmq_port="5555"):
         """Constructor"""
         self.settings   = settings
         self.caller     = caller
@@ -95,23 +96,20 @@ class Importer(object):
         self.filelist   = {}
         self.dirlist    = {}
         self.siteIds    = {}
-        self.removeFromFileList = {} # to remove deleted files
+        self.removeFromFileList = {}  # to remove deleted files
         self.monitor    = False
         self.updatedsize = {}
         self.updatedtime = {}
         self.lines      = None
-        self.faobs      = None       # File as one big string
+        self.faobs      = None  # File as one big string
         self.mode       = None
-        self.pos_in_file = {}        # dict to remember how far we have read in the file
-        #Set defaults
-        self.callHud    = self.config.get_import_parameters().get("callFpdbHud")
+        self.pos_in_file = {}  # dict to remember how far we have read in the file
 
-        # CONFIGURATION OPTIONS
+        # Configuration des paramètres par défaut
+        self.callHud    = self.config.get_import_parameters().get("callFpdbHud")
         self.settings.setdefault("handCount", 0)
-        #self.settings.setdefault("allowHudcacheRebuild", True) # NOT USED NOW
-        #self.settings.setdefault("forceThreads", 2)            # NOT USED NOW
-        self.settings.setdefault("writeQSize", 1000)           # no need to change
-        self.settings.setdefault("writeQMaxWait", 10)          # not used
+        self.settings.setdefault("writeQSize", 1000)
+        self.settings.setdefault("writeQMaxWait", 10)
         self.settings.setdefault("dropIndexes", "don't drop")
         self.settings.setdefault("dropHudCache", "don't drop")
         self.settings.setdefault("starsArchive", False)
@@ -120,13 +118,16 @@ class Importer(object):
         self.settings.setdefault("cacheHHC", False)
 
         self.writeq = None
-        self.database = Database.Database(self.config, sql = self.sql)
+        self.database = Database.Database(self.config, sql=self.sql)
         self.writerdbs = []
-        self.settings.setdefault("threads", 1) # value set by GuiBulkImport
+        self.settings.setdefault("threads", 1)
         for i in range(self.settings['threads']):
-            self.writerdbs.append(Database.Database(self.config, sql = self.sql) )
-        self.zmq_sender = ZMQSender()
-        process_time() # init clock in windows
+            self.writerdbs.append(Database.Database(self.config, sql=self.sql))
+
+        # Modification : spécifier le port pour ZMQ
+        self.zmq_sender = ZMQSender(port=zmq_port)
+        process_time()  # init clock in windows
+
 
     #Set functions
     def setMode(self, value):

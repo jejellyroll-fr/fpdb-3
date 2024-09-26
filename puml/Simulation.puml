@@ -1,9 +1,0 @@
-@startuml classes
-set namespaceSeparator none
-class "Simulation" as simulation.Simulation {
-  params : dict
-  query
-  url : str
-  make_request()
-}
-@enduml

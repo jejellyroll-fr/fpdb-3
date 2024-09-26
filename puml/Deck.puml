@@ -1,9 +1,0 @@
-@startuml classes
-set namespaceSeparator none
-class "Deck" as Deck.Deck {
-  back()
-  card(suit, rank)
-  get_all_card_images()
-  rank(token)
-}
-@enduml
