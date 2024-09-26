@@ -39,7 +39,8 @@ class GuiAutoImport(QWidget):
         self.input_settings = {}
         self.pipe_to_hud = None
 
-        self.importer = Importer.Importer(self, self.settings, self.config, self.sql)
+        self.importer = Importer.Importer(self, self.settings, self.config, self.sql, zmq_port="5556")
+
         self.importer.setCallHud(True)
         self.importer.setQuiet(False)
         self.importer.setHandCount(0)

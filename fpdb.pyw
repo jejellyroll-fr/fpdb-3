@@ -67,7 +67,7 @@ import GuiPrefs
 import GuiLogView
 # import GuiDatabase
 import GuiBulkImport
-import GuiTourneyImport
+#import GuiTourneyImport
 
 import GuiRingPlayerStats
 import GuiTourneyPlayerStats
@@ -80,7 +80,7 @@ import GuiSessionViewer
 import GuiHandViewer
 import GuiTourHandViewer
 #import GuiOddsCalc
-import GuiStove
+#import GuiStove
 
 import SQL
 import Database

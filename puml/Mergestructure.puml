@@ -1,8 +1,0 @@
-@startuml classes
-set namespaceSeparator none
-class "MergeStructures" as MergeStructures.MergeStructures {
-  SnG_Structures : list
-  versions
-  lookupSnG(key, startTime)
-}
-@enduml
