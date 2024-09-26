@@ -44,8 +44,6 @@ jobs:
     - name: Run tests with coverage
       run: pytest --cov=. --cov-report=html .\test\
 
-
-
     - name: Deploy coverage to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
@@ -78,16 +76,18 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
+          const repoName = context.repo.name;
+          const repoOwner = context.repo.owner;
+          const sha = context.sha;
+          const url = `https://${repoOwner}.github.io/${repoName}/coverage/${sha}/`;
           console.log('Attempting to create PR comment');
-          console.log('Owner:', context.repo.owner);
-          console.log('Repo:', context.repo.name);
-          console.log('PR Number:', context.issue.number);
+          console.log('Coverage URL:', url);
           try {
             const response = await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.name,
+              owner: repoOwner,
+              repo: repoName,
               issue_number: context.issue.number,
-              body: `Coverage report for this PR: https://${{ github.repository_owner }}.github.io/${{ github.repository.name }}/coverage/${{ github.sha }}/`
+              body: `Coverage report for this PR: ${url}`
             });
             console.log('Comment created successfully:', response.data.html_url);
           } catch (error) {
@@ -101,16 +101,18 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
+          const repoName = context.repo.name;
+          const repoOwner = context.repo.owner;
+          const sha = context.sha;
+          const url = `https://${repoOwner}.github.io/${repoName}/coverage/${sha}/`;
           console.log('Attempting to create commit comment');
-          console.log('Owner:', context.repo.owner);
-          console.log('Repo:', context.repo.repo);
-          console.log('Commit SHA:', context.sha);
+          console.log('Coverage URL:', url);
           try {
             const response = await github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: `Coverage report for this commit: https://${{ github.repository_owner }}.github.io/${{ github.repository.name }}/coverage/${{ github.sha }}/`
+              owner: repoOwner,
+              repo: repoName,
+              commit_sha: sha,
+              body: `Coverage report for this commit: ${url}`
             });
             console.log('Comment created successfully:', response.data.html_url);
           } catch (error) {
@@ -147,6 +149,7 @@ jobs:
       run: |
         echo "Environment Variables:"
         Get-ChildItem env:
+
 
 
   build-windows:
