@@ -47,6 +47,10 @@ jobs:
     - name: Vérifier contenu de htmlcov
       run: Get-ChildItem ./htmlcov -Recurse
 
+
+    - name: Vérifier contenu du répertoire gh-pages
+      run: Get-ChildItem C:/Users/runneradmin/actions_github_pages_* -Recurse
+      
     - name: Deploy coverage to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
@@ -57,7 +61,7 @@ jobs:
 
     - name: Comment PR with coverage link
       uses: actions/github-script@v6
-      if: github.event_name == 'pull_request'
+      if: github.event_name == 'push' || github.event_name == 'pull_request'
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
