@@ -179,12 +179,13 @@ class fpdb(QMainWindow):
 
     # end def dia_database_stats
 
+    @staticmethod
+    def get_text(widget: QWidget):
+        """Return text of widget, depending on widget type"""
+        return widget.currentText() if isinstance(widget, QComboBox) else widget.text()
+
+
     def dia_hud_preferences(self, widget, data=None):
-
-        def get_text(widget: QWidget):
-            """Return text of widget, depending on widget type"""
-            return widget.currentText() if isinstance(widget, QComboBox) else widget.text()
-
         dia = QDialog(self)
         dia.setWindowTitle("Modifying Huds")
         dia.resize(1200, 600)
@@ -222,6 +223,7 @@ class fpdb(QMainWindow):
         btns.rejected.connect(dia.reject)
         dia.layout().addWidget(btns)
         self.comboGame.currentIndexChanged.connect(self.index_changed)
+        
         # Launch Dialog
         response = dia.exec_()
 
@@ -229,19 +231,35 @@ class fpdb(QMainWindow):
         if self.comboGame.currentIndexChanged and response:
             selected_hud_name = self.comboGame.currentText()
             # User clicked on "Save"
-            for y in range(0, nb_items):
-                self.config.edit_hud(selected_hud_name, get_text(self.stat_position_list[y]), get_text(self.stat_name_list[y]),
-                                    get_text(self.click_list[y]), get_text(self.hudcolor_list[y]), get_text(self.hudprefix_list[y]),
-                                    get_text(self.hudsuffix_list[y]), get_text(self.popup_list[y]), get_text(self.stat_hicolor_list[y]),
-                                    get_text(self.stat_hith_list[y]), get_text(self.stat_locolor_list[y]), get_text(self.stat_loth_list[y]),
-                                    get_text(self.tip_list[y]))
+            for y in range(nb_items):
+                self.config.edit_hud(
+                    selected_hud_name, 
+                    self.get_text(self.stat_position_list[y]), 
+                    self.get_text(self.stat_name_list[y]),
+                    self.get_text(self.click_list[y]), 
+                    self.get_text(self.hudcolor_list[y]), 
+                    self.get_text(self.hudprefix_list[y]),
+                    self.get_text(self.hudsuffix_list[y]), 
+                    self.get_text(self.popup_list[y]), 
+                    self.get_text(self.stat_hicolor_list[y]),
+                    self.get_text(self.stat_hith_list[y]), 
+                    self.get_text(self.stat_locolor_list[y]), 
+                    self.get_text(self.stat_loth_list[y]),
+                    self.get_text(self.tip_list[y]),
+                )
 
             self.config.save()
             self.reload_config()
 
+
     def index_changed(self, index):
         # Called when user changes currently selected HUD
+        print("DEBUG: Entrée dans index_changed")
+        print("DEBUG: index =", index)
+        print("DEBUG: self.config =", self.config)
+        print("DEBUG: self.config.stat_sets =", self.config.stat_sets)
         selected_hud_name = self.comboGame.currentText()
+        print("DEBUG: selected_hud_name =", selected_hud_name)
         for i in reversed(range(self.table.count())):
             self.table.itemAt(i).widget().deleteLater()
 
