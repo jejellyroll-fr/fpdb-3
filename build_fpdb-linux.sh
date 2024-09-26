@@ -112,7 +112,6 @@ FILES=(
     "Stats.py"
     "Summaries.py"
     "TableWindow.py"
-    "TournamentTracker.py"
     "TourneySummary.py"
     "UnibetToFpdb.py"
     "WinamaxSummary.py"
