@@ -37,38 +37,21 @@ jobs:
       run: |
         cp HUD_config.xml C:/Users/runneradmin/AppData/Roaming/fpdb/HUD_config.xml
       
-    - name: Run simple tests
-      run: |
-        pytest test/  
-
     - name: Run tests with coverage
       run: pytest --cov=. --cov-report=html .\test\
 
-    - name: Deploy coverage to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./htmlcov
-        destination_dir: coverage/${{ github.sha }}
-        allow_empty_commit: true
-        disable_nojekyll: true
-        force_orphan: true
-
-    - name: Debug - List contents of actions_github_pages directory
+    - name: Deploy coverage to GitHub Pages (gh-pages branch)
       run: |
-        $tempDir = Get-ChildItem C:\Users\runneradmin\actions_github_pages_* | Select-Object -First 1
-        if ($tempDir) {
-          Write-Output "Temporary directory found: $($tempDir.FullName)"
-          Get-ChildItem $tempDir.FullName -Recurse
-        } else {
-          Write-Output "No temporary directory found"
-        }
-
-    - name: Debug - List contents of gh-pages branch
-      run: |
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'actions@github.com'
         git fetch origin gh-pages
-        git checkout gh-pages
-        Get-ChildItem -Recurse
+        git checkout gh-pages || git checkout --orphan gh-pages
+        rm -rf coverage # Supprimer les anciennes données de couverture
+        mkdir -p coverage/${{ github.sha }} # Créer un dossier pour ce commit
+        cp -r htmlcov/* coverage/${{ github.sha }}/ # Copier le contenu de htmlcov vers le dossier coverage
+        git add coverage
+        git commit -m "Deploy coverage report for commit ${{ github.sha }}"
+        git push origin gh-pages
 
     - name: Comment PR with coverage link
       if: github.event_name == 'pull_request'
@@ -120,35 +103,6 @@ jobs:
             console.error('Error response:', error.response);
           }
 
-    - name: Debug - Check GitHub context
-      if: always()
-      env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
-      run: echo "$env:GITHUB_CONTEXT"
-
-    - name: Debug - Check job context
-      if: always()
-      env:
-        JOB_CONTEXT: ${{ toJson(job) }}
-      run: echo "$env:JOB_CONTEXT"
-
-    - name: Debug - Check steps context
-      if: always()
-      env:
-        STEPS_CONTEXT: ${{ toJson(steps) }}
-      run: echo "$env:STEPS_CONTEXT"
-
-    - name: Debug - Print GitHub event payload
-      if: always()
-      run: |
-        echo "GitHub Event Payload:"
-        Get-Content -Path $env:GITHUB_EVENT_PATH
-
-    - name: Debug - Print environment variables
-      if: always()
-      run: |
-        echo "Environment Variables:"
-        Get-ChildItem env:
 
 
 
