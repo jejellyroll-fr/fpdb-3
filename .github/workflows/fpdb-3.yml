@@ -43,12 +43,18 @@ jobs:
 
     - name: Run tests with coverage
       run: pytest --cov=. --cov-report=html .\test\
+
+    - name: Vérifier contenu de htmlcov
+      run: ls -la ./htmlcov
+
     - name: Deploy coverage to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./htmlcov
         destination_dir: coverage/${{ github.sha }}
+        allow_empty_commit: true
+        
     - name: Comment PR with coverage link
       uses: actions/github-script@v6
       if: github.event_name == 'pull_request'
