@@ -76,7 +76,7 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          const repoName = context.repo.name;
+          const repoName = context.repo.repo;
           const repoOwner = context.repo.owner;
           const sha = context.sha;
           const url = `https://${repoOwner}.github.io/${repoName}/coverage/${sha}/`;
@@ -101,7 +101,7 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          const repoName = context.repo.name;
+          const repoName = context.repo.repo;
           const repoOwner = context.repo.owner;
           const sha = context.sha;
           const url = `https://${repoOwner}.github.io/${repoName}/coverage/${sha}/`;
