@@ -127,7 +127,6 @@ FOLDERS=(
     "icons"
     "fonts"
     "locale"
-    "ppt"
     "static"
     "templates"
     "utils"
