@@ -26,9 +26,20 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest pytest-cov pytest-qt
         pip install -r requirements.txt
+        
+    - name: Create necessary directories
+      run: mkdir -p C:/Users/runneradmin/AppData/Roaming/fpdb
+      
+    - name: Copy HUD_config.xml
+      run: |
+        pwd
+        ls
+        cp HUD_config.xml C:/Users/runneradmin/AppData/Roaming/fpdb/HUD_config.xml
+      
     - name: Run simple tests
       run: |
-        pytest test/  # Run simple tests in the test folder
+        pytest test/  
+
     - name: Run tests with coverage
       run: pytest -v --cov=. --cov-report=html test/
     - name: Deploy coverage to GitHub Pages
