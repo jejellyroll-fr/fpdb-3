@@ -1,6 +1,12 @@
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+
+
+from pathlib import Path
+import sys
+
+sys.path.append(str(Path(__file__).parent.parent))
 from decimal_wrapper import Decimal
 
 class Backing(BaseModel):

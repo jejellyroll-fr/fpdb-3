@@ -122,8 +122,6 @@ $FOLDERS = @(
     "icons",
     "fonts",
     "locale",
-    "static",
-    "templates",
     "utils"
 )
 

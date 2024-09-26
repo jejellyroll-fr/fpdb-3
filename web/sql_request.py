@@ -1,11 +1,16 @@
 import sqlite3
+import sys
 from base_model import *
-import Configuration
-import pathlib
+
+from pathlib import Path
 import math
 import itertools
 
-DATABASE = pathlib.Path(Configuration.CONFIG_PATH, "database", "fpdb.db3")
+sys.path.append(str(Path(__file__).parent.parent))
+import Configuration
+
+
+DATABASE = Path(Configuration.CONFIG_PATH, "database", "fpdb.db3")
 
 def get_backings():
     conn = sqlite3.connect(DATABASE)
