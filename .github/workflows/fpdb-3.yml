@@ -40,6 +40,14 @@ jobs:
     - name: Run tests with coverage
       run: pytest --cov=. --cov-report=html .\test\
 
+    - name: Check if htmlcov directory exists and list contents
+      run: |
+        if (Test-Path htmlcov) {
+          Get-ChildItem htmlcov -Recurse
+        } else {
+          Write-Output "htmlcov directory does not exist"
+        }
+
     - name: Deploy coverage to GitHub Pages (gh-pages branch)
       run: |
         git config --global user.name 'GitHub Actions'
@@ -50,8 +58,8 @@ jobs:
           Remove-Item -Recurse -Force coverage
         }
         New-Item -ItemType Directory -Path coverage/${{ github.sha }} 
-        Copy-Item -Recurse htmlcov/* coverage/${{ github.sha }}/ 
-        git add -A coverage/ 
+        Copy-Item -Recurse htmlcov/* coverage/${{ github.sha }}/
+        git add coverage/${{ github.sha }}/* -f  # Forcer l'ajout des fichiers dans coverage/
         git commit -m "Deploy coverage report for commit ${{ github.sha }}"
         git push origin gh-pages
 
