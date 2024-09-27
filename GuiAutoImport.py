@@ -204,7 +204,7 @@ class GuiAutoImport(QWidget):
                                 print("start hud-comand2", command)
                             bs = 0
                         else:
-                            base_path = sys._MEIPASS if getattr(sys, 'frozen', False) else sys.path[0]
+                            base_path = sys._MEIPASS if getattr(sys, 'frozen', False) else sys.path[0] or os.getcwd()
                             command = os.path.join(base_path, 'HUD_main.pyw')
                             if not os.path.isfile(command):
                                 self.addText("\n" + ('*** %s was not found') % (command))
