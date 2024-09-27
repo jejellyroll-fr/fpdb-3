@@ -192,6 +192,8 @@ class HUD_main(QObject):
         QCoreApplication.quit()
 
     def check_tables(self):
+        if len(self.hud_dict) == 0:
+            log.info("Waiting for hands ...")
         for tablename, hud in list(self.hud_dict.items()):
             status = hud.table.check_table()
             if status == "client_destroyed":
