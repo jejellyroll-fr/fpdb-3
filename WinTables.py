@@ -100,13 +100,14 @@ class Table(Table_Window):
                 if title.split(' ', 1)[0] == "Winamax":
                     self.search_string = self.search_string.split(' ', 3)[0]
 
-                if re.search(self.search_string, title, re.I):
-                    if self.check_bad_words(title):
-                        continue
-                    self.number = hwnd
-                    self.title = title
-                    log.debug(f"Found table in hwnd {self.number} title {self.title}")
-                    break
+                if isinstance(self.search_string, (str, re.Pattern)):
+                    if re.search(self.search_string, title, re.I):
+                        if self.check_bad_words(title): continue
+                        self.number = hwnd
+                        self.title = title
+                        break
+                else:
+                    log.error(f"Invalid search string: {self.search_string}")
 
             except IOError as e:
                 if "closed file" in str(e):
@@ -181,7 +182,3 @@ class Table(Table_Window):
         qwindow.setTransientParent(self.gdkhandle)
         qwindow.setFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus | Qt.WindowStaysOnTopHint)
 
-    def check_bad_words(self, title):
-        """Check if the title contains any bad words."""
-        bad_words = ["History for table:", "HUD:", "Chat:", "FPDBHUD", "Lobby"]
-        return any(bad_word in title.lower() for bad_word in bad_words)

@@ -62,9 +62,7 @@ limit_game_names = { #fpdb name      Stars Name   FTP Name
               ("fl", "27_3draw"  ) : ("Limit Triple Draw 2-7 Lowball",          )
              }
 
-#    A window title might have our table name + one of these words/
-#    phrases. If it has this word in the title, it is not a table.
-bad_words = ('History for table:', 'HUD:', 'Chat:', 'FPDBHUD', 'Lobby')
+
 
 #    Each TableWindow object must have the following attributes correctly populated:
 #    tw.name = the table name from the title bar, which must to match the table name
@@ -89,71 +87,53 @@ bad_words = ('History for table:', 'HUD:', 'Chat:', 'FPDBHUD', 'Lobby')
 #    search_string = 
 
 class Table_Window(object):
-    def __init__(self, config, site, table_name = None, tournament = None, table_number = None):
-
+    def __init__(self, config, site, table_name=None, tournament=None, table_number=None):
         self.config = config
         self.site = site
         self.hud = None   # fill in later
         self.gdkhandle = None
         self.number = None
+        self.tournament = None  # Add this initialization
+        self.table = None       # Add this initialization
+        self.search_string = None  # Add this initialization
         if tournament is not None and table_number is not None:
-            print(tournament)
+            log.info(tournament)
             self.tournament = int(tournament)
-            print(' tournement:')
-            print(self.tournament)
-            print('table_number:')
-            print(type(table_number))
-            print(table_number)
-            #temp bug correction for ipoker must investigate 
-            #if table_number is not an interger
-
-            print('table_number error:')
-            print(type(table_number))
-            print(table_number)
+            log.debug(f'table_number: {type(table_number)} {table_number}')
             self.table = int(table_number)
-            print(self.table)
-            self.name = "%s - %s" % (self.tournament, self.table)
+            self.name = f"{self.tournament} - {self.table}"
             self.type = "tour"
-            table_kwargs = dict(tournament = self.tournament, table_number = self.table)
-            self.tableno_re = getTableNoRe(self.config, self.site, tournament = self.tournament)
+            table_kwargs = dict(tournament=self.tournament, table_number=self.table)
+            self.tableno_re = getTableNoRe(self.config, self.site, tournament=self.tournament)
         elif table_name is not None:
-
-            print('table_number cash:')
-            print(type(table_name))
-            print((table_name))
             self.name = table_name
             self.type = "cash"
             self.tournament = None
-            table_kwargs = dict(table_name = table_name)
-            print('table_kwarg cash:')
-            print(type(table_kwargs))
-            print((table_kwargs))
+            table_kwargs = dict(table_name=table_name)
         else:
             return None
-
         self.search_string = getTableTitleRe(self.config, self.site, self.type, **table_kwargs)
+
         log.debug(f"search string: {self.search_string}")
         # make a small delay otherwise Xtables.root.get_windows()
         #  returns empty for unknown reasons
         sleep(0.1)
-        
+       
         self.find_table_parameters()
         if not self.number:
-            log.error(("Can't find table \"%s\" with search string \"%s\""), table_name, self.search_string)
-
-
+            log.error(f"Can't find table \"{table_name}\" with search string \"{self.search_string}\"")
         geo = self.get_geometry()
         if geo is None:  return None
-        self.width  = geo['width']
+        self.width = geo['width']
         self.height = geo['height']
-        self.x      = geo['x']
-        print(self.x)
-        self.y      = geo['y']
-        print(self.y)
-        self.oldx   = self.x # attn ray: remove these two lines and update Hud.py::update_table_position()
-        print(self.oldx)
-        self.oldy   = self.y
-        print(self.oldy)
+        self.x = geo['x']
+        log.info(self.x)
+        self.y = geo['y']
+        log.info(self.y)
+        self.oldx = self.x # attn ray: remove these two lines and update Hud.py::update_table_position()
+        log.info(self.oldx)
+        self.oldy = self.y
+        log.info(self.oldy)
         self.game = self.get_game()
 
     def __str__(self):
@@ -166,18 +146,18 @@ class Table_Window(object):
                 temp += "    %s = %s\n" % (a, getattr(self, a))
         return temp
 
-####################################################################
-#    "get" methods. These query the table and return the info to get.
-#    They don't change the data in the table and are generally used
-#    by the "check" methods. Most of the get methods are in the 
-#    subclass because they are specific to X, Windows, etc.
+    ####################################################################
+    #    "get" methods. These query the table and return the info to get.
+    #    They don't change the data in the table and are generally used
+    #    by the "check" methods. Most of the get methods are in the 
+    #    subclass because they are specific to X, Windows, etc.
     def get_game(self):
-#        title = self.get_window_title()
-#        if title is None:
-#            return False
+        #        title = self.get_window_title()
+        #        if title is None:
+        #            return False
         title = self.title
 
-#    check for nl and pl games first, to avoid bad matches
+        #    check for nl and pl games first, to avoid bad matches
         for game, names in list(nlpl_game_names.items()):
             for name in names:
                 if name in title:
@@ -194,32 +174,38 @@ class Table_Window(object):
         if new_title is None:
             return False
 
+        # Vérifier si tableno_re est None avant de l'utiliser
+        if self.tableno_re is None:
+            log.debug("tableno_re is None")
+            return False
+
         try:
             log.debug(f"before searching: {new_title}")
             mo = re.search(self.tableno_re, new_title)
-        except AttributeError: #'Table' object has no attribute 'tableno_re'
-            log.debug(f"'Table' object has no attribute 'tableno_re'")
+        except AttributeError:  # Gérer le cas où tableno_re est None ou invalide
+            log.error("'Table' object has no attribute 'tableno_re'")
             return False
-              
+
         if mo is not None:
             return int(mo.group(1))
         return False
 
-####################################################################
-#    check_table() is meant to be called by the hud periodically to
-#    determine if the client has been moved or resized. check_table()
-#    also checks and signals if the client has been closed. 
+
+    ####################################################################
+    #    check_table() is meant to be called by the hud periodically to
+    #    determine if the client has been moved or resized. check_table()
+    #    also checks and signals if the client has been closed. 
     def check_table(self):
         return self.check_size() or self.check_loc()
 
-####################################################################
-#    "check" methods. They use the corresponding get method, update the
-#    table object and return the name of the signal to be emitted or 
-#    False if unchanged. These do not signal for destroyed
-#    clients to prevent a race condition.
+    ####################################################################
+    #    "check" methods. They use the corresponding get method, update the
+    #    table object and return the name of the signal to be emitted or 
+    #    False if unchanged. These do not signal for destroyed
+    #    clients to prevent a race condition.
 
-#    These might be called by a Window.timeout, so they must not
-#    return False, or the timeout will be cancelled.
+    #    These might be called by a Window.timeout, so they must not
+    #    return False, or the timeout will be cancelled.
     def check_size(self):
         new_geo = self.get_geometry()
         if new_geo is None:   # window destroyed
@@ -245,19 +231,51 @@ class Table_Window(object):
         return False  # no change
 
     def has_table_title_changed(self, hud):
-        log.debug(f"before get_table_no()")
         result = self.get_table_no()
-        log.debug(f"tb has change nb {result}")
+        log.debug(f"New table number detected: {result}")
+        
         if result is not False and result != self.table:
-            log.debug(f"compare result and self.table {result} {self.table}")
+            log.debug(f"Table number has changed from {self.table} to {result}")
             self.table = result
             if hud is not None:
-                log.debug(f"return True")
+                log.debug("HUD is not None, returning True")
                 return True
-        log.debug(f"return False")
+            log.debug("HUD is None, returning True")
+            return True
+        log.debug("Table number has not changed, returning False")
         return False
 
+
     def check_bad_words(self, title):
+        log.debug(f"Received title: '{title}' (length: {len(title)})")
+        log.debug(f"Title in bytes: {list(title.encode('utf-8'))}")
+        
+        bad_words = ('History for table:', 'HUD:', 'Chat:', 'FPDBHUD', 'Lobby')
+
+        # Normalize the title
+        title_normalized = title.strip().lower()
+        log.debug(f"Normalized title: '{title_normalized}' (length: {len(title_normalized)})")
+        log.debug(f"Normalized title in bytes: {list(title_normalized.encode('utf-8'))}")
+
         for word in bad_words:
-            if word in title: return True
+            word_normalized = word.lower()
+            log.debug(f"\nChecking for bad word: '{word}' (normalized: '{word_normalized}')")
+            log.debug(f"Bad word in bytes: {list(word.encode('utf-8'))}")
+
+            # Detailed comparison
+            log.debug(f"Comparing '{word_normalized}' with '{title_normalized}'")
+            if word_normalized in title_normalized:
+                log.debug(f"=> Bad word detected: '{word_normalized}' found in '{title_normalized}'")
+                return True
+            else:
+                log.debug(f"=> No match for: '{word_normalized}'")
+
+        log.debug("No bad word detected")
         return False
+
+
+
+
+
+
+
