@@ -1,8 +1,0 @@
-@startuml classes
-set namespaceSeparator none
-class "OddsCalcPQL" as OddsCalcPQL.OddsCalcPQL {
-  board
-  game
-  calcBasePQL()
-}
-@enduml

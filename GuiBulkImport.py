@@ -100,7 +100,8 @@ class GuiBulkImport(QWidget):
         self.settings = settings
         self.config = config
 
-        self.importer = Importer.Importer(self, self.settings, config, sql, self)
+        self.importer = Importer.Importer(self, self.settings, config, sql, self, zmq_port="5557")
+
 
         self.setLayout(QVBoxLayout())
 
