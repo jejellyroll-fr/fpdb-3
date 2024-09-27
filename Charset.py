@@ -40,18 +40,18 @@ if Configuration.LOCALE_ENCODING == 'UTF8':
 def to_utf8(s):
     if not_needed1: return s
 
-    try:
-        #(_out, _len) = encoder_to_utf.encode(s)
-        _out = str(s, Configuration.LOCALE_ENCODING).encode('utf-8')
-        return _out
-    except UnicodeDecodeError:
-        sys.stderr.write(('Could not convert: "%s"') % (s+"\n"))
-        raise
-    except UnicodeEncodeError:
-        sys.stderr.write(('Could not encode: "%s"') % (s+"\n"))
-        raise
-    except TypeError: # TypeError is raised when we give unicode() an already encoded string
-        return s
+    if isinstance(s, str):
+        return s.encode('utf-8')
+    elif isinstance(s, bytes):
+        try:
+            # Try decoding with LOCALE_ENCODING first
+            return s.decode(Configuration.LOCALE_ENCODING).encode('utf-8')
+        except UnicodeDecodeError:
+            # If that fails, raise the error
+            sys.stderr.write(f'Could not convert: "{s!r}"\n')
+            raise
+    else:
+        raise TypeError(f"Unsupported type for to_utf8: {type(s)}")
 
 def to_db_utf8(s):
     if not_needed2: return s
