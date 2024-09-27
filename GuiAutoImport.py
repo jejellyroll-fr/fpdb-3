@@ -29,7 +29,8 @@ def to_raw(string):
 
 class GuiAutoImport(QWidget):
     def __init__(self, settings, config, sql = None, parent = None, cli = False):
-        QWidget.__init__(self, parent)
+        if not cli:
+            QWidget.__init__(self, parent)
         self.importtimer = None
         self.settings = settings
         self.config = config
@@ -57,7 +58,7 @@ class GuiAutoImport(QWidget):
             # TODO: Separate the code that grabs the directories from config
             #       Separate the calls to the Importer API
             #       Create a timer interface that doesn't rely on GTK
-            pass
+            raise NotImplementedError
 
     def setupGui(self):
         self.setLayout(QVBoxLayout())
@@ -183,18 +184,15 @@ class GuiAutoImport(QWidget):
                     print('start hud- pipe_to_hud is none:')
                     try:
                         if self.config.install_method == "exe":
-                            print('start hud- true1:')
                             command = "HUD_main.exe"
                             bs = 0
                         elif self.config.install_method == "app":
-                            print('start hud- true1:')
                             base_path = sys._MEIPASS if getattr(sys, 'frozen', False) else sys.path[0]
                             command = os.path.join(base_path, "HUD_main")
                             if not os.path.isfile(command):
                                 raise FileNotFoundError(f"HUD_main not found at {command}")
                             bs = 1
                         elif os.name == 'nt':
-                            print('start hud- true1:')
                             path = to_raw(sys.path[0])
                             print("start hud- path", path)
                             path2 = os.getcwd()
@@ -207,17 +205,16 @@ class GuiAutoImport(QWidget):
                                 print("start hud-comand2", command)
                             bs = 0
                         else:
-                            base_path = sys._MEIPASS if getattr(sys, 'frozen', False) else sys.path[0]
+                            base_path = sys._MEIPASS if getattr(sys, 'frozen', False) else sys.path[0] or os.getcwd()
                             command = os.path.join(base_path, 'HUD_main.pyw')
                             if not os.path.isfile(command):
                                 self.addText("\n" + ('*** %s was not found') % (command))
-                            command = [command, ] + str.split(self.settings['cl_options'])
+                            command = [command, ] + str.split(self.settings['cl_options'], '.')
                             bs = 1
 
                         print(("opening pipe to HUD"))
+                        print(f"Running {command.__repr__()}")
                         if self.config.install_method == "exe" or (os.name == "nt" and win32console.GetConsoleWindow() == 0):
-                            print('start hud methode install exe:')
-                            print(command)
                             self.pipe_to_hud = subprocess.Popen(command, bufsize=bs,
                                                                 stdin=subprocess.PIPE,
                                                                 stdout=subprocess.PIPE,
@@ -226,11 +223,10 @@ class GuiAutoImport(QWidget):
                                                             )
                         else:
                             self.pipe_to_hud = subprocess.Popen(command, bufsize=bs, stdin=subprocess.PIPE, universal_newlines=True)
-                            print('start hud methode install other:')
-                            print(command)
 
                     except Exception as e:
                         self.addText("\n" + ("*** GuiAutoImport Error opening pipe:") + " " + traceback.format_exc())
+                        # TODO: log.warning() ?
                     else:
                         for (site, type) in self.input_settings:
                             self.importer.addImportDirectory(self.input_settings[(site, type)][0], monitor=True, site=(site, type))
