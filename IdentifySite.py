@@ -182,7 +182,7 @@ class IdentifySite(object):
         if path not in self.filelist:
             print('filelist', self.filelist)
             whole_file, kodec = self.read_file(path)
-            print('whole_file',whole_file)
+            # print('whole_file',whole_file)
             print('kodec',kodec )
             if whole_file:
                 fobj = self.idSite(path, whole_file, kodec)
