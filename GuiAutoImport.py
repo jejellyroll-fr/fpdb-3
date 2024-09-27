@@ -208,7 +208,7 @@ class GuiAutoImport(QWidget):
                             command = os.path.join(base_path, 'HUD_main.pyw')
                             if not os.path.isfile(command):
                                 self.addText("\n" + ('*** %s was not found') % (command))
-                            command = [command, ] + str.split(self.settings['cl_options'])
+                            command = [command, ] + str.split(self.settings['cl_options'], '.')
                             bs = 1
 
                         print(("opening pipe to HUD"))
