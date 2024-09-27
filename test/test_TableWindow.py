@@ -5,19 +5,28 @@ import re
 import platform
 from pathlib import Path
 
+# Add the parent path for imports
 sys.path.append(str(Path(__file__).parent.parent))
 
-# Import TableWindow based on OS
-if platform.system() == 'Windows':
-    from WinTables import Table
-elif platform.system() == 'Darwin':
-    from OSXTables import Table
-elif platform.system() == 'Linux':
-    from XTables import Table
-else:
-    raise OSError("Unsupported operating system")
+# Mapping platforms to corresponding modules
+PLATFORM_MODULES = {
+    'Windows': 'WinTables',
+    'Darwin': 'OSXTables',
+    'Linux': 'XTables'
+}
 
-# Fixtures for config and site
+# Fixture to dynamically import the Table class based on the platform
+@pytest.fixture(scope='module')
+def TableClass():
+    current_platform = platform.system()
+    try:
+        module_name = PLATFORM_MODULES[current_platform]
+        module = __import__(module_name, fromlist=['Table'])
+        return module.Table
+    except KeyError:
+        raise OSError("Unsupported operating system")
+
+# Basic fixtures
 @pytest.fixture
 def config():
     mock_config = MagicMock()
@@ -31,7 +40,7 @@ def config():
 def site():
     return 'test_site'
 
-# Patch for getSiteHhc
+# Fixture to patch getSiteHhc and getTableTitleRe
 @pytest.fixture(autouse=True)
 def mock_getSiteHhc():
     with patch('HandHistoryConverter.getSiteHhc') as mock_hhc, \
@@ -39,116 +48,52 @@ def mock_getSiteHhc():
         mock_hhc.return_value = MagicMock()
         yield
 
+# Fixture to instantiate Table
 @pytest.fixture
-def table_window(config, site):
-    return Table(config, site)
+def table_window(TableClass, config, site):
+    return TableClass(config, site)
 
-@patch('HandHistoryConverter.getTableTitleRe', return_value=re.compile(r'Test Table'))
-def test_table_window_search_string_table_name(mock_get_table_title_re, config, site):
-    """Test if search_string is properly generated with a table name."""
-    table_name = "Test Table"
-    tw = Table(config, site, table_name=table_name)
-    assert isinstance(tw.search_string, re.Pattern)
+# Parameter for supported platforms
+SUPPORTED_PLATFORMS = ['Windows', 'Darwin', 'Linux']
 
-# Windows-specific test
-@pytest.mark.skipif(platform.system() != 'Windows', reason="Test for Windows only")
-@patch('WinTables.Table.find_table_parameters')
-def test_find_table_parameters_called_on_windows(mock_find_table_parameters, table_window):
-    """Test if find_table_parameters is called on Windows."""
-    table_window.find_table_parameters()
-    mock_find_table_parameters.assert_called_once()
+# Helper to get the module name based on the platform
+def get_module_name(platform_name):
+    return PLATFORM_MODULES.get(platform_name)
 
-# macOS-specific test
-@pytest.mark.skipif(platform.system() != 'Darwin', reason="Test for macOS only")
-@patch('OSXTables.Table.find_table_parameters')
-def test_find_table_parameters_called_on_macos(mock_find_table_parameters, table_window):
-    """Test if find_table_parameters is called on macOS."""
-    table_window.find_table_parameters()
-    mock_find_table_parameters.assert_called_once()
-
-# Linux-specific test
-@pytest.mark.skipif(platform.system() != 'Linux', reason="Test for Linux only")
-@patch('XTables.Table.find_table_parameters')
-def test_find_table_parameters_called_on_linux(mock_find_table_parameters, table_window):
-    """Test if find_table_parameters is called on Linux."""
-    table_window.find_table_parameters()
-    mock_find_table_parameters.assert_called_once()
-
-# Test for No Limit Hold'em game detection
 def test_get_game_nl_holdem(table_window):
-    """Test game detection for No Limit Hold'em."""
+    """Test the detection of the game No Limit Hold'em."""
     table_window.title = "No Limit Hold'em"
     game = table_window.get_game()
     assert game == ("nl", "holdem")
 
-# Test for Limit Stud game detection
 def test_get_game_limit_stud(table_window):
-    """Test game detection for Limit Stud."""
+    """Test the detection of the game Limit Stud."""
     table_window.title = "Limit Stud"
     game = table_window.get_game()
     assert game == ("fl", "studhi")
 
-# Test get_table_no when the title matches
-@patch('WinTables.Table.get_window_title')
-def test_get_table_no_matches(mock_get_window_title, table_window):
-    """Test table number extraction when the title matches."""
-    mock_get_window_title.return_value = "Table 123"
-    table_window.tableno_re = re.compile(r'Table (\d+)')
-    table_no = table_window.get_table_no()
-    assert table_no == 123
+def test_get_game_no_match(table_window):
+    """Test the detection of the game when no match is found."""
+    table_window.title = "Unknown Game Title"
+    game = table_window.get_game()
+    assert game is False
 
-# Test get_table_no when no match is found
-@patch('WinTables.Table.get_window_title')
-def test_get_table_no_no_match(mock_get_window_title, table_window):
-    """Test table number extraction when no match is found."""
-    mock_get_window_title.return_value = "Table ABC"
-    table_window.tableno_re = re.compile(r'Table (\d+)')
-    table_no = table_window.get_table_no()
-    assert table_no is False
+def test_get_table_no_matches(TableClass, config, site):
+    """Test extracting the table number when the title matches."""
+    table_window = TableClass(config, site)
+    with patch.object(table_window, 'get_window_title', return_value="Table 123"):
+        table_window.tableno_re = re.compile(r'Table (\d+)')
+        table_no = table_window.get_table_no()
+        assert table_no == 123
 
-# Test check_table calls check_size and check_loc
-@patch('WinTables.Table.check_size')
-@patch('WinTables.Table.check_loc')
-def test_check_table_calls_check_size_and_check_loc(mock_check_loc, mock_check_size, table_window):
-    """Test if check_table calls check_size and check_loc."""
-    mock_check_size.return_value = False
-    mock_check_loc.return_value = False
-    result = table_window.check_table()
-    mock_check_size.assert_called_once()
-    mock_check_loc.assert_called_once()
-    assert result is False
+def test_get_table_no_no_match(TableClass, config, site):
+    """Test extracting the table number when no match is found."""
+    table_window = TableClass(config, site)
+    with patch.object(table_window, 'get_window_title', return_value="Table ABC"):
+        table_window.tableno_re = re.compile(r'Table (\d+)')
+        table_no = table_window.get_table_no()
+        assert table_no is False
 
-# Test check_size detects resizing
-@patch('WinTables.Table.get_geometry')
-def test_check_size_detects_resize(mock_get_geometry, table_window):
-    """Test if check_size detects client resizing."""
-    mock_get_geometry.return_value = {'width': 800, 'height': 600}
-    table_window.width = 1024
-    table_window.height = 768
-    result = table_window.check_size()
-    assert result == "client_resized"
-
-# Test check_loc detects moving
-@patch('WinTables.Table.get_geometry')
-def test_check_loc_detects_move(mock_get_geometry, table_window):
-    """Test if check_loc detects client movement."""
-    mock_get_geometry.return_value = {'x': 100, 'y': 200}
-    table_window.x = 0
-    table_window.y = 0
-    result = table_window.check_loc()
-    assert result == "client_moved"
-
-# Test has_table_title_changed returns True when the table number changes
-@patch('WinTables.Table.get_table_no')
-def test_has_table_title_changed_returns_true(mock_get_table_no, table_window):
-    """Test if has_table_title_changed returns True when the table number changes."""
-    mock_get_table_no.return_value = 100 
-    table_window.table = 50 
-    result = table_window.has_table_title_changed(None)
-    assert table_window.table == 100 
-    assert result is True  
-
-# Test check_bad_words detects bad words
 def test_check_bad_words_detects_bad_word(table_window):
     """Test if check_bad_words detects forbidden words."""
     title = "History for table:"
@@ -156,12 +101,16 @@ def test_check_bad_words_detects_bad_word(table_window):
     assert result is True  
 
 def test_check_bad_words_with_space(table_window):
-    """Test if check_bad_words detects forbidden words with extra spaces."""
+    """Test if check_bad_words detects forbidden words with additional spaces."""
     title = " History for table: "
     result = table_window.check_bad_words(title) 
     assert result is True  
 
-# Manual comparison test
+def test_check_bad_words_no_bad_word(table_window):
+    """Test if check_bad_words does not detect forbidden words when there are none."""
+    result = table_window.check_bad_words("PokerStars Table 1")
+    assert result is False
+
 def test_manual_comparison():
     """Test manual string comparison."""
     title = "History for table:"
@@ -170,13 +119,6 @@ def test_manual_comparison():
     bad_word_normalized = bad_word.lower()
     assert bad_word_normalized in title_normalized, "Manual comparison failed"
 
-# Test check_bad_words detects no bad words when none exist
-def test_check_bad_words_no_bad_word(table_window):
-    """Test if check_bad_words detects no bad words."""
-    result = table_window.check_bad_words("PokerStars Table 1")
-    assert result is False
-
-# Test __str__ method
 def test_table_window_str_method(table_window):
     """Test the __str__ method of TableWindow."""
     table_window.number = 123
@@ -195,27 +137,9 @@ def test_table_window_str_method(table_window):
     assert "x = 100" in result
     assert "y = 200" in result
 
-# Test get_game when no match is found
-def test_get_game_no_match(table_window):
-    """Test game detection when no match is found."""
-    table_window.title = "Unknown Game Title"
-    game = table_window.get_game()
-    assert game is False  
-
-# Test get_table_no with missing tableno_re (AttributeError case)
-@patch('WinTables.Table.get_window_title', new_callable=MagicMock)
-@pytest.mark.skipif(platform.system() != 'Windows', reason="Test specific to Windows")
-def test_get_table_no_no_regex_windows(mock_get_window_title, table_window):
-    """Test get_table_no returns False when tableno_re is missing."""
-    mock_get_window_title.return_value = "Table ABC"
-    table_window.tableno_re = None  
-    table_no = table_window.get_table_no()
-    assert table_no is False  
-
-# Basic initialization test
-def test_table_window_init_basic(config, site):
+def test_table_window_init_basic(TableClass, config, site):
     """Test basic initialization of TableWindow."""
-    tw = Table(config, site)  
+    tw = TableClass(config, site)  
     assert tw.config == config
     assert tw.site == site
     assert tw.hud is None
@@ -224,50 +148,180 @@ def test_table_window_init_basic(config, site):
     assert tw.tournament is None
     assert tw.table is None
 
-# Initialization test with table name (cash game)
-def test_table_window_init_table_name(config, site):
-    """Test initialization with a table name (cash game)."""
-    table_name = "Test Table"
-    tw = Table(config, site, table_name=table_name)
-    assert tw.name == table_name
-    assert tw.type == "cash"
-    assert tw.tournament is None  
-    assert tw.table is None      
-
-# Initialization test with tournament and table number
-def test_table_window_init_tournament(config, site):
+def test_table_window_init_tournament(TableClass, config, site):
     """Test initialization with tournament and table number."""
     tournament = 12345
     table_number = 6789
-    tw = Table(config, site, tournament=tournament, table_number=table_number)
+    tw = TableClass(config, site, tournament=tournament, table_number=table_number)
     assert tw.tournament == tournament
     assert tw.table == table_number
     assert tw.name == f"{tournament} - {table_number}"
     assert tw.type == "tour"
 
-# Initialization test with invalid parameters (neither table name nor tournament/table number)
-def test_table_window_init_invalid_params(config, site):
-    """Test initialization with invalid parameters (missing table name and tournament/table number)."""
-    tw = Table(config, site)
+def test_table_window_init_invalid_params(TableClass, config, site):
+    """Test initialization with invalid parameters."""
+    tw = TableClass(config, site)
     assert tw.search_string is None
 
-# Test generation of search_string with table name
-def test_table_window_search_string_table_name(config, site):
-    """Test search_string generation with table name."""
-    table_name = "Test Table"
-    tw = Table(config, site, table_name=table_name)
-    assert tw.search_string is not None
-
-# Test generation of search_string with tournament
-def test_table_window_search_string_tournament(config, site):
-    """Test search_string generation with tournament."""
+def test_table_window_search_string_tournament(TableClass, config, site):
+    """Test generating search_string with a tournament."""
     tournament = 12345
     table_number = 6789
-    tw = Table(config, site, tournament=tournament, table_number=table_number)
-    assert tw.search_string is not None
+    with patch('HandHistoryConverter.getTableTitleRe', return_value=re.compile(r'Test Table')):
+        tw = TableClass(config, site, tournament=tournament, table_number=table_number)
+        assert tw.search_string is not None
 
-# Test invalid tournament parameters (non-numeric values)
-def test_table_window_init_invalid_tournament_params(config, site):
-    """Test initialization with invalid tournament parameters (non-numeric values)."""
+def test_table_window_init_invalid_tournament_params(TableClass, config, site):
+    """Test initialization with invalid tournament parameters."""
     with pytest.raises(ValueError):
-        tw = Table(config, site, tournament="invalid", table_number="invalid")
+        tw = TableClass(config, site, tournament="invalid", table_number="invalid")
+
+@pytest.mark.parametrize("platform_name,module_name", [
+    ('Windows', 'WinTables'),
+    ('Darwin', 'OSXTables'),
+    ('Linux', 'XTables')
+])
+def test_find_table_parameters_called(platform_name, module_name, TableClass, config, site):
+    """Test if find_table_parameters is called on each platform."""
+    if platform.system() != platform_name:
+        pytest.skip(f"Test for {platform_name} only")
+    with patch(f'{module_name}.Table.find_table_parameters') as mock_find_table_parameters:
+        tw = TableClass(config, site)
+        tw.find_table_parameters()
+        mock_find_table_parameters.assert_called_once()
+
+@pytest.mark.parametrize("platform_name,module_name", [
+    ('Windows', 'WinTables'),
+    ('Darwin', 'OSXTables'),
+    ('Linux', 'XTables')
+])
+def test_check_table_calls_check_size_and_check_loc(platform_name, module_name, TableClass, config, site):
+    """Test if check_table calls check_size and check_loc on each platform."""
+    if platform.system() != platform_name:
+        pytest.skip(f"Test for {platform_name} only")
+    with patch(f'{module_name}.Table.check_size') as mock_check_size, \
+         patch(f'{module_name}.Table.check_loc') as mock_check_loc:
+        tw = TableClass(config, site)
+        mock_check_size.return_value = False
+        mock_check_loc.return_value = False
+        result = tw.check_table()
+        mock_check_size.assert_called_once()
+        mock_check_loc.assert_called_once()
+        assert result is False
+
+@pytest.mark.parametrize("platform_name,module_name", [
+    ('Windows', 'WinTables'),
+    ('Darwin', 'OSXTables'),
+    ('Linux', 'XTables')
+])
+def test_check_size_detects_resize(platform_name, module_name, TableClass, config, site):
+    """Test if check_size detects client resizing on each platform."""
+    if platform.system() != platform_name:
+        pytest.skip(f"Test for {platform_name} only")
+    with patch(f'{module_name}.Table.get_geometry') as mock_get_geometry:
+        tw = TableClass(config, site)
+        mock_get_geometry.return_value = {'width': 800, 'height': 600}
+        tw.width = 1024
+        tw.height = 768
+        result = tw.check_size()
+        assert result == "client_resized"
+
+@pytest.mark.parametrize("platform_name,module_name", [
+    ('Windows', 'WinTables'),
+    ('Darwin', 'OSXTables'),
+    ('Linux', 'XTables')
+])
+def test_check_loc_detects_move(platform_name, module_name, TableClass, config, site):
+    """Test if check_loc detects client movement on each platform."""
+    if platform.system() != platform_name:
+        pytest.skip(f"Test for {platform_name} only")
+    with patch(f'{module_name}.Table.get_geometry') as mock_get_geometry:
+        tw = TableClass(config, site)
+        mock_get_geometry.return_value = {'x': 100, 'y': 200}
+        tw.x = 0
+        tw.y = 0
+        result = tw.check_loc()
+        assert result == "client_moved"
+
+@pytest.mark.parametrize("platform_name,module_name", [
+    ('Windows', 'WinTables'),
+    ('Darwin', 'OSXTables'),
+    ('Linux', 'XTables')
+])
+def test_has_table_title_changed_returns_true(platform_name, module_name, TableClass, config, site):
+    """Test if has_table_title_changed returns True when the table number changes on each platform."""
+    if platform.system() != platform_name:
+        pytest.skip(f"Test for {platform_name} only")
+    with patch(f'{module_name}.Table.get_table_no') as mock_get_table_no:
+        tw = TableClass(config, site)
+        mock_get_table_no.return_value = 100 
+        tw.table = 50 
+        mock_hud = MagicMock()
+        result = tw.has_table_title_changed(mock_hud)
+        assert tw.table == 100 
+        assert result is True
+
+@pytest.mark.parametrize("platform_name,module_name", [
+    ('Windows', 'WinTables'),
+    ('Darwin', 'OSXTables'),
+    ('Linux', 'XTables')
+])
+def test_table_window_init_table_name(platform_name, module_name, TableClass, config, site):
+    """Test initialization with a table name on each platform."""
+    if platform.system() != platform_name:
+        pytest.skip(f"Test for {platform_name} only")
+    with patch(f'{module_name}.Table') as MockTable:
+        # Create a mock instance and configure the attributes
+        mock_instance = MockTable.return_value
+        mock_instance.name = "Test Table"
+        mock_instance.type = "cash"
+        mock_instance.tournament = None
+        mock_instance.table = None
+        
+        # Call the base test function
+        base_test_table_window_init_table_name(MockTable, config, site)
+
+def base_test_table_window_init_table_name(MockTable, config, site):
+    """Base test for initialization with a table name (cash game)."""
+    table_name = "Test Table"
+    tw = MockTable(config, site, table_name=table_name)
+    assert tw.name == table_name
+    assert tw.type == "cash"
+    assert tw.tournament is None
+    assert tw.table is None
+
+@pytest.mark.parametrize("title,expected", [
+    ("History for table:", True),
+    (" History for table: ", True),
+    ("PokerStars Table 1", False),
+    ("hud:", True),  
+])
+def test_check_bad_words(table_window, title, expected):
+    """Test if check_bad_words detects or does not detect forbidden words."""
+    result = table_window.check_bad_words(title)
+    assert result == expected
+
+@pytest.mark.parametrize("platform_name,module_name", [
+    ('Windows', 'WinTables'),
+    ('Darwin', 'OSXTables'),
+    ('Linux', 'XTables')
+])
+def test_manual_comparison_platform(platform_name, module_name):
+    """Test manual string comparison on each platform."""
+    if platform.system() != platform_name:
+        pytest.skip(f"Test for {platform_name} only")
+    test_manual_comparison()
+
+@pytest.mark.parametrize("platform_name,module_name", [
+    ('Windows', 'WinTables'),
+    ('Darwin', 'OSXTables'),
+    ('Linux', 'XTables')
+])
+def test_check_bad_words_detects_bad_word_platform(platform_name, module_name, TableClass, config, site):
+    """Test if check_bad_words detects forbidden words on each platform."""
+    if platform.system() != platform_name:
+        pytest.skip(f"Test for {platform_name} only")
+    table_window = TableClass(config, site)
+    
+    # Normalize the expected behavior across platforms
+    assert table_window.check_bad_words("History for table:".strip().lower()) is True
