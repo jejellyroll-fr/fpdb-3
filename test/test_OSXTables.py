@@ -1,15 +1,18 @@
 import pytest
 from unittest.mock import MagicMock, patch
 import sys
-
+import platform
 from pathlib import Path
 
 # Add the parent path for imports
 sys.path.append(str(Path(__file__).parent.parent))
-from OSXTables import Table, TableActivationObserver
-from AppKit import NSWorkspace
 
-# Mock the dependencies that rely on macOS APIs
+# Only import if on macOS
+if platform.system() == "Darwin":
+    from OSXTables import Table, TableActivationObserver
+    from AppKit import NSWorkspace
+
+@pytest.mark.skipif(platform.system() != "Darwin", reason="Only runs on macOS")
 @pytest.fixture
 def mock_nsworkspace():
     nsworkspace_mock = MagicMock()
@@ -18,12 +21,13 @@ def mock_nsworkspace():
     yield nsworkspace_mock
     patcher.stop()
 
+@pytest.mark.skipif(platform.system() != "Darwin", reason="Only runs on macOS")
 @pytest.fixture
 def mock_table():
     table_mock = MagicMock(spec=Table)
     return table_mock
 
-# Test for the TableActivationObserver class
+@pytest.mark.skipif(platform.system() != "Darwin", reason="Only runs on macOS")
 def test_table_activation_observer_activation(mock_nsworkspace, mock_table):
     observer = TableActivationObserver.alloc().init()
     observer.table = mock_table
@@ -39,6 +43,7 @@ def test_table_activation_observer_activation(mock_nsworkspace, mock_table):
     mock_table.on_activate.assert_called_once()
     mock_table.on_deactivate.assert_not_called()
 
+@pytest.mark.skipif(platform.system() != "Darwin", reason="Only runs on macOS")
 def test_table_activation_observer_deactivation(mock_nsworkspace, mock_table):
     observer = TableActivationObserver.alloc().init()
     observer.table = mock_table
@@ -54,7 +59,7 @@ def test_table_activation_observer_deactivation(mock_nsworkspace, mock_table):
     mock_table.on_activate.assert_not_called()
     mock_table.on_deactivate.assert_called_once()
 
-# Test for the Table class's get_process_name method
+@pytest.mark.skipif(platform.system() != "Darwin", reason="Only runs on macOS")
 def test_table_get_process_name():
     table = Table(config="dummy_config", site="Winamax")
     
