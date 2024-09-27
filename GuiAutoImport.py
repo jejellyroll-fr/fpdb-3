@@ -225,6 +225,7 @@ class GuiAutoImport(QWidget):
 
                     except Exception as e:
                         self.addText("\n" + ("*** GuiAutoImport Error opening pipe:") + " " + traceback.format_exc())
+                        # TODO: log.warning() ?
                     else:
                         for (site, type) in self.input_settings:
                             self.importer.addImportDirectory(self.input_settings[(site, type)][0], monitor=True, site=(site, type))
