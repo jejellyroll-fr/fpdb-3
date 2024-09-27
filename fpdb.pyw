@@ -67,7 +67,7 @@ import GuiPrefs
 import GuiLogView
 # import GuiDatabase
 import GuiBulkImport
-import GuiTourneyImport
+#import GuiTourneyImport
 
 import GuiRingPlayerStats
 import GuiTourneyPlayerStats
@@ -80,7 +80,7 @@ import GuiSessionViewer
 import GuiHandViewer
 import GuiTourHandViewer
 #import GuiOddsCalc
-import GuiStove
+#import GuiStove
 
 import SQL
 import Database
@@ -265,12 +265,12 @@ class fpdb(QMainWindow):
 
     def index_changed(self, index):
         # Called when user changes currently selected HUD
-        print("DEBUG: Entrée dans index_changed")
-        print("DEBUG: index =", index)
-        print("DEBUG: self.config =", self.config)
-        print("DEBUG: self.config.stat_sets =", self.config.stat_sets)
+        log.info("start index_changed")
+        log.debug(f"index = {index}")
+        log.debug(f"self.config = {self.config}")
+        log.debug(f"self.config.stat_sets = {self.config.stat_sets}")
         selected_hud_name = self.comboGame.currentText()
-        print("DEBUG: selected_hud_name =", selected_hud_name)
+        log.debug(f"selected_hud_name = {selected_hud_name}")
         for i in reversed(range(self.table.count())):
             self.table.itemAt(i).widget().deleteLater()
 
@@ -844,7 +844,7 @@ class fpdb(QMainWindow):
         cashMenu = mb.addMenu('Cash')
         tournamentMenu = mb.addMenu('Tournament')
         maintenanceMenu = mb.addMenu('Maintenance')
-        toolsMenu = mb.addMenu('Tools')
+        #toolsMenu = mb.addMenu('Tools')
         helpMenu = mb.addMenu('Help')
         themeMenu = mb.addMenu('Themes')
 
@@ -882,7 +882,7 @@ class fpdb(QMainWindow):
         maintenanceMenu.addAction(makeAction('Rebuild DB Indexes', self.dia_rebuild_indexes))
         maintenanceMenu.addAction(makeAction('Dump Database to Textfile (takes ALOT of time)', self.dia_dump_db))
 
-        toolsMenu.addAction(makeAction('PokerProTools', self.launch_ppt))
+        #toolsMenu.addAction(makeAction('PokerProTools', self.launch_ppt))
         helpMenu.addAction(makeAction('Log Messages', self.dia_logs, 'Log and Debug Messages'))
         helpMenu.addAction(makeAction('Help Tab', self.tab_main_help))
         helpMenu.addSeparator()
