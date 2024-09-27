@@ -29,7 +29,8 @@ def to_raw(string):
 
 class GuiAutoImport(QWidget):
     def __init__(self, settings, config, sql = None, parent = None, cli = False):
-        QWidget.__init__(self, parent)
+        if not cli:
+            QWidget.__init__(self, parent)
         self.importtimer = None
         self.settings = settings
         self.config = config
@@ -56,7 +57,7 @@ class GuiAutoImport(QWidget):
             # TODO: Separate the code that grabs the directories from config
             #       Separate the calls to the Importer API
             #       Create a timer interface that doesn't rely on GTK
-            pass
+            raise NotImplementedError
 
     def setupGui(self):
         self.setLayout(QVBoxLayout())
