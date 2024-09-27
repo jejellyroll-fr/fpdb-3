@@ -265,12 +265,12 @@ class fpdb(QMainWindow):
 
     def index_changed(self, index):
         # Called when user changes currently selected HUD
-        print("DEBUG: Entrée dans index_changed")
-        print("DEBUG: index =", index)
-        print("DEBUG: self.config =", self.config)
-        print("DEBUG: self.config.stat_sets =", self.config.stat_sets)
+        log.info("start index_changed")
+        log.debug(f"index = {index}")
+        log.debug(f"self.config = {self.config}")
+        log.debug(f"self.config.stat_sets = {self.config.stat_sets}")
         selected_hud_name = self.comboGame.currentText()
-        print("DEBUG: selected_hud_name =", selected_hud_name)
+        log.debug(f"selected_hud_name = {selected_hud_name}")
         for i in reversed(range(self.table.count())):
             self.table.itemAt(i).widget().deleteLater()
 
