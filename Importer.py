@@ -268,6 +268,10 @@ class Importer(object):
             for subdir in os.walk(dir):
                 for file in subdir[2]:
                     filename = os.path.join(subdir[0], file)
+                    # ignore symbolic links (Linux & Mac)
+                    if os.path.islink(filename):
+                        log.info(f"Ignoring symlink {filename}")
+                        continue
                     if (time() - os.stat(filename).st_mtime)<= 43200: # look all files modded in the last 12 hours
                                                                     # need long time because FTP in Win does not
                                                                     # update the timestamp on the HH during session
