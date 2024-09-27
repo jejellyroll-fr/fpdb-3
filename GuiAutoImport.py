@@ -182,18 +182,15 @@ class GuiAutoImport(QWidget):
                     print('start hud- pipe_to_hud is none:')
                     try:
                         if self.config.install_method == "exe":
-                            print('start hud- true1:')
                             command = "HUD_main.exe"
                             bs = 0
                         elif self.config.install_method == "app":
-                            print('start hud- true1:')
                             base_path = sys._MEIPASS if getattr(sys, 'frozen', False) else sys.path[0]
                             command = os.path.join(base_path, "HUD_main")
                             if not os.path.isfile(command):
                                 raise FileNotFoundError(f"HUD_main not found at {command}")
                             bs = 1
                         elif os.name == 'nt':
-                            print('start hud- true1:')
                             path = to_raw(sys.path[0])
                             print("start hud- path", path)
                             path2 = os.getcwd()
@@ -214,9 +211,8 @@ class GuiAutoImport(QWidget):
                             bs = 1
 
                         print(("opening pipe to HUD"))
+                        print(f"Running {command.__repr__()}")
                         if self.config.install_method == "exe" or (os.name == "nt" and win32console.GetConsoleWindow() == 0):
-                            print('start hud methode install exe:')
-                            print(command)
                             self.pipe_to_hud = subprocess.Popen(command, bufsize=bs,
                                                                 stdin=subprocess.PIPE,
                                                                 stdout=subprocess.PIPE,
@@ -225,8 +221,6 @@ class GuiAutoImport(QWidget):
                                                             )
                         else:
                             self.pipe_to_hud = subprocess.Popen(command, bufsize=bs, stdin=subprocess.PIPE, universal_newlines=True)
-                            print('start hud methode install other:')
-                            print(command)
 
                     except Exception as e:
                         self.addText("\n" + ("*** GuiAutoImport Error opening pipe:") + " " + traceback.format_exc())
