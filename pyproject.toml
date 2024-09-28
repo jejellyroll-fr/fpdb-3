@@ -43,3 +43,24 @@ database = [
     "mysqlclient==2.2.4",
     "psycopg2-binary==2.9.9",
 ]
+
+[tool.ruff]
+extend-include = ["*.pyw"]
+extend-exclude = [
+    "build",
+    "archives",
+]
+# Lines configuration
+line-length = 120
+indent-width = 4
+
+[tool.ruff.format]
+exclude = ["*.ipynb"]
+
+[tool.ruff.lint]
+exclude = ["*.ipynb"]
+ignore = [
+    "E401",  # Multiple imports on one line"
+    "E731",  # Do not assign a `lambda` expression, use a `def`
+    "E713",  # Test for membership should be `not in`
+]
