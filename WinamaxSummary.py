@@ -1,23 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Copyright 2008-2011 Carl Gherardi
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, version 3 of the License.
+# Copyright 2008-2011 Carl Gherardi
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with this program. If not, see <http://www.gnu.org/licenses/>.
-#In the "official" distribution you can find the license in agpl-3.0.txt.
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# In the "official" distribution you can find the license in agpl-3.0.txt.
 
 
-#import L10n
-#_ = L10n.get_translation()
+# import L10n
+# _ = L10n.get_translation()
 
 from decimal_wrapper import Decimal
 import datetime
@@ -30,29 +30,29 @@ from TourneySummary import *
 
 
 class WinamaxSummary(TourneySummary):
-    
-    limits = { 'No Limit':'nl', 'Pot Limit':'pl', 'Limit':'fl', 'LIMIT':'fl' }
-    games = {                          # base, category
-                               "Hold'em" : ('hold','holdem'), 
-                                 'Omaha' : ('hold','omahahi'),
-                           "5 Card Omaha": ('hold','5_omahahi'),
-                                "Omaha 5": ('hold','5_omahahi'),
-                     "5 Card Omaha Hi/Lo": ('hold','5_omahahi'), #incorrect in file
-                            "Omaha Hi/Lo": ('hold','omahahilo'),
-                            "7-Card Stud": ('stud','studhi'),
-                      "7-Card Stud Hi/Lo": ('stud','studhilo'),
-                                   "Razz": ('stud','razz'),
-                        "2-7 Triple Draw": ('draw','27_3draw')
-               }
+    limits = {"No Limit": "nl", "Pot Limit": "pl", "Limit": "fl", "LIMIT": "fl"}
+    games = {  # base, category
+        "Hold'em": ("hold", "holdem"),
+        "Omaha": ("hold", "omahahi"),
+        "5 Card Omaha": ("hold", "5_omahahi"),
+        "Omaha 5": ("hold", "5_omahahi"),
+        "5 Card Omaha Hi/Lo": ("hold", "5_omahahi"),  # incorrect in file
+        "Omaha Hi/Lo": ("hold", "omahahilo"),
+        "7-Card Stud": ("stud", "studhi"),
+        "7-Card Stud Hi/Lo": ("stud", "studhilo"),
+        "Razz": ("stud", "razz"),
+        "2-7 Triple Draw": ("draw", "27_3draw"),
+    }
 
     substitutions = {
-                     'LEGAL_ISO' : "USD|EUR|GBP|CAD|FPP",     # legal ISO currency codes
-                            'LS' : u"\$|€|" # legal currency symbols
-                    }
-    
-    re_Identify = re.compile(u"Winamax\sPoker\s\-\sTournament\ssummary")
-    
-    re_SummaryTourneyInfo = re.compile(u"""\s:\s
+        "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP",  # legal ISO currency codes
+        "LS": "\$|€|",  # legal currency symbols
+    }
+
+    re_Identify = re.compile("Winamax\sPoker\s\-\sTournament\ssummary")
+
+    re_SummaryTourneyInfo = re.compile(
+        """\s:\s
                                            ((?P<LIMIT>No\sLimit|Limit|LIMIT|Pot\sLimit)\s)?
                                            (?P<GAME>.+)?
                                            \((?P<TOURNO>[0-9]+)\)(\s-\sLate\s(r|R)egistration)?\s+
@@ -78,19 +78,28 @@ class WinamaxSummary(TourneySummary):
                                            (?P<BLAH>You\splayed\s.+)\s+
                                            You\sfinished\sin\s(?P<RANK>[.0-9]+)(st|nd|rd|th)?\splace\s+
                                            (You\swon\s((?P<WINNINGS>[.0-9%(LS)s]+))?(\s\+\s)?(Ticket\s(?P<TICKET>[.0-9%(LS)s]+))?(\s\+\s)?(Bounty\s(?P<BOUNTY>[.0-9%(LS)s]+))?)?
-                                        """ % substitutions ,re.VERBOSE|re.MULTILINE)
+                                        """
+        % substitutions,
+        re.VERBOSE | re.MULTILINE,
+    )
 
     re_GameType = re.compile("""<h1>((?P<LIMIT>No Limit|Pot Limit) (?P<GAME>Hold\'em|Omaha))</h1>""")
 
     re_TourNo = re.compile("ID\=(?P<TOURNO>[0-9]+)")
 
-    re_Player = re.compile(u"""(?P<RANK>\d+)<\/td><td width="30%">(?P<PNAME>.+?)<\/td><td width="60%">(?P<WINNINGS>.+?)</td>""")
+    re_Player = re.compile(
+        """(?P<RANK>\d+)<\/td><td width="30%">(?P<PNAME>.+?)<\/td><td width="60%">(?P<WINNINGS>.+?)</td>"""
+    )
 
-    re_Details = re.compile(u"""<p class="text">(?P<LABEL>.+?) : (?P<VALUE>.+?)</p>""")
-    re_Prizepool = re.compile(u"""<div class="title2">.+: (?P<PRIZEPOOL>[0-9,]+)""")
+    re_Details = re.compile("""<p class="text">(?P<LABEL>.+?) : (?P<VALUE>.+?)</p>""")
+    re_Prizepool = re.compile("""<div class="title2">.+: (?P<PRIZEPOOL>[0-9,]+)""")
 
-    re_DateTime = re.compile("\[(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)")
-    re_Ticket = re.compile(u""" / (?P<TTYPE>Ticket (?P<VALUE>[0-9.]+)&euro;|Tremplin Winamax Poker Tour|Starting Block Winamax Poker Tour|Finale Freeroll Mobile 2012|SNG Freeroll Mobile 2012)""")
+    re_DateTime = re.compile(
+        "\[(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)"
+    )
+    re_Ticket = re.compile(
+        """ / (?P<TTYPE>Ticket (?P<VALUE>[0-9.]+)&euro;|Tremplin Winamax Poker Tour|Starting Block Winamax Poker Tour|Finale Freeroll Mobile 2012|SNG Freeroll Mobile 2012)"""
+    )
 
     codepage = ("utf8", "cp1252")
 
@@ -113,64 +122,63 @@ class WinamaxSummary(TourneySummary):
     def parseSummaryHtml(self):
         self.currency = "EUR"
         soup = BeautifulSoup(self.summaryText)
-        tl = soup.findAll('div', {"class":"left_content"})
+        tl = soup.findAll("div", {"class": "left_content"})
 
-        ps = soup.findAll('p', {"class": "text"})
+        ps = soup.findAll("p", {"class": "text"})
         for p in ps:
             for m in self.re_Details.finditer(str(p)):
                 mg = m.groupdict()
-                #print mg
-                if mg['LABEL'] == 'Buy-in':
-                    mg['VALUE'] = mg['VALUE'].replace(u"&euro;", "")
-                    mg['VALUE'] = mg['VALUE'].replace(u"+", "")
-                    mg['VALUE'] = mg['VALUE'].strip(" $")
-                    bi, fee = mg['VALUE'].split(" ")
-                    self.buyin = int(100*Decimal(bi))
-                    self.fee   = int(100*Decimal(fee))
-                    #print "DEBUG: bi: '%s' fee: '%s" % (self.buyin, self.fee)
-                if mg['LABEL'] == 'Nombre de joueurs inscrits':
-                    self.entries   = mg['VALUE']
-                if mg['LABEL'] == 'D\xc3\xa9but du tournoi':
-                    self.startTime = datetime.datetime.strptime(mg['VALUE'], "%d-%m-%Y %H:%M")
-                if mg['LABEL'] == 'Nombre de joueurs max':
+                # print mg
+                if mg["LABEL"] == "Buy-in":
+                    mg["VALUE"] = mg["VALUE"].replace("&euro;", "")
+                    mg["VALUE"] = mg["VALUE"].replace("+", "")
+                    mg["VALUE"] = mg["VALUE"].strip(" $")
+                    bi, fee = mg["VALUE"].split(" ")
+                    self.buyin = int(100 * Decimal(bi))
+                    self.fee = int(100 * Decimal(fee))
+                    # print "DEBUG: bi: '%s' fee: '%s" % (self.buyin, self.fee)
+                if mg["LABEL"] == "Nombre de joueurs inscrits":
+                    self.entries = mg["VALUE"]
+                if mg["LABEL"] == "D\xc3\xa9but du tournoi":
+                    self.startTime = datetime.datetime.strptime(mg["VALUE"], "%d-%m-%Y %H:%M")
+                if mg["LABEL"] == "Nombre de joueurs max":
                     # Max seats i think
                     pass
 
-        div = soup.findAll('div', {"class": "title2"})
+        div = soup.findAll("div", {"class": "title2"})
         for m in self.re_Prizepool.finditer(str(div)):
             mg = m.groupdict()
-            #print mg
-            self.prizepool = mg['PRIZEPOOL'].replace(u',','.')
-            
+            # print mg
+            self.prizepool = mg["PRIZEPOOL"].replace(",", ".")
 
         for m in self.re_GameType.finditer(str(tl[0])):
             mg = m.groupdict()
-            #print mg
-            self.gametype['limitType'] = self.limits[mg['LIMIT']]
-            self.gametype['category'] = self.games[mg['GAME']][1]
+            # print mg
+            self.gametype["limitType"] = self.limits[mg["LIMIT"]]
+            self.gametype["category"] = self.games[mg["GAME"]][1]
         else:
-            #FIXME: No gametype
+            # FIXME: No gametype
             #       Quitte or Double, Starting Block Winamax Poker Tour
             #       Do not contain enough the gametype.
             # Lookup the tid from the db, if it exists get the gametype info from there, otherwise ParseError
             log.warning(("WinamaxSummary.parseSummary: Gametype unknown defaulting to NLHE"))
-            self.gametype['limitType'] = 'nl'
-            self.gametype['category'] = 'holdem'
+            self.gametype["limitType"] = "nl"
+            self.gametype["category"] = "holdem"
 
         for m in self.re_Player.finditer(str(tl[0])):
             winnings = 0
             mg = m.groupdict()
-            rank     = mg['RANK']
-            name     = mg['PNAME']
-            if rank!='...':
-                rank = int(mg['RANK'])
-                #print "DEUBG: mg: '%s'" % mg
-                is_satellite = self.re_Ticket.search(mg['WINNINGS'])
+            rank = mg["RANK"]
+            name = mg["PNAME"]
+            if rank != "...":
+                rank = int(mg["RANK"])
+                # print "DEUBG: mg: '%s'" % mg
+                is_satellite = self.re_Ticket.search(mg["WINNINGS"])
                 if is_satellite:
                     # Ticket
-                    if is_satellite.group('VALUE'):
-                        winnings = self.convert_to_decimal(is_satellite.group('VALUE'))
-                    else: # Value not specified
+                    if is_satellite.group("VALUE"):
+                        winnings = self.convert_to_decimal(is_satellite.group("VALUE"))
+                    else:  # Value not specified
                         rank = 1
                         # FIXME: Do lookup here
                         # Tremplin Winamax Poker Tour
@@ -180,17 +188,16 @@ class WinamaxSummary(TourneySummary):
                     if winnings > 0:
                         rank = 1
                 else:
-                    winnings = self.convert_to_decimal(mg['WINNINGS'])
-    
-                winnings = int(100*Decimal(winnings))
-                #print "DEBUG: %s) %s: %s"  %(rank, name, winnings)
-                self.addPlayer(rank, name, winnings, self.currency, None, None, None)
+                    winnings = self.convert_to_decimal(mg["WINNINGS"])
 
+                winnings = int(100 * Decimal(winnings))
+                # print "DEBUG: %s) %s: %s"  %(rank, name, winnings)
+                self.addPlayer(rank, name, winnings, self.currency, None, None, None)
 
         for m in self.re_TourNo.finditer(self.summaryText):
             mg = m.groupdict()
-            #print mg
-            self.tourNo = mg['TOURNO']
+            # print mg
+            self.tourNo = mg["TOURNO"]
 
     def parseSummaryFile(self):
         m = self.re_SummaryTourneyInfo.search(self.summaryText)
@@ -200,134 +207,132 @@ class WinamaxSummary(TourneySummary):
             raise FpdbParseError
 
         mg = m.groupdict()
-        #print "DEBUG: m.groupdict(): %s" % m.groupdict()
+        # print "DEBUG: m.groupdict(): %s" % m.groupdict()
 
-        if 'LIMIT' in mg and mg['LIMIT'] != None:
-            self.gametype['limitType'] = self.limits[mg['LIMIT']]
-            self.gametype['category'] = self.games[mg['GAME']][1]
+        if "LIMIT" in mg and mg["LIMIT"] != None:
+            self.gametype["limitType"] = self.limits[mg["LIMIT"]]
+            self.gametype["category"] = self.games[mg["GAME"]][1]
         else:
-            #FIXME: No gametype
+            # FIXME: No gametype
             #       Quitte or Double, Starting Block Winamax Poker Tour
             #       Do not contain enough the gametype.
             # Lookup the tid from the db, if it exists get the gametype info from there, otherwise ParseError
             log.warning(("WinamaxSummary.parseSummary: Gametype unknown defaulting to NLHE"))
-            self.gametype['limitType'] = 'nl'
-            self.gametype['category'] = 'holdem'
-            self.tourneyName = mg['GAME']
-        if 'ENTRIES' in mg:
-            self.entries   = mg['ENTRIES']
-        if 'PRIZEPOOL1' in mg and mg['PRIZEPOOL1'] != None:
-            self.prizepool = int(100*self.convert_to_decimal(mg['PRIZEPOOL1']))
-        if 'PRIZEPOOL2' in mg and mg['PRIZEPOOL2'] != None: 
-            self.prizepool = int(100*self.convert_to_decimal(mg['PRIZEPOOL2']))
-        if 'DATETIME' in mg:
-            self.startTime = datetime.datetime.strptime(mg['DATETIME'], "%Y/%m/%d %H:%M:%S UTC")
+            self.gametype["limitType"] = "nl"
+            self.gametype["category"] = "holdem"
+            self.tourneyName = mg["GAME"]
+        if "ENTRIES" in mg:
+            self.entries = mg["ENTRIES"]
+        if "PRIZEPOOL1" in mg and mg["PRIZEPOOL1"] != None:
+            self.prizepool = int(100 * self.convert_to_decimal(mg["PRIZEPOOL1"]))
+        if "PRIZEPOOL2" in mg and mg["PRIZEPOOL2"] != None:
+            self.prizepool = int(100 * self.convert_to_decimal(mg["PRIZEPOOL2"]))
+        if "DATETIME" in mg:
+            self.startTime = datetime.datetime.strptime(mg["DATETIME"], "%Y/%m/%d %H:%M:%S UTC")
 
-        #FIXME: buyinCurrency and currency not detected
-        self.buyinCurrency = 'EUR'
-        self.currency  = 'EUR'
+        # FIXME: buyinCurrency and currency not detected
+        self.buyinCurrency = "EUR"
+        self.currency = "EUR"
 
-        if 'BUYIN' in mg:
-            #print "DEBUG: BUYIN '%s'" % mg['BUYIN']
-            if mg['BUYIN'] in ('Gratuit', 'Freeroll', 'Ticket uniquement', 'Ticket'):
+        if "BUYIN" in mg:
+            # print "DEBUG: BUYIN '%s'" % mg['BUYIN']
+            if mg["BUYIN"] in ("Gratuit", "Freeroll", "Ticket uniquement", "Ticket"):
                 self.buyin = 0
                 self.fee = 0
                 self.buyinCurrency = "FREE"
             else:
-                if mg['BUYIN'].find(u"€")!=-1:
-                    self.buyinCurrency="EUR"
-                elif mg['BUYIN'].find("FPP")!=-1:
-                    self.buyinCurrency="WIFP"
-                elif mg['BUYIN'].find("Free")!=-1:
-                    self.buyinCurrency="WIFP"
+                if mg["BUYIN"].find("€") != -1:
+                    self.buyinCurrency = "EUR"
+                elif mg["BUYIN"].find("FPP") != -1:
+                    self.buyinCurrency = "WIFP"
+                elif mg["BUYIN"].find("Free") != -1:
+                    self.buyinCurrency = "WIFP"
                 else:
-                    self.buyinCurrency="play"
+                    self.buyinCurrency = "play"
 
-                if mg['BIBOUNTY'] != None and mg['BIRAKE'] != None:
-                    self.koBounty = int(100*Decimal(self.convert_to_decimal(mg['BIRAKE'].strip('\r'))))
+                if mg["BIBOUNTY"] != None and mg["BIRAKE"] != None:
+                    self.koBounty = int(100 * Decimal(self.convert_to_decimal(mg["BIRAKE"].strip("\r"))))
                     self.isKO = True
-                    mg['BIRAKE'] = mg['BIBOUNTY'].strip('\r')
+                    mg["BIRAKE"] = mg["BIBOUNTY"].strip("\r")
 
-                rake = mg['BIRAKE'].strip('\r')
-                self.buyin = int(100*self.convert_to_decimal(mg['BIAMT']))
-                self.fee   = int(100*self.convert_to_decimal(rake))
-    
+                rake = mg["BIRAKE"].strip("\r")
+                self.buyin = int(100 * self.convert_to_decimal(mg["BIAMT"]))
+                self.fee = int(100 * self.convert_to_decimal(rake))
+
                 if self.buyin == 0 and self.fee == 0:
                     self.buyinCurrency = "FREE"
-                
-        if 'REBUY' in mg and mg['REBUY'] != None:
-            self.isRebuy   = True
-            rebuyrake = mg['REBUYRAKE'].strip('\r')
-            rebuyamt = int(100*self.convert_to_decimal(mg['REBUYAMT']))
-            rebuyfee   = int(100*self.convert_to_decimal(rebuyrake))
+
+        if "REBUY" in mg and mg["REBUY"] != None:
+            self.isRebuy = True
+            rebuyrake = mg["REBUYRAKE"].strip("\r")
+            rebuyamt = int(100 * self.convert_to_decimal(mg["REBUYAMT"]))
+            rebuyfee = int(100 * self.convert_to_decimal(rebuyrake))
             self.rebuyCost = rebuyamt + rebuyfee
-        if 'ADDON' in mg and mg['ADDON'] != None:
+        if "ADDON" in mg and mg["ADDON"] != None:
             self.isAddOn = True
-            addonrake = mg['ADDONRAKE'].strip('\r')
-            addonamt = int(100*self.convert_to_decimal(mg['ADDONAMT']))
-            addonfee   = int(100*self.convert_to_decimal(addonrake))
+            addonrake = mg["ADDONRAKE"].strip("\r")
+            addonamt = int(100 * self.convert_to_decimal(mg["ADDONAMT"]))
+            addonfee = int(100 * self.convert_to_decimal(addonrake))
             self.addOnCost = addonamt + addonfee
 
-        if 'TOURNO' in mg:
-            self.tourNo = mg['TOURNO']
-        #self.maxseats  =
-        if int(self.entries) <= 10: #FIXME: obv not a great metric
-            self.isSng     = True
-        if 'MODE' in mg and mg['MODE'] != None:
-            if 'sng' in mg['MODE']:
+        if "TOURNO" in mg:
+            self.tourNo = mg["TOURNO"]
+        # self.maxseats  =
+        if int(self.entries) <= 10:  # FIXME: obv not a great metric
+            self.isSng = True
+        if "MODE" in mg and mg["MODE"] != None:
+            if "sng" in mg["MODE"]:
                 self.isSng = True
-        if 'SPEED' in mg and mg['SPEED'] != None:
-            if mg['SPEED']=='turbo':
-                self.speed = 'Hyper'
-            elif mg['SPEED']=='semiturbo':
-                self.speed = 'Turbo'
-            
-        if 'PNAME' in mg and mg['PNAME'] is not None:
-            name = mg['PNAME'].strip('\r')
-            rank = mg['RANK']
-            if rank!='...':
-                rank = int(mg['RANK'])
+        if "SPEED" in mg and mg["SPEED"] != None:
+            if mg["SPEED"] == "turbo":
+                self.speed = "Hyper"
+            elif mg["SPEED"] == "semiturbo":
+                self.speed = "Turbo"
+
+        if "PNAME" in mg and mg["PNAME"] is not None:
+            name = mg["PNAME"].strip("\r")
+            rank = mg["RANK"]
+            if rank != "...":
+                rank = int(mg["RANK"])
                 winnings = 0
                 rebuyCount = None
                 addOnCount = None
                 koCount = None
-    
-                if 'WINNINGS' in mg and mg['WINNINGS'] != None:
-                    if mg['WINNINGS'].find(u"€")!=-1:
-                        self.currency="EUR"
-                    elif mg['WINNINGS'].find("FPP")!=-1:
-                        self.currency="WIFP"
-                    elif mg['WINNINGS'].find("Free")!=-1:
-                        self.currency="WIFP"
+
+                if "WINNINGS" in mg and mg["WINNINGS"] != None:
+                    if mg["WINNINGS"].find("€") != -1:
+                        self.currency = "EUR"
+                    elif mg["WINNINGS"].find("FPP") != -1:
+                        self.currency = "WIFP"
+                    elif mg["WINNINGS"].find("Free") != -1:
+                        self.currency = "WIFP"
                     else:
-                        self.currency="play"
-                    winnings = int(100*self.convert_to_decimal(mg['WINNINGS']))
-                if 'PREBUYS' in mg and mg['PREBUYS'] != None:
-                    rebuyCount = int(mg['PREBUYS'])
-                if 'PADDONS' in mg and mg['PADDONS'] != None:
-                    addOnCount = int(mg['PADDONS'])
+                        self.currency = "play"
+                    winnings = int(100 * self.convert_to_decimal(mg["WINNINGS"]))
+                if "PREBUYS" in mg and mg["PREBUYS"] != None:
+                    rebuyCount = int(mg["PREBUYS"])
+                if "PADDONS" in mg and mg["PADDONS"] != None:
+                    addOnCount = int(mg["PADDONS"])
 
+                if "TICKET" in mg and mg["TICKET"] != None:
+                    winnings += int(100 * self.convert_to_decimal(mg["TICKET"]))
 
-                if 'TICKET' in mg and mg['TICKET'] != None:
-                    winnings += int(100*self.convert_to_decimal(mg['TICKET']))
-
-                if 'BOUNTY' in mg and mg['BOUNTY'] != None:
-                    koCount = 100*self.convert_to_decimal(mg['BOUNTY']) / Decimal(self.koBounty)
+                if "BOUNTY" in mg and mg["BOUNTY"] != None:
+                    koCount = 100 * self.convert_to_decimal(mg["BOUNTY"]) / Decimal(self.koBounty)
                     if winnings == 0:
-                        if mg['BOUNTY'].find(u"€")!=-1:
-                            self.currency="EUR"
-                        elif mg['BOUNTY'].find("FPP")!=-1:
-                            self.currency="WIFP"
-                        elif mg['BOUNTY'].find("Free")!=-1:
-                            self.currency="WIFP"
+                        if mg["BOUNTY"].find("€") != -1:
+                            self.currency = "EUR"
+                        elif mg["BOUNTY"].find("FPP") != -1:
+                            self.currency = "WIFP"
+                        elif mg["BOUNTY"].find("Free") != -1:
+                            self.currency = "WIFP"
                         else:
-                            self.currency="play"                    
-    
-                #print "DEBUG: addPlayer(%s, %s, %s, %s, %s, %s, %s)" %(rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount)
+                            self.currency = "play"
+
+                # print "DEBUG: addPlayer(%s, %s, %s, %s, %s, %s, %s)" %(rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount)
                 self.addPlayer(rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount)
 
     def convert_to_decimal(self, string):
         dec = self.clearMoneyString(string)
         dec = Decimal(dec)
         return dec
-

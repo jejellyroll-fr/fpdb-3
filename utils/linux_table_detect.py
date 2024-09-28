@@ -4,13 +4,16 @@ import xcffib, xcffib.xproto
 xconn = xcffib.Connection()
 root = xconn.get_setup().roots[xconn.pref_screen].root
 
+
 def getAtom(name):
     return xconn.core.InternAtom(False, len(name), name).reply().atom
+
 
 nclatom = getAtom("_NET_CLIENT_LIST")
 winatom = getAtom("WINDOW")
 wnameatom = getAtom("_NET_WM_NAME")
 utf8atom = getAtom("UTF8_STRING")
+
 
 def get_window_title(window_id):
     reply = xconn.core.GetProperty(False, window_id, wnameatom, utf8atom, 0, (2**32) - 1).reply()
@@ -31,11 +34,3 @@ for window_id in window_ids:
 
 # Disconnect from the X server
 xconn.disconnect()
-
-
-
-
-
-
-
-

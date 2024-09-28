@@ -12,6 +12,7 @@ import json
 from decimal import Decimal
 from datetime import datetime
 
+
 class CustomEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, Decimal):
@@ -25,6 +26,7 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     handscount = get_handscount()
@@ -34,15 +36,25 @@ async def index(request: Request):
     playerscount_cg = get_playerscount_cg()
     playerscount_tour = get_playerscount_tour()
     heroes = get_heroes()
-    return templates.TemplateResponse("index.html", {"request": request, "handscount": handscount, "handscount_cg": handscount_cg, "handscount_tour": handscount_tour, "playerscount": playerscount, "playerscount_cg": playerscount_cg, "playerscount_tour": playerscount_tour, "heroes": heroes})
-
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "handscount": handscount,
+            "handscount_cg": handscount_cg,
+            "handscount_tour": handscount_tour,
+            "playerscount": playerscount,
+            "playerscount_cg": playerscount_cg,
+            "playerscount_tour": playerscount_tour,
+            "heroes": heroes,
+        },
+    )
 
 
 @app.get("/hands", response_class=HTMLResponse)
 async def get_hands_api(request: Request):
     hands = get_hands()
     return templates.TemplateResponse("hands.html", {"request": request, "hands": hands})
-    
 
 
 @app.get("/handsPlayers", response_class=HTMLResponse)
@@ -51,34 +63,27 @@ async def get_handsPlayers_api(request: Request):
     return templates.TemplateResponse("handsPlayers.html", {"request": request, "handsPlayers": handsPlayers})
 
 
-
 @app.get("/players")
-def get_players_endpoint(request: Request,
-                         name: str = None, 
-                         site: str = None,
-                         page: int = 1,
-                         per_page: int = 10):
+def get_players_endpoint(request: Request, name: str = None, site: str = None, page: int = 1, per_page: int = 10):
+    # Call get_players() and unpack players and total
+    players, total = get_players(name=name, site=site, page=page, per_page=per_page)
 
-  # Call get_players() and unpack players and total  
-  players, total = get_players(
-                               name=name,
-                               site=site,
-                               page=page,
-                               per_page=per_page)
+    # Calculate total pages from total count
+    total_pages = math.ceil(total / per_page)
 
-  # Calculate total pages from total count
-  total_pages = math.ceil(total / per_page)
-
-  return templates.TemplateResponse("players.html", {
-    "request": request,
-    "players": players,
-    "page": page, 
-    "per_page": per_page,
-    "total": total,
-    "total_pages": total_pages, 
-    "name": name,
-    "site": site  
-  })
+    return templates.TemplateResponse(
+        "players.html",
+        {
+            "request": request,
+            "players": players,
+            "page": page,
+            "per_page": per_page,
+            "total": total,
+            "total_pages": total_pages,
+            "name": name,
+            "site": site,
+        },
+    )
 
 
 @app.get("/hands/{handId}", response_class=HTMLResponse)
@@ -133,7 +138,7 @@ async def replay_hand(request: Request, handId: int, hero: Optional[str] = None)
             "players": hand.players,
             "stacks": hand.stacks,
             "posted": hand.posted,
-            #"POT": hand.pot,
+            # "POT": hand.pot,
             "seating": hand.seating,
             "gametype": hand.gametype,
             "actions": hand.actions,
@@ -142,8 +147,9 @@ async def replay_hand(request: Request, handId: int, hero: Optional[str] = None)
             "board": hand.board,
             "discards": hand.discards,
             "holecards": hand.holecards,
-            "tourneysPlayersIds": hand.tourneysPlayersIds
+            "tourneysPlayersIds": hand.tourneysPlayersIds,
         }
+
     print(hand)
     # Convert the hand object to a dictionary
     hand_dict = hand_to_dict(hand)
@@ -151,10 +157,6 @@ async def replay_hand(request: Request, handId: int, hero: Optional[str] = None)
     # Serialize the dictionary to JSON
     hand = json.dumps(hand_dict, cls=CustomEncoder)
     return templates.TemplateResponse("replayer.html", {"request": request, "hand": hand})
-
-
-
-
 
 
 @app.get("/players/{playerId}/hands", response_class=HTMLResponse)
@@ -165,7 +167,6 @@ async def get_hands_players_api(
     cash: Optional[bool] = False,
     sort_by: str = None,
 ):
-    
     # Get the name of the player
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -175,33 +176,95 @@ async def get_hands_players_api(
 
     handsPlayers = get_hands_players(playerId, tourney=tourney, cash=cash, sort_by=sort_by)
     decodeCardList = {
-            1: '2h',  2: '3h',  3: '4h',  4: '5h',  5: '6h',
-            6: '7h',  7: '8h',  8: '9h',  9: 'Th',  10: 'Jh',
-            11: 'Qh', 12: 'Kh', 13: 'Ah',
-            14: '2d', 15: '3d', 16: '4d', 17: '5d', 18: '6d',
-            19: '7d', 20: '8d', 21: '9d', 22: 'Td', 23: 'Jd',
-            24: 'Qd', 25: 'Kd', 26: 'Ad',
-            27: '2c', 28: '3c', 29: '4c', 30: '5c', 31: '6c',
-            32: '7c', 33: '8c', 34: '9c', 35: 'Tc', 36: 'Jc',
-            37: 'Qc', 38: 'Kc', 39: 'Ac',
-            40: '2s', 41: '3s', 42: '4s', 43: '5s', 44: '6s',
-            45: '7s', 46: '8s', 47: '9s', 48: 'Ts', 49: 'Js',
-            50: 'Qs', 51: 'Ks', 52: 'As'
-        }
+        1: "2h",
+        2: "3h",
+        3: "4h",
+        4: "5h",
+        5: "6h",
+        6: "7h",
+        7: "8h",
+        8: "9h",
+        9: "Th",
+        10: "Jh",
+        11: "Qh",
+        12: "Kh",
+        13: "Ah",
+        14: "2d",
+        15: "3d",
+        16: "4d",
+        17: "5d",
+        18: "6d",
+        19: "7d",
+        20: "8d",
+        21: "9d",
+        22: "Td",
+        23: "Jd",
+        24: "Qd",
+        25: "Kd",
+        26: "Ad",
+        27: "2c",
+        28: "3c",
+        29: "4c",
+        30: "5c",
+        31: "6c",
+        32: "7c",
+        33: "8c",
+        34: "9c",
+        35: "Tc",
+        36: "Jc",
+        37: "Qc",
+        38: "Kc",
+        39: "Ac",
+        40: "2s",
+        41: "3s",
+        42: "4s",
+        43: "5s",
+        44: "6s",
+        45: "7s",
+        46: "8s",
+        47: "9s",
+        48: "Ts",
+        49: "Js",
+        50: "Qs",
+        51: "Ks",
+        52: "As",
+    }
     # Define which columns to hide based on conditions
     hideColumnX = True  # Set to True if you want to hide column X
     if cash:
         return templates.TemplateResponse(
-            "handsPlayers_cash.html", {"request": request,"decodeCardList": decodeCardList , "handsPlayers": handsPlayers, "hideColumnX": hideColumnX, "name": name}
+            "handsPlayers_cash.html",
+            {
+                "request": request,
+                "decodeCardList": decodeCardList,
+                "handsPlayers": handsPlayers,
+                "hideColumnX": hideColumnX,
+                "name": name,
+            },
         )
     elif tourney:
         return templates.TemplateResponse(
-            "handsPlayers_tourney.html", {"request": request,"decodeCardList": decodeCardList , "handsPlayers": handsPlayers, "hideColumnX": hideColumnX, "name": name}
+            "handsPlayers_tourney.html",
+            {
+                "request": request,
+                "decodeCardList": decodeCardList,
+                "handsPlayers": handsPlayers,
+                "hideColumnX": hideColumnX,
+                "name": name,
+            },
         )
     else:
         return templates.TemplateResponse(
-            "handsPlayers.html", {"request": request, "decodeCardList": decodeCardList , "handsPlayers": handsPlayers, "hideColumnX": hideColumnX, "name": name}
+            "handsPlayers.html",
+            {
+                "request": request,
+                "decodeCardList": decodeCardList,
+                "handsPlayers": handsPlayers,
+                "hideColumnX": hideColumnX,
+                "name": name,
+            },
         )
+
 
 @app.get("/RingProfitAllHandsPlayerIdSite", response_class=HTMLResponse)
 async def get_ring_profit_all_hands_api(
@@ -213,9 +276,8 @@ async def get_ring_profit_all_hands_api(
     category: str = None,
     currency: str = None,
     startdate: str = None,
-    enddate: str = None # Add this parameter
+    enddate: str = None,  # Add this parameter
 ):
-
     # Call get_RingProfitAllHandsPlayerIdSite() and unpack profits
     profits = get_RingProfitAllHandsPlayerIdSite(
         site=site,
@@ -225,13 +287,16 @@ async def get_ring_profit_all_hands_api(
         category=category,
         currency=currency,
         startdate=startdate,
-        enddate=enddate
+        enddate=enddate,
     )
 
     # Fetch the player's name from your data source based on the 'player' parameter
-    player_name = get_player_name(player)  
+    player_name = get_player_name(player)
 
-    return templates.TemplateResponse("RingGraph.html", {"request": request, "profits": profits, "player_name": player_name})
+    return templates.TemplateResponse(
+        "RingGraph.html", {"request": request, "profits": profits, "player_name": player_name}
+    )
+
 
 @app.get("/TourneysProfitPlayerIdSite", response_class=HTMLResponse)
 async def get_torneys_profit_api(
@@ -243,9 +308,8 @@ async def get_torneys_profit_api(
     category: str = None,
     currency: str = None,
     startdate: str = None,
-    enddate: str = None # Add this parameter
+    enddate: str = None,  # Add this parameter
 ):
-
     # Call get_RingProfitAllHandsPlayerIdSite() and unpack profits
     profits = get_tourneysProfitPlayerIdSite(
         site=site,
@@ -255,13 +319,16 @@ async def get_torneys_profit_api(
         category=category,
         currency=currency,
         startdate=startdate,
-        enddate=enddate
+        enddate=enddate,
     )
 
     # Fetch the player's name from your data source based on the 'player' parameter
-    player_name = get_player_name(player)  
+    player_name = get_player_name(player)
 
-    return templates.TemplateResponse("TourneysGraph.html", {"request": request, "profits": profits, "player_name": player_name})
+    return templates.TemplateResponse(
+        "TourneysGraph.html", {"request": request, "profits": profits, "player_name": player_name}
+    )
+
 
 @app.get("/statsplayers", response_class=HTMLResponse)
 async def get_statsplayers_api(
@@ -273,7 +340,7 @@ async def get_statsplayers_api(
     category: str = None,
     currency: str = None,
     startdate: str = None,
-    enddate: str = None
+    enddate: str = None,
 ):
     result = get_statsplayers(
         site=site,
@@ -283,18 +350,13 @@ async def get_statsplayers_api(
         category=category,
         currency=currency,
         startdate=startdate,
-        enddate=enddate
+        enddate=enddate,
     )  # Call the get_statsplayers() function to retrieve the statistics
 
     return templates.TemplateResponse("statsplayers.html", {"request": request, "result": result})
 
 
-
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="127.0.0.1", port=8081)
-
-
-
-
-

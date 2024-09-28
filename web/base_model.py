@@ -9,6 +9,7 @@ import sys
 sys.path.append(str(Path(__file__).parent.parent))
 from decimal_wrapper import Decimal
 
+
 class Backing(BaseModel):
     id: int
     tourneysPlayersId: int
@@ -16,10 +17,12 @@ class Backing(BaseModel):
     buyInPercentage: float
     payOffPercentage: float
 
+
 class Action(BaseModel):
     id: int
     name: str
     code: str
+
 
 class Autorate(BaseModel):
     id: int
@@ -30,6 +33,7 @@ class Autorate(BaseModel):
     ratingTime: Optional[str]
     handCount: Optional[int]
 
+
 class Board(BaseModel):
     id: int
     handId: int
@@ -39,6 +43,7 @@ class Board(BaseModel):
     boardcard3: Optional[int]
     boardcard4: Optional[int]
     boardcard5: Optional[int]
+
 
 class CardsCache(BaseModel):
     id: int
@@ -164,6 +169,7 @@ class CardsCache(BaseModel):
     street2Discards: Optional[int]
     street3Discards: Optional[int]
 
+
 class File(BaseModel):
     id: int
     file: str
@@ -180,6 +186,7 @@ class File(BaseModel):
     errs: Optional[int]
     ttime100: Optional[int]
     finished: Optional[bool]
+
 
 class Gametype(BaseModel):
     id: int
@@ -202,6 +209,7 @@ class Gametype(BaseModel):
     newToGame: Optional[int]
     homeGame: Optional[int]
     split: Optional[int]
+
 
 class Hand(BaseModel):
     id: int
@@ -243,6 +251,7 @@ class Hand(BaseModel):
     comment: Optional[str]
     commentTs: Optional[str]
 
+
 class HandsAction(BaseModel):
     id: int
     handId: int
@@ -253,10 +262,11 @@ class HandsAction(BaseModel):
     actionId: Optional[int]
     amount: Optional[int]
     raiseTo: Optional[int]
-    amountCalled:Optional[int]
+    amountCalled: Optional[int]
     numDiscarded: Optional[int]
-    cardsDiscarded: Optional[str] 
+    cardsDiscarded: Optional[str]
     allIn: Optional[bool]
+
 
 class HandsPlayer(BaseModel):
     id: int
@@ -424,8 +434,8 @@ class HandsPlayer(BaseModel):
     street3Discards: Optional[int]
     handString: Optional[str]
     actionString: Optional[str]
-                                   
-    
+
+
 class HandsPots(BaseModel):
     id: int
     handId: int
@@ -437,17 +447,19 @@ class HandsPots(BaseModel):
     collected: Optional[int]
     rake: Optional[int]
 
+
 class HandsStove(BaseModel):
     id: int
     handId: int
     playerId: int
-    streetId: Optional[int] 
+    streetId: Optional[int]
     boardId: Optional[int]
-    hiLo: str 
-    rankId: Optional[int] 
+    hiLo: str
+    rankId: Optional[int]
     value: Optional[int]
     cards: Optional[str]
     ev: Optional[Decimal]
+
 
 class HudCache(BaseModel):
     id: int
@@ -548,7 +560,7 @@ class HudCache(BaseModel):
     street2CheckCallRaiseChance: Optional[int]
     street2CheckCallDone: Optional[int]
     street2CheckRaiseDone: Optional[int]
-    street3CheckCallRaiseChance:Optional[int]
+    street3CheckCallRaiseChance: Optional[int]
     street3CheckCallDone: Optional[int]
     street3CheckRaiseDone: Optional[int]
     street4CheckCallRaiseChance: Optional[int]
@@ -573,9 +585,11 @@ class HudCache(BaseModel):
     street2Discards: Optional[int]
     street3Discards: Optional[int]
 
+
 class Month(BaseModel):
     id: int
     monthStart: datetime
+
 
 class Player(BaseModel):
     id: int
@@ -585,6 +599,7 @@ class Player(BaseModel):
     chars: Optional[str]
     comment: Optional[str]
     commentTs: Optional[str]
+
 
 class PositionsCache(BaseModel):
     id: int
@@ -597,7 +612,7 @@ class PositionsCache(BaseModel):
     maxPosition: int
     position: Optional[str]
     n: Optional[int]
-    street0VPIChance:Optional[int]
+    street0VPIChance: Optional[int]
     street0VPI: Optional[int]
     street0AggrChance: Optional[int]
     street0Aggr: Optional[int]
@@ -687,7 +702,7 @@ class PositionsCache(BaseModel):
     street2CheckCallRaiseChance: Optional[int]
     street2CheckCallDone: Optional[int]
     street2CheckRaiseDone: Optional[int]
-    street3CheckCallRaiseChance:Optional[int]
+    street3CheckCallRaiseChance: Optional[int]
     street3CheckCallDone: Optional[int]
     street3CheckRaiseDone: Optional[int]
     street4CheckCallRaiseChance: Optional[int]
@@ -712,9 +727,11 @@ class PositionsCache(BaseModel):
     street2Discards: Optional[int]
     street3Discards: Optional[int]
 
+
 class Rank(BaseModel):
     id: int
     name: str
+
 
 class RawHands(BaseModel):
     id: int
@@ -722,11 +739,13 @@ class RawHands(BaseModel):
     rawHand: str
     complain: bool
 
+
 class RawTourneys(BaseModel):
     id: int
     tourneyId: int
     rawTourney: str
     complain: bool
+
 
 class Sessions(BaseModel):
     id: int
@@ -734,6 +753,7 @@ class Sessions(BaseModel):
     monthId: Optional[int]
     sessionStart: datetime
     sessionEnd: datetime
+
 
 class SessionsCache(BaseModel):
     id: int
@@ -833,7 +853,7 @@ class SessionsCache(BaseModel):
     street2CheckCallRaiseChance: Optional[int]
     street2CheckCallDone: Optional[int]
     street2CheckRaiseDone: Optional[int]
-    street3CheckCallRaiseChance:Optional[int]
+    street3CheckCallRaiseChance: Optional[int]
     street3CheckCallDone: Optional[int]
     street3CheckRaiseDone: Optional[int]
     street4CheckCallRaiseChance: Optional[int]
@@ -858,8 +878,10 @@ class SessionsCache(BaseModel):
     street2Discards: Optional[int]
     street3Discards: Optional[int]
 
+
 class Settings(BaseModel):
     version: int
+
 
 class Sites(BaseModel):
     id: int
@@ -873,6 +895,7 @@ class StartCards(BaseModel):
     name: str
     rank: int
     combinations: int
+
 
 class TourneyTypes(BaseModel):
     id: int
@@ -921,6 +944,7 @@ class TourneyTypes(BaseModel):
     guarantee: Optional[bool]
     guaranteeAmt: Optional[int]
 
+
 class Tourneys(BaseModel):
     id: int
     tourneyTypeId: Optional[int]
@@ -937,6 +961,7 @@ class Tourneys(BaseModel):
     addedCurrency: Optional[str]
     comment: Optional[str]
     commentTs: Optional[datetime]
+
 
 class TourneysCache(BaseModel):
     id: int
@@ -1036,7 +1061,7 @@ class TourneysCache(BaseModel):
     street2CheckCallRaiseChance: Optional[int]
     street2CheckCallDone: Optional[int]
     street2CheckRaiseDone: Optional[int]
-    street3CheckCallRaiseChance:Optional[int]
+    street3CheckCallRaiseChance: Optional[int]
     street3CheckCallDone: Optional[int]
     street3CheckRaiseDone: Optional[int]
     street4CheckCallRaiseChance: Optional[int]
@@ -1059,7 +1084,8 @@ class TourneysCache(BaseModel):
     street4Raises: Optional[int]
     street1Discards: Optional[int]
     street2Discards: Optional[int]
-    street3Discards: Optional[int]    
+    street3Discards: Optional[int]
+
 
 class TourneysPlayers(BaseModel):
     id: int
@@ -1074,6 +1100,7 @@ class TourneysPlayers(BaseModel):
     koCount: Optional[float]
     comment: Optional[str]
     commentTs: Optional[str]
+
 
 class Weeks(BaseModel):
     id: int
