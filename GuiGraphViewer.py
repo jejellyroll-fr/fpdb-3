@@ -357,9 +357,9 @@ class GuiGraphViewer(QSplitter):
             return (None, None, None, None)
 
         green = [0, *[float(x[1]) for x in winnings]]
-        blue = [0, *[float(x[1]) if x[2] == True else 0.0 for x in winnings]]
+        blue = [0, *[float(x[1]) if x[2] is True else 0.0 for x in winnings]]
         red = [0]
-        red.extend([float(x[1]) if x[2] == False else 0.0 for x in winnings])
+        red.extend([float(x[1]) if x[2] is False else 0.0 for x in winnings])
         orange = [0]
         orange.extend([float(x[3]) for x in winnings])
         greenline = cumsum(green)

@@ -299,15 +299,15 @@ class DerivedStats(object):
                 collectee_stats["rake"] = rake + remainder_1 + remainder_2
             else:
                 collectee_stats["rake"] = int(100 * (even_split - winnings))
-            if collectee_stats["street1Seen"] == True:
+            if collectee_stats["street1Seen"] is True:
                 collectee_stats["wonWhenSeenStreet1"] = True
-            if collectee_stats["street2Seen"] == True:
+            if collectee_stats["street2Seen"] is True:
                 collectee_stats["wonWhenSeenStreet2"] = True
-            if collectee_stats["street3Seen"] == True:
+            if collectee_stats["street3Seen"] is True:
                 collectee_stats["wonWhenSeenStreet3"] = True
-            if collectee_stats["street4Seen"] == True:
+            if collectee_stats["street4Seen"] is True:
                 collectee_stats["wonWhenSeenStreet4"] = True
-            if collectee_stats["sawShowdown"] == True:
+            if collectee_stats["sawShowdown"] is True:
                 collectee_stats["wonAtSD"] = True
             i += 1
 
@@ -1234,7 +1234,7 @@ class DerivedStats(object):
             name = self.lastBetOrRaiser(hand.actions, hand.actionStreets[i + 1])  # previous street
             if name:
                 chance = self.noBetsBefore(hand.actions, hand.actionStreets[i + 2], name)  # this street
-                if chance == True:
+                if chance is True:
                     player_stats = self.handsplayers.get(name)
                     player_stats["street%dCBChance" % (i + 1)] = True
                     player_stats["street%dCBDone" % (i + 1)] = self.betStreet(
@@ -1355,7 +1355,7 @@ class DerivedStats(object):
         for act in hand.actions[hand.actionStreets[i + 1]]:
             if act[1] in ("folds"):
                 player_stats = self.handsplayers.get(act[0])
-                if player_stats["otherRaisedStreet%s" % i] == True:
+                if player_stats["otherRaisedStreet%s" % i] is True:
                     player_stats["foldToOtherRaisedStreet%s" % i] = True
                     # print "DEBUG: fold detected on handid %s for %s on actionStreet[%s]: %s"
                     #                       %(hand.handid, act[0],hand.actionStreets[i+1], i)

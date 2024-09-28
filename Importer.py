@@ -257,7 +257,7 @@ class Importer(object):
         # This should really be using os.walk
         # http://docs.python.org/library/os.html
         if os.path.isdir(dir):
-            if monitor == True:
+            if monitor is True:
                 self.monitor = True
                 self.dirlist[site] = [dir] + [filter]
 

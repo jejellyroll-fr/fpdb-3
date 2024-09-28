@@ -66,7 +66,7 @@ class GuiAutoImport(QWidget):
         self.password = settings["db-password"]
         self.database = settings["db-databaseName"]
 
-        if cli == False:
+        if cli is False:
             self.setupGui()
         else:
             # TODO: Separate the code that grabs the directories from config
@@ -153,7 +153,7 @@ class GuiAutoImport(QWidget):
         the_sites = self.config.get_supported_sites()
         for site in the_sites:
             params = self.config.get_site_parameters(site)
-            if params["enabled"] == True:
+            if params["enabled"] is True:
                 print(("DEBUG:") + " " + ("Detecting hand history directory for site: '%s'") % site)
                 if os.name == "posix":
                     if self.posix_detect_hh_dirs(site):
@@ -381,7 +381,7 @@ if __name__ == "__main__":
     settings["global_lock"] = interlocks.InterProcessLock(name="fpdb_global_lock")
     settings["cl_options"] = ".".join(sys.argv[1:])
 
-    if options.gui == True:
+    if options.gui is True:
         from PyQt5.QtWidgets import QApplication, QMainWindow
 
         app = QApplication([])

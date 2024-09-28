@@ -940,7 +940,7 @@ class PokerStars(HandHistoryConverter):
         i = 0
         pre, post = hand.handText.split("*** SUMMARY ***")
         hand.cashedOut = self.re_CashedOut.search(pre) is not None
-        if hand.runItTimes == 0 and hand.cashedOut == False:
+        if hand.runItTimes == 0 and hand.cashedOut is False:
             for m in self.re_CollectPot.finditer(post):
                 pot = self.clearMoneyString(m.group("POT"))
                 if bovadaUncalled_v1 and float(pot) == (blindsantes + hand.pot.stp):
