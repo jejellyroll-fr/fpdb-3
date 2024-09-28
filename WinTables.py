@@ -61,28 +61,61 @@ def win_enum_handler(hwnd, lParam):
 
 
 class Table(Table_Window):
-
     # In find_table_parameters of WinTables.py
-
-
     def find_table_parameters(self):
-        """Find a poker client window with the given table name."""
+        """Trouver une fenêtre de poker client correspondant au nom de table donné."""
+        
+        # Log du début de la fonction
+        start_time = time.time()
+        log.debug("Début de find_table_parameters")
+
         window_info = WindowInfoTemp()
-
+        
         try:
-            log.debug(f"before EnumWindows")
+            log.debug("Avant EnumWindows")
             EnumWindows(EnumWindowsProc(win_enum_handler), ctypes.py_object(window_info))
-            log.debug(f"after EnumWindows found {len(window_info.titles)} windows")
+            log.debug(f"Après EnumWindows, {len(window_info.titles)} fenêtres trouvées")
         except Exception as e:
-            log.error(f"Error during EnumWindows: {e}")
+            log.error(f"Erreur pendant EnumWindows : {e}")
+        
+        # Limite de temps pour la recherche
+        time_limit = 10  # secondes
+        start_search_time = time.time()
 
-        time_limit = 10  # Limite de temps en secondes
-        start_time = time.time()  # Enregistre l'heure de début
-
+        # Première passe : filtrer avec self.site
+        found = False
         for hwnd in window_info.titles:
-            try:
-                if time.time() - start_time > time_limit:
-                    log.error(f"Time limit of {time_limit} seconds reached. Exiting loop.")
+            if time.time() - start_search_time > time_limit:
+                log.error(f"Limite de temps de {time_limit} secondes atteinte. Sortie de la boucle.")
+                break
+            
+            title = window_info.titles[hwnd]
+            if not title:
+                continue
+
+            if not IsWindowVisible(hwnd):
+                continue
+            if GetParent(hwnd) != 0:
+                continue
+
+            # Appliquer le filtre self.site si défini
+            if self.site and self.site.lower() not in title.lower():
+                continue
+
+            if re.search(self.search_string, title, re.I):
+                if self.check_bad_words(title):
+                    continue
+                self.number = hwnd
+                self.title = title
+                found = True
+                break
+        
+        # Si aucune fenêtre trouvée avec le filtre, rechercher dans toutes les fenêtres
+        if not found:
+            log.debug("Pas de fenêtre trouvée avec le filtre site, recherche dans toutes les fenêtres")
+            for hwnd in window_info.titles:
+                if time.time() - start_search_time > time_limit:
+                    log.error(f"Limite de temps de {time_limit} secondes atteinte. Sortie de la boucle.")
                     break
 
                 title = window_info.titles[hwnd]
@@ -94,31 +127,20 @@ class Table(Table_Window):
                 if GetParent(hwnd) != 0:
                     continue
 
-                HasNoOwner = ctypes.windll.user32.GetWindow(hwnd, GW_OWNER) == 0
-                WindowStyle = GetWindowLong(hwnd, GWL_EXSTYLE)
-
-                if title.split(' ', 1)[0] == "Winamax":
-                    self.search_string = self.search_string.split(' ', 3)[0]
-
-                if isinstance(self.search_string, (str, re.Pattern)):
-                    if re.search(self.search_string, title, re.I):
-                        if self.check_bad_words(title): continue
-                        self.number = hwnd
-                        self.title = title
-                        break
-                else:
-                    log.error(f"Invalid search string: {self.search_string}")
-
-            except IOError as e:
-                if "closed file" in str(e):
-                    print(f"Warning: Logging to a closed file for hwnd {hwnd}. Skipping this log entry.")
-                else:
-                    log.error(f"IOError for hwnd {hwnd}: {e}")
-            except Exception as e:
-                log.error(f"Unexpected error for hwnd {hwnd}: {e}")
-
+                if re.search(self.search_string, title, re.I):
+                    if self.check_bad_words(title):
+                        continue
+                    self.number = hwnd
+                    self.title = title
+                    break
+        
         if self.number is None:
-            log.error(f"Window {self.search_string} not found.")
+            log.error(f"Fenêtre {self.search_string} non trouvée.")
+        
+        # Log de fin de fonction avec le temps écoulé
+        end_time = time.time()
+        log.debug(f"Fin de find_table_parameters. Temps écoulé : {end_time - start_time:.2f} secondes.")
+
 
 
     # In get_geometry of WinTables.py

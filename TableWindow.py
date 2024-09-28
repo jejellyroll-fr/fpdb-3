@@ -114,6 +114,7 @@ class Table_Window(object):
             table_kwargs = dict(table_name=table_name)
         else:
             return None
+        print(f"table karg: {table_kwargs}")
         self.search_string = getTableTitleRe(self.config, self.site, self.type, **table_kwargs)
 
         log.debug(f"search string: {self.search_string}")
