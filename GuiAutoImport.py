@@ -40,7 +40,7 @@ class GuiAutoImport(QWidget):
         self.input_settings = {}
         self.pipe_to_hud = None
 
-        self.importer = Importer.Importer(self, self.settings, self.config, self.sql, zmq_port="5556")
+        self.importer = Importer.Importer(self, self.settings, self.config, self.sql)
 
         self.importer.setCallHud(True)
         self.importer.setQuiet(False)
@@ -152,7 +152,7 @@ class GuiAutoImport(QWidget):
                    }
         if site == 'PokerStars':
             directory = os.path.expanduser(defaults[site])
-            for file in [file for file in os.listdir(directory) if not file in [".",".."]]:
+            for file in [file for file in os.listdir(directory) if file not in [".",".."]]:
                 print(file)
         return False
 
@@ -224,7 +224,7 @@ class GuiAutoImport(QWidget):
                         else:
                             self.pipe_to_hud = subprocess.Popen(command, bufsize=bs, stdin=subprocess.PIPE, universal_newlines=True)
 
-                    except Exception as e:
+                    except Exception:
                         self.addText("\n" + ("*** GuiAutoImport Error opening pipe:") + " " + traceback.format_exc())
                         # TODO: log.warning() ?
                     else:

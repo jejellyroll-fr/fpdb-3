@@ -18,20 +18,13 @@
 
 import os
 import sys
-import re
 import queue
 # import qdarkstyle
-import multiprocessing
-import threading
-import faulthandler
 if os.name == 'nt':
-    import win32api
-    import win32con
+    pass
 
 import codecs
-import traceback
 import Options
-import string
 from functools import partial
 
 cl_options = '.'.join(sys.argv[1:])
@@ -40,15 +33,14 @@ from L10n import set_locale_translation
 import logging
 
 from PyQt5.QtCore import (QCoreApplication, QDate, Qt, QPoint)
-from PyQt5.QtGui import (QScreen, QIcon, QPalette)
+from PyQt5.QtGui import (QIcon, QPalette)
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QSizePolicy
 from PyQt5.QtWidgets import (QAction, QApplication, QCalendarWidget,
                              QCheckBox, QDateEdit, QDialog,
                              QDialogButtonBox, QFileDialog,
-                             QGridLayout, QHBoxLayout, QInputDialog,
-                             QLabel, QLineEdit, QMainWindow,
-                             QMessageBox, QPushButton, QScrollArea,
-                             QTabWidget, QVBoxLayout, QWidget, QComboBox)
+                             QGridLayout, QLineEdit, QMainWindow,
+                             QMessageBox, QScrollArea,
+                             QTabWidget, QVBoxLayout, QComboBox)
 
 import interlocks
 from Exceptions import *
@@ -71,7 +63,6 @@ import GuiBulkImport
 
 import GuiRingPlayerStats
 import GuiTourneyPlayerStats
-import GuiTourneyViewer
 import GuiPositionalStats
 import GuiAutoImport
 import GuiGraphViewer
@@ -87,7 +78,6 @@ import Database
 import Configuration
 import Card
 import Exceptions
-import Stats
 #import api, app
 import cProfile
 import pstats
@@ -798,12 +788,12 @@ class fpdb(QMainWindow):
         if len(self.nb_tab_names) == 1:
             # only main tab open, reload profile
             self.load_profile()
-            self.warning_box(f"Configuration settings have been updated,"
-                             f" Fpdb needs to be restarted now\n\nClick OK to close Fpdb")
+            self.warning_box("Configuration settings have been updated,"
+                             " Fpdb needs to be restarted now\n\nClick OK to close Fpdb")
             sys.exit()
         else:
-            self.warning_box(f"Updated preferences have not been loaded because windows are open."
-                             f" Re-start fpdb to load them.")
+            self.warning_box("Updated preferences have not been loaded because windows are open."
+                             " Re-start fpdb to load them.")
 
     def process_close_messages(self):
         # check for close messages
@@ -946,8 +936,8 @@ class fpdb(QMainWindow):
             label.setTextInteractionFlags(Qt.TextSelectableByMouse)
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel([
-                f"A new configuration will destroy all personal settings"
-                f" (hud layout, site folders, screennames, favourite seats).\n"
+                "A new configuration will destroy all personal settings"
+                " (hud layout, site folders, screennames, favourite seats).\n"
             ])
 
             diaConfigVersionWarning.layout().addWidget(label)
@@ -990,14 +980,14 @@ class fpdb(QMainWindow):
         except Exceptions.FpdbMySQLAccessDenied:
             err_msg = "MySQL Server reports: Access denied. Are your permissions set correctly?"
         except Exceptions.FpdbMySQLNoDatabase:
-            err_msg = f"MySQL client reports: 2002 or 2003 error." \
-                      f" Unable to connect - Please check that the MySQL service has been started."
+            err_msg = "MySQL client reports: 2002 or 2003 error." \
+                      " Unable to connect - Please check that the MySQL service has been started."
 
         except Exceptions.FpdbPostgresqlAccessDenied:
             err_msg = "PostgreSQL Server reports: Access denied. Are your permissions set correctly?"
         except Exceptions.FpdbPostgresqlNoDatabase:
-            err_msg = f"PostgreSQL client reports: Unable to connect -" \
-                f"Please check that the PostgreSQL service has been started."
+            err_msg = "PostgreSQL client reports: Unable to connect -" \
+                "Please check that the PostgreSQL service has been started."
         if err_msg is not None:
             self.db = None
             self.warning_box(err_msg)
@@ -1009,9 +999,9 @@ class fpdb(QMainWindow):
                                               "An invalid DB version or missing tables have been detected.",
                                               QMessageBox.Ok, self)
             diaDbVersionWarning.setInformativeText(
-                f"This error is not necessarily fatal but it is strongly"
-                f" recommended that you recreate the tables by using the Database menu."
-                f"Not doing this will likely lead to misbehaviour including fpdb crashes, corrupt data etc."
+                "This error is not necessarily fatal but it is strongly"
+                " recommended that you recreate the tables by using the Database menu."
+                "Not doing this will likely lead to misbehaviour including fpdb crashes, corrupt data etc."
             )
 
             diaDbVersionWarning.exec_()
@@ -1206,7 +1196,7 @@ class fpdb(QMainWindow):
         for site in self.config.supported_sites:  # get site names from config file
             try:
                 self.config.get_site_id(site)  # and check against list from db
-            except KeyError as exc:
+            except KeyError:
                 log.warning(f"site {site} missing from db")
                 dia = QMessageBox()
                 dia.setIcon(QMessageBox.Warning)
