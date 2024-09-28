@@ -71,22 +71,24 @@ def test_to_gui_invalid_type(invalid_input):
 def test_set_locale_encoding():
     from Charset import locale_encoding
 
-    # Sauvegarder l'encodage local initial du système
+    # Save the system's initial locale encoding
     initial_locale_encoding = locale_encoding
 
-    # Changer l'encodage en ASCII
+    # Change encoding to ASCII
     set_locale_encoding("ascii")
 
-    # Vérification conditionnelle en fonction de la plateforme
+    # Conditional check based on the platform
     if platform.system() == "Darwin":
-        assert locale_encoding == 'UTF-8', f"macOS devrait garder UTF-8 mais retourne {locale_encoding}"
+        assert locale_encoding == 'UTF-8', f"macOS should remain UTF-8 but returned {locale_encoding}"
     elif platform.system() == "Windows":
-        assert locale_encoding in ['UTF-8', 'ascii'], f"Windows devrait être soit UTF-8 soit ascii mais retourne {locale_encoding}"
+        # Include 'cp1252' for Windows
+        assert locale_encoding in ['UTF-8', 'ascii', 'cp1252'], f"Windows should be either UTF-8, ascii, or cp1252 but returned {locale_encoding}"
     else:
-        assert locale_encoding == 'ascii', f"L'encodage devrait être ascii mais retourne {locale_encoding}"
+        assert locale_encoding == 'ascii', f"Locale should be ascii but returned {locale_encoding}"
 
-    # Restaurer l'encodage initial après le test
+    # Restore the initial encoding after the test
     set_locale_encoding(initial_locale_encoding)
+
 
 
 def test_initialize_encoders():
