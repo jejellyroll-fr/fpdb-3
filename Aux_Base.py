@@ -9,17 +9,17 @@ for clarity
 
 import contextlib
 #    Copyright 2008-2012,  Ray E. Barker
-#    
+#
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
 #    (at your option) any later version.
-#    
+#
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU General Public License for more details.
-#    
+#
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
@@ -32,6 +32,7 @@ import contextlib
 
 #    Standard Library modules
 import logging
+
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = logging.getLogger("hud")
 
@@ -59,20 +60,29 @@ class Aux_Window(object):
         self.params = params
         self.config = config
 
-#   Override these methods as needed
-    def update_data(self, *args): pass
-    def update_gui(self, *args): pass
-    def create(self, *args): pass
-    def save_layout(self, *args): pass
-    def move_windows(self, *args): pass
+    #   Override these methods as needed
+    def update_data(self, *args):
+        pass
+
+    def update_gui(self, *args):
+        pass
+
+    def create(self, *args):
+        pass
+
+    def save_layout(self, *args):
+        pass
+
+    def move_windows(self, *args):
+        pass
 
     def destroy(self):
         with contextlib.suppress(Exception):
             self.container.destroy()
 
-############################################################################
-#    Some utility routines useful for Aux_Windows
-#
+    ############################################################################
+    #    Some utility routines useful for Aux_Windows
+    #
     # Returns the number of places where cards were shown. This can be N
     # players + common cards
     # XXX XXX: AAAAAGGGGGGHHHHHHHHHHHHHH!
@@ -81,36 +91,30 @@ class Aux_Window(object):
     # zeroes, not None
     def count_seats_with_cards(self, cards):
         """Returns the number of seats with shown cards in the list."""
-        return sum(
-            seat != 'common' and cards_tuple[0] != 0
-            for seat, cards_tuple in list(cards.items())
-        )
+        return sum(seat != "common" and cards_tuple[0] != 0 for seat, cards_tuple in list(cards.items()))
 
     def get_id_from_seat(self, seat):
         """Determine player id from seat number, given stat_dict."""
-        
+
         # hh_seats is a list of the actual seat numbers used in the hand history.
         #  Some sites (e.g. iPoker) miss out some seat numbers if max is <10,
         #  e.g. iPoker 6-max uses seats 1,3,5,6,8,10 NOT 1,2,3,4,5,6
         seat = self.hud.layout.hh_seats[seat]
         return next(
-            (
-                id
-                for id, dict in list(self.hud.stat_dict.items())
-                if seat == dict['seat']
-            ),
+            (id for id, dict in list(self.hud.stat_dict.items()) if seat == dict["seat"]),
             None,
         )
 
 
 class Seat_Window(QWidget):
     def __init__(self, aw=None, seat=None):
-        super(Seat_Window, self).__init__(None, Qt.Window | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus
-                                          | Qt.WindowStaysOnTopHint)  # FIXME acceptfocus?  splashscreen?
+        super(Seat_Window, self).__init__(
+            None, Qt.Window | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus | Qt.WindowStaysOnTopHint
+        )  # FIXME acceptfocus?  splashscreen?
         self.lastPos = None
         self.aw = aw
         self.seat = seat
-        self.resize(10,10)
+        self.resize(10, 10)
         self.setAttribute(Qt.WA_AlwaysShowToolTips)
 
     def mousePressEvent(self, event):
@@ -132,8 +136,11 @@ class Seat_Window(QWidget):
     def button_press_left(self, event):
         self.lastPos = event.globalPos()
 
-    def button_press_middle(self, event): pass  # subclass will define this
-    def button_press_right(self, event): pass  # subclass will define this
+    def button_press_middle(self, event):
+        pass  # subclass will define this
+
+    def button_press_right(self, event):
+        pass  # subclass will define this
 
     def mouseMoveEvent(self, event):
         if self.lastPos is not None:
@@ -144,11 +151,17 @@ class Seat_Window(QWidget):
         self.lastPos = None
         self.aw.configure_event_cb(self, self.seat)
 
-    def button_release_middle(self, event): pass  # subclass will define this
-    def button_release_right(self, event): pass  # subclass will define this
-    
-    def create_contents(self, *args): pass
-    def update_contents(self, *args): pass
+    def button_release_middle(self, event):
+        pass  # subclass will define this
+
+    def button_release_right(self, event):
+        pass  # subclass will define this
+
+    def create_contents(self, *args):
+        pass
+
+    def update_contents(self, *args):
+        pass
 
 
 class Aux_Seats(Aux_Window):
@@ -156,40 +169,46 @@ class Aux_Seats(Aux_Window):
 
     def __init__(self, hud, config, params):
         super(Aux_Seats, self).__init__(hud, params, config)
-        self.positions = {}      # dict of window positions. normalised for favourite seat and offset
+        self.positions = {}  # dict of window positions. normalised for favourite seat and offset
         # but _not_ offset to the absolute screen position
-        self.displayed = False   # the seat windows are displayed
+        self.displayed = False  # the seat windows are displayed
         self.uses_timer = False  # the Aux_seats object uses a timer to control hiding
-        self.timer_on = False    # bool = Ture if the timeout for removing the cards is on
+        self.timer_on = False  # bool = Ture if the timeout for removing the cards is on
 
         self.aw_class_window = Seat_Window  # classname to be used by the aw_class_window
 
-#    placeholders that should be overridden--so we don't throw errors
-    def create_contents(self): pass
-    def create_common(self, x, y): pass
-    def update_contents(self): pass
-    
-    def resize_windows(self): 
+    #    placeholders that should be overridden--so we don't throw errors
+    def create_contents(self):
+        pass
+
+    def create_common(self, x, y):
+        pass
+
+    def update_contents(self):
+        pass
+
+    def resize_windows(self):
         # Resize calculation has already happened in HUD_main&hud.py
         # refresh our internal map to reflect these changes
-        for i in (list(range(1, self.hud.max + 1))):
+        for i in list(range(1, self.hud.max + 1)):
             self.positions[i] = self.hud.layout.location[self.adj[i]]
         self.positions["common"] = self.hud.layout.common
         # and then move everything to the new places
         self.move_windows()
 
     def move_windows(self):
-        for i in (list(range(1, self.hud.max + 1))):
-            self.m_windows[i].move(self.positions[i][0] + self.hud.table.x,self.positions[i][1] + self.hud.table.y)
-        self.m_windows["common"].move(self.hud.layout.common[0] + self.hud.table.x,self.hud.layout.common[1]
-                                      + self.hud.table.y)
-        
-    def create(self):        
+        for i in list(range(1, self.hud.max + 1)):
+            self.m_windows[i].move(self.positions[i][0] + self.hud.table.x, self.positions[i][1] + self.hud.table.y)
+        self.m_windows["common"].move(
+            self.hud.layout.common[0] + self.hud.table.x, self.hud.layout.common[1] + self.hud.table.y
+        )
+
+    def create(self):
         self.adj = self.adj_seats()
-        self.m_windows = {}      # windows to put the card/hud items in
-        for i in (list(range(1, self.hud.max + 1)) + ['common']):   
-            if i == 'common':
-                #    The common window is different from the others. Note that it needs to 
+        self.m_windows = {}  # windows to put the card/hud items in
+        for i in list(range(1, self.hud.max + 1)) + ["common"]:
+            if i == "common":
+                #    The common window is different from the others. Note that it needs to
                 #    get realized, shown, topified, etc. in create_common
                 #    self.hud.layout.xxxxx is updated here after scaling, to ensure
                 #    layout and positions are in sync
@@ -200,10 +219,10 @@ class Aux_Seats(Aux_Window):
                 (x, y) = self.hud.layout.location[self.adj[i]]
                 self.m_windows[i] = self.aw_class_window(self, i)
                 self.positions[i] = self.create_scale_position(x, y)
-                self.m_windows[i].move(self.positions[i][0] + self.hud.table.x,self.positions[i][1] + self.hud.table.y)
+                self.m_windows[i].move(self.positions[i][0] + self.hud.table.x, self.positions[i][1] + self.hud.table.y)
                 self.hud.layout.location[self.adj[i]] = self.positions[i]
-                if 'opacity' in self.params:
-                    self.m_windows[i].setWindowOpacity(float(self.params['opacity']))
+                if "opacity" in self.params:
+                    self.m_windows[i].setWindowOpacity(float(self.params["opacity"]))
 
             # main action below - fill the created window with content
             #    the create_contents method is supplied by the subclass
@@ -214,21 +233,21 @@ class Aux_Seats(Aux_Window):
             self.hud.table.topify(self.m_windows[i])
             if not self.uses_timer:
                 self.m_windows[i].show()
-                
+
         self.hud.layout.height = self.hud.table.height
         self.hud.layout.width = self.hud.table.width
 
     def create_scale_position(self, x, y):
         # for a given x/y, scale according to current height/wid vs. reference
         # height/width
-        # This method is needed for create (because the table may not be 
+        # This method is needed for create (because the table may not be
         # the same size as the layout in config)
-        
+
         # any subsequent resizing of this table will be handled through
         # hud_main.idle_resize
 
-        x_scale = (1.0 * self.hud.table.width / self.hud.layout.width)
-        y_scale = (1.0 * self.hud.table.height / self.hud.layout.height)
+        x_scale = 1.0 * self.hud.table.width / self.hud.layout.width
+        y_scale = 1.0 * self.hud.table.height / self.hud.layout.height
         return int(x * x_scale), int(y * y_scale)
 
     def update_gui(self, new_hand_id):
@@ -240,19 +259,20 @@ class Aux_Seats(Aux_Window):
         # the hud and mucked handlers for this table
         self.resize_windows()
 
-#   Methods likely to be of use for any Seat_Window implementation
+    #   Methods likely to be of use for any Seat_Window implementation
     def destroy(self):
         """Destroy all of the seat windows."""
         with contextlib.suppress(AttributeError):
             for i in list(self.m_windows.keys()):
                 self.m_windows[i].destroy()
-                del(self.m_windows[i])
+                del self.m_windows[i]
 
-#   Methods likely to be useful for mucked card windows (or similar) only
+    #   Methods likely to be useful for mucked card windows (or similar) only
     def hide(self):
         """Hide the seat windows."""
-        for (i, w) in list(self.m_windows.items()):
-            if w is not None: w.hide()
+        for i, w in list(self.m_windows.items()):
+            if w is not None:
+                w.hide()
         self.displayed = False
 
     def save_layout(self, *args):
@@ -274,10 +294,10 @@ class Aux_Seats(Aux_Window):
         Move/resize also end up in here due to it being a configure.
         This is not optimal, but isn't easy to work around. fixme.
         """
-        if (i): 
+        if i:
             new_abs_position = widget.pos()  # absolute value of the new position
-            new_position = (new_abs_position.x()-self.hud.table.x, new_abs_position.y()-self.hud.table.y)
-            self.positions[i] = new_position     # write this back to our map
+            new_position = (new_abs_position.x() - self.hud.table.x, new_abs_position.y() - self.hud.table.y)
+            self.positions[i] = new_position  # write this back to our map
             if i != "common":
                 self.hud.layout.location[self.adj[i]] = new_position  # update the hud-level dict,
                 # so other aux can be told
@@ -287,18 +307,18 @@ class Aux_Seats(Aux_Window):
     def adj_seats(self):
         # determine how to adjust seating arrangements, if a "preferred seat" is set in the hud layout configuration
         #  Need range here, not xrange -> need the actual list
-    
+
         adj = list(range(self.hud.max + 1))  # default seat adjustments = no adjustment
-        
+
         #   does the user have a fav_seat? if so, just get out now
         if self.hud.site_parameters["fav_seat"][self.hud.max] == 0:
             return adj
 
         # find the hero's actual seat
-        
+
         actual_seat = None
         for key in self.hud.stat_dict:
-            if self.hud.stat_dict[key]['screen_name'] == self.config.supported_sites[self.hud.site].screen_name:
+            if self.hud.stat_dict[key]["screen_name"] == self.config.supported_sites[self.hud.site].screen_name:
                 # Seat from stat_dict is the seat num recorded in the hand history and database
                 # For tables <10-max, some sites omit some seat nums (e.g. iPoker 6-max uses 1,3,5,6,8,10)
                 # The seat nums in the hh from the site are recorded in config file for each layout, and available
@@ -309,14 +329,14 @@ class Aux_Seats(Aux_Window):
                 #  always numbers its stat_windows using consecutive numbers (e.g. 1-6)
 
                 for i in range(1, self.hud.max + 1):
-                    if self.hud.layout.hh_seats[i] == self.hud.stat_dict[key]['seat']:
+                    if self.hud.layout.hh_seats[i] == self.hud.stat_dict[key]["seat"]:
                         actual_seat = i
                         break
 
         if not actual_seat:  # this shouldn't happen because we don't create huds if the hero isn't seated.
             log.error("Error finding hero seat.")
             return adj
-                
+
         for i in range(self.hud.max + 1):
             j = actual_seat + i
             if j > self.hud.max:

@@ -12,8 +12,8 @@ import os
 import time
 import logging
 import zmq
-from PyQt5.QtCore import (QCoreApplication, QObject, QThread, pyqtSignal, Qt, QTimer)
-from PyQt5.QtWidgets import (QApplication, QLabel, QVBoxLayout, QWidget)
+from PyQt5.QtCore import QCoreApplication, QObject, QThread, pyqtSignal, Qt, QTimer
+from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
 from PyQt5.QtGui import QIcon
 from qt_material import apply_stylesheet
 
@@ -27,11 +27,8 @@ import Deck
 from cachetools import TTLCache
 
 # Logging configuration
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 log = logging.getLogger("hud")
-
-
-
 
 
 class ZMQWorker(QThread):
@@ -53,8 +50,8 @@ class ZMQWorker(QThread):
 
     def stop(self):
         self.is_running = False
-        self.wait() 
-        
+        self.wait()
+
 
 class ZMQReceiver(QObject):
     message_received = pyqtSignal(str)
@@ -91,31 +88,33 @@ class ZMQReceiver(QObject):
         self.context.term()
         log.info("ZMQ receiver closed")
 
+
 class HUD_main(QObject):
     """A main() object to own both the socket thread and the gui."""
-    def __init__(self, options, db_name='fpdb'):
+
+    def __init__(self, options, db_name="fpdb"):
         self.options = options
         QObject.__init__(self)
         self.db_name = db_name
-        Configuration.set_logfile(u"HUD-log.txt")
+        Configuration.set_logfile("HUD-log.txt")
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
 
         # Selecting the right module for the OS
-        if self.config.os_family == 'Linux':
+        if self.config.os_family == "Linux":
             import XTables as Tables
-        elif self.config.os_family == 'Mac':
+        elif self.config.os_family == "Mac":
             import OSXTables as Tables
-        elif self.config.os_family in ('XP', 'Win7'):
+        elif self.config.os_family in ("XP", "Win7"):
             import WinTables as Tables
         log.info(f"HUD_main starting: Using db name = {db_name}")
         self.Tables = Tables  # Assign Tables to self.Tables
 
         # Configuration du logging
         if not options.errorsToConsole:
-            fileName = os.path.join(self.config.dir_log, u'HUD-errors.txt')
+            fileName = os.path.join(self.config.dir_log, "HUD-errors.txt")
             log.info(f"Note: error output is being diverted to {fileName}.")
             log.info("Any major error will be reported there *only*.")
-            errorFile = codecs.open(fileName, 'w', 'utf-8')
+            errorFile = codecs.open(fileName, "w", "utf-8")
             sys.stderr = errorFile
             log.info("HUD_main starting")
 
@@ -127,8 +126,13 @@ class HUD_main(QObject):
             self.hud_dict = {}
             self.blacklist = []
             self.hud_params = self.config.get_hud_ui_parameters()
-            self.deck = Deck.Deck(self.config, deck_type=self.hud_params["deck_type"], card_back=self.hud_params["card_back"],
-                                  width=self.hud_params['card_wd'], height=self.hud_params['card_ht'])
+            self.deck = Deck.Deck(
+                self.config,
+                deck_type=self.hud_params["deck_type"],
+                card_back=self.hud_params["card_back"],
+                width=self.hud_params["card_wd"],
+                height=self.hud_params["card_ht"],
+            )
 
             # Cache initialization
             self.cache = TTLCache(maxsize=1000, ttl=300)  # Cache of 1000 elements with a TTL of 5 minutes
@@ -161,11 +165,11 @@ class HUD_main(QObject):
         self.vb = QVBoxLayout()
         self.vb.setContentsMargins(2, 0, 2, 0)
         self.main_window.setLayout(self.vb)
-        self.label = QLabel('Closing this window will exit from the HUD.')
+        self.label = QLabel("Closing this window will exit from the HUD.")
         self.main_window.closeEvent = self.close_event_handler
         self.vb.addWidget(self.label)
         self.main_window.setWindowTitle("HUD Main Window")
-        cards = os.path.join(self.config.graphics_path, 'tribal.jpg')
+        cards = os.path.join(self.config.graphics_path, "tribal.jpg")
         if cards:
             self.main_window.setWindowIcon(QIcon(cards))
 
@@ -184,9 +188,9 @@ class HUD_main(QObject):
         self.read_stdin(hand_id)
 
     def destroy(self, *args):
-        if hasattr(self, 'zmq_receiver'):
+        if hasattr(self, "zmq_receiver"):
             self.zmq_receiver.close()
-        if hasattr(self, 'zmq_worker'):
+        if hasattr(self, "zmq_worker"):
             self.zmq_worker.stop()
         log.info("Quitting normally")
         QCoreApplication.quit()
@@ -206,7 +210,7 @@ class HUD_main(QObject):
         if self.config.os_family == "Mac":
             for hud in self.hud_dict.values():
                 for aw in hud.aux_windows:
-                    if not hasattr(aw, 'm_windows'):
+                    if not hasattr(aw, "m_windows"):
                         continue
                     for w in aw.m_windows.values():
                         if w.isVisible():
@@ -232,8 +236,6 @@ class HUD_main(QObject):
         log.debug("Moved to a new table, killing current HUD")
         self.kill_hud(None, hud.table.key)
 
-
-
     def kill_hud(self, event, table):
         log.debug("kill_hud event")
         self.idle_kill(table)
@@ -253,7 +255,7 @@ class HUD_main(QObject):
 
         table.hud = self.hud_dict[temp_key]
 
-        self.hud_dict[temp_key].hud_params['new_max_seats'] = None  # trigger for seat layout change
+        self.hud_dict[temp_key].hud_params["new_max_seats"] = None  # trigger for seat layout change
 
         for aw in self.hud_dict[temp_key].aux_windows:
             aw.update_data(new_hand_id, self.db_connection)
@@ -269,7 +271,6 @@ class HUD_main(QObject):
         log.debug(f"Processing new hand id: {new_hand_id}")
         print(f"Entering read_stdin with hand_id: {new_hand_id}")
 
-        
         self.hero, self.hero_ids = {}, {}
         found = False
 
@@ -283,7 +284,7 @@ class HUD_main(QObject):
 
         aux_disabled_sites = []
         for i in enabled_sites:
-            if not self.config.get_site_parameters(i)['aux_enabled']:
+            if not self.config.get_site_parameters(i)["aux_enabled"]:
                 log.info(f"Aux disabled for site {i}")
                 print(f"Aux disabled for site {i}")
                 aux_disabled_sites.append(i)
@@ -333,12 +334,12 @@ class HUD_main(QObject):
         if type == "tour":
             try:
                 log.debug("creating temp_key for tour")
-                if len(table_name) >= 2 and table_name[-2].endswith(','):
-                    parts = table_name.split(',', 1)
+                if len(table_name) >= 2 and table_name[-2].endswith(","):
+                    parts = table_name.split(",", 1)
                 else:
-                    parts = table_name.split(' ', 1)
+                    parts = table_name.split(" ", 1)
 
-                tab_number = tab_number.rsplit(' ', 1)[-1]
+                tab_number = tab_number.rsplit(" ", 1)[-1]
                 temp_key = f"{tour_number} Table {tab_number}"
                 log.debug(f"temp_key {temp_key}")
             except ValueError:
@@ -363,35 +364,39 @@ class HUD_main(QObject):
         # Detection of max_seats and poker_game changes
         if temp_key in self.hud_dict:
             with contextlib.suppress(Exception):
-                newmax = self.hud_dict[temp_key].hud_params['new_max_seats']
+                newmax = self.hud_dict[temp_key].hud_params["new_max_seats"]
                 log.debug(f"newmax {newmax}")
                 if newmax and self.hud_dict[temp_key].max != newmax:
                     log.debug("going to kill_hud due to max seats change")
                     self.kill_hud("activate", temp_key)
-                    while temp_key in self.hud_dict: time.sleep(0.5)
+                    while temp_key in self.hud_dict:
+                        time.sleep(0.5)
                     max = newmax
-                self.hud_dict[temp_key].hud_params['new_max_seats'] = None
+                self.hud_dict[temp_key].hud_params["new_max_seats"] = None
 
             if self.hud_dict[temp_key].poker_game != poker_game:
                 with contextlib.suppress(Exception):
                     log.debug("going to kill_hud due to poker game change")
                     self.kill_hud("activate", temp_key)
-                    while temp_key in self.hud_dict: time.sleep(0.5)
+                    while temp_key in self.hud_dict:
+                        time.sleep(0.5)
 
         # Updating or creating the HUD
         if temp_key in self.hud_dict:
             log.debug(f"update hud for hand {new_hand_id}")
-            self.db_connection.init_hud_stat_vars(self.hud_dict[temp_key].hud_params['hud_days'],
-                                                  self.hud_dict[temp_key].hud_params['h_hud_days'])
-            stat_dict = self.db_connection.get_stats_from_hand(new_hand_id, type, self.hud_dict[temp_key].hud_params,
-                                                               self.hero_ids[site_id], num_seats)
+            self.db_connection.init_hud_stat_vars(
+                self.hud_dict[temp_key].hud_params["hud_days"], self.hud_dict[temp_key].hud_params["h_hud_days"]
+            )
+            stat_dict = self.db_connection.get_stats_from_hand(
+                new_hand_id, type, self.hud_dict[temp_key].hud_params, self.hero_ids[site_id], num_seats
+            )
             log.debug(f"got stats for hand {new_hand_id}")
 
             try:
                 self.hud_dict[temp_key].stat_dict = stat_dict
             except KeyError:
-                log.error(f'hud_dict[{temp_key}] was not found')
-                log.error('will not send hand')
+                log.error(f"hud_dict[{temp_key}] was not found")
+                log.error("will not send hand")
                 return
 
             self.hud_dict[temp_key].cards = self.get_cards(new_hand_id, poker_game)
@@ -401,15 +406,13 @@ class HUD_main(QObject):
             log.debug(f"hud updated for table {temp_key} and hand {new_hand_id}")
         else:
             log.debug(f"create new hud for hand {new_hand_id}")
-            self.db_connection.init_hud_stat_vars(self.hud_params['hud_days'], self.hud_params['h_hud_days'])
-            stat_dict = self.db_connection.get_stats_from_hand(new_hand_id, type, self.hud_params,
-                                                               self.hero_ids[site_id], num_seats)
+            self.db_connection.init_hud_stat_vars(self.hud_params["hud_days"], self.hud_params["h_hud_days"])
+            stat_dict = self.db_connection.get_stats_from_hand(
+                new_hand_id, type, self.hud_params, self.hero_ids[site_id], num_seats
+            )
             log.debug(f"got stats for hand {new_hand_id}")
 
-            hero_found = any(
-                stat_dict[key]['screen_name'] == self.hero[site_id]
-                for key in stat_dict
-            )
+            hero_found = any(stat_dict[key]["screen_name"] == self.hero[site_id] for key in stat_dict)
             if not hero_found:
                 log.info("HUD not created yet, because hero is not seated for this hand")
                 return
@@ -430,7 +433,7 @@ class HUD_main(QObject):
                 tablewindow.key = temp_key
                 tablewindow.max = max
                 tablewindow.site = site_name
-                if hasattr(tablewindow, 'number'):
+                if hasattr(tablewindow, "number"):
                     log.debug("table window still exists")
                     self.create_HUD(new_hand_id, tablewindow, temp_key, max, poker_game, type, stat_dict, cards)
                 else:
@@ -439,9 +442,9 @@ class HUD_main(QObject):
 
     def get_cards(self, new_hand_id, poker_game):
         cards = self.db_connection.get_cards(new_hand_id)
-        if poker_game in ['holdem', 'omahahi', 'omahahilo']:
+        if poker_game in ["holdem", "omahahi", "omahahilo"]:
             comm_cards = self.db_connection.get_common_cards(new_hand_id)
-            cards['common'] = comm_cards['common']
+            cards["common"] = comm_cards["common"]
         return cards
 
     def idle_move(self, hud):
@@ -498,14 +501,13 @@ class HUD_main(QObject):
         except Exception:
             log.exception(f"Error updating HUD for hand {new_hand_id}.")
 
+
 if __name__ == "__main__":
     (options, argv) = Options.fpdb_options()
 
     app = QApplication([])
-    apply_stylesheet(app, theme='dark_purple.xml')
-
+    apply_stylesheet(app, theme="dark_purple.xml")
 
     hm = HUD_main(options, db_name=options.dbname)
-
 
     app.exec_()

@@ -40,30 +40,30 @@ MoveWindow = ctypes.windll.user32.MoveWindow
 b_width = 3
 tb_height = 29
 
+
 # Class for temporarily storing securities
 class WindowInfoTemp:
     def __init__(self):
         self.titles = {}
-        #print("WindowInfo initialized with an empty dictionary.")
+        # print("WindowInfo initialized with an empty dictionary.")
+
 
 # Function for listing windows and retrieving titles
 def win_enum_handler(hwnd, lParam):
-    #print(f"Handler called for hwnd: {hwnd}")
+    # print(f"Handler called for hwnd: {hwnd}")
     window_info = ctypes.cast(lParam, ctypes.py_object).value
     length = GetWindowTextLength(hwnd)
-    #print(f"Window text length: {length}")
+    # print(f"Window text length: {length}")
     if length > 0:
         buff = ctypes.create_unicode_buffer(length + 1)
         GetWindowText(hwnd, buff, length + 1)
-        #print(f"Text retrieved for hwnd {hwnd}: {buff.value}")
+        # print(f"Text retrieved for hwnd {hwnd}: {buff.value}")
         window_info.titles[hwnd] = buff.value
     return True
 
 
 class Table(Table_Window):
-
     # In find_table_parameters of WinTables.py
-
 
     def find_table_parameters(self):
         """Find a poker client window with the given table name."""
@@ -97,8 +97,8 @@ class Table(Table_Window):
                 HasNoOwner = ctypes.windll.user32.GetWindow(hwnd, GW_OWNER) == 0
                 WindowStyle = GetWindowLong(hwnd, GWL_EXSTYLE)
 
-                if title.split(' ', 1)[0] == "Winamax":
-                    self.search_string = self.search_string.split(' ', 3)[0]
+                if title.split(" ", 1)[0] == "Winamax":
+                    self.search_string = self.search_string.split(" ", 3)[0]
 
                 if re.search(self.search_string, title, re.I):
                     if self.check_bad_words(title):
@@ -119,11 +119,10 @@ class Table(Table_Window):
         if self.number is None:
             log.error(f"Window {self.search_string} not found.")
 
-
     # In get_geometry of WinTables.py
     def get_geometry(self):
         """Get the window geometry."""
-        #print(f"Attempting to retrieve geometry for hwnd: {self.number}")
+        # print(f"Attempting to retrieve geometry for hwnd: {self.number}")
         try:
             rect = wintypes.RECT()
             if IsWindow(self.number):
@@ -136,14 +135,14 @@ class Table(Table_Window):
                     self.b_width = GetSystemMetrics(SM_CXSIZEFRAME)
                     self.tb_height = GetSystemMetrics(SM_CYCAPTION)
 
-                    #print(f"Position: ({x}, {y}), Dimensions: {width}x{height}")
-                    #print(f"Border width: {self.b_width}, Title bar height: {self.tb_height}")
+                    # print(f"Position: ({x}, {y}), Dimensions: {width}x{height}")
+                    # print(f"Border width: {self.b_width}, Title bar height: {self.tb_height}")
 
                     return {
-                        'x': int(x) + self.b_width,
-                        'y': int(y) + self.tb_height + self.b_width,
-                        'height': int(height) - 2 * self.b_width - self.tb_height,
-                        'width': int(width) - 2 * self.b_width
+                        "x": int(x) + self.b_width,
+                        "y": int(y) + self.tb_height + self.b_width,
+                        "height": int(height) - 2 * self.b_width - self.tb_height,
+                        "width": int(width) - 2 * self.b_width,
                     }
                 else:
                     log.error(f"Failed to retrieve GetWindowRect for hwnd: {self.number}")
@@ -166,9 +165,9 @@ class Table(Table_Window):
     def move_and_resize_window(self, x, y, width, height):
         """Move and resize the specified window."""
         if self.number:
-            #print(f"Moving and resizing window {self.number}")
+            # print(f"Moving and resizing window {self.number}")
             MoveWindow(self.number, x, y, width, height, True)
-            #print(f"Window moved to ({x}, {y}) with dimensions {width}x{height}")
+            # print(f"Window moved to ({x}, {y}) with dimensions {width}x{height}")
         else:
             log.info("No window to move.")
 
@@ -177,7 +176,7 @@ class Table(Table_Window):
         if self.gdkhandle is None:
             self.gdkhandle = QWindow.fromWinId(int(self.number))
 
-        qwindow = (window.windowHandle())
+        qwindow = window.windowHandle()
         qwindow.setTransientParent(self.gdkhandle)
         qwindow.setFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus | Qt.WindowStaysOnTopHint)
 

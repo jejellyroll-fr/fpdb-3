@@ -19,28 +19,41 @@
 import os
 import sys
 import queue
+
 # import qdarkstyle
-if os.name == 'nt':
+if os.name == "nt":
     pass
 
 import codecs
 import Options
 from functools import partial
 
-cl_options = '.'.join(sys.argv[1:])
+cl_options = ".".join(sys.argv[1:])
 (options, argv) = Options.fpdb_options()
 from L10n import set_locale_translation
 import logging
 
-from PyQt5.QtCore import (QCoreApplication, QDate, Qt, QPoint)
-from PyQt5.QtGui import (QIcon, QPalette)
+from PyQt5.QtCore import QCoreApplication, QDate, Qt, QPoint
+from PyQt5.QtGui import QIcon, QPalette
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QSizePolicy
-from PyQt5.QtWidgets import (QAction, QApplication, QCalendarWidget,
-                             QCheckBox, QDateEdit, QDialog,
-                             QDialogButtonBox, QFileDialog,
-                             QGridLayout, QLineEdit, QMainWindow,
-                             QMessageBox, QScrollArea,
-                             QTabWidget, QVBoxLayout, QComboBox)
+from PyQt5.QtWidgets import (
+    QAction,
+    QApplication,
+    QCalendarWidget,
+    QCheckBox,
+    QDateEdit,
+    QDialog,
+    QDialogButtonBox,
+    QFileDialog,
+    QGridLayout,
+    QLineEdit,
+    QMainWindow,
+    QMessageBox,
+    QScrollArea,
+    QTabWidget,
+    QVBoxLayout,
+    QComboBox,
+)
 
 import interlocks
 from Exceptions import *
@@ -57,9 +70,10 @@ sqlite_version = sqlite3.sqlite_version
 import DetectInstalledSites
 import GuiPrefs
 import GuiLogView
+
 # import GuiDatabase
 import GuiBulkImport
-#import GuiTourneyImport
+# import GuiTourneyImport
 
 import GuiRingPlayerStats
 import GuiTourneyPlayerStats
@@ -70,15 +84,16 @@ import GuiTourneyGraphViewer
 import GuiSessionViewer
 import GuiHandViewer
 import GuiTourHandViewer
-#import GuiOddsCalc
-#import GuiStove
+# import GuiOddsCalc
+# import GuiStove
 
 import SQL
 import Database
 import Configuration
 import Card
 import Exceptions
-#import api, app
+
+# import api, app
 import cProfile
 import pstats
 import io
@@ -91,13 +106,12 @@ profiler = cProfile.Profile()
 profiler.enable()
 
 
-
 Configuration.set_logfile("fpdb-log.txt")
 
 log = logging.getLogger("fpdb")
 
 try:
-    assert not hasattr(sys, 'frozen')  # We're surely not in a git repo if this fails
+    assert not hasattr(sys, "frozen")  # We're surely not in a git repo if this fails
     import subprocess
 
     VERSION = subprocess.Popen(["git", "describe", "--tags", "--dirty"], stdout=subprocess.PIPE).communicate()[0]
@@ -109,11 +123,11 @@ except Exception:
 class fpdb(QMainWindow):
     def launch_ppt(self):
         path = os.getcwd()
-        if os.name == 'nt':
+        if os.name == "nt":
             pathcomp = f"{path}\pyfpdb\ppt\p2.jar"
         else:
             pathcomp = f"{path}/ppt/p2.jar"
-        subprocess.call(['java', '-jar', pathcomp])
+        subprocess.call(["java", "-jar", pathcomp])
 
     def add_and_display_tab(self, new_page, new_tab_name):
         """adds a tab, namely creates the button and displays it and appends all the relevant arrays"""
@@ -156,7 +170,7 @@ class fpdb(QMainWindow):
             f"FPDB{str(VERSION)}",
             "Copyright 2008-2023. See contributors.txt for details"
             + "You are free to change, and distribute original or changed versions "
-              "of fpdb within the rules set out by the license"
+            "of fpdb within the rules set out by the license"
             + "https://github.com/jejellyroll-fr/fpdb-3"
             + "\n"
             + "Your config file is: "
@@ -176,7 +190,8 @@ class fpdb(QMainWindow):
     def dia_database_stats(self, widget, data=None):
         self.warning_box(
             string=f"Number of Hands: {self.db.getHandCount()}\nNumber of Tourneys: {self.db.getTourneyCount()}\nNumber of TourneyTypes: {self.db.getTourneyTypeCount()}",
-            diatitle="Database Statistics")
+            diatitle="Database Statistics",
+        )
 
     # end def dia_database_stats
 
@@ -184,7 +199,6 @@ class fpdb(QMainWindow):
     def get_text(widget: QWidget):
         """Return text of widget, depending on widget type"""
         return widget.currentText() if isinstance(widget, QComboBox) else widget.text()
-
 
     def dia_hud_preferences(self, widget, data=None):
         dia = QDialog(self)
@@ -224,7 +238,7 @@ class fpdb(QMainWindow):
         btns.rejected.connect(dia.reject)
         dia.layout().addWidget(btns)
         self.comboGame.currentIndexChanged.connect(self.index_changed)
-        
+
         # Launch Dialog
         response = dia.exec_()
 
@@ -234,24 +248,23 @@ class fpdb(QMainWindow):
             # User clicked on "Save"
             for y in range(nb_items):
                 self.config.edit_hud(
-                    selected_hud_name, 
-                    self.get_text(self.stat_position_list[y]), 
+                    selected_hud_name,
+                    self.get_text(self.stat_position_list[y]),
                     self.get_text(self.stat_name_list[y]),
-                    self.get_text(self.click_list[y]), 
-                    self.get_text(self.hudcolor_list[y]), 
+                    self.get_text(self.click_list[y]),
+                    self.get_text(self.hudcolor_list[y]),
                     self.get_text(self.hudprefix_list[y]),
-                    self.get_text(self.hudsuffix_list[y]), 
-                    self.get_text(self.popup_list[y]), 
+                    self.get_text(self.hudsuffix_list[y]),
+                    self.get_text(self.popup_list[y]),
                     self.get_text(self.stat_hicolor_list[y]),
-                    self.get_text(self.stat_hith_list[y]), 
-                    self.get_text(self.stat_locolor_list[y]), 
+                    self.get_text(self.stat_hith_list[y]),
+                    self.get_text(self.stat_locolor_list[y]),
                     self.get_text(self.stat_loth_list[y]),
                     self.get_text(self.tip_list[y]),
                 )
 
             self.config.save()
             self.reload_config()
-
 
     def index_changed(self, index):
         # Called when user changes currently selected HUD
@@ -266,9 +279,20 @@ class fpdb(QMainWindow):
 
         self.table.setSpacing(0)
 
-        column_headers = ["coordonate", "stats name", "click", "hudcolor", "hudprefix", "hudsuffix",
-                          "popup", "stat_hicolor", "stat_hith", "stat_locolor", "stat_loth",
-                          "tip"]  # todo ("HUD")
+        column_headers = [
+            "coordonate",
+            "stats name",
+            "click",
+            "hudcolor",
+            "hudprefix",
+            "hudsuffix",
+            "popup",
+            "stat_hicolor",
+            "stat_hith",
+            "stat_locolor",
+            "stat_loth",
+            "tip",
+        ]  # todo ("HUD")
 
         for header_number in range(0, len(column_headers)):
             label = QLabel(column_headers[header_number])
@@ -276,9 +300,20 @@ class fpdb(QMainWindow):
             self.table.addWidget(label, 0, header_number)
 
         # Init lists that will contains QWidgets for each column in table ("stat_position_list" will contain the positions (ex: ["(0,1)", ...]))
-        self.stat_position_list, self.stat_name_list, self.click_list, self.hudcolor_list, self.hudprefix_list, \
-            self.hudsuffix_list, self.popup_list, self.stat_hicolor_list, self.stat_hith_list, self.stat_locolor_list, \
-                self.stat_loth_list, self.tip_list =  [], [], [], [], [], [], [], [], [], [], [], []
+        (
+            self.stat_position_list,
+            self.stat_name_list,
+            self.click_list,
+            self.hudcolor_list,
+            self.hudprefix_list,
+            self.hudsuffix_list,
+            self.popup_list,
+            self.stat_hicolor_list,
+            self.stat_hith_list,
+            self.stat_locolor_list,
+            self.stat_loth_list,
+            self.tip_list,
+        ) = [], [], [], [], [], [], [], [], [], [], [], []
 
         self.load_profile()
         hud_stats = self.config.stat_sets[selected_hud_name]  # Configuration.Stat_sets object
@@ -292,7 +327,7 @@ class fpdb(QMainWindow):
 
             # Column 2: select stat name (between available stats)
             # TODO: don't load all stats on each loop !
-            if os.name == 'nt':
+            if os.name == "nt":
                 icoPath = os.path.dirname(__file__)
                 icoPath = f"{icoPath}\\"
             else:
@@ -381,7 +416,7 @@ class fpdb(QMainWindow):
         dia.setWindowTitle("Skip these games when importing")
         dia.setLayout(QVBoxLayout())
         checkboxes = {}
-        filters = self.config.get_import_parameters()['importFilters']
+        filters = self.config.get_import_parameters()["importFilters"]
         for game in Card.games:
             checkboxes[game] = QCheckBox(game)
             dia.layout().addWidget(checkboxes[game])
@@ -403,7 +438,7 @@ class fpdb(QMainWindow):
         filename = "database-dump.sql"
         result = self.db.dumpDatabase()
 
-        with open(filename, 'w') as dumpFile:
+        with open(filename, "w") as dumpFile:
             dumpFile.write(result)
 
     # end def dia_database_stats
@@ -411,11 +446,18 @@ class fpdb(QMainWindow):
     def dia_recreate_tables(self, widget, data=None):
         """Dialogue that asks user to confirm that he wants to delete and recreate the tables"""
         if self.obtain_global_lock("fpdb.dia_recreate_tables"):  # returns true if successful
-            dia_confirm = QMessageBox(QMessageBox.Warning, "Wipe DB", "Confirm deleting and recreating tables",
-                                      QMessageBox.Yes | QMessageBox.No, self)
-            diastring = f"Please confirm that you want to (re-)create the tables. If there already are tables in" \
-                        f" the database {self.db.database} on {self.db.host}" \
-                        f" they will be deleted and you will have to re-import your histories.\nThis may take a while."
+            dia_confirm = QMessageBox(
+                QMessageBox.Warning,
+                "Wipe DB",
+                "Confirm deleting and recreating tables",
+                QMessageBox.Yes | QMessageBox.No,
+                self,
+            )
+            diastring = (
+                f"Please confirm that you want to (re-)create the tables. If there already are tables in"
+                f" the database {self.db.database} on {self.db.host}"
+                f" they will be deleted and you will have to re-import your histories.\nThis may take a while."
+            )
 
             dia_confirm.setInformativeText(diastring)  # todo: make above string with bold for db, host and deleted
             response = dia_confirm.exec_()
@@ -429,10 +471,12 @@ class fpdb(QMainWindow):
                 self.release_global_lock()
             else:
                 self.release_global_lock()
-                log.info('User cancelled recreating tables')
+                log.info("User cancelled recreating tables")
         else:
-            self.warning_box("Cannot open Database Maintenance window because other"
-                             " windows have been opened. Re-start fpdb to use this option.")
+            self.warning_box(
+                "Cannot open Database Maintenance window because other"
+                " windows have been opened. Re-start fpdb to use this option."
+            )
 
     def dia_recreate_hudcache(self, widget, data=None):
         if self.obtain_global_lock("dia_recreate_hudcache"):
@@ -474,23 +518,28 @@ class fpdb(QMainWindow):
             if response:
                 log.info("Rebuilding HUD Cache ...")
 
-                self.db.rebuild_cache(self.h_start_date.date().toString("yyyy-MM-dd"),
-                                      self.start_date.date().toString("yyyy-MM-dd"))
+                self.db.rebuild_cache(
+                    self.h_start_date.date().toString("yyyy-MM-dd"), self.start_date.date().toString("yyyy-MM-dd")
+                )
             else:
-                log.info('User cancelled rebuilding hud cache')
+                log.info("User cancelled rebuilding hud cache")
 
             self.release_global_lock()
         else:
-            self.warning_box("Cannot open Database Maintenance window because other windows have been opened. "
-                             "Re-start fpdb to use this option.")
+            self.warning_box(
+                "Cannot open Database Maintenance window because other windows have been opened. "
+                "Re-start fpdb to use this option."
+            )
 
     def dia_rebuild_indexes(self, widget, data=None):
         if self.obtain_global_lock("dia_rebuild_indexes"):
-            self.dia_confirm = QMessageBox(QMessageBox.Warning,
-                                           "Rebuild DB",
-                                           "Confirm rebuilding database indexes",
-                                           QMessageBox.Yes | QMessageBox.No,
-                                           self)
+            self.dia_confirm = QMessageBox(
+                QMessageBox.Warning,
+                "Rebuild DB",
+                "Confirm rebuilding database indexes",
+                QMessageBox.Yes | QMessageBox.No,
+                self,
+            )
             diastring = "Please confirm that you want to rebuild the database indexes."
             self.dia_confirm.setInformativeText(diastring)
 
@@ -505,12 +554,14 @@ class fpdb(QMainWindow):
                 log.info(" Analyzing Database ... ")
                 self.db.analyzeDB()
             else:
-                log.info('User cancelled rebuilding db indexes')
+                log.info("User cancelled rebuilding db indexes")
 
             self.release_global_lock()
         else:
-            self.warning_box("Cannot open Database Maintenance window because"
-                             " other windows have been opened. Re-start fpdb to use this option.")
+            self.warning_box(
+                "Cannot open Database Maintenance window because"
+                " other windows have been opened. Re-start fpdb to use this option."
+            )
 
     def dia_logs(self, widget, data=None):
         """opens the log viewer window"""
@@ -519,7 +570,7 @@ class fpdb(QMainWindow):
 
         viewer = None
         for i, t in enumerate(self.threads):
-            if str(t.__class__) == 'GuiLogView.GuiLogView':
+            if str(t.__class__) == "GuiLogView.GuiLogView":
                 viewer = t
                 break
 
@@ -552,10 +603,18 @@ class fpdb(QMainWindow):
             except KeyError:
                 pass
 
-        column_headers = ["Site", "2 players:\nbetween 0 & 2", "3 players:\nbetween 0 & 3 ",
-                          "4 players:\nbetween 0 & 4", "5 players:\nbetween 0 & 5", "6 players:\nbetween 0 & 6",
-                          "7 players:\nbetween 0 & 7", "8 players:\nbetween 0 & 8", "9 players:\nbetween 0 & 9",
-                          "10 players:\nbetween 0 & 10"]  # todo ("HUD")
+        column_headers = [
+            "Site",
+            "2 players:\nbetween 0 & 2",
+            "3 players:\nbetween 0 & 3 ",
+            "4 players:\nbetween 0 & 4",
+            "5 players:\nbetween 0 & 5",
+            "6 players:\nbetween 0 & 6",
+            "7 players:\nbetween 0 & 7",
+            "8 players:\nbetween 0 & 8",
+            "9 players:\nbetween 0 & 9",
+            "10 players:\nbetween 0 & 10",
+        ]  # todo ("HUD")
         # HUD column will contain a button that shows favseat and HUD locations.
         # Make it possible to load screenshot to arrange HUD windowlets.
 
@@ -574,8 +633,17 @@ class fpdb(QMainWindow):
         history_paths = []
         check_buttons = []
         screen_names = []
-        seat2_dict, seat3_dict, seat4_dict, seat5_dict, seat6_dict, seat7_dict, seat8_dict, \
-            seat9_dict, seat10_dict = [], [], [], [], [], [], [], [], []
+        seat2_dict, seat3_dict, seat4_dict, seat5_dict, seat6_dict, seat7_dict, seat8_dict, seat9_dict, seat10_dict = (
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+        )
         summary_paths = []
         detector = DetectInstalledSites.DetectInstalledSites()
 
@@ -651,12 +719,19 @@ class fpdb(QMainWindow):
                 # print "site %s enabled=%s name=%s" % (available_site_names[site_number],
                 # check_buttons[site_number].get_active(), screen_names[site_number].get_text(),
                 # history_paths[site_number].get_text())
-                self.config.edit_fav_seat(available_site_names[site_number],
-                                          str(check_buttons[site_number].isChecked()), seat2_dict[site_number].text(),
-                                          seat3_dict[site_number].text(), seat4_dict[site_number].text(),
-                                          seat5_dict[site_number].text(), seat6_dict[site_number].text(),
-                                          seat7_dict[site_number].text(), seat8_dict[site_number].text(),
-                                          seat9_dict[site_number].text(), seat10_dict[site_number].text())
+                self.config.edit_fav_seat(
+                    available_site_names[site_number],
+                    str(check_buttons[site_number].isChecked()),
+                    seat2_dict[site_number].text(),
+                    seat3_dict[site_number].text(),
+                    seat4_dict[site_number].text(),
+                    seat5_dict[site_number].text(),
+                    seat6_dict[site_number].text(),
+                    seat7_dict[site_number].text(),
+                    seat8_dict[site_number].text(),
+                    seat9_dict[site_number].text(),
+                    seat10_dict[site_number].text(),
+                )
 
             self.config.save()
             self.reload_config()
@@ -679,8 +754,16 @@ class fpdb(QMainWindow):
             except KeyError:
                 pass
 
-        column_headers = ["Site", "Detect", "Screen Name", "Hand History Path", "",
-                          "Tournament Summary Path", "", "Favorite seat"]  # todo ("HUD")
+        column_headers = [
+            "Site",
+            "Detect",
+            "Screen Name",
+            "Hand History Path",
+            "",
+            "Tournament Summary Path",
+            "",
+            "Favorite seat",
+        ]  # todo ("HUD")
         # HUD column will contain a button that shows favseat and HUD locations.
         # Make it possible to load screenshot to arrange HUD windowlets.
 
@@ -736,10 +819,18 @@ class fpdb(QMainWindow):
             if available_site_names[site_number] in detector.supportedSites:
                 button = QPushButton("Detect")
                 table.addWidget(button, y_pos, 1)
-                button.clicked.connect(partial(self.detect_clicked, data=(detector, available_site_names[site_number],
-                                                                          screen_names[site_number],
-                                                                          history_paths[site_number],
-                                                                          summary_paths[site_number])))
+                button.clicked.connect(
+                    partial(
+                        self.detect_clicked,
+                        data=(
+                            detector,
+                            available_site_names[site_number],
+                            screen_names[site_number],
+                            history_paths[site_number],
+                            summary_paths[site_number],
+                        ),
+                    )
+                )
             y_pos += 1
 
         btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, dia)
@@ -753,9 +844,13 @@ class fpdb(QMainWindow):
                 # print "site %s enabled=%s name=%s" % (available_site_names[site_number],
                 # check_buttons[site_number].get_active(), screen_names[site_number].get_text(),
                 # history_paths[site_number].get_text())
-                self.config.edit_site(available_site_names[site_number], str(check_buttons[site_number].isChecked()),
-                                      screen_names[site_number].text(), history_paths[site_number].text(),
-                                      summary_paths[site_number].text())
+                self.config.edit_site(
+                    available_site_names[site_number],
+                    str(check_buttons[site_number].isChecked()),
+                    screen_names[site_number].text(),
+                    history_paths[site_number].text(),
+                    summary_paths[site_number].text(),
+                )
 
             self.config.save()
             self.reload_config()
@@ -767,8 +862,9 @@ class fpdb(QMainWindow):
     def browseClicked(self, widget, parent, path):
         """runs when user clicks one of the browse buttons for the TS folder"""
 
-        newpath = QFileDialog.getExistingDirectory(parent, "Please choose the path that you want to Auto Import",
-                                                   path.text())
+        newpath = QFileDialog.getExistingDirectory(
+            parent, "Please choose the path that you want to Auto Import", path.text()
+        )
         if newpath:
             path.setText(newpath)
 
@@ -778,22 +874,24 @@ class fpdb(QMainWindow):
         entry_screen_name = data[2]
         entry_history_path = data[3]
         entry_summary_path = data[4]
-        if detector.sitestatusdict[site_name]['detected']:
-            entry_screen_name.setText(detector.sitestatusdict[site_name]['heroname'])
-            entry_history_path.setText(detector.sitestatusdict[site_name]['hhpath'])
-            if detector.sitestatusdict[site_name]['tspath']:
-                entry_summary_path.setText(detector.sitestatusdict[site_name]['tspath'])
+        if detector.sitestatusdict[site_name]["detected"]:
+            entry_screen_name.setText(detector.sitestatusdict[site_name]["heroname"])
+            entry_history_path.setText(detector.sitestatusdict[site_name]["hhpath"])
+            if detector.sitestatusdict[site_name]["tspath"]:
+                entry_summary_path.setText(detector.sitestatusdict[site_name]["tspath"])
 
     def reload_config(self):
         if len(self.nb_tab_names) == 1:
             # only main tab open, reload profile
             self.load_profile()
-            self.warning_box("Configuration settings have been updated,"
-                             " Fpdb needs to be restarted now\n\nClick OK to close Fpdb")
+            self.warning_box(
+                "Configuration settings have been updated," " Fpdb needs to be restarted now\n\nClick OK to close Fpdb"
+            )
             sys.exit()
         else:
-            self.warning_box("Updated preferences have not been loaded because windows are open."
-                             " Re-start fpdb to load them.")
+            self.warning_box(
+                "Updated preferences have not been loaded because windows are open." " Re-start fpdb to load them."
+            )
 
     def process_close_messages(self):
         # check for close messages
@@ -811,14 +909,14 @@ class fpdb(QMainWindow):
 
     def __calendar_dialog(self, widget, entry):
         d = QDialog(self.dia_confirm)
-        d.setWindowTitle('Pick a date')
+        d.setWindowTitle("Pick a date")
 
         vb = QVBoxLayout()
         d.setLayout(vb)
         cal = QCalendarWidget()
         vb.addWidget(cal)
 
-        btn = QPushButton('Done')
+        btn = QPushButton("Done")
         btn.clicked.connect(partial(self.__get_date, calendar=cal, entry=entry, win=d))
 
         vb.addWidget(btn)
@@ -828,15 +926,15 @@ class fpdb(QMainWindow):
 
     def createMenuBar(self):
         mb = self.menuBar()
-        configMenu = mb.addMenu('Configure')
-        importMenu = mb.addMenu('Import')
-        hudMenu = mb.addMenu('HUD')
-        cashMenu = mb.addMenu('Cash')
-        tournamentMenu = mb.addMenu('Tournament')
-        maintenanceMenu = mb.addMenu('Maintenance')
-        #toolsMenu = mb.addMenu('Tools')
-        helpMenu = mb.addMenu('Help')
-        themeMenu = mb.addMenu('Themes')
+        configMenu = mb.addMenu("Configure")
+        importMenu = mb.addMenu("Import")
+        hudMenu = mb.addMenu("HUD")
+        cashMenu = mb.addMenu("Cash")
+        tournamentMenu = mb.addMenu("Tournament")
+        maintenanceMenu = mb.addMenu("Maintenance")
+        # toolsMenu = mb.addMenu('Tools')
+        helpMenu = mb.addMenu("Help")
+        themeMenu = mb.addMenu("Themes")
 
         # Create actions
         def makeAction(name, callback, shortcut=None, tip=None):
@@ -848,46 +946,54 @@ class fpdb(QMainWindow):
             action.triggered.connect(callback)
             return action
 
-        configMenu.addAction(makeAction('Site Settings', self.dia_site_preferences))
-        configMenu.addAction(makeAction('Seat Settings', self.dia_site_preferences_seat))
-        configMenu.addAction(makeAction('Hud Settings', self.dia_hud_preferences))
-        configMenu.addAction(
-            makeAction('Adv Preferences', self.dia_advanced_preferences, tip='Edit your preferences'))
-        configMenu.addAction(makeAction('Import filters', self.dia_import_filters))
+        configMenu.addAction(makeAction("Site Settings", self.dia_site_preferences))
+        configMenu.addAction(makeAction("Seat Settings", self.dia_site_preferences_seat))
+        configMenu.addAction(makeAction("Hud Settings", self.dia_hud_preferences))
+        configMenu.addAction(makeAction("Adv Preferences", self.dia_advanced_preferences, tip="Edit your preferences"))
+        configMenu.addAction(makeAction("Import filters", self.dia_import_filters))
         configMenu.addSeparator()
-        configMenu.addAction(makeAction('Close Fpdb', self.quit, 'Ctrl+Q', 'Quit the Program'))
+        configMenu.addAction(makeAction("Close Fpdb", self.quit, "Ctrl+Q", "Quit the Program"))
 
-        importMenu.addAction(makeAction('Bulk Import', self.tab_bulk_import, 'Ctrl+B'))
-        hudMenu.addAction(makeAction('HUD and Auto Import', self.tab_auto_import, 'Ctrl+A'))
-        cashMenu.addAction(makeAction('Graphs', self.tabGraphViewer, 'Ctrl+G'))
-        cashMenu.addAction(makeAction('Ring Player Stats', self.tab_ring_player_stats, 'Ctrl+P'))
-        cashMenu.addAction(makeAction('Hand Viewer', self.tab_hand_viewer))
-        cashMenu.addAction(makeAction('Session Stats', self.tab_session_stats, 'Ctrl+S'))
-        tournamentMenu.addAction(makeAction('Tourney Graphs', self.tabTourneyGraphViewer))
-        tournamentMenu.addAction(makeAction('Tourney Stats', self.tab_tourney_player_stats, 'Ctrl+T'))
-        tournamentMenu.addAction(makeAction('Tourney Hand Viewer', self.tab_tourney_viewer_stats))
-        maintenanceMenu.addAction(makeAction('Statistics', self.dia_database_stats, 'View Database Statistics'))
-        maintenanceMenu.addAction(makeAction('Create or Recreate Tables', self.dia_recreate_tables))
-        maintenanceMenu.addAction(makeAction('Rebuild HUD Cache', self.dia_recreate_hudcache))
-        maintenanceMenu.addAction(makeAction('Rebuild DB Indexes', self.dia_rebuild_indexes))
-        maintenanceMenu.addAction(makeAction('Dump Database to Textfile (takes ALOT of time)', self.dia_dump_db))
+        importMenu.addAction(makeAction("Bulk Import", self.tab_bulk_import, "Ctrl+B"))
+        hudMenu.addAction(makeAction("HUD and Auto Import", self.tab_auto_import, "Ctrl+A"))
+        cashMenu.addAction(makeAction("Graphs", self.tabGraphViewer, "Ctrl+G"))
+        cashMenu.addAction(makeAction("Ring Player Stats", self.tab_ring_player_stats, "Ctrl+P"))
+        cashMenu.addAction(makeAction("Hand Viewer", self.tab_hand_viewer))
+        cashMenu.addAction(makeAction("Session Stats", self.tab_session_stats, "Ctrl+S"))
+        tournamentMenu.addAction(makeAction("Tourney Graphs", self.tabTourneyGraphViewer))
+        tournamentMenu.addAction(makeAction("Tourney Stats", self.tab_tourney_player_stats, "Ctrl+T"))
+        tournamentMenu.addAction(makeAction("Tourney Hand Viewer", self.tab_tourney_viewer_stats))
+        maintenanceMenu.addAction(makeAction("Statistics", self.dia_database_stats, "View Database Statistics"))
+        maintenanceMenu.addAction(makeAction("Create or Recreate Tables", self.dia_recreate_tables))
+        maintenanceMenu.addAction(makeAction("Rebuild HUD Cache", self.dia_recreate_hudcache))
+        maintenanceMenu.addAction(makeAction("Rebuild DB Indexes", self.dia_rebuild_indexes))
+        maintenanceMenu.addAction(makeAction("Dump Database to Textfile (takes ALOT of time)", self.dia_dump_db))
 
-        #toolsMenu.addAction(makeAction('PokerProTools', self.launch_ppt))
-        helpMenu.addAction(makeAction('Log Messages', self.dia_logs, 'Log and Debug Messages'))
-        helpMenu.addAction(makeAction('Help Tab', self.tab_main_help))
+        # toolsMenu.addAction(makeAction('PokerProTools', self.launch_ppt))
+        helpMenu.addAction(makeAction("Log Messages", self.dia_logs, "Log and Debug Messages"))
+        helpMenu.addAction(makeAction("Help Tab", self.tab_main_help))
         helpMenu.addSeparator()
-        helpMenu.addAction(makeAction('Infos', self.dia_about, 'About the program'))
+        helpMenu.addAction(makeAction("Infos", self.dia_about, "About the program"))
 
         themes = [
-            'dark_purple.xml', 'dark_teal.xml', 'dark_blue.xml', 'dark_cyan.xml',
-            'dark_pink.xml', 'dark_red.xml', 'dark_lime.xml', 'light_purple.xml',
-            'light_teal.xml', 'light_blue.xml', 'light_cyan.xml', 'light_pink.xml',
-            'light_red.xml', 'light_lime.xml'
+            "dark_purple.xml",
+            "dark_teal.xml",
+            "dark_blue.xml",
+            "dark_cyan.xml",
+            "dark_pink.xml",
+            "dark_red.xml",
+            "dark_lime.xml",
+            "light_purple.xml",
+            "light_teal.xml",
+            "light_blue.xml",
+            "light_cyan.xml",
+            "light_pink.xml",
+            "light_red.xml",
+            "light_lime.xml",
         ]
 
         for theme in themes:
             themeMenu.addAction(QAction(theme, self, triggered=partial(self.change_theme, theme)))
-
 
     def load_profile(self, create_db=False):
         """Loads profile from the provided path name.
@@ -898,8 +1004,10 @@ class fpdb(QMainWindow):
         """
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
         if self.config.file_error:
-            self.warning_box(f"There is an error in your config file"
-                             f" {self.config.file}:\n{str(self.config.file_error)}", diatitle="CONFIG FILE ERROR")
+            self.warning_box(
+                f"There is an error in your config file" f" {self.config.file}:\n{str(self.config.file_error)}",
+                diatitle="CONFIG FILE ERROR",
+            )
             sys.exit()
 
         log.info(f"Logfile is {os.path.join(self.config.dir_log, self.config.log_file)}")
@@ -907,38 +1015,45 @@ class fpdb(QMainWindow):
         log.info(f"{self.display_config_created_dialogue}")
         log.info(f"{self.config.wrongConfigVersion}")
         if self.config.example_copy or self.display_config_created_dialogue:
-            self.info_box("Config file", [
-                "Config file has been created at " + self.config.file + ".",
-                "Enter your screen_name and hand history path in the Site Preferences window"
-                " (Main menu) before trying to import hands."
-            ])
+            self.info_box(
+                "Config file",
+                [
+                    "Config file has been created at " + self.config.file + ".",
+                    "Enter your screen_name and hand history path in the Site Preferences window"
+                    " (Main menu) before trying to import hands.",
+                ],
+            )
 
             self.display_config_created_dialogue = False
         elif self.config.wrongConfigVersion:
             diaConfigVersionWarning = QDialog()
             diaConfigVersionWarning.setWindowTitle("Strong Warning - Local configuration out of date")
             diaConfigVersionWarning.setLayout(QVBoxLayout())
-            label = QLabel([
-                "\nYour local configuration file needs to be updated."
-            ])
+            label = QLabel(["\nYour local configuration file needs to be updated."])
             diaConfigVersionWarning.layout().addWidget(label)
-            label = QLabel([
-                "\nYour local configuration file needs to be updated.",
-                "This error is not necessarily fatal but it is strongly recommended that you update the configuration."
-            ])
+            label = QLabel(
+                [
+                    "\nYour local configuration file needs to be updated.",
+                    "This error is not necessarily fatal but it is strongly recommended that you update the configuration.",
+                ]
+            )
 
             diaConfigVersionWarning.layout().addWidget(label)
-            label = QLabel([
-                "To create a new configuration, see:",
-                "fpdb.sourceforge.net/apps/mediawiki/fpdb/index.php?title=Reset_Configuration"
-            ])
+            label = QLabel(
+                [
+                    "To create a new configuration, see:",
+                    "fpdb.sourceforge.net/apps/mediawiki/fpdb/index.php?title=Reset_Configuration",
+                ]
+            )
 
             label.setTextInteractionFlags(Qt.TextSelectableByMouse)
             diaConfigVersionWarning.layout().addWidget(label)
-            label = QLabel([
-                "A new configuration will destroy all personal settings"
-                " (hud layout, site folders, screennames, favourite seats).\n"
-            ])
+            label = QLabel(
+                [
+                    "A new configuration will destroy all personal settings"
+                    " (hud layout, site folders, screennames, favourite seats).\n"
+                ]
+            )
 
             diaConfigVersionWarning.layout().addWidget(label)
 
@@ -956,13 +1071,13 @@ class fpdb(QMainWindow):
             self.config.wrongConfigVersion = False
 
         self.settings = {}
-        self.settings['global_lock'] = self.lock
+        self.settings["global_lock"] = self.lock
         if os.sep == "/":
-            self.settings['os'] = "linuxmac"
+            self.settings["os"] = "linuxmac"
         else:
-            self.settings['os'] = "windows"
+            self.settings["os"] = "windows"
 
-        self.settings.update({'cl_options': cl_options})
+        self.settings.update({"cl_options": cl_options})
         self.settings.update(self.config.get_db_parameters())
         self.settings.update(self.config.get_import_parameters())
         self.settings.update(self.config.get_default_paths())
@@ -970,24 +1085,28 @@ class fpdb(QMainWindow):
         if self.db is not None and self.db.is_connected():
             self.db.disconnect()
 
-        self.sql = SQL.Sql(db_server=self.settings['db-server'])
+        self.sql = SQL.Sql(db_server=self.settings["db-server"])
         err_msg = None
         try:
             self.db = Database.Database(self.config, sql=self.sql)
-            if self.db.get_backend_name() == 'SQLite':
+            if self.db.get_backend_name() == "SQLite":
                 # tell sqlite users where the db file is
                 log.info(f"Connected to SQLite: {self.db.db_path}")
         except Exceptions.FpdbMySQLAccessDenied:
             err_msg = "MySQL Server reports: Access denied. Are your permissions set correctly?"
         except Exceptions.FpdbMySQLNoDatabase:
-            err_msg = "MySQL client reports: 2002 or 2003 error." \
-                      " Unable to connect - Please check that the MySQL service has been started."
+            err_msg = (
+                "MySQL client reports: 2002 or 2003 error."
+                " Unable to connect - Please check that the MySQL service has been started."
+            )
 
         except Exceptions.FpdbPostgresqlAccessDenied:
             err_msg = "PostgreSQL Server reports: Access denied. Are your permissions set correctly?"
         except Exceptions.FpdbPostgresqlNoDatabase:
-            err_msg = "PostgreSQL client reports: Unable to connect -" \
+            err_msg = (
+                "PostgreSQL client reports: Unable to connect -"
                 "Please check that the PostgreSQL service has been started."
+            )
         if err_msg is not None:
             self.db = None
             self.warning_box(err_msg)
@@ -995,9 +1114,13 @@ class fpdb(QMainWindow):
             self.db = None
 
         if self.db is not None and self.db.wrongDbVersion:
-            diaDbVersionWarning = QMessageBox(QMessageBox.Warning, "Strong Warning - Invalid database version",
-                                              "An invalid DB version or missing tables have been detected.",
-                                              QMessageBox.Ok, self)
+            diaDbVersionWarning = QMessageBox(
+                QMessageBox.Warning,
+                "Strong Warning - Invalid database version",
+                "An invalid DB version or missing tables have been detected.",
+                QMessageBox.Ok,
+                self,
+            )
             diaDbVersionWarning.setInformativeText(
                 "This error is not necessarily fatal but it is strongly"
                 " recommended that you recreate the tables by using the Database menu."
@@ -1006,8 +1129,10 @@ class fpdb(QMainWindow):
 
             diaDbVersionWarning.exec_()
         if self.db is not None and self.db.is_connected():
-            self.statusBar().showMessage(f"Status: Connected to {self.db.get_backend_name()}"
-                                         f" database named {self.db.database} on host {self.db.host}")
+            self.statusBar().showMessage(
+                f"Status: Connected to {self.db.get_backend_name()}"
+                f" database named {self.db.database} on host {self.db.host}"
+            )
 
             # rollback to make sure any locks are cleared:
             self.db.rollback()
@@ -1015,7 +1140,7 @@ class fpdb(QMainWindow):
         # If the db-version is out of date, don't validate the config
         # otherwise the end user gets bombarded with false messages
         # about every site not existing
-        if hasattr(self.db, 'wrongDbVersion'):
+        if hasattr(self.db, "wrongDbVersion"):
             if not self.db.wrongDbVersion:
                 self.validate_config()
 
@@ -1043,6 +1168,7 @@ class fpdb(QMainWindow):
             if self.db.backend == self.db.MYSQL_INNODB:
                 try:
                     import _mysql_exceptions
+
                     if self.db is not None and self.db.is_connected():
                         self.db.disconnect()
                 except _mysql_exceptions.OperationalError:  # oh, damn, we're already disconnected
@@ -1075,16 +1201,12 @@ class fpdb(QMainWindow):
         self.threads.append(new_import_thread)
         self.add_and_display_tab(new_import_thread, "Bulk Import")
 
-
-
     def tab_tourney_import(self, widget, data=None):
         """opens a tab for bulk importing tournament summaries"""
         new_import_thread = GuiTourneyImport.GuiTourneyImport(self.settings, self.config, self.sql, self.window)
         self.threads.append(new_import_thread)
         bulk_tab = new_import_thread.get_vbox()
         self.add_and_display_tab(bulk_tab, "Tournament Results Import")
-
-
 
     # end def tab_import_imap_summaries
 
@@ -1122,7 +1244,8 @@ class fpdb(QMainWindow):
 
     def tab_main_help(self, widget, data=None):
         """Displays a tab with the main fpdb help screen"""
-        mh_tab = QLabel(("""
+        mh_tab = QLabel((
+            """
                         Welcome to Fpdb!
 
                         This program is currently in an alpha-state, so our database format is still sometimes changed.
@@ -1135,7 +1258,8 @@ class fpdb(QMainWindow):
                         and partially under GPL2 or later.
                         The Windows installer package includes code licensed under the MIT license.
                         You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt
-                        and mit.txt in the fpdb installation directory."""))
+                        and mit.txt in the fpdb installation directory."""
+        ))
         self.add_and_display_tab(mh_tab, "Help")
 
     def get_theme_colors(self):
@@ -1162,12 +1286,12 @@ class fpdb(QMainWindow):
             "line_nonshowdown": "#FF0000",
             "line_ev": "#FFA500",
             "line_hands": "#00FF00",
-            'line_up': 'g',
-            'line_down': 'r',
-            'line_showdown': 'b',
-            'line_nonshowdown': 'm',
-            'line_ev': 'orange',
-            'line_hands': 'c'
+            "line_up": "g",
+            "line_down": "r",
+            "line_showdown": "b",
+            "line_nonshowdown": "m",
+            "line_ev": "orange",
+            "line_hands": "c",
         }
 
     def tabGraphViewer(self, widget, data=None):
@@ -1220,8 +1344,6 @@ class fpdb(QMainWindow):
     def change_theme(self, theme):
         apply_stylesheet(app, theme=theme)
 
-
-
     def update_title_bar_theme(self):
         # Apply the stylesheet to the custom title bar
         self.custom_title_bar.update_theme()
@@ -1240,11 +1362,11 @@ class fpdb(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        if sys.platform == 'darwin':
+        if sys.platform == "darwin":
             pass
         else:
             self.setWindowFlags(Qt.FramelessWindowHint)
-        cards = os.path.join(Configuration.GRAPHICS_PATH, 'tribal.jpg')
+        cards = os.path.join(Configuration.GRAPHICS_PATH, "tribal.jpg")
         if os.path.exists(cards):
             self.setWindowIcon(QIcon(cards))
         set_locale_translation()
@@ -1257,8 +1379,6 @@ class fpdb(QMainWindow):
         self.closeq = queue.Queue(20)
 
         self.oldPos = self.pos()
-
-
 
         if options.initialRun:
             self.display_config_created_dialogue = True
@@ -1283,7 +1403,7 @@ class fpdb(QMainWindow):
             defy = sg.height()
         self.resize(defx, defy)
 
-        if sys.platform == 'darwin':
+        if sys.platform == "darwin":
             pass
         else:
             # Create custom title bar
@@ -1294,7 +1414,7 @@ class fpdb(QMainWindow):
         self.central_layout.setContentsMargins(0, 0, 0, 0)
         self.central_layout.setSpacing(0)
 
-        if sys.platform == 'darwin':
+        if sys.platform == "darwin":
             # Add title bar and menu bar to layout
             self.custom_title_bar = CustomTitleBar(self)
             self.central_layout.addWidget(self.custom_title_bar)
@@ -1329,7 +1449,7 @@ class fpdb(QMainWindow):
 
         self.load_profile(create_db=True)
 
-        if self.config.install_method == 'app':
+        if self.config.install_method == "app":
             for site in list(self.config.supported_sites.values()):
                 if site.screen_name != "YOUR SCREEN NAME HERE":
                     break
@@ -1343,16 +1463,17 @@ class fpdb(QMainWindow):
             self.display_site_preferences = False
 
         if not options.errorsToConsole:
-            fileName = os.path.join(self.config.dir_log, 'fpdb-errors.txt')
-            log.info(f"Note: error output is being diverted to {self.config.dir_log}. Any major error will be reported there _only_.")
-            errorFile = codecs.open(fileName, 'w', 'utf-8')
+            fileName = os.path.join(self.config.dir_log, "fpdb-errors.txt")
+            log.info(
+                f"Note: error output is being diverted to {self.config.dir_log}. Any major error will be reported there _only_."
+            )
+            errorFile = codecs.open(fileName, "w", "utf-8")
             sys.stderr = errorFile
 
         sys.stderr.write("fpdb starting ...")
 
         if options.autoimport:
             self.tab_auto_import(None)
-
 
 
 class CustomTitleBar(QWidget):
@@ -1390,7 +1511,7 @@ class CustomTitleBar(QWidget):
         self.setLayout(layout)
 
         self.is_maximized = False
-        if sys.platform == 'darwin':
+        if sys.platform == "darwin":
             pass
         else:
             self.moving = False
@@ -1417,27 +1538,27 @@ class CustomTitleBar(QWidget):
             self.main_window.oldPos = event.globalPos()
 
 
-
 if __name__ == "__main__":
     from qt_material import apply_stylesheet
     import time
+
     try:
         app = QApplication([])
-        apply_stylesheet(app, theme='dark_purple.xml')
+        apply_stylesheet(app, theme="dark_purple.xml")
         me = fpdb()
         app.exec_()
     finally:
         profiler.disable()
         s = io.StringIO()
-        ps = pstats.Stats(profiler, stream=s).sort_stats('cumulative')
+        ps = pstats.Stats(profiler, stream=s).sort_stats("cumulative")
         ps.print_stats()
 
         # Use timestamp or process ID for unique filenames
         timestamp = time.strftime("%Y%m%d-%H%M%S")
-        results_file = os.path.join(PROFILE_OUTPUT_DIR, f'fpdb_profile_results_{timestamp}.txt')
-        profile_file = os.path.join(PROFILE_OUTPUT_DIR, f'fpdb_profile_{timestamp}.prof')
-        
-        with open(results_file, 'w') as f:
+        results_file = os.path.join(PROFILE_OUTPUT_DIR, f"fpdb_profile_results_{timestamp}.txt")
+        profile_file = os.path.join(PROFILE_OUTPUT_DIR, f"fpdb_profile_{timestamp}.prof")
+
+        with open(results_file, "w") as f:
             f.write(s.getvalue())
-        
+
         profiler.dump_stats(profile_file)
