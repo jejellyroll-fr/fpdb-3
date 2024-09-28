@@ -28,14 +28,14 @@ from past.utils import old_div
 #    Standard Library modules
 
 import os  # todo: remove this once import_dir is in fpdb_import
-from time import time, sleep, process_time
+from time import time, process_time
 import datetime
-import queue
 import shutil
 import re
 import zmq
 
-import logging, traceback
+import logging
+import traceback
 
 from PyQt5.QtWidgets import QProgressBar, QLabel, QDialog, QVBoxLayout
 from PyQt5.QtCore import QCoreApplication
