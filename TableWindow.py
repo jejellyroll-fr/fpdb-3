@@ -33,9 +33,8 @@ client has been resized, destroyed, etc.
 #    Standard Library modules
 import re
 import logging
-import platform
-import unicodedata
 from time import sleep
+
 
 #    FreePokerTools modules
 import Configuration
@@ -89,6 +88,7 @@ limit_game_names = { #fpdb name      Stars Name   FTP Name
 #    search_string = 
 
 class Table_Window(object):
+    BAD_WORDS = ('History for table:', 'HUD:', 'Chat:', 'FPDBHUD', 'Lobby')
     def __init__(self, config, site, table_name=None, tournament=None, table_number=None):
         self.config = config
         self.site = site
@@ -248,53 +248,9 @@ class Table_Window(object):
         return False
 
 
+
     def check_bad_words(self, title):
-        log.debug(f"Received title: '{title}' (length: {len(title)})")
-        
-        bad_words = ('History for table:', 'HUD:', 'Chat:', 'FPDBHUD', 'Lobby')
-        
-        # Normalize the title depending on platform
-        title_normalized = self.normalize_string(title)
-        log.debug(f"Normalized title: '{title_normalized}' (length: {len(title_normalized)})")
-        
-        for word in bad_words:
-            word_normalized = self.normalize_string(word)
-            log.debug(f"\nChecking for bad word: '{word}' (normalized: '{word_normalized}')")
-            log.debug(f"Comparing '{word_normalized}' with '{title_normalized}'")
-            
-            # Print detailed comparison logic
-            if word_normalized in title_normalized:
-                log.debug(f"=> Bad word detected: '{word_normalized}' found in '{title_normalized}'")
-                return True
-            else:
-                log.debug(f"=> No match for: '{word_normalized}'")
-        
-        log.debug("No bad word detected")
-        return False
+        # Nettoyage et conversion en minuscules en une seule étape
+        title_stripped = title.strip().lower()
 
-
-    def normalize_string(self, text):
-        """
-        Normalize the input string for multi-platform comparison.
-        This function strips whitespace, converts to lowercase, and applies Unicode normalization.
-        """
-        # Apply Unicode normalization to handle accented characters or special cases
-        text = unicodedata.normalize('NFKD', text).encode('ASCII', 'ignore').decode('ASCII')
-
-        # Remove leading/trailing whitespaces and convert to lowercase
-        text = text.strip().lower()
-
-        # On Windows, remove potential special characters like carriage returns
-        if platform.system() == 'Windows':
-            text = text.replace('\r', '')
-
-        # Further platform-specific normalization can be added here if needed
-        return text
-
-
-
-
-
-
-
-
+        return any(bad_word.lower() in title_stripped for bad_word in self.BAD_WORDS)

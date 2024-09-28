@@ -273,7 +273,3 @@ class Table(Table_Window):
                 window.setWindowFlag(Qt.WindowStaysOnTopHint, False)
                 window.show()
 
-    def check_bad_words(self, title):
-        # Implement this method to check for unwanted words in the title
-        # Return True if bad words are found, False otherwise
-        return False

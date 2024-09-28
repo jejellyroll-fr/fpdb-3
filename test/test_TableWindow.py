@@ -94,22 +94,9 @@ def test_get_table_no_no_match(TableClass, config, site):
         table_no = table_window.get_table_no()
         assert table_no is False
 
-def test_check_bad_words_detects_bad_word(table_window):
-    """Test if check_bad_words detects forbidden words."""
-    title = "History for table:"
-    result = table_window.check_bad_words(title)
-    assert result is True  
 
-def test_check_bad_words_with_space(table_window):
-    """Test if check_bad_words detects forbidden words with additional spaces."""
-    title = " History for table: "
-    result = table_window.check_bad_words(title) 
-    assert result is True  
 
-def test_check_bad_words_no_bad_word(table_window):
-    """Test if check_bad_words does not detect forbidden words when there are none."""
-    result = table_window.check_bad_words("PokerStars Table 1")
-    assert result is False
+
 
 def test_manual_comparison():
     """Test manual string comparison."""
@@ -290,16 +277,8 @@ def base_test_table_window_init_table_name(MockTable, config, site):
     assert tw.tournament is None
     assert tw.table is None
 
-@pytest.mark.parametrize("title,expected", [
-    ("History for table:", True),
-    (" History for table: ", True),
-    ("PokerStars Table 1", False),
-    ("hud:", True),  
-])
-def test_check_bad_words(table_window, title, expected):
-    """Test if check_bad_words detects or does not detect forbidden words."""
-    result = table_window.check_bad_words(title)
-    assert result == expected
+
+
 
 @pytest.mark.parametrize("platform_name,module_name", [
     ('Windows', 'WinTables'),
@@ -312,16 +291,16 @@ def test_manual_comparison_platform(platform_name, module_name):
         pytest.skip(f"Test for {platform_name} only")
     test_manual_comparison()
 
-@pytest.mark.parametrize("platform_name,module_name", [
-    ('Windows', 'WinTables'),
-    ('Darwin', 'OSXTables'),
-    ('Linux', 'XTables')
+@pytest.mark.parametrize("title,expected", [
+    ("History for table:", True),       # Exact match
+    (" History for table: ", True),     # Spaces around
+    ("PokerStars Table 1", False),      # No bad word
+    ("hud:", True),                     # Detection of the forbidden word "HUD"
 ])
-def test_check_bad_words_detects_bad_word_platform(platform_name, module_name, TableClass, config, site):
-    """Test if check_bad_words detects forbidden words on each platform."""
-    if platform.system() != platform_name:
-        pytest.skip(f"Test for {platform_name} only")
-    table_window = TableClass(config, site)
-    
-    # Normalize the expected behavior across platforms
-    assert table_window.check_bad_words("History for table:".strip().lower()) is True
+def test_check_bad_words(table_window, title, expected):
+    """Test if check_bad_words detects or does not detect forbidden words."""
+    print(f"Searching in title: '{title}'")
+    result = table_window.check_bad_words(title)
+    print(f"Expected: {expected}, Got: {result}")
+    assert result == expected
+
