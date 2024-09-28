@@ -2452,7 +2452,7 @@ def starthands(stat_dict, player):
             count_pfd += 1
             if count_pfd / 8.0 == int(count_pfd / 8.0):
                 PFdefendBB = PFdefendBB + "\n"
-        elif qstreet0Aggr == True:
+        elif qstreet0Aggr is True:
             PFaggr = PFaggr + "/" + humancards + "." + qposition
             count_pfa += 1
             if count_pfa / 8.0 == int(count_pfa / 8.0):

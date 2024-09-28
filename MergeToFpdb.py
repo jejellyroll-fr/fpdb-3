@@ -406,7 +406,7 @@ class Merge(HandHistoryConverter):
                 if list(acted.keys()) == list(seated.keys()):  # We've faound all players
                     fulltable = True
                     break
-            if fulltable != True:
+            if fulltable is not True:
                 for seatno in list(seated.keys()):
                     if seatno not in acted:
                         del seated[seatno]
@@ -785,9 +785,9 @@ class Merge(HandHistoryConverter):
         m = self.re_Cancelled.search(hand.handText)
         if m:
             message = "Found CANCELLED"
-        if message == False and function == "markStreets":
+        if message is False and function == "markStreets":
             message = "Failed to identify all streets"
-        if message == False and function == "readHandInfo":
+        if message is False and function == "readHandInfo":
             message = "END_OF_HAND not found. No obvious reason"
         if message:
             raise FpdbHandPartial("Partial hand history: %s '%s' %s" % (function, hand.handid, message))

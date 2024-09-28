@@ -189,7 +189,7 @@ class IdentifySite(object):
                 fobj = self.idSite(path, whole_file, kodec)
                 print("siteid obj")
                 # print(fobj.path)
-                if fobj == False:  # Site id failed
+                if fobj is False:  # Site id failed
                     log.debug(("DEBUG:") + " " + ("siteId Failed for: %s") % path)
                 else:
                     self.filelist[path] = fobj

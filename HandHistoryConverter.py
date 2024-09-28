@@ -149,7 +149,7 @@ HandHistoryConverter: '%(sitename)s'
         log.info(("Parsing %d hands") % len(list(handsList)))
         # Determine if we're dealing with a HH file or a Summary file
         # quick fix : empty files make the handsList[0] fail ==> If empty file, go on with HH parsing
-        if len(list(handsList)) == 0 or self.isSummary(handsList[0]) == False:
+        if len(list(handsList)) == 0 or self.isSummary(handsList[0]) is False:
             self.parsedObjectType = "HH"
             for handText in handsList:
                 try:
@@ -213,11 +213,11 @@ HandHistoryConverter: '%(sitename)s'
         # maybe archive params should be one archive param, then call method in specific converter?
         # if self.archive:
         #     self.obs = self.convert_archive(self.obs)
-        if self.starsArchive == True:
+        if self.starsArchive is True:
             m = re.compile("^Hand #\d+", re.MULTILINE)
             self.obs = m.sub("", self.obs)
 
-        if self.ftpArchive == True:
+        if self.ftpArchive is True:
             # Remove  ******************** # 1 *************************
             m = re.compile("\*{20}\s#\s\d+\s\*{20,25}\s+", re.MULTILINE)
             self.obs = m.sub("", self.obs)

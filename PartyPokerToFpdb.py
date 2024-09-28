@@ -781,7 +781,7 @@ class PartyPoker(HandHistoryConverter):
             or hand.roundPenny
         ):
             try:
-                assert noSmallBlind == False
+                assert noSmallBlind is False
                 for m in self.re_PostSB.finditer(hand.handText):
                     hand.addBlind(m.group("PNAME"), "small blind", self.clearMoneyString(m.group("SB")))
                     if hand.gametype["sb"] is None:

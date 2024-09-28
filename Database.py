@@ -707,7 +707,7 @@ class Database(object):
             self.h_date_ndays_ago = "d000000"  # date N days ago ('d' + YYMMDD) for hero
             self.date_nhands_ago = {}  # dates N hands ago per player - not used yet
 
-            self.saveActions = False if self.import_options["saveActions"] == False else True
+            self.saveActions = False if self.import_options["saveActions"] is False else True
 
             if self.is_connected():
                 if not self.wrongDbVersion:
