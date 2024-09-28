@@ -566,7 +566,7 @@ class KingsClub(HandHistoryConverter):
 
     def readCommunityCards(self, hand, street):  # street has been matched by markStreets, so exists in this hand
         if (
-            street != "FLOPET" or hand.streets.get("FLOP") == None
+            street != "FLOPET" or hand.streets.get("FLOP") is None
         ):  # a list of streets which get dealt community cards (i.e. all but PREFLOP)
             if street in ("FLOP1", "TURN1", "FLOP2", "TURN2") and not hand.gametype["split"]:
                 hand.setCommunityCards(street, hand.streets[street].split(" "))

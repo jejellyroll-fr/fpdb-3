@@ -358,11 +358,11 @@ class GuiSessionViewer(QSplitter):
 
                 total_hands = total_hands + hds
                 total_time = total_time + minutesplayed
-                if global_lwm == None or global_lwm > lwm:
+                if global_lwm is None or global_lwm > lwm:
                     global_lwm = lwm
-                if global_hwm == None or global_hwm < hwm:
+                if global_hwm is None or global_hwm < hwm:
                     global_hwm = hwm
-                if global_open == None:
+                if global_open is None:
                     global_open = open
                     global_stime = stime
 

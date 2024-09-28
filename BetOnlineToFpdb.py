@@ -383,7 +383,7 @@ class BetOnline(HandHistoryConverter):
             if key == "TOURNO":
                 hand.tourNo = info[key]
             if key == "BUYIN":
-                if hand.tourNo != None:
+                if hand.tourNo is not None:
                     # print "DEBUG: info['BUYIN']: %s" % info['BUYIN']
                     # print "DEBUG: info['BIAMT']: %s" % info['BIAMT']
                     # print "DEBUG: info['BIRAKE']: %s" % info['BIRAKE']
@@ -409,7 +409,7 @@ class BetOnline(HandHistoryConverter):
                             )
 
                         info["BIAMT"] = info["BIAMT"].strip("$€")
-                        if info["BOUNTY"] != None:
+                        if info["BOUNTY"] is not None:
                             # There is a bounty, Which means we need to switch BOUNTY and BIRAKE values
                             tmp = info["BOUNTY"]
                             info["BOUNTY"] = info["BIRAKE"]
@@ -428,13 +428,13 @@ class BetOnline(HandHistoryConverter):
                 hand.level = info[key]
 
             if key == "TABLE":
-                if hand.tourNo != None:
+                if hand.tourNo is not None:
                     hand.tablename = re.split("-", info[key])[1]
                 else:
                     hand.tablename = info[key]
             if key == "BUTTON":
                 hand.buttonpos = info[key]
-            if key == "MAX" and info[key] != None:
+            if key == "MAX" and info[key] is not None:
                 hand.maxseats = int(info[key])
         if not self.re_Board1.search(hand.handText) and self.skin not in ("ActionPoker", "GearPoker"):
             raise FpdbHandPartial("readHandInfo: " + ("Partial hand history") + ": '%s'" % hand.handid)
@@ -613,15 +613,15 @@ class BetOnline(HandHistoryConverter):
         # FIXME
         # The following should only trigger when a small blind is missing in ActionPoker hands, or the sb/bb is ALL_IN
         if self.skin in ("ActionPoker", "GearPoker"):
-            if hand.gametype["sb"] == None and hand.gametype["bb"] != None:
+            if hand.gametype["sb"] is None and hand.gametype["bb"] is not None:
                 BB = str(Decimal(hand.gametype["bb"]) * 2)
-                if self.Lim_Blinds.get(BB) != None:
+                if self.Lim_Blinds.get(BB) is not None:
                     hand.gametype["sb"] = self.Lim_Blinds.get(BB)[0]
-            elif hand.gametype["bb"] == None and hand.gametype["sb"] != None:
+            elif hand.gametype["bb"] is None and hand.gametype["sb"] is not None:
                 for k, v in list(self.Lim_Blinds.items()):
                     if hand.gametype["sb"] == v[0]:
                         hand.gametype["bb"] = v[1]
-            if hand.gametype["sb"] == None or hand.gametype["bb"] == None:
+            if hand.gametype["sb"] is None or hand.gametype["bb"] is None:
                 log.error(("BetOnline.fixBlinds: Failed to fix blinds") + " Hand ID: %s" % (hand.handid,))
                 raise FpdbParseError
             hand.sb = hand.gametype["sb"]

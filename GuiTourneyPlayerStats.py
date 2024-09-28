@@ -174,7 +174,7 @@ class GuiTourneyPlayerStats(QSplitter):
                     else:
                         value = "No"
                 item = QStandardItem("")
-                if value != None and value != -999:
+                if value is not None and value != -999:
                     item = QStandardItem(column[colformat] % value)
                 item.setEditable(False)
                 item.setTextAlignment(Qt.AlignRight)

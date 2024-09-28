@@ -113,10 +113,10 @@ class WinningSummary(TourneySummary):
         info = {}
         m1 = self.re_HTMLPlayer.search(self.header)
         m2 = self.re_HTMLTourneyInfo.search(self.summaryText)
-        if m1 == None or m2 == None:
+        if m1 is None or m2 is None:
             if self.re_HTMLTourNo.search(self.summaryText):
-                tmp1 = self.header[0:200] if m1 == None else "NA"
-                tmp2 = self.summaryText[0:200] if m2 == None else "NA"
+                tmp1 = self.header[0:200] if m1 is None else "NA"
+                tmp2 = self.summaryText[0:200] if m2 is None else "NA"
                 log.error(("WinningSummary.parseSummaryHtml: '%s' '%s") % (tmp1, tmp2))
                 raise FpdbParseError
             else:
@@ -130,10 +130,10 @@ class WinningSummary(TourneySummary):
         # if 'SNG' in info and "Sit & Go" in info['SNG']:
         #    self.isSng = True
 
-        if "TOURNAME" in info and info["TOURNAME"] != None:
+        if "TOURNAME" in info and info["TOURNAME"] is not None:
             self.tourneyName = info["TOURNAME"]
             m3 = self.re_HTMLTourneyExtraInfo.search(self.tourneyName)
-            if m3 != None:
+            if m3 is not None:
                 info.update(m3.groupdict())
 
         if "GAME" in info:
@@ -147,16 +147,16 @@ class WinningSummary(TourneySummary):
             self.gametype["limitType"] = "fl"
 
         self.buyinCurrency = "USD"
-        if "SPECIAL" in info and info["SPECIAL"] != None:
+        if "SPECIAL" in info and info["SPECIAL"] is not None:
             if info["SPECIAL"] in ("Freeroll", "FREEBUY", "Freebuy"):
                 self.buyinCurrency = "FREE"
             self.guaranteeAmt = int(100 * Decimal(self.clearMoneyString(info["GUAR"])))
 
         if "TOURNO" in info:
             self.tourNo = info["TOURNO"]
-        if info["BUYIN"] != None:
+        if info["BUYIN"] is not None:
             self.buyin = int(100 * Decimal(self.clearMoneyString(info["BUYIN"])))
-        if info["FEE"] != None:
+        if info["FEE"] is not None:
             self.fee = int(100 * Decimal(self.clearMoneyString(info["FEE"])))
 
         if "REBUYS" in info and Decimal(self.clearMoneyString(info["REBUYS"].replace(" ", ""))) > 0:
@@ -167,7 +167,7 @@ class WinningSummary(TourneySummary):
             self.isAddOn = True
             self.addOnCost = self.buyin
 
-        if "MAX" in info and info["MAX"] != None:
+        if "MAX" in info and info["MAX"] is not None:
             n = info["MAX"].replace("-Max", "")
             if n in ("Heads-up", "Heads-Up"):
                 self.maxseats = 2
@@ -176,7 +176,7 @@ class WinningSummary(TourneySummary):
         else:
             self.maxseats = 10
 
-        if "SPEED" in info and info["SPEED"] != None:
+        if "SPEED" in info and info["SPEED"] is not None:
             self.speed = self.speeds[info["SPEED"]]
             self.isSng = True
 
@@ -237,7 +237,7 @@ class WinningSummary(TourneySummary):
         koCount = None
         rank = 9999  # fix with lookups
 
-        if "WINNINGS" in info and info["WINNINGS"] != None:
+        if "WINNINGS" in info and info["WINNINGS"] is not None:
             winnings = int(100 * Decimal(self.clearMoneyString(info["WINNINGS"])))
 
         if self.isRebuy and self.rebuyCost > 0:

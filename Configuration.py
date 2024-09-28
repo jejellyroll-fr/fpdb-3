@@ -959,7 +959,7 @@ class GUITourStats(list):
 
 class RawHands(object):
     def __init__(self, node=None):
-        if node == None:
+        if node is None:
             self.save = "error"
             self.compression = "none"
             # print ("missing config section raw_hands")
@@ -989,7 +989,7 @@ class RawHands(object):
 
 class RawTourneys(object):
     def __init__(self, node=None):
-        if node == None:
+        if node is None:
             self.save = "error"
             self.compression = "none"
             # print ("missing config section raw_tourneys")
@@ -1629,7 +1629,7 @@ class Config(object):
         db_node = self.get_db_node(db_name)
         default = default.lower()
         defaultb = string_to_bool(default, False)
-        if db_node != None:
+        if db_node is not None:
             if db_desc is not None:
                 db_node.setAttribute("db_desc", db_desc)
             if db_ip is not None:

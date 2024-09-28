@@ -204,7 +204,7 @@ class Importer(object):
     def addImportFile(self, filename, site="auto"):
         # DEBUG->print("addimportfile: filename is a", filename.__class__, filename)
         # filename not guaranteed to be unicode
-        if self.filelist.get(filename) != None or not os.path.exists(filename):
+        if self.filelist.get(filename) is not None or not os.path.exists(filename):
             return False
 
         self.idsite.processFile(filename)

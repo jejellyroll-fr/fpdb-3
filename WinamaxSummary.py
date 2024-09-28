@@ -106,7 +106,7 @@ class WinamaxSummary(TourneySummary):
     def getSplitRe(self, head):
         re_SplitTourneys = re.compile("Winamax\sPoker\s-\sTournament\ssummary")
         m = re.search("<!DOCTYPE html PUBLIC", head)
-        if m != None:
+        if m is not None:
             self.hhtype = "html"
         else:
             self.hhtype = "summary"
@@ -200,7 +200,7 @@ class WinamaxSummary(TourneySummary):
 
     def parseSummaryFile(self):
         m = self.re_SummaryTourneyInfo.search(self.summaryText)
-        if m == None:
+        if m is None:
             tmp = self.summaryText[0:200]
             log.error(("WinamaxSummary.parseSummaryFromFile: '%s'") % tmp)
             raise FpdbParseError
@@ -208,7 +208,7 @@ class WinamaxSummary(TourneySummary):
         mg = m.groupdict()
         # print "DEBUG: m.groupdict(): %s" % m.groupdict()
 
-        if "LIMIT" in mg and mg["LIMIT"] != None:
+        if "LIMIT" in mg and mg["LIMIT"] is not None:
             self.gametype["limitType"] = self.limits[mg["LIMIT"]]
             self.gametype["category"] = self.games[mg["GAME"]][1]
         else:
@@ -222,9 +222,9 @@ class WinamaxSummary(TourneySummary):
             self.tourneyName = mg["GAME"]
         if "ENTRIES" in mg:
             self.entries = mg["ENTRIES"]
-        if "PRIZEPOOL1" in mg and mg["PRIZEPOOL1"] != None:
+        if "PRIZEPOOL1" in mg and mg["PRIZEPOOL1"] is not None:
             self.prizepool = int(100 * self.convert_to_decimal(mg["PRIZEPOOL1"]))
-        if "PRIZEPOOL2" in mg and mg["PRIZEPOOL2"] != None:
+        if "PRIZEPOOL2" in mg and mg["PRIZEPOOL2"] is not None:
             self.prizepool = int(100 * self.convert_to_decimal(mg["PRIZEPOOL2"]))
         if "DATETIME" in mg:
             self.startTime = datetime.datetime.strptime(mg["DATETIME"], "%Y/%m/%d %H:%M:%S UTC")
@@ -249,7 +249,7 @@ class WinamaxSummary(TourneySummary):
                 else:
                     self.buyinCurrency = "play"
 
-                if mg["BIBOUNTY"] != None and mg["BIRAKE"] != None:
+                if mg["BIBOUNTY"] is not None and mg["BIRAKE"] is not None:
                     self.koBounty = int(100 * Decimal(self.convert_to_decimal(mg["BIRAKE"].strip("\r"))))
                     self.isKO = True
                     mg["BIRAKE"] = mg["BIBOUNTY"].strip("\r")
@@ -261,13 +261,13 @@ class WinamaxSummary(TourneySummary):
                 if self.buyin == 0 and self.fee == 0:
                     self.buyinCurrency = "FREE"
 
-        if "REBUY" in mg and mg["REBUY"] != None:
+        if "REBUY" in mg and mg["REBUY"] is not None:
             self.isRebuy = True
             rebuyrake = mg["REBUYRAKE"].strip("\r")
             rebuyamt = int(100 * self.convert_to_decimal(mg["REBUYAMT"]))
             rebuyfee = int(100 * self.convert_to_decimal(rebuyrake))
             self.rebuyCost = rebuyamt + rebuyfee
-        if "ADDON" in mg and mg["ADDON"] != None:
+        if "ADDON" in mg and mg["ADDON"] is not None:
             self.isAddOn = True
             addonrake = mg["ADDONRAKE"].strip("\r")
             addonamt = int(100 * self.convert_to_decimal(mg["ADDONAMT"]))
@@ -279,10 +279,10 @@ class WinamaxSummary(TourneySummary):
         # self.maxseats  =
         if int(self.entries) <= 10:  # FIXME: obv not a great metric
             self.isSng = True
-        if "MODE" in mg and mg["MODE"] != None:
+        if "MODE" in mg and mg["MODE"] is not None:
             if "sng" in mg["MODE"]:
                 self.isSng = True
-        if "SPEED" in mg and mg["SPEED"] != None:
+        if "SPEED" in mg and mg["SPEED"] is not None:
             if mg["SPEED"] == "turbo":
                 self.speed = "Hyper"
             elif mg["SPEED"] == "semiturbo":
@@ -298,7 +298,7 @@ class WinamaxSummary(TourneySummary):
                 addOnCount = None
                 koCount = None
 
-                if "WINNINGS" in mg and mg["WINNINGS"] != None:
+                if "WINNINGS" in mg and mg["WINNINGS"] is not None:
                     if mg["WINNINGS"].find("€") != -1:
                         self.currency = "EUR"
                     elif mg["WINNINGS"].find("FPP") != -1:
@@ -308,15 +308,15 @@ class WinamaxSummary(TourneySummary):
                     else:
                         self.currency = "play"
                     winnings = int(100 * self.convert_to_decimal(mg["WINNINGS"]))
-                if "PREBUYS" in mg and mg["PREBUYS"] != None:
+                if "PREBUYS" in mg and mg["PREBUYS"] is not None:
                     rebuyCount = int(mg["PREBUYS"])
-                if "PADDONS" in mg and mg["PADDONS"] != None:
+                if "PADDONS" in mg and mg["PADDONS"] is not None:
                     addOnCount = int(mg["PADDONS"])
 
-                if "TICKET" in mg and mg["TICKET"] != None:
+                if "TICKET" in mg and mg["TICKET"] is not None:
                     winnings += int(100 * self.convert_to_decimal(mg["TICKET"]))
 
-                if "BOUNTY" in mg and mg["BOUNTY"] != None:
+                if "BOUNTY" in mg and mg["BOUNTY"] is not None:
                     koCount = 100 * self.convert_to_decimal(mg["BOUNTY"]) / Decimal(self.koBounty)
                     if winnings == 0:
                         if mg["BOUNTY"].find("€") != -1:

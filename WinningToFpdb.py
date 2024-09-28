@@ -407,7 +407,7 @@ class Winning(HandHistoryConverter):
                 if Decimal(self.clearMoneyString(info["sb"])) == Decimal(bb):
                     info["limitType"] = "fl"
 
-            if info.get("limitType") == None:
+            if info.get("limitType") is None:
                 if "omaha" in info["category"]:
                     info["limitType"] = "pl"
                 else:
@@ -529,7 +529,7 @@ class Winning(HandHistoryConverter):
         if "HID" in info:
             hand.handid = info["HID"]
 
-        if "MAX" in info and info["MAX"] != None:
+        if "MAX" in info and info["MAX"] is not None:
             hand.maxseats = int(info["MAX"].replace("-max", ""))
 
         if not hand.maxseats:
@@ -549,7 +549,7 @@ class Winning(HandHistoryConverter):
                 m3 = self.re_Table1.search(info["TABLE"])
                 if m3 is not None:
                     tableinfo = m3.groupdict()
-                    if "SPECIAL" in tableinfo and tableinfo["SPECIAL"] != None:
+                    if "SPECIAL" in tableinfo and tableinfo["SPECIAL"] is not None:
                         if tableinfo["SPECIAL"] in ("Freeroll", "FREEBUY", "Freebuy"):
                             hand.buyinCurrency = "FREE"
                         hand.guaranteeAmt = int(100 * Decimal(self.clearMoneyString(tableinfo["BUYIN"])))
@@ -558,14 +558,14 @@ class Winning(HandHistoryConverter):
                         hand.buyinCurrency = "USD"
                         hand.buyin = int(100 * Decimal(self.clearMoneyString(tableinfo["BUYIN"])))
 
-                    if "MAX" in tableinfo and tableinfo["MAX"] != None:
+                    if "MAX" in tableinfo and tableinfo["MAX"] is not None:
                         n = tableinfo["MAX"].replace("-Max", "")
                         if n in ("Heads-up", "Heads-Up"):
                             hand.maxseats = 2
                         else:
                             hand.maxseats = int(n)
 
-                    if "SPEED" in tableinfo and tableinfo["SPEED"] != None:
+                    if "SPEED" in tableinfo and tableinfo["SPEED"] is not None:
                         hand.speed = self.speeds[tableinfo["SPEED"]]
                         if hand.maxseats == 2 and hand.buyin in self.HUSnG_Fee:
                             hand.fee = self.HUSnG_Fee[hand.buyin][hand.speed]
@@ -653,7 +653,7 @@ class Winning(HandHistoryConverter):
                     hand.tablename = info[key]
             if key == "BUTTON":
                 hand.buttonpos = info[key]
-            if key == "MAX" and info[key] != None:
+            if key == "MAX" and info[key] is not None:
                 hand.maxseats = int(info[key])
 
         if "SCHEDULEDID" in self.in_path:
@@ -928,7 +928,7 @@ class Winning(HandHistoryConverter):
             players = {}
             for found in m:
                 player = found.group("PNAME")
-                if players.get(player) == None:
+                if players.get(player) is None:
                     players[player] = []
                 players[player].append(found.group("CARD").replace("10", "T"))
 
@@ -999,7 +999,7 @@ class Winning(HandHistoryConverter):
         m = self.re_Action1.finditer(hand.streets[street])
         for action in m:
             acts = action.groupdict()
-            if action.group("PNAME") == None:
+            if action.group("PNAME") is None:
                 log.error("WinningToFpdb.readAction: Unknown player %s %s" % (action.group("ATYPE"), hand.handid))
                 raise FpdbParseError
 
@@ -1016,7 +1016,7 @@ class Winning(HandHistoryConverter):
             elif action.group("ATYPE") == "allin":
                 player = action.group("PNAME")
                 # disconnected all in
-                if action.group("BET") == None:
+                if action.group("BET") is None:
                     amount = str(hand.stacks[player])
                 else:
                     amount = self.clearMoneyString(action.group("BET")).replace(",", "")  # some sites have commas
@@ -1085,11 +1085,11 @@ class Winning(HandHistoryConverter):
             0,
         )
         names = [p[1] for p in hand.players]
-        if acts != None and len([a for a in acts if a[1] != "folds"]) == 0:
+        if acts is not None and len([a for a in acts if a[1] != "folds"]) == 0:
             m0 = self.re_Uncalled.search(hand.handText)
             if m0 and Decimal(m0.group("BET")) == Decimal(hand.bb):
                 bovadaUncalled_v2 = True
-            elif m0 == None:
+            elif m0 is None:
                 bovadaUncalled_v1 = True
                 has_sb = len([a[2] for a in hand.actions.get("BLINDSANTES") if a[1] == "small blind"]) > 0
                 adjustment = (Decimal(hand.bb) - Decimal(hand.sb)) if has_sb else Decimal(hand.bb)

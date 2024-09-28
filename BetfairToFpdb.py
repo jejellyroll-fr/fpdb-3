@@ -113,7 +113,7 @@ class Betfair(HandHistoryConverter):
 
     def readHandInfo(self, hand):
         m = self.re_HandInfo.search(hand.handText)
-        if m == None:
+        if m is None:
             tmp = hand.handText[0:200]
             log.error(("BetfairToFpdb.readHandInfo: '%s'") % tmp)
             raise FpdbParseError

@@ -83,11 +83,11 @@ class Hud(object):
         self.layout_set = config.get_layout(self.table.site, self.game_type)
 
         # Just throw error and die if any serious config issues are discovered
-        if self.supported_games_parameters == None:
+        if self.supported_games_parameters is None:
             log.error(("No <game_stat_set> found for %s games for type %s.\n") % (self.poker_game, self.game_type))
             return
 
-        if self.layout_set == None:
+        if self.layout_set is None:
             log.error(("No layout found for %s games for site %s.\n") % (self.game_type, self.table.site))
             return
 
@@ -115,7 +115,7 @@ class Hud(object):
                 aux = aux.strip()  # remove leading/trailing spaces
                 aux_params = config.get_aux_parameters(aux)
                 my_import = importName(aux_params["module"], aux_params["class"])
-                if my_import == None:
+                if my_import is None:
                     continue
                 # The main action happening below !!!
                 # the module/class is instantiated and is fed the config

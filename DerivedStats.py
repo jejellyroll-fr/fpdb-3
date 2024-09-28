@@ -188,7 +188,7 @@ class DerivedStats(object):
         # This (i think...) is correct for both stud and flop games, as hand.board['street'] disappears, and
         # those values remain default in stud.
         boardcards = []
-        if hand.board.get("FLOPET") != None:
+        if hand.board.get("FLOPET") is not None:
             boardcards += hand.board.get("FLOPET")
         for street in hand.communityStreets:
             boardcards += hand.board[street]
@@ -246,7 +246,7 @@ class DerivedStats(object):
             player_stats = self.handsplayers.get(player_name)
             player_stats["seatNo"] = player[0]
             player_stats["startCash"] = int(100 * Decimal(player[2]))
-            if player[4] != None:
+            if player[4] is not None:
                 player_stats["startBounty"] = int(100 * Decimal(player[4]))
                 player_stats["endBounty"] = int(100 * Decimal(player[4]))
             if player_name in hand.endBounty:
@@ -440,7 +440,7 @@ class DerivedStats(object):
                                     try:
                                         value, rank = pokereval.best(side, cards, bcards)
                                         rankId = Card.hands[rank[0]][0]
-                                        if rank != None and rank[0] != "Nothing":
+                                        if rank is not None and rank[0] != "Nothing":
                                             _cards = "".join([pokereval.card2string(i)[0] for i in rank[1:]])
                                         else:
                                             _cards = None
@@ -618,7 +618,7 @@ class DerivedStats(object):
                 holes = [
                     str(c)
                     for c in hcs[hrange[-1][0] : hrange[-1][1]]
-                    if Card.encodeCardList.get(c) != None or c == "0x"
+                    if Card.encodeCardList.get(c) is not None or c == "0x"
                 ]
                 # log.error((p, holes))
                 if "0x" in holes:
@@ -662,7 +662,7 @@ class DerivedStats(object):
                         holes = [
                             str(c)
                             for c in hcs[hrange[-1][0] : hrange[-1][1]]
-                            if Card.encodeCardList.get(c) != None or c == "0x"
+                            if Card.encodeCardList.get(c) is not None or c == "0x"
                         ]
                         board = [str(c) for c in b if "omaha" in evalgame]
                         if "omaha" not in evalgame:
@@ -783,7 +783,7 @@ class DerivedStats(object):
                         holes = [
                             str(c)
                             for c in hcs[hrange[-1][0] : hrange[-1][1]]
-                            if Card.encodeCardList.get(c) != None or c == "0x"
+                            if Card.encodeCardList.get(c) is not None or c == "0x"
                         ]
                         board = [str(c) for c in b if "omaha" in evalgame]
                         if "omaha" not in evalgame:
@@ -842,7 +842,7 @@ class DerivedStats(object):
                     for item in info:
                         # log.error((str(hand.handid)," winners: ",item['winners']))
                         split = [
-                            n for n in item["winners"] if len(playersPots[n][1]) == 1 and hand.collectees.get(n) != None
+                            n for n in item["winners"] if len(playersPots[n][1]) == 1 and hand.collectees.get(n) is not None
                         ]
                         if len(info) == 1:
                             ppot = item["ppot"]
@@ -1169,14 +1169,14 @@ class DerivedStats(object):
                     continue
             if bet_level == 0:
                 if aggr:
-                    if first_agressor == None:
+                    if first_agressor is None:
                         first_agressor = pname
                     bet_level += 1
                 continue
             elif bet_level == 1:
                 player_stats["street0_2BChance"] = raise_chance
                 if aggr:
-                    if first_agressor == None:
+                    if first_agressor is None:
                         first_agressor = pname
                     player_stats["street0_2BDone"] = True
                     bet_level += 1

@@ -163,7 +163,7 @@ class TourneySummary(object):
         if builtFrom == "IMAP":
             # Fix line endings?
             pass
-        if self.db == None:
+        if self.db is None:
             self.db = Database.Database(config)
 
         self.parseSummary()
@@ -300,7 +300,7 @@ name        (string) player name
 winnings    (int) the money the player ended the tourney with (can be 0, or -1 if unknown)
 """
         log.debug("addPlayer: rank:%s - name : '%s' - Winnings (%s)" % (rank, name, winnings))
-        if self.players.get(name) != None:
+        if self.players.get(name) is not None:
             if entryId is None:
                 entries = self.players[name][-1]
                 self.players[name].append(entries + 1)
@@ -351,13 +351,13 @@ winnings    (int) the money the player ended the tourney with (can be 0, or -1 i
                 header = sh.row_values(rownum)[0]
             elif tourNoField in sh.row_values(rownum):
                 keys = [str(c).encode("utf-8") for c in sh.row_values(rownum)]
-            elif keys != None:
+            elif keys is not None:
                 rows.append([str(c).encode("utf-8") for c in sh.row_values(rownum)])
         for row in rows:
             data = dict(zip(keys, row))
             data["header"] = header
             if len(data[tourNoField]) > 0:
-                if entries.get(data[tourNoField]) == None:
+                if entries.get(data[tourNoField]) is None:
                     entries[data[tourNoField]] = []
                 entries[data[tourNoField]].append(data)
         for k, item in entries.iteritems():

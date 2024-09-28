@@ -57,7 +57,7 @@ class BovadaSummary(TourneySummary):
         obj = getattr(BovadaToFpdb, "Bovada", None)
         hhc = obj(self.config, in_path=self.in_path, sitename=None, autostart=False)
         m = hhc.re_GameInfo.search(self.summaryText)
-        if m == None:
+        if m is None:
             tmp = self.summaryText[0:200]
             log.error(("BovadaSummary.parseSummary: '%s'") % tmp)
             raise FpdbParseError
@@ -131,7 +131,7 @@ class BovadaSummary(TourneySummary):
                     else:
                         info["BIRAKE"] = "0"
 
-                    if info["TICKET"] == None:
+                    if info["TICKET"] is None:
                         self.buyin = int(100 * Decimal(info["BIAMT"]))
                         self.fee = int(100 * Decimal(info["BIRAKE"]))
                     else:
@@ -163,13 +163,13 @@ class BovadaSummary(TourneySummary):
 
             m = self.re_Rebuyin.finditer(self.summaryText)
             for a in m:
-                if rebuys == None:
+                if rebuys is None:
                     rebuys = 0
                 rebuys += 1
 
             m = self.re_AddOn.finditer(self.summaryText)
             for a in m:
-                if addons == None:
+                if addons is None:
                     addons = 0
                 addons += 1
 

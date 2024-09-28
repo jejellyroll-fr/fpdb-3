@@ -113,7 +113,7 @@ class PokerTrackerSummary(TourneySummary):
 
     def parseSummary(self):
         m = self.re_TourneyInfo.search(self.summaryText)
-        if m == None:
+        if m is None:
             tmp = self.summaryText[0:200]
             log.error(("PokerTrackerSummary.parseSummary: '%s'") % tmp)
             raise FpdbParseError
@@ -122,7 +122,7 @@ class PokerTrackerSummary(TourneySummary):
 
         mg = m.groupdict()
         if "SITE" in mg:
-            if self.siteNameMap.get(mg["SITE"]) != None:
+            if self.siteNameMap.get(mg["SITE"]) is not None:
                 self.siteName = self.siteNameMap.get(mg["SITE"])
                 self.siteId = self.SITEIDS.get(self.siteName)
             else:
@@ -157,19 +157,19 @@ class PokerTrackerSummary(TourneySummary):
                 self.stack = "Deep"
             if "SATELLITE" in self.tourneyName:
                 self.isSatellite = True
-        if mg["BUYIN"] != None:
+        if mg["BUYIN"] is not None:
             self.buyin = int(100 * float(self.clearMoneyString(mg["BUYIN"])))
-        if mg["FEE"] != None:
+        if mg["FEE"] is not None:
             self.fee = int(100 * float(self.clearMoneyString(mg["FEE"])))
-        if "REBUYAMT" in mg and mg["REBUYAMT"] != None:
+        if "REBUYAMT" in mg and mg["REBUYAMT"] is not None:
             self.isRebuy = True
             self.rebuyCost = int(100 * float(self.clearMoneyString(mg["REBUYAMT"])))
-        if "PRIZEPOOL" in mg and mg["PRIZEPOOL"] != None:
+        if "PRIZEPOOL" in mg and mg["PRIZEPOOL"] is not None:
             self.prizepool = int(100 * float(self.clearMoneyString(mg["PRIZEPOOL"])))
-        if "ADDON" in mg and mg["ADDON"] != None:
+        if "ADDON" in mg and mg["ADDON"] is not None:
             self.isAddOn = True
             self.addOnCost = int(100 * float(self.clearMoneyString(mg["ADDON"])))
-        if "BOUNTY" in mg and mg["BOUNTY"] != None:
+        if "BOUNTY" in mg and mg["BOUNTY"] is not None:
             self.koBounty = int(100 * float(self.clearMoneyString(mg["BOUNTY"])))
             self.isKO = True
         if "ENTRIES" in mg:
@@ -218,22 +218,22 @@ class PokerTrackerSummary(TourneySummary):
             addOnCount = None
             koCount = None
             if len(name) > 0:
-                if "WINNINGS" in mg and mg["WINNINGS"] != None:
+                if "WINNINGS" in mg and mg["WINNINGS"] is not None:
                     winning1 = mg["WINNINGS"]
                     winning2 = self.clearMoneyString(winning1)
                     winning3 = int(float(winning2))
                     winnings = int(100 * float(self.clearMoneyString(mg["WINNINGS"])))
 
-                if "REBUYS" in mg and mg["REBUYS"] != None:
+                if "REBUYS" in mg and mg["REBUYS"] is not None:
                     rebuyCount = int(mg["REBUYS"])
 
-                if "ADDONS" in mg and mg["ADDONS"] != None:
+                if "ADDONS" in mg and mg["ADDONS"] is not None:
                     addOnCount = int(mg["ADDONS"])
 
-                if "KOS" in mg and mg["KOS"] != None:
+                if "KOS" in mg and mg["KOS"] is not None:
                     koCount = int(mg["KOS"])
 
-                if "CUR" in mg and mg["CUR"] != None:
+                if "CUR" in mg and mg["CUR"] is not None:
                     if mg["CUR"] == "$":
                         self.currency = "USD"
                     elif mg["CUR"] == "€":

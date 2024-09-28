@@ -435,7 +435,7 @@ class GGPoker(HandHistoryConverter):
             if key == "TOURNO":
                 hand.tourNo = info[key]
             if key == "BUYIN":
-                if hand.tourNo != None:
+                if hand.tourNo is not None:
                     # print "DEBUG: info['BUYIN']: %s" % info['BUYIN']
                     # print "DEBUG: info['BIAMT']: %s" % info['BIAMT']
                     # print "DEBUG: info['BIRAKE']: %s" % info['BIRAKE']
@@ -476,7 +476,7 @@ class GGPoker(HandHistoryConverter):
                         info["BIAMT"] = info["BIAMT"].strip("$€£FPPSC₹")
 
                         if hand.buyinCurrency != "PSFP":
-                            if info["BOUNTY"] != None:
+                            if info["BOUNTY"] is not None:
                                 # There is a bounty, Which means we need to switch BOUNTY and BIRAKE values
                                 tmp = info["BOUNTY"]
                                 info["BOUNTY"] = info["BIRAKE"]
@@ -496,11 +496,11 @@ class GGPoker(HandHistoryConverter):
                             hand.fee = 0
             if key == "LEVEL":
                 hand.level = info[key]
-            if key == "SHOOTOUT" and info[key] != None:
+            if key == "SHOOTOUT" and info[key] is not None:
                 hand.isShootout = True
             if key == "TABLE":
                 tablesplit = re.split(" ", info[key])
-                if hand.tourNo != None and len(tablesplit) > 1:
+                if hand.tourNo is not None and len(tablesplit) > 1:
                     hand.tablename = tablesplit[1]
                 else:
                     hand.tablename = info[key]
@@ -508,7 +508,7 @@ class GGPoker(HandHistoryConverter):
                 hand.tourneyName = info[key]
             if key == "BUTTON":
                 hand.buttonpos = info[key]
-            if key == "MAX" and info[key] != None:
+            if key == "MAX" and info[key] is not None:
                 hand.maxseats = int(info[key])
 
         if "Zoom" in self.in_path or "Rush" in self.in_path:
@@ -590,7 +590,7 @@ class GGPoker(HandHistoryConverter):
 
     def readCommunityCards(self, hand, street):  # street has been matched by markStreets, so exists in this hand
         if (
-            street != "FLOPET" or hand.streets.get("FLOP") == None
+            street != "FLOPET" or hand.streets.get("FLOP") is None
         ):  # a list of streets which get dealt community cards (i.e. all but PREFLOP)
             m = self.re_Board.search(hand.streets[street])
             hand.setCommunityCards(street, m.group("CARDS").split(" "))
@@ -731,7 +731,7 @@ class GGPoker(HandHistoryConverter):
 
     def readTourneyResults(self, hand):
         """Reads knockout bounties and add them to the koCounts dict"""
-        if self.re_Bounty.search(hand.handText) == None:
+        if self.re_Bounty.search(hand.handText) is None:
             koAmounts = {}
             winner = None
             # %(PLYR)s wins %(CUR)s(?P<AMT>[\.0-9]+) for eliminating (?P<ELIMINATED>.+?) and their own bounty increases by %(CUR)s(?P<INCREASE>[\.0-9]+) to %(CUR)s(?P<ENDAMT>[\.0-9]+)
@@ -780,7 +780,7 @@ class GGPoker(HandHistoryConverter):
         names = [p[1] for p in hand.players]
         i = 0
         pre, post = hand.handText.split("*** SUMMARY ***")
-        hand.cashedOut = self.re_CashedOut.search(pre) != None
+        hand.cashedOut = self.re_CashedOut.search(pre) is not None
         if hand.runItTimes == 0 and hand.cashedOut == False:
             for m in self.re_CollectPot.finditer(post):
                 pot = self.clearMoneyString(m.group("POT"))
