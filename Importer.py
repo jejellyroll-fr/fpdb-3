@@ -613,9 +613,9 @@ class Importer(object):
                     conv = obj(db=self.database, config=self.config, siteName=fpdbfile.site.name, summaryText=summaryText, in_path = fpdbfile.path, header=summaryTexts[0])
                     self.database.resetBulkCache(False)
                     conv.insertOrUpdate(printtest = self.settings['testData'])
-                except FpdbHandPartial as e:
+                except FpdbHandPartial:
                     partial += 1
-                except FpdbParseError as e:
+                except FpdbParseError:
                     log.error(("Summary import parse error in file: %s") % fpdbfile.path)
                     errors += 1
                 if j != 1:
