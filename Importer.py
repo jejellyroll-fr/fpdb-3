@@ -83,7 +83,7 @@ class ZMQSender:
 
 
 class Importer(object):
-    def __init__(self, caller, settings, config, sql=None, parent=None, zmq_port="5555"):
+    def __init__(self, caller, settings, config, sql=None, parent=None):
         """Constructor"""
         self.settings   = settings
         self.caller     = caller
@@ -125,7 +125,7 @@ class Importer(object):
             self.writerdbs.append(Database.Database(self.config, sql=self.sql))
 
         # Modification : spécifier le port pour ZMQ
-        self.zmq_sender = ZMQSender(port=zmq_port)
+        self.zmq_sender = ZMQSender()
         process_time()  # init clock in windows
 
 
