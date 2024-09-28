@@ -224,7 +224,7 @@ class GuiAutoImport(QWidget):
                         else:
                             self.pipe_to_hud = subprocess.Popen(command, bufsize=bs, stdin=subprocess.PIPE, universal_newlines=True)
 
-                    except Exception as e:
+                    except Exception:
                         self.addText("\n" + ("*** GuiAutoImport Error opening pipe:") + " " + traceback.format_exc())
                         # TODO: log.warning() ?
                     else:

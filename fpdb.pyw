@@ -1206,7 +1206,7 @@ class fpdb(QMainWindow):
         for site in self.config.supported_sites:  # get site names from config file
             try:
                 self.config.get_site_id(site)  # and check against list from db
-            except KeyError as exc:
+            except KeyError:
                 log.warning(f"site {site} missing from db")
                 dia = QMessageBox()
                 dia.setIcon(QMessageBox.Warning)
