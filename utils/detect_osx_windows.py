@@ -1,5 +1,4 @@
 import Quartz
-import AppKit
 
 
 def get_window_info():

@@ -18,12 +18,6 @@
 ########################################################################
 
 
-import os, sys
-import re
-from time import time, sleep
-import codecs
-import shutil
-import subprocess
 
 from IdentifySite import *
 

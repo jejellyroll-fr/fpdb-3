@@ -27,21 +27,15 @@ from __future__ import division
 
 import contextlib
 import os
-from past.utils import old_div
 # import L10n
 # _ = L10n.get_translation()
 
-from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QFrame,
-    QHBoxLayout,
-    QLabel,
     QScrollArea,
     QSizePolicy,
     QSplitter,
     QVBoxLayout,
-    QWidget,
-    QFileDialog,
     QMessageBox,
 )
 import contextlib

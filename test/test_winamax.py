@@ -1,5 +1,4 @@
 import re
-import pytest
 
 substitutions = {
     "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP",  # legal ISO currency codes

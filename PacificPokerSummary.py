@@ -19,11 +19,9 @@
 # _ = L10n.get_translation()
 
 from decimal_wrapper import Decimal
-import datetime
 
 from Exceptions import FpdbParseError
 from HandHistoryConverter import *
-import PacificPokerToFpdb
 from TourneySummary import *
 
 

@@ -23,12 +23,10 @@
 # _ = L10n.get_translation()
 
 #    Standard Library modules
-import re
 
 #    Other Library modules
 import ctypes
 
-import AppKit  # Work around some pyinstaller weirdness.
 
 from AppKit import NSView, NSWindowAbove, NSWorkspace
 from Quartz.CoreGraphics import (
@@ -37,7 +35,6 @@ from Quartz.CoreGraphics import (
     kCGWindowOwnerName,
     NSWorkspace,
     kCGWindowBounds,
-    kCGWindowName,
     CGWindowListCopyWindowInfo,
     kCGNullWindowID,
     kCGWindowNumber,

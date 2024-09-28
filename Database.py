@@ -22,7 +22,6 @@ Create and manage the database objects.
 
 from __future__ import print_function
 from __future__ import division
-import future
 
 from past.utils import old_div
 
@@ -42,7 +41,7 @@ from past.utils import old_div
 import os
 import sys
 import traceback
-from datetime import datetime, date, time, timedelta
+from datetime import datetime, time, timedelta
 from time import time, strftime, sleep
 from decimal_wrapper import Decimal
 import string
@@ -673,11 +672,7 @@ class Database(object):
             self.do_connect(c)
 
             if self.backend == self.PGSQL:
-                from psycopg2.extensions import (
-                    ISOLATION_LEVEL_AUTOCOMMIT,
-                    ISOLATION_LEVEL_READ_COMMITTED,
-                    ISOLATION_LEVEL_SERIALIZABLE,
-                )
+                pass
                 # ISOLATION_LEVEL_AUTOCOMMIT     = 0
                 # ISOLATION_LEVEL_READ_COMMITTED = 1
                 # ISOLATION_LEVEL_SERIALIZABLE   = 2

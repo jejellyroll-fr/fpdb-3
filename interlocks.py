@@ -10,9 +10,7 @@ from __future__ import print_function
 
 import sys
 import os, os.path
-import subprocess
 import time
-import signal
 import base64
 
 InterProcessLock = None

@@ -35,7 +35,6 @@ are not immediately obvious, and there is very close linkage with most of
 the Hud modules.
 """
 
-import contextlib
 # import L10n
 # _ = L10n.get_translation()
 
@@ -55,7 +54,6 @@ log = logging.getLogger("hud")
 import Aux_Hud
 import Stats
 from PyQt5.QtWidgets import QInputDialog, QMessageBox
-import SQL
 import Database
 import Configuration
 import os

@@ -22,7 +22,6 @@
 # import L10n
 # _ = L10n.get_translation()
 
-import sys
 import re
 import datetime
 import logging

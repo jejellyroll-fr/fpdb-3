@@ -25,10 +25,8 @@ import re
 import sys
 import os
 from time import time
-from optparse import OptionParser
 import codecs
 
-import Database
 
 import Configuration
 import logging

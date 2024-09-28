@@ -4,9 +4,7 @@
 from __future__ import print_function
 from __future__ import division
 import itertools
-from ast import Pass
 
-from dataclasses import replace
 from past.utils import old_div
 import pathlib
 import os
@@ -15,7 +13,6 @@ from PyQt5.QtCore import QDate, QDateTime
 from PyQt5.QtWidgets import (
     QCalendarWidget,
     QCheckBox,
-    QCompleter,
     QDateEdit,
     QDialog,
     QGridLayout,
@@ -31,14 +28,12 @@ from PyQt5.QtWidgets import (
     QComboBox,
 )
 
-from time import gmtime, mktime, strftime, strptime
 from functools import partial
 import logging
 
 import Configuration
 import Database
 import SQL
-import Charset
 import Card
 
 if __name__ == "__main__":

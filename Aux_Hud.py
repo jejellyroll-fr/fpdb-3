@@ -35,8 +35,8 @@ import logging
 log = logging.getLogger("hud")
 from functools import partial
 
-from PyQt5.QtGui import QCursor, QFont, QPixmap
-from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtGui import QFont, QPixmap
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QComboBox, QGridLayout, QHBoxLayout, QLabel, QPushButton, QSpinBox, QVBoxLayout, QWidget
 
 #    FreePokerTools modules

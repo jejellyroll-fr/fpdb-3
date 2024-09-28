@@ -21,8 +21,7 @@ from __future__ import print_function
 # import L10n
 # _ = L10n.get_translation()
 
-import os
-from time import time, strftime
+from time import time
 
 import Database
 import Filters

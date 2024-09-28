@@ -34,12 +34,10 @@ import codecs
 import os
 import sys
 import inspect
-import string
 import shutil
 import locale
 import re
 import xml.dom.minidom
-from xml.dom.minidom import Node
 
 import platform
 

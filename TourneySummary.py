@@ -22,21 +22,12 @@
 
 # TODO: check to keep only the needed modules
 
-import re
 import sys
 import logging
-import os
-import os.path
-from decimal_wrapper import Decimal
-import operator
-import time, datetime
-from copy import deepcopy
 from Exceptions import *
 import codecs
 
 import pprint
-import DerivedStats
-import Card
 import Database
 from HandHistoryConverter import HandHistoryConverter
 

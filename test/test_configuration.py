@@ -1,5 +1,4 @@
 import pytest
-from unittest.mock import MagicMock, patch
 from xml.dom.minidom import Document
 import sys
 

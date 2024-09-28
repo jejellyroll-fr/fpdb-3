@@ -43,7 +43,6 @@
 # -- Cannot parse hands in which someone is all in in one of the blinds. Until
 #    this is corrected tournaments will be unparseable
 
-import sys
 from HandHistoryConverter import *
 from decimal_wrapper import Decimal
 from TourneySummary import *
