@@ -18,20 +18,13 @@
 
 import os
 import sys
-import re
 import queue
 # import qdarkstyle
-import multiprocessing
-import threading
-import faulthandler
 if os.name == 'nt':
-    import win32api
-    import win32con
+    pass
 
 import codecs
-import traceback
 import Options
-import string
 from functools import partial
 
 cl_options = '.'.join(sys.argv[1:])
@@ -40,15 +33,14 @@ from L10n import set_locale_translation
 import logging
 
 from PyQt5.QtCore import (QCoreApplication, QDate, Qt, QPoint)
-from PyQt5.QtGui import (QScreen, QIcon, QPalette)
+from PyQt5.QtGui import (QIcon, QPalette)
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QSizePolicy
 from PyQt5.QtWidgets import (QAction, QApplication, QCalendarWidget,
                              QCheckBox, QDateEdit, QDialog,
                              QDialogButtonBox, QFileDialog,
-                             QGridLayout, QHBoxLayout, QInputDialog,
-                             QLabel, QLineEdit, QMainWindow,
-                             QMessageBox, QPushButton, QScrollArea,
-                             QTabWidget, QVBoxLayout, QWidget, QComboBox)
+                             QGridLayout, QLineEdit, QMainWindow,
+                             QMessageBox, QScrollArea,
+                             QTabWidget, QVBoxLayout, QComboBox)
 
 import interlocks
 from Exceptions import *
@@ -71,7 +63,6 @@ import GuiBulkImport
 
 import GuiRingPlayerStats
 import GuiTourneyPlayerStats
-import GuiTourneyViewer
 import GuiPositionalStats
 import GuiAutoImport
 import GuiGraphViewer
@@ -87,7 +78,6 @@ import Database
 import Configuration
 import Card
 import Exceptions
-import Stats
 #import api, app
 import cProfile
 import pstats
