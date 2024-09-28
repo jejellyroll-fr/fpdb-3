@@ -28,14 +28,14 @@ from past.utils import old_div
 #    Standard Library modules
 
 import os  # todo: remove this once import_dir is in fpdb_import
-from time import time, sleep, process_time
+from time import time, process_time
 import datetime
-import queue
 import shutil
 import re
 import zmq
 
-import logging, traceback
+import logging
+import traceback
 
 from PyQt5.QtWidgets import QProgressBar, QLabel, QDialog, QVBoxLayout
 from PyQt5.QtCore import QCoreApplication
@@ -83,7 +83,7 @@ class ZMQSender:
 
 
 class Importer(object):
-    def __init__(self, caller, settings, config, sql=None, parent=None, zmq_port="5555"):
+    def __init__(self, caller, settings, config, sql=None, parent=None):
         """Constructor"""
         self.settings   = settings
         self.caller     = caller
@@ -125,7 +125,7 @@ class Importer(object):
             self.writerdbs.append(Database.Database(self.config, sql=self.sql))
 
         # Modification : spécifier le port pour ZMQ
-        self.zmq_sender = ZMQSender(port=zmq_port)
+        self.zmq_sender = ZMQSender()
         process_time()  # init clock in windows
 
 
@@ -613,9 +613,9 @@ class Importer(object):
                     conv = obj(db=self.database, config=self.config, siteName=fpdbfile.site.name, summaryText=summaryText, in_path = fpdbfile.path, header=summaryTexts[0])
                     self.database.resetBulkCache(False)
                     conv.insertOrUpdate(printtest = self.settings['testData'])
-                except FpdbHandPartial as e:
+                except FpdbHandPartial:
                     partial += 1
-                except FpdbParseError as e:
+                except FpdbParseError:
                     log.error(("Summary import parse error in file: %s") % fpdbfile.path)
                     errors += 1
                 if j != 1:
