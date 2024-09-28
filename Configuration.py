@@ -175,45 +175,38 @@ LOGLEVEL = {'DEBUG'   : logging.DEBUG,
 
 
 def get_config(file_name, fallback = True):
-    """Looks in cwd and in self.default_config_path for a config file."""
-    
-    #FIXME
-    # This function has become difficult to understand, plus it no-longer
-    # just looks for a config file, it actually does file copying 
-    
+    """Looks in cwd and in self.default_config_path for a config file.
+    -- FIXME --
+    This function has become difficult to understand, plus it no-longer
+    just looks for a config file, it actually does file copying
+    """
+
     # look for example file even if not used here, path is returned to caller
     config_found,example_found,example_copy = False,False,False
     config_path, example_path = None,None
     if sysPlatform == 'Windows':
-        print('windows TRUE1')
+        # print('-> windows')
         if platform.release() != 'XP':
            OS_FAMILY = 'Win7' #Vista and win7
-           print('windows TRUE2')
+        #    print('-> windows Win7')
     else:
         OS_FAMILY = 'XP'
-        print('windows TRUE3')
+        # print('-> windows XP')
     if OS_FAMILY == 'XP' or 'Win7':
-       print('windows TRUE4')
+    #    print('-> windows XP or Win7')
        config_path = os.path.join(CONFIG_PATH, file_name)
        config_path = config_path.replace("\\", "/")
     else:
        config_path = os.path.join(CONFIG_PATH, file_name)
-    print ("config_path raw=", config_path)
     if os.path.exists(config_path):    # there is a file in the cwd
-        print(os.path.exists(config_path))
-        config_found = True 
-        print (config_found) 
+        config_found = True
         fallback = False
-        print(fallback)          # so we use it
     else: # no file in the cwd, look where it should be in the first place
         config_path = os.path.join(CONFIG_PATH, file_name)
         config_path = config_path.replace("\\", "/")
-        print ("config path 2=", config_path)
         if os.path.exists(config_path):
             config_found = True
-            print (config_found)
             fallback = False
-            print(fallback)
 
     if POSIX:
         # If we're on linux, try to copy example from the place
@@ -278,10 +271,13 @@ def set_logfile(file_name):
         print('logging.conf file already exists')
     else:
      # create a file
-        print('copying logging.conf file in appdata rooming folder')
+        # FIME: why printing that a file is going to be copied but not doing anything ?
+        # print('copying logging.conf file in appdata rooming folder')
+        pass
     if conf_file:
         try:
             log_file = log_file.replace('\\', '/')  # replace each \ with \\
+            print(f"Using logging configfile: {conf_file}")
             logging.config.fileConfig(conf_file, {"logFile":log_file})
         except Exception:
             sys.stderr.write(f"Could not setup log file {file_name}")
