@@ -239,9 +239,7 @@ def get_config(file_name, fallback = True):
 
     elif os.path.exists(os.path.join(CONFIG_PATH, file_name + '.example').replace("\\", "/")):
         try:
-            print("exemple path ok") 
             example_path = os.path.join(CONFIG_PATH, file_name + '.example').replace("\\", "/")
-            print ('exemple_path:', example_path)
             if not config_found and fallback:
                 shutil.copyfile(example_path, config_path)
                 example_copy = True
@@ -254,7 +252,6 @@ def get_config(file_name, fallback = True):
             sys.stderr.write( str(sys.exc_info()) )
             sys.exit()
     elif fallback:
-        print(fallback)
         sys.stderr.write((("No %s found, cannot fall back. Exiting.") % file_name) + "\n")
         sys.exit()
 
@@ -935,7 +932,6 @@ class Config(object):
             self.dir_log = str(custom_log_dir, "utf8")
         else:
             if OS_FAMILY == 'XP' or 'Win7':
-                print('windows TRUE5')
                 self.dir_log = os.path.join(CONFIG_PATH, 'log')
                 self.dir_log = self.dir_log.replace("\\", "/")
             else:
