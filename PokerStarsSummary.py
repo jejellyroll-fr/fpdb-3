@@ -228,7 +228,7 @@ class PokerStarsSummary(TourneySummary):
         re_SplitTourneys = re.compile("(?:PokerStars|Full\sTilt|Run\sIt\sOnce\sPoker) Tournament ")
         re_HTMLSplitTourneys = re.compile('tr id="row_\d+')
         m = re.search("<title>TOURNEYS:", head)
-        if m != None:
+        if m is not None:
             self.hhtype = "html"
             return re_HTMLSplitTourneys
         self.hhtype = "summary"
@@ -269,7 +269,7 @@ class PokerStarsSummary(TourneySummary):
     def parseSummaryXLS(self):
         info = self.summaryText[0]
         m = self.re_XLSPlayer.search(info["header"])
-        if m == None:
+        if m is None:
             tmp1 = info["header"]
             tmp2 = str(info)[0:200]
             log.error(("PokerStarsSummary.parseSummaryXLS: '%s' '%s") % (tmp1, tmp2))
@@ -277,7 +277,7 @@ class PokerStarsSummary(TourneySummary):
         info.update(m.groupdict())
         mg = {}
         for k, j in info.iteritems():
-            if self.re_XLSTourneyInfo.get(k) != None:
+            if self.re_XLSTourneyInfo.get(k) is not None:
                 m1 = self.re_XLSTourneyInfo[k].search(j)
                 if m1:
                     mg.update(m1.groupdict())
@@ -290,14 +290,14 @@ class PokerStarsSummary(TourneySummary):
     def parseSummaryHtml(self):
         info = {}
         m1 = self.re_HTMLPlayer1.search(self.header)
-        if m1 == None:
+        if m1 is None:
             m1 = self.re_HTMLPlayer2.search(self.header)
         m2 = self.re_HTMLTourneyInfo.search(self.summaryText)
-        if m1 == None or m2 == None:
+        if m1 is None or m2 is None:
             if self.re_HTMLPlayer1.search(self.summaryText) or self.re_HTMLPlayer2.search(self.summaryText):
                 raise FpdbHandPartial
-            tmp1 = self.header[0:200] if m1 == None else "NA"
-            tmp2 = self.summaryText if m2 == None else "NA"
+            tmp1 = self.header[0:200] if m1 is None else "NA"
+            tmp2 = self.summaryText if m2 is None else "NA"
             log.error(("PokerStarsSummary.parseSummaryHtml: '%s' '%s") % (tmp1, tmp2))
             raise FpdbParseError
         info.update(m1.groupdict())
@@ -308,10 +308,10 @@ class PokerStarsSummary(TourneySummary):
         if "SNG" in info and "Sit & Go" in info["SNG"]:
             self.isSng = True
 
-        if "TOURNAME" in info and info["TOURNAME"] != None:
+        if "TOURNAME" in info and info["TOURNAME"] is not None:
             self.tourneyName = re.sub("</?(b|font).*?>", "", info["TOURNAME"])
             m3 = self.re_HTMLTourneyExtraInfo.search(self.tourneyName)
-            if m3 != None:
+            if m3 is not None:
                 info.update(m3.groupdict())
 
         if "TOURNO" in info:
@@ -322,12 +322,12 @@ class PokerStarsSummary(TourneySummary):
             self.gametype["category"] = self.games[info["GAME"]][1]
         if "SPLIT" in info and info["SPLIT"] == "Split":
             self.isSplit = True
-        if info["BUYIN"] != None:
+        if info["BUYIN"] is not None:
             if info["BUYIN"] == "Freeroll":
                 self.buyin = 0
             else:
                 self.buyin = int(100 * float(self.clearMoneyString(info["BUYIN"].replace(" ", ""))))
-        if info["FEE"] != None:
+        if info["FEE"] is not None:
             self.fee = int(100 * float(self.clearMoneyString(info["FEE"].replace(" ", ""))))
         if "REBUYADDON" in info and float(self.clearMoneyString(info["REBUYADDON"].replace(" ", ""))) > 0:
             self.isRebuy = True
@@ -339,23 +339,23 @@ class PokerStarsSummary(TourneySummary):
                     self.fee = self.fee / (rebuys + 1)
             self.rebuyCost = self.buyin + self.fee
             self.addOnCost = self.buyin + self.fee
-        if "REBUYADDON1" in info and info["REBUYADDON1"] != None:
+        if "REBUYADDON1" in info and info["REBUYADDON1"] is not None:
             self.isRebuy = True
             self.isAddOn = True
             self.rebuyCost = self.buyin + self.fee
             self.addOnCost = self.buyin + self.fee
         if "ENTRIES" in info:
             self.entries = int(self.clearMoneyString(info["ENTRIES"]))
-        if "MAX" in info and info["MAX"] != None:
+        if "MAX" in info and info["MAX"] is not None:
             self.maxseats = int(info["MAX"])
-        if not self.isSng and "SPEED" in info and info["SPEED"] != None:
+        if not self.isSng and "SPEED" in info and info["SPEED"] is not None:
             if info["SPEED"] == "Turbo":
                 self.speed = "Turbo"
             elif info["SPEED"] == "Hyper-Turbo":
                 self.speed = "Hyper"
-        if "TARGET" in info and info["TARGET"] != None:
+        if "TARGET" in info and info["TARGET"] is not None:
             self.isSatellite = True
-            if "WONTICKET" in info and info["WONTICKET"] != None:
+            if "WONTICKET" in info and info["WONTICKET"] is not None:
                 self.comment = info["TARGET"]
 
         if "DATETIME" in info:
@@ -375,7 +375,7 @@ class PokerStarsSummary(TourneySummary):
                 datetimestr, "%Y/%m/%d %I:%M:%S %p"
             )  # also timezone at end, e.g. " ET"
             self.endTime = HandHistoryConverter.changeTimezone(self.endTime, "ET", "UTC")
-        if datetimestr == None:
+        if datetimestr is None:
             if xlrd and self.re_XLSDateTime.match(info["DATETIME"]):
                 datetup = xlrd.xldate_as_tuple(float(info["DATETIME"]), 0)
                 datetimestr = "%d/%d/%d %d:%d:%d" % (
@@ -393,14 +393,14 @@ class PokerStarsSummary(TourneySummary):
             )  # also timezone at end, e.g. " ET"
             self.endTime = HandHistoryConverter.changeTimezone(self.endTime, "ET", "UTC")
 
-        if "CURRENCY" in info and info["CURRENCY"] != None:
+        if "CURRENCY" in info and info["CURRENCY"] is not None:
             self.currency = info["CURRENCY"]
         if info["BUYIN"] == "Freeroll":
             self.buyinCurrency = "FREE"
             self.currency = "USD"
-        elif info["FPPBUYIN"] != None:
+        elif info["FPPBUYIN"] is not None:
             self.buyinCurrency = "PSFP"
-        elif self.currency != None:
+        elif self.currency is not None:
             self.buyinCurrency = self.currency
         else:
             self.buyinCurrency = "play"
@@ -412,7 +412,7 @@ class PokerStarsSummary(TourneySummary):
         if self.isSng:
             self.lookupStructures(self.endTime)
 
-        if info.get("NAME") != None and info.get("RANK") != None:
+        if info.get("NAME") is not None and info.get("RANK") is not None:
             name = info["NAME"]
             rank = int(self.clearMoneyString(info["RANK"]))
             winnings = 0
@@ -421,7 +421,7 @@ class PokerStarsSummary(TourneySummary):
             koCount = None
             entryId = 1
 
-            if "WINNINGS" in info and info["WINNINGS"] != None:
+            if "WINNINGS" in info and info["WINNINGS"] is not None:
                 winnings = int(100 * float(self.clearMoneyString(info["WINNINGS"])))
 
             if "REBUYADDON" in info and float(self.clearMoneyString(info["REBUYADDON"].replace(" ", ""))) > 0:
@@ -429,7 +429,7 @@ class PokerStarsSummary(TourneySummary):
                 rebuyCount = rebuyAddOnAmt / self.buyin
 
             # KOs should be exclusively handled in the PokerStars hand history files
-            if "KOS" in info and info["KOS"] != None and info["KOS"] != "0.00":
+            if "KOS" in info and info["KOS"] is not None and info["KOS"] != "0.00":
                 self.isKO = True
 
             re_HTMLEntries = re.compile(
@@ -449,7 +449,7 @@ class PokerStarsSummary(TourneySummary):
 
     def parseSummaryFile(self):
         m = self.re_TourneyInfo.search(self.summaryText)
-        if m == None:
+        if m is None:
             if self.re_Header.match(self.summaryText):
                 raise FpdbHandPartial
             if self.re_emailHeader.match(self.summaryText):
@@ -479,7 +479,7 @@ class PokerStarsSummary(TourneySummary):
         )  # also timezone at end, e.g. " ET"
         self.startTime = HandHistoryConverter.changeTimezone(self.startTime, "ET", "UTC")
 
-        if mg["DESC1"] != None:
+        if mg["DESC1"] is not None:
             self.siteName = "Run It Once Poker"
             self.siteId = 26
             re_Player = self.re_PlayerRIO
@@ -496,17 +496,17 @@ class PokerStarsSummary(TourneySummary):
             self.gametype["category"] = self.games[mg["GAME"]][1]
         if "SPLIT" in mg and mg["SPLIT"] == "Split":
             self.isSplit = True
-        if mg["BOUNTY"] != None and mg["FEE"] != None:
+        if mg["BOUNTY"] is not None and mg["FEE"] is not None:
             self.koBounty = int(100 * float(self.clearMoneyString(mg["FEE"])))
             self.isKO = True
             mg["FEE"] = mg["BOUNTY"]
-        if mg["BUYIN"] != None:
+        if mg["BUYIN"] is not None:
             self.buyin = int(100 * float(self.clearMoneyString(mg["BUYIN"]))) + self.koBounty
-        if mg["FEE"] != None:
+        if mg["FEE"] is not None:
             self.fee = int(100 * float(self.clearMoneyString(mg["FEE"])))
 
         m2 = self.re_rebuyAddOn.search(self.summaryText)
-        if m2 and m2.group("REBUYCOUNT") != None:
+        if m2 and m2.group("REBUYCOUNT") is not None:
             self.isRebuy = True
             self.isAddOn = True
             # You made 5 rebuys and 1 addons for a total of USD 3,180.00.
@@ -518,7 +518,7 @@ class PokerStarsSummary(TourneySummary):
         else:
             rebuyCountHero = None
 
-        if "PRIZEPOOL" in mg and mg["PRIZEPOOL"] != None:
+        if "PRIZEPOOL" in mg and mg["PRIZEPOOL"] is not None:
             if "Sunday Million" in mg["PRIZEPOOL"]:
                 self.isSatellite = True
                 newBuyinDate = HandHistoryConverter.changeTimezone(
@@ -532,16 +532,16 @@ class PokerStarsSummary(TourneySummary):
                 self.prizepool = int(float(self.clearMoneyString(mg["PRIZEPOOL"])))
         if "ENTRIES" in mg:
             self.entries = int(mg["ENTRIES"])
-        if "SATELLITE" in mg and mg["SATELLITE"] != None:
+        if "SATELLITE" in mg and mg["SATELLITE"] is not None:
             self.isSatellite = True
             targetBuyin, targetCurrency = 0, "USD"
-            if mg["TARGBUYIN"] != None:
+            if mg["TARGBUYIN"] is not None:
                 targetBuyin += int(100 * float(self.clearMoneyString(mg["TARGBUYIN"])))
-            if mg["TARGFEE"] != None:
+            if mg["TARGFEE"] is not None:
                 targetBuyin += int(100 * float(self.clearMoneyString(mg["TARGFEE"])))
-            if mg["TARGBOUNTY"] != None:
+            if mg["TARGBOUNTY"] is not None:
                 targetBuyin += int(100 * float(self.clearMoneyString(mg["TARGBOUNTY"])))
-            if mg["TARGCUR"] != None:
+            if mg["TARGCUR"] is not None:
                 if mg["CUR"] == "$":
                     targetCurrency = "USD"
                 elif mg["CUR"] == "€":
@@ -604,10 +604,10 @@ class PokerStarsSummary(TourneySummary):
             koCount = None
             entryId = 1
 
-            if "WINNINGS" in mg and mg["WINNINGS"] != None:
+            if "WINNINGS" in mg and mg["WINNINGS"] is not None:
                 winnings = int(100 * float(self.clearMoneyString(mg["WINNINGS"])))
 
-            if "CUR" in mg and mg["CUR"] != None:
+            if "CUR" in mg and mg["CUR"] is not None:
                 if mg["CUR"] == "$":
                     self.currency = "USD"
                 elif mg["CUR"] == "€":
@@ -625,12 +625,12 @@ class PokerStarsSummary(TourneySummary):
                 elif mg["CUR1"] == "SC":
                     self.currency = "PSFP"
 
-            if "STILLPLAYING" in mg and mg["STILLPLAYING"] != None:
+            if "STILLPLAYING" in mg and mg["STILLPLAYING"] is not None:
                 # print "stillplaying"
                 rank = None
                 winnings = None
 
-            if "TICKET" in mg and mg["TICKET"] != None:
+            if "TICKET" in mg and mg["TICKET"] is not None:
                 # print "Tournament Ticket Level %s" % mg['LEVEL']
                 step_values = {
                     "1": "750",  # Step 1 -    $7.50 USD
@@ -642,11 +642,11 @@ class PokerStarsSummary(TourneySummary):
                 }
                 winnings = int(step_values[mg["LEVEL"]])
 
-            if "QUALIFIED" in mg and mg["QUALIFIED"] != None and self.isSatellite:
+            if "QUALIFIED" in mg and mg["QUALIFIED"] is not None and self.isSatellite:
                 winnings = targetBuyin
                 self.currency = targetCurrency
 
-            if "ENTRYID" in mg and mg["ENTRYID"] != None:
+            if "ENTRYID" in mg and mg["ENTRYID"] is not None:
                 entryId = int(mg["ENTRYID"])
                 self.isReEntry = True
 

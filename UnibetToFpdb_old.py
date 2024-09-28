@@ -478,7 +478,7 @@ class Unibet(HandHistoryConverter):
             if key == "TOURNO":
                 hand.tourNo = info[key]
             if key == "BUYIN":
-                if hand.tourNo != None:
+                if hand.tourNo is not None:
                     # print "DEBUG: info['BUYIN']: %s" % info['BUYIN']
                     # print "DEBUG: info['BIAMT']: %s" % info['BIAMT']
                     # print "DEBUG: info['BIRAKE']: %s" % info['BIRAKE']
@@ -519,7 +519,7 @@ class Unibet(HandHistoryConverter):
                         info["BIAMT"] = info["BIAMT"].strip("$€£FPPSC₹")
 
                         if hand.buyinCurrency != "PSFP":
-                            if info["BOUNTY"] != None:
+                            if info["BOUNTY"] is not None:
                                 # There is a bounty, Which means we need to switch BOUNTY and BIRAKE values
                                 tmp = info["BOUNTY"]
                                 info["BOUNTY"] = info["BIRAKE"]
@@ -547,19 +547,19 @@ class Unibet(HandHistoryConverter):
                         hand.isHomeGame = False
             if key == "LEVEL":
                 hand.level = info[key]
-            if key == "SHOOTOUT" and info[key] != None:
+            if key == "SHOOTOUT" and info[key] is not None:
                 hand.isShootout = True
             if key == "TABLE":
                 tablesplit = re.split(" ", info[key])
                 if info["TOURNO"] is not None and info["HIVETABLE"] is not None:
                     hand.tablename = info["HIVETABLE"]
-                elif hand.tourNo != None and len(tablesplit) > 1:
+                elif hand.tourNo is not None and len(tablesplit) > 1:
                     hand.tablename = tablesplit[1]
                 else:
                     hand.tablename = info[key]
             if key == "BUTTON":
                 hand.buttonpos = info[key]
-            if key == "MAX" and info[key] != None:
+            if key == "MAX" and info[key] is not None:
                 hand.maxseats = int(info[key])
 
         if self.re_Cancelled.search(hand.handText):

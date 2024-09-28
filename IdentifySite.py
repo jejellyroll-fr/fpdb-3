@@ -297,13 +297,13 @@ class IdentifySite(object):
     def getFilesForSite(self, sitename, ftype):
         l = []
         for name, f in list(self.filelist.items()):
-            if f.ftype != None and f.site.name == sitename and f.ftype == "hh":
+            if f.ftype is not None and f.site.name == sitename and f.ftype == "hh":
                 l.append(f)
         return l
 
     def fetchGameTypes(self):
         for name, f in list(self.filelist.items()):
-            if f.ftype != None and f.ftype == "hh":
+            if f.ftype is not None and f.ftype == "hh":
                 try:  # TODO: this is a dirty hack. Borrowed from fpdb_import
                     name = str(name, "utf8", "replace")
                 except TypeError:

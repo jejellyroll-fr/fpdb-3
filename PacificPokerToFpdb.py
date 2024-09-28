@@ -288,10 +288,10 @@ class PacificPoker(HandHistoryConverter):
                 hand.newFormat = HandHistoryConverter.changeTimezone(hand.newFormat, "ET", "UTC")
             if key == "HID":
                 hand.handid = info[key]
-            if key == "TOURNO" and info["TOURNO"] != None:
+            if key == "TOURNO" and info["TOURNO"] is not None:
                 hand.tourNo = info[key]
                 hand.isKO = False
-            if key == "BUYIN" and info["BUYIN"] != None:
+            if key == "BUYIN" and info["BUYIN"] is not None:
                 if info[key] == "Free" or info["BIAMT"] is None:
                     hand.buyin = 0
                     hand.fee = 0
@@ -320,13 +320,13 @@ class PacificPoker(HandHistoryConverter):
                         info["BIRAKE"] = self.clearMoneyString(info["BIRAKE"].strip("$€"))
                         hand.fee = int(100 * Decimal(info["BIRAKE"]))
 
-            if key == "TABLE" and info["TABLE"] != None:
+            if key == "TABLE" and info["TABLE"] is not None:
                 hand.tablename = info[key]
-            if key == "TABLEID" and info["TABLEID"] != None:
+            if key == "TABLEID" and info["TABLEID"] is not None:
                 hand.tablename = info[key]
             if key == "BUTTON":
                 hand.buttonpos = info[key]
-            if key == "MAX" and info["MAX"] != None:
+            if key == "MAX" and info["MAX"] is not None:
                 hand.maxseats = int(info[key])
 
             if key == "PLAY" and info["PLAY"] is not None:

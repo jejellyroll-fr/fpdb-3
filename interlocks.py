@@ -56,7 +56,7 @@ class InterProcessLockBase(object):
         abstract
 
     def acquire(self, source, wait=False, retry_time=1):
-        if source == None:
+        if source is None:
             source = "Unknown"
         if self._has_lock:  # make sure 2nd acquire in same process fails
             print(("lock already held by:"), self.heldBy)

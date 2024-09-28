@@ -318,11 +318,11 @@ class PokerTracker(HandHistoryConverter):
 
         mg = m.groupdict()
         # print 'DEBUG determineGameType', '%r' % mg
-        if "LIMIT" in mg and mg["LIMIT"] != None:
+        if "LIMIT" in mg and mg["LIMIT"] is not None:
             info["limitType"] = self.limits[mg["LIMIT"]]
         if "GAME" in mg:
             (info["base"], info["category"]) = self.games[mg["GAME"]]
-            if mg["LIMIT"] == None:
+            if mg["LIMIT"] is None:
                 if info["category"] == "omahahi":
                     info["limitType"] = "pl"
                 elif info["category"] == "holdem":
@@ -432,14 +432,14 @@ class PokerTracker(HandHistoryConverter):
             if key == "TOURNO":
                 hand.tourNo = info[key]
             if key == "BUYIN":
-                if hand.tourNo != None:
+                if hand.tourNo is not None:
                     tourneyname = ""
                     if self.sitename == "Merge":
                         if self.Structures is None:
                             self.Structures = MergeStructures.MergeStructures()
                         tourneyname = re.split(",", m.group("TABLE"))[0].strip()
                         structure = self.Structures.lookupSnG(tourneyname, hand.startTime)
-                        if structure != None:
+                        if structure is not None:
                             hand.buyin = int(100 * structure["buyIn"])
                             hand.fee = int(100 * structure["fee"])
                             hand.buyinCurrency = structure["currency"]
@@ -497,7 +497,7 @@ class PokerTracker(HandHistoryConverter):
                             hand.maxseats = int(m3.group("MAX").split(" ")[0])
             if key == "BUTTON":
                 hand.buttonpos = info[key]
-            if key == "MAX" and info[key] != None:
+            if key == "MAX" and info[key] is not None:
                 seats = int(info[key])
                 if seats <= 10:
                     hand.maxseats = int(info[key])
@@ -527,7 +527,7 @@ class PokerTracker(HandHistoryConverter):
         for a in m:
             # print a.group('SEAT'), a.group('PNAME'), a.group('CASH')
             hand.addPlayer(int(a.group("SEAT")), a.group("PNAME"), a.group("CASH"))
-            if a.group("BUTTON") != None:
+            if a.group("BUTTON") is not None:
                 hand.buttonpos = int(a.group("SEAT"))
         if len(hand.players) == 1:
             raise FpdbHandPartial(("Hand '%s' was cancelled.") % hand.handid)
@@ -643,12 +643,12 @@ class PokerTracker(HandHistoryConverter):
         # The following should only trigger when a small blind is missing in a tournament, or the sb/bb is ALL_IN
         # see http://sourceforge.net/apps/mantisbt/fpdb/view.php?id=115
         if hand.gametype["type"] == "tour" and self.sitename in ("Merge", "iPoker"):
-            if hand.gametype["sb"] == None and hand.gametype["bb"] == None:
+            if hand.gametype["sb"] is None and hand.gametype["bb"] is None:
                 hand.gametype["sb"] = "1"
                 hand.gametype["bb"] = "2"
-            elif hand.gametype["sb"] == None:
+            elif hand.gametype["sb"] is None:
                 hand.gametype["sb"] = str(old_div(int(Decimal(hand.gametype["bb"])), 2))
-            elif hand.gametype["bb"] == None:
+            elif hand.gametype["bb"] is None:
                 hand.gametype["bb"] = str(int(Decimal(hand.gametype["sb"])) * 2)
             if old_div(int(Decimal(hand.gametype["bb"])), 2) != int(Decimal(hand.gametype["sb"])):
                 if old_div(int(Decimal(hand.gametype["bb"])), 2) < int(Decimal(hand.gametype["sb"])):

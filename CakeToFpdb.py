@@ -381,7 +381,7 @@ class Cake(HandHistoryConverter):
                 hand.maxseats = int(info[key])
 
             # extract buy-in information
-            if key in ["BUYIN", "BUYIN1"] and info[key] and hand.tourNo != None:
+            if key in ["BUYIN", "BUYIN1"] and info[key] and hand.tourNo is not None:
                 if info[key].find("$") != -1:
                     hand.buyinCurrency = "USD"
                 elif info[key].find("£") != -1:

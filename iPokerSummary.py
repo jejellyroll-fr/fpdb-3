@@ -156,7 +156,7 @@ class iPokerSummary(TourneySummary):
         mg = m.groupdict()
         # print "DEBUG: m.groupdict(): %s" % mg
 
-        if "SB" in mg and mg["SB"] != None:
+        if "SB" in mg and mg["SB"] is not None:
             tmp = self.summaryText[0:200]
             log.error(("iPokerSummary.parseSummary: Text does not appear to be a tournament '%s'") % tmp)
             raise FpdbParseError
@@ -175,7 +175,7 @@ class iPokerSummary(TourneySummary):
         if m2:
             month = self.months[m2.group("M")]
             sec = m2.group("S")
-            if m2.group("S") == None:
+            if m2.group("S") is None:
                 sec = "00"
             datetimestr = "%s/%s/%s %s:%s:%s" % (
                 m2.group("Y"),
@@ -191,17 +191,17 @@ class iPokerSummary(TourneySummary):
                 self.startTime = datetime.datetime.strptime(mg["DATETIME"], "%Y-%m-%d %H:%M:%S")
             except ValueError:
                 date_match = self.re_DateTime2.search(mg["DATETIME"])
-                if date_match != None:
+                if date_match is not None:
                     datestr = "%d/%m/%Y %H:%M:%S" if "/" in mg["DATETIME"] else "%d.%m.%Y %H:%M:%S"
-                    if date_match.group("S") == None:
+                    if date_match.group("S") is None:
                         datestr = "%d/%m/%Y %H:%M"
                 else:
                     date_match1 = self.re_DateTime3.search(mg["DATETIME"])
                     datestr = "%Y/%m/%d %H:%M:%S"
-                    if date_match1 == None:
+                    if date_match1 is None:
                         log.error(("iPokerSummary.parseSummary Could not read datetime"))
                         raise FpdbParseError
-                    if date_match1.group("S") == None:
+                    if date_match1.group("S") is None:
                         datestr = "%Y/%m/%d %H:%M"
                 self.startTime = datetime.datetime.strptime(mg["DATETIME"], datestr)
 

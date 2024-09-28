@@ -296,10 +296,10 @@ class Winamax(HandHistoryConverter):
                 # TODO: long-term solution for table naming on Winamax.
                 if hand.tablename.endswith("No Limit Hold'em"):
                     hand.tablename = hand.tablename[: -len("No Limit Hold'em")] + "NLHE"
-            if key == "MAXPLAYER" and info[key] != None:
+            if key == "MAXPLAYER" and info[key] is not None:
                 hand.maxseats = int(info[key])
 
-            if key == "BUYIN" and hand.tourNo != None:
+            if key == "BUYIN" and hand.tourNo is not None:
                 print(f"DEBUG: info['BUYIN']: {info['BUYIN']}")
                 print(f"DEBUG: info['BIAMT']: {info['BIAMT']}")
                 print(f"DEBUG: info['BIRAKE']: {info['BIRAKE']}")
@@ -328,7 +328,7 @@ class Winamax(HandHistoryConverter):
 
                     info["BIAMT"] = info["BIAMT"].strip("$€FPP") if info["BIAMT"] is not None else 0
                     if hand.buyinCurrency != "WIFP":
-                        if info["BOUNTY"] != None:
+                        if info["BOUNTY"] is not None:
                             # There is a bounty, Which means we need to switch BOUNTY and BIRAKE values
                             tmp = info["BOUNTY"]
                             info["BOUNTY"] = info["BIRAKE"]

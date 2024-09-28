@@ -107,7 +107,7 @@ class GuiTourneyViewer(QWidget):
             self.table.setColumnCount(columns)
             self.table.setRowCount(rows)
 
-            if result[1] == None:
+            if result[1] is None:
                 self.errorLabel = QLabel.setText(
                     ("Tournament not found.") + " " + ("Please ensure you imported it and selected the correct site.")
                 )

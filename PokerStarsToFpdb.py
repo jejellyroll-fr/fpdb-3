@@ -527,10 +527,10 @@ class PokerStars(HandHistoryConverter):
 
             if key == "HID":
                 hand.handid = info[key]
-            if key == "TOURNO" and info[key] != None:
+            if key == "TOURNO" and info[key] is not None:
                 hand.tourNo = info[key][-18:]
             if key == "BUYIN":
-                if hand.tourNo != None:
+                if hand.tourNo is not None:
                     # print "DEBUG: info['BUYIN']: %s" % info['BUYIN']
                     # print "DEBUG: info['BIAMT']: %s" % info['BIAMT']
                     # print "DEBUG: info['BIRAKE']: %s" % info['BIRAKE']
@@ -573,7 +573,7 @@ class PokerStars(HandHistoryConverter):
                         info["BIAMT"] = info["BIAMT"].strip("$€£FPPSC₹")
 
                         if hand.buyinCurrency != "PSFP":
-                            if info["BOUNTY"] != None:
+                            if info["BOUNTY"] is not None:
                                 # There is a bounty, Which means we need to switch BOUNTY and BIRAKE values
                                 tmp = info["BOUNTY"]
                                 info["BOUNTY"] = info["BIRAKE"]
@@ -601,19 +601,19 @@ class PokerStars(HandHistoryConverter):
                         hand.isHomeGame = False
             if key == "LEVEL":
                 hand.level = info[key]
-            if key == "SHOOTOUT" and info[key] != None:
+            if key == "SHOOTOUT" and info[key] is not None:
                 hand.isShootout = True
             if key == "TABLE":
                 tablesplit = re.split(" ", info[key])
                 if info["TOURNO"] is not None and info["HIVETABLE"] is not None:
                     hand.tablename = info["HIVETABLE"]
-                elif hand.tourNo != None and len(tablesplit) > 1:
+                elif hand.tourNo is not None and len(tablesplit) > 1:
                     hand.tablename = tablesplit[1]
                 else:
                     hand.tablename = info[key]
             if key == "BUTTON":
                 hand.buttonpos = info[key]
-            if key == "MAX" and info[key] != None:
+            if key == "MAX" and info[key] is not None:
                 hand.maxseats = int(info[key])
 
         if "Zoom" in self.in_path or "Rush" in self.in_path:
@@ -739,7 +739,7 @@ class PokerStars(HandHistoryConverter):
         if self.re_EmptyCard.search(hand.streets[street]):
             raise FpdbHandPartial(("Blank community card"))
         if (
-            street != "FLOPET" or hand.streets.get("FLOP") == None
+            street != "FLOPET" or hand.streets.get("FLOP") is None
         ):  # a list of streets which get dealt community cards (i.e. all but PREFLOP)
             m2 = self.re_Board2.search(hand.streets[street])
             if m2:
@@ -880,7 +880,7 @@ class PokerStars(HandHistoryConverter):
 
     def readTourneyResults(self, hand):
         """Reads knockout bounties and add them to the koCounts dict"""
-        if self.re_Bounty.search(hand.handText) == None:
+        if self.re_Bounty.search(hand.handText) is None:
             koAmounts = {}
             winner = None
             # %(PLYR)s wins %(CUR)s(?P<AMT>[\.0-9]+) for eliminating (?P<ELIMINATED>.+?) and their own bounty increases by %(CUR)s(?P<INCREASE>[\.0-9]+) to %(CUR)s(?P<ENDAMT>[\.0-9]+)
@@ -928,18 +928,18 @@ class PokerStars(HandHistoryConverter):
         )
         names = [p[1] for p in hand.players]
         if "Big Blind" in names or "Small Blind" in names or "Dealer" in names or self.siteId == 26:
-            if acts != None and len([a for a in acts if a[1] != "folds"]) == 0:
+            if acts is not None and len([a for a in acts if a[1] != "folds"]) == 0:
                 m0 = self.re_Uncalled.search(hand.handText)
                 if m0 and float(m0.group("BET")) == float(hand.bb):
                     bovadaUncalled_v2 = True
-                elif m0 == None:
+                elif m0 is None:
                     bovadaUncalled_v1 = True
                     has_sb = len([a[2] for a in hand.actions.get("BLINDSANTES") if a[1] == "small blind"]) > 0
                     adjustment = (float(hand.bb) - float(hand.sb)) if has_sb else float(hand.bb)
                     blindsantes = sum([a[2] for a in hand.actions.get("BLINDSANTES")])
         i = 0
         pre, post = hand.handText.split("*** SUMMARY ***")
-        hand.cashedOut = self.re_CashedOut.search(pre) != None
+        hand.cashedOut = self.re_CashedOut.search(pre) is not None
         if hand.runItTimes == 0 and hand.cashedOut == False:
             for m in self.re_CollectPot.finditer(post):
                 pot = self.clearMoneyString(m.group("POT"))

@@ -258,7 +258,7 @@ class Merge(HandHistoryConverter):
                     log.error(("MergeToFpdb.determineGameType: '%s'") % tmp)
                     raise FpdbParseError
             else:
-                if "mix" in gametype and gametype["mix"] != None:
+                if "mix" in gametype and gametype["mix"] is not None:
                     self.mergeMultigametypes(handText)
         return gametype
 
@@ -360,7 +360,7 @@ class Merge(HandHistoryConverter):
             hand.tourNo = tid
             hand.tablename = table
             structure = self.Structures.lookupSnG(self.info["tablename"], hand.startTime)
-            if structure != None:
+            if structure is not None:
                 hand.buyin = int(100 * structure["buyIn"])
                 hand.fee = int(100 * structure["fee"])
                 hand.buyinCurrency = structure["currency"]
@@ -373,16 +373,16 @@ class Merge(HandHistoryConverter):
                 hand.fee = 0
                 hand.buyinCurrency = "NA"
                 hand.maxseats = None
-                if m.group("SEATS") != None:
+                if m.group("SEATS") is not None:
                     hand.maxseats = int(m.group("SEATS"))
         else:
             # log.debug("HID %s-%s, Table %s" % (m.group('HID1'), m.group('HID2'), m.group('TABLENAME')))
             hand.maxseats = None
-            if m.group("TABLENAME") != None:
+            if m.group("TABLENAME") is not None:
                 hand.tablename = m.group("TABLENAME")
             else:
                 hand.tablename = self.base_name
-            if m.group("SEATS") != None:
+            if m.group("SEATS") is not None:
                 hand.maxseats = int(m.group("SEATS"))
         # Check that the hand is complete up to the awarding of the pot; if
         # not, the hand is unparseable
@@ -423,7 +423,7 @@ class Merge(HandHistoryConverter):
             # Merge indexes seats from 0. Add 1 so we don't have to add corner cases everywhere else.
             hand.addPlayer(int(seat) + 1, name, stack)
 
-        if hand.maxseats == None:
+        if hand.maxseats is None:
             if hand.gametype["type"] == "tour" and self.maxseats == 0:
                 hand.maxseats = self.guessMaxSeats(hand)
                 self.maxseats = hand.maxseats
@@ -476,7 +476,7 @@ class Merge(HandHistoryConverter):
                 hand.handText,
                 re.DOTALL,
             )
-        if m == None:
+        if m is None:
             self.determineErrorType(hand, "markStreets")
         hand.addStreets(m)
 
@@ -505,13 +505,13 @@ class Merge(HandHistoryConverter):
             self.adjustMergeTourneyStack(hand, pname, m.group("BRINGIN"))
             hand.addBringIn(pname, m.group("BRINGIN"))
 
-        if hand.gametype["sb"] == None and hand.gametype["bb"] == None:
+        if hand.gametype["sb"] is None and hand.gametype["bb"] is None:
             hand.gametype["sb"] = "1"
             hand.gametype["bb"] = "2"
 
     def readBlinds(self, hand):
         if (hand.gametype["category"], hand.gametype["limitType"]) == ("badugi", "hp"):
-            if hand.gametype["sb"] == None and hand.gametype["bb"] == None:
+            if hand.gametype["sb"] is None and hand.gametype["bb"] is None:
                 hand.gametype["sb"] = "1"
                 hand.gametype["bb"] = "2"
         else:
@@ -583,12 +583,12 @@ class Merge(HandHistoryConverter):
         # The following should only trigger when a small blind is missing in a tournament, or the sb/bb is ALL_IN
         # see http://sourceforge.net/apps/mantisbt/fpdb/view.php?id=115
         if hand.gametype["type"] == "tour" or hand.gametype["secondGame"]:
-            if hand.gametype["sb"] == None and hand.gametype["bb"] == None:
+            if hand.gametype["sb"] is None and hand.gametype["bb"] is None:
                 hand.gametype["sb"] = "1"
                 hand.gametype["bb"] = "2"
-            elif hand.gametype["sb"] == None:
+            elif hand.gametype["sb"] is None:
                 hand.gametype["sb"] = str(old_div(int(Decimal(hand.gametype["bb"])), 2))
-            elif hand.gametype["bb"] == None:
+            elif hand.gametype["bb"] is None:
                 hand.gametype["bb"] = str(int(Decimal(hand.gametype["sb"])) * 2)
             if old_div(int(Decimal(hand.gametype["bb"])), 2) != int(Decimal(hand.gametype["sb"])):
                 if old_div(int(Decimal(hand.gametype["bb"])), 2) < int(Decimal(hand.gametype["sb"])):
@@ -732,7 +732,7 @@ class Merge(HandHistoryConverter):
                         hand.addRaiseTo(street, player, action.group("BET"))
                 elif action.group("ATYPE") == "BET":
                     hand.addBet(street, player, action.group("BET"))
-                elif action.group("ATYPE") == "ALL_IN" and action.group("BET") != None:
+                elif action.group("ATYPE") == "ALL_IN" and action.group("BET") is not None:
                     hand.addAllIn(street, player, action.group("BET"))
                 elif action.group("ATYPE") == "DRAW":
                     hand.addDiscard(street, player, action.group("TXT"))
@@ -753,7 +753,7 @@ class Merge(HandHistoryConverter):
         hand.setUncalledBets(True)
         for m in self.re_CollectPot.finditer(hand.handText):
             pname = self.playerNameFromSeatNo(m.group("PSEAT"), hand)
-            if pname != None:
+            if pname is not None:
                 pot = m.group("POT")
                 hand.addCollectPot(player=pname, pot=pot)
 

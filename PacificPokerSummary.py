@@ -78,7 +78,7 @@ class PacificPokerSummary(TourneySummary):
 
     def parseSummary(self):
         m = self.re_TourneyInfo.search(self.summaryText)
-        if m == None:
+        if m is None:
             tmp = self.summaryText[0:200]
             log.error(("PacificPokerSummary.parseSummary: '%s'") % tmp)
             raise FpdbParseError
@@ -115,10 +115,10 @@ class PacificPokerSummary(TourneySummary):
 
         self.entries = mg["ENTRIES"]
         self.prizepool = self.buyin * int(self.entries)
-        if "REBUYAMT" in mg and mg["REBUYAMT"] != None:
+        if "REBUYAMT" in mg and mg["REBUYAMT"] is not None:
             self.isRebuy = True
             self.rebuyCost = int(100 * self.convert_to_decimal(mg["REBUYAMT"]))
-        if "ADDON" in mg and mg["ADDON"] != None:
+        if "ADDON" in mg and mg["ADDON"] is not None:
             self.isAddOn = True
             self.addOnCost = int(100 * self.convert_to_decimal(mg["ADDON"]))
         # self.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
@@ -148,7 +148,7 @@ class PacificPokerSummary(TourneySummary):
         addOnCount = None
         koCount = None
 
-        if "WINNINGS" in mg and mg["WINNINGS"] != None:
+        if "WINNINGS" in mg and mg["WINNINGS"] is not None:
             winnings = int(100 * self.convert_to_decimal(mg["WINNINGS"]))
             if mg.get("WCURRENCY"):
                 if mg["WCURRENCY"] == "$":
@@ -160,9 +160,9 @@ class PacificPokerSummary(TourneySummary):
                     self.currency = "USD"
                 elif mg["WCURRENCY2"] == "€":
                     self.currency = "EUR"
-        if "PREBUYS" in mg and mg["PREBUYS"] != None:
+        if "PREBUYS" in mg and mg["PREBUYS"] is not None:
             rebuyCount = int(mg["PREBUYS"])
-        if "PADDONS" in mg and mg["PADDONS"] != None:
+        if "PADDONS" in mg and mg["PADDONS"] is not None:
             addOnCount = int(mg["PADDONS"])
 
         self.addPlayer(rank, player, winnings, self.currency, rebuyCount, addOnCount, koCount)

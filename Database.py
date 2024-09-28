@@ -3191,7 +3191,7 @@ class Database(object):
             dccache, inserts = {}, []
             for k, l in list(self.dcbulk.items()):
                 sc = self.s.get(k[0])
-                if sc != None:
+                if sc is not None:
                     garbageWeekMonths = (sc["wid"], sc["mid"]) in self.wmnew or (sc["wid"], sc["mid"]) in self.wmold
                     garbageTourneyTypes = k[2] in self.ttnew or k[2] in self.ttold
                     if self.import_options["hhBulkPath"] == "" or (not garbageWeekMonths and not garbageTourneyTypes):
@@ -3257,7 +3257,7 @@ class Database(object):
             pccache, inserts = {}, []
             for k, l in list(self.pcbulk.items()):
                 sc = self.s.get(k[0])
-                if sc != None:
+                if sc is not None:
                     garbageWeekMonths = (sc["wid"], sc["mid"]) in self.wmnew or (sc["wid"], sc["mid"]) in self.wmold
                     garbageTourneyTypes = k[2] in self.ttnew or k[2] in self.ttold
                     if self.import_options["hhBulkPath"] == "" or (not garbageWeekMonths and not garbageTourneyTypes):
@@ -3387,7 +3387,7 @@ class Database(object):
 
     def getSqlPlayerIDs(self, pnames, siteid, hero):
         result = {}
-        if self.pcache == None:
+        if self.pcache is None:
             self.pcache = LambdaDict(lambda key: self.insertPlayer(key[0], key[1], key[2]))
 
         for player in pnames:
@@ -3435,7 +3435,7 @@ class Database(object):
         else:
             cursor.execute(select, key)
         tmp = cursor.fetchone()
-        if tmp == None:
+        if tmp is None:
             cursor.execute(insert, key)
             result = self.get_last_insert_id(cursor)
         else:
@@ -3448,7 +3448,7 @@ class Database(object):
         return result
 
     def getSqlGameTypeId(self, siteid, game, printdata=False):
-        if self.gtcache == None:
+        if self.gtcache is None:
             self.gtcache = LambdaDict(lambda key: self.insertGameTypes(key[0], key[1]))
 
         self.gtprintdata = printdata
@@ -3512,7 +3512,7 @@ class Database(object):
         q = q.replace("%s", self.sql.query["placeholder"])
         c.execute(q, gtinfo)
         tmp = c.fetchone()
-        if tmp == None:
+        if tmp is None:
             if self.gtprintdata:
                 print("######## Gametype ##########")
                 import pprint
@@ -3583,7 +3583,7 @@ class Database(object):
         cursor.execute(q, (obj.tourNo, obj.siteId))
         result = cursor.fetchone()
 
-        if result != None:
+        if result is not None:
             columnNames = [desc[0].lower() for desc in cursor.description]
             expectedValues = (
                 ("buyin", "buyin"),
@@ -3641,7 +3641,7 @@ class Database(object):
         if not result or updateDb:
             if obj.gametype["mix"] != "none":
                 category, limitType = obj.gametype["mix"], "mx"
-            elif result != None and resultDict["limittype"] == "mx":
+            elif result is not None and resultDict["limittype"] == "mx":
                 category, limitType = resultDict["category"], "mx"
             else:
                 category, limitType = obj.gametype["category"], obj.gametype["limitType"]
@@ -3827,7 +3827,7 @@ class Database(object):
         c.execute(q, (hand.siteId, hand.tourNo))
 
         tmp = c.fetchone()
-        if tmp == None:
+        if tmp is None:
             c.execute(
                 self.sql.query["insertTourney"].replace("%s", self.sql.query["placeholder"]),
                 (
@@ -3857,10 +3857,10 @@ class Database(object):
             else:
                 startTime, endTime = resultDict["startTime"], resultDict["endTime"]
 
-            if startTime == None or t < startTime:
+            if startTime is None or t < startTime:
                 q = self.sql.query["updateTourneyStart"].replace("%s", self.sql.query["placeholder"])
                 c.execute(q, (t, result))
-            elif endTime == None or t > endTime:
+            elif endTime is None or t > endTime:
                 q = self.sql.query["updateTourneyEnd"].replace("%s", self.sql.query["placeholder"])
                 c.execute(q, (t, result))
         return result
@@ -3873,7 +3873,7 @@ class Database(object):
         columnNames = [desc[0] for desc in cursor.description]
         result = cursor.fetchone()
 
-        if result != None:
+        if result is not None:
             if self.backend == self.PGSQL:
                 expectedValues = (
                     ("comment", "comment"),
@@ -3908,11 +3908,11 @@ class Database(object):
             tourneyId = resultDict["id"]
             for ev in expectedValues:
                 if (
-                    getattr(summary, ev[0]) == None and resultDict[ev[1]] != None
+                    getattr(summary, ev[0]) is None and resultDict[ev[1]] is not None
                 ):  # DB has this value but object doesnt, so update object
                     setattr(summary, ev[0], resultDict[ev[1]])
                 elif (
-                    getattr(summary, ev[0]) != None and not resultDict[ev[1]]
+                    getattr(summary, ev[0]) is not None and not resultDict[ev[1]]
                 ):  # object has this value but DB doesnt, so update DB
                     updateDb = True
                 # elif ev=="startTime":
@@ -3921,9 +3921,9 @@ class Database(object):
             if updateDb:
                 q = self.sql.query["updateTourney"].replace("%s", self.sql.query["placeholder"])
                 startTime, endTime = None, None
-                if summary.startTime != None:
+                if summary.startTime is not None:
                     startTime = summary.startTime.replace(tzinfo=None)
-                if summary.endTime != None:
+                if summary.endTime is not None:
                     endTime = summary.endTime.replace(tzinfo=None)
                 row = (
                     summary.entries,
@@ -3942,9 +3942,9 @@ class Database(object):
                 cursor.execute(q, row)
         else:
             startTime, endTime = None, None
-            if summary.startTime != None:
+            if summary.startTime is not None:
                 startTime = summary.startTime.replace(tzinfo=None)
-            if summary.endTime != None:
+            if summary.endTime is not None:
                 endTime = summary.endTime.replace(tzinfo=None)
             row = (
                 summary.tourneyTypeId,
@@ -3991,7 +3991,7 @@ class Database(object):
 
     def getSqlTourneysPlayersIDs(self, hand):
         result = {}
-        if self.tpcache == None:
+        if self.tpcache is None:
             self.tpcache = LambdaDict(lambda key: self.insertTourneysPlayers(key[0], key[1], key[2]))
 
         for player in hand.players:
@@ -4009,7 +4009,7 @@ class Database(object):
         c.execute(q, (tourneyId, playerId, entryId))
 
         tmp = c.fetchone()
-        if tmp == None:  # new player
+        if tmp is None:  # new player
             c.execute(
                 self.sql.query["insertTourneysPlayer"].replace("%s", self.sql.query["placeholder"]),
                 (tourneyId, playerId, entryId, None, None, None, None, None, None),
@@ -4080,12 +4080,12 @@ class Database(object):
                             summaryAttribute += "s"
                         summaryDict = getattr(summary, summaryAttribute)
                         if (
-                            summaryDict[player][entryIdx] == None and resultDict[ev[1]] != None
+                            summaryDict[player][entryIdx] is None and resultDict[ev[1]] is not None
                         ):  # DB has this value but object doesnt, so update object
                             summaryDict[player][entryIdx] = resultDict[ev[1]]
                             setattr(summary, summaryAttribute, summaryDict)
                         elif (
-                            summaryDict[player][entryIdx] != None and not resultDict[ev[1]]
+                            summaryDict[player][entryIdx] is not None and not resultDict[ev[1]]
                         ):  # object has this value but DB doesnt, so update DB
                             updateDb = True
                     if updateDb:

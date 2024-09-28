@@ -412,28 +412,28 @@ class PartyPoker(HandHistoryConverter):
         mg.update(extra)
         # print "DEBUG: mg: %s" % mg
 
-        if "SITE" in mg and mg["SITE"] != None:
+        if "SITE" in mg and mg["SITE"] is not None:
             self.sitename = self.sites[mg["SITE"]][0]
             self.siteId = self.sites[mg["SITE"]][1]  # Needs to match id entry in Sites database
             print("self.siteId", self.siteId)
             print("self.sitename", self.sitename)
-        if "LIMIT" in mg and mg["LIMIT"] != None:
+        if "LIMIT" in mg and mg["LIMIT"] is not None:
             info["limitType"] = self.limits[mg["LIMIT"]]
-        if "LIMIT2" in mg and mg["LIMIT2"] != None:
+        if "LIMIT2" in mg and mg["LIMIT2"] is not None:
             info["limitType"] = self.limits[mg["LIMIT2"]]
-        if "LIMIT3" in mg and mg["LIMIT3"] != None:
+        if "LIMIT3" in mg and mg["LIMIT3"] is not None:
             info["limitType"] = self.limits[mg["LIMIT3"]]
-        if "FAST2" in mg and mg["FAST2"] != None:
+        if "FAST2" in mg and mg["FAST2"] is not None:
             info["fast"] = True
-        elif "FAST3" in mg and mg["FAST3"] != None:
+        elif "FAST3" in mg and mg["FAST3"] is not None:
             info["fast"] = True
         else:
             info["fast"] = False
-        if mg["LIMIT"] == None and mg["LIMIT2"] == None and mg["LIMIT3"] == None:
+        if mg["LIMIT"] is None and mg["LIMIT2"] is None and mg["LIMIT3"] is None:
             info["limitType"] = "fl"
         if "GAME" in mg:
             (info["base"], info["category"]) = self.games[mg["GAME"]]
-        if "CASHBI" in mg and mg["CASHBI"] != None:
+        if "CASHBI" in mg and mg["CASHBI"] is not None:
             # The summary is using buyin rather then listing the blinds
             # Only with NL games?
             mg["CASHBI"] = self.clearMoneyString(mg["CASHBI"])
@@ -485,7 +485,7 @@ class PartyPoker(HandHistoryConverter):
                     info["bb"] = None
             info["buyinType"] = "regular"
         if "CURRENCY" in mg:
-            if mg["CURRENCY"] == None:
+            if mg["CURRENCY"] is None:
                 info["currency"] = self.currencies["$"]
             else:
                 info["currency"] = self.currencies[mg["CURRENCY"]]
@@ -607,17 +607,17 @@ class PartyPoker(HandHistoryConverter):
                     # FIXME: there is no such property in Hand class
                     self.isSNG = True
             if key == "BUYIN":
-                if info.get("TABLE") != None and "Freeroll" in info.get("TABLE"):
+                if info.get("TABLE") is not None and "Freeroll" in info.get("TABLE"):
                     # Freeroll tourney
                     hand.buyin = 0
                     hand.fee = 0
                     hand.buyinCurrency = "FREE"
-                elif info[key] == None:
+                elif info[key] is None:
                     # Freeroll tourney
                     hand.buyin = 0
                     hand.fee = 0
                     hand.buyinCurrency = "NA"
-                elif hand.tourNo != None:
+                elif hand.tourNo is not None:
                     hand.buyin = 0
                     hand.fee = 0
                     hand.buyinCurrency = "NA"
@@ -633,7 +633,7 @@ class PartyPoker(HandHistoryConverter):
                         raise FpdbParseError
                     info[key] = self.clearMoneyString(info[key].strip("$€"))
                     hand.buyin = int(100 * Decimal(info[key]))
-                    if "FEE" in info and info["FEE"] != None:
+                    if "FEE" in info and info["FEE"] is not None:
                         info["FEE"] = self.clearMoneyString(info["FEE"].strip("$€"))
                         hand.fee = int(100 * Decimal(info["FEE"]))
             if key == "LEVEL":
@@ -687,7 +687,7 @@ class PartyPoker(HandHistoryConverter):
             def findFirstEmptySeat(startSeat):
                 i = 0
                 while startSeat in occupiedSeats:
-                    if (startSeat >= hand.maxseats and hand.maxseats != None) or len(occupiedSeats) >= hand.maxseats:
+                    if (startSeat >= hand.maxseats and hand.maxseats is not None) or len(occupiedSeats) >= hand.maxseats:
                         startSeat = 0
                     startSeat += 1
                     i += 1

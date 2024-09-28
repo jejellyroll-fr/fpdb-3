@@ -257,7 +257,7 @@ class MergeSummary(TourneySummary):
 
                 players, out, won = {}, [], []
                 for m in hhc.re_PlayerOut.finditer(handText):
-                    if m.group("PSEAT") != None:
+                    if m.group("PSEAT") is not None:
                         out.append(m.group("PSEAT"))
                 if out:
                     for m in hhc.re_PlayerInfo.finditer(handText):
@@ -439,7 +439,7 @@ class MergeSummary(TourneySummary):
 
                     rank = int(m.group("RANK"))
                     name = m.group("PNAME")
-                    if m.group("WINNINGS") != None:
+                    if m.group("WINNINGS") is not None:
                         if m.group("WINNINGS").find("$") != -1:
                             self.currency = "USD"
                         elif m.group("WINNINGS").find("€") != -1:

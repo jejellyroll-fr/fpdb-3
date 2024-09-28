@@ -365,7 +365,7 @@ class Bovada(HandHistoryConverter):
             if key == "TOURNO":
                 hand.tourNo = info[key]
             if key == "BUYIN":
-                if info["TOURNO"] != None:
+                if info["TOURNO"] is not None:
                     if info[key] == "Freeroll":
                         hand.buyin = 0
                         hand.fee = 0
@@ -383,7 +383,7 @@ class Bovada(HandHistoryConverter):
                             )
                             raise FpdbParseError
 
-                        if info.get("BOUNTY") != None:
+                        if info.get("BOUNTY") is not None:
                             info["BOUNTY"] = self.clearMoneyString(
                                 info["BOUNTY"].strip("$")
                             )  # Strip here where it isn't 'None'
@@ -399,7 +399,7 @@ class Bovada(HandHistoryConverter):
                         else:
                             info["BIRAKE"] = "0"
 
-                        if info["TICKET"] == None:
+                        if info["TICKET"] is None:
                             hand.buyin = int(100 * Decimal(info["BIAMT"]))
                             hand.fee = int(100 * Decimal(info["BIRAKE"]))
                         else:
@@ -412,9 +412,9 @@ class Bovada(HandHistoryConverter):
                     hand.tablename = info["ZONE"] + " " + info[key]
                 else:
                     hand.tablename = info[key]
-            if key == "MAX" and info[key] != None:
+            if key == "MAX" and info[key] is not None:
                 hand.maxseats = int(info[key])
-            if key == "HU" and info[key] != None:
+            if key == "HU" and info[key] is not None:
                 hand.maxseats = 2
             if key == "VERSION":
                 hand.version = info[key]
@@ -555,7 +555,7 @@ class Bovada(HandHistoryConverter):
             player = self.playerSeatFromPosition("BovadaToFpdb.readBringIn", hand.handid, m.group("PNAME"))
             hand.addBringIn(player, self.clearMoneyString(m.group("BRINGIN")))
 
-        if hand.gametype["sb"] == None and hand.gametype["bb"] == None:
+        if hand.gametype["sb"] is None and hand.gametype["bb"] is None:
             hand.gametype["sb"] = "1"
             hand.gametype["bb"] = "2"
 
@@ -621,15 +621,15 @@ class Bovada(HandHistoryConverter):
                 self.allInBlind(hand, "PREFLOP", a, "both")
 
     def fixBlinds(self, hand):
-        if hand.gametype["sb"] == None and hand.gametype["bb"] != None:
+        if hand.gametype["sb"] is None and hand.gametype["bb"] is not None:
             BB = str(Decimal(hand.gametype["bb"]) * 2)
-            if self.Lim_Blinds.get(BB) != None:
+            if self.Lim_Blinds.get(BB) is not None:
                 hand.gametype["sb"] = self.Lim_Blinds.get(BB)[0]
-        elif hand.gametype["bb"] == None and hand.gametype["sb"] != None:
+        elif hand.gametype["bb"] is None and hand.gametype["sb"] is not None:
             for k, v in list(self.Lim_Blinds.items()):
                 if hand.gametype["sb"] == v[0]:
                     hand.gametype["bb"] = v[1]
-        if hand.gametype["sb"] == None or hand.gametype["bb"] == None:
+        if hand.gametype["sb"] is None or hand.gametype["bb"] is None:
             log.error(("BovadaToFpdb.fixBlinds: Failed to fix blinds") + " Hand ID: %s" % (hand.handid,))
             raise FpdbParseError
         hand.sb = hand.gametype["sb"]
@@ -763,9 +763,9 @@ class Bovada(HandHistoryConverter):
             hand.handText.replace(" [ME]", "") if hand.version == "MVS" else hand.handText
         ):  # [ME]
             collect, pot = m.groupdict(), 0
-            if "POT1" in collect and collect["POT1"] != None:
+            if "POT1" in collect and collect["POT1"] is not None:
                 pot += Decimal(self.clearMoneyString(collect["POT1"]))
-            if "POT2" in collect and collect["POT2"] != None:
+            if "POT2" in collect and collect["POT2"] is not None:
                 pot += Decimal(self.clearMoneyString(collect["POT2"]))
             if pot > 0:
                 player = self.playerSeatFromPosition("BovadaToFpdb.readCollectPot", hand.handid, collect["PNAME"])

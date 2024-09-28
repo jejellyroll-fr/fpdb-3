@@ -314,7 +314,7 @@ class Hand(object):
         # Players, Gametypes, TourneyTypes are all shared functions that are needed for additional tables
         # These functions are intended for prep insert eventually
         #####
-        if self.gametype.get("maxSeats") == None:
+        if self.gametype.get("maxSeats") is None:
             self.gametype["maxSeats"] = self.maxseats  # TODO: move up to individual parsers
         else:
             self.maxseats = self.gametype["maxSeats"]
