@@ -1,6 +1,5 @@
 from decimal_wrapper import Decimal
 from Hand import Pot
-import pytest
 
 
 """

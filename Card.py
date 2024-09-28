@@ -19,7 +19,6 @@ from __future__ import division
 
 from past.utils import old_div
 
-import sys
 
 # #import L10n
 # #_ = L10n.get_translation()

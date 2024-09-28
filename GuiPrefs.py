@@ -19,8 +19,6 @@
 # import L10n
 # _ = L10n.get_translation()
 
-import xml.dom.minidom
-from xml.dom.minidom import Node
 
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QTreeWidget, QTreeWidgetItem
 from PyQt5.QtCore import Qt

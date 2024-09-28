@@ -17,14 +17,10 @@
 
 
 import os
-import re
 import codecs
-import Options
-import HandHistoryConverter
 from IdentifySite import IdentifySite
 import Configuration
 import sys
-import time
 import WinamaxToFpdb, BetfairToFpdb, BovadaToFpdb, CakeToFpdb, GGPokerToFpdb, iPokerToFpdb, KingsClubToFpdb, MergeToFpdb, PacificPokerToFpdb, PartyPokerToFpdb, WinningToFpdb, PokerStarsToFpdb
 import chardet
 from L10n import set_locale_translation

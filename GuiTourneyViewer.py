@@ -20,18 +20,8 @@
 # _ = L10n.get_translation()
 
 
-from PyQt5.QtCore import QCoreApplication, QSortFilterProxyModel, Qt
-from PyQt5.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import (
-    QApplication,
-    QFrame,
-    QMenu,
-    QProgressDialog,
-    QScrollArea,
-    QSplitter,
-    QTableView,
     QVBoxLayout,
-    QHBoxLayout,
     QLabel,
     QLineEdit,
     QPushButton,

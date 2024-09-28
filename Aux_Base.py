@@ -36,11 +36,10 @@ import logging
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = logging.getLogger("hud")
 
-from PyQt5.QtCore import Qt, QObject
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget
 
 # FPDB
-import Card
 
 
 # This holds all card images in a nice lookup table. One instance is

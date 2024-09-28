@@ -25,15 +25,11 @@ from past.utils import old_div
 
 import re
 import sys
-import traceback
-from optparse import OptionParser
 import os
 import os.path
 import xml.dom.minidom
 import codecs
 from decimal_wrapper import Decimal
-import operator
-from xml.dom.minidom import Node
 
 import time
 import datetime
@@ -49,7 +45,6 @@ log = logging.getLogger("parser")
 
 import Hand
 from Exceptions import *
-import Configuration
 
 
 class HandHistoryConverter(object):

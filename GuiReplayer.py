@@ -19,10 +19,7 @@
 
 from __future__ import print_function
 from __future__ import division
-from ast import Return
 
-from collections import defaultdict
-from unicodedata import decimal, name
 from past.utils import old_div
 # import L10n
 # _ = L10n.get_translation()
@@ -30,24 +27,19 @@ from past.utils import old_div
 from functools import partial
 import xml.dom.minidom
 
-import json
 import Hand
 import Card
 import Configuration
 import Database
 import SQL
 import Deck
-import Filters
-import Charset
 
-from PyQt5.QtCore import QPoint, QRect, Qt, QTimer, QRectF
-from PyQt5.QtGui import QColor, QImage, QPainter, QTextDocument
+from PyQt5.QtCore import QPoint, QRect, Qt, QTimer
+from PyQt5.QtGui import QColor, QImage, QPainter
 from PyQt5.QtWidgets import QHBoxLayout, QPushButton, QSlider, QVBoxLayout, QCheckBox, QWidget
 
 from math import pi, cos, sin
 from decimal_wrapper import Decimal
-import numpy as np
-from matplotlib import pyplot as plt
 import copy
 import os
 

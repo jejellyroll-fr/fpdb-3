@@ -21,10 +21,7 @@
 # import L10n
 # _ = L10n.get_translation()
 
-import sys
-from collections import defaultdict
 
-from Configuration import LOCALE_ENCODING
 from Exceptions import FpdbParseError
 from HandHistoryConverter import *
 

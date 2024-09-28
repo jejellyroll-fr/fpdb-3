@@ -34,7 +34,6 @@ from past.utils import old_div
 # -- Cannot parse tables that run it twice
 # -- Cannot parse hands in which someone is all in in one of the blinds.
 
-import sys
 from HandHistoryConverter import *
 import MergeStructures
 from decimal_wrapper import Decimal

@@ -1,5 +1,4 @@
 import re
-import pytest
 
 substitutions = {
     "PLYR": r"(?P<PNAME>\w+)",

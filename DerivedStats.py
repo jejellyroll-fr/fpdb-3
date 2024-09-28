@@ -25,7 +25,6 @@ from past.utils import old_div
 import Card
 from decimal_wrapper import Decimal, ROUND_DOWN
 
-import sys
 import logging
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:

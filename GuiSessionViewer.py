@@ -23,13 +23,12 @@ from past.utils import old_div
 # _ = L10n.get_translation()
 
 import sys
-import os
 import traceback
 from time import time, strftime, localtime, gmtime
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QFrame, QHBoxLayout, QLabel, QScrollArea, QSplitter, QTableView, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QFrame, QLabel, QScrollArea, QSplitter, QTableView, QVBoxLayout
 
 import matplotlib
 from matplotlib.figure import Figure
@@ -56,7 +55,6 @@ except ImportError as inst:
     print(("""Failed to load numpy and/or matplotlib in Session Viewer"""))
     print("ImportError: %s" % inst.args)
 
-import Card
 import Database
 import Filters
 import Charset

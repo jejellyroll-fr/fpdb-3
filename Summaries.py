@@ -23,9 +23,7 @@ from __future__ import print_function
 
 import sys
 from imaplib import IMAP4_SSL
-from Summaries import Summaries
 import PokerStarsSummary
-import Exceptions
 
 # TODO: move all these into the config file. until then usage is: ./ImapSummaries.py YourImapHost YourImapUser YourImapPw
 configHost = sys.argv[1]

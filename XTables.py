@@ -28,7 +28,6 @@ import logging
 
 from PyQt5.QtGui import QWindow
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget
 
 #    Other Library modules
 import xcffib, xcffib.xproto

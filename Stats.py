@@ -55,7 +55,6 @@ _ = L10n.get_translation()
 
 #    Standard Library modules
 import sys
-from decimal import Decimal  # needed by hand_instance in m_ratio
 
 
 import re

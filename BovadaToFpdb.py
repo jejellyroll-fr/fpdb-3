@@ -23,9 +23,7 @@
 
 # TODO: straighten out discards for draw games
 
-import sys, copy
 from HandHistoryConverter import *
-import Card
 from decimal_wrapper import Decimal
 
 # Bovada HH Format

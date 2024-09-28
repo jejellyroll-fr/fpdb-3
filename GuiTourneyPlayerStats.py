@@ -21,7 +21,7 @@ from __future__ import print_function
 # import L10n
 # _ = L10n.get_translation()
 
-from time import time, strftime
+from time import time
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel

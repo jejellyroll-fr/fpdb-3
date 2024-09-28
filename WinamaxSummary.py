@@ -25,7 +25,6 @@ from bs4 import BeautifulSoup
 
 from Exceptions import FpdbParseError
 from HandHistoryConverter import *
-import PokerStarsToFpdb
 from TourneySummary import *
 
 
