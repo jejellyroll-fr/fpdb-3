@@ -26,11 +26,12 @@ initialize_encoders()
 # For any other type, it raises a TypeError.
 def to_utf8(s):
     if isinstance(s, str):
-        return s.encode('utf-8')
+        return b'' if s == '' else s.encode('utf-8')
     elif isinstance(s, bytes):
         return s
     else:
         raise TypeError(f"Unsupported type for to_utf8: {type(s)}")
+
 
 # Function to ensure data is ready for GUI display
 # If the input is a string, it returns it unchanged.
@@ -71,4 +72,4 @@ def to_db_utf8(s):
 def set_locale_encoding(encoding):
     global locale_encoding
     locale_encoding = encoding  # Update the locale encoding
-    not_needed1 = not_needed2 = not_needed3 = is_utf8_encoding(locale_encoding)
+    is_utf8_encoding(locale_encoding)
