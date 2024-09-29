@@ -249,7 +249,7 @@ def get_config(file_name, fallback=True):
                     + ("Config file has been created at %r.") % (config_path + "\n")
                 )
 
-        except:
+        except Exception:
             print((("Error copying .example config file, cannot fall back. Exiting."), "\n"))
             sys.stderr.write(("Error copying .example config file, cannot fall back. Exiting.") + "\n")
             sys.stderr.write(str(sys.exc_info()))
