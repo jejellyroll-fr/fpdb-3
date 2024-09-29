@@ -574,7 +574,7 @@ class Bovada(HandHistoryConverter):
                 hand.addBlind(player, "small blind", self.clearMoneyString(postsb["SB"]))
                 if not hand.gametype["sb"]:
                     hand.gametype["sb"] = self.clearMoneyString(postsb["SB"])
-            sb = self.clearMoneyString(postsb["SB"])
+            # sb = self.clearMoneyString(postsb["SB"])
             self.allInBlind(hand, "PREFLOP", a, "small blind")
         for a in self.re_PostBB.finditer(hand.handText):
             if postbb != a.groupdict():
@@ -584,7 +584,7 @@ class Bovada(HandHistoryConverter):
                 self.allInBlind(hand, "PREFLOP", a, "big blind")
                 if not hand.gametype["bb"]:
                     hand.gametype["bb"] = self.clearMoneyString(postbb["BB"])
-                bb = self.clearMoneyString(postbb["BB"])
+                # bb = self.clearMoneyString(postbb["BB"])
                 if not hand.gametype["currency"]:
                     if postbb["CURRENCY"].find("$") != -1:
                         hand.gametype["currency"] = "USD"
