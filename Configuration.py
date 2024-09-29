@@ -1562,48 +1562,29 @@ class Config(object):
     def get_db_parameters(self):
         db = {}
         name = self.db_selected
-        # TODO: What's up with all the exception handling here?!
-        try:
-            db["db-databaseName"] = name
-        except:
-            pass
 
-        try:
-            db["db-desc"] = self.supported_databases[name].db_desc
-        except:
-            pass
+        if name not in self.supported_databases:
+            log.error(f"Database {name} not found in supported databases.")
+            return db
 
-        try:
-            db["db-host"] = self.supported_databases[name].db_ip
-        except:
-            pass
+        # Parameters are retrieved with default values
+        db["db-databaseName"] = name
 
-        try:
-            db["db-port"] = self.supported_databases[name].db_port
-        except:
-            pass
+        # use getattr
+        db["db-desc"] = getattr(self.supported_databases[name], "db_desc", None)
+        db["db-host"] = getattr(self.supported_databases[name], "db_ip", None)
+        db["db-port"] = getattr(self.supported_databases[name], "db_port", None)
+        db["db-user"] = getattr(self.supported_databases[name], "db_user", None)
+        db["db-password"] = getattr(self.supported_databases[name], "db_pass", None)
+        db["db-server"] = getattr(self.supported_databases[name], "db_server", None)
+        db["db-path"] = getattr(self.supported_databases[name], "db_path", None)
 
+        # add backend
         try:
-            db["db-user"] = self.supported_databases[name].db_user
-        except:
-            pass
-
-        try:
-            db["db-password"] = self.supported_databases[name].db_pass
-        except:
-            pass
-
-        try:
-            db["db-server"] = self.supported_databases[name].db_server
-        except:
-            pass
-
-        try:
-            db["db-path"] = self.supported_databases[name].db_path
-        except:
-            pass
-
-        db["db-backend"] = self.get_backend(self.supported_databases[name].db_server)
+            db["db-backend"] = self.get_backend(self.supported_databases[name].db_server)
+        except (AttributeError, KeyError) as e:
+            log.error(f"Error retrieving backend for {name}: {str(e)}")
+            db["db-backend"] = None
 
         return db
 
