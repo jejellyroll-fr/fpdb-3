@@ -1,22 +1,12 @@
 import Pokenum_api_call
 
 response = Pokenum_api_call.run_pokenum(
-    method="-mc",
-    iterations="10000",
-    game="-h",
-    hand=['As', 'Ad', '-', 'Ks', 'Qs'],
-    board=["--"],
-    dead=["/"]
+    method="-mc", iterations="10000", game="-h", hand=["As", "Ad", "-", "Ks", "Qs"], board=["--"], dead=["/"]
 )
 print(response)
 
 response = Pokenum_api_call.run_pokenum(
-    method="",
-    iterations="",
-    game="-h",
-    hand=['As', 'Ad', '-', 'Ks', 'Qs'],
-    board=["--"],
-    dead=["/"]
+    method="", iterations="", game="-h", hand=["As", "Ad", "-", "Ks", "Qs"], board=["--"], dead=["/"]
 )
 print(response)
 
@@ -26,9 +16,9 @@ response = Pokenum_api_call.run_pokenum(
     method="",
     iterations="",
     game="-o",
-    hand=['As', 'Kh', 'Qs', 'Jh', '-', '8h', '8d', '7h', '6d'],
+    hand=["As", "Kh", "Qs", "Jh", "-", "8h", "8d", "7h", "6d"],
     board=["--"],
-    dead=["/"]
+    dead=["/"],
 )
 print(response)
 
@@ -38,9 +28,9 @@ response = Pokenum_api_call.run_pokenum(
     method="-mc",
     iterations="10000",
     game="-o",
-    hand=['As', 'Kh', 'Qs', 'Jh', '-', '8h', '8d', '7h', '6d'],
+    hand=["As", "Kh", "Qs", "Jh", "-", "8h", "8d", "7h", "6d"],
     board=["--"],
-    dead=["/"]
+    dead=["/"],
 )
 print(response)
 
@@ -50,9 +40,9 @@ response = Pokenum_api_call.run_pokenum(
     method="-mc",
     iterations="10000",
     game="-o85",
-    hand=['As', 'Kh', 'Qs', 'Jh', 'Ts', '-', '8h', '8d', '7h', '6d', '9c'],
+    hand=["As", "Kh", "Qs", "Jh", "Ts", "-", "8h", "8d", "7h", "6d", "9c"],
     board=["--"],
-    dead=["/"]
+    dead=["/"],
 )
 print(response)
 
@@ -62,9 +52,9 @@ response = Pokenum_api_call.run_pokenum(
     method="",
     iterations="",
     game="-o",
-    hand=['As', 'Kh', 'Qs', 'Jh',  '8d', '7h', '6d', '9c'],
-    board=["--", '8s', 'Ts', 'Jc'],
-    dead=["/"]
+    hand=["As", "Kh", "Qs", "Jh", "8d", "7h", "6d", "9c"],
+    board=["--", "8s", "Ts", "Jc"],
+    dead=["/"],
 )
 print(response)
 
@@ -74,21 +64,26 @@ response = Pokenum_api_call.run_pokenum(
     method="",
     iterations="",
     game="-o",
-    hand=['As', 'Kh', 'Qs', 'Jh',  '8d', '7h', '6d', '9c'],
-    board=["--", '8s', 'Ts', 'Jc', 'Ad'],
-    dead=["/"]
+    hand=["As", "Kh", "Qs", "Jh", "8d", "7h", "6d", "9c"],
+    board=["--", "8s", "Ts", "Jc", "Ad"],
+    dead=["/"],
 )
 print(response)
 
-# pokenum  -o5 As Ad Kh Qs Jh  - 8h 8d 7h 6d 5d -- 8s Ts Jc 
+# pokenum  -o5 As Ad Kh Qs Jh  - 8h 8d 7h 6d 5d -- 8s Ts Jc
 
 response = Pokenum_api_call.run_pokenum(
     method="",
     iterations="",
     game="-o5",
-    hand=['As','Ad', 'Kh', 'Qs', 'Jh',  '8d', '7h', '6d', '9c', '5d'],
-    board=["--", '8s', 'Ts', 'Jc', ],
-    dead=["/"]
+    hand=["As", "Ad", "Kh", "Qs", "Jh", "8d", "7h", "6d", "9c", "5d"],
+    board=[
+        "--",
+        "8s",
+        "Ts",
+        "Jc",
+    ],
+    dead=["/"],
 )
 print(response)
 
@@ -98,8 +93,8 @@ response = Pokenum_api_call.run_pokenum(
     method="",
     iterations="",
     game="-7s",
-    hand=['As','Ah', 'Ts', 'Th', '8h', '8d', '-',  'Kc', 'Qc', 'Jc', 'Td', '3c', '2d'],
+    hand=["As", "Ah", "Ts", "Th", "8h", "8d", "-", "Kc", "Qc", "Jc", "Td", "3c", "2d"],
     board=["--"],
-    dead=["/", '5c', '6c', '2s', 'Jh']
+    dead=["/", "5c", "6c", "2s", "Jh"],
 )
 print(response)

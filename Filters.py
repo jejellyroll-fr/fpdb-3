@@ -4,33 +4,42 @@
 from __future__ import print_function
 from __future__ import division
 import itertools
-from ast import Pass
 
-from dataclasses import replace
 from past.utils import old_div
 import pathlib
 import os
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QDate, QDateTime
-from PyQt5.QtWidgets import (QCalendarWidget, QCheckBox, QCompleter,
-                             QDateEdit, QDialog, QGridLayout,
-                             QGroupBox, QHBoxLayout, QLabel,
-                             QLineEdit, QPushButton, QRadioButton,
-                             QSpinBox, QVBoxLayout, QWidget, QComboBox)
+from PyQt5.QtWidgets import (
+    QCalendarWidget,
+    QCheckBox,
+    QDateEdit,
+    QDialog,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QRadioButton,
+    QSpinBox,
+    QVBoxLayout,
+    QWidget,
+    QComboBox,
+)
 
-from time import gmtime, mktime, strftime, strptime
 from functools import partial
 import logging
 
 import Configuration
 import Database
 import SQL
-import Charset
 import Card
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 log = logging.getLogger("filter")
+
 
 class Filters(QWidget):
     def __init__(self, db, display={}):
@@ -52,55 +61,80 @@ class Filters(QWidget):
         self.cbTourneyLim = {}
         self.cbTourneyBuyin = {}
 
-        self.gameName = {"27_1draw": ("Single Draw 2-7 Lowball"),
-                         "27_3draw": ("Triple Draw 2-7 Lowball"),
-                         "a5_3draw": ("Triple Draw A-5 Lowball"),
-                         "5_studhi": ("5 Card Stud"),
-                         "badugi": ("Badugi"),
-                         "badacey": ("Badacey"),
-                         "badeucey": ("Badeucey"),
-                         "drawmaha": ("2-7 Drawmaha"),
-                         "a5_1draw": ("A-5 Single Draw"),
-                         "27_razz": ("2-7 Razz"),
-                         "fivedraw": ("5 Card Draw"),
-                         "holdem": ("Hold'em"),
-                         "6_holdem": ("Hold'em"),
-                         "omahahi": ("Omaha"),
-                         "fusion": ("Fusion"),
-                         "omahahilo": ("Omaha Hi/Lo"),
-                         "razz": ("Razz"),
-                         "studhi": ("7 Card Stud"),
-                         "studhilo": ("7 Card Stud Hi/Lo"),
-                         "5_omahahi": ("5 Card Omaha"),
-                         "5_omaha8": ("5 Card Omaha Hi/Lo"),
-                         "cour_hi": ("Courchevel"),
-                         "cour_hilo": ("Courchevel Hi/Lo"),
-                         "2_holdem": ("Double hold'em"),
-                         "irish": ("Irish"),
-                         "6_omahahi": ("6 Card Omaha")}
+        self.gameName = {
+            "27_1draw": ("Single Draw 2-7 Lowball"),
+            "27_3draw": ("Triple Draw 2-7 Lowball"),
+            "a5_3draw": ("Triple Draw A-5 Lowball"),
+            "5_studhi": ("5 Card Stud"),
+            "badugi": ("Badugi"),
+            "badacey": ("Badacey"),
+            "badeucey": ("Badeucey"),
+            "drawmaha": ("2-7 Drawmaha"),
+            "a5_1draw": ("A-5 Single Draw"),
+            "27_razz": ("2-7 Razz"),
+            "fivedraw": ("5 Card Draw"),
+            "holdem": ("Hold'em"),
+            "6_holdem": ("Hold'em"),
+            "omahahi": ("Omaha"),
+            "fusion": ("Fusion"),
+            "omahahilo": ("Omaha Hi/Lo"),
+            "razz": ("Razz"),
+            "studhi": ("7 Card Stud"),
+            "studhilo": ("7 Card Stud Hi/Lo"),
+            "5_omahahi": ("5 Card Omaha"),
+            "5_omaha8": ("5 Card Omaha Hi/Lo"),
+            "cour_hi": ("Courchevel"),
+            "cour_hilo": ("Courchevel Hi/Lo"),
+            "2_holdem": ("Double hold'em"),
+            "irish": ("Irish"),
+            "6_omahahi": ("6 Card Omaha"),
+        }
 
-        self.currencyName = {"USD": ("US Dollar"),
-                             "EUR": ("Euro"),
-                             "T$": ("Tournament Dollar"),
-                             "play": ("Play Money")}
+        self.currencyName = {"USD": ("US Dollar"), "EUR": ("Euro"), "T$": ("Tournament Dollar"), "play": ("Play Money")}
 
-        self.filterText = {'limitsall': ('All'), 'limitsnone': ('None'), 'limitsshow': ('Show Limits'),
-                           'gamesall': ('All'), 'gamesnone': ('None'),
-                           'positionsall': ('All'), 'positionsnone': ('None'),
-                           'currenciesall': ('All'), 'currenciesnone': ('None'),
-                           'seatsbetween': ('Between:'), 'seatsand': ('And:'), 'seatsshow': ('Show Number of Players'),
-                           'playerstitle': ('Hero:'), 'sitestitle': (('Sites') + ':'), 'gamestitle': (('Games') + ':'), 'tourneytitle': (('Tourney') + ':'), 'tourneycat': (('Category') + ':'), 
-                           'limitstitle': ('Limits:'), 'positionstitle': ('Positions:'), 'seatstitle': ('Number of Players:'), 'tourneylim': (('Limit Type') + ':'),
-                           'groupstitle': ('Grouping:'), 'posnshow': ('Show Position Stats'), 'tourneybuyin': (('Buyin') + ':'),
-                           'datestitle': ('Date:'), 'currenciestitle': (('Currencies') + ':'),
-                           'groupsall': ('All Players'), 'cardstitle': (('Hole Cards') + ':'),
-                           'limitsFL': 'FL', 'limitsNL': 'NL', 'limitsPL': 'PL', 'limitsCN': 'CAP', 'ring': ('Ring'), 'tour': ('Tourney'), 'limitsHP': 'HP'}
+        self.filterText = {
+            "limitsall": ("All"),
+            "limitsnone": ("None"),
+            "limitsshow": ("Show Limits"),
+            "gamesall": ("All"),
+            "gamesnone": ("None"),
+            "positionsall": ("All"),
+            "positionsnone": ("None"),
+            "currenciesall": ("All"),
+            "currenciesnone": ("None"),
+            "seatsbetween": ("Between:"),
+            "seatsand": ("And:"),
+            "seatsshow": ("Show Number of Players"),
+            "playerstitle": ("Hero:"),
+            "sitestitle": (("Sites") + ":"),
+            "gamestitle": (("Games") + ":"),
+            "tourneytitle": (("Tourney") + ":"),
+            "tourneycat": (("Category") + ":"),
+            "limitstitle": ("Limits:"),
+            "positionstitle": ("Positions:"),
+            "seatstitle": ("Number of Players:"),
+            "tourneylim": (("Limit Type") + ":"),
+            "groupstitle": ("Grouping:"),
+            "posnshow": ("Show Position Stats"),
+            "tourneybuyin": (("Buyin") + ":"),
+            "datestitle": ("Date:"),
+            "currenciestitle": (("Currencies") + ":"),
+            "groupsall": ("All Players"),
+            "cardstitle": (("Hole Cards") + ":"),
+            "limitsFL": "FL",
+            "limitsNL": "NL",
+            "limitsPL": "PL",
+            "limitsCN": "CAP",
+            "ring": ("Ring"),
+            "tour": ("Tourney"),
+            "limitsHP": "HP",
+        }
 
         gen = self.conf.get_general_params()
         self.day_start = 0
 
-        if 'day_start' in gen:
-            self.day_start = float(gen['day_start'])
+        if "day_start" in gen:
+            self.day_start = float(gen["day_start"])
 
         self.setLayout(QVBoxLayout())
 
@@ -115,7 +149,7 @@ class Filters(QWidget):
         self.type = None
 
         for site in self.conf.get_supported_sites():
-            self.cursor.execute(self.sql.query['getSiteId'], (site,))
+            self.cursor.execute(self.sql.query["getSiteId"], (site,))
             result = self.db.cursor.fetchall()
             if len(result) == 1:
                 self.siteid[site] = result[0][0]
@@ -170,58 +204,58 @@ class Filters(QWidget):
             self.update_filters_for_hero()
 
     def create_player_frame(self):
-        playerFrame = QGroupBox(self.filterText['playerstitle'])
+        playerFrame = QGroupBox(self.filterText["playerstitle"])
         self.leHeroes = {}
         self.fillPlayerFrame(playerFrame, self.display)
         return playerFrame
 
     def create_sites_frame(self):
-        sitesFrame = QGroupBox(self.filterText['sitestitle'])
+        sitesFrame = QGroupBox(self.filterText["sitestitle"])
         self.cbSites = {}
         self.fillSitesFrame(sitesFrame)
         return sitesFrame
 
     def create_games_frame(self):
-        gamesFrame = QGroupBox(self.filterText['gamestitle'])
+        gamesFrame = QGroupBox(self.filterText["gamestitle"])
         self.fillGamesFrame(gamesFrame)
         return gamesFrame
 
     def create_tourney_frame(self):
-        tourneyFrame = QGroupBox(self.filterText['tourneytitle'])
+        tourneyFrame = QGroupBox(self.filterText["tourneytitle"])
         self.cbTourney = {}
         self.fillTourneyTypesFrame(tourneyFrame)
         return tourneyFrame
 
     def create_tourney_cat_frame(self):
-        tourneyCatFrame = QGroupBox(self.filterText['tourneycat'])
+        tourneyCatFrame = QGroupBox(self.filterText["tourneycat"])
         self.cbTourneyCat = {}
         self.fillTourneyCatFrame(tourneyCatFrame)
         return tourneyCatFrame
 
     def create_tourney_lim_frame(self):
-        tourneyLimFrame = QGroupBox(self.filterText['tourneylim'])
+        tourneyLimFrame = QGroupBox(self.filterText["tourneylim"])
         self.cbTourneyLim = {}
         self.fillTourneyLimFrame(tourneyLimFrame)
         return tourneyLimFrame
 
     def create_tourney_buyin_frame(self):
-        tourneyBuyinFrame = QGroupBox(self.filterText['tourneybuyin'])
+        tourneyBuyinFrame = QGroupBox(self.filterText["tourneybuyin"])
         self.cbTourneyBuyin = {}
         self.fillTourneyBuyinFrame(tourneyBuyinFrame)
         return tourneyBuyinFrame
 
     def create_currencies_frame(self):
-        currenciesFrame = QGroupBox(self.filterText['currenciestitle'])
+        currenciesFrame = QGroupBox(self.filterText["currenciestitle"])
         self.fillCurrenciesFrame(currenciesFrame)
         return currenciesFrame
 
     def create_limits_frame(self):
-        limitsFrame = QGroupBox(self.filterText['limitstitle'])
+        limitsFrame = QGroupBox(self.filterText["limitstitle"])
         self.fillLimitsFrame(limitsFrame, self.display)
         return limitsFrame
 
     def create_positions_frame(self):
-        positionsFrame = QGroupBox(self.filterText['positionstitle'])
+        positionsFrame = QGroupBox(self.filterText["positionstitle"])
         self.fillPositionsFrame(positionsFrame, self.display)
         return positionsFrame
 
@@ -232,23 +266,23 @@ class Filters(QWidget):
         return graphopsFrame
 
     def create_seats_frame(self):
-        seatsFrame = QGroupBox(self.filterText['seatstitle'])
+        seatsFrame = QGroupBox(self.filterText["seatstitle"])
         self.sbSeats = {}
         self.fillSeatsFrame(seatsFrame)
         return seatsFrame
 
     def create_groups_frame(self):
-        groupsFrame = QGroupBox(self.filterText['groupstitle'])
+        groupsFrame = QGroupBox(self.filterText["groupstitle"])
         self.fillGroupsFrame(groupsFrame, self.display)
         return groupsFrame
 
     def create_date_frame(self):
-        dateFrame = QGroupBox(self.filterText['datestitle'])
+        dateFrame = QGroupBox(self.filterText["datestitle"])
         self.fillDateFrame(dateFrame)
         return dateFrame
 
     def create_cards_frame(self):
-        cardsFrame = QGroupBox(self.filterText['cardstitle'])
+        cardsFrame = QGroupBox(self.filterText["cardstitle"])
         self.fillHoleCardsFrame(cardsFrame)
         return cardsFrame
 
@@ -268,7 +302,7 @@ class Filters(QWidget):
 
     def getNumTourneys(self):
         return 0
-    
+
     def getGraphOps(self):
         return [g for g in self.cbGraphops if self.cbGraphops[g].isChecked()]
 
@@ -321,10 +355,10 @@ class Filters(QWidget):
 
     def getSeats(self):
         result = {}
-        if 'from' in self.sbSeats:
-            result['from'] = self.sbSeats['from'].value()
-        if 'to' in self.sbSeats:
-            result['to'] = self.sbSeats['to'].value()
+        if "from" in self.sbSeats:
+            result["from"] = self.sbSeats["from"].value()
+        if "to" in self.sbSeats:
+            result["to"] = self.sbSeats["to"].value()
         return result
 
     def getGroups(self):
@@ -352,7 +386,7 @@ class Filters(QWidget):
 
         self.cards = {}
         for i, j in itertools.product(range(2, 15), range(2, 15)):
-            for s in ['s', 'o']:
+            for s in ["s", "o"]:
                 if i >= j:
                     hand = f"{i}{j}{s}"
                     self.cards[hand] = False
@@ -363,7 +397,7 @@ class Filters(QWidget):
     def registerButton1Callback(self, callback):
         self.Button1.clicked.connect(callback)
         self.Button1.setEnabled(True)
-        self.callback['button1'] = callback
+        self.callback["button1"] = callback
 
     def registerButton2Name(self, title):
         self.Button2.setText(title)
@@ -371,10 +405,10 @@ class Filters(QWidget):
     def registerButton2Callback(self, callback):
         self.Button2.clicked.connect(callback)
         self.Button2.setEnabled(True)
-        self.callback['button2'] = callback
+        self.callback["button2"] = callback
 
     def registerCardsCallback(self, callback):
-        self.callback['cards'] = callback
+        self.callback["cards"] = callback
 
     def __set_tourney_type_select(self, w, tourneyType):
         self.tourneyTypes[tourneyType] = w.get_active()
@@ -393,6 +427,7 @@ class Filters(QWidget):
                 abbr = Card.card_map_abbr[j][i]
                 b = QPushButton("")
                 import platform
+
                 if platform.system() == "Darwin":
                     b.setStyleSheet("QPushButton {border-width:0;margin:6;padding:0;}")
                 else:
@@ -418,9 +453,9 @@ class Filters(QWidget):
         p_off = "lightblue"
         if len(card) == 2:
             return p_on if selected else p_off
-        if card[2] == 's':
+        if card[2] == "s":
             return s_on if selected else s_off
-        if card[2] == 'o':
+        if card[2] == "o":
             return o_on if selected else o_off
 
     def __toggle_card_select(self, checkState, widget, card):
@@ -429,8 +464,8 @@ class Filters(QWidget):
         widget.setFont(font)
         widget.setText(card)
         self.cards[card] = not self.cards[card]
-        if 'cards' in self.callback:
-            self.callback['cards'](card)
+        if "cards" in self.callback:
+            self.callback["cards"](card)
 
     def __set_cards(self, checkState):
         pass
@@ -456,56 +491,56 @@ class Filters(QWidget):
             _pname = player
             self.leHeroes[site] = QLineEdit(_pname)
 
-            if os.name == 'nt':
+            if os.name == "nt":
                 icoPath = os.path.dirname(__file__) + "\\icons\\"
             else:
                 icoPath = ""
 
             icon_file = ""
             if site == "PokerStars":
-                icon_file = 'ps.svg'
+                icon_file = "ps.svg"
             elif site == "Full Tilt Poker":
-                icon_file = 'ft.svg'
+                icon_file = "ft.svg"
             elif site == "Everleaf":
-                icon_file = 'everleaf.png'
+                icon_file = "everleaf.png"
             elif site == "Boss":
-                icon_file = 'boss.ico'
+                icon_file = "boss.ico"
             elif site == "PartyPoker":
-                icon_file = 'party.png'
+                icon_file = "party.png"
             elif site == "Merge":
-                icon_file = 'merge.png'
+                icon_file = "merge.png"
             elif site == "PKR":
-                icon_file = 'pkr.png'
+                icon_file = "pkr.png"
             elif site == "iPoker":
-                icon_file = 'ipoker.png'
+                icon_file = "ipoker.png"
             elif site == "Cake":
-                icon_file = 'cake.png'
+                icon_file = "cake.png"
             elif site == "Entraction":
-                icon_file = 'entraction.png'
+                icon_file = "entraction.png"
             elif site == "BetOnline":
-                icon_file = 'betonline.png'
+                icon_file = "betonline.png"
             elif site == "Microgaming":
-                icon_file = 'microgaming.png'
+                icon_file = "microgaming.png"
             elif site == "Bovada":
-                icon_file = 'bovada.png'
+                icon_file = "bovada.png"
             elif site == "Enet":
-                icon_file = 'enet.png'
+                icon_file = "enet.png"
             elif site == "SealsWithClubs":
-                icon_file = 'swc.png'
+                icon_file = "swc.png"
             elif site == "WinningPoker":
-                icon_file = 'winning.png'
+                icon_file = "winning.png"
             elif site == "GGPoker":
-                icon_file = 'gg.png'
+                icon_file = "gg.png"
             elif site == "Pacific":
-                icon_file = 'pacific.png'
+                icon_file = "pacific.png"
             elif site == "KingsClub":
-                icon_file = 'kingsclub.png'
+                icon_file = "kingsclub.png"
             elif site == "Unibet":
-                icon_file = 'unibet.png'
+                icon_file = "unibet.png"
             elif site == "Winamax":
-                icon_file = 'wina.svg'
+                icon_file = "wina.svg"
             else:
-                icon_file = ''
+                icon_file = ""
 
             if icon_file:
                 self.heroList.addItem(QIcon(icoPath + icon_file), f"{_pname} on {site}")
@@ -518,10 +553,10 @@ class Filters(QWidget):
         if "GroupsAll" in display and display["GroupsAll"]:
             hbox = QHBoxLayout()
             vbox.addLayout(hbox)
-            self.cbGroups['allplayers'] = QCheckBox(self.filterText['groupsall'])
-            hbox.addWidget(self.cbGroups['allplayers'])
+            self.cbGroups["allplayers"] = QCheckBox(self.filterText["groupsall"])
+            hbox.addWidget(self.cbGroups["allplayers"])
 
-            lbl = QLabel(('Min # Hands:'))
+            lbl = QLabel(("Min # Hands:"))
             hbox.addWidget(lbl)
 
             self.phands = QSpinBox()
@@ -553,7 +588,7 @@ class Filters(QWidget):
         for count, game in enumerate(result, start=0):
             game = str(result[count])
             if game == "(None,)":
-                game = "(\"None\",)"
+                game = '("None",)'
                 game = game.replace("(", "")
                 game = game.replace(",", "")
                 game = game.replace(")", "")
@@ -595,7 +630,7 @@ class Filters(QWidget):
         for count, game in enumerate(result, start=0):
             game = str(result[count])
             if game == "(None,)":
-                game = "(\"None\",)"
+                game = '("None",)'
                 game = game.replace("(", "")
                 game = game.replace(",", "")
                 game = game.replace(")", "")
@@ -637,7 +672,7 @@ class Filters(QWidget):
         for count, game in enumerate(result, start=0):
             game = str(result[count])
             if game == "(None,)":
-                game = "(\"None\",)"
+                game = '("None",)'
                 game = game.replace("(", "")
                 game = game.replace(",", "")
                 game = game.replace(")", "")
@@ -690,13 +725,11 @@ class Filters(QWidget):
         else:
             log.info("No buy-ins returned from database")
 
-
-
     def fillGamesFrame(self, frame):
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
-        self.cursor.execute(self.sql.query['getGames'])
+        self.cursor.execute(self.sql.query["getGames"])
         result = self.db.cursor.fetchall()
         print(result)
         self.gameList = QComboBox()
@@ -720,16 +753,12 @@ class Filters(QWidget):
                 vbox1.addLayout(hbox)
                 hbox.addStretch()
 
-                btnAll = QPushButton(self.filterText['gamesall'])
-                btnAll.clicked.connect(partial(self.__set_checkboxes,
-                                               checkBoxes=self.cbGames,
-                                               setState=True))
+                btnAll = QPushButton(self.filterText["gamesall"])
+                btnAll.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbGames, setState=True))
                 hbox.addWidget(btnAll)
 
-                btnNone = QPushButton(self.filterText['gamesnone'])
-                btnNone.clicked.connect(partial(self.__set_checkboxes,
-                                                checkBoxes=self.cbGames,
-                                                setState=False))
+                btnNone = QPushButton(self.filterText["gamesnone"])
+                btnNone.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbGames, setState=False))
                 hbox.addWidget(btnNone)
                 hbox.addStretch()
         else:
@@ -740,7 +769,7 @@ class Filters(QWidget):
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
-        self.cursor.execute(self.sql.query['getTourneyNames'])
+        self.cursor.execute(self.sql.query["getTourneyNames"])
         result = self.db.cursor.fetchall()
         print(result)
         self.gameList = QComboBox()
@@ -756,7 +785,7 @@ class Filters(QWidget):
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
-        result = [[0], [1], [2], [3], [4], [5], [6], [7], ['S'], ['B']]
+        result = [[0], [1], [2], [3], [4], [5], [6], [7], ["S"], ["B"]]
         res_count = len(result)
 
         if res_count > 0:
@@ -788,16 +817,12 @@ class Filters(QWidget):
                 vbox1.addLayout(hbox)
                 hbox.addStretch()
 
-                btnAll = QPushButton(self.filterText['positionsall'])
-                btnAll.clicked.connect(partial(self.__set_checkboxes,
-                                               checkBoxes=self.cbPositions,
-                                               setState=True))
+                btnAll = QPushButton(self.filterText["positionsall"])
+                btnAll.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbPositions, setState=True))
                 hbox.addWidget(btnAll)
 
-                btnNone = QPushButton(self.filterText['positionsnone'])
-                btnNone.clicked.connect(partial(self.__set_checkboxes,
-                                                checkBoxes=self.cbPositions,
-                                                setState=False))
+                btnNone = QPushButton(self.filterText["positionsnone"])
+                btnNone.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbPositions, setState=False))
                 hbox.addWidget(btnNone)
                 hbox.addStretch()
         else:
@@ -820,7 +845,7 @@ class Filters(QWidget):
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
-        self.cursor.execute(self.sql.query['getCurrencies'])
+        self.cursor.execute(self.sql.query["getCurrencies"])
         result = self.db.cursor.fetchall()
         if len(result) >= 1:
             for line in result:
@@ -837,16 +862,12 @@ class Filters(QWidget):
                 vbox1.addLayout(hbox)
                 hbox.addStretch()
 
-                btnAll = QPushButton(self.filterText['currenciesall'])
-                btnAll.clicked.connect(partial(self.__set_checkboxes,
-                                               checkBoxes=self.cbCurrencies,
-                                               setState=True))
+                btnAll = QPushButton(self.filterText["currenciesall"])
+                btnAll.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbCurrencies, setState=True))
                 hbox.addWidget(btnAll)
 
-                btnNone = QPushButton(self.filterText['currenciesnone'])
-                btnNone.clicked.connect(partial(self.__set_checkboxes,
-                                                checkBoxes=self.cbCurrencies,
-                                                setState=False))
+                btnNone = QPushButton(self.filterText["currenciesnone"])
+                btnNone.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbCurrencies, setState=False))
                 hbox.addWidget(btnNone)
                 hbox.addStretch()
             else:
@@ -858,7 +879,7 @@ class Filters(QWidget):
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
-        self.cursor.execute(self.sql.query['getCashLimits'])
+        self.cursor.execute(self.sql.query["getCashLimits"])
         result = self.db.cursor.fetchall()
         limits_found = set()
         types_found = set()
@@ -892,21 +913,17 @@ class Filters(QWidget):
                 vbox1.addLayout(hbox)
                 hbox.addStretch()
 
-                btnAll = QPushButton(self.filterText['limitsall'])
-                btnAll.clicked.connect(partial(self.__set_checkboxes,
-                                               checkBoxes=self.cbLimits,
-                                               setState=True))
+                btnAll = QPushButton(self.filterText["limitsall"])
+                btnAll.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbLimits, setState=True))
                 hbox.addWidget(btnAll)
 
-                btnNone = QPushButton(self.filterText['limitsnone'])
-                btnNone.clicked.connect(partial(self.__set_checkboxes,
-                                                checkBoxes=self.cbLimits,
-                                                setState=False))
+                btnNone = QPushButton(self.filterText["limitsnone"])
+                btnNone.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbLimits, setState=False))
                 hbox.addWidget(btnNone)
 
                 if "LimitType" in display and display["LimitType"] and len(limits_found) > 1:
                     for limit in limits_found:
-                        btn = QPushButton(self.filterText['limits' + limit.upper()])
+                        btn = QPushButton(self.filterText["limits" + limit.upper()])
                         btn.clicked.connect(partial(self.__select_limit, limit=limit))
                         hbox.addWidget(btn)
 
@@ -915,8 +932,8 @@ class Filters(QWidget):
             print("INFO: No games returned from database")
             log.info("No games returned from database")
 
-        if "Type" in display and display["Type"] and 'ring' in types_found and 'tour' in types_found:
-            self.type = 'ring'
+        if "Type" in display and display["Type"] and "ring" in types_found and "tour" in types_found:
+            self.type = "ring"
 
     def fillGraphOpsFrame(self, frame):
         vbox1 = QVBoxLayout()
@@ -928,38 +945,38 @@ class Filters(QWidget):
         label = QLabel("Show Graph In:")
         hbox1.addWidget(label)
 
-        self.cbGraphops['$'] = QRadioButton("$$", frame)
-        hbox1.addWidget(self.cbGraphops['$'])
-        self.cbGraphops['$'].setChecked(True)
+        self.cbGraphops["$"] = QRadioButton("$$", frame)
+        hbox1.addWidget(self.cbGraphops["$"])
+        self.cbGraphops["$"].setChecked(True)
 
-        self.cbGraphops['BB'] = QRadioButton("BB", frame)
-        hbox1.addWidget(self.cbGraphops['BB'])
+        self.cbGraphops["BB"] = QRadioButton("BB", frame)
+        hbox1.addWidget(self.cbGraphops["BB"])
 
-        self.cbGraphops['showdown'] = QCheckBox("Showdown Winnings")
-        vbox1.addWidget(self.cbGraphops['showdown'])
+        self.cbGraphops["showdown"] = QCheckBox("Showdown Winnings")
+        vbox1.addWidget(self.cbGraphops["showdown"])
 
-        self.cbGraphops['nonshowdown'] = QCheckBox("Non-Showdown Winnings")
-        vbox1.addWidget(self.cbGraphops['nonshowdown'])
+        self.cbGraphops["nonshowdown"] = QCheckBox("Non-Showdown Winnings")
+        vbox1.addWidget(self.cbGraphops["nonshowdown"])
 
-        self.cbGraphops['ev'] = QCheckBox("EV")
-        vbox1.addWidget(self.cbGraphops['ev'])
+        self.cbGraphops["ev"] = QCheckBox("EV")
+        vbox1.addWidget(self.cbGraphops["ev"])
 
     def fillSeatsFrame(self, frame):
         hbox = QHBoxLayout()
         frame.setLayout(hbox)
 
-        lbl_from = QLabel(self.filterText['seatsbetween'])
-        lbl_to = QLabel(self.filterText['seatsand'])
+        lbl_from = QLabel(self.filterText["seatsbetween"])
+        lbl_to = QLabel(self.filterText["seatsand"])
 
         adj1 = QSpinBox()
         adj1.setRange(2, 10)
         adj1.setValue(2)
-        adj1.valueChanged.connect(partial(self.__seats_changed, 'from'))
+        adj1.valueChanged.connect(partial(self.__seats_changed, "from"))
 
         adj2 = QSpinBox()
         adj2.setRange(2, 10)
         adj2.setValue(10)
-        adj2.valueChanged.connect(partial(self.__seats_changed, 'to'))
+        adj2.valueChanged.connect(partial(self.__seats_changed, "to"))
 
         hbox.addStretch()
         hbox.addWidget(lbl_from)
@@ -968,34 +985,34 @@ class Filters(QWidget):
         hbox.addWidget(adj2)
         hbox.addStretch()
 
-        self.sbSeats['from'] = adj1
-        self.sbSeats['to'] = adj2
+        self.sbSeats["from"] = adj1
+        self.sbSeats["to"] = adj2
 
     def fillGroupsFrame(self, frame, display):
         vbox = QVBoxLayout()
         frame.setLayout(vbox)
 
-        self.cbGroups['limits'] = QCheckBox(self.filterText['limitsshow'])
-        vbox.addWidget(self.cbGroups['limits'])
+        self.cbGroups["limits"] = QCheckBox(self.filterText["limitsshow"])
+        vbox.addWidget(self.cbGroups["limits"])
 
-        self.cbGroups['posn'] = QCheckBox(self.filterText['posnshow'])
-        vbox.addWidget(self.cbGroups['posn'])
+        self.cbGroups["posn"] = QCheckBox(self.filterText["posnshow"])
+        vbox.addWidget(self.cbGroups["posn"])
 
         if "SeatSep" in display and display["SeatSep"]:
-            self.cbGroups['seats'] = QCheckBox(self.filterText['seatsshow'])
-            vbox.addWidget(self.cbGroups['seats'])
+            self.cbGroups["seats"] = QCheckBox(self.filterText["seatsshow"])
+            vbox.addWidget(self.cbGroups["seats"])
 
     def fillDateFrame(self, frame):
         table = QGridLayout()
         frame.setLayout(table)
 
-        lbl_start = QLabel(('From:'))
+        lbl_start = QLabel(("From:"))
         btn_start = QPushButton("Cal")
         btn_start.clicked.connect(partial(self.__calendar_dialog, dateEdit=self.start_date))
         clr_start = QPushButton("Reset")
         clr_start.clicked.connect(self.__clear_start_date)
 
-        lbl_end = QLabel(('To:'))
+        lbl_end = QLabel(("To:"))
         btn_end = QPushButton("Cal")
         btn_end.clicked.connect(partial(self.__calendar_dialog, dateEdit=self.end_date))
         clr_end = QPushButton("Reset")
@@ -1015,76 +1032,76 @@ class Filters(QWidget):
 
     def get_limits_where_clause(self, limits):
         where = ""
-        lims = [int(x[0:-2]) for x in limits if len(x) > 2 and x[-2:] == 'fl']
-        potlims = [int(x[0:-2]) for x in limits if len(x) > 2 and x[-2:] == 'pl']
-        nolims = [int(x[0:-2]) for x in limits if len(x) > 2 and x[-2:] == 'nl']
-        capnolims = [int(x[0:-2]) for x in limits if len(x) > 2 and x[-2:] == 'cn']
-        hpnolims = [int(x[0:-2]) for x in limits if len(x) > 2 and x[-2:] == 'hp']
+        lims = [int(x[0:-2]) for x in limits if len(x) > 2 and x[-2:] == "fl"]
+        potlims = [int(x[0:-2]) for x in limits if len(x) > 2 and x[-2:] == "pl"]
+        nolims = [int(x[0:-2]) for x in limits if len(x) > 2 and x[-2:] == "nl"]
+        capnolims = [int(x[0:-2]) for x in limits if len(x) > 2 and x[-2:] == "cn"]
+        hpnolims = [int(x[0:-2]) for x in limits if len(x) > 2 and x[-2:] == "hp"]
 
         where = "AND ( "
 
         if lims:
-            clause = "(gt.limitType = 'fl' and gt.bigBlind in (%s))" % (','.join(map(str, lims)))
+            clause = "(gt.limitType = 'fl' and gt.bigBlind in (%s))" % (",".join(map(str, lims)))
         else:
             clause = "(gt.limitType = 'fl' and gt.bigBlind in (-1))"
         where = where + clause
         if potlims:
-            clause = "or (gt.limitType = 'pl' and gt.bigBlind in (%s))" % (','.join(map(str, potlims)))
+            clause = "or (gt.limitType = 'pl' and gt.bigBlind in (%s))" % (",".join(map(str, potlims)))
         else:
             clause = "or (gt.limitType = 'pl' and gt.bigBlind in (-1))"
         where = where + clause
         if nolims:
-            clause = "or (gt.limitType = 'nl' and gt.bigBlind in (%s))" % (','.join(map(str, nolims)))
+            clause = "or (gt.limitType = 'nl' and gt.bigBlind in (%s))" % (",".join(map(str, nolims)))
         else:
             clause = "or (gt.limitType = 'nl' and gt.bigBlind in (-1))"
         where = where + clause
         if hpnolims:
-            clause = "or (gt.limitType = 'hp' and gt.bigBlind in (%s))" % (','.join(map(str, hpnolims)))
+            clause = "or (gt.limitType = 'hp' and gt.bigBlind in (%s))" % (",".join(map(str, hpnolims)))
         else:
             clause = "or (gt.limitType = 'hp' and gt.bigBlind in (-1))"
         where = where + clause
         if capnolims:
-            clause = "or (gt.limitType = 'cp' and gt.bigBlind in (%s))" % (','.join(map(str, capnolims)))
+            clause = "or (gt.limitType = 'cp' and gt.bigBlind in (%s))" % (",".join(map(str, capnolims)))
         else:
             clause = "or (gt.limitType = 'cp' and gt.bigBlind in (-1))"
-        where = where + clause + ' )'
+        where = where + clause + " )"
 
         return where
 
     def replace_placeholders_with_filter_values(self, query):
-        if '<game_test>' in query:
+        if "<game_test>" in query:
             games = self.getGames()
             if games:
                 gametest = f"AND gt.category IN {str(tuple(games)).replace(',)', ')')}"
             else:
                 gametest = ""
-            query = query.replace('<game_test>', gametest)
+            query = query.replace("<game_test>", gametest)
 
-        if '<limit_test>' in query:
+        if "<limit_test>" in query:
             limits = self.getLimits()
             if limits:
                 limittest = self.get_limits_where_clause(limits)
             else:
                 limittest = ""
-            query = query.replace('<limit_test>', limittest)
+            query = query.replace("<limit_test>", limittest)
 
-        if '<player_test>' in query:
+        if "<player_test>" in query:
             heroes = self.getHeroes()
             if heroes:
                 hero_ids = self.get_hero_ids(heroes)
                 player_test = f"AND hp.playerId IN ({','.join(map(str, hero_ids))})"
             else:
                 player_test = ""
-            query = query.replace('<player_test>', player_test)
+            query = query.replace("<player_test>", player_test)
 
-        if '<position_test>' in query:
+        if "<position_test>" in query:
             positions = self.getPositions()
             if positions:
                 formatted_positions = [f"'{position}'" for position in positions]
                 positiontest = f"AND hp.position IN ({','.join(formatted_positions)})"
             else:
                 positiontest = ""
-            query = query.replace('<position_test>', positiontest)
+            query = query.replace("<position_test>", positiontest)
 
         return query
 
@@ -1094,7 +1111,7 @@ class Filters(QWidget):
         for site, hero in heroes.items():
             site_id = site_ids.get(site)
             if site_id is not None:
-                self.cursor.execute(self.sql.query['getPlayerId'], (site_id, hero))
+                self.cursor.execute(self.sql.query["getPlayerId"], (site_id, hero))
                 result = self.cursor.fetchone()
                 if result:
                     hero_ids.append(result[0])
@@ -1102,14 +1119,14 @@ class Filters(QWidget):
 
     def __calendar_dialog(self, checkState, dateEdit):
         d = QDialog()
-        d.setWindowTitle('Pick a date')
+        d.setWindowTitle("Pick a date")
 
         vb = QVBoxLayout()
         d.setLayout(vb)
         cal = QCalendarWidget()
         vb.addWidget(cal)
 
-        btn = QPushButton('Done')
+        btn = QPushButton("Done")
         btn.clicked.connect(partial(self.__get_date, dlg=d, calendar=cal, dateEdit=dateEdit))
         vb.addWidget(btn)
         d.exec_()
@@ -1135,13 +1152,13 @@ class Filters(QWidget):
         dlg.accept()
 
     def __seats_changed(self, value, which):
-        seats_from = self.sbSeats['from'].value()
-        seats_to = self.sbSeats['to'].value()
+        seats_from = self.sbSeats["from"].value()
+        seats_to = self.sbSeats["to"].value()
         if seats_from > seats_to:
-            if which == 'from':
-                self.sbSeats['to'].setValue(seats_from)
+            if which == "from":
+                self.sbSeats["to"].setValue(seats_from)
             else:
-                self.sbSeats['from'].setValue(seats_to)
+                self.sbSeats["from"].setValue(seats_to)
 
     def setGames(self, games):
         self.games = games
@@ -1166,8 +1183,8 @@ class Filters(QWidget):
         site_id = self.siteid[site]
         usetype = self.display.get("UseType", "")
         print(f"Game type for hero {hero} on site {site}: {usetype}")
-        
-        if usetype == 'tour':
+
+        if usetype == "tour":
             query = """
             SELECT DISTINCT tt.category
             FROM TourneyTypes tt
@@ -1185,14 +1202,14 @@ class Filters(QWidget):
             JOIN Players p ON hp.playerId = p.id
             WHERE gt.siteId = ? AND p.name = ? AND gt.type = 'ring'
             """
-        
+
         print("Query:")
         print(query)
 
         self.cursor.execute(query, (site_id, hero))
         games = [row[0] for row in self.cursor.fetchall()]
         print(f"Available games for hero {hero} on site {site}: {games}")
-        
+
         for game, checkbox in self.cbGames.items():
             if game in games:
                 checkbox.setChecked(True)
@@ -1204,9 +1221,8 @@ class Filters(QWidget):
         # update
         self.games = games
 
-
     def update_limits_for_hero(self, hero, site):
-        query = self.sql.query['getCashLimits'].replace("%s", str(self.siteid[site]))
+        query = self.sql.query["getCashLimits"].replace("%s", str(self.siteid[site]))
         self.cursor.execute(query)
         limits = [f"{row[2]}{row[1]}" for row in self.cursor.fetchall()]
         for limit, checkbox in self.cbLimits.items():
@@ -1234,7 +1250,7 @@ class Filters(QWidget):
         selected_buyins = []
         for value, checkbox in self.cbTourneyBuyin.items():
             if checkbox.isChecked() and value != "None":
-                buyin, fee = map(int, value.split(','))
+                buyin, fee = map(int, value.split(","))
                 total = buyin + fee
                 selected_buyins.append(total)
         return selected_buyins
@@ -1249,13 +1265,13 @@ class Filters(QWidget):
             WHERE gt.siteId = ? AND p.name = ?
         """
         site_id = self.siteid[site]
-        #debug
-        #print(f"executed request for {hero} on {site} (site_id: {site_id})")
+        # debug
+        # print(f"executed request for {hero} on {site} (site_id: {site_id})")
         self.cursor.execute(query, (site_id, hero))
         currencies = [row[0] for row in self.cursor.fetchall()]
-        #debug
-        #print(f"currencies found for {hero} on {site}: {currencies}")
-        
+        # debug
+        # print(f"currencies found for {hero} on {site}: {currencies}")
+
         for currency, checkbox in self.cbCurrencies.items():
             if currency in currencies:
                 checkbox.setChecked(True)
@@ -1263,40 +1279,43 @@ class Filters(QWidget):
             else:
                 checkbox.setChecked(False)
                 checkbox.setEnabled(False)
-            
+
             # manage tour 'T$' on  'ring'
-            if currency == 'T$' and self.getType() == 'ring':
+            if currency == "T$" and self.getType() == "ring":
                 checkbox.setChecked(False)
                 checkbox.setEnabled(False)
-            #debug
-            #print(f"Devise {currency} - Checked: {checkbox.isChecked()}, Activated: {checkbox.isEnabled()} on {site}")
+            # debug
+            # print(f"Devise {currency} - Checked: {checkbox.isChecked()}, Activated: {checkbox.isEnabled()} on {site}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     config = Configuration.Config(file="HUD_config.test.xml")
     db = Database.Database(config)
 
-    qdict = SQL.Sql(db_server='sqlite')
+    qdict = SQL.Sql(db_server="sqlite")
 
-    filters_display = {"Heroes": False,
-                       "Sites": False,
-                       "Games": False,
-                       "Cards": True,
-                       "Currencies": False,
-                       "Limits": False,
-                       "LimitSep": False,
-                       "LimitType": False,
-                       "Type": False,
-                       "UseType": 'ring',
-                       "Seats": False,
-                       "SeatSep": False,
-                       "Dates": False,
-                       "GraphOps": False,
-                       "Groups": False,
-                       "Button1": False,
-                       "Button2": False
-                       }
+    filters_display = {
+        "Heroes": False,
+        "Sites": False,
+        "Games": False,
+        "Cards": True,
+        "Currencies": False,
+        "Limits": False,
+        "LimitSep": False,
+        "LimitType": False,
+        "Type": False,
+        "UseType": "ring",
+        "Seats": False,
+        "SeatSep": False,
+        "Dates": False,
+        "GraphOps": False,
+        "Groups": False,
+        "Button1": False,
+        "Button2": False,
+    }
 
     from PyQt5.QtWidgets import QMainWindow, QApplication
+
     app = QApplication([])
     i = Filters(db, display=filters_display)
     main_window = QMainWindow()

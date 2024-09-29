@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Copyright 2008-2011 Carl Gherardi
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, version 3 of the License.
+# Copyright 2008-2011 Carl Gherardi
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with this program. If not, see <http://www.gnu.org/licenses/>.
-#In the "official" distribution you can find the license in agpl-3.0.txt.
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# In the "official" distribution you can find the license in agpl-3.0.txt.
 
 
 from __future__ import print_function
@@ -29,11 +29,12 @@ import Filters
 import Charset
 
 try:
-    calluse = not 'matplotlib' in sys.modules
+    calluse = not "matplotlib" in sys.modules
     import matplotlib
+
     if calluse:
         try:
-            matplotlib.use('qt5agg')
+            matplotlib.use("qt5agg")
         except ValueError as e:
             print(e)
     from matplotlib.figure import Figure
@@ -41,12 +42,20 @@ try:
     from matplotlib.font_manager import FontProperties
     from numpy import arange, cumsum
 except ImportError as inst:
-    print(("""Failed to load libs for graphing, graphing will not function. Please install numpy and matplotlib if you want to use graphs."""))
-    print(("""This is of no consequence for other parts of the program, e.g. import and HUD are NOT affected by this problem."""))
+    print(
+        (
+            """Failed to load libs for graphing, graphing will not function. Please install numpy and matplotlib if you want to use graphs."""
+        )
+    )
+    print(
+        (
+            """This is of no consequence for other parts of the program, e.g. import and HUD are NOT affected by this problem."""
+        )
+    )
     print("ImportError: %s" % inst.args)
 
-class GuiTourneyGraphViewer(QSplitter):
 
+class GuiTourneyGraphViewer(QSplitter):
     def __init__(self, querylist, config, parent, colors, debug=True):
         """Constructor for GraphViewer"""
         QSplitter.__init__(self, parent)
@@ -60,7 +69,7 @@ class GuiTourneyGraphViewer(QSplitter):
         filters_display = {
             "Heroes": True,
             "Sites": True,
-            "Games": False, # cash game
+            "Games": False,  # cash game
             "Tourney": True,
             "TourneyCat": True,
             "TourneyLim": True,
@@ -70,13 +79,13 @@ class GuiTourneyGraphViewer(QSplitter):
             "LimitSep": True,
             "LimitType": True,
             "Type": True,
-            "UseType": 'tour',
+            "UseType": "tour",
             "Seats": False,
             "SeatSep": True,
             "Dates": True,
             "Groups": False,
             "Button1": True,
-            "Button2": True
+            "Button2": True,
         }
 
         self.filters = Filters.Filters(self.db, display=filters_display)
@@ -156,40 +165,104 @@ class GuiTourneyGraphViewer(QSplitter):
         green = self.getData(playerids, sitenos, games)
         print("Graph generated in: %s" % (time() - starttime))
 
-        self.ax.set_xlabel("Tournaments", color=self.colors['foreground'])
-        self.ax.set_facecolor(self.colors['background'])
-        self.ax.tick_params(axis='x', colors=self.colors['foreground'])
-        self.ax.tick_params(axis='y', colors=self.colors['foreground'])
-        self.ax.spines['left'].set_color(self.colors['foreground'])
-        self.ax.spines['right'].set_color(self.colors['foreground'])
-        self.ax.spines['top'].set_color(self.colors['foreground'])
-        self.ax.spines['bottom'].set_color(self.colors['foreground'])
-        self.ax.set_ylabel("$", color=self.colors['foreground'])
-        self.ax.grid(color=self.colors['grid'], linestyle=':', linewidth=0.2)
+        self.ax.set_xlabel("Tournaments", color=self.colors["foreground"])
+        self.ax.set_facecolor(self.colors["background"])
+        self.ax.tick_params(axis="x", colors=self.colors["foreground"])
+        self.ax.tick_params(axis="y", colors=self.colors["foreground"])
+        self.ax.spines["left"].set_color(self.colors["foreground"])
+        self.ax.spines["right"].set_color(self.colors["foreground"])
+        self.ax.spines["top"].set_color(self.colors["foreground"])
+        self.ax.spines["bottom"].set_color(self.colors["foreground"])
+        self.ax.set_ylabel("$", color=self.colors["foreground"])
+        self.ax.grid(color=self.colors["grid"], linestyle=":", linewidth=0.2)
         if green is None or len(green) == 0:
-            self.ax.set_title("No Data for Player(s) Found", color=self.colors['foreground'])
-            green = ([0., 0., 0., 0., 500., 1000., 900., 800., 700., 600., 500., 400., 300., 200., 100., 0., 500., 1000., 1000., 1000., 1000., 1000., 1000., 1000., 1000., 1000., 1000., 1000., 1000., 1000., 875., 750., 625., 500., 375., 250., 125., 0., 0., 0., 0., 500., 1000., 900., 800., 700., 600., 500., 400., 300., 200., 100., 0., 500., 1000., 1000.])
+            self.ax.set_title("No Data for Player(s) Found", color=self.colors["foreground"])
+            green = [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                500.0,
+                1000.0,
+                900.0,
+                800.0,
+                700.0,
+                600.0,
+                500.0,
+                400.0,
+                300.0,
+                200.0,
+                100.0,
+                0.0,
+                500.0,
+                1000.0,
+                1000.0,
+                1000.0,
+                1000.0,
+                1000.0,
+                1000.0,
+                1000.0,
+                1000.0,
+                1000.0,
+                1000.0,
+                1000.0,
+                1000.0,
+                1000.0,
+                875.0,
+                750.0,
+                625.0,
+                500.0,
+                375.0,
+                250.0,
+                125.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                500.0,
+                1000.0,
+                900.0,
+                800.0,
+                700.0,
+                600.0,
+                500.0,
+                400.0,
+                300.0,
+                200.0,
+                100.0,
+                0.0,
+                500.0,
+                1000.0,
+                1000.0,
+            ]
 
-            self.ax.plot(green, color='green', label='Tournaments: %d\nProfit: $%.2f' % (len(green), green[-1]))
+            self.ax.plot(green, color="green", label="Tournaments: %d\nProfit: $%.2f" % (len(green), green[-1]))
             self.graphBox.addWidget(self.canvas)
             self.canvas.show()
             self.canvas.draw()
         else:
-            self.ax.set_title("Tournament Results" + names, color=self.colors['foreground'])
-            self.ax.plot(green, color='green', label='Tournaments: %d\nProfit: $%.2f' % (len(green), green[-1]))
-            legend = self.ax.legend(loc='upper left', fancybox=True, shadow=True, prop=FontProperties(size='smaller'), facecolor=self.colors["background"], labelcolor=self.colors['foreground'])
+            self.ax.set_title("Tournament Results" + names, color=self.colors["foreground"])
+            self.ax.plot(green, color="green", label="Tournaments: %d\nProfit: $%.2f" % (len(green), green[-1]))
+            legend = self.ax.legend(
+                loc="upper left",
+                fancybox=True,
+                shadow=True,
+                prop=FontProperties(size="smaller"),
+                facecolor=self.colors["background"],
+                labelcolor=self.colors["foreground"],
+            )
             self.graphBox.addWidget(self.canvas)
             self.canvas.draw()
 
     def getData(self, names, sites, Tourneys):
-        tmp = self.sql.query['tourneyGraphType']
+        tmp = self.sql.query["tourneyGraphType"]
         start_date, end_date = self.filters.getDates()
         tourneys = self.filters.getTourneyTypes()
         tourneysCat = self.filters.getTourneyCat()
         tourneysLim = self.filters.getTourneyLim()
         tourneysBuyin = self.filters.getTourneyBuyin()
 
-        currencies = {'EUR': 'EUR', 'USD': 'USD', '': 'T$'}
+        currencies = {"EUR": "EUR", "USD": "USD", "": "T$"}
         currencytest = str(tuple(currencies.values()))
         currencytest = currencytest.replace(",)", ")")
         currencytest = currencytest.replace("u'", "'")
@@ -200,9 +273,9 @@ class GuiTourneyGraphViewer(QSplitter):
         tourneystest = str(tuple(tourneys))
         tourneysCattest = str(tuple(tourneysCat))
         tourneysLimtest = str(tuple(tourneysLim))
-        tourneysBuyintest = str(tuple(int(buyin.split(',')[0]) for buyin in tourneysBuyin if buyin != "None"))
-        tourneystest = tourneystest.replace('None', '"None"')
-        tourneysBuyintest = tourneysBuyintest.replace('None', '"None"')
+        tourneysBuyintest = str(tuple(int(buyin.split(",")[0]) for buyin in tourneysBuyin if buyin != "None"))
+        tourneystest = tourneystest.replace("None", '"None"')
+        tourneysBuyintest = tourneysBuyintest.replace("None", '"None"')
 
         tmp = tmp.replace("<player_test>", nametest)
         tmp = tmp.replace("<site_test>", sitetest)
@@ -226,9 +299,7 @@ class GuiTourneyGraphViewer(QSplitter):
 
         green = [float(x[1]) for x in winnings]
         greenline = cumsum(green)
-        return (old_div(greenline, 100))
-
-
+        return old_div(greenline, 100)
 
     def exportGraph(self):
         if self.fig is None:
@@ -236,7 +307,7 @@ class GuiTourneyGraphViewer(QSplitter):
 
         else:
             path = os.getcwd()
-            path = path + '/graph.png'
+            path = path + "/graph.png"
             self.fig.savefig(path)
             msg = QMessageBox()
             msg.setWindowTitle("FPDB 3 info")
@@ -244,8 +315,10 @@ class GuiTourneyGraphViewer(QSplitter):
             msg.setText(mess)
             msg.exec()
 
+
 if __name__ == "__main__":
     import Configuration
+
     config = Configuration.Config()
 
     settings = {}
@@ -255,17 +328,13 @@ if __name__ == "__main__":
     settings.update(config.get_default_paths())
 
     from PyQt5.QtWidgets import QApplication, QMainWindow
+
     app = QApplication([])
     import SQL
-    sql = SQL.Sql(db_server=settings['db-server'])
 
-    colors = {
-        'background': '#19232D',
-        'foreground': '#9DA9B5',
-        'grid': '#4D4D4D',
-        'line_up': 'g',
-        'line_down': 'r'
-    }
+    sql = SQL.Sql(db_server=settings["db-server"])
+
+    colors = {"background": "#19232D", "foreground": "#9DA9B5", "grid": "#4D4D4D", "line_up": "g", "line_down": "r"}
 
     i = GuiTourneyGraphViewer(sql, config, None, colors)
     main_window = QMainWindow()

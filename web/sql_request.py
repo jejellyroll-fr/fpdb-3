@@ -3,14 +3,13 @@ import sys
 from base_model import *
 
 from pathlib import Path
-import math
-import itertools
 
 sys.path.append(str(Path(__file__).parent.parent))
 import Configuration
 
 
 DATABASE = Path(Configuration.CONFIG_PATH, "database", "fpdb.db3")
+
 
 def get_backings():
     conn = sqlite3.connect(DATABASE)
@@ -20,6 +19,7 @@ def get_backings():
     conn.close()
     return backings
 
+
 def get_actions():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -27,6 +27,7 @@ def get_actions():
     actions = cursor.fetchall()
     conn.close()
     return actions
+
 
 def get_autorates():
     conn = sqlite3.connect(DATABASE)
@@ -36,6 +37,7 @@ def get_autorates():
     conn.close()
     return autorates
 
+
 def get_boards():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -43,6 +45,7 @@ def get_boards():
     boards = cursor.fetchall()
     conn.close()
     return boards
+
 
 def get_cardsCaches():
     conn = sqlite3.connect(DATABASE)
@@ -52,6 +55,7 @@ def get_cardsCaches():
     conn.close()
     return cardsCaches
 
+
 def get_files():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -59,6 +63,7 @@ def get_files():
     files = cursor.fetchall()
     conn.close()
     return files
+
 
 def get_gametypes():
     conn = sqlite3.connect(DATABASE)
@@ -68,6 +73,7 @@ def get_gametypes():
     conn.close()
     return gametypes
 
+
 def get_hands():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -75,6 +81,7 @@ def get_hands():
     hands = cursor.fetchall()
     conn.close()
     return hands
+
 
 def get_handsActions():
     conn = sqlite3.connect(DATABASE)
@@ -84,6 +91,7 @@ def get_handsActions():
     conn.close()
     return handsActions
 
+
 def get_handsPlayers():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -91,6 +99,7 @@ def get_handsPlayers():
     handsPlayer = cursor.fetchall()
     conn.close()
     return handsPlayer
+
 
 def get_handsPots():
     conn = sqlite3.connect(DATABASE)
@@ -100,6 +109,7 @@ def get_handsPots():
     conn.close()
     return handsPots
 
+
 def get_handsStove():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -108,15 +118,9 @@ def get_handsStove():
     conn.close()
     return handsStoves
 
+
 def get_RingProfitAllHandsPlayerIdSite(
-    site=None,
-    player=None,
-    limit=None,
-    bigBlind=None,
-    currency=None,
-    category=None,
-    startdate=None,
-    enddate=None
+    site=None, player=None, limit=None, bigBlind=None, currency=None, category=None, startdate=None, enddate=None
 ):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -143,14 +147,14 @@ def get_RingProfitAllHandsPlayerIdSite(
 
     # Parameters dict
     params = {
-        'player': player,
-        'site': site,
-        'limit': limit,
-        'bigBlind': bigBlind,
-        'category': category,
-        'currency': currency,
-        'startdate': startdate,
-        'enddate': enddate
+        "player": player,
+        "site": site,
+        "limit": limit,
+        "bigBlind": bigBlind,
+        "category": category,
+        "currency": currency,
+        "startdate": startdate,
+        "enddate": enddate,
     }
 
     # Execute query
@@ -158,15 +162,9 @@ def get_RingProfitAllHandsPlayerIdSite(
 
     return cursor.fetchall()
 
+
 def get_tourneysProfitPlayerIdSite(
-    site=None,
-    player=None,
-    limit=None,
-    buyin=None,
-    currency=None,
-    category=None,
-    startdate=None,
-    enddate=None
+    site=None, player=None, limit=None, buyin=None, currency=None, category=None, startdate=None, enddate=None
 ):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -195,14 +193,14 @@ def get_tourneysProfitPlayerIdSite(
 
     # Parameters dict
     params = {
-        'player': player,
-        'site': site,
-        'limit': limit,
-        'buyin': buyin,
-        'category': category,
-        'currency': currency,
-        'startdate': startdate,
-        'enddate': enddate
+        "player": player,
+        "site": site,
+        "limit": limit,
+        "buyin": buyin,
+        "category": category,
+        "currency": currency,
+        "startdate": startdate,
+        "enddate": enddate,
     }
 
     # Execute query
@@ -211,25 +209,19 @@ def get_tourneysProfitPlayerIdSite(
     return cursor.fetchall()
 
 
-def get_players(
-  name=None,
-  site=None,
-  page=1,
-  per_page=10
-):
+def get_players(name=None, site=None, page=1, per_page=10):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
 
-  conn = sqlite3.connect(DATABASE)
-  cursor = conn.cursor()
+    # Get total count
+    cursor.execute("SELECT COUNT(*) AS total FROM Players p")
+    total = cursor.fetchone()[0]
 
-  # Get total count
-  cursor.execute("SELECT COUNT(*) AS total FROM Players p")
-  total = cursor.fetchone()[0]
+    # Calculate offset
+    offset = (page - 1) * per_page
 
-  # Calculate offset
-  offset = (page - 1) * per_page
-  
-  # SQL query string
-  sql = """
+    # SQL query string
+    sql = """
         SELECT 
         p.id, p.name AS player_name , s.name AS site, p.hero, p.siteId,
         COUNT(hp.id) AS total_hands,
@@ -250,29 +242,25 @@ def get_players(
         :offset
   """
 
-  # Parameters dict
-  params = {
-    'name': name,
-    'site': site,
-    'per_page': per_page,
-    'offset': offset
-  }
-  
-  # Convert dict to string
-  params_str = str(params)
+    # Parameters dict
+    params = {"name": name, "site": site, "per_page": per_page, "offset": offset}
 
-  # Join query string  
-  query = " ".join([sql, params_str])
+    # Convert dict to string
+    params_str = str(params)
 
-  # Print formatted query
-  #print(query)
+    # Join query string
+    query = " ".join([sql, params_str])
 
-  # Execute query
-  cursor.execute(sql, params)
+    # Print formatted query
+    # print(query)
 
-  players = cursor.fetchall()
+    # Execute query
+    cursor.execute(sql, params)
 
-  return players, total
+    players = cursor.fetchall()
+
+    return players, total
+
 
 def get_heroes():
     conn = sqlite3.connect(DATABASE)
@@ -287,7 +275,6 @@ def get_heroes():
     heroes = cursor.fetchall()
     conn.close()
     return heroes
-
 
 
 def get_hands_players(player_id, tourney=False, cash=False, sort_by=None):
@@ -318,11 +305,12 @@ def get_hands_players(player_id, tourney=False, cash=False, sort_by=None):
         query += f" ORDER BY {sort_by}"
 
     cursor.execute(query, (player_id,))
-    
+
     hands_players = cursor.fetchall()
 
     conn.close()
     return hands_players
+
 
 def get_handscount():
     conn = sqlite3.connect(DATABASE)
@@ -331,6 +319,7 @@ def get_handscount():
     handscount = cursor.fetchall()
     conn.close()
     return handscount
+
 
 def get_handscount_cg():
     conn = sqlite3.connect(DATABASE)
@@ -342,6 +331,7 @@ def get_handscount_cg():
     conn.close()
     return handscount_cg
 
+
 def get_handscount_tour():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -352,6 +342,7 @@ def get_handscount_tour():
     conn.close()
     return handscount_tour
 
+
 def get_playerscount():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -360,6 +351,7 @@ def get_playerscount():
     playerscount = cursor.fetchall()
     conn.close()
     return playerscount
+
 
 def get_playerscount_cg():
     conn = sqlite3.connect(DATABASE)
@@ -371,6 +363,7 @@ def get_playerscount_cg():
     conn.close()
     return playerscount_cg
 
+
 def get_playerscount_tour():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -381,15 +374,9 @@ def get_playerscount_tour():
     conn.close()
     return playerscount_tour
 
+
 def get_statsplayers(
-    site=None,
-    player=None,
-    limit=None,
-    bigBlind=None,
-    currency=None,
-    category=None,
-    startdate=None,
-    enddate=None
+    site=None, player=None, limit=None, bigBlind=None, currency=None, category=None, startdate=None, enddate=None
 ):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -463,14 +450,14 @@ def get_statsplayers(
 
     # Parameters dict
     params = {
-        'player': player,
-        'site': site,
-        'limit': limit,
-        'bigBlind': bigBlind,
-        'category': category,
-        'currency': currency,
-        'startdate': startdate,
-        'enddate': enddate
+        "player": player,
+        "site": site,
+        "limit": limit,
+        "bigBlind": bigBlind,
+        "category": category,
+        "currency": currency,
+        "startdate": startdate,
+        "enddate": enddate,
     }
 
     cursor.execute(query, params)
@@ -480,6 +467,7 @@ def get_statsplayers(
 
     return result
 
+
 def get_player_name(player_id):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -487,5 +475,3 @@ def get_player_name(player_id):
     player_name = cursor.fetchone()
     conn.close()
     return player_name[0] if player_name else None
-
-

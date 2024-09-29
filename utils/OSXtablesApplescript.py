@@ -1,8 +1,8 @@
 import sys
 import subprocess
 
-# AppleScript 
-script = '''
+# AppleScript
+script = """
     tell application "System Events"
         set window_list to ""
         set process_list to processes where background only is false
@@ -29,12 +29,12 @@ script = '''
         end repeat
         return window_list
     end tell
-'''
+"""
 
 print("Exécution du script AppleScript...")
 
 # Execute AppleScript
-proc = subprocess.Popen(['osascript', '-e', script], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+proc = subprocess.Popen(["osascript", "-e", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output, error = proc.communicate()
 
 # Verify errors
@@ -42,31 +42,33 @@ if error:
     print(f"Erreur AppleScript: {error.decode('utf-8')}")
     sys.exit(1)
 
-# Decode output 
-output_decode = output.decode('utf-8').strip()
+# Decode output
+output_decode = output.decode("utf-8").strip()
 
 # show output
 print("Sortie brute de l'AppleScript :")
 print(output_decode)
 
 # Split output into entries
-window_entries = output_decode.split(';;')
+window_entries = output_decode.split(";;")
 
 liste_fenetres = []
 
 for entry in window_entries:
-    fields = entry.split('||')
+    fields = entry.split("||")
     if len(fields) == 5:
         proc_name, pid, win_name, size_str, position_str = fields
-        width, height = map(int, size_str.split(','))
-        x, y = map(int, position_str.split(','))
-        liste_fenetres.append({
-            "proc": proc_name,
-            "pid": int(pid),
-            "name": win_name,
-            "size": {"width": width, "height": height},
-            "position": {"x": x, "y": y}
-        })
+        width, height = map(int, size_str.split(","))
+        x, y = map(int, position_str.split(","))
+        liste_fenetres.append(
+            {
+                "proc": proc_name,
+                "pid": int(pid),
+                "name": win_name,
+                "size": {"width": width, "height": height},
+                "position": {"x": x, "y": y},
+            }
+        )
     else:
         print(f"Entrée mal formatée : {entry}")
 
