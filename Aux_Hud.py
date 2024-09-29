@@ -1,12 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Aux_Hud.py
-
-Simple HUD display for FreePokerTools/fpdb HUD.
-"""
-
-# import L10n
-# _ = L10n.get_translation()
 #    Copyright 2011-2012,  Ray E. Barker
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -25,14 +18,18 @@ Simple HUD display for FreePokerTools/fpdb HUD.
 
 ########################################################################
 
-#    to do
+### Aux_Hud.py
+#
+# Simple HUD display for FreePokerTools/fpdb HUD.
+###
+
+# import L10n
+# _ = L10n.get_translation()
 
 #    Standard Library modules
 import os
 import logging
 
-# logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hud")
 from functools import partial
 
 from PyQt5.QtGui import QFont, QPixmap
@@ -44,6 +41,10 @@ import Aux_Base
 import Stats
 import Popup
 import Configuration
+
+
+# logging has been set up in fpdb.py or HUD_main.py, use their settings:
+log = logging.getLogger("hud")
 
 
 class Simple_HUD(Aux_Base.Aux_Seats):
