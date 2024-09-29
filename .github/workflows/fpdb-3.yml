@@ -27,7 +27,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install uv
-        uv pip install
+        uv pip sync
 
     - name: Run Ruff for linting
       run: |
