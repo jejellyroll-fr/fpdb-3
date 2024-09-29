@@ -25,7 +25,7 @@
 
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal_wrapper import Decimal
-
+import re
 # Bovada HH Format
 
 
