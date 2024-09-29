@@ -564,7 +564,8 @@ class Bovada(HandHistoryConverter):
             hand.gametype["bb"] = "2"
 
     def readBlinds(self, hand):
-        sb, bb, acts, postsb, postbb, both = None, None, None, None, None, None
+        # sb, bb,
+        acts, postsb, postbb, both = None, None, None, None  # , None, None
         if not self.re_ReturnBet.search(hand.handText):
             hand.setUncalledBets(True)
         for a in self.re_PostSB.finditer(hand.handText):
