@@ -26,6 +26,7 @@ from past.utils import old_div
 
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal_wrapper import Decimal
+import re
 
 
 class Cake(HandHistoryConverter):
