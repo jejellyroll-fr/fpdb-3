@@ -997,14 +997,14 @@ class RawTourneys(object):
             if save in ("none", "error", "all"):
                 self.save = save
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (raw_tourneys.save, '"error"'))
+                print(("Invalid config value for %s, defaulting to %s") % (self.raw_tourneys.save, '"error"'))
                 self.save = "error"
 
             compression = node.getAttribute("compression")
             if save in ("none", "gzip", "bzip2"):
                 self.compression = compression
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (raw_tourneys.compression, '"none"'))
+                print(("Invalid config value for %s, defaulting to %s") % (self.raw_tourneys.compression, '"none"'))
                 self.compression = "none"
 
     # end def __init__
