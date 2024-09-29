@@ -632,7 +632,7 @@ class Cake(HandHistoryConverter):
 
         # Loop through each action and update the Hand object accordingly
         for action in m:
-            acts = action.groupdict()
+            # acts = action.groupdict()
             # print "DEBUG: acts: %s" %acts
             bet = self.convertMoneyString("BET", action)
             actionType = action.group("ATYPE")
