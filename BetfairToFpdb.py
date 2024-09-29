@@ -25,6 +25,7 @@
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError
 import re
 import logging
+import datetime
 
 log = logging.getLogger("parser")
 
