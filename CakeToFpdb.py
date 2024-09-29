@@ -28,6 +28,7 @@ from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandP
 from decimal_wrapper import Decimal
 import re
 import logging
+import datetime
 
 log = logging.getLogger("parser")
 
