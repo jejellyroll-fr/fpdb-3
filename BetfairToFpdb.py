@@ -24,6 +24,9 @@
 
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError
 import re
+import logging
+
+log = logging.getLogger("parser")
 
 # Betfair HH format
 
