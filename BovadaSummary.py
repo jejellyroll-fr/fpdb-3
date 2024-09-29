@@ -26,6 +26,9 @@ from HandHistoryConverter import HandHistoryConverter, FpdbParseError
 from TourneySummary import TourneySummary
 
 import BovadaToFpdb
+import logging
+
+log = logging.getLogger("parser")
 
 
 class BovadaSummary(TourneySummary):
