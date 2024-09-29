@@ -691,7 +691,7 @@ class BetOnline(HandHistoryConverter):
                         hand.addFold(street, pname)
         m = self.re_Action.finditer(hand.streets[street])
         for action in m:
-            acts = action.groupdict()
+            # acts = action.groupdict()
             # print "DEBUG: street: %s acts: %s" % (street, acts)
             pname = self.unknownPlayer(hand, action.group("PNAME"))
             if action.group("ATYPE") in (" folds", " Folds", " has left the table"):
