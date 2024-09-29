@@ -486,7 +486,7 @@ class Bovada(HandHistoryConverter):
             if action.groupdict() != acts or streetactions == 0:
                 acts = action.groupdict()
                 # print "DEBUG: %s, %s, %s" % (street, acts['PNAME'], acts['ATYPE']), action.group('BET'), streetactions, players, contenders
-                player = self.playerSeatFromPosition("BovadaToFpdb.markStreets", hand.handid, action.group("PNAME"))
+                # player = self.playerSeatFromPosition("BovadaToFpdb.markStreets", hand.handid, action.group("PNAME"))
                 if action.group("ATYPE") == " Fold":
                     contenders -= 1
                 elif action.group("ATYPE") in (" Raises", " raises"):
