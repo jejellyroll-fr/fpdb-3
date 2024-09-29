@@ -1,53 +1,61 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Copyright 2008-2011 Carl Gherardi
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, version 3 of the License.
+# Copyright 2008-2011 Carl Gherardi
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with this program. If not, see <http://www.gnu.org/licenses/>.
-#In the "official" distribution you can find the license in agpl-3.0.txt.
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# In the "official" distribution you can find the license in agpl-3.0.txt.
 
 from __future__ import division
 
-from past.utils import old_div
-#import L10n
-#_ = L10n.get_translation()
+# import L10n
+# _ = L10n.get_translation()
 
-import queue
 
-from PyQt5.QtGui import (QStandardItem, QStandardItemModel)
-from PyQt5.QtWidgets import (QApplication, QDialog, QPushButton, QHBoxLayout, QRadioButton,
-                             QTableView, QVBoxLayout, QWidget, QCheckBox)
+from PyQt5.QtGui import QStandardItem, QStandardItemModel
+from PyQt5.QtWidgets import (
+    QApplication,
+    QPushButton,
+    QHBoxLayout,
+    QRadioButton,
+    QTableView,
+    QVBoxLayout,
+    QWidget,
+    QCheckBox,
+)
 
 import os
-import traceback
 import logging
 from itertools import groupby
 from functools import partial
 import Configuration
+
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = logging.getLogger("logview")
 
-MAX_LINES = 100000         # max lines to display in window
-EST_CHARS_PER_LINE = 150   # used to guesstimate number of lines in log file
+MAX_LINES = 100000  # max lines to display in window
+EST_CHARS_PER_LINE = 150  # used to guesstimate number of lines in log file
 # label, filename, start value, path
-LOGFILES = [['Fpdb Errors',        'fpdb-errors.txt',   False, 'log'],
-            ['Fpdb Log',           'fpdb-log.txt',      True,  'log'],
-            ['HUD Errors',         'HUD-errors.txt',    False, 'log'],
-            ['HUD Log',            'HUD-log.txt',       False, 'log'],
-            ['fpdb.exe log',       'fpdb.exe.log',      False, 'pyfpdb'],
-            ['HUD_main.exe Log',   'HUD_main.exe.log ', False, 'pyfpdb']
-           ]
+LOGFILES = [
+    ["Fpdb Errors", "fpdb-errors.txt", False, "log"],
+    ["Fpdb Log", "fpdb-log.txt", True, "log"],
+    ["HUD Errors", "HUD-errors.txt", False, "log"],
+    ["HUD Log", "HUD-log.txt", False, "log"],
+    ["fpdb.exe log", "fpdb.exe.log", False, "pyfpdb"],
+    ["HUD_main.exe Log", "HUD_main.exe.log ", False, "pyfpdb"],
+]
+
 
 class GuiLogView(QWidget):
     def __init__(self, config, mainwin, closeq):
@@ -76,12 +84,12 @@ class GuiLogView(QWidget):
             rb.setChecked(logf[2])
             rb.clicked.connect(partial(self.__set_logfile, filename=logf[0]))
             hb1.addWidget(rb)
-            
+
         hb2 = QHBoxLayout()
         refreshbutton = QPushButton("Refresh")
         refreshbutton.clicked.connect(self.refresh)
         hb2.addWidget(refreshbutton)
-        
+
         copybutton = QPushButton("Selection Copy to Clipboard")
         copybutton.clicked.connect(self.copy_to_clipboard)
         hb2.addWidget(copybutton)
@@ -124,23 +132,23 @@ class GuiLogView(QWidget):
             selected_levels.append("ERROR")
 
         self.loadLog(selected_levels)
-    
+
     def copy_to_clipboard(self, checkState):
         text = ""
         for row, indexes in groupby(self.listview.selectedIndexes(), lambda i: i.row()):
             text += " ".join([i.data() for i in indexes]) + "\n"
         # print(text)
         QApplication.clipboard().setText(text)
-            
+
     def __set_logfile(self, checkState, filename):
         # print "w is", w, "file is", file, "active is", w.get_active()
         if checkState:
             for logf in LOGFILES:
                 if logf[0] == filename:
-                    if logf[3] == 'pyfpdb':
+                    if logf[3] == "pyfpdb":
                         self.logfile = os.path.join(self.config.pyfpdb_path, logf[1])
                     else:
-                        self.logfile = os.path.join(self.config.dir_log, logf[1])                        
+                        self.logfile = os.path.join(self.config.dir_log, logf[1])
             self.refresh(checkState)  # params are not used
 
     def dialog_response_cb(self, dialog, response_id):
@@ -154,18 +162,19 @@ class GuiLogView(QWidget):
     def loadLog(self, selected_levels=None):
         self.liststore.clear()
         self.liststore.setHorizontalHeaderLabels(
-            ["Date/Time", "Functionality", "Level", "Module", "Function", "Message"])
+            ["Date/Time", "Functionality", "Level", "Module", "Function", "Message"]
+        )
 
         if os.path.exists(self.logfile):
-            with open(self.logfile, 'r') as log_file:
+            with open(self.logfile, "r") as log_file:
                 for line in log_file:
-                    parts = line.strip().split(' - ')
+                    parts = line.strip().split(" - ")
                     if len(parts) == 6:
-                        date_time, functionality,  level, module, function, message = parts
+                        date_time, functionality, level, module, function, message = parts
 
                         # Filter log entries based on selected log levels
                         if selected_levels is None or level in selected_levels:
-                            tablerow = [date_time, functionality,  level, module, function, message]
+                            tablerow = [date_time, functionality, level, module, function, message]
                             tablerow = [QStandardItem(i) for i in tablerow]
                             for item in tablerow:
                                 item.setEditable(False)
@@ -177,11 +186,11 @@ class GuiLogView(QWidget):
         self.loadLog()
 
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     config = Configuration.Config()
 
     from PyQt5.QtWidgets import QApplication, QMainWindow
+
     app = QApplication([])
     main_window = QMainWindow()
     i = GuiLogView(config, main_window, None)

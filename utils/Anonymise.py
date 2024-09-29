@@ -17,15 +17,11 @@
 
 
 import os
-import re
 import codecs
-import Options
-import HandHistoryConverter
 from IdentifySite import IdentifySite
 import Configuration
 import sys
-import time
-import WinamaxToFpdb, BetfairToFpdb, BovadaToFpdb, CakeToFpdb, GGPokerToFpdb, iPokerToFpdb,KingsClubToFpdb, MergeToFpdb, PacificPokerToFpdb, PartyPokerToFpdb, WinningToFpdb, PokerStarsToFpdb
+import WinamaxToFpdb, BetfairToFpdb, BovadaToFpdb, CakeToFpdb, GGPokerToFpdb, iPokerToFpdb, KingsClubToFpdb, MergeToFpdb, PacificPokerToFpdb, PartyPokerToFpdb, WinningToFpdb, PokerStarsToFpdb
 import chardet
 from L10n import set_locale_translation
 
@@ -91,7 +87,7 @@ def anonymize_hand_history(file_path, hero_name):
         "PacificPokerToFpdb": PacificPokerToFpdb.PacificPoker.re_PlayerInfo,
         "PartyPokerToFpdb": PartyPokerToFpdb.PartyPoker.re_PlayerInfo,
         "PokerStarsToFpdb": PokerStarsToFpdb.PokerStars.re_PlayerInfo,
-        "WinningToFpdb": WinningToFpdb.Winning.re_PlayerInfo1
+        "WinningToFpdb": WinningToFpdb.Winning.re_PlayerInfo1,
     }
 
     regex = patterns.get(filter_name)
@@ -100,12 +96,12 @@ def anonymize_hand_history(file_path, hero_name):
 
     # Open the hand history file, detect the encoding, and read the file contents
     if os.path.exists(file_path):
-        with open(file_path, 'rb') as in_file:
+        with open(file_path, "rb") as in_file:
             raw_data = in_file.read()
             result = chardet.detect(raw_data)
-            encoding = result['encoding']
+            encoding = result["encoding"]
 
-            with codecs.open(file_path, 'r', encoding) as in_fh:
+            with codecs.open(file_path, "r", encoding) as in_fh:
                 filecontents = in_fh.read()
     else:
         print(f"Could not find file {file_path}")
@@ -123,12 +119,12 @@ def anonymize_hand_history(file_path, hero_name):
 
         players = []
         for a in m:
-            players = players + [a.group('PNAME')]
+            players = players + [a.group("PNAME")]
 
         uniq = set(players)
 
         for i, name in enumerate(uniq):
-                filecontents = filecontents.replace(name, "Hero" if name == hero_name else f'Player{i}')
+            filecontents = filecontents.replace(name, "Hero" if name == hero_name else f"Player{i}")
 
         # print(filecontents.encode('utf-8').decode())
 
@@ -137,5 +133,3 @@ def anonymize_hand_history(file_path, hero_name):
 
 # Usage example:
 # anonymize_hand_history("C:/MyHandsArchive_H2N/2023/2/21/Ferrare 03.txt", "jejellyroll")
-
-

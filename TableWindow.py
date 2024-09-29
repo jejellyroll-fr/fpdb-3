@@ -27,8 +27,8 @@ client has been resized, destroyed, etc.
 ########################################################################
 
 
-#import L10n
-#_ = L10n.get_translation()
+# import L10n
+# _ = L10n.get_translation()
 
 #    Standard Library modules
 import re
@@ -44,27 +44,27 @@ c = Configuration.Config()
 log = logging.getLogger("hud")
 
 #    Global used for figuring out the current game being played from the title.
-#    The dict key is a tuple of (limit type, category) for the game. 
+#    The dict key is a tuple of (limit type, category) for the game.
 #    The list is the names for those games used by the supported poker sites
 #    This is currently only used for mixed games, so it only needs to support those
 #    games on PokerStars and Full Tilt.
-nlpl_game_names = { #fpdb name      Stars Name   FTP Name (if different)
-              ("nl", "holdem"    ) : ("No Limit Hold\'em"  ,                     ),
-              ("pl", "holdem"    ) : ("Pot Limit Hold\'em" ,                     ),
-              ("pl", "omahahi"   ) : ("Pot Limit Omaha"    ,"Pot Limit Omaha Hi" ),
-             }
-limit_game_names = { #fpdb name      Stars Name   FTP Name
-              ("fl", "holdem"    ) : ("Limit Hold\'em"  ,          ),
-              ("fl", "omahahilo" ) : ("Limit Omaha H/L" ,          ),
-              ("fl", "studhilo"  ) : ("Limit Stud H/L"  ,          ),
-              ("fl", "razz"      ) : ("Limit Razz"      ,          ),
-              ("fl", "studhi"    ) : ("Limit Stud"      , "Stud Hi"),
-              ("fl", "27_3draw"  ) : ("Limit Triple Draw 2-7 Lowball",          )
-             }
+nlpl_game_names = {  # fpdb name      Stars Name   FTP Name (if different)
+    ("nl", "holdem"): ("No Limit Hold'em",),
+    ("pl", "holdem"): ("Pot Limit Hold'em",),
+    ("pl", "omahahi"): ("Pot Limit Omaha", "Pot Limit Omaha Hi"),
+}
+limit_game_names = {  # fpdb name      Stars Name   FTP Name
+    ("fl", "holdem"): ("Limit Hold'em",),
+    ("fl", "omahahilo"): ("Limit Omaha H/L",),
+    ("fl", "studhilo"): ("Limit Stud H/L",),
+    ("fl", "razz"): ("Limit Razz",),
+    ("fl", "studhi"): ("Limit Stud", "Stud Hi"),
+    ("fl", "27_3draw"): ("Limit Triple Draw 2-7 Lowball",),
+}
 
 #    A window title might have our table name + one of these words/
 #    phrases. If it has this word in the title, it is not a table.
-bad_words = ('History for table:', 'HUD:', 'Chat:', 'FPDBHUD', 'Lobby')
+bad_words = ("History for table:", "HUD:", "Chat:", "FPDBHUD", "Lobby")
 
 #    Each TableWindow object must have the following attributes correctly populated:
 #    tw.name = the table name from the title bar, which must to match the table name
@@ -82,50 +82,49 @@ bad_words = ('History for table:', 'HUD:', 'Chat:', 'FPDBHUD', 'Lobby')
 #            screen location of (0, 0) in the working window.
 #    tournament = Tournament number for a tournament or None for a cash game.
 #    table = Table number for a tournament.
-#    gdkhandle = 
-#    window = 
-#    parent = 
-#    game = 
-#    search_string = 
+#    gdkhandle =
+#    window =
+#    parent =
+#    game =
+#    search_string =
+
 
 class Table_Window(object):
-    def __init__(self, config, site, table_name = None, tournament = None, table_number = None):
-
+    def __init__(self, config, site, table_name=None, tournament=None, table_number=None):
         self.config = config
         self.site = site
-        self.hud = None   # fill in later
+        self.hud = None  # fill in later
         self.gdkhandle = None
         self.number = None
         if tournament is not None and table_number is not None:
             print(tournament)
             self.tournament = int(tournament)
-            print(' tournement:')
+            print(" tournement:")
             print(self.tournament)
-            print('table_number:')
+            print("table_number:")
             print(type(table_number))
             print(table_number)
-            #temp bug correction for ipoker must investigate 
-            #if table_number is not an interger
+            # temp bug correction for ipoker must investigate
+            # if table_number is not an interger
 
-            print('table_number error:')
+            print("table_number error:")
             print(type(table_number))
             print(table_number)
             self.table = int(table_number)
             print(self.table)
             self.name = "%s - %s" % (self.tournament, self.table)
             self.type = "tour"
-            table_kwargs = dict(tournament = self.tournament, table_number = self.table)
-            self.tableno_re = getTableNoRe(self.config, self.site, tournament = self.tournament)
+            table_kwargs = dict(tournament=self.tournament, table_number=self.table)
+            self.tableno_re = getTableNoRe(self.config, self.site, tournament=self.tournament)
         elif table_name is not None:
-
-            print('table_number cash:')
+            print("table_number cash:")
             print(type(table_name))
             print((table_name))
             self.name = table_name
             self.type = "cash"
             self.tournament = None
-            table_kwargs = dict(table_name = table_name)
-            print('table_kwarg cash:')
+            table_kwargs = dict(table_name=table_name)
+            print("table_kwarg cash:")
             print(type(table_kwargs))
             print((table_kwargs))
         else:
@@ -136,48 +135,64 @@ class Table_Window(object):
         # make a small delay otherwise Xtables.root.get_windows()
         #  returns empty for unknown reasons
         sleep(0.1)
-        
+
         self.find_table_parameters()
         if not self.number:
-            log.error(("Can't find table \"%s\" with search string \"%s\""), table_name, self.search_string)
-
+            log.error(('Can\'t find table "%s" with search string "%s"'), table_name, self.search_string)
 
         geo = self.get_geometry()
-        if geo is None:  return None
-        self.width  = geo['width']
-        self.height = geo['height']
-        self.x      = geo['x']
+        if geo is None:
+            return None
+        self.width = geo["width"]
+        self.height = geo["height"]
+        self.x = geo["x"]
         print(self.x)
-        self.y      = geo['y']
+        self.y = geo["y"]
         print(self.y)
-        self.oldx   = self.x # attn ray: remove these two lines and update Hud.py::update_table_position()
+        self.oldx = self.x  # attn ray: remove these two lines and update Hud.py::update_table_position()
         print(self.oldx)
-        self.oldy   = self.y
+        self.oldy = self.y
         print(self.oldy)
         self.game = self.get_game()
 
     def __str__(self):
-        likely_attrs = ("number", "title", "site", "width", "height", "x", "y",
-                        "tournament", "table", "gdkhandle", "window", "parent",
-                        "key", "hud", "game", "search_string", "tableno_re")
-        temp = 'TableWindow object\n'
+        likely_attrs = (
+            "number",
+            "title",
+            "site",
+            "width",
+            "height",
+            "x",
+            "y",
+            "tournament",
+            "table",
+            "gdkhandle",
+            "window",
+            "parent",
+            "key",
+            "hud",
+            "game",
+            "search_string",
+            "tableno_re",
+        )
+        temp = "TableWindow object\n"
         for a in likely_attrs:
             if getattr(self, a, 0):
                 temp += "    %s = %s\n" % (a, getattr(self, a))
         return temp
 
-####################################################################
-#    "get" methods. These query the table and return the info to get.
-#    They don't change the data in the table and are generally used
-#    by the "check" methods. Most of the get methods are in the 
-#    subclass because they are specific to X, Windows, etc.
+    ####################################################################
+    #    "get" methods. These query the table and return the info to get.
+    #    They don't change the data in the table and are generally used
+    #    by the "check" methods. Most of the get methods are in the
+    #    subclass because they are specific to X, Windows, etc.
     def get_game(self):
-#        title = self.get_window_title()
-#        if title is None:
-#            return False
+        #        title = self.get_window_title()
+        #        if title is None:
+        #            return False
         title = self.title
 
-#    check for nl and pl games first, to avoid bad matches
+        #    check for nl and pl games first, to avoid bad matches
         for game, names in list(nlpl_game_names.items()):
             for name in names:
                 if name in title:
@@ -197,50 +212,50 @@ class Table_Window(object):
         try:
             log.debug(f"before searching: {new_title}")
             mo = re.search(self.tableno_re, new_title)
-        except AttributeError: #'Table' object has no attribute 'tableno_re'
+        except AttributeError:  #'Table' object has no attribute 'tableno_re'
             log.debug(f"'Table' object has no attribute 'tableno_re'")
             return False
-              
+
         if mo is not None:
             return int(mo.group(1))
         return False
 
-####################################################################
-#    check_table() is meant to be called by the hud periodically to
-#    determine if the client has been moved or resized. check_table()
-#    also checks and signals if the client has been closed. 
+    ####################################################################
+    #    check_table() is meant to be called by the hud periodically to
+    #    determine if the client has been moved or resized. check_table()
+    #    also checks and signals if the client has been closed.
     def check_table(self):
         return self.check_size() or self.check_loc()
 
-####################################################################
-#    "check" methods. They use the corresponding get method, update the
-#    table object and return the name of the signal to be emitted or 
-#    False if unchanged. These do not signal for destroyed
-#    clients to prevent a race condition.
+    ####################################################################
+    #    "check" methods. They use the corresponding get method, update the
+    #    table object and return the name of the signal to be emitted or
+    #    False if unchanged. These do not signal for destroyed
+    #    clients to prevent a race condition.
 
-#    These might be called by a Window.timeout, so they must not
-#    return False, or the timeout will be cancelled.
+    #    These might be called by a Window.timeout, so they must not
+    #    return False, or the timeout will be cancelled.
     def check_size(self):
         new_geo = self.get_geometry()
-        if new_geo is None:   # window destroyed
+        if new_geo is None:  # window destroyed
             return "client_destroyed"
 
-        elif  self.width  != new_geo['width'] or self.height != new_geo['height']:    # window resized
+        elif self.width != new_geo["width"] or self.height != new_geo["height"]:  # window resized
             self.oldwidth = self.width
-            self.width  = new_geo['width']
+            self.width = new_geo["width"]
             self.oldheight = self.height
-            self.height = new_geo['height']
+            self.height = new_geo["height"]
             return "client_resized"
         return False  # no change
 
     def check_loc(self):
-        new_geo = self.get_geometry()        
-        if new_geo is None:   # window destroyed
+        new_geo = self.get_geometry()
+        if new_geo is None:  # window destroyed
             return "client_destroyed"
 
-        if self.x != new_geo['x'] or self.y != new_geo['y']: # window moved
-            self.x      = new_geo['x']
-            self.y      = new_geo['y']
+        if self.x != new_geo["x"] or self.y != new_geo["y"]:  # window moved
+            self.x = new_geo["x"]
+            self.y = new_geo["y"]
             return "client_moved"
         return False  # no change
 
@@ -259,5 +274,6 @@ class Table_Window(object):
 
     def check_bad_words(self, title):
         for word in bad_words:
-            if word in title: return True
+            if word in title:
+                return True
         return False
