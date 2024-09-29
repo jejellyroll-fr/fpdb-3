@@ -481,7 +481,7 @@ class Bovada(HandHistoryConverter):
                 allinblind += 1
         m = self.re_Action.finditer(self.re_Hole_Third.split(hand.handText)[-1])
         dealtIn = len(hand.players) - allinblind
-        streetactions, streetno, players, i, contenders, bets, acts = 0, 1, dealtIn, 0, dealtIn, 0, None
+        streetactions, streetno, players, contenders, bets, acts = 0, 1, dealtIn, 0, dealtIn, 0, None
         for action in m:
             if action.groupdict() != acts or streetactions == 0:
                 acts = action.groupdict()
