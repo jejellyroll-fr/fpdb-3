@@ -21,9 +21,10 @@
 from decimal_wrapper import Decimal
 import datetime
 
-from Exceptions import FpdbParseError
-from HandHistoryConverter import *
-from TourneySummary import *
+
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError
+from TourneySummary import TourneySummary
+
 import BovadaToFpdb
 
 
