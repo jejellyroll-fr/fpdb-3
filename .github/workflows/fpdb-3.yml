@@ -41,7 +41,10 @@ jobs:
     - name: Copy HUD_config.xml
       run: |
         cp HUD_config.xml C:/Users/runneradmin/AppData/Roaming/fpdb/HUD_config.xml
-      
+
+    - name: Install dependencies for tests
+      run: uv pip install .[test]       
+        
     - name: Run tests with coverage
       run: pytest --cov=. --cov-report=html .\test\
 
