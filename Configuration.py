@@ -1866,68 +1866,77 @@ class Config(object):
 
     def get_import_parameters(self):
         imp = {}
+
         try:
             imp["callFpdbHud"] = self.imp.callFpdbHud
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'callFpdbHud': {e}")
             imp["callFpdbHud"] = True
 
         try:
             imp["interval"] = self.imp.interval
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'interval': {e}")
             imp["interval"] = 10
 
-        # ResultsDirectory is the local cache for downloaded results
-        # NOTE: try: except: doesn'tseem to be triggering
-        #       using if instead
+        # Use if instead of try/except for ResultsDirectory
         if self.imp.ResultsDirectory != "":
             imp["ResultsDirectory"] = self.imp.ResultsDirectory
         else:
             imp["ResultsDirectory"] = "~/.fpdb/Results/"
 
-        # hhBulkPath is the default location for bulk imports (if set)
         try:
             imp["hhBulkPath"] = self.imp.hhBulkPath
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'hhBulkPath': {e}")
             imp["hhBulkPath"] = ""
 
         try:
             imp["saveActions"] = self.imp.saveActions
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'saveActions': {e}")
             imp["saveActions"] = False
 
         try:
             imp["cacheSessions"] = self.imp.cacheSessions
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'cacheSessions': {e}")
             imp["cacheSessions"] = False
 
         try:
             imp["publicDB"] = self.imp.publicDB
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'publicDB': {e}")
             imp["publicDB"] = False
 
         try:
             imp["sessionTimeout"] = self.imp.sessionTimeout
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'sessionTimeout': {e}")
             imp["sessionTimeout"] = 30
 
         try:
             imp["saveStarsHH"] = self.imp.saveStarsHH
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'saveStarsHH': {e}")
             imp["saveStarsHH"] = False
 
         try:
             imp["fastStoreHudCache"] = self.imp.fastStoreHudCache
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'fastStoreHudCache': {e}")
             imp["fastStoreHudCache"] = False
 
         try:
             imp["importFilters"] = self.imp.importFilters
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'importFilters': {e}")
             imp["importFilters"] = []
 
         try:
             imp["timezone"] = self.imp.timezone
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'timezone': {e}")
             imp["timezone"] = "America/New_York"
 
         return imp
