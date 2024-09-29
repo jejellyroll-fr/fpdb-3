@@ -29,7 +29,7 @@ import os
 import os.path
 import xml.dom.minidom
 import codecs
-from decimal_wrapper import Decimal
+from decimal import Decimal
 
 import time
 import datetime

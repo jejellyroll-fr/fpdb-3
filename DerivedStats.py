@@ -23,7 +23,7 @@ from past.utils import old_div
 # import L10n
 # _ = L10n.get_translation()
 import Card
-from decimal_wrapper import Decimal, ROUND_DOWN
+from decimal import Decimal, ROUND_DOWN
 
 import logging
 
@@ -842,7 +842,9 @@ class DerivedStats(object):
                     for item in info:
                         # log.error((str(hand.handid)," winners: ",item['winners']))
                         split = [
-                            n for n in item["winners"] if len(playersPots[n][1]) == 1 and hand.collectees.get(n) is not None
+                            n
+                            for n in item["winners"]
+                            if len(playersPots[n][1]) == 1 and hand.collectees.get(n) is not None
                         ]
                         if len(info) == 1:
                             ppot = item["ppot"]

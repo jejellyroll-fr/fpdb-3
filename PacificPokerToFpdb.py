@@ -23,7 +23,7 @@
 # _ = L10n.get_translation()
 
 from HandHistoryConverter import *
-from decimal_wrapper import Decimal
+from decimal import Decimal
 
 # PacificPoker HH Format
 

@@ -39,7 +39,7 @@ from PyQt5.QtGui import QColor, QImage, QPainter
 from PyQt5.QtWidgets import QHBoxLayout, QPushButton, QSlider, QVBoxLayout, QCheckBox, QWidget
 
 from math import pi, cos, sin
-from decimal_wrapper import Decimal
+from decimal import Decimal
 import copy
 import os
 

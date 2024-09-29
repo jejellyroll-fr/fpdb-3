@@ -28,7 +28,7 @@ from past.utils import old_div
 
 from HandHistoryConverter import *
 import MergeStructures
-from decimal_wrapper import Decimal
+from decimal import Decimal
 
 # PokerTracker HH Format
 
