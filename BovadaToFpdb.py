@@ -23,7 +23,7 @@
 
 # TODO: straighten out discards for draw games
 
-from HandHistoryConverter import *
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal_wrapper import Decimal
 
 # Bovada HH Format
