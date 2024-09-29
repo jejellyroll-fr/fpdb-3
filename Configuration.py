@@ -1343,7 +1343,7 @@ class Config(object):
             f.write(self.wrap_long_lines(self.doc.toxml()))
 
     def wrap_long_lines(self, s):
-        lines = [self.wrap_long_line(l) for l in s.splitlines()]
+        lines = [self.wrap_long_line(line) for line in s.splitlines()]
         return "\n".join(lines) + "\n"
 
     def wrap_long_line(self, l):
