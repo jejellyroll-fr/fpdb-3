@@ -40,6 +40,7 @@ import re
 import xml.dom.minidom
 import Charset
 import platform
+import traceback
 
 
 if platform.system() == "Windows":
@@ -1085,17 +1086,9 @@ class Config(object):
                 doc = xml.dom.minidom.parse(file)
                 self.doc = doc  # Root of XML tree
                 self.file_error = None
-            except:
-                import traceback
 
-                log.error((("Error parsing %s.") % (file)) + ("See error log file."))
-                traceback.print_exc(file=sys.stderr)
-                self.file_error = sys.exc_info()[1]
-                # we could add a parameter to decide whether to return or read a line and exit?
-                return
-                # print "press enter to continue"
-                # sys.stdin.readline()
-                # sys.exit()
+            except (OSError, IOError, xml.parsers.expat.ExpatError) as e:
+                log.error(f"Error while processing XML: {traceback.format_exc()} Exception: {e}")
 
             if (not self.example_copy) and (example_file is not None):
                 # reads example file and adds missing elements into current config
@@ -1224,8 +1217,8 @@ class Config(object):
 
         try:
             example_doc = xml.dom.minidom.parse(example_file)
-        except:
-            log.error((("Error parsing example configuration file %s.") % (example_file)) + ("See error log file."))
+        except (OSError, IOError, xml.parsers.expat.ExpatError) as e:
+            log.error(f"Error parsing example configuration file {example_file}. See error log file. Exception: {e}")
             return nodes_added
 
         for cnode in doc.getElementsByTagName("FreePokerToolsConfig"):
@@ -1341,9 +1334,9 @@ class Config(object):
         if file is None:
             file = self.file
             try:
-                shutil.move(file, file + ".backup")
-            except:
-                pass
+                shutil.move(file, f"{file}.backup")
+            except OSError as e:
+                log.error(f"Failed to move file {file} to backup. Exception: {e}")
 
         with codecs.open(file, "w", "utf-8") as f:
             # self.doc.writexml(f)
