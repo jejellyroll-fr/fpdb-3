@@ -26,7 +26,10 @@
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal_wrapper import Decimal
 import re
+import logging
+
 # Bovada HH Format
+log = logging.getLogger("parser")
 
 
 class Bovada(HandHistoryConverter):
