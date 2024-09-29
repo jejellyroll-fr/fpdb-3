@@ -23,33 +23,18 @@ dependencies = [
     "xlrd==2.0.1",
     "pyinstaller==6.9.0",
     "pyzmq==26.0.3",
-    "cachetools==5.5.0"
+    "cachetools==5.5.0",
 ]
 
 [project.optional-dependencies]
-windows = [
-    "pywin32==306",
-    "configparser",
-
-]
-linux = [
-    "xcffib==1.5.0",
-    "python-appimage==1.2.7",
-]
-macos = [
-    "pyobjc==10.3.1",
-]
-database = [
-    "mysqlclient==2.2.4",
-    "psycopg2-binary==2.9.9",
-]
+windows = ["pywin32==306", "configparser"]
+linux = ["xcffib==1.5.0", "python-appimage==1.2.7"]
+macos = ["pyobjc==10.3.1"]
+database = ["mysqlclient==2.2.4", "psycopg2-binary==2.9.9"]
 
 [tool.ruff]
 extend-include = ["*.pyw"]
-extend-exclude = [
-    "build",
-    "archives",
-]
+extend-exclude = ["build", "archives"]
 # Lines configuration
 line-length = 120
 indent-width = 4
@@ -60,7 +45,22 @@ exclude = ["*.ipynb"]
 [tool.ruff.lint]
 exclude = ["*.ipynb"]
 ignore = [
-    "E401",  # Multiple imports on one line"
-    "E731",  # Do not assign a `lambda` expression, use a `def`
-    "E713",  # Test for membership should be `not in`
+    "E401", # Multiple imports on one line"
+    "E731", # Do not assign a `lambda` expression, use a `def`
+    "E713", # Test for membership should be `not in`
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["*"]
+exclude = [
+    "gfx",
+    "web",
+    "fonts",
+    "hooks",
+    "icons",
+    "locale",
+    "archives",
+    "resources",
+    "documentations",
 ]
