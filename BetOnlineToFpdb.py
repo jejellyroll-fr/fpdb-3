@@ -27,7 +27,7 @@ from past.utils import old_div
 # TODO: straighten out discards for draw games
 
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
-from decimal_wrapper import Decimal
+from decimal import Decimal
 import re
 import logging
 import datetime

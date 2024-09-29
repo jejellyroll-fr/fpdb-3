@@ -44,7 +44,7 @@
 #    this is corrected tournaments will be unparseable
 
 from HandHistoryConverter import *
-from decimal_wrapper import Decimal
+from decimal import Decimal
 from TourneySummary import *
 
 

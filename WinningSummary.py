@@ -23,7 +23,7 @@ from past.utils import old_div
 # import L10n
 # _ = L10n.get_translation()
 
-from decimal_wrapper import Decimal
+from decimal import Decimal
 import datetime
 
 from Exceptions import FpdbParseError

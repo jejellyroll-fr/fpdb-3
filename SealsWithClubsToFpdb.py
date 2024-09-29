@@ -26,7 +26,7 @@ import re
 import datetime
 import logging
 from HandHistoryConverter import *
-from decimal_wrapper import Decimal
+from decimal import Decimal
 
 # Set up debug logging
 logging.basicConfig(level=logging.DEBUG)

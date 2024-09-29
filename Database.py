@@ -43,7 +43,7 @@ import sys
 import traceback
 from datetime import datetime, time, timedelta
 from time import time, strftime, sleep
-from decimal_wrapper import Decimal
+from decimal import Decimal
 import string
 import re
 

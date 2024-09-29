@@ -25,7 +25,7 @@ from past.utils import old_div
 # _ = L10n.get_translation()
 
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
-from decimal_wrapper import Decimal
+from decimal import Decimal
 import re
 import logging
 import datetime

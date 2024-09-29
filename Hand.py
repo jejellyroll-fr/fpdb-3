@@ -23,7 +23,7 @@ from __future__ import print_function
 # TODO: get writehand() encoding correct
 
 import sys
-from decimal_wrapper import Decimal
+from decimal import Decimal
 import datetime
 
 import pprint

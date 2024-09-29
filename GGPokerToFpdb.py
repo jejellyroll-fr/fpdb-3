@@ -24,7 +24,7 @@
 # TODO: straighten out discards for draw games
 
 from HandHistoryConverter import *
-from decimal_wrapper import Decimal
+from decimal import Decimal
 
 # PokerStars HH Format
 
