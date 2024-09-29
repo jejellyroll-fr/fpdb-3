@@ -765,7 +765,7 @@ class Cake(HandHistoryConverter):
         log.info(
             f"cake.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'"
         )
-        regex = f""
+        regex = ""
         print("regex get table cash title:", regex)
         if tournament:
             regex = f"Tournament:\s{tournament}\sBuy\-In\s\w+\s:\sTable\s{table_number}"
