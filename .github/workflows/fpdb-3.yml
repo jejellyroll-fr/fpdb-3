@@ -32,8 +32,8 @@ jobs:
 
     - name: Run Ruff for linting
       run: |
-        uv ruff check .
-        uv ruff check --statistics
+        ruff check .
+        ruff check --statistics
 
     - name: Create necessary directories
       run: mkdir -p C:/Users/runneradmin/AppData/Roaming/fpdb
