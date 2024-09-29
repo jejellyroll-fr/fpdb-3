@@ -967,14 +967,14 @@ class RawHands(object):
             if save in ("none", "error", "all"):
                 self.save = save
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (raw_hands.save, '"error"'))
+                print(("Invalid config value for %s, defaulting to %s") % (self.raw_hands.save, '"error"'))
                 self.save = "error"
 
             compression = node.getAttribute("compression")
             if save in ("none", "gzip", "bzip2"):
                 self.compression = compression
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (raw_hands.compression, '"none"'))
+                print(("Invalid config value for %s, defaulting to %s") % (self.raw_hands.compression, '"none"'))
                 self.compression = "none"
 
     # end def __init__
