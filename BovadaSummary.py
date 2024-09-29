@@ -20,7 +20,7 @@
 
 from decimal_wrapper import Decimal
 import datetime
-
+import re
 
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError
 from TourneySummary import TourneySummary
