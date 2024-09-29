@@ -29,6 +29,10 @@ jobs:
         pip install uv
         uv --install 
 
+    - name: Run Ruff for linting
+      run: |
+        uv ruff check .
+
     - name: Create necessary directories
       run: mkdir -p C:/Users/runneradmin/AppData/Roaming/fpdb
       
