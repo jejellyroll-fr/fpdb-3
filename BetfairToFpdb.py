@@ -23,6 +23,7 @@
 # _ = L10n.get_translation()
 
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError
+import re
 
 # Betfair HH format
 
