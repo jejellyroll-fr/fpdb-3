@@ -38,7 +38,7 @@ import shutil
 import locale
 import re
 import xml.dom.minidom
-
+import Charset
 import platform
 
 
@@ -329,8 +329,6 @@ if LOCALE_ENCODING in ("US-ASCII", "", None):
         print((("Default encoding set to US-ASCII, defaulting to CP1252 instead."), ("Please report this problem.")))
 
 # needs LOCALE_ENCODING (above), imported for sqlite setup in Config class below
-
-import Charset
 
 
 ########################################################################
