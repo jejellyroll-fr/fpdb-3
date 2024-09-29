@@ -380,6 +380,7 @@ class Layout(object):
     def __str__(self):
         if hasattr(self, "name"):
             name = str(self.name)
+            log.info(f"attribut {name} exists")
         temp = "    Layout = %d max, width= %d, height = %d" % (self.max, self.width, self.height)
         if hasattr(self, "fav_seat"):
             temp = temp + ", fav_seat = %d\n" % self.fav_seat
