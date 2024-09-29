@@ -182,7 +182,7 @@ def get_config(file_name, fallback=True):
     """
 
     # look for example file even if not used here, path is returned to caller
-    config_found, example_found, example_copy = False, False, False
+    config_found, example_copy = False, False
     config_path, example_path = None, None
     if sysPlatform == "Windows":
         # print('-> windows')
