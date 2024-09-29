@@ -1997,7 +1997,8 @@ class Config(object):
     def get_layout_set_locations(self, set="mucked", max="9"):
         try:
             locations = self.layout_sets[set].layout[max].location
-        except:
+        except (KeyError, AttributeError) as e:
+            log.error(f"Error retrieving layout set locations for set='{set}', max='{max}': {e}")
             locations = (
                 (0, 0),
                 (684, 61),
