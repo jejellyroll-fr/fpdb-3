@@ -47,8 +47,6 @@ the Hud modules.
 #    Standard Library modules
 import logging
 
-# logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hud")
 
 #    FreePokerTools modules
 import Aux_Hud
@@ -57,6 +55,9 @@ from PyQt5.QtWidgets import QInputDialog, QMessageBox
 import Database
 import Configuration
 import os
+
+# logging has been set up in fpdb.py or HUD_main.py, use their settings:
+log = logging.getLogger("hud")
 
 
 class Classic_HUD(Aux_Hud.Simple_HUD):
