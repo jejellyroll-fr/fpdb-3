@@ -1346,27 +1346,27 @@ class Config(object):
         lines = [self.wrap_long_line(line) for line in s.splitlines()]
         return "\n".join(lines) + "\n"
 
-    def wrap_long_line(self, l):
+    def wrap_long_line(self, line):
         if "config_wrap_len" in self.general:
             wrap_len = int(self.general["config_wrap_len"])
         else:
             wrap_len = -1  # < 0 means no wrap
 
-        if wrap_len >= 0 and len(l) > wrap_len:
+        if wrap_len >= 0 and len(line) > wrap_len:
             m = re.compile("\s+\S+\s+")
-            mo = m.match(l)
+            mo = m.match(line)
             if mo:
                 indent_len = mo.end()
                 # print "indent = %s (%s)" % (indent_len, l[0:indent_len])
                 indent = "\n" + " " * indent_len
                 m = re.compile('(\S+="[^"]+"\s+)')
-                parts = [x for x in m.split(l[indent_len:]) if x]
+                parts = [x for x in m.split(line[indent_len:]) if x]
                 if len(parts) > 1:
                     # print "parts =", parts
-                    l = l[0:indent_len] + indent.join(parts)
-            return l
+                    line = line[0:indent_len] + indent.join(parts)
+            return line
         else:
-            return l
+            return line
 
     def editEmail(self, siteName, fetchType, newEmail):
         emailNode = self.getEmailNode(siteName, fetchType)
