@@ -33,7 +33,7 @@ import re
 import zmq
 
 import logging
-import traceback
+
 
 from PyQt5.QtWidgets import QProgressBar, QLabel, QDialog, QVBoxLayout
 from PyQt5.QtCore import QCoreApplication
