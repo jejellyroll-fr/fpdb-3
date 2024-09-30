@@ -123,7 +123,7 @@ class GuiGraphViewer(QSplitter):
 
         sitenos = []
         playerids = []
-        winnings = []
+        # winnings = []
         sites = self.filters.getSites()
         heroes = self.filters.getHeroes()
         siteids = self.filters.getSiteIds()
