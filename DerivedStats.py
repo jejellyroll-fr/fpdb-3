@@ -401,7 +401,8 @@ class DerivedStats(object):
 
     def assembleHandsStove(self, hand):
         category = hand.gametype["category"]
-        holecards, holeplayers, allInStreets = {}, [], hand.allStreets[1:]
+        # holecards, holeplayers, allInStreets = {}, [], hand.allStreets[1:]
+        holecards, holeplayers = {}, []
         base, evalgame, hilo, streets, last, hrange = Card.games[category]
         hiLoKey = {"h": [("h", "hi")], "l": [("l", "low")], "s": [("h", "hi"), ("l", "low")], "r": [("l", "hi")]}
         boards = self.getBoardsDict(hand, base, streets)
