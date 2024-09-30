@@ -754,10 +754,10 @@ class GGPoker(HandHistoryConverter):
             if hand.koBounty > 0:
                 for pname, amount in koAmounts.iteritems():
                     if pname == winner:
-                        end = amount + hand.endBounty[pname]
+                        # end = amount + hand.endBounty[pname]
                         hand.koCounts[pname] = (amount + hand.endBounty[pname]) / Decimal(hand.koBounty)
                     else:
-                        end = 0
+                        # end = 0
                         hand.koCounts[pname] = amount / Decimal(hand.koBounty)
         else:
             for a in self.re_Bounty.finditer(hand.handText):
