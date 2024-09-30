@@ -1350,7 +1350,8 @@ class HoldemOmahaHand(Hand):
                 self.maxseats = hhc.guessMaxSeats(self)
             self.sittingOut()
             hhc.readTourneyResults(self)
-            hhc.readOther(self)
+            # readOther is deprecated
+            # hhc.readOther(self)
         elif builtFrom == "DB":
             # Creator expected to call hhc.select(hid) to fill out object
             log.debug(

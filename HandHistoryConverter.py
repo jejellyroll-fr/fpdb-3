@@ -42,12 +42,13 @@ import logging
 
 import Hand
 from Exceptions import FpdbParseError, FpdbHandPartial, FpdbHandSkipped
+from abc import ABC, abstractmethod
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = logging.getLogger("handHistoryConverter")
 
 
-class HandHistoryConverter(object):
+class HandHistoryConverter(ABC):
     READ_CHUNK_SIZE = 10000  # bytes to read at a time from file in tail mode
 
     # filetype can be "text" or "xml"
@@ -304,15 +305,15 @@ HandHistoryConverter: '%(sitename)s'
     # return [["ring", "hold", "nl"], ["tour", "hold", "nl"]]
     # Showing all supported games limits and types
 
+    @abstractmethod
     def readSupportedGames(self):
-        abstract
+        """This method must be implemented by subclasses to define supported games."""
+        pass
 
-    # should return a list
-    #   type  base limit
-    # [ ring, hold, nl   , sb, bb ]
-    # Valid types specified in docs/tabledesign.html in Gametypes
+    @abstractmethod
     def determineGameType(self, handText):
-        abstract
+        """This method must be implemented by subclasses to define game type determination logic."""
+        pass
 
     """return dict with keys/values:
     'type'       in ('ring', 'tour')
@@ -327,10 +328,11 @@ HandHistoryConverter: '%(sitename)s'
     'bigBet'
     'currency'  in ('USD', 'EUR', 'T$', <countrycode>)
 or None if we fail to get the info """
-    # TODO: which parts are optional/required?
 
+    # TODO: which parts are optional/required?
+    @abstractmethod
     def readHandInfo(self, hand):
-        abstract
+        pass
 
     """Read and set information about the hand being dealt, and set the correct 
     variables in the Hand object 'hand
@@ -352,10 +354,11 @@ or None if we fail to get the info """
     * hand.isKO
     * hand.level
     """
-    # TODO: which parts are optional/required?
 
+    # TODO: which parts are optional/required?
+    @abstractmethod
     def readPlayerStacks(self, hand):
-        abstract
+        pass
 
     """This function is for identifying players at the table, and to pass the 
     information on to 'hand' via Hand.addPlayer(seat, name, chips)
@@ -373,8 +376,9 @@ or None if we fail to get the info """
     *** NOTE: You may find this is a more appropriate place to set hand.maxseats ***
     """
 
+    @abstractmethod
     def compilePlayerRegexs(self):
-        abstract
+        pass
 
     """Compile dynamic regexes -- compile player dependent regexes.
 
@@ -399,8 +403,9 @@ or None if we fail to get the info """
     # Needs to return a MatchObject with group names identifying the streets into the Hand object
     # so groups are called by street names 'PREFLOP', 'FLOP', 'STREET2' etc
     # blinds are done seperately
+    @abstractmethod
     def markStreets(self, hand):
-        abstract
+        pass
 
     """For dividing the handText into sections.
 
@@ -424,8 +429,9 @@ or None if we fail to get the info """
     # Needs to return a list in the format
     # ['player1name', 'player2name', ...] where player1name is the sb and player2name is bb,
     # addtional players are assumed to post a bb oop
+    @abstractmethod
     def readBlinds(self, hand):
-        abstract
+        pass
 
     """Function for reading the various blinds from the hand history.
 
@@ -436,32 +442,41 @@ or None if we fail to get the info """
     Pass any play posting both big and small blinds to hand.addBlind(<name>, 'both', <vale>)
     """
 
+    @abstractmethod
     def readSTP(self, hand):
         pass
 
+    @abstractmethod
     def readAntes(self, hand):
-        abstract
+        pass
 
     """Function for reading the antes from the hand history and passing the hand.addAnte"""
 
+    @abstractmethod
     def readBringIn(self, hand):
-        abstract
+        pass
 
+    @abstractmethod
     def readButton(self, hand):
-        abstract
+        pass
 
+    @abstractmethod
     def readHoleCards(self, hand):
-        abstract
+        pass
 
+    @abstractmethod
     def readAction(self, hand, street):
-        abstract
+        pass
 
+    @abstractmethod
     def readCollectPot(self, hand):
-        abstract
+        pass
 
+    @abstractmethod
     def readShownCards(self, hand):
-        abstract
+        pass
 
+    @abstractmethod
     def readTourneyResults(self, hand):
         """This function is for future use in parsing tourney results directly from a hand"""
         pass
@@ -470,8 +485,9 @@ or None if we fail to get the info """
     # Some sites do odd stuff that doesn't fall in to the normal HH parsing.
     # e.g., FTP doesn't put mixed game info in the HH, but puts in in the
     # file name. Use readOther() to clean up those messes.
-    def readOther(self, hand):
-        pass
+    # @abstractmethod
+    # def readOther(self, hand):
+    #     pass
 
     # Some sites don't report the rake. This will be called at the end of the hand after the pot total has been calculated
     # an inheriting class can calculate it for the specific site if need be.
@@ -637,8 +653,9 @@ or None if we fail to get the info """
         return base.split(".")[0]
 
     # returns a status (True/False) indicating wether the parsing could be done correctly or not
+    @abstractmethod
     def readSummaryInfo(self, summaryInfoList):
-        abstract
+        pass
 
     def getTourney(self):
         return self.tourney
