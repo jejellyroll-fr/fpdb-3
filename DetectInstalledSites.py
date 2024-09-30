@@ -202,7 +202,7 @@ class DetectInstalledSites(object):
         except IndexError:
             self.herofound = None
         except Exception as e:
-            print(f"An unexpected error has occurred : {e}")
+            log.error(f"An unexpected error has occurred : {e}")
             self.herofound = None
 
         return
@@ -211,7 +211,7 @@ class DetectInstalledSites(object):
         if self.Config.os_family == "Linux":
             hhp = os.path.expanduser("~/.wine/drive_c/Program Files/PartyGaming/PartyPoker/HandHistory/")
         elif self.Config.os_family == "XP":
-            hhp = os.path.expanduser(PROGRAM_FILES + "\\PartyGaming\\PartyPoker\\HandHistory\\")
+            hhp = os.path.expanduser(os.path.join(PROGRAM_FILES, "PartyGaming", "PartyPoker", "HandHistory"))
         elif self.Config.os_family == "Win7":
             hhp = os.path.expanduser("c:\\Programs\\PartyGaming\\PartyPoker\\HandHistory\\")
         else:
@@ -227,10 +227,14 @@ class DetectInstalledSites(object):
             dirs.remove("XMLHandHistory")
 
         try:
-            self.herofound = dirs[0]
-            self.hhpathfound = self.hhpathfound + self.herofound
-        except:
-            pass
+            if dirs:
+                self.herofound = dirs[0]
+                self.hhpathfound = os.path.join(self.hhpathfound, self.herofound)
+        except IndexError:
+            self.herofound = None
+        except Exception as e:
+            log.error(f"An unexpected error has occurred : {e}")
+            self.herofound = None
 
         return
 
