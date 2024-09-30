@@ -1203,12 +1203,12 @@ class fpdb(QMainWindow):
         self.threads.append(new_import_thread)
         self.add_and_display_tab(new_import_thread, "Bulk Import")
 
-    def tab_tourney_import(self, widget, data=None):
-        """opens a tab for bulk importing tournament summaries"""
-        new_import_thread = GuiTourneyImport.GuiTourneyImport(self.settings, self.config, self.sql, self.window)
-        self.threads.append(new_import_thread)
-        bulk_tab = new_import_thread.get_vbox()
-        self.add_and_display_tab(bulk_tab, "Tournament Results Import")
+    # def tab_tourney_import(self, widget, data=None):
+    #     """opens a tab for bulk importing tournament summaries"""
+    #     new_import_thread = GuiTourneyImport.GuiTourneyImport(self.settings, self.config, self.sql, self.window)
+    #     self.threads.append(new_import_thread)
+    #     bulk_tab = new_import_thread.get_vbox()
+    #     self.add_and_display_tab(bulk_tab, "Tournament Results Import")
 
     # end def tab_import_imap_summaries
 
