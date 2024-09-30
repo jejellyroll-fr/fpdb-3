@@ -20,12 +20,16 @@
 
 # import L10n
 # _ = L10n.get_translation()
-from HandHistoryConverter import *
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
+import re
+import logging
+import datetime
 from decimal import Decimal
 import platform
 
 
 # Winamax HH Format
+log = logging.getLogger("parser")
 
 
 class Winamax(HandHistoryConverter):
@@ -586,6 +590,18 @@ class Winamax(HandHistoryConverter):
                 string = m.group("STRING")
                 print(m.group("PNAME"), cards, shown, mucked)
                 hand.addShownCards(cards=cards, player=m.group("PNAME"), shown=shown, mucked=mucked, string=string)
+
+    def readSummaryInfo(self, summaryInfoList):
+        """Implement the abstract method from HandHistoryConverter."""
+        # Add the actual implementation here, or use a placeholder if not needed
+        log.info("Reading summary info for Winamax.")
+        return True
+
+    def readTourneyResults(self, hand):
+        """Implement the abstract method from HandHistoryConverter."""
+        # Add the actual implementation here, or use a placeholder if not needed
+        log.info("Reading tournay result info for Winamax.")
+        pass
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
