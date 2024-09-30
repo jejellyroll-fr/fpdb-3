@@ -847,7 +847,7 @@ class PokerStars(HandHistoryConverter):
             return
         m = self.re_Action.finditer(hand.streets[s])
         for action in m:
-            acts = action.groupdict()
+            # acts = action.groupdict()
             # log.error("DEBUG: %s acts: %s" % (street, acts))
             if action.group("ATYPE") == " folds":
                 hand.addFold(street, action.group("PNAME"))
