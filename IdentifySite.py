@@ -195,6 +195,12 @@ class IdentifySite(object):
                     self.filelist[path] = fobj
 
     def read_file(self, in_path):
+        # Ignore macOS-specific hidden files such as .DS_Store
+        if in_path.endswith(".DS_Store"):
+            log.warning(f"Skipping system file {in_path}")
+            return None, None
+
+        # Excel file management if xlrd is available
         if (in_path.endswith(".xls") or in_path.endswith(".xlsx")) and xlrd:
             try:
                 wb = xlrd.open_workbook(in_path)
@@ -205,6 +211,24 @@ class IdentifySite(object):
                 log.error(f"Error reading Excel file {in_path}: {e}")
                 return None, None
 
+        # Check for the presence of a BOM for UTF-16
+        try:
+            with open(in_path, "rb") as infile:
+                raw_data = infile.read()
+
+            # If the file begins with a UTF-16 BOM (little endian or big endian)
+            if raw_data.startswith(b"\xff\xfe") or raw_data.startswith(b"\xfe\xff"):
+                try:
+                    whole_file = raw_data.decode("utf-16")
+                    return whole_file, "utf-16"
+                except UnicodeDecodeError as e:
+                    log.error(f"Error decoding UTF-16 file {in_path}: {e}")
+                    return None, None
+        except IOError as e:
+            log.error(f"Error reading file {in_path}: {e}")
+            return None, None
+
+        # Try different encodings in the `self.codepage` list
         for kodec in self.codepage:
             try:
                 with codecs.open(in_path, "r", kodec) as infile:
@@ -214,6 +238,7 @@ class IdentifySite(object):
                 log.warning(f"Failed to read file {in_path} with codec {kodec}: {e}")
                 continue
 
+        log.error(f"Unable to read file {in_path} with any known codecs.")
         return None, None
 
     def idSite(self, path, whole_file, kodec):
