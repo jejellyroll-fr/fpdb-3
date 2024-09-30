@@ -60,7 +60,9 @@ import Filters
 import Charset
 
 import GuiHandViewer
+import logging
 
+log = logging.getLogger("sessionViewer")
 DEBUG = False
 
 
@@ -413,21 +415,25 @@ class GuiSessionViewer(QSplitter):
                 if self.canvas:
                     self.graphBox.layout().removeWidget(self.canvas)
                     self.canvas.setParent(None)
-            except:
+            except (AttributeError, RuntimeError) as e:
+                # Handle specific exceptions here if you expect them
+                log.error(f"Error during canvas cleanup: {e}")
                 pass
 
             if self.fig is not None:
                 self.fig.clear()
             self.fig = Figure(figsize=(5, 4), dpi=100)
             self.fig.patch.set_facecolor(self.colors["background"])
+
             if self.canvas is not None:
                 self.canvas.destroy()
 
             self.canvas = FigureCanvas(self.fig)
             self.canvas.setParent(self)
-        except:
+        except Exception as e:
+            # Catch all other exceptions and log for better debugging
             err = traceback.extract_tb(sys.exc_info()[2])[-1]
-            print(("Error:") + " " + err[2] + "(" + str(err[1]) + "): " + str(sys.exc_info()[1]))
+            log.error(f"Error: {err[2]}({err[1]}): {e}")
             raise
 
     def generateGraph(self, quotes):
