@@ -27,15 +27,16 @@ from decimal import Decimal, ROUND_DOWN
 
 import logging
 
-# logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("parser")
-
 try:
     from pokereval import PokerEval
 
     pokereval = PokerEval()
-except:
+except Exception:
     pokereval = None
+
+
+# logging has been set up in fpdb.py or HUD_main.py, use their settings:
+log = logging.getLogger("parser")
 
 
 def _buildStatsInitializer():
