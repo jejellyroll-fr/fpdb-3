@@ -903,10 +903,10 @@ class PokerStars(HandHistoryConverter):
             if hand.koBounty > 0:
                 for pname, amount in list(koAmounts.items()):
                     if pname == winner:
-                        end = amount + hand.endBounty[pname]
+                        # end = amount + hand.endBounty[pname]
                         hand.koCounts[pname] = (amount + hand.endBounty[pname]) / float(hand.koBounty)
                     else:
-                        end = 0
+                        # end = 0
                         hand.koCounts[pname] = amount / float(hand.koBounty)
         else:
             for a in self.re_Bounty.finditer(hand.handText):
