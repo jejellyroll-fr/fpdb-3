@@ -195,22 +195,25 @@ class IdentifySite(object):
                     self.filelist[path] = fobj
 
     def read_file(self, in_path):
-        if in_path.endswith(".xls") or in_path.endswith(".xlsx") and xlrd:
+        if (in_path.endswith(".xls") or in_path.endswith(".xlsx")) and xlrd:
             try:
                 wb = xlrd.open_workbook(in_path)
                 sh = wb.sheet_by_index(0)
                 header = str(sh.cell(0, 0).value)
                 return header, "utf-8"
-            except:
+            except (xlrd.XLRDError, IOError) as e:
+                log.error(f"Error reading Excel file {in_path}: {e}")
                 return None, None
+
         for kodec in self.codepage:
             try:
-                infile = codecs.open(in_path, "r", kodec)
-                whole_file = infile.read()
-                infile.close()
-                return whole_file, kodec
-            except:
+                with codecs.open(in_path, "r", kodec) as infile:
+                    whole_file = infile.read()
+                    return whole_file, kodec
+            except (IOError, UnicodeDecodeError) as e:
+                log.warning(f"Failed to read file {in_path} with codec {kodec}: {e}")
                 continue
+
         return None, None
 
     def idSite(self, path, whole_file, kodec):
