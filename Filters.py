@@ -486,7 +486,7 @@ class Filters(QWidget):
         frame.setLayout(vbox)
         self.heroList = QComboBox()
         self.heroList.setStyleSheet("background-color: #455364")
-        current_directory = str(pathlib.Path(__file__).parent.absolute())
+        # current_directory = str(pathlib.Path(__file__).parent.absolute())
 
         for count, site in enumerate(self.conf.get_supported_sites(), start=1):
             player = self.conf.supported_sites[site].screen_name
