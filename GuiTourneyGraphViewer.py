@@ -40,7 +40,7 @@ try:
     from matplotlib.figure import Figure
     from matplotlib.backends.backend_qt5agg import FigureCanvas
     from matplotlib.font_manager import FontProperties
-    from numpy import arange, cumsum
+    from numpy import cumsum
 except ImportError as inst:
     print(
         (
