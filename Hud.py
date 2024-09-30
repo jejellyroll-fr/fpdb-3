@@ -193,7 +193,7 @@ class Hud(object):
     def update(self, hand, config):
         # re-load a hand instance (factory will load correct type for this hand)
         self.hand_instance = Hand.hand_factory(hand, config, self.db_hud_connection)
-        log.debug(f"hud update after hand_factory")
+        log.debug("hud update after hand_factory")
         self.db_hud_connection.connection.rollback()
 
     def get_cards(self, hand):
