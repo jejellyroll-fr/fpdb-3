@@ -159,7 +159,7 @@ HandHistoryConverter: '%(sitename)s'
                     self.numPartial += 1
                     lastParsed = "partial"
                     log.debug("%s" % e)
-                except FpdbHandSkipped as e:
+                except FpdbHandSkipped:
                     self.numSkipped += 1
                     lastParsed = "skipped"
                 except FpdbParseError:
