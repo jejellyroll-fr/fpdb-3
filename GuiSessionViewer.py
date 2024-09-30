@@ -446,7 +446,7 @@ class GuiSessionViewer(QSplitter):
         siteids = self.filters.getSiteIds()
         limits = self.filters.getLimits()
 
-        graphops = self.filters.getGraphOps()
+        # graphops = self.filters.getGraphOps()
 
         names = ""
 
