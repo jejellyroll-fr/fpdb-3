@@ -32,12 +32,12 @@ Create and manage the hud overlays.
 import logging
 import copy
 
-# logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hud")
-
 #    FreePokerTools modules
 import Database
 import Hand
+
+# logging has been set up in fpdb.py or HUD_main.py, use their settings:
+log = logging.getLogger("hud")
 
 
 def importName(module_name, name):
