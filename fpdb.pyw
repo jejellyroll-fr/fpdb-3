@@ -632,9 +632,9 @@ class fpdb(QMainWindow):
             label.setAlignment(Qt.AlignCenter)
             table.addWidget(label, 0, header_number)
 
-        history_paths = []
+        # history_paths = []
         check_buttons = []
-        screen_names = []
+        # screen_names = []
         seat2_dict, seat3_dict, seat4_dict, seat5_dict, seat6_dict, seat7_dict, seat8_dict, seat9_dict, seat10_dict = (
             [],
             [],
@@ -646,7 +646,7 @@ class fpdb(QMainWindow):
             [],
             [],
         )
-        summary_paths = []
+        # summary_paths = []
         detector = DetectInstalledSites.DetectInstalledSites()
 
         y_pos = 1
