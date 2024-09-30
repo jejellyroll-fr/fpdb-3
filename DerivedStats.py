@@ -1371,15 +1371,15 @@ class DerivedStats(object):
     def countPlayers(self, hand):
         pass
 
-    def pfba(self, actions, f=None, l=None):
+    def pfba(self, actions, f=None, limit_actions=None):
         """Helper method. Returns set of PlayersFilteredByActions
 
         f - forbidden actions
-        l - limited to actions
+        limit_actions - limited to actions
         """
         players = set()
         for action in actions:
-            if l is not None and action[1] not in l:
+            if limit_actions is not None and action[1] not in limit_actions:
                 continue
             if f is not None and action[1] in f:
                 continue
