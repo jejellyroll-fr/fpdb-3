@@ -652,7 +652,8 @@ class DerivedStats(object):
                 if potId == 0:
                     pot += sum(hand.pot.common.values()) + hand.pot.stp
                 potId += 1
-                boards, boardId, sumpot = self.getBoardsList(hand), 0, 0
+                # boards, boardId, sumpot = self.getBoardsList(hand), 0, 0
+                boards, boardId = self.getBoardsList(hand), 0
                 for b in boards:
                     boardId += hand.runItTimes >= 2
                     potBoard = Decimal(int(pot / len(boards) * factor)) / factor
