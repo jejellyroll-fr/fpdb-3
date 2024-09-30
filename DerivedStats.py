@@ -765,8 +765,8 @@ class DerivedStats(object):
             and evalgame
             and (len(hand.pot.pots) > 1 or (showdown and (hilo == "s" or hand.runItTimes >= 2)))
         ):
-            rakes, totrake, potId = {}, 0, 0
-
+            # rakes, totrake, potId = {}, 0, 0
+            potId = 0
             for pot, players in hand.pot.pots:
                 if potId == 0:
                     pot += sum(hand.pot.common.values()) + hand.pot.stp
