@@ -389,7 +389,7 @@ class GGPoker(HandHistoryConverter):
                     )
                     raise FpdbParseError
             else:
-                info["sb"] = str((old_div(Decimal(self.clearMoneyString(mg["SB"])), 2)).quantize(Decimal("0.01")))
+                info["sb"] = str((Decimal(self.clearMoneyString(mg["SB"])) / 2).quantize(Decimal("0.01")))
                 info["bb"] = str(Decimal(self.clearMoneyString(mg["SB"])).quantize(Decimal("0.01")))
 
         return info
