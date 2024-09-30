@@ -30,8 +30,6 @@ import pprint
 
 import logging
 
-# logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("parser")
 
 import Configuration
 from Exceptions import FpdbHandDuplicate, FpdbHandPartial, FpdbParseError
@@ -39,6 +37,9 @@ import DerivedStats
 import Card
 
 Configuration.set_logfile("fpdb-log.txt")
+
+# logging has been set up in fpdb.py or HUD_main.py, use their settings:
+log = logging.getLogger("hand")
 
 
 class Hand(object):
