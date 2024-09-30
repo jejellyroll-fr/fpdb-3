@@ -298,11 +298,11 @@ class IdentifySite(object):
         return False
 
     def getFilesForSite(self, sitename, ftype):
-        l = []
+        files_for_site = []
         for name, f in list(self.filelist.items()):
             if f.ftype is not None and f.site.name == sitename and f.ftype == "hh":
-                l.append(f)
-        return l
+                files_for_site.append(f)
+        return files_for_site
 
     def fetchGameTypes(self):
         for name, f in list(self.filelist.items()):
