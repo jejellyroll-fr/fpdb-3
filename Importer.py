@@ -472,7 +472,7 @@ class Importer(object):
         (stored, duplicates, partial, skipped, errors, ttime) = (0, 0, 0, 0, 0, time())
 
         # Load filter, process file, pass returned filename to import_fpdb_file
-        log.info(("Converting %s") % fpdbfile.path)
+        log.info(f"Converting {fpdbfile.path}")
 
         filter_name = fpdbfile.site.filter_name
         mod = __import__(fpdbfile.site.hhc_fname)
@@ -496,6 +496,7 @@ class Importer(object):
             hhc.start()
 
             self.pos_in_file[fpdbfile.path] = hhc.getLastCharacterRead()
+
             # Tally the results
             partial = getattr(hhc, "numPartial")
             skipped = getattr(hhc, "numSkipped")
@@ -545,19 +546,13 @@ class Importer(object):
                         duplicates += 1
                         if doinsert and ihands:
                             backtrack = True
-                    except:
-                        error_trace = ""
-                        formatted_lines = traceback.format_exc().splitlines()
-                        for line in formatted_lines:
-                            error_trace += line
-                        tmp = hand.handText[0:200]
-                        log.error(("Importer._import_hh_file: '%r' Fatal error: '%r'") % (fpdbfile.path, error_trace))
-                        log.error(("'%r'") % tmp)
+                    except Exception as e:
+                        log.error(f"Importer._import_hh_file: '{fpdbfile.path}' Fatal error: '{e}'")
+                        log.error(f"'{hand.handText[0:200]}'")
                         if doinsert and ihands:
                             backtrack = True
-                    if (
-                        backtrack
-                    ):  # If last hand in the file is a duplicate this will backtrack and insert the new hand records
+
+                    if backtrack:
                         hand = ihands[-1]
                         hp, hero = hand.handsplayers, hand.hero
                         hand.hero, self.database.hbulk, hand.handsplayers = (
@@ -572,9 +567,7 @@ class Importer(object):
                         hand.updatePositionsCache(self.database, None, doinsert)
                         hand.updateHudCache(self.database, doinsert)
                         hand.handsplayers, hand.hero = hp, hero
-                # log.debug("DEBUG: hand.updateSessionsCache: %s" % (t5tot))
-                # log.debug("DEBUG: hand.insertHands: %s" % (t6tot))
-                # log.debug("DEBUG: hand.updateHudCache: %s" % (t7tot))
+
                 self.database.commit()
                 ####Lock Placeholder####
 
@@ -588,9 +581,6 @@ class Importer(object):
 
                 # pipe the Hands.id out to the HUD
                 if self.callHud:
-                    print("self.callHud", self.callHud)
-                    print("self.caller", self.caller)
-
                     for hid in list(to_hud):
                         try:
                             log.debug(f"Sending hand ID {hid} to HUD via socket")
@@ -598,9 +588,8 @@ class Importer(object):
                         except IOError as e:
                             log.error(f"Failed to send hand ID to HUD via socket: {e}")
 
-                # Really ugly hack to allow testing Hands within the HHC from someone
-                # with only an Importer objec
-                if self.settings["cacheHHC"]:
+                # Cache HHC if enabled
+                if self.settings.get("cacheHHC", False):
                     self.handhistoryconverter = hhc
         elif self.mode == "auto":
             return (0, 0, partial, skipped, errors, time() - ttime)
