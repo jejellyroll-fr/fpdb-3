@@ -314,14 +314,13 @@ class Importer(object):
         self.database.resetClean()
 
     def importFiles(self, q):
-        """ "Read filenames in self.filelist and pass to despatcher."""
+        """Read filenames in self.filelist and pass to despatcher."""
 
         totstored = 0
         totdups = 0
         totpartial = 0
         totskipped = 0
         toterrors = 0
-        # tottime = 0
         filecount = 0
         fileerrorcount = 0
         moveimportedfiles = False  # TODO need to wire this into GUI and make it prettier
@@ -333,7 +332,7 @@ class Importer(object):
         ProgressDialog.show()
 
         for f in self.filelist:
-            filecount = filecount + 1
+            filecount += 1
             ProgressDialog.progress_update(f, str(self.database.getHandCount()))
 
             (stored, duplicates, partial, skipped, errors, ttime) = self._import_despatch(self.filelist[f])
@@ -343,21 +342,25 @@ class Importer(object):
             totskipped += skipped
             toterrors += errors
 
-            if moveimportedfiles and movefailedfiles:
+            if moveimportedfiles or movefailedfiles:
                 try:
                     if moveimportedfiles:
                         shutil.move(f, "c:\\fpdbimported\\%d-%s" % (filecount, os.path.basename(f[3:])))
-                except:
-                    fileerrorcount = fileerrorcount + 1
+                except (shutil.Error, OSError) as e:
+                    fileerrorcount += 1
+                    log.error(f"Error moving imported file {f}: {e}")
                     if movefailedfiles:
-                        shutil.move(f, "c:\\fpdbfailed\\%d-%s" % (fileerrorcount, os.path.basename(f[3:])))
+                        try:
+                            shutil.move(f, "c:\\fpdbfailed\\%d-%s" % (fileerrorcount, os.path.basename(f[3:])))
+                        except (shutil.Error, OSError) as e:
+                            log.error(f"Error moving failed file {f}: {e}")
 
             self.logImport("bulk", f, stored, duplicates, partial, skipped, errors, ttime, self.filelist[f].fileId)
 
         ProgressDialog.accept()
         del ProgressDialog
 
-        return (totstored, totdups, totpartial, totskipped, toterrors)
+        return totstored, totdups, totpartial, totskipped, toterrors
 
     # end def importFiles
 
