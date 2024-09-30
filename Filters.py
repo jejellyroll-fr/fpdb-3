@@ -6,7 +6,6 @@ from __future__ import division
 import itertools
 
 from past.utils import old_div
-import pathlib
 import os
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QDate, QDateTime
