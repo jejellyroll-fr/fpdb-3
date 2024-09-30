@@ -1099,6 +1099,7 @@ class DerivedStats(object):
         """
         steal_attempt = False
         raised = False
+        stealer = ""
         if hand.gametype["base"] == "stud":
             steal_positions = (2, 1, 0)
         elif len([x for x in hand.actions[hand.actionStreets[0]] if x[1] == "button blind"]) > 0:
