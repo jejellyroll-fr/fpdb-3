@@ -1286,10 +1286,6 @@ class fpdb(QMainWindow):
             "background": self.palette().color(QPalette.Window).name(),
             "foreground": self.palette().color(QPalette.WindowText).name(),
             "grid": "#444444",  # to customize
-            "line_showdown": "#0000FF",
-            "line_nonshowdown": "#FF0000",
-            "line_ev": "#FFA500",
-            "line_hands": "#00FF00",
             "line_up": "g",
             "line_down": "r",
             "line_showdown": "b",
