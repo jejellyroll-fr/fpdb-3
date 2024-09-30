@@ -543,7 +543,7 @@ or None if we fail to get the info """
     def sanityCheck(self):
         """Check we aren't going to do some stupid things"""
         sane = False
-        base_w = False
+        # base_w = False
 
         # Make sure input and output files are different or we'll overwrite the source file
         if True:  # basically.. I don't know
