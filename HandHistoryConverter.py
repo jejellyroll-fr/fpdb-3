@@ -585,15 +585,21 @@ or None if we fail to get the info """
                     self.index = len(self.whole_file)
                     self.kodec = kodec
                     return True
-                except:
-                    pass
+                except (IOError, UnicodeDecodeError) as e:
+                    log.warning(f"Failed to read file with codec {kodec}: {e}")
             else:
-                log.error(("unable to read file with any codec in list!") + " " + self.in_path)
+                log.error(f"Unable to read file with any codec in list! {self.in_path}")
                 self.obs = ""
                 return False
+
         elif self.filetype == "xml":
-            doc = xml.dom.minidom.parse(filename)
-            self.doc = doc
+            if hasattr(self, "in_path"):  # Ensure filename (in_path) is available
+                doc = xml.dom.minidom.parse(self.in_path)
+                self.doc = doc
+            else:
+                log.error("No file path provided for XML filetype")
+                return False
+
         elif self.filetype == "":
             pass
 
