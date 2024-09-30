@@ -42,6 +42,9 @@ from math import pi, cos, sin
 from decimal import Decimal
 import copy
 import os
+import logging
+
+log = logging.getLogger("replayer")
 
 CARD_HEIGHT = 90
 CARD_WIDTH = 70
@@ -128,7 +131,8 @@ class GuiReplayer(QWidget):
                 self.playerBackdrop = QImage(os.path.join(self.conf.graphics_path, "playerbackdrop.png"))
                 self.tableImage = QImage(os.path.join(self.conf.graphics_path, "TableR.png"))
                 self.dealer = QImage(os.path.join(self.conf.graphics_path, "dealer.png"))
-            except:
+            except (FileNotFoundError, OSError) as e:
+                log.error(f"Error loading images: {e}")
                 return
         if self.cardImages is None:
             self.cardwidth = CARD_WIDTH
