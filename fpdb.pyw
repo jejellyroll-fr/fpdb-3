@@ -123,13 +123,13 @@ except Exception:
 
 
 class fpdb(QMainWindow):
-    def launch_ppt(self):
-        path = os.getcwd()
-        if os.name == "nt":
-            pathcomp = f"{path}\pyfpdb\ppt\p2.jar"
-        else:
-            pathcomp = f"{path}/ppt/p2.jar"
-        subprocess.call(["java", "-jar", pathcomp])
+    # def launch_ppt(self):
+    #     path = os.getcwd()
+    #     if os.name == "nt":
+    #         pathcomp = f"{path}\pyfpdb\ppt\p2.jar"
+    #     else:
+    #         pathcomp = f"{path}/ppt/p2.jar"
+    #     subprocess.call(["java", "-jar", pathcomp])
 
     def add_and_display_tab(self, new_page, new_tab_name):
         """adds a tab, namely creates the button and displays it and appends all the relevant arrays"""
