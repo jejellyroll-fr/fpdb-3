@@ -41,7 +41,7 @@ import logging
 
 
 import Hand
-from Exceptions import *
+from Exceptions import FpdbParseError, FpdbHandPartial, FpdbHandSkipped
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = logging.getLogger("handHistoryConverter")
