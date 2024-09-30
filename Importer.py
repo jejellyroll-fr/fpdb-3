@@ -390,10 +390,11 @@ class Importer(object):
         if "handsInDB" not in self.settings:
             try:
                 tmpcursor = db.get_cursor()
-                tmpcursor.execute("Select count(1) from Hands;")
+                tmpcursor.execute("SELECT COUNT(1) FROM Hands;")
                 self.settings["handsInDB"] = tmpcursor.fetchone()[0]
-            except:
-                pass  # if this fails we're probably doomed anyway
+            except Exception as e:
+                log.error(f"Failed to retrieve hands count from database: {e}")
+                return "don't drop"
 
         # add up size of import files
         total_size = 0.0
