@@ -861,18 +861,19 @@ def getSiteHhc(config, sitename):
 def get_out_fh(out_path, parameters):
     if out_path == "-":
         return sys.stdout
-    elif parameters["saveStarsHH"]:
+    elif parameters.get("saveStarsHH", False):
         out_dir = os.path.dirname(out_path)
         if not os.path.isdir(out_dir) and out_dir != "":
             try:
                 os.makedirs(out_dir)
-            except:  # we get a WindowsError here in Windows.. pretty sure something else for Linux :D
-                log.error(("Unable to create output directory %s for HHC!") % out_dir)
+            except OSError as e:
+                log.error(f"Unable to create output directory {out_dir} for HHC: {e}")
             else:
-                log.info(("Created directory '%s'") % out_dir)
+                log.info(f"Created directory '{out_dir}'")
         try:
             return codecs.open(out_path, "w", "utf8")
-        except:
-            log.error(("Output path %s couldn't be opened.") % (out_path))
+        except (IOError, OSError) as e:
+            log.error(f"Output path {out_path} couldn't be opened: {e}")
+            return None
     else:
         return sys.stdout
