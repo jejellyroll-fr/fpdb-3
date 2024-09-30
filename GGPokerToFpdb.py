@@ -774,14 +774,14 @@ class GGPoker(HandHistoryConverter):
 
     def readCollectPot(self, hand):
         # Bovada walks are calculated incorrectly in converted PokerStars hands
-        acts, bovadaUncalled_v1, bovadaUncalled_v2, blindsantes, adjustment = (
-            hand.actions.get("PREFLOP"),
-            False,
-            False,
-            0,
-            0,
-        )
-        names = [p[1] for p in hand.players]
+        # acts, bovadaUncalled_v1, bovadaUncalled_v2, blindsantes, adjustment = (
+        #     hand.actions.get("PREFLOP"),
+        #     False,
+        #     False,
+        #     0,
+        #     0,
+        # )
+        # names = [p[1] for p in hand.players]
         i = 0
         pre, post = hand.handText.split("*** SUMMARY ***")
         hand.cashedOut = self.re_CashedOut.search(pre) is not None
