@@ -17,13 +17,14 @@
 
 # import L10n
 # _ = L10n.get_translation()
-
+from HandHistoryConverter import FpdbParseError, FpdbHandPartial
 from decimal import Decimal
+import re
+import logging
 import datetime
+from TourneySummary import TourneySummary
 
-from Exceptions import FpdbParseError
-from HandHistoryConverter import *
-from TourneySummary import *
+log = logging.getLogger("parser")
 
 
 class iPokerSummary(TourneySummary):
