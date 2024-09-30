@@ -83,7 +83,8 @@ import cProfile
 import pstats
 import io
 import interlocks
-from Exceptions import *
+from Exceptions import FpdbError
+
 import sqlite3
 
 # these imports not required in this module, imported here to report version in About dialog
