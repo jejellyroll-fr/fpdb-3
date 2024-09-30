@@ -1341,7 +1341,7 @@ class DerivedStats(object):
                 #                           %(hand.handid, playername, hand.actionStreets[i+1], i)
 
     def calls(self, hand, i):
-        callers = []
+        # callers = []
         for act in hand.actions[hand.actionStreets[i + 1]]:
             if act[1] in ("calls"):
                 player_stats = self.handsplayers.get(act[0])
