@@ -46,6 +46,9 @@ import os
 import sys
 
 import Configuration
+import logging
+
+log = logging.getLogger("config")
 
 if platform.system() == "Windows":
     # import winpaths
@@ -136,10 +139,8 @@ class DetectInstalledSites(object):
     def detectFullTilt(self):
         if self.Config.os_family == "Linux":
             hhp = os.path.expanduser("~/.wine/drive_c/Program Files/Full Tilt Poker/HandHistory/")
-        elif self.Config.os_family == "XP":
-            hhp = os.path.expanduser(PROGRAM_FILES + "\\Full Tilt Poker\\HandHistory\\")
-        elif self.Config.os_family == "Win7":
-            hhp = os.path.expanduser(PROGRAM_FILES + "\\Full Tilt Poker\\HandHistory\\")
+        elif self.Config.os_family in ["XP", "Win7"]:
+            hhp = os.path.expanduser(os.path.join(PROGRAM_FILES, "Full Tilt Poker", "HandHistory"))
         else:
             return
 
@@ -149,10 +150,20 @@ class DetectInstalledSites(object):
             return
 
         try:
-            self.herofound = os.listdir(self.hhpathfound)[0]
-            self.hhpathfound = self.hhpathfound + self.herofound
-        except:
-            pass
+            files = os.listdir(self.hhpathfound)
+            if files:
+                self.herofound = files[0]
+                self.hhpathfound = os.path.join(self.hhpathfound, self.herofound)
+        except FileNotFoundError:
+            # The HandHistory directory does not exist or is not accessible
+            self.herofound = None
+        except IndexError:
+            # No files in the HandHistory directory
+            self.herofound = None
+        except Exception as e:
+            # Generic management for any other unforeseen exceptions (logging, debugging, etc.)
+            log.error(f"An unexpected error has occurred : {e}")
+            self.herofound = None
 
         return
 
