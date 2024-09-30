@@ -308,6 +308,8 @@ class GuiGraphViewer(QSplitter):
         nametest = str(tuple(names))
         sitetest = str(tuple(sites))
 
+        gametest = ""
+
         for m in list(self.filters.display.items()):
             if m[0] == "Games" and m[1]:
                 if len(games) > 0:
@@ -318,6 +320,7 @@ class GuiGraphViewer(QSplitter):
                     gametest = "and gt.category in %s" % gametest
                 else:
                     gametest = "and gt.category IS NULL"
+
         tmp = tmp.replace("<game_test>", gametest)
 
         limittest = self.filters.get_limits_where_clause(limits)
@@ -327,9 +330,11 @@ class GuiGraphViewer(QSplitter):
         currencytest = currencytest.replace("u'", "'")
         currencytest = "AND gt.currency in %s" % currencytest
 
-        if type == "ring":
+        game_type = self.filters.get_game_type()
+
+        if game_type == "ring":
             limittest = limittest + " and gt.type = 'ring' "
-        elif type == "tour":
+        elif game_type == "tour":
             limittest = limittest + " and gt.type = 'tour' "
 
         tmp = tmp.replace("<player_test>", nametest)
