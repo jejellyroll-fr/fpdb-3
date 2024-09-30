@@ -39,12 +39,12 @@ import pytz
 
 import logging
 
-# logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("parser")
-
 
 import Hand
 from Exceptions import *
+
+# logging has been set up in fpdb.py or HUD_main.py, use their settings:
+log = logging.getLogger("handHistoryConverter")
 
 
 class HandHistoryConverter(object):
