@@ -239,13 +239,16 @@ HandHistoryConverter: '%(sitename)s'
 
     def processHand(self, handText):
         if self.isPartial(handText):
-            raise FpdbHandPartial(("Could not identify as a %s hand") % self.sitename)
+            raise FpdbHandPartial("Could not identify as a %s hand" % self.sitename)
+
         if self.copyGameHeader:
             gametype = self.parseHeader(handText, self.whole_file.replace("\r\n", "\n").replace("\xa0", " "))
         else:
             gametype = self.determineGameType(handText)
+
         hand = None
-        l = None
+        game_details = None
+
         if gametype is None:
             gametype = "unmatched"
             # TODO: not ideal, just trying to not error. Throw ParseException?
@@ -255,27 +258,22 @@ HandHistoryConverter: '%(sitename)s'
             print("gametypecategory", gametype["category"])
             if gametype["category"] in self.import_parameters["importFilters"]:
                 raise FpdbHandSkipped("Skipped %s hand" % gametype["type"])
-            # See if gametype is supported.
-            if "mix" not in gametype:
-                gametype["mix"] = "none"
-            if "ante" not in gametype:
-                gametype["ante"] = 0
-            if "buyinType" not in gametype:
-                gametype["buyinType"] = "regular"
-            if "fast" not in gametype:
-                gametype["fast"] = False
-            if "newToGame" not in gametype:
-                gametype["newToGame"] = False
-            if "homeGame" not in gametype:
-                gametype["homeGame"] = False
-            if "split" not in gametype:
-                gametype["split"] = False
+
+            # Ensure game type has all necessary attributes
+            gametype.setdefault("mix", "none")
+            gametype.setdefault("ante", 0)
+            gametype.setdefault("buyinType", "regular")
+            gametype.setdefault("fast", False)
+            gametype.setdefault("newToGame", False)
+            gametype.setdefault("homeGame", False)
+            gametype.setdefault("split", False)
+
             type = gametype["type"]
             base = gametype["base"]
             limit = gametype["limitType"]
-            l = [type] + [base] + [limit]
+            game_details = [type, base, limit]
 
-        if l in self.readSupportedGames():
+        if game_details in self.readSupportedGames():
             if gametype["base"] == "hold":
                 hand = Hand.HoldemOmahaHand(self.config, self, self.sitename, gametype, handText)
             elif gametype["base"] == "stud":
@@ -283,14 +281,14 @@ HandHistoryConverter: '%(sitename)s'
             elif gametype["base"] == "draw":
                 hand = Hand.DrawHand(self.config, self, self.sitename, gametype, handText)
         else:
-            log.error(("%s Unsupported game type: %s") % (self.sitename, gametype))
+            log.error("%s Unsupported game type: %s", self.sitename, gametype)
             raise FpdbParseError
 
         if hand:
             # hand.writeHand(self.out_fh)
             return hand
         else:
-            log.error(("%s Unsupported game type: %s") % (self.sitename, gametype))
+            log.error("%s Unsupported game type: %s", self.sitename, gametype)
             # TODO: pity we don't know the HID at this stage. Log the entire hand?
 
     def isPartial(self, handText):
