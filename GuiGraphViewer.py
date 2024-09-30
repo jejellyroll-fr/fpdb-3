@@ -330,7 +330,7 @@ class GuiGraphViewer(QSplitter):
         currencytest = currencytest.replace("u'", "'")
         currencytest = "AND gt.currency in %s" % currencytest
 
-        game_type = self.filters.get_game_type()
+        game_type = self.filters.getType()
 
         if game_type == "ring":
             limittest = limittest + " and gt.type = 'ring' "
