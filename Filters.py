@@ -348,7 +348,9 @@ class Filters(QWidget):
     #     return [g for g in self.cbGraphops if self.cbGraphops[g].isChecked()]
 
     def getLimits(self):
-        return [l for l in self.cbLimits if self.cbLimits[l].isChecked() and self.cbLimits[l].isEnabled()]
+        return [
+            limit for limit in self.cbLimits if self.cbLimits[limit].isChecked() and self.cbLimits[limit].isEnabled()
+        ]
 
     def getType(self):
         return self.type
