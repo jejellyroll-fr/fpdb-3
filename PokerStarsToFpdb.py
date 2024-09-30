@@ -23,7 +23,7 @@
 
 # TODO: straighten out discards for draw games
 
-from HandHistoryConverter import HandHistoryConverter, FpdbParseError
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 import re
 import logging
 import datetime
