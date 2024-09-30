@@ -1308,12 +1308,12 @@ class fpdb(QMainWindow):
         self.threads.append(new_gv_thread)
         self.add_and_display_tab(new_gv_thread, "Tourney Graphs")
 
-    def tabStove(self, widget, data=None):
-        """opens a tab for poker stove"""
-        thread = GuiStove.GuiStove(self.config, self)
-        self.threads.append(thread)
-        # tab = thread.get_vbox()
-        self.add_and_display_tab(thread, "Stove")
+    # def tabStove(self, widget, data=None):
+    #     """opens a tab for poker stove"""
+    #     thread = GuiStove.GuiStove(self.config, self)
+    #     self.threads.append(thread)
+    #     # tab = thread.get_vbox()
+    #     self.add_and_display_tab(thread, "Stove")
 
     def validate_config(self):
         # check if sites in config file are in DB
