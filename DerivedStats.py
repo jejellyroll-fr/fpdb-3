@@ -1055,7 +1055,7 @@ class DerivedStats(object):
             # find out who folded, and eliminate them from p_in
             #
             actions = hand.actions[street]
-            p_in = p_in - self.pfba(actions, l=("folds",))
+            p_in = p_in - self.pfba(actions, ("folds",))
             #
             # if everyone folded, we are done, so exit this method
             #
