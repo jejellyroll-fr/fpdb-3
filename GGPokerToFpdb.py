@@ -27,7 +27,7 @@ from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandP
 from decimal import Decimal
 import re
 import logging
-
+import datetime
 
 # GGpoker HH Format
 log = logging.getLogger("parser")
