@@ -23,9 +23,13 @@
 
 # TODO: straighten out discards for draw games
 
-from HandHistoryConverter import *
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError
+import re
+import logging
+import datetime
 
 # PokerStars HH Format
+log = logging.getLogger("parser")
 
 
 class PokerStars(HandHistoryConverter):
@@ -987,6 +991,12 @@ class PokerStars(HandHistoryConverter):
 
                 # print "DEBUG: hand.addShownCards(%s, %s, %s, %s)" %(cards, m.group('PNAME'), shown, mucked)
                 hand.addShownCards(cards=cards, player=m.group("PNAME"), shown=shown, mucked=mucked, string=string)
+
+    def readSummaryInfo(self, summaryInfoList):
+        """Implement the abstract method from HandHistoryConverter."""
+        # Add the actual implementation here, or use a placeholder if not needed
+        log.info("Reading summary info for PokerStars.")
+        return True
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
