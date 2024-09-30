@@ -600,7 +600,7 @@ class fpdb(QMainWindow):
         available_site_names = []
         for site_name in site_names:
             try:
-                tmp = self.config.supported_sites[site_name].enabled
+                self.config.supported_sites[site_name].enabled
                 available_site_names.append(site_name)
             except KeyError:
                 pass
