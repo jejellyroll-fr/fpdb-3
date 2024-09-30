@@ -1386,18 +1386,18 @@ class DerivedStats(object):
             players.add(action[0])
         return players
 
-    def pfbao(self, actions, f=None, l=None, unique=True):
+    def pfbao(self, actions, f=None, limit_actions=None, unique=True):
         """Helper method. Returns set of PlayersFilteredByActionsOrdered
 
         f - forbidden actions
-        l - limited to actions
+        limit_actions - limited to actions
         """
         # Note, this is an adaptation of function 5 from:
         # http://www.peterbe.com/plog/uniqifiers-benchmark
         seen = {}
         players = []
         for action in actions:
-            if l is not None and action[1] not in l:
+            if limit_actions is not None and action[1] not in limit_actions:
                 continue
             if f is not None and action[1] in f:
                 continue
