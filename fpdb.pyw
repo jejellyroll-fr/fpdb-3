@@ -27,9 +27,6 @@ if os.name == "nt":
 import codecs
 import Options
 from functools import partial
-
-cl_options = ".".join(sys.argv[1:])
-(options, argv) = Options.fpdb_options()
 from L10n import set_locale_translation
 import logging
 
@@ -54,18 +51,6 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QComboBox,
 )
-
-import interlocks
-from Exceptions import *
-
-# these imports not required in this module, imported here to report version in About dialog
-import numpy
-
-numpy_version = numpy.__version__
-import sqlite3
-
-sqlite3_version = sqlite3.version
-sqlite_version = sqlite3.sqlite_version
 
 import DetectInstalledSites
 import GuiPrefs
@@ -97,6 +82,22 @@ import Exceptions
 import cProfile
 import pstats
 import io
+import interlocks
+from Exceptions import *
+import sqlite3
+
+# these imports not required in this module, imported here to report version in About dialog
+import numpy
+
+cl_options = ".".join(sys.argv[1:])
+(options, argv) = Options.fpdb_options()
+
+
+numpy_version = numpy.__version__
+
+
+sqlite3_version = sqlite3.version
+sqlite_version = sqlite3.sqlite_version
 
 
 PROFILE_OUTPUT_DIR = os.path.join(os.path.expanduser("~"), "fpdb_profiles")
@@ -1244,8 +1245,9 @@ class fpdb(QMainWindow):
 
     def tab_main_help(self, widget, data=None):
         """Displays a tab with the main fpdb help screen"""
-        mh_tab = QLabel((
-            """
+        mh_tab = QLabel(
+            (
+                """
                         Welcome to Fpdb!
 
                         This program is currently in an alpha-state, so our database format is still sometimes changed.
@@ -1259,7 +1261,8 @@ class fpdb(QMainWindow):
                         The Windows installer package includes code licensed under the MIT license.
                         You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt
                         and mit.txt in the fpdb installation directory."""
-        ))
+            )
+        )
         self.add_and_display_tab(mh_tab, "Help")
 
     def get_theme_colors(self):
