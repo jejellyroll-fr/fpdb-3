@@ -62,7 +62,8 @@ import GuiBulkImport
 
 import GuiRingPlayerStats
 import GuiTourneyPlayerStats
-import GuiPositionalStats
+
+# import GuiPositionalStats
 import GuiAutoImport
 import GuiGraphViewer
 import GuiTourneyGraphViewer
