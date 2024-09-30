@@ -447,11 +447,12 @@ class Winamax(HandHistoryConverter):
             hand.setCommunityCards(street, m.group("CARDS").split(" "))
 
     def readBlinds(self, hand):
-        found_small, found_big = False, False
+        # found_small, found_big = False, False
+
         m = self.re_PostSB.search(hand.handText)
         if m is not None:
             hand.addBlind(m.group("PNAME"), "small blind", m.group("SB"))
-            found_small = True
+            # found_small = True
         else:
             log.debug("No small blind")
             hand.addBlind(None, None, None)
