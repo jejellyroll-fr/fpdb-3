@@ -477,8 +477,8 @@ class Filters(QWidget):
             checkbox.setChecked(setState)
 
     def __select_limit(self, checkState, limit):
-        for l, checkbox in list(self.cbLimits.items()):
-            if l.endswith(limit):
+        for limit_key, checkbox in list(self.cbLimits.items()):
+            if limit_key.endswith(limit):
                 checkbox.setChecked(True)
 
     def fillPlayerFrame(self, frame, display):
