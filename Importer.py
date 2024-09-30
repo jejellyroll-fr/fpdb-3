@@ -50,7 +50,7 @@ from Exceptions import FpdbParseError, FpdbHandDuplicate, FpdbHandPartial
 
 try:
     import xlrd
-except:
+except ImportError:
     xlrd = None
 
 if __name__ == "__main__":
