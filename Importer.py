@@ -619,11 +619,12 @@ class Importer(object):
                 self.progressNotify()
             summaryTexts = self.readFile(obj, fpdbfile.path, fpdbfile.site.name)
             if summaryTexts is None:
-                log.error("Found: '%s' with 0 characters... skipping" % fpbdfile.path)
+                log.error(
+                    "Found: '%s' with 0 characters... skipping" % fpdbfile.path
+                )  # Fixed the typo (fpbdfile -> fpdbfile)
                 return (0, 0, 0, 0, 1, time())  # File had 0 characters
             ####Lock Placeholder####
             for j, summaryText in enumerate(summaryTexts, start=1):
-                doinsert = len(summaryTexts) == j
                 try:
                     conv = obj(
                         db=self.database,
@@ -638,10 +639,10 @@ class Importer(object):
                 except FpdbHandPartial:
                     partial += 1
                 except FpdbParseError:
-                    log.error(("Summary import parse error in file: %s") % fpdbfile.path)
+                    log.error(f"Summary import parse error in file: {fpdbfile.path}")
                     errors += 1
                 if j != 1:
-                    print(("Finished importing %s/%s tournament summaries") % (j, len(summaryTexts)))
+                    print(f"Finished importing {j}/{len(summaryTexts)} tournament summaries")
                 stored = j
             ####Lock Placeholder####
         ttime = time() - ttime
