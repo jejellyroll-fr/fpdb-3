@@ -172,11 +172,11 @@ class DetectInstalledSites(object):
             hhp = os.path.expanduser("~/.wine/drive_c/Program Files/PokerStars/HandHistory/")
             tsp = os.path.expanduser("~/.wine/drive_c/Program Files/PokerStars/TournSummary/")
         elif self.Config.os_family == "XP":
-            hhp = os.path.expanduser(PROGRAM_FILES + "\\PokerStars\\HandHistory\\")
-            tsp = os.path.expanduser(PROGRAM_FILES + "\\PokerStars\\TournSummary\\")
+            hhp = os.path.expanduser(os.path.join(PROGRAM_FILES, "PokerStars", "HandHistory"))
+            tsp = os.path.expanduser(os.path.join(PROGRAM_FILES, "PokerStars", "TournSummary"))
         elif self.Config.os_family == "Win7":
-            hhp = os.path.expanduser(LOCAL_APPDATA + "\\PokerStars\\HandHistory\\")
-            tsp = os.path.expanduser(LOCAL_APPDATA + "\\PokerStars\\TournSummary\\")
+            hhp = os.path.expanduser(os.path.join(LOCAL_APPDATA, "PokerStars", "HandHistory"))
+            tsp = os.path.expanduser(os.path.join(LOCAL_APPDATA, "PokerStars", "TournSummary"))
         elif self.Config.os_family == "Mac":
             hhp = os.path.expanduser("~/Library/Application Support/PokerStars/HandHistory/")
             tsp = os.path.expanduser("~/Library/Application Support/PokerStars/TournSummary/")
@@ -191,12 +191,19 @@ class DetectInstalledSites(object):
             return
 
         try:
-            self.herofound = os.listdir(self.hhpathfound)[0]
-            self.hhpathfound = self.hhpathfound + self.herofound
-            if self.tspathfound:
-                self.tspathfound = self.tspathfound + self.herofound
-        except:
-            pass
+            files = os.listdir(self.hhpathfound)
+            if files:
+                self.herofound = files[0]
+                self.hhpathfound = os.path.join(self.hhpathfound, self.herofound)
+                if self.tspathfound:
+                    self.tspathfound = os.path.join(self.tspathfound, self.herofound)
+        except FileNotFoundError:
+            self.herofound = None
+        except IndexError:
+            self.herofound = None
+        except Exception as e:
+            print(f"An unexpected error has occurred : {e}")
+            self.herofound = None
 
         return
 
