@@ -1202,7 +1202,7 @@ class DerivedStats(object):
                 if aggr:
                     player_stats["street0_3BDone"] = True
                     player_stats["street0_SqueezeDone"] = squeeze_chance
-                    second_agressor = pname
+                    # second_agressor = pname
                     bet_level += 1
                 continue
             elif bet_level == 3:
