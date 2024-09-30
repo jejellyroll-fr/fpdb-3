@@ -53,6 +53,9 @@ except ImportError as inst:
         )
     )
     print("ImportError: %s" % inst.args)
+import logging
+
+log = logging.getLogger("sessionViewer")
 
 
 class GuiTourneyGraphViewer(QSplitter):
@@ -116,13 +119,17 @@ class GuiTourneyGraphViewer(QSplitter):
         try:
             if self.canvas:
                 self.graphBox.removeWidget(self.canvas)
-        except:
+        except (AttributeError, RuntimeError) as e:
+            # Handle specific exceptions related to widget removal
+            log.error(f"Error removing widget: {e}")
             pass
 
         if self.fig is not None:
             self.fig.clear()
+
         self.fig = Figure(figsize=(5.0, 4.0), dpi=100)
         self.fig.patch.set_facecolor(self.colors["background"])
+
         if self.canvas is not None:
             self.canvas.destroy()
 
