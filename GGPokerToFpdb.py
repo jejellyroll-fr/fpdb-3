@@ -23,10 +23,11 @@
 
 # TODO: straighten out discards for draw games
 
-from HandHistoryConverter import *
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal import Decimal
+import re
 
-# PokerStars HH Format
+# GGpoker HH Format
 
 
 class GGPoker(HandHistoryConverter):
