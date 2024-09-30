@@ -321,7 +321,7 @@ class Importer(object):
         totpartial = 0
         totskipped = 0
         toterrors = 0
-        tottime = 0
+        # tottime = 0
         filecount = 0
         fileerrorcount = 0
         moveimportedfiles = False  # TODO need to wire this into GUI and make it prettier
