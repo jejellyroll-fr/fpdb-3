@@ -258,20 +258,25 @@ class DetectInstalledSites(object):
         for skin in merge_skin_names:
             if self.Config.os_family == "Linux":
                 hhp = os.path.expanduser("~/.wine/drive_c/Program Files/" + skin + "/history/")
-            elif self.Config.os_family == "XP":
-                hhp = os.path.expanduser(PROGRAM_FILES + "\\" + skin + "\\history\\")
-            elif self.Config.os_family == "Win7":
-                hhp = os.path.expanduser(PROGRAM_FILES + "\\" + skin + "\\history\\")
+            elif self.Config.os_family in ["XP", "Win7"]:
+                hhp = os.path.expanduser(os.path.join(PROGRAM_FILES, skin, "history"))
             else:
                 return
 
             if os.path.exists(hhp):
                 self.hhpathfound = hhp
                 try:
-                    self.herofound = os.listdir(self.hhpathfound)[0]
-                    self.hhpathfound = self.hhpathfound + self.herofound
-                    break
-                except:
-                    continue
+                    files = os.listdir(self.hhpathfound)
+                    if files:
+                        self.herofound = files[0]
+                        self.hhpathfound = os.path.join(self.hhpathfound, self.herofound)
+                        break
+                except FileNotFoundError:
+                    self.herofound = None
+                except IndexError:
+                    self.herofound = None
+                except Exception as e:
+                    log.error(f"An unexpected error has occurred : {e}")
+                    self.herofound = None
 
         return
