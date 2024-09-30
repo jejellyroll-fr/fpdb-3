@@ -122,7 +122,7 @@ class Importer(object):
             self.writerdbs.append(Database.Database(self.config, sql=self.sql))
 
         # Modification : spécifier le port pour ZMQ
-        self.zmq_sender = ZMQSender()
+        self.zmq_sender = None
         process_time()  # init clock in windows
 
     # Set functions
@@ -581,6 +581,8 @@ class Importer(object):
 
                 # pipe the Hands.id out to the HUD
                 if self.callHud:
+                    if self.zmq_sender is None:
+                        self.zmq_sender = ZMQSender()
                     for hid in list(to_hud):
                         try:
                             log.debug(f"Sending hand ID {hid} to HUD via socket")
