@@ -250,7 +250,7 @@ class GuiTourneyGraphViewer(QSplitter):
         else:
             self.ax.set_title("Tournament Results" + names, color=self.colors["foreground"])
             self.ax.plot(green, color="green", label="Tournaments: %d\nProfit: $%.2f" % (len(green), green[-1]))
-            legend = self.ax.legend(
+            self.ax.legend(
                 loc="upper left",
                 fancybox=True,
                 shadow=True,
