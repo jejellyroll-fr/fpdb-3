@@ -655,7 +655,7 @@ class fpdb(QMainWindow):
             check_button.setChecked(self.config.supported_sites[available_site_names[site_number]].enabled)
             table.addWidget(check_button, y_pos, 0)
             check_buttons.append(check_button)
-            hud_seat = self.config.supported_sites[available_site_names[site_number]].fav_seat[2]
+            # hud_seat = self.config.supported_sites[available_site_names[site_number]].fav_seat[2]
 
             # print('hud seat ps:', type(hud_seat), hud_seat)
             seat2 = QLineEdit()
