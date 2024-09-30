@@ -639,7 +639,8 @@ class DerivedStats(object):
         if pokereval and len(hand.pot.pots) > 1 and evalgame and holeshow:  # hrange
             hand.collected = []  # list of ?
             hand.collectees = {}  # dict from player names to amounts collected (?)
-            rakes, totrake, potId = {}, 0, 0
+            # rakes, totrake, potId = {}, 0, 0
+            potId = 0
             totalrake = hand.rakes.get("rake")
             if not totalrake:
                 totalpot = hand.rakes.get("pot")
