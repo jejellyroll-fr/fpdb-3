@@ -38,7 +38,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QMessageBox,
 )
-import contextlib
+
 from time import time
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvas
