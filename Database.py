@@ -1068,12 +1068,17 @@ class Database(object):
 
     def get_gameinfo_from_hid(self, hand_id):
         # returns a gameinfo (gametype) dictionary suitable for passing
-        #  to Hand.hand_factory
+        # to Hand.hand_factory
         c = self.connection.cursor()
         q = self.sql.query["get_gameinfo_from_hid"]
         q = q.replace("%s", self.sql.query["placeholder"])
         c.execute(q, (hand_id,))
         row = c.fetchone()
+
+        if row is None:
+            log.error(f"No game info found for hand ID {hand_id}")
+            return None
+
         gameinfo = {
             "sitename": row[0],
             "category": row[1],
@@ -1281,9 +1286,6 @@ class Database(object):
             stylekey = "0000000"
             log.info("stat_range: %s" % stat_range)
 
-        # elif stat_range == 'H':
-        #    stylekey = date_nhands_ago  needs array by player here ...
-
         if h_stat_range == "T":
             h_stylekey = self.h_date_ndays_ago
         elif h_stat_range == "A":
@@ -1294,11 +1296,12 @@ class Database(object):
             h_stylekey = "00000000"
             log.info("h_stat_range: %s" % h_stat_range)
 
-        # elif h_stat_range == 'H':
-        #    h_stylekey = date_nhands_ago  needs array by player here ...
-
         # lookup gametypeId from hand
         handinfo = self.get_gameinfo_from_hid(hand)
+        if handinfo is None:
+            log.error(f"No game info found for hand ID {hand}")
+            return stat_dict  # Return an empty stat_dict if no game info is found
+
         gametypeId = handinfo["gametypeId"]
 
         query = "get_stats_from_hand_aggregated"

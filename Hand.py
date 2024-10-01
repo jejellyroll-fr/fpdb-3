@@ -2198,6 +2198,11 @@ def hand_factory(hand_id, config, db_connection):
 
     log.debug(f"get info from db for hand {hand_id}")
     gameinfo = db_connection.get_gameinfo_from_hid(hand_id)
+
+    if gameinfo is None:
+        log.error(f"No game info found for hand ID {hand_id}")
+        return None  # Return None or handle the error appropriately
+
     log.debug(f"gameinfo {gameinfo} for hand {hand_id}")
 
     if gameinfo["base"] == "hold":
@@ -2230,6 +2235,9 @@ def hand_factory(hand_id, config, db_connection):
             builtFrom="DB",
             handid=hand_id,
         )
+    else:
+        log.error(f"Unknown game base type: {gameinfo['base']} for hand {hand_id}")
+        return None  # Handle unexpected game types
 
     log.debug(f"selecting info from db for hand {hand_id}")
     hand_instance.select(db_connection, hand_id)
