@@ -18,10 +18,6 @@
 ########################################################################
 
 
-
-from IdentifySite import *
-
-
 class FPDBArchive(object):
     def __init__(self, hand):
         self.hid = hand.dbid_hands
