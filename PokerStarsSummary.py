@@ -21,11 +21,20 @@
 # _ = L10n.get_translation()
 
 import datetime
-
-from Exceptions import FpdbParseError
-from HandHistoryConverter import *
+import re
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 import PokerStarsStructures
-from TourneySummary import *
+from TourneySummary import TourneySummary
+
+import logging
+
+try:
+    import xlrd
+except ImportError:
+    xlrd = None
+
+# PPokerstatars HH Format
+log = logging.getLogger("parser")
 
 
 class PokerStarsSummary(TourneySummary):
@@ -85,7 +94,6 @@ class PokerStarsSummary(TourneySummary):
         "Omaha H/L Mixed": ("mixed", "plo_lo"),
         "Hold'em Mixed": ("mixed", "mholdem"),
         "Mixed Omaha": ("mixed", "momaha"),
-        "Triple Stud": ("mixed", "3stud"),
     }
 
     substitutions = {
@@ -454,7 +462,7 @@ class PokerStarsSummary(TourneySummary):
                 raise FpdbHandPartial
             if self.re_emailHeader.match(self.summaryText):
                 raise FpdbHandPartial
-            tmp = self.summaryText[0:200]
+            # tmp = self.summaryText[0:200]
             log.error(("PokerStarsSummary.parseSummaryFile: '%s'") % self.summaryText)
             raise FpdbParseError
         # m4 = self.re_TourneyInfo4.search(self.summaryText)
