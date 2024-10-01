@@ -70,7 +70,7 @@ class Table(Table_Window):
         window_info = WindowInfoTemp()
 
         try:
-            log.debug(f"before EnumWindows")
+            log.debug("before EnumWindows")
             EnumWindows(EnumWindowsProc(win_enum_handler), ctypes.py_object(window_info))
             log.debug(f"after EnumWindows found {len(window_info.titles)} windows")
         except Exception as e:
@@ -94,8 +94,8 @@ class Table(Table_Window):
                 if GetParent(hwnd) != 0:
                     continue
 
-                HasNoOwner = ctypes.windll.user32.GetWindow(hwnd, GW_OWNER) == 0
-                WindowStyle = GetWindowLong(hwnd, GWL_EXSTYLE)
+                # HasNoOwner = ctypes.windll.user32.GetWindow(hwnd, GW_OWNER) == 0
+                # WindowStyle = GetWindowLong(hwnd, GWL_EXSTYLE)
 
                 if title.split(" ", 1)[0] == "Winamax":
                     self.search_string = self.search_string.split(" ", 3)[0]
