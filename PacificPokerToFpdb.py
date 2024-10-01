@@ -22,10 +22,15 @@
 # import L10n
 # _ = L10n.get_translation()
 
-from HandHistoryConverter import *
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError
 from decimal import Decimal
+import re
+import logging
+import datetime
 
-# PacificPoker HH Format
+
+# PacificPoker(888) HH Format
+log = logging.getLogger("parser")
 
 
 class PacificPoker(HandHistoryConverter):
@@ -368,7 +373,7 @@ class PacificPoker(HandHistoryConverter):
             raise FpdbParseError
         else:
             # print "DEBUG: Matched markStreets"
-            mg = m.groupdict()
+            m.groupdict()
         #            if 'PREFLOP' in mg:
         #                print "DEBUG: PREFLOP: ", [mg['PREFLOP']]
         #            if 'FLOP' in mg:
@@ -493,7 +498,7 @@ class PacificPoker(HandHistoryConverter):
     def readAction(self, hand, street):
         m = self.re_Action.finditer(hand.streets[street])
         for action in m:
-            acts = action.groupdict()
+            action.groupdict()
             if street not in ("PREFLOP", "DEAL"):
                 hand.setUncalledBets(False)
             # print "DEBUG: acts: %s" %acts
