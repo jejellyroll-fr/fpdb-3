@@ -32,7 +32,7 @@ jobs:
 
     - name: Run Ruff for linting
       run: |
-        ruff check .
+        ruff check . --exclude .\archives\
         ruff check --statistics
 
     - name: Create necessary directories
