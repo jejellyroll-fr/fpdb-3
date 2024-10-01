@@ -22,10 +22,15 @@
 # _ = L10n.get_translation()
 
 
-from Exceptions import FpdbParseError
-from HandHistoryConverter import *
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
+from decimal import Decimal
+import re
+import logging
+import datetime
+import time
 
 # PartyPoker HH Format
+log = logging.getLogger("parser")
 
 
 class PartyPoker(HandHistoryConverter):
@@ -123,7 +128,6 @@ class PartyPoker(HandHistoryConverter):
         "Mar": 3,
         "April": 4,
         "Apr": 4,
-        "May": 5,
         "May": 5,
         "June": 6,
         "Jun": 6,
@@ -512,7 +516,7 @@ class PartyPoker(HandHistoryConverter):
                     )
                     raise FpdbParseError
             else:
-                info["sb"] = str((old_div(Decimal(mg["SB"]), 2)).quantize(Decimal("0.01")))
+                info["sb"] = str((Decimal(mg["SB"]) / 2).quantize(Decimal("0.01")))
                 info["bb"] = str(Decimal(mg["SB"]).quantize(Decimal("0.01")))
         # print "DEUBG: DGT.info: %s" % info
         return info
@@ -687,7 +691,9 @@ class PartyPoker(HandHistoryConverter):
             def findFirstEmptySeat(startSeat):
                 i = 0
                 while startSeat in occupiedSeats:
-                    if (startSeat >= hand.maxseats and hand.maxseats is not None) or len(occupiedSeats) >= hand.maxseats:
+                    if (startSeat >= hand.maxseats and hand.maxseats is not None) or len(
+                        occupiedSeats
+                    ) >= hand.maxseats:
                         startSeat = 0
                     startSeat += 1
                     i += 1
@@ -696,7 +702,7 @@ class PartyPoker(HandHistoryConverter):
                 return startSeat
 
             re_HoleCards = re.compile(r"\*{2} Dealing down cards \*{2}")
-            re_SplitTest = re.compile(r"(joined the table|left the table|is sitting out)")
+            # re_SplitTest = re.compile(r"(joined the table|left the table|is sitting out)")
             re_JoiningPlayers = re.compile(r"(?P<PLAYERNAME>.+?) has joined the table")
             re_BBPostingPlayers = re.compile(r"(?P<PLAYERNAME>.+?) posts big blind", re.MULTILINE)
             re_LeavingPlayers = re.compile(r"(?P<PLAYERNAME>.+?) has left the table")
@@ -786,7 +792,7 @@ class PartyPoker(HandHistoryConverter):
                     hand.addBlind(m.group("PNAME"), "small blind", self.clearMoneyString(m.group("SB")))
                     if hand.gametype["sb"] is None:
                         hand.gametype["sb"] = self.clearMoneyString(m.group("SB"))
-            except:  # no small blind
+            except (AttributeError, IndexError):  # no small blind
                 hand.addBlind(None, None, None)
 
             for a in self.re_PostBB.finditer(hand.handText):
@@ -882,7 +888,7 @@ class PartyPoker(HandHistoryConverter):
     def readAction(self, hand, street):
         m = self.re_Action.finditer(hand.streets[street])
         for action in m:
-            acts = action.groupdict()
+            action.groupdict()
             # print "DEBUG: acts: %s %s" % (street, acts)
             playerName = action.group("PNAME")
             if ":" in playerName:
