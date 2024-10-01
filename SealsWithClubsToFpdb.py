@@ -22,16 +22,15 @@
 # import L10n
 # _ = L10n.get_translation()
 
-import re
-import datetime
-import logging
-from HandHistoryConverter import *
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal import Decimal
+import re
+import logging
+import datetime
 
-# Set up debug logging
-logging.basicConfig(level=logging.DEBUG)
 
 # SealsWithClubs HH Format
+log = logging.getLogger("parser")
 
 
 class SealsWithClubs(HandHistoryConverter):
@@ -124,7 +123,7 @@ class SealsWithClubs(HandHistoryConverter):
 
         Returns: None
         """
-        logging.debug("Compiling player regexes")
+        log.info("Compiling player regexes")
         # Get a set of player names in the hand
         players = {player[1] for player in hand.players}
 
@@ -159,7 +158,7 @@ class SealsWithClubs(HandHistoryConverter):
             )
 
     def readSupportedGames(self):
-        logging.debug("Reading supported games")
+        log.info("Reading supported games")
         return [
             ["ring", "hold", "fl"],
             ["ring", "hold", "nl"],
@@ -179,16 +178,16 @@ class SealsWithClubs(HandHistoryConverter):
         ]
 
     def determineGameType(self, handText):
-        logging.debug("Determining game type")
+        log.info("Determining game type")
         info = {}
         m = self.re_GameInfo.search(handText)
         if not m:
             tmp = handText[:200]
-            logging.error(f"SealsWithClubsToFpdb.determineGameType: '{tmp}'")
+            log.error(f"SealsWithClubsToFpdb.determineGameType: '{tmp}'")
             raise FpdbParseError
 
         mg = m.groupdict()
-        logging.debug(f"Matched groups: {mg}")
+        log.debug(f"Matched groups: {mg}")
         if "LIMIT" in mg:
             info["limitType"] = self.limits[mg["LIMIT"]]
         if "GAME" in mg:
@@ -214,35 +213,35 @@ class SealsWithClubs(HandHistoryConverter):
             info["sb"] = str((Decimal(mg["SB"]) / 2).quantize(Decimal("0.01")))
             info["bb"] = str(Decimal(mg["SB"]).quantize(Decimal("0.01")))
 
-        logging.debug(f"Game info: {info}")
+        log.debug(f"Game info: {info}")
         return info
 
     def readHandInfo(self, hand):
-        logging.debug("Reading hand info")
+        log.info("Reading hand info")
         info = {}
         m = self.re_HandInfo.search(hand.handText, re.DOTALL)
         m2 = self.re_GameInfo.search(hand.handText)
 
         if m is None or m2 is None:
             tmp = hand.handText[:200]
-            logging.error(f"SealsWithClubsToFpdb.readHandInfo: '{tmp}'")
+            log.error(f"SealsWithClubsToFpdb.readHandInfo: '{tmp}'")
             raise FpdbParseError
 
         info.update(m.groupdict())
-        logging.debug(f"HandInfo groups: {m.groupdict()}")
+        log.debug(f"HandInfo groups: {m.groupdict()}")
         info.update(m2.groupdict())
-        logging.debug(f"GameInfo groups: {m2.groupdict()}")
+        log.debug(f"GameInfo groups: {m2.groupdict()}")
 
         if info["TOURNO"] is not None:
             words = m["TABLE"].split()
             new_string = words[1]
             info["TABLE"] = f"{m2['TABLE2']} {new_string}"
-            logging.debug(f"Table name updated to: {info['TABLE']}")
+            log.debug(f"Table name updated to: {info['TABLE']}")
             hand.tablename = f"{info['TABLE']}"
         else:
             # for cash game
             info["TABLE"] = m["TABLE"]
-            logging.debug(f"Table name for cash game: {info['TABLE']}")
+            log.debug(f"Table name for cash game: {info['TABLE']}")
             hand.tablename = f"{info['TABLE']}"
 
         for key in info:
@@ -262,7 +261,7 @@ class SealsWithClubs(HandHistoryConverter):
                 hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
             if key == "HID":
                 hand.handid = info[key]
-                logging.debug(f"Hand ID: {hand.handid}")
+                log.debug(f"Hand ID: {hand.handid}")
             if key == "TOURNO":
                 hand.tourNo = info[key]
             if key == "BUYIN":
@@ -282,21 +281,21 @@ class SealsWithClubs(HandHistoryConverter):
             if key == "HU" and info[key] is not None:
                 hand.maxseats = 2
 
-        logging.debug(f"Final hand info: {info}")
+        log.debug(f"Final hand info: {info}")
 
         if not hand.handid:
-            logging.error("Hand ID not found, unable to process hand.")
+            log.error("Hand ID not found, unable to process hand.")
             raise FpdbParseError("Hand ID not found.")
 
         if self.re_Cancelled.search(hand.handText):
             raise FpdbHandPartial(f"Hand '{hand.handid}' was cancelled.")
 
     def readButton(self, hand):
-        logging.debug("Reading button position")
+        log.info("Reading button position")
         if m := self.re_ButtonPos.search(hand.handText):
             hand.buttonpos = int(m.group("BUTTON"))
         else:
-            logging.debug("readButton: not found")
+            log.debug("readButton: not found")
 
     def readPlayerStacks(self, hand):
         handsplit = hand.handText.split("*** SUMMARY ***")
@@ -315,7 +314,7 @@ class SealsWithClubs(HandHistoryConverter):
             raise FpdbHandPartial(f"Less than 2 players in hand! {hand.handid}.")
 
     def markStreets(self, hand):
-        logging.debug("Marking streets")
+        log.info("Marking streets")
         if self.re_Turn.search(hand.handText) and not self.re_Flop.search(hand.handText):
             raise FpdbParseError
         if self.re_River.search(hand.handText) and not self.re_Turn.search(hand.handText):
@@ -336,20 +335,20 @@ class SealsWithClubs(HandHistoryConverter):
         hand.addStreets(m)
 
     def readCommunityCards(self, hand, street):
-        logging.debug(f"Reading community cards for street: {street}")
+        log.debug(f"Reading community cards for street: {street}")
         if street in ("FLOP", "TURN", "RIVER"):
             m = self.re_Board.search(hand.streets[street])
             hand.setCommunityCards(street, m.group("CARDS").split(" "))
 
     def readAntes(self, hand):
-        logging.debug("Reading antes")
+        log.info("Reading antes")
         m = self.re_Antes.finditer(hand.handText)
         for player in m:
-            logging.debug(f"hand.addAnte({player.group('PNAME')},{player.group('ANTE')})")
+            log.debug(f"hand.addAnte({player.group('PNAME')},{player.group('ANTE')})")
             hand.addAnte(player.group("PNAME"), player.group("ANTE"))
 
     def readBlinds(self, hand):
-        logging.debug("Reading blinds")
+        log.debug("Reading blinds")
         liveBlind = True
         for a in self.re_PostSB.finditer(hand.handText):
             if liveBlind:
@@ -363,7 +362,7 @@ class SealsWithClubs(HandHistoryConverter):
             hand.addBlind(a.group("PNAME"), "both", a.group("SBBB"))
 
     def readHoleCards(self, hand):
-        logging.debug("Reading hole cards")
+        log.debug("Reading hole cards")
         for street in ("PREFLOP", "DEAL"):
             if street in list(hand.streets.keys()):
                 m = self.re_HeroCards.finditer(hand.streets[street])
@@ -373,11 +372,11 @@ class SealsWithClubs(HandHistoryConverter):
                     hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
 
     def readAction(self, hand, street):
-        logging.debug(f"Reading actions for street: {street}")
+        log.debug(f"Reading actions for street: {street}")
         m = self.re_Action.finditer(hand.streets[street])
         for action in m:
             acts = action.groupdict()
-            logging.debug(f"Action details: {acts}")
+            log.debug(f"Action details: {acts}")
             if action.group("ATYPE") == " folds":
                 hand.addFold(street, action.group("PNAME"))
             elif action.group("ATYPE") == " checks":
@@ -389,10 +388,10 @@ class SealsWithClubs(HandHistoryConverter):
             elif action.group("ATYPE") == " bets":
                 hand.addBet(street, action.group("PNAME"), action.group("BET"))
             else:
-                logging.debug(f"DEBUG: Unimplemented {action.group('ATYPE')}: '{action.group('PNAME')}'")
+                log.debug(f"DEBUG: Unimplemented {action.group('ATYPE')}: '{action.group('PNAME')}'")
 
     def readShownCards(self, hand):
-        logging.debug("Reading shown cards")
+        log.info("Reading shown cards")
         for m in self.re_ShownCards.finditer(hand.handText):
             if m.group("CARDS") is not None:
                 cards = m.group("CARDS").split(" ")
@@ -407,7 +406,7 @@ class SealsWithClubs(HandHistoryConverter):
                 hand.addShownCards(cards=cards, player=m.group("PNAME"), shown=shown, mucked=mucked, string=string)
 
     def readShowdownActions(self, hand):
-        logging.debug("Reading showdown actions")
+        log.info("Reading showdown actions")
         for shows in self.re_ShowdownAction.finditer(hand.handText):
             if shows.group("CARDS") is not None:
                 cards = shows.group("CARDS").split(" ")
@@ -418,7 +417,7 @@ class SealsWithClubs(HandHistoryConverter):
                 hand.addShownCards(cards, mucks.group("PNAME"))
 
     def readCollectPot(self, hand):
-        logging.debug("Reading collected pot")
+        log.info("Reading collected pot")
         if self.re_Uncalled.search(hand.handText) is None:
             rake = Decimal(0)
             totalpot = Decimal(0)
@@ -496,15 +495,15 @@ class SealsWithClubs(HandHistoryConverter):
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
-        logging.debug(
+        log.debug(
             f"Seals.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'"
         )
 
         if not table_name:
-            logging.debug("Seals.getTableTitleRe: no valid input provided")
+            log.debug("Seals.getTableTitleRe: no valid input provided")
             return ""
 
-        logging.debug(f"Initial table_name: {table_name}")
+        log.debug(f"Initial table_name: {table_name}")
 
         regex = f"{table_name}"
         words = regex.split()
@@ -512,7 +511,7 @@ class SealsWithClubs(HandHistoryConverter):
         if type in ["tour", "ring"]:
             if len(words) > 2:
                 regex = " ".join(words[1:-1])
-            logging.debug(f"Seals.getTableTitleRe: regex after processing='{regex}'")
+            log.debug(f"Seals.getTableTitleRe: regex after processing='{regex}'")
             return regex
 
         if type == "tour":
@@ -520,9 +519,9 @@ class SealsWithClubs(HandHistoryConverter):
             if match:
                 tournament_id, game_type, chips_info, table_number = match.groups()
                 regex = f"{tournament_id} {game_type} {chips_info} {table_number}"
-                logging.debug(f"Seals.getTableTitleRe: regex for tour='{regex}'")
+                log.debug(f"Seals.getTableTitleRe: regex for tour='{regex}'")
                 return regex
 
         regex = f"{table_name}"
-        logging.debug(f"Seals.getTableTitleRe: regex='{regex}'")
+        log.debug(f"Seals.getTableTitleRe: regex='{regex}'")
         return regex
