@@ -23,9 +23,15 @@ from decimal import Decimal
 import datetime
 from bs4 import BeautifulSoup
 
-from Exceptions import FpdbParseError
-from HandHistoryConverter import *
-from TourneySummary import *
+from HandHistoryConverter import FpdbParseError
+
+import re
+import logging
+
+from TourneySummary import TourneySummary
+
+# Winamax HH Format
+log = logging.getLogger("parser")
 
 
 class WinamaxSummary(TourneySummary):
