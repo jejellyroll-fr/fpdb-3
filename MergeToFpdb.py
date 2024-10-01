@@ -34,9 +34,15 @@ from past.utils import old_div
 # -- Cannot parse tables that run it twice
 # -- Cannot parse hands in which someone is all in in one of the blinds.
 
-from HandHistoryConverter import *
-import MergeStructures
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal import Decimal
+import re
+import logging
+import datetime
+import MergeStructures
+
+# Merge HH Format
+log = logging.getLogger("parser")
 
 
 class Merge(HandHistoryConverter):
