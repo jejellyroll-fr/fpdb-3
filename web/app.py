@@ -2,8 +2,26 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from sql_request import *
-from base_model import *
+import sqlite3
+import sys
+from sql_request import (
+    get_players,
+    get_handscount,
+    get_handscount_cg,
+    get_handscount_tour,
+    get_playerscount,
+    get_playerscount_cg,
+    get_playerscount_tour,
+    get_heroes,
+    get_hands,
+    get_handsPlayers,
+    get_hands_players,
+    get_RingProfitAllHandsPlayerIdSite,
+    get_player_name,
+    get_tourneysProfitPlayerIdSite,
+    get_statsplayers,
+)
+
 import math
 import Hand
 import Configuration
@@ -11,6 +29,13 @@ import Database
 import json
 from decimal import Decimal
 from datetime import datetime
+from typing import Optional
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).parent.parent))
+
+
+DATABASE = Path(Configuration.CONFIG_PATH, "database", "fpdb.db3")
 
 
 class CustomEncoder(json.JSONEncoder):
