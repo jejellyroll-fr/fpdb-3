@@ -24,20 +24,21 @@
 
 import sys
 import logging
-from Exceptions import *
+
 import codecs
 
 import pprint
 import Database
 from HandHistoryConverter import HandHistoryConverter
 
-log = logging.getLogger("parser")
 
 try:
     import xlrd
-except:
+except ImportError:
     xlrd = None
-    log.info(("xlrd not found. Required for importing Excel tourney results files"))
+
+
+log = logging.getLogger("parser")
 
 
 class TourneySummary(object):
@@ -234,12 +235,12 @@ class TourneySummary(object):
     # end def __str__
 
     def getSplitRe(self, head):
-        abstract
+        pass
 
     """Function to return a re object to split the summary text into separate tourneys, based on head of file"""
 
     def parseSummary(self):
-        abstract
+        pass
 
     """should fill the class variables with the parsed information"""
 
@@ -336,7 +337,7 @@ winnings    (int) the money the player ended the tourney with (can be 0, or -1 i
     # end def addPlayer
 
     def writeSummary(self, fh=sys.__stdout__):
-        print >> fh, "Override me"
+        print("Override me", file=fh)
 
     def printSummary(self):
         self.writeSummary(sys.stdout)
