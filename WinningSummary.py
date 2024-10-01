@@ -23,12 +23,15 @@ from past.utils import old_div
 # import L10n
 # _ = L10n.get_translation()
 
-from decimal import Decimal
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
+import re
+import logging
 import datetime
+from decimal import Decimal
+from TourneySummary import TourneySummary
 
-from Exceptions import FpdbParseError
-from HandHistoryConverter import *
-from TourneySummary import *
+# Winning HH Format
+log = logging.getLogger("parser")
 
 
 class WinningSummary(TourneySummary):
