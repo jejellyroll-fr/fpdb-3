@@ -26,11 +26,18 @@ from past.utils import old_div
 
 # TODO: straighten out discards for draw games
 
-from HandHistoryConverter import *
-import MergeStructures
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal import Decimal
+import re
+import logging
+import datetime
+
+
+import MergeStructures
+
 
 # PokerTracker HH Format
+log = logging.getLogger("parser")
 
 
 class PokerTracker(HandHistoryConverter):
@@ -719,7 +726,7 @@ class PokerTracker(HandHistoryConverter):
             m = self.re_Action2.finditer(hand.streets[street])
         curr_pot = Decimal("0")
         for action in m:
-            acts = action.groupdict()
+            action.groupdict()
             # print "DEBUG: acts: %s" %acts
             if action.group("ATYPE") in (" folds", " Fold", " folded"):
                 hand.addFold(street, action.group("PNAME"))
