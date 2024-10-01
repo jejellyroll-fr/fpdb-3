@@ -51,7 +51,6 @@
 
 import L10n
 
-_ = L10n.get_translation()
 
 #    Standard Library modules
 import sys
@@ -69,7 +68,6 @@ import Hand
 # String manipulation
 import codecs
 
-encoder = codecs.lookup(Configuration.LOCALE_ENCODING)
 
 import logging
 
@@ -79,6 +77,9 @@ if __name__ == "__main__":
 log = logging.getLogger("db")
 
 re_Places = re.compile("_[0-9]$")
+
+encoder = codecs.lookup(Configuration.LOCALE_ENCODING)
+_ = L10n.get_translation()
 
 
 # Since tuples are immutable, we have to create a new one when
