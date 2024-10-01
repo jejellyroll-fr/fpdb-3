@@ -31,8 +31,6 @@ from __future__ import division
 from past.utils import old_div
 import logging
 
-# logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hud")
 
 import ctypes
 
@@ -47,6 +45,9 @@ from PyQt5.QtWidgets import QGridLayout, QLabel, QVBoxLayout, QWidget
 
 #    FreePokerTools modules
 import Stats
+
+# logging has been set up in fpdb.py or HUD_main.py, use their settings:
+log = logging.getLogger("hud")
 
 
 class Popup(QWidget):
