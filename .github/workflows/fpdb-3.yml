@@ -42,13 +42,13 @@ jobs:
       run: |
         cp HUD_config.xml C:/Users/runneradmin/AppData/Roaming/fpdb/HUD_config.xml
 
-    - name: Install dependencies for tests
-      run: uv pip install .[test]       
-        
     - name: Run tests with pytest
       run: |
-        uv run pytest --cov=. --cov-report=html .\test\
-
+        uv venv && uv pip install .[test]
+        $env:Path += ";$env:pythonLocation\Scripts"
+        .\.venv\Scripts\Activate.ps1
+        pytest --cov=. --cov-report=html .\test\
+      shell: pwsh
 
     - name: Check if htmlcov directory exists and list contents
       run: |
