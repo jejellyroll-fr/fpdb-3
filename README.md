@@ -116,6 +116,9 @@ I Use anaconda with Python 3.11
 
 ### Using UV package manager
 - install [UV](https://docs.astral.sh/uv)
+- `uv venv`
+- `source .venv/bin/activate`
+- think to install your needed libs ... in my case linux with postgresql: `uv pip install .[linux][postgresql]`
 - `uv run ./fpdb.pyw`
 
 This will create a virtual env (in .venv dir), install all dependencies and run the program.
