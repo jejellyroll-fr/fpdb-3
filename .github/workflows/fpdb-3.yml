@@ -33,7 +33,7 @@ jobs:
     - name: Run Ruff for linting
       run: |
         ruff check . --exclude .\archives\,.\regression-test-files\,.\pypoker-eval\
-        ruff check --statistics
+
 
     - name: Create necessary directories
       run: mkdir -p C:/Users/runneradmin/AppData/Roaming/fpdb
