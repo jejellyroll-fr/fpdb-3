@@ -45,8 +45,11 @@ jobs:
     - name: Install dependencies for tests
       run: uv pip install .[test]       
         
-    - name: Run tests with coverage
-      run: pytest --cov=. --cov-report=html .\test\
+    - name: Run tests with pytest
+      run: |
+        $env:Path += ";$env:pythonLocation\Scripts"
+        pytest --cov=. --cov-report=html .\test\
+      shell: pwsh
 
     - name: Check if htmlcov directory exists and list contents
       run: |
