@@ -30,15 +30,12 @@ import ctypes
 
 from AppKit import NSView, NSWindowAbove, NSWorkspace
 from Quartz.CoreGraphics import (
-    CGWindowListCreate,
     CGWindowListCreateDescriptionFromArray,
     kCGWindowOwnerName,
-    NSWorkspace,
     kCGWindowBounds,
     CGWindowListCopyWindowInfo,
     kCGNullWindowID,
     kCGWindowNumber,
-    kCGWindowListExcludeDesktopElements,
     kCGWindowListOptionOnScreenOnly,
 )
 
@@ -53,15 +50,15 @@ class Table(Table_Window):
         #    self.window, and self.parent (if required).
 
         self.number = None
-        WinList = CGWindowListCreate(0, 0)
-        WinListDict = CGWindowListCreateDescriptionFromArray(WinList)
-        windows = CGWindowListCopyWindowInfo(
-            kCGWindowListExcludeDesktopElements | kCGWindowListOptionOnScreenOnly, kCGNullWindowID
-        )
+        # WinList = CGWindowListCreate(0, 0)
+        # WinListDict = CGWindowListCreateDescriptionFromArray(WinList)
+        # windows = CGWindowListCopyWindowInfo(
+        #     kCGWindowListExcludeDesktopElements | kCGWindowListOptionOnScreenOnly, kCGNullWindowID
+        # )
 
         # for index in range(len(WinListDict)):
         #     for d in WinListDict[index]:
-        curr_app = NSWorkspace.sharedWorkspace().runningApplications()
+        # curr_app = NSWorkspace.sharedWorkspace().runningApplications()
         curr_pid = NSWorkspace.sharedWorkspace().activeApplication()["NSApplicationProcessIdentifier"]
         # curr_app_name = curr_app.localizedName()
         options = kCGWindowListOptionOnScreenOnly
@@ -99,7 +96,7 @@ class Table(Table_Window):
 
     def get_window_title(self):
         WinListDict = CGWindowListCreateDescriptionFromArray((self.number,))
-        options = kCGWindowListOptionOnScreenOnly
+        # options = kCGWindowListOptionOnScreenOnly
         # windowList = CGWindowListCopyWindowInfo(options, kCGNullWindowID)
         for d in WinListDict:
             # for b in windowList:
