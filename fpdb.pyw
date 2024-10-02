@@ -1228,11 +1228,11 @@ class fpdb(QMainWindow):
         self.threads.append(new_thread)
         self.add_and_display_tab(new_thread, "Tourney Viewer")
 
-    def tab_positional_stats(self, widget, data=None):
-        new_ps_thread = GuiPositionalStats.GuiPositionalStats(self.config, self.sql)
-        self.threads.append(new_ps_thread)
-        ps_tab = new_ps_thread.get_vbox()
-        self.add_and_display_tab(ps_tab, "Positional Stats")
+    # def tab_positional_stats(self, widget, data=None):
+    #     new_ps_thread = GuiPositionalStats.GuiPositionalStats(self.config, self.sql)
+    #     self.threads.append(new_ps_thread)
+    #     ps_tab = new_ps_thread.get_vbox()
+    #     self.add_and_display_tab(ps_tab, "Positional Stats")
 
     def tab_session_stats(self, widget, data=None):
         colors = self.get_theme_colors()
@@ -1544,6 +1544,7 @@ if __name__ == "__main__":
     import time
 
     try:
+        Configuration.get_config("HUD_config.xml", True)
         app = QApplication([])
         apply_stylesheet(app, theme="dark_purple.xml")
         me = fpdb()
