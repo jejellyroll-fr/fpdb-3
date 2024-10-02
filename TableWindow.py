@@ -96,6 +96,17 @@ class Table_Window(object):
         self.hud = None  # fill in later
         self.gdkhandle = None
         self.number = None
+        # check if 
+        if isinstance(table_name, bytes):
+            print(f"Décodage de table_name en UTF-8 : {table_name}")
+            table_name = table_name.decode('utf-8')
+        if isinstance(tournament, bytes):
+            print(f"Décodage de table_name en UTF-8 : {tournament}")
+            tournament = tournament.decode('utf-8')
+        if isinstance(table_number, bytes):
+            print(f"Décodage de table_name en UTF-8 : {table_number}")
+            table_number = table_number.decode('utf-8')
+
         if tournament is not None and table_number is not None:
             print(tournament)
             self.tournament = int(tournament)
