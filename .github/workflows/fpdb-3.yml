@@ -47,9 +47,8 @@ jobs:
         
     - name: Run tests with pytest
       run: |
-        $env:Path += ";$env:pythonLocation\Scripts"
-        pytest --cov=. --cov-report=html .\test\
-      shell: pwsh
+        uv run pytest --cov=. --cov-report=html .\test\
+
 
     - name: Check if htmlcov directory exists and list contents
       run: |
