@@ -19,6 +19,9 @@
 
 ########################################################################
 
+# TODO: as suspected display management protocols wayland used in some linux distro like ubuntu is not working
+# probably need to use lib pyWayland, pywlroots or direct low level binding with ctype of C lib ...to study
+
 # import L10n
 # _ = L10n.get_translation()
 
