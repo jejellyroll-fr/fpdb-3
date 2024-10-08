@@ -53,7 +53,8 @@ import logging
 import random
 import SQL
 import Card
-import Charset
+
+# # import Charset
 from Exceptions import (
     FpdbError,
     FpdbMySQLAccessDenied,
@@ -1399,10 +1400,8 @@ class Database(object):
 
     def get_player_id(self, config, siteName, playerName):
         c = self.connection.cursor()
-        siteNameUtf = Charset.to_utf8(siteName)
-        playerNameUtf = str(playerName)
-        # print "db.get_player_id siteName",siteName,"playerName",playerName
-        c.execute(self.sql.query["get_player_id"], (playerNameUtf, siteNameUtf))
+        # conversion to UTF-8 in Python 3 is not needed
+        c.execute(self.sql.query["get_player_id"], (playerName, siteName))
         row = c.fetchone()
         if row:
             return row[0]
@@ -1411,12 +1410,11 @@ class Database(object):
 
     def get_player_names(self, config, site_id=None, like_player_name="%"):
         """Fetch player names from players. Use site_id and like_player_name if provided"""
-
         if site_id is None:
             site_id = -1
         c = self.get_cursor()
-        p_name = Charset.to_utf8(like_player_name)
-        c.execute(self.sql.query["get_player_names"], (p_name, site_id, site_id))
+        # conversion to UTF-8 in Python 3 is not needed
+        c.execute(self.sql.query["get_player_names"], (like_player_name, site_id, site_id))
         rows = c.fetchall()
         return rows
 
@@ -2559,7 +2557,10 @@ class Database(object):
             print("###### End Hands ########")
 
         # Tablename can have odd charachers
-        hdata["tableName"] = Charset.to_db_utf8(hdata["tableName"])[:50]
+        # hdata["tableName"] = Charset.to_db_utf8(hdata["tableName"])[:50]
+        table_name = hdata.get("tableName", "")
+        table_name_safe = table_name.encode("utf-8", "replace").decode("utf-8")
+        hdata["tableName"] = table_name_safe[:50]
 
         self.hids.append(hdata["id"])
         self.hbulk.append(
