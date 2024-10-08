@@ -61,7 +61,8 @@ import re
 #    FreePokerTools modules
 import Configuration
 import Database
-import Charset
+
+# import Charset
 import Card
 import Hand
 
@@ -113,7 +114,7 @@ def do_tip(widget, tip):
     Returns:
     - None
     """
-    _tip = Charset.to_utf8(tip)
+    _tip = str(tip)
     widget.setToolTip(_tip)
 
 
