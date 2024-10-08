@@ -38,7 +38,8 @@ import shutil
 import locale
 import re
 import xml.dom.minidom
-import Charset
+
+# # import Charset
 import platform
 import traceback
 
@@ -1729,20 +1730,24 @@ class Config(object):
 
     def get_backend(self, name):
         """Returns the number of the currently used backend"""
-        if name == DATABASE_TYPE_MYSQL:
-            ret = 2
-        elif name == DATABASE_TYPE_POSTGRESQL:
-            ret = 3
-        elif name == DATABASE_TYPE_SQLITE:
-            ret = 4
-            # sqlcoder: this assignment fixes unicode problems for me with sqlite (windows, cp1252)
-            #           feel free to remove or improve this if you understand the problems
-            #           better than me (not hard!)
-            Charset.not_needed1, Charset.not_needed2, Charset.not_needed3 = True, True, True
-        else:
-            raise ValueError("Unsupported database backend: %s" % self.supported_databases[name].db_server)
 
-        return ret
+        # Mapper les chaînes de caractères reçues aux constantes attendues
+        name_mapping = {
+            "sqlite": "DATABASE_TYPE_SQLITE",
+            "mysql": "DATABASE_TYPE_MYSQL",
+            "postgresql": "DATABASE_TYPE_POSTGRESQL",
+        }
+
+        # Convertir le nom en majuscules en utilisant le mapping
+        if name in name_mapping:
+            name = name_mapping[name]
+        else:
+            raise ValueError(f"Unsupported database backend: {name}")
+
+        # Utilisation des constantes attendues
+        backends = {"DATABASE_TYPE_MYSQL": 2, "DATABASE_TYPE_POSTGRESQL": 3, "DATABASE_TYPE_SQLITE": 4}
+
+        return backends[name]
 
     def getDefaultSite(self):
         "Returns first enabled site or None"
