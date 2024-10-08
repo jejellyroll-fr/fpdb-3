@@ -46,7 +46,7 @@ from matplotlib.font_manager import FontProperties
 from numpy import cumsum
 import Database
 import Filters
-import Charset
+# import Charset
 
 
 class GuiGraphViewer(QSplitter):
@@ -136,7 +136,9 @@ class GuiGraphViewer(QSplitter):
 
         for site in sites:
             sitenos.append(siteids[site])
-            _hname = Charset.to_utf8(heroes[site])
+            _hname = heroes.get(site, "")
+            if not _hname:
+                raise ValueError(f"Hero name not found for site {site}")
             result = self.db.get_player_id(self.conf, site, _hname)
             if result is not None:
                 playerids.append(int(result))
