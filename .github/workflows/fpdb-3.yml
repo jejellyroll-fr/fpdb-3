@@ -5,7 +5,7 @@ on:
     branches:
       - '**'  # Match any branch
     tags:
-      - '*'  # Match any tag
+      - '**'  # Match any tag
   pull_request:
     branches:
       - '**'  # Match any branch
