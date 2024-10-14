@@ -53,7 +53,7 @@ class InterProcessLockBase(object):
         return test
 
     def acquire_impl(self, wait):
-        abstract
+        pass
 
     def acquire(self, source, wait=False, retry_time=1):
         if source is None:

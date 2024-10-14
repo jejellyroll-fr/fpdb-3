@@ -139,7 +139,7 @@ def test_re_PlayerInfo3():
     assert match.group("CASH") == "1,200"
 
 
-def test_re_PlayerInfo3():
+def test_re_PlayerInfo33():
     text = """Seat 8: _all_in_ (958 in chips)"""
     match = re_PlayerInfo.search(text)
     assert match is not None

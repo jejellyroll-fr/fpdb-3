@@ -223,7 +223,7 @@ def test_read_stdin_not_cached(hud_main):
             hud_main.db_connection, "get_stats_from_hand", return_value={"player1": {"screen_name": "test_hero"}}
         ),
         patch.object(hud_main, "get_cards", return_value={}),
-        patch.object(hud_main.Tables, "Table", return_value=MagicMock()) as mock_table,
+        patch.object(hud_main.Tables, "Table", return_value=MagicMock()),
         patch.object(hud_main, "create_HUD") as mock_create_hud,
     ):
         hud_main.read_stdin(test_hand_id)
@@ -613,7 +613,7 @@ def test_aux_windows_creation_and_update(hud_main):
 
         mock_aux_window.create.assert_called_once()
         mock_aux_window.update_gui.assert_called_once_with("new_hand_id")
-        mock_log_debug.assert_called_with(f"idle_create new_hand_id new_hand_id")
+        mock_log_debug.assert_called_with("idle_create new_hand_id new_hand_id")
 
 
 #  Verifies that ZMQReceiver.close properly closes the socket and context, and logs the closure.

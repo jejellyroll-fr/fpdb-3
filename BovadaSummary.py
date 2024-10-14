@@ -18,13 +18,17 @@
 # import L10n
 # _ = L10n.get_translation()
 
-from decimal_wrapper import Decimal
+from decimal import Decimal
 import datetime
+import re
 
-from Exceptions import FpdbParseError
-from HandHistoryConverter import *
-from TourneySummary import *
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError
+from TourneySummary import TourneySummary
+
 import BovadaToFpdb
+import logging
+
+log = logging.getLogger("parser")
 
 
 class BovadaSummary(TourneySummary):

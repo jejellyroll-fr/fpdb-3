@@ -23,10 +23,14 @@
 
 # TODO: straighten out discards for draw games
 
-from HandHistoryConverter import *
-from decimal_wrapper import Decimal
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
+from decimal import Decimal
+import re
+import logging
+import datetime
 
-# PokerStars HH Format
+# GGpoker HH Format
+log = logging.getLogger("parser")
 
 
 class GGPoker(HandHistoryConverter):
@@ -385,7 +389,7 @@ class GGPoker(HandHistoryConverter):
                     )
                     raise FpdbParseError
             else:
-                info["sb"] = str((old_div(Decimal(self.clearMoneyString(mg["SB"])), 2)).quantize(Decimal("0.01")))
+                info["sb"] = str((Decimal(self.clearMoneyString(mg["SB"])) / 2).quantize(Decimal("0.01")))
                 info["bb"] = str(Decimal(self.clearMoneyString(mg["SB"])).quantize(Decimal("0.01")))
 
         return info
@@ -695,7 +699,7 @@ class GGPoker(HandHistoryConverter):
             return
         m = self.re_Action.finditer(hand.streets[s])
         for action in m:
-            acts = action.groupdict()
+            # acts = action.groupdict()
             # log.error("DEBUG: %s acts: %s" % (street, acts))
             if action.group("ATYPE") == " folds":
                 hand.addFold(street, action.group("PNAME"))
@@ -750,10 +754,10 @@ class GGPoker(HandHistoryConverter):
             if hand.koBounty > 0:
                 for pname, amount in koAmounts.iteritems():
                     if pname == winner:
-                        end = amount + hand.endBounty[pname]
+                        # end = amount + hand.endBounty[pname]
                         hand.koCounts[pname] = (amount + hand.endBounty[pname]) / Decimal(hand.koBounty)
                     else:
-                        end = 0
+                        # end = 0
                         hand.koCounts[pname] = amount / Decimal(hand.koBounty)
         else:
             for a in self.re_Bounty.finditer(hand.handText):
@@ -770,14 +774,14 @@ class GGPoker(HandHistoryConverter):
 
     def readCollectPot(self, hand):
         # Bovada walks are calculated incorrectly in converted PokerStars hands
-        acts, bovadaUncalled_v1, bovadaUncalled_v2, blindsantes, adjustment = (
-            hand.actions.get("PREFLOP"),
-            False,
-            False,
-            0,
-            0,
-        )
-        names = [p[1] for p in hand.players]
+        # acts, bovadaUncalled_v1, bovadaUncalled_v2, blindsantes, adjustment = (
+        #     hand.actions.get("PREFLOP"),
+        #     False,
+        #     False,
+        #     0,
+        #     0,
+        # )
+        # names = [p[1] for p in hand.players]
         i = 0
         pre, post = hand.handText.split("*** SUMMARY ***")
         hand.cashedOut = self.re_CashedOut.search(pre) is not None

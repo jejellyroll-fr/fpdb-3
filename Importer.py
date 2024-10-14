@@ -33,7 +33,7 @@ import re
 import zmq
 
 import logging
-import traceback
+
 
 from PyQt5.QtWidgets import QProgressBar, QLabel, QDialog, QVBoxLayout
 from PyQt5.QtCore import QCoreApplication
@@ -50,7 +50,7 @@ from Exceptions import FpdbParseError, FpdbHandDuplicate, FpdbHandPartial
 
 try:
     import xlrd
-except:
+except ImportError:
     xlrd = None
 
 if __name__ == "__main__":
@@ -122,7 +122,7 @@ class Importer(object):
             self.writerdbs.append(Database.Database(self.config, sql=self.sql))
 
         # Modification : spécifier le port pour ZMQ
-        self.zmq_sender = ZMQSender()
+        self.zmq_sender = None
         process_time()  # init clock in windows
 
     # Set functions
@@ -314,14 +314,13 @@ class Importer(object):
         self.database.resetClean()
 
     def importFiles(self, q):
-        """ "Read filenames in self.filelist and pass to despatcher."""
+        """Read filenames in self.filelist and pass to despatcher."""
 
         totstored = 0
         totdups = 0
         totpartial = 0
         totskipped = 0
         toterrors = 0
-        tottime = 0
         filecount = 0
         fileerrorcount = 0
         moveimportedfiles = False  # TODO need to wire this into GUI and make it prettier
@@ -333,7 +332,7 @@ class Importer(object):
         ProgressDialog.show()
 
         for f in self.filelist:
-            filecount = filecount + 1
+            filecount += 1
             ProgressDialog.progress_update(f, str(self.database.getHandCount()))
 
             (stored, duplicates, partial, skipped, errors, ttime) = self._import_despatch(self.filelist[f])
@@ -343,21 +342,25 @@ class Importer(object):
             totskipped += skipped
             toterrors += errors
 
-            if moveimportedfiles and movefailedfiles:
+            if moveimportedfiles or movefailedfiles:
                 try:
                     if moveimportedfiles:
                         shutil.move(f, "c:\\fpdbimported\\%d-%s" % (filecount, os.path.basename(f[3:])))
-                except:
-                    fileerrorcount = fileerrorcount + 1
+                except (shutil.Error, OSError) as e:
+                    fileerrorcount += 1
+                    log.error(f"Error moving imported file {f}: {e}")
                     if movefailedfiles:
-                        shutil.move(f, "c:\\fpdbfailed\\%d-%s" % (fileerrorcount, os.path.basename(f[3:])))
+                        try:
+                            shutil.move(f, "c:\\fpdbfailed\\%d-%s" % (fileerrorcount, os.path.basename(f[3:])))
+                        except (shutil.Error, OSError) as e:
+                            log.error(f"Error moving failed file {f}: {e}")
 
             self.logImport("bulk", f, stored, duplicates, partial, skipped, errors, ttime, self.filelist[f].fileId)
 
         ProgressDialog.accept()
         del ProgressDialog
 
-        return (totstored, totdups, totpartial, totskipped, toterrors)
+        return totstored, totdups, totpartial, totskipped, toterrors
 
     # end def importFiles
 
@@ -387,10 +390,11 @@ class Importer(object):
         if "handsInDB" not in self.settings:
             try:
                 tmpcursor = db.get_cursor()
-                tmpcursor.execute("Select count(1) from Hands;")
+                tmpcursor.execute("SELECT COUNT(1) FROM Hands;")
                 self.settings["handsInDB"] = tmpcursor.fetchone()[0]
-            except:
-                pass  # if this fails we're probably doomed anyway
+            except Exception as e:
+                log.error(f"Failed to retrieve hands count from database: {e}")
+                return "don't drop"
 
         # add up size of import files
         total_size = 0.0
@@ -468,7 +472,7 @@ class Importer(object):
         (stored, duplicates, partial, skipped, errors, ttime) = (0, 0, 0, 0, 0, time())
 
         # Load filter, process file, pass returned filename to import_fpdb_file
-        log.info(("Converting %s") % fpdbfile.path)
+        log.info(f"Converting {fpdbfile.path}")
 
         filter_name = fpdbfile.site.filter_name
         mod = __import__(fpdbfile.site.hhc_fname)
@@ -492,6 +496,7 @@ class Importer(object):
             hhc.start()
 
             self.pos_in_file[fpdbfile.path] = hhc.getLastCharacterRead()
+
             # Tally the results
             partial = getattr(hhc, "numPartial")
             skipped = getattr(hhc, "numSkipped")
@@ -541,19 +546,13 @@ class Importer(object):
                         duplicates += 1
                         if doinsert and ihands:
                             backtrack = True
-                    except:
-                        error_trace = ""
-                        formatted_lines = traceback.format_exc().splitlines()
-                        for line in formatted_lines:
-                            error_trace += line
-                        tmp = hand.handText[0:200]
-                        log.error(("Importer._import_hh_file: '%r' Fatal error: '%r'") % (fpdbfile.path, error_trace))
-                        log.error(("'%r'") % tmp)
+                    except Exception as e:
+                        log.error(f"Importer._import_hh_file: '{fpdbfile.path}' Fatal error: '{e}'")
+                        log.error(f"'{hand.handText[0:200]}'")
                         if doinsert and ihands:
                             backtrack = True
-                    if (
-                        backtrack
-                    ):  # If last hand in the file is a duplicate this will backtrack and insert the new hand records
+
+                    if backtrack:
                         hand = ihands[-1]
                         hp, hero = hand.handsplayers, hand.hero
                         hand.hero, self.database.hbulk, hand.handsplayers = (
@@ -568,9 +567,7 @@ class Importer(object):
                         hand.updatePositionsCache(self.database, None, doinsert)
                         hand.updateHudCache(self.database, doinsert)
                         hand.handsplayers, hand.hero = hp, hero
-                # log.debug("DEBUG: hand.updateSessionsCache: %s" % (t5tot))
-                # log.debug("DEBUG: hand.insertHands: %s" % (t6tot))
-                # log.debug("DEBUG: hand.updateHudCache: %s" % (t7tot))
+
                 self.database.commit()
                 ####Lock Placeholder####
 
@@ -584,9 +581,8 @@ class Importer(object):
 
                 # pipe the Hands.id out to the HUD
                 if self.callHud:
-                    print("self.callHud", self.callHud)
-                    print("self.caller", self.caller)
-
+                    if self.zmq_sender is None:
+                        self.zmq_sender = ZMQSender()
                     for hid in list(to_hud):
                         try:
                             log.debug(f"Sending hand ID {hid} to HUD via socket")
@@ -594,9 +590,8 @@ class Importer(object):
                         except IOError as e:
                             log.error(f"Failed to send hand ID to HUD via socket: {e}")
 
-                # Really ugly hack to allow testing Hands within the HHC from someone
-                # with only an Importer objec
-                if self.settings["cacheHHC"]:
+                # Cache HHC if enabled
+                if self.settings.get("cacheHHC", False):
                     self.handhistoryconverter = hhc
         elif self.mode == "auto":
             return (0, 0, partial, skipped, errors, time() - ttime)
@@ -626,11 +621,12 @@ class Importer(object):
                 self.progressNotify()
             summaryTexts = self.readFile(obj, fpdbfile.path, fpdbfile.site.name)
             if summaryTexts is None:
-                log.error("Found: '%s' with 0 characters... skipping" % fpbdfile.path)
+                log.error(
+                    "Found: '%s' with 0 characters... skipping" % fpdbfile.path
+                )  # Fixed the typo (fpbdfile -> fpdbfile)
                 return (0, 0, 0, 0, 1, time())  # File had 0 characters
             ####Lock Placeholder####
             for j, summaryText in enumerate(summaryTexts, start=1):
-                doinsert = len(summaryTexts) == j
                 try:
                     conv = obj(
                         db=self.database,
@@ -645,10 +641,10 @@ class Importer(object):
                 except FpdbHandPartial:
                     partial += 1
                 except FpdbParseError:
-                    log.error(("Summary import parse error in file: %s") % fpdbfile.path)
+                    log.error(f"Summary import parse error in file: {fpdbfile.path}")
                     errors += 1
                 if j != 1:
-                    print(("Finished importing %s/%s tournament summaries") % (j, len(summaryTexts)))
+                    print(f"Finished importing {j}/{len(summaryTexts)} tournament summaries")
                 stored = j
             ####Lock Placeholder####
         ttime = time() - ttime

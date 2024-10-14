@@ -23,9 +23,13 @@
 
 # TODO: straighten out discards for draw games
 
-from HandHistoryConverter import *
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
+import re
+import logging
+import datetime
 
 # PokerStars HH Format
+log = logging.getLogger("parser")
 
 
 class PokerStars(HandHistoryConverter):
@@ -843,7 +847,7 @@ class PokerStars(HandHistoryConverter):
             return
         m = self.re_Action.finditer(hand.streets[s])
         for action in m:
-            acts = action.groupdict()
+            # acts = action.groupdict()
             # log.error("DEBUG: %s acts: %s" % (street, acts))
             if action.group("ATYPE") == " folds":
                 hand.addFold(street, action.group("PNAME"))
@@ -899,10 +903,10 @@ class PokerStars(HandHistoryConverter):
             if hand.koBounty > 0:
                 for pname, amount in list(koAmounts.items()):
                     if pname == winner:
-                        end = amount + hand.endBounty[pname]
+                        # end = amount + hand.endBounty[pname]
                         hand.koCounts[pname] = (amount + hand.endBounty[pname]) / float(hand.koBounty)
                     else:
-                        end = 0
+                        # end = 0
                         hand.koCounts[pname] = amount / float(hand.koBounty)
         else:
             for a in self.re_Bounty.finditer(hand.handText):
@@ -987,6 +991,12 @@ class PokerStars(HandHistoryConverter):
 
                 # print "DEBUG: hand.addShownCards(%s, %s, %s, %s)" %(cards, m.group('PNAME'), shown, mucked)
                 hand.addShownCards(cards=cards, player=m.group("PNAME"), shown=shown, mucked=mucked, string=string)
+
+    def readSummaryInfo(self, summaryInfoList):
+        """Implement the abstract method from HandHistoryConverter."""
+        # Add the actual implementation here, or use a placeholder if not needed
+        log.info("Reading summary info for PokerStars.")
+        return True
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):

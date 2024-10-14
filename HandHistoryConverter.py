@@ -29,7 +29,7 @@ import os
 import os.path
 import xml.dom.minidom
 import codecs
-from decimal_wrapper import Decimal
+from decimal import Decimal
 
 import time
 import datetime
@@ -39,15 +39,16 @@ import pytz
 
 import logging
 
-# logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("parser")
-
 
 import Hand
-from Exceptions import *
+from Exceptions import FpdbParseError, FpdbHandPartial, FpdbHandSkipped
+from abc import ABC, abstractmethod
+
+# logging has been set up in fpdb.py or HUD_main.py, use their settings:
+log = logging.getLogger("handHistoryConverter")
 
 
-class HandHistoryConverter(object):
+class HandHistoryConverter(ABC):
     READ_CHUNK_SIZE = 10000  # bytes to read at a time from file in tail mode
 
     # filetype can be "text" or "xml"
@@ -159,7 +160,7 @@ HandHistoryConverter: '%(sitename)s'
                     self.numPartial += 1
                     lastParsed = "partial"
                     log.debug("%s" % e)
-                except FpdbHandSkipped as e:
+                except FpdbHandSkipped:
                     self.numSkipped += 1
                     lastParsed = "skipped"
                 except FpdbParseError:
@@ -239,13 +240,16 @@ HandHistoryConverter: '%(sitename)s'
 
     def processHand(self, handText):
         if self.isPartial(handText):
-            raise FpdbHandPartial(("Could not identify as a %s hand") % self.sitename)
+            raise FpdbHandPartial("Could not identify as a %s hand" % self.sitename)
+
         if self.copyGameHeader:
             gametype = self.parseHeader(handText, self.whole_file.replace("\r\n", "\n").replace("\xa0", " "))
         else:
             gametype = self.determineGameType(handText)
+
         hand = None
-        l = None
+        game_details = None
+
         if gametype is None:
             gametype = "unmatched"
             # TODO: not ideal, just trying to not error. Throw ParseException?
@@ -255,27 +259,22 @@ HandHistoryConverter: '%(sitename)s'
             print("gametypecategory", gametype["category"])
             if gametype["category"] in self.import_parameters["importFilters"]:
                 raise FpdbHandSkipped("Skipped %s hand" % gametype["type"])
-            # See if gametype is supported.
-            if "mix" not in gametype:
-                gametype["mix"] = "none"
-            if "ante" not in gametype:
-                gametype["ante"] = 0
-            if "buyinType" not in gametype:
-                gametype["buyinType"] = "regular"
-            if "fast" not in gametype:
-                gametype["fast"] = False
-            if "newToGame" not in gametype:
-                gametype["newToGame"] = False
-            if "homeGame" not in gametype:
-                gametype["homeGame"] = False
-            if "split" not in gametype:
-                gametype["split"] = False
+
+            # Ensure game type has all necessary attributes
+            gametype.setdefault("mix", "none")
+            gametype.setdefault("ante", 0)
+            gametype.setdefault("buyinType", "regular")
+            gametype.setdefault("fast", False)
+            gametype.setdefault("newToGame", False)
+            gametype.setdefault("homeGame", False)
+            gametype.setdefault("split", False)
+
             type = gametype["type"]
             base = gametype["base"]
             limit = gametype["limitType"]
-            l = [type] + [base] + [limit]
+            game_details = [type, base, limit]
 
-        if l in self.readSupportedGames():
+        if game_details in self.readSupportedGames():
             if gametype["base"] == "hold":
                 hand = Hand.HoldemOmahaHand(self.config, self, self.sitename, gametype, handText)
             elif gametype["base"] == "stud":
@@ -283,14 +282,14 @@ HandHistoryConverter: '%(sitename)s'
             elif gametype["base"] == "draw":
                 hand = Hand.DrawHand(self.config, self, self.sitename, gametype, handText)
         else:
-            log.error(("%s Unsupported game type: %s") % (self.sitename, gametype))
+            log.error("%s Unsupported game type: %s", self.sitename, gametype)
             raise FpdbParseError
 
         if hand:
             # hand.writeHand(self.out_fh)
             return hand
         else:
-            log.error(("%s Unsupported game type: %s") % (self.sitename, gametype))
+            log.error("%s Unsupported game type: %s", self.sitename, gametype)
             # TODO: pity we don't know the HID at this stage. Log the entire hand?
 
     def isPartial(self, handText):
@@ -306,15 +305,15 @@ HandHistoryConverter: '%(sitename)s'
     # return [["ring", "hold", "nl"], ["tour", "hold", "nl"]]
     # Showing all supported games limits and types
 
+    @abstractmethod
     def readSupportedGames(self):
-        abstract
+        """This method must be implemented by subclasses to define supported games."""
+        pass
 
-    # should return a list
-    #   type  base limit
-    # [ ring, hold, nl   , sb, bb ]
-    # Valid types specified in docs/tabledesign.html in Gametypes
+    @abstractmethod
     def determineGameType(self, handText):
-        abstract
+        """This method must be implemented by subclasses to define game type determination logic."""
+        pass
 
     """return dict with keys/values:
     'type'       in ('ring', 'tour')
@@ -329,10 +328,11 @@ HandHistoryConverter: '%(sitename)s'
     'bigBet'
     'currency'  in ('USD', 'EUR', 'T$', <countrycode>)
 or None if we fail to get the info """
-    # TODO: which parts are optional/required?
 
+    # TODO: which parts are optional/required?
+    @abstractmethod
     def readHandInfo(self, hand):
-        abstract
+        pass
 
     """Read and set information about the hand being dealt, and set the correct 
     variables in the Hand object 'hand
@@ -354,10 +354,11 @@ or None if we fail to get the info """
     * hand.isKO
     * hand.level
     """
-    # TODO: which parts are optional/required?
 
+    # TODO: which parts are optional/required?
+    @abstractmethod
     def readPlayerStacks(self, hand):
-        abstract
+        pass
 
     """This function is for identifying players at the table, and to pass the 
     information on to 'hand' via Hand.addPlayer(seat, name, chips)
@@ -375,8 +376,9 @@ or None if we fail to get the info """
     *** NOTE: You may find this is a more appropriate place to set hand.maxseats ***
     """
 
+    @abstractmethod
     def compilePlayerRegexs(self):
-        abstract
+        pass
 
     """Compile dynamic regexes -- compile player dependent regexes.
 
@@ -401,8 +403,9 @@ or None if we fail to get the info """
     # Needs to return a MatchObject with group names identifying the streets into the Hand object
     # so groups are called by street names 'PREFLOP', 'FLOP', 'STREET2' etc
     # blinds are done seperately
+    @abstractmethod
     def markStreets(self, hand):
-        abstract
+        pass
 
     """For dividing the handText into sections.
 
@@ -426,8 +429,9 @@ or None if we fail to get the info """
     # Needs to return a list in the format
     # ['player1name', 'player2name', ...] where player1name is the sb and player2name is bb,
     # addtional players are assumed to post a bb oop
+    @abstractmethod
     def readBlinds(self, hand):
-        abstract
+        pass
 
     """Function for reading the various blinds from the hand history.
 
@@ -438,32 +442,41 @@ or None if we fail to get the info """
     Pass any play posting both big and small blinds to hand.addBlind(<name>, 'both', <vale>)
     """
 
+    @abstractmethod
     def readSTP(self, hand):
         pass
 
+    @abstractmethod
     def readAntes(self, hand):
-        abstract
+        pass
 
     """Function for reading the antes from the hand history and passing the hand.addAnte"""
 
+    @abstractmethod
     def readBringIn(self, hand):
-        abstract
+        pass
 
+    @abstractmethod
     def readButton(self, hand):
-        abstract
+        pass
 
+    @abstractmethod
     def readHoleCards(self, hand):
-        abstract
+        pass
 
+    @abstractmethod
     def readAction(self, hand, street):
-        abstract
+        pass
 
+    @abstractmethod
     def readCollectPot(self, hand):
-        abstract
+        pass
 
+    @abstractmethod
     def readShownCards(self, hand):
-        abstract
+        pass
 
+    @abstractmethod
     def readTourneyResults(self, hand):
         """This function is for future use in parsing tourney results directly from a hand"""
         pass
@@ -472,8 +485,9 @@ or None if we fail to get the info """
     # Some sites do odd stuff that doesn't fall in to the normal HH parsing.
     # e.g., FTP doesn't put mixed game info in the HH, but puts in in the
     # file name. Use readOther() to clean up those messes.
-    def readOther(self, hand):
-        pass
+    # @abstractmethod
+    # def readOther(self, hand):
+    #     pass
 
     # Some sites don't report the rake. This will be called at the end of the hand after the pot total has been calculated
     # an inheriting class can calculate it for the specific site if need be.
@@ -529,7 +543,7 @@ or None if we fail to get the info """
     def sanityCheck(self):
         """Check we aren't going to do some stupid things"""
         sane = False
-        base_w = False
+        # base_w = False
 
         # Make sure input and output files are different or we'll overwrite the source file
         if True:  # basically.. I don't know
@@ -571,15 +585,21 @@ or None if we fail to get the info """
                     self.index = len(self.whole_file)
                     self.kodec = kodec
                     return True
-                except:
-                    pass
+                except (IOError, UnicodeDecodeError) as e:
+                    log.warning(f"Failed to read file with codec {kodec}: {e}")
             else:
-                log.error(("unable to read file with any codec in list!") + " " + self.in_path)
+                log.error(f"Unable to read file with any codec in list! {self.in_path}")
                 self.obs = ""
                 return False
+
         elif self.filetype == "xml":
-            doc = xml.dom.minidom.parse(filename)
-            self.doc = doc
+            if hasattr(self, "in_path"):  # Ensure filename (in_path) is available
+                doc = xml.dom.minidom.parse(self.in_path)
+                self.doc = doc
+            else:
+                log.error("No file path provided for XML filetype")
+                return False
+
         elif self.filetype == "":
             pass
 
@@ -639,8 +659,9 @@ or None if we fail to get the info """
         return base.split(".")[0]
 
     # returns a status (True/False) indicating wether the parsing could be done correctly or not
+    @abstractmethod
     def readSummaryInfo(self, summaryInfoList):
-        abstract
+        pass
 
     def getTourney(self):
         return self.tourney
@@ -840,18 +861,19 @@ def getSiteHhc(config, sitename):
 def get_out_fh(out_path, parameters):
     if out_path == "-":
         return sys.stdout
-    elif parameters["saveStarsHH"]:
+    elif parameters.get("saveStarsHH", False):
         out_dir = os.path.dirname(out_path)
         if not os.path.isdir(out_dir) and out_dir != "":
             try:
                 os.makedirs(out_dir)
-            except:  # we get a WindowsError here in Windows.. pretty sure something else for Linux :D
-                log.error(("Unable to create output directory %s for HHC!") % out_dir)
+            except OSError as e:
+                log.error(f"Unable to create output directory {out_dir} for HHC: {e}")
             else:
-                log.info(("Created directory '%s'") % out_dir)
+                log.info(f"Created directory '{out_dir}'")
         try:
             return codecs.open(out_path, "w", "utf8")
-        except:
-            log.error(("Output path %s couldn't be opened.") % (out_path))
+        except (IOError, OSError) as e:
+            log.error(f"Output path {out_path} couldn't be opened: {e}")
+            return None
     else:
         return sys.stdout

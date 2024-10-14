@@ -139,15 +139,6 @@ class MergeStructures(object):
                     "payoutCurrency": "USD",
                     "payouts": (109, 109, 11, 3.8),
                 },
-                "$10 Bounty SnG - 6 Handed": {
-                    "buyIn": 5,
-                    "fee": 1,
-                    "currency": "USD",
-                    "seats": 6,
-                    "multi": False,
-                    "payoutCurrency": "USD",
-                    "payouts": (25, 15, 10),
-                },
                 "$10 Satellite": {
                     "buyIn": 10,
                     "fee": 1,
@@ -156,15 +147,6 @@ class MergeStructures(object):
                     "multi": False,
                     "payoutCurrency": "USD",
                     "payouts": (60,),
-                },
-                "$100 Bounty SnG - 6 Handed": {
-                    "buyIn": 100,
-                    "fee": 9,
-                    "currency": "USD",
-                    "seats": 6,
-                    "multi": False,
-                    "payoutCurrency": "USD",
-                    "payouts": (315, 135),
                 },
                 "$11 Coupon - Super Turbo Satellite": {
                     "buyIn": 1.84,
@@ -1596,15 +1578,6 @@ class MergeStructures(object):
                     "payoutCurrency": "USD",
                     "payouts": (44,),
                 },
-                "Goldfish Room": {
-                    "buyIn": 2,
-                    "fee": 0.2,
-                    "currency": "USD",
-                    "seats": 6,
-                    "multi": False,
-                    "payoutCurrency": "USD",
-                    "payouts": (8.40, 3.60),
-                },
                 "Great White Shark Room - Heads Up": {
                     "buyIn": 2000,
                     "fee": 40,
@@ -2787,15 +2760,6 @@ class MergeStructures(object):
                     "multi": False,
                     "payoutCurrency": "USD",
                     "payouts": (1680, 720),
-                },
-                "Toucan Room - Heads Up": {
-                    "buyIn": 10,
-                    "fee": 0.5,
-                    "currency": "USD",
-                    "seats": 2,
-                    "multi": False,
-                    "payoutCurrency": "USD",
-                    "payouts": (20,),
                 },
                 "Toucan Room - Heads Up": {
                     "buyIn": 10,

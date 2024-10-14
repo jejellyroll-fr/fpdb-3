@@ -26,7 +26,7 @@ from time import time
 from PyQt5.QtWidgets import QFrame, QScrollArea, QSplitter, QVBoxLayout, QMessageBox
 import Database
 import Filters
-import Charset
+# import Charset
 
 try:
     calluse = not "matplotlib" in sys.modules
@@ -40,7 +40,7 @@ try:
     from matplotlib.figure import Figure
     from matplotlib.backends.backend_qt5agg import FigureCanvas
     from matplotlib.font_manager import FontProperties
-    from numpy import arange, cumsum
+    from numpy import cumsum
 except ImportError as inst:
     print(
         (
@@ -53,6 +53,9 @@ except ImportError as inst:
         )
     )
     print("ImportError: %s" % inst.args)
+import logging
+
+log = logging.getLogger("sessionViewer")
 
 
 class GuiTourneyGraphViewer(QSplitter):
@@ -116,13 +119,17 @@ class GuiTourneyGraphViewer(QSplitter):
         try:
             if self.canvas:
                 self.graphBox.removeWidget(self.canvas)
-        except:
+        except (AttributeError, RuntimeError) as e:
+            # Handle specific exceptions related to widget removal
+            log.error(f"Error removing widget: {e}")
             pass
 
         if self.fig is not None:
             self.fig.clear()
+
         self.fig = Figure(figsize=(5.0, 4.0), dpi=100)
         self.fig.patch.set_facecolor(self.colors["background"])
+
         if self.canvas is not None:
             self.canvas.destroy()
 
@@ -144,7 +151,9 @@ class GuiTourneyGraphViewer(QSplitter):
 
         for site in sites:
             sitenos.append(siteids[site])
-            _hname = Charset.to_utf8(heroes[site])
+            _hname = heroes.get(site, "")
+            if not _hname:
+                raise ValueError(f"Hero name not found for site {site}")
             result = self.db.get_player_id(self.conf, site, _hname)
             if result is not None:
                 playerids.append(int(result))
@@ -243,7 +252,7 @@ class GuiTourneyGraphViewer(QSplitter):
         else:
             self.ax.set_title("Tournament Results" + names, color=self.colors["foreground"])
             self.ax.plot(green, color="green", label="Tournaments: %d\nProfit: $%.2f" % (len(green), green[-1]))
-            legend = self.ax.legend(
+            self.ax.legend(
                 loc="upper left",
                 fancybox=True,
                 shadow=True,

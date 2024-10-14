@@ -23,10 +23,14 @@
 
 # TODO: straighten out discards for draw games
 
-from HandHistoryConverter import *
-from decimal_wrapper import Decimal
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
+from decimal import Decimal
+import re
+import logging
+import datetime
 
 # KingsClub HH Format
+log = logging.getLogger("parser")
 
 
 class KingsClub(HandHistoryConverter):
@@ -346,13 +350,13 @@ class KingsClub(HandHistoryConverter):
                     info["sb"] = self.Lim_Blinds[self.clearMoneyString(mg["BB"])][0]
                     info["bb"] = self.Lim_Blinds[self.clearMoneyString(mg["BB"])][1]
                 except KeyError:
-                    info["sb"] = str((old_div(Decimal(self.clearMoneyString(mg["SB"])), 2)).quantize(Decimal("0.01")))
+                    info["sb"] = str((Decimal(self.clearMoneyString(mg["SB"])) / 2).quantize(Decimal("0.01")))
                     info["bb"] = str(Decimal(self.clearMoneyString(mg["SB"])).quantize(Decimal("0.01")))
                     # tmp = handText[0:200]
                     # log.error(_("KingsClubToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg['BB'], tmp))
                     # raise FpdbParseError
             else:
-                info["sb"] = str((old_div(Decimal(self.clearMoneyString(mg["SB"])), 2)).quantize(Decimal("0.01")))
+                info["sb"] = str((Decimal(self.clearMoneyString(mg["SB"])) / 2).quantize(Decimal("0.01")))
                 info["bb"] = str(Decimal(self.clearMoneyString(mg["SB"])).quantize(Decimal("0.01")))
 
         return info
@@ -704,7 +708,7 @@ class KingsClub(HandHistoryConverter):
             return
         m = self.re_Action.finditer(hand.streets[s])
         for action in m:
-            acts = action.groupdict()
+            action.groupdict()
             if (
                 action.group("ATYPE") in (" discards", " stands pat", " draws")
                 and hand.gametype["category"] == "drawmaha"

@@ -23,15 +23,13 @@ from __future__ import print_function
 # TODO: get writehand() encoding correct
 
 import sys
-from decimal_wrapper import Decimal
+from decimal import Decimal
 import datetime
 
 import pprint
 
 import logging
 
-# logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("parser")
 
 import Configuration
 from Exceptions import FpdbHandDuplicate, FpdbHandPartial, FpdbParseError
@@ -39,6 +37,9 @@ import DerivedStats
 import Card
 
 Configuration.set_logfile("fpdb-log.txt")
+
+# logging has been set up in fpdb.py or HUD_main.py, use their settings:
+log = logging.getLogger("hand")
 
 
 class Hand(object):
@@ -1349,7 +1350,8 @@ class HoldemOmahaHand(Hand):
                 self.maxseats = hhc.guessMaxSeats(self)
             self.sittingOut()
             hhc.readTourneyResults(self)
-            hhc.readOther(self)
+            # readOther is deprecated
+            # hhc.readOther(self)
         elif builtFrom == "DB":
             # Creator expected to call hhc.select(hid) to fill out object
             log.debug(
@@ -2196,6 +2198,11 @@ def hand_factory(hand_id, config, db_connection):
 
     log.debug(f"get info from db for hand {hand_id}")
     gameinfo = db_connection.get_gameinfo_from_hid(hand_id)
+
+    if gameinfo is None:
+        log.error(f"No game info found for hand ID {hand_id}")
+        return None  # Return None or handle the error appropriately
+
     log.debug(f"gameinfo {gameinfo} for hand {hand_id}")
 
     if gameinfo["base"] == "hold":
@@ -2228,6 +2235,9 @@ def hand_factory(hand_id, config, db_connection):
             builtFrom="DB",
             handid=hand_id,
         )
+    else:
+        log.error(f"Unknown game base type: {gameinfo['base']} for hand {hand_id}")
+        return None  # Handle unexpected game types
 
     log.debug(f"selecting info from db for hand {hand_id}")
     hand_instance.select(db_connection, hand_id)

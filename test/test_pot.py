@@ -1,4 +1,4 @@
-from decimal_wrapper import Decimal
+from decimal import Decimal
 from Hand import Pot
 
 

@@ -41,29 +41,34 @@ from past.utils import old_div
 import os
 import sys
 import traceback
-from datetime import datetime, time, timedelta
+from datetime import datetime, timedelta
 from time import time, strftime, sleep
-from decimal_wrapper import Decimal
+from decimal import Decimal
 import string
 import re
-
-
 import math
 import pytz
 import csv
 import logging
 import random
+import SQL
+import Card
 
+# # import Charset
+from Exceptions import (
+    FpdbError,
+    FpdbMySQLAccessDenied,
+    FpdbMySQLNoDatabase,
+    FpdbPostgresqlNoDatabase,
+    FpdbPostgresqlAccessDenied,
+)
+import Configuration
 
 re_char = re.compile("[^a-zA-Z]")
 re_insert = re.compile(r"insert\sinto\s(?P<TABLENAME>[A-Za-z]+)\s(?P<COLUMNS>\(.+?\))\s+values", re.DOTALL)
 
 #    FreePokerTools modules
-import SQL
-import Card
-import Charset
-from Exceptions import *
-import Configuration
+
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
@@ -719,8 +724,8 @@ class Database(object):
     def dumpDatabase(self):
         result = "fpdb database dump\nDB version=" + str(DB_VERSION) + "\n\n"
 
-        tables = self.cursor.execute(self.sql.query["list_tables"])
-        tables = self.cursor.fetchall()
+        # tables = self.cursor.execute(self.sql.query["list_tables"])
+        # tables = self.cursor.fetchall()
         for table in (
             "Actions",
             "Autorates",
@@ -850,7 +855,7 @@ class Database(object):
                     # Forcer l'encodage UTF-8
                     self.connection.set_client_encoding("UTF8")
                     self.__connected = True
-                except:
+                except psycopg2.OperationalError:
                     # direct connection failed so try user/pass/... version
                     pass
 
@@ -938,7 +943,7 @@ class Database(object):
                     (("Outdated or too new database version (%s).") % (settings[0])) + " " + ("Please recreate tables.")
                 )
                 self.wrongDbVersion = True
-        except:  # _mysql_exceptions.ProgrammingError:
+        except Exception:  # _mysql_exceptions.ProgrammingError:
             if database != ":memory:":
                 if create:
                     # print (("Failed to read settings table.") + " - " + ("Recreating tables."))
@@ -965,18 +970,16 @@ class Database(object):
             ok = False
             for i in range(maxtimes):
                 try:
-                    ret = self.connection.commit()
+                    self.connection.commit()
                     # log.debug(("commit finished ok, i = ")+str(i))
                     ok = True
-                except:
-                    log.debug(
-                        ("commit %s failed: info=%s value=%s") % (str(i), str(sys.exc_info()), str(sys.exc_info()[1]))
-                    )
+                except Exception as e:
+                    log.debug(("commit %s failed: info=%s value=%s") % (str(i), str(sys.exc_info()), str(e)))
                     sleep(pause)
                 if ok:
                     break
             if not ok:
-                log.debug(("commit failed"))
+                log.debug("commit failed")
                 raise FpdbError("sqlite commit failed")
 
     def rollback(self):
@@ -1038,16 +1041,16 @@ class Database(object):
         c = self.connection.cursor()
         c.execute(self.sql.query["get_table_name"], (hand_id,))
         row = c.fetchone()
-        l = list(row)
+        table_info = list(row)
         if row[3] == "ring":  # cash game
-            l.append(None)
-            l.append(None)
-            return l
+            table_info.append(None)
+            table_info.append(None)
+            return table_info
         else:  # tournament
             tour_no, tab_no = re.split(" ", row[0], 1)
-            l.append(tour_no)
-            l.append(tab_no)
-            return l
+            table_info.append(tour_no)
+            table_info.append(tab_no)
+            return table_info
 
     def get_last_hand(self):
         c = self.connection.cursor()
@@ -1068,12 +1071,17 @@ class Database(object):
 
     def get_gameinfo_from_hid(self, hand_id):
         # returns a gameinfo (gametype) dictionary suitable for passing
-        #  to Hand.hand_factory
+        # to Hand.hand_factory
         c = self.connection.cursor()
         q = self.sql.query["get_gameinfo_from_hid"]
         q = q.replace("%s", self.sql.query["placeholder"])
         c.execute(q, (hand_id,))
         row = c.fetchone()
+
+        if row is None:
+            log.error(f"No game info found for hand ID {hand_id}")
+            return None
+
         gameinfo = {
             "sitename": row[0],
             "category": row[1],
@@ -1281,9 +1289,6 @@ class Database(object):
             stylekey = "0000000"
             log.info("stat_range: %s" % stat_range)
 
-        # elif stat_range == 'H':
-        #    stylekey = date_nhands_ago  needs array by player here ...
-
         if h_stat_range == "T":
             h_stylekey = self.h_date_ndays_ago
         elif h_stat_range == "A":
@@ -1294,11 +1299,12 @@ class Database(object):
             h_stylekey = "00000000"
             log.info("h_stat_range: %s" % h_stat_range)
 
-        # elif h_stat_range == 'H':
-        #    h_stylekey = date_nhands_ago  needs array by player here ...
-
         # lookup gametypeId from hand
         handinfo = self.get_gameinfo_from_hid(hand)
+        if handinfo is None:
+            log.error(f"No game info found for hand ID {hand}")
+            return stat_dict  # Return an empty stat_dict if no game info is found
+
         gametypeId = handinfo["gametypeId"]
 
         query = "get_stats_from_hand_aggregated"
@@ -1346,7 +1352,7 @@ class Database(object):
         be improved at some point ...)
         h_stat_range and stat_range params indicate whether to get stats for hero and/or others
         - only fetch heroes stats if h_stat_range == 'S',
-          and only fetch others stats if stat_range == 'S'
+        and only fetch others stats if stat_range == 'S'
         seats_min/max params give seats limits, only include stats if between these values
         """
 
@@ -1370,16 +1376,14 @@ class Database(object):
             # Loop through stats adding them to appropriate stat_dict:
             while row:
                 playerid = row[0]
-                seats = row[1]
                 if (playerid == hero_id and h_stat_range == "S") or (playerid != hero_id and stat_range == "S"):
                     for name, val in zip(colnames, row):
-                        if not playerid in stat_dict:
+                        if playerid not in stat_dict:
                             stat_dict[playerid] = {}
                             stat_dict[playerid][name.lower()] = val
-                        elif not name.lower() in stat_dict[playerid]:
+                        elif name.lower() not in stat_dict[playerid]:
                             stat_dict[playerid][name.lower()] = val
                         elif name.lower() not in ("hand_id", "player_id", "seat", "screen_name", "seats"):
-                            # print "DEBUG: stat_dict[%s][%s]: %s" %(playerid, name.lower(), val)
                             stat_dict[playerid][name.lower()] += val
                     n += 1
                     if n >= 10000:
@@ -1396,10 +1400,8 @@ class Database(object):
 
     def get_player_id(self, config, siteName, playerName):
         c = self.connection.cursor()
-        siteNameUtf = Charset.to_utf8(siteName)
-        playerNameUtf = str(playerName)
-        # print "db.get_player_id siteName",siteName,"playerName",playerName
-        c.execute(self.sql.query["get_player_id"], (playerNameUtf, siteNameUtf))
+        # conversion to UTF-8 in Python 3 is not needed
+        c.execute(self.sql.query["get_player_id"], (playerName, siteName))
         row = c.fetchone()
         if row:
             return row[0]
@@ -1408,12 +1410,11 @@ class Database(object):
 
     def get_player_names(self, config, site_id=None, like_player_name="%"):
         """Fetch player names from players. Use site_id and like_player_name if provided"""
-
         if site_id is None:
             site_id = -1
         c = self.get_cursor()
-        p_name = Charset.to_utf8(like_player_name)
-        c.execute(self.sql.query["get_player_names"], (p_name, site_id, site_id))
+        # conversion to UTF-8 in Python 3 is not needed
+        c.execute(self.sql.query["get_player_names"], (like_player_name, site_id, site_id))
         rows = c.fetchall()
         return rows
 
@@ -1451,7 +1452,7 @@ class Database(object):
                 ret = c.execute("SELECT lastval()")
                 row = c.fetchone()
                 if not row:
-                    log.warning(("getLastInsertId(%s): problem fetching lastval? row=%d") % (seq, row))
+                    log.warning("getLastInsertId(): problem fetching lastval? row=%s" % row)
                     ret = -1
                 else:
                     ret = row[0]
@@ -1500,8 +1501,8 @@ class Database(object):
                         print("dropping mysql fk", cons[0], fk["fktab"], fk["fkcol"])
                         try:
                             c.execute("alter table " + fk["fktab"] + " drop foreign key " + cons[0])
-                        except:
-                            print("    drop failed: " + str(sys.exc_info()))
+                        except Exception:
+                            log.error("    drop failed: " + str(sys.exc_info()))
                 elif self.backend == self.PGSQL:
                     #    DON'T FORGET TO RECREATE THEM!!
                     print("dropping pg fk", fk["fktab"], fk["fkcol"])
@@ -1519,14 +1520,14 @@ class Database(object):
                                 "alter table %s drop constraint %s_%s_fkey" % (fk["fktab"], fk["fktab"], fk["fkcol"])
                             )
                             print("dropped pg fk pg fk %s_%s_fkey, continuing ..." % (fk["fktab"], fk["fkcol"]))
-                        except:
+                        except Exception:
                             if "does not exist" not in str(sys.exc_info()[1]):
-                                print(
+                                log.error(
                                     ("warning: drop pg fk %s_%s_fkey failed: %s, continuing ...")
                                     % (fk["fktab"], fk["fkcol"], str(sys.exc_info()[1]).rstrip("\n"))
                                 )
                         c.execute("END TRANSACTION")
-                    except:
+                    except Exception:
                         print(
                             ("warning: constraint %s_%s_fkey not dropped: %s, continuing ...")
                             % (fk["fktab"], fk["fkcol"], str(sys.exc_info()[1]).rstrip("\n"))
@@ -1537,18 +1538,18 @@ class Database(object):
         for idx in self.indexes[self.backend]:
             if idx["drop"] == 1:
                 if self.backend == self.MYSQL_INNODB:
-                    print(("dropping mysql index "), idx["tab"], idx["col"])
+                    log.info(("dropping mysql index "), idx["tab"], idx["col"])
                     try:
                         # apparently nowait is not implemented in mysql so this just hangs if there are locks
                         # preventing the index drop :-(
                         c.execute("alter table %s drop index %s;", (idx["tab"], idx["col"]))
-                    except:
-                        print(("    drop index failed: ") + str(sys.exc_info()))
+                    except Exception:
+                        log.error(("    drop index failed: ") + str(sys.exc_info()))
                         # ALTER TABLE `fpdb`.`handsplayers` DROP INDEX `playerId`;
                         # using: 'HandsPlayers' drop index 'playerId'
                 elif self.backend == self.PGSQL:
                     #    DON'T FORGET TO RECREATE THEM!!
-                    print(("dropping pg index "), idx["tab"], idx["col"])
+                    log.info(("dropping pg index "), idx["tab"], idx["col"])
                     try:
                         # try to lock table to see if index drop will work:
                         c.execute("BEGIN TRANSACTION")
@@ -1559,15 +1560,15 @@ class Database(object):
                             # print "drop index %s_%s_idx" % (idx['tab'],idx['col'])
                             c.execute("drop index if exists %s_%s_idx" % (idx["tab"], idx["col"]))
                             # print "dropped  pg index ", idx['tab'], idx['col']
-                        except:
+                        except Exception:
                             if "does not exist" not in str(sys.exc_info()[1]):
-                                print(
+                                log.error(
                                     ("warning: drop index %s_%s_idx failed: %s, continuing ...")
                                     % (idx["tab"], idx["col"], str(sys.exc_info()[1]).rstrip("\n"))
                                 )
                         c.execute("END TRANSACTION")
-                    except:
-                        print(
+                    except Exception:
+                        log.error(
                             ("warning: index %s_%s_idx not dropped %s, continuing ...")
                             % (idx["tab"], idx["col"], str(sys.exc_info()[1]).rstrip("\n"))
                         )
@@ -1626,8 +1627,8 @@ class Database(object):
                                 + fk["rcol"]
                                 + ")"
                             )
-                        except:
-                            print(("Create foreign key failed: ") + str(sys.exc_info()))
+                        except Exception:
+                            log.error(("Create foreign key failed: ") + str(sys.exc_info()))
                 elif self.backend == self.PGSQL:
                     print(("Creating foreign key "), fk["fktab"], fk["fkcol"], "->", fk["rtab"], fk["rcol"])
                     try:
@@ -1647,8 +1648,8 @@ class Database(object):
                             + fk["rcol"]
                             + ")"
                         )
-                    except:
-                        print(("Create foreign key failed: ") + str(sys.exc_info()))
+                    except Exception:
+                        log.error(("Create foreign key failed: ") + str(sys.exc_info()))
                 else:
                     return -1
 
@@ -1659,8 +1660,8 @@ class Database(object):
                     try:
                         s = "alter table %s add index %s(%s)" % (idx["tab"], idx["col"], idx["col"])
                         c.execute(s)
-                    except:
-                        print(("Create foreign key failed: ") + str(sys.exc_info()))
+                    except Exception:
+                        log.error(("Create foreign key failed: ") + str(sys.exc_info()))
                 elif self.backend == self.PGSQL:
                     #                pass
                     # mod to use tab_col for index name?
@@ -1668,8 +1669,8 @@ class Database(object):
                     try:
                         s = "create index %s_%s_idx on %s(%s)" % (idx["tab"], idx["col"], idx["tab"], idx["col"])
                         c.execute(s)
-                    except:
-                        print(("Create index failed: ") + str(sys.exc_info()))
+                    except Exception:
+                        log.error(("Create index failed: ") + str(sys.exc_info()))
                 else:
                     return -1
 
@@ -1795,9 +1796,9 @@ class Database(object):
                 for table in tables:
                     c.execute(self.sql.query["drop_table"] + table[0])
                 c.execute("SET FOREIGN_KEY_CHECKS=1")
-            except:
+            except Exception:
                 err = traceback.extract_tb(sys.exc_info()[2])[-1]
-                print(("***Error dropping tables:"), +err[2] + "(" + str(err[1]) + "): " + str(sys.exc_info()[1]))
+                log.error(("***Error dropping tables:"), +err[2] + "(" + str(err[1]) + "): " + str(sys.exc_info()[1]))
                 self.rollback()
         elif backend == "PostgreSQL":
             try:
@@ -1806,9 +1807,9 @@ class Database(object):
                 tables = c.fetchall()
                 for table in tables:
                     c.execute(self.sql.query["drop_table"] + table[0] + " cascade")
-            except:
+            except Exception:
                 err = traceback.extract_tb(sys.exc_info()[2])[-1]
-                print(("***Error dropping tables:"), err[2] + "(" + str(err[1]) + "): " + str(sys.exc_info()[1]))
+                log.error(("***Error dropping tables:"), err[2] + "(" + str(err[1]) + "): " + str(sys.exc_info()[1]))
                 self.rollback()
         elif backend == "SQLite":
             c.execute(self.sql.query["list_tables"])
@@ -1851,21 +1852,21 @@ class Database(object):
                 print((("Dropping index:"), idx["tab"], idx["col"]))
                 try:
                     self.get_cursor().execute("alter table %s drop index %s", (idx["tab"], idx["col"]))
-                except:
-                    print(("Drop index failed:"), str(sys.exc_info()))
+                except Exception:
+                    log.error(("Drop index failed:"), str(sys.exc_info()))
             elif self.backend == self.PGSQL:
                 print((("Dropping index:"), idx["tab"], idx["col"]))
                 # mod to use tab_col for index name?
                 try:
                     self.get_cursor().execute("drop index %s_%s_idx" % (idx["tab"], idx["col"]))
-                except:
-                    print((("Drop index failed:"), str(sys.exc_info())))
+                except Exception:
+                    log.error((("Drop index failed:"), str(sys.exc_info())))
             elif self.backend == self.SQLITE:
                 print((("Dropping index:"), idx["tab"], idx["col"]))
                 try:
                     self.get_cursor().execute("drop index %s_%s_idx" % (idx["tab"], idx["col"]))
-                except:
-                    print(("Drop index failed:"), str(sys.exc_info()))
+                except Exception:
+                    log.error(("Drop index failed:"), str(sys.exc_info()))
             else:
                 return -1
         if self.backend == self.PGSQL:
@@ -1880,8 +1881,8 @@ class Database(object):
             if self.backend == self.PGSQL:
                 self.connection.set_isolation_level(0)  # allow table/index operations to work
             c = self.get_cursor()
-        except:
-            print(("set_isolation_level failed:"), str(sys.exc_info()))
+        except Exception:
+            log.error(("set_isolation_level failed:"), str(sys.exc_info()))
 
         for fk in self.foreignKeys[self.backend]:
             if self.backend == self.MYSQL_INNODB:
@@ -1914,8 +1915,8 @@ class Database(object):
                             + fk["rcol"]
                             + ")"
                         )
-                    except:
-                        print(("Create foreign key failed:"), str(sys.exc_info()))
+                    except Exception:
+                        log.error(("Create foreign key failed:"), str(sys.exc_info()))
             elif self.backend == self.PGSQL:
                 print(("Creating foreign key:"), fk["fktab"], fk["fkcol"], "->", fk["rtab"], fk["rcol"])
                 try:
@@ -1935,16 +1936,16 @@ class Database(object):
                         + fk["rcol"]
                         + ")"
                     )
-                except:
-                    print(("Create foreign key failed:"), str(sys.exc_info()))
+                except Exception:
+                    log.error(("Create foreign key failed:"), str(sys.exc_info()))
             else:
                 pass
 
         try:
             if self.backend == self.PGSQL:
                 self.connection.set_isolation_level(1)  # go back to normal isolation level
-        except:
-            print(("set_isolation_level failed:"), str(sys.exc_info()))
+        except Exception:
+            log.error(("set_isolation_level failed:"), str(sys.exc_info()))
 
     # end def createAllForeignKeys
 
@@ -1975,8 +1976,8 @@ class Database(object):
                     print(("Dropping foreign key:"), cons[0], fk["fktab"], fk["fkcol"])
                     try:
                         c.execute("alter table " + fk["fktab"] + " drop foreign key " + cons[0])
-                    except:
-                        print(
+                    except Exception:
+                        log.error(
                             ("Warning:"),
                             ("Drop foreign key %s_%s_fkey failed: %s, continuing ...")
                             % (fk["fktab"], fk["fkcol"], str(sys.exc_info()[1]).rstrip("\n")),
@@ -1996,16 +1997,16 @@ class Database(object):
                     try:
                         c.execute("alter table %s drop constraint %s_%s_fkey" % (fk["fktab"], fk["fktab"], fk["fkcol"]))
                         print(("dropped foreign key %s_%s_fkey, continuing ...") % (fk["fktab"], fk["fkcol"]))
-                    except:
+                    except Exception:
                         if "does not exist" not in str(sys.exc_info()[1]):
-                            print(
+                            log.erreur(
                                 ("Warning:"),
                                 ("Drop foreign key %s_%s_fkey failed: %s, continuing ...")
                                 % (fk["fktab"], fk["fkcol"], str(sys.exc_info()[1]).rstrip("\n")),
                             )
                     c.execute("END TRANSACTION")
-                except:
-                    print(
+                except Exception:
+                    log.error(
                         ("Warning:"),
                         ("constraint %s_%s_fkey not dropped: %s, continuing ...")
                         % (fk["fktab"], fk["fkcol"], str(sys.exc_info()[1]).rstrip("\n")),
@@ -2272,7 +2273,7 @@ class Database(object):
 
     def rebuild_cache(self, h_start=None, v_start=None, table="HudCache", ttid=None, wmid=None):
         """clears hudcache and rebuilds from the individual handsplayers records"""
-        stime = time()
+        # stime = time()
         # derive list of program owner's player ids
         self.hero = {}  # name of program owner indexed by site id
         self.hero_ids = {"dummy": -53, "dummy2": -52}  # playerid of owner indexed by site id
@@ -2418,10 +2419,10 @@ class Database(object):
                 return self.hero_hudstart_def
             else:
                 return "20" + tmp[0][1:3] + "-" + tmp[0][3:5] + "-" + tmp[0][5:7]
-        except:
+        except Exception:
             err = traceback.extract_tb(sys.exc_info()[2])[-1]
-            print(("Error rebuilding hudcache:"), str(sys.exc_info()[1]))
-            print(err)
+            log.error(("Error rebuilding hudcache:"), str(sys.exc_info()[1]))
+            log.error(err)
 
     # end def get_hero_hudcache_start
 
@@ -2431,14 +2432,14 @@ class Database(object):
         if self.backend == self.MYSQL_INNODB or self.backend == self.SQLITE:
             try:
                 self.get_cursor().execute(self.sql.query["analyze"])
-            except:
-                print(("Error during analyze:"), str(sys.exc_info()[1]))
+            except Exception:
+                log.error(("Error during analyze:"), str(sys.exc_info()[1]))
         elif self.backend == self.PGSQL:
             self.connection.set_isolation_level(0)  # allow analyze to work
             try:
                 self.get_cursor().execute(self.sql.query["analyze"])
-            except:
-                print(("Error during analyze:"), str(sys.exc_info()[1]))
+            except Exception:
+                log.error(("Error during analyze:"), str(sys.exc_info()[1]))
             self.connection.set_isolation_level(1)  # go back to normal isolation level
         self.commit()
         atime = time() - stime
@@ -2452,14 +2453,14 @@ class Database(object):
         if self.backend == self.MYSQL_INNODB or self.backend == self.SQLITE:
             try:
                 self.get_cursor().execute(self.sql.query["vacuum"])
-            except:
-                print(("Error during vacuum:"), str(sys.exc_info()[1]))
+            except Exception:
+                log.error(("Error during vacuum:"), str(sys.exc_info()[1]))
         elif self.backend == self.PGSQL:
             self.connection.set_isolation_level(0)  # allow vacuum to work
             try:
                 self.get_cursor().execute(self.sql.query["vacuum"])
-            except:
-                print(("Error during vacuum:"), str(sys.exc_info()[1]))
+            except Exception:
+                log.error(("Error during vacuum:"), str(sys.exc_info()[1]))
             self.connection.set_isolation_level(1)  # go back to normal isolation level
         self.commit()
         atime = time() - stime
@@ -2490,7 +2491,7 @@ class Database(object):
     def releaseLock(self):
         if self._has_lock:
             cursor = self.get_cursor()
-            num = cursor.execute(self.sql.query["switchLockOff"], (False, self.threadId))
+            cursor.execute(self.sql.query["switchLockOff"], (False, self.threadId))
             self.commit()
             self._has_lock = False
 
@@ -2498,7 +2499,7 @@ class Database(object):
         """Lock tables in MySQL to try to speed inserts up"""
         try:
             self.get_cursor().execute(self.sql.query["lockForInsert"])
-        except:
+        except Exception:
             print(("Error during lock_for_insert:"), str(sys.exc_info()[1]))
 
     # end def lock_for_insert
@@ -2556,7 +2557,10 @@ class Database(object):
             print("###### End Hands ########")
 
         # Tablename can have odd charachers
-        hdata["tableName"] = Charset.to_db_utf8(hdata["tableName"])[:50]
+        # hdata["tableName"] = Charset.to_db_utf8(hdata["tableName"])[:50]
+        table_name = hdata.get("tableName", "")
+        table_name_safe = table_name.encode("utf-8", "replace").decode("utf-8")
+        hdata["tableName"] = table_name_safe[:50]
 
         self.hids.append(hdata["id"])
         self.hbulk.append(
@@ -3174,22 +3178,23 @@ class Database(object):
             self.dcbulk[k] = line
 
         if doinsert:
-            update_cardscache = self.sql.query["update_cardscache"]
-            update_cardscache = update_cardscache.replace("%s", self.sql.query["placeholder"])
-            insert_cardscache = self.sql.query["insert_cardscache"]
-            insert_cardscache = insert_cardscache.replace("%s", self.sql.query["placeholder"])
-            select_cardscache_ring = self.sql.query["select_cardscache_ring"]
-            select_cardscache_ring = select_cardscache_ring.replace("%s", self.sql.query["placeholder"])
-            select_cardscache_tour = self.sql.query["select_cardscache_tour"]
-            select_cardscache_tour = select_cardscache_tour.replace("%s", self.sql.query["placeholder"])
+            update_cardscache = self.sql.query["update_cardscache"].replace("%s", self.sql.query["placeholder"])
+            insert_cardscache = self.sql.query["insert_cardscache"].replace("%s", self.sql.query["placeholder"])
+            select_cardscache_ring = self.sql.query["select_cardscache_ring"].replace(
+                "%s", self.sql.query["placeholder"]
+            )
+            select_cardscache_tour = self.sql.query["select_cardscache_tour"].replace(
+                "%s", self.sql.query["placeholder"]
+            )
 
-            select_W = self.sql.query["select_W"].replace("%s", self.sql.query["placeholder"])
-            select_M = self.sql.query["select_M"].replace("%s", self.sql.query["placeholder"])
-            insert_W = self.sql.query["insert_W"].replace("%s", self.sql.query["placeholder"])
-            insert_M = self.sql.query["insert_M"].replace("%s", self.sql.query["placeholder"])
+            # Removed unused variables
+            # select_W = self.sql.query["select_W"].replace("%s", self.sql.query["placeholder"])
+            # select_M = self.sql.query["select_M"].replace("%s", self.sql.query["placeholder"])
+            # insert_W = self.sql.query["insert_W"].replace("%s", self.sql.query["placeholder"])
+            # insert_M = self.sql.query["insert_M"].replace("%s", self.sql.query["placeholder"])
 
             dccache, inserts = {}, []
-            for k, l in list(self.dcbulk.items()):
+            for k, line in list(self.dcbulk.items()):
                 sc = self.s.get(k[0])
                 if sc is not None:
                     garbageWeekMonths = (sc["wid"], sc["mid"]) in self.wmnew or (sc["wid"], sc["mid"]) in self.wmold
@@ -3199,10 +3204,10 @@ class Database(object):
                         startCards = dccache.get(n)
                         # Add line to the old line in the hudcache.
                         if startCards is not None:
-                            for idx, val in enumerate(l):
+                            for idx, val in enumerate(line):
                                 dccache[n][idx] += val
                         else:
-                            dccache[n] = l
+                            dccache[n] = line
 
             c = self.get_cursor()
             for k, item in list(dccache.items()):
@@ -3239,43 +3244,43 @@ class Database(object):
             self.pcbulk[k] = line
 
         if doinsert:
-            update_positionscache = self.sql.query["update_positionscache"]
-            update_positionscache = update_positionscache.replace("%s", self.sql.query["placeholder"])
-            insert_positionscache = self.sql.query["insert_positionscache"]
-            insert_positionscache = insert_positionscache.replace("%s", self.sql.query["placeholder"])
+            update_positionscache = self.sql.query["update_positionscache"].replace("%s", self.sql.query["placeholder"])
+            insert_positionscache = self.sql.query["insert_positionscache"].replace("%s", self.sql.query["placeholder"])
+            select_positionscache_ring = self.sql.query["select_positionscache_ring"].replace(
+                "%s", self.sql.query["placeholder"]
+            )
+            select_positionscache_tour = self.sql.query["select_positionscache_tour"].replace(
+                "%s", self.sql.query["placeholder"]
+            )
 
-            select_positionscache_ring = self.sql.query["select_positionscache_ring"]
-            select_positionscache_ring = select_positionscache_ring.replace("%s", self.sql.query["placeholder"])
-            select_positionscache_tour = self.sql.query["select_positionscache_tour"]
-            select_positionscache_tour = select_positionscache_tour.replace("%s", self.sql.query["placeholder"])
+            # Removed unused variables:
+            # select_W = self.sql.query["select_W"].replace("%s", self.sql.query["placeholder"])
+            # select_M = self.sql.query["select_M"].replace("%s", self.sql.query["placeholder"])
+            # insert_W = self.sql.query["insert_W"].replace("%s", self.sql.query["placeholder"])
+            # insert_M = self.sql.query["insert_M"].replace("%s", self.sql.query["placeholder"])
 
-            select_W = self.sql.query["select_W"].replace("%s", self.sql.query["placeholder"])
-            select_M = self.sql.query["select_M"].replace("%s", self.sql.query["placeholder"])
-            insert_W = self.sql.query["insert_W"].replace("%s", self.sql.query["placeholder"])
-            insert_M = self.sql.query["insert_M"].replace("%s", self.sql.query["placeholder"])
-
-            pccache, inserts = {}, []
-            for k, l in list(self.pcbulk.items()):
+            position_cache, inserts = {}, []
+            for k, line in list(self.pcbulk.items()):
                 sc = self.s.get(k[0])
                 if sc is not None:
                     garbageWeekMonths = (sc["wid"], sc["mid"]) in self.wmnew or (sc["wid"], sc["mid"]) in self.wmold
                     garbageTourneyTypes = k[2] in self.ttnew or k[2] in self.ttold
                     if self.import_options["hhBulkPath"] == "" or (not garbageWeekMonths and not garbageTourneyTypes):
                         n = (sc["wid"], sc["mid"], k[1], k[2], k[3], k[4], k[5], k[6])
-                        positions = pccache.get(n)
+                        positions = position_cache.get(n)
                         # Add line to the old line in the hudcache.
                         if positions is not None:
-                            for idx, val in enumerate(l):
-                                pccache[n][idx] += val
+                            for idx, val in enumerate(line):
+                                position_cache[n][idx] += val
                         else:
-                            pccache[n] = l
+                            position_cache[n] = line
 
             c = self.get_cursor()
-            for k, item in list(pccache.items()):
-                if k[3]:
+            for k, item in list(position_cache.items()):
+                if k[3]:  # Check if it's a tournament
                     q = select_positionscache_tour
                     row = list(k)
-                else:
+                else:  # It's a ring game
                     q = select_positionscache_ring
                     row = list(k[:3]) + list(k[-4:])
 
@@ -3342,9 +3347,10 @@ class Database(object):
                     if n == hero and sitename == site:
                         hero_ids.append(v)
 
-        except:
+        except Exception:
             err = traceback.extract_tb(sys.exc_info()[2])[-1]
-            # print ("Error aquiring hero ids:"), str(sys.exc_value)
+            log.error(("Error aquiring hero ids:"), str(sys.exc_value))
+            log.error(f"traceback: {err}")
         return hero_ids
 
     def fetchallDict(self, cursor, desc):
@@ -4171,13 +4177,14 @@ if __name__ == "__main__":
 
 # Code borrowed from http://push.cx/2008/caching-dictionaries-in-python-vs-ruby
 class LambdaDict(dict):
-    def __init__(self, l):
+    def __init__(self, value_factory):
         super(LambdaDict, self).__init__()
-        self.l = l
+        self.value_factory = value_factory
 
     def __getitem__(self, key):
         if key in self:
             return self.get(key)
         else:
-            self.__setitem__(key, self.l(key))
+            # Use the value_factory to generate a value for the missing key
+            self.__setitem__(key, self.value_factory(key))
             return self.get(key)

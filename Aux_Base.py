@@ -1,13 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Aux_Base.py
-
-Some base classes for Aux_Hud, Mucked, and other aux-handlers.
-These classes were previously in Mucked, and have been split away
-for clarity
-"""
-
-import contextlib
 #    Copyright 2008-2012,  Ray E. Barker
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -32,12 +24,19 @@ import contextlib
 
 #    Standard Library modules
 import logging
+import contextlib
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QWidget
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = logging.getLogger("hud")
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget
+
+### Aux_Base.py
+# Some base classes for Aux_Hud, Mucked, and other aux-handlers.
+# These classes were previously in Mucked, and have been split away
+# for clarity
+###
 
 # FPDB
 

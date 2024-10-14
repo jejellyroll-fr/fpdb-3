@@ -32,12 +32,12 @@ Create and manage the hud overlays.
 import logging
 import copy
 
-# logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hud")
-
 #    FreePokerTools modules
 import Database
 import Hand
+
+# logging has been set up in fpdb.py or HUD_main.py, use their settings:
+log = logging.getLogger("hud")
 
 
 def importName(module_name, name):
@@ -193,7 +193,7 @@ class Hud(object):
     def update(self, hand, config):
         # re-load a hand instance (factory will load correct type for this hand)
         self.hand_instance = Hand.hand_factory(hand, config, self.db_hud_connection)
-        log.debug(f"hud update after hand_factory")
+        log.debug("hud update after hand_factory")
         self.db_hud_connection.connection.rollback()
 
     def get_cards(self, hand):

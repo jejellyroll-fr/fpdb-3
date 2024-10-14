@@ -23,10 +23,14 @@
 
 # TODO: straighten out discards for draw games
 
-from HandHistoryConverter import *
-from decimal_wrapper import Decimal
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
+from decimal import Decimal
+import re
+import logging
+import datetime
 
 # Unibet HH Format
+log = logging.getLogger("parser")
 
 
 class Unibet(HandHistoryConverter):

@@ -27,9 +27,6 @@ if os.name == "nt":
 import codecs
 import Options
 from functools import partial
-
-cl_options = ".".join(sys.argv[1:])
-(options, argv) = Options.fpdb_options()
 from L10n import set_locale_translation
 import logging
 
@@ -55,18 +52,6 @@ from PyQt5.QtWidgets import (
     QComboBox,
 )
 
-import interlocks
-from Exceptions import *
-
-# these imports not required in this module, imported here to report version in About dialog
-import numpy
-
-numpy_version = numpy.__version__
-import sqlite3
-
-sqlite3_version = sqlite3.version
-sqlite_version = sqlite3.sqlite_version
-
 import DetectInstalledSites
 import GuiPrefs
 import GuiLogView
@@ -77,7 +62,8 @@ import GuiBulkImport
 
 import GuiRingPlayerStats
 import GuiTourneyPlayerStats
-import GuiPositionalStats
+
+# import GuiPositionalStats
 import GuiAutoImport
 import GuiGraphViewer
 import GuiTourneyGraphViewer
@@ -97,6 +83,23 @@ import Exceptions
 import cProfile
 import pstats
 import io
+import interlocks
+from Exceptions import FpdbError
+
+import sqlite3
+
+# these imports not required in this module, imported here to report version in About dialog
+import numpy
+
+cl_options = ".".join(sys.argv[1:])
+(options, argv) = Options.fpdb_options()
+
+
+numpy_version = numpy.__version__
+
+
+sqlite3_version = sqlite3.version
+sqlite_version = sqlite3.sqlite_version
 
 
 PROFILE_OUTPUT_DIR = os.path.join(os.path.expanduser("~"), "fpdb_profiles")
@@ -121,13 +124,13 @@ except Exception:
 
 
 class fpdb(QMainWindow):
-    def launch_ppt(self):
-        path = os.getcwd()
-        if os.name == "nt":
-            pathcomp = f"{path}\pyfpdb\ppt\p2.jar"
-        else:
-            pathcomp = f"{path}/ppt/p2.jar"
-        subprocess.call(["java", "-jar", pathcomp])
+    # def launch_ppt(self):
+    #     path = os.getcwd()
+    #     if os.name == "nt":
+    #         pathcomp = f"{path}\pyfpdb\ppt\p2.jar"
+    #     else:
+    #         pathcomp = f"{path}/ppt/p2.jar"
+    #     subprocess.call(["java", "-jar", pathcomp])
 
     def add_and_display_tab(self, new_page, new_tab_name):
         """adds a tab, namely creates the button and displays it and appends all the relevant arrays"""
@@ -598,7 +601,7 @@ class fpdb(QMainWindow):
         available_site_names = []
         for site_name in site_names:
             try:
-                tmp = self.config.supported_sites[site_name].enabled
+                self.config.supported_sites[site_name].enabled
                 available_site_names.append(site_name)
             except KeyError:
                 pass
@@ -630,9 +633,9 @@ class fpdb(QMainWindow):
             label.setAlignment(Qt.AlignCenter)
             table.addWidget(label, 0, header_number)
 
-        history_paths = []
+        # history_paths = []
         check_buttons = []
-        screen_names = []
+        # screen_names = []
         seat2_dict, seat3_dict, seat4_dict, seat5_dict, seat6_dict, seat7_dict, seat8_dict, seat9_dict, seat10_dict = (
             [],
             [],
@@ -644,7 +647,7 @@ class fpdb(QMainWindow):
             [],
             [],
         )
-        summary_paths = []
+        # summary_paths = []
         detector = DetectInstalledSites.DetectInstalledSites()
 
         y_pos = 1
@@ -653,7 +656,7 @@ class fpdb(QMainWindow):
             check_button.setChecked(self.config.supported_sites[available_site_names[site_number]].enabled)
             table.addWidget(check_button, y_pos, 0)
             check_buttons.append(check_button)
-            hud_seat = self.config.supported_sites[available_site_names[site_number]].fav_seat[2]
+            # hud_seat = self.config.supported_sites[available_site_names[site_number]].fav_seat[2]
 
             # print('hud seat ps:', type(hud_seat), hud_seat)
             seat2 = QLineEdit()
@@ -749,7 +752,7 @@ class fpdb(QMainWindow):
         available_site_names = []
         for site_name in site_names:
             try:
-                tmp = self.config.supported_sites[site_name].enabled
+                self.config.supported_sites[site_name].enabled
                 available_site_names.append(site_name)
             except KeyError:
                 pass
@@ -1201,12 +1204,12 @@ class fpdb(QMainWindow):
         self.threads.append(new_import_thread)
         self.add_and_display_tab(new_import_thread, "Bulk Import")
 
-    def tab_tourney_import(self, widget, data=None):
-        """opens a tab for bulk importing tournament summaries"""
-        new_import_thread = GuiTourneyImport.GuiTourneyImport(self.settings, self.config, self.sql, self.window)
-        self.threads.append(new_import_thread)
-        bulk_tab = new_import_thread.get_vbox()
-        self.add_and_display_tab(bulk_tab, "Tournament Results Import")
+    # def tab_tourney_import(self, widget, data=None):
+    #     """opens a tab for bulk importing tournament summaries"""
+    #     new_import_thread = GuiTourneyImport.GuiTourneyImport(self.settings, self.config, self.sql, self.window)
+    #     self.threads.append(new_import_thread)
+    #     bulk_tab = new_import_thread.get_vbox()
+    #     self.add_and_display_tab(bulk_tab, "Tournament Results Import")
 
     # end def tab_import_imap_summaries
 
@@ -1225,11 +1228,11 @@ class fpdb(QMainWindow):
         self.threads.append(new_thread)
         self.add_and_display_tab(new_thread, "Tourney Viewer")
 
-    def tab_positional_stats(self, widget, data=None):
-        new_ps_thread = GuiPositionalStats.GuiPositionalStats(self.config, self.sql)
-        self.threads.append(new_ps_thread)
-        ps_tab = new_ps_thread.get_vbox()
-        self.add_and_display_tab(ps_tab, "Positional Stats")
+    # def tab_positional_stats(self, widget, data=None):
+    #     new_ps_thread = GuiPositionalStats.GuiPositionalStats(self.config, self.sql)
+    #     self.threads.append(new_ps_thread)
+    #     ps_tab = new_ps_thread.get_vbox()
+    #     self.add_and_display_tab(ps_tab, "Positional Stats")
 
     def tab_session_stats(self, widget, data=None):
         colors = self.get_theme_colors()
@@ -1244,8 +1247,9 @@ class fpdb(QMainWindow):
 
     def tab_main_help(self, widget, data=None):
         """Displays a tab with the main fpdb help screen"""
-        mh_tab = QLabel((
-            """
+        mh_tab = QLabel(
+            (
+                """
                         Welcome to Fpdb!
 
                         This program is currently in an alpha-state, so our database format is still sometimes changed.
@@ -1259,7 +1263,8 @@ class fpdb(QMainWindow):
                         The Windows installer package includes code licensed under the MIT license.
                         You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt
                         and mit.txt in the fpdb installation directory."""
-        ))
+            )
+        )
         self.add_and_display_tab(mh_tab, "Help")
 
     def get_theme_colors(self):
@@ -1282,10 +1287,6 @@ class fpdb(QMainWindow):
             "background": self.palette().color(QPalette.Window).name(),
             "foreground": self.palette().color(QPalette.WindowText).name(),
             "grid": "#444444",  # to customize
-            "line_showdown": "#0000FF",
-            "line_nonshowdown": "#FF0000",
-            "line_ev": "#FFA500",
-            "line_hands": "#00FF00",
             "line_up": "g",
             "line_down": "r",
             "line_showdown": "b",
@@ -1308,12 +1309,12 @@ class fpdb(QMainWindow):
         self.threads.append(new_gv_thread)
         self.add_and_display_tab(new_gv_thread, "Tourney Graphs")
 
-    def tabStove(self, widget, data=None):
-        """opens a tab for poker stove"""
-        thread = GuiStove.GuiStove(self.config, self)
-        self.threads.append(thread)
-        # tab = thread.get_vbox()
-        self.add_and_display_tab(thread, "Stove")
+    # def tabStove(self, widget, data=None):
+    #     """opens a tab for poker stove"""
+    #     thread = GuiStove.GuiStove(self.config, self)
+    #     self.threads.append(thread)
+    #     # tab = thread.get_vbox()
+    #     self.add_and_display_tab(thread, "Stove")
 
     def validate_config(self):
         # check if sites in config file are in DB
@@ -1543,6 +1544,7 @@ if __name__ == "__main__":
     import time
 
     try:
+        Configuration.get_config("HUD_config.xml", True)
         app = QApplication([])
         apply_stylesheet(app, theme="dark_purple.xml")
         me = fpdb()

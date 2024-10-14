@@ -23,10 +23,16 @@
 
 # TODO: straighten out discards for draw games
 
-from HandHistoryConverter import *
-from decimal_wrapper import Decimal
+# _ = L10n.get_translation()
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
+import re
+import logging
+import datetime
+from decimal import Decimal
+
 
 # Winning HH Format
+log = logging.getLogger("parser")
 
 
 class Winning(HandHistoryConverter):
@@ -998,7 +1004,7 @@ class Winning(HandHistoryConverter):
     def _readAction1(self, hand, street):
         m = self.re_Action1.finditer(hand.streets[street])
         for action in m:
-            acts = action.groupdict()
+            action.groupdict()
             if action.group("PNAME") is None:
                 log.error("WinningToFpdb.readAction: Unknown player %s %s" % (action.group("ATYPE"), hand.handid))
                 raise FpdbParseError
@@ -1040,7 +1046,7 @@ class Winning(HandHistoryConverter):
     def _readAction2(self, hand, street):
         m = self.re_Action2.finditer(hand.streets[street])
         for action in m:
-            acts = action.groupdict()
+            action.groupdict()
             # log.error("DEBUG: %s acts: %s" % (street, acts))
             if action.group("ATYPE") == " folds":
                 hand.addFold(street, action.group("PNAME"))
@@ -1084,7 +1090,7 @@ class Winning(HandHistoryConverter):
             0,
             0,
         )
-        names = [p[1] for p in hand.players]
+        # names = [p[1] for p in hand.players]
         if acts is not None and len([a for a in acts if a[1] != "folds"]) == 0:
             m0 = self.re_Uncalled.search(hand.handText)
             if m0 and Decimal(m0.group("BET")) == Decimal(hand.bb):

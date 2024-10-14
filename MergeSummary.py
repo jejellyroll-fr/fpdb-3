@@ -19,14 +19,18 @@
 # import L10n
 # _ = L10n.get_translation()
 
-from decimal_wrapper import Decimal
+from decimal import Decimal
 import datetime
 from bs4 import BeautifulSoup
 
-from Exceptions import FpdbParseError
-from HandHistoryConverter import *
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError
+import re
+import logging
 import MergeToFpdb, MergeStructures
-from TourneySummary import *
+from TourneySummary import TourneySummary
+
+# Merge HH Format
+log = logging.getLogger("parser")
 
 
 class MergeSummary(TourneySummary):
@@ -78,7 +82,6 @@ class MergeSummary(TourneySummary):
         "Mar": 3,
         "April": 4,
         "Apr": 4,
-        "May": 5,
         "May": 5,
         "June": 6,
         "Jun": 6,
@@ -161,7 +164,7 @@ class MergeSummary(TourneySummary):
     def parseSummaryFromHH(self, mg):
         obj = getattr(MergeToFpdb, "Merge", None)
         hhc = obj(self.config, in_path=self.in_path, sitename=None, autostart=False)
-        update = False
+        # update = False
         handsList = hhc.allHandsAsList()
         handsDict = {}
         Structures = MergeStructures.MergeStructures()

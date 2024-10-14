@@ -43,9 +43,14 @@
 # -- Cannot parse hands in which someone is all in in one of the blinds. Until
 #    this is corrected tournaments will be unparseable
 
-from HandHistoryConverter import *
-from decimal_wrapper import Decimal
-from TourneySummary import *
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
+from decimal import Decimal
+import re
+import logging
+import datetime
+
+
+log = logging.getLogger("parser")
 
 
 class iPoker(HandHistoryConverter):
@@ -563,7 +568,7 @@ class iPoker(HandHistoryConverter):
             raise FpdbParseError
 
         # Extract the relevant information from the match object
-        mg = m.groupdict()
+        m.groupdict()
 
         # Set the table name and maximum number of seats for the hand
         hand.tablename = self.tablename
@@ -631,7 +636,7 @@ class iPoker(HandHistoryConverter):
 
         # Extract player information from regex matches
         for a in m:
-            ag = a.groupdict()
+            a.groupdict()
             # Create a dictionary entry for the player with their seat, stack, winnings,
             # and sitout status
             plist[a.group("PNAME")] = [
@@ -819,23 +824,22 @@ class iPoker(HandHistoryConverter):
         :param hand: A dictionary containing the game type information.
         :return: None
         """
-        # FIXME
-        # The following should only trigger when a small blind is missing in a tournament, or the sb/bb is ALL_IN
-        # see http://sourceforge.net/apps/mantisbt/fpdb/view.php?id=115
         if hand.gametype["type"] != "tour":
             return
+
         if hand.gametype["sb"] is None and hand.gametype["bb"] is None:
             hand.gametype["sb"] = "1"
             hand.gametype["bb"] = "2"
         elif hand.gametype["sb"] is None:
-            hand.gametype["sb"] = str(int(old_div(Decimal(hand.gametype["bb"]), 2)))
+            hand.gametype["sb"] = str(int(int(hand.gametype["bb"]) // 2))
         elif hand.gametype["bb"] is None:
-            hand.gametype["bb"] = str(int(Decimal(hand.gametype["sb"])) * 2)
-        if int(old_div(Decimal(hand.gametype["bb"]), 2)) != int(Decimal(hand.gametype["sb"])):
-            if int(old_div(Decimal(hand.gametype["bb"]), 2)) < int(Decimal(hand.gametype["sb"])):
-                hand.gametype["bb"] = str(int(Decimal(hand.gametype["sb"])) * 2)
+            hand.gametype["bb"] = str(int(hand.gametype["sb"]) * 2)
+
+        if int(hand.gametype["bb"]) // 2 != int(hand.gametype["sb"]):
+            if int(hand.gametype["bb"]) // 2 < int(hand.gametype["sb"]):
+                hand.gametype["bb"] = str(int(hand.gametype["sb"]) * 2)
             else:
-                hand.gametype["sb"] = str(int((Decimal(hand.gametype["bb"])) // 2))
+                hand.gametype["sb"] = str(int(hand.gametype["bb"]) // 2)
 
     def readButton(self, hand):
         # Found in re_Player

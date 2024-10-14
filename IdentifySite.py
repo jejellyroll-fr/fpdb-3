@@ -33,7 +33,7 @@ import logging
 
 try:
     import xlrd
-except:
+except ImportError:
     xlrd = None
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = logging.getLogger("parser")
@@ -195,22 +195,50 @@ class IdentifySite(object):
                     self.filelist[path] = fobj
 
     def read_file(self, in_path):
-        if in_path.endswith(".xls") or in_path.endswith(".xlsx") and xlrd:
+        # Ignore macOS-specific hidden files such as .DS_Store
+        if in_path.endswith(".DS_Store"):
+            log.warning(f"Skipping system file {in_path}")
+            return None, None
+
+        # Excel file management if xlrd is available
+        if (in_path.endswith(".xls") or in_path.endswith(".xlsx")) and xlrd:
             try:
                 wb = xlrd.open_workbook(in_path)
                 sh = wb.sheet_by_index(0)
                 header = str(sh.cell(0, 0).value)
                 return header, "utf-8"
-            except:
+            except (xlrd.XLRDError, IOError) as e:
+                log.error(f"Error reading Excel file {in_path}: {e}")
                 return None, None
+
+        # Check for the presence of a BOM for UTF-16
+        try:
+            with open(in_path, "rb") as infile:
+                raw_data = infile.read()
+
+            # If the file begins with a UTF-16 BOM (little endian or big endian)
+            if raw_data.startswith(b"\xff\xfe") or raw_data.startswith(b"\xfe\xff"):
+                try:
+                    whole_file = raw_data.decode("utf-16")
+                    return whole_file, "utf-16"
+                except UnicodeDecodeError as e:
+                    log.error(f"Error decoding UTF-16 file {in_path}: {e}")
+                    return None, None
+        except IOError as e:
+            log.error(f"Error reading file {in_path}: {e}")
+            return None, None
+
+        # Try different encodings in the `self.codepage` list
         for kodec in self.codepage:
             try:
-                infile = codecs.open(in_path, "r", kodec)
-                whole_file = infile.read()
-                infile.close()
-                return whole_file, kodec
-            except:
+                with codecs.open(in_path, "r", kodec) as infile:
+                    whole_file = infile.read()
+                    return whole_file, kodec
+            except (IOError, UnicodeDecodeError) as e:
+                log.warning(f"Failed to read file {in_path} with codec {kodec}: {e}")
                 continue
+
+        log.error(f"Unable to read file {in_path} with any known codecs.")
         return None, None
 
     def idSite(self, path, whole_file, kodec):
@@ -295,11 +323,11 @@ class IdentifySite(object):
         return False
 
     def getFilesForSite(self, sitename, ftype):
-        l = []
+        files_for_site = []
         for name, f in list(self.filelist.items()):
             if f.ftype is not None and f.site.name == sitename and f.ftype == "hh":
-                l.append(f)
-        return l
+                files_for_site.append(f)
+        return files_for_site
 
     def fetchGameTypes(self):
         for name, f in list(self.filelist.items()):

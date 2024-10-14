@@ -23,10 +23,14 @@
 
 # TODO: straighten out discards for draw games
 
-from HandHistoryConverter import *
-from decimal_wrapper import Decimal
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
+from decimal import Decimal
+import re
+import logging
+import datetime
 
 # Bovada HH Format
+log = logging.getLogger("parser")
 
 
 class Bovada(HandHistoryConverter):
@@ -252,7 +256,7 @@ class Bovada(HandHistoryConverter):
         if gametype["type"] == "tour":
             handlist = re.split(self.re_SplitHands, whole_file)
             result = re.findall(self.re_PlayerSeat, handlist[0])
-            # gametype['maxSeats'] = len(result)
+            gametype["maxSeats"] = len(result)
         return gametype
 
     def determineGameType(self, handText):
@@ -477,12 +481,12 @@ class Bovada(HandHistoryConverter):
                 allinblind += 1
         m = self.re_Action.finditer(self.re_Hole_Third.split(hand.handText)[-1])
         dealtIn = len(hand.players) - allinblind
-        streetactions, streetno, players, i, contenders, bets, acts = 0, 1, dealtIn, 0, dealtIn, 0, None
+        streetactions, streetno, players, contenders, bets, acts = 0, 1, dealtIn, 0, dealtIn, 0, None
         for action in m:
             if action.groupdict() != acts or streetactions == 0:
                 acts = action.groupdict()
                 # print "DEBUG: %s, %s, %s" % (street, acts['PNAME'], acts['ATYPE']), action.group('BET'), streetactions, players, contenders
-                player = self.playerSeatFromPosition("BovadaToFpdb.markStreets", hand.handid, action.group("PNAME"))
+                # player = self.playerSeatFromPosition("BovadaToFpdb.markStreets", hand.handid, action.group("PNAME"))
                 if action.group("ATYPE") == " Fold":
                     contenders -= 1
                 elif action.group("ATYPE") in (" Raises", " raises"):
@@ -560,7 +564,8 @@ class Bovada(HandHistoryConverter):
             hand.gametype["bb"] = "2"
 
     def readBlinds(self, hand):
-        sb, bb, acts, postsb, postbb, both = None, None, None, None, None, None
+        # sb, bb,
+        acts, postsb, postbb, both = None, None, None, None  # , None, None
         if not self.re_ReturnBet.search(hand.handText):
             hand.setUncalledBets(True)
         for a in self.re_PostSB.finditer(hand.handText):
@@ -570,7 +575,7 @@ class Bovada(HandHistoryConverter):
                 hand.addBlind(player, "small blind", self.clearMoneyString(postsb["SB"]))
                 if not hand.gametype["sb"]:
                     hand.gametype["sb"] = self.clearMoneyString(postsb["SB"])
-            sb = self.clearMoneyString(postsb["SB"])
+            # sb = self.clearMoneyString(postsb["SB"])
             self.allInBlind(hand, "PREFLOP", a, "small blind")
         for a in self.re_PostBB.finditer(hand.handText):
             if postbb != a.groupdict():
@@ -580,7 +585,7 @@ class Bovada(HandHistoryConverter):
                 self.allInBlind(hand, "PREFLOP", a, "big blind")
                 if not hand.gametype["bb"]:
                     hand.gametype["bb"] = self.clearMoneyString(postbb["BB"])
-                bb = self.clearMoneyString(postbb["BB"])
+                # bb = self.clearMoneyString(postbb["BB"])
                 if not hand.gametype["currency"]:
                     if postbb["CURRENCY"].find("$") != -1:
                         hand.gametype["currency"] = "USD"
