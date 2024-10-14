@@ -128,7 +128,7 @@ jobs:
 
 
   build-windows:
-    if: github.event_name == 'release'
+    if: github.ref_type == 'tag'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -154,7 +154,7 @@ jobs:
           path: dist/*
 
   build-macos-intel:
-    if: github.event_name == 'release'
+    if: github.ref_type == 'tag'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -188,7 +188,7 @@ jobs:
           path: dist/*
 
   build-macos-arm:
-    if: github.event_name == 'release'
+    if: github.ref_type == 'tag'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -223,7 +223,7 @@ jobs:
 
 
   build-linux:
-    if: github.event_name == 'release'
+    if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
