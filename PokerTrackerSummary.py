@@ -19,12 +19,15 @@
 # import L10n
 # _ = L10n.get_translation()
 
-from decimal_wrapper import Decimal
+from HandHistoryConverter import FpdbParseError
+import re
+import logging
 import datetime
+from TourneySummary import TourneySummary
+from decimal import Decimal
 
-from Exceptions import FpdbParseError
-from HandHistoryConverter import *
-from TourneySummary import *
+# PokerStars HH Format
+log = logging.getLogger("parser")
 
 
 class PokerTrackerSummary(TourneySummary):
@@ -219,9 +222,9 @@ class PokerTrackerSummary(TourneySummary):
             koCount = None
             if len(name) > 0:
                 if "WINNINGS" in mg and mg["WINNINGS"] is not None:
-                    winning1 = mg["WINNINGS"]
-                    winning2 = self.clearMoneyString(winning1)
-                    winning3 = int(float(winning2))
+                    # winning1 = mg["WINNINGS"]
+                    # winning2 = self.clearMoneyString(winning1)
+                    # winning3 = int(float(winning2))
                     winnings = int(100 * float(self.clearMoneyString(mg["WINNINGS"])))
 
                 if "REBUYS" in mg and mg["REBUYS"] is not None:
@@ -247,7 +250,7 @@ class PokerTrackerSummary(TourneySummary):
                     winnings = None
 
                 if len(name) == 0:
-                    log.debug("DEBUG: a.groupdict(): %d %s" % (i, mg))
+                    log.debug("DEBUG: a.groupdict(): %s" % (mg))
 
                 # print "DEBUG: addPlayer(%s, %s, %s, %s, None, None, None)" %(rank, name, winnings, self.currency)
                 # print "DEBUG: self.buyin: %s self.fee %s" %(self.buyin, self.fee)

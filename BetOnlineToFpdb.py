@@ -26,9 +26,13 @@ from past.utils import old_div
 
 # TODO: straighten out discards for draw games
 
-from HandHistoryConverter import *
-from decimal_wrapper import Decimal
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
+from decimal import Decimal
+import re
+import logging
+import datetime
 
+log = logging.getLogger("parser")
 # BetOnline HH Format
 
 
@@ -687,7 +691,7 @@ class BetOnline(HandHistoryConverter):
                         hand.addFold(street, pname)
         m = self.re_Action.finditer(hand.streets[street])
         for action in m:
-            acts = action.groupdict()
+            # acts = action.groupdict()
             # print "DEBUG: street: %s acts: %s" % (street, acts)
             pname = self.unknownPlayer(hand, action.group("PNAME"))
             if action.group("ATYPE") in (" folds", " Folds", " has left the table"):

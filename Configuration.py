@@ -39,7 +39,9 @@ import locale
 import re
 import xml.dom.minidom
 
+# # import Charset
 import platform
+import traceback
 
 
 if platform.system() == "Windows":
@@ -182,7 +184,7 @@ def get_config(file_name, fallback=True):
     """
 
     # look for example file even if not used here, path is returned to caller
-    config_found, example_found, example_copy = False, False, False
+    config_found, example_copy = False, False
     config_path, example_path = None, None
     if sysPlatform == "Windows":
         # print('-> windows')
@@ -249,7 +251,7 @@ def get_config(file_name, fallback=True):
                     + ("Config file has been created at %r.") % (config_path + "\n")
                 )
 
-        except:
+        except IOError:
             print((("Error copying .example config file, cannot fall back. Exiting."), "\n"))
             sys.stderr.write(("Error copying .example config file, cannot fall back. Exiting.") + "\n")
             sys.stderr.write(str(sys.exc_info()))
@@ -330,8 +332,6 @@ if LOCALE_ENCODING in ("US-ASCII", "", None):
 
 # needs LOCALE_ENCODING (above), imported for sqlite setup in Config class below
 
-import Charset
-
 
 ########################################################################
 def string_to_bool(string, default=True):
@@ -382,6 +382,7 @@ class Layout(object):
     def __str__(self):
         if hasattr(self, "name"):
             name = str(self.name)
+            log.info(f"attribut {name} exists")
         temp = "    Layout = %d max, width= %d, height = %d" % (self.max, self.width, self.height)
         if hasattr(self, "fav_seat"):
             temp = temp + ", fav_seat = %d\n" % self.fav_seat
@@ -968,14 +969,14 @@ class RawHands(object):
             if save in ("none", "error", "all"):
                 self.save = save
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (raw_hands.save, '"error"'))
+                print(("Invalid config value for %s, defaulting to %s") % (self.raw_hands.save, '"error"'))
                 self.save = "error"
 
             compression = node.getAttribute("compression")
             if save in ("none", "gzip", "bzip2"):
                 self.compression = compression
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (raw_hands.compression, '"none"'))
+                print(("Invalid config value for %s, defaulting to %s") % (self.raw_hands.compression, '"none"'))
                 self.compression = "none"
 
     # end def __init__
@@ -998,14 +999,14 @@ class RawTourneys(object):
             if save in ("none", "error", "all"):
                 self.save = save
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (raw_tourneys.save, '"error"'))
+                print(("Invalid config value for %s, defaulting to %s") % (self.raw_tourneys.save, '"error"'))
                 self.save = "error"
 
             compression = node.getAttribute("compression")
             if save in ("none", "gzip", "bzip2"):
                 self.compression = compression
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (raw_tourneys.compression, '"none"'))
+                print(("Invalid config value for %s, defaulting to %s") % (self.raw_tourneys.compression, '"none"'))
                 self.compression = "none"
 
     # end def __init__
@@ -1086,17 +1087,9 @@ class Config(object):
                 doc = xml.dom.minidom.parse(file)
                 self.doc = doc  # Root of XML tree
                 self.file_error = None
-            except:
-                import traceback
 
-                log.error((("Error parsing %s.") % (file)) + ("See error log file."))
-                traceback.print_exc(file=sys.stderr)
-                self.file_error = sys.exc_info()[1]
-                # we could add a parameter to decide whether to return or read a line and exit?
-                return
-                # print "press enter to continue"
-                # sys.stdin.readline()
-                # sys.exit()
+            except (OSError, IOError, xml.parsers.expat.ExpatError) as e:
+                log.error(f"Error while processing XML: {traceback.format_exc()} Exception: {e}")
 
             if (not self.example_copy) and (example_file is not None):
                 # reads example file and adds missing elements into current config
@@ -1225,8 +1218,8 @@ class Config(object):
 
         try:
             example_doc = xml.dom.minidom.parse(example_file)
-        except:
-            log.error((("Error parsing example configuration file %s.") % (example_file)) + ("See error log file."))
+        except (OSError, IOError, xml.parsers.expat.ExpatError) as e:
+            log.error(f"Error parsing example configuration file {example_file}. See error log file. Exception: {e}")
             return nodes_added
 
         for cnode in doc.getElementsByTagName("FreePokerToolsConfig"):
@@ -1342,39 +1335,39 @@ class Config(object):
         if file is None:
             file = self.file
             try:
-                shutil.move(file, file + ".backup")
-            except:
-                pass
+                shutil.move(file, f"{file}.backup")
+            except OSError as e:
+                log.error(f"Failed to move file {file} to backup. Exception: {e}")
 
         with codecs.open(file, "w", "utf-8") as f:
             # self.doc.writexml(f)
             f.write(self.wrap_long_lines(self.doc.toxml()))
 
     def wrap_long_lines(self, s):
-        lines = [self.wrap_long_line(l) for l in s.splitlines()]
+        lines = [self.wrap_long_line(line) for line in s.splitlines()]
         return "\n".join(lines) + "\n"
 
-    def wrap_long_line(self, l):
+    def wrap_long_line(self, line):
         if "config_wrap_len" in self.general:
             wrap_len = int(self.general["config_wrap_len"])
         else:
             wrap_len = -1  # < 0 means no wrap
 
-        if wrap_len >= 0 and len(l) > wrap_len:
+        if wrap_len >= 0 and len(line) > wrap_len:
             m = re.compile("\s+\S+\s+")
-            mo = m.match(l)
+            mo = m.match(line)
             if mo:
                 indent_len = mo.end()
                 # print "indent = %s (%s)" % (indent_len, l[0:indent_len])
                 indent = "\n" + " " * indent_len
                 m = re.compile('(\S+="[^"]+"\s+)')
-                parts = [x for x in m.split(l[indent_len:]) if x]
+                parts = [x for x in m.split(line[indent_len:]) if x]
                 if len(parts) > 1:
                     # print "parts =", parts
-                    l = l[0:indent_len] + indent.join(parts)
-            return l
+                    line = line[0:indent_len] + indent.join(parts)
+            return line
         else:
-            return l
+            return line
 
     def editEmail(self, siteName, fetchType, newEmail):
         emailNode = self.getEmailNode(siteName, fetchType)
@@ -1570,48 +1563,29 @@ class Config(object):
     def get_db_parameters(self):
         db = {}
         name = self.db_selected
-        # TODO: What's up with all the exception handling here?!
-        try:
-            db["db-databaseName"] = name
-        except:
-            pass
 
-        try:
-            db["db-desc"] = self.supported_databases[name].db_desc
-        except:
-            pass
+        if name not in self.supported_databases:
+            log.error(f"Database {name} not found in supported databases.")
+            return db
 
-        try:
-            db["db-host"] = self.supported_databases[name].db_ip
-        except:
-            pass
+        # Parameters are retrieved with default values
+        db["db-databaseName"] = name
 
-        try:
-            db["db-port"] = self.supported_databases[name].db_port
-        except:
-            pass
+        # use getattr
+        db["db-desc"] = getattr(self.supported_databases[name], "db_desc", None)
+        db["db-host"] = getattr(self.supported_databases[name], "db_ip", None)
+        db["db-port"] = getattr(self.supported_databases[name], "db_port", None)
+        db["db-user"] = getattr(self.supported_databases[name], "db_user", None)
+        db["db-password"] = getattr(self.supported_databases[name], "db_pass", None)
+        db["db-server"] = getattr(self.supported_databases[name], "db_server", None)
+        db["db-path"] = getattr(self.supported_databases[name], "db_path", None)
 
+        # add backend
         try:
-            db["db-user"] = self.supported_databases[name].db_user
-        except:
-            pass
-
-        try:
-            db["db-password"] = self.supported_databases[name].db_pass
-        except:
-            pass
-
-        try:
-            db["db-server"] = self.supported_databases[name].db_server
-        except:
-            pass
-
-        try:
-            db["db-path"] = self.supported_databases[name].db_path
-        except:
-            pass
-
-        db["db-backend"] = self.get_backend(self.supported_databases[name].db_server)
+            db["db-backend"] = self.get_backend(self.supported_databases[name].db_server)
+        except (AttributeError, KeyError) as e:
+            log.error(f"Error retrieving backend for {name}: {str(e)}")
+            db["db-backend"] = None
 
         return db
 
@@ -1756,20 +1730,24 @@ class Config(object):
 
     def get_backend(self, name):
         """Returns the number of the currently used backend"""
-        if name == DATABASE_TYPE_MYSQL:
-            ret = 2
-        elif name == DATABASE_TYPE_POSTGRESQL:
-            ret = 3
-        elif name == DATABASE_TYPE_SQLITE:
-            ret = 4
-            # sqlcoder: this assignment fixes unicode problems for me with sqlite (windows, cp1252)
-            #           feel free to remove or improve this if you understand the problems
-            #           better than me (not hard!)
-            Charset.not_needed1, Charset.not_needed2, Charset.not_needed3 = True, True, True
-        else:
-            raise ValueError("Unsupported database backend: %s" % self.supported_databases[name].db_server)
 
-        return ret
+        # Mapper les chaînes de caractères reçues aux constantes attendues
+        name_mapping = {
+            "sqlite": "DATABASE_TYPE_SQLITE",
+            "mysql": "DATABASE_TYPE_MYSQL",
+            "postgresql": "DATABASE_TYPE_POSTGRESQL",
+        }
+
+        # Convertir le nom en majuscules en utilisant le mapping
+        if name in name_mapping:
+            name = name_mapping[name]
+        else:
+            raise ValueError(f"Unsupported database backend: {name}")
+
+        # Utilisation des constantes attendues
+        backends = {"DATABASE_TYPE_MYSQL": 2, "DATABASE_TYPE_POSTGRESQL": 3, "DATABASE_TYPE_SQLITE": 4}
+
+        return backends[name]
 
     def getDefaultSite(self):
         "Returns first enabled site or None"
@@ -1783,158 +1761,187 @@ class Config(object):
         hui = {}
 
         default_text = "FPDB Menu - Right click\nLeft-Drag to Move"
+
         try:
             hui["label"] = self.ui.label
             if self.ui.label == "":  # Empty menu label is a big no-no
                 hui["label"] = default_text
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting label: {e}")
             hui["label"] = default_text
 
         try:
             hui["card_ht"] = int(self.ui.card_ht)
-        except:
+        except (AttributeError, ValueError) as e:
+            log.error(f"Error getting card height: {e}")
             hui["card_ht"] = 42
 
         try:
             hui["card_wd"] = int(self.ui.card_wd)
-        except:
+        except (AttributeError, ValueError) as e:
+            log.error(f"Error getting card width: {e}")
             hui["card_wd"] = 30
 
         try:
             hui["deck_type"] = str(self.ui.deck_type)
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting deck type: {e}")
             hui["deck_type"] = "colour"
 
         try:
             hui["card_back"] = str(self.ui.card_back)
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting card back: {e}")
             hui["card_back"] = "back04"
 
         try:
             hui["stat_range"] = self.ui.stat_range
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting stat range: {e}")
             hui["stat_range"] = "A"  # default is show stats for All-time, also S(session) and T(ime)
 
         try:
             hui["hud_days"] = int(self.ui.hud_days)
-        except:
+        except (AttributeError, ValueError) as e:
+            log.error(f"Error getting HUD days: {e}")
             hui["hud_days"] = 90
 
         try:
             hui["agg_bb_mult"] = int(self.ui.agg_bb_mult)
-        except:
+        except (AttributeError, ValueError) as e:
+            log.error(f"Error getting aggregate BB multiplier: {e}")
             hui["agg_bb_mult"] = 1
 
         try:
             hui["seats_style"] = self.ui.seats_style
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting seats style: {e}")
             hui["seats_style"] = "A"  # A / C / E, use A(ll) / C(ustom) / E(xact) seat numbers
 
         try:
             hui["seats_cust_nums_low"] = int(self.ui.seats_cust_nums_low)
-        except:
+        except (AttributeError, ValueError) as e:
+            log.error(f"Error getting custom seat numbers low: {e}")
             hui["seats_cust_nums_low"] = 1
+
         try:
             hui["seats_cust_nums_high"] = int(self.ui.seats_cust_nums_high)
-        except:
+        except (AttributeError, ValueError) as e:
+            log.error(f"Error getting custom seat numbers high: {e}")
             hui["seats_cust_nums_high"] = 10
 
         # Hero specific
-
         try:
             hui["h_stat_range"] = self.ui.h_stat_range
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting hero stat range: {e}")
             hui["h_stat_range"] = "S"
 
         try:
             hui["h_hud_days"] = int(self.ui.h_hud_days)
-        except:
+        except (AttributeError, ValueError) as e:
+            log.error(f"Error getting hero HUD days: {e}")
             hui["h_hud_days"] = 30
 
         try:
             hui["h_agg_bb_mult"] = int(self.ui.h_agg_bb_mult)
-        except:
+        except (AttributeError, ValueError) as e:
+            log.error(f"Error getting hero aggregate BB multiplier: {e}")
             hui["h_agg_bb_mult"] = 1
 
         try:
             hui["h_seats_style"] = self.ui.h_seats_style
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting hero seats style: {e}")
             hui["h_seats_style"] = "A"  # A / C / E, use A(ll) / C(ustom) / E(xact) seat numbers
 
         try:
             hui["h_seats_cust_nums_low"] = int(self.ui.h_seats_cust_nums_low)
-        except:
+        except (AttributeError, ValueError) as e:
+            log.error(f"Error getting hero custom seat numbers low: {e}")
             hui["h_seats_cust_nums_low"] = 1
+
         try:
             hui["h_seats_cust_nums_high"] = int(self.ui.h_seats_cust_nums_high)
-        except:
+        except (AttributeError, ValueError) as e:
+            log.error(f"Error getting hero custom seat numbers high: {e}")
             hui["h_seats_cust_nums_high"] = 10
+
         return hui
 
     def get_import_parameters(self):
         imp = {}
+
         try:
             imp["callFpdbHud"] = self.imp.callFpdbHud
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'callFpdbHud': {e}")
             imp["callFpdbHud"] = True
 
         try:
             imp["interval"] = self.imp.interval
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'interval': {e}")
             imp["interval"] = 10
 
-        # ResultsDirectory is the local cache for downloaded results
-        # NOTE: try: except: doesn'tseem to be triggering
-        #       using if instead
+        # Use if instead of try/except for ResultsDirectory
         if self.imp.ResultsDirectory != "":
             imp["ResultsDirectory"] = self.imp.ResultsDirectory
         else:
             imp["ResultsDirectory"] = "~/.fpdb/Results/"
 
-        # hhBulkPath is the default location for bulk imports (if set)
         try:
             imp["hhBulkPath"] = self.imp.hhBulkPath
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'hhBulkPath': {e}")
             imp["hhBulkPath"] = ""
 
         try:
             imp["saveActions"] = self.imp.saveActions
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'saveActions': {e}")
             imp["saveActions"] = False
 
         try:
             imp["cacheSessions"] = self.imp.cacheSessions
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'cacheSessions': {e}")
             imp["cacheSessions"] = False
 
         try:
             imp["publicDB"] = self.imp.publicDB
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'publicDB': {e}")
             imp["publicDB"] = False
 
         try:
             imp["sessionTimeout"] = self.imp.sessionTimeout
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'sessionTimeout': {e}")
             imp["sessionTimeout"] = 30
 
         try:
             imp["saveStarsHH"] = self.imp.saveStarsHH
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'saveStarsHH': {e}")
             imp["saveStarsHH"] = False
 
         try:
             imp["fastStoreHudCache"] = self.imp.fastStoreHudCache
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'fastStoreHudCache': {e}")
             imp["fastStoreHudCache"] = False
 
         try:
             imp["importFilters"] = self.imp.importFilters
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'importFilters': {e}")
             imp["importFilters"] = []
 
         try:
             imp["timezone"] = self.imp.timezone
-        except:
+        except AttributeError as e:
+            log.error(f"Error getting 'timezone': {e}")
             imp["timezone"] = "America/New_York"
 
         return imp
@@ -1995,7 +2002,8 @@ class Config(object):
     def get_layout_set_locations(self, set="mucked", max="9"):
         try:
             locations = self.layout_sets[set].layout[max].location
-        except:
+        except (KeyError, AttributeError) as e:
+            log.error(f"Error retrieving layout set locations for set='{set}', max='{max}': {e}")
             locations = (
                 (0, 0),
                 (684, 61),

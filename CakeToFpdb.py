@@ -24,8 +24,13 @@ from past.utils import old_div
 # import L10n
 # _ = L10n.get_translation()
 
-from HandHistoryConverter import *
-from decimal_wrapper import Decimal
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
+from decimal import Decimal
+import re
+import logging
+import datetime
+
+log = logging.getLogger("parser")
 
 
 class Cake(HandHistoryConverter):
@@ -627,7 +632,7 @@ class Cake(HandHistoryConverter):
 
         # Loop through each action and update the Hand object accordingly
         for action in m:
-            acts = action.groupdict()
+            # acts = action.groupdict()
             # print "DEBUG: acts: %s" %acts
             bet = self.convertMoneyString("BET", action)
             actionType = action.group("ATYPE")
@@ -760,7 +765,7 @@ class Cake(HandHistoryConverter):
         log.info(
             f"cake.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'"
         )
-        regex = f""
+        regex = ""
         print("regex get table cash title:", regex)
         if tournament:
             regex = f"Tournament:\s{tournament}\sBuy\-In\s\w+\s:\sTable\s{table_number}"

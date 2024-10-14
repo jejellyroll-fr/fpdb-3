@@ -38,7 +38,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QMessageBox,
 )
-import contextlib
+
 from time import time
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvas
@@ -46,7 +46,7 @@ from matplotlib.font_manager import FontProperties
 from numpy import cumsum
 import Database
 import Filters
-import Charset
+# import Charset
 
 
 class GuiGraphViewer(QSplitter):
@@ -123,7 +123,7 @@ class GuiGraphViewer(QSplitter):
 
         sitenos = []
         playerids = []
-        winnings = []
+        # winnings = []
         sites = self.filters.getSites()
         heroes = self.filters.getHeroes()
         siteids = self.filters.getSiteIds()
@@ -136,7 +136,9 @@ class GuiGraphViewer(QSplitter):
 
         for site in sites:
             sitenos.append(siteids[site])
-            _hname = Charset.to_utf8(heroes[site])
+            _hname = heroes.get(site, "")
+            if not _hname:
+                raise ValueError(f"Hero name not found for site {site}")
             result = self.db.get_player_id(self.conf, site, _hname)
             if result is not None:
                 playerids.append(int(result))
@@ -308,6 +310,8 @@ class GuiGraphViewer(QSplitter):
         nametest = str(tuple(names))
         sitetest = str(tuple(sites))
 
+        gametest = ""
+
         for m in list(self.filters.display.items()):
             if m[0] == "Games" and m[1]:
                 if len(games) > 0:
@@ -318,6 +322,7 @@ class GuiGraphViewer(QSplitter):
                     gametest = "and gt.category in %s" % gametest
                 else:
                     gametest = "and gt.category IS NULL"
+
         tmp = tmp.replace("<game_test>", gametest)
 
         limittest = self.filters.get_limits_where_clause(limits)
@@ -327,9 +332,11 @@ class GuiGraphViewer(QSplitter):
         currencytest = currencytest.replace("u'", "'")
         currencytest = "AND gt.currency in %s" % currencytest
 
-        if type == "ring":
+        game_type = self.filters.getType()
+
+        if game_type == "ring":
             limittest = limittest + " and gt.type = 'ring' "
-        elif type == "tour":
+        elif game_type == "tour":
             limittest = limittest + " and gt.type = 'tour' "
 
         tmp = tmp.replace("<player_test>", nametest)

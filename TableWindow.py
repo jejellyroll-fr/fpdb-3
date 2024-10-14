@@ -96,6 +96,17 @@ class Table_Window(object):
         self.hud = None  # fill in later
         self.gdkhandle = None
         self.number = None
+        # check if 
+        if isinstance(table_name, bytes):
+            print(f"Décodage de table_name en UTF-8 : {table_name}")
+            table_name = table_name.decode('utf-8')
+        if isinstance(tournament, bytes):
+            print(f"Décodage de table_name en UTF-8 : {tournament}")
+            tournament = tournament.decode('utf-8')
+        if isinstance(table_number, bytes):
+            print(f"Décodage de table_name en UTF-8 : {table_number}")
+            table_number = table_number.decode('utf-8')
+
         if tournament is not None and table_number is not None:
             print(tournament)
             self.tournament = int(tournament)
@@ -213,7 +224,7 @@ class Table_Window(object):
             log.debug(f"before searching: {new_title}")
             mo = re.search(self.tableno_re, new_title)
         except AttributeError:  #'Table' object has no attribute 'tableno_re'
-            log.debug(f"'Table' object has no attribute 'tableno_re'")
+            log.debug("'Table' object has no attribute 'tableno_re'")
             return False
 
         if mo is not None:
@@ -260,16 +271,16 @@ class Table_Window(object):
         return False  # no change
 
     def has_table_title_changed(self, hud):
-        log.debug(f"before get_table_no()")
+        log.debug("before get_table_no()")
         result = self.get_table_no()
         log.debug(f"tb has change nb {result}")
         if result is not False and result != self.table:
             log.debug(f"compare result and self.table {result} {self.table}")
             self.table = result
             if hud is not None:
-                log.debug(f"return True")
+                log.debug("return True")
                 return True
-        log.debug(f"return False")
+        log.debug("return False")
         return False
 
     def check_bad_words(self, title):

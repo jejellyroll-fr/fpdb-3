@@ -23,12 +23,17 @@ jobs:
       with:
         python-version: '3.11'
     
-    - name: Install dependencies
+    - name: Install uv and project dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest pytest-qt
-        pip install "pytest-cov>=5.0.0"
-        pip install -r requirements.txt
+        pip install uv ruff
+        uv venv
+        uv pip install .
+
+    - name: Run Ruff for linting
+      run: |
+        ruff check . --exclude .\archives\,.\regression-test-files\,.\pypoker-eval\
+
 
     - name: Create necessary directories
       run: mkdir -p C:/Users/runneradmin/AppData/Roaming/fpdb
@@ -36,9 +41,14 @@ jobs:
     - name: Copy HUD_config.xml
       run: |
         cp HUD_config.xml C:/Users/runneradmin/AppData/Roaming/fpdb/HUD_config.xml
-      
-    - name: Run tests with coverage
-      run: pytest --cov=. --cov-report=html .\test\
+
+    - name: Run tests with pytest
+      run: |
+        uv venv && uv pip install .[test]
+        $env:Path += ";$env:pythonLocation\Scripts"
+        .\.venv\Scripts\Activate.ps1
+        pytest --cov=. --cov-report=html .\test\
+      shell: pwsh
 
     - name: Check if htmlcov directory exists and list contents
       run: |

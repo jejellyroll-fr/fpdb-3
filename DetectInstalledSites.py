@@ -46,6 +46,9 @@ import os
 import sys
 
 import Configuration
+import logging
+
+log = logging.getLogger("config")
 
 if platform.system() == "Windows":
     # import winpaths
@@ -136,10 +139,8 @@ class DetectInstalledSites(object):
     def detectFullTilt(self):
         if self.Config.os_family == "Linux":
             hhp = os.path.expanduser("~/.wine/drive_c/Program Files/Full Tilt Poker/HandHistory/")
-        elif self.Config.os_family == "XP":
-            hhp = os.path.expanduser(PROGRAM_FILES + "\\Full Tilt Poker\\HandHistory\\")
-        elif self.Config.os_family == "Win7":
-            hhp = os.path.expanduser(PROGRAM_FILES + "\\Full Tilt Poker\\HandHistory\\")
+        elif self.Config.os_family in ["XP", "Win7"]:
+            hhp = os.path.expanduser(os.path.join(PROGRAM_FILES, "Full Tilt Poker", "HandHistory"))
         else:
             return
 
@@ -149,10 +150,20 @@ class DetectInstalledSites(object):
             return
 
         try:
-            self.herofound = os.listdir(self.hhpathfound)[0]
-            self.hhpathfound = self.hhpathfound + self.herofound
-        except:
-            pass
+            files = os.listdir(self.hhpathfound)
+            if files:
+                self.herofound = files[0]
+                self.hhpathfound = os.path.join(self.hhpathfound, self.herofound)
+        except FileNotFoundError:
+            # The HandHistory directory does not exist or is not accessible
+            self.herofound = None
+        except IndexError:
+            # No files in the HandHistory directory
+            self.herofound = None
+        except Exception as e:
+            # Generic management for any other unforeseen exceptions (logging, debugging, etc.)
+            log.error(f"An unexpected error has occurred : {e}")
+            self.herofound = None
 
         return
 
@@ -161,11 +172,11 @@ class DetectInstalledSites(object):
             hhp = os.path.expanduser("~/.wine/drive_c/Program Files/PokerStars/HandHistory/")
             tsp = os.path.expanduser("~/.wine/drive_c/Program Files/PokerStars/TournSummary/")
         elif self.Config.os_family == "XP":
-            hhp = os.path.expanduser(PROGRAM_FILES + "\\PokerStars\\HandHistory\\")
-            tsp = os.path.expanduser(PROGRAM_FILES + "\\PokerStars\\TournSummary\\")
+            hhp = os.path.expanduser(os.path.join(PROGRAM_FILES, "PokerStars", "HandHistory"))
+            tsp = os.path.expanduser(os.path.join(PROGRAM_FILES, "PokerStars", "TournSummary"))
         elif self.Config.os_family == "Win7":
-            hhp = os.path.expanduser(LOCAL_APPDATA + "\\PokerStars\\HandHistory\\")
-            tsp = os.path.expanduser(LOCAL_APPDATA + "\\PokerStars\\TournSummary\\")
+            hhp = os.path.expanduser(os.path.join(LOCAL_APPDATA, "PokerStars", "HandHistory"))
+            tsp = os.path.expanduser(os.path.join(LOCAL_APPDATA, "PokerStars", "TournSummary"))
         elif self.Config.os_family == "Mac":
             hhp = os.path.expanduser("~/Library/Application Support/PokerStars/HandHistory/")
             tsp = os.path.expanduser("~/Library/Application Support/PokerStars/TournSummary/")
@@ -180,12 +191,19 @@ class DetectInstalledSites(object):
             return
 
         try:
-            self.herofound = os.listdir(self.hhpathfound)[0]
-            self.hhpathfound = self.hhpathfound + self.herofound
-            if self.tspathfound:
-                self.tspathfound = self.tspathfound + self.herofound
-        except:
-            pass
+            files = os.listdir(self.hhpathfound)
+            if files:
+                self.herofound = files[0]
+                self.hhpathfound = os.path.join(self.hhpathfound, self.herofound)
+                if self.tspathfound:
+                    self.tspathfound = os.path.join(self.tspathfound, self.herofound)
+        except FileNotFoundError:
+            self.herofound = None
+        except IndexError:
+            self.herofound = None
+        except Exception as e:
+            log.error(f"An unexpected error has occurred : {e}")
+            self.herofound = None
 
         return
 
@@ -193,7 +211,7 @@ class DetectInstalledSites(object):
         if self.Config.os_family == "Linux":
             hhp = os.path.expanduser("~/.wine/drive_c/Program Files/PartyGaming/PartyPoker/HandHistory/")
         elif self.Config.os_family == "XP":
-            hhp = os.path.expanduser(PROGRAM_FILES + "\\PartyGaming\\PartyPoker\\HandHistory\\")
+            hhp = os.path.expanduser(os.path.join(PROGRAM_FILES, "PartyGaming", "PartyPoker", "HandHistory"))
         elif self.Config.os_family == "Win7":
             hhp = os.path.expanduser("c:\\Programs\\PartyGaming\\PartyPoker\\HandHistory\\")
         else:
@@ -209,10 +227,14 @@ class DetectInstalledSites(object):
             dirs.remove("XMLHandHistory")
 
         try:
-            self.herofound = dirs[0]
-            self.hhpathfound = self.hhpathfound + self.herofound
-        except:
-            pass
+            if dirs:
+                self.herofound = dirs[0]
+                self.hhpathfound = os.path.join(self.hhpathfound, self.herofound)
+        except IndexError:
+            self.herofound = None
+        except Exception as e:
+            log.error(f"An unexpected error has occurred : {e}")
+            self.herofound = None
 
         return
 
@@ -236,20 +258,25 @@ class DetectInstalledSites(object):
         for skin in merge_skin_names:
             if self.Config.os_family == "Linux":
                 hhp = os.path.expanduser("~/.wine/drive_c/Program Files/" + skin + "/history/")
-            elif self.Config.os_family == "XP":
-                hhp = os.path.expanduser(PROGRAM_FILES + "\\" + skin + "\\history\\")
-            elif self.Config.os_family == "Win7":
-                hhp = os.path.expanduser(PROGRAM_FILES + "\\" + skin + "\\history\\")
+            elif self.Config.os_family in ["XP", "Win7"]:
+                hhp = os.path.expanduser(os.path.join(PROGRAM_FILES, skin, "history"))
             else:
                 return
 
             if os.path.exists(hhp):
                 self.hhpathfound = hhp
                 try:
-                    self.herofound = os.listdir(self.hhpathfound)[0]
-                    self.hhpathfound = self.hhpathfound + self.herofound
-                    break
-                except:
-                    continue
+                    files = os.listdir(self.hhpathfound)
+                    if files:
+                        self.herofound = files[0]
+                        self.hhpathfound = os.path.join(self.hhpathfound, self.herofound)
+                        break
+                except FileNotFoundError:
+                    self.herofound = None
+                except IndexError:
+                    self.herofound = None
+                except Exception as e:
+                    log.error(f"An unexpected error has occurred : {e}")
+                    self.herofound = None
 
         return

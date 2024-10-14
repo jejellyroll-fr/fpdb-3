@@ -1,6 +1,6 @@
 import sqlite3
 import sys
-from base_model import *
+
 
 from pathlib import Path
 
@@ -246,10 +246,10 @@ def get_players(name=None, site=None, page=1, per_page=10):
     params = {"name": name, "site": site, "per_page": per_page, "offset": offset}
 
     # Convert dict to string
-    params_str = str(params)
+    # params_str = str(params)
 
     # Join query string
-    query = " ".join([sql, params_str])
+    # query = " ".join([sql, params_str])
 
     # Print formatted query
     # print(query)

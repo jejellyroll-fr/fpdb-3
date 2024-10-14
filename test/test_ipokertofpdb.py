@@ -40,7 +40,7 @@ def test_re_PlayerInfo3():
     m = re_PlayerInfo.finditer(text)
     plist = {}
     for a in m:
-        ag = a.groupdict()
+        a.groupdict()
         plist[a.group("PNAME")] = [int(a.group("SEAT")), (a.group("CASH")), (a.group("WIN")), False]
     assert len(plist) == 2
 
@@ -156,7 +156,7 @@ def test_re_GameInfoTrny_red():
     assert matches[5].group("WIN") == "N/A"
 
 
-def test_re_GameInfoTrny_red():
+def test_re_GameInfoTrny_red2():
     text = """
   <tournamentcode>1067382320</tournamentcode>
   <tournamentname>Series Freebuy Sat 1x125€</tournamentname>

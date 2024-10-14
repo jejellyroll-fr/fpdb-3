@@ -17,12 +17,14 @@
 
 # import L10n
 # _ = L10n.get_translation()
+from HandHistoryConverter import FpdbParseError
+from decimal import Decimal
+import re
+import logging
+from TourneySummary import TourneySummary
 
-from decimal_wrapper import Decimal
-
-from Exceptions import FpdbParseError
-from HandHistoryConverter import *
-from TourneySummary import *
+# Pacifc(888) HH Format
+log = logging.getLogger("parser")
 
 
 class PacificPokerSummary(TourneySummary):

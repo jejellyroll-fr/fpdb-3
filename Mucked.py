@@ -33,8 +33,6 @@ from past.utils import old_div
 #    Standard Library modules
 import logging
 
-# logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hud")
 
 from PyQt5.QtCore import QObject
 from PyQt5.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
@@ -44,6 +42,9 @@ from PyQt5.QtWidgets import QGridLayout, QLabel, QTableView, QVBoxLayout, QWidge
 import Card
 import Aux_Base
 # Utility routine to get the number of valid cards in the card tuple
+
+# logging has been set up in fpdb.py or HUD_main.py, use their settings:
+log = logging.getLogger("hud")
 
 
 def valid_cards(ct):
@@ -222,7 +223,7 @@ class Stud_cards(object):
                     _rank = Card.card_map[_rank]
                     self.eb[(i[0], c - 1)].setPixmap(self.card_images[_suit][_rank])
         #    action in tools tips for later streets
-        round_to_col = (0, 3, 4, 5, 6)
+        # round_to_col = (0, 3, 4, 5, 6)
         # for round in range(1, len(self.tips)):
         #    for r in range(0, self.rows):
         #        self.eb[(round_to_col[round], r)].set_tooltip_text(self.tips[round])

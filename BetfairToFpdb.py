@@ -22,7 +22,12 @@
 # import L10n
 # _ = L10n.get_translation()
 
-from HandHistoryConverter import *
+from HandHistoryConverter import HandHistoryConverter, FpdbParseError
+import re
+import logging
+import datetime
+
+log = logging.getLogger("parser")
 
 # Betfair HH format
 
@@ -157,7 +162,7 @@ class Betfair(HandHistoryConverter):
         try:
             m = self.re_PostSB.search(hand.handText)
             hand.addBlind(m.group("PNAME"), "small blind", m.group("SB"))
-        except:  # no small blind
+        except AttributeError:
             hand.addBlind(None, None, None)
         for a in self.re_PostBB.finditer(hand.handText):
             hand.addBlind(a.group("PNAME"), "big blind", a.group("BB"))

@@ -334,10 +334,10 @@ class HUD_main(QObject):
         if type == "tour":
             try:
                 log.debug("creating temp_key for tour")
-                if len(table_name) >= 2 and table_name[-2].endswith(","):
-                    parts = table_name.split(",", 1)
-                else:
-                    parts = table_name.split(" ", 1)
+                # if len(table_name) >= 2 and table_name[-2].endswith(","):
+                #     parts = table_name.split(",", 1)
+                # else:
+                #     parts = table_name.split(" ", 1)
 
                 tab_number = tab_number.rsplit(" ", 1)[-1]
                 temp_key = f"{tour_number} Table {tab_number}"

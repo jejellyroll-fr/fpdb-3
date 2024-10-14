@@ -23,19 +23,20 @@ from past.utils import old_div
 # import L10n
 # _ = L10n.get_translation()
 import Card
-from decimal_wrapper import Decimal, ROUND_DOWN
+from decimal import Decimal, ROUND_DOWN
 
 import logging
-
-# logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("parser")
 
 try:
     from pokereval import PokerEval
 
     pokereval = PokerEval()
-except:
+except Exception:
     pokereval = None
+
+
+# logging has been set up in fpdb.py or HUD_main.py, use their settings:
+log = logging.getLogger("parser")
 
 
 def _buildStatsInitializer():
@@ -400,7 +401,8 @@ class DerivedStats(object):
 
     def assembleHandsStove(self, hand):
         category = hand.gametype["category"]
-        holecards, holeplayers, allInStreets = {}, [], hand.allStreets[1:]
+        # holecards, holeplayers, allInStreets = {}, [], hand.allStreets[1:]
+        holecards, holeplayers = {}, []
         base, evalgame, hilo, streets, last, hrange = Card.games[category]
         hiLoKey = {"h": [("h", "hi")], "l": [("l", "low")], "s": [("h", "hi"), ("l", "low")], "r": [("l", "hi")]}
         boards = self.getBoardsDict(hand, base, streets)
@@ -637,7 +639,8 @@ class DerivedStats(object):
         if pokereval and len(hand.pot.pots) > 1 and evalgame and holeshow:  # hrange
             hand.collected = []  # list of ?
             hand.collectees = {}  # dict from player names to amounts collected (?)
-            rakes, totrake, potId = {}, 0, 0
+            # rakes, totrake, potId = {}, 0, 0
+            potId = 0
             totalrake = hand.rakes.get("rake")
             if not totalrake:
                 totalpot = hand.rakes.get("pot")
@@ -649,7 +652,8 @@ class DerivedStats(object):
                 if potId == 0:
                     pot += sum(hand.pot.common.values()) + hand.pot.stp
                 potId += 1
-                boards, boardId, sumpot = self.getBoardsList(hand), 0, 0
+                # boards, boardId, sumpot = self.getBoardsList(hand), 0, 0
+                boards, boardId = self.getBoardsList(hand), 0
                 for b in boards:
                     boardId += hand.runItTimes >= 2
                     potBoard = Decimal(int(pot / len(boards) * factor)) / factor
@@ -761,14 +765,15 @@ class DerivedStats(object):
             and evalgame
             and (len(hand.pot.pots) > 1 or (showdown and (hilo == "s" or hand.runItTimes >= 2)))
         ):
-            rakes, totrake, potId = {}, 0, 0
-
+            # rakes, totrake, potId = {}, 0, 0
+            potId = 0
             for pot, players in hand.pot.pots:
                 if potId == 0:
                     pot += sum(hand.pot.common.values()) + hand.pot.stp
                 potId += 1
 
-                boards, boardId, sumpot = self.getBoardsList(hand), 0, 0
+                # boards, boardId, sumpot = self.getBoardsList(hand), 0, 0
+                boards, boardId = self.getBoardsList(hand), 0
 
                 for b in boards:
                     boardId += hand.runItTimes >= 2
@@ -842,7 +847,9 @@ class DerivedStats(object):
                     for item in info:
                         # log.error((str(hand.handid)," winners: ",item['winners']))
                         split = [
-                            n for n in item["winners"] if len(playersPots[n][1]) == 1 and hand.collectees.get(n) is not None
+                            n
+                            for n in item["winners"]
+                            if len(playersPots[n][1]) == 1 and hand.collectees.get(n) is not None
                         ]
                         if len(info) == 1:
                             ppot = item["ppot"]
@@ -1048,7 +1055,7 @@ class DerivedStats(object):
             # find out who folded, and eliminate them from p_in
             #
             actions = hand.actions[street]
-            p_in = p_in - self.pfba(actions, l=("folds",))
+            p_in = p_in - self.pfba(actions, ("folds",))
             #
             # if everyone folded, we are done, so exit this method
             #
@@ -1092,6 +1099,7 @@ class DerivedStats(object):
         """
         steal_attempt = False
         raised = False
+        stealer = ""
         if hand.gametype["base"] == "stud":
             steal_positions = (2, 1, 0)
         elif len([x for x in hand.actions[hand.actionStreets[0]] if x[1] == "button blind"]) > 0:
@@ -1194,7 +1202,7 @@ class DerivedStats(object):
                 if aggr:
                     player_stats["street0_3BDone"] = True
                     player_stats["street0_SqueezeDone"] = squeeze_chance
-                    second_agressor = pname
+                    # second_agressor = pname
                     bet_level += 1
                 continue
             elif bet_level == 3:
@@ -1333,7 +1341,7 @@ class DerivedStats(object):
                 #                           %(hand.handid, playername, hand.actionStreets[i+1], i)
 
     def calls(self, hand, i):
-        callers = []
+        # callers = []
         for act in hand.actions[hand.actionStreets[i + 1]]:
             if act[1] in ("calls"):
                 player_stats = self.handsplayers.get(act[0])
@@ -1363,33 +1371,33 @@ class DerivedStats(object):
     def countPlayers(self, hand):
         pass
 
-    def pfba(self, actions, f=None, l=None):
+    def pfba(self, actions, f=None, limit_actions=None):
         """Helper method. Returns set of PlayersFilteredByActions
 
         f - forbidden actions
-        l - limited to actions
+        limit_actions - limited to actions
         """
         players = set()
         for action in actions:
-            if l is not None and action[1] not in l:
+            if limit_actions is not None and action[1] not in limit_actions:
                 continue
             if f is not None and action[1] in f:
                 continue
             players.add(action[0])
         return players
 
-    def pfbao(self, actions, f=None, l=None, unique=True):
+    def pfbao(self, actions, f=None, limit_actions=None, unique=True):
         """Helper method. Returns set of PlayersFilteredByActionsOrdered
 
         f - forbidden actions
-        l - limited to actions
+        limit_actions - limited to actions
         """
         # Note, this is an adaptation of function 5 from:
         # http://www.peterbe.com/plog/uniqifiers-benchmark
         seen = {}
         players = []
         for action in actions:
-            if l is not None and action[1] not in l:
+            if limit_actions is not None and action[1] not in limit_actions:
                 continue
             if f is not None and action[1] in f:
                 continue

@@ -6,7 +6,6 @@ from __future__ import division
 import itertools
 
 from past.utils import old_div
-import pathlib
 import os
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QDate, QDateTime
@@ -344,11 +343,13 @@ class Filters(QWidget):
         else:
             return {}
 
-    def getGraphOps(self):
-        return [g for g in self.cbGraphops if self.cbGraphops[g].isChecked()]
+    # def getGraphOps(self):
+    #     return [g for g in self.cbGraphops if self.cbGraphops[g].isChecked()]
 
     def getLimits(self):
-        return [l for l in self.cbLimits if self.cbLimits[l].isChecked() and self.cbLimits[l].isEnabled()]
+        return [
+            limit for limit in self.cbLimits if self.cbLimits[limit].isChecked() and self.cbLimits[limit].isEnabled()
+        ]
 
     def getType(self):
         return self.type
@@ -475,8 +476,8 @@ class Filters(QWidget):
             checkbox.setChecked(setState)
 
     def __select_limit(self, checkState, limit):
-        for l, checkbox in list(self.cbLimits.items()):
-            if l.endswith(limit):
+        for limit_key, checkbox in list(self.cbLimits.items()):
+            if limit_key.endswith(limit):
                 checkbox.setChecked(True)
 
     def fillPlayerFrame(self, frame, display):
@@ -484,7 +485,7 @@ class Filters(QWidget):
         frame.setLayout(vbox)
         self.heroList = QComboBox()
         self.heroList.setStyleSheet("background-color: #455364")
-        current_directory = str(pathlib.Path(__file__).parent.absolute())
+        # current_directory = str(pathlib.Path(__file__).parent.absolute())
 
         for count, site in enumerate(self.conf.get_supported_sites(), start=1):
             player = self.conf.supported_sites[site].screen_name

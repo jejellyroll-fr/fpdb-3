@@ -1,15 +1,14 @@
 import pytest
 from xml.dom.minidom import Document
 import sys
-
-
 from pathlib import Path
 
+
 sys.path.append(str(Path(__file__).parent.parent))
-from Configuration import *
+from Configuration import Config
 
 
-# Test pour increment_position
+# Test for increment_position
 def test_increment_position_valid():
     config = Config()
     assert config.increment_position("(0,0)") == "(1,1)"
@@ -37,11 +36,11 @@ def test_increment_position_negative_values():
 
 @pytest.fixture
 def config():
-    # Création d'une instance de la classe Config avec un document XML vide
+    # Create instance
     config = Config()
     doc = Document()
 
-    # Création d'un stat set
+    # Crate stat set
     statset = doc.createElement("ss")
     statset.setAttribute("name", "hud_test")
 
@@ -58,7 +57,7 @@ def config():
 
 
 def test_edit_hud(config):
-    # Appel de la fonction edit_hud avec des valeurs de test
+    # call function edit_hud with test data
     config.edit_hud(
         hud_name="hud_test",
         position="(0,0)",
@@ -75,11 +74,11 @@ def test_edit_hud(config):
         tip="Some tip",
     )
 
-    # Récupérer le noeud modifié
+    # Get modified node
     statset_node = config.doc.getElementsByTagName("ss")[0]
     stat_node = statset_node.getElementsByTagName("stat")[0]
 
-    # Vérifier que les attributs ont été correctement modifiés
+    # checks
     assert stat_node.getAttribute("_stat_name") == "pfr"
     assert stat_node.getAttribute("click") == "True"
     assert stat_node.getAttribute("hudcolor") == "#F44336"
