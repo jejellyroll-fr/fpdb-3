@@ -47,7 +47,6 @@ FILES=(
     "CakeToFpdb.py"
     "Card.py"
     "card_path.py"
-    "Charset.py"
     "Configuration.py"
     "Database.py"
     "decimal_wrapper.py"
