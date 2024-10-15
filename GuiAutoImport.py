@@ -1,12 +1,26 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from __future__ import print_function
-#import L10n
-#_ = L10n.get_translation()
+
+# import L10n
+# _ = L10n.get_translation()
 import subprocess
 import traceback
 import os
 import sys
 import logging
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QPushButton, QLineEdit, QTextEdit, QCheckBox, QFileDialog
+from PyQt5.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QSpinBox,
+    QPushButton,
+    QLineEdit,
+    QTextEdit,
+    QCheckBox,
+    QFileDialog,
+)
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QTextCursor
 
@@ -24,12 +38,15 @@ log = logging.getLogger("importer")
 if os.name == "nt":
     import win32console
 
+
 def to_raw(string):
-    return fr"{string}"
+    return rf"{string}"
+
 
 class GuiAutoImport(QWidget):
-    def __init__(self, settings, config, sql = None, parent = None, cli = False):
-        QWidget.__init__(self, parent)
+    def __init__(self, settings, config, sql=None, parent=None, cli=False):
+        if not cli:
+            QWidget.__init__(self, parent)
         self.importtimer = None
         self.settings = settings
         self.config = config
@@ -40,23 +57,24 @@ class GuiAutoImport(QWidget):
         self.pipe_to_hud = None
 
         self.importer = Importer.Importer(self, self.settings, self.config, self.sql)
+
         self.importer.setCallHud(True)
         self.importer.setQuiet(False)
         self.importer.setHandCount(0)
-        self.importer.setMode('auto')
+        self.importer.setMode("auto")
 
-        self.server = settings['db-host']
-        self.user = settings['db-user']
-        self.password = settings['db-password']
-        self.database = settings['db-databaseName']
+        self.server = settings["db-host"]
+        self.user = settings["db-user"]
+        self.password = settings["db-password"]
+        self.database = settings["db-databaseName"]
 
-        if cli == False:
+        if cli is False:
             self.setupGui()
         else:
             # TODO: Separate the code that grabs the directories from config
             #       Separate the calls to the Importer API
             #       Create a timer interface that doesn't rely on GTK
-            pass
+            raise NotImplementedError
 
     def setupGui(self):
         self.setLayout(QVBoxLayout())
@@ -94,22 +112,26 @@ class GuiAutoImport(QWidget):
     def addText(self, text):
         self.textview.moveCursor(QTextCursor.End)
         self.textview.insertPlainText(text)
-#   end of GuiAutoImport.__init__
+
+    #   end of GuiAutoImport.__init__
 
     def browseClicked(self):
-#   runs when user clicks one of the browse buttons in the auto import tab"""
-#       Browse is not valid while hud is running, so return immediately
-        if (self.pipe_to_hud):
+        #   runs when user clicks one of the browse buttons in the auto import tab"""
+        #       Browse is not valid while hud is running, so return immediately
+        if self.pipe_to_hud:
             return
         data = self.sender().hackdata
         current_path = data[1].text()
 
-        newdir = QFileDialog.getExistingDirectory(self, caption=("Please choose the path that you want to Auto Import"),directory=current_path)
+        newdir = QFileDialog.getExistingDirectory(
+            self, caption=("Please choose the path that you want to Auto Import"), directory=current_path
+        )
         if newdir:
-            #print dia_chooser.get_filename(), 'selected'
+            # print dia_chooser.get_filename(), 'selected'
             data[1].setText(newdir)
             self.input_settings[data[0]][0] = newdir
-    #end def GuiAutoImport.browseClicked
+
+    # end def GuiAutoImport.browseClicked
 
     def do_import(self):
         """Callback for timer to do an import iteration."""
@@ -122,9 +144,9 @@ class GuiAutoImport(QWidget):
 
     def reset_startbutton(self):
         if self.pipe_to_hud is not None:
-            self.startButton.set_label((u'Stop Auto Import'))
+            self.startButton.set_label(("Stop Auto Import"))
         else:
-            self.startButton.set_label((u'Start Auto Import'))
+            self.startButton.set_label(("Start Auto Import"))
 
         return False
 
@@ -133,28 +155,26 @@ class GuiAutoImport(QWidget):
         the_sites = self.config.get_supported_sites()
         for site in the_sites:
             params = self.config.get_site_parameters(site)
-            if params['enabled'] == True:
+            if params["enabled"] is True:
                 print(("DEBUG:") + " " + ("Detecting hand history directory for site: '%s'") % site)
-                if os.name == 'posix':
+                if os.name == "posix":
                     if self.posix_detect_hh_dirs(site):
-                        #data[1].set_text(dia_chooser.get_filename())
-                        self.input_settings[(site, 'hh')][0]
+                        # data[1].set_text(dia_chooser.get_filename())
+                        self.input_settings[(site, "hh")][0]
                         pass
-                elif os.name == 'nt':
+                elif os.name == "nt":
                     # Sorry
                     pass
 
     def posix_detect_hh_dirs(self, site):
         defaults = {
-                    'PokerStars': '~/.wine/drive_c/Program Files/PokerStars/HandHistory',
-                   }
-        if site == 'PokerStars':
+            "PokerStars": "~/.wine/drive_c/Program Files/PokerStars/HandHistory",
+        }
+        if site == "PokerStars":
             directory = os.path.expanduser(defaults[site])
-            for file in [file for file in os.listdir(directory) if not file in [".",".."]]:
+            for file in [file for file in os.listdir(directory) if file not in [".", ".."]]:
                 print(file)
         return False
-
-
 
     def startClicked(self):
         """runs when user clicks start on auto import tab"""
@@ -168,72 +188,79 @@ class GuiAutoImport(QWidget):
         # That is not correct.  It should open another dir for importing while piping the
         # results to the same pipe.  This means that self.path should be a a list of dirs
         # to watch.
-        
+
         if self.startButton.isChecked():
             # - Does the lock acquisition need to be more sophisticated for multiple dirs?
             # (see comment above about what to do if pipe already open)
             # - Ideally we want to release the lock if the auto-import is killed by some
             # kind of exception - is this possible?
-            if self.settings['global_lock'].acquire(wait=False, source="AutoImport"):
+            if self.settings["global_lock"].acquire(wait=False, source="AutoImport"):
                 self.addText("\n" + ("Global lock taken ... Auto Import Started.") + "\n")
                 self.doAutoImportBool = True
                 self.intervalEntry.setEnabled(False)
                 if self.pipe_to_hud is None:
-                    print('start hud- pipe_to_hud is none:')
+                    print("start hud- pipe_to_hud is none:")
                     try:
                         if self.config.install_method == "exe":
-                            print('start hud- true1:')
                             command = "HUD_main.exe"
                             bs = 0
                         elif self.config.install_method == "app":
-                            print('start hud- true1:')
-                            base_path = sys._MEIPASS if getattr(sys, 'frozen', False) else sys.path[0]
+                            base_path = sys._MEIPASS if getattr(sys, "frozen", False) else sys.path[0]
                             command = os.path.join(base_path, "HUD_main")
                             if not os.path.isfile(command):
                                 raise FileNotFoundError(f"HUD_main not found at {command}")
                             bs = 1
-                        elif os.name == 'nt':
-                            print('start hud- true1:')
+                        elif os.name == "nt":
                             path = to_raw(sys.path[0])
                             print("start hud- path", path)
                             path2 = os.getcwd()
                             print("start hud- path2", path2)
                             if win32console.GetConsoleWindow() == 0:
-                                command = 'pythonw "' + path + '\HUD_main.pyw" ' + self.settings['cl_options']
+                                command = 'pythonw "' + path + '\HUD_main.pyw" ' + self.settings["cl_options"]
                                 print("start hud-comand1", command)
                             else:
-                                command = 'python "' + path + '\HUD_main.pyw" ' + self.settings['cl_options']
+                                command = 'python "' + path + '\HUD_main.pyw" ' + self.settings["cl_options"]
                                 print("start hud-comand2", command)
                             bs = 0
                         else:
-                            base_path = sys._MEIPASS if getattr(sys, 'frozen', False) else sys.path[0]
-                            command = os.path.join(base_path, 'HUD_main.pyw')
+                            base_path = sys._MEIPASS if getattr(sys, "frozen", False) else sys.path[0] or os.getcwd()
+                            command = os.path.join(base_path, "HUD_main.pyw")
                             if not os.path.isfile(command):
-                                self.addText("\n" + ('*** %s was not found') % (command))
-                            command = [command, ] + str.split(self.settings['cl_options'])
+                                self.addText("\n" + ("*** %s was not found") % (command))
+                            command = [
+                                command,
+                            ] + str.split(self.settings["cl_options"], ".")
                             bs = 1
 
                         print(("opening pipe to HUD"))
-                        if self.config.install_method == "exe" or (os.name == "nt" and win32console.GetConsoleWindow() == 0):
-                            print('start hud methode install exe:')
-                            print(command)
-                            self.pipe_to_hud = subprocess.Popen(command, bufsize=bs,
-                                                                stdin=subprocess.PIPE,
-                                                                stdout=subprocess.PIPE,
-                                                                stderr=subprocess.PIPE,
-                                                                universal_newlines=True
-                                                            )
+                        print(f"Running {command.__repr__()}")
+                        if self.config.install_method == "exe" or (
+                            os.name == "nt" and win32console.GetConsoleWindow() == 0
+                        ):
+                            self.pipe_to_hud = subprocess.Popen(
+                                command,
+                                bufsize=bs,
+                                stdin=subprocess.PIPE,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                universal_newlines=True,
+                            )
                         else:
-                            self.pipe_to_hud = subprocess.Popen(command, bufsize=bs, stdin=subprocess.PIPE, universal_newlines=True)
-                            print('start hud methode install other:')
-                            print(command)
+                            self.pipe_to_hud = subprocess.Popen(
+                                command, bufsize=bs, stdin=subprocess.PIPE, universal_newlines=True
+                            )
 
-                    except Exception as e:
+                    except Exception:
                         self.addText("\n" + ("*** GuiAutoImport Error opening pipe:") + " " + traceback.format_exc())
+                        # TODO: log.warning() ?
                     else:
-                        for (site, type) in self.input_settings:
-                            self.importer.addImportDirectory(self.input_settings[(site, type)][0], monitor=True, site=(site, type))
-                            self.addText("\n * " + ("Add %s import directory %s") % (site, self.input_settings[(site, type)][0]))
+                        for site, type in self.input_settings:
+                            self.importer.addImportDirectory(
+                                self.input_settings[(site, type)][0], monitor=True, site=(site, type)
+                            )
+                            self.addText(
+                                "\n * " + ("Add %s import directory %s") % (site, self.input_settings[(site, type)][0])
+                            )
                             self.do_import()
                         interval = self.intervalEntry.value()
                         self.importtimer = QTimer()
@@ -246,7 +273,7 @@ class GuiAutoImport(QWidget):
             self.doAutoImportBool = False
             self.importtimer = None
             self.importer.autoSummaryGrab(True)
-            self.settings['global_lock'].release()
+            self.settings["global_lock"].release()
             self.addText("\n" + ("Stopping Auto Import.") + ("Global lock released."))
             if self.pipe_to_hud and self.pipe_to_hud.poll() is not None:
                 self.addText("\n * " + ("Stop Auto Import") + ": " + ("HUD already terminated."))
@@ -257,38 +284,38 @@ class GuiAutoImport(QWidget):
                 self.pipe_to_hud = None
             self.intervalEntry.setEnabled(True)
 
-
-    #end def GuiAutoImport.startClicked
+    # end def GuiAutoImport.startClicked
 
     def get_vbox(self):
         """returns the vbox of this thread"""
         return self.mainVBox
-    #end def get_vbox
 
-    #Create the site line given required info and setup callbacks
-    #enabling and disabling sites from this interface not possible
-    #expects a box to layout the line horizontally
-    def createSiteLine(self, hbox1, hbox2, site, iconpath, type, path, filter_name, active = True):
+    # end def get_vbox
+
+    # Create the site line given required info and setup callbacks
+    # enabling and disabling sites from this interface not possible
+    # expects a box to layout the line horizontally
+    def createSiteLine(self, hbox1, hbox2, site, iconpath, type, path, filter_name, active=True):
         label = QLabel(("%s auto-import:") % site)
         hbox1.addWidget(label)
 
-        dirPath=QLineEdit()
+        dirPath = QLineEdit()
         dirPath.setText(path)
         hbox1.addWidget(dirPath)
-#       Anything typed into dirPath was never recognised (only the browse button works)
-#       so just prevent entry to avoid user confusion
+        #       Anything typed into dirPath was never recognised (only the browse button works)
+        #       so just prevent entry to avoid user confusion
         dirPath.setReadOnly(True)
 
-        browseButton=QPushButton(("Browse..."))
+        browseButton = QPushButton(("Browse..."))
         browseButton.hackdata = [(site, type)] + [dirPath]
-        browseButton.clicked.connect(self.browseClicked)#, [(site,type)] + [dirPath])
+        browseButton.clicked.connect(self.browseClicked)  # , [(site,type)] + [dirPath])
         hbox2.addWidget(browseButton)
 
         label = QLabel("filter:")
         hbox2.addWidget(label)
 
-#       Anything typed into filter was never recognised
-#       so just grey it out to avoid user confusion
+        #       Anything typed into filter was never recognised
+        #       so just grey it out to avoid user confusion
         filterLine = QLineEdit()
         filterLine.setText(filter_name)
         filterLine.setEnabled(False)
@@ -296,7 +323,7 @@ class GuiAutoImport(QWidget):
 
     def addSites(self, vbox1, vbox2):
         the_sites = self.config.get_supported_sites()
-        #log.debug("addSites: the_sites="+str(the_sites))
+        # log.debug("addSites: the_sites="+str(the_sites))
         for site in the_sites:
             pathHBox1 = QHBoxLayout()
             vbox1.addLayout(pathHBox1)
@@ -305,20 +332,39 @@ class GuiAutoImport(QWidget):
 
             params = self.config.get_site_parameters(site)
             paths = self.config.get_default_paths(site)
-            
-            self.createSiteLine(pathHBox1, pathHBox2, site, False, 'hh', paths['hud-defaultPath'], params['converter'], params['enabled'])
-            self.input_settings[(site, 'hh')] = [paths['hud-defaultPath']] + [params['converter']]
-            
-            if 'hud-defaultTSPath' in paths:
+
+            self.createSiteLine(
+                pathHBox1,
+                pathHBox2,
+                site,
+                False,
+                "hh",
+                paths["hud-defaultPath"],
+                params["converter"],
+                params["enabled"],
+            )
+            self.input_settings[(site, "hh")] = [paths["hud-defaultPath"]] + [params["converter"]]
+
+            if "hud-defaultTSPath" in paths:
                 pathHBox1 = QHBoxLayout()
                 vbox1.addLayout(pathHBox1)
                 pathHBox2 = QHBoxLayout()
                 vbox2.addLayout(pathHBox2)
-                self.createSiteLine(pathHBox1, pathHBox2, site, False, 'ts', paths['hud-defaultTSPath'], params['summaryImporter'], params['enabled'])
-                self.input_settings[(site, 'ts')] = [paths['hud-defaultTSPath']] + [params['summaryImporter']]
-        #log.debug("addSites: input_settings="+str(self.input_settings))
+                self.createSiteLine(
+                    pathHBox1,
+                    pathHBox2,
+                    site,
+                    False,
+                    "ts",
+                    paths["hud-defaultTSPath"],
+                    params["summaryImporter"],
+                    params["enabled"],
+                )
+                self.input_settings[(site, "ts")] = [paths["hud-defaultTSPath"]] + [params["summaryImporter"]]
+        # log.debug("addSites: input_settings="+str(self.input_settings))
 
-if __name__== "__main__":
+
+if __name__ == "__main__":
     parser = OptionParser()
     parser.add_option("-q", "--quiet", action="store_false", dest="gui", default=True, help="don't start gui")
     (options, argv) = parser.parse_args()
@@ -326,17 +372,20 @@ if __name__== "__main__":
     config = Configuration.Config()
 
     settings = {}
-    if os.name == 'nt': settings['os'] = 'windows'
-    else:               settings['os'] = 'linuxmac'
+    if os.name == "nt":
+        settings["os"] = "windows"
+    else:
+        settings["os"] = "linuxmac"
 
     settings.update(config.get_db_parameters())
     settings.update(config.get_import_parameters())
     settings.update(config.get_default_paths())
-    settings['global_lock'] = interlocks.InterProcessLock(name="fpdb_global_lock")
-    settings['cl_options'] = '.'.join(sys.argv[1:])
+    settings["global_lock"] = interlocks.InterProcessLock(name="fpdb_global_lock")
+    settings["cl_options"] = ".".join(sys.argv[1:])
 
-    if(options.gui == True):
+    if options.gui is True:
         from PyQt5.QtWidgets import QApplication, QMainWindow
+
         app = QApplication([])
         i = GuiAutoImport(settings, config, None, None)
         main_window = QMainWindow()
@@ -344,4 +393,4 @@ if __name__== "__main__":
         main_window.show()
         app.exec_()
     else:
-        i = GuiAutoImport(settings, config, cli = True)
+        i = GuiAutoImport(settings, config, cli=True)
