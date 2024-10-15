@@ -18,3 +18,4 @@ jinja2
 qt_material
 pyzmq==26.0.3
 cachetools==5.5.0
+starlette>=0.40.0 # not directly required, pinned by Snyk to avoid a vulnerability
