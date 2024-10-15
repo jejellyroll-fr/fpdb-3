@@ -1,9 +1,0 @@
-If you want to run the Odds Oracle from the command line, execute the following from the directory containing this file:
-
-java -jar p2.jar
-
-If you want to run a PQL query from the command line without using the Odds Oracle UI, execute the following
-
-java -cp p2.jar propokertools.cli.RunPQL
-
-For details on running in secure mode, please read the ppt.security file.

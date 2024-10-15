@@ -1,8 +1,0 @@
-@startuml classes
-set namespaceSeparator none
-class "PokerStarsStructures" as PokerStarsStructures.PokerStarsStructures {
-  SnG_Structures : list
-  versions
-  lookupSnG(key, startTime)
-}
-@enduml

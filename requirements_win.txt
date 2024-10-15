@@ -16,3 +16,5 @@ QDarkStyle==3.0.3
 fastapi
 jinja2
 qt_material
+pyzmq==26.0.3
+cachetools==5.5.0

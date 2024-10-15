@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Copyright 2011 Gimick bbtgaf@googlemail.com
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, version 3 of the License.
+# Copyright 2011 Gimick bbtgaf@googlemail.com
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with this program. If not, see <http://www.gnu.org/licenses/>.
-#In the "official" distribution you can find the license in agpl-3.0.txt.
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# In the "official" distribution you can find the license in agpl-3.0.txt.
 
 """
 Attempt to detect which poker sites are installed by the user, their
@@ -46,20 +46,23 @@ import os
 import sys
 
 import Configuration
+import logging
 
-if platform.system() == 'Windows':
-    #import winpaths
-    #PROGRAM_FILES = winpaths.get_program_files()
-    #LOCAL_APPDATA = winpaths.get_local_appdata()
+log = logging.getLogger("config")
+
+if platform.system() == "Windows":
+    # import winpaths
+    # PROGRAM_FILES = winpaths.get_program_files()
+    # LOCAL_APPDATA = winpaths.get_local_appdata()
     import os
-    PROGRAM_FILES = os.getenv('ProgramW6432')
-    LOCAL_APPDATA = os.getenv('APPDATA')
+
+    PROGRAM_FILES = os.getenv("ProgramW6432")
+    LOCAL_APPDATA = os.getenv("APPDATA")
+
 
 class DetectInstalledSites(object):
-
-    def __init__(self, sitename = "All"):
-
-        self.Config=Configuration.Config()
+    def __init__(self, sitename="All"):
+        self.Config = Configuration.Config()
         #
         # objects returned
         #
@@ -70,43 +73,39 @@ class DetectInstalledSites(object):
         self.tspath = ""
         self.detected = ""
         #
-        #since each site has to be hand-coded in this module, there
-        #is little advantage in querying the sites table at the moment.
-        #plus we can run from the command line as no dependencies
+        # since each site has to be hand-coded in this module, there
+        # is little advantage in querying the sites table at the moment.
+        # plus we can run from the command line as no dependencies
         #
-        self.supportedSites = [ "Full Tilt Poker",
-                                "PartyPoker",
-                                "Merge",
-                                "PokerStars"]#,
-                                #"Everleaf",
-                                #"Win2day",
-                                #"OnGame",
-                                #"UltimateBet",
-                                #"Betfair",
-                                #"Absolute",
-                                #"PacificPoker",
-                                #"Partouche",
-                                #"PKR",
-                                #"iPoker",
-                                #"Winamax",
-                                #"Everest" ]
+        self.supportedSites = ["Full Tilt Poker", "PartyPoker", "Merge", "PokerStars"]  # ,
+        # "Everleaf",
+        # "Win2day",
+        # "OnGame",
+        # "UltimateBet",
+        # "Betfair",
+        # "Absolute",
+        # "PacificPoker",
+        # "Partouche",
+        # "PKR",
+        # "iPoker",
+        # "Winamax",
+        # "Everest" ]
 
         self.supportedPlatforms = ["Linux", "XP", "Win7"]
 
         if sitename == "All":
             for siteiter in self.supportedSites:
-                self.sitestatusdict[siteiter]=self.detect(siteiter)
+                self.sitestatusdict[siteiter] = self.detect(siteiter)
         else:
-            self.sitestatusdict[sitename]=self.detect(sitename)
-            self.heroname = self.sitestatusdict[sitename]['heroname']
-            self.hhpath = self.sitestatusdict[sitename]['hhpath']
-            self.tspath = self.sitestatusdict[sitename]['tspath']
-            self.detected = self.sitestatusdict[sitename]['detected']
+            self.sitestatusdict[sitename] = self.detect(sitename)
+            self.heroname = self.sitestatusdict[sitename]["heroname"]
+            self.hhpath = self.sitestatusdict[sitename]["hhpath"]
+            self.tspath = self.sitestatusdict[sitename]["tspath"]
+            self.detected = self.sitestatusdict[sitename]["detected"]
 
         return
 
     def detect(self, siteToDetect):
-
         self.hhpathfound = ""
         self.tspathfound = ""
         self.herofound = ""
@@ -120,7 +119,7 @@ class DetectInstalledSites(object):
         elif siteToDetect == "Merge":
             self.detectMergeNetwork()
 
-        if (self.hhpathfound and self.herofound):
+        if self.hhpathfound and self.herofound:
             encoding = sys.getfilesystemencoding()
             if type(self.hhpathfound) is not str:
                 self.hhpathfound = str(self.hhpathfound, encoding)
@@ -128,18 +127,20 @@ class DetectInstalledSites(object):
                 self.tspathfound = str(self.tspathfound, encoding)
             if type(self.herofound) is not str:
                 self.herofound = str(self.herofound, encoding)
-            return {"detected":True, "hhpath":self.hhpathfound, "heroname":self.herofound, "tspath":self.tspathfound}
+            return {
+                "detected": True,
+                "hhpath": self.hhpathfound,
+                "heroname": self.herofound,
+                "tspath": self.tspathfound,
+            }
         else:
-            return {"detected":False, "hhpath":u"", "heroname":u"", "tspath":u""}
+            return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
 
     def detectFullTilt(self):
-
         if self.Config.os_family == "Linux":
-            hhp=os.path.expanduser("~/.wine/drive_c/Program Files/Full Tilt Poker/HandHistory/")
-        elif self.Config.os_family == "XP":
-            hhp=os.path.expanduser(PROGRAM_FILES+"\\Full Tilt Poker\\HandHistory\\")
-        elif self.Config.os_family == "Win7":
-            hhp=os.path.expanduser(PROGRAM_FILES+"\\Full Tilt Poker\\HandHistory\\")
+            hhp = os.path.expanduser("~/.wine/drive_c/Program Files/Full Tilt Poker/HandHistory/")
+        elif self.Config.os_family in ["XP", "Win7"]:
+            hhp = os.path.expanduser(os.path.join(PROGRAM_FILES, "Full Tilt Poker", "HandHistory"))
         else:
             return
 
@@ -149,27 +150,36 @@ class DetectInstalledSites(object):
             return
 
         try:
-            self.herofound = os.listdir(self.hhpathfound)[0]
-            self.hhpathfound = self.hhpathfound + self.herofound
-        except:
-            pass
+            files = os.listdir(self.hhpathfound)
+            if files:
+                self.herofound = files[0]
+                self.hhpathfound = os.path.join(self.hhpathfound, self.herofound)
+        except FileNotFoundError:
+            # The HandHistory directory does not exist or is not accessible
+            self.herofound = None
+        except IndexError:
+            # No files in the HandHistory directory
+            self.herofound = None
+        except Exception as e:
+            # Generic management for any other unforeseen exceptions (logging, debugging, etc.)
+            log.error(f"An unexpected error has occurred : {e}")
+            self.herofound = None
 
         return
-        
-    def detectPokerStars(self):
 
+    def detectPokerStars(self):
         if self.Config.os_family == "Linux":
-            hhp=os.path.expanduser("~/.wine/drive_c/Program Files/PokerStars/HandHistory/")
-            tsp=os.path.expanduser("~/.wine/drive_c/Program Files/PokerStars/TournSummary/")
+            hhp = os.path.expanduser("~/.wine/drive_c/Program Files/PokerStars/HandHistory/")
+            tsp = os.path.expanduser("~/.wine/drive_c/Program Files/PokerStars/TournSummary/")
         elif self.Config.os_family == "XP":
-            hhp=os.path.expanduser(PROGRAM_FILES+"\\PokerStars\\HandHistory\\")
-            tsp=os.path.expanduser(PROGRAM_FILES+"\\PokerStars\\TournSummary\\")
+            hhp = os.path.expanduser(os.path.join(PROGRAM_FILES, "PokerStars", "HandHistory"))
+            tsp = os.path.expanduser(os.path.join(PROGRAM_FILES, "PokerStars", "TournSummary"))
         elif self.Config.os_family == "Win7":
-            hhp=os.path.expanduser(LOCAL_APPDATA+"\\PokerStars\\HandHistory\\")
-            tsp=os.path.expanduser(LOCAL_APPDATA+"\\PokerStars\\TournSummary\\")
+            hhp = os.path.expanduser(os.path.join(LOCAL_APPDATA, "PokerStars", "HandHistory"))
+            tsp = os.path.expanduser(os.path.join(LOCAL_APPDATA, "PokerStars", "TournSummary"))
         elif self.Config.os_family == "Mac":
-            hhp=os.path.expanduser("~/Library/Application Support/PokerStars/HandHistory/")
-            tsp=os.path.expanduser("~/Library/Application Support/PokerStars/TournSummary/")
+            hhp = os.path.expanduser("~/Library/Application Support/PokerStars/HandHistory/")
+            tsp = os.path.expanduser("~/Library/Application Support/PokerStars/TournSummary/")
         else:
             return
 
@@ -181,23 +191,29 @@ class DetectInstalledSites(object):
             return
 
         try:
-            self.herofound = os.listdir(self.hhpathfound)[0]
-            self.hhpathfound = self.hhpathfound + self.herofound
-            if self.tspathfound:
-                self.tspathfound = self.tspathfound + self.herofound
-        except:
-            pass
+            files = os.listdir(self.hhpathfound)
+            if files:
+                self.herofound = files[0]
+                self.hhpathfound = os.path.join(self.hhpathfound, self.herofound)
+                if self.tspathfound:
+                    self.tspathfound = os.path.join(self.tspathfound, self.herofound)
+        except FileNotFoundError:
+            self.herofound = None
+        except IndexError:
+            self.herofound = None
+        except Exception as e:
+            log.error(f"An unexpected error has occurred : {e}")
+            self.herofound = None
 
         return
 
     def detectPartyPoker(self):
-
         if self.Config.os_family == "Linux":
-            hhp=os.path.expanduser("~/.wine/drive_c/Program Files/PartyGaming/PartyPoker/HandHistory/")
+            hhp = os.path.expanduser("~/.wine/drive_c/Program Files/PartyGaming/PartyPoker/HandHistory/")
         elif self.Config.os_family == "XP":
-            hhp=os.path.expanduser(PROGRAM_FILES+"\\PartyGaming\\PartyPoker\\HandHistory\\")
+            hhp = os.path.expanduser(os.path.join(PROGRAM_FILES, "PartyGaming", "PartyPoker", "HandHistory"))
         elif self.Config.os_family == "Win7":
-            hhp=os.path.expanduser("c:\\Programs\\PartyGaming\\PartyPoker\\HandHistory\\")
+            hhp = os.path.expanduser("c:\\Programs\\PartyGaming\\PartyPoker\\HandHistory\\")
         else:
             return
 
@@ -211,42 +227,56 @@ class DetectInstalledSites(object):
             dirs.remove("XMLHandHistory")
 
         try:
-            self.herofound = dirs[0]
-            self.hhpathfound = self.hhpathfound + self.herofound
-        except:
-            pass
+            if dirs:
+                self.herofound = dirs[0]
+                self.hhpathfound = os.path.join(self.hhpathfound, self.herofound)
+        except IndexError:
+            self.herofound = None
+        except Exception as e:
+            log.error(f"An unexpected error has occurred : {e}")
+            self.herofound = None
 
         return
 
     def detectMergeNetwork(self):
+        # Carbon is the principal room on the Merge network but there are many other skins.
 
-# Carbon is the principal room on the Merge network but there are many other skins.
+        # Normally, we understand that a player can only be valid at one
+        # room on the Merge network so we will exit once successful
 
-# Normally, we understand that a player can only be valid at one
-# room on the Merge network so we will exit once successful
+        # Many thanks to Ilithios for the PlayersOnly information
 
-# Many thanks to Ilithios for the PlayersOnly information
+        merge_skin_names = [
+            "CarbonPoker",
+            "PlayersOnly",
+            "BlackChipPoker",
+            "RPMPoker",
+            "HeroPoker",
+            "PDCPoker",
+        ]
 
-        merge_skin_names = ["CarbonPoker", "PlayersOnly", "BlackChipPoker", "RPMPoker", "HeroPoker",
-                            "PDCPoker", ]
-        
         for skin in merge_skin_names:
             if self.Config.os_family == "Linux":
-                hhp=os.path.expanduser("~/.wine/drive_c/Program Files/"+skin+"/history/")
-            elif self.Config.os_family == "XP":
-                hhp=os.path.expanduser(PROGRAM_FILES+"\\"+skin+"\\history\\")            
-            elif self.Config.os_family == "Win7":
-                hhp=os.path.expanduser(PROGRAM_FILES+"\\"+skin+"\\history\\")
+                hhp = os.path.expanduser("~/.wine/drive_c/Program Files/" + skin + "/history/")
+            elif self.Config.os_family in ["XP", "Win7"]:
+                hhp = os.path.expanduser(os.path.join(PROGRAM_FILES, skin, "history"))
             else:
                 return
 
             if os.path.exists(hhp):
                 self.hhpathfound = hhp
                 try:
-                    self.herofound = os.listdir(self.hhpathfound)[0]
-                    self.hhpathfound = self.hhpathfound + self.herofound
-                    break
-                except:
-                    continue
+                    files = os.listdir(self.hhpathfound)
+                    if files:
+                        self.herofound = files[0]
+                        self.hhpathfound = os.path.join(self.hhpathfound, self.herofound)
+                        break
+                except FileNotFoundError:
+                    self.herofound = None
+                except IndexError:
+                    self.herofound = None
+                except Exception as e:
+                    log.error(f"An unexpected error has occurred : {e}")
+                    self.herofound = None
 
         return
