@@ -179,15 +179,15 @@ class IdentifySite(object):
             return [x]
 
     def processFile(self, path):
-        print("process fill identify", path)
+        log.debug("process fill identify", path)
         if path not in self.filelist:
-            print("filelist", self.filelist)
+            log.debug("filelist", self.filelist)
             whole_file, kodec = self.read_file(path)
-            # print('whole_file',whole_file)
-            print("kodec", kodec)
+            # log.debug('whole_file',whole_file)
+            log.debug("kodec", kodec)
             if whole_file:
                 fobj = self.idSite(path, whole_file, kodec)
-                print("siteid obj")
+                log.debug("siteid obj")
                 # print(fobj.path)
                 if fobj is False:  # Site id failed
                     log.debug(("DEBUG:") + " " + ("siteId Failed for: %s") % path)
