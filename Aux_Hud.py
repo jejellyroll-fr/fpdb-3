@@ -272,7 +272,7 @@ class Simple_table_popup_menu(QWidget):
         self.move(
             self.parentwin.hud.table.x + self.parentwin.aw.xshift, self.parentwin.hud.table.y + self.parentwin.aw.yshift
         )
-        self.setWindowTitle(self.parentwin.menu_label)
+        self.setWindowTitle(self.parentwin.menu_label + " - HUD configuration")
 
         # combobox statrange
         stat_range_combo_dict = {
