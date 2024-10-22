@@ -750,9 +750,9 @@ class Hand(object):
         if match:
             # print('if match', match)
             # print("if match.gr:",match.groupdict())
-            print("type self.streets", type(self.streets))
+            log.debug("type self.streets", type(self.streets))
             self.streets.update(match.groupdict())
-            print("streets:", str(self.streets))
+            log.debug("streets:", str(self.streets))
             log.debug("markStreets:\n" + str(self.streets))
         else:
             tmp = self.handText[0:100]
@@ -1113,7 +1113,7 @@ class Hand(object):
         return retstring
 
     def printHand(self):
-        self.writeHand(sys.stdout)
+        log.debug(self.writeHand(sys.stdout))
 
     def actionString(self, act, street=None):
         log.debug("Hand.actionString(act=%s, street=%s)", act, street)
@@ -1344,7 +1344,7 @@ class HoldemOmahaHand(Hand):
             hhc.readShownCards(self)
             self.pot.handid = self.handid  # This is only required so Pot can throw it in totalPot
             self.totalPot()  # finalise it (total the pot)
-            print("self.totalpot", self.totalpot)
+            log.debug("self.totalpot", self.totalpot)
             hhc.getRake(self)
             if self.maxseats is None:
                 self.maxseats = hhc.guessMaxSeats(self)
@@ -2146,7 +2146,7 @@ class Pot(object):
 
     def end(self):
         # Initialize
-        print("Starting pot calculation...")
+        log.debug("Starting pot calculation...")
 
         self.total = sum(self.committed.values()) + sum(self.common.values()) + self.stp
 
