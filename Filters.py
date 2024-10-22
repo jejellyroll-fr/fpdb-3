@@ -499,47 +499,47 @@ class Filters(QWidget):
 
             icon_file = ""
             if site == "PokerStars":
-                icon_file = "ps.svg"
+                icon_file = "icons/ps.svg"
             elif site == "Full Tilt Poker":
-                icon_file = "ft.svg"
+                icon_file = "icons/ft.svg"
             elif site == "Everleaf":
-                icon_file = "everleaf.png"
+                icon_file = "icons/everleaf.png"
             elif site == "Boss":
-                icon_file = "boss.ico"
+                icon_file = "icons/boss.ico"
             elif site == "PartyPoker":
-                icon_file = "party.png"
+                icon_file = "icons/party.png"
             elif site == "Merge":
-                icon_file = "merge.png"
+                icon_file = "icons/merge.png"
             elif site == "PKR":
-                icon_file = "pkr.png"
+                icon_file = "icons/pkr.png"
             elif site == "iPoker":
-                icon_file = "ipoker.png"
+                icon_file = "icons/ipoker.png"
             elif site == "Cake":
-                icon_file = "cake.png"
+                icon_file = "icons/cake.png"
             elif site == "Entraction":
-                icon_file = "entraction.png"
+                icon_file = "icons/entraction.png"
             elif site == "BetOnline":
-                icon_file = "betonline.png"
+                icon_file = "icons/betonline.png"
             elif site == "Microgaming":
-                icon_file = "microgaming.png"
+                icon_file = "icons/microgaming.png"
             elif site == "Bovada":
-                icon_file = "bovada.png"
+                icon_file = "icons/bovada.png"
             elif site == "Enet":
-                icon_file = "enet.png"
+                icon_file = "icons/enet.png"
             elif site == "SealsWithClubs":
-                icon_file = "swc.png"
+                icon_file = "icons/swc.png"
             elif site == "WinningPoker":
-                icon_file = "winning.png"
+                icon_file = "icons/winning.png"
             elif site == "GGPoker":
-                icon_file = "gg.png"
+                icon_file = "icons/gg.png"
             elif site == "Pacific":
-                icon_file = "pacific.png"
+                icon_file = "icons/pacific.png"
             elif site == "KingsClub":
-                icon_file = "kingsclub.png"
+                icon_file = "icons/kingsclub.png"
             elif site == "Unibet":
-                icon_file = "unibet.png"
+                icon_file = "icons/unibet.png"
             elif site == "Winamax":
-                icon_file = "wina.svg"
+                icon_file = "icons/wina.svg"
             else:
                 icon_file = ""
 
