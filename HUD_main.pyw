@@ -269,7 +269,6 @@ class HUD_main(QObject):
 
     def read_stdin(self, new_hand_id):
         log.debug(f"Processing new hand id: {new_hand_id}")
-        print(f"Entering read_stdin with hand_id: {new_hand_id}")
 
         self.hero, self.hero_ids = {}, {}
         found = False
@@ -277,7 +276,6 @@ class HUD_main(QObject):
         enabled_sites = self.config.get_supported_sites()
         if not enabled_sites:
             log.error("No enabled sites found")
-            print("No enabled sites found")
             self.db_connection.connection.rollback()
             self.destroy()
             return
@@ -286,14 +284,13 @@ class HUD_main(QObject):
         for i in enabled_sites:
             if not self.config.get_site_parameters(i)["aux_enabled"]:
                 log.info(f"Aux disabled for site {i}")
-                print(f"Aux disabled for site {i}")
                 aux_disabled_sites.append(i)
 
         self.db_connection.connection.rollback()  # Libérer le verrou de l'itération précédente
 
         if not found:
             for site in enabled_sites:
-                print("not found ... site in enabled_site")
+                log.debug("not found ... site in enabled_site")
                 if result := self.db_connection.get_site_id(site):
                     site_id = result[0][0]
                     self.hero[site_id] = self.config.supported_sites[site].screen_name
@@ -305,19 +302,16 @@ class HUD_main(QObject):
 
         if new_hand_id != "":
             log.debug("HUD_main.read_stdin: Hand processing starting.")
-            print("HUD_main.read_stdin: Hand processing starting.")
             if new_hand_id in self.cache:
                 log.debug(f"Using cached data for hand {new_hand_id}")
-                print(f"Data found in cache for hand_id: {new_hand_id}")
                 table_info = self.cache[new_hand_id]
             else:
-                print(f"Data not found in cache for hand_id: {new_hand_id}")
+                log.debug(f"Data not found in cache for hand_id: {new_hand_id}")
                 try:
                     table_info = self.db_connection.get_table_info(new_hand_id)
                     self.cache[new_hand_id] = table_info  # Mise en cache des informations
                 except Exception as e:
                     log.error(f"Database error while processing hand {new_hand_id}: {e}", exc_info=True)
-                    print("Database error while processing hand")
                     return
 
         (table_name, max, poker_game, type, fast, site_id, site_name, num_seats, tour_number, tab_number) = table_info
