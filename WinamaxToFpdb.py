@@ -35,9 +35,9 @@ log = logging.getLogger("parser")
 class Winamax(HandHistoryConverter):
     def Trace(f):
         def my_f(*args, **kwds):
-            print(f"entering {f.__name__}")
+            log.debug(f"entering {f.__name__}")
             result = f(*args, **kwds)
-            print(f"exiting {f.__name__}")
+            log.debug(f"exiting {f.__name__}")
             return result
 
         my_f.__name = f.__name__
@@ -282,7 +282,7 @@ class Winamax(HandHistoryConverter):
                 else:
                     datetimestr = "2010/Jan/01 01:01:01"
                     log.error(f"readHandInfo: DATETIME not matched: '{info[key]}'")
-                    print(f"DEBUG: readHandInfo: DATETIME not matched: '{info[key]}'")
+                    log.debug(f"DEBUG: readHandInfo: DATETIME not matched: '{info[key]}'")
                 hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
             elif key == "HID1":
                 # Need to remove non-alphanumerics for MySQL
@@ -304,10 +304,10 @@ class Winamax(HandHistoryConverter):
                 hand.maxseats = int(info[key])
 
             if key == "BUYIN" and hand.tourNo is not None:
-                print(f"DEBUG: info['BUYIN']: {info['BUYIN']}")
-                print(f"DEBUG: info['BIAMT']: {info['BIAMT']}")
-                print(f"DEBUG: info['BIRAKE']: {info['BIRAKE']}")
-                print(f"DEBUG: info['BOUNTY']: {info['BOUNTY']}")
+                log.debug(f"DEBUG: info['BUYIN']: {info['BUYIN']}")
+                log.debug(f"DEBUG: info['BIAMT']: {info['BIAMT']}")
+                log.debug(f"DEBUG: info['BIRAKE']: {info['BIRAKE']}")
+                log.debug(f"DEBUG: info['BOUNTY']: {info['BOUNTY']}")
                 for k in ["BIAMT", "BIRAKE"]:
                     if k in info and info[k]:
                         info[k] = info[k].replace(",", ".")
@@ -416,8 +416,8 @@ class Winamax(HandHistoryConverter):
 
         try:
             hand.addStreets(m)
-            print("adding street", m.group(0))
-            print("---")
+            log.debug("adding street", m.group(0))
+            log.debug("---")
         except Exception:
             log.info("Failed to add streets. handtext=%s")
 
@@ -462,10 +462,12 @@ class Winamax(HandHistoryConverter):
             amount = Decimal(a.group("BB").replace(",", ""))
             hand.lastBet["PREFLOP"] = amount
         for a in self.re_PostDead.finditer(hand.handText):
-            print(f"DEBUG: Found dead blind: addBlind({a.group('PNAME')}, 'secondsb', {a.group('DEAD')})")
+            log.debug(f"DEBUG: Found dead blind: addBlind({a.group('PNAME')}, 'secondsb', {a.group('DEAD')})")
             hand.addBlind(a.group("PNAME"), "secondsb", a.group("DEAD"))
         for a in self.re_PostSecondSB.finditer(hand.handText):
-            print(f"DEBUG: Found dead blind: addBlind({a.group('PNAME')}, 'secondsb/both', {a.group('SB')}, {hand.sb})")
+            log.debug(
+                f"DEBUG: Found dead blind: addBlind({a.group('PNAME')}, 'secondsb/both', {a.group('SB')}, {hand.sb})"
+            )
             if Decimal(a.group("SB")) > Decimal(hand.sb):
                 hand.addBlind(a.group("PNAME"), "both", a.group("SB"))
             else:
@@ -538,7 +540,7 @@ class Winamax(HandHistoryConverter):
         m = self.re_Action.finditer(streetsplit[0])
         for action in m:
             acts = action.groupdict()
-            print(f"DEBUG: acts: {acts}")
+            log.debug(f"DEBUG: acts: {acts}")
             if action.group("ATYPE") == " folds":
                 hand.addFold(street, action.group("PNAME"))
             elif action.group("ATYPE") == " checks":
@@ -564,15 +566,15 @@ class Winamax(HandHistoryConverter):
                 hand.addStandsPat(street, action.group("PNAME"))
             else:
                 log.fatal(f"DEBUG:Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
-            print(f"Processed {acts}")
-            print("committed=", hand.pot.committed)
+            log.info(f"Processed {acts}")
+            log.info("committed=", hand.pot.committed)
 
     def readShowdownActions(self, hand):
         for shows in self.re_ShowdownAction.finditer(hand.handText):
             log.debug(f"add show actions {shows}")
             cards = shows.group("CARDS")
             cards = cards.split(" ")
-            print(f"DEBUG: addShownCards({cards}, {shows.group('PNAME')})")
+            log.debug(f"DEBUG: addShownCards({cards}, {shows.group('PNAME')})")
             hand.addShownCards(cards, shows.group("PNAME"))
 
     def readCollectPot(self, hand):
@@ -589,7 +591,7 @@ class Winamax(HandHistoryConverter):
             if m.group("CARDS") is not None:
                 shown = True
                 string = m.group("STRING")
-                print(m.group("PNAME"), cards, shown, mucked)
+                log.debug(m.group("PNAME"), cards, shown, mucked)
                 hand.addShownCards(cards=cards, player=m.group("PNAME"), shown=shown, mucked=mucked, string=string)
 
     def readSummaryInfo(self, summaryInfoList):
@@ -614,7 +616,7 @@ class Winamax(HandHistoryConverter):
             regex = f"Winamax {table_name}"
         else:
             regex = f"Winamax {table_name} /"
-        print("regex get table cash title:", regex)
+        log.debug("regex get table cash title:", regex)
         if tournament:
             if table_number > 99 or (table_number >= 100 or table_number <= 9) and table_number == 0:
                 regex = r"Winamax\s+([^\(]+)\(%s\)\(#%s\)" % (tournament, table_number)
@@ -623,6 +625,6 @@ class Winamax(HandHistoryConverter):
             else:
                 regex = r"Winamax\s+([^\(]+)\(%s\)\(#00%s\)" % (tournament, table_number)
 
-            print("regex get mtt sng expresso cash title:", regex)
+            log.debug("regex get mtt sng expresso cash title:", regex)
         log.info(f"Winamax.getTableTitleRe: returns: '{regex}'")
         return regex

@@ -255,8 +255,8 @@ HandHistoryConverter: '%(sitename)s'
             # TODO: not ideal, just trying to not error. Throw ParseException?
             self.numErrors += 1
         else:
-            print(gametype)
-            print("gametypecategory", gametype["category"])
+            log.debug(gametype)
+            log.debug("gametypecategory", gametype["category"])
             if gametype["category"] in self.import_parameters["importFilters"]:
                 raise FpdbHandSkipped("Skipped %s hand" % gametype["type"])
 
@@ -492,10 +492,10 @@ or None if we fail to get the info """
     # Some sites don't report the rake. This will be called at the end of the hand after the pot total has been calculated
     # an inheriting class can calculate it for the specific site if need be.
     def getRake(self, hand):
-        print("total pot", hand.totalpot)
-        print("collected pot", hand.totalcollected)
+        log.debug("total pot", hand.totalpot)
+        log.debug("collected pot", hand.totalcollected)
         if hand.totalcollected > hand.totalpot:
-            print("collected pot>total pot")
+            log.debug("collected pot>total pot")
         if hand.rake is None:
             hand.rake = hand.totalpot - hand.totalcollected  #  * Decimal('0.05') # probably not quite right
         if self.siteId == 9 and hand.gametype["type"] == "tour":
@@ -506,7 +506,7 @@ or None if we fail to get the info """
             round = -0.01
         if self.siteId == 15 and hand.totalcollected > hand.totalpot:
             hand.rake = old_div(hand.totalpot, 10)
-            print(hand.rake)
+            log.debug(hand.rake)
         if hand.rake < 0 and (not hand.roundPenny or hand.rake < round) and not hand.cashedOut:
             if self.siteId == 28 and (
                 (hand.rake + Decimal(str(hand.sb)) - (0 if hand.rakes.get("rake") is None else hand.rakes["rake"])) == 0
@@ -550,7 +550,7 @@ or None if we fail to get the info """
             sane = True
 
         if self.in_path != "-" and self.out_path == self.in_path:
-            print(("Output and input files are the same, check config."))
+            log.debug(("Output and input files are the same, check config."))
             sane = False
 
         return sane
