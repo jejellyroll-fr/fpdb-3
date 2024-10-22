@@ -350,6 +350,7 @@ class Simple_table_popup_menu(QWidget):
         grid.addLayout(vbox1, 0, 0)
         grid.addLayout(vbox2, 0, 1)
         grid.addLayout(vbox3, 0, 2)
+        grid.addWidget(QLabel(f"Stat set: {self.parentwin.aw.game_params.name}"), 1, 0)
 
         self.show()
         self.raise_()
