@@ -499,47 +499,47 @@ class Filters(QWidget):
 
             icon_file = ""
             if site == "PokerStars":
-                icon_file = "ps.svg"
+                icon_file = "icons/ps.svg"
             elif site == "Full Tilt Poker":
-                icon_file = "ft.svg"
+                icon_file = "icons/ft.svg"
             elif site == "Everleaf":
-                icon_file = "everleaf.png"
+                icon_file = "icons/everleaf.png"
             elif site == "Boss":
-                icon_file = "boss.ico"
+                icon_file = "icons/boss.ico"
             elif site == "PartyPoker":
-                icon_file = "party.png"
+                icon_file = "icons/party.png"
             elif site == "Merge":
-                icon_file = "merge.png"
+                icon_file = "icons/merge.png"
             elif site == "PKR":
-                icon_file = "pkr.png"
+                icon_file = "icons/pkr.png"
             elif site == "iPoker":
-                icon_file = "ipoker.png"
+                icon_file = "icons/ipoker.png"
             elif site == "Cake":
-                icon_file = "cake.png"
+                icon_file = "icons/cake.png"
             elif site == "Entraction":
-                icon_file = "entraction.png"
+                icon_file = "icons/entraction.png"
             elif site == "BetOnline":
-                icon_file = "betonline.png"
+                icon_file = "icons/betonline.png"
             elif site == "Microgaming":
-                icon_file = "microgaming.png"
+                icon_file = "icons/microgaming.png"
             elif site == "Bovada":
-                icon_file = "bovada.png"
+                icon_file = "icons/bovada.png"
             elif site == "Enet":
-                icon_file = "enet.png"
+                icon_file = "icons/enet.png"
             elif site == "SealsWithClubs":
-                icon_file = "swc.png"
+                icon_file = "icons/swc.png"
             elif site == "WinningPoker":
-                icon_file = "winning.png"
+                icon_file = "icons/winning.png"
             elif site == "GGPoker":
-                icon_file = "gg.png"
+                icon_file = "icons/gg.png"
             elif site == "Pacific":
-                icon_file = "pacific.png"
+                icon_file = "icons/pacific.png"
             elif site == "KingsClub":
-                icon_file = "kingsclub.png"
+                icon_file = "icons/kingsclub.png"
             elif site == "Unibet":
-                icon_file = "unibet.png"
+                icon_file = "icons/unibet.png"
             elif site == "Winamax":
-                icon_file = "wina.svg"
+                icon_file = "icons/wina.svg"
             else:
                 icon_file = ""
 
@@ -583,7 +583,7 @@ class Filters(QWidget):
 
         req = self.cursor.execute("SELECT DISTINCT tourneyName FROM Tourneys")
         result = req.fetchall()
-        print(result)
+        log.debug(result)
         self.gameList = QComboBox()
         self.gameList.setStyleSheet("background-color: #455364")
         for count, game in enumerate(result, start=0):
@@ -598,7 +598,7 @@ class Filters(QWidget):
                 game = game.replace(",", "")
                 game = game.replace(")", "")
 
-            print(game)
+            log.debug(game)
             if game != '"None"':
                 self.gameList.insertItem(count, game)
             else:
@@ -616,7 +616,7 @@ class Filters(QWidget):
                     vbox1.addWidget(self.cbTourney[line[0]])
 
         else:
-            print("INFO: No games returned from database")
+            log.debug("INFO: No games returned from database")
             log.info("No games returned from database")
 
     def fillTourneyCatFrame(self, frame):
@@ -625,7 +625,7 @@ class Filters(QWidget):
 
         req = self.cursor.execute("SELECT DISTINCT category FROM TourneyTypes")
         result = req.fetchall()
-        print(result)
+        log.debug(result)
         self.gameList = QComboBox()
         self.gameList.setStyleSheet("background-color: #455364")
         for count, game in enumerate(result, start=0):
@@ -640,7 +640,7 @@ class Filters(QWidget):
                 game = game.replace(",", "")
                 game = game.replace(")", "")
 
-            print(game)
+            log.debug(game)
             if game != '"None"':
                 self.gameList.insertItem(count, game)
             else:
@@ -658,7 +658,7 @@ class Filters(QWidget):
                     vbox1.addWidget(self.cbTourneyCat[line[0]])
 
         else:
-            print("INFO: No games returned from database")
+            log.debug("INFO: No games returned from database")
             log.info("No games returned from database")
 
     def fillTourneyLimFrame(self, frame):
@@ -667,7 +667,7 @@ class Filters(QWidget):
 
         req = self.cursor.execute("SELECT DISTINCT limitType FROM TourneyTypes")
         result = req.fetchall()
-        print(result)
+        log.debug(result)
         self.gameList = QComboBox()
         self.gameList.setStyleSheet("background-color: #455364")
         for count, game in enumerate(result, start=0):
@@ -682,7 +682,7 @@ class Filters(QWidget):
                 game = game.replace(",", "")
                 game = game.replace(")", "")
 
-            print(game)
+            log.debug(game)
             if game != '"None"':
                 self.gameList.insertItem(count, game)
             else:
@@ -700,7 +700,7 @@ class Filters(QWidget):
                     vbox1.addWidget(self.cbTourneyLim[line[0]])
 
         else:
-            print("INFO: No games returned from database")
+            log.debug("INFO: No games returned from database")
             log.info("No games returned from database")
 
     def fillTourneyBuyinFrame(self, frame):
@@ -732,7 +732,7 @@ class Filters(QWidget):
 
         self.cursor.execute(self.sql.query["getGames"])
         result = self.db.cursor.fetchall()
-        print(result)
+        log.debug(result)
         self.gameList = QComboBox()
         self.gameList.setStyleSheet("background-color: #455364")
         for count, game in enumerate(result, start=0):
@@ -740,7 +740,7 @@ class Filters(QWidget):
             game = game.replace("(", "")
             game = game.replace(",", "")
             game = game.replace(")", "")
-            print(game)
+            log.debug(game)
             self.gameList.insertItem(count, game)
 
         if len(result) >= 1:
@@ -763,7 +763,7 @@ class Filters(QWidget):
                 hbox.addWidget(btnNone)
                 hbox.addStretch()
         else:
-            print("INFO: No games returned from database")
+            log.debug("INFO: No games returned from database")
             log.info("No games returned from database")
 
     def fillTourneyFrame(self, frame):
@@ -772,7 +772,7 @@ class Filters(QWidget):
 
         self.cursor.execute(self.sql.query["getTourneyNames"])
         result = self.db.cursor.fetchall()
-        print(result)
+        log.debug(result)
         self.gameList = QComboBox()
         self.gameList.setStyleSheet("background-color: #455364")
         for count, game in enumerate(result, start=0):
@@ -827,7 +827,7 @@ class Filters(QWidget):
                 hbox.addWidget(btnNone)
                 hbox.addStretch()
         else:
-            print("INFO: No positions returned from database")
+            log.debug("INFO: No positions returned from database")
             log.info("No positions returned from database")
 
     def fillHoleCardsFrame(self, frame):
@@ -930,7 +930,7 @@ class Filters(QWidget):
 
                 hbox.addStretch()
         else:
-            print("INFO: No games returned from database")
+            log.debug("INFO: No games returned from database")
             log.info("No games returned from database")
 
         if "Type" in display and display["Type"] and "ring" in types_found and "tour" in types_found:
@@ -1183,7 +1183,7 @@ class Filters(QWidget):
     def update_games_for_hero(self, hero, site):
         site_id = self.siteid[site]
         usetype = self.display.get("UseType", "")
-        print(f"Game type for hero {hero} on site {site}: {usetype}")
+        log.debug(f"Game type for hero {hero} on site {site}: {usetype}")
 
         if usetype == "tour":
             query = """
@@ -1204,12 +1204,12 @@ class Filters(QWidget):
             WHERE gt.siteId = ? AND p.name = ? AND gt.type = 'ring'
             """
 
-        print("Query:")
-        print(query)
+        log.debug("Query:")
+        log.debug(query)
 
         self.cursor.execute(query, (site_id, hero))
         games = [row[0] for row in self.cursor.fetchall()]
-        print(f"Available games for hero {hero} on site {site}: {games}")
+        log.debug(f"Available games for hero {hero} on site {site}: {games}")
 
         for game, checkbox in self.cbGames.items():
             if game in games:
@@ -1267,11 +1267,11 @@ class Filters(QWidget):
         """
         site_id = self.siteid[site]
         # debug
-        # print(f"executed request for {hero} on {site} (site_id: {site_id})")
+        # log.debug(f"executed request for {hero} on {site} (site_id: {site_id})")
         self.cursor.execute(query, (site_id, hero))
         currencies = [row[0] for row in self.cursor.fetchall()]
         # debug
-        # print(f"currencies found for {hero} on {site}: {currencies}")
+        # log.debug(f"currencies found for {hero} on {site}: {currencies}")
 
         for currency, checkbox in self.cbCurrencies.items():
             if currency in currencies:
@@ -1286,7 +1286,7 @@ class Filters(QWidget):
                 checkbox.setChecked(False)
                 checkbox.setEnabled(False)
             # debug
-            # print(f"Devise {currency} - Checked: {checkbox.isChecked()}, Activated: {checkbox.isEnabled()} on {site}")
+            # log.debug(f"Devise {currency} - Checked: {checkbox.isChecked()}, Activated: {checkbox.isEnabled()} on {site}")
 
 
 if __name__ == "__main__":
