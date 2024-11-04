@@ -546,6 +546,21 @@ class iPoker(HandHistoryConverter):
 
         return self.info
 
+    def readTourneyResults(self, hand):
+        log.info("enter method readTourneyResults.")
+        log.debug("Method readTourneyResults non implemented.")
+        pass
+
+    def readSummaryInfo(self, summaryInfoList):
+        log.info("enter method readSummaryInfo.")
+        log.debug("Method readSummaryInfo non implemented.")
+        return True
+
+    def readSTP(self, hand):
+        log.debug("enter method readSTP.")
+        log.debug("Method readSTP non implemented.")
+        pass
+
     def readHandInfo(self, hand):
         """
         Parses the hand text and extracts relevant information about the hand.
