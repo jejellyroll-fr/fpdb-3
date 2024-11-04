@@ -121,7 +121,7 @@ class Site(object):
 class IdentifySite(object):
     def __init__(self, config, hhcs=None):
         self.config = config
-        self.codepage = ("utf8", "utf-16", "cp1252", "ISO-8859-1")
+        self.codepage = ("utf8", "cp1252", "ISO-8859-1")
         self.sitelist = {}
         self.filelist = {}
         self.generateSiteList(hhcs)
@@ -348,7 +348,7 @@ def main(argv=None):
         argv = sys.argv[1:]
 
     Configuration.set_logfile("fpdb-log.txt")
-    config = Configuration.Config(file="HUD_config.test.xml")
+    config = Configuration.Config(file="HUD_config.xml")
     in_path = os.path.abspath("regression-test-files")
     IdSite = IdentifySite(config)
     start = time()
