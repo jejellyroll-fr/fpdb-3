@@ -39,7 +39,7 @@ import Card
 Configuration.set_logfile("fpdb-log.txt")
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hand")
+log = logging.getLogger("parser")
 
 
 class Hand(object):
@@ -1345,7 +1345,10 @@ class HoldemOmahaHand(Hand):
             self.pot.handid = self.handid  # This is only required so Pot can throw it in totalPot
             self.totalPot()  # finalise it (total the pot)
             log.debug("self.totalpot", self.totalpot)
-            hhc.getRake(self)
+            if self.gametype["type"] == "ring":
+                hhc.getRake(self)
+            else:
+                self.rake = 0  # define rake at 0 for mtt and sng
             if self.maxseats is None:
                 self.maxseats = hhc.guessMaxSeats(self)
             self.sittingOut()
