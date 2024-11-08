@@ -426,9 +426,9 @@ class Importer(object):
                         try:
                             if not os.path.isdir(f):
                                 self.caller.addText("\n" + os.path.basename(f))
-                                print("os.path.basename", os.path.basename(f))
-                                print("self.caller:", self.caller)
-                                print(os.path.basename(f))
+                                log.debug("os.path.basename", os.path.basename(f))
+                                log.debug("self.caller:", self.caller)
+                                log.debug(os.path.basename(f))
                         except KeyError:
                             log.error("File '%s' seems to have disappeared" % f)
                         (stored, duplicates, partial, skipped, errors, ttime) = self._import_despatch(self.filelist[f])
@@ -442,7 +442,7 @@ class Importer(object):
                                     " %d stored, %d duplicates, %d partial, %d skipped, %d errors (time = %f)"
                                     % (stored, duplicates, partial, skipped, errors, ttime)
                                 )
-                                print("self.caller2:", self.caller)
+                                log.debug("self.caller2:", self.caller)
                         except KeyError:  # TODO: Again, what error happens here? fix when we find out ..
                             pass
                         self.updatedsize[f] = stat_info.st_size
