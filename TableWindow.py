@@ -98,46 +98,46 @@ class Table_Window(object):
         self.number = None
         # check if 
         if isinstance(table_name, bytes):
-            print(f"Décodage de table_name en UTF-8 : {table_name}")
+            log.debug(f"Décodage de table_name en UTF-8 : {table_name}")
             table_name = table_name.decode('utf-8')
         if isinstance(tournament, bytes):
-            print(f"Décodage de table_name en UTF-8 : {tournament}")
+            log.debug(f"Décodage de table_name en UTF-8 : {tournament}")
             tournament = tournament.decode('utf-8')
         if isinstance(table_number, bytes):
-            print(f"Décodage de table_name en UTF-8 : {table_number}")
+            log.debug(f"Décodage de table_name en UTF-8 : {table_number}")
             table_number = table_number.decode('utf-8')
 
         if tournament is not None and table_number is not None:
-            print(tournament)
+            log.debug(tournament)
             self.tournament = int(tournament)
-            print(" tournement:")
-            print(self.tournament)
-            print("table_number:")
-            print(type(table_number))
-            print(table_number)
+            log.debug(" tournement:")
+            log.debug(self.tournament)
+            log.debug("table_number:")
+            log.debug(type(table_number))
+            log.debug(table_number)
             # temp bug correction for ipoker must investigate
             # if table_number is not an interger
 
-            print("table_number error:")
-            print(type(table_number))
-            print(table_number)
+            log.debug("table_number error:")
+            log.debug(type(table_number))
+            log.debug(table_number)
             self.table = int(table_number)
-            print(self.table)
+            log.debug(self.table)
             self.name = "%s - %s" % (self.tournament, self.table)
             self.type = "tour"
             table_kwargs = dict(tournament=self.tournament, table_number=self.table)
             self.tableno_re = getTableNoRe(self.config, self.site, tournament=self.tournament)
         elif table_name is not None:
-            print("table_number cash:")
-            print(type(table_name))
-            print((table_name))
+            log.debug("table_number cash:")
+            log.debug(type(table_name))
+            log.debug((table_name))
             self.name = table_name
             self.type = "cash"
             self.tournament = None
             table_kwargs = dict(table_name=table_name)
-            print("table_kwarg cash:")
-            print(type(table_kwargs))
-            print((table_kwargs))
+            log.debug("table_kwarg cash:")
+            log.debug(type(table_kwargs))
+            log.debug((table_kwargs))
         else:
             return None
 
@@ -157,13 +157,13 @@ class Table_Window(object):
         self.width = geo["width"]
         self.height = geo["height"]
         self.x = geo["x"]
-        print(self.x)
+        log.debug(self.x)
         self.y = geo["y"]
-        print(self.y)
+        log.debug(self.y)
         self.oldx = self.x  # attn ray: remove these two lines and update Hud.py::update_table_position()
-        print(self.oldx)
+        log.debug(self.oldx)
         self.oldy = self.y
-        print(self.oldy)
+        log.debug(self.oldy)
         self.game = self.get_game()
 
     def __str__(self):
