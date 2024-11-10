@@ -285,6 +285,21 @@ class PartyPoker(HandHistoryConverter):
     re_GameStartLine = re.compile("Game\s\#\d+\sstarts", re.MULTILINE)
     re_emailedHand = re.compile(r"\*\*\sSummary\s\*\*")
 
+    re_WinningRankOne = re.compile(
+        r"^Congratulations to player (?P<PNAME>.+?) for winning tournament .*",
+        re.MULTILINE,
+    )
+
+    re_WinningRankOther = re.compile(
+        r"^Player\s+(?P<PNAME>.+?)\s+finished\s+in\s+(?P<RANK>\d+)\s+place\s+and\s+received\s+(?P<CURRENCY_SYMBOL>[€$])(?P<AMT>[,\.0-9]+)\s+(?P<CURRENCY_CODE>[A-Z]{3})$",
+        re.MULTILINE,
+    )
+
+    re_RankOther = re.compile(
+        r"^Player\s+(?P<PNAME>.+?)\s+finished\s+in\s+(?P<RANK>\d+)$",
+        re.MULTILINE,
+    )
+
     def __init__(
         self,
         config,
@@ -1104,11 +1119,100 @@ class PartyPoker(HandHistoryConverter):
         log.debug("Method readSummaryInfo not implémented.")
         return True
 
-    def readTourneyResults(self, hand):
-        log.info("Enter method readTourneyResults.")
+    def convert_to_decimal(self, string):
+        dec = self.clearMoneyString(string)
+        dec = Decimal(dec)
+        return dec
 
-        log.debug("Method readTourneyResults not implemented.")
+    def readTourneyResults(self, hand):
+        """Reads tournament results and adds winnings or ranks to the relevant data structures."""
+        log.debug("Enter Method readTourneyResults.")
+
+        # Initialize data structures to store results
+        log.debug("Initializing data structures for tournament results.")
+        hand.winnings = {}  # Initialisation des gains
+        hand.ranks = {}  # Initialisation des rangs
+        koAmounts = {}
+        winner = None
+        hand.isProgressive = False  # Default to non-progressive KO
+        log.debug("Set hand.isProgressive to False (non-progressive KO).")
+
+        # Process the tournament winner (rank 1)
+        log.debug("Processing the tournament winner (rank 1).")
+        m = self.re_WinningRankOne.search(hand.handText)
+        if m:
+            log.debug("Regex re_WinningRankOne matched.")
+            winner = m.group("PNAME")
+            log.debug(f"Winner found: {winner}")
+
+            # Assuming a winning amount in `re_WinningRankOne` pattern as `AMT`
+            if "AMT" in m.groupdict():
+                amt_str = m.group("AMT").replace(",", "")
+                try:
+                    amount = Decimal(amt_str)
+                    log.debug(f"Winning amount for {winner}: {amount}")
+                except Exception as e:
+                    log.error(f"Error converting winning amount '{amt_str}' to Decimal: {e}")
+                    amount = Decimal(0)
+                hand.winnings[winner] = amount
+                log.debug(f"Set hand.winnings[{winner}] = {amount}")
+            else:
+                hand.winnings[winner] = Decimal(0)  # Default amount if none specified
+                log.debug(f"No winning amount specified for {winner}. Set hand.winnings[{winner}] = 0")
+
+            hand.ranks[winner] = 1  # Store the rank for the winner
+            log.debug(f"Set hand.ranks[{winner}] = 1")
+        else:
+            log.debug("Regex re_WinningRankOne did not match. No winner found.")
+
+        # Process other ranked players who received winnings
+        log.debug("Processing other ranked players who received winnings.")
+        for match in self.re_WinningRankOther.finditer(hand.handText):
+            log.debug("Found a match with re_WinningRankOther.")
+            pname = match.group("PNAME")
+            rank = int(match.group("RANK"))
+            amt_str = match.group("AMT").replace(",", "")
+            try:
+                amount = Decimal(amt_str)
+                log.debug(f"Player {pname} has rank {rank} with winnings {amount}")
+            except Exception as e:
+                log.error(f"Error converting amount '{amt_str}' for player '{pname}' to Decimal: {e}")
+                amount = Decimal(0)
+
+            currency_symbol = match.group("CURRENCY_SYMBOL")
+            currency_code = match.group("CURRENCY_CODE")
+            log.debug(
+                f"Player: {pname}, Rank: {rank}, Amount: {amount}, Currency Symbol: {currency_symbol}, Currency Code: {currency_code}"
+            )
+
+            # Store rank and winnings in the hand object
+            hand.ranks[pname] = rank
+            log.debug(f"Set hand.ranks[{pname}] = {rank}")
+            hand.winnings[pname] = amount
+            log.debug(f"Set hand.winnings[{pname}] = {amount}")
+
+        # Process other ranked players without winnings
+        log.debug("Processing other ranked players without winnings.")
+        for match in self.re_RankOther.finditer(hand.handText):
+            log.debug("Found a match with re_RankOther.")
+            pname = match.group("PNAME")
+            rank = int(match.group("RANK"))
+            log.debug(f"Player {pname} has rank {rank} without winnings.")
+
+            # Store rank only in the hand object for these players
+            hand.ranks[pname] = rank
+            log.debug(f"Set hand.ranks[{pname}] = {rank}")
+
+        # Skip KO and progressive KO processing for now
+        log.debug("Skipping KO and progressive KO processing for now.")
+        # Placeholder for future KO/progressive KO handling
         pass
+
+        log.debug("Method readTourneyResults completed.")
+
+        # Optionally, log the final winnings and ranks dictionaries
+        log.debug(f"Final hand.winnings: {hand.winnings}")
+        log.debug(f"Final hand.ranks: {hand.ranks}")
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
