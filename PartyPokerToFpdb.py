@@ -22,6 +22,8 @@
 # _ = L10n.get_translation()
 
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
+from TourneySummary import TourneySummary
+import Database
 from decimal import Decimal
 import re
 import logging
@@ -213,10 +215,8 @@ class PartyPoker(HandHistoryConverter):
         """
             \*{5}\sHand\sHistory\s(F|f)or\sGame\s(?P<HID>\w+)\s\*{5}\s+
             (?P<LIMIT>(NL|PL|FL|))\s*
-            (?P<GAME>(Texas\sHold\'em|Hold\'?em|Omaha\sHi-Lo|Omaha(\sHi)?|7\sCard\sStud\sHi-Lo|7\sCard\sStud|Double\sHold\'em|Short\sDeck))\s+
-            (?:(?P<BUYIN>[%(LS)s]?\s?[%(NUM)s]+)\s*(?P<BUYIN_CURRENCY>%(LEGAL_ISO)s)?\s*Buy-in\s+)?
-            (\+\s(?P<FEE>[%(LS)s]?\s?[%(NUM)s]+)\sEntry\sFee\s+)?
-            \s*\-\s*
+            (?P<GAME>(Texas\sHold'em|Hold'em|Omaha\sHi-Lo|Omaha(\sHi)?|7\sCard\sStud\sHi-Lo|7\sCard\sStud|Double\sHold'em|Short\sDeck))\s+
+            (?P<BUYIN_CURRENCY>[%(LS)s])?(?P<BUYIN>[%(NUM)s]+(\.[%(NUM)s]+)?)\s*(?P<BUYIN_ISO>%(LEGAL_ISO)s)?\s*Buy-in\s*-\s*
             (?P<DATETIME>.+)
             """
         % substitutions,
@@ -291,12 +291,12 @@ class PartyPoker(HandHistoryConverter):
     )
 
     re_WinningRankOther = re.compile(
-        r"^Player\s+(?P<PNAME>.+?)\s+finished\s+in\s+(?P<RANK>\d+)\s+place\s+and\s+received\s+(?P<CURRENCY_SYMBOL>[€$])(?P<AMT>[,\.0-9]+)\s+(?P<CURRENCY_CODE>[A-Z]{3})$",
+        r"^Player\s+(?P<PNAME>.+?)\s+finished\s+in\s+(?P<RANK>\d+)\s+place\s+and\s+received\s+(?P<CURRENCY_SYMBOL>[€$])(?P<AMT>[,\.0-9]+)\s+(?P<CURRENCY_CODE>[A-Z]{3})\s*$",
         re.MULTILINE,
     )
 
     re_RankOther = re.compile(
-        r"^Player\s+(?P<PNAME>.+?)\s+finished\s+in\s+(?P<RANK>\d+)$",
+        r"^Player\s+(?P<PNAME>.+?)\s+finished\s+in\s+(?P<RANK>\d+)\.?\s*$",
         re.MULTILINE,
     )
 
@@ -316,6 +316,10 @@ class PartyPoker(HandHistoryConverter):
         log.debug("init parser PartyPoker.")
         self.last_bet = {}
         self.player_bets = {}
+
+        # Initialize self.db if not already done
+        if not hasattr(self, "db"):
+            self.db = Database.Database(self.config)
 
     def allHandsAsList(self):
         log.debug("enter method allHandsAsList.")
@@ -1130,10 +1134,9 @@ class PartyPoker(HandHistoryConverter):
 
         # Initialize data structures to store results
         log.debug("Initializing data structures for tournament results.")
-        hand.winnings = {}  # Initialisation des gains
-        hand.ranks = {}  # Initialisation des rangs
-        koAmounts = {}
-        winner = None
+        hand.winnings = {}
+        hand.ranks = {}
+        hand.playersIn = []
         hand.isProgressive = False  # Default to non-progressive KO
         log.debug("Set hand.isProgressive to False (non-progressive KO).")
 
@@ -1147,7 +1150,7 @@ class PartyPoker(HandHistoryConverter):
 
             # Assuming a winning amount in `re_WinningRankOne` pattern as `AMT`
             if "AMT" in m.groupdict():
-                amt_str = m.group("AMT").replace(",", "")
+                amt_str = m.group("AMT").replace(",", ".")
                 try:
                     amount = Decimal(amt_str)
                     log.debug(f"Winning amount for {winner}: {amount}")
@@ -1161,6 +1164,7 @@ class PartyPoker(HandHistoryConverter):
                 log.debug(f"No winning amount specified for {winner}. Set hand.winnings[{winner}] = 0")
 
             hand.ranks[winner] = 1  # Store the rank for the winner
+            hand.playersIn.append(winner)
             log.debug(f"Set hand.ranks[{winner}] = 1")
         else:
             log.debug("Regex re_WinningRankOne did not match. No winner found.")
@@ -1171,7 +1175,7 @@ class PartyPoker(HandHistoryConverter):
             log.debug("Found a match with re_WinningRankOther.")
             pname = match.group("PNAME")
             rank = int(match.group("RANK"))
-            amt_str = match.group("AMT").replace(",", "")
+            amt_str = match.group("AMT").replace(",", ".")
             try:
                 amount = Decimal(amt_str)
                 log.debug(f"Player {pname} has rank {rank} with winnings {amount}")
@@ -1190,6 +1194,10 @@ class PartyPoker(HandHistoryConverter):
             log.debug(f"Set hand.ranks[{pname}] = {rank}")
             hand.winnings[pname] = amount
             log.debug(f"Set hand.winnings[{pname}] = {amount}")
+            hand.buyinCurrency = currency_code
+            hand.currency = currency_code
+            if pname not in hand.playersIn:
+                hand.playersIn.append(pname)
 
         # Process other ranked players without winnings
         log.debug("Processing other ranked players without winnings.")
@@ -1200,13 +1208,82 @@ class PartyPoker(HandHistoryConverter):
             log.debug(f"Player {pname} has rank {rank} without winnings.")
 
             # Store rank only in the hand object for these players
-            hand.ranks[pname] = rank
-            log.debug(f"Set hand.ranks[{pname}] = {rank}")
+            if pname not in hand.ranks:
+                hand.ranks[pname] = rank
+                log.debug(f"Set hand.ranks[{pname}] = {rank}")
+            else:
+                log.debug(f"Player {pname} already has a rank with winnings.")
+            if pname not in hand.playersIn:
+                hand.playersIn.append(pname)
 
-        # Skip KO and progressive KO processing for now
-        log.debug("Skipping KO and progressive KO processing for now.")
-        # Placeholder for future KO/progressive KO handling
-        pass
+        # Optionally, set other tournament attributes on hand
+        hand.entries = len(hand.playersIn)
+        hand.prizepool = sum(hand.winnings.values())
+        hand.isTournament = True
+        hand.tourneyName = hand.tablename
+        hand.isSng = True
+        hand.isRebuy = False
+        hand.isAddOn = False
+        hand.isKO = False
+        log.debug(f"Set hand.entries = {hand.entries}, hand.prizepool = {hand.prizepool}")
+
+        # Ensure that hand.endTime is set
+        if not hasattr(hand, "endTime"):
+            hand.endTime = hand.startTime
+            log.debug(f"Set hand.endTime = {hand.endTime}")
+
+        # Now, create a TourneySummary object and store the tournament info
+        log.debug("Creating TourneySummary object.")
+        try:
+            # Create the TourneySummary object
+            summary = TourneySummary(
+                db=self.db,
+                config=self.config,
+                siteName=self.sitename,
+                summaryText=hand.handText,
+                builtFrom="HHC",
+                header="",
+            )
+
+            # Set tournament attributes
+            summary.tourNo = hand.tourNo
+            summary.buyin = hand.buyin
+            summary.fee = hand.fee
+            summary.buyinCurrency = hand.buyinCurrency
+            summary.currency = hand.buyinCurrency
+            summary.startTime = hand.startTime
+            summary.endTime = hand.endTime
+            summary.gametype = hand.gametype
+            summary.maxseats = hand.maxseats
+            summary.entries = hand.entries
+            summary.speed = "Normal"
+            summary.isSng = hand.isSng
+            summary.isRebuy = hand.isRebuy
+            summary.isAddOn = hand.isAddOn
+            summary.isKO = hand.isKO
+
+            # Add players to the summary
+            for pname, rank in hand.ranks.items():
+                winnings = hand.winnings.get(pname, Decimal("0"))
+                winningsCurrency = hand.buyinCurrency
+                summary.addPlayer(
+                    rank=rank,
+                    name=pname,
+                    winnings=int(winnings * 100),  # Convert to cents
+                    winningsCurrency=winningsCurrency,
+                    rebuyCount=0,
+                    addOnCount=0,
+                    koCount=0,
+                )
+                log.debug(f"Added player {pname} to TourneySummary with rank {rank} and winnings {winnings}")
+
+            # Insert or update the tournament in the database
+            log.debug("Inserting or updating tournament in the database.")
+            summary.insertOrUpdate()
+            log.debug("Tournament data inserted/updated successfully.")
+
+        except Exception as e:
+            log.error(f"Error creating or inserting TourneySummary: {e}")
 
         log.debug("Method readTourneyResults completed.")
 

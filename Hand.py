@@ -108,6 +108,7 @@ class Hand(object):
         self.checkForUncalled = False
         self.adjustCollected = False
         self.cashedOut = False
+        self.endTime = None
 
         # tourney stuff
         self.tourNo = None
