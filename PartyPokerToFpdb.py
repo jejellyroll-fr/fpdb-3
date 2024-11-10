@@ -158,15 +158,15 @@ class PartyPoker(HandHistoryConverter):
             (.+?\sfinished\sin\s\d+\splace\.\s+)*
             ((?P<CURRENCY>[%(LS)s]))?\s*
             (
-             ([%(LS)s]?(?P<SB>[%(NUM)s]+)/[%(LS)s]?(?P<BB>[%(NUM)s]+)\s*(?:%(LEGAL_ISO)s)?\s+(?P<FAST3>fastforward\s)?((?P<LIMIT3>NL|PL|FL|)\s+)?)|
-             ((?P<CASHBI>[%(NUM)s]+)\s*(?:%(LEGAL_ISO)s)?\s*)(?P<FAST2>fastforward\s)?(?P<LIMIT2>(NL|PL|FL|))?\s*
+            ([%(LS)s]?(?P<SB>[%(NUM)s]+)/[%(LS)s]?(?P<BB>[%(NUM)s]+)\s*(?:%(LEGAL_ISO)s)?\s+(?P<FAST3>(fastforward|SPOTPOKER)\s)?((?P<LIMIT3>NL|PL|FL|)\s+)?)|
+            ((?P<CASHBI>[%(NUM)s]+)\s*(?:%(LEGAL_ISO)s)?\s*)(?P<FAST2>(fastforward|SPOTPOKER)\s)?(?P<LIMIT2>(NL|PL|FL|))?\s*
             )
             (Tourney\s*)?
             (?P<GAME>(Texas\sHold\'?em|Hold\'?em|Omaha\sHi-Lo|Omaha(\sHi)?|7\sCard\sStud\sHi-Lo|7\sCard\sStud|Double\sHold\'?em|Short\sDeck))\s*
             (Game\sTable\s*)?
             (
-             (\((?P<LIMIT>(NL|PL|FL|Limit|))\)\s*)?
-             (\((?P<SNG>SNG|STT|MTT)(\sJackPot)?\sTournament\s\#(?P<TOURNO>\d+)\)\s*)?
+            (\((?P<LIMIT>(NL|PL|FL|Limit|))\)\s*)?
+            (\((?P<SNG>SNG|STT|MTT)(\sJackPot)?\sTournament\s\#(?P<TOURNO>\d+)\)\s*)?
             )?
             (?:\s\(Buyin\s(?P<BUYIN>[%(LS)s][%(NUM)s]+)\s\+\s(?P<FEE>[%(LS)s][%(NUM)s]+)\))?
             \s*-\s*
