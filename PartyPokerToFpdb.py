@@ -1220,6 +1220,8 @@ class PartyPoker(HandHistoryConverter):
         log.info(
             f"Enter method getTableTitleRe: type='{type}', table_name='{table_name}', tournament='{tournament}', table_number='{table_number}'"
         )
+        tournament = str(tournament) if tournament is not None else None
+        table_number = str(table_number) if table_number is not None else None
         regex = rf"{re.escape(table_name)}" if table_name else ""
         if type == "tour":
             if table_name:
