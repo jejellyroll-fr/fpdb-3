@@ -37,12 +37,12 @@ from past.utils import old_div
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal import Decimal
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 import MergeStructures
 
 # Merge HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class Merge(HandHistoryConverter):
@@ -261,7 +261,7 @@ class Merge(HandHistoryConverter):
                     raise FpdbHandPartial("Partial hand history: No <desription> tag")
                 else:
                     tmp = handText[0:200]
-                    log.error(("MergeToFpdb.determineGameType: '%s'") % tmp)
+                    log.error(f"determine GameType not found: '{tmp}'")
                     raise FpdbParseError
             else:
                 if "mix" in gametype and gametype["mix"] is not None:
@@ -322,7 +322,7 @@ class Merge(HandHistoryConverter):
                 self.info["bb"] = self.Lim_Blinds[mg["BB"]][1]
             except KeyError:
                 tmp = handText[0:200]
-                log.error(("MergeToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg["BB"], tmp))
+                log.error(f"Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'")
                 raise FpdbParseError
 
         return self.info
@@ -331,7 +331,7 @@ class Merge(HandHistoryConverter):
         m = self.re_HandInfo.search(hand.handText)
         if m is None:
             tmp = hand.handText[0:200]
-            log.error(("MergeToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(f"MergeToFpdb.readHandInfo: '{tmp}'")
             raise FpdbParseError
 
         # print "DEBUG: mg: %s" % m.groupdict()
@@ -419,9 +419,7 @@ class Merge(HandHistoryConverter):
 
                 for seatno in list(acted.keys()):
                     if seatno not in seated:
-                        log.error(
-                            ("MergeToFpdb.readPlayerStacks: '%s' Seat:%s acts but not listed") % (hand.handid, seatno)
-                        )
+                        log.error(f"MergeToFpdb.readPlayerStacks: '{hand.handid}' Seat:{seatno} acts but not listed")
                         raise FpdbParseError
 
         for seat in seated:
@@ -615,7 +613,7 @@ class Merge(HandHistoryConverter):
         m2 = self.re_HandInfo.search(handText)
         if m2 is None:
             tmp = handText[0:200]
-            log.error(("MergeToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(f"readHandInfo not found: '{tmp}'")
             raise FpdbParseError
         multigametype = m2.group("MULTIGAMETYPE1") if m2.group("MULTIGAMETYPE1") else m2.group("MULTIGAMETYPE2")
         if multigametype:
@@ -623,7 +621,7 @@ class Merge(HandHistoryConverter):
                 (self.info["base"], self.info["category"]) = self.Multigametypes[multigametype]
             except KeyError:
                 tmp = handText[0:200]
-                log.error(("MergeToFpdb.determineGameType: Multigametypes has no lookup for '%s'") % multigametype)
+                log.error(f"Multigametypes has no lookup for '{multigametype}'")
                 raise FpdbParseError
 
     def adjustMergeTourneyStack(self, hand, player, amount):
@@ -748,9 +746,7 @@ class Merge(HandHistoryConverter):
                     else:
                         hand.addComplete(street, player, action.group("BET"))
                 else:
-                    log.debug(
-                        ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group("PSEAT"), action.group("ATYPE"))
-                    )
+                    log.debug(f"Unimplemented readAction: '{action.group('PSEAT')}' '{action.group('ATYPE')}'")
 
     def readShowdownActions(self, hand):
         pass
@@ -808,8 +804,7 @@ class Merge(HandHistoryConverter):
             # "Fun Step 1 (4358174) - Table 1"
             regex = re.escape(str(tournament))
         log.info(
-            "Merge.getTableTitleRe: table_name='%s' tournament='%s' table_number='%s'"
-            % (table_name, tournament, table_number)
+            f"Merge.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'"
         )
-        log.info("Merge.getTableTitleRe: returns: '%s'" % (regex))
+        log.info(f"Merge.getTableTitleRe: returns: '{regex}'")
         return regex
