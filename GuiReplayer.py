@@ -42,9 +42,9 @@ from math import pi, cos, sin
 from decimal import Decimal
 import copy
 import os
-import logging
+from loggingFpdb import get_logger
 
-log = logging.getLogger("replayer")
+log = get_logger("replayer")
 
 CARD_HEIGHT = 90
 CARD_WIDTH = 70
