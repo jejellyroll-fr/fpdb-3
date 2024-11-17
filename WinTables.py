@@ -1,6 +1,6 @@
 import ctypes
 import re
-import logging
+from loggingFpdb import get_logger
 from ctypes import wintypes
 from PyQt5.QtGui import QWindow
 from PyQt5.QtCore import Qt
@@ -13,7 +13,7 @@ from TableWindow import Table_Window
 app = QApplication(sys.argv)
 
 # logging setup
-log = logging.getLogger("hud")
+log = get_logger("hud")
 
 # Definition of Windows API constants
 GW_OWNER = 4
