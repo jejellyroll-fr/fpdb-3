@@ -57,7 +57,7 @@ if platform.system() == "Windows":
 else:
     winpaths_appdata = False
 
-import logging, logging.config
+from loggingFpdb import get_logger
 
 
 # config version is used to flag a warning at runtime if the users config is
@@ -165,15 +165,7 @@ else:
 PYTHON_VERSION = sys.version[:3]
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("config")
-
-LOGLEVEL = {
-    "DEBUG": logging.DEBUG,
-    "INFO": logging.INFO,
-    "WARNING": logging.WARNING,
-    "ERROR": logging.ERROR,
-    "CRITICAL": logging.CRITICAL,
-}
+log = get_logger("config")
 
 
 def get_config(file_name, fallback=True):
@@ -226,14 +218,14 @@ def get_config(file_name, fallback=True):
                 shutil.copyfile(example_path, config_path)
                 example_copy = True
                 msg = ("Config file has been created at %s.") % (config_path)
-                log.info(msg)
+                log.info(f"Config posix not found: {msg}")
             except IOError:
                 try:
                     example_path = file_name + ".example"
                     shutil.copyfile(example_path, config_path)
                     example_copy = True
                     msg = ("Config file has been created at %s.") % (config_path)
-                    log.info(msg)
+                    log.info(f"Config posix not found: {msg}")
                 except IOError:
                     pass
 
@@ -246,13 +238,11 @@ def get_config(file_name, fallback=True):
                 shutil.copyfile(example_path, config_path)
                 example_copy = True
                 log.info(
-                    ('No %r found in "%r" or "%r".') % (file_name, FPDB_ROOT_PATH, CONFIG_PATH)
-                    + " "
-                    + ("Config file has been created at %r.") % (config_path + "\n")
+                    f'No {file_name!r} found in "{FPDB_ROOT_PATH!r}" or "{CONFIG_PATH!r}". Config file has been created at {config_path!r}.'
                 )
 
         except IOError:
-            print((("Error copying .example config file, cannot fall back. Exiting."), "\n"))
+            log.error(("Error copying .example config file, cannot fall back. Exiting."))
             sys.stderr.write(("Error copying .example config file, cannot fall back. Exiting.") + "\n")
             sys.stderr.write(str(sys.exc_info()))
             sys.exit()
@@ -280,7 +270,7 @@ def set_logfile(file_name):
         try:
             log_file = log_file.replace("\\", "/")  # replace each \ with \\
             print(f"Using logging configfile: {conf_file}")
-            logging.config.fileConfig(conf_file, {"logFile": log_file})
+            log.config.fileConfig(conf_file, {"logFile": log_file})
         except Exception:
             sys.stderr.write(f"Could not setup log file {file_name}")
 
@@ -295,8 +285,8 @@ def check_dir(path, create=True):
     if create:
         path = path.replace("\\", "/")
         msg = ("Creating directory: '%s'") % (path)
-        print(msg)
-        log.info(msg)
+
+        log.info(f"Directory: {msg}")
         os.makedirs(path)  # , "utf-8"))
     else:
         return False
@@ -563,15 +553,7 @@ class Database(object):
         self.db_path = node.getAttribute("db_path")
         self.db_selected = string_to_bool(node.getAttribute("default"), default=False)
         log.debug(
-            "Database db_name:'%(name)s'  db_server:'%(server)s'  db_ip:'%(ip)s'  db_port:'%(port)s' db_user:'%(user)s'  db_pass (not logged)  selected:'%(sel)s'"
-            % {
-                "name": self.db_name,
-                "server": self.db_server,
-                "ip": self.db_ip,
-                "port": self.db_port,
-                "user": self.db_user,
-                "sel": self.db_selected,
-            }
+            f"Database db_name:'{self.db_name}'  db_server:'{self.db_server}'  db_ip:'{self.db_ip}'  db_port:'{self.db_port}' db_user:'{self.db_user}'  db_pass (not logged)  selected:'{self.db_selected}'"
         )
 
     def __str__(self):
@@ -792,7 +774,7 @@ class General(dict):
         #                e.g. user could set to 4.0 for day to start at 4am local time
         # [ HH_bulk_path was here - now moved to import section ]
         for name, value in list(node.attributes.items()):
-            log.debug("config.general: adding %s = %s" % (name, value))
+            log.debug(f"config.general: adding {name} = {value}")
             self[name] = value
 
         try:
@@ -856,8 +838,7 @@ class GUICashStats(list):
                     if child.hasAttribute("xalignment"):
                         xalignment = float(child.getAttribute("xalignment"))
                 except ValueError:
-                    print(("bad number in xalignment was ignored"))
-                    log.info(("bad number in xalignment was ignored"))
+                    log.error(("bad number in xalignment was ignored"))
 
                 self.append([col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment])
 
@@ -942,8 +923,7 @@ class GUITourStats(list):
                     if child.hasAttribute("xalignment"):
                         xalignment = float(child.getAttribute("xalignment"))
                 except ValueError:
-                    print(("bad number in xalignment was ignored"))
-                    log.info(("bad number in xalignment was ignored"))
+                    log.error(("bad number in xalignment was ignored"))
 
                 self.append([col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment])
 
@@ -1042,7 +1022,7 @@ class Config(object):
             else:
                 self.dir_log = os.path.join(CONFIG_PATH, "log")
         self.log_file = os.path.join(self.dir_log, "fpdb-log.txt")
-        log = logging.getLogger("config")
+        log = get_logger("config")
 
         #    "file" is a path to an xml file with the fpdb/HUD configuration
         #    we check the existence of "file" and try to recover if it doesn't exist
@@ -1081,8 +1061,7 @@ class Config(object):
         added, n = 1, 0  # use n to prevent infinite loop if add_missing_elements() fails somehow
         while added > 0 and n < 2:
             n = n + 1
-            log.info("Reading configuration file %s" % file)
-            print(("\n" + ("Reading configuration file %s") + "\n") % file)
+            log.info(f"Reading configuration file {file}")
             try:
                 doc = xml.dom.minidom.parse(file)
                 self.doc = doc  # Root of XML tree
