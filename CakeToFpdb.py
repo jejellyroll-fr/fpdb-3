@@ -459,8 +459,8 @@ class Cake(HandHistoryConverter):
             cash_value = cash_value.encode("utf-8")
             cash_value = cash_value.replace(b"\xe2\x80\xaf", b"")
             cash_value = cash_value.decode("utf-8")
-            print("value:", cash_value)
-            print("type:", type(cash_value))
+            log.debug(f"value: {cash_value}")
+            log.debug(f"type: {type(cash_value)}")
             # Add the player's stack information to the `hand` object
             hand.addPlayer(int(a.group("SEAT")), a.group("PNAME"), cash_value)
 
