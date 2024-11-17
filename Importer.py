@@ -32,7 +32,7 @@ import shutil
 import re
 import zmq
 
-import logging
+from loggingFpdb import get_logger
 
 
 from PyQt5.QtWidgets import QProgressBar, QLabel, QDialog, QVBoxLayout
@@ -56,7 +56,7 @@ except ImportError:
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("importer")
+log = get_logger("importer")
 
 
 class ZMQSender:
@@ -211,7 +211,7 @@ class Importer(object):
         if self.idsite.get_fobj(filename):
             fpdbfile = self.idsite.filelist[filename]
         else:
-            log.error("Importer.addImportFile: siteId Failed for: '%s'" % filename)
+            log.warning(f"siteId Failed for: '{filename}'")
             return False
 
         self.addFileToList(fpdbfile)
@@ -223,9 +223,9 @@ class Importer(object):
                 self.siteIds[fpdbfile.site.name] = result[0][0]
             else:
                 if len(result) == 0:
-                    log.error(("Database ID for %s not found") % fpdbfile.site.name)
+                    log.warning(f"Database ID for {fpdbfile.site.name} not found")
                 else:
-                    log.error(("More than 1 Database ID found for %s") % fpdbfile.site.name)
+                    log.warning(f"More than 1 Database ID found for {fpdbfile.site.name}")
 
         return True
 
@@ -274,7 +274,7 @@ class Importer(object):
                         # update the timestamp on the HH during session
                         self.addImportFile(filename, "auto")
         else:
-            log.warning(("Attempted to add non-directory '%s' as an import directory") % str(dir))
+            log.warning(f"Attempted to add non-directory '{str(dir)}' as an import directory")
 
     def runImport(self):
         """ "Run full import on self.filelist. This is called from GuiBulkImport.py"""
@@ -282,10 +282,7 @@ class Importer(object):
         # Initial setup
         start = datetime.datetime.now()
         starttime = time()
-        log.info(
-            ("Started at %s -- %d files to import. indexes: %s")
-            % (start, len(self.filelist), self.settings["dropIndexes"])
-        )
+        log.info(f"Started at {start} -- {len(self.filelist)} files to import. indexes: {self.settings['dropIndexes']}")
         if self.settings["dropIndexes"] == "auto":
             self.settings["dropIndexes"] = self.calculate_auto2(self.database, 12.0, 500.0)
         if "dropHudCache" in self.settings and self.settings["dropHudCache"] == "auto":
@@ -430,7 +427,7 @@ class Importer(object):
                                 print("self.caller:", self.caller)
                                 print(os.path.basename(f))
                         except KeyError:
-                            log.error("File '%s' seems to have disappeared" % f)
+                            log.error(f"File '{f}' seems to have disappeared")
                         (stored, duplicates, partial, skipped, errors, ttime) = self._import_despatch(self.filelist[f])
                         self.logImport(
                             "auto", f, stored, duplicates, partial, skipped, errors, ttime, self.filelist[f].fileId
@@ -621,8 +618,8 @@ class Importer(object):
                 self.progressNotify()
             summaryTexts = self.readFile(obj, fpdbfile.path, fpdbfile.site.name)
             if summaryTexts is None:
-                log.error(
-                    "Found: '%s' with 0 characters... skipping" % fpdbfile.path
+                log.warning(
+                    f"Found: '{fpdbfile.path}' with 0 characters... skipping"
                 )  # Fixed the typo (fpbdfile -> fpdbfile)
                 return (0, 0, 0, 0, 1, time())  # File had 0 characters
             ####Lock Placeholder####
@@ -676,13 +673,13 @@ class Importer(object):
                 # Remove the first entry if it has < 150 characters
                 if len(summaryTexts) > 1 and len(summaryTexts[0]) <= 150:
                     del summaryTexts[0]
-                    log.warn(("TourneyImport: Removing text < 150 characters from start of file"))
+                    log.warning(("TourneyImport: Removing text < 150 characters from start of file"))
 
                 # Sometimes the summary files also have a footer
                 # Remove the last entry if it has < 100 characters
                 if len(summaryTexts) > 1 and len(summaryTexts[-1]) <= 100:
                     summaryTexts.pop()
-                    log.warn(("TourneyImport: Removing text < 100 characters from end of file"))
+                    log.warning(("TourneyImport: Removing text < 100 characters from end of file"))
         return summaryTexts
 
     def __del__(self):
