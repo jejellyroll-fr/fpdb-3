@@ -17,7 +17,7 @@
 
 from __future__ import print_function
 from __future__ import division
-from past.utils import old_div
+
 
 # import L10n
 # _ = L10n.get_translation()
@@ -36,12 +36,12 @@ import Importer
 import Configuration
 
 
-import logging
+from loggingFpdb import get_logger
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("importer")
+log = get_logger("importer")
 
 
 class GuiBulkImport(QWidget):
@@ -80,10 +80,7 @@ class GuiBulkImport(QWidget):
             if ttime == 0:
                 ttime = 1
 
-            completionMessage = (
-                "Bulk import done: Stored: %d, Duplicates: %d, Partial: %d, Skipped: %d, Errors: %d, Time: %s seconds, Stored/second: %.0f"
-            ) % (stored, dups, partial, skipped, errs, ttime, old_div((stored + 0.0), ttime))
-            print(completionMessage)
+            completionMessage = f"Bulk import done: Stored: {stored}, Duplicates: {dups}, Partial: {partial}, Skipped: {skipped}, Errors: {errs}, Time: {ttime} seconds, Stored/second: {(stored + 0.0) / ttime:.0f}"
             log.info(completionMessage)
 
             self.importer.clearFileList()
