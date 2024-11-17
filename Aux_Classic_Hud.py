@@ -45,7 +45,7 @@ the Hud modules.
 # sort out the wierd focus issues in flop-mucked.
 
 #    Standard Library modules
-import logging
+from loggingFpdb import get_logger
 
 
 #    FreePokerTools modules
@@ -57,7 +57,7 @@ import Configuration
 import os
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hud")
+log = get_logger("hud")
 
 
 class Classic_HUD(Aux_Hud.Simple_HUD):
