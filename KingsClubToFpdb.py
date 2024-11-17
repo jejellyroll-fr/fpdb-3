@@ -26,11 +26,11 @@
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal import Decimal
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 
 # KingsClub HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class KingsClub(HandHistoryConverter):
@@ -313,7 +313,7 @@ class KingsClub(HandHistoryConverter):
         m = self.re_GameInfo.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(("KingsClubToFpdb.determineGameType: '%s'") % tmp)
+            log.error(f"determine GameType not found: '{tmp}'")
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -373,7 +373,7 @@ class KingsClub(HandHistoryConverter):
         m3 = self.re_TourNo.search(hand.handText)
         if m is None or m1 is None or m2 is None:
             tmp = hand.handText[0:200]
-            log.error(("KingsClubToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(f"readHandInfo failed: '{tmp}'")
             raise FpdbParseError
 
         info.update(m.groupdict())
@@ -422,7 +422,7 @@ class KingsClub(HandHistoryConverter):
         if m:
             hand.buttonpos = int(m.group("BUTTON"))
         else:
-            log.info("readButton: " + ("not found"))
+            log.info("readButton not found")
 
     def readPlayerStacks(self, hand):
         pre, post = hand.handText.split("*** SUMMARY *")
@@ -779,11 +779,7 @@ class KingsClub(HandHistoryConverter):
             elif action.group("ATYPE") == " stands pat":
                 hand.addStandsPat(street, action.group("PNAME"), action.group("CARDS"))
             else:
-                log.debug(
-                    ("DEBUG:")
-                    + " "
-                    + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group("PNAME"), action.group("ATYPE"))
-                )
+                log.debug(f"DEBUG: Unimplemented {'readAction'}: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
 
     def readShowdownActions(self, hand):
         pass
