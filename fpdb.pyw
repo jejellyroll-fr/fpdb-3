@@ -28,7 +28,7 @@ import codecs
 import Options
 from functools import partial
 from L10n import set_locale_translation
-import logging
+from loggingFpdb import get_logger, set_default_logging
 
 from PyQt5.QtCore import QCoreApplication, QDate, Qt, QPoint
 from PyQt5.QtGui import QIcon, QPalette
@@ -111,7 +111,10 @@ profiler.enable()
 
 Configuration.set_logfile("fpdb-log.txt")
 
-log = logging.getLogger("fpdb")
+
+# Obtention du logger configuré
+set_default_logging()
+log = get_logger("fpdb")
 
 try:
     assert not hasattr(sys, "frozen")  # We're surely not in a git repo if this fails
