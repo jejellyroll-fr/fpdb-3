@@ -23,7 +23,7 @@
 # TODO: check to keep only the needed modules
 
 import sys
-import logging
+from loggingFpdb import get_logger
 
 import codecs
 
@@ -38,7 +38,7 @@ except ImportError:
     xlrd = None
 
 
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class TourneySummary(object):
@@ -281,7 +281,7 @@ class TourneySummary(object):
         self.db.createOrUpdateTourneysPlayers(self)
         self.db.commit()
 
-        logging.debug(("Tourney Insert/Update done"))
+        log.debug(("Tourney Insert/Update done"))
 
         # TO DO : Return what has been done (tourney created, updated, nothing)
         # ?? stored = 1 if tourney is fully created / duplicates = 1, if everything was already here and correct / partial=1 if some things were already here (between tourney, tourneysPlayers and handsPlayers)
@@ -294,13 +294,13 @@ class TourneySummary(object):
         return (stored, duplicates, partial, errors, ttime)
 
     def addPlayer(self, rank, name, winnings, winningsCurrency, rebuyCount, addOnCount, koCount, entryId=None):
-        """\
-Adds a player to the tourney, and initialises data structures indexed by player.
-rank        (int) indicating the finishing rank (can be -1 if unknown)
-name        (string) player name
-winnings    (int) the money the player ended the tourney with (can be 0, or -1 if unknown)
-"""
-        log.debug("addPlayer: rank:%s - name : '%s' - Winnings (%s)" % (rank, name, winnings))
+        """
+        Adds a player to the tourney, and initialises data structures indexed by player.
+        rank        (int) indicating the finishing rank (can be -1 if unknown)
+        name        (string) player name
+        winnings    (int) the money the player ended the tourney with (can be 0, or -1 if unknown)
+        """
+        log.debug(f"addPlayer: rank:{rank} - name : '{name}' - Winnings ({winnings})")
         if self.players.get(name) is not None:
             if entryId is None:
                 entries = self.players[name][-1]
@@ -375,8 +375,8 @@ winnings    (int) the money the player ended the tourney with (can be 0, or -1 i
                 in_fh.close()
                 break
             except UnicodeDecodeError as e:
-                log.warning("TS.readFile: '%s' : '%s'" % (filename, e))
+                log.error(f"TS.readFile: '{filename}' : '{e}'")
             except UnicodeError as e:
-                log.warning("TS.readFile: '%s' : '%s'" % (filename, e))
+                log.error(f"TS.readFile: '{filename}' : '{e}'")
 
         return whole_file
