@@ -27,7 +27,7 @@
 
 #    Standard Library modules
 import re
-import logging
+from loggingFpdb import get_logger
 
 from PyQt5.QtGui import QWindow
 from PyQt5.QtCore import Qt
@@ -53,7 +53,7 @@ wnameatom = getAtom("_NET_WM_NAME")
 utf8atom = getAtom("UTF8_STRING")
 
 c = Configuration.Config()
-log = logging.getLogger("hud")
+log = get_logger("hud")
 
 
 class Table(Table_Window):
@@ -69,8 +69,7 @@ class Table(Table_Window):
             # escaped_search_string = re.escape(self.search_string)
             # if re.search(escaped_search_string, w_title, re.I):
             if re.search(self.search_string, w_title, re.I):
-                log.debug("%s matches: %s", w_title, self.search_string)
-                log.info('"%s" matches: "%s"', w_title, self.search_string)
+                log.debug(f"{w_title} matches: {self.search_string}")
                 title = w_title.replace('"', "")
                 if self.check_bad_words(title):
                     continue
@@ -81,7 +80,7 @@ class Table(Table_Window):
                 break
 
         if self.number is None:
-            log.warning(("No match in XTables for table '%s'."), self.search_string)
+            log.warning(f"No match in XTables for table '{self.search_string}'")
 
     # This function serves a double purpose. It fetches the X geometry
     # but it also is used to track for window lifecycle. When
