@@ -34,7 +34,7 @@ from PyQt5.QtWidgets import (
 )
 
 import os
-import logging
+from loggingFpdb import get_logger
 from itertools import groupby
 from functools import partial
 import Configuration
@@ -42,7 +42,7 @@ import Configuration
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("logview")
+log = get_logger("logview")
 
 MAX_LINES = 100000  # max lines to display in window
 EST_CHARS_PER_LINE = 150  # used to guesstimate number of lines in log file
