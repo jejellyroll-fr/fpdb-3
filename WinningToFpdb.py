@@ -26,13 +26,13 @@
 # _ = L10n.get_translation()
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 from decimal import Decimal
 
 
 # Winning HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class Winning(HandHistoryConverter):
@@ -383,13 +383,13 @@ class Winning(HandHistoryConverter):
         info = {}
         if not self.re_File1.search(self.in_path):
             tmp = "Invalid filename: %s" % self.in_path
-            log.debug(("WinningToFpdb.determineGameType: '%s'") % tmp)
+            log.debug(f"determine Game Type failed: '{tmp}'")
             raise FpdbHandPartial(tmp)
 
         m = self.re_GameInfo1.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(("WinningToFpdb.determineGameType: '%s'") % tmp)
+            log.error(f"determine Game Type failed: '{tmp}'")
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -452,7 +452,7 @@ class Winning(HandHistoryConverter):
         m = self.re_GameInfo2.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(("WinningToFpdb._determineGameType2: '%s'") % tmp)
+            log.debug(f"determine Game Type failed: '{tmp}'")
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -507,7 +507,7 @@ class Winning(HandHistoryConverter):
         m2 = self.re_DateTime1.search(hand.handText)
         if m is None or m2 is None:
             tmp = hand.handText[0:200]
-            log.error(("WinningToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(f"read Hand Info failed: '{tmp}'")
             raise FpdbParseError
 
         info.update(m.groupdict())
@@ -616,7 +616,7 @@ class Winning(HandHistoryConverter):
         m1 = self.re_HandInfo.search(hand.handText)
         if m is None or m1 is None:
             tmp = hand.handText[0:200]
-            log.error(("WinningToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(f"read Hand Info failed: '{tmp}'")
             raise FpdbParseError
 
         info.update(m.groupdict())
@@ -718,14 +718,14 @@ class Winning(HandHistoryConverter):
         if m:
             hand.buttonpos = int(m.group("BUTTON"))
         else:
-            log.info("readButton: " + ("not found"))
+            log.info("readButton: not found")
 
     def _readButton2(self, hand):
         m = self.re_Button2.search(hand.handText)
         if m:
             hand.buttonpos = int(m.group("BUTTON"))
         else:
-            log.info("readButton: " + ("not found"))
+            log.info("readButton: not found")
 
     def readPlayerStacks(self, hand):
         if self.version == 1:
@@ -815,7 +815,7 @@ class Winning(HandHistoryConverter):
         if m:
             hand.setCommunityCards(street, [c.replace("10", "T") for c in m.group("CARDS").split(" ")])
         else:
-            log.error("WinningToFpdb._readCommunityCards1: No community cards found on %s %s" % (street, hand.handid))
+            log.error(f"No community cards found on {street} {hand.handid}")
             raise FpdbParseError
 
     def _readCommunityCards2(self, hand, street):  # street has been matched by markStreets, so exists in this hand
@@ -823,7 +823,7 @@ class Winning(HandHistoryConverter):
         if m:
             hand.setCommunityCards(street, m.group("CARDS").split(" "))
         else:
-            log.error("WinningToFpdb._readCommunityCards2: No community cards found on %s %s" % (street, hand.handid))
+            log.error(f"No community cards found on {street} {hand.handid}")
             raise FpdbParseError
 
     def readAntes(self, hand):
@@ -1006,7 +1006,7 @@ class Winning(HandHistoryConverter):
         for action in m:
             action.groupdict()
             if action.group("PNAME") is None:
-                log.error("WinningToFpdb.readAction: Unknown player %s %s" % (action.group("ATYPE"), hand.handid))
+                log.error(f"read Action: Unknown player {action.group('ATYPE')} {hand.handid}")
                 raise FpdbParseError
 
             if action.group("ATYPE") == "folds":
@@ -1037,11 +1037,7 @@ class Winning(HandHistoryConverter):
                 else:
                     hand.addCallandRaise(street, player, amount)
             else:
-                log.debug(
-                    ("DEBUG:")
-                    + " "
-                    + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group("PNAME"), action.group("ATYPE"))
-                )
+                log.debug(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
 
     def _readAction2(self, hand, street):
         m = self.re_Action2.finditer(hand.streets[street])
@@ -1062,11 +1058,7 @@ class Winning(HandHistoryConverter):
             elif action.group("ATYPE") == " bets":
                 hand.addBet(street, action.group("PNAME"), self.clearMoneyString(action.group("BET")))
             else:
-                log.debug(
-                    ("DEBUG:")
-                    + " "
-                    + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group("PNAME"), action.group("ATYPE"))
-                )
+                log.debug(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
 
     def readCollectPot(self, hand):
         if self.version == 1:
@@ -1170,9 +1162,6 @@ class Winning(HandHistoryConverter):
         regex = re.escape(str(table_name))
         if type == "tour":
             regex = ", Table " + re.escape(str(table_number)) + "\s\-.*\s\(" + re.escape(str(tournament)) + "\)"
-        log.info(
-            "Winning.getTableTitleRe: table_name='%s' tournament='%s' table_number='%s'"
-            % (table_name, tournament, table_number)
-        )
-        log.info("Winning.getTableTitleRe: returns: '%s'" % (regex))
+        log.info(f"read Table Title: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'")
+        log.info(f"read Table Title: returns: '{regex}'")
         return regex
