@@ -616,7 +616,7 @@ class Winamax(HandHistoryConverter):
             regex = f"Winamax {table_name}"
         else:
             regex = f"Winamax {table_name} /"
-        log.debug("regex get table cash title:", regex)
+        log.debug(f"regex get table cash title: {regex}")
         if tournament:
             regex = r"Winamax\s+([^\(]+)\(%s\)\(#0*%s\)" % (tournament, table_number)
 
