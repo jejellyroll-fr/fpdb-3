@@ -26,12 +26,12 @@ from bs4 import BeautifulSoup
 from HandHistoryConverter import FpdbParseError
 
 import re
-import logging
+from loggingFpdb import get_logger
 
 from TourneySummary import TourneySummary
 
 # Winamax HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class WinamaxSummary(TourneySummary):
@@ -166,7 +166,7 @@ class WinamaxSummary(TourneySummary):
             #       Quitte or Double, Starting Block Winamax Poker Tour
             #       Do not contain enough the gametype.
             # Lookup the tid from the db, if it exists get the gametype info from there, otherwise ParseError
-            log.warning(("WinamaxSummary.parseSummary: Gametype unknown defaulting to NLHE"))
+            log.warning(("Gametype unknown defaulting to NLHE"))
             self.gametype["limitType"] = "nl"
             self.gametype["category"] = "holdem"
 
@@ -208,7 +208,7 @@ class WinamaxSummary(TourneySummary):
         m = self.re_SummaryTourneyInfo.search(self.summaryText)
         if m is None:
             tmp = self.summaryText[0:200]
-            log.error(("WinamaxSummary.parseSummaryFromFile: '%s'") % tmp)
+            log.error(f"parse Summary From File failed: '{tmp}'")
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -222,7 +222,7 @@ class WinamaxSummary(TourneySummary):
             #       Quitte or Double, Starting Block Winamax Poker Tour
             #       Do not contain enough the gametype.
             # Lookup the tid from the db, if it exists get the gametype info from there, otherwise ParseError
-            log.warning(("WinamaxSummary.parseSummary: Gametype unknown defaulting to NLHE"))
+            log.warning(("Gametype unknown defaulting to NLHE"))
             self.gametype["limitType"] = "nl"
             self.gametype["category"] = "holdem"
             self.tourneyName = mg["GAME"]
