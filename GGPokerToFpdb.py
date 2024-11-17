@@ -26,11 +26,11 @@
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal import Decimal
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 
 # GGpoker HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class GGPoker(HandHistoryConverter):
@@ -340,7 +340,7 @@ class GGPoker(HandHistoryConverter):
         m = self.re_GameInfo.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(("GGPokerToFpdb.determineGameType: '%s'") % tmp)
+            log.error(f"determineGameType not found: '{tmp}'")
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -384,9 +384,7 @@ class GGPoker(HandHistoryConverter):
                     info["bb"] = self.Lim_Blinds[self.clearMoneyString(mg["BB"])][1]
                 except KeyError:
                     tmp = handText[0:200]
-                    log.error(
-                        ("GGPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg["BB"], tmp)
-                    )
+                    log.error(f"Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'")
                     raise FpdbParseError
             else:
                 info["sb"] = str((Decimal(self.clearMoneyString(mg["SB"])) / 2).quantize(Decimal("0.01")))
@@ -404,7 +402,7 @@ class GGPoker(HandHistoryConverter):
         m2 = self.re_GameInfo.search(hand.handText)
         if m is None or m2 is None:
             tmp = hand.handText[0:200]
-            log.error(("GGPokerToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(f"readHandInfo not found: '{tmp}'")
             raise FpdbParseError
 
         info.update(m.groupdict())
@@ -471,10 +469,7 @@ class GGPoker(HandHistoryConverter):
                             hand.buyinCurrency = "play"
                         else:
                             # FIXME: handle other currencies, play money
-                            log.error(
-                                ("GGPokerToFpdb.readHandInfo: Failed to detect currency.")
-                                + " Hand ID: %s: '%s'" % (hand.handid, info[key])
-                            )
+                            log.error(f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'")
                             raise FpdbParseError
 
                         info["BIAMT"] = info["BIAMT"].strip("$€£FPPSC₹")
@@ -526,7 +521,7 @@ class GGPoker(HandHistoryConverter):
         if m:
             hand.buttonpos = int(m.group("BUTTON"))
         else:
-            log.info("readButton: " + ("not found"))
+            log.info("readButton: not found")
 
     def readPlayerStacks(self, hand):
         pre, post = hand.handText.split("*** SUMMARY ***")
@@ -699,8 +694,8 @@ class GGPoker(HandHistoryConverter):
             return
         m = self.re_Action.finditer(hand.streets[s])
         for action in m:
-            # acts = action.groupdict()
-            # log.error("DEBUG: %s acts: %s" % (street, acts))
+            acts = action.groupdict()
+            log.debug(f" {street} acts: {acts}")
             if action.group("ATYPE") == " folds":
                 hand.addFold(street, action.group("PNAME"))
             elif action.group("ATYPE") == " checks":
@@ -721,11 +716,7 @@ class GGPoker(HandHistoryConverter):
             elif action.group("ATYPE") == " stands pat":
                 hand.addStandsPat(street, action.group("PNAME"), action.group("CARDS"))
             else:
-                log.debug(
-                    ("DEBUG:")
-                    + " "
-                    + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group("PNAME"), action.group("ATYPE"))
-                )
+                log.debug(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
 
     def readShowdownActions(self, hand):
         # TODO: pick up mucks also??
@@ -826,9 +817,6 @@ class GGPoker(HandHistoryConverter):
         regex = re.escape(str(table_name))
         if type == "tour":
             regex = re.escape(str(tournament)) + ".* (Table|Tisch) " + re.escape(str(table_number))
-        log.info(
-            "Stars.getTableTitleRe: table_name='%s' tournament='%s' table_number='%s'"
-            % (table_name, tournament, table_number)
-        )
-        log.info("Stars.getTableTitleRe: returns: '%s'" % (regex))
+        log.info(f"table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'")
+        log.info(f"returns: '{regex}'")
         return regex
