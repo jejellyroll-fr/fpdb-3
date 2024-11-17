@@ -46,11 +46,11 @@
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal import Decimal
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 
 
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class iPoker(HandHistoryConverter):
@@ -523,7 +523,7 @@ class iPoker(HandHistoryConverter):
             if self.tinfo["buyin"] == 0:
                 self.tinfo["buyinCurrency"] = "FREE"
             if self.tinfo.get("tourNo") is None:
-                log.error(("iPokerToFpdb.determineGameType: Could Not Parse tourNo"))
+                log.error(("Could Not Parse tourNo"))
                 raise FpdbParseError
         else:
             self.info["type"] = "ring"
