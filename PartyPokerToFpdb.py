@@ -26,12 +26,12 @@ from TourneySummary import TourneySummary
 import Database
 from decimal import Decimal
 import re
-import logging
 import datetime
 import time
+from loggingFpdb import get_logger
 
-# PartyPoker HH Format
-log = logging.getLogger("parser")
+# Obtention du logger configuré
+log = get_logger("parser")
 
 
 class PartyPoker(HandHistoryConverter):
@@ -311,91 +311,94 @@ class PartyPoker(HandHistoryConverter):
         ftpArchive=False,
         sitename="PartyPoker",
     ):
-        log.debug("enter method __init__ of PartyPoker.")
+        log.debug(
+            f"Initializing PartyPoker parser in_path: {in_path}, out_path: {out_path}, index: {index}, sitename: {sitename}"
+        )
+
         super().__init__(config, in_path, out_path, index, autostart, starsArchive, ftpArchive, sitename)
-        log.debug("init parser PartyPoker.")
+
+        log.info("Initialized base parser")
+
         self.last_bet = {}
         self.player_bets = {}
 
-        # Initialize self.db if not already done
+        # Initialize database connection if needed
         if not hasattr(self, "db"):
             self.db = Database.Database(self.config)
+            log.debug(f"Initialized database connection config: {str(self.config)}")
+
+        log.debug(f"Completed PartyPoker parser initialization sitename: {sitename}, has_db: {hasattr(self, 'db')}")
 
     def allHandsAsList(self):
-        log.debug("enter method allHandsAsList.")
+        log.info("Starting hands list retrieval")
+
         hands = HandHistoryConverter.allHandsAsList(self)
+
         if hands is None:
-            log.debug("no hand found in allHandsAsList.")
+            log.warning("No hands found in history result: empty")
             return []
+
         filtered_hands = list(filter(lambda text: len(text.strip()), hands))
-        log.debug(f"{len(filtered_hands)} hand filtered in allHandsAsList.")
+
+        log.debug(
+            f"Retrieved and filtered hands total_hands: {len(hands)}, filtered_hands: {len(filtered_hands)}, empty_hands: {len(hands) - len(filtered_hands) if hands else 0}"
+        )
+
         return filtered_hands
 
     def compilePlayerRegexs(self, hand):
-        log.debug("enter method compilePlayerRegexs.")
+        log.debug(f"Starting regex compilation for players hand_id: {hand.handid}")
+
         players = set([player[1] for player in hand.players])
-        log.debug(f"List of players to compile : {players}")
+        log.debug(f"Players identified players: {list(players)}, count: {len(players)}")
+
         if not hasattr(self, "compiledPlayers") or not players <= self.compiledPlayers:
-            log.debug("Compiling specific regex for players.")
+            log.debug("Compiling new regex patterns reason: New players or no existing patterns")
+
             self.compiledPlayers = players
             player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
+
             subst = {
                 "PLYR": player_re,
                 "CUR_SYM": self.sym.get(hand.gametype["currency"], ""),
                 "CUR": hand.gametype["currency"],
                 "BRAX": r"\[\(\)\]",
             }
-            # define regex
-            self.re_PostSB = re.compile(
-                rf"{subst['PLYR']} posts small blind [\[\(\)\]]?{subst['CUR_SYM']}?(?P<SB>[.,0-9]+)\s*({subst['CUR']})?[\[\(\)\]]?\.?\s*$",
-                re.MULTILINE,
-            )
-            log.debug("Regex re_PostSB compiled.")
-            self.re_PostBB = re.compile(
-                rf"{subst['PLYR']} posts big blind [\[\(\)\]]?{subst['CUR_SYM']}?(?P<BB>[.,0-9]+)\s*({subst['CUR']})?[\[\(\)\]]?\.?\s*$",
-                re.MULTILINE,
-            )
-            log.debug("Regex re_PostBB compiled.")
-            self.re_PostDead = re.compile(
-                rf"{subst['PLYR']} posts big blind \+ dead [\[\(\)\]]?{subst['CUR_SYM']}?(?P<BBNDEAD>[.,0-9]+)\s*{subst['CUR_SYM']}?[\[\(\)\]]?\.?\s*$",
-                re.MULTILINE,
-            )
-            log.debug("Regex re_PostDead compiled.")
-            self.re_PostBUB = re.compile(
-                rf"{subst['PLYR']} posts button blind  ?[\[\(\)\]]?{subst['CUR_SYM']}?(?P<BUB>[.,0-9]+)\s*({subst['CUR']})?[\[\(\)\]]?\.?\s*$",
-                re.MULTILINE,
-            )
-            log.debug("Regex re_PostBUB compiled.")
-            self.re_Antes = re.compile(
-                rf"{subst['PLYR']} posts ante(?: of)? [\[\(\)\]]?{subst['CUR_SYM']}?(?P<ANTE>[.,0-9]+)\s*({subst['CUR']})?[\[\(\)\]]?\.?\s*$",
-                re.MULTILINE,
-            )
-            log.debug("Regex re_Antes compiled.")
-            self.re_Action = re.compile(
-                r"""
-                    (?P<PNAME>.+?)\s(?P<ATYPE>bets|checks|raises|completes|bring-ins|calls|folds|is\sall-In|double\sbets)(?:\s*[\[\(\)\]]?\s?(€|$)?(?P<BET>[.,\d]+)\s*(EUR|DOL)?\s*[\]\)]?)?(?:\sto\s[.,\d]+)?\.?\s*$
-                """,
-                re.MULTILINE | re.VERBOSE,
+
+            log.debug(
+                f"Created substitution patterns currency: {hand.gametype['currency']}, currency_symbol: {subst['CUR_SYM']}"
             )
 
-            log.debug("Regex re_Action compiled.")
-            self.re_HeroCards = re.compile(rf"Dealt to {subst['PLYR']} \[\s*(?P<NEWCARDS>.+)\s*\]", re.MULTILINE)
-            log.debug("Regex re_HeroCards compiled.")
-            self.re_ShownCards = re.compile(
-                rf"{subst['PLYR']} (?P<SHOWED>(?:doesn\'t )?shows?) \[ *(?P<CARDS>.+) *\](?P<COMBINATION>.+)\.",
-                re.MULTILINE,
-            )
-            log.debug("Regex re_ShownCards compiled.")
-            self.re_CollectPot = re.compile(
-                rf"{subst['PLYR']}\s+wins\s+(Lo\s\()?{subst['CUR_SYM']}?(?P<POT>[.,\d]+)\s*({subst['CUR']})?\)?",
-                re.MULTILINE | re.VERBOSE,
-            )
-            log.debug("Regex re_CollectPot compiled.")
+            # Compile regex
+            patterns = {
+                "re_PostSB": rf"{subst['PLYR']} posts small blind [\[\(\)\]]?{subst['CUR_SYM']}?(?P<SB>[.,0-9]+)\s*({subst['CUR']})?[\[\(\)\]]?\.?\s*$",
+                "re_PostBB": rf"{subst['PLYR']} posts big blind [\[\(\)\]]?{subst['CUR_SYM']}?(?P<BB>[.,0-9]+)\s*({subst['CUR']})?[\[\(\)\]]?\.?\s*$",
+                "re_PostDead": rf"{subst['PLYR']} posts big blind \+ dead [\[\(\)\]]?{subst['CUR_SYM']}?(?P<BBNDEAD>[.,0-9]+)\s*{subst['CUR_SYM']}?[\[\(\)\]]?\.?\s*$",
+                "re_PostBUB": rf"{subst['PLYR']} posts button blind  ?[\[\(\)\]]?{subst['CUR_SYM']}?(?P<BUB>[.,0-9]+)\s*({subst['CUR']})?[\[\(\)\]]?\.?\s*$",
+                "re_Antes": rf"{subst['PLYR']} posts ante(?: of)? [\[\(\)\]]?{subst['CUR_SYM']}?(?P<ANTE>[.,0-9]+)\s*({subst['CUR']})?[\[\(\)\]]?\.?\s*$",
+                "re_Action": r"""(?P<PNAME>.+?)\s(?P<ATYPE>bets|checks|raises|completes|bring-ins|calls|folds|is\sall-In|double\sbets)(?:\s*[\[\(\)\]]?\s?(€|$)?(?P<BET>[.,\d]+)\s*(EUR|DOL)?\s*[\]\)]?)?(?:\sto\s[.,\d]+)?\.?\s*$""",
+                "re_HeroCards": rf"Dealt to {subst['PLYR']} \[\s*(?P<NEWCARDS>.+)\s*\]",
+                "re_ShownCards": rf"{subst['PLYR']} (?P<SHOWED>(?:doesn\'t )?shows?) \[ *(?P<CARDS>.+) *\](?P<COMBINATION>.+)\.",
+                "re_CollectPot": rf"{subst['PLYR']}\s+wins\s+(Lo\s\()?{subst['CUR_SYM']}?(?P<POT>[.,\d]+)\s*({subst['CUR']})?\)?",
+            }
+
+            try:
+                for name, pattern in patterns.items():
+                    setattr(self, name, re.compile(pattern, re.MULTILINE | (re.VERBOSE if name == "re_Action" else 0)))
+                    log.debug(f"Compiled regex pattern pattern_name: {name}")
+
+            except re.error as e:
+                log.error(f"Failed to compile regex pattern pattern_name: {name}, error: {str(e)}")
+                raise
+
+            log.debug(f"Successfully compiled all regex patterns pattern_count: {len(patterns)}")
+
         else:
-            log.debug("regex already compiled.")
+            log.debug(f"Skipped compilation - patterns already exist compiled_players: {list(self.compiledPlayers)}")
 
     def readSupportedGames(self):
-        log.debug("Enter method readSupportedGames.")
+        log.info("Getting supported games list")
+
         supported_games = [
             ["ring", "hold", "nl"],
             ["ring", "hold", "pl"],
@@ -406,558 +409,667 @@ class PartyPoker(HandHistoryConverter):
             ["tour", "hold", "fl"],
             ["tour", "stud", "fl"],
         ]
-        log.debug(f"supported games : {supported_games}")
+
+        log.debug(
+            f"Retrieved supported games ring_games: {len([g for g in supported_games if g[0] == 'ring'])}, "
+            f"tournaments: {len([g for g in supported_games if g[0] == 'tour'])}, "
+            f"hold_games: {len([g for g in supported_games if g[1] == 'hold'])}, "
+            f"stud_games: {len([g for g in supported_games if g[1] == 'stud'])}, "
+            f"total_games: {len(supported_games)}, "
+            f"variants: {supported_games}"
+        )
+
         return supported_games
 
     def readSTP(self, hand):
-        log.debug("Entera method readSTP.")
-        log.debug("Method readSTP non implemented.")
+        log.debug(f"Starting STP read hand_id: {hand.handid}, status: not_implemented")
+        log.warning(f"STP functionality not implemented hand_id: {hand.handid}, method: readSTP")
         pass
 
     def determineGameType(self, handText):
-        log.debug("Enter method determineGameType.")
+        log.debug("Starting game type determination")
+
+        # Clean input text
         handText = handText.replace("\x00", "")
         info, extra = {}, {}
-        m = self.re_GameInfo.search(handText)
-        log.debug(f"Search with re_GameInfo : {'Found' if m else 'Not found'}")
-        if not m:
-            m = self.re_GameInfoTrny1.search(handText)
-            log.debug(f"Search with re_GameInfoTrny1 : {'Found' if m else 'Not Found'}")
-        if not m:
-            m = self.re_GameInfoTrny2.search(handText)
-            log.debug(f"Search with re_GameInfoTrny2 : {'Found' if m else 'Not Found'}")
-            m2 = self.re_TourNoLevel.search(handText)
-            m3 = self.re_Blinds.search(handText)
-            if m2 and m3:
-                extra.update(m2.groupdict())
-                extra.update(m3.groupdict())
-                log.debug("More Informations added from re_TourNoLevel and re_Blinds.")
-            else:
-                m = None
-        if not m:
-            m = self.re_GameInfoTrny3.search(handText)
-            log.debug(f"Search with re_GameInfoTrny3 : {'Found' if m else 'Not Found'}")
-        if not m:
-            m = self.re_Disconnected.search(handText)
-            log.debug(f"Search with re_Disconnected : {'Found' if m else 'Not Found'}")
-            if m:
-                message = "Player Disconnected"
-                log.debug(f"{message}")
-                raise FpdbHandPartial(f"Partial hand history: {message}")
-            m = self.re_Cancelled.search(handText)
-            log.debug(f"Search with re_Cancelled : {'Found' if m else 'Not Found'}")
-            if m:
-                message = "Table Closed"
-                log.debug(f"{message}")
-                raise FpdbHandPartial(f"Partial hand history: {message}")
-            m = self.re_GameStartLine.match(handText)
-            log.debug(f"Search with re_GameStartLine : {'Found' if m else 'Not Found'}")
-            if m and len(handText) < 50:
-                message = "Game start line"
-                log.debug(f"{message}")
-                raise FpdbHandPartial(f"Partial hand history: {message}")
-            tmp = handText[:200]
-            log.error(f"PartyPokerToFpdb.determineGameType: '{tmp}'")
-            raise FpdbParseError("Hand type determination failed.")
 
+        # Search game info using different patterns
+        patterns = {
+            "GameInfo": self.re_GameInfo,
+            "GameInfoTrny1": self.re_GameInfoTrny1,
+            "GameInfoTrny2": self.re_GameInfoTrny2,
+            "GameInfoTrny3": self.re_GameInfoTrny3,
+            "Disconnected": self.re_Disconnected,
+            "Cancelled": self.re_Cancelled,
+            "GameStartLine": self.re_GameStartLine,
+        }
+
+        m = None
+        for pattern_name, pattern in patterns.items():
+            m = pattern.search(handText)
+            log.debug(f"Searching pattern pattern: {pattern_name}, found: {bool(m)}")
+
+            if m:
+                if pattern_name == "GameInfoTrny2":
+                    m2 = self.re_TourNoLevel.search(handText)
+                    m3 = self.re_Blinds.search(handText)
+                    if m2 and m3:
+                        extra.update(m2.groupdict())
+                        extra.update(m3.groupdict())
+                        log.debug("Found additional tournament info")
+                    else:
+                        m = None
+                break
+
+            elif pattern_name == "Disconnected" and m:
+                log.warning(f"Player disconnected partial_hand: {True}")
+                raise FpdbHandPartial("Partial hand history: Player Disconnected")
+
+            elif pattern_name == "Cancelled" and m:
+                log.warning(f"Table closed partial_hand: {True}")
+                raise FpdbHandPartial("Partial hand history: Table Closed")
+
+            elif pattern_name == "GameStartLine" and m and len(handText) < 50:
+                log.warning(f"Only game start line found partial_hand: {True}")
+                raise FpdbHandPartial("Partial hand history: Game start line")
+
+        if not m:
+            log.error(f"Could not determine game type hand_text: {handText[:200]}")
+            raise FpdbParseError("Hand type determination failed")
+
+        # Process match groups
         mg = m.groupdict()
         mg.update(extra)
-        log.debug(f"Informations on the extracted hand : {mg}")
 
-        if "SITE" in mg and mg["SITE"] is not None:
+        log.debug(f"Extracted hand info groups: {mg}")
+
+        # Set site info if available
+        if "SITE" in mg and mg["SITE"]:
             self.sitename = self.sites.get(mg["SITE"], (self.sitename,))[0]
             self.siteId = self.sites.get(mg["SITE"], (self.siteId,))[1]
-            log.info(f"self.siteId: {self.siteId}")
-            log.info(f"self.sitename: {self.sitename}")
+            log.info(f"Site determined site_name: {self.sitename}, site_id: {self.siteId}")
 
-        if "LIMIT" in mg and mg["LIMIT"] is not None:
-            info["limitType"] = self.limits.get(mg["LIMIT"], "fl")
-            log.debug(f"limitType defined at : {info['limitType']} from LIMIT")
-        if "LIMIT2" in mg and mg["LIMIT2"] is not None:
-            info["limitType"] = self.limits.get(mg["LIMIT2"], "fl")
-            log.debug(f"limitType defined at : {info['limitType']} from LIMIT2")
-        if "LIMIT3" in mg and mg["LIMIT3"] is not None:
-            info["limitType"] = self.limits.get(mg["LIMIT3"], "fl")
-            log.debug(f"limitType defined atà : {info['limitType']} from LIMIT3")
-        if "FAST2" in mg and mg["FAST2"] is not None:
-            info["fast"] = True
-            log.debug("Mode fast defined at True from FAST2")
-        elif "FAST3" in mg and mg["FAST3"] is not None:
-            info["fast"] = True
-            log.debug("Mode fast defined at True from FAST3")
+        # Set limit type
+        for limit_key in ["LIMIT", "LIMIT2", "LIMIT3"]:
+            if mg.get(limit_key):
+                info["limitType"] = self.limits.get(mg[limit_key], "fl")
+                log.debug(f"Limit type set limit_type: {info['limitType']}, source: {limit_key}")
+                break
         else:
-            info["fast"] = False
-            log.debug("Mode fast defined at False")
-        if mg.get("LIMIT") is None and mg.get("LIMIT2") is None and mg.get("LIMIT3") is None:
             info["limitType"] = "fl"
-            log.debug("limitType defined at 'fl'")
+            log.debug("Default limit type set limit_type: fl")
 
-        if "GAME" in mg and mg["GAME"] is not None:
+        # Set fast mode
+        info["fast"] = bool(mg.get("FAST2") or mg.get("FAST3"))
+        log.debug(f"Fast mode setting fast: {info['fast']}")
+
+        # Set game type
+        if "GAME" in mg and mg["GAME"]:
             info["base"], info["category"] = self.games.get(mg["GAME"], ("hold", "holdem"))
-            log.debug(f"base: {info['base']}, category: {info['category']} from GAME")
+            log.debug(f"Game type determined base: {info['base']}, category: {info['category']}")
         else:
-            log.error("game not identified.")
-            raise FpdbParseError("game not identified.")
+            log.error("Game type not found")
+            raise FpdbParseError("Game not identified")
 
-        if "CASHBI" in mg and mg["CASHBI"] is not None:
+        # Process cash buyin
+        if "CASHBI" in mg and mg["CASHBI"]:
             mg["CASHBI"] = self.clearMoneyString(mg["CASHBI"])
-            log.debug(f"CASHBI cleaned : {mg['CASHBI']}")
             m_20BBmin = self.re_20BBmin.search(handText)
-            if m_20BBmin:
-                try:
+
+            try:
+                if m_20BBmin:
                     info["sb"], info["bb"] = self.NLim_Blinds_20bb.get(mg["CASHBI"], ("0.01", "0.02"))
                     info["buyinType"] = "shallow"
                     log.debug(
-                        f"sb: {info['sb']}, bb: {info['bb']}, buyinType: {info['buyinType']} from NLim_Blinds_20bb"
+                        f"Using 20BB min blinds small_blind: {info['sb']}, big_blind: {info['bb']}, buyin_type: shallow"
                     )
-                except KeyError:
-                    tmp = handText[:200]
-                    log.error(
-                        f"PartyPokerToFpdb.determineGameType: NLim_Blinds_20bb has no lookup for '{mg['CASHBI']}' - '{tmp}'"
-                    )
-                    raise FpdbParseError
-            else:
-                try:
-                    if Decimal(mg["CASHBI"]) >= 10000:
-                        nl_bb = str((Decimal(mg["CASHBI"]) / 100).quantize(Decimal("0.01")))
+                else:
+                    cashbi_decimal = Decimal(mg["CASHBI"])
+                    if cashbi_decimal >= 10000:
+                        nl_bb = str((cashbi_decimal / 100).quantize(Decimal("0.01")))
                         info["buyinType"] = "deep"
-                        log.debug(f"buyinType defined at 'deep', nl_bb: {nl_bb}")
                     else:
-                        nl_bb = str((Decimal(mg["CASHBI"]) / 50).quantize(Decimal("0.01")))
+                        nl_bb = str((cashbi_decimal / 50).quantize(Decimal("0.01")))
                         info["buyinType"] = "regular"
-                        log.debug(f"buyinType defined at 'regular', nl_bb: {nl_bb}")
+
                     info["sb"], info["bb"] = self.Lim_Blinds.get(nl_bb, ("0.01", "0.02"))
-                    log.debug(f"sb: {info['sb']}, bb: {info['bb']} from Lim_Blinds")
-                except KeyError:
-                    tmp = handText[:200]
-                    log.error(
-                        f"PartyPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '{mg['CASHBI']}' - '{tmp}'"
+                    log.debug(
+                        f"Blinds determined from cash buyin small_blind: {info['sb']}, big_blind: {info['bb']}, buyin_type: {info['buyinType']}"
                     )
-                    raise FpdbParseError
+
+            except KeyError as e:
+                log.error(
+                    f"Error processing cash buyin cashbi: {mg['CASHBI']}, error: {str(e)}, hand_text: {handText[:200]}"
+                )
+                raise FpdbParseError
+
         else:
+            # Handle blinds for different game types
             if info.get("category") == "6_holdem":
                 info["sb"] = "0"
                 info["bb"] = self.clearMoneyString(mg.get("SB", "0.02"))
-                log.debug(f"sb: {info['sb']}, bb: {info['bb']} for category '6_holdem'")
+
             else:
                 m = self.re_NewLevel.search(handText)
                 if m:
                     mg["SB"] = m.group("SB")
                     mg["BB"] = m.group("BB")
-                    log.debug(f"sb: {mg['SB']}, bb: {mg['BB']} from re_NewLevel")
+
                 info["sb"] = self.clearMoneyString(mg.get("SB", "0.01"))
                 info["bb"] = self.clearMoneyString(mg.get("BB", "0.02"))
-                log.debug(f"sb: {info['sb']}, bb: {info['bb']} after cleaning")
+
             info["buyinType"] = "regular"
-            log.debug("buyinType defined at 'regular'")
 
-        if "CURRENCY" in mg:
-            info["currency"] = self.currencies.get(mg["CURRENCY"], "EUR")
-            log.debug(f"currency define at : {info['currency']} from CURRENCY")
-        else:
-            info["currency"] = "EUR"
-            log.debug("currency defined by defautl at 'EUR'")
+            log.debug(
+                f"Blinds set from game info small_blind: {info['sb']}, big_blind: {info['bb']}, buyin_type: {info['buyinType']}"
+            )
 
-        if "MIXED" in mg and mg["MIXED"] is not None:
+        # Set currency
+        info["currency"] = self.currencies.get(mg.get("CURRENCY"), "EUR")
+        log.debug(f"Currency set currency: {info['currency']}")
+
+        # Set mixed game type if present
+        if "MIXED" in mg and mg["MIXED"]:
             info["mix"] = self.mixes.get(mg["MIXED"], "none")
-            log.debug(f"mix defined at : {info['mix']} from MIXED")
+            log.debug(f"Mixed game type mix: {info['mix']}")
 
+        # Determine if tournament or ring game
         if "TOURNO" in mg and mg["TOURNO"] is None:
             info["type"] = "ring"
-            log.debug("type defined at 'ring' because TOURNO is None")
         else:
             info["type"] = "tour"
             info["currency"] = "T$"
-            log.debug("type defined at 'tour' and currency at 'T$'")
 
-        if info.get("limitType") == "fl" and info.get("bb") is not None:
+        log.debug(f"Game format determined type: {info['type']}, currency: {info['currency']}")
+
+        # Special handling for fixed limit games
+        if info.get("limitType") == "fl" and info.get("bb"):
             if info["type"] == "ring":
                 try:
                     info["sb"], info["bb"] = self.Lim_Blinds.get(mg["BB"], ("0.01", "0.02"))
-                    log.debug(f"sb: {info['sb']}, bb: {info['bb']} from Lim_Blinds from 'ring'")
+                    log.debug(f"Fixed limit ring game blinds small_blind: {info['sb']}, big_blind: {info['bb']}")
                 except KeyError:
-                    tmp = handText[:200]
-                    log.error(
-                        f"PartyPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'"
-                    )
+                    log.error(f"Error setting fixed limit ring blinds BB: {mg['BB']}, hand_text: {handText[:200]}")
                     raise FpdbParseError
             else:
                 info["sb"] = str((Decimal(mg.get("SB", "0")) / 2).quantize(Decimal("0.01")))
                 info["bb"] = str(Decimal(mg.get("SB", "0")).quantize(Decimal("0.01")))
-                log.debug(f"sb: {info['sb']}, bb: {info['bb']} for 'tour'")
+                log.debug(f"Fixed limit tournament blinds small_blind: {info['sb']}, big_blind: {info['bb']}")
 
-        log.debug(f"Game type defined : {info}")
+        log.debug(f"Game type determination complete game_info: {info}")
         return info
 
     def readHandInfo(self, hand):
-        log.debug("Enter method readHandInfo.")
-        info, m2, extra, type3 = {}, None, {}, False
+        log.debug(f"Starting hand info reading hand_id: {getattr(hand, 'handid', None)}")
+
+        info, m2, extra = {}, None, {}
+        type3 = False
+
+        # Clean text
         hand.handText = hand.handText.replace("\x00", "")
 
-        if self.re_emailedHand.search(hand.handText):
-            hand.emailedHand = True
-        else:
-            hand.emailedHand = False
+        # Check if emailed hand
+        hand.emailedHand = bool(self.re_emailedHand.search(hand.handText))
+        log.debug(f"Hand type determined - emailed_hand: {hand.emailedHand}")
 
+        # Get basic hand info
         m = self.re_HandInfo.search(hand.handText, re.DOTALL)
-        log.debug(f"Search with re_HandInfo : {'Found' if m else 'Not Found'}")
 
+        # Get game specific info based on type
         if hand.gametype["type"] == "ring" or hand.emailedHand:
             m2 = self.re_GameInfo.search(hand.handText)
-            log.debug(f"Search with re_GameInfo for 'ring' or 'emailedHand' : {'Found' if m2 else 'Not Found'}")
+            log.debug(f"Ring/email game info search - found: {bool(m2)}")
         else:
-            m2 = self.re_GameInfoTrny1.search(hand.handText)
-            log.debug(f"Search with re_GameInfoTrny1 for 'tour' : {'Found' if m2 else 'Not Found'}")
-            if not m2:
-                m2 = self.re_GameInfoTrny2.search(hand.handText)
-                log.debug(f"Search with re_GameInfoTrny2 for 'tour' : {'Found' if m2 else 'Not Found'}")
-                m3 = self.re_TourNoLevel.search(hand.handText)
-                m4 = self.re_Blinds.search(hand.handText)
-                if m3 and m4:
-                    extra.update(m3.groupdict())
-                    extra.update(m4.groupdict())
-                    log.debug("Adding info from re_TourNoLevel and re_Blinds.")
-                else:
-                    m2 = self.re_GameInfoTrny3.search(hand.handText)
-                    type3 = True
-                    log.debug(f"Search with re_GameInfoTrny3 for 'tour' : {'Found' if m2 else 'Not Found'}")
+            # Tournament hand - try different patterns
+            patterns = [
+                ("GameInfoTrny1", self.re_GameInfoTrny1),
+                ("GameInfoTrny2", self.re_GameInfoTrny2),
+                ("GameInfoTrny3", self.re_GameInfoTrny3),
+            ]
+
+            for name, pattern in patterns:
+                m2 = pattern.search(hand.handText)
+                log.debug(f"Tournament pattern search - pattern: {name}, found: {bool(m2)}")
+
+                if m2:
+                    if name == "GameInfoTrny2":
+                        m3 = self.re_TourNoLevel.search(hand.handText)
+                        m4 = self.re_Blinds.search(hand.handText)
+                        if m3 and m4:
+                            extra.update(m3.groupdict())
+                            extra.update(m4.groupdict())
+                            log.debug("Found additional tournament info")
+                        else:
+                            m2 = None
+                            continue
+
+                    if name == "GameInfoTrny3":
+                        type3 = True
+                    break
+
+        # Handle partial hands
         if not m:
-            m = self.re_Disconnected.search(hand.handText)
-            log.debug(f"Search with re_Disconnected : {'Found' if m else 'Not Found'}")
-            if m:
-                message = "Player Disconnected"
-                log.debug(f"{message}")
-                raise FpdbHandPartial(f"Partial hand history: {message}")
-            m = self.re_Cancelled.search(hand.handText)
-            log.debug(f"Search with re_Cancelled : {'Found' if m else 'Not Found'}")
-            if m:
-                message = "Table Closed"
-                log.debug(f"{message}")
-                raise FpdbHandPartial(f"Partial hand history: {message}")
-            m = self.re_GameStartLine.match(hand.handText)
-            log.debug(f"Search with re_GameStartLine : {'Found' if m else 'Not Found'}")
-            if m and len(hand.handText) < 50:
-                message = "Game start line"
-                log.debug(f"{message}")
-                raise FpdbHandPartial(f"Partial hand history: {message}")
-            tmp = hand.handText[:200]
-            log.error(f"PartyPokerToFpdb.readHandInfo: '{tmp}'")
-            raise FpdbParseError("missing infos.")
+            if self.re_Disconnected.search(hand.handText):
+                log.warning(f"Player disconnected - partial: {True}")
+                raise FpdbHandPartial("Partial hand history: Player Disconnected")
 
-        if m2 is None:
-            tmp = hand.handText[:200]
-            log.error(f"PartyPokerToFpdb.readHandInfo: '{tmp}'")
-            raise FpdbParseError("missing infos.")
+            if self.re_Cancelled.search(hand.handText):
+                log.warning(f"Table closed - partial: {True}")
+                raise FpdbHandPartial("Partial hand history: Table Closed")
 
+            match_start = self.re_GameStartLine.match(hand.handText)
+            if match_start and len(hand.handText) < 50:
+                log.warning(f"Only game start line - partial: {True}")
+                raise FpdbHandPartial("Partial hand history: Game start line")
+
+            log.error(f"Missing basic hand info - hand_text: {hand.handText[:200]}")
+            raise FpdbParseError("Missing infos")
+
+        if not m2:
+            log.error(f"Missing game specific info - hand_text: {hand.handText[:200]}")
+            raise FpdbParseError("Missing infos")
+
+        # Combine all info
         info.update(m.groupdict())
         info.update(m2.groupdict())
         info.update(extra)
-        log.debug(f"infos for hand updated : {info}")
 
-        for key in info:
+        log.debug(f"Collected hand info - info: {info}")
+
+        # Process each info field
+        for key, value in info.items():
             if key == "DATETIME":
-                log.debug("Manage DATETIME.")
-                # Exeample : Saturday, July 25, 07:53:52 EDT 2009
-                m2 = re.search(
-                    r"\w+?,?\s*?(?P<M>\w+)\s+(?P<D>\d+),?\s+(?P<H>\d+):(?P<MIN>\d+):(?P<S>\d+)\s+((?P<TZ>[A-Z]+)\s+)?(?P<Y>\d+)",
-                    info[key],
-                    re.UNICODE,
-                )
-                if m2:
-                    timezone = m2.group("TZ") if m2.group("TZ") else "ET"
-                    month = self.months.get(m2.group("M"))
-                    if not month:
-                        log.error(f"Month unknown : {m2.group('M')}")
-                        raise FpdbParseError(f"Month unknown : {m2.group('M')}")
-                    datetimestr = (
-                        f"{m2.group('Y')}/{month}/{m2.group('D')} {m2.group('H')}:{m2.group('MIN')}:{m2.group('S')}"
-                    )
-                    try:
-                        hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
-                        hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, timezone, "UTC")
-                        log.debug(f"StartTime : {hand.startTime}")
-                    except Exception as e:
-                        log.error(f"Error during parsing of date : {e}")
-                        raise FpdbParseError("Error during parsing of date.")
-                else:
-                    log.error(f"Cannot parse date : {info[key]}")
-                    raise FpdbParseError(f"Cannot parse date : {info[key]}")
+                self._processDateTime(hand, value)
 
-            if key == "HID":
-                log.debug("Manage HID.")
-                if str(info[key]) == "1111111111":
-                    hand.handid = str(int(time.time() * 1000))
-                    hand.roundPenny = True
-                    log.debug(f"HandID generate : {hand.handid}")
-                else:
-                    if re.search("[a-z]", info[key]):
-                        hand.handid = info[key][:13]
-                        hand.roundPenny = True
-                        log.debug(f"HandID defined at : {hand.handid} (roundPenny=True)")
-                    else:
-                        hand.handid = info[key]
-                        log.debug(f"HandID define at : {hand.handid}")
-                log.debug(f"HandID : {hand.handid}")
+            elif key == "HID":
+                self._processHID(hand, value)
 
-            if key == "TABLE":
-                log.debug("Manage TABLE.")
-                if "TOURNO" in info and info["TOURNO"] is None:
-                    if info.get("TABLENO"):
-                        hand.tablename = f"{info[key]} {info['TABLENO']}"
-                        log.debug(f"TableName defined at : {hand.tablename} (with TABLENO)")
-                    else:
-                        hand.tablename = info[key]
-                        log.debug(f"TableName defined at : {hand.tablename}")
-                else:
-                    hand.tablename = info.get("TABLENO", "Unknown")
-                    log.debug(f"TableName defined at : {hand.tablename} (without TABLENO)")
-                log.debug(f"TableName : {hand.tablename}")
+            elif key == "TABLE":
+                self._processTable(hand, info)
 
-            if key == "BUTTON":
-                log.debug("Manage BUTTON.")
-                hand.buttonpos = int(info[key])
-                log.debug(f"Button Position : {hand.buttonpos}")
+            elif key == "BUTTON":
+                hand.buttonpos = int(value)
+                log.debug(f"Set button position - position: {hand.buttonpos}")
 
-            if key == "TOURNO":
-                log.debug("Manage champ TOURNO.")
-                hand.tourNo = info[key]
-                if hand.emailedHand:
-                    hand.buyin = 0
-                    hand.fee = 0
-                    hand.buyinCurrency = "NA"
-                log.debug(f"Tourney No : {hand.tourNo}")
+            elif key == "TOURNO":
+                self._processTourNo(hand, info)
 
-            if key == "BUYIN":
-                log.debug("Manage BUYIN.")
-                if info.get("TABLE") and "Freeroll" in info.get("TABLE"):
-                    # Freeroll tourney
-                    hand.buyin = 0
-                    hand.fee = 0
-                    hand.buyinCurrency = "FREE"
-                    log.debug("Freeroll tourney : buyin and fee defined at 0, buyinCurrency at 'FREE'.")
-                elif info[key] is None:
-                    # Freeroll tourney
-                    hand.buyin = 0
-                    hand.fee = 0
-                    hand.buyinCurrency = "NA"
-                    log.debug("Freeroll tourney : buyin and fee defined at 0, buyinCurrency at 'NA'.")
-                elif hand.tourNo is not None:
-                    hand.buyin = 0
-                    hand.fee = 0
-                    hand.buyinCurrency = "NA"
-                    if "$" in info[key]:
-                        hand.buyinCurrency = "USD"
-                    elif "€" in info[key]:
-                        hand.buyinCurrency = "EUR"
-                    else:
-                        log.error(
-                            f"PartyPokerToFpdb.readHandInfo: Failed to detect currency Hand ID: '{hand.handid}' - '{info[key]}'"
-                        )
-                        raise FpdbParseError
-                    info[key] = self.clearMoneyString(info[key].strip("$€"))
-                    hand.buyin = int(100 * Decimal(info[key]))
-                    log.debug(f"buyin cleaned : {info[key]}, buyin calculated : {hand.buyin} {hand.buyinCurrency}")
-                    if "FEE" in info and info["FEE"] is not None:
-                        info["FEE"] = self.clearMoneyString(info["FEE"].strip("$€"))
-                        hand.fee = int(100 * Decimal(info["FEE"]))
-                        log.debug(f"Fee cleaned : {info['FEE']}, fee calculated : {hand.fee}")
-                    log.debug(f"Buyin : {hand.buyin} {hand.buyinCurrency}, Fee : {hand.fee}")
-                log.debug(f"Buyin final : {hand.buyin} {hand.buyinCurrency}, Fee final : {hand.fee}")
+            elif key == "BUYIN":
+                self._processBuyin(hand, info)
 
-            if key == "LEVEL":
-                log.debug("Manage LEVEL.")
-                hand.level = info[key]
-                log.debug(f"Level : {hand.level}")
+            elif key == "LEVEL":
+                hand.level = value
+                log.debug(f"Set tournament level - level: {value}")
 
-            if key == "PLAY" and info["PLAY"] != "Real":
+            elif key == "PLAY" and value != "Real":
                 hand.gametype["currency"] = "play"
-                log.debug(f"Currency adjust at : {hand.gametype['currency']} (Play Money)")
+                log.debug("Set play money currency")
 
-            if key == "MAX" and info[key] is not None:
-                log.debug("Manage MAX.")
-                hand.maxseats = int(info[key])
-                log.debug(f"Max Seats : {hand.maxseats}")
+            elif key == "MAX" and value is not None:
+                hand.maxseats = int(value)
+                log.debug(f"Set max seats - seats: {hand.maxseats}")
 
-            if type3:
-                log.debug("manage type3.")
-                hand.tourNo = info.get("TABLE", "Unknown")
-                hand.buyin = 0
-                hand.fee = 0
-                hand.buyinCurrency = "NA"
-                log.debug(
-                    f"Type3 ajusté : Tourney No {hand.tourNo}, Buyin {hand.buyin}, Fee {hand.fee}, Currency {hand.buyinCurrency}"
-                )
+        if type3:
+            self._processType3Info(hand, info)
+
+        log.debug(f"Completed hand info processing hand_id: {hand.handid}, type: {hand.gametype['type']}")
+
+    def _processDateTime(self, hand, datetime_str):
+        log.debug(f"Processing datetime raw: {datetime_str}")
+
+        m = re.search(
+            r"\w+?,?\s*?(?P<M>\w+)\s+(?P<D>\d+),?\s+(?P<H>\d+):(?P<MIN>\d+):(?P<S>\d+)\s+((?P<TZ>[A-Z]+)\s+)?(?P<Y>\d+)",
+            datetime_str,
+            re.UNICODE,
+        )
+
+        if not m:
+            log.error(f"Failed to parse datetime datetime: {datetime_str}")
+            raise FpdbParseError(f"Cannot parse date: {datetime_str}")
+
+        timezone = m.group("TZ") if m.group("TZ") else "ET"
+        month = self.months.get(m.group("M"))
+
+        if not month:
+            log.error(f"Unknown month month: {m.group('M')}")
+            raise FpdbParseError(f"Unknown month: {m.group('M')}")
+
+        datetime_str = f"{m.group('Y')}/{month}/{m.group('D')} {m.group('H')}:{m.group('MIN')}:{m.group('S')}"
+
+        try:
+            hand.startTime = datetime.datetime.strptime(datetime_str, "%Y/%m/%d %H:%M:%S")
+            hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, timezone, "UTC")
+            log.debug(f"Set start time time: {str(hand.startTime)}, timezone: {timezone}")
+        except Exception as e:
+            log.error(f"Error parsing datetime error: {str(e)}")
+            raise FpdbParseError("Error parsing date")
+
+    def _processHID(self, hand, hid):
+        log.debug(f"Processing hand ID raw_hid: {hid}")
+
+        if str(hid) == "1111111111":
+            hand.handid = str(int(time.time() * 1000))
+            hand.roundPenny = True
+            log.debug(f"Generated hand ID hand_id: {hand.handid}, round_penny: True")
+        else:
+            if re.search("[a-z]", hid):
+                hand.handid = hid[:13]
+                hand.roundPenny = True
+            else:
+                hand.handid = hid
+
+            log.debug(f"Set hand ID hand_id: {hand.handid}, round_penny: {hand.roundPenny}")
+
+    def _processTable(self, hand, info):
+        log.debug("Processing table info")
+
+        if "TOURNO" in info and info["TOURNO"] is None:
+            if info.get("TABLENO"):
+                hand.tablename = f"{info['TABLE']} {info['TABLENO']}"
+            else:
+                hand.tablename = info["TABLE"]
+        else:
+            hand.tablename = info.get("TABLENO", "Unknown")
+
+        log.debug(f"Set table name table: {hand.tablename}")
+
+    def _processTourNo(self, hand, info):
+        log.debug("Processing tournament number")
+
+        hand.tourNo = info["TOURNO"]
+
+        if hand.emailedHand:
+            hand.buyin = 0
+            hand.fee = 0
+            hand.buyinCurrency = "NA"
+
+        log.debug(
+            f"Set tournament info tour_no: {hand.tourNo}, buyin: {hand.buyin if hasattr(hand, 'buyin') else None}"
+        )
+
+    def _processBuyin(self, hand, info):
+        log.debug("Processing buyin info")
+
+        if info.get("TABLE") and "Freeroll" in info.get("TABLE"):
+            hand.buyin = 0
+            hand.fee = 0
+            hand.buyinCurrency = "FREE"
+            log.debug("Set freeroll tournament")
+
+        elif info["BUYIN"] is None:
+            hand.buyin = 0
+            hand.fee = 0
+            hand.buyinCurrency = "NA"
+            log.debug("Set free tournament")
+
+        elif hand.tourNo is not None:
+            self._processTournamentBuyin(hand, info)
+
+        log.debug(f"Completed buyin processing buyin: {hand.buyin}, currency: {hand.buyinCurrency}, fee: {hand.fee}")
+
+    def _processTournamentBuyin(self, hand, info):
+        hand.buyin = 0
+        hand.fee = 0
+        hand.buyinCurrency = "NA"
+
+        if "$" in info["BUYIN"]:
+            hand.buyinCurrency = "USD"
+        elif "€" in info["BUYIN"]:
+            hand.buyinCurrency = "EUR"
+        else:
+            log.error(f"Unknown currency hand_id: {hand.handid}, buyin: {info['BUYIN']}")
+            raise FpdbParseError
+
+        buyin_str = self.clearMoneyString(info["BUYIN"].strip("$€"))
+        hand.buyin = int(100 * Decimal(buyin_str))
+
+        if "FEE" in info and info["FEE"] is not None:
+            fee_str = self.clearMoneyString(info["FEE"].strip("$€"))
+            hand.fee = int(100 * Decimal(fee_str))
+
+        log.debug(f"Set tournament buyin details buyin: {hand.buyin}, currency: {hand.buyinCurrency}, fee: {hand.fee}")
+
+    def _processType3Info(self, hand, info):
+        log.debug("Processing type 3 tournament info")
+
+        hand.tourNo = info.get("TABLE", "Unknown")
+        hand.buyin = 0
+        hand.fee = 0
+        hand.buyinCurrency = "NA"
+
+        log.debug(
+            f"Set type 3 tournament details tour_no: {hand.tourNo}, buyin: {hand.buyin}, currency: {hand.buyinCurrency}"
+        )
 
     def readButton(self, hand):
-        log.debug("Enter method readButton.")
+        log.debug(f"Starting button position read hand_id: {hand.handid}")
+
         m = self.re_Button.search(hand.handText)
+
         if m:
             hand.buttonpos = int(m.group("BUTTON"))
-            log.debug(f"Button Position found : {hand.buttonpos}")
+            log.debug(f"Button position found hand_id: {hand.handid}, button_position: {hand.buttonpos}")
         else:
-            log.info("readButton: Button not found.")
-        log.debug("Uot method readButton.")
+            log.info(f"No button position found hand_id: {hand.handid}, status: missing")
+        log.debug(f"Completed button position read hand_id: {hand.handid}, has_button: {bool(m)}")
 
     def readPlayerStacks(self, hand):
-        log.debug("Enter method readPlayerStacks.")
-        m = self.re_PlayerInfo.finditer(hand.handText)
+        log.debug(f"Starting player stacks read hand_id: {hand.handid}, game_type: {hand.gametype['type']}")
+
+        # Initialize variables
         maxKnownStack = Decimal("0")
         zeroStackPlayers = []
         self.playerMap = {}
-        log.debug("Init variables for readPlayerStacks.")
-        for a in m:
-            pname = a.group("PNAME").strip()
-            cash = self.clearMoneyString(a.group("CASH"))
-            log.debug(f"Joueur found : {pname} with CASH = {cash}")
+
+        # Process each player info
+        for match in self.re_PlayerInfo.finditer(hand.handText):
+            pname = match.group("PNAME").strip()
+            cash = self.clearMoneyString(match.group("CASH"))
+            seat = int(match.group("SEAT"))
+
+            log.debug(f"Processing player info player: {pname}, stack: {cash}, seat: {seat}")
+
+            # Handle emailed hand player names
             if hand.emailedHand:
-                subst = {"PLYR": re.escape(a.group("PNAME")), "SPACENAME": r"\s(.+)? "}
-                re_PlayerName = re.compile(
-                    rf"^{subst['PLYR']}(?P<PNAMEEXTRA>{subst['SPACENAME']})balance\s", re.MULTILINE | re.VERBOSE
-                )
-                m1 = re_PlayerName.search(hand.handText)
-                if m1 and len(m1.group("PNAMEEXTRA")) > 1:
-                    pname = a.group("PNAME") + m1.group("PNAMEEXTRA")
-                    pname = pname.strip()
-                    self.playerMap[a.group("PNAME")] = pname
-                    log.debug(f"Joueur emailed with name : {pname}")
+                self._processEmailedPlayerName(hand, match, pname)
 
+            # Add player based on stack size
             if Decimal(cash) > 0:
-                # Record the maximum known stack for players with an unknown stack
                 maxKnownStack = max(Decimal(cash), maxKnownStack)
-                hand.addPlayer(int(a.group("SEAT")), pname, cash)
-                log.debug(f"Add player : {pname} at seat {a.group('SEAT')} with €{cash}")
+                hand.addPlayer(seat, pname, cash)
+                log.debug(f"Added player with stack player: {pname}, seat: {seat}, stack: {cash}")
             else:
-                # Players with zero stack to be added later
-                zeroStackPlayers.append([int(a.group("SEAT")), pname, cash])
-                log.debug(f"Player with zero stack detected : {pname} at seat {a.group('SEAT')}")
+                zeroStackPlayers.append([seat, pname, cash])
+                log.debug(f"Found zero stack player player: {pname}, seat: {seat}")
 
+        # Process ring game specifics
         if hand.gametype["type"] == "ring":
-            log.debug("Treatment of players for a 'ring'.")
+            self._processRingGame(hand, maxKnownStack, zeroStackPlayers)
 
-            def findFirstEmptySeat(startSeat):
-                log.debug(f"Search for the first empty seat from {startSeat}.")
-                i = startSeat
-                while i in [player[0] for player in hand.players]:
-                    i += 1
-                    if i > hand.maxseats:
-                        i = 1
-                    if i > 10:
-                        break
-                log.debug(f"Seat empty found : {i}")
-                return i
+        log.debug(f"Completed player stacks read total_players: {len(hand.players)}, max_stack: {str(maxKnownStack)}")
 
-            # re_HoleCards = re.compile(r"\*{2} Dealing down cards \*{2}")
-            re_JoiningPlayers = re.compile(r"(?P<PLAYERNAME>.+?) has joined the table")
-            re_BBPostingPlayers = re.compile(r"(?P<PLAYERNAME>.+?) posts big blind", re.MULTILINE)
-            re_LeavingPlayers = re.compile(r"(?P<PLAYERNAME>.+?) has left the table")
-            # re_PreDeal = re_HoleCards.split(hand.handText)[0]
+    def _processEmailedPlayerName(self, hand, match, pname):
+        """Handle player names in emailed hands"""
+        subst = {"PLYR": re.escape(match.group("PNAME")), "SPACENAME": r"\s(.+)? "}
 
-            match_JoiningPlayers = re_JoiningPlayers.findall(hand.handText)
-            match_LeavingPlayers = re_LeavingPlayers.findall(hand.handText)
-            match_BBPostingPlayers = re_BBPostingPlayers.findall(hand.handText)
+        re_PlayerName = re.compile(
+            rf"^{subst['PLYR']}(?P<PNAMEEXTRA>{subst['SPACENAME']})balance\s", re.MULTILINE | re.VERBOSE
+        )
 
-            log.debug(f"Players joining the table : {match_JoiningPlayers}")
-            log.debug(f"Players leaving the table : {match_LeavingPlayers}")
-            log.debug(f"Players posting the big blind : {match_BBPostingPlayers}")
+        name_match = re_PlayerName.search(hand.handText)
+        if name_match and len(name_match.group("PNAMEEXTRA")) > 1:
+            full_name = match.group("PNAME") + name_match.group("PNAMEEXTRA")
+            full_name = full_name.strip()
+            self.playerMap[match.group("PNAME")] = full_name
+            log.debug(f"Updated emailed hand player name original: {match.group('PNAME')}, full_name: {full_name}")
 
-            # Add each player with zero stack
-            for p in zeroStackPlayers:
-                if p[1] in match_JoiningPlayers:
-                    p[2] = str(maxKnownStack)
-                    log.debug(f"Player {p[1]} joins the table with stack adjusted to €{p[2]}")
-                if p[1] not in match_LeavingPlayers:
-                    hand.addPlayer(p[0], p[1], p[2])
-                    log.debug(f"Addition of player with zero stack : {p[1]} at seat {p[0]} with €{p[2]}")
+    def _processRingGame(self, hand, maxKnownStack, zeroStackPlayers):
+        """Handle ring game specific player processing"""
+        log.debug("Processing ring game players")
 
-            seatedPlayers = [player[1] for player in hand.players]
-            log.debug(f"Seated players after addition : {seatedPlayers}")
+        # Compile regex patterns
+        re_JoiningPlayers = re.compile(r"(?P<PLAYERNAME>.+?) has joined the table")
+        re_BBPostingPlayers = re.compile(r"(?P<PLAYERNAME>.+?) posts big blind", re.MULTILINE)
+        re_LeavingPlayers = re.compile(r"(?P<PLAYERNAME>.+?) has left the table")
 
-            # Add active players not yet added
-            unseatedActivePlayers = list(set(match_BBPostingPlayers) - set(seatedPlayers))
-            log.debug(f"Active players not seated : {unseatedActivePlayers}")
+        # Find player movements
+        joining_players = re_JoiningPlayers.findall(hand.handText)
+        leaving_players = re_LeavingPlayers.findall(hand.handText)
+        bb_posting_players = re_BBPostingPlayers.findall(hand.handText)
 
-            if unseatedActivePlayers:
-                for player in unseatedActivePlayers:
-                    newPlayerSeat = findFirstEmptySeat(1)
-                    hand.addPlayer(newPlayerSeat, player, str(maxKnownStack))
-                    log.debug(
-                        f"Addition of active player not seated : {player} at seat {newPlayerSeat} with €{maxKnownStack}"
-                    )
-        log.debug("Method output readPlayerStacks.")
+        log.debug(
+            f"Found player movements joining: {joining_players}, leaving: {leaving_players}, posting_bb: {bb_posting_players}"
+        )
+
+        # Process zero stack players
+        self._processZeroStackPlayers(hand, zeroStackPlayers, joining_players, leaving_players, maxKnownStack)
+
+        # Get current seated players
+        seated_players = [player[1] for player in hand.players]
+        log.debug(f"Current seated players: players: {seated_players}, count: {len(seated_players)}")
+
+        # Handle unseated active players
+        unseated_active = list(set(bb_posting_players) - set(seated_players))
+        if unseated_active:
+            self._addUnseatedPlayers(hand, unseated_active, maxKnownStack)
+
+    def _findFirstEmptySeat(self, hand, startSeat):
+        """Find first available seat number"""
+        log.debug(f"Searching for empty seat start: {startSeat}")
+
+        occupied_seats = [player[0] for player in hand.players]
+        seat = startSeat
+
+        while seat in occupied_seats:
+            seat += 1
+            if seat > hand.maxseats:
+                seat = 1
+            if seat > 10:
+                break
+
+        log.debug(f"Found empty seat seat: {seat}")
+        return seat
+
+    def _processZeroStackPlayers(self, hand, zero_stack_players, joining, leaving, max_stack):
+        """Process players with zero stacks"""
+        log.debug(f"Processing zero stack players count: {len(zero_stack_players)}")
+
+        for seat, pname, stack in zero_stack_players:
+            if pname in joining:
+                stack = str(max_stack)
+                log.debug(f"Adjusted joining player stack player: {pname}, new_stack: {stack}")
+
+            if pname not in leaving:
+                hand.addPlayer(seat, pname, stack)
+                log.debug(f"Added zero stack player player: {pname}, seat: {seat}, stack: {stack}")
+
+    def _addUnseatedPlayers(self, hand, unseated_players, max_stack):
+        """Add active players who are not yet seated"""
+        log.debug(f"Adding unseated active players players: {unseated_players}")
+
+        for player in unseated_players:
+            new_seat = self._findFirstEmptySeat(hand, 1)
+            hand.addPlayer(new_seat, player, str(max_stack))
+            log.debug(f"Added unseated player player: {player}, seat: {new_seat}, stack: {max_stack}")
 
     def markStreets(self, hand):
-        log.debug("Enter méthode markStreets.")
-        if hand.gametype["base"] in ("hold"):
-            log.debug("Base type detection 'hold'.")
-            m = re.search(
+        log.debug(f"Starting streets marking hand_id: {hand.handid}, game_type: {hand.gametype['base']}")
+
+        street_patterns = {
+            "hold": (
                 r"\*{2} Dealing down cards \*{2}"
                 r"(?P<PREFLOP>.+?)"
                 r"(?:\*{2} Dealing Flop \*{2} (:?\s*)?(?P<FLOP>\[ \S\S, \S\S, \S\S \].+?))?"
                 r"(?:\*{2} Dealing Turn \*{2} (:?\s*)?(?P<TURN>\[ \S\S \].+?))?"
-                r"(?:\*{2} Dealing River \*{2} (:?\s*)?(?P<RIVER>\[ \S\S \].+?))?$",
-                hand.handText,
-                re.DOTALL,
-            )
-            log.debug(f"Result of streets search for 'hold': {'Found' if m else 'Not Found'}")
-        elif hand.gametype["base"] in ("stud"):
-            log.debug("Base type detection 'stud'.")
-            m = re.search(
+                r"(?:\*{2} Dealing River \*{2} (:?\s*)?(?P<RIVER>\[ \S\S \].+?))?$"
+            ),
+            "stud": (
                 r"(?P<ANTES>.+(?=\*\* Dealing \*\*)|.+)"
                 r"(\*\* Dealing \*\*(?P<THIRD>.+(?=\*\* Dealing Fourth street \*\*)|.+))?"
                 r"(\*\* Dealing Fourth street \*\*(?P<FOURTH>.+(?=\*\* Dealing Fifth street \*\*)|.+))?"
                 r"(\*\* Dealing Fifth street \*\*(?P<FIFTH>.+(?=\*\* Dealing Sixth street \*\*)|.+))?"
                 r"(\*\* Dealing Sixth street \*\*(?P<SIXTH>.+(?=\*\* Dealing River \*\*)|.+))?"
-                r"(\*\* Dealing River \*\*(?P<SEVENTH>.+))?",
-                hand.handText,
-                re.DOTALL,
+                r"(\*\* Dealing River \*\*(?P<SEVENTH>.+))?"
+            ),
+        }
+
+        base = hand.gametype["base"]
+        match = None
+
+        if base in street_patterns:
+            pattern = street_patterns[base]
+            match = re.search(pattern, hand.handText, re.DOTALL)
+
+            log.debug(f"Searched street pattern game_type: {base}, found: {bool(match)}")
+        else:
+            log.warning(f"Unsupported game type for street marking game_type: {base}, hand_id: {hand.handid}")
+            return
+
+        if match:
+            # Add streets to hand
+            hand.addStreets(match)
+
+            streets = match.groupdict()
+            log.debug(f"Marked street sections sections: {str({k: bool(v) for k, v in streets.items()})}")
+
+            # Log street actions
+            if base == "hold":
+                for street in ["PREFLOP", "FLOP", "TURN", "RIVER"]:
+                    actions = match.group(street)
+                    log.debug(
+                        f"Street actions - street: {street}, has_actions: {bool(actions)}, actions: {actions if actions else None}"
+                    )
+        else:
+            log.error(
+                f"Street marking failed - hand_id: {hand.handid}, game_type: {base}, text_sample: {hand.handText[:100]}"
             )
-            log.debug(f"Result of streets search for 'stud': {'Found' if m else 'Not Found'}")
-        else:
-            m = None
-            log.warning(f"Streets not supported for the game type : {hand.gametype['base']}")
 
-        if m:
-            hand.addStreets(m)
-            log.debug(f"Marked sections of the hand : {m.groupdict()}")
-
-            for street in ["PREFLOP", "FLOP", "TURN", "RIVER"]:
-                actions = m.group(street) if m.group(street) else "Aucune"
-                log.debug(f"Actions for {street} : {actions}")
-        else:
-            log.error(f"Impossible to mark streets by hand {hand.handid}")
-        log.debug("Method output markStreets.")
+        log.debug(f"Completed streets marking - hand_id: {hand.handid}, success: {bool(match)}")
 
     def readCommunityCards(self, hand, street):
-        log.debug(f"Enter method readCommunityCards for street {street}.")
+        log.debug(f"Entering readCommunityCards method - street: {street}, method: PartyPoker:readCommunityCards")
 
         if street in ("FLOP", "TURN", "RIVER"):
-            log.debug(f"Processing community street cards {street}.")
-            m = self.re_Board.search(hand.streets[street])
+            log.debug(f"Processing community cards - street: {street}, method: PartyPoker:readCommunityCards")
 
+            m = self.re_Board.search(hand.streets[street])
             if m:
                 cards_str = m.group("CARDS")
-                log.debug(f"Chain of cards found for {street} : '{cards_str}'")
-                cards = self.renderCards(cards_str)
-                log.debug(f"Cards returned for {street} : {cards}")
-                hand.setCommunityCards(street, cards)
-                log.debug(f"Community cards defined for {street}.")
-            else:
-                log.warning(f"No community maps found for the street {street}.")
-        else:
-            log.warning(f"readCommunityCards: Unknown or unsupported street '{street}'.")
+                log.debug(
+                    f"Found community cards - street: {street}, cards_string: {cards_str}, method: PartyPoker:readCommunityCards"
+                )
 
-        log.debug("Method output readCommunityCards.")
+                cards = self.renderCards(cards_str)
+                log.debug(
+                    f"Rendered community cards - street: {street}, cards: {cards}, method: PartyPoker:readCommunityCards"
+                )
+
+                hand.setCommunityCards(street, cards)
+                log.info(f"Set community cards - street: {street}, method: PartyPoker:readCommunityCards")
+            else:
+                log.warning(f"No community cards found - street: {street}, method: PartyPoker:readCommunityCards")
+        else:
+            log.warning(f"Unknown or unsupported street - street: {street}, method: PartyPoker:readCommunityCards")
+
+        log.debug("Exiting readCommunityCards method PartyPoker:readCommunityCards")
 
     def readAntes(self, hand):
-        log.debug("Enter method readAntes.")
+        log.debug("Entering readAntes method PartyPoker:readAntes")
+
         for m in self.re_Antes.finditer(hand.handText):
+            player = m.group("PNAME")
             ante = self.clearMoneyString(m.group("ANTE"))
-            hand.addAnte(m.group("PNAME"), ante)
-            log.debug(f"{m.group('PNAME')} posts ante €{ante}")
-        log.debug("Method output readAntes.")
+            hand.addAnte(player, ante)
+
+            log.debug(f"Player posted ante - method: PartyPoker:readAntes, player: {player}, ante: {ante}")
+
+        log.info("Exiting readAntes method")
 
     def readBlinds(self, hand):
+        log.debug("Entering readBlinds method PartyPoker:readBlinds")
+
         noSmallBlind = bool(self.re_NoSmallBlind.search(hand.handText))
+
         if (
             hand.gametype["type"] == "ring"
             or hand.gametype["sb"] is None
@@ -965,31 +1077,50 @@ class PartyPoker(HandHistoryConverter):
             or hand.roundPenny
         ):
             try:
-                assert noSmallBlind == False
-                for m in self.re_PostSB.finditer(hand.handText):
-                    hand.addBlind(m.group("PNAME"), "small blind", self.clearMoneyString(m.group("SB")))
-                    if hand.gametype["sb"] is None:
-                        hand.gametype["sb"] = self.clearMoneyString(m.group("SB"))
-            except:  # no small blind
+                if not noSmallBlind:
+                    for m in self.re_PostSB.finditer(hand.handText):
+                        player = m.group("PNAME")
+                        sb_amount = self.clearMoneyString(m.group("SB"))
+                        hand.addBlind(player, "small blind", sb_amount)
+                        if hand.gametype["sb"] is None:
+                            hand.gametype["sb"] = sb_amount
+                        log.debug(
+                            f"Small blind posted - method: PartyPoker:readBlinds, player: {player}, amount: {sb_amount}"
+                        )
+            except Exception as e:
                 hand.addBlind(None, None, None)
+                log.error(f"No small blind found - method: PartyPoker:readBlinds - error: {str(e)}")
 
             for a in self.re_PostBB.finditer(hand.handText):
-                hand.addBlind(a.group("PNAME"), "big blind", self.clearMoneyString(a.group("BB")))
+                player = a.group("PNAME")
+                bb_amount = self.clearMoneyString(a.group("BB"))
+                hand.addBlind(player, "big blind", bb_amount)
+
                 if hand.gametype["bb"] is None:
-                    hand.gametype["bb"] = self.clearMoneyString(a.group("BB"))
+                    hand.gametype["bb"] = bb_amount
+
+                log.debug(f"Big blind posted - method: PartyPoker:readBlinds, player: {player}, amount: {bb_amount}")
 
             for a in self.re_PostBUB.finditer(hand.handText):
-                hand.addBlind(a.group("PNAME"), "button blind", self.clearMoneyString(a.group("BUB")))
+                player = a.group("PNAME")
+                bub_amount = self.clearMoneyString(a.group("BUB"))
+                hand.addBlind(player, "button blind", bub_amount)
+
+                log.debug(
+                    f"Button blind posted - method: PartyPoker:readBlinds, player: {player}, amount: {bub_amount}"
+                )
 
             for a in self.re_PostDead.finditer(hand.handText):
-                hand.addBlind(a.group("PNAME"), "both", self.clearMoneyString(a.group("BBNDEAD")))
+                player = a.group("PNAME")
+                amount = self.clearMoneyString(a.group("BBNDEAD"))
+                hand.addBlind(player, "both", amount)
+
+                log.debug(f"Both blinds posted - method: PartyPoker:readBlinds, player: {player}, amount: {amount}")
+
         else:
-            # party doesn't track blinds for tournaments
-            # so there're some cra^Wcaclulations
             if hand.buttonpos == 0:
                 self.readButton(hand)
-            # NOTE: code below depends on Hand's implementation
-            # playersMap - dict {seat: (pname,stack)}
+
             playersMap = dict([(f[0], f[1:3]) for f in hand.players if f[1] in hand.handText.split("Trny:")[-1]])
             maxSeat = max(playersMap)
 
@@ -1005,122 +1136,185 @@ class PartyPoker(HandHistoryConverter):
             if noSmallBlind:
                 hand.addBlind(None, None, None)
                 smallBlindSeat = int(hand.buttonpos)
+                log.warning("No small blind in this hand method PartyPoker:readBlinds")
             else:
-                if len(hand.players) == 2:
-                    smallBlindSeat = int(hand.buttonpos)
-                else:
-                    smallBlindSeat = findFirstNonEmptySeat(int(hand.buttonpos) + 1)
+                smallBlindSeat = (
+                    int(hand.buttonpos) if len(hand.players) == 2 else findFirstNonEmptySeat(int(hand.buttonpos) + 1)
+                )
                 blind = smartMin(hand.sb, playersMap[smallBlindSeat][1])
-                hand.addBlind(playersMap[smallBlindSeat][0], "small blind", blind)
+                player = playersMap[smallBlindSeat][0]
+                hand.addBlind(player, "small blind", blind)
+
+                log.debug(f"Small blind posted - method: PartyPoker:readBlinds, player: {player}, amount: {blind}")
 
             if hand.gametype["category"] == "6_holdem":
                 bigBlindSeat = findFirstNonEmptySeat(smallBlindSeat + 1)
                 blind = smartMin(hand.bb, playersMap[bigBlindSeat][1])
-                hand.addBlind(playersMap[bigBlindSeat][0], "button blind", blind)
+                player = playersMap[bigBlindSeat][0]
+                hand.addBlind(player, "button blind", blind)
+
+                log.debug(f"Button blind posted - method: PartyPoker:readBlinds, player: {player}, amount: {blind}")
             else:
                 bigBlindSeat = findFirstNonEmptySeat(smallBlindSeat + 1)
                 blind = smartMin(hand.bb, playersMap[bigBlindSeat][1])
-                hand.addBlind(playersMap[bigBlindSeat][0], "big blind", blind)
+                player = playersMap[bigBlindSeat][0]
+                hand.addBlind(player, "big blind", blind)
+
+                log.debug(f"Big blind posted - method: PartyPoker:readBlinds, player: {player}, amount: {blind}")
+
+        log.info("Exiting readBlinds method")
 
     def readBringIn(self, hand):
-        log.debug("Enter method readBringIn.")
-        log.debug("Method readBringIn not implemented.")
+        log.info("Entering readBringIn method")
+        log.warning("Method not implemented")
         pass
 
     def readHoleCards(self, hand):
-        log.debug("Enter method readHoleCards.")
+        log.info("Entering readHoleCards method")
+
         # Read hero's cards
         for street in ("PREFLOP",):
             if street in hand.streets:
-                log.debug(f"Read holeCards for street {street}.")
+                log.debug(f"Reading hero hole cards - method: PartyPoker:readHoleCards, street: {street}")
+
                 for found in self.re_HeroCards.finditer(hand.streets[street]):
                     hand.hero = found.group("PNAME")
                     newcards = self.renderCards(found.group("NEWCARDS"))
                     hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
-                    log.debug(f"holeCards of {hand.hero} : {newcards}")
+
+                    log.debug(
+                        f"Found hero hole cards - method: PartyPoker:readHoleCards, player: {hand.hero}, cards: {newcards}"
+                    )
 
         # Read other player's cards
         for street, text in hand.streets.items():
             if not text or street in ("PREFLOP", "DEAL"):
                 continue
-            log.debug(f"Read holeCards for street {street}.")
+
+            log.debug(f"Reading other players hole cards - method: PartyPoker:readHoleCards, street: {street}")
+
             for found in self.re_HeroCards.finditer(text):
                 player = found.group("PNAME")
                 newcards = self.renderCards(found.group("NEWCARDS"))
                 hand.addHoleCards(street, player, open=newcards, closed=[], shown=False, mucked=False, dealt=False)
-                log.debug(f"holeCards of {player} at {street} : {newcards}")
-        log.debug("Method output readHoleCards.")
+
+                log.debug(
+                    f"Found player hole cards - method: PartyPoker:readHoleCards, player: {player}, street: {street}, cards: {newcards}"
+                )
+
+        log.info("Exiting readHoleCards method")
 
     def readAction(self, hand, street):
+        log.debug(f"Entering readAction method - method: PartyPoker:readAction, street: {street}")
+
         m = self.re_Action.finditer(hand.streets[street])
         for action in m:
-            acts = action.groupdict()
-            # print "DEBUG: acts: %s %s" % (street, acts)
+            # acts = action.groupdict()
             playerName = action.group("PNAME")
+
             if ":" in playerName:
                 continue  # captures chat
+
             if self.playerMap.get(playerName):
                 playerName = self.playerMap.get(playerName)
+
             amount = self.clearMoneyString(action.group("BET")) if action.group("BET") else None
             actionType = action.group("ATYPE")
 
             if actionType == "folds":
                 hand.addFold(street, playerName)
+                log.debug(f"Player folded - method: PartyPoker:readAction, player: {playerName}")
+
             elif actionType == "checks":
                 hand.addCheck(street, playerName)
+                log.debug(f"Player checked - method: PartyPoker:readAction, player: {playerName}")
+
             elif actionType == "calls":
                 hand.addCall(street, playerName, amount)
+                log.debug(f"Player called - method: PartyPoker:readAction, player: {playerName}, amount: {amount}")
+
             elif actionType == "raises":
                 if street == "PREFLOP" and playerName in [
                     item[0] for item in hand.actions["BLINDSANTES"] if item[2] != "ante"
                 ]:
-                    # preflop raise from blind
                     hand.addCallandRaise(street, playerName, amount)
+                    log.debug(
+                        f"Player raised from blind - method: PartyPoker:readAction, player: {playerName}, amount: {amount}, street: {street}"
+                    )
                 else:
                     hand.addCallandRaise(street, playerName, amount)
-            elif actionType == "bets" or actionType == "double bets":
+                    log.debug(
+                        "Player raised",
+                        data={"method": "PartyPoker:readAction", "player": playerName, "amount": amount},
+                    )
+
+            elif actionType in ("bets", "double bets"):
                 hand.addBet(street, playerName, amount)
+                log.debug(f"Player bet - method: PartyPoker:readAction, player: {playerName}, amount: {amount}")
+
             elif actionType == "completes":
                 hand.addComplete(street, playerName, amount)
+                log.debug(f"Player completed - method: PartyPoker:readAction, player: {playerName}, amount: {amount}")
+
             elif actionType == "bring-ins":
                 hand.addBringIn(playerName, amount)
+                log.debug(f"Player brought in - method: PartyPoker:readAction, player: {playerName}, amount: {amount}")
+
             elif actionType == "is all-In":
                 if amount:
                     hand.addAllIn(street, playerName, amount)
+                    log.debug(
+                        f"Player went all-in - method: PartyPoker:readAction, player: {playerName}, amount: {amount}"
+                    )
+
             else:
                 log.error(
-                    (("PartyPokerToFpdb: Unimplemented %s: '%s' '%s'") + " hid:%s")
-                    % ("readAction", playerName, actionType, hand.handid)
+                    f"Unimplemented action - method: PartyPoker:readAction, player: {playerName}, action_type: {actionType}, hand_id: {hand.handid}"
                 )
                 raise FpdbParseError
 
-    def readShowdownActions(self, hand):
-        log.debug("Enter readShowdownActions.")
+        log.debug(f"Exiting readAction method - method: PartyPoker:readAction, street: {street}")
 
-        log.debug("Method readShowdownActions not implemented (managed in readShownCards).")
+    def readShowdownActions(self, hand):
+        log.debug("Entering readShowdownActions method")
+        log.warning("Method not implemented")
         pass
 
     def readCollectPot(self, hand):
+        log.info("Entering readCollectPot method")
+
         hand.setUncalledBets(True)
+
         for m in self.re_CollectPot.finditer(hand.handText):
-            hand.addCollectPot(player=m.group("PNAME"), pot=self.clearMoneyString(m.group("POT")))
+            player = m.group("PNAME")
+            pot = self.clearMoneyString(m.group("POT"))
+            hand.addCollectPot(player=player, pot=pot)
+
+            log.debug(f"Player collected pot method: PartyPoker:readCollectPot, player: {player}, amount: {pot}")
+
+        log.info("Exiting readCollectPot method")
 
     def readShownCards(self, hand):
-        log.debug("Enter method readShownCards.")
+        log.info("Entering readShownCards method")
+
         for m in self.re_ShownCards.finditer(hand.handText):
             if m.group("CARDS"):
+                player = m.group("PNAME")
                 cards = self.renderCards(m.group("CARDS"))
                 mucked = "SHOWED" in m.groupdict() and m.group("SHOWED") != "shows"
-                hand.addShownCards(
-                    cards=cards, player=m.group("PNAME"), shown=True, mucked=mucked, string=m.group("COMBINATION")
+                combination = m.group("COMBINATION")
+
+                hand.addShownCards(cards=cards, player=player, shown=True, mucked=mucked, string=combination)
+
+                log.debug(
+                    f"Player showed cards method: PartyPoker:readShownCards, player: {player}, cards: {cards}, mucked: {mucked}, combination: {combination}"
                 )
-                log.debug(f"{m.group('PNAME')} showed cards : {cards}")
-        log.debug("Method output readShownCards.")
+
+        log.info("Exiting readShownCards method")
 
     def readSummaryInfo(self, summaryInfoList):
-        log.info("Enter method readSummaryInfo.")
-
-        log.debug("Method readSummaryInfo not implémented.")
+        log.debug("Entering readSummaryInfo method")
+        log.warning("Method not implemented")
         return True
 
     def convert_to_decimal(self, string):
@@ -1129,94 +1323,86 @@ class PartyPoker(HandHistoryConverter):
         return dec
 
     def readTourneyResults(self, hand):
-        """Reads tournament results and adds winnings or ranks to the relevant data structures."""
-        log.debug("Enter Method readTourneyResults.")
+        log.info("Entering readTourneyResults method")
 
-        # Initialize data structures to store results
-        log.debug("Initializing data structures for tournament results.")
+        # Initialize data structures
         hand.winnings = {}
         hand.ranks = {}
         hand.playersIn = []
-        hand.isProgressive = False  # Default to non-progressive KO
-        log.debug("Set hand.isProgressive to False (non-progressive KO).")
+        hand.isProgressive = False
 
-        # Process the tournament winner (rank 1)
-        log.debug("Processing the tournament winner (rank 1).")
+        log.debug("Initialized tournament data structures method: PartyPoker:readTourneyResults, is_progressive: False")
+
+        # Process tournament winner (rank 1)
         m = self.re_WinningRankOne.search(hand.handText)
         if m:
-            log.debug("Regex re_WinningRankOne matched.")
             winner = m.group("PNAME")
-            log.debug(f"Winner found: {winner}")
 
-            # Assuming a winning amount in `re_WinningRankOne` pattern as `AMT`
             if "AMT" in m.groupdict():
                 amt_str = m.group("AMT").replace(",", ".")
                 try:
                     amount = Decimal(amt_str)
-                    log.debug(f"Winning amount for {winner}: {amount}")
+                    hand.winnings[winner] = amount
+
+                    log.debug(
+                        f"Processed tournament winner method: PartyPoker:readTourneyResults, player: {winner}, amount: {amount}"
+                    )
                 except Exception as e:
-                    log.error(f"Error converting winning amount '{amt_str}' to Decimal: {e}")
-                    amount = Decimal(0)
-                hand.winnings[winner] = amount
-                log.debug(f"Set hand.winnings[{winner}] = {amount}")
+                    hand.winnings[winner] = Decimal(0)
+                    log.error(
+                        f"Error processing winner amount method: PartyPoker:readTourneyResults, player: {winner}, amount_string: {amt_str}, error: {str(e)}"
+                    )
             else:
-                hand.winnings[winner] = Decimal(0)  # Default amount if none specified
-                log.debug(f"No winning amount specified for {winner}. Set hand.winnings[{winner}] = 0")
+                hand.winnings[winner] = Decimal(0)
+                log.debug(f"Winner found without amount method: PartyPoker:readTourneyResults, player: {winner}")
 
-            hand.ranks[winner] = 1  # Store the rank for the winner
+            hand.ranks[winner] = 1
             hand.playersIn.append(winner)
-            log.debug(f"Set hand.ranks[{winner}] = 1")
-        else:
-            log.debug("Regex re_WinningRankOne did not match. No winner found.")
 
-        # Process other ranked players who received winnings
-        log.debug("Processing other ranked players who received winnings.")
+        # Process other players with winnings
         for match in self.re_WinningRankOther.finditer(hand.handText):
-            log.debug("Found a match with re_WinningRankOther.")
             pname = match.group("PNAME")
             rank = int(match.group("RANK"))
             amt_str = match.group("AMT").replace(",", ".")
+
             try:
                 amount = Decimal(amt_str)
-                log.debug(f"Player {pname} has rank {rank} with winnings {amount}")
             except Exception as e:
-                log.error(f"Error converting amount '{amt_str}' for player '{pname}' to Decimal: {e}")
                 amount = Decimal(0)
+                log.error(
+                    f"Error processing player amount method: PartyPoker:readTourneyResults, player: {pname}, amount_string: {amt_str}, error: {str(e)}"
+                )
 
-            currency_symbol = match.group("CURRENCY_SYMBOL")
+            # currency_symbol = match.group("CURRENCY_SYMBOL")
             currency_code = match.group("CURRENCY_CODE")
-            log.debug(
-                f"Player: {pname}, Rank: {rank}, Amount: {amount}, Currency Symbol: {currency_symbol}, Currency Code: {currency_code}"
-            )
 
-            # Store rank and winnings in the hand object
             hand.ranks[pname] = rank
-            log.debug(f"Set hand.ranks[{pname}] = {rank}")
             hand.winnings[pname] = amount
-            log.debug(f"Set hand.winnings[{pname}] = {amount}")
             hand.buyinCurrency = currency_code
             hand.currency = currency_code
+
             if pname not in hand.playersIn:
                 hand.playersIn.append(pname)
+
+            log.debug(
+                f"Processed player with winnings method: PartyPoker:readTourneyResults, player: {pname}, rank: {rank}, amount: {amount}, currency: {currency_code}"
+            )
 
         # Process other ranked players without winnings
-        log.debug("Processing other ranked players without winnings.")
         for match in self.re_RankOther.finditer(hand.handText):
-            log.debug("Found a match with re_RankOther.")
             pname = match.group("PNAME")
             rank = int(match.group("RANK"))
-            log.debug(f"Player {pname} has rank {rank} without winnings.")
 
-            # Store rank only in the hand object for these players
             if pname not in hand.ranks:
                 hand.ranks[pname] = rank
-                log.debug(f"Set hand.ranks[{pname}] = {rank}")
-            else:
-                log.debug(f"Player {pname} already has a rank with winnings.")
+                log.debug(
+                    f"Processed ranked player without winnings method: PartyPoker:readTourneyResults, player: {pname}, rank: {rank}"
+                )
+
             if pname not in hand.playersIn:
                 hand.playersIn.append(pname)
 
-        # Optionally, set other tournament attributes on hand
+        # Set tournament attributes
         hand.entries = len(hand.playersIn)
         hand.prizepool = sum(hand.winnings.values())
         hand.isTournament = True
@@ -1225,17 +1411,12 @@ class PartyPoker(HandHistoryConverter):
         hand.isRebuy = False
         hand.isAddOn = False
         hand.isKO = False
-        log.debug(f"Set hand.entries = {hand.entries}, hand.prizepool = {hand.prizepool}")
 
-        # Ensure that hand.endTime is set
         if not hasattr(hand, "endTime"):
             hand.endTime = hand.startTime
-            log.debug(f"Set hand.endTime = {hand.endTime}")
 
-        # Now, create a TourneySummary object and store the tournament info
-        log.debug("Creating TourneySummary object.")
+        # Create TourneySummary
         try:
-            # Create the TourneySummary object
             summary = TourneySummary(
                 db=self.db,
                 config=self.config,
@@ -1245,7 +1426,7 @@ class PartyPoker(HandHistoryConverter):
                 header="",
             )
 
-            # Set tournament attributes
+            # Set summary attributes
             summary.tourNo = hand.tourNo
             summary.buyin = hand.buyin
             summary.fee = hand.fee
@@ -1262,63 +1443,70 @@ class PartyPoker(HandHistoryConverter):
             summary.isAddOn = hand.isAddOn
             summary.isKO = hand.isKO
 
-            # Add players to the summary
+            # Add players to summary
             for pname, rank in hand.ranks.items():
                 winnings = hand.winnings.get(pname, Decimal("0"))
                 winningsCurrency = hand.buyinCurrency
                 summary.addPlayer(
                     rank=rank,
                     name=pname,
-                    winnings=int(winnings * 100),  # Convert to cents
+                    winnings=int(winnings * 100),
                     winningsCurrency=winningsCurrency,
                     rebuyCount=0,
                     addOnCount=0,
                     koCount=0,
                 )
-                log.debug(f"Added player {pname} to TourneySummary with rank {rank} and winnings {winnings}")
 
-            # Insert or update the tournament in the database
-            log.debug("Inserting or updating tournament in the database.")
+                log.debug(
+                    f"Added player to summary method: PartyPoker:readTourneyResults, player: {pname}, rank: {rank}, winnings: {winnings}, currency: {winningsCurrency}"
+                )
+
             summary.insertOrUpdate()
-            log.debug("Tournament data inserted/updated successfully.")
+            log.debug(
+                f"Tournament summary saved method: PartyPoker:readTourneyResults, entries: {hand.entries}, prizepool: {hand.prizepool}"
+            )
 
         except Exception as e:
-            log.error(f"Error creating or inserting TourneySummary: {e}")
+            log.error(f"Error processing tournament summary method: PartyPoker:readTourneyResults, error: {str(e)}")
 
-        log.debug("Method readTourneyResults completed.")
-
-        # Optionally, log the final winnings and ranks dictionaries
-        log.debug(f"Final hand.winnings: {hand.winnings}")
-        log.debug(f"Final hand.ranks: {hand.ranks}")
+        log.debug(
+            f"Exiting readTourneyResults method - method: PartyPoker:readTourneyResults, total_players: {len(hand.ranks)}, total_winners: {len(hand.winnings)}"
+        )
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
-        """Returns a regex for searching window titles."""
-        log.info(
-            f"Enter method getTableTitleRe: type='{type}', table_name='{table_name}', tournament='{tournament}', table_number='{table_number}'"
+        log.debug(
+            f"Processing table title parameters - type: {type}, table_name: {table_name}, tournament: {tournament}, table_number: {table_number}"
         )
+
         tournament = str(tournament) if tournament is not None else None
         table_number = str(table_number) if table_number is not None else None
         regex = rf"{re.escape(table_name)}" if table_name else ""
+
         if type == "tour":
             if table_name:
                 TableName = table_name.split(" ")
                 if len(TableName) > 1 and len(TableName[1]) > 6:
                     regex = rf"#?{re.escape(table_number)}"
+                    log.info(f"Using table number regex pattern - regex: {regex}")
                 else:
                     regex = rf"{re.escape(TableName[0])}.+Table\s#?{re.escape(table_number)}"
+                    log.info(f"Using full table name regex pattern - regex: {regex}")
             else:
                 # sng
                 regex = rf"{re.escape(tournament)}.*{re.escape(table_number)}"
-        log.info(f"Party.getTableTitleRe: return: '{regex}'")
-        log.debug("Method output getTableTitleRe.")
+                log.info(f"Using tournament regex pattern - regex: {regex}")
+
+        log.debug(f"Generated regex pattern - regex: {regex}")
         return regex
 
     @staticmethod
     def renderCards(string):
-        log.debug(f"Enter method renderCards with string: '{string}'")
+        log.debug(f"Processing cards string - input: {string}")
+
         cards = string.strip().split(" ")
         rendered_cards = list(filter(len, map(lambda x: x.strip(" ,"), cards)))
-        log.debug(f"rendered Cards : {rendered_cards}")
-        log.debug("Method output renderCards.")
+
+        log.debug(f"Cards rendering complete - input: {string}, output: {rendered_cards}")
+
         return rendered_cards
