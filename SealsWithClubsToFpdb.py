@@ -25,12 +25,12 @@
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal import Decimal
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 
 
 # SealsWithClubs HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class SealsWithClubs(HandHistoryConverter):
