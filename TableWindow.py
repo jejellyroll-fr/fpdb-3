@@ -32,7 +32,7 @@ client has been resized, destroyed, etc.
 
 #    Standard Library modules
 import re
-import logging
+from loggingFpdb import get_logger
 from time import sleep
 
 #    FreePokerTools modules
@@ -41,7 +41,7 @@ from HandHistoryConverter import getTableTitleRe
 from HandHistoryConverter import getTableNoRe
 
 c = Configuration.Config()
-log = logging.getLogger("hud")
+log = get_logger("hud")
 
 #    Global used for figuring out the current game being played from the title.
 #    The dict key is a tuple of (limit type, category) for the game.
@@ -96,16 +96,16 @@ class Table_Window(object):
         self.hud = None  # fill in later
         self.gdkhandle = None
         self.number = None
-        # check if 
+        # check if
         if isinstance(table_name, bytes):
             print(f"Décodage de table_name en UTF-8 : {table_name}")
-            table_name = table_name.decode('utf-8')
+            table_name = table_name.decode("utf-8")
         if isinstance(tournament, bytes):
             print(f"Décodage de table_name en UTF-8 : {tournament}")
-            tournament = tournament.decode('utf-8')
+            tournament = tournament.decode("utf-8")
         if isinstance(table_number, bytes):
             print(f"Décodage de table_name en UTF-8 : {table_number}")
-            table_number = table_number.decode('utf-8')
+            table_number = table_number.decode("utf-8")
 
         if tournament is not None and table_number is not None:
             print(tournament)
@@ -149,7 +149,7 @@ class Table_Window(object):
 
         self.find_table_parameters()
         if not self.number:
-            log.error(('Can\'t find table "%s" with search string "%s"'), table_name, self.search_string)
+            log.error(f'Can\'t find table "{table_name}" with search string "{self.search_string}"')
 
         geo = self.get_geometry()
         if geo is None:
