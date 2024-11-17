@@ -26,9 +26,9 @@ from HandHistoryConverter import HandHistoryConverter, FpdbParseError
 from TourneySummary import TourneySummary
 
 import BovadaToFpdb
-import logging
+from loggingFpdb import get_logger
 
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class BovadaSummary(TourneySummary):
@@ -63,7 +63,7 @@ class BovadaSummary(TourneySummary):
         m = hhc.re_GameInfo.search(self.summaryText)
         if m is None:
             tmp = self.summaryText[0:200]
-            log.error(("BovadaSummary.parseSummary: '%s'") % tmp)
+            log.error(f"parseSummary not found: '{tmp}'")
             raise FpdbParseError
 
         info = {}
@@ -74,7 +74,7 @@ class BovadaSummary(TourneySummary):
 
         if info["TOURNO"] is None:
             tmp = self.summaryText[0:200]
-            log.error(("BovadaSummary.parseSummary: Text does not appear to be a tournament '%s'") % tmp)
+            log.error(f"Text does not appear to be a tournament '{tmp}'")
             raise FpdbParseError
         else:
             self.tourNo = info["TOURNO"]
@@ -124,7 +124,7 @@ class BovadaSummary(TourneySummary):
                     elif re.match("^[0-9+]*$", info["BUYIN"]):
                         self.buyinCurrency = "play"
                     else:
-                        log.error(("BovadaSummary.parseSummary: Failed to detect currency"))
+                        log.error(("Failed to detect currency"))
                         raise FpdbParseError
                     self.currency = self.buyinCurrency
 
