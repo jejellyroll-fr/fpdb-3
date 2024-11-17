@@ -46,9 +46,9 @@ import os
 import sys
 
 import Configuration
-import logging
+from loggingFpdb import get_logger
 
-log = logging.getLogger("config")
+log = get_logger("config")
 
 if platform.system() == "Windows":
     # import winpaths
