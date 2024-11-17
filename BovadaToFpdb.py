@@ -26,11 +26,11 @@
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal import Decimal
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 
 # Bovada HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class Bovada(HandHistoryConverter):
@@ -264,14 +264,14 @@ class Bovada(HandHistoryConverter):
         m = self.re_GameInfo.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(("BovadaToFpdb.determineGameType: '%s'") % tmp)
+            log.error(f"BovadaToFpdb.determineGameType: '{tmp}'")
             raise FpdbParseError
 
         m1 = self.re_Dealt.search(handText)
         m2 = self.re_Summary.split(handText)
         m3 = self.re_Hole_Third.split(handText)
         if not m1 or len(m2) != 2 or len(m3) > 3:
-            raise FpdbHandPartial("BovadaToFpdb.determineGameType: " + ("Partial hand history"))
+            raise FpdbHandPartial("Partial hand history")
 
         mg = m.groupdict()
         m = self.re_Stakes.search(self.in_path)
@@ -313,9 +313,7 @@ class Bovada(HandHistoryConverter):
                     info["bb"] = self.Lim_Blinds[info["bb"]][1]
                 except KeyError:
                     tmp = handText[0:200]
-                    log.error(
-                        ("BovadaToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'") % (mg["BB"], tmp)
-                    )
+                    log.error(f"Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'")
                     raise FpdbParseError
             else:
                 info["sb"] = str((Decimal(info["sb"]) / 2).quantize(Decimal("0.01")))
@@ -328,7 +326,7 @@ class Bovada(HandHistoryConverter):
         m = self.re_GameInfo.search(hand.handText)
         if m is None:
             tmp = hand.handText[0:200]
-            log.error(("BovadaToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(f"readHandInfo not found: '{tmp}'")
             raise FpdbParseError
 
         info.update(m.groupdict())
@@ -381,10 +379,7 @@ class Bovada(HandHistoryConverter):
                             hand.buyinCurrency = "play"
                         else:
                             # FIXME: handle other currencies, play money
-                            log.error(
-                                ("BovadaToFpdb.readHandInfo: Failed to detect currency.")
-                                + " Hand ID: %s: '%s'" % (hand.handid, info[key])
-                            )
+                            log.error(f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'")
                             raise FpdbParseError
 
                         if info.get("BOUNTY") is not None:
@@ -455,7 +450,7 @@ class Bovada(HandHistoryConverter):
             seatNo += 1
         if len(hand.players) == 0:
             tmp = hand.handText[0:200]
-            log.error(("BovadaToFpdb.readPlayerStacks: '%s'") % tmp)
+            log.error(f"readPlayerStacks failed: '{tmp}'")
             raise FpdbParseError
         elif len(hand.players) == 10:
             hand.maxseats = 10
@@ -463,7 +458,7 @@ class Bovada(HandHistoryConverter):
     def playerSeatFromPosition(self, source, handid, position):
         player = self.playersMap.get(position)
         if player is None:
-            log.error(("Hand.%s: '%s' unknown player seat from position: '%s'") % (source, handid, position))
+            log.error(f"Hand.{source}: '{handid}' unknown player seat from position: '{position}'")
             raise FpdbParseError
         return player
 
@@ -635,7 +630,7 @@ class Bovada(HandHistoryConverter):
                 if hand.gametype["sb"] == v[0]:
                     hand.gametype["bb"] = v[1]
         if hand.gametype["sb"] is None or hand.gametype["bb"] is None:
-            log.error(("BovadaToFpdb.fixBlinds: Failed to fix blinds") + " Hand ID: %s" % (hand.handid,))
+            log.error(f"Failed to fix blinds Hand ID: {hand.handid}")
             raise FpdbParseError
         hand.sb = hand.gametype["sb"]
         hand.bb = hand.gametype["bb"]
@@ -708,7 +703,7 @@ class Bovada(HandHistoryConverter):
                     hand.addCheck(street, player)
                 elif action.group("ATYPE") == " Calls" or action.group("ATYPE") == " Call":
                     if not action.group("BET"):
-                        log.error("BovadaToFpdb.readAction: Amount not found in Call %s" % hand.handid)
+                        log.error(f"Amount not found in Call {hand.handid}")
                         raise FpdbParseError
                     hand.addCall(street, player, self.clearMoneyString(action.group("BET")))
                 elif action.group("ATYPE") in (" Raises", " raises", " All-in(raise)", " All-in(raise-timeout)"):
@@ -717,17 +712,17 @@ class Bovada(HandHistoryConverter):
                     elif action.group("BET"):
                         bet = self.clearMoneyString(action.group("BET"))
                     else:
-                        log.error("BovadaToFpdb.readAction: Amount not found in Raise %s" % hand.handid)
+                        log.error(f"Amount not found in Raise {hand.handid}")
                         raise FpdbParseError
                     hand.addRaiseTo(street, player, bet)
                 elif action.group("ATYPE") in (" Bets", " bets", " Double bets"):
                     if not action.group("BET"):
-                        log.error("BovadaToFpdb.readAction: Amount not found in Bet %s" % hand.handid)
+                        log.error(f"Amount not found in Bet {hand.handid}")
                         raise FpdbParseError
                     hand.addBet(street, player, self.clearMoneyString(action.group("BET")))
                 elif action.group("ATYPE") == " All-in":
                     if not action.group("BET"):
-                        log.error("BovadaToFpdb.readAction: Amount not found in All-in %s" % hand.handid)
+                        log.error(f"BovadaToFpdb.readAction: Amount not found in All-in {hand.handid}")
                         raise FpdbParseError
                     hand.addAllIn(street, player, self.clearMoneyString(action.group("BET")))
                     self.allInBlind(hand, street, action, action.group("ATYPE"))
@@ -736,11 +731,7 @@ class Bovada(HandHistoryConverter):
                 elif action.group("ATYPE") in (" Card dealt to a spot", " Big blind/Bring in"):
                     pass
                 else:
-                    log.debug(
-                        ("DEBUG:")
-                        + " "
-                        + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group("PNAME"), action.group("ATYPE"))
-                    )
+                    log.debug(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
 
     def allInBlind(self, hand, street, action, actiontype):
         if street in ("PREFLOP", "DEAL"):
