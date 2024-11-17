@@ -24,10 +24,10 @@
 
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 # Betfair HH format
 
@@ -88,7 +88,7 @@ class Betfair(HandHistoryConverter):
         m = self.re_GameInfo.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(("BetfairToFpdb.determineGameType: '%s'") % tmp)
+            log.error(f"determineGameType not found: '{tmp}'")
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -120,9 +120,9 @@ class Betfair(HandHistoryConverter):
         m = self.re_HandInfo.search(hand.handText)
         if m is None:
             tmp = hand.handText[0:200]
-            log.error(("BetfairToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(f"determineGameType not found: '{tmp}'")
             raise FpdbParseError
-        log.debug("HID %s, Table %s" % (m.group("HID"), m.group("TABLE")))
+        log.debug(f"HID {m.group('HID')}, Table {m.group('TABLE')}")
         hand.handid = m.group("HID")
         hand.tablename = m.group("TABLE")
         hand.startTime = datetime.datetime.strptime(m.group("DATETIME"), "%A, %B %d, %H:%M:%S GMT %Y")
@@ -135,7 +135,7 @@ class Betfair(HandHistoryConverter):
 
         # Shouldn't really dip into the Hand object, but i've no idea how to tell the length of iter m
         if len(hand.players) < 2:
-            log.info(("Less than 2 players found in hand %s.") % hand.handid)
+            log.info(f"Less than 2 players found in hand {hand.handid}.")
 
     def markStreets(self, hand):
         m = re.search(
@@ -173,13 +173,13 @@ class Betfair(HandHistoryConverter):
         log.debug("reading antes")
         m = self.re_Antes.finditer(hand.handText)
         for player in m:
-            log.debug("hand.addAnte(%s,%s)" % (player.group("PNAME"), player.group("ANTE")))
+            log.debug(f"hand.addAnte({player.group('PNAME')},{player.group('ANTE')})")
             hand.addAnte(player.group("PNAME"), player.group("ANTE"))
 
     def readBringIn(self, hand):
         m = self.re_BringIn.search(hand.handText, re.DOTALL)
         if m:
-            log.debug(("Player bringing in: %s for %s") % (m.group("PNAME"), m.group("BRINGIN")))
+            log.debug(f"Player bringing in: {m.group('PNAME')} for {m.group('BRINGIN')}")
             hand.addBringIn(m.group("PNAME"), m.group("BRINGIN"))
         else:
             log.warning(("No bringin found"))
@@ -216,11 +216,7 @@ class Betfair(HandHistoryConverter):
             elif action.group("ATYPE") == "raises to":
                 hand.addRaiseTo(street, action.group("PNAME"), action.group("BET"))
             else:
-                log.debug(
-                    ("DEBUG:")
-                    + " "
-                    + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group("PNAME"), action.group("ATYPE"))
-                )
+                log.debug(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
 
     def readShowdownActions(self, hand):
         for shows in self.re_ShowdownAction.finditer(hand.handText):
