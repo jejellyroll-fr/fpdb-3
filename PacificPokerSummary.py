@@ -20,11 +20,11 @@
 from HandHistoryConverter import FpdbParseError
 from decimal import Decimal
 import re
-import logging
+from loggingFpdb import get_logger
 from TourneySummary import TourneySummary
 
 # Pacifc(888) HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class PacificPokerSummary(TourneySummary):
@@ -82,7 +82,7 @@ class PacificPokerSummary(TourneySummary):
         m = self.re_TourneyInfo.search(self.summaryText)
         if m is None:
             tmp = self.summaryText[0:200]
-            log.error(("PacificPokerSummary.parseSummary: '%s'") % tmp)
+            log.error(f"parseSummary failed: '{tmp}'")
             raise FpdbParseError
 
         mg = m.groupdict()
