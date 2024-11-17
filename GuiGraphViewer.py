@@ -43,13 +43,13 @@ from time import time
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.font_manager import FontProperties
-import logging
+from loggingFpdb import get_logger
 from numpy import cumsum
 import Database
 import Filters
 # import Charset
 
-log = logging.getLogger("filter")
+log = get_logger("filter")
 
 
 class GuiGraphViewer(QSplitter):
@@ -193,7 +193,7 @@ class GuiGraphViewer(QSplitter):
             self.ax.set_title(f"Profit graph for ring games{names}", color=self.colors["foreground"])
 
             if "showdown" in graphops:
-                log.debug("blue max:", blue.max())
+                log.debug(f"blue max: {blue.max()}")
                 self.ax.plot(
                     blue,
                     color=self.colors["line_showdown"],
