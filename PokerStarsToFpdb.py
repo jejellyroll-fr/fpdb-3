@@ -25,11 +25,11 @@
 
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 
 # PokerStars HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class PokerStars(HandHistoryConverter):
@@ -389,7 +389,7 @@ class PokerStars(HandHistoryConverter):
         m = self.re_GameInfo.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(("PokerStarsToFpdb.determineGameType: '%s'") % tmp)
+            log.error(f"determine Game Type failed: '{tmp}'")
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -461,10 +461,7 @@ class PokerStars(HandHistoryConverter):
                     info["bb"] = self.Lim_Blinds[mg["BB"]][1]
                 except KeyError:
                     tmp = handText[0:200]
-                    log.error(
-                        ("PokerStarsToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'")
-                        % (mg["BB"], tmp)
-                    )
+                    log.error(f"Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'")
                     raise FpdbParseError
             else:
                 info["sb"] = str((float(mg["SB"]) / 2).quantize(float("0.01")))
@@ -482,7 +479,7 @@ class PokerStars(HandHistoryConverter):
         m2 = self.re_GameInfo.search(hand.handText)
         if m is None or m2 is None:
             tmp = hand.handText[0:200]
-            log.error(("PokerStarsToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(f"read Hand Info failed: '{tmp}'")
             raise FpdbParseError
 
         info.update(m.groupdict())
@@ -568,10 +565,7 @@ class PokerStars(HandHistoryConverter):
                             hand.buyinCurrency = "play"
                         else:
                             # FIXME: handle other currencies, play money
-                            log.error(
-                                ("PokerStarsToFpdb.readHandInfo: Failed to detect currency.")
-                                + " Hand ID: %s: '%s'" % (hand.handid, info[key])
-                            )
+                            log.error(f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'")
                             raise FpdbParseError
 
                         info["BIAMT"] = info["BIAMT"].strip("$€£FPPSC₹")
@@ -631,7 +625,7 @@ class PokerStars(HandHistoryConverter):
         if m:
             hand.buttonpos = int(m.group("BUTTON"))
         else:
-            log.info("readButton: " + ("not found"))
+            log.info("readButton: not found")
 
     def readPlayerStacks(self, hand):
         pre, post = hand.handText.split("*** SUMMARY ***")
@@ -867,11 +861,7 @@ class PokerStars(HandHistoryConverter):
             elif action.group("ATYPE") == " stands pat":
                 hand.addStandsPat(street, action.group("PNAME"), action.group("CARDS"))
             else:
-                log.debug(
-                    ("DEBUG:")
-                    + " "
-                    + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group("PNAME"), action.group("ATYPE"))
-                )
+                log.debug(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
         m = self.re_Uncalled.search(hand.streets[s])
         if m:
             hand.addUncalled(street, m.group("PNAME"), m.group("BET"))
@@ -1006,11 +996,8 @@ class PokerStars(HandHistoryConverter):
         if type == "tour":
             regex = re.escape(str(tournament)) + " (Table|Tisch) " + re.escape(str(table_number))
             print("regex tour: ", regex)
-        log.info(
-            "Stars.getTableTitleRe: table_name='%s' tournament='%s' table_number='%s'"
-            % (table_name, tournament, table_number)
-        )
-        log.info("Stars.getTableTitleRe: returns: '%s'" % (regex))
-        print("regex:")
-        print(regex)
+            log.info(
+                f"Stars.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'"
+            )
+            log.info(f"Stars.getTableTitleRe: returns: '{regex}'")
         return regex
