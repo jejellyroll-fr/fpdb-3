@@ -31,7 +31,7 @@ from past.utils import old_div
 # _ = L10n.init_translation()
 
 #    Standard Library modules
-import logging
+from loggingFpdb import get_logger
 
 
 from PyQt5.QtCore import QObject
@@ -44,7 +44,7 @@ import Aux_Base
 # Utility routine to get the number of valid cards in the card tuple
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hud")
+log = get_logger("hud")
 
 
 def valid_cards(ct):
