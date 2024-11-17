@@ -53,9 +53,9 @@ except ImportError as inst:
         )
     )
     print("ImportError: %s" % inst.args)
-import logging
+from loggingFpdb import get_logger
 
-log = logging.getLogger("sessionViewer")
+log = get_logger("sessionViewer")
 
 
 class GuiTourneyGraphViewer(QSplitter):
