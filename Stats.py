@@ -70,12 +70,12 @@ import Hand
 import codecs
 
 
-import logging
+from loggingFpdb import get_logger
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("db")
+log = get_logger("db")
 
 re_Places = re.compile("_[0-9]$")
 
@@ -579,9 +579,7 @@ def profit100(stat_dict, player):
 
     except (KeyError, ValueError, TypeError):
         if stat_dict:
-            log.error(
-                "exception calculating profit100: 100 * %d / %d" % (stat_dict[player]["net"], stat_dict[player]["n"])
-            )
+            log.error(f"exception calculating profit100: 100 * {stat_dict[player]['net']} / {stat_dict[player]['n']}")
         return (stat, "NA", "p=NA", "p/100=NA", "(0/0)", "Profit per 100 hands")
 
 
@@ -616,8 +614,7 @@ def bbper100(stat_dict, player):
     except (KeyError, ValueError, TypeError):
         if stat_dict:
             log.info(
-                "exception calculating bbper100: 100 * %d / %d"
-                % (stat_dict[player]["net"], stat_dict[player]["bigblind"])
+                f"exception calculating bbper100: 100 * {stat_dict[player]['net']} / {stat_dict[player]['bigblind']}"
             )
         return (stat, "NA", "bb100=NA", "bb100=NA", "(--)", "Big blinds won per 100 hands")
 
@@ -656,7 +653,7 @@ def BBper100(stat_dict, player):
 
     except (KeyError, ValueError, TypeError):
         if stat_dict:
-            log.info("exception calculating BBper100: " + str(stat_dict[player]))
+            log.info(f"exception calculating BBper100: {stat_dict[player]}")
         return (stat, "NA", "BB100=NA", "BB100=NA", "(--)", "Big bets won per 100 hands")
 
 
