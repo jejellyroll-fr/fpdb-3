@@ -28,7 +28,7 @@ from PyQt5.QtWidgets import (
 )
 
 from functools import partial
-import logging
+from loggingFpdb import get_logger
 
 import Configuration
 import Database
@@ -37,7 +37,7 @@ import Card
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
-log = logging.getLogger("filter")
+log = get_logger("filter")
 
 
 class Filters(QWidget):
@@ -153,7 +153,7 @@ class Filters(QWidget):
             if len(result) == 1:
                 self.siteid[site] = result[0][0]
             else:
-                log.debug(("Either 0 or more than one site matched for %s"), site)
+                log.debug(f"Either 0 or more than one site matched for {site}")
 
         self.start_date = QDateEdit(QDate(1970, 1, 1))
         self.end_date = QDateEdit(QDate(2100, 1, 1))
@@ -413,7 +413,7 @@ class Filters(QWidget):
 
     def __set_tourney_type_select(self, w, tourneyType):
         self.tourneyTypes[tourneyType] = w.get_active()
-        log.debug("self.tourney_types[%s] set to %s", tourneyType, self.tourneyTypes[tourneyType])
+        log.debug(f"self.tourney_types[{tourneyType}] set to {self.tourneyTypes[tourneyType]}")
 
     def createTourneyTypeLine(self, hbox, tourneyType):
         cb = QCheckBox(str(tourneyType))
@@ -583,7 +583,7 @@ class Filters(QWidget):
 
         req = self.cursor.execute("SELECT DISTINCT tourneyName FROM Tourneys")
         result = req.fetchall()
-        log.debug(result)
+        log.debug(f"Select distint tourney name {result}")
         self.gameList = QComboBox()
         self.gameList.setStyleSheet("background-color: #455364")
         for count, game in enumerate(result, start=0):
@@ -598,7 +598,7 @@ class Filters(QWidget):
                 game = game.replace(",", "")
                 game = game.replace(")", "")
 
-            log.debug(game)
+            log.debug(f"game {game}")
             if game != '"None"':
                 self.gameList.insertItem(count, game)
             else:
@@ -616,8 +616,7 @@ class Filters(QWidget):
                     vbox1.addWidget(self.cbTourney[line[0]])
 
         else:
-            log.debug("INFO: No games returned from database")
-            log.info("No games returned from database")
+            log.debug("No games returned from database")
 
     def fillTourneyCatFrame(self, frame):
         vbox1 = QVBoxLayout()
@@ -625,7 +624,7 @@ class Filters(QWidget):
 
         req = self.cursor.execute("SELECT DISTINCT category FROM TourneyTypes")
         result = req.fetchall()
-        log.debug(result)
+        log.debug(f"show category from tourney {result}")
         self.gameList = QComboBox()
         self.gameList.setStyleSheet("background-color: #455364")
         for count, game in enumerate(result, start=0):
@@ -640,7 +639,7 @@ class Filters(QWidget):
                 game = game.replace(",", "")
                 game = game.replace(")", "")
 
-            log.debug(game)
+            log.debug(f" game {game}")
             if game != '"None"':
                 self.gameList.insertItem(count, game)
             else:
@@ -658,8 +657,7 @@ class Filters(QWidget):
                     vbox1.addWidget(self.cbTourneyCat[line[0]])
 
         else:
-            log.debug("INFO: No games returned from database")
-            log.info("No games returned from database")
+            log.debug("No games returned from database")
 
     def fillTourneyLimFrame(self, frame):
         vbox1 = QVBoxLayout()
@@ -667,7 +665,7 @@ class Filters(QWidget):
 
         req = self.cursor.execute("SELECT DISTINCT limitType FROM TourneyTypes")
         result = req.fetchall()
-        log.debug(result)
+        log.debug(f"show limit from from tourney {result}")
         self.gameList = QComboBox()
         self.gameList.setStyleSheet("background-color: #455364")
         for count, game in enumerate(result, start=0):
@@ -682,7 +680,7 @@ class Filters(QWidget):
                 game = game.replace(",", "")
                 game = game.replace(")", "")
 
-            log.debug(game)
+            log.debug(f"game {game}")
             if game != '"None"':
                 self.gameList.insertItem(count, game)
             else:
@@ -700,8 +698,7 @@ class Filters(QWidget):
                     vbox1.addWidget(self.cbTourneyLim[line[0]])
 
         else:
-            log.debug("INFO: No games returned from database")
-            log.info("No games returned from database")
+            log.debug("No games returned from database")
 
     def fillTourneyBuyinFrame(self, frame):
         vbox1 = QVBoxLayout()
@@ -732,7 +729,7 @@ class Filters(QWidget):
 
         self.cursor.execute(self.sql.query["getGames"])
         result = self.db.cursor.fetchall()
-        log.debug(result)
+        log.debug(f"get games {result}")
         self.gameList = QComboBox()
         self.gameList.setStyleSheet("background-color: #455364")
         for count, game in enumerate(result, start=0):
@@ -740,7 +737,7 @@ class Filters(QWidget):
             game = game.replace("(", "")
             game = game.replace(",", "")
             game = game.replace(")", "")
-            log.debug(game)
+            log.debug(f"game {game}")
             self.gameList.insertItem(count, game)
 
         if len(result) >= 1:
@@ -763,8 +760,7 @@ class Filters(QWidget):
                 hbox.addWidget(btnNone)
                 hbox.addStretch()
         else:
-            log.debug("INFO: No games returned from database")
-            log.info("No games returned from database")
+            log.debug("No games returned from database")
 
     def fillTourneyFrame(self, frame):
         vbox1 = QVBoxLayout()
@@ -772,7 +768,7 @@ class Filters(QWidget):
 
         self.cursor.execute(self.sql.query["getTourneyNames"])
         result = self.db.cursor.fetchall()
-        log.debug(result)
+        log.debug(f"get tourney name {result}")
         self.gameList = QComboBox()
         self.gameList.setStyleSheet("background-color: #455364")
         for count, game in enumerate(result, start=0):
@@ -827,8 +823,7 @@ class Filters(QWidget):
                 hbox.addWidget(btnNone)
                 hbox.addStretch()
         else:
-            log.debug("INFO: No positions returned from database")
-            log.info("No positions returned from database")
+            log.debug("No positions returned from database")
 
     def fillHoleCardsFrame(self, frame):
         vbox1 = QVBoxLayout()
@@ -930,8 +925,7 @@ class Filters(QWidget):
 
                 hbox.addStretch()
         else:
-            log.debug("INFO: No games returned from database")
-            log.info("No games returned from database")
+            log.debug("No games returned from database")
 
         if "Type" in display and display["Type"] and "ring" in types_found and "tour" in types_found:
             self.type = "ring"
@@ -1204,8 +1198,7 @@ class Filters(QWidget):
             WHERE gt.siteId = ? AND p.name = ? AND gt.type = 'ring'
             """
 
-        log.debug("Query:")
-        log.debug(query)
+        log.debug(f"Query:\n{query}")
 
         self.cursor.execute(query, (site_id, hero))
         games = [row[0] for row in self.cursor.fetchall()]
@@ -1267,11 +1260,11 @@ class Filters(QWidget):
         """
         site_id = self.siteid[site]
         # debug
-        # log.debug(f"executed request for {hero} on {site} (site_id: {site_id})")
+        log.debug(f"executed request for {hero} on {site} (site_id: {site_id})")
         self.cursor.execute(query, (site_id, hero))
         currencies = [row[0] for row in self.cursor.fetchall()]
         # debug
-        # log.debug(f"currencies found for {hero} on {site}: {currencies}")
+        log.debug(f"currencies found for {hero} on {site}: {currencies}")
 
         for currency, checkbox in self.cbCurrencies.items():
             if currency in currencies:
@@ -1286,7 +1279,9 @@ class Filters(QWidget):
                 checkbox.setChecked(False)
                 checkbox.setEnabled(False)
             # debug
-            # log.debug(f"Devise {currency} - Checked: {checkbox.isChecked()}, Activated: {checkbox.isEnabled()} on {site}")
+            log.debug(
+                f"Devise {currency} - Checked: {checkbox.isChecked()}, Activated: {checkbox.isEnabled()} on {site}"
+            )
 
 
 if __name__ == "__main__":
