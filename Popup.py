@@ -29,7 +29,7 @@ from __future__ import division
 #    Standard Library modules
 
 from past.utils import old_div
-import logging
+from loggingFpdb import get_logger
 
 
 import ctypes
@@ -47,7 +47,7 @@ from PyQt5.QtWidgets import QGridLayout, QLabel, QVBoxLayout, QWidget
 import Stats
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hud")
+log = get_logger("hud")
 
 
 class Popup(QWidget):
