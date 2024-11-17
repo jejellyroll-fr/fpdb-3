@@ -60,9 +60,9 @@ import Filters
 # import Charset
 
 import GuiHandViewer
-import logging
+from loggingFpdb import get_logger
 
-log = logging.getLogger("sessionViewer")
+log = get_logger("sessionViewer")
 DEBUG = False
 
 
