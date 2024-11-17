@@ -25,7 +25,7 @@ from past.utils import old_div
 import Card
 from decimal import Decimal, ROUND_DOWN
 
-import logging
+from loggingFpdb import get_logger
 
 try:
     from pokereval import PokerEval
@@ -36,7 +36,7 @@ except Exception:
 
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 def _buildStatsInitializer():
@@ -352,7 +352,7 @@ class DerivedStats(object):
             try:
                 player_stats["startCards"] = calcStartCards(hand, player_name)
             except IndexError:
-                log.error("IndexError: string index out of range %s %s" % (hand.handid, hand.in_path))
+                log.error(f"IndexError: string index out of range {hand.handid} {hand.in_path}")
 
         self.setPositions(hand)
         self.calcEffectiveStack(hand)
@@ -461,8 +461,7 @@ class DerivedStats(object):
                                         )
                                     except RuntimeError:
                                         log.error(
-                                            "assembleHandsStove: error determining value and rank for hand %s %s"
-                                            % (hand.handid, hand.in_path)
+                                            f"Error determining value and rank for hand {hand.handid} {hand.in_path}"
                                         )
                                         self.handsstove.append(
                                             [
@@ -531,9 +530,7 @@ class DerivedStats(object):
                                 )
                                 equities = [e["ev"] for e in evs["eval"]]
                             except RuntimeError:
-                                log.error(
-                                    "getAllInEV: error running poker_eval for hand %s %s" % (hand.handid, hand.in_path)
-                                )
+                                log.error(f"getAllInEV: error running poker_eval for hand {hand.handid} {hand.in_path}")
                                 equities = [1000]
                         else:
                             equities = [1000]
@@ -679,9 +676,7 @@ class DerivedStats(object):
                             win = pokereval.winners(game=evalgame, pockets=holecards, board=board)
                         except RuntimeError:
                             # log.error((evalgame, holecards, board))
-                            log.error(
-                                "awardPots: error evaluating winners for hand %s %s" % (hand.handid, hand.in_path)
-                            )
+                            log.error(f"awardPots: error evaluating winners for hand {hand.handid} {hand.in_path}")
                             win = {}
                             win[hiLoKey[hilo][0]] = [0]
                     else:
@@ -800,10 +795,7 @@ class DerivedStats(object):
                         try:
                             win = pokereval.winners(game=evalgame, pockets=holecards, board=board)
                         except RuntimeError:
-                            log.error(
-                                "assembleHandsPots: error evaluating winners for hand %s %s"
-                                % (hand.handid, hand.in_path)
-                            )
+                            log.error(f"error evaluating winners for hand {hand.handid} {hand.in_path}")
                             win = {}
                             win[hiLoKey[hilo][0]] = [0]
                     else:
