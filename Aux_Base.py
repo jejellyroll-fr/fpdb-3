@@ -23,13 +23,13 @@
 #    to do
 
 #    Standard Library modules
-import logging
+from loggingFpdb import get_logger
 import contextlib
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hud")
+log = get_logger("hud")
 
 
 ### Aux_Base.py
