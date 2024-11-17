@@ -8,7 +8,7 @@ import subprocess
 import traceback
 import os
 import sys
-import logging
+from loggingFpdb import get_logger
 from PyQt5.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -33,7 +33,7 @@ import interlocks
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("importer")
+log = get_logger("importer")
 
 if os.name == "nt":
     import win32console
@@ -251,8 +251,9 @@ class GuiAutoImport(QWidget):
                             )
 
                     except Exception:
-                        self.addText("\n" + ("*** GuiAutoImport Error opening pipe:") + " " + traceback.format_exc())
-                        # TODO: log.warning() ?
+                        error_msg = f"GuiAutoImport Error opening pipe: {traceback.format_exc()}"
+                        log.warning(error_msg)
+                        self.addText(f"\n*** {error_msg}")
                     else:
                         for site, type in self.input_settings:
                             self.importer.addImportDirectory(
@@ -323,7 +324,7 @@ class GuiAutoImport(QWidget):
 
     def addSites(self, vbox1, vbox2):
         the_sites = self.config.get_supported_sites()
-        # log.debug("addSites: the_sites="+str(the_sites))
+        log.debug(f"add site {the_sites}")
         for site in the_sites:
             pathHBox1 = QHBoxLayout()
             vbox1.addLayout(pathHBox1)
@@ -361,7 +362,7 @@ class GuiAutoImport(QWidget):
                     params["enabled"],
                 )
                 self.input_settings[(site, "ts")] = [paths["hud-defaultTSPath"]] + [params["summaryImporter"]]
-        # log.debug("addSites: input_settings="+str(self.input_settings))
+        log.debug(f"input_settings {self.input_settings}")
 
 
 if __name__ == "__main__":
