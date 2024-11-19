@@ -52,8 +52,6 @@ if platform.system() == "Windows":
     winpaths_appdata = os.getenv("APPDATA")
     # winpaths_appdata = os.getcwd()
     winpaths_appdata = winpaths_appdata.replace("\\", "/")
-    print("winpaths_appdata:")  # debug
-    print(winpaths_appdata)  # debug
 else:
     winpaths_appdata = False
 
@@ -104,7 +102,6 @@ elif INSTALL_METHOD == "appimage":
     FPDB_ROOT_PATH = os.environ["APPDIR"]
 elif sys.path[0] == "":  # we are probably running directly (>>>import Configuration)
     temp = os.getcwd()  # should be ./pyfpdb
-    print(temp)
     FPDB_ROOT_PATH = os.path.join(temp, os.pardir)  # go up one level (to fpdbroot)
 else:  # all other cases
     # FPDB_ROOT_PATH = os.path.dirname(sys.path[0])  # should be source path to /fpdbroot
@@ -134,7 +131,6 @@ if OS_FAMILY in ["XP", "Win7"]:
     FPDB_ROOT_PATH = FPDB_ROOT_PATH.replace("\\", "/")
     if INSTALL_METHOD == "source":
         script = os.path.realpath(__file__)
-        print("SCript path:", script)
         script = script.replace("\\", "/")
         script = script.rsplit("/", 1)[0]
         GRAPHICS_PATH = script + "/gfx"
@@ -260,7 +256,7 @@ def set_logfile(file_name):
     check_dir(log_dir)
     log_file = os.path.join(log_dir, file_name).replace("\\", "/")
     if os.path.isfile(conf_file):
-        print("logging.conf file already exists")
+        log.info("logging.conf file already exists")
     else:
         # create a file
         # FIME: why printing that a file is going to be copied but not doing anything ?
@@ -269,7 +265,7 @@ def set_logfile(file_name):
     if conf_file:
         try:
             log_file = log_file.replace("\\", "/")  # replace each \ with \\
-            print(f"Using logging configfile: {conf_file}")
+            log.info(f"Using logging configfile: {conf_file}")
             log.config.fileConfig(conf_file, {"logFile": log_file})
         except Exception:
             sys.stderr.write(f"Could not setup log file {file_name}")
@@ -318,7 +314,9 @@ LOCALE_ENCODING = locale.getpreferredencoding()
 if LOCALE_ENCODING in ("US-ASCII", "", None):
     LOCALE_ENCODING = "cp1252"
     if os.uname()[0] != "Darwin":
-        print((("Default encoding set to US-ASCII, defaulting to CP1252 instead."), ("Please report this problem.")))
+        log.warning(
+            (("Default encoding set to US-ASCII, defaulting to CP1252 instead."), ("Please report this problem."))
+        )
 
 # needs LOCALE_ENCODING (above), imported for sqlite setup in Config class below
 
@@ -949,14 +947,14 @@ class RawHands(object):
             if save in ("none", "error", "all"):
                 self.save = save
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (self.raw_hands.save, '"error"'))
+                log.warning(f"Invalid config value for {self.raw_hands.save}, defaulting to error")
                 self.save = "error"
 
             compression = node.getAttribute("compression")
             if save in ("none", "gzip", "bzip2"):
                 self.compression = compression
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (self.raw_hands.compression, '"none"'))
+                log.warning(f"Invalid config value for {self.raw_hands.compression}, defaulting to none")
                 self.compression = "none"
 
     # end def __init__
@@ -979,14 +977,14 @@ class RawTourneys(object):
             if save in ("none", "error", "all"):
                 self.save = save
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (self.raw_tourneys.save, '"error"'))
+                log.warning(f"Invalid config value for {self.raw_tourneys.save}, defaulting to error")
                 self.save = "error"
 
             compression = node.getAttribute("compression")
             if save in ("none", "gzip", "bzip2"):
                 self.compression = compression
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (self.raw_tourneys.compression, '"none"'))
+                log.warning(f"Invalid config value for {self.raw_tourneys.compression}, defaulting to none")
                 self.compression = "none"
 
     # end def __init__
@@ -1032,7 +1030,7 @@ class Config(object):
         if file is not None:  # config file path passed in
             file = os.path.expanduser(file)
             if not os.path.exists(file):
-                print(("Configuration file %s not found. Using defaults.") % (file))
+                log.warning(f"Configuration file {file} not found. Using defaults.")
                 sys.stderr.write(("Configuration file %s not found. Using defaults.") % (file))
                 file = None
 
@@ -1213,11 +1211,11 @@ class Config(object):
                             cnode.appendChild(new)
                             t_node = self.doc.createTextNode("\r\n\r\n")
                             cnode.appendChild(t_node)
-                            print("... adding missing config section: " + e.localName)
+                            log.debug(f"... adding missing config section: {e.localName}")
                             nodes_added = nodes_added + 1
 
         if nodes_added > 0:
-            print(("Added %d missing config sections" % nodes_added) + "\n")
+            log.debug(f"Added {nodes_added} missing config sections")
             self.save()
 
         return nodes_added
@@ -1506,7 +1504,7 @@ class Config(object):
     def save_layout_set(self, ls, max, locations, width=None, height=None):
         # wid/height normally not specified when saving common from the mucked display
 
-        print("saving layout =", ls.name, " ", str(max), "Max ", str(locations), "size:", str(width), "x", str(height))
+        log.debug(f"saving layout = {ls.name} {max}Max {locations} size: {width}x{height}")
         ls_node = self.get_layout_set_node(ls.name)
         layout_node = self.get_layout_node(ls_node, max)
         if width:
