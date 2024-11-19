@@ -64,8 +64,8 @@ class Table(Table_Window):
 
         wins = xconn.core.GetProperty(False, root, nclatom, winatom, 0, (2**32) - 1).reply().value.to_atoms()
         for win in wins:
-            w_title = xconn.core.GetProperty(False, win, wnameatom, utf8atom, 0, (2**32) - 1).reply().value.to_string()
-            log.debug("w_title:", w_title)
+            w_title = xconn.core.GetProperty(False, win, wnameatom, utf8atom, 0, (2**32) - 1).reply().value.to_utf8()
+            log.debug(f"w_title: {w_title}")
             # escaped_search_string = re.escape(self.search_string)
             # if re.search(escaped_search_string, w_title, re.I):
             if re.search(self.search_string, w_title, re.I):
