@@ -503,7 +503,8 @@ def twoStartCardString(card):
             ret = s[x] + s[y] + "s"
         else:
             ret = s[y] + s[x] + "o"
-    log.debug("twoStartCardString(", card, f") = {ret}")
+    log.debug(f"twoStartCardString({card}) = {ret}")
+
     return ret
 
 
