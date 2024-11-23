@@ -724,6 +724,11 @@ class GGPoker(HandHistoryConverter):
             cards = shows.group("CARDS").split(" ")
             hand.addShownCards(cards, shows.group("PNAME"))
 
+    def readSummaryInfo(self, summaryInfoList):
+        log.info("enter method readSummaryInfo.")
+        log.debug("Method readSummaryInfo non implemented.")
+        return True
+
     def readTourneyResults(self, hand):
         """Reads knockout bounties and add them to the koCounts dict"""
         if self.re_Bounty.search(hand.handText) is None:

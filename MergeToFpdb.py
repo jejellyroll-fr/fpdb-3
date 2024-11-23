@@ -221,6 +221,11 @@ class Merge(HandHistoryConverter):
     def compilePlayerRegexs(self, hand):
         pass
 
+    def readSummaryInfo(self, summaryInfoList):
+        log.info("enter method readSummaryInfo.")
+        log.debug("Method readSummaryInfo non implemented.")
+        return True
+
     def playerNameFromSeatNo(self, seatNo, hand):
         # This special function is required because Merge Poker records
         # actions by seat number (0 based), not by the player's name

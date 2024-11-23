@@ -784,6 +784,11 @@ class KingsClub(HandHistoryConverter):
     def readShowdownActions(self, hand):
         pass
 
+    def readSummaryInfo(self, summaryInfoList):
+        log.info("enter method readSummaryInfo.")
+        log.debug("Method readSummaryInfo non implemented.")
+        return True
+
     def readCollectPot(self, hand):
         if (hand.gametype["category"] == "27_1draw" and hand.gametype["limitType"] == "nl") or hand.gametype[
             "base"

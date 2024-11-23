@@ -239,6 +239,11 @@ class Bovada(HandHistoryConverter):
                 re.MULTILINE | re.VERBOSE,
             )
 
+    def readSummaryInfo(self, summaryInfoList):
+        log.info("enter method readSummaryInfo.")
+        log.debug("Method readSummaryInfo non implemented.")
+        return True
+
     def readSupportedGames(self):
         return [
             ["ring", "hold", "nl"],
