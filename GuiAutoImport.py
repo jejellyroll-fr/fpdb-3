@@ -156,7 +156,7 @@ class GuiAutoImport(QWidget):
         for site in the_sites:
             params = self.config.get_site_parameters(site)
             if params["enabled"] is True:
-                print(("DEBUG:") + " " + ("Detecting hand history directory for site: '%s'") % site)
+                log.debug(f"Detecting hand history directory for site: '{site}'")
                 if os.name == "posix":
                     if self.posix_detect_hh_dirs(site):
                         # data[1].set_text(dia_chooser.get_filename())
@@ -173,7 +173,7 @@ class GuiAutoImport(QWidget):
         if site == "PokerStars":
             directory = os.path.expanduser(defaults[site])
             for file in [file for file in os.listdir(directory) if file not in [".", ".."]]:
-                print(file)
+                log.debug(file)
         return False
 
     def startClicked(self):
@@ -199,7 +199,7 @@ class GuiAutoImport(QWidget):
                 self.doAutoImportBool = True
                 self.intervalEntry.setEnabled(False)
                 if self.pipe_to_hud is None:
-                    print("start hud- pipe_to_hud is none:")
+                    log.debug("start hud- pipe_to_hud is none:")
                     try:
                         if self.config.install_method == "exe":
                             command = "HUD_main.exe"
@@ -212,15 +212,15 @@ class GuiAutoImport(QWidget):
                             bs = 1
                         elif os.name == "nt":
                             path = to_raw(sys.path[0])
-                            print("start hud- path", path)
+                            log.debug(f"start hud - path: {path}")
                             path2 = os.getcwd()
-                            print("start hud- path2", path2)
+                            log.debug(f"start hud - path2: {path2}")
                             if win32console.GetConsoleWindow() == 0:
                                 command = 'pythonw "' + path + '\HUD_main.pyw" ' + self.settings["cl_options"]
-                                print("start hud-comand1", command)
+                                log.debug(f"start hud - command: {command}")
                             else:
                                 command = 'python "' + path + '\HUD_main.pyw" ' + self.settings["cl_options"]
-                                print("start hud-comand2", command)
+                                log.debug(f"start hud - command: {command}")
                             bs = 0
                         else:
                             base_path = sys._MEIPASS if getattr(sys, "frozen", False) else sys.path[0] or os.getcwd()
@@ -232,8 +232,8 @@ class GuiAutoImport(QWidget):
                             ] + str.split(self.settings["cl_options"], ".")
                             bs = 1
 
-                        print(("opening pipe to HUD"))
-                        print(f"Running {command.__repr__()}")
+                        log.info(("opening pipe to HUD"))
+                        log.debug(f"Running {command.__repr__()}")
                         if self.config.install_method == "exe" or (
                             os.name == "nt" and win32console.GetConsoleWindow() == 0
                         ):
@@ -281,7 +281,7 @@ class GuiAutoImport(QWidget):
             else:
                 if self.pipe_to_hud:
                     self.pipe_to_hud.terminate()
-                    print(self.pipe_to_hud.stdin, "\n")
+                    log.debug(f"pipe_to_hud stdin: {self.pipe_to_hud.stdin}")
                 self.pipe_to_hud = None
             self.intervalEntry.setEnabled(True)
 

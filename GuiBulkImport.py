@@ -87,7 +87,7 @@ class GuiBulkImport(QWidget):
 
             self.settings["global_lock"].release()
         else:
-            print(("bulk import aborted - global lock not available"))
+            log.warning(("bulk import aborted - global lock not available"))
 
     def get_vbox(self):
         """returns the vbox of this thread"""
