@@ -49,6 +49,9 @@ from PyQt5.QtWidgets import (
 from io import StringIO
 
 import GuiReplayer
+from loggingFpdb import get_logger
+
+log = get_logger("handviewer")
 
 
 class GuiHandViewer(QSplitter):
@@ -392,7 +395,7 @@ class GuiHandViewer(QSplitter):
 
         # Debug output to trace unexpected keys
         if abbr not in card_filter:
-            print(f"Unexpected key in card filter: {abbr}")
+            log.warning(f"Unexpected key in card filter: {abbr}")
 
         return card_filter.get(abbr, True)  # Default to True if key is not found
 
@@ -413,7 +416,7 @@ class GuiHandViewer(QSplitter):
         heroes = self.filters.getHeroes()
         h.hero = heroes.get(h.sitename, None)
         if h.hero is None:
-            print(f"No hero found for site {h.sitename}")
+            log.warning(f"No hero found for site {h.sitename}")
         return h
 
     def render_cards(self, cardstring):
