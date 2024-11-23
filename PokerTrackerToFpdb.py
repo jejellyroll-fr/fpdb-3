@@ -513,6 +513,11 @@ class PokerTracker(HandHistoryConverter):
         if self.re_Cancelled.search(hand.handText):
             raise FpdbHandPartial(("Hand '%s' was cancelled.") % hand.handid)
 
+    def readSummaryInfo(self, summaryInfoList):
+        log.info("enter method readSummaryInfo.")
+        log.debug("Method readSummaryInfo non implemented.")
+        return True
+
     def readButton(self, hand):
         m = self.re_Button.search(hand.handText)
         if m:

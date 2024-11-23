@@ -416,6 +416,11 @@ class SealsWithClubs(HandHistoryConverter):
                 cards = mucks.group("CARDS").split(" ")
                 hand.addShownCards(cards, mucks.group("PNAME"))
 
+    def readSummaryInfo(self, summaryInfoList):
+        log.info("enter method readSummaryInfo.")
+        log.debug("Method readSummaryInfo non implemented.")
+        return True
+
     def readCollectPot(self, hand):
         log.info("Reading collected pot")
         if self.re_Uncalled.search(hand.handText) is None:

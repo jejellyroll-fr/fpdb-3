@@ -1156,6 +1156,11 @@ class Winning(HandHistoryConverter):
                 # print "DEBUG: hand.addShownCards(%s, %s, %s, %s)" %(cards, m.group('PNAME'), shown, mucked)
                 hand.addShownCards(cards=cards, player=m.group("PNAME"), shown=shown, mucked=mucked, string=string)
 
+    def readSummaryInfo(self, summaryInfoList):
+        log.info("enter method readSummaryInfo.")
+        log.debug("Method readSummaryInfo non implemented.")
+        return True
+
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
         "Returns string to search in windows titles"

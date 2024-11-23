@@ -726,6 +726,11 @@ class BetOnline(HandHistoryConverter):
             else:
                 hand.rakes["pot"] = Decimal(self.clearMoneyString(m.group("POT")))
 
+    def readSummaryInfo(self, summaryInfoList):
+        log.info("enter method readSummaryInfo.")
+        log.debug("Method readSummaryInfo non implemented.")
+        return True
+
     def readShownCards(self, hand):
         for m in self.re_ShownCards.finditer(hand.handText):
             if m.group("CARDS") is not None:
