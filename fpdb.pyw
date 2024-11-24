@@ -28,6 +28,7 @@ import codecs
 import Options
 from functools import partial
 from L10n import set_locale_translation
+import logging  # Import the logging module
 from loggingFpdb import get_logger, set_default_logging
 
 from PyQt5.QtCore import QCoreApplication, QDate, Qt, QPoint
@@ -115,6 +116,7 @@ Configuration.set_logfile("fpdb-log.txt")
 # Obtention du logger configuré
 set_default_logging()
 log = get_logger("fpdb")
+log.setLevel(logging.INFO)
 
 try:
     assert not hasattr(sys, "frozen")  # We're surely not in a git repo if this fails
@@ -942,44 +944,45 @@ class fpdb(QMainWindow):
         helpMenu = mb.addMenu("Help")
         themeMenu = mb.addMenu("Themes")
 
-        # Create actions
-        def makeAction(name, callback, shortcut=None, tip=None):
-            action = QAction(name, self)
-            if shortcut:
-                action.setShortcut(shortcut)
-            if tip:
-                action.setToolTip(tip)
-            action.triggered.connect(callback)
-            return action
+        configMenu.addAction(self.makeAction("Site Settings", self.dia_site_preferences))
+        configMenu.addAction(self.makeAction("Seat Settings", self.dia_site_preferences_seat))
+        configMenu.addAction(self.makeAction("Hud Settings", self.dia_hud_preferences))
+        configMenu.addAction(
+            self.makeAction("Adv Preferences", self.dia_advanced_preferences, tip="Edit your preferences")
+        )
+        configMenu.addAction(self.makeAction("Import filters", self.dia_import_filters))
+        # Add the Toggle Debug Logging action
+        self.debug_logging_action = self.makeAction("Enable Debug Logging", self.toggle_debug_logging, checkable=True)
+        configMenu.addAction(self.debug_logging_action)
 
-        configMenu.addAction(makeAction("Site Settings", self.dia_site_preferences))
-        configMenu.addAction(makeAction("Seat Settings", self.dia_site_preferences_seat))
-        configMenu.addAction(makeAction("Hud Settings", self.dia_hud_preferences))
-        configMenu.addAction(makeAction("Adv Preferences", self.dia_advanced_preferences, tip="Edit your preferences"))
-        configMenu.addAction(makeAction("Import filters", self.dia_import_filters))
+        # Set the initial check state based on the current logging level
+        if log.getEffectiveLevel() <= logging.DEBUG:
+            self.debug_logging_action.setChecked(True)
+        else:
+            self.debug_logging_action.setChecked(False)
         configMenu.addSeparator()
-        configMenu.addAction(makeAction("Close Fpdb", self.quit, "Ctrl+Q", "Quit the Program"))
+        configMenu.addAction(self.makeAction("Close Fpdb", self.quit, "Ctrl+Q", "Quit the Program"))
 
-        importMenu.addAction(makeAction("Bulk Import", self.tab_bulk_import, "Ctrl+B"))
-        hudMenu.addAction(makeAction("HUD and Auto Import", self.tab_auto_import, "Ctrl+A"))
-        cashMenu.addAction(makeAction("Graphs", self.tabGraphViewer, "Ctrl+G"))
-        cashMenu.addAction(makeAction("Ring Player Stats", self.tab_ring_player_stats, "Ctrl+P"))
-        cashMenu.addAction(makeAction("Hand Viewer", self.tab_hand_viewer))
-        cashMenu.addAction(makeAction("Session Stats", self.tab_session_stats, "Ctrl+S"))
-        tournamentMenu.addAction(makeAction("Tourney Graphs", self.tabTourneyGraphViewer))
-        tournamentMenu.addAction(makeAction("Tourney Stats", self.tab_tourney_player_stats, "Ctrl+T"))
-        tournamentMenu.addAction(makeAction("Tourney Hand Viewer", self.tab_tourney_viewer_stats))
-        maintenanceMenu.addAction(makeAction("Statistics", self.dia_database_stats, "View Database Statistics"))
-        maintenanceMenu.addAction(makeAction("Create or Recreate Tables", self.dia_recreate_tables))
-        maintenanceMenu.addAction(makeAction("Rebuild HUD Cache", self.dia_recreate_hudcache))
-        maintenanceMenu.addAction(makeAction("Rebuild DB Indexes", self.dia_rebuild_indexes))
-        maintenanceMenu.addAction(makeAction("Dump Database to Textfile (takes ALOT of time)", self.dia_dump_db))
+        importMenu.addAction(self.makeAction("Bulk Import", self.tab_bulk_import, "Ctrl+B"))
+        hudMenu.addAction(self.makeAction("HUD and Auto Import", self.tab_auto_import, "Ctrl+A"))
+        cashMenu.addAction(self.makeAction("Graphs", self.tabGraphViewer, "Ctrl+G"))
+        cashMenu.addAction(self.makeAction("Ring Player Stats", self.tab_ring_player_stats, "Ctrl+P"))
+        cashMenu.addAction(self.makeAction("Hand Viewer", self.tab_hand_viewer))
+        cashMenu.addAction(self.makeAction("Session Stats", self.tab_session_stats, "Ctrl+S"))
+        tournamentMenu.addAction(self.makeAction("Tourney Graphs", self.tabTourneyGraphViewer))
+        tournamentMenu.addAction(self.makeAction("Tourney Stats", self.tab_tourney_player_stats, "Ctrl+T"))
+        tournamentMenu.addAction(self.makeAction("Tourney Hand Viewer", self.tab_tourney_viewer_stats))
+        maintenanceMenu.addAction(self.makeAction("Statistics", self.dia_database_stats, "View Database Statistics"))
+        maintenanceMenu.addAction(self.makeAction("Create or Recreate Tables", self.dia_recreate_tables))
+        maintenanceMenu.addAction(self.makeAction("Rebuild HUD Cache", self.dia_recreate_hudcache))
+        maintenanceMenu.addAction(self.makeAction("Rebuild DB Indexes", self.dia_rebuild_indexes))
+        maintenanceMenu.addAction(self.makeAction("Dump Database to Textfile (takes ALOT of time)", self.dia_dump_db))
 
         # toolsMenu.addAction(makeAction('PokerProTools', self.launch_ppt))
-        helpMenu.addAction(makeAction("Log Messages", self.dia_logs, "Log and Debug Messages"))
-        helpMenu.addAction(makeAction("Help Tab", self.tab_main_help))
+        helpMenu.addAction(self.makeAction("Log Messages", self.dia_logs, "Log and Debug Messages"))
+        helpMenu.addAction(self.makeAction("Help Tab", self.tab_main_help))
         helpMenu.addSeparator()
-        helpMenu.addAction(makeAction("Infos", self.dia_about, "About the program"))
+        helpMenu.addAction(self.makeAction("Infos", self.dia_about, "About the program"))
 
         themes = [
             "dark_purple.xml",
@@ -1000,6 +1003,31 @@ class fpdb(QMainWindow):
 
         for theme in themes:
             themeMenu.addAction(QAction(theme, self, triggered=partial(self.change_theme, theme)))
+
+    def makeAction(self, name, callback, shortcut=None, tip=None, checkable=False):
+        action = QAction(name, self)
+        if shortcut:
+            action.setShortcut(shortcut)
+        if tip:
+            action.setToolTip(tip)
+        if checkable:
+            action.setCheckable(True)
+            action.toggled.connect(callback)
+        else:
+            action.triggered.connect(callback)
+        return action
+
+    def toggle_debug_logging(self, checked):
+        if checked:
+            # Activer le logging debug pour le logger racine
+            logging.getLogger().setLevel(logging.DEBUG)
+            self.statusBar().showMessage("Debug logging enabled")
+            log.debug("logging debug activated.")
+        else:
+            # Désactiver le logging debug (revenir au niveau INFO)
+            logging.getLogger().setLevel(logging.INFO)
+            self.statusBar().showMessage("Debug logging disabled")
+            log.info("logging debug deactivated.")
 
     def load_profile(self, create_db=False):
         """Loads profile from the provided path name.
@@ -1383,6 +1411,12 @@ class fpdb(QMainWindow):
         self.closeq = queue.Queue(20)
 
         self.oldPos = self.pos()
+
+        # Initialize the debug_logging_action to None; it will be set in createMenuBar
+        self.debug_logging_action = None
+
+        # Set default logging level
+        log.setLevel(logging.INFO)  # Set default level to INFO
 
         if options.initialRun:
             self.display_config_created_dialogue = True

@@ -1342,9 +1342,11 @@ class HoldemOmahaHand(Hand):
             self.totalPot()  # finalise it (total the pot)
             log.debug(f"self.totalpot {self.totalpot}")
             if self.gametype["type"] == "ring":
-                hhc.getRake(self)
+                log.debug(f"self.rake {self.rake}")
+                if self.rake is None:
+                    hhc.getRake(self)
             else:
-                self.rake = 0  # define rake at 0 for mtt and sng
+                self.rake = 0
             if self.maxseats is None:
                 self.maxseats = hhc.guessMaxSeats(self)
             self.sittingOut()

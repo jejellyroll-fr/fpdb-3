@@ -17,11 +17,11 @@ def enable_debug_logging():
 
 
 class FpdbLogFormatter(colorlog.ColoredFormatter):
-    """Formateur personnalisé pour les logs FPDB"""
+    """Custom formatter for FPDB logs."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.var_color = "\033[36m"  # Cyan pour les variables
+        self.var_color = "\033[36m"  # Cyan for variables
         self.reset_color = "\033[0m"
 
     def format(self, record):
@@ -42,23 +42,24 @@ class FpdbLogFormatter(colorlog.ColoredFormatter):
 
 
 def setup_logging():
-    """Configure le système de logging"""
+    """Configure the logging system."""
     log_colors = {"DEBUG": "green", "INFO": "blue", "WARNING": "yellow", "ERROR": "red"}
     log_format = "%(log_color)s%(asctime)s [%(name)s:%(module)s:%(funcName)s] [%(levelname)s] %(message)s%(reset)s"
     date_format = "%Y-%m-%d %H:%M:%S"
     formatter = FpdbLogFormatter(fmt=log_format, datefmt=date_format, log_colors=log_colors)
 
-    # Handler console
+    # Console handler
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
     console_handler.setLevel(logging.DEBUG)
 
-    # Logger racine
+    # Root logger
     logger = logging.getLogger()
     logger.setLevel(logging.WARNING)  # Set default level to WARNING
     logger.addHandler(console_handler)
+    logger.propagate = True
 
-    # Handler fichier
+    # File handler
     log_dir = os.path.join(os.path.dirname(__file__), "logs")
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, "fpdb-log.txt")
@@ -72,34 +73,44 @@ def setup_logging():
 
 # Update specific logger's level dynamically
 def update_log_level(logger_name: str, level: int):
-    """Met à jour le niveau de logging pour un logger spécifique"""
+    """Updates the logging level for a specific logger."""
     logger = logging.getLogger(logger_name)
     logger.setLevel(level)
 
 
 class FpdbLogger:
-    """Logger personnalisé pour FPDB"""
+    """Custom logger for FPDB."""
 
     def __init__(self, name: str):
         self.logger = logging.getLogger(name)
 
-    def debug(self, msg: str):
+    def debug(self, msg: str, *args, **kwargs):
         stacklevel = self._get_stacklevel()
-        self.logger.debug(msg, stacklevel=stacklevel)
+        self.logger.debug(msg, *args, stacklevel=stacklevel, **kwargs)
 
-    def info(self, msg: str):
+    def info(self, msg: str, *args, **kwargs):
         stacklevel = self._get_stacklevel()
-        self.logger.info(msg, stacklevel=stacklevel)
+        self.logger.info(msg, *args, stacklevel=stacklevel, **kwargs)
 
-    def warning(self, msg: str):
+    def warning(self, msg: str, *args, **kwargs):
         stacklevel = self._get_stacklevel()
-        self.logger.warning(msg, stacklevel=stacklevel)
+        self.logger.warning(msg, *args, stacklevel=stacklevel, **kwargs)
 
-    def error(self, msg: str):
+    def error(self, msg: str, *args, **kwargs):
         stacklevel = self._get_stacklevel()
-        self.logger.error(msg, stacklevel=stacklevel)
+        self.logger.error(msg, *args, stacklevel=stacklevel, **kwargs)
+
+    def setLevel(self, level):
+        """Sets the logging level for this logger."""
+        self.logger.setLevel(level)
+
+    def getEffectiveLevel(self):
+        """Gets the effective logging level for this logger."""
+        return self.logger.getEffectiveLevel()
 
     def _get_stacklevel(self):
+        # Calculate the stack level to pass to the underlying logger
+        # to get accurate line numbers and function names in the logs
         frame = inspect.currentframe()
         stacklevel = 1
         while frame:
@@ -113,7 +124,7 @@ class FpdbLogger:
 
 
 def get_logger(name: str) -> FpdbLogger:
-    """Retourne un logger FPDB configuré"""
+    """Returns a configured FPDB logger."""
     return FpdbLogger(name)
 
 
