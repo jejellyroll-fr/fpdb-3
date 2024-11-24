@@ -65,7 +65,7 @@ class Table(Table_Window):
         wins = xconn.core.GetProperty(False, root, nclatom, winatom, 0, (2**32) - 1).reply().value.to_atoms()
         for win in wins:
             w_title = xconn.core.GetProperty(False, win, wnameatom, utf8atom, 0, (2**32) - 1).reply().value.to_string()
-            print("w_title:", w_title)
+            log.debug(f"Window title: {w_title}")
             # escaped_search_string = re.escape(self.search_string)
             # if re.search(escaped_search_string, w_title, re.I):
             if re.search(self.search_string, w_title, re.I):
@@ -74,9 +74,9 @@ class Table(Table_Window):
                 if self.check_bad_words(title):
                     continue
                 self.number = win
-                print("self.number:", self.number)
+                log.debug(f"self.number: {self.number}")
                 self.title = title
-                print("self.title:", self.title)
+                log.debug(f"self.title: {self.title}")
                 break
 
         if self.number is None:
