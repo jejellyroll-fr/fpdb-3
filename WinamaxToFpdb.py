@@ -496,7 +496,8 @@ class Winamax(HandHistoryConverter):
                     if newcards := [c for c in found.group("NEWCARDS").split(" ") if c != "X"]:
                         hand.hero = found.group("PNAME")
 
-                        print(f"DEBUG: {hand.handid} addHoleCards({street}, {hand.hero}, {newcards})")
+                        log.debug(f"DEBUG: {hand.handid} addHoleCards({street}, {hand.hero}, {newcards})")
+
                         hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
                         log.debug(f"Hero cards {hand.hero}: {newcards}")
 
