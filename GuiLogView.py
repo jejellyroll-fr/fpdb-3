@@ -17,11 +17,7 @@
 
 from __future__ import division
 
-# import L10n
-# _ = L10n.get_translation()
-
-
-from PyQt5.QtGui import QStandardItem, QStandardItemModel
+from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon, QColor
 from PyQt5.QtWidgets import (
     QApplication,
     QPushButton,
@@ -31,7 +27,13 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
     QCheckBox,
+    QHeaderView,
+    QStyledItemDelegate,
+    QStyle,
+    QLineEdit,
+    QLabel,
 )
+from PyQt5.QtCore import Qt, QRect, QPoint, QSize
 
 import os
 from loggingFpdb import get_logger
@@ -41,80 +43,164 @@ import Configuration
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
-# logging has been set up in fpdb.py or HUD_main.py, use their settings:
+
 log = get_logger("logview")
 
-MAX_LINES = 100000  # max lines to display in window
-EST_CHARS_PER_LINE = 150  # used to guesstimate number of lines in log file
-# label, filename, start value, path
+MAX_LINES = 100000
+EST_CHARS_PER_LINE = 150
+
+# Only include "HUD Log" and "Fpdb Log" in the radio box
 LOGFILES = [
-    ["Fpdb Errors", "fpdb-errors.txt", False, "log"],
     ["Fpdb Log", "fpdb-log.txt", True, "log"],
-    ["HUD Errors", "HUD-errors.txt", False, "log"],
     ["HUD Log", "HUD-log.txt", False, "log"],
-    ["fpdb.exe log", "fpdb.exe.log", False, "pyfpdb"],
-    ["HUD_main.exe Log", "HUD_main.exe.log ", False, "pyfpdb"],
 ]
+
+
+class LogItemDelegate(QStyledItemDelegate):
+    def __init__(self, parent=None):
+        super(LogItemDelegate, self).__init__(parent)
+
+    def paint(self, painter, option, index):
+        # Get the column
+        column = index.column()
+
+        # Get the log level from the model
+        level_index = index.sibling(index.row(), 0)
+        level = index.model().data(level_index, Qt.DisplayRole)
+
+        # Get the icon from the level column
+        icon = index.model().data(level_index, Qt.DecorationRole)
+
+        # Get the text for the current cell
+        text = index.model().data(index, Qt.DisplayRole)
+
+        # Define the color based on the log level
+        if level == "DEBUG":
+            color = QColor("green")
+        elif level == "INFO":
+            color = QColor("white")
+        elif level == "WARNING":
+            color = QColor("orange")
+        elif level == "ERROR":
+            color = QColor("red")
+        else:
+            color = option.palette.color(QPalette.Text)
+
+        painter.save()
+
+        # Draw selection background if item is selected
+        if option.state & QStyle.State_Selected:
+            painter.fillRect(option.rect, option.palette.highlight())
+
+        # For the Level column, draw the icon and text
+        if column == 0:
+            # Set up the icon and text rectangles
+            iconSize = QSize(16, 16)  # Or get from icon.actualSize()
+
+            iconRect = QRect(option.rect)
+            iconRect.setWidth(iconSize.width())
+            iconRect.setHeight(iconSize.height())
+            iconRect.moveTop(option.rect.top() + (option.rect.height() - iconSize.height()) // 2)
+            iconRect.moveLeft(option.rect.left() + 5)
+
+            textRect = QRect(option.rect)
+            textRect.setLeft(iconRect.right() + 5)
+
+            # Draw the icon
+            if icon:
+                icon.paint(painter, iconRect, Qt.AlignCenter)
+
+            # Draw the text
+            painter.setPen(color)
+            painter.drawText(textRect, Qt.AlignLeft | Qt.AlignVCenter, text)
+        else:
+            # For other columns, draw the text
+            painter.setPen(color)
+            painter.drawText(option.rect.adjusted(5, 0, -5, 0), Qt.AlignLeft | Qt.AlignVCenter, text)
+
+        painter.restore()
 
 
 class GuiLogView(QWidget):
     def __init__(self, config, mainwin, closeq):
-        QWidget.__init__(self)
+        super().__init__()
         self.config = config
         self.main_window = mainwin
         self.closeq = closeq
 
-        self.logfile = os.path.join(self.config.dir_log, LOGFILES[1][1])
+        # Set default logfile to "Fpdb Log"
+        self.logfile = os.path.join(self.config.dir_log, LOGFILES[0][1])
 
         self.resize(700, 400)
+        self.setWindowTitle("Log Viewer")
 
         self.setLayout(QVBoxLayout())
 
-        self.liststore = QStandardItemModel(0, 4)
+        # Adjusted the number of columns to 5 (removed "Functionality")
+        self.liststore = QStandardItemModel(0, 5)
         self.listview = QTableView()
         self.listview.setModel(self.liststore)
         self.listview.setSelectionBehavior(QTableView.SelectRows)
         self.listview.setShowGrid(False)
         self.listview.verticalHeader().hide()
+        self.listview.setSortingEnabled(True)
+        self.listview.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+        # Apply the custom delegate
+        self.listview.setItemDelegate(LogItemDelegate(self.listview))
+
         self.layout().addWidget(self.listview)
 
+        # Radio buttons for selecting log file
         hb1 = QHBoxLayout()
         for logf in LOGFILES:
             rb = QRadioButton(logf[0], self)
             rb.setChecked(logf[2])
             rb.clicked.connect(partial(self.__set_logfile, filename=logf[0]))
             hb1.addWidget(rb)
+        self.layout().addLayout(hb1)
 
-        hb2 = QHBoxLayout()
-        refreshbutton = QPushButton("Refresh")
-        refreshbutton.clicked.connect(self.refresh)
-        hb2.addWidget(refreshbutton)
-
-        copybutton = QPushButton("Selection Copy to Clipboard")
-        copybutton.clicked.connect(self.copy_to_clipboard)
-        hb2.addWidget(copybutton)
-
-        # Add checkboxes for log levels
+        # Checkboxes for log levels
+        hb3 = QHBoxLayout()
         self.filter_debug = QCheckBox("DEBUG", self)
         self.filter_info = QCheckBox("INFO", self)
         self.filter_warning = QCheckBox("WARNING", self)
         self.filter_error = QCheckBox("ERROR", self)
 
-        # Connect checkboxes to the filter method
+        # Set all log levels to checked by default
+        self.filter_debug.setChecked(True)
+        self.filter_info.setChecked(True)
+        self.filter_warning.setChecked(True)
+        self.filter_error.setChecked(True)
+
         self.filter_debug.stateChanged.connect(self.filter_log)
         self.filter_info.stateChanged.connect(self.filter_log)
         self.filter_warning.stateChanged.connect(self.filter_log)
         self.filter_error.stateChanged.connect(self.filter_log)
 
-        # Add checkboxes to layout
-        hb3 = QHBoxLayout()
         hb3.addWidget(self.filter_debug)
         hb3.addWidget(self.filter_info)
         hb3.addWidget(self.filter_warning)
         hb3.addWidget(self.filter_error)
         self.layout().addLayout(hb3)
 
-        self.layout().addLayout(hb1)
+        # Add a second filter by "Module"
+        hb4 = QHBoxLayout()
+        hb4.addWidget(QLabel("Filter by Module:"))
+        self.module_filter_edit = QLineEdit()
+        self.module_filter_edit.textChanged.connect(self.filter_log)
+        hb4.addWidget(self.module_filter_edit)
+        self.layout().addLayout(hb4)
+
+        # Buttons for refreshing and copying
+        hb2 = QHBoxLayout()
+        refreshbutton = QPushButton("Refresh")
+        refreshbutton.clicked.connect(self.refresh)
+        hb2.addWidget(refreshbutton)
+
+        copybutton = QPushButton("Copy selection to clipboard")
+        copybutton.clicked.connect(self.copy_to_clipboard)
+        hb2.addWidget(copybutton)
         self.layout().addLayout(hb2)
 
         self.loadLog()
@@ -131,17 +217,16 @@ class GuiLogView(QWidget):
         if self.filter_error.isChecked():
             selected_levels.append("ERROR")
 
-        self.loadLog(selected_levels)
+        module_filter_text = self.module_filter_edit.text()
+        self.loadLog(selected_levels, module_filter_text)
 
-    def copy_to_clipboard(self, checkState):
+    def copy_to_clipboard(self):
         text = ""
         for row, indexes in groupby(self.listview.selectedIndexes(), lambda i: i.row()):
             text += " ".join([i.data() for i in indexes]) + "\n"
-        # print(text)
         QApplication.clipboard().setText(text)
 
     def __set_logfile(self, checkState, filename):
-        # print "w is", w, "file is", file, "active is", w.get_active()
         if checkState:
             for logf in LOGFILES:
                 if logf[0] == filename:
@@ -149,21 +234,18 @@ class GuiLogView(QWidget):
                         self.logfile = os.path.join(self.config.pyfpdb_path, logf[1])
                     else:
                         self.logfile = os.path.join(self.config.dir_log, logf[1])
-            self.refresh(checkState)  # params are not used
+            self.refresh()
 
     def dialog_response_cb(self, dialog, response_id):
-        # this is called whether close button is pressed or window is closed
         self.closeq.put(self.__class__)
         dialog.destroy()
 
     def get_dialog(self):
         return self.dia
 
-    def loadLog(self, selected_levels=None):
+    def loadLog(self, selected_levels=None, module_filter_text=""):
         self.liststore.clear()
-        self.liststore.setHorizontalHeaderLabels(
-            ["Date/Time", "Functionality", "Level", "Module", "Function", "Message"]
-        )
+        self.liststore.setHorizontalHeaderLabels(["Level", "Date/Time", "Module", "Function", "Message"])
 
         if os.path.exists(self.logfile):
             with open(self.logfile, "r") as log_file:
@@ -172,28 +254,53 @@ class GuiLogView(QWidget):
                     if len(parts) == 6:
                         date_time, functionality, level, module, function, message = parts
 
-                        # Filter log entries based on selected log levels
-                        if selected_levels is None or level in selected_levels:
-                            tablerow = [date_time, functionality, level, module, function, message]
-                            tablerow = [QStandardItem(i) for i in tablerow]
-                            for item in tablerow:
+                        # Apply filters for log level and module
+                        if (selected_levels is None or level in selected_levels) and (
+                            module_filter_text == "" or module_filter_text.lower() in module.lower()
+                        ):
+                            level_item = QStandardItem(level)
+
+                            style = QApplication.style()
+                            icon = None
+                            if level == "DEBUG":
+                                icon = style.standardIcon(QStyle.SP_ArrowRight)
+                            elif level == "INFO":
+                                icon = style.standardIcon(QStyle.SP_MessageBoxInformation)
+                            elif level == "WARNING":
+                                icon = style.standardIcon(QStyle.SP_MessageBoxWarning)
+                            elif level == "ERROR":
+                                icon = style.standardIcon(QStyle.SP_MessageBoxCritical)
+                            if icon:
+                                level_item.setIcon(icon)
+                            level_item.setEditable(False)
+
+                            date_item = QStandardItem(date_time)
+                            module_item = QStandardItem(module)
+                            function_item = QStandardItem(function)
+                            message_item = QStandardItem(message)
+
+                            # Make items non-editable
+                            for item in [date_item, module_item, function_item, message_item]:
                                 item.setEditable(False)
-                            self.liststore.appendRow(tablerow)
+
+                            self.liststore.appendRow([level_item, date_item, module_item, function_item, message_item])
 
         self.listview.resizeColumnsToContents()
 
-    def refresh(self, checkState):
-        self.loadLog()
+    def refresh(self):
+        self.filter_log()
 
 
 if __name__ == "__main__":
     config = Configuration.Config()
 
-    from PyQt5.QtWidgets import QApplication, QMainWindow
-
     app = QApplication([])
-    main_window = QMainWindow()
+    main_window = QWidget()
+    layout = QVBoxLayout()
+    main_window.setLayout(layout)
     i = GuiLogView(config, main_window, None)
-    main_window.show()
+    layout.addWidget(i)
     main_window.resize(1400, 800)
+    main_window.setWindowTitle("Log Viewer")
+    main_window.show()
     app.exec_()
