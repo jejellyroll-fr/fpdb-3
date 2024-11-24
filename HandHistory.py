@@ -28,6 +28,10 @@ from __future__ import print_function
 import xml.dom.minidom
 from xml.dom.minidom import Node
 
+from loggingFpdb import get_logger
+
+log = get_logger("handhistory")
+
 
 class HandHistory(object):
     def __init__(self, xml_string, elements=("ALL")):
@@ -105,7 +109,7 @@ class Award(object):
 
 class Game(object):
     def __init__(self, node):
-        print(node)
+        # print(node)
         self.tags = {}
         for tag in (
             ("GAME_NAME", "game_name"),
@@ -117,7 +121,7 @@ class Game(object):
             L = node.getElementsByTagName(tag[0])
             if not L:
                 continue
-            print(L)
+            # print(L)
             for node2 in L:
                 title = ""
                 for node3 in node2.childNodes:
