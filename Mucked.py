@@ -188,7 +188,7 @@ class Stud_cards(object):
     def update_data(self, new_hand_id, db_connection):
         self.tips = []
         action = db_connection.get_action_from_hand(new_hand_id)
-        print(action)
+        # print(action)
         for street in action:
             temp = ""
             for act in street:
