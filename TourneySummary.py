@@ -337,7 +337,8 @@ class TourneySummary(object):
     # end def addPlayer
 
     def writeSummary(self, fh=sys.__stdout__):
-        print("Override me", file=fh)
+        log.warning("writeSummary method needs to be overridden")
+        fh.write("Override me\n")
 
     def printSummary(self):
         self.writeSummary(sys.stdout)
