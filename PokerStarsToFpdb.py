@@ -266,7 +266,7 @@ class PokerStars(HandHistoryConverter):
             re.MULTILINE | re.VERBOSE,
         )
     except Exception as e:
-        print(f"Error compiling re_Action: {e}")
+        log.error(f"Error compiling re_Action: {e}")
 
     re_ShowdownAction = re.compile(
         r"%s: (shows|mucks|mucked|showed) \[(?P<CARDS>.*)\]" % substitutions["PLYR"], re.MULTILINE
@@ -728,9 +728,9 @@ class PokerStars(HandHistoryConverter):
                     hand.handText,
                     re.DOTALL,
                 )
-        print("type", type(m), m)
+        log.debug(f"type: {type(m)}, value: {m}")
         mg = m.groupdict()
-        print("type mg", type(mg), mg)
+        log.debug(f"type mg: {type(mg)}, value: {mg}")
         hand.addStreets(m)
 
     def readCommunityCards(self, hand, street):  # street has been matched by markStreets, so exists in this hand
@@ -805,10 +805,11 @@ class PokerStars(HandHistoryConverter):
                         hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
 
         for street, text in list(hand.streets.items()):
-            print("text", text)
-            print(list(hand.streets.items()))
+            log.debug(f"text: {text}")
+            log.debug(f"hand.streets items: {list(hand.streets.items())}")
             if not text or street in ("PREFLOP", "DEAL"):
                 continue  # already done these
+
             m = self.re_HeroCards.finditer(hand.streets[street])
             for found in m:
                 player = found.group("PNAME")
@@ -992,12 +993,12 @@ class PokerStars(HandHistoryConverter):
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
         "Returns string to search in windows titles"
         regex = re.escape(str(table_name))
-        print("regex cash ", regex)
+        log.debug(f"Regex for cash game: {regex}")
+
         if type == "tour":
             regex = re.escape(str(tournament)) + " (Table|Tisch) " + re.escape(str(table_number))
-            print("regex tour: ", regex)
-            log.info(
-                f"Stars.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'"
-            )
-            log.info(f"Stars.getTableTitleRe: returns: '{regex}'")
+            log.debug(f"Regex for tournament: {regex}")
+            log.info(f"Stars table_name='{table_name}', tournament='{tournament}', table_number='{table_number}'")
+            log.info(f"Stars returns: '{regex}'")
+
         return regex
