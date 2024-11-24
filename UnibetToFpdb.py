@@ -322,7 +322,7 @@ class Unibet(HandHistoryConverter):
 
             # info['limitType'] = self.limits[mg['LIMIT']]
         if "GAME" in mg:
-            print(mg["GAME"])
+            log.debug(f"Game type detected: {mg['GAME']}")
             if mg["GAME"] == "No Limit Hold'Em Banzai":
                 info["base"] = "hold"
                 info["category"] = "holdem"
@@ -436,7 +436,7 @@ class Unibet(HandHistoryConverter):
                         datetimestr1 = str(a.group("H")) + ":" + str(a.group("MIN")) + ":" + str(a.group("S"))
                         datetimestr2 = str(a.group("Y")) + "/" + str(a.group("M")) + "/" + str(a.group("D"))
                         datetimestr = datetimestr2 + " " + datetimestr1
-                        print("datetimestr", datetimestr)
+                        # print("datetimestr", datetimestr)
                         # tz = a.group('TZ')  # just assume ET??
                         # print ("   tz = ", tz, " datetime =", datetimestr)
                     hand.startTime = datetime.datetime.strptime(
@@ -450,10 +450,11 @@ class Unibet(HandHistoryConverter):
                 hand.tourNo = info[key]
             if key == "BUYIN":
                 if hand.tourNo is not None:
-                    print("DEBUG: info['BUYIN']: %s" % info["BUYIN"])
-                    print("DEBUG: info['BIAMT']: %s" % info["BIAMT"])
-                    print("DEBUG: info['BIRAKE']: %s" % info["BIRAKE"])
-                    print("DEBUG: info['BOUNTY']: %s" % info["BOUNTY"])
+                    log.debug(f"info['BUYIN']: {info['BUYIN']}")
+                    log.debug(f"info['BIAMT']: {info['BIAMT']}")
+                    log.debug(f"info['BIRAKE']: {info['BIRAKE']}")
+                    log.debug(f"info['BOUNTY']: {info['BOUNTY']}")
+
                     if info[key].strip() == "Freeroll":
                         hand.buyin = 0
                         hand.fee = 0
@@ -649,9 +650,10 @@ class Unibet(HandHistoryConverter):
         #    we need to grab hero's cards
         for street in ("PREFLOP", "DEAL"):
             if street in hand.streets.keys():
-                print(street)
+                log.debug(f"Processing street: {street}")
                 m = self.re_HeroCards.finditer(hand.streets[street])
-                print(m)
+                log.debug(f"Match object for street {street}: {m}")
+
                 for found in m:
                     #                    if m == None:
                     #                        hand.involved = False
