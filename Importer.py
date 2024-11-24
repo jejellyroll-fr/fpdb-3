@@ -370,7 +370,8 @@ class Importer(object):
         if fpdbfile.ftype == "both" and fpdbfile.path not in self.updatedsize:
             self._import_summary_file(fpdbfile)
         #    pass
-        print("DEBUG: _import_summary_file.ttime: %.3f %s" % (ttime, fpdbfile.ftype))
+        log.debug(f"_import_summary_file.ttime: {ttime:.3f} {fpdbfile.ftype}")
+
         return (stored, duplicates, partial, skipped, errors, ttime)
 
     def calculate_auto2(self, db, scale, increment):
@@ -423,11 +424,12 @@ class Importer(object):
                         try:
                             if not os.path.isdir(f):
                                 self.caller.addText("\n" + os.path.basename(f))
-                                print("os.path.basename", os.path.basename(f))
-                                print("self.caller:", self.caller)
-                                print(os.path.basename(f))
+                                log.debug(f"os.path.basename: {os.path.basename(f)}")
+                                log.debug(f"self.caller: {self.caller}")
+                                log.debug(os.path.basename(f))
                         except KeyError:
                             log.error(f"File '{f}' seems to have disappeared")
+
                         (stored, duplicates, partial, skipped, errors, ttime) = self._import_despatch(self.filelist[f])
                         self.logImport(
                             "auto", f, stored, duplicates, partial, skipped, errors, ttime, self.filelist[f].fileId
@@ -439,9 +441,9 @@ class Importer(object):
                                     " %d stored, %d duplicates, %d partial, %d skipped, %d errors (time = %f)"
                                     % (stored, duplicates, partial, skipped, errors, ttime)
                                 )
-                                print("self.caller2:", self.caller)
+                                log.debug(f"self.caller2: {self.caller}")
                         except KeyError:  # TODO: Again, what error happens here? fix when we find out ..
-                            pass
+                            log.error(f"KeyError encountered while processing file: {f}")
                         self.updatedsize[f] = stat_info.st_size
                         self.updatedtime[f] = time()
                 else:
@@ -622,6 +624,7 @@ class Importer(object):
                     f"Found: '{fpdbfile.path}' with 0 characters... skipping"
                 )  # Fixed the typo (fpbdfile -> fpdbfile)
                 return (0, 0, 0, 0, 1, time())  # File had 0 characters
+
             ####Lock Placeholder####
             for j, summaryText in enumerate(summaryTexts, start=1):
                 try:
@@ -641,10 +644,13 @@ class Importer(object):
                     log.error(f"Summary import parse error in file: {fpdbfile.path}")
                     errors += 1
                 if j != 1:
-                    print(f"Finished importing {j}/{len(summaryTexts)} tournament summaries")
+                    log.info(f"Finished importing {j}/{len(summaryTexts)} tournament summaries")
                 stored = j
             ####Lock Placeholder####
         ttime = time() - ttime
+        log.debug(
+            f"Import summary completed: {stored} stored, {duplicates} duplicates, {partial} partial, {skipped} skipped, {errors} errors in {ttime:.3f} seconds"
+        )
         return (stored - errors - partial, duplicates, partial, skipped, errors, ttime)
 
     def progressNotify(self):
