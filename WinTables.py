@@ -110,7 +110,7 @@ class Table(Table_Window):
 
             except IOError as e:
                 if "closed file" in str(e):
-                    print(f"Warning: Logging to a closed file for hwnd {hwnd}. Skipping this log entry.")
+                    log.warning(f"Logging to a closed file for hwnd {hwnd}. Skipping this log entry.")
                 else:
                     log.error(f"IOError for hwnd {hwnd}: {e}")
             except Exception as e:
