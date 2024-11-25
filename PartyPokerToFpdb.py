@@ -321,6 +321,15 @@ class PartyPoker(HandHistoryConverter):
 
         self.last_bet = {}
         self.player_bets = {}
+        self.playerMap = {}  # Initialize playerMap here
+
+        # Define and initialize regex patterns
+        self.re_Action = re.compile(
+            r"(?P<PNAME>.+?)\s(?P<ATYPE>bets|checks|raises|completes|bring-ins|calls|folds|is\sall-In|double\sbets)"
+            r"(?:\s*[\[\(\)\]]?\s?(€|$)?(?P<BET>[.,\d]+)\s*(EUR|USD)?\s*[\]\)]?)?"
+            r"(?:\sto\s[.,\d]+)?\.?\s*$",
+            re.MULTILINE,
+        )
 
         # Initialize database connection if needed
         if not hasattr(self, "db"):
@@ -855,38 +864,77 @@ class PartyPoker(HandHistoryConverter):
 
     def readPlayerStacks(self, hand):
         log.debug(f"Starting player stacks read hand_id: {hand.handid}, game_type: {hand.gametype['type']}")
+        self.playerMap = {}  # Initialize playerMap
 
-        # Initialize variables
-        maxKnownStack = Decimal("0")
-        zeroStackPlayers = []
-        self.playerMap = {}
+        seat_info_list = []
+        placeholder_seats = []
+        placeholder_detected = False
+        hero_seat_info = None
 
-        # Process each player info
+        # Collect seat information and identify placeholders
         for match in self.re_PlayerInfo.finditer(hand.handText):
             pname = match.group("PNAME").strip()
             cash = self.clearMoneyString(match.group("CASH"))
             seat = int(match.group("SEAT"))
 
-            log.debug(f"Processing player info player: {pname}, stack: {cash}, seat: {seat}")
+            if pname == hand.hero:
+                hero_seat_info = (seat, pname, cash)
+                self.playerMap[pname] = pname
+            elif pname.startswith("Player"):
+                placeholder_seats.append((seat, cash))
+                placeholder_detected = True
+            else:
+                seat_info_list.append((seat, pname, cash))
+                self.playerMap[pname] = pname
 
-            # Handle emailed hand player names
-            if hand.emailedHand:
-                self._processEmailedPlayerName(hand, match, pname)
+        if placeholder_detected:
+            log.debug("Placeholder names detected in seat list. Replacing with real names from actions.")
 
-            # Add player based on stack size
-            if Decimal(cash) > 0:
-                maxKnownStack = max(Decimal(cash), maxKnownStack)
+            # Collect real player names from the actions
+            real_player_names = []
+            for action in self.re_Action.finditer(hand.handText):
+                pname = action.group("PNAME")
+                if pname != hand.hero and pname not in real_player_names:
+                    real_player_names.append(pname)
+
+            # Check if the number of real player names matches the number of placeholders
+            if len(real_player_names) == len(placeholder_seats):
+                # Assign real player names to placeholder seats in order
+                for (seat, cash), pname in zip(placeholder_seats, real_player_names):
+                    hand.addPlayer(seat, pname, cash)
+                    log.debug(f"Assigned real name to seat player: {pname}, seat: {seat}, stack: {cash}")
+                    self.playerMap[pname] = pname
+            else:
+                # If mismatch, assign seats arbitrarily
+                log.warning(
+                    "Number of real player names does not match number of placeholder seats. Assigning seats arbitrarily."
+                )
+                for seat_info, pname in zip(placeholder_seats, real_player_names):
+                    seat, cash = seat_info
+                    hand.addPlayer(seat, pname, cash)
+                    log.debug(f"Assigned real name to seat arbitrarily player: {pname}, seat: {seat}, stack: {cash}")
+                    self.playerMap[pname] = pname
+
+            # Add any remaining real player names without seats
+            if len(real_player_names) > len(placeholder_seats):
+                for pname in real_player_names[len(placeholder_seats) :]:
+                    seat = self._findFirstEmptySeat(hand, 1)
+                    hand.addPlayer(seat, pname, "0")
+                    log.debug(f"Added extra player without seat info player: {pname}, seat: {seat}, stack: Unknown")
+                    self.playerMap[pname] = pname
+        else:
+            # No placeholders detected, process normally
+            for seat, pname, cash in seat_info_list:
                 hand.addPlayer(seat, pname, cash)
                 log.debug(f"Added player with stack player: {pname}, seat: {seat}, stack: {cash}")
-            else:
-                zeroStackPlayers.append([seat, pname, cash])
-                log.debug(f"Found zero stack player player: {pname}, seat: {seat}")
 
-        # Process ring game specifics
-        if hand.gametype["type"] == "ring":
-            self._processRingGame(hand, maxKnownStack, zeroStackPlayers)
+        # Add the hero to the player list
+        if hero_seat_info:
+            seat, pname, cash = hero_seat_info
+            hand.addPlayer(seat, pname, cash)
+            log.debug(f"Added hero player: {pname}, seat: {seat}, stack: {cash}")
 
-        log.debug(f"Completed player stacks read total_players: {len(hand.players)}, max_stack: {str(maxKnownStack)}")
+        log.debug(f"Completed player stacks read total_players: {len(hand.players)}")
 
     def _processEmailedPlayerName(self, hand, match, pname):
         """Handle player names in emailed hands"""
@@ -1207,20 +1255,22 @@ class PartyPoker(HandHistoryConverter):
     def readAction(self, hand, street):
         log.debug(f"Entering readAction method - method: PartyPoker:readAction, street: {street}")
 
+        # Iterate over each action in the street
         m = self.re_Action.finditer(hand.streets[street])
         for action in m:
-            # acts = action.groupdict()
             playerName = action.group("PNAME")
 
             if ":" in playerName:
-                continue  # captures chat
+                continue  # Skip chat messages
 
+            # Use the mapped player name if available
             if self.playerMap.get(playerName):
                 playerName = self.playerMap.get(playerName)
 
             amount = self.clearMoneyString(action.group("BET")) if action.group("BET") else None
             actionType = action.group("ATYPE")
 
+            # Handle different action types
             if actionType == "folds":
                 hand.addFold(street, playerName)
                 log.debug(f"Player folded - method: PartyPoker:readAction, player: {playerName}")
@@ -1234,19 +1284,8 @@ class PartyPoker(HandHistoryConverter):
                 log.debug(f"Player called - method: PartyPoker:readAction, player: {playerName}, amount: {amount}")
 
             elif actionType == "raises":
-                if street == "PREFLOP" and playerName in [
-                    item[0] for item in hand.actions["BLINDSANTES"] if item[2] != "ante"
-                ]:
-                    hand.addCallandRaise(street, playerName, amount)
-                    log.debug(
-                        f"Player raised from blind - method: PartyPoker:readAction, player: {playerName}, amount: {amount}, street: {street}"
-                    )
-                else:
-                    hand.addCallandRaise(street, playerName, amount)
-                    log.debug(
-                        "Player raised",
-                        data={"method": "PartyPoker:readAction", "player": playerName, "amount": amount},
-                    )
+                hand.addCallandRaise(street, playerName, amount)
+                log.debug(f"Player raised - method: PartyPoker:readAction, player: {playerName}, amount: {amount}")
 
             elif actionType in ("bets", "double bets"):
                 hand.addBet(street, playerName, amount)
