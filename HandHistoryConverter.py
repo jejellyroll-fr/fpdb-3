@@ -489,6 +489,10 @@ or None if we fail to get the info """
     # Some sites don't report the rake. This will be called at the end of the hand after the pot total has been calculated
     # an inheriting class can calculate it for the specific site if need be.
     def getRake(self, hand):
+        if hand.totalcollected is None:
+            log.warning(f"totalcollected is None for hand ID {hand.handid}. Defaulting to 0.")
+            hand.totalcollected = Decimal("0.00")
+
         log.debug(f"Total pot amount: {hand.totalpot}")
         log.debug(f"Total collected amount: {hand.totalcollected}")
         if hand.totalcollected > hand.totalpot:
