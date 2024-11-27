@@ -1058,17 +1058,16 @@ class Hand(object):
 
     def totalPot(self):
         """
-        Calculate the total pot, side pots, and identify uncontested pots.
-        Adjust self.totalpot to exclude uncontested pots.
+        Calculate the total pot, side pots, and include uncontested pots.
+        Adjust self.totalpot to reflect the actual total pot.
         """
         log.debug("Starting pot calculation...")
 
-        # Checking the initialization of self.pot.committed
+        # Initial calculation of commitments
         if not isinstance(self.pot.committed, dict) or len(self.pot.committed) == 0:
             log.error("self.pot.committed is not initialized or empty.")
             raise FpdbParseError("self.pot.committed is missing or improperly initialized.")
 
-        # Initial calculation of commitments
         try:
             commitsall = sorted([(Decimal(v), k) for (k, v) in self.pot.committed.items() if Decimal(v) > 0])
         except Exception as e:
@@ -1077,8 +1076,8 @@ class Hand(object):
 
         log.debug(f"Initial committed values (sorted): {commitsall}")
 
-        uncontested_pots = []
-        total_pot = Decimal("0.00")
+        self.totalpot = Decimal("0.00")
+        self.pot.pots = []
 
         try:
             while commitsall:
@@ -1086,43 +1085,29 @@ class Hand(object):
                 commitslive = [(v, k) for (v, k) in commitsall if k in self.pot.contenders]
                 log.debug(f"Live commitments (still in play): {commitslive}")
 
-                if not commitslive:
-                    log.warning("No players left in the running to create further side pots.")
-                    break
+                # Minimum commitment among all players
+                v1 = commitsall[0][0]
+                participants = {k for (v, k) in commitsall}
 
-                # Minimum commitment among active players
-                v1 = commitslive[0][0]
-                participants = {k for (v, k) in commitsall if k in self.pot.contenders}
-
-                # Create a new pot with the active participants
+                # Create a new pot with all participants
                 new_pot = sum([min(v, v1) for (v, k) in commitsall])
-                log.debug(f"Created side pot: Value={new_pot}, Participants={participants}")
-
-                # Check if the pot is uncontested
-                if len(participants) == 1:
-                    uncontested_pots.append(new_pot)
-                    log.debug(f"Detected uncontested pot: Value={new_pot}, Player={next(iter(participants))}")
-                else:
-                    total_pot += new_pot
+                self.totalpot += new_pot
+                self.pot.pots.append((new_pot, participants))
+                log.debug(f"Created pot: Value={new_pot}, Participants={participants}")
 
                 # Update remaining commitments
                 commitsall = [(v - v1, k) for (v, k) in commitsall if v - v1 > 0]
-                log.debug(f"Updated commitments after creating side pot: {commitsall}")
+                log.debug(f"Updated commitments after creating pot: {commitsall}")
 
         except Exception as e:
             log.error(f"Pot calculation failed: {e}")
             raise FpdbParseError(f"Error in pot calculation: {str(e)}")
 
-        log.debug(f"Total side pots: {len(self.pot.pots)}, Total pot (excluding uncontested): {total_pot}")
+        log.debug(f"Total pot calculated: {self.totalpot}")
 
-        self.totalpot = total_pot
-
-        # Record uncontested pots
-        if uncontested_pots:
-            log.info(f"Uncontested pots excluded from total: {uncontested_pots}")
-
-        # Calculate and deduct the rake if necessary
-        self.pot.end()
+        # Include common money (antes, blinds, etc.)
+        self.totalpot += sum(self.pot.common.values()) + self.pot.stp
+        log.debug(f"Total pot after adding common money: {self.totalpot}")
 
         # Ensure totalcollected is initialized
         if self.totalcollected is None:
@@ -1131,6 +1116,15 @@ class Hand(object):
 
         log.debug(f"Total collected amount: {self.totalcollected}")
         log.debug(f"Total pot amount: {self.totalpot}")
+
+        # Final validation
+        if self.totalcollected > self.totalpot:
+            log.error(f"Collected amount ({self.totalcollected}) exceeds total pot ({self.totalpot})")
+            raise FpdbParseError(f"Collected amount exceeds total pot for hand {self.handid}")
+
+        # Calculate rake if necessary
+        self.rake = self.totalpot - self.totalcollected
+        log.debug(f"Rake calculated: {self.rake}")
 
         return self.totalpot
 
@@ -2128,71 +2122,72 @@ class Pot(object):
             return self.streettotals[street]
         return 0
 
-    def end(self):
+    def end(self, totalcollected):
         """
-        Calculate the total pot and side pots, applying rake if necessary.
+        Finalize the pot calculation and include uncontested pots correctly.
         """
         log.debug("Starting pot calculation...")
 
-        # Convert all values to Decimal for consistent calculations
-        self.total = Decimal(sum(self.committed.values())) + Decimal(sum(self.common.values())) + Decimal(self.stp)
-        log.debug(f"Total pot calculated (including STP): {self.total}")
+        # Start with the total committed and common chips
+        self.total = sum(self.committed.values()) + sum(self.common.values()) + self.stp
+        log.debug(f"Initial total pot calculation (committed + common + STP): {self.total:.2f}")
 
         commitsall = sorted([(Decimal(v), k) for (k, v) in self.committed.items() if v > 0])
-        log.debug(f"Initial committed values (sorted): {commitsall}")
+        log.debug(f"Committed values (sorted): {commitsall}")
 
-        pots_to_exclude = []
+        self.pots = []
 
         try:
-            while len(commitsall) > 0:
-                # Filter active players
-                commitslive = [(v, k) for (v, k) in commitsall if k in self.contenders]
-                log.debug(f"Live commitments (still in play): {commitslive}")
+            while commitsall:
+                # Minimum commitment among all players
+                v1 = commitsall[0][0]
+                participants = {k for (v, k) in commitsall}
 
-                if not commitslive:
-                    log.warning("No players left in the running to create further side pots.")
-                    break
+                # Create a new pot with all participants
+                new_pot_value = sum([min(v, v1) for (v, k) in commitsall])
+                self.pots.append((new_pot_value, participants))
+                log.debug(f"New pot created: Value={new_pot_value:.2f}, Participants={participants}")
 
-                v1 = commitslive[0][0]  # Smallest commitment among live players
-                log.debug(f"Smallest commitment among live players: {v1}")
-
-                # Create a new pot
-                new_pot = sum([min(v, v1) for (v, k) in commitsall])
-                participants = {k for (v, k) in commitsall if k in self.contenders}
-                self.pots.append((new_pot, participants))
-                log.debug(f"Created side pot: Value={new_pot}, Participants={participants}")
-
-                # Check if the pot is uncontested
-                if len(participants) == 1:
-                    pots_to_exclude.append(new_pot)
-                    log.debug(f"Detected uncontested pot: Value={new_pot}, Player={next(iter(participants))}")
-
-                # Update remaining commitments
+                # Deduct commitments
                 commitsall = [(v - v1, k) for (v, k) in commitsall if v - v1 > 0]
-                log.debug(f"Updated commitments after creating side pot: {commitsall}")
+                log.debug(f"Remaining commitments: {commitsall}")
 
-        except IndexError as e:
-            log.error(f"Pot.end(): Major failure while calculating pot: {e}")
-            raise FpdbParseError("Error in pot calculation during side pots handling")
+        except Exception as e:
+            log.error(f"Error during pot calculation: {e}")
+            raise FpdbParseError("Error calculating pots")
 
-        # Recalculate the total pots excluding uncontested pots
-        total_pots = sum([p[0] for p in self.pots]) - sum(pots_to_exclude)
-        if total_pots > self.total:
-            log.error(f"Collected amount ({total_pots:.2f}) exceeds total pot ({self.total:.2f})")
-            raise FpdbParseError("Inconsistent pot calculation: collected amount exceeds total pot")
+        # Calculate total pots
+        self.totalpot = sum(p[0] for p in self.pots)
+        log.debug(f"Calculated total pots: {self.totalpot:.2f}")
 
-        log.debug(f"Total side pots: {len(self.pots)}, Total value (excluding uncontested pots): {total_pots:.2f}")
-        self.totalpot = total_pots  # Update self.totalpot to exclude uncontested pots
+        # Final validation
+        if totalcollected > self.totalpot:
+            log.error(f"Collected amount ({totalcollected:.2f}) exceeds total pot ({self.totalpot:.2f})")
+            raise FpdbParseError(f"Collected amount exceeds total pot for hand {self.handid}")
 
-        # Calculate the rake
+        log.debug(f"Final total pot after validation: {self.totalpot:.2f}")
+
+        # Calculate rake
         self.calculate_rake()
+        log.debug(f"Rake calculated: {self.rake:.2f}")
 
-        # Final validation of rake
+        # Validate rake
         if self.rake > self.totalpot * Decimal("0.25"):
-            log.error(f"Suspiciously high rake ({self.rake:.2f}) > 25% of pot ({self.totalpot:.2f})")
-            raise FpdbParseError(f"Rake calculation exceeded limit for hand {self.hand_id}")
+            log.error(f"Suspicious rake: {self.rake:.2f} exceeds 25% of total pot {self.totalpot:.2f}")
+            raise FpdbParseError("Rake exceeds allowed percentage")
 
-        log.debug(f"Final total pot after rake deduction: {self.totalpot:.2f}")
+        log.debug(f"Pot calculation complete. Final pot: {self.totalpot:.2f}")
+
+        # Calculate rake
+        self.calculate_rake()
+        log.debug(f"Rake calculated: {self.rake:.2f}")
+
+        # Validate rake
+        if self.rake > self.totalpot * Decimal("0.25"):
+            log.error(f"Suspicious rake: {self.rake:.2f} exceeds 25% of total pot {self.totalpot:.2f}")
+            raise FpdbParseError("Rake exceeds allowed percentage")
+
+        log.debug(f"Pot calculation complete. Final pot: {self.totalpot:.2f}")
 
     def calculate_rake(self):
         """
