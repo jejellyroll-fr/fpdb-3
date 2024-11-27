@@ -17,9 +17,12 @@
 
 from __future__ import division
 
-from PyQt5.QtGui import QStandardItem, QStandardItemModel, QIcon, QColor
+from PyQt5.QtGui import QStandardItem, QStandardItemModel, QColor, QPalette
+
+
 from PyQt5.QtWidgets import (
     QApplication,
+    QAbstractItemView,
     QPushButton,
     QHBoxLayout,
     QRadioButton,
@@ -33,7 +36,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QLabel,
 )
-from PyQt5.QtCore import Qt, QRect, QPoint, QSize
+from PyQt5.QtCore import Qt, QRect, QSize
 
 import os
 from loggingFpdb import get_logger
@@ -144,7 +147,10 @@ class GuiLogView(QWidget):
         self.listview.setShowGrid(False)
         self.listview.verticalHeader().hide()
         self.listview.setSortingEnabled(True)
-        self.listview.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.listview.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+
+        self.listview.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.listview.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
 
         # Apply the custom delegate
         self.listview.setItemDelegate(LogItemDelegate(self.listview))
