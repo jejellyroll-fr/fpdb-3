@@ -421,6 +421,21 @@ class SealsWithClubs(HandHistoryConverter):
         log.debug("Method readSummaryInfo non implemented.")
         return True
 
+    def readBringIn(self, hand):
+        log.info("enter method readBringIn.")
+        log.debug("Method readBringIn non implemented.")
+        pass
+
+    def readSTP(self, hand):
+        log.info("enter method readSTP.")
+        log.debug("Method readSTP non implemented.")
+        pass
+
+    def readTourneyResults(self, hand):
+        log.info("enter method readTourneyResults.")
+        log.debug("Method readTourneyResults non implemented.")
+        pass
+
     def readCollectPot(self, hand):
         log.info("Reading collected pot")
         if self.re_Uncalled.search(hand.handText) is None:
