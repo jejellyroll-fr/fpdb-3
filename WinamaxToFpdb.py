@@ -616,12 +616,7 @@ class Winamax(HandHistoryConverter):
             regex = f"Winamax {table_name} /"
         log.debug(f"regex get table cash title: {regex}")
         if tournament:
-            if table_number > 99 or (table_number >= 100 or table_number <= 9) and table_number == 0:
-                regex = r"Winamax\s+([^\(]+)\(%s\)\(#%s\)" % (tournament, table_number)
-            elif table_number < 100 and table_number > 9:
-                regex = r"Winamax\s+([^\(]+)\(%s\)\(#0%s\)" % (tournament, table_number)
-            else:
-                regex = r"Winamax\s+([^\(]+)\(%s\)\(#00%s\)" % (tournament, table_number)
+            regex = r"Winamax\s+([^\(]+)\(%s\)\(#0*%s\)" % (tournament, table_number)
 
             log.debug(f"regex get mtt sng expresso cash title: {regex}")
         log.info(f"Winamax.getTableTitleRe: returns: '{regex}'")
