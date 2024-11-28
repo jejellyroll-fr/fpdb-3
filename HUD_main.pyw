@@ -349,7 +349,7 @@ class HUD_main(QObject):
                     self.table_is_stale(self.hud_dict[temp_key])
                     return
             else:
-                for k in self.hud_dict:
+                for k in list(self.hud_dict.keys()):
                     log.debug("check if the tournament number is in the hud_dict under a different table")
                     if k.startswith(tour_number):
                         self.table_is_stale(self.hud_dict[k])
