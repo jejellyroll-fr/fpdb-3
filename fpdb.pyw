@@ -29,7 +29,7 @@ import Options
 from functools import partial
 from L10n import set_locale_translation
 import logging  # Import the logging module
-from loggingFpdb import get_logger, set_default_logging
+from loggingFpdb import get_logger, setup_logging
 
 from PyQt5.QtCore import QCoreApplication, QDate, Qt, QPoint
 from PyQt5.QtGui import QIcon, QPalette
@@ -110,11 +110,10 @@ profiler = cProfile.Profile()
 profiler.enable()
 
 
-Configuration.set_logfile("fpdb-log.txt")
+# Set up initial console logging to capture early logs
+setup_logging(console_only=True)
 
-
-# Obtention du logger configuré
-set_default_logging()
+# Obtain the logger
 log = get_logger("fpdb")
 log.setLevel(logging.INFO)
 
@@ -1031,23 +1030,28 @@ class fpdb(QMainWindow):
 
     def load_profile(self, create_db=False):
         """Loads profile from the provided path name.
-        Set:
-           - self.settings
-           - self.config
-           - self.db
+        Sets:
+        - self.settings
+        - self.config
+        - self.db
         """
+        # Load the configuration
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
         if self.config.file_error:
             self.warning_box(
-                f"There is an error in your config file" f" {self.config.file}:\n{str(self.config.file_error)}",
+                f"There is an error in your config file {self.config.file}:\n{str(self.config.file_error)}",
                 diatitle="CONFIG FILE ERROR",
             )
             sys.exit()
 
-        log.info(f"Logfile is {os.path.join(self.config.dir_log, self.config.log_file)}")
+        # Now reconfigure logging with the log directory from the configuration
+        setup_logging(log_dir=self.config.dir_log)
+
+        log.info(f"Logfile is {os.path.join(self.config.dir_log, 'fpdb-log.txt')}")
         log.info(f"load profiles {self.config.example_copy}")
         log.info(f"{self.display_config_created_dialogue}")
         log.info(f"{self.config.wrongConfigVersion}")
+
         if self.config.example_copy or self.display_config_created_dialogue:
             self.info_box(
                 "Config file",
@@ -1057,53 +1061,40 @@ class fpdb(QMainWindow):
                     " (Main menu) before trying to import hands.",
                 ],
             )
-
             self.display_config_created_dialogue = False
         elif self.config.wrongConfigVersion:
             diaConfigVersionWarning = QDialog()
             diaConfigVersionWarning.setWindowTitle("Strong Warning - Local configuration out of date")
             diaConfigVersionWarning.setLayout(QVBoxLayout())
-            label = QLabel(["\nYour local configuration file needs to be updated."])
+            label = QLabel("\nYour local configuration file needs to be updated.")
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel(
-                [
-                    "\nYour local configuration file needs to be updated.",
-                    "This error is not necessarily fatal but it is strongly recommended that you update the configuration.",
-                ]
+                "\nYour local configuration file needs to be updated."
+                " This error is not necessarily fatal but it is strongly recommended that you update the configuration."
             )
-
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel(
-                [
-                    "To create a new configuration, see:",
-                    "fpdb.sourceforge.net/apps/mediawiki/fpdb/index.php?title=Reset_Configuration",
-                ]
+                "To create a new configuration, see:"
+                " fpdb.sourceforge.net/apps/mediawiki/fpdb/index.php?title=Reset_Configuration"
             )
-
             label.setTextInteractionFlags(Qt.TextSelectableByMouse)
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel(
-                [
-                    "A new configuration will destroy all personal settings"
-                    " (hud layout, site folders, screennames, favourite seats).\n"
-                ]
+                "A new configuration will destroy all personal settings"
+                " (hud layout, site folders, screennames, favourite seats).\n"
             )
-
             diaConfigVersionWarning.layout().addWidget(label)
-
             label = QLabel("To keep existing personal settings, you must edit the local file.")
             diaConfigVersionWarning.layout().addWidget(label)
-
             label = QLabel("See the release note for information about the edits needed")
             diaConfigVersionWarning.layout().addWidget(label)
-
             btns = QDialogButtonBox(QDialogButtonBox.Ok)
             btns.accepted.connect(diaConfigVersionWarning.accept)
             diaConfigVersionWarning.layout().addWidget(btns)
-
             diaConfigVersionWarning.exec_()
             self.config.wrongConfigVersion = False
 
+        # Set up application settings
         self.settings = {}
         self.settings["global_lock"] = self.lock
         if os.sep == "/":
@@ -1116,15 +1107,17 @@ class fpdb(QMainWindow):
         self.settings.update(self.config.get_import_parameters())
         self.settings.update(self.config.get_default_paths())
 
+        # Disconnect from the database if already connected
         if self.db is not None and self.db.is_connected():
             self.db.disconnect()
 
+        # Set up SQL and connect to the database
         self.sql = SQL.Sql(db_server=self.settings["db-server"])
         err_msg = None
         try:
             self.db = Database.Database(self.config, sql=self.sql)
             if self.db.get_backend_name() == "SQLite":
-                # tell sqlite users where the db file is
+                # Inform SQLite users where the database file is located
                 log.info(f"Connected to SQLite: {self.db.db_path}")
         except Exceptions.FpdbMySQLAccessDenied:
             err_msg = "MySQL Server reports: Access denied. Are your permissions set correctly?"
@@ -1133,12 +1126,11 @@ class fpdb(QMainWindow):
                 "MySQL client reports: 2002 or 2003 error."
                 " Unable to connect - Please check that the MySQL service has been started."
             )
-
         except Exceptions.FpdbPostgresqlAccessDenied:
             err_msg = "PostgreSQL Server reports: Access denied. Are your permissions set correctly?"
         except Exceptions.FpdbPostgresqlNoDatabase:
             err_msg = (
-                "PostgreSQL client reports: Unable to connect -"
+                "PostgreSQL client reports: Unable to connect - "
                 "Please check that the PostgreSQL service has been started."
             )
         if err_msg is not None:
@@ -1147,6 +1139,7 @@ class fpdb(QMainWindow):
         if self.db is not None and not self.db.is_connected():
             self.db = None
 
+        # Check for database version issues
         if self.db is not None and self.db.wrongDbVersion:
             diaDbVersionWarning = QMessageBox(
                 QMessageBox.Warning,
@@ -1158,22 +1151,20 @@ class fpdb(QMainWindow):
             diaDbVersionWarning.setInformativeText(
                 "This error is not necessarily fatal but it is strongly"
                 " recommended that you recreate the tables by using the Database menu."
-                "Not doing this will likely lead to misbehaviour including fpdb crashes, corrupt data etc."
+                " Not doing this will likely lead to misbehavior including fpdb crashes, corrupt data, etc."
             )
-
             diaDbVersionWarning.exec_()
+
+        # Update the status bar with the database connection status
         if self.db is not None and self.db.is_connected():
             self.statusBar().showMessage(
                 f"Status: Connected to {self.db.get_backend_name()}"
                 f" database named {self.db.database} on host {self.db.host}"
             )
-
-            # rollback to make sure any locks are cleared:
+            # Rollback to make sure any locks are cleared
             self.db.rollback()
 
-        # If the db-version is out of date, don't validate the config
-        # otherwise the end user gets bombarded with false messages
-        # about every site not existing
+        # Validate the configuration if the database version is up-to-date
         if hasattr(self.db, "wrongDbVersion"):
             if not self.db.wrongDbVersion:
                 self.validate_config()
