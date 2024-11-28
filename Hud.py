@@ -185,7 +185,9 @@ class Hud(object):
         # Load a hand instance (factory will load correct type for this hand)
         self.hand_instance = Hand.hand_factory(hand, config, self.db_hud_connection)
         self.db_hud_connection.connection.rollback()
+
         log.info(f"Creating hud from hand {hand}")
+
 
     def update(self, hand, config):
         # re-load a hand instance (factory will load correct type for this hand)

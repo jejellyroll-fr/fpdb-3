@@ -99,6 +99,7 @@ class Table_Window(object):
 
         # Decode values if they are in bytes
         if isinstance(table_name, bytes):
+
             log.debug(f"Decoding table_name to UTF-8: {table_name}")
             table_name = table_name.decode("utf-8")
         if isinstance(tournament, bytes):
@@ -108,8 +109,10 @@ class Table_Window(object):
             log.debug(f"Decoding table_number to UTF-8: {table_number}")
             table_number = table_number.decode("utf-8")
 
+
         # Handle tournament and table number
         if tournament is not None and table_number is not None:
+
             log.debug(f"Tournament: {tournament}")
             self.tournament = int(tournament)
             log.debug(f"Converted tournament: {self.tournament}")
@@ -124,20 +127,25 @@ class Table_Window(object):
 
             log.debug(f"Converted table number: {self.table}")
             self.name = f"{self.tournament} - {self.table}"
+
             self.type = "tour"
             table_kwargs = dict(tournament=self.tournament, table_number=self.table)
             self.tableno_re = getTableNoRe(self.config, self.site, tournament=self.tournament)
 
         # Handle cash game tables
         elif table_name is not None:
+
             log.debug(f"Cash table name type: {type(table_name)}, value: {table_name}")
+
             self.name = table_name
             self.type = "cash"
             self.tournament = None
             table_kwargs = dict(table_name=table_name)
+
             log.debug(f"Cash table kwargs type: {type(table_kwargs)}, value: {table_kwargs}")
 
         # Log a warning if neither tournament nor table_name is provided
+
         else:
             log.warning("Neither tournament nor table_name provided; initialization failed.")
             return None
@@ -158,6 +166,7 @@ class Table_Window(object):
         self.width = geo["width"]
         self.height = geo["height"]
         self.x = geo["x"]
+
         log.debug(f"X coordinate: {self.x}")
         self.y = geo["y"]
         log.debug(f"Y coordinate: {self.y}")
@@ -165,6 +174,7 @@ class Table_Window(object):
         log.debug(f"Old X coordinate: {self.oldx}")
         self.oldy = self.y
         log.debug(f"Old Y coordinate: {self.oldy}")
+
         self.game = self.get_game()
 
     def __str__(self):
