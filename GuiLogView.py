@@ -15,42 +15,46 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
-from __future__ import division
-
-from PyQt5.QtGui import QStandardItem, QStandardItemModel, QColor, QPalette
-
-
+from PyQt5.QtGui import QColor, QPalette
 from PyQt5.QtWidgets import (
     QApplication,
     QAbstractItemView,
     QPushButton,
     QHBoxLayout,
-    QRadioButton,
     QTableView,
     QVBoxLayout,
     QWidget,
     QCheckBox,
     QHeaderView,
-    QStyledItemDelegate,
     QStyle,
     QLineEdit,
     QLabel,
+    QComboBox,
 )
-from PyQt5.QtCore import Qt, QRect, QSize
-
+from PyQt5.QtCore import (
+    Qt,
+    QAbstractTableModel,
+    QModelIndex,
+    QVariant,
+    QSortFilterProxyModel,
+    QThread,
+    pyqtSignal,
+)
 import os
 from loggingFpdb import get_logger
-from itertools import groupby
-from functools import partial
+
 import Configuration
+from collections import deque
+import json
+import glob
+from datetime import datetime
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 
 log = get_logger("logview")
 
-MAX_LINES = 100000
-EST_CHARS_PER_LINE = 150
+MAX_LOG_ENTRIES = 1000  # Adjust this number as needed
 
 # Only include "HUD Log" and "Fpdb Log" in the radio box
 LOGFILES = [
@@ -59,69 +63,126 @@ LOGFILES = [
 ]
 
 
-class LogItemDelegate(QStyledItemDelegate):
+class LogTableModel(QAbstractTableModel):
     def __init__(self, parent=None):
-        super(LogItemDelegate, self).__init__(parent)
+        super(LogTableModel, self).__init__(parent)
+        self.headers = ["Level", "Date/Time", "Module", "Function", "Message"]
+        self.log_entries = []
 
-    def paint(self, painter, option, index):
-        # Get the column
-        column = index.column()
+    def rowCount(self, parent=QModelIndex()):
+        return len(self.log_entries)
 
-        # Get the log level from the model
-        level_index = index.sibling(index.row(), 0)
-        level = index.model().data(level_index, Qt.DisplayRole)
+    def columnCount(self, parent=QModelIndex()):
+        return len(self.headers)
 
-        # Get the icon from the level column
-        icon = index.model().data(level_index, Qt.DecorationRole)
+    def data(self, index, role=Qt.DisplayRole):
+        if not index.isValid():
+            return QVariant()
+        if not (0 <= index.row() < len(self.log_entries)):
+            return QVariant()
+        entry = self.log_entries[index.row()]
+        if role == Qt.DisplayRole:
+            return entry[index.column()]
+        elif role == Qt.DecorationRole and index.column() == 0:
+            level = entry[0]
+            style = QApplication.style()
+            icon = None
+            if level == "DEBUG":
+                icon = style.standardIcon(QStyle.SP_ArrowRight)
+            elif level == "INFO":
+                icon = style.standardIcon(QStyle.SP_MessageBoxInformation)
+            elif level == "WARNING":
+                icon = style.standardIcon(QStyle.SP_MessageBoxWarning)
+            elif level == "ERROR":
+                icon = style.standardIcon(QStyle.SP_MessageBoxCritical)
+            return icon
+        elif role == Qt.ForegroundRole:
+            level = entry[0]
+            if level == "DEBUG":
+                color = QColor("green")
+            elif level == "INFO":
+                color = QColor("white")
+            elif level == "WARNING":
+                color = QColor("orange")
+            elif level == "ERROR":
+                color = QColor("red")
+            else:
+                color = QApplication.palette().color(QPalette.Text)
+            return color
+        return QVariant()
 
-        # Get the text for the current cell
-        text = index.model().data(index, Qt.DisplayRole)
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        if role != Qt.DisplayRole:
+            return QVariant()
+        if orientation == Qt.Horizontal:
+            return self.headers[section]
+        return QVariant()
 
-        # Define the color based on the log level
-        if level == "DEBUG":
-            color = QColor("green")
-        elif level == "INFO":
-            color = QColor("white")
-        elif level == "WARNING":
-            color = QColor("orange")
-        elif level == "ERROR":
-            color = QColor("red")
+
+class LogFilterProxyModel(QSortFilterProxyModel):
+    def __init__(self, parent=None):
+        super(LogFilterProxyModel, self).__init__(parent)
+        self.selected_levels = set(["DEBUG", "INFO", "WARNING", "ERROR"])
+        self.module_filter_text = ""
+
+    def setLevelFilter(self, levels):
+        self.selected_levels = set(levels)
+        self.invalidateFilter()
+
+    def setModuleFilter(self, text):
+        self.module_filter_text = text.lower()
+        self.invalidateFilter()
+
+    def filterAcceptsRow(self, source_row, source_parent):
+        model = self.sourceModel()
+        level_index = model.index(source_row, 0, source_parent)
+        level = model.data(level_index, Qt.DisplayRole)
+        if level is None:
+            return False
+        level = level.strip().upper()
+        module_index = model.index(source_row, 2, source_parent)
+        module = model.data(module_index, Qt.DisplayRole)
+        if module is None:
+            module = ""
         else:
-            color = option.palette.color(QPalette.Text)
+            module = module.lower()
+        if level not in self.selected_levels:
+            return False
+        if self.module_filter_text and self.module_filter_text not in module:
+            return False
+        return True
 
-        painter.save()
 
-        # Draw selection background if item is selected
-        if option.state & QStyle.State_Selected:
-            painter.fillRect(option.rect, option.palette.highlight())
+class LogLoaderThread(QThread):
+    log_entries_loaded = pyqtSignal(list)
 
-        # For the Level column, draw the icon and text
-        if column == 0:
-            # Set up the icon and text rectangles
-            iconSize = QSize(16, 16)  # Or get from icon.actualSize()
+    def __init__(self, logfile, max_entries):
+        super().__init__()
+        self.logfile = logfile
+        self.max_entries = max_entries
 
-            iconRect = QRect(option.rect)
-            iconRect.setWidth(iconSize.width())
-            iconRect.setHeight(iconSize.height())
-            iconRect.moveTop(option.rect.top() + (option.rect.height() - iconSize.height()) // 2)
-            iconRect.moveLeft(option.rect.left() + 5)
-
-            textRect = QRect(option.rect)
-            textRect.setLeft(iconRect.right() + 5)
-
-            # Draw the icon
-            if icon:
-                icon.paint(painter, iconRect, Qt.AlignCenter)
-
-            # Draw the text
-            painter.setPen(color)
-            painter.drawText(textRect, Qt.AlignLeft | Qt.AlignVCenter, text)
-        else:
-            # For other columns, draw the text
-            painter.setPen(color)
-            painter.drawText(option.rect.adjusted(5, 0, -5, 0), Qt.AlignLeft | Qt.AlignVCenter, text)
-
-        painter.restore()
+    def run(self):
+        entries = []
+        if os.path.exists(self.logfile):
+            with open(self.logfile, "r", encoding="utf-8") as log_file:
+                lines = deque(log_file, maxlen=self.max_entries)
+                for line in lines:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        record_dict = json.loads(line)
+                        level = record_dict.get("levelname", "").strip().upper()
+                        date_time = record_dict.get("asctime", "").strip()
+                        module = record_dict.get("module", "").strip()
+                        function = record_dict.get("funcName", "").strip()
+                        message = record_dict.get("message", "").strip()
+                        entries.append([level, date_time, module, function, message])
+                    except json.JSONDecodeError:
+                        # Line is not valid JSON
+                        log.debug(f"Line is not valid JSON: {line}")
+                        continue
+        self.log_entries_loaded.emit(entries)
 
 
 class GuiLogView(QWidget):
@@ -131,39 +192,37 @@ class GuiLogView(QWidget):
         self.main_window = mainwin
         self.closeq = closeq
 
-        # Set default logfile to "Fpdb Log"
-        self.logfile = os.path.join(self.config.dir_log, LOGFILES[0][1])
-
-        self.resize(700, 400)
+        # Increase the default window size
+        self.resize(1200, 800)
         self.setWindowTitle("Log Viewer")
 
         self.setLayout(QVBoxLayout())
 
-        # Adjusted the number of columns to 5 (removed "Functionality")
-        self.liststore = QStandardItemModel(0, 5)
+        # Initialize the custom model and proxy model
+        self.model = LogTableModel(self)
+        self.proxy_model = LogFilterProxyModel(self)
+        self.proxy_model.setSourceModel(self.model)
+
         self.listview = QTableView()
-        self.listview.setModel(self.liststore)
-        self.listview.setSelectionBehavior(QTableView.SelectRows)
+        self.listview.setModel(self.proxy_model)
+        self.listview.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.listview.setShowGrid(False)
         self.listview.verticalHeader().hide()
         self.listview.setSortingEnabled(True)
         self.listview.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-
+        self.listview.horizontalHeader().setStretchLastSection(False)
         self.listview.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.listview.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
 
-        # Apply the custom delegate
-        self.listview.setItemDelegate(LogItemDelegate(self.listview))
-
         self.layout().addWidget(self.listview)
 
-        # Radio buttons for selecting log file
+        # Combobox for selecting log file
         hb1 = QHBoxLayout()
-        for logf in LOGFILES:
-            rb = QRadioButton(logf[0], self)
-            rb.setChecked(logf[2])
-            rb.clicked.connect(partial(self.__set_logfile, filename=logf[0]))
-            hb1.addWidget(rb)
+        hb1.addWidget(QLabel("Select Log File:"))
+        self.logfile_combo = QComboBox(self)
+        self.update_logfile_list()
+        self.logfile_combo.currentIndexChanged.connect(self.__set_logfile)
+        hb1.addWidget(self.logfile_combo)
         self.layout().addLayout(hb1)
 
         # Checkboxes for log levels
@@ -190,7 +249,7 @@ class GuiLogView(QWidget):
         hb3.addWidget(self.filter_error)
         self.layout().addLayout(hb3)
 
-        # Add a second filter by "Module"
+        # Add a filter by "Module"
         hb4 = QHBoxLayout()
         hb4.addWidget(QLabel("Filter by Module:"))
         self.module_filter_edit = QLineEdit()
@@ -209,8 +268,35 @@ class GuiLogView(QWidget):
         hb2.addWidget(copybutton)
         self.layout().addLayout(hb2)
 
+        # Load the initial log file
         self.loadLog()
         self.show()
+
+    def update_logfile_list(self):
+        log_dir = self.config.dir_log
+        log_pattern = os.path.join(log_dir, "fpdb-log*.txt")
+        log_files = glob.glob(log_pattern)
+        # Sort log files by modification time, newest first
+        log_files.sort(key=os.path.getmtime, reverse=True)
+        self.logfile_combo.blockSignals(True)  # Prevent signals while updating
+        current_selection = self.logfile_combo.currentText()
+        self.logfile_combo.clear()
+        self.logfile_paths = []
+        selected_index = 0
+        for index, logfile in enumerate(log_files):
+            # Format display name with date
+            mod_time = datetime.fromtimestamp(os.path.getmtime(logfile))
+            display_name = f"{os.path.basename(logfile)} ({mod_time.strftime('%Y-%m-%d %H:%M:%S')})"
+            self.logfile_combo.addItem(display_name)
+            self.logfile_paths.append(logfile)
+            if display_name == current_selection:
+                selected_index = index
+        self.logfile_combo.setCurrentIndex(selected_index)
+        self.logfile_combo.blockSignals(False)
+        if self.logfile_paths:
+            self.logfile = self.logfile_paths[selected_index]  # Keep the selected log file
+        else:
+            self.logfile = None
 
     def filter_log(self):
         selected_levels = []
@@ -223,78 +309,46 @@ class GuiLogView(QWidget):
         if self.filter_error.isChecked():
             selected_levels.append("ERROR")
 
+        # Ensure levels are uppercase
+        selected_levels = [level.upper() for level in selected_levels]
+
         module_filter_text = self.module_filter_edit.text()
-        self.loadLog(selected_levels, module_filter_text)
+        self.proxy_model.setLevelFilter(selected_levels)
+        self.proxy_model.setModuleFilter(module_filter_text)
 
     def copy_to_clipboard(self):
+        selected_indexes = self.listview.selectionModel().selectedRows()
         text = ""
-        for row, indexes in groupby(self.listview.selectedIndexes(), lambda i: i.row()):
-            text += " ".join([i.data() for i in indexes]) + "\n"
+        for index in selected_indexes:
+            row_data = []
+            for column in range(self.proxy_model.columnCount()):
+                data = self.proxy_model.data(self.proxy_model.index(index.row(), column), Qt.DisplayRole)
+                row_data.append(str(data))
+            text += "\t".join(row_data) + "\n"
         QApplication.clipboard().setText(text)
 
-    def __set_logfile(self, checkState, filename):
-        if checkState:
-            for logf in LOGFILES:
-                if logf[0] == filename:
-                    if logf[3] == "pyfpdb":
-                        self.logfile = os.path.join(self.config.pyfpdb_path, logf[1])
-                    else:
-                        self.logfile = os.path.join(self.config.dir_log, logf[1])
-            self.refresh()
+    def __set_logfile(self, index):
+        if index >= 0 and index < len(self.logfile_paths):
+            self.logfile = self.logfile_paths[index]
+            self.loadLog()  # Call loadLog instead of refresh
 
-    def dialog_response_cb(self, dialog, response_id):
-        self.closeq.put(self.__class__)
-        dialog.destroy()
+    def loadLog(self):
+        if self.logfile:
+            self.thread = LogLoaderThread(self.logfile, MAX_LOG_ENTRIES)
+            self.thread.log_entries_loaded.connect(self.on_log_entries_loaded)
+            self.thread.start()
 
-    def get_dialog(self):
-        return self.dia
-
-    def loadLog(self, selected_levels=None, module_filter_text=""):
-        self.liststore.clear()
-        self.liststore.setHorizontalHeaderLabels(["Level", "Date/Time", "Module", "Function", "Message"])
-
-        if os.path.exists(self.logfile):
-            with open(self.logfile, "r") as log_file:
-                for line in log_file:
-                    parts = line.strip().split(" - ")
-                    if len(parts) == 6:
-                        date_time, functionality, level, module, function, message = parts
-
-                        # Apply filters for log level and module
-                        if (selected_levels is None or level in selected_levels) and (
-                            module_filter_text == "" or module_filter_text.lower() in module.lower()
-                        ):
-                            level_item = QStandardItem(level)
-
-                            style = QApplication.style()
-                            icon = None
-                            if level == "DEBUG":
-                                icon = style.standardIcon(QStyle.SP_ArrowRight)
-                            elif level == "INFO":
-                                icon = style.standardIcon(QStyle.SP_MessageBoxInformation)
-                            elif level == "WARNING":
-                                icon = style.standardIcon(QStyle.SP_MessageBoxWarning)
-                            elif level == "ERROR":
-                                icon = style.standardIcon(QStyle.SP_MessageBoxCritical)
-                            if icon:
-                                level_item.setIcon(icon)
-                            level_item.setEditable(False)
-
-                            date_item = QStandardItem(date_time)
-                            module_item = QStandardItem(module)
-                            function_item = QStandardItem(function)
-                            message_item = QStandardItem(message)
-
-                            # Make items non-editable
-                            for item in [date_item, module_item, function_item, message_item]:
-                                item.setEditable(False)
-
-                            self.liststore.appendRow([level_item, date_item, module_item, function_item, message_item])
-
-        self.listview.resizeColumnsToContents()
+    def on_log_entries_loaded(self, entries):
+        # Update the model in the main thread
+        self.model.beginResetModel()
+        self.model.log_entries = entries
+        self.model.endResetModel()
+        # Apply filters
+        self.filter_log()
 
     def refresh(self):
-        self.filter_log()
+        # Reload the current log file without resetting the selection
+        self.loadLog()
 
 
 if __name__ == "__main__":
@@ -306,7 +360,8 @@ if __name__ == "__main__":
     main_window.setLayout(layout)
     i = GuiLogView(config, main_window, None)
     layout.addWidget(i)
-    main_window.resize(1400, 800)
+    # Increase the size of the main window
+    main_window.resize(1600, 900)
     main_window.setWindowTitle("Log Viewer")
     main_window.show()
     app.exec_()

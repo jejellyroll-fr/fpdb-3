@@ -3,6 +3,9 @@ import re
 import logging
 import colorlog
 import inspect
+import json
+from logging.handlers import TimedRotatingFileHandler
+import time
 
 
 # Set default logging and debugging modes
@@ -41,34 +44,170 @@ class FpdbLogFormatter(colorlog.ColoredFormatter):
         return re.sub(pattern, repl, message)
 
 
-def setup_logging():
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        record_dict = {
+            "asctime": self.formatTime(record, self.datefmt),
+            "name": record.name,
+            "levelname": record.levelname,
+            "module": record.module,
+            "funcName": record.funcName,
+            "message": record.getMessage(),
+        }
+        return json.dumps(record_dict)
+
+
+class TimedSizedRotatingFileHandler(TimedRotatingFileHandler):
+    """
+    Handler for logging to a file, rotating the log file at certain timed
+    intervals and when the log file reaches a certain size.
+
+    This handler rotates the log file based on time and size, and names the
+    rotated files including date and part number.
+    """
+
+    def __init__(
+        self,
+        filename,
+        when="midnight",
+        interval=1,
+        backupCount=0,
+        encoding=None,
+        delay=False,
+        utc=False,
+        atTime=None,
+        maxBytes=0,
+    ):
+        super().__init__(filename, when, interval, backupCount, encoding, delay, utc, atTime)
+        self.maxBytes = maxBytes
+        self.part = 1  # Initialize part number
+        self.currentDate = time.strftime("%Y-%m-%d")
+
+    def shouldRollover(self, record):
+        """
+        Determine if rollover should occur.
+
+        Overridden to check both time-based and size-based rollover conditions.
+        """
+        t = int(time.time())
+        if t >= self.rolloverAt:
+            self.part = 1  # Reset part number when date changes
+            self.currentDate = time.strftime("%Y-%m-%d")
+            return True
+        if self.maxBytes > 0:
+            self.stream.seek(0, os.SEEK_END)
+            if self.stream.tell() >= self.maxBytes:
+                return True
+        return False
+
+    def doRollover(self):
+        """
+        Do a rollover, as described in __init__().
+        """
+        self.stream.close()
+        currentTime = int(time.time())
+        timeTuple = time.localtime(currentTime)
+        dateStr = time.strftime("%d-%m-%Y", timeTuple)
+
+        # Construct the rotated file name
+        dfn = f"{self.baseFilename}-{dateStr}-part{self.part}.txt"
+
+        # Increment part number for next rollover
+        self.part += 1
+
+        # Rotate the file
+        if os.path.exists(dfn):
+            os.remove(dfn)
+        os.rename(self.baseFilename, dfn)
+
+        # Remove old log files
+        if self.backupCount > 0:
+            for s in self.getFilesToDelete():
+                os.remove(s)
+
+        # Reopen the stream
+        if not self.delay:
+            self.stream = self._open()
+
+        # Compute new rolloverAt
+        newRolloverAt = self.computeRollover(currentTime)
+        while newRolloverAt <= currentTime:
+            newRolloverAt += self.interval
+        self.rolloverAt = newRolloverAt
+
+    def getFilesToDelete(self):
+        """
+        Determine the files to delete when rolling over.
+
+        We need to override this method to match the file naming pattern.
+        """
+        dirName, baseName = os.path.split(self.baseFilename)
+        fileNames = os.listdir(dirName)
+        result = []
+        for fileName in fileNames:
+            if fileName.startswith(baseName) and fileName.endswith(".txt"):
+                result.append(os.path.join(dirName, fileName))
+        result.sort()
+        if len(result) <= self.backupCount:
+            return []
+        else:
+            return result[: len(result) - self.backupCount]
+
+
+def setup_logging(log_dir=None, console_only=False):
     """Configure the logging system."""
-    log_colors = {"DEBUG": "green", "INFO": "blue", "WARNING": "yellow", "ERROR": "red"}
-    log_format = "%(log_color)s%(asctime)s [%(name)s:%(module)s:%(funcName)s] [%(levelname)s] %(message)s%(reset)s"
-    date_format = "%Y-%m-%d %H:%M:%S"
-    formatter = FpdbLogFormatter(fmt=log_format, datefmt=date_format, log_colors=log_colors)
+    try:
+        # Console handler setup remains unchanged
+        log_colors = {"DEBUG": "green", "INFO": "blue", "WARNING": "yellow", "ERROR": "red"}
+        log_format = (
+            "%(log_color)s%(asctime)s [%(name)s:%(module)s:%(funcName)s] " "[%(levelname)s] %(message)s%(reset)s"
+        )
+        date_format = "%Y-%m-%d %H:%M:%S"
+        formatter = colorlog.ColoredFormatter(fmt=log_format, datefmt=date_format, log_colors=log_colors)
 
-    # Console handler
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    console_handler.setLevel(logging.DEBUG)
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(formatter)
+        console_handler.setLevel(logging.DEBUG)
 
-    # Root logger
-    logger = logging.getLogger()
-    logger.setLevel(logging.WARNING)  # Set default level to WARNING
-    logger.addHandler(console_handler)
-    logger.propagate = True
+        # Configure root logger
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)  # Default to INFO level
 
-    # File handler
-    log_dir = os.path.join(os.path.dirname(__file__), "logs")
-    os.makedirs(log_dir, exist_ok=True)
-    log_file = os.path.join(log_dir, "fpdb-log.txt")
+        # Remove existing handlers to prevent duplicate logs
+        logger.handlers = []
+        logger.addHandler(console_handler)
 
-    file_handler = logging.FileHandler(log_file, mode="a", encoding="utf-8")
-    file_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt=date_format)
-    file_handler.setFormatter(file_formatter)
-    file_handler.setLevel(logging.DEBUG)
-    logger.addHandler(file_handler)
+        if not console_only:
+            if log_dir is None:
+                log_dir = os.path.join(os.path.expanduser("~"), "fpdb_logs")
+            log_dir = os.path.normpath(log_dir)
+            os.makedirs(log_dir, exist_ok=True)
+            log_file = os.path.join(log_dir, "fpdb-log.txt")
+            print(f"Attempting to write logs to: {log_file}")
+
+            # Use the custom TimedSizedRotatingFileHandler
+            maxBytes = 1024 * 1024  # 1 MB
+            backupCount = 30  # Keep logs for 30 rollovers
+            file_formatter = JsonFormatter(datefmt=date_format)
+            file_handler = TimedSizedRotatingFileHandler(
+                log_file,
+                when="midnight",
+                interval=1,
+                backupCount=backupCount,
+                encoding="utf-8",
+                maxBytes=maxBytes,
+            )
+            file_handler.setFormatter(file_formatter)
+            file_handler.setLevel(logging.DEBUG)
+
+            logger.addHandler(file_handler)
+
+            print("Logging initialized successfully.")
+            print(f"Logs will be written to: {log_file}")
+
+    except Exception as e:
+        print(f"Error initializing logging: {e}")
+        raise
 
 
 # Update specific logger's level dynamically
@@ -129,4 +268,4 @@ def get_logger(name: str) -> FpdbLogger:
 
 
 # Initialize logging configuration on module load
-setup_logging()
+# setup_logging()
