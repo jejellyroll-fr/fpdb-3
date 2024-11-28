@@ -424,6 +424,7 @@ class Importer(object):
                         try:
                             if not os.path.isdir(f):
                                 self.caller.addText("\n" + os.path.basename(f))
+
                                 log.debug(f"os.path.basename: {os.path.basename(f)}")
                                 log.debug(f"self.caller: {self.caller}")
                                 log.debug(os.path.basename(f))
@@ -441,6 +442,7 @@ class Importer(object):
                                     " %d stored, %d duplicates, %d partial, %d skipped, %d errors (time = %f)"
                                     % (stored, duplicates, partial, skipped, errors, ttime)
                                 )
+
                                 log.debug(f"self.caller2: {self.caller}")
                         except KeyError:  # TODO: Again, what error happens here? fix when we find out ..
                             log.error(f"KeyError encountered while processing file: {f}")
