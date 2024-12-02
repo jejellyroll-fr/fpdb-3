@@ -27,10 +27,10 @@ from past.utils import old_div
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal import Decimal
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class Cake(HandHistoryConverter):
@@ -249,7 +249,7 @@ class Cake(HandHistoryConverter):
             if self.re_Dealer.match(handText):
                 raise FpdbHandPartial
             tmp = handText[:200]
-            log.error(f"CakeToFpdb.determineGameType: '{tmp}'")
+            log.error(f"determineGameType not found: '{tmp}'")
             raise FpdbParseError
 
         # If no ShowDown or ShowDownLeft found, raise appropriate error
@@ -309,7 +309,7 @@ class Cake(HandHistoryConverter):
                     info["bb"] = self.Lim_Blinds[info["bb"]][1]
                 except KeyError as e:
                     tmp = handText[:200]
-                    log.error(f"CakeToFpdb.determineGameType: Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'")
+                    log.error(f"Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'")
                     raise FpdbParseError from e
             # If game type is not 'ring'
             else:
@@ -338,7 +338,7 @@ class Cake(HandHistoryConverter):
         m = self.re_GameInfo.search(hand.handText)
         if m is None:
             tmp = hand.handText[:200]
-            log.error(f"CakeToFpdb.readHandInfo: '{tmp}'")
+            log.error(f"readHandInfo not found: '{tmp}'")
             raise FpdbParseError
 
         info |= m.groupdict()
@@ -397,9 +397,7 @@ class Cake(HandHistoryConverter):
                     hand.buyinCurrency = "play"
                 else:
                     # FIXME: handle other currencies, play money
-                    log.error(
-                        f"CakeToFpdb.readHandInfo: Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'"
-                    )
+                    log.error(f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'")
                     raise FpdbParseError
 
                 # extract buy-in amount and rake amount
@@ -434,7 +432,7 @@ class Cake(HandHistoryConverter):
             hand.buttonpos = int(m.group("BUTTON"))
         else:
             # If not found, log an info message
-            log.info("readButton: " + ("not found"))
+            log.info("readButton: not found")
 
     def readPlayerStacks(self, hand):
         """
@@ -461,8 +459,8 @@ class Cake(HandHistoryConverter):
             cash_value = cash_value.encode("utf-8")
             cash_value = cash_value.replace(b"\xe2\x80\xaf", b"")
             cash_value = cash_value.decode("utf-8")
-            print("value:", cash_value)
-            print("type:", type(cash_value))
+            log.debug(f"value: {cash_value}")
+            log.debug(f"type: {type(cash_value)}")
             # Add the player's stack information to the `hand` object
             hand.addPlayer(int(a.group("SEAT")), a.group("PNAME"), cash_value)
 
@@ -534,7 +532,7 @@ class Cake(HandHistoryConverter):
         m = self.re_Antes.finditer(hand.handText)
         for player in m:
             # Uncomment the following line to enable logging
-            # logging.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
+            log.debug(f"hand.addAnte({player.group('PNAME')},{player.group('ANTE')})")
             hand.addAnte(player.group("PNAME"), self.convertMoneyString("ANTE", player))
 
     def readBringIn(self, hand):
@@ -666,9 +664,7 @@ class Cake(HandHistoryConverter):
 
             # If the current action is not one of the above types, log an error
             else:
-                log.error(
-                    ("DEBUG:") + " " + f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'"
-                )
+                log.error(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
 
     def readShowdownActions(self, hand):
         """
@@ -762,14 +758,12 @@ class Cake(HandHistoryConverter):
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
-        log.info(
-            f"cake.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'"
-        )
+        log.info(f"table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'")
         regex = ""
-        print("regex get table cash title:", regex)
+        log.debug(f"regex get table cash title: {regex}")
         if tournament:
             regex = f"Tournament:\s{tournament}\sBuy\-In\s\w+\s:\sTable\s{table_number}"
             # Tournament: 17106061 Buy-In Freeroll : Table 10 - No Limit Holdem - 15/30
-            print("regex get mtt sng expresso cash title:", regex)
+            log.debug(f"regex get mtt sng expresso cash title: {regex}")
         log.info(f"Seals.getTableTitleRe: returns: '{regex}'")
         return regex

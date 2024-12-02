@@ -108,7 +108,8 @@ FILES=@(
     "WinningSummary.py",
     "WinningToFpdb.py",
     "WinTables.py",
-    "XTables.py"
+    "XTables.py",
+    "loggingFpdb.py"
 )
 
 $FOLDERS = @(

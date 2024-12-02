@@ -29,7 +29,7 @@ Create and manage the hud overlays.
 # _ = L10n.get_translation()
 
 #    Standard Library modules
-import logging
+from loggingFpdb import get_logger
 import copy
 
 #    FreePokerTools modules
@@ -37,7 +37,7 @@ import Database
 import Hand
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hud")
+log = get_logger("hud")
 
 
 def importName(module_name, name):
@@ -47,7 +47,7 @@ def importName(module_name, name):
     try:
         module = __import__(module_name, globals(), locals(), [name])
     except Exception as e:
-        log.error("Could not load hud module %s: %s" % (module_name, e))
+        log.error(f"Could not load hud module {module_name}: {e}")
         return None
     return getattr(module, name)
 
@@ -84,17 +84,15 @@ class Hud(object):
 
         # Just throw error and die if any serious config issues are discovered
         if self.supported_games_parameters is None:
-            log.error(("No <game_stat_set> found for %s games for type %s.\n") % (self.poker_game, self.game_type))
+            log.warning(f"No <game_stat_set> found for {self.poker_game} games for type {self.game_type}.\n")
             return
 
         if self.layout_set is None:
-            log.error(("No layout found for %s games for site %s.\n") % (self.game_type, self.table.site))
+            log.warning(f"No layout found for {self.game_type} games for site {self.table.site}.\n")
             return
 
         if self.max not in self.layout_set.layout:
-            log.error(
-                ("No layout found for %d-max %s games for site %s.\n") % (self.max, self.game_type, self.table.site)
-            )
+            log.warning(f"No layout found for {self.max}-max {self.game_type} games for site {self.table.site}.\n")
             return
         else:
             self.layout = copy.deepcopy(
@@ -187,13 +185,14 @@ class Hud(object):
         # Load a hand instance (factory will load correct type for this hand)
         self.hand_instance = Hand.hand_factory(hand, config, self.db_hud_connection)
         self.db_hud_connection.connection.rollback()
-        log.info(("Creating hud from hand ") + str(hand))
-        print((("Creating hud from hand ") + str(hand)))
+
+        log.info(f"Creating hud from hand {hand}")
+
 
     def update(self, hand, config):
         # re-load a hand instance (factory will load correct type for this hand)
         self.hand_instance = Hand.hand_factory(hand, config, self.db_hud_connection)
-        log.debug("hud update after hand_factory")
+        log.info("hud update after hand_factory")
         self.db_hud_connection.connection.rollback()
 
     def get_cards(self, hand):

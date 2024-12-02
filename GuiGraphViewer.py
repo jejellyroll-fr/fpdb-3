@@ -43,10 +43,13 @@ from time import time
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.font_manager import FontProperties
+from loggingFpdb import get_logger
 from numpy import cumsum
 import Database
 import Filters
 # import Charset
+
+log = get_logger("filter")
 
 
 class GuiGraphViewer(QSplitter):
@@ -145,27 +148,27 @@ class GuiGraphViewer(QSplitter):
                 names = names + "\n" + _hname + " on " + site
 
         if not sitenos:
-            print("No sites selected - defaulting to PokerStars")
+            log.debug("No sites selected - defaulting to PokerStars")
             self.db.rollback()
             return
 
         if not playerids:
-            print("No player ids found")
+            log.debug("No player ids found")
             self.db.rollback()
             return
 
         if not limits:
-            print("No limits found")
+            log.debug("No limits found")
             self.db.rollback()
             return
         # debug
-        # print("currencies selcted:", self.filters.getCurrencies())
+        # log.debug("currencies selcted:", self.filters.getCurrencies())
 
         self.ax = self.fig.add_subplot(111)
 
         starttime = time()
         (green, blue, red, orange) = self.getRingProfitGraph(playerids, sitenos, limits, games, currencies, display_in)
-        print(f"Graph generated in: {time() - starttime}")
+        log.debug(f"Graph generated in: {time() - starttime}")
 
         self.ax.set_xlabel("Hands", color=self.colors["foreground"])
         self.ax.set_facecolor(self.colors["background"])
@@ -190,7 +193,7 @@ class GuiGraphViewer(QSplitter):
             self.ax.set_title(f"Profit graph for ring games{names}", color=self.colors["foreground"])
 
             if "showdown" in graphops:
-                print("blue max:", blue.max())
+                log.debug(f"blue max: {blue.max()}")
                 self.ax.plot(
                     blue,
                     color=self.colors["line_showdown"],
@@ -348,19 +351,19 @@ class GuiGraphViewer(QSplitter):
         tmp = tmp.replace(",)", ")")
 
         # debug
-        # print("Final SQL Request:")
-        # print(tmp)
+        # log.debug("Final SQL Request:")
+        # log.debug(tmp)
 
         self.db.cursor.execute(tmp)
         winnings = self.db.cursor.fetchall()
         self.db.rollback()
 
         # debug
-        # print("winning data :")
-        # print(winnings)
+        # log.debug("winning data :")
+        # log.debug(winnings)
 
         if len(winnings) == 0:
-            # print("Aucune donnée de gains trouvée")
+            # log.debug("Aucune donnée de gains trouvée")
             return (None, None, None, None)
 
         green = [0, *[float(x[1]) for x in winnings]]
@@ -374,17 +377,17 @@ class GuiGraphViewer(QSplitter):
         redline = cumsum(red)
         orangeline = cumsum(orange)
 
-        # print("Data :")
-        # print("Green:", green[:10])  # show only the first 10 results
-        # print("Blue:", blue[:10])
-        # print("Red:", red[:10])
-        # print("Orange:", orange[:10])
+        # log.debug("Data :")
+        # log.debug("Green:", green[:10])  # show only the first 10 results
+        # log.debug("Blue:", blue[:10])
+        # log.debug("Red:", red[:10])
+        # log.debug("Orange:", orange[:10])
 
-        # print("sum :")
-        # print("Greenline:", greenline[:10])
-        # print("Blueline:", blueline[:10])
-        # print("Redline:", redline[:10])
-        # print("Orangeline:", orangeline[:10])
+        # log.debug("sum :")
+        # log.debug("Greenline:", greenline[:10])
+        # log.debug("Blueline:", blueline[:10])
+        # log.debug("Redline:", redline[:10])
+        # log.debug("Orangeline:", orangeline[:10])
 
         return (greenline / 100, blueline / 100, redline / 100, orangeline / 100)
 

@@ -52,12 +52,10 @@ if platform.system() == "Windows":
     winpaths_appdata = os.getenv("APPDATA")
     # winpaths_appdata = os.getcwd()
     winpaths_appdata = winpaths_appdata.replace("\\", "/")
-    print("winpaths_appdata:")  # debug
-    print(winpaths_appdata)  # debug
 else:
     winpaths_appdata = False
 
-import logging, logging.config
+from loggingFpdb import get_logger
 
 
 # config version is used to flag a warning at runtime if the users config is
@@ -104,7 +102,6 @@ elif INSTALL_METHOD == "appimage":
     FPDB_ROOT_PATH = os.environ["APPDIR"]
 elif sys.path[0] == "":  # we are probably running directly (>>>import Configuration)
     temp = os.getcwd()  # should be ./pyfpdb
-    print(temp)
     FPDB_ROOT_PATH = os.path.join(temp, os.pardir)  # go up one level (to fpdbroot)
 else:  # all other cases
     # FPDB_ROOT_PATH = os.path.dirname(sys.path[0])  # should be source path to /fpdbroot
@@ -134,7 +131,6 @@ if OS_FAMILY in ["XP", "Win7"]:
     FPDB_ROOT_PATH = FPDB_ROOT_PATH.replace("\\", "/")
     if INSTALL_METHOD == "source":
         script = os.path.realpath(__file__)
-        print("SCript path:", script)
         script = script.replace("\\", "/")
         script = script.rsplit("/", 1)[0]
         GRAPHICS_PATH = script + "/gfx"
@@ -165,15 +161,7 @@ else:
 PYTHON_VERSION = sys.version[:3]
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("config")
-
-LOGLEVEL = {
-    "DEBUG": logging.DEBUG,
-    "INFO": logging.INFO,
-    "WARNING": logging.WARNING,
-    "ERROR": logging.ERROR,
-    "CRITICAL": logging.CRITICAL,
-}
+log = get_logger("config")
 
 
 def get_config(file_name, fallback=True):
@@ -226,14 +214,14 @@ def get_config(file_name, fallback=True):
                 shutil.copyfile(example_path, config_path)
                 example_copy = True
                 msg = ("Config file has been created at %s.") % (config_path)
-                log.info(msg)
+                log.info(f"Config posix not found: {msg}")
             except IOError:
                 try:
                     example_path = file_name + ".example"
                     shutil.copyfile(example_path, config_path)
                     example_copy = True
                     msg = ("Config file has been created at %s.") % (config_path)
-                    log.info(msg)
+                    log.info(f"Config posix not found: {msg}")
                 except IOError:
                     pass
 
@@ -246,13 +234,11 @@ def get_config(file_name, fallback=True):
                 shutil.copyfile(example_path, config_path)
                 example_copy = True
                 log.info(
-                    ('No %r found in "%r" or "%r".') % (file_name, FPDB_ROOT_PATH, CONFIG_PATH)
-                    + " "
-                    + ("Config file has been created at %r.") % (config_path + "\n")
+                    f'No {file_name!r} found in "{FPDB_ROOT_PATH!r}" or "{CONFIG_PATH!r}". Config file has been created at {config_path!r}.'
                 )
 
         except IOError:
-            print((("Error copying .example config file, cannot fall back. Exiting."), "\n"))
+            log.error(("Error copying .example config file, cannot fall back. Exiting."))
             sys.stderr.write(("Error copying .example config file, cannot fall back. Exiting.") + "\n")
             sys.stderr.write(str(sys.exc_info()))
             sys.exit()
@@ -269,20 +255,25 @@ def set_logfile(file_name):
     log_dir = os.path.join(CONFIG_PATH, "log").replace("\\", "/")
     check_dir(log_dir)
     log_file = os.path.join(log_dir, file_name).replace("\\", "/")
-    if os.path.isfile(conf_file):
-        print("logging.conf file already exists")
+
+    if conf_file and os.path.isfile(conf_file):
+        log.info("logging.conf file already exists")
     else:
-        # create a file
-        # FIME: why printing that a file is going to be copied but not doing anything ?
-        # print('copying logging.conf file in appdata rooming folder')
-        pass
-    if conf_file:
-        try:
-            log_file = log_file.replace("\\", "/")  # replace each \ with \\
-            print(f"Using logging configfile: {conf_file}")
-            logging.config.fileConfig(conf_file, {"logFile": log_file})
-        except Exception:
-            sys.stderr.write(f"Could not setup log file {file_name}")
+        log.warning(f"No logging configuration file found at {conf_file}. Using basic configuration.")
+
+    try:
+        log.basicConfig(
+            filename=log_file,
+            filemode="a",
+            level=log.INFO,
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        )
+        log.info(f"Logging initialized to file: {log_file}")
+    except Exception as e:
+        # Ensure sys.stderr is functional
+        if not sys.stderr:
+            sys.stderr = open(os.devnull, "w")
+        sys.stderr.write(f"Could not setup log file {file_name}: {e}\n")
 
 
 def check_dir(path, create=True):
@@ -295,8 +286,8 @@ def check_dir(path, create=True):
     if create:
         path = path.replace("\\", "/")
         msg = ("Creating directory: '%s'") % (path)
-        print(msg)
-        log.info(msg)
+
+        log.info(f"Directory: {msg}")
         os.makedirs(path)  # , "utf-8"))
     else:
         return False
@@ -328,7 +319,9 @@ LOCALE_ENCODING = locale.getpreferredencoding()
 if LOCALE_ENCODING in ("US-ASCII", "", None):
     LOCALE_ENCODING = "cp1252"
     if os.uname()[0] != "Darwin":
-        print((("Default encoding set to US-ASCII, defaulting to CP1252 instead."), ("Please report this problem.")))
+        log.warning(
+            (("Default encoding set to US-ASCII, defaulting to CP1252 instead."), ("Please report this problem."))
+        )
 
 # needs LOCALE_ENCODING (above), imported for sqlite setup in Config class below
 
@@ -563,15 +556,7 @@ class Database(object):
         self.db_path = node.getAttribute("db_path")
         self.db_selected = string_to_bool(node.getAttribute("default"), default=False)
         log.debug(
-            "Database db_name:'%(name)s'  db_server:'%(server)s'  db_ip:'%(ip)s'  db_port:'%(port)s' db_user:'%(user)s'  db_pass (not logged)  selected:'%(sel)s'"
-            % {
-                "name": self.db_name,
-                "server": self.db_server,
-                "ip": self.db_ip,
-                "port": self.db_port,
-                "user": self.db_user,
-                "sel": self.db_selected,
-            }
+            f"Database db_name:'{self.db_name}'  db_server:'{self.db_server}'  db_ip:'{self.db_ip}'  db_port:'{self.db_port}' db_user:'{self.db_user}'  db_pass (not logged)  selected:'{self.db_selected}'"
         )
 
     def __str__(self):
@@ -792,7 +777,7 @@ class General(dict):
         #                e.g. user could set to 4.0 for day to start at 4am local time
         # [ HH_bulk_path was here - now moved to import section ]
         for name, value in list(node.attributes.items()):
-            log.debug("config.general: adding %s = %s" % (name, value))
+            log.debug(f"config.general: adding {name} = {value}")
             self[name] = value
 
         try:
@@ -856,8 +841,7 @@ class GUICashStats(list):
                     if child.hasAttribute("xalignment"):
                         xalignment = float(child.getAttribute("xalignment"))
                 except ValueError:
-                    print(("bad number in xalignment was ignored"))
-                    log.info(("bad number in xalignment was ignored"))
+                    log.error(("bad number in xalignment was ignored"))
 
                 self.append([col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment])
 
@@ -942,8 +926,7 @@ class GUITourStats(list):
                     if child.hasAttribute("xalignment"):
                         xalignment = float(child.getAttribute("xalignment"))
                 except ValueError:
-                    print(("bad number in xalignment was ignored"))
-                    log.info(("bad number in xalignment was ignored"))
+                    log.error(("bad number in xalignment was ignored"))
 
                 self.append([col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment])
 
@@ -969,14 +952,14 @@ class RawHands(object):
             if save in ("none", "error", "all"):
                 self.save = save
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (self.raw_hands.save, '"error"'))
+                log.warning(f"Invalid config value for {self.raw_hands.save}, defaulting to error")
                 self.save = "error"
 
             compression = node.getAttribute("compression")
             if save in ("none", "gzip", "bzip2"):
                 self.compression = compression
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (self.raw_hands.compression, '"none"'))
+                log.warning(f"Invalid config value for {self.raw_hands.compression}, defaulting to none")
                 self.compression = "none"
 
     # end def __init__
@@ -999,14 +982,14 @@ class RawTourneys(object):
             if save in ("none", "error", "all"):
                 self.save = save
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (self.raw_tourneys.save, '"error"'))
+                log.warning(f"Invalid config value for {self.raw_tourneys.save}, defaulting to error")
                 self.save = "error"
 
             compression = node.getAttribute("compression")
             if save in ("none", "gzip", "bzip2"):
                 self.compression = compression
             else:
-                print(("Invalid config value for %s, defaulting to %s") % (self.raw_tourneys.compression, '"none"'))
+                log.warning(f"Invalid config value for {self.raw_tourneys.compression}, defaulting to none")
                 self.compression = "none"
 
     # end def __init__
@@ -1042,7 +1025,7 @@ class Config(object):
             else:
                 self.dir_log = os.path.join(CONFIG_PATH, "log")
         self.log_file = os.path.join(self.dir_log, "fpdb-log.txt")
-        log = logging.getLogger("config")
+        log = get_logger("config")
 
         #    "file" is a path to an xml file with the fpdb/HUD configuration
         #    we check the existence of "file" and try to recover if it doesn't exist
@@ -1052,7 +1035,7 @@ class Config(object):
         if file is not None:  # config file path passed in
             file = os.path.expanduser(file)
             if not os.path.exists(file):
-                print(("Configuration file %s not found. Using defaults.") % (file))
+                log.warning(f"Configuration file {file} not found. Using defaults.")
                 sys.stderr.write(("Configuration file %s not found. Using defaults.") % (file))
                 file = None
 
@@ -1081,8 +1064,7 @@ class Config(object):
         added, n = 1, 0  # use n to prevent infinite loop if add_missing_elements() fails somehow
         while added > 0 and n < 2:
             n = n + 1
-            log.info("Reading configuration file %s" % file)
-            print(("\n" + ("Reading configuration file %s") + "\n") % file)
+            log.info(f"Reading configuration file {file}")
             try:
                 doc = xml.dom.minidom.parse(file)
                 self.doc = doc  # Root of XML tree
@@ -1234,11 +1216,11 @@ class Config(object):
                             cnode.appendChild(new)
                             t_node = self.doc.createTextNode("\r\n\r\n")
                             cnode.appendChild(t_node)
-                            print("... adding missing config section: " + e.localName)
+                            log.debug(f"... adding missing config section: {e.localName}")
                             nodes_added = nodes_added + 1
 
         if nodes_added > 0:
-            print(("Added %d missing config sections" % nodes_added) + "\n")
+            log.debug(f"Added {nodes_added} missing config sections")
             self.save()
 
         return nodes_added
@@ -1527,7 +1509,7 @@ class Config(object):
     def save_layout_set(self, ls, max, locations, width=None, height=None):
         # wid/height normally not specified when saving common from the mucked display
 
-        print("saving layout =", ls.name, " ", str(max), "Max ", str(locations), "size:", str(width), "x", str(height))
+        log.debug(f"saving layout = {ls.name} {max}Max {locations} size: {width}x{height}")
         ls_node = self.get_layout_set_node(ls.name)
         layout_node = self.get_layout_node(ls_node, max)
         if width:

@@ -24,9 +24,9 @@ import sys
 from optparse import OptionParser
 
 
-import logging
+from loggingFpdb import get_logger
 
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 def fpdb_options():
@@ -166,7 +166,7 @@ def site_alias(alias):
         tmp = aliases[alias]
     except KeyError as e:
         tmp = False
-        log.error(("Alias '%s' unknown") % alias)
+        log.error(f"Alias '{alias}' unknown")
         log.error(f"Exception: {e}")
 
     return tmp

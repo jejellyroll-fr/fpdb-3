@@ -25,12 +25,12 @@ from bs4 import BeautifulSoup
 
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError
 import re
-import logging
+from loggingFpdb import get_logger
 import MergeToFpdb, MergeStructures
 from TourneySummary import TourneySummary
 
 # Merge HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class MergeSummary(TourneySummary):
@@ -172,7 +172,7 @@ class MergeSummary(TourneySummary):
             m = self.re_HandInfoHH.search(handText)
             if m is None:
                 tmp = self.summaryText[0:200]
-                log.error(("MergeSummary.readHandInfo: '%s'") % tmp)
+                log.error(f"readHandInfo not found: '{tmp}'")
                 continue
             tourNo = re.split("-", m.group("TDATA"))[0]
             hands = handsDict.get(tourNo)
@@ -191,7 +191,7 @@ class MergeSummary(TourneySummary):
                 self.gametype["limitType"] = self.limits[mg["LIMIT"]]
             if "GAME" in mg:
                 if mg["GAME"] == "HORSE":
-                    log.error(("MergeSummary.determineGameType: HORSE found, unsupported"))
+                    log.error(("HORSE found, unsupported"))
                     raise FpdbParseError
                     # (self.info['base'], self.info['category']) = self.Multigametypes[m2.group('MULTIGAMETYPE')]
                 else:
@@ -203,7 +203,7 @@ class MergeSummary(TourneySummary):
                 m = self.re_HandInfoHH.search(handText)
                 if m is None:
                     tmp = self.summaryText[0:200]
-                    log.error(("MergeSummary.readHandInfo: '%s'") % tmp)
+                    log.error(f"readHandInfo failed: '{tmp}'")
                     continue
                     # raise FpdbParseError
                 # print 'DEBUG:', m.groupdict()
@@ -229,7 +229,7 @@ class MergeSummary(TourneySummary):
 
                 structure = Structures.lookupSnG(tourneyNameFull, self.startTime)
                 if structure is None:
-                    log.error(("MergeSummary.determineGameType: No match in SnG_Structures"))
+                    log.error(("No match in SnG_Structures"))
                     continue
                     raise FpdbParseError
 
@@ -255,7 +255,7 @@ class MergeSummary(TourneySummary):
                 self.isSng = True
 
                 if structure["multi"]:
-                    log.error(("MergeSummary.determineGameType: Muli-table SnG found, unsupported"))
+                    log.error(("Muli-table SnG found, unsupported"))
                     continue
 
                 players, out, won = {}, [], []
@@ -451,7 +451,7 @@ class MergeSummary(TourneySummary):
                     self.addPlayer(rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount)
 
         if self.gametype["category"] is None:
-            log.error(("MergeSummary.parseSummaryFile: Could not parse summary file"))
+            log.error(("Could not parse summary file"))
             raise FpdbParseError
 
     def convert_to_decimal(self, string):

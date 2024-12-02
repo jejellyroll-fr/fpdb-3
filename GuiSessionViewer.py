@@ -25,6 +25,8 @@ from past.utils import old_div
 import sys
 import traceback
 from time import time, strftime, localtime, gmtime
+from loggingFpdb import get_logger
+
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
@@ -36,6 +38,16 @@ from matplotlib.backends.backend_qt5agg import FigureCanvas
 from mplfinance.original_flavor import candlestick_ochl
 from numpy import diff, nonzero, sum, cumsum, max, min, append
 
+
+import Database
+import Filters
+# import Charset
+
+import GuiHandViewer
+
+log = get_logger("sessionViewer")
+DEBUG = False
+
 try:
     calluse = not "matplotlib" in sys.modules
     import matplotlib
@@ -44,7 +56,7 @@ try:
         try:
             matplotlib.use("qt5agg")
         except ValueError as e:
-            print(e)
+            log.error(f"error importing matplotlib: {e}")
     from matplotlib.figure import Figure
     from matplotlib.backends.backend_qt5agg import FigureCanvas
     from mplfinance.original_flavor import candlestick_ochl
@@ -52,18 +64,8 @@ try:
     from numpy import diff, nonzero, sum, cumsum, max, min, append
 
 except ImportError as inst:
-    print(("""Failed to load numpy and/or matplotlib in Session Viewer"""))
-    print("ImportError: %s" % inst.args)
-
-import Database
-import Filters
-# import Charset
-
-import GuiHandViewer
-import logging
-
-log = logging.getLogger("sessionViewer")
-DEBUG = False
+    log.error(("Failed to load numpy and/or matplotlib in Session Viewer"))
+    log.error(f"ImportError: {inst.args}")
 
 
 class GuiSessionViewer(QSplitter):
@@ -186,19 +188,19 @@ class GuiSessionViewer(QSplitter):
                 playerids.append(result)
 
         if not sitenos:
-            print(("No sites selected - defaulting to PokerStars"))
+            # print(("No sites selected - defaulting to PokerStars"))
             sitenos = [2]
         if not games:
-            print(("No games found"))
+            # print(("No games found"))
             return
         if not currencies:
-            print(("No currencies found"))
+            # print(("No currencies found"))
             return
         if not playerids:
-            print(("No player ids found"))
+            # print(("No player ids found"))
             return
         if not limits:
-            print(("No limits found"))
+            # print(("No limits found"))
             return
 
         self.createStatsPane(frame, playerids, sitenos, games, currencies, limits, seats)
@@ -210,18 +212,18 @@ class GuiSessionViewer(QSplitter):
 
         if DEBUG:
             for x in quotes:
-                print("start %s\tend %s  \thigh %s\tlow %s" % (x[1], x[2], x[3], x[4]))
+                log.debug(f"start {x[1]}\tend {x[2]}\thigh {x[3]}\tlow {x[4]}")
 
         self.generateGraph(quotes)
 
         self.addTable(frame, results)
 
         self.db.rollback()
-        print(("Stats page displayed in %4.2f seconds") % (time() - starttime))
+        log.debug(f"Stats page displayed in {time() - starttime:4.2f} seconds")
 
     def generateDatasets(self, playerids, sitenos, games, currencies, limits, seats):
         if DEBUG:
-            print("DEBUG: Starting generateDatasets")
+            log.debug("Starting generateDatasets")
         THRESHOLD = 1800  # Min # of secs between consecutive hands before being considered a new session
         PADDING = 5  # Additional time in minutes to add to a session, session startup, shutdown etc
 
@@ -387,7 +389,7 @@ class GuiSessionViewer(QSplitter):
                 first_idx = end_idx
                 sid = sid + 1
             else:
-                print("hds <= 0")
+                log.debug("hds <= 0")
         global_close = close
         global_etime = etime
         results.append([""] * 11)
@@ -461,17 +463,17 @@ class GuiSessionViewer(QSplitter):
                 names = names + "\n" + _hname + " on " + site
 
         if not sitenos:
-            print(("No sites selected - defaulting to PokerStars"))
+            # print(("No sites selected - defaulting to PokerStars"))
             self.db.rollback()
             return
 
         if not playerids:
-            print(("No player ids found"))
+            # print(("No player ids found"))
             self.db.rollback()
             return
 
         if not limits:
-            print(("No limits found"))
+            # print(("No limits found"))
             self.db.rollback()
             return
 
@@ -530,7 +532,8 @@ class GuiSessionViewer(QSplitter):
             handids = replayer.get_hand_ids_from_date_range(
                 reformat(self.times[index.row()][0]), reformat(self.times[index.row()][1])
             )
-            print("handids:", handids)
+            log.debug(f"handids: {handids}")
+
             replayer.reload_hands(handids)
 
 

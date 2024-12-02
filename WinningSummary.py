@@ -25,13 +25,13 @@ from past.utils import old_div
 
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 from decimal import Decimal
 from TourneySummary import TourneySummary
 
 # Winning HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class WinningSummary(TourneySummary):
@@ -120,7 +120,7 @@ class WinningSummary(TourneySummary):
             if self.re_HTMLTourNo.search(self.summaryText):
                 tmp1 = self.header[0:200] if m1 is None else "NA"
                 tmp2 = self.summaryText[0:200] if m2 is None else "NA"
-                log.error(("WinningSummary.parseSummaryHtml: '%s' '%s") % (tmp1, tmp2))
+                log.error(f"parse Summary Html failed: '{tmp1}' '{tmp2}'")
                 raise FpdbParseError
             else:
                 raise FpdbHandPartial

@@ -28,7 +28,7 @@
 
 #    Standard Library modules
 import os
-import logging
+from loggingFpdb import get_logger
 
 from functools import partial
 
@@ -44,7 +44,7 @@ import Configuration
 
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hud")
+log = get_logger("hud")
 
 
 class Simple_HUD(Aux_Base.Aux_Seats):
@@ -272,7 +272,7 @@ class Simple_table_popup_menu(QWidget):
         self.move(
             self.parentwin.hud.table.x + self.parentwin.aw.xshift, self.parentwin.hud.table.y + self.parentwin.aw.yshift
         )
-        self.setWindowTitle(self.parentwin.menu_label)
+        self.setWindowTitle(self.parentwin.menu_label + " - HUD configuration")
 
         # combobox statrange
         stat_range_combo_dict = {
@@ -350,6 +350,7 @@ class Simple_table_popup_menu(QWidget):
         grid.addLayout(vbox1, 0, 0)
         grid.addLayout(vbox2, 0, 1)
         grid.addLayout(vbox3, 0, 2)
+        grid.addWidget(QLabel(f"Stat set: {self.parentwin.aw.game_params.name}"), 1, 0)
 
         self.show()
         self.raise_()

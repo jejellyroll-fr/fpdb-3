@@ -17,6 +17,10 @@ from PyQt5.QtWidgets import (
 # import Charset
 import Filters
 
+from loggingFpdb import get_logger
+
+log = get_logger("tourplayerstats")
+
 colalias, colshow, colheading, colxalign, colformat, coltype = 0, 1, 2, 3, 4, 5
 
 
@@ -155,7 +159,7 @@ class GuiTourneyPlayerStats(QSplitter):
             seats,
         )
 
-        print(("Stats page displayed in %4.2f seconds") % (time() - startTime))
+        log.info(f"Stats page displayed in {time() - startTime:4.2f} seconds")
 
     def fillStatsFrame(self, vbox):
         tourneyTypes = self.filters.getTourneyTypes()
@@ -178,10 +182,10 @@ class GuiTourneyPlayerStats(QSplitter):
                 playerids.append(int(result))
 
         if not sitenos:
-            print("No sites selected - defaulting to PokerStars")
+            # print("No sites selected - defaulting to PokerStars")
             sitenos = [2]
         if not playerids:
-            print("No player ids found")
+            # print("No player ids found")
             return
 
         self.createStatsTable(vbox, tourneyTypes, playerids, sitenos, seats)
