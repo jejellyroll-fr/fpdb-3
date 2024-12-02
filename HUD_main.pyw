@@ -10,7 +10,7 @@ import contextlib
 import sys
 import os
 import time
-import logging
+from loggingFpdb import get_logger
 import zmq
 from PyQt5.QtCore import QCoreApplication, QObject, QThread, pyqtSignal, Qt, QTimer
 from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
@@ -27,8 +27,8 @@ import Deck
 from cachetools import TTLCache
 
 # Logging configuration
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-log = logging.getLogger("hud")
+
+log = get_logger("hud")
 
 
 class ZMQWorker(QThread):
@@ -269,7 +269,6 @@ class HUD_main(QObject):
 
     def read_stdin(self, new_hand_id):
         log.debug(f"Processing new hand id: {new_hand_id}")
-        print(f"Entering read_stdin with hand_id: {new_hand_id}")
 
         self.hero, self.hero_ids = {}, {}
         found = False
@@ -277,7 +276,6 @@ class HUD_main(QObject):
         enabled_sites = self.config.get_supported_sites()
         if not enabled_sites:
             log.error("No enabled sites found")
-            print("No enabled sites found")
             self.db_connection.connection.rollback()
             self.destroy()
             return
@@ -286,14 +284,13 @@ class HUD_main(QObject):
         for i in enabled_sites:
             if not self.config.get_site_parameters(i)["aux_enabled"]:
                 log.info(f"Aux disabled for site {i}")
-                print(f"Aux disabled for site {i}")
                 aux_disabled_sites.append(i)
 
         self.db_connection.connection.rollback()  # Libérer le verrou de l'itération précédente
 
         if not found:
             for site in enabled_sites:
-                print("not found ... site in enabled_site")
+                log.debug("not found ... site in enabled_site")
                 if result := self.db_connection.get_site_id(site):
                     site_id = result[0][0]
                     self.hero[site_id] = self.config.supported_sites[site].screen_name
@@ -305,19 +302,16 @@ class HUD_main(QObject):
 
         if new_hand_id != "":
             log.debug("HUD_main.read_stdin: Hand processing starting.")
-            print("HUD_main.read_stdin: Hand processing starting.")
             if new_hand_id in self.cache:
                 log.debug(f"Using cached data for hand {new_hand_id}")
-                print(f"Data found in cache for hand_id: {new_hand_id}")
                 table_info = self.cache[new_hand_id]
             else:
-                print(f"Data not found in cache for hand_id: {new_hand_id}")
+                log.debug(f"Data not found in cache for hand_id: {new_hand_id}")
                 try:
                     table_info = self.db_connection.get_table_info(new_hand_id)
                     self.cache[new_hand_id] = table_info  # Mise en cache des informations
                 except Exception as e:
                     log.error(f"Database error while processing hand {new_hand_id}: {e}", exc_info=True)
-                    print("Database error while processing hand")
                     return
 
         (table_name, max, poker_game, type, fast, site_id, site_name, num_seats, tour_number, tab_number) = table_info
@@ -355,7 +349,7 @@ class HUD_main(QObject):
                     self.table_is_stale(self.hud_dict[temp_key])
                     return
             else:
-                for k in self.hud_dict:
+                for k in list(self.hud_dict.keys()):
                     log.debug("check if the tournament number is in the hud_dict under a different table")
                     if k.startswith(tour_number):
                         self.table_is_stale(self.hud_dict[k])
@@ -453,7 +447,7 @@ class HUD_main(QObject):
             for aw in hud.aux_windows:
                 aw.move_windows()
         except Exception:
-            log.exception(f"Error moving HUD for table: {hud.table.title}.")
+            log.error(f"Error moving HUD for table: {hud.table.title}.")
 
     def idle_resize(self, hud):
         try:
@@ -461,7 +455,7 @@ class HUD_main(QObject):
             for aw in hud.aux_windows:
                 aw.resize_windows()
         except Exception:
-            log.exception(f"Error resizing HUD for table: {hud.table.title}.")
+            log.error(f"Error resizing HUD for table: {hud.table.title}.")
 
     def idle_kill(self, table):
         try:
@@ -472,7 +466,7 @@ class HUD_main(QObject):
                 del self.hud_dict[table]
             self.main_window.resize(1, 1)
         except Exception:
-            log.exception(f"Error killing HUD for table: {table}.")
+            log.error(f"Error killing HUD for table: {table}.")
 
     def idle_create(self, new_hand_id, table, temp_key, max, poker_game, type, stat_dict, cards):
         try:
@@ -489,7 +483,7 @@ class HUD_main(QObject):
                 m.update_gui(new_hand_id)
 
         except Exception:
-            log.exception(f"Error creating HUD for hand {new_hand_id}.")
+            log.error(f"Error creating HUD for hand {new_hand_id}.")
 
     def idle_update(self, new_hand_id, table_name, config):
         try:
@@ -499,7 +493,7 @@ class HUD_main(QObject):
             for aw in self.hud_dict[table_name].aux_windows:
                 aw.update_gui(new_hand_id)
         except Exception:
-            log.exception(f"Error updating HUD for hand {new_hand_id}.")
+            log.error(f"Error updating HUD for hand {new_hand_id}.")
 
 
 if __name__ == "__main__":

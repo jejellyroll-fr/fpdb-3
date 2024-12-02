@@ -13,6 +13,10 @@ import os, os.path
 import time
 import base64
 
+from loggingFpdb import get_logger
+
+log = get_logger("interlocks")
+
 InterProcessLock = None
 
 """
@@ -43,13 +47,13 @@ class InterProcessLockBase(object):
         self.heldBy = None
 
     def getHashedName(self):
-        print(self.name)  # debug
+        log.debug(f"Original name: {self.name}")  # debug
         test = base64.b64encode(self.name.encode())
-        print(test)
+        log.debug(f"Base64 encoded: {test}")
         test = test.replace(b"=", b"")
-        print(test)
+        log.debug(f"Base64 encoded (without '='): {test}")
         test = test.decode()
-        print(test)
+        log.debug(f"Final decoded string: {test}")
         return test
 
     def acquire_impl(self, wait):
@@ -58,19 +62,20 @@ class InterProcessLockBase(object):
     def acquire(self, source, wait=False, retry_time=1):
         if source is None:
             source = "Unknown"
-        if self._has_lock:  # make sure 2nd acquire in same process fails
-            print(("lock already held by:"), self.heldBy)
+        if self._has_lock:  # make sure 2nd acquire in the same process fails
+            log.warning(f"Lock already held by: {self.heldBy}")
             return False
         while not self._has_lock:
             try:
                 self.acquire_impl(wait)
                 self._has_lock = True
                 self.heldBy = source
-                # print 'i have the lock'
+                log.debug("Lock acquired successfully")
             except SingleInstanceError:
                 if not wait:
-                    # raise            # change back to normal acquire functionality, sorry JJ!
+                    log.debug("Failed to acquire lock without waiting")
                     return False
+                log.debug(f"Retrying to acquire lock in {retry_time} seconds")
                 time.sleep(retry_time)
         return True
 

@@ -27,7 +27,7 @@
 
 #    Standard Library modules
 import re
-import logging
+from loggingFpdb import get_logger
 
 from PyQt5.QtGui import QWindow
 from PyQt5.QtCore import Qt
@@ -53,7 +53,7 @@ wnameatom = getAtom("_NET_WM_NAME")
 utf8atom = getAtom("UTF8_STRING")
 
 c = Configuration.Config()
-log = logging.getLogger("hud")
+log = get_logger("hud")
 
 
 class Table(Table_Window):
@@ -64,24 +64,27 @@ class Table(Table_Window):
 
         wins = xconn.core.GetProperty(False, root, nclatom, winatom, 0, (2**32) - 1).reply().value.to_atoms()
         for win in wins:
-            w_title = xconn.core.GetProperty(False, win, wnameatom, utf8atom, 0, (2**32) - 1).reply().value.to_string()
-            print("w_title:", w_title)
+            w_title = xconn.core.GetProperty(False, win, wnameatom, utf8atom, 0, (2**32) - 1).reply().value.to_utf8()
+
+            log.debug(f"Window title: {w_title}")
+
             # escaped_search_string = re.escape(self.search_string)
             # if re.search(escaped_search_string, w_title, re.I):
             if re.search(self.search_string, w_title, re.I):
-                log.debug("%s matches: %s", w_title, self.search_string)
-                log.info('"%s" matches: "%s"', w_title, self.search_string)
+                log.debug(f"{w_title} matches: {self.search_string}")
                 title = w_title.replace('"', "")
                 if self.check_bad_words(title):
                     continue
                 self.number = win
-                print("self.number:", self.number)
+
+                log.debug(f"self.number: {self.number}")
                 self.title = title
-                print("self.title:", self.title)
+                log.debug(f"self.title: {self.title}")
+
                 break
 
         if self.number is None:
-            log.warning(("No match in XTables for table '%s'."), self.search_string)
+            log.warning(f"No match in XTables for table '{self.search_string}'")
 
     # This function serves a double purpose. It fetches the X geometry
     # but it also is used to track for window lifecycle. When
@@ -94,7 +97,7 @@ class Table(Table_Window):
         try:
             geo = xconn.core.GetGeometry(self.number).reply()
             absxy = xconn.core.TranslateCoordinates(self.number, root, geo.x, geo.y).reply()
-            # print('coord:', absxy.dst_x, absxy.dst_y)
+            # log.debug('coord:', absxy.dst_x, absxy.dst_y)
             return {"x": absxy.dst_x, "y": absxy.dst_y, "width": geo.width, "height": geo.height}
         except xcffib.xproto.DrawableError:
             return None

@@ -29,7 +29,7 @@ from past.utils import old_div
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal import Decimal
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 
 
@@ -37,7 +37,7 @@ import MergeStructures
 
 
 # PokerTracker HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class PokerTracker(HandHistoryConverter):
@@ -305,7 +305,7 @@ class PokerTracker(HandHistoryConverter):
         m = self.re_Site.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(("PokerTrackerToFpdb.determineGameType: '%s'") % tmp)
+            log.error(f"determine Game Type failed: '{tmp}'")
             raise FpdbParseError
 
         self.sitename = self.sites[m.group("SITE")][0]
@@ -320,7 +320,7 @@ class PokerTracker(HandHistoryConverter):
             m = self.re_GameInfo3.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(("PokerTrackerToFpdb.determineGameType: '%s'") % tmp)
+            log.error(f"determine Game Type failed: '{tmp}'")
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -366,10 +366,7 @@ class PokerTracker(HandHistoryConverter):
                     info["bb"] = self.Lim_Blinds[bb][1]
                 except KeyError:
                     tmp = handText[0:200]
-                    log.error(
-                        ("PokerTrackerToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'")
-                        % (mg["BB"], tmp)
-                    )
+                    log.error(f"Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'")
                     raise FpdbParseError
             else:
                 sb = self.clearMoneyString(mg["SB"])
@@ -393,7 +390,7 @@ class PokerTracker(HandHistoryConverter):
             m2 = self.re_GameInfo3.search(hand.handText)
         if (m is None and self.sitename not in ("Everest", "Microgaming")) or m2 is None:
             tmp = hand.handText[0:200]
-            log.error(("PokerTrackerToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(f"read Hand Info failed: '{tmp}'")
             raise FpdbParseError
 
         if self.sitename not in ("Everest", "Microgaming"):
@@ -474,10 +471,7 @@ class PokerTracker(HandHistoryConverter):
                                 hand.buyinCurrency = "play"
                             else:
                                 # FIXME: handle other currencies, play money
-                                log.error(
-                                    ("PokerTrackerToFpdb.readHandInfo: Failed to detect currency.")
-                                    + " Hand ID: %s: '%s'" % (hand.handid, info[key])
-                                )
+                                log.error(f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'")
                                 raise FpdbParseError
 
                             info["BIAMT"] = info["BIAMT"].strip("$€£")
@@ -519,12 +513,17 @@ class PokerTracker(HandHistoryConverter):
         if self.re_Cancelled.search(hand.handText):
             raise FpdbHandPartial(("Hand '%s' was cancelled.") % hand.handid)
 
+    def readSummaryInfo(self, summaryInfoList):
+        log.info("enter method readSummaryInfo.")
+        log.debug("Method readSummaryInfo non implemented.")
+        return True
+
     def readButton(self, hand):
         m = self.re_Button.search(hand.handText)
         if m:
             hand.buttonpos = int(m.group("BUTTON"))
         else:
-            log.info("readButton: " + ("not found"))
+            log.info("readButton: not found")
 
     def readPlayerStacks(self, hand):
         if self.sitename != "Microgaming":
@@ -761,11 +760,7 @@ class PokerTracker(HandHistoryConverter):
                     hand.setUncalledBets(False)
                 curr_pot = amount
             else:
-                log.debug(
-                    ("DEBUG:")
-                    + " "
-                    + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group("PNAME"), action.group("ATYPE"))
-                )
+                log.debug(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
 
     def allInBlind(self, hand, street, action, actiontype):
         if street in ("PREFLOP", "DEAL"):

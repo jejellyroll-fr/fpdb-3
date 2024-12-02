@@ -42,9 +42,9 @@ from math import pi, cos, sin
 from decimal import Decimal
 import copy
 import os
-import logging
+from loggingFpdb import get_logger
 
-log = logging.getLogger("replayer")
+log = get_logger("replayer")
 
 CARD_HEIGHT = 90
 CARD_WIDTH = 70
@@ -170,24 +170,22 @@ class GuiReplayer(QWidget):
         nb_player = len(list(state.players.values()))
         # find hero in site
         path = os.path.join(Configuration.Config().config_path, "HUD_config.xml")
-        print(path)
+        # print(path)
         doc = xml.dom.minidom.parse(path)
         for site_node in doc.getElementsByTagName("site"):
             if site_node.getAttribute("site_name") == str(hand.sitename):
-                print(site_node.getAttribute("screen_name"))
+                log.debug(f"Screen name: {site_node.getAttribute('screen_name')}")
                 self.Heroes = site_node.getAttribute("screen_name")
+        log.debug(f"List players: {list(state.players.values())}")
 
-        print("list players:", (list(state.players.values())))
-        # print("list players:", self.Heroes)
         if nb_player == 2:
             # set 2 player
-            print("nb player :", nb_player)
+            log.debug(f"Number of players: {nb_player}")
             i = 0
             for player in list(state.players.values()):
-                # print(player.holecards)
-                print(hand.gametype["category"])
+                log.debug(f"Game type category: {hand.gametype['category']}")
                 if player.name == list(state.players.values())[0].name:
-                    print("round", i, "player", player.name)
+                    log.debug(f"Round {i} player {player.name}")
                     # draw player bloc
                     painter.drawImage(QPoint(635, 790), self.playerBackdrop)
                     if player.action == "folds":
@@ -255,7 +253,7 @@ class GuiReplayer(QWidget):
                             QRect(605, 670, 200, 20), Qt.AlignCenter, "%s%.2f" % (self.currency, player.chips)
                         )
                 elif player.name == list(state.players.values())[1].name:
-                    print("round", i, "player", player.name)
+                    log.debug(f"Round {i} player {player.name}")
                     # draw player bloc
                     painter.drawImage(QPoint(1090, 490), self.playerBackdrop)
                     if player.action == "folds":
@@ -327,15 +325,14 @@ class GuiReplayer(QWidget):
                     pass
                 i += 1
         elif nb_player == 3:
-            print("nb player :", nb_player)
+            log.debug(f"Number of players: {nb_player}")
             i = 0
             for player in list(state.players.values()):
-                # print(player.holecards)
-                print(hand.gametype["category"])
+                log.debug(f"Game type category: {hand.gametype['category']}")
                 if player.name == list(state.players.values())[0].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(530, 650), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))
-                    print("round", i, "player", player.name)
+                    log.debug(f"Round {i} player {player.name}")
                     # draw player bloc
 
                     painter.drawImage(QPoint(635, 790), self.playerBackdrop)
@@ -407,7 +404,7 @@ class GuiReplayer(QWidget):
                 elif player.name == list(state.players.values())[1].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(990, 570), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))  # ok
-                    print("round", i, "player", player.name)
+                    log.debug(f"Round {i} player {player.name}")
                     # draw player bloc
                     painter.drawImage(QPoint(1090, 490), self.playerBackdrop)
                     if player.action == "folds":
@@ -478,7 +475,7 @@ class GuiReplayer(QWidget):
                 elif player.name == list(state.players.values())[2].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(450, 320), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))
-                    print(list(state.players.values())[2])
+                    log.debug(f"Player: {list(state.players.values())[2]}")
                     # draw player bloc
                     painter.drawImage(QPoint(160, 490), self.playerBackdrop)
                     if player.action == "folds":
@@ -550,15 +547,14 @@ class GuiReplayer(QWidget):
                     pass
                 i += 1
         elif nb_player == 4:
-            print("nb player :", nb_player)
+            log.debug(f"Number of players: {nb_player}")
             i = 0
             for player in list(state.players.values()):
-                # print(player.holecards)
-                print(hand.gametype["category"])
+                log.debug(f"Game type category: {hand.gametype['category']}")
                 if player.name == list(state.players.values())[0].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(530, 650), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))
-                    print("round", i, "player", player.name)
+                    log.debug(f"Round {i} player {player.name}")
                     # draw player bloc
                     painter.drawImage(QPoint(635, 790), self.playerBackdrop)
                     if player.action == "folds":
@@ -629,7 +625,7 @@ class GuiReplayer(QWidget):
                 elif player.name == list(state.players.values())[1].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(990, 570), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))  # ok
-                    print("round", i, "player", player.name)
+                    log.debug(f"Round {i} player {player.name}")
                     # draw player bloc
                     painter.drawImage(QPoint(1090, 490), self.playerBackdrop)
                     if player.action == "folds":
@@ -700,7 +696,7 @@ class GuiReplayer(QWidget):
                 elif player.name == list(state.players.values())[2].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(850, 320), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))
-                    print(list(state.players.values())[2])
+                    log.debug(f"Player: {list(state.players.values())[2]}")
                     # draw player bloc
                     painter.drawImage(QPoint(635, 220), self.playerBackdrop)  #
                     if player.action == "folds":
@@ -771,7 +767,7 @@ class GuiReplayer(QWidget):
                 elif player.name == list(state.players.values())[3].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(450, 320), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))
-                    print(list(state.players.values())[2])
+                    log.debug(f"Player: {list(state.players.values())[2]}")
                     # draw player bloc
                     painter.drawImage(QPoint(160, 490), self.playerBackdrop)
                     if player.action == "folds":
@@ -843,15 +839,15 @@ class GuiReplayer(QWidget):
                     pass
                 i += 1
         elif nb_player == 5:
-            print("nb player :", nb_player)
+            log.debug(f"Number of players: {nb_player}")
             i = 0
             for player in list(state.players.values()):
                 # print(player.holecards)
-                print(hand.gametype["category"])
+                log.debug(f"Game type category: {hand.gametype['category']}")
                 if player.name == list(state.players.values())[0].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(530, 650), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))
-                    print("round", i, "player", player.name)
+                    log.debug(f"Round {i} player {player.name}")
                     # draw player bloc
                     painter.drawImage(QPoint(635, 790), self.playerBackdrop)
                     if player.action == "folds":
@@ -922,7 +918,7 @@ class GuiReplayer(QWidget):
                 elif player.name == list(state.players.values())[1].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(990, 570), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))  # ok
-                    print("round", i, "player", player.name)
+                    log.debug(f"Round {i} player {player.name}")
                     # draw player bloc
                     painter.drawImage(QPoint(1090, 490), self.playerBackdrop)
                     if player.action == "folds":
@@ -993,7 +989,7 @@ class GuiReplayer(QWidget):
                 elif player.name == list(state.players.values())[3].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(660, 320), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))
-                    print(list(state.players.values())[2])
+                    log.debug(f"Player: {list(state.players.values())[2]}")
                     # draw player bloc
                     painter.drawImage(QPoint(500, 220), self.playerBackdrop)  # ok
                     if player.action == "folds":
@@ -1064,7 +1060,7 @@ class GuiReplayer(QWidget):
                 elif player.name == list(state.players.values())[2].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(950, 350), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))
-                    print(list(state.players.values())[2])
+                    log.debug(f"Player: {list(state.players.values())[2]}")
                     # draw player bloc
                     painter.drawImage(QPoint(750, 220), self.playerBackdrop)  # ok
                     if player.action == "folds":
@@ -1135,7 +1131,7 @@ class GuiReplayer(QWidget):
                 elif player.name == list(state.players.values())[4].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(450, 320), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))
-                    print(list(state.players.values())[2])
+                    log.debug(f"Player: {list(state.players.values())[2]}")
                     # draw player bloc
                     painter.drawImage(QPoint(160, 490), self.playerBackdrop)
                     if player.action == "folds":
@@ -1207,15 +1203,15 @@ class GuiReplayer(QWidget):
                     pass
                 i += 1
         elif nb_player == 6:
-            print("nb player :", nb_player)
+            log.debug(f"Number of players: {nb_player}")
             i = 0
             for player in list(state.players.values()):
                 # print(player.holecards)
-                print(hand.gametype["category"])
+                log.debug(f"Game type category: {hand.gametype['category']}")
                 if player.name == list(state.players.values())[0].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(650, 650), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))
-                    print("round", i, "player", player.name)
+                    log.debug(f"Round {i} player {player.name}")
                     # draw player bloc
                     painter.drawImage(QPoint(750, 790), self.playerBackdrop)
                     if player.action == "folds":
@@ -1287,7 +1283,7 @@ class GuiReplayer(QWidget):
                 elif player.name == list(state.players.values())[1].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(990, 570), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))  # ok
-                    print("round", i, "player", player.name)
+                    log.debug(f"Round {i} player {player.name}")
                     # draw player bloc
                     painter.drawImage(QPoint(1090, 490), self.playerBackdrop)
                     if player.action == "folds":
@@ -1359,8 +1355,8 @@ class GuiReplayer(QWidget):
                 elif player.name == list(state.players.values())[3].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(660, 320), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))
-                    print("round", i, "player", player.name)
-                    print(list(state.players.values())[2])
+                    log.debug(f"Round {i} player {player.name}")
+                    log.debug(f"Player: {list(state.players.values())[2]}")
                     # draw player bloc
                     painter.drawImage(QPoint(500, 220), self.playerBackdrop)  # ok
                     if player.action == "folds":
@@ -1431,8 +1427,8 @@ class GuiReplayer(QWidget):
                 elif player.name == list(state.players.values())[2].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(950, 350), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))
-                    print("round", i, "player", player.name)
-                    print(list(state.players.values())[2])
+                    log.debug(f"Round {i} player {player.name}")
+                    log.debug(f"Player: {list(state.players.values())[2]}")
                     # draw player bloc
                     painter.drawImage(QPoint(750, 220), self.playerBackdrop)  # ok
                     if player.action == "folds":
@@ -1503,8 +1499,8 @@ class GuiReplayer(QWidget):
                 elif player.name == list(state.players.values())[4].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(450, 320), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))
-                    print("round", i, "player", player.name)
-                    print(list(state.players.values())[2])
+                    log.debug(f"Round {i} player {player.name}")
+                    log.debug(f"Player: {list(state.players.values())[2]}")
                     # draw player bloc
                     painter.drawImage(QPoint(160, 490), self.playerBackdrop)
                     if player.action == "folds":
@@ -1575,8 +1571,8 @@ class GuiReplayer(QWidget):
                 elif player.name == list(state.players.values())[5].name:
                     if hand.get_player_position(player.name) == "S":
                         painter.drawImage(QPoint(450, 620), self.dealer.scaled(40, 40, Qt.KeepAspectRatio))
-                    print("round", i, "player", player.name)
-                    print(list(state.players.values())[2])
+                    log.debug(f"Round {i} player {player.name}")
+                    log.debug(f"Player: {list(state.players.values())[2]}")
                     # draw player bloc
                     painter.drawImage(QPoint(500, 790), self.playerBackdrop)
                     if player.action == "folds":
@@ -1649,20 +1645,20 @@ class GuiReplayer(QWidget):
                     pass
                 i += 1
         elif nb_player == 7:
-            print("nb player :", nb_player)
+            log.debug(f"Number of players: {nb_player}")
         elif nb_player == 8:
-            print("nb player :", nb_player)
+            log.debug(f"Number of players: {nb_player}")
         elif nb_player == 9:
-            print("nb player :", nb_player)
+            log.debug(f"Number of players: {nb_player}")
         elif nb_player == 10:
-            print("nb player :", nb_player)
+            log.debug(f"Number of players: {nb_player}")
 
         painter.setPen(QColor("white"))
 
         for street in state.renderBoard:
             x = 520
             y = 400
-            print("street", street, "value street", state.board[street])
+            log.debug(f"Street {street} value street {state.board[street]}")
             if street == "FLOP" and state.board[street] != []:
                 self.renderboardCards(painter, state.board[street], x, y)
             elif street == "FLOP1" and state.board[street] != []:
@@ -1710,11 +1706,11 @@ class GuiReplayer(QWidget):
         if self.stateSlider.value() == self.stateSlider.maximum():
             if nb_player == 2:
                 # set 2 player
-                print("nb player :", nb_player)
+                log.debug(f"Number of players: {nb_player}")
                 i = 0
                 for player in list(state.players.values()):
                     # print(player.holecards)
-                    print(hand.gametype["category"])
+                    log.debug(f"Game type category: {hand.gametype['category']}")
                     if player.name == list(state.players.values())[0].name:
                         self.renderCards(painter, player.holecards, 660, 700)
                     elif player.name == list(state.players.values())[1].name:
@@ -1723,11 +1719,11 @@ class GuiReplayer(QWidget):
                         pass
                     i += 1
             elif nb_player == 3:
-                print("nb player :", nb_player)
+                log.debug(f"Number of players: {nb_player}")
                 i = 0
                 for player in list(state.players.values()):
                     # print(player.holecards)
-                    print(hand.gametype["category"])
+                    log.debug(f"Game type category: {hand.gametype['category']}")
                     if player.name == list(state.players.values())[0].name:
                         self.renderCards(painter, player.holecards, 660, 700)
                     elif player.name == list(state.players.values())[1].name:
@@ -1738,11 +1734,11 @@ class GuiReplayer(QWidget):
                         pass
                     i += 1
             elif nb_player == 4:
-                print("nb player :", nb_player)
+                log.debug(f"Number of players: {nb_player}")
                 i = 0
                 for player in list(state.players.values()):
                     # print(player.holecards)
-                    print(hand.gametype["category"])
+                    log.debug(f"Game type category: {hand.gametype['category']}")
                     if player.name == list(state.players.values())[0].name:
                         self.renderCards(painter, player.holecards, 660, 700)
                     elif player.name == list(state.players.values())[1].name:
@@ -1755,11 +1751,11 @@ class GuiReplayer(QWidget):
                         pass
                     i += 1
             elif nb_player == 5:
-                print("nb player :", nb_player)
+                log.debug(f"Number of players: {nb_player}")
                 i = 0
                 for player in list(state.players.values()):
                     # print(player.holecards)
-                    print(hand.gametype["category"])
+                    log.debug(f"Game type category: {hand.gametype['category']}")
                     if player.name == list(state.players.values())[0].name:
                         self.renderCards(painter, player.holecards, 660, 700)
                     elif player.name == list(state.players.values())[1].name:
@@ -1774,11 +1770,11 @@ class GuiReplayer(QWidget):
                         pass
                     i += 1
             elif nb_player == 6:
-                print("nb player :", nb_player)
+                log.debug(f"Number of players: {nb_player}")
                 i = 0
                 for player in list(state.players.values()):
                     # print(player.holecards)
-                    print(hand.gametype["category"])
+                    log.debug(f"Game type category: {hand.gametype['category']}")
                     if player.name == list(state.players.values())[0].name:
                         self.renderCards(painter, player.holecards, 770, 700)
                     elif player.name == list(state.players.values())[1].name:
@@ -1795,13 +1791,13 @@ class GuiReplayer(QWidget):
                         pass
                     i += 1
             elif nb_player == 7:
-                print("nb player :", nb_player)
+                log.debug(f"Number of players: {nb_player}")
             elif nb_player == 8:
-                print("nb player :", nb_player)
+                log.debug(f"Number of players: {nb_player}")
             elif nb_player == 9:
-                print("nb player :", nb_player)
+                log.debug(f"Number of players: {nb_player}")
             elif nb_player == 10:
-                print("nb player :", nb_player)
+                log.debug(f"Number of players: {nb_player}")
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Left:
@@ -1826,8 +1822,8 @@ class GuiReplayer(QWidget):
         self.states = []
 
         # info for drawing (game, limite, site ...)
-        print(hand)
-        print(hand.gametype)
+        log.debug(f"Hand raw: {hand}")
+        log.debug(f"Game type: {hand.gametype}")
         info_gen = hand.gametype["category"]
         if info_gen == "omahahilo":
             info_gen = "Omaha Hi/Lo"
@@ -1896,7 +1892,7 @@ class GuiReplayer(QWidget):
             limit_info = "Cap Pot Limit"
         else:
             limit_info = "unknown"
-        print(limit_info)
+        log.debug(f"Limit: {limit_info}")
         self.info = (
             str(limit_info)
             + " "
@@ -2065,7 +2061,7 @@ class TableState(object):
             # print (items[3])
 
             self.players[items[1]] = Player(hand, items[1], items[2], int(items[0]))
-            print(self.players[items[1]])
+            log.debug(f"Items player: {self.players[items[1]]}")
 
     def startPhase(self, phase):
         self.street = phase
@@ -2138,7 +2134,7 @@ class TableState(object):
             player.stack -= action[2]
             self.newpot += action[2]
         else:
-            print("unhandled action: " + str(action))
+            log.warning(f"unhandled action: {str(action)}")
 
         if player.stack == 0:
             self.allinThisStreet = True
@@ -2177,7 +2173,7 @@ class Player(object):
             for i, street in enumerate(hand.actionStreets[1:]):
                 self.streetcards[street] = self.holecards[: i + 3]
             self.holecards = self.streetcards[hand.actionStreets[1]]
-        print("seat", seat)
+        log.debug(f"Seat: {seat}")
         self.x = 0.5 * cos(2 * self.seat * pi / hand.maxseats)
         self.y = 0.8 * sin(2 * self.seat * pi / hand.maxseats)
 

@@ -23,6 +23,7 @@ dependencies = [
     "xlrd==2.0.1",
     "pyzmq==26.0.3",
     "cachetools==5.5.0",
+    "colorlog==6.9.0",
 ]
 
 [project.optional-dependencies]

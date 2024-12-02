@@ -45,7 +45,7 @@ the Hud modules.
 # sort out the wierd focus issues in flop-mucked.
 
 #    Standard Library modules
-import logging
+from loggingFpdb import get_logger
 
 
 #    FreePokerTools modules
@@ -57,7 +57,7 @@ import Configuration
 import os
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hud")
+log = get_logger("hud")
 
 
 class Classic_HUD(Aux_Hud.Simple_HUD):
@@ -182,7 +182,7 @@ class Classic_stat(Aux_Hud.Simple_stat):
             result = db.cursor.fetchone()
             return result[0] if result else "Unknown Player"
         except Exception as e:
-            print(f"Error fetching player name: {e}")
+            log.error(f"Error fetching player name: {e}")
             return "Unknown Player"
         finally:
             db.close_connection()
@@ -195,7 +195,7 @@ class Classic_stat(Aux_Hud.Simple_stat):
             result = db.cursor.fetchone()
             return result[0] if result else ""
         except Exception as e:
-            print(f"Error fetching comment: {e}")
+            log.error(f"Error fetching comment: {e}")
             return ""
         finally:
             db.close_connection()
@@ -208,7 +208,7 @@ class Classic_stat(Aux_Hud.Simple_stat):
             db.commit()
             QMessageBox.information(None, "Comment saved", "The comment has been successfully saved.")
         except Exception as e:
-            print(f"Error saving comment: {e}")
+            log.error(f"Error saving comment: {e}")
             QMessageBox.warning(None, "Error", f"An error occurred while saving the comment: {e}")
         finally:
             db.close_connection()
@@ -221,7 +221,7 @@ class Classic_stat(Aux_Hud.Simple_stat):
             result = db.cursor.fetchone()
             return bool(result and result[0])
         except Exception as e:
-            print(f"Error checking comment: {e}")
+            log.error(f"Error checking comment: {e}")
             return False
         finally:
             db.close_connection()
@@ -252,7 +252,7 @@ class Classic_stat(Aux_Hud.Simple_stat):
                         fg = self.stat_hicolor
                         # print(f"Using hicolor: {fg}")
             except Exception as e:
-                print(f"Error in color selection: {e}")
+                log.error(f"Error in color selection: {e}")
 
         statstring = f"{self.hudprefix}{str(self.number[1])}{self.hudsuffix}"
 
