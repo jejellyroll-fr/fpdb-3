@@ -18,3 +18,4 @@ jinja2
 qt_material
 pyzmq==26.0.3
 cachetools==5.5.0
+colorlog==6.9.0
