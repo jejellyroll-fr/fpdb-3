@@ -112,3 +112,4 @@ zope.event                ==5.0
 zope.interface            ==6.4.post2
 pyzmq==26.0.3
 cachetools==5.5.0
+colorlog==6.9.0

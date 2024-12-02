@@ -112,6 +112,7 @@ FILES=(
     "WinningToFpdb.py"
     "WinTables.py"
     "XTables.py"
+    "loggingFpdb.py"
 )
 
 FOLDERS=(
