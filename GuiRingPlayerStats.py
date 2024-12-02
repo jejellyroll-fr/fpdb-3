@@ -46,6 +46,9 @@ from PyQt5.QtWidgets import (
 import Card
 import Database
 import Filters
+from loggingFpdb import get_logger
+
+log = get_logger("ringplayerstats")
 # import Charset
 
 colalias, colheading, colshowsumm, colshowposn, colformat, coltype, colxalign = 0, 1, 2, 3, 4, 5, 6
@@ -262,13 +265,13 @@ class GuiRingPlayerStats(QSplitter):
 
         if not sitenos:
             # Should probably pop up here.
-            print(("No sites selected - defaulting to PokerStars"))
+            log.debug(("No sites selected - defaulting to PokerStars"))
             sitenos = [2]
         if not playerids:
-            print(("No player ids found"))
+            log.debug(("No player ids found"))
             return
         if not limits:
-            print(("No limits found"))
+            log.debug(("No limits found"))
             return
 
         self.createStatsTable(vbox, playerids, sitenos, limits, seats, groups, dates, games, currencies)
@@ -310,7 +313,7 @@ class GuiRingPlayerStats(QSplitter):
             )
 
         self.db.rollback()
-        print(("Stats page displayed in %4.2f seconds") % (time() - startTime))
+        log.debug(f"Stats page displayed in {time() - startTime:.2f} seconds")
 
     def addGrid(self, vbox, query, flags, playerids, sitenos, limits, seats, groups, dates, games, currencies):
         sqlrow = 0
@@ -579,7 +582,7 @@ class GuiRingPlayerStats(QSplitter):
         else:
             query = query.replace("<position>", "gt.base")
             plposition_column[colshow] = False
-        print(query)
+        # print(query)
         return query
 
     def showDetailFilter(self, checkState):

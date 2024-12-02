@@ -26,7 +26,7 @@ from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandP
 import PokerStarsStructures
 from TourneySummary import TourneySummary
 
-import logging
+from loggingFpdb import get_logger
 
 try:
     import xlrd
@@ -34,7 +34,7 @@ except ImportError:
     xlrd = None
 
 # PPokerstatars HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class PokerStarsSummary(TourneySummary):
@@ -280,7 +280,7 @@ class PokerStarsSummary(TourneySummary):
         if m is None:
             tmp1 = info["header"]
             tmp2 = str(info)[0:200]
-            log.error(("PokerStarsSummary.parseSummaryXLS: '%s' '%s") % (tmp1, tmp2))
+            log.error(f"Summary XLS not found: '{tmp1}' '{tmp2}'")
             raise FpdbParseError
         info.update(m.groupdict())
         mg = {}
@@ -290,7 +290,7 @@ class PokerStarsSummary(TourneySummary):
                 if m1:
                     mg.update(m1.groupdict())
                 elif k == "Game":
-                    log.error(("PokerStarsSummary.parseSummaryXLS Game '%s' not found") % j)
+                    log.error(f"Summary XLS Game '{j}' not found")
                     raise FpdbParseError
         info.update(mg)
         self.parseSummaryArchive(info)
@@ -306,7 +306,7 @@ class PokerStarsSummary(TourneySummary):
                 raise FpdbHandPartial
             tmp1 = self.header[0:200] if m1 is None else "NA"
             tmp2 = self.summaryText if m2 is None else "NA"
-            log.error(("PokerStarsSummary.parseSummaryHtml: '%s' '%s") % (tmp1, tmp2))
+            log.error(f"Summary HTML not found: '{tmp1}' '{tmp2}'")
             raise FpdbParseError
         info.update(m1.groupdict())
         info.update(m2.groupdict())
@@ -463,7 +463,7 @@ class PokerStarsSummary(TourneySummary):
             if self.re_emailHeader.match(self.summaryText):
                 raise FpdbHandPartial
             # tmp = self.summaryText[0:200]
-            log.error(("PokerStarsSummary.parseSummaryFile: '%s'") % self.summaryText)
+            log.error(f"Summary File failed: '{self.summaryText}'")
             raise FpdbParseError
         # m4 = self.re_TourneyInfo4.search(self.summaryText)
         # print "DEBUG: m.groupdict(): %s" % m.groupdict()

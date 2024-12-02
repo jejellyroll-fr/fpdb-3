@@ -37,7 +37,7 @@ import datetime
 from pytz import timezone
 import pytz
 
-import logging
+from loggingFpdb import get_logger
 
 
 import Hand
@@ -45,7 +45,7 @@ from Exceptions import FpdbParseError, FpdbHandPartial, FpdbHandSkipped
 from abc import ABC, abstractmethod
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("handHistoryConverter")
+log = get_logger("handHistoryConverter")
 
 
 class HandHistoryConverter(ABC):
@@ -86,8 +86,7 @@ out_path  (default '-' = sys.stdout)
         self.import_parameters = self.config.get_import_parameters()
         self.sitename = sitename
         log.info(
-            "HandHistory init - %s site, %s subclass, in_path '%r'; out_path '%r'"
-            % (self.sitename, self.__class__, in_path, out_path)
+            f"HandHistory init - {self.sitename} site, {self.__class__} subclass, in_path '{in_path}'; out_path '{out_path}'"
         )  # should use self.filter, not self.sitename
 
         self.index = index
@@ -146,8 +145,8 @@ HandHistoryConverter: '%(sitename)s'
         self.numErrors = 0
         lastParsed = None
         handsList = self.allHandsAsList()
-        log.debug(("Hands list is:") + str(handsList))
-        log.info(("Parsing %d hands") % len(list(handsList)))
+        log.debug(f"Hands list is: {handsList}")
+        log.info(f"Parsing {len(list(handsList))} hands")
         # Determine if we're dealing with a HH file or a Summary file
         # quick fix : empty files make the handsList[0] fail ==> If empty file, go on with HH parsing
         if len(list(handsList)) == 0 or self.isSummary(handsList[0]) is False:
@@ -159,14 +158,14 @@ HandHistoryConverter: '%(sitename)s'
                 except FpdbHandPartial as e:
                     self.numPartial += 1
                     lastParsed = "partial"
-                    log.debug("%s" % e)
+                    log.warning(f"partial {e}")
                 except FpdbHandSkipped:
                     self.numSkipped += 1
                     lastParsed = "skipped"
                 except FpdbParseError:
                     self.numErrors += 1
                     lastParsed = "error"
-                    log.error(("FpdbParseError for file '%s'") % self.in_path)
+                    log.error(f"FpdbParseError for file '{self.in_path}'")
             if lastParsed in ("partial", "error") and self.autoPop:
                 self.index -= len(handsList[-1])
                 if self.isCarraige:
@@ -180,21 +179,16 @@ HandHistoryConverter: '%(sitename)s'
             self.numHands = len(list(handsList))
             endtime = time.time()
             log.info(
-                ("Read %d hands (%d failed) in %.3f seconds")
-                % (self.numHands, (self.numErrors + self.numPartial), endtime - starttime)
+                f"Read {self.numHands} hands ({self.numErrors + self.numPartial} failed) in {endtime - starttime:.3f} seconds"
             )
         else:
             self.parsedObjectType = "Summary"
             summaryParsingStatus = self.readSummaryInfo(handsList)
             endtime = time.time()
             if summaryParsingStatus:
-                log.info(
-                    ("Summary file '%s' correctly parsed (took %.3f seconds)") % (self.in_path, endtime - starttime)
-                )
+                log.info(f"Summary file '{self.in_path}' correctly parsed (took {endtime - starttime:.3f} seconds)")
             else:
-                log.warning(
-                    ("Error converting summary file '%s' (took %.3f seconds)") % (self.in_path, endtime - starttime)
-                )
+                log.warning(f"Error converting summary file '{self.in_path}' (took {endtime - starttime:.3f} seconds)")
 
     def setAutoPop(self, value):
         self.autoPop = value
@@ -224,7 +218,7 @@ HandHistoryConverter: '%(sitename)s'
             self.obs = m.sub("", self.obs)
 
         if self.obs is None or self.obs == "":
-            log.info(("Read no hands from file: '%s'") % self.in_path)
+            log.info(f"Read no hands from file: '{self.in_path}'")
             return []
         handlist = re.split(self.re_SplitHands, self.obs)
         # Some HH formats leave dangling text after the split
@@ -255,8 +249,8 @@ HandHistoryConverter: '%(sitename)s'
             # TODO: not ideal, just trying to not error. Throw ParseException?
             self.numErrors += 1
         else:
-            log.debug(gametype)
-            log.debug("gametypecategory", gametype["category"])
+            log.debug(f"game type {gametype}")
+            log.debug(f"gametypecategory {gametype['category']}")
             if gametype["category"] in self.import_parameters["importFilters"]:
                 raise FpdbHandSkipped("Skipped %s hand" % gametype["type"])
 
@@ -282,15 +276,18 @@ HandHistoryConverter: '%(sitename)s'
             elif gametype["base"] == "draw":
                 hand = Hand.DrawHand(self.config, self, self.sitename, gametype, handText)
         else:
-            log.error("%s Unsupported game type: %s", self.sitename, gametype)
+            log.error(f"{self.sitename} Unsupported game type: {gametype}")
             raise FpdbParseError
 
         if hand:
             # hand.writeHand(self.out_fh)
             return hand
         else:
-            log.error("%s Unsupported game type: %s", self.sitename, gametype)
-            # TODO: pity we don't know the HID at this stage. Log the entire hand?
+            # Log the first few lines of handText to help with debugging
+            preview = "\n".join(handText.split("\n")[:5])  # First 5 lines
+            log.error(f"{self.sitename} Unsupported game type: {gametype}")
+            log.error(f"Hand text preview:\n{preview}")
+            raise FpdbParseError(f"Unsupported game type: {gametype}")
 
     def isPartial(self, handText):
         count = 0
@@ -492,8 +489,12 @@ or None if we fail to get the info """
     # Some sites don't report the rake. This will be called at the end of the hand after the pot total has been calculated
     # an inheriting class can calculate it for the specific site if need be.
     def getRake(self, hand):
-        log.debug("total pot", hand.totalpot)
-        log.debug("collected pot", hand.totalcollected)
+        if hand.totalcollected is None:
+            log.warning(f"totalcollected is None for hand ID {hand.handid}. Defaulting to 0.")
+            hand.totalcollected = Decimal("0.00")
+
+        log.debug(f"Total pot amount: {hand.totalpot}")
+        log.debug(f"Total collected amount: {hand.totalcollected}")
         if hand.totalcollected > hand.totalpot:
             log.debug("collected pot>total pot")
         if hand.rake is None:
@@ -519,13 +520,11 @@ or None if we fail to get the info """
                 == 0
             ):
                 log.error(
-                    ("hhc.getRake(): '%s': Missed sb/bb - Amount collected (%s) is greater than the pot (%s)")
-                    % (hand.handid, str(hand.totalcollected), str(hand.totalpot))
+                    f"'{hand.handid}': Missed sb/bb - Amount collected ({hand.totalcollected}) is greater than the pot ({hand.totalpot})"
                 )
             else:
                 log.error(
-                    ("hhc.getRake(): '%s': Amount collected (%s) is greater than the pot (%s)")
-                    % (hand.handid, str(hand.totalcollected), str(hand.totalpot))
+                    f"'{hand.handid}': Amount collected ({hand.totalcollected}) is greater than the pot ({hand.totalpot})"
                 )
                 raise FpdbParseError
         elif (
@@ -534,10 +533,7 @@ or None if we fail to get the info """
             and not hand.fastFold
             and not hand.cashedOut
         ):
-            log.error(
-                ("hhc.getRake(): '%s': Suspiciously high rake (%s) > 25 pct of pot (%s)")
-                % (hand.handid, str(hand.rake), str(hand.totalpot))
-            )
+            log.error(f"'{hand.handid}': Suspiciously high rake ({hand.rake}) > 25 pct of pot ({hand.totalpot})")
             raise FpdbParseError
 
     def sanityCheck(self):
@@ -678,7 +674,7 @@ or None if we fail to get the info """
         if wantedTimezone == "UTC":
             wantedTimezone = pytz.utc
         else:
-            log.error(("Unsupported target timezone: ") + givenTimezone)
+            log.error(f"Unsupported target timezone: {givenTimezone}")
             raise FpdbParseError(("Unsupported target timezone: ") + givenTimezone)
 
         givenTZ = None
@@ -769,7 +765,7 @@ or None if we fail to get the info """
 
         if givenTZ is None:
             # do not crash if timezone not in list, just return UTC localized time
-            log.error(("Timezone conversion not supported") + ": " + givenTimezone + " " + str(time))
+            log.error(f"Timezone conversion not supported: {givenTimezone} {time}")
             givenTZ = pytz.UTC
             return givenTZ.localize(time)
 

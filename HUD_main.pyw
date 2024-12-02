@@ -10,7 +10,7 @@ import contextlib
 import sys
 import os
 import time
-import logging
+from loggingFpdb import get_logger
 import zmq
 from PyQt5.QtCore import QCoreApplication, QObject, QThread, pyqtSignal, Qt, QTimer
 from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
@@ -27,8 +27,8 @@ import Deck
 from cachetools import TTLCache
 
 # Logging configuration
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-log = logging.getLogger("hud")
+
+log = get_logger("hud")
 
 
 class ZMQWorker(QThread):
@@ -349,7 +349,7 @@ class HUD_main(QObject):
                     self.table_is_stale(self.hud_dict[temp_key])
                     return
             else:
-                for k in self.hud_dict:
+                for k in list(self.hud_dict.keys()):
                     log.debug("check if the tournament number is in the hud_dict under a different table")
                     if k.startswith(tour_number):
                         self.table_is_stale(self.hud_dict[k])
@@ -447,7 +447,7 @@ class HUD_main(QObject):
             for aw in hud.aux_windows:
                 aw.move_windows()
         except Exception:
-            log.exception(f"Error moving HUD for table: {hud.table.title}.")
+            log.error(f"Error moving HUD for table: {hud.table.title}.")
 
     def idle_resize(self, hud):
         try:
@@ -455,7 +455,7 @@ class HUD_main(QObject):
             for aw in hud.aux_windows:
                 aw.resize_windows()
         except Exception:
-            log.exception(f"Error resizing HUD for table: {hud.table.title}.")
+            log.error(f"Error resizing HUD for table: {hud.table.title}.")
 
     def idle_kill(self, table):
         try:
@@ -466,7 +466,7 @@ class HUD_main(QObject):
                 del self.hud_dict[table]
             self.main_window.resize(1, 1)
         except Exception:
-            log.exception(f"Error killing HUD for table: {table}.")
+            log.error(f"Error killing HUD for table: {table}.")
 
     def idle_create(self, new_hand_id, table, temp_key, max, poker_game, type, stat_dict, cards):
         try:
@@ -483,7 +483,7 @@ class HUD_main(QObject):
                 m.update_gui(new_hand_id)
 
         except Exception:
-            log.exception(f"Error creating HUD for hand {new_hand_id}.")
+            log.error(f"Error creating HUD for hand {new_hand_id}.")
 
     def idle_update(self, new_hand_id, table_name, config):
         try:
@@ -493,7 +493,7 @@ class HUD_main(QObject):
             for aw in self.hud_dict[table_name].aux_windows:
                 aw.update_gui(new_hand_id)
         except Exception:
-            log.exception(f"Error updating HUD for hand {new_hand_id}.")
+            log.error(f"Error updating HUD for hand {new_hand_id}.")
 
 
 if __name__ == "__main__":

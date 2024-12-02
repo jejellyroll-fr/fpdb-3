@@ -46,11 +46,11 @@
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal import Decimal
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 
 
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class iPoker(HandHistoryConverter):
@@ -430,7 +430,8 @@ class iPoker(HandHistoryConverter):
             self.info["currency"] = "T$"
             if "TABLET" in mg3:
                 self.info["table_name"] = mg3["TABLET"]
-                print(mg3["TABLET"])
+                log.debug(f"Table name: {mg3['TABLET']}")
+
             # FIXME: The sb/bb isn't listed in the game header. Fixing to 1/2 for now
             self.tinfo = {}  # FIXME?: Full tourney info is only at the top of the file. After the
             #         first hand in a file, there is no way for auto-import to
@@ -523,7 +524,7 @@ class iPoker(HandHistoryConverter):
             if self.tinfo["buyin"] == 0:
                 self.tinfo["buyinCurrency"] = "FREE"
             if self.tinfo.get("tourNo") is None:
-                log.error(("iPokerToFpdb.determineGameType: Could Not Parse tourNo"))
+                log.error(("Could Not Parse tourNo"))
                 raise FpdbParseError
         else:
             self.info["type"] = "ring"
@@ -545,6 +546,21 @@ class iPoker(HandHistoryConverter):
                     raise FpdbParseError from e
 
         return self.info
+
+    def readTourneyResults(self, hand):
+        log.info("enter method readTourneyResults.")
+        log.debug("Method readTourneyResults non implemented.")
+        pass
+
+    def readSummaryInfo(self, summaryInfoList):
+        log.info("enter method readSummaryInfo.")
+        log.debug("Method readSummaryInfo non implemented.")
+        return True
+
+    def readSTP(self, hand):
+        log.debug("enter method readSTP.")
+        log.debug("Method readSTP non implemented.")
+        pass
 
     def readHandInfo(self, hand):
         """
@@ -1009,18 +1025,14 @@ class iPoker(HandHistoryConverter):
         - A string value representing the regular expression pattern for table title.
         """
         # Log the input parameters
-        log.info(
-            f"iPoker getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'"
-        )
+        log.info(f"iPoker table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'")
 
         # Generate the regex pattern based on the input parameters
         regex = f"{table_name}"
 
         if type == "tour":
             regex = f"([^\(]+)\s{table_number}"
-
-            print(regex)
-
+            log.debug(f"Generated regex for 'tour': {regex}")
             return regex
         elif table_name.find("(No DP),") != -1:
             regex = table_name.split("(No DP),")[0]
@@ -1030,5 +1042,5 @@ class iPoker(HandHistoryConverter):
             regex = table_name.split(" ")[0]
 
         # Log the generated regex pattern and return it
-        log.info(f"iPoker getTableTitleRe: returns: '{regex}'")
+        log.info(f"iPoker returns: '{regex}'")
         return regex

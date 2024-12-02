@@ -21,13 +21,13 @@
 
 from HandHistoryConverter import FpdbParseError
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 from TourneySummary import TourneySummary
 from decimal import Decimal
 
 # PokerStars HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class PokerTrackerSummary(TourneySummary):
@@ -118,7 +118,7 @@ class PokerTrackerSummary(TourneySummary):
         m = self.re_TourneyInfo.search(self.summaryText)
         if m is None:
             tmp = self.summaryText[0:200]
-            log.error(("PokerTrackerSummary.parseSummary: '%s'") % tmp)
+            log.error(f"parse Summary failed: '{tmp}'")
             raise FpdbParseError
 
         # print "DEBUG: m.groupdict(): %s" % m.groupdict()
@@ -130,7 +130,7 @@ class PokerTrackerSummary(TourneySummary):
                 self.siteId = self.SITEIDS.get(self.siteName)
             else:
                 tmp = self.summaryText[0:200]
-                log.error(("PokerTrackerSummary.parseSummary: Unsupported site summary '%s'") % tmp)
+                log.error(f"Unsupported site summary '{tmp}'")
                 raise FpdbParseError
         if "TOURNO" in mg:
             self.tourNo = mg["TOURNO"]
@@ -250,7 +250,7 @@ class PokerTrackerSummary(TourneySummary):
                     winnings = None
 
                 if len(name) == 0:
-                    log.debug("DEBUG: a.groupdict(): %s" % (mg))
+                    log.debug(f"a.groupdict(): {mg}")
 
                 # print "DEBUG: addPlayer(%s, %s, %s, %s, None, None, None)" %(rank, name, winnings, self.currency)
                 # print "DEBUG: self.buyin: %s self.fee %s" %(self.buyin, self.fee)

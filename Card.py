@@ -18,7 +18,9 @@ from __future__ import print_function
 from __future__ import division
 
 from past.utils import old_div
+from loggingFpdb import get_logger
 
+log = get_logger("card")
 
 # #import L10n
 # #_ = L10n.get_translation()
@@ -501,7 +503,8 @@ def twoStartCardString(card):
             ret = s[x] + s[y] + "s"
         else:
             ret = s[y] + s[x] + "o"
-    print("twoStartCardString(", card, f") = {ret}")
+    log.debug(f"twoStartCardString({card}) = {ret}")
+
     return ret
 
 

@@ -25,12 +25,12 @@
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal import Decimal
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 
 
 # SealsWithClubs HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class SealsWithClubs(HandHistoryConverter):
@@ -415,6 +415,26 @@ class SealsWithClubs(HandHistoryConverter):
             if mucks.group("SHOWED") == "mucked" and mucks.group("CARDS") is not None:
                 cards = mucks.group("CARDS").split(" ")
                 hand.addShownCards(cards, mucks.group("PNAME"))
+
+    def readSummaryInfo(self, summaryInfoList):
+        log.info("enter method readSummaryInfo.")
+        log.debug("Method readSummaryInfo non implemented.")
+        return True
+
+    def readBringIn(self, hand):
+        log.info("enter method readBringIn.")
+        log.debug("Method readBringIn non implemented.")
+        pass
+
+    def readSTP(self, hand):
+        log.info("enter method readSTP.")
+        log.debug("Method readSTP non implemented.")
+        pass
+
+    def readTourneyResults(self, hand):
+        log.info("enter method readTourneyResults.")
+        log.debug("Method readTourneyResults non implemented.")
+        pass
 
     def readCollectPot(self, hand):
         log.info("Reading collected pot")

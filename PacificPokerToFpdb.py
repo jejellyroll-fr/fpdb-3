@@ -25,12 +25,12 @@
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError
 from decimal import Decimal
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 
 
 # PacificPoker(888) HH Format
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class PacificPoker(HandHistoryConverter):
@@ -212,7 +212,7 @@ class PacificPoker(HandHistoryConverter):
         m = self.re_GameInfo.search(handText)
         if not m:
             tmp = handText[0:200]
-            log.error(("PacificPokerToFpdb.determineGameType: '%s'") % tmp)
+            log.error(f"determine GameType failed: '{tmp}'")
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -266,7 +266,7 @@ class PacificPoker(HandHistoryConverter):
             log.error("re_GameInfo could not be parsed")
         if m is None or m2 is None:
             tmp = hand.handText[0:200]
-            log.error(("PacificPokerToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(f"readHandInfo failed: '{tmp}'")
             raise FpdbParseError
 
         info.update(m.groupdict())
@@ -310,10 +310,7 @@ class PacificPoker(HandHistoryConverter):
                         hand.buyinCurrency = "FREE"
                     else:
                         # FIXME: handle other currencies, FPP, play money
-                        log.error(
-                            ("PacificPokerToFpdb.readHandInfo: Failed to detect currency.")
-                            + " Hand ID: %s: '%s'" % (hand.handid, info[key])
-                        )
+                        log.error(f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'")
                         raise FpdbParseError
 
                     info["BIAMT"] = self.clearMoneyString(info["BIAMT"].strip("$€"))
@@ -346,13 +343,13 @@ class PacificPoker(HandHistoryConverter):
         if m:
             hand.buttonpos = int(m.group("BUTTON"))
         else:
-            log.info("readButton: " + ("not found"))
+            log.info("readButton: not found")
 
     def readPlayerStacks(self, hand):
         m = self.re_PlayerInfo.finditer(hand.handText)
         for a in m:
             if len(a.group("PNAME")) == 0:
-                log.error("PacificPokerToFpdb.readPlayerStacks: Player name empty %s" % hand.handid)
+                log.error(f"Player name empty {hand.handid}")
                 raise FpdbParseError
             hand.addPlayer(int(a.group("SEAT")), a.group("PNAME"), self.clearMoneyString(a.group("CASH")))
 
@@ -369,7 +366,7 @@ class PacificPoker(HandHistoryConverter):
                 re.DOTALL,
             )
         if m is None:
-            log.error(("PacificPokerToFpdb.markStreets: Unable to recognise streets %s" % hand.handid))
+            log.error(f"Unable to recognise streets {hand.handid}")
             raise FpdbParseError
         else:
             # print "DEBUG: Matched markStreets"
@@ -423,20 +420,14 @@ class PacificPoker(HandHistoryConverter):
                     hand.addBlind(a.group("PNAME"), "secondsb", self.clearMoneyString(a.group("SB")))
                 self.allInBlind(hand, "PREFLOP", a, "secondsb")
             else:
-                log.error(
-                    "PacificPokerToFpdb.readBlinds (SB): '%s', '%s' not in hand.stacks"
-                    % (hand.handid, a.group("PNAME"))
-                )
+                log.error(f"readBlinds (SB): '{hand.handid}', '{a.group('PNAME')}' not in hand.stacks")
                 raise FpdbParseError
         for a in self.re_PostBB.finditer(hand.handText):
             if a.group("PNAME") in hand.stacks:
                 hand.addBlind(a.group("PNAME"), "big blind", self.clearMoneyString(a.group("BB")))
                 self.allInBlind(hand, "PREFLOP", a, "big blind")
             else:
-                log.error(
-                    "PacificPokerToFpdb.readBlinds (BB): '%s', '%s' not in hand.stacks"
-                    % (hand.handid, a.group("PNAME"))
-                )
+                log.error(f"readBlinds (BB): '{hand.handid}', '{a.group('PNAME')}' not in hand.stacks")
                 raise FpdbParseError
         for a in self.re_PostBoth.finditer(hand.handText):
             if a.group("PNAME") in hand.stacks:
@@ -449,10 +440,7 @@ class PacificPoker(HandHistoryConverter):
                     hand.addBlind(a.group("PNAME"), "secondsb", self.clearMoneyString(a.group("SB")))
                 self.allInBlind(hand, "PREFLOP", a, "both")
             else:
-                log.error(
-                    "PacificPokerToFpdb.readBlinds (Both): '%s', '%s' not in hand.stacks"
-                    % (hand.handid, a.group("PNAME"))
-                )
+                log.error(f"readBlinds (Both): '{hand.handid}', '{a.group('PNAME')}' not in hand.stacks")
                 raise FpdbParseError
 
     def readHoleCards(self, hand):
@@ -519,11 +507,7 @@ class PacificPoker(HandHistoryConverter):
                 elif action.group("ATYPE") == " stands pat":
                     hand.addStandsPat(street, action.group("PNAME"))
                 else:
-                    log.debug(("DEBUG:") + " " + "Unimplemented %s: '%s' '%s'") % (
-                        "readAction",
-                        action.group("PNAME"),
-                        action.group("ATYPE"),
-                    )
+                    log.warning(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
 
                 if action.group("ATYPE") not in (" checks", " folds"):
                     if not hand.allInBlind:
@@ -532,10 +516,7 @@ class PacificPoker(HandHistoryConverter):
                         if hand.stacks[action.group("PNAME")] == 0 and action.group("ATYPE") == " raises":
                             hand.checkForUncalled = True
             else:
-                log.error(
-                    "PacificPokerToFpdb.readAction: '%s', '%s' not in hand.stacks"
-                    % (hand.handid, action.group("PNAME"))
-                )
+                log.error(f"readAction: '{hand.handid}', '{action.group('PNAME')}' not in hand.stacks")
                 raise FpdbParseError
 
     def allInBlind(self, hand, street, action, actiontype):
@@ -609,15 +590,12 @@ class PacificPoker(HandHistoryConverter):
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
         # Tournament tables look like:
         # Tour NLH 50+5 Brouhaha ID #28353026 Table #7 Blinds: 200/400
-        log.info(
-            "Pacific.getTableTitleRe: table_name='%s' tournament='%s' table_number='%s'"
-            % (table_name, tournament, table_number)
-        )
+        log.info(f"read Table Title: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'")
         regex = "%s" % (table_name)
         if tournament:
             regex = "%s Table #%s" % (tournament, table_number)
 
-        log.info("Pacific.getTableTitleRe: returns: '%s'" % (regex))
+        log.info(f"read Table Title returns: '{regex}'")
         return regex
 
     def readSummaryInfo(self, summaryInfoList):

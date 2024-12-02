@@ -41,6 +41,9 @@ from Quartz.CoreGraphics import (
 
 #    FPDB modules
 from TableWindow import Table_Window
+from loggingFpdb import get_logger
+
+log = get_logger("osxtables")
 
 
 class Table(Table_Window):
@@ -70,7 +73,7 @@ class Table(Table_Window):
             geometry = window["kCGWindowBounds"]
             windowTitle = window.get("kCGWindowName", self.search_string)
             if curr_pid == pid:
-                print("%s - %s (PID: %d, WID: %d): %s" % (ownerName, windowTitle, pid, windowNumber, geometry))
+                log.info(f"{ownerName} - {windowTitle} (PID: {pid}, WID: {windowNumber}): {geometry}")
 
                 title = windowTitle
                 if self.check_bad_words(title):
@@ -101,7 +104,7 @@ class Table(Table_Window):
         for d in WinListDict:
             # for b in windowList:
             if d[kCGWindowNumber] == self.number:  # and b[kCGWindowNumber] == self.number :
-                # print("kCGWindowName", b.get(kCGWindowName, ''))
+                log.debug(f"kCGWindowOwnerName: {d.get(kCGWindowOwnerName, '')}")
                 return d[kCGWindowOwnerName]
         return None
 

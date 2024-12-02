@@ -29,10 +29,10 @@ from past.utils import old_div
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from decimal import Decimal
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 
-log = logging.getLogger("parser")
+log = get_logger("parser")
 # BetOnline HH Format
 
 
@@ -263,7 +263,7 @@ class BetOnline(HandHistoryConverter):
             m2 = self.re_JoinsTable.search(handText)
             if not m2:
                 tmp = handText[0:200]
-                log.error(("BetOnlineToFpdb.determineGameType: '%s'") % tmp)
+                log.error(f"determineGameType not found: '{tmp}'")
                 raise FpdbParseError
             else:
                 raise FpdbHandPartial(
@@ -307,10 +307,7 @@ class BetOnline(HandHistoryConverter):
                     info["bb"] = self.Lim_Blinds[info["BB"]][1]
                 except KeyError:
                     tmp = handText[0:200]
-                    log.error(
-                        ("BetOnlineToFpdb.determineGameType: Lim_Blinds has no lookup for '%s' - '%s'")
-                        % (mg["BB"], tmp)
-                    )
+                    log.error(f"Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'")
                     raise FpdbParseError
             else:
                 info["sb"] = str((old_div(Decimal(info["SB"]), 2)).quantize(Decimal("0.01")))
@@ -327,7 +324,7 @@ class BetOnline(HandHistoryConverter):
         m2 = self.re_GameInfo.search(hand.handText)
         if m is None or m2 is None:
             tmp = hand.handText[0:200]
-            log.error(("BetOnlineToFpdb.readHandInfo: '%s'") % tmp)
+            log.error(f"readHandInfo not found: '{tmp}'")
             raise FpdbParseError
 
         info.update(m.groupdict())
@@ -448,7 +445,7 @@ class BetOnline(HandHistoryConverter):
         if m:
             hand.buttonpos = int(m.group("BUTTON"))
         else:
-            log.info("readButton: " + ("not found"))
+            log.info("readButton: not found")
 
     def readPlayerStacks(self, hand):
         m = self.re_PlayerInfo.finditer(hand.handText)
@@ -626,7 +623,7 @@ class BetOnline(HandHistoryConverter):
                     if hand.gametype["sb"] == v[0]:
                         hand.gametype["bb"] = v[1]
             if hand.gametype["sb"] is None or hand.gametype["bb"] is None:
-                log.error(("BetOnline.fixBlinds: Failed to fix blinds") + " Hand ID: %s" % (hand.handid,))
+                log.error(f"Failed to fix blinds Hand ID: {hand.handid}")
                 raise FpdbParseError
             hand.sb = hand.gametype["sb"]
             hand.bb = hand.gametype["bb"]
@@ -710,11 +707,7 @@ class BetOnline(HandHistoryConverter):
             elif action.group("ATYPE") == " stands pat":
                 hand.addStandsPat(street, pname, action.group("CARDS"))
             else:
-                log.debug(
-                    ("DEBUG:")
-                    + " "
-                    + ("Unimplemented %s: '%s' '%s'") % ("readAction", action.group("PNAME"), action.group("ATYPE"))
-                )
+                log.debug(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
 
     def readShowdownActions(self, hand):
         # TODO: pick up mucks also??
@@ -732,6 +725,11 @@ class BetOnline(HandHistoryConverter):
                 hand.rakes["pot"] += Decimal(self.clearMoneyString(m.group("POT")))
             else:
                 hand.rakes["pot"] = Decimal(self.clearMoneyString(m.group("POT")))
+
+    def readSummaryInfo(self, summaryInfoList):
+        log.info("enter method readSummaryInfo.")
+        log.debug("Method readSummaryInfo non implemented.")
+        return True
 
     def readShownCards(self, hand):
         for m in self.re_ShownCards.finditer(hand.handText):
