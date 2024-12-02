@@ -28,7 +28,7 @@
 
 #    Standard Library modules
 import os
-import logging
+from loggingFpdb import get_logger
 
 from functools import partial
 
@@ -44,7 +44,7 @@ import Configuration
 
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("hud")
+log = get_logger("hud")
 
 
 class Simple_HUD(Aux_Base.Aux_Seats):

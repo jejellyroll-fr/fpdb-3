@@ -6,6 +6,7 @@ import Database
 import SQL
 import Filters
 import Deck
+from loggingFpdb import get_logger
 
 from PyQt5.QtCore import QCoreApplication, QSortFilterProxyModel, Qt
 from PyQt5.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
@@ -22,6 +23,8 @@ from PyQt5.QtWidgets import (
 
 from io import StringIO
 import GuiReplayer
+
+log = get_logger("tourhandViewer")
 
 
 class GuiHandViewer(QSplitter):
@@ -201,7 +204,7 @@ class GuiHandViewer(QSplitter):
         c.execute(q, (start, end))
         results = c.fetchall()
         for row in results[:10]:  # show 10 first results
-            print(row)
+            log.debug(f"show 10  first results {row}")
         return [r[0] for r in results]
 
     def rankedhand(self, hand, game):
@@ -403,7 +406,7 @@ class GuiHandViewer(QSplitter):
 
         # Debug output to trace unexpected keys
         if abbr not in card_filter:
-            print(f"Unexpected key in card filter: {abbr}")
+            log.debug(f"Unexpected key in card filter: {abbr}")
 
         return card_filter.get(abbr, True)  # Default to True if key is not found
 
@@ -420,7 +423,7 @@ class GuiHandViewer(QSplitter):
         heroes = self.filters.getHeroes()
         h.hero = heroes.get(h.sitename, None)
         if h.hero is None:
-            print(f"No hero found for site {h.sitename}")
+            log.warning(f"No hero found for site {h.sitename}")
         return h
 
     def render_cards(self, cardstring):

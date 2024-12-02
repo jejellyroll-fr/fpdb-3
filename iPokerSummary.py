@@ -20,11 +20,11 @@
 from HandHistoryConverter import FpdbParseError, FpdbHandPartial
 from decimal import Decimal
 import re
-import logging
+from loggingFpdb import get_logger
 import datetime
 from TourneySummary import TourneySummary
 
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 
 class iPokerSummary(TourneySummary):
@@ -151,7 +151,7 @@ class iPokerSummary(TourneySummary):
         m = self.re_GameType.search(self.summaryText)
         if not m:
             tmp = self.summaryText[0:200]
-            log.error(("iPokerSummary.determineGameType: '%s'") % tmp)
+            log.error(f"determine GameType not found: '{tmp}'")
             raise FpdbParseError
 
         mg = m.groupdict()
@@ -159,7 +159,7 @@ class iPokerSummary(TourneySummary):
 
         if "SB" in mg and mg["SB"] is not None:
             tmp = self.summaryText[0:200]
-            log.error(("iPokerSummary.parseSummary: Text does not appear to be a tournament '%s'") % tmp)
+            log.error(f"Text does not appear to be a tournament '{tmp}'")
             raise FpdbParseError
         else:
             tourney = True
@@ -200,7 +200,7 @@ class iPokerSummary(TourneySummary):
                     date_match1 = self.re_DateTime3.search(mg["DATETIME"])
                     datestr = "%Y/%m/%d %H:%M:%S"
                     if date_match1 is None:
-                        log.error(("iPokerSummary.parseSummary Could not read datetime"))
+                        log.error(("Could not read datetime"))
                         raise FpdbParseError
                     if date_match1.group("S") is None:
                         datestr = "%Y/%m/%d %H:%M"
@@ -285,7 +285,7 @@ class iPokerSummary(TourneySummary):
                 else:
                     raise FpdbHandPartial(hid=self.tourNo)
                 if self.tourNo is None:
-                    log.error(("iPokerSummary.parseSummary: Could Not Parse tourNo"))
+                    log.error(("Could Not Parse tourNo"))
                     raise FpdbParseError
 
             else:
@@ -348,11 +348,11 @@ class iPokerSummary(TourneySummary):
                 else:
                     raise FpdbHandPartial(hid=self.tourNo)
                 if self.tourNo is None:
-                    log.error(("iPokerSummary.parseSummary: Could Not Parse tourNo"))
+                    log.error(("Could Not Parse tourNo"))
                     raise FpdbParseError
         else:
             tmp = self.summaryText[0:200]
-            log.error(("iPokerSummary.determineGameType: Text does not appear to be a tournament '%s'") % tmp)
+            log.error(("Text does not appear to be a tournament '%s'") % tmp)
             raise FpdbParseError
 
     def convert_to_decimal(self, string):

@@ -25,6 +25,10 @@ from Configuration import GRAPHICS_PATH, CONFIG_PATH
 import xml.etree.ElementTree as ET
 from PyQt5.QtCore import QTranslator
 
+from loggingFpdb import get_logger
+
+log = get_logger("translation")
+
 
 def get_system_language():
     system = platform.system()
@@ -126,7 +130,7 @@ def set_locale_translation():
     transformed_path = path.parent
     locale_path = Path(transformed_path, "locale")
     path_string = str(locale_path)
-    print(f"Locale path: {path_string}")
+    log.info(f"Locale path: {path_string}")
 
     gettext.bindtextdomain("fpdb", path_string)
     gettext.textdomain("fpdb")
@@ -135,10 +139,10 @@ def set_locale_translation():
     root = tree.getroot()
     general_element = root.find("general")
     ui_language = general_element.attrib.get("ui_language")
-    print(f"UI Language: {ui_language}")
+    log.info(f"UI Language: {ui_language}")
 
     try:
         fr_translation = gettext.translation("fpdb", path_string, languages=[ui_language])
         fr_translation.install()
     except FileNotFoundError:
-        print(f"No translation file found for domain: 'fpdb' in {path_string} for language {ui_language}")
+        log.error(f"No translation file found for domain 'fpdb' in {path_string} for language {ui_language}")

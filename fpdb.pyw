@@ -28,7 +28,8 @@ import codecs
 import Options
 from functools import partial
 from L10n import set_locale_translation
-import logging
+import logging  # Import the logging module
+from loggingFpdb import get_logger, setup_logging
 
 from PyQt5.QtCore import QCoreApplication, QDate, Qt, QPoint
 from PyQt5.QtGui import QIcon, QPalette
@@ -109,9 +110,12 @@ profiler = cProfile.Profile()
 profiler.enable()
 
 
-Configuration.set_logfile("fpdb-log.txt")
+# Set up initial console logging to capture early logs
+setup_logging(console_only=True)
 
-log = logging.getLogger("fpdb")
+# Obtain the logger
+log = get_logger("fpdb")
+log.setLevel(logging.INFO)
 
 try:
     assert not hasattr(sys, "frozen")  # We're surely not in a git repo if this fails
@@ -939,44 +943,45 @@ class fpdb(QMainWindow):
         helpMenu = mb.addMenu("Help")
         themeMenu = mb.addMenu("Themes")
 
-        # Create actions
-        def makeAction(name, callback, shortcut=None, tip=None):
-            action = QAction(name, self)
-            if shortcut:
-                action.setShortcut(shortcut)
-            if tip:
-                action.setToolTip(tip)
-            action.triggered.connect(callback)
-            return action
+        configMenu.addAction(self.makeAction("Site Settings", self.dia_site_preferences))
+        configMenu.addAction(self.makeAction("Seat Settings", self.dia_site_preferences_seat))
+        configMenu.addAction(self.makeAction("Hud Settings", self.dia_hud_preferences))
+        configMenu.addAction(
+            self.makeAction("Adv Preferences", self.dia_advanced_preferences, tip="Edit your preferences")
+        )
+        configMenu.addAction(self.makeAction("Import filters", self.dia_import_filters))
+        # Add the Toggle Debug Logging action
+        self.debug_logging_action = self.makeAction("Enable Debug Logging", self.toggle_debug_logging, checkable=True)
+        configMenu.addAction(self.debug_logging_action)
 
-        configMenu.addAction(makeAction("Site Settings", self.dia_site_preferences))
-        configMenu.addAction(makeAction("Seat Settings", self.dia_site_preferences_seat))
-        configMenu.addAction(makeAction("Hud Settings", self.dia_hud_preferences))
-        configMenu.addAction(makeAction("Adv Preferences", self.dia_advanced_preferences, tip="Edit your preferences"))
-        configMenu.addAction(makeAction("Import filters", self.dia_import_filters))
+        # Set the initial check state based on the current logging level
+        if log.getEffectiveLevel() <= logging.DEBUG:
+            self.debug_logging_action.setChecked(True)
+        else:
+            self.debug_logging_action.setChecked(False)
         configMenu.addSeparator()
-        configMenu.addAction(makeAction("Close Fpdb", self.quit, "Ctrl+Q", "Quit the Program"))
+        configMenu.addAction(self.makeAction("Close Fpdb", self.quit, "Ctrl+Q", "Quit the Program"))
 
-        importMenu.addAction(makeAction("Bulk Import", self.tab_bulk_import, "Ctrl+B"))
-        hudMenu.addAction(makeAction("HUD and Auto Import", self.tab_auto_import, "Ctrl+A"))
-        cashMenu.addAction(makeAction("Graphs", self.tabGraphViewer, "Ctrl+G"))
-        cashMenu.addAction(makeAction("Ring Player Stats", self.tab_ring_player_stats, "Ctrl+P"))
-        cashMenu.addAction(makeAction("Hand Viewer", self.tab_hand_viewer))
-        cashMenu.addAction(makeAction("Session Stats", self.tab_session_stats, "Ctrl+S"))
-        tournamentMenu.addAction(makeAction("Tourney Graphs", self.tabTourneyGraphViewer))
-        tournamentMenu.addAction(makeAction("Tourney Stats", self.tab_tourney_player_stats, "Ctrl+T"))
-        tournamentMenu.addAction(makeAction("Tourney Hand Viewer", self.tab_tourney_viewer_stats))
-        maintenanceMenu.addAction(makeAction("Statistics", self.dia_database_stats, "View Database Statistics"))
-        maintenanceMenu.addAction(makeAction("Create or Recreate Tables", self.dia_recreate_tables))
-        maintenanceMenu.addAction(makeAction("Rebuild HUD Cache", self.dia_recreate_hudcache))
-        maintenanceMenu.addAction(makeAction("Rebuild DB Indexes", self.dia_rebuild_indexes))
-        maintenanceMenu.addAction(makeAction("Dump Database to Textfile (takes ALOT of time)", self.dia_dump_db))
+        importMenu.addAction(self.makeAction("Bulk Import", self.tab_bulk_import, "Ctrl+B"))
+        hudMenu.addAction(self.makeAction("HUD and Auto Import", self.tab_auto_import, "Ctrl+A"))
+        cashMenu.addAction(self.makeAction("Graphs", self.tabGraphViewer, "Ctrl+G"))
+        cashMenu.addAction(self.makeAction("Ring Player Stats", self.tab_ring_player_stats, "Ctrl+P"))
+        cashMenu.addAction(self.makeAction("Hand Viewer", self.tab_hand_viewer))
+        cashMenu.addAction(self.makeAction("Session Stats", self.tab_session_stats, "Ctrl+S"))
+        tournamentMenu.addAction(self.makeAction("Tourney Graphs", self.tabTourneyGraphViewer))
+        tournamentMenu.addAction(self.makeAction("Tourney Stats", self.tab_tourney_player_stats, "Ctrl+T"))
+        tournamentMenu.addAction(self.makeAction("Tourney Hand Viewer", self.tab_tourney_viewer_stats))
+        maintenanceMenu.addAction(self.makeAction("Statistics", self.dia_database_stats, "View Database Statistics"))
+        maintenanceMenu.addAction(self.makeAction("Create or Recreate Tables", self.dia_recreate_tables))
+        maintenanceMenu.addAction(self.makeAction("Rebuild HUD Cache", self.dia_recreate_hudcache))
+        maintenanceMenu.addAction(self.makeAction("Rebuild DB Indexes", self.dia_rebuild_indexes))
+        maintenanceMenu.addAction(self.makeAction("Dump Database to Textfile (takes ALOT of time)", self.dia_dump_db))
 
         # toolsMenu.addAction(makeAction('PokerProTools', self.launch_ppt))
-        helpMenu.addAction(makeAction("Log Messages", self.dia_logs, "Log and Debug Messages"))
-        helpMenu.addAction(makeAction("Help Tab", self.tab_main_help))
+        helpMenu.addAction(self.makeAction("Log Messages", self.dia_logs, "Log and Debug Messages"))
+        helpMenu.addAction(self.makeAction("Help Tab", self.tab_main_help))
         helpMenu.addSeparator()
-        helpMenu.addAction(makeAction("Infos", self.dia_about, "About the program"))
+        helpMenu.addAction(self.makeAction("Infos", self.dia_about, "About the program"))
 
         themes = [
             "dark_purple.xml",
@@ -998,25 +1003,55 @@ class fpdb(QMainWindow):
         for theme in themes:
             themeMenu.addAction(QAction(theme, self, triggered=partial(self.change_theme, theme)))
 
+    def makeAction(self, name, callback, shortcut=None, tip=None, checkable=False):
+        action = QAction(name, self)
+        if shortcut:
+            action.setShortcut(shortcut)
+        if tip:
+            action.setToolTip(tip)
+        if checkable:
+            action.setCheckable(True)
+            action.toggled.connect(callback)
+        else:
+            action.triggered.connect(callback)
+        return action
+
+    def toggle_debug_logging(self, checked):
+        if checked:
+            # Activer le logging debug pour le logger racine
+            logging.getLogger().setLevel(logging.DEBUG)
+            self.statusBar().showMessage("Debug logging enabled")
+            log.debug("logging debug activated.")
+        else:
+            # Désactiver le logging debug (revenir au niveau INFO)
+            logging.getLogger().setLevel(logging.INFO)
+            self.statusBar().showMessage("Debug logging disabled")
+            log.info("logging debug deactivated.")
+
     def load_profile(self, create_db=False):
         """Loads profile from the provided path name.
-        Set:
-           - self.settings
-           - self.config
-           - self.db
+        Sets:
+        - self.settings
+        - self.config
+        - self.db
         """
+        # Load the configuration
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
         if self.config.file_error:
             self.warning_box(
-                f"There is an error in your config file" f" {self.config.file}:\n{str(self.config.file_error)}",
+                f"There is an error in your config file {self.config.file}:\n{str(self.config.file_error)}",
                 diatitle="CONFIG FILE ERROR",
             )
             sys.exit()
 
-        log.info(f"Logfile is {os.path.join(self.config.dir_log, self.config.log_file)}")
+        # Now reconfigure logging with the log directory from the configuration
+        setup_logging(log_dir=self.config.dir_log)
+
+        log.info(f"Logfile is {os.path.join(self.config.dir_log, 'fpdb-log.txt')}")
         log.info(f"load profiles {self.config.example_copy}")
         log.info(f"{self.display_config_created_dialogue}")
         log.info(f"{self.config.wrongConfigVersion}")
+
         if self.config.example_copy or self.display_config_created_dialogue:
             self.info_box(
                 "Config file",
@@ -1026,53 +1061,40 @@ class fpdb(QMainWindow):
                     " (Main menu) before trying to import hands.",
                 ],
             )
-
             self.display_config_created_dialogue = False
         elif self.config.wrongConfigVersion:
             diaConfigVersionWarning = QDialog()
             diaConfigVersionWarning.setWindowTitle("Strong Warning - Local configuration out of date")
             diaConfigVersionWarning.setLayout(QVBoxLayout())
-            label = QLabel(["\nYour local configuration file needs to be updated."])
+            label = QLabel("\nYour local configuration file needs to be updated.")
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel(
-                [
-                    "\nYour local configuration file needs to be updated.",
-                    "This error is not necessarily fatal but it is strongly recommended that you update the configuration.",
-                ]
+                "\nYour local configuration file needs to be updated."
+                " This error is not necessarily fatal but it is strongly recommended that you update the configuration."
             )
-
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel(
-                [
-                    "To create a new configuration, see:",
-                    "fpdb.sourceforge.net/apps/mediawiki/fpdb/index.php?title=Reset_Configuration",
-                ]
+                "To create a new configuration, see:"
+                " fpdb.sourceforge.net/apps/mediawiki/fpdb/index.php?title=Reset_Configuration"
             )
-
             label.setTextInteractionFlags(Qt.TextSelectableByMouse)
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel(
-                [
-                    "A new configuration will destroy all personal settings"
-                    " (hud layout, site folders, screennames, favourite seats).\n"
-                ]
+                "A new configuration will destroy all personal settings"
+                " (hud layout, site folders, screennames, favourite seats).\n"
             )
-
             diaConfigVersionWarning.layout().addWidget(label)
-
             label = QLabel("To keep existing personal settings, you must edit the local file.")
             diaConfigVersionWarning.layout().addWidget(label)
-
             label = QLabel("See the release note for information about the edits needed")
             diaConfigVersionWarning.layout().addWidget(label)
-
             btns = QDialogButtonBox(QDialogButtonBox.Ok)
             btns.accepted.connect(diaConfigVersionWarning.accept)
             diaConfigVersionWarning.layout().addWidget(btns)
-
             diaConfigVersionWarning.exec_()
             self.config.wrongConfigVersion = False
 
+        # Set up application settings
         self.settings = {}
         self.settings["global_lock"] = self.lock
         if os.sep == "/":
@@ -1085,15 +1107,17 @@ class fpdb(QMainWindow):
         self.settings.update(self.config.get_import_parameters())
         self.settings.update(self.config.get_default_paths())
 
+        # Disconnect from the database if already connected
         if self.db is not None and self.db.is_connected():
             self.db.disconnect()
 
+        # Set up SQL and connect to the database
         self.sql = SQL.Sql(db_server=self.settings["db-server"])
         err_msg = None
         try:
             self.db = Database.Database(self.config, sql=self.sql)
             if self.db.get_backend_name() == "SQLite":
-                # tell sqlite users where the db file is
+                # Inform SQLite users where the database file is located
                 log.info(f"Connected to SQLite: {self.db.db_path}")
         except Exceptions.FpdbMySQLAccessDenied:
             err_msg = "MySQL Server reports: Access denied. Are your permissions set correctly?"
@@ -1102,12 +1126,11 @@ class fpdb(QMainWindow):
                 "MySQL client reports: 2002 or 2003 error."
                 " Unable to connect - Please check that the MySQL service has been started."
             )
-
         except Exceptions.FpdbPostgresqlAccessDenied:
             err_msg = "PostgreSQL Server reports: Access denied. Are your permissions set correctly?"
         except Exceptions.FpdbPostgresqlNoDatabase:
             err_msg = (
-                "PostgreSQL client reports: Unable to connect -"
+                "PostgreSQL client reports: Unable to connect - "
                 "Please check that the PostgreSQL service has been started."
             )
         if err_msg is not None:
@@ -1116,6 +1139,7 @@ class fpdb(QMainWindow):
         if self.db is not None and not self.db.is_connected():
             self.db = None
 
+        # Check for database version issues
         if self.db is not None and self.db.wrongDbVersion:
             diaDbVersionWarning = QMessageBox(
                 QMessageBox.Warning,
@@ -1127,22 +1151,20 @@ class fpdb(QMainWindow):
             diaDbVersionWarning.setInformativeText(
                 "This error is not necessarily fatal but it is strongly"
                 " recommended that you recreate the tables by using the Database menu."
-                "Not doing this will likely lead to misbehaviour including fpdb crashes, corrupt data etc."
+                " Not doing this will likely lead to misbehavior including fpdb crashes, corrupt data, etc."
             )
-
             diaDbVersionWarning.exec_()
+
+        # Update the status bar with the database connection status
         if self.db is not None and self.db.is_connected():
             self.statusBar().showMessage(
                 f"Status: Connected to {self.db.get_backend_name()}"
                 f" database named {self.db.database} on host {self.db.host}"
             )
-
-            # rollback to make sure any locks are cleared:
+            # Rollback to make sure any locks are cleared
             self.db.rollback()
 
-        # If the db-version is out of date, don't validate the config
-        # otherwise the end user gets bombarded with false messages
-        # about every site not existing
+        # Validate the configuration if the database version is up-to-date
         if hasattr(self.db, "wrongDbVersion"):
             if not self.db.wrongDbVersion:
                 self.validate_config()
@@ -1380,6 +1402,12 @@ class fpdb(QMainWindow):
         self.closeq = queue.Queue(20)
 
         self.oldPos = self.pos()
+
+        # Initialize the debug_logging_action to None; it will be set in createMenuBar
+        self.debug_logging_action = None
+
+        # Set default logging level
+        log.setLevel(logging.INFO)  # Set default level to INFO
 
         if options.initialRun:
             self.display_config_created_dialogue = True

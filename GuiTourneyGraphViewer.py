@@ -28,34 +28,32 @@ import Database
 import Filters
 # import Charset
 
+
+from loggingFpdb import get_logger
+
+log = get_logger("tourgraphViewer")
+
 try:
-    calluse = not "matplotlib" in sys.modules
+    calluse = "matplotlib" not in sys.modules
     import matplotlib
 
     if calluse:
         try:
             matplotlib.use("qt5agg")
         except ValueError as e:
-            print(e)
+            log.error(f"Matplotlib use error: {e}")
     from matplotlib.figure import Figure
     from matplotlib.backends.backend_qt5agg import FigureCanvas
     from matplotlib.font_manager import FontProperties
     from numpy import cumsum
 except ImportError as inst:
-    print(
-        (
-            """Failed to load libs for graphing, graphing will not function. Please install numpy and matplotlib if you want to use graphs."""
-        )
+    log.error(
+        "Failed to load libs for graphing, graphing will not function. Please install numpy and matplotlib if you want to use graphs."
     )
-    print(
-        (
-            """This is of no consequence for other parts of the program, e.g. import and HUD are NOT affected by this problem."""
-        )
+    log.error(
+        "This is of no consequence for other parts of the program, e.g., import and HUD are NOT affected by this problem."
     )
-    print("ImportError: %s" % inst.args)
-import logging
-
-log = logging.getLogger("sessionViewer")
+    log.error(f"ImportError: {inst.args}")
 
 
 class GuiTourneyGraphViewer(QSplitter):
@@ -160,19 +158,19 @@ class GuiTourneyGraphViewer(QSplitter):
                 names = names + "\n" + _hname + " on " + site
 
         if not sitenos:
-            print("No sites selected - defaulting to PokerStars")
+            # print("No sites selected - defaulting to PokerStars")
             self.db.rollback()
             return
 
         if not playerids:
-            print("No player ids found")
+            # print("No player ids found")
             self.db.rollback()
             return
 
         self.ax = self.fig.add_subplot(111)
         starttime = time()
         green = self.getData(playerids, sitenos, games)
-        print("Graph generated in: %s" % (time() - starttime))
+        log.info(f"Graph generated in: {time() - starttime}")
 
         self.ax.set_xlabel("Tournaments", color=self.colors["foreground"])
         self.ax.set_facecolor(self.colors["background"])
@@ -297,7 +295,7 @@ class GuiTourneyGraphViewer(QSplitter):
         tmp = tmp.replace("<tourney_test>", tourneystest)
         tmp = tmp.replace(",)", ")")
 
-        print("DEBUG: sql query:", tmp)
+        log.debug(f"sql query: {tmp}")
 
         self.db.cursor.execute(tmp)
         winnings = self.db.cursor.fetchall()

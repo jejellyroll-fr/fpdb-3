@@ -32,7 +32,7 @@ client has been resized, destroyed, etc.
 
 #    Standard Library modules
 import re
-import logging
+from loggingFpdb import get_logger
 from time import sleep
 
 #    FreePokerTools modules
@@ -41,7 +41,7 @@ from HandHistoryConverter import getTableTitleRe
 from HandHistoryConverter import getTableNoRe
 
 c = Configuration.Config()
-log = logging.getLogger("hud")
+log = get_logger("hud")
 
 #    Global used for figuring out the current game being played from the title.
 #    The dict key is a tuple of (limit type, category) for the game.
@@ -93,52 +93,61 @@ class Table_Window(object):
     def __init__(self, config, site, table_name=None, tournament=None, table_number=None):
         self.config = config
         self.site = site
-        self.hud = None  # fill in later
+        self.hud = None  # Will be filled in later
         self.gdkhandle = None
         self.number = None
-        # check if 
+
+        # Decode values if they are in bytes
         if isinstance(table_name, bytes):
-            log.debug(f"Décodage de table_name en UTF-8 : {table_name}")
-            table_name = table_name.decode('utf-8')
+
+            log.debug(f"Decoding table_name to UTF-8: {table_name}")
+            table_name = table_name.decode("utf-8")
         if isinstance(tournament, bytes):
-            log.debug(f"Décodage de table_name en UTF-8 : {tournament}")
-            tournament = tournament.decode('utf-8')
+            log.debug(f"Decoding tournament to UTF-8: {tournament}")
+            tournament = tournament.decode("utf-8")
         if isinstance(table_number, bytes):
-            log.debug(f"Décodage de table_name en UTF-8 : {table_number}")
-            table_number = table_number.decode('utf-8')
+            log.debug(f"Decoding table_number to UTF-8: {table_number}")
+            table_number = table_number.decode("utf-8")
 
+
+        # Handle tournament and table number
         if tournament is not None and table_number is not None:
-            log.debug(tournament)
-            self.tournament = int(tournament)
-            log.debug(" tournement:")
-            log.debug(self.tournament)
-            log.debug("table_number:")
-            log.debug(type(table_number))
-            log.debug(table_number)
-            # temp bug correction for ipoker must investigate
-            # if table_number is not an interger
 
-            log.debug("table_number error:")
-            log.debug(type(table_number))
-            log.debug(table_number)
-            self.table = int(table_number)
-            log.debug(self.table)
-            self.name = "%s - %s" % (self.tournament, self.table)
+            log.debug(f"Tournament: {tournament}")
+            self.tournament = int(tournament)
+            log.debug(f"Converted tournament: {self.tournament}")
+            log.debug(f"Table number type: {type(table_number)}, value: {table_number}")
+
+            # Temporary correction for errors in table_number conversion
+            try:
+                self.table = int(table_number)
+            except ValueError:
+                log.error(f"Error converting table_number: {table_number}")
+                raise
+
+            log.debug(f"Converted table number: {self.table}")
+            self.name = f"{self.tournament} - {self.table}"
+
             self.type = "tour"
             table_kwargs = dict(tournament=self.tournament, table_number=self.table)
             self.tableno_re = getTableNoRe(self.config, self.site, tournament=self.tournament)
+
+        # Handle cash game tables
         elif table_name is not None:
-            log.debug("table_number cash:")
-            log.debug(type(table_name))
-            log.debug((table_name))
+
+            log.debug(f"Cash table name type: {type(table_name)}, value: {table_name}")
+
             self.name = table_name
             self.type = "cash"
             self.tournament = None
             table_kwargs = dict(table_name=table_name)
-            log.debug("table_kwarg cash:")
-            log.debug(type(table_kwargs))
-            log.debug((table_kwargs))
+
+            log.debug(f"Cash table kwargs type: {type(table_kwargs)}, value: {table_kwargs}")
+
+        # Log a warning if neither tournament nor table_name is provided
+
         else:
+            log.warning("Neither tournament nor table_name provided; initialization failed.")
             return None
 
         self.search_string = getTableTitleRe(self.config, self.site, self.type, **table_kwargs)
@@ -149,7 +158,7 @@ class Table_Window(object):
 
         self.find_table_parameters()
         if not self.number:
-            log.error(('Can\'t find table "%s" with search string "%s"'), table_name, self.search_string)
+            log.error(f'Can\'t find table "{table_name}" with search string "{self.search_string}"')
 
         geo = self.get_geometry()
         if geo is None:
@@ -157,13 +166,15 @@ class Table_Window(object):
         self.width = geo["width"]
         self.height = geo["height"]
         self.x = geo["x"]
-        log.debug(self.x)
+
+        log.debug(f"X coordinate: {self.x}")
         self.y = geo["y"]
-        log.debug(self.y)
-        self.oldx = self.x  # attn ray: remove these two lines and update Hud.py::update_table_position()
-        log.debug(self.oldx)
+        log.debug(f"Y coordinate: {self.y}")
+        self.oldx = self.x  # Attention: Remove these two lines and update Hud.py::update_table_position()
+        log.debug(f"Old X coordinate: {self.oldx}")
         self.oldy = self.y
-        log.debug(self.oldy)
+        log.debug(f"Old Y coordinate: {self.oldy}")
+
         self.game = self.get_game()
 
     def __str__(self):

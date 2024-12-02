@@ -29,14 +29,14 @@ import codecs
 
 
 import Configuration
-import logging
+from loggingFpdb import get_logger
 
 try:
     import xlrd
 except ImportError:
     xlrd = None
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = logging.getLogger("parser")
+log = get_logger("parser")
 
 re_Divider, re_Head, re_XLS = {}, {}, {}
 re_Divider["PokerStars"] = re.compile(r"^Hand #(\d+)\s*$", re.MULTILINE)
@@ -121,7 +121,7 @@ class Site(object):
 class IdentifySite(object):
     def __init__(self, config, hhcs=None):
         self.config = config
-        self.codepage = ("utf8", "utf-16", "cp1252", "ISO-8859-1")
+        self.codepage = ("utf8", "cp1252", "ISO-8859-1")
         self.sitelist = {}
         self.filelist = {}
         self.generateSiteList(hhcs)
@@ -158,7 +158,7 @@ class IdentifySite(object):
             try:
                 self.sitelist[obj.siteId] = Site(site, filter, filter_name, summary, obj)
             except Exception as e:
-                log.error("Failed to load HH importer: %s.  %s" % (filter_name, e))
+                log.error(f"Failed to load HH importer: {filter_name}. {e}")
         self.re_Identify_PT = getattr(__import__("PokerTrackerToFpdb"), "PokerTracker", None).re_Identify
         self.re_SumIdentify_PT = getattr(__import__("PokerTrackerSummary"), "PokerTrackerSummary", None).re_Identify
 
@@ -179,18 +179,18 @@ class IdentifySite(object):
             return [x]
 
     def processFile(self, path):
-        log.debug("process fill identify", path)
+        log.debug(f"process fill identify {path}")
         if path not in self.filelist:
-            log.debug("filelist", self.filelist)
+            log.debug(f"filelist {self.filelist}")
             whole_file, kodec = self.read_file(path)
             # log.debug('whole_file',whole_file)
-            log.debug("kodec", kodec)
+            log.debug(f"kodec {kodec}")
             if whole_file:
                 fobj = self.idSite(path, whole_file, kodec)
-                log.debug("siteid obj")
+                log.debug(f"siteid obj {fobj}")
                 # print(fobj.path)
                 if fobj is False:  # Site id failed
-                    log.debug(("DEBUG:") + " " + ("siteId Failed for: %s") % path)
+                    log.debug(f"siteId Failed for: {path}")
                 else:
                     self.filelist[path] = fobj
 
@@ -348,7 +348,7 @@ def main(argv=None):
         argv = sys.argv[1:]
 
     Configuration.set_logfile("fpdb-log.txt")
-    config = Configuration.Config(file="HUD_config.test.xml")
+    config = Configuration.Config(file="HUD_config.xml")
     in_path = os.path.abspath("regression-test-files")
     IdSite = IdentifySite(config)
     start = time()
