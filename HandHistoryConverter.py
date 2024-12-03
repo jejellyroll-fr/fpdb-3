@@ -568,18 +568,20 @@ or None if we fail to get the info """
             return [x]
 
     def readFile(self):
-        """Open in_path according to self.codepage. Exceptions caught further up"""
-
+        """Opens in_path according to self.codepage. Exceptions are handled elsewhere."""
         if self.filetype == "text":
             for kodec in self.__listof(self.codepage):
-                # print "trying", kodec
                 try:
-                    in_fh = codecs.open(self.in_path, "r", kodec)
-                    self.whole_file = in_fh.read()
-                    in_fh.close()
+                    with open(self.in_path, "rb") as binary_file:
+                        raw_data = binary_file.read()
+
+                    # Decode using the current codec
+                    self.whole_file = raw_data.decode(kodec, errors="strict")
+
                     self.obs = self.whole_file[self.index :]
                     self.index = len(self.whole_file)
                     self.kodec = kodec
+                    log.debug(f"File successfully decoded using codec: {kodec}")
                     return True
                 except (IOError, UnicodeDecodeError) as e:
                     log.warning(f"Failed to read file with codec {kodec}: {e}")
@@ -589,9 +591,15 @@ or None if we fail to get the info """
                 return False
 
         elif self.filetype == "xml":
-            if hasattr(self, "in_path"):  # Ensure filename (in_path) is available
-                doc = xml.dom.minidom.parse(self.in_path)
-                self.doc = doc
+            if hasattr(self, "in_path"):  # Ensure that the file path is available
+                try:
+                    doc = xml.dom.minidom.parse(self.in_path)
+                    self.doc = doc
+                    log.debug("XML file successfully parsed.")
+                    return True
+                except Exception as e:
+                    log.error(f"Error while parsing XML file: {e}")
+                    return False
             else:
                 log.error("No file path provided for XML filetype")
                 return False
