@@ -41,7 +41,7 @@ class Winning(HandHistoryConverter):
     version = 0
     sitename = "WinningPoker"
     filetype = "text"
-    codepage = ("utf-16", "utf8", "cp1252")
+    codepage = ("utf8", "cp1252", "utf-16")
     siteId = 24  # Needs to match id entry in Sites database
     sym = {"USD": "\$", "T$": "", "play": ""}
     substitutions = {
@@ -355,6 +355,8 @@ class Winning(HandHistoryConverter):
     re_CollectPot3 = re.compile(r"^%(PLYR)s collected %(CUR)s(?P<POT>[,.\d]+)" % substitutions, re.MULTILINE)
 
     def compilePlayerRegexs(self, hand):
+        log.debug(f"compilePlayerRegexs called with hand: {hand}")
+        # Implémentation de la méthode
         pass
 
     def readSupportedGames(self):
@@ -372,20 +374,32 @@ class Winning(HandHistoryConverter):
         ]
 
     def determineGameType(self, handText):
+        log.debug(f"determineGameType called with handText of length: {len(handText)}")
+
         if self.re_Identify_Old.search(handText):
+            log.debug("Old format identified. Setting version to 1.")
             self.version = 1
-            return self._determineGameType1(handText)
+            result = self._determineGameType1(handText)
+            log.debug(f"Result from _determineGameType1: {result}")
+            return result
         else:
+            log.debug("New format identified. Setting version to 2.")
             self.version = 2
-            return self._determineGameType2(handText)
+            result = self._determineGameType2(handText)
+            log.debug(f"Result from _determineGameType2: {result}")
+            return result
 
     def _determineGameType1(self, handText):
+        log.debug("Starting _determineGameType1")
         info = {}
+
+        # Check if the filename matches the expected pattern
         if not self.re_File1.search(self.in_path):
-            tmp = "Invalid filename: %s" % self.in_path
+            tmp = f"Invalid filename: {self.in_path}"
             log.debug(f"determine Game Type failed: '{tmp}'")
             raise FpdbHandPartial(tmp)
 
+        # Extract game info from handText
         m = self.re_GameInfo1.search(handText)
         if not m:
             tmp = handText[0:200]
@@ -393,37 +407,57 @@ class Winning(HandHistoryConverter):
             raise FpdbParseError
 
         mg = m.groupdict()
+        log.debug(f"Game info extracted: {mg}")
+
+        # Add tournament data if available
         m1 = self.re_TourNo.search(self.in_path)
         if m1:
             mg.update(m1.groupdict())
+            log.debug(f"Updated game info with tournament data: {mg}")
 
+        # Extract basic game information
         if "GAME" in mg:
             (info["base"], info["category"]) = self.games1[mg["GAME"]]
+            log.debug(f"Base game: {info['base']}, Category: {info['category']}")
+
+        # Extract Small Blind
         if "SB" in mg:
             info["sb"] = mg["SB"]
+            log.debug(f"Small Blind: {info['sb']}")
+
+        # Extract Big Blind
         if "BB" in mg:
             info["bb"] = mg["BB"]
+            log.debug(f"Big Blind: {info['bb']}")
 
+        # Determine limit type
         if info["base"] == "stud":
             info["limitType"] = "fl"
+            log.debug("Limit Type: Fixed Limit (stud)")
         else:
             m2 = self.re_PostBB1.search(handText)
             if m2:
                 bb = self.clearMoneyString(m2.group("BB"))
                 if Decimal(self.clearMoneyString(info["sb"])) == Decimal(bb):
                     info["limitType"] = "fl"
+                    log.debug("Limit Type: Fixed Limit (BB matches SB)")
 
             if info.get("limitType") is None:
                 if "omaha" in info["category"]:
                     info["limitType"] = "pl"
+                    log.debug("Limit Type: Pot Limit (omaha)")
                 else:
                     info["limitType"] = "nl"
+                    log.debug("Limit Type: No Limit")
 
+        # Determine game type: tournament or cash
         if "TOURNO" in mg and mg["TOURNO"] is not None:
             info["type"] = "tour"
         else:
             info["type"] = "ring"
+        log.debug(f"Game Type: {info['type']}")
 
+        # Determine currency and buy-in type
         if "TABLE" in mg and mg["TABLE"] is not None:
             if re.match("PM\s", mg["TABLE"]):
                 info["currency"] = "play"
@@ -431,6 +465,7 @@ class Winning(HandHistoryConverter):
                 info["currency"] = "T$"
             else:
                 info["currency"] = "USD"
+            log.debug(f"Currency: {info['currency']}")
 
             if "(Cap)" in mg["TABLE"]:
                 info["buyinType"] = "cap"
@@ -438,13 +473,18 @@ class Winning(HandHistoryConverter):
                 info["buyinType"] = "shallow"
             else:
                 info["buyinType"] = "regular"
+            log.debug(f"Buyin Type: {info['buyinType']}")
         else:
             info["currency"] = "T$"
+            log.debug("Currency defaulted to T$")
 
+        # Adjust Small Blind and Big Blind for Fixed Limit games
         if info["limitType"] == "fl" and info["bb"] is not None:
             info["sb"] = str((Decimal(mg["SB"]) / 2).quantize(Decimal("0.01")))
             info["bb"] = str(Decimal(mg["SB"]).quantize(Decimal("0.01")))
+            log.debug(f"Adjusted SB: {info['sb']}, Adjusted BB: {info['bb']}")
 
+        log.debug(f"Final game info: {info}")
         return info
 
     def _determineGameType2(self, handText):
@@ -1112,6 +1152,17 @@ class Winning(HandHistoryConverter):
 
     def readShowdownActions(self, hand):
         # TODO: pick up mucks also??
+        pass
+
+    def readSTP(self, hand):
+        log.debug(f"Starting STP read hand_id: {hand.handid}, status: not_implemented")
+        log.warning(f"STP functionality not implemented hand_id: {hand.handid}, method: readSTP")
+        pass
+
+    def readTourneyResults(self, hand):
+        """Implement the abstract method from HandHistoryConverter."""
+        # Add the actual implementation here, or use a placeholder if not needed
+        log.info("Reading tournay result info for Winamax.")
         pass
 
     def readShownCards(self, hand):
