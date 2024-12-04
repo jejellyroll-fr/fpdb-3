@@ -41,37 +41,51 @@ class Winning(HandHistoryConverter):
     version = 0
     sitename = "WinningPoker"
     filetype = "text"
-    codepage = ("utf-16", "utf8", "cp1252")
+    codepage = ("utf8", "cp1252", "utf-16")
     siteId = 24  # Needs to match id entry in Sites database
     sym = {"USD": "\$", "T$": "", "play": ""}
     substitutions = {
-        "LEGAL_ISO": "USD|TB|CP",  # legal ISO currency codes
-        "LS": "\$|",  # legal currency symbols - Euro(cp1252, utf-8)
+        "LEGAL_ISO": "USD|TB|CP",
+        "LS": "\$",  
         "PLYR": r"(?P<PNAME>.+?)",
         "NUM": ".,\dK",
         "CUR": "(\$|)",
         "BRKTS": r"(\(button\)\s|\(small\sblind\)\s|\(big\sblind\)\s|\(button\)\s\(small\sblind\)\s|\(button\)\s\(big\sblind\)\s)?",
     }
+
     games1 = {  # base, category
         "Hold'em": ("hold", "holdem"),
         "Six Plus Hold'em": ("hold", "6_holdem"),
         "Omaha": ("hold", "omahahi"),
         "Omaha HiLow": ("hold", "omahahilo"),
         "5Card Omaha H/L": ("hold", "5_omaha8"),
-        "5Card Omaha": ("hold", "5_omaha"),
+        "5Card Omaha": ("hold", "5_omahahi"),
+        "4Card Omaha H/L": ("hold", "4_omaha8"),
+        "4Card Omaha": ("hold", "4_omahahi"),
+        "5Card Omaha H/L Reshuffle": ("hold", "5_omaha8"),
+        "5Card Omaha Reshuffle": ("hold", "5_omahahi"),
+        "4Card Omaha H/L Reshuffle": ("hold", "4_omaha8"),
+        "4Card Omaha Reshuffle": ("hold", "4_omahahi"),
         "Seven Cards Stud": ("stud", "studhi"),
         "Seven Cards Stud HiLow": ("stud", "studhilo"),
     }
+
     games2 = {  # base, category
         "Holdem": ("hold", "holdem"),
         "Omaha": ("hold", "omahahi"),
         "Omaha H/L": ("hold", "omahahilo"),
         "5Card Omaha H/L": ("hold", "5_omaha8"),
-        "5Card Omaha": ("hold", "5_omaha"),
-        # "Six Plus Hold'em" : ('hold','6_holdem'),
+        "5Card Omaha": ("hold", "5_omahahi"),
+        "4Card Omaha H/L": ("hold", "4_omaha8"),
+        "4Card Omaha": ("hold", "4_omahahi"),
+        "5Card Omaha H/L Reshuffle": ("hold", "5_omaha8"),
+        "5Card Omaha Reshuffle": ("hold", "5_omahahi"),
+        "4Card Omaha H/L Reshuffle": ("hold", "4_omaha8"),
+        "4Card Omaha Reshuffle": ("hold", "4_omahahi"),
         "7Stud": ("stud", "studhi"),
         "7Stud H/L": ("stud", "studhilo"),
     }
+
     limits = {"No Limit": "nl", "Pot Limit": "pl", "Fixed Limit": "fl", "All-in or Fold Limit": "al"}
     speeds = {"Turbo": "Turbo", "Hyper Turbo": "Hyper", "Regular": "Normal"}
     buyin = {"CAP": "cap", "Short": "shallow"}
@@ -147,25 +161,24 @@ class Winning(HandHistoryConverter):
     # Game Hand #82980175 - Tournament #11212445 - Omaha H/L(Pot Limit) - Level 1 (250.00/500.00)- 2019/07/25 02:31:33 UTC
 
     re_GameInfo2 = re.compile(
-        """
-          (Game\s)?Hand\s\#(?P<HID>[0-9]+)\s\-\s
-          (
-          (?P<TOUR>([\$.,\dK]+\sGTD\s)?Tournament\s\#(?P<TOURNO>\d+)\s\-\s) # open paren of tournament info
-          )?
-          # close paren of tournament info
-          (?P<GAME>Holdem|Omaha|Omaha\sH/L|5Card\sOmaha\sH/L|5Card\sOmaha|7Stud|7Stud\sH/L)
-          \((?P<LIMIT>No\sLimit|Fixed\sLimit|Pot\sLimit|All\-in\sor\sFold\sLimit)\)\s\-\s
-          (Level\s(?P<LEVEL>[IVXLC\d]+)\s)?
-          \(?                            # open paren of the stakes
-          (?P<CURRENCY>%(LS)s|)?
-          ((?P<SB>[.0-9]+)/(%(LS)s)?(?P<BB>[.0-9]+))
-          \)?                        # close paren of the stakes
-          \s?\-\s
-          (?P<DATETIME>.*$)
-        """
-        % substitutions,
+        r"""
+        (Game\s)?Hand\s\#(?P<HID>\d+)\s-\s
+        (?:(?P<TOUR>(?P<GTD>[\$.,\dK]+\sGTD\s)?Tournament\s\#(?P<TOURNO>\d+)\s-\s))?
+        (?P<GAME>Holdem|Omaha|Omaha\sH/L|4Card\sOmaha\sH/L|4Card\sOmaha|5Card\sOmaha\sH/L|5Card\sOmaha|
+        4Card\sOmaha\sH/L\sReshuffle|4Card\sOmaha\sReshuffle|5Card\sOmaha\sH/L\sReshuffle|5Card\sOmaha\sReshuffle|7Stud|7Stud\sH/L)\s
+        \((?P<LIMIT>No\sLimit|Fixed\sLimit|Pot\sLimit|All\-in\sor\sFold\sLimit)\)\s-\s
+        (Level\s(?P<LEVEL>[IVXLC\d]+)\s)?
+        \$?(?P<SB>[.0-9]+)/\$?(?P<BB>[.0-9]+)\s-\s
+        (?P<DATETIME>\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2}\sUTC)
+        """,
         re.MULTILINE | re.VERBOSE,
     )
+
+
+
+
+
+
 
     # Seat 6: puccini (5.34).
     re_PlayerInfo1 = re.compile(
@@ -355,6 +368,8 @@ class Winning(HandHistoryConverter):
     re_CollectPot3 = re.compile(r"^%(PLYR)s collected %(CUR)s(?P<POT>[,.\d]+)" % substitutions, re.MULTILINE)
 
     def compilePlayerRegexs(self, hand):
+        log.debug(f"compilePlayerRegexs called with hand: {hand}")
+        # Implémentation de la méthode
         pass
 
     def readSupportedGames(self):
@@ -372,20 +387,32 @@ class Winning(HandHistoryConverter):
         ]
 
     def determineGameType(self, handText):
+        log.debug(f"determineGameType called with handText of length: {len(handText)}")
+
         if self.re_Identify_Old.search(handText):
+            log.debug("Old format identified. Setting version to 1.")
             self.version = 1
-            return self._determineGameType1(handText)
+            result = self._determineGameType1(handText)
+            log.debug(f"Result from _determineGameType1: {result}")
+            return result
         else:
+            log.debug("New format identified. Setting version to 2.")
             self.version = 2
-            return self._determineGameType2(handText)
+            result = self._determineGameType2(handText)
+            log.debug(f"Result from _determineGameType2: {result}")
+            return result
 
     def _determineGameType1(self, handText):
+        log.debug("Starting _determineGameType1")
         info = {}
+
+        # Check if the filename matches the expected pattern
         if not self.re_File1.search(self.in_path):
-            tmp = "Invalid filename: %s" % self.in_path
+            tmp = f"Invalid filename: {self.in_path}"
             log.debug(f"determine Game Type failed: '{tmp}'")
             raise FpdbHandPartial(tmp)
 
+        # Extract game info from handText
         m = self.re_GameInfo1.search(handText)
         if not m:
             tmp = handText[0:200]
@@ -393,37 +420,57 @@ class Winning(HandHistoryConverter):
             raise FpdbParseError
 
         mg = m.groupdict()
+        log.debug(f"Game info extracted: {mg}")
+
+        # Add tournament data if available
         m1 = self.re_TourNo.search(self.in_path)
         if m1:
             mg.update(m1.groupdict())
+            log.debug(f"Updated game info with tournament data: {mg}")
 
+        # Extract basic game information
         if "GAME" in mg:
             (info["base"], info["category"]) = self.games1[mg["GAME"]]
+            log.debug(f"Base game: {info['base']}, Category: {info['category']}")
+
+        # Extract Small Blind
         if "SB" in mg:
             info["sb"] = mg["SB"]
+            log.debug(f"Small Blind: {info['sb']}")
+
+        # Extract Big Blind
         if "BB" in mg:
             info["bb"] = mg["BB"]
+            log.debug(f"Big Blind: {info['bb']}")
 
+        # Determine limit type
         if info["base"] == "stud":
             info["limitType"] = "fl"
+            log.debug("Limit Type: Fixed Limit (stud)")
         else:
             m2 = self.re_PostBB1.search(handText)
             if m2:
                 bb = self.clearMoneyString(m2.group("BB"))
                 if Decimal(self.clearMoneyString(info["sb"])) == Decimal(bb):
                     info["limitType"] = "fl"
+                    log.debug("Limit Type: Fixed Limit (BB matches SB)")
 
             if info.get("limitType") is None:
                 if "omaha" in info["category"]:
                     info["limitType"] = "pl"
+                    log.debug("Limit Type: Pot Limit (omaha)")
                 else:
                     info["limitType"] = "nl"
+                    log.debug("Limit Type: No Limit")
 
+        # Determine game type: tournament or cash
         if "TOURNO" in mg and mg["TOURNO"] is not None:
             info["type"] = "tour"
         else:
             info["type"] = "ring"
+        log.debug(f"Game Type: {info['type']}")
 
+        # Determine currency and buy-in type
         if "TABLE" in mg and mg["TABLE"] is not None:
             if re.match("PM\s", mg["TABLE"]):
                 info["currency"] = "play"
@@ -431,6 +478,7 @@ class Winning(HandHistoryConverter):
                 info["currency"] = "T$"
             else:
                 info["currency"] = "USD"
+            log.debug(f"Currency: {info['currency']}")
 
             if "(Cap)" in mg["TABLE"]:
                 info["buyinType"] = "cap"
@@ -438,84 +486,125 @@ class Winning(HandHistoryConverter):
                 info["buyinType"] = "shallow"
             else:
                 info["buyinType"] = "regular"
+            log.debug(f"Buyin Type: {info['buyinType']}")
         else:
             info["currency"] = "T$"
+            log.debug("Currency defaulted to T$")
 
+        # Adjust Small Blind and Big Blind for Fixed Limit games
         if info["limitType"] == "fl" and info["bb"] is not None:
             info["sb"] = str((Decimal(mg["SB"]) / 2).quantize(Decimal("0.01")))
             info["bb"] = str(Decimal(mg["SB"]).quantize(Decimal("0.01")))
+            log.debug(f"Adjusted SB: {info['sb']}, Adjusted BB: {info['bb']}")
 
+        log.debug(f"Final game info: {info}")
         return info
 
     def _determineGameType2(self, handText):
+        log.debug("Starting _determineGameType2")
         info = {}
+        log.debug(f"Input handText: {handText[:200]}...")  
+        log.debug(f"Attempting regex match with handText: {handText[:200]}")
         m = self.re_GameInfo2.search(handText)
         if not m:
-            tmp = handText[0:200]
-            log.debug(f"determine Game Type failed: '{tmp}'")
+            log.error(f"No match found for handText: {handText[:200]}")
             raise FpdbParseError
-
         mg = m.groupdict()
+        log.debug(f"Regex match groupdict: {mg}")
 
         m1 = self.re_File2.search(self.in_path)
         if m1:
             mg.update(m1.groupdict())
+            log.debug(f"Updated groupdict with file info: {mg}")
 
         if "LIMIT" in mg:
             info["limitType"] = self.limits[mg["LIMIT"]]
+            log.debug(f"Determined limitType: {info['limitType']}")
         if "GAME" in mg:
             (info["base"], info["category"]) = self.games2[mg["GAME"]]
+            log.debug(f"Determined base: {info['base']}, category: {info['category']}")
         if "SB" in mg:
             info["sb"] = mg["SB"]
+            log.debug(f"Determined small blind (sb): {info['sb']}")
         if "BB" in mg:
             info["bb"] = mg["BB"]
+            log.debug(f"Determined big blind (bb): {info['bb']}")
         if "CURRENCY" in mg and mg["CURRENCY"] is not None:
             info["currency"] = self.currencies[mg["CURRENCY"]]
+            log.debug(f"Determined currency: {info['currency']}")
 
-        if "TYPE" in mg and "RUSHID" == mg["TYPE"]:
+        if "TYPE" in mg and mg["TYPE"] == "RUSHID":
             info["fast"] = True
+            log.debug("Game type is 'fast'")
         else:
             info["fast"] = False
+            log.debug("Game type is not 'fast'")
 
         if "TOURNO" in mg and mg["TOURNO"] is None:
             info["type"] = "ring"
+            log.debug("Game type is 'ring'")
         else:
             info["type"] = "tour"
+            log.debug("Game type is 'tour'")
 
         if info.get("currency") in ("T$", None) and info["type"] == "ring":
             info["currency"] = "play"
+            log.debug("Currency set to 'play' for ring games")
 
         if info["limitType"] == "fl" and info["bb"] is not None:
             info["sb"] = str((Decimal(mg["SB"]) / 2).quantize(Decimal("0.01")))
             info["bb"] = str(Decimal(mg["SB"]).quantize(Decimal("0.01")))
+            log.debug(f"Adjusted fixed-limit blinds: sb={info['sb']}, bb={info['bb']}")
 
+        log.debug(f"Final game info: {info}")
         return info
 
+
     def readHandInfo(self, hand):
+        log.debug("Starting readHandInfo")
+        log.debug(f"Input hand: {hand}")
+
         if self.version == 1:
+            log.debug("Using version 1 for reading hand info")
             self._readHandInfo1(hand)
         else:
+            log.debug(f"Using version {self.version} for reading hand info")
             self._readHandInfo2(hand)
 
+        log.debug("Finished readHandInfo")
+
+
     def _readHandInfo1(self, hand):
-        # First check if partial
+        log.debug("Starting _readHandInfo1")
+        log.debug(f"Input handText snippet: {hand.handText[:200]}")  # Display the first 200 characters to avoid verbose logs
+
+        # Check if the hand is cleanly split into pre and post-summary
         if hand.handText.count("------ Summary ------") != 1:
-            raise FpdbHandPartial(("Hand is not cleanly split into pre and post Summary"))
+            log.error("Hand is not cleanly split into pre and post Summary")
+            raise FpdbHandPartial("Hand is not cleanly split into pre and post Summary")
 
         info = {}
+        log.debug("Attempting to match game and datetime regex")
+
+        # Match game info and datetime regex patterns
         m = self.re_GameInfo1.search(hand.handText)
         m2 = self.re_DateTime1.search(hand.handText)
+
         if m is None or m2 is None:
-            tmp = hand.handText[0:200]
-            log.error(f"read Hand Info failed: '{tmp}'")
+            tmp = hand.handText[:200]
+            log.error(f"readHandInfo failed: '{tmp}'")
             raise FpdbParseError
 
         info.update(m.groupdict())
+        log.debug(f"GameInfo regex matched: {info}")
 
+        # Match tournament number from the file path
         m1 = self.re_TourNo.search(self.in_path)
         if m1:
             info.update(m1.groupdict())
+            log.debug(f"TourNo regex matched: {info}")
 
+        # Parse datetime string and convert to UTC
         datetimestr = "%s/%s/%s %s:%s:%s" % (
             m2.group("Y"),
             m2.group("M"),
@@ -524,20 +613,28 @@ class Winning(HandHistoryConverter):
             m2.group("MIN"),
             m2.group("S"),
         )
-        hand.startTime = datetime.datetime.strptime(
-            datetimestr, "%Y/%m/%d %H:%M:%S"
-        )  # also timezone at end, e.g. " ET"
-        hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, self.import_parameters["timezone"], "UTC")
+        log.debug(f"Parsed datetime string: {datetimestr}")
 
+        hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
+        hand.startTime = HandHistoryConverter.changeTimezone(
+            hand.startTime, self.import_parameters["timezone"], "UTC"
+        )
+        log.debug(f"Converted startTime: {hand.startTime}")
+
+        # Update main hand info
         if "TOURNO" in info:
             hand.tourNo = info["TOURNO"]
+            log.debug(f"Tournament number: {hand.tourNo}")
 
         if "HID" in info:
             hand.handid = info["HID"]
+            log.debug(f"Hand ID: {hand.handid}")
 
         if "MAX" in info and info["MAX"] is not None:
             hand.maxseats = int(info["MAX"].replace("-max", ""))
+            log.debug(f"Max seats from info: {hand.maxseats}")
 
+        # Set default max seats if not defined
         if not hand.maxseats:
             if hand.gametype["base"] == "stud":
                 hand.maxseats = 8
@@ -545,86 +642,126 @@ class Winning(HandHistoryConverter):
                 hand.maxseats = 9
             else:
                 hand.maxseats = 10
+            log.debug(f"Default max seats set to: {hand.maxseats}")
 
+        # Parse table-specific information
         if "TABLE" in info and info["TABLE"] is not None:
+            log.debug(f"Parsing table information: {info['TABLE']}")
             if hand.tourNo:
+                # Initialize default tournament values
                 hand.buyin = 0
                 hand.fee = 0
                 hand.buyinCurrency = "NA"
                 hand.tablename = 1
+
+                # Match table details
                 m3 = self.re_Table1.search(info["TABLE"])
                 if m3 is not None:
                     tableinfo = m3.groupdict()
+                    log.debug(f"Table regex matched: {tableinfo}")
+                    
+                    # Process specific table details
                     if "SPECIAL" in tableinfo and tableinfo["SPECIAL"] is not None:
+                        log.debug(f"Table special info: {tableinfo['SPECIAL']}")
                         if tableinfo["SPECIAL"] in ("Freeroll", "FREEBUY", "Freebuy"):
                             hand.buyinCurrency = "FREE"
                         hand.guaranteeAmt = int(100 * Decimal(self.clearMoneyString(tableinfo["BUYIN"])))
+                        log.debug(f"Guarantee amount: {hand.guaranteeAmt}")
 
+                    # Process buyin and max seats
                     if hand.guaranteeAmt == 0:
                         hand.buyinCurrency = "USD"
                         hand.buyin = int(100 * Decimal(self.clearMoneyString(tableinfo["BUYIN"])))
+                        log.debug(f"Buyin set to: {hand.buyin} {hand.buyinCurrency}")
 
                     if "MAX" in tableinfo and tableinfo["MAX"] is not None:
                         n = tableinfo["MAX"].replace("-Max", "")
-                        if n in ("Heads-up", "Heads-Up"):
-                            hand.maxseats = 2
-                        else:
-                            hand.maxseats = int(n)
+                        hand.maxseats = 2 if n in ("Heads-up", "Heads-Up") else int(n)
+                        log.debug(f"Adjusted max seats: {hand.maxseats}")
 
                     if "SPEED" in tableinfo and tableinfo["SPEED"] is not None:
                         hand.speed = self.speeds[tableinfo["SPEED"]]
+                        log.debug(f"Table speed: {hand.speed}")
+
+                        # Calculate fees for SnG based on speed
                         if hand.maxseats == 2 and hand.buyin in self.HUSnG_Fee:
                             hand.fee = self.HUSnG_Fee[hand.buyin][hand.speed]
                             hand.isSng = True
                         if hand.maxseats != 2 and hand.buyin in self.SnG_Fee:
                             hand.fee = self.SnG_Fee[hand.buyin][hand.speed]
                             hand.isSng = True
+                        log.debug(f"SnG fee: {hand.fee}, isSnG: {hand.isSng}")
 
                     hand.tablename = int(m3.group("TABLENO"))
+                    log.debug(f"Table number: {hand.tablename}")
 
+                # Detect specific tournament options
                 if "On Demand" in info["TABLE"]:
                     hand.isOnDemand = True
-
+                    log.debug("Table is 'On Demand'")
                 if " KO" in info["TABLE"] or "Knockout" in info["TABLE"]:
                     hand.isKO = True
-
+                    log.debug("Table is 'Knockout'")
                 if "R/A" in info["TABLE"]:
                     hand.isRebuy = True
                     hand.isAddOn = True
+                    log.debug("Table supports Rebuy and Add-On")
 
                 m4 = self.re_TourneyName1.search(info["TABLE"])
                 if m4:
                     hand.tourneyName = m4.group("TOURNAME")
+                    log.debug(f"Tournament name: {hand.tourneyName}")
             else:
                 hand.tablename = info["TABLE"]
+                log.debug(f"Table name: {hand.tablename}")
+                
+                # Parse buyin type for cash games
                 buyin_type = self.re_buyinType.search(info["TABLE"])
                 if buyin_type:
                     hand.gametype["buyinType"] = self.buyin[buyin_type.group("BUYINTYPE")]
+                    log.debug(f"Buyin type: {hand.gametype['buyinType']}")
         else:
+            # Set default table values for cash games
             hand.buyin = 0
             hand.fee = 0
             hand.buyinCurrency = "NA"
             hand.tablename = 1
+            log.debug("Default table settings applied for cash game")
+
+        log.debug("Finished _readHandInfo1")
+
+
 
     def _readHandInfo2(self, hand):
-        # First check if partial
+        log.debug("Starting _readHandInfo2")
+        log.debug(f"Input handText snippet: {hand.handText[:200]}")  # Display the first 200 characters
+
+        # Check if the hand is cleanly split into pre and post-summary
         if hand.handText.count("*** SUMMARY ***") != 1:
-            raise FpdbHandPartial(("Hand is not cleanly split into pre and post Summary"))
+            log.error("Hand is not cleanly split into pre and post Summary")
+            raise FpdbHandPartial("Hand is not cleanly split into pre and post Summary")
 
         info = {}
+        log.debug("Attempting to match game and hand info regex patterns")
+
+        # Match game and hand information regex
         m = self.re_GameInfo2.search(hand.handText)
         m1 = self.re_HandInfo.search(hand.handText)
+
         if m is None or m1 is None:
-            tmp = hand.handText[0:200]
+            tmp = hand.handText[:200]
             log.error(f"read Hand Info failed: '{tmp}'")
             raise FpdbParseError
 
         info.update(m.groupdict())
         info.update(m1.groupdict())
+        log.debug(f"Matched game and hand info: {info}")
 
+        # Process matched info
         for key in info:
             if key == "DATETIME":
-                datetimestr = "2000/01/01 00:00:00"  # default used if time not found
+                log.debug("Processing DATETIME")
+                datetimestr = "2000/01/01 00:00:00"  # Default datetime
                 m2 = self.re_DateTime2.finditer(info[key])
                 for a in m2:
                     datetimestr = "%s/%s/%s %s:%s:%s" % (
@@ -635,77 +772,98 @@ class Winning(HandHistoryConverter):
                         a.group("MIN"),
                         a.group("S"),
                     )
-                    # tz = a.group('TZ')  # just assume ET??
-                    # print "   tz = ", tz, " datetime =", datetimestr
-                hand.startTime = datetime.datetime.strptime(
-                    datetimestr, "%Y/%m/%d %H:%M:%S"
-                )  # also timezone at end, e.g. " ET"
+                hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
+                log.debug(f"Parsed startTime: {hand.startTime}")
             if key == "HID":
                 hand.handid = info[key]
+                log.debug(f"Hand ID: {hand.handid}")
             if key == "TOURNO":
                 hand.tourNo = info[key]
+                log.debug(f"Tournament number: {hand.tourNo}")
             if key == "LEVEL":
                 hand.level = info[key]
+                log.debug(f"Tournament level: {hand.level}")
             if key == "TABLE":
+                log.debug("Processing TABLE info")
                 if info["TOURNO"] is not None:
                     hand.buyin = 0
                     hand.fee = 0
-                    hand.buyinCurrency = "FREE"  # FIXME
-
+                    hand.buyinCurrency = "FREE"  # Default value for tournaments
                     m2 = self.re_Table2.match(info[key])
                     if m2:
                         hand.tablename = m2.group("TABLENO")
+                        log.debug(f"Table number: {hand.tablename}")
                 else:
                     hand.tablename = info[key]
+                    log.debug(f"Table name: {hand.tablename}")
             if key == "BUTTON":
                 hand.buttonpos = info[key]
+                log.debug(f"Button position: {hand.buttonpos}")
             if key == "MAX" and info[key] is not None:
                 hand.maxseats = int(info[key])
+                log.debug(f"Max seats: {hand.maxseats}")
 
+        # Process tournament-specific information
         if "SCHEDULEDID" in self.in_path:
+            log.debug("Detected SCHEDULEDID in path")
             m3 = self.re_TourneyName2.search(self.in_path)
             if m3:
                 hand.tourneyName = m3.group("TOURNAME").replace("{BACKSLASH}", "\\")
+                log.debug(f"Tournament name: {hand.tourneyName}")
                 m4 = self.re_GTD.search(hand.tourneyName)
                 if m4:
                     hand.isGuarantee = True
                     hand.guaranteeAmt = int(100 * Decimal(self.clearMoneyString(m4.group("GTD"))))
+                    log.debug(f"Guaranteed amount: {hand.guaranteeAmt}")
                 if "Satellite" in hand.tourneyName:
                     hand.isSatellite = True
+                    log.debug("Tournament is a Satellite")
                 if "Shootout" in hand.tourneyName:
                     hand.isShootout = True
+                    log.debug("Tournament is a Shootout")
 
         elif "SITGOID" in self.in_path:
+            log.debug("Detected SITGOID in path")
             hand.isSng = True
             m3 = self.re_TourneyName2.search(self.in_path)
             if m3:
                 hand.tourneyName = m3.group("TOURNAME").replace("{BACKSLASH}", "\\")
+                log.debug(f"Tournament name: {hand.tourneyName}")
+
                 if " Hyper Turbo " in hand.tourneyName:
                     speed = "Hyper Turbo"
                 elif " Turbo " in hand.tourneyName:
                     speed = "Turbo"
                 else:
                     speed = "Regular"
-
                 hand.speed = self.speeds[speed]
+                log.debug(f"Tournament speed: {hand.speed}")
 
                 m4 = self.re_buyin.match(hand.tourneyName)
                 if m4:
                     hand.buyinCurrency = "USD"
                     hand.buyin = int(100 * Decimal(self.clearMoneyString(m4.group("BUYIN"))))
+                    log.debug(f"Buyin: {hand.buyin} {hand.buyinCurrency}")
 
                     if hand.maxseats == 2 and hand.buyin in self.HUSnG_Fee:
                         hand.fee = self.HUSnG_Fee[hand.buyin][hand.speed]
                     if hand.maxseats != 2 and hand.buyin in self.SnG_Fee:
                         hand.fee = self.SnG_Fee[hand.buyin][hand.speed]
+                    log.debug(f"Fee: {hand.fee}")
 
                 m5 = self.re_Step.search(hand.tourneyName)
                 if m5:
                     hand.isStep = True
                     hand.stepNo = int(m5.group("STEPNO"))
+                    log.debug(f"Step number: {hand.stepNo}")
 
         elif "RUSHID" in self.in_path:
-            (hand.gametype["fast"], hand.isFast) = (True, True)
+            log.debug("Detected RUSHID in path")
+            hand.gametype["fast"], hand.isFast = True, True
+            log.debug("Game is fast (Rush)")
+
+        log.debug("Finished _readHandInfo2")
+
 
     def readButton(self, hand):
         if self.version == 1:
@@ -752,7 +910,10 @@ class Winning(HandHistoryConverter):
             self._markStreets2(hand)
 
     def _markStreets1(self, hand):
+        log.debug("Starting _markStreets1")
+        log.debug(f"Game type base: {hand.gametype['base']}")
         if hand.gametype["base"] in ("hold"):
+            log.debug("Attempting to match streets for hold'em game")
             m = re.search(
                 r"(?P<PREFLOP>.+(?=\*\*\* FLOP \*\*\*:)|.+)"
                 r"(\*\*\* FLOP \*\*\*:(?P<FLOP> (\[\S\S\S?] )?\[\S\S\S? ?\S\S\S? \S\S\S?].+(?=\*\*\* TURN \*\*\*:)|.+))?"
@@ -762,6 +923,7 @@ class Winning(HandHistoryConverter):
                 re.DOTALL,
             )
         elif hand.gametype["base"] in ("stud"):
+            log.debug("Attempting to match streets for stud game")
             m = re.search(
                 r"(?P<THIRD>.+(?=\*\*\* Third street \*\*\*)|.+)"
                 r"(\*\*\* Third street \*\*\*(?P<FOURTH>.+(?=\*\*\* Fourth street \*\*\*)|.+))?"
@@ -771,10 +933,21 @@ class Winning(HandHistoryConverter):
                 hand.handText,
                 re.DOTALL,
             )
+        else:
+            log.warning("Unknown game type base, streets matching skipped")
+            return
+        if m:
+            log.debug("Streets successfully matched")
+        else:
+            log.warning("No streets matched")
         hand.addStreets(m)
+        log.debug("Finished _markStreets1")
 
     def _markStreets2(self, hand):
+        log.debug("Starting _markStreets2")
+        log.debug(f"Game type base: {hand.gametype['base']}")
         if hand.gametype["base"] in ("hold"):
+            log.debug("Attempting to match streets for hold'em game")
             m = re.search(
                 r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>(.+(?P<FLOPET>\[\S\S\]))?.+(?=\*\*\* (FLOP|FIRST FLOP|FLOP 1) \*\*\*)|.+)"
                 r"(\*\*\* FLOP \*\*\*(?P<FLOP> (\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\].+(?=\*\*\* (TURN|FIRST TURN|TURN 1) \*\*\*)|.+))?"
@@ -790,6 +963,7 @@ class Winning(HandHistoryConverter):
                 re.DOTALL,
             )
         elif hand.gametype["base"] in ("stud"):
+            log.debug("Attempting to match streets for stud game")
             m = re.search(
                 r"(?P<ANTES>.+(?=\*\*\* 3rd STREET \*\*\*)|.+)"
                 r"(\*\*\* 3rd STREET \*\*\*(?P<THIRD>.+(?=\*\*\* 4th STREET \*\*\*)|.+))?"
@@ -800,327 +974,506 @@ class Winning(HandHistoryConverter):
                 hand.handText,
                 re.DOTALL,
             )
+        else:
+            log.warning("Unknown game type base, streets matching skipped")
+            return
+        if m:
+            log.debug("Streets successfully matched")
+        else:
+            log.warning("No streets matched")
         hand.addStreets(m)
+        log.debug("Finished _markStreets2")
+
 
     def readCommunityCards(self, hand, street):
+        log.debug("Starting readCommunityCards")
+        log.debug(f"Processing street: {street}, Hand ID: {hand.handid}")
         if self.version == 1:
             self._readCommunityCards1(hand, street)
         else:
             self._readCommunityCards2(hand, street)
         if street in ("FLOP1", "TURN1", "RIVER1", "FLOP2", "TURN2", "RIVER2"):
             hand.runItTimes = 2
+            log.debug(f"Set runItTimes to 2 for street: {street}")
+        log.debug("Finished readCommunityCards")
 
-    def _readCommunityCards1(self, hand, street):  # street has been matched by markStreets, so exists in this hand
+    def _readCommunityCards1(self, hand, street):
+        log.debug(f"Executing _readCommunityCards1 for street: {street}")
         m = self.re_Board.search(hand.streets[street])
         if m:
-            hand.setCommunityCards(street, [c.replace("10", "T") for c in m.group("CARDS").split(" ")])
+            cards = [c.replace("10", "T") for c in m.group("CARDS").split(" ")]
+            hand.setCommunityCards(street, cards)
+            log.debug(f"Set community cards for {street}: {cards}")
         else:
-            log.error(f"No community cards found on {street} {hand.handid}")
+            log.error(f"No community cards found on {street}, Hand ID: {hand.handid}")
             raise FpdbParseError
 
-    def _readCommunityCards2(self, hand, street):  # street has been matched by markStreets, so exists in this hand
+    def _readCommunityCards2(self, hand, street):
+        log.debug(f"Executing _readCommunityCards2 for street: {street}")
         m = self.re_Board.search(hand.streets[street])
         if m:
-            hand.setCommunityCards(street, m.group("CARDS").split(" "))
+            cards = m.group("CARDS").split(" ")
+            hand.setCommunityCards(street, cards)
+            log.debug(f"Set community cards for {street}: {cards}")
         else:
-            log.error(f"No community cards found on {street} {hand.handid}")
+            log.error(f"No community cards found on {street}, Hand ID: {hand.handid}")
             raise FpdbParseError
 
     def readAntes(self, hand):
+        log.debug("Starting readAntes")
+        log.debug(f"Hand ID: {hand.handid}, Version: {self.version}")
         if self.version == 1:
             self._readAntes1(hand)
         else:
             self._readAntes2(hand)
+        log.debug("Finished readAntes")
 
     def _readAntes1(self, hand):
-        log.debug(("reading antes"))
+        log.debug("Executing _readAntes1")
         m = self.re_Antes1.finditer(hand.handText)
         for player in m:
-            # ~ logging.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
-            hand.addAnte(player.group("PNAME"), player.group("ANTE"))
+            pname = player.group("PNAME")
+            ante = player.group("ANTE")
+            hand.addAnte(pname, ante)
+            log.debug(f"Added ante for player: {pname}, Ante: {ante}")
 
     def _readAntes2(self, hand):
-        log.debug(("reading antes"))
+        log.debug("Executing _readAntes2")
         m = self.re_Antes2.finditer(hand.handText)
         for player in m:
-            # ~ logging.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
-            hand.addAnte(player.group("PNAME"), player.group("ANTE"))
+            pname = player.group("PNAME")
+            ante = player.group("ANTE")
+            hand.addAnte(pname, ante)
+            log.debug(f"Added ante for player: {pname}, Ante: {ante}")
+
 
     def readBringIn(self, hand):
+        log.debug("Starting readBringIn")
+        log.debug(f"Hand ID: {hand.handid}, Version: {self.version}")
         if self.version == 1:
             self._readBringIn1(hand)
         else:
             self._readBringIn2(hand)
+        log.debug("Finished readBringIn")
 
     def _readBringIn1(self, hand):
+        log.debug("Executing _readBringIn1")
         m = self.re_BringIn1.search(hand.handText, re.DOTALL)
         if m:
-            # ~ logging.debug("readBringIn: %s for %s" %(m.group('PNAME'),  m.group('BRINGIN')))
-            hand.addBringIn(m.group("PNAME"), m.group("BRINGIN"))
+            pname = m.group("PNAME")
+            bringin = m.group("BRINGIN")
+            hand.addBringIn(pname, bringin)
+            log.debug(f"Added bring-in for player: {pname}, Bring-in: {bringin}")
+        else:
+            log.debug("No bring-in found in _readBringIn1")
 
     def _readBringIn2(self, hand):
+        log.debug("Executing _readBringIn2")
         m = self.re_BringIn2.search(hand.handText, re.DOTALL)
         if m:
-            # ~ logging.debug("readBringIn: %s for %s" %(m.group('PNAME'),  m.group('BRINGIN')))
-            hand.addBringIn(m.group("PNAME"), m.group("BRINGIN"))
+            pname = m.group("PNAME")
+            bringin = m.group("BRINGIN")
+            hand.addBringIn(pname, bringin)
+            log.debug(f"Added bring-in for player: {pname}, Bring-in: {bringin}")
+        else:
+            log.debug("No bring-in found in _readBringIn2")
 
     def readBlinds(self, hand):
+        log.debug("Starting readBlinds")
+        log.debug(f"Hand ID: {hand.handid}, Version: {self.version}")
         if self.version == 1:
             self._readBlinds1(hand)
         else:
             self._readBlinds2(hand)
+        log.debug("Finished readBlinds")
 
     def _readBlinds1(self, hand):
+        log.debug("Executing _readBlinds1")
         liveBlind = True
         for a in self.re_PostSB1.finditer(hand.handText):
+            pname = a.group("PNAME")
+            sb = a.group("SB")
             if liveBlind:
-                hand.addBlind(a.group("PNAME"), "small blind", a.group("SB"))
+                hand.addBlind(pname, "small blind", sb)
+                log.debug(f"Added live small blind for player: {pname}, Amount: {sb}")
                 liveBlind = False
             else:
-                pass
-                # Post dead blinds as ante
-                # hand.addBlind(a.group('PNAME'), 'secondsb', a.group('SB'))
+                log.debug(f"Skipped dead small blind for player: {pname}, Amount: {sb}")
         for a in self.re_PostBB1.finditer(hand.handText):
-            hand.addBlind(a.group("PNAME"), "big blind", a.group("BB"))
+            pname = a.group("PNAME")
+            bb = a.group("BB")
+            hand.addBlind(pname, "big blind", bb)
+            log.debug(f"Added big blind for player: {pname}, Amount: {bb}")
         for a in self.re_Posts1.finditer(hand.handText):
-            if Decimal(self.clearMoneyString(a.group("SBBB"))) == Decimal(hand.bb):
-                hand.addBlind(a.group("PNAME"), "big blind", a.group("SBBB"))
+            pname = a.group("PNAME")
+            sbbb = self.clearMoneyString(a.group("SBBB"))
+            if Decimal(sbbb) == Decimal(hand.bb):
+                hand.addBlind(pname, "big blind", sbbb)
+                log.debug(f"Added big blind for player: {pname}, Amount: {sbbb}")
             else:
-                hand.addBlind(a.group("PNAME"), "secondsb", a.group("SBBB"))
+                hand.addBlind(pname, "secondsb", sbbb)
+                log.debug(f"Added second small blind for player: {pname}, Amount: {sbbb}")
 
     def _readBlinds2(self, hand):
+        log.debug("Executing _readBlinds2")
         liveBlind = True
         for a in self.re_PostSB2.finditer(hand.handText):
+            pname = a.group("PNAME")
+            sb = a.group("SB")
             if liveBlind:
-                hand.addBlind(a.group("PNAME"), "small blind", a.group("SB"))
+                hand.addBlind(pname, "small blind", sb)
+                log.debug(f"Added live small blind for player: {pname}, Amount: {sb}")
                 liveBlind = False
             else:
-                pass
-                # Post dead blinds as ante
-                # hand.addBlind(a.group('PNAME'), 'secondsb', a.group('SB'))
+                log.debug(f"Skipped dead small blind for player: {pname}, Amount: {sb}")
         for a in self.re_PostBB2.finditer(hand.handText):
-            hand.addBlind(a.group("PNAME"), "big blind", a.group("BB"))
+            pname = a.group("PNAME")
+            bb = a.group("BB")
+            hand.addBlind(pname, "big blind", bb)
+            log.debug(f"Added big blind for player: {pname}, Amount: {bb}")
         for a in self.re_PostBoth2.finditer(hand.handText):
-            hand.addBlind(a.group("PNAME"), "both", self.clearMoneyString(a.group("SBBB")))
+            pname = a.group("PNAME")
+            both = self.clearMoneyString(a.group("SBBB"))
+            hand.addBlind(pname, "both", both)
+            log.debug(f"Added both blinds for player: {pname}, Amount: {both}")
         for a in self.re_Posts2.finditer(hand.handText):
-            if Decimal(self.clearMoneyString(a.group("SBBB"))) == Decimal(hand.bb):
-                hand.addBlind(a.group("PNAME"), "big blind", a.group("SBBB"))
+            pname = a.group("PNAME")
+            sbbb = self.clearMoneyString(a.group("SBBB"))
+            if Decimal(sbbb) == Decimal(hand.bb):
+                hand.addBlind(pname, "big blind", sbbb)
+                log.debug(f"Added big blind for player: {pname}, Amount: {sbbb}")
             else:
-                hand.addBlind(a.group("PNAME"), "secondsb", a.group("SBBB"))
+                hand.addBlind(pname, "secondsb", sbbb)
+                log.debug(f"Added second small blind for player: {pname}, Amount: {sbbb}")
+
 
     def readHoleCards(self, hand):
+        log.debug("Starting readHoleCards")
+        log.debug(f"Hand ID: {hand.handid}, Version: {self.version}")
         if self.version == 1:
             self._readHoleCards1(hand)
         else:
             self._readHoleCards2(hand)
+        log.debug("Finished readHoleCards")
 
     def _readHoleCards1(self, hand):
-        #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
-        #    we need to grab hero's cards
+        log.debug("Executing _readHoleCards1")
+        # Streets PREFLOP, PREDRAW, and THIRD are special cases because
+        # we need to grab hero's cards
         for street in ("PREFLOP", "DEAL"):
             if street in hand.streets.keys():
+                log.debug(f"Processing street: {street}")
                 newcards = []
                 m = self.re_HeroCards1.finditer(hand.streets[street])
                 for found in m:
                     hand.hero = found.group("PNAME")
-                    newcards.append(found.group("CARD").replace("10", "T"))
+                    card = found.group("CARD").replace("10", "T")
+                    newcards.append(card)
+                    log.debug(f"Found card for hero: {card}, Player: {hand.hero}")
                 if hand.hero:
                     hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
+                    log.debug(f"Added hole cards for hero on {street}: {newcards}")
 
         for street, text in list(hand.streets.items()):
             if not text or street in ("PREFLOP", "DEAL"):
-                continue  # already done these
+                continue  # already processed these
+            log.debug(f"Processing street: {street}")
             m = self.re_HeroCards1.finditer(hand.streets[street])
             players = {}
             for found in m:
                 player = found.group("PNAME")
+                card = found.group("CARD").replace("10", "T")
                 if players.get(player) is None:
                     players[player] = []
-                players[player].append(found.group("CARD").replace("10", "T"))
+                players[player].append(card)
+                log.debug(f"Found card for player: {card}, Player: {player}")
 
             for player, cards in list(players.items()):
+                log.debug(f"Processing player: {player}, Cards: {cards}")
                 if street == "THIRD":  # hero in stud game
-                    hand.dealt.add(player)  # need this for stud??
+                    hand.dealt.add(player)  # Need this for stud?
                     if len(cards) == 3:
                         hand.hero = player
                         hand.addHoleCards(
                             street, player, closed=cards[0:2], open=[cards[2]], shown=False, mucked=False, dealt=False
                         )
+                        log.debug(f"Added hole cards for hero in stud game: Closed={cards[0:2]}, Open={cards[2:]}")
                     else:
                         hand.addHoleCards(street, player, closed=[], open=cards, shown=False, mucked=False, dealt=False)
+                        log.debug(f"Added hole cards for player: Open={cards}")
                 elif street == "SEVENTH":
                     if hand.hero == player:
                         hand.addHoleCards(street, player, open=cards, closed=[], shown=False, mucked=False, dealt=False)
+                        log.debug(f"Added open cards for hero on {street}: {cards}")
                     else:
                         hand.addHoleCards(street, player, open=[], closed=cards, shown=False, mucked=False, dealt=False)
+                        log.debug(f"Added closed cards for player on {street}: {cards}")
                 else:
                     hand.addHoleCards(street, player, open=cards, closed=[], shown=False, mucked=False, dealt=False)
+                    log.debug(f"Added open cards for player on {street}: {cards}")
+
 
     def _readHoleCards2(self, hand):
-        #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
-        #    we need to grab hero's cards
+        log.debug("Executing _readHoleCards2")
+        # Streets PREFLOP, PREDRAW, and THIRD are special cases because
+        # we need to grab hero's cards
         for street in ("PREFLOP", "DEAL"):
             if street in hand.streets.keys():
+                log.debug(f"Processing street: {street}")
                 newcards = []
                 m = self.re_HeroCards2.finditer(hand.streets[street])
                 for found in m:
                     hand.hero = found.group("PNAME")
                     newcards = found.group("NEWCARDS").split(" ")
+                    log.debug(f"Found cards for hero: {newcards}, Player: {hand.hero}")
                 if hand.hero:
                     hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
+                    log.debug(f"Added hole cards for hero on {street}: {newcards}")
 
         for street, text in list(hand.streets.items()):
             if not text or street in ("PREFLOP", "DEAL"):
-                continue  # already done these
+                continue  # already processed these
+            log.debug(f"Processing street: {street}")
             m = self.re_HeroCards2.finditer(hand.streets[street])
             for found in m:
                 player = found.group("PNAME")
-                if found.group("NEWCARDS") is None:
-                    newcards = []
-                else:
-                    newcards = found.group("NEWCARDS").split(" ")
-                if found.group("OLDCARDS") is None:
-                    oldcards = []
-                else:
-                    oldcards = found.group("OLDCARDS").split(" ")
+                newcards = found.group("NEWCARDS").split(" ") if found.group("NEWCARDS") else []
+                oldcards = found.group("OLDCARDS").split(" ") if found.group("OLDCARDS") else []
+                log.debug(f"Player: {player}, New cards: {newcards}, Old cards: {oldcards}")
 
                 if street == "THIRD" and len(newcards) == 3:  # hero in stud game
                     hand.hero = player
-                    hand.dealt.add(player)  # need this for stud??
+                    hand.dealt.add(player)  # Need this for stud?
                     hand.addHoleCards(
                         street, player, closed=newcards[0:2], open=[newcards[2]], shown=False, mucked=False, dealt=False
                     )
+                    log.debug(f"Added hole cards for hero in stud game: Closed={newcards[0:2]}, Open={newcards[2:]}")
                 else:
                     hand.addHoleCards(
                         street, player, open=newcards, closed=oldcards, shown=False, mucked=False, dealt=False
                     )
+                    log.debug(f"Added hole cards for player on {street}: Open={newcards}, Closed={oldcards}")
+
 
     def readAction(self, hand, street):
+        log.debug("Starting readAction")
+        log.debug(f"Processing street: {street}, Hand ID: {hand.handid}, Version: {self.version}")
         if self.version == 1:
             self._readAction1(hand, street)
         else:
             self._readAction2(hand, street)
+        log.debug("Finished readAction")
 
     def _readAction1(self, hand, street):
+        log.debug(f"Executing _readAction1 for street: {street}")
         m = self.re_Action1.finditer(hand.streets[street])
         for action in m:
-            action.groupdict()
+            action_details = action.groupdict()
+            log.debug(f"Action details: {action_details}")
             if action.group("PNAME") is None:
-                log.error(f"read Action: Unknown player {action.group('ATYPE')} {hand.handid}")
+                log.error(f"Unknown player in action: {action.group('ATYPE')}, Hand ID: {hand.handid}")
                 raise FpdbParseError
 
-            if action.group("ATYPE") == "folds":
-                hand.addFold(street, action.group("PNAME"))
-            elif action.group("ATYPE") == "checks":
-                hand.addCheck(street, action.group("PNAME"))
-            elif action.group("ATYPE") == "calls":
-                hand.addCall(street, action.group("PNAME"), self.clearMoneyString(action.group("BET")))
-            elif action.group("ATYPE") in ("raises", "straddle", "caps", "cap"):
-                hand.addCallandRaise(street, action.group("PNAME"), self.clearMoneyString(action.group("BET")))
-            elif action.group("ATYPE") == "bets":
-                hand.addBet(street, action.group("PNAME"), self.clearMoneyString(action.group("BET")))
-            elif action.group("ATYPE") == "allin":
-                player = action.group("PNAME")
-                # disconnected all in
+            player = action.group("PNAME")
+            action_type = action.group("ATYPE")
+            log.debug(f"Processing action: {action_type}, Player: {player}")
+
+            if action_type == "folds":
+                hand.addFold(street, player)
+                log.debug(f"Added fold action: Player={player}, Street={street}")
+            elif action_type == "checks":
+                hand.addCheck(street, player)
+                log.debug(f"Added check action: Player={player}, Street={street}")
+            elif action_type == "calls":
+                amount = self.clearMoneyString(action.group("BET"))
+                hand.addCall(street, player, amount)
+                log.debug(f"Added call action: Player={player}, Amount={amount}, Street={street}")
+            elif action_type in ("raises", "straddle", "caps", "cap"):
+                amount = self.clearMoneyString(action.group("BET"))
+                hand.addCallandRaise(street, player, amount)
+                log.debug(f"Added raise action: Player={player}, Amount={amount}, Street={street}")
+            elif action_type == "bets":
+                amount = self.clearMoneyString(action.group("BET"))
+                hand.addBet(street, player, amount)
+                log.debug(f"Added bet action: Player={player}, Amount={amount}, Street={street}")
+            elif action_type == "allin":
+                # Handle all-in action
+                log.debug(f"Processing all-in action: Player={player}")
                 if action.group("BET") is None:
                     amount = str(hand.stacks[player])
+                    log.debug(f"Disconnected all-in, using player's stack: {amount}")
                 else:
-                    amount = self.clearMoneyString(action.group("BET")).replace(",", "")  # some sites have commas
+                    amount = self.clearMoneyString(action.group("BET")).replace(",", "")  # Some sites use commas
+                    log.debug(f"All-in amount: {amount}")
+
                 Ai = Decimal(amount)
                 Bp = hand.lastBet[street]
                 Bc = sum(hand.bets[street][player])
                 C = Bp - Bc
+                log.debug(f"All-in calculation: Ai={Ai}, Bp={Bp}, Bc={Bc}, C={C}")
+
                 if Ai <= C:
                     hand.addCall(street, player, amount)
+                    log.debug(f"Added all-in as call: Player={player}, Amount={amount}, Street={street}")
                 elif Bp == 0:
                     hand.addBet(street, player, amount)
+                    log.debug(f"Added all-in as bet: Player={player}, Amount={amount}, Street={street}")
                 else:
                     hand.addCallandRaise(street, player, amount)
+                    log.debug(f"Added all-in as call and raise: Player={player}, Amount={amount}, Street={street}")
             else:
-                log.debug(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
+                log.debug(f"Unimplemented action type: '{action_type}' for Player: '{player}'")
+
 
     def _readAction2(self, hand, street):
+        log.debug(f"Executing _readAction2 for street: {street}")
         m = self.re_Action2.finditer(hand.streets[street])
         for action in m:
-            action.groupdict()
-            # log.error("DEBUG: %s acts: %s" % (street, acts))
-            if action.group("ATYPE") == " folds":
-                hand.addFold(street, action.group("PNAME"))
-            elif action.group("ATYPE") == " checks":
-                hand.addCheck(street, action.group("PNAME"))
-            elif action.group("ATYPE") == " calls":
-                hand.addCall(street, action.group("PNAME"), self.clearMoneyString(action.group("BET")))
-            elif action.group("ATYPE") in (" raises", " straddle", " caps", " cap"):
+            action_details = action.groupdict()
+            log.debug(f"Action details: {action_details}")
+
+            player = action.group("PNAME")
+            action_type = action.group("ATYPE").strip()
+            log.debug(f"Processing action: {action_type}, Player: {player}")
+
+            if action_type == "folds":
+                hand.addFold(street, player)
+                log.debug(f"Added fold action: Player={player}, Street={street}")
+            elif action_type == "checks":
+                hand.addCheck(street, player)
+                log.debug(f"Added check action: Player={player}, Street={street}")
+            elif action_type == "calls":
+                amount = self.clearMoneyString(action.group("BET"))
+                hand.addCall(street, player, amount)
+                log.debug(f"Added call action: Player={player}, Amount={amount}, Street={street}")
+            elif action_type in ("raises", "straddle", "caps", "cap"):
                 if action.group("BETTO") is not None:
-                    hand.addRaiseTo(street, action.group("PNAME"), self.clearMoneyString(action.group("BETTO")))
+                    amount_to = self.clearMoneyString(action.group("BETTO"))
+                    hand.addRaiseTo(street, player, amount_to)
+                    log.debug(f"Added raise-to action: Player={player}, AmountTo={amount_to}, Street={street}")
                 elif action.group("BET") is not None:
-                    hand.addCallandRaise(street, action.group("PNAME"), self.clearMoneyString(action.group("BET")))
-            elif action.group("ATYPE") == " bets":
-                hand.addBet(street, action.group("PNAME"), self.clearMoneyString(action.group("BET")))
+                    amount = self.clearMoneyString(action.group("BET"))
+                    hand.addCallandRaise(street, player, amount)
+                    log.debug(f"Added call and raise action: Player={player}, Amount={amount}, Street={street}")
+            elif action_type == "bets":
+                amount = self.clearMoneyString(action.group("BET"))
+                hand.addBet(street, player, amount)
+                log.debug(f"Added bet action: Player={player}, Amount={amount}, Street={street}")
             else:
-                log.debug(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
+                log.debug(f"Unimplemented action: '{player}' '{action_type}'")
 
     def readCollectPot(self, hand):
+        log.debug("Starting readCollectPot")
+        log.debug(f"Hand ID: {hand.handid}, Version: {self.version}, Run It Times: {getattr(hand, 'runItTimes', 1)}")
         if self.version == 1:
             self._readCollectPot1(hand)
         elif hand.runItTimes == 2:
             self._readCollectPot3(hand)
         else:
             self._readCollectPot2(hand)
+        log.debug("Finished readCollectPot")
 
     def _readCollectPot1(self, hand):
+        log.debug("Executing _readCollectPot1")
         for m in self.re_CollectPot1.finditer(hand.handText):
-            if Decimal(self.clearMoneyString(m.group("POT"))) > 0:
-                hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT"))
+            pot_amount = Decimal(self.clearMoneyString(m.group("POT")))
+            if pot_amount > 0:
+                player = m.group("PNAME")
+                hand.addCollectPot(player=player, pot=m.group("POT"))
+                log.debug(f"Added collected pot: Player={player}, Pot={pot_amount}")
+            else:
+                log.debug(f"Ignored pot collection with zero or negative amount: {m.group('POT')}")
+
 
     def _readCollectPot2(self, hand):
-        pre, post = hand.handText.split("*** SUMMARY ***")
-        acts, bovadaUncalled_v1, bovadaUncalled_v2, blindsantes, adjustment = (
-            hand.actions.get("PREFLOP"),
-            False,
-            False,
-            0,
-            0,
-        )
-        # names = [p[1] for p in hand.players]
-        if acts is not None and len([a for a in acts if a[1] != "folds"]) == 0:
-            m0 = self.re_Uncalled.search(hand.handText)
-            if m0 and Decimal(m0.group("BET")) == Decimal(hand.bb):
-                bovadaUncalled_v2 = True
-            elif m0 is None:
-                bovadaUncalled_v1 = True
-                has_sb = len([a[2] for a in hand.actions.get("BLINDSANTES") if a[1] == "small blind"]) > 0
-                adjustment = (Decimal(hand.bb) - Decimal(hand.sb)) if has_sb else Decimal(hand.bb)
-                blindsantes = sum([a[2] for a in hand.actions.get("BLINDSANTES")])
-        else:
-            m0 = self.re_Uncalled.search(hand.handText)
-            if not m0:
-                hand.setUncalledBets(True)
+        log.debug("Executing _readCollectPot2")
+        try:
+            pre, post = hand.handText.split("*** SUMMARY ***")
+            log.debug("Successfully split handText into pre and post summary sections")
+            acts = hand.actions.get("PREFLOP")
+            bovadaUncalled_v1 = False
+            bovadaUncalled_v2 = False
+            blindsantes = 0
+            adjustment = 0
 
-        for m in self.re_CollectPot2.finditer(post):
-            pot = self.clearMoneyString(m.group("POT"))
-            if bovadaUncalled_v1 and Decimal(pot) == (blindsantes):
-                hand.addCollectPot(player=m.group("PNAME"), pot=str(Decimal(pot) - adjustment))
-            elif bovadaUncalled_v2:
-                hand.addCollectPot(player=m.group("PNAME"), pot=str(Decimal(pot) * 2))
+            if acts is not None and len([a for a in acts if a[1] != "folds"]) == 0:
+                log.debug("All actions in PREFLOP are folds, checking uncalled bets")
+                m0 = self.re_Uncalled.search(hand.handText)
+                if m0 and Decimal(m0.group("BET")) == Decimal(hand.bb):
+                    bovadaUncalled_v2 = True
+                    log.debug("Detected Bovada uncalled bet version 2")
+                elif m0 is None:
+                    bovadaUncalled_v1 = True
+                    log.debug("Detected Bovada uncalled bet version 1")
+                    has_sb = len([a[2] for a in hand.actions.get("BLINDSANTES") if a[1] == "small blind"]) > 0
+                    adjustment = (Decimal(hand.bb) - Decimal(hand.sb)) if has_sb else Decimal(hand.bb)
+                    blindsantes = sum([a[2] for a in hand.actions.get("BLINDSANTES")])
+                    log.debug(f"Adjustment calculated: {adjustment}, Blinds/Antes total: {blindsantes}")
             else:
-                hand.addCollectPot(player=m.group("PNAME"), pot=pot)
+                log.debug("Not all actions in PREFLOP are folds, checking for uncalled bets")
+                m0 = self.re_Uncalled.search(hand.handText)
+                if not m0:
+                    hand.setUncalledBets(True)
+                    log.debug("Set uncalled bets to True")
+
+            for m in self.re_CollectPot2.finditer(post):
+                pot = self.clearMoneyString(m.group("POT"))
+                player = m.group("PNAME")
+                log.debug(f"Processing pot collection: Player={player}, Pot={pot}")
+                if bovadaUncalled_v1 and Decimal(pot) == blindsantes:
+                    adjusted_pot = str(Decimal(pot) - adjustment)
+                    hand.addCollectPot(player=player, pot=adjusted_pot)
+                    log.debug(f"Adjusted pot for Bovada version 1: Player={player}, Adjusted Pot={adjusted_pot}")
+                elif bovadaUncalled_v2:
+                    doubled_pot = str(Decimal(pot) * 2)
+                    hand.addCollectPot(player=player, pot=doubled_pot)
+                    log.debug(f"Doubled pot for Bovada version 2: Player={player}, Doubled Pot={doubled_pot}")
+                else:
+                    hand.addCollectPot(player=player, pot=pot)
+                    log.debug(f"Added regular pot collection: Player={player}, Pot={pot}")
+        except Exception as e:
+            log.error(f"Error in _readCollectPot2: {e}")
+            raise
+
 
     def _readCollectPot3(self, hand):
+        log.debug("Executing _readCollectPot3")
         for m in self.re_CollectPot3.finditer(hand.handText):
-            hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT"))
+            player = m.group("PNAME")
+            pot = m.group("POT")
+            hand.addCollectPot(player=player, pot=pot)
+            log.debug(f"Added pot collection for Player={player}, Pot={pot}")
 
     def readShowdownActions(self, hand):
-        # TODO: pick up mucks also??
+        log.debug(f"Starting readShowdownActions for Hand ID: {hand.handid}")
+        # TODO: Implement logic for showdown actions
+        log.debug("Showdown actions functionality not yet implemented")
+        pass
+
+    def readSTP(self, hand):
+        log.debug(f"Starting readSTP for Hand ID: {hand.handid}")
+        log.warning(f"STP functionality not implemented for Hand ID: {hand.handid}")
+        pass
+
+    def readTourneyResults(self, hand):
+        log.debug(f"Starting readTourneyResults for Hand ID: {hand.handid}")
+        log.info("Reading tournament result info for Winamax.")
+        # TODO: Implement tournament results reading logic
         pass
 
     def readShownCards(self, hand):
+        log.debug("Starting readShownCards")
+        log.debug(f"Hand ID: {hand.handid}, Version: {self.version}")
         if self.version == 1:
             self._readShownCards1(hand)
+            log.debug("Executed _readShownCards1")
         else:
             self._readShownCards2(hand)
+            log.debug("Executed _readShownCards2")
+
 
     def _readShownCards1(self, hand):
+        log.debug("Executing _readShownCards1")
         for m in self.re_ShownCards1.finditer(hand.handText):
             if m.group("CARDS") is not None:
                 cards = m.group("CARDS")
@@ -1132,17 +1485,24 @@ class Winning(HandHistoryConverter):
                     string += "|" + m.group("STRING2")
 
                 (shown, mucked) = (False, False)
+                # Uncomment and modify based on additional logic
                 # if m.group('SHOWED') == "showed": shown = True
                 # elif m.group('SHOWED') == "mucked": mucked = True
 
-                # print "DEBUG: hand.addShownCards(%s, %s, %s, %s)" %(cards, m.group('PNAME'), shown, mucked)
+                log.debug(
+                    f"Adding shown cards: Cards={cards}, Player={m.group('PNAME')}, "
+                    f"Shown={shown}, Mucked={mucked}, String={string}"
+                )
                 hand.addShownCards(cards=cards, player=m.group("PNAME"), shown=shown, mucked=mucked, string=string)
+            else:
+                log.debug("No cards found in _readShownCards1 for current match")
+
 
     def _readShownCards2(self, hand):
+        log.debug("Executing _readShownCards2")
         for m in self.re_ShownCards2.finditer(hand.handText):
             if m.group("CARDS") is not None:
-                cards = m.group("CARDS")
-                cards = cards.split(" ")  # needs to be a list, not a set--stud needs the order
+                cards = m.group("CARDS").split(" ")  # needs to be a list, not a set--stud needs the order
                 string = m.group("STRING")
                 if m.group("STRING2"):
                     string += "|" + m.group("STRING2")
@@ -1153,20 +1513,43 @@ class Winning(HandHistoryConverter):
                 elif m.group("SHOWED") == "mucked":
                     mucked = True
 
-                # print "DEBUG: hand.addShownCards(%s, %s, %s, %s)" %(cards, m.group('PNAME'), shown, mucked)
+                log.debug(
+                    f"Adding shown cards: Cards={cards}, Player={m.group('PNAME')}, "
+                    f"Shown={shown}, Mucked={mucked}, String={string}"
+                )
                 hand.addShownCards(cards=cards, player=m.group("PNAME"), shown=shown, mucked=mucked, string=string)
+            else:
+                log.debug("No cards found in _readShownCards2 for current match")
 
     def readSummaryInfo(self, summaryInfoList):
-        log.info("enter method readSummaryInfo.")
-        log.debug("Method readSummaryInfo non implemented.")
+        log.info("Entering method readSummaryInfo")
+        log.debug(f"Summary Info List: {summaryInfoList}")
+        log.debug("Method readSummaryInfo not implemented.")
         return True
+
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
-        "Returns string to search in windows titles"
+        """
+        Returns string to search in windows titles.
+        """
+        log.debug("Executing getTableTitleRe")
+        log.debug(
+            f"Parameters received: type='{type}', table_name='{table_name}', "
+            f"tournament='{tournament}', table_number='{table_number}'"
+        )
+
         regex = re.escape(str(table_name))
         if type == "tour":
-            regex = ", Table " + re.escape(str(table_number)) + "\s\-.*\s\(" + re.escape(str(tournament)) + "\)"
-        log.info(f"read Table Title: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'")
-        log.info(f"read Table Title: returns: '{regex}'")
+            regex = (
+                ", Table " + re.escape(str(table_number)) +
+                r"\s\-.*\s\(" + re.escape(str(tournament)) + r"\)"
+            )
+            log.debug(f"Constructed regex for tournament: '{regex}'")
+        else:
+            log.debug(f"Constructed regex for non-tournament table: '{regex}'")
+
+        log.info(f"Generated Table Title regex: '{regex}'")
         return regex
+
+
