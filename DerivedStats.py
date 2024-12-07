@@ -238,10 +238,12 @@ class DerivedStats(object):
         self.streetXRaises(hand)
 
     def assembleHandsPlayers(self, hand):
-        # street0VPI/vpip already called in Hand
-        # sawShowdown is calculated in playersAtStreetX, as that calculation gives us a convenient list of names
+        """
+        Assemble and calculate player-specific stats for a hand, including net collected and total profit.
+        """
+        log.debug("Starting assembleHandsPlayers...")
 
-        # hand.players = [[seat, name, chips],[seat, name, chips]]
+        # Step 1: Initial setup for each player
         for player in hand.players:
             player_name = player[1]
             player_stats = self.handsplayers.get(player_name)
@@ -252,103 +254,70 @@ class DerivedStats(object):
                 player_stats["endBounty"] = int(100 * Decimal(player[4]))
             if player_name in hand.endBounty:
                 player_stats["endBounty"] = int(hand.endBounty.get(player_name))
-            if player_name in hand.sitout:
-                player_stats["sitout"] = True
-            else:
-                player_stats["sitout"] = False
+            player_stats["sitout"] = player_name in hand.sitout
             if hand.gametype["type"] == "tour":
                 player_stats["tourneyTypeId"] = hand.tourneyTypeId
-                player_stats["tourneysPlayersId"] = hand.tourneysPlayersIds[player[1]]
+                player_stats["tourneysPlayersId"] = hand.tourneysPlayersIds.get(player_name)
             else:
                 player_stats["tourneysPlayersId"] = None
-            if player_name in hand.shown:
-                player_stats["showed"] = True
+            player_stats["showed"] = player_name in hand.shown
 
-        #### seen now processed in playersAtStreetX()
-        # XXX: enumerate(list, start=x) is python 2.6 syntax; 'start'
-        # for i, street in enumerate(hand.actionStreets[2:], start=1):
-        # for i, street in enumerate(hand.actionStreets[2:]):
-        #    self.seen(self.hand, i+1)
+        # Step 2: Calculate net collected for each player
+        log.debug("Calculating net collected for each player...")
+        hand.net_collected = {}
+        for player in hand.pot.committed.keys():
+            collected = hand.collectees.get(player, Decimal("0.00"))
+            uncalled_bets = hand.pot.returned.get(player, Decimal("0.00"))
+            committed = hand.pot.committed.get(player, Decimal("0.00"))
+            hand.net_collected[player] = collected + uncalled_bets - committed
+            log.debug(f"Net collected for {player}: {hand.net_collected[player]:.2f}")
 
-        for i, street in enumerate(hand.actionStreets[1:]):
-            self.aggr(hand, i)
-            self.calls(hand, i)
-            self.bets(hand, i)
-            self.raises(hand, i)
-            if i > 0:
-                self.folds(hand, i)
+        # Step 3: Update stats for each player
+        for player_name, committed in hand.pot.committed.items():
+            committed_player_stats = self.handsplayers.get(player_name)
+            paid = int(100 * committed) + int(100 * hand.pot.common[player_name])
+            committed_player_stats["common"] = int(100 * hand.pot.common[player_name])
+            committed_player_stats["committed"] = int(100 * committed)
 
-        # Winnings is a non-negative value of money collected from the pot, which already includes the
-        # rake taken out. hand.collectees is Decimal, database requires cents
-        num_collectees, i = len(hand.collectees), 0
-        even_split = old_div(hand.totalpot, num_collectees) if num_collectees > 0 else 0
-        unraked = [c for c in list(hand.collectees.values()) if even_split == c]
-        for player, winnings in list(hand.collectees.items()):
-            collectee_stats = self.handsplayers.get(player)
-            collectee_stats["winnings"] = int(100 * winnings)
-            # Splits evenly on split pots and gives remainder to first player
-            # Gets overwritten when calculating multi-way pots in assembleHandsPots
-            if num_collectees == 0:
-                collectee_stats["rake"] = 0
-            elif len(unraked) == 0:
-                rake = old_div(int(100 * hand.rake), num_collectees)
-                remainder_1, remainder_2 = 0, 0
-                if rake > 0 and i == 0:
-                    leftover = int(100 * hand.rake) - (rake * num_collectees)
-                    remainder_1 = int(100 * hand.rake) % rake
-                    remainder_2 = leftover if remainder_1 == 0 else 0
-                collectee_stats["rake"] = rake + remainder_1 + remainder_2
-            else:
-                collectee_stats["rake"] = int(100 * (even_split - winnings))
-            if collectee_stats["street1Seen"] is True:
-                collectee_stats["wonWhenSeenStreet1"] = True
-            if collectee_stats["street2Seen"] is True:
-                collectee_stats["wonWhenSeenStreet2"] = True
-            if collectee_stats["street3Seen"] is True:
-                collectee_stats["wonWhenSeenStreet3"] = True
-            if collectee_stats["street4Seen"] is True:
-                collectee_stats["wonWhenSeenStreet4"] = True
-            if collectee_stats["sawShowdown"] is True:
-                collectee_stats["wonAtSD"] = True
-            i += 1
+            # Use net_collected for totalProfit calculation
+            net_collected = int(100 * hand.net_collected[player_name])
+            committed_player_stats["totalProfit"] = net_collected
+            committed_player_stats["winnings"] = net_collected
 
-        contributed, i = [], 0
-        for player, money_committed in list(hand.pot.committed.items()):
-            committed_player_stats = self.handsplayers.get(player)
-            paid = (100 * money_committed) + (100 * hand.pot.common[player])
-            committed_player_stats["common"] = int(100 * hand.pot.common[player])
-            committed_player_stats["committed"] = int(100 * money_committed)
-            committed_player_stats["totalProfit"] = int(committed_player_stats["winnings"] - paid)
+            # Other stats
             committed_player_stats["allInEV"] = committed_player_stats["totalProfit"]
+            committed_player_stats["rake"] = 100 * hand.rake
             committed_player_stats["rakeDealt"] = 100 * hand.rake / len(hand.players)
             committed_player_stats["rakeWeighted"] = (
                 100 * hand.rake * paid / (100 * hand.totalpot) if hand.rake > 0 else 0
             )
-            if paid > 0:
-                contributed.append(player)
-            i += 1
+            log.debug(
+                f"Updated stats for {player_name}: "
+                f"totalProfit={committed_player_stats['totalProfit']}, "
+                f"rakeDealt={committed_player_stats['rakeDealt']}, "
+                f"rakeWeighted={committed_player_stats['rakeWeighted']}"
+            )
 
-        for i, player in enumerate(contributed):
-            self.handsplayers[player]["rakeContributed"] = 100 * hand.rake / len(contributed)
+        # Step 4: Additional calculations (e.g., rake contributed)
+        contributed_players = [player for player in hand.pot.committed if hand.pot.committed[player] > 0]
+        for player_name in contributed_players:
+            self.handsplayers[player_name]["rakeContributed"] = 100 * hand.rake / len(contributed_players)
 
+        # Additional existing calculations
         self.calcCBets(hand)
 
-        # More inner-loop speed hackery.
+        # Step 5: Encode cards and update additional stats
         encodeCard = Card.encodeCard
         calcStartCards = Card.calcStartCards
         for player in hand.players:
             player_name = player[1]
             hcs = hand.join_holecards(player_name, asList=True)
             hcs = hcs + ["0x"] * 18
-            # for i, card in enumerate(hcs[:20, 1): #Python 2.6 syntax
-            #    self.handsplayers[player[1]]['card%s' % i] = Card.encodeCard(card)
             player_stats = self.handsplayers.get(player_name)
-            if player_stats["sawShowdown"]:
-                player_stats["showdownWinnings"] = player_stats["totalProfit"]
-            else:
-                player_stats["nonShowdownWinnings"] = player_stats["totalProfit"]
+            player_stats["nonShowdownWinnings"] = player_stats["totalProfit"] if not player_stats["sawShowdown"] else 0
+            player_stats["showdownWinnings"] = player_stats["totalProfit"] if player_stats["sawShowdown"] else 0
             for i, card in enumerate(hcs[:20]):
-                player_stats["card%d" % (i + 1)] = encodeCard(card)
+                player_stats[f"card{i + 1}"] = encodeCard(card)
             try:
                 player_stats["startCards"] = calcStartCards(hand, player_name)
             except IndexError:
@@ -360,9 +329,8 @@ class DerivedStats(object):
         self.calc34BetStreet0(hand)
         self.calcSteals(hand)
         self.calcCalledRaiseStreet0(hand)
-        # Additional stats
-        # 3betSB, 3betBB
-        # Squeeze, Ratchet?
+
+        log.debug("assembleHandsPlayers completed.")
 
     def assembleHandsActions(self, hand):
         k = 0

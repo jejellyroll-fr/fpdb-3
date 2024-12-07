@@ -1056,77 +1056,151 @@ class Hand(object):
     def setUncalledBets(self, value):
         self.uncalledbets = value
 
+    def calculate_net_collected(self):
+        """
+        Calculate the net collected amount for each player.
+        """
+        log.debug("Starting net collected calculation...")
+
+        self.net_collected = {}
+        for player in self.pot.committed.keys():
+            collected = self.collectees.get(player, Decimal("0.00"))
+            uncalled_bets = self.pot.returned.get(player, Decimal("0.00"))
+            committed = self.pot.committed.get(player, Decimal("0.00"))
+            self.net_collected[player] = collected + uncalled_bets - committed
+            log.debug(f"Net collected for {player}: {self.net_collected[player]:.2f}")
+
+        log.debug("Net collected calculation complete.")
+
     def totalPot(self):
         """
-        Calculate the total pot, side pots, and include uncontested pots.
-        Adjust self.totalpot to reflect the actual total pot.
+        Calculates the pots (main and side pots), handles uncalled bets, common money, the STP,
+        and calculates the rake. Updates self.totalpot, self.rake, and self.pot.pots.
         """
         log.debug("Starting pot calculation...")
 
-        # Initial calculation of commitments
+        # Basic verification
         if not isinstance(self.pot.committed, dict) or len(self.pot.committed) == 0:
             log.error("self.pot.committed is not initialized or empty.")
             raise FpdbParseError("self.pot.committed is missing or improperly initialized.")
 
+        # Convert and filter positive commits
         try:
-            commitsall = sorted([(Decimal(v), k) for (k, v) in self.pot.committed.items() if Decimal(v) > 0])
+            commitsall = [(Decimal(v), k) for (k, v) in self.pot.committed.items() if Decimal(v) > 0]
         except Exception as e:
             log.error(f"Error while preparing commitsall: {e}")
             raise FpdbParseError(f"Invalid data in self.pot.committed: {e}")
 
+        commitsall.sort(key=lambda x: x[0])
         log.debug(f"Initial committed values (sorted): {commitsall}")
 
+        # Initializations
         self.totalpot = Decimal("0.00")
         self.pot.pots = []
+        if self.totalcollected is None:
+            # If not specified, consider totalcollected as 0.00
+            log.warning("totalcollected was None during totalPot calculation. Set to 0.00")
+            self.totalcollected = Decimal("0.00")
 
+        # Internal function to create a pot from a value
+        def create_pot_from_value(value, calls):
+            pot_val = sum(min(v, value) for (v, k) in calls)
+            self.totalpot += pot_val
+            participants = {k for (v, k) in calls}
+            self.pot.pots.append((pot_val, participants))
+            log.debug(f"Created pot: Value={pot_val}, Participants={participants}")
+
+            # Update the list of remaining commitments
+            updated = []
+            for v, kk in calls:
+                nv = v - value
+                if nv > 0:
+                    updated.append((nv, kk))
+            updated.sort(key=lambda x: x[0])
+            return updated
+
+        # Internal function to handle leftover if only one player remains with an uncontested surplus
+        def handle_leftover(calls):
+            leftover_sum = sum(v for (v, k) in calls)
+            diff = self.totalcollected - self.totalpot
+            log.debug(f"Single-player leftover detected. diff={diff}, leftover={leftover_sum}")
+
+            # If diff > 0, it means there is a positive gap between the total collected and the current pot.
+            # A solo pot can be formed for this leftover.
+            if diff > 0:
+                participant = {calls[0][1]}
+                self.totalpot += leftover_sum
+                self.pot.pots.append((leftover_sum, participant))
+                log.debug(f"Formed final solo pot from leftover: {leftover_sum}, Participant={participant}")
+                return []
+            else:
+                # Otherwise, this surplus must be returned to the player (uncalled bet)
+                player = calls[0][1]
+                self.pot.returned[player] = self.pot.returned.get(player, Decimal("0.00")) + leftover_sum
+                log.debug(f"Uncalled bet returned to {player}: {leftover_sum}")
+                return []
+
+        # Creating the pots
         try:
             while commitsall:
-                # Players still in the game
-                commitslive = [(v, k) for (v, k) in commitsall if k in self.pot.contenders]
-                log.debug(f"Live commitments (still in play): {commitslive}")
-
-                # Minimum commitment among all players
                 v1 = commitsall[0][0]
-                participants = {k for (v, k) in commitsall}
+                # Check if v1 is whole or fractional
+                whole_units = int(v1)
+                remainder = v1 - whole_units
 
-                # Create a new pot with all participants
-                new_pot = sum([min(v, v1) for (v, k) in commitsall])
-                self.totalpot += new_pot
-                self.pot.pots.append((new_pot, participants))
-                log.debug(f"Created pot: Value={new_pot}, Participants={participants}")
+                if remainder == 0:
+                    # Whole number: a single pot
+                    commitsall = create_pot_from_value(v1, commitsall)
+                    if len(commitsall) == 1:
+                        # One player remaining
+                        commitsall = handle_leftover(commitsall)
+                    if not commitsall:
+                        break
+                else:
+                    # Fractional value
+                    # First, handle the whole units
+                    for _ in range(whole_units):
+                        commitsall = create_pot_from_value(Decimal("1.00"), commitsall)
+                        if len(commitsall) == 1:
+                            commitsall = handle_leftover(commitsall)
+                            break
+                        if not commitsall:
+                            break
+                    else:
+                        # Handle the remainder
+                        if remainder > 0 and commitsall:
+                            commitsall = create_pot_from_value(remainder, commitsall)
+                            if len(commitsall) == 1:
+                                commitsall = handle_leftover(commitsall)
 
-                # Update remaining commitments
-                commitsall = [(v - v1, k) for (v, k) in commitsall if v - v1 > 0]
-                log.debug(f"Updated commitments after creating pot: {commitsall}")
+                if not commitsall:
+                    break
+
+            # Add common money and the STP
+            self.totalpot += sum(self.pot.common.values()) + self.pot.stp
+            log.debug(f"Total pot after adding common money: {self.totalpot}")
+
+            # Final rake checks
+            log.debug(f"Total collected amount: {self.totalcollected}")
+            log.debug(f"Total pot amount: {self.totalpot}")
+
+            if self.totalpot > self.totalcollected:
+                # Rake = totalpot - totalcollected
+                self.rake = self.totalpot - self.totalcollected
+                log.debug(f"Rake scenario, Rake={self.rake}")
+                return self.totalpot
+            elif self.totalpot == self.totalcollected:
+                self.rake = Decimal("0.00")
+                log.debug("Exact match between totalpot and totalcollected, rake=0")
+                return self.totalpot
+            else:
+                # totalcollected > totalpot
+                log.error(f"Collected amount ({self.totalcollected}) exceeds total pot ({self.totalpot})")
+                raise FpdbParseError(f"Collected amount exceeds total pot for hand {self.handid}")
 
         except Exception as e:
             log.error(f"Pot calculation failed: {e}")
             raise FpdbParseError(f"Error in pot calculation: {str(e)}")
-
-        log.debug(f"Total pot calculated: {self.totalpot}")
-
-        # Include common money (antes, blinds, etc.)
-        self.totalpot += sum(self.pot.common.values()) + self.pot.stp
-        log.debug(f"Total pot after adding common money: {self.totalpot}")
-
-        # Ensure totalcollected is initialized
-        if self.totalcollected is None:
-            self.totalcollected = Decimal("0.00")
-            log.warning("totalcollected was None during totalPot calculation. Set to 0.00")
-
-        log.debug(f"Total collected amount: {self.totalcollected}")
-        log.debug(f"Total pot amount: {self.totalpot}")
-
-        # Final validation
-        if self.totalcollected > self.totalpot:
-            log.error(f"Collected amount ({self.totalcollected}) exceeds total pot ({self.totalpot})")
-            raise FpdbParseError(f"Collected amount exceeds total pot for hand {self.handid}")
-
-        # Calculate rake if necessary
-        self.rake = self.totalpot - self.totalcollected
-        log.debug(f"Rake calculated: {self.rake}")
-
-        return self.totalpot
 
     def getGameTypeAsString(self):
         """Map the tuple self.gametype onto the pokerstars string describing it"""
@@ -1390,9 +1464,13 @@ class HoldemOmahaHand(Hand):
             self.pot.handid = self.handid  # This is only required so Pot can throw it in totalPot
             self.totalPot()  # Finalize it (total the pot)
             log.debug(f"self.totalpot {self.totalpot}")
+            log.debug(f" type self.totalpot {type(self.totalpot)}")
             if self.gametype["type"] == "ring":
+                log.debug("Ring case")
                 log.debug(f"self.rake {self.rake}")
+                log.debug(f"type self.rake {type(self.rake)}")
                 if self.rake is None:
+                    log.warning("self.rake is None")
                     hhc.getRake(self)
             else:
                 self.rake = 0
@@ -2124,74 +2202,41 @@ class Pot(object):
 
     def end(self, totalcollected):
         """
-        Finalize the pot calculation and include uncontested pots correctly.
+        Finalizes the state of the hand after totalPot has been calculated.
+        Does not redo pot calculations but uses the already determined results.
+        Can be used to validate final totals and potentially use pot.collected
+        information to calculate net profits per player.
         """
-        log.debug("Starting pot calculation...")
+        log.debug("Finalizing hand end state...")
 
-        # Start with the total committed and common chips
-        self.total = sum(self.committed.values()) + sum(self.common.values()) + self.stp
-        log.debug(f"Initial total pot calculation (committed + common + STP): {self.total:.2f}")
+        # Verify that totalcollected matches self.totalcollected if defined
+        if self.totalcollected is None:
+            self.totalcollected = totalcollected
+        elif self.totalcollected != totalcollected:
+            log.error(
+                f"Mismatch: totalcollected passed to end({totalcollected}) does not match "
+                f"self.totalcollected ({self.totalcollected})"
+            )
+            raise FpdbParseError("Mismatch in collected amounts at hand end")
 
-        commitsall = sorted([(Decimal(v), k) for (k, v) in self.committed.items() if v > 0])
-        log.debug(f"Committed values (sorted): {commitsall}")
+        # At this point, everything has already been calculated by totalPot().
+        # Optionally, net gains can be calculated.
+        # net_collected = collected + returned - committed
+        # This calculation will be done where necessary, for example in DerivedStats or during final display.
+        # Here, we simply finalize without recalculating the pot.
 
-        self.pots = []
-
-        try:
-            while commitsall:
-                # Minimum commitment among all players
-                v1 = commitsall[0][0]
-                participants = {k for (v, k) in commitsall}
-
-                # Create a new pot with all participants
-                new_pot_value = sum([min(v, v1) for (v, k) in commitsall])
-                self.pots.append((new_pot_value, participants))
-                log.debug(f"New pot created: Value={new_pot_value:.2f}, Participants={participants}")
-
-                # Deduct commitments
-                commitsall = [(v - v1, k) for (v, k) in commitsall if v - v1 > 0]
-                log.debug(f"Remaining commitments: {commitsall}")
-
-        except Exception as e:
-            log.error(f"Error during pot calculation: {e}")
-            raise FpdbParseError("Error calculating pots")
-
-        # Calculate total pots
-        self.totalpot = sum(p[0] for p in self.pots)
-        log.debug(f"Calculated total pots: {self.totalpot:.2f}")
-
-        # Final validation
-        if totalcollected > self.totalpot:
-            log.error(f"Collected amount ({totalcollected:.2f}) exceeds total pot ({self.totalpot:.2f})")
-            raise FpdbParseError(f"Collected amount exceeds total pot for hand {self.handid}")
-
-        log.debug(f"Final total pot after validation: {self.totalpot:.2f}")
-
-        # Calculate rake
-        self.calculate_rake()
-        log.debug(f"Rake calculated: {self.rake:.2f}")
-
-        # Validate rake
+        # For example, to validate that the rake is consistent:
         if self.rake > self.totalpot * Decimal("0.25"):
             log.error(f"Suspicious rake: {self.rake:.2f} exceeds 25% of total pot {self.totalpot:.2f}")
             raise FpdbParseError("Rake exceeds allowed percentage")
 
-        log.debug(f"Pot calculation complete. Final pot: {self.totalpot:.2f}")
+        log.debug(f"Hand end finalization complete. totalpot={self.totalpot}, rake={self.rake}")
 
-        # Calculate rake
-        self.calculate_rake()
-        log.debug(f"Rake calculated: {self.rake:.2f}")
-
-        # Validate rake
-        if self.rake > self.totalpot * Decimal("0.25"):
-            log.error(f"Suspicious rake: {self.rake:.2f} exceeds 25% of total pot {self.totalpot:.2f}")
-            raise FpdbParseError("Rake exceeds allowed percentage")
-
-        log.debug(f"Pot calculation complete. Final pot: {self.totalpot:.2f}")
+        # No recalculations are done here. We rely on the already prepared data.
 
     def calculate_rake(self):
         """
-        Calculate and distribute the rake for the total pot.
+        Calculates and distributes the rake for the total pot.
         """
         log.debug("Starting rake calculation...")
 
