@@ -135,6 +135,7 @@ class Simple_Stat_Window(Aux_Base.Seat_Window):
     def __init__(self, aw=None, seat=None):
         super(Simple_Stat_Window, self).__init__(aw, seat)
         self.popup_count = 0
+        self.setWindowTitle("HUD - stats")
 
     def button_release_right(self, event):  # show pop up
         widget = self.childAt(event.pos())
