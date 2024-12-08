@@ -35,7 +35,7 @@ class FpdbLogFormatter(colorlog.ColoredFormatter):
     def _colorize_variables(self, message):
         if not isinstance(message, str):
             return message
-        pattern = r"'([^']*)'|\"([^\"]*)\""
+        pattern = r"'([^']*)'|\"([^\"]*)\""  # Capture quoted text (simples or doubles)
 
         def repl(match):
             var = match.group(1) or match.group(2)
