@@ -195,6 +195,7 @@ class iPoker(HandHistoryConverter):
         % substitutions,
         re.VERBOSE,
     )
+
     re_GameInfoTrny2 = re.compile(
         r"""
             (?:(<tour(?:nament)?code>(?P<TOURNO>\d+)</tour(?:nament)?code>))|
@@ -349,9 +350,6 @@ class iPoker(HandHistoryConverter):
         return gametype
 
     def determineGameType(self, handText):
-        """
-        Given a hand history, extract information about the type of game being played.
-        """
         log.debug(f"Starting determineGameType with handText: {handText[:200]}")
 
         m = self.re_GameInfo.search(handText)
@@ -383,6 +381,7 @@ class iPoker(HandHistoryConverter):
 
         tourney = False
 
+        # LH condition
         if mg.get("GAME", "")[:2] == "LH":
             log.debug("Game starts with 'LH'. Setting CATEGORY to 'Holdem' and LIMIT to 'L'.")
             mg["CATEGORY"] = "Holdem"
@@ -390,82 +389,89 @@ class iPoker(HandHistoryConverter):
             mg["BB"] = mg.get("LBB", mg.get("BB", ""))
             log.debug(f"Updated mg after 'LH' condition: {mg}")
 
+        # Determine base/category
         if "GAME" in mg:
             if mg.get("CATEGORY") is None:
-                log.debug("CATEGORY is None. Setting base to 'hold' and category to '5_omahahi'.")
+                log.debug("CATEGORY is None. Setting base='hold' and category='5_omahahi'.")
                 self.info["base"], self.info["category"] = ("hold", "5_omahahi")
             else:
                 category = mg["CATEGORY"]
                 if category in self.games:
                     self.info["base"], self.info["category"] = self.games[category]
-                    log.debug(
-                        f"Set base and category based on games dict: {self.info['base']}, {self.info['category']}"
-                    )
+                    log.debug(f"Set base/category from games dict: {self.info['base']}, {self.info['category']}")
                 else:
                     log.error(f"Unknown CATEGORY '{category}' encountered.")
-                    return None  # ou une autre gestion d'erreur
+                    return None
 
+        # Determine limit type
         if "LIMIT" in mg:
             limit = mg["LIMIT"]
             if limit in self.limits:
                 self.info["limitType"] = self.limits[limit]
-                log.debug(f"Set limitType to '{self.info['limitType']}' based on LIMIT '{limit}'.")
+                log.debug(f"Set limitType to '{self.info['limitType']}' from LIMIT '{limit}'.")
             else:
                 log.error(f"Unknown LIMIT '{limit}' encountered.")
-                return None  # ou une autre gestion d'erreur
+                return None
 
+        # Hero
         if "HERO" in mg and mg["HERO"]:
             self.hero = mg["HERO"]
             log.debug(f"Set hero to '{self.hero}'.")
 
+        # SB/BB
         if "SB" in mg:
             self.info["sb"] = self.clearMoneyString(mg["SB"])
-            log.debug(f"Set small blind (sb) to '{self.info['sb']}'.")
+            log.debug(f"Set sb to '{self.info['sb']}'.")
             if not mg["SB"]:
                 tourney = True
-                log.debug("Small blind is not set. Marking as tournament.")
+                log.debug("SB not set => marking as tournament.")
 
         if "BB" in mg:
             self.info["bb"] = self.clearMoneyString(mg["BB"])
-            log.debug(f"Set big blind (bb) to '{self.info['bb']}'.")
+            log.debug(f"Set bb to '{self.info['bb']}'.")
 
+        # Seats
         if "SEATS" in mg2:
             self.info["seats"] = mg2["SEATS"]
             log.debug(f"Set number of seats to '{self.info['seats']}'.")
 
+        # Uncalled bets
         if self.re_UncalledBets.search(handText):
             self.uncalledbets = False
-            log.debug("Uncalled bets are disabled.")
+            log.debug("Uncalled bets disabled.")
         else:
             self.uncalledbets = True
-            log.debug("Uncalled bets are enabled.")
+            log.debug("Uncalled bets enabled.")
             mv = self.re_ClientVersion.search(handText)
             if mv:
                 major_version = mv.group("VERSION").split(".")[0]
                 log.debug(f"Client version major number: {major_version}")
                 if int(major_version) >= 20:
                     self.uncalledbets = False
-                    log.debug("Client version >= 20. Uncalled bets are disabled.")
+                    log.debug("Client version >= 20 => Uncalled bets disabled.")
 
         if tourney:
+            # Tournament setup
             log.debug("Processing tournament-specific information.")
             self.info["type"] = "tour"
             self.info["currency"] = "T$"
 
             if "TABLET" in mg3:
                 self.info["table_name"] = mg3["TABLET"]
-                log.debug(f"Table name set to '{self.info['table_name']}'.")
+                log.debug(f"Table name: '{self.info['table_name']}'.")
 
             self.tinfo = {}
+            # Extract tourNo
             mt = self.re_TourNo.search(mg.get("TABLE", ""))
             if mt:
                 self.tinfo["tourNo"] = mt.group("TOURNO")
-                log.debug(f"Set tourNo to '{self.tinfo['tourNo']}' from re_TourNo.")
+                log.debug(f"Set tourNo from re_TourNo: {self.tinfo['tourNo']}")
             else:
+                # fallback if re_TourNo not matched
                 tourNo = mg.get("TABLE", "").split(",")[-1].strip().split(" ")[0]
                 if tourNo.isdigit():
                     self.tinfo["tourNo"] = tourNo
-                    log.debug(f"Set tourNo to '{self.tinfo['tourNo']}' from split TABLE.")
+                    log.debug(f"Set tourNo from split TABLE: {tourNo}")
                 else:
                     log.error("Failed to parse tourNo from TABLE.")
                     raise FpdbParseError("Failed to parse tourNo.")
@@ -473,28 +479,28 @@ class iPoker(HandHistoryConverter):
             self.tablename = "1"
             if not mg.get("CURRENCY") or mg["CURRENCY"] == "fun":
                 self.tinfo["buyinCurrency"] = "play"
-                log.debug("Buy-in currency set to 'play'.")
+                log.debug("Buy-in currency: play")
             else:
                 self.tinfo["buyinCurrency"] = mg["CURRENCY"]
-                log.debug(f"Buy-in currency set to '{self.tinfo['buyinCurrency']}'.")
+                log.debug(f"Buy-in currency: {self.tinfo['buyinCurrency']}")
 
             self.tinfo["buyin"] = 0
             self.tinfo["fee"] = 0
             client_match = self.re_client.search(handText)
             if client_match:
                 re_client_split = ".".join(client_match["CLIENT"].split(".")[:2])
-                log.debug(f"Client version split: '{re_client_split}'.")
+                log.debug(f"Client version split: '{re_client_split}'")
             else:
                 re_client_split = ""
-                log.debug("No client version match found.")
+                log.debug("No client version found.")
 
+            # Parsing tournament info depending on client version
             if re_client_split == "23.5":  # betclic fr
-                log.debug("Client split version is '23.5'. Using re_GameInfoTrny regex.")
+                log.debug("Using re_GameInfoTrny (23.5)")
                 matches = list(self.re_GameInfoTrny.finditer(handText))
-                log.debug(f"Number of matches found with re_GameInfoTrny: {len(matches)}")
-                for idx, match in enumerate(matches):
-                    log.debug(f"Match {idx}: {match.groupdict()}")
-                if len(matches) > 6:  # Ensure there are at least 7 matches
+                log.debug(f"Matches with re_GameInfoTrny: {len(matches)}")
+                # Need at least 7 matches (index 0 to 6)
+                if len(matches) > 6:
                     try:
                         mg["TOURNO"] = matches[0].group("TOURNO")
                         mg["NAME"] = matches[1].group("NAME")
@@ -506,141 +512,158 @@ class iPoker(HandHistoryConverter):
                         mg["TOTBUYIN"] = matches[5].group("TOTBUYIN")
                         mg["WIN"] = matches[6].group("WIN")
                         log.debug(f"Extracted tournament info: {mg}")
-                    except IndexError as e:
-                        log.error(f"Insufficient matches for tournament info: {len(matches)} matches found.")
-                        log.debug(f"handText: {handText[:500]}")
-                        raise FpdbParseError("Insufficient matches for tournament info.") from e
+                    except IndexError:
+                        log.error(f"Insufficient matches: {len(matches)} found, need >6.")
+                        log.debug(handText[:500])
+                        raise FpdbParseError("Insufficient matches for tournament info.")
                 else:
-                    log.error(f"Not enough matches for tournament info: {len(matches)} matches found.")
-                    log.debug(f"handText: {handText[:500]}")
+                    log.error(f"Not enough matches: {len(matches)} found.")
+                    log.debug(handText[:500])
                     raise FpdbParseError("Not enough matches for tournament info.")
             else:
-                log.debug("Client split version is not '23.5'. Using re_GameInfoTrny2 regex.")
+                # For others, use re_GameInfoTrny2
+                log.debug("Using re_GameInfoTrny2")
                 matches = list(self.re_GameInfoTrny2.finditer(handText))
-                log.debug(f"Number of matches found with re_GameInfoTrny2: {len(matches)}")
-                for idx, match in enumerate(matches):
-                    log.debug(f"Match {idx}: {match.groupdict()}")
-                if len(matches) > 5:  # Ensure there are at least 6 matches
-                    try:
-                        mg["TOURNO"] = matches[0].group("TOURNO")
-                        mg["NAME"] = matches[1].group("NAME")
-                        mg["PLACE"] = matches[2].group("PLACE")
-                        mg["BIAMT"] = matches[3].group("BIAMT")
-                        mg["BIRAKE"] = matches[3].group("BIRAKE")
-                        mg["TOTBUYIN"] = matches[4].group("TOTBUYIN")
-                        mg["WIN"] = matches[5].group("WIN")
-                        log.debug(f"Extracted tournament info: {mg}")
-                    except IndexError as e:
-                        log.error(f"Insufficient matches for tournament info: {len(matches)} matches found.")
-                        log.debug(f"handText: {handText[:500]}")
-                        raise FpdbParseError("Insufficient matches for tournament info.") from e
-                else:
-                    log.error(f"Not enough matches for tournament info: {len(matches)} matches found.")
-                    log.debug(f"handText: {handText[:500]}")
-                    raise FpdbParseError("Not enough matches for tournament info.")
+                log.debug(f"Matches with re_GameInfoTrny2: {len(matches)}")
+                for idx, mat in enumerate(matches):
+                    log.debug(f"Match {idx}: {mat.groupdict()}")
 
+                # Collect info in a dictionary
+                tourney_info = {}
+                for mat in matches:
+                    gd = mat.groupdict()
+                    for k, v in gd.items():
+                        if v and v.strip():
+                            tourney_info[k] = v.strip()
+
+                mg["TOURNO"] = tourney_info.get("TOURNO", mg.get("TOURNO"))
+                mg["NAME"] = tourney_info.get("NAME", mg.get("NAME"))
+                mg["PLACE"] = tourney_info.get("PLACE", mg.get("PLACE"))
+                mg["BIAMT"] = tourney_info.get("BIAMT", None)
+                mg["BIRAKE"] = tourney_info.get("BIRAKE", None)
+                mg["TOTBUYIN"] = tourney_info.get("TOTBUYIN", mg.get("TOTBUYIN"))
+                mg["WIN"] = tourney_info.get("WIN", None)
+
+                # Handle case where only TOTBUYIN present
+                if mg["BIAMT"] is None and mg["BIRAKE"] is None and mg["TOTBUYIN"]:
+                    total_buyin_str = self.clearMoneyString(self.re_non_decimal.sub("", mg["TOTBUYIN"]))
+                    if "Token" in handText:
+                        mg["BIAMT"] = total_buyin_str
+                        mg["BIRAKE"] = "0"
+                        log.debug("Token buy-in detected.")
+                    else:
+                        mg["BIAMT"] = total_buyin_str
+                        mg["BIRAKE"] = "0"
+                        log.debug("No BIAMT/BIRAKE found, fallback with TOTBUYIN only.")
+
+                # Check essential info
+                if not mg.get("TOURNO") or not mg.get("NAME") or not mg.get("PLACE") or not mg.get("TOTBUYIN"):
+                    log.error(f"Missing essential tournament info: {tourney_info}")
+                    log.debug(handText[:500])
+                    raise FpdbParseError("Not enough matches or missing essential data.")
+
+                log.debug(f"Consolidated tournament info: {mg}")
+
+            # Fill tinfo from mg
             if mg.get("TOURNO"):
                 self.tinfo["tour_name"] = mg.get("NAME", "")
                 self.tinfo["tourNo"] = mg["TOURNO"]
-                log.debug(f"Set tour_name to '{self.tinfo['tour_name']}' and tourNo to '{self.tinfo['tourNo']}'.")
+                log.debug(f"Set tour_name={self.tinfo['tour_name']}, tourNo={self.tinfo['tourNo']}")
 
             if mg.get("PLACE") and mg["PLACE"] != "N/A":
                 self.tinfo["rank"] = int(mg["PLACE"])
-                log.debug(f"Set rank to '{self.tinfo['rank']}'.")
+                log.debug(f"Set rank={self.tinfo['rank']}")
 
             if "winnings" not in self.tinfo:
-                self.tinfo["winnings"] = 0  # Initialize 'winnings' if it doesn't exist yet
-                log.debug("Initialized 'winnings' to 0.")
+                self.tinfo["winnings"] = 0
+                log.debug("Initialized winnings=0")
 
             if mg.get("WIN") and mg["WIN"] != "N/A":
                 try:
                     winnings = int(100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["WIN"]))))
                     self.tinfo["winnings"] += winnings
-                    log.debug(f"Added winnings: {winnings}. Total winnings: {self.tinfo['winnings']}.")
+                    log.debug(f"Added winnings: {winnings}, total: {self.tinfo['winnings']}")
                 except Exception as e:
-                    log.error(f"Error parsing winnings: {mg.get('WIN')}")
+                    log.error(f"Error parsing WIN: {mg.get('WIN')}")
                     raise FpdbParseError("Error parsing winnings.") from e
 
             if not mg.get("BIRAKE"):
-                m3 = self.re_TotalBuyin.search(handText)
-                if m3:
-                    mg = m3.groupdict()
+                m_buyin = self.re_TotalBuyin.search(handText)
+                if m_buyin:
+                    mg.update(m_buyin.groupdict())
                     log.debug(f"Updated mg from re_TotalBuyin: {mg}")
                 elif mg.get("BIAMT"):
                     mg["BIRAKE"] = "0"
-                    log.debug("Set BIRAKE to '0' because re_TotalBuyin did not match and BIAMT is present.")
+                    log.debug("Set BIRAKE=0 since no totalbuyin info but BIAMT found.")
 
             if mg.get("BIAMT") and self.re_FPP.match(mg["BIAMT"]):
                 self.tinfo["buyinCurrency"] = "FPP"
-                log.debug("Buy-in currency set to 'FPP' based on BIAMT.")
+                log.debug("FPP detected as buy-in currency.")
 
             if mg.get("BIRAKE"):
                 mg["BIRAKE"] = self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE"]))
                 mg["BIAMT"] = self.clearMoneyString(self.re_non_decimal.sub("", mg["BIAMT"]))
-                log.debug(f"Cleaned BIRAKE: {mg['BIRAKE']}, BIAMT: {mg['BIAMT']}")
+                log.debug(f"Cleaned BIRAKE={mg['BIRAKE']}, BIAMT={mg['BIAMT']}")
 
-                if re_client_split == "23.5":
-                    if mg.get("BIRAKE2"):
-                        try:
-                            buyin2 = int(
-                                100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE2"])))
-                            )
-                            self.tinfo["buyin"] += buyin2
-                            log.debug(f"Added BIRAKE2 to buyin: {buyin2}. Total buyin: {self.tinfo['buyin']}.")
-                        except Exception as e:
-                            log.error(f"Error parsing BIRAKE2: {mg.get('BIRAKE2')}")
-                            raise FpdbParseError("Error parsing BIRAKE2.") from e
+                if re_client_split == "23.5" and mg.get("BIRAKE2"):
+                    try:
+                        buyin2 = int(100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE2"]))))
+                        self.tinfo["buyin"] += buyin2
+                        log.debug(f"Added BIRAKE2 to buyin: {buyin2}. Total buyin: {self.tinfo['buyin']}")
+                    except Exception:
+                        log.error(f"Error parsing BIRAKE2: {mg.get('BIRAKE2')}")
+                        raise FpdbParseError("Error parsing BIRAKE2.")
 
                     m4 = self.re_Buyin.search(handText)
                     if m4:
                         try:
                             fee = int(100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE"]))))
                             self.tinfo["fee"] = fee
-                            log.debug(f"Set fee to '{fee}'.")
+                            log.debug(f"Set fee={fee}")
                             buyin = int(
                                 100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE2"])))
                             )
                             self.tinfo["buyin"] = buyin
-                            log.debug(f"Set buyin to '{buyin}'.")
-                        except Exception as e:
+                            log.debug(f"Set buyin={buyin}")
+                        except Exception:
                             log.error("Error parsing fee or buyin from BIRAKE/BIRAKE2.")
-                            raise FpdbParseError("Error parsing fee or buyin.") from e
+                            raise FpdbParseError("Error parsing fee or buyin.")
 
             if self.tinfo["buyin"] == 0:
                 self.tinfo["buyinCurrency"] = "FREE"
-                log.debug("Buy-in currency set to 'FREE' because buyin is 0.")
+                log.debug("No buyin found, setting buyinCurrency=FREE")
 
             if self.tinfo.get("tourNo") is None:
                 log.error("Could Not Parse tourNo")
                 raise FpdbParseError("Could Not Parse tourNo")
 
         else:
+            # Ring game
             log.debug("Processing ring game-specific information.")
             self.info["type"] = "ring"
             self.tablename = mg.get("TABLE", "")
-            log.debug(f"Set tablename to '{self.tablename}'.")
+            log.debug(f"Set tablename={self.tablename}")
 
             if not mg.get("TABLECURRENCY") and not mg.get("CURRENCY"):
                 self.info["currency"] = "play"
-                log.debug("Currency set to 'play'.")
+                log.debug("Currency=play")
             elif not mg.get("TABLECURRENCY"):
                 self.info["currency"] = mg["CURRENCY"]
-                log.debug(f"Currency set to '{self.info['currency']}' based on CURRENCY.")
+                log.debug(f"Currency set from CURRENCY={self.info['currency']}")
             else:
                 self.info["currency"] = mg["TABLECURRENCY"]
-                log.debug(f"Currency set to '{self.info['currency']}' based on TABLECURRENCY.")
+                log.debug(f"Currency set from TABLECURRENCY={self.info['currency']}")
 
+            # Fix limit blinds if needed
             if self.info.get("limitType") == "fl" and mg.get("BB") is not None:
                 try:
                     self.info["sb"] = self.Lim_Blinds[self.clearMoneyString(mg["BB"])][0]
                     self.info["bb"] = self.Lim_Blinds[self.clearMoneyString(mg["BB"])][1]
-                    log.debug(f"Set sb to '{self.info['sb']}' and bb to '{self.info['bb']}' based on Lim_Blinds.")
-                except KeyError as e:
+                    log.debug(f"Set sb={self.info['sb']} and bb={self.info['bb']} from Lim_Blinds")
+                except KeyError:
                     tmp = handText[:200]
-                    log.error(
-                        f"iPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '{mg.get('BB', '')}' - '{tmp}'"
-                    )
-                    raise FpdbParseError("Lim_Blinds lookup failed.") from e
+                    log.error(f"No lookup in Lim_Blinds for '{mg.get('BB', '')}' - '{tmp}'")
+                    raise FpdbParseError("Lim_Blinds lookup failed.")
 
         log.debug(f"Final info: {self.info}")
         return self.info
