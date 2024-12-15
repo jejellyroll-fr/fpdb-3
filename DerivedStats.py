@@ -237,100 +237,155 @@ class DerivedStats(object):
         # print "DEBUG: playersAtStreet 1:'%s' 2:'%s' 3:'%s' 4:'%s'" %(self.hands['playersAtStreet1'],self.hands['playersAtStreet2'],self.hands['playersAtStreet3'],self.hands['playersAtStreet4'])
         self.streetXRaises(hand)
 
+
+
     def assembleHandsPlayers(self, hand):
         """
         Assemble and calculate player-specific stats for a hand, including net collected and total profit.
         """
-        log.debug("Starting assembleHandsPlayers...")
+        log.info(f"Starting assembleHandsPlayers for hand ID: {hand.handid}")
 
         # Step 1: Initial setup for each player
+        log.info("Initializing player stats...")
         for player in hand.players:
             player_name = player[1]
-            player_stats = self.handsplayers.get(player_name)
-            player_stats["seatNo"] = player[0]
-            player_stats["startCash"] = int(100 * Decimal(player[2]))
-            if player[4] is not None:
-                player_stats["startBounty"] = int(100 * Decimal(player[4]))
-                player_stats["endBounty"] = int(100 * Decimal(player[4]))
-            if player_name in hand.endBounty:
-                player_stats["endBounty"] = int(hand.endBounty.get(player_name))
-            player_stats["sitout"] = player_name in hand.sitout
-            if hand.gametype["type"] == "tour":
-                player_stats["tourneyTypeId"] = hand.tourneyTypeId
-                player_stats["tourneysPlayersId"] = hand.tourneysPlayersIds.get(player_name)
-            else:
-                player_stats["tourneysPlayersId"] = None
-            player_stats["showed"] = player_name in hand.shown
+            player_stats = self.handsplayers.get(player_name, {})
+            log.info(f"Processing player: {player_name}")
+
+            try:
+                player_stats["seatNo"] = player[0]
+                log.debug(f"Player {player_name} seatNo set to {player_stats['seatNo']}")
+
+                player_stats["startCash"] = int(100 * Decimal(player[2]))
+                log.debug(f"Player {player_name} startCash set to {player_stats['startCash']}")
+
+                if player[4] is not None:
+                    player_stats["startBounty"] = int(100 * Decimal(player[4]))
+                    player_stats["endBounty"] = int(100 * Decimal(player[4]))
+                    log.debug(f"Player {player_name} startBounty and endBounty set to {player_stats['startBounty']}")
+
+                if player_name in hand.endBounty:
+                    player_stats["endBounty"] = int(hand.endBounty.get(player_name))
+                    log.debug(f"Player {player_name} endBounty updated to {player_stats['endBounty']}")
+
+                player_stats["sitout"] = player_name in hand.sitout
+                log.debug(f"Player {player_name} sitout status: {player_stats['sitout']}")
+
+                if hand.gametype["type"] == "tour":
+                    player_stats["tourneyTypeId"] = hand.tourneyTypeId
+                    player_stats["tourneysPlayersId"] = hand.tourneysPlayersIds.get(player_name)
+                    log.debug(
+                        f"Player {player_name} tourneyTypeId: {hand.tourneyTypeId}, "
+                        f"tourneysPlayersId: {player_stats['tourneysPlayersId']}"
+                    )
+                else:
+                    player_stats["tourneysPlayersId"] = None
+                    log.debug(f"Player {player_name} tourneysPlayersId set to None (non-tour game).")
+
+                player_stats["showed"] = player_name in hand.shown
+                log.debug(f"Player {player_name} showed cards: {player_stats['showed']}")
+            except Exception as e:
+                log.error(f"Error initializing stats for player {player_name}: {e}")
 
         # Step 2: Calculate net collected for each player
-        log.debug("Calculating net collected for each player...")
+        log.info("Calculating net collected for each player...")
         hand.net_collected = {}
-        for player in hand.pot.committed.keys():
-            collected = hand.collectees.get(player, Decimal("0.00"))
-            uncalled_bets = hand.pot.returned.get(player, Decimal("0.00"))
-            committed = hand.pot.committed.get(player, Decimal("0.00"))
-            hand.net_collected[player] = collected + uncalled_bets - committed
-            log.debug(f"Net collected for {player}: {hand.net_collected[player]:.2f}")
+        for player, committed in hand.pot.committed.items():
+            try:
+                collected = hand.collectees.get(player, Decimal("0.00"))
+                uncalled_bets = hand.pot.returned.get(player, Decimal("0.00"))
+                net = collected + uncalled_bets - committed
+                hand.net_collected[player] = net
+                log.debug(
+                    f"Player {player}: collected={collected}, uncalled_bets={uncalled_bets}, "
+                    f"committed={committed}, net_collected={net:.2f}"
+                )
+            except Exception as e:
+                log.error(f"Error calculating net collected for player {player}: {e}")
 
         # Step 3: Update stats for each player
+        log.info("Updating player stats based on net collected...")
         for player_name, committed in hand.pot.committed.items():
-            committed_player_stats = self.handsplayers.get(player_name)
-            paid = int(100 * committed) + int(100 * hand.pot.common[player_name])
-            committed_player_stats["common"] = int(100 * hand.pot.common[player_name])
-            committed_player_stats["committed"] = int(100 * committed)
+            player_stats = self.handsplayers.get(player_name, {})
+            log.info(f"Updating stats for player: {player_name}")
 
-            # Use net_collected for totalProfit calculation
-            net_collected = int(100 * hand.net_collected[player_name])
-            committed_player_stats["totalProfit"] = net_collected
-            committed_player_stats["winnings"] = net_collected
+            try:
+                common = hand.pot.common.get(player_name, Decimal("0.00"))
+                paid = int(100 * committed) + int(100 * common)
+                log.debug(f"Player {player_name} paid: committed={int(100 * committed)}, common={int(100 * common)}")
 
-            # Other stats
-            committed_player_stats["allInEV"] = committed_player_stats["totalProfit"]
-            committed_player_stats["rake"] = 100 * hand.rake
-            committed_player_stats["rakeDealt"] = 100 * hand.rake / len(hand.players)
-            committed_player_stats["rakeWeighted"] = (
-                100 * hand.rake * paid / (100 * hand.totalpot) if hand.rake > 0 else 0
-            )
-            log.debug(
-                f"Updated stats for {player_name}: "
-                f"totalProfit={committed_player_stats['totalProfit']}, "
-                f"rakeDealt={committed_player_stats['rakeDealt']}, "
-                f"rakeWeighted={committed_player_stats['rakeWeighted']}"
-            )
+                player_stats["common"] = int(100 * common)
+                player_stats["committed"] = int(100 * committed)
 
-        # Step 4: Additional calculations (e.g., rake contributed)
-        contributed_players = [player for player in hand.pot.committed if hand.pot.committed[player] > 0]
-        for player_name in contributed_players:
-            self.handsplayers[player_name]["rakeContributed"] = 100 * hand.rake / len(contributed_players)
+                net_collected = int(100 * hand.net_collected[player_name])
+                player_stats["totalProfit"] = net_collected
+                player_stats["winnings"] = net_collected
+                player_stats["allInEV"] = net_collected
+                log.debug(
+                    f"Player {player_name} totalProfit={net_collected}, winnings={net_collected}, allInEV={net_collected}"
+                )
 
-        # Additional existing calculations
-        self.calcCBets(hand)
+                player_stats["rake"] = int(100 * hand.rake)
+                num_players = len(hand.players)
+                player_stats["rakeDealt"] = int(100 * hand.rake) / num_players
+                total_pot = int(100 * hand.totalpot)
 
-        # Step 5: Encode cards and update additional stats
-        encodeCard = Card.encodeCard
-        calcStartCards = Card.calcStartCards
+                if total_pot > 0:
+                    player_stats["rakeWeighted"] = int(100 * hand.rake) * paid / total_pot
+                else:
+                    player_stats["rakeWeighted"] = 0
+                    log.warning(f"Total pot is zero. Player {player_name} rakeWeighted set to 0.")
+            except ZeroDivisionError:
+                log.error(f"Division by zero calculating rakeDealt for player {player_name}. Setting to 0.")
+                player_stats["rakeDealt"] = 0
+            except Exception as e:
+                log.error(f"Error updating stats for player {player_name}: {e}")
+
+        # Step 4: Additional calculations
+        log.info("Performing additional calculations (e.g., rake contributed)...")
+        contributed_players = [p for p in hand.pot.committed if hand.pot.committed[p] > 0]
+        if contributed_players:
+            try:
+                rake_contribution = int(100 * hand.rake) / len(contributed_players)
+                for player_name in contributed_players:
+                    self.handsplayers[player_name]["rakeContributed"] = rake_contribution
+                    log.debug(f"Player {player_name} rakeContributed: {rake_contribution}")
+            except Exception as e:
+                log.error(f"Error calculating rakeContributed for players: {e}")
+        else:
+            log.warning("No players contributed to the pot.")
+
+        # Step 5: Encode cards
+        log.info("Encoding cards and updating additional stats for each player...")
         for player in hand.players:
             player_name = player[1]
-            hcs = hand.join_holecards(player_name, asList=True)
-            hcs = hcs + ["0x"] * 18
-            player_stats = self.handsplayers.get(player_name)
-            player_stats["nonShowdownWinnings"] = player_stats["totalProfit"] if not player_stats["sawShowdown"] else 0
-            player_stats["showdownWinnings"] = player_stats["totalProfit"] if player_stats["sawShowdown"] else 0
-            for i, card in enumerate(hcs[:20]):
-                player_stats[f"card{i + 1}"] = encodeCard(card)
+            player_stats = self.handsplayers.get(player_name, {})
             try:
-                player_stats["startCards"] = calcStartCards(hand, player_name)
-            except IndexError:
-                log.error(f"IndexError: string index out of range {hand.handid} {hand.in_path}")
+                hcs = hand.join_holecards(player_name, asList=True) + ["0x"] * 18
+                for i, card in enumerate(hcs[:20]):
+                    encoded_card = Card.encodeCard(card)
+                    player_stats[f"card{i + 1}"] = encoded_card
+                    log.debug(f"Player {player_name} card{i + 1} encoded: {encoded_card}")
+
+                player_stats["nonShowdownWinnings"] = player_stats["totalProfit"] if not player_stats["sawShowdown"] else 0
+                player_stats["showdownWinnings"] = player_stats["totalProfit"] if player_stats["sawShowdown"] else 0
+                log.debug(
+                    f"Player {player_name} nonShowdownWinnings: {player_stats['nonShowdownWinnings']}, "
+                    f"showdownWinnings: {player_stats['showdownWinnings']}"
+                )
+
+                player_stats["startCards"] = Card.calcStartCards(hand, player_name)
+            except IndexError as e:
+                log.error(f"IndexError encoding cards for player {player_name}: {e}")
+                player_stats["startCards"] = []
+            except Exception as e:
+                log.error(f"Error encoding cards for player {player_name}: {e}")
 
         self.setPositions(hand)
-        self.calcEffectiveStack(hand)
-        self.calcCheckCallRaise(hand)
-        self.calc34BetStreet0(hand)
-        self.calcSteals(hand)
-        self.calcCalledRaiseStreet0(hand)
+        log.info(f"Positions set for hand ID: {hand.handid}")
+        log.info(f"assembleHandsPlayers completed for hand ID: {hand.handid}.")
 
-        log.debug("assembleHandsPlayers completed.")
+
 
     def assembleHandsActions(self, hand):
         k = 0
