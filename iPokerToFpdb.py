@@ -44,6 +44,8 @@
 #    this is corrected tournaments will be unparseable
 
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
+from TourneySummary import TourneySummary
+import Database
 from decimal import Decimal
 import re
 from loggingFpdb import get_logger
@@ -668,10 +670,7 @@ class iPoker(HandHistoryConverter):
         log.debug(f"Final info: {self.info}")
         return self.info
 
-    def readTourneyResults(self, hand):
-        log.info("enter method readTourneyResults.")
-        log.debug("Method readTourneyResults non implemented.")
-        pass
+
 
     def readSummaryInfo(self, summaryInfoList):
         log.info("enter method readSummaryInfo.")
@@ -1272,6 +1271,161 @@ class iPoker(HandHistoryConverter):
         # Placeholder for shown cards logic
         log.debug("Currently no implementation for readShownCards.")
         log.debug(f"Exiting readShownCards for hand: {hand.handid}")
+
+
+    def readTourneyResults(self, hand):
+        log.info("Entering readTourneyResults method")
+
+        # Initialize data structures
+        hand.winnings = {}
+        hand.ranks = {}
+        hand.playersIn = []
+        hand.isProgressive = False
+
+        log.debug("Initialized tournament data structures method: iPoker:readTourneyResults, is_progressive: False")
+
+        
+        buyin_amount = Decimal("0")
+        fee_amount = Decimal("0")
+        totbuyin_amount = Decimal("0")
+        currency_symbol = "EUR"  
+        tourno = None
+        rank = None
+        tournament_name = None
+
+
+        for pattern in [self.re_GameInfoTrny, self.re_GameInfoTrny2]:
+            for m in pattern.finditer(hand.handText):
+                mg = m.groupdict()
+                if mg.get("TOURNO"):
+                    tourno = mg["TOURNO"]
+                    hand.tourNo = tourno
+                if mg.get("NAME"):
+                    tournament_name = mg["NAME"]
+                if mg.get("PLACE"):
+                    rank = mg["PLACE"]
+
+                if mg.get("BIAMT"):
+                    amt_str = mg["BIAMT"].strip()
+                    amt_str = amt_str.replace(",", ".")
+
+                    amt_str = self.clearMoneyString(amt_str)
+                    if amt_str:
+                        buyin_amount = Decimal(amt_str)
+                if mg.get("BIRAKE"):
+                    rake_str = mg["BIRAKE"].strip().replace(",", ".")
+                    rake_str = self.clearMoneyString(rake_str)
+                    if rake_str:
+                        fee_amount = Decimal(rake_str)
+                if mg.get("BIRAKE2"):
+
+                    rake2_str = mg["BIRAKE2"].strip().replace(",", ".")
+                    rake2_str = self.clearMoneyString(rake2_str)
+                    if rake2_str:
+                        fee_amount += Decimal(rake2_str)
+
+                if mg.get("TOTBUYIN"):
+                    totbuy_str = mg["TOTBUYIN"].strip().replace(",", ".")
+                    totbuy_str = mg["TOTBUYIN"].strip().replace("€", "")
+                    totbuy_str = self.clearMoneyString(totbuy_str)
+                    if totbuy_str:
+                        log.info(f"buyin: {totbuy_str}")
+                        totbuyin_amount = Decimal(totbuy_str)
+
+
+        if totbuyin_amount > 0:
+            if buyin_amount == 0 and fee_amount == 0:
+                buyin_amount = totbuyin_amount
+                fee_amount = Decimal("0")
+        else:
+            pass
+
+
+        hand.buyin = int(buyin_amount * 100)
+        hand.fee = int(fee_amount * 100)
+        hand.buyinCurrency = currency_symbol
+        hand.currency = currency_symbol
+
+
+
+        hand.entries = len(hand.playersIn)
+        hand.prizepool = sum(hand.winnings.values())
+        hand.isTournament = True
+        hand.tourneyName = tournament_name if tournament_name else hand.tablename
+        hand.isSng = True
+        hand.isRebuy = False
+        hand.isAddOn = False
+        hand.isKO = False
+
+        log.debug(f"detail hand: {hand}")
+
+        if not hasattr(hand, "endTime"):
+            hand.endTime = hand.startTime
+
+        # Create TourneySummary
+        try:
+            # Initialize database connection if needed
+            if not hasattr(self, "db"):
+                self.db = Database.Database(self.config)
+                log.debug(f"Initialized database connection config: {str(self.config)}")
+
+            log.debug(f"Completed PartyPoker parser initialization sitename: {self.sitename}, has_db: {hasattr(self, 'db')}")
+            summary = TourneySummary(
+                db=self.db,
+                config=self.config,
+                siteName=self.sitename,
+                summaryText=hand.handText,
+                builtFrom="HHC",
+                header="",
+            )
+
+            # Set summary attributes
+            summary.tourNo = hand.tourNo
+            summary.buyin = hand.buyin
+            summary.fee = hand.fee
+            summary.buyinCurrency = hand.buyinCurrency
+            summary.currency = hand.buyinCurrency
+            summary.startTime = hand.startTime
+            summary.endTime = hand.endTime
+            summary.gametype = hand.gametype
+            summary.maxseats = hand.maxseats
+            summary.entries = hand.entries
+            summary.speed = "Normal"
+            summary.isSng = hand.isSng
+            summary.isRebuy = hand.isRebuy
+            summary.isAddOn = hand.isAddOn
+            summary.isKO = hand.isKO
+
+            # Add players to summary
+            for pname, rank in hand.ranks.items():
+                winnings = hand.winnings.get(pname, Decimal("0"))
+                winningsCurrency = hand.buyinCurrency
+                summary.addPlayer(
+                    rank=rank,
+                    name=pname,
+                    winnings=int(winnings * 100),
+                    winningsCurrency=winningsCurrency,
+                    rebuyCount=0,
+                    addOnCount=0,
+                    koCount=0,
+                )
+
+                log.debug(
+                    f"Added player to summary method: iPoker:readTourneyResults, player: {pname}, rank: {rank}, winnings: {winnings}, currency: {winningsCurrency}"
+                )
+
+            summary.insertOrUpdate()
+            log.debug(
+                f"Tournament summary saved method: iPoker:readTourneyResults, entries: {hand.entries}, prizepool: {hand.prizepool}"
+            )
+
+        except Exception as e:
+            log.error(f"Error processing tournament summary method: iPoker:readTourneyResults, error: {str(e)}")
+
+        log.debug(
+            f"Exiting readTourneyResults method - method: iPoker:readTourneyResults, total_players: {len(hand.ranks)}, total_winners: {len(hand.winnings)}"
+        )
+
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
