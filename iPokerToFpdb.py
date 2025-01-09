@@ -44,7 +44,10 @@
 #    this is corrected tournaments will be unparseable
 
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
-from decimal import Decimal
+from TourneySummary import TourneySummary
+import Database
+from decimal import Decimal, InvalidOperation
+
 import re
 from loggingFpdb import get_logger
 import datetime
@@ -144,58 +147,6 @@ class iPoker(HandHistoryConverter):
         "2000": ("500.00", "1000.00"),
     }
 
-    # translations from captured groups to fpdb info strings
-    Lim_Blinds = {
-        "0.04": ("0.01", "0.02"),
-        "0.08": ("0.02", "0.04"),
-        "0.10": ("0.02", "0.05"),
-        "0.20": ("0.05", "0.10"),
-        "0.40": ("0.10", "0.20"),
-        "0.50": ("0.10", "0.25"),
-        "1.00": ("0.25", "0.50"),
-        "1": ("0.25", "0.50"),
-        "2.00": ("0.50", "1.00"),
-        "2": ("0.50", "1.00"),
-        "4.00": ("1.00", "2.00"),
-        "4": ("1.00", "2.00"),
-        "6.00": ("1.50", "3.00"),
-        "6": ("1.50", "3.00"),
-        "8.00": ("2.00", "4.00"),
-        "8": ("2.00", "4.00"),
-        "10.00": ("2.50", "5.00"),
-        "10": ("2.50", "5.00"),
-        "20.00": ("5.00", "10.00"),
-        "20": ("5.00", "10.00"),
-        "30.00": ("7.50", "15.00"),
-        "30": ("7.50", "15.00"),
-        "40.00": ("10.00", "20.00"),
-        "40": ("10.00", "20.00"),
-        "60.00": ("15.00", "30.00"),
-        "60": ("15.00", "30.00"),
-        "80.00": ("20.00", "40.00"),
-        "80": ("20.00", "40.00"),
-        "100.00": ("25.00", "50.00"),
-        "100": ("25.00", "50.00"),
-        "150.00": ("50.00", "75.00"),
-        "150": ("50.00", "75.00"),
-        "200.00": ("50.00", "100.00"),
-        "200": ("50.00", "100.00"),
-        "300.00": ("75.00", "150.00"),
-        "300": ("75.00", "150.00"),
-        "400.00": ("100.00", "200.00"),
-        "400": ("100.00", "200.00"),
-        "600.00": ("150.00", "300.00"),
-        "600": ("150.00", "300.00"),
-        "800.00": ("200.00", "400.00"),
-        "800": ("200.00", "400.00"),
-        "1000.00": ("250.00", "500.00"),
-        "1000": ("250.00", "500.00"),
-        "2000.00": ("500.00", "1000.00"),
-        "2000": ("500.00", "1000.00"),
-        "4000.00": ("1000.00", "2000.00"),
-        "4000": ("1000.00", "2000.00"),
-    }
-
     months = {
         "Jan": 1,
         "Feb": 2,
@@ -247,18 +198,20 @@ class iPoker(HandHistoryConverter):
         % substitutions,
         re.VERBOSE,
     )
+
     re_GameInfoTrny2 = re.compile(
         r"""
-                        (?:(<tour(?:nament)?code>(?P<TOURNO>\d+)</tour(?:nament)?code>))|
-                        (?:(<tournamentname>(?P<NAME>[^<]*)</tournamentname>))|
-                        (?:(<place>(?P<PLACE>.+?)</place>))|
-                        (?:(<buyin>(?P<BIAMT>[%(NUM2)s%(LS)s]+)\s\+\s)?(?P<BIRAKE>[%(NUM2)s%(LS)s]+)</buyin>)|
-                        (?:(<totalbuyin>(?P<TOTBUYIN>[%(NUM2)s%(LS)s]+)</totalbuyin>))|
-                        (?:(<win>(%(LS)s)?(?P<WIN>.+?|[%(NUM2)s%(LS)s]+)</win>))
-                        """
+            (?:(<tour(?:nament)?code>(?P<TOURNO>\d+)</tour(?:nament)?code>))|
+            (?:(<tournamentname>(?P<NAME>[^<]*)</tournamentname>))|
+            (?:(<place>(?P<PLACE>.+?)</place>))|
+            (?:(<buyin>(?P<BIAMT>[%(NUM2)s%(LS)s]+)\s\+\s)?(?P<BIRAKE>[%(NUM2)s%(LS)s]+)\s\+\s(?P<BIRAKE2>[%(NUM2)s%(LS)s]+)</buyin>)|
+            (?:(<totalbuyin>(?P<TOTBUYIN>[%(NUM2)s%(LS)s]+)</totalbuyin>))|
+            (?:(<win>(%(LS)s)?(?P<WIN>.+?|[%(NUM2)s%(LS)s]+)</win>))
+        """
         % substitutions,
         re.VERBOSE,
     )
+
     re_Buyin = re.compile(r"""(?:(<totalbuyin>(?P<TOTBUYIN>.*)</totalbuyin>))""", re.VERBOSE)
     re_TotalBuyin = re.compile(
         r"""(?:(<buyin>(?P<BIAMT>[%(NUM2)s%(LS)s]+)\s\+\s)?(?P<BIRAKE>[%(NUM2)s%(LS)s]+)\s\+\s(?P<BIRAKE2>[%(NUM2)s%(LS)s]+)</buyin>)"""
@@ -269,10 +222,11 @@ class iPoker(HandHistoryConverter):
         r'code="(?P<HID>[0-9]+)">\s*?<general>\s*?<startdate>(?P<DATETIME>[\.a-zA-Z-/: 0-9]+)</startdate>', re.MULTILINE
     )
     re_PlayerInfo = re.compile(
-        r'<player( (seat="(?P<SEAT>[0-9]+)"|name="%(PLYR)s"|chips="(%(LS)s)?(?P<CASH>[%(NUM2)s]+)(%(LS)s)?"|dealer="(?P<BUTTONPOS>(0|1))"|win="(%(LS)s)?(?P<WIN>[%(NUM2)s]+)(%(LS)s)?"|bet="(%(LS)s)?(?P<BET>[^"]+)(%(LS)s)?"|addon="\d*"|rebuy="\d*"|merge="\d*"|reg_code="[\d-]*"))+\s*/>'
+        r'<player( (seat="(?P<SEAT>[0-9]+)"|name="%(PLYR)s"|chips="(%(LS)s)?(?P<CASH>[%(NUM2)s]+)(%(LS)s)?"|dealer="(?P<BUTTONPOS>(0|1))"|win="(%(LS)s)?(?P<WIN>[%(NUM2)s]+)(%(LS)s)?"|bet="(%(LS)s)?(?P<BET>[^"]+)(%(LS)s)?"|rakeamount="(%(LS)s)?(?P<RAKEAMOUNT>[%(NUM2)s]+)(%(LS)s)?"|addon="\d*"|rebuy="\d*"|merge="\d*"|reg_code="[\d-]*"))+\s*/>'
         % substitutions,
         re.MULTILINE,
     )
+
     re_Board = re.compile(
         r'<cards( (type="(?P<STREET>Flop|Turn|River)"|player=""))+>(?P<CARDS>.+?)</cards>', re.MULTILINE
     )
@@ -312,7 +266,7 @@ class iPoker(HandHistoryConverter):
     re_FPP = re.compile(r"Pts\s")
 
     def compilePlayerRegexs(self, hand):
-        pass
+        log.debug(f"Compiling player regexes for hand: {hand}")
 
     def playerNameFromSeatNo(self, seatNo, hand):
         """
@@ -327,9 +281,14 @@ class iPoker(HandHistoryConverter):
         Returns:
             str: The name of the player from the given seat number.
         """
+        log.debug(f"Searching for player name from seatNo: {seatNo} in hand: {hand}")
         for p in hand.players:
+            log.debug(f"Checking player: {p}")
             if p[0] == int(seatNo):
+                log.debug(f"Found player: {p[1]} for seatNo: {seatNo}")
                 return p[1]
+        log.debug(f"No player found for seatNo: {seatNo}")
+        return None
 
     def readSupportedGames(self):
         """
@@ -338,7 +297,7 @@ class iPoker(HandHistoryConverter):
         The second element of each game list is either "stud" or "hold".
         The third element of each game list is either "nl", "pl", or "fl".
         """
-        return [
+        supported_games = [
             ["ring", "stud", "fl"],  # ring game with stud format and fixed limit
             ["ring", "hold", "nl"],  # ring game with hold format and no limit
             ["ring", "hold", "pl"],  # ring game with hold format and pot limit
@@ -348,13 +307,15 @@ class iPoker(HandHistoryConverter):
             ["tour", "hold", "fl"],  # tournament with hold format and fixed limit
             ["tour", "stud", "fl"],  # tournament with stud format and fixed limit
         ]
+        log.debug(f"Supported games: {supported_games}")
+        return supported_games
 
     def parseHeader(self, handText, whole_file):
         """
         Parses the header of a hand history and returns the game type.
 
         Args:
-            hand_text (str): The text containing the header of the hand history.
+            handText (str): The text containing the header of the hand history.
             whole_file (str): The entire text of the hand history.
 
         Returns:
@@ -365,192 +326,350 @@ class iPoker(HandHistoryConverter):
             FpdbParseError: If the hand history is an iPoker hand lacking actions/starttime.
             FpdbHandPartial: If the hand history is an iPoker partial hand history without a start date.
         """
+        log.debug(f"Starting parseHeader with handText: {handText[:200]} and whole_file length: {len(whole_file)}")
+
+        # Attempt to determine the game type from the hand text
         gametype = self.determineGameType(handText)
+        log.debug(f"Game type determined from handText: {gametype}")
+
         if gametype is None:
+            # Fallback to determining the game type from the whole file
             gametype = self.determineGameType(whole_file)
+            log.debug(f"Game type determined from whole_file: {gametype}")
+
         if gametype is None:
-            # Catch iPoker hands lacking actions/starttime and funnel them to partial
+            # Handle iPoker hands lacking actions/starttime and funnel them to partial
             if self.re_Partial.search(whole_file):
-                tmp = handText[:200]
-                log.error(f"iPokerToFpdb.determineGameType: '{tmp}'")
+                tmp = handText[:200]  # Limit to the first 200 characters for logging
+                log.error(f"No game type found. Partial handText: '{tmp}'")
                 raise FpdbParseError
+
             else:
                 message = "No startdate"
+                log.warning(f"iPoker partial hand history detected: {message}")
                 raise FpdbHandPartial(f"iPoker partial hand history: {message}")
+
+        log.debug(f"Game type successfully parsed: {gametype}")
         return gametype
 
     def determineGameType(self, handText):
-        """
-        Given a hand history, extract information about the type of game being played.
-        """
+        log.debug(f"Starting determineGameType with handText: {handText[:200]}")
+
         m = self.re_GameInfo.search(handText)
         if not m:
+            log.debug("re_GameInfo regex did not match.")
             return None
+        else:
+            log.debug("re_GameInfo regex matched.")
+
         m2 = self.re_MaxSeats.search(handText)
+        if m2:
+            log.debug("re_MaxSeats regex matched.")
+        else:
+            log.debug("re_MaxSeats regex did not match.")
+
         m3 = self.re_tablenamemtt.search(handText)
+        if m3:
+            log.debug("re_tablenamemtt regex matched.")
+        else:
+            log.debug("re_tablenamemtt regex did not match.")
+
         self.info = {}
         mg = m.groupdict()
-        mg2 = m2.groupdict()
-        mg3 = m3.groupdict()
+        mg2 = m2.groupdict() if m2 else {}
+        mg3 = m3.groupdict() if m3 else {}
+        log.debug(f"Initial groupdict from re_GameInfo: {mg}")
+        log.debug(f"Groupdict from re_MaxSeats: {mg2}")
+        log.debug(f"Groupdict from re_tablenamemtt: {mg3}")
+
         tourney = False
-        # print "DEBUG: m.groupdict(): %s" % mg
-        if mg["GAME"][:2] == "LH":
+
+        # LH condition
+        if mg.get("GAME", "")[:2] == "LH":
+            log.debug("Game starts with 'LH'. Setting CATEGORY to 'Holdem' and LIMIT to 'L'.")
             mg["CATEGORY"] = "Holdem"
             mg["LIMIT"] = "L"
-            mg["BB"] = mg["LBB"]
+            mg["BB"] = mg.get("LBB", mg.get("BB", ""))
+            log.debug(f"Updated mg after 'LH' condition: {mg}")
+
+        # Determine base/category
         if "GAME" in mg:
-            if mg["CATEGORY"] is None:
-                (self.info["base"], self.info["category"]) = ("hold", "5_omahahi")
+            if mg.get("CATEGORY") is None:
+                log.debug("CATEGORY is None. Setting base='hold' and category='5_omahahi'.")
+                self.info["base"], self.info["category"] = ("hold", "5_omahahi")
             else:
-                (self.info["base"], self.info["category"]) = self.games[mg["CATEGORY"]]
+                category = mg["CATEGORY"]
+                if category in self.games:
+                    self.info["base"], self.info["category"] = self.games[category]
+                    log.debug(f"Set base/category from games dict: {self.info['base']}, {self.info['category']}")
+                else:
+                    log.error(f"Unknown CATEGORY '{category}' encountered.")
+                    return None
+
+        # Determine limit type
         if "LIMIT" in mg:
-            self.info["limitType"] = self.limits[mg["LIMIT"]]
-        if "HERO" in mg:
+            limit = mg["LIMIT"]
+            if limit in self.limits:
+                self.info["limitType"] = self.limits[limit]
+                log.debug(f"Set limitType to '{self.info['limitType']}' from LIMIT '{limit}'.")
+            else:
+                log.error(f"Unknown LIMIT '{limit}' encountered.")
+                return None
+
+        # Hero
+        if "HERO" in mg and mg["HERO"]:
             self.hero = mg["HERO"]
+            log.debug(f"Set hero to '{self.hero}'.")
+
+        # SB/BB
         if "SB" in mg:
             self.info["sb"] = self.clearMoneyString(mg["SB"])
+            log.debug(f"Set sb to '{self.info['sb']}'.")
             if not mg["SB"]:
                 tourney = True
+                log.debug("SB not set => marking as tournament.")
+
         if "BB" in mg:
             self.info["bb"] = self.clearMoneyString(mg["BB"])
+            log.debug(f"Set bb to '{self.info['bb']}'.")
+
+        # Seats
         if "SEATS" in mg2:
             self.info["seats"] = mg2["SEATS"]
+            log.debug(f"Set number of seats to '{self.info['seats']}'.")
 
+        # Uncalled bets
         if self.re_UncalledBets.search(handText):
             self.uncalledbets = False
+            log.debug("Uncalled bets disabled.")
         else:
             self.uncalledbets = True
-            if mv := self.re_ClientVersion.search(handText):
+            log.debug("Uncalled bets enabled.")
+            mv = self.re_ClientVersion.search(handText)
+            if mv:
                 major_version = mv.group("VERSION").split(".")[0]
+                log.debug(f"Client version major number: {major_version}")
                 if int(major_version) >= 20:
                     self.uncalledbets = False
+                    log.debug("Client version >= 20 => Uncalled bets disabled.")
 
         if tourney:
+            # Tournament setup
+            log.debug("Processing tournament-specific information.")
             self.info["type"] = "tour"
             self.info["currency"] = "T$"
+
             if "TABLET" in mg3:
                 self.info["table_name"] = mg3["TABLET"]
-                log.debug(f"Table name: {mg3['TABLET']}")
+                log.debug(f"Table name: '{self.info['table_name']}'.")
 
-            # FIXME: The sb/bb isn't listed in the game header. Fixing to 1/2 for now
-            self.tinfo = {}  # FIXME?: Full tourney info is only at the top of the file. After the
-            #         first hand in a file, there is no way for auto-import to
-            #         gather the info unless it reads the entire file every time.
-            mt = self.re_TourNo.search(mg["TABLE"])
+            self.tinfo = {}
+            # Extract tourNo
+            mt = self.re_TourNo.search(mg.get("TABLE", ""))
             if mt:
                 self.tinfo["tourNo"] = mt.group("TOURNO")
+                log.debug(f"Set tourNo from re_TourNo: {self.tinfo['tourNo']}")
             else:
-                tourNo = mg["TABLE"].split(",")[-1].strip().split(" ")[0]
+                # fallback if re_TourNo not matched
+                tourNo = mg.get("TABLE", "").split(",")[-1].strip().split(" ")[0]
                 if tourNo.isdigit():
                     self.tinfo["tourNo"] = tourNo
+                    log.debug(f"Set tourNo from split TABLE: {tourNo}")
+                else:
+                    log.error("Failed to parse tourNo from TABLE.")
+                    raise FpdbParseError("Failed to parse tourNo.")
 
             self.tablename = "1"
-            if not mg["CURRENCY"] or mg["CURRENCY"] == "fun":
+            if not mg.get("CURRENCY") or mg["CURRENCY"] == "fun":
                 self.tinfo["buyinCurrency"] = "play"
+                log.debug("Buy-in currency: play")
             else:
                 self.tinfo["buyinCurrency"] = mg["CURRENCY"]
+                log.debug(f"Buy-in currency: {self.tinfo['buyinCurrency']}")
+
             self.tinfo["buyin"] = 0
             self.tinfo["fee"] = 0
             client_match = self.re_client.search(handText)
-            re_client_split = ".".join(client_match["CLIENT"].split(".")[:2])
-            if re_client_split == "23.5":  # betclic fr
-                matches = list(self.re_GameInfoTrny.finditer(handText))
-                if len(matches) > 0:
-                    mg["TOURNO"] = matches[0].group("TOURNO")
-                    mg["NAME"] = matches[1].group("NAME")
-                    mg["REWARD"] = matches[2].group("REWARD")
-                    mg["PLACE"] = matches[3].group("PLACE")
-                    mg["BIAMT"] = matches[4].group("BIAMT")
-                    mg["BIRAKE"] = matches[4].group("BIRAKE")
-                    mg["BIRAKE2"] = matches[4].group("BIRAKE2")
-                    mg["TOTBUYIN"] = matches[5].group("TOTBUYIN")
-                    mg["WIN"] = matches[6].group("WIN")
-
+            if client_match:
+                re_client_split = ".".join(client_match["CLIENT"].split(".")[:2])
+                log.debug(f"Client version split: '{re_client_split}'")
             else:
-                matches = list(self.re_GameInfoTrny2.finditer(handText))
-                if len(matches) > 0:
-                    mg["TOURNO"] = matches[0].group("TOURNO")
-                    mg["NAME"] = matches[1].group("NAME")
-                    mg["PLACE"] = matches[2].group("PLACE")
-                    mg["BIAMT"] = matches[3].group("BIAMT")
-                    mg["BIRAKE"] = matches[3].group("BIRAKE")
-                    mg["TOTBUYIN"] = matches[4].group("TOTBUYIN")
-                    mg["WIN"] = matches[5].group("WIN")
+                re_client_split = ""
+                log.debug("No client version found.")
 
-            if mg["TOURNO"]:
-                self.tinfo["tour_name"] = mg["NAME"]
+            # Parsing tournament info depending on client version
+            if re_client_split == "23.5":  # betclic fr
+                log.debug("Using re_GameInfoTrny (23.5)")
+                matches = list(self.re_GameInfoTrny.finditer(handText))
+                log.debug(f"Matches with re_GameInfoTrny: {len(matches)}")
+                # Need at least 7 matches (index 0 to 6)
+                if len(matches) > 6:
+                    try:
+                        mg["TOURNO"] = matches[0].group("TOURNO")
+                        mg["NAME"] = matches[1].group("NAME")
+                        mg["REWARD"] = matches[2].group("REWARD")
+                        mg["PLACE"] = matches[3].group("PLACE")
+                        mg["BIAMT"] = matches[4].group("BIAMT")
+                        mg["BIRAKE"] = matches[4].group("BIRAKE")
+                        mg["BIRAKE2"] = matches[4].group("BIRAKE2")
+                        mg["TOTBUYIN"] = matches[5].group("TOTBUYIN")
+                        mg["WIN"] = matches[6].group("WIN")
+                        log.debug(f"Extracted tournament info: {mg}")
+                    except IndexError:
+                        log.error(f"Insufficient matches: {len(matches)} found, need >6.")
+                        log.debug(handText[:500])
+                        raise FpdbParseError("Insufficient matches for tournament info.")
+                else:
+                    log.error(f"Not enough matches: {len(matches)} found.")
+                    log.debug(handText[:500])
+                    raise FpdbParseError("Not enough matches for tournament info.")
+            else:
+                # For others, use re_GameInfoTrny2
+                log.debug("Using re_GameInfoTrny2")
+                matches = list(self.re_GameInfoTrny2.finditer(handText))
+                log.debug(f"Matches with re_GameInfoTrny2: {len(matches)}")
+                for idx, mat in enumerate(matches):
+                    log.debug(f"Match {idx}: {mat.groupdict()}")
+
+                # Collect info in a dictionary
+                tourney_info = {}
+                for mat in matches:
+                    gd = mat.groupdict()
+                    for k, v in gd.items():
+                        if v and v.strip():
+                            tourney_info[k] = v.strip()
+
+                mg["TOURNO"] = tourney_info.get("TOURNO", mg.get("TOURNO"))
+                mg["NAME"] = tourney_info.get("NAME", mg.get("NAME"))
+                mg["PLACE"] = tourney_info.get("PLACE", mg.get("PLACE"))
+                mg["BIAMT"] = tourney_info.get("BIAMT", None)
+                mg["BIRAKE"] = tourney_info.get("BIRAKE", None)
+                mg["TOTBUYIN"] = tourney_info.get("TOTBUYIN", mg.get("TOTBUYIN"))
+                mg["WIN"] = tourney_info.get("WIN", None)
+
+                # Handle case where only TOTBUYIN present
+                if mg["BIAMT"] is None and mg["BIRAKE"] is None and mg["TOTBUYIN"]:
+                    total_buyin_str = self.clearMoneyString(self.re_non_decimal.sub("", mg["TOTBUYIN"]))
+                    if "Token" in handText:
+                        mg["BIAMT"] = total_buyin_str
+                        mg["BIRAKE"] = "0"
+                        log.debug("Token buy-in detected.")
+                    else:
+                        mg["BIAMT"] = total_buyin_str
+                        mg["BIRAKE"] = "0"
+                        log.debug("No BIAMT/BIRAKE found, fallback with TOTBUYIN only.")
+
+                # Check essential info
+                if not mg.get("TOURNO") or not mg.get("NAME") or not mg.get("PLACE") or not mg.get("TOTBUYIN"):
+                    log.error(f"Missing essential tournament info: {tourney_info}")
+                    log.debug(handText[:500])
+                    raise FpdbParseError("Not enough matches or missing essential data.")
+
+                log.debug(f"Consolidated tournament info: {mg}")
+
+            # Fill tinfo from mg
+            if mg.get("TOURNO"):
+                self.tinfo["tour_name"] = mg.get("NAME", "")
                 self.tinfo["tourNo"] = mg["TOURNO"]
-            if mg["PLACE"] and mg["PLACE"] != "N/A":
+                log.debug(f"Set tour_name={self.tinfo['tour_name']}, tourNo={self.tinfo['tourNo']}")
+
+            if mg.get("PLACE") and mg["PLACE"] != "N/A":
                 self.tinfo["rank"] = int(mg["PLACE"])
+                log.debug(f"Set rank={self.tinfo['rank']}")
 
             if "winnings" not in self.tinfo:
-                self.tinfo["winnings"] = 0  # Initialize 'winnings' if it doesn't exist yet
+                self.tinfo["winnings"] = 0
+                log.debug("Initialized winnings=0")
 
-            if mg["WIN"] and mg["WIN"] != "N/A":
-                self.tinfo["winnings"] += int(
-                    100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["WIN"])))
-                )
+            if mg.get("WIN") and mg["WIN"] != "N/A":
+                try:
+                    winnings = int(100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["WIN"]))))
+                    self.tinfo["winnings"] += winnings
+                    log.debug(f"Added winnings: {winnings}, total: {self.tinfo['winnings']}")
+                except Exception as e:
+                    log.error(f"Error parsing WIN: {mg.get('WIN')}")
+                    raise FpdbParseError("Error parsing winnings.") from e
 
-            if not mg["BIRAKE"]:  # and mg['TOTBUYIN']:
-                m3 = self.re_TotalBuyin.search(handText)
-                if m3:
-                    mg = m3.groupdict()
-                elif mg["BIAMT"]:
+            if not mg.get("BIRAKE"):
+                m_buyin = self.re_TotalBuyin.search(handText)
+                if m_buyin:
+                    mg.update(m_buyin.groupdict())
+                    log.debug(f"Updated mg from re_TotalBuyin: {mg}")
+                elif mg.get("BIAMT"):
                     mg["BIRAKE"] = "0"
+                    log.debug("Set BIRAKE=0 since no totalbuyin info but BIAMT found.")
 
-            if mg["BIAMT"] and self.re_FPP.match(mg["BIAMT"]):
+            if mg.get("BIAMT") and self.re_FPP.match(mg["BIAMT"]):
                 self.tinfo["buyinCurrency"] = "FPP"
+                log.debug("FPP detected as buy-in currency.")
 
-            if mg["BIRAKE"]:
-                # FIXME: tournament no looks liek it is in the table name
+            if mg.get("BIRAKE"):
                 mg["BIRAKE"] = self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE"]))
                 mg["BIAMT"] = self.clearMoneyString(self.re_non_decimal.sub("", mg["BIAMT"]))
-                if re_client_split == "23.5":
-                    if mg["BIRAKE2"]:
-                        self.tinfo["buyin"] += int(
-                            100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE2"])))
-                        )
+                log.debug(f"Cleaned BIRAKE={mg['BIRAKE']}, BIAMT={mg['BIAMT']}")
+
+                if re_client_split == "23.5" and mg.get("BIRAKE2"):
+                    try:
+                        buyin2 = int(100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE2"]))))
+                        self.tinfo["buyin"] += buyin2
+                        log.debug(f"Added BIRAKE2 to buyin: {buyin2}. Total buyin: {self.tinfo['buyin']}")
+                    except Exception:
+                        log.error(f"Error parsing BIRAKE2: {mg.get('BIRAKE2')}")
+                        raise FpdbParseError("Error parsing BIRAKE2.")
+
                     m4 = self.re_Buyin.search(handText)
                     if m4:
-                        self.tinfo["fee"] = int(
-                            100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE"])))
-                        )
-                        self.tinfo["buyin"] = int(
-                            100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE2"])))
-                        )
+                        try:
+                            fee = int(100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE"]))))
+                            self.tinfo["fee"] = fee
+                            log.debug(f"Set fee={fee}")
+                            buyin = int(
+                                100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE2"])))
+                            )
+                            self.tinfo["buyin"] = buyin
+                            log.debug(f"Set buyin={buyin}")
+                        except Exception:
+                            log.error("Error parsing fee or buyin from BIRAKE/BIRAKE2.")
+                            raise FpdbParseError("Error parsing fee or buyin.")
 
-                    # FIXME: <place> and <win> not parsed at the moment.
-                    #  NOTE: Both place and win can have the value N/A
             if self.tinfo["buyin"] == 0:
                 self.tinfo["buyinCurrency"] = "FREE"
+                log.debug("No buyin found, setting buyinCurrency=FREE")
+
             if self.tinfo.get("tourNo") is None:
-                log.error(("Could Not Parse tourNo"))
-                raise FpdbParseError
+                log.error("Could Not Parse tourNo")
+                raise FpdbParseError("Could Not Parse tourNo")
+
         else:
+            # Ring game
+            log.debug("Processing ring game-specific information.")
             self.info["type"] = "ring"
-            self.tablename = mg["TABLE"]
-            if not mg["TABLECURRENCY"] and not mg["CURRENCY"]:
+            self.tablename = mg.get("TABLE", "")
+            log.debug(f"Set tablename={self.tablename}")
+
+            if not mg.get("TABLECURRENCY") and not mg.get("CURRENCY"):
                 self.info["currency"] = "play"
-            elif not mg["TABLECURRENCY"]:
+                log.debug("Currency=play")
+            elif not mg.get("TABLECURRENCY"):
                 self.info["currency"] = mg["CURRENCY"]
+                log.debug(f"Currency set from CURRENCY={self.info['currency']}")
             else:
                 self.info["currency"] = mg["TABLECURRENCY"]
+                log.debug(f"Currency set from TABLECURRENCY={self.info['currency']}")
 
-            if self.info["limitType"] == "fl" and self.info["bb"] is not None:
+            # Fix limit blinds if needed
+            if self.info.get("limitType") == "fl" and mg.get("BB") is not None:
                 try:
                     self.info["sb"] = self.Lim_Blinds[self.clearMoneyString(mg["BB"])][0]
                     self.info["bb"] = self.Lim_Blinds[self.clearMoneyString(mg["BB"])][1]
-                except KeyError as e:
+                    log.debug(f"Set sb={self.info['sb']} and bb={self.info['bb']} from Lim_Blinds")
+                except KeyError:
                     tmp = handText[:200]
-                    log.error(f"iPokerToFpdb.determineGameType: Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'")
-                    raise FpdbParseError from e
+                    log.error(f"No lookup in Lim_Blinds for '{mg.get('BB', '')}' - '{tmp}'")
+                    raise FpdbParseError("Lim_Blinds lookup failed.")
 
+        log.debug(f"Final info: {self.info}")
         return self.info
-
-    def readTourneyResults(self, hand):
-        log.info("enter method readTourneyResults.")
-        log.debug("Method readTourneyResults non implemented.")
-        pass
 
     def readSummaryInfo(self, summaryInfoList):
         log.info("enter method readSummaryInfo.")
@@ -575,118 +694,146 @@ class iPoker(HandHistoryConverter):
         Returns:
             None
         """
+        log.debug("Entering readHandInfo.")
         # Search for the relevant information in the hand text
         m = self.re_HandInfo.search(hand.handText)
         if m is None:
-            # If the information cannot be found, log an error and raise an exception
             tmp = hand.handText[:200]
             log.error(f"iPokerToFpdb.readHandInfo: '{tmp}'")
             raise FpdbParseError
+
+        log.debug("HandInfo regex matched.")
+        log.debug(f"Extracted groupdict: {m.groupdict()}")
 
         # Extract the relevant information from the match object
         m.groupdict()
 
         # Set the table name and maximum number of seats for the hand
         hand.tablename = self.tablename
+        log.debug(f"Set hand.tablename: {hand.tablename}")
+
         if self.info["seats"]:
             hand.maxseats = int(self.info["seats"])
+            log.debug(f"Set hand.maxseats: {hand.maxseats}")
 
         # Set the hand ID for the hand
         hand.handid = m.group("HID")
+        log.debug(f"Set hand.handid: {hand.handid}")
 
         # Parse the start time for the hand
         if m2 := self.re_DateTime1.search(m.group("DATETIME")):
-            # If the datetime string matches the first format, parse it accordingly
+            log.debug("Matched re_DateTime1.")
             month = self.months[m2.group("M")]
-            sec = m2.group("S")
-            if m2.group("S") is None:
-                sec = "00"
+            sec = m2.group("S") or "00"
             datetimestr = f"{m2.group('Y')}/{month}/{m2.group('D')} {m2.group('H')}:{m2.group('MIN')}:{sec}"
             hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
+            log.debug(f"Parsed hand.startTime: {hand.startTime}")
         else:
-            # If the datetime string does not match the first format, try the second format
+            log.debug("Failed to match re_DateTime1, trying alternative formats.")
             try:
                 hand.startTime = datetime.datetime.strptime(m.group("DATETIME"), "%Y-%m-%d %H:%M:%S")
+                log.debug(f"Parsed hand.startTime using default format: {hand.startTime}")
             except ValueError as e:
-                # If the datetime string cannot be parsed, try the third format
+                log.warning(f"Failed to parse datetime: {m.group('DATETIME')}. Trying re_DateTime2 or re_DateTime3.")
                 if date_match := self.re_DateTime2.search(m.group("DATETIME")):
+                    log.debug("Matched re_DateTime2.")
                     datestr = "%d/%m/%Y %H:%M:%S" if "/" in m.group("DATETIME") else "%d.%m.%Y %H:%M:%S"
                     if date_match.group("S") is None:
                         datestr = "%d/%m/%Y %H:%M"
                 else:
                     date_match1 = self.re_DateTime3.search(m.group("DATETIME"))
-                    datestr = "%Y/%m/%d %H:%M:%S"
                     if date_match1 is None:
-                        # If the datetime string cannot be parsed in any format, log an error and raise an exception
                         log.error(f"iPokerToFpdb.readHandInfo Could not read datetime: '{hand.handid}'")
                         raise FpdbParseError from e
+                    datestr = "%Y/%m/%d %H:%M:%S"
                     if date_match1.group("S") is None:
                         datestr = "%Y/%m/%d %H:%M"
                 hand.startTime = datetime.datetime.strptime(m.group("DATETIME"), datestr)
+                log.debug(f"Parsed hand.startTime using fallback format: {hand.startTime}")
 
         # If the hand is a tournament hand, set additional information
         if self.info["type"] == "tour":
+            log.debug("Hand is a tournament hand, setting tournament-specific info.")
             hand.tourNo = self.tinfo["tourNo"]
             hand.buyinCurrency = self.tinfo["buyinCurrency"]
             hand.buyin = self.tinfo["buyin"]
             hand.fee = self.tinfo["fee"]
             hand.tablename = f"{self.info['table_name']}"
+            log.debug(
+                f"Set tournament info: tourNo={hand.tourNo}, buyinCurrency={hand.buyinCurrency}, "
+                f"buyin={hand.buyin}, fee={hand.fee}, tablename={hand.tablename}"
+            )
+
+        log.debug("Exiting readHandInfo.")
 
     def readPlayerStacks(self, hand):
-        """
-        Extracts player information from the hand text and populates the Hand object with
-        player stacks and winnings.
+        log.debug(f"Entering readPlayerStacks for hand: {hand.handid}")
 
-        Args:
-            hand (Hand): Hand object to populate with player information.
-
-        Raises:
-            FpdbParseError: If there are fewer than 2 players in the hand.
-
-        Returns:
-            None
-        """
         # Initialize dictionaries and regex pattern
         self.playerWinnings, plist = {}, {}
+        hand.rake = Decimal("0.00")  # Initialize the total rake
+        log.debug("Initialized playerWinnings, plist dictionaries, and hand.rake.")
+
         m = self.re_PlayerInfo.finditer(hand.handText)
+        log.debug("Running regex to find player information in hand text.")
 
         # Extract player information from regex matches
         for a in m:
-            a.groupdict()
-            # Create a dictionary entry for the player with their seat, stack, winnings,
-            # and sitout status
+            log.debug(f"Matched player info: {a.groupdict()}")
+
+            # Extract rake amount, defaulting to '0' if not present
+            rake_amount = self.clearMoneyString(a.group("RAKEAMOUNT") or "0")
+            hand.rake += Decimal(rake_amount)
+            log.debug(f"Added rake amount {rake_amount} for player {a.group('PNAME')}. Total rake: {hand.rake}")
+
+            # Create a dictionary entry for the player
             plist[a.group("PNAME")] = [
                 int(a.group("SEAT")),
                 self.clearMoneyString(a.group("CASH")),
                 self.clearMoneyString(a.group("WIN")),
                 False,
             ]
-            # If the player is the button, set the button position in the Hand object
+            log.debug(
+                f"Player {a.group('PNAME')} added to plist with seat {a.group('SEAT')}, "
+                f"stack {plist[a.group('PNAME')][1]}, winnings {plist[a.group('PNAME')][2]}."
+            )
+
+            # If the player is the button, set the button position
             if a.group("BUTTONPOS") == "1":
                 hand.buttonpos = int(a.group("SEAT"))
+                log.debug(f"Set button position to seat {hand.buttonpos} for player {a.group('PNAME')}.")
 
         # Ensure there are at least 2 players in the hand
         if len(plist) <= 1:
-            # Hand cancelled
-            log.error(f"iPokerToFpdb.readPlayerStacks: '{hand.handid}'")
+            log.error(f"iPokerToFpdb.readPlayerStacks: Less than 2 players in hand '{hand.handid}'.")
             raise FpdbParseError
+
+        log.debug(f"Player list extracted successfully. Total players: {len(plist)}")
 
         # Add remaining players to the Hand object and playerWinnings dictionary if they won
         for pname in plist:
             seat, stack, win, sitout = plist[pname]
+            log.debug(f"Adding player {pname} to hand with seat {seat}, stack {stack}, winnings {win}.")
             hand.addPlayer(seat, pname, stack, None, sitout)
             if Decimal(win) != 0:
                 self.playerWinnings[pname] = win
+                log.debug(f"Player {pname} has winnings: {win}")
 
         # Set the maxseats attribute in the Hand object if it is not already set
         if hand.maxseats is None:
+            log.debug("Determining hand.maxseats.")
             if self.info["type"] == "tour" and self.maxseats == 0:
                 hand.maxseats = self.guessMaxSeats(hand)
                 self.maxseats = hand.maxseats
+                log.debug(f"Guessed maxseats for tournament: {hand.maxseats}")
             elif self.info["type"] == "tour":
                 hand.maxseats = self.maxseats
+                log.debug(f"Set maxseats from tournament info: {hand.maxseats}")
             else:
                 hand.maxseats = None
+                log.debug("maxseats could not be determined and remains None.")
+
+        log.debug("Exiting readPlayerStacks.")
 
     def markStreets(self, hand):
         """
@@ -695,8 +842,10 @@ class iPoker(HandHistoryConverter):
         Args:
             hand (Hand): the Hand object to which the rounds will be added
         """
+        log.debug(f"Entering markStreets for hand: {hand.handid}")
+
         if hand.gametype["base"] in ("hold"):
-            # Extract rounds for hold'em game
+            log.debug("Parsing streets for Hold'em game.")
             m = re.search(
                 r'(?P<PREFLOP>.+(?=<round no="2">)|.+)'  # Preflop round
                 r'(<round no="2">(?P<FLOP>.+(?=<round no="3">)|.+))?'  # Flop round
@@ -706,9 +855,9 @@ class iPoker(HandHistoryConverter):
                 re.DOTALL,
             )
         elif hand.gametype["base"] in ("stud"):
-            # Extract rounds for stud game
+            log.debug("Parsing streets for Stud game.")
             if hand.gametype["category"] == "5_studhi":
-                # Extract rounds for 5-card stud high game
+                log.debug("Parsing streets for 5-card Stud High game.")
                 m = re.search(
                     r'(?P<ANTES>.+(?=<round no="2">)|.+)'  # Antes round
                     r'(<round no="2">(?P<SECOND>.+(?=<round no="3">)|.+))?'  # Second round
@@ -719,7 +868,7 @@ class iPoker(HandHistoryConverter):
                     re.DOTALL,
                 )
             else:
-                # Extract rounds for 7-card stud high/low game
+                log.debug("Parsing streets for 7-card Stud High/Low game.")
                 m = re.search(
                     r'(?P<ANTES>.+(?=<round no="2">)|.+)'  # Antes round
                     r'(<round no="2">(?P<THIRD>.+(?=<round no="3">)|.+))?'  # Third round
@@ -730,7 +879,15 @@ class iPoker(HandHistoryConverter):
                     hand.handText,
                     re.DOTALL,
                 )
-        hand.addStreets(m)
+
+        if m:
+            log.debug(f"Streets regex matched. Groups: {m.groupdict()}")
+            hand.addStreets(m)
+            log.debug("Streets added to hand object.")
+        else:
+            log.warning(f"No streets matched for hand: {hand.handid}")
+
+        log.debug("Exiting markStreets.")
 
     def readCommunityCards(self, hand, street):
         """
@@ -746,20 +903,37 @@ class iPoker(HandHistoryConverter):
         Returns:
             None
         """
+        log.debug(f"Entering readCommunityCards for hand: {hand.handid}, street: {street}")
         cards = []
-        # Search for the board cards in the hand's streets
-        if m := self.re_Board.search(hand.streets[street]):
-            # Split the card string into a list of cards
-            cards = m.group("CARDS").strip().split(" ")
-            # Format the cards
-            cards = [c[1:].replace("10", "T") + c[0].lower() for c in cards]
-            # Set the community cards in the hand object
-            hand.setCommunityCards(street, cards)
-        else:
-            # Log an error if the board cards could not be found
-            log.error(f"iPokerToFpdb.readCommunityCards: '{hand.handid}'")
-            # Raise an exception
-            raise FpdbParseError
+
+        try:
+            # Search for the board cards in the hand's streets
+            if m := self.re_Board.search(hand.streets[street]):
+                log.debug(f"Regex matched for community cards on street: {street}. Match groups: {m.groupdict()}")
+                # Split the card string into a list of cards
+                cards = m.group("CARDS").strip().split(" ")
+                log.debug(f"Extracted raw cards: {cards}")
+
+                # Format the cards
+                cards = [c[1:].replace("10", "T") + c[0].lower() for c in cards]
+                log.debug(f"Formatted cards: {cards}")
+
+                # Set the community cards in the hand object
+                hand.setCommunityCards(street, cards)
+                log.debug(f"Community cards set for street {street}: {cards}")
+            else:
+                # Log an error if the board cards could not be found
+                log.error(
+                    f"iPokerToFpdb.readCommunityCards: No community cards found for hand {hand.handid}, street: {street}"
+                )
+                raise FpdbParseError
+        except Exception as e:
+            log.exception(
+                f"Exception occurred while reading community cards for hand {hand.handid}, street: {street}: {e}"
+            )
+            raise
+
+        log.debug(f"Exiting readCommunityCards for hand: {hand.handid}, street: {street}")
 
     def readAntes(self, hand):
         """
@@ -771,14 +945,23 @@ class iPoker(HandHistoryConverter):
         Returns:
             None
         """
+        log.debug(f"Entering readAntes for hand: {hand.handid}")
+
         # Find all the antes in the hand text using a regular expression
         m = self.re_Action.finditer(hand.handText)
+        log.debug("Searching for antes in hand text.")
 
         # Loop through each ante found
         for a in m:
+            log.debug(f"Matched action: {a.groupdict()}")
             # If the ante is of type 15, add it to the hand
             if a.group("ATYPE") == "15":
-                hand.addAnte(a.group("PNAME"), self.clearMoneyString(a.group("BET")))
+                player_name = a.group("PNAME")
+                ante_amount = self.clearMoneyString(a.group("BET"))
+                log.debug(f"Adding ante for player: {player_name}, amount: {ante_amount}")
+                hand.addAnte(player_name, ante_amount)
+
+        log.debug(f"Exiting readAntes for hand: {hand.handid}")
 
     def readBringIn(self, hand):
         """
@@ -790,10 +973,12 @@ class iPoker(HandHistoryConverter):
         Returns:
             None
         """
-        # If sb and bb are not already set, set them to default values
+        log.debug(f"Entering readBringIn for hand: {hand.handid}")
         if hand.gametype["sb"] is None and hand.gametype["bb"] is None:
             hand.gametype["sb"] = "1"  # default small blind value
             hand.gametype["bb"] = "2"  # default big blind value
+            log.debug("Small blind and big blind not set. Default values assigned: sb=1, bb=2.")
+        log.debug(f"Exiting readBringIn for hand: {hand.handid}")
 
     def readBlinds(self, hand):
         """
@@ -802,36 +987,49 @@ class iPoker(HandHistoryConverter):
         :param hand: Hand object containing the hand history.
         :type hand: Hand
         """
-        # Find all actions in the preflop street
-        for a in self.re_Action.finditer(hand.streets["PREFLOP"]):
-            if a.group("ATYPE") == "1":
-                # If the action is a small blind, add it to the hand object
-                hand.addBlind(a.group("PNAME"), "small blind", self.clearMoneyString(a.group("BET")))
-                # If the small blind amount is not already set, set it
-                if not hand.gametype["sb"]:
-                    hand.gametype["sb"] = self.clearMoneyString(a.group("BET"))
+        log.debug(f"Entering readBlinds for hand: {hand.handid}")
 
         # Find all actions in the preflop street
+        log.debug("Searching for small blind actions in PREFLOP street.")
+        for a in self.re_Action.finditer(hand.streets["PREFLOP"]):
+            if a.group("ATYPE") == "1":
+                player_name = a.group("PNAME")
+                sb_amount = self.clearMoneyString(a.group("BET"))
+                log.debug(f"Small blind detected: Player={player_name}, Amount={sb_amount}")
+                hand.addBlind(player_name, "small blind", sb_amount)
+                if not hand.gametype["sb"]:
+                    hand.gametype["sb"] = sb_amount
+                    log.debug(f"Small blind amount set in gametype: {sb_amount}")
+
+        # Find all actions in the preflop street for big blinds
+        log.debug("Searching for big blind actions in PREFLOP street.")
         m = self.re_Action.finditer(hand.streets["PREFLOP"])
-        # Create a dictionary to store big blind information for each player
         blinds = {int(a.group("ACT")): a.groupdict() for a in m if a.group("ATYPE") == "2"}
-        # Iterate over the big blind information and add it to the hand object
+        log.debug(f"Big blinds found: {len(blinds)} players.")
+
         for b in sorted(list(blinds.keys())):
-            type = "big blind"
             blind = blinds[b]
-            # If the big blind amount is not already set, set it
+            player_name = blind["PNAME"]
+            bet_amount = self.clearMoneyString(blind["BET"])
+            blind_type = "big blind"
+            log.debug(f"Processing big blind: Player={player_name}, Amount={bet_amount}")
+
             if not hand.gametype["bb"]:
-                hand.gametype["bb"] = self.clearMoneyString(blind["BET"])
-            # If the small blind amount is set, check if the amount is bigger than the small blind amount
+                hand.gametype["bb"] = bet_amount
+                log.debug(f"Big blind amount set in gametype: {bet_amount}")
             elif hand.gametype["sb"]:
                 bb = Decimal(hand.gametype["bb"])
-                amount = Decimal(self.clearMoneyString(blind["BET"]))
+                amount = Decimal(bet_amount)
                 if amount > bb:
-                    type = "both"
-            # Add the big blind to the hand object
-            hand.addBlind(blind["PNAME"], type, self.clearMoneyString(blind["BET"]))
+                    blind_type = "both"
+                    log.debug(f"Player {player_name} posted both blinds: Amount={bet_amount}")
+            hand.addBlind(player_name, blind_type, bet_amount)
+
         # Fix tournament blinds if necessary
+        log.debug("Fixing tournament blinds if necessary.")
         self.fixTourBlinds(hand)
+
+        log.debug(f"Exiting readBlinds for hand: {hand.handid}")
 
     def fixTourBlinds(self, hand):
         """
@@ -840,25 +1038,38 @@ class iPoker(HandHistoryConverter):
         :param hand: A dictionary containing the game type information.
         :return: None
         """
+        log.debug(f"Entering fixTourBlinds for hand: {hand.handid}")
         if hand.gametype["type"] != "tour":
+            log.debug("Hand type is not 'tour'. Exiting fixTourBlinds.")
             return
 
+        log.debug(f"Initial gametype blinds: sb={hand.gametype['sb']}, bb={hand.gametype['bb']}")
         if hand.gametype["sb"] is None and hand.gametype["bb"] is None:
             hand.gametype["sb"] = "1"
             hand.gametype["bb"] = "2"
+            log.debug("Blinds missing. Default values assigned: sb=1, bb=2.")
         elif hand.gametype["sb"] is None:
             hand.gametype["sb"] = str(int(int(hand.gametype["bb"]) // 2))
+            log.debug(f"Small blind missing. Calculated and set to: sb={hand.gametype['sb']}")
         elif hand.gametype["bb"] is None:
             hand.gametype["bb"] = str(int(hand.gametype["sb"]) * 2)
+            log.debug(f"Big blind missing. Calculated and set to: bb={hand.gametype['bb']}")
 
         if int(hand.gametype["bb"]) // 2 != int(hand.gametype["sb"]):
             if int(hand.gametype["bb"]) // 2 < int(hand.gametype["sb"]):
                 hand.gametype["bb"] = str(int(hand.gametype["sb"]) * 2)
+                log.debug(f"Big blind adjusted to match small blind: bb={hand.gametype['bb']}")
             else:
                 hand.gametype["sb"] = str(int(hand.gametype["bb"]) // 2)
+                log.debug(f"Small blind adjusted to match big blind: sb={hand.gametype['sb']}")
+        log.debug(f"Final gametype blinds: sb={hand.gametype['sb']}, bb={hand.gametype['bb']}")
+        log.debug(f"Exiting fixTourBlinds for hand: {hand.handid}")
 
     def readButton(self, hand):
-        # Found in re_Player
+        """
+        Placeholder for future implementation of button reading.
+        """
+        log.debug(f"Entering readButton for hand: {hand.handid}. Currently no implementation.")
         pass
 
     def readHoleCards(self, hand):
@@ -872,31 +1083,30 @@ class iPoker(HandHistoryConverter):
         Returns:
             None
         """
+        log.debug(f"Entering readHoleCards for hand: {hand.handid}")
 
-        # streets PREFLOP, PREDRAW, and THIRD are special cases beacause we need to grab hero's cards
+        # Streets PREFLOP, PREDRAW, and THIRD require hero's cards
         for street in ("PREFLOP", "DEAL"):
-            if street in hand.streets.keys():
-                # Find all instances of hero's cards in the street and add them to the Hand object
-                m = self.re_HeroCards.finditer(hand.streets[street])
-                for found in m:
+            if street in hand.streets:
+                log.debug(f"Processing street: {street} for hero's cards.")
+                for found in self.re_HeroCards.finditer(hand.streets[street]):
                     player = found.group("PNAME")
                     cards = found.group("CARDS").split(" ")
                     cards = [c[1:].replace("10", "T") + c[0].lower().replace("x", "") for c in cards]
                     if player == self.hero and cards[0]:
                         hand.hero = player
+                        log.debug(f"Hero identified: {player} with cards: {cards}")
                     hand.addHoleCards(street, player, closed=cards, shown=True, mucked=False, dealt=True)
 
-        # Go through each street in the Hand object and add hole card information for each player
-        for street, text in list(hand.streets.items()):
+        # Process remaining streets
+        for street, text in hand.streets.items():
             if not text or street in ("PREFLOP", "DEAL"):
                 continue  # already done these
-            m = self.re_HeroCards.finditer(hand.streets[street])
-            for found in m:
+            log.debug(f"Processing street: {street} for all players.")
+            for found in self.re_HeroCards.finditer(text):
                 player = found.group("PNAME")
                 if player is not None:
                     cards = found.group("CARDS").split(" ")
-
-                    # Handle special case where hero is not the player and it's the seventh street in a stud game
                     if street == "SEVENTH" and self.hero != player:
                         newcards = []
                         oldcards = [c[1:].replace("10", "T") + c[0].lower() for c in cards if c[0].lower() != "x"]
@@ -904,7 +1114,6 @@ class iPoker(HandHistoryConverter):
                         newcards = [c[1:].replace("10", "T") + c[0].lower() for c in cards if c[0].lower() != "x"]
                         oldcards = []
 
-                    # Handle special case where hero is the player and it's the third street in a stud game
                     if street == "THIRD" and len(newcards) == 3 and self.hero == player:
                         hand.hero = player
                         hand.dealt.add(player)
@@ -917,8 +1126,7 @@ class iPoker(HandHistoryConverter):
                             mucked=False,
                             dealt=False,
                         )
-
-                    # Handle special case where hero is the player and it's the second street in a stud game
+                        log.debug(f"Hero cards on THIRD street: {newcards[:2]} (closed), {newcards[2]} (open)")
                     elif street == "SECOND" and len(newcards) == 2 and self.hero == player:
                         hand.hero = player
                         hand.dealt.add(player)
@@ -931,12 +1139,14 @@ class iPoker(HandHistoryConverter):
                             mucked=False,
                             dealt=False,
                         )
-
-                    # Handle all other cases where hole card information needs to be added to the Hand object
+                        log.debug(f"Hero cards on SECOND street: {newcards[0]} (closed), {newcards[1]} (open)")
                     else:
                         hand.addHoleCards(
                             street, player, open=newcards, closed=oldcards, shown=True, mucked=False, dealt=False
                         )
+                        log.debug(f"Player {player} cards on {street}: {newcards} (open), {oldcards} (closed)")
+
+        log.debug(f"Exiting readHoleCards for hand: {hand.handid}")
 
     def readAction(self, hand, street):
         """
@@ -949,66 +1159,297 @@ class iPoker(HandHistoryConverter):
         Returns:
             None
         """
+        log.debug(f"Entering readAction for hand: {hand.handid}, street: {street}")
+
         # HH format doesn't actually print the actions in order!
+        log.debug(f"Parsing actions for street: {street}")
         m = self.re_Action.finditer(hand.streets[street])
         actions = {int(a.group("ACT")): a.groupdict() for a in m}
+        log.debug(f"Actions found: {len(actions)}")
 
         # Add each action to the corresponding method of the Hand object.
-        # atype is the action type (0 for fold, 4 for check, etc.).
-        for a in sorted(list(actions.keys())):
+        for a in sorted(actions.keys()):
             action = actions[a]
             atype = action["ATYPE"]
             player = action["PNAME"]
             bet = self.clearMoneyString(action["BET"])
 
+            log.debug(f"Processing action: Player={player}, Type={atype}, Bet={bet}")
             if atype == "0":
                 hand.addFold(street, player)
+                log.debug(f"Added fold for player {player} on street {street}.")
             elif atype == "4":
                 hand.addCheck(street, player)
+                log.debug(f"Added check for player {player} on street {street}.")
             elif atype == "3":
                 hand.addCall(street, player, bet)
-            elif atype == "23":  # Raise to
+                log.debug(f"Added call for player {player} on street {street}, Bet={bet}.")
+            elif atype == "23":
                 hand.addRaiseTo(street, player, bet)
-            elif atype == "6":  # Raise by
-                # This is only a guess
+                log.debug(f"Added raise to {bet} for player {player} on street {street}.")
+            elif atype == "6":
                 hand.addRaiseBy(street, player, bet)
+                log.debug(f"Added raise by {bet} for player {player} on street {street}.")
             elif atype == "5":
                 hand.addBet(street, player, bet)
-            elif atype == "16":  # BringIn
+                log.debug(f"Added bet of {bet} for player {player} on street {street}.")
+            elif atype == "16":
                 hand.addBringIn(player, bet)
+                log.debug(f"Added bring-in of {bet} for player {player}.")
             elif atype == "7":
                 hand.addAllIn(street, player, bet)
-            elif atype == "15":  # Ante
-                pass  # Antes dealt with in readAntes
-            elif atype in ["1", "2", "8"]:  # sb/bb/no action this hand (joined table)
-                pass
-            elif atype == "9":  # FIXME: Sitting out
+                log.debug(f"Added all-in of {bet} for player {player} on street {street}.")
+            elif atype == "15":
+                log.debug(f"Ante action skipped for player {player} (handled in readAntes).")
+            elif atype in ["1", "2", "8"]:
+                log.debug(f"Blind or no-action skipped for player {player} (Type={atype}).")
+            elif atype == "9":
                 hand.addFold(street, player)
+                log.debug(f"Player {player} sitting out, added fold for street {street}.")
             else:
-                log.error(
-                    # Log an error for unimplemented actions
-                    ("DEBUG:") + " " + f"Unimplemented readAction: '{action['PNAME']}' '{action['ATYPE']}'"
-                )
+                log.error(f"Unimplemented readAction: Player={player}, Type={atype}")
+
+        log.debug(f"Exiting readAction for hand: {hand.handid}, street: {street}")
 
     def readShowdownActions(self, hand):
-        # Cards lines contain cards
-        pass
-
-    def readCollectPot(self, hand):
         """
-        Sets the uncalled bets for the given hand and adds collect pot actions for each player with non-zero winnings.
+        Reads showdown actions and updates the hand object.
 
         Args:
-            hand: The Hand object to update with the collect pot actions.
+            hand (Hand): The hand object to update with showdown actions.
+
+        Returns:
+            None
         """
-        hand.setUncalledBets(self.uncalledbets)
-        for pname, pot in list(self.playerWinnings.items()):
-            hand.addCollectPot(player=pname, pot=self.clearMoneyString(pot))
-            # add collect pot action for player with non-zero winnings
+        log.debug(f"Entering readShowdownActions for hand: {hand.handid}")
+        # Placeholder for showdown action logic
+        log.debug("Currently no implementation for readShowdownActions.")
+        log.debug(f"Exiting readShowdownActions for hand: {hand.handid}")
+
+    def readCollectPot(self, hand):
+        log.info("Entering readCollectPot method")
+
+        # Activer les mises non égalisées
+        hand.setUncalledBets(True)
+
+        # Initialiser le pot total à zéro
+        total_pot = Decimal("0.00")
+
+        # Parcourir les informations des joueurs pour identifier les pots collectés
+        for m in self.re_PlayerInfo.finditer(hand.handText):
+            player = m.group("PNAME")
+            pot = m.group("WIN")
+            if pot:  # Vérifier si un montant de gain est présent
+                pot_value = self.clearMoneyString(pot)
+                total_pot += Decimal(pot_value)  # Ajouter le montant au pot total
+                hand.addCollectPot(player=player, pot=pot_value)
+                log.debug(f"Player collected pot method: readCollectPot, player: {player}, amount: {pot_value}")
+            else:
+                log.debug(f"No winnings recorded for player: {player}")
+
+        # Ajouter le rake au pot total
+        total_pot += hand.rake or Decimal("0.00")
+
+        # Mettre à jour le total pot dans l'objet hand
+        hand.totalpot = str(total_pot)
+        log.debug(f"Total pot calculated: {hand.totalpot}, Total rake: {hand.rake}")
+
+        log.info("Exiting readCollectPot method")
 
     def readShownCards(self, hand):
-        # Cards lines contain cards
-        pass
+        """
+        Reads shown cards and updates the hand object.
+
+        Args:
+            hand (Hand): The hand object to update with shown cards.
+
+        Returns:
+            None
+        """
+        log.debug(f"Entering readShownCards for hand: {hand.handid}")
+        # Placeholder for shown cards logic
+        log.debug("Currently no implementation for readShownCards.")
+        log.debug(f"Exiting readShownCards for hand: {hand.handid}")
+
+    def readTourneyResults(self, hand):
+        log.info("Entering readTourneyResults method")
+
+        # Initialize data structures
+        hand.winnings = {}
+        hand.ranks = {}
+        hand.playersIn = []
+        hand.isProgressive = False
+
+        log.debug("Initialized tournament data structures method: iPoker:readTourneyResults, is_progressive: False")
+
+        buyin_amount = Decimal("0")
+        fee_amount = Decimal("0")
+        totbuyin_amount = Decimal("0")
+        currency_symbol = "EUR"
+        tourno = None
+        rank = None
+        tournament_name = None
+
+        for pattern in [self.re_GameInfoTrny, self.re_GameInfoTrny2]:
+            for m in pattern.finditer(hand.handText):
+                mg = m.groupdict()
+
+                if mg.get("TOURNO"):
+                    tourno = mg["TOURNO"]
+                    hand.tourNo = tourno
+                    log.debug(f"Parsed tournament number: {tourno}")
+
+                if mg.get("NAME"):
+                    tournament_name = mg["NAME"]
+                    log.debug(f"Parsed tournament name: {tournament_name}")
+
+                if mg.get("PLACE"):
+                    rank = mg["PLACE"]
+                    log.debug(f"Parsed tournament place: {rank}")
+
+                # Handle BIAMT
+                if mg.get("BIAMT"):
+                    amt_str = mg["BIAMT"].strip()
+                    log.debug(f"Raw BIAMT value: {amt_str}")
+                    amt_str = amt_str.replace(",", ".")  # Replace commas with dots for decimals
+                    amt_str = self.clearMoneyString(amt_str)  # Cleanup using the helper function
+
+                    try:
+                        if amt_str:
+                            buyin_amount = Decimal(amt_str)
+                            log.debug(f"Converted BIAMT to Decimal: {buyin_amount}")
+                        else:
+                            log.warning(f"Empty or invalid BIAMT value: {mg['BIAMT']}")
+                    except InvalidOperation as e:
+                        log.error(f"Failed to convert BIAMT to Decimal: {amt_str}. Error: {e}")
+                        buyin_amount = Decimal("0")
+
+                # Handle BIRAKE
+                if mg.get("BIRAKE"):
+                    rake_str = mg["BIRAKE"].strip().replace(",", ".")
+                    rake_str = self.clearMoneyString(rake_str)
+                    try:
+                        if rake_str:
+                            fee_amount = Decimal(rake_str)
+                            log.debug(f"Converted BIRAKE to Decimal: {fee_amount}")
+                    except InvalidOperation as e:
+                        log.error(f"Failed to convert BIRAKE to Decimal: {rake_str}. Error: {e}")
+
+                # Handle BIRAKE2
+                if mg.get("BIRAKE2"):
+                    rake2_str = mg["BIRAKE2"].strip().replace(",", ".")
+                    rake2_str = self.clearMoneyString(rake2_str)
+                    try:
+                        if rake2_str:
+                            fee_amount += Decimal(rake2_str)
+                            log.debug(f"Added BIRAKE2 to fee_amount. New fee_amount: {fee_amount}")
+                    except InvalidOperation as e:
+                        log.error(f"Failed to convert BIRAKE2 to Decimal: {rake2_str}. Error: {e}")
+
+                # Handle TOTBUYIN
+                if mg.get("TOTBUYIN"):
+                    totbuy_str = mg["TOTBUYIN"].strip().replace(",", ".")
+                    totbuy_str = self.clearMoneyString(totbuy_str.replace("€", ""))
+                    try:
+                        if totbuy_str:
+                            totbuyin_amount = Decimal(totbuy_str)
+                            log.debug(f"Converted TOTBUYIN to Decimal: {totbuyin_amount}")
+                    except InvalidOperation as e:
+                        log.error(f"Failed to convert TOTBUYIN to Decimal: {totbuy_str}. Error: {e}")
+
+        # Validate and set buy-in values
+        if totbuyin_amount > 0:
+            if buyin_amount == 0 and fee_amount == 0:
+                buyin_amount = totbuyin_amount
+                fee_amount = Decimal("0")
+                log.debug("Using TOTBUYIN as buy-in amount since BIAMT and fees were missing.")
+        else:
+            pass
+
+        hand.buyin = int(buyin_amount * 100)
+        hand.fee = int(fee_amount * 100)
+        hand.buyinCurrency = currency_symbol
+        hand.currency = currency_symbol
+
+        hand.entries = len(hand.playersIn)
+        hand.prizepool = sum(hand.winnings.values())
+        hand.isTournament = True
+        hand.tourneyName = tournament_name if tournament_name else hand.tablename
+        hand.isSng = True
+        hand.isRebuy = False
+        hand.isAddOn = False
+        hand.isKO = False
+
+        log.debug(f"detail hand: {hand}")
+
+        if not hasattr(hand, "endTime"):
+            hand.endTime = hand.startTime
+
+        # Create TourneySummary
+        try:
+            # Initialize database connection if needed
+            if not hasattr(self, "db"):
+                self.db = Database.Database(self.config)
+                log.debug(f"Initialized database connection config: {str(self.config)}")
+
+            log.debug(
+                f"Completed PartyPoker parser initialization sitename: {self.sitename}, has_db: {hasattr(self, 'db')}"
+            )
+            summary = TourneySummary(
+                db=self.db,
+                config=self.config,
+                siteName=self.sitename,
+                summaryText=hand.handText,
+                builtFrom="HHC",
+                header="",
+            )
+
+            # Set summary attributes
+            summary.tourNo = hand.tourNo
+            summary.buyin = hand.buyin
+            summary.fee = hand.fee
+            summary.buyinCurrency = hand.buyinCurrency
+            summary.currency = hand.buyinCurrency
+            summary.startTime = hand.startTime
+            summary.endTime = hand.endTime
+            summary.gametype = hand.gametype
+            summary.maxseats = hand.maxseats
+            summary.entries = hand.entries
+            summary.speed = "Normal"
+            summary.isSng = hand.isSng
+            summary.isRebuy = hand.isRebuy
+            summary.isAddOn = hand.isAddOn
+            summary.isKO = hand.isKO
+
+            # Add players to summary
+            for pname, rank in hand.ranks.items():
+                winnings = hand.winnings.get(pname, Decimal("0"))
+                winningsCurrency = hand.buyinCurrency
+                summary.addPlayer(
+                    rank=rank,
+                    name=pname,
+                    winnings=int(winnings * 100),
+                    winningsCurrency=winningsCurrency,
+                    rebuyCount=0,
+                    addOnCount=0,
+                    koCount=0,
+                )
+
+                log.debug(
+                    f"Added player to summary method: iPoker:readTourneyResults, player: {pname}, rank: {rank}, winnings: {winnings}, currency: {winningsCurrency}"
+                )
+
+            summary.insertOrUpdate()
+            log.debug(
+                f"Tournament summary saved method: iPoker:readTourneyResults, entries: {hand.entries}, prizepool: {hand.prizepool}"
+            )
+
+        except Exception as e:
+            log.error(f"Error processing tournament summary method: iPoker:readTourneyResults, error: {str(e)}")
+
+        log.debug(
+            f"Exiting readTourneyResults method - method: iPoker:readTourneyResults, total_players: {len(hand.ranks)}, total_winners: {len(hand.winnings)}"
+        )
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):

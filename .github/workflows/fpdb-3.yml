@@ -142,7 +142,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python.exe -m pip install -r requirements.txt
+          python.exe -m pip install -e .[build,windows] -vvv
       - name: Build project
         shell: bash
         run: |
@@ -168,7 +168,7 @@ jobs:
           brew info pyqt@5
           brew install pyqt@5
           python -m pip install sip==6.6.2 
-          python -m pip install -r requirements_macos.txt
+          python -m pip install -e .[build,macos] -vvv
           
       - name: List directory contents
         run: ls -la
@@ -202,7 +202,7 @@ jobs:
           brew info pyqt@5
           brew install pyqt@5
           python -m pip install sip==6.6.2 
-          python -m pip install -r requirements_macos.txt
+          python -m pip install -e .[build,macos] -vvv
 
       - name: List directory contents
         run: ls -la
@@ -241,7 +241,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
-          python -m pip install -r requirements-linux.txt
+          python -m pip install -e .[build,linux] -vvv
       - name: Install PyInstaller
         run: pip install pyinstaller
       - name: Download AppImageTool

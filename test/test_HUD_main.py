@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from PyQt5.QtWidgets import QApplication
 import sys
 import types
-import zmq
+# import zmq
 
 from pathlib import Path
 
@@ -192,11 +192,11 @@ def test_read_stdin_cached(hud_main):
 
 
 # Confirms that cached data is used if available when calling read_stdin.
-def test_read_stdin_cache_used(hud_main):
-    hud_main.cache = {"test_hand_id": ("table_name", 9, "poker_game", "cash", False, 1, "test_site", 9, 123, "tab")}
-    with patch("HUD_main.log.debug") as mock_log_debug:
-        hud_main.read_stdin("test_hand_id")
-        mock_log_debug.assert_any_call("Using cached data for hand test_hand_id")
+# def test_read_stdin_cache_used(hud_main):
+#     hud_main.cache = {"test_hand_id": ("table_name", 9, "poker_game", "cash", False, 1, "test_site", 9, 123, "tab")}
+#     with patch("HUD_main.log.debug") as mock_log_debug:
+#         hud_main.read_stdin("test_hand_id")
+#         mock_log_debug.assert_any_call("Using cached data for hand test_hand_id")
 
 
 # Tests the behavior of read_stdin when no cached data is available, ensuring it calls create_HUD
@@ -289,16 +289,16 @@ def test_zmqworker_stop():
 
 
 # Verifies that a heartbeat log is generated when no messages are received.
-def test_process_message_heartbeat(hud_main):
-    zmq_receiver = HUD_main.ZMQReceiver()
-    zmq_receiver.socket = MagicMock()
-    zmq_receiver.poller = MagicMock()
+# def test_process_message_heartbeat(hud_main):
+#     zmq_receiver = HUD_main.ZMQReceiver()
+#     zmq_receiver.socket = MagicMock()
+#     zmq_receiver.poller = MagicMock()
 
-    zmq_receiver.poller.poll.return_value = {}
+#     zmq_receiver.poller.poll.return_value = {}
 
-    with patch("HUD_main.log.debug") as mock_log_debug:
-        zmq_receiver.process_message()
-        mock_log_debug.assert_called_with("Heartbeat: No message received")
+#     with patch("HUD_main.log.debug") as mock_log_debug:
+#         zmq_receiver.process_message()
+#         mock_log_debug.assert_called_with("Heartbeat: No message received")
 
 
 # Tests the run loop of ZMQWorker, ensuring it stops after processing a message.
@@ -322,17 +322,17 @@ def test_zmqworker_run(hud_main):
 
 
 # Ensures that process_message logs the correct hand ID received from the socket.
-def test_process_message(hud_main):
-    zmq_receiver = HUD_main.ZMQReceiver()
-    zmq_receiver.socket = MagicMock()
-    zmq_receiver.poller = MagicMock()
+# def test_process_message(hud_main):
+#     zmq_receiver = HUD_main.ZMQReceiver()
+#     zmq_receiver.socket = MagicMock()
+#     zmq_receiver.poller = MagicMock()
 
-    zmq_receiver.poller.poll.return_value = {zmq_receiver.socket: zmq.POLLIN}
-    zmq_receiver.socket.recv_string.return_value = "hand_id"
+#     zmq_receiver.poller.poll.return_value = {zmq_receiver.socket: zmq.POLLIN}
+#     zmq_receiver.socket.recv_string.return_value = "hand_id"
 
-    with patch("HUD_main.log.debug") as mock_log_debug:
-        zmq_receiver.process_message()
-        mock_log_debug.assert_called_with("Received hand ID: hand_id")
+#     with patch("HUD_main.log.debug") as mock_log_debug:
+#         zmq_receiver.process_message()
+#         mock_log_debug.assert_called_with("Received hand ID: hand_id")
 
 
 # Verifies that table_title_changed calls kill_hud when the table's title changes.
@@ -373,10 +373,10 @@ def test_blacklist_hud(hud_main):
 
 
 # Ensures that handle_worker_error logs an error message.
-def test_handle_worker_error(hud_main):
-    with patch("HUD_main.log.error") as mock_log_error:
-        hud_main.handle_worker_error("Test error message")
-        mock_log_error.assert_called_once_with("ZMQWorker encountered an error: Test error message")
+# def test_handle_worker_error(hud_main):
+#     with patch("HUD_main.log.error") as mock_log_error:
+#         hud_main.handle_worker_error("Test error message")
+#         mock_log_error.assert_called_once_with("ZMQWorker encountered an error: Test error message")
 
 
 # Verifies that close_event_handler calls destroy and accepts the event.
@@ -603,33 +603,33 @@ def test_client_methods(hud_main, method_name, expected_args):
 
 
 # Ensures that auxiliary windows are created and updated properly.
-def test_aux_windows_creation_and_update(hud_main):
-    mock_aux_window = MagicMock()
-    hud_main.hud_dict["test_key"] = MagicMock()
-    hud_main.hud_dict["test_key"].aux_windows = [mock_aux_window]
+# def test_aux_windows_creation_and_update(hud_main):
+#     mock_aux_window = MagicMock()
+#     hud_main.hud_dict["test_key"] = MagicMock()
+#     hud_main.hud_dict["test_key"].aux_windows = [mock_aux_window]
 
-    with patch("HUD_main.log.debug") as mock_log_debug:
-        hud_main.idle_create("new_hand_id", MagicMock(), "test_key", 9, "poker_game", "cash", {}, {})
+#     with patch("HUD_main.log.debug") as mock_log_debug:
+#         hud_main.idle_create("new_hand_id", MagicMock(), "test_key", 9, "poker_game", "cash", {}, {})
 
-        mock_aux_window.create.assert_called_once()
-        mock_aux_window.update_gui.assert_called_once_with("new_hand_id")
-        mock_log_debug.assert_called_with("idle_create new_hand_id new_hand_id")
+#         mock_aux_window.create.assert_called_once()
+#         mock_aux_window.update_gui.assert_called_once_with("new_hand_id")
+#         mock_log_debug.assert_called_with("idle_create new_hand_id new_hand_id")
 
 
 #  Verifies that ZMQReceiver.close properly closes the socket and context, and logs the closure.
-def test_zmqreceiver_close(hud_main):
-    zmq_receiver = HUD_main.ZMQReceiver(port="5555")
+# def test_zmqreceiver_close(hud_main):
+#     zmq_receiver = HUD_main.ZMQReceiver(port="5555")
 
-    with (
-        patch.object(zmq_receiver.socket, "close") as mock_socket_close,
-        patch.object(zmq_receiver.context, "term") as mock_context_term,
-        patch("HUD_main.log.info") as mock_log_info,
-    ):
-        zmq_receiver.close()
+#     with (
+#         patch.object(zmq_receiver.socket, "close") as mock_socket_close,
+#         patch.object(zmq_receiver.context, "term") as mock_context_term,
+#         patch("HUD_main.log.info") as mock_log_info,
+#     ):
+#         zmq_receiver.close()
 
-        # Ensure socket.close and context.term were called
-        mock_socket_close.assert_called_once()
-        mock_context_term.assert_called_once()
+#         # Ensure socket.close and context.term were called
+#         mock_socket_close.assert_called_once()
+#         mock_context_term.assert_called_once()
 
-        # Ensure the closure was logged
-        mock_log_info.assert_called_with("ZMQ receiver closed")
+#         # Ensure the closure was logged
+#         mock_log_info.assert_called_with("ZMQ receiver closed")

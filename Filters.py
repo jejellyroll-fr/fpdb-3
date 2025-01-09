@@ -493,7 +493,7 @@ class Filters(QWidget):
             self.leHeroes[site] = QLineEdit(_pname)
 
             if os.name == "nt":
-                icoPath = os.path.dirname(__file__) + "\\icons\\"
+                icoPath = os.path.dirname(__file__) + "\\"
             else:
                 icoPath = ""
 
@@ -515,7 +515,7 @@ class Filters(QWidget):
             elif site == "iPoker":
                 icon_file = "icons/ipoker.png"
             elif site == "Cake":
-                icon_file = "icons/cake.png"
+                icon_file = "icons/cake.jpg"
             elif site == "Entraction":
                 icon_file = "icons/entraction.png"
             elif site == "BetOnline":
