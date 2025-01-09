@@ -46,7 +46,8 @@
 from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
 from TourneySummary import TourneySummary
 import Database
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+
 import re
 from loggingFpdb import get_logger
 import datetime
@@ -203,7 +204,7 @@ class iPoker(HandHistoryConverter):
             (?:(<tour(?:nament)?code>(?P<TOURNO>\d+)</tour(?:nament)?code>))|
             (?:(<tournamentname>(?P<NAME>[^<]*)</tournamentname>))|
             (?:(<place>(?P<PLACE>.+?)</place>))|
-            (?:(<buyin>(?P<BIAMT>[%(NUM2)s%(LS)s]+(?:\s\+\s)?(?P<BIRAKE>[%(NUM2)s%(LS)s]+)?)</buyin>))|
+            (?:(<buyin>(?P<BIAMT>[%(NUM2)s%(LS)s]+)\s\+\s)?(?P<BIRAKE>[%(NUM2)s%(LS)s]+)\s\+\s(?P<BIRAKE2>[%(NUM2)s%(LS)s]+)</buyin>)|
             (?:(<totalbuyin>(?P<TOTBUYIN>[%(NUM2)s%(LS)s]+)</totalbuyin>))|
             (?:(<win>(%(LS)s)?(?P<WIN>.+?|[%(NUM2)s%(LS)s]+)</win>))
         """
@@ -669,8 +670,6 @@ class iPoker(HandHistoryConverter):
 
         log.debug(f"Final info: {self.info}")
         return self.info
-
-
 
     def readSummaryInfo(self, summaryInfoList):
         log.info("enter method readSummaryInfo.")
@@ -1272,7 +1271,6 @@ class iPoker(HandHistoryConverter):
         log.debug("Currently no implementation for readShownCards.")
         log.debug(f"Exiting readShownCards for hand: {hand.handid}")
 
-
     def readTourneyResults(self, hand):
         log.info("Entering readTourneyResults method")
 
@@ -1284,69 +1282,94 @@ class iPoker(HandHistoryConverter):
 
         log.debug("Initialized tournament data structures method: iPoker:readTourneyResults, is_progressive: False")
 
-        
         buyin_amount = Decimal("0")
         fee_amount = Decimal("0")
         totbuyin_amount = Decimal("0")
-        currency_symbol = "EUR"  
+        currency_symbol = "EUR"
         tourno = None
         rank = None
         tournament_name = None
 
-
         for pattern in [self.re_GameInfoTrny, self.re_GameInfoTrny2]:
             for m in pattern.finditer(hand.handText):
                 mg = m.groupdict()
+
                 if mg.get("TOURNO"):
                     tourno = mg["TOURNO"]
                     hand.tourNo = tourno
+                    log.debug(f"Parsed tournament number: {tourno}")
+
                 if mg.get("NAME"):
                     tournament_name = mg["NAME"]
+                    log.debug(f"Parsed tournament name: {tournament_name}")
+
                 if mg.get("PLACE"):
                     rank = mg["PLACE"]
+                    log.debug(f"Parsed tournament place: {rank}")
 
+                # Handle BIAMT
                 if mg.get("BIAMT"):
                     amt_str = mg["BIAMT"].strip()
-                    amt_str = amt_str.replace(",", ".")
+                    log.debug(f"Raw BIAMT value: {amt_str}")
+                    amt_str = amt_str.replace(",", ".")  # Replace commas with dots for decimals
+                    amt_str = self.clearMoneyString(amt_str)  # Cleanup using the helper function
 
-                    amt_str = self.clearMoneyString(amt_str)
-                    if amt_str:
-                        buyin_amount = Decimal(amt_str)
+                    try:
+                        if amt_str:
+                            buyin_amount = Decimal(amt_str)
+                            log.debug(f"Converted BIAMT to Decimal: {buyin_amount}")
+                        else:
+                            log.warning(f"Empty or invalid BIAMT value: {mg['BIAMT']}")
+                    except InvalidOperation as e:
+                        log.error(f"Failed to convert BIAMT to Decimal: {amt_str}. Error: {e}")
+                        buyin_amount = Decimal("0")
+
+                # Handle BIRAKE
                 if mg.get("BIRAKE"):
                     rake_str = mg["BIRAKE"].strip().replace(",", ".")
                     rake_str = self.clearMoneyString(rake_str)
-                    if rake_str:
-                        fee_amount = Decimal(rake_str)
-                if mg.get("BIRAKE2"):
+                    try:
+                        if rake_str:
+                            fee_amount = Decimal(rake_str)
+                            log.debug(f"Converted BIRAKE to Decimal: {fee_amount}")
+                    except InvalidOperation as e:
+                        log.error(f"Failed to convert BIRAKE to Decimal: {rake_str}. Error: {e}")
 
+                # Handle BIRAKE2
+                if mg.get("BIRAKE2"):
                     rake2_str = mg["BIRAKE2"].strip().replace(",", ".")
                     rake2_str = self.clearMoneyString(rake2_str)
-                    if rake2_str:
-                        fee_amount += Decimal(rake2_str)
+                    try:
+                        if rake2_str:
+                            fee_amount += Decimal(rake2_str)
+                            log.debug(f"Added BIRAKE2 to fee_amount. New fee_amount: {fee_amount}")
+                    except InvalidOperation as e:
+                        log.error(f"Failed to convert BIRAKE2 to Decimal: {rake2_str}. Error: {e}")
 
+                # Handle TOTBUYIN
                 if mg.get("TOTBUYIN"):
                     totbuy_str = mg["TOTBUYIN"].strip().replace(",", ".")
-                    totbuy_str = mg["TOTBUYIN"].strip().replace("€", "")
-                    totbuy_str = self.clearMoneyString(totbuy_str)
-                    if totbuy_str:
-                        log.info(f"buyin: {totbuy_str}")
-                        totbuyin_amount = Decimal(totbuy_str)
+                    totbuy_str = self.clearMoneyString(totbuy_str.replace("€", ""))
+                    try:
+                        if totbuy_str:
+                            totbuyin_amount = Decimal(totbuy_str)
+                            log.debug(f"Converted TOTBUYIN to Decimal: {totbuyin_amount}")
+                    except InvalidOperation as e:
+                        log.error(f"Failed to convert TOTBUYIN to Decimal: {totbuy_str}. Error: {e}")
 
-
+        # Validate and set buy-in values
         if totbuyin_amount > 0:
             if buyin_amount == 0 and fee_amount == 0:
                 buyin_amount = totbuyin_amount
                 fee_amount = Decimal("0")
+                log.debug("Using TOTBUYIN as buy-in amount since BIAMT and fees were missing.")
         else:
             pass
-
 
         hand.buyin = int(buyin_amount * 100)
         hand.fee = int(fee_amount * 100)
         hand.buyinCurrency = currency_symbol
         hand.currency = currency_symbol
-
-
 
         hand.entries = len(hand.playersIn)
         hand.prizepool = sum(hand.winnings.values())
@@ -1369,7 +1392,9 @@ class iPoker(HandHistoryConverter):
                 self.db = Database.Database(self.config)
                 log.debug(f"Initialized database connection config: {str(self.config)}")
 
-            log.debug(f"Completed PartyPoker parser initialization sitename: {self.sitename}, has_db: {hasattr(self, 'db')}")
+            log.debug(
+                f"Completed PartyPoker parser initialization sitename: {self.sitename}, has_db: {hasattr(self, 'db')}"
+            )
             summary = TourneySummary(
                 db=self.db,
                 config=self.config,
@@ -1425,7 +1450,6 @@ class iPoker(HandHistoryConverter):
         log.debug(
             f"Exiting readTourneyResults method - method: iPoker:readTourneyResults, total_players: {len(hand.ranks)}, total_winners: {len(hand.winnings)}"
         )
-
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
