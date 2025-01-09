@@ -15,7 +15,7 @@ I'm not an expert python developer, this project, as a poker player, is for me t
 ## Updating to python 3.11.9
 
 FPDB is a poker tools - HUD - Replayer
-Download your build directly on this repo: <https://github.com/jejellyroll-fr/fpdb-3-builder>
+
 
 ## wiki
 
@@ -67,26 +67,23 @@ This will create a virtual env (in .venv dir), install all dependencies and run 
 ### Using pip
 
 ```sh
-pip install -r requirements.txt
+pip install .[build,windows]
 ```
 
 or
 
 ```sh
-pip install -r requirements_win.txt
+pip install .[build,linux]
 ```
 
 or
 
 ```sh
-pip install -r requirements_macos.txt
+pip install .[build,macos]
 ```
 
-or
 
-```sh
-pip install -r requirements_fpdb_web.txt
-```
+
 
 ## Dev test
 

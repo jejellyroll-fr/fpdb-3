@@ -303,6 +303,7 @@ class GuiGraphViewer(QSplitter):
         )
 
     def getRingProfitGraph(self, names, sites, limits, games, currencies, units):
+        log.debug("Starting SQL query to fetch graph data...")
         if units == "$":
             tmp = self.sql.query["getRingProfitAllHandsPlayerIdSiteInDollars"]
         elif units == "BB":

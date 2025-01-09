@@ -2617,29 +2617,47 @@ class Database(object):
                 self.commit()
 
     def storeHandsPlayers(self, hid, pids, pdata, doinsert=False, printdata=False):
-        # print "DEBUG: %s %s %s" %(hid, pids, pdata)
+        log.info(f"Entering storeHandsPlayers: hid={hid}, doinsert={doinsert}, printdata={printdata}")
+        
         if printdata:
             import pprint
-
             pp = pprint.PrettyPrinter(indent=4)
+            log.debug("Printing pdata for debugging:")
             pp.pprint(pdata)
 
         hpbulk = self.hpbulk
-        for p, pvalue in list(pdata.items()):
-            # Add (hid, pids[p]) + all the values in pvalue at the
-            # keys in HANDS_PLAYERS_KEYS to hpbulk.
-            bulk_data = [pvalue[key] for key in HANDS_PLAYERS_KEYS]
-            bulk_data.append(pids[p])
-            bulk_data.append(hid)
-            bulk_data.reverse()
-            hpbulk.append(bulk_data)
+        log.debug(f"Initialized hpbulk with current size: {len(hpbulk)}")
+
+        for p, pvalue in pdata.items():
+            log.debug(f"Processing player: {p}")
+            try:
+                bulk_data = [pvalue[key] for key in HANDS_PLAYERS_KEYS]
+                bulk_data.append(pids[p])
+                bulk_data.append(hid)
+                bulk_data.reverse()
+                hpbulk.append(bulk_data)
+                log.debug(f"Appended data for player {p}: {bulk_data}")
+            except KeyError as e:
+                log.error(f"Key error when processing player {p}. Missing key: {e}")
+                raise
+
+        log.debug(f"Final hpbulk size after processing: {len(hpbulk)}")
 
         if doinsert:
-            # self.appendHandsPlayersSessionIds()
-            q = self.sql.query["store_hands_players"]
-            q = q.replace("%s", self.sql.query["placeholder"])
-            c = self.get_cursor(True)
-            self.executemany(c, q, self.hpbulk)  # c.executemany(q, self.hpbulk)
+            log.info("Performing database insertion for hands_players data.")
+            try:
+                q = self.sql.query["store_hands_players"]
+                q = q.replace("%s", self.sql.query["placeholder"])
+                c = self.get_cursor(True)
+                self.executemany(c, q, self.hpbulk)
+                log.info(f"Successfully inserted {len(self.hpbulk)} rows into hands_players.")
+            except Exception as e:
+                log.error(f"Error during database insertion in storeHandsPlayers: {e}")
+                raise
+        else:
+            log.info("Skipping database insertion as doinsert=False.")
+
+        log.info("Exiting storeHandsPlayers.")
 
     def storeHandsPots(self, tdata, doinsert):
         self.htbulk += tdata
