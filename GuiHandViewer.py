@@ -33,9 +33,9 @@ import SQL
 import Filters
 import Deck
 
-from PyQt5.QtCore import QCoreApplication, QSortFilterProxyModel, Qt
-from PyQt5.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import (
+from PySide6.QtCore import QCoreApplication, QSortFilterProxyModel, Qt
+from PySide6.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
+from PySide6.QtWidgets import (
     QApplication,
     QFrame,
     QMenu,
@@ -480,7 +480,7 @@ if __name__ == "__main__":
     settings.update(config.get_import_parameters())
     settings.update(config.get_default_paths())
 
-    from PyQt5.QtWidgets import QMainWindow
+    from PySide6.QtWidgets import QMainWindow
 
     app = QApplication([])
     sql = SQL.Sql(db_server=settings["db-server"])

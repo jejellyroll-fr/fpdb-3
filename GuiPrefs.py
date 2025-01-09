@@ -20,8 +20,8 @@
 # _ = L10n.get_translation()
 
 
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QTreeWidget, QTreeWidgetItem
-from PyQt5.QtCore import Qt
+from PySide6.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QTreeWidget, QTreeWidgetItem
+from PySide6.QtCore import Qt
 
 # from pyfpdb import Configuration
 import Configuration
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
     config = Configuration.Config()
 
-    from PyQt5.QtWidgets import QApplication, QMainWindow
+    from PySide6.QtWidgets import QApplication, QMainWindow
 
     app = QApplication([])
     main_window = QMainWindow()

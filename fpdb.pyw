@@ -31,11 +31,14 @@ from L10n import set_locale_translation
 import logging  # Import the logging module
 from loggingFpdb import get_logger, setup_logging
 
-from PyQt5.QtCore import QCoreApplication, QDate, Qt, QPoint
-from PyQt5.QtGui import QIcon, QPalette
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QSizePolicy
-from PyQt5.QtWidgets import (
-    QAction,
+from PySide6.QtCore import QCoreApplication, QDate, Qt, QPoint
+from PySide6.QtGui import QIcon, QPalette, QAction  # QAction déplacé ici
+from PySide6.QtWidgets import (
+    QWidget,
+    QLabel,
+    QPushButton,
+    QHBoxLayout,
+    QSizePolicy,
     QApplication,
     QCalendarWidget,
     QCheckBox,
@@ -52,6 +55,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QComboBox,
 )
+
 
 import DetectInstalledSites
 import GuiPrefs

@@ -51,7 +51,7 @@ from loggingFpdb import get_logger
 #    FreePokerTools modules
 import Aux_Hud
 import Stats
-from PyQt5.QtWidgets import QInputDialog, QMessageBox
+from PySide6.QtWidgets import QInputDialog, QMessageBox
 import Database
 import Configuration
 import os

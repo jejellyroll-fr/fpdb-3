@@ -35,8 +35,8 @@ import zmq
 from loggingFpdb import get_logger
 
 
-from PyQt5.QtWidgets import QProgressBar, QLabel, QDialog, QVBoxLayout
-from PyQt5.QtCore import QCoreApplication
+from PySide6.QtWidgets import QProgressBar, QLabel, QDialog, QVBoxLayout
+from PySide6.QtCore import QCoreApplication
 
 #    fpdb/FreePokerTools modules
 

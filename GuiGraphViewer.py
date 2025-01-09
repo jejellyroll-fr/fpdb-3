@@ -30,7 +30,7 @@ import os
 # import L10n
 # _ = L10n.get_translation()
 
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QFrame,
     QScrollArea,
     QSizePolicy,

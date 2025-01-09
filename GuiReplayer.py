@@ -34,9 +34,9 @@ import Database
 import SQL
 import Deck
 
-from PyQt5.QtCore import QPoint, QRect, Qt, QTimer
-from PyQt5.QtGui import QColor, QImage, QPainter
-from PyQt5.QtWidgets import QHBoxLayout, QPushButton, QSlider, QVBoxLayout, QCheckBox, QWidget
+from PySide6.QtCore import QPoint, QRect, Qt, QTimer
+from PySide6.QtGui import QColor, QImage, QPainter
+from PySide6.QtWidgets import QHBoxLayout, QPushButton, QSlider, QVBoxLayout, QCheckBox, QWidget
 
 from math import pi, cos, sin
 from decimal import Decimal
@@ -2183,7 +2183,7 @@ if __name__ == "__main__":
     db = Database.Database(config)
     sql = SQL.Sql(db_server=config.get_db_parameters()["db-server"])
 
-    from PyQt5.QtWidgets import QApplication
+    from PySide6.QtWidgets import QApplication
 
     app = QApplication([])
     handlist = [10, 39, 40]

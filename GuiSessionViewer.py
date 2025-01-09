@@ -28,9 +28,9 @@ from time import time, strftime, localtime, gmtime
 from loggingFpdb import get_logger
 
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QFrame, QLabel, QScrollArea, QSplitter, QTableView, QVBoxLayout
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QStandardItem, QStandardItemModel
+from PySide6.QtWidgets import QFrame, QLabel, QScrollArea, QSplitter, QTableView, QVBoxLayout
 
 import matplotlib
 from matplotlib.figure import Figure
@@ -548,7 +548,7 @@ if __name__ == "__main__":
     settings.update(config.get_import_parameters())
     settings.update(config.get_default_paths())
 
-    from PyQt5.QtWidgets import QApplication, QMainWindow
+    from PySide6.QtWidgets import QApplication, QMainWindow
 
     app = QApplication([])
     import SQL

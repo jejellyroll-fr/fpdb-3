@@ -34,9 +34,9 @@ from past.utils import old_div
 from loggingFpdb import get_logger
 
 
-from PyQt5.QtCore import QObject
-from PyQt5.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QGridLayout, QLabel, QTableView, QVBoxLayout, QWidget
+from PySide6.QtCore import QObject
+from PySide6.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
+from PySide6.QtWidgets import QGridLayout, QLabel, QTableView, QVBoxLayout, QWidget
 
 #    FreePokerTools modules
 import Card

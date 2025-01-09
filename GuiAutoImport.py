@@ -9,7 +9,7 @@ import traceback
 import os
 import sys
 from loggingFpdb import get_logger
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QHBoxLayout,
@@ -21,8 +21,8 @@ from PyQt5.QtWidgets import (
     QCheckBox,
     QFileDialog,
 )
-from PyQt5.QtCore import QTimer
-from PyQt5.QtGui import QTextCursor
+from PySide6.QtCore import QTimer
+from PySide6.QtGui import QTextCursor
 
 import Importer
 from optparse import OptionParser
@@ -385,7 +385,7 @@ if __name__ == "__main__":
     settings["cl_options"] = ".".join(sys.argv[1:])
 
     if options.gui is True:
-        from PyQt5.QtWidgets import QApplication, QMainWindow
+        from PySide6.QtWidgets import QApplication, QMainWindow
 
         app = QApplication([])
         i = GuiAutoImport(settings, config, None, None)

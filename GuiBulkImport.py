@@ -26,16 +26,21 @@ import os
 import sys
 from time import time
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QFileDialog
+# Importations PySide6
+from PySide6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLineEdit,
+    QPushButton,
+    QFileDialog,
+    QApplication,
+    QMainWindow,
+)
 
-#    fpdb/FreePokerTools modules
-
-
+# Importations internes du projet
 import Importer
-
 import Configuration
-
-
 from loggingFpdb import get_logger
 
 if __name__ == "__main__":
@@ -124,7 +129,9 @@ class GuiBulkImport(QWidget):
 
     def browseClicked(self):
         newdir = QFileDialog.getExistingDirectory(
-            self, caption=("Please choose the path that you want to Auto Import"), directory=self.importDir.text()
+            self,
+            caption="Please choose the path that you want to Auto Import",
+            dir=self.importDir.text(),
         )
         if newdir:
             self.importDir.setText(newdir)
@@ -141,15 +148,18 @@ if __name__ == "__main__":
     settings.update(config.get_db_parameters())
     settings.update(config.get_import_parameters())
     settings.update(config.get_default_paths())
+
     import interlocks
 
     settings["global_lock"] = interlocks.InterProcessLock(name="fpdb_global_lock")
     settings["cl_options"] = ".".join(sys.argv[1:])
 
-    # from PyQt5.QtWidgets import QApplication, QMainWindow
-    # app = QApplication(sys.argv)
-    # main_window = QMainWindow()
-    # main_window.setCentralWidget(GuiBulkImport(settings, config))
-    # main_window.show()
-    # main_window.resize(600, 100)
-    # app.exec_()
+    app = QApplication(sys.argv)
+    main_window = QMainWindow()
+    gui_bulk_import = GuiBulkImport(settings, config)
+    main_window.setCentralWidget(gui_bulk_import)
+    main_window.setWindowTitle("Bulk Import")
+    main_window.resize(600, 150)
+    main_window.show()
+
+    sys.exit(app.exec())

@@ -2,15 +2,17 @@ import ctypes
 import re
 from loggingFpdb import get_logger
 from ctypes import wintypes
-from PyQt5.QtGui import QWindow
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication
-import sys
+from PySide6.QtGui import QWindow
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QApplication
+
 import time
 
 from TableWindow import Table_Window
 
-app = QApplication(sys.argv)
+app = QApplication.instance()
+if app is None:
+    raise RuntimeError("QApplication instance must be created in the main script.")
 
 # logging setup
 log = get_logger("hud")

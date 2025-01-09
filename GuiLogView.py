@@ -15,8 +15,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
-from PyQt5.QtGui import QColor, QPalette
-from PyQt5.QtWidgets import (
+from PySide6.QtGui import QColor, QPalette
+from PySide6.QtWidgets import (
     QApplication,
     QAbstractItemView,
     QPushButton,
@@ -31,15 +31,15 @@ from PyQt5.QtWidgets import (
     QLabel,
     QComboBox,
 )
-from PyQt5.QtCore import (
+from PySide6.QtCore import (
     Qt,
     QAbstractTableModel,
     QModelIndex,
-    QVariant,
     QSortFilterProxyModel,
     QThread,
-    pyqtSignal,
+    Signal,
 )
+
 import os
 from loggingFpdb import get_logger
 
@@ -76,47 +76,39 @@ class LogTableModel(QAbstractTableModel):
         return len(self.headers)
 
     def data(self, index, role=Qt.DisplayRole):
-        if not index.isValid():
-            return QVariant()
-        if not (0 <= index.row() < len(self.log_entries)):
-            return QVariant()
+        if not index.isValid() or not (0 <= index.row() < len(self.log_entries)):
+            return None
         entry = self.log_entries[index.row()]
         if role == Qt.DisplayRole:
             return entry[index.column()]
         elif role == Qt.DecorationRole and index.column() == 0:
             level = entry[0]
             style = QApplication.style()
-            icon = None
             if level == "DEBUG":
-                icon = style.standardIcon(QStyle.SP_ArrowRight)
+                return style.standardIcon(QStyle.SP_ArrowRight)
             elif level == "INFO":
-                icon = style.standardIcon(QStyle.SP_MessageBoxInformation)
+                return style.standardIcon(QStyle.SP_MessageBoxInformation)
             elif level == "WARNING":
-                icon = style.standardIcon(QStyle.SP_MessageBoxWarning)
+                return style.standardIcon(QStyle.SP_MessageBoxWarning)
             elif level == "ERROR":
-                icon = style.standardIcon(QStyle.SP_MessageBoxCritical)
-            return icon
+                return style.standardIcon(QStyle.SP_MessageBoxCritical)
         elif role == Qt.ForegroundRole:
             level = entry[0]
-            if level == "DEBUG":
-                color = QColor("green")
-            elif level == "INFO":
-                color = QColor("white")
-            elif level == "WARNING":
-                color = QColor("orange")
-            elif level == "ERROR":
-                color = QColor("red")
-            else:
-                color = QApplication.palette().color(QPalette.Text)
+            color = {
+                "DEBUG": QColor("green"),
+                "INFO": QColor("white"),
+                "WARNING": QColor("orange"),
+                "ERROR": QColor("red"),
+            }.get(level, QApplication.palette().color(QPalette.Text))
             return color
-        return QVariant()
+        return None
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
         if role != Qt.DisplayRole:
-            return QVariant()
+            return None
         if orientation == Qt.Horizontal:
             return self.headers[section]
-        return QVariant()
+        return None
 
 
 class LogFilterProxyModel(QSortFilterProxyModel):
@@ -154,7 +146,7 @@ class LogFilterProxyModel(QSortFilterProxyModel):
 
 
 class LogLoaderThread(QThread):
-    log_entries_loaded = pyqtSignal(list)
+    log_entries_loaded = Signal(list)
 
     def __init__(self, logfile, max_entries):
         super().__init__()

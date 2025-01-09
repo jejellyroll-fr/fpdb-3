@@ -15,9 +15,9 @@ images and returns it as a dict of pixbufs.
 
 import os
 
-from PyQt5.QtCore import QRectF
-from PyQt5.QtGui import QPixmap, QPainter
-from PyQt5.QtSvg import QSvgRenderer
+from PySide6.QtCore import QRectF
+from PySide6.QtGui import QPixmap, QPainter
+from PySide6.QtSvg import QSvgRenderer
 
 
 class Deck(object):

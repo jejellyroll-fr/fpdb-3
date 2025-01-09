@@ -29,8 +29,8 @@
 import re
 from loggingFpdb import get_logger
 
-from PyQt5.QtGui import QWindow
-from PyQt5.QtCore import Qt
+from PySide6.QtGui import QWindow
+from PySide6.QtCore import Qt
 
 #    Other Library modules
 import xcffib, xcffib.xproto

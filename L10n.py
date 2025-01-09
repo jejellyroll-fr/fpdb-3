@@ -23,7 +23,7 @@ import locale
 from pathlib import Path
 from Configuration import GRAPHICS_PATH, CONFIG_PATH
 import xml.etree.ElementTree as ET
-from PyQt5.QtCore import QTranslator
+from PySide6.QtCore import QTranslator
 
 from loggingFpdb import get_logger
 

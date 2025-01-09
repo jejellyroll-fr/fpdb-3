@@ -23,7 +23,7 @@ from past.utils import old_div
 import os
 import sys
 from time import time
-from PyQt5.QtWidgets import QFrame, QScrollArea, QSplitter, QVBoxLayout, QMessageBox
+from PySide6.QtWidgets import QFrame, QScrollArea, QSplitter, QVBoxLayout, QMessageBox
 import Database
 import Filters
 # import Charset
@@ -334,7 +334,7 @@ if __name__ == "__main__":
     settings.update(config.get_import_parameters())
     settings.update(config.get_default_paths())
 
-    from PyQt5.QtWidgets import QApplication, QMainWindow
+    from PySide6.QtWidgets import QApplication, QMainWindow
 
     app = QApplication([])
     import SQL

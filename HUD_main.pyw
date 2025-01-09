@@ -12,9 +12,9 @@ import os
 import time
 from loggingFpdb import get_logger
 import zmq
-from PyQt5.QtCore import QCoreApplication, QObject, QThread, pyqtSignal, Qt, QTimer
-from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
-from PyQt5.QtGui import QIcon
+from PySide6.QtCore import QCoreApplication, QObject, QThread, Signal, Qt, QTimer
+from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
+from PySide6.QtGui import QIcon
 from qt_material import apply_stylesheet
 
 import Configuration
@@ -32,7 +32,7 @@ log = get_logger("hud")
 
 
 class ZMQWorker(QThread):
-    error_occurred = pyqtSignal(str)
+    error_occurred = Signal(str)
 
     def __init__(self, zmq_receiver):
         super().__init__()
@@ -54,7 +54,7 @@ class ZMQWorker(QThread):
 
 
 class ZMQReceiver(QObject):
-    message_received = pyqtSignal(str)
+    message_received = Signal(str)
 
     def __init__(self, port="5555", parent=None):
         super().__init__(parent)

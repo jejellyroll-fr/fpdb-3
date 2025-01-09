@@ -7,9 +7,9 @@ import itertools
 
 from past.utils import old_div
 import os
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QDate, QDateTime
-from PyQt5.QtWidgets import (
+from PySide6.QtGui import QIcon
+from PySide6.QtCore import QDate, QDateTime
+from PySide6.QtWidgets import (
     QCalendarWidget,
     QCheckBox,
     QDateEdit,
@@ -1310,7 +1310,7 @@ if __name__ == "__main__":
         "Button2": False,
     }
 
-    from PyQt5.QtWidgets import QMainWindow, QApplication
+    from PySide6.QtWidgets import QMainWindow, QApplication
 
     app = QApplication([])
     i = Filters(db, display=filters_display)
