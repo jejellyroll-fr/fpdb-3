@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from PyQt5.QtWidgets import QApplication
 import sys
 import types
-import zmq
+# import zmq
 
 from pathlib import Path
 
