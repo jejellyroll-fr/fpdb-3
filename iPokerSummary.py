@@ -17,7 +17,7 @@
 
 # import L10n
 # _ = L10n.get_translation()
-from HandHistoryConverter import FpdbParseError, FpdbHandPartial
+from HandHistoryConverter import FpdbParseError
 from decimal import Decimal
 import re
 from loggingFpdb import get_logger
