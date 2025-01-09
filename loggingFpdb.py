@@ -79,10 +79,12 @@ class FpdbLogFormatter(colorlog.ColoredFormatter):
             str: The message with variables colored.
         """
         if not isinstance(message, str):
+
             return message  # If the message is not a string, return it as is
 
         # Define a regex pattern to capture strings enclosed in single or double quotes
         pattern = r"'([^']*)'|\"([^\"]*)\""
+
 
         def repl(match):
             """
