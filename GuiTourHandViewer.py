@@ -1,3 +1,28 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# Copyright 2010-2011 Maxime Grandchamp
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# In the "official" distribution you can find the license in agpl-3.0.txt.
+#
+
+
+# This code once was in GuiReplayer.py and was split up in this and the former by zarturo.
+
+
+# import L10n
+# _ = L10n.get_translation()
+
 from functools import partial
 import Hand
 import Card
@@ -6,7 +31,6 @@ import Database
 import SQL
 import Filters
 import Deck
-from loggingFpdb import get_logger
 
 from PyQt5.QtCore import QCoreApplication, QSortFilterProxyModel, Qt
 from PyQt5.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
@@ -23,11 +47,12 @@ from PyQt5.QtWidgets import (
 
 from io import StringIO
 import GuiReplayer
+from loggingFpdb import get_logger
 
 log = get_logger("tourhandViewer")
 
 
-class GuiHandViewer(QSplitter):
+class TourHandViewer(QSplitter):
     def __init__(self, config, querylist, mainwin):
         QSplitter.__init__(self, mainwin)
         self.config = config
@@ -37,7 +62,32 @@ class GuiHandViewer(QSplitter):
 
         self.db = Database.Database(self.config, sql=self.sql)
 
-        self.setup_filters()
+        filters_display = {
+            "Heroes": True,
+            "Sites": True,
+            "Games": False,  # cash game
+            "Tourney": True,
+            "TourneyCat": True,
+            "TourneyLim": True,
+            "TourneyBuyin": True,
+            "Currencies": True,
+            "Limits": False,
+            "LimitSep": True,
+            "LimitType": True,
+            "Type": True,
+            "UseType": "tour",
+            "Seats": False,
+            "SeatSep": True,
+            "Dates": True,
+            "Groups": False,
+            "Button1": True,
+            "Button2": False,
+        }
+
+        self.filters = Filters.Filters(self.db, display=filters_display)
+        self.filters.registerButton1Name("Load Hands")
+        self.filters.registerButton1Callback(self.loadHands)
+        self.filters.registerCardsCallback(self.filter_cards_cb)
 
         scroll = QScrollArea()
         scroll.setWidget(self.filters)
@@ -112,41 +162,6 @@ class GuiHandViewer(QSplitter):
         self.view.resizeColumnsToContents()
         self.view.setSortingEnabled(True)
 
-    def setup_filters(self):
-        filters_display = {
-            "Heroes": True,
-            "Sites": True,
-            "Games": True,
-            "Currencies": False,
-            "Limits": True,
-            "LimitSep": True,
-            "LimitType": True,
-            "Positions": True,
-            "Type": True,
-            "Seats": False,
-            "SeatSep": False,
-            "Dates": True,
-            "Cards": False,
-            "Groups": False,
-            "GroupsAll": False,
-            "Button1": True,
-            "Button2": False,
-        }
-        self.filters = Filters.Filters(self.db, display=filters_display)
-        self.filters.registerButton1Name("Load Hands")
-        self.filters.registerButton1Callback(self.loadHands)
-        self.filters.registerCardsCallback(self.filter_cards_cb)
-
-        # update games for default hero and site
-        heroes = self.filters.getHeroes()
-        sites = self.filters.getSites()
-
-        default_hero = next(iter(heroes.values())) if heroes else None
-        default_site = next(iter(sites)) if sites else None
-
-        if default_hero and default_site:
-            self.filters.update_games_for_hero(default_hero, default_site)
-
     def init_card_images(self):
         suits = ("s", "h", "d", "c")
         ranks = (14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2)
@@ -163,49 +178,22 @@ class GuiHandViewer(QSplitter):
 
     def loadHands(self, checkState):
         hand_ids = self.get_hand_ids_from_date_range(self.filters.getDates()[0], self.filters.getDates()[1])
+        # ! print(hand_ids)
         self.reload_hands(hand_ids)
 
     def get_hand_ids_from_date_range(self, start, end):
-        q = """
-        SELECT DISTINCT h.id, h.startTime, tt.buyin, tt.fee, p.name, tt.siteId, tt.category
-        FROM Hands h
-        JOIN Tourneys t ON h.tourneyId = t.id
-        JOIN TourneyTypes tt ON t.tourneyTypeId = tt.id
-        JOIN TourneysPlayers tp ON t.id = tp.tourneyId
-        JOIN Players p ON tp.playerId = p.id
-        WHERE h.startTime BETWEEN ? AND ?
-        """
+        q = self.db.sql.query["handsInRangeSessionFilter"]
+        q = q.replace("<datetest>", "between '" + start + "' and '" + end + "'")
 
-        hero_filter = self.filters.getHeroes()
-        if hero_filter:
-            hero_names = ", ".join(f"'{h}'" for h in hero_filter.values())
-            q += f" AND p.name IN ({hero_names})"
+        # Apply filters
+        q = self.filters.replace_placeholders_with_filter_values(q)
 
-        site_filter = self.filters.getSites()
-        if site_filter:
-            site_ids = ", ".join(str(self.filters.siteid[s]) for s in site_filter)
-            q += f" AND tt.siteId IN ({site_ids})"
-
-        category_filter = self.filters.getGames()
-        if category_filter:
-            categories = ", ".join(f"'{c}'" for c in category_filter)
-            q += f" AND tt.category IN ({categories})"
-
-        selected_buyins = self.filters.getBuyIn()
-        if selected_buyins:
-            buyins_str = ", ".join(map(str, selected_buyins))
-            q += f" AND (tt.buyin + tt.fee) IN ({buyins_str})"
-
-        # print(f"Buy-ins sélectionnés (incluant les frais) : {selected_buyins}")
-
+        # debug
         # print("Requête SQL filtrée :", q)
 
         c = self.db.get_cursor()
-        c.execute(q, (start, end))
-        results = c.fetchall()
-        for row in results[:10]:  # show 10 first results
-            log.debug(f"show 10  first results {row}")
-        return [r[0] for r in results]
+        c.execute(q)
+        return [r[0] for r in c.fetchall()]
 
     def rankedhand(self, hand, game):
         ranks = {
@@ -261,31 +249,60 @@ class GuiHandViewer(QSplitter):
         self.view.resizeColumnsToContents()
 
     def addHandRow(self, handid, hand):
-        hero = self.filters.getHeroes()[hand.sitename]
+        hero = self.filters.getHeroes().get(hand.sitename)
+        if not hero:
+            log.warning(f"Hero not found for site: {hand.sitename}")
+            return
+
+        log.debug(f"Processing hand: {handid} for hero: {hero}")
+        log.debug(f"completed info from hand: {str(hand)}")
+
         won = 0
-        nbplayers = len(hand.players)
         if hero in list(hand.collectees.keys()):
             won = hand.collectees[hero]
+        log.debug(f"Hero winnings (won): {won}")
+
         bet = 0
         if hero in list(hand.pot.committed.keys()):
             bet = hand.pot.committed[hero]
-        net = won - bet
+        log.debug(f"Hero committed (bet): {bet}")
+
+        net = won
+        log.debug(f"Net calculated (won): {net}")
+
         pos = hand.get_player_position(hero)
-        gt = hand.gametype["category"]
-        row = []
+        log.debug(f"Hero position: {pos}")
+
+        nbplayers = len(hand.players)
+        log.debug(f"Number of players in hand: {nbplayers}")
+
         totalpot = hand.totalpot
-        rake = hand.rake
+        log.debug(f"Total pot: {totalpot}")
+
+        rake = (totalpot / nbplayers) - net
+        log.debug(f"Rake: {rake}")
+
         sitehandid = hand.handid
+        log.debug(f"Site hand ID: {sitehandid}")
+
+        gt = hand.gametype["category"]
+        log.debug(f"Game type: {gt}")
+
+        row = []
         if hand.gametype["base"] == "hold":
             board = []
-            board.extend(hand.board["FLOP"])
-            board.extend(hand.board["TURN"])
-            board.extend(hand.board["RIVER"])
+            board.extend(hand.board.get("FLOP", []))
+            board.extend(hand.board.get("TURN", []))
+            board.extend(hand.board.get("RIVER", []))
+            log.debug(f"Board cards: {board}")
 
             pre_actions = hand.get_actions_short(hero, "PREFLOP")
+            log.debug(f"Preflop actions for hero: {pre_actions}")
+
             post_actions = ""
-            if "F" not in pre_actions:  # if player hasen't folded preflop
+            if "F" not in pre_actions:  # if player hasn't folded preflop
                 post_actions = hand.get_actions_short_streets(hero, "FLOP", "TURN", "RIVER")
+            log.debug(f"Postflop actions for hero: {post_actions}")
 
             row = [
                 hand.getStakesAsString(),
@@ -295,18 +312,17 @@ class GuiHandViewer(QSplitter):
                 pre_actions,
                 " ".join(board),
                 post_actions,
-                str(won),
-                str(bet),
-                str(net),
+                f"{won:.2f}",
+                f"{bet:.2f}",
+                f"{net:.2f}",
                 gt,
                 str(handid),
-                str(totalpot),
-                str(rake),
+                f"{totalpot:.2f}",
+                f"{rake:.2f}",
                 str(sitehandid),
             ]
         elif hand.gametype["base"] == "stud":
             third = " ".join(hand.holecards["THIRD"][hero][0]) + " " + " ".join(hand.holecards["THIRD"][hero][1])
-            # ugh - fix the stud join_holecards function so we can retrieve sanely
             later_streets = []
             later_streets.extend(hand.holecards["FOURTH"][hero][0])
             later_streets.extend(hand.holecards["FIFTH"][hero][0])
@@ -318,6 +334,8 @@ class GuiHandViewer(QSplitter):
             if "F" not in pre_actions:
                 post_actions = hand.get_actions_short_streets(hero, "FOURTH", "FIFTH", "SIXTH", "SEVENTH")
 
+            log.debug(f"Stud hand details: Third: {third}, Later streets: {later_streets}")
+
             row = [
                 hand.getStakesAsString(),
                 str(nbplayers),
@@ -326,13 +344,13 @@ class GuiHandViewer(QSplitter):
                 pre_actions,
                 " ".join(later_streets),
                 post_actions,
-                str(won),
-                str(bet),
-                str(net),
+                f"{won:.2f}",
+                f"{bet:.2f}",
+                f"{net:.2f}",
                 gt,
                 str(handid),
-                str(totalpot),
-                str(rake),
+                f"{totalpot:.2f}",
+                f"{rake:.2f}",
             ]
         elif hand.gametype["base"] == "draw":
             row = [
@@ -343,16 +361,16 @@ class GuiHandViewer(QSplitter):
                 hand.get_actions_short(hero, "DEAL"),
                 None,
                 None,
-                str(won),
-                str(bet),
-                str(net),
+                f"{won:.2f}",
+                f"{bet:.2f}",
+                f"{net:.2f}",
                 gt,
                 str(handid),
-                str(totalpot),
-                str(rake),
+                f"{totalpot:.2f}",
+                f"{rake:.2f}",
             ]
 
-        modelrow = [QStandardItem(r) for r in row]
+        modelrow = [QStandardItem(str(r)) for r in row]
         for index, item in enumerate(modelrow):
             item.setEditable(False)
             if index in (self.colnum["Street0"], self.colnum["Street1-4"]):
@@ -362,6 +380,7 @@ class GuiHandViewer(QSplitter):
                 item.setData(cards, Qt.UserRole + 1)
             if index in (self.colnum["Bet"], self.colnum["Net"], self.colnum["Won"]):
                 item.setData(float(item.data(Qt.DisplayRole)), Qt.UserRole)
+        log.debug(f"Row added to model: {row}")
         self.model.appendRow(modelrow)
 
     def copyHandToClipboard(self, checkState, hand):
@@ -406,7 +425,7 @@ class GuiHandViewer(QSplitter):
 
         # Debug output to trace unexpected keys
         if abbr not in card_filter:
-            log.debug(f"Unexpected key in card filter: {abbr}")
+            log.warning(f"Unexpected key in card filter: {abbr}")
 
         return card_filter.get(abbr, True)  # Default to True if key is not found
 
@@ -435,7 +454,7 @@ class GuiHandViewer(QSplitter):
         cardstring = cardstring.replace("[", "")
         cardstring = cardstring.replace("]", "")
         cardstring = cardstring.replace("'", "")
-        cardstring.replace(",", "")
+        cardstring = cardstring.replace(",", "")
         cards = [Card.encodeCard(c) for c in cardstring.split(" ")]
         n_cards = len(cards)
 
@@ -448,46 +467,6 @@ class GuiHandViewer(QSplitter):
         return pixbuf
 
 
-class TourHandViewer(GuiHandViewer):
-    def __init__(self, config, querylist, mainwin):
-        super().__init__(config, querylist, mainwin)
-
-    def setup_filters(self):
-        filters_display = {
-            "Heroes": True,
-            "Sites": True,
-            "Games": False,  # cash game
-            "Tourney": True,
-            "TourneyCat": True,
-            "TourneyLim": True,
-            "TourneyBuyin": True,
-            "Currencies": True,
-            "Limits": False,
-            "LimitSep": True,
-            "LimitType": True,
-            "Type": True,
-            "UseType": "tour",
-            "Seats": False,
-            "SeatSep": True,
-            "Dates": True,
-            "Groups": False,
-            "Button1": True,
-            "Button2": False,
-        }
-        self.filters = Filters.Filters(self.db, display=filters_display)
-        self.filters.registerButton1Name("Load Hands")
-        self.filters.registerButton1Callback(self.loadHands)
-        self.filters.registerCardsCallback(self.filter_cards_cb)
-
-        # update games for default hero and site
-        heroes = self.filters.getHeroes()
-        sites = self.filters.getSites()
-
-        default_hero = next(iter(heroes.values())) if heroes else None
-        default_site = next(iter(sites)) if sites else None
-
-        if default_hero and default_site:
-            self.filters.update_games_for_hero(default_hero, default_site)
 
 
 if __name__ == "__main__":
