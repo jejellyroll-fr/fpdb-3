@@ -4596,6 +4596,126 @@ class Sql(object):
                 """
 
         # Used in *Filters:
+        if db_server == "mysql":
+            self.query["getCategoryBySiteAndPlayer"] = """
+            SELECT DISTINCT tt.category
+            FROM TourneyTypes tt
+            JOIN Tourneys t ON tt.id = t.tourneyTypeId
+            JOIN TourneysPlayers tp ON t.id = tp.tourneyId
+            JOIN Players p ON tp.playerId = p.id
+            WHERE tt.siteId = ? AND p.name = ?
+            """
+
+        elif db_server == "postgresql":
+            self.query["getCategoryBySiteAndPlayer"] = """
+            SELECT DISTINCT tt.category
+            FROM TourneyTypes tt
+            JOIN Tourneys t ON tt.id = t.tourneyTypeId
+            JOIN TourneysPlayers tp ON t.id = tp.tourneyId
+            JOIN Players p ON tp.playerId = p.id
+            WHERE tt.siteId = %s AND p.name = %s
+            """
+
+        elif db_server == "sqlite":
+            self.query["getCategoryBySiteAndPlayer"] = """
+            SELECT DISTINCT tt.category
+            FROM TourneyTypes tt
+            JOIN Tourneys t ON tt.id = t.tourneyTypeId
+            JOIN TourneysPlayers tp ON t.id = tp.tourneyId
+            JOIN Players p ON tp.playerId = p.id
+            WHERE tt.siteId = ? AND p.name = ?
+            """
+
+        if db_server == "mysql":
+            self.query["getCategoryBySiteAndPlayerRing"] = """
+            SELECT DISTINCT gt.category
+            FROM GameTypes gt
+            JOIN Hands h ON gt.id = h.gametypeId
+            JOIN HandsPlayers hp ON h.id = hp.handId
+            JOIN Players p ON hp.playerId = p.id
+            WHERE gt.siteId = ? AND p.name = ? AND gt.type = 'ring'
+            """
+
+        elif db_server == "postgresql":
+            self.query["getCategoryBySiteAndPlayerRing"] = """
+            SELECT DISTINCT gt.category
+            FROM GameTypes gt
+            JOIN Hands h ON gt.id = h.gametypeId
+            JOIN HandsPlayers hp ON h.id = hp.handId
+            JOIN Players p ON hp.playerId = p.id
+            WHERE gt.siteId = %s AND p.name = %s AND gt.type = 'ring'
+            """
+
+        elif db_server == "sqlite":
+            self.query["getCategoryBySiteAndPlayerRing"] = """
+            SELECT DISTINCT gt.category
+            FROM GameTypes gt
+            JOIN Hands h ON gt.id = h.gametypeId
+            JOIN HandsPlayers hp ON h.id = hp.handId
+            JOIN Players p ON hp.playerId = p.id
+            WHERE gt.siteId = ? AND p.name = ? AND gt.type = 'ring'
+            """
+
+
+        if db_server == "mysql":
+            self.query["getPositionByPlayerAndHandid"] = """
+            SELECT DISTINCT hp.position 
+            FROM HandsPlayers hp 
+            JOIN Hands h ON hp.handId = h.id 
+            JOIN Players p ON hp.playerId = p.id 
+            WHERE p.name = ? AND h.siteHandNo LIKE ?
+            """
+
+        elif db_server == "postgresql":
+            self.query["getPositionByPlayerAndHandid"] = """
+            SELECT DISTINCT hp.position 
+            FROM HandsPlayers hp 
+            JOIN Hands h ON hp.handId = h.id 
+            JOIN Players p ON hp.playerId = p.id 
+            WHERE p.name = %s AND CAST(h.siteHandNo AS text) LIKE %s
+            """
+
+        elif db_server == "sqlite":
+            self.query["getPositionByPlayerAndHandid"] = """
+            SELECT DISTINCT hp.position 
+            FROM HandsPlayers hp 
+            JOIN Hands h ON hp.handId = h.id 
+            JOIN Players p ON hp.playerId = p.id 
+            WHERE p.name = ? AND h.siteHandNo LIKE ?
+            """
+
+
+        if db_server == "mysql":
+            self.query["getCurrencyBySiteAndPlayer"] = """
+            SELECT DISTINCT gt.currency
+            FROM GameTypes gt
+            JOIN Hands h ON gt.id = h.gametypeId
+            JOIN HandsPlayers hp ON h.id = hp.handId
+            JOIN Players p ON hp.playerId = p.id
+            WHERE gt.siteId = ? AND p.name = ?
+            """
+
+        elif db_server == "postgresql":
+            self.query["getCurrencyBySiteAndPlayer"] = """
+            SELECT DISTINCT gt.currency
+            FROM GameTypes gt
+            JOIN Hands h ON gt.id = h.gametypeId
+            JOIN HandsPlayers hp ON h.id = hp.handId
+            JOIN Players p ON hp.playerId = p.id
+            WHERE gt.siteId = %s AND p.name = %s
+            """
+
+        elif db_server == "sqlite":
+            self.query["getCurrencyBySiteAndPlayer"] = """
+            SELECT DISTINCT gt.currency
+            FROM GameTypes gt
+            JOIN Hands h ON gt.id = h.gametypeId
+            JOIN HandsPlayers hp ON h.id = hp.handId
+            JOIN Players p ON hp.playerId = p.id
+            WHERE gt.siteId = ? AND p.name = ?
+            """
+
+
         # self.query['getLimits'] = already defined further up
         self.query["getLimits2"] = """SELECT DISTINCT type, limitType, bigBlind 
                                       from Gametypes
@@ -5132,7 +5252,7 @@ class Sql(object):
                       AND   ((t.startTime > '<startdate_test>' AND t.startTime < '<enddate_test>')
                                         OR t.startTime is NULL)
                       group by t.tourneyTypeId, s.name, p.name, tt.currency, tt.buyin, tt.fee
-                             , tt.category, tt.limitType, tt.speed
+                             , tt.category, tt.limitType, tt.speed, tt.maxSeats, tt.knockout, tt.reEntry
                       order by t.tourneyTypeId
                               ,p.name
                               ,s.name"""
