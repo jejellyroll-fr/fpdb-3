@@ -493,7 +493,7 @@ class Filters(QWidget):
             self.leHeroes[site] = QLineEdit(_pname)
 
             if os.name == "nt":
-                icoPath = os.path.dirname(__file__) + "\\icons\\"
+                icoPath = os.path.dirname(__file__) + "\\"
             else:
                 icoPath = ""
 
@@ -515,7 +515,7 @@ class Filters(QWidget):
             elif site == "iPoker":
                 icon_file = "icons/ipoker.png"
             elif site == "Cake":
-                icon_file = "icons/cake.png"
+                icon_file = "icons/cake.jpg"
             elif site == "Entraction":
                 icon_file = "icons/entraction.png"
             elif site == "BetOnline":
@@ -581,8 +581,8 @@ class Filters(QWidget):
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
-        req = self.cursor.execute("SELECT DISTINCT tourneyName FROM Tourneys")
-        result = req.fetchall()
+        self.cursor.execute("SELECT DISTINCT tourneyName FROM Tourneys")
+        result = self.cursor.fetchall()
         log.debug(f"Select distint tourney name {result}")
         self.gameList = QComboBox()
         self.gameList.setStyleSheet("background-color: #455364")
@@ -622,8 +622,8 @@ class Filters(QWidget):
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
-        req = self.cursor.execute("SELECT DISTINCT category FROM TourneyTypes")
-        result = req.fetchall()
+        self.cursor.execute("SELECT DISTINCT category FROM TourneyTypes")
+        result = self.cursor.fetchall()
         log.debug(f"show category from tourney {result}")
         self.gameList = QComboBox()
         self.gameList.setStyleSheet("background-color: #455364")
@@ -663,8 +663,8 @@ class Filters(QWidget):
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
-        req = self.cursor.execute("SELECT DISTINCT limitType FROM TourneyTypes")
-        result = req.fetchall()
+        self.cursor.execute("SELECT DISTINCT limitType FROM TourneyTypes")
+        result = self.cursor.fetchall()
         log.debug(f"show limit from from tourney {result}")
         self.gameList = QComboBox()
         self.gameList.setStyleSheet("background-color: #455364")
@@ -704,8 +704,8 @@ class Filters(QWidget):
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
-        req = self.cursor.execute("SELECT DISTINCT buyin, fee FROM TourneyTypes")
-        result = req.fetchall()
+        self.cursor.execute("SELECT DISTINCT buyin, fee FROM TourneyTypes")
+        result = self.cursor.fetchall()
 
         if len(result) >= 1:
             for count, (buyin, fee) in enumerate(result):
@@ -1179,28 +1179,15 @@ class Filters(QWidget):
         usetype = self.display.get("UseType", "")
         log.debug(f"Game type for hero {hero} on site {site}: {usetype}")
 
-        if usetype == "tour":
-            query = """
-            SELECT DISTINCT tt.category
-            FROM TourneyTypes tt
-            JOIN Tourneys t ON tt.id = t.tourneyTypeId
-            JOIN TourneysPlayers tp ON t.id = tp.tourneyId
-            JOIN Players p ON tp.playerId = p.id
-            WHERE tt.siteId = ? AND p.name = ?
-            """
+        if usetype == "tour":       
+            self.cursor.execute(self.sql.query["getCategoryBySiteAndPlayer"], (site_id, hero))
         else:  # ring games
-            query = """
-            SELECT DISTINCT gt.category
-            FROM GameTypes gt
-            JOIN Hands h ON gt.id = h.gametypeId
-            JOIN HandsPlayers hp ON h.id = hp.handId
-            JOIN Players p ON hp.playerId = p.id
-            WHERE gt.siteId = ? AND p.name = ? AND gt.type = 'ring'
-            """
+            self.cursor.execute(self.sql.query["getCategoryBySiteAndPlayerRing"], (site_id, hero))
 
-        log.debug(f"Query:\n{query}")
 
-        self.cursor.execute(query, (site_id, hero))
+
+
+        #self.cursor.execute(query, (site_id, hero))
         games = [row[0] for row in self.cursor.fetchall()]
         log.debug(f"Available games for hero {hero} on site {site}: {games}")
 
@@ -1228,9 +1215,9 @@ class Filters(QWidget):
                 checkbox.setEnabled(False)
 
     def update_positions_for_hero(self, hero, site):
-        query = "SELECT DISTINCT hp.position FROM HandsPlayers hp JOIN Hands h ON hp.handId = h.id JOIN Players p ON hp.playerId = p.id WHERE p.name = ? AND h.siteHandNo LIKE ?"
+        
         site_id = self.siteid[site]
-        self.cursor.execute(query, (hero, f"{site_id}%"))
+        self.cursor.execute(self.sql.query["getPositionByPlayerAndHandid"], (hero, f"{site_id}%"))
         positions = [str(row[0]) for row in self.cursor.fetchall()]
         for position, checkbox in self.cbPositions.items():
             if position in positions:
@@ -1250,18 +1237,11 @@ class Filters(QWidget):
         return selected_buyins
 
     def update_currencies_for_hero(self, hero, site):
-        query = """
-            SELECT DISTINCT gt.currency
-            FROM GameTypes gt
-            JOIN Hands h ON gt.id = h.gametypeId
-            JOIN HandsPlayers hp ON h.id = hp.handId
-            JOIN Players p ON hp.playerId = p.id
-            WHERE gt.siteId = ? AND p.name = ?
-        """
+
         site_id = self.siteid[site]
         # debug
         log.debug(f"executed request for {hero} on {site} (site_id: {site_id})")
-        self.cursor.execute(query, (site_id, hero))
+        self.cursor.execute(self.sql.query["getCurrencyBySiteAndPlayer"], (site_id, hero))
         currencies = [row[0] for row in self.cursor.fetchall()]
         # debug
         log.debug(f"currencies found for {hero} on {site}: {currencies}")
@@ -1295,8 +1275,8 @@ if __name__ == "__main__":
         "Sites": False,
         "Games": False,
         "Cards": True,
-        "Currencies": False,
-        "Limits": False,
+        "Currencies": True,
+        "Limits": True,
         "LimitSep": False,
         "LimitType": False,
         "Type": False,
