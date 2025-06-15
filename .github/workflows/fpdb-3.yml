@@ -148,7 +148,7 @@ jobs:
         run: |
           ./build_fpdb.sh
       - name: Archive build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-windows
           path: dist/*
@@ -182,7 +182,7 @@ jobs:
         run: |
           ./build_fpdb-osx.sh
       - name: Archive build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-macos-intel
           path: dist/*
@@ -216,7 +216,7 @@ jobs:
         run: |
           ./build_fpdb-osx.sh
       - name: Archive build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-macos-arm
           path: dist/*
@@ -253,7 +253,7 @@ jobs:
       - name: Build project
         run: ./build_fpdb-linux.sh
       - name: Archive build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-linux
           path: fpdb-x86_64.AppImage
