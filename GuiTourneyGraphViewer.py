@@ -278,11 +278,33 @@ class GuiTourneyGraphViewer(QSplitter):
         nametest = str(tuple(names))
         sitetest = str(tuple(sites))
         tourneystest = str(tuple(tourneys))
-        tourneysCattest = str(tuple(tourneysCat))
-        tourneysLimtest = str(tuple(tourneysLim))
-        tourneysBuyintest = str(tuple(int(buyin.split(",")[0]) for buyin in tourneysBuyin if buyin != "None"))
+
+        def make_in_clause_sql(values, field_type="str"):
+            if not values:
+                return "('')" if field_type == "str" else "(-1)"
+            
+            if len(values) == 1:
+                val = values[0]
+                return f"('{val}')" if field_type == "str" else f"({val})"
+
+            if field_type == "str":
+                return str(tuple(values))
+            else:
+                return str(tuple(int(v) for v in values))
+
+
+
+        currencytest = f"AND tt.currency in {make_in_clause_sql(currencies.values(), 'str')}"
+        tourneysCattest = make_in_clause_sql(tourneysCat, 'str')
+        tourneysLimtest = make_in_clause_sql(tourneysLim, 'str')
+
+
+        buyins = [int(b.split(",")[0]) for b in tourneysBuyin if b != "None"]
+        tourneysBuyintest = make_in_clause_sql(buyins, 'int')
+
+
         tourneystest = tourneystest.replace("None", '"None"')
-        tourneysBuyintest = tourneysBuyintest.replace("None", '"None"')
+
 
         tmp = tmp.replace("<player_test>", nametest)
         tmp = tmp.replace("<site_test>", sitetest)
