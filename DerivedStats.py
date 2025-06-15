@@ -328,19 +328,21 @@ class DerivedStats(object):
     def assembleHandsPlayers(self, hand):
         """
         Assemble and calculate player-specific stats for a hand, including net collected, total profit,
-        all-in EV, and other derived statistics.
+        all-in EV, and other derived statistics. Also counts post-flop actions.
         """
-
         try:
             log.debug(f"Starting assembleHandsPlayers for hand ID: {hand.handid}")
 
-            # Step 1: Initialize stats for each player
+            # Step 1: Initialize stats for each player (using _INIT_STATS)
             log.debug("Initializing player stats...")
             for player in hand.players:
                 player_name = player[1]
-                player_stats = self.handsplayers.get(player_name, {})
+                # Creates a new copy of the initialization dictionary for each player
+                self.handsplayers[player_name] = _INIT_STATS.copy()
+                player_stats = self.handsplayers.get(player_name)
                 log.debug(f"Processing player: {player_name}")
 
+                # --- Initialisation ---
                 try:
                     player_stats["seatNo"] = player[0]
                     log.debug(f"Player {player_name} seatNo={player_stats['seatNo']}")
@@ -378,8 +380,71 @@ class DerivedStats(object):
                 except Exception as e:
                     log.error(f"Error initializing stats for player {player_name}: {e}")
 
+
+
+           # post-flop share count AND streetXAggr UPDATE
+            log.debug("Counting post-flop actions and updating aggression flags...")
+            street_indices = {}
+            relevant_streets = []
+            # Determining post-flop streets
+            for idx, street_name in enumerate(hand.actionStreets):
+                if idx >= 2 and idx < len(hand.actionStreets): # Start after PREFLOP/DEAL/THIRD
+                    numeric_street_index = idx - 1 
+                    if numeric_street_index <= 4:
+                       street_indices[street_name] = numeric_street_index
+                       relevant_streets.append(street_name)
+
+            log.debug(f"Relevant streets for action counting: {relevant_streets}, mapping: {street_indices}")
+
+            for street_name in relevant_streets:
+                numeric_street_index = street_indices.get(street_name)
+                if numeric_street_index is None:
+                    continue
+
+                log.debug(f"Counting actions for street: {street_name} (numeric index: {numeric_street_index})")
+                for action in hand.actions.get(street_name, []):
+                    player_name = action[0]
+                    action_type = action[1]
+
+                    if player_name in self.handsplayers:
+                        player_stats = self.handsplayers[player_name]
+
+                        # Increment counters
+                        if action_type == 'calls':
+                            player_stats[f'street{numeric_street_index}Calls'] += 1
+                            log.debug(f"Incremented street{numeric_street_index}Calls for {player_name}")
+                        elif action_type == 'bets':
+                            player_stats[f'street{numeric_street_index}Bets'] += 1
+                            player_stats[f'street{numeric_street_index}Aggr'] = True
+                            log.debug(f"Incremented street{numeric_street_index}Bets for {player_name}")
+                        elif action_type in ('raises', 'completes'):
+                            player_stats[f'street{numeric_street_index}Raises'] += 1
+                            player_stats[f'street{numeric_street_index}Aggr'] = True
+                            log.debug(f"Incremented street{numeric_street_index}Raises for {player_name}")
+                        elif action_type == 'allin':
+                            player_stats[f'street{numeric_street_index}AllIn'] = True
+                            player_stats[f'street{numeric_street_index}Aggr'] = True
+                            log.debug(f"Set street{numeric_street_index}AllIn and Aggr to True for {player_name}")
+                        elif action_type == 'discards':
+                            try:
+                                num_discarded = int(action[2]) if len(action) > 2 else 0 # Recover the number of cards
+                            except (IndexError, ValueError, TypeError):
+                                num_discarded = 0 #Handle cases where the number is missing or invalid
+                                log.warning(f"Could not determine number of discarded cards for action: {action}")
+
+                            # Make sure the key exists before adding
+                            player_stats[f'street{numeric_street_index}Discards'] = player_stats.get(f'street{numeric_street_index}Discards', 0) + num_discarded
+                            log.debug(f"Added {num_discarded} to street{numeric_street_index}Discards for {player_name}")
+                        # Note: 'streetXAggr' is set to True for bets, raises, and all-ins.
+
+                    else:
+                        log.warning(f"Player '{player_name}' from action not found in initialized handsplayers for street {street_name}.")
+            # --- 
+
+
             # Step 2: Calculate net collected for each player
             log.debug("Calculating net collected for each player...")
+
             hand.net_collected = {}
             for player, committed in hand.pot.committed.items():
                 try:
@@ -394,9 +459,12 @@ class DerivedStats(object):
                 except Exception as e:
                     log.error(f"Error calculating net collected for player {player}: {e}")
 
+
             # Step 3: Update player stats based on net collected
             log.debug("Updating player stats based on net collected...")
             for player_name, committed in hand.pot.committed.items():
+                if player_name not in self.handsplayers:
+                    continue 
                 player_stats = self.handsplayers.get(player_name, {})
                 log.debug(f"Updating stats for player: {player_name}")
                 try:
@@ -409,26 +477,25 @@ class DerivedStats(object):
                     player_stats["common"] = int(100 * common)
                     player_stats["committed"] = int(100 * committed)
 
-                    net_collected = int(100 * hand.net_collected[player_name])
+                    net_collected = int(100 * hand.net_collected.get(player_name, Decimal("0.00"))) 
                     player_stats["totalProfit"] = net_collected
                     player_stats["winnings"] = net_collected
-                    player_stats["allInEV"] = net_collected
+                    player_stats["allInEV"] = net_collected # Will be recalculated later if EV is relevant
                     log.debug(
                         f"Player {player_name} totalProfit={net_collected}, winnings={net_collected}, allInEV={net_collected}"
                     )
 
-                    player_stats["rake"] = int(100 * hand.rake)
+                    player_stats["rake"] = int(100 * hand.rake) if hand.rake is not None else 0
                     num_players = len(hand.players)
                     if num_players > 0:
-                        player_stats["rakeDealt"] = int(100 * hand.rake) / num_players
+                        player_stats["rakeDealt"] = int(100 * hand.rake) / num_players if hand.rake is not None else 0
                     else:
                         player_stats["rakeDealt"] = 0
                         log.warning("No players found to calculate rakeDealt!")
 
-                    total_pot = int(100 * hand.totalpot)
-
+                    total_pot = int(100 * hand.totalpot) if hand.totalpot is not None else 0
                     if total_pot > 0:
-                        player_stats["rakeWeighted"] = int(100 * hand.rake) * paid / total_pot
+                        player_stats["rakeWeighted"] = int(100 * hand.rake) * paid / total_pot if hand.rake is not None else 0
                     else:
                         player_stats["rakeWeighted"] = 0
                         log.warning(f"Total pot is zero. rakeWeighted for {player_name}=0")
@@ -437,19 +504,20 @@ class DerivedStats(object):
                     log.error(f"Division by zero calculating rakeDealt for player {player_name}. Setting to 0.")
                     player_stats["rakeDealt"] = 0
                 except Exception as e:
-                    log.error(f"Error updating stats for player {player_name}: {e}")
+                    log.error(f"Error updating net stats for player {player_name}: {e}")
 
             # Step 4: Additional calculations (rakeContributed)
             log.debug("Calculating rakeContributed...")
             contributed_players = [p for p in hand.pot.committed if hand.pot.committed[p] > 0]
             if contributed_players:
                 try:
-                    rake_contribution = int(100 * hand.rake) / len(contributed_players)
+                    rake_contribution = int(100 * hand.rake) / len(contributed_players) if hand.rake is not None else 0
                     for player_name in contributed_players:
-                        self.handsplayers[player_name]["rakeContributed"] = rake_contribution
-                        log.debug(f"Player {player_name} rakeContributed={rake_contribution}")
+                         if player_name in self.handsplayers: 
+                            self.handsplayers[player_name]["rakeContributed"] = rake_contribution
+                            log.debug(f"Player {player_name} rakeContributed={rake_contribution}")
                 except Exception as e:
-                    log.error(f"Error calculating rakeContributed for players: {e}")
+                    log.error(f"Error calculating rakeContributed: {e}")
             else:
                 log.warning("No players contributed to the pot.")
 
@@ -457,6 +525,8 @@ class DerivedStats(object):
             log.debug("Encoding cards and updating additional stats for each player...")
             for player in hand.players:
                 player_name = player[1]
+                if player_name not in self.handsplayers:
+                    continue 
                 player_stats = self.handsplayers.get(player_name, {})
                 try:
                     hcs = hand.join_holecards(player_name, asList=True) + ["0x"] * 18
@@ -482,7 +552,9 @@ class DerivedStats(object):
                 except Exception as e:
                     log.error(f"Error encoding cards for player {player_name}: {e}")
 
-            # Reintroduce previously removed functionalities
+            # Calls to functions for calculating derived statistics
+            # These functions now use streetXCalls counters etc.
+            log.debug("Calculating derived stats (CBets, CheckCallRaise, etc.)...")
             try:
                 self.calcCBets(hand)
                 log.debug("Calculated CBets.")
@@ -515,7 +587,8 @@ class DerivedStats(object):
 
             try:
                 self.calcEffectiveStack(hand)
-                log.debug("Calculated Effective Stack.")
+                self.setPositions(hand) # Must be after the calculations that depend on it
+                log.debug("Calculated Effective Stack and set positions.")  
             except Exception as e:
                 log.error(f"Error calculating Effective Stack: {e}")
 
