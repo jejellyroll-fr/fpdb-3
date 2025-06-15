@@ -249,32 +249,60 @@ class GuiHandViewer(QSplitter):
         self.view.resizeColumnsToContents()
 
     def addHandRow(self, handid, hand):
-        hero = self.filters.getHeroes()[hand.sitename]
+        hero = self.filters.getHeroes().get(hand.sitename)
+        if not hero:
+            log.warning(f"Hero not found for site: {hand.sitename}")
+            return
+
+        log.debug(f"Processing hand: {handid} for hero: {hero}")
+        log.debug(f"completed info from hand: {str(hand)}")
+
         won = 0
-        nbplayers = len(hand.players)
-        # ! print("max seaT: ", hand.maxseats)
         if hero in list(hand.collectees.keys()):
             won = hand.collectees[hero]
+        log.debug(f"Hero winnings (won): {won}")
+
         bet = 0
         if hero in list(hand.pot.committed.keys()):
             bet = hand.pot.committed[hero]
-        net = won - bet
+        log.debug(f"Hero committed (bet): {bet}")
+
+        net = won
+        log.debug(f"Net calculated (won): {net}")
+
         pos = hand.get_player_position(hero)
-        gt = hand.gametype["category"]
-        row = []
+        log.debug(f"Hero position: {pos}")
+
+        nbplayers = len(hand.players)
+        log.debug(f"Number of players in hand: {nbplayers}")
+
         totalpot = hand.totalpot
-        rake = hand.rake
+        log.debug(f"Total pot: {totalpot}")
+
+        rake = (totalpot / nbplayers) - net
+        log.debug(f"Rake: {rake}")
+
         sitehandid = hand.handid
+        log.debug(f"Site hand ID: {sitehandid}")
+
+        gt = hand.gametype["category"]
+        log.debug(f"Game type: {gt}")
+
+        row = []
         if hand.gametype["base"] == "hold":
             board = []
-            board.extend(hand.board["FLOP"])
-            board.extend(hand.board["TURN"])
-            board.extend(hand.board["RIVER"])
+            board.extend(hand.board.get("FLOP", []))
+            board.extend(hand.board.get("TURN", []))
+            board.extend(hand.board.get("RIVER", []))
+            log.debug(f"Board cards: {board}")
 
             pre_actions = hand.get_actions_short(hero, "PREFLOP")
+            log.debug(f"Preflop actions for hero: {pre_actions}")
+
             post_actions = ""
-            if "F" not in pre_actions:  # if player hasen't folded preflop
+            if "F" not in pre_actions:  # if player hasn't folded preflop
                 post_actions = hand.get_actions_short_streets(hero, "FLOP", "TURN", "RIVER")
+            log.debug(f"Postflop actions for hero: {post_actions}")
 
             row = [
                 hand.getStakesAsString(),
@@ -284,18 +312,17 @@ class GuiHandViewer(QSplitter):
                 pre_actions,
                 " ".join(board),
                 post_actions,
-                str(won),
-                str(bet),
-                str(net),
+                f"{won:.2f}",
+                f"{bet:.2f}",
+                f"{net:.2f}",
                 gt,
                 str(handid),
-                str(totalpot),
-                str(rake),
+                f"{totalpot:.2f}",
+                f"{rake:.2f}",
                 str(sitehandid),
             ]
         elif hand.gametype["base"] == "stud":
             third = " ".join(hand.holecards["THIRD"][hero][0]) + " " + " ".join(hand.holecards["THIRD"][hero][1])
-            # ugh - fix the stud join_holecards function so we can retrieve sanely
             later_streets = []
             later_streets.extend(hand.holecards["FOURTH"][hero][0])
             later_streets.extend(hand.holecards["FIFTH"][hero][0])
@@ -307,6 +334,8 @@ class GuiHandViewer(QSplitter):
             if "F" not in pre_actions:
                 post_actions = hand.get_actions_short_streets(hero, "FOURTH", "FIFTH", "SIXTH", "SEVENTH")
 
+            log.debug(f"Stud hand details: Third: {third}, Later streets: {later_streets}")
+
             row = [
                 hand.getStakesAsString(),
                 str(nbplayers),
@@ -315,13 +344,13 @@ class GuiHandViewer(QSplitter):
                 pre_actions,
                 " ".join(later_streets),
                 post_actions,
-                str(won),
-                str(bet),
-                str(net),
+                f"{won:.2f}",
+                f"{bet:.2f}",
+                f"{net:.2f}",
                 gt,
                 str(handid),
-                str(totalpot),
-                str(rake),
+                f"{totalpot:.2f}",
+                f"{rake:.2f}",
             ]
         elif hand.gametype["base"] == "draw":
             row = [
@@ -332,16 +361,16 @@ class GuiHandViewer(QSplitter):
                 hand.get_actions_short(hero, "DEAL"),
                 None,
                 None,
-                str(won),
-                str(bet),
-                str(net),
+                f"{won:.2f}",
+                f"{bet:.2f}",
+                f"{net:.2f}",
                 gt,
                 str(handid),
-                str(totalpot),
-                str(rake),
+                f"{totalpot:.2f}",
+                f"{rake:.2f}",
             ]
 
-        modelrow = [QStandardItem(r) for r in row]
+        modelrow = [QStandardItem(str(r)) for r in row]
         for index, item in enumerate(modelrow):
             item.setEditable(False)
             if index in (self.colnum["Street0"], self.colnum["Street1-4"]):
@@ -351,6 +380,7 @@ class GuiHandViewer(QSplitter):
                 item.setData(cards, Qt.UserRole + 1)
             if index in (self.colnum["Bet"], self.colnum["Net"], self.colnum["Won"]):
                 item.setData(float(item.data(Qt.DisplayRole)), Qt.UserRole)
+        log.debug(f"Row added to model: {row}")
         self.model.appendRow(modelrow)
 
     def copyHandToClipboard(self, checkState, hand):

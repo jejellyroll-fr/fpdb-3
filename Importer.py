@@ -525,6 +525,7 @@ class Importer(object):
 
                 for hand in ahands:
                     hand.assembleHand()
+                    log.debug(f"final import of hand: {hand}")
                     phands.append(hand)
 
                 ####Lock Placeholder####

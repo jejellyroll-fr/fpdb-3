@@ -250,27 +250,13 @@ def get_config(file_name, fallback=True):
 
 
 def set_logfile(file_name):
-    (conf_file, copied, example_file) = get_config("logging.conf", fallback=False)
-
     log_dir = os.path.join(CONFIG_PATH, "log").replace("\\", "/")
     check_dir(log_dir)
     log_file = os.path.join(log_dir, file_name).replace("\\", "/")
 
-    if conf_file and os.path.isfile(conf_file):
-        log.info("logging.conf file already exists")
-    else:
-        log.warning(f"No logging configuration file found at {conf_file}. Using basic configuration.")
-
     try:
-        log.basicConfig(
-            filename=log_file,
-            filemode="a",
-            level=log.INFO,
-            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        )
         log.info(f"Logging initialized to file: {log_file}")
     except Exception as e:
-        # Ensure sys.stderr is functional
         if not sys.stderr:
             sys.stderr = open(os.devnull, "w")
         sys.stderr.write(f"Could not setup log file {file_name}: {e}\n")
