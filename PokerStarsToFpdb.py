@@ -38,10 +38,10 @@ class PokerStars(HandHistoryConverter):
     sitename = "PokerStars"
     filetype = "text"
     codepage = ("utf8", "cp1252", "ISO-8859-1")
-    siteId = 2  # Needs to match id entry in Sites database
+    siteId = 32  # Default to PokerStars.COM, will be overridden by detectPokerStarsSkin
     sym = {
-        "USD": "\$",
-        "CAD": "\$",
+        "USD": r"\$",
+        "CAD": r"\$",
         "T$": "",
         "EUR": "\xe2\x82\xac",
         "GBP": "\£",
@@ -333,6 +333,142 @@ class PokerStars(HandHistoryConverter):
         re.MULTILINE | re.VERBOSE,
     )
 
+    # Regex patterns to detect the different PokerStars skins
+    re_PokerStarsFR = re.compile(r"PokerStars\.fr", re.IGNORECASE)
+    re_PokerStarsIT = re.compile(r"PokerStars\.it", re.IGNORECASE)
+    re_PokerStarsES = re.compile(r"PokerStars\.es", re.IGNORECASE)
+    re_PokerStarsPT = re.compile(r"PokerStars\.pt", re.IGNORECASE)
+    re_PokerStarsEU = re.compile(r"PokerStars\.eu", re.IGNORECASE)
+    re_PokerStarsCOM = re.compile(r"PokerStars\.com", re.IGNORECASE)
+
+    def loadHeroMappings(self):
+        """Load hero -> skins mappings from the configuration file"""
+        import os
+        import configparser
+
+        mappings = {}
+        config_file = os.path.join(os.path.dirname(__file__), "pokerstars_skin_mapping.conf")
+
+        if os.path.exists(config_file):
+            config = configparser.ConfigParser()
+            try:
+                config.read(config_file)
+                if "hero_mapping" in config:
+                    for hero, skin in config["hero_mapping"].items():
+                        mappings[hero.lower()] = skin
+            except Exception as e:
+                log.warning(f"Error loading mapping file: {e}")
+
+        return mappings
+
+    def detectPokerStarsSkin(self, handText, filePath=None):
+        """Detects specific PokerStars skin based on file path and/or content"""
+
+        # Mapping des skins vers leurs IDs
+        skin_ids = {
+            "PokerStars.COM": 32,
+            "PokerStars.FR": 33,
+            "PokerStars.IT": 34,
+            "PokerStars.ES": 35,
+            "PokerStars.PT": 36,
+            "PokerStars.EU": 37,
+        }
+
+        # First, check whether the hero has a mapping configured
+        hero_match = re.search(r"Dealt to ([^\[]+)", handText[:500])
+        if hero_match:
+            hero_name = hero_match.group(1).strip()
+
+            # Load mappings if not already done
+            if not hasattr(self, "_hero_mappings"):
+                self._hero_mappings = self.loadHeroMappings()
+
+            # Check whether the hero has a mapping
+            hero_lower = hero_name.lower()
+            if hero_lower in self._hero_mappings:
+                skin = self._hero_mappings[hero_lower]
+                if skin in skin_ids:
+                    return skin, skin_ids[skin]
+
+        # Then try to detect the path to the
+        if filePath:
+            # Normalise the path for comparison
+            path_lower = filePath.lower().replace("\\", "/")
+
+            # Search for typical path patterns for each skin
+            if "pokerstars.fr" in path_lower:
+                return "PokerStars.FR", 33
+            elif "pokerstars.it" in path_lower:
+                return "PokerStars.IT", 34
+            elif "pokerstars.es" in path_lower:
+                return "PokerStars.ES", 35
+            elif "pokerstars.pt" in path_lower:
+                return "PokerStars.PT", 36
+            elif "pokerstars.eu" in path_lower:
+                return "PokerStars.EU", 37
+            elif "pokerstars.com" in path_lower:
+                return "PokerStars.COM", 32
+            # Also check patterns without a dot
+            elif "pokerstarsfr" in path_lower:
+                return "PokerStars.FR", 33
+            elif "pokerstarsit" in path_lower:
+                return "PokerStars.IT", 34
+            elif "pokerstarses" in path_lower:
+                return "PokerStars.ES", 35
+            elif "pokerstarspt" in path_lower:
+                return "PokerStars.PT", 36
+            elif "pokerstarseu" in path_lower:
+                return "PokerStars.EU", 37
+            elif "pokerstarscom" in path_lower:
+                return "PokerStars.COM", 32
+
+        # 2. Si le chemin ne donne pas d'indication, analyser le contenu
+        searchText = handText[:2000]
+
+        # Vérification de l'AAMS/ADM ID pour l'Italie
+        if "AAMS ID:" in searchText or "ADM ID:" in searchText:
+            return "PokerStars.IT", 34
+
+        # 3. Essayer de détecter via le nom du héros s'il contient des indices
+        hero_match = re.search(r"Dealt to ([^\[]+)", handText[:500])
+        if hero_match:
+            hero_name = hero_match.group(1).strip()
+            hero_lower = hero_name.lower()
+            # Certains joueurs incluent le skin dans leur nom
+            if ".fr" in hero_lower or "_fr" in hero_lower:
+                return "PokerStars.FR", 33
+            elif ".it" in hero_lower or "_it" in hero_lower:
+                return "PokerStars.IT", 34
+            elif ".es" in hero_lower or "_es" in hero_lower:
+                return "PokerStars.ES", 35
+            elif ".pt" in hero_lower or "_pt" in hero_lower:
+                return "PokerStars.PT", 36
+            elif ".eu" in hero_lower or "_eu" in hero_lower:
+                return "PokerStars.EU", 37
+            elif ".com" in hero_lower or "_com" in hero_lower:
+                return "PokerStars.COM", 32
+
+        # Search for specific areas of content
+        if self.re_PokerStarsFR.search(searchText):
+            return "PokerStars.FR", 33
+        elif self.re_PokerStarsIT.search(searchText):
+            return "PokerStars.IT", 34
+        elif self.re_PokerStarsES.search(searchText):
+            return "PokerStars.ES", 35
+        elif self.re_PokerStarsPT.search(searchText):
+            return "PokerStars.PT", 36
+        elif self.re_PokerStarsEU.search(searchText):
+            return "PokerStars.EU", 37
+        elif self.re_PokerStarsCOM.search(searchText):
+            return "PokerStars.COM", 32
+
+        # As a last resort, use the currency
+        if "€" in searchText or "EUR" in searchText:
+            return "PokerStars.EU", 37
+        else:
+            # The default setting is PokerStars.COM
+            return "PokerStars.COM", 32
+
     def compilePlayerRegexs(self, hand):
         players = set([player[1] for player in hand.players])
         if not players <= self.compiledPlayers:  # x <= y means 'x is subset of y'
@@ -443,6 +579,11 @@ class PokerStars(HandHistoryConverter):
             elif mg["SITE"] == "PokerBros":
                 self.sitename = "PokerBros"
                 self.siteId = 29
+            elif mg["SITE"] == "PokerStars" or mg["SITE"] == "POKERSTARS":
+                # Detection of specific PokerStars skin
+                self.sitename, self.siteId = self.detectPokerStarsSkin(
+                    handText, self.in_path if hasattr(self, "in_path") else None
+                )
 
         if "TOURNO" in mg and mg["TOURNO"] is None:
             info["type"] = "ring"

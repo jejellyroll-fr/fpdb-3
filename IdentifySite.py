@@ -261,7 +261,25 @@ class IdentifySite(object):
                     f.archive = True
                     f.archiveHead = True
             if m:
-                f.site = site
+                # For PokerStars, we need to determine the specific skin
+                if filter_name == "PokerStars":
+                    # Temporary import of the module to detect the skin
+                    from PokerStarsToFpdb import PokerStars
+
+                    ps = PokerStars(self.config, in_path=path, autostart=False)
+                    skin_name, skin_id = ps.detectPokerStarsSkin(whole_file, path)
+
+                    # Search for the site corresponding to the skin detected
+                    for sid, s in list(self.sitelist.items()):
+                        if s.name == skin_name:
+                            f.site = s
+                            break
+                    else:
+                        # If we can't find the specific skin, we'll use the default site
+                        f.site = site
+                else:
+                    f.site = site
+
                 f.ftype = "hh"
                 if f.site.re_HeroCards:
                     h = f.site.re_HeroCards.search(whole_file[:5000])
