@@ -68,7 +68,18 @@ ranks = {
     "K": 13,
     "A": 14,
 }
-fast_names = {"PokerStars": "Zoom", "Bovada": "Zone", "PacificPoker": "Snap", "Winamax": "Go Fast"}
+fast_names = {
+    "PokerStars": "Zoom",
+    "PokerStars.COM": "Zoom",
+    "PokerStars.FR": "Zoom", 
+    "PokerStars.IT": "Zoom",
+    "PokerStars.ES": "Zoom",
+    "PokerStars.PT": "Zoom",
+    "PokerStars.EU": "Zoom",
+    "Bovada": "Zone",
+    "PacificPoker": "Snap",
+    "Winamax": "Go Fast"
+}
 onlinehelp = {
     "Game": ("Type of Game"),
     "Hand": ("Hole Cards"),

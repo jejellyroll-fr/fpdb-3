@@ -1,18 +1,130 @@
-<?xml version="1.0" ?><FreePokerToolsConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-
-    <!-- config_wrap_len  is preferred max line length in this file, -1 means no max
-         day_start        is time that logical day starts, e.g. 5 means that any play
-                          between 00:00 and 04:59:59 counts as being on the previous day -->
+<?xml version="1.0" ?><FreePokerToolsConfig>
     <general version="83" config_wrap_len="-1" day_start="5" ui_language="fr_FR" config_difficulty="expert"/>
-
+    <site_ids>
+        <site_id site="Full Tilt Poker" id="1"/>
+        <site_id site="PokerStars" id="2"/>
+        <site_id site="PokerStars.COM" id="32"/>
+        <site_id site="PokerStars.FR" id="33"/>
+        <site_id site="PokerStars.IT" id="34"/>
+        <site_id site="PokerStars.ES" id="35"/>
+        <site_id site="PokerStars.PT" id="36"/>
+        <site_id site="PokerStars.EU" id="37"/>
+        <site_id site="Everleaf" id="3"/>
+        <site_id site="Boss" id="4"/>
+        <site_id site="OnGame" id="5"/>
+        <site_id site="UltimateBet" id="6"/>
+        <site_id site="Betfair" id="7"/>
+        <site_id site="PartyPoker" id="9"/>
+        <site_id site="Party Poker" id="38"/>
+        <site_id site="Bwin Poker" id="39"/>
+        <site_id site="Bwin.fr Poker" id="40"/>
+        <site_id site="Bwin.it Poker" id="41"/>
+        <site_id site="Bwin.es Poker" id="42"/>
+        <site_id site="Bwin.de Poker" id="43"/>
+        <site_id site="PartyPoker.fr" id="44"/>
+        <site_id site="PartyPoker.it" id="45"/>
+        <site_id site="PartyPoker.es" id="46"/>
+        <site_id site="PartyPoker.de" id="47"/>
+        <site_id site="Empire Poker" id="48"/>
+        <site_id site="Gamebookers Poker" id="49"/>
+        <site_id site="Intertops Poker" id="50"/>
+        <site_id site="MultiPoker" id="51"/>
+        <site_id site="PokerRoom" id="52"/>
+        <site_id site="PartyPoker NJ" id="53"/>
+        <site_id site="BorgataPoker" id="54"/>
+        <site_id site="Borgata Poker" id="55"/>
+        <site_id site="PacificPoker" id="10"/>
+        <site_id site="Partouche" id="11"/>
+        <site_id site="Merge" id="12"/>
+        <site_id site="PKR" id="13"/>
+        <site_id site="iPoker" id="14"/>
+        <site_id site="PMU Poker" id="56"/>
+        <site_id site="FDJ Poker" id="57"/>
+        <site_id site="Poker770" id="58"/>
+        <site_id site="NetBet Poker" id="59"/>
+        <site_id site="Barrière Poker" id="60"/>
+        <site_id site="Red Star Poker" id="61"/>
+        <site_id site="Titan Poker" id="62"/>
+        <site_id site="Bet365 Poker" id="63"/>
+        <site_id site="William Hill Poker" id="64"/>
+        <site_id site="Paddy Power Poker" id="65"/>
+        <site_id site="Betfair Poker" id="66"/>
+        <site_id site="Coral Poker" id="67"/>
+        <site_id site="Genting Poker" id="68"/>
+        <site_id site="Mansion Poker" id="69"/>
+        <site_id site="Winner Poker" id="70"/>
+        <site_id site="Ladbrokes Poker" id="71"/>
+        <site_id site="Sky Poker" id="72"/>
+        <site_id site="Sisal Poker" id="73"/>
+        <site_id site="Lottomatica Poker" id="74"/>
+        <site_id site="Eurobet Poker" id="75"/>
+        <site_id site="Snai Poker" id="76"/>
+        <site_id site="Goldbet Poker" id="77"/>
+        <site_id site="Casino Barcelona Poker" id="78"/>
+        <site_id site="Sportium Poker" id="79"/>
+        <site_id site="Marca Apuestas Poker" id="80"/>
+        <site_id site="Everest Poker" id="81"/>
+        <site_id site="Bet-at-home Poker" id="82"/>
+        <site_id site="Mybet Poker" id="83"/>
+        <site_id site="Betsson Poker" id="84"/>
+        <site_id site="Betsafe Poker" id="85"/>
+        <site_id site="NordicBet Poker" id="86"/>
+        <site_id site="Unibet Poker" id="87"/>
+        <site_id site="Maria Casino Poker" id="88"/>
+        <site_id site="LeoVegas Poker" id="89"/>
+        <site_id site="Mr Green Poker" id="90"/>
+        <site_id site="Redbet Poker" id="91"/>
+        <site_id site="Winamax" id="15"/>
+        <site_id site="Everest" id="16"/>
+        <site_id site="Cake" id="17"/>
+        <site_id site="Everygame Poker" id="92"/>
+        <site_id site="Everygame" id="93"/>
+        <site_id site="Cake Poker" id="94"/>
+        <site_id site="Juicy Stakes" id="95"/>
+        <site_id site="Juicy Stakes Poker" id="96"/>
+        <site_id site="JuicyStakes" id="97"/>
+        <site_id site="RedStar Poker" id="98"/>
+        <site_id site="RedStar" id="99"/>
+        <site_id site="Sportsbetting.ag Poker" id="100"/>
+        <site_id site="Sportsbetting Poker" id="101"/>
+        <site_id site="SportsBetting.ag" id="102"/>
+        <site_id site="Entraction" id="18"/>
+        <site_id site="BetOnline" id="19"/>
+        <site_id site="BetOnline Poker" id="103"/>
+        <site_id site="BetOnline.ag" id="104"/>
+        <site_id site="Tiger Gaming" id="105"/>
+        <site_id site="TigerGaming" id="106"/>
+        <site_id site="Doyles Room" id="107"/>
+        <site_id site="DoylesRoom" id="108"/>
+        <site_id site="Poker4Ever" id="109"/>
+        <site_id site="Poker 4 Ever" id="110"/>
+        <site_id site="PlayersOnly" id="111"/>
+        <site_id site="Players Only" id="112"/>
+        <site_id site="SunPoker" id="113"/>
+        <site_id site="Sun Poker" id="114"/>
+        <site_id site="Microgaming" id="20"/>
+        <site_id site="Bovada" id="21"/>
+        <site_id site="Enet" id="22"/>
+        <site_id site="SealsWithClubs" id="23"/>
+        <site_id site="WinningPoker" id="24"/>
+        <site_id site="Americas Cardroom" id="115"/>
+        <site_id site="ACR Poker" id="116"/>
+        <site_id site="BlackChipPoker" id="117"/>
+        <site_id site="TruePoker" id="118"/>
+        <site_id site="Ya Poker" id="119"/>
+        <site_id site="PokerMaster" id="25"/>
+        <site_id site="Run It Once Poker" id="26"/>
+        <site_id site="GGPoker" id="27"/>
+        <site_id site="KingsClub" id="28"/>
+        <site_id site="PokerBros" id="29"/>
+        <site_id site="Unibet" id="30"/>
+    </site_ids>
     <import callFpdbHud="True" interval="5" fastStoreHudCache="False" saveActions="True" cacheSessions="False" sessionTimeout="30" publicDB="False"/>
-
     <gui_tour_stats>
         <col col_name="m_ratio" col_title="M ratio" disp_all="True" disp_posn="True" field_format="%d" field_type="str" xalignment="0.0"/>
         <col col_name="bbstack" col_title="bb stack" disp_all="True" disp_posn="True" field_format="%d" field_type="str" xalignment="0.0"/>
         <col col_name="blank" col_title="" disp_all="False" disp_posn="False" field_format="" field_type="str" xalignment="0.0"/>
     </gui_tour_stats>
-
     <gui_cash_stats>
         <col col_name="game" disp_all="True" disp_posn="True" col_title="Game" xalignment="0.0" field_format="%s" field_type="str"/>
         <col col_name="hand" disp_all="False" disp_posn="False" col_title="Hand" xalignment="0.0" field_format="%s" field_type="str"/>
@@ -96,274 +208,8 @@
         <col col_name="cr3" disp_all="True" disp_posn="True" col_title="% check-raise river/6th street" xalignment="1.0" field_format="%3.1f" field_type="str"/>
         <col col_name="cr4" disp_all="True" disp_posn="True" col_title="% check-raise 7th street" xalignment="1.0" field_format="%3.1f" field_type="str"/>
     </gui_cash_stats>
-
-<!-- These values determine what stats are displayed in the HUD
-
-    The following values define how opponents' stats are done, the first 2 determine
-    the time period stats are displayed for, the next 3 determine what blind levels
-    are included (i.e. aggregated):
-
-    stat_range :
-        - A/S/T
-        - if set to A, includes stats from all time
-        - if set to S, includes stats from current session
-        - if set to T, includes stats from last N days; set value in stat_days
-        - defaults to A
-
-    stat_days :
-        - a numeric value
-        - only used if stat_range is set to 'T', this value tells how many days are
-          included in the stat calculation
-        - defaults to 90
-        - value not used by default as it depends on stat_range setting
-
-    aggregation_level_multiplier :
-        - float value
-        - defines how many blind levels are included in stats displayed in HUD
-        - if value is M, stats for blind levels are combined if the higher level
-          is less than or equal to M times the lower blind level
-        - defaults to 3, meaning blind levels from 1/3 of the current level to 3
-          times the current level are included in the stats displayed in the HUD
-        - e.g. if current big blind is 50, stats for blind levels from big blind
-          of 16.7 (50 divided by 3) to big blind of 150 (50 times 3) are included
-        - To include all levels, use a value of "10000"
-
-    The following values define how hero's stats are done, the first 2 determine
-    the time period stats are displayed for, the next 3 determine what blind levels
-    are included (i.e. aggregated):
-
-    hero_stat_range :
-        - A/S/T
-        - if set to A, includes stats from all time
-        - if set to S, includes stats from current session
-        - if set to T, includes stats from last N days; set value in hero_stat_days
-        - defaults to S
-
-    hero_stat_days :
-        - a numeric value
-        - if hero_stat_range is set to 'T', this value tells how many days are
-          included in the stat calculation
-        - defaults to 30
-        - value not used by default as it depends on hero_stat_range setting
-
-    hero_aggregation_level_multiplier :
-        - float value
-        - defines how many blind levels are included in stats displayed in HUD
-        - if value is M, stats for blind levels are combined if the higher level
-          is less than or equal to M times the lower blind level
-        - defaults to 1, meaning only stats from current blind level are included
-        - e.g. if set to 3 and current big blind is 50, stats for blind levels from
-          16.7 (50 divided by 3) to big blind of 150 (50 times 3) are included
-        - To include all levels, use a value of "10000"
--->
     <hud_ui stat_range="A" stat_days="90" aggregation_level_multiplier="3" seats_style="A" seats_cust_nums_low="6" seats_cust_nums_high="10" hero_stat_range="A" hero_stat_days="30" hero_aggregation_level_multiplier="1" hero_seats_style="A" hero_seats_cust_nums_low="6" hero_seats_cust_nums_high="10" label="FPDBmenu" card_ht="78" card_wd="56" deck_type="simple" card_back="back03"/>
-
-
-    <supported_sites>
-        <site site_name="PokerStars" enabled="True" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\jd\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20">
-            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
-            <layout_set game_type="ring" ls="ps_default"/>
-            <layout_set game_type="tour" ls="ps_default"/>
-            <fav max="2" fav_seat="1"/>
-            <fav max="3" fav_seat="3"/>
-            <fav max="4" fav_seat="0"/>
-            <fav max="5" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="7" fav_seat="0"/>
-            <fav max="8" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
-
-
-
-
-
-
-        <site site_name="PartyPoker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker">
-            <layout_set game_type="all" ls="party_default"/>
-            <fav max="2" fav_seat="1"/>
-            <fav max="3" fav_seat="0"/>
-            <fav max="4" fav_seat="0"/>
-            <fav max="5" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="7" fav_seat="0"/>
-            <fav max="8" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
-
-        <site site_name="Merge" enabled="False" HH_path="" screen_name="" site_path="C:/Program Files/Merge/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0">
-            <layout_set game_type="all" ls="merge_default"/>
-            <fav max="2" fav_seat="0"/>
-            <fav max="3" fav_seat="0"/>
-            <fav max="4" fav_seat="0"/>
-            <fav max="5" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="7" fav_seat="0"/>
-            <fav max="8" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
-
-
-
-
-
-        <site site_name="Winamax" enabled="True" HH_path="C:\Users\jd\AppData\Roaming\winamax\documents\accounts\\history" screen_name="" site_path="C:/Program Files/Winamax/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\Red Star Poker\data\85\History\Data\Tournaments">
-            <layout_set game_type="all" ls="winamax_default"/>
-            <fav max="2" fav_seat="2"/>
-            <fav max="3" fav_seat="3"/>
-            <fav max="4" fav_seat="0"/>
-            <fav max="5" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="7" fav_seat="0"/>
-            <fav max="8" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
-
-
-
-        <site site_name="PacificPoker" enabled="False" HH_path="" screen_name="" site_path="C:/Program Files/PacificPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0">
-            <layout_set game_type="all" ls="pacific_default"/>
-            <fav max="2" fav_seat="0"/>
-            <fav max="3" fav_seat="0"/>
-            <fav max="4" fav_seat="0"/>
-            <fav max="5" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="7" fav_seat="0"/>
-            <fav max="8" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
-
-        <site site_name="Cake" enabled="True" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\">
-            <layout_set game_type="all" ls="cake_default"/>
-            <fav max="2" fav_seat="0"/>
-            <fav max="3" fav_seat="0"/>
-            <fav max="4" fav_seat="0"/>
-            <fav max="5" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="7" fav_seat="0"/>
-            <fav max="8" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
-
-
-
-        <site site_name="iPoker" enabled="True" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments">
-            <layout_set game_type="all" ls="ipoker_default"/>
-            <fav max="2" fav_seat="0"/>
-            <fav max="3" fav_seat="0"/>
-            <fav max="4" fav_seat="0"/>
-            <fav max="5" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="7" fav_seat="0"/>
-            <fav max="8" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
-
-
-
-        <site site_name="Bovada" enabled="False" screen_name="" site_path="C:/Bovada/" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0">
-            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
-            <layout_set game_type="all" ls="bodova_default"/>
-            <fav max="2" fav_seat="0"/>
-            <fav max="3" fav_seat="0"/>
-            <fav max="4" fav_seat="0"/>
-            <fav max="5" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="7" fav_seat="0"/>
-            <fav max="8" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
-
-
-
-        <site site_name="SealsWithClubs" enabled="True" screen_name="" site_path="C:/Program Files/SealsWithClubs/handhistories" HH_path="C:\Users\jd\Documents\SwC Poker\Hand History\" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Documents\SwC Poker\Hand History\">
-            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
-            <layout_set game_type="all" ls="sealswithclubs_default"/>
-            <fav max="2" fav_seat="0"/>
-            <fav max="3" fav_seat="0"/>
-            <fav max="4" fav_seat="0"/>
-            <fav max="5" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="7" fav_seat="0"/>
-            <fav max="8" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
-
-        <site site_name="WinningPoker" enabled="True" screen_name="" site_path="C:/AmericasCardroom/" HH_path="C:\ACR Poker\handHistory\" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\ACR Poker\TournamentSummary">
-            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
-            <layout_set game_type="all" ls="winning_default"/>
-            <fav max="2" fav_seat="0"/>
-            <fav max="3" fav_seat="0"/>
-            <fav max="4" fav_seat="0"/>
-            <fav max="5" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="7" fav_seat="0"/>
-            <fav max="8" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
-
-        <site site_name="KingsClub" enabled="False" screen_name="" site_path="C:/AmericasCardroom/" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0">
-            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
-            <layout_set game_type="all" ls="KingsClub_default"/>
-            <fav max="2" fav_seat="0"/>
-            <fav max="3" fav_seat="0"/>
-            <fav max="4" fav_seat="0"/>
-            <fav max="5" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="7" fav_seat="0"/>
-            <fav max="8" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
-
-        <site site_name="GGPoker" enabled="False" screen_name="Hero" site_path="C:/AmericasCardroom/" HH_path="C:\Users\jd\Documents\GGpoker\85" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0">
-            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
-            <layout_set game_type="all" ls="GGPoker_default"/>
-            <fav max="2" fav_seat="0"/>
-            <fav max="3" fav_seat="0"/>
-            <fav max="4" fav_seat="0"/>
-            <fav max="5" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="7" fav_seat="0"/>
-            <fav max="8" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
-
-
-
-        <site site_name="Unibet" enabled="False" screen_name="" site_path="C:/AmericasCardroom/" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0">
-            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
-            <layout_set game_type="all" ls="Unibet_default"/>
-            <fav max="2" fav_seat="0"/>
-            <fav max="3" fav_seat="0"/>
-            <fav max="4" fav_seat="0"/>
-            <fav max="5" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="7" fav_seat="0"/>
-            <fav max="8" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
-    </supported_sites>
-
-
     <supported_games>
-        <!--
-        Mapping of games to aux-handlers
-        The parameter elements for each <game> can be extended
-        without changing Configuration.Config()
-        -->
         <game game_name="holdem" aux="Classic_HUD, mucked">
             <game_stat_set game_type="tour" stat_set="mtt_holdem_nl"/>
             <game_stat_set game_type="ring" stat_set="holdem_cg_expert"/>
@@ -440,44 +286,20 @@
             <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
         </game>
-            <game game_name="fusion" aux="Classic_HUD, mucked">
+        <game game_name="fusion" aux="Classic_HUD, mucked">
             <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
         </game>
     </supported_games>
-
-
     <aux_windows>
-        <!--
-        Aux windows control Huds, Mucked Card displays etc.
-        The parameter elements for each <aw> are specific to that handler
-        and can be extended without changing Configuration.Config()
-        -->
-
-        <!-- HUD aux's -->
         <aw name="Simple_HUD" module="Aux_Hud" class="Simple_HUD" bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
         <aw name="Classic_HUD" module="Aux_Classic_Hud" class="Classic_HUD" bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
-
-        <!-- Mucked card aux's -->
         <aw name="stud_mucked" module="Mucked" class="Stud_mucked" cols="11" rows="8"/>
         <aw name="mucked" module="Mucked" class="Flop_Mucked" opacity="1.0" timeout="5"/>
-
-        <!-- testing aux's -->
         <aw name="Hello" module="Hello" class="Hello"/>
         <aw name="Hello_plus" module="Hello" class="Hello_plus"/>
-
     </aux_windows>
-
-
     <layout_sets>
-        <!--
-        shared layouts used for stats, mucked cards and any other aux
-        - all layouts MUST include a "common" element
-
-        The parameter elements for each <ls> can be extended without
-        changing Configuration.Config()
-        -->
-
         <ls name="default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -561,7 +383,6 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
-
         <ls name="ps_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -645,9 +466,6 @@
                 <location common="1" x="330" y="249"/>
             </layout>
         </ls>
-
-
-
         <ls name="party_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -731,7 +549,6 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
-
         <ls name="ipoker_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -815,9 +632,6 @@
                 <location common="1" x="133" y="41"/>
             </layout>
         </ls>
-
-
-
         <ls name="merge_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -901,9 +715,6 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
-
-
-
         <ls name="pacific_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -987,8 +798,6 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
-
-
         <ls name="cake_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -1072,8 +881,6 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
-
-
         <ls name="winamax_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -1157,11 +964,6 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
-
-
-
-
-
         <ls name="bovada_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -1245,9 +1047,6 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
-
-
-
         <ls name="sealswithclubs_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -1331,7 +1130,6 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
-
         <ls name="winning_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -1415,8 +1213,7 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
-
-         <ls name="KingsClub_default">
+        <ls name="KingsClub_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
                 <location seat="2" x="2" y="221"/>
@@ -1499,7 +1296,6 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
-
         <ls name="GGPoker_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -1583,7 +1379,6 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
-
         <ls name="Unibet_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -1667,9 +1462,7 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
-
     </layout_sets>
-
     <stat_sets>
         <ss name="draw_default" rows="2" cols="3" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="" click=""/>
@@ -1679,7 +1472,6 @@
             <stat _rowcol="(2,2)" _stat_name="wtsd" popup="default" tip="" click=""/>
             <stat _rowcol="(2,3)" _stat_name="wmsd" popup="default" tip="" click=""/>
         </ss>
-
         <ss name="stud_default" rows="3" cols="2" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="" click="" hudcolor="" hudprefix="" hudsuffix="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="" click="" hudcolor="" hudprefix="" hudsuffix="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
@@ -1688,7 +1480,6 @@
             <stat _rowcol="(3,1)" _stat_name="saw_f" popup="default" tip="" click="" hudcolor="" hudprefix="" hudsuffix="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
             <stat _rowcol="(3,2)" _stat_name="wtsd" popup="default" tip="" click="" hudcolor="" hudprefix="" hudsuffix="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
         </ss>
-
         <ss name="omaha_default" rows="3" cols="2" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="playershort" popup="default" tip="" click="" hudcolor="#98FFB0" hudprefix="" hudsuffix=""/>
             <stat _rowcol="(1,2)" _stat_name="n" popup="default" tip="" click=""/>
@@ -1697,257 +1488,176 @@
             <stat _rowcol="(3,1)" _stat_name="saw_f" popup="default" tip="" click=""/>
             <stat _rowcol="(3,2)" _stat_name="ffreq1" popup="default" tip="" click=""/>
         </ss>
-
         <ss name="omaha_cg_expert" rows="5" cols="4" xpad="1" ypad="0">
-            <!-- Ligne 1 -->
             <stat _rowcol="(1,1)" _stat_name="playershort" hudcolor="#E0E0E0" popup="default" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog"/>
             <stat _rowcol="(1,2)" _stat_name="blank" popup="default" tip="" click="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
             <stat _rowcol="(1,3)" _stat_name="totalprofit" popup="default" tip="Total profit" click="" stat_hicolor="#FF5722" stat_hith="" stat_locolor="0" stat_loth="#2196F3"/>
             <stat _rowcol="(1,4)" _stat_name="profit100" popup="default" tip="Profi bb/100" click="" stat_hicolor="#FF5722" stat_hith="" stat_locolor="0" stat_loth="#2196F3"/>
-
-            <!-- Ligne 2 -->
-            <stat _rowcol="(2,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20" stat_midcolor="#FFA726" />
+            <stat _rowcol="(2,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20" stat_midcolor="#FFA726"/>
             <stat _rowcol="(2,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15" stat_midcolor="#FFA726"/>
             <stat _rowcol="(2,3)" _stat_name="three_B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="12" stat_locolor="#4CAF50" stat_loth="5" stat_midcolor="#FFA726"/>
             <stat _rowcol="(2,4)" _stat_name="agg_fact" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5" stat_midcolor="#FFA726"/>
-
-            <!-- Ligne 3 -->
             <stat _rowcol="(3,1)" _stat_name="cb1" popup="default" tip="Flop C-Bet" click="" stat_hicolor="#F44336" stat_hith="70" stat_locolor="#4CAF50" stat_loth="35" stat_midcolor="#FFA726"/>
             <stat _rowcol="(3,2)" _stat_name="cb2" popup="default" tip="Turn C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="25" stat_midcolor="#FFA726"/>
             <stat _rowcol="(3,3)" _stat_name="f_cb1" popup="default" tip="Fold to Flop C-Bet" click="" stat_hicolor="#F44336" stat_hith="65" stat_locolor="#4CAF50" stat_loth="35" stat_midcolor="#FFA726"/>
             <stat _rowcol="(3,4)" _stat_name="f_cb2" popup="default" tip="Fold to Turn C-Bet" click="" stat_hicolor="#F44336" stat_hith="55" stat_locolor="#4CAF50" stat_loth="25" stat_midcolor="#FFA726"/>
-
-            <!-- Ligne 4 -->
             <stat _rowcol="(4,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="20" stat_midcolor="#FFA726"/>
             <stat _rowcol="(4,2)" _stat_name="wmsd" popup="default" tip="Won Money at Showdown" click="" stat_hicolor="#F44336" stat_hith="55" stat_locolor="#4CAF50" stat_loth="45" stat_midcolor="#FFA726"/>
             <stat _rowcol="(4,3)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20" stat_midcolor="#FFA726"/>
             <stat _rowcol="(4,4)" _stat_name="f_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#F44336" stat_hith="70" stat_locolor="#4CAF50" stat_loth="30" stat_midcolor="#FFA726"/>
-
-            <!-- Ligne 5 -->
             <stat _rowcol="(5,1)" _stat_name="four_B" popup="default" tip="4-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="5" stat_locolor="#4CAF50" stat_loth="2" stat_midcolor="#FFA726"/>
             <stat _rowcol="(5,2)" _stat_name="f_4bet" popup="default" tip="Fold to 4-Bet" click="" stat_hicolor="#F44336" stat_hith="70" stat_locolor="#4CAF50" stat_loth="40" stat_midcolor="#FFA726"/>
             <stat _rowcol="(5,3)" _stat_name="blank" popup="default" tip="" click=""/>
             <stat _rowcol="(5,4)" _stat_name="n" popup="default" tip="hands" click="" stat_hicolor="#F44336" stat_hith="500" stat_locolor="#4CAF50" stat_loth="5000" stat_midcolor="#FFA726"/>
         </ss>
-
         <ss name="holdem_cg_expert" rows="5" cols="4" xpad="1" ypad="0">
-            <!-- Ligne 1 -->
             <stat _rowcol="(1,1)" _stat_name="playershort" hudcolor="#E0E0E0" popup="default" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog"/>
             <stat _rowcol="(1,2)" _stat_name="blank" popup="default" tip="" click="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
             <stat _rowcol="(1,3)" _stat_name="totalprofit" popup="default" tip="Total profit" click="" stat_hicolor="#FF5722" stat_hith="" stat_locolor="0" stat_loth="#2196F3"/>
             <stat _rowcol="(1,4)" _stat_name="profit100" popup="default" tip="Profi bb/100" click="" stat_hicolor="#FF5722" stat_hith="" stat_locolor="0" stat_loth="#2196F3"/>
-
-            <!-- Ligne 2 -->
-            <stat _rowcol="(2,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20" stat_midcolor="#FFA726" />
+            <stat _rowcol="(2,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20" stat_midcolor="#FFA726"/>
             <stat _rowcol="(2,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15" stat_midcolor="#FFA726"/>
             <stat _rowcol="(2,3)" _stat_name="three_B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="12" stat_locolor="#4CAF50" stat_loth="5" stat_midcolor="#FFA726"/>
             <stat _rowcol="(2,4)" _stat_name="agg_fact" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5" stat_midcolor="#FFA726"/>
-
-            <!-- Ligne 3 -->
             <stat _rowcol="(3,1)" _stat_name="cb1" popup="default" tip="Flop C-Bet" click="" stat_hicolor="#F44336" stat_hith="70" stat_locolor="#4CAF50" stat_loth="35" stat_midcolor="#FFA726"/>
             <stat _rowcol="(3,2)" _stat_name="cb2" popup="default" tip="Turn C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="25" stat_midcolor="#FFA726"/>
             <stat _rowcol="(3,3)" _stat_name="f_cb1" popup="default" tip="Fold to Flop C-Bet" click="" stat_hicolor="#F44336" stat_hith="65" stat_locolor="#4CAF50" stat_loth="35" stat_midcolor="#FFA726"/>
             <stat _rowcol="(3,4)" _stat_name="f_cb2" popup="default" tip="Fold to Turn C-Bet" click="" stat_hicolor="#F44336" stat_hith="55" stat_locolor="#4CAF50" stat_loth="25" stat_midcolor="#FFA726"/>
-
-            <!-- Ligne 4 -->
             <stat _rowcol="(4,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="20" stat_midcolor="#FFA726"/>
             <stat _rowcol="(4,2)" _stat_name="wmsd" popup="default" tip="Won Money at Showdown" click="" stat_hicolor="#F44336" stat_hith="55" stat_locolor="#4CAF50" stat_loth="45" stat_midcolor="#FFA726"/>
             <stat _rowcol="(4,3)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20" stat_midcolor="#FFA726"/>
             <stat _rowcol="(4,4)" _stat_name="f_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#F44336" stat_hith="70" stat_locolor="#4CAF50" stat_loth="30" stat_midcolor="#FFA726"/>
-
-            <!-- Ligne 5 -->
             <stat _rowcol="(5,1)" _stat_name="four_B" popup="default" tip="4-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="5" stat_locolor="#4CAF50" stat_loth="2" stat_midcolor="#FFA726"/>
             <stat _rowcol="(5,2)" _stat_name="f_4bet" popup="default" tip="Fold to 4-Bet" click="" stat_hicolor="#F44336" stat_hith="70" stat_locolor="#4CAF50" stat_loth="40" stat_midcolor="#FFA726"/>
             <stat _rowcol="(5,3)" _stat_name="blank" popup="default" tip="" click=""/>
             <stat _rowcol="(5,4)" _stat_name="n" popup="default" tip="hands" click="" stat_hicolor="#F44336" stat_hith="500" stat_locolor="#4CAF50" stat_loth="5000" stat_midcolor="#FFA726"/>
         </ss>
-
-
-
         <ss name="razz_cg_expert" rows="4" cols="4" xpad="1" ypad="0">
-            <!-- Ligne 1 -->
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="25" stat_locolor="#4CAF50" stat_loth="10"/>
             <stat _rowcol="(1,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
             <stat _rowcol="(1,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
-
-            <!-- Ligne 2 -->
             <stat _rowcol="(2,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="10"/>
             <stat _rowcol="(2,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,3)" _stat_name="cbet_4th" popup="default" tip="4th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
             <stat _rowcol="(2,4)" _stat_name="fold_cbet_4th" popup="default" tip="Fold to 4th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
-
-            <!-- Ligne 3 -->
             <stat _rowcol="(3,1)" _stat_name="cbet_5th" popup="default" tip="5th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
             <stat _rowcol="(3,2)" _stat_name="fold_cbet_5th" popup="default" tip="Fold to 5th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
             <stat _rowcol="(3,3)" _stat_name="cbet_6th" popup="default" tip="6th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(3,4)" _stat_name="fold_cbet_6th" popup="default" tip="Fold to 6th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
-
-            <!-- Ligne 4 -->
             <stat _rowcol="(4,1)" _stat_name="showdown_7th" popup="default" tip="Went to Showdown on 7th Street" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(4,2)" _stat_name="win_7th" popup="default" tip="Won at Showdown on 7th Street" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
             <stat _rowcol="(4,3)" _stat_name="af" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
             <stat _rowcol="(4,4)" _stat_name="total_hands" popup="default" tip="Total Hands" click=""/>
         </ss>
-
         <ss name="draw_cg_default" rows="4" cols="4" xpad="1" ypad="0">
-            <!-- Ligne 1 -->
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="10"/>
             <stat _rowcol="(1,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
             <stat _rowcol="(1,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
-
-            <!-- Ligne 2 -->
             <stat _rowcol="(2,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(2,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,3)" _stat_name="cbet_1st_draw" popup="default" tip="C-Bet After 1st Draw" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
             <stat _rowcol="(2,4)" _stat_name="fold_cbet_1st_draw" popup="default" tip="Fold to C-Bet After 1st Draw" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
-
-            <!-- Ligne 3 -->
             <stat _rowcol="(3,1)" _stat_name="cbet_2nd_draw" popup="default" tip="C-Bet After 2nd Draw" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
             <stat _rowcol="(3,2)" _stat_name="fold_cbet_2nd_draw" popup="default" tip="Fold to C-Bet After 2nd Draw" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
             <stat _rowcol="(3,3)" _stat_name="cbet_3rd_draw" popup="default" tip="C-Bet After 3rd Draw" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(3,4)" _stat_name="fold_cbet_3rd_draw" popup="default" tip="Fold to C-Bet After 3rd Draw" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
-
-            <!-- Ligne 4 -->
             <stat _rowcol="(4,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="25"/>
             <stat _rowcol="(4,2)" _stat_name="wmsd" popup="default" tip="Won Money at Showdown" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="35"/>
             <stat _rowcol="(4,3)" _stat_name="af" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
             <stat _rowcol="(4,4)" _stat_name="total_hands" popup="default" tip="Total Hands" click=""/>
         </ss>
-
         <ss name="stud_cg_expert" rows="4" cols="4" xpad="1" ypad="0">
-            <!-- Ligne 1 -->
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="10"/>
             <stat _rowcol="(1,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
             <stat _rowcol="(1,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
-
-            <!-- Ligne 2 -->
             <stat _rowcol="(2,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(2,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,3)" _stat_name="cbet_4th" popup="default" tip="4th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
             <stat _rowcol="(2,4)" _stat_name="fold_cbet_4th" popup="default" tip="Fold to 4th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
-
-            <!-- Ligne 3 -->
             <stat _rowcol="(3,1)" _stat_name="cbet_5th" popup="default" tip="5th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
             <stat _rowcol="(3,2)" _stat_name="fold_cbet_5th" popup="default" tip="Fold to 5th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
             <stat _rowcol="(3,3)" _stat_name="cbet_6th" popup="default" tip="6th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(3,4)" _stat_name="fold_cbet_6th" popup="default" tip="Fold to 6th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
-
-            <!-- Ligne 4 -->
             <stat _rowcol="(4,1)" _stat_name="showdown_7th" popup="default" tip="Went to Showdown on 7th Street" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(4,2)" _stat_name="win_7th" popup="default" tip="Won at Showdown on 7th Street" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
             <stat _rowcol="(4,3)" _stat_name="af" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
             <stat _rowcol="(4,4)" _stat_name="total_hands" popup="default" tip="Total Hands" click=""/>
         </ss>
-
         <ss name="expresso_spin_classic_nl_holdem" rows="4" cols="4" xpad="1" ypad="0">
-            <!-- Ligne 1 -->
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(1,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
             <stat _rowcol="(1,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
-
-            <!-- Ligne 2 -->
             <stat _rowcol="(2,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(2,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,3)" _stat_name="cbet_flop" popup="default" tip="Flop C-Bet" click="" stat_hicolor="#F44336" stat_hith="70" stat_locolor="#4CAF50" stat_loth="35"/>
             <stat _rowcol="(2,4)" _stat_name="fold_cbet_flop" popup="default" tip="Fold to Flop C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="65" stat_locolor="#F44336" stat_loth="35"/>
-
-            <!-- Ligne 3 -->
             <stat _rowcol="(3,1)" _stat_name="cbet_turn" popup="default" tip="Turn C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="25"/>
             <stat _rowcol="(3,2)" _stat_name="fold_cbet_turn" popup="default" tip="Fold to Turn C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
             <stat _rowcol="(3,3)" _stat_name="cbet_river" popup="default" tip="River C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(3,4)" _stat_name="fold_cbet_river" popup="default" tip="Fold to River C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="20"/>
-
-            <!-- Ligne 4 -->
             <stat _rowcol="(4,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(4,2)" _stat_name="wmsd" popup="default" tip="Won Money at Showdown" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(4,3)" _stat_name="af" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
             <stat _rowcol="(4,4)" _stat_name="total_hands" popup="default" tip="Total Hands" click=""/>
         </ss>
-
-
         <ss name="mtt_stud" rows="4" cols="4" xpad="1" ypad="0">
-            <!-- Ligne 1 -->
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="10"/>
             <stat _rowcol="(1,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
             <stat _rowcol="(1,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
-
-            <!-- Ligne 2 -->
             <stat _rowcol="(2,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(2,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,3)" _stat_name="cbet_4th" popup="default" tip="4th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
             <stat _rowcol="(2,4)" _stat_name="fold_cbet_4th" popup="default" tip="Fold to 4th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
-
-            <!-- Ligne 3 -->
             <stat _rowcol="(3,1)" _stat_name="cbet_5th" popup="default" tip="5th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
             <stat _rowcol="(3,2)" _stat_name="fold_cbet_5th" popup="default" tip="Fold to 5th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
             <stat _rowcol="(3,3)" _stat_name="cbet_6th" popup="default" tip="6th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(3,4)" _stat_name="fold_cbet_6th" popup="default" tip="Fold to 6th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
-
-            <!-- Ligne 4 -->
             <stat _rowcol="(4,1)" _stat_name="showdown_7th" popup="default" tip="Went to Showdown on 7th Street" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(4,2)" _stat_name="win_7th" popup="default" tip="Won at Showdown on 7th Street" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
             <stat _rowcol="(4,3)" _stat_name="af" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
             <stat _rowcol="(4,4)" _stat_name="m_ratio" popup="default" tip="M-Ratio (stack relative to antes and bring-in)" click="" stat_hicolor="#F44336" stat_hith="10" stat_locolor="#4CAF50" stat_loth="5"/>
         </ss>
-
         <ss name="mtt_omaha" rows="4" cols="4" xpad="1" ypad="0">
-            <!-- Ligne 1 -->
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(1,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
             <stat _rowcol="(1,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
-
-            <!-- Ligne 2 -->
             <stat _rowcol="(2,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(2,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,3)" _stat_name="cbet_flop" popup="default" tip="Flop C-Bet" click="" stat_hicolor="#F44336" stat_hith="70" stat_locolor="#4CAF50" stat_loth="35"/>
             <stat _rowcol="(2,4)" _stat_name="fold_cbet_flop" popup="default" tip="Fold to Flop C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="65" stat_locolor="#F44336" stat_loth="35"/>
-
-            <!-- Ligne 3 -->
             <stat _rowcol="(3,1)" _stat_name="cbet_turn" popup="default" tip="Turn C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="25"/>
             <stat _rowcol="(3,2)" _stat_name="fold_cbet_turn" popup="default" tip="Fold to Turn C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
             <stat _rowcol="(3,3)" _stat_name="cbet_river" popup="default" tip="River C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(3,4)" _stat_name="fold_cbet_river" popup="default" tip="Fold to River C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="20"/>
-
-            <!-- Ligne 4 -->
             <stat _rowcol="(4,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(4,2)" _stat_name="wmsd" popup="default" tip="Won Money at Showdown" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(4,3)" _stat_name="m_ratio" popup="default" tip="M-Ratio (stack relative to blinds and antes)" click="" stat_hicolor="#F44336" stat_hith="10" stat_locolor="#4CAF50" stat_loth="5"/>
             <stat _rowcol="(4,4)" _stat_name="total_hands" popup="default" tip="Total Hands" click=""/>
         </ss>
-
         <ss name="mtt_draw" rows="4" cols="4" xpad="1" ypad="0">
-            <!-- Ligne 1 -->
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(1,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
             <stat _rowcol="(1,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
-
-            <!-- Ligne 2 -->
             <stat _rowcol="(2,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(2,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,3)" _stat_name="cbet_1st_draw" popup="default" tip="C-Bet After 1st Draw" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
             <stat _rowcol="(2,4)" _stat_name="fold_cbet_1st_draw" popup="default" tip="Fold to C-Bet After 1st Draw" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
-
-            <!-- Ligne 3 -->
             <stat _rowcol="(3,1)" _stat_name="cbet_2nd_draw" popup="default" tip="C-Bet After 2nd Draw" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
             <stat _rowcol="(3,2)" _stat_name="fold_cbet_2nd_draw" popup="default" tip="Fold to C-Bet After 2nd Draw" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
             <stat _rowcol="(3,3)" _stat_name="cbet_3rd_draw" popup="default" tip="C-Bet After 3rd Draw" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(3,4)" _stat_name="fold_cbet_3rd_draw" popup="default" tip="Fold to C-Bet After 3rd Draw" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
-
-            <!-- Ligne 4 -->
             <stat _rowcol="(4,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="25"/>
             <stat _rowcol="(4,2)" _stat_name="wmsd" popup="default" tip="Won Money at Showdown" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="35"/>
             <stat _rowcol="(4,3)" _stat_name="m_ratio" popup="default" tip="M-Ratio (stack relative to blinds and antes)" click="" stat_hicolor="#F44336" stat_hith="10" stat_locolor="#4CAF50" stat_loth="5"/>
             <stat _rowcol="(4,4)" _stat_name="total_hands" popup="default" tip="Total Hands" click=""/>
         </ss>
-
-
         <ss name="holdem_default" rows="3" cols="3" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="25"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="20"/>
@@ -1959,66 +1669,46 @@
             <stat _rowcol="(3,2)" _stat_name="steal" popup="default" tip="" click=""/>
             <stat _rowcol="(3,3)" _stat_name="totalprofit" popup="default" tip="" click="" stat_hicolor="#4CAF50" stat_hith="0" stat_locolor="#F44336" stat_loth="0"/>
         </ss>
-
         <ss name="mtt_holdem_nl" rows="5" cols="4" xpad="1" ypad="0">
-            <!-- Ligne 1 -->
             <stat _rowcol="(1,1)" _stat_name="playershort" hudcolor="#E0E0E0" popup="default" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog"/>
             <stat _rowcol="(1,2)" _stat_name="blank" popup="default" tip="" click="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
             <stat _rowcol="(1,3)" _stat_name="blank" popup="default" tip="" click="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
             <stat _rowcol="(1,4)" _stat_name="blank" popup="default" tip="" click="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
-
-            <!-- Ligne 2 -->
             <stat _rowcol="(2,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(2,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(2,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
             <stat _rowcol="(2,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
-
-            <!-- Ligne 3 -->
             <stat _rowcol="(3,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(3,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(3,3)" _stat_name="cbet_flop" popup="default" tip="Flop C-Bet" click="" stat_hicolor="#F44336" stat_hith="70" stat_locolor="#4CAF50" stat_loth="35"/>
             <stat _rowcol="(3,4)" _stat_name="fold_cbet_flop" popup="default" tip="Fold to Flop C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="65" stat_locolor="#F44336" stat_loth="35"/>
-
-            <!-- Ligne 4 -->
             <stat _rowcol="(4,1)" _stat_name="cbet_turn" popup="default" tip="Turn C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="25"/>
             <stat _rowcol="(4,2)" _stat_name="fold_cbet_turn" popup="default" tip="Fold to Turn C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
             <stat _rowcol="(4,3)" _stat_name="cbet_river" popup="default" tip="River C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(4,4)" _stat_name="fold_cbet_river" popup="default" tip="Fold to River C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="20"/>
-
-            <!-- Ligne 5 -->
             <stat _rowcol="(5,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(5,2)" _stat_name="wmsd" popup="default" tip="Won Money at Showdown" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(5,3)" _stat_name="m_ratio" popup="default" tip="M-Ratio (stack relative to blinds and antes)" click="" stat_hicolor="#F44336" stat_hith="10" stat_locolor="#4CAF50" stat_loth="5"/>
             <stat _rowcol="(5,4)" _stat_name="total_hands" popup="default" tip="Total Hands" click=""/>
         </ss>
-
         <ss name="mtt_razz" rows="4" cols="4" xpad="1" ypad="0">
-            <!-- Ligne 1 -->
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="25" stat_locolor="#4CAF50" stat_loth="10"/>
             <stat _rowcol="(1,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
             <stat _rowcol="(1,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
-
-            <!-- Ligne 2 -->
             <stat _rowcol="(2,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="10"/>
             <stat _rowcol="(2,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,3)" _stat_name="cbet_4th" popup="default" tip="4th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
             <stat _rowcol="(2,4)" _stat_name="fold_cbet_4th" popup="default" tip="Fold to 4th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
-
-            <!-- Ligne 3 -->
             <stat _rowcol="(3,1)" _stat_name="cbet_5th" popup="default" tip="5th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
             <stat _rowcol="(3,2)" _stat_name="fold_cbet_5th" popup="default" tip="Fold to 5th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
             <stat _rowcol="(3,3)" _stat_name="cbet_6th" popup="default" tip="6th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(3,4)" _stat_name="fold_cbet_6th" popup="default" tip="Fold to 6th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
-
-            <!-- Ligne 4 -->
             <stat _rowcol="(4,1)" _stat_name="showdown_7th" popup="default" tip="Went to Showdown on 7th Street" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(4,2)" _stat_name="win_7th" popup="default" tip="Won at Showdown on 7th Street" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
             <stat _rowcol="(4,3)" _stat_name="af" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
             <stat _rowcol="(4,4)" _stat_name="m_ratio" popup="default" tip="M-Ratio (stack relative to antes and bring-in)" click="" stat_hicolor="#F44336" stat_hith="10" stat_locolor="#4CAF50" stat_loth="5"/>
         </ss>
-
-        <!-- ring-game config with context popups (seppone)-->
         <ss cols="3" name="holdem_ring_classic" rows="3" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="25" tip="" click=""/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="20" tip="" click=""/>
@@ -2030,7 +1720,6 @@
             <stat _rowcol="(3,2)" _stat_name="steal" popup="default" tip="" click=""/>
             <stat _rowcol="(3,3)" _stat_name="totalprofit" popup="default" stat_hicolor="#4CAF50" stat_hith="0" stat_locolor="#F44336" stat_loth="0" tip="" click=""/>
         </ss>
-
         <ss cols="3" name="holdem_ring" rows="4" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="blank" popup="default"/>
             <stat _rowcol="(1,2)" _stat_name="playershort" hudcolor="#7F9476" hudprefix="" hudsuffix="" popup="holdring_main" tip=""/>
@@ -2045,7 +1734,6 @@
             <stat _rowcol="(4,2)" _stat_name="f_cb1" hudcolor="#ECEBD0" popup="popsteal" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" hudprefix="fcb:" tip=""/>
             <stat _rowcol="(4,3)" _stat_name="a_freq_123" hudcolor="#ECEBD0" popup="popagg" stat_hicolor="#D86C1D" stat_hith="65" stat_locolor="#5ec265" stat_loth="20" hudprefix="afr:" hudsuffix="%" tip=""/>
         </ss>
-
         <ss cols="3" name="holdem_tour_classic" rows="3" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="25" tip="" click=""/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="20" tip="" click=""/>
@@ -2057,7 +1745,6 @@
             <stat _rowcol="(3,2)" _stat_name="steal" popup="default" tip="" click=""/>
             <stat _rowcol="(3,3)" _stat_name="m_ratio" popup="default" click="" stat_hicolor="#4CAF50" hudcolor="#FFFC00" stat_hith="19.99" stat_locolor="#FF0000" stat_loth="9.99" tip=""/>
         </ss>
-
         <ss cols="3" name="holdem_tour" rows="3" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="vpip" hudcolor="#ECEBD0" popup="poppreflop" hudprefix="vpi:" stat_hicolor="#D86C1D" stat_hith="40" stat_locolor="#5ec265" stat_loth="25" tip=""/>
             <stat _rowcol="(1,2)" _stat_name="pfr" hudcolor="#ECEBD0" popup="poppreflop" hudprefix="pfr:" stat_hicolor="#D86C1D" stat_hith="35" stat_locolor="#5ec265" stat_loth="20" tip=""/>
@@ -2070,10 +1757,7 @@
             <stat _rowcol="(3,3)" _stat_name="m_ratio" hudcolor="#FFFC00" hudprefix="M:" stat_hicolor="#5EC265" stat_hith="19.99" stat_locolor="#F33725" stat_loth="9.99" tip=""/>
         </ss>
     </stat_sets>
-
-
     <popup_windows>
-
         <pu pu_name="holdring_main" pu_class="Submenu">
             <pu_stat pu_stat_name="playername"/>
             <pu_stat pu_stat_name="general" pu_stat_submenu="default"/>
@@ -2083,7 +1767,6 @@
             <pu_stat pu_stat_name="river" pu_stat_submenu="hold_river"/>
             <pu_stat pu_stat_name="hands seen" pu_stat_submenu="hold_starthands"/>
         </pu>
-
         <pu pu_name="holdtour_main" pu_class="Submenu">
             <pu_stat pu_stat_name="playername"/>
             <pu_stat pu_stat_name="general" pu_stat_submenu="default"/>
@@ -2093,12 +1776,10 @@
             <pu_stat pu_stat_name="river" pu_stat_submenu="hold_river"/>
             <pu_stat pu_stat_name="hands seen" pu_stat_submenu="hold_starthands"/>
         </pu>
-
         <pu pu_name="hold_starthands" pu_class="Submenu">
             <pu_stat pu_stat_name="~Preflop action seen"/>
             <pu_stat pu_stat_name="starthands"/>
         </pu>
-
         <pu pu_name="hold_pre" pu_class="Submenu">
             <pu_stat pu_stat_name="~Preflop"/>
             <pu_stat pu_stat_name="n"/>
@@ -2109,7 +1790,6 @@
             <pu_stat pu_stat_name="Steal" pu_stat_submenu="hold_steal"/>
             <pu_stat pu_stat_name="3/4 betting" pu_stat_submenu="hold_34bet"/>
         </pu>
-
         <pu pu_name="hold_steal" pu_class="Submenu">
             <pu_stat pu_stat_name="~Steal"/>
             <pu_stat pu_stat_name="n"/>
@@ -2121,7 +1801,6 @@
             <pu_stat pu_stat_name="raiseToSteal"/>
             <pu_stat pu_stat_name="squeeze"/>
         </pu>
-
         <pu pu_name="hold_34bet" pu_class="Submenu">
             <pu_stat pu_stat_name="~3/4 betting"/>
             <pu_stat pu_stat_name="n"/>
@@ -2136,7 +1815,6 @@
             <pu_stat pu_stat_name="raiseToSteal"/>
             <pu_stat pu_stat_name="squeeze"/>
         </pu>
-
         <pu pu_name="hold_flop" pu_class="Submenu">
             <pu_stat pu_stat_name="~Flop"/>
             <pu_stat pu_stat_name="n"/>
@@ -2148,7 +1826,6 @@
             <pu_stat pu_stat_name="f_cb1"/>
             <pu_stat pu_stat_name="f_dbr1"/>
         </pu>
-
         <pu pu_name="hold_turn" pu_class="Submenu">
             <pu_stat pu_stat_name="~Turn"/>
             <pu_stat pu_stat_name="n"/>
@@ -2160,7 +1837,6 @@
             <pu_stat pu_stat_name="f_cb2"/>
             <pu_stat pu_stat_name="f_dbr2"/>
         </pu>
-
         <pu pu_name="hold_river" pu_class="Submenu">
             <pu_stat pu_stat_name="~River"/>
             <pu_stat pu_stat_name="n"/>
@@ -2174,7 +1850,6 @@
             <pu_stat pu_stat_name="wtsd"/>
             <pu_stat pu_stat_name="wmsd"/>
         </pu>
-
         <pu pu_name="default" pu_class="Multicol">
             <pu_stat pu_stat_name="playername"/>
             <pu_stat pu_stat_name="n"/>
@@ -2233,14 +1908,12 @@
             <pu_stat pu_stat_name="cr3"/>
             <pu_stat pu_stat_name="cr4"/>
         </pu>
-
         <pu pu_name="pophands" pu_class="default">
             <pu_stat pu_stat_name="n"/>
             <pu_stat pu_stat_name="totalprofit"/>
             <pu_stat pu_stat_name="profit100"/>
             <pu_stat pu_stat_name="bbper100"/>
         </pu>
-
         <pu pu_name="poppreflop" pu_class="default">
             <pu_stat pu_stat_name="n"/>
             <pu_stat pu_stat_name="vpip"/>
@@ -2248,7 +1921,6 @@
             <pu_stat pu_stat_name="car0"/>
             <pu_stat pu_stat_name="agg_fact"/>
         </pu>
-
         <pu pu_name="pop3bet" pu_class="default">
             <pu_stat pu_stat_name="n"/>
             <pu_stat pu_stat_name="three_B"/>
@@ -2256,13 +1928,11 @@
             <pu_stat pu_stat_name="f_3bet"/>
             <pu_stat pu_stat_name="f_4bet"/>
         </pu>
-
         <pu pu_name="popwtsd" pu_class="default">
             <pu_stat pu_stat_name="n"/>
             <pu_stat pu_stat_name="wtsd"/>
             <pu_stat pu_stat_name="wmsd"/>
         </pu>
-
         <pu pu_class="default" pu_name="popagg">
             <pu_stat pu_stat_name="n"/>
             <pu_stat pu_stat_name="agg_fact"/>
@@ -2272,7 +1942,6 @@
             <pu_stat pu_stat_name="a_freq4"/>
             <pu_stat pu_stat_name="agg_freq"/>
         </pu>
-
         <pu pu_class="default" pu_name="popcb">
             <pu_stat pu_stat_name="n"/>
             <pu_stat pu_stat_name="cbet"/>
@@ -2281,7 +1950,6 @@
             <pu_stat pu_stat_name="cb3"/>
             <pu_stat pu_stat_name="cb4"/>
         </pu>
-
         <pu pu_name="popsteal" pu_class="default">
             <pu_stat pu_stat_name="n"/>
             <pu_stat pu_stat_name="steal"/>
@@ -2291,36 +1959,1323 @@
             <pu_stat pu_stat_name="f_SB_steal"/>
         </pu>
     </popup_windows>
-
-
+    <raw_hands save="none" compression="none"/>
+    <raw_tourneys save="none" compression="none"/>
+    <supported_databases>
+        <database db_server="sqlite" db_name="fpdb.db3" db_ip="localhost" db_user="fpdb" db_pass="fpdb" db_path="" default="True"/>
+    </supported_databases>
+    <supported_sites>
+        <site site_name="PokerStars.COM" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\jd\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="ring" ls="ps_default"/>
+            <layout_set game_type="tour" ls="ps_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="3"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PokerStars.FR" enabled="True" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\jd\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="ring" ls="ps_default"/>
+            <layout_set game_type="tour" ls="ps_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="3"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PokerStars.IT" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\jd\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="ring" ls="ps_default"/>
+            <layout_set game_type="tour" ls="ps_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="3"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PokerStars.ES" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\jd\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="ring" ls="ps_default"/>
+            <layout_set game_type="tour" ls="ps_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="3"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PokerStars.PT" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\jd\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="ring" ls="ps_default"/>
+            <layout_set game_type="tour" ls="ps_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="3"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PokerStars.EU" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.FR\HandHistory\" TS_path="C:\Users\jd\AppData\Local\PokerStars.FR\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="ring" ls="ps_default"/>
+            <layout_set game_type="tour" ls="ps_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="3"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PartyPoker" enabled="True" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Party Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Bwin Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Bwin.fr Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Bwin.it Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Bwin.es Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Bwin.de Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PartyPoker.fr" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PartyPoker.it" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PartyPoker.es" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PartyPoker.de" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Empire Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Gamebookers Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Intertops Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="MultiPoker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PokerRoom" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PartyPoker NJ" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="BorgataPoker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Borgata Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Merge" enabled="False" HH_path="" screen_name="" site_path="C:/Program Files/Merge/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0" network="Merge">
+            <layout_set game_type="all" ls="merge_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Winamax" enabled="True" HH_path="/Users/jdenis/Library/Application Support/Winamax/documents/accounts/jejellyroll/history" screen_name="jejellyroll" site_path="C:/Program Files/Winamax/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Winamax" layout_set_ring="winamax_default" layout_set_tour="winamax_default">
+            <layout_set game_type="all" ls="winamax_default"/>
+            <fav max="2" fav_seat="2"/>
+            <fav max="3" fav_seat="3"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PacificPoker" enabled="False" HH_path="" screen_name="" site_path="C:/Program Files/PacificPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0" network="PacificPoker">
+            <layout_set game_type="all" ls="pacific_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Everygame Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Everygame" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Cake Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Cake" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Juicy Stakes" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Juicy Stakes Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="JuicyStakes" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="RedStar Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="RedStar" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Sportsbetting.ag Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Sportsbetting Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="SportsBetting.ag" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="BetOnline Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="BetOnline.ag" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Tiger Gaming" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="TigerGaming" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Doyles Room" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="DoylesRoom" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Poker4Ever" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Poker 4 Ever" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PlayersOnly" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Players Only" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="SunPoker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Sun Poker" enabled="False" HH_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" screen_name="" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\AppData\Local\CPN\EVERYGAME\Hand History\" network="Cake">
+            <layout_set game_type="all" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PMU Poker" enabled="True" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="FDJ Poker" enabled="True" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Poker770" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="NetBet Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Barrière Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Red Star Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Titan Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Bet365 Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="William Hill Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Paddy Power Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Betfair Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Coral Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Genting Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Mansion Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Winner Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Ladbrokes Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Sky Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Sisal Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Lottomatica Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Eurobet Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Snai Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Goldbet Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Casino Barcelona Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Sportium Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Marca Apuestas Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Everest Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Bet-at-home Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Mybet Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Betsson Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Betsafe Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="NordicBet Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Unibet Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Maria Casino Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="LeoVegas Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Mr Green Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Redbet Poker" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Bovada" enabled="True" screen_name="" site_path="C:/Bovada/" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0" network="Bovada">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="all" ls="bodova_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="SealsWithClubs" enabled="False" screen_name="" site_path="C:/Program Files/SealsWithClubs/handhistories" HH_path="C:\Users\jd\Documents\SwC Poker\Hand History\" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Documents\SwC Poker\Hand History\" network="SealsWithClubs">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="all" ls="sealswithclubs_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Americas Cardroom" enabled="False" screen_name="" site_path="C:/AmericasCardroom/" HH_path="C:\ACR Poker\handHistory\" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\ACR Poker\TournamentSummary" network="WinningPoker">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="all" ls="winning_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="ACR Poker" enabled="False" screen_name="" site_path="C:/AmericasCardroom/" HH_path="C:\ACR Poker\handHistory\" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\ACR Poker\TournamentSummary" network="WinningPoker">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="all" ls="winning_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="WinningPoker" enabled="False" screen_name="" site_path="C:/AmericasCardroom/" HH_path="C:\ACR Poker\handHistory\" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\ACR Poker\TournamentSummary" network="WinningPoker">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="all" ls="winning_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="BlackChipPoker" enabled="False" screen_name="" site_path="C:/AmericasCardroom/" HH_path="C:\ACR Poker\handHistory\" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\ACR Poker\TournamentSummary" network="WinningPoker">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="all" ls="winning_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="TruePoker" enabled="False" screen_name="" site_path="C:/AmericasCardroom/" HH_path="C:\ACR Poker\handHistory\" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\ACR Poker\TournamentSummary" network="WinningPoker">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="all" ls="winning_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Ya Poker" enabled="False" screen_name="" site_path="C:/AmericasCardroom/" HH_path="C:\ACR Poker\handHistory\" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\ACR Poker\TournamentSummary" network="WinningPoker">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="all" ls="winning_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="KingsClub" enabled="False" screen_name="" site_path="C:/AmericasCardroom/" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0" network="KingsClub">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="all" ls="KingsClub_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="GGPoker" enabled="True" screen_name="Hero" site_path="C:/AmericasCardroom/" HH_path="C:\Users\jd\Documents\GGpoker\85" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0" network="GGPoker">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="all" ls="GGPoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Unibet" enabled="True" screen_name="" site_path="C:/AmericasCardroom/" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0" network="Unibet">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="all" ls="Unibet_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+    </supported_sites>
     <hhcs>
-        <hhc site="PokerStars" converter="PokerStarsToFpdb" summaryImporter="PokerStarsSummary"/>
+        <hhc site="PokerStars.COM" converter="PokerStarsToFpdb" summaryImporter="PokerStarsSummary"/>
+        <hhc site="PokerStars.FR" converter="PokerStarsToFpdb" summaryImporter="PokerStarsSummary"/>
+        <hhc site="PokerStars.IT" converter="PokerStarsToFpdb" summaryImporter="PokerStarsSummary"/>
+        <hhc site="PokerStars.ES" converter="PokerStarsToFpdb" summaryImporter="PokerStarsSummary"/>
+        <hhc site="PokerStars.PT" converter="PokerStarsToFpdb" summaryImporter="PokerStarsSummary"/>
+        <hhc site="PokerStars.EU" converter="PokerStarsToFpdb" summaryImporter="PokerStarsSummary"/>
         <hhc site="PartyPoker" converter="PartyPokerToFpdb"/>
-        <hhc site="Betfair" converter="BetfairToFpdb"/>
+        <hhc site="Party Poker" converter="PartyPokerToFpdb"/>
+        <hhc site="Bwin Poker" converter="PartyPokerToFpdb"/>
+        <hhc site="Bwin.fr Poker" converter="PartyPokerToFpdb"/>
+        <hhc site="Bwin.it Poker" converter="PartyPokerToFpdb"/>
+        <hhc site="Bwin.es Poker" converter="PartyPokerToFpdb"/>
+        <hhc site="Bwin.de Poker" converter="PartyPokerToFpdb"/>
+        <hhc site="PartyPoker.fr" converter="PartyPokerToFpdb"/>
+        <hhc site="PartyPoker.it" converter="PartyPokerToFpdb"/>
+        <hhc site="PartyPoker.es" converter="PartyPokerToFpdb"/>
+        <hhc site="PartyPoker.de" converter="PartyPokerToFpdb"/>
+        <hhc site="Empire Poker" converter="PartyPokerToFpdb"/>
+        <hhc site="Gamebookers Poker" converter="PartyPokerToFpdb"/>
+        <hhc site="Intertops Poker" converter="PartyPokerToFpdb"/>
+        <hhc site="MultiPoker" converter="PartyPokerToFpdb"/>
+        <hhc site="PokerRoom" converter="PartyPokerToFpdb"/>
+        <hhc site="PartyPoker NJ" converter="PartyPokerToFpdb"/>
+        <hhc site="BorgataPoker" converter="PartyPokerToFpdb"/>
+        <hhc site="Borgata Poker" converter="PartyPokerToFpdb"/>
         <hhc site="Merge" converter="MergeToFpdb" summaryImporter="MergeSummary"/>
-        <hhc site="iPoker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
         <hhc site="Winamax" converter="WinamaxToFpdb" summaryImporter="WinamaxSummary"/>
         <hhc site="PacificPoker" converter="PacificPokerToFpdb" summaryImporter="PacificPokerSummary"/>
+        <hhc site="Everygame Poker" converter="CakeToFpdb"/>
+        <hhc site="Everygame" converter="CakeToFpdb"/>
+        <hhc site="Cake Poker" converter="CakeToFpdb"/>
         <hhc site="Cake" converter="CakeToFpdb"/>
+        <hhc site="Juicy Stakes" converter="CakeToFpdb"/>
+        <hhc site="Juicy Stakes Poker" converter="CakeToFpdb"/>
+        <hhc site="JuicyStakes" converter="CakeToFpdb"/>
+        <hhc site="RedStar Poker" converter="CakeToFpdb"/>
+        <hhc site="Red Star Poker" converter="CakeToFpdb"/>
+        <hhc site="RedStar" converter="CakeToFpdb"/>
+        <hhc site="Sportsbetting.ag Poker" converter="CakeToFpdb"/>
+        <hhc site="Sportsbetting Poker" converter="CakeToFpdb"/>
+        <hhc site="SportsBetting.ag" converter="CakeToFpdb"/>
+        <hhc site="BetOnline Poker" converter="BetOnlineToFpdb"/>
+        <hhc site="BetOnline.ag" converter="BetOnlineToFpdb"/>
+        <hhc site="Tiger Gaming" converter="CakeToFpdb"/>
+        <hhc site="TigerGaming" converter="CakeToFpdb"/>
+        <hhc site="Doyles Room" converter="CakeToFpdb"/>
+        <hhc site="DoylesRoom" converter="CakeToFpdb"/>
+        <hhc site="Poker4Ever" converter="CakeToFpdb"/>
+        <hhc site="Poker 4 Ever" converter="CakeToFpdb"/>
+        <hhc site="PlayersOnly" converter="CakeToFpdb"/>
+        <hhc site="Players Only" converter="CakeToFpdb"/>
+        <hhc site="SunPoker" converter="CakeToFpdb"/>
+        <hhc site="Sun Poker" converter="CakeToFpdb"/>
+        <hhc site="PMU Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="FDJ Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Poker770" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="NetBet Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Barrière Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Titan Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Bet365 Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="William Hill Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Paddy Power Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Betfair Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Coral Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Genting Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Mansion Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Winner Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Ladbrokes Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Sky Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Sisal Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Lottomatica Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Eurobet Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Snai Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Goldbet Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Casino Barcelona Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Sportium Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Marca Apuestas Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Everest Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Bet-at-home Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Mybet Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Betsson Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Betsafe Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="NordicBet Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Unibet Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Maria Casino Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="LeoVegas Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Mr Green Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Redbet Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
         <hhc site="Bovada" converter="BovadaToFpdb" summaryImporter="BovadaSummary"/>
         <hhc site="SealsWithClubs" converter="SealsWithClubsToFpdb"/>
+        <hhc site="Americas Cardroom" converter="WinningToFpdb" summaryImporter="WinningSummary"/>
+        <hhc site="ACR Poker" converter="WinningToFpdb" summaryImporter="WinningSummary"/>
         <hhc site="WinningPoker" converter="WinningToFpdb" summaryImporter="WinningSummary"/>
+        <hhc site="BlackChipPoker" converter="WinningToFpdb" summaryImporter="WinningSummary"/>
+        <hhc site="TruePoker" converter="WinningToFpdb" summaryImporter="WinningSummary"/>
+        <hhc site="Ya Poker" converter="WinningToFpdb" summaryImporter="WinningSummary"/>
         <hhc site="KingsClub" converter="KingsClubToFpdb"/>
         <hhc site="GGPoker" converter="GGPokerToFpdb"/>
         <hhc site="Unibet" converter="UnibetToFpdb"/>
     </hhcs>
-
-
-    <raw_hands save="none" compression="none"/>
-
-
-    <raw_tourneys save="none" compression="none"/>
-
-
-    <supported_databases>
-        <!-- <database db_server="mysql" db_user="fpdbuser" db_pass="YOUR MYSQL PASSWORD" db_name="fpdb" db_ip="localhost"></database> -->
-             <database db_server="sqlite" db_name="fpdb.db3" db_ip="localhost" db_user="fpdb" db_pass="fpdb" db_path="" default="True"/>
-        <!-- <database db_server="postgresql" db_user="fpdb" db_pass="YOUR POSTGRES PASSWORD" db_name="fpdb" db_ip="localhost" ></database> -->
-    </supported_databases>
-</FreePokerToolsConfig><!-- IMPORTANT: Please note that fpdb stores your email password in clear text.
-So do not post a config containing a password on the Internet or anywhere else without removing the password! -->
+</FreePokerToolsConfig>

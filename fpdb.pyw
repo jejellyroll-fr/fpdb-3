@@ -418,6 +418,169 @@ class fpdb(QMainWindow):
 
             y_pos += 1
 
+    def dia_manage_hud_sites(self, widget, data=None):
+        """Dialog to manage HUD sites - enable/disable sites"""
+        dia = QDialog(self)
+        dia.setWindowTitle("Manage HUD Sites")
+        dia.resize(800, 600)
+        dia.setLayout(QVBoxLayout())
+
+        # Header
+        header_label = QLabel("Enable or disable sites for HUD display")
+        header_label.setStyleSheet("font-size: 14px; font-weight: bold; padding: 10px;")
+        dia.layout().addWidget(header_label)
+
+        # Search box
+        search_layout = QHBoxLayout()
+        search_label = QLabel("Search:")
+        self.site_search = QLineEdit()
+        self.site_search.setPlaceholderText("Type to filter sites...")
+        search_layout.addWidget(search_label)
+        search_layout.addWidget(self.site_search)
+        dia.layout().addLayout(search_layout)
+
+        # Create scrollable area for sites
+        scroll_area = QScrollArea()
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+        scroll_area.setWidget(scroll_widget)
+        scroll_area.setWidgetResizable(True)
+        dia.layout().addWidget(scroll_area)
+
+        # Load current configuration
+        self.load_profile()
+
+        # Get all sites from site_ids
+        site_checkboxes = {}
+        site_widgets = []
+
+        for site_name, site_id in self.config.site_ids.items():
+            # Create a widget for each site
+            site_widget = QWidget()
+            site_layout = QHBoxLayout(site_widget)
+            site_layout.setContentsMargins(5, 5, 5, 5)
+
+            # Checkbox
+            checkbox = QCheckBox()
+            # Check if site is enabled in supported_sites
+            try:
+                checkbox.setChecked(self.config.supported_sites[site_name].enabled)
+            except KeyError:
+                checkbox.setChecked(False)
+
+            site_layout.addWidget(checkbox)
+
+            # Site name
+            name_label = QLabel(site_name)
+            name_label.setMinimumWidth(300)
+            site_layout.addWidget(name_label)
+
+            # Site ID
+            id_label = QLabel(f"ID: {site_id}")
+            id_label.setStyleSheet("color: #666; background-color: #f0f0f0; padding: 2px 8px; border-radius: 10px;")
+            site_layout.addWidget(id_label)
+
+            site_layout.addStretch()
+
+            scroll_layout.addWidget(site_widget)
+            site_checkboxes[site_name] = checkbox
+            site_widgets.append((site_widget, site_name))
+
+        # Connect search functionality
+        def filter_sites():
+            search_text = self.site_search.text().lower()
+            for widget, name in site_widgets:
+                widget.setVisible(search_text in name.lower())
+
+        self.site_search.textChanged.connect(filter_sites)
+
+        # Statistics label
+        self.stats_label = QLabel()
+        self.update_site_stats(site_checkboxes)
+        dia.layout().addWidget(self.stats_label)
+
+        # Connect checkboxes to update stats
+        for checkbox in site_checkboxes.values():
+            checkbox.stateChanged.connect(lambda: self.update_site_stats(site_checkboxes))
+
+        # Buttons
+        button_layout = QHBoxLayout()
+
+        select_all_btn = QPushButton("Select All")
+        select_all_btn.clicked.connect(lambda: self.set_all_sites(site_checkboxes, True))
+        button_layout.addWidget(select_all_btn)
+
+        deselect_all_btn = QPushButton("Deselect All")
+        deselect_all_btn.clicked.connect(lambda: self.set_all_sites(site_checkboxes, False))
+        button_layout.addWidget(deselect_all_btn)
+
+        button_layout.addStretch()
+
+        btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+        button_layout.addWidget(btns)
+
+        dia.layout().addLayout(button_layout)
+
+        btns.accepted.connect(dia.accept)
+        btns.rejected.connect(dia.reject)
+
+        # Show dialog and save if accepted
+        if dia.exec_():
+            # Save the enabled/disabled state for each site
+            for site_name, checkbox in site_checkboxes.items():
+                enabled = checkbox.isChecked()
+                enabled_str = "True" if enabled else "False"
+
+                # Check if site exists in supported_sites
+                if site_name in self.config.supported_sites:
+                    # Use the edit_site method to properly update the XML
+                    current_site = self.config.supported_sites[site_name]
+                    self.config.edit_site(
+                        site_name, enabled_str, current_site.screen_name, current_site.HH_path, current_site.TS_path
+                    )
+                else:
+                    # Create a new site entry if it doesn't exist
+                    # First, check if there's a site node in the XML
+                    site_node = self.config.get_site_node(site_name)
+                    if site_node is None:
+                        # Create a new site node
+                        sites_nodes = self.config.doc.getElementsByTagName("supported_sites")
+                        if sites_nodes:
+                            sites_node = sites_nodes[0]
+                        else:
+                            # Create supported_sites node if it doesn't exist
+                            root = self.config.doc.getElementsByTagName("FreePokerToolsConfig")[0]
+                            sites_node = self.config.doc.createElement("supported_sites")
+                            root.appendChild(sites_node)
+
+                        new_site = self.config.doc.createElement("site")
+                        new_site.setAttribute("site_name", site_name)
+                        new_site.setAttribute("enabled", enabled_str)
+                        new_site.setAttribute("screen_name", "YOUR SCREEN NAME HERE")
+                        new_site.setAttribute("HH_path", "")
+                        new_site.setAttribute("TS_path", "")
+                        new_site.setAttribute("aux_enabled", "True")
+                        sites_node.appendChild(new_site)
+                    else:
+                        # Site node exists but not in supported_sites dict, just update enabled
+                        site_node.setAttribute("enabled", enabled_str)
+
+            # Save configuration
+            self.config.save()
+            self.reload_config()
+
+    def update_site_stats(self, checkboxes):
+        """Update the statistics label"""
+        total = len(checkboxes)
+        enabled = sum(1 for cb in checkboxes.values() if cb.isChecked())
+        self.stats_label.setText(f"Enabled sites: {enabled} / {total}")
+        self.stats_label.setStyleSheet("padding: 10px; background-color: #e0e0e0; border-radius: 5px;")
+
+    def set_all_sites(self, checkboxes, state):
+        """Set all site checkboxes to the given state"""
+        for checkbox in checkboxes.values():
+            checkbox.setChecked(state)
+
     def dia_import_filters(self, checkState):
         dia = QDialog()
         dia.setWindowTitle("Skip these games when importing")
@@ -605,8 +768,8 @@ class fpdb(QMainWindow):
         available_site_names = []
         for site_name in site_names:
             try:
-                self.config.supported_sites[site_name].enabled
-                available_site_names.append(site_name)
+                if self.config.supported_sites[site_name].enabled:
+                    available_site_names.append(site_name)
             except KeyError:
                 pass
 
@@ -745,7 +908,7 @@ class fpdb(QMainWindow):
 
     def dia_site_preferences(self, widget, data=None):
         dia = QDialog(self)
-        dia.setWindowTitle("Site Preferences")
+        dia.setWindowTitle("Site Preferences (Only Enabled Sites)")
         dia.resize(1200, 600)
         label = QLabel("Please select which sites you play on and enter your usernames.")
         dia.setLayout(QVBoxLayout())
@@ -756,23 +919,21 @@ class fpdb(QMainWindow):
         available_site_names = []
         for site_name in site_names:
             try:
-                self.config.supported_sites[site_name].enabled
-                available_site_names.append(site_name)
+                if self.config.supported_sites[site_name].enabled:
+                    available_site_names.append(site_name)
             except KeyError:
                 pass
 
         column_headers = [
             "Site",
+            "Site ID",
             "Detect",
             "Screen Name",
             "Hand History Path",
             "",
             "Tournament Summary Path",
             "",
-            "Favorite seat",
-        ]  # todo ("HUD")
-        # HUD column will contain a button that shows favseat and HUD locations.
-        # Make it possible to load screenshot to arrange HUD windowlets.
+        ]
 
         table = QGridLayout()
         table.setSpacing(0)
@@ -794,44 +955,59 @@ class fpdb(QMainWindow):
 
         y_pos = 1
         for site_number in range(0, len(available_site_names)):
-            check_button = QCheckBox(available_site_names[site_number])
-            check_button.setChecked(self.config.supported_sites[available_site_names[site_number]].enabled)
+            site_name = available_site_names[site_number]
+
+            check_button = QCheckBox(site_name)
+            check_button.setChecked(self.config.supported_sites[site_name].enabled)
             table.addWidget(check_button, y_pos, 0)
             check_buttons.append(check_button)
 
+            # Add Site ID column
+            site_id_label = QLabel()
+            if site_name in self.config.site_ids:
+                site_id_label.setText(str(self.config.site_ids[site_name]))
+            else:
+                site_id_label.setText("N/A")
+            site_id_label.setStyleSheet("padding: 0 10px;")
+            table.addWidget(site_id_label, y_pos, 1)
+
             hero = QLineEdit()
-            hero.setText(self.config.supported_sites[available_site_names[site_number]].screen_name)
-            table.addWidget(hero, y_pos, 2)
+            hero.setText(self.config.supported_sites[site_name].screen_name)
+            table.addWidget(hero, y_pos, 3)
             screen_names.append(hero)
             hero.textChanged.connect(partial(self.autoenableSite, checkbox=check_buttons[site_number]))
 
             entry = QLineEdit()
-            entry.setText(self.config.supported_sites[available_site_names[site_number]].HH_path)
-            table.addWidget(entry, y_pos, 3)
+            entry.setText(self.config.supported_sites[site_name].HH_path)
+            table.addWidget(entry, y_pos, 4)
             history_paths.append(entry)
 
             choose1 = QPushButton("Browse")
-            table.addWidget(choose1, y_pos, 4)
+            table.addWidget(choose1, y_pos, 5)
             choose1.clicked.connect(partial(self.browseClicked, parent=dia, path=history_paths[site_number]))
 
             entry = QLineEdit()
-            entry.setText(self.config.supported_sites[available_site_names[site_number]].TS_path)
-            table.addWidget(entry, y_pos, 5)
+            entry.setText(self.config.supported_sites[site_name].TS_path)
+            table.addWidget(entry, y_pos, 6)
             summary_paths.append(entry)
 
             choose2 = QPushButton("Browse")
-            table.addWidget(choose2, y_pos, 6)
+            table.addWidget(choose2, y_pos, 7)
             choose2.clicked.connect(partial(self.browseClicked, parent=dia, path=summary_paths[site_number]))
 
-            if available_site_names[site_number] in detector.supportedSites:
+            # Check whether the site or its parent network is supported for detection
+            network_name = self.get_network_for_skin(site_name)
+            is_detectable = network_name in detector.supportedSites
+
+            if is_detectable:
                 button = QPushButton("Detect")
-                table.addWidget(button, y_pos, 1)
+                table.addWidget(button, y_pos, 2)
                 button.clicked.connect(
                     partial(
                         self.detect_clicked,
                         data=(
                             detector,
-                            available_site_names[site_number],
+                            site_name,
                             screen_names[site_number],
                             history_paths[site_number],
                             summary_paths[site_number],
@@ -866,6 +1042,100 @@ class fpdb(QMainWindow):
         # autoactivate site if something gets typed in the screename field
         checkbox.setChecked(True)
 
+    def get_network_for_skin(self, site_name):
+        """Mapping a skin to its parent network for detection"""
+        # PokerStars and its variants
+        if site_name.startswith("PokerStars"):
+            return "PokerStars"
+        # iPoker skins
+        elif site_name in [
+            "PMU Poker",
+            "FDJ Poker",
+            "Poker770",
+            "NetBet Poker",
+            "Barrière Poker",
+            "Red Star Poker",
+            "Titan Poker",
+            "Bet365 Poker",
+            "William Hill Poker",
+            "Paddy Power Poker",
+            "Betfair Poker",
+            "Coral Poker",
+            "Genting Poker",
+            "Mansion Poker",
+            "Winner Poker",
+            "Ladbrokes Poker",
+            "Sky Poker",
+            "Sisal Poker",
+            "Lottomatica Poker",
+            "Eurobet Poker",
+            "Snai Poker",
+            "Goldbet Poker",
+            "Casino Barcelona Poker",
+            "Sportium Poker",
+            "Marca Apuestas Poker",
+            "Everest Poker",
+            "Bet-at-home Poker",
+            "Mybet Poker",
+            "Betsson Poker",
+            "Betsafe Poker",
+            "NordicBet Poker",
+            "Unibet Poker",
+            "Maria Casino Poker",
+            "LeoVegas Poker",
+            "Mr Green Poker",
+            "Redbet Poker",
+        ]:
+            return "iPoker"
+        # WPN/ACR skins
+        elif site_name in ["Americas Cardroom", "ACR Poker", "WinningPoker", "BlackChipPoker", "TruePoker", "Ya Poker"]:
+            return "ACR"
+        # PartyGaming skins
+        elif site_name in [
+            "PartyPoker",
+            "Party Poker",
+            "Bwin Poker",
+            "Bwin.fr Poker",
+            "Bwin.it Poker",
+            "Bwin.es Poker",
+            "Bwin.de Poker",
+            "PartyPoker.fr",
+            "PartyPoker.it",
+            "PartyPoker.es",
+            "PartyPoker.de",
+            "Gamebookers Poker",
+            "Empire Poker",
+            "Intertops Poker",
+            "MultiPoker",
+            "PokerRoom",
+            "PartyPoker NJ",
+            "BorgataPoker",
+            "Borgata Poker",
+        ]:
+            return "PartyGaming"
+        # CPN/Everygame skins
+        elif site_name in [
+            "Everygame Poker",
+            "Everygame",
+            "Cake Poker",
+            "Cake",
+            "Juicy Stakes",
+            "Juicy Stakes Poker",
+            "JuicyStakes",
+            "RedStar Poker",
+            "Red Star Poker",
+            "Sportsbetting.ag Poker",
+            "Sportsbetting Poker",
+            "SportsBetting.ag",
+            "BetOnline Poker",
+            "BetOnline.ag",
+            "Tiger Gaming",
+            "TigerGaming",
+        ]:
+            return "CPN"
+        # Return original name if no mapping found
+        return site_name
+
     def browseClicked(self, widget, parent, path):
         """runs when user clicks one of the browse buttons for the TS folder"""
 
@@ -881,11 +1151,61 @@ class fpdb(QMainWindow):
         entry_screen_name = data[2]
         entry_history_path = data[3]
         entry_summary_path = data[4]
-        if detector.sitestatusdict[site_name]["detected"]:
-            entry_screen_name.setText(detector.sitestatusdict[site_name]["heroname"])
-            entry_history_path.setText(detector.sitestatusdict[site_name]["hhpath"])
-            if detector.sitestatusdict[site_name]["tspath"]:
-                entry_summary_path.setText(detector.sitestatusdict[site_name]["tspath"])
+
+        # Mapping the skin to its parent network for detection
+        detection_site = self.get_network_for_skin(site_name)
+
+        # Special case for PokerStars: check all variants
+        if detection_site == "PokerStars":
+            all_variants = detector.get_all_pokerstars_variants()
+            if all_variants:
+                # Search for the variant corresponding to site_name
+                matching_variant = None
+                for variant in all_variants:
+                    variant_name = variant.get("variant", "PokerStars")
+                    # Standardise names for comparison (remove dots)
+                    if variant_name.replace(".", "") == site_name.replace(".", ""):
+                        matching_variant = variant
+                        break
+
+                if matching_variant:
+                    entry_screen_name.setText(matching_variant["heroname"])
+                    entry_history_path.setText(matching_variant["hhpath"])
+                    if matching_variant["tspath"]:
+                        entry_summary_path.setText(matching_variant["tspath"])
+                    QMessageBox.information(
+                        self,
+                        "Detection PokerStars",
+                        f"Configuration applied for {site_name} with detected datas",
+                    )
+                    return
+                else:
+                    # If no exact variant, use the first one found
+                    first_variant = all_variants[0]
+                    entry_screen_name.setText(first_variant["heroname"])
+                    entry_history_path.setText(first_variant["hhpath"])
+                    if first_variant["tspath"]:
+                        entry_summary_path.setText(first_variant["tspath"])
+
+                    # Display an informative message
+                    variants_found = [v.get("variant", "PokerStars") for v in all_variants]
+                    QMessageBox.information(
+                        self,
+                        "Detection PokerStars",
+                        f"PokerStars variants detected: {', '.join(variants_found)}\n"
+                        f"Configuration applied for {site_name} with the data from the first variant found.",
+                    )
+                    return
+
+        # Check whether detection was successful for the mapped site (general case)
+        if detection_site in detector.sitestatusdict and detector.sitestatusdict[detection_site]["detected"]:
+            entry_screen_name.setText(detector.sitestatusdict[detection_site]["heroname"])
+            entry_history_path.setText(detector.sitestatusdict[detection_site]["hhpath"])
+            if detector.sitestatusdict[detection_site]["tspath"]:
+                entry_summary_path.setText(detector.sitestatusdict[detection_site]["tspath"])
+        else:
+            # If no detection was successful, display an information message
+            QMessageBox.information(self, "Detection", f"No installations detected for {site_name}")
 
     def reload_config(self):
         if len(self.nb_tab_names) == 1:
@@ -946,6 +1266,7 @@ class fpdb(QMainWindow):
         configMenu.addAction(self.makeAction("Site Settings", self.dia_site_preferences))
         configMenu.addAction(self.makeAction("Seat Settings", self.dia_site_preferences_seat))
         configMenu.addAction(self.makeAction("Hud Settings", self.dia_hud_preferences))
+        configMenu.addAction(self.makeAction("Manage HUD Sites", self.dia_manage_hud_sites))
         configMenu.addAction(
             self.makeAction("Adv Preferences", self.dia_advanced_preferences, tip="Edit your preferences")
         )
@@ -1347,13 +1668,13 @@ class fpdb(QMainWindow):
                 log.warning(f"site {site} missing from db")
                 dia = QMessageBox()
                 dia.setIcon(QMessageBox.Warning)
-                dia.setText("Unknown Site")
+                dia.setWindowTitle("Unknown Site")
+                dia.setText(f"Warning: Unable to find site '{site}' in database")
+                dia.setInformativeText(
+                    "This site is configured but not found in the database. You may need to recreate the database tables."
+                )
                 dia.setStandardButtons(QMessageBox.Ok)
                 dia.exec_()
-                diastring = f"Warning: Unable to find site '{site}'"
-                dia.format_secondary_text(diastring)
-                dia.run()
-                dia.destroy()
 
     def info_box(self, str1, str2):
         diapath = QMessageBox(self)
@@ -1365,7 +1686,15 @@ class fpdb(QMainWindow):
         return QMessageBox(QMessageBox.Warning, diatitle, string).exec_()
 
     def change_theme(self, theme):
-        apply_stylesheet(app, theme=theme)
+        try:
+            from qt_material import apply_stylesheet
+
+            apply_stylesheet(QApplication.instance(), theme=theme)
+            self.update_title_bar_theme()
+        except ImportError:
+            log.warning("qt_material not available, cannot change theme")
+        except Exception as e:
+            log.error(f"Error changing theme: {e}")
 
     def update_title_bar_theme(self):
         # Apply the stylesheet to the custom title bar

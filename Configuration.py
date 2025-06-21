@@ -410,6 +410,9 @@ class Site(object):
         else:
             self.TS_path = ""
 
+        # Support for the network attribute (configuration by skins)
+        self.network = node.getAttribute("network") if node.hasAttribute("network") else "Unknown"
+
         self.fav_seat = {}
         for fav_node in node.getElementsByTagName("fav"):
             max = int(fav_node.getAttribute("max"))
