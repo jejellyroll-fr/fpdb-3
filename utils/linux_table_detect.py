@@ -1,4 +1,5 @@
-import xcffib, xcffib.xproto
+import xcffib
+import xcffib.xproto
 
 # Connect to the X server
 xconn = xcffib.Connection()
@@ -16,7 +17,9 @@ utf8atom = getAtom("UTF8_STRING")
 
 
 def get_window_title(window_id):
-    reply = xconn.core.GetProperty(False, window_id, wnameatom, utf8atom, 0, (2**32) - 1).reply()
+    reply = xconn.core.GetProperty(
+        False, window_id, wnameatom, utf8atom, 0, (2**32) - 1
+    ).reply()
     if reply.value_len > 0:
         return reply.value.to_string()
     else:

@@ -21,14 +21,15 @@
 # import L10n
 # _ = L10n.get_translation()
 
-from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
-from TourneySummary import TourneySummary
-import Database
-from decimal import Decimal
-import re
 import datetime
+import re
 import time
+from decimal import Decimal
+
+import Database
+from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from loggingFpdb import get_logger
+from TourneySummary import TourneySummary
 
 # Obtention du logger configuré
 log = get_logger("parser")
@@ -40,7 +41,14 @@ class PartyPoker(HandHistoryConverter):
     siteId = 9
     filetype = "text"
     sym = {"USD": "\$", "EUR": "\u20ac", "T$": "", "play": "play"}
-    currencies = {"\$": "USD", "$": "USD", "\xe2\x82\xac": "EUR", "\u20ac": "EUR", "": "T$", "play": "play"}
+    currencies = {
+        "\$": "USD",
+        "$": "USD",
+        "\xe2\x82\xac": "EUR",
+        "\u20ac": "EUR",
+        "": "T$",
+        "play": "play",
+    }
     substitutions = {
         "LEGAL_ISO": "USD|EUR",  # legal ISO currency codes
         "LS": "\$|\u20ac|\xe2\x82\xac|",  # Currency symbols - Euro(cp1252, utf-8)
@@ -266,10 +274,13 @@ class PartyPoker(HandHistoryConverter):
     )
 
     re_NewLevel = re.compile(
-        "Blinds(-Antes)?\((?P<SB>[%(NUM)s ]+)/(?P<BB>[%(NUM)s ]+)(?:\s*-\s*(?P<ANTE>[%(NUM)s ]+))?\)" % substitutions,
+        "Blinds(-Antes)?\((?P<SB>[%(NUM)s ]+)/(?P<BB>[%(NUM)s ]+)(?:\s*-\s*(?P<ANTE>[%(NUM)s ]+))?\)"
+        % substitutions,
         re.VERBOSE | re.MULTILINE | re.DOTALL,
     )
-    re_CountedSeats = re.compile("Total\s+number\s+of\s+players\s*:\s*(?P<COUNTED_SEATS>\d+)", re.MULTILINE)
+    re_CountedSeats = re.compile(
+        "Total\s+number\s+of\s+players\s*:\s*(?P<COUNTED_SEATS>\d+)", re.MULTILINE
+    )
     re_Identify = re.compile("\*{5}\sHand\sHistory\s[fF]or\sGame\s\d+\w+?\s")
     re_SplitHands = re.compile("Game\s*\#\d+\s*starts.\n\n+\#Game\s*No\s*\:\s*\d+\s*")
     re_TailSplitHands = re.compile("(\x00+)")
@@ -277,11 +288,15 @@ class PartyPoker(HandHistoryConverter):
     re_Button = re.compile("Seat (?P<BUTTON>\d+) is the button", re.MULTILINE)
     re_Board = re.compile(r"\[(?P<CARDS>.+)\]")
     re_NoSmallBlind = re.compile(
-        "^There is no Small Blind in this hand as the Big Blind " "of the previous hand left the table", re.MULTILINE
+        "^There is no Small Blind in this hand as the Big Blind "
+        "of the previous hand left the table",
+        re.MULTILINE,
     )
     re_20BBmin = re.compile(r"Table 20BB Min")
     re_Cancelled = re.compile("Table\sClosed\s?", re.MULTILINE)
-    re_Disconnected = re.compile("Connection\sLost\sdue\sto\ssome\sreason\s?", re.MULTILINE)
+    re_Disconnected = re.compile(
+        "Connection\sLost\sdue\sto\ssome\sreason\s?", re.MULTILINE
+    )
     re_GameStartLine = re.compile("Game\s\#\d+\sstarts", re.MULTILINE)
     re_emailedHand = re.compile(r"\*\*\sSummary\s\*\*")
 
@@ -315,7 +330,16 @@ class PartyPoker(HandHistoryConverter):
             f"Initializing PartyPoker parser in_path: {in_path}, out_path: {out_path}, index: {index}, sitename: {sitename}"
         )
 
-        super().__init__(config, in_path, out_path, index, autostart, starsArchive, ftpArchive, sitename)
+        super().__init__(
+            config,
+            in_path,
+            out_path,
+            index,
+            autostart,
+            starsArchive,
+            ftpArchive,
+            sitename,
+        )
 
         log.info("Initialized base parser")
 
@@ -336,7 +360,9 @@ class PartyPoker(HandHistoryConverter):
             self.db = Database.Database(self.config)
             log.debug(f"Initialized database connection config: {str(self.config)}")
 
-        log.debug(f"Completed PartyPoker parser initialization sitename: {sitename}, has_db: {hasattr(self, 'db')}")
+        log.debug(
+            f"Completed PartyPoker parser initialization sitename: {sitename}, has_db: {hasattr(self, 'db')}"
+        )
 
     def allHandsAsList(self):
         log.info("Starting hands list retrieval")
@@ -362,7 +388,9 @@ class PartyPoker(HandHistoryConverter):
         log.debug(f"Players identified players: {list(players)}, count: {len(players)}")
 
         if not hasattr(self, "compiledPlayers") or not players <= self.compiledPlayers:
-            log.debug("Compiling new regex patterns reason: New players or no existing patterns")
+            log.debug(
+                "Compiling new regex patterns reason: New players or no existing patterns"
+            )
 
             self.compiledPlayers = players
             player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
@@ -393,17 +421,30 @@ class PartyPoker(HandHistoryConverter):
 
             try:
                 for name, pattern in patterns.items():
-                    setattr(self, name, re.compile(pattern, re.MULTILINE | (re.VERBOSE if name == "re_Action" else 0)))
+                    setattr(
+                        self,
+                        name,
+                        re.compile(
+                            pattern,
+                            re.MULTILINE | (re.VERBOSE if name == "re_Action" else 0),
+                        ),
+                    )
                     log.debug(f"Compiled regex pattern pattern_name: {name}")
 
             except re.error as e:
-                log.error(f"Failed to compile regex pattern pattern_name: {name}, error: {str(e)}")
+                log.error(
+                    f"Failed to compile regex pattern pattern_name: {name}, error: {str(e)}"
+                )
                 raise
 
-            log.debug(f"Successfully compiled all regex patterns pattern_count: {len(patterns)}")
+            log.debug(
+                f"Successfully compiled all regex patterns pattern_count: {len(patterns)}"
+            )
 
         else:
-            log.debug(f"Skipped compilation - patterns already exist compiled_players: {list(self.compiledPlayers)}")
+            log.debug(
+                f"Skipped compilation - patterns already exist compiled_players: {list(self.compiledPlayers)}"
+            )
 
     def readSupportedGames(self):
         log.info("Getting supported games list")
@@ -432,7 +473,9 @@ class PartyPoker(HandHistoryConverter):
 
     def readSTP(self, hand):
         log.debug(f"Starting STP read hand_id: {hand.handid}, status: not_implemented")
-        log.warning(f"STP functionality not implemented hand_id: {hand.handid}, method: readSTP")
+        log.warning(
+            f"STP functionality not implemented hand_id: {hand.handid}, method: readSTP"
+        )
         pass
 
     def determineGameType(self, handText):
@@ -496,13 +539,17 @@ class PartyPoker(HandHistoryConverter):
         if "SITE" in mg and mg["SITE"]:
             self.sitename = self.sites.get(mg["SITE"], (self.sitename,))[0]
             self.siteId = self.sites.get(mg["SITE"], (self.siteId,))[1]
-            log.info(f"Site determined site_name: {self.sitename}, site_id: {self.siteId}")
+            log.info(
+                f"Site determined site_name: {self.sitename}, site_id: {self.siteId}"
+            )
 
         # Set limit type
         for limit_key in ["LIMIT", "LIMIT2", "LIMIT3"]:
             if mg.get(limit_key):
                 info["limitType"] = self.limits.get(mg[limit_key], "fl")
-                log.debug(f"Limit type set limit_type: {info['limitType']}, source: {limit_key}")
+                log.debug(
+                    f"Limit type set limit_type: {info['limitType']}, source: {limit_key}"
+                )
                 break
         else:
             info["limitType"] = "fl"
@@ -514,8 +561,12 @@ class PartyPoker(HandHistoryConverter):
 
         # Set game type
         if "GAME" in mg and mg["GAME"]:
-            info["base"], info["category"] = self.games.get(mg["GAME"], ("hold", "holdem"))
-            log.debug(f"Game type determined base: {info['base']}, category: {info['category']}")
+            info["base"], info["category"] = self.games.get(
+                mg["GAME"], ("hold", "holdem")
+            )
+            log.debug(
+                f"Game type determined base: {info['base']}, category: {info['category']}"
+            )
         else:
             log.error("Game type not found")
             raise FpdbParseError("Game not identified")
@@ -527,7 +578,9 @@ class PartyPoker(HandHistoryConverter):
 
             try:
                 if m_20BBmin:
-                    info["sb"], info["bb"] = self.NLim_Blinds_20bb.get(mg["CASHBI"], ("0.01", "0.02"))
+                    info["sb"], info["bb"] = self.NLim_Blinds_20bb.get(
+                        mg["CASHBI"], ("0.01", "0.02")
+                    )
                     info["buyinType"] = "shallow"
                     log.debug(
                         f"Using 20BB min blinds small_blind: {info['sb']}, big_blind: {info['bb']}, buyin_type: shallow"
@@ -541,7 +594,9 @@ class PartyPoker(HandHistoryConverter):
                         nl_bb = str((cashbi_decimal / 50).quantize(Decimal("0.01")))
                         info["buyinType"] = "regular"
 
-                    info["sb"], info["bb"] = self.Lim_Blinds.get(nl_bb, ("0.01", "0.02"))
+                    info["sb"], info["bb"] = self.Lim_Blinds.get(
+                        nl_bb, ("0.01", "0.02")
+                    )
                     log.debug(
                         f"Blinds determined from cash buyin small_blind: {info['sb']}, big_blind: {info['bb']}, buyin_type: {info['buyinType']}"
                     )
@@ -589,27 +644,41 @@ class PartyPoker(HandHistoryConverter):
             info["type"] = "tour"
             info["currency"] = "T$"
 
-        log.debug(f"Game format determined type: {info['type']}, currency: {info['currency']}")
+        log.debug(
+            f"Game format determined type: {info['type']}, currency: {info['currency']}"
+        )
 
         # Special handling for fixed limit games
         if info.get("limitType") == "fl" and info.get("bb"):
             if info["type"] == "ring":
                 try:
-                    info["sb"], info["bb"] = self.Lim_Blinds.get(mg["BB"], ("0.01", "0.02"))
-                    log.debug(f"Fixed limit ring game blinds small_blind: {info['sb']}, big_blind: {info['bb']}")
+                    info["sb"], info["bb"] = self.Lim_Blinds.get(
+                        mg["BB"], ("0.01", "0.02")
+                    )
+                    log.debug(
+                        f"Fixed limit ring game blinds small_blind: {info['sb']}, big_blind: {info['bb']}"
+                    )
                 except KeyError:
-                    log.error(f"Error setting fixed limit ring blinds BB: {mg['BB']}, hand_text: {handText[:200]}")
+                    log.error(
+                        f"Error setting fixed limit ring blinds BB: {mg['BB']}, hand_text: {handText[:200]}"
+                    )
                     raise FpdbParseError
             else:
-                info["sb"] = str((Decimal(mg.get("SB", "0")) / 2).quantize(Decimal("0.01")))
+                info["sb"] = str(
+                    (Decimal(mg.get("SB", "0")) / 2).quantize(Decimal("0.01"))
+                )
                 info["bb"] = str(Decimal(mg.get("SB", "0")).quantize(Decimal("0.01")))
-                log.debug(f"Fixed limit tournament blinds small_blind: {info['sb']}, big_blind: {info['bb']}")
+                log.debug(
+                    f"Fixed limit tournament blinds small_blind: {info['sb']}, big_blind: {info['bb']}"
+                )
 
         log.debug(f"Game type determination complete game_info: {info}")
         return info
 
     def readHandInfo(self, hand):
-        log.debug(f"Starting hand info reading hand_id: {getattr(hand, 'handid', None)}")
+        log.debug(
+            f"Starting hand info reading hand_id: {getattr(hand, 'handid', None)}"
+        )
 
         info, m2, extra = {}, None, {}
         type3 = False
@@ -638,7 +707,9 @@ class PartyPoker(HandHistoryConverter):
 
             for name, pattern in patterns:
                 m2 = pattern.search(hand.handText)
-                log.debug(f"Tournament pattern search - pattern: {name}, found: {bool(m2)}")
+                log.debug(
+                    f"Tournament pattern search - pattern: {name}, found: {bool(m2)}"
+                )
 
                 if m2:
                     if name == "GameInfoTrny2":
@@ -721,7 +792,9 @@ class PartyPoker(HandHistoryConverter):
         if type3:
             self._processType3Info(hand, info)
 
-        log.debug(f"Completed hand info processing hand_id: {hand.handid}, type: {hand.gametype['type']}")
+        log.debug(
+            f"Completed hand info processing hand_id: {hand.handid}, type: {hand.gametype['type']}"
+        )
 
     def _processDateTime(self, hand, datetime_str):
         log.debug(f"Processing datetime raw: {datetime_str}")
@@ -746,9 +819,15 @@ class PartyPoker(HandHistoryConverter):
         datetime_str = f"{m.group('Y')}/{month}/{m.group('D')} {m.group('H')}:{m.group('MIN')}:{m.group('S')}"
 
         try:
-            hand.startTime = datetime.datetime.strptime(datetime_str, "%Y/%m/%d %H:%M:%S")
-            hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, timezone, "UTC")
-            log.debug(f"Set start time time: {str(hand.startTime)}, timezone: {timezone}")
+            hand.startTime = datetime.datetime.strptime(
+                datetime_str, "%Y/%m/%d %H:%M:%S"
+            )
+            hand.startTime = HandHistoryConverter.changeTimezone(
+                hand.startTime, timezone, "UTC"
+            )
+            log.debug(
+                f"Set start time time: {str(hand.startTime)}, timezone: {timezone}"
+            )
         except Exception as e:
             log.error(f"Error parsing datetime error: {str(e)}")
             raise FpdbParseError("Error parsing date")
@@ -767,7 +846,9 @@ class PartyPoker(HandHistoryConverter):
             else:
                 hand.handid = hid
 
-            log.debug(f"Set hand ID hand_id: {hand.handid}, round_penny: {hand.roundPenny}")
+            log.debug(
+                f"Set hand ID hand_id: {hand.handid}, round_penny: {hand.roundPenny}"
+            )
 
     def _processTable(self, hand, info):
         log.debug("Processing table info")
@@ -814,7 +895,9 @@ class PartyPoker(HandHistoryConverter):
         elif hand.tourNo is not None:
             self._processTournamentBuyin(hand, info)
 
-        log.debug(f"Completed buyin processing buyin: {hand.buyin}, currency: {hand.buyinCurrency}, fee: {hand.fee}")
+        log.debug(
+            f"Completed buyin processing buyin: {hand.buyin}, currency: {hand.buyinCurrency}, fee: {hand.fee}"
+        )
 
     def _processTournamentBuyin(self, hand, info):
         hand.buyin = 0
@@ -826,7 +909,9 @@ class PartyPoker(HandHistoryConverter):
         elif "€" in info["BUYIN"]:
             hand.buyinCurrency = "EUR"
         else:
-            log.error(f"Unknown currency hand_id: {hand.handid}, buyin: {info['BUYIN']}")
+            log.error(
+                f"Unknown currency hand_id: {hand.handid}, buyin: {info['BUYIN']}"
+            )
             raise FpdbParseError
 
         buyin_str = self.clearMoneyString(info["BUYIN"].strip("$€"))
@@ -836,7 +921,9 @@ class PartyPoker(HandHistoryConverter):
             fee_str = self.clearMoneyString(info["FEE"].strip("$€"))
             hand.fee = int(100 * Decimal(fee_str))
 
-        log.debug(f"Set tournament buyin details buyin: {hand.buyin}, currency: {hand.buyinCurrency}, fee: {hand.fee}")
+        log.debug(
+            f"Set tournament buyin details buyin: {hand.buyin}, currency: {hand.buyinCurrency}, fee: {hand.fee}"
+        )
 
     def _processType3Info(self, hand, info):
         log.debug("Processing type 3 tournament info")
@@ -857,13 +944,21 @@ class PartyPoker(HandHistoryConverter):
 
         if m:
             hand.buttonpos = int(m.group("BUTTON"))
-            log.debug(f"Button position found hand_id: {hand.handid}, button_position: {hand.buttonpos}")
+            log.debug(
+                f"Button position found hand_id: {hand.handid}, button_position: {hand.buttonpos}"
+            )
         else:
-            log.info(f"No button position found hand_id: {hand.handid}, status: missing")
-        log.debug(f"Completed button position read hand_id: {hand.handid}, has_button: {bool(m)}")
+            log.info(
+                f"No button position found hand_id: {hand.handid}, status: missing"
+            )
+        log.debug(
+            f"Completed button position read hand_id: {hand.handid}, has_button: {bool(m)}"
+        )
 
     def readPlayerStacks(self, hand):
-        log.debug(f"Starting player stacks read hand_id: {hand.handid}, game_type: {hand.gametype['type']}")
+        log.debug(
+            f"Starting player stacks read hand_id: {hand.handid}, game_type: {hand.gametype['type']}"
+        )
         self.playerMap = {}  # Initialize playerMap
 
         seat_info_list = []
@@ -888,7 +983,9 @@ class PartyPoker(HandHistoryConverter):
                 self.playerMap[pname] = pname
 
         if placeholder_detected:
-            log.debug("Placeholder names detected in seat list. Replacing with real names from actions.")
+            log.debug(
+                "Placeholder names detected in seat list. Replacing with real names from actions."
+            )
 
             # Collect real player names from the actions
             real_player_names = []
@@ -902,7 +999,9 @@ class PartyPoker(HandHistoryConverter):
                 # Assign real player names to placeholder seats in order
                 for (seat, cash), pname in zip(placeholder_seats, real_player_names):
                     hand.addPlayer(seat, pname, cash)
-                    log.debug(f"Assigned real name to seat player: {pname}, seat: {seat}, stack: {cash}")
+                    log.debug(
+                        f"Assigned real name to seat player: {pname}, seat: {seat}, stack: {cash}"
+                    )
                     self.playerMap[pname] = pname
             else:
                 # If mismatch, assign seats arbitrarily
@@ -912,7 +1011,9 @@ class PartyPoker(HandHistoryConverter):
                 for seat_info, pname in zip(placeholder_seats, real_player_names):
                     seat, cash = seat_info
                     hand.addPlayer(seat, pname, cash)
-                    log.debug(f"Assigned real name to seat arbitrarily player: {pname}, seat: {seat}, stack: {cash}")
+                    log.debug(
+                        f"Assigned real name to seat arbitrarily player: {pname}, seat: {seat}, stack: {cash}"
+                    )
                     self.playerMap[pname] = pname
 
             # Add any remaining real player names without seats
@@ -920,13 +1021,17 @@ class PartyPoker(HandHistoryConverter):
                 for pname in real_player_names[len(placeholder_seats) :]:
                     seat = self._findFirstEmptySeat(hand, 1)
                     hand.addPlayer(seat, pname, "0")
-                    log.debug(f"Added extra player without seat info player: {pname}, seat: {seat}, stack: Unknown")
+                    log.debug(
+                        f"Added extra player without seat info player: {pname}, seat: {seat}, stack: Unknown"
+                    )
                     self.playerMap[pname] = pname
         else:
             # No placeholders detected, process normally
             for seat, pname, cash in seat_info_list:
                 hand.addPlayer(seat, pname, cash)
-                log.debug(f"Added player with stack player: {pname}, seat: {seat}, stack: {cash}")
+                log.debug(
+                    f"Added player with stack player: {pname}, seat: {seat}, stack: {cash}"
+                )
 
         # Add the hero to the player list
         if hero_seat_info:
@@ -941,7 +1046,8 @@ class PartyPoker(HandHistoryConverter):
         subst = {"PLYR": re.escape(match.group("PNAME")), "SPACENAME": r"\s(.+)? "}
 
         re_PlayerName = re.compile(
-            rf"^{subst['PLYR']}(?P<PNAMEEXTRA>{subst['SPACENAME']})balance\s", re.MULTILINE | re.VERBOSE
+            rf"^{subst['PLYR']}(?P<PNAMEEXTRA>{subst['SPACENAME']})balance\s",
+            re.MULTILINE | re.VERBOSE,
         )
 
         name_match = re_PlayerName.search(hand.handText)
@@ -949,7 +1055,9 @@ class PartyPoker(HandHistoryConverter):
             full_name = match.group("PNAME") + name_match.group("PNAMEEXTRA")
             full_name = full_name.strip()
             self.playerMap[match.group("PNAME")] = full_name
-            log.debug(f"Updated emailed hand player name original: {match.group('PNAME')}, full_name: {full_name}")
+            log.debug(
+                f"Updated emailed hand player name original: {match.group('PNAME')}, full_name: {full_name}"
+            )
 
     def _processRingGame(self, hand, maxKnownStack, zeroStackPlayers):
         """Handle ring game specific player processing"""
@@ -957,7 +1065,9 @@ class PartyPoker(HandHistoryConverter):
 
         # Compile regex patterns
         re_JoiningPlayers = re.compile(r"(?P<PLAYERNAME>.+?) has joined the table")
-        re_BBPostingPlayers = re.compile(r"(?P<PLAYERNAME>.+?) posts big blind", re.MULTILINE)
+        re_BBPostingPlayers = re.compile(
+            r"(?P<PLAYERNAME>.+?) posts big blind", re.MULTILINE
+        )
         re_LeavingPlayers = re.compile(r"(?P<PLAYERNAME>.+?) has left the table")
 
         # Find player movements
@@ -970,11 +1080,15 @@ class PartyPoker(HandHistoryConverter):
         )
 
         # Process zero stack players
-        self._processZeroStackPlayers(hand, zeroStackPlayers, joining_players, leaving_players, maxKnownStack)
+        self._processZeroStackPlayers(
+            hand, zeroStackPlayers, joining_players, leaving_players, maxKnownStack
+        )
 
         # Get current seated players
         seated_players = [player[1] for player in hand.players]
-        log.debug(f"Current seated players: players: {seated_players}, count: {len(seated_players)}")
+        log.debug(
+            f"Current seated players: players: {seated_players}, count: {len(seated_players)}"
+        )
 
         # Handle unseated active players
         unseated_active = list(set(bb_posting_players) - set(seated_players))
@@ -998,18 +1112,24 @@ class PartyPoker(HandHistoryConverter):
         log.debug(f"Found empty seat seat: {seat}")
         return seat
 
-    def _processZeroStackPlayers(self, hand, zero_stack_players, joining, leaving, max_stack):
+    def _processZeroStackPlayers(
+        self, hand, zero_stack_players, joining, leaving, max_stack
+    ):
         """Process players with zero stacks"""
         log.debug(f"Processing zero stack players count: {len(zero_stack_players)}")
 
         for seat, pname, stack in zero_stack_players:
             if pname in joining:
                 stack = str(max_stack)
-                log.debug(f"Adjusted joining player stack player: {pname}, new_stack: {stack}")
+                log.debug(
+                    f"Adjusted joining player stack player: {pname}, new_stack: {stack}"
+                )
 
             if pname not in leaving:
                 hand.addPlayer(seat, pname, stack)
-                log.debug(f"Added zero stack player player: {pname}, seat: {seat}, stack: {stack}")
+                log.debug(
+                    f"Added zero stack player player: {pname}, seat: {seat}, stack: {stack}"
+                )
 
     def _addUnseatedPlayers(self, hand, unseated_players, max_stack):
         """Add active players who are not yet seated"""
@@ -1018,10 +1138,14 @@ class PartyPoker(HandHistoryConverter):
         for player in unseated_players:
             new_seat = self._findFirstEmptySeat(hand, 1)
             hand.addPlayer(new_seat, player, str(max_stack))
-            log.debug(f"Added unseated player player: {player}, seat: {new_seat}, stack: {max_stack}")
+            log.debug(
+                f"Added unseated player player: {player}, seat: {new_seat}, stack: {max_stack}"
+            )
 
     def markStreets(self, hand):
-        log.debug(f"Starting streets marking hand_id: {hand.handid}, game_type: {hand.gametype['base']}")
+        log.debug(
+            f"Starting streets marking hand_id: {hand.handid}, game_type: {hand.gametype['base']}"
+        )
 
         street_patterns = {
             "hold": (
@@ -1048,9 +1172,13 @@ class PartyPoker(HandHistoryConverter):
             pattern = street_patterns[base]
             match = re.search(pattern, hand.handText, re.DOTALL)
 
-            log.debug(f"Searched street pattern game_type: {base}, found: {bool(match)}")
+            log.debug(
+                f"Searched street pattern game_type: {base}, found: {bool(match)}"
+            )
         else:
-            log.warning(f"Unsupported game type for street marking game_type: {base}, hand_id: {hand.handid}")
+            log.warning(
+                f"Unsupported game type for street marking game_type: {base}, hand_id: {hand.handid}"
+            )
             return
 
         if match:
@@ -1058,7 +1186,9 @@ class PartyPoker(HandHistoryConverter):
             hand.addStreets(match)
 
             streets = match.groupdict()
-            log.debug(f"Marked street sections sections: {str({k: bool(v) for k, v in streets.items()})}")
+            log.debug(
+                f"Marked street sections sections: {str({k: bool(v) for k, v in streets.items()})}"
+            )
 
             # Log street actions
             if base == "hold":
@@ -1072,13 +1202,19 @@ class PartyPoker(HandHistoryConverter):
                 f"Street marking failed - hand_id: {hand.handid}, game_type: {base}, text_sample: {hand.handText[:100]}"
             )
 
-        log.debug(f"Completed streets marking - hand_id: {hand.handid}, success: {bool(match)}")
+        log.debug(
+            f"Completed streets marking - hand_id: {hand.handid}, success: {bool(match)}"
+        )
 
     def readCommunityCards(self, hand, street):
-        log.debug(f"Entering readCommunityCards method - street: {street}, method: PartyPoker:readCommunityCards")
+        log.debug(
+            f"Entering readCommunityCards method - street: {street}, method: PartyPoker:readCommunityCards"
+        )
 
         if street in ("FLOP", "TURN", "RIVER"):
-            log.debug(f"Processing community cards - street: {street}, method: PartyPoker:readCommunityCards")
+            log.debug(
+                f"Processing community cards - street: {street}, method: PartyPoker:readCommunityCards"
+            )
 
             m = self.re_Board.search(hand.streets[street])
             if m:
@@ -1093,11 +1229,17 @@ class PartyPoker(HandHistoryConverter):
                 )
 
                 hand.setCommunityCards(street, cards)
-                log.info(f"Set community cards - street: {street}, method: PartyPoker:readCommunityCards")
+                log.info(
+                    f"Set community cards - street: {street}, method: PartyPoker:readCommunityCards"
+                )
             else:
-                log.warning(f"No community cards found - street: {street}, method: PartyPoker:readCommunityCards")
+                log.warning(
+                    f"No community cards found - street: {street}, method: PartyPoker:readCommunityCards"
+                )
         else:
-            log.warning(f"Unknown or unsupported street - street: {street}, method: PartyPoker:readCommunityCards")
+            log.warning(
+                f"Unknown or unsupported street - street: {street}, method: PartyPoker:readCommunityCards"
+            )
 
         log.debug("Exiting readCommunityCards method PartyPoker:readCommunityCards")
 
@@ -1109,7 +1251,9 @@ class PartyPoker(HandHistoryConverter):
             ante = self.clearMoneyString(m.group("ANTE"))
             hand.addAnte(player, ante)
 
-            log.debug(f"Player posted ante - method: PartyPoker:readAntes, player: {player}, ante: {ante}")
+            log.debug(
+                f"Player posted ante - method: PartyPoker:readAntes, player: {player}, ante: {ante}"
+            )
 
         log.info("Exiting readAntes method")
 
@@ -1137,7 +1281,9 @@ class PartyPoker(HandHistoryConverter):
                         )
             except Exception as e:
                 hand.addBlind(None, None, None)
-                log.error(f"No small blind found - method: PartyPoker:readBlinds - error: {str(e)}")
+                log.error(
+                    f"No small blind found - method: PartyPoker:readBlinds - error: {str(e)}"
+                )
 
             for a in self.re_PostBB.finditer(hand.handText):
                 player = a.group("PNAME")
@@ -1147,7 +1293,9 @@ class PartyPoker(HandHistoryConverter):
                 if hand.gametype["bb"] is None:
                     hand.gametype["bb"] = bb_amount
 
-                log.debug(f"Big blind posted - method: PartyPoker:readBlinds, player: {player}, amount: {bb_amount}")
+                log.debug(
+                    f"Big blind posted - method: PartyPoker:readBlinds, player: {player}, amount: {bb_amount}"
+                )
 
             for a in self.re_PostBUB.finditer(hand.handText):
                 player = a.group("PNAME")
@@ -1163,13 +1311,21 @@ class PartyPoker(HandHistoryConverter):
                 amount = self.clearMoneyString(a.group("BBNDEAD"))
                 hand.addBlind(player, "both", amount)
 
-                log.debug(f"Both blinds posted - method: PartyPoker:readBlinds, player: {player}, amount: {amount}")
+                log.debug(
+                    f"Both blinds posted - method: PartyPoker:readBlinds, player: {player}, amount: {amount}"
+                )
 
         else:
             if hand.buttonpos == 0:
                 self.readButton(hand)
 
-            playersMap = dict([(f[0], f[1:3]) for f in hand.players if f[1] in hand.handText.split("Trny:")[-1]])
+            playersMap = dict(
+                [
+                    (f[0], f[1:3])
+                    for f in hand.players
+                    if f[1] in hand.handText.split("Trny:")[-1]
+                ]
+            )
             maxSeat = max(playersMap)
 
             def findFirstNonEmptySeat(startSeat):
@@ -1187,13 +1343,17 @@ class PartyPoker(HandHistoryConverter):
                 log.warning("No small blind in this hand method PartyPoker:readBlinds")
             else:
                 smallBlindSeat = (
-                    int(hand.buttonpos) if len(hand.players) == 2 else findFirstNonEmptySeat(int(hand.buttonpos) + 1)
+                    int(hand.buttonpos)
+                    if len(hand.players) == 2
+                    else findFirstNonEmptySeat(int(hand.buttonpos) + 1)
                 )
                 blind = smartMin(hand.sb, playersMap[smallBlindSeat][1])
                 player = playersMap[smallBlindSeat][0]
                 hand.addBlind(player, "small blind", blind)
 
-                log.debug(f"Small blind posted - method: PartyPoker:readBlinds, player: {player}, amount: {blind}")
+                log.debug(
+                    f"Small blind posted - method: PartyPoker:readBlinds, player: {player}, amount: {blind}"
+                )
 
             if hand.gametype["category"] == "6_holdem":
                 bigBlindSeat = findFirstNonEmptySeat(smallBlindSeat + 1)
@@ -1201,14 +1361,18 @@ class PartyPoker(HandHistoryConverter):
                 player = playersMap[bigBlindSeat][0]
                 hand.addBlind(player, "button blind", blind)
 
-                log.debug(f"Button blind posted - method: PartyPoker:readBlinds, player: {player}, amount: {blind}")
+                log.debug(
+                    f"Button blind posted - method: PartyPoker:readBlinds, player: {player}, amount: {blind}"
+                )
             else:
                 bigBlindSeat = findFirstNonEmptySeat(smallBlindSeat + 1)
                 blind = smartMin(hand.bb, playersMap[bigBlindSeat][1])
                 player = playersMap[bigBlindSeat][0]
                 hand.addBlind(player, "big blind", blind)
 
-                log.debug(f"Big blind posted - method: PartyPoker:readBlinds, player: {player}, amount: {blind}")
+                log.debug(
+                    f"Big blind posted - method: PartyPoker:readBlinds, player: {player}, amount: {blind}"
+                )
 
         log.info("Exiting readBlinds method")
 
@@ -1223,12 +1387,21 @@ class PartyPoker(HandHistoryConverter):
         # Read hero's cards
         for street in ("PREFLOP",):
             if street in hand.streets:
-                log.debug(f"Reading hero hole cards - method: PartyPoker:readHoleCards, street: {street}")
+                log.debug(
+                    f"Reading hero hole cards - method: PartyPoker:readHoleCards, street: {street}"
+                )
 
                 for found in self.re_HeroCards.finditer(hand.streets[street]):
                     hand.hero = found.group("PNAME")
                     newcards = self.renderCards(found.group("NEWCARDS"))
-                    hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
+                    hand.addHoleCards(
+                        street,
+                        hand.hero,
+                        closed=newcards,
+                        shown=False,
+                        mucked=False,
+                        dealt=True,
+                    )
 
                     log.debug(
                         f"Found hero hole cards - method: PartyPoker:readHoleCards, player: {hand.hero}, cards: {newcards}"
@@ -1239,12 +1412,22 @@ class PartyPoker(HandHistoryConverter):
             if not text or street in ("PREFLOP", "DEAL"):
                 continue
 
-            log.debug(f"Reading other players hole cards - method: PartyPoker:readHoleCards, street: {street}")
+            log.debug(
+                f"Reading other players hole cards - method: PartyPoker:readHoleCards, street: {street}"
+            )
 
             for found in self.re_HeroCards.finditer(text):
                 player = found.group("PNAME")
                 newcards = self.renderCards(found.group("NEWCARDS"))
-                hand.addHoleCards(street, player, open=newcards, closed=[], shown=False, mucked=False, dealt=False)
+                hand.addHoleCards(
+                    street,
+                    player,
+                    open=newcards,
+                    closed=[],
+                    shown=False,
+                    mucked=False,
+                    dealt=False,
+                )
 
                 log.debug(
                     f"Found player hole cards - method: PartyPoker:readHoleCards, player: {player}, street: {street}, cards: {newcards}"
@@ -1253,7 +1436,9 @@ class PartyPoker(HandHistoryConverter):
         log.info("Exiting readHoleCards method")
 
     def readAction(self, hand, street):
-        log.debug(f"Entering readAction method - method: PartyPoker:readAction, street: {street}")
+        log.debug(
+            f"Entering readAction method - method: PartyPoker:readAction, street: {street}"
+        )
 
         # Iterate over each action in the street
         m = self.re_Action.finditer(hand.streets[street])
@@ -1267,37 +1452,55 @@ class PartyPoker(HandHistoryConverter):
             if self.playerMap.get(playerName):
                 playerName = self.playerMap.get(playerName)
 
-            amount = self.clearMoneyString(action.group("BET")) if action.group("BET") else None
+            amount = (
+                self.clearMoneyString(action.group("BET"))
+                if action.group("BET")
+                else None
+            )
             actionType = action.group("ATYPE")
 
             # Handle different action types
             if actionType == "folds":
                 hand.addFold(street, playerName)
-                log.debug(f"Player folded - method: PartyPoker:readAction, player: {playerName}")
+                log.debug(
+                    f"Player folded - method: PartyPoker:readAction, player: {playerName}"
+                )
 
             elif actionType == "checks":
                 hand.addCheck(street, playerName)
-                log.debug(f"Player checked - method: PartyPoker:readAction, player: {playerName}")
+                log.debug(
+                    f"Player checked - method: PartyPoker:readAction, player: {playerName}"
+                )
 
             elif actionType == "calls":
                 hand.addCall(street, playerName, amount)
-                log.debug(f"Player called - method: PartyPoker:readAction, player: {playerName}, amount: {amount}")
+                log.debug(
+                    f"Player called - method: PartyPoker:readAction, player: {playerName}, amount: {amount}"
+                )
 
             elif actionType == "raises":
                 hand.addCallandRaise(street, playerName, amount)
-                log.debug(f"Player raised - method: PartyPoker:readAction, player: {playerName}, amount: {amount}")
+                log.debug(
+                    f"Player raised - method: PartyPoker:readAction, player: {playerName}, amount: {amount}"
+                )
 
             elif actionType in ("bets", "double bets"):
                 hand.addBet(street, playerName, amount)
-                log.debug(f"Player bet - method: PartyPoker:readAction, player: {playerName}, amount: {amount}")
+                log.debug(
+                    f"Player bet - method: PartyPoker:readAction, player: {playerName}, amount: {amount}"
+                )
 
             elif actionType == "completes":
                 hand.addComplete(street, playerName, amount)
-                log.debug(f"Player completed - method: PartyPoker:readAction, player: {playerName}, amount: {amount}")
+                log.debug(
+                    f"Player completed - method: PartyPoker:readAction, player: {playerName}, amount: {amount}"
+                )
 
             elif actionType == "bring-ins":
                 hand.addBringIn(playerName, amount)
-                log.debug(f"Player brought in - method: PartyPoker:readAction, player: {playerName}, amount: {amount}")
+                log.debug(
+                    f"Player brought in - method: PartyPoker:readAction, player: {playerName}, amount: {amount}"
+                )
 
             elif actionType == "is all-In":
                 if amount:
@@ -1312,7 +1515,9 @@ class PartyPoker(HandHistoryConverter):
                 )
                 raise FpdbParseError
 
-        log.debug(f"Exiting readAction method - method: PartyPoker:readAction, street: {street}")
+        log.debug(
+            f"Exiting readAction method - method: PartyPoker:readAction, street: {street}"
+        )
 
     def readShowdownActions(self, hand):
         log.debug("Entering readShowdownActions method")
@@ -1329,7 +1534,9 @@ class PartyPoker(HandHistoryConverter):
             pot = self.clearMoneyString(m.group("POT"))
             hand.addCollectPot(player=player, pot=pot)
 
-            log.debug(f"Player collected pot method: PartyPoker:readCollectPot, player: {player}, amount: {pot}")
+            log.debug(
+                f"Player collected pot method: PartyPoker:readCollectPot, player: {player}, amount: {pot}"
+            )
 
         log.info("Exiting readCollectPot method")
 
@@ -1343,7 +1550,13 @@ class PartyPoker(HandHistoryConverter):
                 mucked = "SHOWED" in m.groupdict() and m.group("SHOWED") != "shows"
                 combination = m.group("COMBINATION")
 
-                hand.addShownCards(cards=cards, player=player, shown=True, mucked=mucked, string=combination)
+                hand.addShownCards(
+                    cards=cards,
+                    player=player,
+                    shown=True,
+                    mucked=mucked,
+                    string=combination,
+                )
 
                 log.debug(
                     f"Player showed cards method: PartyPoker:readShownCards, player: {player}, cards: {cards}, mucked: {mucked}, combination: {combination}"
@@ -1370,7 +1583,9 @@ class PartyPoker(HandHistoryConverter):
         hand.playersIn = []
         hand.isProgressive = False
 
-        log.debug("Initialized tournament data structures method: PartyPoker:readTourneyResults, is_progressive: False")
+        log.debug(
+            "Initialized tournament data structures method: PartyPoker:readTourneyResults, is_progressive: False"
+        )
 
         # Process tournament winner (rank 1)
         m = self.re_WinningRankOne.search(hand.handText)
@@ -1393,7 +1608,9 @@ class PartyPoker(HandHistoryConverter):
                     )
             else:
                 hand.winnings[winner] = Decimal(0)
-                log.debug(f"Winner found without amount method: PartyPoker:readTourneyResults, player: {winner}")
+                log.debug(
+                    f"Winner found without amount method: PartyPoker:readTourneyResults, player: {winner}"
+                )
 
             hand.ranks[winner] = 1
             hand.playersIn.append(winner)
@@ -1506,7 +1723,9 @@ class PartyPoker(HandHistoryConverter):
             )
 
         except Exception as e:
-            log.error(f"Error processing tournament summary method: PartyPoker:readTourneyResults, error: {str(e)}")
+            log.error(
+                f"Error processing tournament summary method: PartyPoker:readTourneyResults, error: {str(e)}"
+            )
 
         log.debug(
             f"Exiting readTourneyResults method - method: PartyPoker:readTourneyResults, total_players: {len(hand.ranks)}, total_winners: {len(hand.winnings)}"
@@ -1546,6 +1765,8 @@ class PartyPoker(HandHistoryConverter):
         cards = string.strip().split(" ")
         rendered_cards = list(filter(len, map(lambda x: x.strip(" ,"), cards)))
 
-        log.debug(f"Cards rendering complete - input: {string}, output: {rendered_cards}")
+        log.debug(
+            f"Cards rendering complete - input: {string}, output: {rendered_cards}"
+        )
 
         return rendered_cards

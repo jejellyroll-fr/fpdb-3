@@ -16,13 +16,26 @@
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
 
-import os
 import codecs
-from IdentifySite import IdentifySite
-import Configuration
+import os
 import sys
-import WinamaxToFpdb, BetfairToFpdb, BovadaToFpdb, CakeToFpdb, GGPokerToFpdb, iPokerToFpdb, KingsClubToFpdb, MergeToFpdb, PacificPokerToFpdb, PartyPokerToFpdb, WinningToFpdb, PokerStarsToFpdb
+
 import chardet
+
+import BetfairToFpdb
+import BovadaToFpdb
+import CakeToFpdb
+import Configuration
+import GGPokerToFpdb
+import iPokerToFpdb
+import KingsClubToFpdb
+import MergeToFpdb
+import PacificPokerToFpdb
+import PartyPokerToFpdb
+import PokerStarsToFpdb
+import WinamaxToFpdb
+import WinningToFpdb
+from IdentifySite import IdentifySite
 from L10n import set_locale_translation
 
 
@@ -124,7 +137,9 @@ def anonymize_hand_history(file_path, hero_name):
         uniq = set(players)
 
         for i, name in enumerate(uniq):
-            filecontents = filecontents.replace(name, "Hero" if name == hero_name else f"Player{i}")
+            filecontents = filecontents.replace(
+                name, "Hero" if name == hero_name else f"Player{i}"
+            )
 
         # print(filecontents.encode('utf-8').decode())
 

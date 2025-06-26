@@ -5,15 +5,17 @@
 
 from __future__ import print_function
 
+import base64
+import os
+import os.path
+import sys
+import time
+
+from loggingFpdb import get_logger
+
 # import L10n
 # _ = L10n.get_translation()
 
-import sys
-import os, os.path
-import time
-import base64
-
-from loggingFpdb import get_logger
 
 log = get_logger("interlocks")
 
@@ -98,7 +100,9 @@ class InterProcessLockFcntl(InterProcessLockBase):
     def __init__(self, name=None):
         InterProcessLockBase.__init__(self, name)
         self.lockfd = 0
-        self.lock_file_name = os.path.join(LOCK_FILE_DIRECTORY, self.getHashedName() + ".lck")
+        self.lock_file_name = os.path.join(
+            LOCK_FILE_DIRECTORY, self.getHashedName() + ".lck"
+        )
         assert os.path.isdir(LOCK_FILE_DIRECTORY)
 
     # This is the suggested way to get a safe file name, but I like having a descriptively named lock file.
@@ -118,7 +122,9 @@ class InterProcessLockFcntl(InterProcessLockBase):
         except IOError:
             self.lockfd.close()
             self.lockfd = 0
-            raise SingleInstanceError("Could not acquire exclusive lock on " + self.lock_file_name)
+            raise SingleInstanceError(
+                "Could not acquire exclusive lock on " + self.lock_file_name
+            )
 
     def release_impl(self):
         fcntl.lockf(self.lockfd, fcntl.LOCK_UN)
@@ -142,7 +148,9 @@ class InterProcessLockWin32(InterProcessLockBase):
         if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
             self.mutex.Close()
             self.mutex = None
-            raise SingleInstanceError("Could not acquire exclusive lock on " + self.name)
+            raise SingleInstanceError(
+                "Could not acquire exclusive lock on " + self.name
+            )
 
     def release_impl(self):
         self.mutex.Close()
@@ -161,7 +169,9 @@ class InterProcessLockSocket(InterProcessLockBase):
         except socket.error:
             self.socket.close()
             self.socket = None
-            raise SingleInstanceError("Could not acquire exclusive lock on " + self.name)
+            raise SingleInstanceError(
+                "Could not acquire exclusive lock on " + self.name
+            )
 
     def release_impl(self):
         self.socket.close()
@@ -175,8 +185,8 @@ try:
     InterProcessLock = InterProcessLockFcntl
 except ImportError:
     try:
-        import win32event
         import win32api
+        import win32event
         import winerror
 
         InterProcessLock = InterProcessLockWin32

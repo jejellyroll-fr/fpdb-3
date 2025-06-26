@@ -15,9 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
-from __future__ import print_function
-from __future__ import division
-
+from __future__ import division, print_function
 
 # import L10n
 # _ = L10n.get_translation()
@@ -26,17 +24,21 @@ import os
 import sys
 from time import time
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QFileDialog
+from PyQt5.QtWidgets import (
+    QFileDialog,
+    QHBoxLayout,
+    QLineEdit,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
+
+import Configuration
+import Importer
+from loggingFpdb import get_logger
 
 #    fpdb/FreePokerTools modules
 
-
-import Importer
-
-import Configuration
-
-
-from loggingFpdb import get_logger
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
@@ -124,7 +126,9 @@ class GuiBulkImport(QWidget):
 
     def browseClicked(self):
         newdir = QFileDialog.getExistingDirectory(
-            self, caption=("Please choose the path that you want to Auto Import"), directory=self.importDir.text()
+            self,
+            caption=("Please choose the path that you want to Auto Import"),
+            directory=self.importDir.text(),
         )
         if newdir:
             self.importDir.setText(newdir)

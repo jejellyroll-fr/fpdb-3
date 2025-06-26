@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from time import time
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import (
@@ -16,7 +17,6 @@ from PyQt5.QtWidgets import (
 
 # import Charset
 import Filters
-
 from loggingFpdb import get_logger
 
 log = get_logger("tourplayerstats")
@@ -92,11 +92,15 @@ class GuiTourneyPlayerStats(QSplitter):
         self.setStretchFactor(0, 0)
         self.setStretchFactor(1, 1)
 
-    def addGrid(self, vbox, query_name, numTourneys, tourneyTypes, playerids, sitenos, seats):
+    def addGrid(
+        self, vbox, query_name, numTourneys, tourneyTypes, playerids, sitenos, seats
+    ):
         grid = 0
 
         query = self.sql.query[query_name]
-        query = self.refineQuery(query, numTourneys, tourneyTypes, playerids, sitenos, seats)
+        query = self.refineQuery(
+            query, numTourneys, tourneyTypes, playerids, sitenos, seats
+        )
         self.cursor.execute(query)
         result = self.cursor.fetchall()
         colnames = [desc[0] for desc in self.cursor.description]
@@ -127,13 +131,18 @@ class GuiTourneyPlayerStats(QSplitter):
                     if row_data[colnames.index("speed")] != "Normal":
                         if (
                             row_data[colnames.index("speed")] == "Hyper"
-                            and row_data[colnames.index("siteName")] == "Full Tilt Poker"
+                            and row_data[colnames.index("siteName")]
+                            == "Full Tilt Poker"
                         ):
                             value = value + " " + "Super Turbo"
                         else:
                             value = value + " " + row_data[colnames.index("speed")]
                 if column[colalias] in ["knockout", "reEntry"]:
-                    value = "Yes" if row_data[colnames.index(column[colalias])] == 1 else "No"
+                    value = (
+                        "Yes"
+                        if row_data[colnames.index(column[colalias])] == 1
+                        else "No"
+                    )
                 item = QStandardItem("")
                 if value is not None and value != -999:
                     item = QStandardItem(column[colformat] % value)
@@ -213,7 +222,10 @@ class GuiTourneyPlayerStats(QSplitter):
         query = query.replace("<sitetest>", sitetest)
 
         if seats:
-            query = query.replace("<seats_test>", "between " + str(seats["from"]) + " and " + str(seats["to"]))
+            query = query.replace(
+                "<seats_test>",
+                "between " + str(seats["from"]) + " and " + str(seats["to"]),
+            )
             query = query.replace("<groupbyseats>", ",h.seats")
             query = query.replace("<orderbyseats>", ",h.seats")
         else:
@@ -225,7 +237,11 @@ class GuiTourneyPlayerStats(QSplitter):
         if self.detailFilters:
             for f in self.detailFilters:
                 if len(f) == 3:
-                    flagtest += " and %s between %s and %s " % (f[0], str(f[1]), str(f[2]))
+                    flagtest += " and %s between %s and %s " % (
+                        f[0],
+                        str(f[1]),
+                        str(f[2]),
+                    )
         query = query.replace("<flagtest>", flagtest)
 
         if self.db.backend == self.db.MYSQL_INNODB:
@@ -263,8 +279,9 @@ if __name__ == "__main__":
     settings.update(config.get_default_paths())
 
     from PyQt5.QtWidgets import QApplication, QMainWindow
-    import SQL
+
     import Database
+    import SQL
 
     app = QApplication([])
     sql = SQL.Sql(db_server=settings["db-server"])

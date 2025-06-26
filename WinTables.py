@@ -1,13 +1,14 @@
 import ctypes
 import re
-from loggingFpdb import get_logger
-from ctypes import wintypes
-from PyQt5.QtGui import QWindow
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication
 import sys
 import time
+from ctypes import wintypes
 
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QWindow
+from PyQt5.QtWidgets import QApplication
+
+from loggingFpdb import get_logger
 from TableWindow import Table_Window
 
 app = QApplication(sys.argv)
@@ -25,7 +26,9 @@ SM_CYCAPTION = 4
 
 # Windows functions via ctypes
 EnumWindows = ctypes.windll.user32.EnumWindows
-EnumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.wintypes.HWND, ctypes.wintypes.LPARAM)
+EnumWindowsProc = ctypes.WINFUNCTYPE(
+    ctypes.c_bool, ctypes.wintypes.HWND, ctypes.wintypes.LPARAM
+)
 GetWindowText = ctypes.windll.user32.GetWindowTextW
 GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
 IsWindowVisible = ctypes.windll.user32.IsWindowVisible
@@ -71,7 +74,9 @@ class Table(Table_Window):
 
         try:
             log.debug("before EnumWindows")
-            EnumWindows(EnumWindowsProc(win_enum_handler), ctypes.py_object(window_info))
+            EnumWindows(
+                EnumWindowsProc(win_enum_handler), ctypes.py_object(window_info)
+            )
             log.debug(f"after EnumWindows found {len(window_info.titles)} windows")
         except Exception as e:
             log.error(f"Error during EnumWindows: {e}")
@@ -82,7 +87,9 @@ class Table(Table_Window):
         for hwnd in window_info.titles:
             try:
                 if time.time() - start_time > time_limit:
-                    log.error(f"Time limit of {time_limit} seconds reached. Exiting loop.")
+                    log.error(
+                        f"Time limit of {time_limit} seconds reached. Exiting loop."
+                    )
                     break
 
                 title = window_info.titles[hwnd]
@@ -110,7 +117,9 @@ class Table(Table_Window):
 
             except IOError as e:
                 if "closed file" in str(e):
-                    log.warning(f"Logging to a closed file for hwnd {hwnd}. Skipping this log entry.")
+                    log.warning(
+                        f"Logging to a closed file for hwnd {hwnd}. Skipping this log entry."
+                    )
                 else:
                     log.error(f"IOError for hwnd {hwnd}: {e}")
             except Exception as e:
@@ -145,7 +154,9 @@ class Table(Table_Window):
                         "width": int(width) - 2 * self.b_width,
                     }
                 else:
-                    log.error(f"Failed to retrieve GetWindowRect for hwnd: {self.number}")
+                    log.error(
+                        f"Failed to retrieve GetWindowRect for hwnd: {self.number}"
+                    )
                     return None
             else:
                 log.error(f"The window {self.number} is not valid.")
@@ -178,7 +189,12 @@ class Table(Table_Window):
 
         qwindow = window.windowHandle()
         qwindow.setTransientParent(self.gdkhandle)
-        qwindow.setFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus | Qt.WindowStaysOnTopHint)
+        qwindow.setFlags(
+            Qt.Tool
+            | Qt.FramelessWindowHint
+            | Qt.WindowDoesNotAcceptFocus
+            | Qt.WindowStaysOnTopHint
+        )
 
     def check_bad_words(self, title):
         """Check if the title contains any bad words."""

@@ -28,13 +28,14 @@ Create and manage the hud overlays.
 # import L10n
 # _ = L10n.get_translation()
 
-#    Standard Library modules
-from loggingFpdb import get_logger
 import copy
 
 #    FreePokerTools modules
 import Database
 import Hand
+
+#    Standard Library modules
+from loggingFpdb import get_logger
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("hud")
@@ -71,7 +72,9 @@ class Hud(object):
         self.type = game_type
         self.cards = None
         self.site = table.site
-        self.hud_params = dict.copy(parent.hud_params)  # we must dict.copy a fresh hud_params dict
+        self.hud_params = dict.copy(
+            parent.hud_params
+        )  # we must dict.copy a fresh hud_params dict
         # because each aux hud can control local hud param
         # settings.  Simply assigning the dictionary does not
         # create a local/discrete version of the dictionary,
@@ -79,20 +82,28 @@ class Hud(object):
         self.aux_windows = []
 
         self.site_parameters = config.get_site_parameters(self.table.site)
-        self.supported_games_parameters = config.get_supported_games_parameters(self.poker_game, self.game_type)
+        self.supported_games_parameters = config.get_supported_games_parameters(
+            self.poker_game, self.game_type
+        )
         self.layout_set = config.get_layout(self.table.site, self.game_type)
 
         # Just throw error and die if any serious config issues are discovered
         if self.supported_games_parameters is None:
-            log.warning(f"No <game_stat_set> found for {self.poker_game} games for type {self.game_type}.\n")
+            log.warning(
+                f"No <game_stat_set> found for {self.poker_game} games for type {self.game_type}.\n"
+            )
             return
 
         if self.layout_set is None:
-            log.warning(f"No layout found for {self.game_type} games for site {self.table.site}.\n")
+            log.warning(
+                f"No layout found for {self.game_type} games for site {self.table.site}.\n"
+            )
             return
 
         if self.max not in self.layout_set.layout:
-            log.warning(f"No layout found for {self.max}-max {self.game_type} games for site {self.table.site}.\n")
+            log.warning(
+                f"No layout found for {self.max}-max {self.game_type} games for site {self.table.site}.\n"
+            )
             return
         else:
             self.layout = copy.deepcopy(
@@ -155,7 +166,10 @@ class Hud(object):
                     (int(self.layout.location[i][1] * y_scale)),
                 )
 
-        self.layout.common = (int(self.layout.common[0] * x_scale), int(self.layout.common[1] * y_scale))
+        self.layout.common = (
+            int(self.layout.common[0] * x_scale),
+            int(self.layout.common[1] * y_scale),
+        )
 
         self.layout.width = self.table.width
         self.layout.height = self.table.height
@@ -187,7 +201,6 @@ class Hud(object):
         self.db_hud_connection.connection.rollback()
 
         log.info(f"Creating hud from hand {hand}")
-
 
     def update(self, hand, config):
         # re-load a hand instance (factory will load correct type for this hand)

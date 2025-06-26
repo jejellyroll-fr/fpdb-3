@@ -19,15 +19,14 @@
 # import L10n
 # _ = L10n.get_translation()
 
-from decimal import Decimal
 import datetime
+import re
+from decimal import Decimal
+
 from bs4 import BeautifulSoup
 
 from HandHistoryConverter import FpdbParseError
-
-import re
 from loggingFpdb import get_logger
-
 from TourneySummary import TourneySummary
 
 # Winamax HH Format
@@ -88,7 +87,9 @@ class WinamaxSummary(TourneySummary):
         re.VERBOSE | re.MULTILINE,
     )
 
-    re_GameType = re.compile("""<h1>((?P<LIMIT>No Limit|Pot Limit) (?P<GAME>Hold\'em|Omaha))</h1>""")
+    re_GameType = re.compile(
+        """<h1>((?P<LIMIT>No Limit|Pot Limit) (?P<GAME>Hold\'em|Omaha))</h1>"""
+    )
 
     re_TourNo = re.compile("ID\=(?P<TOURNO>[0-9]+)")
 
@@ -145,7 +146,9 @@ class WinamaxSummary(TourneySummary):
                 if mg["LABEL"] == "Nombre de joueurs inscrits":
                     self.entries = mg["VALUE"]
                 if mg["LABEL"] == "D\xc3\xa9but du tournoi":
-                    self.startTime = datetime.datetime.strptime(mg["VALUE"], "%d-%m-%Y %H:%M")
+                    self.startTime = datetime.datetime.strptime(
+                        mg["VALUE"], "%d-%m-%Y %H:%M"
+                    )
                 if mg["LABEL"] == "Nombre de joueurs max":
                     # Max seats i think
                     pass
@@ -233,7 +236,9 @@ class WinamaxSummary(TourneySummary):
         if "PRIZEPOOL2" in mg and mg["PRIZEPOOL2"] is not None:
             self.prizepool = int(100 * self.convert_to_decimal(mg["PRIZEPOOL2"]))
         if "DATETIME" in mg:
-            self.startTime = datetime.datetime.strptime(mg["DATETIME"], "%Y/%m/%d %H:%M:%S UTC")
+            self.startTime = datetime.datetime.strptime(
+                mg["DATETIME"], "%Y/%m/%d %H:%M:%S UTC"
+            )
 
         # FIXME: buyinCurrency and currency not detected
         self.buyinCurrency = "EUR"
@@ -256,7 +261,9 @@ class WinamaxSummary(TourneySummary):
                     self.buyinCurrency = "play"
 
                 if mg["BIBOUNTY"] is not None and mg["BIRAKE"] is not None:
-                    self.koBounty = int(100 * Decimal(self.convert_to_decimal(mg["BIRAKE"].strip("\r"))))
+                    self.koBounty = int(
+                        100 * Decimal(self.convert_to_decimal(mg["BIRAKE"].strip("\r")))
+                    )
                     self.isKO = True
                     mg["BIRAKE"] = mg["BIBOUNTY"].strip("\r")
 
@@ -323,7 +330,11 @@ class WinamaxSummary(TourneySummary):
                     winnings += int(100 * self.convert_to_decimal(mg["TICKET"]))
 
                 if "BOUNTY" in mg and mg["BOUNTY"] is not None:
-                    koCount = 100 * self.convert_to_decimal(mg["BOUNTY"]) / Decimal(self.koBounty)
+                    koCount = (
+                        100
+                        * self.convert_to_decimal(mg["BOUNTY"])
+                        / Decimal(self.koBounty)
+                    )
                     if winnings == 0:
                         if mg["BOUNTY"].find("€") != -1:
                             self.currency = "EUR"
@@ -335,7 +346,9 @@ class WinamaxSummary(TourneySummary):
                             self.currency = "play"
 
                 # print "DEBUG: addPlayer(%s, %s, %s, %s, %s, %s, %s)" %(rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount)
-                self.addPlayer(rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount)
+                self.addPlayer(
+                    rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount
+                )
 
     def convert_to_decimal(self, string):
         dec = self.clearMoneyString(string)

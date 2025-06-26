@@ -1,4 +1,4 @@
-from Card import twoStartCards, decodeStartHandValue, StartCardRank
+from Card import StartCardRank, decodeStartHandValue, twoStartCards
 
 
 def test_twoStartCards():

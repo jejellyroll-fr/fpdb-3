@@ -21,12 +21,16 @@
 
 
 from datetime import datetime
+
 import pytz
 
 
 class MergeStructures(object):
     def __init__(self):
-        self.versions = [pytz.utc.localize(datetime.strptime(d, "%Y/%m/%d %H:%M:%S")) for d in ("2013/05/28 00:00:00",)]
+        self.versions = [
+            pytz.utc.localize(datetime.strptime(d, "%Y/%m/%d %H:%M:%S"))
+            for d in ("2013/05/28 00:00:00",)
+        ]
         self.versions.append(datetime.utcnow().replace(tzinfo=pytz.utc))
         self.SnG_Structures = []
         self.SnG_Structures.append(
@@ -2403,7 +2407,18 @@ class MergeStructures(object):
                     "seats": 10,
                     "multi": False,
                     "payoutCurrency": "USD",
-                    "payouts": (32.50, 32.50, 11, 11, 3.30, 3.30, 3.30, 1.10, 1.10, 0.90),
+                    "payouts": (
+                        32.50,
+                        32.50,
+                        11,
+                        11,
+                        3.30,
+                        3.30,
+                        3.30,
+                        1.10,
+                        1.10,
+                        0.90,
+                    ),
                 },
                 "Snakes'n'Ladders Step 4": {
                     "buyIn": 30,
@@ -2439,7 +2454,18 @@ class MergeStructures(object):
                     "seats": 10,
                     "multi": False,
                     "payoutCurrency": "USD",
-                    "payouts": (2000, 1250, 750, 499.50, 295, 220, 80, 3.30, 1.10, 1.10),
+                    "payouts": (
+                        2000,
+                        1250,
+                        750,
+                        499.50,
+                        295,
+                        220,
+                        80,
+                        3.30,
+                        1.10,
+                        1.10,
+                    ),
                 },
                 "Snow Goose Room": {
                     "buyIn": 10,

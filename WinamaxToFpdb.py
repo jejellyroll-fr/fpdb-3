@@ -18,15 +18,15 @@
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
 
+import datetime
+import platform
+import re
+from decimal import Decimal
+
 # import L10n
 # _ = L10n.get_translation()
-from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
-import re
+from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from loggingFpdb import get_logger
-import datetime
-from decimal import Decimal
-import platform
-
 
 # Winamax HH Format
 log = get_logger("parser")
@@ -51,7 +51,14 @@ class Winamax(HandHistoryConverter):
     siteId = 15  # Needs to match id entry in Sites database
 
     mixes = {}  # Legal mixed games
-    sym = {"USD": "\$", "CAD": "\$", "T$": "", "EUR": "\xe2\x82\xac|\u20ac", "GBP": "\xa3", "play": ""}
+    sym = {
+        "USD": "\$",
+        "CAD": "\$",
+        "T$": "",
+        "EUR": "\xe2\x82\xac|\u20ac",
+        "GBP": "\xa3",
+        "play": "",
+    }
     # ADD Euro, Sterling, etc HERE
     substitutions = {
         "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP",  # legal ISO currency codes
@@ -84,7 +91,9 @@ class Winamax(HandHistoryConverter):
 
     # Static regexes
     # ***** End of hand R5-75443872-57 *****
-    re_Identify = re.compile('Winamax\sPoker\s\-\s(CashGame|Go\sFast|HOLD\-UP|Tournament\s")')
+    re_Identify = re.compile(
+        'Winamax\sPoker\s\-\s(CashGame|Go\sFast|HOLD\-UP|Tournament\s")'
+    )
     re_SplitHands = re.compile(r"\n\n")
 
     re_HandInfo = re.compile(
@@ -118,10 +127,15 @@ class Winamax(HandHistoryConverter):
     re_TailSplitHands = re.compile(r"\n\s*\n")
     re_Button = re.compile(r"Seat\s#(?P<BUTTON>\d+)\sis\sthe\sbutton")
     re_Board = re.compile(r"\[(?P<CARDS>.+)\]")
-    re_Total = re.compile(r"Total pot (?P<TOTAL>[\.\d]+).*(No rake|Rake (?P<RAKE>[\.\d]+))" % substitutions)
+    re_Total = re.compile(
+        r"Total pot (?P<TOTAL>[\.\d]+).*(No rake|Rake (?P<RAKE>[\.\d]+))"
+        % substitutions
+    )
     re_Mixed = re.compile(r"_(?P<MIXED>10games|8games|horse)_")
     re_HUTP = re.compile(
-        r"Hold\-up\sto\sPot:\stotal\s((%(LS)s)?(?P<AMOUNT>[.0-9]+)(%(LS)s)?)" % substitutions, re.MULTILINE | re.VERBOSE
+        r"Hold\-up\sto\sPot:\stotal\s((%(LS)s)?(?P<AMOUNT>[.0-9]+)(%(LS)s)?)"
+        % substitutions,
+        re.MULTILINE | re.VERBOSE,
     )
     # 2010/09/21 03:10:51 UTC
     re_DateTime = re.compile(
@@ -142,7 +156,9 @@ class Winamax(HandHistoryConverter):
         "Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.*)\s\((%(LS)s)?(?P<CASH>[.0-9]+)(%(LS)s)?(,\s(%(LS)s)?(?P<BOUNTY>[.0-9]+)(%(LS)s)?\sbounty)?\)"
         % substitutions
     )
-    re_PlayerInfoSummary = re.compile("Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.+?)\s" % substitutions)
+    re_PlayerInfoSummary = re.compile(
+        "Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.+?)\s" % substitutions
+    )
 
     def compilePlayerRegexs(self, hand):
         players = {player[1] for player in hand.players}
@@ -157,30 +173,41 @@ class Winamax(HandHistoryConverter):
             player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
             subst = {"PLYR": player_re, "CUR": self.sym[hand.gametype["currency"]]}
             self.re_PostSB = re.compile(
-                "%(PLYR)s posts small blind (%(CUR)s)?(?P<SB>[\.0-9]+)(%(CUR)s)?(?! out of position)" % subst,
+                "%(PLYR)s posts small blind (%(CUR)s)?(?P<SB>[\.0-9]+)(%(CUR)s)?(?! out of position)"
+                % subst,
                 re.MULTILINE,
             )
             self.re_PostBB = re.compile(
-                "%(PLYR)s posts big blind (%(CUR)s)?(?P<BB>[\.0-9]+)(%(CUR)s)?" % subst, re.MULTILINE
+                "%(PLYR)s posts big blind (%(CUR)s)?(?P<BB>[\.0-9]+)(%(CUR)s)?" % subst,
+                re.MULTILINE,
             )
             self.re_DenySB = re.compile("(?P<PNAME>.*) deny SB" % subst, re.MULTILINE)
             self.re_Antes = re.compile(
-                r"^%(PLYR)s posts ante (%(CUR)s)?(?P<ANTE>[\.0-9]+)(%(CUR)s)?" % subst, re.MULTILINE
+                r"^%(PLYR)s posts ante (%(CUR)s)?(?P<ANTE>[\.0-9]+)(%(CUR)s)?" % subst,
+                re.MULTILINE,
             )
             self.re_BringIn = re.compile(
-                r"^%(PLYR)s (brings in|bring\-in) (%(CUR)s)?(?P<BRINGIN>[\.0-9]+)(%(CUR)s)?" % subst, re.MULTILINE
+                r"^%(PLYR)s (brings in|bring\-in) (%(CUR)s)?(?P<BRINGIN>[\.0-9]+)(%(CUR)s)?"
+                % subst,
+                re.MULTILINE,
             )
             self.re_PostBoth = re.compile(
-                "(?P<PNAME>.*): posts small \& big blind \( (%(CUR)s)?(?P<SBBB>[\.0-9]+)(%(CUR)s)?\)" % subst
+                "(?P<PNAME>.*): posts small \& big blind \( (%(CUR)s)?(?P<SBBB>[\.0-9]+)(%(CUR)s)?\)"
+                % subst
             )
             self.re_PostDead = re.compile(
-                "(?P<PNAME>.*) posts dead blind \((%(CUR)s)?(?P<DEAD>[\.0-9]+)(%(CUR)s)?\)" % subst, re.MULTILINE
+                "(?P<PNAME>.*) posts dead blind \((%(CUR)s)?(?P<DEAD>[\.0-9]+)(%(CUR)s)?\)"
+                % subst,
+                re.MULTILINE,
             )
             self.re_PostSecondSB = re.compile(
-                "%(PLYR)s posts small blind (%(CUR)s)?(?P<SB>[\.0-9]+)(%(CUR)s)? out of position" % subst, re.MULTILINE
+                "%(PLYR)s posts small blind (%(CUR)s)?(?P<SB>[\.0-9]+)(%(CUR)s)? out of position"
+                % subst,
+                re.MULTILINE,
             )
             self.re_HeroCards = re.compile(
-                "Dealt\sto\s%(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % subst
+                "Dealt\sto\s%(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])"
+                % subst
             )
 
             # no discards action observed yet
@@ -193,7 +220,8 @@ class Winamax(HandHistoryConverter):
             )
 
             self.re_CollectPot = re.compile(
-                "\s*(?P<PNAME>.*)\scollected\s(%(CUR)s)?(?P<POT>[\.\d]+)(%(CUR)s)?.*" % subst
+                "\s*(?P<PNAME>.*)\scollected\s(%(CUR)s)?(?P<POT>[\.\d]+)(%(CUR)s)?.*"
+                % subst
             )
             self.re_ShownCards = re.compile(
                 "^Seat (?P<SEAT>[0-9]+): %(PLYR)s (\((small blind|big blind|button)\) )?showed \[(?P<CARDS>.*)\].+? with (?P<STRING>.*)"
@@ -282,7 +310,9 @@ class Winamax(HandHistoryConverter):
                 else:
                     datetimestr = "2010/Jan/01 01:01:01"
                     log.warning(f"DATETIME not matched: '{info[key]}'")
-                hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
+                hand.startTime = datetime.datetime.strptime(
+                    datetimestr, "%Y/%m/%d %H:%M:%S"
+                )
             elif key == "HID1":
                 # Need to remove non-alphanumerics for MySQL
                 # Concatenating all three or just HID2 + HID3 can produce out of range values
@@ -329,14 +359,18 @@ class Winamax(HandHistoryConverter):
                     else:
                         hand.buyinCurrency = "play"
 
-                    info["BIAMT"] = info["BIAMT"].strip("$€FPP") if info["BIAMT"] is not None else 0
+                    info["BIAMT"] = (
+                        info["BIAMT"].strip("$€FPP") if info["BIAMT"] is not None else 0
+                    )
                     if hand.buyinCurrency != "WIFP":
                         if info["BOUNTY"] is not None:
                             # There is a bounty, Which means we need to switch BOUNTY and BIRAKE values
                             tmp = info["BOUNTY"]
                             info["BOUNTY"] = info["BIRAKE"]
                             info["BIRAKE"] = tmp
-                            info["BOUNTY"] = info["BOUNTY"].strip("$€")  # Strip here where it isn't 'None'
+                            info["BOUNTY"] = info["BOUNTY"].strip(
+                                "$€"
+                            )  # Strip here where it isn't 'None'
                             hand.koBounty = int(100 * Decimal(info["BOUNTY"]))
                             hand.isKO = True
                         else:
@@ -367,7 +401,9 @@ class Winamax(HandHistoryConverter):
         # Going to parse both and only add players in the summary.
         handsplit = hand.handText.split("*** SUMMARY ***")
         if len(handsplit) != 2:
-            raise FpdbHandPartial(f"Hand is not cleanly split into pre and post Summary {hand.handid}.")
+            raise FpdbHandPartial(
+                f"Hand is not cleanly split into pre and post Summary {hand.handid}."
+            )
         pre, post = handsplit
         m = self.re_PlayerInfo.finditer(pre)
         plist = {}
@@ -438,7 +474,9 @@ class Winamax(HandHistoryConverter):
     #            m = self.re_Board.search(hand.streets.group(street))
     #            hand.setCommunityCards(street, m.group('CARDS').split(','))
 
-    def readCommunityCards(self, hand, street):  # street has been matched by markStreets, so exists in this hand
+    def readCommunityCards(
+        self, hand, street
+    ):  # street has been matched by markStreets, so exists in this hand
         if street in ("FLOP", "TURN", "RIVER"):
             # a list of streets which get dealt community cards (i.e. all but PREFLOP)
             # print("DEBUG readCommunityCards:", street, hand.streets.group(street))
@@ -461,10 +499,14 @@ class Winamax(HandHistoryConverter):
             amount = Decimal(a.group("BB").replace(",", ""))
             hand.lastBet["PREFLOP"] = amount
         for a in self.re_PostDead.finditer(hand.handText):
-            log.debug(f"Found dead blind: addBlind({a.group('PNAME')}, 'secondsb', {a.group('DEAD')})")
+            log.debug(
+                f"Found dead blind: addBlind({a.group('PNAME')}, 'secondsb', {a.group('DEAD')})"
+            )
             hand.addBlind(a.group("PNAME"), "secondsb", a.group("DEAD"))
         for a in self.re_PostSecondSB.finditer(hand.handText):
-            log.debug(f"Found dead blind: addBlind({a.group('PNAME')}, 'secondsb/both', {a.group('SB')}, {hand.sb})")
+            log.debug(
+                f"Found dead blind: addBlind({a.group('PNAME')}, 'secondsb/both', {a.group('SB')}, {hand.sb})"
+            )
             if Decimal(a.group("SB")) > Decimal(hand.sb):
                 hand.addBlind(a.group("PNAME"), "both", a.group("SB"))
             else:
@@ -493,12 +535,23 @@ class Winamax(HandHistoryConverter):
             if street in hand.streets.keys():
                 m = self.re_HeroCards.finditer(hand.streets[street])
                 for found in m:
-                    if newcards := [c for c in found.group("NEWCARDS").split(" ") if c != "X"]:
+                    if newcards := [
+                        c for c in found.group("NEWCARDS").split(" ") if c != "X"
+                    ]:
                         hand.hero = found.group("PNAME")
 
-                        log.debug(f"DEBUG: {hand.handid} addHoleCards({street}, {hand.hero}, {newcards})")
+                        log.debug(
+                            f"DEBUG: {hand.handid} addHoleCards({street}, {hand.hero}, {newcards})"
+                        )
 
-                        hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
+                        hand.addHoleCards(
+                            street,
+                            hand.hero,
+                            closed=newcards,
+                            shown=False,
+                            mucked=False,
+                            dealt=True,
+                        )
                         log.debug(f"Hero cards {hand.hero}: {newcards}")
 
         for street, text in list(hand.streets.items()):
@@ -510,11 +563,15 @@ class Winamax(HandHistoryConverter):
                 if found.group("NEWCARDS") is None:
                     newcards = []
                 else:
-                    newcards = [c for c in found.group("NEWCARDS").split(" ") if c != "X"]
+                    newcards = [
+                        c for c in found.group("NEWCARDS").split(" ") if c != "X"
+                    ]
                 if found.group("OLDCARDS") is None:
                     oldcards = []
                 else:
-                    oldcards = [c for c in found.group("OLDCARDS").split(" ") if c != "X"]
+                    oldcards = [
+                        c for c in found.group("OLDCARDS").split(" ") if c != "X"
+                    ]
 
                 if street == "THIRD" and len(newcards) == 3:  # hero in stud game
                     hand.hero = player
@@ -530,7 +587,13 @@ class Winamax(HandHistoryConverter):
                     )
                 else:
                     hand.addHoleCards(
-                        street, player, open=newcards, closed=oldcards, shown=False, mucked=False, dealt=False
+                        street,
+                        player,
+                        open=newcards,
+                        closed=oldcards,
+                        shown=False,
+                        mucked=False,
+                        dealt=False,
                     )
 
     def readAction(self, hand, street):
@@ -547,7 +610,9 @@ class Winamax(HandHistoryConverter):
                 hand.addCall(street, action.group("PNAME"), action.group("BET"))
             elif action.group("ATYPE") == " raises":
                 if bringin := [
-                    act[2] for act in hand.actions[street] if act[0] == action.group("PNAME") and act[1] == "bringin"
+                    act[2]
+                    for act in hand.actions[street]
+                    if act[0] == action.group("PNAME") and act[1] == "bringin"
                 ]:
                     betto = str(Decimal(action.group("BETTO")) + bringin[0])
                 else:
@@ -559,11 +624,18 @@ class Winamax(HandHistoryConverter):
                 else:
                     hand.addBet(street, action.group("PNAME"), action.group("BET"))
             elif action.group("ATYPE") == " discards":
-                hand.addDiscard(street, action.group("PNAME"), action.group("BET"), action.group("DISCARDED"))
+                hand.addDiscard(
+                    street,
+                    action.group("PNAME"),
+                    action.group("BET"),
+                    action.group("DISCARDED"),
+                )
             elif action.group("ATYPE") == " stands pat":
                 hand.addStandsPat(street, action.group("PNAME"))
             else:
-                log.error(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
+                log.error(
+                    f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'"
+                )
             log.debug(f"Processed {acts}")
             log.debug(f"committed {hand.pot.committed}")
 
@@ -584,13 +656,21 @@ class Winamax(HandHistoryConverter):
         for m in self.re_ShownCards.finditer(hand.handText):
             log.debug(f"Read shown cards: {m.group(0)}")
             cards = m.group("CARDS")
-            cards = cards.split(" ")  # needs to be a list, not a set--stud needs the order
+            cards = cards.split(
+                " "
+            )  # needs to be a list, not a set--stud needs the order
             (shown, mucked) = (False, False)
             if m.group("CARDS") is not None:
                 shown = True
                 string = m.group("STRING")
                 log.debug(f"{m.group('PNAME')} {cards} {shown} {mucked}")
-                hand.addShownCards(cards=cards, player=m.group("PNAME"), shown=shown, mucked=mucked, string=string)
+                hand.addShownCards(
+                    cards=cards,
+                    player=m.group("PNAME"),
+                    shown=shown,
+                    mucked=mucked,
+                    string=string,
+                )
 
     def readSummaryInfo(self, summaryInfoList):
         """Implement the abstract method from HandHistoryConverter."""

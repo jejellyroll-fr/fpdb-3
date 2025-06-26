@@ -1,25 +1,26 @@
+import math
+from typing import List, Optional
+
+from base_model import Hand, HandsPlayer, Player
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from sql_request import (
-    get_players,
+    get_hands,
+    get_hands_players,
     get_handscount,
     get_handscount_cg,
     get_handscount_tour,
+    get_handsPlayers,
+    get_heroes,
+    get_player_name,
+    get_players,
     get_playerscount,
     get_playerscount_cg,
     get_playerscount_tour,
-    get_heroes,
-    get_hands,
-    get_handsPlayers,
-    get_hands_players,
     get_RingProfitAllHandsPlayerIdSite,
-    get_player_name,
-    get_tourneysProfitPlayerIdSite,
     get_statsplayers,
+    get_tourneysProfitPlayerIdSite,
 )
-from base_model import Hand, HandsPlayer, Player
-from typing import List, Optional
-import math
 
 app = FastAPI()
 
@@ -105,7 +106,9 @@ async def get_torneys_profit_api(
 
 
 @app.get("/players")
-async def get_players_api(name: str = None, site: str = None, page: int = 1, per_page: int = 10):
+async def get_players_api(
+    name: str = None, site: str = None, page: int = 1, per_page: int = 10
+):
     # Call get_players() and unpack players and total
     players, total = get_players(name=name, site=site, page=page, per_page=per_page)
 
@@ -132,7 +135,9 @@ def get_player_hands_api(
     cash: Optional[bool] = False,  # Default to False
     sort_by: str = None,  # Default to None
 ):
-    handsPlayers = get_hands_players(playerId, tourney=tourney, cash=cash, sort_by=sort_by)
+    handsPlayers = get_hands_players(
+        playerId, tourney=tourney, cash=cash, sort_by=sort_by
+    )
     return JSONResponse(content=handsPlayers)
 
 

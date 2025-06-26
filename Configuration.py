@@ -20,28 +20,25 @@
 
 ########################################################################
 
-# TODO fix / rethink edit stats - it is broken badly just now
 
 #    Standard Library modules
-from __future__ import with_statement
-from __future__ import print_function
-
-
-# import L10n
-# _ = L10n.get_translation()
+from __future__ import print_function, with_statement
 
 import codecs
-import os
-import sys
 import inspect
-import shutil
 import locale
-import re
-import xml.dom.minidom
+import os
 
 # # import Charset
 import platform
+import re
+import shutil
+import sys
 import traceback
+import xml.dom.minidom
+
+# import L10n
+# _ = L10n.get_translation()
 
 
 if platform.system() == "Windows":
@@ -56,7 +53,6 @@ else:
     winpaths_appdata = False
 
 from loggingFpdb import get_logger
-
 
 # config version is used to flag a warning at runtime if the users config is
 #  out of date.
@@ -306,7 +302,10 @@ if LOCALE_ENCODING in ("US-ASCII", "", None):
     LOCALE_ENCODING = "cp1252"
     if os.uname()[0] != "Darwin":
         log.warning(
-            (("Default encoding set to US-ASCII, defaulting to CP1252 instead."), ("Please report this problem."))
+            (
+                ("Default encoding set to US-ASCII, defaulting to CP1252 instead."),
+                ("Please report this problem."),
+            )
         )
 
 # needs LOCALE_ENCODING (above), imported for sqlite setup in Config class below
@@ -356,22 +355,36 @@ class Layout(object):
                     int(location_node.getAttribute("y")),
                 )
             elif location_node.getAttribute("common") != "":
-                self.common = (int(location_node.getAttribute("x")), int(location_node.getAttribute("y")))
+                self.common = (
+                    int(location_node.getAttribute("x")),
+                    int(location_node.getAttribute("y")),
+                )
 
     def __str__(self):
         if hasattr(self, "name"):
             name = str(self.name)
             log.info(f"attribut {name} exists")
-        temp = "    Layout = %d max, width= %d, height = %d" % (self.max, self.width, self.height)
+        temp = "    Layout = %d max, width= %d, height = %d" % (
+            self.max,
+            self.width,
+            self.height,
+        )
         if hasattr(self, "fav_seat"):
             temp = temp + ", fav_seat = %d\n" % self.fav_seat
         else:
             temp = temp + "\n"
         if hasattr(self, "common"):
-            temp = temp + "        Common = (%d, %d)\n" % (self.common[0], self.common[1])
+            temp = temp + "        Common = (%d, %d)\n" % (
+                self.common[0],
+                self.common[1],
+            )
         temp = temp + "        Locations = "
         for i in range(1, len(self.location)):
-            temp = temp + "%s:(%d,%d) " % (self.hh_seats[i], self.location[i][0], self.location[i][1])
+            temp = temp + "%s:(%d,%d) " % (
+                self.hh_seats[i],
+                self.location[i][0],
+                self.location[i][1],
+            )
         return temp + "\n"
 
 
@@ -388,7 +401,14 @@ class Email(object):
     def __str__(self):
         return (
             "    email\n        fetchType = %s  host = %s\n        username = %s password = %s\n        useSsl = %s folder = %s"
-            % (self.fetchType, self.host, self.username, self.password, self.useSsl, self.folder)
+            % (
+                self.fetchType,
+                self.host,
+                self.username,
+                self.password,
+                self.useSsl,
+                self.folder,
+            )
         )
 
 
@@ -450,7 +470,10 @@ class Site(object):
             temp = temp + str(self.emails[fetchtype]) + "\n"
 
         for game_type in self.layout_set:
-            temp = temp + "    game_type = %s, layout_set = %s\n" % (game_type, self.layout_set[game_type])
+            temp = temp + "    game_type = %s, layout_set = %s\n" % (
+                game_type,
+                self.layout_set[game_type],
+            )
 
         for max in self.fav_seat:
             temp = temp + "    max = %s, fav_seat = %s\n" % (max, self.fav_seat[max])
@@ -478,7 +501,10 @@ class Stat(object):
         self.stat_midcolor = node.getAttribute("stat_midcolor")
 
     def __str__(self):
-        temp = "        _rowcol = %s, _stat_name = %s, \n" % (self.rowcol, self.stat_name)
+        temp = "        _rowcol = %s, _stat_name = %s, \n" % (
+            self.rowcol,
+            self.stat_name,
+        )
         for key in dir(self):
             if key.startswith("__"):
                 continue
@@ -642,7 +668,10 @@ class Game_stat_set(object):
         self.stat_set = node.getAttribute("stat_set")
 
     def __str__(self):
-        return "      Game Type: '%s' Stat Set: '%s'\n" % (self.game_type, self.stat_set)
+        return "      Game Type: '%s' Stat Set: '%s'\n" % (
+            self.game_type,
+            self.stat_set,
+        )
 
 
 class HHC(object):
@@ -652,7 +681,11 @@ class HHC(object):
         self.summaryImporter = node.getAttribute("summaryImporter")
 
     def __str__(self):
-        return "%s:\tconverter: '%s' summaryImporter: '%s'" % (self.site, self.converter, self.summaryImporter)
+        return "%s:\tconverter: '%s' summaryImporter: '%s'" % (
+            self.site,
+            self.converter,
+            self.summaryImporter,
+        )
 
 
 class Popup(object):
@@ -666,7 +699,12 @@ class Popup(object):
             self.pu_stats.append(stat_node.getAttribute("pu_stat_name"))
             # if stat_node.getAttribute("pu_stat_submenu"):
             self.pu_stats_submenu.append(
-                tuple((stat_node.getAttribute("pu_stat_name"), stat_node.getAttribute("pu_stat_submenu")))
+                tuple(
+                    (
+                        stat_node.getAttribute("pu_stat_name"),
+                        stat_node.getAttribute("pu_stat_submenu"),
+                    )
+                )
             )
 
     def __str__(self):
@@ -753,6 +791,90 @@ class HudUI(object):
         if node.hasAttribute("hero_seats_cust_nums_high"):
             self.h_seats_cust_nums_high = node.getAttribute("hero_seats_cust_nums_high")
 
+        # Additional HUD positioning attributes
+        if node.hasAttribute("xshift"):
+            self.xshift = node.getAttribute("xshift")
+        if node.hasAttribute("yshift"):
+            self.yshift = node.getAttribute("yshift")
+
+        # Aggregation settings
+        if node.hasAttribute("aggregate_ring"):
+            self.aggregate_ring = node.getAttribute("aggregate_ring")
+        if node.hasAttribute("aggregate_tour"):
+            self.aggregate_tour = node.getAttribute("aggregate_tour")
+        if node.hasAttribute("hud_style"):
+            self.hud_style = node.getAttribute("hud_style")
+        if node.hasAttribute("hero_stat_aggregation"):
+            self.hero_stat_aggregation = node.getAttribute("hero_stat_aggregation")
+        if node.hasAttribute("h_hud_style"):
+            self.h_hud_style = node.getAttribute("h_hud_style")
+
+        # Appearance settings
+        if node.hasAttribute("bgcolor"):
+            self.bgcolor = node.getAttribute("bgcolor")
+        if node.hasAttribute("fgcolor"):
+            self.fgcolor = node.getAttribute("fgcolor")
+        if node.hasAttribute("hudbgcolor"):
+            self.hudbgcolor = node.getAttribute("hudbgcolor")
+        if node.hasAttribute("hudfgcolor"):
+            self.hudfgcolor = node.getAttribute("hudfgcolor")
+        if node.hasAttribute("font"):
+            self.font = node.getAttribute("font")
+        if node.hasAttribute("font_size"):
+            self.font_size = node.getAttribute("font_size")
+
+        # HUD opacity
+        if node.hasAttribute("opacity"):
+            self.opacity = node.getAttribute("opacity")
+
+        # Popup settings
+        if node.hasAttribute("popup_style"):
+            self.popup_style = node.getAttribute("popup_style")
+
+        # Mucked cards settings
+        if node.hasAttribute("mucked_cards"):
+            self.mucked_cards = node.getAttribute("mucked_cards")
+        if node.hasAttribute("mucked_cards_size"):
+            self.mucked_cards_size = node.getAttribute("mucked_cards_size")
+        if node.hasAttribute("mucked_cards_opacity"):
+            self.mucked_cards_opacity = node.getAttribute("mucked_cards_opacity")
+
+        # Aux windows settings
+        if node.hasAttribute("aux_windows"):
+            self.aux_windows = node.getAttribute("aux_windows")
+        if node.hasAttribute("aux_windows_opacity"):
+            self.aux_windows_opacity = node.getAttribute("aux_windows_opacity")
+
+        # HUD menu settings
+        if node.hasAttribute("hud_menu_opacity"):
+            self.hud_menu_opacity = node.getAttribute("hud_menu_opacity")
+        if node.hasAttribute("hud_menu_bgcolor"):
+            self.hud_menu_bgcolor = node.getAttribute("hud_menu_bgcolor")
+        if node.hasAttribute("hud_menu_fgcolor"):
+            self.hud_menu_fgcolor = node.getAttribute("hud_menu_fgcolor")
+
+        # Stat window settings
+        if node.hasAttribute("stat_window_opacity"):
+            self.stat_window_opacity = node.getAttribute("stat_window_opacity")
+        if node.hasAttribute("stat_window_frame"):
+            self.stat_window_frame = node.getAttribute("stat_window_frame")
+
+        # Tooltip settings
+        if node.hasAttribute("tooltip_delay"):
+            self.tooltip_delay = node.getAttribute("tooltip_delay")
+        if node.hasAttribute("tooltip_bgcolor"):
+            self.tooltip_bgcolor = node.getAttribute("tooltip_bgcolor")
+        if node.hasAttribute("tooltip_fgcolor"):
+            self.tooltip_fgcolor = node.getAttribute("tooltip_fgcolor")
+
+        # Advanced settings
+        if node.hasAttribute("update_interval"):
+            self.update_interval = node.getAttribute("update_interval")
+        if node.hasAttribute("max_seats"):
+            self.max_seats = node.getAttribute("max_seats")
+        if node.hasAttribute("debug_level"):
+            self.debug_level = node.getAttribute("debug_level")
+
     def __str__(self):
         return "    label = %s\n" % self.label
 
@@ -804,7 +926,15 @@ class GUICashStats(list):
         # is this needed?
         for child in node.childNodes:
             if child.nodeType == child.ELEMENT_NODE:
-                col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment = (
+                (
+                    col_name,
+                    col_title,
+                    disp_all,
+                    disp_posn,
+                    field_format,
+                    field_type,
+                    xalignment,
+                ) = (
                     None,
                     None,
                     True,
@@ -832,7 +962,17 @@ class GUICashStats(list):
                 except ValueError:
                     log.error(("bad number in xalignment was ignored"))
 
-                self.append([col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment])
+                self.append(
+                    [
+                        col_name,
+                        col_title,
+                        disp_all,
+                        disp_posn,
+                        field_format,
+                        field_type,
+                        xalignment,
+                    ]
+                )
 
     def get_defaults(self):
         """A list of defaults to be called, should there be no entry in config"""
@@ -889,7 +1029,15 @@ class GUITourStats(list):
         # is this needed?
         for child in node.childNodes:
             if child.nodeType == child.ELEMENT_NODE:
-                col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment = (
+                (
+                    col_name,
+                    col_title,
+                    disp_all,
+                    disp_posn,
+                    field_format,
+                    field_type,
+                    xalignment,
+                ) = (
                     None,
                     None,
                     True,
@@ -917,7 +1065,17 @@ class GUITourStats(list):
                 except ValueError:
                     log.error(("bad number in xalignment was ignored"))
 
-                self.append([col_name, col_title, disp_all, disp_posn, field_format, field_type, xalignment])
+                self.append(
+                    [
+                        col_name,
+                        col_title,
+                        disp_all,
+                        disp_posn,
+                        field_format,
+                        field_type,
+                        xalignment,
+                    ]
+                )
 
     def get_defaults(self):
         """A list of defaults to be called, should there be no entry in config"""
@@ -1050,7 +1208,10 @@ class Config(object):
         self.site_ids = {}  # site ID list from the database
         self.doc = None  # Root of XML tree
 
-        added, n = 1, 0  # use n to prevent infinite loop if add_missing_elements() fails somehow
+        added, n = (
+            1,
+            0,
+        )  # use n to prevent infinite loop if add_missing_elements() fails somehow
         while added > 0 and n < 2:
             n = n + 1
             log.info(f"Reading configuration file {file}")
@@ -1302,6 +1463,91 @@ class Config(object):
                 if int(location_node.getAttribute("seat")) == int(seat):
                     return location_node
 
+    def reload(self):
+        """Reload configuration from file without creating a new object"""
+        log.info(f"Reloading configuration from {self.file}")
+
+        try:
+            # Parse the XML file again
+            doc = xml.dom.minidom.parse(self.file)
+            self.doc = doc
+
+            # Clear existing data structures
+            self.supported_sites = {}
+            self.supported_games = {}
+            self.supported_databases = {}
+            self.aux_windows = {}
+            self.layout_sets = {}
+            self.stat_sets = {}
+            self.hhcs = {}
+            self.popup_windows = {}
+
+            # Re-parse all sections
+            # General section
+            if doc.getElementsByTagName("general") == []:
+                self.general.get_defaults()
+            for gen_node in doc.getElementsByTagName("general"):
+                self.general.add_elements(node=gen_node)
+
+            # Sites
+            for site_node in doc.getElementsByTagName("site"):
+                site = Site(node=site_node)
+                self.supported_sites[site.site_name] = site
+
+            # Games
+            for supported_game_node in doc.getElementsByTagName("game"):
+                supported_game = Supported_games(supported_game_node)
+                self.supported_games[supported_game.game_name] = supported_game
+
+            # Databases
+            for db_node in doc.getElementsByTagName("database"):
+                db = Database(node=db_node)
+                if self.db_selected is None or db.db_selected:
+                    self.db_selected = db.db_name
+                self.supported_databases[db.db_name] = db
+
+            # Aux windows
+            for aw_node in doc.getElementsByTagName("aw"):
+                aw = Aux_window(node=aw_node)
+                self.aux_windows[aw.name] = aw
+
+            # Layout sets
+            for ls_node in doc.getElementsByTagName("ls"):
+                ls = Layout_set(node=ls_node)
+                self.layout_sets[ls.name] = ls
+
+            # Stat sets
+            for ss_node in doc.getElementsByTagName("ss"):
+                ss = Stat_sets(node=ss_node)
+                self.stat_sets[ss.name] = ss
+
+            # HHCs
+            for hhc_node in doc.getElementsByTagName("hhc"):
+                hhc = HHC(node=hhc_node)
+                self.hhcs[hhc.site] = hhc
+
+            # Popup windows
+            for pu_node in doc.getElementsByTagName("pu"):
+                pu = Popup(node=pu_node)
+                self.popup_windows[pu.name] = pu
+
+            # Import settings
+            for imp_node in doc.getElementsByTagName("import"):
+                imp = Import(node=imp_node)
+                self.imp = imp
+
+            # HUD UI settings - this is the important part for HUD preferences
+            for hui_node in doc.getElementsByTagName("hud_ui"):
+                hui = HudUI(node=hui_node)
+                self.ui = hui
+
+            log.info("Configuration reloaded successfully")
+            return True
+
+        except Exception as e:
+            log.error(f"Error reloading configuration: {e}")
+            return False
+
     def save(self, file=None):
         if file is None:
             file = self.file
@@ -1457,37 +1703,75 @@ class Config(object):
         statsetNode = self.getStatSetNode(statsetName)
         statNodes = statsetNode.getElementsByTagName("stat")
 
+        # Store existing stat attributes before removing
+        existing_stats = {}
         for node in statNodes:
-            statsetNode.removeChild(node)
+            rowcol = node.getAttribute("_rowcol")
+            existing_stats[rowcol] = {
+                "click": node.getAttribute("click"),
+                "popup": node.getAttribute("popup"),
+                "tip": node.getAttribute("tip"),
+                "hudprefix": node.getAttribute("hudprefix"),
+                "hudsuffix": node.getAttribute("hudsuffix"),
+                "hudcolor": node.getAttribute("hudcolor"),
+                "stat_locolor": node.getAttribute("stat_locolor"),
+                "stat_loth": node.getAttribute("stat_loth"),
+                "stat_midcolor": node.getAttribute("stat_midcolor"),
+                "stat_hicolor": node.getAttribute("stat_hicolor"),
+                "stat_hith": node.getAttribute("stat_hith"),
+            }
+
+        # Remove all child nodes (stats and text nodes)
+        while statsetNode.firstChild:
+            statsetNode.removeChild(statsetNode.firstChild)
 
         statsetNode.setAttribute("rows", str(len(statArray)))
         statsetNode.setAttribute("cols", str(len(statArray[0])))
 
-        for rowNumber in range(len(statArray)):
-            for columnNumber in range(len(statArray[rowNumber])):
-                newStat = self.doc.createElement("stat")
+        for idx, (rowNumber, columnNumber) in enumerate(
+            [(r, c) for r in range(len(statArray)) for c in range(len(statArray[r]))]
+        ):
+            # Add newline and indentation before each stat
+            indent = self.doc.createTextNode("\n            ")
+            statsetNode.appendChild(indent)
 
-                attributes = {
-                    "_stat_name": statArray[rowNumber][columnNumber],
-                    "_rowcol": f"({rowNumber+1},{columnNumber+1})",
-                    "click": "",
-                    "popup": "default",
-                    "tip": "",
-                    "stat_locolor": "",
-                    "stat_loth": "",
-                    "stat_midcolor": "",  # Add stat_midcolor
-                    "stat_hicolor": "",
-                    "stat_hith": "",
-                }
+            newStat = self.doc.createElement("stat")
+            rowcol_str = f"({rowNumber+1},{columnNumber+1})"
 
-                for attr_name, attr_value in attributes.items():
-                    newAttr = self.doc.createAttribute(attr_name)
-                    newStat.setAttributeNode(newAttr)
-                    newStat.setAttribute(attr_name, attr_value)
+            # Default attributes
+            attributes = {
+                "_stat_name": statArray[rowNumber][columnNumber],
+                "_rowcol": rowcol_str,
+                "click": "",
+                "popup": "default",
+                "tip": "",
+                "hudprefix": "",
+                "hudsuffix": "",
+                "hudcolor": "",
+                "stat_locolor": "",
+                "stat_loth": "",
+                "stat_midcolor": "",
+                "stat_hicolor": "",
+                "stat_hith": "",
+            }
 
-                statsetNode.appendChild(newStat)
+            # Restore existing attributes if they exist
+            if rowcol_str in existing_stats:
+                for attr, value in existing_stats[rowcol_str].items():
+                    if value:  # Only set non-empty values
+                        attributes[attr] = value
 
-        statNodes = statsetNode.getElementsByTagName("stat")  # TODO remove this line?
+            for attr_name, attr_value in attributes.items():
+                newAttr = self.doc.createAttribute(attr_name)
+                newStat.setAttributeNode(newAttr)
+                newStat.setAttribute(attr_name, attr_value)
+
+            statsetNode.appendChild(newStat)
+
+        # Add final newline and indentation
+        if len(statArray) > 0:
+            final_indent = self.doc.createTextNode("\n        ")
+            statsetNode.appendChild(final_indent)
 
     # end def editStats
     def editImportFilters(self, games):
@@ -1515,9 +1799,15 @@ class Config(object):
             # MUST pickup the new layout
             # fixme - this is horrid
             if i == "common":
-                self.layout_sets[ls.name].layout[max].common = (locations[i][0], locations[i][1])
+                self.layout_sets[ls.name].layout[max].common = (
+                    locations[i][0],
+                    locations[i][1],
+                )
             else:
-                self.layout_sets[ls.name].layout[max].location[i] = (locations[i][0], locations[i][1])
+                self.layout_sets[ls.name].layout[max].location[i] = (
+                    locations[i][0],
+                    locations[i][1],
+                )
         # more horridness below, fixme
         if height:
             self.layout_sets[ls.name].layout[max].height = height
@@ -1716,7 +2006,11 @@ class Config(object):
             raise ValueError(f"Unsupported database backend: {name}")
 
         # Utilisation des constantes attendues
-        backends = {"DATABASE_TYPE_MYSQL": 2, "DATABASE_TYPE_POSTGRESQL": 3, "DATABASE_TYPE_SQLITE": 4}
+        backends = {
+            "DATABASE_TYPE_MYSQL": 2,
+            "DATABASE_TYPE_POSTGRESQL": 3,
+            "DATABASE_TYPE_SQLITE": 4,
+        }
 
         return backends[name]
 
@@ -1838,7 +2132,363 @@ class Config(object):
             log.error(f"Error getting hero custom seat numbers high: {e}")
             hui["h_seats_cust_nums_high"] = 10
 
+        # Additional parameters that might be stored in hud_ui node
+        try:
+            hui["xshift"] = int(getattr(self.ui, "xshift", 0))
+        except (AttributeError, ValueError):
+            hui["xshift"] = 0
+
+        try:
+            hui["yshift"] = int(getattr(self.ui, "yshift", 0))
+        except (AttributeError, ValueError):
+            hui["yshift"] = 0
+
+        try:
+            hui["aggregate_ring"] = getattr(self.ui, "aggregate_ring", "True")
+        except AttributeError:
+            hui["aggregate_ring"] = "True"
+
+        try:
+            hui["aggregate_tour"] = getattr(self.ui, "aggregate_tour", "True")
+        except AttributeError:
+            hui["aggregate_tour"] = "True"
+
+        try:
+            hui["hud_style"] = getattr(self.ui, "hud_style", "A")
+        except AttributeError:
+            hui["hud_style"] = "A"
+
+        try:
+            hui["hero_stat_aggregation"] = getattr(self.ui, "hero_stat_aggregation", "False")
+        except AttributeError:
+            hui["hero_stat_aggregation"] = "False"
+
+        try:
+            hui["h_hud_style"] = getattr(self.ui, "h_hud_style", "A")
+        except AttributeError:
+            hui["h_hud_style"] = "A"
+
+        # Appearance parameters
+        try:
+            hui["bgcolor"] = getattr(self.ui, "bgcolor", "#000000")
+        except AttributeError:
+            hui["bgcolor"] = "#000000"
+
+        try:
+            hui["fgcolor"] = getattr(self.ui, "fgcolor", "#FFFFFF")
+        except AttributeError:
+            hui["fgcolor"] = "#FFFFFF"
+
+        try:
+            hui["hudbgcolor"] = getattr(self.ui, "hudbgcolor", "#000000")
+        except AttributeError:
+            hui["hudbgcolor"] = "#000000"
+
+        try:
+            hui["hudfgcolor"] = getattr(self.ui, "hudfgcolor", "#FFFFFF")
+        except AttributeError:
+            hui["hudfgcolor"] = "#FFFFFF"
+
+        try:
+            hui["font"] = getattr(self.ui, "font", "Sans")
+        except AttributeError:
+            hui["font"] = "Sans"
+
+        try:
+            hui["font_size"] = getattr(self.ui, "font_size", "8")
+        except AttributeError:
+            hui["font_size"] = "8"
+
+        # Opacity settings
+        try:
+            hui["opacity"] = getattr(self.ui, "opacity", "1.0")
+        except AttributeError:
+            hui["opacity"] = "1.0"
+
+        # Mucked cards settings
+        try:
+            hui["mucked_cards"] = getattr(self.ui, "mucked_cards", "True")
+        except AttributeError:
+            hui["mucked_cards"] = "True"
+
+        try:
+            hui["mucked_cards_size"] = getattr(self.ui, "mucked_cards_size", "100")
+        except AttributeError:
+            hui["mucked_cards_size"] = "100"
+
+        try:
+            hui["mucked_cards_opacity"] = getattr(self.ui, "mucked_cards_opacity", "1.0")
+        except AttributeError:
+            hui["mucked_cards_opacity"] = "1.0"
+
+        # Aux windows settings
+        try:
+            hui["aux_windows"] = getattr(self.ui, "aux_windows", "True")
+        except AttributeError:
+            hui["aux_windows"] = "True"
+
+        try:
+            hui["aux_windows_opacity"] = getattr(self.ui, "aux_windows_opacity", "1.0")
+        except AttributeError:
+            hui["aux_windows_opacity"] = "1.0"
+
+        # HUD menu settings
+        try:
+            hui["hud_menu_opacity"] = getattr(self.ui, "hud_menu_opacity", "1.0")
+        except AttributeError:
+            hui["hud_menu_opacity"] = "1.0"
+
+        try:
+            hui["hud_menu_bgcolor"] = getattr(self.ui, "hud_menu_bgcolor", "#000000")
+        except AttributeError:
+            hui["hud_menu_bgcolor"] = "#000000"
+
+        try:
+            hui["hud_menu_fgcolor"] = getattr(self.ui, "hud_menu_fgcolor", "#FFFFFF")
+        except AttributeError:
+            hui["hud_menu_fgcolor"] = "#FFFFFF"
+
+        # Stat window settings
+        try:
+            hui["stat_window_opacity"] = getattr(self.ui, "stat_window_opacity", "1.0")
+        except AttributeError:
+            hui["stat_window_opacity"] = "1.0"
+
+        try:
+            hui["stat_window_frame"] = getattr(self.ui, "stat_window_frame", "True")
+        except AttributeError:
+            hui["stat_window_frame"] = "True"
+
+        # Tooltip settings
+        try:
+            hui["tooltip_delay"] = getattr(self.ui, "tooltip_delay", "1000")
+        except AttributeError:
+            hui["tooltip_delay"] = "1000"
+
+        try:
+            hui["tooltip_bgcolor"] = getattr(self.ui, "tooltip_bgcolor", "#FFFFE0")
+        except AttributeError:
+            hui["tooltip_bgcolor"] = "#FFFFE0"
+
+        try:
+            hui["tooltip_fgcolor"] = getattr(self.ui, "tooltip_fgcolor", "#000000")
+        except AttributeError:
+            hui["tooltip_fgcolor"] = "#000000"
+
+        # Advanced settings
+        try:
+            hui["update_interval"] = getattr(self.ui, "update_interval", "10")
+        except AttributeError:
+            hui["update_interval"] = "10"
+
+        try:
+            hui["max_seats"] = getattr(self.ui, "max_seats", "10")
+        except AttributeError:
+            hui["max_seats"] = "10"
+
+        try:
+            hui["debug_level"] = getattr(self.ui, "debug_level", "INFO")
+        except AttributeError:
+            hui["debug_level"] = "INFO"
+
+        # Behavior parameters
+        try:
+            hui["update_interval"] = int(getattr(self.ui, "update_interval", 10))
+        except (AttributeError, ValueError):
+            hui["update_interval"] = 10
+
+        try:
+            hui["auto_close"] = getattr(self.ui, "auto_close", "True")
+        except AttributeError:
+            hui["auto_close"] = "True"
+
+        try:
+            hui["block_click"] = getattr(self.ui, "block_click", "False")
+        except AttributeError:
+            hui["block_click"] = "False"
+
+        try:
+            hui["on_click"] = getattr(self.ui, "on_click", "Nothing")
+        except AttributeError:
+            hui["on_click"] = "Nothing"
+
+        try:
+            hui["popup_style"] = getattr(self.ui, "popup_style", "default")
+        except AttributeError:
+            hui["popup_style"] = "default"
+
+        try:
+            hui["stat_range"] = getattr(self.ui, "stat_range", "True")
+        except AttributeError:
+            hui["stat_range"] = "True"
+
+        # Advanced parameters
+        try:
+            hui["max_seats"] = int(getattr(self.ui, "max_seats", 10))
+        except (AttributeError, ValueError):
+            hui["max_seats"] = 10
+
+        try:
+            hui["disable_hud"] = getattr(self.ui, "disable_hud", "False")
+        except AttributeError:
+            hui["disable_hud"] = "False"
+
+        try:
+            hui["query_limit"] = int(getattr(self.ui, "query_limit", 1000))
+        except (AttributeError, ValueError):
+            hui["query_limit"] = 1000
+
+        try:
+            hui["debug_hud"] = getattr(self.ui, "debug_hud", "False")
+        except AttributeError:
+            hui["debug_hud"] = "False"
+
+        try:
+            hui["save_layout"] = getattr(self.ui, "save_layout", "True")
+        except AttributeError:
+            hui["save_layout"] = "True"
+
         return hui
+
+    def set_hud_ui_parameters(self, hud_params):
+        """Set HUD UI parameters from a dictionary"""
+        # Get the hud_ui node
+        hud_ui_nodes = self.doc.getElementsByTagName("hud_ui")
+        if not hud_ui_nodes:
+            # Create hud_ui node if it doesn't exist
+            for config_node in self.doc.getElementsByTagName("FreePokerToolsConfig"):
+                hud_ui_node = self.doc.createElement("hud_ui")
+                config_node.appendChild(hud_ui_node)
+        else:
+            hud_ui_node = hud_ui_nodes[0]
+
+        # Update attributes
+        if "label" in hud_params:
+            hud_ui_node.setAttribute("label", str(hud_params["label"]))
+        if "card_ht" in hud_params:
+            hud_ui_node.setAttribute("card_ht", str(hud_params["card_ht"]))
+        if "card_wd" in hud_params:
+            hud_ui_node.setAttribute("card_wd", str(hud_params["card_wd"]))
+        if "deck_type" in hud_params:
+            hud_ui_node.setAttribute("deck_type", str(hud_params["deck_type"]))
+        if "card_back" in hud_params:
+            hud_ui_node.setAttribute("card_back", str(hud_params["card_back"]))
+        if "stat_range" in hud_params:
+            hud_ui_node.setAttribute("stat_range", str(hud_params["stat_range"]))
+        if "hud_days" in hud_params:
+            hud_ui_node.setAttribute("stat_days", str(hud_params["hud_days"]))
+        if "agg_bb_mult" in hud_params:
+            hud_ui_node.setAttribute("aggregation_level_multiplier", str(hud_params["agg_bb_mult"]))
+        if "seats_style" in hud_params:
+            hud_ui_node.setAttribute("seats_style", str(hud_params["seats_style"]))
+        if "seats_cust_nums_low" in hud_params:
+            hud_ui_node.setAttribute("seats_cust_nums_low", str(hud_params["seats_cust_nums_low"]))
+        if "seats_cust_nums_high" in hud_params:
+            hud_ui_node.setAttribute("seats_cust_nums_high", str(hud_params["seats_cust_nums_high"]))
+
+        # Hero specific
+        if "h_stat_range" in hud_params:
+            hud_ui_node.setAttribute("hero_stat_range", str(hud_params["h_stat_range"]))
+        if "h_hud_days" in hud_params:
+            hud_ui_node.setAttribute("hero_stat_days", str(hud_params["h_hud_days"]))
+        if "h_agg_bb_mult" in hud_params:
+            hud_ui_node.setAttribute("hero_aggregation_level_multiplier", str(hud_params["h_agg_bb_mult"]))
+        if "h_seats_style" in hud_params:
+            hud_ui_node.setAttribute("hero_seats_style", str(hud_params["h_seats_style"]))
+        if "h_seats_cust_nums_low" in hud_params:
+            hud_ui_node.setAttribute("hero_seats_cust_nums_low", str(hud_params["h_seats_cust_nums_low"]))
+        if "h_seats_cust_nums_high" in hud_params:
+            hud_ui_node.setAttribute("hero_seats_cust_nums_high", str(hud_params["h_seats_cust_nums_high"]))
+
+        # Additional appearance parameters
+        if "bgcolor" in hud_params:
+            hud_ui_node.setAttribute("bgcolor", str(hud_params["bgcolor"]))
+        if "fgcolor" in hud_params:
+            hud_ui_node.setAttribute("fgcolor", str(hud_params["fgcolor"]))
+        if "hudbgcolor" in hud_params:
+            hud_ui_node.setAttribute("hudbgcolor", str(hud_params["hudbgcolor"]))
+        if "hudfgcolor" in hud_params:
+            hud_ui_node.setAttribute("hudfgcolor", str(hud_params["hudfgcolor"]))
+        if "font" in hud_params:
+            hud_ui_node.setAttribute("font", str(hud_params["font"]))
+        if "font_size" in hud_params:
+            hud_ui_node.setAttribute("font_size", str(hud_params["font_size"]))
+        if "opacity" in hud_params:
+            hud_ui_node.setAttribute("opacity", str(hud_params["opacity"]))
+
+        # Additional behavior parameters
+        if "xshift" in hud_params:
+            hud_ui_node.setAttribute("xshift", str(hud_params["xshift"]))
+        if "yshift" in hud_params:
+            hud_ui_node.setAttribute("yshift", str(hud_params["yshift"]))
+        if "aggregate_ring" in hud_params:
+            hud_ui_node.setAttribute("aggregate_ring", str(hud_params["aggregate_ring"]))
+        if "aggregate_tour" in hud_params:
+            hud_ui_node.setAttribute("aggregate_tour", str(hud_params["aggregate_tour"]))
+        if "hud_style" in hud_params:
+            hud_ui_node.setAttribute("hud_style", str(hud_params["hud_style"]))
+        if "hero_stat_aggregation" in hud_params:
+            hud_ui_node.setAttribute("hero_stat_aggregation", str(hud_params["hero_stat_aggregation"]))
+        if "h_hud_style" in hud_params:
+            hud_ui_node.setAttribute("h_hud_style", str(hud_params["h_hud_style"]))
+        if "update_interval" in hud_params:
+            hud_ui_node.setAttribute("update_interval", str(hud_params["update_interval"]))
+        if "auto_close" in hud_params:
+            hud_ui_node.setAttribute("auto_close", str(hud_params["auto_close"]))
+        if "block_click" in hud_params:
+            hud_ui_node.setAttribute("block_click", str(hud_params["block_click"]))
+        if "on_click" in hud_params:
+            hud_ui_node.setAttribute("on_click", str(hud_params["on_click"]))
+        if "popup_style" in hud_params:
+            hud_ui_node.setAttribute("popup_style", str(hud_params["popup_style"]))
+        if "max_seats" in hud_params:
+            hud_ui_node.setAttribute("max_seats", str(hud_params["max_seats"]))
+        if "disable_hud" in hud_params:
+            hud_ui_node.setAttribute("disable_hud", str(hud_params["disable_hud"]))
+        if "query_limit" in hud_params:
+            hud_ui_node.setAttribute("query_limit", str(hud_params["query_limit"]))
+        if "debug_hud" in hud_params:
+            hud_ui_node.setAttribute("debug_hud", str(hud_params["debug_hud"]))
+        if "save_layout" in hud_params:
+            hud_ui_node.setAttribute("save_layout", str(hud_params["save_layout"]))
+
+        # Update the internal ui object
+        if hasattr(self, "ui"):
+            for key, value in hud_params.items():
+                if key == "label":
+                    self.ui.label = value
+                elif key == "card_ht":
+                    self.ui.card_ht = str(value)
+                elif key == "card_wd":
+                    self.ui.card_wd = str(value)
+                elif key == "deck_type":
+                    self.ui.deck_type = value
+                elif key == "card_back":
+                    self.ui.card_back = value
+                elif key == "stat_range":
+                    self.ui.stat_range = value
+                elif key == "hud_days":
+                    self.ui.hud_days = str(value)
+                elif key == "agg_bb_mult":
+                    self.ui.agg_bb_mult = str(value)
+                elif key == "seats_style":
+                    self.ui.seats_style = value
+                elif key == "seats_cust_nums_low":
+                    self.ui.seats_cust_nums_low = str(value)
+                elif key == "seats_cust_nums_high":
+                    self.ui.seats_cust_nums_high = str(value)
+                elif key == "h_stat_range":
+                    self.ui.h_stat_range = value
+                elif key == "h_hud_days":
+                    self.ui.h_hud_days = str(value)
+                elif key == "h_agg_bb_mult":
+                    self.ui.h_agg_bb_mult = str(value)
+                elif key == "h_seats_style":
+                    self.ui.h_seats_style = value
+                elif key == "h_seats_cust_nums_low":
+                    self.ui.h_seats_cust_nums_low = str(value)
+                elif key == "h_seats_cust_nums_high":
+                    self.ui.h_seats_cust_nums_high = str(value)
 
     def get_import_parameters(self):
         imp = {}

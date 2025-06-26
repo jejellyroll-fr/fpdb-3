@@ -17,14 +17,14 @@
 
 from __future__ import print_function
 
-# import L10n
-##_ = L10n.get_translation()
-
 import sys
 from optparse import OptionParser
 
-
 from loggingFpdb import get_logger
+
+# import L10n
+##_ = L10n.get_translation()
+
 
 log = get_logger("parser")
 
@@ -40,48 +40,100 @@ def fpdb_options():
         help=("Send error messages to the console rather than the log file."),
     )
     # Option to specify database name
-    parser.add_option("-d", "--databaseName", dest="dbname", help=("Specifies a database name."))
+    parser.add_option(
+        "-d", "--databaseName", dest="dbname", help=("Specifies a database name.")
+    )
     # Option to specify configuration file path
     parser.add_option(
-        "-c", "--configFile", dest="config", default=None, help=("Specifies the full path to a configuration file.")
+        "-c",
+        "--configFile",
+        dest="config",
+        default=None,
+        help=("Specifies the full path to a configuration file."),
     )
     # Option indicating program was restarted with a different path
     parser.add_option(
         "-r",
         "--rerunPython",
         action="store_true",
-        help=("Indicates program was restarted with a different path (only allowed once)."),
+        help=(
+            "Indicates program was restarted with a different path (only allowed once)."
+        ),
     )
     # Option to specify hand history converter module name
     parser.add_option(
-        "-k", "--konverter", dest="hhc", default="PokerStarsToFpdb", help=("Module name for Hand History Converter")
+        "-k",
+        "--konverter",
+        dest="hhc",
+        default="PokerStarsToFpdb",
+        help=("Module name for Hand History Converter"),
     )
     # Option to specify a site name
-    parser.add_option("-s", "--sitename", dest="sitename", default=None, help=("A sitename"))
+    parser.add_option(
+        "-s", "--sitename", dest="sitename", default=None, help=("A sitename")
+    )
     # Option to set the logging level
     parser.add_option(
         "-l",
         "--logging",
         dest="log_level",
         choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL", "EMPTY"),
-        help=("Error logging level:") + " (DEBUG, INFO, WARNING, ERROR, CRITICAL, EMPTY)",
+        help=("Error logging level:")
+        + " (DEBUG, INFO, WARNING, ERROR, CRITICAL, EMPTY)",
         default="EMPTY",
     )
     # Option to print version information and exit
-    parser.add_option("-v", "--version", action="store_true", help=("Print version information and exit."))
+    parser.add_option(
+        "-v",
+        "--version",
+        action="store_true",
+        help=("Print version information and exit."),
+    )
     # Option to force the initial run dialog
-    parser.add_option("-i", "--initialrun", action="store_true", dest="initialRun", help=("Force initial-run dialog"))
+    parser.add_option(
+        "-i",
+        "--initialrun",
+        action="store_true",
+        dest="initialRun",
+        help=("Force initial-run dialog"),
+    )
     # Option to print useful usage lines
     parser.add_option(
-        "-u", "--usage", action="store_true", dest="usage", default=False, help=("Print some useful one liners")
+        "-u",
+        "--usage",
+        action="store_true",
+        dest="usage",
+        default=False,
+        help=("Print some useful one liners"),
     )
     # The following options are used for SplitHandHistory.py (not used anymore)
     # Option to specify input file
-    parser.add_option("-f", "--file", dest="filename", metavar="FILE", default=None, help=("Input file"))
+    parser.add_option(
+        "-f",
+        "--file",
+        dest="filename",
+        metavar="FILE",
+        default=None,
+        help=("Input file"),
+    )
     # Option to specify input directory
-    parser.add_option("-D", "--directory", dest="directory", metavar="FILE", default=None, help=("Input directory"))
+    parser.add_option(
+        "-D",
+        "--directory",
+        dest="directory",
+        metavar="FILE",
+        default=None,
+        help=("Input directory"),
+    )
     # Option to specify output path in quiet mode
-    parser.add_option("-o", "--outpath", dest="outpath", metavar="FILE", default=None, help=("Out path in quiet mode"))
+    parser.add_option(
+        "-o",
+        "--outpath",
+        dest="outpath",
+        metavar="FILE",
+        default=None,
+        help=("Out path in quiet mode"),
+    )
     # Option for handling archive files from PokerStars or Full Tilt Poker
     parser.add_option(
         "-a",
@@ -110,15 +162,36 @@ def fpdb_options():
         help=("How many hands do you want saved to each file. Default is 100"),
     )
     # Option to specify the X location for opening the window
-    parser.add_option("--xloc", dest="xloc", default=None, type="int", help=("X location to open window"))
+    parser.add_option(
+        "--xloc",
+        dest="xloc",
+        default=None,
+        type="int",
+        help=("X location to open window"),
+    )
     # Option to specify the Y location for opening the window
-    parser.add_option("--yloc", dest="yloc", default=None, type="int", help=("Y location to open window"))
+    parser.add_option(
+        "--yloc",
+        dest="yloc",
+        default=None,
+        type="int",
+        help=("Y location to open window"),
+    )
     # Option to auto-start the auto-import feature
-    parser.add_option("--autoimport", action="store_true", dest="autoimport", help=("Auto-start Auto-import"))
+    parser.add_option(
+        "--autoimport",
+        action="store_true",
+        dest="autoimport",
+        help=("Auto-start Auto-import"),
+    )
     # Option to start minimized
-    parser.add_option("--minimized", action="store_true", dest="minimized", help=("Start Minimized"))
+    parser.add_option(
+        "--minimized", action="store_true", dest="minimized", help=("Start Minimized")
+    )
     # Option to start hidden
-    parser.add_option("--hidden", action="store_true", dest="hidden", help=("Start Hidden"))
+    parser.add_option(
+        "--hidden", action="store_true", dest="hidden", help=("Start Hidden")
+    )
 
     (options, argv) = parser.parse_args()
     return (options, argv)

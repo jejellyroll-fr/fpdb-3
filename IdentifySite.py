@@ -17,19 +17,18 @@
 
 from __future__ import print_function
 
+import codecs
+import os
+import re
+import sys
+from time import time
+
+import Configuration
+from loggingFpdb import get_logger
 
 # import L10n
 # _ = L10n.get_translation()
 
-import re
-import sys
-import os
-from time import time
-import codecs
-
-
-import Configuration
-from loggingFpdb import get_logger
 
 try:
     import xlrd
@@ -76,7 +75,9 @@ class Site(object):
         # self.obj            = obj
         if summary:
             self.summary = summary
-            self.re_SumIdentify = getattr(__import__(summary), summary, None).re_Identify
+            self.re_SumIdentify = getattr(
+                __import__(summary), summary, None
+            ).re_Identify
         else:
             self.summary = None
         self.line_delimiter = self.getDelimiter(filter_name)
@@ -156,11 +157,17 @@ class IdentifySite(object):
             mod = __import__(filter)
             obj = getattr(mod, filter_name, None)
             try:
-                self.sitelist[obj.siteId] = Site(site, filter, filter_name, summary, obj)
+                self.sitelist[obj.siteId] = Site(
+                    site, filter, filter_name, summary, obj
+                )
             except Exception as e:
                 log.error(f"Failed to load HH importer: {filter_name}. {e}")
-        self.re_Identify_PT = getattr(__import__("PokerTrackerToFpdb"), "PokerTracker", None).re_Identify
-        self.re_SumIdentify_PT = getattr(__import__("PokerTrackerSummary"), "PokerTrackerSummary", None).re_Identify
+        self.re_Identify_PT = getattr(
+            __import__("PokerTrackerToFpdb"), "PokerTracker", None
+        ).re_Identify
+        self.re_SumIdentify_PT = getattr(
+            __import__("PokerTrackerSummary"), "PokerTrackerSummary", None
+        ).re_Identify
 
     def walkDirectory(self, dir, sitelist):
         """Walks a directory, and executes a callback on each file"""
@@ -257,7 +264,9 @@ class IdentifySite(object):
                 if m1:
                     f.archive = True
                     f.archiveDivider = True
-                elif re_Head.get(filter_name) and re_Head[filter_name].match(whole_file[:5000].replace("\r\n", "\n")):
+                elif re_Head.get(filter_name) and re_Head[filter_name].match(
+                    whole_file[:5000].replace("\r\n", "\n")
+                ):
                     f.archive = True
                     f.archiveHead = True
             if m:
@@ -356,7 +365,12 @@ class IdentifySite(object):
                     log.error(TypeError)
                 mod = __import__(f.site.hhc_fname)
                 obj = getattr(mod, f.site.filter_name, None)
-                hhc = obj(self.config, in_path=name, sitename=f.site.hhc_fname, autostart=False)
+                hhc = obj(
+                    self.config,
+                    in_path=name,
+                    sitename=f.site.hhc_fname,
+                    autostart=False,
+                )
                 if hhc.readFile():
                     f.gametype = hhc.determineGameType(hhc.whole_file)
 
@@ -375,7 +389,10 @@ def main(argv=None):
 
     print("\n----------- SITE LIST -----------")
     for sid, site in list(IdSite.sitelist.items()):
-        print("%2d: Name: %s HHC: %s Summary: %s" % (sid, site.name, site.filter_name, site.summary))
+        print(
+            "%2d: Name: %s HHC: %s Summary: %s"
+            % (sid, site.name, site.filter_name, site.summary)
+        )
     print("----------- END SITE LIST -----------")
 
     print("\n----------- ID REGRESSION FILES -----------")

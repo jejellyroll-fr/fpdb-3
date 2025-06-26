@@ -16,25 +16,22 @@
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 from __future__ import print_function
 
+import datetime
+import pprint
+import sys
+from decimal import Decimal
+
+import Card
+import Configuration
+import DerivedStats
+from Exceptions import FpdbHandDuplicate, FpdbHandPartial, FpdbParseError
+from loggingFpdb import get_logger
 
 # import L10n
 # _ = L10n.get_translation()
 
 # TODO: get writehand() encoding correct
 
-import sys
-from decimal import Decimal
-import datetime
-
-import pprint
-
-from loggingFpdb import get_logger
-
-
-import Configuration
-from Exceptions import FpdbHandDuplicate, FpdbHandPartial, FpdbParseError
-import DerivedStats
-import Card
 
 Configuration.set_logfile("fpdb-log.txt")
 
@@ -43,7 +40,17 @@ log = get_logger("hand")
 
 
 class Hand(object):
-    UPS = {"a": "A", "t": "T", "j": "J", "q": "Q", "k": "K", "S": "s", "C": "c", "H": "h", "D": "d"}
+    UPS = {
+        "a": "A",
+        "t": "T",
+        "j": "J",
+        "q": "Q",
+        "k": "K",
+        "S": "s",
+        "C": "c",
+        "H": "h",
+        "D": "d",
+    }
     LCS = {"H": "h", "D": "d", "C": "c", "S": "s"}
     SYMBOL = {
         "USD": "$",
@@ -172,13 +179,17 @@ class Hand(object):
         self.bets = {}
         self.lastBet = {}
         self.streets = {}
-        self.actions = {}  # [['mct','bets','$10'],['mika','folds'],['carlg','raises','$20']]
+        self.actions = (
+            {}
+        )  # [['mct','bets','$10'],['mika','folds'],['carlg','raises','$20']]
         self.board = {}  # dict from street names to community cards
         self.holecards = {}
         self.discards = {}
         self.showdownStrings = {}
         for street in self.allStreets:
-            self.streets[street] = ""  # portions of the handText, filled by markStreets()
+            self.streets[street] = (
+                ""  # portions of the handText, filled by markStreets()
+            )
             self.actions[street] = []
         for street in self.actionStreets:
             self.bets[street] = {}
@@ -187,9 +198,9 @@ class Hand(object):
         for street in self.holeStreets:
             self.holecards[street] = {}  # dict from player names to holecards
         for street in self.discardStreets:
-            self.discards[
-                street
-            ] = {}  # dict from player names to dicts by street ... of tuples ... of discarded holecards
+            self.discards[street] = (
+                {}
+            )  # dict from player names to dicts by street ... of tuples ... of discarded holecards
         # Collections indexed by player names
         self.rakes = {}
         self.stacks = {}
@@ -213,7 +224,9 @@ class Hand(object):
         self.roundPenny = False
         self.fastFold = False
         # currency symbol for this hand
-        self.sym = self.SYMBOL[self.gametype["currency"]]  # save typing! delete this attr when done
+        self.sym = self.SYMBOL[
+            self.gametype["currency"]
+        ]  # save typing! delete this attr when done
         self.pot.setSym(self.sym)
         self.is_duplicate = False  # i.e. don't update hudcache if true
 
@@ -281,7 +294,9 @@ class Hand(object):
             result = result + "\n%s =\n" % name + pprint.pformat(struct, 4)
         return result
 
-    def addHoleCards(self, street, player, open=[], closed=[], shown=False, mucked=False, dealt=False):
+    def addHoleCards(
+        self, street, player, open=[], closed=[], shown=False, mucked=False, dealt=False
+    ):
         """Assigns observed holecards to a player.
         cards   list of card bigrams e.g. ['2h','Jc']
         player  (string) name of player
@@ -316,11 +331,17 @@ class Hand(object):
         # These functions are intended for prep insert eventually
         #####
         if self.gametype.get("maxSeats") is None:
-            self.gametype["maxSeats"] = self.maxseats  # TODO: move up to individual parsers
+            self.gametype["maxSeats"] = (
+                self.maxseats
+            )  # TODO: move up to individual parsers
         else:
             self.maxseats = self.gametype["maxSeats"]
-        self.dbid_pids = db.getSqlPlayerIDs([p[1] for p in self.players], self.siteId, self.hero)
-        self.dbid_gt = db.getSqlGameTypeId(self.siteId, self.gametype, printdata=printtest)
+        self.dbid_pids = db.getSqlPlayerIDs(
+            [p[1] for p in self.players], self.siteId, self.hero
+        )
+        self.dbid_gt = db.getSqlGameTypeId(
+            self.siteId, self.gametype, printdata=printtest
+        )
 
         # Gametypes
         hilo = Card.games[self.gametype["category"]][2]
@@ -362,16 +383,27 @@ class Hand(object):
         self.handspots = self.stats.getHandsPots()
 
     def getHandId(self, db, id):
-        if db.isDuplicate(self.siteId, self.hands["siteHandNo"], self.hands["heroSeat"], self.publicDB):
-            log.debug(f"Hand.insert(): hid #: {self.hands['siteHandNo']} is a duplicate")
+        if db.isDuplicate(
+            self.siteId, self.hands["siteHandNo"], self.hands["heroSeat"], self.publicDB
+        ):
+            log.debug(
+                f"Hand.insert(): hid #: {self.hands['siteHandNo']} is a duplicate"
+            )
             self.is_duplicate = True  # i.e. don't update hudcache
             next = id
             if self.publicDB:
                 raise FpdbHandDuplicate(
-                    "%s-%s-%s" % (str(self.siteId), str(self.hands["siteHandNo"]), self.hands["heroSeat"])
+                    "%s-%s-%s"
+                    % (
+                        str(self.siteId),
+                        str(self.hands["siteHandNo"]),
+                        self.hands["heroSeat"],
+                    )
                 )
             else:
-                raise FpdbHandDuplicate("%s-%s" % (str(self.siteId), str(self.hands["siteHandNo"])))
+                raise FpdbHandDuplicate(
+                    "%s-%s" % (str(self.siteId), str(self.hands["siteHandNo"]))
+                )
         else:
             self.dbid_hands = id
             self.hands["id"] = self.dbid_hands
@@ -389,19 +421,27 @@ class Hand(object):
         db.storeBoards(self.dbid_hands, self.hands["boards"], doinsert)
 
     def insertHandsPlayers(self, db, doinsert=False, printtest=False):
-        log.info(f"Entering insertHandsPlayers: doinsert={doinsert}, printtest={printtest}")
+        log.info(
+            f"Entering insertHandsPlayers: doinsert={doinsert}, printtest={printtest}"
+        )
 
         try:
             log.debug("Calling storeHandsPlayers for player data.")
-            db.storeHandsPlayers(self.dbid_hands, self.dbid_pids, self.handsplayers, doinsert, printtest)
+            db.storeHandsPlayers(
+                self.dbid_hands, self.dbid_pids, self.handsplayers, doinsert, printtest
+            )
         except Exception as e:
             log.error(f"Error in storeHandsPlayers: {e}")
             raise
 
         if self.handspots:
-            log.debug(f"Sorting handspots: {len(self.handspots)} entries before sorting.")
+            log.debug(
+                f"Sorting handspots: {len(self.handspots)} entries before sorting."
+            )
             self.handspots.sort(key=lambda x: x[1])
-            log.debug(f"Sorting complete. Updating handspots with hand ID: {self.dbid_hands}.")
+            log.debug(
+                f"Sorting complete. Updating handspots with hand ID: {self.dbid_hands}."
+            )
             for ht in self.handspots:
                 ht[0] = self.dbid_hands
             log.debug(f"Updated handspots: {self.handspots}")
@@ -419,7 +459,9 @@ class Hand(object):
     def insertHandsActions(self, db, doinsert=False, printtest=False):
         """Function to inserts HandsActions into database"""
         if self.saveActions:
-            db.storeHandsActions(self.dbid_hands, self.dbid_pids, self.handsactions, doinsert, printtest)
+            db.storeHandsActions(
+                self.dbid_hands, self.dbid_pids, self.handsactions, doinsert, printtest
+            )
 
     def insertHandsStove(self, db, doinsert=False):
         """Function to inserts HandsStove into database"""
@@ -435,13 +477,28 @@ class Hand(object):
     def updateHudCache(self, db, doinsert=False):
         """Function to update the HudCache"""
         if self.callHud:
-            db.storeHudCache(self.dbid_gt, self.gametype, self.dbid_pids, self.startTime, self.handsplayers, doinsert)
+            db.storeHudCache(
+                self.dbid_gt,
+                self.gametype,
+                self.dbid_pids,
+                self.startTime,
+                self.handsplayers,
+                doinsert,
+            )
 
     def updateSessionsCache(self, db, tz, doinsert=False):
         """Function to update the Sessions"""
         if self.cacheSessions:
             heroes = [list(self.dbid_pids.values())[0]]
-            db.storeSessions(self.dbid_hands, self.dbid_pids, self.startTime, self.tourneyId, heroes, tz, doinsert)
+            db.storeSessions(
+                self.dbid_hands,
+                self.dbid_pids,
+                self.startTime,
+                self.tourneyId,
+                heroes,
+                tz,
+                doinsert,
+            )
             db.storeSessionsCache(
                 self.dbid_hands,
                 self.dbid_pids,
@@ -512,11 +569,19 @@ class Hand(object):
         # Discripter must be set to lowercase as postgres returns all descriptors lower case and SQLight returns them as they are
         res = [
             dict(line)
-            for line in [list(zip([column[0].lower() for column in c.description], row)) for row in c.fetchall()]
+            for line in [
+                list(zip([column[0].lower() for column in c.description], row))
+                for row in c.fetchall()
+            ]
         ]
         for row in res:
             self.addPlayer(
-                row["seatno"], row["name"], str(row["chips"]), str(row["position"]), row["sitout"], str(row["bounty"])
+                row["seatno"],
+                row["name"],
+                str(row["chips"]),
+                str(row["position"]),
+                row["sitout"],
+                str(row["bounty"]),
             )
             cardlist = []
             cardlist.append(Card.valueSuitFromCard(row["card1"]))
@@ -549,7 +614,12 @@ class Hand(object):
             game = Card.games[self.gametype["category"]]
             if game[0] == "hold" and cardlist[0] != "":
                 self.addHoleCards(
-                    "PREFLOP", row["name"], closed=cardlist[0 : game[5][0][1]], shown=False, mucked=mucked, dealt=dealt
+                    "PREFLOP",
+                    row["name"],
+                    closed=cardlist[0 : game[5][0][1]],
+                    shown=False,
+                    mucked=mucked,
+                    dealt=dealt,
                 )
             elif game[0] == "stud" and cardlist[2] != "":
                 streets = dict((v, k) for (k, v) in list(game[3].items()))
@@ -600,7 +670,10 @@ class Hand(object):
         # Discripter must be set to lowercase as supported dbs differ on what is returned.
         res = [
             dict(line)
-            for line in [list(zip([column[0].lower() for column in c.description], row)) for row in c.fetchall()]
+            for line in [
+                list(zip([column[0].lower() for column in c.description], row))
+                for row in c.fetchall()
+            ]
         ]
         res = res[0]
 
@@ -616,12 +689,20 @@ class Hand(object):
         # except ValueError:
         #    self.startTime = datetime.datetime.strptime(res['starttime'], "%Y-%m-%d %H:%M:%S")
         # However a startTime is needed for a valid output by writeHand:
-        self.startTime = datetime.datetime.strptime("1970-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+        self.startTime = datetime.datetime.strptime(
+            "1970-01-01 12:00:00", "%Y-%m-%d %H:%M:%S"
+        )
 
         cards = list(
             map(
                 Card.valueSuitFromCard,
-                [res["boardcard1"], res["boardcard2"], res["boardcard3"], res["boardcard4"], res["boardcard5"]],
+                [
+                    res["boardcard1"],
+                    res["boardcard2"],
+                    res["boardcard3"],
+                    res["boardcard4"],
+                    res["boardcard5"],
+                ],
             )
         )
         if cards[0]:
@@ -638,13 +719,22 @@ class Hand(object):
             c.execute(q, (handId,))
             boards = [
                 dict(line)
-                for line in [list(zip([column[0].lower() for column in c.description], row)) for row in c.fetchall()]
+                for line in [
+                    list(zip([column[0].lower() for column in c.description], row))
+                    for row in c.fetchall()
+                ]
             ]
             for b in boards:
                 cards = list(
                     map(
                         Card.valueSuitFromCard,
-                        [b["boardcard1"], b["boardcard2"], b["boardcard3"], b["boardcard4"], b["boardcard5"]],
+                        [
+                            b["boardcard1"],
+                            b["boardcard2"],
+                            b["boardcard3"],
+                            b["boardcard4"],
+                            b["boardcard5"],
+                        ],
                     )
                 )
                 if cards[0]:
@@ -682,7 +772,10 @@ class Hand(object):
         # Discripter must be set to lowercase as supported dbs differ on what is returned.
         res = [
             dict(line)
-            for line in [list(zip([column[0].lower() for column in c.description], row)) for row in c.fetchall()]
+            for line in [
+                list(zip([column[0].lower() for column in c.description], row))
+                for row in c.fetchall()
+            ]
         ]
         for row in res:
             name = row["name"]
@@ -692,7 +785,9 @@ class Hand(object):
             bet = str(row["bet"])
             street = self.allStreets[int(street) + 1]
             discards = row["cardsdiscarded"]
-            log.debug(f"Hand.select():: name: '{name}' street: '{street}' act: '{act}' bet: '{bet}'")
+            log.debug(
+                f"Hand.select():: name: '{name}' street: '{street}' act: '{act}' bet: '{bet}'"
+            )
             if act == 1:  # Ante
                 self.addAnte(name, bet)
             elif act == 2:  # Small Blind
@@ -742,7 +837,11 @@ class Hand(object):
         If a player has None chips he won't be added."""
 
         if len(self.players) > 0 and seat in [p[0] for p in self.players]:
-            raise FpdbHandPartial("addPlayer: " + ("Can't have 2 players in the same seat!") + ": '%s'" % self.handid)
+            raise FpdbHandPartial(
+                "addPlayer: "
+                + ("Can't have 2 players in the same seat!")
+                + ": '%s'" % self.handid
+            )
 
         log.debug(f"add Player: {seat} {name} ({chips})")
         if chips is not None:
@@ -777,7 +876,8 @@ class Hand(object):
             tmp = self.handText[0:100]
             self.cancelled = True
             raise FpdbHandPartial(
-                ("Streets didn't match - Assuming hand '%s' was cancelled.") % (self.handid)
+                ("Streets didn't match - Assuming hand '%s' was cancelled.")
+                % (self.handid)
                 + " "
                 + ("First 100 characters: %s") % tmp
             )
@@ -900,7 +1000,10 @@ class Hand(object):
             self.checkPlayerExists(player, "addCall")
             amount = Decimal(amount)
             self.bets[street][player].append(amount)
-            if street in ("PREFLOP", "DEAL", "THIRD") and self.lastBet.get(street) < amount:
+            if (
+                street in ("PREFLOP", "DEAL", "THIRD")
+                and self.lastBet.get(street) < amount
+            ):
                 self.lastBet[street] = amount
             self.stacks[player] -= amount
             act = (player, "calls", amount, self.stacks[player] == 0)
@@ -1070,7 +1173,10 @@ class Hand(object):
                 else:
                     self.removePlayer(p[1])
         if len(self.players) < 2:
-            raise FpdbHandPartial(("Less than 2 players - Assuming hand '%s' was cancelled.") % (self.handid))
+            raise FpdbHandPartial(
+                ("Less than 2 players - Assuming hand '%s' was cancelled.")
+                % (self.handid)
+            )
 
     def setUncalledBets(self, value):
         self.uncalledbets = value
@@ -1106,11 +1212,17 @@ class Hand(object):
         # Basic verification
         if not isinstance(self.pot.committed, dict) or len(self.pot.committed) == 0:
             log.error("self.pot.committed is not initialized or empty.")
-            raise FpdbParseError("self.pot.committed is missing or improperly initialized.")
+            raise FpdbParseError(
+                "self.pot.committed is missing or improperly initialized."
+            )
 
         # Convert and filter out non-positive commits
         try:
-            commitsall = [(Decimal(v), k) for (k, v) in self.pot.committed.items() if Decimal(v) > 0]
+            commitsall = [
+                (Decimal(v), k)
+                for (k, v) in self.pot.committed.items()
+                if Decimal(v) > 0
+            ]
         except Exception as e:
             log.error(f"Error while preparing commitsall: {e}")
             raise FpdbParseError(f"Invalid data in self.pot.committed: {e}")
@@ -1122,7 +1234,9 @@ class Hand(object):
         self.totalpot = Decimal("0.00")
         self.pot.pots = []
         if self.totalcollected is None:
-            log.warning("totalcollected was None during totalPot calculation. Setting it to 0.00")
+            log.warning(
+                "totalcollected was None during totalPot calculation. Setting it to 0.00"
+            )
             self.totalcollected = Decimal("0.00")
 
         def create_pot_from_value(value, calls):
@@ -1158,19 +1272,25 @@ class Hand(object):
             """
             leftover_sum = sum(v for (v, k) in calls)
             diff = self.totalcollected - self.totalpot
-            log.debug(f"Single-player leftover detected. diff={diff}, leftover={leftover_sum}")
+            log.debug(
+                f"Single-player leftover detected. diff={diff}, leftover={leftover_sum}"
+            )
 
             if diff > 0:
                 # Create a final solo pot from this leftover
                 participant = {calls[0][1]}
                 self.totalpot += leftover_sum
                 self.pot.pots.append((leftover_sum, participant))
-                log.debug(f"Formed final solo pot from leftover: {leftover_sum}, Participant={participant}")
+                log.debug(
+                    f"Formed final solo pot from leftover: {leftover_sum}, Participant={participant}"
+                )
                 return []
             else:
                 # Surplus must be returned to the player as uncalled bet
                 player = calls[0][1]
-                self.pot.returned[player] = self.pot.returned.get(player, Decimal("0.00")) + leftover_sum
+                self.pot.returned[player] = (
+                    self.pot.returned.get(player, Decimal("0.00")) + leftover_sum
+                )
                 log.debug(f"Uncalled bet returned to {player}: {leftover_sum}")
                 return []
 
@@ -1235,8 +1355,12 @@ class Hand(object):
                 return self.totalpot
             else:
                 # totalcollected > totalpot is an error scenario
-                log.error(f"Collected amount ({self.totalcollected}) exceeds total pot ({self.totalpot})")
-                raise FpdbParseError(f"Collected amount exceeds total pot for hand {self.handid}")
+                log.error(
+                    f"Collected amount ({self.totalcollected}) exceeds total pot ({self.totalpot})"
+                )
+                raise FpdbParseError(
+                    f"Collected amount exceeds total pot for hand {self.handid}"
+                )
 
         except Exception as e:
             log.error(f"Pot calculation failed: {e}")
@@ -1259,10 +1383,19 @@ class Hand(object):
             "5_studhi": "5 Card Stud",
             "badugi": "Badugi",
         }
-        ls = {"nl": "No Limit", "pl": "Pot Limit", "fl": "Limit", "cn": "Cap No Limit", "cp": "Cap Pot Limit"}
+        ls = {
+            "nl": "No Limit",
+            "pl": "Pot Limit",
+            "fl": "Limit",
+            "cn": "Cap No Limit",
+            "cp": "Cap Pot Limit",
+        }
 
         log.debug(f"gametype: {self.gametype}")
-        retstring = "%s %s" % (gs[self.gametype["category"]], ls[self.gametype["limitType"]])
+        retstring = "%s %s" % (
+            gs[self.gametype["category"]],
+            ls[self.gametype["limitType"]],
+        )
         return retstring
 
     def printHand(self):
@@ -1278,9 +1411,19 @@ class Hand(object):
         elif act[1] == "cashout":
             return "%s: cashout " % (act[0])
         elif act[1] == "calls":
-            return "%s: calls %s%s%s" % (act[0], self.sym, act[2], " and is all-in" if act[3] else "")
+            return "%s: calls %s%s%s" % (
+                act[0],
+                self.sym,
+                act[2],
+                " and is all-in" if act[3] else "",
+            )
         elif act[1] == "bets":
-            return "%s: bets %s%s%s" % (act[0], self.sym, act[2], " and is all-in" if act[3] else "")
+            return "%s: bets %s%s%s" % (
+                act[0],
+                self.sym,
+                act[2],
+                " and is all-in" if act[3] else "",
+            )
         elif act[1] == "raises":
             return "%s: raises %s%s to %s%s%s" % (
                 act[0],
@@ -1291,15 +1434,40 @@ class Hand(object):
                 " and is all-in" if act[5] else "",
             )
         elif act[1] == "completes":
-            return "%s: completes to %s%s%s" % (act[0], self.sym, act[2], " and is all-in" if act[3] else "")
+            return "%s: completes to %s%s%s" % (
+                act[0],
+                self.sym,
+                act[2],
+                " and is all-in" if act[3] else "",
+            )
         elif act[1] == "small blind":
-            return "%s: posts small blind %s%s%s" % (act[0], self.sym, act[2], " and is all-in" if act[3] else "")
+            return "%s: posts small blind %s%s%s" % (
+                act[0],
+                self.sym,
+                act[2],
+                " and is all-in" if act[3] else "",
+            )
         elif act[1] == "big blind":
-            return "%s: posts big blind %s%s%s" % (act[0], self.sym, act[2], " and is all-in" if act[3] else "")
+            return "%s: posts big blind %s%s%s" % (
+                act[0],
+                self.sym,
+                act[2],
+                " and is all-in" if act[3] else "",
+            )
         elif act[1] == "straddle":
-            return "%s: straddles %s%s%s" % (act[0], self.sym, act[2], " and is all-in" if act[3] else "")
+            return "%s: straddles %s%s%s" % (
+                act[0],
+                self.sym,
+                act[2],
+                " and is all-in" if act[3] else "",
+            )
         elif act[1] == "button blind":
-            return "%s: posts button blind %s%s%s" % (act[0], self.sym, act[2], " and is all-in" if act[3] else "")
+            return "%s: posts button blind %s%s%s" % (
+                act[0],
+                self.sym,
+                act[2],
+                " and is all-in" if act[3] else "",
+            )
         elif act[1] == "both":
             return "%s: posts small & big blinds %s%s%s" % (
                 act[0],
@@ -1308,15 +1476,29 @@ class Hand(object):
                 " and is all-in" if act[3] else "",
             )
         elif act[1] == "ante":
-            return "%s: posts the ante %s%s%s" % (act[0], self.sym, act[2], " and is all-in" if act[3] else "")
+            return "%s: posts the ante %s%s%s" % (
+                act[0],
+                self.sym,
+                act[2],
+                " and is all-in" if act[3] else "",
+            )
         elif act[1] == "bringin":
-            return "%s: brings in for %s%s%s" % (act[0], self.sym, act[2], " and is all-in" if act[3] else "")
+            return "%s: brings in for %s%s%s" % (
+                act[0],
+                self.sym,
+                act[2],
+                " and is all-in" if act[3] else "",
+            )
         elif act[1] == "discards":
             return "%s: discards %s %s%s" % (
                 act[0],
                 act[2],
                 "card" if act[2] == 1 else "cards",
-                " [" + " ".join(self.discards[street][act[0]]) + "]" if self.hero == act[0] else "",
+                (
+                    " [" + " ".join(self.discards[street][act[0]]) + "]"
+                    if self.hero == act[0]
+                    else ""
+                ),
             )
         elif act[1] == "stands pat":
             return "%s: stands pat" % (act[0])
@@ -1348,7 +1530,9 @@ class Hand(object):
         result = []
         for street in streets:
             action = self.get_actions_short(player, street)
-            if len(action) > 0:  # if there is no action on later streets, nothing is added.
+            if (
+                len(action) > 0
+            ):  # if there is no action on later streets, nothing is added.
                 result.append(action)
         return ",".join(result)
 
@@ -1395,9 +1579,16 @@ class Hand(object):
                 self.getStakesAsString(),
             )
         elif self.mixed is not None:  # all other mixed games
-            gs = gs + " %s (%s, %s) - " % (self.MS[self.mixed], self.getGameTypeAsString(), self.getStakesAsString())
+            gs = gs + " %s (%s, %s) - " % (
+                self.MS[self.mixed],
+                self.getGameTypeAsString(),
+                self.getStakesAsString(),
+            )
         else:  # non-mixed cash games
-            gs = gs + " %s (%s) - " % (self.getGameTypeAsString(), self.getStakesAsString())
+            gs = gs + " %s (%s) - " % (
+                self.getGameTypeAsString(),
+                self.getStakesAsString(),
+            )
 
         try:
             timestr = datetime.datetime.strftime(self.startTime, "%Y/%m/%d %H:%M:%S ET")
@@ -1406,7 +1597,9 @@ class Hand(object):
                 "*** ERROR - HAND: calling writeGameLine with unexpected STARTTIME value. "
                 f"Expecting datetime.date object, received: {self.startTime}"
             )
-            log.error("*** Make sure your HandHistoryConverter is setting hand.startTime properly!")
+            log.error(
+                "*** Make sure your HandHistoryConverter is setting hand.startTime properly!"
+            )
             log.debug(f"*** Game String: {gs}")
             return gs
         else:
@@ -1415,9 +1608,16 @@ class Hand(object):
     def writeTableLine(self):
         table_string = "Table "
         if self.gametype["type"] == "tour":
-            table_string = table_string + "'%s %s' %s-max" % (self.tourNo, self.tablename, self.maxseats)
+            table_string = table_string + "'%s %s' %s-max" % (
+                self.tourNo,
+                self.tablename,
+                self.maxseats,
+            )
         else:
-            table_string = table_string + "'%s' %s-max" % (self.tablename, self.maxseats)
+            table_string = table_string + "'%s' %s-max" % (
+                self.tablename,
+                self.maxseats,
+            )
         if self.gametype["currency"] == "play":
             table_string = table_string + " (Play Money)"
         if self.buttonpos is not None and self.buttonpos != 0:
@@ -1434,7 +1634,9 @@ def writeHand(self, fh=sys.__stdout__):
 
 
 class HoldemOmahaHand(Hand):
-    def __init__(self, config, hhc, sitename, gametype, handText, builtFrom="HHC", handid=None):
+    def __init__(
+        self, config, hhc, sitename, gametype, handText, builtFrom="HHC", handid=None
+    ):
         self.config = config
         if gametype["base"] != "hold":
             pass  # or indeed don't pass and complain instead
@@ -1491,8 +1693,8 @@ class HoldemOmahaHand(Hand):
             hhc.readShowdownActions(self)
             # Read actions in street order
             for street, text in list(self.streets.items()):
-                if (
-                    text and (street != "PREFLOP")
+                if text and (
+                    street != "PREFLOP"
                 ):  # TODO: the except PREFLOP shouldn't be necessary, but regression-test-files/cash/Everleaf/Flop/NLHE-10max-USD-0.01-0.02-201008.2Way.All-in.pre.txt fails without it
                     hhc.readCommunityCards(self, street)
             for street in self.actionStreets:
@@ -1501,7 +1703,9 @@ class HoldemOmahaHand(Hand):
                     self.pot.markTotal(street)
             hhc.readCollectPot(self)
             hhc.readShownCards(self)
-            self.pot.handid = self.handid  # This is only required so Pot can throw it in totalPot
+            self.pot.handid = (
+                self.handid
+            )  # This is only required so Pot can throw it in totalPot
             self.totalPot()  # Finalize it (total the pot)
             log.debug(f"self.totalpot {self.totalpot}")
             log.debug(f" type self.totalpot {type(self.totalpot)}")
@@ -1527,7 +1731,9 @@ class HoldemOmahaHand(Hand):
         else:
             log.warning("Neither HHC nor DB+handID provided")
 
-    def addShownCards(self, cards, player, shown=True, mucked=False, dealt=False, string=None):
+    def addShownCards(
+        self, cards, player, shown=True, mucked=False, dealt=False, string=None
+    ):
         if player == self.hero:  # we have hero's cards just update shown/mucked
             if shown:
                 self.shown.add(player)
@@ -1535,7 +1741,15 @@ class HoldemOmahaHand(Hand):
                 self.mucked.add(player)
         else:
             if self.gametype["category"] == "aof_omaha":
-                self.addHoleCards("FLOP", player, open=[], closed=cards, shown=shown, mucked=mucked, dealt=dealt)
+                self.addHoleCards(
+                    "FLOP",
+                    player,
+                    open=[],
+                    closed=cards,
+                    shown=shown,
+                    mucked=mucked,
+                    dealt=dealt,
+                )
             elif len(cards) in (2, 3, 4, 6) or self.gametype["category"] in (
                 "5_omahahi",
                 "5_omaha8",
@@ -1543,14 +1757,35 @@ class HoldemOmahaHand(Hand):
                 "cour_hilo",
                 "fusion",
             ):  # avoid adding board by mistake (Everleaf problem)
-                self.addHoleCards("PREFLOP", player, open=[], closed=cards, shown=shown, mucked=mucked, dealt=dealt)
+                self.addHoleCards(
+                    "PREFLOP",
+                    player,
+                    open=[],
+                    closed=cards,
+                    shown=shown,
+                    mucked=mucked,
+                    dealt=dealt,
+                )
 
             elif len(cards) == 5:  # cards holds a winning hand, not hole cards
                 # filter( lambda x: x not in b, a )             # calcs a - b where a and b are lists
                 # so diff is set to the winning hand minus the board cards, if we're lucky that leaves the hole cards
-                diff = [x for x in cards if x not in self.board["FLOP"] + self.board["TURN"] + self.board["RIVER"]]
+                diff = [
+                    x
+                    for x in cards
+                    if x
+                    not in self.board["FLOP"] + self.board["TURN"] + self.board["RIVER"]
+                ]
                 if len(diff) == 2 and self.gametype["category"] in ("holdem"):
-                    self.addHoleCards("PREFLOP", player, open=[], closed=diff, shown=shown, mucked=mucked, dealt=dealt)
+                    self.addHoleCards(
+                        "PREFLOP",
+                        player,
+                        open=[],
+                        closed=diff,
+                        shown=shown,
+                        mucked=mucked,
+                        dealt=dealt,
+                    )
         if string is not None:
             self.showdownStrings[player] = string
 
@@ -1608,12 +1843,17 @@ class HoldemOmahaHand(Hand):
         super(HoldemOmahaHand, self).writeHand(fh)
 
         players_who_act_preflop = set(
-            ([x[0] for x in self.actions["PREFLOP"]] + [x[0] for x in self.actions["BLINDSANTES"]])
+            (
+                [x[0] for x in self.actions["PREFLOP"]]
+                + [x[0] for x in self.actions["BLINDSANTES"]]
+            )
         )
         log.debug(self.actions["PREFLOP"])
         for player in [x for x in self.players if x[1] in players_who_act_preflop]:
             # N'affiche les stacks que des joueurs ayant agi preflop
-            log.info(f"Seat {player[0]}: {player[1]} (${float(player[2]):.2f} in chips)")
+            log.info(
+                f"Seat {player[0]}: {player[1]} (${float(player[2]):.2f} in chips)"
+            )
 
         if self.actions["BLINDSANTES"]:
             log.debug(f"BLINDSANTES actions: {self.actions['BLINDSANTES']}")
@@ -1622,11 +1862,15 @@ class HoldemOmahaHand(Hand):
 
         fh.write("*** HOLE CARDS ***\n")
         for player in self.dealt:
-            fh.write(f"Dealt to {player} [{' '.join(self.holecards['PREFLOP'][player][1])}]\n")
+            fh.write(
+                f"Dealt to {player} [{' '.join(self.holecards['PREFLOP'][player][1])}]\n"
+            )
 
         if self.hero == "":
             for player in self.shown.difference(self.dealt):
-                fh.write(f"Dealt to {player} [{' '.join(self.holecards['PREFLOP'][player][1])}]\n")
+                fh.write(
+                    f"Dealt to {player} [{' '.join(self.holecards['PREFLOP'][player][1])}]\n"
+                )
 
         if self.actions["PREFLOP"]:
             for act in self.actions["PREFLOP"]:
@@ -1639,7 +1883,9 @@ class HoldemOmahaHand(Hand):
                 fh.write(f"{self.actionString(act)}\n")
 
         if self.board["TURN"]:
-            fh.write(f"*** TURN *** [{' '.join(self.board['FLOP'])}] [{' '.join(self.board['TURN'])}]\n")
+            fh.write(
+                f"*** TURN *** [{' '.join(self.board['FLOP'])}] [{' '.join(self.board['TURN'])}]\n"
+            )
         if self.actions["TURN"]:
             for act in self.actions["TURN"]:
                 fh.write(f"{self.actionString(act)}\n")
@@ -1667,7 +1913,9 @@ class HoldemOmahaHand(Hand):
                     numOfHoleCardsNeeded = 2
 
                 if len(self.holecards["PREFLOP"][name]) == numOfHoleCardsNeeded:
-                    fh.write(f"{name} shows [{' '.join(self.holecards['PREFLOP'][name][1])}] (a hand...)\n")
+                    fh.write(
+                        f"{name} shows [{' '.join(self.holecards['PREFLOP'][name][1])}] (a hand...)\n"
+                    )
 
         # Current PS format has the lines:
         # Uncalled bet ($111.25) returned to s0rrow
@@ -1677,7 +1925,9 @@ class HoldemOmahaHand(Hand):
         # Immediately before the summary.
         # The current importer uses those lines for importing winning rather than the summary
         for name in self.pot.returned:
-            fh.write(f"Uncalled bet ({self.sym}{self.pot.returned[name]}) returned to {name}\n")
+            fh.write(
+                f"Uncalled bet ({self.sym}{self.pot.returned[name]}) returned to {name}\n"
+            )
 
         for entry in self.collected:
             fh.write(f"{entry[0]} collected {self.sym}{entry[1]} from pot\n")
@@ -1700,7 +1950,9 @@ class HoldemOmahaHand(Hand):
                     f"and won ({self.sym}{self.collectees[name]})\n"
                 )
             elif name in self.collectees:
-                fh.write(f"Seat {seatnum}: {name} collected ({self.sym}{self.collectees[name]})\n")
+                fh.write(
+                    f"Seat {seatnum}: {name} collected ({self.sym}{self.collectees[name]})\n"
+                )
             elif name in self.folded:
                 fh.write(f"Seat {seatnum}: {name} folded\n")
             else:
@@ -1710,7 +1962,9 @@ class HoldemOmahaHand(Hand):
                         f"and lost with...\n"
                     )
                 elif name in self.mucked:
-                    fh.write(f"Seat {seatnum}: {name} mucked [{' '.join(self.holecards['PREFLOP'][name][1])}]\n")
+                    fh.write(
+                        f"Seat {seatnum}: {name} mucked [{' '.join(self.holecards['PREFLOP'][name][1])}]\n"
+                    )
                 else:
                     fh.write(f"Seat {seatnum}: {name} mucked\n")
 
@@ -1718,7 +1972,9 @@ class HoldemOmahaHand(Hand):
 
 
 class DrawHand(Hand):
-    def __init__(self, config, hhc, sitename, gametype, handText, builtFrom="HHC", handid=None):
+    def __init__(
+        self, config, hhc, sitename, gametype, handText, builtFrom="HHC", handid=None
+    ):
         self.config = config
         if gametype["base"] != "draw":
             pass  # or indeed don't pass and complain instead
@@ -1726,7 +1982,14 @@ class DrawHand(Hand):
         self.allStreets = ["BLINDSANTES", "DEAL", "DRAWONE"]
         self.holeStreets = ["DEAL", "DRAWONE"]
         self.actionStreets = ["BLINDSANTES", "DEAL", "DRAWONE"]
-        if gametype["category"] in ["27_3draw", "badugi", "a5_3draw", "badacey", "badeucey", "drawmaha"]:
+        if gametype["category"] in [
+            "27_3draw",
+            "badugi",
+            "a5_3draw",
+            "badacey",
+            "badeucey",
+            "drawmaha",
+        ]:
             self.streetList += ["DRAWTWO", "DRAWTHREE"]
             self.allStreets += ["DRAWTWO", "DRAWTHREE"]
             self.holeStreets += ["DRAWTWO", "DRAWTHREE"]
@@ -1750,7 +2013,9 @@ class DrawHand(Hand):
             hhc.markStreets(self)
             # markStreets in Draw may match without dealing cards
             if self.streets["DEAL"] is None:
-                log.error(f"Street 'DEAL' is empty. Was hand '{self.handid}' cancelled?")
+                log.error(
+                    f"Street 'DEAL' is empty. Was hand '{self.handid}' cancelled?"
+                )
                 raise FpdbParseError
             hhc.readBlinds(self)
             hhc.readSTP(self)
@@ -1765,7 +2030,9 @@ class DrawHand(Hand):
                     self.pot.markTotal(street)
             hhc.readCollectPot(self)
             hhc.readShownCards(self)
-            self.pot.handid = self.handid  # This is only required so Pot can throw it in totalPot
+            self.pot.handid = (
+                self.handid
+            )  # This is only required so Pot can throw it in totalPot
             self.totalPot()  # finalise it (total the pot)
             hhc.getRake(self)
             if self.maxseats is None:
@@ -1778,7 +2045,9 @@ class DrawHand(Hand):
             # Creator expected to call hhc.select(hid) to fill out object
             self.maxseats = 10
 
-    def addShownCards(self, cards, player, shown=True, mucked=False, dealt=False, string=None):
+    def addShownCards(
+        self, cards, player, shown=True, mucked=False, dealt=False, string=None
+    ):
         # if player == self.hero: # we have hero's cards just update shown/mucked
         #    if shown:  self.shown.add(player)
         #    if mucked: self.mucked.add(player)
@@ -1786,7 +2055,13 @@ class DrawHand(Hand):
         #    pass
         # TODO: Probably better to find the last street with action and add the hole cards to that street
         self.addHoleCards(
-            self.actionStreets[-1], player, open=[], closed=cards, shown=shown, mucked=mucked, dealt=dealt
+            self.actionStreets[-1],
+            player,
+            open=[],
+            closed=cards,
+            shown=shown,
+            mucked=mucked,
+            dealt=dealt,
         )
         if string is not None:
             self.showdownStrings[player] = string
@@ -1805,7 +2080,10 @@ class DrawHand(Hand):
 
         for i, _street in enumerate(self.holeStreets):
             if player in list(self.holecards[_street].keys()):
-                allhole = self.holecards[_street][player][1] + self.holecards[_street][player][0]
+                allhole = (
+                    self.holecards[_street][player][1]
+                    + self.holecards[_street][player][0]
+                )
                 allhole = allhole[:handsize]
                 for c in range(len(allhole)):
                     idx = c + i * 5
@@ -1830,11 +2108,16 @@ class DrawHand(Hand):
         # HH output should not be translated
         super(DrawHand, self).writeHand(fh)
 
-        players_who_act_ondeal = set([x[0] for x in self.actions["DEAL"]] + [x[0] for x in self.actions["BLINDSANTES"]])
+        players_who_act_ondeal = set(
+            [x[0] for x in self.actions["DEAL"]]
+            + [x[0] for x in self.actions["BLINDSANTES"]]
+        )
 
         for player in [x for x in self.players if x[1] in players_who_act_ondeal]:
             # Only print stacks of players who do something on deal
-            fh.write(f"Seat {player[0]}: {player[1]} ({self.sym}{player[2]} in chips)\n")
+            fh.write(
+                f"Seat {player[0]}: {player[1]} ({self.sym}{player[2]} in chips)\n"
+            )
 
         if "BLINDSANTES" in self.actions:
             for act in self.actions["BLINDSANTES"]:
@@ -1842,7 +2125,9 @@ class DrawHand(Hand):
 
         if "DEAL" in self.actions:
             fh.write("*** DEALING HANDS ***\n")
-            for player in [x[1] for x in self.players if x[1] in players_who_act_ondeal]:
+            for player in [
+                x[1] for x in self.players if x[1] in players_who_act_ondeal
+            ]:
                 if "DEAL" in self.holecards and player in self.holecards["DEAL"]:
                     nc = self.holecards["DEAL"][player][0]
                     fh.write(f"Dealt to {player}: [{' '.join(nc)}]\n")
@@ -1884,7 +2169,9 @@ class DrawHand(Hand):
             # TODO: Complete SHOWDOWN
 
         for name in self.pot.returned:
-            fh.write(f"Uncalled bet ({self.sym}{self.pot.returned[name]}) returned to {name}\n")
+            fh.write(
+                f"Uncalled bet ({self.sym}{self.pot.returned[name]}) returned to {name}\n"
+            )
         for entry in self.collected:
             fh.write(f"{entry[0]} collected {self.sym}{entry[1]} from pot\n")
 
@@ -1894,7 +2181,9 @@ class DrawHand(Hand):
 
 
 class StudHand(Hand):
-    def __init__(self, config, hhc, sitename, gametype, handText, builtFrom="HHC", handid=None):
+    def __init__(
+        self, config, hhc, sitename, gametype, handText, builtFrom="HHC", handid=None
+    ):
         self.config = config
         if gametype["base"] != "stud":
             pass  # or indeed don't pass and complain instead
@@ -1912,8 +2201,22 @@ class StudHand(Hand):
             ]  # a list of the observed street names in order
             self.holeStreets = ["SECOND", "THIRD", "FOURTH", "FIFTH"]
         else:
-            self.allStreets = ["BLINDSANTES", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"]
-            self.actionStreets = ["BLINDSANTES", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"]
+            self.allStreets = [
+                "BLINDSANTES",
+                "THIRD",
+                "FOURTH",
+                "FIFTH",
+                "SIXTH",
+                "SEVENTH",
+            ]
+            self.actionStreets = [
+                "BLINDSANTES",
+                "THIRD",
+                "FOURTH",
+                "FIFTH",
+                "SIXTH",
+                "SEVENTH",
+            ]
             self.streetList = [
                 "BLINDSANTES",
                 "THIRD",
@@ -1956,7 +2259,9 @@ class StudHand(Hand):
                     self.pot.markTotal(street)
             hhc.readCollectPot(self)
             hhc.readShownCards(self)  # not done yet
-            self.pot.handid = self.handid  # This is only required so Pot can throw it in totalPot
+            self.pot.handid = (
+                self.handid
+            )  # This is only required so Pot can throw it in totalPot
             self.totalPot()  # finalise it (total the pot)
             hhc.getRake(self)
             if self.maxseats is None:
@@ -1969,7 +2274,9 @@ class StudHand(Hand):
             # Creator expected to call hhc.select(hid) to fill out object
             self.maxseats = 10
 
-    def addShownCards(self, cards, player, shown=True, mucked=False, dealt=False, string=None):
+    def addShownCards(
+        self, cards, player, shown=True, mucked=False, dealt=False, string=None
+    ):
         if player == self.hero:  # we have hero's cards just update shown/mucked
             if shown:
                 self.shown.add(player)
@@ -1977,16 +2284,79 @@ class StudHand(Hand):
                 self.mucked.add(player)
         else:
             if self.gametype["category"] == "5_studhi" and len(cards) > 4:
-                self.addHoleCards("SECOND", player, open=[cards[1]], closed=[cards[0]], shown=shown, mucked=mucked)
-                self.addHoleCards("THIRD", player, open=[cards[2]], closed=[cards[1]], shown=shown, mucked=mucked)
-                self.addHoleCards("FOURTH", player, open=[cards[3]], closed=cards[1:2], shown=shown, mucked=mucked)
-                self.addHoleCards("FIFTH", player, open=[cards[4]], closed=cards[1:3], shown=shown, mucked=mucked)
+                self.addHoleCards(
+                    "SECOND",
+                    player,
+                    open=[cards[1]],
+                    closed=[cards[0]],
+                    shown=shown,
+                    mucked=mucked,
+                )
+                self.addHoleCards(
+                    "THIRD",
+                    player,
+                    open=[cards[2]],
+                    closed=[cards[1]],
+                    shown=shown,
+                    mucked=mucked,
+                )
+                self.addHoleCards(
+                    "FOURTH",
+                    player,
+                    open=[cards[3]],
+                    closed=cards[1:2],
+                    shown=shown,
+                    mucked=mucked,
+                )
+                self.addHoleCards(
+                    "FIFTH",
+                    player,
+                    open=[cards[4]],
+                    closed=cards[1:3],
+                    shown=shown,
+                    mucked=mucked,
+                )
             if len(cards) > 6:
-                self.addHoleCards("THIRD", player, open=[cards[2]], closed=cards[0:2], shown=shown, mucked=mucked)
-                self.addHoleCards("FOURTH", player, open=[cards[3]], closed=[cards[2]], shown=shown, mucked=mucked)
-                self.addHoleCards("FIFTH", player, open=[cards[4]], closed=cards[2:4], shown=shown, mucked=mucked)
-                self.addHoleCards("SIXTH", player, open=[cards[5]], closed=cards[2:5], shown=shown, mucked=mucked)
-                self.addHoleCards("SEVENTH", player, open=[], closed=[cards[6]], shown=shown, mucked=mucked)
+                self.addHoleCards(
+                    "THIRD",
+                    player,
+                    open=[cards[2]],
+                    closed=cards[0:2],
+                    shown=shown,
+                    mucked=mucked,
+                )
+                self.addHoleCards(
+                    "FOURTH",
+                    player,
+                    open=[cards[3]],
+                    closed=[cards[2]],
+                    shown=shown,
+                    mucked=mucked,
+                )
+                self.addHoleCards(
+                    "FIFTH",
+                    player,
+                    open=[cards[4]],
+                    closed=cards[2:4],
+                    shown=shown,
+                    mucked=mucked,
+                )
+                self.addHoleCards(
+                    "SIXTH",
+                    player,
+                    open=[cards[5]],
+                    closed=cards[2:5],
+                    shown=shown,
+                    mucked=mucked,
+                )
+                self.addHoleCards(
+                    "SEVENTH",
+                    player,
+                    open=[],
+                    closed=[cards[6]],
+                    shown=shown,
+                    mucked=mucked,
+                )
         if string is not None:
             self.showdownStrings[player] = string
 
@@ -2045,7 +2415,9 @@ class StudHand(Hand):
 
         for player in [x for x in self.players if x[1] in players_who_post_antes]:
             # Only print stacks of players who post antes
-            fh.write(f"Seat {player[0]}: {player[1]} ({self.sym}{player[2]} in chips)\n")
+            fh.write(
+                f"Seat {player[0]}: {player[1]} ({self.sym}{player[2]} in chips)\n"
+            )
 
         if "BLINDSANTES" in self.actions:
             for act in self.actions["BLINDSANTES"]:
@@ -2054,7 +2426,9 @@ class StudHand(Hand):
         def write_street(street, label):
             if street in self.actions:
                 dealt = 0
-                for player in [x[1] for x in self.players if x[1] in players_who_post_antes]:
+                for player in [
+                    x[1] for x in self.players if x[1] in players_who_post_antes
+                ]:
                     if player in self.holecards[street]:
                         dealt += 1
                         if dealt == 1:
@@ -2070,7 +2444,9 @@ class StudHand(Hand):
 
         if "SEVENTH" in self.actions:
             fh.write("*** RIVER ***\n")
-            for player in [x[1] for x in self.players if x[1] in players_who_post_antes]:
+            for player in [
+                x[1] for x in self.players if x[1] in players_who_post_antes
+            ]:
                 if player in self.holecards["SEVENTH"]:
                     cards = self.writeHoleCards("SEVENTH", player)
                     if cards:
@@ -2083,7 +2459,9 @@ class StudHand(Hand):
             # TODO: print showdown lines.
 
         for name in self.pot.returned:
-            fh.write(f"Uncalled bet ({self.sym}{self.pot.returned[name]}) returned to {name}\n")
+            fh.write(
+                f"Uncalled bet ({self.sym}{self.pot.returned[name]}) returned to {name}\n"
+            )
         for entry in self.collected:
             fh.write(f"{entry[0]} collected {self.sym}{entry[1]} from pot\n")
 
@@ -2103,11 +2481,17 @@ class StudHand(Hand):
                     f"Seat {seatnum}: {name} showed [{self.join_holecards(name)}] and won ({self.sym}{self.collectees[name]})\n"
                 )
             elif name in self.collectees:
-                fh.write(f"Seat {seatnum}: {name} collected ({self.sym}{self.collectees[name]})\n")
+                fh.write(
+                    f"Seat {seatnum}: {name} collected ({self.sym}{self.collectees[name]})\n"
+                )
             elif name in self.shown:
-                fh.write(f"Seat {seatnum}: {name} showed [{self.join_holecards(name)}]\n")
+                fh.write(
+                    f"Seat {seatnum}: {name} showed [{self.join_holecards(name)}]\n"
+                )
             elif name in self.mucked:
-                fh.write(f"Seat {seatnum}: {name} mucked [{self.join_holecards(name)}]\n")
+                fh.write(
+                    f"Seat {seatnum}: {name} mucked [{self.join_holecards(name)}]\n"
+                )
             elif name in self.folded:
                 fh.write(f"Seat {seatnum}: {name} folded\n")
             else:
@@ -2132,19 +2516,28 @@ class StudHand(Hand):
         if street == "SEVENTH" and player != self.hero:
             return  # only write 7th st line for hero, LDO
         return (
-            hc + " ".join(self.holecards[street][player][1]) + "] [" + " ".join(self.holecards[street][player][0]) + "]"
+            hc
+            + " ".join(self.holecards[street][player][1])
+            + "] ["
+            + " ".join(self.holecards[street][player][0])
+            + "]"
         )
 
     def join_holecards(self, player, asList=False):
         """Function returns a string for the stud writeHand method by default
-        With asList = True it returns the set cards for a player including down cards if they aren't know"""
+        With asList = True it returns the set cards for a player including down cards if they aren't know
+        """
         holecards = []
         for street in self.holeStreets:
             if player in self.holecards[street]:
                 if (self.gametype["category"] == "5_studhi" and street == "SECOND") or (
                     self.gametype["category"] != "5_studhi" and street == "THIRD"
                 ):
-                    holecards = holecards + self.holecards[street][player][1] + self.holecards[street][player][0]
+                    holecards = (
+                        holecards
+                        + self.holecards[street][player][1]
+                        + self.holecards[street][player][0]
+                    )
                 elif street == "SEVENTH":
                     if player == self.hero:
                         holecards = holecards + self.holecards[street][player][0]
@@ -2174,7 +2567,9 @@ class StudHand(Hand):
                         f"join_holecards: # of holecards should be either < 4, 4 or 7 - 5 and 6 should be impossible for anyone who is not a hero\njoin_holecards: holecards({player}): {holecards}"
                     )
                 if holecards == ["0x", "0x"]:
-                    log.warning(f"join_holecards: Player '{player}' appears not to have been dealt a card")
+                    log.warning(
+                        f"join_holecards: Player '{player}' appears not to have been dealt a card"
+                    )
                     # If a player is listed but not dealt a card in a cash game this can occur
                     # Noticed in FTP Razz hand. Return 3 empty cards in this case
                     holecards = ["0x", "0x", "0x"]
@@ -2233,7 +2628,9 @@ class Pot(object):
         self.stp = amount
 
     def markTotal(self, street):
-        self.streettotals[street] = sum(self.committed.values()) + sum(self.common.values()) + self.stp
+        self.streettotals[street] = (
+            sum(self.committed.values()) + sum(self.common.values()) + self.stp
+        )
 
     def getTotalAtStreet(self, street):
         if street in self.streettotals:
@@ -2267,10 +2664,14 @@ class Pot(object):
 
         # For example, to validate that the rake is consistent:
         if self.rake > self.totalpot * Decimal("0.25"):
-            log.error(f"Suspicious rake: {self.rake:.2f} exceeds 25% of total pot {self.totalpot:.2f}")
+            log.error(
+                f"Suspicious rake: {self.rake:.2f} exceeds 25% of total pot {self.totalpot:.2f}"
+            )
             raise FpdbParseError("Rake exceeds allowed percentage")
 
-        log.debug(f"Hand end finalization complete. totalpot={self.totalpot}, rake={self.rake}")
+        log.debug(
+            f"Hand end finalization complete. totalpot={self.totalpot}, rake={self.rake}"
+        )
 
         # No recalculations are done here. We rely on the already prepared data.
 
@@ -2282,12 +2683,16 @@ class Pot(object):
 
         rake_percentage = Decimal("0.05")  # Example: 5% rake
         max_rake = Decimal("3.00")  # Maximum rake
-        minimum_pot_for_rake = Decimal("1.00")  # No rake applied if the total pot is below this value
+        minimum_pot_for_rake = Decimal(
+            "1.00"
+        )  # No rake applied if the total pot is below this value
 
         # Calculate the rake on the main pot
         if self.total < minimum_pot_for_rake:
             self.rake = Decimal("0.00")
-            log.debug("Total pot below the minimum threshold for rake. No rake applied.")
+            log.debug(
+                "Total pot below the minimum threshold for rake. No rake applied."
+            )
         else:
             self.rake = min(self.total * rake_percentage, max_rake)
             log.debug(f"Rake calculated: {self.rake:.2f}")
@@ -2303,7 +2708,9 @@ class Pot(object):
             else:
                 log.debug("Main pot is uncontested. No rake applied.")
 
-        log.debug(f"Rake calculation complete. Rake: {self.rake:.2f}, Total pot: {self.total:.2f}")
+        log.debug(
+            f"Rake calculation complete. Rake: {self.rake:.2f}, Total pot: {self.total:.2f}"
+        )
 
     def __str__(self):
         if self.sym is None:
@@ -2317,7 +2724,12 @@ class Pot(object):
         if len(self.pots) < 2:
             return ret
         ret += " Main pot %s%.2f" % (self.sym, self.pots[0][0])
-        return ret + "".join([(" Side pot %s%.2f." % (self.sym, self.pots[x][0])) for x in range(1, len(self.pots))])
+        return ret + "".join(
+            [
+                (" Side pot %s%.2f." % (self.sym, self.pots[x][0]))
+                for x in range(1, len(self.pots))
+            ]
+        )
 
 
 def hand_factory(hand_id, config, db_connection):
@@ -2369,7 +2781,9 @@ def hand_factory(hand_id, config, db_connection):
 
     log.debug(f"selecting info from db for hand {hand_id}")
     hand_instance.select(db_connection, hand_id)
-    hand_instance.handid_selected = hand_id  # hand_instance does not supply this, create it here
+    hand_instance.handid_selected = (
+        hand_id  # hand_instance does not supply this, create it here
+    )
     log.debug(f"exiting hand_factory for hand {hand_id}")
 
     return hand_instance

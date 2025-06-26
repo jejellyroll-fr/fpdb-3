@@ -17,20 +17,21 @@
 
 from __future__ import print_function
 
+import codecs
+import os
+import re
+import sys
+from io import StringIO
+
+import Configuration
+import Options
+from Exceptions import *
 
 # import L10n
 # _ = L10n.get_translation()
 
 # This code is based heavily on stars-support-hh-split.py by Mika Boström
 
-import os
-import sys
-import re
-import codecs
-import Options
-import Configuration
-from Exceptions import *
-from io import StringIO
 
 (options, argv) = Options.fpdb_options()
 
@@ -40,7 +41,15 @@ codepage = ["utf-16", "utf-8", "cp1252"]
 
 
 class SplitHandHistory(object):
-    def __init__(self, config, in_path="-", out_path=None, hands=100, filter="PokerStarsToFpdb", archive=False):
+    def __init__(
+        self,
+        config,
+        in_path="-",
+        out_path=None,
+        hands=100,
+        filter="PokerStarsToFpdb",
+        archive=False,
+    ):
         self.config = config
         self.in_path = in_path
         self.out_path = out_path
@@ -141,6 +150,7 @@ class SplitHandHistory(object):
 
             def separator(line):
                 return line == "\n"
+
         else:
 
             def separator(line):
@@ -211,7 +221,12 @@ def main(argv=None):
 
     if options.filename:
         SplitHH = SplitHandHistory(
-            options.config, options.filename, options.outpath, options.hands, options.hhc, options.archive
+            options.config,
+            options.filename,
+            options.outpath,
+            options.hands,
+            options.hhc,
+            options.archive,
         )
 
 

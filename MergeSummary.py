@@ -19,14 +19,16 @@
 # import L10n
 # _ = L10n.get_translation()
 
-from decimal import Decimal
 import datetime
+import re
+from decimal import Decimal
+
 from bs4 import BeautifulSoup
 
-from HandHistoryConverter import HandHistoryConverter, FpdbParseError
-import re
+import MergeStructures
+import MergeToFpdb
+from HandHistoryConverter import FpdbParseError, HandHistoryConverter
 from loggingFpdb import get_logger
-import MergeToFpdb, MergeStructures
 from TourneySummary import TourneySummary
 
 # Merge HH Format
@@ -71,7 +73,15 @@ class MergeSummary(TourneySummary):
         "Razz": ("stud", "razz"),
     }
 
-    mixes = {"HA": "ha", "RASH": "rash", "HO": "ho", "SHOE": "shoe", "HORSE": "horse", "HOSE": "hose", "HAR": "har"}
+    mixes = {
+        "HA": "ha",
+        "RASH": "rash",
+        "HO": "ho",
+        "SHOE": "shoe",
+        "HORSE": "horse",
+        "HOSE": "hose",
+        "HAR": "har",
+    }
 
     months = {
         "January": 1,
@@ -103,7 +113,9 @@ class MergeSummary(TourneySummary):
         "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP",  # legal ISO currency codes
         "LS": "\$|€|",  # legal currency symbols
     }
-    re_Identify = re.compile("<title>Online\sPoker\sTournament\sDetails\s\-\sCarbonPoker</title>")
+    re_Identify = re.compile(
+        "<title>Online\sPoker\sTournament\sDetails\s\-\sCarbonPoker</title>"
+    )
     re_NotFound = re.compile("Tournament not found")
     re_GameTypeHH = re.compile(
         r'<description type="(?P<GAME>Holdem|Omaha|Omaha|Omaha\sH/L8|2\-7\sLowball|A\-5\sLowball|Badugi|5\-Draw\sw/Joker|5\-Draw|7\-Stud|7\-Stud\sH/L8|5\-Stud|Razz|HORSE|RASH|HA|HO|SHOE|HOSE|HAR)(?P<TYPE>\sTournament)?" stakes="(?P<LIMIT>[a-zA-Z ]+)(\s\(?\$?(?P<SB>[.0-9]+)?/?\$?(?P<BB>[.0-9]+)?(?P<blah>.*)\)?)?"(\sversion="\d+")?/>\s?',
@@ -133,8 +145,12 @@ class MergeSummary(TourneySummary):
         """<tr>(<td align="center">)?\s+?(?P<RANK>\d+)</td>\s+?<td>(?P<PNAME>.+?)</td>\s+?<td>(?P<WINNINGS>.+?)</td>\s+?</tr>"""
     )
     # re_HTMLDetails = re.compile(u"""<p class="text">(?P<LABEL>.+?) : (?P<VALUE>.+?)</p>""")
-    re_HTMLPrizepool = re.compile("""(Freeroll|Total) Prizepool\s+?</th>\s+?<td>(?P<PRIZEPOOL>[0-9,.]+)\s+?</td>""")
-    re_HTMLStartTime = re.compile("Start Time\s+?</th>\s+?<td>(?P<STARTTIME>.+?)\s+?</td>")
+    re_HTMLPrizepool = re.compile(
+        """(Freeroll|Total) Prizepool\s+?</th>\s+?<td>(?P<PRIZEPOOL>[0-9,.]+)\s+?</td>"""
+    )
+    re_HTMLStartTime = re.compile(
+        "Start Time\s+?</th>\s+?<td>(?P<STARTTIME>.+?)\s+?</td>"
+    )
     re_HTMLDateTime = re.compile(
         "\w+?\s+?(?P<D>\d+)\w+?\s+(?P<M>\w+)\s+(?P<Y>\d+),?\s+(?P<H>\d+):(?P<MIN>\d+):(?P<S>\d+)"
     )
@@ -214,14 +230,25 @@ class MergeSummary(TourneySummary):
                 m1 = self.re_DateTimeHH.search(m.group("DATETIME"))
                 if m1:
                     mg = m1.groupdict()
-                    datetimestr = "%s/%s/%s %s:%s:%s" % (mg["Y"], mg["M"], mg["D"], mg["H"], mg["MIN"], mg["S"])
+                    datetimestr = "%s/%s/%s %s:%s:%s" % (
+                        mg["Y"],
+                        mg["M"],
+                        mg["D"],
+                        mg["H"],
+                        mg["MIN"],
+                        mg["S"],
+                    )
                     # tz = a.group('TZ')  # just assume ET??
                     self.startTime = datetime.datetime.strptime(
                         datetimestr, "%Y/%m/%d %H:%M:%S"
                     )  # also timezone at end, e.g. " ET"
                 else:
-                    self.startTime = datetime.datetime.strptime(m.group("DATETIME")[:14], "%Y%m%d%H%M%S")
-                self.startTime = HandHistoryConverter.changeTimezone(self.startTime, "ET", "UTC")
+                    self.startTime = datetime.datetime.strptime(
+                        m.group("DATETIME")[:14], "%Y%m%d%H%M%S"
+                    )
+                self.startTime = HandHistoryConverter.changeTimezone(
+                    self.startTime, "ET", "UTC"
+                )
 
                 if self.re_turboHH.match(tourneyNameFull):
                     if self.maxseats == 6:
@@ -272,7 +299,11 @@ class MergeSummary(TourneySummary):
 
                     if self.isDoubleOrNothing:
                         if handText == hands[-1]:
-                            won = [w for w in list(players.keys()) if w not in out or w in won]
+                            won = [
+                                w
+                                for w in list(players.keys())
+                                if w not in out or w in won
+                            ]
                             out = [p for p in list(players.keys())]
                     i = 0
                     for n in out:
@@ -285,7 +316,9 @@ class MergeSummary(TourneySummary):
                             if rank <= payouts:
                                 winnings = int(100 * structure["payouts"][rank - 1])
                             i += 1
-                        self.addPlayer(rank, players[n], winnings, self.currency, None, None, None)
+                        self.addPlayer(
+                            rank, players[n], winnings, self.currency, None, None, None
+                        )
             self.insertOrUpdate()
 
     def resetInfo(self):
@@ -312,9 +345,7 @@ class MergeSummary(TourneySummary):
         self.isMatrix = False
         self.isShootout = False
         self.isZoom = False
-        self.matrixMatchId = (
-            None  # For Matrix tourneys : 1-4 => match tables (traditionnal), 0 => Positional winnings info
-        )
+        self.matrixMatchId = None  # For Matrix tourneys : 1-4 => match tables (traditionnal), 0 => Positional winnings info
         self.matrixIdProcessed = None
         self.subTourneyBuyin = None
         self.subTourneyFee = None
@@ -367,7 +398,9 @@ class MergeSummary(TourneySummary):
                     if m.group("GAME").strip() in self.mixes:
                         self.gametype["category"] = self.mixes[m.group("GAME").strip()]
                     else:
-                        self.gametype["category"] = self.games_html[m.group("GAME").strip()][1]
+                        self.gametype["category"] = self.games_html[
+                            m.group("GAME").strip()
+                        ][1]
                     self.gametype["limitType"] = self.limits[m.group("LIMIT").strip()]
                 m = self.re_HTMLTourNo.search(str(p))
                 if m:
@@ -384,23 +417,31 @@ class MergeSummary(TourneySummary):
                 m = self.re_HTMLPrizepool.search(str(p))
                 if m:
                     # print "DEBUG: re_HTMLPrizepool: '%s'" % m.group('PRIZEPOOL')
-                    self.prizepool = int(self.convert_to_decimal(m.group("PRIZEPOOL").strip()))
+                    self.prizepool = int(
+                        self.convert_to_decimal(m.group("PRIZEPOOL").strip())
+                    )
                 m = self.re_HTMLBuyIn.search(str(p))
                 if m:
                     # print "DEBUG: re_HTMLBuyIn: '%s'" % m.group('BUYIN')
-                    self.buyin = int(100 * self.convert_to_decimal(m.group("BUYIN").strip()))
+                    self.buyin = int(
+                        100 * self.convert_to_decimal(m.group("BUYIN").strip())
+                    )
                     if self.buyin == 0:
                         self.buyinCurrency = "FREE"
                 m = self.re_HTMLFee.search(str(p))
                 if m:
                     # print "DEBUG: re_HTMLFee: '%s'" % m.group('FEE')
-                    self.fee = int(100 * self.convert_to_decimal(m.group("FEE").strip()))
+                    self.fee = int(
+                        100 * self.convert_to_decimal(m.group("FEE").strip())
+                    )
                 m = self.re_HTMLBounty.search(str(p))
                 if m:
                     # print "DEBUG: re_HTMLBounty: '%s'" % m.group('KOBOUNTY')
                     if m.group("KOBOUNTY").strip() != "0.00":
                         self.isKO = True
-                        self.koBounty = int(100 * self.convert_to_decimal(m.group("KOBOUNTY").strip()))
+                        self.koBounty = int(
+                            100 * self.convert_to_decimal(m.group("KOBOUNTY").strip())
+                        )
                 m = self.re_HTMLAddons.search(str(p))
                 if m:
                     # print "DEBUG: re_HTMLAddons: '%s'" % m.group('ADDON')
@@ -426,8 +467,12 @@ class MergeSummary(TourneySummary):
                             m2.group("MIN"),
                             m2.group("S"),
                         )
-                        self.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
-                        self.startTime = HandHistoryConverter.changeTimezone(self.startTime, "ET", "UTC")
+                        self.startTime = datetime.datetime.strptime(
+                            datetimestr, "%Y/%m/%d %H:%M:%S"
+                        )
+                        self.startTime = HandHistoryConverter.changeTimezone(
+                            self.startTime, "ET", "UTC"
+                        )
 
             self.currency = self.buyinCurrency
             for p in table2:
@@ -447,8 +492,18 @@ class MergeSummary(TourneySummary):
                             self.currency = "USD"
                         elif m.group("WINNINGS").find("€") != -1:
                             self.currency = "EUR"
-                        winnings = int(100 * self.convert_to_decimal(m.group("WINNINGS")))
-                    self.addPlayer(rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount)
+                        winnings = int(
+                            100 * self.convert_to_decimal(m.group("WINNINGS"))
+                        )
+                    self.addPlayer(
+                        rank,
+                        name,
+                        winnings,
+                        self.currency,
+                        rebuyCount,
+                        addOnCount,
+                        koCount,
+                    )
 
         if self.gametype["category"] is None:
             log.error(("Could not parse summary file"))

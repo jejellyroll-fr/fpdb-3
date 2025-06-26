@@ -148,7 +148,9 @@ def test_re_PlayerInfo33():
     assert match.group("CASH") == "958"
 
 
-re_ButtonPos = re.compile(r"""Seat\s+\#(?P<BUTTON>\d+)\sis\sthe\sbutton""", re.MULTILINE)
+re_ButtonPos = re.compile(
+    r"""Seat\s+\#(?P<BUTTON>\d+)\sis\sthe\sbutton""", re.MULTILINE
+)
 
 
 def test_re_ButtonPos():
@@ -159,7 +161,8 @@ def test_re_ButtonPos():
 
 
 re_CollectPot = re.compile(
-    r"%(PLYR)s\s+%(BRKTS)s%(BRKTS)s(collected|wins|splits|won)\s+\((?P<POT>\d{1,3}(,\d{3})*(\.\d+)?)\)" % substitutions,
+    r"%(PLYR)s\s+%(BRKTS)s%(BRKTS)s(collected|wins|splits|won)\s+\((?P<POT>\d{1,3}(,\d{3})*(\.\d+)?)\)"
+    % substitutions,
     re.MULTILINE,
 )
 re_CollectPot2 = re.compile(
@@ -272,7 +275,8 @@ def test_re_CollectPot9():
 
 
 re_ShowdownAction = re.compile(
-    r"^(?P<PNAME>\w+): (shows \[(?P<CARDS>.*)\]\s\((?P<FHAND>.*?)\)|doesn't show hand|mucks hand)", re.MULTILINE
+    r"^(?P<PNAME>\w+): (shows \[(?P<CARDS>.*)\]\s\((?P<FHAND>.*?)\)|doesn't show hand|mucks hand)",
+    re.MULTILINE,
 )
 
 

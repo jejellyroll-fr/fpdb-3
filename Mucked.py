@@ -5,8 +5,21 @@
 Mucked cards display for FreePokerTools HUD.
 """
 
-from __future__ import print_function
-from __future__ import division
+from __future__ import division, print_function
+
+from past.utils import old_div
+from PyQt5.QtCore import QObject
+from PyQt5.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
+from PyQt5.QtWidgets import QGridLayout, QLabel, QTableView, QVBoxLayout, QWidget
+
+import Aux_Base
+
+#    FreePokerTools modules
+import Card
+
+#    Standard Library modules
+from loggingFpdb import get_logger
+
 #    Copyright 2008-2012,  Ray E. Barker
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -26,21 +39,10 @@ from __future__ import division
 ########################################################################
 
 
-from past.utils import old_div
 # import L10n
 # _ = L10n.init_translation()
 
-#    Standard Library modules
-from loggingFpdb import get_logger
 
-
-from PyQt5.QtCore import QObject
-from PyQt5.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QGridLayout, QLabel, QTableView, QVBoxLayout, QWidget
-
-#    FreePokerTools modules
-import Card
-import Aux_Base
 # Utility routine to get the number of valid cards in the card tuple
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
@@ -262,7 +264,10 @@ class Flop_Mucked(Aux_Base.Aux_Seats, QObject):
         """Create the window for the board cards and do the initial population."""
         w = self.aw_class_window(self, "common")
         self.positions["common"] = self.create_scale_position(x, y)
-        w.move(self.positions["common"][0] + self.hud.table.x, self.positions["common"][1] + self.hud.table.y)
+        w.move(
+            self.positions["common"][0] + self.hud.table.x,
+            self.positions["common"][1] + self.hud.table.y,
+        )
         if "opacity" in self.params:
             w.setWindowOpacity(float(self.params["opacity"]))
         return w
@@ -315,18 +320,27 @@ class Flop_Mucked(Aux_Base.Aux_Seats, QObject):
                 container.seen_cards.setPixmap(scratch)
                 container.resize(1, 1)
                 container.move(
-                    self.positions[i][0] + self.hud.table.x, self.positions[i][1] + self.hud.table.y
+                    self.positions[i][0] + self.hud.table.x,
+                    self.positions[i][1] + self.hud.table.y,
                 )  # here is where I move back
                 container.show()
 
             self.displayed = True
             if i != "common" and self.get_id_from_seat(i) is not None:
-                self.m_windows[i].setToolTip(self.hud.stat_dict[self.get_id_from_seat(i)]["screen_name"])
+                self.m_windows[i].setToolTip(
+                    self.hud.stat_dict[self.get_id_from_seat(i)]["screen_name"]
+                )
 
     def save_layout(self, *args):
         """Save new common position back to the layout element in the config file."""
-        new_locs = {i: ((pos[0]), (pos[1])) for i, pos in list(self.positions.items()) if i == "common"}
-        self.config.save_layout_set(self.hud.layout_set, self.hud.max, new_locs, width=None, height=None)
+        new_locs = {
+            i: ((pos[0]), (pos[1]))
+            for i, pos in list(self.positions.items())
+            if i == "common"
+        }
+        self.config.save_layout_set(
+            self.hud.layout_set, self.hud.max, new_locs, width=None, height=None
+        )
 
     def update_gui(self, new_hand_id):
         """Prepare and show the mucked cards."""
@@ -365,10 +379,15 @@ class Flop_Mucked(Aux_Base.Aux_Seats, QObject):
             # only allow move on "common" element - seat block positions are
             # determined by aux_hud, not mucked card display
             window = widget.get_parent()
-            window.begin_move_drag(event.button, int(event.x_root), int(event.y_root), event.time)
+            window.begin_move_drag(
+                event.button, int(event.x_root), int(event.y_root), event.time
+            )
 
     def expose_all(self):
         for i in self.hud.cards:
             self.m_windows[i].show()
-            self.m_windows[i].move(self.positions[i][0] + self.hud.table.x, self.positions[i][1] + self.hud.table.y)
+            self.m_windows[i].move(
+                self.positions[i][0] + self.hud.table.x,
+                self.positions[i][1] + self.hud.table.y,
+            )
             self.displayed = True

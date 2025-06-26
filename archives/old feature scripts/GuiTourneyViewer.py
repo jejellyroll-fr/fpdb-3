@@ -21,16 +21,16 @@
 
 
 from PyQt5.QtWidgets import (
-    QVBoxLayout,
+    QComboBox,
+    QGridLayout,
     QLabel,
     QLineEdit,
+    QMessageBox,
     QPushButton,
-    QGridLayout,
-    QWidget,
     QTableWidget,
     QTableWidgetItem,
-    QComboBox,
-    QMessageBox,
+    QVBoxLayout,
+    QWidget,
 )
 
 
@@ -95,7 +95,11 @@ class GuiTourneyViewer(QWidget):
         return QMessageBox(QMessageBox.Warning, diatitle, string).exec_()
 
     def displayClicked(self, widget, data=None):
-        if self.siteBox.currentText() == "" or self.entryPlayer.text() == "" or self.entryTourney.text() == "":
+        if (
+            self.siteBox.currentText() == ""
+            or self.entryPlayer.text() == ""
+            or self.entryTourney.text() == ""
+        ):
             self.warning_box("you must enter Site Name, player Name and Tourney Number")
         else:
             self.siteName = self.siteBox.currentText()
@@ -109,7 +113,9 @@ class GuiTourneyViewer(QWidget):
 
             if result[1] is None:
                 self.errorLabel = QLabel.setText(
-                    ("Tournament not found.") + " " + ("Please ensure you imported it and selected the correct site.")
+                    ("Tournament not found.")
+                    + " "
+                    + ("Please ensure you imported it and selected the correct site.")
                 )
                 self.interfaceHBox.addWidget(self.errorLabel)
             else:
@@ -173,7 +179,9 @@ class GuiTourneyViewer(QWidget):
             self.tourneyNo = int(self.entryTourney.text())
         except ValueError:
             self.errorLabel = QLabel()
-            self.errorLabel.setText("invalid entry in tourney number - must enter numbers only")
+            self.errorLabel.setText(
+                "invalid entry in tourney number - must enter numbers only"
+            )
             self.interfaceHBox.addWidget(self.errorLabel)
             return False
         self.siteName = self.siteBox.currentText()

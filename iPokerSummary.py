@@ -15,13 +15,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
+import datetime
+import re
+from decimal import Decimal
+
 # import L10n
 # _ = L10n.get_translation()
 from HandHistoryConverter import FpdbParseError
-from decimal import Decimal
-import re
 from loggingFpdb import get_logger
-import datetime
 from TourneySummary import TourneySummary
 
 log = get_logger("parser")
@@ -34,7 +35,14 @@ class iPokerSummary(TourneySummary):
         "NUM": r".,0-9",
         "NUM2": r"\b((?:\d{1,3}(?:\s\d{3})*)|(?:\d+))\b",  # Regex pattern for matching numbers with spaces
     }
-    currencies = {"€": "EUR", "$": "USD", "": "T$", "£": "GBP", "RSD": "RSD", "kr": "SEK"}
+    currencies = {
+        "€": "EUR",
+        "$": "USD",
+        "": "T$",
+        "£": "GBP",
+        "RSD": "RSD",
+        "kr": "SEK",
+    }
 
     months = {
         "Jan": 1,
@@ -107,10 +115,13 @@ class iPokerSummary(TourneySummary):
         re.VERBOSE,
     )
 
-    re_Buyin = re.compile(r"""(?P<BUYIN>[%(NUM)s]+)""" % substitutions, re.MULTILINE | re.VERBOSE)
+    re_Buyin = re.compile(
+        r"""(?P<BUYIN>[%(NUM)s]+)""" % substitutions, re.MULTILINE | re.VERBOSE
+    )
     re_TourNo = re.compile(r"(?P<TOURNO>\d+)$", re.MULTILINE)
     re_TotalBuyin = re.compile(
-        r"""(?P<BUYIN>(?P<BIAMT>[%(LS)s%(NUM)s]+)\s\+\s?(?P<BIRAKE>[%(LS)s%(NUM)s]+)?)""" % substitutions,
+        r"""(?P<BUYIN>(?P<BIAMT>[%(LS)s%(NUM)s]+)\s\+\s?(?P<BIRAKE>[%(LS)s%(NUM)s]+)?)"""
+        % substitutions,
         re.MULTILINE | re.VERBOSE,
     )
     re_DateTime1 = re.compile(
@@ -125,7 +136,9 @@ class iPokerSummary(TourneySummary):
         """(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""",
         re.MULTILINE,
     )
-    re_Place = re.compile(r"""(<place>(?P<PLACE>.+?)</place>)""" % substitutions, re.VERBOSE)
+    re_Place = re.compile(
+        r"""(<place>(?P<PLACE>.+?)</place>)""" % substitutions, re.VERBOSE
+    )
     re_FPP = re.compile(r"Pts\s")
 
     # Add the non-decimal regex used to strip currency symbols/spaces:
@@ -164,8 +177,12 @@ class iPokerSummary(TourneySummary):
                 self.info["base"], self.info["category"] = ("hold", "5_omahahi")
                 log.debug("No CATEGORY found, defaulting to hold/5_omahahi.")
             else:
-                self.gametype["base"], self.gametype["category"] = self.games[mg["CATEGORY"]]
-                log.debug(f"Set base/category to: {self.gametype['base']}/{self.gametype['category']}")
+                self.gametype["base"], self.gametype["category"] = self.games[
+                    mg["CATEGORY"]
+                ]
+                log.debug(
+                    f"Set base/category to: {self.gametype['base']}/{self.gametype['category']}"
+                )
 
         if "LIMIT" in mg:
             self.gametype["limitType"] = self.limits[mg["LIMIT"]]
@@ -176,17 +193,25 @@ class iPokerSummary(TourneySummary):
             month = self.months[m2.group("M")]
             sec = m2.group("S") or "00"
             datetimestr = f"{m2.group('Y')}/{month}/{m2.group('D')} {m2.group('H')}:{m2.group('MIN')}:{sec}"
-            self.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
+            self.startTime = datetime.datetime.strptime(
+                datetimestr, "%Y/%m/%d %H:%M:%S"
+            )
             log.debug(f"Parsed startTime with re_DateTime1: {self.startTime}")
         else:
             try:
-                self.startTime = datetime.datetime.strptime(mg["DATETIME"], "%Y-%m-%d %H:%M:%S")
+                self.startTime = datetime.datetime.strptime(
+                    mg["DATETIME"], "%Y-%m-%d %H:%M:%S"
+                )
                 log.debug(f"Parsed startTime with default format: {self.startTime}")
             except ValueError:
                 log.debug("Default format failed, trying alternative date formats.")
                 date_match = self.re_DateTime2.search(mg["DATETIME"])
                 if date_match is not None:
-                    datestr = "%d/%m/%Y %H:%M:%S" if "/" in mg["DATETIME"] else "%d.%m.%Y %H:%M:%S"
+                    datestr = (
+                        "%d/%m/%Y %H:%M:%S"
+                        if "/" in mg["DATETIME"]
+                        else "%d.%m.%Y %H:%M:%S"
+                    )
                     if date_match.group("S") is None:
                         datestr = "%d/%m/%Y %H:%M"
                 else:
@@ -218,7 +243,9 @@ class iPokerSummary(TourneySummary):
                 self.tourNo = tourNo
                 log.debug(f"Parsed tourNo from table string: {self.tourNo}")
             else:
-                log.debug("No numeric tourNo found in table string. TourNo may remain None.")
+                log.debug(
+                    "No numeric tourNo found in table string. TourNo may remain None."
+                )
 
         if tourney:
             log.debug("Processing tournament-specific logic using re_GameInfoTrny2.")
@@ -227,8 +254,12 @@ class iPokerSummary(TourneySummary):
 
             # Expecting at least 6 matches: 0=TOURNO, 1=NAME, 2=PLACE, 3=BIAMT/BIRAKE, 4=TOTBUYIN, 5=WIN
             if len(matches) < 6:
-                log.error(f"Not enough matches for tournament info: found {len(matches)}, need at least 6.")
-                log.debug(f"Summary text snippet for debugging:\n{self.summaryText[:500]}")
+                log.error(
+                    f"Not enough matches for tournament info: found {len(matches)}, need at least 6."
+                )
+                log.debug(
+                    f"Summary text snippet for debugging:\n{self.summaryText[:500]}"
+                )
                 raise FpdbParseError("Not enough matches for tournament info.")
 
             for i, mat in enumerate(matches):
@@ -275,13 +306,19 @@ class iPokerSummary(TourneySummary):
                     if stripped_tot:
                         mg2["BIAMT"] = stripped_tot
                         mg2["BIRAKE"] = "0"
-                        log.debug(f"Converted Token buy-in: BIAMT={mg2['BIAMT']} and set BIRAKE=0.")
+                        log.debug(
+                            f"Converted Token buy-in: BIAMT={mg2['BIAMT']} and set BIRAKE=0."
+                        )
                     else:
-                        log.debug("TOTBUYIN present but could not parse numeric value. Setting BIAMT=0.")
+                        log.debug(
+                            "TOTBUYIN present but could not parse numeric value. Setting BIAMT=0."
+                        )
                         mg2["BIAMT"] = "0"
                         mg2["BIRAKE"] = "0"
                 else:
-                    log.debug("Token buyin but no TOTBUYIN available. Setting default buyin=0, fee=0.")
+                    log.debug(
+                        "Token buyin but no TOTBUYIN available. Setting default buyin=0, fee=0."
+                    )
                     mg2["BIAMT"] = "0"
                     mg2["BIRAKE"] = "0"
 
@@ -293,18 +330,24 @@ class iPokerSummary(TourneySummary):
                     log.debug(f"Updated mg2 with total buyin info: {mg2}")
                 elif mg2.get("BIAMT"):
                     mg2["BIRAKE"] = "0"
-                    log.debug("Set BIRAKE=0 due to missing explicit rake info, but BIAMT is present.")
+                    log.debug(
+                        "Set BIRAKE=0 due to missing explicit rake info, but BIAMT is present."
+                    )
 
             if mg2.get("BIAMT") and mg2.get("BIRAKE"):
                 try:
                     self.buyin = int(100 * self.convert_to_decimal(mg2["BIAMT"]))
                 except Exception:
-                    log.debug(f"Failed to parse BIAMT='{mg2['BIAMT']}', setting buyin=0.")
+                    log.debug(
+                        f"Failed to parse BIAMT='{mg2['BIAMT']}', setting buyin=0."
+                    )
                     self.buyin = 0
                 try:
                     self.fee = int(100 * self.convert_to_decimal(mg2["BIRAKE"]))
                 except Exception:
-                    log.debug(f"Failed to parse BIRAKE='{mg2['BIRAKE']}', setting fee=0.")
+                    log.debug(
+                        f"Failed to parse BIRAKE='{mg2['BIRAKE']}', setting fee=0."
+                    )
                     self.fee = 0
                 log.debug(f"Set buyin={self.buyin}, fee={self.fee}")
 
@@ -347,9 +390,13 @@ class iPokerSummary(TourneySummary):
                 dec = Decimal(m.group("BUYIN"))
                 log.debug(f"Converted string '{string}' to decimal {dec}")
             except Exception as e:
-                log.debug(f"Failed to convert '{string}' to decimal: {e}, defaulting to 0.")
+                log.debug(
+                    f"Failed to convert '{string}' to decimal: {e}, defaulting to 0."
+                )
                 dec = 0
         else:
-            log.debug(f"No numeric buyin match found in string '{string}', defaulting to 0.")
+            log.debug(
+                f"No numeric buyin match found in string '{string}', defaulting to 0."
+            )
             dec = 0
         return dec

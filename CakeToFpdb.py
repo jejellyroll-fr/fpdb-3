@@ -20,15 +20,18 @@
 
 from __future__ import division
 
+import datetime
+import re
+from decimal import Decimal
+
 from past.utils import old_div
+
+from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
+from loggingFpdb import get_logger
+
 # import L10n
 # _ = L10n.get_translation()
 
-from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
-from decimal import Decimal
-import re
-from loggingFpdb import get_logger
-import datetime
 
 log = get_logger("parser")
 
@@ -173,7 +176,9 @@ class Cake(HandHistoryConverter):
         re.MULTILINE,
     )
     re_HeroCards = re.compile(
-        r"^Dealt to %(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % substitutions, re.MULTILINE
+        r"^Dealt to %(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])"
+        % substitutions,
+        re.MULTILINE,
     )
     re_Action = re.compile(
         r"""
@@ -185,19 +190,27 @@ class Cake(HandHistoryConverter):
     )
     re_sitsOut = re.compile("^%s sits out" % substitutions["PLYR"], re.MULTILINE)
     re_ShownCards = re.compile(
-        r"^%s: (?P<SHOWED>shows|mucks) \[(?P<CARDS>.*)\] ?(\((?P<STRING>.*)\))?" % substitutions["PLYR"], re.MULTILINE
+        r"^%s: (?P<SHOWED>shows|mucks) \[(?P<CARDS>.*)\] ?(\((?P<STRING>.*)\))?"
+        % substitutions["PLYR"],
+        re.MULTILINE,
     )
     re_CollectPot = re.compile(
         r"^%(PLYR)s:? wins (low pot |high pot )?%(CUR)s(?P<POT>[%(NUM)s]+)((\swith.+?)?\s+\(EUR\s(%(CUR)s)?(?P<EUROVALUE>[%(NUM)s]+)\))?"
         % substitutions,
         re.MULTILINE,
     )
-    re_Finished = re.compile(r"%(PLYR)s:? finished \d+ out of \d+ players" % substitutions, re.MULTILINE)
-    re_Dealer = re.compile(r"Dealer:")  # Some Cake hands just omit the game line so we can just discard them as partial
+    re_Finished = re.compile(
+        r"%(PLYR)s:? finished \d+ out of \d+ players" % substitutions, re.MULTILINE
+    )
+    re_Dealer = re.compile(
+        r"Dealer:"
+    )  # Some Cake hands just omit the game line so we can just discard them as partial
     re_CoinFlip = re.compile(r"Coin\sFlip\sT\d+", re.MULTILINE)
     re_ReturnBet = re.compile(r"returns\suncalled\sbet", re.MULTILINE)
     re_ShowDown = re.compile(r"\*\*\*SHOW DOWN\*\*\*")
-    re_ShowDownLeft = re.compile(r"\*\*\*SHOW\sDOWN\*\*\*\nPlayer\sleft\sthe\stable$", re.MULTILINE)
+    re_ShowDownLeft = re.compile(
+        r"\*\*\*SHOW\sDOWN\*\*\*\nPlayer\sleft\sthe\stable$", re.MULTILINE
+    )
 
     def compilePlayerRegexs(self, hand):
         """
@@ -253,7 +266,9 @@ class Cake(HandHistoryConverter):
             raise FpdbParseError
 
         # If no ShowDown or ShowDownLeft found, raise appropriate error
-        if not self.re_ShowDown.search(handText) or self.re_ShowDownLeft.search(handText):
+        if not self.re_ShowDown.search(handText) or self.re_ShowDownLeft.search(
+            handText
+        ):
             raise FpdbHandPartial
 
         # Extract game info from match object's group dictionary
@@ -314,7 +329,9 @@ class Cake(HandHistoryConverter):
             # If game type is not 'ring'
             else:
                 # Calculate small blind and big blind and store in info dictionary
-                info["sb"] = str((old_div(Decimal(info["sb"]), 2)).quantize(Decimal("0.01")))
+                info["sb"] = str(
+                    (old_div(Decimal(info["sb"]), 2)).quantize(Decimal("0.01"))
+                )
                 info["bb"] = str(Decimal(info["sb"]).quantize(Decimal("0.01")))
 
         return info
@@ -349,11 +366,13 @@ class Cake(HandHistoryConverter):
                 m1 = self.re_DateTime.finditer(info[key])
                 datetimestr = "2000/01/01 00:00:00"  # default used if time not found
                 for a in m1:
-                    datetimestr = (
-                        f"{a.group('Y')}/{a.group('M')}/{a.group('D')} {a.group('H')}:{a.group('MIN')}:{a.group('S')}"
-                    )
-                hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
-                hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
+                    datetimestr = f"{a.group('Y')}/{a.group('M')}/{a.group('D')} {a.group('H')}:{a.group('MIN')}:{a.group('S')}"
+                hand.startTime = datetime.datetime.strptime(
+                    datetimestr, "%Y/%m/%d %H:%M:%S"
+                )
+                hand.startTime = HandHistoryConverter.changeTimezone(
+                    hand.startTime, "ET", "UTC"
+                )
 
             # extract hand ID
             elif key == "HID":
@@ -397,7 +416,9 @@ class Cake(HandHistoryConverter):
                     hand.buyinCurrency = "play"
                 else:
                     # FIXME: handle other currencies, play money
-                    log.error(f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'")
+                    log.error(
+                        f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'"
+                    )
                     raise FpdbParseError
 
                 # extract buy-in amount and rake amount
@@ -571,15 +592,21 @@ class Cake(HandHistoryConverter):
         # Find all instances of the small blind and add them to the Hand object.
         for a in self.re_PostSB.finditer(hand.handText):
             if liveBlind:
-                hand.addBlind(a.group("PNAME"), "small blind", self.convertMoneyString("SB", a))
+                hand.addBlind(
+                    a.group("PNAME"), "small blind", self.convertMoneyString("SB", a)
+                )
                 liveBlind = False
             else:
                 # Post dead blinds as ante
-                hand.addBlind(a.group("PNAME"), "secondsb", self.convertMoneyString("SB", a))
+                hand.addBlind(
+                    a.group("PNAME"), "secondsb", self.convertMoneyString("SB", a)
+                )
 
         # Find all instances of the big blind and add them to the Hand object.
         for a in self.re_PostBB.finditer(hand.handText):
-            hand.addBlind(a.group("PNAME"), "big blind", self.convertMoneyString("BB", a))
+            hand.addBlind(
+                a.group("PNAME"), "big blind", self.convertMoneyString("BB", a)
+            )
 
         # Find all instances of both blinds being posted and add them to the Hand object.
         for a in self.re_PostBoth.finditer(hand.handText):
@@ -611,7 +638,14 @@ class Cake(HandHistoryConverter):
                     # Split the hole cards string into individual cards
                     newcards = found.group("NEWCARDS").split(",")
                     # Add the hole cards to the corresponding street
-                    hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
+                    hand.addHoleCards(
+                        street,
+                        hand.hero,
+                        closed=newcards,
+                        shown=False,
+                        mucked=False,
+                        dealt=True,
+                    )
 
     def readAction(self, hand, street):
         """
@@ -664,7 +698,9 @@ class Cake(HandHistoryConverter):
 
             # If the current action is not one of the above types, log an error
             else:
-                log.error(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
+                log.error(
+                    f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'"
+                )
 
     def readShowdownActions(self, hand):
         """
@@ -693,7 +729,9 @@ class Cake(HandHistoryConverter):
             # Only consider the collect pot if it is not part of a tournament hand.
             if not re.search("Tournament:\s", m.group("PNAME")):
                 # Add the collect pot to the Hand object.
-                hand.addCollectPot(player=m.group("PNAME"), pot=self.convertMoneyString("POT", m))
+                hand.addCollectPot(
+                    player=m.group("PNAME"), pot=self.convertMoneyString("POT", m)
+                )
 
     def readShownCards(self, hand):
         """
@@ -732,7 +770,13 @@ class Cake(HandHistoryConverter):
                     player = m.group("PNAME").replace("_", " ")
 
                 # Add shown cards to the hand.
-                hand.addShownCards(cards=cards, player=player, shown=shown, mucked=mucked, string=string)
+                hand.addShownCards(
+                    cards=cards,
+                    player=player,
+                    shown=shown,
+                    mucked=mucked,
+                    string=string,
+                )
 
     def convertMoneyString(self, type, match):
         """
@@ -758,7 +802,9 @@ class Cake(HandHistoryConverter):
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
-        log.info(f"table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'")
+        log.info(
+            f"table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'"
+        )
         regex = ""
         log.debug(f"regex get table cash title: {regex}")
         if tournament:

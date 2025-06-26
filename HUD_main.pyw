@@ -7,24 +7,25 @@ Main for FreePokerTools HUD.
 
 import codecs
 import contextlib
-import sys
 import os
+import sys
 import time
-from loggingFpdb import get_logger
+
 import zmq
-from PyQt5.QtCore import QCoreApplication, QObject, QThread, pyqtSignal, Qt, QTimer
-from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
+# Add a cache for frequently accessed data
+from cachetools import TTLCache
+from PyQt5.QtCore import (QCoreApplication, QObject, Qt, QThread, QTimer,
+                          pyqtSignal)
 from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
 from qt_material import apply_stylesheet
 
 import Configuration
 import Database
+import Deck
 import Hud
 import Options
-import Deck
-
-# Add a cache for frequently accessed data
-from cachetools import TTLCache
+from loggingFpdb import get_logger
 
 # Logging configuration
 

@@ -39,12 +39,10 @@ Usage:
     detector = DetectInstalledSites("PokerStars")  # Detect specific site
 """
 
-import platform
-import os
-import sys
 import glob
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+import os
+import platform
+from typing import Dict, List, Optional
 
 import Configuration
 from loggingFpdb import get_logger
@@ -70,7 +68,9 @@ def get_linux_paths():
     return {
         "wine_drive_c": os.path.join(home, ".wine", "drive_c"),
         "wine_program_files": os.path.join(home, ".wine", "drive_c", "Program Files"),
-        "wine_program_files_x86": os.path.join(home, ".wine", "drive_c", "Program Files (x86)"),
+        "wine_program_files_x86": os.path.join(
+            home, ".wine", "drive_c", "Program Files (x86)"
+        ),
         "wine_users": os.path.join(home, ".wine", "drive_c", "users"),
     }
 
@@ -97,7 +97,9 @@ class SiteDetector:
         """Override in subclasses"""
         return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
 
-    def _find_heroes_in_path(self, path: str, exclude_dirs: List[str] = None) -> List[str]:
+    def _find_heroes_in_path(
+        self, path: str, exclude_dirs: List[str] = None
+    ) -> List[str]:
         """Find hero directories in a given path, excluding common non-hero folders"""
         if exclude_dirs is None:
             exclude_dirs = [
@@ -260,7 +262,9 @@ class WinamaxDetector(SiteDetector):
         elif self.platform == "Linux":
             paths = get_linux_paths()
             # Check for Wine installation TODO: new native linux app
-            wine_appdata = os.path.join(paths["wine_users"], "*", "AppData", "Roaming", "Winamax", "accounts")
+            wine_appdata = os.path.join(
+                paths["wine_users"], "*", "AppData", "Roaming", "Winamax", "accounts"
+            )
             wine_paths = glob.glob(wine_appdata)
             if wine_paths:
                 base_path = wine_paths[0]
@@ -361,19 +365,24 @@ class iPokerDetector(SiteDetector):
         if self.platform == "Windows":
             paths = get_windows_paths()
             base_path = self._check_path_exists(
-                os.path.join(paths["local_appdata"], skin, "data"), os.path.join(paths["appdata"], skin, "data")
+                os.path.join(paths["local_appdata"], skin, "data"),
+                os.path.join(paths["appdata"], skin, "data"),
             )
 
         elif self.platform == "Linux":
             paths = get_linux_paths()
-            wine_path = os.path.join(paths["wine_users"], "*", "AppData", "Local", skin, "data")
+            wine_path = os.path.join(
+                paths["wine_users"], "*", "AppData", "Local", skin, "data"
+            )
             wine_paths = glob.glob(wine_path)
             if wine_paths:
                 base_path = wine_paths[0]
 
         elif self.platform == "Darwin":  # macOS
             paths = get_mac_paths()
-            base_path = self._check_path_exists(os.path.join(paths["app_support"], skin, "data"))
+            base_path = self._check_path_exists(
+                os.path.join(paths["app_support"], skin, "data")
+            )
 
         if base_path and os.path.exists(base_path):
             try:
@@ -382,7 +391,9 @@ class iPokerDetector(SiteDetector):
                     if item.isdigit():
                         player_path = os.path.join(base_path, item)
                         hhpath = os.path.join(player_path, "History", "Data", "Tables")
-                        tspath = os.path.join(player_path, "History", "Data", "Tournaments")
+                        tspath = os.path.join(
+                            player_path, "History", "Data", "Tournaments"
+                        )
 
                         if os.path.exists(hhpath):
                             return {
@@ -402,7 +413,14 @@ class ACRDetector(SiteDetector):
     """Americas Cardroom (ACR) and WPN network detector"""
 
     def detect(self) -> Dict[str, any]:
-        wpn_skins = ["Americas Cardroom", "ACR Poker", "WinningPoker", "BlackChipPoker", "TruePoker", "Ya Poker"]
+        wpn_skins = [
+            "Americas Cardroom",
+            "ACR Poker",
+            "WinningPoker",
+            "BlackChipPoker",
+            "TruePoker",
+            "Ya Poker",
+        ]
 
         for skin in wpn_skins:
             result = self._detect_skin(skin)
@@ -420,13 +438,13 @@ class ACRDetector(SiteDetector):
             # ACR typically installs to C:\ACR Poker\ or similar
             hhpath = self._check_path_exists(
                 f"C:\\{skin}\\handHistory\\",
-                f"C:\\ACR Poker\\handHistory\\",
+                "C:\\ACR Poker\\handHistory\\",
                 f"C:\\Program Files\\{skin}\\handHistory\\",
                 f"C:\\Program Files (x86)\\{skin}\\handHistory\\",
             )
             tspath = self._check_path_exists(
                 f"C:\\{skin}\\TournamentSummary\\",
-                f"C:\\ACR Poker\\TournamentSummary\\",
+                "C:\\ACR Poker\\TournamentSummary\\",
                 f"C:\\Program Files\\{skin}\\TournamentSummary\\",
                 f"C:\\Program Files (x86)\\{skin}\\TournamentSummary\\",
             )
@@ -443,7 +461,9 @@ class ACRDetector(SiteDetector):
                 os.path.join(paths["wine_drive_c"], skin, "TournamentSummary"),
                 os.path.join(paths["wine_drive_c"], "ACR Poker", "TournamentSummary"),
                 os.path.join(paths["wine_program_files"], skin, "TournamentSummary"),
-                os.path.join(paths["wine_program_files_x86"], skin, "TournamentSummary"),
+                os.path.join(
+                    paths["wine_program_files_x86"], skin, "TournamentSummary"
+                ),
             )
 
         elif self.platform == "Darwin":  # macOS
@@ -484,20 +504,28 @@ class SealsWithClubsDetector(SiteDetector):
         if self.platform == "Windows":
             paths = get_windows_paths()
             hhpath = self._check_path_exists(
-                os.path.join(paths["userprofile"], "Documents", "SwC Poker", "Hand History"),
-                os.path.join(paths["userprofile"], "Documents", "SealsWithClubs", "Hand History"),
+                os.path.join(
+                    paths["userprofile"], "Documents", "SwC Poker", "Hand History"
+                ),
+                os.path.join(
+                    paths["userprofile"], "Documents", "SealsWithClubs", "Hand History"
+                ),
                 "C:\\Program Files\\SealsWithClubs\\handhistories",
             )
 
         elif self.platform == "Linux":
             paths = get_linux_paths()
-            wine_docs = os.path.join(paths["wine_users"], "*", "Documents", "SwC Poker", "Hand History")
+            wine_docs = os.path.join(
+                paths["wine_users"], "*", "Documents", "SwC Poker", "Hand History"
+            )
             wine_paths = glob.glob(wine_docs)
             if wine_paths:
                 hhpath = wine_paths[0]
             else:
                 hhpath = self._check_path_exists(
-                    os.path.join(paths["wine_program_files"], "SealsWithClubs", "handhistories")
+                    os.path.join(
+                        paths["wine_program_files"], "SealsWithClubs", "handhistories"
+                    )
                 )
 
         elif self.platform == "Darwin":  # macOS
@@ -596,7 +624,9 @@ class PartyGamingDetector(SiteDetector):
                 os.path.join(paths["program_files"], skin, "TournSummary"),
                 os.path.join(paths["program_files_x86"], skin, "TournSummary"),
                 os.path.join(paths["userprofile"], "Documents", skin, "TournSummary"),
-                os.path.join(paths["userprofile"], "My Documents", skin, "TournSummary"),
+                os.path.join(
+                    paths["userprofile"], "My Documents", skin, "TournSummary"
+                ),
                 f"C:\\{skin}\\TournSummary\\",
                 "C:\\PartyGaming\\PartyPoker\\TournSummary\\",
                 "C:\\Program Files\\PartyGaming\\PartyPoker\\TournSummary\\",
@@ -610,15 +640,35 @@ class PartyGamingDetector(SiteDetector):
                 os.path.join(paths["wine_program_files"], skin, "HandHistory"),
                 os.path.join(paths["wine_program_files_x86"], skin, "HandHistory"),
                 os.path.join(paths["wine_drive_c"], skin, "HandHistory"),
-                os.path.join(paths["wine_program_files"], "PartyGaming", "PartyPoker", "HandHistory"),
-                os.path.join(paths["wine_program_files_x86"], "PartyGaming", "PartyPoker", "HandHistory"),
+                os.path.join(
+                    paths["wine_program_files"],
+                    "PartyGaming",
+                    "PartyPoker",
+                    "HandHistory",
+                ),
+                os.path.join(
+                    paths["wine_program_files_x86"],
+                    "PartyGaming",
+                    "PartyPoker",
+                    "HandHistory",
+                ),
             )
             tspath = self._check_path_exists(
                 os.path.join(paths["wine_program_files"], skin, "TournSummary"),
                 os.path.join(paths["wine_program_files_x86"], skin, "TournSummary"),
                 os.path.join(paths["wine_drive_c"], skin, "TournSummary"),
-                os.path.join(paths["wine_program_files"], "PartyGaming", "PartyPoker", "TournSummary"),
-                os.path.join(paths["wine_program_files_x86"], "PartyGaming", "PartyPoker", "TournSummary"),
+                os.path.join(
+                    paths["wine_program_files"],
+                    "PartyGaming",
+                    "PartyPoker",
+                    "TournSummary",
+                ),
+                os.path.join(
+                    paths["wine_program_files_x86"],
+                    "PartyGaming",
+                    "PartyPoker",
+                    "TournSummary",
+                ),
             )
 
         elif self.platform == "Darwin":  # macOS
@@ -626,14 +676,22 @@ class PartyGamingDetector(SiteDetector):
             hhpath = self._check_path_exists(
                 os.path.join(paths["app_support"], skin, "HandHistory"),
                 os.path.join(paths["documents"], skin, "HandHistory"),
-                os.path.join(paths["app_support"], "PartyGaming", "PartyPoker", "HandHistory"),
-                os.path.join(paths["documents"], "PartyGaming", "PartyPoker", "HandHistory"),
+                os.path.join(
+                    paths["app_support"], "PartyGaming", "PartyPoker", "HandHistory"
+                ),
+                os.path.join(
+                    paths["documents"], "PartyGaming", "PartyPoker", "HandHistory"
+                ),
             )
             tspath = self._check_path_exists(
                 os.path.join(paths["app_support"], skin, "TournSummary"),
                 os.path.join(paths["documents"], skin, "TournSummary"),
-                os.path.join(paths["app_support"], "PartyGaming", "PartyPoker", "TournSummary"),
-                os.path.join(paths["documents"], "PartyGaming", "PartyPoker", "TournSummary"),
+                os.path.join(
+                    paths["app_support"], "PartyGaming", "PartyPoker", "TournSummary"
+                ),
+                os.path.join(
+                    paths["documents"], "PartyGaming", "PartyPoker", "TournSummary"
+                ),
             )
 
         if hhpath:
@@ -735,7 +793,9 @@ class CPNDetector(SiteDetector):
                 os.path.join(paths["program_files"], skin, "TournSummary"),
                 os.path.join(paths["program_files_x86"], skin, "TournSummary"),
                 os.path.join(paths["userprofile"], "Documents", skin, "TournSummary"),
-                os.path.join(paths["userprofile"], "My Documents", skin, "TournSummary"),
+                os.path.join(
+                    paths["userprofile"], "My Documents", skin, "TournSummary"
+                ),
                 f"C:\\{skin}\\TournSummary\\",
                 "C:\\Cake Poker\\TournSummary\\",
                 "C:\\Everygame Poker\\TournSummary\\",
@@ -753,18 +813,30 @@ class CPNDetector(SiteDetector):
                 os.path.join(paths["wine_program_files_x86"], skin, "HandHistory"),
                 os.path.join(paths["wine_drive_c"], skin, "HandHistory"),
                 os.path.join(paths["wine_program_files"], "Cake Poker", "HandHistory"),
-                os.path.join(paths["wine_program_files_x86"], "Cake Poker", "HandHistory"),
-                os.path.join(paths["wine_program_files"], "Everygame Poker", "HandHistory"),
-                os.path.join(paths["wine_program_files_x86"], "Everygame Poker", "HandHistory"),
+                os.path.join(
+                    paths["wine_program_files_x86"], "Cake Poker", "HandHistory"
+                ),
+                os.path.join(
+                    paths["wine_program_files"], "Everygame Poker", "HandHistory"
+                ),
+                os.path.join(
+                    paths["wine_program_files_x86"], "Everygame Poker", "HandHistory"
+                ),
             )
             tspath = self._check_path_exists(
                 os.path.join(paths["wine_program_files"], skin, "TournSummary"),
                 os.path.join(paths["wine_program_files_x86"], skin, "TournSummary"),
                 os.path.join(paths["wine_drive_c"], skin, "TournSummary"),
                 os.path.join(paths["wine_program_files"], "Cake Poker", "TournSummary"),
-                os.path.join(paths["wine_program_files_x86"], "Cake Poker", "TournSummary"),
-                os.path.join(paths["wine_program_files"], "Everygame Poker", "TournSummary"),
-                os.path.join(paths["wine_program_files_x86"], "Everygame Poker", "TournSummary"),
+                os.path.join(
+                    paths["wine_program_files_x86"], "Cake Poker", "TournSummary"
+                ),
+                os.path.join(
+                    paths["wine_program_files"], "Everygame Poker", "TournSummary"
+                ),
+                os.path.join(
+                    paths["wine_program_files_x86"], "Everygame Poker", "TournSummary"
+                ),
             )
 
         elif self.platform == "Darwin":  # macOS
@@ -872,7 +944,9 @@ class DetectInstalledSites:
             try:
                 result = self.detectors[site_name].detect()
                 if result["detected"]:
-                    log.info(f"Detected {site_name}: {result['heroname']} at {result['hhpath']}")
+                    log.info(
+                        f"Detected {site_name}: {result['heroname']} at {result['hhpath']}"
+                    )
                 return result
             except Exception as e:
                 log.error(f"Error detecting {site_name}: {e}")
@@ -890,7 +964,9 @@ class DetectInstalledSites:
 
     def get_detected_sites(self) -> List[str]:
         """Get list of detected sites"""
-        return [site for site, status in self.sitestatusdict.items() if status["detected"]]
+        return [
+            site for site, status in self.sitestatusdict.items() if status["detected"]
+        ]
 
     def get_site_info(self, site_name: str) -> Optional[Dict[str, any]]:
         """Get detection info for a specific site"""

@@ -19,12 +19,13 @@
 # import L10n
 # _ = L10n.get_translation()
 
-from HandHistoryConverter import FpdbParseError
-import re
-from loggingFpdb import get_logger
 import datetime
-from TourneySummary import TourneySummary
+import re
 from decimal import Decimal
+
+from HandHistoryConverter import FpdbParseError
+from loggingFpdb import get_logger
+from TourneySummary import TourneySummary
 
 # PokerStars HH Format
 log = get_logger("parser")
@@ -32,7 +33,15 @@ log = get_logger("parser")
 
 class PokerTrackerSummary(TourneySummary):
     hhtype = "summary"
-    limits = {"NL": "nl", "No Limit": "nl", "Pot Limit": "pl", "PL": "pl", "FL": "fl", "Limit": "fl", "LIMIT": "fl"}
+    limits = {
+        "NL": "nl",
+        "No Limit": "nl",
+        "Pot Limit": "pl",
+        "PL": "pl",
+        "FL": "fl",
+        "Limit": "fl",
+        "LIMIT": "fl",
+    }
     games = {  # base, category
         "Hold'em": ("hold", "holdem"),
         "Texas Hold'em": ("hold", "holdem"),
@@ -207,8 +216,14 @@ class PokerTrackerSummary(TourneySummary):
             self.buyinCurrency = "FREE"
         self.currency = self.buyinCurrency
 
-        if self.buyinCurrency not in ("FREE", "PSFP") and "ENTRIES" in mg and self.prizepool == 0:
-            self.prizepool = int(Decimal(self.clearMoneyString(mg["BUYIN"]))) * int(self.entries)
+        if (
+            self.buyinCurrency not in ("FREE", "PSFP")
+            and "ENTRIES" in mg
+            and self.prizepool == 0
+        ):
+            self.prizepool = int(Decimal(self.clearMoneyString(mg["BUYIN"]))) * int(
+                self.entries
+            )
 
         m = self.re_Player.finditer(self.summaryText)
         for a in m:
@@ -254,7 +269,9 @@ class PokerTrackerSummary(TourneySummary):
 
                 # print "DEBUG: addPlayer(%s, %s, %s, %s, None, None, None)" %(rank, name, winnings, self.currency)
                 # print "DEBUG: self.buyin: %s self.fee %s" %(self.buyin, self.fee)
-                self.addPlayer(rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount)
+                self.addPlayer(
+                    rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount
+                )
 
         # print self
 
