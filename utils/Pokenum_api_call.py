@@ -1,6 +1,7 @@
+import json
+
 import requests
 from pydantic import BaseModel
-import json
 
 
 class PokenumRequest(BaseModel):
@@ -20,7 +21,13 @@ endpoint = "/pokenum"
 def run_pokenum(method, iterations, game, hand, board, dead):
     # Create a PokenumRequest object with the desired parameters
     request_body = PokenumRequest(
-        method=method, iterations=iterations, game=game, hand=hand, board=board, dead=dead, histogram=False
+        method=method,
+        iterations=iterations,
+        game=game,
+        hand=hand,
+        board=board,
+        dead=dead,
+        histogram=False,
     )
 
     # Send a POST request to the API with the request body

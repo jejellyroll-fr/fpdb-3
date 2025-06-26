@@ -27,21 +27,21 @@
 #    Other Library modules
 import ctypes
 
-
 from AppKit import NSView, NSWindowAbove, NSWorkspace
 from Quartz.CoreGraphics import (
-    CGWindowListCreateDescriptionFromArray,
-    kCGWindowOwnerName,
-    kCGWindowBounds,
     CGWindowListCopyWindowInfo,
+    CGWindowListCreateDescriptionFromArray,
     kCGNullWindowID,
-    kCGWindowNumber,
+    kCGWindowBounds,
     kCGWindowListOptionOnScreenOnly,
+    kCGWindowNumber,
+    kCGWindowOwnerName,
 )
+
+from loggingFpdb import get_logger
 
 #    FPDB modules
 from TableWindow import Table_Window
-from loggingFpdb import get_logger
 
 log = get_logger("osxtables")
 
@@ -62,7 +62,9 @@ class Table(Table_Window):
         # for index in range(len(WinListDict)):
         #     for d in WinListDict[index]:
         # curr_app = NSWorkspace.sharedWorkspace().runningApplications()
-        curr_pid = NSWorkspace.sharedWorkspace().activeApplication()["NSApplicationProcessIdentifier"]
+        curr_pid = NSWorkspace.sharedWorkspace().activeApplication()[
+            "NSApplicationProcessIdentifier"
+        ]
         # curr_app_name = curr_app.localizedName()
         options = kCGWindowListOptionOnScreenOnly
         windowList = CGWindowListCopyWindowInfo(options, kCGNullWindowID)
@@ -73,7 +75,9 @@ class Table(Table_Window):
             geometry = window["kCGWindowBounds"]
             windowTitle = window.get("kCGWindowName", self.search_string)
             if curr_pid == pid:
-                log.info(f"{ownerName} - {windowTitle} (PID: {pid}, WID: {windowNumber}): {geometry}")
+                log.info(
+                    f"{ownerName} - {windowTitle} (PID: {pid}, WID: {windowNumber}): {geometry}"
+                )
 
                 title = windowTitle
                 if self.check_bad_words(title):
@@ -103,7 +107,9 @@ class Table(Table_Window):
         # windowList = CGWindowListCopyWindowInfo(options, kCGNullWindowID)
         for d in WinListDict:
             # for b in windowList:
-            if d[kCGWindowNumber] == self.number:  # and b[kCGWindowNumber] == self.number :
+            if (
+                d[kCGWindowNumber] == self.number
+            ):  # and b[kCGWindowNumber] == self.number :
                 log.debug(f"kCGWindowOwnerName: {d.get(kCGWindowOwnerName, '')}")
                 return d[kCGWindowOwnerName]
         return None

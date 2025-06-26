@@ -24,14 +24,7 @@
 # _ = L10n.get_translation()
 
 from functools import partial
-
-import Hand
-import Card
-import Configuration
-import Database
-import SQL
-import Filters
-import Deck
+from io import StringIO
 
 from PyQt5.QtCore import QCoreApplication, QSortFilterProxyModel, Qt
 from PyQt5.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
@@ -46,9 +39,14 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
 )
 
-from io import StringIO
-
+import Card
+import Configuration
+import Database
+import Deck
+import Filters
 import GuiReplayer
+import Hand
+import SQL
 from loggingFpdb import get_logger
 
 log = get_logger("handviewer")
@@ -155,9 +153,13 @@ class GuiHandViewer(QSplitter):
         self.view.doubleClicked.connect(self.row_activated)
         self.view.contextMenuEvent = self.contextMenu
         self.filterModel.rowsInserted.connect(
-            lambda index, start, end: [self.view.resizeRowToContents(r) for r in range(start, end + 1)]
+            lambda index, start, end: [
+                self.view.resizeRowToContents(r) for r in range(start, end + 1)
+            ]
         )
-        self.filterModel.filterAcceptsRow = lambda row, sourceParent: self.is_row_in_card_filter(row)
+        self.filterModel.filterAcceptsRow = (
+            lambda row, sourceParent: self.is_row_in_card_filter(row)
+        )
 
         self.view.resizeColumnsToContents()
         self.view.setSortingEnabled(True)
@@ -177,7 +179,9 @@ class GuiHandViewer(QSplitter):
         return card_images
 
     def loadHands(self, checkState):
-        hand_ids = self.get_hand_ids_from_date_range(self.filters.getDates()[0], self.filters.getDates()[1])
+        hand_ids = self.get_hand_ids_from_date_range(
+            self.filters.getDates()[0], self.filters.getDates()[1]
+        )
         # ! print(hand_ids)
         self.reload_hands(hand_ids)
 
@@ -301,7 +305,9 @@ class GuiHandViewer(QSplitter):
 
             post_actions = ""
             if "F" not in pre_actions:  # if player hasn't folded preflop
-                post_actions = hand.get_actions_short_streets(hero, "FLOP", "TURN", "RIVER")
+                post_actions = hand.get_actions_short_streets(
+                    hero, "FLOP", "TURN", "RIVER"
+                )
             log.debug(f"Postflop actions for hero: {post_actions}")
 
             row = [
@@ -322,7 +328,11 @@ class GuiHandViewer(QSplitter):
                 str(sitehandid),
             ]
         elif hand.gametype["base"] == "stud":
-            third = " ".join(hand.holecards["THIRD"][hero][0]) + " " + " ".join(hand.holecards["THIRD"][hero][1])
+            third = (
+                " ".join(hand.holecards["THIRD"][hero][0])
+                + " "
+                + " ".join(hand.holecards["THIRD"][hero][1])
+            )
             later_streets = []
             later_streets.extend(hand.holecards["FOURTH"][hero][0])
             later_streets.extend(hand.holecards["FIFTH"][hero][0])
@@ -332,9 +342,13 @@ class GuiHandViewer(QSplitter):
             pre_actions = hand.get_actions_short(hero, "THIRD")
             post_actions = ""
             if "F" not in pre_actions:
-                post_actions = hand.get_actions_short_streets(hero, "FOURTH", "FIFTH", "SIXTH", "SEVENTH")
+                post_actions = hand.get_actions_short_streets(
+                    hero, "FOURTH", "FIFTH", "SIXTH", "SEVENTH"
+                )
 
-            log.debug(f"Stud hand details: Third: {third}, Later streets: {later_streets}")
+            log.debug(
+                f"Stud hand details: Third: {third}, Later streets: {later_streets}"
+            )
 
             row = [
                 hand.getStakesAsString(),
@@ -407,7 +421,9 @@ class GuiHandViewer(QSplitter):
         """Returns true if the cards of the given row are in the card filter"""
         # Does work but all cards that should NOT be displayed have to be clicked.
         card_filter = self.filters.getCards()
-        hcs = self.model.data(self.model.index(rownum, self.colnum["Street0"]), Qt.UserRole + 1).split(" ")
+        hcs = self.model.data(
+            self.model.index(rownum, self.colnum["Street0"]), Qt.UserRole + 1
+        ).split(" ")
 
         if "0x" in hcs:  # if cards are unknown return True
             return True
@@ -433,8 +449,12 @@ class GuiHandViewer(QSplitter):
         handlist = list(sorted(self.hands.keys()))
         # ! print('handlist:')
         # ! print(handlist)
-        self.replayer = GuiReplayer.GuiReplayer(self.config, self.sql, self.main_window, handlist)
-        index = handlist.index(int(index.sibling(index.row(), self.colnum["HandId"]).data()))
+        self.replayer = GuiReplayer.GuiReplayer(
+            self.config, self.sql, self.main_window, handlist
+        )
+        index = handlist.index(
+            int(index.sibling(index.row(), self.colnum["HandId"]).data())
+        )
         # ! print('index:')
         # ! print(index)
         self.replayer.play_hand(index)

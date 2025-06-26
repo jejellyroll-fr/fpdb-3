@@ -22,11 +22,13 @@
 # _ = L10n.get_translation()
 #    to do
 
-#    Standard Library modules
-from loggingFpdb import get_logger
 import contextlib
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget
+
+#    Standard Library modules
+from loggingFpdb import get_logger
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("hud")
@@ -89,7 +91,10 @@ class Aux_Window(object):
     # zeroes, not None
     def count_seats_with_cards(self, cards):
         """Returns the number of seats with shown cards in the list."""
-        return sum(seat != "common" and cards_tuple[0] != 0 for seat, cards_tuple in list(cards.items()))
+        return sum(
+            seat != "common" and cards_tuple[0] != 0
+            for seat, cards_tuple in list(cards.items())
+        )
 
     def get_id_from_seat(self, seat):
         """Determine player id from seat number, given stat_dict."""
@@ -99,7 +104,11 @@ class Aux_Window(object):
         #  e.g. iPoker 6-max uses seats 1,3,5,6,8,10 NOT 1,2,3,4,5,6
         seat = self.hud.layout.hh_seats[seat]
         return next(
-            (id for id, dict in list(self.hud.stat_dict.items()) if seat == dict["seat"]),
+            (
+                id
+                for id, dict in list(self.hud.stat_dict.items())
+                if seat == dict["seat"]
+            ),
             None,
         )
 
@@ -107,7 +116,11 @@ class Aux_Window(object):
 class Seat_Window(QWidget):
     def __init__(self, aw=None, seat=None):
         super(Seat_Window, self).__init__(
-            None, Qt.Window | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus | Qt.WindowStaysOnTopHint
+            None,
+            Qt.Window
+            | Qt.FramelessWindowHint
+            | Qt.WindowDoesNotAcceptFocus
+            | Qt.WindowStaysOnTopHint,
         )  # FIXME acceptfocus?  splashscreen?
         self.lastPos = None
         self.aw = aw
@@ -167,13 +180,17 @@ class Aux_Seats(Aux_Window):
 
     def __init__(self, hud, config, params):
         super(Aux_Seats, self).__init__(hud, params, config)
-        self.positions = {}  # dict of window positions. normalised for favourite seat and offset
+        self.positions = (
+            {}
+        )  # dict of window positions. normalised for favourite seat and offset
         # but _not_ offset to the absolute screen position
         self.displayed = False  # the seat windows are displayed
         self.uses_timer = False  # the Aux_seats object uses a timer to control hiding
         self.timer_on = False  # bool = Ture if the timeout for removing the cards is on
 
-        self.aw_class_window = Seat_Window  # classname to be used by the aw_class_window
+        self.aw_class_window = (
+            Seat_Window  # classname to be used by the aw_class_window
+        )
 
     #    placeholders that should be overridden--so we don't throw errors
     def create_contents(self):
@@ -196,9 +213,13 @@ class Aux_Seats(Aux_Window):
 
     def move_windows(self):
         for i in list(range(1, self.hud.max + 1)):
-            self.m_windows[i].move(self.positions[i][0] + self.hud.table.x, self.positions[i][1] + self.hud.table.y)
+            self.m_windows[i].move(
+                self.positions[i][0] + self.hud.table.x,
+                self.positions[i][1] + self.hud.table.y,
+            )
         self.m_windows["common"].move(
-            self.hud.layout.common[0] + self.hud.table.x, self.hud.layout.common[1] + self.hud.table.y
+            self.hud.layout.common[0] + self.hud.table.x,
+            self.hud.layout.common[1] + self.hud.table.y,
         )
 
     def create(self):
@@ -217,7 +238,10 @@ class Aux_Seats(Aux_Window):
                 (x, y) = self.hud.layout.location[self.adj[i]]
                 self.m_windows[i] = self.aw_class_window(self, i)
                 self.positions[i] = self.create_scale_position(x, y)
-                self.m_windows[i].move(self.positions[i][0] + self.hud.table.x, self.positions[i][1] + self.hud.table.y)
+                self.m_windows[i].move(
+                    self.positions[i][0] + self.hud.table.x,
+                    self.positions[i][1] + self.hud.table.y,
+                )
                 self.hud.layout.location[self.adj[i]] = self.positions[i]
                 if "opacity" in self.params:
                     self.m_windows[i].setWindowOpacity(float(self.params["opacity"]))
@@ -227,7 +251,9 @@ class Aux_Seats(Aux_Window):
             #      for hud's this is probably Aux_Hud.stat_window
             self.create_contents(self.m_windows[i], i)
 
-            self.m_windows[i].create()  # ensure there is a native window handle for topify
+            self.m_windows[
+                i
+            ].create()  # ensure there is a native window handle for topify
             self.hud.table.topify(self.m_windows[i])
             if not self.uses_timer:
                 self.m_windows[i].show()
@@ -294,10 +320,15 @@ class Aux_Seats(Aux_Window):
         """
         if i:
             new_abs_position = widget.pos()  # absolute value of the new position
-            new_position = (new_abs_position.x() - self.hud.table.x, new_abs_position.y() - self.hud.table.y)
+            new_position = (
+                new_abs_position.x() - self.hud.table.x,
+                new_abs_position.y() - self.hud.table.y,
+            )
             self.positions[i] = new_position  # write this back to our map
             if i != "common":
-                self.hud.layout.location[self.adj[i]] = new_position  # update the hud-level dict,
+                self.hud.layout.location[self.adj[i]] = (
+                    new_position  # update the hud-level dict,
+                )
                 # so other aux can be told
             else:
                 self.hud.layout.common = new_position
@@ -316,7 +347,10 @@ class Aux_Seats(Aux_Window):
 
         actual_seat = None
         for key in self.hud.stat_dict:
-            if self.hud.stat_dict[key]["screen_name"] == self.config.supported_sites[self.hud.site].screen_name:
+            if (
+                self.hud.stat_dict[key]["screen_name"]
+                == self.config.supported_sites[self.hud.site].screen_name
+            ):
                 # Seat from stat_dict is the seat num recorded in the hand history and database
                 # For tables <10-max, some sites omit some seat nums (e.g. iPoker 6-max uses 1,3,5,6,8,10)
                 # The seat nums in the hh from the site are recorded in config file for each layout, and available
@@ -331,7 +365,9 @@ class Aux_Seats(Aux_Window):
                         actual_seat = i
                         break
 
-        if not actual_seat:  # this shouldn't happen because we don't create huds if the hero isn't seated.
+        if (
+            not actual_seat
+        ):  # this shouldn't happen because we don't create huds if the hero isn't seated.
             log.error("Error finding hero seat.")
             return adj
 

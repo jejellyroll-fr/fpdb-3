@@ -22,15 +22,13 @@
 
 # TODO: check to keep only the needed modules
 
-import sys
-from loggingFpdb import get_logger
-
 import codecs
-
 import pprint
+import sys
+
 import Database
 from HandHistoryConverter import HandHistoryConverter
-
+from loggingFpdb import get_logger
 
 try:
     import xlrd
@@ -44,7 +42,17 @@ log = get_logger("parser")
 class TourneySummary(object):
     ################################################################
     #    Class Variables
-    UPS = {"a": "A", "t": "T", "j": "J", "q": "Q", "k": "K", "S": "s", "C": "c", "H": "h", "D": "d"}  # SAL- TO KEEP ??
+    UPS = {
+        "a": "A",
+        "t": "T",
+        "j": "J",
+        "q": "Q",
+        "k": "K",
+        "S": "s",
+        "C": "c",
+        "H": "h",
+        "D": "d",
+    }  # SAL- TO KEEP ??
     LCS = {"H": "h", "D": "d", "C": "c", "S": "s"}  # SAL- TO KEEP ??
     SYMBOL = {"USD": "$", "EUR": "$", "T$": "", "play": ""}
     MS = {"horse": "HORSE", "8game": "8-Game", "hose": "HOSE", "ha": "HA"}
@@ -77,7 +85,9 @@ class TourneySummary(object):
         "Run It Once Poker": 26,
     }
 
-    def __init__(self, db, config, siteName, summaryText, in_path="-", builtFrom="HHC", header=""):
+    def __init__(
+        self, db, config, siteName, summaryText, in_path="-", builtFrom="HHC", header=""
+    ):
         self.db = db
         self.config = config
         self.import_parameters = self.config.get_import_parameters()
@@ -265,7 +275,9 @@ class TourneySummary(object):
         # Note: If the TourneyNo could be a unique id .... this would really be a relief to deal with matrix matches ==> Ask on the IRC / Ask Fulltilt ??
         self.db.set_printdata(printtest)
 
-        self.playerIds = self.db.getSqlPlayerIDs(self.players.keys(), self.siteId, self.hero)
+        self.playerIds = self.db.getSqlPlayerIDs(
+            self.players.keys(), self.siteId, self.hero
+        )
         # for player in self.players:
         #    id=self.db.get_player_id(self.config, self.siteName, player)
         #    if not id:
@@ -273,7 +285,9 @@ class TourneySummary(object):
         #    self.playerIds.update({player:id})
 
         # print "TS.insert players",self.players,"playerIds",self.playerIds
-        self.dbid_pids = self.playerIds  # TODO:rename this field in Hand so this silly renaming can be removed
+        self.dbid_pids = (
+            self.playerIds
+        )  # TODO:rename this field in Hand so this silly renaming can be removed
 
         # print "TS.self before starting insert",self
         self.tourneyTypeId = self.db.createOrUpdateTourneyType(self)
@@ -293,7 +307,17 @@ class TourneySummary(object):
         ttime = 0
         return (stored, duplicates, partial, errors, ttime)
 
-    def addPlayer(self, rank, name, winnings, winningsCurrency, rebuyCount, addOnCount, koCount, entryId=None):
+    def addPlayer(
+        self,
+        rank,
+        name,
+        winnings,
+        winningsCurrency,
+        rebuyCount,
+        addOnCount,
+        koCount,
+        entryId=None,
+    ):
         """
         Adds a player to the tourney, and initialises data structures indexed by player.
         rank        (int) indicating the finishing rank (can be -1 if unknown)

@@ -44,17 +44,18 @@ the Hud modules.
 #  - when playing more than one site
 # sort out the wierd focus issues in flop-mucked.
 
-#    Standard Library modules
-from loggingFpdb import get_logger
+import os
 
+from PyQt5.QtWidgets import QInputDialog, QMessageBox
 
 #    FreePokerTools modules
 import Aux_Hud
-import Stats
-from PyQt5.QtWidgets import QInputDialog, QMessageBox
-import Database
 import Configuration
-import os
+import Database
+import Stats
+
+#    Standard Library modules
+from loggingFpdb import get_logger
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("hud")
@@ -95,7 +96,10 @@ class Classic_Stat_Window(Aux_Hud.Simple_Stat_Window):
         else:
             # player dealt-in, force display of stat block
             # need to call move() to re-establish window position
-            self.move(self.aw.positions[i][0] + self.aw.hud.table.x, self.aw.positions[i][1] + self.aw.hud.table.y)
+            self.move(
+                self.aw.positions[i][0] + self.aw.hud.table.x,
+                self.aw.positions[i][1] + self.aw.hud.table.y,
+            )
             self.setWindowOpacity(float(self.aw.params["opacity"]))
             # show item, just in case it was hidden by the user
             self.show()
@@ -163,7 +167,10 @@ class Classic_stat(Aux_Hud.Simple_stat):
         current_comment = self.get_current_comment(player_id)
 
         new_comment, ok = QInputDialog.getMultiLineText(
-            None, f"Add comment to player: {player_name}", f"Add your comment for {player_name}:", current_comment
+            None,
+            f"Add comment to player: {player_name}",
+            f"Add your comment for {player_name}:",
+            current_comment,
         )
         if ok:
             self.save_comment(player_id, new_comment)
@@ -206,10 +213,14 @@ class Classic_stat(Aux_Hud.Simple_stat):
             q = db.sql.query["update_player_comment"]
             db.cursor.execute(q, (comment, player_id))
             db.commit()
-            QMessageBox.information(None, "Comment saved", "The comment has been successfully saved.")
+            QMessageBox.information(
+                None, "Comment saved", "The comment has been successfully saved."
+            )
         except Exception as e:
             log.error(f"Error saving comment: {e}")
-            QMessageBox.warning(None, "Error", f"An error occurred while saving the comment: {e}")
+            QMessageBox.warning(
+                None, "Error", f"An error occurred while saving the comment: {e}"
+            )
         finally:
             db.close_connection()
 
@@ -259,7 +270,9 @@ class Classic_stat(Aux_Hud.Simple_stat):
         # Check if the player has a comment and adjust color or add symbol if it's playershort
         if self.stat == "playershort" and self.has_comment(player_id):
             # fg = "#FF0000"  # Red color for players with comments
-            icon_path = os.path.join(Configuration.GRAPHICS_PATH, "pencil.png")  # Chemin vers l'image de l'icône
+            icon_path = os.path.join(
+                Configuration.GRAPHICS_PATH, "pencil.png"
+            )  # Chemin vers l'image de l'icône
             icon_img = f'<img src="{icon_path}" width="24" height="24">'  # Ajuster la taille de l'icône
             statstring = f"{icon_img} {self.hudprefix}{str(self.number[1])}{self.hudsuffix} "  # Add star symbol
 

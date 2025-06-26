@@ -18,15 +18,14 @@
 # import L10n
 # _ = L10n.get_translation()
 
-from decimal import Decimal
 import datetime
 import re
-
-from HandHistoryConverter import HandHistoryConverter, FpdbParseError
-from TourneySummary import TourneySummary
+from decimal import Decimal
 
 import BovadaToFpdb
+from HandHistoryConverter import FpdbParseError, HandHistoryConverter
 from loggingFpdb import get_logger
+from TourneySummary import TourneySummary
 
 log = get_logger("parser")
 
@@ -43,8 +42,14 @@ class BovadaSummary(TourneySummary):
     codepage = ("utf8", "cp1252")
 
     re_Identify = re.compile("(Ignition|Bovada|Bodog(\.eu|\sUK|\sCanada|88)?)\sHand")
-    re_AddOn = re.compile(r"^%(PLYR)s  ?\[ME\] : Addon (?P<ADDON>[%(NUM)s]+)" % substitutions, re.MULTILINE)
-    re_Rebuyin = re.compile(r"%(PLYR)s  ?\[ME\] : Rebuyin (?P<REBUY>[%(NUM)s]+)" % substitutions, re.MULTILINE)
+    re_AddOn = re.compile(
+        r"^%(PLYR)s  ?\[ME\] : Addon (?P<ADDON>[%(NUM)s]+)" % substitutions,
+        re.MULTILINE,
+    )
+    re_Rebuyin = re.compile(
+        r"%(PLYR)s  ?\[ME\] : Rebuyin (?P<REBUY>[%(NUM)s]+)" % substitutions,
+        re.MULTILINE,
+    )
     re_Ranking = re.compile(
         r"%(PLYR)s  ?\[ME\] : Ranking (?P<RANK>[%(NUM)s]+)(\s+?%(PLYR1)s  ?\[ME\] : Prize Cash \[(?P<WINNINGS>%(CUR)s[%(NUM)s]+)\])?"
         % substitutions,
@@ -107,7 +112,9 @@ class BovadaSummary(TourneySummary):
                 self.startTime = datetime.datetime.strptime(
                     datetimestr, "%Y/%m/%d %H:%M:%S"
                 )  # also timezone at end, e.g. " ET"
-                self.startTime = HandHistoryConverter.changeTimezone(self.startTime, "ET", "UTC")
+                self.startTime = HandHistoryConverter.changeTimezone(
+                    self.startTime, "ET", "UTC"
+                )
 
             self.buyin = 0
             self.fee = 0
@@ -143,7 +150,13 @@ class BovadaSummary(TourneySummary):
                         self.fee = 0
 
                     if info["TOURNAME"] is not None:
-                        tourneyNameFull = info["TOURNAME"] + " - " + info["BIAMT"] + "+" + info["BIRAKE"]
+                        tourneyNameFull = (
+                            info["TOURNAME"]
+                            + " - "
+                            + info["BIAMT"]
+                            + "+"
+                            + info["BIRAKE"]
+                        )
                         self.tourneyName = tourneyNameFull
 
                         if "TOURNAME" in info and "Rebuy" in info["TOURNAME"]:
@@ -162,7 +175,9 @@ class BovadaSummary(TourneySummary):
                         self.currency = "USD"
                     elif re.match("^[0-9+]*$", mg["WINNINGS"]):
                         self.currency = "play"
-                    winnings[i][1] = int(100 * Decimal(self.clearMoneyString(mg["WINNINGS"])))
+                    winnings[i][1] = int(
+                        100 * Decimal(self.clearMoneyString(mg["WINNINGS"]))
+                    )
                 i += 1
 
             m = self.re_Rebuyin.finditer(self.summaryText)
@@ -184,7 +199,9 @@ class BovadaSummary(TourneySummary):
                 else:
                     rankId = None
                 if i == 0:
-                    self.addPlayer(win[0], "Hero", win[1], self.currency, rebuys, addons, rankId)
+                    self.addPlayer(
+                        win[0], "Hero", win[1], self.currency, rebuys, addons, rankId
+                    )
                 else:
                     self.addPlayer(win[0], "Hero", win[1], self.currency, 0, 0, rankId)
                 i += 1

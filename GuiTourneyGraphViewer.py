@@ -16,20 +16,21 @@
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
 
-from __future__ import print_function
-from __future__ import division
+from __future__ import division, print_function
 
-from past.utils import old_div
 import os
 import sys
 from time import time
-from PyQt5.QtWidgets import QFrame, QScrollArea, QSplitter, QVBoxLayout, QMessageBox
+
+from past.utils import old_div
+from PyQt5.QtWidgets import QFrame, QMessageBox, QScrollArea, QSplitter, QVBoxLayout
+
 import Database
 import Filters
+from loggingFpdb import get_logger
+
 # import Charset
 
-
-from loggingFpdb import get_logger
 
 log = get_logger("tourgraphViewer")
 
@@ -42,8 +43,8 @@ try:
             matplotlib.use("qt5agg")
         except ValueError as e:
             log.error(f"Matplotlib use error: {e}")
-    from matplotlib.figure import Figure
     from matplotlib.backends.backend_qt5agg import FigureCanvas
+    from matplotlib.figure import Figure
     from matplotlib.font_manager import FontProperties
     from numpy import cumsum
 except ImportError as inst:
@@ -183,7 +184,9 @@ class GuiTourneyGraphViewer(QSplitter):
         self.ax.set_ylabel("$", color=self.colors["foreground"])
         self.ax.grid(color=self.colors["grid"], linestyle=":", linewidth=0.2)
         if green is None or len(green) == 0:
-            self.ax.set_title("No Data for Player(s) Found", color=self.colors["foreground"])
+            self.ax.set_title(
+                "No Data for Player(s) Found", color=self.colors["foreground"]
+            )
             green = [
                 0.0,
                 0.0,
@@ -243,13 +246,23 @@ class GuiTourneyGraphViewer(QSplitter):
                 1000.0,
             ]
 
-            self.ax.plot(green, color="green", label="Tournaments: %d\nProfit: $%.2f" % (len(green), green[-1]))
+            self.ax.plot(
+                green,
+                color="green",
+                label="Tournaments: %d\nProfit: $%.2f" % (len(green), green[-1]),
+            )
             self.graphBox.addWidget(self.canvas)
             self.canvas.show()
             self.canvas.draw()
         else:
-            self.ax.set_title("Tournament Results" + names, color=self.colors["foreground"])
-            self.ax.plot(green, color="green", label="Tournaments: %d\nProfit: $%.2f" % (len(green), green[-1]))
+            self.ax.set_title(
+                "Tournament Results" + names, color=self.colors["foreground"]
+            )
+            self.ax.plot(
+                green,
+                color="green",
+                label="Tournaments: %d\nProfit: $%.2f" % (len(green), green[-1]),
+            )
             self.ax.legend(
                 loc="upper left",
                 fancybox=True,
@@ -282,7 +295,7 @@ class GuiTourneyGraphViewer(QSplitter):
         def make_in_clause_sql(values, field_type="str"):
             if not values:
                 return "('')" if field_type == "str" else "(-1)"
-            
+
             if len(values) == 1:
                 val = values[0]
                 return f"('{val}')" if field_type == "str" else f"({val})"
@@ -292,19 +305,16 @@ class GuiTourneyGraphViewer(QSplitter):
             else:
                 return str(tuple(int(v) for v in values))
 
-
-
-        currencytest = f"AND tt.currency in {make_in_clause_sql(currencies.values(), 'str')}"
-        tourneysCattest = make_in_clause_sql(tourneysCat, 'str')
-        tourneysLimtest = make_in_clause_sql(tourneysLim, 'str')
-
+        currencytest = (
+            f"AND tt.currency in {make_in_clause_sql(currencies.values(), 'str')}"
+        )
+        tourneysCattest = make_in_clause_sql(tourneysCat, "str")
+        tourneysLimtest = make_in_clause_sql(tourneysLim, "str")
 
         buyins = [int(b.split(",")[0]) for b in tourneysBuyin if b != "None"]
-        tourneysBuyintest = make_in_clause_sql(buyins, 'int')
-
+        tourneysBuyintest = make_in_clause_sql(buyins, "int")
 
         tourneystest = tourneystest.replace("None", '"None"')
-
 
         tmp = tmp.replace("<player_test>", nametest)
         tmp = tmp.replace("<site_test>", sitetest)
@@ -363,7 +373,13 @@ if __name__ == "__main__":
 
     sql = SQL.Sql(db_server=settings["db-server"])
 
-    colors = {"background": "#19232D", "foreground": "#9DA9B5", "grid": "#4D4D4D", "line_up": "g", "line_down": "r"}
+    colors = {
+        "background": "#19232D",
+        "foreground": "#9DA9B5",
+        "grid": "#4D4D4D",
+        "line_up": "g",
+        "line_down": "r",
+    }
 
     i = GuiTourneyGraphViewer(sql, config, None, colors)
     main_window = QMainWindow()

@@ -20,8 +20,14 @@
 # _ = L10n.get_translation()
 
 
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QTreeWidget, QTreeWidgetItem
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+)
 
 # from pyfpdb import Configuration
 import Configuration
@@ -65,7 +71,9 @@ class GuiPrefs(QDialog):
 
         self.configView = QTreeWidget()
         self.configView.setColumnCount(2)
-        self.configView.setHeaderLabels([("Setting"), ("Value (double-click to change)")])
+        self.configView.setHeaderLabels(
+            [("Setting"), ("Value (double-click to change)")]
+        )
 
         if self.doc.documentElement.tagName == "FreePokerToolsConfig":
             self.root = QTreeWidgetItem(["fpdb", None])
@@ -99,7 +107,10 @@ class GuiPrefs(QDialog):
             (setting, value) = (node.nodeName, None)
         elif node.nodeType == node.TEXT_NODE:
             # text nodes hold the whitespace (or whatever) between the xml elements, not used here
-            (setting, value) = ("TEXT: [" + node.nodeValue + "|" + node.nodeValue + "]", node.data)
+            (setting, value) = (
+                "TEXT: [" + node.nodeValue + "|" + node.nodeValue + "]",
+                node.data,
+            )
         else:
             (setting, value) = ("?? " + node.nodeValue, "type=" + str(node.nodeType))
 
@@ -108,8 +119,12 @@ class GuiPrefs(QDialog):
             item = QTreeWidgetItem(parent, [setting, value])
             if node.hasAttributes():
                 for i in range(node.attributes.length):
-                    localName, updated = self.rewriteText(node.attributes.item(i).localName)
-                    attritem = QTreeWidgetItem(item, [localName, node.attributes.item(i).value])
+                    localName, updated = self.rewriteText(
+                        node.attributes.item(i).localName
+                    )
+                    attritem = QTreeWidgetItem(
+                        item, [localName, node.attributes.item(i).value]
+                    )
                     attritem.setData(1, Qt.UserRole, node.attributes.item(i))
                     attritem.setFlags(attritem.flags() | Qt.ItemIsEditable)
 

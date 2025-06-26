@@ -2,33 +2,45 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import os
+
 # import L10n
 # _ = L10n.get_translation()
 import subprocess
-import traceback
-import os
 import sys
-from loggingFpdb import get_logger
-from PyQt5.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QSpinBox,
-    QPushButton,
-    QLineEdit,
-    QTextEdit,
-    QCheckBox,
-    QFileDialog,
-)
+import traceback
+from optparse import OptionParser
+
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QTextCursor
+from PyQt5.QtWidgets import (
+    QCheckBox,
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSpinBox,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
-import Importer
-from optparse import OptionParser
 import Configuration
-
+import Importer
 import interlocks
+from loggingFpdb import get_logger
+
+# Import pour le rechargement dynamique de configuration
+try:
+    from AutoImportConfigObserver import AutoImportConfigObserver
+    from ConfigurationManager import ConfigurationManager
+
+    DYNAMIC_CONFIG_AVAILABLE = True
+except ImportError:
+    DYNAMIC_CONFIG_AVAILABLE = False
+    log = get_logger("importer")
+    log.warning("ConfigurationManager not available, dynamic config reload disabled")
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
@@ -70,6 +82,7 @@ class GuiAutoImport(QWidget):
 
         if cli is False:
             self.setupGui()
+            self._setup_config_observer()
         else:
             # TODO: Separate the code that grabs the directories from config
             #       Separate the calls to the Importer API
@@ -84,7 +97,9 @@ class GuiAutoImport(QWidget):
         self.intervalLabel = QLabel(("Time between imports in seconds:"))
 
         self.intervalEntry = QSpinBox()
-        self.intervalEntry.setValue(int(self.config.get_import_parameters().get("interval")))
+        self.intervalEntry.setValue(
+            int(self.config.get_import_parameters().get("interval"))
+        )
         hbox.addWidget(self.intervalLabel)
         hbox.addWidget(self.intervalEntry)
         self.layout().addLayout(hbox)
@@ -124,7 +139,9 @@ class GuiAutoImport(QWidget):
         current_path = data[1].text()
 
         newdir = QFileDialog.getExistingDirectory(
-            self, caption=("Please choose the path that you want to Auto Import"), directory=current_path
+            self,
+            caption=("Please choose the path that you want to Auto Import"),
+            directory=current_path,
         )
         if newdir:
             # print dia_chooser.get_filename(), 'selected'
@@ -172,7 +189,9 @@ class GuiAutoImport(QWidget):
         }
         if site == "PokerStars":
             directory = os.path.expanduser(defaults[site])
-            for file in [file for file in os.listdir(directory) if file not in [".", ".."]]:
+            for file in [
+                file for file in os.listdir(directory) if file not in [".", ".."]
+            ]:
                 log.debug(file)
         return False
 
@@ -195,7 +214,9 @@ class GuiAutoImport(QWidget):
             # - Ideally we want to release the lock if the auto-import is killed by some
             # kind of exception - is this possible?
             if self.settings["global_lock"].acquire(wait=False, source="AutoImport"):
-                self.addText("\n" + ("Global lock taken ... Auto Import Started.") + "\n")
+                self.addText(
+                    "\n" + ("Global lock taken ... Auto Import Started.") + "\n"
+                )
                 self.doAutoImportBool = True
                 self.intervalEntry.setEnabled(False)
                 if self.pipe_to_hud is None:
@@ -205,10 +226,16 @@ class GuiAutoImport(QWidget):
                             command = "HUD_main.exe"
                             bs = 0
                         elif self.config.install_method == "app":
-                            base_path = sys._MEIPASS if getattr(sys, "frozen", False) else sys.path[0]
+                            base_path = (
+                                sys._MEIPASS
+                                if getattr(sys, "frozen", False)
+                                else sys.path[0]
+                            )
                             command = os.path.join(base_path, "HUD_main")
                             if not os.path.isfile(command):
-                                raise FileNotFoundError(f"HUD_main not found at {command}")
+                                raise FileNotFoundError(
+                                    f"HUD_main not found at {command}"
+                                )
                             bs = 1
                         elif os.name == "nt":
                             path = to_raw(sys.path[0])
@@ -216,17 +243,33 @@ class GuiAutoImport(QWidget):
                             path2 = os.getcwd()
                             log.debug(f"start hud - path2: {path2}")
                             if win32console.GetConsoleWindow() == 0:
-                                command = 'pythonw "' + path + '\HUD_main.pyw" ' + self.settings["cl_options"]
+                                command = (
+                                    'pythonw "'
+                                    + path
+                                    + '\HUD_main.pyw" '
+                                    + self.settings["cl_options"]
+                                )
                                 log.debug(f"start hud - command: {command}")
                             else:
-                                command = 'python "' + path + '\HUD_main.pyw" ' + self.settings["cl_options"]
+                                command = (
+                                    'python "'
+                                    + path
+                                    + '\HUD_main.pyw" '
+                                    + self.settings["cl_options"]
+                                )
                                 log.debug(f"start hud - command: {command}")
                             bs = 0
                         else:
-                            base_path = sys._MEIPASS if getattr(sys, "frozen", False) else sys.path[0] or os.getcwd()
+                            base_path = (
+                                sys._MEIPASS
+                                if getattr(sys, "frozen", False)
+                                else sys.path[0] or os.getcwd()
+                            )
                             command = os.path.join(base_path, "HUD_main.pyw")
                             if not os.path.isfile(command):
-                                self.addText("\n" + ("*** %s was not found") % (command))
+                                self.addText(
+                                    "\n" + ("*** %s was not found") % (command)
+                                )
                             command = [
                                 command,
                             ] + str.split(self.settings["cl_options"], ".")
@@ -247,7 +290,10 @@ class GuiAutoImport(QWidget):
                             )
                         else:
                             self.pipe_to_hud = subprocess.Popen(
-                                command, bufsize=bs, stdin=subprocess.PIPE, universal_newlines=True
+                                command,
+                                bufsize=bs,
+                                stdin=subprocess.PIPE,
+                                universal_newlines=True,
                             )
 
                     except Exception:
@@ -257,10 +303,14 @@ class GuiAutoImport(QWidget):
                     else:
                         for site, type in self.input_settings:
                             self.importer.addImportDirectory(
-                                self.input_settings[(site, type)][0], monitor=True, site=(site, type)
+                                self.input_settings[(site, type)][0],
+                                monitor=True,
+                                site=(site, type),
                             )
                             self.addText(
-                                "\n * " + ("Add %s import directory %s") % (site, self.input_settings[(site, type)][0])
+                                "\n * "
+                                + ("Add %s import directory %s")
+                                % (site, self.input_settings[(site, type)][0])
                             )
                             self.do_import()
                         interval = self.intervalEntry.value()
@@ -269,7 +319,9 @@ class GuiAutoImport(QWidget):
                         self.importtimer.start(interval * 1000)
 
             else:
-                self.addText("\n" + ("Auto Import aborted.") + ("Global lock not available."))
+                self.addText(
+                    "\n" + ("Auto Import aborted.") + ("Global lock not available.")
+                )
         else:  # toggled off
             self.doAutoImportBool = False
             self.importtimer = None
@@ -277,7 +329,9 @@ class GuiAutoImport(QWidget):
             self.settings["global_lock"].release()
             self.addText("\n" + ("Stopping Auto Import.") + ("Global lock released."))
             if self.pipe_to_hud and self.pipe_to_hud.poll() is not None:
-                self.addText("\n * " + ("Stop Auto Import") + ": " + ("HUD already terminated."))
+                self.addText(
+                    "\n * " + ("Stop Auto Import") + ": " + ("HUD already terminated.")
+                )
             else:
                 if self.pipe_to_hud:
                     self.pipe_to_hud.terminate()
@@ -296,7 +350,9 @@ class GuiAutoImport(QWidget):
     # Create the site line given required info and setup callbacks
     # enabling and disabling sites from this interface not possible
     # expects a box to layout the line horizontally
-    def createSiteLine(self, hbox1, hbox2, site, iconpath, type, path, filter_name, active=True):
+    def createSiteLine(
+        self, hbox1, hbox2, site, iconpath, type, path, filter_name, active=True
+    ):
         label = QLabel(("%s auto-import:") % site)
         hbox1.addWidget(label)
 
@@ -344,7 +400,9 @@ class GuiAutoImport(QWidget):
                 params["converter"],
                 params["enabled"],
             )
-            self.input_settings[(site, "hh")] = [paths["hud-defaultPath"]] + [params["converter"]]
+            self.input_settings[(site, "hh")] = [paths["hud-defaultPath"]] + [
+                params["converter"]
+            ]
 
             if "hud-defaultTSPath" in paths:
                 pathHBox1 = QHBoxLayout()
@@ -361,13 +419,47 @@ class GuiAutoImport(QWidget):
                     params["summaryImporter"],
                     params["enabled"],
                 )
-                self.input_settings[(site, "ts")] = [paths["hud-defaultTSPath"]] + [params["summaryImporter"]]
+                self.input_settings[(site, "ts")] = [paths["hud-defaultTSPath"]] + [
+                    params["summaryImporter"]
+                ]
         log.debug(f"input_settings {self.input_settings}")
+
+    def _setup_config_observer(self):
+        """Configure l'observateur de configuration pour l'auto-import"""
+        if DYNAMIC_CONFIG_AVAILABLE:
+            try:
+                config_manager = ConfigurationManager()
+
+                # S'assurer que le ConfigurationManager est initialisé
+                if not config_manager.initialized:
+                    config_manager.initialize(self.config.file)
+
+                # Créer et enregistrer l'observateur
+                self.config_observer = AutoImportConfigObserver(self)
+                config_manager.register_observer(self.config_observer)
+
+                log.info("Observateur de configuration enregistré pour l'auto-import")
+
+            except Exception as e:
+                log.error(f"Erreur lors de la configuration de l'observateur: {e}")
+
+    def updatePaths(self):
+        """Met à jour l'affichage des chemins d'import (appelé par l'observateur)"""
+        # Cette méthode peut être appelée pour rafraîchir l'interface
+        # après un changement de configuration dynamique
+        log.debug("Mise à jour des chemins d'import dans l'interface")
 
 
 if __name__ == "__main__":
     parser = OptionParser()
-    parser.add_option("-q", "--quiet", action="store_false", dest="gui", default=True, help="don't start gui")
+    parser.add_option(
+        "-q",
+        "--quiet",
+        action="store_false",
+        dest="gui",
+        default=True,
+        help="don't start gui",
+    )
     (options, argv) = parser.parse_args()
 
     config = Configuration.Config()

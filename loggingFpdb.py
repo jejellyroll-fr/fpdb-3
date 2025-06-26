@@ -1,11 +1,12 @@
-import os
-import re
-import logging
-import colorlog
 import inspect
 import json
-from logging.handlers import TimedRotatingFileHandler
+import logging
+import os
+import re
 import time
+from logging.handlers import TimedRotatingFileHandler
+
+import colorlog
 
 # Define default logging and debugging modes
 
@@ -85,7 +86,6 @@ class FpdbLogFormatter(colorlog.ColoredFormatter):
         # Define a regex pattern to capture strings enclosed in single or double quotes
         pattern = r"'([^']*)'|\"([^\"]*)\""
 
-
         def repl(match):
             """
             Replacement function used by re.sub.
@@ -97,7 +97,9 @@ class FpdbLogFormatter(colorlog.ColoredFormatter):
             Returns:
                 str: The captured variable with color codes added.
             """
-            var = match.group(1) or match.group(2)  # Extract the variable without quotes
+            var = match.group(1) or match.group(
+                2
+            )  # Extract the variable without quotes
             return f"{self.var_color}'{var}'{self.reset_color}"  # Add color codes around the quotes
 
         # Use re.sub to replace all occurrences of variables with their colored versions
@@ -174,10 +176,14 @@ class TimedSizedRotatingFileHandler(TimedRotatingFileHandler):
             atTime (datetime.time): Specific time for time-based rotation.
             maxBytes (int): Maximum file size in bytes before rotation.
         """
-        super().__init__(filename, when, interval, backupCount, encoding, delay, utc, atTime)
+        super().__init__(
+            filename, when, interval, backupCount, encoding, delay, utc, atTime
+        )
         self.maxBytes = maxBytes  # Maximum size before size-based rotation
         self.part = 1  # Initialize part number for rotated files
-        self.currentDate = time.strftime("%Y-%m-%d")  # Current date in YYYY-MM-DD format
+        self.currentDate = time.strftime(
+            "%Y-%m-%d"
+        )  # Current date in YYYY-MM-DD format
 
     def shouldRollover(self, record):
         """
@@ -242,7 +248,9 @@ class TimedSizedRotatingFileHandler(TimedRotatingFileHandler):
         # Calculate the next rollover time based on the current time
         newRolloverAt = self.computeRollover(currentTime)
         while newRolloverAt <= currentTime:
-            newRolloverAt += self.interval  # Add the interval until rolloverAt is in the future
+            newRolloverAt += (
+                self.interval
+            )  # Add the interval until rolloverAt is in the future
         self.rolloverAt = newRolloverAt  # Update rolloverAt
 
     def getFilesToDelete(self):
@@ -256,13 +264,17 @@ class TimedSizedRotatingFileHandler(TimedRotatingFileHandler):
         Returns:
             list: List of full paths to log files that should be deleted.
         """
-        dirName, baseName = os.path.split(self.baseFilename)  # Split directory and base filename
+        dirName, baseName = os.path.split(
+            self.baseFilename
+        )  # Split directory and base filename
         fileNames = os.listdir(dirName)  # List all files in the directory
         result = []
         for fileName in fileNames:
             # Check if the file matches the rotated log file pattern
             if fileName.startswith(baseName) and fileName.endswith(".txt"):
-                result.append(os.path.join(dirName, fileName))  # Add full path to result
+                result.append(
+                    os.path.join(dirName, fileName)
+                )  # Add full path to result
         result.sort()  # Sort files alphabetically (usually chronological if dates are in the name)
 
         # If the number of files exceeds backupCount, return the oldest files to delete
@@ -291,12 +303,20 @@ def setup_logging(log_dir=None, console_only=False):
     """
     try:
         # Configure the console handler with color coding
-        log_colors = {"DEBUG": "green", "INFO": "blue", "WARNING": "yellow", "ERROR": "red"}
+        log_colors = {
+            "DEBUG": "green",
+            "INFO": "blue",
+            "WARNING": "yellow",
+            "ERROR": "red",
+        }
         log_format = (
-            "%(log_color)s%(asctime)s [%(name)s:%(module)s:%(funcName)s] " "[%(levelname)s] %(message)s%(reset)s"
+            "%(log_color)s%(asctime)s [%(name)s:%(module)s:%(funcName)s] "
+            "[%(levelname)s] %(message)s%(reset)s"
         )
         date_format = "%Y-%m-%d %H:%M:%S"
-        formatter = colorlog.ColoredFormatter(fmt=log_format, datefmt=date_format, log_colors=log_colors)
+        formatter = colorlog.ColoredFormatter(
+            fmt=log_format, datefmt=date_format, log_colors=log_colors
+        )
 
         # Create a stream handler for the console
         console_handler = logging.StreamHandler()
@@ -316,14 +336,20 @@ def setup_logging(log_dir=None, console_only=False):
             if log_dir is None:
                 log_dir = os.path.join(os.path.expanduser("~"), "fpdb_logs")
             log_dir = os.path.normpath(log_dir)  # Normalize the directory path
-            os.makedirs(log_dir, exist_ok=True)  # Create the directory if it doesn't exist
-            log_file = os.path.join(log_dir, "fpdb-log.txt")  # Full path to the log file
+            os.makedirs(
+                log_dir, exist_ok=True
+            )  # Create the directory if it doesn't exist
+            log_file = os.path.join(
+                log_dir, "fpdb-log.txt"
+            )  # Full path to the log file
             print(f"Attempting to write logs to: {log_file}")
 
             # Use the custom TimedSizedRotatingFileHandler
             maxBytes = 1024 * 1024  # 1 MB
             backupCount = 30  # Keep logs for 30 rotations
-            file_formatter = JsonFormatter(datefmt=date_format)  # Use JsonFormatter for files
+            file_formatter = JsonFormatter(
+                datefmt=date_format
+            )  # Use JsonFormatter for files
             file_handler = TimedSizedRotatingFileHandler(
                 log_file,
                 when="midnight",  # Daily rotation at midnight
@@ -386,7 +412,9 @@ class FpdbLogger:
             *args: Positional arguments for message formatting.
             **kwargs: Keyword arguments for message formatting.
         """
-        stacklevel = self._get_stacklevel()  # Calculate stack level for accurate information
+        stacklevel = (
+            self._get_stacklevel()
+        )  # Calculate stack level for accurate information
         self.logger.debug(msg, *args, stacklevel=stacklevel, **kwargs)
 
     def info(self, msg: str, *args, **kwargs):
@@ -457,7 +485,14 @@ class FpdbLogger:
         stacklevel = 1  # Initialize stack level
         while frame:
             co_name = frame.f_code.co_name  # Get the function name of the current frame
-            if co_name in ("debug", "info", "warning", "error", "__init__", "_get_stacklevel"):
+            if co_name in (
+                "debug",
+                "info",
+                "warning",
+                "error",
+                "__init__",
+                "_get_stacklevel",
+            ):
                 # If the function name is one of the logging methods or internal methods,
                 # continue traversing the stack
                 frame = frame.f_back  # Move to the previous frame

@@ -21,7 +21,16 @@
 
 from __future__ import division
 
+import datetime
+import re
+from decimal import Decimal
+
 from past.utils import old_div
+
+import MergeStructures
+from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
+from loggingFpdb import get_logger
+
 # import L10n
 # _ = L10n.get_translation()
 
@@ -34,12 +43,6 @@ from past.utils import old_div
 # -- Cannot parse tables that run it twice
 # -- Cannot parse hands in which someone is all in in one of the blinds.
 
-from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
-from decimal import Decimal
-import re
-from loggingFpdb import get_logger
-import datetime
-import MergeStructures
 
 # Merge HH Format
 log = get_logger("parser")
@@ -76,7 +79,15 @@ class Merge(HandHistoryConverter):
         "Razz": ("stud", "razz"),
     }
 
-    mixes = {"HA": "ha", "RASH": "rash", "HO": "ho", "SHOE": "shoe", "HORSE": "horse", "HOSE": "hose", "HAR": "har"}
+    mixes = {
+        "HA": "ha",
+        "RASH": "rash",
+        "HO": "ho",
+        "SHOE": "shoe",
+        "HORSE": "horse",
+        "HOSE": "hose",
+        "HAR": "har",
+    }
 
     Lim_Blinds = {
         "0.04": ("0.01", "0.02"),
@@ -156,8 +167,12 @@ class Merge(HandHistoryConverter):
         r'<player seat="(?P<SEAT>[0-9]+)" nickname="(?P<PNAME>.+)" balance="\$?(?P<CASH>[.0-9]+)" dealtin="(?P<DEALTIN>(true|false))" />',
         re.MULTILINE,
     )
-    re_Board = re.compile(r'<cards type="COMMUNITY" cards="(?P<CARDS>[^"]+)"', re.MULTILINE)
-    re_Buyin = re.compile(r"\$(?P<BUYIN>[.,0-9]+)\s(?P<TYPE>Freeroll|Satellite|Guaranteed)?", re.MULTILINE)
+    re_Board = re.compile(
+        r'<cards type="COMMUNITY" cards="(?P<CARDS>[^"]+)"', re.MULTILINE
+    )
+    re_Buyin = re.compile(
+        r"\$(?P<BUYIN>[.,0-9]+)\s(?P<TYPE>Freeroll|Satellite|Guaranteed)?", re.MULTILINE
+    )
     re_secondGame = re.compile(r"\$?(?P<SB>[.0-9]+)?/?\$?(?P<BB>[.0-9]+)", re.MULTILINE)
 
     # The following are also static regexes: there is no need to call
@@ -184,7 +199,8 @@ class Merge(HandHistoryConverter):
         re.MULTILINE,
     )
     re_HeroCards = re.compile(
-        r'<cards type="(HOLE|DRAW_DRAWN_CARDS)" cards="(?P<CARDS>.+)" player="(?P<PSEAT>[0-9])"', re.MULTILINE
+        r'<cards type="(HOLE|DRAW_DRAWN_CARDS)" cards="(?P<CARDS>.+)" player="(?P<PSEAT>[0-9])"',
+        re.MULTILINE,
     )
     re_Action = re.compile(
         r'<event sequence="[0-9]+" type="(?P<ATYPE>FOLD|CHECK|CALL|BET|RAISE|ALL_IN|SIT_OUT|DRAW|COMPLETE)"( timestamp="(?P<TIMESTAMP>[0-9]+)")? player="(?P<PSEAT>[0-9])"( amount="(?P<BET>[.0-9]+)")?( text="(?P<TXT>.+)")?\s?/>',
@@ -198,18 +214,29 @@ class Merge(HandHistoryConverter):
         r'<winner amount="(?P<POT>[.0-9]+)" uncalled="(?P<UNCALLED>false|true)" potnumber="[0-9]+" player="(?P<PSEAT>[0-9])"',
         re.MULTILINE,
     )
-    re_SitsOut = re.compile(r'<event sequence="[0-9]+" type="SIT_OUT" player="(?P<PSEAT>[0-9])"\s?/>', re.MULTILINE)
+    re_SitsOut = re.compile(
+        r'<event sequence="[0-9]+" type="SIT_OUT" player="(?P<PSEAT>[0-9])"\s?/>',
+        re.MULTILINE,
+    )
     re_ShownCards = re.compile(
-        r'<cards type="(?P<SHOWED>SHOWN|MUCKED)" cards="(?P<CARDS>.+)" player="(?P<PSEAT>[0-9])"\s?/>', re.MULTILINE
+        r'<cards type="(?P<SHOWED>SHOWN|MUCKED)" cards="(?P<CARDS>.+)" player="(?P<PSEAT>[0-9])"\s?/>',
+        re.MULTILINE,
     )
     re_Connection = re.compile(
         r'<event sequence="[0-9]+" type="(?P<TYPE>RECONNECTED|DISCONNECTED)" timestamp="[0-9]+" player="[0-9]"\s?/>',
         re.MULTILINE,
     )
-    re_Cancelled = re.compile(r'<event sequence="\d+" type="GAME_CANCELLED" timestamp="\d+"\s?/>', re.MULTILINE)
-    re_LeaveTable = re.compile(r'<event sequence="\d+" type="LEAVE" timestamp="\d+" player="\d"\s?/>', re.MULTILINE)
+    re_Cancelled = re.compile(
+        r'<event sequence="\d+" type="GAME_CANCELLED" timestamp="\d+"\s?/>',
+        re.MULTILINE,
+    )
+    re_LeaveTable = re.compile(
+        r'<event sequence="\d+" type="LEAVE" timestamp="\d+" player="\d"\s?/>',
+        re.MULTILINE,
+    )
     re_PlayerOut = re.compile(
-        r'<event sequence="\d+" type="(PLAYER_OUT|LEAVE)" timestamp="\d+" player="(?P<PSEAT>[0-9])"\s?/>', re.MULTILINE
+        r'<event sequence="\d+" type="(PLAYER_OUT|LEAVE)" timestamp="\d+" player="(?P<PSEAT>[0-9])"\s?/>',
+        re.MULTILINE,
     )
     re_EndOfHand = re.compile(r'<round id="END_OF_GAME"', re.MULTILINE)
     re_DateTime = re.compile(
@@ -321,7 +348,11 @@ class Merge(HandHistoryConverter):
             else:
                 self.info["currency"] = "USD"
 
-        if self.info["limitType"] == "fl" and self.info["bb"] is not None and self.info["type"] == "ring":
+        if (
+            self.info["limitType"] == "fl"
+            and self.info["bb"] is not None
+            and self.info["type"] == "ring"
+        ):
             try:
                 self.info["sb"] = self.Lim_Blinds[mg["BB"]][0]
                 self.info["bb"] = self.Lim_Blinds[mg["BB"]][1]
@@ -347,17 +378,30 @@ class Merge(HandHistoryConverter):
         m1 = self.re_DateTime.search(m.group("DATETIME"))
         if m1:
             mg = m1.groupdict()
-            datetimestr = "%s/%s/%s %s:%s:%s" % (mg["Y"], mg["M"], mg["D"], mg["H"], mg["MIN"], mg["S"])
+            datetimestr = "%s/%s/%s %s:%s:%s" % (
+                mg["Y"],
+                mg["M"],
+                mg["D"],
+                mg["H"],
+                mg["MIN"],
+                mg["S"],
+            )
             # tz = a.group('TZ')  # just assume ET??
             hand.startTime = datetime.datetime.strptime(
                 datetimestr, "%Y/%m/%d %H:%M:%S"
             )  # also timezone at end, e.g. " ET"
         else:
-            hand.startTime = datetime.datetime.strptime(m.group("DATETIME")[:14], "%Y%m%d%H%M%S")
+            hand.startTime = datetime.datetime.strptime(
+                m.group("DATETIME")[:14], "%Y%m%d%H%M%S"
+            )
 
-        hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
+        hand.startTime = HandHistoryConverter.changeTimezone(
+            hand.startTime, "ET", "UTC"
+        )
         hand.newFormat = datetime.datetime.strptime("20100908000000", "%Y%m%d%H%M%S")
-        hand.newFormat = HandHistoryConverter.changeTimezone(hand.newFormat, "ET", "UTC")
+        hand.newFormat = HandHistoryConverter.changeTimezone(
+            hand.newFormat, "ET", "UTC"
+        )
 
         if hand.gametype["type"] == "tour":
             tid_table = m.group("TDATA").split("-")
@@ -370,7 +414,9 @@ class Merge(HandHistoryConverter):
             self.info["tourNo"] = hand.tourNo
             hand.tourNo = tid
             hand.tablename = table
-            structure = self.Structures.lookupSnG(self.info["tablename"], hand.startTime)
+            structure = self.Structures.lookupSnG(
+                self.info["tablename"], hand.startTime
+            )
             if structure is not None:
                 hand.buyin = int(100 * structure["buyIn"])
                 hand.fee = int(100 * structure["fee"])
@@ -414,7 +460,9 @@ class Merge(HandHistoryConverter):
             fulltable = False
             for action in m2:
                 acted[action.group("PSEAT")] = True
-                if list(acted.keys()) == list(seated.keys()):  # We've faound all players
+                if list(acted.keys()) == list(
+                    seated.keys()
+                ):  # We've faound all players
                     fulltable = True
                     break
             if fulltable is not True:
@@ -424,7 +472,9 @@ class Merge(HandHistoryConverter):
 
                 for seatno in list(acted.keys()):
                     if seatno not in seated:
-                        log.error(f"MergeToFpdb.readPlayerStacks: '{hand.handid}' Seat:{seatno} acts but not listed")
+                        log.error(
+                            f"MergeToFpdb.readPlayerStacks: '{hand.handid}' Seat:{seatno} acts but not listed"
+                        )
                         raise FpdbParseError
 
         for seat in seated:
@@ -599,11 +649,17 @@ class Merge(HandHistoryConverter):
                 hand.gametype["sb"] = str(old_div(int(Decimal(hand.gametype["bb"])), 2))
             elif hand.gametype["bb"] is None:
                 hand.gametype["bb"] = str(int(Decimal(hand.gametype["sb"])) * 2)
-            if old_div(int(Decimal(hand.gametype["bb"])), 2) != int(Decimal(hand.gametype["sb"])):
-                if old_div(int(Decimal(hand.gametype["bb"])), 2) < int(Decimal(hand.gametype["sb"])):
+            if old_div(int(Decimal(hand.gametype["bb"])), 2) != int(
+                Decimal(hand.gametype["sb"])
+            ):
+                if old_div(int(Decimal(hand.gametype["bb"])), 2) < int(
+                    Decimal(hand.gametype["sb"])
+                ):
                     hand.gametype["bb"] = str(int(Decimal(hand.gametype["sb"])) * 2)
                 else:
-                    hand.gametype["sb"] = str(old_div(int(Decimal(hand.gametype["bb"])), 2))
+                    hand.gametype["sb"] = str(
+                        old_div(int(Decimal(hand.gametype["bb"])), 2)
+                    )
             hand.sb = hand.gametype["sb"]
             hand.bb = hand.gametype["bb"]
             for player, blindtype in list(allinBlinds.items()):
@@ -620,10 +676,16 @@ class Merge(HandHistoryConverter):
             tmp = handText[0:200]
             log.error(f"readHandInfo not found: '{tmp}'")
             raise FpdbParseError
-        multigametype = m2.group("MULTIGAMETYPE1") if m2.group("MULTIGAMETYPE1") else m2.group("MULTIGAMETYPE2")
+        multigametype = (
+            m2.group("MULTIGAMETYPE1")
+            if m2.group("MULTIGAMETYPE1")
+            else m2.group("MULTIGAMETYPE2")
+        )
         if multigametype:
             try:
-                (self.info["base"], self.info["category"]) = self.Multigametypes[multigametype]
+                (self.info["base"], self.info["category"]) = self.Multigametypes[
+                    multigametype
+                ]
             except KeyError:
                 tmp = handText[0:200]
                 log.error(f"Multigametypes has no lookup for '{multigametype}'")
@@ -655,11 +717,22 @@ class Merge(HandHistoryConverter):
                     #                    else:
                     hand.hero = self.playerNameFromSeatNo(found.group("PSEAT"), hand)
                     cards = found.group("CARDS").split(",")
-                    hand.addHoleCards(street, hand.hero, closed=cards, shown=False, mucked=False, dealt=True)
+                    hand.addHoleCards(
+                        street,
+                        hand.hero,
+                        closed=cards,
+                        shown=False,
+                        mucked=False,
+                        dealt=True,
+                    )
 
         for street in hand.holeStreets:
             if street in hand.streets:
-                if not hand.streets[street] or street in ("PREFLOP", "DEAL") or hand.gametype["base"] == "hold":
+                if (
+                    not hand.streets[street]
+                    or street in ("PREFLOP", "DEAL")
+                    or hand.gametype["base"] == "hold"
+                ):
                     continue  # already done these
                 m = self.re_HeroCards.finditer(hand.streets[street])
                 for found in m:
@@ -671,7 +744,9 @@ class Merge(HandHistoryConverter):
                             oldcards = []
                         else:
                             if hand.gametype["base"] == "stud":
-                                cards = found.group("CARDS").replace("null", "").split(",")
+                                cards = (
+                                    found.group("CARDS").replace("null", "").split(",")
+                                )
                                 cards = [c for c in cards if c != ""]
                                 oldcards = cards[:-1]
                                 newcards = [cards[-1]]
@@ -684,7 +759,13 @@ class Merge(HandHistoryConverter):
                             herocards = cards
                             hand.dealt.add(hand.hero)  # need this for stud??
                             hand.addHoleCards(
-                                street, player, closed=oldcards, open=newcards, shown=False, mucked=False, dealt=False
+                                street,
+                                player,
+                                closed=oldcards,
+                                open=newcards,
+                                shown=False,
+                                mucked=False,
+                                dealt=False,
                             )
                         elif cards != herocards and hand.gametype["base"] == "stud":
                             if hand.hero == player:
@@ -715,11 +796,23 @@ class Merge(HandHistoryConverter):
                                 for street in hand.holeStreets:
                                     hand.holecards[street][player] = [[], []]
                                 hand.addHoleCards(
-                                    street, player, closed=cards, open=[], shown=False, mucked=False, dealt=False
+                                    street,
+                                    player,
+                                    closed=cards,
+                                    open=[],
+                                    shown=False,
+                                    mucked=False,
+                                    dealt=False,
                                 )
                         elif hand.gametype["base"] == "draw":
                             hand.addHoleCards(
-                                street, player, closed=oldcards, open=newcards, shown=False, mucked=False, dealt=False
+                                street,
+                                player,
+                                closed=oldcards,
+                                open=newcards,
+                                shown=False,
+                                mucked=False,
+                                dealt=False,
                             )
 
     def readAction(self, hand, street):
@@ -741,7 +834,10 @@ class Merge(HandHistoryConverter):
                         hand.addRaiseTo(street, player, action.group("BET"))
                 elif action.group("ATYPE") == "BET":
                     hand.addBet(street, player, action.group("BET"))
-                elif action.group("ATYPE") == "ALL_IN" and action.group("BET") is not None:
+                elif (
+                    action.group("ATYPE") == "ALL_IN"
+                    and action.group("BET") is not None
+                ):
                     hand.addAllIn(street, player, action.group("BET"))
                 elif action.group("ATYPE") == "DRAW":
                     hand.addDiscard(street, player, action.group("TXT"))
@@ -751,7 +847,9 @@ class Merge(HandHistoryConverter):
                     else:
                         hand.addComplete(street, player, action.group("BET"))
                 else:
-                    log.debug(f"Unimplemented readAction: '{action.group('PSEAT')}' '{action.group('ATYPE')}'")
+                    log.debug(
+                        f"Unimplemented readAction: '{action.group('PSEAT')}' '{action.group('ATYPE')}'"
+                    )
 
     def readShowdownActions(self, hand):
         pass
@@ -778,7 +876,10 @@ class Merge(HandHistoryConverter):
 
                 # print "DEBUG: hand.addShownCards(%s, %s, %s, %s)" %(cards, m.group('PNAME'), shown, mucked)
                 hand.addShownCards(
-                    cards=cards, player=self.playerNameFromSeatNo(m.group("PSEAT"), hand), shown=shown, mucked=mucked
+                    cards=cards,
+                    player=self.playerNameFromSeatNo(m.group("PSEAT"), hand),
+                    shown=shown,
+                    mucked=mucked,
                 )
 
     def determineErrorType(self, hand, function):
@@ -797,7 +898,9 @@ class Merge(HandHistoryConverter):
         if message is False and function == "readHandInfo":
             message = "END_OF_HAND not found. No obvious reason"
         if message:
-            raise FpdbHandPartial("Partial hand history: %s '%s' %s" % (function, hand.handid, message))
+            raise FpdbHandPartial(
+                "Partial hand history: %s '%s' %s" % (function, hand.handid, message)
+            )
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):

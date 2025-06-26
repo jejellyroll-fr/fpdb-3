@@ -1,8 +1,8 @@
-import pytest
-from xml.dom.minidom import Document
 import sys
 from pathlib import Path
+from xml.dom.minidom import Document
 
+import pytest
 
 sys.path.append(str(Path(__file__).parent.parent))
 from Configuration import Config

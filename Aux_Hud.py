@@ -28,20 +28,27 @@
 
 #    Standard Library modules
 import os
-from loggingFpdb import get_logger
-
 from functools import partial
 
-from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QComboBox, QGridLayout, QHBoxLayout, QLabel, QPushButton, QSpinBox, QVBoxLayout, QWidget
+from PyQt5.QtGui import QFont, QPixmap
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QSpinBox,
+    QVBoxLayout,
+    QWidget,
+)
 
 #    FreePokerTools modules
 import Aux_Base
-import Stats
-import Popup
 import Configuration
-
+import Popup
+import Stats
+from loggingFpdb import get_logger
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("hud")
@@ -89,15 +96,15 @@ class Simple_HUD(Aux_Base.Aux_Seats):
         self.tips = [[None] * self.ncols for _ in range(self.nrows)]
 
         for stat in self.game_params.stats:
-            self.stats[self.game_params.stats[stat].rowcol[0]][self.game_params.stats[stat].rowcol[1]] = (
-                self.game_params.stats[stat].stat_name
-            )
-            self.popups[self.game_params.stats[stat].rowcol[0]][self.game_params.stats[stat].rowcol[1]] = (
-                self.game_params.stats[stat].popup
-            )
-            self.tips[self.game_params.stats[stat].rowcol[0]][self.game_params.stats[stat].rowcol[1]] = (
-                self.game_params.stats[stat].tip
-            )
+            self.stats[self.game_params.stats[stat].rowcol[0]][
+                self.game_params.stats[stat].rowcol[1]
+            ] = self.game_params.stats[stat].stat_name
+            self.popups[self.game_params.stats[stat].rowcol[0]][
+                self.game_params.stats[stat].rowcol[1]
+            ] = self.game_params.stats[stat].popup
+            self.tips[self.game_params.stats[stat].rowcol[0]][
+                self.game_params.stats[stat].rowcol[1]
+            ] = self.game_params.stats[stat].tip
 
     def create_contents(self, container, i):
         # this is a call to whatever is in self.aw_class_window but it isn't obvious
@@ -123,9 +130,17 @@ class Simple_HUD(Aux_Base.Aux_Seats):
     def save_layout(self, *args):
         """Save new layout back to the aux element in the config file."""
 
-        new_locs = {self.adj[int(i)]: ((pos[0]), (pos[1])) for i, pos in list(self.positions.items()) if i != "common"}
+        new_locs = {
+            self.adj[int(i)]: ((pos[0]), (pos[1]))
+            for i, pos in list(self.positions.items())
+            if i != "common"
+        }
         self.config.save_layout_set(
-            self.hud.layout_set, self.hud.max, new_locs, self.hud.table.width, self.hud.table.height
+            self.hud.layout_set,
+            self.hud.max,
+            new_locs,
+            self.hud.table.width,
+            self.hud.table.height,
         )
 
 
@@ -150,10 +165,14 @@ class Simple_Stat_Window(Aux_Base.Seat_Window):
                 hand_instance=self.aw.hud.hand_instance,
                 config=self.aw.config,
             )
-            pu.setStyleSheet(f"QWidget{{background:{self.aw.bgcolor};color:{self.aw.fgcolor};}}QToolTip{{}}")
+            pu.setStyleSheet(
+                f"QWidget{{background:{self.aw.bgcolor};color:{self.aw.fgcolor};}}QToolTip{{}}"
+            )
 
     def create_contents(self, i):
-        self.setStyleSheet(f"QWidget{{background:{self.aw.bgcolor};color:{self.aw.fgcolor};}}QToolTip{{}}")
+        self.setStyleSheet(
+            f"QWidget{{background:{self.aw.bgcolor};color:{self.aw.fgcolor};}}QToolTip{{}}"
+        )
         self.grid = QGridLayout()
         self.grid.setHorizontalSpacing(4)
         self.grid.setVerticalSpacing(1)
@@ -167,7 +186,9 @@ class Simple_Stat_Window(Aux_Base.Seat_Window):
                     self.aw.stats[r][c],
                     seat=self.seat,
                     popup=self.aw.popups[r][c],
-                    game_stat_config=self.aw.hud.supported_games_parameters["game_stat_set"].stats[(r, c)],
+                    game_stat_config=self.aw.hud.supported_games_parameters[
+                        "game_stat_set"
+                    ].stats[(r, c)],
                     aw=self.aw,
                 )
                 self.grid.addWidget(self.stat_box[r][c].widget, r, c)
@@ -189,7 +210,9 @@ class Simple_stat(object):
 
     def __init__(self, stat, seat, popup, game_stat_config=None, aw=None):
         self.stat = stat
-        self.lab = aw.aw_class_label("xxx")  # xxx is used as initial value because longer labels don't shrink
+        self.lab = aw.aw_class_label(
+            "xxx"
+        )  # xxx is used as initial value because longer labels don't shrink
         self.lab.setAlignment(Qt.AlignCenter)
         self.lab.aw_seat = aw.hud.layout.hh_seats[seat]
         self.lab.aw_popup = popup
@@ -200,9 +223,13 @@ class Simple_stat(object):
         self.aux_params = aw.aux_params
 
     def update(self, player_id, stat_dict):
-        self.stat_dict = stat_dict  # So the Simple_stat obj always has a fresh stat_dict
+        self.stat_dict = (
+            stat_dict  # So the Simple_stat obj always has a fresh stat_dict
+        )
         self.lab.stat_dict = stat_dict
-        self.number = Stats.do_stat(stat_dict, player_id, self.stat, self.hud.hand_instance)
+        self.number = Stats.do_stat(
+            stat_dict, player_id, self.stat, self.hud.hand_instance
+        )
         if self.number:
             self.lab.setText(str(self.number[1]))
 
@@ -268,10 +295,13 @@ class Simple_table_mw(Aux_Base.Seat_Window):
 
 class Simple_table_popup_menu(QWidget):
     def __init__(self, parentwin):
-        super(Simple_table_popup_menu, self).__init__(None, Qt.Window | Qt.FramelessWindowHint)
+        super(Simple_table_popup_menu, self).__init__(
+            None, Qt.Window | Qt.FramelessWindowHint
+        )
         self.parentwin = parentwin
         self.move(
-            self.parentwin.hud.table.x + self.parentwin.aw.xshift, self.parentwin.hud.table.y + self.parentwin.aw.yshift
+            self.parentwin.hud.table.x + self.parentwin.aw.xshift,
+            self.parentwin.hud.table.y + self.parentwin.aw.yshift,
         )
         self.setWindowTitle(self.parentwin.menu_label + " - HUD configuration")
 
@@ -297,7 +327,9 @@ class Simple_table_popup_menu(QWidget):
         }
         # ComboBox - set max seats
         cb_max_dict = {0: ("Force layout" + "...", None)}
-        for pos, i in enumerate((sorted(self.parentwin.hud.layout_set.layout)), start=1):
+        for pos, i in enumerate(
+            (sorted(self.parentwin.hud.layout_set.layout)), start=1
+        ):
             cb_max_dict[pos] = (("%d-max" % i), i)
         grid = QGridLayout()
         self.setLayout(grid)
@@ -313,8 +345,12 @@ class Simple_table_popup_menu(QWidget):
         vbox1.addWidget(self.build_combo_and_set_active("new_max_seats", cb_max_dict))
 
         vbox2.addWidget(QLabel("Show Player Stats for"))
-        vbox2.addWidget(self.build_combo_and_set_active("h_agg_bb_mult", multiplier_combo_dict))
-        vbox2.addWidget(self.build_combo_and_set_active("h_seats_style", seats_style_combo_dict))
+        vbox2.addWidget(
+            self.build_combo_and_set_active("h_agg_bb_mult", multiplier_combo_dict)
+        )
+        vbox2.addWidget(
+            self.build_combo_and_set_active("h_seats_style", seats_style_combo_dict)
+        )
         hbox = QHBoxLayout()
         hbox.addWidget(QLabel("Custom"))
         self.h_nums_low_spinner = self.build_spinner("h_seats_cust_nums_low", 1, 9)
@@ -324,14 +360,20 @@ class Simple_table_popup_menu(QWidget):
         hbox.addWidget(self.h_nums_high_spinner)
         vbox2.addLayout(hbox)
         hbox = QHBoxLayout()
-        hbox.addWidget(self.build_combo_and_set_active("h_stat_range", stat_range_combo_dict))
+        hbox.addWidget(
+            self.build_combo_and_set_active("h_stat_range", stat_range_combo_dict)
+        )
         self.h_hud_days_spinner = self.build_spinner("h_hud_days", 1, 9999)
         hbox.addWidget(self.h_hud_days_spinner)
         vbox2.addLayout(hbox)
 
         vbox3.addWidget(QLabel("Show Opponent Stats for"))
-        vbox3.addWidget(self.build_combo_and_set_active("agg_bb_mult", multiplier_combo_dict))
-        vbox3.addWidget(self.build_combo_and_set_active("seats_style", seats_style_combo_dict))
+        vbox3.addWidget(
+            self.build_combo_and_set_active("agg_bb_mult", multiplier_combo_dict)
+        )
+        vbox3.addWidget(
+            self.build_combo_and_set_active("seats_style", seats_style_combo_dict)
+        )
         hbox = QHBoxLayout()
         hbox.addWidget(QLabel("Custom"))
         self.nums_low_spinner = self.build_spinner("seats_cust_nums_low", 1, 9)
@@ -341,7 +383,9 @@ class Simple_table_popup_menu(QWidget):
         hbox.addWidget(self.nums_high_spinner)
         vbox3.addLayout(hbox)
         hbox = QHBoxLayout()
-        hbox.addWidget(self.build_combo_and_set_active("stat_range", stat_range_combo_dict))
+        hbox.addWidget(
+            self.build_combo_and_set_active("stat_range", stat_range_combo_dict)
+        )
         self.hud_days_spinner = self.build_spinner("hud_days", 1, 9999)
         hbox.addWidget(self.hud_days_spinner)
         vbox3.addLayout(hbox)
@@ -364,7 +408,9 @@ class Simple_table_popup_menu(QWidget):
         if data == "kill":
             self.parentwin.hud.parent.kill_hud("kill", self.parentwin.hud.table.key)
         if data == "blacklist":
-            self.parentwin.hud.parent.blacklist_hud("kill", self.parentwin.hud.table.key)
+            self.parentwin.hud.parent.blacklist_hud(
+                "kill", self.parentwin.hud.table.key
+            )
         if data == "save":
             # This calls the save_layout method of the Hud object. The Hud object
             # then calls the save_layout method in each installed AW.

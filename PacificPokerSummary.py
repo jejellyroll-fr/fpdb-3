@@ -15,11 +15,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
+import re
+from decimal import Decimal
+
 # import L10n
 # _ = L10n.get_translation()
 from HandHistoryConverter import FpdbParseError
-from decimal import Decimal
-import re
 from loggingFpdb import get_logger
 from TourneySummary import TourneySummary
 
@@ -44,7 +45,9 @@ class PacificPokerSummary(TourneySummary):
         "NUM": ".,\d\xa0",  # legal characters in number format
     }
 
-    re_Identify = re.compile("\*{5}\s(Cassava|888poker|888)(\.[a-z]{2})?(\-[a-z]{2})? Tournament Summary\s\*{5}")
+    re_Identify = re.compile(
+        "\*{5}\s(Cassava|888poker|888)(\.[a-z]{2})?(\-[a-z]{2})? Tournament Summary\s\*{5}"
+    )
 
     re_TourneyInfo = re.compile(
         """
@@ -167,7 +170,9 @@ class PacificPokerSummary(TourneySummary):
         if "PADDONS" in mg and mg["PADDONS"] is not None:
             addOnCount = int(mg["PADDONS"])
 
-        self.addPlayer(rank, player, winnings, self.currency, rebuyCount, addOnCount, koCount)
+        self.addPlayer(
+            rank, player, winnings, self.currency, rebuyCount, addOnCount, koCount
+        )
 
     def convert_to_decimal(self, string):
         dec = self.clearMoneyString(string)

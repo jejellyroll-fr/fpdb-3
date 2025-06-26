@@ -22,31 +22,33 @@
 
 # import L10n
 # _ = L10n.get_translation()
-from __future__ import print_function
-from __future__ import division
+from __future__ import division, print_function
 
 import contextlib
 import os
-# import L10n
-# _ = L10n.get_translation()
+from time import time
 
+from matplotlib.backends.backend_qt5agg import FigureCanvas
+from matplotlib.figure import Figure
+from matplotlib.font_manager import FontProperties
+from numpy import cumsum
 from PyQt5.QtWidgets import (
     QFrame,
+    QMessageBox,
     QScrollArea,
     QSizePolicy,
     QSplitter,
     QVBoxLayout,
-    QMessageBox,
 )
 
-from time import time
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt5agg import FigureCanvas
-from matplotlib.font_manager import FontProperties
-from loggingFpdb import get_logger
-from numpy import cumsum
 import Database
 import Filters
+from loggingFpdb import get_logger
+
+# import L10n
+# _ = L10n.get_translation()
+
+
 # import Charset
 
 log = get_logger("filter")
@@ -167,7 +169,9 @@ class GuiGraphViewer(QSplitter):
         self.ax = self.fig.add_subplot(111)
 
         starttime = time()
-        (green, blue, red, orange) = self.getRingProfitGraph(playerids, sitenos, limits, games, currencies, display_in)
+        (green, blue, red, orange) = self.getRingProfitGraph(
+            playerids, sitenos, limits, games, currencies, display_in
+        )
         log.debug(f"Graph generated in: {time() - starttime}")
 
         self.ax.set_xlabel("Hands", color=self.colors["foreground"])
@@ -190,7 +194,9 @@ class GuiGraphViewer(QSplitter):
         if green is None or len(green) == 0:
             self.plotGraph()
         else:
-            self.ax.set_title(f"Profit graph for ring games{names}", color=self.colors["foreground"])
+            self.ax.set_title(
+                f"Profit graph for ring games{names}", color=self.colors["foreground"]
+            )
 
             if "showdown" in graphops:
                 log.debug(f"blue max: {blue.max()}")
@@ -208,12 +214,17 @@ class GuiGraphViewer(QSplitter):
                 )
             if "ev" in graphops:
                 self.ax.plot(
-                    orange, color=self.colors["line_ev"], label=("All-in EV") + " (%s): %.2f" % (display_in, orange[-1])
+                    orange,
+                    color=self.colors["line_ev"],
+                    label=("All-in EV") + " (%s): %.2f" % (display_in, orange[-1]),
                 )
             self.ax.plot(
                 green,
                 color=self.colors["line_hands"],
-                label=("Hands") + ": %d\n" % len(green) + ("Profit") + ": (%s): %.2f" % (display_in, green[-1]),
+                label=("Hands")
+                + ": %d\n" % len(green)
+                + ("Profit")
+                + ": (%s): %.2f" % (display_in, green[-1]),
             )
 
             handles, labels = self.ax.get_legend_handles_labels()

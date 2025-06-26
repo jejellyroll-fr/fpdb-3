@@ -15,39 +15,40 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
+import glob
+import json
+import os
+from collections import deque
+from datetime import datetime
+
+from PyQt5.QtCore import (
+    QAbstractTableModel,
+    QModelIndex,
+    QSortFilterProxyModel,
+    Qt,
+    QThread,
+    QVariant,
+    pyqtSignal,
+)
 from PyQt5.QtGui import QColor, QPalette
 from PyQt5.QtWidgets import (
-    QApplication,
     QAbstractItemView,
-    QPushButton,
+    QApplication,
+    QCheckBox,
+    QComboBox,
     QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QStyle,
     QTableView,
     QVBoxLayout,
     QWidget,
-    QCheckBox,
-    QHeaderView,
-    QStyle,
-    QLineEdit,
-    QLabel,
-    QComboBox,
 )
-from PyQt5.QtCore import (
-    Qt,
-    QAbstractTableModel,
-    QModelIndex,
-    QVariant,
-    QSortFilterProxyModel,
-    QThread,
-    pyqtSignal,
-)
-import os
-from loggingFpdb import get_logger
 
 import Configuration
-from collections import deque
-import json
-import glob
-from datetime import datetime
+from loggingFpdb import get_logger
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
@@ -209,7 +210,9 @@ class GuiLogView(QWidget):
         self.listview.setShowGrid(False)
         self.listview.verticalHeader().hide()
         self.listview.setSortingEnabled(True)
-        self.listview.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.listview.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeToContents
+        )
         self.listview.horizontalHeader().setStretchLastSection(False)
         self.listview.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.listview.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
@@ -294,7 +297,9 @@ class GuiLogView(QWidget):
         self.logfile_combo.setCurrentIndex(selected_index)
         self.logfile_combo.blockSignals(False)
         if self.logfile_paths:
-            self.logfile = self.logfile_paths[selected_index]  # Keep the selected log file
+            self.logfile = self.logfile_paths[
+                selected_index
+            ]  # Keep the selected log file
         else:
             self.logfile = None
 
@@ -322,7 +327,9 @@ class GuiLogView(QWidget):
         for index in selected_indexes:
             row_data = []
             for column in range(self.proxy_model.columnCount()):
-                data = self.proxy_model.data(self.proxy_model.index(index.row(), column), Qt.DisplayRole)
+                data = self.proxy_model.data(
+                    self.proxy_model.index(index.row(), column), Qt.DisplayRole
+                )
                 row_data.append(str(data))
             text += "\t".join(row_data) + "\n"
         QApplication.clipboard().setText(text)

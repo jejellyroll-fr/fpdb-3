@@ -15,34 +15,30 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 #
-from __future__ import print_function
-from __future__ import division
+from __future__ import division, print_function
 
+import codecs
+import datetime
+import os
+import os.path
+import re
+import sys
+import time
+import xml.dom.minidom
+from abc import ABC, abstractmethod
+from decimal import Decimal
 
+import pytz
 from past.utils import old_div
+from pytz import timezone
+
+import Hand
+from Exceptions import FpdbHandPartial, FpdbHandSkipped, FpdbParseError
+from loggingFpdb import get_logger
+
 # import L10n
 # _ = L10n.get_translation()
 
-import re
-import sys
-import os
-import os.path
-import xml.dom.minidom
-import codecs
-from decimal import Decimal
-
-import time
-import datetime
-
-from pytz import timezone
-import pytz
-
-from loggingFpdb import get_logger
-
-
-import Hand
-from Exceptions import FpdbParseError, FpdbHandPartial, FpdbHandSkipped
-from abc import ABC, abstractmethod
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("handHistoryConverter")
@@ -117,20 +113,21 @@ out_path  (default '-' = sys.stdout)
 
         self.status = True
 
-        self.parsedObjectType = (
-            "HH"  # default behaviour : parsing HH files, can be "Summary" if the parsing encounters a Summary File
-        )
+        self.parsedObjectType = "HH"  # default behaviour : parsing HH files, can be "Summary" if the parsing encounters a Summary File
 
         if autostart:
             self.start()
 
     def __str__(self):
-        return """
+        return (
+            """
 HandHistoryConverter: '%(sitename)s'  
     filetype    '%(filetype)s'
     in_path     '%(in_path)s'
     out_path    '%(out_path)s'
-    """ % locals()
+    """
+            % locals()
+        )
 
     def start(self):
         """Process a hand at a time from the input specified by in_path."""
@@ -186,9 +183,13 @@ HandHistoryConverter: '%(sitename)s'
             summaryParsingStatus = self.readSummaryInfo(handsList)
             endtime = time.time()
             if summaryParsingStatus:
-                log.info(f"Summary file '{self.in_path}' correctly parsed (took {endtime - starttime:.3f} seconds)")
+                log.info(
+                    f"Summary file '{self.in_path}' correctly parsed (took {endtime - starttime:.3f} seconds)"
+                )
             else:
-                log.warning(f"Error converting summary file '{self.in_path}' (took {endtime - starttime:.3f} seconds)")
+                log.warning(
+                    f"Error converting summary file '{self.in_path}' (took {endtime - starttime:.3f} seconds)"
+                )
 
     def setAutoPop(self, value):
         self.autoPop = value
@@ -237,7 +238,9 @@ HandHistoryConverter: '%(sitename)s'
             raise FpdbHandPartial("Could not identify as a %s hand" % self.sitename)
 
         if self.copyGameHeader:
-            gametype = self.parseHeader(handText, self.whole_file.replace("\r\n", "\n").replace("\xa0", " "))
+            gametype = self.parseHeader(
+                handText, self.whole_file.replace("\r\n", "\n").replace("\xa0", " ")
+            )
         else:
             gametype = self.determineGameType(handText)
 
@@ -270,11 +273,17 @@ HandHistoryConverter: '%(sitename)s'
 
         if game_details in self.readSupportedGames():
             if gametype["base"] == "hold":
-                hand = Hand.HoldemOmahaHand(self.config, self, self.sitename, gametype, handText)
+                hand = Hand.HoldemOmahaHand(
+                    self.config, self, self.sitename, gametype, handText
+                )
             elif gametype["base"] == "stud":
-                hand = Hand.StudHand(self.config, self, self.sitename, gametype, handText)
+                hand = Hand.StudHand(
+                    self.config, self, self.sitename, gametype, handText
+                )
             elif gametype["base"] == "draw":
-                hand = Hand.DrawHand(self.config, self, self.sitename, gametype, handText)
+                hand = Hand.DrawHand(
+                    self.config, self, self.sitename, gametype, handText
+                )
         else:
             log.error(f"{self.sitename} Unsupported game type: {gametype}")
             raise FpdbParseError
@@ -490,7 +499,9 @@ or None if we fail to get the info """
     # an inheriting class can calculate it for the specific site if need be.
     def getRake(self, hand):
         if hand.totalcollected is None:
-            log.warning(f"totalcollected is None for hand ID {hand.handid}. Defaulting to 0.")
+            log.warning(
+                f"totalcollected is None for hand ID {hand.handid}. Defaulting to 0."
+            )
             hand.totalcollected = Decimal("0.00")
 
         log.debug(f"Total pot amount: {hand.totalpot}")
@@ -498,7 +509,9 @@ or None if we fail to get the info """
         if hand.totalcollected > hand.totalpot:
             log.debug("collected pot>total pot")
         if hand.rake is None:
-            hand.rake = hand.totalpot - hand.totalcollected  #  * Decimal('0.05') # probably not quite right
+            hand.rake = (
+                hand.totalpot - hand.totalcollected
+            )  #  * Decimal('0.05') # probably not quite right
         if self.siteId == 9 and hand.gametype["type"] == "tour":
             round = -5  # round up to 10
         elif hand.gametype["type"] == "tour":
@@ -508,9 +521,18 @@ or None if we fail to get the info """
         if self.siteId == 15 and hand.totalcollected > hand.totalpot:
             hand.rake = old_div(hand.totalpot, 10)
             log.debug(hand.rake)
-        if hand.rake < 0 and (not hand.roundPenny or hand.rake < round) and not hand.cashedOut:
+        if (
+            hand.rake < 0
+            and (not hand.roundPenny or hand.rake < round)
+            and not hand.cashedOut
+        ):
             if self.siteId == 28 and (
-                (hand.rake + Decimal(str(hand.sb)) - (0 if hand.rakes.get("rake") is None else hand.rakes["rake"])) == 0
+                (
+                    hand.rake
+                    + Decimal(str(hand.sb))
+                    - (0 if hand.rakes.get("rake") is None else hand.rakes["rake"])
+                )
+                == 0
                 or (
                     hand.rake
                     + Decimal(str(hand.sb))
@@ -533,7 +555,9 @@ or None if we fail to get the info """
             and not hand.fastFold
             and not hand.cashedOut
         ):
-            log.error(f"'{hand.handid}': Suspiciously high rake ({hand.rake}) > 25 pct of pot ({hand.totalpot})")
+            log.error(
+                f"'{hand.handid}': Suspiciously high rake ({hand.rake}) > 25 pct of pot ({hand.totalpot})"
+            )
             raise FpdbParseError
 
     def sanityCheck(self):
@@ -766,7 +790,10 @@ or None if we fail to get the info """
             givenTZ = timezone(givenTimezone)
         else:
             timezone_lookup = dict(
-                [(pytz.timezone(x).localize(datetime.datetime.now()).tzname(), x) for x in pytz.all_timezones]
+                [
+                    (pytz.timezone(x).localize(datetime.datetime.now()).tzname(), x)
+                    for x in pytz.all_timezones
+                ]
             )
             if givenTimezone in timezone_lookup:
                 givenTZ = timezone(timezone_lookup[givenTimezone])
@@ -790,7 +817,9 @@ or None if we fail to get the info """
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
         "Returns string to search in windows titles"
         if type == "tour":
-            return re.escape(str(tournament)) + ".+\\Table " + re.escape(str(table_number))
+            return (
+                re.escape(str(tournament)) + ".+\\Table " + re.escape(str(table_number))
+            )
         else:
             return re.escape(table_name)
 

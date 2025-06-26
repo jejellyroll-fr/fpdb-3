@@ -1,6 +1,6 @@
 from decimal import Decimal
-from Hand import Pot
 
+from Hand import Pot
 
 """
 Main functionalities:

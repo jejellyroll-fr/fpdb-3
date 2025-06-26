@@ -1,6 +1,5 @@
 import re
 
-
 substitutions = {
     "LS": r"\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|",
     "PLYR": r"(?P<PNAME>[^\"]+)",
@@ -22,9 +21,7 @@ def test_re_PlayerInfo2():
 
 
 def test_re_PlayerInfo7():
-    text = (
-        '<player bet="100" reg_code="" win="40" seat="3" dealer="0" rebuy="0" chips="1 480" name="pergerd" addon="0"/>'
-    )
+    text = '<player bet="100" reg_code="" win="40" seat="3" dealer="0" rebuy="0" chips="1 480" name="pergerd" addon="0"/>'
     match = re_PlayerInfo.search(text)
     assert match is not None
     assert match.group("SEAT") == "3"
@@ -41,14 +38,17 @@ def test_re_PlayerInfo3():
     plist = {}
     for a in m:
         a.groupdict()
-        plist[a.group("PNAME")] = [int(a.group("SEAT")), (a.group("CASH")), (a.group("WIN")), False]
+        plist[a.group("PNAME")] = [
+            int(a.group("SEAT")),
+            (a.group("CASH")),
+            (a.group("WIN")),
+            False,
+        ]
     assert len(plist) == 2
 
 
 def test_re_PlayerInfo8():
-    text = (
-        '<player bet="740" reg_code="" win="1 480" seat="3" dealer="1" rebuy="0" chips="740" name="pergerd" addon="0"/>'
-    )
+    text = '<player bet="740" reg_code="" win="1 480" seat="3" dealer="1" rebuy="0" chips="740" name="pergerd" addon="0"/>'
     match = re_PlayerInfo.search(text)
     assert match is not None
     assert match.group("SEAT") == "3"

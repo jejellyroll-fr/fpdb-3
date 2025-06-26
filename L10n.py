@@ -17,14 +17,15 @@
 
 # You may find http://boodebr.org/main/python/all-about-python-and-unicode helpful
 import gettext
+import locale
 import platform
 import subprocess
-import locale
-from pathlib import Path
-from Configuration import GRAPHICS_PATH, CONFIG_PATH
 import xml.etree.ElementTree as ET
+from pathlib import Path
+
 from PyQt5.QtCore import QTranslator
 
+from Configuration import CONFIG_PATH, GRAPHICS_PATH
 from loggingFpdb import get_logger
 
 log = get_logger("translation")
@@ -35,12 +36,16 @@ def get_system_language():
     if system == "Windows":
         return locale.getdefaultlocale()[0]
     elif system == "Linux":
-        process = subprocess.Popen(["locale", "-b"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(
+            ["locale", "-b"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
         output, _ = process.communicate()
         return output.decode().strip()
     elif system == "Darwin":
         process = subprocess.Popen(
-            ["defaults", "read", "-g", "AppleLanguages"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            ["defaults", "read", "-g", "AppleLanguages"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
         output, _ = process.communicate()
         output = output.decode().strip().replace("\n", "").replace('"', "")
@@ -142,7 +147,11 @@ def set_locale_translation():
     log.info(f"UI Language: {ui_language}")
 
     try:
-        fr_translation = gettext.translation("fpdb", path_string, languages=[ui_language])
+        fr_translation = gettext.translation(
+            "fpdb", path_string, languages=[ui_language]
+        )
         fr_translation.install()
     except FileNotFoundError:
-        log.error(f"No translation file found for domain 'fpdb' in {path_string} for language {ui_language}")
+        log.error(
+            f"No translation file found for domain 'fpdb' in {path_string} for language {ui_language}"
+        )

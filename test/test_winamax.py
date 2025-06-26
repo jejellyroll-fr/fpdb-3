@@ -6,7 +6,9 @@ substitutions = {
     # legal currency symbols - Euro(cp1252, utf-8)
 }
 
-re_Identify = re.compile(r"Winamax\sPoker\s\-\s(CashGame|Go\sFast|HOLD\-UP|Tournament\s\")")
+re_Identify = re.compile(
+    r"Winamax\sPoker\s\-\s(CashGame|Go\sFast|HOLD\-UP|Tournament\s\")"
+)
 
 
 def test_re_Identify():
@@ -50,7 +52,9 @@ def test_re_HandInfoexp():
 
 
 re_HUTP = re.compile(
-    r"Hold\-up\sto\sPot:\stotal\s((%(LS)s)?(?P<AMOUNT>[.0-9]+)(%(LS)s)?)" % substitutions, re.MULTILINE | re.VERBOSE
+    r"Hold\-up\sto\sPot:\stotal\s((%(LS)s)?(?P<AMOUNT>[.0-9]+)(%(LS)s)?)"
+    % substitutions,
+    re.MULTILINE | re.VERBOSE,
 )
 
 
@@ -62,7 +66,8 @@ def test_re_HUTP():
 
 
 re_PostSB = re.compile(
-    r"(?P<PNAME>.*?)\sposts\ssmall\sblind\s(%(LS)s)?(?P<SB>[\.0-9]+)(%(LS)s)?(?!\sout\sof\sposition)" % substitutions,
+    r"(?P<PNAME>.*?)\sposts\ssmall\sblind\s(%(LS)s)?(?P<SB>[\.0-9]+)(%(LS)s)?(?!\sout\sof\sposition)"
+    % substitutions,
     re.MULTILINE,
 )
 
@@ -76,7 +81,9 @@ def test_re_PostSB():
 
 
 re_PostBB = re.compile(
-    r"(?P<PNAME>.*?)\sposts\sbig\sblind\s(%(LS)s)?(?P<BB>[\.0-9]+)(%(LS)s)?" % substitutions, re.MULTILINE
+    r"(?P<PNAME>.*?)\sposts\sbig\sblind\s(%(LS)s)?(?P<BB>[\.0-9]+)(%(LS)s)?"
+    % substitutions,
+    re.MULTILINE,
 )
 
 

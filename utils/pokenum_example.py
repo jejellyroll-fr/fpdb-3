@@ -1,12 +1,22 @@
 import Pokenum_api_call
 
 response = Pokenum_api_call.run_pokenum(
-    method="-mc", iterations="10000", game="-h", hand=["As", "Ad", "-", "Ks", "Qs"], board=["--"], dead=["/"]
+    method="-mc",
+    iterations="10000",
+    game="-h",
+    hand=["As", "Ad", "-", "Ks", "Qs"],
+    board=["--"],
+    dead=["/"],
 )
 print(response)
 
 response = Pokenum_api_call.run_pokenum(
-    method="", iterations="", game="-h", hand=["As", "Ad", "-", "Ks", "Qs"], board=["--"], dead=["/"]
+    method="",
+    iterations="",
+    game="-h",
+    hand=["As", "Ad", "-", "Ks", "Qs"],
+    board=["--"],
+    dead=["/"],
 )
 print(response)
 

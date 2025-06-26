@@ -32,13 +32,12 @@ client has been resized, destroyed, etc.
 
 #    Standard Library modules
 import re
-from loggingFpdb import get_logger
 from time import sleep
 
 #    FreePokerTools modules
 import Configuration
-from HandHistoryConverter import getTableTitleRe
-from HandHistoryConverter import getTableNoRe
+from HandHistoryConverter import getTableNoRe, getTableTitleRe
+from loggingFpdb import get_logger
 
 c = Configuration.Config()
 log = get_logger("hud")
@@ -90,7 +89,9 @@ bad_words = ("History for table:", "HUD:", "Chat:", "FPDBHUD", "Lobby")
 
 
 class Table_Window(object):
-    def __init__(self, config, site, table_name=None, tournament=None, table_number=None):
+    def __init__(
+        self, config, site, table_name=None, tournament=None, table_number=None
+    ):
         self.config = config
         self.site = site
         self.hud = None  # Will be filled in later
@@ -108,7 +109,6 @@ class Table_Window(object):
         if isinstance(table_number, bytes):
             log.debug(f"Decoding table_number to UTF-8: {table_number}")
             table_number = table_number.decode("utf-8")
-
 
         # Handle tournament and table number
         if tournament is not None and table_number is not None:
@@ -130,7 +130,9 @@ class Table_Window(object):
 
             self.type = "tour"
             table_kwargs = dict(tournament=self.tournament, table_number=self.table)
-            self.tableno_re = getTableNoRe(self.config, self.site, tournament=self.tournament)
+            self.tableno_re = getTableNoRe(
+                self.config, self.site, tournament=self.tournament
+            )
 
         # Handle cash game tables
         elif table_name is not None:
@@ -142,15 +144,21 @@ class Table_Window(object):
             self.tournament = None
             table_kwargs = dict(table_name=table_name)
 
-            log.debug(f"Cash table kwargs type: {type(table_kwargs)}, value: {table_kwargs}")
+            log.debug(
+                f"Cash table kwargs type: {type(table_kwargs)}, value: {table_kwargs}"
+            )
 
         # Log a warning if neither tournament nor table_name is provided
 
         else:
-            log.warning("Neither tournament nor table_name provided; initialization failed.")
+            log.warning(
+                "Neither tournament nor table_name provided; initialization failed."
+            )
             return None
 
-        self.search_string = getTableTitleRe(self.config, self.site, self.type, **table_kwargs)
+        self.search_string = getTableTitleRe(
+            self.config, self.site, self.type, **table_kwargs
+        )
         log.debug(f"search string: {self.search_string}")
         # make a small delay otherwise Xtables.root.get_windows()
         #  returns empty for unknown reasons
@@ -158,7 +166,9 @@ class Table_Window(object):
 
         self.find_table_parameters()
         if not self.number:
-            log.error(f'Can\'t find table "{table_name}" with search string "{self.search_string}"')
+            log.error(
+                f'Can\'t find table "{table_name}" with search string "{self.search_string}"'
+            )
 
         geo = self.get_geometry()
         if geo is None:
@@ -170,7 +180,9 @@ class Table_Window(object):
         log.debug(f"X coordinate: {self.x}")
         self.y = geo["y"]
         log.debug(f"Y coordinate: {self.y}")
-        self.oldx = self.x  # Attention: Remove these two lines and update Hud.py::update_table_position()
+        self.oldx = (
+            self.x
+        )  # Attention: Remove these two lines and update Hud.py::update_table_position()
         log.debug(f"Old X coordinate: {self.oldx}")
         self.oldy = self.y
         log.debug(f"Old Y coordinate: {self.oldy}")
@@ -262,7 +274,9 @@ class Table_Window(object):
         if new_geo is None:  # window destroyed
             return "client_destroyed"
 
-        elif self.width != new_geo["width"] or self.height != new_geo["height"]:  # window resized
+        elif (
+            self.width != new_geo["width"] or self.height != new_geo["height"]
+        ):  # window resized
             self.oldwidth = self.width
             self.width = new_geo["width"]
             self.oldheight = self.height

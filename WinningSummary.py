@@ -19,16 +19,19 @@
 
 from __future__ import division
 
+import datetime
+import re
+from decimal import Decimal
+
 from past.utils import old_div
+
+from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
+from loggingFpdb import get_logger
+from TourneySummary import TourneySummary
+
 # import L10n
 # _ = L10n.get_translation()
 
-from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
-import re
-from loggingFpdb import get_logger
-import datetime
-from decimal import Decimal
-from TourneySummary import TourneySummary
 
 # Winning HH Format
 log = get_logger("parser")
@@ -54,7 +57,9 @@ class WinningSummary(TourneySummary):
 
     re_Identify = re.compile(r'<link\sid="ctl00_CalendarTheme"')
 
-    re_HTMLPlayer = re.compile(r"Player\sDetails:\s%(PLYR)s</a>" % substitutions, re.IGNORECASE)
+    re_HTMLPlayer = re.compile(
+        r"Player\sDetails:\s%(PLYR)s</a>" % substitutions, re.IGNORECASE
+    )
 
     re_HTMLTourneyInfo = re.compile(
         r"<td>(?P<TOURNO>[0-9]+)</td>"
@@ -162,11 +167,17 @@ class WinningSummary(TourneySummary):
         if info["FEE"] is not None:
             self.fee = int(100 * Decimal(self.clearMoneyString(info["FEE"])))
 
-        if "REBUYS" in info and Decimal(self.clearMoneyString(info["REBUYS"].replace(" ", ""))) > 0:
+        if (
+            "REBUYS" in info
+            and Decimal(self.clearMoneyString(info["REBUYS"].replace(" ", ""))) > 0
+        ):
             self.isRebuy = True
             self.rebuyCost = self.buyin
 
-        if "ADDONS" in info and Decimal(self.clearMoneyString(info["ADDONS"].replace(" ", ""))) > 0:
+        if (
+            "ADDONS" in info
+            and Decimal(self.clearMoneyString(info["ADDONS"].replace(" ", ""))) > 0
+        ):
             self.isAddOn = True
             self.addOnCost = self.buyin
 
@@ -231,7 +242,9 @@ class WinningSummary(TourneySummary):
             self.endTime = datetime.datetime.strptime(
                 datetimestr, "%Y/%m/%d %I:%M:%S %p"
             )  # also timezone at end, e.g. " ET"
-            self.endTime = HandHistoryConverter.changeTimezone(self.endTime, self.import_parameters["timezone"], "UTC")
+            self.endTime = HandHistoryConverter.changeTimezone(
+                self.endTime, self.import_parameters["timezone"], "UTC"
+            )
 
         self.currency = "USD"
         winnings = 0
@@ -244,13 +257,25 @@ class WinningSummary(TourneySummary):
             winnings = int(100 * Decimal(self.clearMoneyString(info["WINNINGS"])))
 
         if self.isRebuy and self.rebuyCost > 0:
-            rebuyAmt = int(100 * Decimal(self.clearMoneyString(info["REBUYS"].replace(" ", ""))))
+            rebuyAmt = int(
+                100 * Decimal(self.clearMoneyString(info["REBUYS"].replace(" ", "")))
+            )
             rebuyCount = old_div(rebuyAmt, self.rebuyCost)
 
         if self.isAddOn and self.addOnCost > 0:
-            addOnAmt = int(100 * Decimal(self.clearMoneyString(info["ADDONS"].replace(" ", ""))))
+            addOnAmt = int(
+                100 * Decimal(self.clearMoneyString(info["ADDONS"].replace(" ", "")))
+            )
             addOnCount = old_div(addOnAmt, self.addOnCost)
 
         self.hero = info["PNAME"]
 
-        self.addPlayer(rank, info["PNAME"], winnings, self.currency, rebuyCount, addOnCount, koCount)
+        self.addPlayer(
+            rank,
+            info["PNAME"],
+            winnings,
+            self.currency,
+            rebuyCount,
+            addOnCount,
+            koCount,
+        )

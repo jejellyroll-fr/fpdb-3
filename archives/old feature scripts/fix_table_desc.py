@@ -1,21 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Copyright 2009-2011 Ray E. Barker
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, version 3 of the License.
+# Copyright 2009-2011 Ray E. Barker
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with this program. If not, see <http://www.gnu.org/licenses/>.
-#In the "official" distribution you can find the license in agpl-3.0.txt.
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# In the "official" distribution you can find the license in agpl-3.0.txt.
 
 from __future__ import print_function
+
 import re
 
 desc = """
@@ -40,7 +41,7 @@ table = """
 
 # get rid of the verticle spacing and clean up
 desc = re.sub("[\+\-]+", "", desc)
-desc = re.sub("^\n+", "", desc)       # there's probably a better way
+desc = re.sub("^\n+", "", desc)  # there's probably a better way
 desc = re.sub("\n\n", "\n", desc)
 
 # the first line is the header info

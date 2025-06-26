@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import division
+from __future__ import division, print_function
+
 import itertools
+import os
+from functools import partial
 
 from past.utils import old_div
-import os
-from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QDate, QDateTime
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QCalendarWidget,
     QCheckBox,
+    QComboBox,
     QDateEdit,
     QDialog,
     QGridLayout,
@@ -24,16 +26,13 @@ from PyQt5.QtWidgets import (
     QSpinBox,
     QVBoxLayout,
     QWidget,
-    QComboBox,
 )
 
-from functools import partial
-from loggingFpdb import get_logger
-
+import Card
 import Configuration
 import Database
 import SQL
-import Card
+from loggingFpdb import get_logger
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
@@ -89,7 +88,12 @@ class Filters(QWidget):
             "6_omahahi": ("6 Card Omaha"),
         }
 
-        self.currencyName = {"USD": ("US Dollar"), "EUR": ("Euro"), "T$": ("Tournament Dollar"), "play": ("Play Money")}
+        self.currencyName = {
+            "USD": ("US Dollar"),
+            "EUR": ("Euro"),
+            "T$": ("Tournament Dollar"),
+            "play": ("Play Money"),
+        }
 
         self.filterText = {
             "limitsall": ("All"),
@@ -139,7 +143,9 @@ class Filters(QWidget):
 
         self.callback = {}
 
-        self.setStyleSheet("QPushButton {padding-left:5;padding-right:5;padding-top:2;padding-bottom:2;}")
+        self.setStyleSheet(
+            "QPushButton {padding-left:5;padding-right:5;padding-top:2;padding-bottom:2;}"
+        )
         self.make_filter()
 
     def make_filter(self):
@@ -306,10 +312,18 @@ class Filters(QWidget):
         return [g for g in self.cbGraphops if self.cbGraphops[g].isChecked()]
 
     def getSites(self):
-        return [s for s in self.cbSites if self.cbSites[s].isChecked() and self.cbSites[s].isEnabled()]
+        return [
+            s
+            for s in self.cbSites
+            if self.cbSites[s].isChecked() and self.cbSites[s].isEnabled()
+        ]
 
     def getPositions(self):
-        return [p for p in self.cbPositions if self.cbPositions[p].isChecked() and self.cbPositions[p].isEnabled()]
+        return [
+            p
+            for p in self.cbPositions
+            if self.cbPositions[p].isChecked() and self.cbPositions[p].isEnabled()
+        ]
 
     def getTourneyCat(self):
         return [g for g in self.cbTourneyCat if self.cbTourneyCat[g].isChecked()]
@@ -324,13 +338,21 @@ class Filters(QWidget):
         return [g for g in self.cbTourney if self.cbTourney[g].isChecked()]
 
     def getGames(self):
-        return [g for g in self.cbGames if self.cbGames[g].isChecked() and self.cbGames[g].isEnabled()]
+        return [
+            g
+            for g in self.cbGames
+            if self.cbGames[g].isChecked() and self.cbGames[g].isEnabled()
+        ]
 
     def getCards(self):
         return self.cards
 
     def getCurrencies(self):
-        return [c for c in self.cbCurrencies if self.cbCurrencies[c].isChecked() and self.cbCurrencies[c].isEnabled()]
+        return [
+            c
+            for c in self.cbCurrencies
+            if self.cbCurrencies[c].isChecked() and self.cbCurrencies[c].isEnabled()
+        ]
 
     def getSiteIds(self):
         return self.siteid
@@ -348,7 +370,9 @@ class Filters(QWidget):
 
     def getLimits(self):
         return [
-            limit for limit in self.cbLimits if self.cbLimits[limit].isChecked() and self.cbLimits[limit].isEnabled()
+            limit
+            for limit in self.cbLimits
+            if self.cbLimits[limit].isChecked() and self.cbLimits[limit].isEnabled()
         ]
 
     def getType(self):
@@ -371,7 +395,10 @@ class Filters(QWidget):
         t2 = self.end_date.date()
         adj_t1 = QDateTime(t1).addSecs(offset)
         adj_t2 = QDateTime(t2).addSecs(offset + 24 * 3600 - 1)
-        return (adj_t1.toUTC().toString("yyyy-MM-dd HH:mm:ss"), adj_t2.toUTC().toString("yyyy-MM-dd HH:mm:ss"))
+        return (
+            adj_t1.toUTC().toString("yyyy-MM-dd HH:mm:ss"),
+            adj_t2.toUTC().toString("yyyy-MM-dd HH:mm:ss"),
+        )
 
     def fillCardsFrame(self, frame):
         vbox1 = QVBoxLayout()
@@ -413,11 +440,15 @@ class Filters(QWidget):
 
     def __set_tourney_type_select(self, w, tourneyType):
         self.tourneyTypes[tourneyType] = w.get_active()
-        log.debug(f"self.tourney_types[{tourneyType}] set to {self.tourneyTypes[tourneyType]}")
+        log.debug(
+            f"self.tourney_types[{tourneyType}] set to {self.tourneyTypes[tourneyType]}"
+        )
 
     def createTourneyTypeLine(self, hbox, tourneyType):
         cb = QCheckBox(str(tourneyType))
-        cb.clicked.connect(partial(self.__set_tourney_type_select, tourneyType=tourneyType))
+        cb.clicked.connect(
+            partial(self.__set_tourney_type_select, tourneyType=tourneyType)
+        )
         hbox.addWidget(cb)
         cb.setChecked(True)
 
@@ -433,7 +464,9 @@ class Filters(QWidget):
                     b.setStyleSheet("QPushButton {border-width:0;margin:6;padding:0;}")
                 else:
                     b.setStyleSheet("QPushButton {border-width:0;margin:0;padding:0;}")
-                b.clicked.connect(partial(self.__toggle_card_select, widget=b, card=abbr))
+                b.clicked.connect(
+                    partial(self.__toggle_card_select, widget=b, card=abbr)
+                )
                 self.cards[abbr] = False
                 self.__toggle_card_select(False, widget=b, card=abbr)
                 grid.addWidget(b, j, i)
@@ -752,11 +785,19 @@ class Filters(QWidget):
                 hbox.addStretch()
 
                 btnAll = QPushButton(self.filterText["gamesall"])
-                btnAll.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbGames, setState=True))
+                btnAll.clicked.connect(
+                    partial(
+                        self.__set_checkboxes, checkBoxes=self.cbGames, setState=True
+                    )
+                )
                 hbox.addWidget(btnAll)
 
                 btnNone = QPushButton(self.filterText["gamesnone"])
-                btnNone.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbGames, setState=False))
+                btnNone.clicked.connect(
+                    partial(
+                        self.__set_checkboxes, checkBoxes=self.cbGames, setState=False
+                    )
+                )
                 hbox.addWidget(btnNone)
                 hbox.addStretch()
         else:
@@ -815,11 +856,23 @@ class Filters(QWidget):
                 hbox.addStretch()
 
                 btnAll = QPushButton(self.filterText["positionsall"])
-                btnAll.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbPositions, setState=True))
+                btnAll.clicked.connect(
+                    partial(
+                        self.__set_checkboxes,
+                        checkBoxes=self.cbPositions,
+                        setState=True,
+                    )
+                )
                 hbox.addWidget(btnAll)
 
                 btnNone = QPushButton(self.filterText["positionsnone"])
-                btnNone.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbPositions, setState=False))
+                btnNone.clicked.connect(
+                    partial(
+                        self.__set_checkboxes,
+                        checkBoxes=self.cbPositions,
+                        setState=False,
+                    )
+                )
                 hbox.addWidget(btnNone)
                 hbox.addStretch()
         else:
@@ -859,11 +912,23 @@ class Filters(QWidget):
                 hbox.addStretch()
 
                 btnAll = QPushButton(self.filterText["currenciesall"])
-                btnAll.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbCurrencies, setState=True))
+                btnAll.clicked.connect(
+                    partial(
+                        self.__set_checkboxes,
+                        checkBoxes=self.cbCurrencies,
+                        setState=True,
+                    )
+                )
                 hbox.addWidget(btnAll)
 
                 btnNone = QPushButton(self.filterText["currenciesnone"])
-                btnNone.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbCurrencies, setState=False))
+                btnNone.clicked.connect(
+                    partial(
+                        self.__set_checkboxes,
+                        checkBoxes=self.cbCurrencies,
+                        setState=False,
+                    )
+                )
                 hbox.addWidget(btnNone)
                 hbox.addStretch()
             else:
@@ -910,14 +975,26 @@ class Filters(QWidget):
                 hbox.addStretch()
 
                 btnAll = QPushButton(self.filterText["limitsall"])
-                btnAll.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbLimits, setState=True))
+                btnAll.clicked.connect(
+                    partial(
+                        self.__set_checkboxes, checkBoxes=self.cbLimits, setState=True
+                    )
+                )
                 hbox.addWidget(btnAll)
 
                 btnNone = QPushButton(self.filterText["limitsnone"])
-                btnNone.clicked.connect(partial(self.__set_checkboxes, checkBoxes=self.cbLimits, setState=False))
+                btnNone.clicked.connect(
+                    partial(
+                        self.__set_checkboxes, checkBoxes=self.cbLimits, setState=False
+                    )
+                )
                 hbox.addWidget(btnNone)
 
-                if "LimitType" in display and display["LimitType"] and len(limits_found) > 1:
+                if (
+                    "LimitType" in display
+                    and display["LimitType"]
+                    and len(limits_found) > 1
+                ):
                     for limit in limits_found:
                         btn = QPushButton(self.filterText["limits" + limit.upper()])
                         btn.clicked.connect(partial(self.__select_limit, limit=limit))
@@ -927,7 +1004,12 @@ class Filters(QWidget):
         else:
             log.debug("No games returned from database")
 
-        if "Type" in display and display["Type"] and "ring" in types_found and "tour" in types_found:
+        if (
+            "Type" in display
+            and display["Type"]
+            and "ring" in types_found
+            and "tour" in types_found
+        ):
             self.type = "ring"
 
     def fillGraphOpsFrame(self, frame):
@@ -1003,7 +1085,9 @@ class Filters(QWidget):
 
         lbl_start = QLabel(("From:"))
         btn_start = QPushButton("Cal")
-        btn_start.clicked.connect(partial(self.__calendar_dialog, dateEdit=self.start_date))
+        btn_start.clicked.connect(
+            partial(self.__calendar_dialog, dateEdit=self.start_date)
+        )
         clr_start = QPushButton("Reset")
         clr_start.clicked.connect(self.__clear_start_date)
 
@@ -1036,27 +1120,37 @@ class Filters(QWidget):
         where = "AND ( "
 
         if lims:
-            clause = "(gt.limitType = 'fl' and gt.bigBlind in (%s))" % (",".join(map(str, lims)))
+            clause = "(gt.limitType = 'fl' and gt.bigBlind in (%s))" % (
+                ",".join(map(str, lims))
+            )
         else:
             clause = "(gt.limitType = 'fl' and gt.bigBlind in (-1))"
         where = where + clause
         if potlims:
-            clause = "or (gt.limitType = 'pl' and gt.bigBlind in (%s))" % (",".join(map(str, potlims)))
+            clause = "or (gt.limitType = 'pl' and gt.bigBlind in (%s))" % (
+                ",".join(map(str, potlims))
+            )
         else:
             clause = "or (gt.limitType = 'pl' and gt.bigBlind in (-1))"
         where = where + clause
         if nolims:
-            clause = "or (gt.limitType = 'nl' and gt.bigBlind in (%s))" % (",".join(map(str, nolims)))
+            clause = "or (gt.limitType = 'nl' and gt.bigBlind in (%s))" % (
+                ",".join(map(str, nolims))
+            )
         else:
             clause = "or (gt.limitType = 'nl' and gt.bigBlind in (-1))"
         where = where + clause
         if hpnolims:
-            clause = "or (gt.limitType = 'hp' and gt.bigBlind in (%s))" % (",".join(map(str, hpnolims)))
+            clause = "or (gt.limitType = 'hp' and gt.bigBlind in (%s))" % (
+                ",".join(map(str, hpnolims))
+            )
         else:
             clause = "or (gt.limitType = 'hp' and gt.bigBlind in (-1))"
         where = where + clause
         if capnolims:
-            clause = "or (gt.limitType = 'cp' and gt.bigBlind in (%s))" % (",".join(map(str, capnolims)))
+            clause = "or (gt.limitType = 'cp' and gt.bigBlind in (%s))" % (
+                ",".join(map(str, capnolims))
+            )
         else:
             clause = "or (gt.limitType = 'cp' and gt.bigBlind in (-1))"
         where = where + clause + " )"
@@ -1122,7 +1216,9 @@ class Filters(QWidget):
         vb.addWidget(cal)
 
         btn = QPushButton("Done")
-        btn.clicked.connect(partial(self.__get_date, dlg=d, calendar=cal, dateEdit=dateEdit))
+        btn.clicked.connect(
+            partial(self.__get_date, dlg=d, calendar=cal, dateEdit=dateEdit)
+        )
         vb.addWidget(btn)
         d.exec_()
 
@@ -1179,15 +1275,16 @@ class Filters(QWidget):
         usetype = self.display.get("UseType", "")
         log.debug(f"Game type for hero {hero} on site {site}: {usetype}")
 
-        if usetype == "tour":       
-            self.cursor.execute(self.sql.query["getCategoryBySiteAndPlayer"], (site_id, hero))
+        if usetype == "tour":
+            self.cursor.execute(
+                self.sql.query["getCategoryBySiteAndPlayer"], (site_id, hero)
+            )
         else:  # ring games
-            self.cursor.execute(self.sql.query["getCategoryBySiteAndPlayerRing"], (site_id, hero))
+            self.cursor.execute(
+                self.sql.query["getCategoryBySiteAndPlayerRing"], (site_id, hero)
+            )
 
-
-
-
-        #self.cursor.execute(query, (site_id, hero))
+        # self.cursor.execute(query, (site_id, hero))
         games = [row[0] for row in self.cursor.fetchall()]
         log.debug(f"Available games for hero {hero} on site {site}: {games}")
 
@@ -1215,9 +1312,11 @@ class Filters(QWidget):
                 checkbox.setEnabled(False)
 
     def update_positions_for_hero(self, hero, site):
-        
+
         site_id = self.siteid[site]
-        self.cursor.execute(self.sql.query["getPositionByPlayerAndHandid"], (hero, f"{site_id}%"))
+        self.cursor.execute(
+            self.sql.query["getPositionByPlayerAndHandid"], (hero, f"{site_id}%")
+        )
         positions = [str(row[0]) for row in self.cursor.fetchall()]
         for position, checkbox in self.cbPositions.items():
             if position in positions:
@@ -1241,7 +1340,9 @@ class Filters(QWidget):
         site_id = self.siteid[site]
         # debug
         log.debug(f"executed request for {hero} on {site} (site_id: {site_id})")
-        self.cursor.execute(self.sql.query["getCurrencyBySiteAndPlayer"], (site_id, hero))
+        self.cursor.execute(
+            self.sql.query["getCurrencyBySiteAndPlayer"], (site_id, hero)
+        )
         currencies = [row[0] for row in self.cursor.fetchall()]
         # debug
         log.debug(f"currencies found for {hero} on {site}: {currencies}")
@@ -1290,7 +1391,7 @@ if __name__ == "__main__":
         "Button2": False,
     }
 
-    from PyQt5.QtWidgets import QMainWindow, QApplication
+    from PyQt5.QtWidgets import QApplication, QMainWindow
 
     app = QApplication([])
     i = Filters(db, display=filters_display)

@@ -1,5 +1,5 @@
-import sys
 import subprocess
+import sys
 
 # AppleScript
 script = """
@@ -34,7 +34,9 @@ script = """
 print("Exécution du script AppleScript...")
 
 # Execute AppleScript
-proc = subprocess.Popen(["osascript", "-e", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+proc = subprocess.Popen(
+    ["osascript", "-e", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+)
 output, error = proc.communicate()
 
 # Verify errors

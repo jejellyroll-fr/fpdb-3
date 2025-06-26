@@ -1,36 +1,43 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Copyright 2008-2011 Carl Gherardi
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, version 3 of the License.
+# Copyright 2008-2011 Carl Gherardi
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with this program. If not, see <http://www.gnu.org/licenses/>.
-#In the "official" distribution you can find the license in agpl-3.0.txt
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# In the "official" distribution you can find the license in agpl-3.0.txt
 
 """A script for fetching Winamax tourney results"""
 from __future__ import print_function
 
-
-#import L10n
-#_ = L10n.get_translation()
+import logging
+import os
+import re
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
 
 import Configuration
 import Database
 
-import logging, os, sys
-import re, urllib.request, urllib.error, urllib.parse
+# import L10n
+# _ = L10n.get_translation()
 
 
 def fetch_results_page(tourney_id):
-    url = "http://www.carbonpoker.ag/tournaments/tournament-details.html?id=%s-1" % tourney_id
+    url = (
+        "http://www.carbonpoker.ag/tournaments/tournament-details.html?id=%s-1"
+        % tourney_id
+    )
     try:
         data = urllib.request.urlopen(url).read()
         return data
@@ -38,10 +45,12 @@ def fetch_results_page(tourney_id):
         print(e, tourney_id)
         return None
 
+
 def write_file(filename, data):
-    f = open(filename, 'w')
+    f = open(filename, "w")
     f.write(data)
     f.close()
+
 
 def main():
     Configuration.set_logfile("fpdb-log.txt")
@@ -52,14 +61,14 @@ def main():
     tids = []
 
     for tid in tourney_ids:
-        blah, = tid # Unpack tuple
+        (blah,) = tid  # Unpack tuple
         tids.append(str(blah))
     #    winamax_get_winning(tid,"blah")
     results_dir = config.get_import_parameters().get("ResultsDirectory")
     results_dir = os.path.expanduser(results_dir)
     site_dir = os.path.join(results_dir, "Merge")
     print("DEBUG: site_dir: %s" % site_dir)
-    filelist = [file for file in os.listdir(site_dir) if not file in [".",".."]]
+    filelist = [file for file in os.listdir(site_dir) if not file in [".", ".."]]
     print("DEBUG: filelist : %s" % filelist)
     print("DEBUG: tids     : %s" % tids)
 
@@ -76,8 +85,9 @@ def main():
             filename = os.path.join(site_dir, tid)
             data = fetch_results_page(tid)
             if data != None:
-                print(u"DEBUG: write_file(%s)" %(filename))
+                print("DEBUG: write_file(%s)" % (filename))
                 write_file(filename, data)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

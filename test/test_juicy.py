@@ -1,6 +1,5 @@
 import re
 
-
 substitutions = {
     "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP",  # legal ISO currency codes
     "LS": r"\$|€|",  # legal currency symbols - Euro(cp1252, utf-8)

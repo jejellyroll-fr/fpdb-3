@@ -1,6 +1,7 @@
-import pytest
-from decimal import Decimal
 import logging
+from decimal import Decimal
+
+import pytest
 
 # Configure logging to display debug messages
 logging.basicConfig(level=logging.DEBUG)
@@ -45,11 +46,17 @@ class Hand:
         # Basic check
         if not isinstance(self.pot.committed, dict) or len(self.pot.committed) == 0:
             log.error("self.pot.committed is not initialized or empty.")
-            raise FpdbParseError("self.pot.committed is missing or improperly initialized.")
+            raise FpdbParseError(
+                "self.pot.committed is missing or improperly initialized."
+            )
 
         # Convert and filter positive commits
         try:
-            commitsall = [(Decimal(v), k) for (k, v) in self.pot.committed.items() if Decimal(v) > 0]
+            commitsall = [
+                (Decimal(v), k)
+                for (k, v) in self.pot.committed.items()
+                if Decimal(v) > 0
+            ]
         except Exception as e:
             log.error(f"Error while preparing commitsall: {e}")
             raise FpdbParseError(f"Invalid data in self.pot.committed: {e}")
@@ -62,7 +69,9 @@ class Hand:
         self.pot.pots = []
         if self.totalcollected is None:
             # If not specified, consider totalcollected as 0.00
-            log.warning("totalcollected was None during totalPot calculation. Set to 0.00")
+            log.warning(
+                "totalcollected was None during totalPot calculation. Set to 0.00"
+            )
             self.totalcollected = Decimal("0.00")
 
         # Internal function to create a pot from a value
@@ -86,7 +95,9 @@ class Hand:
         def handle_leftover(calls):
             leftover_sum = sum(v for (v, k) in calls)
             diff = self.totalcollected - self.totalpot
-            log.debug(f"Single-player leftover detected. diff={diff}, leftover={leftover_sum}")
+            log.debug(
+                f"Single-player leftover detected. diff={diff}, leftover={leftover_sum}"
+            )
 
             # If diff > 0, it means there is a positive gap between the total collected and the current pot.
             # A solo pot can be formed for this leftover.
@@ -94,12 +105,16 @@ class Hand:
                 participant = {calls[0][1]}
                 self.totalpot += leftover_sum
                 self.pot.pots.append((leftover_sum, participant))
-                log.debug(f"Formed final solo pot from leftover: {leftover_sum}, Participant={participant}")
+                log.debug(
+                    f"Formed final solo pot from leftover: {leftover_sum}, Participant={participant}"
+                )
                 return []
             else:
                 # Otherwise, this surplus must be returned to the player (uncalled bet)
                 player = calls[0][1]
-                self.pot.returned[player] = self.pot.returned.get(player, Decimal("0.00")) + leftover_sum
+                self.pot.returned[player] = (
+                    self.pot.returned.get(player, Decimal("0.00")) + leftover_sum
+                )
                 log.debug(f"Uncalled bet returned to {player}: {leftover_sum}")
                 return []
 
@@ -158,8 +173,12 @@ class Hand:
                 return self.totalpot
             else:
                 # totalcollected > totalpot
-                log.error(f"Collected amount ({self.totalcollected}) exceeds total pot ({self.totalpot})")
-                raise FpdbParseError(f"Collected amount exceeds total pot for hand {self.handid}")
+                log.error(
+                    f"Collected amount ({self.totalcollected}) exceeds total pot ({self.totalpot})"
+                )
+                raise FpdbParseError(
+                    f"Collected amount exceeds total pot for hand {self.handid}"
+                )
 
         except Exception as e:
             log.error(f"Pot calculation failed: {e}")
@@ -172,10 +191,18 @@ class Hand:
         log.debug("Starting pot calculation...")
 
         # Start with the total committed and common chips
-        self.total = sum(Decimal(v) for v in self.pot.committed.values()) + sum(self.pot.common.values()) + self.pot.stp
-        log.debug(f"Initial total pot calculation (committed + common + STP): {self.total:.2f}")
+        self.total = (
+            sum(Decimal(v) for v in self.pot.committed.values())
+            + sum(self.pot.common.values())
+            + self.pot.stp
+        )
+        log.debug(
+            f"Initial total pot calculation (committed + common + STP): {self.total:.2f}"
+        )
 
-        commitsall = sorted([(Decimal(v), k) for (k, v) in self.pot.committed.items() if Decimal(v) > 0])
+        commitsall = sorted(
+            [(Decimal(v), k) for (k, v) in self.pot.committed.items() if Decimal(v) > 0]
+        )
         log.debug(f"Committed values (sorted): {commitsall}")
 
         self.pot.pots = []
@@ -189,7 +216,9 @@ class Hand:
                 # Create a new pot with all participants
                 new_pot_value = sum([min(v, v1) for (v, k) in commitsall])
                 self.pot.pots.append((new_pot_value, participants))
-                log.debug(f"New pot created: Value={new_pot_value:.2f}, Participants={participants}")
+                log.debug(
+                    f"New pot created: Value={new_pot_value:.2f}, Participants={participants}"
+                )
 
                 # Deduct commitments
                 commitsall = [(v - v1, k) for (v, k) in commitsall if v - v1 > 0]
@@ -205,8 +234,12 @@ class Hand:
 
         # Final validation
         if totalcollected > self.totalpot:
-            log.error(f"Collected amount ({totalcollected:.2f}) exceeds total pot ({self.totalpot:.2f})")
-            raise FpdbParseError(f"Collected amount exceeds total pot for hand {self.handid}")
+            log.error(
+                f"Collected amount ({totalcollected:.2f}) exceeds total pot ({self.totalpot:.2f})"
+            )
+            raise FpdbParseError(
+                f"Collected amount exceeds total pot for hand {self.handid}"
+            )
 
         log.debug(f"Final total pot after validation: {self.totalpot:.2f}")
 
@@ -216,7 +249,9 @@ class Hand:
 
         # Validate rake
         if self.rake > self.totalpot * Decimal("0.25"):
-            log.error(f"Suspicious rake: {self.rake:.2f} exceeds 25% of total pot {self.totalpot:.2f}")
+            log.error(
+                f"Suspicious rake: {self.rake:.2f} exceeds 25% of total pot {self.totalpot:.2f}"
+            )
             raise FpdbParseError("Rake exceeds allowed percentage")
 
         log.debug(f"Pot calculation complete. Final pot: {self.totalpot:.2f}")
@@ -259,7 +294,9 @@ def test_empty_committed():
 
     with pytest.raises(FpdbParseError) as excinfo:
         hand.totalPot()
-    assert "self.pot.committed is missing or improperly initialized" in str(excinfo.value)
+    assert "self.pot.committed is missing or improperly initialized" in str(
+        excinfo.value
+    )
 
 
 def test_collected_exceeds_pot():
@@ -283,7 +320,9 @@ def test_rake_calculation():
     hand.pot.contenders = ["Alice", "Bob", "Charlie"]
     hand.pot.common = {}
     hand.pot.stp = Decimal("0.00")
-    hand.totalcollected = Decimal("58.00")  # Less than the total pot, rake should be 2.00
+    hand.totalcollected = Decimal(
+        "58.00"
+    )  # Less than the total pot, rake should be 2.00
 
     total_pot = hand.totalPot()
 
@@ -396,7 +435,11 @@ def test_missing_totalcollected():
 def test_all_in_during_blinds():
     """Test scenario where a player goes all-in during the blinds."""
     hand = Hand()
-    hand.pot.committed = {"Alice": "1.00", "Bob": "2.00", "Charlie": "100.00"}  # Charlie goes all-in during blinds
+    hand.pot.committed = {
+        "Alice": "1.00",
+        "Bob": "2.00",
+        "Charlie": "100.00",
+    }  # Charlie goes all-in during blinds
     hand.pot.contenders = ["Alice", "Bob", "Charlie"]
     hand.pot.common = {}
     hand.pot.stp = Decimal("0.00")
@@ -409,7 +452,10 @@ def test_all_in_during_blinds():
     assert len(hand.pot.pots) == 3
     expected_pots = [
         (Decimal("3.00"), {"Alice", "Bob", "Charlie"}),
-        (Decimal("2.00"), {"Bob", "Charlie"}),  # Additional commitment from Bob and Charlie
+        (
+            Decimal("2.00"),
+            {"Bob", "Charlie"},
+        ),  # Additional commitment from Bob and Charlie
         (Decimal("98.00"), {"Charlie"}),  # Remaining all-in from Charlie
     ]
     assert hand.pot.pots == expected_pots
@@ -418,7 +464,11 @@ def test_all_in_during_blinds():
 def test_all_in_preflop():
     """Test preflop all-in scenarios."""
     hand = Hand()
-    hand.pot.committed = {"Alice": "50.00", "Bob": "100.00", "Charlie": "200.00"}  # Preflop all-ins
+    hand.pot.committed = {
+        "Alice": "50.00",
+        "Bob": "100.00",
+        "Charlie": "200.00",
+    }  # Preflop all-ins
     hand.pot.contenders = ["Alice", "Bob", "Charlie"]
     hand.pot.common = {}
     hand.pot.stp = Decimal("0.00")
@@ -440,11 +490,19 @@ def test_all_in_preflop():
 def test_all_in_flop():
     """Test all-in scenarios during the flop."""
     hand = Hand()
-    hand.pot.committed = {"Alice": "50.00", "Bob": "50.00", "Charlie": "50.00"}  # Preflop
+    hand.pot.committed = {
+        "Alice": "50.00",
+        "Bob": "50.00",
+        "Charlie": "50.00",
+    }  # Preflop
     hand.pot.contenders = ["Alice", "Bob", "Charlie"]
     # Bets on the flop
-    hand.pot.committed["Alice"] = str(Decimal(hand.pot.committed["Alice"]) + Decimal("0.00"))  # Alice checks
-    hand.pot.committed["Bob"] = str(Decimal(hand.pot.committed["Bob"]) + Decimal("100.00"))  # Bob bets 100
+    hand.pot.committed["Alice"] = str(
+        Decimal(hand.pot.committed["Alice"]) + Decimal("0.00")
+    )  # Alice checks
+    hand.pot.committed["Bob"] = str(
+        Decimal(hand.pot.committed["Bob"]) + Decimal("100.00")
+    )  # Bob bets 100
     hand.pot.committed["Charlie"] = str(
         Decimal(hand.pot.committed["Charlie"]) + Decimal("150.00")
     )  # Charlie goes all-in
@@ -470,8 +528,12 @@ def test_all_in_turn():
     hand.pot.committed = {"Alice": "100.00", "Bob": "100.00"}  # Until the flop
     hand.pot.contenders = ["Alice", "Bob"]
     # Bets on the turn
-    hand.pot.committed["Alice"] = str(Decimal(hand.pot.committed["Alice"]) + Decimal("0.00"))  # Alice checks
-    hand.pot.committed["Bob"] = str(Decimal(hand.pot.committed["Bob"]) + Decimal("200.00"))  # Bob goes all-in
+    hand.pot.committed["Alice"] = str(
+        Decimal(hand.pot.committed["Alice"]) + Decimal("0.00")
+    )  # Alice checks
+    hand.pot.committed["Bob"] = str(
+        Decimal(hand.pot.committed["Bob"]) + Decimal("200.00")
+    )  # Bob goes all-in
 
     hand.totalcollected = Decimal("400.00")
     total_pot = hand.totalPot()
@@ -480,7 +542,10 @@ def test_all_in_turn():
     assert hand.totalpot == Decimal("400.00")
     assert hand.rake == Decimal("0.00")
     assert len(hand.pot.pots) == 2
-    expected_pots = [(Decimal("200.00"), {"Alice", "Bob"}), (Decimal("200.00"), {"Bob"})]
+    expected_pots = [
+        (Decimal("200.00"), {"Alice", "Bob"}),
+        (Decimal("200.00"), {"Bob"}),
+    ]
     assert hand.pot.pots == expected_pots
 
 
@@ -490,8 +555,12 @@ def test_all_in_river():
     hand.pot.committed = {"Alice": "100.00", "Bob": "100.00"}  # Until the turn
     hand.pot.contenders = ["Alice", "Bob"]
     # Bets on the river
-    hand.pot.committed["Alice"] = str(Decimal(hand.pot.committed["Alice"]) + Decimal("500.00"))  # Alice goes all-in
-    hand.pot.committed["Bob"] = str(Decimal(hand.pot.committed["Bob"]) + Decimal("0.00"))  # Bob folds
+    hand.pot.committed["Alice"] = str(
+        Decimal(hand.pot.committed["Alice"]) + Decimal("500.00")
+    )  # Alice goes all-in
+    hand.pot.committed["Bob"] = str(
+        Decimal(hand.pot.committed["Bob"]) + Decimal("0.00")
+    )  # Bob folds
 
     hand.totalcollected = Decimal("700.00")
     total_pot = hand.totalPot()
@@ -500,7 +569,10 @@ def test_all_in_river():
     assert hand.totalpot == Decimal("700.00")
     assert hand.rake == Decimal("0.00")
     assert len(hand.pot.pots) == 2  # Updated here
-    expected_pots = [(Decimal("200.00"), {"Alice", "Bob"}), (Decimal("500.00"), {"Alice"})]
+    expected_pots = [
+        (Decimal("200.00"), {"Alice", "Bob"}),
+        (Decimal("500.00"), {"Alice"}),
+    ]
     assert hand.pot.pots == expected_pots
 
 
@@ -510,8 +582,12 @@ def test_uncalled_bet():
     hand.pot.committed = {"Alice": "100.00", "Bob": "100.00"}  # Until the turn
     hand.pot.contenders = ["Alice", "Bob"]
     # Bets on the river
-    hand.pot.committed["Alice"] = str(Decimal(hand.pot.committed["Alice"]) + Decimal("200.00"))  # Alice bets 200
-    hand.pot.committed["Bob"] = str(Decimal(hand.pot.committed["Bob"]) + Decimal("0.00"))  # Bob folds
+    hand.pot.committed["Alice"] = str(
+        Decimal(hand.pot.committed["Alice"]) + Decimal("200.00")
+    )  # Alice bets 200
+    hand.pot.committed["Bob"] = str(
+        Decimal(hand.pot.committed["Bob"]) + Decimal("0.00")
+    )  # Bob folds
 
     hand.totalcollected = Decimal("400.00")  # Updated total collected
     total_pot = hand.totalPot()
@@ -520,22 +596,37 @@ def test_uncalled_bet():
     assert hand.totalpot == Decimal("400.00")
     assert hand.rake == Decimal("0.00")
     assert len(hand.pot.pots) == 2
-    expected_pots = [(Decimal("200.00"), {"Alice", "Bob"}), (Decimal("200.00"), {"Alice"})]
+    expected_pots = [
+        (Decimal("200.00"), {"Alice", "Bob"}),
+        (Decimal("200.00"), {"Alice"}),
+    ]
     assert hand.pot.pots == expected_pots
 
 
 def test_all_in_with_uncalled_bet():
     """Test all-in scenarios with uncalled bets."""
     hand = Hand()
-    hand.pot.committed = {"Alice": "50.00", "Bob": "50.00", "Charlie": "50.00"}  # Preflop
+    hand.pot.committed = {
+        "Alice": "50.00",
+        "Bob": "50.00",
+        "Charlie": "50.00",
+    }  # Preflop
     hand.pot.contenders = ["Alice", "Bob", "Charlie"]
     # Bets on the flop
-    hand.pot.committed["Alice"] = str(Decimal(hand.pot.committed["Alice"]) + Decimal("150.00"))  # Alice goes all-in
-    hand.pot.committed["Bob"] = str(Decimal(hand.pot.committed["Bob"]) + Decimal("150.00"))  # Bob calls
-    hand.pot.committed["Charlie"] = str(Decimal(hand.pot.committed["Charlie"]) + Decimal("0.00"))  # Charlie folds
+    hand.pot.committed["Alice"] = str(
+        Decimal(hand.pot.committed["Alice"]) + Decimal("150.00")
+    )  # Alice goes all-in
+    hand.pot.committed["Bob"] = str(
+        Decimal(hand.pot.committed["Bob"]) + Decimal("150.00")
+    )  # Bob calls
+    hand.pot.committed["Charlie"] = str(
+        Decimal(hand.pot.committed["Charlie"]) + Decimal("0.00")
+    )  # Charlie folds
 
     # Bets on the turn
-    hand.pot.committed["Bob"] = str(Decimal(hand.pot.committed["Bob"]) + Decimal("200.00"))  # Bob bets 200
+    hand.pot.committed["Bob"] = str(
+        Decimal(hand.pot.committed["Bob"]) + Decimal("200.00")
+    )  # Bob bets 200
     # Alice is already all-in and cannot call
 
     # Bob has an uncalled bet of 200
@@ -679,7 +770,8 @@ def test_end_with_net_gains():
 
     # Net gains for each player
     gains_nets = {
-        player: hand.pot.collected.get(player, Decimal("0.00")) - Decimal(hand.pot.committed.get(player, "0.00"))
+        player: hand.pot.collected.get(player, Decimal("0.00"))
+        - Decimal(hand.pot.committed.get(player, "0.00"))
         for player in hand.pot.committed.keys()
     }
 

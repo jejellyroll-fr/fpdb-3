@@ -22,10 +22,11 @@
 # import L10n
 # _ = L10n.get_translation()
 
-from HandHistoryConverter import HandHistoryConverter, FpdbParseError
-import re
-from loggingFpdb import get_logger
 import datetime
+import re
+
+from HandHistoryConverter import FpdbParseError, HandHistoryConverter
+from loggingFpdb import get_logger
 
 log = get_logger("parser")
 
@@ -50,7 +51,9 @@ class Betfair(HandHistoryConverter):
         re.MULTILINE,
     )
     re_Button = re.compile(r"^Seat (?P<BUTTON>\d+) is the button", re.MULTILINE)
-    re_PlayerInfo = re.compile("Seat (?P<SEAT>[0-9]+): (?P<PNAME>.*)\s\(\s(\$(?P<CASH>[.0-9]+)) \)")
+    re_PlayerInfo = re.compile(
+        "Seat (?P<SEAT>[0-9]+): (?P<PNAME>.*)\s\(\s(\$(?P<CASH>[.0-9]+)) \)"
+    )
     re_Board = re.compile(r"\[ (?P<CARDS>.+) \]")
 
     def compilePlayerRegexs(self, hand):
@@ -60,24 +63,41 @@ class Betfair(HandHistoryConverter):
             self.compiledPlayers = players
             player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
             log.debug("player_re: " + player_re)
-            self.re_PostSB = re.compile("^%s posts small blind \[\$?(?P<SB>[.0-9]+)" % player_re, re.MULTILINE)
-            self.re_PostBB = re.compile("^%s posts big blind \[\$?(?P<BB>[.0-9]+)" % player_re, re.MULTILINE)
-            self.re_Antes = re.compile("^%s antes asdf sadf sadf" % player_re, re.MULTILINE)
-            self.re_BringIn = re.compile("^%s antes asdf sadf sadf" % player_re, re.MULTILINE)
-            self.re_PostBoth = re.compile(
-                "^%s posts small \& big blinds \[\$?(?P<SBBB>[.0-9]+)" % player_re, re.MULTILINE
+            self.re_PostSB = re.compile(
+                "^%s posts small blind \[\$?(?P<SB>[.0-9]+)" % player_re, re.MULTILINE
             )
-            self.re_HeroCards = re.compile("^Dealt to %s \[ (?P<CARDS>.*) \]" % player_re, re.MULTILINE)
-            self.re_Action = re.compile(
-                "^%s (?P<ATYPE>bets|checks|raises to|raises|calls|folds)(\s\[\$(?P<BET>[.\d]+)\])?" % player_re,
+            self.re_PostBB = re.compile(
+                "^%s posts big blind \[\$?(?P<BB>[.0-9]+)" % player_re, re.MULTILINE
+            )
+            self.re_Antes = re.compile(
+                "^%s antes asdf sadf sadf" % player_re, re.MULTILINE
+            )
+            self.re_BringIn = re.compile(
+                "^%s antes asdf sadf sadf" % player_re, re.MULTILINE
+            )
+            self.re_PostBoth = re.compile(
+                "^%s posts small \& big blinds \[\$?(?P<SBBB>[.0-9]+)" % player_re,
                 re.MULTILINE,
             )
-            self.re_ShowdownAction = re.compile("^%s shows \[ (?P<CARDS>.*) \]" % player_re, re.MULTILINE)
+            self.re_HeroCards = re.compile(
+                "^Dealt to %s \[ (?P<CARDS>.*) \]" % player_re, re.MULTILINE
+            )
+            self.re_Action = re.compile(
+                "^%s (?P<ATYPE>bets|checks|raises to|raises|calls|folds)(\s\[\$(?P<BET>[.\d]+)\])?"
+                % player_re,
+                re.MULTILINE,
+            )
+            self.re_ShowdownAction = re.compile(
+                "^%s shows \[ (?P<CARDS>.*) \]" % player_re, re.MULTILINE
+            )
             self.re_CollectPot = re.compile(
-                "^%s wins \$(?P<POT>[.\d]+) (.*?\[ (?P<CARDS>.*?) \])?" % player_re, re.MULTILINE
+                "^%s wins \$(?P<POT>[.\d]+) (.*?\[ (?P<CARDS>.*?) \])?" % player_re,
+                re.MULTILINE,
             )
             self.re_SitsOut = re.compile("^%s sits out" % player_re, re.MULTILINE)
-            self.re_ShownCards = re.compile(r"%s (?P<SEAT>[0-9]+) (?P<CARDS>adsfasdf)" % player_re, re.MULTILINE)
+            self.re_ShownCards = re.compile(
+                r"%s (?P<SEAT>[0-9]+) (?P<CARDS>adsfasdf)" % player_re, re.MULTILINE
+            )
 
     def readSupportedGames(self):
         return [["ring", "hold", "nl"], ["ring", "hold", "pl"]]
@@ -125,7 +145,9 @@ class Betfair(HandHistoryConverter):
         log.debug(f"HID {m.group('HID')}, Table {m.group('TABLE')}")
         hand.handid = m.group("HID")
         hand.tablename = m.group("TABLE")
-        hand.startTime = datetime.datetime.strptime(m.group("DATETIME"), "%A, %B %d, %H:%M:%S GMT %Y")
+        hand.startTime = datetime.datetime.strptime(
+            m.group("DATETIME"), "%A, %B %d, %H:%M:%S GMT %Y"
+        )
         # hand.buttonpos = int(m.group('BUTTON'))
 
     def readPlayerStacks(self, hand):
@@ -149,7 +171,9 @@ class Betfair(HandHistoryConverter):
 
         hand.addStreets(m)
 
-    def readCommunityCards(self, hand, street):  # street has been matched by markStreets, so exists in this hand
+    def readCommunityCards(
+        self, hand, street
+    ):  # street has been matched by markStreets, so exists in this hand
         if street in (
             "FLOP",
             "TURN",
@@ -179,7 +203,9 @@ class Betfair(HandHistoryConverter):
     def readBringIn(self, hand):
         m = self.re_BringIn.search(hand.handText, re.DOTALL)
         if m:
-            log.debug(f"Player bringing in: {m.group('PNAME')} for {m.group('BRINGIN')}")
+            log.debug(
+                f"Player bringing in: {m.group('PNAME')} for {m.group('BRINGIN')}"
+            )
             hand.addBringIn(m.group("PNAME"), m.group("BRINGIN"))
         else:
             log.warning(("No bringin found"))
@@ -196,7 +222,14 @@ class Betfair(HandHistoryConverter):
                 for found in m:
                     hand.hero = found.group("PNAME")
                     newcards = [c.strip() for c in found.group("CARDS").split(",")]
-                    hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
+                    hand.addHoleCards(
+                        street,
+                        hand.hero,
+                        closed=newcards,
+                        shown=False,
+                        mucked=False,
+                        dealt=True,
+                    )
 
     def readStudPlayerCards(self, hand, street):
         # balh blah blah
@@ -216,7 +249,9 @@ class Betfair(HandHistoryConverter):
             elif action.group("ATYPE") == "raises to":
                 hand.addRaiseTo(street, action.group("PNAME"), action.group("BET"))
             else:
-                log.debug(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
+                log.debug(
+                    f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'"
+                )
 
     def readSummaryInfo(self, summaryInfoList):
         log.info("enter method readSummaryInfo.")
@@ -238,4 +273,6 @@ class Betfair(HandHistoryConverter):
             if m.group("CARDS") is not None:
                 cards = m.group("CARDS")
                 cards = cards.split(", ")
-                hand.addShownCards(cards=None, player=m.group("PNAME"), holeandboard=cards)
+                hand.addShownCards(
+                    cards=None, player=m.group("PNAME"), holeandboard=cards
+                )

@@ -6,6 +6,12 @@ Parses HandHistory xml files and returns requested objects.
 """
 
 from __future__ import print_function
+
+import xml.dom.minidom
+from xml.dom.minidom import Node
+
+from loggingFpdb import get_logger
+
 #    Copyright 2008-2011, Ray E. Barker
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -25,10 +31,6 @@ from __future__ import print_function
 ########################################################################
 #    Standard Library modules
 
-import xml.dom.minidom
-from xml.dom.minidom import Node
-
-from loggingFpdb import get_logger
 
 log = get_logger("handhistory")
 
@@ -72,15 +74,30 @@ class Player(object):
         else:
             self.allin = True
 
-        if self.sitting_out == "" or self.sitting_out == "0" or self.sitting_out.upper() == "FALSE":
+        if (
+            self.sitting_out == ""
+            or self.sitting_out == "0"
+            or self.sitting_out.upper() == "FALSE"
+        ):
             self.sitting_out = False
         else:
             self.sitting_out = True
 
     def __str__(self):
-        temp = "%s\n    seat = %s\n    stack = %s\n    cards = %s\n" % (self.name, self.seat, self.stack, self.cards)
-        temp = temp + "    showed_hand = %s\n    allin = %s\n" % (self.showed_hand, self.allin)
-        temp = temp + "    hand = %s\n    start_cards = %s\n" % (self.hand, self.start_cards)
+        temp = "%s\n    seat = %s\n    stack = %s\n    cards = %s\n" % (
+            self.name,
+            self.seat,
+            self.stack,
+            self.cards,
+        )
+        temp = temp + "    showed_hand = %s\n    allin = %s\n" % (
+            self.showed_hand,
+            self.allin,
+        )
+        temp = temp + "    hand = %s\n    start_cards = %s\n" % (
+            self.hand,
+            self.start_cards,
+        )
         return temp
 
 
@@ -160,7 +177,12 @@ class Post(object):
         self.live = node.getAttribute("LIVE")
 
     def __str__(self):
-        return ("%s posted %s %s %s") % (self.player, self.amount, self.posted, self.live)
+        return ("%s posted %s %s %s") % (
+            self.player,
+            self.amount,
+            self.posted,
+            self.live,
+        )
 
 
 class Betting(object):

@@ -27,17 +27,18 @@
 
 #    Standard Library modules
 import re
-from loggingFpdb import get_logger
-
-from PyQt5.QtGui import QWindow
-from PyQt5.QtCore import Qt
 
 #    Other Library modules
-import xcffib, xcffib.xproto
+import xcffib
+import xcffib.xproto
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QWindow
+
+import Configuration
+from loggingFpdb import get_logger
 
 #    FPDB modules
 from TableWindow import Table_Window
-import Configuration
 
 xconn = xcffib.Connection()
 root = xconn.get_setup().roots[xconn.pref_screen].root
@@ -62,9 +63,17 @@ class Table(Table_Window):
         #    given the self.search_string. Then populate self.number, self.title,
         #    self.window, and self.parent (if required).
 
-        wins = xconn.core.GetProperty(False, root, nclatom, winatom, 0, (2**32) - 1).reply().value.to_atoms()
+        wins = (
+            xconn.core.GetProperty(False, root, nclatom, winatom, 0, (2**32) - 1)
+            .reply()
+            .value.to_atoms()
+        )
         for win in wins:
-            w_title = xconn.core.GetProperty(False, win, wnameatom, utf8atom, 0, (2**32) - 1).reply().value.to_utf8()
+            w_title = (
+                xconn.core.GetProperty(False, win, wnameatom, utf8atom, 0, (2**32) - 1)
+                .reply()
+                .value.to_utf8()
+            )
 
             log.debug(f"Window title: {w_title}")
 
@@ -91,19 +100,36 @@ class Table(Table_Window):
     # get_geometry() returns False [None is deal as False], the table is
     # assumed dead and thus the HUD instance may be killed off.
     def get_geometry(self):
-        wins = xconn.core.GetProperty(False, root, nclatom, winatom, 0, (2**32) - 1).reply().value.to_atoms()
+        wins = (
+            xconn.core.GetProperty(False, root, nclatom, winatom, 0, (2**32) - 1)
+            .reply()
+            .value.to_atoms()
+        )
         if self.number not in wins:
             return None
         try:
             geo = xconn.core.GetGeometry(self.number).reply()
-            absxy = xconn.core.TranslateCoordinates(self.number, root, geo.x, geo.y).reply()
+            absxy = xconn.core.TranslateCoordinates(
+                self.number, root, geo.x, geo.y
+            ).reply()
             # log.debug('coord:', absxy.dst_x, absxy.dst_y)
-            return {"x": absxy.dst_x, "y": absxy.dst_y, "width": geo.width, "height": geo.height}
+            return {
+                "x": absxy.dst_x,
+                "y": absxy.dst_y,
+                "width": geo.width,
+                "height": geo.height,
+            }
         except xcffib.xproto.DrawableError:
             return None
 
     def get_window_title(self):
-        return xconn.core.GetProperty(False, self.number, wnameatom, utf8atom, 0, (2**32) - 1).reply().value.to_string()
+        return (
+            xconn.core.GetProperty(
+                False, self.number, wnameatom, utf8atom, 0, (2**32) - 1
+            )
+            .reply()
+            .value.to_string()
+        )
 
     def topify(self, window):
         #    The idea here is to call setTransientParent on the HUD window, with the table window

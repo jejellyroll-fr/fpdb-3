@@ -1,36 +1,37 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
+import json
+import math
 import sqlite3
 import sys
+from datetime import datetime
+from decimal import Decimal
+from pathlib import Path
+from typing import Optional
+
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from sql_request import (
-    get_players,
+    get_hands,
+    get_hands_players,
     get_handscount,
     get_handscount_cg,
     get_handscount_tour,
+    get_handsPlayers,
+    get_heroes,
+    get_player_name,
+    get_players,
     get_playerscount,
     get_playerscount_cg,
     get_playerscount_tour,
-    get_heroes,
-    get_hands,
-    get_handsPlayers,
-    get_hands_players,
     get_RingProfitAllHandsPlayerIdSite,
-    get_player_name,
-    get_tourneysProfitPlayerIdSite,
     get_statsplayers,
+    get_tourneysProfitPlayerIdSite,
 )
 
-import math
-import Hand
 import Configuration
 import Database
-import json
-from decimal import Decimal
-from datetime import datetime
-from typing import Optional
-from pathlib import Path
+import Hand
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -79,17 +80,27 @@ async def index(request: Request):
 @app.get("/hands", response_class=HTMLResponse)
 async def get_hands_api(request: Request):
     hands = get_hands()
-    return templates.TemplateResponse("hands.html", {"request": request, "hands": hands})
+    return templates.TemplateResponse(
+        "hands.html", {"request": request, "hands": hands}
+    )
 
 
 @app.get("/handsPlayers", response_class=HTMLResponse)
 async def get_handsPlayers_api(request: Request):
     handsPlayers = get_handsPlayers()
-    return templates.TemplateResponse("handsPlayers.html", {"request": request, "handsPlayers": handsPlayers})
+    return templates.TemplateResponse(
+        "handsPlayers.html", {"request": request, "handsPlayers": handsPlayers}
+    )
 
 
 @app.get("/players")
-def get_players_endpoint(request: Request, name: str = None, site: str = None, page: int = 1, per_page: int = 10):
+def get_players_endpoint(
+    request: Request,
+    name: str = None,
+    site: str = None,
+    page: int = 1,
+    per_page: int = 10,
+):
     # Call get_players() and unpack players and total
     players, total = get_players(name=name, site=site, page=page, per_page=per_page)
 
@@ -181,7 +192,9 @@ async def replay_hand(request: Request, handId: int, hero: Optional[str] = None)
     print(hand_dict)
     # Serialize the dictionary to JSON
     hand = json.dumps(hand_dict, cls=CustomEncoder)
-    return templates.TemplateResponse("replayer.html", {"request": request, "hand": hand})
+    return templates.TemplateResponse(
+        "replayer.html", {"request": request, "hand": hand}
+    )
 
 
 @app.get("/players/{playerId}/hands", response_class=HTMLResponse)
@@ -199,7 +212,9 @@ async def get_hands_players_api(
     name = cursor.fetchone()[0]
     conn.close()
 
-    handsPlayers = get_hands_players(playerId, tourney=tourney, cash=cash, sort_by=sort_by)
+    handsPlayers = get_hands_players(
+        playerId, tourney=tourney, cash=cash, sort_by=sort_by
+    )
     decodeCardList = {
         1: "2h",
         2: "3h",
@@ -319,7 +334,8 @@ async def get_ring_profit_all_hands_api(
     player_name = get_player_name(player)
 
     return templates.TemplateResponse(
-        "RingGraph.html", {"request": request, "profits": profits, "player_name": player_name}
+        "RingGraph.html",
+        {"request": request, "profits": profits, "player_name": player_name},
     )
 
 
@@ -351,7 +367,8 @@ async def get_torneys_profit_api(
     player_name = get_player_name(player)
 
     return templates.TemplateResponse(
-        "TourneysGraph.html", {"request": request, "profits": profits, "player_name": player_name}
+        "TourneysGraph.html",
+        {"request": request, "profits": profits, "player_name": player_name},
     )
 
 
@@ -378,7 +395,9 @@ async def get_statsplayers_api(
         enddate=enddate,
     )  # Call the get_statsplayers() function to retrieve the statistics
 
-    return templates.TemplateResponse("statsplayers.html", {"request": request, "result": result})
+    return templates.TemplateResponse(
+        "statsplayers.html", {"request": request, "result": result}
+    )
 
 
 if __name__ == "__main__":
