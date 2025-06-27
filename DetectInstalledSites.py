@@ -456,13 +456,30 @@ class iPokerDetector(SiteDetector):
 
         elif self.platform == "Darwin":  # macOS
             paths = get_mac_paths()
-            base_path = self._check_path_exists(
-                os.path.join(paths["app_support"], skin, "data"),
-                os.path.join(paths["documents"], skin, "data"),
-                # Some iPoker clients on macOS might use different structures
-                os.path.join(paths["app_support"], skin),
-                os.path.join(paths["documents"], skin)
-            )
+            # Check for sandboxed apps in Containers
+            home = os.path.expanduser("~")
+            containers_path = os.path.join(home, "Library", "Containers")
+            
+            # Special handling for known macOS iPoker apps
+            if skin == "PMU Poker":
+                # PMU Poker on macOS uses a sandboxed container
+                pmu_container = os.path.join(containers_path, "fr.pmu.poker.macos", "Data", "Library", "Application Support", "PMU Online Poker")
+                if os.path.exists(pmu_container):
+                    base_path = pmu_container
+            elif skin in ["FDJ Poker", "En ligne", "Parions Sport en ligne"]:
+                # FDJ/En ligne on macOS uses a sandboxed container
+                fdj_container = os.path.join(containers_path, "fr.fdj.poker.macos", "Data", "Library", "Application Support", "En Ligne")
+                if os.path.exists(fdj_container):
+                    base_path = fdj_container
+            else:
+                # For other skins, check standard locations
+                base_path = self._check_path_exists(
+                    os.path.join(paths["app_support"], skin, "data"),
+                    os.path.join(paths["documents"], skin, "data"),
+                    # Some iPoker clients on macOS might use different structures
+                    os.path.join(paths["app_support"], skin),
+                    os.path.join(paths["documents"], skin)
+                )
 
         if base_path and os.path.exists(base_path):
             try:
@@ -519,7 +536,7 @@ class iPokerDetector(SiteDetector):
                 os.path.join(paths["documents"], "PokerClient")
             )
         
-        if not os.path.exists(pokerclient_path):
+        if not pokerclient_path or not os.path.exists(pokerclient_path):
             return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
             
         try:
