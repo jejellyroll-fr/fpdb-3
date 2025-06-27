@@ -33,6 +33,16 @@
         <site_id site="PartyPoker NJ" id="53"/>
         <site_id site="BorgataPoker" id="54"/>
         <site_id site="Borgata Poker" id="55"/>
+        <site_id site="WPT Poker" id="120"/>
+        <site_id site="WPTPoker" id="121"/>
+        <site_id site="PartyPoker.pt" id="122"/>
+        <site_id site="PartyPoker.com" id="123"/>
+        <site_id site="PartyPoker.eu" id="124"/>
+        <site_id site="partycasino" id="125"/>
+        <site_id site="PartyCasino" id="126"/>
+        <site_id site="partypoker" id="127"/>
+        <site_id site="bwin" id="128"/>
+        <site_id site="PMU Poker (PartyPoker)" id="129"/>
         <site_id site="PacificPoker" id="10"/>
         <site_id site="Partouche" id="11"/>
         <site_id site="Merge" id="12"/>
@@ -2277,6 +2287,126 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
+        <site site_name="WPT Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="WPTPoker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PartyPoker.pt" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PartyPoker.com" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PartyPoker.eu" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="partycasino" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PartyCasino" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="partypoker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="bwin" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PMU Poker (PartyPoker)" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
+            <layout_set game_type="all" ls="party_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
         <site site_name="Merge" enabled="False" HH_path="" screen_name="" site_path="C:/Program Files/Merge/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0" network="Merge">
             <layout_set game_type="all" ls="merge_default"/>
             <fav max="2" fav_seat="0"/>
@@ -3203,6 +3333,16 @@
         <hhc site="PartyPoker NJ" converter="PartyPokerToFpdb"/>
         <hhc site="BorgataPoker" converter="PartyPokerToFpdb"/>
         <hhc site="Borgata Poker" converter="PartyPokerToFpdb"/>
+        <hhc site="WPT Poker" converter="PartyPokerToFpdb"/>
+        <hhc site="WPTPoker" converter="PartyPokerToFpdb"/>
+        <hhc site="PartyPoker.pt" converter="PartyPokerToFpdb"/>
+        <hhc site="PartyPoker.com" converter="PartyPokerToFpdb"/>
+        <hhc site="PartyPoker.eu" converter="PartyPokerToFpdb"/>
+        <hhc site="partycasino" converter="PartyPokerToFpdb"/>
+        <hhc site="PartyCasino" converter="PartyPokerToFpdb"/>
+        <hhc site="partypoker" converter="PartyPokerToFpdb"/>
+        <hhc site="bwin" converter="PartyPokerToFpdb"/>
+        <hhc site="PMU Poker (PartyPoker)" converter="PartyPokerToFpdb"/>
         <hhc site="Merge" converter="MergeToFpdb" summaryImporter="MergeSummary"/>
         <hhc site="Winamax" converter="WinamaxToFpdb" summaryImporter="WinamaxSummary"/>
         <hhc site="PacificPoker" converter="PacificPokerToFpdb" summaryImporter="PacificPokerSummary"/>

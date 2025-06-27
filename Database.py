@@ -2620,6 +2620,36 @@ class Database(object):
             "INSERT INTO Sites (id,name,code) VALUES ('55', 'Borgata Poker', 'PP')"
         )
         c.execute(
+            "INSERT INTO Sites (id,name,code) VALUES ('120', 'WPT Poker', 'PP')"
+        )
+        c.execute(
+            "INSERT INTO Sites (id,name,code) VALUES ('121', 'WPTPoker', 'PP')"
+        )
+        c.execute(
+            "INSERT INTO Sites (id,name,code) VALUES ('122', 'PartyPoker.pt', 'PP')"
+        )
+        c.execute(
+            "INSERT INTO Sites (id,name,code) VALUES ('123', 'PartyPoker.com', 'PP')"
+        )
+        c.execute(
+            "INSERT INTO Sites (id,name,code) VALUES ('124', 'PartyPoker.eu', 'PP')"
+        )
+        c.execute(
+            "INSERT INTO Sites (id,name,code) VALUES ('125', 'partycasino', 'PP')"
+        )
+        c.execute(
+            "INSERT INTO Sites (id,name,code) VALUES ('126', 'PartyCasino', 'PP')"
+        )
+        c.execute(
+            "INSERT INTO Sites (id,name,code) VALUES ('127', 'partypoker', 'PP')"
+        )
+        c.execute(
+            "INSERT INTO Sites (id,name,code) VALUES ('128', 'bwin', 'PP')"
+        )
+        c.execute(
+            "INSERT INTO Sites (id,name,code) VALUES ('129', 'PMU Poker (PartyPoker)', 'PP')"
+        )
+        c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('10', 'PacificPoker', 'P8')"
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('11', 'Partouche', 'PA')")
