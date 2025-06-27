@@ -11,11 +11,13 @@ import sys
 import traceback
 from optparse import OptionParser
 
-from PyQt5.QtCore import QTimer
-from PyQt5.QtGui import QTextCursor
+from PyQt5.QtCore import QTimer, QDateTime
+from PyQt5.QtGui import QTextCursor, QTextCharFormat, QColor, QPalette
 from PyQt5.QtWidgets import (
     QCheckBox,
     QFileDialog,
+    QFormLayout,
+    QGroupBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -24,6 +26,7 @@ from PyQt5.QtWidgets import (
     QTextEdit,
     QVBoxLayout,
     QWidget,
+    QProgressBar,
 )
 
 import Configuration
@@ -65,8 +68,8 @@ class GuiAutoImport(QWidget):
         self.sql = sql
         self.parent = parent
 
-        self.input_settings = {}
         self.pipe_to_hud = None
+        self.doAutoImportBool = False
 
         self.importer = Importer.Importer(self, self.settings, self.config, self.sql)
 
@@ -90,72 +93,127 @@ class GuiAutoImport(QWidget):
             raise NotImplementedError
 
     def setupGui(self):
-        self.setLayout(QVBoxLayout())
+        self.setWindowTitle("FPDB Auto Import")
+        self.setGeometry(100, 100, 800, 600)
+        
+        # Let qt_material handle the styling
+        # Only set minimal custom styles for specific needs
+        self.setStyleSheet("""
+            QTextEdit#logView {
+                font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+                font-size: 13px;
+            }
+        """)
 
-        hbox = QHBoxLayout()
+        mainLayout = QVBoxLayout()
+        self.setLayout(mainLayout)
 
-        self.intervalLabel = QLabel(("Time between imports in seconds:"))
+        # --- Settings Group ---
+        settingsGroup = QGroupBox("Settings")
+        settingsLayout = QFormLayout()
+        settingsGroup.setLayout(settingsLayout)
+        mainLayout.addWidget(settingsGroup)
 
         self.intervalEntry = QSpinBox()
         self.intervalEntry.setValue(
             int(self.config.get_import_parameters().get("interval"))
         )
-        hbox.addWidget(self.intervalLabel)
-        hbox.addWidget(self.intervalEntry)
-        self.layout().addLayout(hbox)
+        settingsLayout.addRow(QLabel("Time between imports (seconds):"), self.intervalEntry)
 
-        hbox = QHBoxLayout()
-        vbox1 = QVBoxLayout()
-        vbox2 = QVBoxLayout()
-        hbox.addLayout(vbox1)
-        hbox.addLayout(vbox2)
-        self.layout().addLayout(hbox)
-
-        self.addSites(vbox1, vbox2)
+        # --- Log Group ---
+        logGroup = QGroupBox("Log")
+        logLayout = QVBoxLayout()
+        logGroup.setLayout(logLayout)
+        mainLayout.addWidget(logGroup)
 
         self.textview = QTextEdit()
+        self.textview.setObjectName("logView")  # For custom styling
         self.textview.setReadOnly(True)
+        logLayout.addWidget(self.textview)
 
-        self.doAutoImportBool = False
-        self.startButton = QCheckBox(("Start Auto Import"))
+        # --- Controls ---
+        controlsLayout = QHBoxLayout()
+        
+        self.startButton = QCheckBox("Start Auto Import")
         self.startButton.stateChanged.connect(self.startClicked)
-        self.layout().addWidget(self.startButton)
-        self.layout().addWidget(self.textview)
+        controlsLayout.addWidget(self.startButton)
+        
+        # Add a progress indicator
+        self.progressBar = QProgressBar()
+        self.progressBar.setTextVisible(False)
+        self.progressBar.setMaximum(0)  # Indeterminate progress
+        self.progressBar.setVisible(False)
+        self.progressBar.setMaximumHeight(4)
+        # Let qt_material handle the progress bar styling
+        controlsLayout.addWidget(self.progressBar, 1)
+        
+        controlsLayout.addStretch()
+        
+        mainLayout.addLayout(controlsLayout)
+        
+        # Status label
+        self.statusLabel = QLabel("Ready")
+        # Use qt_material property for styling
+        self.statusLabel.setProperty("class", "caption")
+        mainLayout.addWidget(self.statusLabel)
 
-        self.addText(("Auto Import Ready."))
+        self.addText("Auto Import Ready.\n", "info")
 
-    def addText(self, text):
-        self.textview.moveCursor(QTextCursor.End)
-        self.textview.insertPlainText(text)
+    def addText(self, text, level="info"):
+        """Add formatted text to the log with timestamp and color coding"""
+        cursor = self.textview.textCursor()
+        cursor.movePosition(QTextCursor.End)
+        
+        # Add timestamp
+        timestamp = QDateTime.currentDateTime().toString("hh:mm:ss")
+        timestamp_format = QTextCharFormat()
+        # Use theme's disabled text color for timestamp
+        palette = self.palette()
+        timestamp_format.setForeground(palette.color(QPalette.Disabled, QPalette.Text))
+        cursor.insertText(f"[{timestamp}] ", timestamp_format)
+        
+        # Set color based on level using theme-aware colors
+        text_format = QTextCharFormat()
+        if level == "error":
+            # Red color for errors
+            text_format.setForeground(QColor("#f44336"))
+        elif level == "warning":
+            # Orange color for warnings
+            text_format.setForeground(QColor("#ff9800"))
+        elif level == "success":
+            # Green color for success
+            text_format.setForeground(QColor("#4caf50"))
+        elif level == "info":
+            # Use theme's link color for info
+            text_format.setForeground(palette.color(QPalette.Link))
+        else:
+            # Use theme's normal text color
+            text_format.setForeground(palette.color(QPalette.Text))
+        
+        cursor.insertText(text, text_format)
+        
+        # Ensure the new text is visible
+        self.textview.setTextCursor(cursor)
+        self.textview.ensureCursorVisible()
 
     #   end of GuiAutoImport.__init__
 
-    def browseClicked(self):
-        #   runs when user clicks one of the browse buttons in the auto import tab"""
-        #       Browse is not valid while hud is running, so return immediately
-        if self.pipe_to_hud:
-            return
-        data = self.sender().hackdata
-        current_path = data[1].text()
-
-        newdir = QFileDialog.getExistingDirectory(
-            self,
-            caption=("Please choose the path that you want to Auto Import"),
-            directory=current_path,
-        )
-        if newdir:
-            # print dia_chooser.get_filename(), 'selected'
-            data[1].setText(newdir)
-            self.input_settings[data[0]][0] = newdir
-
-    # end def GuiAutoImport.browseClicked
-
+    
     def do_import(self):
         """Callback for timer to do an import iteration."""
         if self.doAutoImportBool:
             self.importer.autoSummaryGrab()
-            self.importer.runUpdated()
-            self.addText(".")
+            result = self.importer.runUpdated()
+            
+            # Add more informative feedback
+            if result and result.get('handsImported', 0) > 0:
+                self.addText(f"\n✓ Imported {result['handsImported']} hands", "success")
+            elif result and result.get('errors', 0) > 0:
+                self.addText(f"\n✗ Import errors: {result['errors']}", "error")
+            else:
+                # Just add a dot for no activity
+                self.addText(".", "info")
+            
             return True
         return False
 
@@ -177,7 +235,6 @@ class GuiAutoImport(QWidget):
                 if os.name == "posix":
                     if self.posix_detect_hh_dirs(site):
                         # data[1].set_text(dia_chooser.get_filename())
-                        self.input_settings[(site, "hh")][0]
                         pass
                 elif os.name == "nt":
                     # Sorry
@@ -214,11 +271,11 @@ class GuiAutoImport(QWidget):
             # - Ideally we want to release the lock if the auto-import is killed by some
             # kind of exception - is this possible?
             if self.settings["global_lock"].acquire(wait=False, source="AutoImport"):
-                self.addText(
-                    "\n" + ("Global lock taken ... Auto Import Started.") + "\n"
-                )
+                self.addText("\nGlobal lock taken ... Auto Import Started.\n", "success")
                 self.doAutoImportBool = True
                 self.intervalEntry.setEnabled(False)
+                self.progressBar.setVisible(True)
+                self.statusLabel.setText("Auto Import Running...")
                 if self.pipe_to_hud is None:
                     log.debug("start hud- pipe_to_hud is none:")
                     try:
@@ -299,39 +356,59 @@ class GuiAutoImport(QWidget):
                     except Exception:
                         error_msg = f"GuiAutoImport Error opening pipe: {traceback.format_exc()}"
                         log.warning(error_msg)
-                        self.addText(f"\n*** {error_msg}")
+                        self.addText(f"\n*** {error_msg}", "error")
                     else:
-                        for site, type in self.input_settings:
-                            self.importer.addImportDirectory(
-                                self.input_settings[(site, type)][0],
-                                monitor=True,
-                                site=(site, type),
-                            )
-                            self.addText(
-                                "\n * "
-                                + ("Add %s import directory %s")
-                                % (site, self.input_settings[(site, type)][0])
-                            )
-                            self.do_import()
+                        # Get import directories from configuration
+                        the_sites = self.config.get_supported_sites()
+                        for site in the_sites:
+                            params = self.config.get_site_parameters(site)
+                            if params["enabled"]:
+                                paths = self.config.get_default_paths(site)
+                                
+                                # Add hand history directory
+                                if "hud-defaultPath" in paths and paths["hud-defaultPath"]:
+                                    self.importer.addImportDirectory(
+                                        paths["hud-defaultPath"],
+                                        monitor=True,
+                                        site=(site, "hh"),
+                                    )
+                                    self.addText(
+                                        f"\n * Add {site} hand history directory: {paths['hud-defaultPath']}",
+                                        "info"
+                                    )
+                                
+                                # Add tournament summary directory if exists
+                                if "hud-defaultTSPath" in paths and paths["hud-defaultTSPath"]:
+                                    self.importer.addImportDirectory(
+                                        paths["hud-defaultTSPath"],
+                                        monitor=True,
+                                        site=(site, "ts"),
+                                    )
+                                    self.addText(
+                                        f"\n * Add {site} tournament summary directory: {paths['hud-defaultTSPath']}",
+                                        "info"
+                                    )
+                        
+                        self.do_import()
                         interval = self.intervalEntry.value()
                         self.importtimer = QTimer()
                         self.importtimer.timeout.connect(self.do_import)
                         self.importtimer.start(interval * 1000)
 
             else:
-                self.addText(
-                    "\n" + ("Auto Import aborted.") + ("Global lock not available.")
-                )
+                self.addText("\nAuto Import aborted. Global lock not available.", "error")
         else:  # toggled off
             self.doAutoImportBool = False
-            self.importtimer = None
+            if self.importtimer:
+                self.importtimer.stop()
+                self.importtimer = None
             self.importer.autoSummaryGrab(True)
             self.settings["global_lock"].release()
-            self.addText("\n" + ("Stopping Auto Import.") + ("Global lock released."))
+            self.addText("\nStopping Auto Import. Global lock released.", "warning")
+            self.progressBar.setVisible(False)
+            self.statusLabel.setText("Ready")
             if self.pipe_to_hud and self.pipe_to_hud.poll() is not None:
-                self.addText(
-                    "\n * " + ("Stop Auto Import") + ": " + ("HUD already terminated.")
-                )
+                self.addText("\n * Stop Auto Import: HUD already terminated.", "info")
             else:
                 if self.pipe_to_hud:
                     self.pipe_to_hud.terminate()
@@ -347,83 +424,7 @@ class GuiAutoImport(QWidget):
 
     # end def get_vbox
 
-    # Create the site line given required info and setup callbacks
-    # enabling and disabling sites from this interface not possible
-    # expects a box to layout the line horizontally
-    def createSiteLine(
-        self, hbox1, hbox2, site, iconpath, type, path, filter_name, active=True
-    ):
-        label = QLabel(("%s auto-import:") % site)
-        hbox1.addWidget(label)
-
-        dirPath = QLineEdit()
-        dirPath.setText(path)
-        hbox1.addWidget(dirPath)
-        #       Anything typed into dirPath was never recognised (only the browse button works)
-        #       so just prevent entry to avoid user confusion
-        dirPath.setReadOnly(True)
-
-        browseButton = QPushButton(("Browse..."))
-        browseButton.hackdata = [(site, type)] + [dirPath]
-        browseButton.clicked.connect(self.browseClicked)  # , [(site,type)] + [dirPath])
-        hbox2.addWidget(browseButton)
-
-        label = QLabel("filter:")
-        hbox2.addWidget(label)
-
-        #       Anything typed into filter was never recognised
-        #       so just grey it out to avoid user confusion
-        filterLine = QLineEdit()
-        filterLine.setText(filter_name)
-        filterLine.setEnabled(False)
-        hbox2.addWidget(filterLine)
-
-    def addSites(self, vbox1, vbox2):
-        the_sites = self.config.get_supported_sites()
-        log.debug(f"add site {the_sites}")
-        for site in the_sites:
-            pathHBox1 = QHBoxLayout()
-            vbox1.addLayout(pathHBox1)
-            pathHBox2 = QHBoxLayout()
-            vbox2.addLayout(pathHBox2)
-
-            params = self.config.get_site_parameters(site)
-            paths = self.config.get_default_paths(site)
-
-            self.createSiteLine(
-                pathHBox1,
-                pathHBox2,
-                site,
-                False,
-                "hh",
-                paths["hud-defaultPath"],
-                params["converter"],
-                params["enabled"],
-            )
-            self.input_settings[(site, "hh")] = [paths["hud-defaultPath"]] + [
-                params["converter"]
-            ]
-
-            if "hud-defaultTSPath" in paths:
-                pathHBox1 = QHBoxLayout()
-                vbox1.addLayout(pathHBox1)
-                pathHBox2 = QHBoxLayout()
-                vbox2.addLayout(pathHBox2)
-                self.createSiteLine(
-                    pathHBox1,
-                    pathHBox2,
-                    site,
-                    False,
-                    "ts",
-                    paths["hud-defaultTSPath"],
-                    params["summaryImporter"],
-                    params["enabled"],
-                )
-                self.input_settings[(site, "ts")] = [paths["hud-defaultTSPath"]] + [
-                    params["summaryImporter"]
-                ]
-        log.debug(f"input_settings {self.input_settings}")
-
+    
     def _setup_config_observer(self):
         """Configure l'observateur de configuration pour l'auto-import"""
         if DYNAMIC_CONFIG_AVAILABLE:
