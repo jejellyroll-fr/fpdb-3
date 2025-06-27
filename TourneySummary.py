@@ -93,8 +93,25 @@ class TourneySummary(object):
         self.import_parameters = self.config.get_import_parameters()
         self.siteName = siteName
         self.siteId = None
-        if siteName in self.SITEIDS:
+        
+        # Try to get site ID from database first
+        if self.db and hasattr(self.db, 'get_site_id'):
+            try:
+                site_id_result = self.db.get_site_id(siteName)
+                if site_id_result and len(site_id_result) > 0:
+                    self.siteId = site_id_result[0][0]
+                    log.debug(f"Got siteId {self.siteId} from database for {siteName}")
+            except Exception as e:
+                log.error(f"Error getting site ID from database: {e}")
+        
+        # Fallback to hardcoded SITEIDS if database lookup fails
+        if self.siteId is None and siteName in self.SITEIDS:
             self.siteId = self.SITEIDS[siteName]
+            log.debug(f"Using hardcoded siteId {self.siteId} for {siteName}")
+            
+        if self.siteId is None:
+            log.error(f"Could not determine site ID for {siteName}")
+            
         self.in_path = in_path
         self.header = header
 
