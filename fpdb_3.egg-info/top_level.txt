@@ -1,0 +1,14 @@
+archives
+build
+dist
+documentations
+gfx
+htmlcov
+icons
+locale
+pypoker-eval
+regression-test-files
+resources
+test
+utils
+web

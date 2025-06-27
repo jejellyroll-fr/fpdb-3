@@ -245,7 +245,13 @@ class ModernSiteCard(QFrame):
         # Use the existing logic from fpdb.pyw
         if site_name.startswith("PokerStars"):
             return "PokerStars"
-        elif site_name in ["PMU Poker", "FDJ Poker", "Poker770", "NetBet Poker"]:
+        elif site_name == "PMU Poker":
+            # PMU Poker standard (iPoker)
+            return "PMU Poker"  # Use special detector that checks both networks
+        elif site_name == "PMU Poker (PartyPoker)":
+            # PMU Poker on PartyPoker network (old version)
+            return "PMU Poker"  # Use special detector that checks both networks
+        elif site_name in ["FDJ Poker", "Poker770", "NetBet Poker"]:
             return "iPoker"
         elif site_name in ["Americas Cardroom", "ACR Poker", "WinningPoker"]:
             return "ACR"
@@ -276,6 +282,32 @@ class ModernSiteCard(QFrame):
                     # Use the first found
                     self.apply_detection_results(all_variants[0])
                     self.show_detection_info(all_variants)
+                    return
+        
+        elif detection_site == "PMU Poker":
+            # Special handling for PMU Poker which can be on two networks
+            if detection_site in detector.sitestatusdict and detector.sitestatusdict[detection_site]["detected"]:
+                result = detector.sitestatusdict[detection_site]
+                network = result.get("network", "unknown")
+                
+                # Check if we're looking for the right network version
+                if self.site_name == "PMU Poker" and network == "iPoker":
+                    # Standard PMU Poker (iPoker) - apply results
+                    self.apply_detection_results(result)
+                    self.show_detection_success_with_network("iPoker")
+                    return
+                elif self.site_name == "PMU Poker (PartyPoker)" and network == "PartyPoker":
+                    # PMU Poker on PartyPoker network - apply results
+                    self.apply_detection_results(result)
+                    self.show_detection_success_with_network("PartyPoker")
+                    return
+                elif self.site_name == "PMU Poker (PartyPoker)" and network == "iPoker":
+                    # Looking for PartyPoker version but found iPoker
+                    self.show_wrong_network_detected("iPoker", "PartyPoker")
+                    return
+                elif self.site_name == "PMU Poker" and network == "PartyPoker":
+                    # Looking for iPoker version but found PartyPoker
+                    self.show_wrong_network_detected("PartyPoker", "iPoker")
                     return
 
         # General case
@@ -323,6 +355,26 @@ class ModernSiteCard(QFrame):
             self.detect_btn,
             self.detect_btn.rect(),
             2000,
+        )
+    
+    def show_detection_success_with_network(self, network):
+        """Show a success message with network info"""
+        QToolTip.showText(
+            self.detect_btn.mapToGlobal(self.detect_btn.rect().center()),
+            f"✅ Paths detected successfully!\nNetwork: {network}",
+            self.detect_btn,
+            self.detect_btn.rect(),
+            3000,
+        )
+    
+    def show_wrong_network_detected(self, found_network, expected_network):
+        """Show a message when wrong network version is detected"""
+        QMessageBox.warning(
+            self,
+            "Wrong Network Version",
+            f"PMU Poker was detected on the {found_network} network,\n"
+            f"but this configuration is for the {expected_network} network.\n\n"
+            f"Please use the correct PMU Poker configuration for your installation."
         )
 
     def get_values(self):
