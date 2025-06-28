@@ -287,13 +287,7 @@ class DerivedStats(object):
                 log.error(f"Error calculating street totals: {e}")
                 raise
 
-            # Calculate VPIP
-            try:
-                self.vpip(hand)
-                log.debug(f"VPIP calculated: {self.hands.get('playersVpi')}")
-            except Exception as e:
-                log.error(f"Error calculating VPIP: {e}")
-                raise
+            # VPIP will be calculated in assembleHandsPlayers after player initialization
 
             # Determine players at each street
             try:
@@ -391,6 +385,13 @@ class DerivedStats(object):
                 except Exception as e:
                     log.error(f"Error initializing stats for player {player_name}: {e}")
 
+            # Calculate VPIP after player initialization
+            try:
+                self.vpip(hand)
+                log.debug(f"VPIP calculated: {self.hands.get('playersVpi')}")
+            except Exception as e:
+                log.error(f"Error calculating VPIP: {e}")
+
             # post-flop share count AND streetXAggr UPDATE
             log.debug("Counting post-flop actions and updating aggression flags...")
             street_indices = {}
@@ -476,6 +477,34 @@ class DerivedStats(object):
                             f"Player '{player_name}' from action not found in initialized handsplayers for street {street_name}."
                         )
             # ---
+
+            # Process preflop/street0 actions for street0Aggr
+            log.debug("Processing preflop actions for street0Aggr...")
+            if len(hand.actionStreets) > 1:
+                preflop_street = hand.actionStreets[1]  # Usually 'PREFLOP' or 'THIRD'
+                log.debug(f"Processing preflop street: {preflop_street}")
+                
+                for action in hand.actions.get(preflop_street, []):
+                    player_name = action[0]
+                    action_type = action[1]
+                    
+                    if player_name in self.handsplayers:
+                        player_stats = self.handsplayers[player_name]
+                        
+                        # Set street0Aggr for aggressive actions
+                        if action_type in ("bets", "raises", "completes"):
+                            player_stats["street0Aggr"] = True
+                            log.debug(f"Set street0Aggr=True for {player_name} (action: {action_type})")
+                        elif action_type == "allin":
+                            player_stats["street0Aggr"] = True
+                            player_stats["street0AllIn"] = True
+                            log.debug(f"Set street0Aggr=True and street0AllIn=True for {player_name}")
+                        
+                        # Count actions for street0
+                        if action_type == "calls":
+                            player_stats["street0Calls"] += 1
+                        elif action_type in ("bets", "raises", "completes"):
+                            player_stats["street0Raises"] += 1
 
             # Step 2: Calculate net collected for each player
             log.debug("Calculating net collected for each player...")
