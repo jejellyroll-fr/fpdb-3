@@ -64,16 +64,23 @@ jobs:
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
+
         git fetch origin gh-pages
         git checkout gh-pages || git checkout --orphan gh-pages
+        git pull origin gh-pages || echo "Branch is orphan or already up to date"
+
         if (Test-Path coverage) {
           Remove-Item -Recurse -Force coverage
         }
-        New-Item -ItemType Directory -Path coverage/${{ github.sha }} 
+
+        New-Item -ItemType Directory -Path coverage/${{ github.sha }}
         Copy-Item -Recurse htmlcov/* coverage/${{ github.sha }}/
-        git add coverage/${{ github.sha }}/* -f  # Forcer l'ajout des fichiers dans coverage/
-        git commit -m "Deploy coverage report for commit ${{ github.sha }}"
+
+        git add coverage/${{ github.sha }}/* -f
+        git commit -m "Deploy coverage report for commit ${{ github.sha }}" || echo "Nothing to commit"
         git push origin gh-pages
+      shell: pwsh
+
 
     - name: Comment PR with coverage link
       if: github.event_name == 'pull_request'
