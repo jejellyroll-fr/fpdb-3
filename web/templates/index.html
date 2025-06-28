@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FPDB 3</title>
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <!-- Add Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+<body class="bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+              <img src="../static/tribal.jpg" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
+              FPDB 3</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/players">Players</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <h1 class="text-light">Welcome to FPDB 3</h1>
+        <div class="table-responsive">
+            <p class="text-light"><b>FPDB</b> is a database program to track your online poker games with HUD (heads-up display), the behaviour of the other players and your winnings/losses while you are playing or after you finish in review.
+
+              Supports <i>Holdem, Omaha, Stud and Razz</i> for cash games as well as SnG and MTT tournaments with more possibly coming in the future. The software is currently in alpha status, which means some of the features are not working yet. As it's open source you're free to add any feature you like or modify the existing ones to fit your needs.</p>
+              <p class="text-light"><u>the database contains</u>:<br>
+                 <b>{{ handscount[0][0] }}</b> hands including <b>{{ handscount_cg[0][0] }}</b> <i>cash game</i> hands and <b>{{ handscount_tour[0][0] }}</b> <i>tournament</i> hands<br>
+                 <b>{{ playerscount[0][0] }}</b> players including {{ playerscount_cg[0][0] }} cash game players and {{ playerscount_tour[0][0] }} tournament players</p>
+                 <p class="text-light">You are playing on :<br>
+                    {% for hero in heroes %}
+                  <i>{{ hero[1] }}</i> as <b>{{ hero[0] }}</b> see <a href="/RingProfitAllHandsPlayerIdSite?site={{ hero[3] }}&player={{ hero[2] }}">Ring graph result</a> or <a href="/TourneysProfitPlayerIdSite?site={{ hero[3] }}&player={{ hero[2] }}">Tourneys graph result</a><br>
+                    {% endfor %}
+                  </p>
+        </div>
+    </div>
+    <!-- Add Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+

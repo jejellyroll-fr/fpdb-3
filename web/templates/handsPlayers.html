@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hands Players</title>
+      <!-- Add Bootstrap CSS -->
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+      <link rel="stylesheet" href="styles.css">
+      <style>
+        .card-images-row {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .card-image {
+            max-width: 30px;
+            margin-right: 5px; /* Add some margin between card images */
+        }
+    </style>
+      <script>
+        var encodeCardList = {
+            '2h': 1, '3h': 2, '4h': 3, '5h': 4, '6h': 5, '7h': 6, '8h': 7, '9h': 8, 'Th': 9, 'Jh': 10, 'Qh': 11, 'Kh': 12, 'Ah': 13,
+            '2d': 14, '3d': 15, '4d': 16, '5d': 17, '6d': 18, '7d': 19, '8d': 20, '9d': 21, 'Td': 22, 'Jd': 23, 'Qd': 24, 'Kd': 25, 'Ad': 26,
+            '2c': 27, '3c': 28, '4c': 29, '5c': 30, '6c': 31, '7c': 32, '8c': 33, '9c': 34, 'Tc': 35, 'Jc': 36, 'Qc': 37, 'Kc': 38, 'Ac': 39,
+            '2s': 40, '3s': 41, '4s': 42, '5s': 43, '6s': 44, '7s': 45, '8s': 46, '9s': 47, 'Ts': 48, 'Js': 49, 'Qs': 50, 'Ks': 51, 'As': 52,
+            '  ': 0
+        };
+        var decodeCardList = {
+            1: '2h',  2: '3h',  3: '4h',  4: '5h',  5: '6h',
+            6: '7h',  7: '8h',  8: '9h',  9: 'Th',  10: 'Jh',
+            11: 'Qh', 12: 'Kh', 13: 'Ah',
+            14: '2d', 15: '3d', 16: '4d', 17: '5d', 18: '6d',
+            19: '7d', 20: '8d', 21: '9d', 22: 'Td', 23: 'Jd',
+            24: 'Qd', 25: 'Kd', 26: 'Ad',
+            27: '2c', 28: '3c', 29: '4c', 30: '5c', 31: '6c',
+            32: '7c', 33: '8c', 34: '9c', 35: 'Tc', 36: 'Jc',
+            37: 'Qc', 38: 'Kc', 39: 'Ac',
+            40: '2s', 41: '3s', 42: '4s', 43: '5s', 44: '6s',
+            45: '7s', 46: '8s', 47: '9s', 48: 'Ts', 49: 'Js',
+            50: 'Qs', 51: 'Ks', 52: 'As',
+            0: '  '
+        };
+    </script>
+    </head>
+    <body class="bg-dark">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">FPDB 3</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/players">Players</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+        <div class="container">
+          <h1 class="text-light">Hands Players</h1>
+          <div class="table-responsive">
+            <table class="table table-dark table-striped table-sm">
+                <thead>
+        <tr>
+            <!-- hansplayers -->
+            <th>id</th>
+            <th>handId</th>
+            <th>playerId</th>
+            <th>startCash</th>
+            <th>effStack</th>
+            <th>startBounty</th>
+            <th>endBounty</th>
+            <th>position</th>
+            <th>seatNo</th>
+            <th>sitout</th>
+            <th>cards</th>
+            <th>card8</th>
+            <th>card9</th>
+            <th>card10</th>
+            <th>card11</th>
+            <th>card12</th>
+            <th>card13</th>
+            <th>card14</th>
+            <th>card15</th>
+            <th>card16</th>
+            <th>card17</th>
+            <th>card18</th>
+            <th>card19</th>
+            <th>card20</th>
+            <th>startCards</th>
+            <th>common</th>
+            <th>committed</th>
+            <th>winnings</th>
+            <th>rake</th>
+            <th>rakeDealt</th>
+            <th>rakeContributed</th>
+            <th>rakeWeighted</th>
+            <th>totalProfit</th>
+            <th>allInEV</th>
+            <th>comment</th>
+            <th>commentTs</th>
+            <th>tourneysPlayersId</th>
+            <th>wonWhenSeenStreet1</th>
+            <th>wonWhenSeenStreet2</th>
+            <th>wonWhenSeenStreet3</th>
+            <th>wonWhenSeenStreet4</th>
+            <th>wonAtSD</th>
+            <th>street0VPIChance</th>
+            <th>street0VPI</th>
+            <th>street0AggrChance</th>
+            <th>street0Aggr</th>
+            <th>street0CalledRaiseChance</th>
+            <th>street0CalledRaiseDone</th>
+            <th>street0_2BChance</th>
+            <th>street0_2BDone</th>
+            <th>street0_3BChance</th>
+            <th>street0_3BDone</th>
+            <th>street0_4BChance</th>
+            <th>street0_4BDone</th>
+            <th>street0_C4BChance</th>
+            <th>street0_C4BDone</th>
+            <th>street0_FoldTo2BChance</th>
+            <th>street0_FoldTo2BDone</th>
+            <th>street0_FoldTo3BChance</th>
+            <th>street0_FoldTo3BDone</th>
+            <th>street0_FoldTo4BChance</th>
+            <th>street0_FoldTo4BDone</th>
+            <th>street0_SqueezeChance</th>
+            <th>street0_SqueezeDone</th>
+            <th>raiseToStealChance</th>
+            <th>raiseToStealDone</th>
+            <th>stealChance</th>
+            <th>stealDone</th>
+            <th>success_Steal</th>
+            <th>street1Seen</th>
+            <th>street2Seen</th>
+            <th>street3Seen</th>
+            <th>street4Seen</th>
+            <th>sawShowdown</th>
+            <th>showed</th>
+            <th>street0AllIn</th>
+            <th>street1AllIn</th>
+            <th>street2AllIn</th>
+            <th>street3AllIn</th>
+            <th>street4AllIn</th>
+            <th>wentAllIn</th>
+            <th>street0InPosition</th>
+            <th>street1InPosition</th>
+            <th>street2InPosition</th>
+            <th>street3InPosition</th>
+            <th>street4InPosition</th>
+            <th>street0FirstToAct</th>
+            <th>street1FirstToAct</th>
+            <th>street2FirstToAct</th>
+            <th>street3FirstToAct</th>
+            <th>street4FirstToAct</th>
+            <th>street1Aggr</th>
+            <th>street2Aggr</th>
+            <th>street3Aggr</th>
+            <th>street4Aggr</th>
+            <th>otherRaisedStreet0</th>
+            <th>otherRaisedStreet1</th>
+            <th>otherRaisedStreet2</th>
+            <th>otherRaisedStreet3</th>
+            <th>otherRaisedStreet4</th>
+            <th>foldToOtherRaisedStreet0</th>
+            <th>foldToOtherRaisedStreet1</th>
+            <th>foldToOtherRaisedStreet2</th>
+            <th>foldToOtherRaisedStreet3</th>
+            <th>foldToOtherRaisedStreet4</th>
+            <th>raiseFirstInChance</th>
+            <th>raisedFirstIn</th>
+            <th>foldBbToStealChance</th>
+            <th>foldedBbToSteal</th>
+            <th>foldSbToStealChance</th>
+            <th>foldedSbToSteal</th>
+            <th>street1CBChance</th>
+            <th>street1CBDone</th>
+            <th>street2CBChance</th>
+            <th>street2CBDone</th>
+            <th>street3CBChance</th>
+            <th>street3CBDone</th>
+            <th>street4CBChance</th>
+            <th>street4CBDone</th>
+            <th>foldToStreet1CBChance</th>
+            <th>foldToStreet1CBDone</th>
+            <th>foldToStreet2CBChance</th>
+            <th>foldToStreet2CBDone</th>
+            <th>foldToStreet3CBChance</th>
+            <th>foldToStreet3CBDone</th>
+            <th>foldToStreet4CBChance</th>
+            <th>foldToStreet4CBDone</th>
+            <th>street1CheckCallRaiseChance</th>
+            <th>street1CheckCallDone</th>
+            <th>street1CheckRaiseDone</th>
+            <th>street2CheckCallRaiseChance</th>
+            <th>street2CheckCallDone</th>
+            <th>street2CheckRaiseDone</th>
+            <th>street3CheckCallRaiseChance</th>
+            <th>street3CheckCallDone</th>
+            <th>street3CheckRaiseDone</th>
+            <th>street4CheckCallRaiseChance</th>
+            <th>street4CheckCallDone</th>
+            <th>street4CheckRaiseDone</th>
+            <th>street0Calls</th>
+            <th>street1Calls</th>
+            <th>street2Calls</th>
+            <th>street3Calls</th>
+            <th>street4Calls</th>
+            <th>street0Bets</th>
+            <th>street1Bets</th>
+            <th>street2Bets</th>
+            <th>street3Bets</th>
+            <th>street4Bets</th>
+            <th>street0Raises</th>
+            <th>street1Raises</th>
+            <th>street2Raises</th>
+            <th>street3Raises</th>
+            <th>street4Raises</th>
+            <th>street1Discards</th>
+            <th>street2Discards</th>
+            <th>street3Discards</th>
+            <th>handString</th>
+            <th>actionString</th>
+            <!-- HandsActions -->
+
+            <!-- HandsPots -->
+            <th>id</th>
+            <th>handId</th>
+            <th>potId</th>
+            <th>boardId</th>
+            <th>hiLo</th>
+            <th>playerId</th>
+            <th>pot</th>
+            <th>collected</th>
+            <th>rake</th>
+            <!-- HandsStove -->
+            <th>id</th>
+            <th>handId</th>
+            <th>playerId</th>
+            <th>streetId</th>
+            <th>boardId</th>
+            <th>hiLo</th>
+            <th>rankId</th>
+            <th>value</th>
+            <th>cards</th>
+            <th>ev</th>
+            <!-- HandsStove -->
+            <th>id</th>
+            <th>tableName</th>
+            <th>siteHandNo</th>
+            <th>tourneyId</th>
+            <th>gametypeId</th>
+            <th>sessionId</th>
+            <th>fileId</th>
+            <th>startTime</th>
+            <th>importTime</th>
+            <th>seats</th>
+            <th>heroSeat</th>
+            <th>maxPosition</th>
+            <th>boardCard1</th>
+            <th>boardCard2</th>
+            <th>boardCard3</th>
+            <th>boardCard4</th>
+            <th>boardCard5</th>
+            <th>texture</th>
+            <th>runItTwice</th>
+            <th>playersVPI</th>
+            <th>playersAtStreet1</th>
+            <th>playersAtStreet2</th>
+            <th>playersAtStreet3</th>
+            <th>playersAtStreet4</th>
+            <th>playersAtShowdown</th>
+            <th>street0Raises</th>
+            <th>street1Raises</th>
+            <th>street2Raises</th>
+            <th>street3Raises</th>
+            <th>street4Raises</th>
+            <th>street0Pot</th>
+            <th>street1Pot</th>
+            <th>street2Pot</th>
+            <th>street3Pot</th>
+            <th>street4Pot</th>
+            <th>finalPot</th>
+            <th>comment</th>
+            <th>commentTs</th>
+        </tr>
+    </thead>
+    <tbody> 
+        {% for handsPlayer in handsPlayers %}
+        <tr>
+            <td>{{ handsPlayer[0] }}</td>
+            <td>{{ handsPlayer[1] }}</td>
+            <td>{{ handsPlayer[2] }}</td>
+            <td>{{ handsPlayer[3] }}</td>
+            <td>{{ handsPlayer[4] }}</td>
+            <td>{{ handsPlayer[5] }}</td>
+            <td>{{ handsPlayer[6] }}</td>
+            <td>{{ handsPlayer[7] }}</td>
+            <td>{{ handsPlayer[8] }}</td>
+            <td>{{ handsPlayer[9] }}</td>
+            <td><div class="card-images-row">
+                {% if handsPlayer[10] in decodeCardList %}
+                        {% set card_str = decodeCardList[handsPlayer[10]] %}
+                        {% set rank = card_str[:-1] %}
+                        {% set suit = card_str[-1] %}
+                    
+                        {% set card_image_url10 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                        <img src="{{ card_image_url10 }}" class="card-image" >
+                   
+                    {% else %}
+                    
+                    {% endif %}
+                
+
+                {% if handsPlayer[11] in decodeCardList %}
+                        {% set card_str = decodeCardList[handsPlayer[11]] %}
+                        {% set rank = card_str[:-1] %}
+                        {% set suit = card_str[-1] %}
+                    
+                        {% set card_image_url11 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                        <img src="{{ card_image_url11 }}" class="card-image" >
+                   
+                    {% else %}
+                    
+                    {% endif %}
+                
+                {% if handsPlayer[12] in decodeCardList %}
+                        {% set card_str = decodeCardList[handsPlayer[12]] %}
+                        {% set rank = card_str[:-1] %}
+                        {% set suit = card_str[-1] %}
+                    
+                        {% set card_image_url12 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                        <img src="{{ card_image_url12 }}" class="card-image" >
+                   
+                    {% else %}
+                    
+                    {% endif %}
+                
+                {% if handsPlayer[13] in decodeCardList %}
+                        {% set card_str = decodeCardList[handsPlayer[13]] %}
+                        {% set rank = card_str[:-1] %}
+                        {% set suit = card_str[-1] %}
+                    
+                        {% set card_image_url13 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                        <img src="{{ card_image_url13 }}" class="card-image" >
+                   
+                    {% else %}
+                    
+                    {% endif %}
+                
+                {% if handsPlayer[14] in decodeCardList %}
+                        {% set card_str = decodeCardList[handsPlayer[14]] %}
+                        {% set rank = card_str[:-1] %}
+                        {% set suit = card_str[-1] %}
+                    
+                        {% set card_image_url14 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                        <img src="{{ card_image_url14 }}" class="card-image" >
+                   
+                    {% else %}
+                    
+                    {% endif %}
+                
+            
+                {% if handsPlayer[15] in decodeCardList %}
+                        {% set card_str = decodeCardList[handsPlayer[15]] %}
+                        {% set rank = card_str[:-1] %}
+                        {% set suit = card_str[-1] %}
+                    
+                        {% set card_image_url15 = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                        <img src="{{ card_image_url15 }}" class="card-image" >
+                   
+                    {% else %}
+                    
+                    {% endif %}
+                
+                {% if handsPlayer[16] in decodeCardList %}
+                        {% set card_str = decodeCardList[handsPlayer[16]] %}
+                        {% set rank = card_str[:-1] %}
+                        {% set suit = card_str[-1] %}
+                    
+                        {% set card_image_url = "/static/colour/" + suit + "_" + rank + ".svg" %}
+                        <img src="{{ card_image_url16 }}" class="card-image" >
+                   
+                    {% else %}
+                    
+                    {% endif %}
+                           
+        </div></td>
+            <td>{{ handsPlayer[17] }}</td>
+            <td>{{ handsPlayer[18] }}</td>
+            <td>{{ handsPlayer[19] }}</td>
+            <td>{{ handsPlayer[20] }}</td>
+            <td>{{ handsPlayer[21] }}</td>
+            <td>{{ handsPlayer[22] }}</td>
+            <td>{{ handsPlayer[23] }}</td>
+            <td>{{ handsPlayer[24] }}</td>
+            <td>{{ handsPlayer[25] }}</td>
+            <td>{{ handsPlayer[26] }}</td>
+            <td>{{ handsPlayer[27] }}</td>
+            <td>{{ handsPlayer[28] }}</td>
+            <td>{{ handsPlayer[29] }}</td>
+            <td>{{ handsPlayer[30] }}</td>
+            <td>{{ handsPlayer[31] }}</td>
+            <td>{{ handsPlayer[32] }}</td>
+            <td>{{ handsPlayer[33] }}</td>
+            <td>{{ handsPlayer[34] }}</td>
+            <td>{{ handsPlayer[35] }}</td>
+            <td>{{ handsPlayer[36] }}</td>
+            <td>{{ handsPlayer[37] }}</td>
+            <td>{{ handsPlayer[38] }}</td>
+            <td>{{ handsPlayer[39] }}</td>
+            <td>{{ handsPlayer[40] }}</td>
+            <td>{{ handsPlayer[41] }}</td>
+            <td>{{ handsPlayer[42] }}</td>
+            <td>{{ handsPlayer[43] }}</td>
+            <td>{{ handsPlayer[44] }}</td>
+            <td>{{ handsPlayer[45] }}</td>
+            <td>{{ handsPlayer[46] }}</td>
+            <td>{{ handsPlayer[47] }}</td>
+            <td>{{ handsPlayer[48] }}</td>
+            <td>{{ handsPlayer[49] }}</td>
+            <td>{{ handsPlayer[50] }}</td>
+            <td>{{ handsPlayer[51] }}</td>
+            <td>{{ handsPlayer[52] }}</td>
+            <td>{{ handsPlayer[53] }}</td>
+            <td>{{ handsPlayer[54] }}</td>
+            <td>{{ handsPlayer[55] }}</td>
+            <td>{{ handsPlayer[56] }}</td>
+            <td>{{ handsPlayer[57] }}</td>
+            <td>{{ handsPlayer[58] }}</td>
+            <td>{{ handsPlayer[59] }}</td>
+            <td>{{ handsPlayer[60] }}</td>
+            <td>{{ handsPlayer[61] }}</td>
+            <td>{{ handsPlayer[62] }}</td>
+            <td>{{ handsPlayer[63] }}</td>
+            <td>{{ handsPlayer[64] }}</td>
+            <td>{{ handsPlayer[65] }}</td>
+            <td>{{ handsPlayer[66] }}</td>
+            <td>{{ handsPlayer[67] }}</td>
+            <td>{{ handsPlayer[68] }}</td>
+            <td>{{ handsPlayer[69] }}</td>
+            <td>{{ handsPlayer[70] }}</td>
+            <td>{{ handsPlayer[71] }}</td>
+            <td>{{ handsPlayer[72] }}</td>
+            <td>{{ handsPlayer[73] }}</td>
+            <td>{{ handsPlayer[74] }}</td>
+            <td>{{ handsPlayer[75] }}</td>
+            <td>{{ handsPlayer[76] }}</td>
+            <td>{{ handsPlayer[77] }}</td>
+            <td>{{ handsPlayer[78] }}</td>
+            <td>{{ handsPlayer[79] }}</td>
+            <td>{{ handsPlayer[80] }}</td>
+            <td>{{ handsPlayer[81] }}</td>
+            <td>{{ handsPlayer[82] }}</td>
+            <td>{{ handsPlayer[83] }}</td>
+            <td>{{ handsPlayer[84] }}</td>
+            <td>{{ handsPlayer[85] }}</td>
+            <td>{{ handsPlayer[86] }}</td>
+            <td>{{ handsPlayer[87] }}</td>
+            <td>{{ handsPlayer[88] }}</td>
+            <td>{{ handsPlayer[89] }}</td>
+            <td>{{ handsPlayer[90] }}</td>
+            <td>{{ handsPlayer[91] }}</td>
+            <td>{{ handsPlayer[92] }}</td>
+            <td>{{ handsPlayer[93] }}</td>
+            <td>{{ handsPlayer[94] }}</td>
+            <td>{{ handsPlayer[95] }}</td>
+            <td>{{ handsPlayer[96] }}</td>
+            <td>{{ handsPlayer[97] }}</td>
+            <td>{{ handsPlayer[98] }}</td>
+            <td>{{ handsPlayer[99] }}</td>
+            <td>{{ handsPlayer[100] }}</td>
+            <td>{{ handsPlayer[101] }}</td>
+            <td>{{ handsPlayer[102] }}</td>
+            <td>{{ handsPlayer[103] }}</td>
+            <td>{{ handsPlayer[104] }}</td>
+            <td>{{ handsPlayer[105] }}</td>
+            <td>{{ handsPlayer[106] }}</td>
+            <td>{{ handsPlayer[107] }}</td>
+            <td>{{ handsPlayer[108] }}</td>
+            <td>{{ handsPlayer[109] }}</td>
+            <td>{{ handsPlayer[110] }}</td>
+            <td>{{ handsPlayer[111] }}</td>
+            <td>{{ handsPlayer[112] }}</td>
+            <td>{{ handsPlayer[113] }}</td>
+            <td>{{ handsPlayer[114] }}</td>
+            <td>{{ handsPlayer[115] }}</td>
+            <td>{{ handsPlayer[116] }}</td>
+            <td>{{ handsPlayer[117] }}</td>
+            <td>{{ handsPlayer[118] }}</td>
+            <td>{{ handsPlayer[119] }}</td>
+            <td>{{ handsPlayer[120] }}</td>
+            <td>{{ handsPlayer[121] }}</td>
+            <td>{{ handsPlayer[122] }}</td>
+            <td>{{ handsPlayer[123] }}</td>
+            <td>{{ handsPlayer[124] }}</td>
+            <td>{{ handsPlayer[125] }}</td>
+            <td>{{ handsPlayer[126] }}</td>
+            <td>{{ handsPlayer[127] }}</td>
+            <td>{{ handsPlayer[128] }}</td>
+            <td>{{ handsPlayer[129] }}</td>
+            <td>{{ handsPlayer[130] }}</td>
+            <td>{{ handsPlayer[131] }}</td>
+            <td>{{ handsPlayer[132] }}</td>
+            <td>{{ handsPlayer[133] }}</td>
+            <td>{{ handsPlayer[134] }}</td>
+            <td>{{ handsPlayer[135] }}</td>
+            <td>{{ handsPlayer[136] }}</td>
+            <td>{{ handsPlayer[137] }}</td>
+            <td>{{ handsPlayer[138] }}</td>
+            <td>{{ handsPlayer[139] }}</td>
+            <td>{{ handsPlayer[140] }}</td>
+            <td>{{ handsPlayer[141] }}</td>
+            <td>{{ handsPlayer[142] }}</td>
+            <td>{{ handsPlayer[143] }}</td>
+            <td>{{ handsPlayer[144] }}</td>
+            <td>{{ handsPlayer[145] }}</td>
+            <td>{{ handsPlayer[146] }}</td>
+            <td>{{ handsPlayer[147] }}</td>
+            <td>{{ handsPlayer[148] }}</td>
+            <td>{{ handsPlayer[149] }}</td>
+            <td>{{ handsPlayer[150] }}</td>
+            <td>{{ handsPlayer[151] }}</td>
+            <td>{{ handsPlayer[152] }}</td>
+            <td>{{ handsPlayer[153] }}</td>
+            <td>{{ handsPlayer[154] }}</td>
+            <td>{{ handsPlayer[155] }}</td>
+            <td>{{ handsPlayer[156] }}</td>
+            <td>{{ handsPlayer[157] }}</td>
+            <td>{{ handsPlayer[158] }}</td>
+            <td>{{ handsPlayer[159] }}</td>
+            <td>{{ handsPlayer[160] }}</td>
+            <td>{{ handsPlayer[161] }}</td>
+            <td>{{ handsPlayer[162] }}</td>
+            <td>{{ handsPlayer[163] }}</td>
+            <td>{{ handsPlayer[164] }}</td>
+            <td>{{ handsPlayer[165] }}</td>
+            <td>{{ handsPlayer[166] }}</td>
+            <td>{{ handsPlayer[167] }}</td>
+            <td>{{ handsPlayer[168] }}</td>
+            <td>{{ handsPlayer[169] }}</td>
+            <td>{{ handsPlayer[170] }}</td>
+            <td>{{ handsPlayer[171] }}</td>
+            <td>{{ handsPlayer[172] }}</td>
+            <td>{{ handsPlayer[173] }}</td>
+            <td>{{ handsPlayer[174] }}</td>
+            <td>{{ handsPlayer[175] }}</td>
+            <td>{{ handsPlayer[176] }}</td>
+            <td>{{ handsPlayer[177] }}</td>
+            <td>{{ handsPlayer[178] }}</td>
+            <td>{{ handsPlayer[179] }}</td>
+            <td>{{ handsPlayer[180] }}</td>
+            <td>{{ handsPlayer[181] }}</td>
+            <td>{{ handsPlayer[182] }}</td>
+            <td>{{ handsPlayer[183] }}</td>
+            <td>{{ handsPlayer[184] }}</td>
+            <td>{{ handsPlayer[185] }}</td>
+            <td>{{ handsPlayer[186] }}</td>
+            <td>{{ handsPlayer[187] }}</td>
+            <td>{{ handsPlayer[188] }}</td>
+            <td>{{ handsPlayer[189] }}</td>
+            <td>{{ handsPlayer[190] }}</td>
+            <td>{{ handsPlayer[191] }}</td>
+            <td>{{ handsPlayer[192] }}</td>
+            <td>{{ handsPlayer[193] }}</td>
+            <td>{{ handsPlayer[194] }}</td>
+            <td>{{ handsPlayer[195] }}</td>
+            <td>{{ handsPlayer[196] }}</td>
+            <td>{{ handsPlayer[197] }}</td>
+            <td>{{ handsPlayer[198] }}</td>
+            <td>{{ handsPlayer[199] }}</td>
+            <td>{{ handsPlayer[200] }}</td>
+            <td>{{ handsPlayer[201] }}</td>
+            <td>{{ handsPlayer[202] }}</td>
+            <td>{{ handsPlayer[203] }}</td>
+            <td>{{ handsPlayer[204] }}</td>
+            <td>{{ handsPlayer[205] }}</td>
+            <td>{{ handsPlayer[206] }}</td>
+            <td>{{ handsPlayer[207] }}</td>
+            <td>{{ handsPlayer[208] }}</td>
+            <td>{{ handsPlayer[209] }}</td>
+            <td>{{ handsPlayer[210] }}</td>
+            <td>{{ handsPlayer[211] }}</td>
+            <td>{{ handsPlayer[212] }}</td>
+            <td>{{ handsPlayer[213] }}</td>
+            <td>{{ handsPlayer[214] }}</td>
+            <td>{{ handsPlayer[215] }}</td>
+            <td>{{ handsPlayer[216] }}</td>
+            <td>{{ handsPlayer[217] }}</td>
+            <td>{{ handsPlayer[218] }}</td>
+            <td>{{ handsPlayer[219] }}</td>
+
+         
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+</div>
+  <!-- Add Bootstrap JS (Optional) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

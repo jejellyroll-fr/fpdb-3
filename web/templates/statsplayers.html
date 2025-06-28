@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+              <img src="../static/tribal.jpg" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
+              FPDB 3</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/players">Players</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <title>Player Statistics</title>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <style>
+        .chart-container {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+        }
+      </style>
+</head>
+
+<body class="bg-dark">
+    <div class="container">
+    <h4 class="text-light">Player Statistics</h4>
+<div class="chart-container">
+<!-- Bar Chart: VPIP and PFR Comparison -->
+<div>
+    <h5 class="text-light">VPIP and PFR Comparison</h5>
+    <canvas id="vpip-pfr-bar-chart" width="30" height="15"></canvas>
+</div>
+
+<!-- Pie Chart: Position Distribution -->
+<div>
+    <h5 class="text-light">Position Distribution</h5>
+    <canvas id="position-pie-chart" width="30" height="15"></canvas>
+</div>
+
+<!-- Line Chart: Aggression Frequency Over Hands Played -->
+<div>
+    <h5 class="text-light">Aggression Frequency Over Hands Played</h5>
+    <canvas id="aggfrq-line-chart" width="30" height="15"></canvas>
+</div>
+
+<!-- Scatter Plot: VPIP vs PFR -->
+<div>
+    <h5 class="text-light">VPIP vs PFR</h5>
+    <canvas id="vpip-pfr-scatter-plot" width="30" height="15"></canvas>
+</div>
+</div>
+    <script>
+        // Retrieve player statistics data from the server
+        const playerStatistics = JSON.parse('{{ result | tojson | safe }}');
+
+        // Extract relevant data for charts
+        const playerNames = playerStatistics.map(player => player[1]);
+        const vpipValues = playerStatistics.map(player => player[13]);
+        const pfrValues = playerStatistics.map(player => player[14]);
+        const positions = playerStatistics.map(player => player[11]);
+
+        // Bar Chart: VPIP and PFR Comparison
+        new Chart(document.getElementById("vpip-pfr-bar-chart"), {
+            type: 'bar',
+            data: {
+                labels: playerNames,
+                datasets: [
+                    { label: 'VPIP', data: vpipValues, backgroundColor: 'blue' },
+                    { label: 'PFR', data: pfrValues, backgroundColor: 'green' }
+                ]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Pie Chart: Position Distribution
+        new Chart(document.getElementById("position-pie-chart"), {
+            type: 'pie',
+            data: {
+                labels: positions,
+                datasets: [{
+                    data: positions.map(() => 1), // All positions have equal weight
+                    backgroundColor: ['red', 'blue', 'green', 'yellow', 'orange']
+                }]
+            }
+        });
+
+        // Line Chart: Aggression Frequency Over Hands Played
+        const handsPlayed = playerStatistics.map(player => player[12]);
+        const aggfrqValues = playerStatistics.map(player => player[30]);
+        new Chart(document.getElementById("aggfrq-line-chart"), {
+            type: 'line',
+            data: {
+                labels: handsPlayed,
+                datasets: [{
+                    label: 'Aggression Frequency',
+                    data: aggfrqValues,
+                    borderColor: 'purple',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: 'Hands Played' } },
+                    y: { title: { display: true, text: 'Aggression Frequency' }, beginAtZero: true }
+                }
+            }
+        });
+
+        // Scatter Plot: VPIP vs PFR
+        new Chart(document.getElementById("vpip-pfr-scatter-plot"), {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'VPIP vs PFR',
+                    data: vpipValues.map((vpip, index) => ({ x: vpip, y: pfrValues[index] })),
+                    backgroundColor: 'blue'
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: 'VPIP' }, beginAtZero: true },
+                    y: { title: { display: true, text: 'PFR' }, beginAtZero: true }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

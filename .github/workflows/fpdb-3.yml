@@ -1,0 +1,269 @@
+name: Fpdb3
+
+on:
+  push:
+    branches:
+      - '**'  # Match any branch
+    tags:
+      - '**'  # Match any tag
+  pull_request:
+    branches:
+      - '**'  # Match any branch
+  release:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  test-and-coverage:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install uv and project dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install uv ruff
+        uv venv
+        uv pip install .
+
+    - name: Run Ruff for linting
+      run: |
+        ruff check . --exclude .\archives\,.\regression-test-files\,.\pypoker-eval\
+
+
+    - name: Create necessary directories
+      run: mkdir -p C:/Users/runneradmin/AppData/Roaming/fpdb
+      
+    - name: Copy HUD_config.xml
+      run: |
+        cp HUD_config.xml C:/Users/runneradmin/AppData/Roaming/fpdb/HUD_config.xml
+
+    - name: Run tests with pytest
+      run: |
+        uv venv && uv pip install .[test]
+        $env:Path += ";$env:pythonLocation\Scripts"
+        .\.venv\Scripts\Activate.ps1
+        pytest --cov=. --cov-report=html .\test\
+      shell: pwsh
+
+    - name: Check if htmlcov directory exists and list contents
+      run: |
+        if (Test-Path htmlcov) {
+          Get-ChildItem htmlcov -Recurse
+        } else {
+          Write-Output "htmlcov directory does not exist"
+        }
+
+    - name: Deploy coverage to GitHub Pages (gh-pages branch)
+      run: |
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'actions@github.com'
+
+        git fetch origin gh-pages
+        git checkout gh-pages || git checkout --orphan gh-pages
+        git pull origin gh-pages || echo "Branch is orphan or already up to date"
+
+        if (Test-Path coverage) {
+          Remove-Item -Recurse -Force coverage
+        }
+
+        New-Item -ItemType Directory -Path coverage/${{ github.sha }}
+        Copy-Item -Recurse htmlcov/* coverage/${{ github.sha }}/
+
+        git add coverage/${{ github.sha }}/* -f
+        git commit -m "Deploy coverage report for commit ${{ github.sha }}" || echo "Nothing to commit"
+        git push origin gh-pages
+      shell: pwsh
+
+
+    - name: Comment PR with coverage link
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const repoName = context.repo.repo;
+          const repoOwner = context.repo.owner;
+          const sha = context.sha;
+          const url = `https://${repoOwner}.github.io/${repoName}/coverage/${sha}/`;
+          console.log('Attempting to create PR comment');
+          console.log('Coverage URL:', url);
+          try {
+            const response = await github.rest.issues.createComment({
+              owner: repoOwner,
+              repo: repoName,
+              issue_number: context.issue.number,
+              body: `Coverage report for this PR: ${url}`
+            });
+            console.log('Comment created successfully:', response.data.html_url);
+          } catch (error) {
+            console.error('Error creating comment:', error);
+            console.error('Error response:', error.response);
+          }
+
+    - name: Comment commit with coverage link
+      if: github.event_name == 'push'
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const repoName = context.repo.repo;
+          const repoOwner = context.repo.owner;
+          const sha = context.sha;
+          const url = `https://${repoOwner}.github.io/${repoName}/coverage/${sha}/`;
+          console.log('Attempting to create commit comment');
+          console.log('Coverage URL:', url);
+          try {
+            const response = await github.rest.repos.createCommitComment({
+              owner: repoOwner,
+              repo: repoName,
+              commit_sha: sha,
+              body: `Coverage report for this commit: ${url}`
+            });
+            console.log('Comment created successfully:', response.data.html_url);
+          } catch (error) {
+            console.error('Error creating comment:', error);
+            console.error('Error response:', error.response);
+          }
+
+
+
+  build-windows:
+    if: github.event_name == 'push'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Update PATH
+        run: |
+          echo "C:\hostedtoolcache\windows\Python\3.11.x\x64\Scripts;C:\hostedtoolcache\windows\Python\3.11.x\x64" >> $env:GITHUB_PATH
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python.exe -m pip install -e .[build,windows] -vvv
+      - name: Build project
+        shell: bash
+        run: |
+          ./build_fpdb.sh
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-windows
+          path: dist/*
+
+  build-macos-intel:
+      if: github.event_name == 'push'
+      runs-on: macos-latest
+      steps:
+        - uses: actions/checkout@v3
+
+        - name: Set up Python 3.11
+          uses: actions/setup-python@v4
+          with:
+            python-version: '3.11'
+
+        - name: Install Homebrew dependencies
+          run: |
+            brew install pyqt@5
+            echo "QMAKE=$(brew --prefix qt@5)/bin/qmake" >> $GITHUB_ENV
+
+        - name: Install Python dependencies (without PyQt5)
+          run: |
+            python -m pip install --upgrade pip setuptools wheel
+            python -m pip install sip==6.6.2
+            python -m pip install -e .[build,macos] -vvv
+
+        - name: List directory contents
+          run: ls -la
+
+        - name: Make build script executable
+          run: chmod +x ./build_fpdb-osx.sh
+
+        - name: Run build script
+          run: ./build_fpdb-osx.sh
+
+        - name: Archive build artifacts
+          uses: actions/upload-artifact@v4
+          with:
+            name: build-artifacts-macos-intel
+            path: dist/*
+
+  build-macos-arm:
+    if: github.event_name == 'push'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          brew info pyqt@5
+          brew install pyqt@5
+          python -m pip install sip==6.6.2 
+          python -m pip install -e .[build,macos] -vvv
+
+      - name: List directory contents
+        run: ls -la
+      - name: Make build script executable
+        run: chmod +x ./build_fpdb-osx.sh
+      - name: Run build script
+        run: ./build_fpdb-osx.sh
+
+      - name: Build project
+        shell: bash
+        run: |
+          ./build_fpdb-osx.sh
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-macos-arm
+          path: dist/*
+
+
+  build-linux:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxcb1 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 libxkbcommon-x11-0 libxcb-xfixes0 fuse libfuse2
+          sudo modprobe fuse
+          sudo groupadd fuse
+          sudo usermod -a -G fuse $USER
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -e .[build,linux] -vvv
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+      - name: Download AppImageTool
+        run: |
+          wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool-x86_64.AppImage
+      - name: Make build script executable
+        run: chmod +x ./build_fpdb-linux.sh
+      - name: Build project
+        run: ./build_fpdb-linux.sh
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-linux
+          path: fpdb-x86_64.AppImage

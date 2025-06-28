@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:cc="http://creativecommons.org/ns#"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+    xmlns:svg="http://www.w3.org/2000/svg"
+    xmlns:ns1="http://sozi.baierouge.fr"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    id="svg16720"
+    sodipodi:docname="diamond_7.svg"
+    viewBox="0 0 90 135"
+    sodipodi:version="0.32"
+    version="1.0"
+    inkscape:output_extension="org.inkscape.output.svg.inkscape"
+    inkscape:version="0.46"
+  >
+  <sodipodi:namedview
+      id="base"
+      bordercolor="#666666"
+      inkscape:pageshadow="2"
+      guidetolerance="10"
+      pagecolor="#ffffff"
+      gridtolerance="10000"
+      inkscape:window-height="719"
+      inkscape:zoom="1.4"
+      objecttolerance="10"
+      showgrid="false"
+      borderopacity="1.0"
+      inkscape:current-layer="layer1"
+      inkscape:cx="1.1905278"
+      inkscape:cy="112.32681"
+      inkscape:window-y="47"
+      inkscape:window-x="611"
+      inkscape:window-width="641"
+      inkscape:pageopacity="0.0"
+      inkscape:document-units="px"
+  />
+  <g
+      id="layer1"
+      inkscape:label="Layer 1"
+      inkscape:groupmode="layer"
+      transform="translate(-117.86 -330.58)"
+    >
+    <g
+        id="g14658"
+        transform="translate(-367.24 -96.286)"
+      >
+      <g
+          id="g4750"
+          transform="translate(464.24 416.93)"
+        >
+        <rect
+            id="rect4752"
+            style="fill:#000000"
+            ry="14.04"
+            height="135"
+            width="90"
+            y="9.9336"
+            x="20.857"
+        />
+        <rect
+            id="rect4754"
+            style="fill:#f2f2f2"
+            ry="13"
+            height="125"
+            width="80"
+            y="14.934"
+            x="25.857"
+        />
+      </g
+      >
+      <path
+          id="text4820"
+          style="fill:#800000"
+          d="m547.78 497.31c-0.27 0.74-0.51 1.52-0.72 2.32-0.16 0.74-0.37 1.49-0.64 2.24h0.16c-4.53 1.86-8.99 3.78-13.36 5.76-4.37 1.92-8.56 4.26-12.56 7.04-1.39 0.05-2.75 0.1-4.08 0.16-1.33 0.05-2.69 0.1-4.08 0.16l0.16-0.16c2.56-2.03 5.25-3.87 8.08-5.52 2.88-1.66 5.81-3.18 8.8-4.56 2.99-1.44 6-2.78 9.04-4 3.04-1.23 6.08-2.4 9.12-3.52l0.08 0.08m-30.4 41.2c0.48-3.84 1.09-7.68 1.84-11.52 0.75-3.9 1.73-7.68 2.96-11.36 3.52-2.56 7.28-4.75 11.28-6.56 4.05-1.87 8.16-3.66 12.32-5.36v0.08c-1.87 5.97-3.81 11.94-5.84 17.92-2.03 5.92-4.24 11.7-6.64 17.36v0.08c-2.72-0.22-5.36-0.32-7.92-0.32s-5.2-0.11-7.92-0.32h-0.08m-8.96-55.04c7.15-0.11 14.35-0.27 21.6-0.48 7.31-0.22 14.61-0.32 21.92-0.32l0.08 0.08c-0.64 2.18-1.25 4.34-1.84 6.48-0.59 2.13-1.2 4.29-1.84 6.48h-0.24c-3.36 1.22-6.72 2.48-10.08 3.76-3.36 1.22-6.67 2.61-9.92 4.16-3.2 1.49-6.35 3.2-9.44 5.12-3.09 1.86-6.03 4-8.8 6.4h-0.4l-1.2 0.16c0.05-1.39 0.08-2.75 0.08-4.08v-4c0-3.52-0.03-6.99-0.08-10.4-0.05-3.47-0.08-6.96-0.08-10.48l0.08-2.56 0.16-0.32"
+      />
+      <path
+          id="text5381"
+          style="fill:#aa0000"
+          d="m530.11 435.84v3.87c-2.94 3.55-5.11 6.95-6.5 10.2-1.37 3.26-2.17 6.84-2.39 10.76h-4.92c0.33-2.64 0.73-4.86 1.23-6.69 0.49-1.83 1.16-3.65 2.02-5.45 0.48-1.09 1.32-2.54 2.51-4.35 1.2-1.82 2.19-3.13 2.95-3.95h-12.34v-4.39h17.44"
+      />
+      <path
+          id="path5478"
+          sodipodi:nodetypes="ccccc"
+          style="fill:#d40000"
+          d="m503.66 434.81c2.5 6.88 5.62 10 12.5 12.5-6.88 2.5-10 5.63-12.5 12.5-2.5-6.87-5.63-10-12.5-12.5 6.87-2.5 10-5.62 12.5-12.5z"
+      />
+      <path
+          id="path5766"
+          sodipodi:nodetypes="ccccc"
+          style="fill:#d40000"
+          d="m511.43 477.36c1.5 4.13 3.37 6 7.5 7.5-4.13 1.5-6 3.38-7.5 7.5-1.5-4.12-3.38-6-7.5-7.5 4.12-1.5 6-3.37 7.5-7.5z"
+      />
+      <path
+          id="path5768"
+          sodipodi:nodetypes="ccccc"
+          style="fill:#d40000"
+          d="m509.43 504.36c1.5 4.13 3.37 6 7.5 7.5-4.13 1.5-6 3.38-7.5 7.5-1.5-4.12-3.38-6-7.5-7.5 4.12-1.5 6-3.37 7.5-7.5z"
+      />
+      <path
+          id="path5770"
+          sodipodi:nodetypes="ccccc"
+          style="fill:#d40000"
+          d="m536.43 531.36c1.5 4.13 3.37 6 7.5 7.5-4.13 1.5-6 3.38-7.5 7.5-1.5-4.12-3.38-6-7.5-7.5 4.12-1.5 6-3.37 7.5-7.5z"
+      />
+      <path
+          id="path5772"
+          sodipodi:nodetypes="ccccc"
+          style="fill:#d40000"
+          d="m516.43 528.36c1.5 4.13 3.37 6 7.5 7.5-4.13 1.5-6 3.38-7.5 7.5-1.5-4.12-3.38-6-7.5-7.5 4.12-1.5 6-3.37 7.5-7.5z"
+      />
+      <path
+          id="path5774"
+          sodipodi:nodetypes="ccccc"
+          style="fill:#d40000"
+          d="m546.43 505.36c1.5 4.13 3.37 6 7.5 7.5-4.13 1.5-6 3.38-7.5 7.5-1.5-4.12-3.38-6-7.5-7.5 4.12-1.5 6-3.37 7.5-7.5z"
+      />
+      <path
+          id="path5776"
+          sodipodi:nodetypes="ccccc"
+          style="fill:#d40000"
+          d="m553.43 474.36c1.5 4.13 3.37 6 7.5 7.5-4.13 1.5-6 3.38-7.5 7.5-1.5-4.12-3.38-6-7.5-7.5 4.12-1.5 6-3.37 7.5-7.5z"
+      />
+      <path
+          id="path5778"
+          sodipodi:nodetypes="ccccc"
+          style="fill:#d40000"
+          d="m531.43 469.36c1.5 4.13 3.37 6 7.5 7.5-4.13 1.5-6 3.38-7.5 7.5-1.5-4.12-3.38-6-7.5-7.5 4.12-1.5 6-3.37 7.5-7.5z"
+      />
+    </g
+    >
+  </g
+  >
+  <metadata
+    >
+    <rdf:RDF
+      >
+      <cc:Work
+        >
+        <dc:format
+          >image/svg+xml</dc:format
+        >
+        <dc:type
+            rdf:resource="http://purl.org/dc/dcmitype/StillImage"
+        />
+        <cc:license
+            rdf:resource="http://creativecommons.org/licenses/publicdomain/"
+        />
+        <dc:publisher
+          >
+          <cc:Agent
+              rdf:about="http://openclipart.org/"
+            >
+            <dc:title
+              >Openclipart</dc:title
+            >
+          </cc:Agent
+          >
+        </dc:publisher
+        >
+        <dc:title
+          >Seven of Diamonds</dc:title
+        >
+        <dc:date
+          >2009-02-07T18:53:23</dc:date
+        >
+        <dc:description
+          >Seven of diamonds from a funky card deck</dc:description
+        >
+        <dc:source
+          >https://openclipart.org/detail/21463/seven-of-diamonds-by-momoko</dc:source
+        >
+        <dc:creator
+          >
+          <cc:Agent
+            >
+            <dc:title
+              >momoko</dc:title
+            >
+          </cc:Agent
+          >
+        </dc:creator
+        >
+        <dc:subject
+          >
+          <rdf:Bag
+            >
+            <rdf:li
+              >card</rdf:li
+            >
+            <rdf:li
+              >diamonds</rdf:li
+            >
+            <rdf:li
+              >remix</rdf:li
+            >
+            <rdf:li
+              >seven</rdf:li
+            >
+          </rdf:Bag
+          >
+        </dc:subject
+        >
+      </cc:Work
+      >
+      <cc:License
+          rdf:about="http://creativecommons.org/licenses/publicdomain/"
+        >
+        <cc:permits
+            rdf:resource="http://creativecommons.org/ns#Reproduction"
+        />
+        <cc:permits
+            rdf:resource="http://creativecommons.org/ns#Distribution"
+        />
+        <cc:permits
+            rdf:resource="http://creativecommons.org/ns#DerivativeWorks"
+        />
+      </cc:License
+      >
+    </rdf:RDF
+    >
+  </metadata
+  >
+</svg
+>

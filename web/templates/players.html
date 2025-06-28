@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <!-- Add Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="styles.css"> 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">FPDB 3</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/players">Players</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container mt-4">
+
+  <!-- Pagination info -->
+  <p class="text-light">
+    Showing page {{ page }} of {{ total_pages }} pages
+  </p>
+
+<!-- Pagination links -->
+<nav aria-label="Players pagination">
+  <ul class="pagination">
+
+    {% if page > 1 %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page - 1 }}">Prev</a> 
+      </li>
+    {% endif %}
+
+    {% for p in range(1, total_pages + 1) %}
+      <li class="page-item {% if p == page %}active{% endif %}">
+        <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+      </li>
+    {% endfor %}
+
+    {% if page < total_pages %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page + 1 }}">Next</a>
+      </li>
+    {% endif %}
+
+  </ul>
+</nav>
+<div class="container">
+  <div class="row">
+      <div class="col-sm">
+<form class="row row-cols-lg-auto g-3 align-items-center">
+
+  <div class="col-12">
+
+  <input name="name" value="{{selected_name}}" type="text" class="form-control" placeholder="Search player by name..." aria-label="Username" aria-describedby="basic-addon1">
+</div>
+
+  <div class="col-12">
+<button  type="submit" class="btn btn-secondary"><i class="bi bi-search"></i></button>
+
+</div>
+</form>
+          </div>
+      <div class="col-sm">
+      <form class="row row-cols-lg-auto g-3 align-items-center">
+<div class="col-12">
+  <select name="site" class="form-select" aria-label="Default select example">
+    <option value="Winamax">Winamax</option>
+    <option value="PokerStars">PokerStars</option>
+    <option value="WinningPoker">WinningPoker</option>
+    {% for site in sites %}
+    <option value="{{site}}" {% if selected_site == site %}selected{% endif %}>{{site}}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<div class="col-12">
+  <button  type="submit" class="btn btn-secondary">Filter Sites</button>
+</div>  
+<div class="col-12">
+<a href="/players">
+  <button  type="button" class="btn btn-secondary"><i class="bi bi-trash"></i> </button>
+
+</a>
+</div>
+
+</form>
+</div>
+</div></div>
+
+  <!-- Players table -->
+  <div class="container">
+    <h1 class="text-light">Players</h1>
+    <div class="table-responsive">
+      <table class="table table-dark table-striped">
+    <thead>
+      <tr>
+          <th rowspan="2">Id</th>
+          <th rowspan="2">Name</th>
+          <th rowspan="2">Sites</th>
+          <th rowspan="2">Hero</th>
+          <th rowspan="2">Total Hands</th>
+          <th rowspan="2">Cash games Total Hands</th>
+          <th rowspan="2">Cash games Graph</th>
+          <th rowspan="2">Cash games Hands Details</th>
+          <th rowspan="2">Total Hands Tournement or SNG</th>
+          <th rowspan="2">Tournement or SNG Graph</th>
+          <th rowspan="2"> Tournement or SNG Hands Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for player in players %}
+        <tr>
+          <td>{{ player[0] }}</td>
+          <td>{{ player[1] }}</td>
+          <td>{{ player[2] }}</td>
+          <td>{{ player[3] }}</td>
+          <td>{{ player[5] }}</td>
+          <td>{{ player[6] }}</td>
+          <td><a href="/RingProfitAllHandsPlayerIdSite?site={{ player[4] }}&player={{ player[0] }}"><i class="bi bi-graph-up"></i></a></td>
+          <td><a href="/players/{{ player[0] }}/hands?cash=True"><i class="bi bi-eye-fill"></i></a></td>
+          <td>{{ player[7] }}</td>
+          <td><a href="/TourneysProfitPlayerIdSite?site={{ player[4] }}&player={{ player[0] }}"><i class="bi bi-graph-up"></i></a></td>
+          <td><a href="/players/{{ player[0] }}/hands?tourney=True"><i class="bi bi-eye-fill"></i></a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+    <!-- Add Bootstrap JS (Optional) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

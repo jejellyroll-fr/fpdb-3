@@ -1,0 +1,10 @@
+pyfpdb/__pycache__/
+.vscode/
+.git/
+.pyc
+.idea
+__pycache__/
+.vs/
+build/
+dist/
+*.spec

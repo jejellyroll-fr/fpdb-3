@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Backings</title>
+    <style>
+      /* CSS styles */
+    </style>
+  </head>
+  <body>
+    <h1>Backings</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>TourneysPlayersID</th>
+          <th>PlayerID</th>
+          <th>BuyInPercentage</th>
+          <th>PayOffPercentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for backing in backings %}
+        <tr>
+          <td>{{ backing.id }}</td>
+          <td>{{ backing.tourneysPlayersId }}</td>
+          <td>{{ backing.playerId }}</td>
+          <td>{{ backing.buyInPercentage }}</td>
+          <td>{{ backing.payOffPercentage }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <script>
+      // JavaScript code
+    </script>
+  </body>
+</html>
+
