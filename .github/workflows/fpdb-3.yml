@@ -154,38 +154,41 @@ jobs:
           path: dist/*
 
   build-macos-intel:
-    if: github.event_name == 'push'
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          brew info pyqt@5
-          brew install pyqt@5
-          python -m pip install sip==6.6.2 
-          python -m pip install -e .[build,macos] -vvv
-          
-      - name: List directory contents
-        run: ls -la
-      - name: Make build script executable
-        run: chmod +x ./build_fpdb-osx.sh
-      - name: Run build script
-        run: ./build_fpdb-osx.sh
+      if: github.event_name == 'push'
+      runs-on: macos-latest
+      steps:
+        - uses: actions/checkout@v3
 
-      - name: Build project
-        shell: bash
-        run: |
-          ./build_fpdb-osx.sh
-      - name: Archive build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts-macos-intel
-          path: dist/*
+        - name: Set up Python 3.11
+          uses: actions/setup-python@v4
+          with:
+            python-version: '3.11'
+
+        - name: Install Homebrew dependencies
+          run: |
+            brew install pyqt@5
+            echo "QMAKE=$(brew --prefix qt@5)/bin/qmake" >> $GITHUB_ENV
+
+        - name: Install Python dependencies (without PyQt5)
+          run: |
+            python -m pip install --upgrade pip setuptools wheel
+            python -m pip install sip==6.6.2
+            python -m pip install -e .[build,macos] -vvv
+
+        - name: List directory contents
+          run: ls -la
+
+        - name: Make build script executable
+          run: chmod +x ./build_fpdb-osx.sh
+
+        - name: Run build script
+          run: ./build_fpdb-osx.sh
+
+        - name: Archive build artifacts
+          uses: actions/upload-artifact@v4
+          with:
+            name: build-artifacts-macos-intel
+            path: dist/*
 
   build-macos-arm:
     if: github.event_name == 'push'
