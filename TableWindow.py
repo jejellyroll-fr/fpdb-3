@@ -90,7 +90,7 @@ bad_words = ("History for table:", "HUD:", "Chat:", "FPDBHUD", "Lobby")
 
 class Table_Window(object):
     def __init__(
-        self, config, site, table_name=None, tournament=None, table_number=None
+        self, config, site, table_name=None, tournament=None, table_number=None,
     ):
         self.config = config
         self.site = site
@@ -131,7 +131,7 @@ class Table_Window(object):
             self.type = "tour"
             table_kwargs = dict(tournament=self.tournament, table_number=self.table)
             self.tableno_re = getTableNoRe(
-                self.config, self.site, tournament=self.tournament
+                self.config, self.site, tournament=self.tournament,
             )
 
         # Handle cash game tables
@@ -145,19 +145,19 @@ class Table_Window(object):
             table_kwargs = dict(table_name=table_name)
 
             log.debug(
-                f"Cash table kwargs type: {type(table_kwargs)}, value: {table_kwargs}"
+                f"Cash table kwargs type: {type(table_kwargs)}, value: {table_kwargs}",
             )
 
         # Log a warning if neither tournament nor table_name is provided
 
         else:
             log.warning(
-                "Neither tournament nor table_name provided; initialization failed."
+                "Neither tournament nor table_name provided; initialization failed.",
             )
             return None
 
         self.search_string = getTableTitleRe(
-            self.config, self.site, self.type, **table_kwargs
+            self.config, self.site, self.type, **table_kwargs,
         )
         log.debug(f"search string: {self.search_string}")
         # make a small delay otherwise Xtables.root.get_windows()
@@ -167,7 +167,7 @@ class Table_Window(object):
         self.find_table_parameters()
         if not self.number:
             log.error(
-                f'Can\'t find table "{table_name}" with search string "{self.search_string}"'
+                f'Can\'t find table "{table_name}" with search string "{self.search_string}"',
             )
 
         geo = self.get_geometry()

@@ -380,10 +380,10 @@ class HUD_main(QObject):
         if temp_key in self.hud_dict:
             log.debug(f"update hud for hand {new_hand_id}")
             self.db_connection.init_hud_stat_vars(
-                self.hud_dict[temp_key].hud_params["hud_days"], self.hud_dict[temp_key].hud_params["h_hud_days"]
+                self.hud_dict[temp_key].hud_params["hud_days"], self.hud_dict[temp_key].hud_params["h_hud_days"],
             )
             stat_dict = self.db_connection.get_stats_from_hand(
-                new_hand_id, type, self.hud_dict[temp_key].hud_params, self.hero_ids[site_id], num_seats
+                new_hand_id, type, self.hud_dict[temp_key].hud_params, self.hero_ids[site_id], num_seats,
             )
             log.debug(f"got stats for hand {new_hand_id}")
 
@@ -403,7 +403,7 @@ class HUD_main(QObject):
             log.debug(f"create new hud for hand {new_hand_id}")
             self.db_connection.init_hud_stat_vars(self.hud_params["hud_days"], self.hud_params["h_hud_days"])
             stat_dict = self.db_connection.get_stats_from_hand(
-                new_hand_id, type, self.hud_params, self.hero_ids[site_id], num_seats
+                new_hand_id, type, self.hud_params, self.hero_ids[site_id], num_seats,
             )
             log.debug(f"got stats for hand {new_hand_id}")
 

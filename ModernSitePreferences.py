@@ -67,7 +67,7 @@ class ModernSiteCard(QFrame):
                     border: 1px solid rgba(128, 128, 128, 0.5);
                     background-color: rgba(255, 255, 255, 0.08);
                 }
-            """
+            """,
             )
             self._style_applied = True
 
@@ -399,7 +399,7 @@ class ModernSiteCard(QFrame):
             "Wrong Network Version",
             f"PMU Poker was detected on the {found_network} network,\n"
             f"but this configuration is for the {expected_network} network.\n\n"
-            f"Please use the correct PMU Poker configuration for your installation."
+            f"Please use the correct PMU Poker configuration for your installation.",
         )
     
     def show_detection_info_ipoker(self, skins):
@@ -508,7 +508,7 @@ class ModernSitePreferencesDialog(QDialog):
                 border: none;
                 background: none;
             }
-        """
+        """,
         )
 
         self.setup_ui()

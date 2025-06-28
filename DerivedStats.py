@@ -244,11 +244,11 @@ class DerivedStats(object):
                     if street_i in hand.board:
                         boardcards += hand.board[street_i]
                         log.debug(
-                            f"Run {i+1}: Added {street_i} cards: {hand.board[street_i]}"
+                            f"Run {i+1}: Added {street_i} cards: {hand.board[street_i]}",
                         )
                     else:
                         log.warning(
-                            f"Run {i+1}: Street {street_i} not found in hand.board."
+                            f"Run {i+1}: Street {street_i} not found in hand.board.",
                         )
 
                 if hand.gametype.get("split"):
@@ -295,7 +295,7 @@ class DerivedStats(object):
                 log.debug(
                     f"Players at streets: 1={self.hands.get('playersAtStreet1')}, "
                     f"2={self.hands.get('playersAtStreet2')}, 3={self.hands.get('playersAtStreet3')}, "
-                    f"4={self.hands.get('playersAtStreet4')}, Showdown={self.hands.get('playersAtShowdown')}"
+                    f"4={self.hands.get('playersAtStreet4')}, Showdown={self.hands.get('playersAtShowdown')}",
                 )
             except Exception as e:
                 log.error(f"Error determining players at streets: {e}")
@@ -309,7 +309,7 @@ class DerivedStats(object):
                     f"street1Raises={self.hands.get('street1Raises')}, "
                     f"street2Raises={self.hands.get('street2Raises')}, "
                     f"street3Raises={self.hands.get('street3Raises')}, "
-                    f"street4Raises={self.hands.get('street4Raises')}"
+                    f"street4Raises={self.hands.get('street4Raises')}",
                 )
             except Exception as e:
                 log.error(f"Error calculating raises per street: {e}")
@@ -346,20 +346,20 @@ class DerivedStats(object):
 
                     player_stats["startCash"] = int(100 * Decimal(player[2]))
                     log.debug(
-                        f"Player {player_name} startCash={player_stats['startCash']}"
+                        f"Player {player_name} startCash={player_stats['startCash']}",
                     )
 
                     if player[4] is not None:
                         player_stats["startBounty"] = int(100 * Decimal(player[4]))
                         player_stats["endBounty"] = int(100 * Decimal(player[4]))
                         log.debug(
-                            f"Player {player_name} startBounty={player_stats['startBounty']} endBounty={player_stats['endBounty']}"
+                            f"Player {player_name} startBounty={player_stats['startBounty']} endBounty={player_stats['endBounty']}",
                         )
 
                     if player_name in hand.endBounty:
                         player_stats["endBounty"] = int(hand.endBounty.get(player_name))
                         log.debug(
-                            f"Player {player_name} endBounty updated={player_stats['endBounty']}"
+                            f"Player {player_name} endBounty updated={player_stats['endBounty']}",
                         )
 
                     player_stats["sitout"] = player_name in hand.sitout
@@ -368,16 +368,16 @@ class DerivedStats(object):
                     if hand.gametype.get("type") == "tour":
                         player_stats["tourneyTypeId"] = hand.tourneyTypeId
                         player_stats["tourneysPlayersId"] = hand.tourneysPlayersIds.get(
-                            player_name
+                            player_name,
                         )
                         log.debug(
                             f"Player {player_name} tourneyTypeId={hand.tourneyTypeId}, "
-                            f"tourneysPlayersId={player_stats['tourneysPlayersId']}"
+                            f"tourneysPlayersId={player_stats['tourneysPlayersId']}",
                         )
                     else:
                         player_stats["tourneysPlayersId"] = None
                         log.debug(
-                            f"Player {player_name} tourneysPlayersId=None (cash game)"
+                            f"Player {player_name} tourneysPlayersId=None (cash game)",
                         )
 
                     player_stats["showed"] = player_name in hand.shown
@@ -399,7 +399,7 @@ class DerivedStats(object):
             # Determining post-flop streets
             for idx, street_name in enumerate(hand.actionStreets):
                 if idx >= 2 and idx < len(
-                    hand.actionStreets
+                    hand.actionStreets,
                 ):  # Start after PREFLOP/DEAL/THIRD
                     numeric_street_index = idx - 1
                     if numeric_street_index <= 4:
@@ -407,7 +407,7 @@ class DerivedStats(object):
                         relevant_streets.append(street_name)
 
             log.debug(
-                f"Relevant streets for action counting: {relevant_streets}, mapping: {street_indices}"
+                f"Relevant streets for action counting: {relevant_streets}, mapping: {street_indices}",
             )
 
             for street_name in relevant_streets:
@@ -416,7 +416,7 @@ class DerivedStats(object):
                     continue
 
                 log.debug(
-                    f"Counting actions for street: {street_name} (numeric index: {numeric_street_index})"
+                    f"Counting actions for street: {street_name} (numeric index: {numeric_street_index})",
                 )
                 for action in hand.actions.get(street_name, []):
                     player_name = action[0]
@@ -429,25 +429,25 @@ class DerivedStats(object):
                         if action_type == "calls":
                             player_stats[f"street{numeric_street_index}Calls"] += 1
                             log.debug(
-                                f"Incremented street{numeric_street_index}Calls for {player_name}"
+                                f"Incremented street{numeric_street_index}Calls for {player_name}",
                             )
                         elif action_type == "bets":
                             player_stats[f"street{numeric_street_index}Bets"] += 1
                             player_stats[f"street{numeric_street_index}Aggr"] = True
                             log.debug(
-                                f"Incremented street{numeric_street_index}Bets for {player_name}"
+                                f"Incremented street{numeric_street_index}Bets for {player_name}",
                             )
                         elif action_type in ("raises", "completes"):
                             player_stats[f"street{numeric_street_index}Raises"] += 1
                             player_stats[f"street{numeric_street_index}Aggr"] = True
                             log.debug(
-                                f"Incremented street{numeric_street_index}Raises for {player_name}"
+                                f"Incremented street{numeric_street_index}Raises for {player_name}",
                             )
                         elif action_type == "allin":
                             player_stats[f"street{numeric_street_index}AllIn"] = True
                             player_stats[f"street{numeric_street_index}Aggr"] = True
                             log.debug(
-                                f"Set street{numeric_street_index}AllIn and Aggr to True for {player_name}"
+                                f"Set street{numeric_street_index}AllIn and Aggr to True for {player_name}",
                             )
                         elif action_type == "discards":
                             try:
@@ -457,24 +457,24 @@ class DerivedStats(object):
                             except (IndexError, ValueError, TypeError):
                                 num_discarded = 0  # Handle cases where the number is missing or invalid
                                 log.warning(
-                                    f"Could not determine number of discarded cards for action: {action}"
+                                    f"Could not determine number of discarded cards for action: {action}",
                                 )
 
                             # Make sure the key exists before adding
                             player_stats[f"street{numeric_street_index}Discards"] = (
                                 player_stats.get(
-                                    f"street{numeric_street_index}Discards", 0
+                                    f"street{numeric_street_index}Discards", 0,
                                 )
                                 + num_discarded
                             )
                             log.debug(
-                                f"Added {num_discarded} to street{numeric_street_index}Discards for {player_name}"
+                                f"Added {num_discarded} to street{numeric_street_index}Discards for {player_name}",
                             )
                         # Note: 'streetXAggr' is set to True for bets, raises, and all-ins.
 
                     else:
                         log.warning(
-                            f"Player '{player_name}' from action not found in initialized handsplayers for street {street_name}."
+                            f"Player '{player_name}' from action not found in initialized handsplayers for street {street_name}.",
                         )
             # ---
 
@@ -518,11 +518,11 @@ class DerivedStats(object):
                     hand.net_collected[player] = net
                     log.debug(
                         f"Player {player}: collected={collected}, uncalled_bets={uncalled_bets}, "
-                        f"committed={committed}, net_collected={net:.2f}"
+                        f"committed={committed}, net_collected={net:.2f}",
                     )
                 except Exception as e:
                     log.error(
-                        f"Error calculating net collected for player {player}: {e}"
+                        f"Error calculating net collected for player {player}: {e}",
                     )
 
             # Step 3: Update player stats based on net collected
@@ -536,14 +536,14 @@ class DerivedStats(object):
                     common = hand.pot.common.get(player_name, Decimal("0.00"))
                     paid = int(100 * committed) + int(100 * common)
                     log.debug(
-                        f"Player {player_name} paid: committed={int(100 * committed)}, common={int(100 * common)}"
+                        f"Player {player_name} paid: committed={int(100 * committed)}, common={int(100 * common)}",
                     )
 
                     player_stats["common"] = int(100 * common)
                     player_stats["committed"] = int(100 * committed)
 
                     net_collected = int(
-                        100 * hand.net_collected.get(player_name, Decimal("0.00"))
+                        100 * hand.net_collected.get(player_name, Decimal("0.00")),
                     )
                     player_stats["totalProfit"] = net_collected
                     player_stats["winnings"] = net_collected
@@ -551,7 +551,7 @@ class DerivedStats(object):
                         net_collected  # Will be recalculated later if EV is relevant
                     )
                     log.debug(
-                        f"Player {player_name} totalProfit={net_collected}, winnings={net_collected}, allInEV={net_collected}"
+                        f"Player {player_name} totalProfit={net_collected}, winnings={net_collected}, allInEV={net_collected}",
                     )
 
                     player_stats["rake"] = (
@@ -580,12 +580,12 @@ class DerivedStats(object):
                     else:
                         player_stats["rakeWeighted"] = 0
                         log.warning(
-                            f"Total pot is zero. rakeWeighted for {player_name}=0"
+                            f"Total pot is zero. rakeWeighted for {player_name}=0",
                         )
 
                 except ZeroDivisionError:
                     log.error(
-                        f"Division by zero calculating rakeDealt for player {player_name}. Setting to 0."
+                        f"Division by zero calculating rakeDealt for player {player_name}. Setting to 0.",
                     )
                     player_stats["rakeDealt"] = 0
                 except Exception as e:
@@ -609,7 +609,7 @@ class DerivedStats(object):
                                 "rakeContributed"
                             ] = rake_contribution
                             log.debug(
-                                f"Player {player_name} rakeContributed={rake_contribution}"
+                                f"Player {player_name} rakeContributed={rake_contribution}",
                             )
                 except Exception as e:
                     log.error(f"Error calculating rakeContributed: {e}")
@@ -642,16 +642,16 @@ class DerivedStats(object):
                     )
                     log.debug(
                         f"Player {player_name} nonShowdownWinnings={player_stats['nonShowdownWinnings']}, "
-                        f"showdownWinnings={player_stats['showdownWinnings']}"
+                        f"showdownWinnings={player_stats['showdownWinnings']}",
                     )
 
                     player_stats["startCards"] = Card.calcStartCards(hand, player_name)
                     log.debug(
-                        f"Player {player_name} startCards={player_stats['startCards']}"
+                        f"Player {player_name} startCards={player_stats['startCards']}",
                     )
                 except IndexError as e:
                     log.error(
-                        f"IndexError encoding cards for player {player_name}: {e}"
+                        f"IndexError encoding cards for player {player_name}: {e}",
                     )
                     player_stats["startCards"] = []
                 except Exception as e:
@@ -693,7 +693,7 @@ class DerivedStats(object):
             try:
                 self.calcEffectiveStack(hand)
                 self.setPositions(
-                    hand
+                    hand,
                 )  # Must be after the calculations that depend on it
                 log.debug("Calculated Effective Stack and set positions.")
             except Exception as e:
@@ -705,7 +705,7 @@ class DerivedStats(object):
                 log.debug(f"Positions set for hand ID: {hand.handid}")
             except Exception as e:
                 log.error(
-                    f"Error setting player positions for hand ID {hand.handid}: {e}"
+                    f"Error setting player positions for hand ID {hand.handid}: {e}",
                 )
 
             log.debug(f"assembleHandsPlayers completed for hand ID: {hand.handid}.")
@@ -747,11 +747,11 @@ class DerivedStats(object):
                     # Safely get actionId
                     try:
                         self.handsactions[k]["actionId"] = hand.ACTION.get(
-                            action_type, None
+                            action_type, None,
                         )
                         if self.handsactions[k]["actionId"] is None:
                             log.warning(
-                                f"Unknown action type '{action_type}' for player {player_name} in action {k}."
+                                f"Unknown action type '{action_type}' for player {player_name} in action {k}.",
                             )
                     except Exception as e:
                         log.error(f"Error retrieving actionId for action {k}: {e}")
@@ -762,7 +762,7 @@ class DerivedStats(object):
                         try:
                             self.handsactions[k]["amount"] = int(100 * act[2])
                             log.debug(
-                                f"Action {k}: Set amount to {self.handsactions[k]['amount']} for player {player_name}."
+                                f"Action {k}: Set amount to {self.handsactions[k]['amount']} for player {player_name}.",
                             )
                         except (TypeError, ValueError) as e:
                             log.error(f"Error converting amount for action {k}: {e}")
@@ -773,11 +773,11 @@ class DerivedStats(object):
                             self.handsactions[k]["amountCalled"] = int(100 * act[4])
                             log.debug(
                                 f"Action {k}: Set raiseTo to {self.handsactions[k]['raiseTo']} and "
-                                f"amountCalled to {self.handsactions[k]['amountCalled']} for player {player_name}."
+                                f"amountCalled to {self.handsactions[k]['amountCalled']} for player {player_name}.",
                             )
                         except (TypeError, ValueError) as e:
                             log.error(
-                                f"Error converting raiseTo or amountCalled for action {k}: {e}"
+                                f"Error converting raiseTo or amountCalled for action {k}: {e}",
                             )
 
                     if action_type in ("discards"):
@@ -787,29 +787,29 @@ class DerivedStats(object):
                                 f"street{(i - 1)}Discards"
                             ] = int(act[2])
                             log.debug(
-                                f"Action {k}: Set numDiscarded to {self.handsactions[k]['numDiscarded']} for player {player_name}."
+                                f"Action {k}: Set numDiscarded to {self.handsactions[k]['numDiscarded']} for player {player_name}.",
                             )
                         except (TypeError, ValueError, IndexError) as e:
                             log.error(
-                                f"Error setting numDiscarded for action {k} and player {player_name}: {e}"
+                                f"Error setting numDiscarded for action {k} and player {player_name}: {e}",
                             )
 
                     if action_type in ("discards") and len(act) > 3:
                         try:
                             self.handsactions[k]["cardsDiscarded"] = act[3]
                             log.debug(
-                                f"Action {k}: Set cardsDiscarded to {self.handsactions[k]['cardsDiscarded']} for player {player_name}."
+                                f"Action {k}: Set cardsDiscarded to {self.handsactions[k]['cardsDiscarded']} for player {player_name}.",
                             )
                         except Exception as e:
                             log.error(
-                                f"Error setting cardsDiscarded for action {k} and player {player_name}: {e}"
+                                f"Error setting cardsDiscarded for action {k} and player {player_name}: {e}",
                             )
 
                     if len(act) > 3 and action_type not in ("discards"):
                         try:
                             self.handsactions[k]["allIn"] = act[-1]
                             log.debug(
-                                f"Action {k}: Set allIn to {self.handsactions[k]['allIn']} for player {player_name}."
+                                f"Action {k}: Set allIn to {self.handsactions[k]['allIn']} for player {player_name}.",
                             )
                             if act[-1]:
                                 self.handsplayers[player_name]["wentAllIn"] = True
@@ -817,11 +817,11 @@ class DerivedStats(object):
                                     f"street{(i - 1)}AllIn"
                                 ] = True
                                 log.debug(
-                                    f"Player {player_name} wentAllIn set to True for street {i - 1}."
+                                    f"Player {player_name} wentAllIn set to True for street {i - 1}.",
                                 )
                         except IndexError as e:
                             log.error(
-                                f"Error accessing allIn flag for action {k} and player {player_name}: {e}"
+                                f"Error accessing allIn flag for action {k} and player {player_name}: {e}",
                             )
 
                     # Additional validation or logging can be added here as needed
@@ -845,11 +845,11 @@ class DerivedStats(object):
             try:
                 base, evalgame, hilo, streets, last, hrange = Card.games[category]
                 log.debug(
-                    f"Game configuration for category '{category}': base={base}, evalgame={evalgame}, hilo={hilo}, streets={streets}, last={last}, hrange={hrange}"
+                    f"Game configuration for category '{category}': base={base}, evalgame={evalgame}, hilo={hilo}, streets={streets}, last={last}, hrange={hrange}",
                 )
             except KeyError:
                 log.error(
-                    f"Unknown game category '{category}' for hand ID: {hand.handid}"
+                    f"Unknown game category '{category}' for hand ID: {hand.handid}",
                 )
                 return  # Exit the function as the category is unrecognized
 
@@ -862,7 +862,7 @@ class DerivedStats(object):
             boards = self.getBoardsDict(hand, base, streets)
 
             log.debug(
-                f"Hand category: {category}, base: {base}, evalgame: {evalgame}, hilo: {hilo}"
+                f"Hand category: {category}, base: {base}, evalgame: {evalgame}, hilo: {hilo}",
             )
             log.debug(f"Extracted boards: {boards}")
 
@@ -899,7 +899,7 @@ class DerivedStats(object):
                             log.debug(
                                 f"Evaluating hand for {pname} at street '{street}' (id: {streetId}): "
                                 f"streetSeen={streetSeen}, hero={pname == hand.hero}, showed={hp.get('showed', False)}, "
-                                f"sawShowdown={hp.get('sawShowdown', False)}, wentAllIn={hp.get('wentAllIn', False)}"
+                                f"sawShowdown={hp.get('sawShowdown', False)}, wentAllIn={hp.get('wentAllIn', False)}",
                             )
                             boardId, hl, rankId, value, _cards = 0, "n", 1, 0, None
                             for n in range(len(board["board"])):
@@ -958,16 +958,16 @@ class DerivedStats(object):
 
                                     log.debug(
                                         f"{pname}, street {streetId}, boardId {boardId}, cards: {cards}, board: {bcards}, "
-                                        f"notnull={notnull}, postflop={postflop}, maxcards={maxcards}"
+                                        f"notnull={notnull}, postflop={postflop}, maxcards={maxcards}",
                                     )
 
                                     if notnull and (postflop or maxcards):
                                         for hl, side in hiLoKey.get(
-                                            hilo, [("n", "hi")]
+                                            hilo, [("n", "hi")],
                                         ):
                                             try:
                                                 value, rank = pokereval.best(
-                                                    side, cards, bcards
+                                                    side, cards, bcards,
                                                 )
                                                 rankId = (
                                                     Card.hands.get(rank[0], [1])[0]
@@ -979,7 +979,7 @@ class DerivedStats(object):
                                                         [
                                                             pokereval.card2string(i)[0]
                                                             for i in rank[1:]
-                                                        ]
+                                                        ],
                                                     )
                                                     if rank and rank[0] != "Nothing"
                                                     else None
@@ -996,14 +996,14 @@ class DerivedStats(object):
                                                         value,
                                                         _cards,
                                                         0,
-                                                    ]
+                                                    ],
                                                 )
                                                 log.debug(
-                                                    f"{pname} : Added result to handsstove (rankId={rankId}, value={value})"
+                                                    f"{pname} : Added result to handsstove (rankId={rankId}, value={value})",
                                                 )
                                             except RuntimeError as e:
                                                 log.error(
-                                                    f"RuntimeError determining value and rank for hand {hand.handid}, path {hand.in_path}: {e}"
+                                                    f"RuntimeError determining value and rank for hand {hand.handid}, path {hand.in_path}: {e}",
                                                 )
                                                 self.handsstove.append(
                                                     [
@@ -1016,7 +1016,7 @@ class DerivedStats(object):
                                                         0,
                                                         None,
                                                         0,
-                                                    ]
+                                                    ],
                                                 )
                                     else:
                                         self.handsstove.append(
@@ -1030,14 +1030,14 @@ class DerivedStats(object):
                                                 0,
                                                 None,
                                                 0,
-                                            ]
+                                            ],
                                         )
                                         log.debug(
-                                            f"{pname} : No valid combination, added default value to handsstove."
+                                            f"{pname} : No valid combination, added default value to handsstove.",
                                         )
                                 except Exception as e:
                                     log.error(
-                                        f"Error processing street '{street}' for player {pname}: {e}"
+                                        f"Error processing street '{street}' for player {pname}: {e}",
                                     )
                 else:
                     hl, streetId = hiLoKey.get(hilo, [("n", "low")])[0][0], 0
@@ -1059,10 +1059,10 @@ class DerivedStats(object):
                             0,
                             None,
                             0,
-                        ]
+                        ],
                     )
                     log.debug(
-                        f"{pname} : No evalgame, added simplified entry to handsstove."
+                        f"{pname} : No evalgame, added simplified entry to handsstove.",
                     )
 
             # If in hold and evalgame, calculate All-In EV
@@ -1070,11 +1070,11 @@ class DerivedStats(object):
                 try:
                     log.debug("Calculating All-In EV for the hand.")
                     self.getAllInEV(
-                        hand, evalgame, holeplayers, boards, streets, holecards
+                        hand, evalgame, holeplayers, boards, streets, holecards,
                     )
                 except Exception as e:
                     log.error(
-                        f"Error calculating All-In EV for hand {hand.handid}: {e}"
+                        f"Error calculating All-In EV for hand {hand.handid}: {e}",
                     )
 
             log.debug(f"Completed assembleHandsStove for hand ID: {hand.handid}")
@@ -1114,11 +1114,11 @@ class DerivedStats(object):
                     ]
 
                     log.debug(
-                        f"BoardId {boardId}: valid showdown or all-in players: {valid}"
+                        f"BoardId {boardId}: valid showdown or all-in players: {valid}",
                     )
                     if not valid:
                         log.warning(
-                            "No valid players found. Either no one saw the showdown, is all-in, or the cards are unknown (0x)."
+                            "No valid players found. Either no one saw the showdown, is all-in, or the cards are unknown (0x).",
                         )
 
                     if potId == 1:
@@ -1130,7 +1130,7 @@ class DerivedStats(object):
                         _deadcards = [holecards[d]["hole"] for d in deadplayers]
                         deadcards = [item for sublist in _deadcards for item in sublist]
                         log.debug(
-                            f"Eliminated players: {deadplayers}, dead cards: {deadcards}"
+                            f"Eliminated players: {deadplayers}, dead cards: {deadcards}",
                         )
 
                     # Condition for calculating equities
@@ -1139,7 +1139,7 @@ class DerivedStats(object):
                     # This allows EV calculation when players are all-in.
                     if len(players) == len(valid) and (board["allin"] or hand.publicDB):
                         log.debug(
-                            f"All pot players are valid, all-in, or public. board['allin']={board['allin']}, hand.publicDB={hand.publicDB}"
+                            f"All pot players are valid, all-in, or public. board['allin']={board['allin']}, hand.publicDB={hand.publicDB}",
                         )
                         if board["allin"] and not startstreet:
                             startstreet = street
@@ -1149,7 +1149,7 @@ class DerivedStats(object):
                             try:
                                 pockets = [holecards[p]["hole"] for p in valid]
                                 log.debug(
-                                    f"Calculating equities with poker_eval: game={evalgame}, pockets={pockets}, dead={deadcards}"
+                                    f"Calculating equities with poker_eval: game={evalgame}, pockets={pockets}, dead={deadcards}",
                                 )
                                 evs = pokereval.poker_eval(
                                     game=evalgame,
@@ -1163,7 +1163,7 @@ class DerivedStats(object):
                                 log.debug(f"Calculated equities: {equities}")
                             except RuntimeError as e:
                                 log.error(
-                                    f"getAllInEV: Error running poker_eval for hand {hand.handid} {hand.in_path}: {e}"
+                                    f"getAllInEV: Error running poker_eval for hand {hand.handid} {hand.in_path}: {e}",
                                 )
                                 equities = [1000]
                         else:
@@ -1178,7 +1178,7 @@ class DerivedStats(object):
                             for i in range(len(equities)):
                                 equities[i] += remainder
                                 log.debug(
-                                    f"Adjusted equity for player {valid[i]}: {equities[i]}"
+                                    f"Adjusted equity for player {valid[i]}: {equities[i]}",
                                 )
 
                         for i, p in enumerate(valid):
@@ -1200,21 +1200,21 @@ class DerivedStats(object):
                                     + 100 * hand.pot.common[p]
                                 )
                                 log.debug(
-                                    f"{p}: Updated eq={holecards[p]['eq']} and committed={holecards[p]['committed']}"
+                                    f"{p}: Updated eq={holecards[p]['eq']} and committed={holecards[p]['committed']}",
                                 )
 
                             for j in self.handsstove:
                                 # Update values in handsstove
                                 if [pid, streetId, boardId] == j[1:4] and len(
-                                    valid
+                                    valid,
                                 ) == len(hand.pot.contenders):
                                     j[-1] = equities[i]
                                     log.debug(
-                                        f"Updated handsstove for {p}, streetId={streetId}, boardId={boardId}, equity={equities[i]}"
+                                        f"Updated handsstove for {p}, streetId={streetId}, boardId={boardId}, equity={equities[i]}",
                                     )
                     else:
                         log.debug(
-                            f"EV calculation conditions not met here. len(players)={len(players)}, len(valid)={len(valid)}, board['allin']={board['allin']}, hand.publicDB={hand.publicDB}"
+                            f"EV calculation conditions not met here. len(players)={len(players)}, len(valid)={len(valid)}, board['allin']={board['allin']}, hand.publicDB={hand.publicDB}",
                         )
 
         # Final allInEV calculation
@@ -1224,7 +1224,7 @@ class DerivedStats(object):
                     holecards[p]["eq"] - holecards[p]["committed"]
                 )
                 log.debug(
-                    f"{p}: Final allInEV calculation = {self.handsplayers[p]['allInEV']}"
+                    f"{p}: Final allInEV calculation = {self.handsplayers[p]['allInEV']}",
                 )
 
         log.debug("Completed getAllInEV")
@@ -1254,16 +1254,16 @@ class DerivedStats(object):
                         if street_i in hand.board:
                             boardcards += hand.board[street_i]
                             log.debug(
-                                f"Run {i + 1}: Added cards from '{street_i}': {hand.board[street_i]}"
+                                f"Run {i + 1}: Added cards from '{street_i}': {hand.board[street_i]}",
                             )
                         else:
                             log.warning(
-                                f"Run {i + 1}: Street '{street_i}' not found in hand.board."
+                                f"Run {i + 1}: Street '{street_i}' not found in hand.board.",
                             )
 
                     cards = [str(c) for c in community + boardcards]
                     log.debug(
-                        f"Run {i + 1}: Combined community and board cards: {cards}"
+                        f"Run {i + 1}: Combined community and board cards: {cards}",
                     )
                     boards.append(cards)
 
@@ -1321,7 +1321,7 @@ class DerivedStats(object):
                     boards[s] = {"board": [b], "allin": False}
                     boardcards += hand.board.get(s, [])
                     log.debug(
-                        f"Added board cards for street '{s}': {hand.board.get(s, [])}"
+                        f"Added board cards for street '{s}': {hand.board.get(s, [])}",
                     )
                 except KeyError as e:
                     log.error(f"Missing board information for street '{s}': {e}")
@@ -1332,7 +1332,7 @@ class DerivedStats(object):
                     if streetId > 0 and allInStreets[streetId - 1] in boards:
                         boards[allInStreets[streetId - 1]]["allin"] = True
                         log.debug(
-                            f"Marked previous street '{allInStreets[streetId - 1]}' as all-in."
+                            f"Marked previous street '{allInStreets[streetId - 1]}' as all-in.",
                         )
                     boards[s]["allin"] = True
                     log.debug(f"Marked current street '{s}' as all-in.")
@@ -1351,11 +1351,11 @@ class DerivedStats(object):
                     if street_i in hand.board:
                         runitcards += hand.board[street_i]
                         log.debug(
-                            f"Run {i + 1}: Added cards from '{street_i}': {hand.board[street_i]}"
+                            f"Run {i + 1}: Added cards from '{street_i}': {hand.board[street_i]}",
                         )
                     else:
                         log.warning(
-                            f"Run {i + 1}: Street '{street_i}' not found in hand.board."
+                            f"Run {i + 1}: Street '{street_i}' not found in hand.board.",
                         )
 
                 # Calculate the street index for boardStreets
@@ -1365,11 +1365,11 @@ class DerivedStats(object):
                 if 0 <= sId < len(boardStreets):
                     boardStreets[sId].append(boardcards + runitcards)
                     log.debug(
-                        f"Run {i + 1}: Updated boardStreets[{sId}] with cards: {boardcards + runitcards}"
+                        f"Run {i + 1}: Updated boardStreets[{sId}] with cards: {boardcards + runitcards}",
                     )
                 else:
                     log.warning(
-                        f"Run {i + 1}: sId={sId} is out of range for boardStreets."
+                        f"Run {i + 1}: sId={sId} is out of range for boardStreets.",
                     )
 
             # Assign the collected run iterations to the boards
@@ -1377,16 +1377,16 @@ class DerivedStats(object):
                 if i < len(boardStreets) and boardStreets[i]:
                     boards[street]["board"] = boardStreets[i]
                     log.debug(
-                        f"Assigned boardStreets[{i}] to street '{street}': {boardStreets[i]}"
+                        f"Assigned boardStreets[{i}] to street '{street}': {boardStreets[i]}",
                     )
                 elif street in boards:
                     log.debug(
-                        f"No additional board cards for street '{street}' from runs."
+                        f"No additional board cards for street '{street}' from runs.",
                     )
 
         else:
             log.debug(
-                f"Base game type is '{base}'. Initializing empty boards for all-in streets."
+                f"Base game type is '{base}'. Initializing empty boards for all-in streets.",
             )
             for s in allInStreets:
                 if s in streets:
@@ -1400,18 +1400,18 @@ class DerivedStats(object):
         for s in allInStreets:
             if s not in boards:
                 log.debug(
-                    f"Street '{s}' not present in boards. Skipping all-in detection."
+                    f"Street '{s}' not present in boards. Skipping all-in detection.",
                 )
                 continue
             if boards[s]["allin"]:
                 log.debug(
-                    f"Street '{s}' is already marked as all-in. Continuing to next street."
+                    f"Street '{s}' is already marked as all-in. Continuing to next street.",
                 )
                 continue
 
             streetId = streets[s]
             log.debug(
-                f"Checking all-in status for street '{s}' with streetId={streetId}."
+                f"Checking all-in status for street '{s}' with streetId={streetId}.",
             )
 
             # Determine alive players after this street
@@ -1430,7 +1430,7 @@ class DerivedStats(object):
                         if pname in folds:
                             folded_earlier = True
                             log.debug(
-                                f"Player {pname} folded earlier at street '{street_action}'."
+                                f"Player {pname} folded earlier at street '{street_action}'.",
                             )
                             break
                 if not folded_earlier:
@@ -1441,7 +1441,7 @@ class DerivedStats(object):
 
             if not alive_players:
                 log.warning(
-                    f"No alive players found for street '{s}'. Cannot mark as all-in."
+                    f"No alive players found for street '{s}'. Cannot mark as all-in.",
                 )
                 continue
 
@@ -1458,15 +1458,15 @@ class DerivedStats(object):
             if all_allin:
                 boards[s]["allin"] = True
                 log.debug(
-                    f"All alive players are all-in at street '{s}'. Marked board['allin']=True."
+                    f"All alive players are all-in at street '{s}'. Marked board['allin']=True.",
                 )
             else:
                 log.debug(
-                    f"Not all alive players are all-in at street '{s}'. board['allin'] remains False."
+                    f"Not all alive players are all-in at street '{s}'. board['allin'] remains False.",
                 )
 
         log.debug(
-            f"Completed getBoardsDict for hand {hand.handid}. Final boards: {boards}"
+            f"Completed getBoardsDict for hand {hand.handid}. Final boards: {boards}",
         )
         return boards
 
@@ -1541,12 +1541,12 @@ class DerivedStats(object):
                     if len(holecards) > 1:
                         try:
                             win = pokereval.winners(
-                                game=evalgame, pockets=holecards, board=board
+                                game=evalgame, pockets=holecards, board=board,
                             )
                         except RuntimeError:
                             # log.error((evalgame, holecards, board))
                             log.error(
-                                f"awardPots: error evaluating winners for hand {hand.handid} {hand.in_path}"
+                                f"awardPots: error evaluating winners for hand {hand.handid} {hand.in_path}",
                             )
                             win = {}
                             win[hiLoKey[hilo][0]] = [0]
@@ -1577,7 +1577,7 @@ class DerivedStats(object):
                                     ppot += cent
                                     modSplit -= cent
                                 rake = (totalrake * (ppot / hand.totalpot)).quantize(
-                                    Decimal("0.01"), rounding=ROUND_DOWN
+                                    Decimal("0.01"), rounding=ROUND_DOWN,
                                 )
                                 hand.addCollectPot(player=p, pot=(ppot - rake))
 
@@ -1644,11 +1644,11 @@ class DerivedStats(object):
         # Configure game settings
         hiLoKey = {"h": ["hi"], "l": ["low"], "r": ["low"], "s": ["hi", "low"]}
         game_settings = Card.games.get(
-            category, ("hold", "default_game", "h", {}, [], {})
+            category, ("hold", "default_game", "h", {}, [], {}),
         )
         base, evalgame, hilo, streets, last, hrange = game_settings
         log.debug(
-            f"Game settings: base={base}, evalgame={evalgame}, hilo={hilo}, streets={streets}, hrange={hrange}"
+            f"Game settings: base={base}, evalgame={evalgame}, hilo={hilo}, streets={streets}, hrange={hrange}",
         )
 
         # Process pots
@@ -1668,7 +1668,7 @@ class DerivedStats(object):
                     additional_pot = sum(hand.pot.common.values()) + hand.pot.stp
                     pot += additional_pot
                     log.debug(
-                        f"Main pot adjusted by adding common pot and stp: +{additional_pot} => {pot}"
+                        f"Main pot adjusted by adding common pot and stp: +{additional_pot} => {pot}",
                     )
                 potId += 1
 
@@ -1686,7 +1686,7 @@ class DerivedStats(object):
                     if boardId == 1:
                         potBoard += modBoard
                         log.debug(
-                            f"First boardId {boardId}: Adjusted potBoard with modBoard: {potBoard}"
+                            f"First boardId {boardId}: Adjusted potBoard with modBoard: {potBoard}",
                         )
 
                     holeplayers, holecards = [], []
@@ -1709,21 +1709,21 @@ class DerivedStats(object):
                     if len(holecards) > 1:
                         try:
                             log.debug(
-                                f"Evaluating winners with pokereval for potId {potId}, boardId {boardId}"
+                                f"Evaluating winners with pokereval for potId {potId}, boardId {boardId}",
                             )
                             win = pokereval.winners(
-                                game=evalgame, pockets=holecards, board=board
+                                game=evalgame, pockets=holecards, board=board,
                             )
                             log.debug(f"Winners determined: {win}")
                         except RuntimeError as e:
                             log.error(
-                                f"Error evaluating winners for hand {hand.handid} at path {hand.in_path}: {e}"
+                                f"Error evaluating winners for hand {hand.handid} at path {hand.in_path}: {e}",
                             )
                             win = {}
                             win[hiLoKey[hilo][0]] = [0]
                     else:
                         log.debug(
-                            "Only one player with valid holecards. Assigning default winner."
+                            "Only one player with valid holecards. Assigning default winner.",
                         )
                         win = {}
                         win[hiLoKey[hilo][0]] = [0]
@@ -1753,7 +1753,7 @@ class DerivedStats(object):
                                 else [holeplayers[w] for w in win[hl]]
                             )
                             log.debug(
-                                f"Pot split for {hl}: potSplit={potSplit}, modSplit={modSplit}, pnames={pnames}"
+                                f"Pot split for {hl}: potSplit={potSplit}, modSplit={modSplit}, pnames={pnames}",
                             )
 
                             for n in positions:
@@ -1767,7 +1767,7 @@ class DerivedStats(object):
                                         ppot += cent
                                         modSplit -= cent
                                         log.debug(
-                                            f"Adjusted potSplit for player {pname} by cent={cent}. New ppot={ppot}"
+                                            f"Adjusted potSplit for player {pname} by cent={cent}. New ppot={ppot}",
                                         )
 
                                     playersPots[pname][0] += ppot
@@ -1783,11 +1783,11 @@ class DerivedStats(object):
                                     playersPots[pname][1].append(data)
                                     self.handsplayers[pname]["rake"] = 0
                                     log.debug(
-                                        f"Updated playersPots for {pname}: {playersPots[pname]}"
+                                        f"Updated playersPots for {pname}: {playersPots[pname]}",
                                     )
 
                     log.debug(
-                        f"Completed processing boardId {boardId} for potId {potId}"
+                        f"Completed processing boardId {boardId} for potId {potId}",
                     )
 
             # Finalizing pot distributions
@@ -1804,7 +1804,7 @@ class DerivedStats(object):
                             and hand.collectees.get(n) is not None
                         ]
                         log.debug(
-                            f"Processing pot split for player {p}: item={item}, split={split}"
+                            f"Processing pot split for player {p}: item={item}, split={split}",
                         )
 
                         if len(info) == 1:
@@ -1812,32 +1812,32 @@ class DerivedStats(object):
                             rake = ppot - hand.collectees[p]
                             collected = hand.collectees[p]
                             log.debug(
-                                f"Single pot split: ppot={ppot}, collected={collected}, rake={rake}"
+                                f"Single pot split: ppot={ppot}, collected={collected}, rake={rake}",
                             )
                         elif item == info[-1]:
                             ppot, collected = potFound[p]
                             rake = ppot - collected
                             log.debug(
-                                f"Last pot split: ppot={ppot}, collected={collected}, rake={rake}"
+                                f"Last pot split: ppot={ppot}, collected={collected}, rake={rake}",
                             )
                         elif split and not item["mod"]:
                             ppot = item["ppot"]
                             collected = min(
-                                [hand.collectees[s] for s in split] + [ppot]
+                                [hand.collectees[s] for s in split] + [ppot],
                             )
                             rake = ppot - collected
                             log.debug(
-                                f"Partial pot split: ppot={ppot}, collected={collected}, rake={rake}"
+                                f"Partial pot split: ppot={ppot}, collected={collected}, rake={rake}",
                             )
                         else:
                             ppot = item["ppot"]
                             totalrake = total - hand.collectees[p]
                             rake = (totalrake * (ppot / total)).quantize(
-                                Decimal("0.01")
+                                Decimal("0.01"),
                             )
                             collected = ppot - rake
                             log.debug(
-                                f"General pot split: ppot={ppot}, collected={collected}, rake={rake}"
+                                f"General pot split: ppot={ppot}, collected={collected}, rake={rake}",
                             )
 
                         potFound[p][0] -= ppot
@@ -2092,7 +2092,7 @@ class DerivedStats(object):
                     action
                     for action in hand.actions[street]
                     if action[1] in ("raises", "bets", "completes")
-                ]
+                ],
             )
 
     def calcSteals(self, hand):
@@ -2113,7 +2113,7 @@ class DerivedStats(object):
                     x
                     for x in hand.actions[hand.actionStreets[0]]
                     if x[1] == "button blind"
-                ]
+                ],
             )
             > 0
         ):
@@ -2261,23 +2261,23 @@ class DerivedStats(object):
         # for i, street in enumerate(hand.actionStreets[2:], start=1):
         for i, street in enumerate(hand.actionStreets[2:]):
             name = self.lastBetOrRaiser(
-                hand.actions, hand.actionStreets[i + 1]
+                hand.actions, hand.actionStreets[i + 1],
             )  # previous street
             if name:
                 chance = self.noBetsBefore(
-                    hand.actions, hand.actionStreets[i + 2], name
+                    hand.actions, hand.actionStreets[i + 2], name,
                 )  # this street
                 if chance is True:
                     player_stats = self.handsplayers.get(name)
                     player_stats["street%dCBChance" % (i + 1)] = True
                     player_stats["street%dCBDone" % (i + 1)] = self.betStreet(
-                        hand.actions, hand.actionStreets[i + 2], name
+                        hand.actions, hand.actionStreets[i + 2], name,
                     )
                     if player_stats["street%dCBDone" % (i + 1)]:
                         for pname, folds in list(
                             self.foldTofirstsBetOrRaiser(
-                                hand.actions, street, name
-                            ).items()
+                                hand.actions, street, name,
+                            ).items(),
                         ):
                             # print "DEBUG:", hand.handid, pname.encode('utf8'), street, folds, '--', name, 'lastbet on ', hand.actionStreets[i+1]
                             self.handsplayers[pname][

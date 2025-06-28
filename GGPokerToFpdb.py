@@ -42,15 +42,15 @@ class GGPoker(HandHistoryConverter):
     codepage = ("utf8", "cp1252")
     siteId = 27  # Needs to match id entry in Sites database
     sym = {
-        "USD": "\$",
+        "USD": r"\$",
         "T$": "",
         "play": "",
     }  # ADD Euro, Sterling, etc HERE
     substitutions = {
         "LEGAL_ISO": "USD|CNY",  # legal ISO currency codes
-        "LS": "\$|\¥|",  # legal currency symbols - Euro(cp1252, utf-8)
+        "LS": r"\$|\¥|",  # legal currency symbols - Euro(cp1252, utf-8)
         "PLYR": r"\s?(?P<PNAME>.+?)",
-        "CUR": "(\$|\¥|)",
+        "CUR": r"(\$|\¥|)",
         "BRKTS": r"(\(button\) |\(small blind\) |\(big blind\) |\(button blind\) |\(button\) \(small blind\) |\(small blind/button\) |\(button\) \(big blind\) )?",
     }
 
@@ -151,27 +151,27 @@ class GGPoker(HandHistoryConverter):
     # Static regexes
     re_GameInfo = re.compile(
         """
-          Poker\sHand\s\#[A-Z]{0,2}(?P<HID>[0-9]+):\s+
-          (\{.*\}\s+)?((?P<TOUR>((Zoom|Rush)\s)?(Tournament))\s\#                # open paren of tournament info
-          (?P<TOURNO>\d+),\s
+          Poker\\sHand\\s\\#[A-Z]{0,2}(?P<HID>[0-9]+):\\s+
+          (\\{.*\\}\\s+)?((?P<TOUR>((Zoom|Rush)\\s)?(Tournament))\\s\\#                # open paren of tournament info
+          (?P<TOURNO>\\d+),\\s
           # here's how I plan to use LS
-          (?P<TOURNAME>.+?)\s
+          (?P<TOURNAME>.+?)\\s
           )?
           # close paren of tournament info
-          (?P<GAME>Hold\'em|Hold\'em|ShortDeck|Omaha|PLO|Omaha\sHi/Lo|PLO\-(5|6))\s
-          (?P<LIMIT>No\sLimit|Fixed\sLimit|Limit|Pot\sLimit|\(NL\spostflop\))?,?\s*
-          (-\s)?
-          (?P<SHOOTOUT>Match.*,\s)?
-          (Level(?P<LEVEL>[IVXLC\d]+)\s?)?
-          \(?                            # open paren of the stakes
+          (?P<GAME>Hold\'em|Hold\'em|ShortDeck|Omaha|PLO|Omaha\\sHi/Lo|PLO\\-(5|6))\\s
+          (?P<LIMIT>No\\sLimit|Fixed\\sLimit|Limit|Pot\\sLimit|\\(NL\\spostflop\\))?,?\\s*
+          (-\\s)?
+          (?P<SHOOTOUT>Match.*,\\s)?
+          (Level(?P<LEVEL>[IVXLC\\d]+)\\s?)?
+          \\(?                            # open paren of the stakes
           (?P<CURRENCY>%(LS)s|)?
-          (ante\s\d+,\s)?
+          (ante\\s\\d+,\\s)?
           ((?P<SB>[,.0-9]+)/(%(LS)s)?(?P<BB>[,.0-9]+)|(?P<BUB>[,.0-9]+))
-          (?P<CAP>\s-\s[%(LS)s]?(?P<CAPAMT>[,.0-9]+)\sCap\s-\s)?        # Optional Cap part
-          \s?(?P<ISO>%(LEGAL_ISO)s)?
-          \)                        # close paren of the stakes
-          (?P<BLAH2>\s\[AAMS\sID:\s[A-Z0-9]+\])?         # AAMS ID: in .it HH's
-          \s-\s
+          (?P<CAP>\\s-\\s[%(LS)s]?(?P<CAPAMT>[,.0-9]+)\\sCap\\s-\\s)?        # Optional Cap part
+          \\s?(?P<ISO>%(LEGAL_ISO)s)?
+          \\)                        # close paren of the stakes
+          (?P<BLAH2>\\s\\[AAMS\\sID:\\s[A-Z0-9]+\\])?         # AAMS ID: in .it HH's
+          \\s-\\s
           (?P<DATETIME>.*$)
         """
         % substitutions,
@@ -179,7 +179,7 @@ class GGPoker(HandHistoryConverter):
     )
 
     re_PlayerInfo = re.compile(
-        """
+        r"""
           ^\s?Seat\s(?P<SEAT>[0-9]+):\s
           (?P<PNAME>.*)\s
           \((%(LS)s)?(?P<CASH>[,.0-9]+)\sin\schips
@@ -192,28 +192,28 @@ class GGPoker(HandHistoryConverter):
 
     re_HandInfo = re.compile(
         """
-          ^\s?Table\s(ID\s)?\'(?P<TABLE>.+?)\'\s
-          ((?P<MAX>\d+)-max\s)?
-          (?P<PLAY>\(Play\sMoney\)\s)?
-          (Seat\s\#(?P<BUTTON>\d+)\sis\sthe\sbutton)?""",
+          ^\\s?Table\\s(ID\\s)?\'(?P<TABLE>.+?)\'\\s
+          ((?P<MAX>\\d+)-max\\s)?
+          (?P<PLAY>\\(Play\\sMoney\\)\\s)?
+          (Seat\\s\\#(?P<BUTTON>\\d+)\\sis\\sthe\\sbutton)?""",
         re.MULTILINE | re.VERBOSE,
     )
 
-    re_Identify = re.compile("Poker\sHand\s\#[A-Z]{0,2}?\d+:")
-    re_SplitHands = re.compile("(?:\s?\n){2,}")
+    re_Identify = re.compile(r"Poker\sHand\s\#[A-Z]{0,2}?\d+:")
+    re_SplitHands = re.compile("(?:\\s?\n){2,}")
     re_TailSplitHands = re.compile("(\n\n\n+)")
-    re_Button = re.compile("Seat #(?P<BUTTON>\d+) is the button", re.MULTILINE)
+    re_Button = re.compile(r"Seat #(?P<BUTTON>\d+) is the button", re.MULTILINE)
     re_Board = re.compile(r"\[(?P<CARDS>.+)\]")
     re_Board2 = re.compile(r"\[(?P<C1>\S\S)\] \[(\S\S)?(?P<C2>\S\S) (?P<C3>\S\S)\]")
     re_Board3 = re.compile(
-        r"Board\s\[(?P<FLOP>\S\S \S\S \S\S) (?P<TURN>\S\S) (?P<RIVER>\S\S)\]"
+        r"Board\s\[(?P<FLOP>\S\S \S\S \S\S) (?P<TURN>\S\S) (?P<RIVER>\S\S)\]",
     )
     re_DateTime1 = re.compile(
-        """(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)""",
+        r"""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)""",
         re.MULTILINE,
     )
     re_DateTime2 = re.compile(
-        """(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+)""",
+        r"""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+)""",
         re.MULTILINE,
     )
     # revised re including timezone (not currently used):
@@ -263,7 +263,7 @@ class GGPoker(HandHistoryConverter):
         re.MULTILINE | re.VERBOSE,
     )
     re_ShowdownAction = re.compile(
-        r"^%s: shows \[(?P<CARDS>.*)\]" % substitutions["PLYR"], re.MULTILINE
+        r"^%s: shows \[(?P<CARDS>.*)\]" % substitutions["PLYR"], re.MULTILINE,
     )
     re_sitsOut = re.compile("^%s sits out" % substitutions["PLYR"], re.MULTILINE)
     # re_ShownCards       = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % substitutions, re.MULTILINE)
@@ -274,7 +274,7 @@ class GGPoker(HandHistoryConverter):
     )
     # Vinsand88 cashed out the hand for $2.19 | Cash Out Fee $0.02
     re_CollectPot2 = re.compile(
-        r"^%(PLYR)s collected %(CUR)s(?P<POT>[,.\d]+)" % substitutions, re.MULTILINE
+        r"^%(PLYR)s collected %(CUR)s(?P<POT>[,.\d]+)" % substitutions, re.MULTILINE,
     )
     re_CollectPot3 = re.compile(
         r"^%(PLYR)s: Receives Cashout \(%(CUR)s(?P<POT>[,.\d]+)\)" % substitutions,
@@ -286,12 +286,12 @@ class GGPoker(HandHistoryConverter):
     )
     re_CashedOut = re.compile(r"(Chooses\sto\sEV\sCashout|Receives\sCashout)")
     re_WinningRankOne = re.compile(
-        "^%(PLYR)s wins the tournament and receives %(CUR)s(?P<AMT>[,\.0-9]+) - congratulations!$"
+        r"^%(PLYR)s wins the tournament and receives %(CUR)s(?P<AMT>[,\.0-9]+) - congratulations!$"
         % substitutions,
         re.MULTILINE,
     )
     re_WinningRankOther = re.compile(
-        "^%(PLYR)s finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place and received %(CUR)s(?P<AMT>[,.0-9]+)\.$"
+        r"^%(PLYR)s finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place and received %(CUR)s(?P<AMT>[,.0-9]+)\.$"
         % substitutions,
         re.MULTILINE,
     )
@@ -300,16 +300,16 @@ class GGPoker(HandHistoryConverter):
         % substitutions,
         re.MULTILINE,
     )
-    re_Cancelled = re.compile("Hand\scancelled", re.MULTILINE)
+    re_Cancelled = re.compile(r"Hand\scancelled", re.MULTILINE)
     re_Uncalled = re.compile(
-        "Uncalled bet \(%(CUR)s(?P<BET>[,.\d]+)\) returned to" % substitutions,
+        r"Uncalled bet \(%(CUR)s(?P<BET>[,.\d]+)\) returned to" % substitutions,
         re.MULTILINE,
     )
     # APTEM-89 wins the $0.27 bounty for eliminating Hero
     # ChazDazzle wins the 22000 bounty for eliminating berkovich609
     # JKuzja, vecenta split the $50 bounty for eliminating ODYSSES
     re_Bounty = re.compile(
-        "^%(PLYR)s (?P<SPLIT>split|wins) the %(CUR)s(?P<AMT>[,\.0-9]+) bounty for eliminating (?P<ELIMINATED>.+?)$"
+        r"^%(PLYR)s (?P<SPLIT>split|wins) the %(CUR)s(?P<AMT>[,\.0-9]+) bounty for eliminating (?P<ELIMINATED>.+?)$"
         % substitutions,
         re.MULTILINE,
     )
@@ -317,7 +317,7 @@ class GGPoker(HandHistoryConverter):
     # Amsterdam71 wins $4.60 for splitting the elimination of Frimble11 and their own bounty increases by $4.59 to $41.32
     # Amsterdam71 wins the tournament and receives $230.36 - congratulations!
     re_Progressive = re.compile(
-        """
+        r"""
                         ^%(PLYR)s\swins\s%(CUR)s(?P<AMT>[,\.0-9]+)\s
                         for\s(splitting\sthe\selimination\sof|eliminating)\s(?P<ELIMINATED>.+?)\s
                         and\stheir\sown\sbounty\sincreases\sby\s%(CUR)s(?P<INCREASE>[\.0-9]+)\sto\s%(CUR)s(?P<ENDAMT>[\.0-9]+)$"""
@@ -325,14 +325,14 @@ class GGPoker(HandHistoryConverter):
         re.MULTILINE | re.VERBOSE,
     )
     re_Rake = re.compile(
-        """
+        r"""
                         Total\spot\s%(CUR)s(?P<POT>[,\.0-9]+)(.+?)?\s\|\sRake\s%(CUR)s(?P<RAKE>[,\.0-9]+)"""
         % substitutions,
         re.MULTILINE | re.VERBOSE,
     )
 
     re_STP = re.compile(
-        """
+        r"""
                         Cash\sDrop\sto\sPot\s:\stotal\s%(CUR)s(?P<AMOUNT>[,\.0-9]+)"""
         % substitutions,
         re.MULTILINE | re.VERBOSE,
@@ -346,7 +346,7 @@ class GGPoker(HandHistoryConverter):
             subst = {
                 "PLYR": player_re,
                 "BRKTS": r"(\(button\) |\(small blind\) |\(big blind\) |\(button\) \(small blind\) |\(button\) \(big blind\) )?",
-                "CUR": "(\$|\xe2\x82\xac|\u20ac||\£|)",
+                "CUR": "(\\$|\xe2\x82\xac|\u20ac||\\£|)",
             }
             self.re_HeroCards = re.compile(
                 r"^Dealt to %(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])"
@@ -354,7 +354,7 @@ class GGPoker(HandHistoryConverter):
                 re.MULTILINE,
             )
             self.re_ShownCards = re.compile(
-                "^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$"
+                r"^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$"
                 % subst,
                 re.MULTILINE,
             )
@@ -433,11 +433,11 @@ class GGPoker(HandHistoryConverter):
             else:
                 info["sb"] = str(
                     (Decimal(self.clearMoneyString(mg["SB"])) / 2).quantize(
-                        Decimal("0.01")
-                    )
+                        Decimal("0.01"),
+                    ),
                 )
                 info["bb"] = str(
-                    Decimal(self.clearMoneyString(mg["SB"])).quantize(Decimal("0.01"))
+                    Decimal(self.clearMoneyString(mg["SB"])).quantize(Decimal("0.01")),
                 )
 
         return info
@@ -446,7 +446,7 @@ class GGPoker(HandHistoryConverter):
         # First check if partial
         if hand.handText.count("*** SUMMARY ***") != 1:
             raise FpdbHandPartial(
-                ("Hand is not cleanly split into pre and post Summary")
+                ("Hand is not cleanly split into pre and post Summary"),
             )
 
         info = {}
@@ -480,10 +480,10 @@ class GGPoker(HandHistoryConverter):
                     # tz = a.group('TZ')  # just assume ET??
                     # print "   tz = ", tz, " datetime =", datetimestr
                 hand.startTime = datetime.datetime.strptime(
-                    datetimestr, "%Y/%m/%d %H:%M:%S"
+                    datetimestr, "%Y/%m/%d %H:%M:%S",
                 )  # also timezone at end, e.g. " ET"
                 hand.startTime = HandHistoryConverter.changeTimezone(
-                    hand.startTime, "ET", "UTC"
+                    hand.startTime, "ET", "UTC",
                 )
 
             if key == "HID":
@@ -524,7 +524,7 @@ class GGPoker(HandHistoryConverter):
                         else:
                             # FIXME: handle other currencies, play money
                             log.error(
-                                f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'"
+                                f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'",
                             )
                             raise FpdbParseError
 
@@ -537,7 +537,7 @@ class GGPoker(HandHistoryConverter):
                                 info["BOUNTY"] = info["BIRAKE"]
                                 info["BIRAKE"] = tmp
                                 info["BOUNTY"] = info["BOUNTY"].strip(
-                                    "$€£₹"
+                                    "$€£₹",
                                 )  # Strip here where it isn't 'None'
                                 hand.koBounty = int(100 * Decimal(info["BOUNTY"]))
                                 hand.isKO = True
@@ -605,7 +605,7 @@ class GGPoker(HandHistoryConverter):
         if hand.gametype["category"] in ("27_1draw", "fivedraw"):
             # isolate the first discard/stand pat line (thanks Carl for the regex)
             discard_split = re.split(
-                r"(?:(.+(?: stands pat|: discards).+))", hand.handText, re.DOTALL
+                r"(?:(.+(?: stands pat|: discards).+))", hand.handText, re.DOTALL,
             )
             if len(hand.handText) == len(discard_split[0]):
                 # handText was not split, no DRAW street occurred
@@ -646,11 +646,11 @@ class GGPoker(HandHistoryConverter):
                         "FLOP": "[%s] %s" % (m1.group("FLOP"), hand.streets["FLOP"]),
                         "TURN": "[%s]" % m1.group("TURN"),
                         "RIVER": "[%s]" % m1.group("RIVER"),
-                    }
+                    },
                 )
 
     def readCommunityCards(
-        self, hand, street
+        self, hand, street,
     ):  # street has been matched by markStreets, so exists in this hand
         if (
             street != "FLOPET" or hand.streets.get("FLOP") is None
@@ -673,7 +673,7 @@ class GGPoker(HandHistoryConverter):
         for player in m:
             # ~ logging.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
             hand.addAnte(
-                player.group("PNAME"), self.clearMoneyString(player.group("ANTE"))
+                player.group("PNAME"), self.clearMoneyString(player.group("ANTE")),
             )
 
     def readBringIn(self, hand):
@@ -709,13 +709,13 @@ class GGPoker(HandHistoryConverter):
                     )
         for a in self.re_PostMissed.finditer(hand.handText):
             hand.addBlind(
-                a.group("PNAME"), "secondsb", self.clearMoneyString(a.group("SBBB"))
+                a.group("PNAME"), "secondsb", self.clearMoneyString(a.group("SBBB")),
             )
         for a in self.re_PostStraddle.finditer(hand.handText):
             if straddles.get(a.group("PNAME")) is None:
                 straddles[a.group("PNAME")] = self.clearMoneyString(a.group("STRADDLE"))
             elif Decimal(straddles[a.group("PNAME")]) < Decimal(
-                self.clearMoneyString(a.group("STRADDLE"))
+                self.clearMoneyString(a.group("STRADDLE")),
             ):
                 straddles[a.group("PNAME")] = self.clearMoneyString(a.group("STRADDLE"))
         for p, amount in list(straddles.items()):
@@ -723,11 +723,11 @@ class GGPoker(HandHistoryConverter):
         for a in self.re_PostBB.finditer(hand.handText):
             if straddles.get(a.group("PNAME")) is None:
                 hand.addBlind(
-                    a.group("PNAME"), "big blind", self.clearMoneyString(a.group("BB"))
+                    a.group("PNAME"), "big blind", self.clearMoneyString(a.group("BB")),
                 )
         for a in self.re_PostBUB.finditer(hand.handText):
             hand.addBlind(
-                a.group("PNAME"), "button blind", self.clearMoneyString(a.group("BUB"))
+                a.group("PNAME"), "button blind", self.clearMoneyString(a.group("BUB")),
             )
 
     def readHoleCards(self, hand):
@@ -846,7 +846,7 @@ class GGPoker(HandHistoryConverter):
                 hand.addStandsPat(street, action.group("PNAME"), action.group("CARDS"))
             else:
                 log.debug(
-                    f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'"
+                    f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'",
                 )
 
     def readShowdownActions(self, hand):
@@ -936,7 +936,7 @@ class GGPoker(HandHistoryConverter):
             if m.group("CARDS") is not None:
                 cards = m.group("CARDS")
                 cards = cards.split(
-                    " "
+                    " ",
                 )  # needs to be a list, not a set--stud needs the order
                 string = m.group("STRING")
                 if m.group("STRING2"):
@@ -968,7 +968,7 @@ class GGPoker(HandHistoryConverter):
                 + re.escape(str(table_number))
             )
         log.info(
-            f"table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'"
+            f"table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'",
         )
         log.info(f"returns: '{regex}'")
         return regex

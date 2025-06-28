@@ -48,17 +48,17 @@ class BetOnline(HandHistoryConverter):
     codepage = ("utf8", "cp1252")
     siteId = 19  # Needs to match id entry in Sites database
     sym = {
-        "USD": "\$",
-        "CAD": "\$",
+        "USD": r"\$",
+        "CAD": r"\$",
         "T$": "",
         "EUR": "€",
         "GBP": "\xa3",
         "play": "",
     }  # ADD Euro, Sterling, etc HERE
     substitutions = {
-        "LS": "\$|€|",  # legal currency symbols - Euro(cp1252, utf-8)
+        "LS": r"\$|€|",  # legal currency symbols - Euro(cp1252, utf-8)
         "PLYR": r"(?P<PNAME>.+?)",
-        "NUM": ".,\d",
+        "NUM": r".,\d",
     }
 
     # translations from captured groups to fpdb info strings
@@ -139,22 +139,22 @@ class BetOnline(HandHistoryConverter):
     # Static regexes
     re_GameInfo = re.compile(
         """
-          (?P<SKIN>BetOnline\sPoker|PayNoRake|ActionPoker\.com|Gear\sPoker|SportsBetting\.ag\sPoker|Tiger\sGaming)\sGame\s\#(?P<HID>[0-9]+):\s+
-          (\{.*\}\s+)?(Tournament\s\#                # open paren of tournament info
-          (?P<TOURNO>\d+):\s?
+          (?P<SKIN>BetOnline\\sPoker|PayNoRake|ActionPoker\\.com|Gear\\sPoker|SportsBetting\\.ag\\sPoker|Tiger\\sGaming)\\sGame\\s\\#(?P<HID>[0-9]+):\\s+
+          (\\{.*\\}\\s+)?(Tournament\\s\\#                # open paren of tournament info
+          (?P<TOURNO>\\d+):\\s?
           # here's how I plan to use LS
-          (?P<BUYIN>(?P<BIAMT>(%(LS)s)[%(NUM)s]+)?\+?(?P<BIRAKE>(%(LS)s)[%(NUM)s]+)?\+?(?P<BOUNTY>(%(LS)s)[%(NUM)s]+)?\s?|Freeroll|)\s+)?
+          (?P<BUYIN>(?P<BIAMT>(%(LS)s)[%(NUM)s]+)?\\+?(?P<BIRAKE>(%(LS)s)[%(NUM)s]+)?\\+?(?P<BOUNTY>(%(LS)s)[%(NUM)s]+)?\\s?|Freeroll|)\\s+)?
           # close paren of tournament info
-          (?P<GAME>Hold\'em|Razz|7\sCard\sStud|7\sCard\sStud\sHi/Lo|Omaha|Omaha\sHi/Lo|Badugi|Triple\sDraw\s2\-7\sLowball|Single\sDraw\s2\-7\sLowball|5\sCard\sDraw)\s
-          (?P<LIMIT>No\sLimit|Limit|LIMIT|Pot\sLimit)?,?\s?
+          (?P<GAME>Hold\'em|Razz|7\\sCard\\sStud|7\\sCard\\sStud\\sHi/Lo|Omaha|Omaha\\sHi/Lo|Badugi|Triple\\sDraw\\s2\\-7\\sLowball|Single\\sDraw\\s2\\-7\\sLowball|5\\sCard\\sDraw)\\s
+          (?P<LIMIT>No\\sLimit|Limit|LIMIT|Pot\\sLimit)?,?\\s?
           (
-              \(?                            # open paren of the stakes
+              \\(?                            # open paren of the stakes
               (?P<CURRENCY>%(LS)s|)?
               (?P<SB>[%(NUM)s]+)/(%(LS)s)?
               (?P<BB>[%(NUM)s]+)
-              \)?                        # close paren of the stakes
+              \\)?                        # close paren of the stakes
           )?
-          \s?-\s
+          \\s?-\\s
           (?P<DATETIME>.*$)
         """
         % substitutions,
@@ -162,7 +162,7 @@ class BetOnline(HandHistoryConverter):
     )
 
     re_PlayerInfo = re.compile(
-        """
+        r"""
           ^Seat\s(?P<SEAT>[0-9]+):\s
           (?P<PNAME>.*)\s
           \((%(LS)s)?(?P<CASH>[%(NUM)s]+)\sin\s[cC]hips\)"""
@@ -172,39 +172,39 @@ class BetOnline(HandHistoryConverter):
 
     re_HandInfo1 = re.compile(
         """
-          ^Table\s\'(?P<TABLE>[\/,\.\-\ &%\$\#a-zA-Z\d\'\(\)]+)\'\s
-          ((?P<MAX>\d+)-max\s)?
-          (?P<MONEY>\((Play\sMoney|Real\sMoney)\)\s)?
-          (Seat\s\#(?P<BUTTON>\d+)\sis\sthe\sbutton)?""",
+          ^Table\\s\'(?P<TABLE>[\\/,\\.\\-\\ &%\\$\\#a-zA-Z\\d\'\\(\\)]+)\'\\s
+          ((?P<MAX>\\d+)-max\\s)?
+          (?P<MONEY>\\((Play\\sMoney|Real\\sMoney)\\)\\s)?
+          (Seat\\s\\#(?P<BUTTON>\\d+)\\sis\\sthe\\sbutton)?""",
         re.MULTILINE | re.VERBOSE,
     )
 
     re_HandInfo2 = re.compile(
         """
-          ^Table\s(?P<TABLE>[\/,\.\-\ &%\$\#a-zA-Z\d\']+)\s
-          (?P<MONEY>\((Play\sMoney|Real\sMoney)\)\s)?
-          (Seat\s\#(?P<BUTTON>\d+)\sis\sthe\sbutton)?""",
+          ^Table\\s(?P<TABLE>[\\/,\\.\\-\\ &%\\$\\#a-zA-Z\\d\']+)\\s
+          (?P<MONEY>\\((Play\\sMoney|Real\\sMoney)\\)\\s)?
+          (Seat\\s\\#(?P<BUTTON>\\d+)\\sis\\sthe\\sbutton)?""",
         re.MULTILINE | re.VERBOSE,
     )
 
     re_Identify = re.compile(
-        "(BetOnline\sPoker|PayNoRake|ActionPoker\.com|Gear\sPoker|SportsBetting\.ag\sPoker|Tiger\sGaming)\sGame\s\#\d+"
+        r"(BetOnline\sPoker|PayNoRake|ActionPoker\.com|Gear\sPoker|SportsBetting\.ag\sPoker|Tiger\sGaming)\sGame\s\#\d+",
     )
     re_SplitHands = re.compile("\n\n\n+")
     re_TailSplitHands = re.compile("(\n\n\n+)")
-    re_Button = re.compile("Seat #(?P<BUTTON>\d+) is the button", re.MULTILINE)
+    re_Button = re.compile(r"Seat #(?P<BUTTON>\d+) is the button", re.MULTILINE)
     re_Board1 = re.compile(
-        r"Board \[(?P<FLOP>\S\S\S? \S\S\S? \S\S\S?)?\s?(?P<TURN>\S\S\S?)?\s?(?P<RIVER>\S\S\S?)?\]"
+        r"Board \[(?P<FLOP>\S\S\S? \S\S\S? \S\S\S?)?\s?(?P<TURN>\S\S\S?)?\s?(?P<RIVER>\S\S\S?)?\]",
     )
     re_Board2 = re.compile(r"\[(?P<CARDS>.+)\]")
     re_Hole = re.compile(r"\*\*\*\sHOLE\sCARDS\s\*\*\*")
 
     re_DateTime1 = re.compile(
-        """(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?\s(?P<TZ>.*$)""",
+        r"""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?\s(?P<TZ>.*$)""",
         re.MULTILINE,
     )
     re_DateTime2 = re.compile(
-        """(?P<Y>[0-9]{4})\-(?P<M>[0-9]{2})\-(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)""",
+        r"""(?P<Y>[0-9]{4})\-(?P<M>[0-9]{2})\-(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)""",
         re.MULTILINE,
     )
 
@@ -246,12 +246,12 @@ class BetOnline(HandHistoryConverter):
         re.MULTILINE | re.VERBOSE,
     )
     re_ShowdownAction = re.compile(
-        r"^%s: shows (?P<CARDS>.*)" % substitutions["PLYR"], re.MULTILINE
+        r"^%s: shows (?P<CARDS>.*)" % substitutions["PLYR"], re.MULTILINE,
     )
     re_sitsOut = re.compile("^%s sits out" % substitutions["PLYR"], re.MULTILINE)
-    re_JoinsTable = re.compile("^.+ joins the table at seat #\d+", re.MULTILINE)
+    re_JoinsTable = re.compile(r"^.+ joins the table at seat #\d+", re.MULTILINE)
     re_TotalPot = re.compile(
-        r"^Total pot (?P<POT>[%(NUM)s]+)( \| Rake (?P<RAKE>[%(NUM)s]+))?", re.MULTILINE
+        r"^Total pot (?P<POT>[%(NUM)s]+)( \| Rake (?P<RAKE>[%(NUM)s]+))?", re.MULTILINE,
     )
     re_ShownCards = re.compile(
         r"Seat (?P<SEAT>[0-9]+): %(PLYR)s (\(.+?\)  )?(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and won \([%(NUM)s]+\))?"
@@ -299,7 +299,7 @@ class BetOnline(HandHistoryConverter):
             else:
                 raise FpdbHandPartial(
                     "BetOnlineToFpdb.determineGameType: "
-                    + ("Partial hand history: 'Player joining table'")
+                    + ("Partial hand history: 'Player joining table'"),
                 )
 
         mg = m.groupdict()
@@ -343,7 +343,7 @@ class BetOnline(HandHistoryConverter):
                     raise FpdbParseError
             else:
                 info["sb"] = str(
-                    (old_div(Decimal(info["SB"]), 2)).quantize(Decimal("0.01"))
+                    (old_div(Decimal(info["SB"]), 2)).quantize(Decimal("0.01")),
                 )
                 info["bb"] = str(Decimal(info["SB"]).quantize(Decimal("0.01")))
 
@@ -410,10 +410,10 @@ class BetOnline(HandHistoryConverter):
                         time_zone = "ET"
                     # print "   tz = ", tz, " datetime =", datetimestr
                 hand.startTime = datetime.datetime.strptime(
-                    datetimestr, "%Y/%m/%d %H:%M:%S"
+                    datetimestr, "%Y/%m/%d %H:%M:%S",
                 )  # also timezone at end, e.g. " ET"
                 hand.startTime = HandHistoryConverter.changeTimezone(
-                    hand.startTime, time_zone, "UTC"
+                    hand.startTime, time_zone, "UTC",
                 )
             if key == "HID":
                 hand.handid = info[key]
@@ -447,7 +447,7 @@ class BetOnline(HandHistoryConverter):
                                 )
                                 + " "
                                 + ("Hand ID")
-                                + ": %s: '%s'" % (hand.handid, info[key])
+                                + ": %s: '%s'" % (hand.handid, info[key]),
                             )
 
                         info["BIAMT"] = info["BIAMT"].strip("$€")
@@ -457,7 +457,7 @@ class BetOnline(HandHistoryConverter):
                             info["BOUNTY"] = info["BIRAKE"]
                             info["BIRAKE"] = tmp
                             info["BOUNTY"] = info["BOUNTY"].strip(
-                                "$€"
+                                "$€",
                             )  # Strip here where it isn't 'None'
                             hand.koBounty = int(100 * Decimal(info["BOUNTY"]))
                             hand.isKO = True
@@ -485,7 +485,7 @@ class BetOnline(HandHistoryConverter):
             "GearPoker",
         ):
             raise FpdbHandPartial(
-                "readHandInfo: " + ("Partial hand history") + ": '%s'" % hand.handid
+                "readHandInfo: " + ("Partial hand history") + ": '%s'" % hand.handid,
             )
 
     def readButton(self, hand):
@@ -500,7 +500,7 @@ class BetOnline(HandHistoryConverter):
         for a in m:
             pname = self.unknownPlayer(hand, a.group("PNAME"))
             hand.addPlayer(
-                int(a.group("SEAT")), pname, self.clearMoneyString(a.group("CASH"))
+                int(a.group("SEAT")), pname, self.clearMoneyString(a.group("CASH")),
             )
 
     def markStreets(self, hand):
@@ -512,7 +512,7 @@ class BetOnline(HandHistoryConverter):
         if hand.gametype["category"] in ("27_1draw", "fivedraw"):
             # isolate the first discard/stand pat line (thanks Carl for the regex)
             discard_split = re.split(
-                r"(?:(.+(?: stands pat|: discards).+))", hand.handText, re.DOTALL
+                r"(?:(.+(?: stands pat|: discards).+))", hand.handText, re.DOTALL,
             )
             if len(hand.handText) == len(discard_split[0]):
                 # handText was not split, no DRAW street occurred
@@ -597,7 +597,7 @@ class BetOnline(HandHistoryConverter):
         #        print hand.streets
 
     def readCommunityCards(
-        self, hand, street
+        self, hand, street,
     ):  # street has been matched by markStreets, so exists in this hand
         if street in (
             "FLOP",
@@ -651,7 +651,7 @@ class BetOnline(HandHistoryConverter):
             else:
                 raise FpdbHandPartial(
                     "BetOnlineToFpdb.readBlinds: "
-                    + ("Partial hand history: 'No blind info'")
+                    + ("Partial hand history: 'No blind info'"),
                 )
             hand.addBlind(pname, "big blind", bb)
             if not hand.gametype["bb"] and self.skin in ("ActionPoker", "GearPoker"):
@@ -782,19 +782,19 @@ class BetOnline(HandHistoryConverter):
                 hand.addCall(street, pname, self.clearMoneyString(action.group("BET")))
             elif action.group("ATYPE") in (" raises", " Raises", " Reraises"):
                 hand.addCallandRaise(
-                    street, pname, self.clearMoneyString(action.group("BET"))
+                    street, pname, self.clearMoneyString(action.group("BET")),
                 )
             elif action.group("ATYPE") in (" bets", " Bets"):
                 hand.addBet(street, pname, self.clearMoneyString(action.group("BET")))
             elif action.group("ATYPE") == " discards":
                 hand.addDiscard(
-                    street, pname, action.group("BET"), action.group("CARDS")
+                    street, pname, action.group("BET"), action.group("CARDS"),
                 )
             elif action.group("ATYPE") == " stands pat":
                 hand.addStandsPat(street, pname, action.group("CARDS"))
             else:
                 log.debug(
-                    f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'"
+                    f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'",
                 )
 
     def readShowdownActions(self, hand):
@@ -825,7 +825,7 @@ class BetOnline(HandHistoryConverter):
                 pname = self.unknownPlayer(hand, m.group("PNAME"))
                 cards = m.group("CARDS")
                 cards = cards.split(
-                    " "
+                    " ",
                 )  # needs to be a list, not a set--stud needs the order
                 cards = [
                     c[:-1].replace("10", "T") + c[-1].lower()
@@ -841,7 +841,7 @@ class BetOnline(HandHistoryConverter):
                     continue
                 # print "DEBUG: hand.addShownCards(%s, %s, %s, %s)" %(cards, m.group('PNAME'), shown, mucked)
                 hand.addShownCards(
-                    cards=cards, player=pname, shown=shown, mucked=mucked, string=None
+                    cards=cards, player=pname, shown=shown, mucked=mucked, string=None,
                 )
 
     @staticmethod

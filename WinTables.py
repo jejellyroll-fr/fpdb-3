@@ -27,7 +27,7 @@ SM_CYCAPTION = 4
 # Windows functions via ctypes
 EnumWindows = ctypes.windll.user32.EnumWindows
 EnumWindowsProc = ctypes.WINFUNCTYPE(
-    ctypes.c_bool, ctypes.wintypes.HWND, ctypes.wintypes.LPARAM
+    ctypes.c_bool, ctypes.wintypes.HWND, ctypes.wintypes.LPARAM,
 )
 GetWindowText = ctypes.windll.user32.GetWindowTextW
 GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
@@ -75,7 +75,7 @@ class Table(Table_Window):
         try:
             log.debug("before EnumWindows")
             EnumWindows(
-                EnumWindowsProc(win_enum_handler), ctypes.py_object(window_info)
+                EnumWindowsProc(win_enum_handler), ctypes.py_object(window_info),
             )
             log.debug(f"after EnumWindows found {len(window_info.titles)} windows")
         except Exception as e:
@@ -88,7 +88,7 @@ class Table(Table_Window):
             try:
                 if time.time() - start_time > time_limit:
                     log.error(
-                        f"Time limit of {time_limit} seconds reached. Exiting loop."
+                        f"Time limit of {time_limit} seconds reached. Exiting loop.",
                     )
                     break
 
@@ -118,7 +118,7 @@ class Table(Table_Window):
             except IOError as e:
                 if "closed file" in str(e):
                     log.warning(
-                        f"Logging to a closed file for hwnd {hwnd}. Skipping this log entry."
+                        f"Logging to a closed file for hwnd {hwnd}. Skipping this log entry.",
                     )
                 else:
                     log.error(f"IOError for hwnd {hwnd}: {e}")
@@ -155,7 +155,7 @@ class Table(Table_Window):
                     }
                 else:
                     log.error(
-                        f"Failed to retrieve GetWindowRect for hwnd: {self.number}"
+                        f"Failed to retrieve GetWindowRect for hwnd: {self.number}",
                     )
                     return None
             else:
@@ -193,7 +193,7 @@ class Table(Table_Window):
             Qt.Tool
             | Qt.FramelessWindowHint
             | Qt.WindowDoesNotAcceptFocus
-            | Qt.WindowStaysOnTopHint
+            | Qt.WindowStaysOnTopHint,
         )
 
     def check_bad_words(self, title):

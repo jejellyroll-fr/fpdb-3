@@ -37,7 +37,7 @@ def get_system_language():
         return locale.getdefaultlocale()[0]
     elif system == "Linux":
         process = subprocess.Popen(
-            ["locale", "-b"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            ["locale", "-b"], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         )
         output, _ = process.communicate()
         return output.decode().strip()
@@ -148,10 +148,10 @@ def set_locale_translation():
 
     try:
         fr_translation = gettext.translation(
-            "fpdb", path_string, languages=[ui_language]
+            "fpdb", path_string, languages=[ui_language],
         )
         fr_translation.install()
     except FileNotFoundError:
         log.error(
-            f"No translation file found for domain 'fpdb' in {path_string} for language {ui_language}"
+            f"No translation file found for domain 'fpdb' in {path_string} for language {ui_language}",
         )

@@ -50,13 +50,13 @@ class WinamaxSummary(TourneySummary):
 
     substitutions = {
         "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP",  # legal ISO currency codes
-        "LS": "\$|€|",  # legal currency symbols
+        "LS": r"\$|€|",  # legal currency symbols
     }
 
-    re_Identify = re.compile("Winamax\sPoker\s\-\sTournament\ssummary")
+    re_Identify = re.compile(r"Winamax\sPoker\s\-\sTournament\ssummary")
 
     re_SummaryTourneyInfo = re.compile(
-        """\s:\s
+        r"""\s:\s
                                            ((?P<LIMIT>No\sLimit|Limit|LIMIT|Pot\sLimit)\s)?
                                            (?P<GAME>.+)?
                                            \((?P<TOURNO>[0-9]+)\)(\s-\sLate\s(r|R)egistration)?\s+
@@ -88,30 +88,30 @@ class WinamaxSummary(TourneySummary):
     )
 
     re_GameType = re.compile(
-        """<h1>((?P<LIMIT>No Limit|Pot Limit) (?P<GAME>Hold\'em|Omaha))</h1>"""
+        """<h1>((?P<LIMIT>No Limit|Pot Limit) (?P<GAME>Hold\'em|Omaha))</h1>""",
     )
 
-    re_TourNo = re.compile("ID\=(?P<TOURNO>[0-9]+)")
+    re_TourNo = re.compile(r"ID\=(?P<TOURNO>[0-9]+)")
 
     re_Player = re.compile(
-        """(?P<RANK>\d+)<\/td><td width="30%">(?P<PNAME>.+?)<\/td><td width="60%">(?P<WINNINGS>.+?)</td>"""
+        r"""(?P<RANK>\d+)<\/td><td width="30%">(?P<PNAME>.+?)<\/td><td width="60%">(?P<WINNINGS>.+?)</td>""",
     )
 
     re_Details = re.compile("""<p class="text">(?P<LABEL>.+?) : (?P<VALUE>.+?)</p>""")
     re_Prizepool = re.compile("""<div class="title2">.+: (?P<PRIZEPOOL>[0-9,]+)""")
 
     re_DateTime = re.compile(
-        "\[(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)"
+        r"\[(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)",
     )
     re_Ticket = re.compile(
-        """ / (?P<TTYPE>Ticket (?P<VALUE>[0-9.]+)&euro;|Tremplin Winamax Poker Tour|Starting Block Winamax Poker Tour|Finale Freeroll Mobile 2012|SNG Freeroll Mobile 2012)"""
+        """ / (?P<TTYPE>Ticket (?P<VALUE>[0-9.]+)&euro;|Tremplin Winamax Poker Tour|Starting Block Winamax Poker Tour|Finale Freeroll Mobile 2012|SNG Freeroll Mobile 2012)""",
     )
 
     codepage = ("utf8", "cp1252")
 
     @staticmethod
     def getSplitRe(self, head):
-        re_SplitTourneys = re.compile("Winamax\sPoker\s-\sTournament\ssummary")
+        re_SplitTourneys = re.compile(r"Winamax\sPoker\s-\sTournament\ssummary")
         m = re.search("<!DOCTYPE html PUBLIC", head)
         if m is not None:
             self.hhtype = "html"
@@ -147,7 +147,7 @@ class WinamaxSummary(TourneySummary):
                     self.entries = mg["VALUE"]
                 if mg["LABEL"] == "D\xc3\xa9but du tournoi":
                     self.startTime = datetime.datetime.strptime(
-                        mg["VALUE"], "%d-%m-%Y %H:%M"
+                        mg["VALUE"], "%d-%m-%Y %H:%M",
                     )
                 if mg["LABEL"] == "Nombre de joueurs max":
                     # Max seats i think
@@ -237,7 +237,7 @@ class WinamaxSummary(TourneySummary):
             self.prizepool = int(100 * self.convert_to_decimal(mg["PRIZEPOOL2"]))
         if "DATETIME" in mg:
             self.startTime = datetime.datetime.strptime(
-                mg["DATETIME"], "%Y/%m/%d %H:%M:%S UTC"
+                mg["DATETIME"], "%Y/%m/%d %H:%M:%S UTC",
             )
 
         # FIXME: buyinCurrency and currency not detected
@@ -262,7 +262,7 @@ class WinamaxSummary(TourneySummary):
 
                 if mg["BIBOUNTY"] is not None and mg["BIRAKE"] is not None:
                     self.koBounty = int(
-                        100 * Decimal(self.convert_to_decimal(mg["BIRAKE"].strip("\r")))
+                        100 * Decimal(self.convert_to_decimal(mg["BIRAKE"].strip("\r"))),
                     )
                     self.isKO = True
                     mg["BIRAKE"] = mg["BIBOUNTY"].strip("\r")
@@ -347,7 +347,7 @@ class WinamaxSummary(TourneySummary):
 
                 # print "DEBUG: addPlayer(%s, %s, %s, %s, %s, %s, %s)" %(rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount)
                 self.addPlayer(
-                    rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount
+                    rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount,
                 )
 
     def convert_to_decimal(self, string):

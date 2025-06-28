@@ -91,7 +91,7 @@ class Popup(QWidget):
             parentcvp = ctypes.c_void_p(int(parentwinid))
             parentview = NSView(c_void_p=parentcvp)
             parentview.window().addChildWindow_ordered_(
-                selfview.window(), NSWindowAbove
+                selfview.window(), NSWindowAbove,
             )
         else:
             self.windowHandle().setTransientParent(self.parent().windowHandle())
@@ -207,7 +207,7 @@ class Submenu(Popup):
                 xlab = QLabel("x")
                 xlab.setStyleSheet(
                     "background:%s;color:%s;"
-                    % (self.win.aw.fgcolor, self.win.aw.bgcolor)
+                    % (self.win.aw.fgcolor, self.win.aw.bgcolor),
                 )
                 grid_line[row]["x"] = xlab
                 self.grid.addWidget(grid_line[row]["x"], row - 1, 2)
@@ -221,7 +221,7 @@ class Submenu(Popup):
                     self.grid.addWidget(grid_line[row]["arrow_object"], row - 1, 1)
                 else:
                     self.grid.addWidget(
-                        grid_line[row]["arrow_object"], row - 1, 1, 1, 2
+                        grid_line[row]["arrow_object"], row - 1, 1, 1, 2,
                     )
 
             self.grid.addWidget(grid_line[row]["lab"], row - 1, 0)
@@ -331,7 +331,7 @@ def popup_factory(
 
     class_to_return = getattr(__import__(__name__), pop.pu_class)
     popup_instance = class_to_return(
-        seat, stat_dict, win, pop, hand_instance, config, parent_popup
+        seat, stat_dict, win, pop, hand_instance, config, parent_popup,
     )
 
     return popup_instance

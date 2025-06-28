@@ -332,7 +332,7 @@ class fpdb(QMainWindow):
                     # Use the edit_site method to properly update the XML
                     current_site = self.config.supported_sites[site_name]
                     self.config.edit_site(
-                        site_name, enabled_str, current_site.screen_name, current_site.HH_path, current_site.TS_path
+                        site_name, enabled_str, current_site.screen_name, current_site.HH_path, current_site.TS_path,
                     )
                 else:
                     # Create a new site entry if it doesn't exist
@@ -448,7 +448,7 @@ class fpdb(QMainWindow):
         else:
             self.warning_box(
                 "Cannot open Database Maintenance window because other"
-                " windows have been opened. Re-start fpdb to use this option."
+                " windows have been opened. Re-start fpdb to use this option.",
             )
 
     def dia_recreate_hudcache(self, widget, data=None):
@@ -492,7 +492,7 @@ class fpdb(QMainWindow):
                 log.info("Rebuilding HUD Cache ...")
 
                 self.db.rebuild_cache(
-                    self.h_start_date.date().toString("yyyy-MM-dd"), self.start_date.date().toString("yyyy-MM-dd")
+                    self.h_start_date.date().toString("yyyy-MM-dd"), self.start_date.date().toString("yyyy-MM-dd"),
                 )
             else:
                 log.info("User cancelled rebuilding hud cache")
@@ -501,7 +501,7 @@ class fpdb(QMainWindow):
         else:
             self.warning_box(
                 "Cannot open Database Maintenance window because other windows have been opened. "
-                "Re-start fpdb to use this option."
+                "Re-start fpdb to use this option.",
             )
 
     def dia_rebuild_indexes(self, widget, data=None):
@@ -533,7 +533,7 @@ class fpdb(QMainWindow):
         else:
             self.warning_box(
                 "Cannot open Database Maintenance window because"
-                " other windows have been opened. Re-start fpdb to use this option."
+                " other windows have been opened. Re-start fpdb to use this option.",
             )
 
     def dia_logs(self, widget, data=None):
@@ -590,7 +590,7 @@ class fpdb(QMainWindow):
                         str(values['enabled']),
                         values['screen_name'],
                         values['hh_path'],
-                        values['ts_path']
+                        values['ts_path'],
                     )
             
             # Détecter les changements avant de sauvegarder
@@ -664,20 +664,20 @@ class fpdb(QMainWindow):
                     f"{message}\n\n"
                     "Les changements suivants nécessitent un redémarrage:\n"
                     f"{changes_text}\n\n"
-                    "Fpdb doit être redémarré maintenant\n\nCliquez OK pour fermer Fpdb"
+                    "Fpdb doit être redémarré maintenant\n\nCliquez OK pour fermer Fpdb",
                 )
                 sys.exit()
             else:
                 # Échec du rechargement
                 self.warning_box(
                     f"Erreur lors du rechargement de la configuration:\n{message}\n\n"
-                    "Fpdb doit être redémarré maintenant\n\nCliquez OK pour fermer Fpdb"
+                    "Fpdb doit être redémarré maintenant\n\nCliquez OK pour fermer Fpdb",
                 )
                 sys.exit()
         else:
             self.warning_box(
                 "Les préférences mises à jour n'ont pas été chargées car des fenêtres sont ouvertes. "
-                "Redémarrez fpdb pour les charger."
+                "Redémarrez fpdb pour les charger.",
             )
 
     def process_close_messages(self):
@@ -728,7 +728,7 @@ class fpdb(QMainWindow):
         configMenu.addAction(self.makeAction("HUD Preferences", self.dia_hud_preferences))
         configMenu.addAction(self.makeAction("Manage HUD Sites", self.dia_manage_hud_sites))
         configMenu.addAction(
-            self.makeAction("Adv Preferences", self.dia_advanced_preferences, tip="Edit your preferences")
+            self.makeAction("Adv Preferences", self.dia_advanced_preferences, tip="Edit your preferences"),
         )
         configMenu.addAction(self.makeAction("Import filters", self.dia_import_filters))
         # Add the Toggle Debug Logging action
@@ -851,18 +851,18 @@ class fpdb(QMainWindow):
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel(
                 "\nYour local configuration file needs to be updated."
-                " This error is not necessarily fatal but it is strongly recommended that you update the configuration."
+                " This error is not necessarily fatal but it is strongly recommended that you update the configuration.",
             )
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel(
                 "To create a new configuration, see:"
-                " fpdb.sourceforge.net/apps/mediawiki/fpdb/index.php?title=Reset_Configuration"
+                " fpdb.sourceforge.net/apps/mediawiki/fpdb/index.php?title=Reset_Configuration",
             )
             label.setTextInteractionFlags(Qt.TextSelectableByMouse)
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel(
                 "A new configuration will destroy all personal settings"
-                " (hud layout, site folders, screennames, favourite seats).\n"
+                " (hud layout, site folders, screennames, favourite seats).\n",
             )
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel("To keep existing personal settings, you must edit the local file.")
@@ -932,7 +932,7 @@ class fpdb(QMainWindow):
             diaDbVersionWarning.setInformativeText(
                 "This error is not necessarily fatal but it is strongly"
                 " recommended that you recreate the tables by using the Database menu."
-                " Not doing this will likely lead to misbehavior including fpdb crashes, corrupt data, etc."
+                " Not doing this will likely lead to misbehavior including fpdb crashes, corrupt data, etc.",
             )
             diaDbVersionWarning.exec_()
 
@@ -940,7 +940,7 @@ class fpdb(QMainWindow):
         if self.db is not None and self.db.is_connected():
             self.statusBar().showMessage(
                 f"Status: Connected to {self.db.get_backend_name()}"
-                f" database named {self.db.database} on host {self.db.host}"
+                f" database named {self.db.database} on host {self.db.host}",
             )
             # Rollback to make sure any locks are cleared
             self.db.rollback()
@@ -1066,7 +1066,7 @@ class fpdb(QMainWindow):
                         The Windows installer package includes code licensed under the MIT license.
                         You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt
                         and mit.txt in the fpdb installation directory."""
-            )
+            ),
         )
         self.add_and_display_tab(mh_tab, "Help")
 
@@ -1131,7 +1131,7 @@ class fpdb(QMainWindow):
                 dia.setWindowTitle("Unknown Site")
                 dia.setText(f"Warning: Unable to find site '{site}' in database")
                 dia.setInformativeText(
-                    "This site is configured but not found in the database. You may need to recreate the database tables."
+                    "This site is configured but not found in the database. You may need to recreate the database tables.",
                 )
                 dia.setStandardButtons(QMessageBox.Ok)
                 dia.exec_()
@@ -1286,7 +1286,7 @@ class fpdb(QMainWindow):
         if not options.errorsToConsole:
             fileName = os.path.join(self.config.dir_log, "fpdb-errors.txt")
             log.info(
-                f"Note: error output is being diverted to {self.config.dir_log}. Any major error will be reported there _only_."
+                f"Note: error output is being diverted to {self.config.dir_log}. Any major error will be reported there _only_.",
             )
             errorFile = codecs.open(fileName, "w", "utf-8")
             sys.stderr = errorFile

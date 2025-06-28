@@ -144,7 +144,7 @@ class Filters(QWidget):
         self.callback = {}
 
         self.setStyleSheet(
-            "QPushButton {padding-left:5;padding-right:5;padding-top:2;padding-bottom:2;}"
+            "QPushButton {padding-left:5;padding-right:5;padding-top:2;padding-bottom:2;}",
         )
         self.make_filter()
 
@@ -441,13 +441,13 @@ class Filters(QWidget):
     def __set_tourney_type_select(self, w, tourneyType):
         self.tourneyTypes[tourneyType] = w.get_active()
         log.debug(
-            f"self.tourney_types[{tourneyType}] set to {self.tourneyTypes[tourneyType]}"
+            f"self.tourney_types[{tourneyType}] set to {self.tourneyTypes[tourneyType]}",
         )
 
     def createTourneyTypeLine(self, hbox, tourneyType):
         cb = QCheckBox(str(tourneyType))
         cb.clicked.connect(
-            partial(self.__set_tourney_type_select, tourneyType=tourneyType)
+            partial(self.__set_tourney_type_select, tourneyType=tourneyType),
         )
         hbox.addWidget(cb)
         cb.setChecked(True)
@@ -465,7 +465,7 @@ class Filters(QWidget):
                 else:
                     b.setStyleSheet("QPushButton {border-width:0;margin:0;padding:0;}")
                 b.clicked.connect(
-                    partial(self.__toggle_card_select, widget=b, card=abbr)
+                    partial(self.__toggle_card_select, widget=b, card=abbr),
                 )
                 self.cards[abbr] = False
                 self.__toggle_card_select(False, widget=b, card=abbr)
@@ -787,16 +787,16 @@ class Filters(QWidget):
                 btnAll = QPushButton(self.filterText["gamesall"])
                 btnAll.clicked.connect(
                     partial(
-                        self.__set_checkboxes, checkBoxes=self.cbGames, setState=True
-                    )
+                        self.__set_checkboxes, checkBoxes=self.cbGames, setState=True,
+                    ),
                 )
                 hbox.addWidget(btnAll)
 
                 btnNone = QPushButton(self.filterText["gamesnone"])
                 btnNone.clicked.connect(
                     partial(
-                        self.__set_checkboxes, checkBoxes=self.cbGames, setState=False
-                    )
+                        self.__set_checkboxes, checkBoxes=self.cbGames, setState=False,
+                    ),
                 )
                 hbox.addWidget(btnNone)
                 hbox.addStretch()
@@ -861,7 +861,7 @@ class Filters(QWidget):
                         self.__set_checkboxes,
                         checkBoxes=self.cbPositions,
                         setState=True,
-                    )
+                    ),
                 )
                 hbox.addWidget(btnAll)
 
@@ -871,7 +871,7 @@ class Filters(QWidget):
                         self.__set_checkboxes,
                         checkBoxes=self.cbPositions,
                         setState=False,
-                    )
+                    ),
                 )
                 hbox.addWidget(btnNone)
                 hbox.addStretch()
@@ -917,7 +917,7 @@ class Filters(QWidget):
                         self.__set_checkboxes,
                         checkBoxes=self.cbCurrencies,
                         setState=True,
-                    )
+                    ),
                 )
                 hbox.addWidget(btnAll)
 
@@ -927,7 +927,7 @@ class Filters(QWidget):
                         self.__set_checkboxes,
                         checkBoxes=self.cbCurrencies,
                         setState=False,
-                    )
+                    ),
                 )
                 hbox.addWidget(btnNone)
                 hbox.addStretch()
@@ -977,16 +977,16 @@ class Filters(QWidget):
                 btnAll = QPushButton(self.filterText["limitsall"])
                 btnAll.clicked.connect(
                     partial(
-                        self.__set_checkboxes, checkBoxes=self.cbLimits, setState=True
-                    )
+                        self.__set_checkboxes, checkBoxes=self.cbLimits, setState=True,
+                    ),
                 )
                 hbox.addWidget(btnAll)
 
                 btnNone = QPushButton(self.filterText["limitsnone"])
                 btnNone.clicked.connect(
                     partial(
-                        self.__set_checkboxes, checkBoxes=self.cbLimits, setState=False
-                    )
+                        self.__set_checkboxes, checkBoxes=self.cbLimits, setState=False,
+                    ),
                 )
                 hbox.addWidget(btnNone)
 
@@ -1086,7 +1086,7 @@ class Filters(QWidget):
         lbl_start = QLabel(("From:"))
         btn_start = QPushButton("Cal")
         btn_start.clicked.connect(
-            partial(self.__calendar_dialog, dateEdit=self.start_date)
+            partial(self.__calendar_dialog, dateEdit=self.start_date),
         )
         clr_start = QPushButton("Reset")
         clr_start.clicked.connect(self.__clear_start_date)
@@ -1217,7 +1217,7 @@ class Filters(QWidget):
 
         btn = QPushButton("Done")
         btn.clicked.connect(
-            partial(self.__get_date, dlg=d, calendar=cal, dateEdit=dateEdit)
+            partial(self.__get_date, dlg=d, calendar=cal, dateEdit=dateEdit),
         )
         vb.addWidget(btn)
         d.exec_()
@@ -1277,11 +1277,11 @@ class Filters(QWidget):
 
         if usetype == "tour":
             self.cursor.execute(
-                self.sql.query["getCategoryBySiteAndPlayer"], (site_id, hero)
+                self.sql.query["getCategoryBySiteAndPlayer"], (site_id, hero),
             )
         else:  # ring games
             self.cursor.execute(
-                self.sql.query["getCategoryBySiteAndPlayerRing"], (site_id, hero)
+                self.sql.query["getCategoryBySiteAndPlayerRing"], (site_id, hero),
             )
 
         # self.cursor.execute(query, (site_id, hero))
@@ -1315,7 +1315,7 @@ class Filters(QWidget):
 
         site_id = self.siteid[site]
         self.cursor.execute(
-            self.sql.query["getPositionByPlayerAndHandid"], (hero, f"{site_id}%")
+            self.sql.query["getPositionByPlayerAndHandid"], (hero, f"{site_id}%"),
         )
         positions = [str(row[0]) for row in self.cursor.fetchall()]
         for position, checkbox in self.cbPositions.items():
@@ -1341,7 +1341,7 @@ class Filters(QWidget):
         # debug
         log.debug(f"executed request for {hero} on {site} (site_id: {site_id})")
         self.cursor.execute(
-            self.sql.query["getCurrencyBySiteAndPlayer"], (site_id, hero)
+            self.sql.query["getCurrencyBySiteAndPlayer"], (site_id, hero),
         )
         currencies = [row[0] for row in self.cursor.fetchall()]
         # debug
@@ -1361,7 +1361,7 @@ class Filters(QWidget):
                 checkbox.setEnabled(False)
             # debug
             log.debug(
-                f"Devise {currency} - Checked: {checkbox.isChecked()}, Activated: {checkbox.isEnabled()} on {site}"
+                f"Devise {currency} - Checked: {checkbox.isChecked()}, Activated: {checkbox.isEnabled()} on {site}",
             )
 
 

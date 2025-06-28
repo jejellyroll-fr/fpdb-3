@@ -68,7 +68,7 @@ from loggingFpdb import get_logger
 
 re_char = re.compile("[^a-zA-Z]")
 re_insert = re.compile(
-    r"insert\sinto\s(?P<TABLENAME>[A-Za-z]+)\s(?P<COLUMNS>\(.+?\))\s+values", re.DOTALL
+    r"insert\sinto\s(?P<TABLENAME>[A-Za-z]+)\s(?P<COLUMNS>\(.+?\))\s+values", re.DOTALL,
 )
 
 #    FreePokerTools modules
@@ -1287,7 +1287,7 @@ class Database(object):
                     log.info(f"Creating directory: '{self.config.dir_database}'")
                     os.makedirs(self.config.dir_database)
                 database = os.path.join(self.config.dir_database, database).replace(
-                    "\\", "/"
+                    "\\", "/",
                 )
             self.db_path = database
             log.info(f"Connecting to SQLite: {self.db_path}")
@@ -1309,17 +1309,17 @@ class Database(object):
                     self.connection.create_aggregate("variance", 1, VARIANCE)
                 else:
                     log.warning(
-                        ("Some database functions will not work without NumPy support")
+                        ("Some database functions will not work without NumPy support"),
                     )
                 self.cursor = self.connection.cursor()
                 self.cursor.execute(
-                    "PRAGMA temp_store=2"
+                    "PRAGMA temp_store=2",
                 )  # use memory for temp tables/indexes
                 self.cursor.execute(
-                    "PRAGMA journal_mode=WAL"
+                    "PRAGMA journal_mode=WAL",
                 )  # use memory for temp tables/indexes
                 self.cursor.execute(
-                    "PRAGMA synchronous=0"
+                    "PRAGMA synchronous=0",
                 )  # don't wait for file writes to finish
             else:
                 raise FpdbError("sqlite database " + database + " does not exist")
@@ -1343,7 +1343,7 @@ class Database(object):
             settings = self.cursor.fetchone()
             if settings[0] != DB_VERSION:
                 log.error(
-                    f"Outdated or too new database version ({settings[0]}). Please recreate tables."
+                    f"Outdated or too new database version ({settings[0]}). Please recreate tables.",
                 )
                 self.wrongDbVersion = True
         except Exception:  # _mysql_exceptions.ProgrammingError:
@@ -1356,7 +1356,7 @@ class Database(object):
                 else:
                     # print (("Failed to read settings table.") + " - " + ("Please recreate tables."))
                     log.info(
-                        ("Failed to read settings table...Please recreate tables.")
+                        ("Failed to read settings table...Please recreate tables."),
                     )
                     self.wrongDbVersion = True
             else:
@@ -1746,7 +1746,7 @@ class Database(object):
         c.execute(self.sql.query[query], subs)
         ptime = time() - stime
         log.info(
-            f"HudCache query get_stats_from_hand_aggregated took {ptime:.3f} seconds"
+            f"HudCache query get_stats_from_hand_aggregated took {ptime:.3f} seconds",
         )
         colnames = [desc[0] for desc in c.description]
         for row in c.fetchall():
@@ -1858,7 +1858,7 @@ class Database(object):
         c = self.get_cursor()
         # conversion to UTF-8 in Python 3 is not needed
         c.execute(
-            self.sql.query["get_player_names"], (like_player_name, site_id, site_id)
+            self.sql.query["get_player_names"], (like_player_name, site_id, site_id),
         )
         rows = c.fetchall()
         return rows
@@ -1886,7 +1886,7 @@ class Database(object):
                 ret = self.connection.insert_id()
                 if ret < 1 or ret > 999999999:
                     log.warning(
-                        f"getLastInsertId(): problem fetching insert_id? ret={ret}"
+                        f"getLastInsertId(): problem fetching insert_id? ret={ret}",
                     )
                     ret = -1
             elif self.backend == self.PGSQL:
@@ -1900,7 +1900,7 @@ class Database(object):
                 row = c.fetchone()
                 if not row:
                     log.warning(
-                        f"getLastInsertId(): problem fetching lastval? row={row}"
+                        f"getLastInsertId(): problem fetching lastval? row={row}",
                     )
                     ret = -1
                 else:
@@ -1930,7 +1930,7 @@ class Database(object):
             return
         if self.backend == self.PGSQL:
             self.connection.set_isolation_level(
-                0
+                0,
             )  # allow table/index operations to work
         for fk in self.foreignKeys[self.backend]:
             if fk["drop"] == 1:
@@ -1950,14 +1950,14 @@ class Database(object):
                     # print "preparebulk find fk: cons=", cons
                     if cons:
                         log.debug(
-                            f"dropping mysql fk {cons[0]} {fk['fktab']} {fk['fkcol']}"
+                            f"dropping mysql fk {cons[0]} {fk['fktab']} {fk['fkcol']}",
                         )
                         try:
                             c.execute(
                                 "alter table "
                                 + fk["fktab"]
                                 + " drop foreign key "
-                                + cons[0]
+                                + cons[0],
                             )
                         except Exception:
                             log.error(f"    drop failed: {sys.exc_info()}")
@@ -1971,25 +1971,25 @@ class Database(object):
                         # will leave code here for now pending further tests/enhancement ...
                         c.execute("BEGIN TRANSACTION")
                         c.execute(
-                            "lock table %s in exclusive mode nowait" % (fk["fktab"],)
+                            "lock table %s in exclusive mode nowait" % (fk["fktab"],),
                         )
                         # print "after lock, status:", c.statusmessage
                         # print "alter table %s drop constraint %s_%s_fkey" % (fk['fktab'], fk['fktab'], fk['fkcol'])
                         try:
                             c.execute(
                                 "alter table %s drop constraint %s_%s_fkey"
-                                % (fk["fktab"], fk["fktab"], fk["fkcol"])
+                                % (fk["fktab"], fk["fktab"], fk["fkcol"]),
                             )
                             log.debug(f"dropping pg fk {fk['fktab']} {fk['fkcol']}")
                         except Exception:
                             if "does not exist" not in str(sys.exc_info()[1]):
                                 log.error(
-                                    f"warning: drop pg fk {fk['fktab']}_{fk['fkcol']}_fkey failed: {str(sys.exc_info()[1]).rstrip()}, continuing ..."
+                                    f"warning: drop pg fk {fk['fktab']}_{fk['fkcol']}_fkey failed: {str(sys.exc_info()[1]).rstrip()}, continuing ...",
                                 )
                         c.execute("END TRANSACTION")
                     except Exception:
                         log.error(
-                            rf"warning: constraint {fk['fktab']}_{fk['fkcol']}_fkey not dropped: {str(sys.exc_info()[1]).rstrip('')}, continuing ..."
+                            rf"warning: constraint {fk['fktab']}_{fk['fkcol']}_fkey not dropped: {str(sys.exc_info()[1]).rstrip('')}, continuing ...",
                         )
                 else:
                     return -1
@@ -2002,7 +2002,7 @@ class Database(object):
                         # apparently nowait is not implemented in mysql so this just hangs if there are locks
                         # preventing the index drop :-(
                         c.execute(
-                            "alter table %s drop index %s;", (idx["tab"], idx["col"])
+                            "alter table %s drop index %s;", (idx["tab"], idx["col"]),
                         )
                     except Exception:
                         log.error(f"    drop index failed: {sys.exc_info()}")
@@ -2015,7 +2015,7 @@ class Database(object):
                         # try to lock table to see if index drop will work:
                         c.execute("BEGIN TRANSACTION")
                         c.execute(
-                            "lock table %s in exclusive mode nowait" % (idx["tab"],)
+                            "lock table %s in exclusive mode nowait" % (idx["tab"],),
                         )
                         # print "after lock, status:", c.statusmessage
                         try:
@@ -2023,18 +2023,18 @@ class Database(object):
                             # print "drop index %s_%s_idx" % (idx['tab'],idx['col'])
                             c.execute(
                                 "drop index if exists %s_%s_idx"
-                                % (idx["tab"], idx["col"])
+                                % (idx["tab"], idx["col"]),
                             )
                             # print "dropped  pg index ", idx['tab'], idx['col']
                         except Exception:
                             if "does not exist" not in str(sys.exc_info()[1]):
                                 log.error(
-                                    f"drop index {idx['tab']}_{idx['col']}_idx failed: {str(sys.exc_info()[1]).rstrip('')}, continuing ..."
+                                    f"drop index {idx['tab']}_{idx['col']}_idx failed: {str(sys.exc_info()[1]).rstrip('')}, continuing ...",
                                 )
                         c.execute("END TRANSACTION")
                     except Exception:
                         log.error(
-                            f"index {idx['tab']}_{idx['col']}_idx not dropped {str(sys.exc_info()[1]).rstrip('')}, continuing ..."
+                            f"index {idx['tab']}_{idx['col']}_idx not dropped {str(sys.exc_info()[1]).rstrip('')}, continuing ...",
                         )
                 else:
                     return -1
@@ -2059,7 +2059,7 @@ class Database(object):
 
         if self.backend == self.PGSQL:
             self.connection.set_isolation_level(
-                0
+                0,
             )  # allow table/index operations to work
         for fk in self.foreignKeys[self.backend]:
             if fk["drop"] == 1:
@@ -2081,7 +2081,7 @@ class Database(object):
                         pass
                     else:
                         log.debug(
-                            f"Creating foreign key {fk['fktab']}.{fk['fkcol']} -> {fk['rtab']}.{fk['rcol']}"
+                            f"Creating foreign key {fk['fktab']}.{fk['fkcol']} -> {fk['rtab']}.{fk['rcol']}",
                         )
                         try:
                             c.execute(
@@ -2093,13 +2093,13 @@ class Database(object):
                                 + fk["rtab"]
                                 + "("
                                 + fk["rcol"]
-                                + ")"
+                                + ")",
                             )
                         except Exception:
                             log.error(f"Create foreign key failed: {sys.exc_info()}")
                 elif self.backend == self.PGSQL:
                     log.debug(
-                        f"Creating foreign key {fk['fktab']}.{fk['fkcol']} -> {fk['rtab']}.{fk['rcol']}"
+                        f"Creating foreign key {fk['fktab']}.{fk['fkcol']} -> {fk['rtab']}.{fk['rcol']}",
                     )
                     try:
                         c.execute(
@@ -2116,7 +2116,7 @@ class Database(object):
                             + fk["rtab"]
                             + "("
                             + fk["rcol"]
-                            + ")"
+                            + ")",
                         )
                     except Exception:
                         log.error(f"Create foreign key failed: {sys.exc_info()}")
@@ -2237,8 +2237,8 @@ class Database(object):
         c.execute(self.sql.query["addTourneyIndex"])
         c.execute(
             self.sql.query["addHandsIndex"].replace(
-                "<heroseat>", ", heroSeat" if self.publicDB else ""
-            )
+                "<heroseat>", ", heroSeat" if self.publicDB else "",
+            ),
         )
         c.execute(self.sql.query["addPlayersIndex"])
         c.execute(self.sql.query["addTPlayersIndex"])
@@ -2282,7 +2282,7 @@ class Database(object):
             except Exception:
                 err = traceback.extract_tb(sys.exc_info()[2])[-1]
                 log.error(
-                    f"Error dropping tables: {err[2]}({err[1]}): {sys.exc_info()[1]}"
+                    f"Error dropping tables: {err[2]}({err[1]}): {sys.exc_info()[1]}",
                 )
                 self.rollback()
         elif backend == "PostgreSQL":
@@ -2295,7 +2295,7 @@ class Database(object):
             except Exception:
                 err = traceback.extract_tb(sys.exc_info()[2])[-1]
                 log.error(
-                    f"Error dropping tables: {err[2]} ({err[1]}): {sys.exc_info()[1]}"
+                    f"Error dropping tables: {err[2]} ({err[1]}): {sys.exc_info()[1]}",
                 )
                 self.rollback()
         elif backend == "SQLite":
@@ -2313,7 +2313,7 @@ class Database(object):
 
         if self.backend == self.PGSQL:
             self.connection.set_isolation_level(
-                0
+                0,
             )  # allow table/index operations to work
         c = self.get_cursor()
         for idx in self.indexes[self.backend]:
@@ -2341,14 +2341,14 @@ class Database(object):
         # maybe upgrade to use data dictionary?? (but take care to exclude PK and FK)
         if self.backend == self.PGSQL:
             self.connection.set_isolation_level(
-                0
+                0,
             )  # allow table/index operations to work
         for idx in self.indexes[self.backend]:
             if self.backend == self.MYSQL_INNODB:
                 log.debug(f"Dropping index: {idx['tab']} {idx['col']}")
                 try:
                     self.get_cursor().execute(
-                        "alter table %s drop index %s", (idx["tab"], idx["col"])
+                        "alter table %s drop index %s", (idx["tab"], idx["col"]),
                     )
                 except Exception:
                     log.error(f"Drop index failed: {sys.exc_info()}")
@@ -2357,7 +2357,7 @@ class Database(object):
                 # mod to use tab_col for index name?
                 try:
                     self.get_cursor().execute(
-                        "drop index %s_%s_idx" % (idx["tab"], idx["col"])
+                        "drop index %s_%s_idx" % (idx["tab"], idx["col"]),
                     )
                 except Exception:
                     log.error(f"Drop index failed: {sys.exc_info()}")
@@ -2365,7 +2365,7 @@ class Database(object):
                 log.debug(f"Dropping index: {idx['tab']} {idx['col']}")
                 try:
                     self.get_cursor().execute(
-                        "drop index %s_%s_idx" % (idx["tab"], idx["col"])
+                        "drop index %s_%s_idx" % (idx["tab"], idx["col"]),
                     )
                 except Exception:
                     log.error(f"Drop index failed: {sys.exc_info()}")
@@ -2382,7 +2382,7 @@ class Database(object):
         try:
             if self.backend == self.PGSQL:
                 self.connection.set_isolation_level(
-                    0
+                    0,
                 )  # allow table/index operations to work
             c = self.get_cursor()
         except Exception:
@@ -2407,7 +2407,7 @@ class Database(object):
                     pass
                 else:
                     log.debug(
-                        f"Creating foreign key: {fk['fktab']} {fk['fkcol']} -> {fk['rtab']} {fk['rcol']}"
+                        f"Creating foreign key: {fk['fktab']} {fk['fkcol']} -> {fk['rtab']} {fk['rcol']}",
                     )
                     try:
                         c.execute(
@@ -2419,13 +2419,13 @@ class Database(object):
                             + fk["rtab"]
                             + "("
                             + fk["rcol"]
-                            + ")"
+                            + ")",
                         )
                     except Exception:
                         log.error(f"Create foreign key failed: {sys.exc_info()}")
             elif self.backend == self.PGSQL:
                 log.debug(
-                    f"Creating foreign key: {fk['fktab']}.{fk['fkcol']} -> {fk['rtab']}.{fk['rcol']}"
+                    f"Creating foreign key: {fk['fktab']}.{fk['fkcol']} -> {fk['rtab']}.{fk['rcol']}",
                 )
                 try:
                     c.execute(
@@ -2442,7 +2442,7 @@ class Database(object):
                         + fk["rtab"]
                         + "("
                         + fk["rcol"]
-                        + ")"
+                        + ")",
                     )
                 except Exception:
                     log.error(f"Create foreign key failed: {str(sys.exc_info())}")
@@ -2452,7 +2452,7 @@ class Database(object):
         try:
             if self.backend == self.PGSQL:
                 self.connection.set_isolation_level(
-                    1
+                    1,
                 )  # go back to normal isolation level
         except Exception:
             log.error(f"set_isolation_level failed: {str(sys.exc_info())}")
@@ -2465,7 +2465,7 @@ class Database(object):
         # maybe upgrade to use data dictionary?? (but take care to exclude PK and FK)
         if self.backend == self.PGSQL:
             self.connection.set_isolation_level(
-                0
+                0,
             )  # allow table/index operations to work
         c = self.get_cursor()
 
@@ -2486,18 +2486,18 @@ class Database(object):
                 # print "preparebulk find fk: cons=", cons
                 if cons:
                     log.debug(
-                        f"Dropping foreign key: {cons[0]} {fk['fktab']}.{fk['fkcol']}"
+                        f"Dropping foreign key: {cons[0]} {fk['fktab']}.{fk['fkcol']}",
                     )
                     try:
                         c.execute(
                             "alter table "
                             + fk["fktab"]
                             + " drop foreign key "
-                            + cons[0]
+                            + cons[0],
                         )
                     except Exception:
                         log.error(
-                            f"Warning: Drop foreign key {fk['fktab']}_{fk['fkcol']}_fkey failed: {str(sys.exc_info()[1]).rstrip('')}, continuing ..."
+                            f"Warning: Drop foreign key {fk['fktab']}_{fk['fkcol']}_fkey failed: {str(sys.exc_info()[1]).rstrip('')}, continuing ...",
                         )
             elif self.backend == self.PGSQL:
                 #    DON'T FORGET TO RECREATE THEM!!
@@ -2514,20 +2514,20 @@ class Database(object):
                     try:
                         c.execute(
                             "alter table %s drop constraint %s_%s_fkey"
-                            % (fk["fktab"], fk["fktab"], fk["fkcol"])
+                            % (fk["fktab"], fk["fktab"], fk["fkcol"]),
                         )
                         log.debug(
-                            f"dropped foreign key {fk['fktab']}_{fk['fkcol']}_fkey, continuing ..."
+                            f"dropped foreign key {fk['fktab']}_{fk['fkcol']}_fkey, continuing ...",
                         )
                     except Exception:
                         if "does not exist" not in str(sys.exc_info()[1]):
                             log.error(
-                                f"Drop foreign key {fk['fktab']}_{fk['fkcol']}_fkey failed: {str(sys.exc_info()[1]).rstrip('')}, continuing ..."
+                                f"Drop foreign key {fk['fktab']}_{fk['fkcol']}_fkey failed: {str(sys.exc_info()[1]).rstrip('')}, continuing ...",
                             )
                     c.execute("END TRANSACTION")
                 except Exception:
                     log.error(
-                        f"Constraint {fk['fktab']}_{fk['fkcol']}_fkey not dropped: {str(sys.exc_info()[1]).rstrip('')}, continuing ..."
+                        f"Constraint {fk['fktab']}_{fk['fkcol']}_fkey not dropped: {str(sys.exc_info()[1]).rstrip('')}, continuing ...",
                     )
             else:
                 # print ("Only MySQL and Postgres supported so far")
@@ -2543,27 +2543,27 @@ class Database(object):
         c.execute("INSERT INTO Settings (version) VALUES (%s);" % (DB_VERSION))
         # Fill Sites
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('1', 'Full Tilt Poker', 'FT')"
+            "INSERT INTO Sites (id,name,code) VALUES ('1', 'Full Tilt Poker', 'FT')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('2', 'PokerStars', 'PS')")
         # PokerStars variants
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('32', 'PokerStars.COM', 'PS')"
+            "INSERT INTO Sites (id,name,code) VALUES ('32', 'PokerStars.COM', 'PS')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('33', 'PokerStars.FR', 'PS')"
+            "INSERT INTO Sites (id,name,code) VALUES ('33', 'PokerStars.FR', 'PS')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('34', 'PokerStars.IT', 'PS')"
+            "INSERT INTO Sites (id,name,code) VALUES ('34', 'PokerStars.IT', 'PS')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('35', 'PokerStars.ES', 'PS')"
+            "INSERT INTO Sites (id,name,code) VALUES ('35', 'PokerStars.ES', 'PS')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('36', 'PokerStars.PT', 'PS')"
+            "INSERT INTO Sites (id,name,code) VALUES ('36', 'PokerStars.PT', 'PS')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('37', 'PokerStars.EU', 'PS')"
+            "INSERT INTO Sites (id,name,code) VALUES ('37', 'PokerStars.EU', 'PS')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('3', 'Everleaf', 'EV')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('4', 'Boss', 'BM')")
@@ -2576,81 +2576,81 @@ class Database(object):
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('38', 'Party Poker', 'PP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('39', 'Bwin Poker', 'PP')")
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('40', 'Bwin.fr Poker', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('40', 'Bwin.fr Poker', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('41', 'Bwin.it Poker', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('41', 'Bwin.it Poker', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('42', 'Bwin.es Poker', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('42', 'Bwin.es Poker', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('43', 'Bwin.de Poker', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('43', 'Bwin.de Poker', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('44', 'PartyPoker.fr', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('44', 'PartyPoker.fr', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('45', 'PartyPoker.it', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('45', 'PartyPoker.it', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('46', 'PartyPoker.es', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('46', 'PartyPoker.es', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('47', 'PartyPoker.de', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('47', 'PartyPoker.de', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('48', 'Empire Poker', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('48', 'Empire Poker', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('49', 'Gamebookers Poker', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('49', 'Gamebookers Poker', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('50', 'Intertops Poker', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('50', 'Intertops Poker', 'PP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('51', 'MultiPoker', 'PP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('52', 'PokerRoom', 'PP')")
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('53', 'PartyPoker NJ', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('53', 'PartyPoker NJ', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('54', 'BorgataPoker', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('54', 'BorgataPoker', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('55', 'Borgata Poker', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('55', 'Borgata Poker', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('120', 'WPT Poker', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('120', 'WPT Poker', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('121', 'WPTPoker', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('121', 'WPTPoker', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('122', 'PartyPoker.pt', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('122', 'PartyPoker.pt', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('123', 'PartyPoker.com', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('123', 'PartyPoker.com', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('124', 'PartyPoker.eu', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('124', 'PartyPoker.eu', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('125', 'partycasino', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('125', 'partycasino', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('126', 'PartyCasino', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('126', 'PartyCasino', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('127', 'partypoker', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('127', 'partypoker', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('128', 'bwin', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('128', 'bwin', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('129', 'PMU Poker (PartyPoker)', 'PP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('129', 'PMU Poker (PartyPoker)', 'PP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('10', 'PacificPoker', 'P8')"
+            "INSERT INTO Sites (id,name,code) VALUES ('10', 'PacificPoker', 'P8')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('11', 'Partouche', 'PA')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('12', 'Merge', 'MN')")
@@ -2661,149 +2661,149 @@ class Database(object):
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('57', 'FDJ Poker', 'IP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('58', 'Poker770', 'IP')")
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('59', 'NetBet Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('59', 'NetBet Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('60', 'Barrière Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('60', 'Barrière Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('61', 'Red Star Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('61', 'Red Star Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('62', 'Titan Poker', 'IP')")
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('63', 'Bet365 Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('63', 'Bet365 Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('64', 'William Hill Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('64', 'William Hill Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('65', 'Paddy Power Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('65', 'Paddy Power Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('66', 'Betfair Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('66', 'Betfair Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('67', 'Coral Poker', 'IP')")
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('68', 'Genting Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('68', 'Genting Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('69', 'Mansion Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('69', 'Mansion Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('70', 'Winner Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('70', 'Winner Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('71', 'Ladbrokes Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('71', 'Ladbrokes Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('72', 'Sky Poker', 'IP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('73', 'Sisal Poker', 'IP')")
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('74', 'Lottomatica Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('74', 'Lottomatica Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('75', 'Eurobet Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('75', 'Eurobet Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('76', 'Snai Poker', 'IP')")
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('77', 'Goldbet Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('77', 'Goldbet Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('78', 'Casino Barcelona Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('78', 'Casino Barcelona Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('79', 'Sportium Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('79', 'Sportium Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('80', 'Marca Apuestas Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('80', 'Marca Apuestas Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('81', 'Everest Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('81', 'Everest Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('82', 'Bet-at-home Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('82', 'Bet-at-home Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('83', 'Mybet Poker', 'IP')")
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('84', 'Betsson Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('84', 'Betsson Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('85', 'Betsafe Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('85', 'Betsafe Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('86', 'NordicBet Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('86', 'NordicBet Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('87', 'Unibet Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('87', 'Unibet Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('88', 'Maria Casino Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('88', 'Maria Casino Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('89', 'LeoVegas Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('89', 'LeoVegas Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('90', 'Mr Green Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('90', 'Mr Green Poker', 'IP')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('91', 'Redbet Poker', 'IP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('91', 'Redbet Poker', 'IP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('15', 'Winamax', 'WM')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('16', 'Everest', 'EP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('17', 'Cake', 'CK')")
         # Cake network variants
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('92', 'Everygame Poker', 'CK')"
+            "INSERT INTO Sites (id,name,code) VALUES ('92', 'Everygame Poker', 'CK')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('93', 'Everygame', 'CK')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('94', 'Cake Poker', 'CK')")
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('95', 'Juicy Stakes', 'CK')"
+            "INSERT INTO Sites (id,name,code) VALUES ('95', 'Juicy Stakes', 'CK')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('96', 'Juicy Stakes Poker', 'CK')"
+            "INSERT INTO Sites (id,name,code) VALUES ('96', 'Juicy Stakes Poker', 'CK')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('97', 'JuicyStakes', 'CK')")
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('98', 'RedStar Poker', 'CK')"
+            "INSERT INTO Sites (id,name,code) VALUES ('98', 'RedStar Poker', 'CK')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('99', 'RedStar', 'CK')")
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('100', 'Sportsbetting.ag Poker', 'CK')"
+            "INSERT INTO Sites (id,name,code) VALUES ('100', 'Sportsbetting.ag Poker', 'CK')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('101', 'Sportsbetting Poker', 'CK')"
+            "INSERT INTO Sites (id,name,code) VALUES ('101', 'Sportsbetting Poker', 'CK')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('102', 'SportsBetting.ag', 'CK')"
+            "INSERT INTO Sites (id,name,code) VALUES ('102', 'SportsBetting.ag', 'CK')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('18', 'Entraction', 'TR')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('19', 'BetOnline', 'BO')")
         # BetOnline network variants
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('103', 'BetOnline Poker', 'BO')"
+            "INSERT INTO Sites (id,name,code) VALUES ('103', 'BetOnline Poker', 'BO')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('104', 'BetOnline.ag', 'BO')"
+            "INSERT INTO Sites (id,name,code) VALUES ('104', 'BetOnline.ag', 'BO')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('105', 'Tiger Gaming', 'BO')"
+            "INSERT INTO Sites (id,name,code) VALUES ('105', 'Tiger Gaming', 'BO')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('106', 'TigerGaming', 'BO')"
+            "INSERT INTO Sites (id,name,code) VALUES ('106', 'TigerGaming', 'BO')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('107', 'Doyles Room', 'BO')"
+            "INSERT INTO Sites (id,name,code) VALUES ('107', 'Doyles Room', 'BO')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('108', 'DoylesRoom', 'BO')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('109', 'Poker4Ever', 'BO')")
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('110', 'Poker 4 Ever', 'BO')"
+            "INSERT INTO Sites (id,name,code) VALUES ('110', 'Poker 4 Ever', 'BO')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('111', 'PlayersOnly', 'BO')"
+            "INSERT INTO Sites (id,name,code) VALUES ('111', 'PlayersOnly', 'BO')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('112', 'Players Only', 'BO')"
+            "INSERT INTO Sites (id,name,code) VALUES ('112', 'Players Only', 'BO')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('113', 'SunPoker', 'BO')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('114', 'Sun Poker', 'BO')")
@@ -2811,24 +2811,24 @@ class Database(object):
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('21', 'Bovada', 'BV')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('22', 'Enet', 'EN')")
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('23', 'SealsWithClubs', 'SW')"
+            "INSERT INTO Sites (id,name,code) VALUES ('23', 'SealsWithClubs', 'SW')",
         )
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('24', 'WinningPoker', 'WP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('24', 'WinningPoker', 'WP')",
         )
         # WPN network variants
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('115', 'Americas Cardroom', 'WP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('115', 'Americas Cardroom', 'WP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('116', 'ACR Poker', 'WP')")
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('117', 'BlackChipPoker', 'WP')"
+            "INSERT INTO Sites (id,name,code) VALUES ('117', 'BlackChipPoker', 'WP')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('118', 'TruePoker', 'WP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('119', 'Ya Poker', 'WP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('25', 'PokerMaster', 'PM')")
         c.execute(
-            "INSERT INTO Sites (id,name,code) VALUES ('26', 'Run It Once Poker', 'RO')"
+            "INSERT INTO Sites (id,name,code) VALUES ('26', 'Run It Once Poker', 'RO')",
         )
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('27', 'GGPoker', 'GG')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('28', 'KingsClub', 'KC')")
@@ -2838,7 +2838,7 @@ class Database(object):
         # Fill Actions
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('1', 'ante', 'A')")
         c.execute(
-            "INSERT INTO Actions (id,name,code) VALUES ('2', 'small blind', 'SB')"
+            "INSERT INTO Actions (id,name,code) VALUES ('2', 'small blind', 'SB')",
         )
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('3', 'secondsb', 'SSB')")
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('4', 'big blind', 'BB')")
@@ -2854,7 +2854,7 @@ class Database(object):
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('14', 'completes', 'P')")
         c.execute("INSERT INTO Actions (id,name,code) VALUES ('15', 'straddle', 'ST')")
         c.execute(
-            "INSERT INTO Actions (id,name,code) VALUES ('16', 'button blind', 'BUB')"
+            "INSERT INTO Actions (id,name,code) VALUES ('16', 'button blind', 'BUB')",
         )
         # Fill Rank
         c.execute("INSERT INTO Rank (id,name) VALUES ('1', 'Nothing')")
@@ -2869,7 +2869,7 @@ class Database(object):
         c.execute("INSERT INTO Rank (id,name) VALUES ('10', 'StFlush')")
         # Fill StartCards
         sql = "INSERT INTO StartCards (category, name, rank, combinations) VALUES (%s, %s, %s, %s)".replace(
-            "%s", self.sql.query["placeholder"]
+            "%s", self.sql.query["placeholder"],
         )
         for i in range(170):
             (name, rank, combinations) = Card.StartCardRank(i)
@@ -2937,10 +2937,10 @@ class Database(object):
                 )
                 if self.backend == self.PGSQL:
                     query = query.replace(
-                        "<styleKey>", ",'d' || to_char(h.startTime, 'YYMMDD')"
+                        "<styleKey>", ",'d' || to_char(h.startTime, 'YYMMDD')",
                     )
                     query = query.replace(
-                        "<styleKeyGroup>", ",to_char(h.startTime, 'YYMMDD')"
+                        "<styleKeyGroup>", ",to_char(h.startTime, 'YYMMDD')",
                     )
                 elif self.backend == self.SQLITE:
                     query = query.replace(
@@ -2953,10 +2953,10 @@ class Database(object):
                     )
                 elif self.backend == self.MYSQL_INNODB:
                     query = query.replace(
-                        "<styleKey>", ",date_format(h.startTime, 'd%y%m%d')"
+                        "<styleKey>", ",date_format(h.startTime, 'd%y%m%d')",
                     )
                     query = query.replace(
-                        "<styleKeyGroup>", ",date_format(h.startTime, 'd%y%m%d')"
+                        "<styleKeyGroup>", ",date_format(h.startTime, 'd%y%m%d')",
                     )
             else:
                 query = query.replace("<hc_position>", ",'0' as hc_position")
@@ -3070,7 +3070,7 @@ class Database(object):
         return query
 
     def rebuild_cache(
-        self, h_start=None, v_start=None, table="HudCache", ttid=None, wmid=None
+        self, h_start=None, v_start=None, table="HudCache", ttid=None, wmid=None,
     ):
         """clears hudcache and rebuilds from the individual handsplayers records"""
         # stime = time()
@@ -3128,7 +3128,7 @@ class Database(object):
                     + "   AND hp.tourneysPlayersId IS NULL)"
                 )
             rebuild_sql_cash = self.sql.query["rebuildCache"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             rebuild_sql_cash = rebuild_sql_cash.replace("<tourney_join_clause>", "")
             rebuild_sql_cash = rebuild_sql_cash.replace("<where_clause>", where)
@@ -3163,14 +3163,14 @@ class Database(object):
                 + "   AND hp.tourneysPlayersId >= 0)"
             )
         rebuild_sql_tourney = self.sql.query["rebuildCache"].replace(
-            "%s", self.sql.query["placeholder"]
+            "%s", self.sql.query["placeholder"],
         )
         rebuild_sql_tourney = rebuild_sql_tourney.replace(
-            "<tourney_join_clause>", """INNER JOIN Tourneys t ON (t.id = h.tourneyId)"""
+            "<tourney_join_clause>", """INNER JOIN Tourneys t ON (t.id = h.tourneyId)""",
         )
         rebuild_sql_tourney = rebuild_sql_tourney.replace("<where_clause>", where)
         rebuild_sql_tourney = self.replace_statscache(
-            "tour", table, rebuild_sql_tourney
+            "tour", table, rebuild_sql_tourney,
         )
         # print rebuild_sql_tourney
         self.get_cursor().execute(rebuild_sql_tourney)
@@ -3181,19 +3181,19 @@ class Database(object):
 
     def update_timezone(self, tz_name):
         select_W = self.sql.query["select_W"].replace(
-            "%s", self.sql.query["placeholder"]
+            "%s", self.sql.query["placeholder"],
         )
         select_M = self.sql.query["select_M"].replace(
-            "%s", self.sql.query["placeholder"]
+            "%s", self.sql.query["placeholder"],
         )
         insert_W = self.sql.query["insert_W"].replace(
-            "%s", self.sql.query["placeholder"]
+            "%s", self.sql.query["placeholder"],
         )
         insert_M = self.sql.query["insert_M"].replace(
-            "%s", self.sql.query["placeholder"]
+            "%s", self.sql.query["placeholder"],
         )
         update_WM_S = self.sql.query["update_WM_S"].replace(
-            "%s", self.sql.query["placeholder"]
+            "%s", self.sql.query["placeholder"],
         )
         c = self.get_cursor()
         c.execute("SELECT id, sessionStart, weekId wid, monthId mid FROM Sessions")
@@ -3203,7 +3203,7 @@ class Database(object):
             tz = pytz.timezone(tz_name)
             loc_tz = utc_start.astimezone(tz).strftime("%z")
             offset = timedelta(
-                hours=int(loc_tz[:-2]), minutes=int(loc_tz[0] + loc_tz[-2:])
+                hours=int(loc_tz[:-2]), minutes=int(loc_tz[0] + loc_tz[-2:]),
             )
             local = s["sessionStart"] + offset
             monthStart = datetime(local.year, local.month, 1)
@@ -3242,7 +3242,7 @@ class Database(object):
                         self.hero_ids[site_id] = int(p_id)
 
             q = self.sql.query["get_hero_hudcache_start"].replace(
-                "<playerid_list>", str(tuple(self.hero_ids.values()))
+                "<playerid_list>", str(tuple(self.hero_ids.values())),
             )
             c = self.get_cursor()
             c.execute(q)
@@ -3364,11 +3364,11 @@ class Database(object):
                 for _ in range(5)
             )
             bulk_file = os.path.join(
-                self.import_options["hhBulkPath"], m.group("TABLENAME") + "_" + rand
+                self.import_options["hhBulkPath"], m.group("TABLENAME") + "_" + rand,
             )
             with open(bulk_file, "wb") as csvfile:
                 writer = csv.writer(
-                    csvfile, delimiter="\t", quotechar='"', quoting=csv.QUOTE_MINIMAL
+                    csvfile, delimiter="\t", quotechar='"', quoting=csv.QUOTE_MINIMAL,
                 )
                 writer.writerows(w for w in values)
             q_insert = (
@@ -3443,7 +3443,7 @@ class Database(object):
                 hdata["street3Pot"],
                 hdata["street4Pot"],
                 hdata["finalPot"],
-            ]
+            ],
         )
 
         if doinsert:
@@ -3468,7 +3468,7 @@ class Database(object):
     def updateTourneysSessions(self):
         if self.tbulk:
             q_update_sessions = self.sql.query["updateTourneysSessions"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             c = self.get_cursor()
             for t, sid in list(self.tbulk.items()):
@@ -3477,7 +3477,7 @@ class Database(object):
 
     def storeHandsPlayers(self, hid, pids, pdata, doinsert=False, printdata=False):
         log.info(
-            f"Entering storeHandsPlayers: hid={hid}, doinsert={doinsert}, printdata={printdata}"
+            f"Entering storeHandsPlayers: hid={hid}, doinsert={doinsert}, printdata={printdata}",
         )
 
         if printdata:
@@ -3513,7 +3513,7 @@ class Database(object):
                 c = self.get_cursor(True)
                 self.executemany(c, q, self.hpbulk)
                 log.info(
-                    f"Successfully inserted {len(self.hpbulk)} rows into hands_players."
+                    f"Successfully inserted {len(self.hpbulk)} rows into hands_players.",
                 )
             except Exception as e:
                 log.error(f"Error during database insertion in storeHandsPlayers: {e}")
@@ -3555,7 +3555,7 @@ class Database(object):
                     adata[a]["numDiscarded"],
                     adata[a]["cardsDiscarded"],
                     adata[a]["allIn"],
-                )
+                ),
             )
 
         if doinsert:
@@ -3637,20 +3637,20 @@ class Database(object):
         if doinsert:
             update_hudcache = self.sql.query["update_hudcache"]
             update_hudcache = update_hudcache.replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             insert_hudcache = self.sql.query["insert_hudcache"]
             insert_hudcache = insert_hudcache.replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
 
             select_hudcache_ring = self.sql.query["select_hudcache_ring"]
             select_hudcache_ring = select_hudcache_ring.replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             select_hudcache_tour = self.sql.query["select_hudcache_tour"]
             select_hudcache_tour = select_hudcache_tour.replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             inserts = []
             c = self.get_cursor()
@@ -3685,7 +3685,7 @@ class Database(object):
             tz = pytz.timezone(tz_name)
             loc_tz = utc_start.astimezone(tz).strftime("%z")
             offset = timedelta(
-                hours=int(loc_tz[:-2]), minutes=int(loc_tz[0] + loc_tz[-2:])
+                hours=int(loc_tz[:-2]), minutes=int(loc_tz[0] + loc_tz[-2:]),
             )
             local = naive + offset
             monthStart = datetime(local.year, local.month, 1)
@@ -3776,40 +3776,40 @@ class Database(object):
 
         if doinsert:
             select_S = self.sql.query["select_S"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             select_W = self.sql.query["select_W"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             select_M = self.sql.query["select_M"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             update_S = self.sql.query["update_S"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             insert_W = self.sql.query["insert_W"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             insert_M = self.sql.query["insert_M"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             insert_S = self.sql.query["insert_S"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             update_S_SC = self.sql.query["update_S_SC"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             update_S_TC = self.sql.query["update_S_TC"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             update_S_T = self.sql.query["update_S_T"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             update_S_H = self.sql.query["update_S_H"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             delete_S = self.sql.query["delete_S"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             c = self.get_cursor()
             for i in range(len(self.s["bk"])):
@@ -3855,11 +3855,11 @@ class Database(object):
                         end, update = self.s["bk"][i]["sessionEnd"], True
                     if updateW:
                         wid = self.insertOrUpdate(
-                            "weeks", c, (week,), select_W, insert_W
+                            "weeks", c, (week,), select_W, insert_W,
                         )
                     if updateM:
                         mid = self.insertOrUpdate(
-                            "months", c, (month,), select_M, insert_M
+                            "months", c, (month,), select_M, insert_M,
                         )
                     if updateW or updateM:
                         self.wmnew.add((wid, mid))
@@ -3925,7 +3925,7 @@ class Database(object):
             self.commit()
 
     def storeSessionsCache(
-        self, hid, pids, startTime, gametypeId, gametype, pdata, heroes, doinsert=False
+        self, hid, pids, startTime, gametypeId, gametype, pdata, heroes, doinsert=False,
     ):
         """Update cached cash sessions. If no record exists, do an insert"""
         THRESHOLD = timedelta(seconds=int(self.sessionTimeout * 60))
@@ -3990,16 +3990,16 @@ class Database(object):
 
         if doinsert:
             select_SC = self.sql.query["select_SC"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             update_SC = self.sql.query["update_SC"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             insert_SC = self.sql.query["insert_SC"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             delete_SC = self.sql.query["delete_SC"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             c = self.get_cursor()
             for k, sessionplayer in list(self.sc.items()):
@@ -4011,7 +4011,7 @@ class Database(object):
                     row = [lower, upper] + list(k[:2])
                     c.execute(select_SC, row)
                     r = self.fetchallDict(
-                        c, ["id", "sessionId", "startTime", "endTime"] + CACHE_KEYS
+                        c, ["id", "sessionId", "startTime", "endTime"] + CACHE_KEYS,
                     )
                     num = len(r)
                     d = [0] * num
@@ -4072,7 +4072,7 @@ class Database(object):
             self.commit()
 
     def storeTourneysCache(
-        self, hid, pids, startTime, tid, gametype, pdata, heroes, doinsert=False
+        self, hid, pids, startTime, tid, gametype, pdata, heroes, doinsert=False,
     ):
         """Update cached tour sessions. If no record exists, do an insert"""
         if gametype["type"] == "tour" and pdata:
@@ -4109,13 +4109,13 @@ class Database(object):
 
         if doinsert:
             update_TC = self.sql.query["update_TC"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             insert_TC = self.sql.query["insert_TC"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             select_TC = self.sql.query["select_TC"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
 
             inserts = []
@@ -4185,16 +4185,16 @@ class Database(object):
 
         if doinsert:
             update_cardscache = self.sql.query["update_cardscache"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             insert_cardscache = self.sql.query["insert_cardscache"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             select_cardscache_ring = self.sql.query["select_cardscache_ring"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             select_cardscache_tour = self.sql.query["select_cardscache_tour"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
 
             # Removed unused variables
@@ -4281,10 +4281,10 @@ class Database(object):
 
         if doinsert:
             update_positionscache = self.sql.query["update_positionscache"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             insert_positionscache = self.sql.query["insert_positionscache"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             select_positionscache_ring = self.sql.query[
                 "select_positionscache_ring"
@@ -4423,7 +4423,7 @@ class Database(object):
         if publicDB:
             key = (siteHandNo, siteId, heroSeat)
             q = q.replace("<heroSeat>", " AND heroSeat=%s").replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
         else:
             key = (siteHandNo, siteId)
@@ -4442,7 +4442,7 @@ class Database(object):
         result = {}
         if self.pcache is None:
             self.pcache = LambdaDict(
-                lambda key: self.insertPlayer(key[0], key[1], key[2])
+                lambda key: self.insertPlayer(key[0], key[1], key[2]),
             )
 
         for player in pnames:
@@ -4580,7 +4580,7 @@ class Database(object):
 
             c.execute(
                 self.sql.query["insertGameTypes"].replace(
-                    "%s", self.sql.query["placeholder"]
+                    "%s", self.sql.query["placeholder"],
                 ),
                 gtinsert,
             )
@@ -4592,7 +4592,7 @@ class Database(object):
     def getTourneyInfo(self, siteName, tourneyNo):
         c = self.get_cursor()
         q = self.sql.query["getTourneyInfo"].replace(
-            "%s", self.sql.query["placeholder"]
+            "%s", self.sql.query["placeholder"],
         )
         c.execute(q, (siteName, tourneyNo))
         columnNames = c.description
@@ -4623,7 +4623,7 @@ class Database(object):
         #                 hand.isRebuy, hand.rebuyCost, hand.isAddOn, hand.addOnCost, hand.speed, hand.isShootout, hand.isMatrix)
 
         result = self.createOrUpdateTourneyType(
-            hand
+            hand,
         )  # self.ttcache[(hand.tourNo, hand.siteId, tourneydata)]
 
         return result
@@ -4646,7 +4646,7 @@ class Database(object):
         setattr(obj, "limitType", obj.gametype["limitType"])
         cursor = self.get_cursor()
         q = self.sql.query["getTourneyTypeIdByTourneyNo"].replace(
-            "%s", self.sql.query["placeholder"]
+            "%s", self.sql.query["placeholder"],
         )
         cursor.execute(q, (obj.tourNo, obj.siteId))
         result = cursor.fetchone()
@@ -4759,7 +4759,7 @@ class Database(object):
             )
             cursor.execute(
                 self.sql.query["getTourneyTypeId"].replace(
-                    "%s", self.sql.query["placeholder"]
+                    "%s", self.sql.query["placeholder"],
                 ),
                 row,
             )
@@ -4776,7 +4776,7 @@ class Database(object):
                     log.debug("###### End Tourneys ########")
                 cursor.execute(
                     self.sql.query["insertTourneyType"].replace(
-                        "%s", self.sql.query["placeholder"]
+                        "%s", self.sql.query["placeholder"],
                     ),
                     row,
                 )
@@ -4784,7 +4784,7 @@ class Database(object):
             if updateDb:
                 # print 'DEBUG createOrUpdateTourneyType:', 'old', oldttid, 'new', ttid, row
                 q = self.sql.query["updateTourneyTypeId"].replace(
-                    "%s", self.sql.query["placeholder"]
+                    "%s", self.sql.query["placeholder"],
                 )
                 cursor.execute(q, (ttid, obj.siteId, obj.tourNo))
                 self.ttold.add(oldttid)
@@ -4802,17 +4802,17 @@ class Database(object):
             else:
                 tables = set([])
             select = self.sql.query["selectTourneyWithTypeId"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             delete = self.sql.query["deleteTourneyTypeId"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             cursor = self.get_cursor()
             for ttid in self.ttold:
                 for t in tables:
                     statement = "clear%sTourneyType" % t
                     clear = self.sql.query[statement].replace(
-                        "%s", self.sql.query["placeholder"]
+                        "%s", self.sql.query["placeholder"],
                     )
                     cursor.execute(clear, (ttid,))
                 self.commit()
@@ -4825,14 +4825,14 @@ class Database(object):
                 for t in tables:
                     statement = "clear%sTourneyType" % t
                     clear = self.sql.query[statement].replace(
-                        "%s", self.sql.query["placeholder"]
+                        "%s", self.sql.query["placeholder"],
                     )
                     cursor.execute(clear, (ttid,))
                 self.commit()
             for t in tables:
                 statement = "fetchNew%sTourneyTypeIds" % t
                 fetch = self.sql.query[statement].replace(
-                    "%s", self.sql.query["placeholder"]
+                    "%s", self.sql.query["placeholder"],
                 )
                 cursor.execute(fetch)
                 for id in cursor.fetchall():
@@ -4841,16 +4841,16 @@ class Database(object):
     def cleanUpWeeksMonths(self):
         if self.cacheSessions and self.wmold:
             selectWeekId = self.sql.query["selectSessionWithWeekId"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             selectMonthId = self.sql.query["selectSessionWithMonthId"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             deleteWeekId = self.sql.query["deleteWeekId"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             deleteMonthId = self.sql.query["deleteMonthId"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             )
             cursor = self.get_cursor()
             weeks, months, wmids = set(), set(), set()
@@ -4858,7 +4858,7 @@ class Database(object):
                 for t in ("CardsCache", "PositionsCache"):
                     statement = "clear%sWeeksMonths" % t
                     clear = self.sql.query[statement].replace(
-                        "%s", self.sql.query["placeholder"]
+                        "%s", self.sql.query["placeholder"],
                     )
                     cursor.execute(clear, (wid, mid))
                 self.commit()
@@ -4883,7 +4883,7 @@ class Database(object):
                 for t in ("CardsCache", "PositionsCache"):
                     statement = "clear%sWeeksMonths" % t
                     clear = self.sql.query[statement].replace(
-                        "%s", self.sql.query["placeholder"]
+                        "%s", self.sql.query["placeholder"],
                     )
                     cursor.execute(clear, (wid, mid))
                 self.commit()
@@ -4892,7 +4892,7 @@ class Database(object):
                 for t in ("CardsCache", "PositionsCache"):
                     statement = "fetchNew%sWeeksMonths" % t
                     fetch = self.sql.query[statement].replace(
-                        "%s", self.sql.query["placeholder"]
+                        "%s", self.sql.query["placeholder"],
                     )
                     cursor.execute(fetch)
                     for wid, mid in cursor.fetchall():
@@ -4937,7 +4937,7 @@ class Database(object):
         if tmp is None:
             c.execute(
                 self.sql.query["insertTourney"].replace(
-                    "%s", self.sql.query["placeholder"]
+                    "%s", self.sql.query["placeholder"],
                 ),
                 (
                     hand.tourneyTypeId,
@@ -4968,12 +4968,12 @@ class Database(object):
 
             if startTime is None or t < startTime:
                 q = self.sql.query["updateTourneyStart"].replace(
-                    "%s", self.sql.query["placeholder"]
+                    "%s", self.sql.query["placeholder"],
                 )
                 c.execute(q, (t, result))
             elif endTime is None or t > endTime:
                 q = self.sql.query["updateTourneyEnd"].replace(
-                    "%s", self.sql.query["placeholder"]
+                    "%s", self.sql.query["placeholder"],
                 )
                 c.execute(q, (t, result))
         return result
@@ -4981,7 +4981,7 @@ class Database(object):
     def createOrUpdateTourney(self, summary):
         cursor = self.get_cursor()
         q = self.sql.query["getTourneyByTourneyNo"].replace(
-            "%s", self.sql.query["placeholder"]
+            "%s", self.sql.query["placeholder"],
         )
         cursor.execute(q, (summary.siteId, summary.tourNo))
 
@@ -5035,7 +5035,7 @@ class Database(object):
                 #        summary.startTime=resultDict[ev]
             if updateDb:
                 q = self.sql.query["updateTourney"].replace(
-                    "%s", self.sql.query["placeholder"]
+                    "%s", self.sql.query["placeholder"],
                 )
                 startTime, endTime = None, None
                 if summary.startTime is not None:
@@ -5088,7 +5088,7 @@ class Database(object):
                 log.debug("###### End Tourneys ########")
             cursor.execute(
                 self.sql.query["insertTourney"].replace(
-                    "%s", self.sql.query["placeholder"]
+                    "%s", self.sql.query["placeholder"],
                 ),
                 row,
             )
@@ -5100,7 +5100,7 @@ class Database(object):
     def getTourneyPlayerInfo(self, siteName, tourneyNo, playerName):
         c = self.get_cursor()
         c.execute(
-            self.sql.query["getTourneyPlayerInfo"], (siteName, tourneyNo, playerName)
+            self.sql.query["getTourneyPlayerInfo"], (siteName, tourneyNo, playerName),
         )
         columnNames = c.description
 
@@ -5117,7 +5117,7 @@ class Database(object):
         result = {}
         if self.tpcache is None:
             self.tpcache = LambdaDict(
-                lambda key: self.insertTourneysPlayers(key[0], key[1], key[2])
+                lambda key: self.insertTourneysPlayers(key[0], key[1], key[2]),
             )
 
         for player in hand.players:
@@ -5138,7 +5138,7 @@ class Database(object):
         if tmp is None:  # new player
             c.execute(
                 self.sql.query["insertTourneysPlayer"].replace(
-                    "%s", self.sql.query["placeholder"]
+                    "%s", self.sql.query["placeholder"],
                 ),
                 (tourneyId, playerId, entryId, None, None, None, None, None, None),
             )
@@ -5153,12 +5153,12 @@ class Database(object):
         updateDb = False
         cursor = self.get_cursor()
         q = self.sql.query["updateTourneysPlayerBounties"].replace(
-            "%s", self.sql.query["placeholder"]
+            "%s", self.sql.query["placeholder"],
         )
         for player, tourneysPlayersId in list(hand.tourneysPlayersIds.items()):
             if player in hand.koCounts:
                 cursor.execute(
-                    q, (hand.koCounts[player], hand.koCounts[player], tourneysPlayersId)
+                    q, (hand.koCounts[player], hand.koCounts[player], tourneysPlayersId),
                 )
                 updateDb = True
         if updateDb:
@@ -5169,7 +5169,7 @@ class Database(object):
         cursor = self.get_cursor()
         cursor.execute(
             self.sql.query["getTourneysPlayersByTourney"].replace(
-                "%s", self.sql.query["placeholder"]
+                "%s", self.sql.query["placeholder"],
             ),
             (summary.tourneyId,),
         )
@@ -5183,7 +5183,7 @@ class Database(object):
                 if (playerId, entryId) in tplayers:
                     cursor.execute(
                         self.sql.query["getTourneysPlayersByIds"].replace(
-                            "%s", self.sql.query["placeholder"]
+                            "%s", self.sql.query["placeholder"],
                         ),
                         (summary.tourneyId, playerId, entryId),
                     )
@@ -5228,7 +5228,7 @@ class Database(object):
                             updateDb = True
                     if updateDb:
                         q = self.sql.query["updateTourneysPlayer"].replace(
-                            "%s", self.sql.query["placeholder"]
+                            "%s", self.sql.query["placeholder"],
                         )
                         inputs = (
                             summary.ranks[player][entryIdx],
@@ -5255,13 +5255,13 @@ class Database(object):
                             summary.rebuyCounts[player][entryIdx],
                             summary.addOnCounts[player][entryIdx],
                             summary.koCounts[player][entryIdx],
-                        )
+                        ),
                     )
         if inserts:
             self.executemany(
                 cursor,
                 self.sql.query["insertTourneysPlayer"].replace(
-                    "%s", self.sql.query["placeholder"]
+                    "%s", self.sql.query["placeholder"],
                 ),
                 inserts,
             )

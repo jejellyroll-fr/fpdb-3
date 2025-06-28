@@ -16,14 +16,18 @@ on:
 jobs:
   test-and-coverage:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.10', '3.11']
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
     
-    - name: Set up Python 3.11
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: ${{ matrix.python-version }}
     
     - name: Install uv and project dependencies
       run: |
@@ -34,33 +38,66 @@ jobs:
 
     - name: Run Ruff for linting
       run: |
-        ruff check . --exclude .\archives\,.\regression-test-files\,.\pypoker-eval\
+        ruff check .
 
-
-    - name: Create necessary directories
+    - name: Create necessary directories (Windows)
+      if: runner.os == 'Windows'
       run: mkdir -p C:/Users/runneradmin/AppData/Roaming/fpdb
       
-    - name: Copy HUD_config.xml
+    - name: Copy HUD_config.xml (Windows)
+      if: runner.os == 'Windows'
       run: |
         cp HUD_config.xml C:/Users/runneradmin/AppData/Roaming/fpdb/HUD_config.xml
 
-    - name: Run tests with pytest
+    - name: Create necessary directories (Unix)
+      if: runner.os != 'Windows'
+      run: mkdir -p ~/.fpdb
+      
+    - name: Copy HUD_config.xml (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        cp HUD_config.xml ~/.fpdb/HUD_config.xml
+
+    - name: Run tests with pytest (Windows)
+      if: runner.os == 'Windows'
       run: |
         uv venv && uv pip install .[test]
         $env:Path += ";$env:pythonLocation\Scripts"
         .\.venv\Scripts\Activate.ps1
-        pytest --cov=. --cov-report=html .\test\
+        # Run all tests including root level test files
+        pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py .\test\ test_*.py
       shell: pwsh
 
-    - name: Check if htmlcov directory exists and list contents
+    - name: Run tests with pytest (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        uv venv && uv pip install .[test]
+        source .venv/bin/activate
+        # Run all tests including root level test files
+        pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py test/ test_*.py
+
+    - name: Check if htmlcov directory exists and list contents (Windows)
+      if: runner.os == 'Windows'
       run: |
         if (Test-Path htmlcov) {
           Get-ChildItem htmlcov -Recurse
         } else {
           Write-Output "htmlcov directory does not exist"
         }
+      shell: pwsh
+
+    - name: Check if htmlcov directory exists and list contents (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        if [ -d htmlcov ]; then
+          ls -la htmlcov
+        else
+          echo "htmlcov directory does not exist"
+        fi
 
     - name: Deploy coverage to GitHub Pages (gh-pages branch)
+      # Only deploy from one job to avoid conflicts
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
@@ -69,17 +106,13 @@ jobs:
         git checkout gh-pages || git checkout --orphan gh-pages
         git pull origin gh-pages || echo "Branch is orphan or already up to date"
 
-        if (Test-Path coverage) {
-          Remove-Item -Recurse -Force coverage
-        }
-
-        New-Item -ItemType Directory -Path coverage/${{ github.sha }}
-        Copy-Item -Recurse htmlcov/* coverage/${{ github.sha }}/
+        rm -rf coverage/${{ github.sha }} || true
+        mkdir -p coverage/${{ github.sha }}
+        cp -r htmlcov/* coverage/${{ github.sha }}/
 
         git add coverage/${{ github.sha }}/* -f
         git commit -m "Deploy coverage report for commit ${{ github.sha }}" || echo "Nothing to commit"
         git push origin gh-pages
-      shell: pwsh
 
 
     - name: Comment PR with coverage link

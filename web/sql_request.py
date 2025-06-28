@@ -283,7 +283,7 @@ def get_heroes():
                         JOIN Sites s ON p.siteId = s.id
                         WHERE p.hero = 1;
                       
-                   """
+                   """,
     )
     heroes = cursor.fetchall()
     conn.close()
@@ -340,7 +340,7 @@ def get_handscount_cg():
     cursor.execute(
         """SELECT COUNT(*) AS handCount
                         FROM Hands
-                        WHERE tourneyId IS NULL"""
+                        WHERE tourneyId IS NULL""",
     )
     handscount_cg = cursor.fetchall()
     conn.close()
@@ -353,7 +353,7 @@ def get_handscount_tour():
     cursor.execute(
         """SELECT COUNT(*) AS handCount
                         FROM Hands
-                        WHERE tourneyId IS NOT NULL"""
+                        WHERE tourneyId IS NOT NULL""",
     )
     handscount_tour = cursor.fetchall()
     conn.close()
@@ -365,7 +365,7 @@ def get_playerscount():
     cursor = conn.cursor()
     cursor.execute(
         """SELECT COUNT(DISTINCT playerId) AS distinctPlayerCount FROM HandsPlayers;
-    """
+    """,
     )
     playerscount = cursor.fetchall()
     conn.close()
@@ -378,7 +378,7 @@ def get_playerscount_cg():
     cursor.execute(
         """SELECT COUNT(DISTINCT playerId) AS distinctPlayerCount FROM HandsPlayers
                     WHERE tourneysPlayersId IS NULL 
-                    """
+                    """,
     )
     playerscount_cg = cursor.fetchall()
     conn.close()
@@ -391,7 +391,7 @@ def get_playerscount_tour():
     cursor.execute(
         """SELECT COUNT(DISTINCT playerId) AS distinctPlayerCount FROM HandsPlayers
                     WHERE tourneysPlayersId IS NOT NULL
-                    """
+                    """,
     )
     playerscount_tour = cursor.fetchall()
     conn.close()

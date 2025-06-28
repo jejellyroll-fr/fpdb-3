@@ -193,7 +193,7 @@ class Importer(object):
                 ttime100,
                 True,
                 id,
-            ]
+            ],
         )
         self.database.commit()
 
@@ -208,7 +208,7 @@ class Importer(object):
         if not fpdbfile.fileId:
             now = datetime.datetime.utcnow()
             fpdbfile.fileId = self.database.storeFile(
-                [file, fpdbfile.site.name, now, now, 0, 0, 0, 0, 0, 0, 0, False]
+                [file, fpdbfile.site.name, now, now, 0, 0, 0, 0, 0, 0, 0, False],
             )
             self.database.commit()
 
@@ -238,7 +238,7 @@ class Importer(object):
                     log.warning(f"Database ID for {fpdbfile.site.name} not found")
                 else:
                     log.warning(
-                        f"More than 1 Database ID found for {fpdbfile.site.name}"
+                        f"More than 1 Database ID found for {fpdbfile.site.name}",
                     )
 
         return True
@@ -267,7 +267,7 @@ class Importer(object):
     # dirlist is a hash of lists:
     # dirlist{ 'PokerStars' => ["/path/to/import/", "filtername"] }
     def addImportDirectory(
-        self, dir, monitor=False, site=("default", "hh"), filter="passthrough"
+        self, dir, monitor=False, site=("default", "hh"), filter="passthrough",
     ):
         # gets called by GuiAutoImport.
         # This should really be using os.walk
@@ -293,7 +293,7 @@ class Importer(object):
                         self.addImportFile(filename, "auto")
         else:
             log.warning(
-                f"Attempted to add non-directory '{str(dir)}' as an import directory"
+                f"Attempted to add non-directory '{str(dir)}' as an import directory",
             )
 
     def runImport(self):
@@ -303,15 +303,15 @@ class Importer(object):
         start = datetime.datetime.now()
         starttime = time()
         log.info(
-            f"Started at {start} -- {len(self.filelist)} files to import. indexes: {self.settings['dropIndexes']}"
+            f"Started at {start} -- {len(self.filelist)} files to import. indexes: {self.settings['dropIndexes']}",
         )
         if self.settings["dropIndexes"] == "auto":
             self.settings["dropIndexes"] = self.calculate_auto2(
-                self.database, 12.0, 500.0
+                self.database, 12.0, 500.0,
             )
         if "dropHudCache" in self.settings and self.settings["dropHudCache"] == "auto":
             self.settings["dropHudCache"] = self.calculate_auto2(
-                self.database, 25.0, 500.0
+                self.database, 25.0, 500.0,
             )  # returns "drop"/"don't drop"
 
         (totstored, totdups, totpartial, totskipped, toterrors) = self.importFiles(None)
@@ -573,7 +573,7 @@ class Importer(object):
                             KeyError
                         ):  # TODO: Again, what error happens here? fix when we find out ..
                             log.error(
-                                f"KeyError encountered while processing file: {f}"
+                                f"KeyError encountered while processing file: {f}",
                             )
                         self.updatedsize[f] = stat_info.st_size
                         self.updatedtime[f] = time()
@@ -684,7 +684,7 @@ class Importer(object):
                             backtrack = True
                     except Exception as e:
                         log.error(
-                            f"Importer._import_hh_file: '{fpdbfile.path}' Fatal error: '{e}'"
+                            f"Importer._import_hh_file: '{fpdbfile.path}' Fatal error: '{e}'",
                         )
                         log.error(f"'{hand.handText[0:200]}'")
                         if doinsert and ihands:
@@ -720,10 +720,10 @@ class Importer(object):
                     doinsert = len(ihands) == i + 1
                     hand = ihands[i]
                     hand.insertHandsPlayers(
-                        self.database, doinsert, self.settings["testData"]
+                        self.database, doinsert, self.settings["testData"],
                     )
                     hand.insertHandsActions(
-                        self.database, doinsert, self.settings["testData"]
+                        self.database, doinsert, self.settings["testData"],
                     )
                     hand.insertHandsStove(self.database, doinsert)
                 self.database.commit()
@@ -773,7 +773,7 @@ class Importer(object):
             summaryTexts = self.readFile(obj, fpdbfile.path, fpdbfile.site.name)
             if summaryTexts is None:
                 log.warning(
-                    f"Found: '{fpdbfile.path}' with 0 characters... skipping"
+                    f"Found: '{fpdbfile.path}' with 0 characters... skipping",
                 )  # Fixed the typo (fpbdfile -> fpdbfile)
                 return (0, 0, 0, 0, 1, time())  # File had 0 characters
 
@@ -797,13 +797,13 @@ class Importer(object):
                     errors += 1
                 if j != 1:
                     log.info(
-                        f"Finished importing {j}/{len(summaryTexts)} tournament summaries"
+                        f"Finished importing {j}/{len(summaryTexts)} tournament summaries",
                     )
                 stored = j
             ####Lock Placeholder####
         ttime = time() - ttime
         log.debug(
-            f"Import summary completed: {stored} stored, {duplicates} duplicates, {partial} partial, {skipped} skipped, {errors} errors in {ttime:.3f} seconds"
+            f"Import summary completed: {stored} stored, {duplicates} duplicates, {partial} partial, {skipped} skipped, {errors} errors in {ttime:.3f} seconds",
         )
         return (stored - errors - partial, duplicates, partial, skipped, errors, ttime)
 
@@ -836,7 +836,7 @@ class Importer(object):
                     log.warning(
                         (
                             "TourneyImport: Removing text < 150 characters from start of file"
-                        )
+                        ),
                     )
 
                 # Sometimes the summary files also have a footer
@@ -846,12 +846,12 @@ class Importer(object):
                     log.warning(
                         (
                             "TourneyImport: Removing text < 100 characters from end of file"
-                        )
+                        ),
                     )
         return summaryTexts
 
     def __del__(self):
-        if hasattr(self, "zmq_sender"):
+        if hasattr(self, "zmq_sender") and self.zmq_sender is not None:
             self.zmq_sender.close()
 
 
@@ -874,13 +874,13 @@ class ImportProgressDialog(QDialog):
         self.pbar.setValue(self.fraction)
 
         self.handcount.setText(
-            ("Database Statistics") + " - " + ("Number of Hands:") + " " + handcount
+            ("Database Statistics") + " - " + ("Number of Hands:") + " " + handcount,
         )
 
         now = datetime.datetime.now()
         now_formatted = now.strftime("%H:%M:%S")
         self.progresstext.setText(
-            now_formatted + " - " + ("Importing") + " " + filename + "\n"
+            now_formatted + " - " + ("Importing") + " " + filename + "\n",
         )
 
     def __init__(self, total, parent):

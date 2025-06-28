@@ -214,12 +214,12 @@ class Classic_stat(Aux_Hud.Simple_stat):
             db.cursor.execute(q, (comment, player_id))
             db.commit()
             QMessageBox.information(
-                None, "Comment saved", "The comment has been successfully saved."
+                None, "Comment saved", "The comment has been successfully saved.",
             )
         except Exception as e:
             log.error(f"Error saving comment: {e}")
             QMessageBox.warning(
-                None, "Error", f"An error occurred while saving the comment: {e}"
+                None, "Error", f"An error occurred while saving the comment: {e}",
             )
         finally:
             db.close_connection()
@@ -271,7 +271,7 @@ class Classic_stat(Aux_Hud.Simple_stat):
         if self.stat == "playershort" and self.has_comment(player_id):
             # fg = "#FF0000"  # Red color for players with comments
             icon_path = os.path.join(
-                Configuration.GRAPHICS_PATH, "pencil.png"
+                Configuration.GRAPHICS_PATH, "pencil.png",
             )  # Chemin vers l'image de l'icône
             icon_img = f'<img src="{icon_path}" width="24" height="24">'  # Ajuster la taille de l'icône
             statstring = f"{icon_img} {self.hudprefix}{str(self.number[1])}{self.hudsuffix} "  # Add star symbol

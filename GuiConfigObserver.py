@@ -125,7 +125,7 @@ class GuiConfigObserver(ConfigObserver):
             if len(parts) >= 2:
                 site_name = parts[1]
                 log.info(
-                    f"Hero name updated for {site_name}: {change.new_value}"
+                    f"Hero name updated for {site_name}: {change.new_value}",
                 )
 
                 # Update open windows if necessary

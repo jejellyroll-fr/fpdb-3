@@ -2977,7 +2977,7 @@ class MergeStructures(object):
                     "payoutCurrency": "USD",
                     "payouts": (14,),
                 },
-            }
+            },
         )
         self.SnG_Structures.append(
             {
@@ -3953,7 +3953,7 @@ class MergeStructures(object):
                     "payoutCurrency": "USD",
                     "payouts": (70.77, 48.54, 37.20, 28.35, 20.18, 13.6, 8.16),
                 },
-            }
+            },
         )
 
     def lookupSnG(self, key, startTime):

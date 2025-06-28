@@ -208,16 +208,16 @@ class GuiSessionViewer(QSplitter):
             return
 
         self.createStatsPane(
-            frame, playerids, sitenos, games, currencies, limits, seats
+            frame, playerids, sitenos, games, currencies, limits, seats,
         )
 
     def createStatsPane(
-        self, frame, playerids, sitenos, games, currencies, limits, seats
+        self, frame, playerids, sitenos, games, currencies, limits, seats,
     ):
         starttime = time()
 
         (results, quotes) = self.generateDatasets(
-            playerids, sitenos, games, currencies, limits, seats
+            playerids, sitenos, games, currencies, limits, seats,
         )
 
         if DEBUG:
@@ -240,7 +240,7 @@ class GuiSessionViewer(QSplitter):
         q = self.sql.query["sessionStats"]
         start_date, end_date = self.filters.getDates()
         q = q.replace(
-            "<datestest>", " BETWEEN '" + start_date + "' AND '" + end_date + "'"
+            "<datestest>", " BETWEEN '" + start_date + "' AND '" + end_date + "'",
         )
 
         for m in list(self.filters.display.items()):
@@ -366,7 +366,7 @@ class GuiSessionViewer(QSplitter):
                 stime = strftime("%d/%m/%Y %H:%M", localtime(times[first_idx]))
                 etime = strftime("%d/%m/%Y %H:%M", localtime(times[last_idx]))
                 self.times.append(
-                    (times[first_idx] - PADDING * 60, times[last_idx] + PADDING * 60)
+                    (times[first_idx] - PADDING * 60, times[last_idx] + PADDING * 60),
                 )
                 minutesplayed = old_div((times[last_idx] - times[first_idx]), 60)
                 minutesplayed = minutesplayed + PADDING
@@ -403,7 +403,7 @@ class GuiSessionViewer(QSplitter):
                         "%.2f" % hwm,
                         "%.2f" % (hwm - lwm),
                         "%.2f" % won,
-                    ]
+                    ],
                 )
                 quotes.append((sid, open, close, hwm, lwm))
                 first_idx = end_idx
@@ -426,7 +426,7 @@ class GuiSessionViewer(QSplitter):
                 "%.2f" % global_hwm,
                 "%.2f" % (global_hwm - global_lwm),
                 "%.2f" % (global_close - global_open),
-            ]
+            ],
         )
 
         return (results, quotes)
@@ -505,7 +505,7 @@ class GuiSessionViewer(QSplitter):
         self.ax.spines["top"].set_color(self.colors["foreground"])
         self.ax.spines["bottom"].set_color(self.colors["foreground"])
         self.ax.set_title(
-            (("Session graph for ring games") + names), color=self.colors["foreground"]
+            (("Session graph for ring games") + names), color=self.colors["foreground"],
         )
         self.ax.set_facecolor(self.colors["background"])
         self.ax.set_xlabel(("Sessions"), fontsize=12, color=self.colors["foreground"])
@@ -528,7 +528,7 @@ class GuiSessionViewer(QSplitter):
 
         self.liststore = QStandardItemModel(0, len(self.columns))
         self.liststore.setHorizontalHeaderLabels(
-            [column[colheading] for column in self.columns]
+            [column[colheading] for column in self.columns],
         )
         for row in results:
             listrow = [QStandardItem(str(r)) for r in row]

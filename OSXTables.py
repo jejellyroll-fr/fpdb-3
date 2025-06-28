@@ -76,7 +76,7 @@ class Table(Table_Window):
             windowTitle = window.get("kCGWindowName", self.search_string)
             if curr_pid == pid:
                 log.info(
-                    f"{ownerName} - {windowTitle} (PID: {pid}, WID: {windowNumber}): {geometry}"
+                    f"{ownerName} - {windowTitle} (PID: {pid}, WID: {windowNumber}): {geometry}",
                 )
 
                 title = windowTitle

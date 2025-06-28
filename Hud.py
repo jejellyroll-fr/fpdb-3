@@ -73,7 +73,7 @@ class Hud(object):
         self.cards = None
         self.site = table.site
         self.hud_params = dict.copy(
-            parent.hud_params
+            parent.hud_params,
         )  # we must dict.copy a fresh hud_params dict
         # because each aux hud can control local hud param
         # settings.  Simply assigning the dictionary does not
@@ -83,31 +83,31 @@ class Hud(object):
 
         self.site_parameters = config.get_site_parameters(self.table.site)
         self.supported_games_parameters = config.get_supported_games_parameters(
-            self.poker_game, self.game_type
+            self.poker_game, self.game_type,
         )
         self.layout_set = config.get_layout(self.table.site, self.game_type)
 
         # Just throw error and die if any serious config issues are discovered
         if self.supported_games_parameters is None:
             log.warning(
-                f"No <game_stat_set> found for {self.poker_game} games for type {self.game_type}.\n"
+                f"No <game_stat_set> found for {self.poker_game} games for type {self.game_type}.\n",
             )
             return
 
         if self.layout_set is None:
             log.warning(
-                f"No layout found for {self.game_type} games for site {self.table.site}.\n"
+                f"No layout found for {self.game_type} games for site {self.table.site}.\n",
             )
             return
 
         if self.max not in self.layout_set.layout:
             log.warning(
-                f"No layout found for {self.max}-max {self.game_type} games for site {self.table.site}.\n"
+                f"No layout found for {self.max}-max {self.game_type} games for site {self.table.site}.\n",
             )
             return
         else:
             self.layout = copy.deepcopy(
-                self.layout_set.layout[self.max]
+                self.layout_set.layout[self.max],
             )  # deepcopy required here, because self.layout is used
             # to propagate block moves from hud to mucked display
             # (needed because there is only 1 layout for all aux)

@@ -113,7 +113,7 @@ class GuiAutoImport(QWidget):
 
         self.intervalEntry = QSpinBox()
         self.intervalEntry.setValue(
-            int(self.config.get_import_parameters().get("interval"))
+            int(self.config.get_import_parameters().get("interval")),
         )
         settingsLayout.addRow(QLabel("Time between imports (seconds):"), self.intervalEntry)
 
@@ -279,7 +279,7 @@ class GuiAutoImport(QWidget):
                             command = os.path.join(base_path, "HUD_main")
                             if not os.path.isfile(command):
                                 raise FileNotFoundError(
-                                    f"HUD_main not found at {command}"
+                                    f"HUD_main not found at {command}",
                                 )
                             bs = 1
                         elif os.name == "nt":
@@ -291,7 +291,7 @@ class GuiAutoImport(QWidget):
                                 command = (
                                     'pythonw "'
                                     + path
-                                    + '\HUD_main.pyw" '
+                                    + r'\HUD_main.pyw" '
                                     + self.settings["cl_options"]
                                 )
                                 log.debug(f"start hud - command: {command}")
@@ -299,7 +299,7 @@ class GuiAutoImport(QWidget):
                                 command = (
                                     'python "'
                                     + path
-                                    + '\HUD_main.pyw" '
+                                    + r'\HUD_main.pyw" '
                                     + self.settings["cl_options"]
                                 )
                                 log.debug(f"start hud - command: {command}")
@@ -313,7 +313,7 @@ class GuiAutoImport(QWidget):
                             command = os.path.join(base_path, "HUD_main.pyw")
                             if not os.path.isfile(command):
                                 self.addText(
-                                    "\n" + ("*** %s was not found") % (command)
+                                    "\n" + ("*** %s was not found") % (command),
                                 )
                             command = [
                                 command,
@@ -362,7 +362,7 @@ class GuiAutoImport(QWidget):
                                     )
                                     self.addText(
                                         f"\n * Add {site} hand history directory: {paths['hud-defaultPath']}",
-                                        "info"
+                                        "info",
                                     )
                                 
                                 # Add tournament summary directory if exists
@@ -374,7 +374,7 @@ class GuiAutoImport(QWidget):
                                     )
                                     self.addText(
                                         f"\n * Add {site} tournament summary directory: {paths['hud-defaultTSPath']}",
-                                        "info"
+                                        "info",
                                     )
                         
                         self.do_import()

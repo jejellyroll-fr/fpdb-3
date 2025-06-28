@@ -230,7 +230,7 @@ def get_config(file_name, fallback=True):
                 shutil.copyfile(example_path, config_path)
                 example_copy = True
                 log.info(
-                    f'No {file_name!r} found in "{FPDB_ROOT_PATH!r}" or "{CONFIG_PATH!r}". Config file has been created at {config_path!r}.'
+                    f'No {file_name!r} found in "{FPDB_ROOT_PATH!r}" or "{CONFIG_PATH!r}". Config file has been created at {config_path!r}.',
                 )
 
         except IOError:
@@ -305,7 +305,7 @@ if LOCALE_ENCODING in ("US-ASCII", "", None):
             (
                 ("Default encoding set to US-ASCII, defaulting to CP1252 instead."),
                 ("Please report this problem."),
-            )
+            ),
         )
 
 # needs LOCALE_ENCODING (above), imported for sqlite setup in Config class below
@@ -571,7 +571,7 @@ class Database(object):
         self.db_path = node.getAttribute("db_path")
         self.db_selected = string_to_bool(node.getAttribute("default"), default=False)
         log.debug(
-            f"Database db_name:'{self.db_name}'  db_server:'{self.db_server}'  db_ip:'{self.db_ip}'  db_port:'{self.db_port}' db_user:'{self.db_user}'  db_pass (not logged)  selected:'{self.db_selected}'"
+            f"Database db_name:'{self.db_name}'  db_server:'{self.db_server}'  db_ip:'{self.db_ip}'  db_port:'{self.db_port}' db_user:'{self.db_user}'  db_pass (not logged)  selected:'{self.db_selected}'",
         )
 
     def __str__(self):
@@ -703,8 +703,8 @@ class Popup(object):
                     (
                         stat_node.getAttribute("pu_stat_name"),
                         stat_node.getAttribute("pu_stat_submenu"),
-                    )
-                )
+                    ),
+                ),
             )
 
     def __str__(self):
@@ -971,7 +971,7 @@ class GUICashStats(list):
                         field_format,
                         field_type,
                         xalignment,
-                    ]
+                    ],
                 )
 
     def get_defaults(self):
@@ -1074,7 +1074,7 @@ class GUITourStats(list):
                         field_format,
                         field_type,
                         xalignment,
-                    ]
+                    ],
                 )
 
     def get_defaults(self):
@@ -1571,13 +1571,13 @@ class Config(object):
             wrap_len = -1  # < 0 means no wrap
 
         if wrap_len >= 0 and len(line) > wrap_len:
-            m = re.compile("\s+\S+\s+")
+            m = re.compile(r"\s+\S+\s+")
             mo = m.match(line)
             if mo:
                 indent_len = mo.end()
                 # print "indent = %s (%s)" % (indent_len, l[0:indent_len])
                 indent = "\n" + " " * indent_len
-                m = re.compile('(\S+="[^"]+"\s+)')
+                m = re.compile(r'(\S+="[^"]+"\s+)')
                 parts = [x for x in m.split(line[indent_len:]) if x]
                 if len(parts) > 1:
                     # print "parts =", parts
@@ -1729,7 +1729,7 @@ class Config(object):
         statsetNode.setAttribute("cols", str(len(statArray[0])))
 
         for idx, (rowNumber, columnNumber) in enumerate(
-            [(r, c) for r in range(len(statArray)) for c in range(len(statArray[r]))]
+            [(r, c) for r in range(len(statArray)) for c in range(len(statArray[r]))],
         ):
             # Add newline and indentation before each stat
             indent = self.doc.createTextNode("\n            ")

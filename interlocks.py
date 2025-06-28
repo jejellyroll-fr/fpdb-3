@@ -101,7 +101,7 @@ class InterProcessLockFcntl(InterProcessLockBase):
         InterProcessLockBase.__init__(self, name)
         self.lockfd = 0
         self.lock_file_name = os.path.join(
-            LOCK_FILE_DIRECTORY, self.getHashedName() + ".lck"
+            LOCK_FILE_DIRECTORY, self.getHashedName() + ".lck",
         )
         assert os.path.isdir(LOCK_FILE_DIRECTORY)
 
@@ -123,7 +123,7 @@ class InterProcessLockFcntl(InterProcessLockBase):
             self.lockfd.close()
             self.lockfd = 0
             raise SingleInstanceError(
-                "Could not acquire exclusive lock on " + self.lock_file_name
+                "Could not acquire exclusive lock on " + self.lock_file_name,
             )
 
     def release_impl(self):
@@ -149,7 +149,7 @@ class InterProcessLockWin32(InterProcessLockBase):
             self.mutex.Close()
             self.mutex = None
             raise SingleInstanceError(
-                "Could not acquire exclusive lock on " + self.name
+                "Could not acquire exclusive lock on " + self.name,
             )
 
     def release_impl(self):
@@ -170,7 +170,7 @@ class InterProcessLockSocket(InterProcessLockBase):
             self.socket.close()
             self.socket = None
             raise SingleInstanceError(
-                "Could not acquire exclusive lock on " + self.name
+                "Could not acquire exclusive lock on " + self.name,
             )
 
     def release_impl(self):

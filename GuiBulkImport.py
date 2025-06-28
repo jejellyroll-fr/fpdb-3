@@ -60,7 +60,7 @@ class GuiBulkImport(QWidget):
         # Does the lock acquisition need to be more sophisticated for multiple dirs?
         # (see comment above about what to do if pipe already open)
         if self.settings["global_lock"].acquire(
-            wait=False, source="GuiBulkImport"
+            wait=False, source="GuiBulkImport",
         ):  # returns false immediately if lock not acquired
             # try:
             #    get the dir to import from the chooser

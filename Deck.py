@@ -22,15 +22,15 @@ from PyQt5.QtSvg import QSvgRenderer
 
 class Deck(object):
     def __init__(
-        self, config, deck_type="simple", card_back="back04", width=30, height=42
+        self, config, deck_type="simple", card_back="back04", width=30, height=42,
     ):
         self.__width = width
         self.__height = height
         self.__cardspath = os.path.join(
-            config.graphics_path, "cards", deck_type
+            config.graphics_path, "cards", deck_type,
         ).replace("\\", "/")
         self.__backfile = os.path.join(
-            config.graphics_path, "cards", "backs", f"{card_back}.svg"
+            config.graphics_path, "cards", "backs", f"{card_back}.svg",
         ).replace("\\", "/")
         self.__cards = dict({"s": None, "h": None, "d": None, "c": None})
         self.__card_back = None
@@ -71,43 +71,43 @@ class Deck(object):
         sd = {}
         _p = self.__cardspath
         sd[2] = self.__load_svg(
-            os.path.join(_p, (suit_key + "_" + "2" + ".svg")).replace("\\", "/")
+            os.path.join(_p, (suit_key + "_" + "2" + ".svg")).replace("\\", "/"),
         )
         sd[3] = self.__load_svg(
-            os.path.join(_p, (suit_key + "_" + "3" + ".svg")).replace("\\", "/")
+            os.path.join(_p, (suit_key + "_" + "3" + ".svg")).replace("\\", "/"),
         )
         sd[4] = self.__load_svg(
-            os.path.join(_p, (suit_key + "_" + "4" + ".svg")).replace("\\", "/")
+            os.path.join(_p, (suit_key + "_" + "4" + ".svg")).replace("\\", "/"),
         )
         sd[5] = self.__load_svg(
-            os.path.join(_p, (suit_key + "_" + "5" + ".svg")).replace("\\", "/")
+            os.path.join(_p, (suit_key + "_" + "5" + ".svg")).replace("\\", "/"),
         )
         sd[6] = self.__load_svg(
-            os.path.join(_p, (suit_key + "_" + "6" + ".svg")).replace("\\", "/")
+            os.path.join(_p, (suit_key + "_" + "6" + ".svg")).replace("\\", "/"),
         )
         sd[7] = self.__load_svg(
-            os.path.join(_p, (suit_key + "_" + "7" + ".svg")).replace("\\", "/")
+            os.path.join(_p, (suit_key + "_" + "7" + ".svg")).replace("\\", "/"),
         )
         sd[8] = self.__load_svg(
-            os.path.join(_p, (suit_key + "_" + "8" + ".svg")).replace("\\", "/")
+            os.path.join(_p, (suit_key + "_" + "8" + ".svg")).replace("\\", "/"),
         )
         sd[9] = self.__load_svg(
-            os.path.join(_p, (suit_key + "_" + "9" + ".svg")).replace("\\", "/")
+            os.path.join(_p, (suit_key + "_" + "9" + ".svg")).replace("\\", "/"),
         )
         sd[10] = self.__load_svg(
-            os.path.join(_p, (suit_key + "_" + "10" + ".svg")).replace("\\", "/")
+            os.path.join(_p, (suit_key + "_" + "10" + ".svg")).replace("\\", "/"),
         )
         sd[11] = self.__load_svg(
-            os.path.join(_p, (suit_key + "_" + "j" + ".svg")).replace("\\", "/")
+            os.path.join(_p, (suit_key + "_" + "j" + ".svg")).replace("\\", "/"),
         )
         sd[12] = self.__load_svg(
-            os.path.join(_p, (suit_key + "_" + "q" + ".svg")).replace("\\", "/")
+            os.path.join(_p, (suit_key + "_" + "q" + ".svg")).replace("\\", "/"),
         )
         sd[13] = self.__load_svg(
-            os.path.join(_p, (suit_key + "_" + "k" + ".svg")).replace("\\", "/")
+            os.path.join(_p, (suit_key + "_" + "k" + ".svg")).replace("\\", "/"),
         )
         sd[14] = self.__load_svg(
-            os.path.join(_p, (suit_key + "_" + "a" + ".svg")).replace("\\", "/")
+            os.path.join(_p, (suit_key + "_" + "a" + ".svg")).replace("\\", "/"),
         )
         self.__cards[suit_key] = sd
 

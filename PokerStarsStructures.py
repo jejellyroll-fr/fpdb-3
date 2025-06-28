@@ -157,7 +157,7 @@ class PokerStarsStructures(object):
                 (625, 50, 90): "Normal",  # 90 Player Knockout
                 (1250, 100, 90): "Normal",  # 90 Player Knockout
                 (300, 30, 180): "Normal",  # 180 Player Rebuy
-            }
+            },
         )
         self.SnG_Structures.append(
             {
@@ -165,7 +165,7 @@ class PokerStarsStructures(object):
                 (500, 23, 9, 9): "Hyper",  # 7-10 handed, under 45 entrants
                 (500, 21, 6, 6): "Hyper",  # 6-handed, Under 45 Entrants
                 (500, 11, 2, 2): "Hyper",  # Heads Up
-            }
+            },
         )
         self.SnG_Structures.append(
             {
@@ -314,7 +314,7 @@ class PokerStarsStructures(object):
                 (98880, 1120, 2): "Hyper",  # Heads Up
                 (91, 9, 180): "Hyper",  # 180 Entrants
                 (2, 0, 990): "Hyper",  # 990 Entrants
-            }
+            },
         )
 
     def lookupSnG(self, key, startTime):

@@ -171,7 +171,7 @@ class iPoker(HandHistoryConverter):
     # Static regexes
     re_client = re.compile(r"<client_version>(?P<CLIENT>.*?)</client_version>")
     # re_Identify = re.compile(u"""<\?xml version=\"1\.0\" encoding=\"utf-8\"\?>""")
-    re_Identify = re.compile("""<game gamecode=\"\d+\">""")
+    re_Identify = re.compile("""<game gamecode=\"\\d+\">""")
     re_SplitHands = re.compile(r"</game>")
     re_TailSplitHands = re.compile(r"(</game>)")
     re_GameInfo = re.compile(
@@ -256,15 +256,15 @@ class iPoker(HandHistoryConverter):
         re.MULTILINE,
     )
     re_DateTime1 = re.compile(
-        """(?P<D>[0-9]{2})\-(?P<M>[a-zA-Z]{3})\-(?P<Y>[0-9]{4})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""",
+        r"""(?P<D>[0-9]{2})\-(?P<M>[a-zA-Z]{3})\-(?P<Y>[0-9]{4})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""",
         re.MULTILINE,
     )
     re_DateTime2 = re.compile(
-        """(?P<D>[0-9]{2})[\/\.](?P<M>[0-9]{2})[\/\.](?P<Y>[0-9]{4})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""",
+        r"""(?P<D>[0-9]{2})[\/\.](?P<M>[0-9]{2})[\/\.](?P<Y>[0-9]{4})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""",
         re.MULTILINE,
     )
     re_DateTime3 = re.compile(
-        """(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""",
+        r"""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})\s+(?P<H>[0-9]+):(?P<MIN>[0-9]+)(:(?P<S>[0-9]+))?""",
         re.MULTILINE,
     )
     re_MaxSeats = re.compile(r"<tablesize>(?P<SEATS>[0-9]+)</tablesize>", re.MULTILINE)
@@ -272,8 +272,8 @@ class iPoker(HandHistoryConverter):
     re_TourNo = re.compile(r"(?P<TOURNO>\d+)$", re.MULTILINE)
     re_non_decimal = re.compile(r"[^\d.,]+")
     re_Partial = re.compile("<startdate>", re.MULTILINE)
-    re_UncalledBets = re.compile("<uncalled_bet_enabled>true<\/uncalled_bet_enabled>")
-    re_ClientVersion = re.compile("<client_version>(?P<VERSION>[.\d]+)</client_version>")
+    re_UncalledBets = re.compile(r"<uncalled_bet_enabled>true<\/uncalled_bet_enabled>")
+    re_ClientVersion = re.compile(r"<client_version>(?P<VERSION>[.\d]+)</client_version>")
     re_FPP = re.compile(r"Pts\s")
 
     def __init__(self, config, in_path="-", out_path="-", follow=False, index=0, autostart=True, starsArchive=False, ftpArchive=False, sitename="iPoker"):
@@ -723,7 +723,7 @@ class iPoker(HandHistoryConverter):
                             self.tinfo["fee"] = fee
                             log.debug(f"Set fee={fee}")
                             buyin = int(
-                                100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE2"])))
+                                100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE2"]))),
                             )
                             self.tinfo["buyin"] = buyin
                             log.debug(f"Set buyin={buyin}")
@@ -860,7 +860,7 @@ class iPoker(HandHistoryConverter):
             hand.tablename = f"{self.info['table_name']}"
             log.debug(
                 f"Set tournament info: tourNo={hand.tourNo}, buyinCurrency={hand.buyinCurrency}, "
-                f"buyin={hand.buyin}, fee={hand.fee}, tablename={hand.tablename}"
+                f"buyin={hand.buyin}, fee={hand.fee}, tablename={hand.tablename}",
             )
 
         log.debug("Exiting readHandInfo.")
@@ -894,7 +894,7 @@ class iPoker(HandHistoryConverter):
             ]
             log.debug(
                 f"Player {a.group('PNAME')} added to plist with seat {a.group('SEAT')}, "
-                f"stack {plist[a.group('PNAME')][1]}, winnings {plist[a.group('PNAME')][2]}."
+                f"stack {plist[a.group('PNAME')][1]}, winnings {plist[a.group('PNAME')][2]}.",
             )
 
             # If the player is the button, set the button position
@@ -1023,12 +1023,12 @@ class iPoker(HandHistoryConverter):
             else:
                 # Log an error if the board cards could not be found
                 log.error(
-                    f"iPokerToFpdb.readCommunityCards: No community cards found for hand {hand.handid}, street: {street}"
+                    f"iPokerToFpdb.readCommunityCards: No community cards found for hand {hand.handid}, street: {street}",
                 )
                 raise FpdbParseError
         except Exception as e:
             log.exception(
-                f"Exception occurred while reading community cards for hand {hand.handid}, street: {street}: {e}"
+                f"Exception occurred while reading community cards for hand {hand.handid}, street: {street}: {e}",
             )
             raise
 
@@ -1505,7 +1505,7 @@ class iPoker(HandHistoryConverter):
                 log.debug(f"Initialized database connection config: {str(self.config)}")
 
             log.debug(
-                f"Completed PartyPoker parser initialization sitename: {self.sitename}, has_db: {hasattr(self, 'db')}"
+                f"Completed PartyPoker parser initialization sitename: {self.sitename}, has_db: {hasattr(self, 'db')}",
             )
             summary = TourneySummary(
                 db=self.db,
@@ -1548,19 +1548,19 @@ class iPoker(HandHistoryConverter):
                 )
 
                 log.debug(
-                    f"Added player to summary method: iPoker:readTourneyResults, player: {pname}, rank: {rank}, winnings: {winnings}, currency: {winningsCurrency}"
+                    f"Added player to summary method: iPoker:readTourneyResults, player: {pname}, rank: {rank}, winnings: {winnings}, currency: {winningsCurrency}",
                 )
 
             summary.insertOrUpdate()
             log.debug(
-                f"Tournament summary saved method: iPoker:readTourneyResults, entries: {hand.entries}, prizepool: {hand.prizepool}"
+                f"Tournament summary saved method: iPoker:readTourneyResults, entries: {hand.entries}, prizepool: {hand.prizepool}",
             )
 
         except Exception as e:
             log.error(f"Error processing tournament summary method: iPoker:readTourneyResults, error: {str(e)}")
 
         log.debug(
-            f"Exiting readTourneyResults method - method: iPoker:readTourneyResults, total_players: {len(hand.ranks)}, total_winners: {len(hand.winnings)}"
+            f"Exiting readTourneyResults method - method: iPoker:readTourneyResults, total_players: {len(hand.ranks)}, total_winners: {len(hand.winnings)}",
         )
 
     @staticmethod
@@ -1584,7 +1584,7 @@ class iPoker(HandHistoryConverter):
         regex = f"{table_name}"
 
         if type == "tour":
-            regex = f"([^\(]+)\s{table_number}"
+            regex = rf"([^\(]+)\s{table_number}"
             log.debug(f"Generated regex for 'tour': {regex}")
             return regex
         elif table_name.find("(No DP),") != -1:

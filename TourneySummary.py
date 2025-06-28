@@ -86,7 +86,7 @@ class TourneySummary(object):
     }
 
     def __init__(
-        self, db, config, siteName, summaryText, in_path="-", builtFrom="HHC", header=""
+        self, db, config, siteName, summaryText, in_path="-", builtFrom="HHC", header="",
     ):
         self.db = db
         self.config = config
@@ -293,7 +293,7 @@ class TourneySummary(object):
         self.db.set_printdata(printtest)
 
         self.playerIds = self.db.getSqlPlayerIDs(
-            self.players.keys(), self.siteId, self.hero
+            self.players.keys(), self.siteId, self.hero,
         )
         # for player in self.players:
         #    id=self.db.get_player_id(self.config, self.siteName, player)

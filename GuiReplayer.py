@@ -135,13 +135,13 @@ class GuiReplayer(QWidget):
         if self.tableImage is None or self.playerBackdrop is None:
             try:
                 self.playerBackdrop = QImage(
-                    os.path.join(self.conf.graphics_path, "playerbackdrop.png")
+                    os.path.join(self.conf.graphics_path, "playerbackdrop.png"),
                 )
                 self.tableImage = QImage(
-                    os.path.join(self.conf.graphics_path, "TableR.png")
+                    os.path.join(self.conf.graphics_path, "TableR.png"),
                 )
                 self.dealer = QImage(
-                    os.path.join(self.conf.graphics_path, "dealer.png")
+                    os.path.join(self.conf.graphics_path, "dealer.png"),
                 )
             except (FileNotFoundError, OSError) as e:
                 log.error(f"Error loading images: {e}")
@@ -159,7 +159,7 @@ class GuiReplayer(QWidget):
             self.cardImages[0] = self.deck_inst.back()
 
         if not event.rect().intersects(
-            QRect(0, 0, self.tableImage.width(), self.tableImage.height())
+            QRect(0, 0, self.tableImage.width(), self.tableImage.height()),
         ):
             return
 
@@ -225,7 +225,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 660, 700
+                                        painter, ["0", "0", "0", "0"], 660, 700,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -239,7 +239,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 660, 700
+                                        painter, ["0", "0", "0", "0", "0"], 660, 700,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -256,7 +256,7 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0", "0"], 660, 700)
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 660, 700
+                                        painter, player.holecards, 660, 700,
                                     )
                     # draw player's stack
                     painter.drawText(
@@ -268,7 +268,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(605, 807, 200, 20), Qt.AlignCenter, player.action
+                            QRect(605, 807, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw pot
                         painter.drawText(
@@ -312,7 +312,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 1115, 400
+                                        painter, ["0", "0", "0", "0"], 1115, 400,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -326,7 +326,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 1115, 400
+                                        painter, ["0", "0", "0", "0", "0"], 1115, 400,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -341,11 +341,11 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0"], 1115, 400)
                                 elif hand.gametype["category"] == "2_holdem":
                                     self.renderCards(
-                                        painter, ["0", "0", "0"], 1115, 400
+                                        painter, ["0", "0", "0"], 1115, 400,
                                     )
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 1115, 400
+                                        painter, player.holecards, 1115, 400,
                                     )
 
                     # draw player's info
@@ -358,7 +358,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(1070, 507, 200, 20), Qt.AlignCenter, player.action
+                            QRect(1070, 507, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw bet pot
                         painter.drawText(
@@ -416,7 +416,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 660, 700
+                                        painter, ["0", "0", "0", "0"], 660, 700,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -430,7 +430,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 660, 700
+                                        painter, ["0", "0", "0", "0", "0"], 660, 700,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -447,7 +447,7 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0", "0"], 660, 700)
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 660, 700
+                                        painter, player.holecards, 660, 700,
                                     )
                     # draw player's stack
                     painter.drawText(
@@ -460,7 +460,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(605, 807, 200, 20), Qt.AlignCenter, player.action
+                            QRect(605, 807, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw pot
                         painter.drawText(
@@ -509,7 +509,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 1115, 400
+                                        painter, ["0", "0", "0", "0"], 1115, 400,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -523,7 +523,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 1115, 400
+                                        painter, ["0", "0", "0", "0", "0"], 1115, 400,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -538,11 +538,11 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0"], 1115, 400)
                                 elif hand.gametype["category"] == "2_holdem":
                                     self.renderCards(
-                                        painter, ["0", "0", "0"], 1115, 400
+                                        painter, ["0", "0", "0"], 1115, 400,
                                     )
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 1115, 400
+                                        painter, player.holecards, 1115, 400,
                                     )
 
                     # draw player's info
@@ -555,7 +555,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(1070, 507, 200, 20), Qt.AlignCenter, player.action
+                            QRect(1070, 507, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw bet pot
                         painter.drawText(
@@ -604,7 +604,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 185, 400
+                                        painter, ["0", "0", "0", "0"], 185, 400,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -618,7 +618,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 185, 400
+                                        painter, ["0", "0", "0", "0", "0"], 185, 400,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -635,7 +635,7 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0", "0"], 185, 400)
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 185, 400
+                                        painter, player.holecards, 185, 400,
                                     )
 
                     # draw player's info
@@ -648,7 +648,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(140, 507, 200, 20), Qt.AlignCenter, player.action
+                            QRect(140, 507, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw bet pot
                         painter.drawText(
@@ -705,7 +705,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 660, 700
+                                        painter, ["0", "0", "0", "0"], 660, 700,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -719,7 +719,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 660, 700
+                                        painter, ["0", "0", "0", "0", "0"], 660, 700,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -736,7 +736,7 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0", "0"], 660, 700)
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 660, 700
+                                        painter, player.holecards, 660, 700,
                                     )
                     # draw player's stack
                     painter.drawText(
@@ -749,7 +749,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(605, 807, 200, 20), Qt.AlignCenter, player.action
+                            QRect(605, 807, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw pot
                         painter.drawText(
@@ -798,7 +798,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 1115, 400
+                                        painter, ["0", "0", "0", "0"], 1115, 400,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -812,7 +812,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 1115, 400
+                                        painter, ["0", "0", "0", "0", "0"], 1115, 400,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -827,11 +827,11 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0"], 1115, 400)
                                 elif hand.gametype["category"] == "2_holdem":
                                     self.renderCards(
-                                        painter, ["0", "0", "0"], 1115, 400
+                                        painter, ["0", "0", "0"], 1115, 400,
                                     )
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 1115, 400
+                                        painter, player.holecards, 1115, 400,
                                     )
 
                     # draw player's info
@@ -844,7 +844,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(1070, 507, 200, 20), Qt.AlignCenter, player.action
+                            QRect(1070, 507, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw bet pot
                         painter.drawText(
@@ -893,7 +893,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 655, 130
+                                        painter, ["0", "0", "0", "0"], 655, 130,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -907,7 +907,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 655, 130
+                                        painter, ["0", "0", "0", "0", "0"], 655, 130,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -924,7 +924,7 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0", "0"], 655, 130)
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 655, 130
+                                        painter, player.holecards, 655, 130,
                                     )
 
                     # draw player's info
@@ -937,7 +937,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(605, 237, 200, 20), Qt.AlignCenter, player.action
+                            QRect(605, 237, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw bet pot
                         painter.drawText(
@@ -986,7 +986,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 185, 400
+                                        painter, ["0", "0", "0", "0"], 185, 400,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -1000,7 +1000,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 185, 400
+                                        painter, ["0", "0", "0", "0", "0"], 185, 400,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -1017,7 +1017,7 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0", "0"], 185, 400)
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 185, 400
+                                        painter, player.holecards, 185, 400,
                                     )
 
                     # draw player's info
@@ -1030,7 +1030,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(140, 507, 200, 20), Qt.AlignCenter, player.action
+                            QRect(140, 507, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw bet pot
                         painter.drawText(
@@ -1088,7 +1088,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 660, 700
+                                        painter, ["0", "0", "0", "0"], 660, 700,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -1102,7 +1102,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 660, 700
+                                        painter, ["0", "0", "0", "0", "0"], 660, 700,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -1119,7 +1119,7 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0", "0"], 660, 700)
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 660, 700
+                                        painter, player.holecards, 660, 700,
                                     )
                     # draw player's stack
                     painter.drawText(
@@ -1132,7 +1132,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(605, 807, 200, 20), Qt.AlignCenter, player.action
+                            QRect(605, 807, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw pot
                         painter.drawText(
@@ -1181,7 +1181,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 1115, 400
+                                        painter, ["0", "0", "0", "0"], 1115, 400,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -1195,7 +1195,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 1115, 400
+                                        painter, ["0", "0", "0", "0", "0"], 1115, 400,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -1210,11 +1210,11 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0"], 1115, 400)
                                 elif hand.gametype["category"] == "2_holdem":
                                     self.renderCards(
-                                        painter, ["0", "0", "0"], 1115, 400
+                                        painter, ["0", "0", "0"], 1115, 400,
                                     )
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 1115, 400
+                                        painter, player.holecards, 1115, 400,
                                     )
 
                     # draw player's info
@@ -1227,7 +1227,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(1070, 507, 200, 20), Qt.AlignCenter, player.action
+                            QRect(1070, 507, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw bet pot
                         painter.drawText(
@@ -1276,7 +1276,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 520, 130
+                                        painter, ["0", "0", "0", "0"], 520, 130,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -1290,7 +1290,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 520, 130
+                                        painter, ["0", "0", "0", "0", "0"], 520, 130,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -1307,7 +1307,7 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0", "0"], 520, 130)
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 520, 130
+                                        painter, player.holecards, 520, 130,
                                     )
 
                     # draw player's info
@@ -1320,7 +1320,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(480, 237, 200, 20), Qt.AlignCenter, player.action
+                            QRect(480, 237, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw bet pot
                         painter.drawText(
@@ -1369,7 +1369,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 770, 130
+                                        painter, ["0", "0", "0", "0"], 770, 130,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -1383,7 +1383,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 770, 130
+                                        painter, ["0", "0", "0", "0", "0"], 770, 130,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -1400,7 +1400,7 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0", "0"], 770, 130)
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 770, 130
+                                        painter, player.holecards, 770, 130,
                                     )
 
                     # draw player's info
@@ -1413,7 +1413,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(730, 237, 200, 20), Qt.AlignCenter, player.action
+                            QRect(730, 237, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw bet pot
                         painter.drawText(
@@ -1462,7 +1462,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 185, 400
+                                        painter, ["0", "0", "0", "0"], 185, 400,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -1476,7 +1476,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 185, 400
+                                        painter, ["0", "0", "0", "0", "0"], 185, 400,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -1493,7 +1493,7 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0", "0"], 185, 400)
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 185, 400
+                                        painter, player.holecards, 185, 400,
                                     )
 
                     # draw player's info
@@ -1506,7 +1506,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(140, 507, 200, 20), Qt.AlignCenter, player.action
+                            QRect(140, 507, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw bet pot
                         painter.drawText(
@@ -1564,7 +1564,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 770, 700
+                                        painter, ["0", "0", "0", "0"], 770, 700,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -1578,7 +1578,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 770, 700
+                                        painter, ["0", "0", "0", "0", "0"], 770, 700,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -1595,7 +1595,7 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0", "0"], 770, 700)
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 770, 700
+                                        painter, player.holecards, 770, 700,
                                     )
                     # draw player's stack
                     painter.drawText(
@@ -1608,7 +1608,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(730, 807, 200, 20), Qt.AlignCenter, player.action
+                            QRect(730, 807, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw pot
 
@@ -1658,7 +1658,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 1115, 400
+                                        painter, ["0", "0", "0", "0"], 1115, 400,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -1672,7 +1672,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 1115, 400
+                                        painter, ["0", "0", "0", "0", "0"], 1115, 400,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -1687,11 +1687,11 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0"], 1115, 400)
                                 elif hand.gametype["category"] == "2_holdem":
                                     self.renderCards(
-                                        painter, ["0", "0", "0"], 1115, 400
+                                        painter, ["0", "0", "0"], 1115, 400,
                                     )
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 1115, 400
+                                        painter, player.holecards, 1115, 400,
                                     )
 
                     # draw player's info
@@ -1704,7 +1704,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(1070, 507, 200, 20), Qt.AlignCenter, player.action
+                            QRect(1070, 507, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw bet pot
 
@@ -1755,7 +1755,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 520, 130
+                                        painter, ["0", "0", "0", "0"], 520, 130,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -1769,7 +1769,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 520, 130
+                                        painter, ["0", "0", "0", "0", "0"], 520, 130,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -1786,7 +1786,7 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0", "0"], 520, 130)
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 520, 130
+                                        painter, player.holecards, 520, 130,
                                     )
 
                     # draw player's info
@@ -1799,7 +1799,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(480, 237, 200, 20), Qt.AlignCenter, player.action
+                            QRect(480, 237, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw bet pot
                         painter.drawText(
@@ -1849,7 +1849,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 770, 130
+                                        painter, ["0", "0", "0", "0"], 770, 130,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -1863,7 +1863,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 770, 130
+                                        painter, ["0", "0", "0", "0", "0"], 770, 130,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -1880,7 +1880,7 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0", "0"], 770, 130)
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 770, 130
+                                        painter, player.holecards, 770, 130,
                                     )
 
                     # draw player's info
@@ -1893,7 +1893,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(730, 237, 200, 20), Qt.AlignCenter, player.action
+                            QRect(730, 237, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw bet pot
                         painter.drawText(
@@ -1943,7 +1943,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 185, 400
+                                        painter, ["0", "0", "0", "0"], 185, 400,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -1957,7 +1957,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 185, 400
+                                        painter, ["0", "0", "0", "0", "0"], 185, 400,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -1974,7 +1974,7 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0", "0"], 185, 400)
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 185, 400
+                                        painter, player.holecards, 185, 400,
                                     )
 
                     # draw player's info
@@ -1987,7 +1987,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(140, 507, 200, 20), Qt.AlignCenter, player.action
+                            QRect(140, 507, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw bet pot
                         painter.drawText(
@@ -2037,7 +2037,7 @@ class GuiReplayer(QWidget):
                                     or "fusion"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0"], 520, 700
+                                        painter, ["0", "0", "0", "0"], 520, 700,
                                     )
                                 elif (
                                     hand.gametype["category"] == "5_omahahi"
@@ -2051,7 +2051,7 @@ class GuiReplayer(QWidget):
                                     or "drawmaha"
                                 ):
                                     self.renderCards(
-                                        painter, ["0", "0", "0", "0", "0"], 520, 700
+                                        painter, ["0", "0", "0", "0", "0"], 520, 700,
                                     )
                                 elif hand.gametype["category"] == "6_omahahi":
                                     self.renderCards(
@@ -2068,7 +2068,7 @@ class GuiReplayer(QWidget):
                                     self.renderCards(painter, ["0", "0", "0"], 520, 700)
                                 else:
                                     self.renderCards(
-                                        painter, player.holecards, 520, 700
+                                        painter, player.holecards, 520, 700,
                                     )
 
                     # draw player's info
@@ -2081,7 +2081,7 @@ class GuiReplayer(QWidget):
                         painter.setPen(QColor("yellow"))
                         # draw player's actions
                         painter.drawText(
-                            QRect(480, 807, 200, 20), Qt.AlignCenter, player.action
+                            QRect(480, 807, 200, 20), Qt.AlignCenter, player.action,
                         )
                         # draw bet pot
                         painter.drawText(
@@ -2262,7 +2262,7 @@ class GuiReplayer(QWidget):
             self.stateSlider.setValue(max(0, self.stateSlider.value() - 1))
         elif event.key() == Qt.Key_Right:
             self.stateSlider.setValue(
-                min(self.stateSlider.maximum(), self.stateSlider.value() + 1)
+                min(self.stateSlider.maximum(), self.stateSlider.value() + 1),
             )
         elif event.key() == Qt.Key_Up:
             if self.handidx < len(self.handlist) - 1:
@@ -2634,7 +2634,7 @@ class Player(object):
         if hand.gametype["base"] == "draw":
             for street in hand.actionStreets[1:]:
                 self.streetcards[street] = hand.join_holecards(
-                    name, asList=True, street=street
+                    name, asList=True, street=street,
                 )
             self.holecards = self.streetcards[hand.actionStreets[1]]
         elif hand.gametype["base"] == "stud":

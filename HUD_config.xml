@@ -3176,7 +3176,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="SealsWithClubs" enabled="False" screen_name="" site_path="C:/Program Files/SealsWithClubs/handhistories" HH_path="C:\Users\jd\Documents\SwC Poker\Hand History\" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Documents\SwC Poker\Hand History\" network="SealsWithClubs">
+        <site site_name="SealsWithClubs" enabled="True" screen_name="edinapoker" site_path="/Users/jdenis/Documents/SwC Poker/Hand History/" HH_path="/Users/jdenis/Documents/SwC Poker/Hand History/edinapoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="/Users/jdenis/Documents/SwC Poker/Hand History/edinapoker/" network="SealsWithClubs">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="all" ls="sealswithclubs_default"/>
             <fav max="2" fav_seat="0"/>
