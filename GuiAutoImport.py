@@ -15,13 +15,10 @@ from PyQt5.QtCore import QTimer, QDateTime
 from PyQt5.QtGui import QTextCursor, QTextCharFormat, QColor, QPalette
 from PyQt5.QtWidgets import (
     QCheckBox,
-    QFileDialog,
     QFormLayout,
     QGroupBox,
     QHBoxLayout,
     QLabel,
-    QLineEdit,
-    QPushButton,
     QSpinBox,
     QTextEdit,
     QVBoxLayout,
