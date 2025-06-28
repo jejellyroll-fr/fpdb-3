@@ -448,7 +448,7 @@ class AddStatDialog(QDialog):
         use_mid_color = self.use_midcolor.isChecked()
 
         self.color_preview.set_colors(
-            self.locolor, self.midcolor, self.hicolor, low_threshold, high_threshold, use_mid_color
+            self.locolor, self.midcolor, self.hicolor, low_threshold, high_threshold, use_mid_color,
         )
 
     def get_stat(self):
@@ -617,7 +617,7 @@ class ModernHudPreferences(QDialog):
 
         # Preview info
         info_label = QLabel(
-            "The preview shows the layout of statistics in the HUD.\nClick and popup actions are indicated by icons."
+            "The preview shows the layout of statistics in the HUD.\nClick and popup actions are indicated by icons.",
         )
         info_label.setProperty("class", "caption")
         info_label.setWordWrap(True)
@@ -922,7 +922,7 @@ class ModernHudPreferences(QDialog):
                     {"row": 0, "col": 0, "stat": "vpip", "click": "", "popup": ""},
                     {"row": 0, "col": 1, "stat": "pfr", "click": "", "popup": ""},
                     {"row": 1, "col": 0, "stat": "3bet", "click": "", "popup": ""},
-                ]
+                ],
             }
         self.profile_combo.clear()
         self.profile_combo.addItems(list(self.hud_profiles.keys()))
@@ -1182,7 +1182,7 @@ class ModernHudPreferences(QDialog):
             # Add color indicator if colors are configured
             if stat.get("stat_locolor") or stat.get("stat_hicolor"):
                 stat_item.setToolTip(
-                    f"Colors configured: Low={stat.get('stat_locolor', 'none')}, High={stat.get('stat_hicolor', 'none')}"
+                    f"Colors configured: Low={stat.get('stat_locolor', 'none')}, High={stat.get('stat_hicolor', 'none')}",
                 )
 
         self.preview.set_stats(stats)
@@ -1780,7 +1780,7 @@ class PopupEditDialog(QDialog):
 
             if stat_name_item and stat_name_item.text():
                 stats.append(
-                    {"stat_name": stat_name_item.text(), "submenu": submenu_item.text() if submenu_item else ""}
+                    {"stat_name": stat_name_item.text(), "submenu": submenu_item.text() if submenu_item else ""},
                 )
 
         return {"name": self.name_input.text(), "class": self.class_combo.currentText(), "stats": stats}

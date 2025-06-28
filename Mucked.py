@@ -328,7 +328,7 @@ class Flop_Mucked(Aux_Base.Aux_Seats, QObject):
             self.displayed = True
             if i != "common" and self.get_id_from_seat(i) is not None:
                 self.m_windows[i].setToolTip(
-                    self.hud.stat_dict[self.get_id_from_seat(i)]["screen_name"]
+                    self.hud.stat_dict[self.get_id_from_seat(i)]["screen_name"],
                 )
 
     def save_layout(self, *args):
@@ -339,7 +339,7 @@ class Flop_Mucked(Aux_Base.Aux_Seats, QObject):
             if i == "common"
         }
         self.config.save_layout_set(
-            self.hud.layout_set, self.hud.max, new_locs, width=None, height=None
+            self.hud.layout_set, self.hud.max, new_locs, width=None, height=None,
         )
 
     def update_gui(self, new_hand_id):
@@ -380,7 +380,7 @@ class Flop_Mucked(Aux_Base.Aux_Seats, QObject):
             # determined by aux_hud, not mucked card display
             window = widget.get_parent()
             window.begin_move_drag(
-                event.button, int(event.x_root), int(event.y_root), event.time
+                event.button, int(event.x_root), int(event.y_root), event.time,
             )
 
     def expose_all(self):

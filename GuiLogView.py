@@ -211,7 +211,7 @@ class GuiLogView(QWidget):
         self.listview.verticalHeader().hide()
         self.listview.setSortingEnabled(True)
         self.listview.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeToContents
+            QHeaderView.ResizeToContents,
         )
         self.listview.horizontalHeader().setStretchLastSection(False)
         self.listview.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -328,7 +328,7 @@ class GuiLogView(QWidget):
             row_data = []
             for column in range(self.proxy_model.columnCount()):
                 data = self.proxy_model.data(
-                    self.proxy_model.index(index.row(), column), Qt.DisplayRole
+                    self.proxy_model.index(index.row(), column), Qt.DisplayRole,
                 )
                 row_data.append(str(data))
             text += "\t".join(row_data) + "\n"

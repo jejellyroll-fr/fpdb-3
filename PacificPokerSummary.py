@@ -41,16 +41,16 @@ class PacificPokerSummary(TourneySummary):
 
     substitutions = {
         "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP",  # legal ISO currency codes
-        "LS": "\$|€|",  # legal currency symbols
-        "NUM": ".,\d\xa0",  # legal characters in number format
+        "LS": r"\$|€|",  # legal currency symbols
+        "NUM": ".,\\d\xa0",  # legal characters in number format
     }
 
     re_Identify = re.compile(
-        "\*{5}\s(Cassava|888poker|888)(\.[a-z]{2})?(\-[a-z]{2})? Tournament Summary\s\*{5}"
+        r"\*{5}\s(Cassava|888poker|888)(\.[a-z]{2})?(\-[a-z]{2})? Tournament Summary\s\*{5}",
     )
 
     re_TourneyInfo = re.compile(
-        """
+        r"""
                         Tournament\sID:\s(?P<TOURNO>[0-9]+)\s+
                         Buy-In:\s(?P<BUYIN>(((?P<BIAMT>(?P<CURRENCY1>%(LS)s)?[%(NUM)s]+\s?(?P<CURRENCY2>%(LS)s)?)(\s\+\s?(?P<BIRAKE>(%(LS)s)?[%(NUM)s]+\s?(%(LS)s)?))?)|(Free)|(.+?)))\s+
                         (Rebuy:\s[%(LS)s](?P<REBUYAMT>[%(NUM)s]+)\s?(%(LS)s)?\s+)?
@@ -65,8 +65,8 @@ class PacificPokerSummary(TourneySummary):
 
     re_Category = re.compile(
         """
-          (?P<LIMIT>No\sLimit|Fix\sLimit|Pot\sLimit)\s
-          (?P<GAME>Holdem|Omaha|OmahaHL|Hold\'em|Omaha\sHi/Lo|OmahaHL)
+          (?P<LIMIT>No\\sLimit|Fix\\sLimit|Pot\\sLimit)\\s
+          (?P<GAME>Holdem|Omaha|OmahaHL|Hold\'em|Omaha\\sHi/Lo|OmahaHL)
                                """
         % substitutions,
         re.VERBOSE | re.MULTILINE | re.DOTALL,
@@ -77,7 +77,7 @@ class PacificPokerSummary(TourneySummary):
     @staticmethod
     def getSplitRe(self, head):
         re_SplitTourneys = re.compile(
-            "\*\*\*\*\* (Cassava|888poker|888)(\.[a-z]{2})?(\-[a-z]{2})? Tournament Summary \*\*\*\*\*"
+            r"\*\*\*\*\* (Cassava|888poker|888)(\.[a-z]{2})?(\-[a-z]{2})? Tournament Summary \*\*\*\*\*",
         )
         return re_SplitTourneys
 
@@ -171,7 +171,7 @@ class PacificPokerSummary(TourneySummary):
             addOnCount = int(mg["PADDONS"])
 
         self.addPlayer(
-            rank, player, winnings, self.currency, rebuyCount, addOnCount, koCount
+            rank, player, winnings, self.currency, rebuyCount, addOnCount, koCount,
         )
 
     def convert_to_decimal(self, string):

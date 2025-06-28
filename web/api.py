@@ -1,5 +1,5 @@
 import math
-from typing import List, Optional
+from typing import List
 
 from base_model import Hand, HandsPlayer, Player
 from fastapi import FastAPI
@@ -107,7 +107,7 @@ async def get_torneys_profit_api(
 
 @app.get("/players")
 async def get_players_api(
-    name: str = None, site: str = None, page: int = 1, per_page: int = 10
+    name: str = None, site: str = None, page: int = 1, per_page: int = 10,
 ):
     # Call get_players() and unpack players and total
     players, total = get_players(name=name, site=site, page=page, per_page=per_page)
@@ -124,19 +124,19 @@ async def get_players_api(
             "total_pages": total_pages,
             "name": name,
             "site": site,
-        }
+        },
     )
 
 
 @app.get("/players/{playerId}/hands", response_model=List[HandsPlayer])
 def get_player_hands_api(
     playerId: int,
-    tourney: Optional[bool] = False,  # Default to False
-    cash: Optional[bool] = False,  # Default to False
+    tourney: bool | None = False,  # Default to False
+    cash: bool | None = False,  # Default to False
     sort_by: str = None,  # Default to None
 ):
     handsPlayers = get_hands_players(
-        playerId, tourney=tourney, cash=cash, sort_by=sort_by
+        playerId, tourney=tourney, cash=cash, sort_by=sort_by,
     )
     return JSONResponse(content=handsPlayers)
 

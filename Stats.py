@@ -146,7 +146,7 @@ def do_stat(stat_dict, player=24, stat="vpip", hand_instance=None):
         return None
 
     result = eval(
-        "%(stat)s(stat_dict, %(player)d)" % {"stat": statname, "player": player}
+        "%(stat)s(stat_dict, %(player)d)" % {"stat": statname, "player": player},
     )
 
     # If decimal places have been defined, override result[1]
@@ -320,10 +320,10 @@ def m_ratio(stat_dict, player):
         for i in hand_instance.bets["BLINDSANTES"][p]:
             compulsory_bets += float(i)
     compulsory_bets += float(
-        hand_instance.gametype.get("sb", 0)
+        hand_instance.gametype.get("sb", 0),
     )  # Ensure "sb" key exists
     compulsory_bets += float(
-        hand_instance.gametype.get("bb", 0)
+        hand_instance.gametype.get("bb", 0),
     )  # Ensure "bb" key exists
 
     stack = _calculate_end_stack(stat_dict, player, hand_instance)
@@ -605,7 +605,7 @@ def profit100(stat_dict, player):
     except (KeyError, ValueError, TypeError):
         if stat_dict:
             log.error(
-                f"exception calculating profit100: 100 * {stat_dict[player]['net']} / {stat_dict[player]['n']}"
+                f"exception calculating profit100: 100 * {stat_dict[player]['net']} / {stat_dict[player]['n']}",
             )
         return (stat, "NA", "p=NA", "p/100=NA", "(0/0)", "Profit per 100 hands")
 
@@ -641,7 +641,7 @@ def bbper100(stat_dict, player):
     except (KeyError, ValueError, TypeError):
         if stat_dict:
             log.info(
-                f"exception calculating bbper100: 100 * {stat_dict[player]['net']} / {stat_dict[player]['bigblind']}"
+                f"exception calculating bbper100: 100 * {stat_dict[player]['net']} / {stat_dict[player]['bigblind']}",
             )
         return (
             stat,
@@ -848,7 +848,7 @@ def s_steal(stat_dict, player):
     try:
         if float(stat_dict[player]["steal"]) != 0:
             stat = float(stat_dict[player]["suc_st"]) / float(
-                stat_dict[player]["steal"]
+                stat_dict[player]["steal"],
             )
         return (
             stat,
@@ -887,7 +887,7 @@ def f_SB_steal(stat_dict, player):
     try:
         if float(stat_dict[player]["sbstolen"]) != 0:
             stat = float(stat_dict[player]["sbnotdef"]) / float(
-                stat_dict[player]["sbstolen"]
+                stat_dict[player]["sbstolen"],
             )
         return (
             stat,
@@ -923,7 +923,7 @@ def f_BB_steal(stat_dict, player):
     try:
         if float(stat_dict[player]["bbstolen"]) != 0:
             stat = float(stat_dict[player]["bbnotdef"]) / float(
-                stat_dict[player]["bbstolen"]
+                stat_dict[player]["bbstolen"],
             )
         return (
             stat,
@@ -959,10 +959,10 @@ def f_steal(stat_dict, player):
     stat = 0.0
     try:
         folded_blind = stat_dict[player].get("sbnotdef", 0) + stat_dict[player].get(
-            "bbnotdef", 0
+            "bbnotdef", 0,
         )
         blind_stolen = stat_dict[player].get("sbstolen", 0) + stat_dict[player].get(
-            "bbstolen", 0
+            "bbstolen", 0,
         )
 
         if (
@@ -1083,7 +1083,7 @@ def cfour_B(stat_dict, player):
     try:
         if float(stat_dict[player]["cfb_opp_0"]) != 0:
             stat = float(stat_dict[player]["cfb_0"]) / float(
-                stat_dict[player]["cfb_opp_0"]
+                stat_dict[player]["cfb_opp_0"],
             )
         return (
             stat,
@@ -1512,7 +1512,7 @@ def squeeze(stat_dict, player):
     stat = 0.0
     try:
         sqz_opp_0 = float(
-            stat_dict[player].get("sqz_opp_0", 0)
+            stat_dict[player].get("sqz_opp_0", 0),
         )  # Ensure key exists and default to 0
         if sqz_opp_0 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["sqz_0"]) / sqz_opp_0
@@ -1544,7 +1544,7 @@ def raiseToSteal(stat_dict, player):
     stat = 0.0
     try:
         rts_opp = float(
-            stat_dict[player].get("rts_opp", 0)
+            stat_dict[player].get("rts_opp", 0),
         )  # Ensure key exists and default to 0
         if rts_opp != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["rts"]) / rts_opp
@@ -1577,7 +1577,7 @@ def car0(stat_dict, player):
     stat = 0.0
     try:
         car_opp_0 = float(
-            stat_dict[player].get("car_opp_0", 0)
+            stat_dict[player].get("car_opp_0", 0),
         )  # Ensure key exists and default to 0
         if car_opp_0 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["car_0"]) / car_opp_0
@@ -1611,7 +1611,7 @@ def f_3bet(stat_dict, player):
     stat = 0.0
     try:
         f3b_opp_0 = float(
-            stat_dict[player].get("f3b_opp_0", 0)
+            stat_dict[player].get("f3b_opp_0", 0),
         )  # Ensure key exists and default to 0
         if f3b_opp_0 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["f3b_0"]) / f3b_opp_0
@@ -1651,7 +1651,7 @@ def f_4bet(stat_dict, player):
     stat = 0.0
     try:
         f4b_opp_0 = float(
-            stat_dict[player].get("f4b_opp_0", 0)
+            stat_dict[player].get("f4b_opp_0", 0),
         )  # Ensure key exists and default to 0
         if f4b_opp_0 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["f4b_0"]) / f4b_opp_0
@@ -1690,7 +1690,7 @@ def WMsF(stat_dict, player):
     stat = 0.0
     try:
         saw_1 = float(
-            stat_dict[player].get("saw_1", 0)
+            stat_dict[player].get("saw_1", 0),
         )  # Ensure key exists and default to 0
         if saw_1 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["w_w_s_1"]) / saw_1
@@ -1729,7 +1729,7 @@ def a_freq1(stat_dict, player):
     stat = 0.0
     try:
         saw_f = float(
-            stat_dict[player].get("saw_f", 0)
+            stat_dict[player].get("saw_f", 0),
         )  # Ensure key exists and default to 0
         if saw_f != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["aggr_1"]) / saw_f
@@ -1768,7 +1768,7 @@ def a_freq2(stat_dict, player):
     stat = 0.0
     try:
         saw_2 = float(
-            stat_dict[player].get("saw_2", 0)
+            stat_dict[player].get("saw_2", 0),
         )  # Ensure key exists and default to 0
         if saw_2 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["aggr_2"]) / saw_2
@@ -1807,7 +1807,7 @@ def a_freq3(stat_dict, player):
     stat = 0.0
     try:
         saw_3 = float(
-            stat_dict[player].get("saw_3", 0)
+            stat_dict[player].get("saw_3", 0),
         )  # Ensure key exists and default to 0
         if saw_3 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["aggr_3"]) / saw_3
@@ -1847,7 +1847,7 @@ def a_freq4(stat_dict, player):
     try:
         if float(stat_dict[player]["saw_4"]) != 0:
             stat = float(stat_dict[player]["aggr_4"]) / float(
-                stat_dict[player]["saw_4"]
+                stat_dict[player]["saw_4"],
             )
         return (
             stat,
@@ -2076,7 +2076,7 @@ def cb1(stat_dict, player):
     try:
         if float(stat_dict[player]["cb_opp_1"]) != 0:
             stat = float(stat_dict[player]["cb_1"]) / float(
-                stat_dict[player]["cb_opp_1"]
+                stat_dict[player]["cb_opp_1"],
             )
         return (
             stat,
@@ -2110,7 +2110,7 @@ def cb2(stat_dict, player):
     stat = 0.0
     try:
         cb_opp_2 = float(
-            stat_dict[player].get("cb_opp_2", 0)
+            stat_dict[player].get("cb_opp_2", 0),
         )  # Ensure key exists and default to 0
         if cb_opp_2 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["cb_2"]) / cb_opp_2
@@ -2149,7 +2149,7 @@ def cb3(stat_dict, player):
     stat = 0.0
     try:
         cb_opp_3 = float(
-            stat_dict[player].get("cb_opp_3", 0)
+            stat_dict[player].get("cb_opp_3", 0),
         )  # Ensure key exists and default to 0
         if cb_opp_3 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["cb_3"]) / cb_opp_3
@@ -2189,7 +2189,7 @@ def cb4(stat_dict, player):
     try:
         if float(stat_dict[player]["cb_opp_4"]) != 0:
             stat = float(stat_dict[player]["cb_4"]) / float(
-                stat_dict[player]["cb_opp_4"]
+                stat_dict[player]["cb_opp_4"],
             )
         return (
             stat,
@@ -2224,7 +2224,7 @@ def ffreq1(stat_dict, player):
     stat = 0.0
     try:
         was_raised_1 = float(
-            stat_dict[player].get("was_raised_1", 0)
+            stat_dict[player].get("was_raised_1", 0),
         )  # Ensure key exists and default to 0
         if was_raised_1 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["f_freq_1"]) / was_raised_1
@@ -2264,7 +2264,7 @@ def ffreq2(stat_dict, player):
     stat = 0.0
     try:
         was_raised_2 = float(
-            stat_dict[player].get("was_raised_2", 0)
+            stat_dict[player].get("was_raised_2", 0),
         )  # Ensure key exists and default to 0
         if was_raised_2 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["f_freq_2"]) / was_raised_2
@@ -2304,7 +2304,7 @@ def ffreq3(stat_dict, player):
     stat = 0.0
     try:
         was_raised_3 = float(
-            stat_dict[player].get("was_raised_3", 0)
+            stat_dict[player].get("was_raised_3", 0),
         )  # Ensure key exists and default to 0
         if was_raised_3 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["f_freq_3"]) / was_raised_3
@@ -2345,7 +2345,7 @@ def ffreq4(stat_dict, player):
     try:
         if float(stat_dict[player]["was_raised_4"]) != 0:
             stat = float(stat_dict[player]["f_freq_4"]) / float(
-                stat_dict[player]["was_raised_4"]
+                stat_dict[player]["was_raised_4"],
             )
         return (
             stat,
@@ -2381,7 +2381,7 @@ def f_cb1(stat_dict, player):
     stat = 0.0
     try:
         f_cb_opp_1 = float(
-            stat_dict[player].get("f_cb_opp_1", 0)
+            stat_dict[player].get("f_cb_opp_1", 0),
         )  # Ensure key exists and default to 0
         if f_cb_opp_1 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["f_cb_1"]) / f_cb_opp_1
@@ -2429,7 +2429,7 @@ def f_cb2(stat_dict, player):
     try:
         if float(stat_dict[player]["f_cb_opp_2"]) != 0:
             stat = float(stat_dict[player]["f_cb_2"]) / float(
-                stat_dict[player]["f_cb_opp_2"]
+                stat_dict[player]["f_cb_opp_2"],
             )
         return (
             stat,
@@ -2472,7 +2472,7 @@ def f_cb3(stat_dict, player):
     try:
         if float(stat_dict[player]["f_cb_opp_3"]) != 0:
             stat = float(stat_dict[player]["f_cb_3"]) / float(
-                stat_dict[player]["f_cb_opp_3"]
+                stat_dict[player]["f_cb_opp_3"],
             )
         return (
             stat,
@@ -2518,7 +2518,7 @@ def f_cb4(stat_dict, player):
     try:
         if float(stat_dict[player]["f_cb_opp_4"]) != 0:
             stat = float(stat_dict[player]["f_cb_4"]) / float(
-                stat_dict[player]["f_cb_opp_4"]
+                stat_dict[player]["f_cb_opp_4"],
             )
         return (
             stat,
@@ -2563,7 +2563,7 @@ def cr1(stat_dict, player):
     stat = 0.0
     try:
         ccr_opp_1 = float(
-            stat_dict[player].get("ccr_opp_1", 0)
+            stat_dict[player].get("ccr_opp_1", 0),
         )  # Ensure key exists and default to 0
         if ccr_opp_1 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["cr_1"]) / ccr_opp_1
@@ -2610,7 +2610,7 @@ def cr2(stat_dict, player):
     stat = 0.0
     try:
         ccr_opp_2 = float(
-            stat_dict[player].get("ccr_opp_2", 0)
+            stat_dict[player].get("ccr_opp_2", 0),
         )  # Ensure key exists and default to 0
         if ccr_opp_2 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["cr_2"]) / ccr_opp_2
@@ -2657,7 +2657,7 @@ def cr3(stat_dict, player):
     stat = 0.0
     try:
         ccr_opp_3 = float(
-            stat_dict[player].get("ccr_opp_3", 0)
+            stat_dict[player].get("ccr_opp_3", 0),
         )  # Ensure key exists and default to 0
         if ccr_opp_3 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["cr_3"]) / ccr_opp_3
@@ -2704,7 +2704,7 @@ def cr4(stat_dict, player):
     stat = 0.0
     try:
         ccr_opp_4 = float(
-            stat_dict[player].get("ccr_opp_4", 0)
+            stat_dict[player].get("ccr_opp_4", 0),
         )  # Ensure key exists and default to 0
         if ccr_opp_4 != 0:  # Check to avoid division by zero
             stat = float(stat_dict[player]["cr_4"]) / ccr_opp_4
@@ -2768,7 +2768,7 @@ def game_abbr(stat_dict, player):
             "holdem.pl": "Hp",
             "studhi.nl": "Sn",
         }.get(
-            cat_plus_limit, "Unknown"
+            cat_plus_limit, "Unknown",
         )  # Default to "Unknown" if not found
         return (
             stat,
@@ -2922,10 +2922,10 @@ def check_raise_frequency(stat_dict, player):
 def river_call_efficiency(stat_dict, player):
     try:
         river_calls = stat_dict[player].get(
-            "call_3", 0
+            "call_3", 0,
         )  # Safely get river calls, defaulting to 0
         showdowns_won = stat_dict[player].get(
-            "wmsd", 0
+            "wmsd", 0,
         )  # Safely get showdowns won, defaulting to 0
 
         # Calculate the efficiency, ensuring no division by zero
@@ -3149,7 +3149,7 @@ if __name__ == "__main__":
                 attr,
                 " : ",
                 do_stat(
-                    stat_dict, player=player, stat=attr, hand_instance=hand_instance
+                    stat_dict, player=player, stat=attr, hand_instance=hand_instance,
                 ),
             )
         break
@@ -3157,7 +3157,7 @@ if __name__ == "__main__":
     print()
     print("Legal stats:")
     print(
-        "(add _0 to name to display with 0 decimal places, _1 to display with 1, etc)"
+        "(add _0 to name to display with 0 decimal places, _1 to display with 1, etc)",
     )
     stat_descriptions = get_valid_stats()
     for stat in STATLIST:

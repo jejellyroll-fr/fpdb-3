@@ -49,10 +49,10 @@ try:
     from numpy import cumsum
 except ImportError as inst:
     log.error(
-        "Failed to load libs for graphing, graphing will not function. Please install numpy and matplotlib if you want to use graphs."
+        "Failed to load libs for graphing, graphing will not function. Please install numpy and matplotlib if you want to use graphs.",
     )
     log.error(
-        "This is of no consequence for other parts of the program, e.g., import and HUD are NOT affected by this problem."
+        "This is of no consequence for other parts of the program, e.g., import and HUD are NOT affected by this problem.",
     )
     log.error(f"ImportError: {inst.args}")
 
@@ -185,7 +185,7 @@ class GuiTourneyGraphViewer(QSplitter):
         self.ax.grid(color=self.colors["grid"], linestyle=":", linewidth=0.2)
         if green is None or len(green) == 0:
             self.ax.set_title(
-                "No Data for Player(s) Found", color=self.colors["foreground"]
+                "No Data for Player(s) Found", color=self.colors["foreground"],
             )
             green = [
                 0.0,
@@ -256,7 +256,7 @@ class GuiTourneyGraphViewer(QSplitter):
             self.canvas.draw()
         else:
             self.ax.set_title(
-                "Tournament Results" + names, color=self.colors["foreground"]
+                "Tournament Results" + names, color=self.colors["foreground"],
             )
             self.ax.plot(
                 green,

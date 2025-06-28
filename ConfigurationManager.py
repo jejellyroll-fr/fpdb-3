@@ -313,7 +313,7 @@ class ConfigurationManager:
                 return False, f"Error: {str(e)}", []
 
     def _identify_changes(
-        self, old_config: Configuration.Config, new_config: Configuration.Config
+        self, old_config: Configuration.Config, new_config: Configuration.Config,
     ) -> List[ConfigChange]:
         """
         Identifies the differences between two configurations.
@@ -342,7 +342,7 @@ class ConfigurationManager:
                                 f"supported_sites.{site_name}",
                                 None,
                                 f"New site: {site_name}",
-                            )
+                            ),
                         )
                     else:
                         # Comparer les attributs du site
@@ -354,7 +354,7 @@ class ConfigurationManager:
                                         f"supported_sites.{site_name}.enabled",
                                         old_site.enabled,
                                         new_site.enabled,
-                                    )
+                                    ),
                                 )
                         if hasattr(old_site, "screen_name") and hasattr(new_site, "screen_name"):
                             if old_site.screen_name != new_site.screen_name:
@@ -364,7 +364,7 @@ class ConfigurationManager:
                                         f"supported_sites.{site_name}.screen_name",
                                         old_site.screen_name,
                                         new_site.screen_name,
-                                    )
+                                    ),
                                 )
                         if hasattr(old_site, "HH_path") and hasattr(new_site, "HH_path"):
                             if old_site.HH_path != new_site.HH_path:
@@ -374,7 +374,7 @@ class ConfigurationManager:
                                         f"supported_sites.{site_name}.HH_path",
                                         old_site.HH_path,
                                         new_site.HH_path,
-                                    )
+                                    ),
                                 )
                         if hasattr(old_site, "TS_path") and hasattr(new_site, "TS_path"):
                             if old_site.TS_path != new_site.TS_path:
@@ -384,7 +384,7 @@ class ConfigurationManager:
                                         f"supported_sites.{site_name}.TS_path",
                                         old_site.TS_path,
                                         new_site.TS_path,
-                                    )
+                                    ),
                                 )
 
                         # Comparer les sièges favoris
@@ -396,7 +396,7 @@ class ConfigurationManager:
                                         f"supported_sites.{site_name}.fav_seat",
                                         old_site.fav_seat,
                                         new_site.fav_seat,
-                                    )
+                                    ),
                                 )
 
             # Compare import settings
@@ -412,7 +412,7 @@ class ConfigurationManager:
                                 "import.interval",
                                 old_imp.interval,
                                 new_imp.interval,
-                            )
+                            ),
                         )
 
                 if hasattr(old_imp, "callFpdbHud") and hasattr(new_imp, "callFpdbHud"):
@@ -423,7 +423,7 @@ class ConfigurationManager:
                                 "import.callFpdbHud",
                                 old_imp.callFpdbHud,
                                 new_imp.callFpdbHud,
-                            )
+                            ),
                         )
 
             # Compare import filters
@@ -437,7 +437,7 @@ class ConfigurationManager:
                             "import.ImportFilters",
                             old_filters,
                             new_filters,
-                        )
+                        ),
                     )
             except Exception as e:
                 log.debug(f"Error comparing filters: {e}")
@@ -455,7 +455,7 @@ class ConfigurationManager:
                                 f"database.{key}",
                                 old_db.get(key),
                                 new_db[key],
-                            )
+                            ),
                         )
             except Exception as e:
                 log.debug(f"Error comparing DB parameters: {e}")
@@ -474,7 +474,7 @@ class ConfigurationManager:
                                     f"hud_ui.{key}",
                                     old_hud_ui.get(key),
                                     new_hud_ui[key],
-                                )
+                                ),
                             )
             except Exception as e:
                 log.debug(f"Error comparing HUD UI parameters: {e}")
@@ -636,7 +636,7 @@ class ConfigurationManager:
                 log.debug(f"Comparison for {site_name}:")
                 log.debug(f"  Saved: {saved_site}")
                 log.debug(
-                    f"  Current: screen_name={getattr(site, 'screen_name', '')}, HH_path={getattr(site, 'HH_path', '')}, TS_path={getattr(site, 'TS_path', '')}"
+                    f"  Current: screen_name={getattr(site, 'screen_name', '')}, HH_path={getattr(site, 'HH_path', '')}, TS_path={getattr(site, 'TS_path', '')}",
                 )
 
                 # Check each attribute
@@ -648,7 +648,7 @@ class ConfigurationManager:
                             f"supported_sites.{site_name}.enabled",
                             saved_site.get("enabled"),
                             current_enabled,
-                        )
+                        ),
                     )
 
                 current_screen_name = getattr(site, "screen_name", "")
@@ -659,7 +659,7 @@ class ConfigurationManager:
                             f"supported_sites.{site_name}.screen_name",
                             saved_site.get("screen_name"),
                             current_screen_name,
-                        )
+                        ),
                     )
 
                 current_hh_path = getattr(site, "HH_path", "")
@@ -670,7 +670,7 @@ class ConfigurationManager:
                             f"supported_sites.{site_name}.HH_path",
                             saved_site.get("HH_path"),
                             current_hh_path,
-                        )
+                        ),
                     )
 
                 current_ts_path = getattr(site, "TS_path", "")
@@ -681,7 +681,7 @@ class ConfigurationManager:
                             f"supported_sites.{site_name}.TS_path",
                             saved_site.get("TS_path"),
                             current_ts_path,
-                        )
+                        ),
                     )
 
                 # Compare favorite seats
@@ -694,7 +694,7 @@ class ConfigurationManager:
                             f"supported_sites.{site_name}.fav_seat",
                             saved_fav_seat,
                             current_fav_seat,
-                        )
+                        ),
                     )
 
         # Compare import filters
@@ -708,7 +708,7 @@ class ConfigurationManager:
                         "import.ImportFilters",
                         saved_filters,
                         current_filters,
-                    )
+                    ),
                 )
         except Exception as e:
             log.warning("Error loading copyFromFilter: %s", e)
@@ -732,7 +732,7 @@ class ConfigurationManager:
                                 f"hud_ui.{key}",
                                 saved_value,
                                 current_value,
-                            )
+                            ),
                         )
                         log.debug(f"HUD UI change detected: {key}: {saved_value} -> {current_value}")
         except Exception as e:

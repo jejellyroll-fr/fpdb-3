@@ -295,11 +295,11 @@ class GuiRingPlayerStats(QSplitter):
             return
 
         self.createStatsTable(
-            vbox, playerids, sitenos, limits, seats, groups, dates, games, currencies
+            vbox, playerids, sitenos, limits, seats, groups, dates, games, currencies,
         )
 
     def createStatsTable(
-        self, vbox, playerids, sitenos, limits, seats, groups, dates, games, currencies
+        self, vbox, playerids, sitenos, limits, seats, groups, dates, games, currencies,
     ):
         startTime = time()
         show_detail = True
@@ -517,7 +517,7 @@ class GuiRingPlayerStats(QSplitter):
                             column[colheading],
                             treerow[0].text(),
                             onlinehelp[column[colheading]],
-                        )
+                        ),
                     )
                 treerow.append(item)
             self.liststore[grid].appendRow(treerow)
@@ -525,10 +525,10 @@ class GuiRingPlayerStats(QSplitter):
 
         view.resizeColumnsToContents()
         view.setSortingEnabled(
-            True
+            True,
         )  # do this after resizing columns, otherwise it leaves room for the sorting triangle in every heading
         view.resizeColumnToContents(
-            0
+            0,
         )  # we want room for the sorting triangle in column 0 where it starts.
         view.resizeRowsToContents()
 
@@ -651,7 +651,7 @@ class GuiRingPlayerStats(QSplitter):
             groupLevels = "limits" not in groups
             if groupLevels:
                 query = query.replace(
-                    "<hgametypeId>", "p.name"
+                    "<hgametypeId>", "p.name",
                 )  # need to use p.name for sqlite posn stats to work
             else:
                 query = query.replace("<hgametypeId>", "h.gametypeId")
@@ -685,7 +685,7 @@ class GuiRingPlayerStats(QSplitter):
 
         # Filter on dates
         query = query.replace(
-            "<datestest>", " between '" + dates[0] + "' and '" + dates[1] + "'"
+            "<datestest>", " between '" + dates[0] + "' and '" + dates[1] + "'",
         )
 
         # Group by position?

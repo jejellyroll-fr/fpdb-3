@@ -117,7 +117,7 @@ def test_continuation_bet_flop(stats_calculator):
         "currency": "EUR",
     }
     hand_cbet = HoldemOmahaHand(
-        config_mock, None, "Winamax", gametype, "", builtFrom="Test"
+        config_mock, None, "Winamax", gametype, "", builtFrom="Test",
     )
     hand_cbet.players = [
         [1, "Player1", "10000", "S", None],
@@ -152,25 +152,25 @@ def test_continuation_bet_flop(stats_calculator):
 
     # Player1 (Agressor Preflop)
     assert player1_stats.get(
-        "street1CBChance", False
+        "street1CBChance", False,
     ), "Player1 should have CBet chance on Flop"
     assert player1_stats.get(
-        "street1CBDone", False
+        "street1CBDone", False,
     ), "Player1 should have made a CBet on Flop"
 
     # Player2 (preflop caller)
     assert not player2_stats.get(
-        "street1CBChance", False
+        "street1CBChance", False,
     ), "Player2 should not have CBet chance on Flop"
     assert not player2_stats.get(
-        "street1CBDone", False
+        "street1CBDone", False,
     ), "Player2 did not make a CBet on Flop"
 
     assert player2_stats.get(
-        "foldToStreet1CBChance", False
+        "foldToStreet1CBChance", False,
     ), "Player2 should face a CBet chance on Flop"
     assert player2_stats.get(
-        "foldToStreet1CBDone", True
+        "foldToStreet1CBDone", True,
     ), "Player2 should have folded to CBet on Flop"
 
 
@@ -186,7 +186,7 @@ def test_check_raise_flop(stats_calculator):
         "currency": "EUR",
     }
     hand_cr = HoldemOmahaHand(
-        config_mock, None, "Winamax", gametype, "", builtFrom="Test"
+        config_mock, None, "Winamax", gametype, "", builtFrom="Test",
     )
     # P1 SB, P2 BB/Agressor Preflop
     hand_cr.players = [
@@ -219,18 +219,18 @@ def test_check_raise_flop(stats_calculator):
 
     # Player1 (those whose Check-Raise)
     assert player1_stats.get(
-        "street1CheckCallRaiseChance", False
+        "street1CheckCallRaiseChance", False,
     ), "Player1 should have Check-Raise chance on Flop"
     assert not player1_stats.get(
-        "street1CheckCallDone", False
+        "street1CheckCallDone", False,
     ), "Player1 did not Check-Call on Flop"
     assert player1_stats.get(
-        "street1CheckRaiseDone", False
+        "street1CheckRaiseDone", False,
     ), "Player1 should have Check-Raised on Flop"
 
     # Player2 (those who Bet)
     assert not player2_stats.get(
-        "street1CheckCallRaiseChance", False
+        "street1CheckCallRaiseChance", False,
     ), "Player2 did not Check, so no CR chance"
 
 
@@ -246,7 +246,7 @@ def test_allin_flag_set(stats_calculator):
         "currency": "EUR",
     }
     hand_allin = HoldemOmahaHand(
-        config_mock, None, "Winamax", gametype, "", builtFrom="Test"
+        config_mock, None, "Winamax", gametype, "", builtFrom="Test",
     )
     hand_allin.players = [
         [1, "Player1", "100", "B", None],
@@ -264,7 +264,7 @@ def test_allin_flag_set(stats_calculator):
             ("Player1", "raises", Decimal("60"), Decimal("80"), Decimal("20"), False),
         ],
         "FLOP": [
-            ("Player1", "bets", Decimal("20"), True)
+            ("Player1", "bets", Decimal("20"), True),
         ],  # Player1 all-in on the Flop (street1)
         "TURN": [],
         "RIVER": [],
@@ -276,13 +276,13 @@ def test_allin_flag_set(stats_calculator):
     player2_stats = stats_calculator.handsplayers["Player2"]
 
     assert player1_stats.get(
-        "street1AllIn", False
+        "street1AllIn", False,
     ), "Player1 Flop AllIn flag should be True"
     assert not player2_stats.get(
-        "street1AllIn", False
+        "street1AllIn", False,
     ), "Player2 Flop AllIn flag should be False"
     assert not player1_stats.get(
-        "street2AllIn", False
+        "street2AllIn", False,
     ), "Player1 Turn AllIn flag should be False"  # Check another street
 
 
@@ -299,7 +299,7 @@ def test_discard_counter(stats_calculator):
         "currency": "EUR",
     }
     hand_draw = Hand.DrawHand(
-        config_mock, None, "Winamax", gametype, "", builtFrom="Test"
+        config_mock, None, "Winamax", gametype, "", builtFrom="Test",
     )
     hand_draw.players = [
         [1, "Player1", "10000", "B", None],
@@ -369,7 +369,7 @@ def test_aggression_flag_logic(stats_calculator):
         "currency": "EUR",
     }
     hand_aggr = HoldemOmahaHand(
-        config_mock, None, "Winamax", gametype, "", builtFrom="Test"
+        config_mock, None, "Winamax", gametype, "", builtFrom="Test",
     )
     hand_aggr.players = [
         [1, "Player1", "10000", "B", None],
@@ -403,22 +403,22 @@ def test_aggression_flag_logic(stats_calculator):
 
     # Flop (Street 1): Player1 bet, even though he checked later
     assert player1_stats.get(
-        "street1Aggr", False
+        "street1Aggr", False,
     ), "Player1 Flop Aggression should be True (due to bet)"
     # Turn (Street 2): Player1  raise
     assert player1_stats.get(
-        "street2Aggr", False
+        "street2Aggr", False,
     ), "Player1 Turn Aggression should be True (due to raise)"
     # River (Street 3): No aggressive action
     assert not player1_stats.get(
-        "street3Aggr", False
+        "street3Aggr", False,
     ), "Player1 River Aggression should be False"
 
     # Flop (Street 1): Player2 just call
     assert not player2_stats.get(
-        "street1Aggr", False
+        "street1Aggr", False,
     ), "Player2 Flop Aggression should be False"
     # Turn (Street 2): Player2 fold
     assert not player2_stats.get(
-        "street2Aggr", False
+        "street2Aggr", False,
     ), "Player2 Turn Aggression should be False"

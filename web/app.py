@@ -5,7 +5,6 @@ import sys
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
-from typing import Optional
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
@@ -81,7 +80,7 @@ async def index(request: Request):
 async def get_hands_api(request: Request):
     hands = get_hands()
     return templates.TemplateResponse(
-        "hands.html", {"request": request, "hands": hands}
+        "hands.html", {"request": request, "hands": hands},
     )
 
 
@@ -89,7 +88,7 @@ async def get_hands_api(request: Request):
 async def get_handsPlayers_api(request: Request):
     handsPlayers = get_handsPlayers()
     return templates.TemplateResponse(
-        "handsPlayers.html", {"request": request, "handsPlayers": handsPlayers}
+        "handsPlayers.html", {"request": request, "handsPlayers": handsPlayers},
     )
 
 
@@ -123,7 +122,7 @@ def get_players_endpoint(
 
 
 @app.get("/hands/{handId}", response_class=HTMLResponse)
-async def replay_hand(request: Request, handId: int, hero: Optional[str] = None):
+async def replay_hand(request: Request, handId: int, hero: str | None = None):
     config = Configuration.Config()
     hand = Hand.hand_factory(handId, config, Database.Database(config, sql=None))
 
@@ -193,7 +192,7 @@ async def replay_hand(request: Request, handId: int, hero: Optional[str] = None)
     # Serialize the dictionary to JSON
     hand = json.dumps(hand_dict, cls=CustomEncoder)
     return templates.TemplateResponse(
-        "replayer.html", {"request": request, "hand": hand}
+        "replayer.html", {"request": request, "hand": hand},
     )
 
 
@@ -201,8 +200,8 @@ async def replay_hand(request: Request, handId: int, hero: Optional[str] = None)
 async def get_hands_players_api(
     playerId: int,
     request: Request,
-    tourney: Optional[bool] = False,
-    cash: Optional[bool] = False,
+    tourney: bool | None = False,
+    cash: bool | None = False,
     sort_by: str = None,
 ):
     # Get the name of the player
@@ -213,7 +212,7 @@ async def get_hands_players_api(
     conn.close()
 
     handsPlayers = get_hands_players(
-        playerId, tourney=tourney, cash=cash, sort_by=sort_by
+        playerId, tourney=tourney, cash=cash, sort_by=sort_by,
     )
     decodeCardList = {
         1: "2h",
@@ -396,7 +395,7 @@ async def get_statsplayers_api(
     )  # Call the get_statsplayers() function to retrieve the statistics
 
     return templates.TemplateResponse(
-        "statsplayers.html", {"request": request, "result": result}
+        "statsplayers.html", {"request": request, "result": result},
     )
 
 

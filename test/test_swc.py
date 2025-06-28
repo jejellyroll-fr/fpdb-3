@@ -70,7 +70,7 @@ def test_re_GameInfo52():
 
 
 re_HandInfo = re.compile(
-    r"""^Table\s'(?P<TABLE>.*?)'\(\d+\)\s(?P<MAX>\d+)-max\s(?:\(Real Money\)\s)?Seat\s\#\d+\sis\sthe\sbutton"""
+    r"""^Table\s'(?P<TABLE>.*?)'\(\d+\)\s(?P<MAX>\d+)-max\s(?:\(Real Money\)\s)?Seat\s\#\d+\sis\sthe\sbutton""",
 )
 
 
@@ -149,7 +149,7 @@ def test_re_PlayerInfo33():
 
 
 re_ButtonPos = re.compile(
-    r"""Seat\s+\#(?P<BUTTON>\d+)\sis\sthe\sbutton""", re.MULTILINE
+    r"""Seat\s+\#(?P<BUTTON>\d+)\sis\sthe\sbutton""", re.MULTILINE,
 )
 
 

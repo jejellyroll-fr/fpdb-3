@@ -7,7 +7,7 @@ from __future__ import print_function
 
 import re
 
-re_space = re.compile("([\(\)AKQJT0-9]+)\s+", re.MULTILINE)
+re_space = re.compile(r"([\(\)AKQJT0-9]+)\s+", re.MULTILINE)
 
 razzlist = """(32)A (3A)2 (2A)3 (42)A (4A)2 (2A)4 (43)A (4A)3 (3A)4 (43)2
  (42)3 (32)4 (52)A (5A)2 (2A)5 (53)A (5A)3 (3A)5 (53)2 (52)3

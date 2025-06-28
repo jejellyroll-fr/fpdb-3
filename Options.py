@@ -41,7 +41,7 @@ def fpdb_options():
     )
     # Option to specify database name
     parser.add_option(
-        "-d", "--databaseName", dest="dbname", help=("Specifies a database name.")
+        "-d", "--databaseName", dest="dbname", help=("Specifies a database name."),
     )
     # Option to specify configuration file path
     parser.add_option(
@@ -70,7 +70,7 @@ def fpdb_options():
     )
     # Option to specify a site name
     parser.add_option(
-        "-s", "--sitename", dest="sitename", default=None, help=("A sitename")
+        "-s", "--sitename", dest="sitename", default=None, help=("A sitename"),
     )
     # Option to set the logging level
     parser.add_option(
@@ -186,11 +186,11 @@ def fpdb_options():
     )
     # Option to start minimized
     parser.add_option(
-        "--minimized", action="store_true", dest="minimized", help=("Start Minimized")
+        "--minimized", action="store_true", dest="minimized", help=("Start Minimized"),
     )
     # Option to start hidden
     parser.add_option(
-        "--hidden", action="store_true", dest="hidden", help=("Start Hidden")
+        "--hidden", action="store_true", dest="hidden", help=("Start Hidden"),
     )
 
     (options, argv) = parser.parse_args()

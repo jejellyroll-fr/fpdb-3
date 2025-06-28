@@ -1,5 +1,6 @@
 import sys
 import types
+import shutil
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -8,8 +9,16 @@ from PyQt5.QtWidgets import QApplication
 
 # import zmq
 
+# Add parent directory to path before imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-sys.path.append(str(Path(__file__).parent.parent))
+# Create a temporary copy of HUD_main.pyw as HUD_main.py
+source_file = Path(__file__).parent.parent / "HUD_main.pyw"
+temp_file = Path(__file__).parent.parent / "HUD_main.py"
+
+# Copy the file at module level
+if source_file.exists() and not temp_file.exists():
+    shutil.copy2(source_file, temp_file)
 
 # Create a mock 'WinTables' module
 win_tables_module = types.ModuleType("WinTables")
@@ -142,7 +151,7 @@ def test_create_hud(hud_main):
         mock_table = MagicMock()
         mock_table.site = "test_site"
         hud_main.create_HUD(
-            "new_hand_id", mock_table, "temp_key", 9, "poker_game", "cash", {}, {}
+            "new_hand_id", mock_table, "temp_key", 9, "poker_game", "cash", {}, {},
         )
 
         assert "temp_key" in hud_main.hud_dict
@@ -155,7 +164,7 @@ def test_update_hud(hud_main):
     with patch.object(hud_main, "idle_update") as mock_idle_update:
         hud_main.update_HUD("new_hand_id", "table_name", hud_main.config)
         mock_idle_update.assert_called_once_with(
-            "new_hand_id", "table_name", hud_main.config
+            "new_hand_id", "table_name", hud_main.config,
         )
 
 
@@ -343,7 +352,7 @@ def test_zmqworker_run(hud_main):
     with (
         patch("time.sleep", return_value=None),
         patch.object(
-            zmq_receiver, "process_message", side_effect=stop_after_one_iteration
+            zmq_receiver, "process_message", side_effect=stop_after_one_iteration,
         ) as mock_process_message,
     ):
         worker.run()
@@ -526,7 +535,7 @@ def test_idle_create(import_path, hud_main):
             print(f"tablehudlabel: {tablehudlabel}")
             print(f"Type of tablehudlabel: {tablehudlabel.__class__}")
             print(
-                f"Is instance of mocked QLabel: {isinstance(tablehudlabel, mock_qlabel.return_value.__class__)}"
+                f"Is instance of mocked QLabel: {isinstance(tablehudlabel, mock_qlabel.return_value.__class__)}",
             )
 
             # Check taht vb.addWidget is called
@@ -548,7 +557,7 @@ def test_idle_create(import_path, hud_main):
             # Check call
             try:
                 mock_create.assert_called_once_with(
-                    new_hand_id, hud_main.config, stat_dict
+                    new_hand_id, hud_main.config, stat_dict,
                 )
                 print("create method assertion passed")
             except AssertionError as e:
@@ -608,7 +617,7 @@ def test_idle_kill_widget_removal(hud_main):
 
 # Ensures that check_tables calls the correct methods for different table statuses.
 @pytest.mark.parametrize(
-    "status", ["client_destroyed", "client_moved", "client_resized"]
+    "status", ["client_destroyed", "client_moved", "client_resized"],
 )
 def test_check_tables_full_coverage(hud_main, status):
     mock_hud = MagicMock()
@@ -650,7 +659,7 @@ def test_client_methods(hud_main, method_name, expected_args):
         getattr(hud_main, method_name)(None, mock_hud)
         if method_name == "client_destroyed":
             mock_idle_method.assert_called_once_with(
-                expected_args[0], mock_hud.table.key
+                expected_args[0], mock_hud.table.key,
             )
         else:
             mock_idle_method.assert_called_once_with(mock_hud)
@@ -687,3 +696,12 @@ def test_client_methods(hud_main, method_name, expected_args):
 
 #         # Ensure the closure was logged
 #         mock_log_info.assert_called_with("ZMQ receiver closed")
+
+
+# Cleanup function to remove the temporary file after all tests
+def teardown_module():
+    """Remove the temporary HUD_main.py file after all tests are done"""
+    temp_file = Path(__file__).parent.parent / "HUD_main.py"
+    if temp_file.exists():
+        temp_file.unlink()
+        print(f"Cleaned up temporary file: {temp_file}")

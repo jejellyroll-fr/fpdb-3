@@ -35,7 +35,7 @@ print("Exécution du script AppleScript...")
 
 # Execute AppleScript
 proc = subprocess.Popen(
-    ["osascript", "-e", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    ["osascript", "-e", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
 )
 output, error = proc.communicate()
 
@@ -69,7 +69,7 @@ for entry in window_entries:
                 "name": win_name,
                 "size": {"width": width, "height": height},
                 "position": {"x": x, "y": y},
-            }
+            },
         )
     else:
         print(f"Entrée mal formatée : {entry}")

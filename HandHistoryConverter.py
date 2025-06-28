@@ -57,7 +57,7 @@ class HandHistoryConverter(ABC):
     # "utf_8" is more likely if there are funny characters
     codepage = "cp1252"
 
-    re_tzOffset = re.compile("^\w+[+-]\d{4}$")
+    re_tzOffset = re.compile(r"^\w+[+-]\d{4}$")
     copyGameHeader = False
     summaryInFile = False
 
@@ -82,7 +82,7 @@ out_path  (default '-' = sys.stdout)
         self.import_parameters = self.config.get_import_parameters()
         self.sitename = sitename
         log.info(
-            f"HandHistory init - {self.sitename} site, {self.__class__} subclass, in_path '{in_path}'; out_path '{out_path}'"
+            f"HandHistory init - {self.sitename} site, {self.__class__} subclass, in_path '{in_path}'; out_path '{out_path}'",
         )  # should use self.filter, not self.sitename
 
         self.index = index
@@ -176,7 +176,7 @@ HandHistoryConverter: '%(sitename)s'
             self.numHands = len(list(handsList))
             endtime = time.time()
             log.info(
-                f"Read {self.numHands} hands ({self.numErrors + self.numPartial} failed) in {endtime - starttime:.3f} seconds"
+                f"Read {self.numHands} hands ({self.numErrors + self.numPartial} failed) in {endtime - starttime:.3f} seconds",
             )
         else:
             self.parsedObjectType = "Summary"
@@ -184,11 +184,11 @@ HandHistoryConverter: '%(sitename)s'
             endtime = time.time()
             if summaryParsingStatus:
                 log.info(
-                    f"Summary file '{self.in_path}' correctly parsed (took {endtime - starttime:.3f} seconds)"
+                    f"Summary file '{self.in_path}' correctly parsed (took {endtime - starttime:.3f} seconds)",
                 )
             else:
                 log.warning(
-                    f"Error converting summary file '{self.in_path}' (took {endtime - starttime:.3f} seconds)"
+                    f"Error converting summary file '{self.in_path}' (took {endtime - starttime:.3f} seconds)",
                 )
 
     def setAutoPop(self, value):
@@ -210,12 +210,12 @@ HandHistoryConverter: '%(sitename)s'
         # if self.archive:
         #     self.obs = self.convert_archive(self.obs)
         if self.starsArchive is True:
-            m = re.compile("^Hand #\d+", re.MULTILINE)
+            m = re.compile(r"^Hand #\d+", re.MULTILINE)
             self.obs = m.sub("", self.obs)
 
         if self.ftpArchive is True:
             # Remove  ******************** # 1 *************************
-            m = re.compile("\*{20}\s#\s\d+\s\*{20,25}\s+", re.MULTILINE)
+            m = re.compile(r"\*{20}\s#\s\d+\s\*{20,25}\s+", re.MULTILINE)
             self.obs = m.sub("", self.obs)
 
         if self.obs is None or self.obs == "":
@@ -239,7 +239,7 @@ HandHistoryConverter: '%(sitename)s'
 
         if self.copyGameHeader:
             gametype = self.parseHeader(
-                handText, self.whole_file.replace("\r\n", "\n").replace("\xa0", " ")
+                handText, self.whole_file.replace("\r\n", "\n").replace("\xa0", " "),
             )
         else:
             gametype = self.determineGameType(handText)
@@ -274,15 +274,15 @@ HandHistoryConverter: '%(sitename)s'
         if game_details in self.readSupportedGames():
             if gametype["base"] == "hold":
                 hand = Hand.HoldemOmahaHand(
-                    self.config, self, self.sitename, gametype, handText
+                    self.config, self, self.sitename, gametype, handText,
                 )
             elif gametype["base"] == "stud":
                 hand = Hand.StudHand(
-                    self.config, self, self.sitename, gametype, handText
+                    self.config, self, self.sitename, gametype, handText,
                 )
             elif gametype["base"] == "draw":
                 hand = Hand.DrawHand(
-                    self.config, self, self.sitename, gametype, handText
+                    self.config, self, self.sitename, gametype, handText,
                 )
         else:
             log.error(f"{self.sitename} Unsupported game type: {gametype}")
@@ -500,7 +500,7 @@ or None if we fail to get the info """
     def getRake(self, hand):
         if hand.totalcollected is None:
             log.warning(
-                f"totalcollected is None for hand ID {hand.handid}. Defaulting to 0."
+                f"totalcollected is None for hand ID {hand.handid}. Defaulting to 0.",
             )
             hand.totalcollected = Decimal("0.00")
 
@@ -542,11 +542,11 @@ or None if we fail to get the info """
                 == 0
             ):
                 log.error(
-                    f"'{hand.handid}': Missed sb/bb - Amount collected ({hand.totalcollected}) is greater than the pot ({hand.totalpot})"
+                    f"'{hand.handid}': Missed sb/bb - Amount collected ({hand.totalcollected}) is greater than the pot ({hand.totalpot})",
                 )
             else:
                 log.error(
-                    f"'{hand.handid}': Amount collected ({hand.totalcollected}) is greater than the pot ({hand.totalpot})"
+                    f"'{hand.handid}': Amount collected ({hand.totalcollected}) is greater than the pot ({hand.totalpot})",
                 )
                 raise FpdbParseError
         elif (
@@ -556,7 +556,7 @@ or None if we fail to get the info """
             and not hand.cashedOut
         ):
             log.error(
-                f"'{hand.handid}': Suspiciously high rake ({hand.rake}) > 25 pct of pot ({hand.totalpot})"
+                f"'{hand.handid}': Suspiciously high rake ({hand.rake}) > 25 pct of pot ({hand.totalpot})",
             )
             raise FpdbParseError
 
@@ -793,7 +793,7 @@ or None if we fail to get the info """
                 [
                     (pytz.timezone(x).localize(datetime.datetime.now()).tzname(), x)
                     for x in pytz.all_timezones
-                ]
+                ],
             )
             if givenTimezone in timezone_lookup:
                 givenTZ = timezone(timezone_lookup[givenTimezone])
@@ -806,7 +806,7 @@ or None if we fail to get the info """
 
         localisedTime = givenTZ.localize(time)
         utcTime = localisedTime.astimezone(wantedTimezone) + datetime.timedelta(
-            seconds=-3600 * (old_div(offset, 100)) - 60 * (offset % 100)
+            seconds=-3600 * (old_div(offset, 100)) - 60 * (offset % 100),
         )
         # log.debug("utcTime: " + str(utcTime))
         return utcTime
@@ -828,7 +828,7 @@ or None if we fail to get the info """
         "Returns string to search window title for tournament table no."
         # Full Tilt:  $30 + $3 Tournament (181398949), Table 1 - 600/1200 Ante 100 - Limit Razz
         # PokerStars: WCOOP 2nd Chance 02: $1,050 NLHE - Tournament 307521826 Table 1 - Blinds $30/$60
-        return "%s.+(?:Table|Torneo) (\d+)" % (tournament,)
+        return r"%s.+(?:Table|Torneo) (\d+)" % (tournament,)
 
     @staticmethod
     def clearMoneyString(money):

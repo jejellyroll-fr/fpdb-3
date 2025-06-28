@@ -4,7 +4,7 @@ import Quartz
 def get_window_info():
     # Obtenir toutes les fenêtres sur l'écran
     window_list = Quartz.CGWindowListCopyWindowInfo(
-        Quartz.kCGWindowListOptionOnScreenOnly, Quartz.kCGNullWindowID
+        Quartz.kCGWindowListOptionOnScreenOnly, Quartz.kCGNullWindowID,
     )
 
     # Parcourir toutes les fenêtres et extraire des informations

@@ -98,33 +98,33 @@ class PokerStarsSummary(TourneySummary):
 
     substitutions = {
         "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP|SC|INR|CNY",  # legal ISO currency codes
-        "LS": "\$|\xe2\x82\xac|\u20ac||\£|\u20b9|\¥|Rs\.\s|",  # legal currency symbols - Euro(cp1252, utf-8)
+        "LS": "\\$|\xe2\x82\xac|\u20ac||\\£|\u20b9|\\¥|Rs\\.\\s|",  # legal currency symbols - Euro(cp1252, utf-8)
     }
 
     re_Identify = re.compile(
-        "((?P<SITE>PokerStars|Full\sTilt|Run\sIt\sOnce\sPoker)\sTournament\s\#\d+|<title>TOURNEYS:)"
+        r"((?P<SITE>PokerStars|Full\sTilt|Run\sIt\sOnce\sPoker)\sTournament\s\#\d+|<title>TOURNEYS:)",
     )
 
-    re_TourNo = re.compile("\#(?P<TOURNO>[0-9]+),")
-    re_Header = re.compile("History\sRequest\s\-\s")
-    re_emailHeader = re.compile("Delivered\-To\:\s")
+    re_TourNo = re.compile(r"\#(?P<TOURNO>[0-9]+),")
+    re_Header = re.compile(r"History\sRequest\s\-\s")
+    re_emailHeader = re.compile(r"Delivered\-To\:\s")
 
     re_TourneyInfo = re.compile(
         """
-                        \#(?P<TOURNO>[0-9]+),\s
-                        (?P<DESC1>.+?\sSNG\s)?
-                        ((?P<LIMIT>No\sLimit|NO\sLIMIT|Limit|LIMIT|Pot\sLimit|POT\sLIMIT|Pot\sLimit\sPre\-Flop,\sNo\sLimit\sPost\-Flop)\s)?
-                        (?P<SPLIT>Split)?\s?
-                        (?P<GAME>Hold\'em|6\+\sHold\'em|Hold\s\'Em|Razz|RAZZ|7\sCard\sStud|7\sCard\sStud\sHi/Lo|Omaha|Omaha\sHi/Lo|Badugi|Triple\sDraw\s2\-7\sLowball|Single\sDraw\s2\-7\sLowball|5\sCard\sDraw|(5|6)\sCard\sOmaha(\sHi/Lo)?|Courchevel(\sHi/Lo)?|HORSE|8\-Game|HOSE|Mixed\sOmaha\sH/L|Mixed\sHold\'em|Mixed\sPLH/PLO|Mixed\sNLH/PLO||Mixed\sOmaha|Triple\sStud)\s+
-                        (?P<DESC>[ a-zA-Z]+\s+)?
-                        (Buy-In:\s(?P<CURRENCY>[%(LS)s]?)(?P<BUYIN>[,.0-9]+)(\s(?P<CURRENCY1>(FPP|SC)))?(\/[%(LS)s]?(?P<FEE>[,.0-9]+))?(\/[%(LS)s]?(?P<BOUNTY>[,.0-9]+))?(?P<CUR>\s(%(LEGAL_ISO)s))?\s+)?
-                        (?P<ENTRIES>[0-9]+)\splayers\s+
-                        ([%(LS)s]?(?P<ADDED>[,.\d]+)(\s(%(LEGAL_ISO)s))?\sadded\sto\sthe\sprize\spool\sby\s(PokerStars|Full\sTilt)(\.com)?\s+)?
-                        (Total\sPrize\sPool:\s[%(LS)s]?(?P<PRIZEPOOL>[,.0-9]+|Sunday\sMillion\s(ticket|biļete))(\s(%(LEGAL_ISO)s))?\s+)?
-                        (?P<SATELLITE>Target\sTournament\s\#(?P<TARGTOURNO>[0-9]+)\s+
-                         (Buy-In:\s(?P<TARGCURRENCY>[%(LS)s]?)(?P<TARGBUYIN>[,.0-9]+)(\/[%(LS)s]?(?P<TARGFEE>[,.0-9]+))?(\/[%(LS)s]?(?P<TARGBOUNTY>[,.0-9]+))?(?P<TARGCUR>\s(%(LEGAL_ISO)s))?\s+)?)?
-                        ([0-9]+\stickets?\sto\sthe\starget\stournament\s+)?
-                        Tournament\sstarted\s+(-\s)?
+                        \\#(?P<TOURNO>[0-9]+),\\s
+                        (?P<DESC1>.+?\\sSNG\\s)?
+                        ((?P<LIMIT>No\\sLimit|NO\\sLIMIT|Limit|LIMIT|Pot\\sLimit|POT\\sLIMIT|Pot\\sLimit\\sPre\\-Flop,\\sNo\\sLimit\\sPost\\-Flop)\\s)?
+                        (?P<SPLIT>Split)?\\s?
+                        (?P<GAME>Hold\'em|6\\+\\sHold\'em|Hold\\s\'Em|Razz|RAZZ|7\\sCard\\sStud|7\\sCard\\sStud\\sHi/Lo|Omaha|Omaha\\sHi/Lo|Badugi|Triple\\sDraw\\s2\\-7\\sLowball|Single\\sDraw\\s2\\-7\\sLowball|5\\sCard\\sDraw|(5|6)\\sCard\\sOmaha(\\sHi/Lo)?|Courchevel(\\sHi/Lo)?|HORSE|8\\-Game|HOSE|Mixed\\sOmaha\\sH/L|Mixed\\sHold\'em|Mixed\\sPLH/PLO|Mixed\\sNLH/PLO||Mixed\\sOmaha|Triple\\sStud)\\s+
+                        (?P<DESC>[ a-zA-Z]+\\s+)?
+                        (Buy-In:\\s(?P<CURRENCY>[%(LS)s]?)(?P<BUYIN>[,.0-9]+)(\\s(?P<CURRENCY1>(FPP|SC)))?(\\/[%(LS)s]?(?P<FEE>[,.0-9]+))?(\\/[%(LS)s]?(?P<BOUNTY>[,.0-9]+))?(?P<CUR>\\s(%(LEGAL_ISO)s))?\\s+)?
+                        (?P<ENTRIES>[0-9]+)\\splayers\\s+
+                        ([%(LS)s]?(?P<ADDED>[,.\\d]+)(\\s(%(LEGAL_ISO)s))?\\sadded\\sto\\sthe\\sprize\\spool\\sby\\s(PokerStars|Full\\sTilt)(\\.com)?\\s+)?
+                        (Total\\sPrize\\sPool:\\s[%(LS)s]?(?P<PRIZEPOOL>[,.0-9]+|Sunday\\sMillion\\s(ticket|biļete))(\\s(%(LEGAL_ISO)s))?\\s+)?
+                        (?P<SATELLITE>Target\\sTournament\\s\\#(?P<TARGTOURNO>[0-9]+)\\s+
+                         (Buy-In:\\s(?P<TARGCURRENCY>[%(LS)s]?)(?P<TARGBUYIN>[,.0-9]+)(\\/[%(LS)s]?(?P<TARGFEE>[,.0-9]+))?(\\/[%(LS)s]?(?P<TARGBOUNTY>[,.0-9]+))?(?P<TARGCUR>\\s(%(LEGAL_ISO)s))?\\s+)?)?
+                        ([0-9]+\\stickets?\\sto\\sthe\\starget\\stournament\\s+)?
+                        Tournament\\sstarted\\s+(-\\s)?
                         (?P<DATETIME>.*$)
                         """
         % substitutions,
@@ -136,7 +136,7 @@ class PokerStarsSummary(TourneySummary):
     # re_TourneyInfo4 = re.compile(u"""Tournament\sstarted\s+(-\s)?(?P<DATETIME>.*$)""" % substitutions ,re.VERBOSE|re.MULTILINE)
     # You made 5 rebuys and 1 addons for a total of USD 3,180.00.
     re_rebuyAddOn = re.compile(
-        """
+        r"""
                         You\smade\s(?P<REBUYCOUNT>\d+)\srebuys\sand\s(?P<ADDONCOUNT>\d+)\saddons\sfor\sa\stotal\sof\s(%(LEGAL_ISO)s)\s(?P<REBUYADDON>[,.0-9]+)
                                """
         % substitutions,
@@ -144,7 +144,7 @@ class PokerStarsSummary(TourneySummary):
     )
     # You collected 5 bounties for a total of USD 875.00.
     re_KOBounties = re.compile(
-        """
+        r"""
                         You\scollected\s(?P<KOCOUNT>\d+)\sbounties\sfor\sa\stotal\sof\s(%(LEGAL_ISO)s)\s(?P<KOBOUNTY>[,.0-9]+)
                                """
         % substitutions,
@@ -180,31 +180,31 @@ class PokerStarsSummary(TourneySummary):
     re_XLSTourneyInfo["Game"] = re.compile(
         r"(?P<LIMIT>[ a-zA-Z\-]+)\s"
         r"(?P<SPLIT>Split)?\s?"
-        r"(?P<GAME>Hold\'em|Razz|RAZZ|7\sCard\sStud|7\sCard\sStud\sH/L|Omaha|Omaha\sH/L|Badugi|Triple\sDraw\s2\-7(\sLowball)?|Single\sDraw\s2\-7(\sLowball)?|5\sCard\sDraw|(5|6)\sCard\sOmaha(\sH/L)?|Courchevel(\sH/L)?|HORSE|Horse|8\-Game|HOSE|Hose|Omaha\sH/L\sMixed|Hold\'em\sMixed|PLH/PLO\sMixed|NLH/PLO\sMixed|Triple\sStud|NLH/NLO\sMixed|Mixed\sNLH/NLO|Mixed\sOmaha\sH/L|Mixed\sHold\'em|Mixed\sPLH/PLO|Mixed\sNLH/PLO)"
+        r"(?P<GAME>Hold\'em|Razz|RAZZ|7\sCard\sStud|7\sCard\sStud\sH/L|Omaha|Omaha\sH/L|Badugi|Triple\sDraw\s2\-7(\sLowball)?|Single\sDraw\s2\-7(\sLowball)?|5\sCard\sDraw|(5|6)\sCard\sOmaha(\sH/L)?|Courchevel(\sH/L)?|HORSE|Horse|8\-Game|HOSE|Hose|Omaha\sH/L\sMixed|Hold\'em\sMixed|PLH/PLO\sMixed|NLH/PLO\sMixed|Triple\sStud|NLH/NLO\sMixed|Mixed\sNLH/NLO|Mixed\sOmaha\sH/L|Mixed\sHold\'em|Mixed\sPLH/PLO|Mixed\sNLH/PLO)",
     )
     re_XLSTourneyInfo["Currency"] = re.compile(
-        r"(?P<CURRENCY>(%(LEGAL_ISO)s)?)" % substitutions
+        r"(?P<CURRENCY>(%(LEGAL_ISO)s)?)" % substitutions,
     )
     re_XLSTourneyInfo["Buy-In"] = re.compile(
-        r"(?P<BUYIN>([,.0-9]+|Freeroll))(?P<FPPBUYIN>\s(FPP|SC|StarsCoin))?"
+        r"(?P<BUYIN>([,.0-9]+|Freeroll))(?P<FPPBUYIN>\s(FPP|SC|StarsCoin))?",
     )
     re_XLSTourneyInfo["ReBuys"] = re.compile(r"(?P<REBUYADDON>[,.0-9]+)")
     re_XLSTourneyInfo["Rake"] = re.compile(r"(?P<FEE>[,.0-9]+)")
     re_XLSTourneyInfo["Place"] = re.compile(r"(?P<RANK>[,.0-9]+)")
     re_XLSTourneyInfo["Entries"] = re.compile(r"(?P<ENTRIES>[,.0-9]+)")
     re_XLSTourneyInfo["Prize"] = re.compile(
-        r"(?P<WINNINGS>[,.0-9]+)(?P<FPPWINNINGS>\s\+\s[,.0-9]+\s(FPP|SC|StarsCoin))?"
+        r"(?P<WINNINGS>[,.0-9]+)(?P<FPPWINNINGS>\s\+\s[,.0-9]+\s(FPP|SC|StarsCoin))?",
     )
     re_XLSTourneyInfo["Bounty Awarded"] = re.compile(r"(?P<KOS>[,.0-9]+)")
     re_XLSTourneyInfo["Target ID"] = re.compile(r"(?P<TARGET>[0-9]+)?")
     re_XLSTourneyInfo["Qualified"] = re.compile(r"(?P<WONTICKET>\*\\\/\*)?")
 
     re_PlayerStars = re.compile(
-        """(?P<RANK>[,.0-9]+):\s(?P<NAME>.+?)(\s\[(?P<ENTRYID>\d+)\])?\s\(.+?\),(\s)?((?P<CUR>\[%(LS)s]?)(?P<WINNINGS>[,.0-9]+)(\s(?P<CUR1>(FPP|SC)))?)?(?P<STILLPLAYING>still\splaying)?((?P<TICKET>Tournament\sTicket)\s\(WSOP\sStep\s(?P<LEVEL>\d)\))?(?P<QUALIFIED>\s\(qualified\sfor\sthe\starget\stournament\)|Sunday\sMillion\s(ticket|biļete))?(\s+)?"""
-        % substitutions
+        r"""(?P<RANK>[,.0-9]+):\s(?P<NAME>.+?)(\s\[(?P<ENTRYID>\d+)\])?\s\(.+?\),(\s)?((?P<CUR>\[%(LS)s]?)(?P<WINNINGS>[,.0-9]+)(\s(?P<CUR1>(FPP|SC)))?)?(?P<STILLPLAYING>still\splaying)?((?P<TICKET>Tournament\sTicket)\s\(WSOP\sStep\s(?P<LEVEL>\d)\))?(?P<QUALIFIED>\s\(qualified\sfor\sthe\starget\stournament\)|Sunday\sMillion\s(ticket|biļete))?(\s+)?"""
+        % substitutions,
     )
     re_PlayerRIO = re.compile(
-        """(?P<RANK>[,.0-9]+):\s(?P<NAME>[^,]+?)(,\s(?P<CUR>\[%(LS)s])(?P<WINNINGS>[,.0-9]+))?(\s+)?$"""
+        r"""(?P<RANK>[,.0-9]+):\s(?P<NAME>[^,]+?)(,\s(?P<CUR>\[%(LS)s])(?P<WINNINGS>[,.0-9]+))?(\s+)?$"""
         % substitutions,
         re.MULTILINE,
     )
@@ -213,26 +213,26 @@ class PokerStarsSummary(TourneySummary):
         re.IGNORECASE,
     )
     re_HTMLPlayer2 = re.compile(
-        r"<title>TOURNEYS:\s&lt;(?P<NAME>.+?)&gt;</title>", re.IGNORECASE
+        r"<title>TOURNEYS:\s&lt;(?P<NAME>.+?)&gt;</title>", re.IGNORECASE,
     )
     re_XLSPlayer = re.compile(
-        r"All\s(?P<SNG>(Regular|(Heads\sup\s)?Sit\s&\sGo))\sTournaments\splayed\sby\s\'(?P<NAME>.+?)\'"
+        r"All\s(?P<SNG>(Regular|(Heads\sup\s)?Sit\s&\sGo))\sTournaments\splayed\sby\s\'(?P<NAME>.+?)\'",
     )
 
     re_DateTime = re.compile(
-        """(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)""",
+        r"""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)""",
         re.MULTILINE,
     )
     re_HTMLDateTime = re.compile(
-        """(?P<M>[0-9]+)\/(?P<D>[0-9]+)\/(?P<Y>[0-9]{4})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+) (?P<AMPM>(AM|PM))""",
+        r"""(?P<M>[0-9]+)\/(?P<D>[0-9]+)\/(?P<Y>[0-9]{4})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+) (?P<AMPM>(AM|PM))""",
         re.MULTILINE,
     )
     re_HTMLTourneyExtraInfo = re.compile(
-        "\[(Deep\s)?((?P<MAX>\d+)-Max,\s?)?((\dx\-)?(?P<SPEED>Turbo|Hyper\-Turbo))?(, )?(?P<REBUYADDON1>\dR\dA)?"
+        r"\[(Deep\s)?((?P<MAX>\d+)-Max,\s?)?((\dx\-)?(?P<SPEED>Turbo|Hyper\-Turbo))?(, )?(?P<REBUYADDON1>\dR\dA)?",
     )
     re_XLSDateTime = re.compile("^[.0-9]+$")
     re_Rank = re.compile(
-        "^You\sfinished\sin\s(?P<RANK>[0-9]+)(st|nd|rd|th)\splace\.", re.MULTILINE
+        r"^You\sfinished\sin\s(?P<RANK>[0-9]+)(st|nd|rd|th)\splace\.", re.MULTILINE,
     )
     # re_WinningRankOne   = re.compile(u"^%(PLYR)s wins the tournament and receives %(CUR)s(?P<AMT>[\.0-9]+) - congratulations!$" %  substitutions, re.MULTILINE)
     # re_WinningRankOther = re.compile(u"^%(PLYR)s finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place and received %(CUR)s(?P<AMT>[.0-9]+)\.$" %  substitutions, re.MULTILINE)
@@ -243,9 +243,9 @@ class PokerStarsSummary(TourneySummary):
     @staticmethod
     def getSplitRe(self, head):
         re_SplitTourneys = re.compile(
-            "(?:PokerStars|Full\sTilt|Run\sIt\sOnce\sPoker) Tournament "
+            r"(?:PokerStars|Full\sTilt|Run\sIt\sOnce\sPoker) Tournament ",
         )
-        re_HTMLSplitTourneys = re.compile('tr id="row_\d+')
+        re_HTMLSplitTourneys = re.compile(r'tr id="row_\d+')
         m = re.search("<title>TOURNEYS:", head)
         if m is not None:
             self.hhtype = "html"
@@ -269,7 +269,7 @@ class PokerStarsSummary(TourneySummary):
         raise FpdbParseError(
             (
                 "PokerStarsSummary.parseSummaryHtml: This file format is not yet supported"
-            )
+            ),
         )
         # self.entries   = Unavailable from HH
         # self.prizepool = Unavailable from HH
@@ -318,7 +318,7 @@ class PokerStarsSummary(TourneySummary):
         m2 = self.re_HTMLTourneyInfo.search(self.summaryText)
         if m1 is None or m2 is None:
             if self.re_HTMLPlayer1.search(
-                self.summaryText
+                self.summaryText,
             ) or self.re_HTMLPlayer2.search(self.summaryText):
                 raise FpdbHandPartial
             tmp1 = self.header[0:200] if m1 is None else "NA"
@@ -352,11 +352,11 @@ class PokerStarsSummary(TourneySummary):
                 self.buyin = 0
             else:
                 self.buyin = int(
-                    100 * float(self.clearMoneyString(info["BUYIN"].replace(" ", "")))
+                    100 * float(self.clearMoneyString(info["BUYIN"].replace(" ", ""))),
                 )
         if info["FEE"] is not None:
             self.fee = int(
-                100 * float(self.clearMoneyString(info["FEE"].replace(" ", "")))
+                100 * float(self.clearMoneyString(info["FEE"].replace(" ", ""))),
             )
         if (
             "REBUYADDON" in info
@@ -365,7 +365,7 @@ class PokerStarsSummary(TourneySummary):
             self.isRebuy = True
             self.isAddOn = True
             rebuyAddOnAmt = int(
-                100 * float(self.clearMoneyString(info["REBUYADDON"].replace(" ", "")))
+                100 * float(self.clearMoneyString(info["REBUYADDON"].replace(" ", ""))),
             )
             if self.buyin != 0:
                 rebuys = int(rebuyAddOnAmt / self.buyin)
@@ -406,10 +406,10 @@ class PokerStarsSummary(TourneySummary):
                 a.group("AMPM"),
             )
             self.endTime = datetime.datetime.strptime(
-                datetimestr, "%Y/%m/%d %I:%M:%S %p"
+                datetimestr, "%Y/%m/%d %I:%M:%S %p",
             )  # also timezone at end, e.g. " ET"
             self.endTime = HandHistoryConverter.changeTimezone(
-                self.endTime, "ET", "UTC"
+                self.endTime, "ET", "UTC",
             )
         if datetimestr is None:
             if xlrd and self.re_XLSDateTime.match(info["DATETIME"]):
@@ -425,10 +425,10 @@ class PokerStarsSummary(TourneySummary):
             else:
                 datetimestr = "2000/01/01 12:00:00"
             self.endTime = datetime.datetime.strptime(
-                datetimestr, "%Y/%m/%d %H:%M:%S"
+                datetimestr, "%Y/%m/%d %H:%M:%S",
             )  # also timezone at end, e.g. " ET"
             self.endTime = HandHistoryConverter.changeTimezone(
-                self.endTime, "ET", "UTC"
+                self.endTime, "ET", "UTC",
             )
 
         if "CURRENCY" in info and info["CURRENCY"] is not None:
@@ -469,7 +469,7 @@ class PokerStarsSummary(TourneySummary):
             ):
                 rebuyAddOnAmt = int(
                     100
-                    * float(self.clearMoneyString(info["REBUYADDON"].replace(" ", "")))
+                    * float(self.clearMoneyString(info["REBUYADDON"].replace(" ", ""))),
                 )
                 rebuyCount = rebuyAddOnAmt / self.buyin
 
@@ -531,10 +531,10 @@ class PokerStarsSummary(TourneySummary):
             )
 
         self.startTime = datetime.datetime.strptime(
-            datetimestr, "%Y/%m/%d %H:%M:%S"
+            datetimestr, "%Y/%m/%d %H:%M:%S",
         )  # also timezone at end, e.g. " ET"
         self.startTime = HandHistoryConverter.changeTimezone(
-            self.startTime, "ET", "UTC"
+            self.startTime, "ET", "UTC",
         )
 
         if mg["DESC1"] is not None:
@@ -571,7 +571,7 @@ class PokerStarsSummary(TourneySummary):
             self.isAddOn = True
             # You made 5 rebuys and 1 addons for a total of USD 3,180.00.
             rebuyCountHero = int(m2.group("REBUYCOUNT")) + int(
-                m2.group("ADDONCOUNT")
+                m2.group("ADDONCOUNT"),
             )  # combine b/c html summary does not split out
             self.rebuyCost = self.buyin + self.fee
             self.addOnCost = self.buyin + self.fee
@@ -583,7 +583,7 @@ class PokerStarsSummary(TourneySummary):
                 self.isSatellite = True
                 newBuyinDate = HandHistoryConverter.changeTimezone(
                     datetime.datetime.strptime(
-                        "2019/01/27 00:00:00", "%Y/%m/%d %H:%M:%S"
+                        "2019/01/27 00:00:00", "%Y/%m/%d %H:%M:%S",
                     ),
                     "ET",
                     "UTC",

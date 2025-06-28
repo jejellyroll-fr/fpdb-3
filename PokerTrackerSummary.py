@@ -53,43 +53,43 @@ class PokerTrackerSummary(TourneySummary):
 
     substitutions = {
         "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP",  # legal ISO currency codes
-        "LS": "\$|€|\£|P|SC|",  # legal currency symbols - Euro(cp1252, utf-8)
+        "LS": r"\$|€|\£|P|SC|",  # legal currency symbols - Euro(cp1252, utf-8)
         "PLYR": r"(?P<PNAME>.+?)",
-        "NUM": ".,\d",
-        "CUR": "(\$|€||\£|)",
+        "NUM": r".,\d",
+        "CUR": r"(\$|€||\£|)",
     }
 
     re_Identify = re.compile("PokerTracker")
 
     re_TourneyInfo = re.compile(
         """
-                        \s(3|4)\sTournament\sSummary\s+
-                        Site:\s(?P<SITE>.+?)\s+
-                        Game:\s(?P<GAME>Holdem|Texas\sHold\'em|Omaha|Omaha\sHi|Omaha\sHi\/Lo)\s+
-                        Tournament\s\#:\s(?P<TOURNO>[0-9]+)\s+
-                        Started:\s(?P<DATETIME>.+?)\s+
-                        Finished:\s(?P<DATETIME1>.+?)\s+
-                        Buyin:\s(?P<CURRENCY>[%(LS)s]?)(?P<BUYIN>[,.0-9]+)\s+
-                        (Bounty:\s[%(LS)s]?(?P<BOUNTY>[,.0-9]+)\s+)?
-                        Fee:\s[%(LS)s]?(?P<FEE>[,.0-9]+)\s+
-                        (Prize\sPool:\s[%(LS)s]?(?P<PRIZEPOOL>[,.0-9]+)\s+)?
-                        (Rebuy:\s[%(LS)s]?(?P<REBUYAMT>[,.0-9]+)\s+)?
-                        (Addon:\s[%(LS)s]?(?P<ADDON>[,.0-9]+)\s+)?
-                        Initial\sStack:\s(?P<STACK>[0-9]+)\s+
-                        Table\sType:\s(?P<TYPE>.+?)\s+
-                        Tourney\sType:\s(?P<LIMIT>No\sLimit|Limit|LIMIT|Pot\sLimit|N\/A)\s+
-                        Players:\s(?P<ENTRIES>\d+)\s+
+                        \\s(3|4)\\sTournament\\sSummary\\s+
+                        Site:\\s(?P<SITE>.+?)\\s+
+                        Game:\\s(?P<GAME>Holdem|Texas\\sHold\'em|Omaha|Omaha\\sHi|Omaha\\sHi\\/Lo)\\s+
+                        Tournament\\s\\#:\\s(?P<TOURNO>[0-9]+)\\s+
+                        Started:\\s(?P<DATETIME>.+?)\\s+
+                        Finished:\\s(?P<DATETIME1>.+?)\\s+
+                        Buyin:\\s(?P<CURRENCY>[%(LS)s]?)(?P<BUYIN>[,.0-9]+)\\s+
+                        (Bounty:\\s[%(LS)s]?(?P<BOUNTY>[,.0-9]+)\\s+)?
+                        Fee:\\s[%(LS)s]?(?P<FEE>[,.0-9]+)\\s+
+                        (Prize\\sPool:\\s[%(LS)s]?(?P<PRIZEPOOL>[,.0-9]+)\\s+)?
+                        (Rebuy:\\s[%(LS)s]?(?P<REBUYAMT>[,.0-9]+)\\s+)?
+                        (Addon:\\s[%(LS)s]?(?P<ADDON>[,.0-9]+)\\s+)?
+                        Initial\\sStack:\\s(?P<STACK>[0-9]+)\\s+
+                        Table\\sType:\\s(?P<TYPE>.+?)\\s+
+                        Tourney\\sType:\\s(?P<LIMIT>No\\sLimit|Limit|LIMIT|Pot\\sLimit|N\\/A)\\s+
+                        Players:\\s(?P<ENTRIES>\\d+)\\s+
                         """
         % substitutions,
         re.VERBOSE | re.MULTILINE,
     )
 
-    re_Max = re.compile("\((?P<MAX>\d+)\smax\)\s")
-    re_Speed = re.compile("(?P<SPEED>Turbo|Hyper\-Turbo)")
-    re_Sng = re.compile("\s(?P<SNG>SNG)\s")
+    re_Max = re.compile(r"\((?P<MAX>\d+)\smax\)\s")
+    re_Speed = re.compile(r"(?P<SPEED>Turbo|Hyper\-Turbo)")
+    re_Sng = re.compile(r"\s(?P<SNG>SNG)\s")
 
     re_Player = re.compile(
-        """
+        r"""
         Place:\s(?P<RANK>[0-9]+),\s
         Player:\s(?P<NAME>.*),\s
         Won:\s(?P<CUR>[%(LS)s]?)(?P<WINNINGS>[,.0-9]+),
@@ -102,7 +102,7 @@ class PokerTrackerSummary(TourneySummary):
     )
 
     re_DateTime = re.compile(
-        """(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)""",
+        r"""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)""",
         re.MULTILINE,
     )
 
@@ -201,7 +201,7 @@ class PokerTrackerSummary(TourneySummary):
             datetimestr = "2000/01/01 00:00:00"  # default used if time not found
 
         self.startTime = datetime.datetime.strptime(
-            datetimestr, "%Y/%m/%d %H:%M:%S"
+            datetimestr, "%Y/%m/%d %H:%M:%S",
         )  # also timezone at end, e.g. " ET"
 
         if mg["CURRENCY"] == "$":
@@ -222,7 +222,7 @@ class PokerTrackerSummary(TourneySummary):
             and self.prizepool == 0
         ):
             self.prizepool = int(Decimal(self.clearMoneyString(mg["BUYIN"]))) * int(
-                self.entries
+                self.entries,
             )
 
         m = self.re_Player.finditer(self.summaryText)
@@ -270,7 +270,7 @@ class PokerTrackerSummary(TourneySummary):
                 # print "DEBUG: addPlayer(%s, %s, %s, %s, None, None, None)" %(rank, name, winnings, self.currency)
                 # print "DEBUG: self.buyin: %s self.fee %s" %(self.buyin, self.fee)
                 self.addPlayer(
-                    rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount
+                    rank, name, winnings, self.currency, rebuyCount, addOnCount, koCount,
                 )
 
         # print self

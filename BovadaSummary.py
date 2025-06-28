@@ -33,15 +33,15 @@ log = get_logger("parser")
 class BovadaSummary(TourneySummary):
     substitutions = {
         "LEGAL_ISO": "USD",  # legal ISO currency codes
-        "LS": "\$|",  # legal currency symbols - Euro(cp1252, utf-8)
+        "LS": r"\$|",  # legal currency symbols - Euro(cp1252, utf-8)
         "PLYR": r"(?P<PNAME>.+?)",
         "PLYR1": r"(?P<PNAME1>.+?)",
-        "CUR": "(\$|)",
-        "NUM": ".,\d",
+        "CUR": r"(\$|)",
+        "NUM": r".,\d",
     }
     codepage = ("utf8", "cp1252")
 
-    re_Identify = re.compile("(Ignition|Bovada|Bodog(\.eu|\sUK|\sCanada|88)?)\sHand")
+    re_Identify = re.compile(r"(Ignition|Bovada|Bodog(\.eu|\sUK|\sCanada|88)?)\sHand")
     re_AddOn = re.compile(
         r"^%(PLYR)s  ?\[ME\] : Addon (?P<ADDON>[%(NUM)s]+)" % substitutions,
         re.MULTILINE,
@@ -110,10 +110,10 @@ class BovadaSummary(TourneySummary):
                     # tz = a.group('TZ')  # just assume ET??
                     # print "   tz = ", tz, " datetime =", datetimestr
                 self.startTime = datetime.datetime.strptime(
-                    datetimestr, "%Y/%m/%d %H:%M:%S"
+                    datetimestr, "%Y/%m/%d %H:%M:%S",
                 )  # also timezone at end, e.g. " ET"
                 self.startTime = HandHistoryConverter.changeTimezone(
-                    self.startTime, "ET", "UTC"
+                    self.startTime, "ET", "UTC",
                 )
 
             self.buyin = 0
@@ -176,7 +176,7 @@ class BovadaSummary(TourneySummary):
                     elif re.match("^[0-9+]*$", mg["WINNINGS"]):
                         self.currency = "play"
                     winnings[i][1] = int(
-                        100 * Decimal(self.clearMoneyString(mg["WINNINGS"]))
+                        100 * Decimal(self.clearMoneyString(mg["WINNINGS"])),
                     )
                 i += 1
 
@@ -200,7 +200,7 @@ class BovadaSummary(TourneySummary):
                     rankId = None
                 if i == 0:
                     self.addPlayer(
-                        win[0], "Hero", win[1], self.currency, rebuys, addons, rankId
+                        win[0], "Hero", win[1], self.currency, rebuys, addons, rankId,
                     )
                 else:
                     self.addPlayer(win[0], "Hero", win[1], self.currency, 0, 0, rankId)

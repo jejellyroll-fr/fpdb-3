@@ -98,7 +98,7 @@ class FpdbLogFormatter(colorlog.ColoredFormatter):
                 str: The captured variable with color codes added.
             """
             var = match.group(1) or match.group(
-                2
+                2,
             )  # Extract the variable without quotes
             return f"{self.var_color}'{var}'{self.reset_color}"  # Add color codes around the quotes
 
@@ -177,12 +177,12 @@ class TimedSizedRotatingFileHandler(TimedRotatingFileHandler):
             maxBytes (int): Maximum file size in bytes before rotation.
         """
         super().__init__(
-            filename, when, interval, backupCount, encoding, delay, utc, atTime
+            filename, when, interval, backupCount, encoding, delay, utc, atTime,
         )
         self.maxBytes = maxBytes  # Maximum size before size-based rotation
         self.part = 1  # Initialize part number for rotated files
         self.currentDate = time.strftime(
-            "%Y-%m-%d"
+            "%Y-%m-%d",
         )  # Current date in YYYY-MM-DD format
 
     def shouldRollover(self, record):
@@ -265,7 +265,7 @@ class TimedSizedRotatingFileHandler(TimedRotatingFileHandler):
             list: List of full paths to log files that should be deleted.
         """
         dirName, baseName = os.path.split(
-            self.baseFilename
+            self.baseFilename,
         )  # Split directory and base filename
         fileNames = os.listdir(dirName)  # List all files in the directory
         result = []
@@ -273,7 +273,7 @@ class TimedSizedRotatingFileHandler(TimedRotatingFileHandler):
             # Check if the file matches the rotated log file pattern
             if fileName.startswith(baseName) and fileName.endswith(".txt"):
                 result.append(
-                    os.path.join(dirName, fileName)
+                    os.path.join(dirName, fileName),
                 )  # Add full path to result
         result.sort()  # Sort files alphabetically (usually chronological if dates are in the name)
 
@@ -315,7 +315,7 @@ def setup_logging(log_dir=None, console_only=False):
         )
         date_format = "%Y-%m-%d %H:%M:%S"
         formatter = colorlog.ColoredFormatter(
-            fmt=log_format, datefmt=date_format, log_colors=log_colors
+            fmt=log_format, datefmt=date_format, log_colors=log_colors,
         )
 
         # Create a stream handler for the console
@@ -337,10 +337,10 @@ def setup_logging(log_dir=None, console_only=False):
                 log_dir = os.path.join(os.path.expanduser("~"), "fpdb_logs")
             log_dir = os.path.normpath(log_dir)  # Normalize the directory path
             os.makedirs(
-                log_dir, exist_ok=True
+                log_dir, exist_ok=True,
             )  # Create the directory if it doesn't exist
             log_file = os.path.join(
-                log_dir, "fpdb-log.txt"
+                log_dir, "fpdb-log.txt",
             )  # Full path to the log file
             print(f"Attempting to write logs to: {log_file}")
 
@@ -348,7 +348,7 @@ def setup_logging(log_dir=None, console_only=False):
             maxBytes = 1024 * 1024  # 1 MB
             backupCount = 30  # Keep logs for 30 rotations
             file_formatter = JsonFormatter(
-                datefmt=date_format
+                datefmt=date_format,
             )  # Use JsonFormatter for files
             file_handler = TimedSizedRotatingFileHandler(
                 log_file,

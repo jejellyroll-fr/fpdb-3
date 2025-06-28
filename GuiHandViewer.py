@@ -147,7 +147,7 @@ class GuiHandViewer(QSplitter):
                 "Total Pot",
                 "Rake",
                 "SiteHandId",
-            ]
+            ],
         )
 
         self.view.doubleClicked.connect(self.row_activated)
@@ -155,7 +155,7 @@ class GuiHandViewer(QSplitter):
         self.filterModel.rowsInserted.connect(
             lambda index, start, end: [
                 self.view.resizeRowToContents(r) for r in range(start, end + 1)
-            ]
+            ],
         )
         self.filterModel.filterAcceptsRow = (
             lambda row, sourceParent: self.is_row_in_card_filter(row)
@@ -180,7 +180,7 @@ class GuiHandViewer(QSplitter):
 
     def loadHands(self, checkState):
         hand_ids = self.get_hand_ids_from_date_range(
-            self.filters.getDates()[0], self.filters.getDates()[1]
+            self.filters.getDates()[0], self.filters.getDates()[1],
         )
         # ! print(hand_ids)
         self.reload_hands(hand_ids)
@@ -306,7 +306,7 @@ class GuiHandViewer(QSplitter):
             post_actions = ""
             if "F" not in pre_actions:  # if player hasn't folded preflop
                 post_actions = hand.get_actions_short_streets(
-                    hero, "FLOP", "TURN", "RIVER"
+                    hero, "FLOP", "TURN", "RIVER",
                 )
             log.debug(f"Postflop actions for hero: {post_actions}")
 
@@ -343,11 +343,11 @@ class GuiHandViewer(QSplitter):
             post_actions = ""
             if "F" not in pre_actions:
                 post_actions = hand.get_actions_short_streets(
-                    hero, "FOURTH", "FIFTH", "SIXTH", "SEVENTH"
+                    hero, "FOURTH", "FIFTH", "SIXTH", "SEVENTH",
                 )
 
             log.debug(
-                f"Stud hand details: Third: {third}, Later streets: {later_streets}"
+                f"Stud hand details: Third: {third}, Later streets: {later_streets}",
             )
 
             row = [
@@ -422,7 +422,7 @@ class GuiHandViewer(QSplitter):
         # Does work but all cards that should NOT be displayed have to be clicked.
         card_filter = self.filters.getCards()
         hcs = self.model.data(
-            self.model.index(rownum, self.colnum["Street0"]), Qt.UserRole + 1
+            self.model.index(rownum, self.colnum["Street0"]), Qt.UserRole + 1,
         ).split(" ")
 
         if "0x" in hcs:  # if cards are unknown return True
@@ -450,10 +450,10 @@ class GuiHandViewer(QSplitter):
         # ! print('handlist:')
         # ! print(handlist)
         self.replayer = GuiReplayer.GuiReplayer(
-            self.config, self.sql, self.main_window, handlist
+            self.config, self.sql, self.main_window, handlist,
         )
         index = handlist.index(
-            int(index.sibling(index.row(), self.colnum["HandId"]).data())
+            int(index.sibling(index.row(), self.colnum["HandId"]).data()),
         )
         # ! print('index:')
         # ! print(index)

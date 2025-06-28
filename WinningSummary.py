@@ -38,12 +38,12 @@ log = get_logger("parser")
 
 
 class WinningSummary(TourneySummary):
-    sym = {"USD": "\$", "T$": "", "play": ""}
+    sym = {"USD": r"\$", "T$": "", "play": ""}
     substitutions = {
         "LEGAL_ISO": "TB|CP",  # legal ISO currency codes
-        "LS": "\$|",  # legal currency symbols
+        "LS": r"\$|",  # legal currency symbols
         "PLYR": r"(?P<PNAME>.+?)",
-        "NUM": ".,\dK",
+        "NUM": r".,\dK",
     }
     games = {  # base, category
         "Hold'em": ("hold", "holdem"),
@@ -58,7 +58,7 @@ class WinningSummary(TourneySummary):
     re_Identify = re.compile(r'<link\sid="ctl00_CalendarTheme"')
 
     re_HTMLPlayer = re.compile(
-        r"Player\sDetails:\s%(PLYR)s</a>" % substitutions, re.IGNORECASE
+        r"Player\sDetails:\s%(PLYR)s</a>" % substitutions, re.IGNORECASE,
     )
 
     re_HTMLTourneyInfo = re.compile(
@@ -93,7 +93,7 @@ class WinningSummary(TourneySummary):
     )
 
     re_HTMLTourneyExtraInfo = re.compile(
-        """
+        r"""
         ^([%(LS)s]|)?(?P<GUAR>[%(NUM)s]+)\s
         ((?P<GAMEEXTRA>Holdem|PLO|PLO8|Omaha\sHi/Lo|Omaha|PL\sOmaha|PL\sOmaha\sHi/Lo|PLO\sHi/Lo)\s?)?
         ((?P<SPECIAL>(GTD|Freeroll|FREEBUY|Freebuy))\s?)?
@@ -106,10 +106,10 @@ class WinningSummary(TourneySummary):
     )
 
     re_HTMLDateTime = re.compile(
-        "(?P<M>[0-9]+)\/(?P<D>[0-9]+)\/(?P<Y>[0-9]{4})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+) (?P<AMPM>(AM|PM))",
+        r"(?P<M>[0-9]+)\/(?P<D>[0-9]+)\/(?P<Y>[0-9]{4})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+) (?P<AMPM>(AM|PM))",
         re.MULTILINE,
     )
-    re_HTMLTourNo = re.compile("\s+<td>(?P<TOURNO>[0-9]+)</td>", re.DOTALL)
+    re_HTMLTourNo = re.compile(r"\s+<td>(?P<TOURNO>[0-9]+)</td>", re.DOTALL)
 
     codepage = ["utf8", "cp1252"]
 
@@ -220,10 +220,10 @@ class WinningSummary(TourneySummary):
                 a.group("AMPM"),
             )
             self.startTime = datetime.datetime.strptime(
-                datetimestr, "%Y/%m/%d %I:%M:%S %p"
+                datetimestr, "%Y/%m/%d %I:%M:%S %p",
             )  # also timezone at end, e.g. " ET"
             self.startTime = HandHistoryConverter.changeTimezone(
-                self.startTime, self.import_parameters["timezone"], "UTC"
+                self.startTime, self.import_parameters["timezone"], "UTC",
             )
 
         if "TOURNEYEND" in info:
@@ -240,10 +240,10 @@ class WinningSummary(TourneySummary):
                 a.group("AMPM"),
             )
             self.endTime = datetime.datetime.strptime(
-                datetimestr, "%Y/%m/%d %I:%M:%S %p"
+                datetimestr, "%Y/%m/%d %I:%M:%S %p",
             )  # also timezone at end, e.g. " ET"
             self.endTime = HandHistoryConverter.changeTimezone(
-                self.endTime, self.import_parameters["timezone"], "UTC"
+                self.endTime, self.import_parameters["timezone"], "UTC",
             )
 
         self.currency = "USD"
@@ -258,13 +258,13 @@ class WinningSummary(TourneySummary):
 
         if self.isRebuy and self.rebuyCost > 0:
             rebuyAmt = int(
-                100 * Decimal(self.clearMoneyString(info["REBUYS"].replace(" ", "")))
+                100 * Decimal(self.clearMoneyString(info["REBUYS"].replace(" ", ""))),
             )
             rebuyCount = old_div(rebuyAmt, self.rebuyCost)
 
         if self.isAddOn and self.addOnCost > 0:
             addOnAmt = int(
-                100 * Decimal(self.clearMoneyString(info["ADDONS"].replace(" ", "")))
+                100 * Decimal(self.clearMoneyString(info["ADDONS"].replace(" ", ""))),
             )
             addOnCount = old_div(addOnAmt, self.addOnCost)
 

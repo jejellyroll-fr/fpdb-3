@@ -41,18 +41,18 @@ class Betfair(HandHistoryConverter):
 
     # Static regexes
     re_GameInfo = re.compile(
-        "^(?P<LIMIT>NL|PL|) (?P<CURRENCY>\$|)?(?P<SB>[.0-9]+)/\$?(?P<BB>[.0-9]+) (?P<GAME>(Texas Hold'em|Omaha Hi|Omaha|Razz))",
+        r"^(?P<LIMIT>NL|PL|) (?P<CURRENCY>\$|)?(?P<SB>[.0-9]+)/\$?(?P<BB>[.0-9]+) (?P<GAME>(Texas Hold'em|Omaha Hi|Omaha|Razz))",
         re.MULTILINE,
     )
-    re_Identify = re.compile("\*{5}\sBetfair\sPoker\sHand\sHistory\sfor\sGame\s\d+\s")
+    re_Identify = re.compile(r"\*{5}\sBetfair\sPoker\sHand\sHistory\sfor\sGame\s\d+\s")
     re_SplitHands = re.compile(r"\n\n+")
     re_HandInfo = re.compile(
-        "\*\*\*\*\* Betfair Poker Hand History for Game (?P<HID>[0-9]+) \*\*\*\*\*\n(?P<LIMIT>NL|PL|) (?P<CURRENCY>\$|)?(?P<SB>[.0-9]+)/\$?(?P<BB>[.0-9]+) (?P<GAMETYPE>(Texas Hold'em|Omaha|Razz)) - (?P<DATETIME>[a-zA-Z]+, [a-zA-Z]+ \d+, \d\d:\d\d:\d\d GMT \d\d\d\d)\nTable (?P<TABLE>[ a-zA-Z0-9]+) \d-max \(Real Money\)\nSeat (?P<BUTTON>[0-9]+)",
+        "\\*\\*\\*\\*\\* Betfair Poker Hand History for Game (?P<HID>[0-9]+) \\*\\*\\*\\*\\*\n(?P<LIMIT>NL|PL|) (?P<CURRENCY>\\$|)?(?P<SB>[.0-9]+)/\\$?(?P<BB>[.0-9]+) (?P<GAMETYPE>(Texas Hold'em|Omaha|Razz)) - (?P<DATETIME>[a-zA-Z]+, [a-zA-Z]+ \\d+, \\d\\d:\\d\\d:\\d\\d GMT \\d\\d\\d\\d)\nTable (?P<TABLE>[ a-zA-Z0-9]+) \\d-max \\(Real Money\\)\nSeat (?P<BUTTON>[0-9]+)",
         re.MULTILINE,
     )
     re_Button = re.compile(r"^Seat (?P<BUTTON>\d+) is the button", re.MULTILINE)
     re_PlayerInfo = re.compile(
-        "Seat (?P<SEAT>[0-9]+): (?P<PNAME>.*)\s\(\s(\$(?P<CASH>[.0-9]+)) \)"
+        r"Seat (?P<SEAT>[0-9]+): (?P<PNAME>.*)\s\(\s(\$(?P<CASH>[.0-9]+)) \)",
     )
     re_Board = re.compile(r"\[ (?P<CARDS>.+) \]")
 
@@ -64,39 +64,39 @@ class Betfair(HandHistoryConverter):
             player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
             log.debug("player_re: " + player_re)
             self.re_PostSB = re.compile(
-                "^%s posts small blind \[\$?(?P<SB>[.0-9]+)" % player_re, re.MULTILINE
+                r"^%s posts small blind \[\$?(?P<SB>[.0-9]+)" % player_re, re.MULTILINE,
             )
             self.re_PostBB = re.compile(
-                "^%s posts big blind \[\$?(?P<BB>[.0-9]+)" % player_re, re.MULTILINE
+                r"^%s posts big blind \[\$?(?P<BB>[.0-9]+)" % player_re, re.MULTILINE,
             )
             self.re_Antes = re.compile(
-                "^%s antes asdf sadf sadf" % player_re, re.MULTILINE
+                "^%s antes asdf sadf sadf" % player_re, re.MULTILINE,
             )
             self.re_BringIn = re.compile(
-                "^%s antes asdf sadf sadf" % player_re, re.MULTILINE
+                "^%s antes asdf sadf sadf" % player_re, re.MULTILINE,
             )
             self.re_PostBoth = re.compile(
-                "^%s posts small \& big blinds \[\$?(?P<SBBB>[.0-9]+)" % player_re,
+                r"^%s posts small \& big blinds \[\$?(?P<SBBB>[.0-9]+)" % player_re,
                 re.MULTILINE,
             )
             self.re_HeroCards = re.compile(
-                "^Dealt to %s \[ (?P<CARDS>.*) \]" % player_re, re.MULTILINE
+                r"^Dealt to %s \[ (?P<CARDS>.*) \]" % player_re, re.MULTILINE,
             )
             self.re_Action = re.compile(
-                "^%s (?P<ATYPE>bets|checks|raises to|raises|calls|folds)(\s\[\$(?P<BET>[.\d]+)\])?"
+                r"^%s (?P<ATYPE>bets|checks|raises to|raises|calls|folds)(\s\[\$(?P<BET>[.\d]+)\])?"
                 % player_re,
                 re.MULTILINE,
             )
             self.re_ShowdownAction = re.compile(
-                "^%s shows \[ (?P<CARDS>.*) \]" % player_re, re.MULTILINE
+                r"^%s shows \[ (?P<CARDS>.*) \]" % player_re, re.MULTILINE,
             )
             self.re_CollectPot = re.compile(
-                "^%s wins \$(?P<POT>[.\d]+) (.*?\[ (?P<CARDS>.*?) \])?" % player_re,
+                r"^%s wins \$(?P<POT>[.\d]+) (.*?\[ (?P<CARDS>.*?) \])?" % player_re,
                 re.MULTILINE,
             )
             self.re_SitsOut = re.compile("^%s sits out" % player_re, re.MULTILINE)
             self.re_ShownCards = re.compile(
-                r"%s (?P<SEAT>[0-9]+) (?P<CARDS>adsfasdf)" % player_re, re.MULTILINE
+                r"%s (?P<SEAT>[0-9]+) (?P<CARDS>adsfasdf)" % player_re, re.MULTILINE,
             )
 
     def readSupportedGames(self):
@@ -146,7 +146,7 @@ class Betfair(HandHistoryConverter):
         hand.handid = m.group("HID")
         hand.tablename = m.group("TABLE")
         hand.startTime = datetime.datetime.strptime(
-            m.group("DATETIME"), "%A, %B %d, %H:%M:%S GMT %Y"
+            m.group("DATETIME"), "%A, %B %d, %H:%M:%S GMT %Y",
         )
         # hand.buttonpos = int(m.group('BUTTON'))
 
@@ -172,7 +172,7 @@ class Betfair(HandHistoryConverter):
         hand.addStreets(m)
 
     def readCommunityCards(
-        self, hand, street
+        self, hand, street,
     ):  # street has been matched by markStreets, so exists in this hand
         if street in (
             "FLOP",
@@ -204,7 +204,7 @@ class Betfair(HandHistoryConverter):
         m = self.re_BringIn.search(hand.handText, re.DOTALL)
         if m:
             log.debug(
-                f"Player bringing in: {m.group('PNAME')} for {m.group('BRINGIN')}"
+                f"Player bringing in: {m.group('PNAME')} for {m.group('BRINGIN')}",
             )
             hand.addBringIn(m.group("PNAME"), m.group("BRINGIN"))
         else:
@@ -250,7 +250,7 @@ class Betfair(HandHistoryConverter):
                 hand.addRaiseTo(street, action.group("PNAME"), action.group("BET"))
             else:
                 log.debug(
-                    f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'"
+                    f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'",
                 )
 
     def readSummaryInfo(self, summaryInfoList):
@@ -274,5 +274,5 @@ class Betfair(HandHistoryConverter):
                 cards = m.group("CARDS")
                 cards = cards.split(", ")
                 hand.addShownCards(
-                    cards=None, player=m.group("PNAME"), holeandboard=cards
+                    cards=None, player=m.group("PNAME"), holeandboard=cards,
                 )

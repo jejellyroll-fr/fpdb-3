@@ -166,12 +166,12 @@ class Simple_Stat_Window(Aux_Base.Seat_Window):
                 config=self.aw.config,
             )
             pu.setStyleSheet(
-                f"QWidget{{background:{self.aw.bgcolor};color:{self.aw.fgcolor};}}QToolTip{{}}"
+                f"QWidget{{background:{self.aw.bgcolor};color:{self.aw.fgcolor};}}QToolTip{{}}",
             )
 
     def create_contents(self, i):
         self.setStyleSheet(
-            f"QWidget{{background:{self.aw.bgcolor};color:{self.aw.fgcolor};}}QToolTip{{}}"
+            f"QWidget{{background:{self.aw.bgcolor};color:{self.aw.fgcolor};}}QToolTip{{}}",
         )
         self.grid = QGridLayout()
         self.grid.setHorizontalSpacing(4)
@@ -211,7 +211,7 @@ class Simple_stat(object):
     def __init__(self, stat, seat, popup, game_stat_config=None, aw=None):
         self.stat = stat
         self.lab = aw.aw_class_label(
-            "xxx"
+            "xxx",
         )  # xxx is used as initial value because longer labels don't shrink
         self.lab.setAlignment(Qt.AlignCenter)
         self.lab.aw_seat = aw.hud.layout.hh_seats[seat]
@@ -228,7 +228,7 @@ class Simple_stat(object):
         )
         self.lab.stat_dict = stat_dict
         self.number = Stats.do_stat(
-            stat_dict, player_id, self.stat, self.hud.hand_instance
+            stat_dict, player_id, self.stat, self.hud.hand_instance,
         )
         if self.number:
             self.lab.setText(str(self.number[1]))
@@ -296,7 +296,7 @@ class Simple_table_mw(Aux_Base.Seat_Window):
 class Simple_table_popup_menu(QWidget):
     def __init__(self, parentwin):
         super(Simple_table_popup_menu, self).__init__(
-            None, Qt.Window | Qt.FramelessWindowHint
+            None, Qt.Window | Qt.FramelessWindowHint,
         )
         self.parentwin = parentwin
         self.move(
@@ -328,7 +328,7 @@ class Simple_table_popup_menu(QWidget):
         # ComboBox - set max seats
         cb_max_dict = {0: ("Force layout" + "...", None)}
         for pos, i in enumerate(
-            (sorted(self.parentwin.hud.layout_set.layout)), start=1
+            (sorted(self.parentwin.hud.layout_set.layout)), start=1,
         ):
             cb_max_dict[pos] = (("%d-max" % i), i)
         grid = QGridLayout()
@@ -346,10 +346,10 @@ class Simple_table_popup_menu(QWidget):
 
         vbox2.addWidget(QLabel("Show Player Stats for"))
         vbox2.addWidget(
-            self.build_combo_and_set_active("h_agg_bb_mult", multiplier_combo_dict)
+            self.build_combo_and_set_active("h_agg_bb_mult", multiplier_combo_dict),
         )
         vbox2.addWidget(
-            self.build_combo_and_set_active("h_seats_style", seats_style_combo_dict)
+            self.build_combo_and_set_active("h_seats_style", seats_style_combo_dict),
         )
         hbox = QHBoxLayout()
         hbox.addWidget(QLabel("Custom"))
@@ -361,7 +361,7 @@ class Simple_table_popup_menu(QWidget):
         vbox2.addLayout(hbox)
         hbox = QHBoxLayout()
         hbox.addWidget(
-            self.build_combo_and_set_active("h_stat_range", stat_range_combo_dict)
+            self.build_combo_and_set_active("h_stat_range", stat_range_combo_dict),
         )
         self.h_hud_days_spinner = self.build_spinner("h_hud_days", 1, 9999)
         hbox.addWidget(self.h_hud_days_spinner)
@@ -369,10 +369,10 @@ class Simple_table_popup_menu(QWidget):
 
         vbox3.addWidget(QLabel("Show Opponent Stats for"))
         vbox3.addWidget(
-            self.build_combo_and_set_active("agg_bb_mult", multiplier_combo_dict)
+            self.build_combo_and_set_active("agg_bb_mult", multiplier_combo_dict),
         )
         vbox3.addWidget(
-            self.build_combo_and_set_active("seats_style", seats_style_combo_dict)
+            self.build_combo_and_set_active("seats_style", seats_style_combo_dict),
         )
         hbox = QHBoxLayout()
         hbox.addWidget(QLabel("Custom"))
@@ -384,7 +384,7 @@ class Simple_table_popup_menu(QWidget):
         vbox3.addLayout(hbox)
         hbox = QHBoxLayout()
         hbox.addWidget(
-            self.build_combo_and_set_active("stat_range", stat_range_combo_dict)
+            self.build_combo_and_set_active("stat_range", stat_range_combo_dict),
         )
         self.hud_days_spinner = self.build_spinner("hud_days", 1, 9999)
         hbox.addWidget(self.hud_days_spinner)
@@ -409,7 +409,7 @@ class Simple_table_popup_menu(QWidget):
             self.parentwin.hud.parent.kill_hud("kill", self.parentwin.hud.table.key)
         if data == "blacklist":
             self.parentwin.hud.parent.blacklist_hud(
-                "kill", self.parentwin.hud.table.key
+                "kill", self.parentwin.hud.table.key,
             )
         if data == "save":
             # This calls the save_layout method of the Hud object. The Hud object
@@ -436,7 +436,7 @@ class Simple_table_popup_menu(QWidget):
             if combo_dict[pos][1] == self.parentwin.hud.hud_params[field]:
                 widget.setCurrentIndex(pos)
         widget.currentIndexChanged[int].connect(
-            partial(self.change_combo_field_value, field=field, combo_dict=combo_dict)
+            partial(self.change_combo_field_value, field=field, combo_dict=combo_dict),
         )
         return widget
 

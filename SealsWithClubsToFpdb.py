@@ -78,12 +78,12 @@ class SealsWithClubs(HandHistoryConverter):
     )
 
     re_Identify = re.compile(r"SwCPoker\sHand\s")
-    re_SplitHands = re.compile("(?:\s?\n){2,}")
+    re_SplitHands = re.compile("(?:\\s?\n){2,}")
     re_ButtonName = re.compile(
-        r"""^(?P<BUTTONNAME>.*) has the dealer button""", re.MULTILINE
+        r"""^(?P<BUTTONNAME>.*) has the dealer button""", re.MULTILINE,
     )
     re_ButtonPos = re.compile(
-        r"""Seat\s+\#(?P<BUTTON>\d+)\sis\sthe\sbutton""", re.MULTILINE
+        r"""Seat\s+\#(?P<BUTTON>\d+)\sis\sthe\sbutton""", re.MULTILINE,
     )
     re_Board = re.compile(r"\[(?P<CARDS>.+)\]")
     re_DateTime = re.compile(
@@ -94,13 +94,13 @@ class SealsWithClubs(HandHistoryConverter):
     # These used to be compiled per player, but regression tests say
     # we don't have to, and it makes life faster.
     re_PostSB = re.compile(
-        r"^%(PLYR)s: posts small blind (?P<SB>[.0-9]+)" % substitutions, re.MULTILINE
+        r"^%(PLYR)s: posts small blind (?P<SB>[.0-9]+)" % substitutions, re.MULTILINE,
     )
     re_PostBB = re.compile(
-        r"^%(PLYR)s: posts big blind (?P<BB>[.0-9]+)" % substitutions, re.MULTILINE
+        r"^%(PLYR)s: posts big blind (?P<BB>[.0-9]+)" % substitutions, re.MULTILINE,
     )
     re_Antes = re.compile(
-        r"^%(PLYR)s: posts the ante (?P<ANTE>[.0-9]+)" % substitutions, re.MULTILINE
+        r"^%(PLYR)s: posts the ante (?P<ANTE>[.0-9]+)" % substitutions, re.MULTILINE,
     )
     re_PostBoth = re.compile(
         r"^%(PLYR)s: posts small \& big blind (?P<SBBB>[.0-9]+)" % substitutions,
@@ -126,14 +126,14 @@ class SealsWithClubs(HandHistoryConverter):
         % substitutions,
         re.MULTILINE,
     )
-    re_Cancelled = re.compile("Hand\scancelled", re.MULTILINE)
+    re_Cancelled = re.compile(r"Hand\scancelled", re.MULTILINE)
     re_Uncalled = re.compile(
-        "Uncalled bet \((?P<BET>[,.\d]+)\) returned to %(PLYR)s" % substitutions,
+        r"Uncalled bet \((?P<BET>[,.\d]+)\) returned to %(PLYR)s" % substitutions,
         re.MULTILINE,
     )
-    re_Flop = re.compile("\*\*\* FLOP \*\*\*")
-    re_Turn = re.compile("\*\*\* TURN \*\*\*")
-    re_River = re.compile("\*\*\* RIVER \*\*\*")
+    re_Flop = re.compile(r"\*\*\* FLOP \*\*\*")
+    re_Turn = re.compile(r"\*\*\* TURN \*\*\*")
+    re_River = re.compile(r"\*\*\* RIVER \*\*\*")
     re_rake = re.compile(
         "Total pot (?P<TOTALPOT>\\d{1,3}(,\\d{3})*(\\.\\d+)?)\\s\\|\\sRake\\s(?P<RAKE>\\d{1,3}(,\\d{3})*(\\.\\d+)?)",
         re.MULTILINE,
@@ -167,7 +167,7 @@ class SealsWithClubs(HandHistoryConverter):
             subst = {
                 "PLYR": player_re,
                 "BRKTS": r"(\(button\) |\(small blind\) |\(big blind\) |\(button\) \(small blind\) |\(button\) \(big blind\) )?",
-                "CUR": "(\$|\xe2\x82\xac|\u20ac||\£|)",
+                "CUR": "(\\$|\xe2\x82\xac|\u20ac||\\£|)",
             }
 
             # Compile a regular expression to match the cards dealt to the player
@@ -181,7 +181,7 @@ class SealsWithClubs(HandHistoryConverter):
             # Compile a regular expression to match the cards shown by the player
             # The regular expression is of the form "^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$"
             self.re_ShownCards = re.compile(
-                "^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$"
+                r"^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$"
                 % subst,
                 re.MULTILINE,
             )
@@ -287,10 +287,10 @@ class SealsWithClubs(HandHistoryConverter):
                         a.group("S"),
                     )
                 hand.startTime = datetime.datetime.strptime(
-                    datetimestr, "%Y-%m-%d %H:%M:%S"
+                    datetimestr, "%Y-%m-%d %H:%M:%S",
                 )
                 hand.startTime = HandHistoryConverter.changeTimezone(
-                    hand.startTime, "ET", "UTC"
+                    hand.startTime, "ET", "UTC",
                 )
             if key == "HID":
                 hand.handid = info[key]
@@ -334,7 +334,7 @@ class SealsWithClubs(HandHistoryConverter):
         handsplit = hand.handText.split("*** SUMMARY ***")
         if len(handsplit) != 2:
             raise FpdbHandPartial(
-                f"Hand is not cleanly split into pre and post Summary {hand.handid}."
+                f"Hand is not cleanly split into pre and post Summary {hand.handid}.",
             )
         pre, post = handsplit
         m = self.re_PlayerInfo.finditer(pre)
@@ -351,11 +351,11 @@ class SealsWithClubs(HandHistoryConverter):
     def markStreets(self, hand):
         log.info("Marking streets")
         if self.re_Turn.search(hand.handText) and not self.re_Flop.search(
-            hand.handText
+            hand.handText,
         ):
             raise FpdbParseError
         if self.re_River.search(hand.handText) and not self.re_Turn.search(
-            hand.handText
+            hand.handText,
         ):
             raise FpdbParseError
 
@@ -435,7 +435,7 @@ class SealsWithClubs(HandHistoryConverter):
                 hand.addBet(street, action.group("PNAME"), action.group("BET"))
             else:
                 log.debug(
-                    f"DEBUG: Unimplemented {action.group('ATYPE')}: '{action.group('PNAME')}'"
+                    f"DEBUG: Unimplemented {action.group('ATYPE')}: '{action.group('PNAME')}'",
                 )
 
     def readShownCards(self, hand):
@@ -537,7 +537,7 @@ class SealsWithClubs(HandHistoryConverter):
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
         log.debug(
-            f"Seals.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'"
+            f"Seals.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'",
         )
 
         if not table_name:

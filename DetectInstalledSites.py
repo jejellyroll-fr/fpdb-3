@@ -42,7 +42,7 @@ Usage:
 import glob
 import os
 import platform
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import Configuration
 from loggingFpdb import get_logger
@@ -126,7 +126,7 @@ class SiteDetector:
 
         return heroes
 
-    def _check_path_exists(self, *paths) -> Optional[str]:
+    def _check_path_exists(self, *paths) -> str | None:
         """Check if any of the given paths exist and return the first one found"""
         for path in paths:
             if path and os.path.exists(path):
@@ -456,14 +456,14 @@ class iPokerDetector(SiteDetector):
             if skin == "PMU Poker":
                 # PMU Poker on macOS uses a sandboxed container
                 pmu_container = os.path.join(
-                    containers_path, "fr.pmu.poker.macos", "Data", "Library", "Application Support", "PMU Online Poker"
+                    containers_path, "fr.pmu.poker.macos", "Data", "Library", "Application Support", "PMU Online Poker",
                 )
                 if os.path.exists(pmu_container):
                     base_path = pmu_container
             elif skin in ["FDJ Poker", "En ligne", "Parions Sport en ligne"]:
                 # FDJ/En ligne on macOS uses a sandboxed container
                 fdj_container = os.path.join(
-                    containers_path, "fr.fdj.poker.macos", "Data", "Library", "Application Support", "En Ligne"
+                    containers_path, "fr.fdj.poker.macos", "Data", "Library", "Application Support", "En Ligne",
                 )
                 if os.path.exists(fdj_container):
                     base_path = fdj_container
@@ -526,7 +526,7 @@ class iPokerDetector(SiteDetector):
         elif self.platform == "Darwin":  # macOS
             paths = get_mac_paths()
             pokerclient_path = self._check_path_exists(
-                os.path.join(paths["app_support"], "PokerClient"), os.path.join(paths["documents"], "PokerClient")
+                os.path.join(paths["app_support"], "PokerClient"), os.path.join(paths["documents"], "PokerClient"),
             )
 
         if not pokerclient_path or not os.path.exists(pokerclient_path):
@@ -715,7 +715,7 @@ class SealsWithClubsDetector(SiteDetector):
                 hhpath = wine_paths[0]
             else:
                 hhpath = self._check_path_exists(
-                    os.path.join(paths["wine_program_files"], "SealsWithClubs", "handhistories")
+                    os.path.join(paths["wine_program_files"], "SealsWithClubs", "handhistories"),
                 )
 
         elif self.platform == "Darwin":  # macOS
@@ -1009,7 +1009,7 @@ class PartyGamingDetector(SiteDetector):
                                     "heroname": "Hero",
                                     "tspath": tspath if os.path.exists(tspath) else "",
                                     "skin": info["skin"],
-                                }
+                                },
                             )
                         else:
                             # Look for hero folders
@@ -1026,7 +1026,7 @@ class PartyGamingDetector(SiteDetector):
                                         "heroname": hero,
                                         "tspath": final_tspath,
                                         "skin": info["skin"],
-                                    }
+                                    },
                                 )
                     except (OSError, PermissionError) as e:
                         log.error(f"Error accessing {hhpath}: {e}")
@@ -1272,7 +1272,7 @@ class DetectInstalledSites:
         """Get list of detected sites"""
         return [site for site, status in self.sitestatusdict.items() if status["detected"]]
 
-    def get_site_info(self, site_name: str) -> Optional[Dict[str, any]]:
+    def get_site_info(self, site_name: str) -> Dict[str, any] | None:
         """Get detection info for a specific site"""
         return self.sitestatusdict.get(site_name)
 

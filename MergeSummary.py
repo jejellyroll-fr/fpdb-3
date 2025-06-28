@@ -111,10 +111,10 @@ class MergeSummary(TourneySummary):
 
     substitutions = {
         "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP",  # legal ISO currency codes
-        "LS": "\$|€|",  # legal currency symbols
+        "LS": r"\$|€|",  # legal currency symbols
     }
     re_Identify = re.compile(
-        "<title>Online\sPoker\sTournament\sDetails\s\-\sCarbonPoker</title>"
+        r"<title>Online\sPoker\sTournament\sDetails\s\-\sCarbonPoker</title>",
     )
     re_NotFound = re.compile("Tournament not found")
     re_GameTypeHH = re.compile(
@@ -131,28 +131,28 @@ class MergeSummary(TourneySummary):
     )
     re_turboHH = re.compile(r"Turbo\s\-\s")
 
-    re_HTMLName = re.compile("Name\s+?</th>\s+?<td>(?P<NAME>.+?)\s+?</td>")
+    re_HTMLName = re.compile(r"Name\s+?</th>\s+?<td>(?P<NAME>.+?)\s+?</td>")
     re_HTMLGameType = re.compile(
-        """Game Type\s+?</th>\s+?<td>(?P<LIMIT>Fixed Limit|No Limit|Pot Limit) (?P<GAME>Texas\sHoldem|Omaha|Omaha\sHiLo|2\-7\sLow\sTriple\sDraw|Badugi|Seven\sCard\sStud|Seven\sCard\sStud\sHiLo|Five\sCard\sStud|Razz|HORSE|HA|HO)\s+?</td>"""
+        r"""Game Type\s+?</th>\s+?<td>(?P<LIMIT>Fixed Limit|No Limit|Pot Limit) (?P<GAME>Texas\sHoldem|Omaha|Omaha\sHiLo|2\-7\sLow\sTriple\sDraw|Badugi|Seven\sCard\sStud|Seven\sCard\sStud\sHiLo|Five\sCard\sStud|Razz|HORSE|HA|HO)\s+?</td>""",
     )
-    re_HTMLBuyIn = re.compile("Buy In\s+?</th>\s+?<td>(?P<BUYIN>[0-9,.]+)\s+?</td>")
-    re_HTMLFee = re.compile("Entry Fee\s+?</th>\s+?<td>(?P<FEE>[0-9,.]+)\s+?</td>")
-    re_HTMLBounty = re.compile("Bounty\s+?</th>\s+?<td>(?P<KOBOUNTY>.+?)\s+?</td>")
-    re_HTMLAddons = re.compile("Addons\s+?</th>\s+?<td>(?P<ADDON>.+?)\s+?</td>")
-    re_HTMLRebuy = re.compile("Rebuys\s+?</th>\s+?<td>(?P<REBUY>.+?)\s+?</td>")
-    re_HTMLTourNo = re.compile("Game ID</th>\s+?<td>(?P<TOURNO>[0-9]+)-1</td>")
+    re_HTMLBuyIn = re.compile(r"Buy In\s+?</th>\s+?<td>(?P<BUYIN>[0-9,.]+)\s+?</td>")
+    re_HTMLFee = re.compile(r"Entry Fee\s+?</th>\s+?<td>(?P<FEE>[0-9,.]+)\s+?</td>")
+    re_HTMLBounty = re.compile(r"Bounty\s+?</th>\s+?<td>(?P<KOBOUNTY>.+?)\s+?</td>")
+    re_HTMLAddons = re.compile(r"Addons\s+?</th>\s+?<td>(?P<ADDON>.+?)\s+?</td>")
+    re_HTMLRebuy = re.compile(r"Rebuys\s+?</th>\s+?<td>(?P<REBUY>.+?)\s+?</td>")
+    re_HTMLTourNo = re.compile(r"Game ID</th>\s+?<td>(?P<TOURNO>[0-9]+)-1</td>")
     re_HTMLPlayer = re.compile(
-        """<tr>(<td align="center">)?\s+?(?P<RANK>\d+)</td>\s+?<td>(?P<PNAME>.+?)</td>\s+?<td>(?P<WINNINGS>.+?)</td>\s+?</tr>"""
+        r"""<tr>(<td align="center">)?\s+?(?P<RANK>\d+)</td>\s+?<td>(?P<PNAME>.+?)</td>\s+?<td>(?P<WINNINGS>.+?)</td>\s+?</tr>""",
     )
     # re_HTMLDetails = re.compile(u"""<p class="text">(?P<LABEL>.+?) : (?P<VALUE>.+?)</p>""")
     re_HTMLPrizepool = re.compile(
-        """(Freeroll|Total) Prizepool\s+?</th>\s+?<td>(?P<PRIZEPOOL>[0-9,.]+)\s+?</td>"""
+        r"""(Freeroll|Total) Prizepool\s+?</th>\s+?<td>(?P<PRIZEPOOL>[0-9,.]+)\s+?</td>""",
     )
     re_HTMLStartTime = re.compile(
-        "Start Time\s+?</th>\s+?<td>(?P<STARTTIME>.+?)\s+?</td>"
+        r"Start Time\s+?</th>\s+?<td>(?P<STARTTIME>.+?)\s+?</td>",
     )
     re_HTMLDateTime = re.compile(
-        "\w+?\s+?(?P<D>\d+)\w+?\s+(?P<M>\w+)\s+(?P<Y>\d+),?\s+(?P<H>\d+):(?P<MIN>\d+):(?P<S>\d+)"
+        r"\w+?\s+?(?P<D>\d+)\w+?\s+(?P<M>\w+)\s+(?P<Y>\d+),?\s+(?P<H>\d+):(?P<MIN>\d+):(?P<S>\d+)",
     )
 
     re_Ticket = re.compile(""" / Ticket (?P<VALUE>[0-9.]+)&euro;""")
@@ -240,14 +240,14 @@ class MergeSummary(TourneySummary):
                     )
                     # tz = a.group('TZ')  # just assume ET??
                     self.startTime = datetime.datetime.strptime(
-                        datetimestr, "%Y/%m/%d %H:%M:%S"
+                        datetimestr, "%Y/%m/%d %H:%M:%S",
                     )  # also timezone at end, e.g. " ET"
                 else:
                     self.startTime = datetime.datetime.strptime(
-                        m.group("DATETIME")[:14], "%Y%m%d%H%M%S"
+                        m.group("DATETIME")[:14], "%Y%m%d%H%M%S",
                     )
                 self.startTime = HandHistoryConverter.changeTimezone(
-                    self.startTime, "ET", "UTC"
+                    self.startTime, "ET", "UTC",
                 )
 
                 if self.re_turboHH.match(tourneyNameFull):
@@ -317,7 +317,7 @@ class MergeSummary(TourneySummary):
                                 winnings = int(100 * structure["payouts"][rank - 1])
                             i += 1
                         self.addPlayer(
-                            rank, players[n], winnings, self.currency, None, None, None
+                            rank, players[n], winnings, self.currency, None, None, None,
                         )
             self.insertOrUpdate()
 
@@ -418,13 +418,13 @@ class MergeSummary(TourneySummary):
                 if m:
                     # print "DEBUG: re_HTMLPrizepool: '%s'" % m.group('PRIZEPOOL')
                     self.prizepool = int(
-                        self.convert_to_decimal(m.group("PRIZEPOOL").strip())
+                        self.convert_to_decimal(m.group("PRIZEPOOL").strip()),
                     )
                 m = self.re_HTMLBuyIn.search(str(p))
                 if m:
                     # print "DEBUG: re_HTMLBuyIn: '%s'" % m.group('BUYIN')
                     self.buyin = int(
-                        100 * self.convert_to_decimal(m.group("BUYIN").strip())
+                        100 * self.convert_to_decimal(m.group("BUYIN").strip()),
                     )
                     if self.buyin == 0:
                         self.buyinCurrency = "FREE"
@@ -432,7 +432,7 @@ class MergeSummary(TourneySummary):
                 if m:
                     # print "DEBUG: re_HTMLFee: '%s'" % m.group('FEE')
                     self.fee = int(
-                        100 * self.convert_to_decimal(m.group("FEE").strip())
+                        100 * self.convert_to_decimal(m.group("FEE").strip()),
                     )
                 m = self.re_HTMLBounty.search(str(p))
                 if m:
@@ -440,7 +440,7 @@ class MergeSummary(TourneySummary):
                     if m.group("KOBOUNTY").strip() != "0.00":
                         self.isKO = True
                         self.koBounty = int(
-                            100 * self.convert_to_decimal(m.group("KOBOUNTY").strip())
+                            100 * self.convert_to_decimal(m.group("KOBOUNTY").strip()),
                         )
                 m = self.re_HTMLAddons.search(str(p))
                 if m:
@@ -468,10 +468,10 @@ class MergeSummary(TourneySummary):
                             m2.group("S"),
                         )
                         self.startTime = datetime.datetime.strptime(
-                            datetimestr, "%Y/%m/%d %H:%M:%S"
+                            datetimestr, "%Y/%m/%d %H:%M:%S",
                         )
                         self.startTime = HandHistoryConverter.changeTimezone(
-                            self.startTime, "ET", "UTC"
+                            self.startTime, "ET", "UTC",
                         )
 
             self.currency = self.buyinCurrency
@@ -493,7 +493,7 @@ class MergeSummary(TourneySummary):
                         elif m.group("WINNINGS").find("€") != -1:
                             self.currency = "EUR"
                         winnings = int(
-                            100 * self.convert_to_decimal(m.group("WINNINGS"))
+                            100 * self.convert_to_decimal(m.group("WINNINGS")),
                         )
                     self.addPlayer(
                         rank,

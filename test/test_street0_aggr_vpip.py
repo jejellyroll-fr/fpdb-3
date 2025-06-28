@@ -11,8 +11,7 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from DerivedStats import DerivedStats, _INIT_STATS
-import Card
+from DerivedStats import DerivedStats
 
 
 class MockHand:
@@ -30,18 +29,18 @@ class MockHand:
             "base": "hold",
             "currency": "USD",
             "sb": "0.50",
-            "bb": "1.00"
+            "bb": "1.00",
         }
         self.players = [
             (1, "Hero", Decimal("100.00"), None, None),
             (2, "Villain1", Decimal("100.00"), None, None),
             (3, "Villain2", Decimal("100.00"), None, None),
-            (4, "Villain3", Decimal("100.00"), None, None)
+            (4, "Villain3", Decimal("100.00"), None, None),
         ]
         self.board = {
             "FLOP": [],
             "TURN": [],
-            "RIVER": []
+            "RIVER": [],
         }
         self.communityStreets = ["FLOP", "TURN", "RIVER"]
         self.allStreets = ["BLINDSANTES", "PREFLOP", "FLOP", "TURN", "RIVER"]
@@ -54,19 +53,19 @@ class MockHand:
             "calls": 4,
             "bets": 5,
             "completes": 6,
-            "folds": 7
+            "folds": 7,
         }
         
         # Default actions - can be overridden
         self.actions = {
             "BLINDSANTES": [
                 ("Villain1", "small blind", Decimal("0.50")),
-                ("Villain2", "big blind", Decimal("1.00"))
+                ("Villain2", "big blind", Decimal("1.00")),
             ],
             "PREFLOP": actions_preflop or [],
             "FLOP": [],
             "TURN": [],
-            "RIVER": []
+            "RIVER": [],
         }
         
         self.pot = MockPot()
@@ -102,7 +101,7 @@ class MockPot:
             "Hero": Decimal("12.00"),
             "Villain1": Decimal("3.00"),
             "Villain2": Decimal("12.00"),
-            "Villain3": Decimal("0.00")
+            "Villain3": Decimal("0.00"),
         }
         self.common = {}
         self.returned = {}
@@ -163,7 +162,7 @@ class TestStreet0AggrVPIP:
             ("Hero", "raises", Decimal("3.00"), Decimal("3.00"), Decimal("0.00")),
             ("Villain1", "calls", Decimal("2.50")),
             ("Villain2", "folds"),
-            ("Villain3", "folds")
+            ("Villain3", "folds"),
         ]
         hand = MockHand(actions_preflop=actions)
         
@@ -181,7 +180,7 @@ class TestStreet0AggrVPIP:
             ("Hero", "raises", Decimal("3.00"), Decimal("3.00"), Decimal("0.00")),
             ("Villain1", "calls", Decimal("2.50")),
             ("Villain2", "raises", Decimal("9.00"), Decimal("12.00"), Decimal("3.00")),
-            ("Hero", "calls", Decimal("9.00"))
+            ("Hero", "calls", Decimal("9.00")),
         ]
         hand = MockHand(actions_preflop=actions)
         
@@ -205,7 +204,7 @@ class TestStreet0AggrVPIP:
         actions = [
             ("Hero", "bets", Decimal("3.00")),
             ("Villain1", "calls", Decimal("3.00")),
-            ("Villain2", "folds")
+            ("Villain2", "folds"),
         ]
         hand = MockHand(actions_preflop=actions)
         
@@ -219,7 +218,7 @@ class TestStreet0AggrVPIP:
         actions = [
             ("Hero", "completes", Decimal("1.00")),
             ("Villain1", "calls", Decimal("0.50")),
-            ("Villain2", "folds")
+            ("Villain2", "folds"),
         ]
         hand = MockHand(actions_preflop=actions)
         
@@ -233,7 +232,7 @@ class TestStreet0AggrVPIP:
         actions = [
             ("Hero", "raises", Decimal("3.00"), Decimal("3.00"), Decimal("0.00")),
             ("Villain1", "allin", Decimal("100.00"), None, None, True),
-            ("Hero", "calls", Decimal("97.00"))
+            ("Hero", "calls", Decimal("97.00")),
         ]
         hand = MockHand(actions_preflop=actions)
         
@@ -249,7 +248,7 @@ class TestStreet0AggrVPIP:
             ("Hero", "calls", Decimal("1.00")),
             ("Villain1", "calls", Decimal("1.00")),
             ("Villain2", "calls", Decimal("0.50")),
-            ("Villain3", "checks")
+            ("Villain3", "checks"),
         ]
         hand = MockHand(actions_preflop=actions)
         
@@ -275,7 +274,7 @@ class TestStreet0AggrVPIP:
             ("Hero", "raises", Decimal("3.00"), Decimal("3.00"), Decimal("0.00")),
             ("Villain1", "raises", Decimal("9.00"), Decimal("12.00"), Decimal("3.00")),
             ("Hero", "raises", Decimal("27.00"), Decimal("36.00"), Decimal("12.00")),
-            ("Villain1", "calls", Decimal("24.00"))
+            ("Villain1", "calls", Decimal("24.00")),
         ]
         hand = MockHand(actions_preflop=actions)
         
@@ -308,7 +307,7 @@ class TestStreet0AggrVPIP:
         """Test that sitting out players don't get VPIP chance"""
         actions = [
             ("Hero", "raises", Decimal("3.00"), Decimal("3.00"), Decimal("0.00")),
-            ("Villain1", "calls", Decimal("2.50"))
+            ("Villain1", "calls", Decimal("2.50")),
         ]
         hand = MockHand(actions_preflop=actions)
         hand.sitout = ["Villain3"]  # Villain3 is sitting out

@@ -170,7 +170,7 @@ class GuiGraphViewer(QSplitter):
 
         starttime = time()
         (green, blue, red, orange) = self.getRingProfitGraph(
-            playerids, sitenos, limits, games, currencies, display_in
+            playerids, sitenos, limits, games, currencies, display_in,
         )
         log.debug(f"Graph generated in: {time() - starttime}")
 
@@ -195,7 +195,7 @@ class GuiGraphViewer(QSplitter):
             self.plotGraph()
         else:
             self.ax.set_title(
-                f"Profit graph for ring games{names}", color=self.colors["foreground"]
+                f"Profit graph for ring games{names}", color=self.colors["foreground"],
             )
 
             if "showdown" in graphops:

@@ -176,7 +176,7 @@ class ModernSeatCard(QFrame):
                 border: 1px solid rgba(128, 128, 128, 0.5);
                 background-color: rgba(255, 255, 255, 0.08);
             }
-        """
+        """,
         )
 
         # Set a maximum height to avoid stretching
@@ -282,7 +282,7 @@ class ModernSeatCard(QFrame):
                     if isinstance(self.site_config.fav_seat, dict):
                         # If it's a dictionary
                         current_fav = self.site_config.fav_seat.get(
-                            str(max_seats), self.site_config.fav_seat.get(max_seats, 0)
+                            str(max_seats), self.site_config.fav_seat.get(max_seats, 0),
                         )
                     elif isinstance(self.site_config.fav_seat, list) and len(self.site_config.fav_seat) > max_seats:
                         # If it's a list
@@ -431,7 +431,7 @@ class ModernSeatPreferencesDialog(QDialog):
                 border-radius: 20px;
                 font-size: 14px;
             }
-        """
+        """,
         )
         self.search_input.textChanged.connect(self.apply_filter)
         filter_layout.addWidget(self.search_input)
@@ -837,7 +837,7 @@ class ModernSeatPreferencesDialog(QDialog):
     def import_settings(self):
         """Import seat settings from a JSON file"""
         filename, _ = QFileDialog.getOpenFileName(
-            self, "Import Seat Settings", os.path.expanduser("~"), "JSON Files (*.json)"
+            self, "Import Seat Settings", os.path.expanduser("~"), "JSON Files (*.json)",
         )
 
         if filename:

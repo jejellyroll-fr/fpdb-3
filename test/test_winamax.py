@@ -7,7 +7,7 @@ substitutions = {
 }
 
 re_Identify = re.compile(
-    r"Winamax\sPoker\s\-\s(CashGame|Go\sFast|HOLD\-UP|Tournament\s\")"
+    r"Winamax\sPoker\s\-\s(CashGame|Go\sFast|HOLD\-UP|Tournament\s\")",
 )
 
 
@@ -97,7 +97,7 @@ def test_re_PostBB():
 
 re_PlayerInfo = re.compile(
     r"Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.*)\s\((%(LS)s)?(?P<CASH>[.0-9]+)(%(LS)s)?(,\s(%(LS)s)?(?P<BOUNTY>[.0-9]+)(%(LS)s)?\sbounty)?\)"
-    % substitutions
+    % substitutions,
 )
 
 

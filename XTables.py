@@ -110,7 +110,7 @@ class Table(Table_Window):
         try:
             geo = xconn.core.GetGeometry(self.number).reply()
             absxy = xconn.core.TranslateCoordinates(
-                self.number, root, geo.x, geo.y
+                self.number, root, geo.x, geo.y,
             ).reply()
             # log.debug('coord:', absxy.dst_x, absxy.dst_y)
             return {
@@ -125,7 +125,7 @@ class Table(Table_Window):
     def get_window_title(self):
         return (
             xconn.core.GetProperty(
-                False, self.number, wnameatom, utf8atom, 0, (2**32) - 1
+                False, self.number, wnameatom, utf8atom, 0, (2**32) - 1,
             )
             .reply()
             .value.to_string()

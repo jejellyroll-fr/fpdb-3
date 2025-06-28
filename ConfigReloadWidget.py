@@ -129,7 +129,7 @@ class ConfigReloadWidget(QWidget):
         if modified:
             self.status_label.setText("Configuration modified*")
             self.status_label.setToolTip(
-                "Unsaved changes are present"
+                "Unsaved changes are present",
             )
         else:
             self.status_label.setText("Configuration up to date")

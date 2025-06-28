@@ -93,13 +93,13 @@ class GuiTourneyPlayerStats(QSplitter):
         self.setStretchFactor(1, 1)
 
     def addGrid(
-        self, vbox, query_name, numTourneys, tourneyTypes, playerids, sitenos, seats
+        self, vbox, query_name, numTourneys, tourneyTypes, playerids, sitenos, seats,
     ):
         grid = 0
 
         query = self.sql.query[query_name]
         query = self.refineQuery(
-            query, numTourneys, tourneyTypes, playerids, sitenos, seats
+            query, numTourneys, tourneyTypes, playerids, sitenos, seats,
         )
         self.cursor.execute(query)
         result = self.cursor.fetchall()
