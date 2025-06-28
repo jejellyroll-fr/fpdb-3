@@ -492,80 +492,47 @@ class SealsWithClubs(HandHistoryConverter):
 
     def readCollectPot(self, hand):
         log.info("Reading collected pot")
-        if self.re_Uncalled.search(hand.handText) is None:
-            rake = Decimal(0)
-            totalpot = Decimal(0)
-            for m in self.re_CollectPot.finditer(hand.handText):
-                if m.group("POT") is not None:
-                    hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT"))
-                elif m.group("POT2") is not None:
-                    hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT2"))
-            if self.re_rake.search(hand.handText) is not None:
-                for m in self.re_rake.finditer(hand.handText):
-                    rake = rake + Decimal(m.group("RAKE"))
-                    if "," in m.group("TOTALPOT"):
-                        newtotalpot = m.group("TOTALPOT").replace(",", "")
-                        totalpot = totalpot + Decimal(newtotalpot)
-                    else:
-                        totalpot = totalpot + Decimal(m.group("TOTALPOT"))
-            if hand.rake is None:
-                hand.rake = rake
-            elif hand.rakes.get("rake"):
-                hand.rakes["rake"] += rake
-            else:
-                hand.rakes["rake"] = rake
-            hand.totalpot = totalpot
-        else:
+        
+        # Get rake and total pot from summary FIRST
+        rake = Decimal(0)
+        totalpot_from_summary = Decimal(0)
+        
+        if self.re_rake.search(hand.handText) is not None:
+            for m in self.re_rake.finditer(hand.handText):
+                rake = rake + Decimal(m.group("RAKE"))
+                if "," in m.group("TOTALPOT"):
+                    newtotalpot = m.group("TOTALPOT").replace(",", "")
+                    totalpot_from_summary = totalpot_from_summary + Decimal(newtotalpot)
+                else:
+                    totalpot_from_summary = totalpot_from_summary + Decimal(m.group("TOTALPOT"))
+        
+        # For SealsWithClubs, the total pot in summary is the actual total pot
+        # It already includes everything (main pot, side pots, uncalled bets)
+        # We trust this value instead of recalculating
+        hand.totalpot = totalpot_from_summary
+        
+        # Now collect all pots won by players
+        for m in self.re_CollectPot.finditer(hand.handText):
+            if m.group("POT") is not None:
+                hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT"))
+            elif m.group("POT2") is not None:
+                hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT2"))
+        
+        # Check for uncalled bets
+        if self.re_Uncalled.search(hand.handText) is not None:
             hand.setUncalledBets(True)
-            rake = Decimal(0)
-            totalpot = Decimal(0)
-            if self.re_rake.search(hand.handText) is not None:
-                for m in self.re_rake.finditer(hand.handText):
-                    rake = rake + Decimal(m.group("RAKE"))
-                    if "," in m.group("TOTALPOT"):
-                        newtotalpot = m.group("TOTALPOT").replace(",", "")
-                        totalpot = totalpot + Decimal(newtotalpot)
-                    else:
-                        totalpot = totalpot + Decimal(m.group("TOTALPOT"))
-            if hand.rake is None:
-                hand.rake = rake
-            elif hand.rakes.get("rake"):
-                hand.rakes["rake"] += rake
-            else:
-                hand.rakes["rake"] = rake
-            hand.totalpot = totalpot
-            total = rake + totalpot
-            for m in self.re_CollectPot.finditer(hand.handText):
-                if m.group("POT") is not None:
-                    if totalpot == Decimal(m.group("POT")):
-                        uncalledpot = Decimal(0)
-                        for m in self.re_Uncalled.finditer(hand.handText):
-                            if "," in m.group("BET"):
-                                newbet = m.group("BET").replace(",", "")
-                                uncalledpot = uncalledpot + Decimal(newbet)
-                            else:
-                                uncalledpot = uncalledpot + Decimal(m.group("BET"))
-                        collectpot = totalpot
-                        total = total + uncalledpot
-                        hand.totalpot = total
-                        hand.addCollectPot(player=m.group("PNAME"), pot=collectpot)
-                    else:
-                        hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT"))
-                elif m.group("POT2") is not None:
-                    if totalpot == Decimal(m.group("POT2")):
-                        uncalledpot = Decimal(0)
-                        for m in self.re_Uncalled.finditer(hand.handText):
-                            if "," in m.group("BET"):
-                                newbet = m.group("BET").replace(",", "")
-                                uncalledpot = uncalledpot + Decimal(newbet)
-                            else:
-                                uncalledpot = uncalledpot + Decimal(m.group("BET"))
-                        collectpot = totalpot
-                        total = total + uncalledpot
-                        hand.totalpot = total
-                        hand.addCollectPot(player=m.group("PNAME"), pot=collectpot)
-                    else:
-                        hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT2"))
+            for m in self.re_Uncalled.finditer(hand.handText):
+                # Process uncalled bets but don't add them to totalpot
+                # They are already included in the summary total
+                pass
+        
+        # Set rake
+        if hand.rake is None:
+            hand.rake = rake
+        elif hand.rakes.get("rake"):
+            hand.rakes["rake"] += rake
+        else:
+            hand.rakes["rake"] = rake
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):

@@ -744,8 +744,26 @@ class SealsWithClubsDetector(SiteDetector):
             )
 
         if hhpath and os.path.exists(hhpath):
-            # SwC typically doesn't use separate hero folders
-            # Check if there are any .txt files (hand histories)
+            # Check for hero folders first
+            heroes = self._find_heroes_in_path(hhpath)
+            if heroes:
+                hero = heroes[0]  # Take first hero found
+                hero_path = os.path.join(hhpath, hero)
+                # Check if there are any .txt files in the hero folder
+                try:
+                    files = os.listdir(hero_path)
+                    txt_files = [f for f in files if f.endswith(".txt")]
+                    if txt_files:
+                        return {
+                            "detected": True,
+                            "hhpath": hero_path,
+                            "heroname": hero,
+                            "tspath": "",  # SwC doesn't use separate tournament summaries
+                        }
+                except (OSError, PermissionError) as e:
+                    log.error(f"Error detecting SealsWithClubs hero folder: {e}")
+            
+            # If no hero folders, check if there are .txt files directly in hhpath
             try:
                 files = os.listdir(hhpath)
                 txt_files = [f for f in files if f.endswith(".txt")]
@@ -975,7 +993,7 @@ class PartyGamingDetector(SiteDetector):
         return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
 
     def _detect_programs_installations(self) -> List[Dict[str, any]]:
-        """Detect PartyPoker installations in C:\Programs"""
+        """Detect PartyPoker installations in C:\\Programs"""
         if self.platform != "Windows":
             return []
             

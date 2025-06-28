@@ -1206,8 +1206,29 @@ class Hand(object):
         If the game is a tournament ('self.gametype["type"] == "tour"'), we do not recalculate
         rake on a per-hand basis. Instead, we set self.rake to 0. This avoids the issue of
         exceeding collected amounts in tournament scenarios.
+        
+        If totalpot has already been set by the parser (e.g., SealsWithClubs), we trust that value
+        and skip recalculation.
         """
         log.debug("Starting pot calculation...")
+        
+        # If totalpot has already been set by the parser, trust it
+        if self.totalpot is not None and self.totalpot > 0:
+            log.debug(f"Total pot already set by parser: {self.totalpot}")
+            
+            # Still need to calculate rake if not set
+            if self.rake is None:
+                if self.gametype["type"] == "tour":
+                    self.rake = Decimal("0.00")
+                    log.debug("Tournament detected, rake set to 0.")
+                elif self.totalpot > self.totalcollected:
+                    self.rake = self.totalpot - self.totalcollected
+                    log.debug(f"Calculated rake: {self.rake}")
+                else:
+                    self.rake = Decimal("0.00")
+                    log.debug("No rake detected.")
+            
+            return self.totalpot
 
         # Basic verification
         if not isinstance(self.pot.committed, dict) or len(self.pot.committed) == 0:
