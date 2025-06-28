@@ -493,7 +493,13 @@ class Importer(object):
                     ):
                         try:
                             if not os.path.isdir(f):
-                                self.caller.addText("\n" + os.path.basename(f))
+                                # Extract site name from the file object
+                                site_name = self.filelist[f].site.name if self.filelist[f] and self.filelist[f].site else "Unknown"
+                                
+                                # Extract hand number from filename (assuming it's in the filename)
+                                import re
+                                hand_match = re.search(r'(\d{6,})', os.path.basename(f))
+                                hand_number = hand_match.group(1) if hand_match else "N/A"
 
                                 log.debug(f"os.path.basename: {os.path.basename(f)}")
                                 log.debug(f"self.caller: {self.caller}")
@@ -517,20 +523,50 @@ class Importer(object):
                         )
                         self.database.commit()
                         try:
-                            if not os.path.isdir(
-                                f
-                            ):  # Note: This assumes that whatever calls us has an "addText" func
-                                self.caller.addText(
-                                    " %d stored, %d duplicates, %d partial, %d skipped, %d errors (time = %f)"
-                                    % (
-                                        stored,
-                                        duplicates,
-                                        partial,
-                                        skipped,
-                                        errors,
-                                        ttime,
-                                    )
-                                )
+                            if not os.path.isdir(f):
+                                # Prepare the log event details
+                                site_name = self.filelist[f].site.name if self.filelist[f] and self.filelist[f].site else "Unknown"
+                                
+                                # Extract hand number from filename
+                                import re
+                                hand_match = re.search(r'(\d{6,})', os.path.basename(f))
+                                hand_number = hand_match.group(1) if hand_match else os.path.basename(f)[:20]
+                                
+                                event_text = f"{site_name} - {hand_number}"
+                                
+                                # Determine status
+                                if errors > 0:
+                                    status = "error"
+                                    event_text += " KO"
+                                elif stored > 0:
+                                    status = "success"
+                                    event_text += " OK"
+                                elif duplicates > 0:
+                                    status = "warning"
+                                    event_text += " (duplicate)"
+                                elif skipped > 0:
+                                    status = "warning"
+                                    event_text += " (skipped)"
+                                else:
+                                    status = "info"
+                                    event_text += " (no changes)"
+                                
+                                # Add details if there were any actions
+                                if stored > 0 or duplicates > 0 or partial > 0 or skipped > 0 or errors > 0:
+                                    details = []
+                                    if stored > 0:
+                                        details.append(f"{stored} stored")
+                                    if duplicates > 0:
+                                        details.append(f"{duplicates} duplicates")
+                                    if partial > 0:
+                                        details.append(f"{partial} partial")
+                                    if skipped > 0:
+                                        details.append(f"{skipped} skipped")
+                                    if errors > 0:
+                                        details.append(f"{errors} errors")
+                                    event_text += f" ({', '.join(details)})"
+                                
+                                self.caller.addText(f"\n{event_text}", status)
 
                                 log.debug(f"self.caller2: {self.caller}")
                         except (

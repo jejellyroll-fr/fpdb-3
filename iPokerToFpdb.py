@@ -1363,7 +1363,7 @@ class iPoker(HandHistoryConverter):
         total_pot += hand.rake or Decimal("0.00")
 
         # Mettre à jour le total pot dans l'objet hand
-        hand.totalpot = str(total_pot)
+        hand.totalpot = total_pot
         log.debug(f"Total pot calculated: {hand.totalpot}, Total rake: {hand.rake}")
 
         log.info("Exiting readCollectPot method")

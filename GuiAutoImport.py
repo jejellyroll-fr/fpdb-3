@@ -200,17 +200,8 @@ class GuiAutoImport(QWidget):
         """Callback for timer to do an import iteration."""
         if self.doAutoImportBool:
             self.importer.autoSummaryGrab()
-            result = self.importer.runUpdated()
-            
-            # Add more informative feedback
-            if result and result.get('handsImported', 0) > 0:
-                self.addText(f"\n✓ Imported {result['handsImported']} hands", "success")
-            elif result and result.get('errors', 0) > 0:
-                self.addText(f"\n✗ Import errors: {result['errors']}", "error")
-            else:
-                # Just add a dot for no activity
-                self.addText(".", "info")
-            
+            self.importer.runUpdated()
+            # The detailed logging is now handled in Importer.runUpdated()
             return True
         return False
 
