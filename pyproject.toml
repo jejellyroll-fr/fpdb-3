@@ -1,12 +1,6 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel",
-    "sip>=6.7.0",
-    "sipbuild>=6.7.0"
-]
+requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
-
 
 [project]
 name = "fpdb-3"

@@ -29,16 +29,16 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Preinstall PyQt5 wheel
+    - name: Preinstall PyQt5 wheel to avoid source build
       run: |
         python -m pip install --upgrade pip
         python -m pip install "PyQt5==5.15.6"
 
-    - name: Install uv and test dependencies
+    - name: Install uv and remaining dependencies (excluding PyQt5)
       run: |
         pip install uv
         uv venv
-        uv pip install .[test]
+        uv pip install .[test] --no-deps
 
     - name: Run Ruff for linting
       run: |
@@ -121,20 +121,12 @@ jobs:
           const repoOwner = context.repo.owner;
           const sha = context.sha;
           const url = `https://${repoOwner}.github.io/${repoName}/coverage/${sha}/`;
-          console.log('Attempting to create PR comment');
-          console.log('Coverage URL:', url);
-          try {
-            const response = await github.rest.issues.createComment({
+          await github.rest.issues.createComment({
             owner: repoOwner,
             repo: repoName,
             issue_number: context.issue.number,
             body: `Coverage report for this PR: ${url}`
           });
-            console.log('Comment created successfully:', response.data.html_url);
-          } catch (error) {
-            console.error('Error creating comment:', error);
-            console.error('Error response:', error.response);
-          }
 
     - name: Comment commit with coverage link
       if: github.event_name == 'push'
@@ -146,20 +138,12 @@ jobs:
           const repoOwner = context.repo.owner;
           const sha = context.sha;
           const url = `https://${repoOwner}.github.io/${repoName}/coverage/${sha}/`;
-          console.log('Attempting to create commit comment');
-          console.log('Coverage URL:', url);
-          try {
-            const response = await github.rest.repos.createCommitComment({
+          await github.rest.repos.createCommitComment({
             owner: repoOwner,
             repo: repoName,
             commit_sha: sha,
             body: `Coverage report for this commit: ${url}`
           });
-            console.log('Comment created successfully:', response.data.html_url);
-          } catch (error) {
-            console.error('Error creating comment:', error);
-            console.error('Error response:', error.response);
-          }
 
 
 
