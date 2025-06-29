@@ -65,7 +65,8 @@ jobs:
         $env:Path += ";$env:pythonLocation\Scripts"
         .\.venv\Scripts\Activate.ps1
         # Run all tests including root level test files
-        pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py "test/test_*.py"
+        pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py test/
+
       shell: pwsh
 
     - name: Run tests with pytest (Unix)
@@ -74,7 +75,8 @@ jobs:
         uv venv && uv pip install .[test]
         source .venv/bin/activate
         # Run all tests including root level test files
-        pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py "test/test_*.py"
+        pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py test/
+
 
     - name: Check if htmlcov directory exists and list contents (Windows)
       if: runner.os == 'Windows'
