@@ -95,8 +95,8 @@ async def get_handsPlayers_api(request: Request):
 @app.get("/players")
 def get_players_endpoint(
     request: Request,
-    name: str = None,
-    site: str = None,
+    name: str | None = None,
+    site: str | None = None,
     page: int = 1,
     per_page: int = 10,
 ):
@@ -185,10 +185,8 @@ async def replay_hand(request: Request, handId: int, hero: str | None = None):
             "tourneysPlayersIds": hand.tourneysPlayersIds,
         }
 
-    print(hand)
     # Convert the hand object to a dictionary
     hand_dict = hand_to_dict(hand)
-    print(hand_dict)
     # Serialize the dictionary to JSON
     hand = json.dumps(hand_dict, cls=CustomEncoder)
     return templates.TemplateResponse(
@@ -202,7 +200,7 @@ async def get_hands_players_api(
     request: Request,
     tourney: bool | None = False,
     cash: bool | None = False,
-    sort_by: str = None,
+    sort_by: str | None = None,
 ):
     # Get the name of the player
     conn = sqlite3.connect(DATABASE)
@@ -281,7 +279,7 @@ async def get_hands_players_api(
                 "name": name,
             },
         )
-    elif tourney:
+    if tourney:
         return templates.TemplateResponse(
             "handsPlayers_tourney.html",
             {
@@ -292,30 +290,29 @@ async def get_hands_players_api(
                 "name": name,
             },
         )
-    else:
-        return templates.TemplateResponse(
-            "handsPlayers.html",
-            {
-                "request": request,
-                "decodeCardList": decodeCardList,
-                "handsPlayers": handsPlayers,
-                "hideColumnX": hideColumnX,
-                "name": name,
-            },
-        )
+    return templates.TemplateResponse(
+        "handsPlayers.html",
+        {
+            "request": request,
+            "decodeCardList": decodeCardList,
+            "handsPlayers": handsPlayers,
+            "hideColumnX": hideColumnX,
+            "name": name,
+        },
+    )
 
 
 @app.get("/RingProfitAllHandsPlayerIdSite", response_class=HTMLResponse)
 async def get_ring_profit_all_hands_api(
     request: Request,
-    site: int = None,
-    player: int = None,
-    limit: str = None,
-    bigBlind: int = None,
-    category: str = None,
-    currency: str = None,
-    startdate: str = None,
-    enddate: str = None,  # Add this parameter
+    site: int | None = None,
+    player: int | None = None,
+    limit: str | None = None,
+    bigBlind: int | None = None,
+    category: str | None = None,
+    currency: str | None = None,
+    startdate: str | None = None,
+    enddate: str | None = None,  # Add this parameter
 ):
     # Call get_RingProfitAllHandsPlayerIdSite() and unpack profits
     profits = get_RingProfitAllHandsPlayerIdSite(
@@ -341,14 +338,14 @@ async def get_ring_profit_all_hands_api(
 @app.get("/TourneysProfitPlayerIdSite", response_class=HTMLResponse)
 async def get_torneys_profit_api(
     request: Request,
-    site: int = None,
-    player: int = None,
-    limit: str = None,
-    buyin: int = None,
-    category: str = None,
-    currency: str = None,
-    startdate: str = None,
-    enddate: str = None,  # Add this parameter
+    site: int | None = None,
+    player: int | None = None,
+    limit: str | None = None,
+    buyin: int | None = None,
+    category: str | None = None,
+    currency: str | None = None,
+    startdate: str | None = None,
+    enddate: str | None = None,  # Add this parameter
 ):
     # Call get_RingProfitAllHandsPlayerIdSite() and unpack profits
     profits = get_tourneysProfitPlayerIdSite(
@@ -374,14 +371,14 @@ async def get_torneys_profit_api(
 @app.get("/statsplayers", response_class=HTMLResponse)
 async def get_statsplayers_api(
     request: Request,
-    site: int = None,
-    player: int = None,
-    limit: str = None,
-    bigBlind: int = None,
-    category: str = None,
-    currency: str = None,
-    startdate: str = None,
-    enddate: str = None,
+    site: int | None = None,
+    player: int | None = None,
+    limit: str | None = None,
+    bigBlind: int | None = None,
+    category: str | None = None,
+    currency: str | None = None,
+    startdate: str | None = None,
+    enddate: str | None = None,
 ):
     result = get_statsplayers(
         site=site,

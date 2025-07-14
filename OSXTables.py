@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """OSX specific methods for TableWindows Class."""
 #    Copyright 2008 - 2011, Ray E. Barker
 
@@ -19,13 +17,11 @@
 
 ########################################################################
 
-# import L10n
-# _ = L10n.get_translation()
+from __future__ import annotations
 
 #    Standard Library modules
-
-#    Other Library modules
 import ctypes
+from typing import Any
 
 from AppKit import NSView, NSWindowAbove, NSWorkspace
 from Quartz.CoreGraphics import (
@@ -47,51 +43,54 @@ log = get_logger("osxtables")
 
 
 class Table(Table_Window):
-    def find_table_parameters(self):
-        #    This is called by __init__(). Find the poker table window of interest,
-        #    given the self.search_string. Then populate self.number, self.title,
-        #    self.window, and self.parent (if required).
+    """OSX-specific table window implementation."""
+    def find_table_parameters(self) -> str | None:
+        """Find the poker table window of interest.
 
+        This is called by __init__(). Find the poker table window of interest,
+        given the self.search_string. Then populate self.number, self.title,
+        self.window, and self.parent (if required).
+
+        Returns:
+            The window title if found, None otherwise.
+        """
         self.number = None
-        # WinList = CGWindowListCreate(0, 0)
-        # WinListDict = CGWindowListCreateDescriptionFromArray(WinList)
-        # windows = CGWindowListCopyWindowInfo(
-        #     kCGWindowListExcludeDesktopElements | kCGWindowListOptionOnScreenOnly, kCGNullWindowID
-        # )
-
-        # for index in range(len(WinListDict)):
-        #     for d in WinListDict[index]:
-        # curr_app = NSWorkspace.sharedWorkspace().runningApplications()
         curr_pid = NSWorkspace.sharedWorkspace().activeApplication()[
             "NSApplicationProcessIdentifier"
         ]
-        # curr_app_name = curr_app.localizedName()
         options = kCGWindowListOptionOnScreenOnly
-        windowList = CGWindowListCopyWindowInfo(options, kCGNullWindowID)
-        for window in windowList:
+        window_list = CGWindowListCopyWindowInfo(options, kCGNullWindowID)
+        for window in window_list:
             pid = window["kCGWindowOwnerPID"]
-            windowNumber = window["kCGWindowNumber"]
-            ownerName = window["kCGWindowOwnerName"]
+            window_number = window["kCGWindowNumber"]
+            owner_name = window["kCGWindowOwnerName"]
             geometry = window["kCGWindowBounds"]
-            windowTitle = window.get("kCGWindowName", self.search_string)
+            window_title = window.get("kCGWindowName", self.search_string)
             if curr_pid == pid:
                 log.info(
-                    f"{ownerName} - {windowTitle} (PID: {pid}, WID: {windowNumber}): {geometry}",
+                    "%s - %s (PID: %s, WID: %s): %s",
+                    owner_name, window_title, pid, window_number, geometry,
                 )
 
-                title = windowTitle
+                title = window_title
                 if self.check_bad_words(title):
                     continue
-                self.number = int(windowNumber)
+                self.number = int(window_number)
                 self.title = title
                 return self.title
         if self.number is None:
             return None
+        return None
 
-    def get_geometry(self):
-        WinListDict = CGWindowListCreateDescriptionFromArray((self.number,))
+    def get_geometry(self) -> dict[str, int] | None:
+        """Get the geometry of the table window.
 
-        for d in WinListDict:
+        Returns:
+            Dictionary with x, y, width, height coordinates or None if not found.
+        """
+        win_list_dict = CGWindowListCreateDescriptionFromArray((self.number,))
+
+        for d in win_list_dict:
             if d[kCGWindowNumber] == self.number:
                 return {
                     "x": int(d[kCGWindowBounds]["X"]),
@@ -101,20 +100,27 @@ class Table(Table_Window):
                 }
         return None
 
-    def get_window_title(self):
-        WinListDict = CGWindowListCreateDescriptionFromArray((self.number,))
-        # options = kCGWindowListOptionOnScreenOnly
-        # windowList = CGWindowListCopyWindowInfo(options, kCGNullWindowID)
-        for d in WinListDict:
-            # for b in windowList:
+    def get_window_title(self) -> str | None:
+        """Get the title of the table window.
+
+        Returns:
+            The window title string or None if not found.
+        """
+        win_list_dict = CGWindowListCreateDescriptionFromArray((self.number,))
+        for d in win_list_dict:
             if (
                 d[kCGWindowNumber] == self.number
             ):  # and b[kCGWindowNumber] == self.number :
-                log.debug(f"kCGWindowOwnerName: {d.get(kCGWindowOwnerName, '')}")
+                log.debug("kCGWindowOwnerName: %s", d.get(kCGWindowOwnerName, ""))
                 return d[kCGWindowOwnerName]
         return None
 
-    def topify(self, window):
+    def topify(self, window: Any) -> None:
+        """Bring the table window to the front.
+
+        Args:
+            window: The Qt widget window to bring to front.
+        """
         winid = window.effectiveWinId()
         cvp = ctypes.c_void_p(int(winid))
         view = NSView(c_void_p=cvp)

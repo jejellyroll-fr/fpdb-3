@@ -31,7 +31,6 @@ script = """
     end tell
 """
 
-print("Exécution du script AppleScript...")
 
 # Execute AppleScript
 proc = subprocess.Popen(
@@ -41,15 +40,12 @@ output, error = proc.communicate()
 
 # Verify errors
 if error:
-    print(f"Erreur AppleScript: {error.decode('utf-8')}")
     sys.exit(1)
 
 # Decode output
 output_decode = output.decode("utf-8").strip()
 
 # show output
-print("Sortie brute de l'AppleScript :")
-print(output_decode)
 
 # Split output into entries
 window_entries = output_decode.split(";;")
@@ -72,9 +68,8 @@ for entry in window_entries:
             },
         )
     else:
-        print(f"Entrée mal formatée : {entry}")
+        pass
 
 # Show structured output
-print("\nSortie structurée :")
-for fenetre in liste_fenetres:
-    print(fenetre)
+for _fenetre in liste_fenetres:
+    pass

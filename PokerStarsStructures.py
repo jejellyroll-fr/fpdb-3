@@ -1,37 +1,38 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-#    Copyright 2010-2013, Chaz Littlejohn
-#
-#    This program is free software; you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program; if not, write to the Free Software
-#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+"""PokerStarsStructures module for PokerStars tournament structures.
 
-########################################################################
+Copyright 2010-2013, Chaz Littlejohn
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+"""
 
 
 from datetime import datetime
+from typing import Any
 
 import pytz
 
 
-class PokerStarsStructures(object):
-    def __init__(self):
+class PokerStarsStructures:
+    """PokerStars tournament structures."""
+
+    def __init__(self) -> None:
+        """Initialize PokerStars tournament structures."""
         self.versions = [
-            pytz.utc.localize(datetime.strptime(d, "%Y/%m/%d %H:%M:%S"))
+            datetime.strptime(d, "%Y/%m/%d %H:%M:%S").replace(tzinfo=pytz.utc)
             for d in ("2011/05/05 00:00:00", "2011/05/20 00:00:00")
         ]
-        self.versions.append(datetime.utcnow().replace(tzinfo=pytz.utc))
+        self.versions.append(datetime.now(tz=pytz.utc))
         self.SnG_Structures = []
         self.SnG_Structures.append(
             {
@@ -317,8 +318,17 @@ class PokerStarsStructures(object):
             },
         )
 
-    def lookupSnG(self, key, startTime):
+    def lookupSnG(self, key: tuple[int, int, int], start_time: Any) -> str | None:
+        """Look up tournament structure by key and start time.
+
+        Args:
+            key: Tournament structure key (buy-in, fee, max_seats).
+            start_time: Tournament start time.
+
+        Returns:
+            Tournament structure string or None if not found.
+        """
         for i in range(len(self.versions)):
-            if startTime < self.versions[i]:
-                struct = self.SnG_Structures[i].get(key)
-                return struct
+            if start_time < self.versions[i]:
+                return self.SnG_Structures[i].get(key)
+        return None

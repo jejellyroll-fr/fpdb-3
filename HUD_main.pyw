@@ -1,21 +1,21 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Hud_main.py
+"""Hud_main.py.
 
 Main for FreePokerTools HUD.
 """
 
-import codecs
 import contextlib
-import os
 import sys
 import time
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
 import zmq
+
 # Add a cache for frequently accessed data
 from cachetools import TTLCache
-from PyQt5.QtCore import (QCoreApplication, QObject, Qt, QThread, QTimer,
-                          pyqtSignal)
+from PyQt5.QtCore import QCoreApplication, QEvent, QObject, Qt, QThread, QTimer, pyqtSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
 from qt_material import apply_stylesheet
@@ -32,48 +32,74 @@ from loggingFpdb import get_logger
 log = get_logger("hud")
 
 
+@dataclass
+class HUDCreationArgs:
+    """Arguments for creating a HUD."""
+
+    new_hand_id: str
+    table: Any
+    temp_key: str
+    max_seats: int
+    poker_game: str
+    game_type: str
+    stat_dict: dict[str, Any]
+    cards: dict[str, Any]
+
+
 class ZMQWorker(QThread):
+    """A QThread to run the ZMQ message processing loop."""
+
     error_occurred = pyqtSignal(str)
 
-    def __init__(self, zmq_receiver):
+    def __init__(self, zmq_receiver: "ZMQReceiver") -> None:
+        """Initialize the ZMQ worker."""
         super().__init__()
         self.zmq_receiver = zmq_receiver
         self.is_running = True
 
-    def run(self):
+    def run(self) -> None:
+        """Run the ZMQ message processing loop."""
+        log.info("ZMQWorker started and listening for messages")
         while self.is_running:
             try:
                 self.zmq_receiver.process_message()
-            except Exception as e:
-                log.error(f"Error in ZMQWorker: {e}")
-                self.error_occurred.emit(str(e))
+            except Exception:
+                log.exception("Error in ZMQWorker")
+                self.error_occurred.emit("Error in ZMQWorker")
             time.sleep(0.01)  # Short delay to avoid excessive CPU usage
 
-    def stop(self):
+    def stop(self) -> None:
+        """Stop the worker thread."""
         self.is_running = False
         self.wait()
 
 
 class ZMQReceiver(QObject):
+    """A QObject to receive ZMQ messages."""
+
     message_received = pyqtSignal(str)
 
-    def __init__(self, port="5555", parent=None):
+    def __init__(self, port: str = "5555", parent: QObject | None = None) -> None:
+        """Initialize the ZMQ receiver."""
         super().__init__(parent)
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PULL)
         self.socket.connect(f"tcp://127.0.0.1:{port}")
-        log.info(f"ZMQ receiver connected on port {port}")
+        log.info("ZMQ receiver connected on port %s", port)
+        # Set socket options for better debugging
+        self.socket.setsockopt(zmq.RCVTIMEO, 1000)  # 1 second timeout
 
         # Heartbeat configuration
         self.poller = zmq.Poller()
         self.poller.register(self.socket, zmq.POLLIN)
 
-    def process_message(self):
+    def process_message(self) -> None:
+        """Process a ZMQ message."""
         try:
             socks = dict(self.poller.poll(1000))  # Timeout 1 seconde
             if self.socket in socks and socks[self.socket] == zmq.POLLIN:
                 hand_id = self.socket.recv_string(zmq.NOBLOCK)
-                log.debug(f"Received hand ID: {hand_id}")
+                log.info("ZMQ received hand ID: %s", hand_id)
                 self.message_received.emit(hand_id)
             else:
                 # Heartbeat
@@ -82,18 +108,20 @@ class ZMQReceiver(QObject):
             if e.errno == zmq.EAGAIN:
                 pass  # No message available
             else:
-                log.error(f"ZMQ error: {e}")
+                log.exception("ZMQ error")
 
-    def close(self):
+    def close(self) -> None:
+        """Close the ZMQ socket and context."""
         self.socket.close()
         self.context.term()
         log.info("ZMQ receiver closed")
 
 
-class HUD_main(QObject):
+class HudMain(QObject):
     """A main() object to own both the socket thread and the gui."""
 
-    def __init__(self, options, db_name="fpdb"):
+    def __init__(self, options: "Options.Values", db_name: str = "fpdb") -> None:
+        """Initialize the main HUD application."""
         self.options = options
         QObject.__init__(self)
         self.db_name = db_name
@@ -107,25 +135,29 @@ class HUD_main(QObject):
             import OSXTables as Tables
         elif self.config.os_family in ("XP", "Win7"):
             import WinTables as Tables
-        log.info(f"HUD_main starting: Using db name = {db_name}")
+        log.info("HudMain starting: Using db name = %s", db_name)
         self.Tables = Tables  # Assign Tables to self.Tables
 
         # Configuration du logging
         if not options.errorsToConsole:
-            fileName = os.path.join(self.config.dir_log, "HUD-errors.txt")
-            log.info(f"Note: error output is being diverted to {fileName}.")
+            log_dir = Path(self.config.dir_log)
+            log_dir.mkdir(exist_ok=True)
+            file_name = log_dir / "HUD-errors.txt"
+            log.info("Note: error output is being diverted to %s.", file_name)
             log.info("Any major error will be reported there *only*.")
-            errorFile = codecs.open(fileName, "w", "utf-8")
-            sys.stderr = errorFile
-            log.info("HUD_main starting")
+            error_file = file_name.open("w", encoding="utf-8")
+            sys.stderr = error_file
+            log.info("HudMain starting")
 
+        log.info("HudMain.__init__ starting")
         try:
             # Connecting to the database
+            log.info("Connecting to database...")
             self.db_connection = Database.Database(self.config)
 
             # HUD dictionary and parameters
-            self.hud_dict = {}
-            self.blacklist = []
+            self.hud_dict: dict[str, Hud.Hud] = {}
+            self.blacklist: list[Any] = []
             self.hud_params = self.config.get_hud_ui_parameters()
             self.deck = Deck.Deck(
                 self.config,
@@ -136,27 +168,31 @@ class HUD_main(QObject):
             )
 
             # Cache initialization
-            self.cache = TTLCache(maxsize=1000, ttl=300)  # Cache of 1000 elements with a TTL of 5 minutes
+            self.cache: TTLCache = TTLCache(maxsize=1000, ttl=300)  # Cache of 1000 elements with a TTL of 5 minutes
 
             # Initialisation ZMQ avec QThread
+            log.info("Initializing ZMQ communication...")
             self.zmq_receiver = ZMQReceiver(parent=self)
             self.zmq_receiver.message_received.connect(self.handle_message)
             self.zmq_worker = ZMQWorker(self.zmq_receiver)
             self.zmq_worker.error_occurred.connect(self.handle_worker_error)
+            log.info("Starting ZMQ worker...")
             self.zmq_worker.start()
 
             # Main window
             self.init_main_window()
 
             log.debug("Main window initialized and shown.")
-        except Exception as e:
-            log.error(f"Error during HUD_main initialization: {e}")
+        except Exception:
+            log.exception("Error during HudMain initialization")
             raise
 
-    def handle_worker_error(self, error_message):
-        log.error(f"ZMQWorker encountered an error: {error_message}")
+    def handle_worker_error(self, error_message: str) -> None:
+        """Handle errors from the ZMQ worker."""
+        log.error("ZMQWorker encountered an error: %s", error_message)
 
-    def init_main_window(self):
+    def init_main_window(self) -> None:
+        """Initialize the main application window."""
         self.main_window = QWidget(None, Qt.Dialog | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
         if self.options.xloc is not None or self.options.yloc is not None:
             x = int(self.options.xloc) if self.options.xloc is not None else self.main_window.x()
@@ -170,9 +206,9 @@ class HUD_main(QObject):
         self.main_window.closeEvent = self.close_event_handler
         self.vb.addWidget(self.label)
         self.main_window.setWindowTitle("HUD Main Window")
-        cards = os.path.join(self.config.graphics_path, "tribal.jpg")
-        if cards:
-            self.main_window.setWindowIcon(QIcon(cards))
+        cards_path = Path(self.config.graphics_path) / "tribal.jpg"
+        if cards_path.exists():
+            self.main_window.setWindowIcon(QIcon(str(cards_path)))
 
         # Timer for periodically checking tables
         self.check_tables_timer = QTimer(self)
@@ -180,15 +216,19 @@ class HUD_main(QObject):
         self.check_tables_timer.start(800)
         self.main_window.show()
 
-    def close_event_handler(self, event):
+    def close_event_handler(self, event: QEvent) -> None:
+        """Handle the close event of the main window."""
         self.destroy()
         event.accept()
 
-    def handle_message(self, hand_id):
+    def handle_message(self, hand_id: str) -> None:
+        """Handle an incoming message from the ZMQ receiver."""
         # This method will be called in the main thread
+        log.debug("HUD received message with hand_id: %s", hand_id)
         self.read_stdin(hand_id)
 
-    def destroy(self, *args):
+    def destroy(self) -> None:
+        """Destroy the application and clean up resources."""
         if hasattr(self, "zmq_receiver"):
             self.zmq_receiver.close()
         if hasattr(self, "zmq_worker"):
@@ -196,18 +236,18 @@ class HUD_main(QObject):
         log.info("Quitting normally")
         QCoreApplication.quit()
 
-    def check_tables(self):
-        if len(self.hud_dict) == 0:
-            log.info("Waiting for hands ...")
-        for tablename, hud in list(self.hud_dict.items()):
-            status = hud.table.check_table()
-            if status == "client_destroyed":
-                self.client_destroyed(None, hud)
-            elif status == "client_moved":
-                self.client_moved(None, hud)
-            elif status == "client_resized":
-                self.client_resized(None, hud)
+    def _handle_table_status(self, hud: Hud.Hud) -> None:
+        """Handle status changes for a single table."""
+        status = hud.table.check_table()
+        if status == "client_destroyed":
+            self.client_destroyed(None, hud)
+        elif status == "client_moved":
+            self.client_moved(None, hud)
+        elif status == "client_resized":
+            self.client_resized(None, hud)
 
+    def _topify_mac_windows(self) -> None:
+        """Bring all HUD windows to the top on macOS."""
         if self.config.os_family == "Mac":
             for hud in self.hud_dict.values():
                 for aw in hud.aux_windows:
@@ -217,63 +257,85 @@ class HUD_main(QObject):
                         if w.isVisible():
                             hud.table.topify(w)
 
-    def client_moved(self, widget, hud):
+    def check_tables(self) -> None:
+        """Periodically check the status of poker tables."""
+        if not self.hud_dict:
+            log.info("Waiting for hands ...")
+        for hud in list(self.hud_dict.values()):
+            self._handle_table_status(hud)
+        self._topify_mac_windows()
+
+    def client_moved(self, _widget: QWidget | None, hud: Hud.Hud) -> None:
+        """Handle the client moved event."""
         log.debug("Client moved event")
         self.idle_move(hud)
 
-    def client_resized(self, widget, hud):
+    def client_resized(self, _widget: QWidget | None, hud: Hud.Hud) -> None:
+        """Handle the client resized event."""
         log.debug("Client resized event")
         self.idle_resize(hud)
 
-    def client_destroyed(self, widget, hud):
+    def client_destroyed(self, _widget: QWidget | None, hud: Hud.Hud) -> None:
+        """Handle the client destroyed event."""
         log.debug("Client destroyed event")
         self.kill_hud(None, hud.table.key)
 
-    def table_title_changed(self, widget, hud):
+    def table_title_changed(self, _widget: QWidget | None, hud: Hud.Hud) -> None:
+        """Handle the table title changed event."""
         log.debug("Table title changed, killing current HUD")
         self.kill_hud(None, hud.table.key)
 
-    def table_is_stale(self, hud):
+    def table_is_stale(self, hud: Hud.Hud) -> None:
+        """Handle a stale table by killing the HUD."""
         log.debug("Moved to a new table, killing current HUD")
         self.kill_hud(None, hud.table.key)
 
-    def kill_hud(self, event, table):
+    def kill_hud(self, _event: QEvent | None, table: str) -> None:
+        """Kill the HUD for a specific table."""
         log.debug("kill_hud event")
         self.idle_kill(table)
 
-    def blacklist_hud(self, event, table):
+    def blacklist_hud(self, _event: QEvent | None, table: str) -> None:
+        """Blacklist a HUD and kill it."""
         log.debug("blacklist_hud event")
         self.blacklist.append(self.hud_dict[table].tablenumber)
         self.idle_kill(table)
 
-    def create_HUD(self, new_hand_id, table, temp_key, max, poker_game, type, stat_dict, cards):
-        log.debug(f"Creating HUD for table {temp_key} and hand {new_hand_id}")
-        self.hud_dict[temp_key] = Hud.Hud(self, table, max, poker_game, type, self.config)
-        self.hud_dict[temp_key].table_name = temp_key
-        self.hud_dict[temp_key].stat_dict = stat_dict
-        self.hud_dict[temp_key].cards = cards
-        self.hud_dict[temp_key].max = max
+    def create_HUD(self, args: HUDCreationArgs) -> None:
+        """Create a new HUD for a table."""
+        log.debug("Creating HUD for table %s and hand %s", args.temp_key, args.new_hand_id)
+        self.hud_dict[args.temp_key] = Hud.Hud(
+            self,
+            args.table,
+            args.max_seats,
+            args.poker_game,
+            args.game_type,
+            self.config,
+        )
+        self.hud_dict[args.temp_key].table_name = args.temp_key
+        self.hud_dict[args.temp_key].stat_dict = args.stat_dict
+        self.hud_dict[args.temp_key].cards = args.cards
+        self.hud_dict[args.temp_key].max = args.max_seats
 
-        table.hud = self.hud_dict[temp_key]
+        args.table.hud = self.hud_dict[args.temp_key]
 
-        self.hud_dict[temp_key].hud_params["new_max_seats"] = None  # trigger for seat layout change
+        self.hud_dict[args.temp_key].hud_params["new_max_seats"] = None  # trigger for seat layout change
 
-        for aw in self.hud_dict[temp_key].aux_windows:
-            aw.update_data(new_hand_id, self.db_connection)
+        for aw in self.hud_dict[args.temp_key].aux_windows:
+            aw.update_data(args.new_hand_id, self.db_connection)
 
-        self.idle_create(new_hand_id, table, temp_key, max, poker_game, type, stat_dict, cards)
-        log.debug(f"HUD for table {temp_key} created successfully.")
+        self.idle_create(args)
+        log.debug("HUD for table %s created successfully.", args.temp_key)
 
-    def update_HUD(self, new_hand_id, table_name, config):
-        log.debug(f"Updating HUD for table {table_name} and hand {new_hand_id}")
+    def update_HUD(self, new_hand_id: str, table_name: str, config: Configuration.Config) -> None:
+        """Update an existing HUD."""
+        log.debug("Updating HUD for table %s and hand %s", table_name, new_hand_id)
         self.idle_update(new_hand_id, table_name, config)
 
-    def read_stdin(self, new_hand_id):
-        log.debug(f"Processing new hand id: {new_hand_id}")
-
-        self.hero, self.hero_ids = {}, {}
-        found = False
-
+    def _initialize_hero_data(self) -> None:
+        """Initialize hero data from the configuration."""
+        self.hero: dict[int, str] = {}
+        self.hero_ids: dict[int, int] = {}
         enabled_sites = self.config.get_supported_sites()
         if not enabled_sites:
             log.error("No enabled sites found")
@@ -281,184 +343,240 @@ class HUD_main(QObject):
             self.destroy()
             return
 
-        aux_disabled_sites = []
-        for i in enabled_sites:
-            if not self.config.get_site_parameters(i)["aux_enabled"]:
-                log.info(f"Aux disabled for site {i}")
-                aux_disabled_sites.append(i)
+        for site in enabled_sites:
+            if result := self.db_connection.get_site_id(site):
+                site_id = result[0][0]
+                self.hero[site_id] = self.config.supported_sites[site].screen_name
+                self.hero_ids[site_id] = self.db_connection.get_player_id(self.config, site, self.hero[site_id])
+                if self.hero_ids[site_id] is None:
+                    self.hero_ids[site_id] = -1
 
-        self.db_connection.connection.rollback()  # Libérer le verrou de l'itération précédente
+    def _get_table_info(self, hand_id: str) -> tuple | None:
+        """Get table information from cache or database."""
+        if hand_id in self.cache:
+            log.debug("Using cached data for hand %s", hand_id)
+            return self.cache[hand_id]
 
-        if not found:
-            for site in enabled_sites:
-                log.debug("not found ... site in enabled_site")
-                if result := self.db_connection.get_site_id(site):
-                    site_id = result[0][0]
-                    self.hero[site_id] = self.config.supported_sites[site].screen_name
-                    self.hero_ids[site_id] = self.db_connection.get_player_id(self.config, site, self.hero[site_id])
-                    if self.hero_ids[site_id] is not None:
-                        found = True
-                    else:
-                        self.hero_ids[site_id] = -1
-
-        if new_hand_id != "":
-            log.debug("HUD_main.read_stdin: Hand processing starting.")
-            if new_hand_id in self.cache:
-                log.debug(f"Using cached data for hand {new_hand_id}")
-                table_info = self.cache[new_hand_id]
-            else:
-                log.debug(f"Data not found in cache for hand_id: {new_hand_id}")
-                try:
-                    table_info = self.db_connection.get_table_info(new_hand_id)
-                    self.cache[new_hand_id] = table_info  # Mise en cache des informations
-                except Exception as e:
-                    log.error(f"Database error while processing hand {new_hand_id}: {e}", exc_info=True)
-                    return
-
-        (table_name, max, poker_game, type, fast, site_id, site_name, num_seats, tour_number, tab_number) = table_info
-
-        if fast:
-            return
-
-        if site_name in aux_disabled_sites:
-            return
-        if site_name not in enabled_sites:
-            return
-
-        # Generating the temporary key
-        if type == "tour":
-            try:
-                log.debug("creating temp_key for tour")
-                # if len(table_name) >= 2 and table_name[-2].endswith(","):
-                #     parts = table_name.split(",", 1)
-                # else:
-                #     parts = table_name.split(" ", 1)
-
-                tab_number = tab_number.rsplit(" ", 1)[-1]
-                temp_key = f"{tour_number} Table {tab_number}"
-                log.debug(f"temp_key {temp_key}")
-            except ValueError:
-                log.error("Both tab_number and table_name not working")
+        log.debug("Data not found in cache for hand_id: %s", hand_id)
+        try:
+            table_info = self.db_connection.get_table_info(hand_id)
+            self.cache[hand_id] = table_info
+        except Exception:
+            log.exception("Database error while processing hand %s", hand_id)
+            return None
         else:
-            temp_key = table_name
+            return table_info
 
-        # Managing table changes for tournaments
-        if type == "tour":
-            if temp_key in self.hud_dict:
-                if self.hud_dict[temp_key].table.has_table_title_changed(self.hud_dict[temp_key]):
-                    log.debug("table has been renamed")
-                    self.table_is_stale(self.hud_dict[temp_key])
-                    return
-            else:
-                for k in list(self.hud_dict.keys()):
+    def _get_temp_key(self, game_type: str, tour_number: str, tab_number: str, table_name: str) -> str:
+        """Generate a temporary key for the table."""
+        if game_type != "tour":
+            return table_name
+        try:
+            log.debug("creating temp_key for tour")
+            tab_number_suffix = tab_number.rsplit(" ", 1)[-1]
+        except ValueError:
+            log.exception("Both tab_number and table_name not working")
+            return table_name
+        else:
+            return f"{tour_number} Table {tab_number_suffix}"
+
+    def _handle_tournament_table_changes(self, game_type: str, temp_key: str, tour_number: str) -> bool:
+        """Handle table changes in tournaments. Returns True if stale."""
+        if game_type != "tour":
+            return False
+
+        if temp_key in self.hud_dict:
+            if self.hud_dict[temp_key].table.has_table_title_changed(self.hud_dict[temp_key]):
+                log.debug("table has been renamed")
+                self.table_is_stale(self.hud_dict[temp_key])
+                return True
+        else:
+            for k in list(self.hud_dict.keys()):
+                if k.startswith(tour_number):
                     log.debug("check if the tournament number is in the hud_dict under a different table")
-                    if k.startswith(tour_number):
-                        self.table_is_stale(self.hud_dict[k])
-                        continue
+                    self.table_is_stale(self.hud_dict[k])
+                    # continue checking other tables
+        return False
 
-        # Detection of max_seats and poker_game changes
-        if temp_key in self.hud_dict:
-            with contextlib.suppress(Exception):
-                newmax = self.hud_dict[temp_key].hud_params["new_max_seats"]
-                log.debug(f"newmax {newmax}")
-                if newmax and self.hud_dict[temp_key].max != newmax:
-                    log.debug("going to kill_hud due to max seats change")
-                    self.kill_hud("activate", temp_key)
-                    while temp_key in self.hud_dict:
-                        time.sleep(0.5)
-                    max = newmax
+    def _handle_hud_reconfiguration(self, temp_key: str, poker_game: str) -> tuple[str, str] | None:
+        """Handle HUD reconfiguration for max seats and game type changes."""
+        if temp_key not in self.hud_dict:
+            return poker_game, None
+
+        with contextlib.suppress(Exception):
+            newmax = self.hud_dict[temp_key].hud_params.get("new_max_seats")
+            if newmax and self.hud_dict[temp_key].max != newmax:
+                log.debug("going to kill_hud due to max seats change")
+                self.kill_hud("activate", temp_key)
+                while temp_key in self.hud_dict:
+                    time.sleep(0.5)
                 self.hud_dict[temp_key].hud_params["new_max_seats"] = None
+                return poker_game, newmax
 
-            if self.hud_dict[temp_key].poker_game != poker_game:
-                with contextlib.suppress(Exception):
-                    log.debug("going to kill_hud due to poker game change")
-                    self.kill_hud("activate", temp_key)
-                    while temp_key in self.hud_dict:
-                        time.sleep(0.5)
+        if self.hud_dict[temp_key].poker_game != poker_game:
+            with contextlib.suppress(Exception):
+                log.debug("going to kill_hud due to poker game change")
+                self.kill_hud("activate", temp_key)
+                while temp_key in self.hud_dict:
+                    time.sleep(0.5)
+        return poker_game, None
 
-        # Updating or creating the HUD
-        if temp_key in self.hud_dict:
-            log.debug(f"update hud for hand {new_hand_id}")
-            self.db_connection.init_hud_stat_vars(
-                self.hud_dict[temp_key].hud_params["hud_days"], self.hud_dict[temp_key].hud_params["h_hud_days"],
+    def _update_existing_hud(
+        self,
+        new_hand_id: str,
+        temp_key: str,
+        game_type: str,
+        site_id: int,
+        num_seats: int,
+    ) -> None:
+        """Update an existing HUD with new hand data."""
+        log.debug("update hud for hand %s", new_hand_id)
+        hud = self.hud_dict[temp_key]
+        self.db_connection.init_hud_stat_vars(hud.hud_params["hud_days"], hud.hud_params["h_hud_days"])
+        stat_dict = self.db_connection.get_stats_from_hand(
+            new_hand_id,
+            game_type,
+            hud.hud_params,
+            self.hero_ids[site_id],
+            num_seats,
+        )
+        log.debug("got stats for hand %s", new_hand_id)
+
+        try:
+            hud.stat_dict = stat_dict
+        except KeyError:
+            log.exception("hud_dict[%s] was not found", temp_key)
+            return
+
+        hud.cards = self.get_cards(new_hand_id, hud.poker_game)
+        for aw in hud.aux_windows:
+            aw.update_data(new_hand_id, self.db_connection)
+        self.update_HUD(new_hand_id, temp_key, self.config)
+        log.debug("hud updated for table %s and hand %s", temp_key, new_hand_id)
+
+    def _create_new_hud(self, new_hand_id: str, temp_key: str, table_info: tuple, site_id: int, num_seats: int) -> None:
+        """Create a new HUD for a table."""
+        (table_name, max_seats, poker_game, game_type, _, _, site_name, _, tour_number, tab_number) = table_info
+
+        log.debug("create new hud for hand %s", new_hand_id)
+        self.db_connection.init_hud_stat_vars(self.hud_params["hud_days"], self.hud_params["h_hud_days"])
+        stat_dict = self.db_connection.get_stats_from_hand(
+            new_hand_id,
+            game_type,
+            self.hud_params,
+            self.hero_ids[site_id],
+            num_seats,
+        )
+        log.debug("got stats for hand %s", new_hand_id)
+
+        if not any(stat_dict[key]["screen_name"] == self.hero[site_id] for key in stat_dict):
+            log.info("HUD not created yet, because hero is not seated for this hand")
+            return
+
+        cards = self.get_cards(new_hand_id, poker_game)
+        table_kwargs = {"table_name": table_name, "tournament": tour_number, "table_number": tab_number}
+        tablewindow = self.Tables.Table(self.config, site_name, **table_kwargs)
+
+        if tablewindow.number is None:
+            if game_type == "tour":
+                table_name = f"{tour_number} {tab_number}"
+            log.error("HUD create: table name %s not found, skipping.", table_name)
+            return
+        if tablewindow.number in self.blacklist:
+            return
+
+        tablewindow.key = temp_key
+        tablewindow.max = max_seats
+        tablewindow.site = site_name
+
+        if hasattr(tablewindow, "number"):
+            args = HUDCreationArgs(
+                new_hand_id=new_hand_id,
+                table=tablewindow,
+                temp_key=temp_key,
+                max_seats=max_seats,
+                poker_game=poker_game,
+                game_type=game_type,
+                stat_dict=stat_dict,
+                cards=cards,
             )
-            stat_dict = self.db_connection.get_stats_from_hand(
-                new_hand_id, type, self.hud_dict[temp_key].hud_params, self.hero_ids[site_id], num_seats,
-            )
-            log.debug(f"got stats for hand {new_hand_id}")
-
-            try:
-                self.hud_dict[temp_key].stat_dict = stat_dict
-            except KeyError:
-                log.error(f"hud_dict[{temp_key}] was not found")
-                log.error("will not send hand")
-                return
-
-            self.hud_dict[temp_key].cards = self.get_cards(new_hand_id, poker_game)
-            for aw in self.hud_dict[temp_key].aux_windows:
-                aw.update_data(new_hand_id, self.db_connection)
-            self.update_HUD(new_hand_id, temp_key, self.config)
-            log.debug(f"hud updated for table {temp_key} and hand {new_hand_id}")
+            self.create_HUD(args)
         else:
-            log.debug(f"create new hud for hand {new_hand_id}")
-            self.db_connection.init_hud_stat_vars(self.hud_params["hud_days"], self.hud_params["h_hud_days"])
-            stat_dict = self.db_connection.get_stats_from_hand(
-                new_hand_id, type, self.hud_params, self.hero_ids[site_id], num_seats,
-            )
-            log.debug(f"got stats for hand {new_hand_id}")
+            log.error('Table "%s" no longer exists', table_name)
 
-            hero_found = any(stat_dict[key]["screen_name"] == self.hero[site_id] for key in stat_dict)
-            if not hero_found:
-                log.info("HUD not created yet, because hero is not seated for this hand")
-                return
+    def read_stdin(self, new_hand_id: str) -> None:
+        """Read and process a new hand ID from stdin."""
+        log.debug("Processing new hand id: %s", new_hand_id)
+        self._initialize_hero_data()
 
-            cards = self.get_cards(new_hand_id, poker_game)
-            table_kwargs = dict(table_name=table_name, tournament=tour_number, table_number=tab_number)
-            tablewindow = self.Tables.Table(self.config, site_name, **table_kwargs)
-            if tablewindow.number is None:
-                log.debug("tablewindow.number is none")
-                if type == "tour":
-                    table_name = f"{tour_number} {tab_number}"
-                log.error(f"HUD create: table name {table_name} not found, skipping.")
-                return
-            elif tablewindow.number in self.blacklist:
-                return
-            else:
-                log.debug("tablewindow.number is not none")
-                tablewindow.key = temp_key
-                tablewindow.max = max
-                tablewindow.site = site_name
-                if hasattr(tablewindow, "number"):
-                    log.debug("table window still exists")
-                    self.create_HUD(new_hand_id, tablewindow, temp_key, max, poker_game, type, stat_dict, cards)
-                else:
-                    log.error(f'Table "{table_name}" no longer exists')
-                    return
+        if not new_hand_id:
+            return
 
-    def get_cards(self, new_hand_id, poker_game):
+        table_info = self._get_table_info(new_hand_id)
+        if not table_info:
+            return
+
+        (table_name, max_seats, poker_game, game_type, fast, site_id, site_name, num_seats, tour_number, tab_number) = (
+            table_info
+        )
+
+        enabled_sites = self.config.get_supported_sites()
+        aux_disabled_sites = [
+            site for site in enabled_sites if not self.config.get_site_parameters(site)["aux_enabled"]
+        ]
+        if fast or site_name in aux_disabled_sites or site_name not in enabled_sites:
+            log.debug("HUD creation skipped: fast=%s, site_disabled=%s, site_enabled=%s", 
+                      fast, site_name in aux_disabled_sites, site_name in enabled_sites)
+            return
+
+        temp_key = self._get_temp_key(game_type, tour_number, tab_number, table_name)
+        log.debug("Generated temp_key: %s for table: %s", temp_key, table_name)
+
+        if self._handle_tournament_table_changes(game_type, temp_key, tour_number):
+            return  # Stale table was handled
+
+        poker_game, new_max_seats = self._handle_hud_reconfiguration(temp_key, poker_game)
+        if new_max_seats:
+            # Re-create the HUD with the new max seats
+            self.kill_hud(None, temp_key)
+            self._create_new_hud(new_hand_id, temp_key, table_info, site_id, new_max_seats)
+            return
+
+        if temp_key in self.hud_dict:
+            log.debug("Updating existing HUD for temp_key: %s", temp_key)
+            self._update_existing_hud(new_hand_id, temp_key, game_type, site_id, num_seats)
+        else:
+            log.debug("Creating new HUD for temp_key: %s", temp_key)
+            self._create_new_hud(new_hand_id, temp_key, table_info, site_id, num_seats)
+
+    def get_cards(self, new_hand_id: str, poker_game: str) -> dict[str, Any]:
+        """Get card data for a given hand."""
         cards = self.db_connection.get_cards(new_hand_id)
         if poker_game in ["holdem", "omahahi", "omahahilo"]:
             comm_cards = self.db_connection.get_common_cards(new_hand_id)
             cards["common"] = comm_cards["common"]
         return cards
 
-    def idle_move(self, hud):
+    def idle_move(self, hud: Hud.Hud) -> None:
+        """Handle the idle move event."""
         try:
             hud.move_table_position()
             for aw in hud.aux_windows:
                 aw.move_windows()
         except Exception:
-            log.error(f"Error moving HUD for table: {hud.table.title}.")
+            log.exception("Error moving HUD for table: %s.", hud.table.title)
 
-    def idle_resize(self, hud):
+    def idle_resize(self, hud: Hud.Hud) -> None:
+        """Handle the idle resize event."""
         try:
             hud.resize_windows()
             for aw in hud.aux_windows:
                 aw.resize_windows()
         except Exception:
-            log.error(f"Error resizing HUD for table: {hud.table.title}.")
+            log.exception("Error resizing HUD for table: %s.", hud.table.title)
 
-    def idle_kill(self, table):
+    def idle_kill(self, table: str) -> None:
+        """Handle the idle kill event."""
         try:
             if table in self.hud_dict:
                 self.vb.removeWidget(self.hud_dict[table].tablehudlabel)
@@ -467,34 +585,36 @@ class HUD_main(QObject):
                 del self.hud_dict[table]
             self.main_window.resize(1, 1)
         except Exception:
-            log.error(f"Error killing HUD for table: {table}.")
+            log.exception("Error killing HUD for table: %s.", table)
 
-    def idle_create(self, new_hand_id, table, temp_key, max, poker_game, type, stat_dict, cards):
+    def idle_create(self, args: HUDCreationArgs) -> None:
+        """Handle the idle create event."""
         try:
-            newlabel = QLabel(f"{table.site} - {temp_key}")
-            log.debug(f"adding label {newlabel.text()}")
+            newlabel = QLabel(f"{args.table.site} - {args.temp_key}")
+            log.debug("adding label %s", newlabel.text())
             self.vb.addWidget(newlabel)
 
-            self.hud_dict[temp_key].tablehudlabel = newlabel
-            self.hud_dict[temp_key].tablenumber = table.number
-            self.hud_dict[temp_key].create(new_hand_id, self.config, stat_dict)
-            for m in self.hud_dict[temp_key].aux_windows:
+            self.hud_dict[args.temp_key].tablehudlabel = newlabel
+            self.hud_dict[args.temp_key].tablenumber = args.table.number
+            self.hud_dict[args.temp_key].create(args.new_hand_id, self.config, args.stat_dict)
+            for m in self.hud_dict[args.temp_key].aux_windows:
                 m.create()
-                log.debug(f"idle_create new_hand_id {new_hand_id}")
-                m.update_gui(new_hand_id)
+                log.debug("idle_create new_hand_id %s", args.new_hand_id)
+                m.update_gui(args.new_hand_id)
 
         except Exception:
-            log.error(f"Error creating HUD for hand {new_hand_id}.")
+            log.exception("Error creating HUD for hand %s.", args.new_hand_id)
 
-    def idle_update(self, new_hand_id, table_name, config):
+    def idle_update(self, new_hand_id: str, table_name: str, config: Configuration.Config) -> None:
+        """Handle the idle update event."""
         try:
-            log.debug(f"idle_update entered for {table_name} {new_hand_id}")
+            log.debug("idle_update entered for %s %s", table_name, new_hand_id)
             self.hud_dict[table_name].update(new_hand_id, config)
-            log.debug(f"idle_update update_gui {new_hand_id}")
+            log.debug("idle_update update_gui %s", new_hand_id)
             for aw in self.hud_dict[table_name].aux_windows:
                 aw.update_gui(new_hand_id)
         except Exception:
-            log.error(f"Error updating HUD for hand {new_hand_id}.")
+            log.exception("Error updating HUD for hand %s.", new_hand_id)
 
 
 if __name__ == "__main__":
@@ -503,6 +623,6 @@ if __name__ == "__main__":
     app = QApplication([])
     apply_stylesheet(app, theme="dark_purple.xml")
 
-    hm = HUD_main(options, db_name=options.dbname)
+    hm = HudMain(options, db_name=options.dbname)
 
     app.exec_()

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from time import time
 
@@ -25,7 +24,7 @@ colalias, colshow, colheading, colxalign, colformat, coltype = 0, 1, 2, 3, 4, 5
 
 
 class GuiTourneyPlayerStats(QSplitter):
-    def __init__(self, config, db, sql, mainwin, debug=True):
+    def __init__(self, config, db, sql, mainwin, debug=True) -> None:
         super().__init__(mainwin)
         self.conf = config
         self.db = db
@@ -94,7 +93,7 @@ class GuiTourneyPlayerStats(QSplitter):
 
     def addGrid(
         self, vbox, query_name, numTourneys, tourneyTypes, playerids, sitenos, seats,
-    ):
+    ) -> None:
         grid = 0
 
         query = self.sql.query[query_name]
@@ -114,7 +113,7 @@ class GuiTourneyPlayerStats(QSplitter):
         self.listcols.append([])
 
         # Create Header
-        for col, column in enumerate(self.columns):
+        for _col, column in enumerate(self.columns):
             s = column[colheading]
             self.listcols[grid].append(s)
         model.setHorizontalHeaderLabels(self.listcols[grid])
@@ -122,21 +121,17 @@ class GuiTourneyPlayerStats(QSplitter):
         # Fullfill
         for row_data in result:
             treerow = []
-            for col, column in enumerate(self.columns):
-                if column[colalias] in colnames:
-                    value = row_data[colnames.index(column[colalias])]
-                else:
-                    value = None
-                if column[colalias] == "siteName":
-                    if row_data[colnames.index("speed")] != "Normal":
-                        if (
-                            row_data[colnames.index("speed")] == "Hyper"
-                            and row_data[colnames.index("siteName")]
-                            == "Full Tilt Poker"
-                        ):
-                            value = value + " " + "Super Turbo"
-                        else:
-                            value = value + " " + row_data[colnames.index("speed")]
+            for _col, column in enumerate(self.columns):
+                value = row_data[colnames.index(column[colalias])] if column[colalias] in colnames else None
+                if column[colalias] == "siteName" and row_data[colnames.index("speed")] != "Normal":
+                    if (
+                        row_data[colnames.index("speed")] == "Hyper"
+                        and row_data[colnames.index("siteName")]
+                        == "Full Tilt Poker"
+                    ):
+                        value = value + " " + "Super Turbo"
+                    else:
+                        value = value + " " + row_data[colnames.index("speed")]
                 if column[colalias] in ["knockout", "reEntry"]:
                     value = (
                         "Yes"
@@ -154,7 +149,7 @@ class GuiTourneyPlayerStats(QSplitter):
         view.resizeColumnsToContents()
         view.setSortingEnabled(True)
 
-    def createStatsTable(self, vbox, tourneyTypes, playerids, sitenos, seats):
+    def createStatsTable(self, vbox, tourneyTypes, playerids, sitenos, seats) -> None:
         startTime = time()
 
         numTourneys = self.filters.getNumTourneys()
@@ -170,7 +165,7 @@ class GuiTourneyPlayerStats(QSplitter):
 
         log.info(f"Stats page displayed in {time() - startTime:4.2f} seconds")
 
-    def fillStatsFrame(self, vbox):
+    def fillStatsFrame(self, vbox) -> None:
         tourneyTypes = self.filters.getTourneyTypes()
         sites = self.filters.getSites()
         heroes = self.filters.getHeroes()
@@ -185,7 +180,8 @@ class GuiTourneyPlayerStats(QSplitter):
             sitenos.append(siteids[site])
             _hname = heroes.get(site, "")
             if not _hname:
-                raise ValueError(f"Hero name not found for site {site}")
+                msg = f"Hero name not found for site {site}"
+                raise ValueError(msg)
             result = self.db.get_player_id(self.conf, site, _hname)
             if result is not None:
                 playerids.append(int(result))
@@ -216,7 +212,7 @@ class GuiTourneyPlayerStats(QSplitter):
         if sitenos:
             sitetest = str(tuple(sitenos))
             sitetest = sitetest.replace(",)", ")")
-            sitetest = "and tt.siteId in %s" % sitetest
+            sitetest = f"and tt.siteId in {sitetest}"
         else:
             sitetest = "and tt.siteId IS NULL"
         query = query.replace("<sitetest>", sitetest)
@@ -237,11 +233,7 @@ class GuiTourneyPlayerStats(QSplitter):
         if self.detailFilters:
             for f in self.detailFilters:
                 if len(f) == 3:
-                    flagtest += " and %s between %s and %s " % (
-                        f[0],
-                        str(f[1]),
-                        str(f[2]),
-                    )
+                    flagtest += f" and {f[0]} between {f[1]!s} and {f[2]!s} "
         query = query.replace("<flagtest>", flagtest)
 
         if self.db.backend == self.db.MYSQL_INNODB:
@@ -251,11 +243,10 @@ class GuiTourneyPlayerStats(QSplitter):
 
         start_date, end_date = self.filters.getDates()
         query = query.replace("<startdate_test>", start_date)
-        query = query.replace("<enddate_test>", end_date)
+        return query.replace("<enddate_test>", end_date)
 
-        return query
 
-    def refreshStats(self):
+    def refreshStats(self) -> None:
         for i in reversed(range(self.stats_frame.layout().count())):
             widgetToRemove = self.stats_frame.layout().itemAt(i).widget()
             self.stats_frame.layout().removeWidget(widgetToRemove)

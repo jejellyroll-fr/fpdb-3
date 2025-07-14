@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright 2008-2011 Carl Gherardi
 # This program is free software: you can redistribute it and/or modify
@@ -16,7 +15,6 @@
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
 
-from __future__ import division, print_function
 
 import os
 import sys
@@ -36,30 +34,30 @@ log = get_logger("tourgraphViewer")
 
 try:
     calluse = "matplotlib" not in sys.modules
-    import matplotlib
+    import matplotlib as mpl
 
     if calluse:
         try:
-            matplotlib.use("qt5agg")
+            mpl.use("qt5agg")
         except ValueError as e:
-            log.error(f"Matplotlib use error: {e}")
+            log.exception(f"Matplotlib use error: {e}")
     from matplotlib.backends.backend_qt5agg import FigureCanvas
     from matplotlib.figure import Figure
     from matplotlib.font_manager import FontProperties
     from numpy import cumsum
 except ImportError as inst:
-    log.error(
+    log.exception(
         "Failed to load libs for graphing, graphing will not function. Please install numpy and matplotlib if you want to use graphs.",
     )
-    log.error(
+    log.exception(
         "This is of no consequence for other parts of the program, e.g., import and HUD are NOT affected by this problem.",
     )
-    log.error(f"ImportError: {inst.args}")
+    log.exception(f"ImportError: {inst.args}")
 
 
 class GuiTourneyGraphViewer(QSplitter):
-    def __init__(self, querylist, config, parent, colors, debug=True):
-        """Constructor for GraphViewer"""
+    def __init__(self, querylist, config, parent, colors, debug=True) -> None:
+        """Constructor for GraphViewer."""
         QSplitter.__init__(self, parent)
         self.sql = querylist
         self.conf = config
@@ -114,14 +112,13 @@ class GuiTourneyGraphViewer(QSplitter):
         self.db.rollback()
         self.exportFile = None
 
-    def clearGraphData(self):
+    def clearGraphData(self) -> None:
         try:
             if self.canvas:
                 self.graphBox.removeWidget(self.canvas)
         except (AttributeError, RuntimeError) as e:
             # Handle specific exceptions related to widget removal
-            log.error(f"Error removing widget: {e}")
-            pass
+            log.exception(f"Error removing widget: {e}")
 
         if self.fig is not None:
             self.fig.clear()
@@ -135,7 +132,7 @@ class GuiTourneyGraphViewer(QSplitter):
         self.canvas = FigureCanvas(self.fig)
         self.canvas.setParent(self)
 
-    def generateGraph(self, widget):
+    def generateGraph(self, widget) -> None:
         self.clearGraphData()
 
         sitenos = []
@@ -152,7 +149,8 @@ class GuiTourneyGraphViewer(QSplitter):
             sitenos.append(siteids[site])
             _hname = heroes.get(site, "")
             if not _hname:
-                raise ValueError(f"Hero name not found for site {site}")
+                msg = f"Hero name not found for site {site}"
+                raise ValueError(msg)
             result = self.db.get_player_id(self.conf, site, _hname)
             if result is not None:
                 playerids.append(int(result))
@@ -286,7 +284,7 @@ class GuiTourneyGraphViewer(QSplitter):
         currencytest = str(tuple(currencies.values()))
         currencytest = currencytest.replace(",)", ")")
         currencytest = currencytest.replace("u'", "'")
-        currencytest = "AND tt.currency in %s" % currencytest
+        currencytest = f"AND tt.currency in {currencytest}"
 
         nametest = str(tuple(names))
         sitetest = str(tuple(sites))
@@ -302,8 +300,7 @@ class GuiTourneyGraphViewer(QSplitter):
 
             if field_type == "str":
                 return str(tuple(values))
-            else:
-                return str(tuple(int(v) for v in values))
+            return str(tuple(int(v) for v in values))
 
         currencytest = (
             f"AND tt.currency in {make_in_clause_sql(currencies.values(), 'str')}"
@@ -340,19 +337,18 @@ class GuiTourneyGraphViewer(QSplitter):
         greenline = cumsum(green)
         return old_div(greenline, 100)
 
-    def exportGraph(self):
+    def exportGraph(self) -> None:
         if self.fig is None:
             return
 
-        else:
-            path = os.getcwd()
-            path = path + "/graph.png"
-            self.fig.savefig(path)
-            msg = QMessageBox()
-            msg.setWindowTitle("FPDB 3 info")
-            mess = "Your graph is saved in " + path
-            msg.setText(mess)
-            msg.exec()
+        path = os.getcwd()
+        path = path + "/graph.png"
+        self.fig.savefig(path)
+        msg = QMessageBox()
+        msg.setWindowTitle("FPDB 3 info")
+        mess = "Your graph is saved in " + path
+        msg.setText(mess)
+        msg.exec()
 
 
 if __name__ == "__main__":

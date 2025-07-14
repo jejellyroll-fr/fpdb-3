@@ -1,11 +1,9 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""
-ConfigReloadWidget.py
+"""ConfigReloadWidget.py.
 
 Widget to display configuration reload status in the status bar.
 """
+
+from typing import Any
 
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QColor, QPainter, QPixmap
@@ -18,18 +16,19 @@ log = get_logger("configwidget")
 
 
 class ConfigReloadWidget(QWidget):
-    """Widget displaying configuration reload status"""
+    """Widget displaying configuration reload status."""
 
     # Signals
     reload_requested = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Any = None) -> None:
+        """Initialize the config reload widget."""
         super().__init__(parent)
         self.setup_ui()
         self.config_manager = ConfigurationManager()
 
-    def setup_ui(self):
-        """Configure widget interface"""
+    def setup_ui(self) -> None:
+        """Configure widget interface."""
         layout = QHBoxLayout()
         layout.setContentsMargins(5, 0, 5, 0)
         self.setLayout(layout)
@@ -60,8 +59,8 @@ class ConfigReloadWidget(QWidget):
 
         layout.addStretch()
 
-    def update_status_icon(self, status):
-        """Update icon according to status"""
+    def update_status_icon(self, status: str) -> None:
+        """Update icon according to status."""
         pixmap = QPixmap(16, 16)
         pixmap.fill(Qt.transparent)
 
@@ -84,21 +83,21 @@ class ConfigReloadWidget(QWidget):
 
         self.status_icon.setPixmap(pixmap)
 
-    def on_reload_clicked(self):
-        """Called when reload button is clicked"""
+    def on_reload_clicked(self) -> None:
+        """Called when reload button is clicked."""
         self.reload_requested.emit()
         self.start_reload()
 
-    def start_reload(self):
-        """Start reload animation"""
+    def start_reload(self) -> None:
+        """Start reload animation."""
         self.update_status_icon("loading")
         self.status_label.setText("Reloading...")
         self.progress_bar.show()
         self.progress_bar.setRange(0, 0)  # Indeterminate mode
         self.reload_button.setEnabled(False)
 
-    def reload_complete(self, success, message, restart_required=False):
-        """Called when reload is complete"""
+    def reload_complete(self, *, success: bool, message: str, restart_required: bool = False) -> None:
+        """Called when reload is complete."""
         self.progress_bar.hide()
         self.reload_button.setEnabled(True)
 
@@ -119,13 +118,13 @@ class ConfigReloadWidget(QWidget):
             self.status_label.setText("Reload error")
             self.status_label.setToolTip(message)
 
-    def flash_success(self):
-        """Flash animation to indicate success"""
+    def flash_success(self) -> None:
+        """Flash animation to indicate success."""
         self.status_label.setStyleSheet("QLabel { background-color: #90EE90; }")
         QTimer.singleShot(500, lambda: self.status_label.setStyleSheet(""))
 
-    def set_config_modified(self, modified=True):
-        """Indicates if configuration has been modified"""
+    def set_config_modified(self, *, modified: bool = True) -> None:
+        """Indicates if configuration has been modified."""
         if modified:
             self.status_label.setText("Configuration modified*")
             self.status_label.setToolTip(
@@ -137,15 +136,16 @@ class ConfigReloadWidget(QWidget):
 
 
 class ConfigStatusBar(QWidget):
-    """Extended status bar with configuration reload support"""
+    """Extended status bar with configuration reload support."""
 
-    def __init__(self, main_window):
+    def __init__(self, main_window: Any) -> None:
+        """Initialize the config status bar."""
         super().__init__()
         self.main_window = main_window
         self.setup_ui()
 
-    def setup_ui(self):
-        """Configure status bar interface"""
+    def setup_ui(self) -> None:
+        """Configure status bar interface."""
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
@@ -161,14 +161,14 @@ class ConfigStatusBar(QWidget):
         self.reload_widget.reload_requested.connect(self.on_reload_requested)
         layout.addWidget(self.reload_widget)
 
-    def showMessage(self, message, timeout=0):
-        """Display a message in the status bar"""
+    def showMessage(self, message: str, timeout: int = 0) -> None:
+        """Display a message in the status bar."""
         self.message_label.setText(message)
         if timeout > 0:
             QTimer.singleShot(timeout, lambda: self.message_label.setText(""))
 
-    def on_reload_requested(self):
-        """Called when reload is requested"""
+    def on_reload_requested(self) -> None:
+        """Called when reload is requested."""
         self.reload_widget.start_reload()
 
         # Delegate to main window
@@ -176,20 +176,20 @@ class ConfigStatusBar(QWidget):
             # Simulate asynchronous call
             QTimer.singleShot(100, self._do_reload)
 
-    def _do_reload(self):
-        """Perform reload"""
+    def _do_reload(self) -> None:
+        """Perform reload."""
         try:
             # Call main window's reload_config
             self.main_window.reload_config()
             # Note: Result will be handled by callbacks
         except Exception as e:
-            log.error(f"Error during reload: {e}")
-            self.reload_widget.reload_complete(False, str(e))
+            log.exception("Error during reload")
+            self.reload_widget.reload_complete(success=False, message=str(e))
 
-    def notify_reload_complete(self, success, message, restart_required=False):
-        """Notify reload completion"""
-        self.reload_widget.reload_complete(success, message, restart_required)
+    def notify_reload_complete(self, *, success: bool, message: str, restart_required: bool = False) -> None:
+        """Notify reload completion."""
+        self.reload_widget.reload_complete(success=success, message=message, restart_required=restart_required)
 
-    def set_config_modified(self, modified=True):
-        """Indicates if configuration has been modified"""
-        self.reload_widget.set_config_modified(modified)
+    def set_config_modified(self, *, modified: bool = True) -> None:
+        """Indicates if configuration has been modified."""
+        self.reload_widget.set_config_modified(modified=modified)

@@ -1,7 +1,7 @@
 from Card import StartCardRank, decodeStartHandValue, twoStartCards
 
 
-def test_twoStartCards():
+def test_twoStartCards() -> None:
     # Test pair
     result = twoStartCards(4, "d", 4, "c")
     assert result == 29
@@ -23,7 +23,7 @@ def test_twoStartCards():
     assert result == 170
 
 
-def test_decodeStartHandValue():
+def test_decodeStartHandValue() -> None:
     # Test holdem game
     assert decodeStartHandValue("holdem", 169) == "AA"
     assert decodeStartHandValue("6_holdem", 166) == "AJs"
@@ -36,23 +36,23 @@ def test_decodeStartHandValue():
     assert decodeStartHandValue("unknown_game", 123) == "xx"
 
 
-def test_StartCardRank():
+def test_StartCardRank() -> None:
     # Tests that the function returns the correct tuple for idx = 0
-    def test_idx_0(self):
+    def test_idx_0(self) -> None:
         assert StartCardRank(0) == ("22", 54, 12)
 
     # Tests that the function returns the correct tuple for idx = 5
-    def test_idx_5(self):
+    def test_idx_5(self) -> None:
         assert StartCardRank(5) == ("72o", 169, 24)
 
     # Tests that the function returns the correct tuple for idx = 14
-    def test_idx_13(self):
+    def test_idx_13(self) -> None:
         assert StartCardRank(13) == ("32s", 111, 8)
 
     # Tests that the function returns the correct tuple for idx = 15
-    def test_idx_14(self):
+    def test_idx_14(self) -> None:
         assert StartCardRank(14) == ("33", 53, 12)
 
     # Tests that the function returns the correct tuple for idx = 170
-    def test_idx_169(self):
+    def test_idx_169(self) -> None:
         assert StartCardRank(171) == ("xx", 170, 0)

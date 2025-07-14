@@ -1,14 +1,27 @@
+"""Pydantic base models for FPDB web API.
+
+This module contains all the Pydantic BaseModel classes used for data validation
+and serialization in the FPDB web API.
+
+Note: Variable names use mixedCase to match database column names and maintain
+API compatibility. This is intentional and follows the existing database schema.
+"""
+
+# ruff: noqa: N815
+# Ignore mixedCase variable names as they match database schema
+
 import sys
 from datetime import datetime
+from decimal import Decimal
 from pathlib import Path
 
 from pydantic import BaseModel
 
 sys.path.append(str(Path(__file__).parent.parent))
-from decimal import Decimal
 
 
 class Backing(BaseModel):
+    """Backing model for tournament player backing information."""
     id: int
     tourneysPlayersId: int
     playerId: int
@@ -17,12 +30,14 @@ class Backing(BaseModel):
 
 
 class Action(BaseModel):
+    """Action model for player actions in poker hands."""
     id: int
     name: str
     code: str
 
 
 class Autorate(BaseModel):
+    """Autorate model for automatic player ratings."""
     id: int
     playerId: int | None
     gametypeId: int | None
@@ -33,6 +48,7 @@ class Autorate(BaseModel):
 
 
 class Board(BaseModel):
+    """Board model for community cards in poker hands."""
     id: int
     handId: int
     boardId: int | None
@@ -44,6 +60,7 @@ class Board(BaseModel):
 
 
 class CardsCache(BaseModel):
+    """CardsCache model for cached card statistics."""
     id: int
     weekId: int | None
     monthId: int | None
@@ -169,6 +186,7 @@ class CardsCache(BaseModel):
 
 
 class File(BaseModel):
+    """File model for hand history files."""
     id: int
     file: str
     site: str | None
@@ -187,6 +205,7 @@ class File(BaseModel):
 
 
 class Gametype(BaseModel):
+    """Gametype model for different poker game types."""
     id: int
     siteId: int
     currency: str
@@ -210,6 +229,7 @@ class Gametype(BaseModel):
 
 
 class Hand(BaseModel):
+    """Hand model for individual poker hands."""
     id: int
     tableName: str
     siteHandNo: int
@@ -251,6 +271,7 @@ class Hand(BaseModel):
 
 
 class HandsAction(BaseModel):
+    """HandsAction model for actions taken during poker hands."""
     id: int
     handId: int
     playerId: int
@@ -267,6 +288,7 @@ class HandsAction(BaseModel):
 
 
 class HandsPlayer(BaseModel):
+    """HandsPlayer model for player data in poker hands."""
     id: int
     handId: int
     playerId: int
@@ -435,6 +457,7 @@ class HandsPlayer(BaseModel):
 
 
 class HandsPots(BaseModel):
+    """HandsPots model for pot information in poker hands."""
     id: int
     handId: int
     potId: int | None
@@ -447,6 +470,7 @@ class HandsPots(BaseModel):
 
 
 class HandsStove(BaseModel):
+    """HandsStove model for stove analysis data."""
     id: int
     handId: int
     playerId: int
@@ -460,6 +484,7 @@ class HandsStove(BaseModel):
 
 
 class HudCache(BaseModel):
+    """HudCache model for cached HUD statistics."""
     id: int
     gametypeId: int | None
     playerId: int | None
@@ -585,11 +610,13 @@ class HudCache(BaseModel):
 
 
 class Month(BaseModel):
+    """Month model for monthly time periods."""
     id: int
     monthStart: datetime
 
 
 class Player(BaseModel):
+    """Player model for poker players."""
     id: int
     name: str | None
     siteId: int | None
@@ -600,6 +627,7 @@ class Player(BaseModel):
 
 
 class PositionsCache(BaseModel):
+    """PositionsCache model for cached position statistics."""
     id: int
     weekId: int | None
     monthId: int | None
@@ -727,11 +755,13 @@ class PositionsCache(BaseModel):
 
 
 class Rank(BaseModel):
+    """Rank model for player ranks."""
     id: int
     name: str
 
 
 class RawHands(BaseModel):
+    """RawHands model for raw hand history data."""
     id: int
     handId: int
     rawHand: str
@@ -739,6 +769,7 @@ class RawHands(BaseModel):
 
 
 class RawTourneys(BaseModel):
+    """RawTourneys model for raw tournament data."""
     id: int
     tourneyId: int
     rawTourney: str
@@ -746,6 +777,7 @@ class RawTourneys(BaseModel):
 
 
 class Sessions(BaseModel):
+    """Sessions model for poker playing sessions."""
     id: int
     weekId: int | None
     monthId: int | None
@@ -754,6 +786,7 @@ class Sessions(BaseModel):
 
 
 class SessionsCache(BaseModel):
+    """SessionsCache model for cached session statistics."""
     id: int
     sessionId: int | None
     startTime: datetime
@@ -878,16 +911,19 @@ class SessionsCache(BaseModel):
 
 
 class Settings(BaseModel):
+    """Settings model for application settings."""
     version: int
 
 
 class Sites(BaseModel):
+    """Sites model for poker sites."""
     id: int
     name: str
     code: str
 
 
 class StartCards(BaseModel):
+    """StartCards model for starting hand cards."""
     id: int
     category: str
     name: str
@@ -896,6 +932,7 @@ class StartCards(BaseModel):
 
 
 class TourneyTypes(BaseModel):
+    """TourneyTypes model for tournament types."""
     id: int
     siteId: int
     currency: str | None
@@ -944,6 +981,7 @@ class TourneyTypes(BaseModel):
 
 
 class Tourneys(BaseModel):
+    """Tourneys model for tournament data."""
     id: int
     tourneyTypeId: int | None
     sessionId: int | None
@@ -962,6 +1000,7 @@ class Tourneys(BaseModel):
 
 
 class TourneysCache(BaseModel):
+    """TourneysCache model for cached tournament statistics."""
     id: int
     sessionId: int | None
     startTime: datetime
@@ -1086,6 +1125,7 @@ class TourneysCache(BaseModel):
 
 
 class TourneysPlayers(BaseModel):
+    """TourneysPlayers model for tournament player data."""
     id: int
     tourneyId: int | None
     playerId: int | None
@@ -1101,5 +1141,6 @@ class TourneysPlayers(BaseModel):
 
 
 class Weeks(BaseModel):
+    """Weeks model for weekly time periods."""
     id: int
     weekStart: datetime

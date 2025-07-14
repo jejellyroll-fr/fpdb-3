@@ -1,35 +1,30 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+"""Options module for FPDB command line argument parsing.
 
-# Copyright 2008-2011 Ray E. Barker
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, version 3 of the License.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-# In the "official" distribution you can find the license in agpl-3.0.txt.
+Copyright 2008-2011 Ray E. Barker
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, version 3 of the License.
 
-from __future__ import print_function
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+In the "official" distribution you can find the license in agpl-3.0.txt.
+"""
+
 
 import sys
 from optparse import OptionParser
 
 from loggingFpdb import get_logger
 
-# import L10n
-##_ = L10n.get_translation()
-
-
 log = get_logger("parser")
 
 
-def fpdb_options():
+def fpdb_options() -> tuple:
     """Process command line options for fpdb and HUD_main."""
     parser = OptionParser()  # Initialize option parser
     # Option for sending error messages to console instead of log file
@@ -78,8 +73,7 @@ def fpdb_options():
         "--logging",
         dest="log_level",
         choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL", "EMPTY"),
-        help=("Error logging level:")
-        + " (DEBUG, INFO, WARNING, ERROR, CRITICAL, EMPTY)",
+        help="Error logging level: (DEBUG, INFO, WARNING, ERROR, CRITICAL, EMPTY)",
         default="EMPTY",
     )
     # Option to print version information and exit
@@ -197,8 +191,8 @@ def fpdb_options():
     return (options, argv)
 
 
-def site_alias(alias):
-    """Function for converting various site aliases to the FPDB name"""
+def site_alias(alias: str) -> str | bool:
+    """Function for converting various site aliases to the FPDB name."""
     tmp = alias  # Initialize with the original alias (not really up to date)
     aliases = {
         "Absolute": "Absolute",
@@ -237,10 +231,9 @@ def site_alias(alias):
 
     try:
         tmp = aliases[alias]
-    except KeyError as e:
+    except KeyError:
         tmp = False
-        log.error(f"Alias '{alias}' unknown")
-        log.error(f"Exception: {e}")
+        log.exception("Alias '%s' unknown", alias)
 
     return tmp
 
@@ -248,9 +241,5 @@ def site_alias(alias):
 if __name__ == "__main__":
     (options, argv) = fpdb_options()
 
-    print("errorsToConsole =", options.errorsToConsole)
-    print("database name   =", options.dbname)
-    print("config file     =", options.config)
 
-    print(("press enter to end"))
     sys.stdin.readline()

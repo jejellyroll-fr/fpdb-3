@@ -44,6 +44,7 @@
 #    this is corrected tournaments will be unparseable
 
 import datetime
+import os
 import re
 from decimal import Decimal, InvalidOperation
 
@@ -63,7 +64,7 @@ class iPoker(HandHistoryConverter):
     sitename = "iPoker"
     filetype = "text"
     codepage = ("utf8", "cp1252")
-    siteId = 14
+    site_id = 14
     copyGameHeader = True  # NOTE: Not sure if this is necessary yet. The file is xml so its likely
     summaryInFile = True
 
@@ -170,8 +171,8 @@ class iPoker(HandHistoryConverter):
 
     # Static regexes
     re_client = re.compile(r"<client_version>(?P<CLIENT>.*?)</client_version>")
-    # re_Identify = re.compile(u"""<\?xml version=\"1\.0\" encoding=\"utf-8\"\?>""")
-    re_Identify = re.compile("""<game gamecode=\"\\d+\">""")
+    # re_identify = re.compile(u"""<\?xml version=\"1\.0\" encoding=\"utf-8\"\?>""")
+    re_identify = re.compile("""<game gamecode=\"\\d+\">""")
     re_SplitHands = re.compile(r"</game>")
     re_TailSplitHands = re.compile(r"(</game>)")
     re_GameInfo = re.compile(
@@ -225,11 +226,11 @@ class iPoker(HandHistoryConverter):
         re.VERBOSE,
     )
     re_HandInfo = re.compile(
-        r'code="(?P<HID>[0-9]+)">\s*?<general>\s*?<startdate>(?P<DATETIME>[\.a-zA-Z-/: 0-9]+)</startdate>',
-        re.MULTILINE,
+        r'code="(?P<HID>[0-9]+)".*?<general>(.*?<startdate>(?P<DATETIME>[\.a-zA-Z-/: 0-9]+)</startdate>)?',
+        re.MULTILINE | re.DOTALL,
     )
     re_PlayerInfo = re.compile(
-        r'<player( (seat="(?P<SEAT>[0-9]+)"|name="%(PLYR)s"|chips="(%(LS)s)?(?P<CASH>[%(NUM2)s]+)(%(LS)s)?"|dealer="(?P<BUTTONPOS>(0|1))"|win="(%(LS)s)?(?P<WIN>[%(NUM2)s]+)(%(LS)s)?"|bet="(%(LS)s)?(?P<BET>[^"]+)(%(LS)s)?"|rakeamount="(%(LS)s)?(?P<RAKEAMOUNT>[%(NUM2)s]+)(%(LS)s)?"|addon="\d*"|rebuy="\d*"|merge="\d*"|reg_code="[\d-]*"))+\s*/>'
+        r'<player( (seat="(?P<SEAT>[0-9]+)"|name="%(PLYR)s"|chips="(%(LS)s)?(?P<CASH>[\d.,\s]+)(%(LS)s)?"|dealer="(?P<BUTTONPOS>(0|1))"|win="(%(LS)s)?(?P<WIN>[\d.,\s]+)(%(LS)s)?"|bet="(%(LS)s)?(?P<BET>[^"]+)(%(LS)s)?"|rakeamount="(%(LS)s)?(?P<RAKEAMOUNT>[\d.,\s]+)(%(LS)s)?"|addon="\d*"|rebuy="\d*"|merge="\d*"|reg_code="[\d-]*"))+\s*/>'
         % substitutions,
         re.MULTILINE,
     )
@@ -288,12 +289,45 @@ class iPoker(HandHistoryConverter):
         if hasattr(self.config, "get_site_id"):
             site_id_result = self.config.get_site_id(self.sitename)
             if site_id_result:
-                self.siteId = site_id_result
-                log.debug(f"Set siteId to {self.siteId} for skin {self.sitename}")
+                self.site_id = site_id_result
+                log.debug(f"Set site_id to {self.site_id} for skin {self.sitename}")
             else:
                 log.warning(f"Could not find site ID for {self.sitename}, using default iPoker ID")
                 self.sitename = "iPoker"
-                self.siteId = 14
+                self.site_id = 14
+
+    def cleanIPokerMoney(self, money_str):
+        """
+        Clean iPoker money strings that may contain currency symbols and leading zeros.
+        
+        Args:
+            money_str (str): Raw money string like "002€" or "023€"
+            
+        Returns:
+            str: Cleaned money string that can be converted to Decimal
+        """
+        if not money_str:
+            return money_str
+            
+        # Remove currency symbols and non-decimal characters
+        cleaned = self.re_non_decimal.sub("", money_str)
+        
+        # Remove leading zeros but preserve decimal structure
+        if cleaned and cleaned != "0":
+            # Handle cases like "002" -> "2", "023" -> "23", but keep "0.02" as is
+            if '.' not in cleaned and ',' not in cleaned:
+                # Pure integer with leading zeros
+                cleaned = str(int(cleaned))
+            elif ',' in cleaned and cleaned.count(',') == 1:
+                # European decimal format: "0,23" 
+                parts = cleaned.split(',')
+                if len(parts) == 2:
+                    integer_part = str(int(parts[0])) if parts[0] else "0"
+                    decimal_part = parts[1]
+                    cleaned = f"{integer_part},{decimal_part}"
+        
+        # Finally use the standard clearMoneyString
+        return self.clearMoneyString(cleaned)
 
     def detectSkin(self, path):
         """Detect the iPoker skin from the file path."""
@@ -363,6 +397,32 @@ class iPoker(HandHistoryConverter):
         # Default to generic iPoker if no specific skin detected
         log.info(f"No specific iPoker skin detected from path: {path}, using default 'iPoker'")
         return "iPoker"
+
+    def getFileCreationTime(self):
+        """
+        Get the creation time of the current hand history file.
+        
+        Returns:
+            datetime: File creation time or current time if file doesn't exist
+        """
+        try:
+            if hasattr(self, 'in_path') and self.in_path and self.in_path != "-":
+                if os.path.exists(self.in_path):
+                    # Get file creation time (or modified time as fallback)
+                    try:
+                        creation_time = os.path.getctime(self.in_path)
+                    except (OSError, AttributeError):
+                        # Fallback to modification time if creation time not available
+                        creation_time = os.path.getmtime(self.in_path)
+                    
+                    return datetime.datetime.fromtimestamp(creation_time)
+                    
+        except Exception as e:
+            log.warning(f"Could not get file creation time: {e}")
+        
+        # Fallback to current time
+        log.warning("Using current time as fallback for missing startdate")
+        return datetime.datetime.now()
 
     def compilePlayerRegexs(self, hand):
         log.debug(f"Compiling player regexes for hand: {hand}")
@@ -444,9 +504,9 @@ class iPoker(HandHistoryConverter):
                 raise FpdbParseError
 
             else:
-                message = "No startdate"
-                log.warning(f"iPoker partial hand history detected: {message}")
-                raise FpdbHandPartial(f"iPoker partial hand history: {message}")
+                # Missing startdate is no longer considered a partial since we can use file creation time as fallback
+                log.warning(f"No game type determined, but this may be due to missing startdate. Will attempt to use file creation time fallback.")
+                raise FpdbParseError
 
         log.debug(f"Game type successfully parsed: {gametype}")
         return gametype
@@ -648,7 +708,7 @@ class iPoker(HandHistoryConverter):
 
                 # Handle case where only TOTBUYIN present
                 if mg["BIAMT"] is None and mg["BIRAKE"] is None and mg["TOTBUYIN"]:
-                    total_buyin_str = self.clearMoneyString(self.re_non_decimal.sub("", mg["TOTBUYIN"]))
+                    total_buyin_str = self.cleanIPokerMoney(mg["TOTBUYIN"])
                     if "Token" in handText:
                         mg["BIAMT"] = total_buyin_str
                         mg["BIRAKE"] = "0"
@@ -682,7 +742,7 @@ class iPoker(HandHistoryConverter):
 
             if mg.get("WIN") and mg["WIN"] != "N/A":
                 try:
-                    winnings = int(100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["WIN"]))))
+                    winnings = int(100 * Decimal(self.cleanIPokerMoney(mg["WIN"])))
                     self.tinfo["winnings"] += winnings
                     log.debug(f"Added winnings: {winnings}, total: {self.tinfo['winnings']}")
                 except Exception as e:
@@ -703,13 +763,13 @@ class iPoker(HandHistoryConverter):
                 log.debug("FPP detected as buy-in currency.")
 
             if mg.get("BIRAKE"):
-                mg["BIRAKE"] = self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE"]))
-                mg["BIAMT"] = self.clearMoneyString(self.re_non_decimal.sub("", mg["BIAMT"]))
+                mg["BIRAKE"] = self.cleanIPokerMoney(mg["BIRAKE"])
+                mg["BIAMT"] = self.cleanIPokerMoney(mg["BIAMT"])
                 log.debug(f"Cleaned BIRAKE={mg['BIRAKE']}, BIAMT={mg['BIAMT']}")
 
                 if re_client_split == "23.5" and mg.get("BIRAKE2"):
                     try:
-                        buyin2 = int(100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE2"]))))
+                        buyin2 = int(100 * Decimal(self.cleanIPokerMoney(mg["BIRAKE2"])))
                         self.tinfo["buyin"] += buyin2
                         log.debug(f"Added BIRAKE2 to buyin: {buyin2}. Total buyin: {self.tinfo['buyin']}")
                     except Exception:
@@ -719,12 +779,10 @@ class iPoker(HandHistoryConverter):
                     m4 = self.re_Buyin.search(handText)
                     if m4:
                         try:
-                            fee = int(100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE"]))))
+                            fee = int(100 * Decimal(self.cleanIPokerMoney(mg["BIRAKE"])))
                             self.tinfo["fee"] = fee
                             log.debug(f"Set fee={fee}")
-                            buyin = int(
-                                100 * Decimal(self.clearMoneyString(self.re_non_decimal.sub("", mg["BIRAKE2"]))),
-                            )
+                            buyin = int(100 * Decimal(self.cleanIPokerMoney(mg["BIRAKE2"])))
                             self.tinfo["buyin"] = buyin
                             log.debug(f"Set buyin={buyin}")
                         except Exception:
@@ -770,6 +828,7 @@ class iPoker(HandHistoryConverter):
         log.debug(f"Final info: {self.info}")
         return self.info
 
+
     def readSummaryInfo(self, summaryInfoList):
         log.info("enter method readSummaryInfo.")
         log.debug("Method readSummaryInfo non implemented.")
@@ -811,7 +870,7 @@ class iPoker(HandHistoryConverter):
         hand.tablename = self.tablename
         log.debug(f"Set hand.tablename: {hand.tablename}")
 
-        if self.info["seats"]:
+        if self.info.get("seats"):
             hand.maxseats = int(self.info["seats"])
             log.debug(f"Set hand.maxseats: {hand.maxseats}")
 
@@ -820,7 +879,12 @@ class iPoker(HandHistoryConverter):
         log.debug(f"Set hand.handid: {hand.handid}")
 
         # Parse the start time for the hand
-        if m2 := self.re_DateTime1.search(m.group("DATETIME")):
+        datetime_str = m.group("DATETIME")
+        if datetime_str is None:
+            log.warning(f"No startdate found in hand {hand.handid}. Using file creation time as fallback.")
+            hand.startTime = self.getFileCreationTime()
+            log.debug(f"Set hand.startTime from file creation time: {hand.startTime}")
+        elif m2 := self.re_DateTime1.search(datetime_str):
             log.debug("Matched re_DateTime1.")
             month = self.months[m2.group("M")]
             sec = m2.group("S") or "00"
@@ -830,24 +894,24 @@ class iPoker(HandHistoryConverter):
         else:
             log.debug("Failed to match re_DateTime1, trying alternative formats.")
             try:
-                hand.startTime = datetime.datetime.strptime(m.group("DATETIME"), "%Y-%m-%d %H:%M:%S")
+                hand.startTime = datetime.datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S")
                 log.debug(f"Parsed hand.startTime using default format: {hand.startTime}")
             except ValueError as e:
-                log.warning(f"Failed to parse datetime: {m.group('DATETIME')}. Trying re_DateTime2 or re_DateTime3.")
-                if date_match := self.re_DateTime2.search(m.group("DATETIME")):
+                log.warning(f"Failed to parse datetime: {datetime_str}. Trying re_DateTime2 or re_DateTime3.")
+                if date_match := self.re_DateTime2.search(datetime_str):
                     log.debug("Matched re_DateTime2.")
-                    datestr = "%d/%m/%Y %H:%M:%S" if "/" in m.group("DATETIME") else "%d.%m.%Y %H:%M:%S"
+                    datestr = "%d/%m/%Y %H:%M:%S" if "/" in datetime_str else "%d.%m.%Y %H:%M:%S"
                     if date_match.group("S") is None:
                         datestr = "%d/%m/%Y %H:%M"
                 else:
-                    date_match1 = self.re_DateTime3.search(m.group("DATETIME"))
+                    date_match1 = self.re_DateTime3.search(datetime_str)
                     if date_match1 is None:
                         log.error(f"iPokerToFpdb.readHandInfo Could not read datetime: '{hand.handid}'")
                         raise FpdbParseError from e
                     datestr = "%Y/%m/%d %H:%M:%S"
                     if date_match1.group("S") is None:
                         datestr = "%Y/%m/%d %H:%M"
-                hand.startTime = datetime.datetime.strptime(m.group("DATETIME"), datestr)
+                hand.startTime = datetime.datetime.strptime(datetime_str, datestr)
                 log.debug(f"Parsed hand.startTime using fallback format: {hand.startTime}")
 
         # If the hand is a tournament hand, set additional information
@@ -870,6 +934,7 @@ class iPoker(HandHistoryConverter):
 
         # Initialize dictionaries and regex pattern
         self.playerWinnings, plist = {}, {}
+        self.seat_mapping = {}  # Store seat mapping for tournaments
         hand.rake = Decimal("0.00")  # Initialize the total rake
         log.debug("Initialized playerWinnings, plist dictionaries, and hand.rake.")
 
@@ -877,7 +942,9 @@ class iPoker(HandHistoryConverter):
         log.debug("Running regex to find player information in hand text.")
 
         # Extract player information from regex matches
+        original_seats = []
         for a in m:
+            log.info(f"🎯 SEAT DETECTION: Player {a.group('PNAME')} detected at seat {a.group('SEAT')}")
             log.debug(f"Matched player info: {a.groupdict()}")
 
             # Extract rake amount, defaulting to '0' if not present
@@ -885,52 +952,86 @@ class iPoker(HandHistoryConverter):
             hand.rake += Decimal(rake_amount)
             log.debug(f"Added rake amount {rake_amount} for player {a.group('PNAME')}. Total rake: {hand.rake}")
 
+            # Store original seat number
+            original_seat = int(a.group("SEAT"))
+            original_seats.append(original_seat)
+            
             # Create a dictionary entry for the player
             plist[a.group("PNAME")] = [
-                int(a.group("SEAT")),
+                original_seat,
                 self.clearMoneyString(a.group("CASH")),
                 self.clearMoneyString(a.group("WIN")),
                 False,
             ]
-            log.debug(
-                f"Player {a.group('PNAME')} added to plist with seat {a.group('SEAT')}, "
+            log.info(
+                f"🎯 PLAYER ADDED: {a.group('PNAME')} at seat {a.group('SEAT')}, "
                 f"stack {plist[a.group('PNAME')][1]}, winnings {plist[a.group('PNAME')][2]}.",
             )
 
             # If the player is the button, set the button position
             if a.group("BUTTONPOS") == "1":
-                hand.buttonpos = int(a.group("SEAT"))
+                hand.buttonpos = original_seat
                 log.debug(f"Set button position to seat {hand.buttonpos} for player {a.group('PNAME')}.")
 
         # Ensure there are at least 2 players in the hand
         if len(plist) <= 1:
-            log.error(f"iPokerToFpdb.readPlayerStacks: Less than 2 players in hand '{hand.handid}'.")
-            raise FpdbParseError
+            log.warning(f"iPokerToFpdb.readPlayerStacks: Less than 2 players in hand '{hand.handid}'. Marking as partial.")
+            raise FpdbHandPartial(f"iPoker partial hand history: Less than 2 players ({len(plist)} players found)")
 
         log.debug(f"Player list extracted successfully. Total players: {len(plist)}")
+
+        # For tournaments, remap seats to sequential numbers (1, 2, 3, ...) for HUD compatibility
+        if self.info["type"] == "tour":
+            # Sort original seats to maintain consistent mapping
+            original_seats_sorted = sorted(original_seats)
+            for i, original_seat in enumerate(original_seats_sorted):
+                self.seat_mapping[original_seat] = i + 1
+            
+            log.info(f"🎯 SEAT MAPPING: {self.seat_mapping}")
+            
+            # Remap button position if needed
+            if hand.buttonpos and hand.buttonpos in self.seat_mapping:
+                old_button = hand.buttonpos
+                hand.buttonpos = self.seat_mapping[hand.buttonpos]
+                log.info(f"🎯 BUTTON REMAPPED: {old_button} -> {hand.buttonpos}")
+            
+            # Remap seats in plist
+            for pname in plist:
+                old_seat = plist[pname][0]
+                new_seat = self.seat_mapping.get(old_seat, old_seat)
+                plist[pname][0] = new_seat
+                log.info(f"🎯 SEAT REMAPPED: {pname} {old_seat} -> {new_seat}")
 
         # Add remaining players to the Hand object and playerWinnings dictionary if they won
         for pname in plist:
             seat, stack, win, sitout = plist[pname]
-            log.debug(f"Adding player {pname} to hand with seat {seat}, stack {stack}, winnings {win}.")
+            log.info(f"🎯 ADDING TO HAND: {pname} at seat {seat}, stack {stack}, winnings {win}")
             hand.addPlayer(seat, pname, stack, None, sitout)
             if Decimal(win) != 0:
                 self.playerWinnings[pname] = win
                 log.debug(f"Player {pname} has winnings: {win}")
+        
+        # Log final hand.players structure 
+        log.info(f"🎯 FINAL HAND.PLAYERS: {[f'seat{p[0]}:{p[1]}' for p in hand.players]}")
+        log.info(f"🎯 MAXSEATS WILL BE: {hand.maxseats if hand.maxseats else 'TO_BE_DETERMINED'}")
 
         # Set the maxseats attribute in the Hand object if it is not already set
         if hand.maxseats is None:
-            log.debug("Determining hand.maxseats.")
+            log.info("🎯 DETERMINING MAXSEATS...")
             if self.info["type"] == "tour" and self.maxseats == 0:
                 hand.maxseats = self.guessMaxSeats(hand)
                 self.maxseats = hand.maxseats
-                log.debug(f"Guessed maxseats for tournament: {hand.maxseats}")
+                log.info(f"🎯 GUESSED MAXSEATS for tournament: {hand.maxseats}")
             elif self.info["type"] == "tour":
                 hand.maxseats = self.maxseats
-                log.debug(f"Set maxseats from tournament info: {hand.maxseats}")
+                log.info(f"🎯 SET MAXSEATS from tournament info: {hand.maxseats}")
             else:
                 hand.maxseats = None
-                log.debug("maxseats could not be determined and remains None.")
+                log.info("🎯 MAXSEATS could not be determined and remains None")
+        else:
+            log.info(f"🎯 MAXSEATS already set: {hand.maxseats}")
+        
+        log.info(f"🎯 FINAL MAXSEATS: {hand.maxseats}")
 
         log.debug("Exiting readPlayerStacks.")
 
@@ -1195,6 +1296,12 @@ class iPoker(HandHistoryConverter):
                     if player == self.hero and cards[0]:
                         hand.hero = player
                         log.debug(f"Hero identified: {player} with cards: {cards}")
+                    
+                    # Check if player exists in hand before adding hole cards
+                    if player not in hand.players:
+                        log.warning(f"Skipping hole cards for unknown player '{player}' in hand '{hand.handid}'")
+                        continue
+                        
                     hand.addHoleCards(
                         street,
                         player,
@@ -1212,6 +1319,10 @@ class iPoker(HandHistoryConverter):
             for found in self.re_HeroCards.finditer(text):
                 player = found.group("PNAME")
                 if player is not None:
+                    # Check if player exists in hand before processing hole cards
+                    if player not in hand.players:
+                        log.warning(f"Skipping hole cards for unknown player '{player}' in hand '{hand.handid}' on street '{street}'")
+                        continue
                     cards = found.group("CARDS").split(" ")
                     if street == "SEVENTH" and self.hero != player:
                         newcards = []
@@ -1597,3 +1708,8 @@ class iPoker(HandHistoryConverter):
         # Log the generated regex pattern and return it
         log.info(f"iPoker returns: '{regex}'")
         return regex
+
+    def readOther(self, hand):
+        """Read other information from hand that doesn't fit standard categories."""
+        log.debug(f"Reading other information for hand: {hand.handid}")
+        pass

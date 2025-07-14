@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """Base class for interacting with poker client windows.
 
 There are currently subclasses for X, OSX, and Windows.
@@ -88,10 +87,10 @@ bad_words = ("History for table:", "HUD:", "Chat:", "FPDBHUD", "Lobby")
 #    search_string =
 
 
-class Table_Window(object):
+class Table_Window:
     def __init__(
         self, config, site, table_name=None, tournament=None, table_number=None,
-    ):
+    ) -> None:
         self.config = config
         self.site = site
         self.hud = None  # Will be filled in later
@@ -122,14 +121,23 @@ class Table_Window(object):
             try:
                 self.table = int(table_number)
             except ValueError:
-                log.error(f"Error converting table_number: {table_number}")
-                raise
+                # Try to extract table number from string like "Twister 0.25€, 1091614818"
+                import re
+                match = re.search(r'(\d+)$', str(table_number))
+                if match:
+                    self.table = int(match.group(1))
+                    log.debug(f"Extracted table number from string: {self.table}")
+                else:
+                    log.exception(f"Error converting table_number: {table_number}")
+                    # Fallback to tournament number if table extraction fails
+                    self.table = self.tournament
+                    log.warning(f"Using tournament number as table fallback: {self.table}")
 
             log.debug(f"Converted table number: {self.table}")
             self.name = f"{self.tournament} - {self.table}"
 
             self.type = "tour"
-            table_kwargs = dict(tournament=self.tournament, table_number=self.table)
+            table_kwargs = {"tournament": self.tournament, "table_number": self.table}
             self.tableno_re = getTableNoRe(
                 self.config, self.site, tournament=self.tournament,
             )
@@ -142,7 +150,7 @@ class Table_Window(object):
             self.name = table_name
             self.type = "cash"
             self.tournament = None
-            table_kwargs = dict(table_name=table_name)
+            table_kwargs = {"table_name": table_name}
 
             log.debug(
                 f"Cash table kwargs type: {type(table_kwargs)}, value: {table_kwargs}",
@@ -154,7 +162,7 @@ class Table_Window(object):
             log.warning(
                 "Neither tournament nor table_name provided; initialization failed.",
             )
-            return None
+            return
 
         self.search_string = getTableTitleRe(
             self.config, self.site, self.type, **table_kwargs,
@@ -172,7 +180,7 @@ class Table_Window(object):
 
         geo = self.get_geometry()
         if geo is None:
-            return None
+            return
         self.width = geo["width"]
         self.height = geo["height"]
         self.x = geo["x"]
@@ -189,7 +197,7 @@ class Table_Window(object):
 
         self.game = self.get_game()
 
-    def __str__(self):
+    def __str__(self) -> str:
         likely_attrs = (
             "number",
             "title",
@@ -212,7 +220,7 @@ class Table_Window(object):
         temp = "TableWindow object\n"
         for a in likely_attrs:
             if getattr(self, a, 0):
-                temp += "    %s = %s\n" % (a, getattr(self, a))
+                temp += f"    {a} = {getattr(self, a)}\n"
         return temp
 
     ####################################################################
@@ -269,12 +277,12 @@ class Table_Window(object):
 
     #    These might be called by a Window.timeout, so they must not
     #    return False, or the timeout will be cancelled.
-    def check_size(self):
+    def check_size(self) -> str | bool:
         new_geo = self.get_geometry()
         if new_geo is None:  # window destroyed
             return "client_destroyed"
 
-        elif (
+        if (
             self.width != new_geo["width"] or self.height != new_geo["height"]
         ):  # window resized
             self.oldwidth = self.width
@@ -284,7 +292,7 @@ class Table_Window(object):
             return "client_resized"
         return False  # no change
 
-    def check_loc(self):
+    def check_loc(self) -> str | bool:
         new_geo = self.get_geometry()
         if new_geo is None:  # window destroyed
             return "client_destroyed"
@@ -295,7 +303,7 @@ class Table_Window(object):
             return "client_moved"
         return False  # no change
 
-    def has_table_title_changed(self, hud):
+    def has_table_title_changed(self, hud) -> bool:
         log.debug("before get_table_no()")
         result = self.get_table_no()
         log.debug(f"tb has change nb {result}")
@@ -308,8 +316,5 @@ class Table_Window(object):
         log.debug("return False")
         return False
 
-    def check_bad_words(self, title):
-        for word in bad_words:
-            if word in title:
-                return True
-        return False
+    def check_bad_words(self, title) -> bool:
+        return any(word in title for word in bad_words)

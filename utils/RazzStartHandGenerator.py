@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-"""Generate Razz startCards encoding and decoding for Card.py"""
+"""Generate Razz startCards encoding and decoding for Card.py."""
 
-from __future__ import print_function
 
 import re
 
@@ -134,26 +132,18 @@ count = 1
 string = ""
 
 for a in re_space.finditer(razzlist):
-    string = string + ("'%s':%s," % (a.group(1), count))
+    string = string + (f"'{a.group(1)}':{count},")
     count += 1
     if count % 10 == 0:
         string = string + "\n"
-print("-------------------------")
-print("Razz encode list")
-print("------------------------ ")
-print(string)
 
 string = ""
 count = 1
 
 for a in re_space.finditer(razzlist):
-    string = string + ("%s:'%s'," % (count, a.group(1)))
+    string = string + (f"{count}:'{a.group(1)}',")
     count += 1
     if count % 10 == 0:
         string = string + "\n"
 
 
-print("-------------------------")
-print("Razz decode list")
-print("------------------------ ")
-print(string)

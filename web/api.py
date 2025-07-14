@@ -1,5 +1,4 @@
 import math
-from typing import List
 
 from base_model import Hand, HandsPlayer, Player
 from fastapi import FastAPI
@@ -25,19 +24,19 @@ from sql_request import (
 app = FastAPI()
 
 
-@app.get("/hands", response_model=List[Hand])
+@app.get("/hands", response_model=list[Hand])
 async def get_hands_api():
     hands = get_hands()
     return JSONResponse(content=hands)
 
 
-@app.get("/handsPlayers", response_model=List[HandsPlayer])
+@app.get("/handsPlayers", response_model=list[HandsPlayer])
 async def get_handsPlayers_api():
     handsPlayers = get_handsPlayers()
     return JSONResponse(content=handsPlayers)
 
 
-@app.get("/heroes", response_model=List[Player])
+@app.get("/heroes", response_model=list[Player])
 async def get_heroes_api():
     heroes = get_heroes()
     return JSONResponse(content=heroes)
@@ -45,14 +44,14 @@ async def get_heroes_api():
 
 @app.get("/RingProfitAllHandsPlayerIdSite")
 async def get_ring_profit_all_hands_api(
-    site: int = None,
-    player: int = None,
-    limit: str = None,
-    bigBlind: int = None,
-    category: str = None,
-    currency: str = None,
-    startdate: str = None,
-    enddate: str = None,
+    site: int | None = None,
+    player: int | None = None,
+    limit: str | None = None,
+    bigBlind: int | None = None,
+    category: str | None = None,
+    currency: str | None = None,
+    startdate: str | None = None,
+    enddate: str | None = None,
 ):
     # Call get_RingProfitAllHandsPlayerIdSite() and unpack profits
     profits = get_RingProfitAllHandsPlayerIdSite(
@@ -75,14 +74,14 @@ async def get_ring_profit_all_hands_api(
 
 @app.get("/TourneysProfitPlayerIdSite")
 async def get_torneys_profit_api(
-    site: int = None,
-    player: int = None,
-    limit: str = None,
-    buyin: int = None,
-    category: str = None,
-    currency: str = None,
-    startdate: str = None,
-    enddate: str = None,
+    site: int | None = None,
+    player: int | None = None,
+    limit: str | None = None,
+    buyin: int | None = None,
+    category: str | None = None,
+    currency: str | None = None,
+    startdate: str | None = None,
+    enddate: str | None = None,
 ):
     # Call get_RingProfitAllHandsPlayerIdSite() and unpack profits
     profits = get_tourneysProfitPlayerIdSite(
@@ -107,7 +106,7 @@ async def get_torneys_profit_api(
 
 @app.get("/players")
 async def get_players_api(
-    name: str = None, site: str = None, page: int = 1, per_page: int = 10,
+    name: str | None = None, site: str | None = None, page: int = 1, per_page: int = 10,
 ):
     # Call get_players() and unpack players and total
     players, total = get_players(name=name, site=site, page=page, per_page=per_page)
@@ -128,12 +127,12 @@ async def get_players_api(
     )
 
 
-@app.get("/players/{playerId}/hands", response_model=List[HandsPlayer])
+@app.get("/players/{playerId}/hands", response_model=list[HandsPlayer])
 def get_player_hands_api(
     playerId: int,
     tourney: bool | None = False,  # Default to False
     cash: bool | None = False,  # Default to False
-    sort_by: str = None,  # Default to None
+    sort_by: str | None = None,  # Default to None
 ):
     handsPlayers = get_hands_players(
         playerId, tourney=tourney, cash=cash, sort_by=sort_by,
@@ -179,14 +178,14 @@ async def get_playerscount_tour_api():
 
 @app.get("/statsplayers")
 async def get_statsplayers_api(
-    site: int = None,
-    player: int = None,
-    limit: str = None,
-    bigBlind: int = None,
-    category: str = None,
-    currency: str = None,
-    startdate: str = None,
-    enddate: str = None,
+    site: int | None = None,
+    player: int | None = None,
+    limit: str | None = None,
+    bigBlind: int | None = None,
+    category: str | None = None,
+    currency: str | None = None,
+    startdate: str | None = None,
+    enddate: str | None = None,
 ):
     result = get_statsplayers(
         site=site,

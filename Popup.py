@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Popup.py
+"""Popup.py.
 
 Popup windows for the HUD.
 """
 
-from __future__ import division
 
 import ctypes
 
@@ -62,8 +60,8 @@ class Popup(QWidget):
         hand_instance=None,
         config=None,
         parent_popup=None,
-    ):
-        super(Popup, self).__init__(
+    ) -> None:
+        super().__init__(
             parent_popup or win,
             Qt.Window | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus,
         )
@@ -99,12 +97,12 @@ class Popup(QWidget):
         self.move(QCursor.pos())
 
     #    Every popup window needs one of these
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event) -> None:
         """Handle button clicks on the popup window."""
         #    Any button click gets rid of popup.
         self.destroy_pop()
 
-    def create(self):
+    def create(self) -> None:
         # popup_count is used by Aux_hud to prevent multiple active popups per player
         # do not increment count if this popup is a child of another popup
         if self.parent_popup:
@@ -112,7 +110,7 @@ class Popup(QWidget):
         else:
             self.win.popup_count += 1
 
-    def destroy_pop(self):
+    def destroy_pop(self) -> None:
         if self.parent_popup:
             self.parent_popup.submenu_count -= 1
         else:
@@ -121,8 +119,8 @@ class Popup(QWidget):
 
 
 class default(Popup):
-    def create(self):
-        super(default, self).create()
+    def create(self) -> None:
+        super().create()
         player_id = None
         for id in list(self.stat_dict.keys()):
             if self.seat == self.stat_dict[id]["seat"]:
@@ -159,8 +157,8 @@ class default(Popup):
 
 class Submenu(Popup):
     # fixme refactor this class, too much repeat code
-    def create(self):
-        super(Submenu, self).create()
+    def create(self) -> None:
+        super().create()
 
         player_id = None
         for id in list(self.stat_dict.keys()):
@@ -206,8 +204,7 @@ class Submenu(Popup):
 
                 xlab = QLabel("x")
                 xlab.setStyleSheet(
-                    "background:%s;color:%s;"
-                    % (self.win.aw.fgcolor, self.win.aw.bgcolor),
+                    f"background:{self.win.aw.fgcolor};color:{self.win.aw.bgcolor};",
                 )
                 grid_line[row]["x"] = xlab
                 self.grid.addWidget(grid_line[row]["x"], row - 1, 2)
@@ -228,7 +225,7 @@ class Submenu(Popup):
 
             row += 1
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event) -> None:
         widget = self.childAt(event.pos())
         submenu = "_destroy"
         if hasattr(widget, "submenu"):
@@ -252,8 +249,8 @@ class Multicol(Popup):
     # like a default, but will flow into columns of 16 items
     # use "blank" items if the default flowing affects readability
 
-    def create(self):
-        super(Multicol, self).create()
+    def create(self) -> None:
+        super().create()
 
         player_id = None
         for id in list(self.stat_dict.keys()):
@@ -330,8 +327,7 @@ def popup_factory(
     # getattr looksup the class reference in this module
 
     class_to_return = getattr(__import__(__name__), pop.pu_class)
-    popup_instance = class_to_return(
+    return class_to_return(
         seat, stat_dict, win, pop, hand_instance, config, parent_popup,
     )
 
-    return popup_instance

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright 2009-2011 Stephane Alessio
 # This program is free software: you can redistribute it and/or modify
@@ -15,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
-"""parses and stores summary sections from e.g. eMail or summary files"""
+"""parses and stores summary sections from e.g. eMail or summary files."""
 
 # import L10n
 # _ = L10n.get_translation()
@@ -39,7 +38,7 @@ except ImportError:
 log = get_logger("parser")
 
 
-class TourneySummary(object):
+class TourneySummary:
     ################################################################
     #    Class Variables
     UPS = {
@@ -87,31 +86,31 @@ class TourneySummary(object):
 
     def __init__(
         self, db, config, siteName, summaryText, in_path="-", builtFrom="HHC", header="",
-    ):
+    ) -> None:
         self.db = db
         self.config = config
         self.import_parameters = self.config.get_import_parameters()
         self.siteName = siteName
         self.siteId = None
-        
+
         # Try to get site ID from database first
-        if self.db and hasattr(self.db, 'get_site_id'):
+        if self.db and hasattr(self.db, "get_site_id"):
             try:
                 site_id_result = self.db.get_site_id(siteName)
                 if site_id_result and len(site_id_result) > 0:
                     self.siteId = site_id_result[0][0]
                     log.debug(f"Got siteId {self.siteId} from database for {siteName}")
             except Exception as e:
-                log.error(f"Error getting site ID from database: {e}")
-        
+                log.exception(f"Error getting site ID from database: {e}")
+
         # Fallback to hardcoded SITEIDS if database lookup fails
         if self.siteId is None and siteName in self.SITEIDS:
             self.siteId = self.SITEIDS[siteName]
             log.debug(f"Using hardcoded siteId {self.siteId} for {siteName}")
-            
+
         if self.siteId is None:
             log.error(f"Could not determine site ID for {siteName}")
-            
+
         self.in_path = in_path
         self.header = header
 
@@ -198,7 +197,7 @@ class TourneySummary(object):
 
     # end def __init__
 
-    def __str__(self):
+    def __str__(self) -> str:
         # TODO : Update
         vars = (
             (("SITE"), self.siteName),
@@ -253,20 +252,20 @@ class TourneySummary(object):
         )
         str = ""
         for name, var in vars:
-            str = str + "\n%s = " % name + pprint.pformat(var)
+            str = str + f"\n{name} = " + pprint.pformat(var)
 
         for name, struct in structs:
-            str = str + "\n%s =\n" % name + pprint.pformat(struct, 4)
+            str = str + f"\n{name} =\n" + pprint.pformat(struct, 4)
         return str
 
     # end def __str__
 
-    def getSplitRe(self, head):
+    def getSplitRe(self, head) -> None:
         pass
 
     """Function to return a re object to split the summary text into separate tourneys, based on head of file"""
 
-    def parseSummary(self):
+    def parseSummary(self) -> None:
         pass
 
     """should fill the class variables with the parsed information"""
@@ -276,7 +275,7 @@ class TourneySummary(object):
 
     @staticmethod
     def clearMoneyString(money):
-        "Renders 'numbers' like '1 200' and '2,000'"
+        """Renders 'numbers' like '1 200' and '2,000'."""
         money = money.strip("€&euro;\u20ac$ ")
         return HandHistoryConverter.clearMoneyString(money)
 
@@ -312,7 +311,7 @@ class TourneySummary(object):
         self.db.createOrUpdateTourneysPlayers(self)
         self.db.commit()
 
-        log.debug(("Tourney Insert/Update done"))
+        log.debug("Tourney Insert/Update done")
 
         # TO DO : Return what has been done (tourney created, updated, nothing)
         # ?? stored = 1 if tourney is fully created / duplicates = 1, if everything was already here and correct / partial=1 if some things were already here (between tourney, tourneysPlayers and handsPlayers)
@@ -334,12 +333,11 @@ class TourneySummary(object):
         addOnCount,
         koCount,
         entryId=None,
-    ):
-        """
-        Adds a player to the tourney, and initialises data structures indexed by player.
+    ) -> None:
+        """Adds a player to the tourney, and initialises data structures indexed by player.
         rank        (int) indicating the finishing rank (can be -1 if unknown)
         name        (string) player name
-        winnings    (int) the money the player ended the tourney with (can be 0, or -1 if unknown)
+        winnings    (int) the money the player ended the tourney with (can be 0, or -1 if unknown).
         """
         log.debug(f"addPlayer: rank:{rank} - name : '{name}' - Winnings ({winnings})")
         if self.players.get(name) is not None:
@@ -347,7 +345,7 @@ class TourneySummary(object):
                 entries = self.players[name][-1]
                 self.players[name].append(entries + 1)
             elif entryId in self.players[name]:
-                return None
+                return
             else:
                 self.players[name].append(entryId)
             if rank:
@@ -377,11 +375,11 @@ class TourneySummary(object):
 
     # end def addPlayer
 
-    def writeSummary(self, fh=sys.__stdout__):
+    def writeSummary(self, fh=sys.__stdout__) -> None:
         log.warning("writeSummary method needs to be overridden")
         fh.write("Override me\n")
 
-    def printSummary(self):
+    def printSummary(self) -> None:
         self.writeSummary(sys.stdout)
 
     @staticmethod
@@ -397,13 +395,13 @@ class TourneySummary(object):
             elif keys is not None:
                 rows.append([str(c).encode("utf-8") for c in sh.row_values(rownum)])
         for row in rows:
-            data = dict(zip(keys, row))
+            data = dict(zip(keys, row, strict=False))
             data["header"] = header
             if len(data[tourNoField]) > 0:
                 if entries.get(data[tourNoField]) is None:
                     entries[data[tourNoField]] = []
                 entries[data[tourNoField]].append(data)
-        for k, item in entries.iteritems():
+        for _k, item in entries.iteritems():
             summaryTexts.append(item)
         return summaryTexts
 
@@ -417,8 +415,8 @@ class TourneySummary(object):
                 in_fh.close()
                 break
             except UnicodeDecodeError as e:
-                log.error(f"TS.readFile: '{filename}' : '{e}'")
+                log.exception(f"TS.readFile: '{filename}' : '{e}'")
             except UnicodeError as e:
-                log.error(f"TS.readFile: '{filename}' : '{e}'")
+                log.exception(f"TS.readFile: '{filename}' : '{e}'")
 
         return whole_file

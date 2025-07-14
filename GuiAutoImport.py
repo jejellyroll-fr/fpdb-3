@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from __future__ import print_function
 
 import os
 
@@ -11,20 +9,27 @@ import sys
 import traceback
 from optparse import OptionParser
 
-from PyQt5.QtCore import QTimer, QDateTime
-from PyQt5.QtGui import QTextCursor, QTextCharFormat, QColor, QPalette
+from PyQt5.QtCore import QDateTime, QTimer
+from PyQt5.QtGui import QColor, QPalette, QTextCharFormat, QTextCursor
 from PyQt5.QtWidgets import (
     QCheckBox,
     QFormLayout,
     QGroupBox,
     QHBoxLayout,
     QLabel,
+    QProgressBar,
     QSpinBox,
     QTextEdit,
     QVBoxLayout,
     QWidget,
-    QProgressBar,
 )
+
+# Import qt_material for theming
+try:
+    from qt_material import apply_stylesheet
+    QT_MATERIAL_AVAILABLE = True
+except ImportError:
+    QT_MATERIAL_AVAILABLE = False
 
 import Configuration
 import Importer
@@ -51,12 +56,12 @@ if os.name == "nt":
     import win32console
 
 
-def to_raw(string):
+def to_raw(string) -> str:
     return rf"{string}"
 
 
 class GuiAutoImport(QWidget):
-    def __init__(self, settings, config, sql=None, parent=None, cli=False):
+    def __init__(self, settings, config, sql=None, parent=None, cli=False) -> None:
         if not cli:
             QWidget.__init__(self, parent)
         self.importtimer = None
@@ -89,16 +94,32 @@ class GuiAutoImport(QWidget):
             #       Create a timer interface that doesn't rely on GTK
             raise NotImplementedError
 
-    def setupGui(self):
+    def setupGui(self) -> None:
         self.setWindowTitle("FPDB Auto Import")
         self.setGeometry(100, 100, 800, 600)
+
+        # Apply qt_material theme if available
+        if QT_MATERIAL_AVAILABLE:
+            # Apply the same theme as HUD_main
+            apply_stylesheet(self, theme="dark_purple.xml")
         
-        # Let qt_material handle the styling
-        # Only set minimal custom styles for specific needs
+        # Set minimal custom styles for specific needs
         self.setStyleSheet("""
             QTextEdit#logView {
                 font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
                 font-size: 13px;
+                line-height: 1.4;
+                border-radius: 8px;
+            }
+            
+            QGroupBox {
+                font-weight: bold;
+                margin-top: 10px;
+            }
+            
+            QProgressBar {
+                border-radius: 2px;
+                text-align: center;
             }
         """)
 
@@ -130,11 +151,11 @@ class GuiAutoImport(QWidget):
 
         # --- Controls ---
         controlsLayout = QHBoxLayout()
-        
+
         self.startButton = QCheckBox("Start Auto Import")
         self.startButton.stateChanged.connect(self.startClicked)
         controlsLayout.addWidget(self.startButton)
-        
+
         # Add a progress indicator
         self.progressBar = QProgressBar()
         self.progressBar.setTextVisible(False)
@@ -143,11 +164,11 @@ class GuiAutoImport(QWidget):
         self.progressBar.setMaximumHeight(4)
         # Let qt_material handle the progress bar styling
         controlsLayout.addWidget(self.progressBar, 1)
-        
+
         controlsLayout.addStretch()
-        
+
         mainLayout.addLayout(controlsLayout)
-        
+
         # Status label
         self.statusLabel = QLabel("Ready")
         # Use qt_material property for styling
@@ -156,47 +177,126 @@ class GuiAutoImport(QWidget):
 
         self.addText("Auto Import Ready.\n", "info")
 
-    def addText(self, text, level="info"):
-        """Add formatted text to the log with timestamp and color coding"""
+    def apply_theme(self, theme_name="dark_purple.xml"):
+        """Apply a qt_material theme to the widget."""
+        if QT_MATERIAL_AVAILABLE:
+            apply_stylesheet(self, theme=theme_name)
+            self.addText(f"Theme changed to {theme_name.replace('.xml', '')}\n", "info")
+        else:
+            self.addText("qt_material not available, cannot change theme\n", "warning")
+
+    def addText(self, text, level="info") -> None:
+        """Add formatted text to the log with timestamp, icon and color coding."""
         cursor = self.textview.textCursor()
         cursor.movePosition(QTextCursor.End)
+
+        # Clean text: remove leading newlines to ensure timestamp stays at line start
+        clean_text = text.lstrip('\n')
+        leading_newlines = len(text) - len(clean_text)
         
-        # Add timestamp
+        # Add any leading newlines first (but not before timestamp)
+        if leading_newlines > 0:
+            cursor.insertText('\n' * leading_newlines)
+
+        # Add timestamp at the start of the actual message line
         timestamp = QDateTime.currentDateTime().toString("hh:mm:ss")
         timestamp_format = QTextCharFormat()
-        # Use theme's disabled text color for timestamp
-        palette = self.palette()
-        timestamp_format.setForeground(palette.color(QPalette.Disabled, QPalette.Text))
-        cursor.insertText(f"[{timestamp}] ", timestamp_format)
         
-        # Set color based on level using theme-aware colors
+        # Use qt_material theme colors
+        palette = self.palette()
+        if QT_MATERIAL_AVAILABLE:
+            # Material design muted text color
+            timestamp_format.setForeground(QColor("#9E9E9E"))
+        else:
+            timestamp_format.setForeground(palette.color(QPalette.Disabled, QPalette.Text))
+        
+        cursor.insertText(f"[{timestamp}] ", timestamp_format)
+
+        # Add icon and set color based on level
+        icon_format = QTextCharFormat()
         text_format = QTextCharFormat()
+        
         if level == "error":
-            # Red color for errors
-            text_format.setForeground(QColor("#f44336"))
+            # Material Red 500
+            color = QColor("#F44336")
+            icon = "❌ "  # Cross mark
         elif level == "warning":
-            # Orange color for warnings
-            text_format.setForeground(QColor("#ff9800"))
+            # Material Orange 500
+            color = QColor("#FF9800")
+            icon = "⚠️  "  # Warning sign
         elif level == "success":
-            # Green color for success
-            text_format.setForeground(QColor("#4caf50"))
+            # Material Green 500
+            color = QColor("#4CAF50")
+            icon = "✅ "  # Check mark
         elif level == "info":
-            # Use theme's link color for info
-            text_format.setForeground(palette.color(QPalette.Link))
+            # Material Blue 500
+            color = QColor("#2196F3")
+            icon = "ℹ️  "  # Information
+        elif level == "import":
+            # Material Purple 500
+            color = QColor("#9C27B0")
+            icon = "📥 "  # Inbox tray (import)
+        elif level == "export":
+            # Material Indigo 500
+            color = QColor("#3F51B5")
+            icon = "📤 "  # Outbox tray (export)
+        elif level == "process":
+            # Material Deep Orange 500
+            color = QColor("#FF5722")
+            icon = "⚙️  "  # Gear (processing)
+        elif level == "hud":
+            # Material Teal 500
+            color = QColor("#009688")
+            icon = "🎮 "  # Video game controller (HUD)
+        elif level == "file":
+            # Material Brown 500
+            color = QColor("#795548")
+            icon = "📄 "  # Document
+        elif level == "folder":
+            # Material Blue Grey 500
+            color = QColor("#607D8B")
+            icon = "📁 "  # Folder
+        elif level == "network":
+            # Material Light Green 500
+            color = QColor("#8BC34A")
+            icon = "🌐 "  # Globe
+        elif level == "database":
+            # Material Cyan 500
+            color = QColor("#00BCD4")
+            icon = "🗄️  "  # File cabinet
+        elif level == "poker":
+            # Material Red 700
+            color = QColor("#D32F2F")
+            icon = "♠️  "  # Spade suit
+        elif level == "lock":
+            # Material Amber 700
+            color = QColor("#FFA000")
+            icon = "🔒 "  # Lock
+        elif level == "unlock":
+            # Material Light Green 700
+            color = QColor("#689F38")
+            icon = "🔓 "  # Unlock
         else:
             # Use theme's normal text color
-            text_format.setForeground(palette.color(QPalette.Text))
+            color = palette.color(QPalette.Text)
+            icon = "📝 "  # Memo (default)
+
+        # Set format for both icon and text
+        icon_format.setForeground(color)
+        text_format.setForeground(color)
         
-        cursor.insertText(text, text_format)
-        
+        # Insert icon and text
+        cursor.insertText(icon, icon_format)
+        cursor.insertText(clean_text, text_format)
+
         # Ensure the new text is visible
         self.textview.setTextCursor(cursor)
         self.textview.ensureCursorVisible()
 
     #   end of GuiAutoImport.__init__
 
-    
-    def do_import(self):
+
+    def do_import(self) -> bool:
         """Callback for timer to do an import iteration."""
         if self.doAutoImportBool:
             self.importer.autoSummaryGrab()
@@ -205,16 +305,16 @@ class GuiAutoImport(QWidget):
             return True
         return False
 
-    def reset_startbutton(self):
+    def reset_startbutton(self) -> bool:
         if self.pipe_to_hud is not None:
-            self.startButton.set_label(("Stop Auto Import"))
+            self.startButton.set_label("Stop Auto Import")
         else:
-            self.startButton.set_label(("Start Auto Import"))
+            self.startButton.set_label("Start Auto Import")
 
         return False
 
-    def detect_hh_dirs(self, widget, data):
-        """Attempt to find user hand history directories for enabled sites"""
+    def detect_hh_dirs(self, widget, data) -> None:
+        """Attempt to find user hand history directories for enabled sites."""
         the_sites = self.config.get_supported_sites()
         for site in the_sites:
             params = self.config.get_site_parameters(site)
@@ -228,7 +328,7 @@ class GuiAutoImport(QWidget):
                     # Sorry
                     pass
 
-    def posix_detect_hh_dirs(self, site):
+    def posix_detect_hh_dirs(self, site) -> bool:
         defaults = {
             "PokerStars": "~/.wine/drive_c/Program Files/PokerStars/HandHistory",
         }
@@ -240,9 +340,8 @@ class GuiAutoImport(QWidget):
                 log.debug(file)
         return False
 
-    def startClicked(self):
-        """runs when user clicks start on auto import tab"""
-
+    def startClicked(self) -> None:
+        """Runs when user clicks start on auto import tab."""
         # Check to see if we have an open file handle to the HUD and open one if we do not.
         # bufsize = 1 means unbuffered
         # We need to close this file handle sometime.
@@ -259,7 +358,7 @@ class GuiAutoImport(QWidget):
             # - Ideally we want to release the lock if the auto-import is killed by some
             # kind of exception - is this possible?
             if self.settings["global_lock"].acquire(wait=False, source="AutoImport"):
-                self.addText("\nGlobal lock taken ... Auto Import Started.\n", "success")
+                self.addText("\nGlobal lock taken ... Auto Import Started.\n", "lock")
                 self.doAutoImportBool = True
                 self.intervalEntry.setEnabled(False)
                 self.progressBar.setVisible(True)
@@ -278,8 +377,9 @@ class GuiAutoImport(QWidget):
                             )
                             command = os.path.join(base_path, "HUD_main")
                             if not os.path.isfile(command):
+                                msg = f"HUD_main not found at {command}"
                                 raise FileNotFoundError(
-                                    f"HUD_main not found at {command}",
+                                    msg,
                                 )
                             bs = 1
                         elif os.name == "nt":
@@ -313,14 +413,12 @@ class GuiAutoImport(QWidget):
                             command = os.path.join(base_path, "HUD_main.pyw")
                             if not os.path.isfile(command):
                                 self.addText(
-                                    "\n" + ("*** %s was not found") % (command),
+                                    "\n" + (f"*** {command} was not found"),
                                 )
-                            command = [
-                                command,
-                            ] + str.split(self.settings["cl_options"], ".")
+                            command = [command, *str.split(self.settings["cl_options"], ".")]
                             bs = 1
 
-                        log.info(("opening pipe to HUD"))
+                        log.info("opening pipe to HUD")
                         log.debug(f"Running {command.__repr__()}")
                         if self.config.install_method == "exe" or (
                             os.name == "nt" and win32console.GetConsoleWindow() == 0
@@ -352,9 +450,9 @@ class GuiAutoImport(QWidget):
                             params = self.config.get_site_parameters(site)
                             if params["enabled"]:
                                 paths = self.config.get_default_paths(site)
-                                
+
                                 # Add hand history directory
-                                if "hud-defaultPath" in paths and paths["hud-defaultPath"]:
+                                if paths.get("hud-defaultPath"):
                                     self.importer.addImportDirectory(
                                         paths["hud-defaultPath"],
                                         monitor=True,
@@ -362,11 +460,11 @@ class GuiAutoImport(QWidget):
                                     )
                                     self.addText(
                                         f"\n * Add {site} hand history directory: {paths['hud-defaultPath']}",
-                                        "info",
+                                        "folder",
                                     )
-                                
+
                                 # Add tournament summary directory if exists
-                                if "hud-defaultTSPath" in paths and paths["hud-defaultTSPath"]:
+                                if paths.get("hud-defaultTSPath"):
                                     self.importer.addImportDirectory(
                                         paths["hud-defaultTSPath"],
                                         monitor=True,
@@ -374,9 +472,9 @@ class GuiAutoImport(QWidget):
                                     )
                                     self.addText(
                                         f"\n * Add {site} tournament summary directory: {paths['hud-defaultTSPath']}",
-                                        "info",
+                                        "folder",
                                     )
-                        
+
                         self.do_import()
                         interval = self.intervalEntry.value()
                         self.importtimer = QTimer()
@@ -392,11 +490,11 @@ class GuiAutoImport(QWidget):
                 self.importtimer = None
             self.importer.autoSummaryGrab(True)
             self.settings["global_lock"].release()
-            self.addText("\nStopping Auto Import. Global lock released.", "warning")
+            self.addText("\nStopping Auto Import. Global lock released.", "unlock")
             self.progressBar.setVisible(False)
             self.statusLabel.setText("Ready")
             if self.pipe_to_hud and self.pipe_to_hud.poll() is not None:
-                self.addText("\n * Stop Auto Import: HUD already terminated.", "info")
+                self.addText("\n * Stop Auto Import: HUD already terminated.", "hud")
             else:
                 if self.pipe_to_hud:
                     self.pipe_to_hud.terminate()
@@ -407,14 +505,14 @@ class GuiAutoImport(QWidget):
     # end def GuiAutoImport.startClicked
 
     def get_vbox(self):
-        """returns the vbox of this thread"""
+        """Returns the vbox of this thread."""
         return self.mainVBox
 
     # end def get_vbox
 
-    
-    def _setup_config_observer(self):
-        """Configure l'observateur de configuration pour l'auto-import"""
+
+    def _setup_config_observer(self) -> None:
+        """Configure l'observateur de configuration pour l'auto-import."""
         if DYNAMIC_CONFIG_AVAILABLE:
             try:
                 config_manager = ConfigurationManager()
@@ -430,10 +528,10 @@ class GuiAutoImport(QWidget):
                 log.info("Observateur de configuration enregistré pour l'auto-import")
 
             except Exception as e:
-                log.error(f"Erreur lors de la configuration de l'observateur: {e}")
+                log.exception(f"Erreur lors de la configuration de l'observateur: {e}")
 
-    def updatePaths(self):
-        """Met à jour l'affichage des chemins d'import (appelé par l'observateur)"""
+    def updatePaths(self) -> None:
+        """Met à jour l'affichage des chemins d'import (appelé par l'observateur)."""
         # Cette méthode peut être appelée pour rafraîchir l'interface
         # après un changement de configuration dynamique
         log.debug("Mise à jour des chemins d'import dans l'interface")

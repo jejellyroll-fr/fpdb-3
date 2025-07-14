@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright 2010-2011 Chaz Littlejohn
 # This program is free software: you can redistribute it and/or modify
@@ -15,7 +14,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
-from __future__ import print_function
 
 import codecs
 import os
@@ -45,7 +43,7 @@ re_XLS["PokerStars"] = re.compile(r"Tournaments\splayed\sby\s\'.+?\'")
 re_XLS["Fulltilt"] = re.compile(r"Player\sTournament\sReport\sfor\s.+?\s\(.*\)")
 
 
-class FPDBFile(object):
+class FPDBFile:
     path = ""
     ftype = None  # Valid: hh, summary, both
     site = None
@@ -56,28 +54,28 @@ class FPDBFile(object):
     gametype = False
     hero = "-"
 
-    def __init__(self, path):
+    def __init__(self, path) -> None:
         self.path = path
 
 
-class Site(object):
-    def __init__(self, name, hhc_fname, filter_name, summary, obj):
+class Site:
+    def __init__(self, name, hhc_fname, filter_name, summary, obj) -> None:
         self.name = name
         # FIXME: rename filter to hhc_fname
         self.hhc_fname = hhc_fname
         # FIXME: rename filter_name to hhc_type
         self.filter_name = filter_name
-        self.re_SplitHands = obj.re_SplitHands
+        self.re_SplitHands = getattr(obj, 're_split_hands', getattr(obj, 're_SplitHands', None))
         self.codepage = obj.codepage
         self.copyGameHeader = obj.copyGameHeader
         self.summaryInFile = obj.summaryInFile
-        self.re_Identify = obj.re_Identify
+        self.re_Identify = obj.re_identify
         # self.obj            = obj
         if summary:
             self.summary = summary
             self.re_SumIdentify = getattr(
                 __import__(summary), summary, None,
-            ).re_Identify
+            ).re_identify
         else:
             self.summary = None
         self.line_delimiter = self.getDelimiter(filter_name)
@@ -89,7 +87,7 @@ class Site(object):
         line_delimiter = None
         if filter_name == "PokerStars":
             line_delimiter = "\n\n"
-        elif filter_name == "Fulltilt" or filter_name == "PokerTracker":
+        elif filter_name in ("Fulltilt", "PokerTracker"):
             line_delimiter = "\n\n\n"
         elif self.re_SplitHands.match("\n\n") and filter_name != "Entraction":
             line_delimiter = "\n\n"
@@ -109,25 +107,108 @@ class Site(object):
 
         return line_addendum
 
-    def getHeroRegex(self, obj, filter_name):
+    def getHeroRegex(self, obj, filter_name) -> None:
         self.re_HeroCards = None
-        if hasattr(obj, "re_HeroCards"):
-            if filter_name not in ("Bovada", "Enet"):
-                self.re_HeroCards = obj.re_HeroCards
+        if hasattr(obj, "re_hero_cards") and filter_name not in ("Bovada", "Enet"):
+            self.re_HeroCards = obj.re_hero_cards
+        elif hasattr(obj, "re_HeroCards") and filter_name not in ("Bovada", "Enet"):
+            self.re_HeroCards = obj.re_HeroCards
         if filter_name == "PokerTracker":
             self.re_HeroCards1 = obj.re_HeroCards1
             self.re_HeroCards2 = obj.re_HeroCards2
 
 
-class IdentifySite(object):
-    def __init__(self, config, hhcs=None):
+class IdentifySite:
+    def __init__(self, config, hhcs=None) -> None:
         self.config = config
         self.codepage = ("utf8", "cp1252", "ISO-8859-1")
         self.sitelist = {}
         self.filelist = {}
         self.generateSiteList(hhcs)
 
-    def scan(self, path):
+    def detectiPokerSkin(self, handText):
+        """Detect specific iPoker skin from hand text content."""
+        # Extract table name from hand text
+        table_pattern = r"Table\s+(.+?),"
+        table_match = re.search(table_pattern, handText)
+        table_name = table_match.group(1) if table_match else ""
+        
+        log.debug(f"Detected table name: {table_name}")
+        
+        # Map of indicators to skin names (must match Sites table)
+        skin_mapping = {
+            "redbet": "Redbet Poker",
+            "pmu": "PMU Poker", 
+            "fdj": "FDJ Poker",
+            "betclic": "Betclic Poker",
+            "netbet": "NetBet Poker",
+            "poker770": "Poker770",
+            "barriere": "Barrière Poker",
+            "titan": "Titan Poker",
+            "bet365": "Bet365 Poker",
+            "william hill": "William Hill Poker",
+            "williamhill": "William Hill Poker",
+            "paddy power": "Paddy Power Poker", 
+            "paddypower": "Paddy Power Poker",
+            "betfair": "Betfair Poker",
+            "coral": "Coral Poker",
+            "genting": "Genting Poker",
+            "mansion": "Mansion Poker",
+            "winner": "Winner Poker",
+            "ladbrokes": "Ladbrokes Poker",
+            "sky": "Sky Poker",
+            "sisal": "Sisal Poker",
+            "lottomatica": "Lottomatica Poker",
+            "eurobet": "Eurobet Poker",
+            "snai": "Snai Poker",
+            "goldbet": "Goldbet Poker",
+            "casino barcelona": "Casino Barcelona Poker",
+            "sportium": "Sportium Poker",
+            "marca": "Marca Apuestas Poker",
+            "everest": "Everest Poker",
+            "bet-at-home": "Bet-at-home Poker",
+            "mybet": "Mybet Poker",
+            "betsson": "Betsson Poker",
+            "betsafe": "Betsafe Poker",
+            "nordicbet": "NordicBet Poker",
+            "unibet": "Unibet Poker",
+            "maria": "Maria Casino Poker",
+            "leovegas": "LeoVegas Poker", 
+            "mr green": "Mr Green Poker",
+            "expekt": "Expekt Poker",
+            "coolbet": "Coolbet Poker",
+            "chilipoker": "Chilipoker",
+            "dafa": "Dafa Poker",
+            "dafabet": "Dafabet Poker",
+            "fun88": "Fun88 Poker",
+            "betfred": "Betfred Poker",
+            "guts": "Guts Poker",
+            "sportingbet": "Sportingbet Poker",
+            "multipoker": "MultiPoker",
+            "red star": "Red Star Poker",
+            "redstar": "Red Star Poker",
+        }
+        
+        # Check table name and hand text for skin indicators
+        search_text = (table_name + " " + handText).lower()
+        
+        # Specific patterns for French sites
+        if any(indicator in search_text for indicator in ["saratov", "scone", "moscow"]):
+            # These table name patterns are typical of FDJ Poker
+            log.debug("Detected FDJ Poker based on table name pattern")
+            return "FDJ Poker"
+        
+        # Check each mapping
+        for indicator, skin_name in skin_mapping.items():
+            if indicator in search_text:
+                log.debug(f"Detected iPoker skin: {skin_name} from indicator: {indicator}")
+                return skin_name
+        
+        # Default to generic iPoker if no specific skin detected
+        log.debug("No specific iPoker skin detected, using default 'iPoker'")
+        return "iPoker"
+
+    def scan(self, path) -> None:
         if os.path.isdir(path):
             self.walkDirectory(path, self.sitelist)
         else:
@@ -143,34 +224,37 @@ class IdentifySite(object):
     def get_filelist(self):
         return self.filelist
 
-    def clear_filelist(self):
+    def clear_filelist(self) -> None:
         self.filelist = {}
 
-    def generateSiteList(self, hhcs):
-        """Generates a ordered dictionary of site, filter and filter name for each site in hhcs"""
+    def generateSiteList(self, hhcs) -> None:
+        """Generates a ordered dictionary of site, filter and filter name for each site in hhcs."""
         if not hhcs:
             hhcs = self.config.hhcs
         for site, hhc in list(hhcs.items()):
             filter = hhc.converter
             filter_name = filter.replace("ToFpdb", "")
             summary = hhc.summaryImporter
-            mod = __import__(filter)
-            obj = getattr(mod, filter_name, None)
             try:
-                self.sitelist[obj.siteId] = Site(
+                mod = __import__(filter)
+                obj = getattr(mod, filter_name, None)
+                site_id = getattr(obj, 'site_id', getattr(obj, 'siteId', None))
+                self.sitelist[site_id] = Site(
                     site, filter, filter_name, summary, obj,
                 )
+            except ModuleNotFoundError:
+                log.warning(f"Could not find module {filter}, skipping.")
             except Exception as e:
-                log.error(f"Failed to load HH importer: {filter_name}. {e}")
+                log.exception(f"Failed to load HH importer: {filter_name}. {e}")
         self.re_Identify_PT = getattr(
             __import__("PokerTrackerToFpdb"), "PokerTracker", None,
-        ).re_Identify
+        ).re_identify
         self.re_SumIdentify_PT = getattr(
             __import__("PokerTrackerSummary"), "PokerTrackerSummary", None,
-        ).re_Identify
+        ).re_identify
 
-    def walkDirectory(self, dir, sitelist):
-        """Walks a directory, and executes a callback on each file"""
+    def walkDirectory(self, dir, sitelist) -> None:
+        """Walks a directory, and executes a callback on each file."""
         dir = os.path.abspath(dir)
         for file in [file for file in os.listdir(dir) if not file in [".", ".."]]:
             nfile = os.path.join(dir, file)
@@ -180,12 +264,11 @@ class IdentifySite(object):
                 self.processFile(nfile)
 
     def __listof(self, x):
-        if isinstance(x, list) or isinstance(x, tuple):
+        if isinstance(x, list | tuple):
             return x
-        else:
-            return [x]
+        return [x]
 
-    def processFile(self, path):
+    def processFile(self, path) -> None:
         log.debug(f"process fill identify {path}")
         if path not in self.filelist:
             log.debug(f"filelist {self.filelist}")
@@ -208,14 +291,14 @@ class IdentifySite(object):
             return None, None
 
         # Excel file management if xlrd is available
-        if (in_path.endswith(".xls") or in_path.endswith(".xlsx")) and xlrd:
+        if (in_path.endswith((".xls", ".xlsx"))) and xlrd:
             try:
                 wb = xlrd.open_workbook(in_path)
                 sh = wb.sheet_by_index(0)
                 header = str(sh.cell(0, 0).value)
                 return header, "utf-8"
-            except (xlrd.XLRDError, IOError) as e:
-                log.error(f"Error reading Excel file {in_path}: {e}")
+            except (OSError, xlrd.XLRDError) as e:
+                log.exception(f"Error reading Excel file {in_path}: {e}")
                 return None, None
 
         # Check for the presence of a BOM for UTF-16
@@ -224,15 +307,15 @@ class IdentifySite(object):
                 raw_data = infile.read()
 
             # If the file begins with a UTF-16 BOM (little endian or big endian)
-            if raw_data.startswith(b"\xff\xfe") or raw_data.startswith(b"\xfe\xff"):
+            if raw_data.startswith((b"\xff\xfe", b"\xfe\xff")):
                 try:
                     whole_file = raw_data.decode("utf-16")
                     return whole_file, "utf-16"
                 except UnicodeDecodeError as e:
-                    log.error(f"Error decoding UTF-16 file {in_path}: {e}")
+                    log.exception(f"Error decoding UTF-16 file {in_path}: {e}")
                     return None, None
-        except IOError as e:
-            log.error(f"Error reading file {in_path}: {e}")
+        except OSError as e:
+            log.exception(f"Error reading file {in_path}: {e}")
             return None, None
 
         # Try different encodings in the `self.codepage` list
@@ -241,7 +324,7 @@ class IdentifySite(object):
                 with codecs.open(in_path, "r", kodec) as infile:
                     whole_file = infile.read()
                     return whole_file, kodec
-            except (IOError, UnicodeDecodeError) as e:
+            except (OSError, UnicodeDecodeError) as e:
                 log.warning(f"Failed to read file {in_path} with codec {kodec}: {e}")
                 continue
 
@@ -249,14 +332,14 @@ class IdentifySite(object):
         return None, None
 
     def idSite(self, path, whole_file, kodec):
-        """Identifies the site the hh file originated from"""
+        """Identifies the site the hh file originated from."""
         f = FPDBFile(path)
         f.kodec = kodec
         # DEBUG:print('idsite path',path )
         # DEBUG:print('idsite f',f,f.ftype,f.site,f.gametype )
 
         # DEBUG:print('idsite self.sitelist.items',self.sitelist.items())
-        for id, site in list(self.sitelist.items()):
+        for _id, site in list(self.sitelist.items()):
             filter_name = site.filter_name
             m = site.re_Identify.search(whole_file[:5000])
             if m and filter_name in ("Fulltilt", "PokerStars"):
@@ -279,7 +362,7 @@ class IdentifySite(object):
                     skin_name, skin_id = ps.detectPokerStarsSkin(whole_file, path)
 
                     # Search for the site corresponding to the skin detected
-                    for sid, s in list(self.sitelist.items()):
+                    for _sid, s in list(self.sitelist.items()):
                         if s.name == skin_name:
                             f.site = s
                             break
@@ -298,9 +381,9 @@ class IdentifySite(object):
                     f.hero = "Hero"
                 return f
 
-        for id, site in list(self.sitelist.items()):
+        for _id, site in list(self.sitelist.items()):
             if site.summary:
-                if path.endswith(".xls") or path.endswith(".xlsx"):
+                if path.endswith((".xls", ".xlsx")):
                     filter_name = site.filter_name
                     if filter_name in ("Fulltilt", "PokerStars"):
                         m2 = re_XLS[filter_name].search(whole_file[:5000])
@@ -323,7 +406,15 @@ class IdentifySite(object):
             mod = __import__(filter)
             obj = getattr(mod, filter_name, None)
             summary = "PokerTrackerSummary"
-            f.site = Site("PokerTracker", filter, filter_name, summary, obj)
+            
+            # Detect specific iPoker skin for PokerTracker format
+            detected_site_name = "PokerTracker"  # default
+            if m1 and "GAME #" in m1.group():
+                # This is an iPoker hand, detect the specific skin
+                detected_site_name = self.detectiPokerSkin(whole_file)
+                log.debug(f"Detected iPoker skin from PokerTracker format: {detected_site_name}")
+            
+            f.site = Site(detected_site_name, filter, filter_name, summary, obj)
             if m1:
                 f.ftype = "hh"
                 if re.search(r"\*{2}\sGame\sID\s", m1.group()):
@@ -351,18 +442,18 @@ class IdentifySite(object):
 
     def getFilesForSite(self, sitename, ftype):
         files_for_site = []
-        for name, f in list(self.filelist.items()):
+        for _name, f in list(self.filelist.items()):
             if f.ftype is not None and f.site.name == sitename and f.ftype == "hh":
                 files_for_site.append(f)
         return files_for_site
 
-    def fetchGameTypes(self):
+    def fetchGameTypes(self) -> None:
         for name, f in list(self.filelist.items()):
             if f.ftype is not None and f.ftype == "hh":
                 try:  # TODO: this is a dirty hack. Borrowed from fpdb_import
                     name = str(name, "utf8", "replace")
                 except TypeError:
-                    log.error(TypeError)
+                    log.exception(TypeError)
                 mod = __import__(f.site.hhc_fname)
                 obj = getattr(mod, f.site.filter_name, None)
                 hhc = obj(
@@ -375,7 +466,7 @@ class IdentifySite(object):
                     f.gametype = hhc.determineGameType(hhc.whole_file)
 
 
-def main(argv=None):
+def main(argv=None) -> None:
     if argv is None:
         argv = sys.argv[1:]
 
@@ -383,35 +474,23 @@ def main(argv=None):
     config = Configuration.Config(file="HUD_config.xml")
     in_path = os.path.abspath("regression-test-files")
     IdSite = IdentifySite(config)
-    start = time()
+    time()
     IdSite.scan(in_path)
-    print("duration", time() - start)
 
-    print("\n----------- SITE LIST -----------")
-    for sid, site in list(IdSite.sitelist.items()):
-        print(
-            "%2d: Name: %s HHC: %s Summary: %s"
-            % (sid, site.name, site.filter_name, site.summary),
-        )
-    print("----------- END SITE LIST -----------")
+    for _sid, _site in list(IdSite.sitelist.items()):
+        pass
 
-    print("\n----------- ID REGRESSION FILES -----------")
     count = 0
-    for f, ffile in list(IdSite.filelist.items()):
+    for _f, ffile in list(IdSite.filelist.items()):
         tmp = ""
-        tmp += ": Type: %s " % ffile.ftype
+        tmp += f": Type: {ffile.ftype} "
         count += 1
         if ffile.ftype == "hh":
-            tmp += "Conv: %s" % ffile.site.hhc_fname
+            tmp += f"Conv: {ffile.site.hhc_fname}"
         elif ffile.ftype == "summary":
-            tmp += "Conv: %s" % ffile.site.summary
-        print(f, tmp)
-    print(count, "files identified")
-    print("----------- END ID REGRESSION FILES -----------")
+            tmp += f"Conv: {ffile.site.summary}"
 
-    print("----------- RETRIEVE FOR SINGLE SITE -----------")
     IdSite.getFilesForSite("PokerStars", "hh")
-    print("----------- END RETRIEVE FOR SINGLE SITE -----------")
 
 
 if __name__ == "__main__":

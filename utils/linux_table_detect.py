@@ -22,8 +22,7 @@ def get_window_title(window_id):
     ).reply()
     if reply.value_len > 0:
         return reply.value.to_string()
-    else:
-        return ""
+    return ""
 
 
 # Get the client list
@@ -33,7 +32,6 @@ window_ids = reply.value.to_atoms()
 # Iterate over the windows and print their titles
 for window_id in window_ids:
     window_title = get_window_title(window_id)
-    print(window_title)
 
 # Disconnect from the X server
 xconn.disconnect()
