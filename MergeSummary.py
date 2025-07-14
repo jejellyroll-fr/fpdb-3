@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright 2008-2011 Carl Gherardi
 # This program is free software: you can redistribute it and/or modify
@@ -113,7 +112,7 @@ class MergeSummary(TourneySummary):
         "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP",  # legal ISO currency codes
         "LS": r"\$|€|",  # legal currency symbols
     }
-    re_Identify = re.compile(
+    re_identify = re.compile(
         r"<title>Online\sPoker\sTournament\sDetails\s\-\sCarbonPoker</title>",
     )
     re_NotFound = re.compile("Tournament not found")
@@ -161,23 +160,22 @@ class MergeSummary(TourneySummary):
 
     @staticmethod
     def getSplitRe(self, head):
-        re_SplitTourneys = re.compile("PokerStars Tournament ")
-        return re_SplitTourneys
+        return re.compile("PokerStars Tournament ")
 
-    def parseSummary(self):
+    def parseSummary(self) -> None:
         # id type of file and call correct function
         m = self.re_GameTypeHH.search(self.summaryText)
         if m:
             mg = m.groupdict()
-            if " Tournament" == mg["TYPE"]:
+            if mg["TYPE"] == " Tournament":
                 self.parseSummaryFromHH(mg)
         elif not self.re_NotFound.search(self.summaryText):
             self.parseSummaryFile()
         else:
-            log.error(("The tournament was not found or is invalid"))
+            log.error("The tournament was not found or is invalid")
             raise FpdbParseError
 
-    def parseSummaryFromHH(self, mg):
+    def parseSummaryFromHH(self, mg) -> None:
         obj = getattr(MergeToFpdb, "Merge", None)
         hhc = obj(self.config, in_path=self.in_path, sitename=None, autostart=False)
         # update = False
@@ -207,11 +205,10 @@ class MergeSummary(TourneySummary):
                 self.gametype["limitType"] = self.limits[mg["LIMIT"]]
             if "GAME" in mg:
                 if mg["GAME"] == "HORSE":
-                    log.error(("HORSE found, unsupported"))
+                    log.error("HORSE found, unsupported")
                     raise FpdbParseError
                     # (self.info['base'], self.info['category']) = self.Multigametypes[m2.group('MULTIGAMETYPE')]
-                else:
-                    self.gametype["category"] = self.games[mg["GAME"]][1]
+                self.gametype["category"] = self.games[mg["GAME"]][1]
             if "SEATS" in mg and mg["SEATS"] is not None:
                 self.maxseats = int(mg["SEATS"])
 
@@ -230,7 +227,7 @@ class MergeSummary(TourneySummary):
                 m1 = self.re_DateTimeHH.search(m.group("DATETIME"))
                 if m1:
                     mg = m1.groupdict()
-                    datetimestr = "%s/%s/%s %s:%s:%s" % (
+                    datetimestr = "{}/{}/{} {}:{}:{}".format(
                         mg["Y"],
                         mg["M"],
                         mg["D"],
@@ -250,13 +247,12 @@ class MergeSummary(TourneySummary):
                     self.startTime, "ET", "UTC",
                 )
 
-                if self.re_turboHH.match(tourneyNameFull):
-                    if self.maxseats == 6:
-                        tourneyNameFull += " (6-max)"
+                if self.re_turboHH.match(tourneyNameFull) and self.maxseats == 6:
+                    tourneyNameFull += " (6-max)"
 
                 structure = Structures.lookupSnG(tourneyNameFull, self.startTime)
                 if structure is None:
-                    log.error(("No match in SnG_Structures"))
+                    log.error("No match in SnG_Structures")
                     continue
                     raise FpdbParseError
 
@@ -282,7 +278,7 @@ class MergeSummary(TourneySummary):
                 self.isSng = True
 
                 if structure["multi"]:
-                    log.error(("Muli-table SnG found, unsupported"))
+                    log.error("Muli-table SnG found, unsupported")
                     continue
 
                 players, out, won = {}, [], []
@@ -297,14 +293,13 @@ class MergeSummary(TourneySummary):
                     for m in hhc.re_CollectPot.finditer(handText):
                         won.append(m.group("PSEAT"))
 
-                    if self.isDoubleOrNothing:
-                        if handText == hands[-1]:
-                            won = [
-                                w
-                                for w in list(players.keys())
-                                if w not in out or w in won
-                            ]
-                            out = [p for p in list(players.keys())]
+                    if self.isDoubleOrNothing and handText == hands[-1]:
+                        won = [
+                            w
+                            for w in list(players.keys())
+                            if w not in out or w in won
+                        ]
+                        out = list(players.keys())
                     i = 0
                     for n in out:
                         winnings = 0
@@ -321,7 +316,7 @@ class MergeSummary(TourneySummary):
                         )
             self.insertOrUpdate()
 
-    def resetInfo(self):
+    def resetInfo(self) -> None:
         self.tourneyName = None
         self.tourneyTypeId = None
         self.tourneyId = None
@@ -381,7 +376,7 @@ class MergeSummary(TourneySummary):
         # currency symbol for this summary
         self.sym = None
 
-    def parseSummaryFile(self):
+    def parseSummaryFile(self) -> None:
         self.buyinCurrency = "USD"
         soup = BeautifulSoup(self.summaryText)
         tables = soup.findAll("table")
@@ -459,7 +454,7 @@ class MergeSummary(TourneySummary):
                     m2 = self.re_HTMLDateTime.search(m.group("STARTTIME"))
                     if m2:
                         month = self.months[m2.group("M")]
-                        datetimestr = "%s/%s/%s %s:%s:%s" % (
+                        datetimestr = "{}/{}/{} {}:{}:{}".format(
                             m2.group("Y"),
                             month,
                             m2.group("D"),
@@ -506,10 +501,9 @@ class MergeSummary(TourneySummary):
                     )
 
         if self.gametype["category"] is None:
-            log.error(("Could not parse summary file"))
+            log.error("Could not parse summary file")
             raise FpdbParseError
 
     def convert_to_decimal(self, string):
         dec = self.clearMoneyString(string)
-        dec = Decimal(dec)
-        return dec
+        return Decimal(dec)

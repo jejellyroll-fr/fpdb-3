@@ -17,7 +17,7 @@ from Importer import Importer
 
 
 class MockConfig:
-    def __init__(self):
+    def __init__(self) -> None:
         self.hhcs = {}
 
     def get_import_parameters(self):
@@ -38,7 +38,7 @@ class MockConfig:
     def get_site_parameters(self, site):
         return {}
 
-    def get_site_id(self, site):
+    def get_site_id(self, site) -> int:
         return 1
 
     def get_db_parameters(self):
@@ -63,16 +63,16 @@ class MockConfig:
 
 
 class MockCursor:
-    def execute(self, *args):
+    def execute(self, *args) -> None:
         pass
 
-    def fetchone(self):
+    def fetchone(self) -> None:
         return None
 
     def fetchall(self):
         return []
 
-    def close(self):
+    def close(self) -> None:
         pass
 
     # Ajouter description si nécessaire pour fetchallDict
@@ -82,7 +82,7 @@ class MockCursor:
 class MockHandProcessor:  # Reste inchangé
     def __init__(
         self, config, in_path, index, autostart, starsArchive, ftpArchive, sitename,
-    ):
+    ) -> None:
         self.numPartial = 0
         self.numSkipped = 0
         self.numErrors = 1
@@ -90,10 +90,10 @@ class MockHandProcessor:  # Reste inchangé
         self._last_char_read = index + 100
         self.processed_hands = []
 
-    def setAutoPop(self, val):
+    def setAutoPop(self, val) -> None:
         pass
 
-    def start(self):
+    def start(self) -> None:
         pass
 
     def getProcessedHands(self):
@@ -122,7 +122,7 @@ def importer(config_mock):
     mock_connection.cursor = Mock(return_value=MockCursor())
 
     # Fonction qui sera utilisée par le patch de do_connect
-    def mock_do_connect_with_connection(self_db, config):
+    def mock_do_connect_with_connection(self_db, config) -> None:
         # Assigner le mock de connexion à l'instance de Database
         # qui est en train d'être initialisée *à l'intérieur* de Importer.__init__
         self_db.connection = mock_connection
@@ -132,7 +132,7 @@ def importer(config_mock):
         self_db.wrongDbVersion = False
 
     # Fonction qui sera utilisée par le patch de check_version
-    def mock_check_version(self_db, database, create):
+    def mock_check_version(self_db, database, create) -> None:
         # Initialiser wrongDbVersion comme le fait la vraie méthode
         self_db.wrongDbVersion = False
 
@@ -205,7 +205,7 @@ def mock_fpdb_file(config_mock):
     # Dans test_importer_errors.py -> test_error_triggers_autopop
 
 
-def test_error_triggers_autopop(importer, mock_fpdb_file, monkeypatch, caplog):
+def test_error_triggers_autopop(importer, mock_fpdb_file, monkeypatch, caplog) -> None:
     """Vérifie que le message autoPop est loggé quand une erreur survient."""
     # Positionner les données internes de l'importer
     importer.filelist = {"dummy_path/winamax_mtt.txt": mock_fpdb_file}

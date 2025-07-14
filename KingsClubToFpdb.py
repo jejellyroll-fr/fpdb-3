@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 #    Copyright 2008-2011, Carl Gherardi
 #
@@ -166,8 +165,7 @@ class KingsClub(HandHistoryConverter):
           (?P<LIMIT>No\sLimit|Limit|Pot\sLimit)\s
           (?P<GAME>Holdem|Short\sDeck\sHoldem|Razz|Seven\sCard\sStud|Seven\sCard\sStud\sHi\-Lo|Omaha|Omaha\s(5|6)\sCard|Omaha\sHi\-Lo|Badugi|2\-7\sTriple\sDraw|2\-7\sSingle\sDraw|5\sCard\sDraw|Big\sO|2\-7\sRazz|Badacey|Badeucey|A\-5\sTriple\sDraw|A\-5\sSingle\sDraw|2\-7\sDrawmaha|Captain)\s
           \-\s(?P<SB>[,.0-9]+)/(?P<BB>[,.0-9]+)
-        """
-        % substitutions,
+        """.format(),
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -175,9 +173,8 @@ class KingsClub(HandHistoryConverter):
         r"""
           ^\s?Seat\s(?P<SEAT>[0-9]+):\s
           (?P<PNAME>.*)\s
-          \((%(LS)s)?(?P<CASH>[,.0-9]+)
-          \)"""
-        % substitutions,
+          \(({LS})?(?P<CASH>[,.0-9]+)
+          \)""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -192,7 +189,7 @@ class KingsClub(HandHistoryConverter):
 
     re_TourNo = re.compile(r"Table\s'T(?P<TOURNO>\d+)\s\[(?P<TABLENO>\d+)\]'")
 
-    re_Identify = re.compile(r"^\#\d+:")
+    re_identify = re.compile(r"^\#\d+:")
     re_SplitHands = re.compile("(?:\\s?\n){2,}")
     re_TailSplitHands = re.compile("(\n\n\n+)")
     re_Button = re.compile(r"Seat #(?P<BUTTON>\d+) is the button", re.MULTILINE)
@@ -208,72 +205,65 @@ class KingsClub(HandHistoryConverter):
     # These used to be compiled per player, but regression tests say
     # we don't have to, and it makes life faster.
     re_PostSB = re.compile(
-        r"^%(PLYR)s: posts the small blind %(CUR)s(?P<SB>[,.0-9]+)" % substitutions,
+        r"^{PLYR}: posts the small blind {CUR}(?P<SB>[,.0-9]+)".format(**substitutions),
         re.MULTILINE,
     )
     re_PostBB = re.compile(
-        r"^%(PLYR)s: posts the big blind %(CUR)s(?P<BB>[,.0-9]+)" % substitutions,
+        r"^{PLYR}: posts the big blind {CUR}(?P<BB>[,.0-9]+)".format(**substitutions),
         re.MULTILINE,
     )
     re_Antes = re.compile(
-        r"^%(PLYR)s: posts ante %(CUR)s(?P<ANTE>[,.0-9]+)" % substitutions, re.MULTILINE,
+        r"^{PLYR}: posts ante {CUR}(?P<ANTE>[,.0-9]+)".format(**substitutions), re.MULTILINE,
     )
     re_BringIn = re.compile(
-        r"^%(PLYR)s brings[- ]in( low|) for %(CUR)s(?P<BRINGIN>[,.0-9]+)"
-        % substitutions,
+        r"^{PLYR} brings[- ]in( low|) for {CUR}(?P<BRINGIN>[,.0-9]+)".format(**substitutions),
         re.MULTILINE,
     )
     re_PostBoth = re.compile(
-        r"^%(PLYR)s: posts blind %(CUR)s(?P<SBBB>[,.0-9]+)" % substitutions,
+        r"^{PLYR}: posts blind {CUR}(?P<SBBB>[,.0-9]+)".format(**substitutions),
         re.MULTILINE,
     )
     re_PostStraddle = re.compile(
-        r"^%(PLYR)s: (posts )?straddles? %(CUR)s(?P<STRADDLE>[,.0-9]+)" % substitutions,
+        r"^{PLYR}: (posts )?straddles? {CUR}(?P<STRADDLE>[,.0-9]+)".format(**substitutions),
         re.MULTILINE,
     )
     re_Action = re.compile(
-        r"""^%(PLYR)s(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat|\sdraws)(\s%(CUR)s(?P<BET>[,.\d]+))?(\sto\s%(CUR)s(?P<BETTO>[,.\d]+))?\s*(,\sand\sis\sall.in)?(and\shas\sreached\sthe\s\[%(CUR)s\d\.,]+\scap)?(\son|\scards?)?(\s\(disconnect\))?(\s\[(?P<CARDS>.+?)\]\sdraws\s\[(?P<DRAWS1>.+?)\](\s\[(?P<DRAWS2>.+?)\])?)?\s*$"""
-        % substitutions,
+        r"""^{PLYR}(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat|\sdraws)(\s{CUR}(?P<BET>[,.\d]+))?(\sto\s{CUR}(?P<BETTO>[,.\d]+))?\s*(,\sand\sis\sall.in)?(and\shas\sreached\sthe\s\[{CUR}\d\.,]+\scap)?(\son|\scards?)?(\s\(disconnect\))?(\s\[(?P<CARDS>.+?)\]\sdraws\s\[(?P<DRAWS1>.+?)\](\s\[(?P<DRAWS2>.+?)\])?)?\s*$""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
     re_ShowdownAction = re.compile(
-        r"^%s shows \[(?P<CARDS>.*)\]" % substitutions["PLYR"], re.MULTILINE,
+        r"^{} shows \[(?P<CARDS>.*)\]".format(substitutions["PLYR"]), re.MULTILINE,
     )
-    re_sitsOut = re.compile("^%s sits out" % substitutions["PLYR"], re.MULTILINE)
+    re_sitsOut = re.compile("^{} sits out".format(substitutions["PLYR"]), re.MULTILINE)
     # re_ShownCards       = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % substitutions, re.MULTILINE)
     # bd43 wins (279.50) from pot
     re_CollectPot = re.compile(
-        r"^%(PLYR)s wins (pot )?(side pot \d )?\((?P<POT>[,.\d]+)\)( from pot)?"
-        % substitutions,
+        r"^{PLYR} wins (pot )?(side pot \d )?\((?P<POT>[,.\d]+)\)( from pot)?".format(**substitutions),
         re.MULTILINE,
     )
     re_CashedOut = re.compile(r"cashed\sout\sthe\shand")
     re_WinningRankOne = re.compile(
-        r"^%(PLYR)s wins the tournament and receives %(CUR)s(?P<AMT>[,\.0-9]+) - congratulations!$"
-        % substitutions,
+        r"^{PLYR} wins the tournament and receives {CUR}(?P<AMT>[,\.0-9]+) - congratulations!$".format(**substitutions),
         re.MULTILINE,
     )
     re_WinningRankOther = re.compile(
-        r"^%(PLYR)s finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place and received %(CUR)s(?P<AMT>[,.0-9]+)\.$"
-        % substitutions,
+        r"^{PLYR} finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place and received {CUR}(?P<AMT>[,.0-9]+)\.$".format(**substitutions),
         re.MULTILINE,
     )
     re_RankOther = re.compile(
-        "^%(PLYR)s finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place$"
-        % substitutions,
+        "^{PLYR} finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place$".format(**substitutions),
         re.MULTILINE,
     )
     re_Cancelled = re.compile(r"Hand\scancelled", re.MULTILINE)
     re_Uncalled = re.compile(
-        r"Uncalled bet \(%(CUR)s(?P<BET>[,.\d]+)\) returned to" % substitutions,
+        r"Uncalled bet \({CUR}(?P<BET>[,.\d]+)\) returned to".format(**substitutions),
         re.MULTILINE,
     )
     # APTEM-89 wins the $0.27 bounty for eliminating Hero
     # ChazDazzle wins the 22000 bounty for eliminating berkovich609
     # JKuzja, vecenta split the $50 bounty for eliminating ODYSSES
     re_Bounty = re.compile(
-        r"^%(PLYR)s (?P<SPLIT>split|wins) the %(CUR)s(?P<AMT>[,\.0-9]+) bounty for eliminating (?P<ELIMINATED>.+?)$"
-        % substitutions,
+        r"^{PLYR} (?P<SPLIT>split|wins) the {CUR}(?P<AMT>[,\.0-9]+) bounty for eliminating (?P<ELIMINATED>.+?)$".format(**substitutions),
         re.MULTILINE,
     )
     # Amsterdam71 wins $19.90 for eliminating MuKoJla and their own bounty increases by $19.89 to $155.32
@@ -281,17 +271,15 @@ class KingsClub(HandHistoryConverter):
     # Amsterdam71 wins the tournament and receives $230.36 - congratulations!
     re_Progressive = re.compile(
         r"""
-                        ^%(PLYR)s\swins\s%(CUR)s(?P<AMT>[,\.0-9]+)\s
+                        ^{PLYR}\swins\s{CUR}(?P<AMT>[,\.0-9]+)\s
                         for\s(splitting\sthe\selimination\sof|eliminating)\s(?P<ELIMINATED>.+?)\s
-                        and\stheir\sown\sbounty\sincreases\sby\s%(CUR)s(?P<INCREASE>[\.0-9]+)\sto\s%(CUR)s(?P<ENDAMT>[\.0-9]+)$"""
-        % substitutions,
+                        and\stheir\sown\sbounty\sincreases\sby\s{CUR}(?P<INCREASE>[\.0-9]+)\sto\s{CUR}(?P<ENDAMT>[\.0-9]+)$""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
     re_STP = re.compile(
         r"""
-                        STP\sadded:\s%(CUR)s(?P<AMOUNT>[,\.0-9]+)"""
-        % substitutions,
+                        STP\sadded:\s{CUR}(?P<AMOUNT>[,\.0-9]+)""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -301,8 +289,8 @@ class KingsClub(HandHistoryConverter):
         r"^\s?Table\s(ID\s)?\'(?P<TABLE>.+?)\'\s", re.MULTILINE | re.VERBOSE,
     )
 
-    def compilePlayerRegexs(self, hand):
-        players = set([player[1] for player in hand.players])
+    def compilePlayerRegexs(self, hand) -> None:
+        players = {player[1] for player in hand.players}
         if not players <= self.compiledPlayers:  # x <= y means 'x is subset of y'
             self.compiledPlayers = players
             player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
@@ -312,8 +300,7 @@ class KingsClub(HandHistoryConverter):
                 "CUR": "(\\$|\xe2\x82\xac|\u20ac||\\£|)",
             }
             self.re_HeroCards = re.compile(
-                r"^Dealt to %(PLYR)s:(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])"
-                % subst,
+                r"^Dealt to {PLYR}:(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])".format(**subst),
                 re.MULTILINE,
             )
 
@@ -404,10 +391,11 @@ class KingsClub(HandHistoryConverter):
 
         return info
 
-    def readHandInfo(self, hand):
+    def readHandInfo(self, hand) -> None:
         # First check if partial
         if hand.handText.count("*** SUMMARY *") != 1:
-            raise FpdbHandPartial("Hand is not cleanly split into pre and post Summary")
+            msg = "Hand is not cleanly split into pre and post Summary"
+            raise FpdbHandPartial(msg)
 
         info = {}
         m = self.re_HandInfo.search(hand.handText, re.DOTALL)
@@ -429,7 +417,7 @@ class KingsClub(HandHistoryConverter):
         # 2021-01-02 15:39:12
         datetimestr = "2000/01/01 00:00:00"  # default used if time not found
         for a in m1:
-            datetimestr = "%s/%s/%s %s:%s:%s" % (
+            datetimestr = "{}/{}/{} {}:{}:{}".format(
                 a.group("Y"),
                 a.group("M"),
                 a.group("D"),
@@ -460,16 +448,17 @@ class KingsClub(HandHistoryConverter):
             if key == "BUTTON":
                 hand.buttonpos = info[key]
         if self.re_Cancelled.search(hand.handText):
-            raise FpdbHandPartial(("Hand '%s' was cancelled.") % hand.handid)
+            msg = (f"Hand '{hand.handid}' was cancelled.")
+            raise FpdbHandPartial(msg)
 
-    def readButton(self, hand):
+    def readButton(self, hand) -> None:
         m = self.re_Button.search(hand.handText)
         if m:
             hand.buttonpos = int(m.group("BUTTON"))
         else:
             log.info("readButton not found")
 
-    def readPlayerStacks(self, hand):
+    def readPlayerStacks(self, hand) -> None:
         pre, post = hand.handText.split("*** SUMMARY *")
         m = self.re_PlayerInfo.finditer(pre)
         for a in m:
@@ -483,7 +472,7 @@ class KingsClub(HandHistoryConverter):
                 ),
             )
 
-    def markStreets(self, hand):
+    def markStreets(self, hand) -> None:
         # There is no marker between deal and draw in KingsClubPkr A5 single draw
         #  this upsets the accounting, incorrectly sets handsPlayers.cardxx and
         #  in consequence the mucked-display is incorrect.
@@ -626,7 +615,7 @@ class KingsClub(HandHistoryConverter):
 
     def readCommunityCards(
         self, hand, street,
-    ):  # street has been matched by markStreets, so exists in this hand
+    ) -> None:  # street has been matched by markStreets, so exists in this hand
         if (
             street != "FLOPET" or hand.streets.get("FLOP") is None
         ):  # a list of streets which get dealt community cards (i.e. all but PREFLOP)
@@ -644,16 +633,16 @@ class KingsClub(HandHistoryConverter):
         if street in ("FLOP1", "TURN1", "RIVER1", "FLOP2", "TURN2", "RIVER2"):
             hand.runItTimes = 2
 
-    def readSTP(self, hand):
-        log.debug(("read Splash the Pot"))
+    def readSTP(self, hand) -> None:
+        log.debug("read Splash the Pot")
         m = self.re_STP.search(hand.handText)
         if m:
             hand.addSTP(m.group("AMOUNT"))
 
-    def readAntes(self, hand):
+    def readAntes(self, hand) -> None:
         log.debug("reading antes")
         m = self.re_Antes.finditer(hand.handText)
-        pnames = set([])
+        pnames = set()
         for player in m:
             # ~ logging.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
             if (
@@ -680,7 +669,7 @@ class KingsClub(HandHistoryConverter):
                 )
             pnames.add(player.group("PNAME"))
 
-    def readBringIn(self, hand):
+    def readBringIn(self, hand) -> None:
         m = self.re_BringIn.search(hand.handText, re.DOTALL)
         if m:
             # ~ logging.debug("readBringIn: %s for %s" %(m.group('PNAME'),  m.group('BRINGIN')))
@@ -693,7 +682,7 @@ class KingsClub(HandHistoryConverter):
                 ),
             )
 
-    def readBlinds(self, hand):
+    def readBlinds(self, hand) -> None:
         for a in self.re_PostSB.finditer(hand.handText):
             hand.addBlind(
                 a.group("PNAME"),
@@ -735,11 +724,11 @@ class KingsClub(HandHistoryConverter):
                 ),
             )
 
-    def readHoleCards(self, hand):
+    def readHoleCards(self, hand) -> None:
         #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
         #    we need to grab hero's cards
         for street in ("PREFLOP", "DEAL"):
-            if street in hand.streets.keys():
+            if street in hand.streets:
                 m = self.re_HeroCards.finditer(hand.streets[street])
                 for found in m:
                     #                    if m == None:
@@ -806,11 +795,8 @@ class KingsClub(HandHistoryConverter):
                         dealt=False,
                     )
 
-    def readAction(self, hand, street):
-        if hand.gametype["split"] and street in hand.communityStreets:
-            s = street + "2"
-        else:
-            s = street
+    def readAction(self, hand, street) -> None:
+        s = street + "2" if hand.gametype["split"] and street in hand.communityStreets else street
         if not hand.streets[s]:
             return
         m = self.re_Action.finditer(hand.streets[s])
@@ -931,15 +917,15 @@ class KingsClub(HandHistoryConverter):
                     f"DEBUG: Unimplemented {'readAction'}: '{action.group('PNAME')}' '{action.group('ATYPE')}'",
                 )
 
-    def readShowdownActions(self, hand):
+    def readShowdownActions(self, hand) -> None:
         pass
 
-    def readSummaryInfo(self, summaryInfoList):
+    def readSummaryInfo(self, summaryInfoList) -> bool:
         log.info("enter method readSummaryInfo.")
         log.debug("Method readSummaryInfo non implemented.")
         return True
 
-    def readCollectPot(self, hand):
+    def readCollectPot(self, hand) -> None:
         if (
             hand.gametype["category"] == "27_1draw"
             and hand.gametype["limitType"] == "nl"
@@ -960,7 +946,7 @@ class KingsClub(HandHistoryConverter):
             else:
                 hand.rakes["rake"] = Decimal(self.clearMoneyString(m.group("RAKE")))
 
-    def readShownCards(self, hand):
+    def readShownCards(self, hand) -> None:
         runIt = False
         for shows in self.re_ShowdownAction.finditer(hand.handText):
             player = shows.group("PNAME").replace("Run 1: ", "")

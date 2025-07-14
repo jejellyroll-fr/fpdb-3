@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Hud.py
+"""Hud.py.
 
 Create and manage the hud overlays.
 """
@@ -22,13 +20,10 @@ Create and manage the hud overlays.
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 ########################################################################
-# todo
-
-
-# import L10n
-# _ = L10n.get_translation()
+# TODO(R Barker): Complete Hud implementation.
 
 import copy
+from typing import Any
 
 #    FreePokerTools modules
 import Database
@@ -41,36 +36,36 @@ from loggingFpdb import get_logger
 log = get_logger("hud")
 
 
-def importName(module_name, name):
+def importName(module_name: str, name: str) -> Any:
     """Import a named object 'name' from module 'module_name'."""
     #    Recipe 16.3 in the Python Cookbook, 2nd ed.  Thanks!!!!
 
     try:
         module = __import__(module_name, globals(), locals(), [name])
-    except Exception as e:
-        log.error(f"Could not load hud module {module_name}: {e}")
+    except Exception:
+        log.exception("Could not load hud module %s", module_name)
         return None
     return getattr(module, name)
 
 
-class Hud(object):
-    def __init__(self, parent, table, max, poker_game, game_type, config):
-        #    __init__ is (now) intended to be called from the stdin thread, so it
-        #    must not touch the gui
-        # if parent is None:  # running from cli .. # fixme dont think this is working as expected
-        #    self.parent = self
-        # else:
-        #    self.parent    = parent
-        # print "parent", parent
+class Hud:
+    """A class to manage the HUD overlays."""
+
+    def __init__(self, parent: Any, table: Any, max_players: int, poker_game: str, game_type: str, config: Any) -> None:  # noqa: PLR0913
+        """Initialize the HUD.
+
+        This method is intended to be called from the stdin thread,
+        so it must not touch the GUI.
+        """
         self.parent = parent
         self.table = table
         self.config = config
-        self.db_hud_connection = None
+        self.db_hud_connection: Database.Database | None = None
         self.poker_game = poker_game
         self.game_type = game_type  # (ring|tour)
-        self.max = max
+        self.max = max_players
         self.type = game_type
-        self.cards = None
+        self.cards: dict[str, Any] | None = None
         self.site = table.site
         self.hud_params = dict.copy(
             parent.hud_params,
@@ -79,49 +74,56 @@ class Hud(object):
         # settings.  Simply assigning the dictionary does not
         # create a local/discrete version of the dictionary,
         # so the different hud-windows get cross-contaminated
-        self.aux_windows = []
+        self.aux_windows: list[Any] = []
 
         self.site_parameters = config.get_site_parameters(self.table.site)
         self.supported_games_parameters = config.get_supported_games_parameters(
-            self.poker_game, self.game_type,
+            self.poker_game,
+            self.game_type,
         )
         self.layout_set = config.get_layout(self.table.site, self.game_type)
 
         # Just throw error and die if any serious config issues are discovered
         if self.supported_games_parameters is None:
             log.warning(
-                f"No <game_stat_set> found for {self.poker_game} games for type {self.game_type}.\n",
+                "No <game_stat_set> found for %s games for type %s.\n",
+                self.poker_game,
+                self.game_type,
             )
             return
 
         if self.layout_set is None:
             log.warning(
-                f"No layout found for {self.game_type} games for site {self.table.site}.\n",
+                "No layout found for %s games for site %s.\n",
+                self.game_type,
+                self.table.site,
             )
             return
 
         if self.max not in self.layout_set.layout:
             log.warning(
-                f"No layout found for {self.max}-max {self.game_type} games for site {self.table.site}.\n",
+                "No layout found for %d-max %s games for site %s.\n",
+                self.max,
+                self.game_type,
+                self.table.site,
             )
             return
-        else:
-            self.layout = copy.deepcopy(
-                self.layout_set.layout[self.max],
-            )  # deepcopy required here, because self.layout is used
-            # to propagate block moves from hud to mucked display
-            # (needed because there is only 1 layout for all aux)
-            #
-            # if we didn't deepcopy, self.layout would be shared
-            # amongst all open huds - this is fine until one of the
-            # huds does a resize, and then we have a total mess to
-            # understand how a single block move on a resized screen
-            # should be propagated to other tables of different sizes
+        self.layout = copy.deepcopy(
+            self.layout_set.layout[self.max],
+        )  # deepcopy required here, because self.layout is used
+        # to propagate block moves from hud to mucked display
+        # (needed because there is only 1 layout for all aux)
+        #
+        # if we didn't deepcopy, self.layout would be shared
+        # amongst all open huds - this is fine until one of the
+        # huds does a resize, and then we have a total mess to
+        # understand how a single block move on a resized screen
+        # should be propagated to other tables of different sizes
 
         # if there are AUX windows configured, set them up
-        if not self.supported_games_parameters["aux"] == [""]:
-            for aux in self.supported_games_parameters["aux"].split(","):
-                aux = aux.strip()  # remove leading/trailing spaces
+        if self.supported_games_parameters["aux"] != [""]:
+            for aux_str in self.supported_games_parameters["aux"].split(","):
+                aux = aux_str.strip()  # remove leading/trailing spaces
                 aux_params = config.get_aux_parameters(aux)
                 my_import = importName(aux_params["module"], aux_params["class"])
                 if my_import is None:
@@ -141,18 +143,19 @@ class Hud(object):
 
         self.creation_attrs = None
 
-    def move_table_position(self):
-        pass
+    def move_table_position(self) -> None:
+        """Move the table position."""
 
-    def kill(self, *args):
-        #    kill all stat_windows, popups and aux_windows in this HUD
+    def kill(self) -> None:
+        """Kill all stat_windows, popups and aux_windows in this HUD."""
         #    heap dead, burnt bodies, blood 'n guts, veins between my teeth
         #    kill all aux windows
         for aux in self.aux_windows:
             aux.destroy()
         self.aux_windows = []
 
-    def resize_windows(self):
+    def resize_windows(self) -> None:
+        """Resize the windows based on the table size."""
         # resize self.layout object; this will then be picked-up
         # by all attached aux's when called by hud_main.idle_update
 
@@ -174,19 +177,20 @@ class Hud(object):
         self.layout.width = self.table.width
         self.layout.height = self.table.height
 
-    def reposition_windows(self, *args):
-        pass
+    def reposition_windows(self) -> None:
+        """Reposition the windows."""
 
-    def save_layout(self, *args):
-        #    ask each aux to save its layout back to the config object
+    def save_layout(self) -> None:
+        """Ask each aux to save its layout back to the config object."""
         [aux.save_layout() for aux in self.aux_windows]
         #    write the layouts back to the HUD_config
         self.config.save()
 
-    def create(self, hand, config, stat_dict):
-        # update this hud, to the stats and players as of "hand"
-        # hand is the hand id of the most recent hand played at this table
+    def create(self, hand: int, config: Any, stat_dict: dict[str, Any]) -> None:
+        """Update this hud, to the stats and players as of "hand".
 
+        hand is the hand id of the most recent hand played at this table.
+        """
         self.stat_dict = stat_dict  # stat_dict from HUD_main.read_stdin is mapped here
         # the db_connection created in HUD_Main is NOT available to the
         #  hud.py and aux handlers, so create a fresh connection in this class
@@ -200,15 +204,17 @@ class Hud(object):
         self.hand_instance = Hand.hand_factory(hand, config, self.db_hud_connection)
         self.db_hud_connection.connection.rollback()
 
-        log.info(f"Creating hud from hand {hand}")
+        log.info("Creating hud from hand %d", hand)
 
-    def update(self, hand, config):
+    def update(self, hand: int, config: Any) -> None:
+        """Re-load a hand instance."""
         # re-load a hand instance (factory will load correct type for this hand)
         self.hand_instance = Hand.hand_factory(hand, config, self.db_hud_connection)
         log.info("hud update after hand_factory")
         self.db_hud_connection.connection.rollback()
 
-    def get_cards(self, hand):
+    def get_cards(self, hand: int) -> dict[str, Any]:
+        """Get the cards for a given hand."""
         cards = self.db_hud_connection.get_cards(hand)
         if self.poker_game in ["holdem", "omahahi", "omahahilo"]:
             comm_cards = self.db_hud_connection.get_common_cards(hand)

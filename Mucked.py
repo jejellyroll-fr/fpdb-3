@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Mucked.py
+"""Mucked.py.
 
 Mucked cards display for FreePokerTools HUD.
 """
 
-from __future__ import division, print_function
 
 from past.utils import old_div
 from PyQt5.QtCore import QObject
@@ -53,8 +51,8 @@ def valid_cards(ct):
     return sum(c != 0 for c in ct)
 
 
-class Stud_mucked(Aux_Base.Aux_Window):
-    def __init__(self, hud, config, params):
+class Stud_mucked(Aux_Base.AuxWindow):
+    def __init__(self, hud, config, params) -> None:
         self.hud = hud  # hud object that this aux window supports
         self.config = config  # configuration object for this aux window to use
         self.params = params  # hash aux params from config
@@ -69,7 +67,7 @@ class Stud_mucked(Aux_Base.Aux_Window):
         self.mucked_cards = Stud_cards(self, params, config)
         self.mucked_list.mucked_cards = self.mucked_cards
 
-    def create(self):
+    def create(self) -> None:
         self.container = QWidget()
         self.vbox = QVBoxLayout()
         self.container.setLayout(self.vbox)
@@ -79,24 +77,24 @@ class Stud_mucked(Aux_Base.Aux_Window):
         self.mucked_cards.create(self.vbox)
         self.container.show()
 
-    def update_data(self, new_hand_id, db_connection):
+    def update_data(self, new_hand_id, db_connection) -> None:
         # uncomment next line when action is available in the db
         # self.mucked_cards.update_data(new_hand_id, db_connection)
         self.mucked_list.update_data(new_hand_id, db_connection)
 
-    def update_gui(self, new_hand_id):
+    def update_gui(self, new_hand_id) -> None:
         self.mucked_cards.update_gui(new_hand_id)
         self.mucked_list.update_gui(new_hand_id)
 
 
-class Stud_list(object):
-    def __init__(self, parent, params, config, hero):
+class Stud_list:
+    def __init__(self, parent, params, config, hero) -> None:
         self.parent = parent
         self.params = params
         self.config = config
         self.hero = hero
 
-    def create(self, container):
+    def create(self, container) -> None:
         self.container = container
         self.treeview = QTableView()
         self.liststore = QStandardItemModel(0, 4, self.treeview)
@@ -105,9 +103,8 @@ class Stud_list(object):
         self.treeview.verticalHeader().hide()
         self.container.addWidget(self.treeview)
 
-    def update_data(self, new_hand_id, db_connection):
+    def update_data(self, new_hand_id, db_connection) -> None:
         """Updates the data needed for the list box."""
-
         #        db_connection = Database.Database(self.config, 'fpdb', '')
         self.winners = db_connection.get_winners_from_hand(new_hand_id)
         pot = 0
@@ -117,7 +114,7 @@ class Stud_list(object):
             if winners != "":
                 winners = f"{winners}, "
             winners = winners + player
-        pot_dec = "%.2f" % (old_div(float(pot), 100))
+        pot_dec = f"{old_div(float(pot), 100):.2f}"
 
         hero_cards = self.get_hero_cards(self.parent.hero)
         self.info_row = ((new_hand_id, hero_cards, pot_dec, winners),)
@@ -137,14 +134,14 @@ class Stud_list(object):
             "xxxxxx",
         )
 
-    def update_gui(self, new_hand_id):
+    def update_gui(self, new_hand_id) -> None:
         self.liststore.appendRow(list(map(QStandardItem, self.info_row[0])))
         self.treeview.resizeColumnsToContents()
         self.treeview.horizontalHeader().setStretchLastSection(True)
 
 
-class Stud_cards(object):
-    def __init__(self, parent, params, config):
+class Stud_cards:
+    def __init__(self, parent, params, config) -> None:
         self.parent = parent
         self.params = params
         self.config = config
@@ -156,7 +153,7 @@ class Stud_cards(object):
         self.rows = 8
         self.cols = 7
 
-    def create(self, container):
+    def create(self, container) -> None:
         self.container = container
         self.grid = QGridLayout()
 
@@ -187,7 +184,7 @@ class Stud_cards(object):
 
         self.container.addLayout(self.grid)
 
-    def update_data(self, new_hand_id, db_connection):
+    def update_data(self, new_hand_id, db_connection) -> None:
         self.tips = []
         action = db_connection.get_action_from_hand(new_hand_id)
         # print(action)
@@ -197,14 +194,14 @@ class Stud_cards(object):
                 temp = temp + act[0] + " " + act[1] + "s "
                 if act[2] > 0:
                     if act[2] % 100 > 0:
-                        temp = temp + "%4.2f\n" % (old_div(float(act[2]), 100))
+                        temp = temp + f"{old_div(float(act[2]), 100):4.2f}\n"
                     else:
                         temp = temp + "%d\n" % (old_div(act[2], 100))
                 else:
                     temp = temp + "\n"
             self.tips.append(temp)
 
-    def update_gui(self, new_hand_id):
+    def update_gui(self, new_hand_id) -> None:
         self.clear()
         for c, cards in list(self.parent.hud.cards.items()):
             if c == "common":
@@ -241,19 +238,19 @@ class Stud_cards(object):
             "No Name",
         )
 
-    def clear(self):
-        for r in range(0, self.rows):
+    def clear(self) -> None:
+        for r in range(self.rows):
             self.grid_contents[(1, r)].setText("             ")
-            for c in range(0, 7):
+            for c in range(7):
                 # Start by creating a box of nothing but card backs
                 self.eb[(c, r)].setPixmap(self.card_images[0])
 
 
-class Flop_Mucked(Aux_Base.Aux_Seats, QObject):
-    """Aux_Window class for displaying mucked cards for flop games."""
+class Flop_Mucked(Aux_Base.AuxSeats, QObject):
+    """AuxWindow class for displaying mucked cards for flop games."""
 
-    def __init__(self, hud, config, params):
-        super(Flop_Mucked, self).__init__(hud, config, params)
+    def __init__(self, hud, config, params) -> None:
+        super().__init__(hud, config, params)
         QObject.__init__(self)
         self.card_images = self.hud.parent.deck.get_all_card_images()
         self.card_height = self.hud.parent.hud_params["card_ht"]
@@ -264,15 +261,16 @@ class Flop_Mucked(Aux_Base.Aux_Seats, QObject):
         """Create the window for the board cards and do the initial population."""
         w = self.aw_class_window(self, "common")
         self.positions["common"] = self.create_scale_position(x, y)
-        w.move(
-            self.positions["common"][0] + self.hud.table.x,
-            self.positions["common"][1] + self.hud.table.y,
-        )
+        table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
+        table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
+        pos_x = max(0, self.positions["common"][0] + table_x)
+        pos_y = max(0, self.positions["common"][1] + table_y)
+        w.move(pos_x, pos_y)
         if "opacity" in self.params:
             w.setWindowOpacity(float(self.params["opacity"]))
         return w
 
-    def create_contents(self, container, i):
+    def create_contents(self, container, i) -> None:
         """Create the widgets for showing the contents of the Aux_seats window."""
         container.seen_cards = QLabel()
         container.seen_cards.setPixmap(self.card_images[0])
@@ -284,7 +282,7 @@ class Flop_Mucked(Aux_Base.Aux_Seats, QObject):
     # { seat_num: (card, card, [...]) }
     #
     # Thus the individual hands (cards for seat) are tuples
-    def update_contents(self, container, i):
+    def update_contents(self, container, i) -> None:
         hist_seat = self.hud.layout.hh_seats[i] if type(i) is int else i
         if hist_seat not in self.hud.cards:
             return
@@ -319,10 +317,11 @@ class Flop_Mucked(Aux_Base.Aux_Seats, QObject):
             if container is not None:
                 container.seen_cards.setPixmap(scratch)
                 container.resize(1, 1)
-                container.move(
-                    self.positions[i][0] + self.hud.table.x,
-                    self.positions[i][1] + self.hud.table.y,
-                )  # here is where I move back
+                table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
+                table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
+                pos_x = max(0, self.positions[i][0] + table_x)
+                pos_y = max(0, self.positions[i][1] + table_y)
+                container.move(pos_x, pos_y)  # here is where I move back
                 container.show()
 
             self.displayed = True
@@ -331,7 +330,7 @@ class Flop_Mucked(Aux_Base.Aux_Seats, QObject):
                     self.hud.stat_dict[self.get_id_from_seat(i)]["screen_name"],
                 )
 
-    def save_layout(self, *args):
+    def save_layout(self, *args) -> None:
         """Save new common position back to the layout element in the config file."""
         new_locs = {
             i: ((pos[0]), (pos[1]))
@@ -342,7 +341,7 @@ class Flop_Mucked(Aux_Base.Aux_Seats, QObject):
             self.hud.layout_set, self.hud.max, new_locs, width=None, height=None,
         )
 
-    def update_gui(self, new_hand_id):
+    def update_gui(self, new_hand_id) -> None:
         """Prepare and show the mucked cards."""
         if self.displayed:
             self.hide()
@@ -351,20 +350,19 @@ class Flop_Mucked(Aux_Base.Aux_Seats, QObject):
         if n_sd < 2:
             return
 
-        super(Flop_Mucked, self).update_gui(new_hand_id)
+        super().update_gui(new_hand_id)
 
         if self.displayed and float(self.params["timeout"]) > 0:
             self.timer_on = True
             self.startTimer(int(1000 * float(self.params["timeout"])))
 
-    def timerEvent(self, event):
+    def timerEvent(self, event) -> None:
         self.killTimer(event.timerId())
         if self.timer_on:
             self.hide()
 
-    def button_press_cb(self, widget, event, i, *args):
+    def button_press_cb(self, widget, event, i, *args) -> None:
         """Handle button clicks in the event boxes."""
-
         if event.button == 2:  # middle button event, hold display (do not timeout)
             if self.timer_on:
                 self.timer_on = False
@@ -383,11 +381,12 @@ class Flop_Mucked(Aux_Base.Aux_Seats, QObject):
                 event.button, int(event.x_root), int(event.y_root), event.time,
             )
 
-    def expose_all(self):
+    def expose_all(self) -> None:
         for i in self.hud.cards:
             self.m_windows[i].show()
-            self.m_windows[i].move(
-                self.positions[i][0] + self.hud.table.x,
-                self.positions[i][1] + self.hud.table.y,
-            )
+            table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
+            table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
+            pos_x = max(0, self.positions[i][0] + table_x)
+            pos_y = max(0, self.positions[i][1] + table_y)
+            self.m_windows[i].move(pos_x, pos_y)
             self.displayed = True

@@ -11,7 +11,7 @@ re_Identify = re.compile(
 )
 
 
-def test_re_Identify():
+def test_re_Identify() -> None:
     text = 'Winamax Poker - HOLD-UP "Colorado" - HandId: #18876587-492053-1695486636 - Holdem no limit (0.01€/0.02€) - 2023/09/23 16:30:36 UTC'
     match = re_Identify.search(text)
     assert match is not None
@@ -19,20 +19,19 @@ def test_re_Identify():
 
 re_HandInfo = re.compile(
     r"""
-\s*Winamax\sPoker\s-\s(?P<RING>(CashGame|Go\sFast\s\"[^\"]+\"|HOLD\-UP\s\"[^\"]+\"))?(?P<TOUR>Tournament\s(?P<TOURNAME>.+)?\sbuyIn:\s(?P<BUYIN>(?P<BIAMT>[%(LS)s\d\,.]+)?(\s\+?\s|-)(?P<BIRAKE>[%(LS)s\d\,.]+)?\+?(?P<BOUNTY>[%(LS)s\d\.]+)?\s?(?P<TOUR_ISO>%(LEGAL_ISO)s)?|(?P<FREETICKET>[\sa-zA-Z]+))?\s(level:\s(?P<LEVEL>\d+))?.*)?\s-\sHandId:\s\#(?P<HID1>\d+)-(?P<HID2>\d+)-(?P<HID3>\d+)\s-\s(?P<GAME>Holdem|Omaha|Omaha5|Omaha8|5\sCard\sOmaha|5\sCard\sOmaha\sHi/Lo|Omaha\sHi/Lo|7\-Card\sStud|7stud|7\-Card\sStud\sHi/Lo|7stud8|Razz|2\-7\sTriple\sDraw|Lowball27)\s(?P<LIMIT>fixed\slimit|no\slimit|pot\slimit)\s\((((%(LS)s)?(?P<ANTE>[.0-9]+)(%(LS)s)?)/)?((%(LS)s)?(?P<SB>[.0-9]+)(%(LS)s)?)/((%(LS)s)?(?P<BB>[.0-9]+)(%(LS)s)?)\)\s-\s(?P<DATETIME>.*)(Table:?\s\'(?P<TABLE>[^(]+)(.(?P<TOURNO>\d+).\#(?P<TABLENO>\d+))?.*\'\s(?P<MAXPLAYER>\d+)\-max\s(?P<MONEY>\(real\smoney\)))?
-            """
-    % substitutions,
+\s*Winamax\sPoker\s-\s(?P<RING>(CashGame|Go\sFast\s\"[^\"]+\"|HOLD\-UP\s\"[^\"]+\"))?(?P<TOUR>Tournament\s(?P<TOURNAME>.+)?\sbuyIn:\s(?P<BUYIN>(?P<BIAMT>[{LS}\d\,.]+)?(\s\+?\s|-)(?P<BIRAKE>[{LS}\d\,.]+)?\+?(?P<BOUNTY>[{LS}\d\.]+)?\s?(?P<TOUR_ISO>{LEGAL_ISO})?|(?P<FREETICKET>[\sa-zA-Z]+))?\s(level:\s(?P<LEVEL>\d+))?.*)?\s-\sHandId:\s\#(?P<HID1>\d+)-(?P<HID2>\d+)-(?P<HID3>\d+)\s-\s(?P<GAME>Holdem|Omaha|Omaha5|Omaha8|5\sCard\sOmaha|5\sCard\sOmaha\sHi/Lo|Omaha\sHi/Lo|7\-Card\sStud|7stud|7\-Card\sStud\sHi/Lo|7stud8|Razz|2\-7\sTriple\sDraw|Lowball27)\s(?P<LIMIT>fixed\slimit|no\slimit|pot\slimit)\s\(((({LS})?(?P<ANTE>[.0-9]+)({LS})?)/)?(({LS})?(?P<SB>[.0-9]+)({LS})?)/(({LS})?(?P<BB>[.0-9]+)({LS})?)\)\s-\s(?P<DATETIME>.*)(Table:?\s\'(?P<TABLE>[^(]+)(.(?P<TOURNO>\d+).\#(?P<TABLENO>\d+))?.*\'\s(?P<MAXPLAYER>\d+)\-max\s(?P<MONEY>\(real\smoney\)))?
+            """.format(**substitutions),
     re.MULTILINE | re.DOTALL | re.VERBOSE,
 )
 
 
-def test_re_HandInfo():
+def test_re_HandInfo() -> None:
     text = 'Winamax Poker - HOLD-UP "Colorado" - HandId: #18876587-492053-1695486636 - Holdem no limit (0.01€/0.02€) - 2023/09/23 16:30:36 UTC'
     match = re_HandInfo.search(text)
     assert match is not None
 
 
-def test_re_HandInfoexp():
+def test_re_HandInfoexp() -> None:
     text = 'Winamax Poker - Tournament "Expresso Nitro" buyIn: 0.23€ + 0.02€ level: 1 - HandId: #3011596205705658369-1-1695541274 - Holdem no limit (10/20) - 2023/09/24 07:41:14 UTC'
     match = re_HandInfo.search(text)
     assert match is not None
@@ -52,13 +51,12 @@ def test_re_HandInfoexp():
 
 
 re_HUTP = re.compile(
-    r"Hold\-up\sto\sPot:\stotal\s((%(LS)s)?(?P<AMOUNT>[.0-9]+)(%(LS)s)?)"
-    % substitutions,
+    r"Hold\-up\sto\sPot:\stotal\s(({LS})?(?P<AMOUNT>[.0-9]+)({LS})?)".format(**substitutions),
     re.MULTILINE | re.VERBOSE,
 )
 
 
-def test_re_HUTP():
+def test_re_HUTP() -> None:
     text = "Hold-up to Pot: total 0.20€"
     match = re_HUTP.search(text)
     assert match is not None
@@ -66,13 +64,12 @@ def test_re_HUTP():
 
 
 re_PostSB = re.compile(
-    r"(?P<PNAME>.*?)\sposts\ssmall\sblind\s(%(LS)s)?(?P<SB>[\.0-9]+)(%(LS)s)?(?!\sout\sof\sposition)"
-    % substitutions,
+    r"(?P<PNAME>.*?)\sposts\ssmall\sblind\s({LS})?(?P<SB>[\.0-9]+)({LS})?(?!\sout\sof\sposition)".format(**substitutions),
     re.MULTILINE,
 )
 
 
-def test_re_PostSB():
+def test_re_PostSB() -> None:
     text = "LordShiva posts small blind 0.01€"
     match = re_PostSB.search(text)
     assert match is not None
@@ -81,13 +78,12 @@ def test_re_PostSB():
 
 
 re_PostBB = re.compile(
-    r"(?P<PNAME>.*?)\sposts\sbig\sblind\s(%(LS)s)?(?P<BB>[\.0-9]+)(%(LS)s)?"
-    % substitutions,
+    r"(?P<PNAME>.*?)\sposts\sbig\sblind\s({LS})?(?P<BB>[\.0-9]+)({LS})?".format(**substitutions),
     re.MULTILINE,
 )
 
 
-def test_re_PostBB():
+def test_re_PostBB() -> None:
     text = "LordShiva posts big blind 0.01€"
     match = re_PostBB.search(text)
     assert match is not None
@@ -96,12 +92,11 @@ def test_re_PostBB():
 
 
 re_PlayerInfo = re.compile(
-    r"Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.*)\s\((%(LS)s)?(?P<CASH>[.0-9]+)(%(LS)s)?(,\s(%(LS)s)?(?P<BOUNTY>[.0-9]+)(%(LS)s)?\sbounty)?\)"
-    % substitutions,
+    r"Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.*)\s\(({LS})?(?P<CASH>[.0-9]+)({LS})?(,\s({LS})?(?P<BOUNTY>[.0-9]+)({LS})?\sbounty)?\)".format(**substitutions),
 )
 
 
-def test_re_PlayerInfo():
+def test_re_PlayerInfo() -> None:
     text = "Seat 1: 77boy77 (0.60€)"
     match = re_PlayerInfo.search(text)
     assert match is not None

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 #    Copyright 2009-2011, Grigorij Indigirkin
 #
@@ -163,13 +162,13 @@ class PartyPoker(HandHistoryConverter):
     # Static regexes
     re_GameInfo = re.compile(
         """
-            \\*{5}\\sHand\\sHistory\\s(F|f)or\\sGame\\s(?P<HID>\\w+)\\s\\*{5}(\\s\\((?P<SITE>Poker\\sStars|PokerMaster|Party|PartyPoker|IPoker|Pacific|WPN|PokerBros)\\))?\\s+
+            \\*{{5}}\\sHand\\sHistory\\s(F|f)or\\sGame\\s(?P<HID>\\w+)\\s\\*{{5}}(\\s\\((?P<SITE>Poker\\sStars|PokerMaster|Party|PartyPoker|IPoker|Pacific|WPN|PokerBros)\\))?\\s+
             (.+?\\shas\\sleft\\sthe\\stable\\.\\s+)*
             (.+?\\sfinished\\sin\\s\\d+\\splace\\.\\s+)*
-            ((?P<CURRENCY>[%(LS)s]))?\\s*
+            ((?P<CURRENCY>[{LS}]))?\\s*
             (
-            ([%(LS)s]?(?P<SB>[%(NUM)s]+)/[%(LS)s]?(?P<BB>[%(NUM)s]+)\\s*(?:%(LEGAL_ISO)s)?\\s+(?P<FAST3>(fastforward|SPOTPOKER)\\s)?((?P<LIMIT3>NL|PL|FL|)\\s+)?)|
-            ((?P<CASHBI>[%(NUM)s]+)\\s*(?:%(LEGAL_ISO)s)?\\s*)(?P<FAST2>(fastforward|SPOTPOKER)\\s)?(?P<LIMIT2>(NL|PL|FL|))?\\s*
+            ([{LS}]?(?P<SB>[{NUM}]+)/[{LS}]?(?P<BB>[{NUM}]+)\\s*(?:{LEGAL_ISO})?\\s+(?P<FAST3>(fastforward|SPOTPOKER)\\s)?((?P<LIMIT3>NL|PL|FL|)\\s+)?)|
+            ((?P<CASHBI>[{NUM}]+)\\s*(?:{LEGAL_ISO})?\\s*)(?P<FAST2>(fastforward|SPOTPOKER)\\s)?(?P<LIMIT2>(NL|PL|FL|))?\\s*
             )
             (Tourney\\s*)?
             (?P<GAME>(Texas\\sHold\'?em|Hold\'?em|Omaha\\sHi-Lo|Omaha(\\sHi)?|7\\sCard\\sStud\\sHi-Lo|7\\sCard\\sStud|Double\\sHold\'?em|Short\\sDeck))\\s*
@@ -178,11 +177,10 @@ class PartyPoker(HandHistoryConverter):
             (\\((?P<LIMIT>(NL|PL|FL|Limit|))\\)\\s*)?
             (\\((?P<SNG>SNG|STT|MTT)(\\sJackPot)?\\sTournament\\s\\#(?P<TOURNO>\\d+)\\)\\s*)?
             )?
-            (?:\\s\\(Buyin\\s(?P<BUYIN>[%(LS)s][%(NUM)s]+)\\s\\+\\s(?P<FEE>[%(LS)s][%(NUM)s]+)\\))?
+            (?:\\s\\(Buyin\\s(?P<BUYIN>[{LS}][{NUM}]+)\\s\\+\\s(?P<FEE>[{LS}][{NUM}]+)\\))?
             \\s*-\\s*
             (?P<DATETIME>.+)
-            """
-        % substitutions,
+            """.format(**substitutions),
         re.VERBOSE | re.UNICODE,
     )
 
@@ -200,58 +198,54 @@ class PartyPoker(HandHistoryConverter):
 
     re_GameInfoTrny1 = re.compile(
         """
-            \\*{5}\\sHand\\sHistory\\s(F|f)or\\sGame\\s(?P<HID>\\w+)\\s\\*{5}\\s+
+            \\*{{5}}\\sHand\\sHistory\\s(F|f)or\\sGame\\s(?P<HID>\\w+)\\s\\*{{5}}\\s+
             (?P<LIMIT>(NL|PL|FL|))\\s*
             (?P<GAME>(Texas\\sHold\'em|Hold\'?em|Omaha\\sHi-Lo|Omaha(\\sHi)?|7\\sCard\\sStud\\sHi-Lo|7\\sCard\\sStud|Double\\sHold\'em|Short\\sDeck))\\s+
-            (?:(?P<BUYIN>[%(LS)s]?\\s?[%(NUM)s]+)\\s*(?P<BUYIN_CURRENCY>%(LEGAL_ISO)s)?\\s*Buy-in\\s+)?
-            (\\+\\s(?P<FEE>[%(LS)s]?\\s?[%(NUM)s]+)\\sEntry\\sFee\\s+)?
+            (?:(?P<BUYIN>[{LS}]?\\s?[{NUM}]+)\\s*(?P<BUYIN_CURRENCY>{LEGAL_ISO})?\\s*Buy-in\\s+)?
+            (\\+\\s(?P<FEE>[{LS}]?\\s?[{NUM}]+)\\sEntry\\sFee\\s+)?
             Trny:\\s?(?P<TOURNO>\\d+)\\s+
             Level:\\s*(?P<LEVEL>\\d+)\\s+
             ((Blinds|Stakes)(?:-Antes)?)\\(
-                (?P<SB>[%(NUM)s ]+)\\s*
-                /(?P<BB>[%(NUM)s ]+)
-                (?:\\s*-\\s*(?P<ANTE>[%(NUM)s ]+)\\$?)?
+                (?P<SB>[{NUM} ]+)\\s*
+                /(?P<BB>[{NUM} ]+)
+                (?:\\s*-\\s*(?P<ANTE>[{NUM} ]+)\\$?)?
             \\)
             \\s*\\-\\s*
             (?P<DATETIME>.+)
-            """
-        % substitutions,
+            """.format(**substitutions),
         re.VERBOSE | re.UNICODE,
     )
 
     re_GameInfoTrny2 = re.compile(
         r"""
-            \*{5}\sHand\sHistory\s(F|f)or\sGame\s(?P<HID>\w+)\s\*{5}\s+
+            \*{{5}}\sHand\sHistory\s(F|f)or\sGame\s(?P<HID>\w+)\s\*{{5}}\s+
             (?P<LIMIT>(NL|PL|FL|))\s*
             (?P<GAME>(Texas\sHold'em|Hold'em|Omaha\sHi-Lo|Omaha(\sHi)?|7\sCard\sStud\sHi-Lo|7\sCard\sStud|Double\sHold'em|Short\sDeck))\s+
-            (?P<BUYIN_CURRENCY>[%(LS)s])?(?P<BUYIN>[%(NUM)s]+(\.[%(NUM)s]+)?)\s*(?P<BUYIN_ISO>%(LEGAL_ISO)s)?\s*Buy-in\s*-\s*
+            (?P<BUYIN_CURRENCY>[{LS}])?(?P<BUYIN>[{NUM}]+(\.[{NUM}]+)?)\s*(?P<BUYIN_ISO>{LEGAL_ISO})?\s*Buy-in\s*-\s*
             (?P<DATETIME>.+)
-            """
-        % substitutions,
+            """.format(**substitutions),
         re.VERBOSE | re.UNICODE,
     )
 
     re_GameInfoTrny3 = re.compile(
         """
-            \\*{5}\\sHand\\sHistory\\s(F|f)or\\sGame\\s(?P<HID>\\w+)\\s\\*{5}\\s\\((?P<SITE>Poker\\sStars|PokerMaster|Party|IPoker|Pacific|WPN|PokerBros)\\)\\s+
+            \\*{{5}}\\sHand\\sHistory\\s(F|f)or\\sGame\\s(?P<HID>\\w+)\\s\\*{{5}}\\s\\((?P<SITE>Poker\\sStars|PokerMaster|Party|IPoker|Pacific|WPN|PokerBros)\\)\\s+
             Tourney\\sHand\\s
             (?P<LIMIT>(NL|PL|FL|))\\s*
             (?P<GAME>(Texas\\sHold\'em|Hold\'?em|Omaha\\sHi-Lo|Omaha(\\sHi)?|7\\sCard\\sStud\\sHi-Lo|7\\sCard\\sStud|Double\\sHold\'em|Short\\sDeck))\\s+
             \\s*\\-\\s*
             (?P<DATETIME>.+)
-            """
-        % substitutions,
+            """.format(),
         re.VERBOSE | re.UNICODE,
     )
 
     re_Blinds = re.compile(
         r"""
             ^((Blinds|Stakes)(?:-Antes)?)\(
-                (?P<SB>[%(NUM)s ]+)\s*
-                /(?P<BB>[%(NUM)s ]+)
-                (?:\s*-\s*(?P<ANTE>[%(NUM)s ]+)\$?)?
-            \)$"""
-        % substitutions,
+                (?P<SB>[{NUM} ]+)\s*
+                /(?P<BB>[{NUM} ]+)
+                (?:\s*-\s*(?P<ANTE>[{NUM} ]+)\$?)?
+            \)$""".format(**substitutions),
         re.VERBOSE | re.MULTILINE,
     )
 
@@ -267,21 +261,19 @@ class PartyPoker(HandHistoryConverter):
         r"""
           (S|s)eat\s?(?P<SEAT>\d+):\s
           (?P<PNAME>.*)\s
-          \(\s*[%(LS)s]?(?P<CASH>[%(NUM)s]+)\s*(?:%(LEGAL_ISO)s|)\s*\)
-          """
-        % substitutions,
+          \(\s*[{LS}]?(?P<CASH>[{NUM}]+)\s*(?:{LEGAL_ISO}|)\s*\)
+          """.format(**substitutions),
         re.VERBOSE | re.UNICODE,
     )
 
     re_NewLevel = re.compile(
-        r"Blinds(-Antes)?\((?P<SB>[%(NUM)s ]+)/(?P<BB>[%(NUM)s ]+)(?:\s*-\s*(?P<ANTE>[%(NUM)s ]+))?\)"
-        % substitutions,
+        r"Blinds(-Antes)?\((?P<SB>[{NUM} ]+)/(?P<BB>[{NUM} ]+)(?:\s*-\s*(?P<ANTE>[{NUM} ]+))?\)".format(**substitutions),
         re.VERBOSE | re.MULTILINE | re.DOTALL,
     )
     re_CountedSeats = re.compile(
         r"Total\s+number\s+of\s+players\s*:\s*(?P<COUNTED_SEATS>\d+)", re.MULTILINE,
     )
-    re_Identify = re.compile(r"\*{5}\sHand\sHistory\s[fF]or\sGame\s\d+\w+?\s")
+    re_identify = re.compile(r"\*{5}\sHand\sHistory\s[fF]or\sGame\s\d+\w+?\s")
     re_SplitHands = re.compile("Game\\s*\\#\\d+\\s*starts.\n\n+\\#Game\\s*No\\s*\\:\\s*\\d+\\s*")
     re_TailSplitHands = re.compile("(\x00+)")
     lineSplitter = "\n"
@@ -325,7 +317,7 @@ class PartyPoker(HandHistoryConverter):
         starsArchive=False,
         ftpArchive=False,
         sitename="PartyPoker",
-    ):
+    ) -> None:
         log.debug(
             f"Initializing PartyPoker parser in_path: {in_path}, out_path: {out_path}, index: {index}, sitename: {sitename}",
         )
@@ -358,7 +350,7 @@ class PartyPoker(HandHistoryConverter):
         # Initialize database connection if needed
         if not hasattr(self, "db"):
             self.db = Database.Database(self.config)
-            log.debug(f"Initialized database connection config: {str(self.config)}")
+            log.debug(f"Initialized database connection config: {self.config!s}")
 
         log.debug(
             f"Completed PartyPoker parser initialization sitename: {sitename}, has_db: {hasattr(self, 'db')}",
@@ -381,10 +373,10 @@ class PartyPoker(HandHistoryConverter):
 
         return filtered_hands
 
-    def compilePlayerRegexs(self, hand):
+    def compilePlayerRegexs(self, hand) -> None:
         log.debug(f"Starting regex compilation for players hand_id: {hand.handid}")
 
-        players = set([player[1] for player in hand.players])
+        players = {player[1] for player in hand.players}
         log.debug(f"Players identified players: {list(players)}, count: {len(players)}")
 
         if not hasattr(self, "compiledPlayers") or not players <= self.compiledPlayers:
@@ -432,8 +424,8 @@ class PartyPoker(HandHistoryConverter):
                     log.debug(f"Compiled regex pattern pattern_name: {name}")
 
             except re.error as e:
-                log.error(
-                    f"Failed to compile regex pattern pattern_name: {name}, error: {str(e)}",
+                log.exception(
+                    f"Failed to compile regex pattern pattern_name: {name}, error: {e!s}",
                 )
                 raise
 
@@ -471,12 +463,11 @@ class PartyPoker(HandHistoryConverter):
 
         return supported_games
 
-    def readSTP(self, hand):
+    def readSTP(self, hand) -> None:
         log.debug(f"Starting STP read hand_id: {hand.handid}, status: not_implemented")
         log.warning(
             f"STP functionality not implemented hand_id: {hand.handid}, method: readSTP",
         )
-        pass
 
     def determineGameType(self, handText):
         log.debug("Starting game type determination")
@@ -513,21 +504,25 @@ class PartyPoker(HandHistoryConverter):
                         m = None
                 break
 
-            elif pattern_name == "Disconnected" and m:
+            if pattern_name == "Disconnected" and m:
                 log.warning(f"Player disconnected partial_hand: {True}")
-                raise FpdbHandPartial("Partial hand history: Player Disconnected")
+                msg = "Partial hand history: Player Disconnected"
+                raise FpdbHandPartial(msg)
 
-            elif pattern_name == "Cancelled" and m:
+            if pattern_name == "Cancelled" and m:
                 log.warning(f"Table closed partial_hand: {True}")
-                raise FpdbHandPartial("Partial hand history: Table Closed")
+                msg = "Partial hand history: Table Closed"
+                raise FpdbHandPartial(msg)
 
-            elif pattern_name == "GameStartLine" and m and len(handText) < 50:
+            if pattern_name == "GameStartLine" and m and len(handText) < 50:
                 log.warning(f"Only game start line found partial_hand: {True}")
-                raise FpdbHandPartial("Partial hand history: Game start line")
+                msg = "Partial hand history: Game start line"
+                raise FpdbHandPartial(msg)
 
         if not m:
             log.error(f"Could not determine game type hand_text: {handText[:200]}")
-            raise FpdbParseError("Hand type determination failed")
+            msg = "Hand type determination failed"
+            raise FpdbParseError(msg)
 
         # Process match groups
         mg = m.groupdict()
@@ -536,7 +531,7 @@ class PartyPoker(HandHistoryConverter):
         log.debug(f"Extracted hand info groups: {mg}")
 
         # Set site info if available
-        if "SITE" in mg and mg["SITE"]:
+        if mg.get("SITE"):
             self.sitename = self.sites.get(mg["SITE"], (self.sitename,))[0]
             self.siteId = self.sites.get(mg["SITE"], (self.siteId,))[1]
             log.info(
@@ -560,7 +555,7 @@ class PartyPoker(HandHistoryConverter):
         log.debug(f"Fast mode setting fast: {info['fast']}")
 
         # Set game type
-        if "GAME" in mg and mg["GAME"]:
+        if mg.get("GAME"):
             info["base"], info["category"] = self.games.get(
                 mg["GAME"], ("hold", "holdem"),
             )
@@ -569,10 +564,11 @@ class PartyPoker(HandHistoryConverter):
             )
         else:
             log.error("Game type not found")
-            raise FpdbParseError("Game not identified")
+            msg = "Game not identified"
+            raise FpdbParseError(msg)
 
         # Process cash buyin
-        if "CASHBI" in mg and mg["CASHBI"]:
+        if mg.get("CASHBI"):
             mg["CASHBI"] = self.clearMoneyString(mg["CASHBI"])
             m_20BBmin = self.re_20BBmin.search(handText)
 
@@ -602,8 +598,8 @@ class PartyPoker(HandHistoryConverter):
                     )
 
             except KeyError as e:
-                log.error(
-                    f"Error processing cash buyin cashbi: {mg['CASHBI']}, error: {str(e)}, hand_text: {handText[:200]}",
+                log.exception(
+                    f"Error processing cash buyin cashbi: {mg['CASHBI']}, error: {e!s}, hand_text: {handText[:200]}",
                 )
                 raise FpdbParseError
 
@@ -633,7 +629,7 @@ class PartyPoker(HandHistoryConverter):
         log.debug(f"Currency set currency: {info['currency']}")
 
         # Set mixed game type if present
-        if "MIXED" in mg and mg["MIXED"]:
+        if mg.get("MIXED"):
             info["mix"] = self.mixes.get(mg["MIXED"], "none")
             log.debug(f"Mixed game type mix: {info['mix']}")
 
@@ -659,7 +655,7 @@ class PartyPoker(HandHistoryConverter):
                         f"Fixed limit ring game blinds small_blind: {info['sb']}, big_blind: {info['bb']}",
                     )
                 except KeyError:
-                    log.error(
+                    log.exception(
                         f"Error setting fixed limit ring blinds BB: {mg['BB']}, hand_text: {handText[:200]}",
                     )
                     raise FpdbParseError
@@ -675,7 +671,7 @@ class PartyPoker(HandHistoryConverter):
         log.debug(f"Game type determination complete game_info: {info}")
         return info
 
-    def readHandInfo(self, hand):
+    def readHandInfo(self, hand) -> None:
         log.debug(
             f"Starting hand info reading hand_id: {getattr(hand, 'handid', None)}",
         )
@@ -731,23 +727,28 @@ class PartyPoker(HandHistoryConverter):
         if not m:
             if self.re_Disconnected.search(hand.handText):
                 log.warning(f"Player disconnected - partial: {True}")
-                raise FpdbHandPartial("Partial hand history: Player Disconnected")
+                msg = "Partial hand history: Player Disconnected"
+                raise FpdbHandPartial(msg)
 
             if self.re_Cancelled.search(hand.handText):
                 log.warning(f"Table closed - partial: {True}")
-                raise FpdbHandPartial("Partial hand history: Table Closed")
+                msg = "Partial hand history: Table Closed"
+                raise FpdbHandPartial(msg)
 
             match_start = self.re_GameStartLine.match(hand.handText)
             if match_start and len(hand.handText) < 50:
                 log.warning(f"Only game start line - partial: {True}")
-                raise FpdbHandPartial("Partial hand history: Game start line")
+                msg = "Partial hand history: Game start line"
+                raise FpdbHandPartial(msg)
 
             log.error(f"Missing basic hand info - hand_text: {hand.handText[:200]}")
-            raise FpdbParseError("Missing infos")
+            msg = "Missing infos"
+            raise FpdbParseError(msg)
 
         if not m2:
             log.error(f"Missing game specific info - hand_text: {hand.handText[:200]}")
-            raise FpdbParseError("Missing infos")
+            msg = "Missing infos"
+            raise FpdbParseError(msg)
 
         # Combine all info
         info.update(m.groupdict())
@@ -796,7 +797,7 @@ class PartyPoker(HandHistoryConverter):
             f"Completed hand info processing hand_id: {hand.handid}, type: {hand.gametype['type']}",
         )
 
-    def _processDateTime(self, hand, datetime_str):
+    def _processDateTime(self, hand, datetime_str) -> None:
         log.debug(f"Processing datetime raw: {datetime_str}")
 
         m = re.search(
@@ -807,14 +808,16 @@ class PartyPoker(HandHistoryConverter):
 
         if not m:
             log.error(f"Failed to parse datetime datetime: {datetime_str}")
-            raise FpdbParseError(f"Cannot parse date: {datetime_str}")
+            msg = f"Cannot parse date: {datetime_str}"
+            raise FpdbParseError(msg)
 
         timezone = m.group("TZ") if m.group("TZ") else "ET"
         month = self.months.get(m.group("M"))
 
         if not month:
             log.error(f"Unknown month month: {m.group('M')}")
-            raise FpdbParseError(f"Unknown month: {m.group('M')}")
+            msg = f"Unknown month: {m.group('M')}"
+            raise FpdbParseError(msg)
 
         datetime_str = f"{m.group('Y')}/{month}/{m.group('D')} {m.group('H')}:{m.group('MIN')}:{m.group('S')}"
 
@@ -826,13 +829,14 @@ class PartyPoker(HandHistoryConverter):
                 hand.startTime, timezone, "UTC",
             )
             log.debug(
-                f"Set start time time: {str(hand.startTime)}, timezone: {timezone}",
+                f"Set start time time: {hand.startTime!s}, timezone: {timezone}",
             )
         except Exception as e:
-            log.error(f"Error parsing datetime error: {str(e)}")
-            raise FpdbParseError("Error parsing date")
+            log.exception(f"Error parsing datetime error: {e!s}")
+            msg = "Error parsing date"
+            raise FpdbParseError(msg)
 
-    def _processHID(self, hand, hid):
+    def _processHID(self, hand, hid) -> None:
         log.debug(f"Processing hand ID raw_hid: {hid}")
 
         if str(hid) == "1111111111":
@@ -850,7 +854,7 @@ class PartyPoker(HandHistoryConverter):
                 f"Set hand ID hand_id: {hand.handid}, round_penny: {hand.roundPenny}",
             )
 
-    def _processTable(self, hand, info):
+    def _processTable(self, hand, info) -> None:
         log.debug("Processing table info")
 
         if "TOURNO" in info and info["TOURNO"] is None:
@@ -863,7 +867,7 @@ class PartyPoker(HandHistoryConverter):
 
         log.debug(f"Set table name table: {hand.tablename}")
 
-    def _processTourNo(self, hand, info):
+    def _processTourNo(self, hand, info) -> None:
         log.debug("Processing tournament number")
 
         hand.tourNo = info["TOURNO"]
@@ -877,7 +881,7 @@ class PartyPoker(HandHistoryConverter):
             f"Set tournament info tour_no: {hand.tourNo}, buyin: {hand.buyin if hasattr(hand, 'buyin') else None}",
         )
 
-    def _processBuyin(self, hand, info):
+    def _processBuyin(self, hand, info) -> None:
         log.debug("Processing buyin info")
 
         if info.get("TABLE") and "Freeroll" in info.get("TABLE"):
@@ -899,7 +903,7 @@ class PartyPoker(HandHistoryConverter):
             f"Completed buyin processing buyin: {hand.buyin}, currency: {hand.buyinCurrency}, fee: {hand.fee}",
         )
 
-    def _processTournamentBuyin(self, hand, info):
+    def _processTournamentBuyin(self, hand, info) -> None:
         hand.buyin = 0
         hand.fee = 0
         hand.buyinCurrency = "NA"
@@ -925,7 +929,7 @@ class PartyPoker(HandHistoryConverter):
             f"Set tournament buyin details buyin: {hand.buyin}, currency: {hand.buyinCurrency}, fee: {hand.fee}",
         )
 
-    def _processType3Info(self, hand, info):
+    def _processType3Info(self, hand, info) -> None:
         log.debug("Processing type 3 tournament info")
 
         hand.tourNo = info.get("TABLE", "Unknown")
@@ -937,7 +941,7 @@ class PartyPoker(HandHistoryConverter):
             f"Set type 3 tournament details tour_no: {hand.tourNo}, buyin: {hand.buyin}, currency: {hand.buyinCurrency}",
         )
 
-    def readButton(self, hand):
+    def readButton(self, hand) -> None:
         log.debug(f"Starting button position read hand_id: {hand.handid}")
 
         m = self.re_Button.search(hand.handText)
@@ -955,7 +959,7 @@ class PartyPoker(HandHistoryConverter):
             f"Completed button position read hand_id: {hand.handid}, has_button: {bool(m)}",
         )
 
-    def readPlayerStacks(self, hand):
+    def readPlayerStacks(self, hand) -> None:
         log.debug(
             f"Starting player stacks read hand_id: {hand.handid}, game_type: {hand.gametype['type']}",
         )
@@ -997,7 +1001,7 @@ class PartyPoker(HandHistoryConverter):
             # Check if the number of real player names matches the number of placeholders
             if len(real_player_names) == len(placeholder_seats):
                 # Assign real player names to placeholder seats in order
-                for (seat, cash), pname in zip(placeholder_seats, real_player_names):
+                for (seat, cash), pname in zip(placeholder_seats, real_player_names, strict=False):
                     hand.addPlayer(seat, pname, cash)
                     log.debug(
                         f"Assigned real name to seat player: {pname}, seat: {seat}, stack: {cash}",
@@ -1008,7 +1012,7 @@ class PartyPoker(HandHistoryConverter):
                 log.warning(
                     "Number of real player names does not match number of placeholder seats. Assigning seats arbitrarily.",
                 )
-                for seat_info, pname in zip(placeholder_seats, real_player_names):
+                for seat_info, pname in zip(placeholder_seats, real_player_names, strict=False):
                     seat, cash = seat_info
                     hand.addPlayer(seat, pname, cash)
                     log.debug(
@@ -1041,8 +1045,8 @@ class PartyPoker(HandHistoryConverter):
 
         log.debug(f"Completed player stacks read total_players: {len(hand.players)}")
 
-    def _processEmailedPlayerName(self, hand, match, pname):
-        """Handle player names in emailed hands"""
+    def _processEmailedPlayerName(self, hand, match, pname) -> None:
+        """Handle player names in emailed hands."""
         subst = {"PLYR": re.escape(match.group("PNAME")), "SPACENAME": r"\s(.+)? "}
 
         re_PlayerName = re.compile(
@@ -1059,8 +1063,8 @@ class PartyPoker(HandHistoryConverter):
                 f"Updated emailed hand player name original: {match.group('PNAME')}, full_name: {full_name}",
             )
 
-    def _processRingGame(self, hand, maxKnownStack, zeroStackPlayers):
-        """Handle ring game specific player processing"""
+    def _processRingGame(self, hand, maxKnownStack, zeroStackPlayers) -> None:
+        """Handle ring game specific player processing."""
         log.debug("Processing ring game players")
 
         # Compile regex patterns
@@ -1096,7 +1100,7 @@ class PartyPoker(HandHistoryConverter):
             self._addUnseatedPlayers(hand, unseated_active, maxKnownStack)
 
     def _findFirstEmptySeat(self, hand, startSeat):
-        """Find first available seat number"""
+        """Find first available seat number."""
         log.debug(f"Searching for empty seat start: {startSeat}")
 
         occupied_seats = [player[0] for player in hand.players]
@@ -1114,8 +1118,8 @@ class PartyPoker(HandHistoryConverter):
 
     def _processZeroStackPlayers(
         self, hand, zero_stack_players, joining, leaving, max_stack,
-    ):
-        """Process players with zero stacks"""
+    ) -> None:
+        """Process players with zero stacks."""
         log.debug(f"Processing zero stack players count: {len(zero_stack_players)}")
 
         for seat, pname, stack in zero_stack_players:
@@ -1131,8 +1135,8 @@ class PartyPoker(HandHistoryConverter):
                     f"Added zero stack player player: {pname}, seat: {seat}, stack: {stack}",
                 )
 
-    def _addUnseatedPlayers(self, hand, unseated_players, max_stack):
-        """Add active players who are not yet seated"""
+    def _addUnseatedPlayers(self, hand, unseated_players, max_stack) -> None:
+        """Add active players who are not yet seated."""
         log.debug(f"Adding unseated active players players: {unseated_players}")
 
         for player in unseated_players:
@@ -1142,7 +1146,7 @@ class PartyPoker(HandHistoryConverter):
                 f"Added unseated player player: {player}, seat: {new_seat}, stack: {max_stack}",
             )
 
-    def markStreets(self, hand):
+    def markStreets(self, hand) -> None:
         log.debug(
             f"Starting streets marking hand_id: {hand.handid}, game_type: {hand.gametype['base']}",
         )
@@ -1206,7 +1210,7 @@ class PartyPoker(HandHistoryConverter):
             f"Completed streets marking - hand_id: {hand.handid}, success: {bool(match)}",
         )
 
-    def readCommunityCards(self, hand, street):
+    def readCommunityCards(self, hand, street) -> None:
         log.debug(
             f"Entering readCommunityCards method - street: {street}, method: PartyPoker:readCommunityCards",
         )
@@ -1243,7 +1247,7 @@ class PartyPoker(HandHistoryConverter):
 
         log.debug("Exiting readCommunityCards method PartyPoker:readCommunityCards")
 
-    def readAntes(self, hand):
+    def readAntes(self, hand) -> None:
         log.debug("Entering readAntes method PartyPoker:readAntes")
 
         for m in self.re_Antes.finditer(hand.handText):
@@ -1257,7 +1261,7 @@ class PartyPoker(HandHistoryConverter):
 
         log.info("Exiting readAntes method")
 
-    def readBlinds(self, hand):
+    def readBlinds(self, hand) -> None:
         log.debug("Entering readBlinds method PartyPoker:readBlinds")
 
         noSmallBlind = bool(self.re_NoSmallBlind.search(hand.handText))
@@ -1281,8 +1285,8 @@ class PartyPoker(HandHistoryConverter):
                         )
             except Exception as e:
                 hand.addBlind(None, None, None)
-                log.error(
-                    f"No small blind found - method: PartyPoker:readBlinds - error: {str(e)}",
+                log.exception(
+                    f"No small blind found - method: PartyPoker:readBlinds - error: {e!s}",
                 )
 
             for a in self.re_PostBB.finditer(hand.handText):
@@ -1319,13 +1323,10 @@ class PartyPoker(HandHistoryConverter):
             if hand.buttonpos == 0:
                 self.readButton(hand)
 
-            playersMap = dict(
-                [
-                    (f[0], f[1:3])
+            playersMap = {
+                f[0]: f[1:3]
                     for f in hand.players
-                    if f[1] in hand.handText.split("Trny:")[-1]
-                ],
-            )
+                    if f[1] in hand.handText.split("Trny:")[-1]}
             maxSeat = max(playersMap)
 
             def findFirstNonEmptySeat(startSeat):
@@ -1376,12 +1377,11 @@ class PartyPoker(HandHistoryConverter):
 
         log.info("Exiting readBlinds method")
 
-    def readBringIn(self, hand):
+    def readBringIn(self, hand) -> None:
         log.info("Entering readBringIn method")
         log.warning("Method not implemented")
-        pass
 
-    def readHoleCards(self, hand):
+    def readHoleCards(self, hand) -> None:
         log.info("Entering readHoleCards method")
 
         # Read hero's cards
@@ -1435,7 +1435,7 @@ class PartyPoker(HandHistoryConverter):
 
         log.info("Exiting readHoleCards method")
 
-    def readAction(self, hand, street):
+    def readAction(self, hand, street) -> None:
         log.debug(
             f"Entering readAction method - method: PartyPoker:readAction, street: {street}",
         )
@@ -1519,12 +1519,11 @@ class PartyPoker(HandHistoryConverter):
             f"Exiting readAction method - method: PartyPoker:readAction, street: {street}",
         )
 
-    def readShowdownActions(self, hand):
+    def readShowdownActions(self, hand) -> None:
         log.debug("Entering readShowdownActions method")
         log.warning("Method not implemented")
-        pass
 
-    def readCollectPot(self, hand):
+    def readCollectPot(self, hand) -> None:
         log.info("Entering readCollectPot method")
 
         hand.setUncalledBets(True)
@@ -1540,7 +1539,7 @@ class PartyPoker(HandHistoryConverter):
 
         log.info("Exiting readCollectPot method")
 
-    def readShownCards(self, hand):
+    def readShownCards(self, hand) -> None:
         log.info("Entering readShownCards method")
 
         for m in self.re_ShownCards.finditer(hand.handText):
@@ -1564,17 +1563,16 @@ class PartyPoker(HandHistoryConverter):
 
         log.info("Exiting readShownCards method")
 
-    def readSummaryInfo(self, summaryInfoList):
+    def readSummaryInfo(self, summaryInfoList) -> bool:
         log.debug("Entering readSummaryInfo method")
         log.warning("Method not implemented")
         return True
 
     def convert_to_decimal(self, string):
         dec = self.clearMoneyString(string)
-        dec = Decimal(dec)
-        return dec
+        return Decimal(dec)
 
-    def readTourneyResults(self, hand):
+    def readTourneyResults(self, hand) -> None:
         log.info("Entering readTourneyResults method")
 
         # Initialize data structures
@@ -1603,8 +1601,8 @@ class PartyPoker(HandHistoryConverter):
                     )
                 except Exception as e:
                     hand.winnings[winner] = Decimal(0)
-                    log.error(
-                        f"Error processing winner amount method: PartyPoker:readTourneyResults, player: {winner}, amount_string: {amt_str}, error: {str(e)}",
+                    log.exception(
+                        f"Error processing winner amount method: PartyPoker:readTourneyResults, player: {winner}, amount_string: {amt_str}, error: {e!s}",
                     )
             else:
                 hand.winnings[winner] = Decimal(0)
@@ -1625,8 +1623,8 @@ class PartyPoker(HandHistoryConverter):
                 amount = Decimal(amt_str)
             except Exception as e:
                 amount = Decimal(0)
-                log.error(
-                    f"Error processing player amount method: PartyPoker:readTourneyResults, player: {pname}, amount_string: {amt_str}, error: {str(e)}",
+                log.exception(
+                    f"Error processing player amount method: PartyPoker:readTourneyResults, player: {pname}, amount_string: {amt_str}, error: {e!s}",
                 )
 
             # currency_symbol = match.group("CURRENCY_SYMBOL")
@@ -1723,8 +1721,8 @@ class PartyPoker(HandHistoryConverter):
             )
 
         except Exception as e:
-            log.error(
-                f"Error processing tournament summary method: PartyPoker:readTourneyResults, error: {str(e)}",
+            log.exception(
+                f"Error processing tournament summary method: PartyPoker:readTourneyResults, error: {e!s}",
             )
 
         log.debug(
@@ -1763,7 +1761,7 @@ class PartyPoker(HandHistoryConverter):
         log.debug(f"Processing cards string - input: {string}")
 
         cards = string.strip().split(" ")
-        rendered_cards = list(filter(len, map(lambda x: x.strip(" ,"), cards)))
+        rendered_cards = list(filter(len, (x.strip(" ,") for x in cards)))
 
         log.debug(
             f"Cards rendering complete - input: {string}, output: {rendered_cards}",

@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-"""
-ModernSitePreferences.py
+"""ModernSitePreferences.py.
 
 Modern and responsive interface for site settings in fpdb.
 """
@@ -29,16 +27,15 @@ from PyQt5.QtWidgets import (
 )
 
 import DetectInstalledSites
-
 from loggingFpdb import get_logger
 
 log = get_logger("modernsitepreferences")
 
 
 class ModernSiteCard(QFrame):
-    """Modern widget to display a site's settings"""
+    """Modern widget to display a site's settings."""
 
-    def __init__(self, site_name, site_config, site_id=None, parent=None):
+    def __init__(self, site_name, site_config, site_id=None, parent=None) -> None:
         super().__init__(parent)
         self.site_name = site_name
         self.site_config = site_config
@@ -51,8 +48,8 @@ class ModernSiteCard(QFrame):
 
         self.setup_ui()
 
-    def apply_styles(self):
-        """Apply styles (called only when visible)"""
+    def apply_styles(self) -> None:
+        """Apply styles (called only when visible)."""
         if not self._style_applied:
             self.setStyleSheet(
                 """
@@ -71,12 +68,12 @@ class ModernSiteCard(QFrame):
             )
             self._style_applied = True
 
-    def showEvent(self, event):
-        """Called when the widget becomes visible"""
+    def showEvent(self, event) -> None:
+        """Called when the widget becomes visible."""
         super().showEvent(event)
         self.apply_styles()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         layout = QVBoxLayout(self)
         layout.setSpacing(10)
 
@@ -198,8 +195,8 @@ class ModernSiteCard(QFrame):
         # Update content visibility
         self.update_content_visibility()
 
-    def on_toggle_changed(self, checked):
-        """Handle toggle state change"""
+    def on_toggle_changed(self, checked) -> None:
+        """Handle toggle state change."""
         self.update_content_visibility()
         # Auto-enable if typing in the screen name field
         if checked and self.screen_name_input.text() == "YOUR SCREEN NAME HERE":
@@ -216,12 +213,12 @@ class ModernSiteCard(QFrame):
                 if self.site_name in self.parent_dialog.visible_cards:
                     self.parent_dialog.filter_sites()
 
-    def update_content_visibility(self):
-        """Show/hide content based on toggle state"""
+    def update_content_visibility(self) -> None:
+        """Show/hide content based on toggle state."""
         self.content_widget.setVisible(self.enable_toggle.isChecked())
 
-    def browse_clicked(self, path_input):
-        """Open folder selection dialog"""
+    def browse_clicked(self, path_input) -> None:
+        """Open folder selection dialog."""
         current_path = path_input.text()
         new_path = QFileDialog.getExistingDirectory(
             self,
@@ -235,32 +232,32 @@ class ModernSiteCard(QFrame):
                 self.enable_toggle.setChecked(True)
 
     def is_site_detectable(self):
-        """Check if the site is detectable"""
+        """Check if the site is detectable."""
         detector = DetectInstalledSites.DetectInstalledSites()
         network_name = self.get_network_for_skin(self.site_name)
         return network_name in detector.supportedSites
 
     def get_network_for_skin(self, site_name):
-        """Map a skin to its parent network for detection"""
+        """Map a skin to its parent network for detection."""
         # Use the existing logic from fpdb.pyw
         if site_name.startswith("PokerStars"):
             return "PokerStars"
-        elif site_name == "PMU Poker":
+        if site_name == "PMU Poker":
             # PMU Poker standard (iPoker)
             return "iPoker"  # PMU Poker is on iPoker network
-        elif site_name == "PMU Poker (PartyPoker)":
+        if site_name == "PMU Poker (PartyPoker)":
             # PMU Poker on PartyPoker network (old version)
             return "PartyGaming"  # PMU Poker PartyPoker version uses PartyGaming detector
-        elif site_name in ["FDJ Poker", "Poker770", "NetBet Poker", "En ligne"]:
+        if site_name in ["FDJ Poker", "Poker770", "NetBet Poker", "En ligne"]:
             return "iPoker"
-        elif site_name in ["Americas Cardroom", "ACR Poker", "WinningPoker"]:
+        if site_name in ["Americas Cardroom", "ACR Poker", "WinningPoker"]:
             return "ACR"
-        elif site_name in ["PartyPoker", "Party Poker", "Bwin Poker"]:
+        if site_name in ["PartyPoker", "Party Poker", "Bwin Poker"]:
             return "PartyGaming"
         return site_name
 
-    def detect_clicked(self):
-        """Automatically detect paths"""
+    def detect_clicked(self) -> None:
+        """Automatically detect paths."""
         detector = DetectInstalledSites.DetectInstalledSites()
         detection_site = self.get_network_for_skin(self.site_name)
 
@@ -278,12 +275,12 @@ class ModernSiteCard(QFrame):
                     self.apply_detection_results(matching_variant)
                     self.show_detection_success()
                     return
-                elif all_variants:
+                if all_variants:
                     # Use the first found
                     self.apply_detection_results(all_variants[0])
                     self.show_detection_info(all_variants)
                     return
-        
+
         elif detection_site == "iPoker":
             # Special handling for iPoker skins
             all_ipoker_skins = detector.get_all_ipoker_skins()
@@ -295,17 +292,17 @@ class ModernSiteCard(QFrame):
                     if skin_name == self.site_name:
                         matching_skin = skin_data
                         break
-                
+
                 if matching_skin:
                     self.apply_detection_results(matching_skin)
                     self.show_detection_success()
                     return
-                elif all_ipoker_skins:
+                if all_ipoker_skins:
                     # No exact match, use the first detected iPoker skin
                     self.apply_detection_results(all_ipoker_skins[0])
                     self.show_detection_info_ipoker(all_ipoker_skins)
                     return
-        
+
         elif detection_site == "PartyGaming":
             # Special handling for PartyGaming skins (including PMU Poker PartyPoker)
             all_party_skins = detector.get_all_partypoker_skins()
@@ -317,12 +314,12 @@ class ModernSiteCard(QFrame):
                     if skin_name == self.site_name or (self.site_name == "PMU Poker (PartyPoker)" and skin_name == "PMU Poker (PartyPoker)"):
                         matching_skin = skin_data
                         break
-                
+
                 if matching_skin:
                     self.apply_detection_results(matching_skin)
                     self.show_detection_success()
                     return
-                elif all_party_skins:
+                if all_party_skins:
                     # No exact match, use the first detected PartyGaming skin
                     self.apply_detection_results(all_party_skins[0])
                     self.show_detection_info_party(all_party_skins)
@@ -335,11 +332,11 @@ class ModernSiteCard(QFrame):
         else:
             self.show_detection_failure()
 
-    def apply_detection_results(self, detection_data):
-        """Apply detection results"""
+    def apply_detection_results(self, detection_data) -> None:
+        """Apply detection results."""
         self.screen_name_input.setText(detection_data["heroname"])
         self.hh_path_input.setText(detection_data["hhpath"])
-        
+
         # For tournament path: use tspath if provided, otherwise use hhpath
         # Many sites (like PokerStars, Winamax) use the same folder for both
         tspath = detection_data.get("tspath", "")
@@ -353,8 +350,8 @@ class ModernSiteCard(QFrame):
         if not self.enable_toggle.isChecked():
             self.enable_toggle.setChecked(True)
 
-    def show_detection_success(self):
-        """Show a success message"""
+    def show_detection_success(self) -> None:
+        """Show a success message."""
         QToolTip.showText(
             self.detect_btn.mapToGlobal(self.detect_btn.rect().center()),
             "✅ Paths detected successfully!",
@@ -363,17 +360,17 @@ class ModernSiteCard(QFrame):
             2000,
         )
 
-    def show_detection_info(self, variants):
-        """Show information about detected variants"""
+    def show_detection_info(self, variants) -> None:
+        """Show information about detected variants."""
         variants_names = [v.get("variant", "PokerStars") for v in variants]
         QMessageBox.information(
             self,
             "PokerStars Detection",
-            f"Detected variants: {', '.join(variants_names)}\n" f"Applied configuration from the first variant found.",
+            f"Detected variants: {', '.join(variants_names)}\nApplied configuration from the first variant found.",
         )
 
-    def show_detection_failure(self):
-        """Show a failure message"""
+    def show_detection_failure(self) -> None:
+        """Show a failure message."""
         QToolTip.showText(
             self.detect_btn.mapToGlobal(self.detect_btn.rect().center()),
             "❌ No installation detected",
@@ -381,9 +378,9 @@ class ModernSiteCard(QFrame):
             self.detect_btn.rect(),
             2000,
         )
-    
-    def show_detection_success_with_network(self, network):
-        """Show a success message with network info"""
+
+    def show_detection_success_with_network(self, network) -> None:
+        """Show a success message with network info."""
         QToolTip.showText(
             self.detect_btn.mapToGlobal(self.detect_btn.rect().center()),
             f"✅ Paths detected successfully!\nNetwork: {network}",
@@ -391,9 +388,9 @@ class ModernSiteCard(QFrame):
             self.detect_btn.rect(),
             3000,
         )
-    
-    def show_wrong_network_detected(self, found_network, expected_network):
-        """Show a message when wrong network version is detected"""
+
+    def show_wrong_network_detected(self, found_network, expected_network) -> None:
+        """Show a message when wrong network version is detected."""
         QMessageBox.warning(
             self,
             "Wrong Network Version",
@@ -401,9 +398,9 @@ class ModernSiteCard(QFrame):
             f"but this configuration is for the {expected_network} network.\n\n"
             f"Please use the correct PMU Poker configuration for your installation.",
         )
-    
-    def show_detection_info_ipoker(self, skins):
-        """Show information about detected iPoker skins"""
+
+    def show_detection_info_ipoker(self, skins) -> None:
+        """Show information about detected iPoker skins."""
         skin_names = [s.get("skin", "Unknown") for s in skins]
         QMessageBox.information(
             self,
@@ -411,9 +408,9 @@ class ModernSiteCard(QFrame):
             f"Detected iPoker skins: {', '.join(skin_names)}\n"
             f"Applied configuration from the first skin found.",
         )
-    
-    def show_detection_info_party(self, skins):
-        """Show information about detected PartyGaming skins"""
+
+    def show_detection_info_party(self, skins) -> None:
+        """Show information about detected PartyGaming skins."""
         skin_names = [s.get("skin", "Unknown") for s in skins]
         QMessageBox.information(
             self,
@@ -423,7 +420,7 @@ class ModernSiteCard(QFrame):
         )
 
     def get_values(self):
-        """Get current values"""
+        """Get current values."""
         return {
             "enabled": self.enable_toggle.isChecked(),
             "screen_name": self.screen_name_input.text(),
@@ -433,14 +430,14 @@ class ModernSiteCard(QFrame):
 
 
 class ModernToggleSwitch(QCheckBox):
-    """Modern toggle switch, iOS/Android style"""
+    """Modern toggle switch, iOS/Android style."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setFixedSize(50, 25)
         self.setCursor(Qt.PointingHandCursor)
 
-    def paintEvent(self, event):
+    def paintEvent(self, event) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
@@ -459,10 +456,7 @@ class ModernToggleSwitch(QCheckBox):
         painter.drawRoundedRect(0, 0, self.width(), self.height(), self.height() / 2, self.height() / 2)
 
         # Handle position
-        if self.isChecked():
-            handle_x = self.width() - self.height() + 2
-        else:
-            handle_x = 2
+        handle_x = self.width() - self.height() + 2 if self.isChecked() else 2
 
         # Draw the handle
         painter.setBrush(QBrush(handle_color))
@@ -470,9 +464,9 @@ class ModernToggleSwitch(QCheckBox):
 
 
 class ModernSitePreferencesDialog(QDialog):
-    """Modern dialog for site preferences"""
+    """Modern dialog for site preferences."""
 
-    def __init__(self, config, parent=None):
+    def __init__(self, config, parent=None) -> None:
         super().__init__(parent)
         self.config = config
         self.site_cards = {}
@@ -514,7 +508,7 @@ class ModernSitePreferencesDialog(QDialog):
         self.setup_ui()
         self.load_sites()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         main_layout = QVBoxLayout(self)
         main_layout.setSpacing(20)
         main_layout.setContentsMargins(20, 20, 20, 20)
@@ -594,8 +588,8 @@ class ModernSitePreferencesDialog(QDialog):
 
         main_layout.addLayout(button_layout)
 
-    def load_sites(self):
-        """Load site data (without creating widgets)"""
+    def load_sites(self) -> None:
+        """Load site data (without creating widgets)."""
         # Clear existing sites
         for card in self.site_cards.values():
             card.deleteLater()
@@ -623,8 +617,8 @@ class ModernSitePreferencesDialog(QDialog):
         # Apply the initial filter (will only create cards for enabled sites)
         self.filter_sites()
 
-    def filter_sites(self):
-        """Filter sites - search only among enabled sites"""
+    def filter_sites(self) -> None:
+        """Filter sites - search only among enabled sites."""
         search_text = self.search_input.text().lower()
 
         # Determine which sites should be visible
@@ -657,8 +651,8 @@ class ModernSitePreferencesDialog(QDialog):
                     self.site_cards[site_name].show()
                 self.visible_cards.add(site_name)
 
-    def detect_all_sites(self):
-        """Detect all possible sites"""
+    def detect_all_sites(self) -> None:
+        """Detect all possible sites."""
         detected_count = 0
         for site_name in self.visible_cards:
             if site_name in self.site_cards:
@@ -681,7 +675,7 @@ class ModernSitePreferencesDialog(QDialog):
             )
 
     def is_site_configured(self, card):
-        """Check if a site is configured"""
+        """Check if a site is configured."""
         try:
             values = card.get_values()
             return (
@@ -694,7 +688,7 @@ class ModernSitePreferencesDialog(QDialog):
             return False
 
     def get_changes(self):
-        """Get all changes made"""
+        """Get all changes made."""
         changes = {}
         for site_name, card in self.site_cards.items():
             changes[site_name] = card.get_values()

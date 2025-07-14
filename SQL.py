@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """Returns a dict of SQL statements used in fpdb."""
 
-from __future__ import print_function
 
 import re
 
@@ -37,8 +35,8 @@ import re
 #    FreePokerTools modules
 
 
-class Sql(object):
-    def __init__(self, game="holdem", db_server="mysql"):
+class Sql:
+    def __init__(self, game="holdem", db_server="mysql") -> None:
         self.query = {}
         ###############################################################################3
         #    Support for the Free Poker DataBase = fpdb   http://fpdb.sourceforge.net/
@@ -86,7 +84,7 @@ class Sql(object):
         # Set transaction isolation level
         ##################################################################
 
-        if db_server == "mysql" or db_server == "postgresql":
+        if db_server in ("mysql", "postgresql"):
             self.query[
                 "set tx level"
             ] = """SET SESSION TRANSACTION
@@ -240,7 +238,7 @@ class Sql(object):
             self.query[
                 "createRankTable"
             ] = """CREATE TABLE Rank (
-                        id SMALLINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id), 
+                        id SMALLINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
                         name varchar(8) NOT NULL)
                         ENGINE=INNODB"""
 
@@ -441,13 +439,13 @@ class Sql(object):
                         id INT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
                         name VARCHAR(32) NOT NULL,
                         siteId SMALLINT UNSIGNED NOT NULL, FOREIGN KEY (siteId) REFERENCES Sites(id),
-                        hero BOOLEAN, 
+                        hero BOOLEAN,
                         chars char(3),
                         comment text,
                         commentTs DATETIME,
                         profil text,
                         color_code VARCHAR(7) DEFAULT '#FFFFFF',
-                        symbol VARCHAR(10) DEFAULT '★' 
+                        symbol VARCHAR(10) DEFAULT '★'
                         )
                         ENGINE=INNODB"""
         elif db_server == "postgresql":
@@ -477,7 +475,7 @@ class Sql(object):
                         commentTs timestamp,
                         profil TEXT,
                         color_code TEXT DEFAULT '#FFFFFF',
-                        symbol TEXT DEFAULT '★',  
+                        symbol TEXT DEFAULT '★',
                         FOREIGN KEY(siteId) REFERENCES Sites(id) ON DELETE CASCADE)"""
 
         ################################
@@ -533,7 +531,7 @@ class Sql(object):
                             tourneyId INT UNSIGNED, FOREIGN KEY (tourneyId) REFERENCES Tourneys(id),
                             gametypeId SMALLINT UNSIGNED NOT NULL, FOREIGN KEY (gametypeId) REFERENCES Gametypes(id),
                             sessionId INT UNSIGNED, FOREIGN KEY (sessionId) REFERENCES Sessions(id),
-                            fileId INT(10) UNSIGNED NOT NULL, FOREIGN KEY (fileId) REFERENCES Files(id), 
+                            fileId INT(10) UNSIGNED NOT NULL, FOREIGN KEY (fileId) REFERENCES Files(id),
                             startTime DATETIME NOT NULL,
                             importTime DATETIME NOT NULL,
                             seats TINYINT NOT NULL,
@@ -731,7 +729,7 @@ class Sql(object):
                         matrix BOOLEAN,
                         multiEntry BOOLEAN,
                         reEntry BOOLEAN,
-                        fast BOOLEAN, 
+                        fast BOOLEAN,
                         newToGame BOOLEAN,
                         homeGame BOOLEAN,
                         split BOOLEAN,
@@ -927,7 +925,7 @@ class Sql(object):
                         position CHAR(1),
                         seatNo SMALLINT NOT NULL,
                         sitout BOOLEAN NOT NULL,
-                    
+
                         card1 smallint NOT NULL,  /* 0=none, 1-13=2-Ah 14-26=2-Ad 27-39=2-Ac 40-52=2-As */
                         card2 smallint NOT NULL,
                         card3 smallint,
@@ -949,9 +947,9 @@ class Sql(object):
                         card19 smallint,
                         card20 smallint,
                         startCards SMALLINT UNSIGNED, FOREIGN KEY (startCards) REFERENCES StartCards(id),
-                        
+
                         common BIGINT NOT NULL,
-                        committed BIGINT NOT NULL,                        
+                        committed BIGINT NOT NULL,
                         winnings BIGINT NOT NULL,
                         rake BIGINT NOT NULL,
                         rakeDealt NUMERIC NOT NULL,
@@ -968,7 +966,7 @@ class Sql(object):
                         wonWhenSeenStreet3 BOOLEAN,
                         wonWhenSeenStreet4 BOOLEAN,
                         wonAtSD BOOLEAN,
-                        
+
                         street0VPIChance BOOLEAN,
                         street0VPI BOOLEAN,
                         street0AggrChance BOOLEAN,
@@ -1004,14 +1002,14 @@ class Sql(object):
                         street4Seen BOOLEAN,
                         sawShowdown BOOLEAN,
                         showed      BOOLEAN,
-                        
+
                         street0AllIn BOOLEAN,
                         street1AllIn BOOLEAN,
                         street2AllIn BOOLEAN,
                         street3AllIn BOOLEAN,
                         street4AllIn BOOLEAN,
                         wentAllIn BOOLEAN,
-                        
+
                         street0InPosition BOOLEAN,
                         street1InPosition BOOLEAN,
                         street2InPosition BOOLEAN,
@@ -1095,7 +1093,7 @@ class Sql(object):
                         street1Discards TINYINT,
                         street2Discards TINYINT,
                         street3Discards TINYINT,
-                        
+
                         handString TEXT,
                         actionString VARCHAR(15))
                         ENGINE=INNODB"""
@@ -1133,7 +1131,7 @@ class Sql(object):
                         card17 smallint,
                         card18 smallint,
                         card19 smallint,
-                        card20 smallint, 
+                        card20 smallint,
                         startCards smallint, FOREIGN KEY (startCards) REFERENCES StartCards(id),
 
                         common BIGINT NOT NULL,
@@ -1190,14 +1188,14 @@ class Sql(object):
                         street4Seen BOOLEAN,
                         sawShowdown BOOLEAN,
                         showed      BOOLEAN,
-                        
+
                         street0AllIn BOOLEAN,
                         street1AllIn BOOLEAN,
                         street2AllIn BOOLEAN,
                         street3AllIn BOOLEAN,
                         street4AllIn BOOLEAN,
                         wentAllIn BOOLEAN,
-                        
+
                         street0InPosition BOOLEAN,
                         street1InPosition BOOLEAN,
                         street2InPosition BOOLEAN,
@@ -1281,7 +1279,7 @@ class Sql(object):
                         street1Discards SMALLINT,
                         street2Discards SMALLINT,
                         street3Discards SMALLINT,
-                        
+
                         handString TEXT,
                         actionString VARCHAR(15))"""
         elif db_server == "sqlite":
@@ -1298,7 +1296,7 @@ class Sql(object):
                         position TEXT,
                         seatNo INT NOT NULL,
                         sitout BOOLEAN NOT NULL,
-                    
+
                         card1 INT NOT NULL,  /* 0=none, 1-13=2-Ah 14-26=2-Ad 27-39=2-Ac 40-52=2-As */
                         card2 INT NOT NULL,
                         card3 INT,
@@ -1320,7 +1318,7 @@ class Sql(object):
                         card19 INT,
                         card20 INT,
                         startCards INT,
-                    
+
                         common INT NOT NULL,
                         committed INT NOT NULL,
                         winnings INT NOT NULL,
@@ -1339,7 +1337,7 @@ class Sql(object):
                         wonWhenSeenStreet3 INT,
                         wonWhenSeenStreet4 INT,
                         wonAtSD INT,
-                        
+
                         street0VPIChance INT,
                         street0VPI INT,
                         street0AggrChance INT,
@@ -1375,14 +1373,14 @@ class Sql(object):
                         street4Seen INT,
                         sawShowdown INT,
                         showed      INT,
-                        
+
                         street0AllIn INT,
                         street1AllIn INT,
                         street2AllIn INT,
                         street3AllIn INT,
                         street4AllIn INT,
                         wentAllIn INT,
-                        
+
                         street0InPosition INT,
                         street1InPosition INT,
                         street2InPosition INT,
@@ -1466,7 +1464,7 @@ class Sql(object):
                         street1Discards INT,
                         street2Discards INT,
                         street3Discards INT,
-                        
+
                         handString TEXT,
                         actionString VARCHAR(15))
                         """
@@ -1760,7 +1758,7 @@ class Sql(object):
                         position CHAR(1),
                         tourneyTypeId SMALLINT UNSIGNED, FOREIGN KEY (tourneyTypeId) REFERENCES TourneyTypes(id),
                         styleKey CHAR(7) NOT NULL,  /* 1st char is style (A/T/H/S), other 6 are the key */
-                        n INT NOT NULL,                        
+                        n INT NOT NULL,
                         street0VPIChance INT,
                         street0VPI INT,
                         street0AggrChance INT,
@@ -1792,7 +1790,7 @@ class Sql(object):
                         street2Seen INT,
                         street3Seen INT,
                         street4Seen INT,
-                        sawShowdown INT,                        
+                        sawShowdown INT,
                         street1Aggr INT,
                         street2Aggr INT,
                         street3Aggr INT,
@@ -1811,7 +1809,7 @@ class Sql(object):
                         wonWhenSeenStreet2 INT,
                         wonWhenSeenStreet3 INT,
                         wonWhenSeenStreet4 INT,
-                        wonAtSD INT,                        
+                        wonAtSD INT,
                         raiseFirstInChance INT,
                         raisedFirstIn INT,
                         foldBbToStealChance INT,
@@ -1825,7 +1823,7 @@ class Sql(object):
                         street3CBChance INT,
                         street3CBDone INT,
                         street4CBChance INT,
-                        street4CBDone INT,                        
+                        street4CBDone INT,
                         foldToStreet1CBChance INT,
                         foldToStreet1CBDone INT,
                         foldToStreet2CBChance INT,
@@ -1833,7 +1831,7 @@ class Sql(object):
                         foldToStreet3CBChance INT,
                         foldToStreet3CBDone INT,
                         foldToStreet4CBChance INT,
-                        foldToStreet4CBDone INT,                        
+                        foldToStreet4CBDone INT,
                         common BIGINT,
                         committed BIGINT,
                         winnings BIGINT,
@@ -1844,7 +1842,7 @@ class Sql(object):
                         totalProfit BIGINT,
                         allInEV NUMERIC,
                         showdownWinnings BIGINT,
-                        nonShowdownWinnings BIGINT,                        
+                        nonShowdownWinnings BIGINT,
                         street1CheckCallRaiseChance INT,
                         street1CheckCallDone INT,
                         street1CheckRaiseDone INT,
@@ -1871,7 +1869,7 @@ class Sql(object):
                         street1Raises INT,
                         street2Raises INT,
                         street3Raises INT,
-                        street4Raises INT,                        
+                        street4Raises INT,
                         street1Discards INT,
                         street2Discards INT,
                         street3Discards INT)
@@ -1887,7 +1885,7 @@ class Sql(object):
                         position CHAR(1),
                         tourneyTypeId INT, FOREIGN KEY (tourneyTypeId) REFERENCES TourneyTypes(id),
                         styleKey CHAR(7) NOT NULL,  /* 1st char is style (A/T/H/S), other 6 are the key */
-                        n INT,                        
+                        n INT,
                         street0VPIChance INT,
                         street0VPI INT,
                         street0AggrChance INT,
@@ -2014,7 +2012,7 @@ class Sql(object):
                         position TEXT,
                         tourneyTypeId INT,
                         styleKey TEXT NOT NULL,  /* 1st char is style (A/T/H/S), other 6 are the key */
-                        n INT,                        
+                        n INT,
                         street0VPIChance INT,
                         street0VPI INT,
                         street0AggrChance INT,
@@ -2146,7 +2144,7 @@ class Sql(object):
                         tourneyTypeId SMALLINT UNSIGNED, FOREIGN KEY (tourneyTypeId) REFERENCES TourneyTypes(id),
                         playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
                         startCards SMALLINT UNSIGNED NOT NULL, FOREIGN KEY (startCards) REFERENCES StartCards(id),
-                        n INT NOT NULL,                        
+                        n INT NOT NULL,
                         street0VPIChance INT,
                         street0VPI INT,
                         street0AggrChance INT,
@@ -2178,7 +2176,7 @@ class Sql(object):
                         street2Seen INT,
                         street3Seen INT,
                         street4Seen INT,
-                        sawShowdown INT,                        
+                        sawShowdown INT,
                         street1Aggr INT,
                         street2Aggr INT,
                         street3Aggr INT,
@@ -2197,7 +2195,7 @@ class Sql(object):
                         wonWhenSeenStreet2 INT,
                         wonWhenSeenStreet3 INT,
                         wonWhenSeenStreet4 INT,
-                        wonAtSD INT,                        
+                        wonAtSD INT,
                         raiseFirstInChance INT,
                         raisedFirstIn INT,
                         foldBbToStealChance INT,
@@ -2211,7 +2209,7 @@ class Sql(object):
                         street3CBChance INT,
                         street3CBDone INT,
                         street4CBChance INT,
-                        street4CBDone INT,                        
+                        street4CBDone INT,
                         foldToStreet1CBChance INT,
                         foldToStreet1CBDone INT,
                         foldToStreet2CBChance INT,
@@ -2219,7 +2217,7 @@ class Sql(object):
                         foldToStreet3CBChance INT,
                         foldToStreet3CBDone INT,
                         foldToStreet4CBChance INT,
-                        foldToStreet4CBDone INT,                        
+                        foldToStreet4CBDone INT,
                         common BIGINT,
                         committed BIGINT,
                         winnings BIGINT,
@@ -2230,7 +2228,7 @@ class Sql(object):
                         totalProfit BIGINT,
                         allInEV NUMERIC,
                         showdownWinnings BIGINT,
-                        nonShowdownWinnings BIGINT,                        
+                        nonShowdownWinnings BIGINT,
                         street1CheckCallRaiseChance INT,
                         street1CheckCallDone INT,
                         street1CheckRaiseDone INT,
@@ -2273,7 +2271,7 @@ class Sql(object):
                         tourneyTypeId INT, FOREIGN KEY (tourneyTypeId) REFERENCES TourneyTypes(id),
                         playerId INT, FOREIGN KEY (playerId) REFERENCES Players(id),
                         startCards SMALLINT, FOREIGN KEY (startCards) REFERENCES StartCards(id),
-                        n INT,                        
+                        n INT,
                         street0VPIChance INT,
                         street0VPI INT,
                         street0AggrChance INT,
@@ -2400,7 +2398,7 @@ class Sql(object):
                         tourneyTypeId INT,
                         playerId INT,
                         startCards INT,
-                        n INT,                        
+                        n INT,
                         street0VPIChance INT,
                         street0VPI INT,
                         street0AggrChance INT,
@@ -2534,7 +2532,7 @@ class Sql(object):
                         seats SMALLINT NOT NULL,
                         maxPosition TINYINT NOT NULL,
                         position CHAR(1),
-                        n INT NOT NULL,                        
+                        n INT NOT NULL,
                         street0VPIChance INT,
                         street0VPI INT,
                         street0AggrChance INT,
@@ -2566,7 +2564,7 @@ class Sql(object):
                         street2Seen INT,
                         street3Seen INT,
                         street4Seen INT,
-                        sawShowdown INT,                        
+                        sawShowdown INT,
                         street1Aggr INT,
                         street2Aggr INT,
                         street3Aggr INT,
@@ -2585,7 +2583,7 @@ class Sql(object):
                         wonWhenSeenStreet2 INT,
                         wonWhenSeenStreet3 INT,
                         wonWhenSeenStreet4 INT,
-                        wonAtSD INT,                        
+                        wonAtSD INT,
                         raiseFirstInChance INT,
                         raisedFirstIn INT,
                         foldBbToStealChance INT,
@@ -2599,7 +2597,7 @@ class Sql(object):
                         street3CBChance INT,
                         street3CBDone INT,
                         street4CBChance INT,
-                        street4CBDone INT,                        
+                        street4CBDone INT,
                         foldToStreet1CBChance INT,
                         foldToStreet1CBDone INT,
                         foldToStreet2CBChance INT,
@@ -2607,7 +2605,7 @@ class Sql(object):
                         foldToStreet3CBChance INT,
                         foldToStreet3CBDone INT,
                         foldToStreet4CBChance INT,
-                        foldToStreet4CBDone INT,                        
+                        foldToStreet4CBDone INT,
                         common BIGINT,
                         committed BIGINT,
                         winnings BIGINT,
@@ -2618,7 +2616,7 @@ class Sql(object):
                         totalProfit BIGINT,
                         allInEV NUMERIC,
                         showdownWinnings BIGINT,
-                        nonShowdownWinnings BIGINT,                        
+                        nonShowdownWinnings BIGINT,
                         street1CheckCallRaiseChance INT,
                         street1CheckCallDone INT,
                         street1CheckRaiseDone INT,
@@ -2743,7 +2741,7 @@ class Sql(object):
                         rake BIGINT,
                         rakeDealt NUMERIC,
                         rakeContributed NUMERIC,
-                        rakeWeighted NUMERIC,                        
+                        rakeWeighted NUMERIC,
                         totalProfit BIGINT,
                         allInEV NUMERIC,
                         showdownWinnings BIGINT,
@@ -3019,135 +3017,7 @@ class Sql(object):
                         endTime DATETIME NOT NULL,
                         gametypeId SMALLINT UNSIGNED, FOREIGN KEY (gametypeId) REFERENCES Gametypes(id),
                         playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        n INT NOT NULL,                        
-                        street0VPIChance INT,
-                        street0VPI INT,
-                        street0AggrChance INT,
-                        street0Aggr INT,
-                        street0CalledRaiseChance INT,
-                        street0CalledRaiseDone INT,
-                        street0_2BChance INT,
-                        street0_2BDone INT,
-                        street0_3BChance INT,
-                        street0_3BDone INT,
-                        street0_4BChance INT,
-                        street0_4BDone INT,
-                        street0_C4BChance INT,
-                        street0_C4BDone INT,
-                        street0_FoldTo2BChance INT,
-                        street0_FoldTo2BDone INT,
-                        street0_FoldTo3BChance INT,
-                        street0_FoldTo3BDone INT,
-                        street0_FoldTo4BChance INT,
-                        street0_FoldTo4BDone INT,
-                        street0_SqueezeChance INT,
-                        street0_SqueezeDone INT,
-                        raiseToStealChance INT,
-                        raiseToStealDone INT,
-                        stealChance INT,
-                        stealDone INT,
-                        success_Steal INT,
-                        street1Seen INT,
-                        street2Seen INT,
-                        street3Seen INT,
-                        street4Seen INT,
-                        sawShowdown INT,                        
-                        street1Aggr INT,
-                        street2Aggr INT,
-                        street3Aggr INT,
-                        street4Aggr INT,
-                        otherRaisedStreet0 INT,
-                        otherRaisedStreet1 INT,
-                        otherRaisedStreet2 INT,
-                        otherRaisedStreet3 INT,
-                        otherRaisedStreet4 INT,
-                        foldToOtherRaisedStreet0 INT,
-                        foldToOtherRaisedStreet1 INT,
-                        foldToOtherRaisedStreet2 INT,
-                        foldToOtherRaisedStreet3 INT,
-                        foldToOtherRaisedStreet4 INT,                        
-                        wonWhenSeenStreet1 INT,
-                        wonWhenSeenStreet2 INT,
-                        wonWhenSeenStreet3 INT,
-                        wonWhenSeenStreet4 INT,
-                        wonAtSD INT,                        
-                        raiseFirstInChance INT,
-                        raisedFirstIn INT,
-                        foldBbToStealChance INT,
-                        foldedBbToSteal INT,
-                        foldSbToStealChance INT,
-                        foldedSbToSteal INT,
-                        street1CBChance INT,
-                        street1CBDone INT,
-                        street2CBChance INT,
-                        street2CBDone INT,
-                        street3CBChance INT,
-                        street3CBDone INT,
-                        street4CBChance INT,
-                        street4CBDone INT,                        
-                        foldToStreet1CBChance INT,
-                        foldToStreet1CBDone INT,
-                        foldToStreet2CBChance INT,
-                        foldToStreet2CBDone INT,
-                        foldToStreet3CBChance INT,
-                        foldToStreet3CBDone INT,
-                        foldToStreet4CBChance INT,
-                        foldToStreet4CBDone INT,                        
-                        common BIGINT,
-                        committed BIGINT,
-                        winnings BIGINT,
-                        rake BIGINT,
-                        rakeDealt NUMERIC,
-                        rakeContributed NUMERIC,
-                        rakeWeighted NUMERIC,
-                        totalProfit BIGINT,
-                        allInEV NUMERIC,
-                        showdownWinnings BIGINT,
-                        nonShowdownWinnings BIGINT,                        
-                        street1CheckCallRaiseChance INT,
-                        street1CheckCallDone INT,
-                        street1CheckRaiseDone INT,
-                        street2CheckCallRaiseChance INT,
-                        street2CheckCallDone INT,
-                        street2CheckRaiseDone INT,
-                        street3CheckCallRaiseChance INT,
-                        street3CheckCallDone INT,
-                        street3CheckRaiseDone INT,
-                        street4CheckCallRaiseChance INT,
-                        street4CheckCallDone INT,
-                        street4CheckRaiseDone INT,
-                        street0Calls INT,
-                        street1Calls INT,
-                        street2Calls INT,
-                        street3Calls INT,
-                        street4Calls INT,
-                        street0Bets INT,
-                        street1Bets INT,
-                        street2Bets INT,
-                        street3Bets INT,
-                        street4Bets INT,
-                        street0Raises INT,
-                        street1Raises INT,
-                        street2Raises INT,
-                        street3Raises INT,
-                        street4Raises INT,
-                        street1Discards INT,
-                        street2Discards INT,
-                        street3Discards INT)
-                        ENGINE=INNODB
-                        """
-
-        elif db_server == "postgresql":
-            self.query[
-                "createSessionsCacheTable"
-            ] = """CREATE TABLE SessionsCache (
-                        id SERIAL, PRIMARY KEY (id),
-                        sessionId INT, FOREIGN KEY (sessionId) REFERENCES Sessions(id),
-                        startTime timestamp without time zone NOT NULL,
-                        endTime timestamp without time zone NOT NULL,
-                        gametypeId INT, FOREIGN KEY (gametypeId) REFERENCES Gametypes(id),
-                        playerId INT, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        n INT,                        
+                        n INT NOT NULL,
                         street0VPIChance INT,
                         street0VPI INT,
                         street0AggrChance INT,
@@ -3193,7 +3063,135 @@ class Sql(object):
                         foldToOtherRaisedStreet1 INT,
                         foldToOtherRaisedStreet2 INT,
                         foldToOtherRaisedStreet3 INT,
-                        foldToOtherRaisedStreet4 INT,                        
+                        foldToOtherRaisedStreet4 INT,
+                        wonWhenSeenStreet1 INT,
+                        wonWhenSeenStreet2 INT,
+                        wonWhenSeenStreet3 INT,
+                        wonWhenSeenStreet4 INT,
+                        wonAtSD INT,
+                        raiseFirstInChance INT,
+                        raisedFirstIn INT,
+                        foldBbToStealChance INT,
+                        foldedBbToSteal INT,
+                        foldSbToStealChance INT,
+                        foldedSbToSteal INT,
+                        street1CBChance INT,
+                        street1CBDone INT,
+                        street2CBChance INT,
+                        street2CBDone INT,
+                        street3CBChance INT,
+                        street3CBDone INT,
+                        street4CBChance INT,
+                        street4CBDone INT,
+                        foldToStreet1CBChance INT,
+                        foldToStreet1CBDone INT,
+                        foldToStreet2CBChance INT,
+                        foldToStreet2CBDone INT,
+                        foldToStreet3CBChance INT,
+                        foldToStreet3CBDone INT,
+                        foldToStreet4CBChance INT,
+                        foldToStreet4CBDone INT,
+                        common BIGINT,
+                        committed BIGINT,
+                        winnings BIGINT,
+                        rake BIGINT,
+                        rakeDealt NUMERIC,
+                        rakeContributed NUMERIC,
+                        rakeWeighted NUMERIC,
+                        totalProfit BIGINT,
+                        allInEV NUMERIC,
+                        showdownWinnings BIGINT,
+                        nonShowdownWinnings BIGINT,
+                        street1CheckCallRaiseChance INT,
+                        street1CheckCallDone INT,
+                        street1CheckRaiseDone INT,
+                        street2CheckCallRaiseChance INT,
+                        street2CheckCallDone INT,
+                        street2CheckRaiseDone INT,
+                        street3CheckCallRaiseChance INT,
+                        street3CheckCallDone INT,
+                        street3CheckRaiseDone INT,
+                        street4CheckCallRaiseChance INT,
+                        street4CheckCallDone INT,
+                        street4CheckRaiseDone INT,
+                        street0Calls INT,
+                        street1Calls INT,
+                        street2Calls INT,
+                        street3Calls INT,
+                        street4Calls INT,
+                        street0Bets INT,
+                        street1Bets INT,
+                        street2Bets INT,
+                        street3Bets INT,
+                        street4Bets INT,
+                        street0Raises INT,
+                        street1Raises INT,
+                        street2Raises INT,
+                        street3Raises INT,
+                        street4Raises INT,
+                        street1Discards INT,
+                        street2Discards INT,
+                        street3Discards INT)
+                        ENGINE=INNODB
+                        """
+
+        elif db_server == "postgresql":
+            self.query[
+                "createSessionsCacheTable"
+            ] = """CREATE TABLE SessionsCache (
+                        id SERIAL, PRIMARY KEY (id),
+                        sessionId INT, FOREIGN KEY (sessionId) REFERENCES Sessions(id),
+                        startTime timestamp without time zone NOT NULL,
+                        endTime timestamp without time zone NOT NULL,
+                        gametypeId INT, FOREIGN KEY (gametypeId) REFERENCES Gametypes(id),
+                        playerId INT, FOREIGN KEY (playerId) REFERENCES Players(id),
+                        n INT,
+                        street0VPIChance INT,
+                        street0VPI INT,
+                        street0AggrChance INT,
+                        street0Aggr INT,
+                        street0CalledRaiseChance INT,
+                        street0CalledRaiseDone INT,
+                        street0_2BChance INT,
+                        street0_2BDone INT,
+                        street0_3BChance INT,
+                        street0_3BDone INT,
+                        street0_4BChance INT,
+                        street0_4BDone INT,
+                        street0_C4BChance INT,
+                        street0_C4BDone INT,
+                        street0_FoldTo2BChance INT,
+                        street0_FoldTo2BDone INT,
+                        street0_FoldTo3BChance INT,
+                        street0_FoldTo3BDone INT,
+                        street0_FoldTo4BChance INT,
+                        street0_FoldTo4BDone INT,
+                        street0_SqueezeChance INT,
+                        street0_SqueezeDone INT,
+                        raiseToStealChance INT,
+                        raiseToStealDone INT,
+                        stealChance INT,
+                        stealDone INT,
+                        success_Steal INT,
+                        street1Seen INT,
+                        street2Seen INT,
+                        street3Seen INT,
+                        street4Seen INT,
+                        sawShowdown INT,
+                        street1Aggr INT,
+                        street2Aggr INT,
+                        street3Aggr INT,
+                        street4Aggr INT,
+                        otherRaisedStreet0 INT,
+                        otherRaisedStreet1 INT,
+                        otherRaisedStreet2 INT,
+                        otherRaisedStreet3 INT,
+                        otherRaisedStreet4 INT,
+                        foldToOtherRaisedStreet0 INT,
+                        foldToOtherRaisedStreet1 INT,
+                        foldToOtherRaisedStreet2 INT,
+                        foldToOtherRaisedStreet3 INT,
+                        foldToOtherRaisedStreet4 INT,
                         wonWhenSeenStreet1 INT,
                         wonWhenSeenStreet2 INT,
                         wonWhenSeenStreet3 INT,
@@ -3320,7 +3318,7 @@ class Sql(object):
                         foldToOtherRaisedStreet1 INT,
                         foldToOtherRaisedStreet2 INT,
                         foldToOtherRaisedStreet3 INT,
-                        foldToOtherRaisedStreet4 INT,                        
+                        foldToOtherRaisedStreet4 INT,
                         wonWhenSeenStreet1 INT,
                         wonWhenSeenStreet2 INT,
                         wonWhenSeenStreet3 INT,
@@ -3405,135 +3403,7 @@ class Sql(object):
                         endTime DATETIME NOT NULL,
                         tourneyId INT UNSIGNED NOT NULL, FOREIGN KEY (tourneyId) REFERENCES Tourneys(id),
                         playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        n INT NOT NULL,                        
-                        street0VPIChance INT,
-                        street0VPI INT,
-                        street0AggrChance INT,
-                        street0Aggr INT,
-                        street0CalledRaiseChance INT,
-                        street0CalledRaiseDone INT,
-                        street0_2BChance INT,
-                        street0_2BDone INT,
-                        street0_3BChance INT,
-                        street0_3BDone INT,
-                        street0_4BChance INT,
-                        street0_4BDone INT,
-                        street0_C4BChance INT,
-                        street0_C4BDone INT,
-                        street0_FoldTo2BChance INT,
-                        street0_FoldTo2BDone INT,
-                        street0_FoldTo3BChance INT,
-                        street0_FoldTo3BDone INT,
-                        street0_FoldTo4BChance INT,
-                        street0_FoldTo4BDone INT,
-                        street0_SqueezeChance INT,
-                        street0_SqueezeDone INT,
-                        raiseToStealChance INT,
-                        raiseToStealDone INT,
-                        stealChance INT,
-                        stealDone INT,
-                        success_Steal INT,
-                        street1Seen INT,
-                        street2Seen INT,
-                        street3Seen INT,
-                        street4Seen INT,
-                        sawShowdown INT,                        
-                        street1Aggr INT,
-                        street2Aggr INT,
-                        street3Aggr INT,
-                        street4Aggr INT,
-                        otherRaisedStreet0 INT,
-                        otherRaisedStreet1 INT,
-                        otherRaisedStreet2 INT,
-                        otherRaisedStreet3 INT,
-                        otherRaisedStreet4 INT,
-                        foldToOtherRaisedStreet0 INT,
-                        foldToOtherRaisedStreet1 INT,
-                        foldToOtherRaisedStreet2 INT,
-                        foldToOtherRaisedStreet3 INT,
-                        foldToOtherRaisedStreet4 INT,                        
-                        wonWhenSeenStreet1 INT,
-                        wonWhenSeenStreet2 INT,
-                        wonWhenSeenStreet3 INT,
-                        wonWhenSeenStreet4 INT,
-                        wonAtSD INT,                        
-                        raiseFirstInChance INT,
-                        raisedFirstIn INT,
-                        foldBbToStealChance INT,
-                        foldedBbToSteal INT,
-                        foldSbToStealChance INT,
-                        foldedSbToSteal INT,
-                        street1CBChance INT,
-                        street1CBDone INT,
-                        street2CBChance INT,
-                        street2CBDone INT,
-                        street3CBChance INT,
-                        street3CBDone INT,
-                        street4CBChance INT,
-                        street4CBDone INT,                        
-                        foldToStreet1CBChance INT,
-                        foldToStreet1CBDone INT,
-                        foldToStreet2CBChance INT,
-                        foldToStreet2CBDone INT,
-                        foldToStreet3CBChance INT,
-                        foldToStreet3CBDone INT,
-                        foldToStreet4CBChance INT,
-                        foldToStreet4CBDone INT,                        
-                        common BIGINT,
-                        committed BIGINT,
-                        winnings BIGINT,
-                        rake BIGINT,
-                        rakeDealt NUMERIC,
-                        rakeContributed NUMERIC,
-                        rakeWeighted NUMERIC,
-                        totalProfit BIGINT,
-                        allInEV NUMERIC,
-                        showdownWinnings BIGINT,
-                        nonShowdownWinnings BIGINT,                        
-                        street1CheckCallRaiseChance INT,
-                        street1CheckCallDone INT,
-                        street1CheckRaiseDone INT,
-                        street2CheckCallRaiseChance INT,
-                        street2CheckCallDone INT,
-                        street2CheckRaiseDone INT,
-                        street3CheckCallRaiseChance INT,
-                        street3CheckCallDone INT,
-                        street3CheckRaiseDone INT,
-                        street4CheckCallRaiseChance INT,
-                        street4CheckCallDone INT,
-                        street4CheckRaiseDone INT,
-                        street0Calls INT,
-                        street1Calls INT,
-                        street2Calls INT,
-                        street3Calls INT,
-                        street4Calls INT,
-                        street0Bets INT,
-                        street1Bets INT,
-                        street2Bets INT,
-                        street3Bets INT,
-                        street4Bets INT,
-                        street0Raises INT,
-                        street1Raises INT,
-                        street2Raises INT,
-                        street3Raises INT,
-                        street4Raises INT,
-                        street1Discards INT,
-                        street2Discards INT,
-                        street3Discards INT)
-                        ENGINE=INNODB
-                        """
-
-        elif db_server == "postgresql":
-            self.query[
-                "createTourneysCacheTable"
-            ] = """CREATE TABLE TourneysCache (
-                        id SERIAL, PRIMARY KEY (id),
-                        sessionId INT, FOREIGN KEY (sessionId) REFERENCES Sessions(id),
-                        startTime timestamp without time zone NOT NULL,
-                        endTime timestamp without time zone NOT NULL,
-                        tourneyId INT, FOREIGN KEY (tourneyId) REFERENCES Tourneys(id),
-                        playerId INT, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        n INT,                        
+                        n INT NOT NULL,
                         street0VPIChance INT,
                         street0VPI INT,
                         street0AggrChance INT,
@@ -3579,7 +3449,135 @@ class Sql(object):
                         foldToOtherRaisedStreet1 INT,
                         foldToOtherRaisedStreet2 INT,
                         foldToOtherRaisedStreet3 INT,
-                        foldToOtherRaisedStreet4 INT,                        
+                        foldToOtherRaisedStreet4 INT,
+                        wonWhenSeenStreet1 INT,
+                        wonWhenSeenStreet2 INT,
+                        wonWhenSeenStreet3 INT,
+                        wonWhenSeenStreet4 INT,
+                        wonAtSD INT,
+                        raiseFirstInChance INT,
+                        raisedFirstIn INT,
+                        foldBbToStealChance INT,
+                        foldedBbToSteal INT,
+                        foldSbToStealChance INT,
+                        foldedSbToSteal INT,
+                        street1CBChance INT,
+                        street1CBDone INT,
+                        street2CBChance INT,
+                        street2CBDone INT,
+                        street3CBChance INT,
+                        street3CBDone INT,
+                        street4CBChance INT,
+                        street4CBDone INT,
+                        foldToStreet1CBChance INT,
+                        foldToStreet1CBDone INT,
+                        foldToStreet2CBChance INT,
+                        foldToStreet2CBDone INT,
+                        foldToStreet3CBChance INT,
+                        foldToStreet3CBDone INT,
+                        foldToStreet4CBChance INT,
+                        foldToStreet4CBDone INT,
+                        common BIGINT,
+                        committed BIGINT,
+                        winnings BIGINT,
+                        rake BIGINT,
+                        rakeDealt NUMERIC,
+                        rakeContributed NUMERIC,
+                        rakeWeighted NUMERIC,
+                        totalProfit BIGINT,
+                        allInEV NUMERIC,
+                        showdownWinnings BIGINT,
+                        nonShowdownWinnings BIGINT,
+                        street1CheckCallRaiseChance INT,
+                        street1CheckCallDone INT,
+                        street1CheckRaiseDone INT,
+                        street2CheckCallRaiseChance INT,
+                        street2CheckCallDone INT,
+                        street2CheckRaiseDone INT,
+                        street3CheckCallRaiseChance INT,
+                        street3CheckCallDone INT,
+                        street3CheckRaiseDone INT,
+                        street4CheckCallRaiseChance INT,
+                        street4CheckCallDone INT,
+                        street4CheckRaiseDone INT,
+                        street0Calls INT,
+                        street1Calls INT,
+                        street2Calls INT,
+                        street3Calls INT,
+                        street4Calls INT,
+                        street0Bets INT,
+                        street1Bets INT,
+                        street2Bets INT,
+                        street3Bets INT,
+                        street4Bets INT,
+                        street0Raises INT,
+                        street1Raises INT,
+                        street2Raises INT,
+                        street3Raises INT,
+                        street4Raises INT,
+                        street1Discards INT,
+                        street2Discards INT,
+                        street3Discards INT)
+                        ENGINE=INNODB
+                        """
+
+        elif db_server == "postgresql":
+            self.query[
+                "createTourneysCacheTable"
+            ] = """CREATE TABLE TourneysCache (
+                        id SERIAL, PRIMARY KEY (id),
+                        sessionId INT, FOREIGN KEY (sessionId) REFERENCES Sessions(id),
+                        startTime timestamp without time zone NOT NULL,
+                        endTime timestamp without time zone NOT NULL,
+                        tourneyId INT, FOREIGN KEY (tourneyId) REFERENCES Tourneys(id),
+                        playerId INT, FOREIGN KEY (playerId) REFERENCES Players(id),
+                        n INT,
+                        street0VPIChance INT,
+                        street0VPI INT,
+                        street0AggrChance INT,
+                        street0Aggr INT,
+                        street0CalledRaiseChance INT,
+                        street0CalledRaiseDone INT,
+                        street0_2BChance INT,
+                        street0_2BDone INT,
+                        street0_3BChance INT,
+                        street0_3BDone INT,
+                        street0_4BChance INT,
+                        street0_4BDone INT,
+                        street0_C4BChance INT,
+                        street0_C4BDone INT,
+                        street0_FoldTo2BChance INT,
+                        street0_FoldTo2BDone INT,
+                        street0_FoldTo3BChance INT,
+                        street0_FoldTo3BDone INT,
+                        street0_FoldTo4BChance INT,
+                        street0_FoldTo4BDone INT,
+                        street0_SqueezeChance INT,
+                        street0_SqueezeDone INT,
+                        raiseToStealChance INT,
+                        raiseToStealDone INT,
+                        stealChance INT,
+                        stealDone INT,
+                        success_Steal INT,
+                        street1Seen INT,
+                        street2Seen INT,
+                        street3Seen INT,
+                        street4Seen INT,
+                        sawShowdown INT,
+                        street1Aggr INT,
+                        street2Aggr INT,
+                        street3Aggr INT,
+                        street4Aggr INT,
+                        otherRaisedStreet0 INT,
+                        otherRaisedStreet1 INT,
+                        otherRaisedStreet2 INT,
+                        otherRaisedStreet3 INT,
+                        otherRaisedStreet4 INT,
+                        foldToOtherRaisedStreet0 INT,
+                        foldToOtherRaisedStreet1 INT,
+                        foldToOtherRaisedStreet2 INT,
+                        foldToOtherRaisedStreet3 INT,
+                        foldToOtherRaisedStreet4 INT,
                         wonWhenSeenStreet1 INT,
                         wonWhenSeenStreet2 INT,
                         wonWhenSeenStreet3 INT,
@@ -3706,7 +3704,7 @@ class Sql(object):
                         foldToOtherRaisedStreet1 INT,
                         foldToOtherRaisedStreet2 INT,
                         foldToOtherRaisedStreet3 INT,
-                        foldToOtherRaisedStreet4 INT,                     
+                        foldToOtherRaisedStreet4 INT,
                         wonWhenSeenStreet1 INT,
                         wonWhenSeenStreet2 INT,
                         wonWhenSeenStreet3 INT,
@@ -3781,11 +3779,7 @@ class Sql(object):
             self.query["addTourneyIndex"] = (
                 """ALTER TABLE Tourneys ADD UNIQUE INDEX siteTourneyNo(siteTourneyNo, tourneyTypeId)"""
             )
-        elif db_server == "postgresql":
-            self.query["addTourneyIndex"] = (
-                """CREATE UNIQUE INDEX siteTourneyNo ON Tourneys (siteTourneyNo, tourneyTypeId)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addTourneyIndex"] = (
                 """CREATE UNIQUE INDEX siteTourneyNo ON Tourneys (siteTourneyNo, tourneyTypeId)"""
             )
@@ -3794,11 +3788,7 @@ class Sql(object):
             self.query["addHandsIndex"] = (
                 """ALTER TABLE Hands ADD UNIQUE INDEX siteHandNo(siteHandNo, gametypeId<heroseat>)"""
             )
-        elif db_server == "postgresql":
-            self.query["addHandsIndex"] = (
-                """CREATE UNIQUE INDEX siteHandNo ON Hands (siteHandNo, gametypeId<heroseat>)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addHandsIndex"] = (
                 """CREATE UNIQUE INDEX siteHandNo ON Hands (siteHandNo, gametypeId<heroseat>)"""
             )
@@ -3807,11 +3797,7 @@ class Sql(object):
             self.query["addPlayersSeat"] = (
                 """ALTER TABLE HandsPlayers ADD UNIQUE INDEX playerSeat_idx(handId, seatNo)"""
             )
-        elif db_server == "postgresql":
-            self.query["addPlayersSeat"] = (
-                """CREATE UNIQUE INDEX playerSeat_idx ON HandsPlayers (handId, seatNo)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addPlayersSeat"] = (
                 """CREATE UNIQUE INDEX playerSeat_idx ON HandsPlayers (handId, seatNo)"""
             )
@@ -3820,11 +3806,7 @@ class Sql(object):
             self.query["addHeroSeat"] = (
                 """ALTER TABLE Hands ADD UNIQUE INDEX heroSeat_idx(id, heroSeat)"""
             )
-        elif db_server == "postgresql":
-            self.query["addHeroSeat"] = (
-                """CREATE UNIQUE INDEX heroSeat_idx ON Hands (id, heroSeat)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addHeroSeat"] = (
                 """CREATE UNIQUE INDEX heroSeat_idx ON Hands (id, heroSeat)"""
             )
@@ -3833,11 +3815,7 @@ class Sql(object):
             self.query["addHandsPlayersSeat"] = (
                 """ALTER TABLE HandsPlayers ADD UNIQUE INDEX handsPlayerSeat_idx(handId, seatNo)"""
             )
-        elif db_server == "postgresql":
-            self.query["addHandsPlayersSeat"] = (
-                """CREATE UNIQUE INDEX handsPlayerSeat_idx ON Hands (handId, seatNo)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addHandsPlayersSeat"] = (
                 """CREATE UNIQUE INDEX handsPlayerSeat_idx ON Hands (handId, seatNo)"""
             )
@@ -3846,11 +3824,7 @@ class Sql(object):
             self.query["addPlayersIndex"] = (
                 """ALTER TABLE Players ADD UNIQUE INDEX name(name, siteId)"""
             )
-        elif db_server == "postgresql":
-            self.query["addPlayersIndex"] = (
-                """CREATE UNIQUE INDEX name ON Players (name, siteId)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addPlayersIndex"] = (
                 """CREATE UNIQUE INDEX name ON Players (name, siteId)"""
             )
@@ -3859,11 +3833,7 @@ class Sql(object):
             self.query["addTPlayersIndex"] = (
                 """ALTER TABLE TourneysPlayers ADD UNIQUE INDEX _tourneyId(tourneyId, playerId, entryId)"""
             )
-        elif db_server == "postgresql":
-            self.query["addTPlayersIndex"] = (
-                """CREATE UNIQUE INDEX tourneyId ON TourneysPlayers (tourneyId, playerId, entryId)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addTPlayersIndex"] = (
                 """CREATE UNIQUE INDEX tourneyId ON TourneysPlayers (tourneyId, playerId, entryId)"""
             )
@@ -3872,11 +3842,7 @@ class Sql(object):
             self.query["addStartCardsIndex"] = (
                 """ALTER TABLE StartCards ADD UNIQUE INDEX cards_idx (category, rank)"""
             )
-        elif db_server == "postgresql":
-            self.query["addStartCardsIndex"] = (
-                """CREATE UNIQUE INDEX cards_idx ON StartCards (category, rank)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addStartCardsIndex"] = (
                 """CREATE UNIQUE INDEX cards_idx ON StartCards (category, rank)"""
             )
@@ -3885,20 +3851,14 @@ class Sql(object):
             self.query["addSeatsIndex"] = (
                 """ALTER TABLE Hands ADD INDEX seats_idx (seats)"""
             )
-        elif db_server == "postgresql":
-            self.query["addSeatsIndex"] = """CREATE INDEX seats_idx ON Hands (seats)"""
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addSeatsIndex"] = """CREATE INDEX seats_idx ON Hands (seats)"""
 
         if db_server == "mysql":
             self.query["addPositionIndex"] = (
                 """ALTER TABLE HandsPlayers ADD INDEX position_idx (position)"""
             )
-        elif db_server == "postgresql":
-            self.query["addPositionIndex"] = (
-                """CREATE INDEX position_idx ON HandsPlayers (position)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addPositionIndex"] = (
                 """CREATE INDEX position_idx ON HandsPlayers (position)"""
             )
@@ -3907,11 +3867,7 @@ class Sql(object):
             self.query["addStartCashIndex"] = (
                 """ALTER TABLE HandsPlayers ADD INDEX cash_idx (startCash)"""
             )
-        elif db_server == "postgresql":
-            self.query["addStartCashIndex"] = (
-                """CREATE INDEX cash_idx ON HandsPlayers (startCash)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addStartCashIndex"] = (
                 """CREATE INDEX cash_idx ON HandsPlayers (startCash)"""
             )
@@ -3920,11 +3876,7 @@ class Sql(object):
             self.query["addEffStackIndex"] = (
                 """ALTER TABLE HandsPlayers ADD INDEX eff_stack_idx (effStack)"""
             )
-        elif db_server == "postgresql":
-            self.query["addEffStackIndex"] = (
-                """CREATE INDEX eff_stack_idx ON HandsPlayers (effStack)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addEffStackIndex"] = (
                 """CREATE INDEX eff_stack_idx ON HandsPlayers (effStack)"""
             )
@@ -3933,11 +3885,7 @@ class Sql(object):
             self.query["addTotalProfitIndex"] = (
                 """ALTER TABLE HandsPlayers ADD INDEX profit_idx (totalProfit)"""
             )
-        elif db_server == "postgresql":
-            self.query["addTotalProfitIndex"] = (
-                """CREATE INDEX profit_idx ON HandsPlayers (totalProfit)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addTotalProfitIndex"] = (
                 """CREATE INDEX profit_idx ON HandsPlayers (totalProfit)"""
             )
@@ -3946,11 +3894,7 @@ class Sql(object):
             self.query["addWinningsIndex"] = (
                 """ALTER TABLE HandsPlayers ADD INDEX winnings_idx (winnings)"""
             )
-        elif db_server == "postgresql":
-            self.query["addWinningsIndex"] = (
-                """CREATE INDEX winnings_idx ON HandsPlayers (winnings)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addWinningsIndex"] = (
                 """CREATE INDEX winnings_idx ON HandsPlayers (winnings)"""
             )
@@ -3959,11 +3903,7 @@ class Sql(object):
             self.query["addFinalPotIndex"] = (
                 """ALTER TABLE Hands ADD INDEX pot_idx (finalPot)"""
             )
-        elif db_server == "postgresql":
-            self.query["addFinalPotIndex"] = (
-                """CREATE INDEX pot_idx ON Hands (finalPot)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addFinalPotIndex"] = (
                 """CREATE INDEX pot_idx ON Hands (finalPot)"""
             )
@@ -3972,11 +3912,7 @@ class Sql(object):
             self.query["addStreetIndex"] = (
                 """ALTER TABLE HandsStove ADD INDEX street_idx (streetId, boardId)"""
             )
-        elif db_server == "postgresql":
-            self.query["addStreetIndex"] = (
-                """CREATE INDEX street_idx ON HandsStove (streetId, boardId)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addStreetIndex"] = (
                 """CREATE INDEX street_idx ON HandsStove (streetId, boardId)"""
             )
@@ -4005,11 +3941,7 @@ class Sql(object):
             self.query["addFilesIndex"] = (
                 """CREATE UNIQUE INDEX index_file ON Files (file(255))"""
             )
-        elif db_server == "postgresql":
-            self.query["addFilesIndex"] = (
-                """CREATE UNIQUE INDEX index_file ON Files (file)"""
-            )
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["addFilesIndex"] = (
                 """CREATE UNIQUE INDEX index_file ON Files (file)"""
             )
@@ -4033,7 +3965,7 @@ class Sql(object):
         self.query[
             "get_player_id"
         ] = """
-                select Players.id AS player_id 
+                select Players.id AS player_id
                 from Players, Sites
                 where Players.name = %s
                 and Sites.name = %s
@@ -4190,7 +4122,7 @@ class Sql(object):
                 AND   hc.styleKey > %s
                       /* styleKey is currently 'd' (for date) followed by a yyyymmdd
                          date key. Set it to 0000000 or similar to get all records  */
-                /* also check activeseats here even if only 3 groups eg 2-3/4-6/7+ 
+                /* also check activeseats here even if only 3 groups eg 2-3/4-6/7+
                    e.g. could use a multiplier:
                    AND   h.seats > X / 1.25  and  hp.seats < X * 1.25
                    where X is the number of active players at the current table (and
@@ -4984,10 +4916,10 @@ class Sql(object):
             self.query[
                 "getPositionByPlayerAndHandid"
             ] = """
-            SELECT DISTINCT hp.position 
-            FROM HandsPlayers hp 
-            JOIN Hands h ON hp.handId = h.id 
-            JOIN Players p ON hp.playerId = p.id 
+            SELECT DISTINCT hp.position
+            FROM HandsPlayers hp
+            JOIN Hands h ON hp.handId = h.id
+            JOIN Players p ON hp.playerId = p.id
             WHERE p.name = ? AND h.siteHandNo LIKE ?
             """
 
@@ -4995,10 +4927,10 @@ class Sql(object):
             self.query[
                 "getPositionByPlayerAndHandid"
             ] = """
-            SELECT DISTINCT hp.position 
-            FROM HandsPlayers hp 
-            JOIN Hands h ON hp.handId = h.id 
-            JOIN Players p ON hp.playerId = p.id 
+            SELECT DISTINCT hp.position
+            FROM HandsPlayers hp
+            JOIN Hands h ON hp.handId = h.id
+            JOIN Players p ON hp.playerId = p.id
             WHERE p.name = %s AND CAST(h.siteHandNo AS text) LIKE %s
             """
 
@@ -5006,10 +4938,10 @@ class Sql(object):
             self.query[
                 "getPositionByPlayerAndHandid"
             ] = """
-            SELECT DISTINCT hp.position 
-            FROM HandsPlayers hp 
-            JOIN Hands h ON hp.handId = h.id 
-            JOIN Players p ON hp.playerId = p.id 
+            SELECT DISTINCT hp.position
+            FROM HandsPlayers hp
+            JOIN Hands h ON hp.handId = h.id
+            JOIN Players p ON hp.playerId = p.id
             WHERE p.name = ? AND h.siteHandNo LIKE ?
             """
 
@@ -5052,7 +4984,7 @@ class Sql(object):
         # self.query['getLimits'] = already defined further up
         self.query[
             "getLimits2"
-        ] = """SELECT DISTINCT type, limitType, bigBlind 
+        ] = """SELECT DISTINCT type, limitType, bigBlind
                                       from Gametypes
                                       ORDER by type, limitType DESC, bigBlind DESC"""
         self.query[
@@ -5060,7 +4992,7 @@ class Sql(object):
         ] = """select DISTINCT type
                                            , gt.limitType
                                            , case type
-                                                 when 'ring' then bigBlind 
+                                                 when 'ring' then bigBlind
 -                                                else buyin
 -                                            end as bb_or_buyin
                                       from Gametypes gt
@@ -5130,15 +5062,15 @@ class Sql(object):
                              end                                                                    AS pff4
 
                             ,case when sum(cast(hp.raiseFirstInChance as SIGNED)) = 0 then -999
-                                  else 100.0 * sum(cast(hp.raisedFirstIn as SIGNED)) / 
+                                  else 100.0 * sum(cast(hp.raisedFirstIn as SIGNED)) /
                                        sum(cast(hp.raiseFirstInChance as SIGNED))
                              end                                                                    AS rfi
                             ,case when sum(cast(hp.stealChance as SIGNED)) = 0 then -999
-                                  else 100.0 * sum(cast(hp.stealDone as SIGNED)) / 
+                                  else 100.0 * sum(cast(hp.stealDone as SIGNED)) /
                                        sum(cast(hp.stealChance as SIGNED))
                              end                                                                    AS steals
                             ,case when sum(cast(hp.stealDone as SIGNED)) = 0 then -999
-                                  else 100.0 * sum(cast(hp.success_Steal as SIGNED)) / 
+                                  else 100.0 * sum(cast(hp.success_Steal as SIGNED)) /
                                        sum(cast(hp.stealDone as SIGNED))
                              end                                                                    AS suc_steal
                             ,100.0*sum(cast(hp.street1Seen as SIGNED))/count(1)            AS saw_f
@@ -5169,13 +5101,13 @@ class Sql(object):
                                  else (sum(cast(hp.street1Aggr as SIGNED)) + sum(cast(hp.street2Aggr as SIGNED)) + sum(cast(hp.street3Aggr as SIGNED)) + sum(cast(hp.street4Aggr as SIGNED)))
                                      /(0.0+sum(cast(hp.street1Calls as SIGNED))+ sum(cast(hp.street2Calls as SIGNED))+ sum(cast(hp.street3Calls as SIGNED))+ sum(cast(hp.street4Calls as SIGNED)))
                              end                                                                    AS aggfac
-                            ,100.0*(sum(cast(hp.street1Aggr as SIGNED)) + sum(cast(hp.street2Aggr as SIGNED)) + sum(cast(hp.street3Aggr as SIGNED)) + sum(cast(hp.street4Aggr as SIGNED))) 
+                            ,100.0*(sum(cast(hp.street1Aggr as SIGNED)) + sum(cast(hp.street2Aggr as SIGNED)) + sum(cast(hp.street3Aggr as SIGNED)) + sum(cast(hp.street4Aggr as SIGNED)))
                                        / ((sum(cast(hp.foldToOtherRaisedStreet1 as SIGNED))+ sum(cast(hp.foldToOtherRaisedStreet2 as SIGNED))+ sum(cast(hp.foldToOtherRaisedStreet3 as SIGNED))+ sum(cast(hp.foldToOtherRaisedStreet4 as SIGNED))) +
                                        (sum(cast(hp.street1Calls as SIGNED))+ sum(cast(hp.street2Calls as SIGNED))+ sum(cast(hp.street3Calls as SIGNED))+ sum(cast(hp.street4Calls as SIGNED))) +
                                        (sum(cast(hp.street1Aggr as SIGNED)) + sum(cast(hp.street2Aggr as SIGNED)) + sum(cast(hp.street3Aggr as SIGNED)) + sum(cast(hp.street4Aggr as SIGNED))) )
                                                                                                     AS aggfrq
-                            ,100.0*(sum(cast(hp.street1CBDone as SIGNED)) + sum(cast(hp.street2CBDone as SIGNED)) + sum(cast(hp.street3CBDone as SIGNED)) + sum(cast(hp.street4CBDone as SIGNED))) 
-                                       / (sum(cast(hp.street1CBChance as SIGNED))+ sum(cast(hp.street2CBChance as SIGNED))+ sum(cast(hp.street3CBChance as SIGNED))+ sum(cast(hp.street4CBChance as SIGNED))) 
+                            ,100.0*(sum(cast(hp.street1CBDone as SIGNED)) + sum(cast(hp.street2CBDone as SIGNED)) + sum(cast(hp.street3CBDone as SIGNED)) + sum(cast(hp.street4CBDone as SIGNED)))
+                                       / (sum(cast(hp.street1CBChance as SIGNED))+ sum(cast(hp.street2CBChance as SIGNED))+ sum(cast(hp.street3CBChance as SIGNED))+ sum(cast(hp.street4CBChance as SIGNED)))
                                                                                                     AS conbet
                             ,sum(hp.totalProfit)/100.0                                              AS net
                             ,sum(hp.rake)/100.0                                                     AS rake
@@ -5265,15 +5197,15 @@ class Sql(object):
                                   else 100.0*sum(cast(hp.street0_FoldTo4Bdone as <signed>integer))/sum(cast(hp.street0_FoldTo4Bchance as <signed>integer))
                              end                                                                    AS pff4
                             ,case when sum(cast(hp.raiseFirstInChance as <signed>integer)) = 0 then -999
-                                  else 100.0 * sum(cast(hp.raisedFirstIn as <signed>integer)) / 
+                                  else 100.0 * sum(cast(hp.raisedFirstIn as <signed>integer)) /
                                        sum(cast(hp.raiseFirstInChance as <signed>integer))
                              end                                                                    AS rfi
                             ,case when sum(cast(hp.stealChance as <signed>integer)) = 0 then -999
-                                  else 100.0 * sum(cast(hp.stealDone as <signed>integer)) / 
+                                  else 100.0 * sum(cast(hp.stealDone as <signed>integer)) /
                                        sum(cast(hp.stealChance as <signed>integer))
                              end                                                                    AS steals
                             ,case when sum(cast(hp.stealDone as <signed>integer)) = 0 then -999
-                                  else 100.0 * sum(cast(hp.success_Steal as <signed>integer)) / 
+                                  else 100.0 * sum(cast(hp.success_Steal as <signed>integer)) /
                                        sum(cast(hp.stealDone as <signed>integer))
                              end                                                                    AS suc_steal
                             ,100.0*sum(cast(hp.street1Seen as <signed>integer))/count(1)            AS saw_f
@@ -5310,7 +5242,7 @@ class Sql(object):
                                 sum(cast(hp.street1Aggr as <signed>integer))+ sum(cast(hp.street2Aggr as <signed>integer))+ sum(cast(hp.street3Aggr as <signed>integer))+ sum(cast(hp.street4Aggr as <signed>integer))
                                 = 0 then -999
                             else
-                            100.0*(sum(cast(hp.street1Aggr as <signed>integer)) + sum(cast(hp.street2Aggr as <signed>integer)) + sum(cast(hp.street3Aggr as <signed>integer)) + sum(cast(hp.street4Aggr as <signed>integer))) 
+                            100.0*(sum(cast(hp.street1Aggr as <signed>integer)) + sum(cast(hp.street2Aggr as <signed>integer)) + sum(cast(hp.street3Aggr as <signed>integer)) + sum(cast(hp.street4Aggr as <signed>integer)))
                                        / ((sum(cast(hp.foldToOtherRaisedStreet1 as <signed>integer))+ sum(cast(hp.foldToOtherRaisedStreet2 as <signed>integer))+ sum(cast(hp.foldToOtherRaisedStreet3 as <signed>integer))+ sum(cast(hp.foldToOtherRaisedStreet4 as <signed>integer))) +
                                        (sum(cast(hp.street1Calls as <signed>integer))+ sum(cast(hp.street2Calls as <signed>integer))+ sum(cast(hp.street3Calls as <signed>integer))+ sum(cast(hp.street4Calls as <signed>integer))) +
                                        (sum(cast(hp.street1Aggr as <signed>integer)) + sum(cast(hp.street2Aggr as <signed>integer)) + sum(cast(hp.street3Aggr as <signed>integer)) + sum(cast(hp.street4Aggr as <signed>integer))) )
@@ -5321,8 +5253,8 @@ class Sql(object):
                                 sum(cast(hp.street3CBChance as <signed>integer))+
                                 sum(cast(hp.street4CBChance as <signed>integer)) = 0 then -999
                             else
-                             100.0*(sum(cast(hp.street1CBDone as <signed>integer)) + sum(cast(hp.street2CBDone as <signed>integer)) + sum(cast(hp.street3CBDone as <signed>integer)) + sum(cast(hp.street4CBDone as <signed>integer))) 
-                                       / (sum(cast(hp.street1CBChance as <signed>integer))+ sum(cast(hp.street2CBChance as <signed>integer))+ sum(cast(hp.street3CBChance as <signed>integer))+ sum(cast(hp.street4CBChance as <signed>integer))) 
+                             100.0*(sum(cast(hp.street1CBDone as <signed>integer)) + sum(cast(hp.street2CBDone as <signed>integer)) + sum(cast(hp.street3CBDone as <signed>integer)) + sum(cast(hp.street4CBDone as <signed>integer)))
+                                       / (sum(cast(hp.street1CBChance as <signed>integer))+ sum(cast(hp.street2CBChance as <signed>integer))+ sum(cast(hp.street3CBChance as <signed>integer))+ sum(cast(hp.street4CBChance as <signed>integer)))
                             end                                                                     AS conbet
                             ,sum(hp.totalProfit)/100.0                                              AS net
                             ,sum(hp.rake)/100.0                                                     AS rake
@@ -5415,15 +5347,15 @@ class Sql(object):
                                   else 100.0*sum(cast(hp.street0_FoldTo4Bdone as <signed>integer))/sum(cast(hp.street0_FoldTo4Bchance as <signed>integer))
                              end                                                                    AS pff4
                             ,case when sum(cast(hp.raiseFirstInChance as <signed>integer)) = 0 then -999
-                                  else 100.0 * sum(cast(hp.raisedFirstIn as <signed>integer)) / 
+                                  else 100.0 * sum(cast(hp.raisedFirstIn as <signed>integer)) /
                                        sum(cast(hp.raiseFirstInChance as <signed>integer))
                              end                                                                    AS rfi
                             ,case when sum(cast(hp.stealChance as <signed>integer)) = 0 then -999
-                                  else 100.0 * sum(cast(hp.stealDone as <signed>integer)) / 
+                                  else 100.0 * sum(cast(hp.stealDone as <signed>integer)) /
                                        sum(cast(hp.stealChance as <signed>integer))
                              end                                                                    AS steals
                             ,case when sum(cast(hp.stealDone as <signed>integer)) = 0 then -999
-                                  else 100.0 * sum(cast(hp.success_Steal as <signed>integer)) / 
+                                  else 100.0 * sum(cast(hp.success_Steal as <signed>integer)) /
                                        sum(cast(hp.stealDone as <signed>integer))
                              end                                                                    AS suc_steal
                             ,100.0*sum(cast(hp.street1Seen as <signed>integer))/count(1)            AS saw_f
@@ -5454,13 +5386,13 @@ class Sql(object):
                                  else (sum(cast(hp.street1Aggr as <signed>integer)) + sum(cast(hp.street2Aggr as <signed>integer)) + sum(cast(hp.street3Aggr as <signed>integer)) + sum(cast(hp.street4Aggr as <signed>integer)))
                                      /(0.0+sum(cast(hp.street1Calls as <signed>integer))+ sum(cast(hp.street2Calls as <signed>integer))+ sum(cast(hp.street3Calls as <signed>integer))+ sum(cast(hp.street4Calls as <signed>integer)))
                              end                                                                    AS aggfac
-                            ,100.0*(sum(cast(hp.street1Aggr as <signed>integer)) + sum(cast(hp.street2Aggr as <signed>integer)) + sum(cast(hp.street3Aggr as <signed>integer)) + sum(cast(hp.street4Aggr as <signed>integer))) 
+                            ,100.0*(sum(cast(hp.street1Aggr as <signed>integer)) + sum(cast(hp.street2Aggr as <signed>integer)) + sum(cast(hp.street3Aggr as <signed>integer)) + sum(cast(hp.street4Aggr as <signed>integer)))
                                        / ((sum(cast(hp.foldToOtherRaisedStreet1 as <signed>integer))+ sum(cast(hp.foldToOtherRaisedStreet2 as <signed>integer))+ sum(cast(hp.foldToOtherRaisedStreet3 as <signed>integer))+ sum(cast(hp.foldToOtherRaisedStreet4 as <signed>integer))) +
                                        (sum(cast(hp.street1Calls as <signed>integer))+ sum(cast(hp.street2Calls as <signed>integer))+ sum(cast(hp.street3Calls as <signed>integer))+ sum(cast(hp.street4Calls as <signed>integer))) +
                                        (sum(cast(hp.street1Aggr as <signed>integer)) + sum(cast(hp.street2Aggr as <signed>integer)) + sum(cast(hp.street3Aggr as <signed>integer)) + sum(cast(hp.street4Aggr as <signed>integer))) )
                                                                                                     AS aggfrq
-                            ,100.0*(sum(cast(hp.street1CBDone as <signed>integer)) + sum(cast(hp.street2CBDone as <signed>integer)) + sum(cast(hp.street3CBDone as <signed>integer)) + sum(cast(hp.street4CBDone as <signed>integer))) 
-                                       / (sum(cast(hp.street1CBChance as <signed>integer))+ sum(cast(hp.street2CBChance as <signed>integer))+ sum(cast(hp.street3CBChance as <signed>integer))+ sum(cast(hp.street4CBChance as <signed>integer))) 
+                            ,100.0*(sum(cast(hp.street1CBDone as <signed>integer)) + sum(cast(hp.street2CBDone as <signed>integer)) + sum(cast(hp.street3CBDone as <signed>integer)) + sum(cast(hp.street4CBDone as <signed>integer)))
+                                       / (sum(cast(hp.street1CBChance as <signed>integer))+ sum(cast(hp.street2CBChance as <signed>integer))+ sum(cast(hp.street3CBChance as <signed>integer))+ sum(cast(hp.street4CBChance as <signed>integer)))
                                                                                                     AS conbet
                             ,sum(hp.totalProfit)/100.0                                              AS net
                             ,sum(hp.rake)/100.0                                                     AS rake
@@ -6711,7 +6643,7 @@ class Sql(object):
         ] = """
             select h.id
                 from Hands h
-                
+
             where h.startTime <datetest>
                """
 
@@ -6735,9 +6667,9 @@ class Sql(object):
         self.query[
             "getPlayerId"
         ] = """
-            SELECT id 
-            FROM Players 
-            WHERE siteId = %s 
+            SELECT id
+            FROM Players
+            WHERE siteId = %s
             AND name = %s
         """
 
@@ -7185,7 +7117,7 @@ class Sql(object):
                 ,foldToOtherRaisedStreet1
                 ,foldToOtherRaisedStreet2
                 ,foldToOtherRaisedStreet3
-                ,foldToOtherRaisedStreet4                
+                ,foldToOtherRaisedStreet4
                 ,wonWhenSeenStreet1
                 ,wonWhenSeenStreet2
                 ,wonWhenSeenStreet3
@@ -7302,7 +7234,7 @@ class Sql(object):
                       ,sum(CAST(foldToOtherRaisedStreet1 as integer))
                       ,sum(CAST(foldToOtherRaisedStreet2 as integer))
                       ,sum(CAST(foldToOtherRaisedStreet3 as integer))
-                      ,sum(CAST(foldToOtherRaisedStreet4 as integer))                      
+                      ,sum(CAST(foldToOtherRaisedStreet4 as integer))
                       ,sum(CAST(wonWhenSeenStreet1 as integer))
                       ,sum(CAST(wonWhenSeenStreet2 as integer))
                       ,sum(CAST(wonWhenSeenStreet3 as integer))
@@ -7880,16 +7812,16 @@ class Sql(object):
             street2Calls=street2Calls+%s,
             street3Calls=street3Calls+%s,
             street4Calls=street4Calls+%s,
-            street0Bets=street0Bets+%s, 
+            street0Bets=street0Bets+%s,
             street1Bets=street1Bets+%s,
-            street2Bets=street2Bets+%s, 
+            street2Bets=street2Bets+%s,
             street3Bets=street3Bets+%s,
-            street4Bets=street4Bets+%s, 
+            street4Bets=street4Bets+%s,
             street0Raises=street0Raises+%s,
             street1Raises=street1Raises+%s,
             street2Raises=street2Raises+%s,
             street3Raises=street3Raises+%s,
-            street4Raises=street4Raises+%s,            
+            street4Raises=street4Raises+%s,
             street1Discards=street1Discards+%s,
             street2Discards=street2Discards+%s,
             street3Discards=street3Discards+%s
@@ -8186,11 +8118,11 @@ class Sql(object):
                     street2Calls=street2Calls+%s,
                     street3Calls=street3Calls+%s,
                     street4Calls=street4Calls+%s,
-                    street0Bets=street0Bets+%s, 
+                    street0Bets=street0Bets+%s,
                     street1Bets=street1Bets+%s,
-                    street2Bets=street2Bets+%s, 
+                    street2Bets=street2Bets+%s,
                     street3Bets=street3Bets+%s,
-                    street4Bets=street4Bets+%s, 
+                    street4Bets=street4Bets+%s,
                     street0Raises=street0Raises+%s,
                     street1Raises=street1Raises+%s,
                     street2Raises=street2Raises+%s,
@@ -8507,11 +8439,11 @@ class Sql(object):
                     street2Calls=street2Calls+%s,
                     street3Calls=street3Calls+%s,
                     street4Calls=street4Calls+%s,
-                    street0Bets=street0Bets+%s, 
+                    street0Bets=street0Bets+%s,
                     street1Bets=street1Bets+%s,
-                    street2Bets=street2Bets+%s, 
+                    street2Bets=street2Bets+%s,
                     street3Bets=street3Bets+%s,
-                    street4Bets=street4Bets+%s, 
+                    street4Bets=street4Bets+%s,
                     street0Raises=street0Raises+%s,
                     street1Raises=street1Raises+%s,
                     street2Raises=street2Raises+%s,
@@ -9090,7 +9022,7 @@ class Sql(object):
         self.query[
             "update_S"
         ] = """
-                    UPDATE Sessions SET 
+                    UPDATE Sessions SET
                     weekId=%s,
                     monthId=%s,
                     sessionStart=%s,
@@ -9205,11 +9137,11 @@ class Sql(object):
                     street2Calls=street2Calls+%s,
                     street3Calls=street3Calls+%s,
                     street4Calls=street4Calls+%s,
-                    street0Bets=street0Bets+%s, 
+                    street0Bets=street0Bets+%s,
                     street1Bets=street1Bets+%s,
-                    street2Bets=street2Bets+%s, 
+                    street2Bets=street2Bets+%s,
                     street3Bets=street3Bets+%s,
-                    street4Bets=street4Bets+%s, 
+                    street4Bets=street4Bets+%s,
                     street0Raises=street0Raises+%s,
                     street1Raises=street1Raises+%s,
                     street2Raises=street2Raises+%s,
@@ -9327,11 +9259,11 @@ class Sql(object):
                     street2Calls=street2Calls+%s,
                     street3Calls=street3Calls+%s,
                     street4Calls=street4Calls+%s,
-                    street0Bets=street0Bets+%s, 
+                    street0Bets=street0Bets+%s,
                     street1Bets=street1Bets+%s,
-                    street2Bets=street2Bets+%s, 
+                    street2Bets=street2Bets+%s,
                     street3Bets=street3Bets+%s,
-                    street4Bets=street4Bets+%s, 
+                    street4Bets=street4Bets+%s,
                     street0Raises=street0Raises+%s,
                     street1Raises=street1Raises+%s,
                     street2Raises=street2Raises+%s,
@@ -9410,33 +9342,29 @@ class Sql(object):
             self.query[
                 "analyze"
             ] = """
-            analyze table Actions, Autorates, Backings, Boards, Files, Gametypes, Hands, HandsActions, HandsPlayers, 
+            analyze table Actions, Autorates, Backings, Boards, Files, Gametypes, Hands, HandsActions, HandsPlayers,
                           HandsStove, HudCache, Players, RawHands, RawTourneys, Sessions, Settings, Sites,
                           Tourneys, TourneysPlayers, TourneyTypes
             """
-        elif db_server == "postgresql":
-            self.query["analyze"] = "analyze"
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["analyze"] = "analyze"
 
         if db_server == "mysql":
             self.query[
                 "vacuum"
             ] = """
-            optimize table Actions, Autorates, Backings, Boards, Files, Gametypes, Hands, HandsActions, HandsPlayers, 
+            optimize table Actions, Autorates, Backings, Boards, Files, Gametypes, Hands, HandsActions, HandsPlayers,
                            HandsStove, HudCache, Players, RawHands, RawTourneys, Sessions, Settings, Sites,
                            Tourneys, TourneysPlayers, TourneyTypes
             """
-        elif db_server == "postgresql":
-            self.query["vacuum"] = """ vacuum """
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["vacuum"] = """ vacuum """
 
         if db_server == "mysql":
             self.query[
                 "switchLockOn"
             ] = """
-                        UPDATE InsertLock k1, 
+                        UPDATE InsertLock k1,
                         (SELECT count(locked) as locks FROM InsertLock WHERE locked=True) as k2 SET
                         k1.locked=%s
                         WHERE k1.id=%s
@@ -9458,9 +9386,7 @@ class Sql(object):
                           , HudCache write, Gametypes write, Sites write, Tourneys write
                           , TourneysPlayers write, TourneyTypes write, Autorates write
                 """
-        elif db_server == "postgresql":
-            self.query["lockForInsert"] = ""
-        elif db_server == "sqlite":
+        elif db_server in ("postgresql", "sqlite"):
             self.query["lockForInsert"] = ""
 
         self.query[
@@ -9500,7 +9426,7 @@ class Sql(object):
 
         self.query[
             "insertGameTypes"
-        ] = """insert into Gametypes (siteId, currency, type, base, category, limitType, hiLo, mix, 
+        ] = """insert into Gametypes (siteId, currency, type, base, category, limitType, hiLo, mix,
                                                smallBlind, bigBlind, smallBet, bigBet, maxSeats, ante, buyinType, fast, newToGame, homeGame, split)
                                            values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
@@ -9533,7 +9459,7 @@ class Sql(object):
                                                               tt.shootout,
                                                               tt.matrix,
                                                               tt.fast,
-                                                              tt.stack, 
+                                                              tt.stack,
                                                               tt.step,
                                                               tt.stepNo,
                                                               tt.chance,
@@ -9553,8 +9479,8 @@ class Sql(object):
                                                               tt.flighted,
                                                               tt.guarantee,
                                                               tt.guaranteeAmt
-                                                    FROM TourneyTypes tt 
-                                                    INNER JOIN Tourneys t ON (t.tourneyTypeId = tt.id) 
+                                                    FROM TourneyTypes tt
+                                                    INNER JOIN Tourneys t ON (t.tourneyTypeId = tt.id)
                                                     WHERE t.siteTourneyNo=%s AND tt.siteId=%s
         """
 
@@ -9626,11 +9552,11 @@ class Sql(object):
         elif db_server == "postgresql":
             self.query[
                 "updateTourneyTypeId"
-            ] = """UPDATE Tourneys t 
+            ] = """UPDATE Tourneys t
                                                 SET tourneyTypeId = %s
-                                                FROM TourneyTypes tt 
+                                                FROM TourneyTypes tt
                                                 WHERE t.tourneyTypeId = tt.id
-                                                AND tt.siteId=%s 
+                                                AND tt.siteId=%s
                                                 AND t.siteTourneyNo=%s
             """
         else:
@@ -9643,7 +9569,7 @@ class Sql(object):
 
         self.query[
             "selectTourneyWithTypeId"
-        ] = """SELECT id 
+        ] = """SELECT id
                                                 FROM Tourneys
                                                 WHERE tourneyTypeId = %s
         """
@@ -9776,14 +9702,14 @@ class Sql(object):
                                                     addOnCount,
                                                     koCount
                                                 )
-                                                values (%s, %s, %s, %s, %s, 
+                                                values (%s, %s, %s, %s, %s,
                                                         %s, %s, %s, %s)
         """
 
         self.query[
             "selectHandsPlayersWithWrongTTypeId"
         ] = """SELECT id
-                                                              FROM HandsPlayers 
+                                                              FROM HandsPlayers
                                                               WHERE tourneyTypeId <> %s AND (TourneysPlayersId+0=%s)
         """
 
@@ -9794,7 +9720,7 @@ class Sql(object):
 
         self.query[
             "updateHandsPlayersForTTypeId"
-        ] = """UPDATE HandsPlayers 
+        ] = """UPDATE HandsPlayers
                                                          SET tourneyTypeId= %s
                                                          WHERE (id=%s)
         """
@@ -10202,9 +10128,7 @@ class Sql(object):
         ################################
         # placeholders and substitution stuff
         ################################
-        if db_server == "mysql":
-            self.query["placeholder"] = "%s"
-        elif db_server == "postgresql":
+        if db_server in ("mysql", "postgresql"):
             self.query["placeholder"] = "%s"
         elif db_server == "sqlite":
             self.query["placeholder"] = "?"
@@ -10218,6 +10142,5 @@ class Sql(object):
 if __name__ == "__main__":
     #    just print the default queries and exit
     s = Sql()
-    for key in s.query:
-        print("For query " + key + ", sql =")
-        print(s.query[key])
+    for _key in s.query:
+        pass

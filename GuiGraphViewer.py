@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright 2010-2011 Maxime Grandchamp
 # This program is free software: you can redistribute it and/or modify
@@ -22,7 +21,6 @@
 
 # import L10n
 # _ = L10n.get_translation()
-from __future__ import division, print_function
 
 import contextlib
 import os
@@ -55,7 +53,7 @@ log = get_logger("filter")
 
 
 class GuiGraphViewer(QSplitter):
-    def __init__(self, querylist, config, parent, colors, debug=True):
+    def __init__(self, querylist, config, parent, colors, debug=True) -> None:
         QSplitter.__init__(self, parent)
         self.sql = querylist
         self.conf = config
@@ -109,7 +107,7 @@ class GuiGraphViewer(QSplitter):
 
         self.db.rollback()
 
-    def clearGraphData(self):
+    def clearGraphData(self) -> None:
         with contextlib.suppress(Exception):
             if self.canvas:
                 self.graphBox.removeWidget(self.canvas)
@@ -123,7 +121,7 @@ class GuiGraphViewer(QSplitter):
         self.canvas = FigureCanvas(self.fig)
         self.canvas.setParent(self)
 
-    def generateGraph(self, widget):
+    def generateGraph(self, widget) -> None:
         self.clearGraphData()
 
         sitenos = []
@@ -143,7 +141,8 @@ class GuiGraphViewer(QSplitter):
             sitenos.append(siteids[site])
             _hname = heroes.get(site, "")
             if not _hname:
-                raise ValueError(f"Hero name not found for site {site}")
+                msg = f"Hero name not found for site {site}"
+                raise ValueError(msg)
             result = self.db.get_player_id(self.conf, site, _hname)
             if result is not None:
                 playerids.append(int(result))
@@ -203,20 +202,20 @@ class GuiGraphViewer(QSplitter):
                 self.ax.plot(
                     blue,
                     color=self.colors["line_showdown"],
-                    label=("Showdown") + " (%s): %.2f" % (display_in, blue[-1]),
+                    label=("Showdown") + f" ({display_in}): {blue[-1]:.2f}",
                 )
 
             if "nonshowdown" in graphops:
                 self.ax.plot(
                     red,
                     color=self.colors["line_nonshowdown"],
-                    label=("Non-showdown") + " (%s): %.2f" % (display_in, red[-1]),
+                    label=("Non-showdown") + f" ({display_in}): {red[-1]:.2f}",
                 )
             if "ev" in graphops:
                 self.ax.plot(
                     orange,
                     color=self.colors["line_ev"],
-                    label=("All-in EV") + " (%s): %.2f" % (display_in, orange[-1]),
+                    label=("All-in EV") + f" ({display_in}): {orange[-1]:.2f}",
                 )
             self.ax.plot(
                 green,
@@ -224,7 +223,7 @@ class GuiGraphViewer(QSplitter):
                 label=("Hands")
                 + ": %d\n" % len(green)
                 + ("Profit")
-                + ": (%s): %.2f" % (display_in, green[-1]),
+                + f": ({display_in}): {green[-1]:.2f}",
             )
 
             handles, labels = self.ax.get_legend_handles_labels()
@@ -246,7 +245,7 @@ class GuiGraphViewer(QSplitter):
         self.graphBox.addWidget(self.canvas)
         self.canvas.draw()
 
-    def plotGraph(self):
+    def plotGraph(self) -> None:
         self.ax.set_title("No Data for Player(s) Found")
         green = [
             0.0,
@@ -310,7 +309,7 @@ class GuiGraphViewer(QSplitter):
             green,
             color=self.colors["line_hands"],
             linewidth=0.5,
-            label=("Hands") + ": %d\n" % len(green) + ("Profit") + ": %.2f" % green[-1],
+            label=("Hands") + ": %d\n" % len(green) + ("Profit") + f": {green[-1]:.2f}",
         )
 
     def getRingProfitGraph(self, names, sites, limits, games, currencies, units):
@@ -334,7 +333,7 @@ class GuiGraphViewer(QSplitter):
                     gametest = gametest.replace("L", "")
                     gametest = gametest.replace(",)", ")")
                     gametest = gametest.replace("u'", "'")
-                    gametest = "and gt.category in %s" % gametest
+                    gametest = f"and gt.category in {gametest}"
                 else:
                     gametest = "and gt.category IS NULL"
 
@@ -345,7 +344,7 @@ class GuiGraphViewer(QSplitter):
         currencytest = str(tuple(currencies))
         currencytest = currencytest.replace(",)", ")")
         currencytest = currencytest.replace("u'", "'")
-        currencytest = "AND gt.currency in %s" % currencytest
+        currencytest = f"AND gt.currency in {currencytest}"
 
         game_type = self.filters.getType()
 
@@ -403,7 +402,7 @@ class GuiGraphViewer(QSplitter):
 
         return (greenline / 100, blueline / 100, redline / 100, orangeline / 100)
 
-    def exportGraph(self):
+    def exportGraph(self) -> None:
         if self.fig is None:
             return
         path = f"{os.getcwd()}/graph.png"

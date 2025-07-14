@@ -8,13 +8,12 @@ substitutions = {
     "BRKTS": r"(\(button\) |\(small blind\) |\(big blind\) |\(button blind\) |\(button\) \(small blind\) |\(small blind\) \(button\) |\(big blind\) \(button\) |\(small blind/button\) |\(button\) \(big blind\) )?",
 }
 re_WinningRankOne = re.compile(
-    r"%(PLYR)s wins the tournament and receives %(CUR)s(?P<AMT>[,\.0-9]+) - congratulations!$"
-    % substitutions,
+    r"{PLYR} wins the tournament and receives {CUR}(?P<AMT>[,\.0-9]+) - congratulations!$".format(**substitutions),
     re.MULTILINE,
 )
 
 
-def test_re_WinningRankOne():
+def test_re_WinningRankOne() -> None:
     text = """jeje_sat wins the tournament and receives €0.75 - congratulations!"""
     match = re_WinningRankOne.search(text)
     assert match is not None

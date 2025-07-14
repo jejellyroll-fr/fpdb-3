@@ -26,9 +26,8 @@ def parser(config_mock):
     return Winamax(config_mock, autostart=False)
 
 
-def test_incomplete_hand_header(parser):
-    """
-    Teste une main avec un en-tête incomplet (section *** SUMMARY *** manquante).
+def test_incomplete_hand_header(parser) -> None:
+    """Teste une main avec un en-tête incomplet (section *** SUMMARY *** manquante).
     On s'attend à ce que determineGameType ou readHandInfo lève FpdbHandPartial ou FpdbParseError.
     """
     incomplete_header = """
@@ -48,9 +47,8 @@ PlayerA: bets 40
         parser.readHandInfo(mock_hand)
 
 
-def test_hand_missing_summary(parser):
-    """
-    Teste une main complète mais sans la section *** SUMMARY ***.
+def test_hand_missing_summary(parser) -> None:
+    """Teste une main complète mais sans la section *** SUMMARY ***.
     L'appel à readPlayerStacks devrait lever une FpdbHandPartial.
     """
     hand_no_summary = """
@@ -76,9 +74,8 @@ PlayerA: doesn't show hand
         parser.readPlayerStacks(mock_hand)
 
 
-def test_hand_with_invalid_action(parser, config_mock):
-    """
-    Teste une main contenant une ligne d'action malformée.
+def test_hand_with_invalid_action(parser, config_mock) -> None:
+    """Teste une main contenant une ligne d'action malformée.
     On s'attend à ce que l'une des étapes (lecture des infos ou action) lève FpdbParseError ou FpdbHandPartial.
     """
     hand_bad_action = """

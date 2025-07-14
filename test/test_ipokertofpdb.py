@@ -8,19 +8,18 @@ substitutions = {
 }
 
 re_PlayerInfo = re.compile(
-    r'<player( (seat="(?P<SEAT>[0-9]+)"|name="%(PLYR)s"|chips="(%(LS)s)?(?P<CASH>[%(NUM2)s]+)(%(LS)s)?"|dealer="(?P<BUTTONPOS>(0|1))"|win="(%(LS)s)?(?P<WIN>[%(NUM)s]+)(%(LS)s)?"|bet="(%(LS)s)?(?P<BET>[^"]+)(%(LS)s)?"|addon="\d*"|rebuy="\d*"|merge="\d*"|reg_code="[\d-]*"))+\s*/>'
-    % substitutions,
+    r'<player( (seat="(?P<SEAT>[0-9]+)"|name="{PLYR}"|chips="({LS})?(?P<CASH>[{NUM2}]+)({LS})?"|dealer="(?P<BUTTONPOS>(0|1))"|win="({LS})?(?P<WIN>[{NUM}]+)({LS})?"|bet="({LS})?(?P<BET>[^"]+)({LS})?"|addon="\d*"|rebuy="\d*"|merge="\d*"|reg_code="[\d-]*"))+\s*/>'.format(**substitutions),
     re.MULTILINE,
 )
 
 
-def test_re_PlayerInfo2():
+def test_re_PlayerInfo2() -> None:
     text = '<player bet="20" reg_code="5105918454" win="0" seat="10" dealer="1" rebuy="0" chips="20" name="clement10s" addon="0"/>'
     match = re_PlayerInfo.search(text)
     assert match is not None
 
 
-def test_re_PlayerInfo7():
+def test_re_PlayerInfo7() -> None:
     text = '<player bet="100" reg_code="" win="40" seat="3" dealer="0" rebuy="0" chips="1 480" name="pergerd" addon="0"/>'
     match = re_PlayerInfo.search(text)
     assert match is not None
@@ -32,7 +31,7 @@ def test_re_PlayerInfo7():
     assert match.group("BET") == "100"
 
 
-def test_re_PlayerInfo3():
+def test_re_PlayerInfo3() -> None:
     text = '<player bet="100" reg_code="" win="40" seat="3" dealer="0" rebuy="0" chips="1 480" name="pergerd" addon="0"/><player bet="20" reg_code="5105918454" win="0" seat="10" dealer="1" rebuy="0" chips="20" name="clement10s" addon="0"/>'
     m = re_PlayerInfo.finditer(text)
     plist = {}
@@ -47,7 +46,7 @@ def test_re_PlayerInfo3():
     assert len(plist) == 2
 
 
-def test_re_PlayerInfo8():
+def test_re_PlayerInfo8() -> None:
     text = '<player bet="740" reg_code="" win="1 480" seat="3" dealer="1" rebuy="0" chips="740" name="pergerd" addon="0"/>'
     match = re_PlayerInfo.search(text)
     assert match is not None
@@ -63,13 +62,12 @@ re_GameInfoTrny = re.compile(
     r"""
 (?:(<tour(?:nament)?code>(?P<TOURNO>\d+)</tour(?:nament)?code>))|
 (?:(<tournamentname>(?P<NAME>[^<]*)</tournamentname>))|
-(?:(<rewarddrawn>(?P<REWARD>[%(NUM2)s%(LS)s]+)</rewarddrawn>))| 
+(?:(<rewarddrawn>(?P<REWARD>[{NUM2}{LS}]+)</rewarddrawn>))|
 (?:(<place>(?P<PLACE>.+?)</place>))|
-(?:(<buyin>(?P<BIAMT>[%(NUM2)s%(LS)s]+)\s\+\s)?(?P<BIRAKE>[%(NUM2)s%(LS)s]+)\s\+\s(?P<BIRAKE2>[%(NUM2)s%(LS)s]+)</buyin>)|
+(?:(<buyin>(?P<BIAMT>[{NUM2}{LS}]+)\s\+\s)?(?P<BIRAKE>[{NUM2}{LS}]+)\s\+\s(?P<BIRAKE2>[{NUM2}{LS}]+)</buyin>)|
 (?:(<totalbuyin>(?P<TOTBUYIN>.*)</totalbuyin>))|
-(?:(<win>(%(LS)s)?(?P<WIN>[%(NUM2)s%(LS)s]+)</win>))
-"""
-    % substitutions,
+(?:(<win>({LS})?(?P<WIN>[{NUM2}{LS}]+)</win>))
+""".format(**substitutions),
     re.VERBOSE,
 )
 
@@ -79,16 +77,15 @@ re_GameInfoTrny2 = re.compile(
 (?:(<tour(?:nament)?code>(?P<TOURNO>\d+)</tour(?:nament)?code>))|
 (?:(<tournamentname>(?P<NAME>[^<]*)</tournamentname>))|
 (?:(<place>(?P<PLACE>.+?)</place>))|
-(?:(<buyin>(?P<BIAMT>[%(NUM2)s%(LS)s]+)\s\+\s)?(?P<BIRAKE>[%(NUM2)s%(LS)s]+)</buyin>)|
-(?:(<totalbuyin>(?P<TOTBUYIN>[%(NUM2)s%(LS)s]+)</totalbuyin>))|
-(?:(<win>(%(LS)s)?(?P<WIN>.+?|[%(NUM2)s%(LS)s]+)</win>))
-"""
-    % substitutions,
+(?:(<buyin>(?P<BIAMT>[{NUM2}{LS}]+)\s\+\s)?(?P<BIRAKE>[{NUM2}{LS}]+)</buyin>)|
+(?:(<totalbuyin>(?P<TOTBUYIN>[{NUM2}{LS}]+)</totalbuyin>))|
+(?:(<win>({LS})?(?P<WIN>.+?|[{NUM2}{LS}]+)</win>))
+""".format(**substitutions),
     re.VERBOSE,
 )
 
 
-def test_re_GameInfoTrny():
+def test_re_GameInfoTrny() -> None:
     text = """
   <tournamentcode>826763510</tournamentcode>
   <tournamentname>Sit’n’Go Twister 0.20€</tournamentname>
@@ -111,7 +108,7 @@ def test_re_GameInfoTrny():
     assert matches[6].group("WIN") == "0"
 
 
-def test_re_GameInfoTrnywin():
+def test_re_GameInfoTrnywin() -> None:
     text = """
   <tournamentcode>829730818</tournamentcode>
   <tournamentname>Sit’n’Go Twister 0.20€</tournamentname>
@@ -134,7 +131,7 @@ def test_re_GameInfoTrnywin():
     assert matches[6].group("WIN") == "0,40€"
 
 
-def test_re_GameInfoTrny_red():
+def test_re_GameInfoTrny_red() -> None:
     text = """
   <tournamentcode>1061132557</tournamentcode>
   <tournamentname>E10 Freebuy Sat 1x30€</tournamentname>
@@ -156,7 +153,7 @@ def test_re_GameInfoTrny_red():
     assert matches[5].group("WIN") == "N/A"
 
 
-def test_re_GameInfoTrny_red2():
+def test_re_GameInfoTrny_red2() -> None:
     text = """
   <tournamentcode>1067382320</tournamentcode>
   <tournamentname>Series Freebuy Sat 1x125€</tournamentname>
@@ -181,7 +178,7 @@ def test_re_GameInfoTrny_red2():
 re_TourNo = re.compile(r"(?P<TOURNO>\d+)$")
 
 
-def test_re_Tourno1():
+def test_re_Tourno1() -> None:
     text = "Sit’n’Go Twister 0.20€, 829730819"
     match = re_TourNo.search(text)
     assert match.group("TOURNO") == "829730819"
@@ -190,7 +187,7 @@ def test_re_Tourno1():
 re_client = re.compile(r"<client_version>(?P<CLIENT>.*?)</client_version>")
 
 
-def test_re_cliento1():
+def test_re_cliento1() -> None:
     text = "<client_version>23.5.1.13</client_version>"
     match = re_client.search(text)
     assert match.group("CLIENT") == "23.5.1.13"
@@ -199,7 +196,7 @@ def test_re_cliento1():
 re_MaxSeats = re.compile(r"<tablesize>(?P<SEATS>[0-9]+)</tablesize>", re.MULTILINE)
 
 
-def test_MaxSeats1():
+def test_MaxSeats1() -> None:
     text = "<tablesize>6</tablesize>"
     match = re_MaxSeats.search(text)
     assert match.group("SEATS") == "6"

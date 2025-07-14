@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-"""
-ModernSeatPreferences.py
+"""ModernSeatPreferences.py.
 
 Modern interface for dynamic management of favorite seats by site.
 """
@@ -38,19 +36,19 @@ log = get_logger("modernseatpreferences")
 
 
 class SeatSelector(QWidget):
-    """Widget to select a favorite seat with visualization"""
+    """Widget to select a favorite seat with visualization."""
 
     seatChanged = pyqtSignal(int)
 
-    def __init__(self, max_seats, current_seat=0, parent=None):
+    def __init__(self, max_seats, current_seat=0, parent=None) -> None:
         super().__init__(parent)
         self.max_seats = max_seats
         self.current_seat = current_seat
         self.seat_buttons = []
         self.setFixedSize(120, 80)  # Fixed size for uniformity
 
-    def paintEvent(self, event):
-        """Draw the poker table"""
+    def paintEvent(self, event) -> None:
+        """Draw the poker table."""
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
@@ -110,8 +108,8 @@ class SeatSelector(QWidget):
                 str(i),
             )
 
-    def mousePressEvent(self, event):
-        """Handle click on a seat"""
+    def mousePressEvent(self, event) -> None:
+        """Handle click on a seat."""
         # Calculate which seat was clicked
         width = self.width()
         height = self.height()
@@ -144,17 +142,17 @@ class SeatSelector(QWidget):
                 self.update()
                 break
 
-    def setSeat(self, seat):
-        """Set the selected seat"""
+    def setSeat(self, seat) -> None:
+        """Set the selected seat."""
         if 0 <= seat <= self.max_seats:
             self.current_seat = seat
             self.update()
 
 
 class ModernSeatCard(QFrame):
-    """Card to configure favorite seats for a site"""
+    """Card to configure favorite seats for a site."""
 
-    def __init__(self, site_name, site_config, parent=None):
+    def __init__(self, site_name, site_config, parent=None) -> None:
         super().__init__(parent)
         self.site_name = site_name
         self.site_config = site_config
@@ -184,7 +182,7 @@ class ModernSeatCard(QFrame):
 
         self.setup_ui()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         layout = QVBoxLayout(self)
 
         # Header
@@ -289,8 +287,7 @@ class ModernSeatCard(QFrame):
                         current_fav = self.site_config.fav_seat[max_seats]
                     else:
                         current_fav = 0
-            except Exception as e:
-                print(f"Error reading fav_seat for {self.site_name}, max_seats={max_seats}: {e}")
+            except Exception:
                 current_fav = 0
 
             seat_input.setText(str(current_fav))
@@ -326,8 +323,8 @@ class ModernSeatCard(QFrame):
         info_label.setStyleSheet("color: palette(disabled-text); font-style: italic; padding: 5px;")
         layout.addWidget(info_label)
 
-    def on_seat_changed(self, max_seats, text):
-        """Handle text change in the input"""
+    def on_seat_changed(self, max_seats, text) -> None:
+        """Handle text change in the input."""
         try:
             seat = int(text) if text else 0
             if 0 <= seat <= max_seats:
@@ -338,13 +335,13 @@ class ModernSeatCard(QFrame):
         except ValueError:
             pass
 
-    def on_visual_seat_changed(self, max_seats, seat):
-        """Handle change via the visual selector"""
+    def on_visual_seat_changed(self, max_seats, seat) -> None:
+        """Handle change via the visual selector."""
         self.seat_inputs[max_seats].setText(str(seat))
         # Auto-save will be triggered by on_seat_changed
 
-    def reset_to_default(self):
-        """Reset all seats to 0"""
+    def reset_to_default(self) -> None:
+        """Reset all seats to 0."""
         reply = QMessageBox.question(
             self,
             "Reset Seats",
@@ -358,7 +355,7 @@ class ModernSeatCard(QFrame):
                 self.seat_selectors[max_seats].setSeat(0)
 
     def get_values(self):
-        """Get the values of favorite seats"""
+        """Get the values of favorite seats."""
         values = {}
         for max_seats in range(2, 11):
             try:
@@ -370,9 +367,9 @@ class ModernSeatCard(QFrame):
 
 
 class ModernSeatPreferencesDialog(QDialog):
-    """Modern dialog for managing favorite seats"""
+    """Modern dialog for managing favorite seats."""
 
-    def __init__(self, config, parent=None):
+    def __init__(self, config, parent=None) -> None:
         super().__init__(parent)
         self.config = config
         self.site_cards = {}
@@ -385,7 +382,7 @@ class ModernSeatPreferencesDialog(QDialog):
         self.setup_ui()
         self.load_sites()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         main_layout = QVBoxLayout(self)
         main_layout.setSpacing(20)
         main_layout.setContentsMargins(20, 20, 20, 20)
@@ -495,8 +492,8 @@ class ModernSeatPreferencesDialog(QDialog):
         self.status_bar = QStatusBar()
         main_layout.addWidget(self.status_bar)
 
-    def load_sites(self):
-        """Load all sites"""
+    def load_sites(self) -> None:
+        """Load all sites."""
         # Clear existing sites
         for card in self.site_cards.values():
             card.deleteLater()
@@ -516,8 +513,8 @@ class ModernSeatPreferencesDialog(QDialog):
         # Update statistics
         self.update_stats()
 
-    def apply_filter(self):
-        """Apply search and status filters"""
+    def apply_filter(self) -> None:
+        """Apply search and status filters."""
         search_text = self.search_input.text().lower()
         filter_mode = self.filter_combo.currentText()
 
@@ -546,8 +543,7 @@ class ModernSeatPreferencesDialog(QDialog):
                                 i < len(card.site_config.fav_seat) and card.site_config.fav_seat[i] != 0
                                 for i in range(2, 11)
                             )
-                except Exception as e:
-                    print(f"Error in filter for {site_name}: {e}")
+                except Exception:
                     show = True  # Show by default if error
             # By default "All Enabled Sites" shows all loaded sites (already filtered as enabled)
 
@@ -560,8 +556,8 @@ class ModernSeatPreferencesDialog(QDialog):
         # Update stats
         self.update_stats()
 
-    def update_stats(self):
-        """Update displayed statistics"""
+    def update_stats(self) -> None:
+        """Update displayed statistics."""
         # All displayed sites are already enabled
         enabled_sites = len(self.site_cards)
         configured_sites = 0
@@ -581,13 +577,13 @@ class ModernSeatPreferencesDialog(QDialog):
                         )
                 if has_config:
                     configured_sites += 1
-            except Exception as e:
-                print(f"Error counting configured sites: {e}")
+            except Exception:
+                pass
 
         self.stats_label.setText(f"Enabled sites: {enabled_sites} | Sites with custom seats: {configured_sites}")
 
-    def auto_save_single_site(self, site_name):
-        """Auto-save changes for a single site"""
+    def auto_save_single_site(self, site_name) -> None:
+        """Auto-save changes for a single site."""
         try:
             if site_name in self.site_cards:
                 card = self.site_cards[site_name]
@@ -613,8 +609,7 @@ class ModernSeatPreferencesDialog(QDialog):
                         if int(current_val) != seat_values.get(max_seats, 0):
                             changes_made = True
                             break
-                    except Exception as e:
-                        print(f"Error checking changes for {site_name}, max_seats={max_seats}: {e}")
+                    except Exception:
                         continue
 
                 if not changes_made:
@@ -650,12 +645,12 @@ class ModernSeatPreferencesDialog(QDialog):
                 # Show a subtle visual indicator
                 self.status_bar.showMessage(f"✔️ Auto-saved seats for {site_name}", 2000)
 
-        except Exception as e:
+        except Exception:
             # On error, do not interrupt the user
-            print(f"Auto-save error for {site_name}: {str(e)}")
+            pass
 
-    def save_changes(self):
-        """Save changes"""
+    def save_changes(self) -> None:
+        """Save changes."""
         try:
             # Collect all changes
             changes_made = False
@@ -681,8 +676,7 @@ class ModernSeatPreferencesDialog(QDialog):
                         if int(current_val) != seat_values.get(max_seats, 0):
                             changes_made = True
                             break
-                    except Exception as e:
-                        print(f"Error checking changes for {site_name}, max_seats={max_seats}: {e}")
+                    except Exception:
                         continue
 
                 # Get the current enabled state of the site
@@ -731,10 +725,10 @@ class ModernSeatPreferencesDialog(QDialog):
             self.accept()
 
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to save seat preferences:\n{str(e)}")
+            QMessageBox.critical(self, "Error", f"Failed to save seat preferences:\n{e!s}")
 
-    def reload_parent_config(self):
-        """Reload configuration in the parent application"""
+    def reload_parent_config(self) -> None:
+        """Reload configuration in the parent application."""
         try:
             # Try to reload via the parent (fpdb)
             if hasattr(self.parent(), "reload_config"):
@@ -755,14 +749,14 @@ class ModernSeatPreferencesDialog(QDialog):
             except ImportError:
                 pass
 
-        except Exception as e:
-            print(f"Error reloading configuration: {str(e)}")
+        except Exception:
+            pass
 
-    def closeEvent(self, event):
-        """Handle window close event"""
+    def closeEvent(self, event) -> None:
+        """Handle window close event."""
         # Check for unsaved changes
         has_changes = False
-        for site_name, card in self.site_cards.items():
+        for card in self.site_cards.values():
             seat_values = card.get_values()
             for max_seats in range(2, 11):
                 try:
@@ -779,8 +773,7 @@ class ModernSeatPreferencesDialog(QDialog):
                     if int(current_val) != seat_values.get(max_seats, 0):
                         has_changes = True
                         break
-                except Exception as e:
-                    print(f"Error checking changes in closeEvent for {site_name}, max_seats={max_seats}: {e}")
+                except Exception:
                     continue
             if has_changes:
                 break
@@ -806,8 +799,8 @@ class ModernSeatPreferencesDialog(QDialog):
 
         event.accept()
 
-    def export_settings(self):
-        """Export seat settings to a JSON file"""
+    def export_settings(self) -> None:
+        """Export seat settings to a JSON file."""
         filename, _ = QFileDialog.getSaveFileName(
             self,
             "Export Seat Settings",
@@ -832,10 +825,10 @@ class ModernSeatPreferencesDialog(QDialog):
                 QMessageBox.information(self, "Export Successful", f"Seat settings exported to:\n{filename}")
 
             except Exception as e:
-                QMessageBox.critical(self, "Export Error", f"Failed to export settings:\n{str(e)}")
+                QMessageBox.critical(self, "Export Error", f"Failed to export settings:\n{e!s}")
 
-    def import_settings(self):
-        """Import seat settings from a JSON file"""
+    def import_settings(self) -> None:
+        """Import seat settings from a JSON file."""
         filename, _ = QFileDialog.getOpenFileName(
             self, "Import Seat Settings", os.path.expanduser("~"), "JSON Files (*.json)",
         )
@@ -843,7 +836,7 @@ class ModernSeatPreferencesDialog(QDialog):
         if filename:
             try:
                 # Load the file
-                with open(filename, "r") as f:
+                with open(filename) as f:
                     import_data = json.load(f)
 
                 # Apply configurations
@@ -879,12 +872,12 @@ class ModernSeatPreferencesDialog(QDialog):
                     self.save_changes()
 
             except Exception as e:
-                QMessageBox.critical(self, "Import Error", f"Failed to import settings:\n{str(e)}")
+                QMessageBox.critical(self, "Import Error", f"Failed to import settings:\n{e!s}")
 
 
 # Utility function to integrate with fpdb.pyw
 def show_modern_seat_preferences(config, parent=None):
-    """Show the modern seat preferences dialog"""
+    """Show the modern seat preferences dialog."""
     dialog = ModernSeatPreferencesDialog(config, parent)
     result = dialog.exec_()
 
@@ -896,7 +889,7 @@ def show_modern_seat_preferences(config, parent=None):
                 parent.on_seat_preferences_changed()
             elif hasattr(parent, "refresh_tables"):
                 parent.refresh_tables()
-        except Exception as e:
-            print(f"Error notifying parent of seat preference changes: {str(e)}")
+        except Exception:
+            pass
 
     return result

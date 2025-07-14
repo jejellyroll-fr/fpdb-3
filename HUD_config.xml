@@ -9,6 +9,7 @@
         <site_id site="PokerStars.ES" id="35"/>
         <site_id site="PokerStars.PT" id="36"/>
         <site_id site="PokerStars.EU" id="37"/>
+        <site_id site="PokerStars.DE" id="130"/>
         <site_id site="Everleaf" id="3"/>
         <site_id site="Boss" id="4"/>
         <site_id site="OnGame" id="5"/>
@@ -220,90 +221,90 @@
     </gui_cash_stats>
     <hud_ui stat_range="A" stat_days="90" aggregation_level_multiplier="3" seats_style="A" seats_cust_nums_low="6" seats_cust_nums_high="10" hero_stat_range="A" hero_stat_days="30" hero_aggregation_level_multiplier="1" hero_seats_style="A" hero_seats_cust_nums_low="6" hero_seats_cust_nums_high="10" label="FPDBmenu" card_ht="78" card_wd="56" deck_type="simple" card_back="back03"/>
     <supported_games>
-        <game game_name="holdem" aux="Classic_HUD, mucked">
+        <game game_name="holdem" aux="ClassicHud, mucked">
             <game_stat_set game_type="tour" stat_set="mtt_holdem_nl"/>
             <game_stat_set game_type="ring" stat_set="holdem_cg_expert"/>
         </game>
-        <game game_name="2_holdem" aux="Classic_HUD, mucked">
+        <game game_name="2_holdem" aux="ClassicHud, mucked">
             <game_stat_set game_type="tour" stat_set="mtt_holdem_nl"/>
             <game_stat_set game_type="ring" stat_set="holdem_cg_expert"/>
         </game>
-        <game game_name="irish" aux="Classic_HUD, mucked">
+        <game game_name="irish" aux="ClassicHud, mucked">
             <game_stat_set game_type="tour" stat_set="mtt_holdem_nl"/>
             <game_stat_set game_type="ring" stat_set="holdem_cg_expert"/>
         </game>
-        <game game_name="razz" aux="stud_mucked, Classic_HUD">
+        <game game_name="razz" aux="stud_mucked, ClassicHud">
             <game_stat_set game_type="ring" stat_set="razz_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_razz"/>
         </game>
-        <game game_name="omahahi" aux="Classic_HUD, mucked">
+        <game game_name="omahahi" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
         </game>
-        <game game_name="omahahilo" aux="Classic_HUD, mucked">
+        <game game_name="omahahilo" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
         </game>
-        <game game_name="5_omahahi" aux="Classic_HUD, mucked">
+        <game game_name="5_omahahi" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
         </game>
-        <game game_name="5_omaha8" aux="Classic_HUD, mucked">
+        <game game_name="5_omaha8" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
         </game>
-        <game game_name="cour_hi" aux="Classic_HUD, mucked">
+        <game game_name="cour_hi" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
         </game>
-        <game game_name="cour_hilo" aux="Classic_HUD, mucked">
+        <game game_name="cour_hilo" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
         </game>
-        <game game_name="studhi" aux="stud_mucked, Classic_HUD">
+        <game game_name="studhi" aux="stud_mucked, ClassicHud">
             <game_stat_set game_type="ring" stat_set="stud_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_stud"/>
         </game>
-        <game game_name="5_studhi" aux="stud_mucked, Classic_HUD">
+        <game game_name="5_studhi" aux="stud_mucked, ClassicHud">
             <game_stat_set game_type="ring" stat_set="stud_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_stud"/>
         </game>
-        <game game_name="studhilo" aux="stud_mucked, Classic_HUD">
+        <game game_name="studhilo" aux="stud_mucked, ClassicHud">
             <game_stat_set game_type="ring" stat_set="stud_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_stud"/>
         </game>
-        <game game_name="27_3draw" aux="Classic_HUD, mucked">
+        <game game_name="27_3draw" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="draw_cg_default"/>
             <game_stat_set game_type="tour" stat_set="mtt_draw"/>
         </game>
-        <game game_name="27_1draw" aux="Classic_HUD, mucked">
+        <game game_name="27_1draw" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="draw_cg_default"/>
             <game_stat_set game_type="tour" stat_set="mtt_draw"/>
         </game>
-        <game game_name="badugi" aux="Classic_HUD, mucked">
+        <game game_name="badugi" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="draw_cg_default"/>
             <game_stat_set game_type="tour" stat_set="mtt_draw"/>
         </game>
-        <game game_name="fivedraw" aux="Classic_HUD, mucked">
+        <game game_name="fivedraw" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="draw_cg_default"/>
             <game_stat_set game_type="tour" stat_set="mtt_draw"/>
         </game>
-        <game game_name="a5_3draw" aux="Classic_HUD, mucked">
+        <game game_name="a5_3draw" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="draw_cg_default"/>
             <game_stat_set game_type="tour" stat_set="mtt_draw"/>
         </game>
-        <game game_name="6_omahahi" aux="Classic_HUD, mucked">
+        <game game_name="6_omahahi" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
         </game>
-        <game game_name="fusion" aux="Classic_HUD, mucked">
+        <game game_name="fusion" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
         </game>
     </supported_games>
     <aux_windows>
-        <aw name="Simple_HUD" module="Aux_Hud" class="Simple_HUD" bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
-        <aw name="Classic_HUD" module="Aux_Classic_Hud" class="Classic_HUD" bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
+        <aw name="Simple_HUD" module="Aux_Hud" class="SimpleHUD" bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
+        <aw name="ClassicHud" module="Aux_Classic_Hud" class="ClassicHud" bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
         <aw name="stud_mucked" module="Mucked" class="Stud_mucked" cols="11" rows="8"/>
         <aw name="mucked" module="Mucked" class="Flop_Mucked" opacity="1.0" timeout="5"/>
         <aw name="Hello" module="Hello" class="Hello"/>
@@ -2059,6 +2060,20 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
+        <site site_name="PokerStars.DE" enabled="False" screen_name="" site_path="C:/Program Files/PokerStars/" HH_path="C:\Users\jd\AppData\Local\PokerStars.DE\HandHistory\" TS_path="C:\Users\jd\AppData\Local\PokerStars.DE\TournSummary" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20" network="PokerStars">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
+            <layout_set game_type="ring" ls="ps_default"/>
+            <layout_set game_type="tour" ls="ps_default"/>
+            <fav max="2" fav_seat="1"/>
+            <fav max="3" fav_seat="3"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
         <site site_name="PartyPoker" enabled="True" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="1"/>
@@ -2744,7 +2759,8 @@
             <fav max="10" fav_seat="0"/>
         </site>
         <site site_name="FDJ Poker" enabled="True" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
-            <layout_set game_type="all" ls="ipoker_default"/>
+            <layout_set game_type="ring" ls="ipoker_default"/>
+            <layout_set game_type="tour" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>

@@ -33,6 +33,5 @@ def run_pokenum(method, iterations, game, hand, board, dead):
     # Send a POST request to the API with the request body
     response = requests.post(f"{app_url}{endpoint}", json=request_body.dict())
     content = response.content.decode("utf-8")
-    data_dict = json.loads(content)
+    return json.loads(content)
     # Return the response content
-    return data_dict

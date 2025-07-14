@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 #    Copyright 2008-2013, Carl Gherardi
 #
@@ -77,7 +76,7 @@ class SealsWithClubs(HandHistoryConverter):
         re.MULTILINE,
     )
 
-    re_Identify = re.compile(r"SwCPoker\sHand\s")
+    re_identify = re.compile(r"SwCPoker\sHand\s")
     re_SplitHands = re.compile("(?:\\s?\n){2,}")
     re_ButtonName = re.compile(
         r"""^(?P<BUTTONNAME>.*) has the dealer button""", re.MULTILINE,
@@ -94,26 +93,24 @@ class SealsWithClubs(HandHistoryConverter):
     # These used to be compiled per player, but regression tests say
     # we don't have to, and it makes life faster.
     re_PostSB = re.compile(
-        r"^%(PLYR)s: posts small blind (?P<SB>[.0-9]+)" % substitutions, re.MULTILINE,
+        r"^{PLYR}: posts small blind (?P<SB>[.0-9]+)".format(**substitutions), re.MULTILINE,
     )
     re_PostBB = re.compile(
-        r"^%(PLYR)s: posts big blind (?P<BB>[.0-9]+)" % substitutions, re.MULTILINE,
+        r"^{PLYR}: posts big blind (?P<BB>[.0-9]+)".format(**substitutions), re.MULTILINE,
     )
     re_Antes = re.compile(
-        r"^%(PLYR)s: posts the ante (?P<ANTE>[.0-9]+)" % substitutions, re.MULTILINE,
+        r"^{PLYR}: posts the ante (?P<ANTE>[.0-9]+)".format(**substitutions), re.MULTILINE,
     )
     re_PostBoth = re.compile(
-        r"^%(PLYR)s: posts small \& big blind (?P<SBBB>[.0-9]+)" % substitutions,
+        r"^{PLYR}: posts small \& big blind (?P<SBBB>[.0-9]+)".format(**substitutions),
         re.MULTILINE,
     )
     re_HeroCards = re.compile(
-        r"^Dealt to %(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])"
-        % substitutions,
+        r"^Dealt to {PLYR}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])".format(**substitutions),
         re.MULTILINE,
     )
     re_Action = re.compile(
-        r"""^%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)(?:\s(?P<BET>\d{1,3}(,\d{3})*(\.\d+)?))?(?:\sto\s(?P<POT>\d{1,3}(,\d{3})*(\.\d+)?))?\s*$"""
-        % substitutions,
+        r"""^{PLYR}:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)(?:\s(?P<BET>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?(?:\sto\s(?P<POT>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?\s*$""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -122,13 +119,12 @@ class SealsWithClubs(HandHistoryConverter):
         re.MULTILINE,
     )
     re_CollectPot = re.compile(
-        r"^Seat (?P<SEAT>[0-9]+): %(PLYR)s ((%(BRKTS)s(((((?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \((?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(\s\sand\s(won\s\([.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$)|collected\s\((?P<POT2>[.\d]+)\)))|folded ((on the (Flop|Turn|River))|before Flop)))|folded before Flop \(didn't bet\))"
-        % substitutions,
+        r"^Seat (?P<SEAT>[0-9]+): {PLYR} (({BRKTS}(((((?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \((?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(\s\sand\s(won\s\([.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$)|collected\s\((?P<POT2>[.\d]+)\)))|folded ((on the (Flop|Turn|River))|before Flop)))|folded before Flop \(didn't bet\))".format(**substitutions),
         re.MULTILINE,
     )
     re_Cancelled = re.compile(r"Hand\scancelled", re.MULTILINE)
     re_Uncalled = re.compile(
-        r"Uncalled bet \((?P<BET>[,.\d]+)\) returned to %(PLYR)s" % substitutions,
+        r"Uncalled bet \((?P<BET>[,.\d]+)\) returned to {PLYR}".format(**substitutions),
         re.MULTILINE,
     )
     re_Flop = re.compile(r"\*\*\* FLOP \*\*\*")
@@ -138,17 +134,17 @@ class SealsWithClubs(HandHistoryConverter):
         "Total pot (?P<TOTALPOT>\\d{1,3}(,\\d{3})*(\\.\\d+)?)\\s\\|\\sRake\\s(?P<RAKE>\\d{1,3}(,\\d{3})*(\\.\\d+)?)",
         re.MULTILINE,
     )
-    re_Mucked = re.compile("^%(PLYR)s: mucks hand" % substitutions, re.MULTILINE)
+    re_Mucked = re.compile("^{PLYR}: mucks hand".format(**substitutions), re.MULTILINE)
 
-    def compilePlayerRegexs(self, hand):
-        """
-        Compiles regular expressions to match player names and cards shown in a poker hand.
+    def compilePlayerRegexs(self, hand) -> None:
+        """Compiles regular expressions to match player names and cards shown in a poker hand.
 
         Args:
         - self: instance of the class containing the method
         - hand: a Hand object representing the poker hand
 
         Returns: None
+
         """
         log.info("Compiling player regexes")
         # Get a set of player names in the hand
@@ -173,16 +169,14 @@ class SealsWithClubs(HandHistoryConverter):
             # Compile a regular expression to match the cards dealt to the player
             # The regular expression is of the form "^Dealt to %(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])"
             self.re_HeroCards = re.compile(
-                r"^Dealt to %(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])"
-                % subst,
+                r"^Dealt to {PLYR}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])".format(**subst),
                 re.MULTILINE,
             )
 
             # Compile a regular expression to match the cards shown by the player
             # The regular expression is of the form "^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$"
             self.re_ShownCards = re.compile(
-                r"^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$"
-                % subst,
+                r"^Seat (?P<SEAT>[0-9]+): {PLYR} {BRKTS}(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \({CUR}(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\({CUR}[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$".format(**subst),
                 re.MULTILINE,
             )
 
@@ -245,7 +239,7 @@ class SealsWithClubs(HandHistoryConverter):
         log.debug(f"Game info: {info}")
         return info
 
-    def readHandInfo(self, hand):
+    def readHandInfo(self, hand) -> None:
         log.info("Reading hand info")
         info = {}
         m = self.re_HandInfo.search(hand.handText, re.DOTALL)
@@ -278,7 +272,7 @@ class SealsWithClubs(HandHistoryConverter):
                 m1 = self.re_DateTime.finditer(info[key])
                 datetimestr = "2000-01-01 00:00:00"
                 for a in m1:
-                    datetimestr = "%s-%s-%s %s:%s:%s" % (
+                    datetimestr = "{}-{}-{} {}:{}:{}".format(
                         a.group("Y"),
                         a.group("M"),
                         a.group("D"),
@@ -297,16 +291,15 @@ class SealsWithClubs(HandHistoryConverter):
                 log.debug(f"Hand ID: {hand.handid}")
             if key == "TOURNO":
                 hand.tourNo = info[key]
-            if key == "BUYIN":
-                if hand.tourNo is not None:
-                    if info[key] == "Freeroll":
-                        hand.buyin = 0
-                        hand.fee = 0
-                        hand.buyinCurrency = "FREE"
-                    else:
-                        hand.buyinCurrency = "mBTC"
-                        hand.buyin = int(100 * Decimal(info["BIAMT"]))
-                        hand.fee = int(100 * Decimal(info["BIRAKE"]))
+            if key == "BUYIN" and hand.tourNo is not None:
+                if info[key] == "Freeroll":
+                    hand.buyin = 0
+                    hand.fee = 0
+                    hand.buyinCurrency = "FREE"
+                else:
+                    hand.buyinCurrency = "mBTC"
+                    hand.buyin = int(100 * Decimal(info["BIAMT"]))
+                    hand.fee = int(100 * Decimal(info["BIRAKE"]))
             if key == "LEVEL":
                 hand.level = info[key]
             if key == "MAX" and info[key] is not None:
@@ -318,23 +311,26 @@ class SealsWithClubs(HandHistoryConverter):
 
         if not hand.handid:
             log.error("Hand ID not found, unable to process hand.")
-            raise FpdbParseError("Hand ID not found.")
+            msg = "Hand ID not found."
+            raise FpdbParseError(msg)
 
         if self.re_Cancelled.search(hand.handText):
-            raise FpdbHandPartial(f"Hand '{hand.handid}' was cancelled.")
+            msg = f"Hand '{hand.handid}' was cancelled."
+            raise FpdbHandPartial(msg)
 
-    def readButton(self, hand):
+    def readButton(self, hand) -> None:
         log.info("Reading button position")
         if m := self.re_ButtonPos.search(hand.handText):
             hand.buttonpos = int(m.group("BUTTON"))
         else:
             log.debug("readButton: not found")
 
-    def readPlayerStacks(self, hand):
+    def readPlayerStacks(self, hand) -> None:
         handsplit = hand.handText.split("*** SUMMARY ***")
         if len(handsplit) != 2:
+            msg = f"Hand is not cleanly split into pre and post Summary {hand.handid}."
             raise FpdbHandPartial(
-                f"Hand is not cleanly split into pre and post Summary {hand.handid}.",
+                msg,
             )
         pre, post = handsplit
         m = self.re_PlayerInfo.finditer(pre)
@@ -346,9 +342,10 @@ class SealsWithClubs(HandHistoryConverter):
                 plist[a.group("PNAME")] = [int(a.group("SEAT")), a.group("CASH")]
 
         if len(plist.keys()) < 2:
-            raise FpdbHandPartial(f"Less than 2 players in hand! {hand.handid}.")
+            msg = f"Less than 2 players in hand! {hand.handid}."
+            raise FpdbHandPartial(msg)
 
-    def markStreets(self, hand):
+    def markStreets(self, hand) -> None:
         log.info("Marking streets")
         if self.re_Turn.search(hand.handText) and not self.re_Flop.search(
             hand.handText,
@@ -373,20 +370,20 @@ class SealsWithClubs(HandHistoryConverter):
 
         hand.addStreets(m)
 
-    def readCommunityCards(self, hand, street):
+    def readCommunityCards(self, hand, street) -> None:
         log.debug(f"Reading community cards for street: {street}")
         if street in ("FLOP", "TURN", "RIVER"):
             m = self.re_Board.search(hand.streets[street])
             hand.setCommunityCards(street, m.group("CARDS").split(" "))
 
-    def readAntes(self, hand):
+    def readAntes(self, hand) -> None:
         log.info("Reading antes")
         m = self.re_Antes.finditer(hand.handText)
         for player in m:
             log.debug(f"hand.addAnte({player.group('PNAME')},{player.group('ANTE')})")
             hand.addAnte(player.group("PNAME"), player.group("ANTE"))
 
-    def readBlinds(self, hand):
+    def readBlinds(self, hand) -> None:
         log.debug("Reading blinds")
         liveBlind = True
         for a in self.re_PostSB.finditer(hand.handText):
@@ -400,7 +397,7 @@ class SealsWithClubs(HandHistoryConverter):
         for a in self.re_PostBoth.finditer(hand.handText):
             hand.addBlind(a.group("PNAME"), "both", a.group("SBBB"))
 
-    def readHoleCards(self, hand):
+    def readHoleCards(self, hand) -> None:
         log.debug("Reading hole cards")
         for street in ("PREFLOP", "DEAL"):
             if street in list(hand.streets.keys()):
@@ -417,7 +414,7 @@ class SealsWithClubs(HandHistoryConverter):
                         dealt=True,
                     )
 
-    def readAction(self, hand, street):
+    def readAction(self, hand, street) -> None:
         log.debug(f"Reading actions for street: {street}")
         m = self.re_Action.finditer(hand.streets[street])
         for action in m:
@@ -438,7 +435,7 @@ class SealsWithClubs(HandHistoryConverter):
                     f"DEBUG: Unimplemented {action.group('ATYPE')}: '{action.group('PNAME')}'",
                 )
 
-    def readShownCards(self, hand):
+    def readShownCards(self, hand) -> None:
         log.info("Reading shown cards")
         for m in self.re_ShownCards.finditer(hand.handText):
             if m.group("CARDS") is not None:
@@ -459,7 +456,7 @@ class SealsWithClubs(HandHistoryConverter):
                     string=string,
                 )
 
-    def readShowdownActions(self, hand):
+    def readShowdownActions(self, hand) -> None:
         log.info("Reading showdown actions")
         for shows in self.re_ShowdownAction.finditer(hand.handText):
             if shows.group("CARDS") is not None:
@@ -470,33 +467,30 @@ class SealsWithClubs(HandHistoryConverter):
                 cards = mucks.group("CARDS").split(" ")
                 hand.addShownCards(cards, mucks.group("PNAME"))
 
-    def readSummaryInfo(self, summaryInfoList):
+    def readSummaryInfo(self, summaryInfoList) -> bool:
         log.info("enter method readSummaryInfo.")
         log.debug("Method readSummaryInfo non implemented.")
         return True
 
-    def readBringIn(self, hand):
+    def readBringIn(self, hand) -> None:
         log.info("enter method readBringIn.")
         log.debug("Method readBringIn non implemented.")
-        pass
 
-    def readSTP(self, hand):
+    def readSTP(self, hand) -> None:
         log.info("enter method readSTP.")
         log.debug("Method readSTP non implemented.")
-        pass
 
-    def readTourneyResults(self, hand):
+    def readTourneyResults(self, hand) -> None:
         log.info("enter method readTourneyResults.")
         log.debug("Method readTourneyResults non implemented.")
-        pass
 
-    def readCollectPot(self, hand):
+    def readCollectPot(self, hand) -> None:
         log.info("Reading collected pot")
-        
+
         # Get rake and total pot from summary FIRST
         rake = Decimal(0)
         totalpot_from_summary = Decimal(0)
-        
+
         if self.re_rake.search(hand.handText) is not None:
             for m in self.re_rake.finditer(hand.handText):
                 rake = rake + Decimal(m.group("RAKE"))
@@ -505,19 +499,19 @@ class SealsWithClubs(HandHistoryConverter):
                     totalpot_from_summary = totalpot_from_summary + Decimal(newtotalpot)
                 else:
                     totalpot_from_summary = totalpot_from_summary + Decimal(m.group("TOTALPOT"))
-        
+
         # For SealsWithClubs, the total pot in summary is the actual total pot
         # It already includes everything (main pot, side pots, uncalled bets)
         # We trust this value instead of recalculating
         hand.totalpot = totalpot_from_summary
-        
+
         # Now collect all pots won by players
         for m in self.re_CollectPot.finditer(hand.handText):
             if m.group("POT") is not None:
                 hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT"))
             elif m.group("POT2") is not None:
                 hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT2"))
-        
+
         # Check for uncalled bets
         if self.re_Uncalled.search(hand.handText) is not None:
             hand.setUncalledBets(True)
@@ -525,7 +519,7 @@ class SealsWithClubs(HandHistoryConverter):
                 # Process uncalled bets but don't add them to totalpot
                 # They are already included in the summary total
                 pass
-        
+
         # Set rake
         if hand.rake is None:
             hand.rake = rake

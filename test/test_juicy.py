@@ -13,9 +13,8 @@ re_PlayerInfo = re.compile(
     r"""
           ^Seat\s(?P<SEAT>[0-9]+):\s
           (?P<PNAME>.+?)\s
-          \((%(LS)s)?(?P<CASH>[%(NUM)s]+)\sin\schips\)
-          (\s\s\(EUR\s(%(CUR)s)?(?P<EUROVALUE>[%(NUM)s]+)\))?"""
-    % substitutions,
+          \(({LS})?(?P<CASH>[{NUM}]+)\sin\schips\)
+          (\s\s\(EUR\s({CUR})?(?P<EUROVALUE>[{NUM}]+)\))?""".format(**substitutions),
     re.MULTILINE | re.VERBOSE,
 )
 
@@ -23,14 +22,13 @@ re_PlayerInfo2 = re.compile(
     r"""
           ^Seat\s(?P<SEAT>[0-9]+):\s
           (?P<PNAME>.+?)\s
-          \((%(LS)s)?(?P<CASH>[%(NUM2)s]+)\sin\schips\)
-          (\s\s\(EUR\s(%(CUR)s)?(?P<EUROVALUE>[%(NUM)s]+)\))?"""
-    % substitutions,
+          \(({LS})?(?P<CASH>[{NUM2}]+)\sin\schips\)
+          (\s\s\(EUR\s({CUR})?(?P<EUROVALUE>[{NUM}]+)\))?""".format(**substitutions),
     re.MULTILINE | re.VERBOSE,
 )
 
 
-def test_re_PlayerInfo2():
+def test_re_PlayerInfo2() -> None:
     text = "Seat 1: joker7 (1 200 in chips) "
     match = re_PlayerInfo.search(text)
     assert match is not None
@@ -39,7 +37,7 @@ def test_re_PlayerInfo2():
     assert match.group("CASH") == "1 200"
 
 
-def test_re_PlayerInfo3():
+def test_re_PlayerInfo3() -> None:
     text = "Seat 1: joker7 (1 200 in chips) "
     match = re_PlayerInfo2.search(text)
     assert match is not None
@@ -53,14 +51,13 @@ hand_text = "Hand#710910543B500014 - Freeroll to GOLD CHIPS T17122229 -- FREEROL
 
 re_GameInfo = re.compile(
     r"""
-          Hand\#(?P<HID>[A-Z0-9]+)\s+\-\s+(?P<TABLE>(?P<BUYIN1>(?P<BIAMT1>(%(LS)s)[%(NUM)s]+)\sNLH\s(?P<MAX1>\d+)\smax)?.+?)\s(\((Turbo,\s)?(?P<MAX>\d+)\-+[Mm]ax\)\s)?((?P<TOURNO>T\d+)|\d+)\s(\-\-\s(TICKET|CASH|TICKETCASH|FREEROLL)\s\-\-\s(?P<BUYIN>(?P<BIAMT>\$\d+)\s\+\s(?P<BIRAKE>\$\d+))\s\-\-\s(?P<TMAX>\d+)\sMax\s)?(\-\-\sTable\s(?P<TABLENO>\d+)\s)?\-\-\s(?P<CURRENCY>%(LS)s|)?(?P<ANTESB>(\-)?\d)/(%(LS)s)?(?P<SBBB>\d+)(/(%(LS)s)?(?P<BB>\d+))?\s(?P<LIMIT>NL|FL||PL)\s(?P<GAME>Hold\'em|Omaha|Omaha\sHi/Lo|OmahaHiLo)\s-\-\s(?P<DATETIME>.*$)
-          """
-    % substitutions,
+          Hand\#(?P<HID>[A-Z0-9]+)\s+\-\s+(?P<TABLE>(?P<BUYIN1>(?P<BIAMT1>({LS})[{NUM}]+)\sNLH\s(?P<MAX1>\d+)\smax)?.+?)\s(\((Turbo,\s)?(?P<MAX>\d+)\-+[Mm]ax\)\s)?((?P<TOURNO>T\d+)|\d+)\s(\-\-\s(TICKET|CASH|TICKETCASH|FREEROLL)\s\-\-\s(?P<BUYIN>(?P<BIAMT>\$\d+)\s\+\s(?P<BIRAKE>\$\d+))\s\-\-\s(?P<TMAX>\d+)\sMax\s)?(\-\-\sTable\s(?P<TABLENO>\d+)\s)?\-\-\s(?P<CURRENCY>{LS}|)?(?P<ANTESB>(\-)?\d)/({LS})?(?P<SBBB>\d+)(/({LS})?(?P<BB>\d+))?\s(?P<LIMIT>NL|FL||PL)\s(?P<GAME>Hold\'em|Omaha|Omaha\sHi/Lo|OmahaHiLo)\s-\-\s(?P<DATETIME>.*$)
+          """.format(**substitutions),
     re.MULTILINE | re.VERBOSE,
 )
 
 
-def test_re_GameInfo3():
+def test_re_GameInfo3() -> None:
     text = "Hand#710910543B500014 - Freeroll to GOLD CHIPS T17122229 -- FREEROLL -- $0 + $0 -- 9 Max -- Table 4 -- 0/10/20 NL Hold'em -- 2023/09/22 - 17:35:27"
     match = re_GameInfo.search(text)
     assert match is not None

@@ -26,7 +26,7 @@ class TestPot:
     #     assert pot.pots == [(Decimal(20), {'player1', 'player2'})]
 
     # Tests that adding money to the pot updates the committed dictionary and adds the player to the contenders set.
-    def test_addMoney(self):
+    def test_addMoney(self) -> None:
         pot = Pot()
         pot.addPlayer("player1")
         pot.addPlayer("player2")
@@ -38,7 +38,7 @@ class TestPot:
         assert pot.contenders == {"player1", "player2"}
 
     # Tests that removing a player from the pot deletes their entries from the committed, common, and antes dictionaries.
-    def test_removePlayer(self):
+    def test_removePlayer(self) -> None:
         pot = Pot()
         pot.addPlayer("player1")
         pot.addPlayer("player2")
@@ -50,7 +50,7 @@ class TestPot:
         assert "player1" not in pot.antes
 
     # Tests that marking the total at a street updates the streettotals dictionary with the correct value.
-    def test_markTotal(self):
+    def test_markTotal(self) -> None:
         pot = Pot()
         pot.addPlayer("player1")
         pot.addPlayer("player2")
@@ -63,7 +63,7 @@ class TestPot:
         assert pot.streettotals == {"flop": Decimal(35)}
 
     # Tests that getting the total at a street returns the correct value from the streettotals dictionary.
-    def test_getTotalAtStreet(self):
+    def test_getTotalAtStreet(self) -> None:
         pot = Pot()
         pot.streettotals = {"flop": Decimal(35), "turn": Decimal(50)}
 
@@ -72,7 +72,7 @@ class TestPot:
         assert pot.getTotalAtStreet("river") == 0
 
     # Tests that adding a fold for a player removes them from the contenders set.
-    def test_addFold(self):
+    def test_addFold(self) -> None:
         pot = Pot()
         pot.contenders = {"player1", "player2", "player3"}
 

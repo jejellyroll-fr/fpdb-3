@@ -40,14 +40,13 @@ build = ["pyinstaller>=6.9.0", "wheel>=0.42.0"]
 build-linux = ["python-appimage==1.2.7"]
 windows = ["pywin32==306", "configparser", "PyQt5==5.15.6"]
 linux = ["xcffib==1.5.0", "PyQt5==5.15.6"]
-macos = ["pyobjc==10.3.1"]
+macos = ["pyobjc==10.3.1","PyQt5==5.15.6"]
 mysql = ["mysqlclient==2.2.4"]
 postgresql = ["psycopg2-binary==2.9.9"]
 
 [tool.ruff]
 extend-include = ["*.pyw"]
 extend-exclude = ["build", "archives"]
-# Lines configuration
 line-length = 120
 indent-width = 4
 
@@ -55,16 +54,25 @@ indent-width = 4
 exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
-exclude = ["*.ipynb"]
+select = ["ALL"]
 ignore = [
-    "E401", # Multiple imports on one line"
-    "E731", # Do not assign a `lambda` expression, use a `def`
-    "E713", # Test for membership should be `not in`
+    "E401",  # Multiple imports on one line
+    "E731",  # Assign lambda
+    "E713",  # Use 'not in'
+    "ANN401",  # Unused type annotation
+    "N802",  # Function name should be lowercase
+    "TD003", # Missing issue link on the line following this TODO
+    "FIX002" # Line contains TODO, consider resolving the issue
 ]
 
+# Style des doc-strings (déplacé ici pour éviter l’avertissement de dépréciation)
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+# Tolérances spécifiques aux tests
 [tool.ruff.lint.per-file-ignores]
-"test/*.py" = ["E712"]  # Allow explicit True/False comparisons in tests
-"test_*.py" = ["E712"]  # Allow explicit True/False comparisons in test files
+"test/*.py"  = ["E712"]
+"test_*.py"  = ["E712"]
 
 [tool.setuptools.packages.find]
 where = ["."]

@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-"""
-ConfigurationManager.py
+"""ConfigurationManager.py.
 
 Singleton manager for fpdb configuration with dynamic reload support.
 This module minimizes the need for restarts when configuration changes.
@@ -12,7 +10,7 @@ import copy
 import threading
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import Configuration
 from loggingFpdb import get_logger
@@ -21,7 +19,7 @@ log = get_logger("configmgr")
 
 
 class ChangeType(Enum):
-    """Types of configuration changes"""
+    """Types of configuration changes."""
 
     SITE_SETTINGS = "site_settings"
     HUD_SETTINGS = "hud_settings"
@@ -34,49 +32,46 @@ class ChangeType(Enum):
 
 
 class ConfigChange:
-    """Represents a configuration change"""
+    """Represents a configuration change."""
 
-    def __init__(self, change_type: ChangeType, path: str, old_value: Any, new_value: Any):
+    def __init__(self, change_type: ChangeType, path: str, old_value: Any, new_value: Any) -> None:
         self.type = change_type
         self.path = path
         self.old_value = old_value
         self.new_value = new_value
         self.requires_restart = False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"ConfigChange({self.type.value}, {self.path}, {self.old_value} -> {self.new_value})"
 
 
 class ConfigObserver(ABC):
-    """Interface for configuration change observers"""
+    """Interface for configuration change observers."""
 
     @abstractmethod
     def on_config_change(self, change: ConfigChange) -> bool:
-        """
-        Called when a configuration change occurs.
+        """Called when a configuration change occurs.
 
         Args:
             change: The configuration change
 
         Returns:
             bool: True if the change was successfully applied, False otherwise
+
         """
-        pass
 
     @abstractmethod
-    def get_observed_paths(self) -> List[str]:
-        """
-        Returns the list of configuration paths observed by this component.
+    def get_observed_paths(self) -> list[str]:
+        """Returns the list of configuration paths observed by this component.
 
         Returns:
             List[str]: List of paths (e.g., ["import.interval", "import.path"])
+
         """
-        pass
 
 
 class ConfigurationManager:
-    """
-    Singleton manager for fpdb configuration.
+    """Singleton manager for fpdb configuration.
 
     Handles loading, saving, and dynamic reloading of configuration,
     as well as notifying observer components of changes.
@@ -108,22 +103,22 @@ class ConfigurationManager:
                 cls._instance = super().__new__(cls)
             return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         if not hasattr(self, "initialized"):
             self.initialized = False
             self._config = None
-            self._observers: List[ConfigObserver] = []
-            self._change_history: List[ConfigChange] = []
-            self._pending_changes: List[ConfigChange] = []
+            self._observers: list[ConfigObserver] = []
+            self._change_history: list[ConfigChange] = []
+            self._pending_changes: list[ConfigChange] = []
             self._config_file_path = None
             self._last_saved_state = {}  # Last saved state
 
-    def initialize(self, config_file=None):
-        """
-        Initializes the configuration manager.
+    def initialize(self, config_file=None) -> None:
+        """Initializes the configuration manager.
 
         Args:
             config_file: Path to the configuration file (optional)
+
         """
         with self._lock:
             if self.initialized:
@@ -139,42 +134,42 @@ class ConfigurationManager:
                 self._capture_current_state()
                 log.info(f"ConfigurationManager initialized with {self._config_file_path}")
             except Exception as e:
-                log.error(f"Error during initialization: {e}")
+                log.exception(f"Error during initialization: {e}")
                 raise
 
     def get_config(self) -> Configuration.Config:
-        """Returns the current configuration instance"""
+        """Returns the current configuration instance."""
         if not self.initialized:
-            raise RuntimeError("ConfigurationManager not initialized")
+            msg = "ConfigurationManager not initialized"
+            raise RuntimeError(msg)
         return self._config
 
-    def register_observer(self, observer: ConfigObserver):
-        """
-        Registers an observer for configuration changes.
+    def register_observer(self, observer: ConfigObserver) -> None:
+        """Registers an observer for configuration changes.
 
         Args:
             observer: The observer to register
+
         """
         with self._lock:
             if observer not in self._observers:
                 self._observers.append(observer)
                 log.debug(f"Observer {observer.__class__.__name__} registered")
 
-    def unregister_observer(self, observer: ConfigObserver):
-        """
-        Unregisters an observer.
+    def unregister_observer(self, observer: ConfigObserver) -> None:
+        """Unregisters an observer.
 
         Args:
             observer: The observer to unregister
+
         """
         with self._lock:
             if observer in self._observers:
                 self._observers.remove(observer)
                 log.debug(f"Observer {observer.__class__.__name__} unregistered")
 
-    def check_pending_changes(self, current_config) -> List[ConfigChange]:
-        """
-        Checks for pending changes in the current (in-memory) configuration
+    def check_pending_changes(self, current_config) -> list[ConfigChange]:
+        """Checks for pending changes in the current (in-memory) configuration
         compared to the last loaded configuration.
 
         Args:
@@ -182,6 +177,7 @@ class ConfigurationManager:
 
         Returns:
             List[ConfigChange]: List of detected changes
+
         """
         with self._lock:
             if not self.initialized:
@@ -198,21 +194,21 @@ class ConfigurationManager:
                 return changes
 
             except Exception as e:
-                log.error(f"Error while checking changes: {e}")
+                log.exception(f"Error while checking changes: {e}")
                 import traceback
 
                 traceback.print_exc()
                 return []
 
-    def reload_config(self) -> Tuple[bool, str, List[ConfigChange]]:
-        """
-        Reloads the configuration from file.
+    def reload_config(self) -> tuple[bool, str, list[ConfigChange]]:
+        """Reloads the configuration from file.
 
         Returns:
             Tuple[bool, str, List[ConfigChange]]:
                 - Success (True/False)
                 - Status message
                 - List of changes requiring a restart
+
         """
         with self._lock:
             if not self.initialized:
@@ -265,23 +261,23 @@ class ConfigurationManager:
                 # Use reload() method of existing Config object
                 # This avoids creating a new object and allows components
                 # with a reference to the old object to see the changes
-                if hasattr(self._config, 'reload'):
+                if hasattr(self._config, "reload"):
                     log.info("Using Config.reload() method")
                     self._config.reload()
                 else:
                     # Fallback: copy important attributes
                     log.warning("Config.reload() not available, copying attributes")
-                    if hasattr(new_config, 'ui'):
+                    if hasattr(new_config, "ui"):
                         self._config.ui = new_config.ui
-                    if hasattr(new_config, 'doc'):
+                    if hasattr(new_config, "doc"):
                         self._config.doc = new_config.doc
-                    if hasattr(new_config, 'supported_sites'):
+                    if hasattr(new_config, "supported_sites"):
                         self._config.supported_sites = new_config.supported_sites
-                    if hasattr(new_config, 'supported_games'):
+                    if hasattr(new_config, "supported_games"):
                         self._config.supported_games = new_config.supported_games
-                    if hasattr(new_config, 'supported_databases'):
+                    if hasattr(new_config, "supported_databases"):
                         self._config.supported_databases = new_config.supported_databases
-                    if hasattr(new_config, 'stat_sets'):
+                    if hasattr(new_config, "stat_sets"):
                         self._config.stat_sets = new_config.stat_sets
 
                 # Capture new state
@@ -298,25 +294,23 @@ class ConfigurationManager:
                         f"{len(dynamic_changes)} changes applied, {len(restart_changes)} require restart",
                         restart_changes,
                     )
-                else:
-                    return (
-                        True,
-                        f"{len(dynamic_changes)} changes applied successfully",
-                        [],
-                    )
+                return (
+                    True,
+                    f"{len(dynamic_changes)} changes applied successfully",
+                    [],
+                )
 
             except Exception as e:
-                log.error(f"Error during reload: {e}")
+                log.exception(f"Error during reload: {e}")
                 import traceback
 
                 traceback.print_exc()
-                return False, f"Error: {str(e)}", []
+                return False, f"Error: {e!s}", []
 
     def _identify_changes(
         self, old_config: Configuration.Config, new_config: Configuration.Config,
-    ) -> List[ConfigChange]:
-        """
-        Identifies the differences between two configurations.
+    ) -> list[ConfigChange]:
+        """Identifies the differences between two configurations.
 
         Args:
             old_config: Old configuration
@@ -324,6 +318,7 @@ class ConfigurationManager:
 
         Returns:
             List[ConfigChange]: List of identified changes
+
         """
         changes = []
 
@@ -459,13 +454,13 @@ class ConfigurationManager:
                         )
             except Exception as e:
                 log.debug(f"Error comparing DB parameters: {e}")
-                
+
             # Compare HUD UI parameters
             try:
                 if hasattr(old_config, "get_hud_ui_parameters") and hasattr(new_config, "get_hud_ui_parameters"):
                     old_hud_ui = old_config.get_hud_ui_parameters()
                     new_hud_ui = new_config.get_hud_ui_parameters()
-                    
+
                     for key in new_hud_ui:
                         if old_hud_ui.get(key) != new_hud_ui[key]:
                             changes.append(
@@ -480,7 +475,7 @@ class ConfigurationManager:
                 log.debug(f"Error comparing HUD UI parameters: {e}")
 
         except Exception as e:
-            log.error(f"Error identifying changes: {e}")
+            log.exception(f"Error identifying changes: {e}")
             import traceback
 
             traceback.print_exc()
@@ -488,14 +483,14 @@ class ConfigurationManager:
         return changes
 
     def _requires_restart(self, change: ConfigChange) -> bool:
-        """
-        Determines if a change requires a restart.
+        """Determines if a change requires a restart.
 
         Args:
             change: The change to evaluate
 
         Returns:
             bool: True if a restart is required
+
         """
         # Check critical paths
         for critical_path in self.RESTART_REQUIRED_PATHS:
@@ -517,9 +512,8 @@ class ConfigurationManager:
 
         return False
 
-    def _apply_dynamic_changes(self, changes: List[ConfigChange], new_config: Configuration.Config) -> bool:
-        """
-        Applies changes that can be made dynamically.
+    def _apply_dynamic_changes(self, changes: list[ConfigChange], new_config: Configuration.Config) -> bool:
+        """Applies changes that can be made dynamically.
 
         Args:
             changes: List of changes to apply
@@ -527,11 +521,12 @@ class ConfigurationManager:
 
         Returns:
             bool: True if all changes were successfully applied
+
         """
         all_success = True
 
         # Group changes by relevant observer
-        observer_changes: Dict[ConfigObserver, List[ConfigChange]] = {}
+        observer_changes: dict[ConfigObserver, list[ConfigChange]] = {}
 
         for change in changes:
             for observer in self._observers:
@@ -552,38 +547,38 @@ class ConfigurationManager:
                         log.error(f"Failed to apply change {change} by {observer.__class__.__name__}")
                         all_success = False
             except Exception as e:
-                log.error(f"Error notifying {observer.__class__.__name__}: {e}")
+                log.exception(f"Error notifying {observer.__class__.__name__}: {e}")
                 all_success = False
 
         return all_success
 
-    def get_pending_restart_changes(self) -> List[ConfigChange]:
-        """
-        Returns the list of pending changes that require a restart.
+    def get_pending_restart_changes(self) -> list[ConfigChange]:
+        """Returns the list of pending changes that require a restart.
 
         Returns:
             List[ConfigChange]: List of changes requiring a restart
+
         """
         return [c for c in self._pending_changes if c.requires_restart]
 
-    def clear_pending_changes(self):
-        """Clears the list of pending changes"""
+    def clear_pending_changes(self) -> None:
+        """Clears the list of pending changes."""
         self._pending_changes.clear()
 
-    def get_change_history(self, limit: int = 100) -> List[ConfigChange]:
-        """
-        Returns the change history.
+    def get_change_history(self, limit: int = 100) -> list[ConfigChange]:
+        """Returns the change history.
 
         Args:
             limit: Maximum number of changes to return
 
         Returns:
             List[ConfigChange]: Change history
+
         """
         return self._change_history[-limit:]
 
-    def _capture_current_state(self):
-        """Captures the current configuration state for future comparison"""
+    def _capture_current_state(self) -> None:
+        """Captures the current configuration state for future comparison."""
         self._last_saved_state = {"sites": {}, "import": {}, "database": {}, "hud_ui": {}}
 
         # Capture site state
@@ -611,7 +606,7 @@ class ConfigurationManager:
             self._last_saved_state["import"]["filters"] = self._config.get_import_parameters().get("importFilters", [])
         except Exception as e:
             log.warning("Error loading import filters: %s", e)
-            
+
         # Capture HUD UI state
         try:
             if hasattr(self._config, "get_hud_ui_parameters"):
@@ -620,9 +615,8 @@ class ConfigurationManager:
         except Exception as e:
             log.warning("Error capturing HUD UI parameters: %s", e)
 
-    def detect_changes_from_saved_state(self, current_config) -> List[ConfigChange]:
-        """
-        Detects changes compared to the last saved state.
+    def detect_changes_from_saved_state(self, current_config) -> list[ConfigChange]:
+        """Detects changes compared to the last saved state.
         Used when the configuration is modified in place.
         """
         changes = []
@@ -712,19 +706,19 @@ class ConfigurationManager:
                 )
         except Exception as e:
             log.warning("Error loading copyFromFilter: %s", e)
-            
+
         # Compare HUD UI parameters
         try:
             if hasattr(current_config, "get_hud_ui_parameters"):
                 current_hud_ui = current_config.get_hud_ui_parameters()
                 saved_hud_ui = self._last_saved_state.get("hud_ui", {})
-                
+
                 # Compare each HUD UI parameter
                 all_keys = set(current_hud_ui.keys()) | set(saved_hud_ui.keys())
                 for key in all_keys:
                     current_value = current_hud_ui.get(key)
                     saved_value = saved_hud_ui.get(key)
-                    
+
                     if current_value != saved_value:
                         changes.append(
                             ConfigChange(

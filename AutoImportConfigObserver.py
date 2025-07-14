@@ -1,41 +1,42 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+"""Observe auto-import configuration changes.
 
+This module defines ``AutoImportConfigObserver``, which listens for
+configuration updates that can be applied without restarting the application.
 """
-AutoImportConfigObserver.py
 
-Configuration observer for the auto-import module.
-Manages configuration changes that can be applied without restart.
-"""
+from __future__ import annotations
 
 import threading
+from typing import TYPE_CHECKING
+
 from ConfigurationManager import ConfigChange, ConfigObserver
 from loggingFpdb import get_logger
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from GuiAutoImport import GuiAutoImport
+
 log = get_logger("autoimportconfig")
+
+MIN_PATH_PARTS = 2  # longueur min pour path.split(".")
+SITE_INDEX = 1  # index du nom de site dans path.split(".")
 
 
 class AutoImportConfigObserver(ConfigObserver):
-    """
-    Observer for auto-import configuration changes.
+    """Observer for auto-import configuration changes."""
 
-    Manages changes that can be applied dynamically such as:
-    - Import paths
-    - Game filters
-    - Import options (except interval)
-    """
-
-    def __init__(self, auto_import_gui):
-        """
-        Initialize the auto-import observer.
+    def __init__(self, auto_import_gui: GuiAutoImport) -> None:
+        """Initialize the auto-import observer.
 
         Args:
-            auto_import_gui: Reference to GuiAutoImport
+            auto_import_gui: instance de GuiAutoImport
+
         """
         self.auto_import = auto_import_gui
         self._lock = threading.Lock()
-        self.observed_paths = [
-            "supported_sites.*.HH_path",  # Hand history paths
+        self.observed_paths: list[str] = [
+            "supported_sites.*.HH_path",  # Hand-history paths
             "import.ImportFilters",  # Import filters
             "import.fastStoreHudCache",  # Cache options
             "import.saveActions",  # Save actions
@@ -43,140 +44,166 @@ class AutoImportConfigObserver(ConfigObserver):
             "import.sessionTimeout",  # Session timeout
         ]
 
-    def get_observed_paths(self):
-        """Returns the observed configuration paths"""
+    def get_observed_paths(self) -> list[str]:
+        """Return the list of observed configuration paths."""
         return self.observed_paths
 
     def on_config_change(self, change: ConfigChange) -> bool:
-        """
-        Apply a configuration change to auto-import.
+        """Apply a configuration change to auto-import.
 
         Args:
-            change: The change to apply
+            change: The configuration change to apply.
 
         Returns:
-            bool: True if the change was successfully applied
+            bool: ``True`` if the change was applied ,
+                ``False`` in case of exception.
+
         """
+        # Mapping “ keyword in path → handler ”
+        handlers: dict[str, Callable[[ConfigChange], bool]] = {
+            "HH_path": self._apply_path_change,
+            "ImportFilters": self._apply_filter_change,
+            "fastStoreHudCache": self._apply_cache_option_change,
+            "saveActions": self._apply_action_option_change,
+            "cacheSessions": self._apply_session_option_change,
+            "sessionTimeout": self._apply_session_option_change,
+        }
+
+        applied = False  # dafult result
+
         try:
             with self._lock:
-                log.info(f"Applying auto-import change: {change}")
+                log.info("Applying auto-import change: %s", change)
 
-                # Import path changes
-                if "HH_path" in change.path:
-                    return self._apply_path_change(change)
+                # Browse the mapping and apply the first handler that matches
+                for key, handler in handlers.items():
+                    if key in change.path:
+                        applied = handler(change)
+                        break
+                else:  # No handler found
+                    log.warning("Unhandled change: %s", change.path)
+                    applied = True  # The “neutral” operation is considered successful
 
-                # Filter changes
-                elif "ImportFilters" in change.path:
-                    return self._apply_filter_change(change)
+        except Exception:
+            log.exception("Error applying change %s", change)
+            applied = False
 
-                # Cache options
-                elif "fastStoreHudCache" in change.path:
-                    return self._apply_cache_option_change(change)
-
-                # Action options
-                elif "saveActions" in change.path:
-                    return self._apply_action_option_change(change)
-
-                # Session options
-                elif "cacheSessions" in change.path or "sessionTimeout" in change.path:
-                    return self._apply_session_option_change(change)
-
-                else:
-                    log.warning(f"Unhandled change: {change.path}")
-                    return True
-
-        except Exception as e:
-            log.error(f"Error applying change {change}: {e}")
-            return False
+        return applied
 
     def _apply_path_change(self, change: ConfigChange) -> bool:
-        """Apply an import path change"""
+        """Update import directories when an HH_path value changes."""
         try:
-            # Extract site name from path
+            # Extract site name -- e.g.: “supported_sites.PokerStars.HH_path”
             parts = change.path.split(".")
-            if len(parts) >= 2:
-                site_name = parts[1]
+            if len(parts) < MIN_PATH_PARTS:
+                log.warning("Unexpected path format: %s", change.path)
+                return True  # Neutral operation
 
-                # If auto-import is running, update monitored paths
-                if hasattr(self.auto_import, "importer") and self.auto_import.importer:
-                    if hasattr(self.auto_import.importer, "addImportDirectory"):
-                        # Remove old path if present
-                        if change.old_value and hasattr(self.auto_import.importer, "removeImportDirectory"):
-                            self.auto_import.importer.removeImportDirectory(change.old_value)
+            site_name = parts[SITE_INDEX]
 
-                        # Add new path
-                        if change.new_value:
-                            self.auto_import.importer.addImportDirectory(change.new_value, monitor=True)
+            importer = getattr(self.auto_import, "importer", None)
+            add_dir = getattr(importer, "addImportDirectory", None)
+            remove_dir = getattr(importer, "removeImportDirectory", None)
 
-                        log.info(f"Import path updated for {site_name}: {change.old_value} → {change.new_value}")
+            if importer and add_dir:
+                # Removes old directory, if any
+                if change.old_value and remove_dir:
+                    remove_dir(change.old_value)
 
-                # Update interface if necessary
-                if hasattr(self.auto_import, "updatePaths"):
-                    self.auto_import.updatePaths()
+                # Adds the new directory
+                add_dir(change.new_value, monitor=True)
 
-            return True
-        except Exception as e:
-            log.error(f"Error changing path: {e}")
+                log.info(
+                    "Import path updated for %s: %s → %s",
+                    site_name,
+                    change.old_value,
+                    change.new_value,
+                )
+
+            # Refreshes interface, if available
+            if hasattr(self.auto_import, "updatePaths"):
+                self.auto_import.updatePaths()
+
+        except Exception:  # pragma: no cover - logs and returns False
+            log.exception("Error changing HH_path for %s", change)
             return False
+        else:
+            return True
 
     def _apply_filter_change(self, change: ConfigChange) -> bool:
-        """Apply an import filter change"""
+        """Apply an import-filter change."""
         try:
-            log.info(f"Import filters updated: {change.new_value}")
-
+            log.info("Import filters updated: %s", change.new_value)
             # Update filters in importer
-            if hasattr(self.auto_import, "importer") and self.auto_import.importer:
-                if hasattr(self.auto_import.importer, "setImportFilters"):
-                    self.auto_import.importer.setImportFilters(change.new_value)
+            importer = getattr(self.auto_import, "importer", None)
+            set_filters = getattr(importer, "setImportFilters", None)
 
-            return True
-        except Exception as e:
-            log.error(f"Error changing filters: {e}")
+            if set_filters:
+                set_filters(change.new_value)
+
+        except Exception:
+            log.exception("Error changing filters for %s", change)
             return False
+        else:
+            return True
 
     def _apply_cache_option_change(self, change: ConfigChange) -> bool:
-        """Apply a cache option change"""
+        """Apply a fast-HUD-cache option change."""
         try:
-            log.info(f"Cache option updated: fastStoreHudCache = {change.new_value}")
+            log.info("Cache option updated: %s", change.new_value)
 
-            # Update option in importer
-            if hasattr(self.auto_import, "importer") and self.auto_import.importer:
-                if hasattr(self.auto_import.importer, "setFastStoreHudCache"):
-                    self.auto_import.importer.setFastStoreHudCache(change.new_value)
+            # Retrieves setter if attribute string exists
+            set_cache = getattr(
+                getattr(self.auto_import, "importer", None),
+                "setFastStoreHudCache",
+                None,
+            )
 
-            return True
-        except Exception as e:
-            log.error(f"Error changing cache option: {e}")
+            if set_cache:
+                set_cache(change.new_value)
+
+        except Exception:
+            log.exception("Error changing cache option for %s", change)
             return False
+        else:
+            return True
 
     def _apply_action_option_change(self, change: ConfigChange) -> bool:
-        """Apply an action option change"""
+        """Apply a save-actions option change."""
         try:
-            log.info(f"Action option updated: saveActions = {change.new_value}")
+            log.info("Action option updated: %s", change.new_value)
 
-            # Update option in importer
-            if hasattr(self.auto_import, "importer") and self.auto_import.importer:
-                if hasattr(self.auto_import.importer, "setSaveActions"):
-                    self.auto_import.importer.setSaveActions(change.new_value)
+            set_actions = getattr(
+                getattr(self.auto_import, "importer", None),
+                "setSaveActions",
+                None,
+            )
+            if set_actions:
+                set_actions(change.new_value)
 
-            return True
-        except Exception as e:
-            log.error(f"Error changing action option: {e}")
+        except Exception:
+            log.exception("Error changing action option for %s", change)
             return False
+        else:
+            return True
 
     def _apply_session_option_change(self, change: ConfigChange) -> bool:
-        """Apply a session option change"""
+        """Apply a session-related option change (cacheSessions / sessionTimeout)."""
         try:
-            log.info(f"Session option updated: {change.path} = {change.new_value}")
+            log.info("Session option updated: %s", change.new_value)
 
-            # Update option in importer
-            if hasattr(self.auto_import, "importer") and self.auto_import.importer:
-                if "cacheSessions" in change.path and hasattr(self.auto_import.importer, "setCacheSessions"):
-                    self.auto_import.importer.setCacheSessions(change.new_value)
-                elif "sessionTimeout" in change.path and hasattr(self.auto_import.importer, "setSessionTimeout"):
-                    self.auto_import.importer.setSessionTimeout(change.new_value)
+            importer = getattr(self.auto_import, "importer", None)
 
-            return True
-        except Exception as e:
-            log.error(f"Error changing session option: {e}")
+            set_cache_sessions = getattr(importer, "setCacheSessions", None)
+            set_timeout = getattr(importer, "setSessionTimeout", None)
+
+            if "cacheSessions" in change.path and set_cache_sessions:
+                set_cache_sessions(change.new_value)
+            elif "sessionTimeout" in change.path and set_timeout:
+                set_timeout(change.new_value)
+
+        except Exception:
+            log.exception("Error changing session option for %s", change)
             return False
+        else:
+            return True

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright 2010-2011 Maxime Grandchamp
 # This program is free software: you can redistribute it and/or modify
@@ -53,7 +52,7 @@ log = get_logger("handviewer")
 
 
 class GuiHandViewer(QSplitter):
-    def __init__(self, config, querylist, mainwin):
+    def __init__(self, config, querylist, mainwin) -> None:
         QSplitter.__init__(self, mainwin)
         self.config = config
         self.main_window = mainwin
@@ -169,8 +168,8 @@ class GuiHandViewer(QSplitter):
         ranks = (14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2)
 
         card_images = [0] * 53
-        for j in range(0, 13):
-            for i in range(0, 4):
+        for j in range(13):
+            for i in range(4):
                 loc = Card.cardFromValueSuit(ranks[j], suits[i])
                 card_image = self.deck_instance.card(suits[i], ranks[j])
                 card_images[loc] = card_image
@@ -178,7 +177,7 @@ class GuiHandViewer(QSplitter):
         card_images[0] = back_image
         return card_images
 
-    def loadHands(self, checkState):
+    def loadHands(self, checkState) -> None:
         hand_ids = self.get_hand_ids_from_date_range(
             self.filters.getDates()[0], self.filters.getDates()[1],
         )
@@ -229,10 +228,9 @@ class GuiHandViewer(QSplitter):
             if suit1 == suit2:
                 suit1 += 4
             return card1 * 14 * 14 + card2 * 14 + suit1
-        else:
-            return 0
+        return 0
 
-    def reload_hands(self, handids):
+    def reload_hands(self, handids) -> None:
         self.hands = {}
         self.model.removeRows(0, self.model.rowCount())
         if len(handids) == 0:
@@ -252,14 +250,14 @@ class GuiHandViewer(QSplitter):
                 self.view.resizeColumnsToContents()
         self.view.resizeColumnsToContents()
 
-    def addHandRow(self, handid, hand):
+    def addHandRow(self, handid, hand) -> None:
         hero = self.filters.getHeroes().get(hand.sitename)
         if not hero:
             log.warning(f"Hero not found for site: {hand.sitename}")
             return
 
         log.debug(f"Processing hand: {handid} for hero: {hero}")
-        log.debug(f"completed info from hand: {str(hand)}")
+        log.debug(f"completed info from hand: {hand!s}")
 
         won = 0
         if hero in list(hand.collectees.keys()):
@@ -397,12 +395,12 @@ class GuiHandViewer(QSplitter):
         log.debug(f"Row added to model: {row}")
         self.model.appendRow(modelrow)
 
-    def copyHandToClipboard(self, checkState, hand):
+    def copyHandToClipboard(self, checkState, hand) -> None:
         handText = StringIO()
         hand.writeHand(handText)
         QApplication.clipboard().setText(handText.getvalue())
 
-    def contextMenu(self, event):
+    def contextMenu(self, event) -> None:
         index = self.view.currentIndex()
         if index.row() < 0:
             return
@@ -413,12 +411,12 @@ class GuiHandViewer(QSplitter):
         m.move(event.globalPos())
         m.exec_()
 
-    def filter_cards_cb(self, card):
+    def filter_cards_cb(self, card) -> None:
         if hasattr(self, "hands"):
             self.filterModel.invalidateFilter()
 
     def is_row_in_card_filter(self, rownum):
-        """Returns true if the cards of the given row are in the card filter"""
+        """Returns true if the cards of the given row are in the card filter."""
         # Does work but all cards that should NOT be displayed have to be clicked.
         card_filter = self.filters.getCards()
         hcs = self.model.data(
@@ -445,8 +443,8 @@ class GuiHandViewer(QSplitter):
 
         return card_filter.get(abbr, True)  # Default to True if key is not found
 
-    def row_activated(self, index):
-        handlist = list(sorted(self.hands.keys()))
+    def row_activated(self, index) -> None:
+        handlist = sorted(self.hands.keys())
         # ! print('handlist:')
         # ! print(handlist)
         self.replayer = GuiReplayer.GuiReplayer(

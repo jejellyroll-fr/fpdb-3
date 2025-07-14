@@ -140,7 +140,7 @@ def get_RingProfitAllHandsPlayerIdSite(
         AND (:site IS NULL OR pl.siteId = :site)
         AND (h.startTime > :startdate OR :startdate IS NULL)
         AND (h.startTime < :enddate OR :enddate IS NULL)
-        AND (gt.limitType = :limit OR :limit IS NULL) 
+        AND (gt.limitType = :limit OR :limit IS NULL)
         AND (gt.bigBlind IN (:bigBlind) OR :bigBlind IS NULL)
         AND (gt.category IN (:category) OR :category IS NULL)
         AND (gt.currency = :currency OR :currency IS NULL)
@@ -233,23 +233,23 @@ def get_players(name=None, site=None, page=1, per_page=10):
 
     # SQL query string
     sql = """
-        SELECT 
+        SELECT
         p.id, p.name AS player_name , s.name AS site, p.hero, p.siteId,
         COUNT(hp.id) AS total_hands,
-        SUM(CASE WHEN hp.tourneysPlayersId IS NULL THEN 1 ELSE 0 END) AS cash_hands, 
+        SUM(CASE WHEN hp.tourneysPlayersId IS NULL THEN 1 ELSE 0 END) AS cash_hands,
         SUM(CASE WHEN hp.tourneysPlayersId IS NOT NULL THEN 1 ELSE 0 END) AS tournament_hands
         FROM Players p
-        LEFT JOIN Sites s ON p.siteId = s.id 
+        LEFT JOIN Sites s ON p.siteId = s.id
         LEFT JOIN HandsPlayers hp ON hp.playerId = p.id
         WHERE
-        (:name IS NULL OR p.name LIKE :name) 
+        (:name IS NULL OR p.name LIKE :name)
         AND
         (:site IS NULL OR s.name = :site)
-        GROUP BY 
-        p.id, p.name, s.name, p.hero 
+        GROUP BY
+        p.id, p.name, s.name, p.hero
         LIMIT
         :per_page
-        OFFSET 
+        OFFSET
         :offset
   """
 
@@ -282,7 +282,7 @@ def get_heroes():
                         FROM Players p
                         JOIN Sites s ON p.siteId = s.id
                         WHERE p.hero = 1;
-                      
+
                    """,
     )
     heroes = cursor.fetchall()
@@ -377,7 +377,7 @@ def get_playerscount_cg():
     cursor = conn.cursor()
     cursor.execute(
         """SELECT COUNT(DISTINCT playerId) AS distinctPlayerCount FROM HandsPlayers
-                    WHERE tourneysPlayersId IS NULL 
+                    WHERE tourneysPlayersId IS NULL
                     """,
     )
     playerscount_cg = cursor.fetchall()

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright 2008-2013 Steffen Schaumburg
 # This program is free software: you can redistribute it and/or modify
@@ -16,6 +15,7 @@
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
 import codecs
+import contextlib
 import cProfile
 import io
 import logging
@@ -26,15 +26,30 @@ import sqlite3
 import sys
 from functools import partial
 
-import numpy
+import numpy as np
 from PyQt5.QtCore import QCoreApplication, QDate, QPoint, Qt
 from PyQt5.QtGui import QIcon, QPalette
-from PyQt5.QtWidgets import (QAction, QApplication, QCalendarWidget, QCheckBox,
-                             QComboBox, QDateEdit, QDialog, QDialogButtonBox,
-                             QHBoxLayout, QLabel, QLineEdit,
-                             QMainWindow, QMessageBox, QPushButton,
-                             QScrollArea, QSizePolicy, QTabWidget, QVBoxLayout,
-                             QWidget)
+from PyQt5.QtWidgets import (
+    QAction,
+    QApplication,
+    QCalendarWidget,
+    QCheckBox,
+    QComboBox,
+    QDateEdit,
+    QDialog,
+    QDialogButtonBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QSizePolicy,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 import Card
 import Configuration
@@ -46,13 +61,13 @@ import GuiGraphViewer
 import GuiHandViewer
 import GuiLogView
 import GuiPrefs
-import ModernHudPreferences
 import GuiRingPlayerStats
 import GuiSessionViewer
 import GuiTourHandViewer
 import GuiTourneyGraphViewer
 import GuiTourneyPlayerStats
 import interlocks
+import ModernHudPreferences
 import Options
 import SQL
 from ConfigInitializer import ensure_config_initialized
@@ -79,7 +94,7 @@ cl_options = ".".join(sys.argv[1:])
 (options, argv) = Options.fpdb_options()
 
 
-numpy_version = numpy.__version__
+numpy_version = np.__version__
 
 
 sqlite3_version = sqlite3.version
@@ -119,9 +134,9 @@ class fpdb(QMainWindow):
     #         pathcomp = f"{path}/ppt/p2.jar"
     #     subprocess.call(["java", "-jar", pathcomp])
 
-    def add_and_display_tab(self, new_page, new_tab_name):
-        """adds a tab, namely creates the button and displays it and appends all the relevant arrays"""
-        for name in self.nb_tab_names:  # todo: check this is valid
+    def add_and_display_tab(self, new_page, new_tab_name) -> None:
+        """Adds a tab, namely creates the button and displays it and appends all the relevant arrays."""
+        for name in self.nb_tab_names:  # TODO: check this is valid
             if name == new_tab_name:
                 self.display_tab(new_tab_name)
                 return  # if tab already exists, just go to it
@@ -141,8 +156,8 @@ class fpdb(QMainWindow):
         index = self.nb.addTab(page, new_tab_name)
         self.nb.setCurrentIndex(index)
 
-    def display_tab(self, new_tab_name):
-        """displays the indicated tab"""
+    def display_tab(self, new_tab_name) -> None:
+        """Displays the indicated tab."""
         tab_no = -1
         for i, name in enumerate(self.nb_tab_names):
             if new_tab_name == name:
@@ -150,14 +165,14 @@ class fpdb(QMainWindow):
                 break
 
         if tab_no < 0 or tab_no >= self.nb.count():
-            raise FpdbError(f"invalid tab_no {str(tab_no)}")
-        else:
-            self.nb.setCurrentIndex(tab_no)
+            msg = f"invalid tab_no {tab_no!s}"
+            raise FpdbError(msg)
+        self.nb.setCurrentIndex(tab_no)
 
-    def dia_about(self, widget, data=None):
+    def dia_about(self, widget, data=None) -> None:
         QMessageBox.about(
             self,
-            f"FPDB{str(VERSION)}",
+            f"FPDB{VERSION!s}",
             "Copyright 2008-2023. See contributors.txt for details"
             + "You are free to change, and distribute original or changed versions "
             "of fpdb within the rules set out by the license"
@@ -166,9 +181,8 @@ class fpdb(QMainWindow):
             + "Your config file is: "
             + self.config.file,
         )
-        return
 
-    def dia_advanced_preferences(self, widget, data=None):
+    def dia_advanced_preferences(self, widget, data=None) -> None:
         # force reload of prefs from xml file - needed because HUD could
         # have changed file contents
         self.load_profile()
@@ -179,11 +193,11 @@ class fpdb(QMainWindow):
             if config_manager.initialized:
                 pending_changes = config_manager.check_pending_changes(self.config)
                 config_manager._pending_changes = pending_changes
-            
+
             self.config.save()
             self.reload_config()
 
-    def dia_database_stats(self, widget, data=None):
+    def dia_database_stats(self, widget, data=None) -> None:
         self.warning_box(
             string=f"Number of Hands: {self.db.getHandCount()}\nNumber of Tourneys: {self.db.getTourneyCount()}\nNumber of TourneyTypes: {self.db.getTourneyTypeCount()}",
             diatitle="Database Statistics",
@@ -193,15 +207,15 @@ class fpdb(QMainWindow):
 
     @staticmethod
     def get_text(widget: QWidget):
-        """Return text of widget, depending on widget type"""
+        """Return text of widget, depending on widget type."""
         return widget.currentText() if isinstance(widget, QComboBox) else widget.text()
 
-    def dia_hud_preferences(self, widget, data=None):
-        """Ouvre le dialogue moderne des préférences HUD"""
+    def dia_hud_preferences(self, widget, data=None) -> None:
+        """Ouvre le dialogue moderne des préférences HUD."""
         # force reload of prefs from xml file - needed because HUD could
         # have changed file contents
         self.load_profile()
-        
+
         dia = ModernHudPreferences.ModernHudPreferences(self.config, self)
         if dia.exec_():
             # Détecter les changements avant de sauvegarder
@@ -209,13 +223,13 @@ class fpdb(QMainWindow):
             if config_manager.initialized:
                 pending_changes = config_manager.check_pending_changes(self.config)
                 config_manager._pending_changes = pending_changes
-                
+
             self.config.save()
             self.reload_config()
 
-    
-    def dia_manage_hud_sites(self, widget, data=None):
-        """Dialog to manage HUD sites - enable/disable sites"""
+
+    def dia_manage_hud_sites(self, widget, data=None) -> None:
+        """Dialog to manage HUD sites - enable/disable sites."""
         dia = QDialog(self)
         dia.setWindowTitle("Manage HUD Sites")
         dia.resize(800, 600)
@@ -283,7 +297,7 @@ class fpdb(QMainWindow):
             site_widgets.append((site_widget, site_name))
 
         # Connect search functionality
-        def filter_sites():
+        def filter_sites() -> None:
             search_text = self.site_search.text().lower()
             for widget, name in site_widgets:
                 widget.setVisible(search_text in name.lower())
@@ -367,24 +381,24 @@ class fpdb(QMainWindow):
             if config_manager.initialized:
                 pending_changes = config_manager.check_pending_changes(self.config)
                 config_manager._pending_changes = pending_changes
-                
+
             self.config.save()
             self.reload_config()
 
-    def update_site_stats(self, checkboxes):
-        """Update the statistics label"""
+    def update_site_stats(self, checkboxes) -> None:
+        """Update the statistics label."""
         total = len(checkboxes)
         enabled = sum(1 for cb in checkboxes.values() if cb.isChecked())
         self.stats_label.setText(f"Enabled sites: {enabled} / {total}")
         # Utiliser une classe pour le style au lieu de CSS en dur
         self.stats_label.setProperty("class", "info-box")
 
-    def set_all_sites(self, checkboxes, state):
-        """Set all site checkboxes to the given state"""
+    def set_all_sites(self, checkboxes, state) -> None:
+        """Set all site checkboxes to the given state."""
         for checkbox in checkboxes.values():
             checkbox.setChecked(state)
 
-    def dia_import_filters(self, checkState):
+    def dia_import_filters(self, checkState) -> None:
         dia = QDialog()
         dia.setWindowTitle("Skip these games when importing")
         dia.setLayout(QVBoxLayout())
@@ -407,7 +421,7 @@ class fpdb(QMainWindow):
             self.config.editImportFilters(",".join(filterGames))
             self.config.save()
 
-    def dia_dump_db(self, widget, data=None):
+    def dia_dump_db(self, widget, data=None) -> None:
         filename = "database-dump.sql"
         result = self.db.dumpDatabase()
 
@@ -416,8 +430,8 @@ class fpdb(QMainWindow):
 
     # end def dia_database_stats
 
-    def dia_recreate_tables(self, widget, data=None):
-        """Dialogue that asks user to confirm that he wants to delete and recreate the tables"""
+    def dia_recreate_tables(self, widget, data=None) -> None:
+        """Dialogue that asks user to confirm that he wants to delete and recreate the tables."""
         if self.obtain_global_lock("fpdb.dia_recreate_tables"):  # returns true if successful
             dia_confirm = QMessageBox(
                 QMessageBox.Warning,
@@ -432,14 +446,14 @@ class fpdb(QMainWindow):
                 f" they will be deleted and you will have to re-import your histories.\nThis may take a while."
             )
 
-            dia_confirm.setInformativeText(diastring)  # todo: make above string with bold for db, host and deleted
+            dia_confirm.setInformativeText(diastring)  # TODO: make above string with bold for db, host and deleted
             response = dia_confirm.exec_()
 
             if response == QMessageBox.Yes:
                 self.db.recreate_tables()
                 # find any guibulkimport/guiautoimport windows and clear cache:
                 for t in self.threads:
-                    if isinstance(t, GuiBulkImport.GuiBulkImport) or isinstance(t, GuiAutoImport.GuiAutoImport):
+                    if isinstance(t, GuiBulkImport.GuiBulkImport | GuiAutoImport.GuiAutoImport):
                         t.importer.database.resetCache()
                 self.release_global_lock()
             else:
@@ -451,7 +465,7 @@ class fpdb(QMainWindow):
                 " windows have been opened. Re-start fpdb to use this option.",
             )
 
-    def dia_recreate_hudcache(self, widget, data=None):
+    def dia_recreate_hudcache(self, widget, data=None) -> None:
         if self.obtain_global_lock("dia_recreate_hudcache"):
             self.dia_confirm = QDialog()
             self.dia_confirm.setWindowTitle("Confirm recreating HUD cache")
@@ -504,7 +518,7 @@ class fpdb(QMainWindow):
                 "Re-start fpdb to use this option.",
             )
 
-    def dia_rebuild_indexes(self, widget, data=None):
+    def dia_rebuild_indexes(self, widget, data=None) -> None:
         if self.obtain_global_lock("dia_rebuild_indexes"):
             self.dia_confirm = QMessageBox(
                 QMessageBox.Warning,
@@ -536,13 +550,13 @@ class fpdb(QMainWindow):
                 " other windows have been opened. Re-start fpdb to use this option.",
             )
 
-    def dia_logs(self, widget, data=None):
-        """opens the log viewer window"""
+    def dia_logs(self, widget, data=None) -> None:
+        """Opens the log viewer window."""
         # remove members from self.threads if close messages received
         self.process_close_messages()
 
         viewer = None
-        for i, t in enumerate(self.threads):
+        for _i, t in enumerate(self.threads):
             if str(t.__class__) == "GuiLogView.GuiLogView":
                 viewer = t
                 break
@@ -558,18 +572,18 @@ class fpdb(QMainWindow):
         # if lock_set:
         #    self.release_global_lock()
 
-    def dia_site_preferences_seat(self, widget, data=None):
-        """Ouvre le dialogue moderne des préférences de sièges"""
+    def dia_site_preferences_seat(self, widget, data=None) -> None:
+        """Ouvre le dialogue moderne des préférences de sièges."""
         from ModernSeatPreferences import ModernSeatPreferencesDialog
 
         # Créer et afficher le dialogue moderne
         dia = ModernSeatPreferencesDialog(self.config, self)
-        
+
         # Le dialogue gère lui-même la sauvegarde et le rechargement
         dia.exec_()
 
-    def dia_site_preferences(self, widget, data=None):
-        """Ouvre le dialogue moderne des préférences de sites"""
+    def dia_site_preferences(self, widget, data=None) -> None:
+        """Ouvre le dialogue moderne des préférences de sites."""
         from ModernSitePreferences import ModernSitePreferencesDialog
 
         # Pas besoin de recharger le profil, utiliser la config existante
@@ -577,39 +591,39 @@ class fpdb(QMainWindow):
 
         # Créer et afficher le dialogue moderne
         dia = ModernSitePreferencesDialog(self.config, self)
-        
+
         if dia.exec_():
             # Récupérer les changements
             changes = dia.get_changes()
-            
+
             # Appliquer les changements
             for site_name, values in changes.items():
                 if site_name in self.config.supported_sites:
                     self.config.edit_site(
                         site_name,
-                        str(values['enabled']),
-                        values['screen_name'],
-                        values['hh_path'],
-                        values['ts_path'],
+                        str(values["enabled"]),
+                        values["screen_name"],
+                        values["hh_path"],
+                        values["ts_path"],
                     )
-            
+
             # Détecter les changements avant de sauvegarder
             config_manager = ConfigurationManager()
             if config_manager.initialized:
                 pending_changes = config_manager.check_pending_changes(self.config)
                 config_manager._pending_changes = pending_changes
-                
+
             self.config.save()
             self.reload_config()
 
     # Les méthodes suivantes sont maintenant gérées par ModernSitePreferences
     # mais sont conservées pour compatibilité avec d'autres parties du code
-    
-    def autoenableSite(self, text, checkbox):
+
+    def autoenableSite(self, text, checkbox) -> None:
         # autoactivate site if something gets typed in the screename field
         checkbox.setChecked(True)
 
-    def reload_hud_displays(self):
+    def reload_hud_displays(self) -> None:
         """Recharge tous les affichages HUD actifs."""
         log.info("Reloading all active HUD displays...")
         reloaded_huds = 0
@@ -620,35 +634,35 @@ class fpdb(QMainWindow):
                     reloaded_huds += 1
                 except Exception as e:
                     log.error(f"Error reloading HUD in thread {thread}: {e}", exc_info=True)
-        
+
         if reloaded_huds > 0:
             log.info(f"Successfully reloaded {reloaded_huds} HUD displays.")
             self.statusBar().showMessage(f"{reloaded_huds} HUD displays reloaded", 3000)
         else:
             log.info("No active HUD displays found to reload.")
 
-    def reload_config(self):
-        """Recharge la configuration avec support du rechargement dynamique"""
+    def reload_config(self) -> None:
+        """Recharge la configuration avec support du rechargement dynamique."""
         if len(self.nb_tab_names) == 1:
             # Essayer le rechargement dynamique via ConfigurationManager
             config_manager = ConfigurationManager()
-            
+
             # Initialiser le ConfigurationManager s'il ne l'est pas déjà
             if not config_manager.initialized:
                 config_manager.initialize(self.config.file)
-            
+
             success, message, restart_changes = config_manager.reload_config()
-            
+
             if success and not restart_changes:
                 # Rechargement dynamique réussi sans changements nécessitant un redémarrage
                 # IMPORTANT: Mettre à jour self.config pour qu'il pointe vers la config du ConfigurationManager
                 self.config = config_manager.get_config()
-                
+
                 # Mettre à jour aussi les références dans les onglets existants
                 for thread in self.threads:
-                    if hasattr(thread, 'config'):
+                    if hasattr(thread, "config"):
                         thread.config = self.config
-                
+
                 if "Aucun changement détecté" in message:
                     self.info_box("Configuration", message)
                 else:
@@ -659,7 +673,7 @@ class fpdb(QMainWindow):
                 changes_text = "\n".join([f"- {c.path}: {c.old_value} → {c.new_value}" for c in restart_changes[:5]])
                 if len(restart_changes) > 5:
                     changes_text += f"\n... et {len(restart_changes) - 5} autres changements"
-                
+
                 self.warning_box(
                     f"{message}\n\n"
                     "Les changements suivants nécessitent un redémarrage:\n"
@@ -680,7 +694,7 @@ class fpdb(QMainWindow):
                 "Redémarrez fpdb pour les charger.",
             )
 
-    def process_close_messages(self):
+    def process_close_messages(self) -> None:
         # check for close messages
         try:
             while True:
@@ -694,7 +708,7 @@ class fpdb(QMainWindow):
             # no close messages on queue, do nothing
             pass
 
-    def __calendar_dialog(self, widget, entry):
+    def __calendar_dialog(self, widget, entry) -> None:
         d = QDialog(self.dia_confirm)
         d.setWindowTitle("Pick a date")
 
@@ -709,9 +723,8 @@ class fpdb(QMainWindow):
         vb.addWidget(btn)
 
         d.exec_()
-        return
 
-    def createMenuBar(self):
+    def createMenuBar(self) -> None:
         mb = self.menuBar()
         configMenu = mb.addMenu("Configure")
         importMenu = mb.addMenu("Import")
@@ -797,7 +810,7 @@ class fpdb(QMainWindow):
             action.triggered.connect(callback)
         return action
 
-    def toggle_debug_logging(self, checked):
+    def toggle_debug_logging(self, checked) -> None:
         if checked:
             # Activer le logging debug pour le logger racine
             logging.getLogger().setLevel(logging.DEBUG)
@@ -809,18 +822,18 @@ class fpdb(QMainWindow):
             self.statusBar().showMessage("Debug logging disabled")
             log.info("logging debug deactivated.")
 
-    def load_profile(self, create_db=False):
+    def load_profile(self, create_db=False) -> None:
         """Loads profile from the provided path name.
         Sets:
         - self.settings
         - self.config
-        - self.db
+        - self.db.
         """
         # Load the configuration
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
         if self.config.file_error:
             self.warning_box(
-                f"There is an error in your config file {self.config.file}:\n{str(self.config.file_error)}",
+                f"There is an error in your config file {self.config.file}:\n{self.config.file_error!s}",
                 diatitle="CONFIG FILE ERROR",
             )
             sys.exit()
@@ -946,9 +959,8 @@ class fpdb(QMainWindow):
             self.db.rollback()
 
         # Validate the configuration if the database version is up-to-date
-        if hasattr(self.db, "wrongDbVersion"):
-            if not self.db.wrongDbVersion:
-                self.validate_config()
+        if hasattr(self.db, "wrongDbVersion") and not self.db.wrongDbVersion:
+            self.validate_config()
 
     def obtain_global_lock(self, source):
         ret = self.lock.acquire(source=source)  # will return false if lock is already held
@@ -961,7 +973,7 @@ class fpdb(QMainWindow):
         # need to release it later:
         # self.lock.release()
 
-    def quit(self, widget, data=None):
+    def quit(self, widget, data=None) -> None:
         # TODO: can we get some / all of the stuff done in this function to execute on any kind of abort?
         # FIXME  get two "quitting normally" messages, following the addition of the self.window.destroy() call
         #       ... because self.window.destroy() leads to self.destroy() which calls this!
@@ -979,21 +991,20 @@ class fpdb(QMainWindow):
                         self.db.disconnect()
                 except _mysql_exceptions.OperationalError:  # oh, damn, we're already disconnected
                     pass
-            else:
-                if self.db is not None and self.db.is_connected():
-                    self.db.disconnect()
+            elif self.db is not None and self.db.is_connected():
+                self.db.disconnect()
         else:
             pass
         # self.statusIcon.set_visible(False)
         QCoreApplication.quit()
 
-    def release_global_lock(self):
+    def release_global_lock(self) -> None:
         self.lock.release()
         self.lockTakenBy = None
         log.info("Global lock released.")
 
-    def tab_auto_import(self, widget, data=None):
-        """opens the auto import tab"""
+    def tab_auto_import(self, widget, data=None) -> None:
+        """Opens the auto import tab."""
         new_aimp_thread = GuiAutoImport.GuiAutoImport(self.settings, self.config, self.sql, self)
         self.threads.append(new_aimp_thread)
         self.add_and_display_tab(new_aimp_thread, "HUD")
@@ -1001,8 +1012,8 @@ class fpdb(QMainWindow):
             new_aimp_thread.startClicked(new_aimp_thread.startButton, "autostart")
             options.autoimport = False
 
-    def tab_bulk_import(self, widget, data=None):
-        """opens a tab for bulk importing"""
+    def tab_bulk_import(self, widget, data=None) -> None:
+        """Opens a tab for bulk importing."""
         new_import_thread = GuiBulkImport.GuiBulkImport(self.settings, self.config, self.sql, self)
         self.threads.append(new_import_thread)
         self.add_and_display_tab(new_import_thread, "Bulk Import")
@@ -1016,17 +1027,17 @@ class fpdb(QMainWindow):
 
     # end def tab_import_imap_summaries
 
-    def tab_ring_player_stats(self, widget, data=None):
+    def tab_ring_player_stats(self, widget, data=None) -> None:
         new_ps_thread = GuiRingPlayerStats.GuiRingPlayerStats(self.config, self.sql, self)
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Ring Player Stats")
 
-    def tab_tourney_player_stats(self, widget, data=None):
+    def tab_tourney_player_stats(self, widget, data=None) -> None:
         new_ps_thread = GuiTourneyPlayerStats.GuiTourneyPlayerStats(self.config, self.db, self.sql, self)
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Tourney Stats")
 
-    def tab_tourney_viewer_stats(self, widget, data=None):
+    def tab_tourney_viewer_stats(self, widget, data=None) -> None:
         new_thread = GuiTourHandViewer.TourHandViewer(self.config, self.sql, self)
         self.threads.append(new_thread)
         self.add_and_display_tab(new_thread, "Tourney Viewer")
@@ -1037,19 +1048,19 @@ class fpdb(QMainWindow):
     #     ps_tab = new_ps_thread.get_vbox()
     #     self.add_and_display_tab(ps_tab, "Positional Stats")
 
-    def tab_session_stats(self, widget, data=None):
+    def tab_session_stats(self, widget, data=None) -> None:
         colors = self.get_theme_colors()
         new_ps_thread = GuiSessionViewer.GuiSessionViewer(self.config, self.sql, self, self, colors=colors)
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Session Stats")
 
-    def tab_hand_viewer(self, widget, data=None):
+    def tab_hand_viewer(self, widget, data=None) -> None:
         new_ps_thread = GuiHandViewer.GuiHandViewer(self.config, self.sql, self)
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Hand Viewer")
 
-    def tab_main_help(self, widget, data=None):
-        """Displays a tab with the main fpdb help screen"""
+    def tab_main_help(self, widget, data=None) -> None:
+        """Displays a tab with the main fpdb help screen."""
         mh_tab = QLabel(
             (
                 """
@@ -1071,8 +1082,7 @@ class fpdb(QMainWindow):
         self.add_and_display_tab(mh_tab, "Help")
 
     def get_theme_colors(self):
-        """
-        Returns a dictionary containing the theme colors used in the application.
+        """Returns a dictionary containing the theme colors used in the application.
 
         The dictionary contains the following keys:
         - "background": the name of the color used for the background.
@@ -1085,6 +1095,7 @@ class fpdb(QMainWindow):
 
         Returns:
             dict: A dictionary containing the theme colors.
+
         """
         return {
             "background": self.palette().color(QPalette.Window).name(),
@@ -1098,15 +1109,15 @@ class fpdb(QMainWindow):
             "line_hands": "c",
         }
 
-    def tabGraphViewer(self, widget, data=None):
-        """opens a graph viewer tab"""
+    def tabGraphViewer(self, widget, data=None) -> None:
+        """Opens a graph viewer tab."""
         colors = self.get_theme_colors()
         new_gv_thread = GuiGraphViewer.GuiGraphViewer(self.sql, self.config, self, colors=colors)
         self.threads.append(new_gv_thread)
         self.add_and_display_tab(new_gv_thread, "Graphs")
 
-    def tabTourneyGraphViewer(self, widget, data=None):
-        """opens a graph viewer tab"""
+    def tabTourneyGraphViewer(self, widget, data=None) -> None:
+        """Opens a graph viewer tab."""
         colors = self.get_theme_colors()
         new_gv_thread = GuiTourneyGraphViewer.GuiTourneyGraphViewer(self.sql, self.config, self, colors=colors)
         self.threads.append(new_gv_thread)
@@ -1119,7 +1130,7 @@ class fpdb(QMainWindow):
     #     # tab = thread.get_vbox()
     #     self.add_and_display_tab(thread, "Stove")
 
-    def validate_config(self):
+    def validate_config(self) -> None:
         # check if sites in config file are in DB
         for site in self.config.supported_sites:  # get site names from config file
             try:
@@ -1145,7 +1156,7 @@ class fpdb(QMainWindow):
     def warning_box(self, string, diatitle="FPDB WARNING"):
         return QMessageBox(QMessageBox.Warning, diatitle, string).exec_()
 
-    def change_theme(self, theme):
+    def change_theme(self, theme) -> None:
         try:
             from qt_material import apply_stylesheet
 
@@ -1154,25 +1165,23 @@ class fpdb(QMainWindow):
         except ImportError:
             log.warning("qt_material not available, cannot change theme")
         except Exception as e:
-            log.error(f"Error changing theme: {e}")
+            log.exception(f"Error changing theme: {e}")
 
-    def update_title_bar_theme(self):
+    def update_title_bar_theme(self) -> None:
         # Apply the stylesheet to the custom title bar
         self.custom_title_bar.update_theme()
 
-    def close_tab(self, index):
+    def close_tab(self, index) -> None:
         item = self.nb.widget(index)
         self.nb.removeTab(index)
         self.nb_tab_names.pop(index)
 
-        try:
+        with contextlib.suppress(ValueError):
             self.threads.remove(item)
-        except ValueError:
-            pass
 
         item.deleteLater()
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         if sys.platform == "darwin":
             pass
@@ -1215,10 +1224,8 @@ class fpdb(QMainWindow):
         self.setWindowTitle("Free Poker DB 3")
         defx, defy = 1920, 1080
         sg = QApplication.primaryScreen().availableGeometry()
-        if sg.width() < defx:
-            defx = sg.width()
-        if sg.height() < defy:
-            defy = sg.height()
+        defx = min(sg.width(), defx)
+        defy = min(sg.height(), defy)
         self.resize(defx, defy)
 
         if sys.platform == "darwin":
@@ -1266,7 +1273,7 @@ class fpdb(QMainWindow):
             self.visible = True
 
         self.load_profile(create_db=True)
-        
+
         # Enregistrer l'observateur GUI (ConfigurationManager déjà initialisé dans load_profile)
         self._register_gui_observer()
 
@@ -1295,30 +1302,30 @@ class fpdb(QMainWindow):
 
         if options.autoimport:
             self.tab_auto_import(None)
-            
-    def _register_gui_observer(self):
-        """Enregistre l'observateur GUI avec le ConfigurationManager"""
+
+    def _register_gui_observer(self) -> None:
+        """Enregistre l'observateur GUI avec le ConfigurationManager."""
         try:
             config_manager = ConfigurationManager()
-            
+
             # Initialiser le ConfigurationManager s'il ne l'est pas déjà
             if not config_manager.initialized:
                 config_manager.initialize(self.config.file)
                 # IMPORTANT: Synchroniser les objets config
                 config_manager._config = self.config
                 config_manager._capture_current_state()
-            
+
             # Enregistrer l'observateur GUI
             gui_observer = GuiConfigObserver(self)
             config_manager.register_observer(gui_observer)
             log.info("Observateur GUI enregistré avec le ConfigurationManager")
-            
+
         except Exception as e:
-            log.error(f"Erreur lors de l'enregistrement de l'observateur GUI: {e}")
+            log.exception(f"Erreur lors de l'enregistrement de l'observateur GUI: {e}")
 
 
 class CustomTitleBar(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setAutoFillBackground(True)
         self.main_window = parent
@@ -1358,21 +1365,21 @@ class CustomTitleBar(QWidget):
             self.moving = False
             self.offset = None
 
-    def toggle_maximize_restore(self):
+    def toggle_maximize_restore(self) -> None:
         if self.is_maximized:
             self.main_window.showNormal()
         else:
             self.main_window.showMaximized()
         self.is_maximized = not self.is_maximized
 
-    def update_theme(self):
+    def update_theme(self) -> None:
         self.setStyleSheet(self.main_window.styleSheet())
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event) -> None:
         if event.button() == Qt.LeftButton:
             self.main_window.oldPos = event.globalPos()
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event) -> None:
         if event.buttons() == Qt.LeftButton:
             delta = QPoint(event.globalPos() - self.main_window.oldPos)
             self.main_window.move(self.main_window.x() + delta.x(), self.main_window.y() + delta.y())
@@ -1393,7 +1400,7 @@ if __name__ == "__main__":
         if config:
             log.info("Configuration initialized successfully")
     except Exception as e:
-        log.error(f"Failed to initialize configuration: {e}")
+        log.exception(f"Failed to initialize configuration: {e}")
         sys.exit(1)
 
     try:

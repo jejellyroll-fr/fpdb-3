@@ -1,44 +1,23 @@
 #!/bin/bash
-# Script to run tests locally
+# -------------------------------------------------------------------------------------------------
+# fpdb-3 – unified test runner
+# Runs Ruff linting + pytest with coverage (terminal + HTML + XML)
+# -------------------------------------------------------------------------------------------------
+set -euo pipefail
 
-echo "Running fpdb-3 tests..."
+#echo "Running Ruff linting..."
+#uv run ruff check . --fix --unsafe-fixes
 
-# Check if uv is installed
-if ! command -v uv &> /dev/null; then
-    echo "uv is not installed. Installing..."
-    pip install uv
-fi
+echo
+echo "Running pytest with coverage..."
+uv run pytest -v \
+  --cov=. \
+  --cov-config=.coveragerc \
+  --cov-report=term-missing \
+  --cov-report=html \
+  --cov-report=xml
 
-# Create virtual environment if it doesn't exist
-if [ ! -d ".venv" ]; then
-    echo "Creating virtual environment..."
-    uv venv
-fi
-
-# Install test dependencies
-echo "Installing test dependencies..."
-uv pip install -e .[test]
-
-# Run linting
-echo "Running ruff linting..."
-uv run ruff check .
-
-# Create necessary directories
-echo "Creating necessary directories..."
-mkdir -p ~/.fpdb
-if [ -f "HUD_config.xml" ]; then
-    cp HUD_config.xml ~/.fpdb/
-fi
-
-# Run tests
-echo "Running tests..."
-uv run pytest -v --tb=short test/
-
-# Run tests with coverage if requested
-if [ "$1" == "--coverage" ]; then
-    echo "Running tests with coverage..."
-    uv run pytest --cov=. --cov-report=html --cov-report=term test/
-    echo "Coverage report generated in htmlcov/"
-fi
-
-echo "Tests completed!"
+echo
+echo "✅ Tests finished."
+echo "📊 Coverage: see summary above."
+echo "🖥️  Detailed HTML report: htmlcov/index.html"

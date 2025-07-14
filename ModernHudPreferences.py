@@ -1,39 +1,38 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QBrush, QColor, QFont, QLinearGradient, QPainter, QPen
 from PyQt5.QtWidgets import (
-    QDialog,
-    QVBoxLayout,
-    QHBoxLayout,
-    QGridLayout,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QComboBox,
-    QDialogButtonBox,
-    QListWidget,
-    QTableWidget,
-    QTableWidgetItem,
     QAbstractItemView,
-    QGroupBox,
-    QFrame,
-    QSplitter,
-    QGraphicsView,
-    QGraphicsScene,
-    QGraphicsRectItem,
-    QGraphicsSimpleTextItem,
-    QHeaderView,
-    QMessageBox,
-    QFormLayout,
-    QSpinBox,
     QCheckBox,
     QColorDialog,
-    QWidget,
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QFormLayout,
+    QFrame,
+    QGraphicsRectItem,
+    QGraphicsScene,
+    QGraphicsSimpleTextItem,
+    QGraphicsView,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QMessageBox,
+    QPushButton,
+    QSpinBox,
+    QSplitter,
+    QTableWidget,
+    QTableWidgetItem,
     QTabWidget,
     QTextEdit,
+    QVBoxLayout,
+    QWidget,
 )
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QBrush, QPen, QFont, QPainter, QLinearGradient
 
 from loggingFpdb import get_logger
 
@@ -42,7 +41,7 @@ log = get_logger("modernhudpreferences")
 
 # --- Color Preview Widget ---
 class ColorPreviewWidget(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.low_color = QColor("#ff0000")
         self.mid_color = QColor("#ffff00")
@@ -51,7 +50,7 @@ class ColorPreviewWidget(QWidget):
         self.high_threshold = 60
         self.use_mid_color = False
 
-    def set_colors(self, low_color, mid_color, high_color, low_threshold, high_threshold, use_mid_color):
+    def set_colors(self, low_color, mid_color, high_color, low_threshold, high_threshold, use_mid_color) -> None:
         self.low_color = QColor(low_color)
         self.mid_color = QColor(mid_color)
         self.high_color = QColor(high_color)
@@ -60,7 +59,7 @@ class ColorPreviewWidget(QWidget):
         self.use_mid_color = use_mid_color
         self.update()
 
-    def paintEvent(self, event):
+    def paintEvent(self, event) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
@@ -105,7 +104,7 @@ class ColorPreviewWidget(QWidget):
 
 # --- Visual HUD Preview Widget ---
 class HudPreviewWidget(QGraphicsView):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.scene = QGraphicsScene(self)
         self.setScene(self.scene)
@@ -117,16 +116,16 @@ class HudPreviewWidget(QGraphicsView):
         self.grid_cols = 5
         self.stats = []  # List of dicts: {row, col, stat, click, popup}
 
-    def set_grid(self, rows, cols):
+    def set_grid(self, rows, cols) -> None:
         self.grid_rows = rows
         self.grid_cols = cols
         self.update_preview()
 
-    def set_stats(self, stats):
+    def set_stats(self, stats) -> None:
         self.stats = stats
         self.update_preview()
 
-    def update_preview(self):
+    def update_preview(self) -> None:
         self.scene.clear()
         w, h = 300, 300
         cell_w = w / self.grid_cols
@@ -168,7 +167,7 @@ class HudPreviewWidget(QGraphicsView):
 
 # --- Add/Edit Stat Dialog ---
 class AddStatDialog(QDialog):
-    def __init__(self, stat=None, max_rows=5, max_cols=5, parent=None):
+    def __init__(self, stat=None, max_rows=5, max_cols=5, parent=None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Add/Edit Statistic")
         self.setMinimumWidth(600)
@@ -409,13 +408,13 @@ class AddStatDialog(QDialog):
                 self.loth_input.setValue(int(float(stat["stat_loth"])))
             if "stat_hith" in stat:
                 self.hith_input.setValue(int(float(stat["stat_hith"])))
-            if "stat_locolor" in stat and stat["stat_locolor"]:
+            if stat.get("stat_locolor"):
                 self.locolor = stat["stat_locolor"]
                 self.locolor_btn.setStyleSheet(f"background-color: {self.locolor};")
-            if "stat_hicolor" in stat and stat["stat_hicolor"]:
+            if stat.get("stat_hicolor"):
                 self.hicolor = stat["stat_hicolor"]
                 self.hicolor_btn.setStyleSheet(f"background-color: {self.hicolor};")
-            if "stat_midcolor" in stat and stat["stat_midcolor"]:
+            if stat.get("stat_midcolor"):
                 self.midcolor = stat["stat_midcolor"]
                 self.midcolor_btn.setStyleSheet(f"background-color: {self.midcolor};")
                 self.use_midcolor.setChecked(True)
@@ -424,7 +423,7 @@ class AddStatDialog(QDialog):
         # Initial preview update
         self.update_preview()
 
-    def choose_color(self, color_type):
+    def choose_color(self, color_type) -> None:
         color = QColorDialog.getColor()
         if color.isValid():
             if color_type == "low":
@@ -438,11 +437,11 @@ class AddStatDialog(QDialog):
                 self.hicolor_btn.setStyleSheet(f"background-color: {self.hicolor};")
             self.update_preview()
 
-    def toggle_midcolor(self, checked):
+    def toggle_midcolor(self, checked) -> None:
         self.midcolor_btn.setEnabled(checked)
         self.update_preview()
 
-    def update_preview(self):
+    def update_preview(self) -> None:
         low_threshold = self.loth_input.value()
         high_threshold = self.hith_input.value()
         use_mid_color = self.use_midcolor.isChecked()
@@ -475,7 +474,7 @@ class AddStatDialog(QDialog):
 
 # --- Main Modern HUD Preferences Dialog ---
 class ModernHudPreferences(QDialog):
-    def __init__(self, config, parent=None):
+    def __init__(self, config, parent=None) -> None:
         super().__init__(parent)
         self.config = config
         self.setWindowTitle("HUD Preferences")
@@ -823,8 +822,8 @@ class ModernHudPreferences(QDialog):
         # Update status
         self.update_status()
 
-    def update_status(self):
-        """Update status label with current profile info"""
+    def update_status(self) -> None:
+        """Update status label with current profile info."""
         if self.profile_combo.currentIndex() >= 0:
             profile_name = self.profile_combo.currentText()
             profile = self.hud_profiles.get(profile_name, {})
@@ -838,23 +837,23 @@ class ModernHudPreferences(QDialog):
             self.status_label.setText(f"Profile: {profile_name} | Grid: {rows}×{cols} | Statistics: {len(stats)}")
 
     def _deep_copy_profiles(self, profiles):
-        """Create a deep copy of profiles for change detection"""
+        """Create a deep copy of profiles for change detection."""
         import copy
 
         return copy.deepcopy(profiles)
 
     def _deep_copy_popups(self, popups):
-        """Create a deep copy of popup windows for change detection"""
+        """Create a deep copy of popup windows for change detection."""
         import copy
 
         return copy.deepcopy(popups)
 
     def has_unsaved_changes(self):
-        """Check if there are unsaved changes"""
+        """Check if there are unsaved changes."""
         return self.hud_profiles != self.original_profiles or self.popup_windows != self.original_popups
 
-    def closeEvent(self, event):
-        """Handle window close event"""
+    def closeEvent(self, event) -> None:
+        """Handle window close event."""
         if self.has_unsaved_changes():
             reply = QMessageBox.question(
                 self,
@@ -876,7 +875,7 @@ class ModernHudPreferences(QDialog):
         else:
             event.accept()
 
-    def load_profiles(self):
+    def load_profiles(self) -> None:
         # Try to load HUD profiles from config (from HUD_config.xml)
         self.hud_profiles = None
         # 1. Try config.hud_profiles (preferred)
@@ -929,8 +928,8 @@ class ModernHudPreferences(QDialog):
         if self.profile_combo.count() > 0:
             self.profile_combo.setCurrentIndex(0)
 
-    def load_popup_windows(self):
-        """Load popup window definitions from config"""
+    def load_popup_windows(self) -> None:
+        """Load popup window definitions from config."""
         self.popup_windows = {}
 
         if hasattr(self.config, "popup_windows") and self.config.popup_windows:
@@ -957,8 +956,8 @@ class ModernHudPreferences(QDialog):
         if self.popup_combo.count() > 0:
             self.popup_combo.setCurrentIndex(0)
 
-    def on_popup_selected(self, index):
-        """Handle popup selection from combo box"""
+    def on_popup_selected(self, index) -> None:
+        """Handle popup selection from combo box."""
         if index < 0 or index >= self.popup_combo.count():
             self.popup_name_edit.clear()
             self.popup_class_combo.setCurrentIndex(0)
@@ -984,16 +983,16 @@ class ModernHudPreferences(QDialog):
         # Update preview
         self.update_popup_preview()
 
-    def on_popup_class_changed(self, new_class):
-        """Handle popup class change"""
+    def on_popup_class_changed(self, new_class) -> None:
+        """Handle popup class change."""
         if self.popup_combo.currentIndex() >= 0:
             popup_name = self.popup_combo.currentText()
             if popup_name in self.popup_windows:
                 self.popup_windows[popup_name]["class"] = new_class
                 self.update_popup_preview()
 
-    def update_popup_preview(self):
-        """Update the popup preview display"""
+    def update_popup_preview(self) -> None:
+        """Update the popup preview display."""
         if self.popup_combo.currentIndex() < 0:
             return
 
@@ -1014,11 +1013,11 @@ class ModernHudPreferences(QDialog):
         css = f"""
         <style>
             body {{ font-family: Arial, sans-serif; margin: 10px; color: {text_color}; }}
-            .popup-window {{ 
-                background-color: {bg_color}; 
-                color: {text_color}; 
-                border: 2px solid {border_color}; 
-                border-radius: 5px; 
+            .popup-window {{
+                background-color: {bg_color};
+                color: {text_color};
+                border: 2px solid {border_color};
+                border-radius: 5px;
                 padding: 10px;
                 margin-top: 10px;
             }}
@@ -1134,7 +1133,7 @@ class ModernHudPreferences(QDialog):
 
         self.popup_preview.setHtml(preview_text)
 
-    def on_profile_selected(self, index):
+    def on_profile_selected(self, index) -> None:
         if index < 0 or index >= self.profile_combo.count():
             self.stat_table.setRowCount(0)
             self.preview.set_stats([])
@@ -1188,7 +1187,7 @@ class ModernHudPreferences(QDialog):
         self.preview.set_stats(stats)
         self.update_status()
 
-    def add_profile(self):
+    def add_profile(self) -> None:
         # Create custom dialog for profile creation
         dialog = QDialog(self)
         dialog.setWindowTitle("New Profile")
@@ -1230,7 +1229,7 @@ class ModernHudPreferences(QDialog):
                 # Update preview grid size
                 self.preview.set_grid(rows, cols)
 
-    def duplicate_profile(self):
+    def duplicate_profile(self) -> None:
         if self.profile_combo.currentIndex() < 0:
             return
         name = self.profile_combo.currentText()
@@ -1244,7 +1243,7 @@ class ModernHudPreferences(QDialog):
             self.profile_combo.addItem(new_name)
             self.profile_combo.setCurrentIndex(self.profile_combo.count() - 1)
 
-    def delete_profile(self):
+    def delete_profile(self) -> None:
         if self.profile_combo.currentIndex() < 0:
             return
         name = self.profile_combo.currentText()
@@ -1271,11 +1270,10 @@ class ModernHudPreferences(QDialog):
         if isinstance(profile, list):
             # Old format - return the list directly
             return name, profile
-        else:
-            # New format - return the stats list
-            return name, profile.get("stats", [])
+        # New format - return the stats list
+        return name, profile.get("stats", [])
 
-    def add_stat(self):
+    def add_stat(self) -> None:
         name, stats = self.get_current_profile()
         if stats is None:
             return
@@ -1294,7 +1292,7 @@ class ModernHudPreferences(QDialog):
             stats.append(stat)
             self.on_profile_selected(self.profile_combo.currentIndex())
 
-    def edit_stat(self):
+    def edit_stat(self) -> None:
         name, stats = self.get_current_profile()
         if stats is None:
             return
@@ -1315,7 +1313,7 @@ class ModernHudPreferences(QDialog):
             stats[row] = dlg.get_stat()
             self.on_profile_selected(self.profile_combo.currentIndex())
 
-    def remove_stat(self):
+    def remove_stat(self) -> None:
         name, stats = self.get_current_profile()
         if stats is None:
             return
@@ -1325,7 +1323,7 @@ class ModernHudPreferences(QDialog):
         del stats[row]
         self.on_profile_selected(self.profile_combo.currentIndex())
 
-    def save_changes(self):
+    def save_changes(self) -> None:
         try:
             # We need to update the XML directly for the stat sets
             if hasattr(self.config, "doc") and self.config.doc:
@@ -1379,7 +1377,7 @@ class ModernHudPreferences(QDialog):
                         stat_set_node.removeChild(stat_set_node.firstChild)
 
                     # Add new stat nodes with proper formatting
-                    for i, stat in enumerate(stats):
+                    for _i, stat in enumerate(stats):
                         # Add newline and indentation before each stat
                         indent = self.config.doc.createTextNode("\n            ")
                         stat_set_node.appendChild(indent)
@@ -1517,10 +1515,10 @@ class ModernHudPreferences(QDialog):
             self.accept()
 
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to save HUD profiles:\n{str(e)}")
+            QMessageBox.critical(self, "Error", f"Failed to save HUD profiles:\n{e!s}")
 
-    def add_popup(self):
-        """Add a new popup window"""
+    def add_popup(self) -> None:
+        """Add a new popup window."""
         from PyQt5.QtWidgets import QInputDialog
 
         name, ok = QInputDialog.getText(self, "New Popup", "Enter popup name:")
@@ -1529,8 +1527,8 @@ class ModernHudPreferences(QDialog):
             self.popup_combo.addItem(name)
             self.popup_combo.setCurrentText(name)
 
-    def duplicate_popup(self):
-        """Duplicate current popup"""
+    def duplicate_popup(self) -> None:
+        """Duplicate current popup."""
         if self.popup_combo.currentIndex() < 0:
             return
         current_name = self.popup_combo.currentText()
@@ -1545,8 +1543,8 @@ class ModernHudPreferences(QDialog):
             self.popup_combo.addItem(new_name)
             self.popup_combo.setCurrentText(new_name)
 
-    def delete_popup(self):
-        """Delete current popup"""
+    def delete_popup(self) -> None:
+        """Delete current popup."""
         if self.popup_combo.currentIndex() < 0:
             return
         popup_name = self.popup_combo.currentText()
@@ -1564,8 +1562,8 @@ class ModernHudPreferences(QDialog):
             if self.popup_combo.count() > 0:
                 self.popup_combo.setCurrentIndex(0)
 
-    def add_popup_stat(self):
-        """Add a stat to current popup"""
+    def add_popup_stat(self) -> None:
+        """Add a stat to current popup."""
         if self.popup_combo.currentIndex() < 0:
             return
 
@@ -1576,8 +1574,8 @@ class ModernHudPreferences(QDialog):
             self.popup_windows[popup_name]["stats"].append(stat_data)
             self.on_popup_selected(self.popup_combo.currentIndex())
 
-    def edit_popup_stat(self):
-        """Edit selected stat in current popup"""
+    def edit_popup_stat(self) -> None:
+        """Edit selected stat in current popup."""
         if self.popup_combo.currentIndex() < 0:
             return
 
@@ -1595,8 +1593,8 @@ class ModernHudPreferences(QDialog):
             stats[current_row] = dialog.get_stat_data()
             self.on_popup_selected(self.popup_combo.currentIndex())
 
-    def remove_popup_stat(self):
-        """Remove selected stat from current popup"""
+    def remove_popup_stat(self) -> None:
+        """Remove selected stat from current popup."""
         if self.popup_combo.currentIndex() < 0:
             return
 
@@ -1608,8 +1606,8 @@ class ModernHudPreferences(QDialog):
         self.popup_windows[popup_name]["stats"].pop(current_row)
         self.on_popup_selected(self.popup_combo.currentIndex())
 
-    def move_stat_up(self):
-        """Move selected stat up in the list"""
+    def move_stat_up(self) -> None:
+        """Move selected stat up in the list."""
         if self.popup_combo.currentIndex() < 0:
             return
 
@@ -1623,8 +1621,8 @@ class ModernHudPreferences(QDialog):
         self.on_popup_selected(self.popup_combo.currentIndex())
         self.popup_stats_list.setCurrentRow(current_row - 1)
 
-    def move_stat_down(self):
-        """Move selected stat down in the list"""
+    def move_stat_down(self) -> None:
+        """Move selected stat down in the list."""
         if self.popup_combo.currentIndex() < 0:
             return
 
@@ -1642,7 +1640,7 @@ class ModernHudPreferences(QDialog):
 
 # --- Popup Stat Edit Dialog ---
 class PopupStatEditDialog(QDialog):
-    def __init__(self, stat_data=None, parent=None):
+    def __init__(self, stat_data=None, parent=None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Edit Popup Statistic")
         self.setMinimumWidth(400)
@@ -1672,13 +1670,13 @@ class PopupStatEditDialog(QDialog):
         layout.addRow(btn_box)
 
     def get_stat_data(self):
-        """Get the stat data from the dialog"""
+        """Get the stat data from the dialog."""
         return {"stat_name": self.stat_name_input.text(), "submenu": self.submenu_input.text()}
 
 
 # --- Popup Edit Dialog ---
 class PopupEditDialog(QDialog):
-    def __init__(self, popup_data=None, parent=None):
+    def __init__(self, popup_data=None, parent=None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Edit Popup Window")
         self.setMinimumSize(600, 500)
@@ -1756,8 +1754,8 @@ class PopupEditDialog(QDialog):
 
         main_layout.addLayout(button_layout)
 
-    def add_stat(self):
-        """Add a new stat to the table"""
+    def add_stat(self) -> None:
+        """Add a new stat to the table."""
         row = self.stats_table.rowCount()
         self.stats_table.insertRow(row)
         self.stats_table.setItem(row, 0, QTableWidgetItem(""))
@@ -1765,14 +1763,14 @@ class PopupEditDialog(QDialog):
         # Make the new row editable
         self.stats_table.editItem(self.stats_table.item(row, 0))
 
-    def remove_stat(self):
-        """Remove selected stat from the table"""
+    def remove_stat(self) -> None:
+        """Remove selected stat from the table."""
         current_row = self.stats_table.currentRow()
         if current_row >= 0:
             self.stats_table.removeRow(current_row)
 
     def get_popup_data(self):
-        """Get the popup data from the dialog"""
+        """Get the popup data from the dialog."""
         stats = []
         for row in range(self.stats_table.rowCount()):
             stat_name_item = self.stats_table.item(row, 0)

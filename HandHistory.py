@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""HandHistory.py
+"""HandHistory.py.
 
 Parses HandHistory xml files and returns requested objects.
 """
 
-from __future__ import print_function
 
 import xml.dom.minidom
 from xml.dom.minidom import Node
@@ -35,8 +33,8 @@ from loggingFpdb import get_logger
 log = get_logger("handhistory")
 
 
-class HandHistory(object):
-    def __init__(self, xml_string, elements=("ALL")):
+class HandHistory:
+    def __init__(self, xml_string, elements=("ALL")) -> None:
         doc = xml.dom.minidom.parseString(xml_string)
         if elements == ("ALL"):
             elements = ("BETTING", "AWARDS", "POSTS", "PLAYERS", "GAME")
@@ -57,8 +55,8 @@ class HandHistory(object):
                 self.PLAYERS[a_player.name] = a_player
 
 
-class Player(object):
-    def __init__(self, node):
+class Player:
+    def __init__(self, node) -> None:
         self.name = node.getAttribute("NAME")
         self.seat = node.getAttribute("SEAT")
         self.stack = node.getAttribute("STACK")
@@ -69,63 +67,49 @@ class Player(object):
         self.hand = node.getAttribute("HAND")
         self.start_cards = node.getAttribute("START_CARDS")
 
-        if self.allin == "" or self.allin == "0" or self.allin.upper() == "FALSE":
+        if self.allin in ("", "0") or self.allin.upper() == "FALSE":
             self.allin = False
         else:
             self.allin = True
 
         if (
-            self.sitting_out == ""
-            or self.sitting_out == "0"
-            or self.sitting_out.upper() == "FALSE"
+            self.sitting_out in ("", "0") or self.sitting_out.upper() == "FALSE"
         ):
             self.sitting_out = False
         else:
             self.sitting_out = True
 
-    def __str__(self):
-        temp = "%s\n    seat = %s\n    stack = %s\n    cards = %s\n" % (
-            self.name,
-            self.seat,
-            self.stack,
-            self.cards,
-        )
-        temp = temp + "    showed_hand = %s\n    allin = %s\n" % (
-            self.showed_hand,
-            self.allin,
-        )
-        temp = temp + "    hand = %s\n    start_cards = %s\n" % (
-            self.hand,
-            self.start_cards,
-        )
-        return temp
+    def __str__(self) -> str:
+        temp = f"{self.name}\n    seat = {self.seat}\n    stack = {self.stack}\n    cards = {self.cards}\n"
+        temp = temp + f"    showed_hand = {self.showed_hand}\n    allin = {self.allin}\n"
+        return temp + f"    hand = {self.hand}\n    start_cards = {self.start_cards}\n"
 
 
-class Awards(object):
-    def __init__(self, node):
+class Awards:
+    def __init__(self, node) -> None:
         self.awards = []  # just an array of award objects
         for a in node.getElementsByTagName("AWARD"):
             self.awards.append(Award(a))
 
-    def __str__(self):
+    def __str__(self) -> str:
         temp = ""
         for a in self.awards:
-            temp = temp + "%s\n" % (a)
+            temp = temp + f"{a}\n"
         return temp
 
 
-class Award(object):
-    def __init__(self, node):
+class Award:
+    def __init__(self, node) -> None:
         self.player = node.getAttribute("PLAYER")
         self.amount = node.getAttribute("AMOUNT")
         self.pot = node.getAttribute("POT")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.player + " won " + self.amount + " from " + self.pot
 
 
-class Game(object):
-    def __init__(self, node):
+class Game:
+    def __init__(self, node) -> None:
         # print(node)
         self.tags = {}
         for tag in (
@@ -146,8 +130,8 @@ class Game(object):
                         title += node3.data
                 self.tags[tag[1]] = title
 
-    def __str__(self):
-        return "%s %s %s, (%s max), %s" % (
+    def __str__(self) -> str:
+        return "{} {} {}, ({} max), {}".format(
             self.tags["structure"],
             self.tags["game_name"],
             self.tags["game_name"],
@@ -156,84 +140,74 @@ class Game(object):
         )
 
 
-class Posts(object):
-    def __init__(self, node):
+class Posts:
+    def __init__(self, node) -> None:
         self.posts = []  # just an array of post objects
         for p in node.getElementsByTagName("POST"):
             self.posts.append(Post(p))
 
-    def __str__(self):
+    def __str__(self) -> str:
         temp = ""
         for p in self.posts:
-            temp = temp + "%s\n" % (p)
+            temp = temp + f"{p}\n"
         return temp
 
 
-class Post(object):
-    def __init__(self, node):
+class Post:
+    def __init__(self, node) -> None:
         self.player = node.getAttribute("PLAYER")
         self.amount = node.getAttribute("AMOUNT")
         self.posted = node.getAttribute("POSTED")
         self.live = node.getAttribute("LIVE")
 
-    def __str__(self):
-        return ("%s posted %s %s %s") % (
-            self.player,
-            self.amount,
-            self.posted,
-            self.live,
-        )
+    def __str__(self) -> str:
+        return (f"{self.player} posted {self.amount} {self.posted} {self.live}")
 
 
-class Betting(object):
-    def __init__(self, node):
+class Betting:
+    def __init__(self, node) -> None:
         self.rounds = []  # a Betting object is just an array of rounds
         for r in node.getElementsByTagName("ROUND"):
             self.rounds.append(Round(r))
 
-    def __str__(self):
+    def __str__(self) -> str:
         temp = ""
         for r in self.rounds:
-            temp = temp + "%s\n" % (r)
+            temp = temp + f"{r}\n"
         return temp
 
 
-class Round(object):
-    def __init__(self, node):
+class Round:
+    def __init__(self, node) -> None:
         self.name = node.getAttribute("ROUND_NAME")
         self.action = []
         for a in node.getElementsByTagName("ACTION"):
             self.action.append(Action(a))
 
-    def __str__(self):
+    def __str__(self) -> str:
         temp = self.name + "\n"
         for a in self.action:
-            temp = temp + "    %s\n" % (a)
+            temp = temp + f"    {a}\n"
         return temp
 
 
-class Action(object):
-    def __init__(self, node):
+class Action:
+    def __init__(self, node) -> None:
         self.player = node.getAttribute("PLAYER")
         self.action = node.getAttribute("ACT")
         self.amount = node.getAttribute("AMOUNT")
         self.allin = node.getAttribute("ALLIN")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.player + " " + self.action + " " + self.amount + " " + self.allin
 
 
 if __name__ == "__main__":
-    file = open("test.xml", "r")
+    file = open("test.xml")
     xml_string = file.read()
     file.close()
 
-    print(xml_string + "\n\n\n")
     h = HandHistory(xml_string, ("ALL"))
-    print(h.GAME)
-    print(h.POSTS)
-    print(h.BETTING)
-    print(h.AWARDS)
 
-    for p in list(h.PLAYERS.keys()):
-        print(h.PLAYERS[p])
+    for _p in list(h.PLAYERS.keys()):
+        pass

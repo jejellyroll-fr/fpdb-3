@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Manage collecting and formatting of stats and tooltips."""
 #    Copyright 2008-2011, Ray E. Barker
@@ -81,40 +80,43 @@ _ = L10n.get_translation()
 # overriding any decimal placements. Copy old ones and recreate the
 # second value in tuple to specified format-
 def __stat_override(decimals, stat_vals):
-    """
-    Returns a tuple with the first element of `stat_vals` as a float, the second element as a string
+    """Returns a tuple with the first element of `stat_vals` as a float, the second element as a string
     with `decimals` number of decimal places, and the remaining elements of `stat_vals`.
 
-    Parameters:
+    Parameters
+    ----------
     - decimals (int): The number of decimal places to round the first element of `stat_vals`.
     - stat_vals (tuple): A tuple of values.
 
     Returns:
+    -------
     - tuple: A tuple with the first element of `stat_vals` as a float, the second element as a string
       with `decimals` number of decimal places, and the remaining elements of `stat_vals`.
+
     """
     s = "%.*f" % (decimals, 100.0 * stat_vals[0])
     return stat_vals[0], s, stat_vals[2], stat_vals[3], stat_vals[4], stat_vals[5]
 
 
-def do_tip(widget, tip):
-    """
-    Sets the tooltip of the given widget to the UTF-8 encoded version of the tip.
+def do_tip(widget, tip) -> None:
+    """Sets the tooltip of the given widget to the UTF-8 encoded version of the tip.
 
-    Parameters:
+    Parameters
+    ----------
     - widget: The widget to set the tooltip for.
     - tip: The tip to encode and set as the tooltip.
 
     Returns:
+    -------
     - None
+
     """
     _tip = str(tip)
     widget.setToolTip(_tip)
 
 
 def do_stat(stat_dict, player=24, stat="vpip", hand_instance=None):
-    """
-    Calculates a specific statistic for a given player in a hand.
+    """Calculates a specific statistic for a given player in a hand.
 
     Args:
         stat_dict (dict): A dictionary containing statistics for all players in the hand.
@@ -130,6 +132,7 @@ def do_stat(stat_dict, player=24, stat="vpip", hand_instance=None):
         If the statistic name ends with an underscore followed by a number, it is overridden with the specified number of decimal places.
         The decimal place override assumes the raw result is a fraction (x/100), and manual decimal places only make sense for percentage values.
         The profit/100 hands (bb/BB) already default to three decimal places anyhow, so they are unlikely override candidates.
+
     """
     # hand instance is not needed for many stat functions
     # so this optional parameter will be stored in a global
@@ -174,8 +177,7 @@ def do_stat(stat_dict, player=24, stat="vpip", hand_instance=None):
 
 
 def totalprofit(stat_dict, player):
-    """
-    Calculates the total profit for a given player.
+    """Calculates the total profit for a given player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -193,14 +195,15 @@ def totalprofit(stat_dict, player):
     If the 'net' key is not present in the stat_dict for the given player, or if the value cannot be converted to a float,
     the function returns a tuple with default values:
         - ('0', '$0.00', 'tp=0', 'totalprofit=0', '0', 'Total Profit')
+
     """
     try:
         stat = float(stat_dict[player]["net"]) / 100
         return (
             stat / 100.0,
-            "$%.2f" % stat,
-            "tp=$%.2f" % stat,
-            "tot_prof=$%.2f" % stat,
+            f"${stat:.2f}",
+            f"tp=${stat:.2f}",
+            f"tot_prof=${stat:.2f}",
             str(stat),
             "Total Profit",
         )
@@ -209,8 +212,7 @@ def totalprofit(stat_dict, player):
 
 
 def playername(stat_dict, player):
-    """
-    Retrieves the player's screen name from the stat dictionary.
+    """Retrieves the player's screen name from the stat dictionary.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -218,6 +220,7 @@ def playername(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the player's screen name repeated five times and a constant 'Player name' at the end. If the player's screen name is not found, it returns an empty string five times followed by 'Player name'.
+
     """
     try:
         return (
@@ -233,8 +236,7 @@ def playername(stat_dict, player):
 
 
 def _calculate_end_stack(stat_dict, player, hand_instance):
-    """
-    Calculate the end stack size for a given player in a hand instance.
+    """Calculate the end stack size for a given player in a hand instance.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -250,6 +252,7 @@ def _calculate_end_stack(stat_dict, player, hand_instance):
     Todo:
         - Find a better way to calculate the end stack size from the hand_instance.
         - Add a hand_instance "end_of_hand_stack" attribute.
+
     """
     # fixme - move this code into Hands.py - it really belongs there
 
@@ -285,8 +288,7 @@ def _calculate_end_stack(stat_dict, player, hand_instance):
 
 
 def m_ratio(stat_dict, player):
-    """
-    Calculate the M-ratio for a player in a tournament.
+    """Calculate the M-ratio for a player in a tournament.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -297,6 +299,7 @@ def m_ratio(stat_dict, player):
 
     Note:
         This function calculates the M-ratio using the end-of-hand stack count versus the hand's antes/blinds.
+
     """
     # Tournament M-ratio calculation
     # Using the end-of-hand stack count vs. that hand's antes/blinds
@@ -346,8 +349,7 @@ def m_ratio(stat_dict, player):
 
 
 def bbstack(stat_dict, player):
-    """
-    Calculate the tournament stack size in Big Blinds.
+    """Calculate the tournament stack size in Big Blinds.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -358,6 +360,7 @@ def bbstack(stat_dict, player):
 
     Note:
         This function calculates the stack size in Big Blinds based on the end of hand stack count and the current Big Blind limit.
+
     """
     # Tournament Stack calculation in Big Blinds
     # Result is end of hand stack count / Current Big Blind limit
@@ -373,10 +376,7 @@ def bbstack(stat_dict, player):
 
     stack = _calculate_end_stack(stat_dict, player, hand_instance)
 
-    if current_bigblindlimit != 0:
-        stat = stack / current_bigblindlimit
-    else:
-        stat = 0
+    stat = stack / current_bigblindlimit if current_bigblindlimit != 0 else 0
 
     return (
         (stat / 100.0),
@@ -389,8 +389,7 @@ def bbstack(stat_dict, player):
 
 
 def playershort(stat_dict, player):
-    """
-    Retrieves the shortened screen name of a player from the given stat_dict.
+    """Retrieves the shortened screen name of a player from the given stat_dict.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -405,6 +404,7 @@ def playershort(stat_dict, player):
     Note:
         If the length of the screen name is greater than 6, it is truncated to 5 characters and a dot is appended.
         The returned tuple contains the shortened screen name repeated 5 times and the player's full screen name.
+
     """
     try:
         r = stat_dict[player]["screen_name"]
@@ -417,8 +417,7 @@ def playershort(stat_dict, player):
 
 
 def vpip(stat_dict, player):
-    """
-    A function to calculate and return VPIP (Voluntarily Put In Pot) percentage.
+    """A function to calculate and return VPIP (Voluntarily Put In Pot) percentage.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -440,6 +439,7 @@ def vpip(stat_dict, player):
             - 'vpip=NA'
             - '(0/0)'
             - 'Voluntarily put in preflop/3rd street %'
+
     """
     stat = 0.0
     try:
@@ -469,8 +469,7 @@ def vpip(stat_dict, player):
 
 
 def pfr(stat_dict, player):
-    """
-    Calculate and return the preflop raise percentage (pfr) for a player.
+    """Calculate and return the preflop raise percentage (pfr) for a player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -478,6 +477,7 @@ def pfr(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the pfr value, formatted pfr percentages, and related information.
+
     """
     stat = 0.0
     try:
@@ -500,8 +500,7 @@ def pfr(stat_dict, player):
 
 
 def wtsd(stat_dict, player):
-    """
-    Calculate and return the percentage of hands where a player went to showdown when seen flop/4th street.
+    """Calculate and return the percentage of hands where a player went to showdown when seen flop/4th street.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -509,6 +508,7 @@ def wtsd(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the percentage value, formatted percentage percentages, and related information.
+
     """
     stat = 0.0
     try:
@@ -538,8 +538,7 @@ def wtsd(stat_dict, player):
 
 
 def wmsd(stat_dict, player):
-    """
-    Calculate and return the win money at showdown (wmsd) statistics for a player.
+    """Calculate and return the win money at showdown (wmsd) statistics for a player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -547,6 +546,7 @@ def wmsd(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the wmsd value, formatted wmsd percentages, and related information.
+
     """
     stat = 0.0
     try:
@@ -571,8 +571,7 @@ def wmsd(stat_dict, player):
 # Money is stored as pennies, so there is an implicit 100-multiplier
 # already in place
 def profit100(stat_dict, player):
-    """
-    Calculate the profit per 100 hands for a given player.
+    """Calculate the profit per 100 hands for a given player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -584,6 +583,7 @@ def profit100(stat_dict, player):
     Notes:
         - The profit per 100 hands is calculated by dividing the net winnings by the number of hands played.
         - If an exception occurs during the calculation, the function returns a tuple with default values.
+
     """
     stat = 0.0
     try:
@@ -595,24 +595,23 @@ def profit100(stat_dict, player):
 
         return (
             stat / 100.0,
-            "%.2f" % (stat),
-            "p=%.2f" % (stat),
-            "p/100=%.2f" % (stat),
+            f"{stat:.2f}",
+            f"p={stat:.2f}",
+            f"p/100={stat:.2f}",
             "%d/%d" % (stat_dict[player]["net"], n),
             "Profit per 100 hands",
         )
 
     except (KeyError, ValueError, TypeError):
         if stat_dict:
-            log.error(
+            log.exception(
                 f"exception calculating profit100: 100 * {stat_dict[player]['net']} / {stat_dict[player]['n']}",
             )
         return (stat, "NA", "p=NA", "p/100=NA", "(0/0)", "Profit per 100 hands")
 
 
 def bbper100(stat_dict, player):
-    """
-    Calculate the number of big blinds won per 100 hands for a given player.
+    """Calculate the number of big blinds won per 100 hands for a given player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -620,6 +619,7 @@ def bbper100(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the number of big blinds won per 100 hands value, formatted values, and related information.
+
     """
     stat = 0.0
     try:
@@ -631,9 +631,9 @@ def bbper100(stat_dict, player):
 
         return (
             stat / 100.0,
-            "%5.3f" % (stat),
-            "bb100=%5.3f" % (stat),
-            "bb100=%5.3f" % (stat),
+            f"{stat:5.3f}",
+            f"bb100={stat:5.3f}",
+            f"bb100={stat:5.3f}",
             "(%d,%d)" % (100 * stat_dict[player]["net"], bigblind),
             "Big blinds won per 100 hands",
         )
@@ -654,8 +654,7 @@ def bbper100(stat_dict, player):
 
 
 def BBper100(stat_dict, player):
-    """
-    Calculate the number of big bets won per 100 hands for a given player.
+    """Calculate the number of big bets won per 100 hands for a given player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -667,6 +666,7 @@ def BBper100(stat_dict, player):
     Notes:
         - The number of big bets won per 100 hands is calculated by dividing the net winnings by the big blind value, multiplied by 50.
         - If an exception occurs during the calculation, the function returns a tuple with default values.
+
     """
     stat = 0.0
     try:
@@ -678,9 +678,9 @@ def BBper100(stat_dict, player):
 
         return (
             stat / 100.0,
-            "%5.3f" % (stat),
-            "BB100=%5.3f" % (stat),
-            "BB100=%5.3f" % (stat),
+            f"{stat:5.3f}",
+            f"BB100={stat:5.3f}",
+            f"BB100={stat:5.3f}",
             "(%d,%d)" % (100 * stat_dict[player]["net"], 2 * bigblind),
             "Big bets won per 100 hands",
         )
@@ -715,6 +715,7 @@ def saw_f(stat_dict, player):
             - A description of the statistic.
 
     If an error occurs during calculation, default values are returned.
+
     """
     try:
         num = float(stat_dict[player]["saw_f"])
@@ -735,8 +736,7 @@ def saw_f(stat_dict, player):
 
 
 def n(stat_dict, player):
-    """
-    Calculate and format the number of hands seen for a player.
+    """Calculate and format the number of hands seen for a player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -744,6 +744,7 @@ def n(stat_dict, player):
 
     Returns:
         tuple: A tuple containing formatted strings representing the number of hands seen in different ways.
+
     """
     try:
         # If sample is large enough, use X.Yk notation instead
@@ -760,7 +761,7 @@ def n(stat_dict, player):
             fmt = "%d.%dk" % (k, d)
         return (
             stat_dict[player]["n"],
-            "%s" % fmt,
+            f"{fmt}",
             "n=%d" % (stat_dict[player]["n"]),
             "n=%d" % (stat_dict[player]["n"]),
             "(%d)" % (stat_dict[player]["n"]),
@@ -780,8 +781,7 @@ def n(stat_dict, player):
 
 
 def steal(stat_dict, player):
-    """
-    Calculate and format the steal percentage for a player.
+    """Calculate and format the steal percentage for a player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -802,6 +802,7 @@ def steal(stat_dict, player):
     Notes:
         - The steal percentage is calculated by dividing the steal count by the steal opponent count.
         - If any of the required statistics are missing, the function returns default values.
+
     """
     stat = 0.0
     try:
@@ -825,8 +826,7 @@ def steal(stat_dict, player):
 
 
 def s_steal(stat_dict, player):
-    """
-    Calculate and format the steal success percentage for a player.
+    """Calculate and format the steal success percentage for a player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -843,6 +843,7 @@ def s_steal(stat_dict, player):
 
     Raises:
         None
+
     """
     stat = 0.0
     try:
@@ -864,8 +865,7 @@ def s_steal(stat_dict, player):
 
 
 def f_SB_steal(stat_dict, player):
-    """
-    Calculate the folded Small Blind (SB) to steal statistics for a player.
+    """Calculate the folded Small Blind (SB) to steal statistics for a player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -882,6 +882,7 @@ def f_SB_steal(stat_dict, player):
 
     Raises:
         None
+
     """
     stat = 0.0
     try:
@@ -918,6 +919,7 @@ def f_BB_steal(stat_dict, player):
             - String: A description of the statistic.
 
     If an exception occurs during the calculation, returns default values for the statistics.
+
     """
     stat = 0.0
     try:
@@ -938,8 +940,7 @@ def f_BB_steal(stat_dict, player):
 
 
 def f_steal(stat_dict, player):
-    """
-    Calculate the folded blind to steal statistics for a player.
+    """Calculate the folded blind to steal statistics for a player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -955,6 +956,7 @@ def f_steal(stat_dict, player):
             - String: A description of the statistic.
 
     If an exception occurs during the calculation, returns default values for the statistics.
+
     """
     stat = 0.0
     try:
@@ -983,8 +985,7 @@ def f_steal(stat_dict, player):
 
 
 def three_B(stat_dict, player):
-    """
-    Calculate the three bet statistics for a player.
+    """Calculate the three bet statistics for a player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -1000,6 +1001,7 @@ def three_B(stat_dict, player):
             - String: A description of the statistic.
 
     If an exception occurs during the calculation, returns default values for the statistics.
+
     """
     stat = 0.0
     try:
@@ -1022,8 +1024,7 @@ def three_B(stat_dict, player):
 
 
 def four_B(stat_dict, player):
-    """
-    Calculate the four bet statistics for a player.
+    """Calculate the four bet statistics for a player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -1039,6 +1040,7 @@ def four_B(stat_dict, player):
             - String: A description of the statistic.
 
     If an exception occurs during the calculation, returns default values for the statistics.
+
     """
     stat = 0.0
     try:
@@ -1061,8 +1063,7 @@ def four_B(stat_dict, player):
 
 
 def cfour_B(stat_dict, player):
-    """
-    Calculate the cold 4 bet statistics for a player.
+    """Calculate the cold 4 bet statistics for a player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -1078,6 +1079,7 @@ def cfour_B(stat_dict, player):
             - String: A description of the statistic.
 
     If an exception occurs during the calculation, returns default values for the statistics.
+
     """
     stat = 0.0
     try:
@@ -1106,8 +1108,7 @@ def cfour_B(stat_dict, player):
 
 # Four Bet Range
 def fbr(stat_dict, player):
-    """
-    A function to calculate the four bet range statistics for a player.
+    """A function to calculate the four bet range statistics for a player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -1123,6 +1124,7 @@ def fbr(stat_dict, player):
             - String: A description of the statistic.
 
     If an exception occurs during the calculation, returns default values for the statistics.
+
     """
     stat = 0.0
     try:
@@ -1152,8 +1154,7 @@ def fbr(stat_dict, player):
 
 # Call 3 Bet
 def ctb(stat_dict, player):
-    """
-    A function to calculate the call three bet statistics for a player.
+    """A function to calculate the call three bet statistics for a player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -1169,6 +1170,7 @@ def ctb(stat_dict, player):
             - String: A description of the statistic.
 
     If an exception occurs during the calculation, returns default values for the statistics.
+
     """
     stat = 0.0
     try:
@@ -1213,6 +1215,7 @@ def dbr1(stat_dict, player):
 
     Example:
         dbr1(stat_dict, player)
+
     """
     stat = 0.0
     try:
@@ -1261,6 +1264,7 @@ def dbr2(stat_dict, player):
 
     Example:
         dbr2(stat_dict, player)
+
     """
     stat = 0.0
     try:
@@ -1309,6 +1313,7 @@ def dbr3(stat_dict, player):
 
     Example:
         dbr3(stat_dict, player)
+
     """
     stat = 0.0
     try:
@@ -1360,6 +1365,7 @@ def f_dbr1(stat_dict, player):
 
     Note:
         If an exception occurs during calculation, 'NA' values are returned.
+
     """
     stat = 0.0
     try:
@@ -1411,6 +1417,7 @@ def f_dbr2(stat_dict, player):
 
     Note:
         If an exception occurs during calculation, 'NA' values are returned.
+
     """
     stat = 0.0
     try:
@@ -1462,6 +1469,7 @@ def f_dbr3(stat_dict, player):
 
     Note:
         If an exception occurs during calculation, 'NA' values are returned.
+
     """
     stat = 0.0
     try:
@@ -1499,8 +1507,7 @@ def f_dbr3(stat_dict, player):
 
 
 def squeeze(stat_dict, player):
-    """
-    Calculate the squeeze statistic for a player.
+    """Calculate the squeeze statistic for a player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -1508,6 +1515,7 @@ def squeeze(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the calculated statistic, percentage values, and formatted strings.
+
     """
     stat = 0.0
     try:
@@ -1540,6 +1548,7 @@ def raiseToSteal(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the raise to steal stat, formatted percentages, and additional information.
+
     """
     stat = 0.0
     try:
@@ -1573,6 +1582,7 @@ def car0(stat_dict, player):
     Returns:
         tuple: A tuple containing various formatted strings representing the CAR0 stat.
             If an exception occurs during calculation, returns default 'NA' values.
+
     """
     stat = 0.0
     try:
@@ -1607,6 +1617,7 @@ def f_3bet(stat_dict, player):
         tuple: A tuple containing various representations of the Fold to 3-Bet statistic.
             The tuple includes the statistic value, percentage, labels, and counts.
             If an error occurs during calculation, returns 'NA' values.
+
     """
     stat = 0.0
     try:
@@ -1638,8 +1649,7 @@ def f_3bet(stat_dict, player):
 
 
 def f_4bet(stat_dict, player):
-    """
-    Calculate and return fold to 4-bet statistics for a player.
+    """Calculate and return fold to 4-bet statistics for a player.
 
     Args:
         stat_dict (dict): Dictionary containing player statistics.
@@ -1647,6 +1657,7 @@ def f_4bet(stat_dict, player):
 
     Returns:
         tuple: Tuple containing various statistics related to fold to 4-bet.
+
     """
     stat = 0.0
     try:
@@ -1686,6 +1697,7 @@ def WMsF(stat_dict, player):
 
     Returns:
         tuple: A tuple containing various win money percentage statistics and descriptions.
+
     """
     stat = 0.0
     try:
@@ -1725,6 +1737,7 @@ def a_freq1(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the calculated aggression frequency, formatted strings, and related information.
+
     """
     stat = 0.0
     try:
@@ -1764,6 +1777,7 @@ def a_freq2(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the calculated aggression frequency, formatted strings, and related information.
+
     """
     stat = 0.0
     try:
@@ -1803,6 +1817,7 @@ def a_freq3(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the calculated aggression frequency, formatted strings, and related information.
+
     """
     stat = 0.0
     try:
@@ -1842,6 +1857,7 @@ def a_freq4(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the calculated aggression frequency, formatted strings, and related information.
+
     """
     stat = 0.0
     try:
@@ -1877,6 +1893,7 @@ def a_freq_123(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the calculated aggression frequency, formatted strings, and related information.
+
     """
     stat = 0.0
     try:
@@ -1928,6 +1945,7 @@ def agg_fact(stat_dict, player):
         tuple: A tuple containing the calculated aggression factor in different formats.
             The formats include percentage, float, and string representations.
             If an exception occurs during calculation, default values are returned.
+
     """
     stat = 0.0
     try:
@@ -1946,16 +1964,13 @@ def agg_fact(stat_dict, player):
         )
 
         # Check to avoid division by zero
-        if post_call > 0:
-            stat = float(bet_raise) / float(post_call)
-        else:
-            stat = float(bet_raise)
+        stat = float(bet_raise) / float(post_call) if post_call > 0 else float(bet_raise)
 
         return (
             stat / 100.0,
-            "%2.2f" % (stat),
-            "afa=%2.2f" % (stat),
-            "agg_fa=%2.2f" % (stat),
+            f"{stat:2.2f}",
+            f"afa={stat:2.2f}",
+            f"agg_fa={stat:2.2f}",
             "(%d/%d)" % (bet_raise, post_call),
             "Aggression factor",
         )
@@ -1975,6 +1990,7 @@ def agg_fact_pct(stat_dict, player):
 
     Raises:
         Exception: If an error occurs during the calculation, returns default values.
+
     """
     stat = 0.0
     try:
@@ -1998,9 +2014,9 @@ def agg_fact_pct(stat_dict, player):
 
         return (
             stat / 100.0,
-            "%2.2f" % (stat),
-            "afap=%2.2f" % (stat),
-            "agg_fa_pct=%2.2f" % (stat),
+            f"{stat:2.2f}",
+            f"afap={stat:2.2f}",
+            f"agg_fa_pct={stat:2.2f}",
             "(%d/%d)" % (bet_raise, post_call),
             "Aggression factor pct",
         )
@@ -2027,6 +2043,7 @@ def cbet(stat_dict, player):
 
     Raises:
         Exception: If there is an issue with calculating the cbet percentage.
+
     """
     stat = 0.0
     try:
@@ -2071,6 +2088,7 @@ def cb1(stat_dict, player):
 
     Returns:
         tuple: A tuple containing various formatted strings representing the continuation bet statistic.
+
     """
     stat = 0.0
     try:
@@ -2106,6 +2124,7 @@ def cb2(stat_dict, player):
 
     Returns:
         tuple: A tuple containing various formatted strings representing the continuation bet statistic.
+
     """
     stat = 0.0
     try:
@@ -2145,6 +2164,7 @@ def cb3(stat_dict, player):
 
     Returns:
         tuple: A tuple containing various formatted strings representing the continuation bet statistic.
+
     """
     stat = 0.0
     try:
@@ -2184,6 +2204,7 @@ def cb4(stat_dict, player):
 
     Returns:
         tuple: A tuple containing various formatted strings representing the continuation bet statistic.
+
     """
     stat = 0.0
     try:
@@ -2211,8 +2232,7 @@ def cb4(stat_dict, player):
 
 
 def ffreq1(stat_dict, player):
-    """
-    Calculate the fold frequency statistic for a given player on the flop/4th street.
+    """Calculate the fold frequency statistic for a given player on the flop/4th street.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -2220,6 +2240,7 @@ def ffreq1(stat_dict, player):
 
     Returns:
         tuple: A tuple containing various formatted strings representing the fold frequency statistic.
+
     """
     stat = 0.0
     try:
@@ -2251,8 +2272,7 @@ def ffreq1(stat_dict, player):
 
 
 def ffreq2(stat_dict, player):
-    """
-    Calculate the fold frequency statistic for a given player on the turn/5th street.
+    """Calculate the fold frequency statistic for a given player on the turn/5th street.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -2260,6 +2280,7 @@ def ffreq2(stat_dict, player):
 
     Returns:
         tuple: A tuple containing various formatted strings representing the fold frequency statistic.
+
     """
     stat = 0.0
     try:
@@ -2291,8 +2312,7 @@ def ffreq2(stat_dict, player):
 
 
 def ffreq3(stat_dict, player):
-    """
-    Calculate the fold frequency statistic for a given player on the river/6th street.
+    """Calculate the fold frequency statistic for a given player on the river/6th street.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -2300,6 +2320,7 @@ def ffreq3(stat_dict, player):
 
     Returns:
         tuple: A tuple containing various formatted strings representing the fold frequency statistic.
+
     """
     stat = 0.0
     try:
@@ -2331,8 +2352,7 @@ def ffreq3(stat_dict, player):
 
 
 def ffreq4(stat_dict, player):
-    """
-    Calculate the fold frequency statistic for a given player on the 7th street.
+    """Calculate the fold frequency statistic for a given player on the 7th street.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -2340,6 +2360,7 @@ def ffreq4(stat_dict, player):
 
     Returns:
         tuple: A tuple containing various formatted strings representing the fold frequency statistic.
+
     """
     stat = 0.0
     try:
@@ -2361,8 +2382,7 @@ def ffreq4(stat_dict, player):
 
 
 def f_cb1(stat_dict, player):
-    """
-    Calculate the fold to continuation bet statistic for a given player on the flop/4th street.
+    """Calculate the fold to continuation bet statistic for a given player on the flop/4th street.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -2377,6 +2397,7 @@ def f_cb1(stat_dict, player):
               - f_cb_1 (str): The calculated statistic value formatted as a percentage with a specific format.
               - count (str): The count of occurrences divided by the count of opponent's continuation bets.
               - description (str): A description of the statistic.
+
     """
     stat = 0.0
     try:
@@ -2408,8 +2429,7 @@ def f_cb1(stat_dict, player):
 
 
 def f_cb2(stat_dict, player):
-    """
-    Calculate the fold to continuation bet statistic for a given player on the turn/5th street.
+    """Calculate the fold to continuation bet statistic for a given player on the turn/5th street.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -2424,6 +2444,7 @@ def f_cb2(stat_dict, player):
               - f_cb_2 (str): The calculated statistic value formatted as a percentage with a specific format.
               - count (str): The count of occurrences divided by the count of opponent's continuation bets.
               - description (str): A description of the statistic.
+
     """
     stat = 0.0
     try:
@@ -2451,8 +2472,7 @@ def f_cb2(stat_dict, player):
 
 
 def f_cb3(stat_dict, player):
-    """
-    Calculate the fold to continuation bet statistic for a given player on the river/6th street.
+    """Calculate the fold to continuation bet statistic for a given player on the river/6th street.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -2467,6 +2487,7 @@ def f_cb3(stat_dict, player):
               - f_cb_3 (str): The calculated statistic value formatted as a percentage with a specific format.
               - count (str): The count of occurrences divided by the count of opponent's continuation bets.
               - description (str): A description of the statistic.
+
     """
     stat = 0.0
     try:
@@ -2494,8 +2515,7 @@ def f_cb3(stat_dict, player):
 
 
 def f_cb4(stat_dict, player):
-    """
-    Calculate the fold to continuation bet statistic for a given player on the 7th street.
+    """Calculate the fold to continuation bet statistic for a given player on the 7th street.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -2513,6 +2533,7 @@ def f_cb4(stat_dict, player):
 
     Raises:
         None
+
     """
     stat = 0.0
     try:
@@ -2540,8 +2561,7 @@ def f_cb4(stat_dict, player):
 
 
 def cr1(stat_dict, player):
-    """
-    Calculate the check-raise flop/4th street statistic for a given player.
+    """Calculate the check-raise flop/4th street statistic for a given player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -2559,6 +2579,7 @@ def cr1(stat_dict, player):
 
     Raises:
         None
+
     """
     stat = 0.0
     try:
@@ -2590,8 +2611,7 @@ def cr1(stat_dict, player):
 
 
 def cr2(stat_dict, player):
-    """
-    Calculates the check-raise turn/5th street for a given player.
+    """Calculates the check-raise turn/5th street for a given player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -2606,6 +2626,7 @@ def cr2(stat_dict, player):
               - cr_2 (str): The calculated statistic value formatted with a specific format.
               - count (str): The count of occurrences divided by the count of opponent's check-raises.
               - description (str): A description of the statistic.
+
     """
     stat = 0.0
     try:
@@ -2634,8 +2655,7 @@ def cr2(stat_dict, player):
 
 
 def cr3(stat_dict, player):
-    """
-    Calculate the river/6th street check-raise statistic for a given player.
+    """Calculate the river/6th street check-raise statistic for a given player.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -2653,6 +2673,7 @@ def cr3(stat_dict, player):
 
     Raises:
         None
+
     """
     stat = 0.0
     try:
@@ -2681,8 +2702,7 @@ def cr3(stat_dict, player):
 
 
 def cr4(stat_dict, player):
-    """
-    Calculate the 7th street check-raise statistics for a given player on the 7th street.
+    """Calculate the 7th street check-raise statistics for a given player on the 7th street.
 
     Args:
         stat_dict (dict): A dictionary containing player statistics.
@@ -2700,6 +2720,7 @@ def cr4(stat_dict, player):
 
     Raises:
         None
+
     """
     stat = 0.0
     try:
@@ -2721,15 +2742,17 @@ def cr4(stat_dict, player):
 
 
 def game_abbr(stat_dict, player):
-    """
-    Function to retrieve the abbreviation for a specific poker game based on the game category and limit type.
+    """Function to retrieve the abbreviation for a specific poker game based on the game category and limit type.
 
-    Parameters:
+    Parameters
+    ----------
     - stat_dict: Dictionary containing statistics related to the game.
     - player: Integer representing the player number.
 
     Returns:
+    -------
     - Tuple containing various representations of the game abbreviation.
+
     """
     hand_instance = _global_hand_instance
     stat = ""
@@ -2772,10 +2795,10 @@ def game_abbr(stat_dict, player):
         )  # Default to "Unknown" if not found
         return (
             stat,
-            "%s" % stat,
-            "game=%s" % stat,
-            "game_abbr=%s" % stat,
-            "(%s)" % stat,
+            f"{stat}",
+            f"game={stat}",
+            f"game_abbr={stat}",
+            f"({stat})",
             "Game abbreviation",
         )
     except (KeyError, ValueError, TypeError):
@@ -2793,8 +2816,7 @@ def blank(stat_dict, player):
 
 
 def vpip_pfr_ratio(stat_dict, player):
-    """
-    Calculate the VPIP/PFR ratio for a player.
+    """Calculate the VPIP/PFR ratio for a player.
 
     This statistic represents the ratio between a player's VPIP (Voluntarily Put money In Pot)
     and PFR (Pre-Flop Raise) percentages, which gives an indication of the player's preflop aggression.
@@ -2805,6 +2827,7 @@ def vpip_pfr_ratio(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
+
     """
     try:
         vpip_opp = float(stat_dict[player].get("vpip_opp", 0))
@@ -2821,9 +2844,9 @@ def vpip_pfr_ratio(stat_dict, player):
 
         return (
             stat,
-            "%2.2f" % (stat),
-            "v/p=%2.2f" % (stat),
-            "vpip/pfr=%2.2f" % (stat),
+            f"{stat:2.2f}",
+            f"v/p={stat:2.2f}",
+            f"vpip/pfr={stat:2.2f}",
             "(%d/%d)/(%d/%d)"
             % (
                 stat_dict[player]["vpip"],
@@ -2950,8 +2973,7 @@ def river_call_efficiency(stat_dict, player):
 
 
 def starthands(stat_dict, player):
-    """
-    Retrieves the starting hands and their positions for a specific player in a hand.
+    """Retrieves the starting hands and their positions for a specific player in a hand.
 
     Args:
         stat_dict (dict): A dictionary containing the statistics.
@@ -2977,7 +2999,6 @@ def starthands(stat_dict, player):
         - The function formats the retrieved data and returns it as a tuple.
 
     """
-
     hand_instance = _global_hand_instance
     if not hand_instance:
         return ("", "", "", "", "", "Hands seen at this table")
@@ -3088,11 +3109,11 @@ def starthands(stat_dict, player):
 
 
 def get_valid_stats():
-    """
-    Function to retrieve valid stats descriptions.
+    """Function to retrieve valid stats descriptions.
 
     Returns:
         dict: A dictionary containing descriptions of valid stats.
+
     """
     global _global_hand_instance
     _global_hand_instance = None
@@ -3142,23 +3163,11 @@ if __name__ == "__main__":
     stat_dict = db_connection.get_stats_from_hand(h, "ring")
     hand_instance = Hand.hand_factory(h, c, db_connection)
 
-    for player in stat_dict.keys():
-        print(f"Example stats. Player = {player}, Hand = {h}:")
-        for attr in STATLIST:
-            print(
-                attr,
-                " : ",
-                do_stat(
-                    stat_dict, player=player, stat=attr, hand_instance=hand_instance,
-                ),
-            )
+    for _player in stat_dict:
+        for _attr in STATLIST:
+            pass
         break
 
-    print()
-    print("Legal stats:")
-    print(
-        "(add _0 to name to display with 0 decimal places, _1 to display with 1, etc)",
-    )
     stat_descriptions = get_valid_stats()
-    for stat in STATLIST:
-        print(stat, " : ", stat_descriptions[stat])
+    for _stat in STATLIST:
+        pass
