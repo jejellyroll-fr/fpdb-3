@@ -27,7 +27,7 @@ extensions = [
 ]
 
 templates_path = ['_templates']
-exclude_patterns = []
+exclude_patterns = ['**/*-bak.py', '**/*-current.py', '**/*-old-bak.py', '**/*-legacy.py']
 
 language = 'en'
 
@@ -35,6 +35,8 @@ source_suffix = {
     '.rst': 'restructuredtext',
     '.md': 'markdown',
 }
+
+autodoc_mock_imports = ["MergeStructures", "ctypes.windll", "xcffib"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

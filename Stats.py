@@ -194,6 +194,7 @@ def totalprofit(stat_dict, player):
 
     If the 'net' key is not present in the stat_dict for the given player, or if the value cannot be converted to a float,
     the function returns a tuple with default values:
+
         - ('0', '$0.00', 'tp=0', 'totalprofit=0', '0', 'Total Profit')
 
     """
