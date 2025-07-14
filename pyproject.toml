@@ -30,6 +30,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+docs = [
+    "sphinx<8.0",
+    "furo",
+    "myst-parser",
+    "sphinx-autodoc-typehints",
+]
 test = [
     "pytest>=8.3.2",
     "pytest-qt>=4.0.2",

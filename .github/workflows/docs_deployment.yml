@@ -1,0 +1,42 @@
+name: Deploy Documentation to GitHub Pages
+
+on:
+  # Se déclenche à chaque push sur la branche main
+  push:
+    branches:
+      - main  # Assurez-vous que c'est bien votre branche principale
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Ou la version que vous utilisez
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install dependencies
+        run: ~/.cargo/bin/uv pip install -e .[docs]
+
+      - name: Build Sphinx documentation
+        run: ~/.cargo/bin/uv run sphinx-build -b html docs/source docs/build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/build
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
