@@ -1,0 +1,12 @@
+archives
+docs
+documentations
+gfx
+icons
+importer_cli_rust
+locale
+pypoker-eval
+resources
+test
+utils
+web

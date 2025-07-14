@@ -1,0 +1,112 @@
+LICENSE
+README.md
+pyproject.toml
+archives/obsolete_parsers/BetOnlineToFpdb.py
+archives/obsolete_parsers/BetfairToFpdb.py
+archives/obsolete_parsers/MergeStructures.py
+archives/obsolete_parsers/MergeSummary.py
+archives/obsolete_parsers/MergeToFpdb.py
+archives/old feature scripts/Cardold.py
+archives/old feature scripts/Charset.py
+archives/old feature scripts/Databaseold.py
+archives/old feature scripts/DerivedStats_old.py
+archives/old feature scripts/GuiDatabase.py
+archives/old feature scripts/GuiOddsCalc.py
+archives/old feature scripts/GuiPositionalStats.py
+archives/old feature scripts/GuiStove.py
+archives/old feature scripts/GuiTourneyImport.py
+archives/old feature scripts/GuiTourneyViewer.py
+archives/old feature scripts/HUD_run_me.py
+archives/old feature scripts/Hello.py
+archives/old feature scripts/Importer-old.py
+archives/old feature scripts/ImporterLight.py
+archives/old feature scripts/OddsCalc.py
+archives/old feature scripts/OddsCalcNew2.py
+archives/old feature scripts/OddsCalcPQL.py
+archives/old feature scripts/OddsCalcnew.py
+archives/old feature scripts/P5sResultsParser.py
+archives/old feature scripts/RushNotesAux.py
+archives/old feature scripts/RushNotesMerge.py
+archives/old feature scripts/ScriptAddStatToRegression.py
+archives/old feature scripts/ScriptFetchMergeResults.py
+archives/old feature scripts/ScriptFetchWinamaxResults.py
+archives/old feature scripts/ScriptGenerateWikiPage.py
+archives/old feature scripts/SitenameSummary.py
+archives/old feature scripts/SplitHandHistory.py
+archives/old feature scripts/Stove.py
+archives/old feature scripts/Summaries.py
+archives/old feature scripts/TournamentTracker.py
+archives/old feature scripts/TreeViewTooltips.py
+archives/old feature scripts/UnibetToFpdb_old.py
+archives/old feature scripts/files_rc.py
+archives/old feature scripts/fix_table_desc.py
+archives/old feature scripts/fpdb_prerun.py
+archives/old feature scripts/montecarlo.py
+archives/old feature scripts/ppt.py
+archives/old feature scripts/run_fpdb.py
+archives/old feature scripts/sim.py
+archives/old feature scripts/sim2.py
+archives/old feature scripts/simulation.py
+archives/old feature scripts/windows_make_bats.py
+archives/old tests scripts/TestDetectInstalledSites.py
+archives/old tests scripts/TestHandsPlayers.py
+archives/old tests scripts/bug-1823.py
+archives/old tests scripts/test_Database.py
+archives/old tests scripts/test_Everleaf.py
+archives/old tests scripts/test_FullTilt.py
+archives/old tests scripts/test_PokerStars.py
+archives/old tests scripts/test_charset.py
+archives/old tests scripts/test_party.py
+archives/old tests scripts/test_pokereval.py
+archives/old tests scripts/testodd.py
+archives/old tests scripts/xlib_tester.py
+archives/packaging/windows/py2exe_setup.py
+fpdb_3.egg-info/PKG-INFO
+fpdb_3.egg-info/SOURCES.txt
+fpdb_3.egg-info/dependency_links.txt
+fpdb_3.egg-info/requires.txt
+fpdb_3.egg-info/top_level.txt
+pypoker-eval/bug-1823.py
+pypoker-eval/pokereval.py
+pypoker-eval/setup.py
+pypoker-eval/setup_win.py
+pypoker-eval/test copy.py
+pypoker-eval/test.py
+pypoker-eval/poker-eval/bindings/python/pokereval.py
+pypoker-eval/poker-eval/examples/pokenum.py
+pypoker-eval/poker-eval/examples/pokenum2.py
+pypoker-eval/poker-eval/examples/test.py
+test/test_HUD_main.py
+test/test_Star.py
+test/test_assemble_hands.py
+test/test_assemble_hands_actions.py
+test/test_bovada_hand.py
+test/test_card.py
+test/test_configuration.py
+test/test_hand.py
+test/test_importer_errors.py
+test/test_ipoker_parser.py
+test/test_ipokertofpdb.py
+test/test_juicy.py
+test/test_pot.py
+test/test_pt4_ipoker.py
+test/test_regex.py
+test/test_set_positions.py
+test/test_site_identification.py
+test/test_stud_34bet.py
+test/test_stud_positions.py
+test/test_stud_steals.py
+test/test_swc.py
+test/test_utils.py
+test/test_winamax.py
+test/test_winamax_parser_errors.py
+utils/Anonymise.py
+utils/Archive.py
+utils/OSXtablesApplescript.py
+utils/Pokenum_api_call.py
+utils/RazzStartHandGenerator.py
+utils/detect_osx_windows.py
+utils/linux_table_detect.py
+utils/pokenum_example.py
+utils/pypokertest.py
+utils/win_table_detect.py
