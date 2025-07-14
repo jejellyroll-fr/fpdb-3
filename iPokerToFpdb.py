@@ -183,9 +183,9 @@ class iPoker(HandHistoryConverter):
             (<(tablecurrency|tournamentcurrency)>(?P<TABLECURRENCY>.*)</(tablecurrency|tournamentcurrency)>\s+?)?
             (<smallblind>.+</smallblind>\s+?)?
             (<bigblind>.+</bigblind>\s+?)?
-            <duration>.+</duration>\s+?
-            <gamecount>.+</gamecount>\s+?
-            <startdate>.+</startdate>\s+?
+            (<duration>.+</duration>\s+?)?
+            (<gamecount>.+</gamecount>\s+?)?
+            (<startdate>.+</startdate>\s+?)?
             <currency>(?P<CURRENCY>.+)?</currency>\s+?
             <nickname>(?P<HERO>.+)?</nickname>
             """
@@ -957,10 +957,13 @@ class iPoker(HandHistoryConverter):
             original_seats.append(original_seat)
             
             # Create a dictionary entry for the player
+            win_amount = a.group("WIN")
+            win_cleaned = self.clearMoneyString(win_amount) if win_amount else "0"
+            
             plist[a.group("PNAME")] = [
                 original_seat,
                 self.clearMoneyString(a.group("CASH")),
-                self.clearMoneyString(a.group("WIN")),
+                win_cleaned,
                 False,
             ]
             log.info(

@@ -10,6 +10,7 @@
         <site_id site="PokerStars.PT" id="36"/>
         <site_id site="PokerStars.EU" id="37"/>
         <site_id site="PokerStars.DE" id="130"/>
+        <site_id site="Betclic Poker" id="131"/>
         <site_id site="Everleaf" id="3"/>
         <site_id site="Boss" id="4"/>
         <site_id site="OnGame" id="5"/>
@@ -2771,6 +2772,19 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
+        <site site_name="Betclic Poker" enabled="True" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="ring" ls="ipoker_default"/>
+            <layout_set game_type="tour" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
         <site site_name="Poker770" enabled="False" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" screen_name="85" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
@@ -3389,6 +3403,7 @@
         <hhc site="Sun Poker" converter="CakeToFpdb"/>
         <hhc site="PMU Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
         <hhc site="FDJ Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
+        <hhc site="Betclic Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
         <hhc site="Poker770" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
         <hhc site="NetBet Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
         <hhc site="Barrière Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
