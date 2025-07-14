@@ -24,7 +24,7 @@ from decimal import Decimal
 
 from past.utils import old_div
 
-import MergeStructures
+
 from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from loggingFpdb import get_logger
 
