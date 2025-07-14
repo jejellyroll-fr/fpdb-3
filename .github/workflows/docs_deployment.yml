@@ -1,10 +1,9 @@
 name: Deploy Documentation to GitHub Pages
 
 on:
-  # Se déclenche à chaque push sur la branche main
   push:
     branches:
-      - main  # Assurez-vous que c'est bien votre branche principale
+      - feature/add-skins
 
 permissions:
   contents: read
@@ -21,7 +20,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # Ou la version que vous utilisez
+          python-version: '3.11' 
 
       - name: Install uv
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
