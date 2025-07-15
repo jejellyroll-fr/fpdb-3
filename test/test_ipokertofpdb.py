@@ -200,3 +200,172 @@ def test_MaxSeats1() -> None:
     text = "<tablesize>6</tablesize>"
     match = re_MaxSeats.search(text)
     assert match.group("SEATS") == "6"
+
+
+# Test for re_action regex
+re_action = re.compile(
+    r'<action(?=(?:[^>]*\bno="(?P<ACT>\d+)"))(?=(?:[^>]*\bplayer="(?P<PNAME>[^"]+)"))(?=(?:[^>]*\btype="(?P<ATYPE>\d+)"))(?=(?:[^>]*\bsum="[^"]*?(?P<BET>\d+(?:\.\d+)?)"))[^>]*>',
+    re.MULTILINE,
+)
+
+
+def test_re_action_fold() -> None:
+    """Test fold action parsing."""
+    text = '<action no="1" player="Joueur1" type="0" sum="0" timestamp="1234567890"/>'
+    match = re_action.search(text)
+    assert match is not None
+    assert match.group("ACT") == "1"
+    assert match.group("PNAME") == "Joueur1"
+    assert match.group("ATYPE") == "0"
+    assert match.group("BET") == "0"
+
+
+def test_re_action_call() -> None:
+    """Test call action parsing."""
+    text = '<action no="2" player="Joueur2" type="3" sum="100" timestamp="1234567890"/>'
+    match = re_action.search(text)
+    assert match is not None
+    assert match.group("ACT") == "2"
+    assert match.group("PNAME") == "Joueur2"
+    assert match.group("ATYPE") == "3"
+    assert match.group("BET") == "100"
+
+
+def test_re_action_bet() -> None:
+    """Test bet action parsing."""
+    text = '<action no="3" player="Joueur3" type="5" sum="200" timestamp="1234567890"/>'
+    match = re_action.search(text)
+    assert match is not None
+    assert match.group("ACT") == "3"
+    assert match.group("PNAME") == "Joueur3"
+    assert match.group("ATYPE") == "5"
+    assert match.group("BET") == "200"
+
+
+def test_re_action_raise_to() -> None:
+    """Test raise to action parsing."""
+    text = '<action no="4" player="Joueur4" type="23" sum="500" timestamp="1234567890"/>'
+    match = re_action.search(text)
+    assert match is not None
+    assert match.group("ACT") == "4"
+    assert match.group("PNAME") == "Joueur4"
+    assert match.group("ATYPE") == "23"
+    assert match.group("BET") == "500"
+
+
+def test_re_action_check() -> None:
+    """Test check action parsing."""
+    text = '<action no="5" player="Joueur5" type="4" sum="0" timestamp="1234567890"/>'
+    match = re_action.search(text)
+    assert match is not None
+    assert match.group("ACT") == "5"
+    assert match.group("PNAME") == "Joueur5"
+    assert match.group("ATYPE") == "4"
+    assert match.group("BET") == "0"
+
+
+def test_re_action_all_in() -> None:
+    """Test all-in action parsing."""
+    text = '<action no="6" player="Joueur6" type="7" sum="1000" timestamp="1234567890"/>'
+    match = re_action.search(text)
+    assert match is not None
+    assert match.group("ACT") == "6"
+    assert match.group("PNAME") == "Joueur6"
+    assert match.group("ATYPE") == "7"
+    assert match.group("BET") == "1000"
+
+
+def test_re_action_multiple_actions() -> None:
+    """Test parsing multiple actions in sequence."""
+    text = """<action no="1" player="Joueur1" type="0" sum="0" timestamp="1234567890"/>
+<action no="2" player="Joueur2" type="3" sum="100" timestamp="1234567891"/>
+<action no="3" player="Joueur3" type="5" sum="200" timestamp="1234567892"/>"""
+
+    actions = {}
+    for match in re_action.finditer(text):
+        actions[int(match.group("ACT"))] = match.groupdict()
+
+    assert len(actions) == 3
+    assert actions[1]["PNAME"] == "Joueur1"
+    assert actions[1]["ATYPE"] == "0"
+    assert actions[1]["BET"] == "0"
+    assert actions[2]["PNAME"] == "Joueur2"
+    assert actions[2]["ATYPE"] == "3"
+    assert actions[2]["BET"] == "100"
+    assert actions[3]["PNAME"] == "Joueur3"
+    assert actions[3]["ATYPE"] == "5"
+    assert actions[3]["BET"] == "200"
+
+
+def test_re_action_with_spaces_in_name() -> None:
+    """Test action parsing with spaces in player name."""
+    text = '<action no="7" player="Joueur Avec Espaces" type="3" sum="50" timestamp="1234567890"/>'
+    match = re_action.search(text)
+    assert match is not None
+    assert match.group("ACT") == "7"
+    assert match.group("PNAME") == "Joueur Avec Espaces"
+    assert match.group("ATYPE") == "3"
+    assert match.group("BET") == "50"
+
+
+def test_re_action_decimal_bet() -> None:
+    """Test action parsing with decimal bet amount."""
+    text = '<action no="8" player="Joueur8" type="23" sum="15.50" timestamp="1234567890"/>'
+    match = re_action.search(text)
+    assert match is not None
+    assert match.group("ACT") == "8"
+    assert match.group("PNAME") == "Joueur8"
+    assert match.group("ATYPE") == "23"
+    assert match.group("BET") == "15.50"
+
+
+def test_re_action_currency_prefix() -> None:
+    """Test action parsing with currency prefix in sum."""
+    text = '<action no="9" player="Joueur9" type="5" sum="€25.00" timestamp="1234567890"/>'
+    match = re_action.search(text)
+    assert match is not None
+    assert match.group("ACT") == "9"
+    assert match.group("PNAME") == "Joueur9"
+    assert match.group("ATYPE") == "5"
+    assert match.group("BET") == "25.00"
+
+
+def test_re_action_real_ipoker_format() -> None:
+    """Test with real iPoker format."""
+    text = """<action no="1" player="Hero" type="1" sum="€0.05" timestamp="1234567890"/>
+<action no="2" player="Villain" type="2" sum="€0.10" timestamp="1234567891"/>
+<action no="3" player="Hero" type="3" sum="€0.10" timestamp="1234567892"/>
+<action no="4" player="Villain" type="23" sum="€0.30" timestamp="1234567893"/>
+<action no="5" player="Hero" type="0" sum="€0.00" timestamp="1234567894"/>"""
+
+    actions = {}
+    for match in re_action.finditer(text):
+        actions[int(match.group("ACT"))] = match.groupdict()
+
+    assert len(actions) == 5
+    assert actions[1]["PNAME"] == "Hero"
+    assert actions[1]["ATYPE"] == "1"
+    assert actions[1]["BET"] == "0.05"
+    assert actions[2]["PNAME"] == "Villain"
+    assert actions[2]["ATYPE"] == "2"
+    assert actions[2]["BET"] == "0.10"
+    assert actions[3]["PNAME"] == "Hero"
+    assert actions[3]["ATYPE"] == "3"
+    assert actions[3]["BET"] == "0.10"
+    assert actions[4]["PNAME"] == "Villain"
+    assert actions[4]["ATYPE"] == "23"
+    assert actions[4]["BET"] == "0.30"
+    assert actions[5]["PNAME"] == "Hero"
+    assert actions[5]["ATYPE"] == "0"
+    assert actions[5]["BET"] == "0.00"
+
+
+def test_re_action_with_attributes_order() -> None:
+    """Test action parsing with different attribute order."""
+    text = '<action type="5" sum="€50.00" no="10" player="Player10" timestamp="1234567890"/>'
+    match = re_action.search(text)
+    assert match is not None
+    assert match.group("ACT") == "10"
+    assert match.group("PNAME") == "Player10"
+    assert match.group("ATYPE") == "5"
+    assert match.group("BET") == "50.00"

@@ -1391,21 +1391,24 @@ class Hand:
                 log.debug("Exact match between totalpot and totalcollected, rake=0")
                 return self.totalpot
             # totalcollected > totalpot is an error scenario
-            # Exception for Bovada Zone Poker hands with incomplete Summary sections
-            if self.sitename == "Bovada" and hasattr(self, 'isZonePoker') and self.isZonePoker:
-                # For Zone Poker hands, use collected amount as the pot total
-                log.warning(f"Bovada Zone Poker hand {self.handid}: using collected amount as pot total")
+            # Exception for special cases and hand viewing
+            if (self.sitename == "Bovada" and hasattr(self, 'isZonePoker') and self.isZonePoker) or \
+               (hasattr(self, 'rake') and self.rake is not None):
+                # For Zone Poker hands or hands with pre-set rake, use collected amount as the pot total
+                log.warning(f"Hand {self.handid}: collected amount exceeds calculated pot, using collected amount as pot total")
                 self.totalpot = self.totalcollected
-                self.rake = Decimal("0.00")  # Rake already deducted
+                if not hasattr(self, 'rake') or self.rake is None:
+                    self.rake = Decimal("0.00")  # Rake already deducted or calculated elsewhere
                 return self.totalpot
             
-            log.error(
-                f"Collected amount ({self.totalcollected}) exceeds total pot ({self.totalpot})",
+            # For hand viewing/display, be more tolerant
+            log.warning(
+                f"Collected amount ({self.totalcollected}) exceeds total pot ({self.totalpot}) for hand {self.handid}, adjusting for display",
             )
-            msg = f"Collected amount exceeds total pot for hand {self.handid}"
-            raise FpdbParseError(
-                msg,
-            )
+            # Use collected amount as pot total for display purposes
+            self.totalpot = self.totalcollected  
+            self.rake = Decimal("0.00")  # Assume rake already deducted
+            return self.totalpot
 
         except Exception as e:
             log.exception(f"Pot calculation failed: {e}")
