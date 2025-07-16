@@ -1734,3 +1734,15 @@ class Winning(HandHistoryConverter):
 
         log.info(f"Generated Table Title regex: '{regex}'")
         return regex
+
+
+    def readOther(self, hand: "Hand") -> None:
+        """Read other information from hand that doesn't fit standard categories.
+
+        Args:
+            hand: The Hand object to read other information from.
+
+        Returns:
+            None
+
+        """

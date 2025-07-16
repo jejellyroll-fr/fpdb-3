@@ -19,7 +19,7 @@ import datetime
 import decimal
 import re
 from decimal import Decimal
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from HandHistoryConverter import FpdbParseError
 from loggingFpdb import get_logger
@@ -30,6 +30,13 @@ log = get_logger("parser")
 
 class iPokerSummary(TourneySummary):  # noqa: N801
     """iPoker tournament summary parser."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initialize iPokerSummary with default values for new fields."""
+        super().__init__(*args, **kwargs)
+        # Initialize new lottery fields with default values
+        self.isLottery = False
+        self.tourneyMultiplier = 1
 
     substitutions: ClassVar = {
         "LS": "\\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\\£|RSD|kr|",
@@ -110,7 +117,8 @@ class iPokerSummary(TourneySummary):  # noqa: N801
                         (?:(<place>(?P<PLACE>.+?)</place>))|
                         (?:(<buyin>(?P<BIAMT>[{NUM2}{LS}]+|\bToken\b)(?:\s\+\s)?(?P<BIRAKE>[{NUM2}{LS}]+)?)</buyin>)|
                         (?:(<totalbuyin>(?P<TOTBUYIN>[{NUM2}{LS}]+)</totalbuyin>))|
-                        (?:(<win>({LS})?(?P<WIN>.+?|[{NUM2}{LS}]+)</win>))
+                        (?:(<win>({LS})?(?P<WIN>.+?|[{NUM2}{LS}]+)</win>))|
+                        (?:(<rewarddrawn>(?P<REWARDDRAWN>[{NUM2}{LS}]+)</rewarddrawn>))
         """.format(**substitutions),
         re.VERBOSE,
     )
@@ -145,10 +153,9 @@ class iPokerSummary(TourneySummary):  # noqa: N801
 
     codepage: ClassVar = ["utf8", "cp1252"]
 
-    @staticmethod
-    def getSplitRe(_head: str) -> re.Pattern[str]:
+    def getSplitRe(self, _head: str) -> re.Pattern[str]:
         """Get regex pattern for splitting tournament summaries."""
-        return re.compile("PokerStars Tournament ")
+        return re.compile(r"<session\ssessioncode=")
 
     def parseSummary(self) -> None:  # noqa: C901, PLR0912, PLR0915
         """Parse tournament summary text."""
@@ -169,6 +176,7 @@ class iPokerSummary(TourneySummary):  # noqa: N801
             raise FpdbParseError
         log.debug("No SB found, treating as tournament.")
         tourney = True
+        log.info("Tournament flag set to true")
 
         if "GAME" in mg:
             if mg.get("CATEGORY") is None:
@@ -248,12 +256,13 @@ class iPokerSummary(TourneySummary):  # noqa: N801
                 )
 
         if tourney:
+            log.info("Entering tournament processing section")
             log.debug("Processing tournament-specific logic using re_game_info_trny2.")
             matches = list(self.re_game_info_trny2.finditer(self.summaryText))
             log.debug("Number of matches found with re_game_info_trny2: %d", len(matches))
 
-            # Expecting at least 6 matches: 0=TOURNO, 1=NAME, 2=PLACE, 3=BIAMT/BIRAKE, 4=TOTBUYIN, 5=WIN
-            min_matches = 6
+            # Expecting at least 6 matches: 0=TOURNO, 1=NAME, 2=PLACE, 3=BIAMT/BIRAKE, 4=TOTBUYIN, 5=WIN, 6=REWARDDRAWN
+            min_matches = 6  # Keep at 6 since REWARDDRAWN is optional
             if len(matches) < min_matches:
                 log.error(
                     "Not enough matches for tournament info: found %d, need at least %d.", len(matches), min_matches,
@@ -267,15 +276,22 @@ class iPokerSummary(TourneySummary):  # noqa: N801
             for i, mat in enumerate(matches):
                 log.debug("Match %d: %s", i, mat.groupdict())
 
+            # Build mg2 dictionary from all matches
             mg2 = {
-                "TOURNO": matches[0].group("TOURNO"),
-                "NAME": matches[1].group("NAME"),
-                "PLACE": matches[2].group("PLACE"),
-                "BIAMT": matches[3].group("BIAMT"),
-                "BIRAKE": matches[3].group("BIRAKE"),
-                "TOTBUYIN": matches[4].group("TOTBUYIN"),
-                "WIN": matches[5].group("WIN"),
+                "TOURNO": None,
+                "NAME": None,
+                "PLACE": None,
+                "BIAMT": None,
+                "BIRAKE": None,
+                "TOTBUYIN": None,
+                "WIN": None,
+                "REWARDDRAWN": None,
             }
+
+            # Extract data from each match
+            for match in matches:
+                groups = match.groupdict()
+                mg2.update({key: value for key, value in groups.items() if value is not None})
             log.debug("Consolidated mg2: %s", mg2)
 
             self.buyin = 0
@@ -369,6 +385,10 @@ class iPokerSummary(TourneySummary):  # noqa: N801
             self.addPlayer(rank, hero, winnings, self.currency, None, None, None)
             log.debug("Added hero player: %s, rank=%s, winnings=%s", hero, rank, winnings)
 
+            # Detect Twister tournaments and calculate multiplier
+            log.debug("Calling _detect_twister_tournament with mg2: %s", mg2)
+            self._detect_twister_tournament(mg2)
+
             if self.tourNo is None:
                 log.error("Could Not Parse tourNo")
                 msg = "Could Not Parse tourNo"
@@ -381,8 +401,70 @@ class iPokerSummary(TourneySummary):  # noqa: N801
 
         log.debug("Finished parseSummary successfully.")
 
+    def _detect_twister_tournament(self, mg2: dict) -> None:
+        """Detect Twister tournament and set lottery fields."""
+        log.debug("Entering _detect_twister_tournament")
+        try:
+            # Check if this is a Twister tournament
+            tournament_name = mg2.get("NAME", "")
+            log.debug("Tournament name: '%s'", tournament_name)
+            if "Twister" in tournament_name or "twister" in tournament_name.lower():
+                log.debug("Detected Twister tournament from name: %s", tournament_name)
+
+                # Extract rewarddrawn and calculate multiplier
+                rewarddrawn_str = mg2.get("REWARDDRAWN", "")
+                buyin_str = mg2.get("TOTBUYIN", "") or mg2.get("BIAMT", "")
+
+                if rewarddrawn_str and buyin_str:
+                    try:
+                        rewarddrawn = self.convert_to_decimal(rewarddrawn_str)
+                        buyin = self.convert_to_decimal(buyin_str)
+
+                        if rewarddrawn > 0 and buyin > 0:
+                            multiplier = rewarddrawn / buyin
+                            if multiplier > 1:
+                                self.isLottery = True
+                                self.tourneyMultiplier = int(multiplier)
+                                log.info("Twister detected: lottery=%s, multiplier=%s (rewarddrawn=%s, buyin=%s)",
+                                         self.isLottery, self.tourneyMultiplier, rewarddrawn, buyin)
+                            else:
+                                log.debug("Multiplier <= 1, not a lottery: %s", multiplier)
+                        else:
+                            log.debug("Invalid amounts for multiplier calculation: rewarddrawn=%s, buyin=%s",
+                                     rewarddrawn, buyin)
+                    except (ValueError, TypeError, decimal.InvalidOperation) as e:
+                        log.debug("Error calculating Twister multiplier: %s", e)
+                else:
+                    log.debug("Missing rewarddrawn or buyin for Twister detection")
+            else:
+                log.debug("Not a Twister tournament (tournament name: %s)", tournament_name)
+        except (ValueError, TypeError, decimal.InvalidOperation) as e:
+            log.debug("Error in Twister detection: %s", e)
+
     def convert_to_decimal(self, string: str) -> Decimal:
         """Convert money string to decimal."""
+        if not string:
+            return Decimal(0)
+
+        # Handle complex format with multiple amounts (e.g., "0€ + 0,02€ + 0,23€")
+        if "+" in string:
+            parts = string.split("+")
+            total = Decimal("0")
+            for part_str in parts:
+                part = part_str.strip()
+                if part:
+                    # Use clearMoneyString to clean each part
+                    cleaned = self.clearMoneyString(part)
+                    # Replace comma with dot for decimal separator
+                    cleaned = cleaned.replace(",", ".")
+                    if cleaned:
+                        try:
+                            total += Decimal(cleaned)
+                        except (ValueError, TypeError, decimal.InvalidOperation):
+                            continue
+            log.debug("Converted complex string '%s' to decimal %s", string, total)
+            return total
+        # Original logic for simple amounts
         dec = self.clearMoneyString(string)
         log.debug("Attempting to convert string to decimal: '%s' => '%s'", string, dec)
         if not dec:

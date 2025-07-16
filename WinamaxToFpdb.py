@@ -678,3 +678,14 @@ class Winamax(HandHistoryConverter):
             log.debug(f"regex get mtt sng expresso cash title: {regex}")
         log.info(f"Winamax.getTableTitleRe: returns: '{regex}'")
         return regex
+    
+    def readOther(self, hand: "Hand") -> None:
+        """Read other information from hand that doesn't fit standard categories.
+
+        Args:
+            hand: The Hand object to read other information from.
+
+        Returns:
+            None
+
+        """

@@ -155,8 +155,8 @@ class Bovada(HandHistoryConverter):
     re_split_hands: ClassVar[re.Pattern[str]] = re.compile("\n\n+")
     re_tail_split_hands: ClassVar[re.Pattern[str]] = re.compile("(\n\n\n+)")
     re_button: ClassVar[re.Pattern[str]] = re.compile(
-        r"Dealer : Set dealer\/Bring in spot \[(?P<BUTTON>\d+)\]",
-        re.MULTILINE,
+        r"Dealer\s?:\s?Set\sdealer(\/Bring\sin\sspot)?\s\[(?P<BUTTON>\d+)\]",
+        re.MULTILINE | re.VERBOSE,
     )
     re_board1: ClassVar[re.Pattern[str]] = re.compile(
         r"Board \[(?P<FLOP>\S\S\S? \S\S\S? \S\S\S?)?\s+?(?P<TURN>\S\S\S?)?\s+?(?P<RIVER>\S\S\S?)?\]",
@@ -299,7 +299,7 @@ class Bovada(HandHistoryConverter):
     def determineGameType(self, hand_text: str) -> dict[str, str]:
         """Determine game type information from hand text."""
         self._validateHandText(hand_text)
-        mg = self._extractGameInfo(hand_text)
+        mg = self._extractGameInfo(hand_text, self.in_path)
         info = self._buildGameTypeInfo(mg)
         self._adjustFixedLimitBlinds(info, mg, hand_text)
         return info
@@ -321,11 +321,11 @@ class Bovada(HandHistoryConverter):
             msg = "Partial hand history"
             raise FpdbHandPartial(msg)
 
-    def _extractGameInfo(self, hand_text: str) -> dict[str, str]:
+    def _extractGameInfo(self, hand_text: str, in_path: str = "") -> dict[str, str]:
         """Extract game information from hand text."""
         m = self.re_game_info.search(hand_text)
         mg = m.groupdict()
-        m = self.re_stakes.search(self.in_path)
+        m = self.re_stakes.search(in_path)
         if m:
             mg.update(m.groupdict())
         return mg

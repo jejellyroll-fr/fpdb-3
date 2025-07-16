@@ -66,6 +66,17 @@ def main():
     print(f"Starting import of {len(importer.filelist)} files...")
     # Run the import
     (stored, dups, partial, skipped, errors, ttime) = importer.runImport()
+    
+    # Process tournament summaries for files marked as "both"
+    print("Processing tournament summaries...")
+    
+    # Debug: check which files are marked as "both"
+    both_files = [f for f, fpdbfile in importer.filelist.items() if fpdbfile.ftype == "both"]
+    print(f"Files marked as 'both': {len(both_files)}")
+    for f in both_files:
+        print(f"  - {f}")
+    
+    importer.autoSummaryGrab(force=True)
 
     # Print summary report
     # Colors and icons for the report
