@@ -4643,6 +4643,8 @@ class Database:
                 ("isFlighted", "flighted"),
                 ("isGuarantee", "guarantee"),
                 ("guaranteeAmt", "guaranteeamt"),
+                ("isLottery", "lottery"),
+                ("tourneyMultiplier", "multiplier"),
             )
             resultDict = dict(list(zip(columnNames, result, strict=False)))
             ttid = resultDict["id"]
@@ -4708,6 +4710,8 @@ class Database:
                 obj.isFlighted,
                 obj.isGuarantee,
                 obj.guaranteeAmt,
+                getattr(obj, 'isLottery', False),
+                getattr(obj, 'tourneyMultiplier', 1),
             )
             cursor.execute(
                 self.sql.query["getTourneyTypeId"].replace(

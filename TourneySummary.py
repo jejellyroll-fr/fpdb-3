@@ -348,27 +348,27 @@ class TourneySummary:
                 return
             else:
                 self.players[name].append(entryId)
-            if rank:
+            if rank is not None:
                 self.ranks[name].append(rank)
                 self.winnings[name].append(winnings)
                 self.winningsCurrency[name].append(winningsCurrency)
             else:
                 self.ranks[name].append(None)
-                self.winnings[name].append(None)
-                self.winningsCurrency[name].append(None)
+                self.winnings[name].append(winnings)
+                self.winningsCurrency[name].append(winningsCurrency)
             self.rebuyCounts[name].append(None)
             self.addOnCounts[name].append(None)
             self.koCounts[name].append(None)
         else:
             self.players[name] = [entryId if entryId is not None else 1]
-            if rank:
+            if rank is not None:
                 self.ranks.update({name: [rank]})
                 self.winnings.update({name: [winnings]})
                 self.winningsCurrency.update({name: [winningsCurrency]})
             else:
                 self.ranks.update({name: [None]})
-                self.winnings.update({name: [None]})
-                self.winningsCurrency.update({name: [None]})
+                self.winnings.update({name: [winnings]})
+                self.winningsCurrency.update({name: [winningsCurrency]})
             self.rebuyCounts.update({name: [rebuyCount]})
             self.addOnCounts.update({name: [addOnCount]})
             self.koCounts.update({name: [koCount]})

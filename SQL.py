@@ -743,7 +743,9 @@ class Sql:
                         onDemand BOOLEAN,
                         flighted BOOLEAN,
                         guarantee BOOLEAN,
-                        guaranteeAmt BIGINT)
+                        guaranteeAmt BIGINT,
+                        lottery BOOLEAN DEFAULT FALSE,
+                        multiplier INT DEFAULT 1)
                         ENGINE=INNODB"""
         elif db_server == "postgresql":
             self.query[
@@ -793,7 +795,9 @@ class Sql:
                         onDemand BOOLEAN,
                         flighted BOOLEAN,
                         guarantee BOOLEAN,
-                        guaranteeAmt BIGINT)"""
+                        guaranteeAmt BIGINT,
+                        lottery BOOLEAN DEFAULT FALSE,
+                        multiplier INT DEFAULT 1)"""
         elif db_server == "sqlite":
             self.query[
                 "createTourneyTypesTable"
@@ -842,7 +846,9 @@ class Sql:
                         onDemand BOOLEAN,
                         flighted BOOLEAN,
                         guarantee BOOLEAN,
-                        guaranteeAmt INT)"""
+                        guaranteeAmt INT,
+                        lottery BOOLEAN DEFAULT FALSE,
+                        multiplier INT DEFAULT 1)"""
 
         ################################
         # Create Tourneys
@@ -9478,7 +9484,9 @@ class Sql:
                                                               tt.onDemand,
                                                               tt.flighted,
                                                               tt.guarantee,
-                                                              tt.guaranteeAmt
+                                                              tt.guaranteeAmt,
+                                                              tt.lottery,
+                                                              tt.multiplier
                                                     FROM TourneyTypes tt
                                                     INNER JOIN Tourneys t ON (t.tourneyTypeId = tt.id)
                                                     WHERE t.siteTourneyNo=%s AND tt.siteId=%s
@@ -9527,6 +9535,8 @@ class Sql:
                                             AND flighted=%s
                                             AND guarantee=%s
                                             AND guaranteeAmt=%s
+                                            AND lottery=%s
+                                            AND multiplier=%s
         """
 
         self.query[
@@ -9535,10 +9545,11 @@ class Sql:
                                                    siteId, currency, buyin, fee, category, limitType, maxSeats, sng, knockout, koBounty, progressive,
                                                    rebuy, rebuyCost, addOn, addOnCost, speed, shootout, matrix, fast,
                                                    stack, step, stepNo, chance, chanceCount, multiEntry, reEntry, homeGame, newToGame, split,
-                                                   fifty50, time, timeAmt, satellite, doubleOrNothing, cashOut, onDemand, flighted, guarantee, guaranteeAmt
+                                                   fifty50, time, timeAmt, satellite, doubleOrNothing, cashOut, onDemand, flighted, guarantee, guaranteeAmt,
+                                                   lottery, multiplier
                                                    )
                                               values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                                                      %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                                      %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
 
         if db_server == "sqlite":

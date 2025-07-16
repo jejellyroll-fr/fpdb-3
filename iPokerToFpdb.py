@@ -44,6 +44,7 @@ and convert them to FPDB format, including support for multiple skins.
 #    this is corrected tournaments will be unparseable
 
 import datetime
+import decimal
 import re
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -73,7 +74,8 @@ class iPoker(HandHistoryConverter):  # noqa: N801
     codepage = ("utf8", "cp1252")
     site_id = 14
     copy_game_header = True  # NOTE: Not sure if this is necessary yet. The file is xml so its likely
-    summary_in_file = True
+    summary_in_file = False
+    summary_in_file_alt = False  # Alternative naming used by importer
 
     substitutions: ClassVar[dict[str, str]] = {
         "LS": r"\$|\xe2\x82\xac|\xe2\u201a\xac|\u20ac|\xc2\xa3|\£|RSD|kr|",  # Currency symbols
@@ -576,18 +578,24 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         # Initialize info directly from XML data
         self.info = {}
 
-        # Parse gametype string (e.g., "Holdem NL $0.02/$0.04")
-        gametype_pattern = (
+        # Parse gametype string - handle both formats
+        gametype_pattern_with_blinds = (
             r"(\w+(?:\s+\w+)*)\s+"
             r"(NL|PL|L|SL|БЛ|LP|No\s+limit|Pot\s+limit|Limit)\s*"
             r"\$?([0-9.,]+)/\$?([0-9.,]+)"
         )
-        gametype_match = re.match(gametype_pattern, gametype_text)
+        gametype_pattern_no_blinds = (
+            r"(\w+(?:\s+\w+)*)\s+"
+            r"(NL|PL|L|SL|БЛ|LP|No\s+limit|Pot\s+limit|Limit)\s*$"
+        )
+
+        gametype_match = re.match(gametype_pattern_with_blinds, gametype_text)
+        if not gametype_match:
+            gametype_match = re.match(gametype_pattern_no_blinds, gametype_text)
+
         if gametype_match:
             game_name = gametype_match.group(1)
             limit_type = gametype_match.group(2)
-            sb = gametype_match.group(3)
-            bb = gametype_match.group(4)
 
             # Set game category
             if "Holdem" in game_name or "Hold" in game_name:
@@ -614,9 +622,22 @@ class iPoker(HandHistoryConverter):  # noqa: N801
             elif limit_type in ("L", "Limit"):
                 self.info["limitType"] = "fl"
 
-            # Set blinds
-            self.info["sb"] = sb.replace(",", ".")
-            self.info["bb"] = bb.replace(",", ".")
+            # Set blinds if present, otherwise use defaults
+            min_groups_for_blinds = 4
+            if len(gametype_match.groups()) >= min_groups_for_blinds:
+                # Has blinds info
+                sb = gametype_match.group(3)
+                bb = gametype_match.group(4)
+                self.info["sb"] = sb.replace(",", ".")
+                self.info["bb"] = bb.replace(",", ".")
+            elif self.info.get("base") == "stud":
+                # For stud tournaments, use ante-based structure
+                self.info["sb"] = "0"
+                self.info["bb"] = "0"
+            else:
+                # For hold'em/omaha tournaments, use default blind structure
+                self.info["sb"] = "10"
+                self.info["bb"] = "20"
         else:
             # If regex doesn't match, try to extract game info from filename or fallback
             log.debug("Gametype regex failed, trying fallback parsing")
@@ -676,9 +697,19 @@ class iPoker(HandHistoryConverter):  # noqa: N801
                 self.info["base"] = "hold"
                 self.info["category"] = "holdem"
 
-        # Set other basic info
-        self.info["type"] = "ring"  # Assume ring game unless proven otherwise
-        self.info["currency"] = session_info.get("currency", "USD")
+        # Detect tournament vs ring game
+        if "<tournamentname>" in self.whole_file or "<place>" in self.whole_file:
+            log.debug("Tournament detected in XML - setting type to tour")
+            self.info["type"] = "tour"
+            self.info["currency"] = "T$"  # Tournament currency
+
+            # Initialize tournament info for XML format
+            self.tinfo = {}
+            self._initialize_xml_tournament_info()
+        else:
+            log.debug("No tournament markers found - setting type to ring")
+            self.info["type"] = "ring"
+            self.info["currency"] = session_info.get("currency", "USD")
         self.tablename = session_info.get("tablename", "Unknown")
 
         # Set defaults
@@ -692,6 +723,381 @@ class iPoker(HandHistoryConverter):  # noqa: N801
 
         log.debug("Final XML parsed info: %s", self.info)
         return self.info
+
+    def _create_tournament_summary_with_all_players(self, hand: Any, tournament_data: dict) -> None:  # noqa: C901, PLR0912, PLR0915
+        """Create a TourneySummary with all players parsed from XML."""
+        try:
+            from decimal import Decimal
+
+            from Database import Database
+            from TourneySummary import TourneySummary
+
+            log.info("Creating TourneySummary with all players")
+
+            # Get database connection
+            db = Database(self.config)
+
+            # Create TourneySummary
+            summary = TourneySummary(
+                db=db,
+                config=self.config,
+                siteName=self.sitename,
+                summaryText=getattr(self, "whole_file", hand.handText),
+                builtFrom="HHC",
+                header="",
+            )
+
+            # Set basic tournament info
+            summary.tourNo = tournament_data.get("tourno")
+            summary.tourneyName = tournament_data.get("tournament_name", "Unknown")
+            summary.buyin = int(tournament_data.get("buyin_amount", Decimal("0")) * 100)
+            summary.fee = int(tournament_data.get("fee_amount", Decimal("0")) * 100)
+            summary.buyinCurrency = tournament_data.get("currency_symbol", "EUR")
+            summary.currency = summary.buyinCurrency
+
+            # Parse tournament data from session/general (not game/players)
+            xml_source = getattr(self, "whole_file", hand.handText)
+
+            # Get hero data from session/general
+            hero_name = re.search(r"<nickname>([^<]*)</nickname>", xml_source)
+            hero_place = re.search(r"<place>([^<]*)</place>", xml_source)
+            hero_win = re.search(r"<win>([^<]*)</win>", xml_source)
+
+            if hero_name:
+                hero_name = hero_name.group(1)
+
+                # Get hero rank (None if not found or N/A)
+                hero_rank = None
+                if hero_place and hero_place.group(1) != "N/A":
+                    try:
+                        hero_rank = int(hero_place.group(1))
+                    except (ValueError, TypeError):
+                        hero_rank = None
+
+                # Get hero winnings (0 if not found)
+                hero_winnings = 0
+                if hero_win and hero_win.group(1) != "N/A":
+                    try:
+                        # Convert "0€" to 0 cents, "1€" to 100 cents, etc.
+                        win_str = hero_win.group(1).replace("€", "").replace(",", ".")
+                        hero_winnings = int(float(win_str) * 100) if win_str else 0
+                    except (ValueError, TypeError):
+                        hero_winnings = 0
+
+                log.info("Hero data: %s, rank=%s, winnings=%s cents", hero_name, hero_rank, hero_winnings)
+
+                # Add hero to tournament
+                summary.addPlayer(hero_rank, hero_name, hero_winnings, summary.currency, None, None, None)
+
+                # Get all other players from game/players but only their names (no wins/ranks)
+                other_players = set()
+                player_name_pattern = r'<player[^>]*name="([^"]*)"[^>]*'
+                all_player_names = re.findall(player_name_pattern, xml_source)
+
+                for player_name in all_player_names:
+                    if player_name != hero_name:
+                        other_players.add(player_name)
+
+                log.info("Other players found: %s", list(other_players))
+
+                # Add other players with unknown rank and no winnings
+                for player_name in other_players:
+                    log.debug("Adding other player %s: rank=None, winnings=0", player_name)
+                    summary.addPlayer(None, player_name, 0, summary.currency, None, None, None)
+
+            else:
+                log.error("No hero found in XML")
+
+            # Detect Twister and set lottery fields
+            if "Twister" in summary.tourneyName:
+                summary.isLottery = True
+                # Calculate multiplier from rewarddrawn vs buyin
+                rewarddrawn_match = re.search(r"<rewarddrawn>([^<]*)</rewarddrawn>", xml_source)
+                if rewarddrawn_match:
+                    try:
+                        rewarddrawn = Decimal(rewarddrawn_match.group(1).replace(",", ".").replace("€", ""))
+                        if summary.buyin > 0:
+                            multiplier = rewarddrawn / (summary.buyin / 100)
+                            summary.tourneyMultiplier = int(multiplier) if multiplier > 1 else 1
+                        else:
+                            summary.tourneyMultiplier = 1
+                    except (ValueError, TypeError, decimal.InvalidOperation):
+                        summary.tourneyMultiplier = 1
+                else:
+                    summary.tourneyMultiplier = 1
+            else:
+                summary.isLottery = False
+                summary.tourneyMultiplier = 1
+
+            log.info("TourneySummary created: lottery=%s, multiplier=%s", summary.isLottery, summary.tourneyMultiplier)
+
+            # Insert into database
+            summary.insertOrUpdate()
+
+            log.info("TourneySummary successfully inserted into database")
+
+        except (ValueError, TypeError, AttributeError, ImportError):
+            log.exception("Error creating TourneySummary")
+
+    def _clean_currency_amount(self, amount_str: str) -> str:
+        """Clean currency amount string for parsing.
+
+        Handles European format (comma as decimal separator) and removes currency symbols.
+        Also handles complex formats like '0€ + 0,02€ + 0,23€'.
+        Example: '0,25€' -> '0.25'
+        Example: '0€ + 0,02€ + 0,23€' -> '0.25'
+        """
+        if not amount_str:
+            return "0"
+
+        # Handle complex format with multiple amounts (e.g., "0€ + 0,02€ + 0,23€")
+        if "+" in amount_str:
+            parts = amount_str.split("+")
+            total = Decimal("0")
+            for part_str in parts:
+                part = part_str.strip()
+                if part:
+                    # Remove currency symbols
+                    cleaned = re.sub(r"[€$£¥]", "", part)
+                    # Replace comma with dot for decimal separator
+                    cleaned = cleaned.replace(",", ".")
+                    # Remove any remaining non-digit, non-dot characters
+                    cleaned = re.sub(r"[^\d.]", "", cleaned)
+                    if cleaned:
+                        try:
+                            total += Decimal(cleaned)
+                        except decimal.InvalidOperation:
+                            continue
+            return str(total)
+        # Simple format
+        # Remove currency symbols
+        cleaned = re.sub(r"[€$£¥]", "", amount_str)
+
+        # Replace comma with dot for decimal separator (European format)
+        cleaned = cleaned.replace(",", ".")
+
+        # Remove any remaining non-digit, non-dot characters
+        cleaned = re.sub(r"[^\d.]", "", cleaned)
+
+        # Handle empty string
+        if not cleaned:
+            return "0"
+
+        return cleaned
+
+    def _initialize_xml_tournament_info(self) -> None:  # noqa: C901, PLR0912, PLR0915
+        """Initialize tournament info for XML format tournaments."""
+        log.debug("Initializing tournament info for XML format")
+
+        # Extract tournament info from whole_file - includes both old and new XML formats
+        tourney_patterns = {
+            # Basic tournament data
+            "tournamentcode": r"<tournamentcode>([^<]*)</tournamentcode>",
+            "tournamentname": r"<tournamentname>([^<]*)</tournamentname>",
+            "place": r"<place>([^<]*)</place>",
+            "buyin": r"<buyin>([^<]*)</buyin>",
+            "birake": r"<birake>([^<]*)</birake>",
+            "totalbuyin": r"<totalbuyin>([^<]*)</totalbuyin>",
+            "win": r"<win>([^<]*)</win>",
+            "currency": r"<currency>([^<]*)</currency>",
+            "nickname": r"<nickname>([^<]*)</nickname>",
+
+            # Extended tournament data
+            "client_version": r"<client_version>([^<]*)</client_version>",
+            "mode": r"<mode>([^<]*)</mode>",
+            "duration": r"<duration>([^<]*)</duration>",
+            "gamecount": r"<gamecount>([^<]*)</gamecount>",
+            "rewarddrawn": r"<rewarddrawn>([^<]*)</rewarddrawn>",
+            "statuspoints": r"<statuspoints>([^<]*)</statuspoints>",
+            "awardpoints": r"<awardpoints>([^<]*)</awardpoints>",
+            "ipoints": r"<ipoints>([^<]*)</ipoints>",
+            "tablesize": r"<tablesize>([^<]*)</tablesize>",
+
+            # Player performance data
+            "bets": r"<bets>([^<]*)</bets>",
+            "wins": r"<wins>([^<]*)</wins>",
+            "chipsin": r"<chipsin>([^<]*)</chipsin>",
+            "chipsout": r"<chipsout>([^<]*)</chipsout>",
+
+            # Timing data
+            "startdate": r"<startdate>([^<]*)</startdate>",
+            "enddate": r"<enddate>([^<]*)</enddate>",
+
+            # Game type data
+            "gametype": r"<gametype>([^<]*)</gametype>",
+            "tablename": r"<tablename>([^<]*)</tablename>",
+        }
+
+        tourney_info = {}
+        for key, pattern in tourney_patterns.items():
+            match = re.search(pattern, self.whole_file)
+            if match:
+                tourney_info[key] = match.group(1)
+                log.debug("Found tournament %s: %s", key, match.group(1))
+
+        # Initialize tinfo if not exists
+        if not hasattr(self, "tinfo"):
+            self.tinfo = {}
+
+        # Extract tournament number - prefer tournamentcode over tablename parsing
+        if tourney_info.get("tournamentcode"):
+            self.tinfo["tourNo"] = tourney_info["tournamentcode"]
+            log.debug("Using tournamentcode as tourNo: %s", self.tinfo["tourNo"])
+        else:
+            # Fallback: extract from tablename
+            tablename = re.search(r"<tablename>([^<]*)</tablename>", self.whole_file)
+            if tablename:
+                tourno_match = re.search(r"(\d{9,})", tablename.group(1))
+                if tourno_match:
+                    self.tinfo["tourNo"] = tourno_match.group(1)
+                    log.debug("Extracted tourNo from tablename: %s", self.tinfo["tourNo"])
+                else:
+                    self.tinfo["tourNo"] = "1"
+                    log.debug("No tourNo found in tablename, using placeholder: 1")
+            else:
+                self.tinfo["tourNo"] = "1"
+                log.debug("No tablename found, using placeholder tourNo: 1")
+
+        # Set tournament info
+        self.tinfo["tourName"] = tourney_info.get("tournamentname", "Unknown Tournament")
+
+        # Parse buyin info - handle both old and new formats
+        buyin_str = tourney_info.get("buyin", "0")
+        birake_str = tourney_info.get("birake", "0")
+        totalbuyin_str = tourney_info.get("totalbuyin", "0")
+
+        # Parse amounts using European decimal format (comma as decimal separator)
+        try:
+            if buyin_str and buyin_str != "0":
+                # Handle old format like "$0.22+$0.03" or new format like "0,22€"
+                if "+" in buyin_str:
+                    # Old format: "$0.22+$0.03"
+                    parts = buyin_str.split("+")
+                    min_parts = 2
+                    if len(parts) >= min_parts:
+                        buyin_clean = self._clean_currency_amount(parts[0])
+                        fee_clean = self._clean_currency_amount(parts[1])
+                        self.tinfo["buyin"] = int(Decimal(buyin_clean) * 100)
+                        self.tinfo["fee"] = int(Decimal(fee_clean) * 100)
+                    else:
+                        buyin_clean = self._clean_currency_amount(buyin_str)
+                        self.tinfo["buyin"] = int(Decimal(buyin_clean) * 100)
+                        self.tinfo["fee"] = 0
+                else:
+                    # New format: "0,22€"
+                    buyin_clean = self._clean_currency_amount(buyin_str)
+                    self.tinfo["buyin"] = int(Decimal(buyin_clean) * 100)
+                    self.tinfo["fee"] = 0
+            else:
+                self.tinfo["buyin"] = 0
+                self.tinfo["fee"] = 0
+
+            # Handle separate fee (birake) field
+            if birake_str and birake_str != "0":
+                birake_clean = self._clean_currency_amount(birake_str)
+                self.tinfo["fee"] = int(Decimal(birake_clean) * 100)
+
+            # If no buyin/fee but totalbuyin exists, use totalbuyin as buyin
+            if self.tinfo["buyin"] == 0 and self.tinfo["fee"] == 0 and totalbuyin_str and totalbuyin_str != "0":
+                totalbuyin_clean = self._clean_currency_amount(totalbuyin_str)
+                self.tinfo["buyin"] = int(Decimal(totalbuyin_clean) * 100)
+                self.tinfo["fee"] = 0
+                log.debug("Using totalbuyin as buyin: %s", self.tinfo["buyin"])
+
+        except (ValueError, TypeError, decimal.InvalidOperation) as e:
+            log.warning("Error parsing buyin amounts: %s", e)
+            self.tinfo["buyin"] = 0
+            self.tinfo["fee"] = 0
+
+        # Set currency
+        self.tinfo["currency"] = tourney_info.get("currency", "EUR")
+        self.tinfo["buyinCurrency"] = self.tinfo["currency"]
+
+        if self.tinfo["buyin"] == 0:
+            self.tinfo["buyinCurrency"] = "FREE"
+
+        # Set hero (player nickname)
+        if tourney_info.get("nickname"):
+            self.tinfo["hero"] = tourney_info["nickname"]
+
+        # Extended tournament data
+        self.tinfo["client_version"] = tourney_info.get("client_version", "")
+        self.tinfo["mode"] = tourney_info.get("mode", "")
+        self.tinfo["duration"] = tourney_info.get("duration", "")
+        self.tinfo["gamecount"] = tourney_info.get("gamecount", "0")
+        self.tinfo["tablesize"] = tourney_info.get("tablesize", "")
+
+        # iPoker points and rewards
+        self.tinfo["statuspoints"] = tourney_info.get("statuspoints", "0")
+        self.tinfo["awardpoints"] = tourney_info.get("awardpoints", "0")
+        self.tinfo["ipoints"] = tourney_info.get("ipoints", "0")
+
+        # Reward drawn (prize pool amount for Twister lottery)
+        if tourney_info.get("rewarddrawn"):
+            try:
+                reward_clean = self._clean_currency_amount(tourney_info["rewarddrawn"])
+                self.tinfo["rewarddrawn"] = Decimal(reward_clean)
+                self.tinfo["rewarddrawn_cents"] = int(self.tinfo["rewarddrawn"] * 100)
+            except (ValueError, TypeError, decimal.InvalidOperation):
+                self.tinfo["rewarddrawn"] = Decimal("0")
+                self.tinfo["rewarddrawn_cents"] = 0
+        else:
+            self.tinfo["rewarddrawn"] = Decimal("0")
+            self.tinfo["rewarddrawn_cents"] = 0
+
+        # Calculate Twister multiplier (rewarddrawn / buyin)
+        if self.tinfo["rewarddrawn"] > 0 and self.tinfo["buyin"] > 0:
+            # Convert buyin from cents to euros for calculation
+            buyin_euros = Decimal(self.tinfo["buyin"]) / 100
+            self.tinfo["multiplier"] = self.tinfo["rewarddrawn"] / buyin_euros
+            log.debug("Calculated Twister multiplier: %s (rewarddrawn: %s / buyin: %s)",
+                     self.tinfo["multiplier"], self.tinfo["rewarddrawn"], buyin_euros)
+        else:
+            self.tinfo["multiplier"] = Decimal("0")
+            log.debug("Cannot calculate multiplier: rewarddrawn=%s, buyin=%s",
+                     self.tinfo["rewarddrawn"], self.tinfo["buyin"])
+
+        # Player performance data
+        self.tinfo["bets"] = tourney_info.get("bets", "0")
+        self.tinfo["wins"] = tourney_info.get("wins", "0")
+        self.tinfo["chipsin"] = tourney_info.get("chipsin", "0")
+        self.tinfo["chipsout"] = tourney_info.get("chipsout", "0")
+
+        # Parse hero winnings
+        if tourney_info.get("win"):
+            try:
+                win_clean = self._clean_currency_amount(tourney_info["win"])
+                self.tinfo["hero_winnings"] = Decimal(win_clean)
+                self.tinfo["hero_winnings_cents"] = int(self.tinfo["hero_winnings"] * 100)
+            except (ValueError, TypeError, decimal.InvalidOperation):
+                self.tinfo["hero_winnings"] = Decimal("0")
+                self.tinfo["hero_winnings_cents"] = 0
+        else:
+            self.tinfo["hero_winnings"] = Decimal("0")
+            self.tinfo["hero_winnings_cents"] = 0
+
+        # Parse timing data
+        if tourney_info.get("startdate"):
+            try:
+                import datetime as dt
+                start_time = dt.datetime.strptime(tourney_info["startdate"], "%Y-%m-%d %H:%M:%S")  # noqa: DTZ007
+                self.tinfo["startTime"] = start_time.replace(tzinfo=dt.timezone.utc)
+            except (ValueError, TypeError):
+                self.tinfo["startTime"] = None
+
+        if tourney_info.get("enddate"):
+            try:
+                import datetime as dt
+                end_time = dt.datetime.strptime(tourney_info["enddate"], "%Y-%m-%d %H:%M:%S")  # noqa: DTZ007
+                self.tinfo["endTime"] = end_time.replace(tzinfo=dt.timezone.utc)
+            except (ValueError, TypeError):
+                self.tinfo["endTime"] = None
+
+        # Set table name for tournament
+        self.tablename = "1"
+        self.info["table_name"] = self.tinfo["tourName"]
+
+        log.debug("Initialized tournament info: %s", self.tinfo)
 
     def _process_lh_game_type(self, mg: dict) -> dict:
         """Process LH game type."""
@@ -782,14 +1188,12 @@ class iPoker(HandHistoryConverter):  # noqa: N801
 
     def _process_tournament_info(self, mg: dict, mg3: dict, hand_text: str) -> bool:
         """Process tournament-specific information."""
-        # Skip tournament processing for cash games
-        if self.info.get("type") == "ring":
-            log.debug("Skipping tournament info processing for cash game")
+        # Check if this is a tournament (type should already be set by _parse_xml_format)
+        if self.info.get("type") != "tour":
+            log.debug("Skipping tournament info processing - type is %s", self.info.get("type"))
             return False
 
         log.debug("Processing tournament-specific information.")
-        self.info["type"] = "tour"
-        self.info["currency"] = "T$"
 
         if "TABLET" in mg3:
             self.info["table_name"] = mg3["TABLET"]
@@ -1139,11 +1543,28 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         # Process uncalled bets information
         self._process_uncalled_bets(hand_text)
 
+        # Detect tournament vs ring game (check for tournament markers in whole file)
+        if hasattr(self, "whole_file") and self.whole_file:
+            if "<tournamentname>" in self.whole_file or "<place>" in self.whole_file:
+                log.debug("Tournament detected in XML - setting type to tour")
+                self.info["type"] = "tour"
+                self.info["currency"] = "T$"  # Tournament currency
+
+                # Initialize tournament info for XML format
+                self.tinfo = {}
+                self._initialize_xml_tournament_info()
+            else:
+                log.debug("No tournament markers found - setting type to ring")
+                self.info["type"] = "ring"
+
         # Process tournament information
+        log.debug("Before tournament processing - type is: %s", self.info.get("type"))
         tourney = self._process_tournament_info(mg, mg3, hand_text)
+        log.debug("Tournament processing result: %s", tourney)
 
         # Handle ring game specific logic
         if not tourney:
+            log.debug("Tournament processing failed, handling as ring game")
             self._handle_ring_game_logic(mg, hand_text)
 
         log.debug("Final info: %s", self.info)
@@ -1605,6 +2026,10 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         """
         log.debug("Entering readAntes for hand: %s", hand.handid)
 
+        # Debug: show players in hand
+        player_names = [player[1] for player in hand.players]
+        log.debug("Players in hand: %s", player_names)
+
         # Find all the antes in the hand text using a regular expression
         m = self.re_action.finditer(hand.handText)
         log.debug("Searching for antes in hand text.")
@@ -1617,6 +2042,13 @@ class iPoker(HandHistoryConverter):  # noqa: N801
                 player_name = a.group("PNAME")
                 ante_amount = self.clearMoneyString(a.group("BET"))
                 log.debug("Adding ante for player: %s, amount: %s", player_name, ante_amount)
+
+                # Check if player exists before adding ante
+                if player_name not in player_names:
+                    log.warning("Player %s not found in hand players list: %s. Skipping ante.",
+                               player_name, player_names)
+                    continue
+
                 hand.addAnte(player_name, ante_amount)
 
         log.debug("Exiting readAntes for hand: %s", hand.handid)
@@ -1645,6 +2077,10 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         """
         log.debug("Entering readBlinds for hand: %s", hand.handid)
 
+        # Debug: show players in hand
+        player_names = [player[1] for player in hand.players]
+        log.debug("Players in hand: %s", player_names)
+
         # Find all actions in the preflop street
         log.debug("Searching for small blind actions in PREFLOP street.")
         for a in self.re_action.finditer(hand.streets["PREFLOP"]):
@@ -1652,6 +2088,13 @@ class iPoker(HandHistoryConverter):  # noqa: N801
                 player_name = a.group("PNAME")
                 sb_amount = self.clearMoneyString(a.group("BET"))
                 log.debug("Small blind detected: Player=%s, Amount=%s", player_name, sb_amount)
+
+                # Check if player exists before adding blind
+                if player_name not in player_names:
+                    log.warning("Player %s not found in hand players list: %s. Skipping small blind.",
+                               player_name, player_names)
+                    continue
+
                 hand.addBlind(player_name, "small blind", sb_amount)
                 if not hand.gametype["sb"]:
                     hand.gametype["sb"] = sb_amount
@@ -1660,7 +2103,11 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         # Find all actions in the preflop street for big blinds
         log.debug("Searching for big blind actions in PREFLOP street.")
         m = self.re_action.finditer(hand.streets["PREFLOP"])
-        blinds = {int(a.group("ACT")): a.groupdict() for a in m if a.group("ATYPE") == "2"}
+        blinds = {
+            int(a.group("ACT")): a.groupdict()
+            for a in m
+            if a.group("ATYPE") == "2" and a.group("PNAME") in player_names
+        }
         log.debug("Big blinds found: %s players.", len(blinds))
 
         for b in sorted(blinds.keys()):
@@ -1930,6 +2377,10 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         """
         log.debug("Entering readAction for hand: %s, street: %s", hand.handid, street)
 
+        # Debug: show players in hand
+        player_names = [player[1] for player in hand.players]
+        log.debug("Players in hand: %s", player_names)
+
         # HH format doesn't actually print the actions in order!
         m = self.re_action.finditer(hand.streets[street])
         actions = {}
@@ -1942,6 +2393,12 @@ class iPoker(HandHistoryConverter):  # noqa: N801
             player = action["PNAME"]
             bet = self.clearMoneyString(action["BET"])
             log.debug("Processing action: street=%s, player=%s, atype=%s, bet=%s", street, player, atype, bet)
+
+            # Check if player exists in hand before processing actions
+            if player not in player_names:
+                log.warning("Player %s not found in hand players list: %s. Skipping action type %s.",
+                           player, player_names, atype)
+                continue
 
             if atype == "0":
                 hand.addFold(street, player)
@@ -2059,6 +2516,11 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         # Process players and winnings
         self._process_tournament_players(hand, tournament_data)
 
+        # Create TourneySummary with all players (only once per tournament)
+        if not hasattr(self, "tournament_summary_created"):
+            self._create_tournament_summary_with_all_players(hand, tournament_data)
+            self.tournament_summary_created = True
+
         log.info("Exiting readTourneyResults method")
 
     def _initialize_tournament_data(self, hand: Any) -> None:
@@ -2069,7 +2531,7 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         hand.isProgressive = False
         log.debug("Initialized tournament data structures method: iPoker:readTourneyResults, is_progressive: False")
 
-    def _parse_tournament_data(self, hand_text: str) -> dict:
+    def _parse_tournament_data(self, hand_text: str) -> dict:  # noqa: C901, PLR0912, PLR0915
         """Parse tournament data from hand text."""
         tournament_data = {
             "buyin_amount": Decimal("0"),
@@ -2081,10 +2543,114 @@ class iPoker(HandHistoryConverter):  # noqa: N801
             "tournament_name": None,
         }
 
-        for pattern in [self.re_game_info_trny, self.re_game_info_trny2]:
-            for m in pattern.finditer(hand_text):
-                mg = m.groupdict()
-                self._extract_tournament_data_from_match(mg, tournament_data)
+        # Use whole_file instead of hand_text for XML parsing
+        xml_source = getattr(self, "whole_file", hand_text)
+
+        # Parse tournament info from XML - extended patterns
+        tourney_patterns = {
+            # Basic tournament data
+            "tournamentcode": r"<tournamentcode>([^<]*)</tournamentcode>",
+            "tournamentname": r"<tournamentname>([^<]*)</tournamentname>",
+            "place": r"<place>([^<]*)</place>",
+            "buyin": r"<buyin>([^<]*)</buyin>",
+            "birake": r"<birake>([^<]*)</birake>",
+            "totalbuyin": r"<totalbuyin>([^<]*)</totalbuyin>",
+            "win": r"<win>([^<]*)</win>",
+            "currency": r"<currency>([^<]*)</currency>",
+
+            # Extended data for tournament results
+            "rewarddrawn": r"<rewarddrawn>([^<]*)</rewarddrawn>",
+            "statuspoints": r"<statuspoints>([^<]*)</statuspoints>",
+            "awardpoints": r"<awardpoints>([^<]*)</awardpoints>",
+            "ipoints": r"<ipoints>([^<]*)</ipoints>",
+            "gamecount": r"<gamecount>([^<]*)</gamecount>",
+            "duration": r"<duration>([^<]*)</duration>",
+            "tablesize": r"<tablesize>([^<]*)</tablesize>",
+            "mode": r"<mode>([^<]*)</mode>",
+            "bets": r"<bets>([^<]*)</bets>",
+            "wins": r"<wins>([^<]*)</wins>",
+            "chipsin": r"<chipsin>([^<]*)</chipsin>",
+            "chipsout": r"<chipsout>([^<]*)</chipsout>",
+        }
+
+        tourney_info = {}
+        for key, pattern in tourney_patterns.items():
+            match = re.search(pattern, xml_source)
+            if match:
+                tourney_info[key] = match.group(1)
+                log.debug("Found tournament %s: %s", key, match.group(1))
+
+        # Extract tournament data
+        tournament_data["tourno"] = tourney_info.get("tournamentcode")
+        tournament_data["tournament_name"] = tourney_info.get("tournamentname")
+        tournament_data["rank"] = tourney_info.get("place")
+        tournament_data["currency_symbol"] = tourney_info.get("currency", "EUR")
+
+        # Extended tournament data
+        tournament_data["gamecount"] = tourney_info.get("gamecount", "0")
+        tournament_data["duration"] = tourney_info.get("duration", "")
+        tournament_data["tablesize"] = tourney_info.get("tablesize", "")
+        tournament_data["mode"] = tourney_info.get("mode", "")
+        tournament_data["statuspoints"] = tourney_info.get("statuspoints", "0")
+        tournament_data["awardpoints"] = tourney_info.get("awardpoints", "0")
+        tournament_data["ipoints"] = tourney_info.get("ipoints", "0")
+        tournament_data["bets"] = tourney_info.get("bets", "0")
+        tournament_data["wins"] = tourney_info.get("wins", "0")
+        tournament_data["chipsin"] = tourney_info.get("chipsin", "0")
+        tournament_data["chipsout"] = tourney_info.get("chipsout", "0")
+
+        # Parse buyin amounts
+        try:
+            buyin_str = tourney_info.get("buyin", "0")
+            if buyin_str and buyin_str != "0":
+                buyin_clean = self._clean_currency_amount(buyin_str)
+                tournament_data["buyin_amount"] = Decimal(buyin_clean)
+
+            birake_str = tourney_info.get("birake", "0")
+            if birake_str and birake_str != "0":
+                birake_clean = self._clean_currency_amount(birake_str)
+                tournament_data["fee_amount"] = Decimal(birake_clean)
+
+            totalbuyin_str = tourney_info.get("totalbuyin", "0")
+            if totalbuyin_str and totalbuyin_str != "0":
+                totalbuyin_clean = self._clean_currency_amount(totalbuyin_str)
+                tournament_data["totbuyin_amount"] = Decimal(totalbuyin_clean)
+
+            # Parse hero winnings
+            win_str = tourney_info.get("win", "0")
+            if win_str and win_str != "0":
+                win_clean = self._clean_currency_amount(win_str)
+                tournament_data["hero_winnings"] = Decimal(win_clean)
+            else:
+                tournament_data["hero_winnings"] = Decimal("0")
+
+            # Parse reward drawn (Twister prize pool)
+            rewarddrawn_str = tourney_info.get("rewarddrawn", "0")
+            if rewarddrawn_str and rewarddrawn_str != "0":
+                reward_clean = self._clean_currency_amount(rewarddrawn_str)
+                tournament_data["rewarddrawn"] = Decimal(reward_clean)
+            else:
+                tournament_data["rewarddrawn"] = Decimal("0")
+
+            # Calculate Twister multiplier (rewarddrawn / buyin)
+            if tournament_data["rewarddrawn"] > 0 and tournament_data["buyin_amount"] > 0:
+                tournament_data["multiplier"] = tournament_data["rewarddrawn"] / tournament_data["buyin_amount"]
+                log.debug("Calculated Twister multiplier: %s (rewarddrawn: %s / buyin: %s)",
+                         tournament_data["multiplier"], tournament_data["rewarddrawn"], tournament_data["buyin_amount"])
+            elif tournament_data["rewarddrawn"] > 0 and tournament_data["totbuyin_amount"] > 0:
+                # Fallback to totalbuyin if buyin_amount is 0
+                tournament_data["multiplier"] = tournament_data["rewarddrawn"] / tournament_data["totbuyin_amount"]
+                log.debug("Calculated Twister multiplier using totalbuyin: %s (rewarddrawn: %s / totalbuyin: %s)",
+                         tournament_data["multiplier"], tournament_data["rewarddrawn"],
+                         tournament_data["totbuyin_amount"])
+            else:
+                tournament_data["multiplier"] = Decimal("0")
+                log.debug("Cannot calculate multiplier: rewarddrawn=%s, buyin_amount=%s, totbuyin_amount=%s",
+                         tournament_data["rewarddrawn"], tournament_data["buyin_amount"],
+                         tournament_data["totbuyin_amount"])
+
+        except (ValueError, TypeError, decimal.InvalidOperation) as e:
+            log.warning("Error parsing tournament buyin amounts: %s", e)
 
         self._validate_tournament_data(tournament_data)
         return tournament_data
@@ -2184,10 +2750,44 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         hand.isAddOn = False
         hand.isKO = False
 
+        # Extended tournament attributes
+        hand.gamecount = tournament_data.get("gamecount", "0")
+        hand.duration = tournament_data.get("duration", "")
+        hand.tablesize = tournament_data.get("tablesize", "")
+        hand.mode = tournament_data.get("mode", "")
+
+        # iPoker points
+        hand.statuspoints = tournament_data.get("statuspoints", "0")
+        hand.awardpoints = tournament_data.get("awardpoints", "0")
+        hand.ipoints = tournament_data.get("ipoints", "0")
+
+        # Player performance
+        hand.bets = tournament_data.get("bets", "0")
+        hand.wins = tournament_data.get("wins", "0")
+        hand.chipsin = tournament_data.get("chipsin", "0")
+        hand.chipsout = tournament_data.get("chipsout", "0")
+
+        # Hero winnings (in cents)
+        hand.hero_winnings = int(tournament_data.get("hero_winnings", Decimal("0")) * 100)
+
+        # Reward drawn (Twister prize pool) in cents
+        hand.rewarddrawn = int(tournament_data.get("rewarddrawn", Decimal("0")) * 100)
+
+        # Twister multiplier (rewarddrawn / buyin)
+        hand.multiplier = float(tournament_data.get("multiplier", Decimal("0")))
+
+        # Lottery tournament detection and attributes
+        hand.isLottery = tournament_data.get("multiplier", Decimal("0")) > 1
+        hand.tourneyMultiplier = int(tournament_data.get("multiplier", Decimal("1")))
+
         if not hasattr(hand, "endTime"):
             hand.endTime = hand.startTime
 
-        log.debug("Set tournament attributes: tourNo=%s, buyin=%s, fee=%s", hand.tourNo, hand.buyin, hand.fee)
+        log.debug("Set tournament attributes: tourNo=%s, buyin=%s, fee=%s",
+                 hand.tourNo, hand.buyin, hand.fee)
+        log.debug("Set tournament attributes continued: hero_winnings=%s, rewarddrawn=%s, multiplier=%s",
+                 hand.hero_winnings,
+                 hand.rewarddrawn, hand.multiplier)
 
     def _process_tournament_players(self, hand: Any, tournament_data: dict) -> None:
         """Process tournament players and their results."""
@@ -2208,12 +2808,31 @@ class iPoker(HandHistoryConverter):  # noqa: N801
             except (ValueError, TypeError):
                 log.warning("Invalid rank value: %s", tournament_data["rank"])
 
+        # Set hero winnings from tournament data
+        if self.hero and self.hero in hand.winnings:
+            hero_winnings_cents = int(tournament_data.get("hero_winnings", Decimal("0")) * 100)
+            hand.winnings[self.hero] = hero_winnings_cents
+            log.debug("Set winnings for hero %s: %s cents", self.hero, hero_winnings_cents)
+        else:
+            log.error("Hero %s not found in hand.winnings: %s", self.hero, hand.winnings)
+
+        # For Twister tournaments, calculate other players' winnings based on Twister rules
+        if tournament_data.get("multiplier", Decimal("0")) > 1:
+            # In Twister, only the winner gets the prize pool, others get 0
+            if self.hero and self.hero in hand.ranks and hand.ranks[self.hero] == 1:
+                # Hero is the winner, already set above
+                pass
+            elif self.hero and self.hero in hand.winnings:
+                hand.winnings[self.hero] = 0
+                log.debug("Set winnings for hero %s to 0 (non-winner in Twister)", self.hero)
+
         # Set hand statistics
         hand.entries = len(hand.playersIn)
         hand.prizepool = sum(hand.winnings.values())
 
-        # Create tournament summary
-        self._create_tournament_summary(hand)
+        # Tournament summary will be handled by iPokerSummary parser automatically
+        # when summary_in_file = True and summaryImporter="iPokerSummary" in config
+        log.debug("Tournament summary will be processed by iPokerSummary parser")
 
     def _create_tournament_summary(self, hand: Any) -> None:
         """Create and save tournament summary."""

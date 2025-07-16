@@ -627,13 +627,13 @@ class Importer:
             )
             hhc.setAutoPop(self.mode == "auto")
             hhc.start()
-            
+
             # Add parsing issues to the main importer's list
             for issue in hhc.parsing_issues:
                 self.import_issues.append(f"In {fpdbfile.path}: {issue}")
 
             # Capture the detected sitename from the parser (for iPoker skin detection)
-            detected_sitename = getattr(hhc, 'sitename', None)
+            detected_sitename = getattr(hhc, "sitename", None)
 
             self.pos_in_file[fpdbfile.path] = hhc.getLastCharacterRead()
 
@@ -762,37 +762,88 @@ class Importer:
 
         stored -= duplicates
 
-        if stored > 0 and ihands[0].gametype["type"] == "tour" and hhc.summaryInFile:
-            fpdbfile.ftype = "both"
+        # Mark file for summary processing if it's a tournament with summary in file
+        # Process even if stored=0 (duplicates) to ensure tournament summaries are processed
+        # Use phands instead of ihands to include duplicates
+        if len(phands) > 0:
+            gametype = phands[0].gametype
+            log.debug("Checking summary conditions:")
+            log.debug(f"  len(phands): {len(phands)}")
+            log.debug(f"  gametype: {gametype}")
+            log.debug(f"  gametype['type']: {gametype.get('type', 'NOT_FOUND')}")
+            log.debug(f"  summaryInFile: {getattr(hhc, 'summaryInFile', 'NOT_FOUND')}")
+            log.debug(f"  hhc type: {type(hhc)}")
+            log.debug(f"  hhc sitename: {getattr(hhc, 'sitename', 'NOT_FOUND')}")
+
+            if gametype.get("type") == "tour" and getattr(hhc, "summaryInFile", False):
+                fpdbfile.ftype = "both"
+                log.info(f"✅ File {fpdbfile.path} marked as 'both' for summary processing")
+            else:
+                log.warning(f"❌ File {fpdbfile.path} NOT marked for summary processing")
+                log.warning(f"   - type is '{gametype.get('type')}' (expected 'tour')")
+                log.warning(f"   - summaryInFile is '{getattr(hhc, 'summaryInFile', False)}' (expected True)")
+        else:
+            log.warning("❌ No phands available for summary checking")
 
         ttime = time() - ttime
         return (stored, duplicates, partial, skipped, errors, ttime, detected_sitename)
 
     def autoSummaryGrab(self, force=False) -> None:
+        log.debug(f"autoSummaryGrab called with force={force}")
+        log.debug(f"Total files in filelist: {len(self.filelist)}")
+
+        both_files_count = 0
         for f, fpdbfile in list(self.filelist.items()):
-            stat_info = os.stat(f)
-            if (
-                (time() - stat_info.st_mtime) > 300 or force
-            ) and fpdbfile.ftype == "both":
-                self._import_summary_file(fpdbfile)
-                fpdbfile.ftype = "hh"
+            log.debug(f"Processing file: {f}, ftype: {fpdbfile.ftype}")
+
+            if fpdbfile.ftype == "both":
+                both_files_count += 1
+                stat_info = os.stat(f)
+                file_age = time() - stat_info.st_mtime
+                log.debug(f"File {f} marked as 'both', age: {file_age:.1f}s, force: {force}")
+
+                if file_age > 300 or force:
+                    log.debug(f"Processing summary for file: {f}")
+                    self._import_summary_file(fpdbfile)
+                    fpdbfile.ftype = "hh"
+                    log.debug(f"Summary processing completed for: {f}")
+                else:
+                    log.debug(f"File {f} too recent (age: {file_age:.1f}s), skipping summary processing")
+
+        log.debug(f"autoSummaryGrab completed. Files marked as 'both': {both_files_count}")
 
     def _import_summary_file(self, fpdbfile):
+        log.debug(f"_import_summary_file called for: {fpdbfile.path}")
+        log.debug(f"Site: {fpdbfile.site.name}, Summary module: {fpdbfile.site.summary}")
+
         (stored, duplicates, partial, skipped, errors, ttime) = (0, 0, 0, 0, 0, time())
-        mod = __import__(fpdbfile.site.summary)
+
+        try:
+            mod = __import__(fpdbfile.site.summary)
+            log.debug(f"Successfully imported module: {fpdbfile.site.summary}")
+        except ImportError as e:
+            log.error(f"Failed to import summary module {fpdbfile.site.summary}: {e}")
+            return (0, 0, 0, 0, 1, time())
+
         obj = getattr(mod, fpdbfile.site.summary, None)
+        log.debug(f"Summary class object: {obj}")
+
         if callable(obj):
             if self.caller:
                 self.progressNotify()
             summaryTexts = self.readFile(obj, fpdbfile.path, fpdbfile.site.name)
+            log.debug(f"readFile returned: {type(summaryTexts)}, length: {len(summaryTexts) if summaryTexts else 0}")
+
             if summaryTexts is None:
                 log.warning(
                     f"Found: '{fpdbfile.path}' with 0 characters... skipping",
-                )  # Fixed the typo (fpbdfile -> fpdbfile)
+                )
                 return (0, 0, 0, 0, 1, time())  # File had 0 characters
 
+            log.debug(f"Processing {len(summaryTexts)} summary texts")
             ####Lock Placeholder####
             for j, summaryText in enumerate(summaryTexts, start=1):
+                log.debug(f"Processing summary {j}/{len(summaryTexts)}, length: {len(summaryText)}")
                 try:
                     conv = obj(
                         db=self.database,
@@ -898,7 +949,7 @@ class ImportProgressDialog(QDialog):
         if self.parent is None or self.parent == "CLI_NO_PROGRESS":
             # Command line mode, no GUI
             return
-        
+
         # GUI Mode
         QDialog.__init__(self, parent)
         self.setWindowTitle("Importing")
@@ -918,7 +969,7 @@ class ImportProgressDialog(QDialog):
 
     def progress_update(self, filename, handcount) -> None:
         self.fraction += 1
-        
+
         if self.parent is None:
             # Command line mode
             if self.total > 0:
@@ -926,15 +977,15 @@ class ImportProgressDialog(QDialog):
                     progress = self.fraction / self.total
                     bar_length = 40
                     filled_len = int(round(bar_length * progress))
-                    bar = '█' * filled_len + '─' * (bar_length - filled_len)
+                    bar = "█" * filled_len + "─" * (bar_length - filled_len)
                     percentage = round(progress * 100, 1)
                     # Use sys.stdout.write for continuous line update
-                    sys.stdout.write(f'\rProgress: |{bar}| {percentage}% Complete - {os.path.basename(filename)}')
+                    sys.stdout.write(f"\rProgress: |{bar}| {percentage}% Complete - {os.path.basename(filename)}")
                     sys.stdout.flush()
                 except (ZeroDivisionError, ValueError):
                     pass # Avoid errors if total is 0 for some reason
             return
-        elif self.parent == "CLI_NO_PROGRESS":
+        if self.parent == "CLI_NO_PROGRESS":
             return # No output at all
 
         # GUI mode
@@ -954,12 +1005,12 @@ class ImportProgressDialog(QDialog):
         self.progresstext.setText(
             now_formatted + " - " + ("Importing") + " " + filename + "\n",
         )
-    
+
     def accept(self):
         if self.parent is None:
-            sys.stdout.write('\n') # Newline after progress bar finishes
+            sys.stdout.write("\n") # Newline after progress bar finishes
             return
-        elif self.parent == "CLI_NO_PROGRESS":
+        if self.parent == "CLI_NO_PROGRESS":
             return
         super().accept()
 
