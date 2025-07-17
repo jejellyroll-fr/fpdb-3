@@ -110,7 +110,7 @@ class SealsWithClubs(HandHistoryConverter):
         re.MULTILINE,
     )
     re_Action = re.compile(
-        r"""^{PLYR}:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)(?:\s(?P<BET>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?(?:\sto\s(?P<POT>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?\s*$""".format(**substitutions),
+        r"""^{PLYR}:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)(?:\s(?P<BET>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?(?:\sto\s(?P<POT>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?(?:\sand\sis\sall-in)?.*?$""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -374,7 +374,12 @@ class SealsWithClubs(HandHistoryConverter):
         log.debug(f"Reading community cards for street: {street}")
         if street in ("FLOP", "TURN", "RIVER"):
             m = self.re_Board.search(hand.streets[street])
-            hand.setCommunityCards(street, m.group("CARDS").split(" "))
+            if m:
+                cards_str = m.group("CARDS")
+                # Clean up the cards string by removing extra brackets
+                cards_str = cards_str.replace(']', '').replace('[', '')
+                cards = [card.strip() for card in cards_str.split() if card.strip()]
+                hand.setCommunityCards(street, cards)
 
     def readAntes(self, hand) -> None:
         log.info("Reading antes")

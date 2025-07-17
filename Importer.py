@@ -646,13 +646,15 @@ class Importer:
             stored -= partial
             stored -= skipped
 
+            # Initialize variables that are used later in the function
+            (phands, ahands, ihands, to_hud) = ([], [], [], [])
+
             if stored > 0:
                 if self.caller:
                     self.progressNotify()
                 handlist = hhc.getProcessedHands()
                 self.database.resetBulkCache(True)
                 self.pos_in_file[fpdbfile.path] = hhc.getLastCharacterRead()
-                (phands, ahands, ihands, to_hud) = ([], [], [], [])
                 self.database.resetBulkCache()
 
                 ####Lock Placeholder####
