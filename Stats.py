@@ -98,6 +98,38 @@ def __stat_override(decimals, stat_vals):
     return stat_vals[0], s, stat_vals[2], stat_vals[3], stat_vals[4], stat_vals[5]
 
 
+def format_no_data_stat(stat_name, description, numerator=None, denominator=None):
+    """Returns a standardized tuple for stats with no data available.
+    
+    This function creates a consistent format for displaying '-' when no data
+    is available, distinguishing it from actual 0 values.
+    
+    Parameters
+    ----------
+    - stat_name (str): The name of the statistic (e.g., "vpip", "pfr", "3bet")
+    - description (str): Human-readable description of the statistic
+    - numerator (int, optional): The numerator value for fraction display
+    - denominator (int, optional): The denominator value for fraction display
+    
+    Returns
+    -------
+    - tuple: Standardized tuple (0.0, "-", "stat_name=-", "stat_name=-", "(-/-)", "description")
+    """
+    if numerator is not None and denominator is not None:
+        fraction = f"({numerator}/{denominator})"
+    else:
+        fraction = "(-/-)"
+    
+    return (
+        0.0,
+        "-",
+        f"{stat_name}=-",
+        f"{stat_name}=-",
+        fraction,
+        description
+    )
+
+
 def do_tip(widget, tip) -> None:
     """Sets the tooltip of the given widget to the UTF-8 encoded version of the tip.
 
@@ -427,35 +459,33 @@ def vpip(stat_dict, player):
     Returns:
         tuple: A tuple containing:
             - VPIP percentage (float)
-            - VPIP percentage formatted as a string
+            - VPIP percentage formatted as a string or "-" if no data
             - 'v=' followed by VPIP percentage formatted as a percentage string
             - 'vpip=' followed by VPIP percentage formatted as a percentage string
             - '(x/y)' where x is the VPIP and y is VPIP opportunities
             - 'Voluntarily put in preflop/3rd street %'
 
-        If an error occurs, returns:
-            - 0.0
-            - 'NA'
-            - 'v=NA'
-            - 'vpip=NA'
-            - '(0/0)'
-            - 'Voluntarily put in preflop/3rd street %'
+        If no opportunities available, returns "-" to distinguish from 0% (tight player).
 
     """
     stat = 0.0
     try:
-        vpip_opp = float(stat_dict[player].get("vpip_opp", 0))  # Ensure key exists
-        if vpip_opp != 0:  # Check if vpip_opp is non-zero to avoid division by zero
-            stat = float(stat_dict[player]["vpip"]) / vpip_opp
-        else:
-            stat = 0  # Default to 0 if vpip_opp is zero
+        vpip_opp = float(stat_dict[player].get("vpip_opp", 0))
+        vpip_count = float(stat_dict[player].get("vpip", 0))
+        
+        # No opportunities = no data available
+        if vpip_opp == 0:
+            return format_no_data_stat("vpip", "Voluntarily put in preflop/3rd street %")
+        
+        # Calculate VPIP percentage
+        stat = vpip_count / vpip_opp
 
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "v=%3.1f%%" % (100.0 * stat),
             "vpip=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["vpip"], vpip_opp),
+            "(%d/%d)" % (vpip_count, vpip_opp),
             "Voluntarily put in preflop/3rd street %",
         )
     except (KeyError, ValueError, TypeError):
@@ -478,22 +508,27 @@ def pfr(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the pfr value, formatted pfr percentages, and related information.
+        Returns "-" if no opportunities available to distinguish from 0% (passive player).
 
     """
     stat = 0.0
     try:
-        pfr_opp = float(stat_dict[player].get("pfr_opp", 0))  # Ensure key exists
-        if pfr_opp != 0:  # Check if pfr_opp is non-zero to avoid division by zero
-            stat = float(stat_dict[player]["pfr"]) / pfr_opp
-        else:
-            stat = 0  # Default to 0 if pfr_opp is zero
+        pfr_opp = float(stat_dict[player].get("pfr_opp", 0))
+        pfr_count = float(stat_dict[player].get("pfr", 0))
+        
+        # No opportunities = no data available
+        if pfr_opp == 0:
+            return format_no_data_stat("pfr", "Preflop/3rd street raise %")
+        
+        # Calculate PFR percentage
+        stat = pfr_count / pfr_opp
 
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "p=%3.1f%%" % (100.0 * stat),
             "pfr=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["pfr"], pfr_opp),
+            "(%d/%d)" % (pfr_count, pfr_opp),
             "Preflop/3rd street raise %",
         )
     except (KeyError, ValueError, TypeError):
@@ -797,6 +832,8 @@ def steal(stat_dict, player):
             - '(%d/%d)' (str): The steal count and steal opponent count formatted as a string.
             - '% steal attempted' (str): The description of the steal percentage.
 
+        If no opportunities available, returns "-" to distinguish from 0% (passive player).
+
     Raises:
         None
 
@@ -808,17 +845,21 @@ def steal(stat_dict, player):
     stat = 0.0
     try:
         steal_opp = float(stat_dict[player].get("steal_opp", 0))  # Ensure key exists
-        if steal_opp != 0:  # Check if steal_opp is non-zero to avoid division by zero
-            stat = float(stat_dict[player]["steal"]) / steal_opp
-        else:
-            stat = 0  # Default to 0 if steal_opp is zero
+        steal_count = float(stat_dict[player].get("steal", 0))
+        
+        # No opportunities = no data available
+        if steal_opp == 0:
+            return format_no_data_stat("steal", "% steal attempted")
+        
+        # Calculate steal percentage
+        stat = steal_count / steal_opp
 
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "st=%3.1f%%" % (100.0 * stat),
             "steal=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["steal"], steal_opp),
+            "(%d/%d)" % (steal_count, steal_opp),
             "% steal attempted",
         )
 
@@ -1007,17 +1048,21 @@ def three_B(stat_dict, player):
     stat = 0.0
     try:
         tb_opp_0 = float(stat_dict[player].get("tb_opp_0", 0))  # Ensure key exists
-        if tb_opp_0 != 0:  # Check if tb_opp_0 is non-zero to avoid division by zero
-            stat = float(stat_dict[player]["tb_0"]) / tb_opp_0
-        else:
-            stat = 0  # Default to 0 if tb_opp_0 is zero
+        tb_0 = float(stat_dict[player].get("tb_0", 0))
+        
+        # No opportunities = no data available
+        if tb_opp_0 == 0:
+            return format_no_data_stat("3B", "% 3 bet preflop/3rd street")
+        
+        # Calculate 3bet percentage
+        stat = tb_0 / tb_opp_0
 
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "3B=%3.1f%%" % (100.0 * stat),
             "3B_pf=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["tb_0"], tb_opp_0),
+            "(%d/%d)" % (tb_0, tb_opp_0),
             "% 3 bet preflop/3rd street",
         )
     except (KeyError, ValueError, TypeError):
@@ -1738,24 +1783,27 @@ def a_freq1(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the calculated aggression frequency, formatted strings, and related information.
+        Returns "-" if no opportunities available to distinguish from 0% (passive player).
 
     """
     stat = 0.0
     try:
-        saw_f = float(
-            stat_dict[player].get("saw_f", 0),
-        )  # Ensure key exists and default to 0
-        if saw_f != 0:  # Check to avoid division by zero
-            stat = float(stat_dict[player]["aggr_1"]) / saw_f
-        else:
-            stat = 0  # Default to 0 if saw_f is zero
+        saw_f = float(stat_dict[player].get("saw_f", 0))
+        aggr_1 = float(stat_dict[player].get("aggr_1", 0))
+        
+        # No opportunities = no data available
+        if saw_f == 0:
+            return format_no_data_stat("a1", "Aggression frequency flop/4th street")
+        
+        # Calculate aggression frequency
+        stat = aggr_1 / saw_f
 
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "a1=%3.1f%%" % (100.0 * stat),
             "a_fq_1=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["aggr_1"], saw_f),
+            "(%d/%d)" % (aggr_1, saw_f),
             "Aggression frequency flop/4th street",
         )
     except (KeyError, ValueError, TypeError):
@@ -1778,24 +1826,27 @@ def a_freq2(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the calculated aggression frequency, formatted strings, and related information.
+        Returns "-" if no opportunities available to distinguish from 0% (passive player).
 
     """
     stat = 0.0
     try:
-        saw_2 = float(
-            stat_dict[player].get("saw_2", 0),
-        )  # Ensure key exists and default to 0
-        if saw_2 != 0:  # Check to avoid division by zero
-            stat = float(stat_dict[player]["aggr_2"]) / saw_2
-        else:
-            stat = 0  # Default to 0 if saw_2 is zero
+        saw_2 = float(stat_dict[player].get("saw_2", 0))
+        aggr_2 = float(stat_dict[player].get("aggr_2", 0))
+        
+        # No opportunities = no data available
+        if saw_2 == 0:
+            return format_no_data_stat("a2", "Aggression frequency turn/5th street")
+        
+        # Calculate aggression frequency
+        stat = aggr_2 / saw_2
 
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "a2=%3.1f%%" % (100.0 * stat),
             "a_fq_2=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["aggr_2"], saw_2),
+            "(%d/%d)" % (aggr_2, saw_2),
             "Aggression frequency turn/5th street",
         )
     except (KeyError, ValueError, TypeError):
@@ -1818,24 +1869,27 @@ def a_freq3(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the calculated aggression frequency, formatted strings, and related information.
+        Returns "-" if no opportunities available to distinguish from 0% (passive player).
 
     """
     stat = 0.0
     try:
-        saw_3 = float(
-            stat_dict[player].get("saw_3", 0),
-        )  # Ensure key exists and default to 0
-        if saw_3 != 0:  # Check to avoid division by zero
-            stat = float(stat_dict[player]["aggr_3"]) / saw_3
-        else:
-            stat = 0  # Default to 0 if saw_3 is zero
+        saw_3 = float(stat_dict[player].get("saw_3", 0))
+        aggr_3 = float(stat_dict[player].get("aggr_3", 0))
+        
+        # No opportunities = no data available
+        if saw_3 == 0:
+            return format_no_data_stat("a3", "Aggression frequency river/6th street")
+        
+        # Calculate aggression frequency
+        stat = aggr_3 / saw_3
 
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "a3=%3.1f%%" % (100.0 * stat),
             "a_fq_3=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["aggr_3"], saw_3),
+            "(%d/%d)" % (aggr_3, saw_3),
             "Aggression frequency river/6th street",
         )
     except (KeyError, ValueError, TypeError):
@@ -1858,20 +1912,27 @@ def a_freq4(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the calculated aggression frequency, formatted strings, and related information.
+        Returns "-" if no opportunities available to distinguish from 0% (passive player).
 
     """
     stat = 0.0
     try:
-        if float(stat_dict[player]["saw_4"]) != 0:
-            stat = float(stat_dict[player]["aggr_4"]) / float(
-                stat_dict[player]["saw_4"],
-            )
+        saw_4 = float(stat_dict[player].get("saw_4", 0))
+        aggr_4 = float(stat_dict[player].get("aggr_4", 0))
+        
+        # No opportunities = no data available
+        if saw_4 == 0:
+            return format_no_data_stat("a4", "Aggression frequency 7th street")
+        
+        # Calculate aggression frequency
+        stat = aggr_4 / saw_4
+
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "a4=%3.1f%%" % (100.0 * stat),
             "a_fq_4=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["aggr_4"], stat_dict[player]["saw_4"]),
+            "(%d/%d)" % (aggr_4, saw_4),
             "Aggression frequency 7th street",
         )
     except (KeyError, ValueError, TypeError):
@@ -1945,7 +2006,7 @@ def agg_fact(stat_dict, player):
     Returns:
         tuple: A tuple containing the calculated aggression factor in different formats.
             The formats include percentage, float, and string representations.
-            If an exception occurs during calculation, default values are returned.
+            Returns "-" if no post-flop actions available to distinguish from 0.0 (passive player).
 
     """
     stat = 0.0
@@ -1964,7 +2025,11 @@ def agg_fact(stat_dict, player):
             + stat_dict[player].get("call_4", 0)
         )
 
-        # Check to avoid division by zero
+        # No post-flop actions = no data available
+        if bet_raise == 0 and post_call == 0:
+            return format_no_data_stat("afa", "Aggression factor", bet_raise, post_call)
+        
+        # Calculate aggression factor (bet+raise) / call
         stat = float(bet_raise) / float(post_call) if post_call > 0 else float(bet_raise)
 
         return (
@@ -1988,9 +2053,7 @@ def agg_fact_pct(stat_dict, player):
 
     Returns:
         tuple: A tuple containing the aggression factor percentage, formatted strings, and related information.
-
-    Raises:
-        Exception: If an error occurs during the calculation, returns default values.
+            Returns "-" if no post-flop actions available to distinguish from 0.0% (passive player).
 
     """
     stat = 0.0
@@ -2009,7 +2072,11 @@ def agg_fact_pct(stat_dict, player):
             + stat_dict[player].get("call_4", 0)
         )
 
-        # Check to avoid division by zero
+        # No post-flop actions = no data available
+        if bet_raise == 0 and post_call == 0:
+            return format_no_data_stat("afap", "Aggression factor pct", bet_raise, post_call)
+        
+        # Calculate aggression factor percentage (bet+raise) / (bet+raise+call)
         if float(post_call + bet_raise) > 0.0:
             stat = float(bet_raise) / float(post_call + bet_raise)
 
@@ -2062,11 +2129,12 @@ def cbet(stat_dict, player):
             + stat_dict[player].get("cb_opp_4", 0)
         )
 
-        # Check to avoid division by zero
-        if oppt != 0:
-            stat = float(cbets) / float(oppt)
-        else:
-            stat = 0  # Default to 0 if oppt is zero
+        # No opportunities = no data available
+        if oppt == 0:
+            return format_no_data_stat("cbet", "% continuation bet")
+        
+        # Calculate cbet percentage
+        stat = float(cbets) / float(oppt)
 
         return (
             stat,
@@ -2248,17 +2316,21 @@ def ffreq1(stat_dict, player):
         was_raised_1 = float(
             stat_dict[player].get("was_raised_1", 0),
         )  # Ensure key exists and default to 0
-        if was_raised_1 != 0:  # Check to avoid division by zero
-            stat = float(stat_dict[player]["f_freq_1"]) / was_raised_1
-        else:
-            stat = 0  # Default to 0 if was_raised_1 is zero
+        f_freq_1 = float(stat_dict[player].get("f_freq_1", 0))
+        
+        # No opportunities = no data available
+        if was_raised_1 == 0:
+            return format_no_data_stat("ff1", "% fold frequency flop/4th street")
+        
+        # Calculate fold frequency percentage
+        stat = f_freq_1 / was_raised_1
 
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "ff1=%3.1f%%" % (100.0 * stat),
             "ff_1=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["f_freq_1"], was_raised_1),
+            "(%d/%d)" % (f_freq_1, was_raised_1),
             "% fold frequency flop/4th street",
         )
     except (KeyError, ValueError, TypeError):
@@ -2288,17 +2360,21 @@ def ffreq2(stat_dict, player):
         was_raised_2 = float(
             stat_dict[player].get("was_raised_2", 0),
         )  # Ensure key exists and default to 0
-        if was_raised_2 != 0:  # Check to avoid division by zero
-            stat = float(stat_dict[player]["f_freq_2"]) / was_raised_2
-        else:
-            stat = 0  # Default to 0 if was_raised_2 is zero
+        f_freq_2 = float(stat_dict[player].get("f_freq_2", 0))
+        
+        # No opportunities = no data available
+        if was_raised_2 == 0:
+            return format_no_data_stat("ff2", "% fold frequency turn/5th street")
+        
+        # Calculate fold frequency percentage
+        stat = f_freq_2 / was_raised_2
 
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "ff2=%3.1f%%" % (100.0 * stat),
             "ff_2=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["f_freq_2"], was_raised_2),
+            "(%d/%d)" % (f_freq_2, was_raised_2),
             "% fold frequency turn/5th street",
         )
     except (KeyError, ValueError, TypeError):
@@ -2328,17 +2404,21 @@ def ffreq3(stat_dict, player):
         was_raised_3 = float(
             stat_dict[player].get("was_raised_3", 0),
         )  # Ensure key exists and default to 0
-        if was_raised_3 != 0:  # Check to avoid division by zero
-            stat = float(stat_dict[player]["f_freq_3"]) / was_raised_3
-        else:
-            stat = 0  # Default to 0 if was_raised_3 is zero
+        f_freq_3 = float(stat_dict[player].get("f_freq_3", 0))
+        
+        # No opportunities = no data available
+        if was_raised_3 == 0:
+            return format_no_data_stat("ff3", "% fold frequency river/6th street")
+        
+        # Calculate fold frequency percentage
+        stat = f_freq_3 / was_raised_3
 
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "ff3=%3.1f%%" % (100.0 * stat),
             "ff_3=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["f_freq_3"], was_raised_3),
+            "(%d/%d)" % (f_freq_3, was_raised_3),
             "% fold frequency river/6th street",
         )
     except (KeyError, ValueError, TypeError):
@@ -2365,17 +2445,22 @@ def ffreq4(stat_dict, player):
     """
     stat = 0.0
     try:
-        if float(stat_dict[player]["was_raised_4"]) != 0:
-            stat = float(stat_dict[player]["f_freq_4"]) / float(
-                stat_dict[player]["was_raised_4"],
-            )
+        was_raised_4 = float(stat_dict[player].get("was_raised_4", 0))
+        f_freq_4 = float(stat_dict[player].get("f_freq_4", 0))
+        
+        # No opportunities = no data available
+        if was_raised_4 == 0:
+            return format_no_data_stat("ff4", "% fold frequency 7th street")
+        
+        # Calculate fold frequency percentage
+        stat = f_freq_4 / was_raised_4
+        
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "ff4=%3.1f%%" % (100.0 * stat),
             "ff_4=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)"
-            % (stat_dict[player]["f_freq_4"], stat_dict[player]["was_raised_4"]),
+            "(%d/%d)" % (f_freq_4, was_raised_4),
             "% fold frequency 7th street",
         )
     except (KeyError, ValueError, TypeError):
@@ -2405,17 +2490,21 @@ def f_cb1(stat_dict, player):
         f_cb_opp_1 = float(
             stat_dict[player].get("f_cb_opp_1", 0),
         )  # Ensure key exists and default to 0
-        if f_cb_opp_1 != 0:  # Check to avoid division by zero
-            stat = float(stat_dict[player]["f_cb_1"]) / f_cb_opp_1
-        else:
-            stat = 0  # Default to 0 if f_cb_opp_1 is zero
+        f_cb_1 = float(stat_dict[player].get("f_cb_1", 0))
+        
+        # No opportunities = no data available
+        if f_cb_opp_1 == 0:
+            return format_no_data_stat("f_cb1", "% fold to continuation bet flop/4th street")
+        
+        # Calculate fold to continuation bet percentage
+        stat = f_cb_1 / f_cb_opp_1
 
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "f_cb1=%3.1f%%" % (100.0 * stat),
             "f_cb_1=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["f_cb_1"], f_cb_opp_1),
+            "(%d/%d)" % (f_cb_1, f_cb_opp_1),
             "% fold to continuation bet flop/4th street",
         )
     except (KeyError, ValueError, TypeError):
@@ -2449,16 +2538,22 @@ def f_cb2(stat_dict, player):
     """
     stat = 0.0
     try:
-        if float(stat_dict[player]["f_cb_opp_2"]) != 0:
-            stat = float(stat_dict[player]["f_cb_2"]) / float(
-                stat_dict[player]["f_cb_opp_2"],
-            )
+        f_cb_opp_2 = float(stat_dict[player].get("f_cb_opp_2", 0))
+        f_cb_2 = float(stat_dict[player].get("f_cb_2", 0))
+        
+        # No opportunities = no data available
+        if f_cb_opp_2 == 0:
+            return format_no_data_stat("f_cb2", "% fold to continuation bet turn/5th street")
+        
+        # Calculate fold to continuation bet percentage
+        stat = f_cb_2 / f_cb_opp_2
+        
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "f_cb2=%3.1f%%" % (100.0 * stat),
             "f_cb_2=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["f_cb_2"], stat_dict[player]["f_cb_opp_2"]),
+            "(%d/%d)" % (f_cb_2, f_cb_opp_2),
             "% fold to continuation bet turn/5th street",
         )
     except (KeyError, ValueError, TypeError):
@@ -2492,16 +2587,22 @@ def f_cb3(stat_dict, player):
     """
     stat = 0.0
     try:
-        if float(stat_dict[player]["f_cb_opp_3"]) != 0:
-            stat = float(stat_dict[player]["f_cb_3"]) / float(
-                stat_dict[player]["f_cb_opp_3"],
-            )
+        f_cb_opp_3 = float(stat_dict[player].get("f_cb_opp_3", 0))
+        f_cb_3 = float(stat_dict[player].get("f_cb_3", 0))
+        
+        # No opportunities = no data available
+        if f_cb_opp_3 == 0:
+            return format_no_data_stat("f_cb3", "% fold to continuation bet river/6th street")
+        
+        # Calculate fold to continuation bet percentage
+        stat = f_cb_3 / f_cb_opp_3
+        
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "f_cb3=%3.1f%%" % (100.0 * stat),
             "f_cb_3=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["f_cb_3"], stat_dict[player]["f_cb_opp_3"]),
+            "(%d/%d)" % (f_cb_3, f_cb_opp_3),
             "% fold to continuation bet river/6th street",
         )
     except (KeyError, ValueError, TypeError):
@@ -2538,16 +2639,22 @@ def f_cb4(stat_dict, player):
     """
     stat = 0.0
     try:
-        if float(stat_dict[player]["f_cb_opp_4"]) != 0:
-            stat = float(stat_dict[player]["f_cb_4"]) / float(
-                stat_dict[player]["f_cb_opp_4"],
-            )
+        f_cb_opp_4 = float(stat_dict[player].get("f_cb_opp_4", 0))
+        f_cb_4 = float(stat_dict[player].get("f_cb_4", 0))
+        
+        # No opportunities = no data available
+        if f_cb_opp_4 == 0:
+            return format_no_data_stat("f_cb4", "% fold to continuation bet 7th street")
+        
+        # Calculate fold to continuation bet percentage
+        stat = f_cb_4 / f_cb_opp_4
+        
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "f_cb4=%3.1f%%" % (100.0 * stat),
             "f_cb_4=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["f_cb_4"], stat_dict[player]["f_cb_opp_4"]),
+            "(%d/%d)" % (f_cb_4, f_cb_opp_4),
             "% fold to continuation bet 7th street",
         )
     except (KeyError, ValueError, TypeError):
@@ -2587,17 +2694,21 @@ def cr1(stat_dict, player):
         ccr_opp_1 = float(
             stat_dict[player].get("ccr_opp_1", 0),
         )  # Ensure key exists and default to 0
-        if ccr_opp_1 != 0:  # Check to avoid division by zero
-            stat = float(stat_dict[player]["cr_1"]) / ccr_opp_1
-        else:
-            stat = 0  # Default to 0 if ccr_opp_1 is zero
+        cr_1 = float(stat_dict[player].get("cr_1", 0))
+        
+        # No opportunities = no data available
+        if ccr_opp_1 == 0:
+            return format_no_data_stat("cr1", "% check-raise flop/4th street")
+        
+        # Calculate check-raise percentage
+        stat = cr_1 / ccr_opp_1
 
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "cr1=%3.1f%%" % (100.0 * stat),
             "cr_1=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["cr_1"], ccr_opp_1),
+            "(%d/%d)" % (cr_1, ccr_opp_1),
             "% check-raise flop/4th street",
         )
     except (KeyError, ValueError, TypeError):
@@ -2634,14 +2745,21 @@ def cr2(stat_dict, player):
         ccr_opp_2 = float(
             stat_dict[player].get("ccr_opp_2", 0),
         )  # Ensure key exists and default to 0
-        if ccr_opp_2 != 0:  # Check to avoid division by zero
-            stat = float(stat_dict[player]["cr_2"]) / ccr_opp_2
+        cr_2 = float(stat_dict[player].get("cr_2", 0))
+        
+        # No opportunities = no data available
+        if ccr_opp_2 == 0:
+            return format_no_data_stat("cr2", "% check-raise turn/5th street")
+        
+        # Calculate check-raise percentage
+        stat = cr_2 / ccr_opp_2
+        
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "cr2=%3.1f%%" % (100.0 * stat),
             "cr_2=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["cr_2"], ccr_opp_2),
+            "(%d/%d)" % (cr_2, ccr_opp_2),
             "% check-raise turn/5th street",
         )
     except (KeyError, ValueError, TypeError):
@@ -2681,14 +2799,21 @@ def cr3(stat_dict, player):
         ccr_opp_3 = float(
             stat_dict[player].get("ccr_opp_3", 0),
         )  # Ensure key exists and default to 0
-        if ccr_opp_3 != 0:  # Check to avoid division by zero
-            stat = float(stat_dict[player]["cr_3"]) / ccr_opp_3
+        cr_3 = float(stat_dict[player].get("cr_3", 0))
+        
+        # No opportunities = no data available
+        if ccr_opp_3 == 0:
+            return format_no_data_stat("cr3", "% check-raise river/6th street")
+        
+        # Calculate check-raise percentage
+        stat = cr_3 / ccr_opp_3
+        
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "cr3=%3.1f%%" % (100.0 * stat),
             "cr_3=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["cr_3"], ccr_opp_3),
+            "(%d/%d)" % (cr_3, ccr_opp_3),
             "% check-raise river/6th street",
         )
     except (KeyError, ValueError, TypeError):
@@ -2728,14 +2853,21 @@ def cr4(stat_dict, player):
         ccr_opp_4 = float(
             stat_dict[player].get("ccr_opp_4", 0),
         )  # Ensure key exists and default to 0
-        if ccr_opp_4 != 0:  # Check to avoid division by zero
-            stat = float(stat_dict[player]["cr_4"]) / ccr_opp_4
+        cr_4 = float(stat_dict[player].get("cr_4", 0))
+        
+        # No opportunities = no data available
+        if ccr_opp_4 == 0:
+            return format_no_data_stat("cr4", "% check-raise 7th street")
+        
+        # Calculate check-raise percentage
+        stat = cr_4 / ccr_opp_4
+        
         return (
             stat,
             "%3.1f" % (100.0 * stat),
             "cr4=%3.1f%%" % (100.0 * stat),
             "cr_4=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["cr_4"], ccr_opp_4),
+            "(%d/%d)" % (cr_4, ccr_opp_4),
             "% check-raise 7th street",
         )
     except (KeyError, ValueError, TypeError):

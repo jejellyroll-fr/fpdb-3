@@ -21,7 +21,7 @@ import contextlib
 from typing import TYPE_CHECKING, Any
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QApplication, QWidget
 
 if TYPE_CHECKING:
     from PyQt5.QtGui import QMouseEvent
@@ -31,6 +31,26 @@ from loggingFpdb import get_logger
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("hud")
+
+
+def clamp_to_screen(x: int, y: int, width: int = 200, height: int = 100) -> tuple[int, int]:
+    """Clamp window position to screen boundaries."""
+    app = QApplication.instance()
+    if app is None:
+        return max(0, x), max(0, y)
+
+    screen = app.primaryScreen()
+    if screen is None:
+        return max(0, x), max(0, y)
+
+    geometry = screen.geometry()
+    max_x = geometry.width() - width
+    max_y = geometry.height() - height
+
+    clamped_x = max(0, min(x, max_x))
+    clamped_y = max(0, min(y, max_y))
+
+    return clamped_x, clamped_y
 
 
 ### Aux_Base.py
@@ -236,13 +256,15 @@ class AuxSeats(AuxWindow):
         table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
 
         for i in list(range(1, self.hud.max + 1)):
-            pos_x = max(0, self.positions[i][0] + table_x)
-            pos_y = max(0, self.positions[i][1] + table_y)
-            self.m_windows[i].move(pos_x, pos_y)
+            pos_x = self.positions[i][0] + table_x
+            pos_y = self.positions[i][1] + table_y
+            clamped_x, clamped_y = clamp_to_screen(pos_x, pos_y)
+            self.m_windows[i].move(clamped_x, clamped_y)
 
-        common_x = max(0, self.hud.layout.common[0] + table_x)
-        common_y = max(0, self.hud.layout.common[1] + table_y)
-        self.m_windows["common"].move(common_x, common_y)
+        common_x = self.hud.layout.common[0] + table_x
+        common_y = self.hud.layout.common[1] + table_y
+        clamped_common_x, clamped_common_y = clamp_to_screen(common_x, common_y)
+        self.m_windows["common"].move(clamped_common_x, clamped_common_y)
 
     def create(self) -> None:
         """Create all seat windows."""

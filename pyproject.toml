@@ -27,6 +27,7 @@ dependencies = [
     "pyzmq==26.0.3",
     "cachetools==5.5.0",
     "colorlog==6.9.0",
+    "pytest-qt>=4.4.0",
 ]
 
 [project.optional-dependencies]

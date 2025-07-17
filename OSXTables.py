@@ -60,6 +60,8 @@ class Table(Table_Window):
         ]
         options = kCGWindowListOptionOnScreenOnly
         window_list = CGWindowListCopyWindowInfo(options, kCGNullWindowID)
+
+        # First try to find the window in the active application
         for window in window_list:
             pid = window["kCGWindowOwnerPID"]
             window_number = window["kCGWindowNumber"]
@@ -69,6 +71,29 @@ class Table(Table_Window):
             if curr_pid == pid:
                 log.info(
                     "%s - %s (PID: %s, WID: %s): %s",
+                    owner_name, window_title, pid, window_number, geometry,
+                )
+
+                title = window_title
+                if self.check_bad_words(title):
+                    continue
+                self.number = int(window_number)
+                self.title = title
+                return self.title
+
+        # If not found in active application, search in all windows
+        log.info("Window not found in active application, searching all windows...")
+        for window in window_list:
+            pid = window["kCGWindowOwnerPID"]
+            window_number = window["kCGWindowNumber"]
+            owner_name = window["kCGWindowOwnerName"]
+            geometry = window["kCGWindowBounds"]
+            window_title = window.get("kCGWindowName", self.search_string)
+
+            # Check if this window matches our search criteria
+            if self.search_string and self.search_string in window_title:
+                log.info(
+                    "Found matching window: %s - %s (PID: %s, WID: %s): %s",
                     owner_name, window_title, pid, window_number, geometry,
                 )
 
@@ -88,6 +113,10 @@ class Table(Table_Window):
         Returns:
             Dictionary with x, y, width, height coordinates or None if not found.
         """
+        if self.number is None:
+            log.warning("Cannot get geometry: window number is None")
+            return None
+
         win_list_dict = CGWindowListCreateDescriptionFromArray((self.number,))
 
         for d in win_list_dict:
@@ -106,6 +135,10 @@ class Table(Table_Window):
         Returns:
             The window title string or None if not found.
         """
+        if self.number is None:
+            log.warning("Cannot get window title: window number is None")
+            return None
+
         win_list_dict = CGWindowListCreateDescriptionFromArray((self.number,))
         for d in win_list_dict:
             if (
@@ -121,6 +154,10 @@ class Table(Table_Window):
         Args:
             window: The Qt widget window to bring to front.
         """
+        if self.number is None:
+            log.warning("Cannot topify window: window number is None")
+            return
+
         winid = window.effectiveWinId()
         cvp = ctypes.c_void_p(int(winid))
         view = NSView(c_void_p=cvp)

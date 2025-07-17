@@ -278,9 +278,10 @@ class SimpleTableMW(Aux_Base.SeatWindow):
 
         table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
         table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
-        pos_x = max(0, table_x + self.aw.xshift)
-        pos_y = max(0, table_y + self.aw.yshift)
-        self.move(pos_x, pos_y)
+        pos_x = table_x + self.aw.xshift
+        pos_y = table_y + self.aw.yshift
+        clamped_x, clamped_y = Aux_Base.clamp_to_screen(pos_x, pos_y, 100, 100)
+        self.move(clamped_x, clamped_y)
 
     def button_press_right(self, _event: Any) -> None:
         """Handle button clicks in the FPDB main menu event box."""
@@ -293,9 +294,10 @@ class SimpleTableMW(Aux_Base.SeatWindow):
         # force menu to the offset position from table origin (do not use common setting)
         table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
         table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
-        pos_x = max(0, table_x + self.aw.xshift)
-        pos_y = max(0, table_y + self.aw.yshift)
-        self.move(pos_x, pos_y)
+        pos_x = table_x + self.aw.xshift
+        pos_y = table_y + self.aw.yshift
+        clamped_x, clamped_y = Aux_Base.clamp_to_screen(pos_x, pos_y)
+        self.move(clamped_x, clamped_y)
 
 
 class SimpleTablePopupMenu(QWidget):
@@ -310,9 +312,10 @@ class SimpleTablePopupMenu(QWidget):
         self.parentwin = parentwin
         table_x = max(0, self.parentwin.hud.table.x) if self.parentwin.hud.table.x is not None else 50
         table_y = max(0, self.parentwin.hud.table.y) if self.parentwin.hud.table.y is not None else 50
-        pos_x = max(0, table_x + self.parentwin.aw.xshift)
-        pos_y = max(0, table_y + self.parentwin.aw.yshift)
-        self.move(pos_x, pos_y)
+        pos_x = table_x + self.parentwin.aw.xshift
+        pos_y = table_y + self.parentwin.aw.yshift
+        clamped_x, clamped_y = Aux_Base.clamp_to_screen(pos_x, pos_y, 400, 300)  # Larger window size
+        self.move(clamped_x, clamped_y)
         self.setWindowTitle(self.parentwin.menu_label + " - HUD configuration")
         self._setup_ui()
         self.show()

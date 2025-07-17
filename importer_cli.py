@@ -16,8 +16,6 @@ import warnings
 def main():
     # Suppress FutureWarnings
     warnings.simplefilter(action='ignore', category=FutureWarning)
-    # Silence logs below ERROR level
-    logging.basicConfig(level=logging.ERROR)
 
     parser = argparse.ArgumentParser(description="Import hand history files into fpdb.")
     parser.add_argument('paths', metavar='PATH', type=str, nargs='+',
@@ -28,8 +26,23 @@ def main():
                         help='Disable progress reporting.')
     parser.add_argument('--config', type=str,
                         help='Path to fpdb.toml configuration file.')
+    parser.add_argument('--debug', action='store_true',
+                        help='Enable debug logging to see detailed import information.')
+    parser.add_argument('--verbose', '-v', action='store_true',
+                        help='Enable verbose logging (INFO level).')
 
     args = parser.parse_args()
+
+    # Setup logging based on debug/verbose flags
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s [%(name)s:%(funcName)s] [%(levelname)s] %(message)s')
+        print("Debug logging enabled")
+    elif args.verbose:
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(name)s:%(funcName)s] [%(levelname)s] %(message)s')
+        print("Verbose logging enabled")
+    else:
+        # Silence logs below ERROR level (default behavior)
+        logging.basicConfig(level=logging.ERROR)
 
     # Setup configuration
     config_file = None
