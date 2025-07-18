@@ -359,6 +359,15 @@ class SimpleTablePopupMenu(QWidget):
         vbox.addWidget(self.build_button("Stop this HUD", "blacklist"))
         vbox.addWidget(self.build_button("Close", "close"))
         vbox.addWidget(QLabel(""))
+        
+        # Add stat set selector
+        stat_sets_dict = self._create_stat_sets_dict()
+        if len(stat_sets_dict) > 1:  # Only show if there are multiple stat sets
+            vbox.addWidget(QLabel("Stat Set (HUD):"))
+            self.stat_set_combo = self.build_stat_set_combo(stat_sets_dict)
+            vbox.addWidget(self.stat_set_combo)
+            vbox.addWidget(QLabel(""))
+        
         vbox.addWidget(self.build_combo_and_set_active("new_max_seats", cb_max_dict))
         return vbox
 
@@ -458,6 +467,14 @@ class SimpleTablePopupMenu(QWidget):
             cb_max_dict[pos] = (f"{i}-max", i)
         return cb_max_dict
 
+    def _create_stat_sets_dict(self) -> dict:
+        """Create the dictionary for the stat sets combo box."""
+        stat_sets = self.parentwin.hud.config.get_stat_sets()
+        stat_sets_dict = {}
+        for i, stat_set_name in enumerate(stat_sets):
+            stat_sets_dict[i] = (stat_set_name, stat_set_name)
+        return stat_sets_dict
+
     def delete_event(self) -> None:
         """Delete the event."""
         self.parentwin.menu_is_popped = False
@@ -503,6 +520,85 @@ class SimpleTablePopupMenu(QWidget):
             partial(self.change_combo_field_value, field=field, combo_dict=combo_dict),
         )
         return widget
+
+    def build_stat_set_combo(self, stat_sets_dict: dict) -> QComboBox:
+        """Build a combo box for stat sets and set the active value."""
+        combo = QComboBox()
+        for pos in stat_sets_dict:
+            combo.addItem(stat_sets_dict[pos][0])
+            # Get current stat set name
+            current_stat_set = self._get_current_stat_set()
+            if stat_sets_dict[pos][1] == current_stat_set:
+                combo.setCurrentIndex(pos)
+        combo.currentIndexChanged[int].connect(
+            partial(self.change_stat_set, stat_sets_dict=stat_sets_dict),
+        )
+        return combo
+
+    def _get_current_stat_set(self) -> str:
+        """Get the current stat set name."""
+        # The stat set is available in the game parameters
+        return self.parentwin.aw.game_params.name
+
+    def change_stat_set(self, sel: int, stat_sets_dict: dict) -> None:
+        """Change the stat set."""
+        new_stat_set = stat_sets_dict[sel][1]
+        
+        # Update the configuration to use the new stat set
+        self._update_stat_set_in_config(new_stat_set)
+        
+        # Save the configuration
+        self.parentwin.hud.config.save()
+        
+        # Close the popup menu
+        self.delete_event()
+        
+        # Instead of killing the HUD, try to refresh it with the new stat set
+        try:
+            # Update the game params to use the new stat set
+            self.parentwin.aw.game_params = self.parentwin.hud.config.get_game_parameters(
+                self.parentwin.hud.poker_game, 
+                self.parentwin.hud.game_type
+            )
+            
+            # Refresh the HUD display
+            if hasattr(self.parentwin.hud, 'stat_dict'):
+                self.parentwin.aw.update(self.parentwin.hud.stat_dict)
+        except Exception:
+            # If refresh fails, fall back to restarting the HUD
+            self.parentwin.hud.parent.kill_hud("kill", self.parentwin.hud.table.key)
+
+    def _update_stat_set_in_config(self, new_stat_set: str) -> None:
+        """Update the stat set in the configuration."""
+        # Get the current game configuration
+        poker_game = self.parentwin.hud.poker_game
+        game_type = self.parentwin.hud.game_type
+        
+        # Update the game_stat_set configuration
+        if poker_game in self.parentwin.hud.config.supported_games:
+            game_config = self.parentwin.hud.config.supported_games[poker_game]
+            
+            # game_stat_set is a dictionary indexed by game_type
+            if game_type in game_config.game_stat_set:
+                game_config.game_stat_set[game_type].stat_set = new_stat_set
+            
+            # Also update the XML directly
+            self._update_xml_stat_set(poker_game, game_type, new_stat_set)
+
+    def _update_xml_stat_set(self, poker_game: str, game_type: str, new_stat_set: str) -> None:
+        """Update the stat set in the XML configuration."""
+        # Find the game node in the XML document
+        game_nodes = self.parentwin.hud.config.doc.getElementsByTagName("game")
+        for game_node in game_nodes:
+            if game_node.getAttribute("game_name") == poker_game:
+                # Find the game_stat_set node for this game type
+                game_stat_set_nodes = game_node.getElementsByTagName("game_stat_set")
+                for gss_node in game_stat_set_nodes:
+                    if gss_node.getAttribute("game_type") == game_type:
+                        # Update the stat_set attribute
+                        gss_node.setAttribute("stat_set", new_stat_set)
+                        break
+                break
 
     def change_combo_field_value(self, sel: int, field: str, combo_dict: dict) -> None:
         """Change the value of a combo box field."""
