@@ -111,6 +111,7 @@ class Hud:
         self.layout = copy.deepcopy(
             self.layout_set.layout[self.max],
         )  # deepcopy required here, because self.layout is used
+        log.debug(f"HUD layout created for {self.max}-max table. Positions: {[self.layout.location[i] for i in range(1, self.max + 1) if self.layout.location[i] is not None]}")
         # to propagate block moves from hud to mucked display
         # (needed because there is only 1 layout for all aux)
         #
