@@ -99,6 +99,31 @@ class SimpleHUD(Aux_Base.AuxSeats):
                 self.game_params.stats[stat].tip
             )
 
+    def _refresh_stats_layout(self) -> None:
+        """Refresh the stats layout when game_params change (for stat set switching)."""
+        # Update layout parameters from new game_params
+        self.nrows = self.game_params.rows
+        self.ncols = self.game_params.cols
+        self.xpad = self.game_params.xpad
+        self.ypad = self.game_params.ypad
+        
+        # Reinitialize the stats arrays
+        self.stats = [[None] * self.ncols for _ in range(self.nrows)]
+        self.popups = [[None] * self.ncols for _ in range(self.nrows)]
+        self.tips = [[None] * self.ncols for _ in range(self.nrows)]
+        
+        # Repopulate with new stat set configuration
+        for stat in self.game_params.stats:
+            self.stats[self.game_params.stats[stat].rowcol[0]][self.game_params.stats[stat].rowcol[1]] = (
+                self.game_params.stats[stat].stat_name
+            )
+            self.popups[self.game_params.stats[stat].rowcol[0]][self.game_params.stats[stat].rowcol[1]] = (
+                self.game_params.stats[stat].popup
+            )
+            self.tips[self.game_params.stats[stat].rowcol[0]][self.game_params.stats[stat].rowcol[1]] = (
+                self.game_params.stats[stat].tip
+            )
+
     def create_contents(self, container: Any, i: int) -> None:
         """Create the contents of the container."""
         # this is a call to whatever is in self.aw_class_window but it isn't obvious
@@ -127,6 +152,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
     def save_layout(self) -> None:
         """Save new layout back to the aux element in the config file."""
         new_locs = {self.adj[int(i)]: ((pos[0]), (pos[1])) for i, pos in list(self.positions.items()) if i != "common"}
+        log.info(f"Saving layout for {self.hud.max}-max table: {new_locs}")
         self.config.save_layout_set(
             self.hud.layout_set,
             self.hud.max,
@@ -134,6 +160,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
             self.hud.table.width,
             self.hud.table.height,
         )
+        log.info("Layout saved successfully")
 
 
 class SimpleStatWindow(Aux_Base.SeatWindow):
@@ -556,16 +583,28 @@ class SimpleTablePopupMenu(QWidget):
         # Instead of killing the HUD, try to refresh it with the new stat set
         try:
             # Update the game params to use the new stat set
-            self.parentwin.aw.game_params = self.parentwin.hud.config.get_game_parameters(
+            self.parentwin.aw.game_params = self.parentwin.hud.config.get_supported_games_parameters(
                 self.parentwin.hud.poker_game, 
                 self.parentwin.hud.game_type
-            )
+            )["game_stat_set"]
             
-            # Refresh the HUD display
+            # Refresh the HUD display with new stat set
             if hasattr(self.parentwin.hud, 'stat_dict'):
+                # Need to refresh the stats layout and popups with new stat set
+                self.parentwin.aw._refresh_stats_layout()
+                
+                # Recreate contents of all existing windows with new stat set
+                for seat in self.parentwin.aw.stat_windows:
+                    if self.parentwin.aw.stat_windows[seat] is not None:
+                        self.parentwin.aw.stat_windows[seat].create_contents(seat)
+                
+                # Update with current data
                 self.parentwin.aw.update(self.parentwin.hud.stat_dict)
-        except Exception:
-            # If refresh fails, fall back to restarting the HUD
+                log.info("HUD refreshed with new stat set: %s", new_stat_set)
+        except Exception as e:
+            # If refresh fails, restart the HUD to apply the new stat set
+            # This is intentional for the switch feature, not an unwanted restart
+            log.info("Refreshing HUD failed, restarting to apply stat set '%s': %s", new_stat_set, e)
             self.parentwin.hud.parent.kill_hud("kill", self.parentwin.hud.table.key)
 
     def _update_stat_set_in_config(self, new_stat_set: str) -> None:

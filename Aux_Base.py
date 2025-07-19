@@ -281,12 +281,14 @@ class AuxSeats(AuxWindow):
                 self.hud.layout.common = self.create_scale_position(x, y)
             else:
                 (x, y) = self.hud.layout.location[self.adj[i]]
+                log.debug(f"Seat {i}: Loading position from layout: ({x}, {y})")
                 self.m_windows[i] = self.aw_class_window(self, i)
                 self.positions[i] = self.create_scale_position(x, y)
-                table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
-                table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
+                table_x = self.hud.table.x if self.hud.table.x is not None else 0
+                table_y = self.hud.table.y if self.hud.table.y is not None else 0
                 pos_x = max(0, self.positions[i][0] + table_x)
                 pos_y = max(0, self.positions[i][1] + table_y)
+                log.debug(f"Seat {i}: Final position: table({table_x}, {table_y}) + relative({self.positions[i][0]}, {self.positions[i][1]}) = ({pos_x}, {pos_y})")
                 self.m_windows[i].move(pos_x, pos_y)
                 self.hud.layout.location[self.adj[i]] = self.positions[i]
                 if "opacity" in self.params:
@@ -372,6 +374,7 @@ class AuxSeats(AuxWindow):
                 new_abs_position.x() - table_x,
                 new_abs_position.y() - table_y,
             )
+            log.debug(f"Seat {i}: Position updated - abs({new_abs_position.x()}, {new_abs_position.y()}) - table({table_x}, {table_y}) = relative({new_position[0]}, {new_position[1]})")
             self.positions[i] = new_position  # write this back to our map
             if i != "common":
                 self.hud.layout.location[self.adj[i]] = new_position  # update the hud-level dict,

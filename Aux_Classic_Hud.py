@@ -87,8 +87,8 @@ class ClassicStatWindow(Aux_Hud.SimpleStatWindow):
         else:
             # player dealt-in, force display of stat block
             # need to call move() to re-establish window position
-            table_x = max(0, self.aw.hud.table.x) if self.aw.hud.table.x is not None else 50
-            table_y = max(0, self.aw.hud.table.y) if self.aw.hud.table.y is not None else 50
+            table_x = self.aw.hud.table.x if self.aw.hud.table.x is not None else 0
+            table_y = self.aw.hud.table.y if self.aw.hud.table.y is not None else 0
             pos_x = max(0, self.aw.positions[i][0] + table_x)
             pos_y = max(0, self.aw.positions[i][1] + table_y)
             self.move(pos_x, pos_y)
@@ -171,7 +171,7 @@ class ClassicStat(Aux_Hud.SimpleStat):
 
     def open_comment_dialog(self, _event: Any) -> None:
         """Opens a dialog to add or edit a comment for a player."""
-        if self.stat != "playershort":
+        if self.stat not in ("playershort", "player_note"):
             return
 
         player_id = self.get_player_id()
@@ -288,11 +288,14 @@ class ClassicStat(Aux_Hud.SimpleStat):
 
         statstring = f"{self.hudprefix}{self.number[1]!s}{self.hudsuffix}"
 
-        # Check if the player has a comment and adjust color or add symbol if it's playershort
-        if self.stat == "playershort" and self.has_comment(player_id):
-            icon_path = Path(Configuration.GRAPHICS_PATH) / "pencil.png"  # Chemin vers l'image de l'icône
-            icon_img = f'<img src="{icon_path}" width="24" height="24">'  # Ajuster la taille de l'icône
-            statstring = f"{icon_img} {self.hudprefix}{self.number[1]!s}{self.hudsuffix} "  # Add star symbol
+        # Special handling for player_note stat - change color based on notes
+        if self.stat == "player_note":
+            if self.has_comment(player_id):
+                # Orange/yellow color when notes exist
+                statstring = f'<span style="color: #FFA500; font-size: 16px;">{self.number[1]}</span>'
+            else:
+                # Gray color when no notes
+                statstring = f'<span style="color: #808080; font-size: 16px;">{self.number[1]}</span>'
 
         self.set_color(fg=fg, bg=None)
         self.lab.setText(statstring)

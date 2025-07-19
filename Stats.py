@@ -2972,6 +2972,29 @@ def blank(stat_dict, player):
     return ("", "", "", "", "", "<blank>")
 
 
+def player_note(stat_dict, player):
+    """Display a note icon that changes color based on whether the player has notes."""
+    try:
+        # Try to get player_id from stat_dict 
+        player_id = None
+        for pid, data in stat_dict.items():
+            if data.get('screen_name') == player:
+                player_id = pid
+                break
+        
+        if player_id is None:
+            # Default gray icon if no player found
+            return ("📝", "📝", "📝", "📝", "📝", "Player note icon")
+        
+        # Check if player has notes using database query
+        # This will be handled by the HUD display logic that checks has_comment()
+        # Return a note icon - color will be determined by the HUD
+        return ("📝", "📝", "📝", "📝", "📝", "Player note icon")
+        
+    except Exception:
+        return ("📝", "📝", "📝", "📝", "📝", "Player note icon")
+
+
 ################################################################################################
 # NEW STATS
 
