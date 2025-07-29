@@ -3,7 +3,7 @@ name: Deploy Documentation to GitHub Pages
 on:
   push:
     branches:
-      - feature/add-skins
+      - main
 
 permissions:
   contents: read
