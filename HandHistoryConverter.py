@@ -33,6 +33,7 @@ from pytz import timezone
 import Hand
 from Exceptions import FpdbHandPartial, FpdbHandSkipped, FpdbParseError
 from loggingFpdb import get_logger
+from ImprovedErrorHandler import get_improved_error_handler
 
 # import L10n
 # _ = L10n.get_translation()
@@ -98,6 +99,9 @@ in_path   (default '-' = sys.stdin)
         self.parsing_issues = []
         self.isCarraige = False
         self.autoPop = False
+        
+        # Initialize improved error handler
+        self.error_handler = get_improved_error_handler()
 
         # Tourney object used to store TourneyInfo when called to deal with a Summary file
         self.tourney = None
@@ -157,6 +161,9 @@ HandHistoryConverter: '{sitename}'
                 except FpdbHandPartial as e:
                     self.numPartial += 1
                     lastParsed = "partial"
+                    error_info = self.error_handler.record_error(
+                        self.in_path, "partial", str(e), handText
+                    )
                     self.parsing_issues.append(f"[PARTIAL] Hand starting with '{handText[:30]}...': {e}")
                     log.warning(f"partial {e}")
                 except FpdbHandSkipped:
@@ -165,18 +172,39 @@ HandHistoryConverter: '{sitename}'
                 except FpdbParseError as e:
                     self.numErrors += 1
                     lastParsed = "error"
+                    error_info = self.error_handler.record_error(
+                        self.in_path, "error", str(e), handText
+                    )
                     self.parsing_issues.append(f"[ERROR] Hand starting with '{handText[:30]}...': {e}")
                     log.exception(f"FpdbParseError for file '{self.in_path}'")
+            
+            # Improved error handling - only reset file position when truly necessary
             if lastParsed in ("partial", "error") and self.autoPop:
-                self.index -= len(handsList[-1])
-                if self.isCarraige:
-                    self.index -= handsList[-1].count("\n")
-                handsList.pop()
+                # Use improved error handler to decide whether to reset file position
+                should_reset = False
                 if lastParsed == "partial":
-                    self.numPartial -= 1
+                    error_info = self.error_handler.record_error(
+                        self.in_path, "partial", "Partial hand detected", handsList[-1]
+                    )
+                    should_reset = self.error_handler.should_reset_file_position(self.in_path, error_info)
+                elif lastParsed == "error":
+                    error_info = self.error_handler.record_error(
+                        self.in_path, "error", "Parse error detected", handsList[-1]
+                    )
+                    should_reset = self.error_handler.should_reset_file_position(self.in_path, error_info)
+                
+                if should_reset:
+                    self.index -= len(handsList[-1])
+                    if self.isCarraige:
+                        self.index -= handsList[-1].count("\n")
+                    handsList.pop()
+                    if lastParsed == "partial":
+                        self.numPartial -= 1
+                    else:
+                        self.numErrors -= 1
+                    log.info("Removing problematic hand & resetting index due to permanent error")
                 else:
-                    self.numErrors -= 1
-                log.info("Removing partially written hand & resetting index")
+                    log.info(f"Keeping file position despite {lastParsed} error - classified as temporary/recoverable")
             self.numHands = len(list(handsList))
             endtime = time.time()
             log.info(

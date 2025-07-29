@@ -26,6 +26,8 @@ import Deck
 import Hud
 import Options
 from loggingFpdb import get_logger
+from HudStatsPersistence import get_hud_stats_persistence
+from SmartHudManager import get_smart_hud_manager, RestartReason
 
 # Logging configuration
 
@@ -169,6 +171,12 @@ class HudMain(QObject):
 
             # Cache initialization
             self.cache: TTLCache = TTLCache(maxsize=1000, ttl=300)  # Cache of 1000 elements with a TTL of 5 minutes
+            
+            # Stats persistence initialization
+            self.stats_persistence = get_hud_stats_persistence()
+            
+            # Smart HUD manager initialization
+            self.smart_hud_manager = get_smart_hud_manager()
 
             # Initialisation ZMQ avec QThread
             log.info("Initializing ZMQ communication...")
@@ -282,8 +290,23 @@ class HudMain(QObject):
 
     def table_title_changed(self, _widget: QWidget | None, hud: Hud.Hud) -> None:
         """Handle the table title changed event."""
-        log.debug("Table title changed, killing current HUD")
-        self.kill_hud(None, hud.table.key)
+        table_key = hud.table.key
+        new_title = getattr(hud.table, 'title', '')
+        
+        # Use smart manager to determine if title change is significant
+        if self.smart_hud_manager.has_table_title_changed(table_key, new_title):
+            should_restart, reason = self.smart_hud_manager.should_restart_hud(
+                table_key, RestartReason.TABLE_CLOSED
+            )
+            
+            if should_restart:
+                log.info(f"Table title changed significantly, restarting HUD: {reason}")
+                self.smart_hud_manager.record_restart(table_key, f"Title change: {reason}")
+                self.kill_hud(None, table_key)
+            else:
+                log.debug(f"Table title changed but restart not needed: {reason}")
+        else:
+            log.debug("Table title change detected but not significant enough for restart")
 
     def table_is_stale(self, hud: Hud.Hud) -> None:
         """Handle a stale table by killing the HUD."""
@@ -403,22 +426,53 @@ class HudMain(QObject):
         if temp_key not in self.hud_dict:
             return poker_game, None
 
-        with contextlib.suppress(Exception):
-            newmax = self.hud_dict[temp_key].hud_params.get("new_max_seats")
-            if newmax and self.hud_dict[temp_key].max != newmax:
-                log.debug("going to kill_hud due to max seats change")
-                self.kill_hud("activate", temp_key)
-                while temp_key in self.hud_dict:
-                    time.sleep(0.5)
-                self.hud_dict[temp_key].hud_params["new_max_seats"] = None
-                return poker_game, newmax
+        hud = self.hud_dict[temp_key]
+        current_state = {
+            'poker_game': getattr(hud, 'poker_game', ''),
+            'max_seats': getattr(hud, 'max', 0)
+        }
 
-        if self.hud_dict[temp_key].poker_game != poker_game:
-            with contextlib.suppress(Exception):
-                log.debug("going to kill_hud due to poker game change")
-                self.kill_hud("activate", temp_key)
-                while temp_key in self.hud_dict:
-                    time.sleep(0.5)
+        # Check for max seats change
+        with contextlib.suppress(Exception):
+            newmax = hud.hud_params.get("new_max_seats")
+            if newmax and hud.max != newmax:
+                new_state = current_state.copy()
+                new_state['max_seats'] = newmax
+                
+                should_restart, reason = self.smart_hud_manager.should_restart_hud(
+                    temp_key, RestartReason.MAX_SEATS_CHANGE, current_state, new_state
+                )
+                
+                if should_restart:
+                    log.info(f"Smart restart for max seats change: {reason}")
+                    self.smart_hud_manager.record_restart(temp_key, f"Max seats: {reason}")
+                    self.kill_hud("activate", temp_key)
+                    while temp_key in self.hud_dict:
+                        time.sleep(0.5)
+                    hud.hud_params["new_max_seats"] = None
+                    return poker_game, newmax
+                else:
+                    log.info(f"Skipping restart for max seats change: {reason}")
+
+        # Check for game type change
+        if hud.poker_game != poker_game:
+            new_state = current_state.copy()
+            new_state['poker_game'] = poker_game
+            
+            should_restart, reason = self.smart_hud_manager.should_restart_hud(
+                temp_key, RestartReason.GAME_TYPE_CHANGE, current_state, new_state
+            )
+            
+            if should_restart:
+                log.info(f"Smart restart for game type change: {reason}")
+                self.smart_hud_manager.record_restart(temp_key, f"Game type: {reason}")
+                with contextlib.suppress(Exception):
+                    self.kill_hud("activate", temp_key)
+                    while temp_key in self.hud_dict:
+                        time.sleep(0.5)
+            else:
+                log.info(f"Skipping restart for game type change: {reason}")
+        
         return poker_game, None
 
     def _update_existing_hud(
@@ -469,6 +523,14 @@ class HudMain(QObject):
         )
         log.debug("got stats for hand %s", new_hand_id)
 
+        # Try to load cached stats to preserve data across restarts
+        cached_stats = self.stats_persistence.load_hud_stats(temp_key)
+        if cached_stats:
+            log.info(f"Found cached HUD stats for table {temp_key}, merging with current data")
+            merged_data = self.stats_persistence.merge_stats(cached_stats, {"stat_dict": stat_dict})
+            stat_dict = merged_data.get("stat_dict", stat_dict)
+            log.debug("Merged cached stats with fresh database stats")
+
         if not any(stat_dict[key]["screen_name"] == self.hero[site_id] for key in stat_dict):
             log.info("HUD not created yet, because hero is not seated for this hand")
             return
@@ -488,6 +550,11 @@ class HudMain(QObject):
         tablewindow.key = temp_key
         tablewindow.max = max_seats
         tablewindow.site = site_name
+
+        # Register table state with smart HUD manager
+        self.smart_hud_manager.update_table_state(
+            temp_key, poker_game, game_type, max_seats, site_name, table_name
+        )
 
         if hasattr(tablewindow, "number"):
             args = HUDCreationArgs(
@@ -579,6 +646,24 @@ class HudMain(QObject):
         """Handle the idle kill event."""
         try:
             if table in self.hud_dict:
+                # Save HUD stats before killing to prevent data loss
+                hud = self.hud_dict[table]
+                hud_data = {
+                    "stat_dict": getattr(hud, 'stat_dict', {}),
+                    "cards": getattr(hud, 'cards', {}),
+                    "poker_game": getattr(hud, 'poker_game', ''),
+                    "game_type": getattr(hud, 'game_type', ''),
+                    "max_seats": getattr(hud, 'max', 0),
+                    "hud_params": getattr(hud, 'hud_params', {}),
+                    "last_hand_id": getattr(hud, 'last_hand_id', '')
+                }
+                
+                if self.stats_persistence.save_hud_stats(table, hud_data):
+                    log.info(f"HUD stats saved before restart for table: {table}")
+                else:
+                    log.warning(f"Failed to save HUD stats for table: {table}")
+                
+                # Original kill logic
                 self.vb.removeWidget(self.hud_dict[table].tablehudlabel)
                 self.hud_dict[table].tablehudlabel.setParent(None)
                 self.hud_dict[table].kill()
