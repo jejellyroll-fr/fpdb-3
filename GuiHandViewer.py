@@ -419,6 +419,11 @@ class GuiHandViewer(QSplitter):
         """Returns true if the cards of the given row are in the card filter."""
         # Does work but all cards that should NOT be displayed have to be clicked.
         card_filter = self.filters.getCards()
+
+        # if the filter is not active, show all hands
+        if not card_filter:
+            return True
+
         hcs = self.model.data(
             self.model.index(rownum, self.colnum["Street0"]), Qt.UserRole + 1,
         ).split(" ")
@@ -437,11 +442,8 @@ class GuiHandViewer(QSplitter):
         idx = Card.twoStartCards(value1, hcs[0][1], value2, hcs[1][1])
         abbr = Card.twoStartCardString(idx)
 
-        # Debug output to trace unexpected keys
-        if abbr not in card_filter:
-            log.warning(f"Unexpected key in card filter: {abbr}")
-
-        return card_filter.get(abbr, True)  # Default to True if key is not found
+        # if the filter is active, only show hands that are in it.
+        return card_filter.get(abbr, False)
 
     def row_activated(self, index) -> None:
         handlist = sorted(self.hands.keys())
