@@ -25,9 +25,9 @@ import Database
 import Deck
 import Hud
 import Options
-from loggingFpdb import get_logger
 from HudStatsPersistence import get_hud_stats_persistence
-from SmartHudManager import get_smart_hud_manager, RestartReason
+from loggingFpdb import get_logger
+from SmartHudManager import RestartReason, get_smart_hud_manager
 
 # Logging configuration
 
@@ -86,8 +86,8 @@ class ZMQReceiver(QObject):
         super().__init__(parent)
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PULL)
-        self.socket.connect(f"tcp://127.0.0.1:{port}")
-        log.info("ZMQ receiver connected on port %s", port)
+        self.socket.bind(f"tcp://127.0.0.1:{port}")
+        log.info("ZMQ receiver bound to port %s", port)
         # Set socket options for better debugging
         self.socket.setsockopt(zmq.RCVTIMEO, 1000)  # 1 second timeout
 
@@ -127,8 +127,79 @@ class HudMain(QObject):
         self.options = options
         QObject.__init__(self)
         self.db_name = db_name
-        Configuration.set_logfile("HUD-log.txt")
+
+        # Ensure HUD logging is properly initialized
+        import logging
+        from pathlib import Path
+
+        from loggingFpdb import JsonFormatter, TimedSizedRotatingFileHandler
+
+        try:
+            # Create HUD-specific log directory and file
+            hud_log_dir = Path.home() / ".fpdb" / "log"
+            hud_log_dir.mkdir(parents=True, exist_ok=True)
+            hud_log_file = hud_log_dir / "HUD-log.txt"
+
+            # Get the HUD logger and configure it
+            hud_logger = logging.getLogger("hud")
+            hud_logger.setLevel(logging.DEBUG)
+
+            # Remove existing handlers to avoid duplicates
+            for handler in hud_logger.handlers[:]:
+                hud_logger.removeHandler(handler)
+
+            # Create HUD-specific file handler using our custom rotating handler
+            file_handler = TimedSizedRotatingFileHandler(
+                filename=str(hud_log_file),
+                when="midnight",
+                interval=1,
+                backup_count=7,
+                max_bytes=10 * 1024 * 1024,  # 10 MB
+                encoding="utf-8",
+            )
+            file_handler.setLevel(logging.DEBUG)
+
+            # Use our JSON formatter
+            json_formatter = JsonFormatter()
+            file_handler.setFormatter(json_formatter)
+
+            # Add handler to HUD logger
+            hud_logger.addHandler(file_handler)
+
+            # Add console handler using FPDB's colored formatter
+            import colorlog
+            log_colors = {
+                "DEBUG": "green",
+                "INFO": "blue",
+                "WARNING": "yellow",
+                "ERROR": "red",
+            }
+            log_format = (
+                "%(log_color)s%(asctime)s [%(name)s:%(module)s:%(funcName)s] "
+                "[%(levelname)s] %(message)s%(reset)s"
+            )
+            date_format = "%Y-%m-%d %H:%M:%S"
+            console_formatter = colorlog.ColoredFormatter(
+                fmt=log_format, datefmt=date_format, log_colors=log_colors,
+            )
+
+            console_handler = logging.StreamHandler()
+            console_handler.setLevel(logging.INFO)
+            console_handler.setFormatter(console_formatter)
+            hud_logger.addHandler(console_handler)
+
+            hud_logger.propagate = False  # Use our own handlers instead of propagating
+
+            log.info(f"HUD logging configured to: {hud_log_file}")
+            log.info("HUD_main starting up - logging initialized successfully")
+
+        except Exception as e:
+            log.error(f"Failed to setup HUD logging: {e}")
+            import traceback
+            traceback.print_exc()
+
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
+        log.info("HUD_main initialized - Config loaded, OS family: %s", self.config.os_family)
 
         # Selecting the right module for the OS
         if self.config.os_family == "Linux":
@@ -152,10 +223,13 @@ class HudMain(QObject):
             log.info("HudMain starting")
 
         log.info("HudMain.__init__ starting")
+        log.info("HUD DEBUG - Options: errorsToConsole=%s, logging_level=%s",
+                options.errorsToConsole, getattr(options, "logging_level", "Not set"))
         try:
             # Connecting to the database
             log.info("Connecting to database...")
             self.db_connection = Database.Database(self.config)
+            log.info("Database connection successful")
 
             # HUD dictionary and parameters
             self.hud_dict: dict[str, Hud.Hud] = {}
@@ -171,16 +245,17 @@ class HudMain(QObject):
 
             # Cache initialization
             self.cache: TTLCache = TTLCache(maxsize=1000, ttl=300)  # Cache of 1000 elements with a TTL of 5 minutes
-            
+
             # Stats persistence initialization
             self.stats_persistence = get_hud_stats_persistence()
-            
+
             # Smart HUD manager initialization
             self.smart_hud_manager = get_smart_hud_manager()
 
             # Initialisation ZMQ avec QThread
             log.info("Initializing ZMQ communication...")
             self.zmq_receiver = ZMQReceiver(parent=self)
+            log.info("ZMQ receiver created successfully")
             self.zmq_receiver.message_received.connect(self.handle_message)
             self.zmq_worker = ZMQWorker(self.zmq_receiver)
             self.zmq_worker.error_occurred.connect(self.handle_worker_error)
@@ -232,8 +307,9 @@ class HudMain(QObject):
     def handle_message(self, hand_id: str) -> None:
         """Handle an incoming message from the ZMQ receiver."""
         # This method will be called in the main thread
-        log.debug("HUD received message with hand_id: %s", hand_id)
+        log.info("HUD RECEIVED MESSAGE - hand_id: %s", hand_id)
         self.read_stdin(hand_id)
+        log.debug("Message processing completed for hand_id: %s", hand_id)
 
     def destroy(self) -> None:
         """Destroy the application and clean up resources."""
@@ -268,7 +344,8 @@ class HudMain(QObject):
     def check_tables(self) -> None:
         """Periodically check the status of poker tables."""
         if not self.hud_dict:
-            log.info("Waiting for hands ...")
+            # log.info("Waiting for hands ...")
+            pass
         for hud in list(self.hud_dict.values()):
             self._handle_table_status(hud)
         self._topify_mac_windows()
@@ -291,14 +368,14 @@ class HudMain(QObject):
     def table_title_changed(self, _widget: QWidget | None, hud: Hud.Hud) -> None:
         """Handle the table title changed event."""
         table_key = hud.table.key
-        new_title = getattr(hud.table, 'title', '')
-        
+        new_title = getattr(hud.table, "title", "")
+
         # Use smart manager to determine if title change is significant
         if self.smart_hud_manager.has_table_title_changed(table_key, new_title):
             should_restart, reason = self.smart_hud_manager.should_restart_hud(
-                table_key, RestartReason.TABLE_CLOSED
+                table_key, RestartReason.TABLE_CLOSED,
             )
-            
+
             if should_restart:
                 log.info(f"Table title changed significantly, restarting HUD: {reason}")
                 self.smart_hud_manager.record_restart(table_key, f"Title change: {reason}")
@@ -428,8 +505,8 @@ class HudMain(QObject):
 
         hud = self.hud_dict[temp_key]
         current_state = {
-            'poker_game': getattr(hud, 'poker_game', ''),
-            'max_seats': getattr(hud, 'max', 0)
+            "poker_game": getattr(hud, "poker_game", ""),
+            "max_seats": getattr(hud, "max", 0),
         }
 
         # Check for max seats change
@@ -437,12 +514,12 @@ class HudMain(QObject):
             newmax = hud.hud_params.get("new_max_seats")
             if newmax and hud.max != newmax:
                 new_state = current_state.copy()
-                new_state['max_seats'] = newmax
-                
+                new_state["max_seats"] = newmax
+
                 should_restart, reason = self.smart_hud_manager.should_restart_hud(
-                    temp_key, RestartReason.MAX_SEATS_CHANGE, current_state, new_state
+                    temp_key, RestartReason.MAX_SEATS_CHANGE, current_state, new_state,
                 )
-                
+
                 if should_restart:
                     log.info(f"Smart restart for max seats change: {reason}")
                     self.smart_hud_manager.record_restart(temp_key, f"Max seats: {reason}")
@@ -451,18 +528,17 @@ class HudMain(QObject):
                         time.sleep(0.5)
                     hud.hud_params["new_max_seats"] = None
                     return poker_game, newmax
-                else:
-                    log.info(f"Skipping restart for max seats change: {reason}")
+                log.info(f"Skipping restart for max seats change: {reason}")
 
         # Check for game type change
         if hud.poker_game != poker_game:
             new_state = current_state.copy()
-            new_state['poker_game'] = poker_game
-            
+            new_state["poker_game"] = poker_game
+
             should_restart, reason = self.smart_hud_manager.should_restart_hud(
-                temp_key, RestartReason.GAME_TYPE_CHANGE, current_state, new_state
+                temp_key, RestartReason.GAME_TYPE_CHANGE, current_state, new_state,
             )
-            
+
             if should_restart:
                 log.info(f"Smart restart for game type change: {reason}")
                 self.smart_hud_manager.record_restart(temp_key, f"Game type: {reason}")
@@ -472,7 +548,7 @@ class HudMain(QObject):
                         time.sleep(0.5)
             else:
                 log.info(f"Skipping restart for game type change: {reason}")
-        
+
         return poker_game, None
 
     def _update_existing_hud(
@@ -553,7 +629,7 @@ class HudMain(QObject):
 
         # Register table state with smart HUD manager
         self.smart_hud_manager.update_table_state(
-            temp_key, poker_game, game_type, max_seats, site_name, table_name
+            temp_key, poker_game, game_type, max_seats, site_name, table_name,
         )
 
         if hasattr(tablewindow, "number"):
@@ -592,7 +668,7 @@ class HudMain(QObject):
             site for site in enabled_sites if not self.config.get_site_parameters(site)["aux_enabled"]
         ]
         if fast or site_name in aux_disabled_sites or site_name not in enabled_sites:
-            log.debug("HUD creation skipped: fast=%s, site_disabled=%s, site_enabled=%s", 
+            log.debug("HUD creation skipped: fast=%s, site_disabled=%s, site_enabled=%s",
                       fast, site_name in aux_disabled_sites, site_name in enabled_sites)
             return
 
@@ -649,20 +725,20 @@ class HudMain(QObject):
                 # Save HUD stats before killing to prevent data loss
                 hud = self.hud_dict[table]
                 hud_data = {
-                    "stat_dict": getattr(hud, 'stat_dict', {}),
-                    "cards": getattr(hud, 'cards', {}),
-                    "poker_game": getattr(hud, 'poker_game', ''),
-                    "game_type": getattr(hud, 'game_type', ''),
-                    "max_seats": getattr(hud, 'max', 0),
-                    "hud_params": getattr(hud, 'hud_params', {}),
-                    "last_hand_id": getattr(hud, 'last_hand_id', '')
+                    "stat_dict": getattr(hud, "stat_dict", {}),
+                    "cards": getattr(hud, "cards", {}),
+                    "poker_game": getattr(hud, "poker_game", ""),
+                    "game_type": getattr(hud, "game_type", ""),
+                    "max_seats": getattr(hud, "max", 0),
+                    "hud_params": getattr(hud, "hud_params", {}),
+                    "last_hand_id": getattr(hud, "last_hand_id", ""),
                 }
-                
+
                 if self.stats_persistence.save_hud_stats(table, hud_data):
                     log.info(f"HUD stats saved before restart for table: {table}")
                 else:
                     log.warning(f"Failed to save HUD stats for table: {table}")
-                
+
                 # Original kill logic
                 self.vb.removeWidget(self.hud_dict[table].tablehudlabel)
                 self.hud_dict[table].tablehudlabel.setParent(None)

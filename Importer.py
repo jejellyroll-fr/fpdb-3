@@ -57,8 +57,8 @@ class ZMQSender:
     def __init__(self, port="5555") -> None:
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUSH)
-        self.socket.bind(f"tcp://127.0.0.1:{port}")
-        log.info(f"ZMQ sender initialized on port {port}")
+        self.socket.connect(f"tcp://127.0.0.1:{port}")
+        log.info(f"ZMQ sender connected to port {port}")
 
     def send_hand_id(self, hand_id) -> None:
         try:
@@ -690,8 +690,10 @@ class Importer:
                         hand.updateTourneyResults(self.database)
                         ihands.append(hand)
                         to_hud.append(hand.dbid_hands)
+                        log.info(f"Hand {hand.dbid_hands} added to HUD queue")
                     except FpdbHandDuplicate:
                         duplicates += 1
+                        log.info("Duplicate hand detected - not sending to HUD")
                         if doinsert and ihands:
                             backtrack = True
                     except FpdbHandPartial as e:
@@ -747,11 +749,12 @@ class Importer:
 
                 # pipe the Hands.id out to the HUD
                 if self.callHud:
+                    log.info(f"ZMQ DEBUG - to_hud contains {len(to_hud)} hands: {to_hud}")
                     if self.zmq_sender is None:
                         self.zmq_sender = ZMQSender()
                     for hid in to_hud:
                         try:
-                            log.debug(f"Sending hand ID {hid} to HUD via socket")
+                            log.info(f"Sending hand ID {hid} to HUD via ZMQ socket")
                             self.zmq_sender.send_hand_id(hid)
                         except OSError as e:
                             log.exception(f"Failed to send hand ID to HUD via socket: {e}")
@@ -779,13 +782,13 @@ class Importer:
 
             if gametype.get("type") == "tour" and getattr(hhc, "summaryInFile", False):
                 fpdbfile.ftype = "both"
-                log.info(f"✅ File {fpdbfile.path} marked as 'both' for summary processing")
+                log.info(f"File {fpdbfile.path} marked as 'both' for summary processing")
             else:
-                log.warning(f"❌ File {fpdbfile.path} NOT marked for summary processing")
+                log.warning(f"File {fpdbfile.path} NOT marked for summary processing")
                 log.warning(f"   - type is '{gametype.get('type')}' (expected 'tour')")
                 log.warning(f"   - summaryInFile is '{getattr(hhc, 'summaryInFile', False)}' (expected True)")
         else:
-            log.warning("❌ No phands available for summary checking")
+            log.warning("No phands available for summary checking")
 
         ttime = time() - ttime
         return (stored, duplicates, partial, skipped, errors, ttime, detected_sitename)
@@ -881,7 +884,7 @@ class Importer:
         QCoreApplication.processEvents()
 
     def readFile(self, obj, filename, site):
-        if filename.endswith(".xls") or filename.endswith(".xlsx") and xlrd:
+        if filename.endswith(".xls") or (filename.endswith(".xlsx") and xlrd):
             obj.hhtype = "xls"
             tourNoField = "Tourney" if site == "PokerStars" else "tournament key"
             summaryTexts = obj.summaries_from_excel(filename, tourNoField)

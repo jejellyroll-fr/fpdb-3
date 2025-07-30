@@ -163,17 +163,26 @@ class Hud:
         x_scale = 1.0 * self.table.width / self.layout.width
         y_scale = 1.0 * self.table.height / self.layout.height
 
+        log.info("HUD RESIZE - Table: %dx%d, Layout: %dx%d, Scale: %.2fx%.2f",
+                self.table.width, self.table.height, self.layout.width, self.layout.height, x_scale, y_scale)
+
         for i in list(range(1, self.max + 1)):
             if self.layout.location[i]:
+                old_pos = self.layout.location[i]
                 self.layout.location[i] = (
                     (int(self.layout.location[i][0] * x_scale)),
                     (int(self.layout.location[i][1] * y_scale)),
                 )
+                log.debug("Seat %d layout scaled: (%d,%d) -> (%d,%d)",
+                         i, old_pos[0], old_pos[1], self.layout.location[i][0], self.layout.location[i][1])
 
+        old_common = self.layout.common
         self.layout.common = (
             int(self.layout.common[0] * x_scale),
             int(self.layout.common[1] * y_scale),
         )
+        log.info("Common layout scaled: (%d,%d) -> (%d,%d)",
+                old_common[0], old_common[1], self.layout.common[0], self.layout.common[1])
 
         self.layout.width = self.table.width
         self.layout.height = self.table.height
