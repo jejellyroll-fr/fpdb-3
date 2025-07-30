@@ -257,13 +257,18 @@ class WinamaxDetector(SiteDetector):
             )
 
         elif self.platform == "Linux":
-            paths = get_linux_paths()
-            # Check for Wine installation TODO: new native linux app
-            wine_appdata = str(Path(paths["wine_users"]) / "*" / "AppData" / "Roaming" / "Winamax" / "accounts")
-            wine_paths = list(Path().glob(wine_appdata))
-            wine_paths = [str(p) for p in wine_paths]
-            if wine_paths:
-                base_path = wine_paths[0]
+            # Check for native Linux Winamax app first
+            native_path = str(Path.home() / ".config" / "winamax" / "documents" / "accounts")
+            if Path(native_path).exists():
+                base_path = native_path
+            else:
+                # Fallback to Wine installation
+                paths = get_linux_paths()
+                wine_users_path = Path(paths["wine_users"])
+                wine_paths = list(wine_users_path.glob("*/AppData/Roaming/Winamax/accounts"))
+                wine_paths = [str(p) for p in wine_paths]
+                if wine_paths:
+                    base_path = wine_paths[0]
 
         elif self.platform == "Darwin":  # macOS
             paths = get_mac_paths()
@@ -438,8 +443,8 @@ class iPokerDetector(SiteDetector):  # noqa: N801
             paths = get_linux_paths()
             # Wine paths for Windows clients
             wine_paths = []
-            wine_local = str(Path(paths["wine_users"]) / "*" / "AppData" / "Local" / skin / "data")
-            wine_paths.extend([str(p) for p in Path().glob(wine_local)])
+            wine_users_path = Path(paths["wine_users"])
+            wine_paths.extend([str(p) for p in wine_users_path.glob(f"*/AppData/Local/{skin}/data")])
 
             # Also check Program Files in Wine
             wine_pf = str(Path(paths["wine_program_files"]) / skin / "data")
@@ -530,8 +535,8 @@ class iPokerDetector(SiteDetector):  # noqa: N801
         elif self.platform == "Linux":
             paths = get_linux_paths()
             # Check Wine paths
-            wine_pokerclient = str(Path(paths["wine_users"]) / "*" / "AppData" / "Local" / "PokerClient")
-            wine_paths = [str(p) for p in Path().glob(wine_pokerclient)]
+            wine_users_path = Path(paths["wine_users"])
+            wine_paths = [str(p) for p in wine_users_path.glob("*/AppData/Local/PokerClient")]
             if wine_paths:
                 pokerclient_path = wine_paths[0]
         elif self.platform == "Darwin":  # macOS
@@ -723,8 +728,8 @@ class SealsWithClubsDetector(SiteDetector):
 
         elif self.platform == "Linux":
             paths = get_linux_paths()
-            wine_docs = str(Path(paths["wine_users"]) / "*" / "Documents" / "SwC Poker" / "Hand History")
-            wine_paths = [str(p) for p in Path().glob(wine_docs)]
+            wine_users_path = Path(paths["wine_users"])
+            wine_paths = [str(p) for p in wine_users_path.glob("*/Documents/SwC Poker/Hand History")]
             if wine_paths:
                 hhpath = wine_paths[0]
             else:
@@ -885,8 +890,8 @@ class PartyGamingDetector(SiteDetector):
         elif self.platform == "Linux":
             paths = get_linux_paths()
             # Wine installation paths
-            wine_docs = str(Path(paths["wine_users"]) / "*" / "Documents" / skin / "HandHistory")
-            wine_docs_paths = [str(p) for p in Path().glob(wine_docs)]
+            wine_users_path = Path(paths["wine_users"])
+            wine_docs_paths = [str(p) for p in wine_users_path.glob(f"*/Documents/{skin}/HandHistory")]
 
             hhpath = self._check_path_exists(
                 str(Path(paths["wine_program_files"]) / skin / "HandHistory"),
@@ -897,8 +902,7 @@ class PartyGamingDetector(SiteDetector):
                 wine_docs_paths[0] if wine_docs_paths else None,
             )
 
-            wine_docs_ts = str(Path(paths["wine_users"]) / "*" / "Documents" / skin / "TournSummary")
-            wine_docs_ts_paths = [str(p) for p in Path().glob(wine_docs_ts)]
+            wine_docs_ts_paths = [str(p) for p in wine_users_path.glob(f"*/Documents/{skin}/TournSummary")]
 
             tspath = self._check_path_exists(
                 str(Path(paths["wine_program_files"]) / skin / "TournSummary"),

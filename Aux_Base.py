@@ -20,7 +20,7 @@ from __future__ import annotations
 import contextlib
 from typing import TYPE_CHECKING, Any
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import QPoint, Qt
 from PyQt5.QtWidgets import QApplication, QWidget
 
 if TYPE_CHECKING:
@@ -35,20 +35,43 @@ log = get_logger("hud")
 
 def clamp_to_screen(x: int, y: int, width: int = 200, height: int = 100) -> tuple[int, int]:
     """Clamp window position to screen boundaries."""
+    from loggingFpdb import get_logger
+    log = get_logger("hud")
+
     app = QApplication.instance()
     if app is None:
+        log.warning("No QApplication instance for screen clamping")
         return max(0, x), max(0, y)
 
-    screen = app.primaryScreen()
+    # Try to find the screen containing the point
+    screen = app.screenAt(QPoint(x, y))
     if screen is None:
+        # Fallback to primary screen
+        screen = app.primaryScreen()
+        log.info("Point (%d,%d) not on any screen, using primary screen", x, y)
+    else:
+        log.debug("Point (%d,%d) found on screen: %s", x, y, screen.name())
+
+    if screen is None:
+        log.warning("No screen available for clamping")
         return max(0, x), max(0, y)
 
     geometry = screen.geometry()
-    max_x = geometry.width() - width
-    max_y = geometry.height() - height
+    log.info("Screen geometry: X=%d, Y=%d, Width=%d, Height=%d",
+            geometry.x(), geometry.y(), geometry.width(), geometry.height())
 
-    clamped_x = max(0, min(x, max_x))
-    clamped_y = max(0, min(y, max_y))
+    # Clamp to the actual screen boundaries (including offset for extended screens)
+    min_x = geometry.x()
+    max_x = geometry.x() + geometry.width() - width
+    min_y = geometry.y()
+    max_y = geometry.y() + geometry.height() - height
+
+    clamped_x = max(min_x, min(x, max_x))
+    clamped_y = max(min_y, min(y, max_y))
+
+    if clamped_x != x or clamped_y != y:
+        log.info("CLAMPING: Original (%d,%d) -> Clamped (%d,%d) [Screen bounds: %d-%d, %d-%d]",
+                x, y, clamped_x, clamped_y, min_x, max_x, min_y, max_y)
 
     return clamped_x, clamped_y
 
@@ -241,11 +264,18 @@ class AuxSeats(AuxWindow):
 
     def resize_windows(self) -> None:
         """Resize all windows."""
+        log.info("RESIZING HUD WINDOWS - Table dimensions: %dx%d", self.hud.table.width, self.hud.table.height)
         # Resize calculation has already happened in HUD_main&hud.py
         # refresh our internal map to reflect these changes
         for i in list(range(1, self.hud.max + 1)):
+            old_pos = self.positions.get(i, (0, 0))
             self.positions[i] = self.hud.layout.location[self.adj[i]]
+            log.debug("Seat %d position updated: (%d,%d) -> (%d,%d)",
+                     i, old_pos[0], old_pos[1], self.positions[i][0], self.positions[i][1])
+        old_common = self.positions.get("common", (0, 0))
         self.positions["common"] = self.hud.layout.common
+        log.info("Common position updated: (%d,%d) -> (%d,%d)",
+                old_common[0], old_common[1], self.positions["common"][0], self.positions["common"][1])
         # and then move everything to the new places
         self.move_windows()
 
@@ -255,15 +285,22 @@ class AuxSeats(AuxWindow):
         table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
         table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
 
+        log.info("MOVING HUD WINDOWS - Table position: X=%d, Y=%d (from table.x=%s, table.y=%s)",
+                table_x, table_y, self.hud.table.x, self.hud.table.y)
+
         for i in list(range(1, self.hud.max + 1)):
             pos_x = self.positions[i][0] + table_x
             pos_y = self.positions[i][1] + table_y
             clamped_x, clamped_y = clamp_to_screen(pos_x, pos_y)
+            log.info("Moving seat %d window: Layout pos (%d,%d) + Table pos (%d,%d) = Final pos (%d,%d) -> Clamped (%d,%d)",
+                    i, self.positions[i][0], self.positions[i][1], table_x, table_y, pos_x, pos_y, clamped_x, clamped_y)
             self.m_windows[i].move(clamped_x, clamped_y)
 
         common_x = self.hud.layout.common[0] + table_x
         common_y = self.hud.layout.common[1] + table_y
         clamped_common_x, clamped_common_y = clamp_to_screen(common_x, common_y)
+        log.info("Moving common window: Layout pos (%d,%d) + Table pos (%d,%d) = Final pos (%d,%d) -> Clamped (%d,%d)",
+                self.hud.layout.common[0], self.hud.layout.common[1], table_x, table_y, common_x, common_y, clamped_common_x, clamped_common_y)
         self.m_windows["common"].move(clamped_common_x, clamped_common_y)
 
     def create(self) -> None:

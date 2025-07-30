@@ -32,14 +32,12 @@ are not immediately obvious, and there is very close linkage with most of
 the Hud modules.
 """
 
-from pathlib import Path
 from typing import Any
 
 from PyQt5.QtWidgets import QInputDialog, QMessageBox
 
 #    FreePokerTools modules
 import Aux_Hud
-import Configuration
 import Database
 import Stats
 
@@ -91,6 +89,8 @@ class ClassicStatWindow(Aux_Hud.SimpleStatWindow):
             table_y = self.aw.hud.table.y if self.aw.hud.table.y is not None else 0
             pos_x = max(0, self.aw.positions[i][0] + table_x)
             pos_y = max(0, self.aw.positions[i][1] + table_y)
+            log.info("CLASSIC HUD - Moving seat %d stat window: Layout pos (%d,%d) + Table pos (%d,%d) = Final pos (%d,%d)",
+                    i, self.aw.positions[i][0], self.aw.positions[i][1], table_x, table_y, pos_x, pos_y)
             self.move(pos_x, pos_y)
             self.setWindowOpacity(float(self.aw.params["opacity"]))
             # show item, just in case it was hidden by the user
@@ -273,8 +273,8 @@ class ClassicStat(Aux_Hud.SimpleStat):
         if self.stat_loth != "" and self.stat_hith != "":
             try:
                 value_str = self.number[1]
-                if value_str == "NA":
-                    fg = self.incolor  # default color for NA
+                if value_str == "NA" or value_str == "-" or value_str == "":
+                    fg = self.incolor  # default color for NA/no data
                 else:
                     value = float(value_str)
                     if value < float(self.stat_loth):

@@ -62,6 +62,8 @@ class Table(Table_Window):
         #    given the self.search_string. Then populate self.number, self.title,
         #    self.window, and self.parent (if required).
 
+        log.info("Starting window detection for search string: '%s'", self.search_string)
+
         wins = (
             xconn.core.GetProperty(
                 delete=False, window=root, property=nclatom, type=winatom,
@@ -70,6 +72,8 @@ class Table(Table_Window):
             .reply()
             .value.to_atoms()
         )
+
+        log.info("Found %d windows to scan", len(wins))
         for win in wins:
             w_title = (
                 xconn.core.GetProperty(
@@ -83,20 +87,33 @@ class Table(Table_Window):
             log.debug("Window title: %s", w_title)
 
             if re.search(self.search_string, w_title, re.IGNORECASE):
-                log.debug("%s matches: %s", w_title, self.search_string)
+                log.info("WINDOW MATCH FOUND: '%s' matches search string '%s'", w_title, self.search_string)
                 title = w_title.replace('"', "")
                 if self.check_bad_words(title):
+                    log.warning("Window rejected due to bad words: '%s'", title)
                     continue
                 self.number = win
-
-                log.debug("self.number: %s", self.number)
                 self.title = title
-                log.debug("self.title: %s", self.title)
+
+                log.info("TABLE WINDOW DETECTED - ID: %s, Title: '%s'", self.number, self.title)
+
+                # Get initial geometry for logging
+                try:
+                    geo = xconn.core.GetGeometry(self.number).reply()
+                    absxy = xconn.core.TranslateCoordinates(
+                        self.number, root, geo.x, geo.y,
+                    ).reply()
+                    log.info("Initial window geometry - X: %d, Y: %d, Width: %d, Height: %d",
+                            absxy.dst_x, absxy.dst_y, geo.width, geo.height)
+                except xcffib.xproto.DrawableError:
+                    log.exception("Failed to get initial geometry")
 
                 break
 
         if self.number is None:
-            log.warning("No match in XTables for table '%s'", self.search_string)
+            log.error("WINDOW DETECTION FAILED: No match found for search string '%s'", self.search_string)
+        else:
+            log.info("WINDOW DETECTION SUCCESS: Table window found and configured")
 
     # This function serves a double purpose. It fetches the X geometry
     # but it also is used to track for window lifecycle. When
@@ -104,6 +121,8 @@ class Table(Table_Window):
     # assumed dead and thus the HUD instance may be killed off.
     def get_geometry(self) -> dict[str, int]:
         """Get window geometry coordinates."""
+        log.debug("Getting geometry for window ID: %s", self.number)
+
         wins = (
             xconn.core.GetProperty(
                 delete=False, window=root, property=nclatom, type=winatom,
@@ -112,22 +131,29 @@ class Table(Table_Window):
             .reply()
             .value.to_atoms()
         )
+
         if self.number not in wins:
+            log.warning("Window ID %s not found in active windows list - table may be closed", self.number)
             return None
+
         try:
             geo = xconn.core.GetGeometry(self.number).reply()
             absxy = xconn.core.TranslateCoordinates(
                 self.number, root, geo.x, geo.y,
             ).reply()
         except xcffib.xproto.DrawableError:
+            log.warning("DrawableError getting geometry for window %s - window may be destroyed", self.number)
             return None
         else:
-            return {
+            geometry = {
                 "x": absxy.dst_x,
                 "y": absxy.dst_y,
                 "width": geo.width,
                 "height": geo.height,
             }
+            log.info("CURRENT GEOMETRY for window %s: X=%d, Y=%d, Width=%d, Height=%d",
+                    self.number, geometry["x"], geometry["y"], geometry["width"], geometry["height"])
+            return geometry
 
     def get_window_title(self) -> str:
         """Get window title string."""
@@ -146,14 +172,26 @@ class Table(Table_Window):
         #    as the argument. This should keep the HUD window on top of the table window, as if
         #    the hud window was a dialog belonging to the table.
 
+        log.info("Setting up HUD window positioning for table window %s", self.number)
+
         #    X doesn't like calling the foreign_new function in XTables.
         #    Nope don't know why. Moving it here seems to make X happy.
         if self.gdkhandle is None:
+            log.debug("Creating QWindow handle for table window %s", self.number)
             self.gdkhandle = QWindow.fromWinId(int(self.number))
+            log.debug("QWindow handle created successfully")
 
         #   This is the gdkhandle for the HUD window
         qwindow = window.windowHandle()
+        log.info("Setting HUD window as transient parent of table window")
         qwindow.setTransientParent(self.gdkhandle)
+
         # Qt.Dialog keeps HUD windows above the table (but not above anything else)
-        # Qy.CustomizedWindowHing removes the title bar.
+        # Qt.CustomizedWindowHint removes the title bar.
         qwindow.setFlags(Qt.CustomizeWindowHint | Qt.Dialog)
+        log.info("HUD window flags set - HUD should now be positioned above table window")
+
+        # Log HUD window position after setup
+        hud_geometry = window.geometry()
+        log.info("HUD FINAL POSITION: X=%d, Y=%d, Width=%d, Height=%d",
+                hud_geometry.x(), hud_geometry.y(), hud_geometry.width(), hud_geometry.height())
