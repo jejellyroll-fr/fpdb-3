@@ -101,7 +101,7 @@ class Winamax(HandHistoryConverter):
             (?P<RING>(CashGame|Go\\sFast\\s"[^"]+"|HOLD\\-UP\\s"[^"]+"))?
             (?P<TOUR>Tournament\\s
             (?P<TOURNAME>.+)?\\s
-            buyIn:\\s(?P<BUYIN>(?P<BIAMT>[{LS}\\d\\,.]+)?(\\s\\+?\\s|-)(?P<BIRAKE>[{LS}\\d\\,.]+)?\\+?(?P<BOUNTY>[{LS}\\d\\.]+)?\\s?(?P<TOUR_ISO>{LEGAL_ISO})?|(?P<FREETICKET>[\\sa-zA-Z]+))?\\s
+            buyIn:\\s(?P<BUYIN>(?P<BIAMT>[\\d\\,.]+)({LS})?\\s?\\+?\\s?(?P<BIRAKE>[\\d\\,.]+)({LS})?\\+?(?P<BOUNTY>[{LS}\\d\\.]+)?\\s?(?P<TOUR_ISO>{LEGAL_ISO})?|(?P<FREETICKET>[\\sa-zA-Z]+))?\\s
             (level:\\s(?P<LEVEL>\\d+))?
             .*)?
             \\s-\\sHandId:\\s\\#(?P<HID1>\\d+)-(?P<HID2>\\d+)-(?P<HID3>\\d+)\\s-\\s  # REB says: HID3 is the correct hand number
@@ -318,7 +318,7 @@ class Winamax(HandHistoryConverter):
             if key == "MAXPLAYER" and info[key] is not None:
                 hand.maxseats = int(info[key])
 
-            if key == "BUYIN" and hand.tourNo is not None:
+            if key == "BUYIN" and info.get("TOURNO") is not None:
                 log.debug(f"info['BUYIN']: {info['BUYIN']}")
                 log.debug(f"info['BIAMT']: {info['BIAMT']}")
                 log.debug(f"info['BIRAKE']: {info['BIRAKE']}")
@@ -376,6 +376,16 @@ class Winamax(HandHistoryConverter):
 
             if key == "LEVEL":
                 hand.level = info[key]
+
+        # Detect lottery tournaments (Expresso, Expresso Nitro)
+        if hand.tourNo is not None and info.get("TOURNAME"):
+            tourname = info["TOURNAME"].strip('"')
+            if "Expresso" in tourname:
+                hand.isLottery = True
+                hand.tourneyMultiplier = 1  # Default multiplier, could be enhanced later
+            else:
+                hand.isLottery = False
+                hand.tourneyMultiplier = 1
 
         hand.mixed = None
 

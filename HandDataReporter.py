@@ -527,6 +527,9 @@ class HandDataReporter:
                 "is_rebuy": getattr(hand_obj, "isRebuy", False),
                 "is_addon": getattr(hand_obj, "isAddOn", False),
                 "is_ko": getattr(hand_obj, "isKO", False),
+                "is_lottery": getattr(hand_obj, "isLottery", False),
+                "tourney_multiplier": getattr(hand_obj, "tourneyMultiplier", 1),
+                "speed": getattr(hand_obj, "speed", ""),
             }
 
         # Statut base de données
@@ -728,10 +731,16 @@ class HandDataReporter:
                             print("         🏆 Informations tournoi:")
                             info = hand["tournament_info"]
                             print(f"            - Numéro: {info['tourney_no']}")
-                            if info.get("buyin", "0") != "0":
-                                print(f"            - Buy-in: ${info['buyin']} {info.get('buyin_currency', '')}")
-                            if info.get("fee", "0") != "0":
-                                print(f"            - Fee: ${info['fee']}")
+                            buyin_val = info.get("buyin", "0")
+                            fee_val = info.get("fee", "0")
+                            if buyin_val not in ("0", "None", None, ""):
+                                # Convert from centimes to euros for display
+                                buyin_euros = float(buyin_val) / 100
+                                print(f"            - Buy-in: {buyin_euros:.2f} {info.get('buyin_currency', '')}")
+                            if fee_val not in ("0", "None", None, ""):
+                                # Convert from centimes to euros for display
+                                fee_euros = float(fee_val) / 100
+                                print(f"            - Fee: {fee_euros:.2f} {info.get('buyin_currency', '')}")
                             if info.get("level"):
                                 print(f"            - Niveau: {info['level']}")
                             features = []
@@ -743,6 +752,17 @@ class HandDataReporter:
                                 features.append("Knockout")
                             if features:
                                 print(f"            - Features: {', '.join(features)}")
+                            
+                            # Affichage des informations lottery uniquement pour les SNGs lottery
+                            if info.get("is_lottery"):
+                                print("         🎰 SNG Lottery:")
+                                multiplier = info.get("tourney_multiplier", 1)
+                                if multiplier and str(multiplier) not in ("1", "None", None, ""):
+                                    print(f"            - Multiplier: {multiplier}x")
+                                speed = info.get("speed", "").strip()
+                                if speed:
+                                    print(f"            - Vitesse: {speed}")
+                                print(f"            - Type: Lottery SNG")
 
                         # Informations sur les bugs détectés
                         print("         🐛 Diagnostic:")

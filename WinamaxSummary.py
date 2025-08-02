@@ -106,9 +106,16 @@ class WinamaxSummary(TourneySummary):
     )
 
     codepage: ClassVar = ("utf8", "cp1252")
+    hhtype: ClassVar = "summary"
 
-    @staticmethod
-    def getSplitRe(head: str) -> re.Pattern[str]:
+    def __init__(self, *args, **kwargs):
+        """Initialize WinamaxSummary with lottery support."""
+        super().__init__(*args, **kwargs)
+        # Initialize lottery fields with default values
+        self.isLottery = False
+        self.tourneyMultiplier = 1
+
+    def getSplitRe(self, head: str) -> re.Pattern[str]:
         """Get regex pattern for splitting tournament summaries."""
         re_split_tourneys = re.compile(r"Winamax\sPoker\s-\sTournament\ssummary")
         m = re.search("<!DOCTYPE html PUBLIC", head)
@@ -344,7 +351,43 @@ class WinamaxSummary(TourneySummary):
                     rank, name, winnings, self.currency, rebuy_count, add_on_count, ko_count,
                 )
 
+        # Detect lottery tournaments after parsing
+        self._detect_expresso_lottery()
+
     def convert_to_decimal(self, string: str) -> Decimal:
         """Convert money string to decimal."""
         dec = self.clearMoneyString(string)
         return Decimal(dec)
+
+    def _detect_expresso_lottery(self) -> None:
+        """Detect Expresso lottery tournaments and set lottery attributes."""
+        log.debug("Detecting Expresso lottery tournament")
+        
+        # Check if tournament name contains "Expresso"
+        tournament_name = getattr(self, 'tourneyName', '')
+        if tournament_name and "Expresso" in tournament_name:
+            self.isLottery = True
+            log.info("Expresso lottery tournament detected: %s", tournament_name)
+            
+            # Calculate multiplier from prizepool vs buy-in total
+            if hasattr(self, 'prizepool') and hasattr(self, 'buyin') and hasattr(self, 'fee'):
+                total_buyin = (self.buyin + self.fee) if self.buyin and self.fee else 0
+                if total_buyin > 0 and self.prizepool > 0:
+                    # Convert to same units (both should be in centimes)
+                    multiplier = self.prizepool / total_buyin
+                    self.tourneyMultiplier = int(round(multiplier))
+                    log.info("Calculated multiplier: prizepool=%s, total_buyin=%s, multiplier=%sx", 
+                            self.prizepool, total_buyin, self.tourneyMultiplier)
+                else:
+                    self.tourneyMultiplier = 1
+                    log.debug("Cannot calculate multiplier: prizepool=%s, buyin=%s, fee=%s",
+                            getattr(self, 'prizepool', None), 
+                            getattr(self, 'buyin', None), 
+                            getattr(self, 'fee', None))
+            else:
+                self.tourneyMultiplier = 1
+            
+            log.info("Lottery tournament: lottery=%s, multiplier=%s", 
+                    self.isLottery, self.tourneyMultiplier)
+        else:
+            log.debug("Not an Expresso tournament: %s", tournament_name)
