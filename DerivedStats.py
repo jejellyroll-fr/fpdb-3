@@ -382,6 +382,8 @@ class DerivedStats:
                     self.hands["street3Pot"] = totals[STREET3_IDX] if len(totals) > STREET3_IDX else 0
                     self.hands["street4Pot"] = totals[STREET4_IDX] if len(totals) > STREET4_IDX else 0
                     self.hands["finalPot"] = totals[FINAL_POT_IDX] if len(totals) > FINAL_POT_IDX else 0
+                    # Add bomb pot amount from hand object
+                    self.hands["bombPot"] = getattr(hand, "bombPot", 0)
                     log.debug("Street totals: %s", totals)
                 else:
                     # Default values if totals is not iterable
@@ -391,6 +393,8 @@ class DerivedStats:
                     self.hands["street3Pot"] = 0
                     self.hands["street4Pot"] = 0
                     self.hands["finalPot"] = 0
+                    # Add bomb pot amount from hand object
+                    self.hands["bombPot"] = getattr(hand, "bombPot", 0)
                     log.warning("Street totals not iterable: %s", totals)
             except Exception:
                 log.exception("Error calculating street totals")
@@ -401,6 +405,8 @@ class DerivedStats:
                 self.hands["street3Pot"] = 0
                 self.hands["street4Pot"] = 0
                 self.hands["finalPot"] = 0
+                # Add bomb pot amount from hand object
+                self.hands["bombPot"] = getattr(hand, "bombPot", 0)
 
             # VPIP will be calculated in assembleHandsPlayers after player initialization
 

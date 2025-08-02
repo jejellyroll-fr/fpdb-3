@@ -91,14 +91,14 @@ class Winamax(HandHistoryConverter):
     # Static regexes
     # ***** End of hand R5-75443872-57 *****
     re_identify = re.compile(
-        r'Winamax\sPoker\s\-\s(CashGame|Go\sFast|HOLD\-UP|Tournament\s")',
+        r'Winamax\sPoker\s\-\s(CashGame|Go\sFast|HOLD\-UP|ESCAPE|Tournament\s")',
     )
     re_SplitHands = re.compile(r"\n\n")
 
     re_HandInfo = re.compile(
         """
             \\s*Winamax\\sPoker\\s-\\s
-            (?P<RING>(CashGame|Go\\sFast\\s"[^"]+"|HOLD\\-UP\\s"[^"]+"))?
+            (?P<RING>(CashGame|Go\\sFast\\s"[^"]+"|HOLD\\-UP\\s"[^"]+"|ESCAPE\\s"[^"]+"))?
             (?P<TOUR>Tournament\\s
             (?P<TOURNAME>.+)?\\s
             buyIn:\\s(?P<BUYIN>(?P<BIAMT>[\\d\\,.]+)({LS})?\\s?\\+?\\s?(?P<BIRAKE>[\\d\\,.]+)({LS})?\\+?(?P<BOUNTY>[{LS}\\d\\.]+)?\\s?(?P<TOUR_ISO>{LEGAL_ISO})?|(?P<FREETICKET>[\\sa-zA-Z]+))?\\s
@@ -131,6 +131,10 @@ class Winamax(HandHistoryConverter):
     re_Mixed = re.compile(r"_(?P<MIXED>10games|8games|horse)_")
     re_HUTP = re.compile(
         r"Hold\-up\sto\sPot:\stotal\s(({LS})?(?P<AMOUNT>[.0-9]+)({LS})?)".format(**substitutions),
+        re.MULTILINE | re.VERBOSE,
+    )
+    re_EscapePot = re.compile(
+        r"Escape\sto\sPot:\stotal\s(({LS})?(?P<AMOUNT>[.0-9]+)({LS})?)".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
     # 2010/09/21 03:10:51 UTC
@@ -523,6 +527,10 @@ class Winamax(HandHistoryConverter):
     def readSTP(self, hand) -> None:
         if m := self.re_HUTP.search(hand.handText):
             hand.addSTP(m.group("AMOUNT"))
+        elif m := self.re_EscapePot.search(hand.handText):
+            hand.addSTP(m.group("AMOUNT"))
+            # Store bomb pot amount in dedicated field
+            hand.bombPot = int(float(m.group("AMOUNT")) * 100)  # Convert to cents
 
     def readHoleCards(self, hand) -> None:
         # streets PREFLOP, PREDRAW, and THIRD are special cases beacause
