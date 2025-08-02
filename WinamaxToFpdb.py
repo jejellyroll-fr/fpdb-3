@@ -48,8 +48,13 @@ class Winamax(HandHistoryConverter):
     filetype = "text"
     codepage = ("utf8", "cp1252")
     siteId = 15  # Needs to match id entry in Sites database
+    site_id = 15  # Needs to match id entry in Sites database
 
-    mixes = {}  # Legal mixed games
+    mixes = {
+        "8games": "8game",
+        "10games": "10game", 
+        "horse": "horse"
+    }  # Legal mixed games
     sym = {
         "USD": r"\$",
         "CAD": r"\$",
