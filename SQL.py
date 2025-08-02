@@ -561,6 +561,7 @@ class Sql:
                             street3Pot BIGINT,                  /* pot size at river/street6 */
                             street4Pot BIGINT,                  /* pot size at sd/street7 */
                             finalPot   BIGINT,                  /* final pot size */
+                            bombPot    BIGINT,                  /* bomb pot amount (0 = no bomb pot) */
                             comment TEXT,
                             commentTs DATETIME)
                         ENGINE=INNODB"""
@@ -604,6 +605,7 @@ class Sql:
                             street3Pot BIGINT,                 /* pot size at river/street6 */
                             street4Pot BIGINT,                 /* pot size at sd/street7 */
                             finalPot   BIGINT,                 /* final pot size */
+                            bombPot    BIGINT,                 /* bomb pot amount (0 = no bomb pot) */
                             comment TEXT,
                             commentTs timestamp without time zone)"""
         elif db_server == "sqlite":
@@ -646,6 +648,7 @@ class Sql:
                             street3Pot INT,                 /* pot size at river/street6 */
                             street4Pot INT,                 /* pot size at sd/street7 */
                             finalPot INT,                   /* final pot size */
+                            bombPot INT,                    /* bomb pot amount (0 = no bomb pot) */
                             comment TEXT,
                             commentTs timestamp)"""
 
@@ -3912,6 +3915,28 @@ class Sql:
         elif db_server in ("postgresql", "sqlite"):
             self.query["addFinalPotIndex"] = (
                 """CREATE INDEX pot_idx ON Hands (finalPot)"""
+            )
+        # Add bombPot column to existing Hands tables
+        if db_server == "mysql":
+            self.query["addBombPotColumn"] = (
+                """ALTER TABLE Hands ADD COLUMN bombPot BIGINT DEFAULT 0"""
+            )
+        elif db_server == "postgresql":
+            self.query["addBombPotColumn"] = (
+                """ALTER TABLE Hands ADD COLUMN bombPot BIGINT DEFAULT 0"""
+            )
+        elif db_server == "sqlite":
+            self.query["addBombPotColumn"] = (
+                """ALTER TABLE Hands ADD COLUMN bombPot INT DEFAULT 0"""
+            )
+        # Add index for bombPot queries
+        if db_server == "mysql":
+            self.query["addBombPotIndex"] = (
+                """ALTER TABLE Hands ADD INDEX bomb_pot_idx (bombPot)"""
+            )
+        elif db_server in ("postgresql", "sqlite"):
+            self.query["addBombPotIndex"] = (
+                """CREATE INDEX bomb_pot_idx ON Hands (bombPot)"""
             )
 
         if db_server == "mysql":
@@ -9776,13 +9801,14 @@ class Sql:
                                             street2Pot,
                                             street3Pot,
                                             street4Pot,
-                                            finalPot
+                                            finalPot,
+                                            bombPot
                                              )
                                              values
                                               (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                                                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                                                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                                               %s, %s)"""
+                                               %s, %s, %s)"""
 
         self.query[
             "store_hands_players"

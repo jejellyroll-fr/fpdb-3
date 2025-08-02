@@ -219,6 +219,7 @@ class Hand:
         self.totalpot = None
         self.totalcollected = Decimal("0.00")
         self.rake = None
+        self.bombPot = 0  # Bomb pot amount in cents (0 = no bomb pot)
         self.roundPenny = False
         self.fastFold = False
         # currency symbol for this hand

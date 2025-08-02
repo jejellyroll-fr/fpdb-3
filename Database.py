@@ -3429,6 +3429,7 @@ class Database:
                 hdata["street3Pot"],
                 hdata["street4Pot"],
                 hdata["finalPot"],
+                hdata.get("bombPot", 0),
             ],
         )
 
