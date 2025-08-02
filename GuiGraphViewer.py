@@ -49,7 +49,7 @@ from loggingFpdb import get_logger
 
 # import Charset
 
-log = get_logger("filter")
+log = get_logger("gui_graph_viewer")
 
 
 class GuiGraphViewer(QSplitter):
@@ -374,7 +374,7 @@ class GuiGraphViewer(QSplitter):
         # log.debug(winnings)
 
         if len(winnings) == 0:
-            # log.debug("Aucune donnée de gains trouvée")
+            # log.debug("No winnings data found")
             return (None, None, None, None)
 
         green = [0, *[float(x[1]) for x in winnings]]

@@ -56,7 +56,7 @@ from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryCon
 from loggingFpdb import get_logger
 from TourneySummary import TourneySummary
 
-log = get_logger("parser")
+log = get_logger("ipoker_parser")
 
 
 class iPoker(HandHistoryConverter):  # noqa: N801
@@ -2201,7 +2201,7 @@ class iPoker(HandHistoryConverter):  # noqa: N801
                     player = found.group("PNAME")
                     cards = self._normalize_cards(found.group("CARDS").split(" "))
 
-                    if hasattr(self, 'hero') and player == self.hero and cards[0]:
+                    if hasattr(self, "hero") and player == self.hero and cards[0]:
                         hand.hero = player
                         log.debug("Hero identified: %s with cards: %s", player, cards)
 
@@ -2247,9 +2247,9 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         cards = found.group("CARDS").split(" ")
         newcards, oldcards = self._categorize_cards(cards, street, player)
 
-        if street == "THIRD" and len(newcards) == self.THIRD_STREET_CARDS_COUNT and hasattr(self, 'hero') and self.hero == player:
+        if street == "THIRD" and len(newcards) == self.THIRD_STREET_CARDS_COUNT and hasattr(self, "hero") and self.hero == player:
             self._process_third_street_hero(hand, street, player, newcards)
-        elif street == "SECOND" and len(newcards) == self.SECOND_STREET_CARDS_COUNT and hasattr(self, 'hero') and self.hero == player:
+        elif street == "SECOND" and len(newcards) == self.SECOND_STREET_CARDS_COUNT and hasattr(self, "hero") and self.hero == player:
             self._process_second_street_hero(hand, street, player, newcards)
         else:
             self._process_standard_hole_cards(hand, street, player, newcards, oldcards)
@@ -2260,7 +2260,7 @@ class iPoker(HandHistoryConverter):  # noqa: N801
 
     def _categorize_cards(self, cards: list[str], street: str, player: str) -> tuple[list[str], list[str]]:
         """Categorize cards into new and old cards based on street and player."""
-        if street == "SEVENTH" and hasattr(self, 'hero') and self.hero != player:
+        if street == "SEVENTH" and hasattr(self, "hero") and self.hero != player:
             newcards = []
             oldcards = [c[1:].replace("10", "T") + c[0].lower() for c in cards if c[0].lower() != "x"]
         else:
@@ -2449,28 +2449,28 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         """
         log.info("Entering readCollectPot method")
 
-        # Activer les mises non égalisées
+        # Enable uncalled bets
         hand.setUncalledBets(True)
 
-        # Initialiser le pot total à zéro
+        # Initialize total pot to zero
         total_pot = Decimal("0.00")
 
-        # Parcourir les informations des joueurs pour identifier les pots collectés
+        # Go through player information to identify collected pots
         for m in self.re_player_info.finditer(hand.handText):
             player = m.group("PNAME")
             pot = m.group("WIN")
-            if pot:  # Vérifier si un montant de gain est présent
+            if pot:  # Check if win amount is present
                 pot_value = self.clearMoneyString(pot)
-                total_pot += Decimal(pot_value)  # Ajouter le montant au pot total
+                total_pot += Decimal(pot_value)  # Add the amount to the total pot
                 hand.addCollectPot(player=player, pot=pot_value)
                 log.debug("Player collected pot method: readCollectPot, player: %s, amount: %s", player, pot_value)
             else:
                 log.debug("No winnings recorded for player: %s", player)
 
-        # Ajouter le rake au pot total
+        # Add the rake to the total pot
         total_pot += hand.rake or Decimal("0.00")
 
-        # Mettre à jour le total pot dans l'objet hand
+        # Update total pot in hand object
         hand.totalpot = total_pot
         log.debug("Total pot calculated: %s, Total rake: %s", hand.totalpot, hand.rake)
 
@@ -2802,27 +2802,27 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         if tournament_data["rank"] and tournament_data["rank"] != "N/A":
             try:
                 rank_value = int(tournament_data["rank"])
-                if hasattr(self, 'hero') and self.hero and self.hero in hand.ranks:
+                if hasattr(self, "hero") and self.hero and self.hero in hand.ranks:
                     hand.ranks[self.hero] = rank_value
                     log.debug("Set rank for hero %s: %s", self.hero, rank_value)
             except (ValueError, TypeError):
                 log.warning("Invalid rank value: %s", tournament_data["rank"])
 
         # Set hero winnings from tournament data
-        if hasattr(self, 'hero') and self.hero and self.hero in hand.winnings:
+        if hasattr(self, "hero") and self.hero and self.hero in hand.winnings:
             hero_winnings_cents = int(tournament_data.get("hero_winnings", Decimal("0")) * 100)
             hand.winnings[self.hero] = hero_winnings_cents
             log.debug("Set winnings for hero %s: %s cents", self.hero, hero_winnings_cents)
         else:
-            log.error("Hero %s not found in hand.winnings: %s", getattr(self, 'hero', 'None'), hand.winnings)
+            log.error("Hero %s not found in hand.winnings: %s", getattr(self, "hero", "None"), hand.winnings)
 
         # For Twister tournaments, calculate other players' winnings based on Twister rules
         if tournament_data.get("multiplier", Decimal("0")) > 1:
             # In Twister, only the winner gets the prize pool, others get 0
-            if hasattr(self, 'hero') and self.hero and self.hero in hand.ranks and hand.ranks[self.hero] == 1:
+            if hasattr(self, "hero") and self.hero and self.hero in hand.ranks and hand.ranks[self.hero] == 1:
                 # Hero is the winner, already set above
                 pass
-            elif hasattr(self, 'hero') and self.hero and self.hero in hand.winnings:
+            elif hasattr(self, "hero") and self.hero and self.hero in hand.winnings:
                 hand.winnings[self.hero] = 0
                 log.debug("Set winnings for hero %s to 0 (non-winner in Twister)", self.hero)
 

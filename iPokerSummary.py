@@ -25,7 +25,7 @@ from HandHistoryConverter import FpdbParseError
 from loggingFpdb import get_logger
 from TourneySummary import TourneySummary
 
-log = get_logger("parser")
+log = get_logger("ipoker_summary_parser")
 
 
 class iPokerSummary(TourneySummary):  # noqa: N801

@@ -30,7 +30,7 @@ from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryCon
 from loggingFpdb import get_logger
 
 # Unibet HH Format
-log = get_logger("parser")
+log = get_logger("unibet_parser")
 
 
 class Unibet(HandHistoryConverter):

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-HUD Statistics Persistence Manager to prevent data loss during restarts.
+"""HUD Statistics Persistence Manager to prevent data loss during restarts.
 
 This module provides a temporary persistence layer for HUD statistics,
 allowing accumulated data to be preserved during unexpected restarts.
@@ -9,8 +8,8 @@ allowing accumulated data to be preserved during unexpected restarts.
 import json
 import os
 import time
-from typing import Any, Dict, Optional
 from pathlib import Path
+from typing import Any
 
 from loggingFpdb import get_logger
 
@@ -19,33 +18,31 @@ log = get_logger("hud_stats_persistence")
 
 class HudStatsPersistence:
     """HUD statistics persistence manager."""
-    
+
     def __init__(self, config_dir: str = None) -> None:
-        """
-        Initialize the persistence manager.
+        """Initialize the persistence manager.
         
         Args:
             config_dir: Configuration directory, defaults to ~/.fpdb
         """
         if config_dir is None:
             config_dir = os.path.expanduser("~/.fpdb")
-        
+
         self.persistence_dir = Path(config_dir) / "hud_stats_cache"
         self.persistence_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # TTL for cached statistics (30 minutes)
         self.stats_ttl = 30 * 60
-        
+
         log.info(f"HUD Stats Persistence initialized at {self.persistence_dir}")
-    
+
     def _get_cache_file_path(self, table_key: str) -> Path:
         """Generate cache file path for a table."""
         safe_key = "".join(c for c in table_key if c.isalnum() or c in "._-")
         return self.persistence_dir / f"{safe_key}.json"
-    
-    def save_hud_stats(self, table_key: str, hud_data: Dict[str, Any]) -> bool:
-        """
-        Save HUD statistics for a table.
+
+    def save_hud_stats(self, table_key: str, hud_data: dict[str, Any]) -> bool:
+        """Save HUD statistics for a table.
         
         Args:
             table_key: Unique table identifier
@@ -56,7 +53,7 @@ class HudStatsPersistence:
         """
         try:
             cache_file = self._get_cache_file_path(table_key)
-            
+
             # Prepare data with metadata
             cache_data = {
                 "table_key": table_key,
@@ -67,22 +64,21 @@ class HudStatsPersistence:
                 "game_type": hud_data.get("game_type", ""),
                 "max_seats": hud_data.get("max_seats", 0),
                 "hud_params": hud_data.get("hud_params", {}),
-                "last_hand_id": hud_data.get("last_hand_id", "")
+                "last_hand_id": hud_data.get("last_hand_id", ""),
             }
-            
-            with open(cache_file, 'w', encoding='utf-8') as f:
+
+            with open(cache_file, "w", encoding="utf-8") as f:
                 json.dump(cache_data, f, indent=2, default=str)
-            
+
             log.debug(f"HUD stats saved for table {table_key}")
             return True
-            
+
         except Exception as e:
             log.exception(f"Failed to save HUD stats for table {table_key}: {e}")
             return False
-    
-    def load_hud_stats(self, table_key: str) -> Optional[Dict[str, Any]]:
-        """
-        Load HUD statistics for a table.
+
+    def load_hud_stats(self, table_key: str) -> dict[str, Any] | None:
+        """Load HUD statistics for a table.
         
         Args:
             table_key: Unique table identifier
@@ -92,30 +88,29 @@ class HudStatsPersistence:
         """
         try:
             cache_file = self._get_cache_file_path(table_key)
-            
+
             if not cache_file.exists():
                 log.debug(f"No cached stats found for table {table_key}")
                 return None
-            
-            with open(cache_file, 'r', encoding='utf-8') as f:
+
+            with open(cache_file, encoding="utf-8") as f:
                 cache_data = json.load(f)
-            
+
             # Check if data is not expired
             if time.time() - cache_data.get("timestamp", 0) > self.stats_ttl:
                 log.debug(f"Cached stats expired for table {table_key}")
                 self.remove_hud_stats(table_key)
                 return None
-            
+
             log.debug(f"HUD stats loaded for table {table_key}")
             return cache_data
-            
+
         except Exception as e:
             log.exception(f"Failed to load HUD stats for table {table_key}: {e}")
             return None
-    
+
     def remove_hud_stats(self, table_key: str) -> bool:
-        """
-        Remove cached HUD statistics for a table.
+        """Remove cached HUD statistics for a table.
         
         Args:
             table_key: Unique table identifier
@@ -125,47 +120,46 @@ class HudStatsPersistence:
         """
         try:
             cache_file = self._get_cache_file_path(table_key)
-            
+
             if cache_file.exists():
                 cache_file.unlink()
                 log.debug(f"Cached stats removed for table {table_key}")
-            
+
             return True
-            
+
         except Exception as e:
             log.exception(f"Failed to remove HUD stats for table {table_key}: {e}")
             return False
-    
+
     def cleanup_expired_stats(self) -> None:
         """Clean up expired statistics from cache."""
         try:
             current_time = time.time()
             removed_count = 0
-            
+
             for cache_file in self.persistence_dir.glob("*.json"):
                 try:
-                    with open(cache_file, 'r', encoding='utf-8') as f:
+                    with open(cache_file, encoding="utf-8") as f:
                         cache_data = json.load(f)
-                    
+
                     if current_time - cache_data.get("timestamp", 0) > self.stats_ttl:
                         cache_file.unlink()
                         removed_count += 1
-                        
+
                 except Exception as e:
                     log.warning(f"Failed to process cache file {cache_file}: {e}")
                     # Remove corrupted file
                     cache_file.unlink()
                     removed_count += 1
-            
+
             if removed_count > 0:
                 log.info(f"Cleaned up {removed_count} expired HUD stats cache files")
-                
+
         except Exception as e:
             log.exception(f"Failed to cleanup expired stats: {e}")
-    
-    def merge_stats(self, cached_stats: Dict[str, Any], new_stats: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Merge cached statistics with new ones.
+
+    def merge_stats(self, cached_stats: dict[str, Any], new_stats: dict[str, Any]) -> dict[str, Any]:
+        """Merge cached statistics with new ones.
         
         Args:
             cached_stats: Cached statistics
@@ -177,32 +171,32 @@ class HudStatsPersistence:
         try:
             # Start with new stats as base
             merged = new_stats.copy()
-            
+
             # Merge stat_dict while preserving historical data
             cached_stat_dict = cached_stats.get("stat_dict", {})
             new_stat_dict = new_stats.get("stat_dict", {})
-            
+
             # For each player in cached stats
             for player_id, cached_player_stats in cached_stat_dict.items():
                 if player_id in new_stat_dict:
                     # Player present in both: merge intelligently
                     merged_player_stats = new_stat_dict[player_id].copy()
-                    
+
                     # Preserve certain accumulated stats if they are more important
                     for stat_key, cached_value in cached_player_stats.items():
                         if stat_key not in merged_player_stats or merged_player_stats[stat_key] == 0:
                             merged_player_stats[stat_key] = cached_value
-                    
+
                     merged["stat_dict"][player_id] = merged_player_stats
                 else:
                     # Player only in cache: preserve
                     if "stat_dict" not in merged:
                         merged["stat_dict"] = {}
                     merged["stat_dict"][player_id] = cached_player_stats
-            
+
             log.debug("Successfully merged cached and new HUD stats")
             return merged
-            
+
         except Exception as e:
             log.exception(f"Failed to merge stats: {e}")
             return new_stats  # Return new stats on error

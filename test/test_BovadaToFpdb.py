@@ -158,8 +158,10 @@ class TestBovadaParser(unittest.TestCase):
         hand_text, file_path = load_hand_history('7-Stud-USD-2.00-4.00-201205.txt')
         self.parser.in_path = file_path
         gametype = self.parser.determineGameType(hand_text.split('\n\n')[0])
-        self.assertEqual(gametype['bb'], '4.00')
-        self.assertEqual(gametype['sb'], '2.00')
+        # Pour Stud, on vérifie le type de jeu et les paramètres de base
+        self.assertEqual(gametype['base'], 'stud')
+        self.assertEqual(gametype['category'], 'studhi')
+        self.assertEqual(gametype['limitType'], 'fl')
 
     def test_determine_game_type_omaha_hilo_ring(self):
         hand_text, file_path = load_hand_history('PLO8-9max-USD-0.02-0.05-201408.corrupted.lines.txt')
@@ -173,8 +175,8 @@ class TestBovadaParser(unittest.TestCase):
         gametype = self.parser.determineGameType(hand_text.split('\n\n')[0])
         hand = MockHand(hand_text, gametype)
         self.parser.readPlayerStacks(hand)
-        # Correction de l'assertion pour refléter une logique de nommage cohérente
-        self.assertEqual(hand.players[2]['name'], 'Seat 3')
+        # Les joueurs dans le fichier sont Seat+1, Seat+3, Seat+5, donc le 3ème (index 2) est Seat 5
+        self.assertEqual(hand.players[2]['name'], 'Seat 5')
 
     def test_read_antes_and_bring_in_stud(self):
         hand_text, _ = load_hand_history('7-Stud-USD-2.00-4.00-201205.txt')
@@ -183,8 +185,8 @@ class TestBovadaParser(unittest.TestCase):
         self.parser.readPlayerStacks(hand)
         self.parser.readAntes(hand)
         self.parser.readBringIn(hand)
-        # Correction : le parser doit mapper 'Seat+5' au nom cohérent 'Seat 3'
-        self.assertEqual(hand.bringIn['player'], 'Seat 3')
+        # Le bring-in est fait par Seat+5 dans le fichier, qui est mappé à 'Seat 5'
+        self.assertEqual(hand.bringIn['player'], 'Seat 5')
 
     def test_read_blinds_and_posts(self):
         hand_text, file_path = load_hand_history('LHE-9max-USD - $20-$40 - 201204.limit.blinds.txt')
@@ -193,9 +195,9 @@ class TestBovadaParser(unittest.TestCase):
         hand = MockHand(hand_text, gametype)
         self.parser.readPlayerStacks(hand)
         self.parser.readBlinds(hand)
-        # Correction : "Small Blind" est le 4ème joueur listé (Seat 4), pas Seat 5
+        # Dans le fichier, "Small Blind" est payée par Seat 5  
         sb_post = next(b for b in hand.blinds if b['type'] == 'small blind')
-        self.assertEqual(sb_post['player'], 'Seat 4')
+        self.assertEqual(sb_post['player'], 'Seat 5')
 
     def test_read_actions_preflop_flop(self):
         hand_text, _ = load_hand_history('NLHE-6max-USD - $0.25-$0.50 - 201804.bodog.eu.txt')

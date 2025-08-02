@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-
+"""parses and stores summary sections from e.g. eMail or summary files."""
 # Copyright 2009-2011 Stephane Alessio
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -14,7 +13,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
-"""parses and stores summary sections from e.g. eMail or summary files."""
+
 
 # import L10n
 # _ = L10n.get_translation()
@@ -35,7 +34,7 @@ except ImportError:
     xlrd = None
 
 
-log = get_logger("parser")
+log = get_logger("tourney_summary_parser")
 
 
 class TourneySummary:

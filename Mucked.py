@@ -44,7 +44,7 @@ from loggingFpdb import get_logger
 # Utility routine to get the number of valid cards in the card tuple
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("hud")
+log = get_logger("mucked_hud")
 
 
 def valid_cards(ct):
@@ -54,7 +54,7 @@ def valid_cards(ct):
 class Stud_mucked(Aux_Base.AuxWindow):
     def __init__(self, hud, config, params) -> None:
         self.hud = hud  # hud object that this aux window supports
-        self.config = config  # configuration object for this aux window to use
+        self.config = config  # Configuration object for this aux window to use
         self.params = params  # hash aux params from config
 
         try:

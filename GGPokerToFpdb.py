@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 from loggingFpdb import get_logger
 
 # GGpoker HH Format
-log = get_logger("parser")
+log = get_logger("ggpoker_parser")
 
 
 class GGPoker(HandHistoryConverter):

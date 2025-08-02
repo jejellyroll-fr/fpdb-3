@@ -45,7 +45,7 @@ import Stats
 from loggingFpdb import get_logger
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("hud")
+log = get_logger("aux_classic_hud")
 
 
 class ClassicHud(Aux_Hud.SimpleHUD):
@@ -56,7 +56,15 @@ class ClassicHud(Aux_Hud.SimpleHUD):
     """
 
     def __init__(self, hud: Any, config: Any, params: Any) -> None:
-        """Initializes the ClassicHud."""
+        """Initializes the ClassicHud instance for a poker table.
+
+        Sets up the class attributes to ensure the correct stat window, stat, table menu, and label classes are used.
+
+        Args:
+            hud: The HUD instance associated with the table.
+            config: The configuration object for the HUD.
+            params: Additional parameters for HUD customization.
+        """
         super().__init__(hud, config, params)
 
         # the following attributes ensure that the correct
@@ -71,33 +79,78 @@ class ClassicHud(Aux_Hud.SimpleHUD):
 class ClassicStatWindow(Aux_Hud.SimpleStatWindow):
     """Stat windows are the blocks shown continually, 1 for each player."""
 
-    def update_contents(self, i: int) -> None:
-        """Update the contents of the stat window."""
-        super().update_contents(i)
-        if i == "common":
+    @staticmethod
+    def _nz(value: int | None, default: int = 0) -> int:
+        """Returns the value if it is not None, otherwise returns the default.
+
+        This utility function provides a fallback value when the input is None.
+
+        Args:
+            value: The value to check for None.
+            default: The value to return if value is None.
+
+        Returns:
+            int: The value if not None, otherwise the default.
+        """
+        return default if value is None else value
+
+
+    def update_contents(self, seat: int | str) -> None:
+        """Updates the contents of the stat window for the given seat.
+
+        This method refreshes the stat window display, hiding or repositioning it as needed based on the seat status.
+
+        Args:
+            seat: The seat identifier, which can be an integer or the string "common".
+        """
+        super().update_contents(seat)
+
+        if seat == "common":
             return
 
-        # control kill/display of active/inactive player stat blocks
-        if self.aw.get_id_from_seat(i) is None:
-            # no player dealt in this seat for this hand
-            # hide the display
+        # seat inactive → hide window
+        if self.aw.get_id_from_seat(seat) is None:
             self.hide()
-        else:
-            # player dealt-in, force display of stat block
-            # need to call move() to re-establish window position
-            table_x = self.aw.hud.table.x if self.aw.hud.table.x is not None else 0
-            table_y = self.aw.hud.table.y if self.aw.hud.table.y is not None else 0
-            pos_x = max(0, self.aw.positions[i][0] + table_x)
-            pos_y = max(0, self.aw.positions[i][1] + table_y)
-            log.info("CLASSIC HUD - Moving seat %d stat window: Layout pos (%d,%d) + Table pos (%d,%d) = Final pos (%d,%d)",
-                    i, self.aw.positions[i][0], self.aw.positions[i][1], table_x, table_y, pos_x, pos_y)
-            self.move(pos_x, pos_y)
-            self.setWindowOpacity(float(self.aw.params["opacity"]))
-            # show item, just in case it was hidden by the user
-            self.show()
+            return
+
+        # active seat → position and display
+        self._position_and_show_block(seat)
+
+
+    def _position_and_show_block(self, seat: int) -> None:
+        """Positions and shows the stat window for the specified seat.
+
+        This method calculates the window position based on the seat and table coordinates, then displays the window.
+
+        Args:
+            seat: The seat number for which to position and show the stat window.
+        """
+        table_x = self._nz(self.aw.hud.table.x)
+        table_y = self._nz(self.aw.hud.table.y)
+
+        pos_x = max(0, self.aw.positions[seat][0] + table_x)
+        pos_y = max(0, self.aw.positions[seat][1] + table_y)
+
+        log.info(
+            "CLASSIC HUD - Moving seat %d stat window: Layout pos (%d,%d) + "
+            "Table pos (%d,%d) = Final pos (%d,%d)",
+            seat, self.aw.positions[seat][0], self.aw.positions[seat][1],
+            table_x, table_y, pos_x, pos_y,
+        )
+
+        self.move(pos_x, pos_y)
+        self.setWindowOpacity(float(self.aw.params["opacity"]))
+        self.show()  # in case the user has hidden it
+
 
     def button_press_middle(self, _event: Any) -> None:
-        """Hides the window when the middle mouse button is pressed."""
+        """Handles the middle mouse button press event.
+
+        This method hides the stat window when the middle mouse button is pressed.
+
+        Args:
+            _event: The event object associated with the mouse button press.
+        """
         self.hide()
 
 
@@ -111,7 +164,16 @@ class ClassicStat(Aux_Hud.SimpleStat):
         popup: Any,
         aw: Any,
     ) -> None:
-        """Initializes the ClassicStat."""
+        """Initializes a ClassicStat instance for displaying a statistic.
+
+        Sets up the statistic's configuration, color, and click behavior based on the HUD and stat configuration.
+
+        Args:
+            stat: The name of the statistic to display.
+            seat: The seat number associated with the statistic.
+            popup: The popup configuration or identifier for the stat.
+            aw: The auxiliary HUD object providing context and configuration.
+        """
         super().__init__(stat, seat, popup, aw)
         # popup is the instance of this stat in the supported games stat configuration
         # use this prefix to directly extract the attributes
@@ -170,7 +232,14 @@ class ClassicStat(Aux_Hud.SimpleStat):
             self.lab.mouseDoubleClickEvent = self.open_comment_dialog
 
     def open_comment_dialog(self, _event: Any) -> None:
-        """Opens a dialog to add or edit a comment for a player."""
+        """Opens a dialog for adding or editing a comment for a player.
+
+        This method displays a multi-line input dialog to allow the user
+        to add or update a comment for the selected player.
+
+        Args:
+            _event: The event object associated with the double-click action.
+        """
         if self.stat not in ("playershort", "player_note"):
             return
 
@@ -191,14 +260,28 @@ class ClassicStat(Aux_Hud.SimpleStat):
             self.save_comment(player_id, new_comment)
 
     def get_player_id(self) -> int | None:
-        """Returns the player ID for the current seat."""
-        for player_id_, data in self.stat_dict.items():
-            if data["seat"] == self.lab.aw_seat:
-                return player_id_
-        return None
+        """Returns the player ID for the current seat.
+
+        This method searches the stat dictionary for a player
+        whose seat matches the label's seat and returns their player ID.
+
+        Returns:
+            int | None: The player ID if found, otherwise None.
+        """
+        return next((player_id_ for player_id_, data in self.stat_dict.items()
+                    if data["seat"] == self.lab.aw_seat), None)
 
     def get_player_name(self, player_id: int) -> str:
-        """Returns the player name for the given player ID."""
+        """Returns the player name for the given player ID.
+
+        This method queries the database to retrieve the player's name based on their ID.
+
+        Args:
+            player_id: The unique identifier of the player.
+
+        Returns:
+            str: The player's name if found, otherwise "Unknown Player".
+        """
         db = Database.Database(self.aw.hud.config)
         try:
             q = db.sql.query["get_player_name"]
@@ -212,7 +295,16 @@ class ClassicStat(Aux_Hud.SimpleStat):
             db.close_connection()
 
     def get_current_comment(self, player_id: int) -> str:
-        """Returns the current comment for the given player ID."""
+        """Retrieves the current comment for the specified player.
+
+        This method queries the database to fetch the comment associated with the given player ID.
+
+        Args:
+            player_id: The unique identifier of the player.
+
+        Returns:
+            str: The player's comment if found, otherwise an empty string.
+        """
         db = Database.Database(self.aw.hud.config)
         try:
             q = db.sql.query["get_player_comment"]
@@ -226,7 +318,14 @@ class ClassicStat(Aux_Hud.SimpleStat):
             db.close_connection()
 
     def save_comment(self, player_id: int, comment: str) -> None:
-        """Saves a comment for the given player ID."""
+        """Saves a comment for the specified player in the database.
+
+        This method updates the player's comment and displays a message box indicating success or failure.
+
+        Args:
+            player_id: The unique identifier of the player.
+            comment: The comment text to be saved.
+        """
         db = Database.Database(self.aw.hud.config)
         try:
             q = db.sql.query["update_player_comment"]
@@ -248,7 +347,16 @@ class ClassicStat(Aux_Hud.SimpleStat):
             db.close_connection()
 
     def has_comment(self, player_id: int) -> bool:
-        """Checks if a player has a comment."""
+        """Checks if the specified player has a comment in the database.
+
+        This method queries the database to determine if a comment exists for the given player ID.
+
+        Args:
+            player_id: The unique identifier of the player.
+
+        Returns:
+            bool: True if a comment exists for the player, otherwise False.
+        """
         db = Database.Database(self.aw.hud.config)
         try:
             q = db.sql.query["get_player_comment"]
@@ -262,7 +370,18 @@ class ClassicStat(Aux_Hud.SimpleStat):
             db.close_connection()
 
     def update(self, player_id: int, stat_dict: dict) -> bool | None:
-        """Updates the stat display."""
+        """Updates the display of the statistic for a given player.
+
+        This method refreshes the statistic's value, color,
+        and tooltip based on the player's data and stat configuration.
+
+        Args:
+            player_id: The unique identifier of the player.
+            stat_dict: A dictionary containing statistics for all players.
+
+        Returns:
+            bool | None: Returns False if the stat was not created, otherwise None.
+        """
         super().update(player_id, stat_dict)
 
         if not self.number:  # stat did not create, so exit now
@@ -273,8 +392,8 @@ class ClassicStat(Aux_Hud.SimpleStat):
         if self.stat_loth != "" and self.stat_hith != "":
             try:
                 value_str = self.number[1]
-                if value_str == "NA" or value_str == "-" or value_str == "":
-                    fg = self.incolor  # default color for NA/no data
+                if value_str in ("NA", "-", ""):
+                    fg = "white"  # default color for NA/no data
                 else:
                     value = float(value_str)
                     if value < float(self.stat_loth):

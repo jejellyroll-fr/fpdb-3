@@ -24,7 +24,6 @@ from decimal import Decimal
 
 from past.utils import old_div
 
-
 from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from loggingFpdb import get_logger
 
@@ -35,7 +34,7 @@ from loggingFpdb import get_logger
 
 
 # PokerTracker HH Format
-log = get_logger("parser")
+log = get_logger("pokertracker_parser")
 
 
 class PokerTracker(HandHistoryConverter):
@@ -315,13 +314,13 @@ class PokerTracker(HandHistoryConverter):
         table_pattern = r"Table\s+(.+?),"
         table_match = re.search(table_pattern, handText)
         table_name = table_match.group(1) if table_match else ""
-        
+
         log.debug(f"Detected table name: {table_name}")
-        
+
         # Map of indicators to skin names (must match Sites table)
         skin_mapping = {
             "redbet": "Redbet Poker",
-            "pmu": "PMU Poker", 
+            "pmu": "PMU Poker",
             "fdj": "FDJ Poker",
             "betclic": "Betclic Poker",
             "netbet": "NetBet Poker",
@@ -331,7 +330,7 @@ class PokerTracker(HandHistoryConverter):
             "bet365": "Bet365 Poker",
             "william hill": "William Hill Poker",
             "williamhill": "William Hill Poker",
-            "paddy power": "Paddy Power Poker", 
+            "paddy power": "Paddy Power Poker",
             "paddypower": "Paddy Power Poker",
             "betfair": "Betfair Poker",
             "coral": "Coral Poker",
@@ -356,7 +355,7 @@ class PokerTracker(HandHistoryConverter):
             "nordicbet": "NordicBet Poker",
             "unibet": "Unibet Poker",
             "maria": "Maria Casino Poker",
-            "leovegas": "LeoVegas Poker", 
+            "leovegas": "LeoVegas Poker",
             "mr green": "Mr Green Poker",
             "expekt": "Expekt Poker",
             "coolbet": "Coolbet Poker",
@@ -371,22 +370,22 @@ class PokerTracker(HandHistoryConverter):
             "red star": "Red Star Poker",
             "redstar": "Red Star Poker",
         }
-        
+
         # Check table name and hand text for skin indicators
         search_text = (table_name + " " + handText).lower()
-        
+
         # Specific patterns for French sites
         if any(indicator in search_text for indicator in ["saratov", "scone", "moscow"]):
             # These table name patterns are typical of FDJ Poker
             log.debug("Detected FDJ Poker based on table name pattern")
             return "FDJ Poker"
-        
+
         # Check each mapping
         for indicator, skin_name in skin_mapping.items():
             if indicator in search_text:
                 log.debug(f"Detected iPoker skin: {skin_name} from indicator: {indicator}")
                 return skin_name
-        
+
         # Default to generic iPoker if no specific skin detected
         log.debug("No specific iPoker skin detected, using default 'iPoker'")
         return "iPoker"
@@ -394,19 +393,19 @@ class PokerTracker(HandHistoryConverter):
     def is_ipoker_skin(self):
         """Check if current sitename is an iPoker skin."""
         ipoker_skins = {
-            "iPoker", "FDJ Poker", "Redbet Poker", "PMU Poker", "Betclic Poker", 
-            "NetBet Poker", "Poker770", "Barrière Poker", "Titan Poker", 
-            "Bet365 Poker", "William Hill Poker", "Paddy Power Poker", 
-            "Betfair Poker", "Coral Poker", "Genting Poker", "Mansion Poker", 
-            "Winner Poker", "Ladbrokes Poker", "Sky Poker", "Sisal Poker", 
-            "Lottomatica Poker", "Eurobet Poker", "Snai Poker", "Goldbet Poker", 
-            "Casino Barcelona Poker", "Sportium Poker", "Marca Apuestas Poker", 
-            "Everest Poker", "Bet-at-home Poker", "Mybet Poker", "Betsson Poker", 
-            "Betsafe Poker", "NordicBet Poker", "Unibet Poker", "Maria Casino Poker", 
-            "LeoVegas Poker", "Mr Green Poker", "Expekt Poker", "Coolbet Poker", 
-            "Chilipoker", "Dafa Poker", "Dafabet Poker", "Fun88 Poker", 
-            "Betfred Poker", "Guts Poker", "Sportingbet Poker", "MultiPoker", 
-            "Red Star Poker"
+            "iPoker", "FDJ Poker", "Redbet Poker", "PMU Poker", "Betclic Poker",
+            "NetBet Poker", "Poker770", "Barrière Poker", "Titan Poker",
+            "Bet365 Poker", "William Hill Poker", "Paddy Power Poker",
+            "Betfair Poker", "Coral Poker", "Genting Poker", "Mansion Poker",
+            "Winner Poker", "Ladbrokes Poker", "Sky Poker", "Sisal Poker",
+            "Lottomatica Poker", "Eurobet Poker", "Snai Poker", "Goldbet Poker",
+            "Casino Barcelona Poker", "Sportium Poker", "Marca Apuestas Poker",
+            "Everest Poker", "Bet-at-home Poker", "Mybet Poker", "Betsson Poker",
+            "Betsafe Poker", "NordicBet Poker", "Unibet Poker", "Maria Casino Poker",
+            "LeoVegas Poker", "Mr Green Poker", "Expekt Poker", "Coolbet Poker",
+            "Chilipoker", "Dafa Poker", "Dafabet Poker", "Fun88 Poker",
+            "Betfred Poker", "Guts Poker", "Sportingbet Poker", "MultiPoker",
+            "Red Star Poker",
         }
         return self.sitename in ipoker_skins
 
@@ -431,7 +430,7 @@ class PokerTracker(HandHistoryConverter):
         self.site_id = self.sites[m.group("SITE")][
             1
         ]  # Needs to match id entry in Sites database
-        
+
         # Detect iPoker skin from table name or hand text
         if self.sitename == "iPoker":
             detected_skin = self.detectiPokerSkin(handText)
@@ -1057,7 +1056,7 @@ class PokerTracker(HandHistoryConverter):
     def readBringIn(self, hand) -> None:
         """Read bring-in for stud games."""
         log.debug("reading bring-in")
-        m = self.re_BringIn.search(hand.handText) if hasattr(self, 're_BringIn') else None
+        m = self.re_BringIn.search(hand.handText) if hasattr(self, "re_BringIn") else None
         if m:
             self.adjustMergeTourneyStack(hand, m.group("PNAME"), m.group("BRINGIN"))
             hand.addBringIn(m.group("PNAME"), m.group("BRINGIN"))
@@ -1066,16 +1065,13 @@ class PokerTracker(HandHistoryConverter):
         """Read STP (Sit and Play) information."""
         log.debug("reading STP")
         # Placeholder implementation - PokerTracker format doesn't typically have STP info
-        pass
 
     def readTourneyResults(self, hand) -> None:
         """Read tournament results from hand text."""
         log.debug("reading tournament results")
         # PokerTracker format typically doesn't include tournament results in hand history
         # Tournament results would be in separate summary files
-        pass
 
     def readOther(self, hand) -> None:
         """Read other information from hand that doesn't fit standard categories."""
         log.debug("reading other information")
-        pass

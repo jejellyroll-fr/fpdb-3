@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Base class for interacting with poker client windows.
 
 There are currently subclasses for X, OSX, and Windows.
@@ -39,7 +38,7 @@ from HandHistoryConverter import getTableNoRe, getTableTitleRe
 from loggingFpdb import get_logger
 
 c = Configuration.Config()
-log = get_logger("hud")
+log = get_logger("table_window")
 
 #    Global used for figuring out the current game being played from the title.
 #    The dict key is a tuple of (limit type, category) for the game.
@@ -123,7 +122,7 @@ class Table_Window:
             except ValueError:
                 # Try to extract table number from string like "Twister 0.25€, 1091614818"
                 import re
-                match = re.search(r'(\d+)$', str(table_number))
+                match = re.search(r"(\d+)$", str(table_number))
                 if match:
                     self.table = int(match.group(1))
                     log.debug(f"Extracted table number from string: {self.table}")

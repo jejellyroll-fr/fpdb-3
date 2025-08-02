@@ -25,15 +25,12 @@ import codecs
 import inspect
 import locale
 import os
-
-
 import platform
 import re
 import shutil
 import sys
 import traceback
 import xml.dom.minidom
-
 
 if platform.system() == "Windows":
     import os
@@ -143,7 +140,7 @@ POSIX = os.name == "posix"
 PYTHON_VERSION = sys.version[:3]
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("config")
+log = get_logger("configuration")
 
 
 def get_config(file_name, fallback=True):
@@ -1295,7 +1292,7 @@ class Config:
             example_doc = xml.dom.minidom.parse(example_file)
         except (OSError, xml.parsers.expat.ExpatError) as e:
             log.exception(
-                f"Error parsing example configuration file {example_file}. See error log file. Exception: {e}"
+                f"Error parsing example configuration file {example_file}. See error log file. Exception: {e}",
             )
             return nodes_added
 
@@ -1935,21 +1932,21 @@ class Config:
 
     def get_backend(self, name):
         """Returns the number of the currently used backend."""
-        # Mapper les chaînes de caractères reçues aux constantes attendues
+        # Map received character strings to expected constants
         name_mapping = {
             "sqlite": "DATABASE_TYPE_SQLITE",
             "mysql": "DATABASE_TYPE_MYSQL",
             "postgresql": "DATABASE_TYPE_POSTGRESQL",
         }
 
-        # Convertir le nom en majuscules en utilisant le mapping
+        # Convert the name to uppercase using mapping
         if name in name_mapping:
             name = name_mapping[name]
         else:
             msg = f"Unsupported database backend: {name}"
             raise ValueError(msg)
 
-        # Utilisation des constantes attendues
+        # Use of expected constants
         backends = {
             "DATABASE_TYPE_MYSQL": 2,
             "DATABASE_TYPE_POSTGRESQL": 3,

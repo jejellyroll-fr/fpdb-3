@@ -30,11 +30,23 @@ if TYPE_CHECKING:
 from loggingFpdb import get_logger
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("hud")
+log = get_logger("aux_base")
 
 
 def clamp_to_screen(x: int, y: int, width: int = 200, height: int = 100) -> tuple[int, int]:
-    """Clamp window position to screen boundaries."""
+    """Clamp a window position to fit within the visible screen area.
+
+    Ensures that the given coordinates and window size do not extend beyond the boundaries of the screen.
+
+    Args:
+        x: The x-coordinate of the window.
+        y: The y-coordinate of the window.
+        width: The width of the window (default is 200).
+        height: The height of the window (default is 100).
+
+    Returns:
+        tuple[int, int]: The clamped (x, y) coordinates within the screen bounds.
+    """
     from loggingFpdb import get_logger
     log = get_logger("hud")
 
@@ -113,22 +125,45 @@ class AuxWindow:
 
     #   Override these methods as needed
     def update_data(self, *args: Any) -> None:
-        """Update the data for the window."""
+        """Update the data for the auxiliary window.
+
+        This method is a placeholder for updating the window's data.
+        """
+
 
     def update_gui(self, *args: Any) -> None:
-        """Update the GUI of the window."""
+        """Update the graphical user interface for the auxiliary window.
+
+        This method is a placeholder for updating the window's GUI elements.
+        """
+
 
     def create(self, *args: Any) -> None:
-        """Create the window."""
+        """Create the auxiliary window.
+
+        This method is a placeholder for creating the window and its resources.
+        """
+
 
     def save_layout(self, *args: Any) -> None:
-        """Save the layout of the window."""
+        """Save the layout of the auxiliary window.
+
+        This method is a placeholder for saving the current layout configuration.
+        """
+
 
     def move_windows(self, *args: Any) -> None:
-        """Move the window."""
+        """Move all auxiliary windows to their correct positions.
+
+        This method is a placeholder for moving windows and should be overridden in subclasses.
+        """
+
 
     def destroy(self) -> None:
-        """Destroy the window."""
+        """Destroy the window and release its resources.
+
+        Attempts to destroy the window container, suppressing any exceptions that may occur.
+        """
         with contextlib.suppress(Exception):
             self.container.destroy()
 
@@ -181,7 +216,13 @@ class SeatWindow(QWidget):
         self.setAttribute(Qt.WA_AlwaysShowToolTips)
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
-        """Handle mouse press events."""
+        """Handle mouse press events for the seat window.
+
+        Responds to left, middle, and right mouse button presses by calling the corresponding handler methods.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
         if event.button() == Qt.LeftButton:
             self.button_press_left(event)
         elif event.button() == Qt.MiddleButton:
@@ -190,7 +231,13 @@ class SeatWindow(QWidget):
             self.button_press_right(event)
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        """Handle mouse release events."""
+        """Handle mouse release events for the seat window.
+
+        Calls the appropriate handler method based on which mouse button was released.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
         if event.button() == Qt.LeftButton:
             self.button_release_left(event)
         elif event.button() == Qt.MiddleButton:
@@ -199,37 +246,91 @@ class SeatWindow(QWidget):
             self.button_release_right(event)
 
     def button_press_left(self, event: QMouseEvent) -> None:
-        """Handle left mouse button press."""
+        """Handle left mouse button press.
+
+        Records the global position of the mouse when the left button is pressed.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
         self.lastPos = event.globalPos()
 
     def button_press_middle(self, event: QMouseEvent) -> None:
-        """Handle middle mouse button press."""
+        """Handle middle mouse button press.
+
+        This method is a placeholder for handling middle mouse button press events.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
+
 
     def button_press_right(self, event: QMouseEvent) -> None:
-        """Handle right mouse button press."""
+        """Handle right mouse button press.
+
+        This method is a placeholder for handling right mouse button press events.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
+
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
-        """Handle mouse move events."""
+        """Handle mouse move events for the seat window.
+
+        Moves the window according to the mouse movement if a drag is in progress.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
         if self.lastPos is not None:
             self.move(self.pos() + event.globalPos() - self.lastPos)
             self.lastPos = event.globalPos()
 
     def button_release_left(self, _event: QMouseEvent) -> None:
-        """Handle left mouse button release."""
+        """Handle left mouse button release.
+
+        Resets the last mouse position and triggers the configuration event callback.
+
+        Args:
+            _event: The mouse event containing button and position information.
+        """
         self.lastPos = None
         self.aw.configure_event_cb(self, self.seat)
 
     def button_release_middle(self, event: QMouseEvent) -> None:
-        """Handle middle mouse button release."""
+        """Handle middle mouse button release.
+
+        This method is a placeholder for handling middle mouse button release events.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
+
 
     def button_release_right(self, event: QMouseEvent) -> None:
-        """Handle right mouse button release."""
+        """Handle right mouse button release.
+
+        This method is a placeholder for handling right mouse button release events.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
+
 
     def create_contents(self, *args: Any) -> None:
-        """Create the contents of the window."""
+        """Create the contents of the seat window.
+
+        This method is a placeholder for populating the window with its contents.
+        """
+
 
     def update_contents(self, *args: Any) -> None:
-        """Update the contents of the window."""
+        """Update the contents of the seat window.
+
+        This method is a placeholder for updating the window's contents.
+        """
+
 
 
 class AuxSeats(AuxWindow):
@@ -248,22 +349,42 @@ class AuxSeats(AuxWindow):
         # but _not_ offset to the absolute screen position
         self.displayed = False  # the seat windows are displayed
         self.uses_timer = False  # the Aux_seats object uses a timer to control hiding
-        self.timer_on = False  # bool = Ture if the timeout for removing the cards is on
+        self.timer_on = False  # bool = True if the timeout for removing the cards is on
 
         self.aw_class_window = SeatWindow  # classname to be used by the aw_class_window
 
     #    placeholders that should be overridden--so we don't throw errors
     def create_contents(self) -> None:
-        """Create the contents of the windows."""
+        """Create the contents for each seat window.
+
+        This method is a placeholder and should be overridden to populate each seat window with its contents.
+        """
+
 
     def create_common(self, x: int, y: int) -> None:
-        """Create the common card window."""
+        """Create the common window at the specified position.
+
+        This method is a placeholder and should be overridden to create the common window at the given coordinates.
+
+        Args:
+            x: The x-coordinate for the common window.
+            y: The y-coordinate for the common window.
+        """
+
 
     def update_contents(self) -> None:
-        """Update the contents of the windows."""
+        """Update the contents for each seat window.
+
+        This method is a placeholder and should be overridden to update the contents of each seat window.
+        """
+
 
     def resize_windows(self) -> None:
-        """Resize all windows."""
+        """Resize and reposition all HUD windows.
+
+        Updates the internal map of window positions based on the latest table and layout dimensions,
+        then moves all windows accordingly.
+        """
         log.info("RESIZING HUD WINDOWS - Table dimensions: %dx%d", self.hud.table.width, self.hud.table.height)
         # Resize calculation has already happened in HUD_main&hud.py
         # refresh our internal map to reflect these changes
@@ -280,7 +401,11 @@ class AuxSeats(AuxWindow):
         self.move_windows()
 
     def move_windows(self) -> None:
-        """Move all windows to their correct positions."""
+        """Move all seat and common windows to their correct positions.
+
+        Calculates the absolute positions for each window based on the table's current coordinates and layout,
+        clamps them to the screen, and moves the windows accordingly.
+        """
         # Ensure table coordinates are valid (not negative or off-screen)
         table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
         table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
@@ -292,19 +417,26 @@ class AuxSeats(AuxWindow):
             pos_x = self.positions[i][0] + table_x
             pos_y = self.positions[i][1] + table_y
             clamped_x, clamped_y = clamp_to_screen(pos_x, pos_y)
-            log.info("Moving seat %d window: Layout pos (%d,%d) + Table pos (%d,%d) = Final pos (%d,%d) -> Clamped (%d,%d)",
-                    i, self.positions[i][0], self.positions[i][1], table_x, table_y, pos_x, pos_y, clamped_x, clamped_y)
+            log.info("Moving seat %d window: Layout pos (%d,%d) + Table pos (%d,%d) = "
+                    "Final pos (%d,%d) -> Clamped (%d,%d)",
+                    i, self.positions[i][0], self.positions[i][1], table_x, table_y,
+                    pos_x, pos_y, clamped_x, clamped_y)
             self.m_windows[i].move(clamped_x, clamped_y)
 
         common_x = self.hud.layout.common[0] + table_x
         common_y = self.hud.layout.common[1] + table_y
         clamped_common_x, clamped_common_y = clamp_to_screen(common_x, common_y)
         log.info("Moving common window: Layout pos (%d,%d) + Table pos (%d,%d) = Final pos (%d,%d) -> Clamped (%d,%d)",
-                self.hud.layout.common[0], self.hud.layout.common[1], table_x, table_y, common_x, common_y, clamped_common_x, clamped_common_y)
+                self.hud.layout.common[0], self.hud.layout.common[1], table_x, table_y, common_x, common_y,
+                clamped_common_x, clamped_common_y)
         self.m_windows["common"].move(clamped_common_x, clamped_common_y)
 
     def create(self) -> None:
-        """Create all seat windows."""
+        """Create and initialize all seat and common windows for the HUD.
+
+        Sets up the window objects for each seat and the common area,
+        positions them according to the current layout and table size, and displays them as needed.
+        """
         self.adj = self.adj_seats()
         self.m_windows = {}  # windows to put the card/hud items in
         for i in [*list(range(1, self.hud.max + 1)), "common"]:
@@ -318,14 +450,15 @@ class AuxSeats(AuxWindow):
                 self.hud.layout.common = self.create_scale_position(x, y)
             else:
                 (x, y) = self.hud.layout.location[self.adj[i]]
-                log.debug(f"Seat {i}: Loading position from layout: ({x}, {y})")
+                log.debug("Seat %s: Loading position from layout: (%s, %s)", i, x, y)
                 self.m_windows[i] = self.aw_class_window(self, i)
                 self.positions[i] = self.create_scale_position(x, y)
                 table_x = self.hud.table.x if self.hud.table.x is not None else 0
                 table_y = self.hud.table.y if self.hud.table.y is not None else 0
                 pos_x = max(0, self.positions[i][0] + table_x)
                 pos_y = max(0, self.positions[i][1] + table_y)
-                log.debug(f"Seat {i}: Final position: table({table_x}, {table_y}) + relative({self.positions[i][0]}, {self.positions[i][1]}) = ({pos_x}, {pos_y})")
+                log.debug("Seat %s: Final position: table(%s, %s) + relative(%s, %s) = (%s, %s)",
+                          i, table_x, table_y, self.positions[i][0], self.positions[i][1], pos_x, pos_y)
                 self.m_windows[i].move(pos_x, pos_y)
                 self.hud.layout.location[self.adj[i]] = self.positions[i]
                 if "opacity" in self.params:
@@ -354,12 +487,22 @@ class AuxSeats(AuxWindow):
         Any subsequent resizing of this table will be handled through
         hud_main.idle_resize.
         """
-        x_scale = 1.0 * self.hud.table.width / self.hud.layout.width
-        y_scale = 1.0 * self.hud.table.height / self.hud.layout.height
+        lw, lh = self.hud.layout.width, self.hud.layout.height
+
+        if lw == 0 or lh == 0:
+            msg = "Layout width/height cannot be zero when scaling positions"
+            raise ValueError(msg)
+
+        x_scale = self.hud.table.width  / lw
+        y_scale = self.hud.table.height / lh
         return int(x * x_scale), int(y * y_scale)
 
     def update_gui(self, _new_hand_id: Any) -> None:
-        """Update the gui, LDO."""
+        """Update the graphical user interface for all seat windows.
+
+        Calls the update_contents method for each seat window and
+        resizes windows to reflect any changes in block positions.
+        """
         for i in list(self.m_windows.keys()):
             self.update_contents(self.m_windows[i], i)
         # reload latest block positions, in case another aux has changed them
@@ -369,7 +512,10 @@ class AuxSeats(AuxWindow):
 
     #   Methods likely to be of use for any SeatWindow implementation
     def destroy(self) -> None:
-        """Destroy all of the seat windows."""
+        """Destroy all seat and common windows for the HUD.
+
+        Iterates through all managed windows, destroys each one, and removes it from the internal dictionary.
+        """
         with contextlib.suppress(AttributeError):
             for i in list(self.m_windows.keys()):
                 self.m_windows[i].destroy()
@@ -377,7 +523,10 @@ class AuxSeats(AuxWindow):
 
     #   Methods likely to be useful for mucked card windows (or similar) only
     def hide(self) -> None:
-        """Hide the seat windows."""
+        """Hide all seat and common windows for the HUD.
+
+        Iterates through all managed windows and hides each one, updating the displayed state.
+        """
         for _i, w in list(self.m_windows.items()):
             if w is not None:
                 w.hide()
@@ -411,7 +560,9 @@ class AuxSeats(AuxWindow):
                 new_abs_position.x() - table_x,
                 new_abs_position.y() - table_y,
             )
-            log.debug(f"Seat {i}: Position updated - abs({new_abs_position.x()}, {new_abs_position.y()}) - table({table_x}, {table_y}) = relative({new_position[0]}, {new_position[1]})")
+            log.debug("Seat %s: Position updated - abs(%s, %s) - table(%s, %s) = relative(%s, %s)",
+                      i, new_abs_position.x(), new_abs_position.y(), table_x, table_y,
+                      new_position[0], new_position[1])
             self.positions[i] = new_position  # write this back to our map
             if i != "common":
                 self.hud.layout.location[self.adj[i]] = new_position  # update the hud-level dict,

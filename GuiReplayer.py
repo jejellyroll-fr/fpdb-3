@@ -48,7 +48,7 @@ from loggingFpdb import get_logger
 # _ = L10n.get_translation()
 
 
-log = get_logger("replayer")
+log = get_logger("gui_replayer")
 
 CARD_HEIGHT = 90
 CARD_WIDTH = 70

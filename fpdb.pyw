@@ -18,7 +18,6 @@ import codecs
 import contextlib
 import cProfile
 import io
-import logging
 import os
 import pstats
 import queue
@@ -77,7 +76,7 @@ from GuiConfigObserver import GuiConfigObserver
 from L10n import set_locale_translation
 from loggingFpdb import get_logger, setup_logging
 
-# Initialisation précoce de la configuration (fix issue #22)
+# Early configuration initialization (fix issue #22)
 ensure_config_initialized()
 
 # import GuiTourneyImport
@@ -113,7 +112,8 @@ setup_logging(console_only=True)
 
 # Obtain the logger
 log = get_logger("fpdb")
-log.setLevel(logging.INFO)
+# Note: Logger level is now controlled by Logger Dev Tool configuration
+# The get_logger() function automatically applies the correct level from saved configuration
 
 try:
     assert not hasattr(sys, "frozen")  # We're surely not in a git repo if this fails
@@ -188,7 +188,7 @@ class fpdb(QMainWindow):
         self.load_profile()
         if GuiPrefs.GuiPrefs(self.config, self).exec_():
             # save updated config
-            # Détecter les changements avant de sauvegarder
+            # Detect changes before saving
             config_manager = ConfigurationManager()
             if config_manager.initialized:
                 pending_changes = config_manager.check_pending_changes(self.config)
@@ -211,14 +211,14 @@ class fpdb(QMainWindow):
         return widget.currentText() if isinstance(widget, QComboBox) else widget.text()
 
     def dia_hud_preferences(self, widget, data=None) -> None:
-        """Ouvre le dialogue moderne des préférences HUD."""
+        """Open modern HUD preferences dialog."""
         # force reload of prefs from xml file - needed because HUD could
         # have changed file contents
         self.load_profile()
 
         dia = ModernHudPreferences.ModernHudPreferences(self.config, self)
         if dia.exec_():
-            # Détecter les changements avant de sauvegarder
+            # Detect changes before saving
             config_manager = ConfigurationManager()
             if config_manager.initialized:
                 pending_changes = config_manager.check_pending_changes(self.config)
@@ -376,7 +376,7 @@ class fpdb(QMainWindow):
                         site_node.setAttribute("enabled", enabled_str)
 
             # Save configuration
-            # Détecter les changements avant de sauvegarder
+            # Detect changes before saving
             config_manager = ConfigurationManager()
             if config_manager.initialized:
                 pending_changes = config_manager.check_pending_changes(self.config)
@@ -390,7 +390,7 @@ class fpdb(QMainWindow):
         total = len(checkboxes)
         enabled = sum(1 for cb in checkboxes.values() if cb.isChecked())
         self.stats_label.setText(f"Enabled sites: {enabled} / {total}")
-        # Utiliser une classe pour le style au lieu de CSS en dur
+        # Use a class for styling instead of hard-coded CSS
         self.stats_label.setProperty("class", "info-box")
 
     def set_all_sites(self, checkboxes, state) -> None:
@@ -573,30 +573,30 @@ class fpdb(QMainWindow):
         #    self.release_global_lock()
 
     def dia_site_preferences_seat(self, widget, data=None) -> None:
-        """Ouvre le dialogue moderne des préférences de sièges."""
+        """Open modern seat preferences dialog."""
         from ModernSeatPreferences import ModernSeatPreferencesDialog
 
-        # Créer et afficher le dialogue moderne
+        # Create and display modern dialog
         dia = ModernSeatPreferencesDialog(self.config, self)
 
-        # Le dialogue gère lui-même la sauvegarde et le rechargement
+        # Dialog handles saving and reloading itself
         dia.exec_()
 
     def dia_site_preferences(self, widget, data=None) -> None:
-        """Ouvre le dialogue moderne des préférences de sites."""
+        """Open modern site preferences dialog."""
         from ModernSitePreferences import ModernSitePreferencesDialog
 
-        # Pas besoin de recharger le profil, utiliser la config existante
-        # self.load_profile()  # Commenté pour éviter de relire le XML
+        # No need to reload profile, use existing config
+        # self.load_profile()  # Commented to avoid re-reading XML
 
-        # Créer et afficher le dialogue moderne
+        # Create and display modern dialog
         dia = ModernSitePreferencesDialog(self.config, self)
 
         if dia.exec_():
-            # Récupérer les changements
+            # Get changes
             changes = dia.get_changes()
 
-            # Appliquer les changements
+            # Apply changes
             for site_name, values in changes.items():
                 if site_name in self.config.supported_sites:
                     self.config.edit_site(
@@ -607,7 +607,7 @@ class fpdb(QMainWindow):
                         values["ts_path"],
                     )
 
-            # Détecter les changements avant de sauvegarder
+            # Detect changes before saving
             config_manager = ConfigurationManager()
             if config_manager.initialized:
                 pending_changes = config_manager.check_pending_changes(self.config)
@@ -616,15 +616,15 @@ class fpdb(QMainWindow):
             self.config.save()
             self.reload_config()
 
-    # Les méthodes suivantes sont maintenant gérées par ModernSitePreferences
-    # mais sont conservées pour compatibilité avec d'autres parties du code
+    # The following methods are now managed by ModernSitePreferences
+    # but are kept for compatibility with other part of code
 
     def autoenableSite(self, text, checkbox) -> None:
         # autoactivate site if something gets typed in the screename field
         checkbox.setChecked(True)
 
     def reload_hud_displays(self) -> None:
-        """Recharge tous les affichages HUD actifs."""
+        """Reloads all active HUD displays."""
         log.info("Reloading all active HUD displays...")
         reloaded_huds = 0
         for thread in self.threads:
@@ -642,56 +642,56 @@ class fpdb(QMainWindow):
             log.info("No active HUD displays found to reload.")
 
     def reload_config(self) -> None:
-        """Recharge la configuration avec support du rechargement dynamique."""
+        """Reloads the configuration with dynamic reload support."""
         if len(self.nb_tab_names) == 1:
-            # Essayer le rechargement dynamique via ConfigurationManager
+            # Try dynamic reloading via ConfigurationManager
             config_manager = ConfigurationManager()
 
-            # Initialiser le ConfigurationManager s'il ne l'est pas déjà
+            # Initialize ConfigurationManager if not already done
             if not config_manager.initialized:
                 config_manager.initialize(self.config.file)
 
             success, message, restart_changes = config_manager.reload_config()
 
             if success and not restart_changes:
-                # Rechargement dynamique réussi sans changements nécessitant un redémarrage
-                # IMPORTANT: Mettre à jour self.config pour qu'il pointe vers la config du ConfigurationManager
+                # Dynamic reload successful without changes requiring restart
+                # IMPORTANT: Update self.config to point to the config of ConfigurationManager
                 self.config = config_manager.get_config()
 
-                # Mettre à jour aussi les références dans les onglets existants
+                # Also update references in existing tabs
                 for thread in self.threads:
                     if hasattr(thread, "config"):
                         thread.config = self.config
 
-                if "Aucun changement détecté" in message:
+                if "No changes detected" in message:
                     self.info_box("Configuration", message)
                 else:
-                    self.info_box("Configuration mise à jour", message)
+                    self.info_box("Configuration updated", message)
                 log.info(f"Configuration reloaded: {message}")
             elif success and restart_changes:
-                # Certains changements nécessitent un redémarrage
+                # Some changes require restart
                 changes_text = "\n".join([f"- {c.path}: {c.old_value} → {c.new_value}" for c in restart_changes[:5]])
                 if len(restart_changes) > 5:
-                    changes_text += f"\n... et {len(restart_changes) - 5} autres changements"
+                    changes_text += f"\n... and {len(restart_changes) - 5} other changes"
 
                 self.warning_box(
                     f"{message}\n\n"
-                    "Les changements suivants nécessitent un redémarrage:\n"
+                    "The following changes require a restart:\n"
                     f"{changes_text}\n\n"
-                    "Fpdb doit être redémarré maintenant\n\nCliquez OK pour fermer Fpdb",
+                    "Fpdb must be restarted now.\n\nClick OK to close Fpdb.",
                 )
                 sys.exit()
             else:
-                # Échec du rechargement
+                # Reload failed
                 self.warning_box(
-                    f"Erreur lors du rechargement de la configuration:\n{message}\n\n"
-                    "Fpdb doit être redémarré maintenant\n\nCliquez OK pour fermer Fpdb",
+                    f"Error while reloading configuration:\n{message}\n\n"
+                    "Fpdb must be restarted now.\n\nClick OK to close Fpdb.",
                 )
                 sys.exit()
         else:
             self.warning_box(
-                "Les préférences mises à jour n'ont pas été chargées car des fenêtres sont ouvertes. "
-                "Redémarrez fpdb pour les charger.",
+                "The updated preferences have not been loaded because windows are open. "
+                "Restart fpdb to load them.",
             )
 
     def process_close_messages(self) -> None:
@@ -744,15 +744,10 @@ class fpdb(QMainWindow):
             self.makeAction("Adv Preferences", self.dia_advanced_preferences, tip="Edit your preferences"),
         )
         configMenu.addAction(self.makeAction("Import filters", self.dia_import_filters))
-        # Add the Toggle Debug Logging action
-        self.debug_logging_action = self.makeAction("Enable Debug Logging", self.toggle_debug_logging, checkable=True)
-        configMenu.addAction(self.debug_logging_action)
-
-        # Set the initial check state based on the current logging level
-        if log.getEffectiveLevel() <= logging.DEBUG:
-            self.debug_logging_action.setChecked(True)
-        else:
-            self.debug_logging_action.setChecked(False)
+        # Add the Logger Dev Tool action
+        self.logger_dev_tool_action = self.makeAction("Logger Dev Tool", self.show_logger_dev_tool,
+                                                     tip="Advanced logger manager")
+        configMenu.addAction(self.logger_dev_tool_action)
         configMenu.addSeparator()
         configMenu.addAction(self.makeAction("Close Fpdb", self.quit, "Ctrl+Q", "Quit the Program"))
 
@@ -810,17 +805,16 @@ class fpdb(QMainWindow):
             action.triggered.connect(callback)
         return action
 
-    def toggle_debug_logging(self, checked) -> None:
-        if checked:
-            # Activer le logging debug pour le logger racine
-            logging.getLogger().setLevel(logging.DEBUG)
-            self.statusBar().showMessage("Debug logging enabled")
-            log.debug("logging debug activated.")
-        else:
-            # Désactiver le logging debug (revenir au niveau INFO)
-            logging.getLogger().setLevel(logging.INFO)
-            self.statusBar().showMessage("Debug logging disabled")
-            log.info("logging debug deactivated.")
+    def show_logger_dev_tool(self) -> None:
+        """Open the advanced logger development tool."""
+        try:
+            from loggingFpdb import show_logger_dev_tool
+            show_logger_dev_tool(self)
+            self.statusBar().showMessage("Logger Dev Tool open")
+        except Exception as e:
+            log.error(f"Error opening Logger Dev Tool: {e}")
+            self.statusBar().showMessage(f"Error: {e}")
+
 
     def load_profile(self, create_db=False) -> None:
         """Loads profile from the provided path name.
@@ -1204,8 +1198,8 @@ class fpdb(QMainWindow):
         # Initialize the debug_logging_action to None; it will be set in createMenuBar
         self.debug_logging_action = None
 
-        # Set default logging level
-        log.setLevel(logging.INFO)  # Set default level to INFO
+        # Logger level is now controlled by Logger Dev Tool configuration
+        # No need to override the level here as get_logger() handles this automatically
 
         if options.initialRun:
             self.display_config_created_dialogue = True
@@ -1274,7 +1268,7 @@ class fpdb(QMainWindow):
 
         self.load_profile(create_db=True)
 
-        # Enregistrer l'observateur GUI (ConfigurationManager déjà initialisé dans load_profile)
+        # Register GUI observer (ConfigurationManager already initialized dans load_profile)
         self._register_gui_observer()
 
         if self.config.install_method == "app":
@@ -1304,24 +1298,24 @@ class fpdb(QMainWindow):
             self.tab_auto_import(None)
 
     def _register_gui_observer(self) -> None:
-        """Enregistre l'observateur GUI avec le ConfigurationManager."""
+        """Registers the GUI observer with the ConfigurationManager."""
         try:
             config_manager = ConfigurationManager()
 
-            # Initialiser le ConfigurationManager s'il ne l'est pas déjà
+            # Initialize ConfigurationManager if not already done
             if not config_manager.initialized:
                 config_manager.initialize(self.config.file)
-                # IMPORTANT: Synchroniser les objets config
+                # IMPORTANT: Synchronise config objects
                 config_manager._config = self.config
                 config_manager._capture_current_state()
 
-            # Enregistrer l'observateur GUI
+            # Register GUI observer
             gui_observer = GuiConfigObserver(self)
             config_manager.register_observer(gui_observer)
-            log.info("Observateur GUI enregistré avec le ConfigurationManager")
+            log.info("GUI observer registered with ConfigurationManager")
 
         except Exception as e:
-            log.exception(f"Erreur lors de l'enregistrement de l'observateur GUI: {e}")
+            log.exception(f"Error while registering the GUI observer: {e}")
 
 
 class CustomTitleBar(QWidget):

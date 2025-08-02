@@ -24,7 +24,7 @@ from loggingFpdb import get_logger
 from TourneySummary import TourneySummary
 
 # Pacifc(888) HH Format
-log = get_logger("parser")
+log = get_logger("pacific_poker_summary_parser")
 
 
 class PacificPokerSummary(TourneySummary):

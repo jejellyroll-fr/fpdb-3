@@ -40,7 +40,6 @@ from past.utils import old_div
 import Card
 import Configuration
 import SQL
-
 from Exceptions import (
     FpdbError,
     FpdbMySQLAccessDenied,
@@ -74,7 +73,7 @@ re_insert = re.compile(
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("db")
+log = get_logger("database")
 
 #    Other library modules
 try:
@@ -4591,7 +4590,7 @@ class Database:
 
 
     def defaultTourneyTypeValue(self, value1, value2, field) -> bool:
-        return bool(not value1 or field == "maxseats" and value1 > value2 or field == "limitType" and value2 == "mx" or (field, value1) == ("buyinCurrency", "NA") or (field, value1) == ("stack", "Regular") or (field, value1) == ("speed", "Normal") or field == "koBounty" and value1)
+        return bool(not value1 or (field == "maxseats" and value1 > value2) or (field == "limitType" and value2 == "mx") or (field, value1) == ("buyinCurrency", "NA") or (field, value1) == ("stack", "Regular") or (field, value1) == ("speed", "Normal") or (field == "koBounty" and value1))
 
     def createOrUpdateTourneyType(self, obj):
         ttid, _ttid, updateDb = None, None, False
@@ -4710,8 +4709,8 @@ class Database:
                 obj.isFlighted,
                 obj.isGuarantee,
                 obj.guaranteeAmt,
-                getattr(obj, 'isLottery', False),
-                getattr(obj, 'tourneyMultiplier', 1),
+                getattr(obj, "isLottery", False),
+                getattr(obj, "tourneyMultiplier", 1),
             )
             cursor.execute(
                 self.sql.query["getTourneyTypeId"].replace(

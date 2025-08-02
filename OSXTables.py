@@ -39,7 +39,7 @@ from loggingFpdb import get_logger
 #    FPDB modules
 from TableWindow import Table_Window
 
-log = get_logger("osxtables")
+log = get_logger("osx_tables")
 
 
 class Table(Table_Window):

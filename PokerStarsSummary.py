@@ -30,7 +30,7 @@ except ImportError:
     xlrd = None
 
 # PPokerstatars HH Format
-log = get_logger("parser")
+log = get_logger("pokerstars_summary_parser")
 
 
 class PokerStarsSummary(TourneySummary):

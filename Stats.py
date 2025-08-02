@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """Manage collecting and formatting of stats and tooltips."""
 #    Copyright 2008-2011, Ray E. Barker
 
@@ -68,7 +66,7 @@ from loggingFpdb import get_logger
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("db")
+log = get_logger("stats")
 
 re_Places = re.compile("_[0-9]$")
 
@@ -111,7 +109,7 @@ def format_no_data_stat(stat_name, description, numerator=None, denominator=None
     - numerator (int, optional): The numerator value for fraction display
     - denominator (int, optional): The denominator value for fraction display
     
-    Returns
+    Returns:
     -------
     - tuple: Standardized tuple (0.0, "-", "stat_name=-", "stat_name=-", "(-/-)", "description")
     """
@@ -119,14 +117,14 @@ def format_no_data_stat(stat_name, description, numerator=None, denominator=None
         fraction = f"({numerator}/{denominator})"
     else:
         fraction = "(-/-)"
-    
+
     return (
         0.0,
         "-",
         f"{stat_name}=-",
         f"{stat_name}=-",
         fraction,
-        description
+        description,
     )
 
 
@@ -180,8 +178,15 @@ def do_stat(stat_dict, player=24, stat="vpip", hand_instance=None):
     if statname not in STATLIST:
         return None
 
+    # Ensure player is an integer to prevent TypeError
+    try:
+        player_int = int(player)
+    except (ValueError, TypeError):
+        log.error(f"Invalid player parameter: {player} (type: {type(player)})")
+        return None
+
     result = eval(
-        "%(stat)s(stat_dict, %(player)d)" % {"stat": statname, "player": player},
+        "%(stat)s(stat_dict, %(player)d)" % {"stat": statname, "player": player_int},
     )
 
     # If decimal places have been defined, override result[1]
@@ -472,11 +477,11 @@ def vpip(stat_dict, player):
     try:
         vpip_opp = float(stat_dict[player].get("vpip_opp", 0))
         vpip_count = float(stat_dict[player].get("vpip", 0))
-        
+
         # No opportunities = no data available
         if vpip_opp == 0:
             return format_no_data_stat("vpip", "Voluntarily put in preflop/3rd street %")
-        
+
         # Calculate VPIP percentage
         stat = vpip_count / vpip_opp
 
@@ -515,11 +520,11 @@ def pfr(stat_dict, player):
     try:
         pfr_opp = float(stat_dict[player].get("pfr_opp", 0))
         pfr_count = float(stat_dict[player].get("pfr", 0))
-        
+
         # No opportunities = no data available
         if pfr_opp == 0:
             return format_no_data_stat("pfr", "Preflop/3rd street raise %")
-        
+
         # Calculate PFR percentage
         stat = pfr_count / pfr_opp
 
@@ -551,11 +556,11 @@ def wtsd(stat_dict, player):
     try:
         saw_f = float(stat_dict[player].get("saw_f", 0))  # Ensure key exists
         sd = float(stat_dict[player].get("sd", 0))
-        
+
         # No opportunities = no data available
         if saw_f == 0:
             return format_no_data_stat("wtsd", "% went to showdown when seen flop/4th street")
-        
+
         # Calculate WTSD percentage
         stat = sd / saw_f
 
@@ -594,11 +599,11 @@ def wmsd(stat_dict, player):
     try:
         sd = float(stat_dict[player].get("sd", 0))  # Ensure key exists
         wmsd_value = float(stat_dict[player].get("wmsd", 0))
-        
+
         # No showdowns = no data available
         if sd == 0:
             return format_no_data_stat("wmsd", "% won some money at showdown")
-        
+
         # Calculate WMSD percentage
         stat = wmsd_value / sd
 
@@ -633,6 +638,10 @@ def profit100(stat_dict, player):
     """
     stat = 0.0
     try:
+        # Check if player exists in stat_dict first
+        if player not in stat_dict:
+            return (stat, "NA", "p=NA", "p/100=NA", "(0/0)", "Profit per 100 hands")
+            
         n = float(stat_dict[player].get("n", 0))  # Ensure key exists
         if n != 0:  # Check if 'n' (number of hands) is non-zero
             stat = float(stat_dict[player]["net"]) / n
@@ -651,7 +660,7 @@ def profit100(stat_dict, player):
     except (KeyError, ValueError, TypeError):
         if stat_dict:
             log.exception(
-                f"exception calculating profit100: 100 * {stat_dict[player]['net']} / {stat_dict[player]['n']}",
+                f"exception calculating profit100: player {player} not found in stat_dict or missing data",
             )
         return (stat, "NA", "p=NA", "p/100=NA", "(0/0)", "Profit per 100 hands")
 
@@ -856,11 +865,11 @@ def steal(stat_dict, player):
     try:
         steal_opp = float(stat_dict[player].get("steal_opp", 0))  # Ensure key exists
         steal_count = float(stat_dict[player].get("steal", 0))
-        
+
         # No opportunities = no data available
         if steal_opp == 0:
             return format_no_data_stat("steal", "% steal attempted")
-        
+
         # Calculate steal percentage
         stat = steal_count / steal_opp
 
@@ -902,14 +911,14 @@ def s_steal(stat_dict, player):
     try:
         steal_attempts = float(stat_dict[player].get("steal", 0))
         successful_steals = float(stat_dict[player].get("suc_st", 0))
-        
+
         # No steal attempts = no data available
         if steal_attempts == 0:
             return format_no_data_stat("s_st", "% steal success")
-        
+
         # Calculate steal success percentage
         stat = successful_steals / steal_attempts
-        
+
         return (
             stat,
             "%3.1f" % (100.0 * stat),
@@ -948,14 +957,14 @@ def f_SB_steal(stat_dict, player):
     try:
         sbstolen = float(stat_dict[player].get("sbstolen", 0))
         sbnotdef = float(stat_dict[player].get("sbnotdef", 0))
-        
+
         # No steal attempts = no data available
         if sbstolen == 0:
             return format_no_data_stat("fSB", "% folded SB to steal")
-        
+
         # Calculate fold SB to steal percentage
         stat = sbnotdef / sbstolen
-        
+
         return (
             stat,
             "%3.1f" % (100.0 * stat),
@@ -992,14 +1001,14 @@ def f_BB_steal(stat_dict, player):
     try:
         bbstolen = float(stat_dict[player].get("bbstolen", 0))
         bbnotdef = float(stat_dict[player].get("bbnotdef", 0))
-        
+
         # No steal attempts = no data available
         if bbstolen == 0:
             return format_no_data_stat("fBB", "% folded BB to steal")
-        
+
         # Calculate fold BB to steal percentage
         stat = bbnotdef / bbstolen
-        
+
         return (
             stat,
             "%3.1f" % (100.0 * stat),
@@ -1083,11 +1092,11 @@ def three_B(stat_dict, player):
     try:
         tb_opp_0 = float(stat_dict[player].get("tb_opp_0", 0))  # Ensure key exists
         tb_0 = float(stat_dict[player].get("tb_0", 0))
-        
+
         # No opportunities = no data available
         if tb_opp_0 == 0:
             return format_no_data_stat("3B", "% 3 bet preflop/3rd street")
-        
+
         # Calculate 3bet percentage
         stat = tb_0 / tb_opp_0
 
@@ -1127,11 +1136,11 @@ def four_B(stat_dict, player):
     try:
         fb_opp_0 = float(stat_dict[player].get("fb_opp_0", 0))  # Ensure key exists
         fb_0 = float(stat_dict[player].get("fb_0", 0))
-        
+
         # No opportunities = no data available
         if fb_opp_0 == 0:
             return format_no_data_stat("4B", "% 4 bet preflop/3rd street")
-        
+
         # Calculate 4bet percentage
         stat = fb_0 / fb_opp_0
 
@@ -1171,14 +1180,14 @@ def cfour_B(stat_dict, player):
     try:
         cfb_opp_0 = float(stat_dict[player].get("cfb_opp_0", 0))
         cfb_0 = float(stat_dict[player].get("cfb_0", 0))
-        
+
         # No opportunities = no data available
         if cfb_opp_0 == 0:
             return format_no_data_stat("C4B", "% cold 4 bet preflop/3rd street")
-        
+
         # Calculate cold 4bet percentage
         stat = cfb_0 / cfb_opp_0
-        
+
         return (
             stat,
             "%3.1f" % (100.0 * stat),
@@ -1315,15 +1324,15 @@ def dbr1(stat_dict, player):
         cb_1 = float(stat_dict[player].get("cb_1", 0))
         saw_f = float(stat_dict[player].get("saw_f", 0))
         cb_opp_1 = float(stat_dict[player].get("cb_opp_1", 0))
-        
+
         # Calculate donk opportunities (saw flop but no cbet opportunity)
         donk_opp = saw_f - cb_opp_1
         donk_bets = aggr_1 - cb_1
-        
+
         # No opportunities = no data available
         if donk_opp == 0:
             return format_no_data_stat("dbr1", "% DonkBetAndRaise flop/4th street")
-        
+
         # Calculate donk bet and raise percentage
         stat = donk_bets / donk_opp
         return (
@@ -1358,15 +1367,15 @@ def dbr2(stat_dict, player):
         cb_2 = float(stat_dict[player].get("cb_2", 0))
         saw_2 = float(stat_dict[player].get("saw_2", 0))
         cb_opp_2 = float(stat_dict[player].get("cb_opp_2", 0))
-        
+
         # Calculate donk opportunities (saw turn but no cbet opportunity)
         donk_opp = saw_2 - cb_opp_2
         donk_bets = aggr_2 - cb_2
-        
+
         # No opportunities = no data available
         if donk_opp == 0:
             return format_no_data_stat("dbr2", "% DonkBetAndRaise turn/5th street")
-        
+
         # Calculate donk bet and raise percentage
         stat = donk_bets / donk_opp
         return (
@@ -1602,11 +1611,11 @@ def squeeze(stat_dict, player):
     try:
         sqz_opp_0 = float(stat_dict[player].get("sqz_opp_0", 0))
         sqz_0 = float(stat_dict[player].get("sqz_0", 0))
-        
+
         # No opportunities = no data available
         if sqz_opp_0 == 0:
             return format_no_data_stat("SQZ", "% squeeze preflop")
-        
+
         # Calculate squeeze percentage
         stat = sqz_0 / sqz_opp_0
 
@@ -1638,11 +1647,11 @@ def raiseToSteal(stat_dict, player):
     try:
         rts_opp = float(stat_dict[player].get("rts_opp", 0))
         rts = float(stat_dict[player].get("rts", 0))
-        
+
         # No opportunities = no data available
         if rts_opp == 0:
             return format_no_data_stat("RST", "% raise to steal")
-        
+
         # Calculate raise to steal percentage
         stat = rts / rts_opp
 
@@ -1791,11 +1800,11 @@ def WMsF(stat_dict, player):
         saw_1 = float(stat_dict[player].get("saw_1", 0))
         saw_f = float(stat_dict[player].get("saw_f", 0))
         w_w_s_1 = float(stat_dict[player].get("w_w_s_1", 0))
-        
+
         # No flops seen = no data available
         if saw_f == 0:
             return format_no_data_stat("WMsF", "% won money when seen flop/4th street")
-        
+
         # Calculate win money seeing flop percentage
         stat = w_w_s_1 / saw_1 if saw_1 != 0 else 0
 
@@ -1834,11 +1843,11 @@ def a_freq1(stat_dict, player):
     try:
         saw_f = float(stat_dict[player].get("saw_f", 0))
         aggr_1 = float(stat_dict[player].get("aggr_1", 0))
-        
+
         # No opportunities = no data available
         if saw_f == 0:
             return format_no_data_stat("a1", "Aggression frequency flop/4th street")
-        
+
         # Calculate aggression frequency
         stat = aggr_1 / saw_f
 
@@ -1877,11 +1886,11 @@ def a_freq2(stat_dict, player):
     try:
         saw_2 = float(stat_dict[player].get("saw_2", 0))
         aggr_2 = float(stat_dict[player].get("aggr_2", 0))
-        
+
         # No opportunities = no data available
         if saw_2 == 0:
             return format_no_data_stat("a2", "Aggression frequency turn/5th street")
-        
+
         # Calculate aggression frequency
         stat = aggr_2 / saw_2
 
@@ -1920,11 +1929,11 @@ def a_freq3(stat_dict, player):
     try:
         saw_3 = float(stat_dict[player].get("saw_3", 0))
         aggr_3 = float(stat_dict[player].get("aggr_3", 0))
-        
+
         # No opportunities = no data available
         if saw_3 == 0:
             return format_no_data_stat("a3", "Aggression frequency river/6th street")
-        
+
         # Calculate aggression frequency
         stat = aggr_3 / saw_3
 
@@ -1963,11 +1972,11 @@ def a_freq4(stat_dict, player):
     try:
         saw_4 = float(stat_dict[player].get("saw_4", 0))
         aggr_4 = float(stat_dict[player].get("aggr_4", 0))
-        
+
         # No opportunities = no data available
         if saw_4 == 0:
             return format_no_data_stat("a4", "Aggression frequency 7th street")
-        
+
         # Calculate aggression frequency
         stat = aggr_4 / saw_4
 
@@ -2072,7 +2081,7 @@ def agg_fact(stat_dict, player):
         # No post-flop actions = no data available
         if bet_raise == 0 and post_call == 0:
             return format_no_data_stat("afa", "Aggression factor", bet_raise, post_call)
-        
+
         # Calculate aggression factor (bet+raise) / call
         stat = float(bet_raise) / float(post_call) if post_call > 0 else float(bet_raise)
 
@@ -2119,7 +2128,7 @@ def agg_fact_pct(stat_dict, player):
         # No post-flop actions = no data available
         if bet_raise == 0 and post_call == 0:
             return format_no_data_stat("afap", "Aggression factor pct", bet_raise, post_call)
-        
+
         # Calculate aggression factor percentage (bet+raise) / (bet+raise+call)
         if float(post_call + bet_raise) > 0.0:
             stat = float(bet_raise) / float(post_call + bet_raise)
@@ -2176,7 +2185,7 @@ def cbet(stat_dict, player):
         # No opportunities = no data available
         if oppt == 0:
             return format_no_data_stat("cbet", "% continuation bet")
-        
+
         # Calculate cbet percentage
         stat = float(cbets) / float(oppt)
 
@@ -2207,11 +2216,11 @@ def cb1(stat_dict, player):
     try:
         cb_opp_1 = float(stat_dict[player].get("cb_opp_1", 0))
         cb_1 = float(stat_dict[player].get("cb_1", 0))
-        
+
         # No opportunities = no data available
         if cb_opp_1 == 0:
             return format_no_data_stat("cb1", "% continuation bet flop/4th street")
-        
+
         # Calculate continuation bet percentage
         stat = cb_1 / cb_opp_1
         return (
@@ -2241,11 +2250,11 @@ def cb2(stat_dict, player):
     try:
         cb_opp_2 = float(stat_dict[player].get("cb_opp_2", 0))
         cb_2 = float(stat_dict[player].get("cb_2", 0))
-        
+
         # No opportunities = no data available
         if cb_opp_2 == 0:
             return format_no_data_stat("cb2", "% continuation bet turn/5th street")
-        
+
         # Calculate continuation bet percentage
         stat = cb_2 / cb_opp_2
         return (
@@ -2275,11 +2284,11 @@ def cb3(stat_dict, player):
     try:
         cb_opp_3 = float(stat_dict[player].get("cb_opp_3", 0))
         cb_3 = float(stat_dict[player].get("cb_3", 0))
-        
+
         # No opportunities = no data available
         if cb_opp_3 == 0:
             return format_no_data_stat("cb3", "% continuation bet river/6th street")
-        
+
         # Calculate continuation bet percentage
         stat = cb_3 / cb_opp_3
         return (
@@ -2309,11 +2318,11 @@ def cb4(stat_dict, player):
     try:
         cb_opp_4 = float(stat_dict[player].get("cb_opp_4", 0))
         cb_4 = float(stat_dict[player].get("cb_4", 0))
-        
+
         # No opportunities = no data available
         if cb_opp_4 == 0:
             return format_no_data_stat("cb4", "% continuation bet 7th street")
-        
+
         # Calculate continuation bet percentage
         stat = cb_4 / cb_opp_4
         return (
@@ -2345,11 +2354,11 @@ def ffreq1(stat_dict, player):
             stat_dict[player].get("was_raised_1", 0),
         )  # Ensure key exists and default to 0
         f_freq_1 = float(stat_dict[player].get("f_freq_1", 0))
-        
+
         # No opportunities = no data available
         if was_raised_1 == 0:
             return format_no_data_stat("ff1", "% fold frequency flop/4th street")
-        
+
         # Calculate fold frequency percentage
         stat = f_freq_1 / was_raised_1
 
@@ -2389,11 +2398,11 @@ def ffreq2(stat_dict, player):
             stat_dict[player].get("was_raised_2", 0),
         )  # Ensure key exists and default to 0
         f_freq_2 = float(stat_dict[player].get("f_freq_2", 0))
-        
+
         # No opportunities = no data available
         if was_raised_2 == 0:
             return format_no_data_stat("ff2", "% fold frequency turn/5th street")
-        
+
         # Calculate fold frequency percentage
         stat = f_freq_2 / was_raised_2
 
@@ -2433,11 +2442,11 @@ def ffreq3(stat_dict, player):
             stat_dict[player].get("was_raised_3", 0),
         )  # Ensure key exists and default to 0
         f_freq_3 = float(stat_dict[player].get("f_freq_3", 0))
-        
+
         # No opportunities = no data available
         if was_raised_3 == 0:
             return format_no_data_stat("ff3", "% fold frequency river/6th street")
-        
+
         # Calculate fold frequency percentage
         stat = f_freq_3 / was_raised_3
 
@@ -2475,14 +2484,14 @@ def ffreq4(stat_dict, player):
     try:
         was_raised_4 = float(stat_dict[player].get("was_raised_4", 0))
         f_freq_4 = float(stat_dict[player].get("f_freq_4", 0))
-        
+
         # No opportunities = no data available
         if was_raised_4 == 0:
             return format_no_data_stat("ff4", "% fold frequency 7th street")
-        
+
         # Calculate fold frequency percentage
         stat = f_freq_4 / was_raised_4
-        
+
         return (
             stat,
             "%3.1f" % (100.0 * stat),
@@ -2519,11 +2528,11 @@ def f_cb1(stat_dict, player):
             stat_dict[player].get("f_cb_opp_1", 0),
         )  # Ensure key exists and default to 0
         f_cb_1 = float(stat_dict[player].get("f_cb_1", 0))
-        
+
         # No opportunities = no data available
         if f_cb_opp_1 == 0:
             return format_no_data_stat("f_cb1", "% fold to continuation bet flop/4th street")
-        
+
         # Calculate fold to continuation bet percentage
         stat = f_cb_1 / f_cb_opp_1
 
@@ -2568,14 +2577,14 @@ def f_cb2(stat_dict, player):
     try:
         f_cb_opp_2 = float(stat_dict[player].get("f_cb_opp_2", 0))
         f_cb_2 = float(stat_dict[player].get("f_cb_2", 0))
-        
+
         # No opportunities = no data available
         if f_cb_opp_2 == 0:
             return format_no_data_stat("f_cb2", "% fold to continuation bet turn/5th street")
-        
+
         # Calculate fold to continuation bet percentage
         stat = f_cb_2 / f_cb_opp_2
-        
+
         return (
             stat,
             "%3.1f" % (100.0 * stat),
@@ -2617,14 +2626,14 @@ def f_cb3(stat_dict, player):
     try:
         f_cb_opp_3 = float(stat_dict[player].get("f_cb_opp_3", 0))
         f_cb_3 = float(stat_dict[player].get("f_cb_3", 0))
-        
+
         # No opportunities = no data available
         if f_cb_opp_3 == 0:
             return format_no_data_stat("f_cb3", "% fold to continuation bet river/6th street")
-        
+
         # Calculate fold to continuation bet percentage
         stat = f_cb_3 / f_cb_opp_3
-        
+
         return (
             stat,
             "%3.1f" % (100.0 * stat),
@@ -2669,14 +2678,14 @@ def f_cb4(stat_dict, player):
     try:
         f_cb_opp_4 = float(stat_dict[player].get("f_cb_opp_4", 0))
         f_cb_4 = float(stat_dict[player].get("f_cb_4", 0))
-        
+
         # No opportunities = no data available
         if f_cb_opp_4 == 0:
             return format_no_data_stat("f_cb4", "% fold to continuation bet 7th street")
-        
+
         # Calculate fold to continuation bet percentage
         stat = f_cb_4 / f_cb_opp_4
-        
+
         return (
             stat,
             "%3.1f" % (100.0 * stat),
@@ -2723,11 +2732,11 @@ def cr1(stat_dict, player):
             stat_dict[player].get("ccr_opp_1", 0),
         )  # Ensure key exists and default to 0
         cr_1 = float(stat_dict[player].get("cr_1", 0))
-        
+
         # No opportunities = no data available
         if ccr_opp_1 == 0:
             return format_no_data_stat("cr1", "% check-raise flop/4th street")
-        
+
         # Calculate check-raise percentage
         stat = cr_1 / ccr_opp_1
 
@@ -2774,14 +2783,14 @@ def cr2(stat_dict, player):
             stat_dict[player].get("ccr_opp_2", 0),
         )  # Ensure key exists and default to 0
         cr_2 = float(stat_dict[player].get("cr_2", 0))
-        
+
         # No opportunities = no data available
         if ccr_opp_2 == 0:
             return format_no_data_stat("cr2", "% check-raise turn/5th street")
-        
+
         # Calculate check-raise percentage
         stat = cr_2 / ccr_opp_2
-        
+
         return (
             stat,
             "%3.1f" % (100.0 * stat),
@@ -2828,14 +2837,14 @@ def cr3(stat_dict, player):
             stat_dict[player].get("ccr_opp_3", 0),
         )  # Ensure key exists and default to 0
         cr_3 = float(stat_dict[player].get("cr_3", 0))
-        
+
         # No opportunities = no data available
         if ccr_opp_3 == 0:
             return format_no_data_stat("cr3", "% check-raise river/6th street")
-        
+
         # Calculate check-raise percentage
         stat = cr_3 / ccr_opp_3
-        
+
         return (
             stat,
             "%3.1f" % (100.0 * stat),
@@ -2882,14 +2891,14 @@ def cr4(stat_dict, player):
             stat_dict[player].get("ccr_opp_4", 0),
         )  # Ensure key exists and default to 0
         cr_4 = float(stat_dict[player].get("cr_4", 0))
-        
+
         # No opportunities = no data available
         if ccr_opp_4 == 0:
             return format_no_data_stat("cr4", "% check-raise 7th street")
-        
+
         # Calculate check-raise percentage
         stat = cr_4 / ccr_opp_4
-        
+
         return (
             stat,
             "%3.1f" % (100.0 * stat),
@@ -2975,22 +2984,22 @@ def blank(stat_dict, player):
 def player_note(stat_dict, player):
     """Display a note icon that changes color based on whether the player has notes."""
     try:
-        # Try to get player_id from stat_dict 
+        # Try to get player_id from stat_dict
         player_id = None
         for pid, data in stat_dict.items():
-            if data.get('screen_name') == player:
+            if data.get("screen_name") == player:
                 player_id = pid
                 break
-        
+
         if player_id is None:
             # Default gray icon if no player found
             return ("📝", "📝", "📝", "📝", "📝", "Player note icon")
-        
+
         # Check if player has notes using database query
         # This will be handled by the HUD display logic that checks has_comment()
         # Return a note icon - color will be determined by the HUD
         return ("📝", "📝", "📝", "📝", "📝", "Player note icon")
-        
+
     except Exception:
         return ("📝", "📝", "📝", "📝", "📝", "Player note icon")
 
@@ -3077,11 +3086,11 @@ def cold_call(stat_dict, player):
     try:
         car_opp = float(stat_dict[player].get("CAR_opp_0", 0))
         car_count = float(stat_dict[player].get("CAR_0", 0))
-        
+
         # No opportunities = no data available
         if car_opp == 0:
             return format_no_data_stat("cc", "% cold call preflop")
-        
+
         # Calculate cold call percentage
         stat = car_count / car_opp
         return (
@@ -3116,14 +3125,14 @@ def limp(stat_dict, player):
         vpip_opp = float(stat_dict[player].get("vpip_opp", 0))
         vpip_count = float(stat_dict[player].get("vpip", 0))
         pfr_count = float(stat_dict[player].get("pfr", 0))
-        
+
         # No opportunities = no data available
         if vpip_opp == 0:
             return format_no_data_stat("limp", "% limp preflop")
-        
+
         # Calculate limp count (vpip actions that are not raises)
         limp_count = vpip_count - pfr_count
-        
+
         # Calculate limp percentage
         stat = limp_count / vpip_opp
         return (
@@ -3159,16 +3168,16 @@ def iso(stat_dict, player):
     try:
         pfr_opp = float(stat_dict[player].get("pfr_opp", 0))
         pfr_count = float(stat_dict[player].get("pfr", 0))
-        
+
         # No opportunities = no data available
         # For now, we'll use PFR as a proxy for ISO opportunities
         if pfr_opp == 0:
             return format_no_data_stat("iso", "% isolation raise")
-        
+
         # Simplified calculation: assume some fraction of PFR are isolation raises
         # This is a placeholder - would need more sophisticated analysis for accuracy
         iso_count = pfr_count * 0.3  # Rough estimate that 30% of raises are isolation
-        
+
         # Calculate isolation percentage
         stat = iso_count / pfr_opp
         return (
@@ -3202,18 +3211,18 @@ def rfi_total(stat_dict, player):
         pfr_opp = float(stat_dict[player].get("pfr_opp", 0))
         pfr_count = float(stat_dict[player].get("pfr", 0))
         three_bet_count = float(stat_dict[player].get("3bet", 0))
-        
+
         # No opportunities = no data available
         if pfr_opp == 0:
             return format_no_data_stat("rfi", "% raise first in")
-        
+
         # Calculate RFI count (raises that are not 3bets/4bets)
         # This is a simplified calculation
         rfi_count = pfr_count - three_bet_count
-        
+
         # Ensure non-negative values
         rfi_count = max(0, rfi_count)
-        
+
         # Calculate RFI percentage
         stat = rfi_count / pfr_opp
         return (
@@ -3247,15 +3256,15 @@ def three_bet_vs_steal(stat_dict, player):
     try:
         three_bet_opp = float(stat_dict[player].get("3bet_opp", 0))
         three_bet_count = float(stat_dict[player].get("3bet", 0))
-        
+
         # No opportunities = no data available
         if three_bet_opp == 0:
             return format_no_data_stat("3bvs", "% 3bet vs steal")
-        
+
         # Simplified calculation: assume portion of 3bets are against steals
         # This is a rough approximation
         three_bet_vs_steal_count = three_bet_count * 0.4  # 40% of 3bets vs steal
-        
+
         # Calculate 3bet vs steal percentage
         stat = three_bet_vs_steal_count / three_bet_opp
         return (
@@ -3289,15 +3298,15 @@ def call_vs_steal(stat_dict, player):
     try:
         car_opp = float(stat_dict[player].get("CAR_opp_0", 0))
         car_count = float(stat_dict[player].get("CAR_0", 0))
-        
+
         # No opportunities = no data available
         if car_opp == 0:
             return format_no_data_stat("cvs", "% call vs steal")
-        
+
         # Simplified calculation: assume portion of calls are against steals
         # This is a rough approximation
         call_vs_steal_count = car_count * 0.5  # 50% of calls vs steal
-        
+
         # Calculate call vs steal percentage
         stat = call_vs_steal_count / car_opp
         return (
@@ -3329,11 +3338,11 @@ def fold_vs_4bet(stat_dict, player):
     try:
         f4b_opp = float(stat_dict[player].get("F4B_opp_0", 0))
         f4b_count = float(stat_dict[player].get("F4B_0", 0))
-        
+
         # No opportunities = no data available
         if f4b_opp == 0:
             return format_no_data_stat("f4b", "% fold vs 4bet")
-        
+
         # Calculate fold vs 4bet percentage
         stat = f4b_count / f4b_opp
         return (
@@ -3370,26 +3379,26 @@ def float_bet(stat_dict, player):
         # Get flop position and calls
         street1_in_position = float(stat_dict[player].get("street1InPosition", 0))
         street1_calls = float(stat_dict[player].get("street1Calls", 0))
-        
+
         # Get turn bets and first to act
         street2_bets = float(stat_dict[player].get("street2Bets", 0))
         street2_first_to_act = float(stat_dict[player].get("street2FirstToAct", 0))
-        
+
         # Get opportunities to see flop and turn
         saw_flop = float(stat_dict[player].get("saw_f", 0))
         saw_turn = float(stat_dict[player].get("saw_t", 0))
-        
+
         # Calculate float opportunities: called flop in position and saw turn
         float_opportunities = min(street1_in_position, street1_calls, saw_turn)
-        
+
         # No opportunities = no data available
         if float_opportunities == 0:
             return format_no_data_stat("float", "% float bet turn")
-        
+
         # Calculate float count: bet turn after calling flop in position
         # This is a simplified calculation as we don't have exact sequence data
         float_count = min(street2_bets, float_opportunities)
-        
+
         # Calculate float percentage
         stat = float_count / float_opportunities
         return (
@@ -3425,23 +3434,23 @@ def probe_bet(stat_dict, player):
         # Get flop betting data
         street1_bets = float(stat_dict[player].get("street1Bets", 0))
         saw_flop = float(stat_dict[player].get("saw_f", 0))
-        
+
         # Get continuation bet data (opponent's cb opportunities and actual cbs)
         cb_opp_1 = float(stat_dict[player].get("cb_opp_1", 0))
         cb_1 = float(stat_dict[player].get("cb_1", 0))
-        
+
         # Calculate probe opportunities: saw flop when opponent could have c-bet but didn't
         # This is approximated as flops seen where opponent had cb opportunity but didn't c-bet
         probe_opportunities = saw_flop - cb_1
-        
+
         # No opportunities = no data available
         if probe_opportunities <= 0:
             return format_no_data_stat("probe", "% probe bet flop")
-        
+
         # Calculate probe count: bets made in probe situations
         # This is a simplified calculation as exact sequence data isn't available
         probe_count = min(street1_bets, probe_opportunities)
-        
+
         # Calculate probe percentage
         stat = probe_count / probe_opportunities
         return (
@@ -3474,11 +3483,11 @@ def sd_winrate(stat_dict, player):
     try:
         sd = float(stat_dict[player].get("sd", 0))  # sawShowdown
         wmsd = float(stat_dict[player].get("wmsd", 0))  # wonAtSD
-        
+
         # No showdown opportunities = no data available
         if sd == 0:
             return format_no_data_stat("sd_wr", "% showdown winrate")
-        
+
         # Calculate showdown winrate
         stat = wmsd / sd
         return (
@@ -3512,21 +3521,21 @@ def non_sd_winrate(stat_dict, player):
         saw_f = float(stat_dict[player].get("saw_f", 0))  # street1Seen
         sd = float(stat_dict[player].get("sd", 0))  # sawShowdown
         wmsd = float(stat_dict[player].get("wmsd", 0))  # wonAtSD
-        
+
         # Get total wins by street
         w_w_s_1 = float(stat_dict[player].get("w_w_s_1", 0))  # wonWhenSeenStreet1
-        
+
         # Calculate non-showdown opportunities
         non_sd_opportunities = saw_f - sd
-        
+
         # No non-showdown opportunities = no data available
         if non_sd_opportunities == 0:
             return format_no_data_stat("nsd_wr", "% non-showdown winrate")
-        
+
         # Calculate non-showdown wins (approximation)
         # Total wins when seen flop minus showdown wins
         non_sd_wins = w_w_s_1 - wmsd
-        
+
         # Calculate non-showdown winrate
         stat = non_sd_wins / non_sd_opportunities
         return (
@@ -3559,11 +3568,11 @@ def bet_frequency_flop(stat_dict, player):
     try:
         saw_f = float(stat_dict[player].get("saw_f", 0))  # street1Seen
         street1_bets = float(stat_dict[player].get("street1Bets", 0))
-        
+
         # No flop opportunities = no data available
         if saw_f == 0:
             return format_no_data_stat("bet_f", "% bet frequency flop")
-        
+
         # Calculate bet frequency on flop
         stat = street1_bets / saw_f
         return (
@@ -3596,11 +3605,11 @@ def bet_frequency_turn(stat_dict, player):
     try:
         saw_t = float(stat_dict[player].get("saw_t", 0))  # street2Seen
         street2_bets = float(stat_dict[player].get("street2Bets", 0))
-        
+
         # No turn opportunities = no data available
         if saw_t == 0:
             return format_no_data_stat("bet_t", "% bet frequency turn")
-        
+
         # Calculate bet frequency on turn
         stat = street2_bets / saw_t
         return (
@@ -3633,11 +3642,11 @@ def raise_frequency_flop(stat_dict, player):
     try:
         saw_f = float(stat_dict[player].get("saw_f", 0))  # street1Seen
         street1_raises = float(stat_dict[player].get("street1Raises", 0))
-        
+
         # No flop opportunities = no data available
         if saw_f == 0:
             return format_no_data_stat("raise_f", "% raise frequency flop")
-        
+
         # Calculate raise frequency on flop
         stat = street1_raises / saw_f
         return (
@@ -3670,11 +3679,11 @@ def raise_frequency_turn(stat_dict, player):
     try:
         saw_t = float(stat_dict[player].get("saw_t", 0))  # street2Seen
         street2_raises = float(stat_dict[player].get("street2Raises", 0))
-        
+
         # No turn opportunities = no data available
         if saw_t == 0:
             return format_no_data_stat("raise_t", "% raise frequency turn")
-        
+
         # Calculate raise frequency on turn
         stat = street2_raises / saw_t
         return (
@@ -3709,23 +3718,23 @@ def cb_ip(stat_dict, player):
         cb_1 = float(stat_dict[player].get("cb_1", 0))
         street1_in_position = float(stat_dict[player].get("street1InPosition", 0))
         saw_f = float(stat_dict[player].get("saw_f", 0))
-        
+
         # Calculate estimated IP ratio
         if saw_f == 0:
             return format_no_data_stat("cb_ip", "% c-bet in position")
-        
+
         ip_ratio = street1_in_position / saw_f
-        
+
         # Calculate IP c-bet opportunities (approximation)
         cb_ip_opportunities = cb_opp_1 * ip_ratio
-        
+
         # No IP c-bet opportunities = no data available
         if cb_ip_opportunities == 0:
             return format_no_data_stat("cb_ip", "% c-bet in position")
-        
+
         # Calculate IP c-bet count (approximation)
         cb_ip_count = cb_1 * ip_ratio
-        
+
         # Calculate IP c-bet percentage
         stat = cb_ip_count / cb_ip_opportunities
         return (
@@ -3760,23 +3769,23 @@ def cb_oop(stat_dict, player):
         cb_1 = float(stat_dict[player].get("cb_1", 0))
         street1_in_position = float(stat_dict[player].get("street1InPosition", 0))
         saw_f = float(stat_dict[player].get("saw_f", 0))
-        
+
         # Calculate estimated OOP ratio
         if saw_f == 0:
             return format_no_data_stat("cb_oop", "% c-bet out of position")
-        
+
         oop_ratio = (saw_f - street1_in_position) / saw_f
-        
+
         # Calculate OOP c-bet opportunities (approximation)
         cb_oop_opportunities = cb_opp_1 * oop_ratio
-        
+
         # No OOP c-bet opportunities = no data available
         if cb_oop_opportunities == 0:
             return format_no_data_stat("cb_oop", "% c-bet out of position")
-        
+
         # Calculate OOP c-bet count (approximation)
         cb_oop_count = cb_1 * oop_ratio
-        
+
         # Calculate OOP c-bet percentage
         stat = cb_oop_count / cb_oop_opportunities
         return (
@@ -3813,25 +3822,25 @@ def triple_barrel(stat_dict, player):
         cb_2 = float(stat_dict[player].get("cb_2", 0))
         cb_opp_3 = float(stat_dict[player].get("cb_opp_3", 0))
         cb_3 = float(stat_dict[player].get("cb_3", 0))
-        
+
         # Calculate triple barrel opportunities (minimum of all three streets)
         triple_barrel_opportunities = min(cb_opp_1, cb_opp_2, cb_opp_3)
-        
+
         # No triple barrel opportunities = no data available
         if triple_barrel_opportunities == 0:
             return format_no_data_stat("3barrel", "% triple barrel")
-        
+
         # Calculate triple barrel count (approximation based on c-bet ratios)
         if cb_opp_1 > 0 and cb_opp_2 > 0 and cb_opp_3 > 0:
             cb_rate_1 = cb_1 / cb_opp_1
             cb_rate_2 = cb_2 / cb_opp_2
             cb_rate_3 = cb_3 / cb_opp_3
-            
+
             # Estimate triple barrel count
             triple_barrel_count = triple_barrel_opportunities * cb_rate_1 * cb_rate_2 * cb_rate_3
         else:
             triple_barrel_count = 0
-        
+
         # Calculate triple barrel percentage
         stat = triple_barrel_count / triple_barrel_opportunities
         return (
@@ -3864,17 +3873,17 @@ def resteal(stat_dict, player):
     try:
         three_bet_opp = float(stat_dict[player].get("tb_opp_0", 0))
         three_bet = float(stat_dict[player].get("tb_0", 0))
-        
+
         # Estimate resteal opportunities (approximately 60% of 3-bet opportunities are vs steal)
         resteal_opportunities = three_bet_opp * 0.6
-        
+
         # No resteal opportunities = no data available
         if resteal_opportunities == 0:
             return format_no_data_stat("resteal", "% resteal")
-        
+
         # Calculate resteal count (approximation - 70% of 3-bets are resteals)
         resteal_count = three_bet * 0.7
-        
+
         # Calculate resteal percentage
         stat = resteal_count / resteal_opportunities
         return (
@@ -3907,21 +3916,21 @@ def probe_bet_turn(stat_dict, player):
         # Get turn betting data
         street2_bets = float(stat_dict[player].get("street2Bets", 0))
         saw_t = float(stat_dict[player].get("saw_t", 0))
-        
+
         # Get continuation bet data (opponent's cb opportunities and actual cbs)
         cb_opp_2 = float(stat_dict[player].get("cb_opp_2", 0))
         cb_2 = float(stat_dict[player].get("cb_2", 0))
-        
+
         # Calculate turn probe opportunities: saw turn when opponent could have c-bet but didn't
         turn_probe_opportunities = saw_t - cb_2
-        
+
         # No opportunities = no data available
         if turn_probe_opportunities <= 0:
             return format_no_data_stat("probe_t", "% probe bet turn")
-        
+
         # Calculate turn probe count: bets made in turn probe situations
         turn_probe_count = min(street2_bets, turn_probe_opportunities)
-        
+
         # Calculate turn probe percentage
         stat = turn_probe_count / turn_probe_opportunities
         return (
@@ -3954,21 +3963,21 @@ def probe_bet_river(stat_dict, player):
         # Get river betting data
         street3_bets = float(stat_dict[player].get("street3Bets", 0))
         saw_r = float(stat_dict[player].get("saw_r", 0))
-        
+
         # Get continuation bet data (opponent's cb opportunities and actual cbs)
         cb_opp_3 = float(stat_dict[player].get("cb_opp_3", 0))
         cb_3 = float(stat_dict[player].get("cb_3", 0))
-        
+
         # Calculate river probe opportunities: saw river when opponent could have c-bet but didn't
         river_probe_opportunities = saw_r - cb_3
-        
+
         # No opportunities = no data available
         if river_probe_opportunities <= 0:
             return format_no_data_stat("probe_r", "% probe bet river")
-        
+
         # Calculate river probe count: bets made in river probe situations
         river_probe_count = min(street3_bets, river_probe_opportunities)
-        
+
         # Calculate river probe percentage
         stat = river_probe_count / river_probe_opportunities
         return (
@@ -4002,20 +4011,20 @@ def rfi_early_position(stat_dict, player):
         pfr_opp = float(stat_dict[player].get("pfr_opp", 0))
         pfr = float(stat_dict[player].get("pfr", 0))
         three_bet = float(stat_dict[player].get("tb_0", 0))
-        
+
         # Estimate early position opportunities (approximately 25% of total hands)
         early_position_opportunities = pfr_opp * 0.25
-        
+
         # No early position opportunities = no data available
         if early_position_opportunities == 0:
             return format_no_data_stat("rfi_ep", "% RFI early position")
-        
+
         # Calculate RFI count (PFR - 3bets)
         rfi_total = pfr - three_bet
-        
+
         # Estimate early position RFI (25% of total RFI)
         early_position_rfi = rfi_total * 0.25
-        
+
         # Calculate early position RFI percentage
         stat = early_position_rfi / early_position_opportunities
         return (
@@ -4049,20 +4058,20 @@ def rfi_middle_position(stat_dict, player):
         pfr_opp = float(stat_dict[player].get("pfr_opp", 0))
         pfr = float(stat_dict[player].get("pfr", 0))
         three_bet = float(stat_dict[player].get("tb_0", 0))
-        
+
         # Estimate middle position opportunities (approximately 30% of total hands)
         middle_position_opportunities = pfr_opp * 0.30
-        
+
         # No middle position opportunities = no data available
         if middle_position_opportunities == 0:
             return format_no_data_stat("rfi_mp", "% RFI middle position")
-        
+
         # Calculate RFI count (PFR - 3bets)
         rfi_total = pfr - three_bet
-        
+
         # Estimate middle position RFI (30% of total RFI)
         middle_position_rfi = rfi_total * 0.30
-        
+
         # Calculate middle position RFI percentage
         stat = middle_position_rfi / middle_position_opportunities
         return (
@@ -4096,20 +4105,20 @@ def rfi_late_position(stat_dict, player):
         pfr_opp = float(stat_dict[player].get("pfr_opp", 0))
         pfr = float(stat_dict[player].get("pfr", 0))
         three_bet = float(stat_dict[player].get("tb_0", 0))
-        
+
         # Estimate late position opportunities (approximately 45% of total hands)
         late_position_opportunities = pfr_opp * 0.45
-        
+
         # No late position opportunities = no data available
         if late_position_opportunities == 0:
             return format_no_data_stat("rfi_lp", "% RFI late position")
-        
+
         # Calculate RFI count (PFR - 3bets)
         rfi_total = pfr - three_bet
-        
+
         # Estimate late position RFI (45% of total RFI)
         late_position_rfi = rfi_total * 0.45
-        
+
         # Calculate late position RFI percentage
         stat = late_position_rfi / late_position_opportunities
         return (
@@ -4142,15 +4151,15 @@ def avg_bet_size_flop(stat_dict, player):
     try:
         street1_bets = float(stat_dict[player].get("street1Bets", 0))
         saw_f = float(stat_dict[player].get("saw_f", 0))
-        
+
         # No flop betting data = no data available
         if street1_bets == 0:
             return format_no_data_stat("avg_bet_f", "avg bet size flop")
-        
+
         # Estimate average bet size (approximation: 65% of pot)
         # This is based on typical poker bet sizing patterns
         estimated_avg_bet_size = 65.0
-        
+
         return (
             estimated_avg_bet_size / 100.0,
             "%3.0f" % estimated_avg_bet_size,
@@ -4181,15 +4190,15 @@ def avg_bet_size_turn(stat_dict, player):
     try:
         street2_bets = float(stat_dict[player].get("street2Bets", 0))
         saw_t = float(stat_dict[player].get("saw_t", 0))
-        
+
         # No turn betting data = no data available
         if street2_bets == 0:
             return format_no_data_stat("avg_bet_t", "avg bet size turn")
-        
+
         # Estimate average bet size (approximation: 70% of pot)
         # Turn bets are typically slightly larger than flop bets
         estimated_avg_bet_size = 70.0
-        
+
         return (
             estimated_avg_bet_size / 100.0,
             "%3.0f" % estimated_avg_bet_size,
@@ -4220,15 +4229,15 @@ def avg_bet_size_river(stat_dict, player):
     try:
         street3_bets = float(stat_dict[player].get("street3Bets", 0))
         saw_r = float(stat_dict[player].get("saw_r", 0))
-        
+
         # No river betting data = no data available
         if street3_bets == 0:
             return format_no_data_stat("avg_bet_r", "avg bet size river")
-        
+
         # Estimate average bet size (approximation: 75% of pot)
         # River bets are typically larger for value or polarized
         estimated_avg_bet_size = 75.0
-        
+
         return (
             estimated_avg_bet_size / 100.0,
             "%3.0f" % estimated_avg_bet_size,
@@ -4260,18 +4269,18 @@ def overbet_frequency(stat_dict, player):
         street1_bets = float(stat_dict[player].get("street1Bets", 0))
         street2_bets = float(stat_dict[player].get("street2Bets", 0))
         street3_bets = float(stat_dict[player].get("street3Bets", 0))
-        
+
         total_bets = street1_bets + street2_bets + street3_bets
-        
+
         # No betting data = no data available
         if total_bets == 0:
             return format_no_data_stat("overbet", "% overbet frequency")
-        
+
         # Estimate overbet frequency (approximation: 15% of all bets are overbets)
         # This is based on typical aggressive poker patterns
         estimated_overbet_frequency = 15.0
         estimated_overbet_count = total_bets * (estimated_overbet_frequency / 100.0)
-        
+
         return (
             estimated_overbet_frequency / 100.0,
             "%3.1f" % estimated_overbet_frequency,

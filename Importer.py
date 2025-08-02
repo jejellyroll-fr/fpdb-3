@@ -54,13 +54,24 @@ log = get_logger("importer")
 
 
 class ZMQSender:
+    """ZMQ sender for sending hand IDs to the HUD."""
     def __init__(self, port="5555") -> None:
+        """Initialize the ZMQSender and connect to the specified port.
+
+        Args:
+            port (str, optional): The port to connect to on localhost. Defaults to "5555".
+        """
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUSH)
         self.socket.connect(f"tcp://127.0.0.1:{port}")
         log.info(f"ZMQ sender connected to port {port}")
 
     def send_hand_id(self, hand_id) -> None:
+        """Send a hand ID to the connected ZMQ server.
+
+        Args:
+            hand_id: The hand ID to send.
+        """
         try:
             self.socket.send_string(str(hand_id))
             log.debug(f"Sent hand ID {hand_id} via ZMQ")
@@ -68,14 +79,40 @@ class ZMQSender:
             log.exception(f"Failed to send hand ID {hand_id}: {e}")
 
     def close(self) -> None:
-        self.socket.close()
-        self.context.term()
-        log.info("ZMQ sender closed")
+        """Close the ZMQ socket and terminate the context.
+
+        This method releases all ZMQ resources and logs the closure of the sender.
+        """
+        try:
+            # Set linger to 0 to close immediately without waiting for pending messages
+            self.socket.setsockopt(zmq.LINGER, 0)
+            self.socket.close()
+            # Terminate context with a timeout to prevent hanging
+            self.context.term()
+            log.info("ZMQ sender closed")
+        except Exception as e:
+            log.warning(f"Error during ZMQ sender close: {e}")
+            # Force termination if there's an error
+            try:
+                self.context.term()
+            except:
+                pass
 
 
 class Importer:
+    """Importer class for handling file imports and processing."""
     def __init__(self, caller, settings, config, sql=None, parent=None) -> None:
-        """Constructor."""
+        """Initialize the Importer for handling file imports and processing.
+
+        Sets up configuration, database connections, and prepares internal state for importing files.
+
+        Args:
+            caller: The object that initiated the import process.
+            settings: A dictionary of import settings.
+            config: The configuration object.
+            sql: Optional SQL connection or cursor.
+            parent: Optional parent object, typically for GUI integration.
+        """
         self.settings = settings
         self.caller = caller
         self.config = config
@@ -97,7 +134,7 @@ class Importer:
         self.mode = None
         self.pos_in_file = {}  # dict to remember how far we have read in the file
 
-        # Configuration des paramètres par défaut
+        # Configuration of default parameters
         self.callHud = self.config.get_import_parameters().get("callFpdbHud")
         self.settings.setdefault("handCount", 0)
         self.settings.setdefault("writeQSize", 1000)
@@ -116,66 +153,196 @@ class Importer:
         for _i in range(self.settings["threads"]):
             self.writerdbs.append(Database.Database(self.config, sql=self.sql))
 
-        # Modification : spécifier le port pour ZMQ
+        # Modification: specify port for ZMQ
         self.zmq_sender = None
+        
+        # HandDataReporter for quality analysis
+        self.hand_data_reporter = None
+        
         process_time()  # init clock in windows
 
     # Set functions
     def setMode(self, value) -> None:
+        """Set the import mode for the Importer.
+
+        Updates the mode attribute to control how files are processed during import.
+
+        Args:
+            value: The mode to set for the importer.
+        """
         self.mode = value
 
     def setCallHud(self, value) -> None:
+        """Enable or disable HUD calls during import.
+
+        Sets the callHud attribute to control whether the HUD is notified during file imports.
+
+        Args:
+            value: Boolean or value indicating whether to call the HUD.
+        """
         self.callHud = value
 
     def setCacheSessions(self, value) -> None:
+        """Enable or disable session caching during import.
+
+        Sets the cacheSessions attribute to control whether session data is cached.
+
+        Args:
+            value: Boolean or value indicating whether to cache sessions.
+        """
         self.cacheSessions = value
 
     def setHandCount(self, value) -> None:
+        """Set the hand count value in the import settings.
+
+        Updates the 'handCount' setting to the specified integer value.
+
+        Args:
+            value: The new hand count to set.
+        """
         self.settings["handCount"] = int(value)
 
     def setQuiet(self, value) -> None:
+        """Set the quiet mode for the importer.
+
+        Updates the 'quiet' setting to control the verbosity of the import process.
+
+        Args:
+            value: Boolean or value indicating whether to enable quiet mode.
+        """
         self.settings["quiet"] = value
 
     def setHandsInDB(self, value) -> None:
+        """Set the number of hands in the database.
+
+        Updates the 'handsInDB' setting to the specified value.
+
+        Args:
+            value: The new number of hands to set in the database.
+        """
         self.settings["handsInDB"] = value
 
     def setThreads(self, value) -> None:
+        """Set the number of threads used for importing.
+
+        Updates the 'threads' setting and ensures the writer database list matches the thread count.
+
+        Args:
+            value: The number of threads to use for importing.
+        """
         self.settings["threads"] = value
         if self.settings["threads"] > len(self.writerdbs):
             for _i in range(self.settings["threads"] - len(self.writerdbs)):
                 self.writerdbs.append(Database.Database(self.config, sql=self.sql))
 
     def setDropIndexes(self, value) -> None:
+        """Set the dropIndexes setting for the importer.
+
+        Updates the 'dropIndexes' setting to control index dropping behavior during import.
+
+        Args:
+            value: The value to set for the dropIndexes setting.
+        """
         self.settings["dropIndexes"] = value
 
+    def setHandDataReporter(self, reporter) -> None:
+        """Enable HandDataReporter for detailed import analysis.
+        
+        Args:
+            reporter: HandDataReporter instance
+        """
+        self.hand_data_reporter = reporter
+        log.info(f"HandDataReporter enabled with level: {reporter.report_level}")
+
     def setDropHudCache(self, value) -> None:
+        """Set the dropHudCache setting for the importer.
+
+        Updates the 'dropHudCache' setting to control HUD cache dropping behavior during import.
+
+        Args:
+            value: The value to set for the dropHudCache setting.
+        """
         self.settings["dropHudCache"] = value
 
     def setStarsArchive(self, value) -> None:
+        """Set the starsArchive setting for the importer.
+
+        Updates the 'starsArchive' setting to control PokerStars hand history archiving.
+
+        Args:
+            value: The value to set for the starsArchive setting.
+        """
         self.settings["starsArchive"] = value
 
     def setFTPArchive(self, value) -> None:
+        """Set the ftpArchive setting for the importer.
+
+        Updates the 'ftpArchive' setting to control FTP hand history archiving.
+
+        Args:
+            value: The value to set for the ftpArchive setting.
+        """
         self.settings["ftpArchive"] = value
 
     def setPrintTestData(self, value) -> None:
+        """Set the testData setting for the importer.
+
+        Updates the 'testData' setting to control whether test data is printed during import.
+
+        Args:
+            value: The value to set for the testData setting.
+        """
         self.settings["testData"] = value
 
     def setFakeCacheHHC(self, value) -> None:
+        """Set the cacheHHC setting for the importer.
+
+        Updates the 'cacheHHC' setting to control fake hand history converter caching.
+
+        Args:
+            value: The value to set for the cacheHHC setting.
+        """
         self.settings["cacheHHC"] = value
 
     def getCachedHHC(self):
+        """Retrieve the cached hand history converter.
+
+        Returns the hand history converter instance currently cached by the importer.
+
+        Returns:
+            The cached hand history converter instance.
+        """
         return self.handhistoryconverter
 
     #   def setWatchTime(self):
     #       self.updated = time()
 
     def clearFileList(self) -> None:
+        """Clear all tracked file lists and related state.
+
+        Resets the updated size, update time, file position, and file list dictionaries to empty.
+        """
         self.updatedsize = {}
         self.updatetime = {}
         self.pos_in_file = {}
         self.filelist = {}
 
     def logImport(self, type, file, stored, dups, partial, skipped, errs, ttime, id) -> None:
+        """Log the results of an import operation to the database.
+
+        Records import statistics such as the number of hands processed, duplicates, partials, skipped, errors, and timing information.
+
+        Args:
+            type: The type of import operation.
+            file: The file being imported.
+            stored: Number of hands successfully stored.
+            dups: Number of duplicate hands found.
+            partial: Number of partially imported hands.
+            skipped: Number of skipped hands.
+            errs: Number of errors encountered.
+            ttime: Time taken for the import operation.
+            id: The database ID associated with the file.
+        """
         hands = stored + dups + partial + skipped + errs
         now = datetime.datetime.utcnow()
         ttime100 = ttime * 100
@@ -198,7 +365,13 @@ class Importer:
         self.database.commit()
 
     def addFileToList(self, fpdbfile) -> None:
-        """FPDBFile."""
+        """Add a file to the database and assign a file ID.
+
+        Extracts the file name, retrieves or stores its ID in the database, and updates the file object.
+
+        Args:
+            fpdbfile: The file object to add and update with a file ID.
+        """
         file = os.path.splitext(os.path.basename(fpdbfile.path))[0]
         try:  # TODO: this is a dirty hack. GBI needs it, GAI fails with it.
             file = str(file, "utf8", "replace")
@@ -214,6 +387,17 @@ class Importer:
 
     # Add an individual file to filelist
     def addImportFile(self, filename, site="auto") -> bool:
+        """Add a single file to the import list and associate it with a site.
+
+        Processes the file, determines its site, adds it to the file list, and updates site IDs as needed.
+
+        Args:
+            filename: The path to the file to import.
+            site: The site identifier or "auto" to detect automatically.
+
+        Returns:
+            bool: True if the file was successfully added, False otherwise.
+        """
         # DEBUG->print("addimportfile: filename is a", filename.__class__, filename)
         # filename not guaranteed to be unicode
         if self.filelist.get(filename) is not None or not os.path.exists(filename):
@@ -244,7 +428,17 @@ class Importer:
 
     # Called from GuiBulkImport to add a file or directory. Bulk import never monitors
     def addBulkImportImportFileOrDir(self, inputPath, site="auto"):
-        """Add a file or directory for bulk import."""
+        """Add a file or all files in a directory to the bulk import list.
+
+        Handles both individual files and directories, recursively adding all files in a directory to the import list.
+
+        Args:
+            inputPath: The path to a file or directory to import.
+            site: The site identifier or "auto" to detect automatically.
+
+        Returns:
+            bool: True if files were successfully added, False otherwise.
+        """
         # for windows platform, force os.walk variable to be unicode
         # see fpdb-main post 9th July 2011
         if self.config.posix:
@@ -267,6 +461,16 @@ class Importer:
     def addImportDirectory(
         self, dir, monitor=False, site=("default", "hh"), filter="passthrough",
     ) -> None:
+        """Add all files from a directory to the import list, optionally enabling monitoring.
+
+        Recursively scans the specified directory, adding files modified in the last 12 hours to the import list. Optionally enables monitoring for the directory.
+
+        Args:
+            dir: The directory path to import files from.
+            monitor: Whether to enable monitoring for new files in the directory.
+            site: The site identifier tuple.
+            filter: The filter name to use for imported files.
+        """
         # gets called by GuiAutoImport.
         # This should really be using os.walk
         # http://docs.python.org/library/os.html
@@ -295,7 +499,13 @@ class Importer:
             )
 
     def runImport(self):
-        """ "Run full import on self.filelist. This is called from GuiBulkImport.py."""
+        """Run the import process for all files in the file list.
+
+        Initializes import settings, processes all files, performs post-import cleanup, and returns import statistics and duration.
+
+        Returns:
+            tuple: A tuple containing the number of stored, duplicate, partial, skipped, and error hands, and the total import duration in seconds.
+        """
         # Initial setup
         start = datetime.datetime.now()
         starttime = time()
@@ -334,12 +544,25 @@ class Importer:
     # end def runImport
 
     def runPostImport(self) -> None:
+        """Perform post-import cleanup operations on the database.
+
+        Cleans up tournament types, weeks, and months, and resets the database clean state after import.
+        """
         self.database.cleanUpTourneyTypes()
         self.database.cleanUpWeeksMonths()
         self.database.resetClean()
 
     def importFiles(self, q):
-        """Read filenames in self.filelist and pass to despatcher."""
+        """Import all files in the file list and aggregate import statistics.
+
+        Processes each file in the file list, updates progress, logs results, and handles file movement on success or failure.
+
+        Args:
+            q: Unused parameter, reserved for future use.
+
+        Returns:
+            tuple: A tuple containing the total number of stored, duplicate, partial, skipped, and error hands.
+        """
         totstored = 0
         totdups = 0
         totpartial = 0
@@ -416,6 +639,16 @@ class Importer:
     # end def importFiles
 
     def _import_despatch(self, fpdbfile):
+        """Dispatch the import process for a given file based on its type.
+
+        Determines the file type and calls the appropriate import method, returning import statistics and detected site name.
+
+        Args:
+            fpdbfile: The file object to import.
+
+        Returns:
+            tuple: A tuple containing the number of stored, duplicate, partial, skipped, and error hands, the import time, and the detected site name.
+        """
         stored, duplicates, partial, skipped, errors, ttime = 0, 0, 0, 0, 0, 0
         detected_sitename = None
         if fpdbfile.ftype in ("hh", "both"):
@@ -434,11 +667,17 @@ class Importer:
         return (stored, duplicates, partial, skipped, errors, ttime, detected_sitename)
 
     def calculate_auto2(self, db, scale, increment):
-        """A second heuristic to determine a reasonable value of drop/don't drop
-        This one adds up size of files to import to guess number of hands in them
-        Example values of scale and increment params might be 10 and 500 meaning
-        roughly: drop if importing more than 10% (100/scale) of hands in db or if
-        less than 500 hands in db.
+        """Determine whether to drop indexes based on database and import file sizes.
+
+        Calculates if indexes should be dropped by comparing the number of hands in the database and the total size of import files, using provided scale and increment values.
+
+        Args:
+            db: The database connection or object.
+            scale: The scaling factor for the calculation.
+            increment: The increment value for the calculation.
+
+        Returns:
+            str: "drop" if indexes should be dropped, otherwise "don't drop".
         """
         size_per_hand = 1300.0  # wag based on a PS 6-up FLHE file. Actual value not hugely important
         # as values of scale and increment compensate for it anyway.
@@ -475,7 +714,10 @@ class Importer:
 
     # Run import on updated files, then store latest update time. Called from GuiAutoImport.py
     def runUpdated(self) -> None:
-        """Check for new files in monitored directories."""
+        """Import updated files and refresh their tracked state.
+
+        Scans the tracked directories and files, imports any files that have changed, updates their state, and performs post-import cleanup.
+        """
         for site, type in self.dirlist:
             self.addImportDirectory(
                 self.dirlist[(site, type)][0],
@@ -598,14 +840,25 @@ class Importer:
         self.runPostImport()
 
     def _import_hh_file(self, fpdbfile):
-        """Function for actual import of a hh file
-        This is now an internal function that should not be called directly.
+        """Import a hand history file and process its contents.
+
+        Loads the appropriate hand history converter, processes the file, updates the database, and handles HUD and summary processing as needed.
+
+        Args:
+            fpdbfile: The file object representing the hand history file to import.
+
+        Returns:
+            tuple: A tuple containing the number of stored, duplicate, partial, skipped, and error hands, the import time, and the detected site name.
         """
         (stored, duplicates, partial, skipped, errors, ttime) = (0, 0, 0, 0, 0, time())
         detected_sitename = None  # Will store the sitename detected by the parser
 
         # Load filter, process file, pass returned filename to import_fpdb_file
         log.info(f"Converting {fpdbfile.path}")
+        
+        # Start HandDataReporter file tracking if enabled
+        if self.hand_data_reporter:
+            self.hand_data_reporter.start_file(fpdbfile.path)
 
         filter_name = fpdbfile.site.filter_name
         mod = __import__(fpdbfile.site.hhc_fname)
@@ -631,6 +884,10 @@ class Importer:
             # Add parsing issues to the main importer's list
             for issue in hhc.parsing_issues:
                 self.import_issues.append(f"In {fpdbfile.path}: {issue}")
+                
+                # Report parsing issues if HandDataReporter is enabled
+                if self.hand_data_reporter:
+                    self.hand_data_reporter.report_hand_failure(fpdbfile.path, Exception(issue))
 
             # Capture the detected sitename from the parser (for iPoker skin detection)
             detected_sitename = getattr(hhc, "sitename", None)
@@ -691,20 +948,42 @@ class Importer:
                         ihands.append(hand)
                         to_hud.append(hand.dbid_hands)
                         log.info(f"Hand {hand.dbid_hands} added to HUD queue")
-                    except FpdbHandDuplicate:
+                        
+                        # Report successful hand processing
+                        if self.hand_data_reporter:
+                            try:
+                                self.hand_data_reporter.report_hand_success(fpdbfile.path, hand)
+                            except Exception as e:
+                                print(f"🚨 ERREUR HandDataReporter: {e}")
+                            
+                    except FpdbHandDuplicate as e:
                         duplicates += 1
                         log.info("Duplicate hand detected - not sending to HUD")
                         if doinsert and ihands:
                             backtrack = True
+                            
+                        # Report duplicate hand
+                        if self.hand_data_reporter:
+                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, e, hand.handText[:200] if hasattr(hand, 'handText') else "")
+                            
                     except FpdbHandPartial as e:
                         partial += 1
                         self.import_issues.append(f"[PARTIAL] In {fpdbfile.path}: Hand starting with '{hand.handText[:30]}...' - {e}")
+                        
+                        # Report partial hand
+                        if self.hand_data_reporter:
+                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, e, hand.handText[:200] if hasattr(hand, 'handText') else "", hand)
+                            
                     except Exception as e:
                         errors += 1
                         self.import_issues.append(f"[ERROR] In {fpdbfile.path}: Hand starting with '{hand.handText[:30]}...' - {e}")
                         log.exception(
                             f"Importer._import_hh_file: '{fpdbfile.path}' Fatal error: '{e}'",
                         )
+                        
+                        # Report error hand
+                        if self.hand_data_reporter:
+                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, e, hand.handText[:200] if hasattr(hand, 'handText') else "")
                         log.exception(f"'{hand.handText[0:200]}'")
                         if doinsert and ihands:
                             backtrack = True
@@ -791,9 +1070,21 @@ class Importer:
             log.warning("No phands available for summary checking")
 
         ttime = time() - ttime
+        
+        # Finalize HandDataReporter file tracking if enabled
+        if self.hand_data_reporter:
+            self.hand_data_reporter.finish_file(fpdbfile.path)
+        
         return (stored, duplicates, partial, skipped, errors, ttime, detected_sitename)
 
     def autoSummaryGrab(self, force=False) -> None:
+        """Automatically process summary files marked as 'both' if they are old enough or if forced.
+
+        Iterates through the file list, processing tournament summary files that are ready, and updates their type after processing.
+
+        Args:
+            force: If True, process all 'both' files regardless of age.
+        """
         log.debug(f"autoSummaryGrab called with force={force}")
         log.debug(f"Total files in filelist: {len(self.filelist)}")
 
@@ -818,6 +1109,16 @@ class Importer:
         log.debug(f"autoSummaryGrab completed. Files marked as 'both': {both_files_count}")
 
     def _import_summary_file(self, fpdbfile):
+        """Import and process a tournament summary file.
+
+        Loads the appropriate summary converter, processes the file, updates the database, and handles errors and partial imports.
+
+        Args:
+            fpdbfile: The file object representing the summary file to import.
+
+        Returns:
+            tuple: A tuple containing the number of stored, duplicate, partial, skipped, and error summaries, and the import time.
+        """
         log.debug(f"_import_summary_file called for: {fpdbfile.path}")
         log.debug(f"Site: {fpdbfile.site.name}, Summary module: {fpdbfile.site.summary}")
 
@@ -880,10 +1181,25 @@ class Importer:
         return (stored - errors - partial, duplicates, partial, skipped, errors, ttime)
 
     def progressNotify(self) -> None:
-        """A callback to the interface while events are pending."""
+        """Notify the application to process pending GUI events.
+
+        Ensures the GUI remains responsive during long-running import operations.
+        """
         QCoreApplication.processEvents()
 
     def readFile(self, obj, filename, site):
+        """Read and split a tournament summary file into individual summaries.
+
+        Handles both Excel and text summary files, splitting them into separate summaries and removing short headers or footers as needed.
+
+        Args:
+            obj: The summary converter object.
+            filename: The path to the summary file.
+            site: The site name associated with the summary file.
+
+        Returns:
+            list: A list of summary texts extracted from the file, or None if the file could not be read.
+        """
         if filename.endswith(".xls") or (filename.endswith(".xlsx") and xlrd):
             obj.hhtype = "xls"
             tourNoField = "Tourney" if site == "PokerStars" else "tournament key"
@@ -918,8 +1234,50 @@ class Importer:
                 )
         return summaryTexts
 
-    def cleanup(self):
-        """Explicitly clean up resources to prevent database timeouts."""
+    def get_hand_data_report(self, file_path: str = None) -> str:
+        """Get a formatted report from HandDataReporter.
+        
+        Args:
+            file_path: Path to specific file to report on. If None, returns session summary.
+            
+        Returns:
+            Formatted report string
+        """
+        if not self.hand_data_reporter:
+            return "HandDataReporter not enabled. Use setHandDataReporter() to enable detailed reporting."
+            
+        if file_path:
+            return self.hand_data_reporter.generate_file_report(file_path)
+        else:
+            return self.hand_data_reporter.generate_session_summary()
+            
+    def export_hand_data_json(self, output_path: str) -> None:
+        """Export HandDataReporter data to JSON file.
+        
+        Args:
+            output_path: Path where to save the JSON report
+        """
+        if not self.hand_data_reporter:
+            log.warning("HandDataReporter not enabled. Cannot export JSON report.")
+            return
+            
+        self.hand_data_reporter.export_json(output_path)
+
+    def cleanup(self) -> None:
+        """Clean up database connections and ZMQ resources used by the importer.
+
+        Closes any open database connections and ZMQ sender, logging the cleanup process or any errors encountered.
+        """
+        # Close ZMQ sender first
+        if hasattr(self, "zmq_sender") and self.zmq_sender is not None:
+            try:
+                self.zmq_sender.close()
+                self.zmq_sender = None
+                log.debug("ZMQ sender closed during cleanup.")
+            except Exception as e:
+                log.warning(f"Error closing ZMQ sender during cleanup: {e}")
+        
+        # Close database connections
         if hasattr(self, "database") and self.database is not None:
             try:
                 self.database.cleanup_connections()
@@ -928,6 +1286,10 @@ class Importer:
                 log.warning(f"Error during importer cleanup: {e}")
 
     def __del__(self) -> None:
+        """Destructor to clean up resources used by the importer.
+
+        Closes the ZMQ sender and database connections to prevent resource leaks and timeout issues.
+        """
         if hasattr(self, "zmq_sender") and self.zmq_sender is not None:
             self.zmq_sender.close()
         # Clean up database connections to prevent timeout issues
@@ -947,6 +1309,14 @@ class ImportProgressDialog(QDialog):
     """
 
     def __init__(self, total, parent) -> None:
+        """Initialize the ImportProgressDialog to display import progress.
+
+        Sets up the progress bar and labels for both GUI and command line modes, tracking the total number of import iterations.
+
+        Args:
+            total: The total number of expected iterations (files to import).
+            parent: The parent widget or indicator for command line mode.
+        """
         self.parent = parent
         self.fraction = 0
         self.total = total
@@ -973,6 +1343,14 @@ class ImportProgressDialog(QDialog):
         self.layout().addWidget(self.progresstext)
 
     def progress_update(self, filename, handcount) -> None:
+        """Update the progress display for the import process.
+
+        Increments the progress bar or command line indicator, updates the hand count, and displays the current file being imported.
+
+        Args:
+            filename: The name of the file currently being imported.
+            handcount: The current number of hands in the database.
+        """
         self.fraction += 1
 
         if self.parent is None:
@@ -1011,7 +1389,11 @@ class ImportProgressDialog(QDialog):
             now_formatted + " - " + ("Importing") + " " + filename + "\n",
         )
 
-    def accept(self):
+    def accept(self) -> None:
+        """Finalize and close the progress dialog.
+
+        Handles both command line and GUI modes, ensuring proper cleanup and display behavior.
+        """
         if self.parent is None:
             sys.stdout.write("\n") # Newline after progress bar finishes
             return
@@ -1019,12 +1401,20 @@ class ImportProgressDialog(QDialog):
             return
         super().accept()
 
-    def resize(self, *args):
+    def resize(self, *args) -> None:
+        """Resize the progress dialog window.
+
+        Adjusts the dialog size in GUI mode; does nothing in command line mode.
+        """
         if self.parent is None or self.parent == "CLI_NO_PROGRESS":
             return
         super().resize(*args)
 
-    def show(self):
+    def show(self) -> None:
+        """Display the progress dialog window.
+
+        Shows the dialog in GUI mode; does nothing in command line mode.
+        """
         if self.parent is None or self.parent == "CLI_NO_PROGRESS":
             return
         super().show()

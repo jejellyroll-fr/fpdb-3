@@ -170,15 +170,15 @@ class Filters(QWidget):
 
         self.callback = {}
 
-        # Le style est géré par qt_material appliqué au niveau application
-        # Nous ajoutons seulement des ajustements spécifiques si nécessaire
+        # Style is managed by qt_material applied at application level
+        # We only add specific adjustments if necessary
         self.setStyleSheet(self.get_filter_specific_styles())
         self.make_filter()
 
     def get_filter_specific_styles(self) -> str:
-        """Styles spécifiques pour les filtres qui complètent le thème qt_material."""
+        """Specific styles for filters that complement the qt_material theme."""
         return """
-            /* Ajustements spécifiques pour les filtres */
+            /* Specific adjustments for filters */
             QGroupBox {
                 font-weight: bold;
                 font-size: 13px;
@@ -192,7 +192,7 @@ class Filters(QWidget):
                 padding: 0 10px 0 10px;
             }
 
-            /* Espacement amélioré pour les contrôles */
+            /* Improved spacing for controls */
             QCheckBox {
                 spacing: 8px;
                 padding: 3px;
@@ -203,14 +203,14 @@ class Filters(QWidget):
                 padding: 3px;
             }
 
-            /* Boutons avec padding amélioré */
+            /* Buttons with improved padding */
             QPushButton {
                 padding: 8px 16px;
                 font-weight: 500;
                 min-height: 18px;
             }
 
-            /* Contrôles d'entrée avec padding cohérent */
+            /* Input controls with consistent padding */
             QComboBox, QDateEdit, QSpinBox, QLineEdit {
                 padding: 6px 12px;
                 min-width: 100px;

@@ -32,15 +32,15 @@ from pytz import timezone
 
 import Hand
 from Exceptions import FpdbHandPartial, FpdbHandSkipped, FpdbParseError
-from loggingFpdb import get_logger
 from ImprovedErrorHandler import get_improved_error_handler
+from loggingFpdb import get_logger
 
 # import L10n
 # _ = L10n.get_translation()
 
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("handHistoryConverter")
+log = get_logger("hand_history_converter")
 
 
 class HandHistoryConverter(ABC):
@@ -99,7 +99,7 @@ in_path   (default '-' = sys.stdin)
         self.parsing_issues = []
         self.isCarraige = False
         self.autoPop = False
-        
+
         # Initialize improved error handler
         self.error_handler = get_improved_error_handler()
 
@@ -123,8 +123,8 @@ in_path   (default '-' = sys.stdin)
     @property
     def siteId(self) -> int:
         """Backward compatibility property for siteId access."""
-        return getattr(self, 'site_id', None)
-    
+        return getattr(self, "site_id", None)
+
     def __str__(self) -> str:
         return (
             """
@@ -162,7 +162,7 @@ HandHistoryConverter: '{sitename}'
                     self.numPartial += 1
                     lastParsed = "partial"
                     error_info = self.error_handler.record_error(
-                        self.in_path, "partial", str(e), handText
+                        self.in_path, "partial", str(e), handText,
                     )
                     self.parsing_issues.append(f"[PARTIAL] Hand starting with '{handText[:30]}...': {e}")
                     log.warning(f"partial {e}")
@@ -173,26 +173,26 @@ HandHistoryConverter: '{sitename}'
                     self.numErrors += 1
                     lastParsed = "error"
                     error_info = self.error_handler.record_error(
-                        self.in_path, "error", str(e), handText
+                        self.in_path, "error", str(e), handText,
                     )
                     self.parsing_issues.append(f"[ERROR] Hand starting with '{handText[:30]}...': {e}")
                     log.exception(f"FpdbParseError for file '{self.in_path}'")
-            
+
             # Improved error handling - only reset file position when truly necessary
             if lastParsed in ("partial", "error") and self.autoPop:
                 # Use improved error handler to decide whether to reset file position
                 should_reset = False
                 if lastParsed == "partial":
                     error_info = self.error_handler.record_error(
-                        self.in_path, "partial", "Partial hand detected", handsList[-1]
+                        self.in_path, "partial", "Partial hand detected", handsList[-1],
                     )
                     should_reset = self.error_handler.should_reset_file_position(self.in_path, error_info)
                 elif lastParsed == "error":
                     error_info = self.error_handler.record_error(
-                        self.in_path, "error", "Parse error detected", handsList[-1]
+                        self.in_path, "error", "Parse error detected", handsList[-1],
                     )
                     should_reset = self.error_handler.should_reset_file_position(self.in_path, error_info)
-                
+
                 if should_reset:
                     self.index -= len(handsList[-1])
                     if self.isCarraige:
@@ -253,7 +253,7 @@ HandHistoryConverter: '{sitename}'
         if self.obs is None or self.obs == "":
             log.info(f"Read no hands from file: '{self.in_path}'")
             return []
-        split_hands_re = getattr(self, 're_split_hands', getattr(self, 're_SplitHands', None))
+        split_hands_re = getattr(self, "re_split_hands", getattr(self, "re_SplitHands", None))
         handlist = re.split(split_hands_re, self.obs)
         # Some HH formats leave dangling text after the split
         # ie. </game> (split) </session>EOL

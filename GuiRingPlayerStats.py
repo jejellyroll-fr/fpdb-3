@@ -45,7 +45,7 @@ from loggingFpdb import get_logger
 # _ = L10n.get_translation()
 
 
-log = get_logger("ringplayerstats")
+log = get_logger("gui_ring_player_stats")
 # import Charset
 
 colalias, colheading, colshowsumm, colshowposn, colformat, coltype, colxalign = (

@@ -29,7 +29,7 @@ from PyQt5.QtWidgets import (
 import DetectInstalledSites
 from loggingFpdb import get_logger
 
-log = get_logger("modernsitepreferences")
+log = get_logger("modern_site_preferences")
 
 
 class ModernSiteCard(QFrame):
@@ -169,7 +169,7 @@ class ModernSiteCard(QFrame):
 
         self.ts_browse_btn = QPushButton("Browse")
         # Style that adapts automatically to the theme
-        self.ts_browse_btn.setStyleSheet("")  # Laisser qt_material gérer le style
+        self.ts_browse_btn.setStyleSheet("")  # Let qt_material manage the style
         self.ts_browse_btn.clicked.connect(partial(self.browse_clicked, self.ts_path_input))
         ts_layout.addWidget(self.ts_browse_btn)
 
@@ -183,7 +183,7 @@ class ModernSiteCard(QFrame):
             self.detect_btn = QPushButton("🔍 Auto-Detect Paths")
             # Use the primary style from qt_material
             self.detect_btn.setProperty("class", "primary")
-            self.detect_btn.setStyleSheet("")  # Laisser qt_material gérer le style
+            self.detect_btn.setStyleSheet("")  # Let qt_material manage the style
             self.detect_btn.clicked.connect(self.detect_clicked)
             detect_layout.addWidget(self.detect_btn)
 
