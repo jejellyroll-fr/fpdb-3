@@ -63,6 +63,10 @@ class ZMQSender:
         """
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUSH)
+        # Set high water mark to prevent memory issues
+        self.socket.setsockopt(zmq.SNDHWM, 1000)
+        # Set send timeout to prevent blocking forever
+        self.socket.setsockopt(zmq.SNDTIMEO, 100)  # 100ms timeout
         self.socket.connect(f"tcp://127.0.0.1:{port}")
         log.info(f"ZMQ sender connected to port {port}")
 
@@ -73,8 +77,10 @@ class ZMQSender:
             hand_id: The hand ID to send.
         """
         try:
-            self.socket.send_string(str(hand_id))
+            self.socket.send_string(str(hand_id), zmq.NOBLOCK)
             log.debug(f"Sent hand ID {hand_id} via ZMQ")
+        except zmq.Again:
+            log.warning(f"ZMQ queue full, dropping hand ID {hand_id}")
         except zmq.ZMQError as e:
             log.exception(f"Failed to send hand ID {hand_id}: {e}")
 
