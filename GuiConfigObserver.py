@@ -9,7 +9,7 @@ from typing import Any
 from ConfigurationManager import ConfigChange, ConfigObserver
 from loggingFpdb import get_logger
 
-log = get_logger("guiconfig")
+log = get_logger("gui_config_observer")
 
 
 class GuiConfigObserver(ConfigObserver):

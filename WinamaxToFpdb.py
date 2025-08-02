@@ -28,7 +28,7 @@ from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryCon
 from loggingFpdb import get_logger
 
 # Winamax HH Format
-log = get_logger("parser")
+log = get_logger("winamax_parser")
 
 
 class Winamax(HandHistoryConverter):
@@ -670,7 +670,11 @@ class Winamax(HandHistoryConverter):
             f"Winamax.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'",
         )
         sysPlatform = platform.system()  # Linux, Windows, Darwin
-        regex = f"Winamax {table_name}" if sysPlatform[:5] == "Linux" else f"Winamax {table_name} /"
+        # Use word boundaries to prevent partial matches (e.g., "Casablanca" matching "Casablanca 02")
+        if sysPlatform[:5] == "Linux":
+            regex = rf"^Winamax {re.escape(table_name)}(\s|$)"
+        else:
+            regex = rf"^Winamax {re.escape(table_name)} /"
         log.debug(f"regex get table cash title: {regex}")
         if tournament:
             regex = rf"Winamax\s+([^\(]+)\({tournament}\)\(#0*{table_number}\)"
@@ -678,7 +682,7 @@ class Winamax(HandHistoryConverter):
             log.debug(f"regex get mtt sng expresso cash title: {regex}")
         log.info(f"Winamax.getTableTitleRe: returns: '{regex}'")
         return regex
-    
+
     def readOther(self, hand: "Hand") -> None:
         """Read other information from hand that doesn't fit standard categories.
 

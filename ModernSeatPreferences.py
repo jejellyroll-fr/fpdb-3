@@ -32,7 +32,7 @@ from PyQt5.QtWidgets import (
 
 from loggingFpdb import get_logger
 
-log = get_logger("modernseatpreferences")
+log = get_logger("modern_seat_preferences")
 
 
 class SeatSelector(QWidget):
@@ -262,7 +262,7 @@ class ModernSeatCard(QFrame):
             players_label = QLabel(f"{max_seats}P")
             players_label.setMinimumWidth(60)
             players_label.setAlignment(Qt.AlignCenter)
-            players_label.setMinimumHeight(80)  # Même hauteur que la table
+            players_label.setMinimumHeight(80)  # Same height as table
             players_label.setMaximumHeight(80)
             seats_layout.addWidget(players_label, row, col, Qt.AlignVCenter | Qt.AlignHCenter)
 
@@ -621,7 +621,7 @@ class ModernSeatPreferencesDialog(QDialog):
                 # Update configuration for this site only
                 self.config.edit_fav_seat(
                     site_name,
-                    enabled,  # Ajouter le paramètre enabled
+                    enabled,  # Add enabled parameter
                     seat2_dict=str(seat_values.get(2, 0)),
                     seat3_dict=str(seat_values.get(3, 0)),
                     seat4_dict=str(seat_values.get(4, 0)),
@@ -685,7 +685,7 @@ class ModernSeatPreferencesDialog(QDialog):
                 # Update configuration
                 self.config.edit_fav_seat(
                     site_name,
-                    enabled,  # Ajouter le paramètre enabled
+                    enabled,  # Add enabled parameter
                     seat2_dict=str(seat_values.get(2, 0)),
                     seat3_dict=str(seat_values.get(3, 0)),
                     seat4_dict=str(seat_values.get(4, 0)),

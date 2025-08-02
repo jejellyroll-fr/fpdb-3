@@ -48,7 +48,7 @@ from loggingFpdb import get_logger
 # import Charset
 
 
-log = get_logger("sessionViewer")
+log = get_logger("gui_session_viewer")
 DEBUG = False
 
 try:

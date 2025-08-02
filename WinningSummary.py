@@ -28,7 +28,7 @@ from loggingFpdb import get_logger
 from TourneySummary import TourneySummary
 
 # Winning HH Format
-log = get_logger("parser")
+log = get_logger("winning_summary_parser")
 
 
 class WinningSummary(TourneySummary):

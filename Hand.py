@@ -1157,12 +1157,12 @@ class Hand:
         amount = Decimal(amount)
         self.checkPlayerExists(player, "addUncalled")
         self.stacks[player] += amount
-        
+
         # Check if this is part of a walk scenario
-        is_walk = (hasattr(self, 'walk_adjustments') and 
-                  player in self.walk_adjustments and 
+        is_walk = (hasattr(self, "walk_adjustments") and
+                  player in self.walk_adjustments and
                   self.walk_adjustments[player] == amount)
-        
+
         if is_walk:
             log.info(f"Walk detected: not removing uncalled bet from pot for {player}")
             # In a walk, the pot calculation is already correct in the collection
@@ -1227,11 +1227,11 @@ class Hand:
             log.debug(f"Total pot already set by parser: {self.totalpot}")
 
             # Check if rake was explicitly parsed from hand text
-            if hasattr(self, 'rake_parsed') and self.rake_parsed and self.rake is not None:
+            if hasattr(self, "rake_parsed") and self.rake_parsed and self.rake is not None:
                 log.debug(f"Rake already parsed from hand text: {self.rake}")
                 # When both pot and rake are parsed, skip validation
                 return self.totalpot
-            
+
             # Still need to calculate rake if not set
             if self.rake is None:
                 if self.gametype["type"] == "tour":
@@ -1392,21 +1392,21 @@ class Hand:
                 return self.totalpot
             # totalcollected > totalpot is an error scenario
             # Exception for special cases and hand viewing
-            if (self.sitename == "Bovada" and hasattr(self, 'isZonePoker') and self.isZonePoker) or \
-               (hasattr(self, 'rake') and self.rake is not None):
+            if (self.sitename == "Bovada" and hasattr(self, "isZonePoker") and self.isZonePoker) or \
+               (hasattr(self, "rake") and self.rake is not None):
                 # For Zone Poker hands or hands with pre-set rake, use collected amount as the pot total
                 log.warning(f"Hand {self.handid}: collected amount exceeds calculated pot, using collected amount as pot total")
                 self.totalpot = self.totalcollected
-                if not hasattr(self, 'rake') or self.rake is None:
+                if not hasattr(self, "rake") or self.rake is None:
                     self.rake = Decimal("0.00")  # Rake already deducted or calculated elsewhere
                 return self.totalpot
-            
+
             # For hand viewing/display, be more tolerant
             log.warning(
                 f"Collected amount ({self.totalcollected}) exceeds total pot ({self.totalpot}) for hand {self.handid}, adjusting for display",
             )
             # Use collected amount as pot total for display purposes
-            self.totalpot = self.totalcollected  
+            self.totalpot = self.totalcollected
             self.rake = Decimal("0.00")  # Assume rake already deducted
             return self.totalpot
 
@@ -1872,7 +1872,7 @@ class HoldemOmahaHand(Hand):
         )
         log.debug(self.actions["PREFLOP"])
         for player in [x for x in self.players if x[1] in players_who_act_preflop]:
-            # N'affiche les stacks que des joueurs ayant agi preflop
+            # Only displays the stacks of players who acted preflop.
             log.info(
                 f"Seat {player[0]}: {player[1]} (${float(player[2]):.2f} in chips)",
             )

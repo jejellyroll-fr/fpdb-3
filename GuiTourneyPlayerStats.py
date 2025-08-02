@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (
 import Filters
 from loggingFpdb import get_logger
 
-log = get_logger("tourplayerstats")
+log = get_logger("gui_tourney_player_stats")
 
 colalias, colshow, colheading, colxalign, colformat, coltype = 0, 1, 2, 3, 4, 5
 

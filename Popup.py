@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Popup.py.
 
 Popup windows for the HUD.
@@ -47,11 +46,11 @@ from PyQt5.QtWidgets import QGridLayout, QLabel, QVBoxLayout, QWidget
 import Stats
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("hud")
+log = get_logger("popup")
 
 # Import modern popup classes
 try:
-    from ModernPopup import ModernSubmenu, ModernSubmenuLight, ModernSubmenuClassic
+    from ModernPopup import ModernSubmenu, ModernSubmenuClassic, ModernSubmenuLight
 except ImportError:
     log.warning("Modern popup classes not available")
     ModernSubmenu = None
@@ -336,7 +335,7 @@ def popup_factory(
     # getattr looksup the class reference in this module
 
     class_to_return = getattr(__import__(__name__), pop.pu_class, None)
-    
+
     # If class not found in Popup module, try ModernPopup module
     if class_to_return is None:
         try:
@@ -345,16 +344,16 @@ def popup_factory(
             class_to_return = getattr(ModernPopup, pop.pu_class, None)
             if class_to_return is None:
                 # Try from MODERN_POPUP_CLASSES dict
-                if hasattr(ModernPopup, 'MODERN_POPUP_CLASSES'):
+                if hasattr(ModernPopup, "MODERN_POPUP_CLASSES"):
                     class_to_return = ModernPopup.MODERN_POPUP_CLASSES.get(pop.pu_class)
         except (ImportError, AttributeError) as e:
             log.debug(f"Could not import ModernPopup classes: {e}")
-    
+
     # Fallback to default popup if class still not found
     if class_to_return is None:
         log.warning(f"Popup class '{pop.pu_class}' not found, falling back to default")
         class_to_return = default
-    
+
     return class_to_return(
         seat, stat_dict, win, pop, hand_instance, config, parent_popup,
     )

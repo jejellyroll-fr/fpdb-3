@@ -9,7 +9,7 @@ from typing import Any
 from ConfigurationManager import ChangeType, ConfigChange, ConfigObserver
 from loggingFpdb import get_logger
 
-log = get_logger("configobs")
+log = get_logger("config_observers")
 
 
 class HUDConfigObserver(ConfigObserver):
@@ -48,7 +48,7 @@ class HUDConfigObserver(ConfigObserver):
     def _update_hud_settings(self, change: ConfigChange) -> bool:  # noqa: ARG002
         """Update general HUD settings."""
         try:
-            # Notifier tous les HUD actifs
+            # Notify all active HUDs
             if hasattr(self.hud_main, "hud_instances"):
                 for hud in self.hud_main.hud_instances.values():
                     hud.reconfig()

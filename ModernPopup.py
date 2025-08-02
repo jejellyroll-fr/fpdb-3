@@ -24,7 +24,7 @@ from Popup import Popup
 from PopupIcons import IconProvider, get_icon_provider, get_stat_category
 from PopupThemes import PopupTheme, get_stat_color, get_theme
 
-log = get_logger("hud")
+log = get_logger("modern_popup")
 
 
 class ModernStatRow(QWidget):

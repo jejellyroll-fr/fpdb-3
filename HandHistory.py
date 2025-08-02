@@ -30,7 +30,7 @@ from loggingFpdb import get_logger
 #    Standard Library modules
 
 
-log = get_logger("handhistory")
+log = get_logger("hand_history")
 
 
 class HandHistory:

@@ -36,7 +36,7 @@ from PyQt5.QtWidgets import (
 
 from loggingFpdb import get_logger
 
-log = get_logger("modernhudpreferences")
+log = get_logger("modern_hud_preferences")
 
 
 # --- Color Preview Widget ---
@@ -507,7 +507,7 @@ class ModernHudPreferences(QDialog):
 
         self.profile_combo = QComboBox()
         self.profile_combo.setMinimumWidth(250)
-        # Laisser qt_material gérer le style
+        # Let qt_material manage the style
         self.profile_combo.currentIndexChanged.connect(self.on_profile_selected)
         profile_bar.addWidget(self.profile_combo)
 
@@ -765,7 +765,7 @@ class ModernHudPreferences(QDialog):
         # Preview area - reduced size
         self.popup_preview = QTextEdit()
         self.popup_preview.setReadOnly(True)
-        # Utiliser les couleurs du thème pour le preview
+        # Use theme colors for preview
         palette = self.palette()
         self.popup_preview.setStyleSheet(f"""
             background-color: {palette.base().color().name()};
@@ -1001,7 +1001,7 @@ class ModernHudPreferences(QDialog):
         popup_class = popup_data.get("class", "default")
         stats = popup_data.get("stats", [])
 
-        # Obtenir les couleurs du thème actuel
+        # Get current theme colors
         palette = self.palette()
         bg_color = palette.window().color().name()
         text_color = palette.windowText().color().name()
@@ -1121,7 +1121,7 @@ class ModernHudPreferences(QDialog):
 
         # Add description
         caption_color = palette.text().color()
-        caption_color.setAlpha(150)  # Rendre le texte un peu plus transparent
+        caption_color.setAlpha(150)  # Make the text a bit more transparent
         caption_color_str = caption_color.name(QColor.HexArgb)
 
         if popup_class == "Submenu":

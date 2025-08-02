@@ -21,7 +21,7 @@ from optparse import OptionParser
 
 from loggingFpdb import get_logger
 
-log = get_logger("parser")
+log = get_logger("options")
 
 
 def fpdb_options() -> tuple:

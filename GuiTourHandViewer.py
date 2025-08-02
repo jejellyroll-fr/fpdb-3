@@ -48,7 +48,7 @@ import Hand
 import SQL
 from loggingFpdb import get_logger
 
-log = get_logger("tourhandViewer")
+log = get_logger("gui_tour_hand_viewer")
 
 
 class TourHandViewer(QSplitter):
@@ -194,7 +194,7 @@ class TourHandViewer(QSplitter):
         q = self.filters.replace_placeholders_with_filter_values(q)
 
         # debug
-        # print("Requête SQL filtrée :", q)
+        # print("Filtered SQL query:", q)
 
         c = self.db.get_cursor()
         c.execute(q)

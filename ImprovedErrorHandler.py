@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-"""
-Improved error handler for import operations to prevent unnecessary HUD restarts.
+"""Improved error handler for import operations to prevent unnecessary HUD restarts.
 
 This module provides better error classification and handling to distinguish
 between temporary parsing issues and permanent file corruption.
 """
 
 import time
-from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
@@ -36,13 +34,13 @@ class ParseError:
 
 class ImprovedErrorHandler:
     """Enhanced error handler for import operations."""
-    
+
     def __init__(self) -> None:
         """Initialize the error handler."""
-        self.error_history: Dict[str, List[ParseError]] = {}
+        self.error_history: dict[str, list[ParseError]] = {}
         self.max_retries = 3
         self.temporary_error_threshold = 5  # Max temporary errors before treating as permanent
-        
+
         # Patterns that indicate temporary vs permanent errors
         self.temporary_error_patterns = [
             "connection",
@@ -50,20 +48,19 @@ class ImprovedErrorHandler:
             "network",
             "temporary",
             "lock",
-            "busy"
+            "busy",
         ]
-        
+
         self.permanent_error_patterns = [
             "invalid format",
             "corrupted",
             "malformed",
             "syntax error",
-            "unexpected end"
+            "unexpected end",
         ]
-    
+
     def classify_error(self, error_message: str, hand_text: str) -> ErrorSeverity:
-        """
-        Classify error severity based on error message and context.
+        """Classify error severity based on error message and context.
         
         Args:
             error_message: The error message
@@ -73,31 +70,30 @@ class ImprovedErrorHandler:
             ErrorSeverity classification
         """
         error_lower = error_message.lower()
-        
+
         # Check for permanent error indicators
         for pattern in self.permanent_error_patterns:
             if pattern in error_lower:
                 return ErrorSeverity.PERMANENT
-        
+
         # Check for temporary error indicators
         for pattern in self.temporary_error_patterns:
             if pattern in error_lower:
                 return ErrorSeverity.TEMPORARY
-        
+
         # Analyze hand text characteristics
         if len(hand_text.strip()) < 50:
             return ErrorSeverity.RECOVERABLE  # Likely incomplete hand
-        
+
         # Check for common partial hand indicators
-        if not any(keyword in hand_text.lower() for keyword in ['hand #', 'seat ', 'dealt to']):
+        if not any(keyword in hand_text.lower() for keyword in ["hand #", "seat ", "dealt to"]):
             return ErrorSeverity.RECOVERABLE
-        
+
         # Default to recoverable for unknown errors
         return ErrorSeverity.RECOVERABLE
-    
+
     def should_reset_file_position(self, file_path: str, error: ParseError) -> bool:
-        """
-        Determine if file position should be reset based on error history.
+        """Determine if file position should be reset based on error history.
         
         Args:
             file_path: Path to the file being processed
@@ -109,28 +105,27 @@ class ImprovedErrorHandler:
         if error.severity == ErrorSeverity.PERMANENT:
             log.info(f"Permanent error detected for {file_path}, resetting file position")
             return True
-        
+
         if error.severity == ErrorSeverity.TEMPORARY:
             # Don't reset for temporary errors
             log.debug(f"Temporary error for {file_path}, maintaining file position")
             return False
-        
+
         # For recoverable errors, check history
         if file_path not in self.error_history:
             self.error_history[file_path] = []
-        
-        recent_errors = [e for e in self.error_history[file_path] 
+
+        recent_errors = [e for e in self.error_history[file_path]
                         if time.time() - e.timestamp < 300]  # Last 5 minutes
-        
+
         if len(recent_errors) >= self.temporary_error_threshold:
             log.warning(f"Too many recent errors for {file_path}, treating as permanent")
             return True
-        
+
         return False
-    
+
     def record_error(self, file_path: str, error_type: str, message: str, hand_text: str) -> ParseError:
-        """
-        Record a parse error and return error information.
+        """Record a parse error and return error information.
         
         Args:
             file_path: Path to the file being processed
@@ -142,33 +137,32 @@ class ImprovedErrorHandler:
             ParseError object with classification
         """
         severity = self.classify_error(message, hand_text)
-        
+
         error = ParseError(
             error_type=error_type,
             message=message,
             severity=severity,
             hand_text=hand_text[:200],  # Truncate for storage
-            timestamp=time.time()
+            timestamp=time.time(),
         )
-        
+
         if file_path not in self.error_history:
             self.error_history[file_path] = []
-        
+
         self.error_history[file_path].append(error)
-        
+
         # Cleanup old errors (older than 1 hour)
         cutoff_time = time.time() - 3600
         self.error_history[file_path] = [
-            e for e in self.error_history[file_path] 
+            e for e in self.error_history[file_path]
             if e.timestamp > cutoff_time
         ]
-        
+
         log.debug(f"Recorded {severity.value} error for {file_path}: {message}")
         return error
-    
+
     def should_retry_import(self, file_path: str, error: ParseError) -> bool:
-        """
-        Determine if import should be retried.
+        """Determine if import should be retried.
         
         Args:
             file_path: Path to the file being processed
@@ -179,16 +173,15 @@ class ImprovedErrorHandler:
         """
         if error.severity == ErrorSeverity.PERMANENT:
             return False
-        
+
         if error.retry_count >= self.max_retries:
             log.warning(f"Max retries reached for {file_path}")
             return False
-        
+
         return error.severity in [ErrorSeverity.TEMPORARY, ErrorSeverity.RECOVERABLE]
-    
-    def get_error_statistics(self, file_path: str) -> Dict[str, int]:
-        """
-        Get error statistics for a file.
+
+    def get_error_statistics(self, file_path: str) -> dict[str, int]:
+        """Get error statistics for a file.
         
         Args:
             file_path: Path to the file
@@ -198,16 +191,15 @@ class ImprovedErrorHandler:
         """
         if file_path not in self.error_history:
             return {"temporary": 0, "recoverable": 0, "permanent": 0}
-        
+
         stats = {"temporary": 0, "recoverable": 0, "permanent": 0}
         for error in self.error_history[file_path]:
             stats[error.severity.value] += 1
-        
+
         return stats
-    
+
     def cleanup_file_history(self, file_path: str) -> None:
-        """
-        Clean up error history for a file (e.g., when file processing is complete).
+        """Clean up error history for a file (e.g., when file processing is complete).
         
         Args:
             file_path: Path to the file

@@ -43,7 +43,7 @@ from typing import Any
 import Configuration
 from loggingFpdb import get_logger
 
-log = get_logger("config")
+log = get_logger("detect_installed_sites")
 
 
 # Platform-specific path helpers
@@ -508,8 +508,8 @@ class iPokerDetector(SiteDetector):  # noqa: N801
                         tspath = str(Path(item_path) / "History" / "Data" / "Tournaments")
 
                         if Path(hhpath).exists() or Path(hhpath).parent.exists():
-                            # Détecté même si le dossier Tables n'existe pas encore
-                            # mais que la structure History/Data existe
+                            # Detected even if Tables folder doesn't exist yet
+                            # but that the History/Data structure exists
                             return {
                                 "detected": True,
                                 "hhpath": hhpath,

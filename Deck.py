@@ -21,6 +21,9 @@ from PyQt5.QtCore import QRectF
 from PyQt5.QtGui import QPainter, QPixmap
 from PyQt5.QtSvg import QSvgRenderer
 
+from loggingFpdb import get_logger
+
+log = get_logger("deck")
 
 class Deck:
     """Card deck for mucked card display.

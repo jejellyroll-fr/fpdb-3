@@ -15,7 +15,7 @@ from typing import Any
 import Configuration
 from loggingFpdb import get_logger
 
-log = get_logger("configmgr")
+log = get_logger("configuration_manager")
 
 
 class ChangeType(Enum):
@@ -340,7 +340,7 @@ class ConfigurationManager:
                             ),
                         )
                     else:
-                        # Comparer les attributs du site
+                        # Compare site attributes
                         if hasattr(old_site, "enabled") and hasattr(new_site, "enabled"):
                             if old_site.enabled != new_site.enabled:
                                 changes.append(
@@ -382,7 +382,7 @@ class ConfigurationManager:
                                     ),
                                 )
 
-                        # Comparer les sièges favoris
+                        # Compare favorite seats
                         if hasattr(old_site, "fav_seat") and hasattr(new_site, "fav_seat"):
                             if old_site.fav_seat != new_site.fav_seat:
                                 changes.append(

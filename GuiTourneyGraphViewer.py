@@ -30,7 +30,7 @@ from loggingFpdb import get_logger
 # import Charset
 
 
-log = get_logger("tourgraphViewer")
+log = get_logger("gui_tourney_graph_viewer")
 
 try:
     calluse = "matplotlib" not in sys.modules

@@ -30,7 +30,7 @@ from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryCon
 from loggingFpdb import get_logger
 
 # KingsClub HH Format
-log = get_logger("parser")
+log = get_logger("kings_club_parser")
 
 
 class KingsClub(HandHistoryConverter):

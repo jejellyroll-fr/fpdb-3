@@ -34,7 +34,7 @@ except ImportError:
 
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("parser")
+log = get_logger("derived_stats")
 
 # Constants for street indices
 STREET0_IDX = 0

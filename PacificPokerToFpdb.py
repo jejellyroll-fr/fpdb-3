@@ -29,7 +29,7 @@ from HandHistoryConverter import FpdbParseError, HandHistoryConverter
 from loggingFpdb import get_logger
 
 # PacificPoker(888) HH Format
-log = get_logger("parser")
+log = get_logger("pacific_poker_parser")
 
 
 class PacificPoker(HandHistoryConverter):

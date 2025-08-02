@@ -43,14 +43,23 @@ import Stats
 from loggingFpdb import get_logger
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("hud")
+log = get_logger("aux_hud")
 
 
 class SimpleHUD(Aux_Base.AuxSeats):
     """A simple HUD class based on the Aux_Window interface."""
 
     def __init__(self, hud: Any, config: Any, aux_params: Any) -> None:
-        """Initialise the HUD."""
+        """Initializes the SimpleHUD instance for a poker table.
+
+        This constructor sets up the HUD's configuration, layout, and stat window classes for the table.
+        It prepares the stat, popup, and tip arrays based on the current game parameters.
+
+        Args:
+            hud: The HUD instance associated with the table.
+            config: The configuration object for the HUD.
+            aux_params: Additional parameters for HUD customization.
+        """
         #    Save everything you need to know about the hud as attrs.
         #    That way a subclass doesn't have to grab them.
         #    Also, the subclass can override any of these attributes
@@ -99,19 +108,23 @@ class SimpleHUD(Aux_Base.AuxSeats):
                 self.game_params.stats[stat].tip
             )
 
-    def _refresh_stats_layout(self) -> None:
-        """Refresh the stats layout when game_params change (for stat set switching)."""
+    def refresh_stats_layout(self) -> None:
+        """Refreshes the stats layout arrays based on the current game parameters.
+
+        This method updates the layout parameters and repopulates the stats, popups, and tips arrays
+        to reflect any changes in the stat set configuration.
+        """
         # Update layout parameters from new game_params
         self.nrows = self.game_params.rows
         self.ncols = self.game_params.cols
         self.xpad = self.game_params.xpad
         self.ypad = self.game_params.ypad
-        
+
         # Reinitialize the stats arrays
         self.stats = [[None] * self.ncols for _ in range(self.nrows)]
         self.popups = [[None] * self.ncols for _ in range(self.nrows)]
         self.tips = [[None] * self.ncols for _ in range(self.nrows)]
-        
+
         # Repopulate with new stat set configuration
         for stat in self.game_params.stats:
             self.stats[self.game_params.stats[stat].rowcol[0]][self.game_params.stats[stat].rowcol[1]] = (
@@ -125,23 +138,50 @@ class SimpleHUD(Aux_Base.AuxSeats):
             )
 
     def create_contents(self, container: Any, i: int) -> None:
-        """Create the contents of the container."""
+        """Create the contents of the specified container.
+
+        This method delegates the creation of contents to the container's create_contents method.
+
+        Args:
+            container: The container object whose contents are to be created.
+            i: The index or identifier for the contents to be created.
+        """
         # this is a call to whatever is in self.aw_class_window but it isn't obvious
         container.create_contents(i)
 
     def update_contents(self, container: Any, i: int) -> None:
-        """Update the contents of the container."""
+        """Update the contents of the specified container.
+
+        This method delegates the update of contents to the container's update_contents method.
+
+        Args:
+            container: The container object whose contents are to be updated.
+            i: The index or identifier for the contents to be updated.
+        """
         # this is a call to whatever is in self.aw_class_window but it isn't obvious
         container.update_contents(i)
 
     def create_common(self, _x: int = 0, _y: int = 0) -> Any:
-        """Create the common menu window."""
+        """Create the common table menu window for the HUD.
+
+        This method instantiates and returns the main table menu window for the HUD.
+
+        Args:
+            _x: The x-coordinate for positioning (unused).
+            _y: The y-coordinate for positioning (unused).
+
+        Returns:
+            Any: The created table menu window instance.
+        """
         # invokes the simple_table_mw class (or similar)
         self.table_mw = self.aw_class_table_mw(self.hud, aw=self)
         return self.table_mw
 
     def move_windows(self) -> None:
-        """Move the windows."""
+        """Move all HUD windows to their appropriate positions.
+
+        This method moves both the stat windows and the main table menu window to their updated locations.
+        """
         super().move_windows()
         #
         # tell our mw that an update is needed (normally on table move)
@@ -150,9 +190,12 @@ class SimpleHUD(Aux_Base.AuxSeats):
         self.table_mw.move_windows()
 
     def save_layout(self) -> None:
-        """Save new layout back to the aux element in the config file."""
+        """Save the current HUD layout configuration.
+
+        This method saves the positions of all HUD elements for the current table layout to the configuration.
+        """
         new_locs = {self.adj[int(i)]: ((pos[0]), (pos[1])) for i, pos in list(self.positions.items()) if i != "common"}
-        log.info(f"Saving layout for {self.hud.max}-max table: {new_locs}")
+        log.info("Saving layout for %s-max table: %s", self.hud.max, new_locs)
         self.config.save_layout_set(
             self.hud.layout_set,
             self.hud.max,
@@ -167,13 +210,27 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
     """Simple window class for stat windows."""
 
     def __init__(self, aw: Any | None = None, seat: Any | None = None) -> None:
-        """Initialise the stat window."""
+        """Initializes the SimpleStatWindow for a specific seat.
+
+        This constructor sets up the stat window, initializes the popup count, and sets the window title.
+
+        Args:
+            aw: The auxiliary HUD object providing context and configuration.
+            seat: The seat number associated with this stat window.
+        """
         super().__init__(aw, seat)
         self.popup_count = 0
         self.setWindowTitle("HUD - stats")
 
     def button_release_right(self, event: Any) -> None:  # show pop up
-        """Show the popup menu."""
+        """Show a popup window with detailed statistics when the right mouse button is released.
+
+        This method displays a popup with additional stat information for the widget under the cursor,
+        provided the widget contains stats and no other popup is currently active.
+
+        Args:
+            event: The mouse event triggering the popup.
+        """
         widget = self.childAt(event.pos())
 
         if widget.stat_dict and self.popup_count == 0 and widget.aw_popup:
@@ -191,7 +248,10 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             )
 
     def create_contents(self, _i: int) -> None:
-        """Create the contents of the stat window."""
+        """Create and lay out the stat widgets for the stat window.
+
+        This method initializes the grid layout and populates it with stat widgets for each row and column.
+        """
         self.setStyleSheet(
             f"QWidget{{background:{self.aw.bgcolor};color:{self.aw.fgcolor};}}QToolTip{{}}",
         )
@@ -214,7 +274,13 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
                 self.stat_box[r][c].widget.setFont(self.aw.font)
 
     def update_contents(self, i: int) -> None:
-        """Update the contents of the stat window."""
+        """Update the stat widgets for the specified seat.
+
+        This method refreshes all stat widgets in the window for the given seat, using the latest player data.
+
+        Args:
+            i: The seat identifier to update.
+        """
         if i == "common":
             return
         player_id = self.aw.get_id_from_seat(i)
@@ -229,7 +295,17 @@ class SimpleStat:
     """A simple class for displaying a single stat."""
 
     def __init__(self, stat: str, seat: int, popup: str, aw: Any) -> None:
-        """Initialise the stat."""
+        """Initializes a SimpleStat instance for displaying a single statistic.
+
+        This constructor sets up the label, associates it with the correct seat and popup,
+        and stores relevant HUD context.
+
+        Args:
+            stat: The name of the statistic to display.
+            seat: The seat number associated with the statistic.
+            popup: The popup configuration or identifier for the stat.
+            aw: The auxiliary HUD object providing context and configuration.
+        """
         self.stat = stat
         self.lab = aw.aw_class_label(
             "---",
@@ -244,7 +320,14 @@ class SimpleStat:
         self.aux_params = aw.aux_params
 
     def update(self, player_id: str, stat_dict: dict) -> None:
-        """Update the stat value."""
+        """Update the statistic display for a given player.
+
+        This method recalculates the statistic value and updates the label text for the specified player.
+
+        Args:
+            player_id: The unique identifier of the player.
+            stat_dict: A dictionary containing statistics for all players.
+        """
         self.stat_dict = stat_dict  # So the Simple_stat obj always has a fresh stat_dict
         self.lab.stat_dict = stat_dict
         self.number = Stats.do_stat(
@@ -257,7 +340,14 @@ class SimpleStat:
             self.lab.setText(str(self.number[1]))
 
     def set_color(self, fg: str | None = None, bg: str | None = None) -> None:
-        """Set the color of the stat."""
+        """Set the foreground and background color of the stat label.
+
+        This method updates the label's stylesheet to apply the specified font, foreground, and background colors.
+
+        Args:
+            fg: The foreground (text) color to apply.
+            bg: The background color to apply.
+        """
         ss = f"QLabel{{font-family: {self.aux_params['font']};font-size: {self.aux_params['font_size']}pt;"
         if fg:
             ss += f"color: {fg};"
@@ -279,7 +369,14 @@ class SimpleTableMW(Aux_Base.SeatWindow):
     #    BTW: It might be better to do this with a different AW.
 
     def __init__(self, hud: Any, aw: Any | None = None) -> None:
-        """Initialise the main window."""
+        """Initializes the SimpleTableMW, the main table HUD menu window.
+
+        This constructor sets up the menu label, icon, layout, and positions the menu window relative to the table.
+
+        Args:
+            hud: The HUD instance associated with the table.
+            aw: The auxiliary HUD object providing context and configuration.
+        """
         super().__init__(aw)
         self.hud = hud
         self.aw = aw
@@ -311,13 +408,22 @@ class SimpleTableMW(Aux_Base.SeatWindow):
         self.move(clamped_x, clamped_y)
 
     def button_press_right(self, _event: Any) -> None:
-        """Handle button clicks in the FPDB main menu event box."""
+        """Show the table popup menu when the right mouse button is pressed.
+
+        This method displays the table popup menu if it is not already open.
+
+        Args:
+            _event: The mouse event triggering the popup menu.
+        """
         if not self.menu_is_popped:
             self.menu_is_popped = True
             SimpleTablePopupMenu(self)
 
     def move_windows(self) -> None:
-        """Move the windows."""
+        """Move the table menu window to its correct position relative to the table.
+
+        This method repositions the menu window based on the table's current coordinates and configured offsets.
+        """
         # force menu to the offset position from table origin (do not use common setting)
         table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
         table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
@@ -331,7 +437,13 @@ class SimpleTablePopupMenu(QWidget):
     """A simple table popup menu."""
 
     def __init__(self, parentwin: Any) -> None:
-        """Initialise the popup menu."""
+        """Initializes the SimpleTablePopupMenu for HUD configuration.
+
+        This constructor sets up the popup menu window, positions it relative to the table, and initializes the UI.
+
+        Args:
+            parentwin: The parent window instance that owns this popup menu.
+        """
         super().__init__(
             None,
             Qt.Window | Qt.FramelessWindowHint,
@@ -343,13 +455,17 @@ class SimpleTablePopupMenu(QWidget):
         pos_y = table_y + self.parentwin.aw.yshift
         clamped_x, clamped_y = Aux_Base.clamp_to_screen(pos_x, pos_y, 400, 300)  # Larger window size
         self.move(clamped_x, clamped_y)
-        self.setWindowTitle(self.parentwin.menu_label + " - HUD configuration")
+        self.setWindowTitle(f"{self.parentwin.menu_label} - HUD configuration")
         self._setup_ui()
         self.show()
         self.raise_()
 
     def _setup_ui(self) -> None:
-        """Set up the UI for the popup menu."""
+        """Set up the user interface for the table popup menu.
+
+        This method initializes the combo box dictionaries, creates the main controls and stats configuration boxes,
+        and arranges them in the popup menu layout.
+        """
         # Dictionaries for combo boxes
         stat_range_combo_dict = self._create_stat_range_dict()
         seats_style_combo_dict = self._create_seats_style_dict()
@@ -379,14 +495,23 @@ class SimpleTablePopupMenu(QWidget):
         grid.addWidget(QLabel(f"Stat set: {self.parentwin.aw.game_params.name}"), 1, 0)
 
     def _create_main_controls(self, cb_max_dict: dict) -> QVBoxLayout:
-        """Create the main control buttons and combo box."""
+        """Create the main control buttons and selectors for the popup menu.
+
+        This method adds buttons for HUD control actions and, if available, a stat set selector and max seats combo box.
+
+        Args:
+            cb_max_dict: The dictionary for the max seats combo box.
+
+        Returns:
+            QVBoxLayout: The vertical layout containing all main controls.
+        """
         vbox = QVBoxLayout()
         vbox.addWidget(self.build_button("Restart This HUD", "kill"))
         vbox.addWidget(self.build_button("Save HUD Layout", "save"))
         vbox.addWidget(self.build_button("Stop this HUD", "blacklist"))
         vbox.addWidget(self.build_button("Close", "close"))
         vbox.addWidget(QLabel(""))
-        
+
         # Add stat set selector
         stat_sets_dict = self._create_stat_sets_dict()
         if len(stat_sets_dict) > 1:  # Only show if there are multiple stat sets
@@ -394,7 +519,7 @@ class SimpleTablePopupMenu(QWidget):
             self.stat_set_combo = self.build_stat_set_combo(stat_sets_dict)
             vbox.addWidget(self.stat_set_combo)
             vbox.addWidget(QLabel(""))
-        
+
         vbox.addWidget(self.build_combo_and_set_active("new_max_seats", cb_max_dict))
         return vbox
 
@@ -404,7 +529,19 @@ class SimpleTablePopupMenu(QWidget):
         seats_style_dict: dict,
         stat_range_dict: dict,
     ) -> QVBoxLayout:
-        """Create the player stats configuration box."""
+        """Create the player stats configuration box for the popup menu.
+
+        This method builds and arranges the controls for configuring player stats display,
+        including combo boxes and spinners.
+
+        Args:
+            multiplier_dict: The dictionary for the multiplier combo box.
+            seats_style_dict: The dictionary for the seats style combo box.
+            stat_range_dict: The dictionary for the stat range combo box.
+
+        Returns:
+            QVBoxLayout: The vertical layout containing all player stats controls.
+        """
         vbox = QVBoxLayout()
         vbox.addWidget(QLabel("Show Player Stats for"))
         vbox.addWidget(
@@ -436,7 +573,19 @@ class SimpleTablePopupMenu(QWidget):
         seats_style_dict: dict,
         stat_range_dict: dict,
     ) -> QVBoxLayout:
-        """Create the opponent stats configuration box."""
+        """Create the opponent stats configuration box for the popup menu.
+
+        This method builds and arranges the controls for configuring opponent stats display,
+        including combo boxes and spinners.
+
+        Args:
+            multiplier_dict: The dictionary for the multiplier combo box.
+            seats_style_dict: The dictionary for the seats style combo box.
+            stat_range_dict: The dictionary for the stat range combo box.
+
+        Returns:
+            QVBoxLayout: The vertical layout containing all opponent stats controls.
+        """
         vbox = QVBoxLayout()
         vbox.addWidget(QLabel("Show Opponent Stats for"))
         vbox.addWidget(self.build_combo_and_set_active("agg_bb_mult", multiplier_dict))
@@ -459,7 +608,13 @@ class SimpleTablePopupMenu(QWidget):
         return vbox
 
     def _create_stat_range_dict(self) -> dict:
-        """Create the dictionary for the stat range combo box."""
+        """Create the dictionary for the stat range combo box.
+
+        This method returns a dictionary mapping stat range options to their display labels and codes.
+
+        Returns:
+            dict: The dictionary for the stat range combo box.
+        """
         return {
             0: ("Since: All Time", "A"),
             1: ("Since: Session", "S"),
@@ -467,7 +622,13 @@ class SimpleTablePopupMenu(QWidget):
         }
 
     def _create_seats_style_dict(self) -> dict:
-        """Create the dictionary for the seats style combo box."""
+        """Create the dictionary for the seats style combo box.
+
+        This method returns a dictionary mapping seat style options to their display labels and codes.
+
+        Returns:
+            dict: The dictionary for the seats style combo box.
+        """
         return {
             0: ("Number of Seats: Any Number", "A"),
             1: ("Number of Seats: Custom", "C"),
@@ -475,7 +636,13 @@ class SimpleTablePopupMenu(QWidget):
         }
 
     def _create_multiplier_dict(self) -> dict:
-        """Create the dictionary for the multiplier combo box."""
+        """Create the dictionary for the multiplier combo box.
+
+        This method returns a dictionary mapping multiplier options to their display labels and values.
+
+        Returns:
+            dict: The dictionary for the multiplier combo box.
+        """
         return {
             0: ("For This Blind Level Only", 1),
             1: ("  0.5 to 2 * Current Blinds", 2),
@@ -485,7 +652,13 @@ class SimpleTablePopupMenu(QWidget):
         }
 
     def _create_max_seats_dict(self) -> dict:
-        """Create the dictionary for the max seats combo box."""
+        """Create the dictionary for the max seats combo box.
+
+        This method returns a dictionary mapping available table layouts to their display labels and values.
+
+        Returns:
+            dict: The dictionary for the max seats combo box.
+        """
         cb_max_dict = {0: ("Force layout...", None)}
         for pos, i in enumerate(
             sorted(self.parentwin.hud.layout_set.layout),
@@ -495,20 +668,33 @@ class SimpleTablePopupMenu(QWidget):
         return cb_max_dict
 
     def _create_stat_sets_dict(self) -> dict:
-        """Create the dictionary for the stat sets combo box."""
+        """Create the dictionary for the stat set combo box.
+
+        This method returns a dictionary mapping available stat sets to their display labels and values.
+
+        Returns:
+            dict: The dictionary for the stat set combo box.
+        """
         stat_sets = self.parentwin.hud.config.get_stat_sets()
-        stat_sets_dict = {}
-        for i, stat_set_name in enumerate(stat_sets):
-            stat_sets_dict[i] = (stat_set_name, stat_set_name)
-        return stat_sets_dict
+        return {i: (stat_set_name, stat_set_name) for i, stat_set_name in enumerate(stat_sets)}
 
     def delete_event(self) -> None:
-        """Delete the event."""
+        """Handle the event to close and destroy the popup menu.
+
+        This method resets the menu state in the parent window and destroys the popup menu instance.
+        """
         self.parentwin.menu_is_popped = False
         self.destroy()
 
     def callback(self, _check_state: Any, data: str | None = None) -> None:
-        """Handle callbacks from the menu."""
+        """Handle button callbacks for popup menu actions.
+
+        This method processes actions such as killing the HUD, blacklisting, saving the layout, and closing the popup.
+
+        Args:
+            _check_state: The state of the triggering event (unused).
+            data: The action keyword indicating which operation to perform.
+        """
         if data == "kill":
             self.parentwin.hud.parent.kill_hud("kill", self.parentwin.hud.table.key)
         if data == "blacklist":
@@ -523,13 +709,36 @@ class SimpleTablePopupMenu(QWidget):
         self.delete_event()
 
     def build_button(self, labeltext: str, cbkeyword: str) -> QPushButton:
-        """Build a button."""
+        """Build a QPushButton with a connected callback for the popup menu.
+
+        This method creates a button with the specified label and connects it
+        to the callback using the provided keyword.
+
+        Args:
+            labeltext: The text to display on the button.
+            cbkeyword: The keyword to pass to the callback when the button is clicked.
+
+        Returns:
+            QPushButton: The created button instance.
+        """
         button = QPushButton(labeltext)
         button.clicked.connect(partial(self.callback, data=cbkeyword))
         return button
 
     def build_spinner(self, field: str, low: int, high: int) -> QSpinBox:
-        """Build a spinner."""
+        """Build a QSpinBox for numeric input in the popup menu.
+
+        This method creates a spin box with the specified range and initial value,
+        and connects it to update the HUD parameter.
+
+        Args:
+            field: The HUD parameter field to bind to the spin box.
+            low: The minimum value for the spin box.
+            high: The maximum value for the spin box.
+
+        Returns:
+            QSpinBox: The created spin box instance.
+        """
         spin_box = QSpinBox()
         spin_box.setRange(low, high)
         spin_box.setValue(self.parentwin.hud.hud_params[field])
@@ -537,7 +746,18 @@ class SimpleTablePopupMenu(QWidget):
         return spin_box
 
     def build_combo_and_set_active(self, field: str, combo_dict: dict) -> QComboBox:
-        """Build a combo box and set the active item."""
+        """Build a QComboBox for selection in the popup menu and set the active value.
+
+        This method creates a combo box with the specified options, sets the current value based on the HUD parameter,
+        and connects it to update the parameter when changed.
+
+        Args:
+            field: The HUD parameter field to bind to the combo box.
+            combo_dict: The dictionary of options for the combo box.
+
+        Returns:
+            QComboBox: The created combo box instance.
+        """
         widget = QComboBox()
         for pos in combo_dict:
             widget.addItem(combo_dict[pos][0])
@@ -549,7 +769,17 @@ class SimpleTablePopupMenu(QWidget):
         return widget
 
     def build_stat_set_combo(self, stat_sets_dict: dict) -> QComboBox:
-        """Build a combo box for stat sets and set the active value."""
+        """Build a QComboBox for selecting the stat set in the popup menu.
+
+        This method creates a combo box with available stat sets, sets the current value,
+        and connects it to update the stat set.
+
+        Args:
+            stat_sets_dict: The dictionary of available stat sets.
+
+        Returns:
+            QComboBox: The created combo box instance for stat set selection.
+        """
         combo = QComboBox()
         for pos in stat_sets_dict:
             combo.addItem(stat_sets_dict[pos][0])
@@ -563,69 +793,98 @@ class SimpleTablePopupMenu(QWidget):
         return combo
 
     def _get_current_stat_set(self) -> str:
-        """Get the current stat set name."""
+        """Get the name of the currently active stat set.
+
+        This method retrieves the stat set name from the current game parameters.
+
+        Returns:
+            str: The name of the current stat set.
+        """
         # The stat set is available in the game parameters
         return self.parentwin.aw.game_params.name
 
     def change_stat_set(self, sel: int, stat_sets_dict: dict) -> None:
-        """Change the stat set."""
+        """Change the active stat set for the HUD and refresh the display.
+
+        This method updates the configuration to use the selected stat set, saves the configuration,
+        closes the popup menu, and attempts to refresh the HUD with the new stat set. If refreshing fails,
+        the HUD is restarted to apply the new stat set.
+
+        Args:
+            sel: The index of the selected stat set in the combo box.
+            stat_sets_dict: The dictionary of available stat sets.
+        """
         new_stat_set = stat_sets_dict[sel][1]
-        
+
         # Update the configuration to use the new stat set
         self._update_stat_set_in_config(new_stat_set)
-        
+
         # Save the configuration
         self.parentwin.hud.config.save()
-        
+
         # Close the popup menu
         self.delete_event()
-        
+
         # Instead of killing the HUD, try to refresh it with the new stat set
         try:
             # Update the game params to use the new stat set
             self.parentwin.aw.game_params = self.parentwin.hud.config.get_supported_games_parameters(
-                self.parentwin.hud.poker_game, 
-                self.parentwin.hud.game_type
+                self.parentwin.hud.poker_game,
+                self.parentwin.hud.game_type,
             )["game_stat_set"]
-            
+
             # Refresh the HUD display with new stat set
-            if hasattr(self.parentwin.hud, 'stat_dict'):
+            if hasattr(self.parentwin.hud, "stat_dict"):
                 # Need to refresh the stats layout and popups with new stat set
-                self.parentwin.aw._refresh_stats_layout()
-                
+                self.parentwin.aw.refresh_stats_layout()
+
                 # Recreate contents of all existing windows with new stat set
                 for seat in self.parentwin.aw.stat_windows:
                     if self.parentwin.aw.stat_windows[seat] is not None:
                         self.parentwin.aw.stat_windows[seat].create_contents(seat)
-                
+
                 # Update with current data
                 self.parentwin.aw.update(self.parentwin.hud.stat_dict)
                 log.info("HUD refreshed with new stat set: %s", new_stat_set)
-        except Exception as e:
+        except (AttributeError, KeyError, TypeError) as e:
             # If refresh fails, restart the HUD to apply the new stat set
             # This is intentional for the switch feature, not an unwanted restart
             log.info("Refreshing HUD failed, restarting to apply stat set '%s': %s", new_stat_set, e)
             self.parentwin.hud.parent.kill_hud("kill", self.parentwin.hud.table.key)
 
     def _update_stat_set_in_config(self, new_stat_set: str) -> None:
-        """Update the stat set in the configuration."""
-        # Get the current game configuration
-        poker_game = self.parentwin.hud.poker_game
-        game_type = self.parentwin.hud.game_type
-        
+        """Update the stat set in the configuration and XML for the current game.
+
+        This method updates the stat set for the current poker game and game type in both the in-memory configuration
+        and the XML configuration file.
+
+        Args:
+            new_stat_set: The name of the new stat set to apply.
+        """
         # Update the game_stat_set configuration
+        poker_game = self.parentwin.hud.poker_game
         if poker_game in self.parentwin.hud.config.supported_games:
             game_config = self.parentwin.hud.config.supported_games[poker_game]
-            
+
             # game_stat_set is a dictionary indexed by game_type
+            game_type = self.parentwin.hud.game_type
             if game_type in game_config.game_stat_set:
                 game_config.game_stat_set[game_type].stat_set = new_stat_set
-            
+
             # Also update the XML directly
             self._update_xml_stat_set(poker_game, game_type, new_stat_set)
 
     def _update_xml_stat_set(self, poker_game: str, game_type: str, new_stat_set: str) -> None:
-        """Update the stat set in the XML configuration."""
+        """Update the stat set attribute in the XML configuration for a specific game and game type.
+
+        This method locates the relevant game and game_stat_set nodes in the XML document and updates
+        the stat_set attribute to the new value.
+
+        Args:
+            poker_game: The name of the poker game to update.
+            game_type: The type of the game to update.
+            new_stat_set: The new stat set name to assign in the XML.
+        """
         # Find the game node in the XML document
         game_nodes = self.parentwin.hud.config.doc.getElementsByTagName("game")
         for game_node in game_nodes:
@@ -640,16 +899,36 @@ class SimpleTablePopupMenu(QWidget):
                 break
 
     def change_combo_field_value(self, sel: int, field: str, combo_dict: dict) -> None:
-        """Change the value of a combo box field."""
+        """Update the HUD parameter value based on the selected combo box option.
+
+        This method sets the specified HUD parameter to the value associated with the selected combo box item
+        and updates the enabled state of related spinners.
+
+        Args:
+            sel: The index of the selected item in the combo box.
+            field: The HUD parameter field to update.
+            combo_dict: The dictionary of options for the combo box.
+        """
         self.parentwin.hud.hud_params[field] = combo_dict[sel][1]
         self.set_spinners_active()
 
     def change_spin_field_value(self, value: int, field: str) -> None:
-        """Change the value of a spin box field."""
+        """Update the HUD parameter value based on the spin box input.
+
+        This method sets the specified HUD parameter to the value provided by the spin box.
+
+        Args:
+            value: The new value selected in the spin box.
+            field: The HUD parameter field to update.
+        """
         self.parentwin.hud.hud_params[field] = value
 
     def set_spinners_active(self) -> None:
-        """Set the spinners active or inactive based on the combo box selection."""
+        """Enable or disable spinner controls based on current HUD parameter selections.
+
+        This method updates the enabled state of various spinner widgets in the popup menu
+        according to the current values of the HUD's parameter fields.
+        """
         if self.parentwin.hud.hud_params["h_stat_range"] == "T":
             self.h_hud_days_spinner.setEnabled(True)
         else:

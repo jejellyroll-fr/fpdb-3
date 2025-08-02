@@ -51,7 +51,7 @@ wnameatom = getAtom("_NET_WM_NAME")
 utf8atom = getAtom("UTF8_STRING")
 
 c = Configuration.Config()
-log = get_logger("hud")
+log = get_logger("x_tables")
 
 
 class Table(Table_Window):

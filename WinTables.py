@@ -1,3 +1,4 @@
+"""Windows specific methods for TableWindows Class."""
 import ctypes
 import re
 import sys
@@ -14,7 +15,7 @@ from TableWindow import Table_Window
 app = QApplication(sys.argv)
 
 # logging setup
-log = get_logger("hud")
+log = get_logger("win_tables")
 
 # Definition of Windows API constants
 GW_OWNER = 4
@@ -82,7 +83,7 @@ class Table(Table_Window):
             log.exception(f"Error during EnumWindows: {e}")
 
         time_limit = 10  # Limite de temps en secondes
-        start_time = time.time()  # Enregistre l'heure de début
+        start_time = time.time()  # Record start time
 
         for hwnd in window_info.titles:
             try:

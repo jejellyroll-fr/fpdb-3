@@ -52,7 +52,7 @@ from loggingFpdb import get_logger
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 
-log = get_logger("logview")
+log = get_logger("gui_log_view")
 
 MAX_LOG_ENTRIES = 1000  # Adjust this number as needed
 

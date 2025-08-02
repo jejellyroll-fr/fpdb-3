@@ -46,13 +46,13 @@ from loggingFpdb import get_logger
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("importer")
+log = get_logger("gui_bulk_import")
 
 
 class GuiBulkImport(QWidget):
     """Widget for bulk importing hand history files."""
 
-    # CONFIGURATION  -  update these as preferred:
+    # Configuration  -  update these as preferred:
     allow_threads = False  # set to True to try out the threads field
 
     def load_clicked(self) -> None:

@@ -24,12 +24,15 @@
 import datetime
 import re
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from loggingFpdb import get_logger
 
+if TYPE_CHECKING:
+    from Hand import Hand
 # SealsWithClubs HH Format
-log = get_logger("parser")
+log = get_logger("seals_with_clubs_parser")
 
 
 class SealsWithClubs(HandHistoryConverter):
@@ -377,7 +380,7 @@ class SealsWithClubs(HandHistoryConverter):
             if m:
                 cards_str = m.group("CARDS")
                 # Clean up the cards string by removing extra brackets
-                cards_str = cards_str.replace(']', '').replace('[', '')
+                cards_str = cards_str.replace("]", "").replace("[", "")
                 cards = [card.strip() for card in cards_str.split() if card.strip()]
                 hand.setCommunityCards(street, cards)
 
@@ -565,7 +568,7 @@ class SealsWithClubs(HandHistoryConverter):
         regex = f"{table_name}"
         log.debug(f"Seals.getTableTitleRe: regex='{regex}'")
         return regex
-    
+
     def readOther(self, hand: "Hand") -> None:
         """Read other information from hand that doesn't fit standard categories.
 

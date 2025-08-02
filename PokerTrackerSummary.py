@@ -25,7 +25,7 @@ from loggingFpdb import get_logger
 from TourneySummary import TourneySummary
 
 # PokerTracker HH Format
-log = get_logger("parser")
+log = get_logger("pokertracker_summary_parser")
 
 
 class PokerTrackerSummary(TourneySummary):

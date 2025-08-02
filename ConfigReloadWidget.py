@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import QHBoxLayout, QLabel, QProgressBar, QPushButton, QWid
 from ConfigurationManager import ConfigurationManager
 from loggingFpdb import get_logger
 
-log = get_logger("configwidget")
+log = get_logger("config_reload_widget")
 
 
 class ConfigReloadWidget(QWidget):

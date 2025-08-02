@@ -36,7 +36,7 @@ import Importer
 import interlocks
 from loggingFpdb import get_logger
 
-# Import pour le rechargement dynamique de configuration
+# Import for dynamic reloading configuration
 try:
     from AutoImportConfigObserver import AutoImportConfigObserver
     from ConfigurationManager import ConfigurationManager
@@ -44,13 +44,13 @@ try:
     DYNAMIC_CONFIG_AVAILABLE = True
 except ImportError:
     DYNAMIC_CONFIG_AVAILABLE = False
-    log = get_logger("importer")
+    log = get_logger("gui_auto_import")
     log.warning("ConfigurationManager not available, dynamic config reload disabled")
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("importer")
+log = get_logger("gui_auto_import")
 
 if os.name == "nt":
     import win32console
@@ -102,7 +102,7 @@ class GuiAutoImport(QWidget):
         if QT_MATERIAL_AVAILABLE:
             # Apply the same theme as HUD_main
             apply_stylesheet(self, theme="dark_purple.xml")
-        
+
         # Set minimal custom styles for specific needs
         self.setStyleSheet("""
             QTextEdit#logView {
@@ -191,17 +191,17 @@ class GuiAutoImport(QWidget):
         cursor.movePosition(QTextCursor.End)
 
         # Clean text: remove leading newlines to ensure timestamp stays at line start
-        clean_text = text.lstrip('\n')
+        clean_text = text.lstrip("\n")
         leading_newlines = len(text) - len(clean_text)
-        
+
         # Add any leading newlines first (but not before timestamp)
         if leading_newlines > 0:
-            cursor.insertText('\n' * leading_newlines)
+            cursor.insertText("\n" * leading_newlines)
 
         # Add timestamp at the start of the actual message line
         timestamp = QDateTime.currentDateTime().toString("hh:mm:ss")
         timestamp_format = QTextCharFormat()
-        
+
         # Use qt_material theme colors
         palette = self.palette()
         if QT_MATERIAL_AVAILABLE:
@@ -209,13 +209,13 @@ class GuiAutoImport(QWidget):
             timestamp_format.setForeground(QColor("#9E9E9E"))
         else:
             timestamp_format.setForeground(palette.color(QPalette.Disabled, QPalette.Text))
-        
+
         cursor.insertText(f"[{timestamp}] ", timestamp_format)
 
         # Add icon and set color based on level
         icon_format = QTextCharFormat()
         text_format = QTextCharFormat()
-        
+
         if level == "error":
             # Material Red 500
             color = QColor("#F44336")
@@ -284,7 +284,7 @@ class GuiAutoImport(QWidget):
         # Set format for both icon and text
         icon_format.setForeground(color)
         text_format.setForeground(color)
-        
+
         # Insert icon and text
         cursor.insertText(icon, icon_format)
         cursor.insertText(clean_text, text_format)
@@ -512,29 +512,29 @@ class GuiAutoImport(QWidget):
 
 
     def _setup_config_observer(self) -> None:
-        """Configure l'observateur de configuration pour l'auto-import."""
+        """Configure the configuration observer for auto-import."""
         if DYNAMIC_CONFIG_AVAILABLE:
             try:
                 config_manager = ConfigurationManager()
 
-                # S'assurer que le ConfigurationManager est initialisé
+                # Ensure ConfigurationManager is initialized
                 if not config_manager.initialized:
                     config_manager.initialize(self.config.file)
 
-                # Créer et enregistrer l'observateur
+                # Create and register observer
                 self.config_observer = AutoImportConfigObserver(self)
                 config_manager.register_observer(self.config_observer)
 
-                log.info("Observateur de configuration enregistré pour l'auto-import")
+                log.info("Configuration observer registered for auto-import")
 
             except Exception as e:
-                log.exception(f"Erreur lors de la configuration de l'observateur: {e}")
+                log.exception(f"Error during observer configuration: {e}")
 
     def updatePaths(self) -> None:
-        """Met à jour l'affichage des chemins d'import (appelé par l'observateur)."""
-        # Cette méthode peut être appelée pour rafraîchir l'interface
-        # après un changement de configuration dynamique
-        log.debug("Mise à jour des chemins d'import dans l'interface")
+        """Update display of import paths (called by observer)."""
+        # This method can be called to refresh interface
+        # after dynamic configuration change
+        log.debug("Updating import paths in interface")
 
 
 if __name__ == "__main__":

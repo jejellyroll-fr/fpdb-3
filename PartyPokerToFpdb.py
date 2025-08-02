@@ -30,8 +30,8 @@ from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryCon
 from loggingFpdb import get_logger
 from TourneySummary import TourneySummary
 
-# Obtention du logger configuré
-log = get_logger("parser")
+# Getting configured logger
+log = get_logger("partypoker_parser")
 
 
 class PartyPoker(HandHistoryConverter):

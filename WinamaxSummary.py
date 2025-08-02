@@ -27,7 +27,7 @@ from loggingFpdb import get_logger
 from TourneySummary import TourneySummary
 
 # Winamax HH Format
-log = get_logger("parser")
+log = get_logger("winamax_summary_parser")
 
 
 class WinamaxSummary(TourneySummary):

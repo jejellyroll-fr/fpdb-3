@@ -31,7 +31,7 @@ from SmartHudManager import RestartReason, get_smart_hud_manager
 
 # Logging configuration
 
-log = get_logger("hud")
+log = get_logger("hud_main")
 
 
 @dataclass
@@ -135,14 +135,28 @@ class HudMain(QObject):
         from loggingFpdb import JsonFormatter, TimedSizedRotatingFileHandler
 
         try:
+            # Import LoggerRegistry to get the current logger configuration
+            from loggingFpdb import LoggerRegistry
+
             # Create HUD-specific log directory and file
             hud_log_dir = Path.home() / ".fpdb" / "log"
             hud_log_dir.mkdir(parents=True, exist_ok=True)
             hud_log_file = hud_log_dir / "HUD-log.txt"
 
-            # Get the HUD logger and configure it
-            hud_logger = logging.getLogger("hud")
-            hud_logger.setLevel(logging.DEBUG)
+            # Get the HUD logger and check if it's already configured by Logger Dev Tool
+            hud_logger = logging.getLogger("hud_main")
+            registry = LoggerRegistry()
+
+            # Get the current level from Logger Dev Tool configuration or use ERROR as default
+            logger_info = registry.get_logger_info("hud_main")
+            if logger_info:
+                configured_level = logger_info.current_level
+                log.info(f"Using Logger Dev Tool configuration: level={logging.getLevelName(configured_level)}")
+            else:
+                configured_level = logging.ERROR
+                log.info("Using default ERROR level for HUD logger")
+
+            hud_logger.setLevel(configured_level)
 
             # Remove existing handlers to avoid duplicates
             for handler in hud_logger.handlers[:]:
@@ -157,7 +171,8 @@ class HudMain(QObject):
                 max_bytes=10 * 1024 * 1024,  # 10 MB
                 encoding="utf-8",
             )
-            file_handler.setLevel(logging.DEBUG)
+            # File handler should respect the logger level
+            file_handler.setLevel(configured_level)
 
             # Use our JSON formatter
             json_formatter = JsonFormatter()
@@ -184,7 +199,8 @@ class HudMain(QObject):
             )
 
             console_handler = logging.StreamHandler()
-            console_handler.setLevel(logging.INFO)
+            # Console handler should also respect the configured level
+            console_handler.setLevel(configured_level)
             console_handler.setFormatter(console_formatter)
             hud_logger.addHandler(console_handler)
 
@@ -211,7 +227,7 @@ class HudMain(QObject):
         log.info("HudMain starting: Using db name = %s", db_name)
         self.Tables = Tables  # Assign Tables to self.Tables
 
-        # Configuration du logging
+        # Logging configuration
         if not options.errorsToConsole:
             log_dir = Path(self.config.dir_log)
             log_dir.mkdir(exist_ok=True)
@@ -252,7 +268,7 @@ class HudMain(QObject):
             # Smart HUD manager initialization
             self.smart_hud_manager = get_smart_hud_manager()
 
-            # Initialisation ZMQ avec QThread
+            # Initialization ZMQ avec QThread
             log.info("Initializing ZMQ communication...")
             self.zmq_receiver = ZMQReceiver(parent=self)
             log.info("ZMQ receiver created successfully")

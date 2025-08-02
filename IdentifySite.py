@@ -33,7 +33,7 @@ try:
 except ImportError:
     xlrd = None
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("parser")
+log = get_logger("identify_site")
 
 re_Divider, re_Head, re_XLS = {}, {}, {}
 re_Divider["PokerStars"] = re.compile(r"^Hand #(\d+)\s*$", re.MULTILINE)
@@ -65,7 +65,7 @@ class Site:
         self.hhc_fname = hhc_fname
         # FIXME: rename filter_name to hhc_type
         self.filter_name = filter_name
-        self.re_SplitHands = getattr(obj, 're_split_hands', getattr(obj, 're_SplitHands', None))
+        self.re_SplitHands = getattr(obj, "re_split_hands", getattr(obj, "re_SplitHands", None))
         self.codepage = obj.codepage
         self.copyGameHeader = obj.copyGameHeader
         self.summaryInFile = obj.summaryInFile
@@ -132,13 +132,13 @@ class IdentifySite:
         table_pattern = r"Table\s+(.+?),"
         table_match = re.search(table_pattern, handText)
         table_name = table_match.group(1) if table_match else ""
-        
+
         log.debug(f"Detected table name: {table_name}")
-        
+
         # Map of indicators to skin names (must match Sites table)
         skin_mapping = {
             "redbet": "Redbet Poker",
-            "pmu": "PMU Poker", 
+            "pmu": "PMU Poker",
             "fdj": "FDJ Poker",
             "betclic": "Betclic Poker",
             "netbet": "NetBet Poker",
@@ -148,7 +148,7 @@ class IdentifySite:
             "bet365": "Bet365 Poker",
             "william hill": "William Hill Poker",
             "williamhill": "William Hill Poker",
-            "paddy power": "Paddy Power Poker", 
+            "paddy power": "Paddy Power Poker",
             "paddypower": "Paddy Power Poker",
             "betfair": "Betfair Poker",
             "coral": "Coral Poker",
@@ -173,7 +173,7 @@ class IdentifySite:
             "nordicbet": "NordicBet Poker",
             "unibet": "Unibet Poker",
             "maria": "Maria Casino Poker",
-            "leovegas": "LeoVegas Poker", 
+            "leovegas": "LeoVegas Poker",
             "mr green": "Mr Green Poker",
             "expekt": "Expekt Poker",
             "coolbet": "Coolbet Poker",
@@ -188,22 +188,22 @@ class IdentifySite:
             "red star": "Red Star Poker",
             "redstar": "Red Star Poker",
         }
-        
+
         # Check table name and hand text for skin indicators
         search_text = (table_name + " " + handText).lower()
-        
+
         # Specific patterns for French sites
         if any(indicator in search_text for indicator in ["saratov", "scone", "moscow"]):
             # These table name patterns are typical of FDJ Poker
             log.debug("Detected FDJ Poker based on table name pattern")
             return "FDJ Poker"
-        
+
         # Check each mapping
         for indicator, skin_name in skin_mapping.items():
             if indicator in search_text:
                 log.debug(f"Detected iPoker skin: {skin_name} from indicator: {indicator}")
                 return skin_name
-        
+
         # Default to generic iPoker if no specific skin detected
         log.debug("No specific iPoker skin detected, using default 'iPoker'")
         return "iPoker"
@@ -238,7 +238,7 @@ class IdentifySite:
             try:
                 mod = __import__(filter)
                 obj = getattr(mod, filter_name, None)
-                site_id = getattr(obj, 'site_id', getattr(obj, 'siteId', None))
+                site_id = getattr(obj, "site_id", getattr(obj, "siteId", None))
                 self.sitelist[site_id] = Site(
                     site, filter, filter_name, summary, obj,
                 )
@@ -406,14 +406,14 @@ class IdentifySite:
             mod = __import__(filter)
             obj = getattr(mod, filter_name, None)
             summary = "PokerTrackerSummary"
-            
+
             # Detect specific iPoker skin for PokerTracker format
             detected_site_name = "PokerTracker"  # default
             if m1 and "GAME #" in m1.group():
                 # This is an iPoker hand, detect the specific skin
                 detected_site_name = self.detectiPokerSkin(whole_file)
                 log.debug(f"Detected iPoker skin from PokerTracker format: {detected_site_name}")
-            
+
             f.site = Site(detected_site_name, filter, filter_name, summary, obj)
             if m1:
                 f.ftype = "hh"

@@ -34,7 +34,7 @@ from loggingFpdb import get_logger
 if TYPE_CHECKING:
     from Hand import Hand
 
-log = get_logger("parser")
+log = get_logger("cake_parser")
 
 
 class Cake(HandHistoryConverter):

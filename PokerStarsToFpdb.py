@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from Hand import Hand
 
 # PokerStars HH Format
-log = get_logger("parser")
+log = get_logger("pokerstars_parser")
 
 # Site ID constants
 SITE_POKERSTARS_COM = 32
@@ -588,16 +588,16 @@ class PokerStars(HandHistoryConverter):
         """Detect skin based on hand text content."""
         search_text = hand_text[:2000]
 
-        # Vérification de l'AAMS/ADM ID pour l'Italie
+        # Verification of AAMS/ADM ID for Italy
         if "AAMS ID:" in search_text or "ADM ID:" in search_text:
             return "PokerStars.IT", SITE_POKERSTARS_IT
 
-        # Essayer de détecter via le nom du héros s'il contient des indices
+        # Try to detect via hero name if it contains clues
         hero_match = re.search(r"Dealt to ([^\[]+)", hand_text[:500])
         if hero_match:
             hero_name = hero_match.group(1).strip()
             hero_lower = hero_name.lower()
-            # Certains joueurs incluent le skin dans leur nom
+            # CSome players include the skin in their name.
             for suffix1, suffix2, skin_name in POKERSTARS_HERO_SUFFIXES:
                 if suffix1 in hero_lower or suffix2 in hero_lower:
                     return skin_name, POKERSTARS_SKIN_IDS[skin_name]

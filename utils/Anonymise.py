@@ -19,16 +19,16 @@ import codecs
 import os
 import sys
 
-import chardet
-
 import BetfairToFpdb
+import chardet
+import MergeToFpdb
+
 import BovadaToFpdb
 import CakeToFpdb
 import Configuration
 import GGPokerToFpdb
 import iPokerToFpdb
 import KingsClubToFpdb
-import MergeToFpdb
 import PacificPokerToFpdb
 import PartyPokerToFpdb
 import PokerStarsToFpdb

@@ -11,7 +11,7 @@ from typing import Any
 
 # Configuration  logging
 logging.basicConfig(level=logging.INFO)
-log = logging.getLogger("ConfigInitializer")
+log = logging.getLogger("config_initializer")
 
 
 class ConfigInitializer:

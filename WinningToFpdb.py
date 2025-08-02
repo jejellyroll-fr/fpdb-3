@@ -25,13 +25,17 @@
 import datetime
 import re
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 # _ = L10n.get_translation()
 from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from loggingFpdb import get_logger
 
+if TYPE_CHECKING:
+    from Hand import Hand
+
 # Winning HH Format
-log = get_logger("parser")
+log = get_logger("winning_parser")
 
 
 class Winning(HandHistoryConverter):
@@ -393,7 +397,7 @@ class Winning(HandHistoryConverter):
 
     def compilePlayerRegexs(self, hand) -> None:
         log.debug(f"compilePlayerRegexs called with hand: {hand}")
-        # Implémentation de la méthode
+        # Method implementation
 
     def readSupportedGames(self):
         return [
