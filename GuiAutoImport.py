@@ -111,12 +111,12 @@ class GuiAutoImport(QWidget):
                 line-height: 1.4;
                 border-radius: 8px;
             }
-            
+
             QGroupBox {
                 font-weight: bold;
                 margin-top: 10px;
             }
-            
+
             QProgressBar {
                 border-radius: 2px;
                 text-align: center;
@@ -177,7 +177,7 @@ class GuiAutoImport(QWidget):
 
         self.addText("Auto Import Ready.\n", "info")
 
-    def apply_theme(self, theme_name="dark_purple.xml"):
+    def apply_theme(self, theme_name="dark_purple.xml") -> None:
         """Apply a qt_material theme to the widget."""
         if QT_MATERIAL_AVAILABLE:
             apply_stylesheet(self, theme=theme_name)

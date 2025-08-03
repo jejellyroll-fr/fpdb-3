@@ -265,9 +265,11 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         r'|player="{PLYR}"))+>(?P<CARDS>.+?)</cards>'.format(**substitutions),
         re.MULTILINE,
     )
-    # Original re_Action pattern (replaced by cleaner version below)
+    # Enhanced re_Action pattern to handle both Betclic and FDJ formats
+    # Supports both "sum="0€"" and "sum="€0.02"" formats with flexible attribute order
+    # Also handles both comma (0,02€) and dot (0.02€) decimal separators
     re_action = re.compile(
-        r'<action(?=(?:[^>]*\bno="(?P<ACT>\d+)"))(?=(?:[^>]*\bplayer="(?P<PNAME>[^"]+)"))(?=(?:[^>]*\btype="(?P<ATYPE>\d+)"))(?=(?:[^>]*\bsum="[^"]*?(?P<BET>\d+(?:\.\d+)?)"))[^>]*>',
+        r'<action(?=(?:[^>]*\bno="(?P<ACT>\d+)"))(?=(?:[^>]*\bplayer="(?P<PNAME>[^"]+)"))(?=(?:[^>]*\btype="(?P<ATYPE>\d+)"))(?=(?:[^>]*\bsum="[^"]*?(?P<BET>\d+(?:[.,]\d+)?)[^"]*"))[^>]*>',
         re.MULTILINE,
     )
     re_sits_out = re.compile(
@@ -294,7 +296,6 @@ class iPoker(HandHistoryConverter):  # noqa: N801
     re_uncalled_bets = re.compile(r"<uncalled_bet_enabled>true<\/uncalled_bet_enabled>")
     re_client_version = re.compile(r"<client_version>(?P<VERSION>[.\d]+)</client_version>")
     re_fpp = re.compile(r"Pts\s")
-
 
     def _raise_community_cards_error(self, hand_id: str, street: str) -> None:
         """Raise an error when community cards cannot be found."""
@@ -712,6 +713,11 @@ class iPoker(HandHistoryConverter):  # noqa: N801
             self.info["currency"] = session_info.get("currency", "USD")
         self.tablename = session_info.get("tablename", "Unknown")
 
+        # Set hero from nickname
+        if "nickname" in session_info:
+            self.hero = session_info["nickname"]
+            log.debug("Set hero from XML nickname: %s", self.hero)
+
         # Set defaults
         self.info["ante"] = 0
         self.info["buyinType"] = "regular"
@@ -750,8 +756,8 @@ class iPoker(HandHistoryConverter):  # noqa: N801
             # Set basic tournament info
             summary.tourNo = tournament_data.get("tourno")
             summary.tourneyName = tournament_data.get("tournament_name", "Unknown")
-            summary.buyin = int(tournament_data.get("buyin_amount", Decimal("0")) * 100)
-            summary.fee = int(tournament_data.get("fee_amount", Decimal("0")) * 100)
+            summary.buyin = int(tournament_data.get("buyin_amount", Decimal(0)) * 100)
+            summary.fee = int(tournament_data.get("fee_amount", Decimal(0)) * 100)
             summary.buyinCurrency = tournament_data.get("currency_symbol", "EUR")
             summary.currency = summary.buyinCurrency
 
@@ -853,7 +859,7 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         # Handle complex format with multiple amounts (e.g., "0€ + 0,02€ + 0,23€")
         if "+" in amount_str:
             parts = amount_str.split("+")
-            total = Decimal("0")
+            total = Decimal(0)
             for part_str in parts:
                 part = part_str.strip()
                 if part:
@@ -901,7 +907,6 @@ class iPoker(HandHistoryConverter):  # noqa: N801
             "win": r"<win>([^<]*)</win>",
             "currency": r"<currency>([^<]*)</currency>",
             "nickname": r"<nickname>([^<]*)</nickname>",
-
             # Extended tournament data
             "client_version": r"<client_version>([^<]*)</client_version>",
             "mode": r"<mode>([^<]*)</mode>",
@@ -912,17 +917,14 @@ class iPoker(HandHistoryConverter):  # noqa: N801
             "awardpoints": r"<awardpoints>([^<]*)</awardpoints>",
             "ipoints": r"<ipoints>([^<]*)</ipoints>",
             "tablesize": r"<tablesize>([^<]*)</tablesize>",
-
             # Player performance data
             "bets": r"<bets>([^<]*)</bets>",
             "wins": r"<wins>([^<]*)</wins>",
             "chipsin": r"<chipsin>([^<]*)</chipsin>",
             "chipsout": r"<chipsout>([^<]*)</chipsout>",
-
             # Timing data
             "startdate": r"<startdate>([^<]*)</startdate>",
             "enddate": r"<enddate>([^<]*)</enddate>",
-
             # Game type data
             "gametype": r"<gametype>([^<]*)</gametype>",
             "tablename": r"<tablename>([^<]*)</tablename>",
@@ -1039,10 +1041,10 @@ class iPoker(HandHistoryConverter):  # noqa: N801
                 self.tinfo["rewarddrawn"] = Decimal(reward_clean)
                 self.tinfo["rewarddrawn_cents"] = int(self.tinfo["rewarddrawn"] * 100)
             except (ValueError, TypeError, decimal.InvalidOperation):
-                self.tinfo["rewarddrawn"] = Decimal("0")
+                self.tinfo["rewarddrawn"] = Decimal(0)
                 self.tinfo["rewarddrawn_cents"] = 0
         else:
-            self.tinfo["rewarddrawn"] = Decimal("0")
+            self.tinfo["rewarddrawn"] = Decimal(0)
             self.tinfo["rewarddrawn_cents"] = 0
 
         # Calculate Twister multiplier (rewarddrawn / buyin)
@@ -1050,12 +1052,17 @@ class iPoker(HandHistoryConverter):  # noqa: N801
             # Convert buyin from cents to euros for calculation
             buyin_euros = Decimal(self.tinfo["buyin"]) / 100
             self.tinfo["multiplier"] = self.tinfo["rewarddrawn"] / buyin_euros
-            log.debug("Calculated Twister multiplier: %s (rewarddrawn: %s / buyin: %s)",
-                     self.tinfo["multiplier"], self.tinfo["rewarddrawn"], buyin_euros)
+            log.debug(
+                "Calculated Twister multiplier: %s (rewarddrawn: %s / buyin: %s)",
+                self.tinfo["multiplier"],
+                self.tinfo["rewarddrawn"],
+                buyin_euros,
+            )
         else:
-            self.tinfo["multiplier"] = Decimal("0")
-            log.debug("Cannot calculate multiplier: rewarddrawn=%s, buyin=%s",
-                     self.tinfo["rewarddrawn"], self.tinfo["buyin"])
+            self.tinfo["multiplier"] = Decimal(0)
+            log.debug(
+                "Cannot calculate multiplier: rewarddrawn=%s, buyin=%s", self.tinfo["rewarddrawn"], self.tinfo["buyin"]
+            )
 
         # Player performance data
         self.tinfo["bets"] = tourney_info.get("bets", "0")
@@ -1070,16 +1077,17 @@ class iPoker(HandHistoryConverter):  # noqa: N801
                 self.tinfo["hero_winnings"] = Decimal(win_clean)
                 self.tinfo["hero_winnings_cents"] = int(self.tinfo["hero_winnings"] * 100)
             except (ValueError, TypeError, decimal.InvalidOperation):
-                self.tinfo["hero_winnings"] = Decimal("0")
+                self.tinfo["hero_winnings"] = Decimal(0)
                 self.tinfo["hero_winnings_cents"] = 0
         else:
-            self.tinfo["hero_winnings"] = Decimal("0")
+            self.tinfo["hero_winnings"] = Decimal(0)
             self.tinfo["hero_winnings_cents"] = 0
 
         # Parse timing data
         if tourney_info.get("startdate"):
             try:
                 import datetime as dt
+
                 start_time = dt.datetime.strptime(tourney_info["startdate"], "%Y-%m-%d %H:%M:%S")  # noqa: DTZ007
                 self.tinfo["startTime"] = start_time.replace(tzinfo=dt.timezone.utc)
             except (ValueError, TypeError):
@@ -1088,6 +1096,7 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         if tourney_info.get("enddate"):
             try:
                 import datetime as dt
+
                 end_time = dt.datetime.strptime(tourney_info["enddate"], "%Y-%m-%d %H:%M:%S")  # noqa: DTZ007
                 self.tinfo["endTime"] = end_time.replace(tzinfo=dt.timezone.utc)
             except (ValueError, TypeError):
@@ -1865,6 +1874,10 @@ class iPoker(HandHistoryConverter):  # noqa: N801
             if Decimal(win) != 0:
                 self.playerWinnings[pname] = win
                 log.debug("Player %s has winnings: %s", pname, win)
+            # Set hand.hero if this player matches the hero nickname
+            if hasattr(self, "hero") and self.hero and pname == self.hero:
+                hand.hero = pname
+                log.info("🎯 SET HAND HERO: %s", pname)
 
     def _determine_max_seats(self, hand: Any) -> None:
         """Determine the maximum number of seats."""
@@ -1883,8 +1896,9 @@ class iPoker(HandHistoryConverter):  # noqa: N801
                 hand.maxseats = self.maxseats
                 log.info("🎯 SET MAXSEATS from tournament info: %s", hand.maxseats)
             else:
-                hand.maxseats = None
-                log.info("🎯 MAXSEATS could not be determined and remains None")
+                # For ring games, use guessMaxSeats
+                hand.maxseats = self.guessMaxSeats(hand)
+                log.info("🎯 GUESSED MAXSEATS for ring game: %s", hand.maxseats)
         else:
             log.info("🎯 MAXSEATS already set: %s", hand.maxseats)
 
@@ -2045,8 +2059,9 @@ class iPoker(HandHistoryConverter):  # noqa: N801
 
                 # Check if player exists before adding ante
                 if player_name not in player_names:
-                    log.warning("Player %s not found in hand players list: %s. Skipping ante.",
-                               player_name, player_names)
+                    log.warning(
+                        "Player %s not found in hand players list: %s. Skipping ante.", player_name, player_names
+                    )
                     continue
 
                 hand.addAnte(player_name, ante_amount)
@@ -2091,8 +2106,9 @@ class iPoker(HandHistoryConverter):  # noqa: N801
 
                 # Check if player exists before adding blind
                 if player_name not in player_names:
-                    log.warning("Player %s not found in hand players list: %s. Skipping small blind.",
-                               player_name, player_names)
+                    log.warning(
+                        "Player %s not found in hand players list: %s. Skipping small blind.", player_name, player_names
+                    )
                     continue
 
                 hand.addBlind(player_name, "small blind", sb_amount)
@@ -2247,9 +2263,19 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         cards = found.group("CARDS").split(" ")
         newcards, oldcards = self._categorize_cards(cards, street, player)
 
-        if street == "THIRD" and len(newcards) == self.THIRD_STREET_CARDS_COUNT and hasattr(self, "hero") and self.hero == player:
+        if (
+            street == "THIRD"
+            and len(newcards) == self.THIRD_STREET_CARDS_COUNT
+            and hasattr(self, "hero")
+            and self.hero == player
+        ):
             self._process_third_street_hero(hand, street, player, newcards)
-        elif street == "SECOND" and len(newcards) == self.SECOND_STREET_CARDS_COUNT and hasattr(self, "hero") and self.hero == player:
+        elif (
+            street == "SECOND"
+            and len(newcards) == self.SECOND_STREET_CARDS_COUNT
+            and hasattr(self, "hero")
+            and self.hero == player
+        ):
             self._process_second_street_hero(hand, street, player, newcards)
         else:
             self._process_standard_hole_cards(hand, street, player, newcards, oldcards)
@@ -2396,8 +2422,12 @@ class iPoker(HandHistoryConverter):  # noqa: N801
 
             # Check if player exists in hand before processing actions
             if player not in player_names:
-                log.warning("Player %s not found in hand players list: %s. Skipping action type %s.",
-                           player, player_names, atype)
+                log.warning(
+                    "Player %s not found in hand players list: %s. Skipping action type %s.",
+                    player,
+                    player_names,
+                    atype,
+                )
                 continue
 
             if atype == "0":
@@ -2534,9 +2564,9 @@ class iPoker(HandHistoryConverter):  # noqa: N801
     def _parse_tournament_data(self, hand_text: str) -> dict:  # noqa: C901, PLR0912, PLR0915
         """Parse tournament data from hand text."""
         tournament_data = {
-            "buyin_amount": Decimal("0"),
-            "fee_amount": Decimal("0"),
-            "totbuyin_amount": Decimal("0"),
+            "buyin_amount": Decimal(0),
+            "fee_amount": Decimal(0),
+            "totbuyin_amount": Decimal(0),
             "currency_symbol": "EUR",
             "tourno": None,
             "rank": None,
@@ -2557,7 +2587,6 @@ class iPoker(HandHistoryConverter):  # noqa: N801
             "totalbuyin": r"<totalbuyin>([^<]*)</totalbuyin>",
             "win": r"<win>([^<]*)</win>",
             "currency": r"<currency>([^<]*)</currency>",
-
             # Extended data for tournament results
             "rewarddrawn": r"<rewarddrawn>([^<]*)</rewarddrawn>",
             "statuspoints": r"<statuspoints>([^<]*)</statuspoints>",
@@ -2622,7 +2651,7 @@ class iPoker(HandHistoryConverter):  # noqa: N801
                 win_clean = self._clean_currency_amount(win_str)
                 tournament_data["hero_winnings"] = Decimal(win_clean)
             else:
-                tournament_data["hero_winnings"] = Decimal("0")
+                tournament_data["hero_winnings"] = Decimal(0)
 
             # Parse reward drawn (Twister prize pool)
             rewarddrawn_str = tourney_info.get("rewarddrawn", "0")
@@ -2630,24 +2659,34 @@ class iPoker(HandHistoryConverter):  # noqa: N801
                 reward_clean = self._clean_currency_amount(rewarddrawn_str)
                 tournament_data["rewarddrawn"] = Decimal(reward_clean)
             else:
-                tournament_data["rewarddrawn"] = Decimal("0")
+                tournament_data["rewarddrawn"] = Decimal(0)
 
             # Calculate Twister multiplier (rewarddrawn / buyin)
             if tournament_data["rewarddrawn"] > 0 and tournament_data["buyin_amount"] > 0:
                 tournament_data["multiplier"] = tournament_data["rewarddrawn"] / tournament_data["buyin_amount"]
-                log.debug("Calculated Twister multiplier: %s (rewarddrawn: %s / buyin: %s)",
-                         tournament_data["multiplier"], tournament_data["rewarddrawn"], tournament_data["buyin_amount"])
+                log.debug(
+                    "Calculated Twister multiplier: %s (rewarddrawn: %s / buyin: %s)",
+                    tournament_data["multiplier"],
+                    tournament_data["rewarddrawn"],
+                    tournament_data["buyin_amount"],
+                )
             elif tournament_data["rewarddrawn"] > 0 and tournament_data["totbuyin_amount"] > 0:
                 # Fallback to totalbuyin if buyin_amount is 0
                 tournament_data["multiplier"] = tournament_data["rewarddrawn"] / tournament_data["totbuyin_amount"]
-                log.debug("Calculated Twister multiplier using totalbuyin: %s (rewarddrawn: %s / totalbuyin: %s)",
-                         tournament_data["multiplier"], tournament_data["rewarddrawn"],
-                         tournament_data["totbuyin_amount"])
+                log.debug(
+                    "Calculated Twister multiplier using totalbuyin: %s (rewarddrawn: %s / totalbuyin: %s)",
+                    tournament_data["multiplier"],
+                    tournament_data["rewarddrawn"],
+                    tournament_data["totbuyin_amount"],
+                )
             else:
-                tournament_data["multiplier"] = Decimal("0")
-                log.debug("Cannot calculate multiplier: rewarddrawn=%s, buyin_amount=%s, totbuyin_amount=%s",
-                         tournament_data["rewarddrawn"], tournament_data["buyin_amount"],
-                         tournament_data["totbuyin_amount"])
+                tournament_data["multiplier"] = Decimal(0)
+                log.debug(
+                    "Cannot calculate multiplier: rewarddrawn=%s, buyin_amount=%s, totbuyin_amount=%s",
+                    tournament_data["rewarddrawn"],
+                    tournament_data["buyin_amount"],
+                    tournament_data["totbuyin_amount"],
+                )
 
         except (ValueError, TypeError, decimal.InvalidOperation) as e:
             log.warning("Error parsing tournament buyin amounts: %s", e)
@@ -2689,7 +2728,7 @@ class iPoker(HandHistoryConverter):  # noqa: N801
                     log.warning("Empty or invalid BIAMT value: %s", mg["BIAMT"])
             except InvalidOperation:
                 log.exception("Failed to convert BIAMT to Decimal: %s", amt_str)
-                tournament_data["buyin_amount"] = Decimal("0")
+                tournament_data["buyin_amount"] = Decimal(0)
 
     def _process_fee_amounts(self, mg: dict, tournament_data: dict) -> None:
         """Process fee amounts (BIRAKE and BIRAKE2) from match groups."""
@@ -2733,7 +2772,7 @@ class iPoker(HandHistoryConverter):  # noqa: N801
             and tournament_data["fee_amount"] == 0
         ):
             tournament_data["buyin_amount"] = tournament_data["totbuyin_amount"]
-            tournament_data["fee_amount"] = Decimal("0")
+            tournament_data["fee_amount"] = Decimal(0)
             log.debug("Using TOTBUYIN as buy-in amount since BIAMT and fees were missing.")
 
     def _set_tournament_attributes(self, tournament_data: dict, hand: Any) -> None:
@@ -2768,26 +2807,28 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         hand.chipsout = tournament_data.get("chipsout", "0")
 
         # Hero winnings (in cents)
-        hand.hero_winnings = int(tournament_data.get("hero_winnings", Decimal("0")) * 100)
+        hand.hero_winnings = int(tournament_data.get("hero_winnings", Decimal(0)) * 100)
 
         # Reward drawn (Twister prize pool) in cents
-        hand.rewarddrawn = int(tournament_data.get("rewarddrawn", Decimal("0")) * 100)
+        hand.rewarddrawn = int(tournament_data.get("rewarddrawn", Decimal(0)) * 100)
 
         # Twister multiplier (rewarddrawn / buyin)
-        hand.multiplier = float(tournament_data.get("multiplier", Decimal("0")))
+        hand.multiplier = float(tournament_data.get("multiplier", Decimal(0)))
 
         # Lottery tournament detection and attributes
-        hand.isLottery = tournament_data.get("multiplier", Decimal("0")) > 1
-        hand.tourneyMultiplier = int(tournament_data.get("multiplier", Decimal("1")))
+        hand.isLottery = tournament_data.get("multiplier", Decimal(0)) > 1
+        hand.tourneyMultiplier = int(tournament_data.get("multiplier", Decimal(1)))
 
         if not hasattr(hand, "endTime"):
             hand.endTime = hand.startTime
 
-        log.debug("Set tournament attributes: tourNo=%s, buyin=%s, fee=%s",
-                 hand.tourNo, hand.buyin, hand.fee)
-        log.debug("Set tournament attributes continued: hero_winnings=%s, rewarddrawn=%s, multiplier=%s",
-                 hand.hero_winnings,
-                 hand.rewarddrawn, hand.multiplier)
+        log.debug("Set tournament attributes: tourNo=%s, buyin=%s, fee=%s", hand.tourNo, hand.buyin, hand.fee)
+        log.debug(
+            "Set tournament attributes continued: hero_winnings=%s, rewarddrawn=%s, multiplier=%s",
+            hand.hero_winnings,
+            hand.rewarddrawn,
+            hand.multiplier,
+        )
 
     def _process_tournament_players(self, hand: Any, tournament_data: dict) -> None:
         """Process tournament players and their results."""
@@ -2810,14 +2851,14 @@ class iPoker(HandHistoryConverter):  # noqa: N801
 
         # Set hero winnings from tournament data
         if hasattr(self, "hero") and self.hero and self.hero in hand.winnings:
-            hero_winnings_cents = int(tournament_data.get("hero_winnings", Decimal("0")) * 100)
+            hero_winnings_cents = int(tournament_data.get("hero_winnings", Decimal(0)) * 100)
             hand.winnings[self.hero] = hero_winnings_cents
             log.debug("Set winnings for hero %s: %s cents", self.hero, hero_winnings_cents)
         else:
             log.error("Hero %s not found in hand.winnings: %s", getattr(self, "hero", "None"), hand.winnings)
 
         # For Twister tournaments, calculate other players' winnings based on Twister rules
-        if tournament_data.get("multiplier", Decimal("0")) > 1:
+        if tournament_data.get("multiplier", Decimal(0)) > 1:
             # In Twister, only the winner gets the prize pool, others get 0
             if hasattr(self, "hero") and self.hero and self.hero in hand.ranks and hand.ranks[self.hero] == 1:
                 # Hero is the winner, already set above
@@ -2869,7 +2910,7 @@ class iPoker(HandHistoryConverter):  # noqa: N801
 
             # Add players to summary
             for pname, rank in hand.ranks.items():
-                winnings = hand.winnings.get(pname, Decimal("0"))
+                winnings = hand.winnings.get(pname, Decimal(0))
                 summary.addPlayer(
                     rank=rank,
                     name=pname,

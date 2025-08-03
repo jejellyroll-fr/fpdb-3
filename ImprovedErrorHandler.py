@@ -61,11 +61,11 @@ class ImprovedErrorHandler:
 
     def classify_error(self, error_message: str, hand_text: str) -> ErrorSeverity:
         """Classify error severity based on error message and context.
-        
+
         Args:
             error_message: The error message
             hand_text: The problematic hand text
-            
+
         Returns:
             ErrorSeverity classification
         """
@@ -94,11 +94,11 @@ class ImprovedErrorHandler:
 
     def should_reset_file_position(self, file_path: str, error: ParseError) -> bool:
         """Determine if file position should be reset based on error history.
-        
+
         Args:
             file_path: Path to the file being processed
             error: The current parse error
-            
+
         Returns:
             True if file position should be reset, False otherwise
         """
@@ -126,13 +126,13 @@ class ImprovedErrorHandler:
 
     def record_error(self, file_path: str, error_type: str, message: str, hand_text: str) -> ParseError:
         """Record a parse error and return error information.
-        
+
         Args:
             file_path: Path to the file being processed
             error_type: Type of error (partial, error, etc.)
             message: Error message
             hand_text: Problematic hand text
-            
+
         Returns:
             ParseError object with classification
         """
@@ -163,11 +163,11 @@ class ImprovedErrorHandler:
 
     def should_retry_import(self, file_path: str, error: ParseError) -> bool:
         """Determine if import should be retried.
-        
+
         Args:
             file_path: Path to the file being processed
             error: The parse error
-            
+
         Returns:
             True if import should be retried, False otherwise
         """
@@ -182,10 +182,10 @@ class ImprovedErrorHandler:
 
     def get_error_statistics(self, file_path: str) -> dict[str, int]:
         """Get error statistics for a file.
-        
+
         Args:
             file_path: Path to the file
-            
+
         Returns:
             Dictionary with error counts by severity
         """
@@ -200,7 +200,7 @@ class ImprovedErrorHandler:
 
     def cleanup_file_history(self, file_path: str) -> None:
         """Clean up error history for a file (e.g., when file processing is complete).
-        
+
         Args:
             file_path: Path to the file
         """

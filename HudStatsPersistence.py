@@ -19,9 +19,9 @@ log = get_logger("hud_stats_persistence")
 class HudStatsPersistence:
     """HUD statistics persistence manager."""
 
-    def __init__(self, config_dir: str = None) -> None:
+    def __init__(self, config_dir: str | None = None) -> None:
         """Initialize the persistence manager.
-        
+
         Args:
             config_dir: Configuration directory, defaults to ~/.fpdb
         """
@@ -43,11 +43,11 @@ class HudStatsPersistence:
 
     def save_hud_stats(self, table_key: str, hud_data: dict[str, Any]) -> bool:
         """Save HUD statistics for a table.
-        
+
         Args:
             table_key: Unique table identifier
             hud_data: HUD data to save
-            
+
         Returns:
             True if save succeeded, False otherwise
         """
@@ -79,10 +79,10 @@ class HudStatsPersistence:
 
     def load_hud_stats(self, table_key: str) -> dict[str, Any] | None:
         """Load HUD statistics for a table.
-        
+
         Args:
             table_key: Unique table identifier
-            
+
         Returns:
             HUD data dictionary or None if not found/expired
         """
@@ -111,10 +111,10 @@ class HudStatsPersistence:
 
     def remove_hud_stats(self, table_key: str) -> bool:
         """Remove cached HUD statistics for a table.
-        
+
         Args:
             table_key: Unique table identifier
-            
+
         Returns:
             True if removal succeeded, False otherwise
         """
@@ -160,11 +160,11 @@ class HudStatsPersistence:
 
     def merge_stats(self, cached_stats: dict[str, Any], new_stats: dict[str, Any]) -> dict[str, Any]:
         """Merge cached statistics with new ones.
-        
+
         Args:
             cached_stats: Cached statistics
             new_stats: New statistics
-            
+
         Returns:
             Merged statistics
         """

@@ -1923,13 +1923,13 @@ class Database:
                 if self.backend == self.MYSQL_INNODB:
                     c.execute(
                         "SELECT constraint_name "
-                        + "FROM information_schema.KEY_COLUMN_USAGE "
-                        +
+                         "FROM information_schema.KEY_COLUMN_USAGE "
+
                         # "WHERE REFERENCED_TABLE_SCHEMA = 'fpdb'
                         "WHERE 1=1 "
-                        + "AND table_name = %s AND column_name = %s "
-                        + "AND referenced_table_name = %s "
-                        + "AND referenced_column_name = %s ",
+                         "AND table_name = %s AND column_name = %s "
+                         "AND referenced_table_name = %s "
+                         "AND referenced_column_name = %s ",
                         (fk["fktab"], fk["fkcol"], fk["rtab"], fk["rcol"]),
                     )
                     cons = c.fetchone()
@@ -2051,13 +2051,13 @@ class Database:
                 if self.backend == self.MYSQL_INNODB:
                     c.execute(
                         "SELECT constraint_name "
-                        + "FROM information_schema.KEY_COLUMN_USAGE "
-                        +
+                         "FROM information_schema.KEY_COLUMN_USAGE "
+
                         # "WHERE REFERENCED_TABLE_SCHEMA = 'fpdb'
                         "WHERE 1=1 "
-                        + "AND table_name = %s AND column_name = %s "
-                        + "AND referenced_table_name = %s "
-                        + "AND referenced_column_name = %s ",
+                         "AND table_name = %s AND column_name = %s "
+                         "AND referenced_table_name = %s "
+                         "AND referenced_column_name = %s ",
                         (fk["fktab"], fk["fkcol"], fk["rtab"], fk["rcol"]),
                     )
                     cons = c.fetchone()
@@ -2377,13 +2377,13 @@ class Database:
             if self.backend == self.MYSQL_INNODB:
                 c.execute(
                     "SELECT constraint_name "
-                    + "FROM information_schema.KEY_COLUMN_USAGE "
-                    +
+                     "FROM information_schema.KEY_COLUMN_USAGE "
+
                     # "WHERE REFERENCED_TABLE_SCHEMA = 'fpdb'
                     "WHERE 1=1 "
-                    + "AND table_name = %s AND column_name = %s "
-                    + "AND referenced_table_name = %s "
-                    + "AND referenced_column_name = %s ",
+                     "AND table_name = %s AND column_name = %s "
+                     "AND referenced_table_name = %s "
+                     "AND referenced_column_name = %s ",
                     (fk["fktab"], fk["fkcol"], fk["rtab"], fk["rcol"]),
                 )
                 cons = c.fetchone()
@@ -2459,13 +2459,13 @@ class Database:
             if self.backend == self.MYSQL_INNODB:
                 c.execute(
                     "SELECT constraint_name "
-                    + "FROM information_schema.KEY_COLUMN_USAGE "
-                    +
+                     "FROM information_schema.KEY_COLUMN_USAGE "
+
                     # "WHERE REFERENCED_TABLE_SHEMA = 'fpdb'
                     "WHERE 1=1 "
-                    + "AND table_name = %s AND column_name = %s "
-                    + "AND referenced_table_name = %s "
-                    + "AND referenced_column_name = %s ",
+                     "AND table_name = %s AND column_name = %s "
+                     "AND referenced_table_name = %s "
+                     "AND referenced_column_name = %s ",
                     (fk["fktab"], fk["fkcol"], fk["rtab"], fk["rcol"]),
                 )
                 cons = c.fetchone()
@@ -5220,7 +5220,7 @@ class Database:
                 inserts,
             )
 
-    def cleanup_connections(self):
+    def cleanup_connections(self) -> None:
         """Clean up database connections to prevent timeouts and pool exhaustion."""
         try:
             if hasattr(self, "cursor") and self.cursor:
@@ -5238,7 +5238,7 @@ class Database:
         except Exception as e:
             log.warning(f"Error closing connection: {e}")
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Ensure connections are cleaned up when Database object is destroyed."""
         try:
             self.cleanup_connections()

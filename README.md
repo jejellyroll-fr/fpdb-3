@@ -16,7 +16,6 @@ I'm not an expert python developer, this project, as a poker player, is for me t
 
 FPDB is a poker tools - HUD - Replayer
 
-
 ## wiki
 
 - [wiki Homepage](https://github.com/jejellyroll-fr/fpdb-3/wiki)
@@ -34,6 +33,10 @@ FPDB is a poker tools - HUD - Replayer
 - If have questions or want to discuss about the project: <https://github.com/jejellyroll-fr/fpdb-3/discussions>
 
 ## Requirement for dev
+
+### New dev documentation genrated with sphinx
+
+<https://jejellyroll-fr.github.io/fpdb-3/>
 
 ```sh
 mkdir ~/.fpdb
@@ -81,9 +84,6 @@ or
 ```sh
 pip install .[build,macos]
 ```
-
-
-
 
 ## Dev test
 

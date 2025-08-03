@@ -52,8 +52,8 @@ class Winamax(HandHistoryConverter):
 
     mixes = {
         "8games": "8game",
-        "10games": "10game", 
-        "horse": "horse"
+        "10games": "10game",
+        "horse": "horse",
     }  # Legal mixed games
     sym = {
         "USD": r"\$",
@@ -299,7 +299,7 @@ class Winamax(HandHistoryConverter):
                     )
                 else:
                     datetimestr = "2010/Jan/01 01:01:01"
-                    log.warning(f"DATETIME not matched: '{info[key]}'")
+                    log.warning(f"DATETIME not matched: '{value}'")
                 hand.startTime = datetime.datetime.strptime(
                     datetimestr, "%Y/%m/%d %H:%M:%S",
                 )
@@ -310,17 +310,17 @@ class Winamax(HandHistoryConverter):
                 hand.handid = f"{int(info['HID1'][:14])}{int(info['HID2'])}"
 
             elif key == "TOURNO":
-                hand.tourNo = info[key]
+                hand.tourNo = value
             if key == "TABLE":
-                hand.tablename = info[key]
+                hand.tablename = value
                 if hand.gametype["type"] == "tour":
                     hand.tablename = info["TABLENO"]
                     hand.roundPenny = True
                 # TODO: long-term solution for table naming on Winamax.
                 if hand.tablename.endswith("No Limit Hold'em"):
                     hand.tablename = hand.tablename[: -len("No Limit Hold'em")] + "NLHE"
-            if key == "MAXPLAYER" and info[key] is not None:
-                hand.maxseats = int(info[key])
+            if key == "MAXPLAYER" and value is not None:
+                hand.maxseats = int(value)
 
             if key == "BUYIN" and info.get("TOURNO") is not None:
                 log.debug(f"info['BUYIN']: {info['BUYIN']}")
@@ -336,11 +336,11 @@ class Winamax(HandHistoryConverter):
                     hand.fee = 0
                     hand.buyinCurrency = "FREE"
                 else:
-                    if info[key].find("$") != -1:
+                    if value.find("$") != -1:
                         hand.buyinCurrency = "USD"
-                    elif info[key].find("€") != -1:
+                    elif value.find("€") != -1:
                         hand.buyinCurrency = "EUR"
-                    elif info[key].find("FPP") != -1 or info[key].find("Free") != -1:
+                    elif value.find("FPP") != -1 or value.find("Free") != -1:
                         hand.buyinCurrency = "WIFP"
                     elif info["MONEY"]:
                         hand.buyinCurrency = "EUR"
@@ -379,7 +379,7 @@ class Winamax(HandHistoryConverter):
                         hand.buyinCurrency = "FREE"
 
             if key == "LEVEL":
-                hand.level = info[key]
+                hand.level = value
 
         # Detect lottery tournaments (Expresso, Expresso Nitro)
         if hand.tourNo is not None and info.get("TOURNAME"):

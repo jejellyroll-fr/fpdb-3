@@ -15,6 +15,8 @@
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
 
+import builtins
+import contextlib
 import datetime
 import os
 import re
@@ -99,10 +101,8 @@ class ZMQSender:
         except Exception as e:
             log.warning(f"Error during ZMQ sender close: {e}")
             # Force termination if there's an error
-            try:
+            with contextlib.suppress(builtins.BaseException):
                 self.context.term()
-            except:
-                pass
 
 
 class Importer:
@@ -161,10 +161,10 @@ class Importer:
 
         # Modification: specify port for ZMQ
         self.zmq_sender = None
-        
+
         # HandDataReporter for quality analysis
         self.hand_data_reporter = None
-        
+
         process_time()  # init clock in windows
 
     # Set functions
@@ -253,7 +253,7 @@ class Importer:
 
     def setHandDataReporter(self, reporter) -> None:
         """Enable HandDataReporter for detailed import analysis.
-        
+
         Args:
             reporter: HandDataReporter instance
         """
@@ -861,7 +861,7 @@ class Importer:
 
         # Load filter, process file, pass returned filename to import_fpdb_file
         log.info(f"Converting {fpdbfile.path}")
-        
+
         # Start HandDataReporter file tracking if enabled
         if self.hand_data_reporter:
             self.hand_data_reporter.start_file(fpdbfile.path)
@@ -890,7 +890,7 @@ class Importer:
             # Add parsing issues to the main importer's list
             for issue in hhc.parsing_issues:
                 self.import_issues.append(f"In {fpdbfile.path}: {issue}")
-                
+
                 # Report parsing issues if HandDataReporter is enabled
                 if self.hand_data_reporter:
                     self.hand_data_reporter.report_hand_failure(fpdbfile.path, Exception(issue))
@@ -954,42 +954,44 @@ class Importer:
                         ihands.append(hand)
                         to_hud.append(hand.dbid_hands)
                         log.info(f"Hand {hand.dbid_hands} added to HUD queue")
-                        
+
                         # Report successful hand processing
                         if self.hand_data_reporter:
                             try:
+                                log.debug(f"DEBUG: Calling report_hand_success for hand {hand.handid}")
                                 self.hand_data_reporter.report_hand_success(fpdbfile.path, hand)
+                                log.debug(f"DEBUG: report_hand_success completed for hand {hand.handid}")
                             except Exception as e:
-                                print(f"🚨 ERREUR HandDataReporter: {e}")
-                            
+                                log.error(f"DEBUG: Exception in report_hand_success: {e}")
+
                     except FpdbHandDuplicate as e:
                         duplicates += 1
                         log.info("Duplicate hand detected - not sending to HUD")
                         if doinsert and ihands:
                             backtrack = True
-                            
+
                         # Report duplicate hand
                         if self.hand_data_reporter:
-                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, e, hand.handText[:200] if hasattr(hand, 'handText') else "")
-                            
+                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, e, hand.handText[:200] if hasattr(hand, "handText") else "")
+
                     except FpdbHandPartial as e:
                         partial += 1
                         self.import_issues.append(f"[PARTIAL] In {fpdbfile.path}: Hand starting with '{hand.handText[:30]}...' - {e}")
-                        
+
                         # Report partial hand
                         if self.hand_data_reporter:
-                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, e, hand.handText[:200] if hasattr(hand, 'handText') else "", hand)
-                            
+                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, e, hand.handText[:200] if hasattr(hand, "handText") else "", hand)
+
                     except Exception as e:
                         errors += 1
                         self.import_issues.append(f"[ERROR] In {fpdbfile.path}: Hand starting with '{hand.handText[:30]}...' - {e}")
                         log.exception(
                             f"Importer._import_hh_file: '{fpdbfile.path}' Fatal error: '{e}'",
                         )
-                        
+
                         # Report error hand
                         if self.hand_data_reporter:
-                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, e, hand.handText[:200] if hasattr(hand, 'handText') else "")
+                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, e, hand.handText[:200] if hasattr(hand, "handText") else "")
                         log.exception(f"'{hand.handText[0:200]}'")
                         if doinsert and ihands:
                             backtrack = True
@@ -1076,11 +1078,11 @@ class Importer:
             log.warning("No phands available for summary checking")
 
         ttime = time() - ttime
-        
+
         # Finalize HandDataReporter file tracking if enabled
         if self.hand_data_reporter:
             self.hand_data_reporter.finish_file(fpdbfile.path)
-        
+
         return (stored, duplicates, partial, skipped, errors, ttime, detected_sitename)
 
     def autoSummaryGrab(self, force=False) -> None:
@@ -1134,7 +1136,7 @@ class Importer:
             mod = __import__(fpdbfile.site.summary)
             log.debug(f"Successfully imported module: {fpdbfile.site.summary}")
         except ImportError as e:
-            log.error(f"Failed to import summary module {fpdbfile.site.summary}: {e}")
+            log.exception(f"Failed to import summary module {fpdbfile.site.summary}: {e}")
             return (0, 0, 0, 0, 1, time())
 
         obj = getattr(mod, fpdbfile.site.summary, None)
@@ -1240,33 +1242,32 @@ class Importer:
                 )
         return summaryTexts
 
-    def get_hand_data_report(self, file_path: str = None) -> str:
+    def get_hand_data_report(self, file_path: str | None = None) -> str:
         """Get a formatted report from HandDataReporter.
-        
+
         Args:
             file_path: Path to specific file to report on. If None, returns session summary.
-            
+
         Returns:
             Formatted report string
         """
         if not self.hand_data_reporter:
             return "HandDataReporter not enabled. Use setHandDataReporter() to enable detailed reporting."
-            
+
         if file_path:
             return self.hand_data_reporter.generate_file_report(file_path)
-        else:
-            return self.hand_data_reporter.generate_session_summary()
-            
+        return self.hand_data_reporter.generate_session_summary()
+
     def export_hand_data_json(self, output_path: str) -> None:
         """Export HandDataReporter data to JSON file.
-        
+
         Args:
             output_path: Path where to save the JSON report
         """
         if not self.hand_data_reporter:
             log.warning("HandDataReporter not enabled. Cannot export JSON report.")
             return
-            
+
         self.hand_data_reporter.export_json(output_path)
 
     def cleanup(self) -> None:
@@ -1282,7 +1283,7 @@ class Importer:
                 log.debug("ZMQ sender closed during cleanup.")
             except Exception as e:
                 log.warning(f"Error closing ZMQ sender during cleanup: {e}")
-        
+
         # Close database connections
         if hasattr(self, "database") and self.database is not None:
             try:
@@ -1365,7 +1366,7 @@ class ImportProgressDialog(QDialog):
                 try:
                     progress = self.fraction / self.total
                     bar_length = 40
-                    filled_len = int(round(bar_length * progress))
+                    filled_len = round(bar_length * progress)
                     bar = "█" * filled_len + "─" * (bar_length - filled_len)
                     percentage = round(progress * 100, 1)
                     # Use sys.stdout.write for continuous line update

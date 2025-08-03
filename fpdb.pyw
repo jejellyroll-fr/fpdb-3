@@ -174,11 +174,11 @@ class fpdb(QMainWindow):
             self,
             f"FPDB{VERSION!s}",
             "Copyright 2008-2023. See contributors.txt for details"
-            + "You are free to change, and distribute original or changed versions "
+             "You are free to change, and distribute original or changed versions "
             "of fpdb within the rules set out by the license"
-            + "https://github.com/jejellyroll-fr/fpdb-3"
-            + "\n"
-            + "Your config file is: "
+             "https://github.com/jejellyroll-fr/fpdb-3"
+             "\n"
+             "Your config file is: "
             + self.config.file,
         )
 
@@ -812,7 +812,7 @@ class fpdb(QMainWindow):
             show_logger_dev_tool(self)
             self.statusBar().showMessage("Logger Dev Tool open")
         except Exception as e:
-            log.error(f"Error opening Logger Dev Tool: {e}")
+            log.exception(f"Error opening Logger Dev Tool: {e}")
             self.statusBar().showMessage(f"Error: {e}")
 
 

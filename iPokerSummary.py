@@ -449,7 +449,7 @@ class iPokerSummary(TourneySummary):  # noqa: N801
         # Handle complex format with multiple amounts (e.g., "0€ + 0,02€ + 0,23€")
         if "+" in string:
             parts = string.split("+")
-            total = Decimal("0")
+            total = Decimal(0)
             for part_str in parts:
                 part = part_str.strip()
                 if part:

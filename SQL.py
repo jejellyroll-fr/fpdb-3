@@ -3917,11 +3917,7 @@ class Sql:
                 """CREATE INDEX pot_idx ON Hands (finalPot)"""
             )
         # Add bombPot column to existing Hands tables
-        if db_server == "mysql":
-            self.query["addBombPotColumn"] = (
-                """ALTER TABLE Hands ADD COLUMN bombPot BIGINT DEFAULT 0"""
-            )
-        elif db_server == "postgresql":
+        if db_server in {"mysql", "postgresql"}:
             self.query["addBombPotColumn"] = (
                 """ALTER TABLE Hands ADD COLUMN bombPot BIGINT DEFAULT 0"""
             )

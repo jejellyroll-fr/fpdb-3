@@ -634,8 +634,8 @@ class GuiRingPlayerStats(QSplitter):
             query = query.replace(
                 "<orderbyhgametypeId>",
                 ",case when floor((hp.startcards-1)/13) >= mod((hp.startcards-1),13) then hp.startcards + 0.1 "
-                + " else 13*mod((hp.startcards-1),13) + floor((hp.startcards-1)/13) + 1 "
-                + " end desc ",
+                 " else 13*mod((hp.startcards-1),13) + floor((hp.startcards-1)/13) + 1 "
+                 " end desc ",
             )
         else:
             query = query.replace("<orderbyhgametypeId>", "")

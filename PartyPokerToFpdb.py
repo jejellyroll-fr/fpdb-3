@@ -1191,7 +1191,7 @@ class PartyPoker(HandHistoryConverter):
 
             streets = match.groupdict()
             log.debug(
-                f"Marked street sections sections: {str({k: bool(v) for k, v in streets.items()})}",
+                f"Marked street sections sections: { {k: bool(v) for k, v in streets.items()}!s}",
             )
 
             # Log street actions
@@ -1699,7 +1699,7 @@ class PartyPoker(HandHistoryConverter):
 
             # Add players to summary
             for pname, rank in hand.ranks.items():
-                winnings = hand.winnings.get(pname, Decimal("0"))
+                winnings = hand.winnings.get(pname, Decimal(0))
                 winningsCurrency = hand.buyinCurrency
                 summary.addPlayer(
                     rank=rank,
