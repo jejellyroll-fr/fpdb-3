@@ -20,7 +20,6 @@ fpdb-3
    Database
    Deck
    DerivedStats
-   DerivedStats-legacy
    DetectInstalledSites
    Exceptions
    Filters
@@ -76,9 +75,6 @@ fpdb-3
    card_path
    iPokerSummary
    iPokerToFpdb
-   iPokerToFpdb-bak
-   iPokerToFpdb-current
-   iPokerToFpdb-old-bak
    importer_cli
    interlocks
    loggingFpdb
