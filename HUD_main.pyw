@@ -210,7 +210,7 @@ class HudMain(QObject):
             log.info("HUD_main starting up - logging initialized successfully")
 
         except Exception as e:
-            log.error(f"Failed to setup HUD logging: {e}")
+            log.exception(f"Failed to setup HUD logging: {e}")
             import traceback
             traceback.print_exc()
 

@@ -12,7 +12,7 @@ log = get_logger("popup_themes")
 class PopupTheme:
     """Base class for popup themes."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self.name = name
         self.colors = {}
         self.fonts = {}
@@ -34,7 +34,7 @@ class PopupTheme:
 class MaterialDarkTheme(PopupTheme):
     """Material Design Dark theme."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("material_dark")
 
         self.colors = {
@@ -86,7 +86,7 @@ class MaterialDarkTheme(PopupTheme):
 class MaterialLightTheme(PopupTheme):
     """Material Design Light theme."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("material_light")
 
         self.colors = {
@@ -138,7 +138,7 @@ class MaterialLightTheme(PopupTheme):
 class ClassicTheme(PopupTheme):
     """Classic FPDB theme for compatibility."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("classic")
 
         self.colors = {
@@ -196,7 +196,7 @@ def get_theme(theme_name: str = "material_dark") -> PopupTheme:
     return theme_class()
 
 
-def get_stat_color(theme: PopupTheme, stat_name: str, value: float, thresholds: dict[str, float] = None) -> str:
+def get_stat_color(theme: PopupTheme, stat_name: str, value: float, thresholds: dict[str, float] | None = None) -> str:
     """Get color for a stat based on its value and thresholds."""
     if thresholds is None:
         # Default thresholds for common stats

@@ -263,7 +263,6 @@ class LoggerRegistry:
 
         if name in self._loggers:
             logger_info = self._loggers[name]
-            old_level = logger_info.current_level
 
             # CRITICAL: Update the actual Python logger instance that the application uses
             # This ensures that existing loggers in the application get the new level
@@ -304,10 +303,9 @@ class LoggerRegistry:
                 for handler in root_logger.handlers:
                     if isinstance(handler, logging.StreamHandler) and not hasattr(
                         handler, "baseFilename",
-                    ):
-                        if handler.level > level:
-                            handler.setLevel(level)
-                            handlers_updated += 1
+                    ) and handler.level > level:
+                        handler.setLevel(level)
+                        handlers_updated += 1
 
                 # If no handlers were found or updated, add a new console handler
                 if not root_has_console_handler and handlers_updated == 0:
@@ -418,11 +416,10 @@ class LoggerRegistry:
         # If logger not found, try discovering it first
         if name not in self._loggers:
             self.discover_loggers()
-        result = self._loggers.get(name)
-        return result
+        return self._loggers.get(name)
 
     def filter_loggers(
-        self, pattern: str = "", level_filter: int = None,
+        self, pattern: str = "", level_filter: int | None = None,
     ) -> dict[str, LoggerInfo]:
         """Filter registered loggers by name pattern and/or logging level.
 
@@ -461,7 +458,7 @@ def get_logger_registry() -> LoggerRegistry:
 class LogConfig:
     """Configuration manager for logger settings with JSON persistence."""
 
-    def __init__(self, config_dir: str = None) -> None:
+    def __init__(self, config_dir: str | None = None) -> None:
         """Initialize the LogConfig instance and set up configuration file paths.
 
         Sets the directory and file path for logger configuration, creating the directory if it does not exist. If no directory is provided, defaults to a 'fpdb_logs' folder in the user's home directory.
@@ -505,7 +502,7 @@ class LogConfig:
             return True
 
         except Exception as e:
-            logging.getLogger(__name__).error(f"Failed to save logger config: {e}")
+            logging.getLogger(__name__).exception(f"Failed to save logger config: {e}")
             return False
 
     def load_config_data(self) -> dict:
@@ -523,7 +520,7 @@ class LogConfig:
             with open(self.config_file, encoding="utf-8") as f:
                 return json.load(f)
         except Exception as e:
-            logging.getLogger(__name__).error(f"Failed to load logger config data: {e}")
+            logging.getLogger(__name__).exception(f"Failed to load logger config data: {e}")
             return {}
 
     def load_config(self, registry: LoggerRegistry) -> bool:
@@ -555,7 +552,7 @@ class LogConfig:
             return True
 
         except Exception as e:
-            logging.getLogger(__name__).error(f"Failed to load logger config: {e}")
+            logging.getLogger(__name__).exception(f"Failed to load logger config: {e}")
             return False
 
     def export_config(self, registry: LoggerRegistry, filename: str) -> bool:
@@ -592,7 +589,7 @@ class LogConfig:
             return True
 
         except Exception as e:
-            logging.getLogger(__name__).error(f"Failed to export config: {e}")
+            logging.getLogger(__name__).exception(f"Failed to export config: {e}")
             return False
 
     def import_config(self, registry: LoggerRegistry, filename: str) -> bool:
@@ -627,7 +624,7 @@ class LogConfig:
             return True
 
         except Exception as e:
-            logging.getLogger(__name__).error(f"Failed to import config: {e}")
+            logging.getLogger(__name__).exception(f"Failed to import config: {e}")
             return False
 
 
@@ -999,7 +996,7 @@ def show_logger_dev_tool(parent=None):
         tool = LoggerDevTool(parent)
         return tool.show()
     except ImportError as e:
-        logging.getLogger(__name__).error(f"Cannot show Logger Dev Tool: {e}")
+        logging.getLogger(__name__).exception(f"Cannot show Logger Dev Tool: {e}")
         return None
 
 
@@ -1363,9 +1360,8 @@ def ensure_console_handlers_configured() -> None:
             for handler in root_logger.handlers:
                 if isinstance(handler, logging.StreamHandler) and not hasattr(
                     handler, "baseFilename",
-                ):
-                    if handler.level > min_level:
-                        handler.setLevel(min_level)
+                ) and handler.level > min_level:
+                    handler.setLevel(min_level)
 
     except Exception as e:
         logging.getLogger(__name__).debug(f"Error configuring console handlers: {e}")

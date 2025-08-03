@@ -66,13 +66,13 @@ class SmartHudManager:
         new_state: dict | None = None,
     ) -> tuple[bool, str]:
         """Determine if HUD should be restarted.
-        
+
         Args:
             table_key: Unique table identifier
             reason: Reason for potential restart
             current_state: Current table state
             new_state: New table state
-            
+
         Returns:
             Tuple of (should_restart, explanation)
         """
@@ -180,7 +180,7 @@ class SmartHudManager:
         table_title: str = "",
     ) -> None:
         """Update stored table state.
-        
+
         Args:
             table_key: Unique table identifier
             poker_game: Poker game type
@@ -214,7 +214,7 @@ class SmartHudManager:
 
     def record_restart(self, table_key: str, reason: str) -> None:
         """Record that a HUD restart occurred.
-        
+
         Args:
             table_key: Unique table identifier
             reason: Reason for restart
@@ -232,11 +232,11 @@ class SmartHudManager:
 
     def has_table_title_changed(self, table_key: str, new_title: str) -> bool:
         """Check if table title has significantly changed.
-        
+
         Args:
             table_key: Unique table identifier
             new_title: New table title
-            
+
         Returns:
             True if title change indicates table change
         """

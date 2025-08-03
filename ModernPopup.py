@@ -30,7 +30,7 @@ log = get_logger("modern_popup")
 class ModernStatRow(QWidget):
     """A modern stat row with icon, name, value and visual indicators."""
 
-    def __init__(self, stat_name: str, stat_data: tuple, theme: PopupTheme, icon_provider: IconProvider):
+    def __init__(self, stat_name: str, stat_data: tuple, theme: PopupTheme, icon_provider: IconProvider) -> None:
         super().__init__()
         self.stat_name = stat_name
         self.stat_data = stat_data
@@ -40,7 +40,7 @@ class ModernStatRow(QWidget):
         self.setup_ui()
         self.setup_style()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         """Setup the UI elements."""
         layout = QHBoxLayout()
         layout.setContentsMargins(8, 4, 8, 4)
@@ -55,10 +55,7 @@ class ModernStatRow(QWidget):
         if self.stat_data:
             # Get clean stat name by removing the "=value" part
             full_name = self.stat_data[3]
-            if "=" in full_name:
-                clean_name = full_name.split("=")[0]
-            else:
-                clean_name = full_name
+            clean_name = full_name.split("=")[0] if "=" in full_name else full_name
         else:
             clean_name = self.stat_name
 
@@ -88,7 +85,7 @@ class ModernStatRow(QWidget):
 
         self.setLayout(layout)
 
-    def setup_style(self):
+    def setup_style(self) -> None:
         """Apply theme styling."""
         # Extract numeric value for color determination
         try:
@@ -144,7 +141,7 @@ class ModernStatRow(QWidget):
             }}
         """)
 
-    def _update_progress_bar(self):
+    def _update_progress_bar(self) -> None:
         """Update the progress bar based on stat value."""
         if not self.stat_data or len(self.stat_data) < 2:
             self.indicator.setValue(0)
@@ -177,7 +174,7 @@ class ModernStatRow(QWidget):
 class ModernSectionWidget(QFrame):
     """A collapsible section for grouping related stats."""
 
-    def __init__(self, section_name: str, theme: PopupTheme, icon_provider: IconProvider):
+    def __init__(self, section_name: str, theme: PopupTheme, icon_provider: IconProvider) -> None:
         super().__init__()
         self.section_name = section_name
         self.theme = theme
@@ -187,7 +184,7 @@ class ModernSectionWidget(QFrame):
         self.setup_ui()
         self.setup_style()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         """Setup the section UI."""
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -227,7 +224,7 @@ class ModernSectionWidget(QFrame):
 
         self.setLayout(layout)
 
-    def setup_style(self):
+    def setup_style(self) -> None:
         """Apply section styling."""
         self.setFrameStyle(QFrame.Box)
         self.setStyleSheet(f"""
@@ -249,7 +246,7 @@ class ModernSectionWidget(QFrame):
         self.header_label.setStyleSheet(f"color: {self.theme.get_color('text_primary')};")
         self.header_icon.setStyleSheet(f"color: {self.theme.get_color('text_accent')};")
 
-    def add_stat_row(self, stat_name: str, stat_data: tuple):
+    def add_stat_row(self, stat_name: str, stat_data: tuple) -> None:
         """Add a stat row to this section."""
         row = ModernStatRow(stat_name, stat_data, self.theme, self.icon_provider)
         self.stat_rows.append(row)
@@ -259,7 +256,7 @@ class ModernSectionWidget(QFrame):
 class ModernSubmenu(Popup):
     """Modern popup window with sectioned layout and improved styling."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         # Extract theme from kwargs if provided
         self.theme_name = kwargs.pop("theme", "material_dark")
         self.icon_provider_name = kwargs.pop("icon_provider", "emoji")
@@ -299,7 +296,7 @@ class ModernSubmenu(Popup):
         self.create_header(player_id)
         self.create_content(player_id)
 
-    def setup_window_style(self):
+    def setup_window_style(self) -> None:
         """Setup the overall window styling."""
         self.setStyleSheet(f"""
             ModernSubmenu {{
@@ -320,7 +317,7 @@ class ModernSubmenu(Popup):
         self.main_layout.setSpacing(self.theme.get_spacing("section_spacing"))
         self.setLayout(self.main_layout)
 
-    def create_header(self, player_id: int):
+    def create_header(self, player_id: int) -> None:
         """Create the popup header with player info and close button."""
         header_layout = QHBoxLayout()
         header_layout.setContentsMargins(8, 6, 8, 6)
@@ -369,7 +366,7 @@ class ModernSubmenu(Popup):
 
         self.main_layout.addWidget(self.header_widget)
 
-    def create_content(self, player_id: int):
+    def create_content(self, player_id: int) -> None:
         """Create the main content with sectioned stats."""
         # Scroll area for content
         scroll_area = QScrollArea()
@@ -407,7 +404,7 @@ class ModernSubmenu(Popup):
             if section_name in categorized_stats:
                 section = ModernSectionWidget(section_name, self.theme, self.icon_provider)
 
-                for stat, stat_data, submenu in categorized_stats[section_name]:
+                for stat, stat_data, _submenu in categorized_stats[section_name]:
                     section.add_stat_row(stat, stat_data)
 
                 content_layout.addWidget(section)
@@ -418,7 +415,7 @@ class ModernSubmenu(Popup):
             if section_name not in self.sections:
                 section = ModernSectionWidget(section_name, self.theme, self.icon_provider)
 
-                for stat, stat_data, submenu in stats:
+                for stat, stat_data, _submenu in stats:
                     section.add_stat_row(stat, stat_data)
 
                 content_layout.addWidget(section)
@@ -434,7 +431,7 @@ class ModernSubmenu(Popup):
         self.setMinimumSize(320, 400)
         self.setMaximumSize(500, 600)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event) -> None:
         """Handle mouse press for dragging."""
         if event.button() == Qt.LeftButton:
             # Check if click is on header area for dragging
@@ -449,7 +446,7 @@ class ModernSubmenu(Popup):
         # Call parent to handle other events (right-click popup destruction, etc.)
         super().mousePressEvent(event)
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event) -> None:
         """Handle mouse move for dragging."""
         if (event.buttons() == Qt.LeftButton and
             self.drag_start_position is not None):
@@ -471,7 +468,7 @@ class ModernSubmenu(Popup):
         # Call parent for other mouse move events
         super().mouseMoveEvent(event)
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event) -> None:
         """Handle mouse release to stop dragging."""
         if event.button() == Qt.LeftButton and self.drag_start_position is not None:
             # If we were dragging, just reset drag state and don't call parent
@@ -490,7 +487,7 @@ class ModernSubmenu(Popup):
 class ModernSubmenuLight(ModernSubmenu):
     """Light theme variant of ModernSubmenu."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         kwargs["theme"] = "material_light"
         super().__init__(*args, **kwargs)
 
@@ -498,7 +495,7 @@ class ModernSubmenuLight(ModernSubmenu):
 class ModernSubmenuClassic(ModernSubmenu):
     """Classic theme variant of ModernSubmenu for compatibility."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         kwargs["theme"] = "classic"
         kwargs["icon_provider"] = "text"
         super().__init__(*args, **kwargs)

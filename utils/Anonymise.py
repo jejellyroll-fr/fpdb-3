@@ -49,8 +49,7 @@ def sanitize_filter_name(input_str):
 
     """
     # If the input string starts with "hh", remove those characters
-    if input_str.startswith("hh"):
-        input_str = input_str[2:]
+    input_str = input_str.removeprefix("hh")
     # Trim any leading or trailing whitespace from the input string
     return input_str.strip()
 

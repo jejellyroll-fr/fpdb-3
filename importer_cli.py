@@ -12,7 +12,7 @@ from HandDataReporter import HandDataReporter
 from Importer import Importer
 
 
-def main():
+def main() -> None:
     # Suppress FutureWarnings
     warnings.simplefilter(action="ignore", category=FutureWarning)
 
@@ -45,10 +45,8 @@ def main():
     # Setup logging based on debug/verbose flags
     if args.debug:
         logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(name)s:%(funcName)s] [%(levelname)s] %(message)s")
-        print("Debug logging enabled")
     elif args.verbose:
         logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s:%(funcName)s] [%(levelname)s] %(message)s")
-        print("Verbose logging enabled")
     else:
         # Silence all logs except CRITICAL (quiet mode for normal usage)
         # Capture and disable all logging immediately
@@ -69,7 +67,7 @@ def main():
         if os.path.exists(args.config):
             config_file = args.config
         else:
-            print(f"Config file not found: {args.config}", file=sys.stderr)
+            pass
             # Decide if you want to exit or proceed with default config
             # sys.exit(1)
 
@@ -85,7 +83,6 @@ def main():
         # Pass debug mode information to reporter
         if args.debug:
             hand_reporter._debug_mode = True
-        print(f"🔍 Hand data reporting enabled (level: {args.report_level})")
 
     # Setup importer
     importer = Importer(caller=None, settings={}, config=config, sql=db.sql, parent=None)
@@ -99,27 +96,21 @@ def main():
     # Add files/dirs to importer
     for path in args.paths:
         if not os.path.exists(path):
-            print(f"Path not found: {path}", file=sys.stderr)
             continue
-        print(f"Adding {path} to import list...")
         importer.addBulkImportImportFileOrDir(path, site=args.site)
 
     if not importer.filelist:
-        print("No valid files found to import.")
         return
 
-    print(f"Starting import of {len(importer.filelist)} files...")
     # Run the import
     (stored, dups, partial, skipped, errors, ttime) = importer.runImport()
 
     # Process tournament summaries for files marked as "both"
-    print("Processing tournament summaries...")
 
     # Debug: check which files are marked as "both"
     both_files = [f for f, fpdbfile in importer.filelist.items() if fpdbfile.ftype == "both"]
-    print(f"Files marked as 'both': {len(both_files)}")
-    for f in both_files:
-        print(f"  - {f}")
+    for _f in both_files:
+        pass
 
     importer.autoSummaryGrab(force=True)
 
@@ -133,47 +124,23 @@ def main():
         BOLD = "\033[1m"
         END = "\033[0m"
 
-    ICONS = {
-        "time": "⏱️",
-        "files": "📁",
-        "stored": "✔️",
-        "duplicates": "⚠️",
-        "partial": "↪️",
-        "skipped": "⏭️",
-        "errors": "❌",
-    }
 
-    print(f"\n{Colors.BOLD}--- Import Summary ---{Colors.END}")
-    print(f"  {ICONS['time']} Total time: {Colors.BLUE}{ttime:.2f} seconds{Colors.END}")
-    print(f"  {ICONS['files']} Files processed: {Colors.BLUE}{len(importer.filelist)}{Colors.END}")
-    print(f"  {ICONS['stored']} Hands stored: {Colors.GREEN}{stored}{Colors.END}")
-    print(f"  {ICONS['duplicates']} Duplicates: {Colors.YELLOW}{dups}{Colors.END}")
-    print(f"  {ICONS['partial']} Partial (skipped): {Colors.YELLOW}{partial}{Colors.END}")
-    print(f"  {ICONS['skipped']} Skipped (other): {Colors.YELLOW}{skipped}{Colors.END}")
-    print(f"  {ICONS['errors']} Errors: {Colors.RED if errors > 0 else Colors.GREEN}{errors}{Colors.END}")
-    print(f"{Colors.BOLD}----------------------{Colors.END}")
 
     if importer.import_issues:
-        print(f"\n{Colors.BOLD}--- Import Issues ---{Colors.END}")
         for issue in importer.import_issues:
             if issue.startswith("[ERROR]"):
-                print(f"  {Colors.RED}{issue}{Colors.END}")
+                pass
             else:
-                print(f"  {Colors.YELLOW}{issue}{Colors.END}")
-        print(f"{Colors.BOLD}----------------------{Colors.END}")
+                pass
 
     # Generate hand data report if enabled
     if hand_reporter:
-        print("🔍 Génération du rapport...")
         hand_reporter.generate_report()
-        print("✅ Rapport généré")
 
         if args.export_json:
             hand_reporter.export_json(args.export_json)
 
-    print("🧹 Nettoyage en cours...")
     importer.cleanup()
-    print("✅ Nettoyage terminé")
 
 
 if __name__ == "__main__":

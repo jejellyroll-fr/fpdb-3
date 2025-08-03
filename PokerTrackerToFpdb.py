@@ -925,7 +925,7 @@ class PokerTracker(HandHistoryConverter):
             m = self.re_Action1.finditer(hand.streets[street])
         else:
             m = self.re_Action2.finditer(hand.streets[street])
-        curr_pot = Decimal("0")
+        curr_pot = Decimal(0)
         for action in m:
             action.groupdict()
             # print "DEBUG: acts: %s" %acts
@@ -978,7 +978,7 @@ class PokerTracker(HandHistoryConverter):
                 hand.addAllIn(street, action.group("PNAME"), action.group("BET"))
                 if (
                     curr_pot > amount
-                    and curr_pot > Decimal("0")
+                    and curr_pot > Decimal(0)
                     and self.sitename == "Microgaming"
                 ):
                     hand.setUncalledBets(False)

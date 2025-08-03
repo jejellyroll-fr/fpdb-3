@@ -38,12 +38,12 @@ source_suffix = {
 }
 
 autodoc_mock_imports = [
-    "MergeStructures", 
-    "ctypes.windll", 
+    "MergeStructures",
+    "ctypes.windll",
     "xcffib",
     "PyQt5",
     "PyQt5.QtCore",
-    "PyQt5.QtGui", 
+    "PyQt5.QtGui",
     "PyQt5.QtWidgets",
     "PyQt5.QtSvg",
     "PySide2",
@@ -52,7 +52,7 @@ autodoc_mock_imports = [
     "pyzmq",
     "zmq",
     "base_model",
-    "sql_request"
+    "sql_request",
 ]
 
 # Ignore import errors for problematic modules

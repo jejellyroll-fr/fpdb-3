@@ -11,7 +11,7 @@ log = get_logger("popup_icons")
 class IconProvider:
     """Base class for icon providers."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self.name = name
         self.icons = {}
 
@@ -42,7 +42,7 @@ class IconProvider:
 class EmojiIconProvider(IconProvider):
     """Emoji-based icon provider."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("emoji")
 
         # Main stat icons
@@ -153,7 +153,7 @@ class EmojiIconProvider(IconProvider):
 class UnicodeIconProvider(IconProvider):
     """Unicode symbol-based icon provider."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("unicode")
 
         self.icons = {
@@ -208,7 +208,7 @@ class UnicodeIconProvider(IconProvider):
 class TextIconProvider(IconProvider):
     """Text-based icon provider for compatibility."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("text")
 
         self.icons = {

@@ -98,25 +98,22 @@ def __stat_override(decimals, stat_vals):
 
 def format_no_data_stat(stat_name, description, numerator=None, denominator=None):
     """Returns a standardized tuple for stats with no data available.
-    
+
     This function creates a consistent format for displaying '-' when no data
     is available, distinguishing it from actual 0 values.
-    
+
     Parameters
     ----------
     - stat_name (str): The name of the statistic (e.g., "vpip", "pfr", "3bet")
     - description (str): Human-readable description of the statistic
     - numerator (int, optional): The numerator value for fraction display
     - denominator (int, optional): The denominator value for fraction display
-    
+
     Returns:
     -------
     - tuple: Standardized tuple (0.0, "-", "stat_name=-", "stat_name=-", "(-/-)", "description")
     """
-    if numerator is not None and denominator is not None:
-        fraction = f"({numerator}/{denominator})"
-    else:
-        fraction = "(-/-)"
+    fraction = f"({numerator}/{denominator})" if numerator is not None and denominator is not None else "(-/-)"
 
     return (
         0.0,
@@ -182,7 +179,7 @@ def do_stat(stat_dict, player=24, stat="vpip", hand_instance=None):
     try:
         player_int = int(player)
     except (ValueError, TypeError):
-        log.error(f"Invalid player parameter: {player} (type: {type(player)})")
+        log.exception(f"Invalid player parameter: {player} (type: {type(player)})")
         return None
 
     result = eval(
@@ -641,7 +638,7 @@ def profit100(stat_dict, player):
         # Check if player exists in stat_dict first
         if player not in stat_dict:
             return (stat, "NA", "p=NA", "p/100=NA", "(0/0)", "Profit per 100 hands")
-            
+
         n = float(stat_dict[player].get("n", 0))  # Ensure key exists
         if n != 0:  # Check if 'n' (number of hands) is non-zero
             stat = float(stat_dict[player]["net"]) / n
@@ -809,7 +806,7 @@ def n(stat_dict, player):
             k = _n / 1000
             c = _n % 1000
             _c = float(c) / 100.0
-            d = int(round(_c))
+            d = round(_c)
             if d == 10:
                 k += 1
                 d = 0
@@ -3070,14 +3067,14 @@ def vpip_pfr_ratio(stat_dict, player):
 
 def cold_call(stat_dict, player):
     """Calculate the Cold Call percentage for a player.
-    
-    A cold call is when a player calls a raise without having previously 
+
+    A cold call is when a player calls a raise without having previously
     put money into the pot voluntarily (no limp, no raise, just calling a raise).
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no cold call opportunities to distinguish from 0% (never cold called).
@@ -3107,15 +3104,15 @@ def cold_call(stat_dict, player):
 
 def limp(stat_dict, player):
     """Calculate the Limp percentage for a player.
-    
+
     A limp is when a player voluntarily enters the pot preflop without raising
     (calls the big blind or completes the small blind).
     Limp = VPIP - PFR (voluntary actions that are not raises)
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no preflop opportunities to distinguish from 0% (never limped).
@@ -3149,17 +3146,17 @@ def limp(stat_dict, player):
 
 def iso(stat_dict, player):
     """Calculate the Isolation (ISO) percentage for a player.
-    
+
     An isolation raise is when a player raises after one or more players have limped.
     This is approximated as: PFR opportunities with limpers present / Total PFR opportunities
-    
+
     Note: This is a simplified calculation. A more accurate version would require
     analyzing hand sequences to determine when limpers were present.
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no isolation opportunities to distinguish from 0% (never isolated).
@@ -3194,14 +3191,14 @@ def iso(stat_dict, player):
 
 def rfi_total(stat_dict, player):
     """Calculate the Raise First In (RFI) percentage for a player.
-    
+
     RFI is when a player is the first to voluntarily put money in the pot preflop with a raise.
     This is approximated as PFR minus 3bets, 4bets, and calls after raises.
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no RFI opportunities to distinguish from 0% (never raised first in).
@@ -3239,15 +3236,15 @@ def rfi_total(stat_dict, player):
 
 def three_bet_vs_steal(stat_dict, player):
     """Calculate the 3-bet vs Steal percentage for a player.
-    
+
     This measures how often a player 3-bets when facing a steal attempt.
     Since we don't have specific "3bet vs steal" data, we'll use 3bet data
     as a proxy and assume some portion are against steal attempts.
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no 3bet vs steal opportunities to distinguish from 0% (never 3bet vs steal).
@@ -3281,15 +3278,15 @@ def three_bet_vs_steal(stat_dict, player):
 
 def call_vs_steal(stat_dict, player):
     """Calculate the Call vs Steal percentage for a player.
-    
+
     This measures how often a player calls when facing a steal attempt.
     Since we don't have specific "call vs steal" data, we'll use cold call data
     as a proxy and assume some portion are against steal attempts.
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no call vs steal opportunities to distinguish from 0% (never called vs steal).
@@ -3323,13 +3320,13 @@ def call_vs_steal(stat_dict, player):
 
 def fold_vs_4bet(stat_dict, player):
     """Calculate the Fold vs 4bet percentage for a player.
-    
+
     This measures how often a player folds when facing a 4bet.
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no fold vs 4bet opportunities to distinguish from 0% (never faced 4bet).
@@ -3359,17 +3356,17 @@ def fold_vs_4bet(stat_dict, player):
 
 def float_bet(stat_dict, player):
     """Calculate the Float Bet percentage for a player.
-    
+
     A float bet is when a player calls a flop bet in position with the intention
     of taking the pot away on a later street (usually the turn) if the opponent
     shows weakness by checking.
-    
+
     Float = Call flop in position + Bet turn (when opponent checks)
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no float opportunities to distinguish from 0% (never floated).
@@ -3382,10 +3379,10 @@ def float_bet(stat_dict, player):
 
         # Get turn bets and first to act
         street2_bets = float(stat_dict[player].get("street2Bets", 0))
-        street2_first_to_act = float(stat_dict[player].get("street2FirstToAct", 0))
+        float(stat_dict[player].get("street2FirstToAct", 0))
 
         # Get opportunities to see flop and turn
-        saw_flop = float(stat_dict[player].get("saw_f", 0))
+        float(stat_dict[player].get("saw_f", 0))
         saw_turn = float(stat_dict[player].get("saw_t", 0))
 
         # Calculate float opportunities: called flop in position and saw turn
@@ -3415,16 +3412,16 @@ def float_bet(stat_dict, player):
 
 def probe_bet(stat_dict, player):
     """Calculate the Probe Bet percentage for a player.
-    
+
     A probe bet is when a player bets after the preflop aggressor checks,
     testing the strength of the opponent's hand.
-    
+
     Probe = Bet after preflop aggressor checks
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no probe opportunities to distinguish from 0% (never probed).
@@ -3436,7 +3433,7 @@ def probe_bet(stat_dict, player):
         saw_flop = float(stat_dict[player].get("saw_f", 0))
 
         # Get continuation bet data (opponent's cb opportunities and actual cbs)
-        cb_opp_1 = float(stat_dict[player].get("cb_opp_1", 0))
+        float(stat_dict[player].get("cb_opp_1", 0))
         cb_1 = float(stat_dict[player].get("cb_1", 0))
 
         # Calculate probe opportunities: saw flop when opponent could have c-bet but didn't
@@ -3467,14 +3464,14 @@ def probe_bet(stat_dict, player):
 
 def sd_winrate(stat_dict, player):
     """Calculate the Showdown Winrate for a player.
-    
+
     This measures the percentage of hands won when going to showdown.
     SD Winrate = wonAtSD / sawShowdown
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no showdown opportunities to distinguish from 0% (never won at showdown).
@@ -3504,14 +3501,14 @@ def sd_winrate(stat_dict, player):
 
 def non_sd_winrate(stat_dict, player):
     """Calculate the Non-Showdown Winrate for a player.
-    
+
     This measures the percentage of hands won without going to showdown.
     This is an approximation based on overall winrate vs showdown winrate.
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no non-showdown opportunities to distinguish from 0% (never won non-showdown).
@@ -3552,14 +3549,14 @@ def non_sd_winrate(stat_dict, player):
 
 def bet_frequency_flop(stat_dict, player):
     """Calculate the Bet Frequency on flop for a player.
-    
+
     This measures how often a player bets when they have the opportunity on the flop.
     Bet Frequency = street1Bets / street1Seen
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no flop opportunities to distinguish from 0% (never bet flop).
@@ -3589,14 +3586,14 @@ def bet_frequency_flop(stat_dict, player):
 
 def bet_frequency_turn(stat_dict, player):
     """Calculate the Bet Frequency on turn for a player.
-    
+
     This measures how often a player bets when they have the opportunity on the turn.
     Bet Frequency = street2Bets / street2Seen
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no turn opportunities to distinguish from 0% (never bet turn).
@@ -3626,14 +3623,14 @@ def bet_frequency_turn(stat_dict, player):
 
 def raise_frequency_flop(stat_dict, player):
     """Calculate the Raise Frequency on flop for a player.
-    
+
     This measures how often a player raises when they have the opportunity on the flop.
     Raise Frequency = street1Raises / street1Seen
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no flop opportunities to distinguish from 0% (never raised flop).
@@ -3663,14 +3660,14 @@ def raise_frequency_flop(stat_dict, player):
 
 def raise_frequency_turn(stat_dict, player):
     """Calculate the Raise Frequency on turn for a player.
-    
+
     This measures how often a player raises when they have the opportunity on the turn.
     Raise Frequency = street2Raises / street2Seen
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no turn opportunities to distinguish from 0% (never raised turn).
@@ -3700,14 +3697,14 @@ def raise_frequency_turn(stat_dict, player):
 
 def cb_ip(stat_dict, player):
     """Calculate the Continuation Bet In Position percentage for a player.
-    
+
     This measures how often a player c-bets when they are in position on the flop.
     CB IP = (cb_1 * estimated_IP_ratio) / (cb_opp_1 * estimated_IP_ratio)
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no IP c-bet opportunities to distinguish from 0% (never c-bet IP).
@@ -3751,14 +3748,14 @@ def cb_ip(stat_dict, player):
 
 def cb_oop(stat_dict, player):
     """Calculate the Continuation Bet Out of Position percentage for a player.
-    
+
     This measures how often a player c-bets when they are out of position on the flop.
     CB OOP = (cb_1 * estimated_OOP_ratio) / (cb_opp_1 * estimated_OOP_ratio)
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no OOP c-bet opportunities to distinguish from 0% (never c-bet OOP).
@@ -3802,14 +3799,14 @@ def cb_oop(stat_dict, player):
 
 def triple_barrel(stat_dict, player):
     """Calculate the Triple Barrel percentage for a player.
-    
+
     This measures how often a player bets all three streets (flop, turn, river).
     Triple Barrel = (cb_1 * cb_2 * cb_3) / (cb_opp_1 * cb_opp_2 * cb_opp_3)
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no triple barrel opportunities to distinguish from 0% (never triple barreled).
@@ -3857,14 +3854,14 @@ def triple_barrel(stat_dict, player):
 
 def resteal(stat_dict, player):
     """Calculate the Resteal percentage for a player.
-    
+
     This measures how often a player re-raises against a steal attempt.
     Resteal is approximated as a portion of 3-bets against steal positions.
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no resteal opportunities to distinguish from 0% (never restealed).
@@ -3900,13 +3897,13 @@ def resteal(stat_dict, player):
 
 def probe_bet_turn(stat_dict, player):
     """Calculate the Probe Bet Turn percentage for a player.
-    
+
     This measures how often a player probe bets on the turn after the preflop aggressor checks.
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no turn probe opportunities to distinguish from 0% (never probed turn).
@@ -3918,7 +3915,7 @@ def probe_bet_turn(stat_dict, player):
         saw_t = float(stat_dict[player].get("saw_t", 0))
 
         # Get continuation bet data (opponent's cb opportunities and actual cbs)
-        cb_opp_2 = float(stat_dict[player].get("cb_opp_2", 0))
+        float(stat_dict[player].get("cb_opp_2", 0))
         cb_2 = float(stat_dict[player].get("cb_2", 0))
 
         # Calculate turn probe opportunities: saw turn when opponent could have c-bet but didn't
@@ -3947,13 +3944,13 @@ def probe_bet_turn(stat_dict, player):
 
 def probe_bet_river(stat_dict, player):
     """Calculate the Probe Bet River percentage for a player.
-    
+
     This measures how often a player probe bets on the river after the preflop aggressor checks.
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no river probe opportunities to distinguish from 0% (never probed river).
@@ -3965,7 +3962,7 @@ def probe_bet_river(stat_dict, player):
         saw_r = float(stat_dict[player].get("saw_r", 0))
 
         # Get continuation bet data (opponent's cb opportunities and actual cbs)
-        cb_opp_3 = float(stat_dict[player].get("cb_opp_3", 0))
+        float(stat_dict[player].get("cb_opp_3", 0))
         cb_3 = float(stat_dict[player].get("cb_3", 0))
 
         # Calculate river probe opportunities: saw river when opponent could have c-bet but didn't
@@ -3994,14 +3991,14 @@ def probe_bet_river(stat_dict, player):
 
 def rfi_early_position(stat_dict, player):
     """Calculate the RFI (Raise First In) percentage from early position for a player.
-    
+
     This measures how often a player raises first in from early position (UTG, UTG+1, UTG+2).
     Early position RFI is approximated as 25% of total RFI.
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no early position opportunities to distinguish from 0% (never RFI early).
@@ -4041,14 +4038,14 @@ def rfi_early_position(stat_dict, player):
 
 def rfi_middle_position(stat_dict, player):
     """Calculate the RFI (Raise First In) percentage from middle position for a player.
-    
+
     This measures how often a player raises first in from middle position (MP, MP+1, MP+2).
     Middle position RFI is approximated as 30% of total RFI.
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no middle position opportunities to distinguish from 0% (never RFI middle).
@@ -4088,14 +4085,14 @@ def rfi_middle_position(stat_dict, player):
 
 def rfi_late_position(stat_dict, player):
     """Calculate the RFI (Raise First In) percentage from late position for a player.
-    
+
     This measures how often a player raises first in from late position (CO, BTN).
     Late position RFI is approximated as 45% of total RFI.
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no late position opportunities to distinguish from 0% (never RFI late).
@@ -4135,22 +4132,21 @@ def rfi_late_position(stat_dict, player):
 
 def avg_bet_size_flop(stat_dict, player):
     """Calculate the average bet size on flop as a percentage of pot for a player.
-    
+
     This is an approximation as exact bet sizes are not available in aggregated stats.
     Returns an estimated average bet size based on betting patterns.
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no flop betting data to distinguish from 0% (never bet flop).
     """
-    stat = 0.0
     try:
         street1_bets = float(stat_dict[player].get("street1Bets", 0))
-        saw_f = float(stat_dict[player].get("saw_f", 0))
+        float(stat_dict[player].get("saw_f", 0))
 
         # No flop betting data = no data available
         if street1_bets == 0:
@@ -4162,9 +4158,9 @@ def avg_bet_size_flop(stat_dict, player):
 
         return (
             estimated_avg_bet_size / 100.0,
-            "%3.0f" % estimated_avg_bet_size,
-            "avg_bet_f=%3.0f%%" % estimated_avg_bet_size,
-            "avg_bet_size_flop=%3.0f%%" % estimated_avg_bet_size,
+            f"{estimated_avg_bet_size:3.0f}",
+            f"avg_bet_f={estimated_avg_bet_size:3.0f}%",
+            f"avg_bet_size_flop={estimated_avg_bet_size:3.0f}%",
             "(%d bets)" % street1_bets,
             "avg bet size flop",
         )
@@ -4174,22 +4170,21 @@ def avg_bet_size_flop(stat_dict, player):
 
 def avg_bet_size_turn(stat_dict, player):
     """Calculate the average bet size on turn as a percentage of pot for a player.
-    
+
     This is an approximation as exact bet sizes are not available in aggregated stats.
     Returns an estimated average bet size based on betting patterns.
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no turn betting data to distinguish from 0% (never bet turn).
     """
-    stat = 0.0
     try:
         street2_bets = float(stat_dict[player].get("street2Bets", 0))
-        saw_t = float(stat_dict[player].get("saw_t", 0))
+        float(stat_dict[player].get("saw_t", 0))
 
         # No turn betting data = no data available
         if street2_bets == 0:
@@ -4201,9 +4196,9 @@ def avg_bet_size_turn(stat_dict, player):
 
         return (
             estimated_avg_bet_size / 100.0,
-            "%3.0f" % estimated_avg_bet_size,
-            "avg_bet_t=%3.0f%%" % estimated_avg_bet_size,
-            "avg_bet_size_turn=%3.0f%%" % estimated_avg_bet_size,
+            f"{estimated_avg_bet_size:3.0f}",
+            f"avg_bet_t={estimated_avg_bet_size:3.0f}%",
+            f"avg_bet_size_turn={estimated_avg_bet_size:3.0f}%",
             "(%d bets)" % street2_bets,
             "avg bet size turn",
         )
@@ -4213,22 +4208,21 @@ def avg_bet_size_turn(stat_dict, player):
 
 def avg_bet_size_river(stat_dict, player):
     """Calculate the average bet size on river as a percentage of pot for a player.
-    
+
     This is an approximation as exact bet sizes are not available in aggregated stats.
     Returns an estimated average bet size based on betting patterns.
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no river betting data to distinguish from 0% (never bet river).
     """
-    stat = 0.0
     try:
         street3_bets = float(stat_dict[player].get("street3Bets", 0))
-        saw_r = float(stat_dict[player].get("saw_r", 0))
+        float(stat_dict[player].get("saw_r", 0))
 
         # No river betting data = no data available
         if street3_bets == 0:
@@ -4240,9 +4234,9 @@ def avg_bet_size_river(stat_dict, player):
 
         return (
             estimated_avg_bet_size / 100.0,
-            "%3.0f" % estimated_avg_bet_size,
-            "avg_bet_r=%3.0f%%" % estimated_avg_bet_size,
-            "avg_bet_size_river=%3.0f%%" % estimated_avg_bet_size,
+            f"{estimated_avg_bet_size:3.0f}",
+            f"avg_bet_r={estimated_avg_bet_size:3.0f}%",
+            f"avg_bet_size_river={estimated_avg_bet_size:3.0f}%",
             "(%d bets)" % street3_bets,
             "avg bet size river",
         )
@@ -4252,19 +4246,18 @@ def avg_bet_size_river(stat_dict, player):
 
 def overbet_frequency(stat_dict, player):
     """Calculate the overbet frequency for a player.
-    
+
     This is an approximation as exact bet sizes are not available in aggregated stats.
     Estimates how often a player makes overbets (bets > pot size).
-    
+
     Args:
         stat_dict (dict): A dictionary containing player statistics.
         player (int): The player for whom the statistic is calculated.
-    
+
     Returns:
         tuple: A tuple containing the calculated statistic, formatted strings, and related information.
         Returns "-" if no betting data to distinguish from 0% (never overbets).
     """
-    stat = 0.0
     try:
         street1_bets = float(stat_dict[player].get("street1Bets", 0))
         street2_bets = float(stat_dict[player].get("street2Bets", 0))
@@ -4283,9 +4276,9 @@ def overbet_frequency(stat_dict, player):
 
         return (
             estimated_overbet_frequency / 100.0,
-            "%3.1f" % estimated_overbet_frequency,
-            "overbet=%3.1f%%" % estimated_overbet_frequency,
-            "overbet_freq=%3.1f%%" % estimated_overbet_frequency,
+            f"{estimated_overbet_frequency:3.1f}",
+            f"overbet={estimated_overbet_frequency:3.1f}%",
+            f"overbet_freq={estimated_overbet_frequency:3.1f}%",
             "(%d/%d)" % (estimated_overbet_count, total_bets),
             "% overbet frequency",
         )
@@ -4461,36 +4454,36 @@ def starthands(stat_dict, player):
 
     query = (
         "SELECT distinct startCards, street0Aggr, street0CalledRaiseDone, "
-        + "case when HandsPlayers.position = 'B' then 'b' "
-        + "when HandsPlayers.position = 'S' then 'b' "
-        + "when HandsPlayers.position = '0' then 'l' "
-        + "when HandsPlayers.position = '1' then 'l' "
-        + "when HandsPlayers.position = '2' then 'm' "
-        + "when HandsPlayers.position = '3' then 'm' "
-        + "when HandsPlayers.position = '4' then 'm' "
-        + "when HandsPlayers.position = '5' then 'e' "
-        + "when HandsPlayers.position = '6' then 'e' "
-        + "when HandsPlayers.position = '7' then 'e' "
-        + "when HandsPlayers.position = '8' then 'e' "
-        + "when HandsPlayers.position = '9' then 'e' "
-        + "else 'X' end "
-        + "FROM Hands, HandsPlayers, Gametypes "
-        + "WHERE HandsPlayers.handId = Hands.id "
-        + " AND Gametypes.id = Hands.gametypeid "
-        + " AND Gametypes.type = "
-        + "   (SELECT Gametypes.type FROM Gametypes, Hands   "
-        + "  WHERE Hands.gametypeid = Gametypes.id and Hands.id = %d) "
-        + " AND Gametypes.Limittype =  "
-        + "   (SELECT Gametypes.limitType FROM Gametypes, Hands  "
-        + " WHERE Hands.gametypeid = Gametypes.id and Hands.id = %d) "
-        + "AND Gametypes.category = 'holdem' "
-        + "AND fileId = (SELECT fileId FROM Hands "
-        + " WHERE Hands.id = %d) "
-        + "AND HandsPlayers.playerId = %d "
-        + "AND street0VPI "
-        + "AND startCards > 0 AND startCards <> 170 "
-        + "ORDER BY startCards DESC "
-        + ";"
+         "case when HandsPlayers.position = 'B' then 'b' "
+         "when HandsPlayers.position = 'S' then 'b' "
+         "when HandsPlayers.position = '0' then 'l' "
+         "when HandsPlayers.position = '1' then 'l' "
+         "when HandsPlayers.position = '2' then 'm' "
+         "when HandsPlayers.position = '3' then 'm' "
+         "when HandsPlayers.position = '4' then 'm' "
+         "when HandsPlayers.position = '5' then 'e' "
+         "when HandsPlayers.position = '6' then 'e' "
+         "when HandsPlayers.position = '7' then 'e' "
+         "when HandsPlayers.position = '8' then 'e' "
+         "when HandsPlayers.position = '9' then 'e' "
+         "else 'X' end "
+         "FROM Hands, HandsPlayers, Gametypes "
+         "WHERE HandsPlayers.handId = Hands.id "
+         " AND Gametypes.id = Hands.gametypeid "
+         " AND Gametypes.type = "
+         "   (SELECT Gametypes.type FROM Gametypes, Hands   "
+         "  WHERE Hands.gametypeid = Gametypes.id and Hands.id = %d) "
+         " AND Gametypes.Limittype =  "
+         "   (SELECT Gametypes.limitType FROM Gametypes, Hands  "
+         " WHERE Hands.gametypeid = Gametypes.id and Hands.id = %d) "
+         "AND Gametypes.category = 'holdem' "
+         "AND fileId = (SELECT fileId FROM Hands "
+         " WHERE Hands.id = %d) "
+         "AND HandsPlayers.playerId = %d "
+         "AND street0VPI "
+         "AND startCards > 0 AND startCards <> 170 "
+         "ORDER BY startCards DESC "
+         ";"
     ) % (int(handid), int(handid), int(handid), int(player))
 
     # print query

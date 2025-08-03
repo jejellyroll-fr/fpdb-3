@@ -431,11 +431,11 @@ class Bovada(HandHistoryConverter):
         # Initialize blinds as None
         info["sb"] = None
         info["bb"] = None
-        
+
         # Set blinds if available
-        if "SB" in mg and mg["SB"]:
+        if mg.get("SB"):
             info["sb"] = self.clearMoneyString(mg["SB"])
-        if "BB" in mg and mg["BB"]:
+        if mg.get("BB"):
             info["bb"] = self.clearMoneyString(mg["BB"])
 
         # Set tournament vs ring
@@ -452,7 +452,7 @@ class Bovada(HandHistoryConverter):
 
         # Set fast flag
         info["fast"] = "Zone" in mg["GAME"]
-        
+
         # Set split flag (Bovada doesn't have split pot games like Hi/Lo)
         info["split"] = False
 
@@ -475,7 +475,7 @@ class Bovada(HandHistoryConverter):
         # If blinds are not set, try to extract them from hand content
         if info["sb"] is None or info["bb"] is None:
             self._extractBlindsFromContent(info, hand_text)
-            
+
         if info["limitType"] == "fl" and info["bb"] is not None:
             if info["type"] == "ring":
                 try:
@@ -487,24 +487,22 @@ class Bovada(HandHistoryConverter):
                     raise FpdbParseError from None
             else:
                 info["sb"] = str((Decimal(info["sb"]) / 2).quantize(Decimal("0.01")))
-                
+
     def _extractBlindsFromContent(self, info: dict[str, str], hand_text: str) -> None:
         """Extract blind values from hand content when not in header or filename.
-        
+
         Args:
             info: The dictionary containing game type information to update.
             hand_text: The text of the hand history to search for blind information.
         """
         # Look for "Small Blind : Ante/Small Blind $X.XX"
-        if sb_match := re.search(r"Small Blind\s*:\s*.*?\$([0-9.]+)", hand_text):
-            if info["sb"] is None:
-                info["sb"] = self.clearMoneyString(sb_match.group(1))
-                
-        # Look for "Big Blind : Big blind/Bring in $X.XX"  
-        if bb_match := re.search(r"Big Blind\s*:\s*.*?\$([0-9.]+)", hand_text):
-            if info["bb"] is None:
-                info["bb"] = self.clearMoneyString(bb_match.group(1))
-                
+        if (sb_match := re.search(r"Small Blind\s*:\s*.*?\$([0-9.]+)", hand_text)) and info["sb"] is None:
+            info["sb"] = self.clearMoneyString(sb_match.group(1))
+
+        # Look for "Big Blind : Big blind/Bring in $X.XX"
+        if (bb_match := re.search(r"Big Blind\s*:\s*.*?\$([0-9.]+)", hand_text)) and info["bb"] is None:
+            info["bb"] = self.clearMoneyString(bb_match.group(1))
+
         # For Stud games, sb/bb are not applicable (they use antes and bring-in)
         # Leave sb/bb as None for Stud games
 
@@ -881,16 +879,16 @@ class Bovada(HandHistoryConverter):
         # Split hand text by street markers
         if hand.gametype["base"] == "hold":
             # For Hold'em games, use standard street markers
-            street_splits = re.split(r'\*\*\* (HOLE CARDS|FLOP|TURN|RIVER|SUMMARY) \*\*\*', hand.handText)
-            
+            street_splits = re.split(r"\*\*\* (HOLE CARDS|FLOP|TURN|RIVER|SUMMARY) \*\*\*", hand.handText)
+
             # Map sections to streets based on position in split
             street_mapping = {
                 2: "PREFLOP",  # Section after HOLE CARDS
                 4: "FLOP",     # Section after FLOP
-                6: "TURN",     # Section after TURN  
+                6: "TURN",     # Section after TURN
                 8: "RIVER",    # Section after RIVER
             }
-            
+
             for section_idx, street in street_mapping.items():
                 if section_idx < len(street_splits):
                     content = street_splits[section_idx].strip()
@@ -902,7 +900,7 @@ class Bovada(HandHistoryConverter):
 
         # Process board cards
         self._process_board_cards(hand)
-        
+
     def _markStreetsComplex(self, hand: "Hand") -> None:
         """Original complex logic for marking streets, used for Stud games."""
         street, firststreet = self._get_initial_street_info(hand)
@@ -945,7 +943,7 @@ class Bovada(HandHistoryConverter):
         # Set default street if none found
         if not hand.streets.get(firststreet):
             hand.streets[firststreet] = hand.handText
-            
+
     def _process_board_cards(self, hand: "Hand") -> None:
         """Extract and process board cards from street content, separating them from actions."""
         if hand.gametype["base"] == "hold":
@@ -953,16 +951,16 @@ class Bovada(HandHistoryConverter):
             for street in ["FLOP", "TURN", "RIVER"]:
                 if street in hand.streets and hand.streets[street].strip():
                     content = hand.streets[street]
-                    
+
                     # Look for board cards pattern like [2c Qc 7h] or [2c Qc 7h] [Ac]
-                    board_matches = re.findall(r'\[([2-9TJQKA][chsd]\s*)+\]', content)
+                    board_matches = re.findall(r"\[([2-9TJQKA][chsd]\s*)+\]", content)
                     if board_matches:
                         # Extract actions (everything that's not board cards)
-                        actions_content = re.sub(r'\s*\[([2-9TJQKA][chsd]\s*)+\]', '', content)
+                        actions_content = re.sub(r"\s*\[([2-9TJQKA][chsd]\s*)+\]", "", content)
                         hand.streets[street] = actions_content.strip()
-                        
+
                         # Store the board cards (just for debugging, readCommunityCards will handle them)
-                        board_cards = ' '.join(board_matches).replace('[', '').replace(']', '')
+                        " ".join(board_matches).replace("[", "").replace("]", "")
                         # Could store board_cards somewhere if needed
 
     def readCommunityCards(
@@ -1680,11 +1678,11 @@ class Bovada(HandHistoryConverter):
             hand: The Hand object to update with additional hand information.
         """
         # Check if this is Zone Poker based on game type fast flag
-        if hasattr(hand, 'gametype') and hand.gametype.get('fast'):
+        if hasattr(hand, "gametype") and hand.gametype.get("fast"):
             hand.isZonePoker = True
         else:
             hand.isZonePoker = False
-            
+
         if m := self.re_rake.search(hand.handText):
             rake_amount = self.clearMoneyString(m.group("RAKE"))
             pot_amount = self.clearMoneyString(m.group("POT"))
