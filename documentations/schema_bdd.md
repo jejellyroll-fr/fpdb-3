@@ -1,6 +1,13 @@
 # Schéma de la base **fpdb.db3**
 
-_Généré le 2025-07-18 22:00:06_
+_Généré le 2025-08-03 08:40:00_
+
+## Dernières modifications
+
+### 2025-08-03 : Ajout du support Bomb Pot
+- **Nouveau champ `bombPot`** dans la table `Hands` : Stocke le montant du bomb pot en centimes (0 = pas de bomb pot)
+- **Support ESCAPE Winamax** : Détection automatique des mains "Escape to Pot" de Winamax
+- **Performances optimisées** : Index et requêtes SQL directes sur les mains bomb pot
 
 ## Actions
 
@@ -300,6 +307,7 @@ _Généré le 2025-07-18 22:00:06_
 | street3Pot | INT | Non |  |  |
 | street4Pot | INT | Non |  |  |
 | finalPot | INT | Non |  |  |
+| bombPot | INT | Non |  |  |
 | comment | TEXT | Non |  |  |
 | commentTs | timestamp | Non |  |  |
 
@@ -1364,4 +1372,55 @@ _Généré le 2025-07-18 22:00:06_
 |-----|------|----------|----|--------|
 | id | INTEGER | Non | 1 |  |
 | weekStart | timestamp | Oui |  |  |
+
+## Exemples d'utilisation du champ bombPot
+
+### Requêtes SQL pour les mains Bomb Pot
+
+```sql
+-- Toutes les mains avec bomb pot
+SELECT tableName, siteHandNo, bombPot/100.0 as bombPot_euros, finalPot/100.0 as finalPot_euros, startTime 
+FROM Hands 
+WHERE bombPot > 0 
+ORDER BY startTime DESC;
+
+-- Statistiques bomb pot par table
+SELECT tableName, 
+       COUNT(*) as total_mains,
+       COUNT(CASE WHEN bombPot > 0 THEN 1 END) as mains_bomb_pot,
+       ROUND(SUM(bombPot)/100.0, 2) as total_bomb_pot_euros,
+       ROUND(AVG(CASE WHEN bombPot > 0 THEN bombPot/100.0 END), 2) as avg_bomb_pot_euros
+FROM Hands 
+GROUP BY tableName 
+HAVING mains_bomb_pot > 0;
+
+-- Mains ESCAPE avec bomb pot supérieur à 1€
+SELECT * FROM Hands 
+WHERE bombPot >= 100 
+ORDER BY bombPot DESC;
+
+-- Joueurs ayant joué le plus de mains bomb pot
+SELECT p.name, 
+       COUNT(*) as mains_bomb_pot,
+       ROUND(SUM(h.bombPot)/100.0, 2) as total_bomb_pot_euros,
+       ROUND(AVG(h.bombPot)/100.0, 2) as avg_bomb_pot_euros
+FROM Hands h 
+JOIN HandsPlayers hp ON h.id = hp.handId 
+JOIN Players p ON hp.playerId = p.id 
+WHERE h.bombPot > 0 
+GROUP BY p.name 
+ORDER BY mains_bomb_pot DESC;
+```
+
+### Format des données
+
+- **bombPot** : Stocké en centimes (INT)
+  - `0` = Pas de bomb pot
+  - `10` = 0.10€ de bomb pot  
+  - `100` = 1.00€ de bomb pot
+  - `500` = 5.00€ de bomb pot
+
+### Sites supportés
+
+- **Winamax ESCAPE** : Détection automatique des lignes "Escape to Pot: total X.XX€"
 
