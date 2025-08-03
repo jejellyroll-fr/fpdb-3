@@ -37,7 +37,26 @@ source_suffix = {
     ".md": "markdown",
 }
 
-autodoc_mock_imports = ["MergeStructures", "ctypes.windll", "xcffib"]
+autodoc_mock_imports = [
+    "MergeStructures", 
+    "ctypes.windll", 
+    "xcffib",
+    "PyQt5",
+    "PyQt5.QtCore",
+    "PyQt5.QtGui", 
+    "PyQt5.QtWidgets",
+    "PyQt5.QtSvg",
+    "PySide2",
+    "AppKit",
+    "qt_material",
+    "pyzmq",
+    "zmq",
+    "base_model",
+    "sql_request"
+]
+
+# Ignore import errors for problematic modules
+autodoc_ignore_module_errors = True
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

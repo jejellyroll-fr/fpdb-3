@@ -28,6 +28,10 @@ dependencies = [
     "cachetools==5.5.0",
     "colorlog==6.9.0",
     "pytest-qt>=4.4.0",
+    "sphinx>=7.4.7",
+    "furo>=2025.7.19",
+    "myst-parser>=4.0.1",
+    "sphinx-autodoc-typehints>=2.3.0",
 ]
 
 [project.optional-dependencies]
