@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """HUD Statistics Persistence Manager to prevent data loss during restarts.
 
 This module provides a temporary persistence layer for HUD statistics,

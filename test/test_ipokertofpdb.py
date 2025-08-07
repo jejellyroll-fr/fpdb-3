@@ -8,7 +8,9 @@ substitutions = {
 }
 
 re_PlayerInfo = re.compile(
-    r'<player( (seat="(?P<SEAT>[0-9]+)"|name="{PLYR}"|chips="({LS})?(?P<CASH>[{NUM2}]+)({LS})?"|dealer="(?P<BUTTONPOS>(0|1))"|win="({LS})?(?P<WIN>[{NUM}]+)({LS})?"|bet="({LS})?(?P<BET>[^"]+)({LS})?"|addon="\d*"|rebuy="\d*"|merge="\d*"|reg_code="[\d-]*"))+\s*/>'.format(**substitutions),
+    r'<player( (seat="(?P<SEAT>[0-9]+)"|name="{PLYR}"|chips="({LS})?(?P<CASH>[{NUM2}]+)({LS})?"|dealer="(?P<BUTTONPOS>(0|1))"|win="({LS})?(?P<WIN>[{NUM}]+)({LS})?"|bet="({LS})?(?P<BET>[^"]+)({LS})?"|addon="\d*"|rebuy="\d*"|merge="\d*"|reg_code="[\d-]*"))+\s*/>'.format(
+        **substitutions,
+    ),
     re.MULTILINE,
 )
 
@@ -20,7 +22,9 @@ def test_re_PlayerInfo2() -> None:
 
 
 def test_re_PlayerInfo7() -> None:
-    text = '<player bet="100" reg_code="" win="40" seat="3" dealer="0" rebuy="0" chips="1 480" name="pergerd" addon="0"/>'
+    text = (
+        '<player bet="100" reg_code="" win="40" seat="3" dealer="0" rebuy="0" chips="1 480" name="pergerd" addon="0"/>'
+    )
     match = re_PlayerInfo.search(text)
     assert match is not None
     assert match.group("SEAT") == "3"
@@ -47,7 +51,9 @@ def test_re_PlayerInfo3() -> None:
 
 
 def test_re_PlayerInfo8() -> None:
-    text = '<player bet="740" reg_code="" win="1 480" seat="3" dealer="1" rebuy="0" chips="740" name="pergerd" addon="0"/>'
+    text = (
+        '<player bet="740" reg_code="" win="1 480" seat="3" dealer="1" rebuy="0" chips="740" name="pergerd" addon="0"/>'
+    )
     match = re_PlayerInfo.search(text)
     assert match is not None
     assert match.group("SEAT") == "3"

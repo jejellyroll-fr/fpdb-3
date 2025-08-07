@@ -52,6 +52,7 @@ maresdelsur: Shows [DQ HK S7 D7] Straight, Ace High
 louisaf55: Shows [S8 CQ C5 C8] Flush, Ace High
 louisaf55: wins €0.56"""
 
+
 def test_site_identification() -> bool:
     """Test site identification for PokerTracker4 iPoker hands."""
     # Create a minimal config
@@ -77,6 +78,7 @@ def test_site_identification() -> bool:
     except (ValueError, ImportError, AttributeError):
         traceback.print_exc()
         return False
+
 
 if __name__ == "__main__":
     test_site_identification()

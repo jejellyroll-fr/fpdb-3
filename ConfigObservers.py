@@ -25,7 +25,17 @@ class HUDConfigObserver(ConfigObserver):
         self._lock = threading.Lock()
 
     def on_config_change(self, change: ConfigChange) -> bool:
-        """Apply configuration changes for HUD."""
+        """Apply HUD configuration changes in response to observed updates.
+
+        Handles HUD, stat, and hero name changes by updating the relevant HUD components.
+        Returns True if the change was applied successfully, otherwise False.
+
+        Args:
+            change: The configuration change event to process.
+
+        Returns:
+            True if the change was applied successfully, False otherwise.
+        """
         try:
             with self._lock:
                 if change.type == ChangeType.HUD_SETTINGS:
@@ -42,11 +52,26 @@ class HUDConfigObserver(ConfigObserver):
             return False
 
     def get_observed_paths(self) -> list[str]:
-        """Returns paths observed by HUD."""
+        """Return the list of configuration paths observed by this HUD observer.
+
+        Provides the configuration paths that this observer monitors for changes.
+
+        Returns:
+            A list of configuration path strings.
+        """
         return ["stat_sets", "supported_sites", "hud_ui", "layout_sets"]
 
     def _update_hud_settings(self, change: ConfigChange) -> bool:  # noqa: ARG002
-        """Update general HUD settings."""
+        """Update HUD settings for all active HUD instances.
+
+        Notifies all active HUDs to reconfigure themselves in response to a configuration change.
+
+        Args:
+            change: The configuration change event to process.
+
+        Returns:
+            True if the HUDs were updated successfully, False otherwise.
+        """
         try:
             # Notify all active HUDs
             if hasattr(self.hud_main, "hud_instances"):
@@ -59,7 +84,16 @@ class HUDConfigObserver(ConfigObserver):
         return False
 
     def _update_stat_settings(self, change: ConfigChange) -> bool:
-        """Update displayed statistics."""
+        """Update stat settings for relevant HUD instances.
+
+        Updates stat windows for HUDs that match the affected stat set when a configuration change is detected.
+
+        Args:
+            change: The configuration change event to process.
+
+        Returns:
+            True if the stat settings were updated successfully, False otherwise.
+        """
         try:
             # Parse path to extract info
             # Format: stat_sets.{name}.stats.{position}
@@ -80,7 +114,17 @@ class HUDConfigObserver(ConfigObserver):
         return False
 
     def _update_hero_name(self, change: ConfigChange) -> bool:
-        """Update hero name for a site."""
+        """Update the hero name for all HUDs associated with a specific site.
+
+        Sets the hero name and updates hero stats for all active HUD instances matching
+        the site in the configuration change.
+
+        Args:
+            change: The configuration change event to process.
+
+        Returns:
+            True if the hero name was updated successfully, False otherwise.
+        """
         try:
             site_name = change.path.split(".")[1]
             # Update in all active HUDs for this site
@@ -111,14 +155,29 @@ class DatabaseConfigObserver(ConfigObserver):
         self.database = database_instance
 
     def on_config_change(self, change: ConfigChange) -> bool:
-        """DB changes require restart - always returns False."""
+        """Handle database configuration changes.
+
+        Logs the detected database configuration change. Always returns False as database changes require a restart.
+
+        Args:
+            change: The configuration change event to process.
+
+        Returns:
+            False, as database changes are not applied dynamically.
+        """
         log.info("Database change detected: %s", change.path)
         # DB changes are marked as requiring restart
         # by ConfigurationManager, so we do nothing here
         return False
 
     def get_observed_paths(self) -> list[str]:
-        """Returns observed paths for database."""
+        """Return the list of configuration paths observed by this database observer.
+
+        Provides the configuration paths that this observer monitors for changes.
+
+        Returns:
+            A list of configuration path strings.
+        """
         return ["database"]
 
 
@@ -134,7 +193,17 @@ class GuiPrefsObserver(ConfigObserver):
         self.main_window = main_window
 
     def on_config_change(self, change: ConfigChange) -> bool:
-        """Apply GUI configuration changes."""
+        """Apply GUI configuration changes in response to observed updates.
+
+        Handles theme, GUI, and seat preference changes by updating the relevant GUI components.
+        Returns True if the change was applied successfully, otherwise False.
+
+        Args:
+            change: The configuration change event to process.
+
+        Returns:
+            True if the change was applied successfully, False otherwise.
+        """
         try:
             if change.type == ChangeType.THEME_SETTINGS:
                 return self._update_theme(change)
@@ -150,7 +219,13 @@ class GuiPrefsObserver(ConfigObserver):
             return True
 
     def get_observed_paths(self) -> list[str]:
-        """Returns observed paths for interface."""
+        """Return the list of configuration paths observed by this GUI preferences observer.
+
+        Provides the configuration paths that this observer monitors for changes.
+
+        Returns:
+            A list of configuration path strings.
+        """
         return [
             "general",
             "gui_cash_stats",
@@ -159,7 +234,16 @@ class GuiPrefsObserver(ConfigObserver):
         ]
 
     def _update_theme(self, change: ConfigChange) -> bool:
-        """Update interface theme."""
+        """Update the application theme in response to a configuration change.
+
+        Changes the theme of the main window if supported and logs the update.
+
+        Args:
+            change: The configuration change event to process.
+
+        Returns:
+            True if the theme was updated successfully, False otherwise.
+        """
         try:
             if hasattr(self.main_window, "change_theme"):
                 self.main_window.change_theme(change.new_value)
@@ -172,7 +256,16 @@ class GuiPrefsObserver(ConfigObserver):
         return False
 
     def _update_gui_settings(self, change: ConfigChange) -> bool:  # noqa: ARG002
-        """Update general interface settings."""
+        """Update GUI settings in response to a configuration change.
+
+        Refreshes affected windows or tabs in the main window when GUI settings are updated.
+
+        Args:
+            change: The configuration change event to process.
+
+        Returns:
+            True if the GUI was updated successfully, False otherwise.
+        """
         try:
             # Refresh affected windows
             if hasattr(self.main_window, "refresh_tabs"):
@@ -185,7 +278,16 @@ class GuiPrefsObserver(ConfigObserver):
         return False
 
     def _update_seat_preferences(self, change: ConfigChange) -> bool:
-        """Update seat preferences."""
+        """Update seat preferences in response to a configuration change.
+
+        Logs the update of seat preferences and notifies relevant components if necessary.
+
+        Args:
+            change: The configuration change event to process.
+
+        Returns:
+            True if the seat preferences were updated successfully, False otherwise.
+        """
         try:
             # Seat preferences mainly affect HUD
             # Notify HUD via its observer
@@ -209,7 +311,16 @@ class BulkImportConfigObserver(ConfigObserver):
         self.bulk_import = bulk_import_instance
 
     def on_config_change(self, change: ConfigChange) -> bool:
-        """Apply changes for bulk import."""
+        """Apply bulk import configuration changes in response to observed updates.
+
+        Updates the default or bulk import path for hand histories when relevant configuration changes are detected.
+
+        Args:
+            change: The configuration change event to process.
+
+        Returns:
+            True if the change was applied successfully, False otherwise.
+        """
         try:
             if change.path.endswith(".HH_path"):
                 # Update default path
@@ -229,5 +340,11 @@ class BulkImportConfigObserver(ConfigObserver):
             return True
 
     def get_observed_paths(self) -> list[str]:
-        """Returns observed paths for bulk import."""
+        """Return the list of configuration paths observed by this bulk import observer.
+
+        Provides the configuration paths that this observer monitors for changes.
+
+        Returns:
+            A list of configuration path strings.
+        """
         return ["supported_sites", "import.hhBulkPath", "import.ResultsDirectory"]

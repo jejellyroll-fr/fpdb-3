@@ -121,7 +121,8 @@ class BovadaSummary(TourneySummary):
     def _process_buyin_info(self, info: dict, hhc: HandHistoryConverter) -> None:
         """Process and assign buy-in, fee, and tournament name information.
 
-        This method detects the currency, processes buy-in and fee amounts, and sets tournament name and rebuy/add-on flags
+        This method detects the currency, processes buy-in and fee amounts,
+        and sets tournament name and rebuy/add-on flags
         based on the provided info dictionary and hand history converter.
 
         Args:

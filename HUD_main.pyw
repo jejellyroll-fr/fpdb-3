@@ -5,7 +5,12 @@ Main for FreePokerTools HUD.
 """
 
 import contextlib
+import os
 import sys
+
+if sys.platform.startswith("linux") and os.getenv("FPDB_FORCE_X11") == "1":
+    os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
+
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -219,7 +224,13 @@ class HudMain(QObject):
 
         # Selecting the right module for the OS
         if self.config.os_family == "Linux":
-            import XTables as Tables
+            # Simplified: XWayland support or X11 fallback
+            if os.getenv("QT_QPA_PLATFORM") == "xcb" or not os.environ.get("WAYLAND_DISPLAY"):
+                log.info("XWayland forced under wayland → backend XTables")
+                import XTables as Tables
+            else:
+                log.info("Session X11 detected → backend XTables")
+                import XTables as Tables
         elif self.config.os_family == "Mac":
             import OSXTables as Tables
         elif self.config.os_family in ("XP", "Win7"):

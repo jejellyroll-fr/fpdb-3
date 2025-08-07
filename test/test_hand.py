@@ -12,7 +12,6 @@ class FpdbParseError(Exception):
     """Custom exception for parsing errors in FPDB."""
 
 
-
 class Pot:
     """Represents the pot in a poker hand, including committed amounts, contenders, common money, and side pots."""
 
@@ -51,11 +50,7 @@ class Hand:
 
         # Convert and filter positive commits
         try:
-            commitsall = [
-                (Decimal(v), k)
-                for (k, v) in self.pot.committed.items()
-                if Decimal(v) > 0
-            ]
+            commitsall = [(Decimal(v), k) for (k, v) in self.pot.committed.items() if Decimal(v) > 0]
         except Exception as e:
             log.exception(f"Error while preparing commitsall: {e}")
             msg = f"Invalid data in self.pot.committed: {e}"
@@ -111,9 +106,7 @@ class Hand:
                 return []
             # Otherwise, this surplus must be returned to the player (uncalled bet)
             player = calls[0][1]
-            self.pot.returned[player] = (
-                self.pot.returned.get(player, Decimal("0.00")) + leftover_sum
-            )
+            self.pot.returned[player] = self.pot.returned.get(player, Decimal("0.00")) + leftover_sum
             log.debug(f"Uncalled bet returned to {player}: {leftover_sum}")
             return []
 
@@ -189,11 +182,7 @@ class Hand:
         log.debug("Starting pot calculation...")
 
         # Start with the total committed and common chips
-        self.total = (
-            sum(Decimal(v) for v in self.pot.committed.values())
-            + sum(self.pot.common.values())
-            + self.pot.stp
-        )
+        self.total = sum(Decimal(v) for v in self.pot.committed.values()) + sum(self.pot.common.values()) + self.pot.stp
         log.debug(
             f"Initial total pot calculation (committed + common + STP): {self.total:.2f}",
         )
@@ -768,8 +757,7 @@ def test_end_with_net_gains() -> None:
 
     # Net gains for each player
     gains_nets = {
-        player: hand.pot.collected.get(player, Decimal("0.00"))
-        - Decimal(hand.pot.committed.get(player, "0.00"))
+        player: hand.pot.collected.get(player, Decimal("0.00")) - Decimal(hand.pot.committed.get(player, "0.00"))
         for player in hand.pot.committed
     }
 

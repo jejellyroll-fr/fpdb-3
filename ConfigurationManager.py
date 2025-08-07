@@ -10,7 +10,7 @@ import copy
 import threading
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any
+from typing import Any, ClassVar
 
 import Configuration
 from loggingFpdb import get_logger
@@ -81,7 +81,7 @@ class ConfigurationManager:
     _lock = threading.RLock()
 
     # Changes requiring a full restart
-    RESTART_REQUIRED_PATHS = [
+    RESTART_REQUIRED_PATHS: ClassVar[list[str]] = [
         "database",  # Any database change
         "supported_sites.*.enabled",  # Site enable/disable
         "import.interval",  # Import interval (thread timing)
@@ -89,7 +89,7 @@ class ConfigurationManager:
     ]
 
     # Changes that can be applied dynamically
-    DYNAMIC_CHANGE_PATHS = [
+    DYNAMIC_CHANGE_PATHS: ClassVar[list[str]] = [
         "supported_sites.*.fav_seat",  # Favorite seats
         "supported_sites.*.screen_name",  # Screen name
         "supported_sites.*.HH_path",  # Hand history path
@@ -169,14 +169,15 @@ class ConfigurationManager:
                 log.debug(f"Observer {observer.__class__.__name__} unregistered")
 
     def check_pending_changes(self, current_config) -> list[ConfigChange]:
-        """Checks for pending changes in the current (in-memory) configuration
-        compared to the last loaded configuration.
+        """Checks for pending configuration changes compared to the last saved state.
+
+        This method compares the current configuration with the last captured state and returns a list of detected changes.
 
         Args:
-            current_config: Current configuration (modified in memory)
+            current_config: The current configuration instance to compare.
 
         Returns:
-            List[ConfigChange]: List of detected changes
+            List[ConfigChange]: List of configuration changes detected.
 
         """
         with self._lock:
@@ -308,7 +309,9 @@ class ConfigurationManager:
                 return False, f"Error: {e!s}", []
 
     def _identify_changes(
-        self, old_config: Configuration.Config, new_config: Configuration.Config,
+        self,
+        old_config: Configuration.Config,
+        new_config: Configuration.Config,
     ) -> list[ConfigChange]:
         """Identifies the differences between two configurations.
 
@@ -616,8 +619,16 @@ class ConfigurationManager:
             log.warning("Error capturing HUD UI parameters: %s", e)
 
     def detect_changes_from_saved_state(self, current_config) -> list[ConfigChange]:
-        """Detects changes compared to the last saved state.
-        Used when the configuration is modified in place.
+        """Detects configuration changes by comparing the current state to the last saved state.
+
+        This method returns a list of configuration changes that have occurred since the last state capture.
+
+        Args:
+            current_config: The current configuration instance to compare.
+
+        Returns:
+            List[ConfigChange]: List of detected configuration changes.
+
         """
         changes = []
 

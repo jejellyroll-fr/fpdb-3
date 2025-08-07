@@ -34,46 +34,34 @@ test_text = """#661361197, No Limit Hold'em
 Super Satellite
 Buy-In: Â£75.00/Â£7.00 GBP
 43 players
-Total Prize Pool: Â£3225.00 GBP 
+Total Prize Pool: Â£3225.00 GBP
 Target Tournament #637573140 Buy-In: Â£1850.00 GBP
 Tournament started 2012/12/30 23:32:00 CET [2012/12/30 17:32:00 ET]"""
 
-print("Testing regex...")
-print("Test text:", repr(test_text))
-print()
 
 m = re_TourneyInfo.search(test_text)
 if m:
-    print("Match found!")
-    print("Groups:", m.groupdict())
+    pass
 else:
-    print("No match found")
-    
+
     # Let's test parts of the regex
-    print("\nTesting parts...")
-    
+
     # Test tournament number part
     tourno_pattern = r"#(?P<TOURNO>[0-9]+),\s"
     m1 = re.search(tourno_pattern, test_text)
-    print("Tournament number:", m1.groupdict() if m1 else "No match")
-    
-    # Test game part  
+
+    # Test game part
     game_pattern = r"(?P<GAME>Hold\'em|6\\+\\sHold\'em|Hold\\s\'Em)"
     m2 = re.search(game_pattern, test_text)
-    print("Game:", m2.groupdict() if m2 else "No match")
-    
+
     # Test buy-in part
     buyin_pattern = r"Buy-In:\s(?P<CURRENCY>[{LS}]*)(?P<BUYIN>[,.0-9]+)".format(**substitutions)
-    m3 = re.search(buyin_pattern, test_text)  
-    print("Buy-in:", m3.groupdict() if m3 else "No match")
-    
+    m3 = re.search(buyin_pattern, test_text)
+
     # Test simpler buy-in
     simple_buyin = r"Buy-In:\s(.{0,3})([,.0-9]+)"
     m3b = re.search(simple_buyin, test_text)
-    print("Simple buy-in:", m3b.groups() if m3b else "No match")
-    
+
     # Test currency pattern specifically
     currency_pattern = f"[{substitutions['LS']}]"
-    print("Currency pattern:", repr(currency_pattern))
     m4 = re.search(currency_pattern, test_text)
-    print("Currency match:", m4.group() if m4 else "No match")

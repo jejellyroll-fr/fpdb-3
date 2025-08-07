@@ -2,8 +2,10 @@
 
 import os
 
-# import L10n
-# _ = L10n.get_translation()
+# OPTION A : on veut XWayland si la variable est posée
+if os.getenv("FPDB_FORCE_X11") == "1":
+    os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
+
 import subprocess
 import sys
 import traceback
@@ -363,12 +365,17 @@ class GuiAutoImport(QWidget):
                 self.intervalEntry.setEnabled(False)
                 self.progressBar.setVisible(True)
                 self.statusLabel.setText("Auto Import Running...")
+
                 if self.pipe_to_hud is None:
-                    log.debug("start hud- pipe_to_hud is none:")
+                    log.debug("start hud - pipe_to_hud is none:")
                     try:
+                        # ------------------------------------------------------------------
+                        # 1) build command line
+                        # ------------------------------------------------------------------
                         if self.config.install_method == "exe":
                             command = "HUD_main.exe"
                             bs = 0
+
                         elif self.config.install_method == "app":
                             base_path = (
                                 sys._MEIPASS
@@ -378,33 +385,20 @@ class GuiAutoImport(QWidget):
                             command = os.path.join(base_path, "HUD_main")
                             if not os.path.isfile(command):
                                 msg = f"HUD_main not found at {command}"
-                                raise FileNotFoundError(
-                                    msg,
-                                )
+                                raise FileNotFoundError(msg)
                             bs = 1
-                        elif os.name == "nt":
+
+                        elif os.name == "nt":      # Windows installation source
                             path = to_raw(sys.path[0])
-                            log.debug(f"start hud - path: {path}")
-                            path2 = os.getcwd()
-                            log.debug(f"start hud - path2: {path2}")
-                            if win32console.GetConsoleWindow() == 0:
-                                command = (
-                                    'pythonw "'
-                                    + path
-                                    + r'\HUD_main.pyw" '
-                                    + self.settings["cl_options"]
-                                )
-                                log.debug(f"start hud - command: {command}")
-                            else:
-                                command = (
-                                    'python "'
-                                    + path
-                                    + r'\HUD_main.pyw" '
-                                    + self.settings["cl_options"]
-                                )
-                                log.debug(f"start hud - command: {command}")
+                            use_pythonw = win32console.GetConsoleWindow() == 0
+                            interpreter = "pythonw" if use_pythonw else "python"
+                            command = (
+                                f'{interpreter} "{path}\\HUD_main.pyw" '
+                                f"{self.settings['cl_options']}"
+                            )
                             bs = 0
-                        else:
+
+                        else:                      # Linux & macOS installation source
                             base_path = (
                                 sys._MEIPASS
                                 if getattr(sys, "frozen", False)
@@ -412,67 +406,70 @@ class GuiAutoImport(QWidget):
                             )
                             command = os.path.join(base_path, "HUD_main.pyw")
                             if not os.path.isfile(command):
-                                self.addText(
-                                    "\n" + (f"*** {command} was not found"),
-                                )
-                            command = [command, *str.split(self.settings["cl_options"], ".")]
+                                self.addText(f"\n*** {command} was not found", "error")
+                            command = [command, *self.settings["cl_options"].split()]
                             bs = 1
 
+                        # ------------------------------------------------------------------
+                        # 2) prepare env for sub process
+                        # ------------------------------------------------------------------
+                        env = None  # default
+
+                        if sys.platform.startswith("linux") and os.getenv("FPDB_FORCE_X11") == "1":
+                            env = os.environ.copy()
+                            env.setdefault("QT_QPA_PLATFORM", "xcb")
+                            env.setdefault("FPDB_FORCE_X11", "1")
+
                         log.info("opening pipe to HUD")
-                        log.debug(f"Running {command.__repr__()}")
+                        log.debug(f"Running {command!r} with bs={bs}")
+
+                        # ------------------------------------------------------------------
+                        # 3) launchHUD
+                        # ------------------------------------------------------------------
+                        popen_kwargs = {
+                            "bufsize": bs,
+                            "stdin": subprocess.PIPE,
+                            "universal_newlines": True,
+                        }
+                        # Capture stdout/err for windows « exe »
                         if self.config.install_method == "exe" or (
                             os.name == "nt" and win32console.GetConsoleWindow() == 0
                         ):
-                            self.pipe_to_hud = subprocess.Popen(
-                                command,
-                                bufsize=bs,
-                                stdin=subprocess.PIPE,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                universal_newlines=True,
-                            )
-                        else:
-                            self.pipe_to_hud = subprocess.Popen(
-                                command,
-                                bufsize=bs,
-                                stdin=subprocess.PIPE,
-                                universal_newlines=True,
-                            )
+                            popen_kwargs.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+                        if env is not None:
+                            popen_kwargs["env"] = env
+
+                        self.pipe_to_hud = subprocess.Popen(command, **popen_kwargs)
 
                     except Exception:
                         error_msg = f"GuiAutoImport Error opening pipe: {traceback.format_exc()}"
                         log.warning(error_msg)
                         self.addText(f"\n*** {error_msg}", "error")
                     else:
-                        # Get import directories from configuration
+                        # ------------------------------------------------------------------
+                        # 4) path config, timer, etc.
+                        # ------------------------------------------------------------------
                         the_sites = self.config.get_supported_sites()
                         for site in the_sites:
                             params = self.config.get_site_parameters(site)
                             if params["enabled"]:
                                 paths = self.config.get_default_paths(site)
-
-                                # Add hand history directory
                                 if paths.get("hud-defaultPath"):
                                     self.importer.addImportDirectory(
-                                        paths["hud-defaultPath"],
-                                        monitor=True,
-                                        site=(site, "hh"),
+                                        paths["hud-defaultPath"], monitor=True, site=(site, "hh"),
                                     )
                                     self.addText(
-                                        f"\n * Add {site} hand history directory: {paths['hud-defaultPath']}",
-                                        "folder",
+                                        f"\n * Add {site} hand history directory: "
+                                        f"{paths['hud-defaultPath']}", "folder",
                                     )
-
-                                # Add tournament summary directory if exists
                                 if paths.get("hud-defaultTSPath"):
                                     self.importer.addImportDirectory(
-                                        paths["hud-defaultTSPath"],
-                                        monitor=True,
-                                        site=(site, "ts"),
+                                        paths["hud-defaultTSPath"], monitor=True, site=(site, "ts"),
                                     )
                                     self.addText(
-                                        f"\n * Add {site} tournament summary directory: {paths['hud-defaultTSPath']}",
-                                        "folder",
+                                        f"\n * Add {site} tournament summary directory: "
+                                        f"{paths['hud-defaultTSPath']}", "folder",
                                     )
 
                         self.do_import()
@@ -483,7 +480,8 @@ class GuiAutoImport(QWidget):
 
             else:
                 self.addText("\nAuto Import aborted. Global lock not available.", "error")
-        else:  # toggled off
+
+        else:  # bouton « Start » décoché → arrêt
             self.doAutoImportBool = False
             if self.importtimer:
                 self.importtimer.stop()

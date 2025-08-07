@@ -81,7 +81,14 @@ class MockCursor:
 
 class MockHandProcessor:  # Reste inchangé
     def __init__(
-        self, config, in_path, index, autostart, starsArchive, ftpArchive, sitename,
+        self,
+        config,
+        in_path,
+        index,
+        autostart,
+        starsArchive,
+        ftpArchive,
+        sitename,
     ) -> None:
         self.numPartial = 0
         self.numSkipped = 0
@@ -141,13 +148,16 @@ def importer(config_mock):
     with (
         patch("Database.Database.do_connect", mock_do_connect_with_connection),
         patch(
-            "Database.Database.check_version", mock_check_version,
+            "Database.Database.check_version",
+            mock_check_version,
         ),  # Empêche la vraie vérification mais initialise wrongDbVersion
         patch(
-            "Database.Database.get_sites", return_value=None,
+            "Database.Database.get_sites",
+            return_value=None,
         ),  # Empêche la vraie lecture
         patch(
-            "Database.Database.is_connected", return_value=True,
+            "Database.Database.is_connected",
+            return_value=True,
         ),  # Assure qu'il pense être connecté
         # Patch explicite de rollback pour être sûr qu'il ne lève pas d'erreur si connection n'est pas entièrement mocké
         patch.object(Database.Database, "rollback", return_value=None, create=True),
@@ -162,10 +172,12 @@ def importer(config_mock):
     # critiques pendant l'init ont été contrôlées par les patches.
     # On s'assure que l'attribut connection existe bien après l'init
     assert hasattr(
-        imp.database, "connection",
+        imp.database,
+        "connection",
     ), "Database object should have a 'connection' attribute after init"
     assert hasattr(
-        imp.database, "cursor",
+        imp.database,
+        "cursor",
     ), "Database object should have a 'cursor' attribute after init"
 
     # Assigner un mock DB complet APRÈS l'init peut être nécessaire si
@@ -223,7 +235,9 @@ def test_error_triggers_autopop(importer, mock_fpdb_file, monkeypatch, caplog) -
 
     # Patch la méthode _import_hh_file pour simuler une erreur
     monkeypatch.setattr(
-        importer, "_import_hh_file", lambda fpdbfile: (0, 0, 0, 0, 1, 0.1),
+        importer,
+        "_import_hh_file",
+        lambda fpdbfile: (0, 0, 0, 0, 1, 0.1),
     )
 
     caplog.set_level("INFO", logger="importer")

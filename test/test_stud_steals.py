@@ -70,7 +70,7 @@ class MockHand:
         self.collectees = {}
         self.pot = Mock()
         self.pot.pots = [(Decimal("10.00"), ["Hero"])]
-        self.pot.common = {p[1]: Decimal("0") for p in self.players}
+        self.pot.common = {p[1]: Decimal(0) for p in self.players}
         self.pot.committed = {p[1]: Decimal("1.67") for p in self.players}
         self.pot.stp = 0
         self.sitout = set()
@@ -108,8 +108,7 @@ class MockHand:
         }
 
     def getStreetTotals(self):
-        return [Decimal("1.00"), Decimal("2.00"), Decimal("4.00"),
-                Decimal("6.00"), Decimal("8.00"), Decimal("10.00")]
+        return [Decimal("1.00"), Decimal("2.00"), Decimal("4.00"), Decimal("6.00"), Decimal("8.00"), Decimal("10.00")]
 
     def join_holecards(self, player, asList=False):
         if asList:
@@ -138,13 +137,13 @@ class TestStudSteals:
                 ("Hero", "ante", Decimal("0.10")),
             ],
             "THIRD": [
-                ("Player1", "bringin", Decimal("0.10")),    # Bring-in
+                ("Player1", "bringin", Decimal("0.10")),  # Bring-in
                 ("Player2", "folds"),
                 ("Player3", "folds"),
-                ("Player4", "raises", Decimal("0.25")),     # Steal attempt from position 2
+                ("Player4", "raises", Decimal("0.25")),  # Steal attempt from position 2
                 ("Player5", "folds"),
                 ("Hero", "folds"),
-                ("Player1", "folds"),                        # Bring-in folds
+                ("Player1", "folds"),  # Bring-in folds
             ],
             "FOURTH": [],
             "FIFTH": [],
@@ -175,7 +174,7 @@ class TestStudSteals:
             [3, "Player3", Decimal("100.00"), None, None],
             [4, "Player4", Decimal("100.00"), None, None],
         ]
-        self.hand.pot.common = {p[1]: Decimal("0") for p in self.hand.players}
+        self.hand.pot.common = {p[1]: Decimal(0) for p in self.hand.players}
         self.hand.pot.committed = {p[1]: Decimal("1.67") for p in self.hand.players}
 
         self.hand.actions = {
@@ -188,9 +187,9 @@ class TestStudSteals:
             "THIRD": [
                 ("Player1", "bringin", Decimal("0.10")),
                 ("Player2", "folds"),
-                ("Player3", "raises", Decimal("0.25")),     # Steal attempt
+                ("Player3", "raises", Decimal("0.25")),  # Steal attempt
                 ("Player4", "folds"),
-                ("Player1", "calls", Decimal("0.15")),       # Bring-in defends
+                ("Player1", "calls", Decimal("0.15")),  # Bring-in defends
             ],
             "FOURTH": [],
             "FIFTH": [],
@@ -219,7 +218,7 @@ class TestStudSteals:
             [3, "Player3", Decimal("100.00"), None, None],
             [4, "Player4", Decimal("100.00"), None, None],
         ]
-        self.hand.pot.common = {p[1]: Decimal("0") for p in self.hand.players}
+        self.hand.pot.common = {p[1]: Decimal(0) for p in self.hand.players}
         self.hand.pot.committed = {p[1]: Decimal("1.67") for p in self.hand.players}
 
         self.hand.actions = {
@@ -263,7 +262,7 @@ class TestStudSteals:
             ],
             "THIRD": [
                 ("Player1", "bringin", Decimal("0.10")),
-                ("Player2", "raises", Decimal("0.25")),     # Early position raise
+                ("Player2", "raises", Decimal("0.25")),  # Early position raise
                 ("Player3", "folds"),
                 ("Player4", "folds"),
                 ("Player5", "folds"),
@@ -294,7 +293,7 @@ class TestStudSteals:
             [2, "Hero", Decimal("100.00"), None, None],
         ]
         self.hand.hero = "Hero"
-        self.hand.pot.common = {p[1]: Decimal("0") for p in self.hand.players}
+        self.hand.pot.common = {p[1]: Decimal(0) for p in self.hand.players}
         self.hand.pot.committed = {p[1]: Decimal("5.00") for p in self.hand.players}
 
         self.hand.actions = {
@@ -304,7 +303,7 @@ class TestStudSteals:
             ],
             "THIRD": [
                 ("Player1", "bringin", Decimal("0.10")),
-                ("Hero", "raises", Decimal("0.25")),        # HU steal attempt
+                ("Hero", "raises", Decimal("0.25")),  # HU steal attempt
                 ("Player1", "folds"),
             ],
             "FOURTH": [],
@@ -338,7 +337,7 @@ class TestStudSteals:
                 ("Player3", "folds"),
                 ("Player4", "folds"),
                 ("Player5", "folds"),
-                ("Hero", "raises", Decimal("0.25")),        # Last position steal
+                ("Hero", "raises", Decimal("0.25")),  # Last position steal
                 ("Player1", "folds"),
             ],
             "FOURTH": [],
@@ -364,7 +363,7 @@ class TestStudSteals:
             [3, "Player3", Decimal("100.00"), None, None],
             [4, "Player4", Decimal("100.00"), None, None],
         ]
-        self.hand.pot.common = {p[1]: Decimal("0") for p in self.hand.players}
+        self.hand.pot.common = {p[1]: Decimal(0) for p in self.hand.players}
         self.hand.pot.committed = {p[1]: Decimal("1.67") for p in self.hand.players}
 
         self.hand.actions = {
@@ -377,9 +376,9 @@ class TestStudSteals:
             "THIRD": [
                 ("Player1", "bringin", Decimal("0.10")),
                 ("Player2", "folds"),
-                ("Player3", "raises", Decimal("0.25")),     # Steal attempt
+                ("Player3", "raises", Decimal("0.25")),  # Steal attempt
                 ("Player4", "folds"),
-                ("Player1", "raises", Decimal("0.50")),     # Re-steal from bring-in
+                ("Player1", "raises", Decimal("0.50")),  # Re-steal from bring-in
                 ("Player3", "folds"),
             ],
             "FOURTH": [],

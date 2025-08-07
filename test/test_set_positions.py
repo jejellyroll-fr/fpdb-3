@@ -303,9 +303,9 @@ if __name__ == "__main__":
     # Run tests with pytest if available
     try:
         import pytest
+
         pytest.main([__file__, "-v"])
     except ImportError:
-
         # Basic test runner
         test_instance = TestSetPositions()
         stats = test_instance.stats()
@@ -322,4 +322,3 @@ if __name__ == "__main__":
                 pass
             except Exception:
                 pass
-

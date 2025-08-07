@@ -174,7 +174,7 @@ class Hud:
                     (int(self.layout.location[i][1] * y_scale)),
                 )
                 log.debug("Seat %d layout scaled: (%d,%d) -> (%d,%d)",
-                         i, old_pos[0], old_pos[1], self.layout.location[i][0], self.layout.location[i][1])
+                        i, old_pos[0], old_pos[1], self.layout.location[i][0], self.layout.location[i][1])
 
         old_common = self.layout.common
         self.layout.common = (

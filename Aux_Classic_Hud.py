@@ -45,7 +45,7 @@ import Stats
 from loggingFpdb import get_logger
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("aux_classic_hud")
+log = get_logger("hud_main")
 
 
 class ClassicHud(Aux_Hud.SimpleHUD):

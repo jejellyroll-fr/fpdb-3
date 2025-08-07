@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 from loggingFpdb import get_logger
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("aux_base")
+log = get_logger("hud_main")
 
 
 def clamp_to_screen(x: int, y: int, width: int = 200, height: int = 100) -> tuple[int, int]:
@@ -392,7 +392,7 @@ class AuxSeats(AuxWindow):
             old_pos = self.positions.get(i, (0, 0))
             self.positions[i] = self.hud.layout.location[self.adj[i]]
             log.debug("Seat %d position updated: (%d,%d) -> (%d,%d)",
-                     i, old_pos[0], old_pos[1], self.positions[i][0], self.positions[i][1])
+                    i, old_pos[0], old_pos[1], self.positions[i][0], self.positions[i][1])
         old_common = self.positions.get("common", (0, 0))
         self.positions["common"] = self.hud.layout.common
         log.info("Common position updated: (%d,%d) -> (%d,%d)",
@@ -437,6 +437,7 @@ class AuxSeats(AuxWindow):
         Sets up the window objects for each seat and the common area,
         positions them according to the current layout and table size, and displays them as needed.
         """
+        log.debug("=== AUX_BASE CREATE() METHOD CALLED ===")
         self.adj = self.adj_seats()
         self.m_windows = {}  # windows to put the card/hud items in
         for i in [*list(range(1, self.hud.max + 1)), "common"]:
@@ -457,9 +458,13 @@ class AuxSeats(AuxWindow):
                 table_y = self.hud.table.y if self.hud.table.y is not None else 0
                 pos_x = max(0, self.positions[i][0] + table_x)
                 pos_y = max(0, self.positions[i][1] + table_y)
-                log.debug("Seat %s: Final position: table(%s, %s) + relative(%s, %s) = (%s, %s)",
-                          i, table_x, table_y, self.positions[i][0], self.positions[i][1], pos_x, pos_y)
+                log.debug("=== AUX_BASE POSITIONING === Seat %s: table(%s, %s) + relative(%s, %s) = final(%s, %s)",
+                        i, table_x, table_y, self.positions[i][0], self.positions[i][1], pos_x, pos_y)
                 self.m_windows[i].move(pos_x, pos_y)
+                # Verify position after move
+                actual_pos = self.m_windows[i].pos()
+                log.debug("=== POSITION AFTER MOVE === Seat %s: requested(%s, %s) -> actual(%s, %s)",
+                        i, pos_x, pos_y, actual_pos.x(), actual_pos.y())
                 self.hud.layout.location[self.adj[i]] = self.positions[i]
                 if "opacity" in self.params:
                     self.m_windows[i].setWindowOpacity(float(self.params["opacity"]))
@@ -470,6 +475,8 @@ class AuxSeats(AuxWindow):
             self.create_contents(self.m_windows[i], i)
 
             self.m_windows[i].create()  # ensure there is a native window handle for topify
+            log.info("=== AUX_BASE CALLING TOPIFY === window[%d]=%s, table=%s", i, self.m_windows[i],
+                    self.hud.table.title if hasattr(self.hud.table, "title") else "NO_TITLE")
             self.hud.table.topify(self.m_windows[i])
             if not self.uses_timer:
                 self.m_windows[i].show()
@@ -495,7 +502,14 @@ class AuxSeats(AuxWindow):
 
         x_scale = self.hud.table.width  / lw
         y_scale = self.hud.table.height / lh
-        return int(x * x_scale), int(y * y_scale)
+
+        scaled_x = int(x * x_scale)
+        scaled_y = int(y * y_scale)
+
+        log.error("=== SCALING DEBUG === Original(%d,%d) Layout(%dx%d) Table(%dx%d) Scale(%.2f,%.2f) Result(%d,%d)",
+                x, y, lw, lh, self.hud.table.width, self.hud.table.height, x_scale, y_scale, scaled_x, scaled_y)
+
+        return scaled_x, scaled_y
 
     def update_gui(self, _new_hand_id: Any) -> None:
         """Update the graphical user interface for all seat windows.
