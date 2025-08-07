@@ -149,7 +149,8 @@ def test_re_PlayerInfo33() -> None:
 
 
 re_ButtonPos = re.compile(
-    r"""Seat\s+\#(?P<BUTTON>\d+)\sis\sthe\sbutton""", re.MULTILINE,
+    r"""Seat\s+\#(?P<BUTTON>\d+)\sis\sthe\sbutton""",
+    re.MULTILINE,
 )
 
 
@@ -161,11 +162,15 @@ def test_re_ButtonPos() -> None:
 
 
 re_CollectPot = re.compile(
-    r"{PLYR}\s+{BRKTS}{BRKTS}(collected|wins|splits|won)\s+\((?P<POT>\d{{1,3}}(,\d{{3}})*(\.\d+)?)\)".format(**substitutions),
+    r"{PLYR}\s+{BRKTS}{BRKTS}(collected|wins|splits|won)\s+\((?P<POT>\d{{1,3}}(,\d{{3}})*(\.\d+)?)\)".format(
+        **substitutions,
+    ),
     re.MULTILINE,
 )
 re_CollectPot2 = re.compile(
-    r"^Seat (?P<SEAT>[0-9]+): {PLYR} (({BRKTS}(((((?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \((?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(\s\sand\s(won\s\([.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$)|collected\s\((?P<POT2>[.\d]+)\)))|folded ((on the (Flop|Turn|River))|before Flop)))|folded before Flop \(didn't bet\))".format(**substitutions),
+    r"^Seat (?P<SEAT>[0-9]+): {PLYR} (({BRKTS}(((((?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \((?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(\s\sand\s(won\s\([.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$)|collected\s\((?P<POT2>[.\d]+)\)))|folded ((on the (Flop|Turn|River))|before Flop)))|folded before Flop \(didn't bet\))".format(
+        **substitutions,
+    ),
     re.MULTILINE,
 )
 
@@ -286,7 +291,9 @@ def test_re_ShowdownAction() -> None:
 
 
 re_Action = re.compile(
-    r"""^{PLYR}:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)(?:\s(?P<BET>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?(?:\sto\s(?P<POT>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?\s*$""".format(**substitutions),
+    r"""^{PLYR}:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)(?:\s(?P<BET>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?(?:\sto\s(?P<POT>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?\s*$""".format(
+        **substitutions,
+    ),
     re.MULTILINE | re.VERBOSE,
 )
 

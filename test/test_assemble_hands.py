@@ -1,16 +1,15 @@
-#!/usr/bin/env python
-
 """Test suite for assembleHands method in DerivedStats."""
 
-import os
 import sys
-from datetime import datetime
+from collections.abc import Callable
+from datetime import datetime, timezone
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
 
 # Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import Card
 from DerivedStats import DerivedStats
@@ -20,9 +19,10 @@ class MockHand:
     """Mock Hand object for testing assembleHands."""
 
     def __init__(self) -> None:
+        """Initialize mock hand object with test data."""
         self.handid = "12345"
         self.tablename = "Test Table"
-        self.startTime = datetime(2024, 1, 1, 12, 0, 0)
+        self.startTime = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
         self.tourneyId = None
         self.tourneyTypeId = None
         self.hero = "Hero"
@@ -66,18 +66,18 @@ class MockHand:
         }
         self.pot = MockPot()
 
-    def getStreetTotals(self):
+    def getStreetTotals(self) -> list[Decimal]:
         """Return street pot totals."""
         return [
-            Decimal("1.50"),   # Blinds
-            Decimal("7.50"),   # After preflop
+            Decimal("1.50"),  # Blinds
+            Decimal("7.50"),  # After preflop
             Decimal("16.50"),  # After flop
             Decimal("16.50"),  # After turn
             Decimal("16.50"),  # After river
-            Decimal("16.50"),   # Final pot
+            Decimal("16.50"),  # Final pot
         ]
 
-    def countPlayers(self):
+    def countPlayers(self) -> int:
         """Count number of players."""
         return len(self.players)
 
@@ -86,6 +86,7 @@ class MockPot:
     """Mock Pot object."""
 
     def __init__(self) -> None:
+        """Initialize MockPot with empty pot data structures."""
         self.committed = {}
         self.common = {}
         self.returned = {}
@@ -97,30 +98,60 @@ class MockPot:
 class TestAssembleHands:
     """Test cases for assembleHands method."""
 
+    def _assert_board_cards(self, stats: DerivedStats, expected_cards: list[str | None]) -> None:
+        """Helper method to assert board card encoding.
+
+        Args:
+            stats: DerivedStats instance with assembled hands
+            expected_cards: List of card strings or None for missing cards (max 5)
+        """
+        for i, card in enumerate(expected_cards[:5], 1):
+            board_key = f"boardcard{i}"
+            expected_value = Card.encodeCard(card) if card else 0
+            assert stats.hands[board_key] == expected_value
+
+    def _setup_and_assemble_hand(
+        self, stats: DerivedStats, hand_modifier: Callable[[MockHand], None] | None = None,
+    ) -> MockHand:
+        """Helper method to create and assemble a hand with optional modifications.
+
+        Args:
+            stats: DerivedStats instance to use for assembly
+            hand_modifier: Optional function to modify the hand before assembly
+
+        Returns:
+            The modified MockHand instance
+        """
+        hand = MockHand()
+        if hand_modifier:
+            hand_modifier(hand)
+        stats.assembleHands(hand)
+        return hand
+
     @pytest.fixture
-    def stats(self):
+    def stats(self) -> DerivedStats:
         """Create a DerivedStats instance."""
         stats = DerivedStats()
 
         # Mock required methods
-        def mock_countPlayers(hand):
+        def mock_countPlayers(hand: MockHand) -> int:
             return len(hand.players)
 
-        def mock_playersAtStreetX(hand) -> None:
+        def mock_playersAtStreetX(_: MockHand) -> None:
             stats.hands["playersAtStreet1"] = 2
             stats.hands["playersAtStreet2"] = 2
             stats.hands["playersAtStreet3"] = 2
             stats.hands["playersAtStreet4"] = 2
             stats.hands["playersAtShowdown"] = 0
 
-        def mock_streetXRaises(hand) -> None:
+        def mock_streetXRaises(_: MockHand) -> None:
             stats.hands["street0Raises"] = 1
             stats.hands["street1Raises"] = 0
             stats.hands["street2Raises"] = 0
             stats.hands["street3Raises"] = 0
             stats.hands["street4Raises"] = 0
 
-        def mock_vpip(hand) -> None:
+        def mock_vpip(_: MockHand) -> None:
             stats.hands["playersVpi"] = 2
 
         stats.countPlayers = mock_countPlayers
@@ -130,11 +161,9 @@ class TestAssembleHands:
 
         return stats
 
-    def test_basic_hand_assembly(self, stats) -> None:
+    def test_basic_hand_assembly(self, stats: DerivedStats) -> None:
         """Test basic hand assembly with standard holdem hand."""
-        hand = MockHand()
-
-        stats.assembleHands(hand)
+        hand = self._setup_and_assemble_hand(stats)
 
         # Check basic hand properties
         assert stats.hands["tableName"] == "Test Table"
@@ -145,11 +174,7 @@ class TestAssembleHands:
         assert stats.hands["heroSeat"] == 1
 
         # Check board cards are encoded correctly
-        assert stats.hands["boardcard1"] == Card.encodeCard("As")
-        assert stats.hands["boardcard2"] == Card.encodeCard("Kh")
-        assert stats.hands["boardcard3"] == Card.encodeCard("Qd")
-        assert stats.hands["boardcard4"] == Card.encodeCard("Jc")
-        assert stats.hands["boardcard5"] == Card.encodeCard("Ts")
+        self._assert_board_cards(stats, ["As", "Kh", "Qd", "Jc", "Ts"])
 
         # Check street pots
         assert stats.hands["street0Pot"] == 150  # 1.50 * 100
@@ -159,54 +184,50 @@ class TestAssembleHands:
         assert stats.hands["street4Pot"] == 1650
         assert stats.hands["finalPot"] == 1650
 
-    def test_tournament_hand(self, stats) -> None:
+    def test_tournament_hand(self, stats: DerivedStats) -> None:
         """Test hand assembly for tournament hand."""
-        hand = MockHand()
-        hand.gametype["type"] = "tour"
-        hand.tourneyId = 999
-        hand.tourneyTypeId = 10
+        def modify_for_tournament(hand: MockHand) -> None:
+            hand.gametype["type"] = "tour"
+            hand.tourneyId = 999
+            hand.tourneyTypeId = 10
 
-        stats.assembleHands(hand)
+        self._setup_and_assemble_hand(stats, modify_for_tournament)
 
         assert stats.hands["tourneyId"] == 999
         assert stats.hands["gametypeId"] is None  # Set later by DB
 
-    def test_no_hero_hand(self, stats) -> None:
+    def test_no_hero_hand(self, stats: DerivedStats) -> None:
         """Test hand assembly when no hero is present."""
-        hand = MockHand()
-        hand.hero = None
+        def remove_hero(hand: MockHand) -> None:
+            hand.hero = None
 
-        stats.assembleHands(hand)
+        self._setup_and_assemble_hand(stats, remove_hero)
 
         assert stats.hands["heroSeat"] == 0
 
-    def test_incomplete_board(self, stats) -> None:
+    def test_incomplete_board(self, stats: DerivedStats) -> None:
         """Test hand assembly with incomplete board (e.g., all-in preflop)."""
-        hand = MockHand()
-        hand.board = {
-            "FLOP": ["As", "Kh", "Qd"],
-            "TURN": [],
-            "RIVER": [],
-        }
+        def set_incomplete_board(hand: MockHand) -> None:
+            hand.board = {
+                "FLOP": ["As", "Kh", "Qd"],
+                "TURN": [],
+                "RIVER": [],
+            }
 
-        stats.assembleHands(hand)
+        self._setup_and_assemble_hand(stats, set_incomplete_board)
 
         # Check board cards - missing cards should be encoded as 0
-        assert stats.hands["boardcard1"] == Card.encodeCard("As")
-        assert stats.hands["boardcard2"] == Card.encodeCard("Kh")
-        assert stats.hands["boardcard3"] == Card.encodeCard("Qd")
-        assert stats.hands["boardcard4"] == 0  # No turn card
-        assert stats.hands["boardcard5"] == 0  # No river card
+        self._assert_board_cards(stats, ["As", "Kh", "Qd", None, None])
 
-    def test_run_it_twice(self, stats) -> None:
+    def test_run_it_twice(self, stats: DerivedStats) -> None:
         """Test hand assembly for run it twice scenario."""
-        hand = MockHand()
-        hand.runItTimes = 2
-        hand.board["FLOP2"] = ["2s", "2h", "2d"]
-        hand.board["TURN2"] = ["2c"]
-        hand.board["RIVER2"] = ["3s"]
+        def setup_run_it_twice(hand: MockHand) -> None:
+            hand.runItTimes = 2
+            hand.board["FLOP2"] = ["2s", "2h", "2d"]
+            hand.board["TURN2"] = ["2c"]
+            hand.board["RIVER2"] = ["3s"]
 
-        stats.assembleHands(hand)
+        self._setup_and_assemble_hand(stats, setup_run_it_twice)
 
         assert stats.hands["runItTwice"] == True
         assert len(stats.hands["boards"]) == 2
@@ -221,86 +242,54 @@ class TestAssembleHands:
         assert board2[0] == 2  # Board ID
         assert len(board2) == 6  # Board ID + 5 cards
 
-    def test_split_pot_game(self, stats) -> None:
+    def test_split_pot_game(self, stats: DerivedStats) -> None:
         """Test hand assembly for split pot games."""
-        hand = MockHand()
-        hand.gametype["split"] = True
-        hand.gametype["category"] = "omaha8"
+        def setup_split_pot(hand: MockHand) -> None:
+            hand.gametype["split"] = True
+            hand.gametype["category"] = "omaha8"
 
-        stats.assembleHands(hand)
+        self._setup_and_assemble_hand(stats, setup_split_pot)
 
         # In split games, boards are handled differently
         assert stats.hands["runItTwice"] == False
         assert len(stats.hands["boards"]) == 1
 
-    def test_empty_actions(self, stats) -> None:
+    def test_empty_actions(self, stats: DerivedStats) -> None:
         """Test hand assembly with no actions."""
-        hand = MockHand()
-        hand.actions = {
-            "BLINDSANTES": [],
-            "PREFLOP": [],
-            "FLOP": [],
-            "TURN": [],
-            "RIVER": [],
-        }
+        def clear_actions(hand: MockHand) -> None:
+            hand.actions = {
+                "BLINDSANTES": [],
+                "PREFLOP": [],
+                "FLOP": [],
+                "TURN": [],
+                "RIVER": [],
+            }
 
-        stats.assembleHands(hand)
+        self._setup_and_assemble_hand(stats, clear_actions)
 
         # Should still assemble basic hand info
         assert stats.hands["tableName"] == "Test Table"
         assert stats.hands["siteHandNo"] == "12345"
         assert stats.hands["seats"] == 4
 
-    def test_special_board_cards(self, stats) -> None:
+    def test_special_board_cards(self, stats: DerivedStats) -> None:
         """Test encoding of special board situations."""
-        hand = MockHand()
-        hand.board = {
-            "FLOPET": ["As", "Kh"],  # Special flop key
-            "FLOP": ["Qd"],
-            "TURN": ["Jc"],
-            "RIVER": ["Ts"],
-        }
+        def setup_special_board(hand: MockHand) -> None:
+            hand.board = {
+                "FLOPET": ["As", "Kh"],  # Special flop key
+                "FLOP": ["Qd"],
+                "TURN": ["Jc"],
+                "RIVER": ["Ts"],
+            }
 
-        stats.assembleHands(hand)
+        self._setup_and_assemble_hand(stats, setup_special_board)
 
         # FLOPET cards should be included first
-        assert stats.hands["boardcard1"] == Card.encodeCard("As")
-        assert stats.hands["boardcard2"] == Card.encodeCard("Kh")
-        assert stats.hands["boardcard3"] == Card.encodeCard("Qd")
-        assert stats.hands["boardcard4"] == Card.encodeCard("Jc")
-        assert stats.hands["boardcard5"] == Card.encodeCard("Ts")
+        self._assert_board_cards(stats, ["As", "Kh", "Qd", "Jc", "Ts"])
 
-    def test_max_position_initialization(self, stats) -> None:
+    def test_max_position_initialization(self, stats: DerivedStats) -> None:
         """Test that maxPosition is properly initialized."""
-        hand = MockHand()
-
-        stats.assembleHands(hand)
+        self._setup_and_assemble_hand(stats)
 
         assert stats.hands["maxPosition"] == -1
         assert stats.hands["texture"] is None
-
-
-if __name__ == "__main__":
-    # Run tests with pytest if available
-    try:
-        import pytest
-        pytest.main([__file__, "-v"])
-    except ImportError:
-
-        # Basic test runner
-        test_instance = TestAssembleHands()
-        stats = test_instance.stats()
-
-        test_methods = [method for method in dir(test_instance) if method.startswith("test_")]
-
-        for method_name in test_methods:
-            try:
-                # Create fresh stats instance for each test
-                fresh_stats = test_instance.stats()
-                method = getattr(test_instance, method_name)
-                method(fresh_stats)
-            except AssertionError:
-                pass
-            except Exception:
-                pass
-

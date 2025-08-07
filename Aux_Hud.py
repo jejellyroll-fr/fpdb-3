@@ -43,7 +43,7 @@ import Stats
 from loggingFpdb import get_logger
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("aux_hud")
+log = get_logger("hud_main")
 
 
 class SimpleHUD(Aux_Base.AuxSeats):
@@ -60,6 +60,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
             config: The configuration object for the HUD.
             aux_params: Additional parameters for HUD customization.
         """
+        log.debug("=== SIMPLEHUD __INIT__ CALLED ===")
         #    Save everything you need to know about the hud as attrs.
         #    That way a subclass doesn't have to grab them.
         #    Also, the subclass can override any of these attributes
@@ -233,7 +234,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         """
         widget = self.childAt(event.pos())
 
-        if widget.stat_dict and self.popup_count == 0 and widget.aw_popup:
+        if widget and hasattr(widget, "stat_dict") and widget.stat_dict and self.popup_count == 0 and hasattr(widget, "aw_popup") and widget.aw_popup:
             # do not popup on empty blocks or if one is already active
             pu = Popup.popup_factory(
                 seat=widget.aw_seat,

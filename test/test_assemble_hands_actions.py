@@ -1,16 +1,12 @@
-#!/usr/bin/env python
-
 """Test suite for assembleHandsActions method in DerivedStats."""
 
-import os
 import sys
 from decimal import Decimal
+from pathlib import Path
 from unittest.mock import Mock
 
-import pytest
-
 # Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from DerivedStats import DerivedStats
 
@@ -59,18 +55,18 @@ class TestAssembleHandsActions:
         self.mock_hand.actions = {
             "BLINDS": [],
             "PREFLOP": [
-                ("Player1", "raises", Decimal("10"), Decimal("10"), Decimal("5"), False),
-                ("Player2", "calls", Decimal("10"), False),
+                ("Player1", "raises", Decimal(10), Decimal(10), Decimal(5), False),
+                ("Player2", "calls", Decimal(10), False),
                 ("Player3", "folds"),
             ],
             "FLOP": [
-                ("Player1", "bets", Decimal("15"), False),
-                ("Player2", "calls", Decimal("15"), False),
+                ("Player1", "bets", Decimal(15), False),
+                ("Player2", "calls", Decimal(15), False),
             ],
             "TURN": [
                 ("Player1", "checks"),
-                ("Player2", "bets", Decimal("30"), False),
-                ("Player1", "calls", Decimal("30"), False),
+                ("Player2", "bets", Decimal(30), False),
+                ("Player1", "calls", Decimal(30), False),
             ],
             "RIVER": [
                 ("Player1", "checks"),
@@ -103,8 +99,8 @@ class TestAssembleHandsActions:
         self.mock_hand.actions = {
             "BLINDS": [],
             "PREFLOP": [
-                ("Player1", "raises", Decimal("100"), Decimal("100"), Decimal("2"), True),  # All-in
-                ("Player2", "calls", Decimal("100"), True),  # All-in call
+                ("Player1", "raises", Decimal(100), Decimal(100), Decimal(2), True),  # All-in
+                ("Player2", "calls", Decimal(100), True),  # All-in call
             ],
         }
 
@@ -127,7 +123,7 @@ class TestAssembleHandsActions:
             "BLINDS": [],
             "DEAL": [
                 ("Player1", "checks"),
-                ("Player2", "bets", Decimal("5"), False),
+                ("Player2", "bets", Decimal(5), False),
             ],
             "DRAWONE": [
                 ("Player1", "discards", 3, ["Ah", "Kh", "Qh"]),
@@ -156,8 +152,8 @@ class TestAssembleHandsActions:
         self.mock_hand.actions = {
             "BLINDS": [],
             "PREFLOP": [
-                ("Player1", "raises", Decimal("10"), Decimal("10"), Decimal("0"), False),
-                ("Player2", "calls", Decimal("10"), False),
+                ("Player1", "raises", Decimal(10), Decimal(10), Decimal(0), False),
+                ("Player2", "calls", Decimal(10), False),
             ],
             "FLOP": [],  # No actions on flop
             "TURN": [],  # No actions on turn
@@ -178,8 +174,8 @@ class TestAssembleHandsActions:
         self.mock_hand.actions = {
             "BLINDS": [],
             "THIRD": [
-                ("Player1", "bets", Decimal("2"), False),
-                ("Player2", "completes", Decimal("4"), Decimal("4"), Decimal("2"), False),
+                ("Player1", "bets", Decimal(2), False),
+                ("Player2", "completes", Decimal(4), Decimal(4), Decimal(2), False),
             ],
             "FOURTH": [],
         }
@@ -201,7 +197,7 @@ class TestAssembleHandsActions:
         self.mock_hand.actions = {
             "BLINDS": [],
             "PREFLOP": [
-                ("Player1", "unknown_action", Decimal("10"), False),
+                ("Player1", "unknown_action", Decimal(10), False),
             ],
         }
 
@@ -220,13 +216,13 @@ class TestAssembleHandsActions:
         self.mock_hand.actions = {
             "BLINDS": [],
             "PREFLOP": [
-                ("Player1", "raises", Decimal("10"), Decimal("10"), Decimal("0"), False),
-                ("Player2", "calls", Decimal("10"), False),
-                ("Player3", "raises", Decimal("30"), Decimal("30"), Decimal("10"), False),
+                ("Player1", "raises", Decimal(10), Decimal(10), Decimal(0), False),
+                ("Player2", "calls", Decimal(10), False),
+                ("Player3", "raises", Decimal(30), Decimal(30), Decimal(10), False),
             ],
             "FLOP": [
                 ("Player1", "checks"),
-                ("Player2", "bets", Decimal("20"), False),
+                ("Player2", "bets", Decimal(20), False),
             ],
         }
 
@@ -262,5 +258,4 @@ class TestAssembleHandsActions:
         assert self.derived_stats.handsactions[1]["amountCalled"] == 100
 
 
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+

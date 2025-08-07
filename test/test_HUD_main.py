@@ -152,7 +152,14 @@ def test_create_hud(hud_main) -> None:
         mock_table = MagicMock()
         mock_table.site = "test_site"
         hud_main.create_HUD(
-            "new_hand_id", mock_table, "temp_key", 9, "poker_game", "cash", {}, {},
+            "new_hand_id",
+            mock_table,
+            "temp_key",
+            9,
+            "poker_game",
+            "cash",
+            {},
+            {},
         )
 
         assert "temp_key" in hud_main.hud_dict
@@ -165,7 +172,9 @@ def test_update_hud(hud_main) -> None:
     with patch.object(hud_main, "idle_update") as mock_idle_update:
         hud_main.update_HUD("new_hand_id", "table_name", hud_main.config)
         mock_idle_update.assert_called_once_with(
-            "new_hand_id", "table_name", hud_main.config,
+            "new_hand_id",
+            "table_name",
+            hud_main.config,
         )
 
 
@@ -353,7 +362,9 @@ def test_zmqworker_run(hud_main) -> None:
     with (
         patch("time.sleep", return_value=None),
         patch.object(
-            zmq_receiver, "process_message", side_effect=stop_after_one_iteration,
+            zmq_receiver,
+            "process_message",
+            side_effect=stop_after_one_iteration,
         ) as mock_process_message,
     ):
         worker.run()
@@ -513,7 +524,6 @@ def test_idle_create(import_path, hud_main) -> None:
             patch.object(hud_main.hud_dict["test_table"], "create") as mock_create,
             patch.object(hud_main.hud_dict["test_table"], "aux_windows", []),
         ):
-
             # Call idle_create
             hud_main.idle_create(
                 new_hand_id,
@@ -526,7 +536,6 @@ def test_idle_create(import_path, hud_main) -> None:
                 cards,
             )
 
-
             # Checks
             hud_main.hud_dict[temp_key].tablehudlabel
 
@@ -535,25 +544,21 @@ def test_idle_create(import_path, hud_main) -> None:
                 hud_main.vb.addWidget.assert_called_once()
 
             # Check attributs
-            assert (
-                hud_main.hud_dict[temp_key].tablehudlabel is not None
-            ), "tablehudlabel is None"
-            assert (
-                hud_main.hud_dict[temp_key].tablenumber == table.number
-            ), "tablenumber mismatch"
+            assert hud_main.hud_dict[temp_key].tablehudlabel is not None, "tablehudlabel is None"
+            assert hud_main.hud_dict[temp_key].tablenumber == table.number, "tablenumber mismatch"
 
             # Check call
             with contextlib.suppress(AssertionError):
                 mock_create.assert_called_once_with(
-                    new_hand_id, hud_main.config, stat_dict,
+                    new_hand_id,
+                    hud_main.config,
+                    stat_dict,
                 )
 
         # Check logs
         expected_log_message = f"adding label {table.site} - {temp_key}"
 
-        log_message_found = any(
-            call[0][0] == expected_log_message for call in mock_log.debug.call_args_list
-        )
+        log_message_found = any(call[0][0] == expected_log_message for call in mock_log.debug.call_args_list)
         if log_message_found:
             pass
         else:
@@ -600,7 +605,8 @@ def test_idle_kill_widget_removal(hud_main) -> None:
 
 # Ensures that check_tables calls the correct methods for different table statuses.
 @pytest.mark.parametrize(
-    "status", ["client_destroyed", "client_moved", "client_resized"],
+    "status",
+    ["client_destroyed", "client_moved", "client_resized"],
 )
 def test_check_tables_full_coverage(hud_main, status) -> None:
     mock_hud = MagicMock()
@@ -642,7 +648,8 @@ def test_client_methods(hud_main, method_name, expected_args) -> None:
         getattr(hud_main, method_name)(None, mock_hud)
         if method_name == "client_destroyed":
             mock_idle_method.assert_called_once_with(
-                expected_args[0], mock_hud.table.key,
+                expected_args[0],
+                mock_hud.table.key,
             )
         else:
             mock_idle_method.assert_called_once_with(mock_hud)

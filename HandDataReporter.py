@@ -601,82 +601,66 @@ class HandDataReporter:
                 else:
                     hands_to_show = stats["hands_data"][:2]  # Première 2 mains en mode detailed
 
-                print(f"\n📋 DÉTAILS DES MAINS ({len(hands_to_show)}/{len(stats['hands_data'])}):")
 
                 for i, hand in enumerate(hands_to_show, 1):
-                    print(f"\nMain #{i}:")
-                    print(f"   ID: {hand.get('hand_id', 'N/A')}")
-                    print(f"   Table: {hand.get('table_name', 'N/A')}")
-                    print(f"   Type: {hand.get('category', 'N/A')} {hand.get('limit_type', 'N/A')}")
 
                     if self.report_level == "full":
                         # Informations enrichies
-                        print(f"   💰 Détails financiers:")
-                        if hand.get("ante", "0") != "0":
-                            print(f"      - Ante: ${hand.get('ante', '0')}")
-                        else:
-                            print(f"      - Rake: ${hand.get('rake', '0')}")
-                            if hand.get("ante", "0") != "0":
-                                print(f"      - Ante: ${hand.get('ante', '0')}")
+                        if hand.get("ante", "0") != "0" or hand.get("ante", "0") != "0":
+                            pass
 
                         # Only show blinds for non-Stud games
                         game_category = hand.get("category", "").lower()
                         if "stud" not in game_category:
                             if hand.get("small_blind", "0") != "0":
-                                print(f"      - Small Blind: ${hand.get('small_blind', '0')}")
+                                pass
                             if hand.get("big_blind", "0") != "0":
-                                print(f"      - Big Blind: ${hand.get('big_blind', '0')}")
+                                pass
 
                         if hand.get("total_collected", "0") != "0":
-                            print(f"      - Total Pot: ${hand.get('total_collected', '0')}")
+                            pass
 
                         # Informations de table
                         if hand.get("button_pos") is not None:
-                            print(f"   🎛️ Button: Seat {hand.get('button_pos')}")
+                            pass
 
-                        print(f"   📊 Stacks finaux:")
                         if hand.get("all_players_list"):
                             for player_info in hand["all_players_list"]:
                                 if isinstance(player_info, dict):
-                                    player_name = player_info.get("name", "Unknown")
-                                    final_stack = player_info.get("final_stack", "0") 
-                                    print(f"      - {player_name}: ${final_stack}")
+                                    player_info.get("name", "Unknown")
+                                    player_info.get("final_stack", "0")
                                 else:
                                     # player_info est une chaîne (nom du joueur)
-                                    print(f"      - {player_info}: N/A")
+                                    pass
 
                         # Afficher les cartes des joueurs
                         if hand.get("players"):
                             players_with_cards = [p for p, info in hand["players"].items() if info.get("hole_cards")]
                             if players_with_cards:
-                                print(f"   🃏 Cartes révélées:")
                                 for player in players_with_cards:
                                     cards = hand["players"][player]["hole_cards"]
                                     # Remplacer les cartes "0x" par "[cachées]"
                                     if "0x" in cards:
                                         cards = cards.replace("0x", "X").replace("X X X X", "[cachées]")
-                                    print(f"      - {player}: {cards}")
 
                         # Afficher le board
                         if hand.get("board_cards"):
                             board_str = ", ".join([f"{street}: {' '.join(cards)}" for street, cards in hand["board_cards"].items() if cards])
                             if board_str:
-                                print(f"   🎴 Board: {board_str}")
+                                pass
 
                         # Afficher les actions détaillées par street
                         if hand.get("detailed_actions"):
-                            print(f"   💸 Structure des mises par street:")
-                            for street_name, actions in hand["detailed_actions"].items():
+                            for actions in hand["detailed_actions"].values():
                                 if actions:
-                                    print(f"      {street_name.upper()}:")
                                     for action in actions:
                                         player = action.get("player", "Unknown")
-                                        action_type = action.get("action", "unknown")
+                                        action.get("action", "unknown")
                                         amount = action.get("amount", "0")
                                         if amount and amount != "0":
-                                            print(f"         {player}: {action_type} ${amount}")
+                                            pass
                                         else:
-                                            print(f"         {player}: {action_type}")
+                                            pass
 
                         # Afficher les collections (qui a gagné combien)
                         if hand.get("winners"):
@@ -863,48 +847,43 @@ class HandDataReporter:
         """Afficher la hiérarchie des types de jeux."""
         game_types = self.session_stats["game_types"]
 
-        print("\n🎮 RÉPARTITION PAR TYPE DE JEU:")
 
         # Cash Games
         cash_total = sum(sum(variants.values()) for variants in game_types["cash_games"].values())
         if cash_total > 0:
-            print(f"\n💰 CASH GAMES ({cash_total} mains):")
 
             # Hold'em
             holdem_cash = game_types["cash_games"]["holdem"]
             holdem_total = sum(holdem_cash.values())
             if holdem_total > 0:
-                print(f"   🎯 Hold'em ({holdem_total} mains):")
                 if holdem_cash["nl"] > 0:
-                    print(f"      • No Limit: {holdem_cash['nl']} mains")
+                    pass
                 if holdem_cash["pl"] > 0:
-                    print(f"      • Pot Limit: {holdem_cash['pl']} mains")
+                    pass
                 if holdem_cash["fl"] > 0:
-                    print(f"      • Fixed Limit: {holdem_cash['fl']} mains")
+                    pass
 
             # Stud
             stud_cash = game_types["cash_games"]["stud"]
             stud_total = sum(stud_cash.values())
             if stud_total > 0:
-                print(f"   🎯 Stud ({stud_total} mains):")
                 if stud_cash["7_card"] > 0:
-                    print(f"      • 7-Card Stud: {stud_cash['7_card']} mains")
+                    pass
                 if stud_cash["5_card"] > 0:
-                    print(f"      • 5-Card Stud: {stud_cash['5_card']} mains")
+                    pass
                 if stud_cash["hi_lo"] > 0:
-                    print(f"      • Hi-Lo Split: {stud_cash['hi_lo']} mains")
+                    pass
 
             # Draw
             draw_cash = game_types["cash_games"]["draw"]
             draw_total = sum(draw_cash.values())
             if draw_total > 0:
-                print(f"   🎯 Draw ({draw_total} mains):")
                 if draw_cash["5_card"] > 0:
-                    print(f"      • 5-Card Draw: {draw_cash['5_card']} mains")
+                    pass
                 if draw_cash["2_7"] > 0:
-                    print(f"      • 2-7 Triple Draw: {draw_cash['2_7']} mains")
+                    pass
                 if draw_cash["badugi"] > 0:
-                    print(f"      • Badugi: {draw_cash['badugi']} mains")
+                    pass
 
         # Tournaments
         tourney_total = sum(sum(variants.values()) for variants in game_types["tournaments"].values())

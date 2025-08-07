@@ -52,6 +52,7 @@ maresdelsur: Shows [DQ HK S7 D7] Straight, Ace High
 louisaf55: Shows [S8 CQ C5 C8] Flush, Ace High
 louisaf55: wins €0.56"""
 
+
 def test_pt4_ipoker_detection() -> bool:
     """Test PokerTracker4 iPoker skin detection."""
     """Test PokerTracker4 iPoker skin detection."""
@@ -86,6 +87,7 @@ def test_pt4_ipoker_detection() -> bool:
         return False
     else:
         return True
+
 
 if __name__ == "__main__":
     test_pt4_ipoker_detection()

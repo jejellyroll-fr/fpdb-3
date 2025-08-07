@@ -23,7 +23,17 @@ class ConfigInitializer:
 
     @classmethod
     def _find_config_path(cls, config_file: str) -> str:
-        """Find the configuration file path."""
+        """Find the full path to the configuration file, creating it if necessary.
+
+        Searches for the configuration file in several standard locations and
+        creates it in the user's home directory if not found.
+
+        Args:
+            config_file: The name of the configuration file to locate.
+
+        Returns:
+            The full path to the configuration file.
+        """
         if Path(config_file).is_absolute():
             return config_file
 
@@ -100,14 +110,29 @@ class ConfigInitializer:
 
     @classmethod
     def get_config(cls) -> Any:
-        """Returns the configuration, initializes it if necessary."""
-        if not cls._initialized or not cls._config:
-            return cls.initialize()
-        return cls._config
+        """Return the current configuration object, initializing if necessary.
+
+        Retrieves the configuration if it is already initialized, or initializes it if not.
+
+        Returns:
+            The initialized Configuration object.
+        """
+        return cls._config if cls._initialized and cls._config else cls.initialize()
+
 
     @classmethod
     def reload_config(cls) -> Any:
-        """Reloads the configuration from file."""
+        """Reload the configuration from the current configuration file.
+
+        Resets the initialization state and reloads the configuration if a config file is set.
+        Raises an error if no config file is available.
+
+        Returns:
+            The reloaded Configuration object.
+
+        Raises:
+            RuntimeError: If no configuration file is available to reload.
+        """
         if cls._config_file:
             cls._initialized = False
             cls._config = None
@@ -117,27 +142,38 @@ class ConfigInitializer:
 
     @classmethod
     def is_initialized(cls) -> bool:
-        """Checks if the configuration is initialized."""
+        """Check if the configuration has been initialized.
+
+        Returns True if the configuration is initialized and available, otherwise False.
+
+        Returns:
+            True if configuration is initialized, False otherwise.
+        """
         return cls._initialized and cls._config is not None
 
     @classmethod
     def get_config_path(cls) -> str | None:
-        """Returns the current configuration file path."""
+        """Return the path to the current configuration file.
+
+        Provides the file path of the configuration file if it has been set, otherwise returns None.
+
+        Returns:
+            The path to the configuration file, or None if not set.
+        """
         return cls._config_file
 
 
 # Convenience function for quick initialization
 def ensure_config_initialized(config_file: str = "HUD_config.xml") -> Any:
-    """Ensures that the configuration is initialized.
+    """Ensure the fpdb configuration is initialized and return it.
 
-    This function can be safely called from any module.
+    Initializes the configuration using the specified file if it is not already initialized.
+
+    Args:
+        config_file: The name of the configuration file to use.
+
+    Returns:
+        The initialized Configuration object.
     """
     return ConfigInitializer.initialize(config_file)
 
-
-# Auto-initialization when importing the module
-if __name__ != "__main__":
-    # If this module is imported (not executed directly),
-    # we can optionally initialize the config
-    # This is disabled by default to avoid side effects
-    pass

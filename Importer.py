@@ -962,7 +962,7 @@ class Importer:
                                 self.hand_data_reporter.report_hand_success(fpdbfile.path, hand)
                                 log.debug(f"DEBUG: report_hand_success completed for hand {hand.handid}")
                             except Exception as e:
-                                log.error(f"DEBUG: Exception in report_hand_success: {e}")
+                                log.exception(f"DEBUG: Exception in report_hand_success: {e}")
 
                     except FpdbHandDuplicate as e:
                         duplicates += 1

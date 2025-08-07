@@ -1061,7 +1061,7 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         else:
             self.tinfo["multiplier"] = Decimal(0)
             log.debug(
-                "Cannot calculate multiplier: rewarddrawn=%s, buyin=%s", self.tinfo["rewarddrawn"], self.tinfo["buyin"]
+                "Cannot calculate multiplier: rewarddrawn=%s, buyin=%s", self.tinfo["rewarddrawn"], self.tinfo["buyin"],
             )
 
         # Player performance data
@@ -2060,7 +2060,7 @@ class iPoker(HandHistoryConverter):  # noqa: N801
                 # Check if player exists before adding ante
                 if player_name not in player_names:
                     log.warning(
-                        "Player %s not found in hand players list: %s. Skipping ante.", player_name, player_names
+                        "Player %s not found in hand players list: %s. Skipping ante.", player_name, player_names,
                     )
                     continue
 
@@ -2107,7 +2107,7 @@ class iPoker(HandHistoryConverter):  # noqa: N801
                 # Check if player exists before adding blind
                 if player_name not in player_names:
                     log.warning(
-                        "Player %s not found in hand players list: %s. Skipping small blind.", player_name, player_names
+                        "Player %s not found in hand players list: %s. Skipping small blind.", player_name, player_names,
                     )
                     continue
 

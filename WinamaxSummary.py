@@ -18,7 +18,7 @@ In the "official" distribution you can find the license in agpl-3.0.txt.
 import datetime
 import re
 from decimal import Decimal
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from bs4 import BeautifulSoup
 
@@ -56,32 +56,32 @@ class WinamaxSummary(TourneySummary):
 
     re_summary_tourney_info = re.compile(
         r"""\s:\s
-                                           ((?P<LIMIT>No\sLimit|Limit|LIMIT|Pot\sLimit)\s)?
-                                           (?P<GAME>.+)?
-                                           \((?P<TOURNO>[0-9]+)\)(\s-\sLate\s(r|R)egistration)?\s+
-                                           (Player\s:\s(?P<PNAME>.*)\s+)?
-                                           Buy-In\s:\s(?P<BUYIN>(?P<BIAMT>.+?)\s\+\s(?P<BIRAKE>.+?)(\s\+\s(?P<BIBOUNTY>.+))?|Freeroll|Gratuit|Ticket\suniquement|Free|Ticket)\s+
-                                           (Rebuy\scost\s:\s(?P<REBUY>(?P<REBUYAMT>.+)\s\+\s(?P<REBUYRAKE>.+))\s+)?
-                                           (Addon\scost\s:\s(?P<ADDON>(?P<ADDONAMT>.+)\s\+\s(?P<ADDONRAKE>.+))\s+)?
-                                           (Your\srebuys\s:\s(?P<PREBUYS>\d+)\s+)?
-                                           (Your\saddons\s:\s(?P<PADDONS>\d+)\s+)?
-                                           Registered\splayers\s:\s(?P<ENTRIES>[0-9]+)\s+
-                                           (Total\srebuys\s:\s\d+\s+)?
-                                           (Total\saddons\s:\s\d+\s+)?
-                                           (Prizepool\s:\s(?P<PRIZEPOOL1>[.0-9{LS}]+)\s+)?
-                                           (Mode\s:\s(?P<MODE>.+)?\s+)?
-                                           (Type\s:\s(?P<TYPE>.+)?\s+)?
-                                           (Speed\s:\s(?P<SPEED>.+)?\s+)?
-                                           (Flight\sID\s:\s.+\s+)?
-                                           (Levels\s:\s.+\s+)?
-                                           (Total\srebuys\s:\s(?P<TREBUYS>\d+)\s+)?
-                                           (Total\saddons\s:\s(?P<TADDONS>\d+)\s+)?
-                                           (Prizepool\s:\s(?P<PRIZEPOOL2>[.0-9{LS}]+)\s+)?
-                                           Tournament\sstarted\s(?P<DATETIME>[0-9]{{4}}\/[0-9]{{2}}\/[0-9]{{2}}\s[0-9]{{2}}:[0-9]{{2}}:[0-9]{{2}}\sUTC)\s+
-                                           (?P<BLAH>You\splayed\s.+)\s+
-                                           You\sfinished\sin\s(?P<RANK>[.0-9]+)(st|nd|rd|th)?\splace\s+
-                                           (You\swon\s((?P<WINNINGS>[.0-9{LS}]+))?(\s\+\s)?(Ticket\s(?P<TICKET>[.0-9{LS}]+))?(\s\+\s)?(Bounty\s(?P<BOUNTY>[.0-9{LS}]+))?)?
-                                        """.format(**substitutions),
+            ((?P<LIMIT>No\sLimit|Limit|LIMIT|Pot\sLimit)\s)?
+            (?P<GAME>.+)?
+            \((?P<TOURNO>[0-9]+)\)(\s-\sLate\s(r|R)egistration)?\s+
+            (Player\s:\s(?P<PNAME>.*)\s+)?
+            Buy-In\s:\s(?P<BUYIN>(?P<BIAMT>.+?)\s\+\s(?P<BIRAKE>.+?)(\s\+\s(?P<BIBOUNTY>.+))?|Freeroll|Gratuit|Ticket\suniquement|Free|Ticket)\s+
+            (Rebuy\scost\s:\s(?P<REBUY>(?P<REBUYAMT>.+)\s\+\s(?P<REBUYRAKE>.+))\s+)?
+            (Addon\scost\s:\s(?P<ADDON>(?P<ADDONAMT>.+)\s\+\s(?P<ADDONRAKE>.+))\s+)?
+            (Your\srebuys\s:\s(?P<PREBUYS>\d+)\s+)?
+            (Your\saddons\s:\s(?P<PADDONS>\d+)\s+)?
+            Registered\splayers\s:\s(?P<ENTRIES>[0-9]+)\s+
+            (Total\srebuys\s:\s\d+\s+)?
+            (Total\saddons\s:\s\d+\s+)?
+            (Prizepool\s:\s(?P<PRIZEPOOL1>[.0-9{LS}]+)\s+)?
+            (Mode\s:\s(?P<MODE>.+)?\s+)?
+            (Type\s:\s(?P<TYPE>.+)?\s+)?
+            (Speed\s:\s(?P<SPEED>.+)?\s+)?
+            (Flight\sID\s:\s.+\s+)?
+            (Levels\s:\s(?P<LEVELS>.+)\s+)?
+            (Total\srebuys\s:\s(?P<TREBUYS>\d+)\s+)?
+            (Total\saddons\s:\s(?P<TADDONS>\d+)\s+)?
+            (Prizepool\s:\s(?P<PRIZEPOOL2>[.0-9{LS}]+)\s+)?
+            Tournament\sstarted\s(?P<DATETIME>[0-9]{{4}}\/[0-9]{{2}}\/[0-9]{{2}}\s[0-9]{{2}}:[0-9]{{2}}:[0-9]{{2}}\sUTC)\s+
+            (?P<BLAH>You\splayed\s.+)\s+
+            You\sfinished\sin\s(?P<RANK>[.0-9]+)(st|nd|rd|th)?\splace\s+
+            (You\swon\s((?P<WINNINGS>[.0-9{LS}]+))?(\s\+\s)?(Ticket\s(?P<TICKET>[.0-9{LS}]+))?(\s\+\s)?(Bounty\s(?P<BOUNTY>[.0-9{LS}]+))?)?
+            """.format(**substitutions),
         re.VERBOSE | re.MULTILINE,
     )
 
@@ -108,134 +108,316 @@ class WinamaxSummary(TourneySummary):
     codepage: ClassVar = ("utf8", "cp1252")
     hhtype: ClassVar = "summary"
 
-    def __init__(self, *args, **kwargs) -> None:
-        """Initialize WinamaxSummary with lottery support."""
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initializes a WinamaxSummary instance.
+
+        Sets up the tournament summary parser and initializes lottery-related fields to their default values.
+
+        """
         super().__init__(*args, **kwargs)
         # Initialize lottery fields with default values
         self.isLottery = False
         self.tourneyMultiplier = 1
 
     def getSplitRe(self, head: str) -> re.Pattern[str]:
-        """Get regex pattern for splitting tournament summaries."""
-        re_split_tourneys = re.compile(r"Winamax\sPoker\s-\sTournament\ssummary")
-        m = re.search("<!DOCTYPE html PUBLIC", head)
-        if m is not None:
-            pass
-        else:
-            pass
-        return re_split_tourneys
+        """Returns the regular expression pattern used to split Winamax tournament summaries.
+
+        This method provides a compiled regex pattern that identifies the start of a Winamax tournament summary.
+
+        Args:
+            head: The header portion of the file (unused but required by interface).
+
+        Returns:
+            re.Pattern[str]: Compiled regular expression for summary splitting.
+
+        """
+        return re.compile(r"Winamax\sPoker\s-\sTournament\ssummary")
 
     def parseSummary(self) -> None:
-        """Parse tournament summary text."""
+        """Parses the tournament summary based on the summary type.
+
+        This method dispatches to the appropriate parser depending on whether the summary is in file or HTML format.
+
+        """
         if self.hhtype == "summary":
             self.parseSummaryFile()
         elif self.hhtype == "html":
             self.parseSummaryHtml()
 
-    def parseSummaryHtml(self) -> None:  # noqa: PLR0912, C901
-        """Parse HTML tournament summary."""
-        self.currency = "EUR"
+    def parseSummaryHtml(self) -> None:
+        """Parses a Winamax tournament summary in HTML format.
+
+        This method extracts tournament details, prizepool, game type, player information,
+        and tournament number from the HTML summary.
+
+        """
         soup = BeautifulSoup(self.summaryText)
-        tl = soup.findAll("div", {"class": "left_content"})
+        left_content = soup.findAll("div", {"class": "left_content"})
 
-        ps = soup.findAll("p", {"class": "text"})
-        for p in ps:
-            for m in self.re_details.finditer(str(p)):
-                mg = m.groupdict()
-                # print mg
-                if mg["LABEL"] == "Buy-in":
-                    mg["VALUE"] = mg["VALUE"].replace("&euro;", "")
-                    mg["VALUE"] = mg["VALUE"].replace("+", "")
-                    mg["VALUE"] = mg["VALUE"].strip(" $")
-                    bi, fee = mg["VALUE"].split(" ")
-                    self.buyin = int(100 * Decimal(bi))
-                    self.fee = int(100 * Decimal(fee))
-                    # print "DEBUG: bi: '%s' fee: '%s" % (self.buyin, self.fee)
-                if mg["LABEL"] == "Nombre de joueurs inscrits":
-                    self.entries = mg["VALUE"]
-                if mg["LABEL"] == "D\xc3\xa9but du tournoi":
+        self._parse_tournament_details(soup)
+        self._parse_prizepool(soup)
+        self._parse_gametype(left_content)
+        self._parse_players(left_content)
+        self._parse_tournament_number()
+
+    def _parse_tournament_details(self, soup: BeautifulSoup) -> None:
+        """Parses tournament details from the provided HTML soup.
+
+        This method extracts and sets the buy-in, number of entries, and tournament start time from the summary HTML.
+
+        Args:
+            soup: BeautifulSoup object containing the tournament summary HTML.
+
+        """
+        text_paragraphs = soup.findAll("p", {"class": "text"})
+        for paragraph in text_paragraphs:
+            for match in self.re_details.finditer(str(paragraph)):
+                match_groups = match.groupdict()
+                label = match_groups["LABEL"]
+                value = match_groups["VALUE"]
+
+                if label == "Buy-in":
+                    self._parse_buyin(value)
+                elif label == "Nombre de joueurs inscrits":
+                    self.entries = value
+                elif label == "D\xc3\xa9but du tournoi":
                     self.startTime = datetime.datetime.strptime(
-                        mg["VALUE"], "%d-%m-%Y %H:%M",
+                        value, "%d-%m-%Y %H:%M",
                     ).replace(tzinfo=datetime.timezone.utc)
-                if mg["LABEL"] == "Nombre de joueurs max":
-                    # Max seats i think
-                    pass
 
-        div = soup.findAll("div", {"class": "title2"})
-        for m in self.re_prizepool.finditer(str(div)):
-            mg = m.groupdict()
-            # print mg
-            self.prizepool = mg["PRIZEPOOL"].replace(",", ".")
+    def _parse_buyin(self, value: str) -> None:
+        """Parses the buy-in and fee from a value string.
 
-        for m in self.re_game_type.finditer(str(tl[0])):
-            mg = m.groupdict()
-            # print mg
-            self.gametype["limitType"] = self.limits[mg["LIMIT"]]
-            self.gametype["category"] = self.games[mg["GAME"]][1]
-        # TODO(@dev): No gametype
-        #       Quitte or Double, Starting Block Winamax Poker Tour
-        #       Do not contain enough the gametype.
-        # Lookup the tid from the db, if it exists get the gametype info from there, otherwise ParseError
+        This method extracts and sets the buy-in and fee amounts from the provided string.
+
+        Args:
+            value: The string containing buy-in and fee information.
+
+        """
+        # Detect currency before cleaning the value
+        detected_currency = self._determine_currency(value)
+        self.currency = detected_currency
+        self.buyinCurrency = detected_currency
+
+        cleaned_value = value.replace("&euro;", "").replace("+", "").strip(" $")
+        buyin_str, fee_str = cleaned_value.split(" ")
+        self.buyin = int(100 * Decimal(buyin_str))
+        self.fee = int(100 * Decimal(fee_str))
+
+    def _parse_prizepool(self, soup: BeautifulSoup) -> None:
+        """Parses the prizepool amount from the provided HTML soup.
+
+        This method extracts and sets the prizepool value from the tournament summary HTML.
+
+        Args:
+            soup: BeautifulSoup object containing the tournament summary HTML.
+
+        """
+        title_divs = soup.findAll("div", {"class": "title2"})
+        for match in self.re_prizepool.finditer(str(title_divs)):
+            match_groups = match.groupdict()
+            self.prizepool = match_groups["PRIZEPOOL"].replace(",", ".")
+
+    def _parse_gametype(self, left_content: list[Any]) -> None:
+        """Parses the game type from the provided HTML content.
+
+        This method sets the limit type and category for the tournament based on the parsed game type information.
+
+        Args:
+            left_content: List of HTML elements containing game type information.
+
+        """
+        for match in self.re_game_type.finditer(str(left_content[0])):
+            match_groups = match.groupdict()
+            self.gametype["limitType"] = self.limits[match_groups["LIMIT"]]
+            self.gametype["category"] = self.games[match_groups["GAME"]][1]
+            return
+
+        # Default gametype if not found
         log.warning("Gametype unknown defaulting to NLHE")
         self.gametype["limitType"] = "nl"
         self.gametype["category"] = "holdem"
 
-        for m in self.re_player.finditer(str(tl[0])):
-            winnings = 0
-            mg = m.groupdict()
-            rank = mg["RANK"]
-            name = mg["PNAME"]
-            if rank != "...":
-                rank = int(mg["RANK"])
-                # print "DEUBG: mg: '%s'" % mg
-                is_satellite = self.re_ticket.search(mg["WINNINGS"])
-                if is_satellite:
-                    # Ticket
-                    if is_satellite.group("VALUE"):
-                        winnings = self.convert_to_decimal(is_satellite.group("VALUE"))
-                    else:  # Value not specified
-                        rank = 1
-                        # TODO(@dev): Do lookup here
-                        # Tremplin Winamax Poker Tour
-                        # Starting Block Winamax Poker Tour
-                    # For stallites, any ticket means 1st
-                    if winnings > 0:
-                        rank = 1
-                else:
-                    winnings = self.convert_to_decimal(mg["WINNINGS"])
+    def _parse_players(self, left_content: list) -> None:
+        """Parses player information from the provided HTML content.
 
-                winnings = int(100 * Decimal(winnings))
-                # print "DEBUG: %s) %s: %s"  %(rank, name, winnings)
-                self.addPlayer(rank, name, winnings, self.currency, None, None, None)
+        This method extracts player rank, name, and winnings from the summary and
+        adds each player to the tournament summary.
 
-        for m in self.re_tour_no.finditer(self.summaryText):
-            mg = m.groupdict()
-            # print mg
-            self.tourNo = mg["TOURNO"]
+        Args:
+            left_content: List of HTML elements containing player information.
 
-    def parseSummaryFile(self) -> None:  # noqa: PLR0912, PLR0915, C901
-        """Parse file-based tournament summary."""
-        m = self.re_summary_tourney_info.search(self.summaryText)
-        if m is None:
-            tmp = self.summaryText[0:200]
-            log.error("parse Summary From File failed: '%s'", tmp)
-            raise FpdbParseError
+        """
+        for match in self.re_player.finditer(str(left_content[0])):
+            match_groups = match.groupdict()
+            rank_str = match_groups["RANK"]
 
-        mg = m.groupdict()
-        # print "DEBUG: m.groupdict(): %s" % m.groupdict()
+            if rank_str != "...":
+                name = match_groups["PNAME"]
+                rank = int(rank_str)
+                winnings = self._calculate_winnings(match_groups["WINNINGS"])
+                if winnings is not None:
+                    winnings_cents = int(100 * Decimal(winnings))
+                    self.addPlayer(rank, name, winnings_cents, self.currency, None, None, None)
 
+    def _calculate_winnings(self, winnings_str: str) -> Decimal | None:
+        """Calculates the winnings amount from a winnings string.
+
+        This method extracts and returns the winnings as a decimal value,
+        handling both cash and satellite ticket winnings.
+
+        Args:
+            winnings_str: The string containing winnings information.
+
+        Returns:
+            Decimal or None: The winnings amount as a Decimal, or None if not applicable.
+
+        """
+        if satellite_match := self.re_ticket.search(winnings_str):
+            if satellite_match.group("VALUE"):
+                winnings = self.convert_to_decimal(satellite_match.group("VALUE"))
+                return winnings if winnings > 0 else None
+            return None  # Value not specified for satellite
+        return self.convert_to_decimal(winnings_str)
+
+    def _parse_tournament_number(self) -> None:
+        """Parses the tournament number from the summary text.
+
+        This method extracts and sets the tournament number (tourNo) from the summary using a regular expression.
+
+        """
+        for match in self.re_tour_no.finditer(self.summaryText):
+            match_groups = match.groupdict()
+            self.tourNo = match_groups["TOURNO"]
+
+    def _parse_gametype(self, mg: dict) -> None:
+        """Parses the game type from a match group dictionary.
+
+        This method sets the limit type and category for the tournament based on the provided match group information.
+        If the information is incomplete, it attempts to parse from levels or falls back to default values.
+
+        Args:
+            mg: Dictionary containing parsed match group data.
+
+        """
         if "LIMIT" in mg and mg["LIMIT"] is not None:
             self.gametype["limitType"] = self.limits[mg["LIMIT"]]
             self.gametype["category"] = self.games[mg["GAME"]][1]
+        elif "LEVELS" in mg and mg["LEVELS"] is not None:
+            # Parse gametype from Levels information
+            if self._parse_gametype_from_levels(mg["LEVELS"]):
+                return
+            # If parsing from levels failed, fall back to defaults
+            log.warning("Could not parse gametype from Levels, defaulting to NLHE")
+            self._set_default_gametype(mg)
         else:
-            # TODO(@dev): No gametype
-            #       Quitte or Double, Starting Block Winamax Poker Tour
-            #       Do not contain enough the gametype.
-            # Lookup the tid from the db, if it exists get the gametype info from there, otherwise ParseError
             log.warning("Gametype unknown defaulting to NLHE")
-            self.gametype["limitType"] = "nl"
+            self._set_default_gametype(mg)
+
+    def _set_default_gametype(self, mg: dict) -> None:
+        """Sets the default game type for the tournament.
+
+        This method assigns default values for limit type, category,
+        and tournament name when game type information is missing.
+
+        Args:
+            mg: Dictionary containing parsed match group data.
+
+        """
+        self.gametype["limitType"] = "nl"
+        self.gametype["category"] = "holdem"
+        self.tourneyName = mg.get("GAME", "Unknown")
+
+    # Constants for parsing
+    MIN_LEVEL_PARTS = 4
+
+    def _parse_gametype_from_levels(self, levels_str: str) -> bool:
+        """Parses gametype from Levels string.
+
+        Extracts the game category and limit type from the levels information.
+        Example: "[10-20:0:180:holdem-no-limit,...]" -> category: "holdem", limitType: "nl"
+
+        Args:
+            levels_str: The levels string from tournament summary.
+
+        Returns:
+            bool: True if parsing succeeded, False otherwise.
+        """
+        gametype_str = self._extract_gametype_string(levels_str)
+        return self._parse_gametype_string(gametype_str) if gametype_str else False
+
+    def _extract_gametype_string(self, levels_str: str) -> str:
+        """Extracts the gametype string from the levels information.
+
+        This method parses the levels string to retrieve the gametype portion for further processing.
+
+        Args:
+            levels_str: The levels string from tournament summary.
+
+        Returns:
+            str: The extracted gametype string, or an empty string if not found.
+
+        """
+        import re
+        level_match = re.search(r"\[([^,\]]+)", levels_str)
+        if not level_match:
+            return ""
+
+        first_level = level_match[1]
+        parts = first_level.split(":")
+        return parts[3] if len(parts) >= self.MIN_LEVEL_PARTS else ""
+
+    def _parse_gametype_string(self, gametype_str: str) -> bool:
+        """Parses the game type string to set the tournament category and limit type.
+
+        This method analyzes the gametype string and updates the category and limit type accordingly.
+
+        Args:
+            gametype_str: The string containing game type information.
+
+        Returns:
+            bool: True if parsing and setting was successful, False otherwise.
+
+        """
+        if "holdem" in gametype_str:
             self.gametype["category"] = "holdem"
-            self.tourneyName = mg["GAME"]
+            return self._set_limit_type(gametype_str)
+        if "omaha" in gametype_str:
+            self.gametype["category"] = "5_omahahi" if "5" in gametype_str else "omahahi"
+            return self._set_limit_type(gametype_str)
+        return False
+
+    def _set_limit_type(self, gametype_str: str) -> bool:
+        """Sets the limit type for the tournament based on the gametype string.
+
+        This method updates the limit type in the gametype dictionary according to the parsed game type string.
+
+        Args:
+            gametype_str: The string containing game type information.
+
+        Returns:
+            bool: True if a valid limit type was set, False otherwise.
+
+        """
+        if "no-limit" in gametype_str:
+            self.gametype["limitType"] = "nl"
+        elif "pot-limit" in gametype_str:
+            self.gametype["limitType"] = "pl"
+        elif "limit" in gametype_str:
+            self.gametype["limitType"] = "fl"
+        else:
+            return False
+        return True
+
+    def _parse_basic_info(self, mg: dict) -> None:
+        """Parses basic tournament information from the match group dictionary.
+
+        This method extracts and sets entries, prizepool, start time, and tournament number from the parsed match group.
+
+        Args:
+            mg: Dictionary containing parsed match group data.
+
+        """
         if "ENTRIES" in mg:
             self.entries = mg["ENTRIES"]
         if "PRIZEPOOL1" in mg and mg["PRIZEPOOL1"] is not None:
@@ -246,45 +428,70 @@ class WinamaxSummary(TourneySummary):
             self.startTime = datetime.datetime.strptime(
                 mg["DATETIME"], "%Y/%m/%d %H:%M:%S UTC",
             ).replace(tzinfo=datetime.timezone.utc)
+        if "TOURNO" in mg:
+            self.tourNo = mg["TOURNO"]
 
-        # TODO(@dev): buyinCurrency and currency not detected
+    def _parse_buyin_info(self, mg: dict) -> None:
+        """Parses buy-in and fee information from the match group dictionary.
+
+        This method extracts and sets the buy-in amount, fee, and currency for the tournament,
+        including handling special cases such as freerolls and KO bounties.
+
+        Args:
+            mg: Dictionary containing parsed match group data.
+
+        """
+        # Initialize with default currency, will be overridden by detection logic
         self.buyinCurrency = "EUR"
         self.currency = "EUR"
 
-        if "BUYIN" in mg:
-            # print "DEBUG: BUYIN '%s'" % mg['BUYIN']
-            if mg["BUYIN"] in ("Gratuit", "Freeroll", "Ticket uniquement", "Ticket"):
-                self.buyin = 0
-                self.fee = 0
-                self.buyinCurrency = "FREE"
-            else:
-                if mg["BUYIN"].find("€") != -1:
-                    self.buyinCurrency = "EUR"
-                elif mg["BUYIN"].find("FPP") != -1 or mg["BUYIN"].find("Free") != -1:
-                    self.buyinCurrency = "WIFP"
-                else:
-                    self.buyinCurrency = "play"
+        if "BUYIN" not in mg:
+            return
 
-                if mg["BIBOUNTY"] is not None and mg["BIRAKE"] is not None:
-                    self.koBounty = int(
-                        100 * Decimal(self.convert_to_decimal(mg["BIRAKE"].strip("\r"))),
-                    )
-                    self.isKO = True
-                    mg["BIRAKE"] = mg["BIBOUNTY"].strip("\r")
+        if mg["BUYIN"] in ("Gratuit", "Freeroll", "Ticket uniquement", "Ticket"):
+            self.buyin = 0
+            self.fee = 0
+            self.buyinCurrency = "FREE"
+            self.currency = "FREE"
+            return
 
-                rake = mg["BIRAKE"].strip("\r")
-                self.buyin = int(100 * self.convert_to_decimal(mg["BIAMT"]))
-                self.fee = int(100 * self.convert_to_decimal(rake))
+        # Determine currency from buy-in text
+        detected_currency = self._determine_currency(mg["BUYIN"])
+        self.buyinCurrency = detected_currency
+        self.currency = detected_currency
 
-                if self.buyin == 0 and self.fee == 0:
-                    self.buyinCurrency = "FREE"
+        # Handle KO bounty
+        if mg["BIBOUNTY"] is not None and mg["BIRAKE"] is not None:
+            self.koBounty = int(
+                100 * Decimal(self.convert_to_decimal(mg["BIRAKE"].strip("\r"))),
+            )
+            self.isKO = True
+            mg["BIRAKE"] = mg["BIBOUNTY"].strip("\r")
 
+        rake = mg["BIRAKE"].strip("\r")
+        self.buyin = int(100 * self.convert_to_decimal(mg["BIAMT"]))
+        self.fee = int(100 * self.convert_to_decimal(rake))
+
+        if self.buyin == 0 and self.fee == 0:
+            self.buyinCurrency = "FREE"
+            self.currency = "FREE"
+
+    def _parse_rebuy_addon(self, mg: dict) -> None:
+        """Parses rebuy and addon information from the match group dictionary.
+
+        This method extracts and sets rebuy and addon costs for the tournament, including rake and fee calculations.
+
+        Args:
+            mg: Dictionary containing parsed match group data.
+
+        """
         if "REBUY" in mg and mg["REBUY"] is not None:
             self.isRebuy = True
             rebuyrake = mg["REBUYRAKE"].strip("\r")
             rebuyamt = int(100 * self.convert_to_decimal(mg["REBUYAMT"]))
             rebuyfee = int(100 * self.convert_to_decimal(rebuyrake))
             self.rebuyCost = rebuyamt + rebuyfee
+
         if "ADDON" in mg and mg["ADDON"] is not None:
             self.isAddOn = True
             addonrake = mg["ADDONRAKE"].strip("\r")
@@ -292,9 +499,16 @@ class WinamaxSummary(TourneySummary):
             addonfee = int(100 * self.convert_to_decimal(addonrake))
             self.addOnCost = addonamt + addonfee
 
-        if "TOURNO" in mg:
-            self.tourNo = mg["TOURNO"]
-        # self.maxseats  =
+    def _parse_tournament_type(self, mg: dict) -> None:
+        """Parses the tournament type and speed from the match group dictionary.
+
+        This method determines if the tournament is a Sit & Go (SNG) and
+        sets the speed attribute based on the parsed information.
+
+        Args:
+            mg: Dictionary containing parsed match group data.
+
+        """
         sng_threshold = 10
         if int(self.entries) <= sng_threshold:  # TODO(@dev): obv not a great metric
             self.isSng = True
@@ -306,61 +520,125 @@ class WinamaxSummary(TourneySummary):
             elif mg["SPEED"] == "semiturbo":
                 self.speed = "Turbo"
 
-        if "PNAME" in mg and mg["PNAME"] is not None:
-            name = mg["PNAME"].strip("\r")
-            rank = mg["RANK"]
-            if rank != "...":
-                rank = int(mg["RANK"])
-                winnings = 0
-                rebuy_count = None
-                add_on_count = None
-                ko_count = None
+    def _determine_currency(self, amount_str: str) -> str:
+        """Determine currency from amount string.
 
-                if "WINNINGS" in mg and mg["WINNINGS"] is not None:
-                    if mg["WINNINGS"].find("€") != -1:
-                        self.currency = "EUR"
-                    elif mg["WINNINGS"].find("FPP") != -1 or mg["WINNINGS"].find("Free") != -1:
-                        self.currency = "WIFP"
-                    else:
-                        self.currency = "play"
-                    winnings = int(100 * self.convert_to_decimal(mg["WINNINGS"]))
-                if "PREBUYS" in mg and mg["PREBUYS"] is not None:
-                    rebuy_count = int(mg["PREBUYS"])
-                if "PADDONS" in mg and mg["PADDONS"] is not None:
-                    add_on_count = int(mg["PADDONS"])
+        Args:
+            amount_str: String containing currency information
 
-                if "TICKET" in mg and mg["TICKET"] is not None:
-                    winnings += int(100 * self.convert_to_decimal(mg["TICKET"]))
+        Returns:
+            str: Detected currency code (EUR, USD, GBP, CAD, WIFP, FREE, or play)
+        """
+        if not amount_str:
+            return "EUR"  # Default fallback
 
-                if "BOUNTY" in mg and mg["BOUNTY"] is not None:
-                    ko_count = (
-                        100
-                        * self.convert_to_decimal(mg["BOUNTY"])
-                        / Decimal(self.koBounty)
-                    )
-                    if winnings == 0:
-                        if mg["BOUNTY"].find("€") != -1:
-                            self.currency = "EUR"
-                        elif mg["BOUNTY"].find("FPP") != -1 or mg["BOUNTY"].find("Free") != -1:
-                            self.currency = "WIFP"
-                        else:
-                            self.currency = "play"
+        # Check for Euro symbols
+        if "€" in amount_str or "EUR" in amount_str:
+            return "EUR"
+        # Check for Dollar symbols
+        if "$" in amount_str or "USD" in amount_str:
+            return "USD"
+        # Check for Winamax points
+        return "WIFP" if "FPP" in amount_str or "Free" in amount_str else "play"
 
-                # Debug output removed for clarity
-                self.addPlayer(
-                    rank, name, winnings, self.currency, rebuy_count, add_on_count, ko_count,
-                )
+    def _parse_player_info(self, mg: dict) -> None:
+        """Parses player information from the match group dictionary.
+
+        This method extracts and sets player name, rank, winnings, rebuy count, add-on count, and
+        KO count from the parsed match group, and adds the player to the tournament summary.
+
+        Args:
+            mg: Dictionary containing parsed match group data.
+
+        """
+        if "PNAME" not in mg or mg["PNAME"] is None:
+            return
+
+        name = mg["PNAME"].strip("\r")
+        rank = mg["RANK"]
+
+        if rank == "...":
+            return
+
+        rank = int(mg["RANK"])
+        winnings = 0
+        rebuy_count = None
+        add_on_count = None
+        ko_count = None
+
+        if "WINNINGS" in mg and mg["WINNINGS"] is not None:
+            self.currency = self._determine_currency(mg["WINNINGS"])
+            winnings = int(100 * self.convert_to_decimal(mg["WINNINGS"]))
+
+        if "PREBUYS" in mg and mg["PREBUYS"] is not None:
+            rebuy_count = int(mg["PREBUYS"])
+
+        if "PADDONS" in mg and mg["PADDONS"] is not None:
+            add_on_count = int(mg["PADDONS"])
+
+        if "TICKET" in mg and mg["TICKET"] is not None:
+            winnings += int(100 * self.convert_to_decimal(mg["TICKET"]))
+
+        if "BOUNTY" in mg and mg["BOUNTY"] is not None:
+            ko_count = (
+                100
+                * self.convert_to_decimal(mg["BOUNTY"])
+                / Decimal(self.koBounty)
+            )
+            if winnings == 0:
+                self.currency = self._determine_currency(mg["BOUNTY"])
+
+        self.addPlayer(
+            rank, name, winnings, self.currency, rebuy_count, add_on_count, ko_count,
+        )
+
+    def parseSummaryFile(self) -> None:
+        """Parses a Winamax tournament summary from a file.
+
+        This method extracts all relevant tournament information from the summary text,
+        including game type, basic info, buy-in, rebuy/addon, tournament type, and player info.
+        It also detects if the tournament is an Expresso lottery tournament.
+
+        """
+        m = self.re_summary_tourney_info.search(self.summaryText)
+        if m is None:
+            tmp = self.summaryText[:200]
+            log.error("parse Summary From File failed: '%s'", tmp)
+            raise FpdbParseError
+
+        mg = m.groupdict()
+
+        self._parse_gametype(mg)
+        self._parse_basic_info(mg)
+        self._parse_buyin_info(mg)
+        self._parse_rebuy_addon(mg)
+        self._parse_tournament_type(mg)
+        self._parse_player_info(mg)
 
         # Detect lottery tournaments after parsing
         self._detect_expresso_lottery()
 
     def convert_to_decimal(self, string: str) -> Decimal:
-        """Convert money string to decimal."""
+        """Converts a string representing a monetary value to a Decimal.
+
+        This method cleans the input string and returns its value as a Decimal for precise calculations.
+
+        Args:
+            string: The string containing the monetary value.
+
+        Returns:
+            Decimal: The cleaned monetary value as a Decimal.
+
+        """
         dec = self.clearMoneyString(string)
         return Decimal(dec)
 
     def _detect_expresso_lottery(self) -> None:
-        """Detect Expresso lottery tournaments and set lottery attributes."""
+        """Detects if the tournament is an Expresso lottery tournament.
+
+        This method checks the tournament name for 'Expresso' and sets the lottery flag and multiplier accordingly.
+
+        """
         log.debug("Detecting Expresso lottery tournament")
 
         # Check if tournament name contains "Expresso"

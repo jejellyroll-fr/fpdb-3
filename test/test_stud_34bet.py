@@ -70,10 +70,10 @@ class MockHand:
         self.pot = Mock()
         self.pot.pots = [(Decimal("10.00"), ["Hero"])]
         self.pot.common = {
-            "Player1": Decimal("0"),
-            "Player2": Decimal("0"),
-            "Player3": Decimal("0"),
-            "Hero": Decimal("0"),
+            "Player1": Decimal(0),
+            "Player2": Decimal(0),
+            "Player3": Decimal(0),
+            "Hero": Decimal(0),
         }
         self.pot.committed = {
             "Player1": Decimal("2.50"),
@@ -117,8 +117,7 @@ class MockHand:
         }
 
     def getStreetTotals(self):
-        return [Decimal("1.00"), Decimal("2.00"), Decimal("4.00"),
-                Decimal("6.00"), Decimal("8.00"), Decimal("10.00")]
+        return [Decimal("1.00"), Decimal("2.00"), Decimal("4.00"), Decimal("6.00"), Decimal("8.00"), Decimal("10.00")]
 
     def join_holecards(self, player, asList=False):
         if asList:
@@ -145,12 +144,12 @@ class TestStud34Bet:
                 ("Hero", "ante", Decimal("0.10")),
             ],
             "THIRD": [
-                ("Player1", "bringin", Decimal("0.10")),      # Bring-in (not counted)
-                ("Player2", "completes", Decimal("0.25")),    # Complete = 1-bet
-                ("Player3", "raises", Decimal("0.50")),       # Raise = 2-bet
-                ("Hero", "raises", Decimal("0.75")),          # Re-raise = 3-bet
+                ("Player1", "bringin", Decimal("0.10")),  # Bring-in (not counted)
+                ("Player2", "completes", Decimal("0.25")),  # Complete = 1-bet
+                ("Player3", "raises", Decimal("0.50")),  # Raise = 2-bet
+                ("Hero", "raises", Decimal("0.75")),  # Re-raise = 3-bet
                 ("Player1", "folds"),
-                ("Player2", "raises", Decimal("1.00")),       # Re-re-raise = 4-bet
+                ("Player2", "raises", Decimal("1.00")),  # Re-re-raise = 4-bet
                 ("Player3", "folds"),
                 ("Hero", "calls", Decimal("0.25")),
             ],
@@ -203,8 +202,8 @@ class TestStud34Bet:
                 ("Player2", "ante", Decimal("0.10")),
             ],
             "THIRD": [
-                ("Player1", "bringin", Decimal("0.10")),   # Not counted
-                ("Player2", "raises", Decimal("0.25")),    # This is 1-bet in Stud
+                ("Player1", "bringin", Decimal("0.10")),  # Not counted
+                ("Player2", "raises", Decimal("0.25")),  # This is 1-bet in Stud
                 ("Player1", "calls", Decimal("0.15")),
             ],
             "FOURTH": [],
@@ -263,10 +262,10 @@ class TestStud34Bet:
             ],
             "THIRD": [
                 ("Player1", "bringin", Decimal("0.10")),
-                ("Player2", "completes", Decimal("0.25")),   # 1-bet
-                ("Player3", "raises", Decimal("0.50")),      # 2-bet
-                ("Hero", "raises", Decimal("0.75")),         # 3-bet
-                ("Player1", "raises", Decimal("1.00")),      # Cold 4-bet
+                ("Player2", "completes", Decimal("0.25")),  # 1-bet
+                ("Player3", "raises", Decimal("0.50")),  # 2-bet
+                ("Hero", "raises", Decimal("0.75")),  # 3-bet
+                ("Player1", "raises", Decimal("1.00")),  # Cold 4-bet
                 ("Player2", "folds"),
                 ("Player3", "folds"),
                 ("Hero", "calls", Decimal("0.25")),
@@ -294,9 +293,9 @@ class TestStud34Bet:
             ],
             "THIRD": [
                 ("Player1", "bringin", Decimal("0.10")),
-                ("Player2", "completes", Decimal("0.25")),   # 1-bet
-                ("Player3", "calls", Decimal("0.25")),       # Call creates squeeze opportunity
-                ("Hero", "raises", Decimal("0.50")),         # This is 2-bet, not 3-bet
+                ("Player2", "completes", Decimal("0.25")),  # 1-bet
+                ("Player3", "calls", Decimal("0.25")),  # Call creates squeeze opportunity
+                ("Hero", "raises", Decimal("0.50")),  # This is 2-bet, not 3-bet
                 ("Player1", "folds"),
                 ("Player2", "folds"),
                 ("Player3", "folds"),
@@ -344,9 +343,9 @@ class TestStud34Bet:
 
         # All players except Player1 (who only did bring-in) should have VPIP
         assert self.stats.handsplayers["Player1"]["street0VPI"] == False  # Only bring-in
-        assert self.stats.handsplayers["Player2"]["street0VPI"] == True   # Complete
-        assert self.stats.handsplayers["Player3"]["street0VPI"] == True   # Call
-        assert self.stats.handsplayers["Hero"]["street0VPI"] == True      # Raise
+        assert self.stats.handsplayers["Player2"]["street0VPI"] == True  # Complete
+        assert self.stats.handsplayers["Player3"]["street0VPI"] == True  # Call
+        assert self.stats.handsplayers["Hero"]["street0VPI"] == True  # Raise
 
         # VPIP count should be 3
         assert self.stats.hands["playersVpi"] == 3

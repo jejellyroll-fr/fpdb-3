@@ -523,17 +523,20 @@ names = {
 ITER_MAP = {0: 50000, 1: 0, 2: 0, 3: 0}
 
 
-def decodeStartHandValue(game: str, value: int) -> str:
-    """Decode a starting hand value into a string representation."""
-    if game in ("holdem", "6_holdem"):
-        return twoStartCardString(value)
-    if game in ("razz", "27_razz"):
-        return decodeRazzStartHand(value)
-    return "xx"
 
 
 def calcStartCards(hand: Any, player: Any) -> int:
-    """Calculate the starting card value for a given hand and player."""
+    """Calculate the integer representation of a player's starting cards.
+
+    Determines the starting hand value for a player based on the game type and their hole cards.
+
+    Args:
+        hand: The hand object containing game and player information.
+        player: The player whose starting cards are being evaluated.
+
+    Returns:
+        An integer representing the starting hand value, or a constant for unknown hands.
+    """
     hcs = hand.join_holecards(player, asList=True)
     if hand.gametype["category"] in ("holdem", "6_holdem"):
         value1 = card_map.get(hcs[0][0])
@@ -561,7 +564,16 @@ DATABASE_FILTERS = {
 
 
 def StartCardRank(idx: int) -> tuple[str, int, int]:
-    """Return the rank of a starting card index."""
+    """Return the rank information for a starting hand by index.
+
+    Retrieves a tuple containing the hand string, its rank, and the number of combinations for the given index.
+
+    Args:
+        idx: The index of the starting hand.
+
+    Returns:
+        A tuple of (hand string, rank, number of combinations).
+    """
     rank_list = [
         ("22", 54, 12),
         ("32o", 160, 24),
@@ -3381,8 +3393,32 @@ def encodeRazzStartHand(cards: list[tuple[str, str]]) -> int:
     return idx if (idx := encode_razz_list.get(start_hand)) else 0
 
 
+_DECODERS = {
+    "holdem": twoStartCardString,
+    "6_holdem": twoStartCardString,
+    "razz": decodeRazzStartHand,
+    "27_razz": decodeRazzStartHand,
+}
+
+def decodeStartHandValue(game: str, value: int) -> str:
+    """Return a string representation of a starting hand value for a given game.
+
+    Converts the integer value of a starting hand to its string representation based on the game type.
+
+    Args:
+        game: The name of the poker game (e.g., 'holdem', 'razz').
+        value: The integer value representing the starting hand.
+
+    Returns:
+        A string representing the starting hand (e.g., 'AQo', '(32)A', or 'xx' for unknown).
+    """
+    return _DECODERS.get(game, lambda _v: "xx")(value)
+
+
+
 if __name__ == "__main__":
-    try:
+    import contextlib
+    with contextlib.suppress(ValueError, EOFError):
         s = int(input("--> "))
         if s == 1:
             while True:
@@ -3390,5 +3426,3 @@ if __name__ == "__main__":
         elif s == CARD_INPUT_OPTION:
             while True:
                 cardid = int(input("Enter card: "))
-    except (ValueError, EOFError):
-        pass
