@@ -56,8 +56,7 @@ class MockPopup:
         stat_names = ["vpip", "pfr", "three_B", "steal", "cbet", "a_freq1"]
 
         for stat_name in stat_names:
-            stat_result = Stats.do_stat(stat_dict, seat, stat_name)
-            if stat_result:
+            if stat_result := Stats.do_stat(stat_dict, seat, stat_name):
                 stat_label = QLabel(f"{stat_name.upper()}\n{stat_result[1]}")
                 stat_label.setStyleSheet("border: 1px solid #CCCCCC; padding: 5px; margin: 2px; text-align: center;")
                 stat_label.setAlignment(Qt.AlignCenter)

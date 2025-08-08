@@ -75,7 +75,7 @@ def hud_main(app, qtbot):
         }
         mock_config_instance.get_layout.return_value = "some_layout"
 
-        hm = HUD_main.HUD_main(options, db_name=options.dbname)
+        hm = HUD_main.HudMain(options, db_name=options.dbname)
         qtbot.addWidget(hm.main_window)
         yield hm
 
@@ -151,16 +151,18 @@ def test_create_hud(hud_main) -> None:
     ):
         mock_table = MagicMock()
         mock_table.site = "test_site"
-        hud_main.create_HUD(
-            "new_hand_id",
-            mock_table,
-            "temp_key",
-            9,
-            "poker_game",
-            "cash",
-            {},
-            {},
+        args = HUD_main.HUDCreationArgs(
+            new_hand_id="new_hand_id",
+            table=mock_table,
+            temp_key="temp_key",
+            max_seats=9,
+            poker_game="poker_game",
+            game_type="cash",
+            stat_dict={},
+            cards={}
         )
+        
+        hud_main.create_HUD(args)
 
         assert "temp_key" in hud_main.hud_dict
         mock_hud.assert_called_once()
@@ -385,11 +387,18 @@ def test_zmqworker_run(hud_main) -> None:
 #         mock_log_debug.assert_called_with("Received hand ID: hand_id")
 
 
-# Verifies that table_title_changed calls kill_hud when the table's title changes.
+# Verifies that table_title_changed calls kill_hud when the table's title changes significantly.
 def test_table_title_changed_calls_kill_hud(hud_main) -> None:
     mock_hud = MagicMock()
     mock_hud.table.key = "test_table"
+    mock_hud.table.title = "new_title"
     hud_main.hud_dict["test_table"] = mock_hud
+
+    # Mock the smart_hud_manager to return that title changed and should restart
+    hud_main.smart_hud_manager = MagicMock()
+    hud_main.smart_hud_manager.has_table_title_changed.return_value = True
+    hud_main.smart_hud_manager.should_restart_hud.return_value = (True, "Title changed significantly")
+    hud_main.smart_hud_manager.record_restart = MagicMock()
 
     with patch.object(hud_main, "kill_hud") as mock_kill_hud:
         hud_main.table_title_changed(None, mock_hud)
@@ -508,61 +517,52 @@ def test_idle_create(import_path, hud_main) -> None:
         hud_main.hud_dict = {"test_table": mock_hud}
         hud_main.vb = MagicMock()
 
-        new_hand_id = "new_hand_id"
         table = MagicMock()
         table.site = "test_site"
         table.number = 123
-        temp_key = "test_table"
-        max = 9
-        poker_game = "holdem"
-        hud_type = "cash"
-        stat_dict = {}
-        cards = {}
+        
+        args = HUD_main.HUDCreationArgs(
+            new_hand_id="new_hand_id",
+            table=table,
+            temp_key="test_table",
+            max_seats=9,
+            poker_game="holdem",
+            game_type="cash",
+            stat_dict={},
+            cards={}
+        )
 
         with (
-            patch.object(hud_main, "get_cards", return_value=cards),
+            patch.object(hud_main, "get_cards", return_value=args.cards),
             patch.object(hud_main.hud_dict["test_table"], "create") as mock_create,
             patch.object(hud_main.hud_dict["test_table"], "aux_windows", []),
         ):
             # Call idle_create
-            hud_main.idle_create(
-                new_hand_id,
-                table,
-                temp_key,
-                max,
-                poker_game,
-                hud_type,
-                stat_dict,
-                cards,
-            )
+            hud_main.idle_create(args)
 
             # Checks
-            hud_main.hud_dict[temp_key].tablehudlabel
+            hud_main.hud_dict[args.temp_key].tablehudlabel
 
-            # Check taht vb.addWidget is called
+            # Check that vb.addWidget is called
             with contextlib.suppress(AssertionError):
                 hud_main.vb.addWidget.assert_called_once()
 
-            # Check attributs
-            assert hud_main.hud_dict[temp_key].tablehudlabel is not None, "tablehudlabel is None"
-            assert hud_main.hud_dict[temp_key].tablenumber == table.number, "tablenumber mismatch"
+            # Check attributes
+            assert hud_main.hud_dict[args.temp_key].tablehudlabel is not None, "tablehudlabel is None"
+            assert hud_main.hud_dict[args.temp_key].tablenumber == table.number, "tablenumber mismatch"
 
             # Check call
             with contextlib.suppress(AssertionError):
                 mock_create.assert_called_once_with(
-                    new_hand_id,
+                    args.new_hand_id,
                     hud_main.config,
-                    stat_dict,
+                    args.stat_dict,
                 )
 
-        # Check logs
-        expected_log_message = f"adding label {table.site} - {temp_key}"
+        # Check logs - the method creates a label with site and temp_key
+        expected_log_message = f"adding label {table.site} - {args.temp_key}"
 
         log_message_found = any(call[0][0] == expected_log_message for call in mock_log.debug.call_args_list)
-        if log_message_found:
-            pass
-        else:
-            pass
 
 
 # Ensures that idle_update updates the HUD and auxiliary windows.

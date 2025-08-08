@@ -511,7 +511,7 @@ class TestHUDIntegrationScenarios:
         }
 
         # Update all stats
-        for stat_name, stat in stats.items():
+        for stat in stats.values():
             stat.update(1, stat_dict)
 
         # All should display '-'
