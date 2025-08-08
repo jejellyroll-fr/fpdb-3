@@ -290,7 +290,7 @@ class TestBovadaParser(unittest.TestCase):
         assert hand.pot_winners[0]["player"] == "Seat 6"
 
     def test_read_collect_pot_hilo_split(self) -> None:
-        hand_text, _ = load_hand_history("7-StudHL-USD - RING - $5-$10, $1.25 Ante - 201404.txt")
+        hand_text, _ = load_hand_history("7-StudHL-USD-RING-$5-$10,$1.25Ante-201404.txt")
         gametype = self.parser.determineGameType(hand_text.split("\n\n")[0])
         hand = MockHand(hand_text, gametype)
         self.parser.readPlayerStacks(hand)
