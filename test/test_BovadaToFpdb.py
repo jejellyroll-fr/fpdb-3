@@ -1,7 +1,13 @@
-import os
+"""Test module for BovadaToFpdb parser.
+
+Comprehensive test suite for the Bovada hand history parser, covering
+various game types including Hold'em, Omaha, and Stud variants.
+"""
+
 import unittest
 from datetime import datetime, timezone
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
 
@@ -10,13 +16,16 @@ try:
 except ImportError:
     import sys
 
-    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+    sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
     from BovadaToFpdb import Bovada, FpdbHandPartial, FpdbParseError
 
 
 # --- Mocks ---
 class MockHand:
-    def __init__(self, hand_text, gametype, in_path="") -> None:
+    """Mock hand object for testing Bovada parser functionality."""
+
+    def __init__(self, hand_text: str, gametype: dict, in_path: str = "") -> None:
+        """Initialize mock hand with basic attributes."""
         self.handText = hand_text
         self.gametype = gametype
         self.in_path = in_path
@@ -56,59 +65,76 @@ class MockHand:
         self.stacks = {}
         self.dealt = set()
 
-    def addPlayer(self, seat_no, name, stack) -> None:
+    def addPlayer(self, seat_no: int, name: str, stack: str) -> None:
+        """Add a player to the hand."""
         player_info = {"seat": seat_no, "name": name, "stack": Decimal(stack)}
         self.players.append(player_info)
         self.stacks[name] = Decimal(stack)
 
-    def addAnte(self, player, amount) -> None:
+    def addAnte(self, player: str, amount: str) -> None:
+        """Add an ante for a player."""
         self.antes[player] = Decimal(amount)
 
-    def addBringIn(self, player, amount) -> None:
+    def addBringIn(self, player: str, amount: str) -> None:
+        """Add a bring-in bet for a player."""
         self.bringIn = {"player": player, "amount": Decimal(amount)}
 
-    def addBlind(self, player, blind_type, amount) -> None:
+    def addBlind(self, player: str, blind_type: str, amount: str) -> None:
+        """Add a blind bet for a player."""
         self.blinds.append({"player": player, "type": blind_type, "amount": Decimal(amount)})
 
-    def setUncalledBets(self, value) -> None:
+    def setUncalledBets(self, value: bool) -> None:
+        """Set whether to track uncalled bets."""
         self.uncalledBets = value
 
-    def setCommunityCards(self, street, cards) -> None:
+    def setCommunityCards(self, street: str, cards: list) -> None:
+        """Set community cards for a street."""
         self.community_cards[street] = cards
 
-    def addHoleCards(self, street, player, **kwargs) -> None:
+    def addHoleCards(self, street: str, player: str, **kwargs) -> None:
+        """Add hole cards for a player on a street."""
         if player not in self.hole_cards:
             self.hole_cards[player] = {}
         self.hole_cards[player][street] = kwargs
 
-    def addFold(self, street, player) -> None:
+    def addFold(self, street: str, player: str) -> None:
+        """Add a fold action."""
         self.actions.append((street, player, "fold", None))
 
-    def addCheck(self, street, player) -> None:
+    def addCheck(self, street: str, player: str) -> None:
+        """Add a check action."""
         self.actions.append((street, player, "check", None))
 
-    def addCall(self, street, player, amount) -> None:
+    def addCall(self, street: str, player: str, amount: str) -> None:
+        """Add a call action."""
         self.actions.append((street, player, "call", Decimal(amount)))
 
-    def addBet(self, street, player, amount) -> None:
+    def addBet(self, street: str, player: str, amount: str) -> None:
+        """Add a bet action."""
         self.actions.append((street, player, "bet", Decimal(amount)))
 
-    def addRaiseTo(self, street, player, amount) -> None:
+    def addRaiseTo(self, street: str, player: str, amount: str) -> None:
+        """Add a raise action."""
         self.actions.append((street, player, "raise", Decimal(amount)))
 
-    def addAllIn(self, street, player, amount) -> None:
+    def addAllIn(self, street: str, player: str, amount: str) -> None:
+        """Add an all-in action."""
         self.actions.append((street, player, "allin", Decimal(amount)))
 
-    def addShownCards(self, cards, player) -> None:
+    def addShownCards(self, cards: list, player: str) -> None:
+        """Add shown cards for a player."""
         self.shown_cards[player] = cards
 
-    def addCollectPot(self, player, pot) -> None:
+    def addCollectPot(self, player: str, pot: str) -> None:
+        """Add pot collection for a player."""
         self.pot_winners.append({"player": player, "amount": Decimal(pot)})
         self.totalcollected += Decimal(pot)
 
 
 class MockConfig:
-    def get_import_parameters(self):
+    """Mock configuration object for testing."""
+    
+    def get_import_parameters(self) -> dict:
         return {}
 
 
@@ -116,9 +142,10 @@ _file_cache = {}
 
 
 def find_file(name, path):
-    for root, _dirs, files in os.walk(path):
-        if name in files:
-            return os.path.join(root, name)
+    """Find a file by name recursively in the given path."""
+    search_path = Path(path)
+    for file_path in search_path.rglob(name):
+        return str(file_path)
     return None
 
 
@@ -127,10 +154,10 @@ def load_hand_history(filename):
         # Retourne le contenu et le chemin depuis le cache
         return _file_cache[filename]
 
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    base_search_dir = os.path.abspath(os.path.join(script_dir, ".."))
+    script_dir = Path(__file__).parent
+    base_search_dir = script_dir.parent.resolve()
 
-    file_path = find_file(filename, base_search_dir)
+    file_path = find_file(filename, str(base_search_dir))
 
     if file_path:
         with open(file_path, encoding="utf-8-sig") as f:

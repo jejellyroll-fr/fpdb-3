@@ -711,7 +711,7 @@ class Bovada(HandHistoryConverter):
         Raises:
             FpdbParseError: If no players are found in the hand text.
         """
-        self.playersMap, seat_no = {}, 1
+        self.playersMap = {}
         if hand.gametype["base"] in ("stud"):
             m = self.re_player_info_stud.finditer(hand.handText)
         else:
@@ -731,11 +731,10 @@ class Bovada(HandHistoryConverter):
                 else:
                     self.playersMap[a.group("PNAME")] = f"Seat {a.group('SEAT')}"
                 hand.addPlayer(
-                    seat_no,
+                    int(a.group("SEAT")),
                     self.playersMap[a.group("PNAME")],
                     self.clearMoneyString(a.group("CASH")),
                 )
-            seat_no += 1
         if len(hand.players) == 0:
             tmp = hand.handText[:200]
             log.error("readPlayerStacks failed: '%s'", tmp)
