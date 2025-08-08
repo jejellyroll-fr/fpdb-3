@@ -1,78 +1,108 @@
-"""Tests de régression pour BovadaToFpdb - S'assurer que les corrections restent fonctionnelles.
+"""Regression tests for BovadaToFpdb - Ensure fixes remain functional.
 
-Ce module contient des tests de régression pour prévenir la réintroduction de bugs
-déjà corrigés dans le parser Bovada.
+This module contains regression tests to prevent reintroduction of bugs
+already fixed in the Bovada parser.
 """
 
-import os
+import datetime
+import inspect
 import subprocess
 import sys
 import unittest
+from pathlib import Path
+
+from BovadaToFpdb import Bovada
 
 
 class BovadaRegressionTests(unittest.TestCase):
-    """Tests de régression pour s'assurer que les corrections antérieures fonctionnent toujours."""
+    """Regression tests to ensure previous fixes still work."""
 
     def test_all_original_tests_still_pass(self) -> None:
-        """Régression: S'assurer que tous les tests originaux passent encore."""
-        # Exécuter les tests originaux qui fonctionnaient après les corrections
-        result = subprocess.run(
-            [sys.executable, "-m", "pytest", "test/test_BovadaToFpdb.py", "-v"],
-            cwd=os.path.dirname(os.path.dirname(__file__)),
+        """Regression: Ensure all original tests still pass."""
+        # Run the original tests that worked after the fixes
+        # Security: Using trusted command with validated arguments and shell=False
+        # Validate that we're using the expected Python executable
+        if not Path(sys.executable).exists():
+            self.fail(f"Python executable not found: {sys.executable}")
+
+        # Validate test file exists
+        test_file = Path(__file__).parent.parent / "test" / "test_BovadaToFpdb.py"
+        if not test_file.exists():
+            self.skipTest(f"Test file not found: {test_file}")
+
+        result = subprocess.run(  # noqa: S603
+            [sys.executable, "-m", "pytest", str(test_file), "-v"],
+            cwd=Path(__file__).parent.parent,
             capture_output=True,
-            text=True, check=False,
+            text=True,
+            shell=False,
+            check=False,
+            timeout=60,  # Add timeout for security
         )
 
-        assert result.returncode == 0, f"Tests originaux échouent - régression détectée:\n{result.stdout}\n{result.stderr}"
+        assert result.returncode == 0, (
+            f"Original tests fail - regression detected:\n{result.stdout}\n{result.stderr}"
+        )
 
-        # Vérifier que le nombre exact de tests passe (23 tests)
+        # Verify that the exact number of tests pass (23 tests)
         assert "23 passed" in result.stdout
 
     def test_datetime_import_regression(self) -> None:
-        """Régression: S'assurer que l'import datetime.strptime fonctionne."""
+        """Regression: Ensure datetime.strptime import works."""
         try:
-            import datetime
-
-            # Test direct de l'utilisation dans le code - le plus important
+            # Direct test of usage in the code - most important
             test_date_string = "2012-08-26 23:35:15"
-            parsed_date = datetime.datetime.strptime(test_date_string, "%Y-%m-%d %H:%M:%S")
+            # Use timezone-aware parsing to avoid naive datetime warning
+            parsed_date = datetime.datetime.strptime(test_date_string, "%Y-%m-%d %H:%M:%S").replace(
+                tzinfo=datetime.timezone.utc,
+            )
             assert isinstance(parsed_date, datetime.datetime)
 
         except AttributeError as e:
             if "datetime" in str(e):
-                self.fail(f"Régression datetime import détectée: {e}")
+                self.fail(f"Datetime import regression detected: {e}")
             raise
 
     def test_split_flag_regression(self) -> None:
-        """Régression: S'assurer que la clé 'split' est toujours définie."""
-        # Importer et vérifier que la définition de split est dans le code
-        import inspect
-
-        from BovadaToFpdb import Bovada
-
-        # Vérifier que _buildGameTypeInfo contient le code pour split
+        """Regression: Ensure 'split' key is still defined."""
+        # Verify that _buildGameTypeInfo contains the split code
         source = inspect.getsource(Bovada._buildGameTypeInfo)
-        assert "split" in source, "La clé 'split' manque dans _buildGameTypeInfo - régression détectée"
+        assert "split" in source, "'split' key missing in _buildGameTypeInfo - regression detected"
 
     def test_cli_importer_basic_functionality(self) -> None:
-        """Régression: S'assurer que l'importer CLI fonctionne toujours."""
-        test_file = "regression-test-files/cash/Bovada/Flop/NLHE-USD-0.10-0.25-201208.raise.to.format.change.txt"
+        """Regression: Ensure CLI importer still works."""
+        # Security: Validate all paths before subprocess execution
+        base_dir = Path(__file__).parent.parent
+        test_file = (
+            base_dir / "regression-test-files/cash/Bovada/Flop/"
+            "NLHE-USD-0.10-0.25-201208.raise.to.format.change.txt"
+        )
+        importer_cli = base_dir / "importer_cli.py"
 
-        # Vérifier que le fichier existe
-        if not os.path.exists(test_file):
-            self.skipTest(f"Fichier de test {test_file} non disponible")
+        # Validate that all required files exist
+        if not test_file.exists():
+            self.skipTest(f"Test file {test_file} not available")
 
-        # Tester l'import sans réellement modifier la base
-        result = subprocess.run(
-            [sys.executable, "importer_cli.py", "--site", "Bovada", "--no-progress", test_file],
-            cwd=os.path.dirname(os.path.dirname(__file__)),
+        if not importer_cli.exists():
+            self.skipTest(f"CLI importer script not found: {importer_cli}")
+
+        if not Path(sys.executable).exists():
+            self.fail(f"Python executable not found: {sys.executable}")
+
+        # Test import without actually modifying the database
+        # Security: Using validated paths and controlled arguments with shell=False
+        result = subprocess.run( # noqa: S603
+            [sys.executable, str(importer_cli), "--site", "Bovada", "--no-progress", str(test_file)],
+            cwd=base_dir,
             capture_output=True,
             text=True,
-            timeout=30, check=False,
+            shell=False,
+            timeout=30,
+            check=False,
         )
 
-        # L'import doit réussir (code retour 0)
-        assert result.returncode == 0, f"CLI importer échoue - régression détectée:\n{result.stdout}\n{result.stderr}"
+        # Import must succeed (return code 0)
+        assert result.returncode == 0, f"CLI importer fails - regression detected:\n{result.stdout}\n{result.stderr}"
 
 
 if __name__ == "__main__":
