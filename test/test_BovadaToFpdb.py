@@ -157,9 +157,7 @@ def load_hand_history(filename):
     script_dir = Path(__file__).parent
     base_search_dir = script_dir.parent.resolve()
 
-    file_path = find_file(filename, str(base_search_dir))
-
-    if file_path:
+    if file_path := find_file(filename, str(base_search_dir)):
         with open(file_path, encoding="utf-8-sig") as f:
             content = f.read()
             # Met en cache le contenu et le chemin

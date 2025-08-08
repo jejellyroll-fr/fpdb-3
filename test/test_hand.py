@@ -201,7 +201,7 @@ class Hand:
                 participants = {k for (v, k) in commitsall}
 
                 # Create a new pot with all participants
-                new_pot_value = sum([min(v, v1) for (v, k) in commitsall])
+                new_pot_value = sum(min(v, v1) for (v, k) in commitsall)
                 self.pot.pots.append((new_pot_value, participants))
                 log.debug(
                     f"New pot created: Value={new_pot_value:.2f}, Participants={participants}",
@@ -214,7 +214,7 @@ class Hand:
         except Exception as e:
             log.exception(f"Error during pot calculation: {e}")
             msg = "Error calculating pots"
-            raise FpdbParseError(msg)
+            raise FpdbParseError(msg) from e
 
         # Calculate total pots
         self.totalpot = sum(p[0] for p in self.pot.pots)

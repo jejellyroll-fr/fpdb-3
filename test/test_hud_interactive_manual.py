@@ -21,6 +21,31 @@ from Aux_Hud import SimpleStat
 class HUDManualTestWindow(QMainWindow):
     """Manual test window for HUD display verification."""
 
+    def _create_styled_label(self, text: str, font_size: int, margin: int = 5, 
+                           color: str = "#333333", font_weight: str = "normal",
+                           font_style: str = "normal", alignment: str = "left") -> QLabel:
+        """Create a styled QLabel with common styling patterns."""
+        label = QLabel(text)
+        style_parts = [
+            f"font-size: {font_size}px",
+            f"margin: {margin}px", 
+            f"color: {color}"
+        ]
+        
+        if font_weight != "normal":
+            style_parts.append(f"font-weight: {font_weight}")
+        if font_style != "normal":
+            style_parts.append(f"font-style: {font_style}")
+        if alignment == "center":
+            style_parts.append("text-align: center")
+            
+        label.setStyleSheet("; ".join(style_parts) + ";")
+        
+        if alignment == "center":
+            label.setAlignment(Qt.AlignCenter)
+            
+        return label
+
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("FPDB HUD Manual Test - No Data vs Zero Display")
@@ -32,9 +57,10 @@ class HUDManualTestWindow(QMainWindow):
         layout = QVBoxLayout(central_widget)
 
         # Add title
-        title = QLabel("FPDB HUD Manual Test - Verify '-' vs '0' Display")
-        title.setStyleSheet("font-size: 20px; font-weight: bold; margin: 10px; color: #333333;")
-        title.setAlignment(Qt.AlignCenter)
+        title = self._create_styled_label(
+            "FPDB HUD Manual Test - Verify '-' vs '0' Display",
+            font_size=20, font_weight="bold", margin=10, alignment="center"
+        )
         layout.addWidget(title)
 
         # Add instructions
@@ -61,55 +87,7 @@ class HUDManualTestWindow(QMainWindow):
 
     def create_mock_aw(self):
         """Create mock AuxWindow for testing."""
-        aw = Mock()
-        aw.params = {"fgcolor": "#000000", "bgcolor": "#FFFFFF", "font": "Arial", "font_size": 12, "opacity": 1.0}
-        aw.aux_params = {"font": "Arial", "font_size": 12, "fgcolor": "#000000", "bgcolor": "#FFFFFF"}
-        aw.hud = Mock()
-        aw.hud.hand_instance = None
-        aw.hud.layout = Mock()
-
-        # Create proper seat mocks
-        seat_mocks = {}
-        for i in range(1, 7):
-            seat_mock = Mock()
-            seat_mock.seat_number = i
-            seat_mock.player_name = f"Player{i}"
-            seat_mocks[i] = seat_mock
-        aw.hud.layout.hh_seats = seat_mocks
-
-        # Return real QLabel instances
-        aw.aw_class_label = Mock(side_effect=lambda *args: QLabel())
-
-        # Create proper stat_set mock for ClassicStat
-        def create_stat_obj(stat_name):
-            stat_obj = Mock()
-            stat_obj.stat_name = stat_name
-            stat_obj.stat_locolor = "#FF0000"  # Red for low values
-            stat_obj.stat_loth = "10"
-            stat_obj.stat_hicolor = "#00FF00"  # Green for high values
-            stat_obj.stat_hith = "30"
-            stat_obj.stat_midcolor = "#FFFF00"  # Yellow for mid values
-            stat_obj.hudcolor = "#000000"
-            stat_obj.hudprefix = ""
-            stat_obj.hudsuffix = ""
-            stat_obj.click = ""
-            stat_obj.tip = ""
-            return stat_obj
-
-        stat_set = Mock()
-        stat_set.stats = {
-            "vpip": create_stat_obj("vpip"),
-            "pfr": create_stat_obj("pfr"),
-            "three_B": create_stat_obj("three_B"),
-            "steal": create_stat_obj("steal"),
-            "cbet": create_stat_obj("cbet"),
-            "a_freq1": create_stat_obj("a_freq1"),
-            "agg_fact": create_stat_obj("agg_fact"),
-        }
-
-        aw.hud.supported_games_parameters = {"game_stat_set": stat_set}
-
-        return aw
+        return _create_mock_auxwindow()
 
     def create_test_scenarios(self, layout) -> None:
         """Create different test scenarios."""
@@ -207,6 +185,15 @@ class HUDManualTestWindow(QMainWindow):
         for scenario in scenarios:
             self.create_scenario_widget(layout, scenario)
 
+    def get_stat_colors(self, stat_value: str) -> tuple[str, str]:
+        """Get text and background colors for a stat value."""
+        if stat_value == "-":
+            return "#FF0000", "#FFEEEE"  # Red for no data
+        elif stat_value == "0.0":
+            return "#0000FF", "#EEEEFF"  # Blue for zero
+        else:
+            return "#00AA00", "#EEFFEE"  # Green for normal values
+
     def create_scenario_widget(self, layout, scenario) -> None:
         """Create a widget for a specific test scenario."""
         # Create scenario container
@@ -217,18 +204,22 @@ class HUDManualTestWindow(QMainWindow):
         scenario_layout = QVBoxLayout(scenario_widget)
 
         # Add title
-        title_label = QLabel(scenario["title"])
-        title_label.setStyleSheet("font-size: 16px; font-weight: bold; margin: 5px; color: #333333;")
+        title_label = self._create_styled_label(
+            scenario["title"], font_size=16, font_weight="bold"
+        )
         scenario_layout.addWidget(title_label)
 
         # Add description
-        desc_label = QLabel(scenario["description"])
-        desc_label.setStyleSheet("font-size: 12px; margin: 5px; color: #666666;")
+        desc_label = self._create_styled_label(
+            scenario["description"], font_size=12, color="#666666"
+        )
         scenario_layout.addWidget(desc_label)
 
         # Add expected result
-        expected_label = QLabel(f"Expected: {scenario['expected']}")
-        expected_label.setStyleSheet("font-size: 11px; margin: 5px; color: #444444; font-style: italic;")
+        expected_label = self._create_styled_label(
+            f"Expected: {scenario['expected']}", font_size=11, 
+            color="#444444", font_style="italic"
+        )
         scenario_layout.addWidget(expected_label)
 
         # Create stats display
@@ -251,9 +242,9 @@ class HUDManualTestWindow(QMainWindow):
             stat_layout = QVBoxLayout(stat_container)
 
             # Create stat label
-            name_label = QLabel(stat_label)
-            name_label.setStyleSheet("font-size: 10px; text-align: center; margin: 1px; font-weight: bold;")
-            name_label.setAlignment(Qt.AlignCenter)
+            name_label = self._create_styled_label(
+                stat_label, font_size=10, margin=1, font_weight="bold", alignment="center"
+            )
             stat_layout.addWidget(name_label)
 
             # Create stat
@@ -262,15 +253,7 @@ class HUDManualTestWindow(QMainWindow):
 
             # Style the stat based on its value
             stat_value = stat.lab.text()
-            if stat_value == "-":
-                stat_color = "#FF0000"  # Red for no data
-                bg_color = "#FFEEEE"
-            elif stat_value == "0.0":
-                stat_color = "#0000FF"  # Blue for zero
-                bg_color = "#EEEEFF"
-            else:
-                stat_color = "#00AA00"  # Green for normal values
-                bg_color = "#EEFFEE"
+            stat_color, bg_color = self.get_stat_colors(stat_value)
 
             stat.lab.setStyleSheet(f"""
                 QLabel {{
@@ -292,6 +275,102 @@ class HUDManualTestWindow(QMainWindow):
         layout.addWidget(scenario_widget)
 
 
+import pytest
+
+
+@pytest.fixture
+def qapp():
+    """Ensure QApplication exists for tests."""
+    from PyQt5.QtWidgets import QApplication
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication([])
+    return app
+
+
+@pytest.mark.parametrize("scenario_name,data,stat_name,expected_value", [
+    ("no_data", {1: {"vpip": 0, "vpip_opp": 0, "pfr": 0, "pfr_opp": 0}}, "vpip", "-"),
+    ("no_data", {1: {"vpip": 0, "vpip_opp": 0, "pfr": 0, "pfr_opp": 0}}, "pfr", "-"),
+    ("zero_actions", {1: {"vpip": 0, "vpip_opp": 25, "pfr": 0, "pfr_opp": 25}}, "vpip", "0.0"),
+    ("zero_actions", {1: {"vpip": 0, "vpip_opp": 25, "pfr": 0, "pfr_opp": 25}}, "pfr", "0.0"),
+    ("normal_values", {1: {"vpip": 12, "vpip_opp": 50, "pfr": 8, "pfr_opp": 50}}, "vpip", "24.0"),
+    ("normal_values", {1: {"vpip": 12, "vpip_opp": 50, "pfr": 8, "pfr_opp": 50}}, "pfr", "16.0"),
+])
+def test_hud_stat_display_scenarios(qapp, scenario_name, data, stat_name, expected_value):
+    """Test HUD stat display for different data scenarios."""
+    from Aux_Hud import SimpleStat
+    
+    # Create mock AuxWindow
+    aw = _create_mock_auxwindow()
+    
+    # Create and test the stat
+    stat = SimpleStat(stat_name, 1, "default", aw)
+    stat.update(1, data)
+    
+    actual_value = stat.lab.text()
+    assert actual_value == expected_value, (
+        f"Scenario '{scenario_name}': {stat_name} expected '{expected_value}', "
+        f"got '{actual_value}'"
+    )
+
+
+def _create_mock_auxwindow():
+    """Create mock AuxWindow for testing."""
+    aw = Mock()
+    aw.params = {"fgcolor": "#000000", "bgcolor": "#FFFFFF", "font": "Arial", "font_size": 12, "opacity": 1.0}
+    aw.aux_params = {"font": "Arial", "font_size": 12, "fgcolor": "#000000", "bgcolor": "#FFFFFF"}
+    aw.hud = Mock()
+    aw.hud.hand_instance = None
+    aw.hud.layout = Mock()
+
+    # Create proper seat mocks
+    seat_mocks = {}
+    for i in range(1, 7):
+        seat_mock = Mock()
+        seat_mock.seat_number = i
+        seat_mock.player_name = f"Player{i}"
+        seat_mocks[i] = seat_mock
+    aw.hud.layout.hh_seats = seat_mocks
+
+    # Return real QLabel instances
+    aw.aw_class_label = Mock(side_effect=lambda *args: QLabel())
+
+    # Create proper stat_set mock
+    def create_stat_obj(stat_name):
+        stat_obj = Mock()
+        stat_obj.stat_name = stat_name
+        stat_obj.stat_locolor = "#FF0000"
+        stat_obj.stat_loth = "10"
+        stat_obj.stat_hicolor = "#00FF00"
+        stat_obj.stat_hith = "30"
+        stat_obj.stat_midcolor = "#FFFF00"
+        stat_obj.hudcolor = "#000000"
+        stat_obj.hudprefix = ""
+        stat_obj.hudsuffix = ""
+        stat_obj.click = ""
+        stat_obj.tip = ""
+        return stat_obj
+
+    stat_set = Mock()
+    stat_set.stats = {
+        "vpip": create_stat_obj("vpip"),
+        "pfr": create_stat_obj("pfr"),
+        "three_B": create_stat_obj("three_B"),
+        "steal": create_stat_obj("steal"),
+        "cbet": create_stat_obj("cbet"),
+        "a_freq1": create_stat_obj("a_freq1"),
+        "agg_fact": create_stat_obj("agg_fact"),
+    }
+
+    aw.hud.supported_games_parameters = {"game_stat_set": stat_set}
+    return aw
+
+
+def create_test_mock_aw():
+    """Create mock AuxWindow for testing."""
+    return _create_mock_auxwindow()
+
+
 def main() -> None:
     """Main function to run the interactive test."""
     app = QApplication(sys.argv)
@@ -299,7 +378,6 @@ def main() -> None:
     # Create and show the test window
     window = HUDManualTestWindow()
     window.show()
-
 
     # Run the application
     app.exec_()

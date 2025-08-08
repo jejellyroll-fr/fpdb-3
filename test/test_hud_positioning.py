@@ -209,6 +209,12 @@ class TestHudStatSetSwitching(unittest.TestCase):
     def setUp(self) -> None:
         """Set up test fixtures."""
         self.config = Mock(spec=Configuration.Config)
+        game_config = Mock()
+        game_config.game_stat_set = {"ring": Mock()}
+        self.config.supported_games = {"holdem": game_config}
+        self.config.doc = Mock()
+        self.config.doc.getElementsByTagName = Mock(return_value=[])
+        self.config.save = Mock()
         self.hud = Mock()
         self.hud.config = self.config
         self.hud.poker_game = "holdem"
@@ -227,7 +233,7 @@ class TestHudStatSetSwitching(unittest.TestCase):
         self.parent_window.hud = self.hud
         self.parent_window.aw = Mock()
         self.parent_window.aw.game_params = Mock()
-        self.parent_window.aw._refresh_stats_layout = Mock()
+        self.parent_window.aw.refresh_stats_layout = Mock()
         self.parent_window.aw.stat_windows = {}
         self.parent_window.aw.update = Mock()
 
@@ -250,7 +256,7 @@ class TestHudStatSetSwitching(unittest.TestCase):
             self.popup_menu.change_stat_set(0, stat_sets_dict)
 
             # Should try refresh first
-            self.parent_window.aw._refresh_stats_layout.assert_called_once()
+            self.parent_window.aw.refresh_stats_layout.assert_called_once()
             self.parent_window.aw.update.assert_called_once_with(self.hud.stat_dict)
 
             # Should log success, not restart
@@ -260,7 +266,7 @@ class TestHudStatSetSwitching(unittest.TestCase):
     def test_change_stat_set_restarts_on_refresh_failure(self) -> None:
         """Test that change_stat_set restarts HUD when refresh fails."""
         # Mock failed refresh
-        self.config.get_supported_games_parameters.side_effect = Exception("Refresh failed")
+        self.config.get_supported_games_parameters.side_effect = KeyError("Refresh failed")
 
         stat_sets_dict = {0: ("StatSet1", "StatSet1")}
 
@@ -275,7 +281,7 @@ class TestHudStatSetSwitching(unittest.TestCase):
             self.hud.parent.kill_hud.assert_called_once_with("kill", "test_table")
 
     def test_refresh_stats_layout_updates_arrays(self) -> None:
-        """Test that _refresh_stats_layout updates stats arrays correctly."""
+        """Test that refresh_stats_layout updates stats arrays correctly."""
         # Create a real SimpleHUD to test the method
         simple_hud = Aux_Hud.SimpleHUD.__new__(Aux_Hud.SimpleHUD)
 
@@ -291,8 +297,8 @@ class TestHudStatSetSwitching(unittest.TestCase):
         }
         simple_hud.game_params = game_params
 
-        # Call _refresh_stats_layout
-        simple_hud._refresh_stats_layout()
+        # Call refresh_stats_layout
+        simple_hud.refresh_stats_layout()
 
         # Check that arrays were updated
         assert simple_hud.nrows == 3
@@ -323,7 +329,7 @@ class TestHudRegressionPrevention(unittest.TestCase):
         parent_window = Mock()
         parent_window.hud = hud
         parent_window.aw = Mock()
-        parent_window.aw._refresh_stats_layout = Mock()
+        parent_window.aw.refresh_stats_layout = Mock()
         parent_window.aw.stat_windows = {}
         parent_window.aw.update = Mock()
         parent_window.aw.game_params = Mock()
