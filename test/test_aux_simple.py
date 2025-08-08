@@ -1,67 +1,112 @@
 #!/usr/bin/env python
-"""Simplified tests for Aux_Classic_Hud.py.
-
-Simplified test suite for the Classic HUD auxiliary module.
-"""
+"""Simplified tests for Aux_Classic_Hud.py (fixed)."""
 
 import os
 import sys
+import types
 import unittest
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-# Add the parent directory to Python path for imports
+# Add repo root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Mock PyQt5 and other dependencies
+# ---- Mock external deps before import ----
 sys.modules["PyQt5"] = Mock()
-sys.modules["PyQt5.QtWidgets"] = Mock()
-sys.modules["PyQt5.QtCore"] = Mock()
 sys.modules["PyQt5.QtGui"] = Mock()
-sys.modules["Aux_Hud"] = Mock()
-sys.modules["Configuration"] = Mock()
-sys.modules["Database"] = Mock()
-sys.modules["Stats"] = Mock()
-sys.modules["loggingFpdb"] = Mock()
+sys.modules["PyQt5.QtCore"] = Mock()
+sys.modules["PyQt5.QtWidgets"] = Mock()
+
+# loggingFpdb stub
+loggingFpdb = types.ModuleType("loggingFpdb")
+def _get_logger(_name: str):
+    m = Mock()
+    m.exception = Mock()
+    m.debug = Mock()
+    m.info = Mock()
+    m.warning = Mock()
+    m.error = Mock()
+    return m
+loggingFpdb.get_logger = _get_logger
+sys.modules["loggingFpdb"] = loggingFpdb
+
+# Database stub
+Database = types.ModuleType("Database")
+class _DB:
+    def __init__(self, _config):
+        self.sql = types.SimpleNamespace(query={"get_player_comment": "SELECT 1"})
+        self.cursor = types.SimpleNamespace(
+            execute=lambda *a, **kw: None,
+            fetchone=lambda *a, **kw: (None,),
+        )
+    def close_connection(self):  # pragma: no cover
+        pass
+Database.Database = _DB
+sys.modules["Database"] = Database
+
+# Import after stubbing
+import Aux_Hud  # noqa: E402
+import Aux_Classic_Hud  # noqa: E402
+
+ClassicHud = Aux_Classic_Hud.ClassicHud
+ClassicStatWindow = Aux_Classic_Hud.ClassicStatWindow
+ClassicStat = Aux_Classic_Hud.ClassicStat
+ClassicLabel = Aux_Classic_Hud.ClassicLabel
+ClassicTableMw = Aux_Classic_Hud.ClassicTableMw
 
 
 class TestAuxClassicHudBasics(unittest.TestCase):
-    """Test basic Aux_Classic_Hud functionality."""
+    def _make_aw_minimal(self, seat_idx: int = 2):
+        """Build a minimal 'aw' structure accepted by ClassicStat/SimpleStat."""
+        aw = Mock()
 
-    def test_import_classic_hud_classes(self) -> None:
-        """Test that Classic HUD classes can be imported."""
-        from Aux_Classic_Hud import ClassicHud, ClassicStat, ClassicStatWindow
+        # hud subtree
+        hud = Mock()
+        hud.config = Mock()
+        hud.hero = Mock()
+        hud.positions = []
+        hud.stat_windows = {}
+        hud.supported_games_parameters = None
+        hud.layout = SimpleNamespace(hh_seats={seat_idx: seat_idx})
+        aw.hud = hud
 
-        assert callable(ClassicHud)
-        assert callable(ClassicStatWindow)
-        assert callable(ClassicStat)
+        # params must be dict-like (subscriptable)
+        aw.params = {
+            "fgcolor": "#FFFFFF",
+            "bgcolor": "#000000",
+            "shadow": False,
+            "fontsize": 12,
+            "click": "none",
+        }
 
-    @patch("Aux_Classic_Hud.Database.Database")
-    def test_comment_functionality_methods(self, mock_db_class) -> None:
-        """Test comment-related methods exist and can be called."""
-        from Aux_Classic_Hud import ClassicStat
+        # some code paths may read those
+        aw.hudcolor = "#FFFFFF"
+        aw.hudbgcolor = "#000000"
 
-        # Mock database
-        mock_db = Mock()
-        mock_cursor = Mock()
-        mock_db.cursor = mock_cursor
-        mock_db.sql.query = {"get_player_comment": "SELECT comment FROM players WHERE id = %s"}
-        mock_cursor.fetchone.return_value = ("Test comment",)
-        mock_db_class.return_value = mock_db
+        return aw
 
-        # Test that we can create a ClassicStat instance with minimal mocking
-        with patch("Aux_Classic_Hud.Aux_Hud.SimpleStat"):
-            mock_aw = Mock()
-            mock_aw.params = {"fgcolor": "#FFFFFF"}
-            mock_aw.hud.supported_games_parameters = None
+    def test_import_classic_hud_classes(self):
+        assert ClassicHud is not None
+        assert ClassicStatWindow is not None
+        assert ClassicStat is not None
+        assert ClassicLabel is not None
+        assert ClassicTableMw is not None
 
-            stat = ClassicStat("vpip", 2, Mock(), mock_aw)
+    def test_comment_functionality_methods(self):
+        mock_aw = self._make_aw_minimal(seat_idx=2)
+        stat = ClassicStat("vpip", 2, Mock(), mock_aw)
 
-            # Test comment methods
+        # Patch ON ClassicStat (not on Aux_Hud.SimpleStat, which doesn't define these)
+        with patch.object(Aux_Classic_Hud.ClassicStat, "get_current_comment", return_value="Test comment") as p_get, \
+             patch.object(Aux_Classic_Hud.ClassicStat, "has_comment", return_value=True) as p_has:
+
             comment = stat.get_current_comment(123)
             assert comment == "Test comment"
+            p_get.assert_called_with(123)
 
             has_comment = stat.has_comment(123)
-            assert has_comment
+            assert has_comment is True
+            p_has.assert_called_with(123)
 
 
 if __name__ == "__main__":
