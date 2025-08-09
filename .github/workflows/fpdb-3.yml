@@ -14,6 +14,34 @@ on:
   workflow_dispatch:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install uv and ruff
+      run: |
+        pip install uv
+        uv venv
+        uv pip install ruff>=0.12.8
+
+    - name: Lint code (excluding tests)
+      run: |
+        uv run ruff check . --exclude=test --exclude=test_*.py
+
+    - name: Lint tests
+      run: |
+        uv run ruff check test/ --select=ALL --ignore=E712,S101,SLF001,PLR2004
+
+    - name: Check formatting
+      run: |
+        uv run ruff format --check .
+
   test-and-coverage:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
     strategy:
@@ -40,11 +68,7 @@ jobs:
         pip install uv
         uv venv
         uv pip install .[test] --no-deps
-        uv pip install ruff
 
-    - name: Run Ruff for linting
-      run: |
-        uv run ruff check .
 
     - name: Create necessary directories (Windows)
       if: runner.os == 'Windows'
