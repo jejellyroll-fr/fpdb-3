@@ -89,20 +89,16 @@ jobs:
       run: |
         uv run pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py test/ .
 
-    - name: Setup virtual display (Linux only)
+    - name: Run tests with pytest (Linux with Xvfb)
       if: runner.os == 'Linux'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y xvfb
+      uses: coactions/setup-xvfb@v1
+      with:
+        run: uv run pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py test/ .
 
-    - name: Run tests with pytest (Unix)
-      if: runner.os != 'Windows'
+    - name: Run tests with pytest (macOS)
+      if: runner.os == 'macOS'
       shell: bash
       run: |
-        if [ "$RUNNER_OS" = "Linux" ]; then
-          export DISPLAY=:99
-          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-        fi
         uv run pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py test/ .
 
     - name: Check if htmlcov directory exists and list contents (Windows)
