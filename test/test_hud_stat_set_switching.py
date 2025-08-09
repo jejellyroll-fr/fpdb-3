@@ -31,7 +31,7 @@ class TestStatSetSwitching(unittest.TestCase):
         # Mock aux window
         self.aux_window = Mock()
         self.aux_window.hud = self.hud
-        self.aux_window._refresh_stats_layout = Mock()
+        self.aux_window.refresh_stats_layout = Mock()
         self.aux_window.stat_windows = {1: Mock(), 2: Mock()}
         self.aux_window.update = Mock()
 
@@ -67,6 +67,30 @@ class TestStatSetSwitching(unittest.TestCase):
         expected = {0: ("StatSet1", "StatSet1"), 1: ("StatSet2", "StatSet2"), 2: ("StatSet3", "StatSet3")}
         assert stat_sets_dict == expected
 
+    def _verify_successful_refresh(self, new_game_params, stat_set_name, mock_log):
+        """Helper method to verify successful stat set refresh operations."""
+        # Verify sequence of operations
+        self.popup_menu._update_stat_set_in_config.assert_called_once_with(stat_set_name)
+        self.config.save.assert_called_once()
+        self.popup_menu.delete_event.assert_called_once()
+
+        # Verify refresh attempt
+        self.config.get_supported_games_parameters.assert_called_once_with("holdem", "ring")
+        assert self.aux_window.game_params == new_game_params
+        self.aux_window.refresh_stats_layout.assert_called_once()
+
+        # Verify window recreation
+        for window in self.aux_window.stat_windows.values():
+            window.create_contents.assert_called()
+
+        self.aux_window.update.assert_called_once_with(self.hud.stat_dict)
+
+        # Should log success
+        mock_log.info.assert_called_with("HUD refreshed with new stat set: %s", stat_set_name)
+
+        # Should NOT restart HUD
+        self.hud.parent.kill_hud.assert_not_called()
+
     def test_change_stat_set_successful_refresh(self) -> None:
         """Test successful stat set change with hot refresh."""
         # Mock successful config update
@@ -92,27 +116,7 @@ class TestStatSetSwitching(unittest.TestCase):
             # Call change_stat_set
             self.popup_menu.change_stat_set(0, stat_sets_dict)
 
-            # Verify sequence of operations
-            self.popup_menu._update_stat_set_in_config.assert_called_once_with("NewStatSet")
-            self.config.save.assert_called_once()
-            self.popup_menu.delete_event.assert_called_once()
-
-            # Verify refresh attempt
-            self.config.get_supported_games_parameters.assert_called_once_with("holdem", "ring")
-            assert self.aux_window.game_params == new_game_params
-            self.aux_window._refresh_stats_layout.assert_called_once()
-
-            # Verify window recreation
-            for window in self.aux_window.stat_windows.values():
-                window.create_contents.assert_called()
-
-            self.aux_window.update.assert_called_once_with(self.hud.stat_dict)
-
-            # Should log success
-            mock_log.info.assert_called_with("HUD refreshed with new stat set: %s", "NewStatSet")
-
-            # Should NOT restart HUD
-            self.hud.parent.kill_hud.assert_not_called()
+            self._verify_successful_refresh(new_game_params, "NewStatSet", mock_log)
 
     def test_change_stat_set_refresh_failure_restarts_hud(self) -> None:
         """Test stat set change that fails refresh and restarts HUD."""
@@ -166,8 +170,8 @@ class TestStatSetSwitching(unittest.TestCase):
         }
         simple_hud.game_params = game_params
 
-        # Call _refresh_stats_layout
-        simple_hud._refresh_stats_layout()
+        # Call refresh_stats_layout
+        simple_hud.refresh_stats_layout()
 
         # Verify layout parameters updated
         assert simple_hud.nrows == 4
@@ -251,34 +255,40 @@ class TestStatSetSwitching(unittest.TestCase):
                     if gss_node.getAttribute("game_type") == "ring":
                         assert gss_node.getAttribute("stat_set") == "NewStatSet"
 
+    def _create_mock_combo_box(self) -> Mock:
+        """Create a mock QComboBox for testing."""
+        mock_combo = Mock()
+        mock_combo.count.return_value = 3
+        mock_combo.itemText.side_effect = ["Basic", "Advanced", "Tournament"]
+        mock_combo.currentIndex.return_value = 1
+        mock_combo.currentIndexChanged = Mock()
+        mock_combo.currentIndexChanged.__getitem__ = Mock(return_value=Mock())
+        return mock_combo
+
+    def _verify_combo_box_setup(self, combo: Mock, mock_combo: Mock) -> None:
+        """Verify combo box setup and content."""
+        assert combo == mock_combo
+        assert combo.count() == 3
+        assert combo.itemText(0) == "Basic"
+        assert combo.itemText(1) == "Advanced"
+        assert combo.itemText(2) == "Tournament"
+        assert combo.currentIndex() == 1
+
     def test_stat_set_combo_creation(self) -> None:
         """Test creation of stat set combo box."""
         from unittest.mock import patch
-
-        from PyQt5.QtWidgets import QApplication, QComboBox
-
-        # Mock QT Application (needed for QComboBox)
-        if not QApplication.instance():
-            QApplication([])
 
         # Mock stat sets
         stat_sets_dict = {0: ("Basic", "Basic"), 1: ("Advanced", "Advanced"), 2: ("Tournament", "Tournament")}
 
         # Mock current stat set
-        with patch.object(self.popup_menu, "_get_current_stat_set", return_value="Advanced"):
-            # Mock change_stat_set connection
-            with patch.object(self.popup_menu, "change_stat_set"):
-                combo = self.popup_menu.build_stat_set_combo(stat_sets_dict)
-
-                # Verify combo box setup
-                assert isinstance(combo, QComboBox)
-                assert combo.count() == 3
-                assert combo.itemText(0) == "Basic"
-                assert combo.itemText(1) == "Advanced"
-                assert combo.itemText(2) == "Tournament"
-
-                # Current selection should be "Advanced" (index 1)
-                assert combo.currentIndex() == 1
+        self.popup_menu._get_current_stat_set = Mock(return_value="Advanced")
+        
+        mock_combo = self._create_mock_combo_box()
+        
+        with patch('Aux_Hud.QComboBox', return_value=mock_combo):
+            combo = self.popup_menu.build_stat_set_combo(stat_sets_dict)
+            self._verify_combo_box_setup(combo, mock_combo)
 
 
 class TestStatSetSwitchingIntegration(unittest.TestCase):
@@ -308,7 +318,7 @@ class TestStatSetSwitchingIntegration(unittest.TestCase):
         # Mock aux window with refresh capability
         aux_window = Mock()
         aux_window.game_params = Mock()
-        aux_window._refresh_stats_layout = Mock()
+        aux_window.refresh_stats_layout = Mock()
         aux_window.stat_windows = {1: Mock(), 2: Mock()}
         aux_window.update = Mock()
 
@@ -337,7 +347,7 @@ class TestStatSetSwitchingIntegration(unittest.TestCase):
         config.save.assert_called_once()
         popup_menu.delete_event.assert_called_once()
         config.get_supported_games_parameters.assert_called_once()
-        aux_window._refresh_stats_layout.assert_called_once()
+        aux_window.refresh_stats_layout.assert_called_once()
         aux_window.update.assert_called_once()
 
         # HUD should not restart on successful refresh
