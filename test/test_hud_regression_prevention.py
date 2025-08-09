@@ -29,7 +29,7 @@ class TestHudRestartRegression(unittest.TestCase):
 
         aux_window = Mock()
         aux_window.game_params = Mock()
-        aux_window._refresh_stats_layout = Mock()
+        aux_window.refresh_stats_layout = Mock()
         aux_window.stat_windows = {}
         aux_window.update = Mock()
 
@@ -57,7 +57,7 @@ class TestHudRestartRegression(unittest.TestCase):
         hud.parent.kill_hud.assert_not_called()
 
         # Should attempt refresh
-        aux_window._refresh_stats_layout.assert_called_once()
+        aux_window.refresh_stats_layout.assert_called_once()
         aux_window.update.assert_called_once()
 
     def test_refresh_failure_still_allows_restart(self) -> None:
@@ -254,7 +254,7 @@ class TestConfigurationReloadRegression(unittest.TestCase):
 
         # After reload - positions cleared
         simulate_reload()
-        assert config.layout_sets == {}
+        assert not config.layout_sets
 
         # This is the problematic behavior that requires positions
         # to be saved to XML before any reload occurs
@@ -345,7 +345,7 @@ class TestMemoryLeakRegression(unittest.TestCase):
 
         # Cleanup (should happen when HUD is destroyed)
         remove_event_handlers()
-        assert len(event_handlers) == 0
+        assert not event_handlers
 
 
 class TestEdgeCaseRegression(unittest.TestCase):
@@ -364,7 +364,7 @@ class TestEdgeCaseRegression(unittest.TestCase):
         hud.stat_dict = {}
 
         aux_window = Mock()
-        aux_window._refresh_stats_layout = Mock()
+        aux_window.refresh_stats_layout = Mock()
         aux_window.stat_windows = {}
         aux_window.update = Mock()
 

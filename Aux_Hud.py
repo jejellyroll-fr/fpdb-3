@@ -847,7 +847,7 @@ class SimpleTablePopupMenu(QWidget):
                 # Update with current data
                 self.parentwin.aw.update(self.parentwin.hud.stat_dict)
                 log.info("HUD refreshed with new stat set: %s", new_stat_set)
-        except (AttributeError, KeyError, TypeError) as e:
+        except (AttributeError, KeyError, TypeError, Exception) as e:
             # If refresh fails, restart the HUD to apply the new stat set
             # This is intentional for the switch feature, not an unwanted restart
             log.info("Refreshing HUD failed, restarting to apply stat set '%s': %s", new_stat_set, e)
