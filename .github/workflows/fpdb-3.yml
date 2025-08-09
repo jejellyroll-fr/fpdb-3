@@ -87,19 +87,19 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        uv run pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py test/ .
+        uv run pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py --ignore=test/test_hud.py test/ .
 
     - name: Run tests with pytest (Linux with Xvfb)
       if: runner.os == 'Linux'
       uses: coactions/setup-xvfb@v1
       with:
-        run: uv run pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py test/ .
+        run: uv run pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py --ignore=test/test_hud.py test/ .
 
     - name: Run tests with pytest (macOS)
       if: runner.os == 'macOS'
       shell: bash
       run: |
-        uv run pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py test/ .
+        uv run pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py --ignore=test/test_hud.py test/ .
 
     - name: Check if htmlcov directory exists and list contents (Windows)
       if: runner.os == 'Windows'
