@@ -67,7 +67,7 @@ jobs:
       run: |
         pip install uv
         uv venv
-        uv pip install .[test] --no-deps
+        uv pip install .[test]
 
 
     - name: Create necessary directories (Windows)
@@ -90,15 +90,13 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        .\.venv\Scripts\Activate.ps1
-        pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py test/ .
+        uv run pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py test/ .
 
     - name: Run tests with pytest (Unix)
       if: runner.os != 'Windows'
       shell: bash
       run: |
-        source .venv/bin/activate
-        pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py test/ .
+        uv run pytest --cov=. --cov-report=html --ignore=test/test_HUD_main.py test/ .
 
     - name: Check if htmlcov directory exists and list contents (Windows)
       if: runner.os == 'Windows'
