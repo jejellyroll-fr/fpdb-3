@@ -12,69 +12,83 @@ from unittest.mock import Mock, patch, MagicMock
 # Add the parent directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Mock PyQt5 to avoid GUI dependencies in tests
-sys.modules["PyQt5"] = Mock()
-sys.modules["PyQt5.QtCore"] = Mock()
-sys.modules["PyQt5.QtGui"] = Mock()
-sys.modules["PyQt5.QtWidgets"] = Mock()
-
-# Import Qt classes and set up mocks
-from unittest.mock import Mock
-
-Qt = Mock()
-Qt.AlignCenter = 1
-Qt.AlignRight = 2
-Qt.ScrollBarAsNeeded = 1
-Qt.ScrollBarNever = 2
-
-QFont = Mock()
-QLabel = Mock()
-QWidget = Mock()
-QVBoxLayout = Mock()
-QHBoxLayout = Mock()
-QGridLayout = Mock()
-QScrollArea = Mock()
-QPushButton = Mock()
-QFrame = Mock()
-
-# Mock the Qt imports
-sys.modules["PyQt5.QtCore"].Qt = Qt
-sys.modules["PyQt5.QtGui"].QFont = QFont
-sys.modules["PyQt5.QtWidgets"].QLabel = QLabel
-sys.modules["PyQt5.QtWidgets"].QWidget = QWidget
-sys.modules["PyQt5.QtWidgets"].QVBoxLayout = QVBoxLayout
-sys.modules["PyQt5.QtWidgets"].QHBoxLayout = QHBoxLayout
-sys.modules["PyQt5.QtWidgets"].QGridLayout = QGridLayout
-sys.modules["PyQt5.QtWidgets"].QScrollArea = QScrollArea
-sys.modules["PyQt5.QtWidgets"].QPushButton = QPushButton
-sys.modules["PyQt5.QtWidgets"].QFrame = QFrame
-
-# Mock Stats module
-Stats = Mock()
-Stats.do_stat = Mock()
-Stats.do_tip = Mock()
-sys.modules["Stats"] = Stats
-
-# Mock Popup module
-Popup = Mock()
-Popup.Popup = Mock()
-sys.modules["Popup"] = Popup
-
-# Now import our modules
-from ModernPopup import (
-    MODERN_POPUP_CLASSES,
-    ModernSectionWidget,
-    ModernStatRow,
-    ModernSubmenu,
-    ModernSubmenuClassic,
-    ModernSubmenuLight,
-)
-from PopupIcons import EmojiIconProvider, TextIconProvider
-from PopupThemes import ClassicTheme, MaterialDarkTheme, MaterialLightTheme
-
-
 class TestModernStatRow(unittest.TestCase):
     """Test the ModernStatRow widget."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up mocks for modern popup tests."""
+        cls._original_modules = {}
+        modules_to_mock = [
+            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets",
+            "Stats", "Popup"
+        ]
+        
+        for module_name in modules_to_mock:
+            if module_name in sys.modules:
+                cls._original_modules[module_name] = sys.modules[module_name]
+            sys.modules[module_name] = Mock()
+
+        # Set up Qt mocks (moved from top level)
+        Qt = Mock()
+        Qt.AlignCenter = 1
+        Qt.AlignRight = 2
+        Qt.ScrollBarAsNeeded = 1
+        Qt.ScrollBarNever = 2
+
+        QFont = Mock()
+        QLabel = Mock()
+        QWidget = Mock()
+        QVBoxLayout = Mock()
+        QHBoxLayout = Mock()
+        QGridLayout = Mock()
+        QScrollArea = Mock()
+        QPushButton = Mock()
+        QFrame = Mock()
+
+        sys.modules["PyQt5.QtCore"].Qt = Qt
+        sys.modules["PyQt5.QtGui"].QFont = QFont
+        sys.modules["PyQt5.QtWidgets"].QLabel = QLabel
+        sys.modules["PyQt5.QtWidgets"].QWidget = QWidget
+        sys.modules["PyQt5.QtWidgets"].QVBoxLayout = QVBoxLayout
+        sys.modules["PyQt5.QtWidgets"].QHBoxLayout = QHBoxLayout
+        sys.modules["PyQt5.QtWidgets"].QGridLayout = QGridLayout
+        sys.modules["PyQt5.QtWidgets"].QScrollArea = QScrollArea
+        sys.modules["PyQt5.QtWidgets"].QPushButton = QPushButton
+        sys.modules["PyQt5.QtWidgets"].QFrame = QFrame
+
+        # Mock Stats and Popup modules
+        sys.modules["Stats"].do_stat = Mock()
+        sys.modules["Stats"].do_tip = Mock()
+        sys.modules["Popup"].Popup = Mock()
+
+        # Import modules after mocks are set up
+        global MODERN_POPUP_CLASSES, ModernSectionWidget, ModernStatRow, ModernSubmenu, ModernSubmenuClassic, ModernSubmenuLight
+        global EmojiIconProvider, TextIconProvider, ClassicTheme, MaterialDarkTheme, MaterialLightTheme
+        from ModernPopup import (
+            MODERN_POPUP_CLASSES,
+            ModernSectionWidget,
+            ModernStatRow,
+            ModernSubmenu,
+            ModernSubmenuClassic,
+            ModernSubmenuLight,
+        )
+        from PopupIcons import EmojiIconProvider, TextIconProvider
+        from PopupThemes import ClassicTheme, MaterialDarkTheme, MaterialLightTheme
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up mocks after modern popup tests."""
+        modules_to_mock = [
+            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets",
+            "Stats", "Popup"
+        ]
+        
+        for module_name in modules_to_mock:
+            if module_name in cls._original_modules:
+                sys.modules[module_name] = cls._original_modules[module_name]
+            elif module_name in sys.modules:
+                del sys.modules[module_name]
 
     def test_initialization(self) -> None:
         """Test ModernStatRow class exists and has expected structure."""

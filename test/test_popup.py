@@ -12,46 +12,61 @@ from unittest.mock import Mock, patch
 # Add the parent directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Mock PyQt5 to avoid GUI dependencies in tests
-sys.modules["PyQt5"] = Mock()
-sys.modules["PyQt5.QtCore"] = Mock()
-sys.modules["PyQt5.QtGui"] = Mock()
-sys.modules["PyQt5.QtWidgets"] = Mock()
-sys.modules["AppKit"] = Mock()
-
-# Mock other dependencies
-sys.modules["Stats"] = Mock()
-sys.modules["loggingFpdb"] = Mock()
-sys.modules["ModernPopup"] = Mock()
-sys.modules["past"] = Mock()
-sys.modules["past.utils"] = Mock()
-
-# Set up Qt mocks
-Qt = Mock()
-Qt.Window = 1
-Qt.FramelessWindowHint = 2
-Qt.WindowDoesNotAcceptFocus = 4
-
-QWidget = Mock()
-QLabel = Mock()
-QVBoxLayout = Mock()
-QGridLayout = Mock()
-QCursor = Mock()
-QCursor.pos.return_value = Mock()
-
-sys.modules["PyQt5.QtCore"].Qt = Qt
-sys.modules["PyQt5.QtWidgets"].QWidget = QWidget
-sys.modules["PyQt5.QtWidgets"].QLabel = QLabel
-sys.modules["PyQt5.QtWidgets"].QVBoxLayout = QVBoxLayout
-sys.modules["PyQt5.QtWidgets"].QGridLayout = QGridLayout
-sys.modules["PyQt5.QtGui"].QCursor = QCursor
-
-# Import the module to test
-from Popup import Multicol, Popup, Submenu, default
-
 
 class TestPopupBase(unittest.TestCase):
     """Test the base Popup class."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up mocks for all popup test classes."""
+        cls._original_modules = {}
+        modules_to_mock = [
+            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets",
+            "AppKit", "Stats", "loggingFpdb", "ModernPopup", "past", "past.utils"
+        ]
+        
+        for module_name in modules_to_mock:
+            if module_name in sys.modules:
+                cls._original_modules[module_name] = sys.modules[module_name]
+            sys.modules[module_name] = Mock()
+
+        # Set up Qt mocks
+        Qt = Mock()
+        Qt.Window = 1
+        Qt.FramelessWindowHint = 2
+        Qt.WindowDoesNotAcceptFocus = 4
+
+        QWidget = Mock()
+        QLabel = Mock()
+        QVBoxLayout = Mock()
+        QGridLayout = Mock()
+        QCursor = Mock()
+        QCursor.pos.return_value = Mock()
+
+        sys.modules["PyQt5.QtCore"].Qt = Qt
+        sys.modules["PyQt5.QtWidgets"].QWidget = QWidget
+        sys.modules["PyQt5.QtWidgets"].QLabel = QLabel
+        sys.modules["PyQt5.QtWidgets"].QVBoxLayout = QVBoxLayout
+        sys.modules["PyQt5.QtWidgets"].QGridLayout = QGridLayout
+        sys.modules["PyQt5.QtGui"].QCursor = QCursor
+
+        # Import the module to test after mocks are set up
+        global Multicol, Popup, Submenu, default
+        from Popup import Multicol, Popup, Submenu, default
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up mocks after all popup test classes."""
+        modules_to_mock = [
+            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets", 
+            "AppKit", "Stats", "loggingFpdb", "ModernPopup", "past", "past.utils"
+        ]
+        
+        for module_name in modules_to_mock:
+            if module_name in cls._original_modules:
+                sys.modules[module_name] = cls._original_modules[module_name]
+            elif module_name in sys.modules:
+                del sys.modules[module_name]
 
     def setUp(self) -> None:
         """Set up test environment."""

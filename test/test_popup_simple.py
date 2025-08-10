@@ -12,21 +12,37 @@ from unittest.mock import Mock, patch
 # Add the parent directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Mock PyQt5 and other dependencies
-sys.modules["PyQt5"] = Mock()
-sys.modules["PyQt5.QtCore"] = Mock()
-sys.modules["PyQt5.QtGui"] = Mock()
-sys.modules["PyQt5.QtWidgets"] = Mock()
-sys.modules["AppKit"] = Mock()
-sys.modules["Stats"] = Mock()
-sys.modules["loggingFpdb"] = Mock()
-sys.modules["ModernPopup"] = Mock()
-sys.modules["past"] = Mock()
-sys.modules["past.utils"] = Mock()
-
 
 class TestPopupBasics(unittest.TestCase):
     """Test basic popup functionality."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up mocks for this test class only."""
+        cls._original_modules = {}
+        modules_to_mock = [
+            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets",
+            "AppKit", "Stats", "loggingFpdb", "ModernPopup", "past", "past.utils"
+        ]
+        
+        for module_name in modules_to_mock:
+            if module_name in sys.modules:
+                cls._original_modules[module_name] = sys.modules[module_name]
+            sys.modules[module_name] = Mock()
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up mocks after this test class."""
+        modules_to_mock = [
+            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets",
+            "AppKit", "Stats", "loggingFpdb", "ModernPopup", "past", "past.utils"
+        ]
+        
+        for module_name in modules_to_mock:
+            if module_name in cls._original_modules:
+                sys.modules[module_name] = cls._original_modules[module_name]
+            elif module_name in sys.modules:
+                del sys.modules[module_name]
 
     def test_import_popup_classes(self) -> None:
         """Test that popup classes can be imported."""
