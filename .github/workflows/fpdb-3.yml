@@ -91,11 +91,13 @@ jobs:
       shell: pwsh
       run: ./run_tests.ps1
 
+    - name: Install xvfb (Linux)
+      if: runner.os == 'Linux'
+      run: sudo apt-get update && sudo apt-get install -y xvfb
+
     - name: Run tests with unified script (Linux with Xvfb)
       if: runner.os == 'Linux'
-      uses: coactions/setup-xvfb@v1
-      with:
-        run: ./run_tests.sh
+      run: xvfb-run -a --server-args="-screen 0 1024x768x24" ./run_tests.sh
 
     - name: Run tests with unified script (macOS)
       if: runner.os == 'macOS'

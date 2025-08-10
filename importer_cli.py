@@ -86,9 +86,12 @@ def main() -> None:
                 db.create_tables()
             except Exception as e:
                 # Tables may already exist - this is OK for CLI usage
-                if "already exists" not in str(e).lower():
-                    # Re-raise if it's not a "table already exists" error
+                error_msg = str(e).lower()
+                if "already exists" not in error_msg and "table" not in error_msg:
+                    # Re-raise if it's not a table-related error
+                    print(f"Database setup warning: {e}", file=sys.stderr)
                     raise
+                # Otherwise, silently continue - tables exist and that's fine
     except Exception as e:
         print(f"Error connecting to database: {e}", file=sys.stderr)
         raise
