@@ -254,7 +254,7 @@ def get_stat_category(stat_name: str) -> str:
     flop_stats = ["cb1", "f_cb1", "raise_cb1", "donk_bet", "float_bet", "check_call_flop"]
     turn_stats = ["cb2", "f_cb2", "turn_aggression", "turn_check_call"]
     river_stats = ["cb3", "f_cb3", "river_aggression", "value_bet", "bluff"]
-    steal_stats = ["steal", "f_steal", "call_vs_steal", "three_B_vs_steal", "resteal"]
+    steal_stats = ["steal", "f_steal", "call_vs_steal", "three_B_vs_steal", "three_bet_vs_steal", "resteal"]
     aggression_stats = ["agg_fact", "agg_freq", "agg_pct", "bet_freq", "raise_freq"]
     general_stats = ["hands", "totalprofit", "profit100", "wtsd", "wmsd"]
     player_stats = ["playername", "player_note", "n"]
