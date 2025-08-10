@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Test pour valider les améliorations du popup moderne."""
+"""Test to validate modern popup improvements."""
 
 import sys
 from pathlib import Path
@@ -8,22 +8,28 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
+def _setup_popup_components() -> bool:
+    """Setup popup components for testing."""
+    from PopupIcons import get_icon_provider
+    from PopupThemes import get_theme
+
+    get_theme("material_dark")
+    get_icon_provider("emoji")
+    return True
+
+
 def test_stat_name_extraction() -> bool | None:
-    """Test que l'extraction du nom de stat fonctionne correctement."""
+    """Test that stat name extraction works correctly."""
     try:
-        from PopupIcons import get_icon_provider
-        from PopupThemes import get_theme
+        _setup_popup_components()
 
-        get_theme("material_dark")
-        get_icon_provider("emoji")
-
-        # Test avec différents formats de stat_data
+        # Test with different stat_data formats
         test_cases = [
             # Format: (stat_name, stat_data, expected_clean_name)
             ("vpip", (0.25, "25%", "vpip=25%", "vpip=25%", "(1/4)", "Description"), "vpip"),
             ("pfr", (0.15, "15%", "pfr=15%", "pfr=15%", "(3/20)", "Description"), "pfr"),
             ("three_B", (0.05, "5%", "three_B=5%", "three_B=5%", "(1/20)", "Description"), "three_B"),
-            ("test_stat", None, "test_stat"),  # Cas sans data
+            ("test_stat", None, "test_stat"),  # Case without data
         ]
 
         for test_case in test_cases:
@@ -32,7 +38,7 @@ def test_stat_name_extraction() -> bool | None:
             else:
                 continue
 
-            # Simuler l'extraction comme dans le code
+            # Simulate extraction as in the code
             if stat_data:
                 full_name = stat_data[3]
                 clean_name = full_name.split("=")[0] if "=" in full_name else full_name
@@ -51,26 +57,26 @@ def test_stat_name_extraction() -> bool | None:
 
 
 def test_progress_bar_calculation() -> bool:
-    """Test que le calcul des barres de progression fonctionne."""
+    """Test that progress bar calculation works."""
     # Test cases: (value, expected_percentage, description)
     test_cases = [
         (0.0, 0, "0%"),
         (0.25, 25, "25% (fraction)"),
         (0.5, 50, "50% (fraction)"),
         (1.0, 100, "100% (fraction)"),
-        (25, 25, "25% (déjà pourcentage)"),
-        (50, 50, "50% (déjà pourcentage)"),
-        (100, 100, "100% (déjà pourcentage)"),
-        (150, 100, "150% (clamped à 100)"),  # Test clamping
+        (25, 25, "25% (already percentage)"),
+        (50, 50, "50% (already percentage)"),
+        (100, 100, "100% (already percentage)"),
+        (150, 100, "150% (clamped to 100)"),  # Test clamping
     ]
 
     for value, expected_percentage, _description in test_cases:
-        # Simuler la logique de calcul
+        # Simulate calculation logic
         percentage = min(max(value, 0), 100) if value > 1.0 else min(max(value * 100, 0), 100)
 
         assert percentage == expected_percentage, f"Expected {expected_percentage}%, got {percentage}%"
 
-        # Test génération barre
+        # Test bar generation
         filled_chars = int(percentage / 10)
         filled_part = "█" * filled_chars
         empty_part = "▒" * (10 - filled_chars)
@@ -82,14 +88,14 @@ def test_progress_bar_calculation() -> bool:
 
 
 def test_partial_progress_characters() -> bool:
-    """Test des caractères partiels pour plus de précision."""
-    # Test cases avec valeurs qui donnent des restes
+    """Test partial characters for better precision."""
+    # Test cases with values that give remainders
     test_cases = [
-        (23, "██▎▒▒▒▒▒▒▒"),  # 23% -> 2 pleins + partial
-        (27, "██▌▒▒▒▒▒▒▒"),  # 27% -> 2 pleins + partial
-        (29, "██▉▒▒▒▒▒▒▒"),  # 29% -> 2 pleins + partial
-        (67, "██████▌▒▒▒"),  # 67% -> 6 pleins + partial
-        (95, "█████████▌"),  # 95% -> 9 pleins + partial
+        (23, "██▎▒▒▒▒▒▒▒"),  # 23% 
+        (27, "██▌▒▒▒▒▒▒▒"),  # 27% 
+        (29, "██▉▒▒▒▒▒▒▒"),  # 29% 
+        (67, "██████▌▒▒▒"),  # 67% 
+        (95, "█████████▌"),  # 95% 
     ]
 
     for percentage, _expected_bar in test_cases:
@@ -112,18 +118,18 @@ def test_partial_progress_characters() -> bool:
 
         progress_bar = filled_part + empty_part
 
-        # Vérifier longueur correcte
+        # Verify correct length
         assert len(progress_bar) == 10, f"Bar should be 10 chars, got {len(progress_bar)}"
 
     return True
 
 
 def test_drag_and_drop_attributes() -> bool | None:
-    """Test que les attributs de drag and drop sont initialisés."""
+    """Test that drag and drop attributes are initialized."""
     try:
-        # Test que les attributs nécessaires sont définis
+        # Test that necessary attributes are defined
 
-        # Vérifier que les attributs seraient initialisés
+        # Verify that attributes would be initialized
 
 
         return True
@@ -132,16 +138,5 @@ def test_drag_and_drop_attributes() -> bool | None:
         return False
 
 
-if __name__ == "__main__":
 
-    success1 = test_stat_name_extraction()
-    success2 = test_progress_bar_calculation()
-    success3 = test_partial_progress_characters()
-    success4 = test_drag_and_drop_attributes()
-
-    if success1 and success2 and success3 and success4:
-        pass
-
-    else:
-        pass
 
