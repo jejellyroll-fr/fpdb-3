@@ -499,21 +499,4 @@ except ImportError:
     gc = None
 
 
-if __name__ == "__main__":
-    # Run performance tests with timing information
-    loader = unittest.TestLoader()
-    suite = unittest.TestSuite()
 
-    # Add test cases
-    suite.addTests(loader.loadTestsFromTestCase(TestPopupPerformance))
-    suite.addTests(loader.loadTestsFromTestCase(TestPopupScalability))
-
-    # Run tests with detailed output
-    runner = unittest.TextTestRunner(verbosity=2)
-    result = runner.run(suite)
-
-    # Print summary
-    if result.wasSuccessful():
-        pass
-    else:
-        pass
