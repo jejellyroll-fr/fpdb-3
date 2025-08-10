@@ -6,7 +6,18 @@
 # -------------------------------------------------------------------------------------------------
 
 Write-Host "Installing test dependencies..." -ForegroundColor Green
-uv pip install ".[test]"
+# Check if PyQt5 is already installed (e.g., from CI setup)
+try {
+    uv run python -c "import PyQt5.QtCore; print('PyQt5 already installed')" | Out-Null
+    Write-Host "PyQt5 already installed, skipping PyQt5 installation" -ForegroundColor Yellow
+    # Install test dependencies without PyQt5 to avoid version conflicts
+    uv pip install ".[test-no-pyqt]"
+    uv pip install -e . --no-deps
+}
+catch {
+    Write-Host "Installing all test dependencies including PyQt5" -ForegroundColor Yellow
+    uv pip install ".[test]"
+}
 
 Write-Host ""
 Write-Host "Running main test suite (excluding GUI tests)..." -ForegroundColor Green

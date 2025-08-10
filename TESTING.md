@@ -25,6 +25,15 @@ make test-all
 
 ## 🔧 Available Commands
 
+### Installation Options
+```bash
+# Install test dependencies only (without PyQt5 - useful in CI)
+uv pip install .[test-no-pyqt]
+
+# Install all test dependencies (including PyQt5)
+uv pip install .[test]
+```
+
 ### Make Commands
 ```bash
 make test              # Main test suite (excludes GUI)
@@ -89,11 +98,16 @@ GUI tests (`test_HUD_main.py`) can cause segfaults in headless environments due 
    - Problem: `sys.modules` mocks affecting other tests
    - Solution: Isolated mocks using `setUpClass`/`tearDownClass`
 
-2. **GUI tests failing**
+2. **PyQt5 installation issues** ✅ **FIXED**
+   - Problem: Version conflicts between CI and local installations
+   - Solution: Smart detection in scripts + `test-no-pyqt` option
+   - CI installs PyQt5 first, then scripts use `test-no-pyqt` to avoid conflicts
+
+3. **GUI tests failing**
    - Expected on headless systems
    - Run with: `make test-gui` or `uv run pytest test/test_HUD_main.py`
 
-3. **Performance test failures**
+4. **Performance test failures**
    - Adjust thresholds in `test_popup_performance.py` if needed
    - Current threshold: 50x linear scaling
 
