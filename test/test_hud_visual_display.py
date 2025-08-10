@@ -288,7 +288,7 @@ class TestVisualHUDDisplay:
 
         labels = ["No Data", "Tight (0%)", "Loose-Passive (15%)", "Normal (40%)", "Loose (75%)"]
 
-        for _i, (stat_dict, label) in enumerate(zip(stat_dicts, labels, strict=False)):
+        for stat_dict, label in zip(stat_dicts, labels, strict=False):
             # Create container for each stat
             stat_container = QWidget()
             stat_layout = QVBoxLayout(stat_container)
