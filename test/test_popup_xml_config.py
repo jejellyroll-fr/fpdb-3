@@ -197,7 +197,7 @@ class TestPopupXMLConfiguration(unittest.TestCase):
                 # Find playershort stat (which should use modern popup)
                 playershort_stats = [stat for stat in ss.findall("stat") if stat.get("_stat_name") == "playershort"]
 
-                assert len(playershort_stats) > 0, f"Stat set '{ss_name}' should have playershort stat"
+                assert playershort_stats, f"Stat set '{ss_name}' should have playershort stat"
 
                 for stat in playershort_stats:
                     popup = stat.get("popup")
@@ -340,8 +340,7 @@ class TestPopupStatValidation(unittest.TestCase):
                 stat_categories = set()
 
                 for pu_stat in pu.findall("pu_stat"):
-                    stat_name = pu_stat.get("pu_stat_name")
-                    if stat_name:
+                    if stat_name := pu_stat.get("pu_stat_name"):
                         category = get_stat_category(stat_name)
                         stat_categories.add(category)
 
@@ -417,8 +416,7 @@ class TestPopupUsageInStatSets(unittest.TestCase):
                     referenced_popups.add(popup)
 
         # Check that all referenced popups are defined
-        undefined_popups = referenced_popups - defined_popups
-        if undefined_popups:
+        if undefined_popups := referenced_popups - defined_popups:
             self.fail(f"Undefined popups referenced in stat sets: {undefined_popups}")
 
     def test_modern_stat_sets_use_modern_popups(self) -> None:
@@ -427,9 +425,7 @@ class TestPopupUsageInStatSets(unittest.TestCase):
         modern_popup_classes = {"ModernSubmenu", "ModernSubmenuLight", "ModernSubmenuClassic"}
 
         # Build map of popup name to class
-        popup_class_map = {}
-        for pu in popup_windows.findall("pu"):
-            popup_class_map[pu.get("pu_name")] = pu.get("pu_class")
+        popup_class_map = {pu.get("pu_name"): pu.get("pu_class") for pu in popup_windows.findall("pu")}
 
         # Check modernized stat sets
         stat_sets = self.root.find("stat_sets")
