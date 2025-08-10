@@ -4,6 +4,7 @@
 Test suite for the HUD management system.
 """
 
+import contextlib
 import os
 import sys
 import unittest
@@ -41,11 +42,8 @@ class TestImportName(unittest.TestCase):
     def test_import_invalid_attribute(self) -> None:
         """Test importing a valid module but invalid attribute."""
         result = importName("sys", "nonexistent_attribute")
-        # Should raise AttributeError, but we can test it gracefully
-        try:
+        with contextlib.suppress(AttributeError):
             assert result is None
-        except AttributeError:
-            pass  # Expected behavior
 
 
 class TestHudInitialization(unittest.TestCase):
@@ -68,9 +66,11 @@ class TestHudInitialization(unittest.TestCase):
             "aux": "ClassicHud",
             "stat_set": "holdem_6max_pro",
         }
+        mock_layout = Mock()
+        mock_layout.location = {i: (100 + i * 10, 200 + i * 10) for i in range(1, 7)}  # Mock positions
         self.mock_config.get_layout.return_value = Mock()
         self.mock_config.get_layout.return_value.layout = {
-            6: Mock(),  # Mock layout for 6-max
+            6: mock_layout,  # Mock layout for 6-max
         }
         self.mock_config.get_aux_parameters.return_value = Mock()
         self.mock_config.get_aux_parameters.return_value.__getitem__ = Mock(
@@ -158,7 +158,11 @@ class TestHudInitialization(unittest.TestCase):
             )
 
             mock_log.warning.assert_called_once()
-            assert "No layout found for 6-max" in mock_log.warning.call_args[0][0]
+            # Check that the warning was called with the expected format string and arguments
+            args, kwargs = mock_log.warning.call_args
+            assert args[0] == "No layout found for %d-max %s games for site %s.\n"
+            assert args[1] == 6  # max players
+            assert args[2] == "ring"  # game type
 
     def test_aux_windows_initialization(self) -> None:
         """Test that aux windows are properly initialized."""
@@ -266,12 +270,23 @@ class TestHudMethods(unittest.TestCase):
 
         self.mock_table = Mock()
         self.mock_table.site = "PokerStars"
+        self.mock_table.width = 1000
+        self.mock_table.height = 750
 
         self.mock_config = Mock()
         self.mock_config.get_site_parameters.return_value = {}
         self.mock_config.get_supported_games_parameters.return_value = {"aux": "", "stat_set": "holdem_6max_pro"}
+        self.mock_config.get_aux_parameters.return_value = Mock()
+        self.mock_config.get_aux_parameters.return_value.__getitem__ = Mock(
+            side_effect=lambda x: {"module": "TestAux", "class": "TestAux"}[x],
+        )
+        mock_layout = Mock()
+        mock_layout.location = {i: (100 + i * 10, 200 + i * 10) for i in range(1, 7)}  # Mock positions
+        mock_layout.width = 800
+        mock_layout.height = 600
+        mock_layout.common = (400, 300)
         self.mock_config.get_layout.return_value = Mock()
-        self.mock_config.get_layout.return_value.layout = {6: Mock()}
+        self.mock_config.get_layout.return_value.layout = {6: mock_layout}
 
         # Create HUD instance
         self.hud = Hud(
@@ -377,14 +392,16 @@ class TestHudMethods(unittest.TestCase):
 
         # Mock database connection
         mock_db = Mock()
-        mock_db.get_cards.return_value = expected_cards
+        mock_db.get_cards.return_value = {"hole": ["Ah", "Kh"]}
+        mock_db.get_common_cards.return_value = {"common": ["Qh", "Jh", "Th"]}
         self.hud.db_hud_connection = mock_db
 
         result = self.hud.get_cards(hand_id)
 
-        # Check that database method was called
+        # Check that database methods were called
         mock_db.get_cards.assert_called_once_with(hand_id)
-        assert result == expected_cards
+        mock_db.get_common_cards.assert_called_once_with(hand_id)
+        assert result == {"hole": ["Ah", "Kh"], "common": ["Qh", "Jh", "Th"]}
 
     def test_get_cards_without_database(self) -> None:
         """Test get_cards method without database connection."""
@@ -426,12 +443,19 @@ class TestHudIntegration(unittest.TestCase):
 
         mock_table = Mock()
         mock_table.site = "PokerStars"
+        mock_table.width = 1000
+        mock_table.height = 750
 
         mock_config = Mock()
         mock_config.get_site_parameters.return_value = {"site_setting": "value"}
         mock_config.get_supported_games_parameters.return_value = {"aux": "ClassicHud", "stat_set": "holdem_6max_pro"}
+        mock_layout_item = Mock()
+        mock_layout_item.location = {i: (100 + i * 10, 200 + i * 10) for i in range(1, 7)}  # Mock positions
+        mock_layout_item.width = 800
+        mock_layout_item.height = 600
+        mock_layout_item.common = (400, 300)
         mock_layout = Mock()
-        mock_layout.layout = {6: Mock()}
+        mock_layout.layout = {6: mock_layout_item}
         mock_config.get_layout.return_value = mock_layout
         mock_config.get_aux_parameters.return_value = {"module": "Aux_Classic_Hud", "class": "Hud"}
 
@@ -494,12 +518,23 @@ class TestHudErrorHandling(unittest.TestCase):
 
         mock_table = Mock()
         mock_table.site = "PokerStars"
+        mock_table.width = 1000
+        mock_table.height = 750
 
         mock_config = Mock()
         mock_config.get_site_parameters.return_value = {}
         mock_config.get_supported_games_parameters.return_value = {"aux": "", "stat_set": "test"}
+        mock_config.get_aux_parameters.return_value = Mock()
+        mock_config.get_aux_parameters.return_value.__getitem__ = Mock(
+            side_effect=lambda x: {"module": "TestAux", "class": "TestAux"}[x],
+        )
+        mock_layout = Mock()
+        mock_layout.location = {i: (100 + i * 10, 200 + i * 10) for i in range(1, 7)}  # Mock positions
+        mock_layout.width = 800
+        mock_layout.height = 600
+        mock_layout.common = (400, 300)
         mock_config.get_layout.return_value = Mock()
-        mock_config.get_layout.return_value.layout = {6: Mock()}
+        mock_config.get_layout.return_value.layout = {6: mock_layout}
 
         hud = Hud(
             parent=mock_parent,
