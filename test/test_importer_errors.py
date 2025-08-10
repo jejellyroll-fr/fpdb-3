@@ -237,7 +237,7 @@ def test_error_triggers_autopop(importer, mock_fpdb_file, monkeypatch, caplog) -
     monkeypatch.setattr(
         importer,
         "_import_hh_file",
-        lambda fpdbfile: (0, 0, 0, 0, 1, 0.1),
+        lambda fpdbfile: (0, 0, 0, 0, 1, 0.1, None),
     )
 
     caplog.set_level("INFO", logger="importer")
