@@ -14,8 +14,8 @@ re_WinningRankOne = re.compile(
 
 
 def test_re_WinningRankOne() -> None:
-    text = """jeje_sat wins the tournament and receives €0.75 - congratulations!"""
+    text = """toto wins the tournament and receives €0.75 - congratulations!"""
     match = re_WinningRankOne.search(text)
     assert match is not None
-    assert match.group("PNAME") == "jeje_sat"
+    assert match.group("PNAME") == "toto"
     assert match.group("AMT") == "0.75"
