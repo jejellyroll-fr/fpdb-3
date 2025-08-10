@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
-"""Test script pour le parser iPoker."""
+"""Test script for the iPoker parser."""
 
 import logging
+import pytest
 
 from PokerTrackerToFpdb import PokerTracker
 
-# Configuration du logging
+# Logging configuration
 logging.basicConfig(level=logging.DEBUG, format="%(name)s - %(levelname)s - %(message)s")
 log = logging.getLogger(__name__)
 
 
+@pytest.mark.parametrize("file_path", [
+    "regression-test-files/cash/iPoker/Flop/6+Holdem-EUR-0.25-0.50-201702.txt"
+])
 def test_ipoker_file(file_path) -> bool | None:
-    """Test d'un fichier iPoker."""
+    """Test one iPoker file."""
     try:
-        # Lire le fichier
+        # Read the file
         try:
             with open(file_path, encoding="utf-8") as f:
                 content = f.read()
@@ -22,33 +26,28 @@ def test_ipoker_file(file_path) -> bool | None:
                 content = f.read()
 
 
-        # Créer le parser
+        # Create the parser
         from Configuration import Config
 
         config = Config()
         parser = PokerTracker(config, autostart=False)
         parser.readFile(file_path)
 
-        # Tester la détection du site
+        # Test site detection
         site_match = parser.re_Site.search(content)
-        if site_match:
-            pass
-        else:
+        if not site_match:
             return False
 
-        # Tester la détection du game type
+        # Test game type detection
         try:
             parser.determineGameType(content)
         except Exception:
             return False
 
-        # Tester la division en mains
+        # Test hand splitting
         hands = parser.allHandsAsList()
 
-        if len(hands) > 0:
-            pass
-
-        return True
+        return len(hands) > 0
 
     except Exception:
         import traceback
@@ -57,7 +56,3 @@ def test_ipoker_file(file_path) -> bool | None:
         return False
 
 
-if __name__ == "__main__":
-    # Test avec un fichier iPoker
-    test_file = "/Users/jdenis/fpdb-3/regression-test-files/PokerTracker-Archives/Mixed-Sources/cash/NLHE/NLHE-EUR-0.05-0.10-201901.iPoker.new.version.txt"
-    test_ipoker_file(test_file)
