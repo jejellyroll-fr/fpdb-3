@@ -7,7 +7,16 @@
 set -euo pipefail
 
 echo "Installing test dependencies..."
-uv pip install .[test]
+# Check if PyQt5 is already installed (e.g., from CI setup)
+if uv run python -c "import PyQt5.QtCore; print('PyQt5 already installed')" 2>/dev/null; then
+    echo "PyQt5 already installed, skipping PyQt5 installation"
+    # Install test dependencies without PyQt5 to avoid version conflicts
+    uv pip install .[test-no-pyqt]
+    uv pip install -e . --no-deps
+else
+    echo "Installing all test dependencies including PyQt5"
+    uv pip install .[test]
+fi
 
 echo
 echo "Running main test suite (excluding GUI tests)..."
