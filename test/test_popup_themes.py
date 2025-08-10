@@ -51,17 +51,21 @@ class TestPopupTheme(unittest.TestCase):
         assert self.theme.get_color("text_primary") == "#FFFFFF"
         assert self.theme.get_color("nonexistent") == "#FFFFFF"  # Default
 
+    def _assert_font_properties(self, font: dict, expected_family: str, expected_size: int, expected_weight: str = None) -> None:
+        """Helper method to assert font properties."""
+        assert font["family"] == expected_family
+        assert font["size"] == expected_size
+        if expected_weight:
+            assert font["weight"] == expected_weight
+
     def test_get_font(self) -> None:
         """Test font retrieval."""
         font = self.theme.get_font("header")
-        assert font["family"] == "Arial"
-        assert font["size"] == 12
-        assert font["weight"] == "bold"
+        self._assert_font_properties(font, "Arial", 12, "bold")
 
         # Test default
         default_font = self.theme.get_font("nonexistent")
-        assert default_font["family"] == "Arial"
-        assert default_font["size"] == 10
+        self._assert_font_properties(default_font, "Arial", 10)
 
     def test_get_spacing(self) -> None:
         """Test spacing retrieval."""
@@ -77,6 +81,13 @@ class TestMaterialDarkTheme(unittest.TestCase):
         """Set up Material Dark theme."""
         self.theme = MaterialDarkTheme()
 
+    def _assert_font_properties(self, font: dict, expected_family: str, expected_size: int, expected_weight: str = None) -> None:
+        """Helper method to assert font properties."""
+        assert font["family"] == expected_family
+        assert font["size"] == expected_size
+        if expected_weight:
+            assert font["weight"] == expected_weight
+
     def test_theme_name(self) -> None:
         """Test theme name."""
         assert self.theme.name == "material_dark"
@@ -91,13 +102,10 @@ class TestMaterialDarkTheme(unittest.TestCase):
     def test_fonts(self) -> None:
         """Test font configurations."""
         header_font = self.theme.get_font("header")
-        assert header_font["family"] == "Segoe UI"
-        assert header_font["size"] == 12
-        assert header_font["weight"] == "bold"
+        self._assert_font_properties(header_font, "Segoe UI", 12, "bold")
 
         stat_font = self.theme.get_font("stat_name")
-        assert stat_font["family"] == "Segoe UI"
-        assert stat_font["size"] == 9
+        self._assert_font_properties(stat_font, "Segoe UI", 9)
 
     def test_spacing(self) -> None:
         """Test spacing configurations."""
