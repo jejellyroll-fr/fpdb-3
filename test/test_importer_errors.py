@@ -1,19 +1,19 @@
 import os
-import re  # Importer re pour Site
+import re  # Import re for Site
 import sys
 import time
-from unittest.mock import MagicMock, Mock, patch  # Importer Mock et MagicMock
+from unittest.mock import MagicMock, Mock, patch  # Import Mock and MagicMock
 
 import pytest
 
-# Ajouter le chemin du projet pour les imports
+# Add project path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import Database  # Importer Database pour patcher
+import Database  # Import Database for patching
 from IdentifySite import FPDBFile, Site
 from Importer import Importer
 
-# --- Mocks simples ---
+# --- Simple Mocks ---
 
 
 class MockConfig:
@@ -43,7 +43,7 @@ class MockConfig:
 
     def get_db_parameters(self):
         return {
-            "db-backend": 4,  # Simuler SQLite
+            "db-backend": 4,  # Simulate SQLite
             "db-server": "sqlite",
             "db-databaseName": ":memory:",
             "db-host": None,
@@ -57,8 +57,8 @@ class MockConfig:
         return {"day_start": "0"}
 
 
-# MockDatabase n'est plus utilisé car on laisse l'Importer créer une
-# instance réelle de Database (dont les méthodes critiques sont patchées)
+# MockDatabase is no longer used as we let the Importer create a
+# real instance of Database (with critical methods patched)
 # class MockDatabase: ...
 
 
@@ -75,11 +75,11 @@ class MockCursor:
     def close(self) -> None:
         pass
 
-    # Ajouter description si nécessaire pour fetchallDict
+    # Add description if needed for fetchallDict
     description = []
 
 
-class MockHandProcessor:  # Reste inchangé
+class MockHandProcessor:  # Remains unchanged
     def __init__(
         self,
         config,
@@ -122,55 +122,55 @@ def config_mock():
 def importer(config_mock):
     settings = {"autoPop": True, "global_lock": Mock()}
 
-    # Créer un mock pour l'objet connection qui sera assigné par mock_do_connect_with_connection
+    # Create a mock for the connection object that will be assigned by mock_do_connect_with_connection
     mock_connection = MagicMock()
     mock_connection.rollback = Mock()
     mock_connection.close = Mock()
     mock_connection.cursor = Mock(return_value=MockCursor())
 
-    # Fonction qui sera utilisée par le patch de do_connect
+    # Function that will be used by the do_connect patch
     def mock_do_connect_with_connection(self_db, config) -> None:
-        # Assigner le mock de connexion à l'instance de Database
-        # qui est en train d'être initialisée *à l'intérieur* de Importer.__init__
+        # Assign the connection mock to the Database instance
+        # that is being initialized *inside* Importer.__init__
         self_db.connection = mock_connection
-        # Initialiser aussi le curseur directement sur l'instance db
+        # Also initialize the cursor directly on the db instance
         self_db.cursor = mock_connection.cursor()
-        # Initialiser wrongDbVersion ici car il est vérifié avant check_version
+        # Initialize wrongDbVersion here as it is checked before check_version
         self_db.wrongDbVersion = False
 
-    # Fonction qui sera utilisée par le patch de check_version
+    # Function that will be used by the check_version patch
     def mock_check_version(self_db, database, create) -> None:
-        # Initialiser wrongDbVersion comme le fait la vraie méthode
+        # Initialize wrongDbVersion as the real method does
         self_db.wrongDbVersion = False
 
-    # Patch les méthodes de Database.Database appelées pendant l'init de Importer
-    # Note: On patche la classe Database DANS le module Database où elle est définie
+    # Patch Database.Database methods called during Importer init
+    # Note: We patch the Database class IN the Database module where it is defined
     with (
         patch("Database.Database.do_connect", mock_do_connect_with_connection),
         patch(
             "Database.Database.check_version",
             mock_check_version,
-        ),  # Empêche la vraie vérification mais initialise wrongDbVersion
+        ),  # Prevents real verification but initializes wrongDbVersion
         patch(
             "Database.Database.get_sites",
             return_value=None,
-        ),  # Empêche la vraie lecture
+        ),  # Prevents real reading
         patch(
             "Database.Database.is_connected",
             return_value=True,
-        ),  # Assure qu'il pense être connecté
-        # Patch explicite de rollback pour être sûr qu'il ne lève pas d'erreur si connection n'est pas entièrement mocké
+        ),  # Ensures it thinks it's connected
+        # Explicit rollback patch to ensure it doesn't raise an error if connection isn't fully mocked
         patch.object(Database.Database, "rollback", return_value=None, create=True),
-        # On ne patche plus __init__ directement
+        # We no longer patch __init__ directly
     ):
-        # L'initialisation de Importer va créer une instance de Database,
-        # et les méthodes patchées ci-dessus seront appelées pour cette instance.
+        # Importer initialization will create a Database instance,
+        # and the patched methods above will be called for this instance.
         imp = Importer(None, settings, config_mock, sql=None, parent=None)
 
     imp.autoPop = True
-    # imp.database est maintenant une instance réelle de Database, mais ses méthodes
-    # critiques pendant l'init ont été contrôlées par les patches.
-    # On s'assure que l'attribut connection existe bien après l'init
+    # imp.database is now a real instance of Database, but its critical
+    # methods during init have been controlled by the patches.
+    # We ensure that the connection attribute exists after init
     assert hasattr(
         imp.database,
         "connection",
@@ -180,21 +180,21 @@ def importer(config_mock):
         "cursor",
     ), "Database object should have a 'cursor' attribute after init"
 
-    # Assigner un mock DB complet APRÈS l'init peut être nécessaire si
-    # les méthodes appelées DANS LE TEST utilisent des mocks spécifiques
-    # Si les méthodes appelées par _import_despatch sont mockées (comme ci-dessous),
-    # ce n'est peut-être pas nécessaire. Gardons-le pour l'instant.
-    # imp.database = MockDatabase()  # Remplacer l'instance potentiellement réelle par notre mock complet
+    # Assigning a complete mock DB AFTER init may be necessary if
+    # methods called IN THE TEST use specific mocks
+    # If methods called by _import_despatch are mocked (as below),
+    # this may not be necessary. Let's keep it for now.
+    # imp.database = MockDatabase()  # Replace the potentially real instance with our complete mock
 
     return imp
 
 
 @pytest.fixture
 def mock_fpdb_file(config_mock):
-    # Mocker l'initialisation de Site
+    # Mock Site initialization
     with patch("IdentifySite.Site.__init__", return_value=None):
         mock_site = Site("Winamax", "WinamaxToFpdb", "Winamax", "WinamaxSummary", None)
-        # Attribuer manuellement les attributs nécessaires
+        # Manually assign necessary attributes
         mock_site.name = "Winamax"
         mock_site.hhc_fname = "WinamaxToFpdb"
         mock_site.filter_name = "Winamax"
@@ -212,28 +212,28 @@ def mock_fpdb_file(config_mock):
     fpdb_file.fileId = 1
     return fpdb_file
 
-    # --- Test de gestion d'erreur et activation d'autoPop ---
+    # --- Error handling test and autoPop activation ---
 
-    # Dans test_importer_errors.py -> test_error_triggers_autopop
+    # In test_importer_errors.py -> test_error_triggers_autopop
 
 
 def test_error_triggers_autopop(importer, mock_fpdb_file, monkeypatch, caplog) -> None:
-    """Vérifie que le message autoPop est loggé quand une erreur survient."""
-    # Positionner les données internes de l'importer
+    """Verifies that the autoPop message is logged when an error occurs."""
+    # Set internal importer data
     importer.filelist = {"dummy_path/winamax_mtt.txt": mock_fpdb_file}
     importer.pos_in_file = {"dummy_path/winamax_mtt.txt": 0}
 
-    # --- CORRECTION DU PATCH ---
-    # Patcher 'os.path.exists' LÀ OÙ IL EST IMPORTÉ/UTILISÉ dans le module Importer
+    # --- PATCH CORRECTION ---
+    # Patch 'os.path.exists' WHERE IT IS IMPORTED/USED in the Importer module
     monkeypatch.setattr("Importer.os.path.exists", lambda path: True)
-    # Patcher 'os.stat' LÀ OÙ IL EST IMPORTÉ/UTILISÉ dans le module Importer
+    # Patch 'os.stat' WHERE IT IS IMPORTED/USED in the Importer module
     monkeypatch.setattr(
         "Importer.os.stat",
         lambda path: os.stat_result((0, 0, 0, 0, 0, 0, 100, 0, time.time() - 10, 0)),
     )
     # -------------------------
 
-    # Patch la méthode _import_hh_file pour simuler une erreur
+    # Patch the _import_hh_file method to simulate an error
     monkeypatch.setattr(
         importer,
         "_import_hh_file",
@@ -242,12 +242,11 @@ def test_error_triggers_autopop(importer, mock_fpdb_file, monkeypatch, caplog) -
 
     caplog.set_level("INFO", logger="importer")
 
-    # Appeler la méthode _import_despatch
+    # Call the _import_despatch method
     importer._import_despatch(mock_fpdb_file)
 
-    # Vérifier que le test s'exécute sans AttributeError
-    assert True
+    # Verify that the test runs without AttributeError
 
-    # Note: L'assertion pour le log est commentée car le log est dans la méthode mockée
+    # Note: The log assertion is commented out because the log is in the mocked method
     # assert any("Removing partially written hand & resetting index" in line for line in caplog.text.splitlines()), \
     #        f"Log message not found. Logs:\n{caplog.text}"
