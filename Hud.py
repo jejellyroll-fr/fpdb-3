@@ -45,7 +45,12 @@ def importName(module_name: str, name: str) -> Any:
     except Exception:
         log.exception("Could not load hud module %s", module_name)
         return None
-    return getattr(module, name)
+    
+    try:
+        return getattr(module, name)
+    except AttributeError:
+        log.exception("Could not find attribute %s in module %s", name, module_name)
+        return None
 
 
 class Hud:
@@ -152,7 +157,10 @@ class Hud:
         #    heap dead, burnt bodies, blood 'n guts, veins between my teeth
         #    kill all aux windows
         for aux in self.aux_windows:
-            aux.destroy()
+            try:
+                aux.kill()
+            except Exception:
+                log.exception("Error killing aux window")
         self.aux_windows = []
 
     def resize_windows(self) -> None:
@@ -186,13 +194,29 @@ class Hud:
 
         self.layout.width = self.table.width
         self.layout.height = self.table.height
+        
+        # Call resize_windows on all aux windows
+        for aux in self.aux_windows:
+            try:
+                aux.resize_windows()
+            except Exception:
+                log.exception("Error resizing aux window")
 
     def reposition_windows(self) -> None:
         """Reposition the windows."""
+        for aux in self.aux_windows:
+            try:
+                aux.reposition_windows()
+            except Exception:
+                log.exception("Error repositioning aux window")
 
     def save_layout(self) -> None:
         """Ask each aux to save its layout back to the config object."""
-        [aux.save_layout() for aux in self.aux_windows]
+        for aux in self.aux_windows:
+            try:
+                aux.save_layout(self.layout)
+            except Exception:
+                log.exception("Error saving layout for aux window")
         #    write the layouts back to the HUD_config
         self.config.save()
 
@@ -215,18 +239,43 @@ class Hud:
         self.db_hud_connection.connection.rollback()
 
         log.info("Creating hud from hand %d", hand)
+        
+        # Call create on all aux windows
+        for aux in self.aux_windows:
+            try:
+                aux.create()
+            except Exception:
+                log.exception("Error creating aux window")
 
     def update(self, hand: int, config: Any) -> None:
         """Re-load a hand instance."""
         # re-load a hand instance (factory will load correct type for this hand)
-        self.hand_instance = Hand.hand_factory(hand, config, self.db_hud_connection)
-        log.info("hud update after hand_factory")
-        self.db_hud_connection.connection.rollback()
+        if self.db_hud_connection is not None:
+            self.hand_instance = Hand.hand_factory(hand, config, self.db_hud_connection)
+            log.info("hud update after hand_factory")
+            self.db_hud_connection.connection.rollback()
+        
+        # Get updated cards
+        self.cards = self.get_cards(hand)
+        
+        # Call update on all aux windows
+        for aux in self.aux_windows:
+            try:
+                aux.update()
+            except Exception:
+                log.exception("Error updating aux window")
 
     def get_cards(self, hand: int) -> dict[str, Any]:
         """Get the cards for a given hand."""
-        cards = self.db_hud_connection.get_cards(hand)
-        if self.poker_game in ["holdem", "omahahi", "omahahilo"]:
-            comm_cards = self.db_hud_connection.get_common_cards(hand)
-            cards["common"] = comm_cards["common"]
-        return cards
+        if self.db_hud_connection is None:
+            return {}
+        
+        try:
+            cards = self.db_hud_connection.get_cards(hand)
+            if self.poker_game in ["holdem", "omahahi", "omahahilo"]:
+                comm_cards = self.db_hud_connection.get_common_cards(hand)
+                cards["common"] = comm_cards["common"]
+            return cards
+        except Exception:
+            log.exception("Error getting cards for hand %d", hand)
+            return {}
