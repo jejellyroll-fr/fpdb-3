@@ -13,17 +13,34 @@ from unittest.mock import Mock, patch
 # Add the parent directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Mock dependencies that are hard to test
-sys.modules["Database"] = Mock()
-sys.modules["Hand"] = Mock()
-sys.modules["loggingFpdb"] = Mock()
-
-# Import the module to test
-from Hud import Hud, importName
-
-
 class TestImportName(unittest.TestCase):
     """Test the importName utility function."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up mocks for HUD tests."""
+        cls._original_modules = {}
+        modules_to_mock = ["Database", "Hand", "loggingFpdb"]
+        
+        for module_name in modules_to_mock:
+            if module_name in sys.modules:
+                cls._original_modules[module_name] = sys.modules[module_name]
+            sys.modules[module_name] = Mock()
+
+        # Import the module to test after mocks are set up
+        global Hud, importName
+        from Hud import Hud, importName
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up mocks after HUD tests."""
+        modules_to_mock = ["Database", "Hand", "loggingFpdb"]
+        
+        for module_name in modules_to_mock:
+            if module_name in cls._original_modules:
+                sys.modules[module_name] = cls._original_modules[module_name]
+            elif module_name in sys.modules:
+                del sys.modules[module_name]
 
     def test_import_valid_module(self) -> None:
         """Test importing a valid module and class."""
