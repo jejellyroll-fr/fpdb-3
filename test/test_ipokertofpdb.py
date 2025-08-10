@@ -287,9 +287,7 @@ def test_re_action_multiple_actions() -> None:
 <action no="2" player="Joueur2" type="3" sum="100" timestamp="1234567891"/>
 <action no="3" player="Joueur3" type="5" sum="200" timestamp="1234567892"/>"""
 
-    actions = {}
-    for match in re_action.finditer(text):
-        actions[int(match.group("ACT"))] = match.groupdict()
+    actions = {int(match.group("ACT")): match.groupdict() for match in re_action.finditer(text)}
 
     assert len(actions) == 3
     assert actions[1]["PNAME"] == "Joueur1"
@@ -344,9 +342,7 @@ def test_re_action_real_ipoker_format() -> None:
 <action no="4" player="Villain" type="23" sum="€0.30" timestamp="1234567893"/>
 <action no="5" player="Hero" type="0" sum="€0.00" timestamp="1234567894"/>"""
 
-    actions = {}
-    for match in re_action.finditer(text):
-        actions[int(match.group("ACT"))] = match.groupdict()
+    actions = {int(match.group("ACT")): match.groupdict() for match in re_action.finditer(text)}
 
     assert len(actions) == 5
     assert actions[1]["PNAME"] == "Hero"
