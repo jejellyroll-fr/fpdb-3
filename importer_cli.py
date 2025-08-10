@@ -71,10 +71,27 @@ def main() -> None:
             # Decide if you want to exit or proceed with default config
             # sys.exit(1)
 
-    config = Configuration.Config(file=config_file)
+    try:
+        config = Configuration.Config(file=config_file)
+    except Exception as e:
+        print(f"Error loading configuration: {e}", file=sys.stderr)
+        raise
 
     # Setup database
-    db = Database.Database(config)
+    try:
+        db = Database.Database(config)
+        # Ensure database is ready for import (creates tables if needed)
+        if hasattr(db, 'create_tables'):
+            try:
+                db.create_tables()
+            except Exception as e:
+                # Tables may already exist - this is OK for CLI usage
+                if "already exists" not in str(e).lower():
+                    # Re-raise if it's not a "table already exists" error
+                    raise
+    except Exception as e:
+        print(f"Error connecting to database: {e}", file=sys.stderr)
+        raise
 
     # Setup hand data reporter if requested
     hand_reporter = None
@@ -144,4 +161,14 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+        sys.exit(0)
+    except KeyboardInterrupt:
+        print("Import interrupted by user", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"CLI importer error: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(1)

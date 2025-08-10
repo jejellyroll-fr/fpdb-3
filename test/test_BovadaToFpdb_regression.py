@@ -102,7 +102,15 @@ class BovadaRegressionTests(unittest.TestCase):
         )
 
         # Import must succeed (return code 0)
-        assert result.returncode == 0, f"CLI importer fails - regression detected:\n{result.stdout}\n{result.stderr}"
+        assert result.returncode == 0, (
+            f"CLI importer fails - regression detected:\n"
+            f"Exit code: {result.returncode}\n"
+            f"Command: {' '.join([sys.executable, str(importer_cli), '--site', 'Bovada', '--no-progress', str(test_file)])}\n"
+            f"Working directory: {base_dir}\n"
+            f"Test file exists: {test_file.exists()}\n"
+            f"STDOUT:\n{result.stdout}\n"
+            f"STDERR:\n{result.stderr}"
+        )
 
 
 if __name__ == "__main__":
