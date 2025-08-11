@@ -385,7 +385,7 @@ class AuxSeats(AuxWindow):
         Updates the internal map of window positions based on the latest table and layout dimensions,
         then moves all windows accordingly.
         """
-        log.info("RESIZING HUD WINDOWS - Table dimensions: %dx%d", self.hud.table.width, self.hud.table.height)
+        log.debug("RESIZING HUD WINDOWS - Table dimensions: %dx%d", self.hud.table.width, self.hud.table.height)
         # Resize calculation has already happened in HUD_main&hud.py
         # refresh our internal map to reflect these changes
         for i in list(range(1, self.hud.max + 1)):
@@ -395,7 +395,7 @@ class AuxSeats(AuxWindow):
                     i, old_pos[0], old_pos[1], self.positions[i][0], self.positions[i][1])
         old_common = self.positions.get("common", (0, 0))
         self.positions["common"] = self.hud.layout.common
-        log.info("Common position updated: (%d,%d) -> (%d,%d)",
+        log.debug("Common position updated: (%d,%d) -> (%d,%d)",
                 old_common[0], old_common[1], self.positions["common"][0], self.positions["common"][1])
         # and then move everything to the new places
         self.move_windows()
@@ -410,14 +410,14 @@ class AuxSeats(AuxWindow):
         table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
         table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
 
-        log.info("MOVING HUD WINDOWS - Table position: X=%d, Y=%d (from table.x=%s, table.y=%s)",
+        log.debug("MOVING HUD WINDOWS - Table position: X=%d, Y=%d (from table.x=%s, table.y=%s)",
                 table_x, table_y, self.hud.table.x, self.hud.table.y)
 
         for i in list(range(1, self.hud.max + 1)):
             pos_x = self.positions[i][0] + table_x
             pos_y = self.positions[i][1] + table_y
             clamped_x, clamped_y = clamp_to_screen(pos_x, pos_y)
-            log.info("Moving seat %d window: Layout pos (%d,%d) + Table pos (%d,%d) = "
+            log.debug("Moving seat %d window: Layout pos (%d,%d) + Table pos (%d,%d) = "
                     "Final pos (%d,%d) -> Clamped (%d,%d)",
                     i, self.positions[i][0], self.positions[i][1], table_x, table_y,
                     pos_x, pos_y, clamped_x, clamped_y)
@@ -426,7 +426,7 @@ class AuxSeats(AuxWindow):
         common_x = self.hud.layout.common[0] + table_x
         common_y = self.hud.layout.common[1] + table_y
         clamped_common_x, clamped_common_y = clamp_to_screen(common_x, common_y)
-        log.info("Moving common window: Layout pos (%d,%d) + Table pos (%d,%d) = Final pos (%d,%d) -> Clamped (%d,%d)",
+        log.debug("Moving common window: Layout pos (%d,%d) + Table pos (%d,%d) = Final pos (%d,%d) -> Clamped (%d,%d)",
                 self.hud.layout.common[0], self.hud.layout.common[1], table_x, table_y, common_x, common_y,
                 clamped_common_x, clamped_common_y)
         self.m_windows["common"].move(clamped_common_x, clamped_common_y)
@@ -475,7 +475,7 @@ class AuxSeats(AuxWindow):
             self.create_contents(self.m_windows[i], i)
 
             self.m_windows[i].create()  # ensure there is a native window handle for topify
-            log.info("=== AUX_BASE CALLING TOPIFY === window[%d]=%s, table=%s", i, self.m_windows[i],
+            log.debug("=== AUX_BASE CALLING TOPIFY === window[%d]=%s, table=%s", i, self.m_windows[i],
                     self.hud.table.title if hasattr(self.hud.table, "title") else "NO_TITLE")
             self.hud.table.topify(self.m_windows[i])
             if not self.uses_timer:
@@ -506,7 +506,7 @@ class AuxSeats(AuxWindow):
         scaled_x = int(x * x_scale)
         scaled_y = int(y * y_scale)
 
-        log.error("=== SCALING DEBUG === Original(%d,%d) Layout(%dx%d) Table(%dx%d) Scale(%.2f,%.2f) Result(%d,%d)",
+        log.debug("=== SCALING DEBUG === Original(%d,%d) Layout(%dx%d) Table(%dx%d) Scale(%.2f,%.2f) Result(%d,%d)",
                 x, y, lw, lh, self.hud.table.width, self.hud.table.height, x_scale, y_scale, scaled_x, scaled_y)
 
         return scaled_x, scaled_y
@@ -555,8 +555,7 @@ class AuxSeats(AuxWindow):
         This class method would only be valid for an aux which has full control
         over all seat and common locations.
         """
-        log.error("AuxSeats.save_layout called - this shouldn't happen")
-        log.error("save_layout method should be handled in the aux")
+        log.warning("AuxSeats.save_layout called - save_layout method should be handled in the aux")
 
     def configure_event_cb(self, widget: SeatWindow, i: int | str) -> None:
         """Update the current location for each statblock.
