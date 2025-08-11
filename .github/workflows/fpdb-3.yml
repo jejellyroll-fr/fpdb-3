@@ -57,14 +57,35 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install uv and dependencies
+    - name: Install uv and dependencies (Windows)
+      if: runner.os == 'Windows'
       run: |
         python -m pip install --upgrade pip
         pip install uv
         uv venv
         uv pip install --only-binary :all: "PyQt5==5.15.11"
         uv pip install pytest>=8.3.2 pytest-qt>=4.0.2 pytest-cov>=5.0.0 ruff>=0.12.8
-        uv pip install -e . --no-deps
+        uv pip install -e .[windows] --no-deps
+
+    - name: Install uv and dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        python -m pip install --upgrade pip
+        pip install uv
+        uv venv
+        uv pip install --only-binary :all: "PyQt5==5.15.11"
+        uv pip install pytest>=8.3.2 pytest-qt>=4.0.2 pytest-cov>=5.0.0 ruff>=0.12.8
+        uv pip install -e .[linux] --no-deps
+
+    - name: Install uv and dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        python -m pip install --upgrade pip
+        pip install uv
+        uv venv
+        uv pip install --only-binary :all: "PyQt5==5.15.11"
+        uv pip install pytest>=8.3.2 pytest-qt>=4.0.2 pytest-cov>=5.0.0 ruff>=0.12.8
+        uv pip install -e .[macos] --no-deps
 
 
     - name: Create necessary directories (Windows)
