@@ -96,8 +96,15 @@ class HudStatsPersistence:
                 cache_data = json.load(f)
 
             # Check if data is not expired
-            if time.time() - cache_data.get("timestamp", 0) > self.stats_ttl:
-                log.debug(f"Cached stats expired for table {table_key}")
+            current_time = time.time()
+            file_timestamp = cache_data.get("timestamp", 0)
+            time_diff = current_time - file_timestamp
+            
+            log.debug(f"Checking expiration for {table_key}: current_time={current_time}, file_timestamp={file_timestamp}, time_diff={time_diff}, ttl={self.stats_ttl}")
+            
+            # Special case: if TTL is 0, always consider expired (used by tests)
+            if self.stats_ttl == 0 or time_diff >= self.stats_ttl:  # Use >= instead of > for edge cases
+                log.debug(f"Cached stats expired for table {table_key} (time_diff={time_diff} >= ttl={self.stats_ttl})")
                 # Try to remove the expired file, but return None regardless
                 self.remove_hud_stats(table_key)
                 # Double-check if file still exists (Windows filesystem issue)
@@ -176,7 +183,12 @@ class HudStatsPersistence:
                     with open(cache_file, encoding="utf-8") as f:
                         cache_data = json.load(f)
 
-                    if current_time - cache_data.get("timestamp", 0) > self.stats_ttl:
+                    file_timestamp = cache_data.get("timestamp", 0)
+                    time_diff = current_time - file_timestamp
+                    log.debug(f"Cleanup check for {cache_file.name}: time_diff={time_diff}, ttl={self.stats_ttl}")
+                    
+                    # Special case: if TTL is 0, always consider expired (used by tests)
+                    if self.stats_ttl == 0 or time_diff >= self.stats_ttl:  # Use >= for consistency
                         # Enhanced Windows-compatible file removal
                         try:
                             cache_file.unlink(missing_ok=True)
