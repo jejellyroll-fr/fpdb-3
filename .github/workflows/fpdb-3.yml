@@ -147,23 +147,47 @@ jobs:
           echo "htmlcov directory does not exist"
         fi
 
+    - name: Prepare coverage deployment
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      run: |
+        # Backup coverage files before cleaning
+        if [ -d htmlcov ]; then
+          cp -r htmlcov /tmp/htmlcov-backup
+          echo "Coverage files backed up to /tmp/htmlcov-backup"
+        else
+          echo "No htmlcov directory found to backup"
+          exit 1
+        fi
+
     - name: Deploy coverage to GitHub Pages (gh-pages branch)
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
 
-        git fetch origin gh-pages
+        # Clean up any uncommitted changes from test runs
+        git add . || true
+        git stash || true
+        git clean -fd || true
+
+        # Fetch and switch to gh-pages branch
+        git fetch origin gh-pages || true
         git checkout gh-pages || git checkout --orphan gh-pages
         git pull origin gh-pages || echo "Branch is orphan or already up to date"
 
+        # Deploy coverage files from backup
         rm -rf coverage/${{ github.sha }} || true
         mkdir -p coverage/${{ github.sha }}
-        cp -r htmlcov/* coverage/${{ github.sha }}/
+        cp -r /tmp/htmlcov-backup/* coverage/${{ github.sha }}/ || echo "No coverage backup found"
 
-        git add coverage/${{ github.sha }}/* -f
-        git commit -m "Deploy coverage report for commit ${{ github.sha }}" || echo "Nothing to commit"
-        git push origin gh-pages
+        # Commit and push if there are changes
+        git add coverage/${{ github.sha }}/* -f || true
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Deploy coverage report for commit ${{ github.sha }}"
+          git push origin gh-pages
+        fi
 
     - name: Comment PR with coverage link
       if: github.event_name == 'pull_request'
