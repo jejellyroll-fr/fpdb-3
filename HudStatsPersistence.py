@@ -98,7 +98,22 @@ class HudStatsPersistence:
             # Check if data is not expired
             if time.time() - cache_data.get("timestamp", 0) > self.stats_ttl:
                 log.debug(f"Cached stats expired for table {table_key}")
+                # Try to remove the expired file, but return None regardless
                 self.remove_hud_stats(table_key)
+                # Double-check if file still exists (Windows filesystem issue)
+                if cache_file.exists():
+                    log.warning(f"File still exists after removal attempt on Windows: {cache_file}")
+                    # Force removal with retry logic
+                    import platform
+                    if platform.system() == "Windows":
+                        for i in range(3):  # Try up to 3 times
+                            try:
+                                cache_file.unlink(missing_ok=True)
+                                time.sleep(0.01 * (i + 1))  # Progressive delay
+                                if not cache_file.exists():
+                                    break
+                            except Exception as e:
+                                log.warning(f"Retry {i+1} failed to remove {cache_file}: {e}")
                 return None
 
             log.debug(f"HUD stats loaded for table {table_key}")
@@ -162,14 +177,34 @@ class HudStatsPersistence:
                         cache_data = json.load(f)
 
                     if current_time - cache_data.get("timestamp", 0) > self.stats_ttl:
-                        cache_file.unlink()
-                        removed_count += 1
+                        # Enhanced Windows-compatible file removal
+                        try:
+                            cache_file.unlink(missing_ok=True)
+                            removed_count += 1
+                            # Verify removal on Windows
+                            import platform
+                            if platform.system() == "Windows" and cache_file.exists():
+                                log.warning(f"File still exists after cleanup on Windows: {cache_file}")
+                                # Force retry
+                                for i in range(3):
+                                    try:
+                                        cache_file.unlink(missing_ok=True)
+                                        time.sleep(0.01 * (i + 1))
+                                        if not cache_file.exists():
+                                            break
+                                    except Exception as retry_e:
+                                        log.warning(f"Cleanup retry {i+1} failed for {cache_file}: {retry_e}")
+                        except Exception as unlink_e:
+                            log.warning(f"Failed to remove expired file {cache_file}: {unlink_e}")
 
                 except Exception as e:
                     log.warning(f"Failed to process cache file {cache_file}: {e}")
-                    # Remove corrupted file
-                    cache_file.unlink()
-                    removed_count += 1
+                    # Remove corrupted file with Windows handling
+                    try:
+                        cache_file.unlink(missing_ok=True)
+                        removed_count += 1
+                    except Exception as unlink_e:
+                        log.warning(f"Failed to remove corrupted file {cache_file}: {unlink_e}")
 
             if removed_count > 0:
                 log.info(f"Cleaned up {removed_count} expired HUD stats cache files")
