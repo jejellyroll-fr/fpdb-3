@@ -1,0 +1,553 @@
+{
+  "version": "1.0",
+  "timestamp": 1754311262.1069903,
+  "exported_from": "FPDB Logger Dev Tool",
+  "loggers": {
+    "card": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "configuration": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "database": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "identify_site": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "importer": {
+      "level": 0,
+      "level_name": "NOTSET",
+      "enabled": false,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "interlocks": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "configuration_manager": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "auto_import_config_observer": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "gui_auto_import": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "gui_bulk_import": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "filter": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "gui_graph_viewer": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "deck": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "derived_stats": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "hand": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "gui_replayer": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "gui_hand_viewer": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "gui_log_view": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "gui_ring_player_stats": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "gui_session_viewer": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "gui_tour_hand_viewer": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "gui_tourney_graph_viewer": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "gui_tourney_player_stats": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "modern_hud_preferences": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "options": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "gui_config_observer": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "translation": {
+      "level": 0,
+      "level_name": "NOTSET",
+      "enabled": false,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "root": {
+      "level": 20,
+      "level_name": "INFO",
+      "enabled": true,
+      "original_level": 0,
+      "original_level_name": "NOTSET"
+    },
+    "sqlalchemy": {
+      "level": 30,
+      "level_name": "WARNING",
+      "enabled": true,
+      "original_level": 30,
+      "original_level_name": "WARNING"
+    },
+    "aux_base": {
+      "level": 10,
+      "level_name": "DEBUG",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "aux_classic_hud": {
+      "level": 10,
+      "level_name": "DEBUG",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "aux_hud": {
+      "level": 10,
+      "level_name": "DEBUG",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "bovada_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "bovada_summary_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "cake_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "config": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "config_observers": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "config_reload_widget": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "detect_installed_sites": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "fpdb": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "ggpoker_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "hand_history": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "hand_history_converter": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "hud": {
+      "level": 10,
+      "level_name": "DEBUG",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "hud_main": {
+      "level": 10,
+      "level_name": "DEBUG",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "hud_stats_persistence": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "improved_error_handler": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "ipoker_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "ipoker_summary_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "kings_club_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "modern_popup": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "modern_seat_preferences": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "modern_site_preferences": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "mucked_hud": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "osx_tables": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "wayland_tables": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "pacific_poker_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "pacific_poker_summary_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "partypoker_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "pokerstars_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "pokerstars_summary_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "pokertracker_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "pokertracker_summary_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "popup": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "popup_icons": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "popup_themes": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "seals_with_clubs_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "smart_hud_manager": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "stats": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "table_window": {
+      "level": 10,
+      "level_name": "DEBUG",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "tourney_summary_parser": {
+      "level": 0,
+      "level_name": "NOTSET",
+      "enabled": false,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "unibet_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "winamax_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "winamax_summary_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "winning_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "winning_summary_parser": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "win_tables": {
+      "level": 40,
+      "level_name": "ERROR",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    },
+    "x_tables": {
+      "level": 10,
+      "level_name": "DEBUG",
+      "enabled": true,
+      "original_level": 40,
+      "original_level_name": "ERROR"
+    }
+  }
+}

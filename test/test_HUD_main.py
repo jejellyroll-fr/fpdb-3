@@ -1,13 +1,25 @@
-import pytest
-from unittest.mock import MagicMock, patch
-from PyQt5.QtWidgets import QApplication
+import contextlib
+import shutil
 import sys
 import types
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
+from PyQt5.QtWidgets import QApplication
+
 # import zmq
 
-from pathlib import Path
+# Add parent directory to path before imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-sys.path.append(str(Path(__file__).parent.parent))
+# Create a temporary copy of HUD_main.pyw as HUD_main.py
+source_file = Path(__file__).parent.parent / "HUD_main.pyw"
+temp_file = Path(__file__).parent.parent / "HUD_main.py"
+
+# Copy the file at module level
+if source_file.exists() and not temp_file.exists():
+    shutil.copy2(source_file, temp_file)
 
 # Create a mock 'WinTables' module
 win_tables_module = types.ModuleType("WinTables")
@@ -63,7 +75,7 @@ def hud_main(app, qtbot):
         }
         mock_config_instance.get_layout.return_value = "some_layout"
 
-        hm = HUD_main.HUD_main(options, db_name=options.dbname)
+        hm = HUD_main.HudMain(options, db_name=options.dbname)
         qtbot.addWidget(hm.main_window)
         yield hm
 
@@ -72,7 +84,7 @@ def hud_main(app, qtbot):
 
 
 # Verifies that all necessary attributes of the HUD_main instance are correctly initialized.
-def test_hud_main_initialization(hud_main):
+def test_hud_main_initialization(hud_main) -> None:
     assert hud_main.db_name == "test_db"
     assert hasattr(hud_main, "config")
     assert hasattr(hud_main, "db_connection")
@@ -87,14 +99,14 @@ def test_hud_main_initialization(hud_main):
 
 
 # Ensures that the handle_message method correctly calls read_stdin when provided with a hand ID.
-def test_handle_message(hud_main):
+def test_handle_message(hud_main) -> None:
     with patch.object(hud_main, "read_stdin") as mock_read_stdin:
         hud_main.handle_message("test_hand_id")
         mock_read_stdin.assert_called_once_with("test_hand_id")
 
 
 # Checks that the destroy method properly closes connections and stops processes.
-def test_destroy(hud_main):
+def test_destroy(hud_main) -> None:
     with (
         patch.object(hud_main.zmq_receiver, "close") as mock_close,
         patch.object(hud_main.zmq_worker, "stop") as mock_stop,
@@ -108,14 +120,14 @@ def test_destroy(hud_main):
 
 # Verifies that check_tables calls the correct methods (client_destroyed, client_moved, client_resized) based on the table's status.
 @pytest.mark.parametrize(
-    "status, expected_method",
+    ("status", "expected_method"),
     [
         ("client_destroyed", "client_destroyed"),
         ("client_moved", "client_moved"),
         ("client_resized", "client_resized"),
     ],
 )
-def test_check_tables(hud_main, status, expected_method):
+def test_check_tables(hud_main, status, expected_method) -> None:
     mock_hud = MagicMock()
     mock_hud.table.check_table.return_value = status
     hud_main.hud_dict = {"test_table": mock_hud}
@@ -126,18 +138,31 @@ def test_check_tables(hud_main, status, expected_method):
 
 
 # Ensures that create_HUD creates a new HUD and adds it to the hud_dict.
-def test_create_hud(hud_main):
+def test_create_hud(hud_main) -> None:
     with (
         patch.object(HUD_main.Hud, "Hud") as mock_hud,
         patch.object(hud_main, "idle_create") as mock_idle_create,
         patch.object(
-            hud_main.config, "get_site_parameters", return_value={"layout_set": "some_layout", "param1": "value1"}
+            hud_main.config,
+            "get_site_parameters",
+            return_value={"layout_set": "some_layout", "param1": "value1"},
         ),
         patch.object(hud_main.config, "get_layout", return_value="some_layout"),
     ):
         mock_table = MagicMock()
         mock_table.site = "test_site"
-        hud_main.create_HUD("new_hand_id", mock_table, "temp_key", 9, "poker_game", "cash", {}, {})
+        args = HUD_main.HUDCreationArgs(
+            new_hand_id="new_hand_id",
+            table=mock_table,
+            temp_key="temp_key",
+            max_seats=9,
+            poker_game="poker_game",
+            game_type="cash",
+            stat_dict={},
+            cards={}
+        )
+        
+        hud_main.create_HUD(args)
 
         assert "temp_key" in hud_main.hud_dict
         mock_hud.assert_called_once()
@@ -145,14 +170,18 @@ def test_create_hud(hud_main):
 
 
 # Verifies that update_HUD properly calls idle_update.
-def test_update_hud(hud_main):
+def test_update_hud(hud_main) -> None:
     with patch.object(hud_main, "idle_update") as mock_idle_update:
         hud_main.update_HUD("new_hand_id", "table_name", hud_main.config)
-        mock_idle_update.assert_called_once_with("new_hand_id", "table_name", hud_main.config)
+        mock_idle_update.assert_called_once_with(
+            "new_hand_id",
+            "table_name",
+            hud_main.config,
+        )
 
 
 #  Ensures that cached data is processed correctly in read_stdin and calls update_HUD.
-def test_read_stdin_cached(hud_main):
+def test_read_stdin_cached(hud_main) -> None:
     # Configuration env
     hud_main.config = MagicMock()
     hud_main.config.get_supported_sites.return_value = ["test_site"]
@@ -182,7 +211,9 @@ def test_read_stdin_cached(hud_main):
         patch.object(hud_main.db_connection, "get_player_id", return_value=123),
         patch.object(hud_main.db_connection, "init_hud_stat_vars"),
         patch.object(
-            hud_main.db_connection, "get_stats_from_hand", return_value={"player1": {"screen_name": "test_hero"}}
+            hud_main.db_connection,
+            "get_stats_from_hand",
+            return_value={"player1": {"screen_name": "test_hero"}},
         ),
         patch.object(hud_main, "get_cards", return_value={}),
         patch.object(hud_main, "update_HUD") as mock_update_hud,
@@ -200,7 +231,7 @@ def test_read_stdin_cached(hud_main):
 
 
 # Tests the behavior of read_stdin when no cached data is available, ensuring it calls create_HUD
-def test_read_stdin_not_cached(hud_main):
+def test_read_stdin_not_cached(hud_main) -> None:
     hud_main.config = MagicMock()
     hud_main.config.get_supported_sites.return_value = ["test_site"]
     hud_main.config.supported_sites = {"test_site": MagicMock(screen_name="test_hero")}
@@ -212,7 +243,18 @@ def test_read_stdin_not_cached(hud_main):
 
     hud_main.cache = {}
 
-    table_info = ("table_name", 9, "poker_game", "tour", False, 1, "test_site", 9, 123456, "Table 789")
+    table_info = (
+        "table_name",
+        9,
+        "poker_game",
+        "tour",
+        False,
+        1,
+        "test_site",
+        9,
+        123456,
+        "Table 789",
+    )
 
     with (
         patch.object(hud_main.db_connection, "get_site_id", return_value=[(1,)]),
@@ -220,7 +262,9 @@ def test_read_stdin_not_cached(hud_main):
         patch.object(hud_main.db_connection, "get_table_info", return_value=table_info),
         patch.object(hud_main.db_connection, "init_hud_stat_vars"),
         patch.object(
-            hud_main.db_connection, "get_stats_from_hand", return_value={"player1": {"screen_name": "test_hero"}}
+            hud_main.db_connection,
+            "get_stats_from_hand",
+            return_value={"player1": {"screen_name": "test_hero"}},
         ),
         patch.object(hud_main, "get_cards", return_value={}),
         patch.object(hud_main.Tables, "Table", return_value=MagicMock()),
@@ -231,7 +275,7 @@ def test_read_stdin_not_cached(hud_main):
 
 
 # Ensures that get_cards retrieves both player and community cards correctly.
-def test_get_cards(hud_main):
+def test_get_cards(hud_main) -> None:
     mock_db = MagicMock()
     mock_db.get_cards.return_value = {"player1": ["As", "Kh"]}
     mock_db.get_common_cards.return_value = {"common": ["Jd", "Qc", "Tc"]}
@@ -243,7 +287,7 @@ def test_get_cards(hud_main):
 
 
 # Verifies that idle_kill removes the HUD from hud_dict and cleans up widgets.
-def test_idle_kill(hud_main):
+def test_idle_kill(hud_main) -> None:
     mock_hud = MagicMock()
     hud_main.hud_dict["test_table"] = mock_hud
     hud_main.vb = MagicMock()
@@ -256,7 +300,7 @@ def test_idle_kill(hud_main):
 
 
 # Checks exception handling in read_stdin when an error occurs in get_table_info.
-def test_read_stdin_exception_handling(hud_main):
+def test_read_stdin_exception_handling(hud_main) -> None:
     hud_main.config = MagicMock()
     hud_main.config.get_supported_sites.return_value = ["test_site"]
     hud_main.config.get_site_parameters.return_value = {"aux_enabled": True}
@@ -268,7 +312,11 @@ def test_read_stdin_exception_handling(hud_main):
     test_hand_id = "test_hand_id"
 
     with (
-        patch.object(hud_main.db_connection, "get_table_info", side_effect=Exception("Database error")),
+        patch.object(
+            hud_main.db_connection,
+            "get_table_info",
+            side_effect=Exception("Database error"),
+        ),
         patch.object(hud_main, "destroy") as mock_destroy,
     ):
         hud_main.read_stdin(test_hand_id)
@@ -277,7 +325,7 @@ def test_read_stdin_exception_handling(hud_main):
 
 
 # Ensures that ZMQWorker.stop stops the worker properly.
-def test_zmqworker_stop():
+def test_zmqworker_stop() -> None:
     zmq_receiver = MagicMock()
     worker = HUD_main.ZMQWorker(zmq_receiver)
     worker.wait = MagicMock()
@@ -302,7 +350,7 @@ def test_zmqworker_stop():
 
 
 # Tests the run loop of ZMQWorker, ensuring it stops after processing a message.
-def test_zmqworker_run(hud_main):
+def test_zmqworker_run(hud_main) -> None:
     zmq_receiver = MagicMock()
     worker = HUD_main.ZMQWorker(zmq_receiver)
 
@@ -310,12 +358,16 @@ def test_zmqworker_run(hud_main):
     worker.is_running = True
 
     # Use of `side_effect` to stop the loop after the first call to `process_message`.
-    def stop_after_one_iteration(*args, **kwargs):
+    def stop_after_one_iteration(*args, **kwargs) -> None:
         worker.is_running = False
 
     with (
         patch("time.sleep", return_value=None),
-        patch.object(zmq_receiver, "process_message", side_effect=stop_after_one_iteration) as mock_process_message,
+        patch.object(
+            zmq_receiver,
+            "process_message",
+            side_effect=stop_after_one_iteration,
+        ) as mock_process_message,
     ):
         worker.run()
         mock_process_message.assert_called_once()
@@ -335,11 +387,18 @@ def test_zmqworker_run(hud_main):
 #         mock_log_debug.assert_called_with("Received hand ID: hand_id")
 
 
-# Verifies that table_title_changed calls kill_hud when the table's title changes.
-def test_table_title_changed_calls_kill_hud(hud_main):
+# Verifies that table_title_changed calls kill_hud when the table's title changes significantly.
+def test_table_title_changed_calls_kill_hud(hud_main) -> None:
     mock_hud = MagicMock()
     mock_hud.table.key = "test_table"
+    mock_hud.table.title = "new_title"
     hud_main.hud_dict["test_table"] = mock_hud
+
+    # Mock the smart_hud_manager to return that title changed and should restart
+    hud_main.smart_hud_manager = MagicMock()
+    hud_main.smart_hud_manager.has_table_title_changed.return_value = True
+    hud_main.smart_hud_manager.should_restart_hud.return_value = (True, "Title changed significantly")
+    hud_main.smart_hud_manager.record_restart = MagicMock()
 
     with patch.object(hud_main, "kill_hud") as mock_kill_hud:
         hud_main.table_title_changed(None, mock_hud)
@@ -347,7 +406,7 @@ def test_table_title_changed_calls_kill_hud(hud_main):
 
 
 # Ensures that table_is_stale calls kill_hud for stale tables.
-def test_table_is_stale_calls_kill_hud(hud_main):
+def test_table_is_stale_calls_kill_hud(hud_main) -> None:
     mock_hud = MagicMock()
     mock_hud.table.key = "test_table"
     hud_main.hud_dict["test_table"] = mock_hud
@@ -358,7 +417,7 @@ def test_table_is_stale_calls_kill_hud(hud_main):
 
 
 # Verifies that blacklist_hud correctly removes a HUD from hud_dict and adds it to the blacklist.
-def test_blacklist_hud(hud_main):
+def test_blacklist_hud(hud_main) -> None:
     mock_hud = MagicMock()
     mock_hud.tablenumber = 123
     hud_main.hud_dict["test_table"] = mock_hud
@@ -380,7 +439,7 @@ def test_blacklist_hud(hud_main):
 
 
 # Verifies that close_event_handler calls destroy and accepts the event.
-def test_close_event_handler(hud_main):
+def test_close_event_handler(hud_main) -> None:
     mock_event = MagicMock()
     with patch.object(hud_main, "destroy") as mock_destroy:
         hud_main.close_event_handler(mock_event)
@@ -389,7 +448,7 @@ def test_close_event_handler(hud_main):
 
 
 # Ensures that idle_move moves the table and auxiliary windows.
-def test_idle_move(hud_main):
+def test_idle_move(hud_main) -> None:
     mock_hud = MagicMock()
     mock_hud.aux_windows = [MagicMock()]
     hud_main.idle_move(mock_hud)
@@ -400,7 +459,7 @@ def test_idle_move(hud_main):
 
 
 # Verifies that idle_resize resizes the table and auxiliary windows.
-def test_idle_resize(hud_main):
+def test_idle_resize(hud_main) -> None:
     mock_hud = MagicMock()
     mock_hud.aux_windows = [MagicMock()]
     hud_main.idle_resize(mock_hud)
@@ -411,7 +470,7 @@ def test_idle_resize(hud_main):
 
 
 # Checks that kill_hud removes the HUD from hud_dict and cleans up associated widgets.
-def test_kill_hud(hud_main):
+def test_kill_hud(hud_main) -> None:
     mock_hud = MagicMock()
     hud_main.hud_dict["test_table"] = mock_hud
     hud_main.vb = MagicMock()
@@ -424,7 +483,7 @@ def test_kill_hud(hud_main):
 
 
 # Verifies that client_moved calls idle_move for the given HUD.
-def test_client_moved(hud_main):
+def test_client_moved(hud_main) -> None:
     mock_hud = MagicMock()
     with patch.object(hud_main, "idle_move") as mock_idle_move:
         hud_main.client_moved(None, mock_hud)
@@ -432,7 +491,7 @@ def test_client_moved(hud_main):
 
 
 # Ensures that client_resized calls idle_resize for the given HUD.
-def test_client_resized(hud_main):
+def test_client_resized(hud_main) -> None:
     mock_hud = MagicMock()
     with patch.object(hud_main, "idle_resize") as mock_idle_resize:
         hud_main.client_resized(None, mock_hud)
@@ -440,7 +499,7 @@ def test_client_resized(hud_main):
 
 
 # Checks that client_destroyed calls kill_hud for the appropriate HUD.
-def test_client_destroyed(hud_main):
+def test_client_destroyed(hud_main) -> None:
     mock_hud = MagicMock()
     mock_hud.table.key = "test_table"
     with patch.object(hud_main, "kill_hud") as mock_kill_hud:
@@ -450,78 +509,64 @@ def test_client_destroyed(hud_main):
 
 # Verifies that idle_create creates a new HUD and adds it to hud_dict, along with logging.
 @pytest.mark.parametrize("import_path", ["HUD_main.QLabel", "PyQt5.QtWidgets.QLabel"])
-def test_idle_create(import_path, hud_main):
-    with patch(import_path) as mock_qlabel, patch("HUD_main.log") as mock_log:
+def test_idle_create(import_path, hud_main) -> None:
+    with patch(import_path), patch("HUD_main.log") as mock_log:
         # Configuration
         mock_hud = MagicMock()
         mock_hud.tablehudlabel = MagicMock()
         hud_main.hud_dict = {"test_table": mock_hud}
         hud_main.vb = MagicMock()
 
-        new_hand_id = "new_hand_id"
         table = MagicMock()
         table.site = "test_site"
         table.number = 123
-        temp_key = "test_table"
-        max = 9
-        poker_game = "holdem"
-        hud_type = "cash"
-        stat_dict = {}
-        cards = {}
+        
+        args = HUD_main.HUDCreationArgs(
+            new_hand_id="new_hand_id",
+            table=table,
+            temp_key="test_table",
+            max_seats=9,
+            poker_game="holdem",
+            game_type="cash",
+            stat_dict={},
+            cards={}
+        )
 
         with (
-            patch.object(hud_main, "get_cards", return_value=cards),
+            patch.object(hud_main, "get_cards", return_value=args.cards),
             patch.object(hud_main.hud_dict["test_table"], "create") as mock_create,
             patch.object(hud_main.hud_dict["test_table"], "aux_windows", []),
         ):
-            print("Before calling idle_create")
-
             # Call idle_create
-            hud_main.idle_create(new_hand_id, table, temp_key, max, poker_game, hud_type, stat_dict, cards)
-
-            print("After calling idle_create")
-            print(f"mock_qlabel.call_count: {mock_qlabel.call_count}")
-            print(f"mock_qlabel.call_args_list: {mock_qlabel.call_args_list}")
+            hud_main.idle_create(args)
 
             # Checks
-            tablehudlabel = hud_main.hud_dict[temp_key].tablehudlabel
-            print(f"tablehudlabel: {tablehudlabel}")
-            print(f"Type of tablehudlabel: {tablehudlabel.__class__}")
-            print(f"Is instance of mocked QLabel: {isinstance(tablehudlabel, mock_qlabel.return_value.__class__)}")
+            hud_main.hud_dict[args.temp_key].tablehudlabel
 
-            # Check taht vb.addWidget is called
-            try:
+            # Check that vb.addWidget is called
+            with contextlib.suppress(AssertionError):
                 hud_main.vb.addWidget.assert_called_once()
-                print("vb.addWidget assertion passed")
-            except AssertionError as e:
-                print(f"vb.addWidget assertion failed: {e}")
 
-            # Check attributs
-            assert hud_main.hud_dict[temp_key].tablehudlabel is not None, "tablehudlabel is None"
-            assert hud_main.hud_dict[temp_key].tablenumber == table.number, "tablenumber mismatch"
-            print("hud_dict assertions passed")
+            # Check attributes
+            assert hud_main.hud_dict[args.temp_key].tablehudlabel is not None, "tablehudlabel is None"
+            assert hud_main.hud_dict[args.temp_key].tablenumber == table.number, "tablenumber mismatch"
 
             # Check call
-            try:
-                mock_create.assert_called_once_with(new_hand_id, hud_main.config, stat_dict)
-                print("create method assertion passed")
-            except AssertionError as e:
-                print(f"create method assertion failed: {e}")
+            with contextlib.suppress(AssertionError):
+                mock_create.assert_called_once_with(
+                    args.new_hand_id,
+                    hud_main.config,
+                    args.stat_dict,
+                )
 
-        # Check logs
-        expected_log_message = f"adding label {table.site} - {temp_key}"
-        print(f"Expected log message: {expected_log_message}")
-        print(f"Actual log calls: {mock_log.debug.call_args_list}")
+        # Check logs - the method creates a label with site and temp_key
+        expected_log_message = f"adding label {table.site} - {args.temp_key}"
 
         log_message_found = any(call[0][0] == expected_log_message for call in mock_log.debug.call_args_list)
-        if log_message_found:
-            print("Log assertion passed")
-        else:
-            print("Log assertion failed: Expected message not found in debug logs")
 
 
 # Ensures that idle_update updates the HUD and auxiliary windows.
-def test_idle_update(hud_main):
+def test_idle_update(hud_main) -> None:
     # Create a mock HUD
     temp_key = "table_name"
     mock_hud = MagicMock()
@@ -540,7 +585,7 @@ def test_idle_update(hud_main):
 
 
 # Confirms that idle_kill removes widgets from the layout and calls the HUD's kill method.
-def test_idle_kill_widget_removal(hud_main):
+def test_idle_kill_widget_removal(hud_main) -> None:
     mock_hud = MagicMock()
     hud_main.hud_dict["test_table"] = mock_hud
     hud_main.vb = MagicMock()
@@ -559,8 +604,11 @@ def test_idle_kill_widget_removal(hud_main):
 
 
 # Ensures that check_tables calls the correct methods for different table statuses.
-@pytest.mark.parametrize("status", ["client_destroyed", "client_moved", "client_resized"])
-def test_check_tables_full_coverage(hud_main, status):
+@pytest.mark.parametrize(
+    "status",
+    ["client_destroyed", "client_moved", "client_resized"],
+)
+def test_check_tables_full_coverage(hud_main, status) -> None:
     mock_hud = MagicMock()
     mock_hud.table.check_table.return_value = status
     hud_main.hud_dict = {"test_table": mock_hud}
@@ -579,25 +627,30 @@ def test_check_tables_full_coverage(hud_main, status):
 
 #  Verifies that the appropriate idle methods (idle_move, idle_resize, kill_hud) are called for different client actions.
 @pytest.mark.parametrize(
-    "method_name, expected_args",
+    ("method_name", "expected_args"),
     [
         ("client_moved", (MagicMock(),)),
         ("client_resized", (MagicMock(),)),
         ("client_destroyed", (None, MagicMock().table.key)),
     ],
 )
-def test_client_methods(hud_main, method_name, expected_args):
+def test_client_methods(hud_main, method_name, expected_args) -> None:
     mock_hud = MagicMock()
 
     # Map method to expected idle method
-    idle_method = {"client_moved": "idle_move", "client_resized": "idle_resize", "client_destroyed": "kill_hud"}[
-        method_name
-    ]
+    idle_method = {
+        "client_moved": "idle_move",
+        "client_resized": "idle_resize",
+        "client_destroyed": "kill_hud",
+    }[method_name]
 
     with patch.object(hud_main, idle_method) as mock_idle_method:
         getattr(hud_main, method_name)(None, mock_hud)
         if method_name == "client_destroyed":
-            mock_idle_method.assert_called_once_with(expected_args[0], mock_hud.table.key)
+            mock_idle_method.assert_called_once_with(
+                expected_args[0],
+                mock_hud.table.key,
+            )
         else:
             mock_idle_method.assert_called_once_with(mock_hud)
 
@@ -633,3 +686,11 @@ def test_client_methods(hud_main, method_name, expected_args):
 
 #         # Ensure the closure was logged
 #         mock_log_info.assert_called_with("ZMQ receiver closed")
+
+
+# Cleanup function to remove the temporary file after all tests
+def teardown_module() -> None:
+    """Remove the temporary HUD_main.py file after all tests are done."""
+    temp_file = Path(__file__).parent.parent / "HUD_main.py"
+    if temp_file.exists():
+        temp_file.unlink()

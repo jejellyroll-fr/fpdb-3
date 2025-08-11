@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright 2008-2011 Carl Gherardi
 # This program is free software: you can redistribute it and/or modify
@@ -16,49 +15,49 @@
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
 
-from __future__ import print_function
-from __future__ import division
 
-from past.utils import old_div
 import os
 import sys
 from time import time
-from PyQt5.QtWidgets import QFrame, QScrollArea, QSplitter, QVBoxLayout, QMessageBox
+
+from past.utils import old_div
+from PyQt5.QtWidgets import QFrame, QMessageBox, QScrollArea, QSplitter, QVBoxLayout
+
 import Database
 import Filters
+from loggingFpdb import get_logger
+
 # import Charset
 
 
-from loggingFpdb import get_logger
-
-log = get_logger("tourgraphViewer")
+log = get_logger("gui_tourney_graph_viewer")
 
 try:
     calluse = "matplotlib" not in sys.modules
-    import matplotlib
+    import matplotlib as mpl
 
     if calluse:
         try:
-            matplotlib.use("qt5agg")
+            mpl.use("qt5agg")
         except ValueError as e:
-            log.error(f"Matplotlib use error: {e}")
-    from matplotlib.figure import Figure
+            log.exception(f"Matplotlib use error: {e}")
     from matplotlib.backends.backend_qt5agg import FigureCanvas
+    from matplotlib.figure import Figure
     from matplotlib.font_manager import FontProperties
     from numpy import cumsum
 except ImportError as inst:
-    log.error(
-        "Failed to load libs for graphing, graphing will not function. Please install numpy and matplotlib if you want to use graphs."
+    log.exception(
+        "Failed to load libs for graphing, graphing will not function. Please install numpy and matplotlib if you want to use graphs.",
     )
-    log.error(
-        "This is of no consequence for other parts of the program, e.g., import and HUD are NOT affected by this problem."
+    log.exception(
+        "This is of no consequence for other parts of the program, e.g., import and HUD are NOT affected by this problem.",
     )
-    log.error(f"ImportError: {inst.args}")
+    log.exception(f"ImportError: {inst.args}")
 
 
 class GuiTourneyGraphViewer(QSplitter):
-    def __init__(self, querylist, config, parent, colors, debug=True):
-        """Constructor for GraphViewer"""
+    def __init__(self, querylist, config, parent, colors, debug=True) -> None:
+        """Constructor for GraphViewer."""
         QSplitter.__init__(self, parent)
         self.sql = querylist
         self.conf = config
@@ -113,14 +112,13 @@ class GuiTourneyGraphViewer(QSplitter):
         self.db.rollback()
         self.exportFile = None
 
-    def clearGraphData(self):
+    def clearGraphData(self) -> None:
         try:
             if self.canvas:
                 self.graphBox.removeWidget(self.canvas)
         except (AttributeError, RuntimeError) as e:
             # Handle specific exceptions related to widget removal
-            log.error(f"Error removing widget: {e}")
-            pass
+            log.exception(f"Error removing widget: {e}")
 
         if self.fig is not None:
             self.fig.clear()
@@ -134,7 +132,7 @@ class GuiTourneyGraphViewer(QSplitter):
         self.canvas = FigureCanvas(self.fig)
         self.canvas.setParent(self)
 
-    def generateGraph(self, widget):
+    def generateGraph(self, widget) -> None:
         self.clearGraphData()
 
         sitenos = []
@@ -151,7 +149,8 @@ class GuiTourneyGraphViewer(QSplitter):
             sitenos.append(siteids[site])
             _hname = heroes.get(site, "")
             if not _hname:
-                raise ValueError(f"Hero name not found for site {site}")
+                msg = f"Hero name not found for site {site}"
+                raise ValueError(msg)
             result = self.db.get_player_id(self.conf, site, _hname)
             if result is not None:
                 playerids.append(int(result))
@@ -183,7 +182,9 @@ class GuiTourneyGraphViewer(QSplitter):
         self.ax.set_ylabel("$", color=self.colors["foreground"])
         self.ax.grid(color=self.colors["grid"], linestyle=":", linewidth=0.2)
         if green is None or len(green) == 0:
-            self.ax.set_title("No Data for Player(s) Found", color=self.colors["foreground"])
+            self.ax.set_title(
+                "No Data for Player(s) Found", color=self.colors["foreground"],
+            )
             green = [
                 0.0,
                 0.0,
@@ -243,13 +244,23 @@ class GuiTourneyGraphViewer(QSplitter):
                 1000.0,
             ]
 
-            self.ax.plot(green, color="green", label="Tournaments: %d\nProfit: $%.2f" % (len(green), green[-1]))
+            self.ax.plot(
+                green,
+                color="green",
+                label="Tournaments: %d\nProfit: $%.2f" % (len(green), green[-1]),
+            )
             self.graphBox.addWidget(self.canvas)
             self.canvas.show()
             self.canvas.draw()
         else:
-            self.ax.set_title("Tournament Results" + names, color=self.colors["foreground"])
-            self.ax.plot(green, color="green", label="Tournaments: %d\nProfit: $%.2f" % (len(green), green[-1]))
+            self.ax.set_title(
+                "Tournament Results" + names, color=self.colors["foreground"],
+            )
+            self.ax.plot(
+                green,
+                color="green",
+                label="Tournaments: %d\nProfit: $%.2f" % (len(green), green[-1]),
+            )
             self.ax.legend(
                 loc="upper left",
                 fancybox=True,
@@ -273,7 +284,7 @@ class GuiTourneyGraphViewer(QSplitter):
         currencytest = str(tuple(currencies.values()))
         currencytest = currencytest.replace(",)", ")")
         currencytest = currencytest.replace("u'", "'")
-        currencytest = "AND tt.currency in %s" % currencytest
+        currencytest = f"AND tt.currency in {currencytest}"
 
         nametest = str(tuple(names))
         sitetest = str(tuple(sites))
@@ -282,29 +293,25 @@ class GuiTourneyGraphViewer(QSplitter):
         def make_in_clause_sql(values, field_type="str"):
             if not values:
                 return "('')" if field_type == "str" else "(-1)"
-            
+
             if len(values) == 1:
                 val = values[0]
                 return f"('{val}')" if field_type == "str" else f"({val})"
 
             if field_type == "str":
                 return str(tuple(values))
-            else:
-                return str(tuple(int(v) for v in values))
+            return str(tuple(int(v) for v in values))
 
-
-
-        currencytest = f"AND tt.currency in {make_in_clause_sql(currencies.values(), 'str')}"
-        tourneysCattest = make_in_clause_sql(tourneysCat, 'str')
-        tourneysLimtest = make_in_clause_sql(tourneysLim, 'str')
-
+        currencytest = (
+            f"AND tt.currency in {make_in_clause_sql(currencies.values(), 'str')}"
+        )
+        tourneysCattest = make_in_clause_sql(tourneysCat, "str")
+        tourneysLimtest = make_in_clause_sql(tourneysLim, "str")
 
         buyins = [int(b.split(",")[0]) for b in tourneysBuyin if b != "None"]
-        tourneysBuyintest = make_in_clause_sql(buyins, 'int')
-
+        tourneysBuyintest = make_in_clause_sql(buyins, "int")
 
         tourneystest = tourneystest.replace("None", '"None"')
-
 
         tmp = tmp.replace("<player_test>", nametest)
         tmp = tmp.replace("<site_test>", sitetest)
@@ -330,19 +337,18 @@ class GuiTourneyGraphViewer(QSplitter):
         greenline = cumsum(green)
         return old_div(greenline, 100)
 
-    def exportGraph(self):
+    def exportGraph(self) -> None:
         if self.fig is None:
             return
 
-        else:
-            path = os.getcwd()
-            path = path + "/graph.png"
-            self.fig.savefig(path)
-            msg = QMessageBox()
-            msg.setWindowTitle("FPDB 3 info")
-            mess = "Your graph is saved in " + path
-            msg.setText(mess)
-            msg.exec()
+        path = os.getcwd()
+        path = path + "/graph.png"
+        self.fig.savefig(path)
+        msg = QMessageBox()
+        msg.setWindowTitle("FPDB 3 info")
+        mess = "Your graph is saved in " + path
+        msg.setText(mess)
+        msg.exec()
 
 
 if __name__ == "__main__":
@@ -363,7 +369,13 @@ if __name__ == "__main__":
 
     sql = SQL.Sql(db_server=settings["db-server"])
 
-    colors = {"background": "#19232D", "foreground": "#9DA9B5", "grid": "#4D4D4D", "line_up": "g", "line_down": "r"}
+    colors = {
+        "background": "#19232D",
+        "foreground": "#9DA9B5",
+        "grid": "#4D4D4D",
+        "line_up": "g",
+        "line_down": "r",
+    }
 
     i = GuiTourneyGraphViewer(sql, config, None, colors)
     main_window = QMainWindow()

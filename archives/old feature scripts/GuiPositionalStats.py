@@ -17,15 +17,15 @@
 
 from __future__ import print_function
 
-
-# import L10n
-# _ = L10n.get_translation()
-
 from time import time
+
+import Charset
 
 import Database
 import Filters
-import Charset
+
+# import L10n
+# _ = L10n.get_translation()
 
 
 class GuiPositionalStats(object):
@@ -70,7 +70,13 @@ class GuiPositionalStats(object):
         self.columns = [
             ["game", True, "Game", 0.0, "%s"],
             ["hand", False, "Hand", 0.0, "%s"],  # true not allowed for this line
-            ["plposition", False, "Posn", 1.0, "%s"],  # true not allowed for this line (set in code)
+            [
+                "plposition",
+                False,
+                "Posn",
+                1.0,
+                "%s",
+            ],  # true not allowed for this line (set in code)
             ["n", True, "Hds", 1.0, "%d"],
             ["avgseats", True, "Seats", 1.0, "%3.1f"],
             ["vpip", True, "VPIP", 1.0, "%3.1f"],
@@ -369,7 +375,9 @@ class GuiPositionalStats(object):
         vbox.show_all()
 
         self.db.rollback()
-        print(("Positional Stats page displayed in %4.2f seconds") % (time() - starttime))
+        print(
+            ("Positional Stats page displayed in %4.2f seconds") % (time() - starttime)
+        )
 
     # end def fillStatsFrame(self, vbox):
 
@@ -383,7 +391,10 @@ class GuiPositionalStats(object):
             query = query.replace("<player_test>", "1 = 2")
 
         if seats:
-            query = query.replace("<seats_test>", "between " + str(seats["from"]) + " and " + str(seats["to"]))
+            query = query.replace(
+                "<seats_test>",
+                "between " + str(seats["from"]) + " and " + str(seats["to"]),
+            )
             if (
                 False
             ):  #'show' in seats and seats['show']: should be 'show' in groups but we don't even show groups in filters
@@ -423,7 +434,9 @@ class GuiPositionalStats(object):
         query = query.replace("<hgametypeId>", "h.gametypeId")
 
         # Filter on dates
-        query = query.replace("<datestest>", " between '" + dates[0] + "' and '" + dates[1] + "'")
+        query = query.replace(
+            "<datestest>", " between '" + dates[0] + "' and '" + dates[1] + "'"
+        )
 
         # print "query =\n", query
         return query

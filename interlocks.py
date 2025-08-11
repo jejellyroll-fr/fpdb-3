@@ -1,19 +1,19 @@
-# -*- coding: utf-8 -*-
 
 # Code from http://ender.snowburst.org:4747/~jjohns/interlocks.py
 # Thanks JJ!
 
-from __future__ import print_function
+
+import base64
+import os
+import os.path
+import sys
+import time
+
+from loggingFpdb import get_logger
 
 # import L10n
 # _ = L10n.get_translation()
 
-import sys
-import os, os.path
-import time
-import base64
-
-from loggingFpdb import get_logger
 
 log = get_logger("interlocks")
 
@@ -25,7 +25,7 @@ Just use me like a thread lock.  acquire() / release() / locked()
 Differences compared to thread locks:
 1. By default, acquire()'s wait parameter is false.
 2. When acquire fails, SingleInstanceError is thrown instead of simply returning false.
-3. acquire() can take a 3rd parameter retry_time, which, if wait is True, tells the locking 
+3. acquire() can take a 3rd parameter retry_time, which, if wait is True, tells the locking
    mechanism how long to sleep between retrying the lock.  Has no effect for unix/InterProcessLockFcntl.
 
 Differences in fpdb version to JJ's original:
@@ -35,11 +35,11 @@ Differences in fpdb version to JJ's original:
 
 
 class SingleInstanceError(RuntimeError):
-    "Thrown when you try to acquire an InterProcessLock and another version of the process is already running."
+    """Thrown when you try to acquire an InterProcessLock and another version of the process is already running."""
 
 
-class InterProcessLockBase(object):
-    def __init__(self, name=None):
+class InterProcessLockBase:
+    def __init__(self, name=None) -> None:
         self._has_lock = False
         if not name:
             name = sys.argv[0]
@@ -56,10 +56,10 @@ class InterProcessLockBase(object):
         log.debug(f"Final decoded string: {test}")
         return test
 
-    def acquire_impl(self, wait):
+    def acquire_impl(self, wait) -> None:
         pass
 
-    def acquire(self, source, wait=False, retry_time=1):
+    def acquire(self, source, wait=False, retry_time=1) -> bool:
         if source is None:
             source = "Unknown"
         if self._has_lock:  # make sure 2nd acquire in the same process fails
@@ -79,12 +79,12 @@ class InterProcessLockBase(object):
                 time.sleep(retry_time)
         return True
 
-    def release(self):
+    def release(self) -> None:
         self.release_impl()
         self._has_lock = False
         self.heldBy = None
 
-    def locked(self):
+    def locked(self) -> bool:
         if self.acquire():
             self.release()
             return False
@@ -95,10 +95,12 @@ LOCK_FILE_DIRECTORY = "/tmp"
 
 
 class InterProcessLockFcntl(InterProcessLockBase):
-    def __init__(self, name=None):
+    def __init__(self, name=None) -> None:
         InterProcessLockBase.__init__(self, name)
         self.lockfd = 0
-        self.lock_file_name = os.path.join(LOCK_FILE_DIRECTORY, self.getHashedName() + ".lck")
+        self.lock_file_name = os.path.join(
+            LOCK_FILE_DIRECTORY, self.getHashedName() + ".lck",
+        )
         assert os.path.isdir(LOCK_FILE_DIRECTORY)
 
     # This is the suggested way to get a safe file name, but I like having a descriptively named lock file.
@@ -108,62 +110,68 @@ class InterProcessLockFcntl(InterProcessLockBase):
         bad_filename_character_re = re.compile(r"/\?<>\\\:;\*\|\'\"\^=\.\[\]")
         return bad_filename_character_re.sub("_", self.name)
 
-    def acquire_impl(self, wait):
+    def acquire_impl(self, wait) -> None:
         self.lockfd = open(self.lock_file_name, "w")
         fcntrl_options = fcntl.LOCK_EX
         if not wait:
             fcntrl_options |= fcntl.LOCK_NB
         try:
             fcntl.flock(self.lockfd, fcntrl_options)
-        except IOError:
+        except OSError:
             self.lockfd.close()
             self.lockfd = 0
-            raise SingleInstanceError("Could not acquire exclusive lock on " + self.lock_file_name)
+            raise SingleInstanceError(
+                "Could not acquire exclusive lock on " + self.lock_file_name,
+            )
 
-    def release_impl(self):
+    def release_impl(self) -> None:
         fcntl.lockf(self.lockfd, fcntl.LOCK_UN)
         self.lockfd.close()
         self.lockfd = 0
         try:
             os.unlink(self.lock_file_name)
-        except IOError:
+        except OSError:
             # We don't care about the existence of the file too much here.  It's the flock() we care about,
             # And that should just go away magically.
             pass
 
 
 class InterProcessLockWin32(InterProcessLockBase):
-    def __init__(self, name=None):
+    def __init__(self, name=None) -> None:
         InterProcessLockBase.__init__(self, name)
         self.mutex = None
 
-    def acquire_impl(self, wait):
+    def acquire_impl(self, wait) -> None:
         self.mutex = win32event.CreateMutex(None, 0, self.getHashedName())
         if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
             self.mutex.Close()
             self.mutex = None
-            raise SingleInstanceError("Could not acquire exclusive lock on " + self.name)
+            raise SingleInstanceError(
+                "Could not acquire exclusive lock on " + self.name,
+            )
 
-    def release_impl(self):
+    def release_impl(self) -> None:
         self.mutex.Close()
 
 
 class InterProcessLockSocket(InterProcessLockBase):
-    def __init__(self, name=None):
+    def __init__(self, name=None) -> None:
         InterProcessLockBase.__init__(self, name)
         self.socket = None
         self.portno = 65530 - abs(self.getHashedName().__hash__()) % 32749
 
-    def acquire_impl(self, wait):
+    def acquire_impl(self, wait) -> None:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             self.socket.bind(("127.0.0.1", self.portno))
-        except socket.error:
+        except OSError:
             self.socket.close()
             self.socket = None
-            raise SingleInstanceError("Could not acquire exclusive lock on " + self.name)
+            raise SingleInstanceError(
+                "Could not acquire exclusive lock on " + self.name,
+            )
 
-    def release_impl(self):
+    def release_impl(self) -> None:
         self.socket.close()
         self.socket = None
 
@@ -175,8 +183,8 @@ try:
     InterProcessLock = InterProcessLockFcntl
 except ImportError:
     try:
-        import win32event
         import win32api
+        import win32event
         import winerror
 
         InterProcessLock = InterProcessLockWin32
@@ -186,10 +194,9 @@ except ImportError:
         InterProcessLock = InterProcessLockSocket
 
 
-def test_construct():
-    """
-    # Making the name of the test unique so it can be executed my multiple users on the same machine.
-    >>> test_name = 'InterProcessLockTest' +str(os.getpid()) + str(time.time())
+def test_construct() -> None:
+    r"""# Making the name of the test unique so it can be executed my multiple users on the same machine.
+    >>> test_name = 'InterProcessLockTest' +str(os.getpid()) + str(time.time()).
 
     >>> lock1 = InterProcessLock(name=test_name)
     >>> lock1.acquire()
@@ -288,7 +295,6 @@ def test_construct():
 
     """
 
-    pass
 
 
 if __name__ == "__main__":

@@ -1,50 +1,69 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from __future__ import print_function
 
-# import L10n
-# _ = L10n.get_translation()
-import subprocess
-import traceback
 import os
+
+# OPTION A : on veut XWayland si la variable est posée
+if os.getenv("FPDB_FORCE_X11") == "1":
+    os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
+
+import subprocess
 import sys
-from loggingFpdb import get_logger
+import traceback
+from optparse import OptionParser
+
+from PyQt5.QtCore import QDateTime, QTimer
+from PyQt5.QtGui import QColor, QPalette, QTextCharFormat, QTextCursor
 from PyQt5.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
+    QCheckBox,
+    QFormLayout,
+    QGroupBox,
     QHBoxLayout,
     QLabel,
+    QProgressBar,
     QSpinBox,
-    QPushButton,
-    QLineEdit,
     QTextEdit,
-    QCheckBox,
-    QFileDialog,
+    QVBoxLayout,
+    QWidget,
 )
-from PyQt5.QtCore import QTimer
-from PyQt5.QtGui import QTextCursor
 
-import Importer
-from optparse import OptionParser
+# Import qt_material for theming
+try:
+    from qt_material import apply_stylesheet
+    QT_MATERIAL_AVAILABLE = True
+except ImportError:
+    QT_MATERIAL_AVAILABLE = False
+
 import Configuration
-
+import Importer
 import interlocks
+from loggingFpdb import get_logger
+
+# Import for dynamic reloading configuration
+try:
+    from AutoImportConfigObserver import AutoImportConfigObserver
+    from ConfigurationManager import ConfigurationManager
+
+    DYNAMIC_CONFIG_AVAILABLE = True
+except ImportError:
+    DYNAMIC_CONFIG_AVAILABLE = False
+    log = get_logger("gui_auto_import")
+    log.warning("ConfigurationManager not available, dynamic config reload disabled")
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
-log = get_logger("importer")
+log = get_logger("gui_auto_import")
 
 if os.name == "nt":
     import win32console
 
 
-def to_raw(string):
+def to_raw(string) -> str:
     return rf"{string}"
 
 
 class GuiAutoImport(QWidget):
-    def __init__(self, settings, config, sql=None, parent=None, cli=False):
+    def __init__(self, settings, config, sql=None, parent=None, cli=False) -> None:
         if not cli:
             QWidget.__init__(self, parent)
         self.importtimer = None
@@ -53,8 +72,8 @@ class GuiAutoImport(QWidget):
         self.sql = sql
         self.parent = parent
 
-        self.input_settings = {}
         self.pipe_to_hud = None
+        self.doAutoImportBool = False
 
         self.importer = Importer.Importer(self, self.settings, self.config, self.sql)
 
@@ -70,88 +89,234 @@ class GuiAutoImport(QWidget):
 
         if cli is False:
             self.setupGui()
+            self._setup_config_observer()
         else:
             # TODO: Separate the code that grabs the directories from config
             #       Separate the calls to the Importer API
             #       Create a timer interface that doesn't rely on GTK
             raise NotImplementedError
 
-    def setupGui(self):
-        self.setLayout(QVBoxLayout())
+    def setupGui(self) -> None:
+        self.setWindowTitle("FPDB Auto Import")
+        self.setGeometry(100, 100, 800, 600)
 
-        hbox = QHBoxLayout()
+        # Apply qt_material theme if available
+        if QT_MATERIAL_AVAILABLE:
+            # Apply the same theme as HUD_main
+            apply_stylesheet(self, theme="dark_purple.xml")
 
-        self.intervalLabel = QLabel(("Time between imports in seconds:"))
+        # Set minimal custom styles for specific needs
+        self.setStyleSheet("""
+            QTextEdit#logView {
+                font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+                font-size: 13px;
+                line-height: 1.4;
+                border-radius: 8px;
+            }
+
+            QGroupBox {
+                font-weight: bold;
+                margin-top: 10px;
+            }
+
+            QProgressBar {
+                border-radius: 2px;
+                text-align: center;
+            }
+        """)
+
+        mainLayout = QVBoxLayout()
+        self.setLayout(mainLayout)
+
+        # --- Settings Group ---
+        settingsGroup = QGroupBox("Settings")
+        settingsLayout = QFormLayout()
+        settingsGroup.setLayout(settingsLayout)
+        mainLayout.addWidget(settingsGroup)
 
         self.intervalEntry = QSpinBox()
-        self.intervalEntry.setValue(int(self.config.get_import_parameters().get("interval")))
-        hbox.addWidget(self.intervalLabel)
-        hbox.addWidget(self.intervalEntry)
-        self.layout().addLayout(hbox)
+        self.intervalEntry.setValue(
+            int(self.config.get_import_parameters().get("interval")),
+        )
+        settingsLayout.addRow(QLabel("Time between imports (seconds):"), self.intervalEntry)
 
-        hbox = QHBoxLayout()
-        vbox1 = QVBoxLayout()
-        vbox2 = QVBoxLayout()
-        hbox.addLayout(vbox1)
-        hbox.addLayout(vbox2)
-        self.layout().addLayout(hbox)
-
-        self.addSites(vbox1, vbox2)
+        # --- Log Group ---
+        logGroup = QGroupBox("Log")
+        logLayout = QVBoxLayout()
+        logGroup.setLayout(logLayout)
+        mainLayout.addWidget(logGroup)
 
         self.textview = QTextEdit()
+        self.textview.setObjectName("logView")  # For custom styling
         self.textview.setReadOnly(True)
+        logLayout.addWidget(self.textview)
 
-        self.doAutoImportBool = False
-        self.startButton = QCheckBox(("Start Auto Import"))
+        # --- Controls ---
+        controlsLayout = QHBoxLayout()
+
+        self.startButton = QCheckBox("Start Auto Import")
         self.startButton.stateChanged.connect(self.startClicked)
-        self.layout().addWidget(self.startButton)
-        self.layout().addWidget(self.textview)
+        controlsLayout.addWidget(self.startButton)
 
-        self.addText(("Auto Import Ready."))
+        # Add a progress indicator
+        self.progressBar = QProgressBar()
+        self.progressBar.setTextVisible(False)
+        self.progressBar.setMaximum(0)  # Indeterminate progress
+        self.progressBar.setVisible(False)
+        self.progressBar.setMaximumHeight(4)
+        # Let qt_material handle the progress bar styling
+        controlsLayout.addWidget(self.progressBar, 1)
 
-    def addText(self, text):
-        self.textview.moveCursor(QTextCursor.End)
-        self.textview.insertPlainText(text)
+        controlsLayout.addStretch()
+
+        mainLayout.addLayout(controlsLayout)
+
+        # Status label
+        self.statusLabel = QLabel("Ready")
+        # Use qt_material property for styling
+        self.statusLabel.setProperty("class", "caption")
+        mainLayout.addWidget(self.statusLabel)
+
+        self.addText("Auto Import Ready.\n", "info")
+
+    def apply_theme(self, theme_name="dark_purple.xml") -> None:
+        """Apply a qt_material theme to the widget."""
+        if QT_MATERIAL_AVAILABLE:
+            apply_stylesheet(self, theme=theme_name)
+            self.addText(f"Theme changed to {theme_name.replace('.xml', '')}\n", "info")
+        else:
+            self.addText("qt_material not available, cannot change theme\n", "warning")
+
+    def addText(self, text, level="info") -> None:
+        """Add formatted text to the log with timestamp, icon and color coding."""
+        cursor = self.textview.textCursor()
+        cursor.movePosition(QTextCursor.End)
+
+        # Clean text: remove leading newlines to ensure timestamp stays at line start
+        clean_text = text.lstrip("\n")
+        leading_newlines = len(text) - len(clean_text)
+
+        # Add any leading newlines first (but not before timestamp)
+        if leading_newlines > 0:
+            cursor.insertText("\n" * leading_newlines)
+
+        # Add timestamp at the start of the actual message line
+        timestamp = QDateTime.currentDateTime().toString("hh:mm:ss")
+        timestamp_format = QTextCharFormat()
+
+        # Use qt_material theme colors
+        palette = self.palette()
+        if QT_MATERIAL_AVAILABLE:
+            # Material design muted text color
+            timestamp_format.setForeground(QColor("#9E9E9E"))
+        else:
+            timestamp_format.setForeground(palette.color(QPalette.Disabled, QPalette.Text))
+
+        cursor.insertText(f"[{timestamp}] ", timestamp_format)
+
+        # Add icon and set color based on level
+        icon_format = QTextCharFormat()
+        text_format = QTextCharFormat()
+
+        if level == "error":
+            # Material Red 500
+            color = QColor("#F44336")
+            icon = "❌ "  # Cross mark
+        elif level == "warning":
+            # Material Orange 500
+            color = QColor("#FF9800")
+            icon = "⚠️  "  # Warning sign
+        elif level == "success":
+            # Material Green 500
+            color = QColor("#4CAF50")
+            icon = "✅ "  # Check mark
+        elif level == "info":
+            # Material Blue 500
+            color = QColor("#2196F3")
+            icon = "ℹ️  "  # Information
+        elif level == "import":
+            # Material Purple 500
+            color = QColor("#9C27B0")
+            icon = "📥 "  # Inbox tray (import)
+        elif level == "export":
+            # Material Indigo 500
+            color = QColor("#3F51B5")
+            icon = "📤 "  # Outbox tray (export)
+        elif level == "process":
+            # Material Deep Orange 500
+            color = QColor("#FF5722")
+            icon = "⚙️  "  # Gear (processing)
+        elif level == "hud":
+            # Material Teal 500
+            color = QColor("#009688")
+            icon = "🎮 "  # Video game controller (HUD)
+        elif level == "file":
+            # Material Brown 500
+            color = QColor("#795548")
+            icon = "📄 "  # Document
+        elif level == "folder":
+            # Material Blue Grey 500
+            color = QColor("#607D8B")
+            icon = "📁 "  # Folder
+        elif level == "network":
+            # Material Light Green 500
+            color = QColor("#8BC34A")
+            icon = "🌐 "  # Globe
+        elif level == "database":
+            # Material Cyan 500
+            color = QColor("#00BCD4")
+            icon = "🗄️  "  # File cabinet
+        elif level == "poker":
+            # Material Red 700
+            color = QColor("#D32F2F")
+            icon = "♠️  "  # Spade suit
+        elif level == "lock":
+            # Material Amber 700
+            color = QColor("#FFA000")
+            icon = "🔒 "  # Lock
+        elif level == "unlock":
+            # Material Light Green 700
+            color = QColor("#689F38")
+            icon = "🔓 "  # Unlock
+        else:
+            # Use theme's normal text color
+            color = palette.color(QPalette.Text)
+            icon = "📝 "  # Memo (default)
+
+        # Set format for both icon and text
+        icon_format.setForeground(color)
+        text_format.setForeground(color)
+
+        # Insert icon and text
+        cursor.insertText(icon, icon_format)
+        cursor.insertText(clean_text, text_format)
+
+        # Ensure the new text is visible
+        self.textview.setTextCursor(cursor)
+        self.textview.ensureCursorVisible()
 
     #   end of GuiAutoImport.__init__
 
-    def browseClicked(self):
-        #   runs when user clicks one of the browse buttons in the auto import tab"""
-        #       Browse is not valid while hud is running, so return immediately
-        if self.pipe_to_hud:
-            return
-        data = self.sender().hackdata
-        current_path = data[1].text()
 
-        newdir = QFileDialog.getExistingDirectory(
-            self, caption=("Please choose the path that you want to Auto Import"), directory=current_path
-        )
-        if newdir:
-            # print dia_chooser.get_filename(), 'selected'
-            data[1].setText(newdir)
-            self.input_settings[data[0]][0] = newdir
-
-    # end def GuiAutoImport.browseClicked
-
-    def do_import(self):
+    def do_import(self) -> bool:
         """Callback for timer to do an import iteration."""
         if self.doAutoImportBool:
             self.importer.autoSummaryGrab()
             self.importer.runUpdated()
-            self.addText(".")
+            # The detailed logging is now handled in Importer.runUpdated()
             return True
         return False
 
-    def reset_startbutton(self):
+    def reset_startbutton(self) -> bool:
         if self.pipe_to_hud is not None:
-            self.startButton.set_label(("Stop Auto Import"))
+            self.startButton.set_label("Stop Auto Import")
         else:
-            self.startButton.set_label(("Start Auto Import"))
+            self.startButton.set_label("Start Auto Import")
 
         return False
 
-    def detect_hh_dirs(self, widget, data):
-        """Attempt to find user hand history directories for enabled sites"""
+    def detect_hh_dirs(self, widget, data) -> None:
+        """Attempt to find user hand history directories for enabled sites."""
         the_sites = self.config.get_supported_sites()
         for site in the_sites:
             params = self.config.get_site_parameters(site)
@@ -160,25 +325,25 @@ class GuiAutoImport(QWidget):
                 if os.name == "posix":
                     if self.posix_detect_hh_dirs(site):
                         # data[1].set_text(dia_chooser.get_filename())
-                        self.input_settings[(site, "hh")][0]
                         pass
                 elif os.name == "nt":
                     # Sorry
                     pass
 
-    def posix_detect_hh_dirs(self, site):
+    def posix_detect_hh_dirs(self, site) -> bool:
         defaults = {
             "PokerStars": "~/.wine/drive_c/Program Files/PokerStars/HandHistory",
         }
         if site == "PokerStars":
             directory = os.path.expanduser(defaults[site])
-            for file in [file for file in os.listdir(directory) if file not in [".", ".."]]:
+            for file in [
+                file for file in os.listdir(directory) if file not in [".", ".."]
+            ]:
                 log.debug(file)
         return False
 
-    def startClicked(self):
-        """runs when user clicks start on auto import tab"""
-
+    def startClicked(self) -> None:
+        """Runs when user clicks start on auto import tab."""
         # Check to see if we have an open file handle to the HUD and open one if we do not.
         # bufsize = 1 means unbuffered
         # We need to close this file handle sometime.
@@ -195,89 +360,139 @@ class GuiAutoImport(QWidget):
             # - Ideally we want to release the lock if the auto-import is killed by some
             # kind of exception - is this possible?
             if self.settings["global_lock"].acquire(wait=False, source="AutoImport"):
-                self.addText("\n" + ("Global lock taken ... Auto Import Started.") + "\n")
+                self.addText("\nGlobal lock taken ... Auto Import Started.\n", "lock")
                 self.doAutoImportBool = True
                 self.intervalEntry.setEnabled(False)
+                self.progressBar.setVisible(True)
+                self.statusLabel.setText("Auto Import Running...")
+
                 if self.pipe_to_hud is None:
-                    log.debug("start hud- pipe_to_hud is none:")
+                    log.debug("start hud - pipe_to_hud is none:")
                     try:
+                        # ------------------------------------------------------------------
+                        # 1) build command line
+                        # ------------------------------------------------------------------
                         if self.config.install_method == "exe":
                             command = "HUD_main.exe"
                             bs = 0
+
                         elif self.config.install_method == "app":
-                            base_path = sys._MEIPASS if getattr(sys, "frozen", False) else sys.path[0]
+                            base_path = (
+                                sys._MEIPASS
+                                if getattr(sys, "frozen", False)
+                                else sys.path[0]
+                            )
                             command = os.path.join(base_path, "HUD_main")
                             if not os.path.isfile(command):
-                                raise FileNotFoundError(f"HUD_main not found at {command}")
-                            bs = 1
-                        elif os.name == "nt":
-                            path = to_raw(sys.path[0])
-                            log.debug(f"start hud - path: {path}")
-                            path2 = os.getcwd()
-                            log.debug(f"start hud - path2: {path2}")
-                            if win32console.GetConsoleWindow() == 0:
-                                command = 'pythonw "' + path + '\HUD_main.pyw" ' + self.settings["cl_options"]
-                                log.debug(f"start hud - command: {command}")
-                            else:
-                                command = 'python "' + path + '\HUD_main.pyw" ' + self.settings["cl_options"]
-                                log.debug(f"start hud - command: {command}")
-                            bs = 0
-                        else:
-                            base_path = sys._MEIPASS if getattr(sys, "frozen", False) else sys.path[0] or os.getcwd()
-                            command = os.path.join(base_path, "HUD_main.pyw")
-                            if not os.path.isfile(command):
-                                self.addText("\n" + ("*** %s was not found") % (command))
-                            command = [
-                                command,
-                            ] + str.split(self.settings["cl_options"], ".")
+                                msg = f"HUD_main not found at {command}"
+                                raise FileNotFoundError(msg)
                             bs = 1
 
-                        log.info(("opening pipe to HUD"))
-                        log.debug(f"Running {command.__repr__()}")
+                        elif os.name == "nt":      # Windows installation source
+                            path = to_raw(sys.path[0])
+                            use_pythonw = win32console.GetConsoleWindow() == 0
+                            interpreter = "pythonw" if use_pythonw else "python"
+                            command = (
+                                f'{interpreter} "{path}\\HUD_main.pyw" '
+                                f"{self.settings['cl_options']}"
+                            )
+                            bs = 0
+
+                        else:                      # Linux & macOS installation source
+                            base_path = (
+                                sys._MEIPASS
+                                if getattr(sys, "frozen", False)
+                                else sys.path[0] or os.getcwd()
+                            )
+                            command = os.path.join(base_path, "HUD_main.pyw")
+                            if not os.path.isfile(command):
+                                self.addText(f"\n*** {command} was not found", "error")
+                            command = [command, *self.settings["cl_options"].split()]
+                            bs = 1
+
+                        # ------------------------------------------------------------------
+                        # 2) prepare env for sub process
+                        # ------------------------------------------------------------------
+                        env = None  # default
+
+                        if sys.platform.startswith("linux") and os.getenv("FPDB_FORCE_X11") == "1":
+                            env = os.environ.copy()
+                            env.setdefault("QT_QPA_PLATFORM", "xcb")
+                            env.setdefault("FPDB_FORCE_X11", "1")
+
+                        log.info("opening pipe to HUD")
+                        log.debug(f"Running {command!r} with bs={bs}")
+
+                        # ------------------------------------------------------------------
+                        # 3) launchHUD
+                        # ------------------------------------------------------------------
+                        popen_kwargs = {
+                            "bufsize": bs,
+                            "stdin": subprocess.PIPE,
+                            "universal_newlines": True,
+                        }
+                        # Capture stdout/err for windows « exe »
                         if self.config.install_method == "exe" or (
                             os.name == "nt" and win32console.GetConsoleWindow() == 0
                         ):
-                            self.pipe_to_hud = subprocess.Popen(
-                                command,
-                                bufsize=bs,
-                                stdin=subprocess.PIPE,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                universal_newlines=True,
-                            )
-                        else:
-                            self.pipe_to_hud = subprocess.Popen(
-                                command, bufsize=bs, stdin=subprocess.PIPE, universal_newlines=True
-                            )
+                            popen_kwargs.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+                        if env is not None:
+                            popen_kwargs["env"] = env
+
+                        self.pipe_to_hud = subprocess.Popen(command, **popen_kwargs)
 
                     except Exception:
                         error_msg = f"GuiAutoImport Error opening pipe: {traceback.format_exc()}"
                         log.warning(error_msg)
-                        self.addText(f"\n*** {error_msg}")
+                        self.addText(f"\n*** {error_msg}", "error")
                     else:
-                        for site, type in self.input_settings:
-                            self.importer.addImportDirectory(
-                                self.input_settings[(site, type)][0], monitor=True, site=(site, type)
-                            )
-                            self.addText(
-                                "\n * " + ("Add %s import directory %s") % (site, self.input_settings[(site, type)][0])
-                            )
-                            self.do_import()
+                        # ------------------------------------------------------------------
+                        # 4) path config, timer, etc.
+                        # ------------------------------------------------------------------
+                        the_sites = self.config.get_supported_sites()
+                        for site in the_sites:
+                            params = self.config.get_site_parameters(site)
+                            if params["enabled"]:
+                                paths = self.config.get_default_paths(site)
+                                if paths.get("hud-defaultPath"):
+                                    self.importer.addImportDirectory(
+                                        paths["hud-defaultPath"], monitor=True, site=(site, "hh"),
+                                    )
+                                    self.addText(
+                                        f"\n * Add {site} hand history directory: "
+                                        f"{paths['hud-defaultPath']}", "folder",
+                                    )
+                                if paths.get("hud-defaultTSPath"):
+                                    self.importer.addImportDirectory(
+                                        paths["hud-defaultTSPath"], monitor=True, site=(site, "ts"),
+                                    )
+                                    self.addText(
+                                        f"\n * Add {site} tournament summary directory: "
+                                        f"{paths['hud-defaultTSPath']}", "folder",
+                                    )
+
+                        self.do_import()
                         interval = self.intervalEntry.value()
                         self.importtimer = QTimer()
                         self.importtimer.timeout.connect(self.do_import)
                         self.importtimer.start(interval * 1000)
 
             else:
-                self.addText("\n" + ("Auto Import aborted.") + ("Global lock not available."))
-        else:  # toggled off
+                self.addText("\nAuto Import aborted. Global lock not available.", "error")
+
+        else:  # bouton « Start » décoché → arrêt
             self.doAutoImportBool = False
-            self.importtimer = None
+            if self.importtimer:
+                self.importtimer.stop()
+                self.importtimer = None
             self.importer.autoSummaryGrab(True)
             self.settings["global_lock"].release()
-            self.addText("\n" + ("Stopping Auto Import.") + ("Global lock released."))
+            self.addText("\nStopping Auto Import. Global lock released.", "unlock")
+            self.progressBar.setVisible(False)
+            self.statusLabel.setText("Ready")
             if self.pipe_to_hud and self.pipe_to_hud.poll() is not None:
-                self.addText("\n * " + ("Stop Auto Import") + ": " + ("HUD already terminated."))
+                self.addText("\n * Stop Auto Import: HUD already terminated.", "hud")
             else:
                 if self.pipe_to_hud:
                     self.pipe_to_hud.terminate()
@@ -288,86 +503,48 @@ class GuiAutoImport(QWidget):
     # end def GuiAutoImport.startClicked
 
     def get_vbox(self):
-        """returns the vbox of this thread"""
+        """Returns the vbox of this thread."""
         return self.mainVBox
 
     # end def get_vbox
 
-    # Create the site line given required info and setup callbacks
-    # enabling and disabling sites from this interface not possible
-    # expects a box to layout the line horizontally
-    def createSiteLine(self, hbox1, hbox2, site, iconpath, type, path, filter_name, active=True):
-        label = QLabel(("%s auto-import:") % site)
-        hbox1.addWidget(label)
 
-        dirPath = QLineEdit()
-        dirPath.setText(path)
-        hbox1.addWidget(dirPath)
-        #       Anything typed into dirPath was never recognised (only the browse button works)
-        #       so just prevent entry to avoid user confusion
-        dirPath.setReadOnly(True)
+    def _setup_config_observer(self) -> None:
+        """Configure the configuration observer for auto-import."""
+        if DYNAMIC_CONFIG_AVAILABLE:
+            try:
+                config_manager = ConfigurationManager()
 
-        browseButton = QPushButton(("Browse..."))
-        browseButton.hackdata = [(site, type)] + [dirPath]
-        browseButton.clicked.connect(self.browseClicked)  # , [(site,type)] + [dirPath])
-        hbox2.addWidget(browseButton)
+                # Ensure ConfigurationManager is initialized
+                if not config_manager.initialized:
+                    config_manager.initialize(self.config.file)
 
-        label = QLabel("filter:")
-        hbox2.addWidget(label)
+                # Create and register observer
+                self.config_observer = AutoImportConfigObserver(self)
+                config_manager.register_observer(self.config_observer)
 
-        #       Anything typed into filter was never recognised
-        #       so just grey it out to avoid user confusion
-        filterLine = QLineEdit()
-        filterLine.setText(filter_name)
-        filterLine.setEnabled(False)
-        hbox2.addWidget(filterLine)
+                log.info("Configuration observer registered for auto-import")
 
-    def addSites(self, vbox1, vbox2):
-        the_sites = self.config.get_supported_sites()
-        log.debug(f"add site {the_sites}")
-        for site in the_sites:
-            pathHBox1 = QHBoxLayout()
-            vbox1.addLayout(pathHBox1)
-            pathHBox2 = QHBoxLayout()
-            vbox2.addLayout(pathHBox2)
+            except Exception as e:
+                log.exception(f"Error during observer configuration: {e}")
 
-            params = self.config.get_site_parameters(site)
-            paths = self.config.get_default_paths(site)
-
-            self.createSiteLine(
-                pathHBox1,
-                pathHBox2,
-                site,
-                False,
-                "hh",
-                paths["hud-defaultPath"],
-                params["converter"],
-                params["enabled"],
-            )
-            self.input_settings[(site, "hh")] = [paths["hud-defaultPath"]] + [params["converter"]]
-
-            if "hud-defaultTSPath" in paths:
-                pathHBox1 = QHBoxLayout()
-                vbox1.addLayout(pathHBox1)
-                pathHBox2 = QHBoxLayout()
-                vbox2.addLayout(pathHBox2)
-                self.createSiteLine(
-                    pathHBox1,
-                    pathHBox2,
-                    site,
-                    False,
-                    "ts",
-                    paths["hud-defaultTSPath"],
-                    params["summaryImporter"],
-                    params["enabled"],
-                )
-                self.input_settings[(site, "ts")] = [paths["hud-defaultTSPath"]] + [params["summaryImporter"]]
-        log.debug(f"input_settings {self.input_settings}")
+    def updatePaths(self) -> None:
+        """Update display of import paths (called by observer)."""
+        # This method can be called to refresh interface
+        # after dynamic configuration change
+        log.debug("Updating import paths in interface")
 
 
 if __name__ == "__main__":
     parser = OptionParser()
-    parser.add_option("-q", "--quiet", action="store_false", dest="gui", default=True, help="don't start gui")
+    parser.add_option(
+        "-q",
+        "--quiet",
+        action="store_false",
+        dest="gui",
+        default=True,
+        help="don't start gui",
+    )
     (options, argv) = parser.parse_args()
 
     config = Configuration.Config()
