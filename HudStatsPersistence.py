@@ -102,7 +102,18 @@ class HudStatsPersistence:
                 return None
 
             log.debug(f"HUD stats loaded for table {table_key}")
-            return cache_data
+            # Return the HUD data without cache metadata (timestamp)
+            hud_data = {
+                "table_key": cache_data.get("table_key", table_key),
+                "stat_dict": cache_data.get("stat_dict", {}),
+                "cards": cache_data.get("cards", {}),
+                "poker_game": cache_data.get("poker_game", ""),
+                "game_type": cache_data.get("game_type", ""),
+                "max_seats": cache_data.get("max_seats", 0),
+                "hud_params": cache_data.get("hud_params", {}),
+                "last_hand_id": cache_data.get("last_hand_id", ""),
+            }
+            return hud_data
 
         except Exception as e:
             log.exception(f"Failed to load HUD stats for table {table_key}: {e}")
@@ -122,6 +133,15 @@ class HudStatsPersistence:
 
             if cache_file.exists():
                 cache_file.unlink()
+                # On Windows, verify file is actually deleted
+                import platform
+                if platform.system() == "Windows":
+                    # Small delay to ensure Windows filesystem operations complete
+                    import time
+                    time.sleep(0.01)
+                    if cache_file.exists():
+                        log.warning(f"File deletion delayed on Windows for {cache_file}")
+                        return False
                 log.debug(f"Cached stats removed for table {table_key}")
 
             return True
