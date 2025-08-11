@@ -27,19 +27,38 @@ dependencies = [
     "pyzmq==26.0.3",
     "cachetools==5.5.0",
     "colorlog==6.9.0",
+    "pytest-qt>=4.4.0",
+    "sphinx>=7.4.7",
+    "furo>=2025.7.19",
+    "myst-parser>=4.0.1",
+    "sphinx-autodoc-typehints>=2.3.0",
+    
 ]
 
 [project.optional-dependencies]
+docs = [
+    "sphinx<8.0",
+    "furo",
+    "myst-parser",
+    "sphinx-autodoc-typehints",
+]
 test = [
     "pytest>=8.3.2",
     "pytest-qt>=4.0.2",
     "pytest-cov>=5.0.0",
-    "PyQt5==5.15.6",
+    "PyQt5==5.15.11",
+    "ruff>=0.12.8",
+]
+test-no-pyqt = [
+    "pytest>=8.3.2",
+    "pytest-qt>=4.0.2",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.12.8",
 ]
 build = ["pyinstaller>=6.9.0", "wheel>=0.42.0"]
 build-linux = ["python-appimage==1.2.7"]
-windows = ["pywin32==306", "configparser", "PyQt5==5.15.6"]
-linux = ["xcffib==1.5.0", "PyQt5==5.15.6"]
+windows = ["pywin32==306", "configparser", "PyQt5==5.15.11"]
+linux = ["xcffib==1.5.0", "PyQt5==5.15.11"]
 macos = ["pyobjc==10.3.1"]
 mysql = ["mysqlclient==2.2.4"]
 postgresql = ["psycopg2-binary==2.9.9"]
@@ -47,7 +66,6 @@ postgresql = ["psycopg2-binary==2.9.9"]
 [tool.ruff]
 extend-include = ["*.pyw"]
 extend-exclude = ["build", "archives"]
-# Lines configuration
 line-length = 120
 indent-width = 4
 
@@ -55,12 +73,25 @@ indent-width = 4
 exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
-exclude = ["*.ipynb"]
+select = ["ALL"]
 ignore = [
-    "E401", # Multiple imports on one line"
-    "E731", # Do not assign a `lambda` expression, use a `def`
-    "E713", # Test for membership should be `not in`
+    "E401",  # Multiple imports on one line
+    "E731",  # Assign lambda
+    "E713",  # Use 'not in'
+    "ANN401",  # Unused type annotation
+    "N802",  # Function name should be lowercase
+    "TD003", # Missing issue link on the line following this TODO
+    "FIX002" # Line contains TODO, consider resolving the issue
 ]
+
+# Style des doc-strings (déplacé ici pour éviter l’avertissement de dépréciation)
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+# Tolérances spécifiques aux tests
+[tool.ruff.lint.per-file-ignores]
+"test/*.py"  = ["E712", "S101", "SLF001", "PLR2004"]
+"test_*.py"  = ["E712", "S101", "SLF001", "PLR2004"]
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -75,4 +106,34 @@ exclude = [
     "archives",
     "resources",
     "documentations",
+]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/test/*",
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/archives/*",
+    "*/regression-test-files/*",
+    "*/pypoker-eval/*",
+    "*/build/*",
+    "*/dist/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
 ]

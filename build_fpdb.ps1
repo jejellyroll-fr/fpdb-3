@@ -33,18 +33,23 @@ $SECOND_SCRIPT = "HUD_main.pyw"
 $PYINSTALLER_OPTIONS = "--noconfirm --onedir --windowed --log-level=DEBUG"
 
 # List of all files
+
+
 FILES=@(
+    "AutoImportConfigObserver.py",
     "Aux_Base.py",
     "Aux_Classic_Hud.py",
     "Aux_Hud.py",
-    "BetfairToFpdb.py",
-    "BetOnlineToFpdb.py",
     "BovadaSummary.py",
     "BovadaToFpdb.py",
     "CakeToFpdb.py",
     "Card.py",
     "card_path.py",
+    "ConfigInitializer.py",
+    "ConfigObservers.py",
     "Configuration.py",
+    "ConfigReloadWidget.py",
+    "ConfigurationManager.py",
     "Database.py",
     "Deck.py",
     "DerivedStats.py",
@@ -66,24 +71,24 @@ FILES=@(
     "GuiTourneyGraphViewer.py",
     "GuiTourneyPlayerStats.py",
     "Hand.py",
+    "HandDataReporter.py",
     "HandHistory.py",
     "HandHistoryConverter.py",
     "Hud.py",
+    "HudStatsPersistence.py",
     "HUD_config.test.xml",
     "HUD_config.xml",
     "HUD_config.xml.example",
     "HUD_main.pyw",
     "IdentifySite.py",
+    "importer_cli.py",
     "Importer.py",
+    "ImprovedErrorHandler.py",
     "interlocks.py",
     "iPokerSummary.py",
     "iPokerToFpdb.py",
     "KingsClubToFpdb.py",
     "L10n.py",
-    "logging.conf",
-    "MergeStructures.py",
-    "MergeSummary.py",
-    "MergeToFpdb.py",
     "Mucked.py",
     "Options.py",
     "OSXTables.py",
@@ -109,7 +114,14 @@ FILES=@(
     "WinningToFpdb.py",
     "WinTables.py",
     "XTables.py",
-    "loggingFpdb.py"
+    "loggingFpdb.py",
+    "ModernHudPreferences.py",
+    "ModernPopup.py",
+    "ModernSeatPreferences.py",
+    "ModernSitePreferences.py",
+    "PopupIcons.py",
+    "PopupThemes.py",
+    "SmartHudManager.py"
 )
 
 $FOLDERS = @(

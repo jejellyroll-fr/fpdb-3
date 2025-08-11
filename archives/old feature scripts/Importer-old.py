@@ -16,27 +16,28 @@
 #In the "official" distribution you can find the license in agpl-3.0.txt.
 
 import L10n
+
 _ = L10n.get_translation()
 
 #    Standard Library modules
 
-import os  # todo: remove this once import_dir is in fpdb_import
-from time import time, sleep, clock
 import datetime
-import Queue
-import shutil
+import logging
+import os  # todo: remove this once import_dir is in fpdb_import
 import re
+import shutil
+import traceback
+from time import clock, sleep, time
 
-import logging, traceback
-
-from PyQt5.QtWidgets import QProgressBar, QLabel, QDialog, QVBoxLayout
+import Queue
 from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout
 
+import Configuration
 #    fpdb/FreePokerTools modules
 import Database
-import Configuration
 import IdentifySite
-from Exceptions import FpdbParseError, FpdbHandDuplicate, FpdbHandPartial
+from Exceptions import FpdbHandDuplicate, FpdbHandPartial, FpdbParseError
 
 try:
     import xlrd

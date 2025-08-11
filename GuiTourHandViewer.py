@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright 2010-2011 Maxime Grandchamp
 # This program is free software: you can redistribute it and/or modify
@@ -24,13 +23,7 @@
 # _ = L10n.get_translation()
 
 from functools import partial
-import Hand
-import Card
-import Configuration
-import Database
-import SQL
-import Filters
-import Deck
+from io import StringIO
 
 from PyQt5.QtCore import QCoreApplication, QSortFilterProxyModel, Qt
 from PyQt5.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
@@ -45,15 +38,21 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
 )
 
-from io import StringIO
+import Card
+import Configuration
+import Database
+import Deck
+import Filters
 import GuiReplayer
+import Hand
+import SQL
 from loggingFpdb import get_logger
 
-log = get_logger("tourhandViewer")
+log = get_logger("gui_tour_hand_viewer")
 
 
 class TourHandViewer(QSplitter):
-    def __init__(self, config, querylist, mainwin):
+    def __init__(self, config, querylist, mainwin) -> None:
         QSplitter.__init__(self, mainwin)
         self.config = config
         self.main_window = mainwin
@@ -149,15 +148,19 @@ class TourHandViewer(QSplitter):
                 "Total Pot",
                 "Rake",
                 "SiteHandId",
-            ]
+            ],
         )
 
         self.view.doubleClicked.connect(self.row_activated)
         self.view.contextMenuEvent = self.contextMenu
         self.filterModel.rowsInserted.connect(
-            lambda index, start, end: [self.view.resizeRowToContents(r) for r in range(start, end + 1)]
+            lambda index, start, end: [
+                self.view.resizeRowToContents(r) for r in range(start, end + 1)
+            ],
         )
-        self.filterModel.filterAcceptsRow = lambda row, sourceParent: self.is_row_in_card_filter(row)
+        self.filterModel.filterAcceptsRow = (
+            lambda row, sourceParent: self.is_row_in_card_filter(row)
+        )
 
         self.view.resizeColumnsToContents()
         self.view.setSortingEnabled(True)
@@ -167,8 +170,8 @@ class TourHandViewer(QSplitter):
         ranks = (14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2)
 
         card_images = [0] * 53
-        for j in range(0, 13):
-            for i in range(0, 4):
+        for j in range(13):
+            for i in range(4):
                 loc = Card.cardFromValueSuit(ranks[j], suits[i])
                 card_image = self.deck_instance.card(suits[i], ranks[j])
                 card_images[loc] = card_image
@@ -176,8 +179,10 @@ class TourHandViewer(QSplitter):
         card_images[0] = back_image
         return card_images
 
-    def loadHands(self, checkState):
-        hand_ids = self.get_hand_ids_from_date_range(self.filters.getDates()[0], self.filters.getDates()[1])
+    def loadHands(self, checkState) -> None:
+        hand_ids = self.get_hand_ids_from_date_range(
+            self.filters.getDates()[0], self.filters.getDates()[1],
+        )
         # ! print(hand_ids)
         self.reload_hands(hand_ids)
 
@@ -189,7 +194,7 @@ class TourHandViewer(QSplitter):
         q = self.filters.replace_placeholders_with_filter_values(q)
 
         # debug
-        # print("Requête SQL filtrée :", q)
+        # print("Filtered SQL query:", q)
 
         c = self.db.get_cursor()
         c.execute(q)
@@ -225,10 +230,9 @@ class TourHandViewer(QSplitter):
             if suit1 == suit2:
                 suit1 += 4
             return card1 * 14 * 14 + card2 * 14 + suit1
-        else:
-            return 0
+        return 0
 
-    def reload_hands(self, handids):
+    def reload_hands(self, handids) -> None:
         self.hands = {}
         self.model.removeRows(0, self.model.rowCount())
         if len(handids) == 0:
@@ -248,14 +252,14 @@ class TourHandViewer(QSplitter):
                 self.view.resizeColumnsToContents()
         self.view.resizeColumnsToContents()
 
-    def addHandRow(self, handid, hand):
+    def addHandRow(self, handid, hand) -> None:
         hero = self.filters.getHeroes().get(hand.sitename)
         if not hero:
             log.warning(f"Hero not found for site: {hand.sitename}")
             return
 
         log.debug(f"Processing hand: {handid} for hero: {hero}")
-        log.debug(f"completed info from hand: {str(hand)}")
+        log.debug(f"completed info from hand: {hand!s}")
 
         won = 0
         if hero in list(hand.collectees.keys()):
@@ -301,7 +305,9 @@ class TourHandViewer(QSplitter):
 
             post_actions = ""
             if "F" not in pre_actions:  # if player hasn't folded preflop
-                post_actions = hand.get_actions_short_streets(hero, "FLOP", "TURN", "RIVER")
+                post_actions = hand.get_actions_short_streets(
+                    hero, "FLOP", "TURN", "RIVER",
+                )
             log.debug(f"Postflop actions for hero: {post_actions}")
 
             row = [
@@ -322,7 +328,11 @@ class TourHandViewer(QSplitter):
                 str(sitehandid),
             ]
         elif hand.gametype["base"] == "stud":
-            third = " ".join(hand.holecards["THIRD"][hero][0]) + " " + " ".join(hand.holecards["THIRD"][hero][1])
+            third = (
+                " ".join(hand.holecards["THIRD"][hero][0])
+                + " "
+                + " ".join(hand.holecards["THIRD"][hero][1])
+            )
             later_streets = []
             later_streets.extend(hand.holecards["FOURTH"][hero][0])
             later_streets.extend(hand.holecards["FIFTH"][hero][0])
@@ -332,9 +342,13 @@ class TourHandViewer(QSplitter):
             pre_actions = hand.get_actions_short(hero, "THIRD")
             post_actions = ""
             if "F" not in pre_actions:
-                post_actions = hand.get_actions_short_streets(hero, "FOURTH", "FIFTH", "SIXTH", "SEVENTH")
+                post_actions = hand.get_actions_short_streets(
+                    hero, "FOURTH", "FIFTH", "SIXTH", "SEVENTH",
+                )
 
-            log.debug(f"Stud hand details: Third: {third}, Later streets: {later_streets}")
+            log.debug(
+                f"Stud hand details: Third: {third}, Later streets: {later_streets}",
+            )
 
             row = [
                 hand.getStakesAsString(),
@@ -383,12 +397,12 @@ class TourHandViewer(QSplitter):
         log.debug(f"Row added to model: {row}")
         self.model.appendRow(modelrow)
 
-    def copyHandToClipboard(self, checkState, hand):
+    def copyHandToClipboard(self, checkState, hand) -> None:
         handText = StringIO()
         hand.writeHand(handText)
         QApplication.clipboard().setText(handText.getvalue())
 
-    def contextMenu(self, event):
+    def contextMenu(self, event) -> None:
         index = self.view.currentIndex()
         if index.row() < 0:
             return
@@ -399,15 +413,17 @@ class TourHandViewer(QSplitter):
         m.move(event.globalPos())
         m.exec_()
 
-    def filter_cards_cb(self, card):
+    def filter_cards_cb(self, card) -> None:
         if hasattr(self, "hands"):
             self.filterModel.invalidateFilter()
 
     def is_row_in_card_filter(self, rownum):
-        """Returns true if the cards of the given row are in the card filter"""
+        """Returns true if the cards of the given row are in the card filter."""
         # Does work but all cards that should NOT be displayed have to be clicked.
         card_filter = self.filters.getCards()
-        hcs = self.model.data(self.model.index(rownum, self.colnum["Street0"]), Qt.UserRole + 1).split(" ")
+        hcs = self.model.data(
+            self.model.index(rownum, self.colnum["Street0"]), Qt.UserRole + 1,
+        ).split(" ")
 
         if "0x" in hcs:  # if cards are unknown return True
             return True
@@ -429,10 +445,14 @@ class TourHandViewer(QSplitter):
 
         return card_filter.get(abbr, True)  # Default to True if key is not found
 
-    def row_activated(self, index):
-        handlist = list(sorted(self.hands.keys()))
-        self.replayer = GuiReplayer.GuiReplayer(self.config, self.sql, self.main_window, handlist)
-        index = handlist.index(int(index.sibling(index.row(), self.colnum["HandId"]).data()))
+    def row_activated(self, index) -> None:
+        handlist = sorted(self.hands.keys())
+        self.replayer = GuiReplayer.GuiReplayer(
+            self.config, self.sql, self.main_window, handlist,
+        )
+        index = handlist.index(
+            int(index.sibling(index.row(), self.colnum["HandId"]).data()),
+        )
         self.replayer.play_hand(index)
 
     def importhand(self, handid=1):
@@ -465,8 +485,6 @@ class TourHandViewer(QSplitter):
             painter.drawPixmap(x, 0, self.cardImages[card])
             x += card_width
         return pixbuf
-
-
 
 
 if __name__ == "__main__":

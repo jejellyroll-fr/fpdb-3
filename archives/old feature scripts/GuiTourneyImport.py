@@ -1,36 +1,34 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Copyright 2008-2011 Carl Gherardi
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU Affero General Public License as published by
-#the Free Software Foundation, version 3 of the License.
+# Copyright 2008-2011 Carl Gherardi
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU Affero General Public License
-#along with this program. If not, see <http://www.gnu.org/licenses/>.
-#In the "official" distribution you can find the license in agpl-3.0.txt.
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# In the "official" distribution you can find the license in agpl-3.0.txt.
 
-from __future__ import print_function
-from __future__ import division
+from __future__ import division, print_function
 
-
-from past.utils import old_div
-#import L10n
-#_ = L10n.get_translation()
+import codecs
+import datetime
+import logging
 
 #    Standard Library modules
 import os
-import sys
-from time import time
-import traceback
-import datetime
-import codecs
 import re
+import sys
+import traceback
+from time import time
+
+from past.utils import old_div
 
 #    fpdb/FreePokerTools modules
 import Configuration
@@ -38,7 +36,10 @@ import Database
 import Options
 from Exceptions import FpdbParseError
 
-import logging
+# import L10n
+# _ = L10n.get_translation()
+
+
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
@@ -51,7 +52,6 @@ class GuiTourneyImport(object):
         while gtk.events_pending():
             gtk.main_iteration(False)
 
-
     def load_clicked(self, widget, data=None):
         stored = None
         dups = None
@@ -59,24 +59,26 @@ class GuiTourneyImport(object):
         errs = None
         ttime = None
 
-        if self.settings['global_lock'].acquire(wait=False, source="GuiTourneyImport"):
+        if self.settings["global_lock"].acquire(wait=False, source="GuiTourneyImport"):
             selected = self.chooser.get_filenames()
 
             sitename = self.cbfilter.get_model()[self.cbfilter.get_active()][0]
 
             for selection in selected:
-                self.importer.addImportFileOrDir(selection, site = sitename)
+                self.importer.addImportFileOrDir(selection, site=sitename)
             starttime = time()
             (stored, errs) = self.importer.runImport()
 
             ttime = time() - starttime
             if ttime == 0:
                 ttime = 1
-            print(('Tourney import done: Stored: %d, Errors: %d in %s seconds - %.0f/sec')\
-                     % (stored, errs, ttime, old_div((stored+0.0), ttime)))
+            print(
+                ("Tourney import done: Stored: %d, Errors: %d in %s seconds - %.0f/sec")
+                % (stored, errs, ttime, old_div((stored + 0.0), ttime))
+            )
             self.importer.clearFileList()
 
-            self.settings['global_lock'].release()
+            self.settings["global_lock"].release()
         else:
             print(("tourney import aborted - global lock not available"))
 
@@ -84,7 +86,7 @@ class GuiTourneyImport(object):
         """returns the vbox of this thread"""
         return self.vbox
 
-    def __init__(self, settings, config, sql = None, parent = None):
+    def __init__(self, settings, config, sql=None, parent=None):
         self.settings = settings
         self.config = config
         self.parent = parent
@@ -95,85 +97,94 @@ class GuiTourneyImport(object):
         self.vbox.show()
 
         self.chooser = gtk.FileChooserWidget()
-        self.chooser.set_filename(self.settings['bulkImport-defaultPath'])
+        self.chooser.set_filename(self.settings["bulkImport-defaultPath"])
         self.chooser.set_select_multiple(True)
         self.chooser.set_show_hidden(True)
         self.vbox.add(self.chooser)
         self.chooser.show()
 
-#    Table widget to hold the settings
+        #    Table widget to hold the settings
         self.table = gtk.Table(rows=5, columns=5, homogeneous=False)
         self.vbox.add(self.table)
         self.table.show()
 
-#    label - tsc 
+        #    label - tsc
         self.lab_filter = gtk.Label(("Site filter:"))
-        self.table.attach(self.lab_filter, 1, 2, 2, 3, xpadding=0, ypadding=0,
-                          yoptions=gtk.SHRINK)
+        self.table.attach(
+            self.lab_filter, 1, 2, 2, 3, xpadding=0, ypadding=0, yoptions=gtk.SHRINK
+        )
         self.lab_filter.show()
         self.lab_filter.set_justify(gtk.JUSTIFY_RIGHT)
         self.lab_filter.set_alignment(1.0, 0.5)
 
-#    ComboBox - filter
+        #    ComboBox - filter
         self.cbfilter = gtk.combo_box_new_text()
-        disabled_sites = []                                # move disabled sites to bottom of list
+        disabled_sites = []  # move disabled sites to bottom of list
         for w in self.config.hhcs:
-            print("%s = '%s'" %(w, self.config.hhcs[w].summaryImporter))
+            print("%s = '%s'" % (w, self.config.hhcs[w].summaryImporter))
             try:
                 # Include sites with a tourney summary importer, and enabled
-                if self.config.supported_sites[w].enabled and self.config.hhcs[w].summaryImporter != '':
+                if (
+                    self.config.supported_sites[w].enabled
+                    and self.config.hhcs[w].summaryImporter != ""
+                ):
                     self.cbfilter.append_text(w)
                 else:
                     disabled_sites.append(w)
-            except: # self.supported_sites[w] may not exist if hud_config is bad
+            except:  # self.supported_sites[w] may not exist if hud_config is bad
                 disabled_sites.append(w)
         for w in disabled_sites:
-            if self.config.hhcs[w].summaryImporter != '':
+            if self.config.hhcs[w].summaryImporter != "":
                 self.cbfilter.append_text(w)
         self.cbfilter.set_active(0)
-        self.table.attach(self.cbfilter, 2, 3, 2, 3, xpadding=10, ypadding=1,
-                          yoptions=gtk.SHRINK)
+        self.table.attach(
+            self.cbfilter, 2, 3, 2, 3, xpadding=10, ypadding=1, yoptions=gtk.SHRINK
+        )
         self.cbfilter.show()
 
-#    button - Import
-        self.load_button = gtk.Button(('Bulk Import'))  # todo: rename variables to import too
-        self.load_button.connect('clicked', self.load_clicked,
-                                 ('Import clicked'))
-        self.table.attach(self.load_button, 2, 3, 4, 5, xpadding=0, ypadding=0,
-                          yoptions=gtk.SHRINK)
+        #    button - Import
+        self.load_button = gtk.Button(
+            ("Bulk Import")
+        )  # todo: rename variables to import too
+        self.load_button.connect("clicked", self.load_clicked, ("Import clicked"))
+        self.table.attach(
+            self.load_button, 2, 3, 4, 5, xpadding=0, ypadding=0, yoptions=gtk.SHRINK
+        )
         self.load_button.show()
 
-#    label - spacer (keeps rows 3 & 5 apart)
+        #    label - spacer (keeps rows 3 & 5 apart)
         self.lab_spacer = gtk.Label()
-        self.table.attach(self.lab_spacer, 3, 5, 3, 4, xpadding=0, ypadding=0,
-                          yoptions=gtk.SHRINK)
+        self.table.attach(
+            self.lab_spacer, 3, 5, 3, 4, xpadding=0, ypadding=0, yoptions=gtk.SHRINK
+        )
         self.lab_spacer.show()
 
-class SummaryImporter(object):
-    def __init__(self, config, sql = None, parent = None, caller = None):
-        self.config     = config
-        self.database   = Database.Database(self.config)
-        self.sql        = sql
-        self.parent     = parent
-        self.caller     = caller
-        self.settings   = { 'testData':False }
 
-        self.filelist   = {}
-        self.dirlist    = {}
+class SummaryImporter(object):
+    def __init__(self, config, sql=None, parent=None, caller=None):
+        self.config = config
+        self.database = Database.Database(self.config)
+        self.sql = sql
+        self.parent = parent
+        self.caller = caller
+        self.settings = {"testData": False}
+
+        self.filelist = {}
+        self.dirlist = {}
 
         self.updatedsize = {}
         self.updatedtime = {}
 
     def setPrintTestData(self, value):
-        self.settings['testData'] = value
+        self.settings["testData"] = value
 
-    def addImportFile(self, filename, site = "default", tsc = "passthrough"):
+    def addImportFile(self, filename, site="default", tsc="passthrough"):
         if filename in self.filelist or not os.path.exists(filename):
             print("DEBUG: addImportFile: File exists, or path non-existent")
             return
         self.filelist[filename] = [site] + [tsc]
 
-    def addImportDirectory(self,dir,monitor=False, site="default", tsc="passthrough"):
+    def addImportDirectory(self, dir, monitor=False, site="default", tsc="passthrough"):
         if os.path.isdir(dir):
             if monitor == True:
                 self.monitor = True
@@ -182,38 +193,46 @@ class SummaryImporter(object):
             for file in os.listdir(dir):
                 self.addImportFile(os.path.join(dir, file), site, tsc)
         else:
-            log.warning(("Attempted to add non-directory '%s' as an import directory") % str(dir))
+            log.warning(
+                ("Attempted to add non-directory '%s' as an import directory")
+                % str(dir)
+            )
 
-    def addImportFileOrDir(self, inputPath, site = "PokerStars"):
-        
-        #for windows platform, force os.walk variable to be unicode
+    def addImportFileOrDir(self, inputPath, site="PokerStars"):
+
+        # for windows platform, force os.walk variable to be unicode
         # see fpdb-main post 9th July 2011
-        
+
         if self.config.posix:
             pass
         else:
             inputPath = str(inputPath)
-            
+
         tsc = self.config.hhcs[site].summaryImporter
         if os.path.isdir(inputPath):
             for subdir in os.walk(inputPath):
                 for file in subdir[2]:
-                    self.addImportFile(os.path.join(subdir[0], file),
-                                       site=site, tsc=tsc)
+                    self.addImportFile(
+                        os.path.join(subdir[0], file), site=site, tsc=tsc
+                    )
         else:
             self.addImportFile(inputPath, site=site, tsc=tsc)
 
     def runImport(self):
         start = datetime.datetime.now()
         starttime = time()
-        log.info(("Tourney Summary Import started at %s - %d files to import.") % (start, len(self.filelist)))
+        log.info(
+            ("Tourney Summary Import started at %s - %d files to import.")
+            % (start, len(self.filelist))
+        )
 
         total_errors = 0
         total_imported = 0
         ProgressDialog = ProgressBar(len(self.filelist), self.parent)
         for f in self.filelist:
             ProgressDialog.progress_update(f, str(total_imported))
-            if self.parent: self.caller.progressNotify()
+            if self.parent:
+                self.caller.progressNotify()
             if os.path.exists(f):
                 (site, tsc) = self.filelist[f]
                 imported, errs = self.importFile(f, tsc, site)
@@ -224,12 +243,11 @@ class SummaryImporter(object):
         del ProgressDialog
         self.database.cleanUpTourneyTypes()
         return (total_imported, total_errors)
-            
 
     def runUpdated(self):
         pass
 
-    def importFile(self, filename, tsc = "PokerStarsSummary", site = "PokerStars"):
+    def importFile(self, filename, tsc="PokerStarsSummary", site="PokerStars"):
         mod = __import__(tsc)
         obj = getattr(mod, tsc, None)
         if callable(obj):
@@ -239,36 +257,53 @@ class SummaryImporter(object):
             foabs = obj.readFile(obj, filename)
             if len(foabs) == 0:
                 log.error("Found: '%s' with 0 characters... skipping" % filename)
-                return (0, 1) # File had 0 characters
-            re_Split = obj.getSplitRe(obj,foabs[:1000])
+                return (0, 1)  # File had 0 characters
+            re_Split = obj.getSplitRe(obj, foabs[:1000])
             summaryTexts = re.split(re_Split, foabs)
 
             # The summary files tend to have a header or footer
             # Remove the first and/or last entry if it has < 100 characters
             if not len(summaryTexts[0]):
                 del summaryTexts[0]
-            
-            if len(summaryTexts)>1:
+
+            if len(summaryTexts) > 1:
                 if len(summaryTexts[-1]) <= 100:
                     summaryTexts.pop()
-                    log.warn(("TourneyImport: Removing text < 100 characters from end of file"))
-    
+                    log.warn(
+                        (
+                            "TourneyImport: Removing text < 100 characters from end of file"
+                        )
+                    )
+
                 if len(summaryTexts[0]) <= 130:
                     del summaryTexts[0]
-                    log.warn(("TourneyImport: Removing text < 100 characters from start of file"))
+                    log.warn(
+                        (
+                            "TourneyImport: Removing text < 100 characters from start of file"
+                        )
+                    )
 
             ####Lock Placeholder####
             for j, summaryText in enumerate(summaryTexts, start=1):
-                doinsert = len(summaryTexts)==j
+                doinsert = len(summaryTexts) == j
                 try:
-                    conv = obj(db=self.database, config=self.config, siteName=site, summaryText=summaryText, in_path = filename)
+                    conv = obj(
+                        db=self.database,
+                        config=self.config,
+                        siteName=site,
+                        summaryText=summaryText,
+                        in_path=filename,
+                    )
                     self.database.resetBulkCache(False)
-                    conv.insertOrUpdate(printtest = self.settings['testData'])
+                    conv.insertOrUpdate(printtest=self.settings["testData"])
                 except FpdbParseError as e:
                     log.error(("Tourney import parse error in file: %s") % filename)
                     errors += 1
                 if j != 1:
-                    print(("Finished importing %s/%s tournament summaries") %(j, len(summaryTexts)))
+                    print(
+                        ("Finished importing %s/%s tournament summaries")
+                        % (j, len(summaryTexts))
+                    )
                 imported = j
             ####Lock Placeholder####
         return (imported - errors, errors)
@@ -277,6 +312,7 @@ class SummaryImporter(object):
         self.updatedsize = {}
         self.updatetime = {}
         self.filelist = {}
+
 
 class ProgressBar(object):
     """
@@ -292,23 +328,21 @@ class ProgressBar(object):
         if self.parent:
             self.progress.destroy()
 
-
     def progress_update(self, file, count):
         if not self.parent:
-            #nothing to do
+            # nothing to do
             return
 
         self.fraction += 1
-        #update sum if fraction exceeds expected total number of iterations
+        # update sum if fraction exceeds expected total number of iterations
         if self.fraction > self.sum:
             sum = self.fraction
 
-        #progress bar total set to 1 plus the number of items,to prevent it
-        #reaching 100% prior to processing fully completing
+        # progress bar total set to 1 plus the number of items,to prevent it
+        # reaching 100% prior to processing fully completing
 
         progress_percent = old_div(float(self.fraction), (float(self.sum) + 1.0))
-        progress_text = (self.title + " "
-                            + str(self.fraction) + " / " + str(self.sum))
+        progress_text = self.title + " " + str(self.fraction) + " / " + str(self.sum)
 
         self.pbar.set_fraction(progress_percent)
         self.pbar.set_text(progress_text)
@@ -317,22 +351,24 @@ class ProgressBar(object):
 
         now = datetime.datetime.now()
         now_formatted = now.strftime("%H:%M:%S")
-        self.progresstext.set_text(now_formatted + " - "+self.title+ " " +file+"\n")
+        self.progresstext.set_text(
+            now_formatted + " - " + self.title + " " + file + "\n"
+        )
 
     def __init__(self, sum, parent):
 
         self.parent = parent
         if not self.parent:
-            #no parent is passed, assume this is being run from the
-            #command line, so return immediately
+            # no parent is passed, assume this is being run from the
+            # command line, so return immediately
             return
 
         self.fraction = 0
         self.sum = sum
-        self.title = ("Importing")
+        self.title = "Importing"
 
         self.progress = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        self.progress.set_size_request(500,150)
+        self.progress.set_size_request(500, 150)
 
         self.progress.set_resizable(False)
         self.progress.set_modal(True)
@@ -374,22 +410,25 @@ class ProgressBar(object):
 
         self.progress.show()
 
+
 def usage():
     print(("USAGE:"))
     print("./GuiTourneyImport.py -k <Site> -f <" + ("Filename") + ">")
     print("./GuiTourneyImport.py -k PokerStars -f <" + ("Filename") + ">")
     print("./GuiTourneyImport.py -k 'Full Tilt Poker' -f <" + ("Filename") + ">")
 
+
 def main(argv=None):
     """main can also be called in the python interpreter, by supplying the command line as the argument."""
     import SQL
+
     if argv is None:
         argv = sys.argv[1:]
 
     (options, argv) = Options.fpdb_options()
 
     if options.usage == True:
-        #Print usage examples and exit
+        # Print usage examples and exit
         usage()
         sys.exit(0)
 
@@ -399,7 +438,7 @@ def main(argv=None):
         exit(0)
 
     config = Configuration.Config("HUD_config.test.xml")
-    sql = SQL.Sql(db_server = 'sqlite')
+    sql = SQL.Sql(db_server="sqlite")
 
     if options.filename == None:
         print(("Need a filename to import"))
@@ -408,7 +447,7 @@ def main(argv=None):
 
     importer = SummaryImporter(config, sql, None, None)
 
-    importer.addImportFileOrDir(options.filename, site = options.hhc)
+    importer.addImportFileOrDir(options.filename, site=options.hhc)
     if options.testData:
         importer.setPrintTestData(True)
     starttime = time()
@@ -417,12 +456,12 @@ def main(argv=None):
     ttime = time() - starttime
     if ttime == 0:
         ttime = 1
-    print(('Tourney import done: Stored: %d, Errors: %d in %s seconds - %.0f/sec')\
-                     % (stored, errs, ttime, old_div((stored+0.0), ttime)))
+    print(
+        ("Tourney import done: Stored: %d, Errors: %d in %s seconds - %.0f/sec")
+        % (stored, errs, ttime, old_div((stored + 0.0), ttime))
+    )
     importer.clearFileList()
 
-    
 
-
-if __name__  == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

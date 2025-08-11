@@ -1,3 +1,5 @@
+"""Tests for Winamax regex patterns used in hand history parsing."""
+
 import re
 
 substitutions = {
@@ -6,33 +8,46 @@ substitutions = {
     # legal currency symbols - Euro(cp1252, utf-8)
 }
 
-re_Identify = re.compile(r"Winamax\sPoker\s\-\s(CashGame|Go\sFast|HOLD\-UP|Tournament\s\")")
+re_identify = re.compile(
+    r"Winamax\sPoker\s\-\s(CashGame|Go\sFast|HOLD\-UP|Tournament\s\")",
+)
 
 
-def test_re_Identify():
-    text = 'Winamax Poker - HOLD-UP "Colorado" - HandId: #18876587-492053-1695486636 - Holdem no limit (0.01€/0.02€) - 2023/09/23 16:30:36 UTC'
-    match = re_Identify.search(text)
+def test_re_identify() -> None:
+    """Test regex pattern for identifying Winamax poker games."""
+    text = (
+        'Winamax Poker - HOLD-UP "Colorado" - HandId: #18876587-492053-1695486636 - '
+        "Holdem no limit (0.01€/0.02€) - 2023/09/23 16:30:36 UTC"
+    )
+    match = re_identify.search(text)
     assert match is not None
 
 
-re_HandInfo = re.compile(
+re_hand_info = re.compile(
     r"""
-\s*Winamax\sPoker\s-\s(?P<RING>(CashGame|Go\sFast\s\"[^\"]+\"|HOLD\-UP\s\"[^\"]+\"))?(?P<TOUR>Tournament\s(?P<TOURNAME>.+)?\sbuyIn:\s(?P<BUYIN>(?P<BIAMT>[%(LS)s\d\,.]+)?(\s\+?\s|-)(?P<BIRAKE>[%(LS)s\d\,.]+)?\+?(?P<BOUNTY>[%(LS)s\d\.]+)?\s?(?P<TOUR_ISO>%(LEGAL_ISO)s)?|(?P<FREETICKET>[\sa-zA-Z]+))?\s(level:\s(?P<LEVEL>\d+))?.*)?\s-\sHandId:\s\#(?P<HID1>\d+)-(?P<HID2>\d+)-(?P<HID3>\d+)\s-\s(?P<GAME>Holdem|Omaha|Omaha5|Omaha8|5\sCard\sOmaha|5\sCard\sOmaha\sHi/Lo|Omaha\sHi/Lo|7\-Card\sStud|7stud|7\-Card\sStud\sHi/Lo|7stud8|Razz|2\-7\sTriple\sDraw|Lowball27)\s(?P<LIMIT>fixed\slimit|no\slimit|pot\slimit)\s\((((%(LS)s)?(?P<ANTE>[.0-9]+)(%(LS)s)?)/)?((%(LS)s)?(?P<SB>[.0-9]+)(%(LS)s)?)/((%(LS)s)?(?P<BB>[.0-9]+)(%(LS)s)?)\)\s-\s(?P<DATETIME>.*)(Table:?\s\'(?P<TABLE>[^(]+)(.(?P<TOURNO>\d+).\#(?P<TABLENO>\d+))?.*\'\s(?P<MAXPLAYER>\d+)\-max\s(?P<MONEY>\(real\smoney\)))?
-            """
-    % substitutions,
+\s*Winamax\sPoker\s-\s(?P<RING>(CashGame|Go\sFast\s\"[^\"]+\"|HOLD\-UP\s\"[^\"]+\"))?(?P<TOUR>Tournament\s(?P<TOURNAME>.+)?\sbuyIn:\s(?P<BUYIN>(?P<BIAMT>[{LS}\d\,.]+)?(\s\+?\s|-)(?P<BIRAKE>[{LS}\d\,.]+)?\+?(?P<BOUNTY>[{LS}\d\.]+)?\s?(?P<TOUR_ISO>{LEGAL_ISO})?|(?P<FREETICKET>[\sa-zA-Z]+))?\s(level:\s(?P<LEVEL>\d+))?.*)?\s-\sHandId:\s\#(?P<HID1>\d+)-(?P<HID2>\d+)-(?P<HID3>\d+)\s-\s(?P<GAME>Holdem|Omaha|Omaha5|Omaha8|5\sCard\sOmaha|5\sCard\sOmaha\sHi/Lo|Omaha\sHi/Lo|7\-Card\sStud|7stud|7\-Card\sStud\sHi/Lo|7stud8|Razz|2\-7\sTriple\sDraw|Lowball27)\s(?P<LIMIT>fixed\slimit|no\slimit|pot\slimit)\s\(((({LS})?(?P<ANTE>[.0-9]+)({LS})?)/)?(({LS})?(?P<SB>[.0-9]+)({LS})?)/(({LS})?(?P<BB>[.0-9]+)({LS})?)\)\s-\s(?P<DATETIME>.*)(Table:?\s\'(?P<TABLE>[^(]+)(.(?P<TOURNO>\d+).\#(?P<TABLENO>\d+))?.*\'\s(?P<MAXPLAYER>\d+)\-max\s(?P<MONEY>\(real\smoney\)))?
+            """.format(**substitutions),
     re.MULTILINE | re.DOTALL | re.VERBOSE,
 )
 
 
-def test_re_HandInfo():
-    text = 'Winamax Poker - HOLD-UP "Colorado" - HandId: #18876587-492053-1695486636 - Holdem no limit (0.01€/0.02€) - 2023/09/23 16:30:36 UTC'
-    match = re_HandInfo.search(text)
+def test_re_hand_info() -> None:
+    """Test regex pattern for parsing basic hand information."""
+    text = (
+        'Winamax Poker - HOLD-UP "Colorado" - HandId: #18876587-492053-1695486636 - '
+        "Holdem no limit (0.01€/0.02€) - 2023/09/23 16:30:36 UTC"
+    )
+    match = re_hand_info.search(text)
     assert match is not None
 
 
-def test_re_HandInfoexp():
-    text = 'Winamax Poker - Tournament "Expresso Nitro" buyIn: 0.23€ + 0.02€ level: 1 - HandId: #3011596205705658369-1-1695541274 - Holdem no limit (10/20) - 2023/09/24 07:41:14 UTC'
-    match = re_HandInfo.search(text)
+def test_re_hand_info_exp() -> None:
+    """Test regex pattern for parsing tournament hand information with detailed groups."""
+    text = (
+        'Winamax Poker - Tournament "Expresso Nitro" buyIn: 0.23€ + 0.02€ level: 1 - '
+        "HandId: #3011596205705658369-1-1695541274 - Holdem no limit (10/20) - 2023/09/24 07:41:14 UTC"
+    )
+    match = re_hand_info.search(text)
     assert match is not None
     assert match.group("TOURNAME") == '"Expresso Nitro"'
     assert match.group("BUYIN") == "0.23€ + 0.02€"
@@ -49,54 +64,63 @@ def test_re_HandInfoexp():
     assert match.group("DATETIME") == "2023/09/24 07:41:14 UTC"
 
 
-re_HUTP = re.compile(
-    r"Hold\-up\sto\sPot:\stotal\s((%(LS)s)?(?P<AMOUNT>[.0-9]+)(%(LS)s)?)" % substitutions, re.MULTILINE | re.VERBOSE
+re_hutp = re.compile(
+    r"Hold\-up\sto\sPot:\stotal\s(({LS})?(?P<AMOUNT>[.0-9]+)({LS})?)".format(**substitutions),
+    re.MULTILINE | re.VERBOSE,
 )
 
 
-def test_re_HUTP():
+def test_re_hutp() -> None:
+    """Test regex pattern for parsing Hold-up to Pot amounts."""
     text = "Hold-up to Pot: total 0.20€"
-    match = re_HUTP.search(text)
+    match = re_hutp.search(text)
     assert match is not None
     assert match.group("AMOUNT") == "0.20"
 
 
-re_PostSB = re.compile(
-    r"(?P<PNAME>.*?)\sposts\ssmall\sblind\s(%(LS)s)?(?P<SB>[\.0-9]+)(%(LS)s)?(?!\sout\sof\sposition)" % substitutions,
+re_post_sb = re.compile(
+    r"(?P<PNAME>.*?)\sposts\ssmall\sblind\s({LS})?(?P<SB>[\.0-9]+)({LS})?(?!\sout\sof\sposition)".format(
+        **substitutions,
+    ),
     re.MULTILINE,
 )
 
 
-def test_re_PostSB():
+def test_re_post_sb() -> None:
+    """Test regex pattern for parsing small blind posts."""
     text = "LordShiva posts small blind 0.01€"
-    match = re_PostSB.search(text)
+    match = re_post_sb.search(text)
     assert match is not None
     assert match.group("PNAME") == "LordShiva"
     assert match.group("SB") == "0.01"
 
 
-re_PostBB = re.compile(
-    r"(?P<PNAME>.*?)\sposts\sbig\sblind\s(%(LS)s)?(?P<BB>[\.0-9]+)(%(LS)s)?" % substitutions, re.MULTILINE
+re_post_bb = re.compile(
+    r"(?P<PNAME>.*?)\sposts\sbig\sblind\s({LS})?(?P<BB>[\.0-9]+)({LS})?".format(**substitutions),
+    re.MULTILINE,
 )
 
 
-def test_re_PostBB():
+def test_re_post_bb() -> None:
+    """Test regex pattern for parsing big blind posts."""
     text = "LordShiva posts big blind 0.01€"
-    match = re_PostBB.search(text)
+    match = re_post_bb.search(text)
     assert match is not None
     assert match.group("PNAME") == "LordShiva"
     assert match.group("BB") == "0.01"
 
 
-re_PlayerInfo = re.compile(
-    r"Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.*)\s\((%(LS)s)?(?P<CASH>[.0-9]+)(%(LS)s)?(,\s(%(LS)s)?(?P<BOUNTY>[.0-9]+)(%(LS)s)?\sbounty)?\)"
-    % substitutions
+re_player_info = re.compile(
+    r"Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.*)\s\(({LS})?(?P<CASH>[.0-9]+)({LS})?(,\s({LS})?(?P<BOUNTY>[.0-9]+)({LS})?\sbounty)?\)".format(
+        **substitutions,
+    ),
 )
 
 
-def test_re_PlayerInfo():
+def test_re_player_info() -> None:
+    """Test regex pattern for parsing player seat information."""
     text = "Seat 1: 77boy77 (0.60€)"
-    match = re_PlayerInfo.search(text)
+    match = re_player_info.search(text)
     assert match is not None
     assert match.group("SEAT") == "1"
     assert match.group("PNAME") == "77boy77"

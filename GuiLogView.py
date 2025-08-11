@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright 2008-2011 Carl Gherardi
 # This program is free software: you can redistribute it and/or modify
@@ -15,44 +14,45 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
+import glob
+import json
+import os
+from collections import deque
+from datetime import datetime
+
+from PyQt5.QtCore import (
+    QAbstractTableModel,
+    QModelIndex,
+    QSortFilterProxyModel,
+    Qt,
+    QThread,
+    QVariant,
+    pyqtSignal,
+)
 from PyQt5.QtGui import QColor, QPalette
 from PyQt5.QtWidgets import (
-    QApplication,
     QAbstractItemView,
-    QPushButton,
+    QApplication,
+    QCheckBox,
+    QComboBox,
     QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QStyle,
     QTableView,
     QVBoxLayout,
     QWidget,
-    QCheckBox,
-    QHeaderView,
-    QStyle,
-    QLineEdit,
-    QLabel,
-    QComboBox,
 )
-from PyQt5.QtCore import (
-    Qt,
-    QAbstractTableModel,
-    QModelIndex,
-    QVariant,
-    QSortFilterProxyModel,
-    QThread,
-    pyqtSignal,
-)
-import os
-from loggingFpdb import get_logger
 
 import Configuration
-from collections import deque
-import json
-import glob
-from datetime import datetime
+from loggingFpdb import get_logger
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 
-log = get_logger("logview")
+log = get_logger("gui_log_view")
 
 MAX_LOG_ENTRIES = 1000  # Adjust this number as needed
 
@@ -64,8 +64,8 @@ LOGFILES = [
 
 
 class LogTableModel(QAbstractTableModel):
-    def __init__(self, parent=None):
-        super(LogTableModel, self).__init__(parent)
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
         self.headers = ["Level", "Date/Time", "Module", "Function", "Message"]
         self.log_entries = []
 
@@ -83,7 +83,7 @@ class LogTableModel(QAbstractTableModel):
         entry = self.log_entries[index.row()]
         if role == Qt.DisplayRole:
             return entry[index.column()]
-        elif role == Qt.DecorationRole and index.column() == 0:
+        if role == Qt.DecorationRole and index.column() == 0:
             level = entry[0]
             style = QApplication.style()
             icon = None
@@ -96,7 +96,7 @@ class LogTableModel(QAbstractTableModel):
             elif level == "ERROR":
                 icon = style.standardIcon(QStyle.SP_MessageBoxCritical)
             return icon
-        elif role == Qt.ForegroundRole:
+        if role == Qt.ForegroundRole:
             level = entry[0]
             if level == "DEBUG":
                 color = QColor("green")
@@ -120,20 +120,20 @@ class LogTableModel(QAbstractTableModel):
 
 
 class LogFilterProxyModel(QSortFilterProxyModel):
-    def __init__(self, parent=None):
-        super(LogFilterProxyModel, self).__init__(parent)
-        self.selected_levels = set(["DEBUG", "INFO", "WARNING", "ERROR"])
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.selected_levels = {"DEBUG", "INFO", "WARNING", "ERROR"}
         self.module_filter_text = ""
 
-    def setLevelFilter(self, levels):
+    def setLevelFilter(self, levels) -> None:
         self.selected_levels = set(levels)
         self.invalidateFilter()
 
-    def setModuleFilter(self, text):
+    def setModuleFilter(self, text) -> None:
         self.module_filter_text = text.lower()
         self.invalidateFilter()
 
-    def filterAcceptsRow(self, source_row, source_parent):
+    def filterAcceptsRow(self, source_row, source_parent) -> bool:
         model = self.sourceModel()
         level_index = model.index(source_row, 0, source_parent)
         level = model.data(level_index, Qt.DisplayRole)
@@ -142,29 +142,24 @@ class LogFilterProxyModel(QSortFilterProxyModel):
         level = level.strip().upper()
         module_index = model.index(source_row, 2, source_parent)
         module = model.data(module_index, Qt.DisplayRole)
-        if module is None:
-            module = ""
-        else:
-            module = module.lower()
+        module = "" if module is None else module.lower()
         if level not in self.selected_levels:
             return False
-        if self.module_filter_text and self.module_filter_text not in module:
-            return False
-        return True
+        return not (self.module_filter_text and self.module_filter_text not in module)
 
 
 class LogLoaderThread(QThread):
     log_entries_loaded = pyqtSignal(list)
 
-    def __init__(self, logfile, max_entries):
+    def __init__(self, logfile, max_entries) -> None:
         super().__init__()
         self.logfile = logfile
         self.max_entries = max_entries
 
-    def run(self):
+    def run(self) -> None:
         entries = []
         if os.path.exists(self.logfile):
-            with open(self.logfile, "r", encoding="utf-8") as log_file:
+            with open(self.logfile, encoding="utf-8") as log_file:
                 lines = deque(log_file, maxlen=self.max_entries)
                 for line in lines:
                     line = line.strip()
@@ -186,7 +181,7 @@ class LogLoaderThread(QThread):
 
 
 class GuiLogView(QWidget):
-    def __init__(self, config, mainwin, closeq):
+    def __init__(self, config, mainwin, closeq) -> None:
         super().__init__()
         self.config = config
         self.main_window = mainwin
@@ -209,7 +204,9 @@ class GuiLogView(QWidget):
         self.listview.setShowGrid(False)
         self.listview.verticalHeader().hide()
         self.listview.setSortingEnabled(True)
-        self.listview.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.listview.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeToContents,
+        )
         self.listview.horizontalHeader().setStretchLastSection(False)
         self.listview.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.listview.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
@@ -272,7 +269,7 @@ class GuiLogView(QWidget):
         self.loadLog()
         self.show()
 
-    def update_logfile_list(self):
+    def update_logfile_list(self) -> None:
         log_dir = self.config.dir_log
         log_pattern = os.path.join(log_dir, "fpdb-log*.txt")
         log_files = glob.glob(log_pattern)
@@ -294,11 +291,13 @@ class GuiLogView(QWidget):
         self.logfile_combo.setCurrentIndex(selected_index)
         self.logfile_combo.blockSignals(False)
         if self.logfile_paths:
-            self.logfile = self.logfile_paths[selected_index]  # Keep the selected log file
+            self.logfile = self.logfile_paths[
+                selected_index
+            ]  # Keep the selected log file
         else:
             self.logfile = None
 
-    def filter_log(self):
+    def filter_log(self) -> None:
         selected_levels = []
         if self.filter_debug.isChecked():
             selected_levels.append("DEBUG")
@@ -316,29 +315,31 @@ class GuiLogView(QWidget):
         self.proxy_model.setLevelFilter(selected_levels)
         self.proxy_model.setModuleFilter(module_filter_text)
 
-    def copy_to_clipboard(self):
+    def copy_to_clipboard(self) -> None:
         selected_indexes = self.listview.selectionModel().selectedRows()
         text = ""
         for index in selected_indexes:
             row_data = []
             for column in range(self.proxy_model.columnCount()):
-                data = self.proxy_model.data(self.proxy_model.index(index.row(), column), Qt.DisplayRole)
+                data = self.proxy_model.data(
+                    self.proxy_model.index(index.row(), column), Qt.DisplayRole,
+                )
                 row_data.append(str(data))
             text += "\t".join(row_data) + "\n"
         QApplication.clipboard().setText(text)
 
-    def __set_logfile(self, index):
+    def __set_logfile(self, index) -> None:
         if index >= 0 and index < len(self.logfile_paths):
             self.logfile = self.logfile_paths[index]
             self.loadLog()  # Call loadLog instead of refresh
 
-    def loadLog(self):
+    def loadLog(self) -> None:
         if self.logfile:
             self.thread = LogLoaderThread(self.logfile, MAX_LOG_ENTRIES)
             self.thread.log_entries_loaded.connect(self.on_log_entries_loaded)
             self.thread.start()
 
-    def on_log_entries_loaded(self, entries):
+    def on_log_entries_loaded(self, entries) -> None:
         # Update the model in the main thread
         self.model.beginResetModel()
         self.model.log_entries = entries
@@ -346,7 +347,7 @@ class GuiLogView(QWidget):
         # Apply filters
         self.filter_log()
 
-    def refresh(self):
+    def refresh(self) -> None:
         # Reload the current log file without resetting the selection
         self.loadLog()
 

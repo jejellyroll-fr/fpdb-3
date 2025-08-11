@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright 2008-2013 Steffen Schaumburg
 # This program is free software: you can redistribute it and/or modify
@@ -15,88 +14,86 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
-
-import os
-import sys
-import queue
-
-# import qdarkstyle
-if os.name == "nt":
-    pass
-
 import codecs
-import Options
+import contextlib
+import cProfile
+import io
+import os
+import pstats
+import queue
+import sqlite3
+import sys
 from functools import partial
-from L10n import set_locale_translation
-import logging  # Import the logging module
-from loggingFpdb import get_logger, setup_logging
 
-from PyQt5.QtCore import QCoreApplication, QDate, Qt, QPoint
+import numpy as np
+from PyQt5.QtCore import QCoreApplication, QDate, QPoint, Qt
 from PyQt5.QtGui import QIcon, QPalette
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QSizePolicy
 from PyQt5.QtWidgets import (
     QAction,
     QApplication,
     QCalendarWidget,
     QCheckBox,
+    QComboBox,
     QDateEdit,
     QDialog,
     QDialogButtonBox,
-    QFileDialog,
-    QGridLayout,
+    QHBoxLayout,
+    QLabel,
     QLineEdit,
     QMainWindow,
     QMessageBox,
+    QPushButton,
     QScrollArea,
+    QSizePolicy,
     QTabWidget,
     QVBoxLayout,
-    QComboBox,
+    QWidget,
 )
 
-import DetectInstalledSites
-import GuiPrefs
-import GuiLogView
-
-# import GuiDatabase
+import Card
+import Configuration
+import Database
+import Exceptions
+import GuiAutoImport
 import GuiBulkImport
+import GuiGraphViewer
+import GuiHandViewer
+import GuiLogView
+import GuiPrefs
+import GuiRingPlayerStats
+import GuiSessionViewer
+import GuiTourHandViewer
+import GuiTourneyGraphViewer
+import GuiTourneyPlayerStats
+import interlocks
+import ModernHudPreferences
+import Options
+import SQL
+from ConfigInitializer import ensure_config_initialized
+from ConfigurationManager import ConfigurationManager
+from Exceptions import FpdbError
+from GuiConfigObserver import GuiConfigObserver
+from L10n import set_locale_translation
+from loggingFpdb import get_logger, setup_logging
+
+# Early configuration initialization (fix issue #22)
+ensure_config_initialized()
+
 # import GuiTourneyImport
 
-import GuiRingPlayerStats
-import GuiTourneyPlayerStats
 
-# import GuiPositionalStats
-import GuiAutoImport
-import GuiGraphViewer
-import GuiTourneyGraphViewer
-import GuiSessionViewer
-import GuiHandViewer
-import GuiTourHandViewer
 # import GuiOddsCalc
 # import GuiStove
 
-import SQL
-import Database
-import Configuration
-import Card
-import Exceptions
 
-# import api, app
-import cProfile
-import pstats
-import io
-import interlocks
-from Exceptions import FpdbError
 
-import sqlite3
 
-# these imports not required in this module, imported here to report version in About dialog
-import numpy
 
 cl_options = ".".join(sys.argv[1:])
 (options, argv) = Options.fpdb_options()
 
 
-numpy_version = numpy.__version__
+numpy_version = np.__version__
 
 
 sqlite3_version = sqlite3.version
@@ -115,7 +112,8 @@ setup_logging(console_only=True)
 
 # Obtain the logger
 log = get_logger("fpdb")
-log.setLevel(logging.INFO)
+# Note: Logger level is now controlled by Logger Dev Tool configuration
+# The get_logger() function automatically applies the correct level from saved configuration
 
 try:
     assert not hasattr(sys, "frozen")  # We're surely not in a git repo if this fails
@@ -136,9 +134,9 @@ class fpdb(QMainWindow):
     #         pathcomp = f"{path}/ppt/p2.jar"
     #     subprocess.call(["java", "-jar", pathcomp])
 
-    def add_and_display_tab(self, new_page, new_tab_name):
-        """adds a tab, namely creates the button and displays it and appends all the relevant arrays"""
-        for name in self.nb_tab_names:  # todo: check this is valid
+    def add_and_display_tab(self, new_page, new_tab_name) -> None:
+        """Adds a tab, namely creates the button and displays it and appends all the relevant arrays."""
+        for name in self.nb_tab_names:  # TODO: check this is valid
             if name == new_tab_name:
                 self.display_tab(new_tab_name)
                 return  # if tab already exists, just go to it
@@ -158,8 +156,8 @@ class fpdb(QMainWindow):
         index = self.nb.addTab(page, new_tab_name)
         self.nb.setCurrentIndex(index)
 
-    def display_tab(self, new_tab_name):
-        """displays the indicated tab"""
+    def display_tab(self, new_tab_name) -> None:
+        """Displays the indicated tab."""
         tab_no = -1
         for i, name in enumerate(self.nb_tab_names):
             if new_tab_name == name:
@@ -167,34 +165,39 @@ class fpdb(QMainWindow):
                 break
 
         if tab_no < 0 or tab_no >= self.nb.count():
-            raise FpdbError(f"invalid tab_no {str(tab_no)}")
-        else:
-            self.nb.setCurrentIndex(tab_no)
+            msg = f"invalid tab_no {tab_no!s}"
+            raise FpdbError(msg)
+        self.nb.setCurrentIndex(tab_no)
 
-    def dia_about(self, widget, data=None):
+    def dia_about(self, widget, data=None) -> None:
         QMessageBox.about(
             self,
-            f"FPDB{str(VERSION)}",
+            f"FPDB{VERSION!s}",
             "Copyright 2008-2023. See contributors.txt for details"
-            + "You are free to change, and distribute original or changed versions "
+             "You are free to change, and distribute original or changed versions "
             "of fpdb within the rules set out by the license"
-            + "https://github.com/jejellyroll-fr/fpdb-3"
-            + "\n"
-            + "Your config file is: "
+             "https://github.com/jejellyroll-fr/fpdb-3"
+             "\n"
+             "Your config file is: "
             + self.config.file,
         )
-        return
 
-    def dia_advanced_preferences(self, widget, data=None):
+    def dia_advanced_preferences(self, widget, data=None) -> None:
         # force reload of prefs from xml file - needed because HUD could
         # have changed file contents
         self.load_profile()
         if GuiPrefs.GuiPrefs(self.config, self).exec_():
             # save updated config
+            # Detect changes before saving
+            config_manager = ConfigurationManager()
+            if config_manager.initialized:
+                pending_changes = config_manager.check_pending_changes(self.config)
+                config_manager._pending_changes = pending_changes
+
             self.config.save()
             self.reload_config()
 
-    def dia_database_stats(self, widget, data=None):
+    def dia_database_stats(self, widget, data=None) -> None:
         self.warning_box(
             string=f"Number of Hands: {self.db.getHandCount()}\nNumber of Tourneys: {self.db.getTourneyCount()}\nNumber of TourneyTypes: {self.db.getTourneyTypeCount()}",
             diatitle="Database Statistics",
@@ -204,221 +207,198 @@ class fpdb(QMainWindow):
 
     @staticmethod
     def get_text(widget: QWidget):
-        """Return text of widget, depending on widget type"""
+        """Return text of widget, depending on widget type."""
         return widget.currentText() if isinstance(widget, QComboBox) else widget.text()
 
-    def dia_hud_preferences(self, widget, data=None):
-        dia = QDialog(self)
-        dia.setWindowTitle("Modifying Huds")
-        dia.resize(1200, 600)
-        label = QLabel("Please edit your huds.")
-        dia.setLayout(QVBoxLayout())
-        dia.layout().addWidget(label)
-        label2 = QLabel("Please select the game category for which you want to configure HUD stats:")
-        dia.layout().addWidget(label2)
-        self.comboGame = QComboBox()
+    def dia_hud_preferences(self, widget, data=None) -> None:
+        """Open modern HUD preferences dialog."""
+        # force reload of prefs from xml file - needed because HUD could
+        # have changed file contents
+        self.load_profile()
 
-        huds_names = self.config.get_stat_sets()
-        for hud_name in huds_names:
-            self.comboGame.addItem(hud_name)
-
-        dia.layout().addWidget(self.comboGame)
-        self.comboGame.setCurrentIndex(1)
-        selected_hud_name = self.comboGame.currentText()
-
-        self.load_profile()  # => self.[config, settings]
-
-        # HUD column will contain a button that shows favseat and HUD locations.
-        # TODO: Make it possible to load screenshot to arrange HUD windowlets.
-
-        self.table = QGridLayout()
-        self.table.setSpacing(0)
-
-        scrolling_frame = QScrollArea(dia)
-        dia.layout().addWidget(scrolling_frame)
-        scrolling_frame.setLayout(self.table)
-
-        nb_items = len(self.config.stat_sets[selected_hud_name].stats)
-
-        btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, dia)
-        btns.accepted.connect(dia.accept)
-        btns.rejected.connect(dia.reject)
-        dia.layout().addWidget(btns)
-        self.comboGame.currentIndexChanged.connect(self.index_changed)
-
-        # Launch Dialog
-        response = dia.exec_()
-
-        # Treat dialog closed event
-        if self.comboGame.currentIndexChanged and response:
-            selected_hud_name = self.comboGame.currentText()
-            # User clicked on "Save"
-            for y in range(nb_items):
-                self.config.edit_hud(
-                    selected_hud_name,
-                    self.get_text(self.stat_position_list[y]),
-                    self.get_text(self.stat_name_list[y]),
-                    self.get_text(self.click_list[y]),
-                    self.get_text(self.hudcolor_list[y]),
-                    self.get_text(self.hudprefix_list[y]),
-                    self.get_text(self.hudsuffix_list[y]),
-                    self.get_text(self.popup_list[y]),
-                    self.get_text(self.stat_hicolor_list[y]),
-                    self.get_text(self.stat_hith_list[y]),
-                    self.get_text(self.stat_locolor_list[y]),
-                    self.get_text(self.stat_loth_list[y]),
-                    self.get_text(self.tip_list[y]),
-                )
+        dia = ModernHudPreferences.ModernHudPreferences(self.config, self)
+        if dia.exec_():
+            # Detect changes before saving
+            config_manager = ConfigurationManager()
+            if config_manager.initialized:
+                pending_changes = config_manager.check_pending_changes(self.config)
+                config_manager._pending_changes = pending_changes
 
             self.config.save()
             self.reload_config()
 
-    def index_changed(self, index):
-        # Called when user changes currently selected HUD
-        log.info("start index_changed")
-        log.debug(f"index = {index}")
-        log.debug(f"self.config = {self.config}")
-        log.debug(f"self.config.stat_sets = {self.config.stat_sets}")
-        selected_hud_name = self.comboGame.currentText()
-        log.debug(f"selected_hud_name = {selected_hud_name}")
-        for i in reversed(range(self.table.count())):
-            self.table.itemAt(i).widget().deleteLater()
 
-        self.table.setSpacing(0)
+    def dia_manage_hud_sites(self, widget, data=None) -> None:
+        """Dialog to manage HUD sites - enable/disable sites."""
+        dia = QDialog(self)
+        dia.setWindowTitle("Manage HUD Sites")
+        dia.resize(800, 600)
+        dia.setLayout(QVBoxLayout())
 
-        column_headers = [
-            "coordonate",
-            "stats name",
-            "click",
-            "hudcolor",
-            "hudprefix",
-            "hudsuffix",
-            "popup",
-            "stat_hicolor",
-            "stat_hith",
-            "stat_locolor",
-            "stat_loth",
-            "tip",
-        ]  # todo ("HUD")
+        # Header
+        header_label = QLabel("Enable or disable sites for HUD display")
+        header_label.setProperty("class", "h2")
+        dia.layout().addWidget(header_label)
 
-        for header_number in range(0, len(column_headers)):
-            label = QLabel(column_headers[header_number])
-            label.setAlignment(Qt.AlignCenter)
-            self.table.addWidget(label, 0, header_number)
+        # Search box
+        search_layout = QHBoxLayout()
+        search_label = QLabel("Search:")
+        self.site_search = QLineEdit()
+        self.site_search.setPlaceholderText("Type to filter sites...")
+        search_layout.addWidget(search_label)
+        search_layout.addWidget(self.site_search)
+        dia.layout().addLayout(search_layout)
 
-        # Init lists that will contains QWidgets for each column in table ("stat_position_list" will contain the positions (ex: ["(0,1)", ...]))
-        (
-            self.stat_position_list,
-            self.stat_name_list,
-            self.click_list,
-            self.hudcolor_list,
-            self.hudprefix_list,
-            self.hudsuffix_list,
-            self.popup_list,
-            self.stat_hicolor_list,
-            self.stat_hith_list,
-            self.stat_locolor_list,
-            self.stat_loth_list,
-            self.tip_list,
-        ) = [], [], [], [], [], [], [], [], [], [], [], []
+        # Create scrollable area for sites
+        scroll_area = QScrollArea()
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+        scroll_area.setWidget(scroll_widget)
+        scroll_area.setWidgetResizable(True)
+        dia.layout().addWidget(scroll_area)
 
+        # Load current configuration
         self.load_profile()
-        hud_stats = self.config.stat_sets[selected_hud_name]  # Configuration.Stat_sets object
-        y_pos = 1
-        for position in hud_stats.stats.keys():
-            # Column 1: stat position
-            stat2 = QLabel()
-            stat2.setText(str(position))
-            self.table.addWidget(stat2, y_pos, 0)
-            self.stat_position_list.append(stat2)
 
-            # Column 2: select stat name (between available stats)
-            # TODO: don't load all stats on each loop !
-            if os.name == "nt":
-                icoPath = os.path.dirname(__file__)
-                icoPath = f"{icoPath}\\"
-            else:
-                icoPath = "icons/"
-            stat3 = QComboBox()
-            stats_cash = self.config.get_gui_cash_stat_params()  # Available stats for cash game
-            for x in range(0, len(stats_cash)):
-                # print(stats_cash[x][0])
-                stat3.addItem(QIcon(f"{icoPath}Letter-C-icon.png"), stats_cash[x][0])
-            stats_tour = self.config.get_gui_tour_stat_params()  # Available stats for tournament
-            for x in range(0, len(stats_tour)):
-                # print(stats_tour[x][0])
-                stat3.addItem(QIcon(f"{icoPath}Letter-T-icon.png"), stats_tour[x][0])
-            stat3.setCurrentText(str(hud_stats.stats[position].stat_name))
-            self.table.addWidget(stat3, y_pos, 1)
-            self.stat_name_list.append(stat3)
+        # Get all sites from site_ids
+        site_checkboxes = {}
+        site_widgets = []
 
-            # Column 3: "click"
-            stat4 = QLineEdit()
-            stat4.setText(str(hud_stats.stats[position].click))
-            self.table.addWidget(stat4, y_pos, 2)
-            self.click_list.append(stat4)
+        for site_name, site_id in self.config.site_ids.items():
+            # Create a widget for each site
+            site_widget = QWidget()
+            site_layout = QHBoxLayout(site_widget)
+            site_layout.setContentsMargins(5, 5, 5, 5)
 
-            # Column 4: "hudcolor"
-            stat5 = QLineEdit()
-            stat5.setText(str(hud_stats.stats[position].hudcolor))
-            self.table.addWidget(stat5, y_pos, 3)
-            self.hudcolor_list.append(stat5)
+            # Checkbox
+            checkbox = QCheckBox()
+            # Check if site is enabled in supported_sites
+            try:
+                checkbox.setChecked(self.config.supported_sites[site_name].enabled)
+            except KeyError:
+                checkbox.setChecked(False)
 
-            # Column 5: "hudprefix"
-            stat6 = QLineEdit()
-            stat6.setText(str(hud_stats.stats[position].hudprefix))
-            self.table.addWidget(stat6, y_pos, 4)
-            self.hudprefix_list.append(stat6)
+            site_layout.addWidget(checkbox)
 
-            # Column 6: "hudsuffix"
-            stat7 = QLineEdit()
-            stat7.setText(str(hud_stats.stats[position].hudsuffix))
-            self.table.addWidget(stat7, y_pos, 5)
-            self.hudsuffix_list.append(stat7)
+            # Site name
+            name_label = QLabel(site_name)
+            name_label.setMinimumWidth(300)
+            site_layout.addWidget(name_label)
 
-            # Column 7: "popup"
-            stat8 = QComboBox()
-            for popup in self.config.popup_windows.keys():
-                stat8.addItem(popup)
-            stat8.setCurrentText(str(hud_stats.stats[position].popup))
-            self.table.addWidget(stat8, y_pos, 6)
-            self.popup_list.append(stat8)
+            # Site ID
+            id_label = QLabel(f"ID: {site_id}")
+            id_label.setProperty("class", "badge")
+            site_layout.addWidget(id_label)
 
-            # Column 8: "stat_hicolor"
-            stat9 = QLineEdit()
-            stat9.setText(str(hud_stats.stats[position].stat_hicolor))
-            self.table.addWidget(stat9, y_pos, 7)
-            self.stat_hicolor_list.append(stat9)
+            site_layout.addStretch()
 
-            # Column 9: "stat_hith"
-            stat10 = QLineEdit()
-            stat10.setText(str(hud_stats.stats[position].stat_hith))
-            self.table.addWidget(stat10, y_pos, 8)
-            self.stat_hith_list.append(stat10)
+            scroll_layout.addWidget(site_widget)
+            site_checkboxes[site_name] = checkbox
+            site_widgets.append((site_widget, site_name))
 
-            # Column 10: "stat_locolor"
-            stat11 = QLineEdit()
-            stat11.setText(str(hud_stats.stats[position].stat_locolor))
-            self.table.addWidget(stat11, y_pos, 9)
-            self.stat_locolor_list.append(stat11)
+        # Connect search functionality
+        def filter_sites() -> None:
+            search_text = self.site_search.text().lower()
+            for widget, name in site_widgets:
+                widget.setVisible(search_text in name.lower())
 
-            # Column 11: "stat_loth"
-            stat12 = QLineEdit()
-            stat12.setText(str(hud_stats.stats[position].stat_loth))
-            self.table.addWidget(stat12, y_pos, 10)
-            self.stat_loth_list.append(stat12)
+        self.site_search.textChanged.connect(filter_sites)
 
-            # Column 12: "tip"
-            stat13 = QLineEdit()
-            stat13.setText(str(hud_stats.stats[position].tip))
-            self.table.addWidget(stat13, y_pos, 11)
-            self.tip_list.append(stat13)
-            # if available_site_names[site_number] in detector.supportedSites:
-            # pass
+        # Statistics label
+        self.stats_label = QLabel()
+        self.update_site_stats(site_checkboxes)
+        dia.layout().addWidget(self.stats_label)
 
-            y_pos += 1
+        # Connect checkboxes to update stats
+        for checkbox in site_checkboxes.values():
+            checkbox.stateChanged.connect(lambda: self.update_site_stats(site_checkboxes))
 
-    def dia_import_filters(self, checkState):
+        # Buttons
+        button_layout = QHBoxLayout()
+
+        select_all_btn = QPushButton("Select All")
+        select_all_btn.clicked.connect(lambda: self.set_all_sites(site_checkboxes, True))
+        button_layout.addWidget(select_all_btn)
+
+        deselect_all_btn = QPushButton("Deselect All")
+        deselect_all_btn.clicked.connect(lambda: self.set_all_sites(site_checkboxes, False))
+        button_layout.addWidget(deselect_all_btn)
+
+        button_layout.addStretch()
+
+        btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+        button_layout.addWidget(btns)
+
+        dia.layout().addLayout(button_layout)
+
+        btns.accepted.connect(dia.accept)
+        btns.rejected.connect(dia.reject)
+
+        # Show dialog and save if accepted
+        if dia.exec_():
+            # Save the enabled/disabled state for each site
+            for site_name, checkbox in site_checkboxes.items():
+                enabled = checkbox.isChecked()
+                enabled_str = "True" if enabled else "False"
+
+                # Check if site exists in supported_sites
+                if site_name in self.config.supported_sites:
+                    # Use the edit_site method to properly update the XML
+                    current_site = self.config.supported_sites[site_name]
+                    self.config.edit_site(
+                        site_name, enabled_str, current_site.screen_name, current_site.HH_path, current_site.TS_path,
+                    )
+                else:
+                    # Create a new site entry if it doesn't exist
+                    # First, check if there's a site node in the XML
+                    site_node = self.config.get_site_node(site_name)
+                    if site_node is None:
+                        # Create a new site node
+                        sites_nodes = self.config.doc.getElementsByTagName("supported_sites")
+                        if sites_nodes:
+                            sites_node = sites_nodes[0]
+                        else:
+                            # Create supported_sites node if it doesn't exist
+                            root = self.config.doc.getElementsByTagName("FreePokerToolsConfig")[0]
+                            sites_node = self.config.doc.createElement("supported_sites")
+                            root.appendChild(sites_node)
+
+                        new_site = self.config.doc.createElement("site")
+                        new_site.setAttribute("site_name", site_name)
+                        new_site.setAttribute("enabled", enabled_str)
+                        new_site.setAttribute("screen_name", "YOUR SCREEN NAME HERE")
+                        new_site.setAttribute("HH_path", "")
+                        new_site.setAttribute("TS_path", "")
+                        new_site.setAttribute("aux_enabled", "True")
+                        sites_node.appendChild(new_site)
+                    else:
+                        # Site node exists but not in supported_sites dict, just update enabled
+                        site_node.setAttribute("enabled", enabled_str)
+
+            # Save configuration
+            # Detect changes before saving
+            config_manager = ConfigurationManager()
+            if config_manager.initialized:
+                pending_changes = config_manager.check_pending_changes(self.config)
+                config_manager._pending_changes = pending_changes
+
+            self.config.save()
+            self.reload_config()
+
+    def update_site_stats(self, checkboxes) -> None:
+        """Update the statistics label."""
+        total = len(checkboxes)
+        enabled = sum(1 for cb in checkboxes.values() if cb.isChecked())
+        self.stats_label.setText(f"Enabled sites: {enabled} / {total}")
+        # Use a class for styling instead of hard-coded CSS
+        self.stats_label.setProperty("class", "info-box")
+
+    def set_all_sites(self, checkboxes, state) -> None:
+        """Set all site checkboxes to the given state."""
+        for checkbox in checkboxes.values():
+            checkbox.setChecked(state)
+
+    def dia_import_filters(self, checkState) -> None:
         dia = QDialog()
         dia.setWindowTitle("Skip these games when importing")
         dia.setLayout(QVBoxLayout())
@@ -441,7 +421,7 @@ class fpdb(QMainWindow):
             self.config.editImportFilters(",".join(filterGames))
             self.config.save()
 
-    def dia_dump_db(self, widget, data=None):
+    def dia_dump_db(self, widget, data=None) -> None:
         filename = "database-dump.sql"
         result = self.db.dumpDatabase()
 
@@ -450,8 +430,8 @@ class fpdb(QMainWindow):
 
     # end def dia_database_stats
 
-    def dia_recreate_tables(self, widget, data=None):
-        """Dialogue that asks user to confirm that he wants to delete and recreate the tables"""
+    def dia_recreate_tables(self, widget, data=None) -> None:
+        """Dialogue that asks user to confirm that he wants to delete and recreate the tables."""
         if self.obtain_global_lock("fpdb.dia_recreate_tables"):  # returns true if successful
             dia_confirm = QMessageBox(
                 QMessageBox.Warning,
@@ -466,14 +446,14 @@ class fpdb(QMainWindow):
                 f" they will be deleted and you will have to re-import your histories.\nThis may take a while."
             )
 
-            dia_confirm.setInformativeText(diastring)  # todo: make above string with bold for db, host and deleted
+            dia_confirm.setInformativeText(diastring)  # TODO: make above string with bold for db, host and deleted
             response = dia_confirm.exec_()
 
             if response == QMessageBox.Yes:
                 self.db.recreate_tables()
                 # find any guibulkimport/guiautoimport windows and clear cache:
                 for t in self.threads:
-                    if isinstance(t, GuiBulkImport.GuiBulkImport) or isinstance(t, GuiAutoImport.GuiAutoImport):
+                    if isinstance(t, GuiBulkImport.GuiBulkImport | GuiAutoImport.GuiAutoImport):
                         t.importer.database.resetCache()
                 self.release_global_lock()
             else:
@@ -482,10 +462,10 @@ class fpdb(QMainWindow):
         else:
             self.warning_box(
                 "Cannot open Database Maintenance window because other"
-                " windows have been opened. Re-start fpdb to use this option."
+                " windows have been opened. Re-start fpdb to use this option.",
             )
 
-    def dia_recreate_hudcache(self, widget, data=None):
+    def dia_recreate_hudcache(self, widget, data=None) -> None:
         if self.obtain_global_lock("dia_recreate_hudcache"):
             self.dia_confirm = QDialog()
             self.dia_confirm.setWindowTitle("Confirm recreating HUD cache")
@@ -526,7 +506,7 @@ class fpdb(QMainWindow):
                 log.info("Rebuilding HUD Cache ...")
 
                 self.db.rebuild_cache(
-                    self.h_start_date.date().toString("yyyy-MM-dd"), self.start_date.date().toString("yyyy-MM-dd")
+                    self.h_start_date.date().toString("yyyy-MM-dd"), self.start_date.date().toString("yyyy-MM-dd"),
                 )
             else:
                 log.info("User cancelled rebuilding hud cache")
@@ -535,10 +515,10 @@ class fpdb(QMainWindow):
         else:
             self.warning_box(
                 "Cannot open Database Maintenance window because other windows have been opened. "
-                "Re-start fpdb to use this option."
+                "Re-start fpdb to use this option.",
             )
 
-    def dia_rebuild_indexes(self, widget, data=None):
+    def dia_rebuild_indexes(self, widget, data=None) -> None:
         if self.obtain_global_lock("dia_rebuild_indexes"):
             self.dia_confirm = QMessageBox(
                 QMessageBox.Warning,
@@ -567,16 +547,16 @@ class fpdb(QMainWindow):
         else:
             self.warning_box(
                 "Cannot open Database Maintenance window because"
-                " other windows have been opened. Re-start fpdb to use this option."
+                " other windows have been opened. Re-start fpdb to use this option.",
             )
 
-    def dia_logs(self, widget, data=None):
-        """opens the log viewer window"""
+    def dia_logs(self, widget, data=None) -> None:
+        """Opens the log viewer window."""
         # remove members from self.threads if close messages received
         self.process_close_messages()
 
         viewer = None
-        for i, t in enumerate(self.threads):
+        for _i, t in enumerate(self.threads):
             if str(t.__class__) == "GuiLogView.GuiLogView":
                 viewer = t
                 break
@@ -592,315 +572,129 @@ class fpdb(QMainWindow):
         # if lock_set:
         #    self.release_global_lock()
 
-    def dia_site_preferences_seat(self, widget, data=None):
-        dia = QDialog(self)
-        dia.setWindowTitle("Seat Preferences")
-        dia.resize(1200, 600)
-        label = QLabel("Please select your prefered seat.")
-        dia.setLayout(QVBoxLayout())
-        dia.layout().addWidget(label)
+    def dia_site_preferences_seat(self, widget, data=None) -> None:
+        """Open modern seat preferences dialog."""
+        from ModernSeatPreferences import ModernSeatPreferencesDialog
 
-        self.load_profile()
-        site_names = self.config.site_ids
-        available_site_names = []
-        for site_name in site_names:
-            try:
-                self.config.supported_sites[site_name].enabled
-                available_site_names.append(site_name)
-            except KeyError:
-                pass
+        # Create and display modern dialog
+        dia = ModernSeatPreferencesDialog(self.config, self)
 
-        column_headers = [
-            "Site",
-            "2 players:\nbetween 0 & 2",
-            "3 players:\nbetween 0 & 3 ",
-            "4 players:\nbetween 0 & 4",
-            "5 players:\nbetween 0 & 5",
-            "6 players:\nbetween 0 & 6",
-            "7 players:\nbetween 0 & 7",
-            "8 players:\nbetween 0 & 8",
-            "9 players:\nbetween 0 & 9",
-            "10 players:\nbetween 0 & 10",
-        ]  # todo ("HUD")
-        # HUD column will contain a button that shows favseat and HUD locations.
-        # Make it possible to load screenshot to arrange HUD windowlets.
+        # Dialog handles saving and reloading itself
+        dia.exec_()
 
-        table = QGridLayout()
-        table.setSpacing(0)
+    def dia_site_preferences(self, widget, data=None) -> None:
+        """Open modern site preferences dialog."""
+        from ModernSitePreferences import ModernSitePreferencesDialog
 
-        scrolling_frame = QScrollArea(dia)
-        dia.layout().addWidget(scrolling_frame)
-        scrolling_frame.setLayout(table)
+        # No need to reload profile, use existing config
+        # self.load_profile()  # Commented to avoid re-reading XML
 
-        for header_number in range(0, len(column_headers)):
-            label = QLabel(column_headers[header_number])
-            label.setAlignment(Qt.AlignCenter)
-            table.addWidget(label, 0, header_number)
+        # Create and display modern dialog
+        dia = ModernSitePreferencesDialog(self.config, self)
 
-        # history_paths = []
-        check_buttons = []
-        # screen_names = []
-        seat2_dict, seat3_dict, seat4_dict, seat5_dict, seat6_dict, seat7_dict, seat8_dict, seat9_dict, seat10_dict = (
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-        )
-        # summary_paths = []
-        detector = DetectInstalledSites.DetectInstalledSites()
+        if dia.exec_():
+            # Get changes
+            changes = dia.get_changes()
 
-        y_pos = 1
-        for site_number in range(0, len(available_site_names)):
-            check_button = QCheckBox(available_site_names[site_number])
-            check_button.setChecked(self.config.supported_sites[available_site_names[site_number]].enabled)
-            table.addWidget(check_button, y_pos, 0)
-            check_buttons.append(check_button)
-            # hud_seat = self.config.supported_sites[available_site_names[site_number]].fav_seat[2]
-
-            # print('hud seat ps:', type(hud_seat), hud_seat)
-            seat2 = QLineEdit()
-
-            seat2.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[2]))
-            table.addWidget(seat2, y_pos, 1)
-            seat2_dict.append(seat2)
-            seat2.textChanged.connect(partial(self.autoenableSite, checkbox=check_buttons[site_number]))
-
-            seat3 = QLineEdit()
-            seat3.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[3]))
-            table.addWidget(seat3, y_pos, 2)
-            seat3_dict.append(seat3)
-
-            seat4 = QLineEdit()
-            seat4.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[4]))
-            table.addWidget(seat4, y_pos, 3)
-            seat4_dict.append(seat4)
-
-            seat5 = QLineEdit()
-            seat5.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[5]))
-            table.addWidget(seat5, y_pos, 4)
-            seat5_dict.append(seat5)
-
-            seat6 = QLineEdit()
-            seat6.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[6]))
-            table.addWidget(seat6, y_pos, 5)
-            seat6_dict.append(seat6)
-
-            seat7 = QLineEdit()
-            seat7.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[7]))
-            table.addWidget(seat7, y_pos, 6)
-            seat7_dict.append(seat7)
-
-            seat8 = QLineEdit()
-            seat8.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[8]))
-            table.addWidget(seat8, y_pos, 7)
-            seat8_dict.append(seat8)
-
-            seat9 = QLineEdit()
-            seat9.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[9]))
-            table.addWidget(seat9, y_pos, 8)
-            seat9_dict.append(seat9)
-
-            seat10 = QLineEdit()
-            seat10.setText(str(self.config.supported_sites[available_site_names[site_number]].fav_seat[10]))
-            table.addWidget(seat10, y_pos, 9)
-            seat10_dict.append(seat10)
-
-            if available_site_names[site_number] in detector.supportedSites:
-                pass
-
-            y_pos += 1
-
-        btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, dia)
-        btns.accepted.connect(dia.accept)
-        btns.rejected.connect(dia.reject)
-        dia.layout().addWidget(btns)
-
-        response = dia.exec_()
-        if response:
-            for site_number in range(0, len(available_site_names)):
-                # print "site %s enabled=%s name=%s" % (available_site_names[site_number],
-                # check_buttons[site_number].get_active(), screen_names[site_number].get_text(),
-                # history_paths[site_number].get_text())
-                self.config.edit_fav_seat(
-                    available_site_names[site_number],
-                    str(check_buttons[site_number].isChecked()),
-                    seat2_dict[site_number].text(),
-                    seat3_dict[site_number].text(),
-                    seat4_dict[site_number].text(),
-                    seat5_dict[site_number].text(),
-                    seat6_dict[site_number].text(),
-                    seat7_dict[site_number].text(),
-                    seat8_dict[site_number].text(),
-                    seat9_dict[site_number].text(),
-                    seat10_dict[site_number].text(),
-                )
-
-            self.config.save()
-            self.reload_config()
-
-    def dia_site_preferences(self, widget, data=None):
-        dia = QDialog(self)
-        dia.setWindowTitle("Site Preferences")
-        dia.resize(1200, 600)
-        label = QLabel("Please select which sites you play on and enter your usernames.")
-        dia.setLayout(QVBoxLayout())
-        dia.layout().addWidget(label)
-
-        self.load_profile()
-        site_names = self.config.site_ids
-        available_site_names = []
-        for site_name in site_names:
-            try:
-                self.config.supported_sites[site_name].enabled
-                available_site_names.append(site_name)
-            except KeyError:
-                pass
-
-        column_headers = [
-            "Site",
-            "Detect",
-            "Screen Name",
-            "Hand History Path",
-            "",
-            "Tournament Summary Path",
-            "",
-            "Favorite seat",
-        ]  # todo ("HUD")
-        # HUD column will contain a button that shows favseat and HUD locations.
-        # Make it possible to load screenshot to arrange HUD windowlets.
-
-        table = QGridLayout()
-        table.setSpacing(0)
-
-        scrolling_frame = QScrollArea(dia)
-        dia.layout().addWidget(scrolling_frame)
-        scrolling_frame.setLayout(table)
-
-        for header_number in range(0, len(column_headers)):
-            label = QLabel(column_headers[header_number])
-            label.setAlignment(Qt.AlignCenter)
-            table.addWidget(label, 0, header_number)
-
-        check_buttons = []
-        screen_names = []
-        history_paths = []
-        summary_paths = []
-        detector = DetectInstalledSites.DetectInstalledSites()
-
-        y_pos = 1
-        for site_number in range(0, len(available_site_names)):
-            check_button = QCheckBox(available_site_names[site_number])
-            check_button.setChecked(self.config.supported_sites[available_site_names[site_number]].enabled)
-            table.addWidget(check_button, y_pos, 0)
-            check_buttons.append(check_button)
-
-            hero = QLineEdit()
-            hero.setText(self.config.supported_sites[available_site_names[site_number]].screen_name)
-            table.addWidget(hero, y_pos, 2)
-            screen_names.append(hero)
-            hero.textChanged.connect(partial(self.autoenableSite, checkbox=check_buttons[site_number]))
-
-            entry = QLineEdit()
-            entry.setText(self.config.supported_sites[available_site_names[site_number]].HH_path)
-            table.addWidget(entry, y_pos, 3)
-            history_paths.append(entry)
-
-            choose1 = QPushButton("Browse")
-            table.addWidget(choose1, y_pos, 4)
-            choose1.clicked.connect(partial(self.browseClicked, parent=dia, path=history_paths[site_number]))
-
-            entry = QLineEdit()
-            entry.setText(self.config.supported_sites[available_site_names[site_number]].TS_path)
-            table.addWidget(entry, y_pos, 5)
-            summary_paths.append(entry)
-
-            choose2 = QPushButton("Browse")
-            table.addWidget(choose2, y_pos, 6)
-            choose2.clicked.connect(partial(self.browseClicked, parent=dia, path=summary_paths[site_number]))
-
-            if available_site_names[site_number] in detector.supportedSites:
-                button = QPushButton("Detect")
-                table.addWidget(button, y_pos, 1)
-                button.clicked.connect(
-                    partial(
-                        self.detect_clicked,
-                        data=(
-                            detector,
-                            available_site_names[site_number],
-                            screen_names[site_number],
-                            history_paths[site_number],
-                            summary_paths[site_number],
-                        ),
+            # Apply changes
+            for site_name, values in changes.items():
+                if site_name in self.config.supported_sites:
+                    self.config.edit_site(
+                        site_name,
+                        str(values["enabled"]),
+                        values["screen_name"],
+                        values["hh_path"],
+                        values["ts_path"],
                     )
-                )
-            y_pos += 1
 
-        btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, dia)
-        btns.accepted.connect(dia.accept)
-        btns.rejected.connect(dia.reject)
-        dia.layout().addWidget(btns)
-
-        response = dia.exec_()
-        if response:
-            for site_number in range(0, len(available_site_names)):
-                # print "site %s enabled=%s name=%s" % (available_site_names[site_number],
-                # check_buttons[site_number].get_active(), screen_names[site_number].get_text(),
-                # history_paths[site_number].get_text())
-                self.config.edit_site(
-                    available_site_names[site_number],
-                    str(check_buttons[site_number].isChecked()),
-                    screen_names[site_number].text(),
-                    history_paths[site_number].text(),
-                    summary_paths[site_number].text(),
-                )
+            # Detect changes before saving
+            config_manager = ConfigurationManager()
+            if config_manager.initialized:
+                pending_changes = config_manager.check_pending_changes(self.config)
+                config_manager._pending_changes = pending_changes
 
             self.config.save()
             self.reload_config()
 
-    def autoenableSite(self, text, checkbox):
+    # The following methods are now managed by ModernSitePreferences
+    # but are kept for compatibility with other part of code
+
+    def autoenableSite(self, text, checkbox) -> None:
         # autoactivate site if something gets typed in the screename field
         checkbox.setChecked(True)
 
-    def browseClicked(self, widget, parent, path):
-        """runs when user clicks one of the browse buttons for the TS folder"""
+    def reload_hud_displays(self) -> None:
+        """Reloads all active HUD displays."""
+        log.info("Reloading all active HUD displays...")
+        reloaded_huds = 0
+        for thread in self.threads:
+            if isinstance(thread, GuiAutoImport.GuiAutoImport):
+                try:
+                    thread.reload_hud_config()
+                    reloaded_huds += 1
+                except Exception as e:
+                    log.error(f"Error reloading HUD in thread {thread}: {e}", exc_info=True)
 
-        newpath = QFileDialog.getExistingDirectory(
-            parent, "Please choose the path that you want to Auto Import", path.text()
-        )
-        if newpath:
-            path.setText(newpath)
+        if reloaded_huds > 0:
+            log.info(f"Successfully reloaded {reloaded_huds} HUD displays.")
+            self.statusBar().showMessage(f"{reloaded_huds} HUD displays reloaded", 3000)
+        else:
+            log.info("No active HUD displays found to reload.")
 
-    def detect_clicked(self, widget, data):
-        detector = data[0]
-        site_name = data[1]
-        entry_screen_name = data[2]
-        entry_history_path = data[3]
-        entry_summary_path = data[4]
-        if detector.sitestatusdict[site_name]["detected"]:
-            entry_screen_name.setText(detector.sitestatusdict[site_name]["heroname"])
-            entry_history_path.setText(detector.sitestatusdict[site_name]["hhpath"])
-            if detector.sitestatusdict[site_name]["tspath"]:
-                entry_summary_path.setText(detector.sitestatusdict[site_name]["tspath"])
-
-    def reload_config(self):
+    def reload_config(self) -> None:
+        """Reloads the configuration with dynamic reload support."""
         if len(self.nb_tab_names) == 1:
-            # only main tab open, reload profile
-            self.load_profile()
-            self.warning_box(
-                "Configuration settings have been updated," " Fpdb needs to be restarted now\n\nClick OK to close Fpdb"
-            )
-            sys.exit()
+            # Try dynamic reloading via ConfigurationManager
+            config_manager = ConfigurationManager()
+
+            # Initialize ConfigurationManager if not already done
+            if not config_manager.initialized:
+                config_manager.initialize(self.config.file)
+
+            success, message, restart_changes = config_manager.reload_config()
+
+            if success and not restart_changes:
+                # Dynamic reload successful without changes requiring restart
+                # IMPORTANT: Update self.config to point to the config of ConfigurationManager
+                self.config = config_manager.get_config()
+
+                # Also update references in existing tabs
+                for thread in self.threads:
+                    if hasattr(thread, "config"):
+                        thread.config = self.config
+
+                if "No changes detected" in message:
+                    self.info_box("Configuration", message)
+                else:
+                    self.info_box("Configuration updated", message)
+                log.info(f"Configuration reloaded: {message}")
+            elif success and restart_changes:
+                # Some changes require restart
+                changes_text = "\n".join([f"- {c.path}: {c.old_value} → {c.new_value}" for c in restart_changes[:5]])
+                if len(restart_changes) > 5:
+                    changes_text += f"\n... and {len(restart_changes) - 5} other changes"
+
+                self.warning_box(
+                    f"{message}\n\n"
+                    "The following changes require a restart:\n"
+                    f"{changes_text}\n\n"
+                    "Fpdb must be restarted now.\n\nClick OK to close Fpdb.",
+                )
+                sys.exit()
+            else:
+                # Reload failed
+                self.warning_box(
+                    f"Error while reloading configuration:\n{message}\n\n"
+                    "Fpdb must be restarted now.\n\nClick OK to close Fpdb.",
+                )
+                sys.exit()
         else:
             self.warning_box(
-                "Updated preferences have not been loaded because windows are open." " Re-start fpdb to load them."
+                "The updated preferences have not been loaded because windows are open. "
+                "Restart fpdb to load them.",
             )
 
-    def process_close_messages(self):
+    def process_close_messages(self) -> None:
         # check for close messages
         try:
             while True:
@@ -914,7 +708,7 @@ class fpdb(QMainWindow):
             # no close messages on queue, do nothing
             pass
 
-    def __calendar_dialog(self, widget, entry):
+    def __calendar_dialog(self, widget, entry) -> None:
         d = QDialog(self.dia_confirm)
         d.setWindowTitle("Pick a date")
 
@@ -929,9 +723,8 @@ class fpdb(QMainWindow):
         vb.addWidget(btn)
 
         d.exec_()
-        return
 
-    def createMenuBar(self):
+    def createMenuBar(self) -> None:
         mb = self.menuBar()
         configMenu = mb.addMenu("Configure")
         importMenu = mb.addMenu("Import")
@@ -945,20 +738,16 @@ class fpdb(QMainWindow):
 
         configMenu.addAction(self.makeAction("Site Settings", self.dia_site_preferences))
         configMenu.addAction(self.makeAction("Seat Settings", self.dia_site_preferences_seat))
-        configMenu.addAction(self.makeAction("Hud Settings", self.dia_hud_preferences))
+        configMenu.addAction(self.makeAction("HUD Preferences", self.dia_hud_preferences))
+        configMenu.addAction(self.makeAction("Manage HUD Sites", self.dia_manage_hud_sites))
         configMenu.addAction(
-            self.makeAction("Adv Preferences", self.dia_advanced_preferences, tip="Edit your preferences")
+            self.makeAction("Adv Preferences", self.dia_advanced_preferences, tip="Edit your preferences"),
         )
         configMenu.addAction(self.makeAction("Import filters", self.dia_import_filters))
-        # Add the Toggle Debug Logging action
-        self.debug_logging_action = self.makeAction("Enable Debug Logging", self.toggle_debug_logging, checkable=True)
-        configMenu.addAction(self.debug_logging_action)
-
-        # Set the initial check state based on the current logging level
-        if log.getEffectiveLevel() <= logging.DEBUG:
-            self.debug_logging_action.setChecked(True)
-        else:
-            self.debug_logging_action.setChecked(False)
+        # Add the Logger Dev Tool action
+        self.logger_dev_tool_action = self.makeAction("Logger Dev Tool", self.show_logger_dev_tool,
+                                                     tip="Advanced logger manager")
+        configMenu.addAction(self.logger_dev_tool_action)
         configMenu.addSeparator()
         configMenu.addAction(self.makeAction("Close Fpdb", self.quit, "Ctrl+Q", "Quit the Program"))
 
@@ -1016,30 +805,29 @@ class fpdb(QMainWindow):
             action.triggered.connect(callback)
         return action
 
-    def toggle_debug_logging(self, checked):
-        if checked:
-            # Activer le logging debug pour le logger racine
-            logging.getLogger().setLevel(logging.DEBUG)
-            self.statusBar().showMessage("Debug logging enabled")
-            log.debug("logging debug activated.")
-        else:
-            # Désactiver le logging debug (revenir au niveau INFO)
-            logging.getLogger().setLevel(logging.INFO)
-            self.statusBar().showMessage("Debug logging disabled")
-            log.info("logging debug deactivated.")
+    def show_logger_dev_tool(self) -> None:
+        """Open the advanced logger development tool."""
+        try:
+            from loggingFpdb import show_logger_dev_tool
+            show_logger_dev_tool(self)
+            self.statusBar().showMessage("Logger Dev Tool open")
+        except Exception as e:
+            log.exception(f"Error opening Logger Dev Tool: {e}")
+            self.statusBar().showMessage(f"Error: {e}")
 
-    def load_profile(self, create_db=False):
+
+    def load_profile(self, create_db=False) -> None:
         """Loads profile from the provided path name.
         Sets:
         - self.settings
         - self.config
-        - self.db
+        - self.db.
         """
         # Load the configuration
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
         if self.config.file_error:
             self.warning_box(
-                f"There is an error in your config file {self.config.file}:\n{str(self.config.file_error)}",
+                f"There is an error in your config file {self.config.file}:\n{self.config.file_error!s}",
                 diatitle="CONFIG FILE ERROR",
             )
             sys.exit()
@@ -1070,18 +858,18 @@ class fpdb(QMainWindow):
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel(
                 "\nYour local configuration file needs to be updated."
-                " This error is not necessarily fatal but it is strongly recommended that you update the configuration."
+                " This error is not necessarily fatal but it is strongly recommended that you update the configuration.",
             )
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel(
                 "To create a new configuration, see:"
-                " fpdb.sourceforge.net/apps/mediawiki/fpdb/index.php?title=Reset_Configuration"
+                " fpdb.sourceforge.net/apps/mediawiki/fpdb/index.php?title=Reset_Configuration",
             )
             label.setTextInteractionFlags(Qt.TextSelectableByMouse)
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel(
                 "A new configuration will destroy all personal settings"
-                " (hud layout, site folders, screennames, favourite seats).\n"
+                " (hud layout, site folders, screennames, favourite seats).\n",
             )
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel("To keep existing personal settings, you must edit the local file.")
@@ -1151,7 +939,7 @@ class fpdb(QMainWindow):
             diaDbVersionWarning.setInformativeText(
                 "This error is not necessarily fatal but it is strongly"
                 " recommended that you recreate the tables by using the Database menu."
-                " Not doing this will likely lead to misbehavior including fpdb crashes, corrupt data, etc."
+                " Not doing this will likely lead to misbehavior including fpdb crashes, corrupt data, etc.",
             )
             diaDbVersionWarning.exec_()
 
@@ -1159,15 +947,14 @@ class fpdb(QMainWindow):
         if self.db is not None and self.db.is_connected():
             self.statusBar().showMessage(
                 f"Status: Connected to {self.db.get_backend_name()}"
-                f" database named {self.db.database} on host {self.db.host}"
+                f" database named {self.db.database} on host {self.db.host}",
             )
             # Rollback to make sure any locks are cleared
             self.db.rollback()
 
         # Validate the configuration if the database version is up-to-date
-        if hasattr(self.db, "wrongDbVersion"):
-            if not self.db.wrongDbVersion:
-                self.validate_config()
+        if hasattr(self.db, "wrongDbVersion") and not self.db.wrongDbVersion:
+            self.validate_config()
 
     def obtain_global_lock(self, source):
         ret = self.lock.acquire(source=source)  # will return false if lock is already held
@@ -1180,7 +967,7 @@ class fpdb(QMainWindow):
         # need to release it later:
         # self.lock.release()
 
-    def quit(self, widget, data=None):
+    def quit(self, widget, data=None) -> None:
         # TODO: can we get some / all of the stuff done in this function to execute on any kind of abort?
         # FIXME  get two "quitting normally" messages, following the addition of the self.window.destroy() call
         #       ... because self.window.destroy() leads to self.destroy() which calls this!
@@ -1198,21 +985,20 @@ class fpdb(QMainWindow):
                         self.db.disconnect()
                 except _mysql_exceptions.OperationalError:  # oh, damn, we're already disconnected
                     pass
-            else:
-                if self.db is not None and self.db.is_connected():
-                    self.db.disconnect()
+            elif self.db is not None and self.db.is_connected():
+                self.db.disconnect()
         else:
             pass
         # self.statusIcon.set_visible(False)
         QCoreApplication.quit()
 
-    def release_global_lock(self):
+    def release_global_lock(self) -> None:
         self.lock.release()
         self.lockTakenBy = None
         log.info("Global lock released.")
 
-    def tab_auto_import(self, widget, data=None):
-        """opens the auto import tab"""
+    def tab_auto_import(self, widget, data=None) -> None:
+        """Opens the auto import tab."""
         new_aimp_thread = GuiAutoImport.GuiAutoImport(self.settings, self.config, self.sql, self)
         self.threads.append(new_aimp_thread)
         self.add_and_display_tab(new_aimp_thread, "HUD")
@@ -1220,8 +1006,8 @@ class fpdb(QMainWindow):
             new_aimp_thread.startClicked(new_aimp_thread.startButton, "autostart")
             options.autoimport = False
 
-    def tab_bulk_import(self, widget, data=None):
-        """opens a tab for bulk importing"""
+    def tab_bulk_import(self, widget, data=None) -> None:
+        """Opens a tab for bulk importing."""
         new_import_thread = GuiBulkImport.GuiBulkImport(self.settings, self.config, self.sql, self)
         self.threads.append(new_import_thread)
         self.add_and_display_tab(new_import_thread, "Bulk Import")
@@ -1235,17 +1021,17 @@ class fpdb(QMainWindow):
 
     # end def tab_import_imap_summaries
 
-    def tab_ring_player_stats(self, widget, data=None):
+    def tab_ring_player_stats(self, widget, data=None) -> None:
         new_ps_thread = GuiRingPlayerStats.GuiRingPlayerStats(self.config, self.sql, self)
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Ring Player Stats")
 
-    def tab_tourney_player_stats(self, widget, data=None):
+    def tab_tourney_player_stats(self, widget, data=None) -> None:
         new_ps_thread = GuiTourneyPlayerStats.GuiTourneyPlayerStats(self.config, self.db, self.sql, self)
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Tourney Stats")
 
-    def tab_tourney_viewer_stats(self, widget, data=None):
+    def tab_tourney_viewer_stats(self, widget, data=None) -> None:
         new_thread = GuiTourHandViewer.TourHandViewer(self.config, self.sql, self)
         self.threads.append(new_thread)
         self.add_and_display_tab(new_thread, "Tourney Viewer")
@@ -1256,19 +1042,19 @@ class fpdb(QMainWindow):
     #     ps_tab = new_ps_thread.get_vbox()
     #     self.add_and_display_tab(ps_tab, "Positional Stats")
 
-    def tab_session_stats(self, widget, data=None):
+    def tab_session_stats(self, widget, data=None) -> None:
         colors = self.get_theme_colors()
         new_ps_thread = GuiSessionViewer.GuiSessionViewer(self.config, self.sql, self, self, colors=colors)
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Session Stats")
 
-    def tab_hand_viewer(self, widget, data=None):
+    def tab_hand_viewer(self, widget, data=None) -> None:
         new_ps_thread = GuiHandViewer.GuiHandViewer(self.config, self.sql, self)
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Hand Viewer")
 
-    def tab_main_help(self, widget, data=None):
-        """Displays a tab with the main fpdb help screen"""
+    def tab_main_help(self, widget, data=None) -> None:
+        """Displays a tab with the main fpdb help screen."""
         mh_tab = QLabel(
             (
                 """
@@ -1285,13 +1071,12 @@ class fpdb(QMainWindow):
                         The Windows installer package includes code licensed under the MIT license.
                         You can find the full license texts in agpl-3.0.txt, gpl-2.0.txt, gpl-3.0.txt
                         and mit.txt in the fpdb installation directory."""
-            )
+            ),
         )
         self.add_and_display_tab(mh_tab, "Help")
 
     def get_theme_colors(self):
-        """
-        Returns a dictionary containing the theme colors used in the application.
+        """Returns a dictionary containing the theme colors used in the application.
 
         The dictionary contains the following keys:
         - "background": the name of the color used for the background.
@@ -1304,6 +1089,7 @@ class fpdb(QMainWindow):
 
         Returns:
             dict: A dictionary containing the theme colors.
+
         """
         return {
             "background": self.palette().color(QPalette.Window).name(),
@@ -1317,15 +1103,15 @@ class fpdb(QMainWindow):
             "line_hands": "c",
         }
 
-    def tabGraphViewer(self, widget, data=None):
-        """opens a graph viewer tab"""
+    def tabGraphViewer(self, widget, data=None) -> None:
+        """Opens a graph viewer tab."""
         colors = self.get_theme_colors()
         new_gv_thread = GuiGraphViewer.GuiGraphViewer(self.sql, self.config, self, colors=colors)
         self.threads.append(new_gv_thread)
         self.add_and_display_tab(new_gv_thread, "Graphs")
 
-    def tabTourneyGraphViewer(self, widget, data=None):
-        """opens a graph viewer tab"""
+    def tabTourneyGraphViewer(self, widget, data=None) -> None:
+        """Opens a graph viewer tab."""
         colors = self.get_theme_colors()
         new_gv_thread = GuiTourneyGraphViewer.GuiTourneyGraphViewer(self.sql, self.config, self, colors=colors)
         self.threads.append(new_gv_thread)
@@ -1338,7 +1124,7 @@ class fpdb(QMainWindow):
     #     # tab = thread.get_vbox()
     #     self.add_and_display_tab(thread, "Stove")
 
-    def validate_config(self):
+    def validate_config(self) -> None:
         # check if sites in config file are in DB
         for site in self.config.supported_sites:  # get site names from config file
             try:
@@ -1347,13 +1133,13 @@ class fpdb(QMainWindow):
                 log.warning(f"site {site} missing from db")
                 dia = QMessageBox()
                 dia.setIcon(QMessageBox.Warning)
-                dia.setText("Unknown Site")
+                dia.setWindowTitle("Unknown Site")
+                dia.setText(f"Warning: Unable to find site '{site}' in database")
+                dia.setInformativeText(
+                    "This site is configured but not found in the database. You may need to recreate the database tables.",
+                )
                 dia.setStandardButtons(QMessageBox.Ok)
                 dia.exec_()
-                diastring = f"Warning: Unable to find site '{site}'"
-                dia.format_secondary_text(diastring)
-                dia.run()
-                dia.destroy()
 
     def info_box(self, str1, str2):
         diapath = QMessageBox(self)
@@ -1364,26 +1150,32 @@ class fpdb(QMainWindow):
     def warning_box(self, string, diatitle="FPDB WARNING"):
         return QMessageBox(QMessageBox.Warning, diatitle, string).exec_()
 
-    def change_theme(self, theme):
-        apply_stylesheet(app, theme=theme)
+    def change_theme(self, theme) -> None:
+        try:
+            from qt_material import apply_stylesheet
 
-    def update_title_bar_theme(self):
+            apply_stylesheet(QApplication.instance(), theme=theme)
+            self.update_title_bar_theme()
+        except ImportError:
+            log.warning("qt_material not available, cannot change theme")
+        except Exception as e:
+            log.exception(f"Error changing theme: {e}")
+
+    def update_title_bar_theme(self) -> None:
         # Apply the stylesheet to the custom title bar
         self.custom_title_bar.update_theme()
 
-    def close_tab(self, index):
+    def close_tab(self, index) -> None:
         item = self.nb.widget(index)
         self.nb.removeTab(index)
         self.nb_tab_names.pop(index)
 
-        try:
+        with contextlib.suppress(ValueError):
             self.threads.remove(item)
-        except ValueError:
-            pass
 
         item.deleteLater()
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         if sys.platform == "darwin":
             pass
@@ -1406,8 +1198,8 @@ class fpdb(QMainWindow):
         # Initialize the debug_logging_action to None; it will be set in createMenuBar
         self.debug_logging_action = None
 
-        # Set default logging level
-        log.setLevel(logging.INFO)  # Set default level to INFO
+        # Logger level is now controlled by Logger Dev Tool configuration
+        # No need to override the level here as get_logger() handles this automatically
 
         if options.initialRun:
             self.display_config_created_dialogue = True
@@ -1426,10 +1218,8 @@ class fpdb(QMainWindow):
         self.setWindowTitle("Free Poker DB 3")
         defx, defy = 1920, 1080
         sg = QApplication.primaryScreen().availableGeometry()
-        if sg.width() < defx:
-            defx = sg.width()
-        if sg.height() < defy:
-            defy = sg.height()
+        defx = min(sg.width(), defx)
+        defy = min(sg.height(), defy)
         self.resize(defx, defy)
 
         if sys.platform == "darwin":
@@ -1478,6 +1268,9 @@ class fpdb(QMainWindow):
 
         self.load_profile(create_db=True)
 
+        # Register GUI observer (ConfigurationManager already initialized dans load_profile)
+        self._register_gui_observer()
+
         if self.config.install_method == "app":
             for site in list(self.config.supported_sites.values()):
                 if site.screen_name != "YOUR SCREEN NAME HERE":
@@ -1494,7 +1287,7 @@ class fpdb(QMainWindow):
         if not options.errorsToConsole:
             fileName = os.path.join(self.config.dir_log, "fpdb-errors.txt")
             log.info(
-                f"Note: error output is being diverted to {self.config.dir_log}. Any major error will be reported there _only_."
+                f"Note: error output is being diverted to {self.config.dir_log}. Any major error will be reported there _only_.",
             )
             errorFile = codecs.open(fileName, "w", "utf-8")
             sys.stderr = errorFile
@@ -1504,9 +1297,29 @@ class fpdb(QMainWindow):
         if options.autoimport:
             self.tab_auto_import(None)
 
+    def _register_gui_observer(self) -> None:
+        """Registers the GUI observer with the ConfigurationManager."""
+        try:
+            config_manager = ConfigurationManager()
+
+            # Initialize ConfigurationManager if not already done
+            if not config_manager.initialized:
+                config_manager.initialize(self.config.file)
+                # IMPORTANT: Synchronise config objects
+                config_manager._config = self.config
+                config_manager._capture_current_state()
+
+            # Register GUI observer
+            gui_observer = GuiConfigObserver(self)
+            config_manager.register_observer(gui_observer)
+            log.info("GUI observer registered with ConfigurationManager")
+
+        except Exception as e:
+            log.exception(f"Error while registering the GUI observer: {e}")
+
 
 class CustomTitleBar(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setAutoFillBackground(True)
         self.main_window = parent
@@ -1546,21 +1359,21 @@ class CustomTitleBar(QWidget):
             self.moving = False
             self.offset = None
 
-    def toggle_maximize_restore(self):
+    def toggle_maximize_restore(self) -> None:
         if self.is_maximized:
             self.main_window.showNormal()
         else:
             self.main_window.showMaximized()
         self.is_maximized = not self.is_maximized
 
-    def update_theme(self):
+    def update_theme(self) -> None:
         self.setStyleSheet(self.main_window.styleSheet())
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event) -> None:
         if event.button() == Qt.LeftButton:
             self.main_window.oldPos = event.globalPos()
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event) -> None:
         if event.buttons() == Qt.LeftButton:
             delta = QPoint(event.globalPos() - self.main_window.oldPos)
             self.main_window.move(self.main_window.x() + delta.x(), self.main_window.y() + delta.y())
@@ -1568,11 +1381,23 @@ class CustomTitleBar(QWidget):
 
 
 if __name__ == "__main__":
-    from qt_material import apply_stylesheet
     import time
 
+    from qt_material import apply_stylesheet
+
+    # IMPORTANT: Initialize configuration BEFORE creating the application
+    # This ensures all required files (HUD_config.xml, directories) exist
+    # before any component tries to use them - fixes issue #22
     try:
-        Configuration.get_config("HUD_config.xml", True)
+        from ConfigInitializer import ConfigInitializer
+        config = ConfigInitializer.initialize()
+        if config:
+            log.info("Configuration initialized successfully")
+    except Exception as e:
+        log.exception(f"Failed to initialize configuration: {e}")
+        sys.exit(1)
+
+    try:
         app = QApplication([])
         apply_stylesheet(app, theme="dark_purple.xml")
         me = fpdb()

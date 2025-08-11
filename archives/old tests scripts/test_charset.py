@@ -1,7 +1,7 @@
+import pytest
 from Charset import to_utf8
 
 import Configuration
-import pytest
 
 """
 Code Analysis

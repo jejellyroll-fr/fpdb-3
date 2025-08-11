@@ -20,7 +20,6 @@ data_files = [
     ]],
     ["usr/share/applications", ["files/fpdb.desktop"]],
     ["usr/share/python-fpdb", [
-        "pyfpdb/logging.conf",
         "pyfpdb/HUD_config.xml.example"
     ]],
     ["usr/share/python-fpdb/cards/backs", ["gfx/cards/backs/*"]],
