@@ -1,19 +1,27 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit,QLabel, QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QComboBox, QMessageBox
-from sqlalchemy import null
-
-
 import OddsCalc
 import OddsCalcPQL
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
+from sqlalchemy import null
 
-
-    
 
 class GuiOddsCalc(QWidget):
     def get_vbox(self):
         """returns the vbox of this thread"""
-        return self.layout()    
+        return self.layout()
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QWidget.__init__(self, parent)
         self.setLayout(QVBoxLayout())
 
@@ -36,10 +44,10 @@ class GuiOddsCalc(QWidget):
         s8 = "Stud Hi/Lo"
         self.QLEgame.insertItem(8, s8)
         o6 = "6 card Omaha"
-        self.QLEgame.insertItem(9, o6)                
+        self.QLEgame.insertItem(9, o6)
         self.QLEgame.setMinimumWidth(300)
         self.QLdeadcard = QLabel("Dead Card")
-        self.QLEdeadcard = QLineEdit()        
+        self.QLEdeadcard = QLineEdit()
         self.QLboard = QLabel("Board")
         self.QLEboard = QLineEdit()
         self.QLhero = QLabel("Hero")
@@ -56,25 +64,23 @@ class GuiOddsCalc(QWidget):
         self.QLEvilain5 = QLineEdit()
         self.Lreq = QLabel()
 
-        
-        
         self.hbox = QHBoxLayout()
         self.hbox.addWidget(self.QLgame)
         self.hbox.addWidget(self.QLEgame)
         self.hbox.addWidget(self.QLdeadcard)
         self.hbox.addWidget(self.Lreq)
         self.hbox.addWidget(self.QLEdeadcard)
-        
+
         self.Lreq.setText("Not Required")
-        self.Lreq.setStyleSheet("QLabel { color : green; }")        
+        self.Lreq.setStyleSheet("QLabel { color : green; }")
         self.layout().addLayout(self.hbox)
 
         self.hbox2 = QHBoxLayout()
-        
+
         self.hbox2.addWidget(self.QLboard)
         self.hbox2.addWidget(self.QLEboard)
         self.layout().addLayout(self.hbox2)
-        
+
         self.hbox3 = QHBoxLayout()
         self.hbox3.addWidget(self.QLhero)
         self.hbox3.addWidget(self.QLEhero)
@@ -91,10 +97,8 @@ class GuiOddsCalc(QWidget):
         self.layout().addLayout(self.hbox3)
         self.QLEgame.activated[str].connect(self.index_changed)
 
-        self.load_button = QPushButton(('Odds Calculate'))
+        self.load_button = QPushButton(("Odds Calculate"))
 
-            
-        
         self.load_button.clicked.connect(self.load_result)
         self.layout().addWidget(self.load_button)
 
@@ -102,7 +106,7 @@ class GuiOddsCalc(QWidget):
         hbox_result = QHBoxLayout()
         hbox_result.addWidget(self.QTcalc)
         self.layout().addLayout(hbox_result)
-        
+
     def warning_box(self, string, diatitle=("FPDB WARNING")):
         return QMessageBox(QMessageBox.Warning, diatitle, string).exec_()
 
@@ -114,26 +118,25 @@ class GuiOddsCalc(QWidget):
             self.Lreq.setText("Not Required")
         elif self.QLEgame.currentText() == "6 card Omaha":
             self.Lreq.setText("Not Required")
-            self.Lreq.setStyleSheet("QLabel { color : green; }")    
+            self.Lreq.setStyleSheet("QLabel { color : green; }")
         elif self.QLEgame.currentText() == "5 card Omaha":
             self.Lreq.setText("Not Required")
-            self.Lreq.setStyleSheet("QLabel { color : green; }") 
+            self.Lreq.setStyleSheet("QLabel { color : green; }")
         elif self.QLEgame.currentText() == "5 card Omaha Hi/Lo":
             self.Lreq.setText("Not Required")
-            self.Lreq.setStyleSheet("QLabel { color : green; }")    
+            self.Lreq.setStyleSheet("QLabel { color : green; }")
         elif self.QLEgame.currentText() == "Omaha Hi/Lo":
             self.Lreq.setText("Not Required")
-            self.Lreq.setStyleSheet("QLabel { color : green; }")   
+            self.Lreq.setStyleSheet("QLabel { color : green; }")
         elif self.QLEgame.currentText() == "Razz":
             self.Lreq.setText("Required")
-            self.Lreq.setStyleSheet("QLabel { color : red; }")     
+            self.Lreq.setStyleSheet("QLabel { color : red; }")
         elif self.QLEgame.currentText() == "Stud":
             self.Lreq.setText("Required")
-            self.Lreq.setStyleSheet("QLabel { color : red; }") 
+            self.Lreq.setStyleSheet("QLabel { color : red; }")
         elif self.QLEgame.currentText() == "Stud Hi/Lo":
             self.Lreq.setText("Required")
-            self.Lreq.setStyleSheet("QLabel { color : red; }")                                          
-   
+            self.Lreq.setStyleSheet("QLabel { color : red; }")
 
     def load_result(self):
         if self.QLEhero.text() == "" and self.QLEvilain1.text() == "":
@@ -141,23 +144,23 @@ class GuiOddsCalc(QWidget):
         else:
             game = self.QLEgame.currentText()
             if game == "hold'em":
-                game = 'holdem'
+                game = "holdem"
             elif game == "Omaha":
-                game = 'omahahi'
+                game = "omahahi"
             elif game == "5 card Omaha":
-                game = 'omahahi5'
+                game = "omahahi5"
             elif game == "5 card Omaha Hi/Lo":
-                game = 'omaha85'
+                game = "omaha85"
             elif game == "Omaha Hi/Lo":
-                game = 'omaha8'
+                game = "omaha8"
             elif game == "Razz":
-                game = 'razz'
+                game = "razz"
             elif game == "Stud":
-                game = 'studhi'
+                game = "studhi"
             elif game == "Stud Hi/Lo":
-                game = 'stud8'
+                game = "stud8"
             elif game == "6 card Omaha":
-                game = 'omahahi6'
+                game = "omahahi6"
             print(game)
             board = self.QLEboard.text()
             dead = self.QLEdeadcard.text()
@@ -167,28 +170,28 @@ class GuiOddsCalc(QWidget):
             vilain3 = self.QLEvilain3.text()
             vilain4 = self.QLEvilain4.text()
             vilain5 = self.QLEvilain5.text()
-            if game == 'stud8' or game == 'studhi' or game == 'razz':      
-                odd1 = OddsCalcPQL.OddsCalcPQL(game,board)
-                #odd1 = OddsCalc.OddsCalc(str(game),str(dead),str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5))
+            if game == "stud8" or game == "studhi" or game == "razz":
+                odd1 = OddsCalcPQL.OddsCalcPQL(game, board)
+                # odd1 = OddsCalc.OddsCalc(str(game),str(dead),str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5))
             else:
-                odd1 = OddsCalcPQL.OddsCalcPQL(game,board)
-                #odd1 = OddsCalc.OddsCalc(str(game),str(dead),str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5))
-        
+                odd1 = OddsCalcPQL.OddsCalcPQL(game, board)
+                # odd1 = OddsCalc.OddsCalc(str(game),str(dead),str(board),str(hero),str(vilain1),str(vilain2),str(vilain3),str(vilain4),str(vilain5))
+
             result_brut = odd1.calcBasePQL()
 
             print(result_brut)
             row_count = len(result_brut)
             print(row_count)
-            column_count = 2 #nb player
+            column_count = 2  # nb player
             print(column_count)
-            self.QTcalc.setColumnCount(int(row_count/2)) 
+            self.QTcalc.setColumnCount(int(row_count / 2))
             self.QTcalc.setRowCount(column_count)
-            name_col = ['Hands', 'Equity', 'Win','Ties']
+            name_col = ["Hands", "Equity", "Win", "Ties"]
             self.QTcalc.setHorizontalHeaderLabels((list(name_col)))
 
-            for row in range(column_count-1):
-                for col in range(row_count-1):
+            for row in range(column_count - 1):
+                for col in range(row_count - 1):
                     item = list(result_brut.values())
-                    print('item value:',item)
-                    print('item value:',item[col])
+                    print("item value:", item)
+                    print("item value:", item[col])
                     self.QTcalc.setItem(row, col, QTableWidgetItem(item[col]))

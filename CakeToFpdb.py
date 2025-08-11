@@ -1,6 +1,9 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
+"""Cake Network hand history parser.
+
+This module provides functionality to parse hand history files from the Cake Network
+and convert them to FPDB format.
+"""
+
 #    Copyright 2008-2011, Carl Gherardi
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -18,24 +21,24 @@
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
 
-from __future__ import division
 
-from past.utils import old_div
-# import L10n
-# _ = L10n.get_translation()
-
-from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
-from decimal import Decimal
-import re
-from loggingFpdb import get_logger
 import datetime
+import re
+from decimal import Decimal
+from re import Match
+from typing import TYPE_CHECKING, ClassVar
 
-log = get_logger("parser")
+from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
+from loggingFpdb import get_logger
+
+if TYPE_CHECKING:
+    from Hand import Hand
+
+log = get_logger("cake_parser")
 
 
 class Cake(HandHistoryConverter):
-    """
-    A class for converting Cake hand histories to FPDB format.
+    """A class for converting Cake hand histories to FPDB format.
 
     Inherits from HandHistoryConverter.
 
@@ -53,19 +56,19 @@ class Cake(HandHistoryConverter):
     sitename = "Cake"
     filetype = "text"
     codepage = ("utf8", "cp1252")
-    siteId = 17
-    sym = {"USD": "\$", "CAD": "\$", "T$": "", "EUR": "€", "GBP": "\xa3", "play": ""}
-    substitutions = {
+    site_id = 17
+    sym: ClassVar[dict[str, str]] = {"USD": r"\$", "CAD": r"\$", "T$": "", "EUR": "€", "GBP": "\xa3", "play": ""}
+    substitutions: ClassVar[dict[str, str]] = {
         "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP",  # legal ISO currency codes
         "LS": r"\$|€|",  # legal currency symbols - Euro(cp1252, utf-8)
         "PLYR": r"(?P<PNAME>.+?)",
-        "CUR": r"(\$|€|)",
-        "NUM": r".(,|\s)\d\xa0",
+        "CUR": r"(\\\$|€|)?",
+        "NUM": r"0-9,\.",
         "NUM2": r"\b((?:\d{1,3}(?:\s\d{3})*)|(?:\d+))\b",  # Regex pattern for matching numbers with spaces
     }
 
     # translations from captured groups to fpdb info strings
-    Lim_Blinds = {
+    lim_blinds: ClassVar[dict[str, tuple[str, str]]] = {
         "0.04": ("0.01", "0.02"),
         "0.08": ("0.02", "0.04"),
         "0.10": ("0.02", "0.05"),
@@ -108,112 +111,145 @@ class Cake(HandHistoryConverter):
         "1000": ("250.00", "500.00"),
     }
 
-    limits = {"NL": "nl", "PL": "pl", "FL": "fl"}
-    games = {  # base, category
+    limits: ClassVar[dict[str, str]] = {"NL": "nl", "PL": "pl", "FL": "fl"}
+    games: ClassVar[dict[str, tuple[str, str]]] = {  # base, category
         "Hold'em": ("hold", "holdem"),
         "Omaha": ("hold", "omahahi"),
         "Omaha Hi/Lo": ("hold", "omahahilo"),
         "OmahaHiLo": ("hold", "omahahilo"),
     }
-    currencies = {"€": "EUR", "$": "USD", "": "T$"}
+    currencies: ClassVar[dict[str, str]] = {"€": "EUR", "$": "USD", "": "T$"}
 
-    # Static regexes
-    re_GameInfo = re.compile(
+    # Static regexes - Tournament format (with explicit buyin structure)
+    re_game_info_tournament = re.compile(
+        r"(?:ï»¿)?Hand\#(?P<HID>[A-Z0-9]+)\s+\-\s+(?P<TOURNAMENT_INFO>.+?)\s+T(?P<TOURNO>\d+)\s+\-\-\s+"
+        r"(?P<BUYIN_TYPE>CASH|TICKET|TICKETCASH)\s+\-\-\s+"
+        r"(?P<BUYIN>[\$€£]?[0-9,\.]+)\s*\+\s*(?P<FEE>[\$€£]?[0-9,\.]+)\s+\-\-\s+"
+        r"(?P<MAXSEATS>\d+)\s+Max\s+\-\-\s+Table\s+(?P<TABLENO>\d+)\s+\-\-\s+"
+        r"(?P<ANTE>[\-0-9,\.]+)[/,](?P<SB>[0-9,\.]+)[/,](?P<BB>[0-9,\.]+)\s+"
+        r"(?P<LIMIT>NL|FL|PL)\s+(?P<GAME>Hold\'em|Omaha|OmahaHiLo|Omaha\sHi/Lo)\s+\-\-\s+"
+        r"(?P<DATETIME>.*?)$",
+        re.MULTILINE,
+    )
+
+    # Static regexes - Simple tournament format (without explicit buyin structure)
+    re_game_info_tournament_simple = re.compile(
+        r"(?:ï»¿)?Hand\#(?P<HID>[A-Z0-9]+)\s+\-\s+(?P<TOURNAMENT_INFO>.+?)\s+T(?P<TOURNO>\d+)\s+\-\-\s+"
+        r"Table\s+(?P<TABLENO>\d+)\s+\-\-\s+"
+        r"(?P<ANTE>[\-0-9,\.]+)[/,](?P<SB>[0-9,\.]+)[/,](?P<BB>[0-9,\.]+)\s+"
+        r"(?P<LIMIT>NL|FL|PL)\s+(?P<GAME>Hold\'em|Omaha|OmahaHiLo|Omaha\sHi/Lo)\s+\-\-\s+"
+        r"(?P<DATETIME>.*?)$",
+        re.MULTILINE,
+    )
+
+    # Static regexes - Cash game format
+    re_game_info_cash = re.compile(
+        r"(?:ï»¿)?Hand\#(?P<HID>[A-Z0-9]+)\s+\-\s+(?P<TABLE>.+?)\s+(?P<TABLENO>\d+)\s+\-\-\s+"
+        r"(?P<CURRENCY>[$€£])?(?P<SB>[0-9,\.]+)[/,](?P<CURRENCY2>[$€£])?(?P<BB>[0-9,\.]+)\s+"
+        r"(?P<LIMIT>NL|FL|PL)\s+(?P<GAME>Hold\'em|Omaha|Omaha\sHi/Lo|OmahaHiLo)\s+\-\-\s+"
+        r"(?P<DATETIME>.*?)$",
+        re.MULTILINE,
+    )
+
+    re_player_info = re.compile(
+        r"^Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.+?)\s\([$]?(?P<CASH>[0-9,\.\s]+)\sin\schips\)\s*(DEALER)?",
+        re.MULTILINE,
+    )
+
+    re_trim = re.compile(r"(Hand\#)")
+    re_identify = re.compile(r"Hand\#[A-Z0-9]+\s\-\s")
+    re_split_hands = re.compile("\n\n+")
+    re_button = re.compile(r"Dealer: Seat (?P<BUTTON>\d+)", re.MULTILINE)
+    re_board = re.compile(r"\[(?P<CARDS>.+)\]")
+
+    re_date_time = re.compile(
+        r"""(?P<Y>[0-9]{4})[\/\-\.](?P<M>[0-9]{2})[\/\-\.](?P<D>[0-9]{2})[\- ]+"""
+        r"""(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)""",
+        re.MULTILINE,
+    )
+    re_post_sb = re.compile(
+        r"^{PLYR}: posts small blind {CUR}(?P<SB>[{NUM}]+)(\s\(EUR\s({CUR})?(?P<EUROVALUE>[{NUM}]+)\))?$".format(
+            **substitutions,
+        ),
+        re.MULTILINE,
+    )
+    re_post_bb = re.compile(
+        r"^{PLYR}: posts big blind {CUR}(?P<BB>[{NUM}]+)(\s\(EUR\s({CUR})?(?P<EUROVALUE>[{NUM}]+)\))?$".format(
+            **substitutions,
+        ),
+        re.MULTILINE,
+    )
+    re_antes = re.compile(
+        r"^{PLYR}: posts ante of {CUR}(?P<ANTE>[{NUM}]+)(\s\(EUR\s({CUR})?(?P<EUROVALUE>[{NUM}]+)\))?".format(
+            **substitutions,
+        ),
+        re.MULTILINE,
+    )
+    re_bring_in = re.compile(
+        r"^{PLYR}: brings[- ]in( low|) for {CUR}(?P<BRINGIN>[{NUM}]+)"
+        r"(\s\(EUR\s({CUR})?(?P<EUROVALUE>[{NUM}]+)\))?".format(
+            **substitutions,
+        ),
+        re.MULTILINE,
+    )
+    re_post_both = re.compile(
+        r"^{PLYR}:posts dead blind {CUR}(\-)?(?P<SB>[{NUM}]+) and big blind {CUR}(?P<BB>[{NUM}]+)".format(
+            **substitutions,
+        ),
+        re.MULTILINE,
+    )
+    re_hero_cards = re.compile(
+        r"^Dealt to {PLYR}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])".format(**substitutions),
+        re.MULTILINE,
+    )
+    re_action = re.compile(
         r"""
-          Hand\#(?P<HID>[A-Z0-9]+)\s+\-\s+(?P<TABLE>(?P<BUYIN1>(?P<BIAMT1>(%(LS)s)[%(NUM)s]+)\sNLH\s(?P<MAX1>\d+)\smax)?.+?)\s(\((Turbo,\s)?(?P<MAX>\d+)\-+[Mm]ax\)\s)?((?P<TOURNO>T\d+)|\d+)\s(\-\-\s(TICKET|CASH|TICKETCASH|FREEROLL)\s\-\-\s(?P<BUYIN>(?P<BIAMT>\$\d+)\s\+\s(?P<BIRAKE>\$\d+))\s\-\-\s(?P<TMAX>\d+)\sMax\s)?(\-\-\sTable\s(?P<TABLENO>\d+)\s)?\-\-\s(?P<CURRENCY>%(LS)s|)?(?P<ANTESB>(\-)?\d+)/(%(LS)s)?(?P<SBBB>\d+)(/(%(LS)s)?(?P<BB>\d+))?\s(?P<LIMIT>NL|FL||PL)\s(?P<GAME>Hold\'em|Omaha|Omaha\sHi/Lo|OmahaHiLo)\s-\-\s(?P<DATETIME>.*$)
-          
-          """
-        % substitutions,
+                        ^{PLYR}:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sis\sall\sin)
+                        (\s(to\s)?({CUR})?(?P<BET>[{NUM}]+))?(\s\(EUR\s({CUR})?(?P<EUROVALUE>[{NUM}]+)\))?$
+                        """.format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
+    re_sits_out = re.compile("^{} sits out".format(substitutions["PLYR"]), re.MULTILINE)
+    re_shown_cards = re.compile(
+        r"^{}: (?P<SHOWED>shows|mucks) \[(?P<CARDS>.*)\] ?(\((?P<STRING>.*)\))?".format(substitutions["PLYR"]),
+        re.MULTILINE,
+    )
+    re_collect_pot = re.compile(
+        r"^{PLYR}:? wins (low pot |high pot )?{CUR}(?P<POT>[{NUM}]+)"
+        r"((\swith.+?)?\s+\(EUR\s({CUR})?(?P<EUROVALUE>[{NUM}]+)\))?".format(
+            **substitutions,
+        ),
+        re.MULTILINE,
+    )
+    re_finished = re.compile(
+        r"{PLYR}:? finished \d+ out of \d+ players".format(**substitutions),
+        re.MULTILINE,
+    )
+    re_dealer = re.compile(
+        r"Dealer:",
+    )  # Some Cake hands just omit the game line so we can just discard them as partial
+    re_coin_flip = re.compile(r"Coin\sFlip\sT\d+", re.MULTILINE)
+    re_return_bet = re.compile(r"returns\suncalled\sbet", re.MULTILINE)
+    re_show_down = re.compile(r"\*\*\*SHOW DOWN\*\*\*")
+    re_show_down_left = re.compile(
+        r"\*\*\*SHOW\sDOWN\*\*\*\nPlayer\sleft\sthe\stable$",
+        re.MULTILINE,
+    )
 
-    re_PlayerInfo = re.compile(
-        r"""
-            ^Seat\s(?P<SEAT>[0-9]+):\s
-            (?P<PNAME>.+?)\s
-            \((%(LS)s)?(?P<CASH>[%(NUM2)s]+)\sin\schips\)
-            (\s\s\(EUR\s(%(CUR)s)?(?P<EUROVALUE>[%(NUM)s]+)\))?"""
-        % substitutions,
-        re.MULTILINE | re.VERBOSE,
-    )
-
-    re_Trim = re.compile("(Hand\#)")
-    re_Identify = re.compile("Hand\#[A-Z0-9]+\s\-\s")
-    re_SplitHands = re.compile("\n\n+")
-    re_Button = re.compile("Dealer: Seat (?P<BUTTON>\d+)", re.MULTILINE)
-    re_Board = re.compile(r"\[(?P<CARDS>.+)\]")
-
-    re_DateTime = re.compile(
-        """(?P<Y>[0-9]{4})[\/\-\.](?P<M>[0-9]{2})[\/\-\.](?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)""",
-        re.MULTILINE,
-    )
-    re_PostSB = re.compile(
-        r"^%(PLYR)s: posts small blind %(CUR)s(?P<SB>[%(NUM)s]+)(\s\(EUR\s(%(CUR)s)?(?P<EUROVALUE>[%(NUM)s]+)\))?$"
-        % substitutions,
-        re.MULTILINE,
-    )
-    re_PostBB = re.compile(
-        r"^%(PLYR)s: posts big blind %(CUR)s(?P<BB>[%(NUM)s]+)(\s\(EUR\s(%(CUR)s)?(?P<EUROVALUE>[%(NUM)s]+)\))?$"
-        % substitutions,
-        re.MULTILINE,
-    )
-    re_Antes = re.compile(
-        r"^%(PLYR)s: posts ante of %(CUR)s(?P<ANTE>[%(NUM)s]+)(\s\(EUR\s(%(CUR)s)?(?P<EUROVALUE>[%(NUM)s]+)\))?"
-        % substitutions,
-        re.MULTILINE,
-    )
-    re_BringIn = re.compile(
-        r"^%(PLYR)s: brings[- ]in( low|) for %(CUR)s(?P<BRINGIN>[%(NUM)s]+)(\s\(EUR\s(%(CUR)s)?(?P<EUROVALUE>[%(NUM)s]+)\))?"
-        % substitutions,
-        re.MULTILINE,
-    )
-    re_PostBoth = re.compile(
-        r"^%(PLYR)s:posts dead blind %(CUR)s(\-)?(?P<SB>[%(NUM)s]+) and big blind %(CUR)s(?P<BB>[%(NUM)s]+)"
-        % substitutions,
-        re.MULTILINE,
-    )
-    re_HeroCards = re.compile(
-        r"^Dealt to %(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % substitutions, re.MULTILINE
-    )
-    re_Action = re.compile(
-        r"""
-                        ^%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sis\sall\sin)
-                        (\s(to\s)?(%(CUR)s)?(?P<BET>[%(NUM)s]+))?(\s\(EUR\s(%(CUR)s)?(?P<EUROVALUE>[%(NUM)s]+)\))?$
-                        """
-        % substitutions,
-        re.MULTILINE | re.VERBOSE,
-    )
-    re_sitsOut = re.compile("^%s sits out" % substitutions["PLYR"], re.MULTILINE)
-    re_ShownCards = re.compile(
-        r"^%s: (?P<SHOWED>shows|mucks) \[(?P<CARDS>.*)\] ?(\((?P<STRING>.*)\))?" % substitutions["PLYR"], re.MULTILINE
-    )
-    re_CollectPot = re.compile(
-        r"^%(PLYR)s:? wins (low pot |high pot )?%(CUR)s(?P<POT>[%(NUM)s]+)((\swith.+?)?\s+\(EUR\s(%(CUR)s)?(?P<EUROVALUE>[%(NUM)s]+)\))?"
-        % substitutions,
-        re.MULTILINE,
-    )
-    re_Finished = re.compile(r"%(PLYR)s:? finished \d+ out of \d+ players" % substitutions, re.MULTILINE)
-    re_Dealer = re.compile(r"Dealer:")  # Some Cake hands just omit the game line so we can just discard them as partial
-    re_CoinFlip = re.compile(r"Coin\sFlip\sT\d+", re.MULTILINE)
-    re_ReturnBet = re.compile(r"returns\suncalled\sbet", re.MULTILINE)
-    re_ShowDown = re.compile(r"\*\*\*SHOW DOWN\*\*\*")
-    re_ShowDownLeft = re.compile(r"\*\*\*SHOW\sDOWN\*\*\*\nPlayer\sleft\sthe\stable$", re.MULTILINE)
-
-    def compilePlayerRegexs(self, hand):
-        """
-        Compiles regular expressions representing the cards in a player's hand.
+    def compilePlayerRegexs(self, hand: list[str]) -> None:
+        """Compiles regular expressions representing the cards in a player's hand.
 
         Args:
             hand (list[str]): The cards in the player's hand.
 
         Returns:
             list[re.Pattern]: A list of compiled regular expressions, one for each card in the player's hand.
-        """
-        pass  # TODO: Implement this function.
 
-    def readSupportedGames(self):
         """
-        Returns a list of supported games.
+        # TODO(maintainer): Implement this function.
+
+    def readSupportedGames(self) -> list[list[str]]:
+        """Returns a list of supported games.
 
         Each supported game is represented as a list of game modes.
         """
@@ -226,34 +262,49 @@ class Cake(HandHistoryConverter):
             ["tour", "hold", "fl"],  # Tournament, hold mode, fixed limit
         ]
 
-    def determineGameType(self, handText):
-        """
-        Determine the type of game from the given hand text.
+    def determineGameType(self, hand_text: str) -> dict:  # noqa: C901, PLR0912, PLR0915
+        """Determine the type of game from the given hand text.
 
         Args:
-            handText (str): The text of the hand.
+            hand_text (str): The text of the hand.
 
         Returns:
             dict: A dictionary containing information about the game type.
+
         """
         # Initialize dictionary to store game type info
         info = {}
 
-        # Search for game info in hand text
-        m = self.re_GameInfo.search(handText)
+        # Search for game info in hand text - try tournament formats first
+        m = self.re_game_info_tournament.search(hand_text)
+        is_tournament = True
+        is_simple_tournament = False
+
+        # If full tournament format doesn't match, try simple tournament format
+        if not m:
+            m = self.re_game_info_tournament_simple.search(hand_text)
+            is_simple_tournament = True
+
+        # If no tournament format matches, try cash game format
+        if not m:
+            m = self.re_game_info_cash.search(hand_text)
+            is_tournament = False
+            is_simple_tournament = False
 
         # If no game info found, raise appropriate error
         if not m:
-            if self.re_Finished.search(handText):
+            if self.re_finished.search(hand_text):
                 raise FpdbHandPartial
-            if self.re_Dealer.match(handText):
+            if self.re_dealer.match(hand_text):
                 raise FpdbHandPartial
-            tmp = handText[:200]
-            log.error(f"determineGameType not found: '{tmp}'")
+            tmp = hand_text[:200]
+            log.error("determineGameType not found: '%s'", tmp)
             raise FpdbParseError
 
         # If no ShowDown or ShowDownLeft found, raise appropriate error
-        if not self.re_ShowDown.search(handText) or self.re_ShowDownLeft.search(handText):
+        if not self.re_show_down.search(hand_text) or self.re_show_down_left.search(
+            hand_text,
+        ):
             raise FpdbHandPartial
 
         # Extract game info from match object's group dictionary
@@ -268,77 +319,115 @@ class Cake(HandHistoryConverter):
             (info["base"], info["category"]) = self.games[mg["GAME"]]
 
         # Determine big blind and store in info dictionary
-        if "BB" in mg:
-            if not mg["BB"]:
-                info["bb"] = self.clearMoneyString(mg["SBBB"])
-            else:
-                info["bb"] = self.clearMoneyString(mg["BB"])
+        if mg.get("BB"):
+            info["bb"] = self.clearMoneyString(mg["BB"])
 
         # Determine small blind and store in info dictionary
-        if "SBBB" in mg:
-            if not mg["BB"]:
-                info["sb"] = self.clearMoneyString(mg["ANTESB"])
-            else:
-                info["sb"] = self.clearMoneyString(mg["SBBB"])
+        if mg.get("SB"):
+            info["sb"] = self.clearMoneyString(mg["SB"])
 
-        # Determine currency and store in info dictionary
-        if "CURRENCY" in mg:
-            info["currency"] = self.currencies[mg["CURRENCY"]]
-
-        # Determine mix and store in info dictionary
-        if "MIXED" in mg and mg["MIXED"] is not None:
-            info["mix"] = self.mixes[mg["MIXED"]]
-
-        # Determine game type and store in info dictionary
-        if "TOURNO" in mg and mg["TOURNO"] is not None:
+        # Determine game type and currency based on format
+        if is_tournament or is_simple_tournament:
             info["type"] = "tour"
+
+            if is_simple_tournament:
+                # Simple tournament format - extract currency from tournament info
+                tournament_info = mg.get("TOURNAMENT_INFO", "")
+                if "$" in tournament_info:
+                    info["currency"] = "USD"
+                elif "€" in tournament_info:
+                    info["currency"] = "EUR"
+                elif "£" in tournament_info:
+                    info["currency"] = "GBP"
+                elif "FREE" in tournament_info.upper() or "FREEROLL" in tournament_info.upper():
+                    info["currency"] = "play"
+                else:
+                    info["currency"] = "USD"
+
+                # Extract buyin from tournament info for simple format
+                buyin_match = re.search(r"[\$€£]([0-9,\.]+)", tournament_info)
+                if buyin_match:
+                    info["buyin"] = self.clearMoneyString(buyin_match.group(1))
+                    info["fee"] = "0"  # No explicit fee in simple format
+                else:
+                    info["buyin"] = "0"
+                    info["fee"] = "0"
+            else:
+                # Full tournament format - extract currency from buyin
+                buyin_type = mg.get("BUYIN_TYPE", "")
+                if buyin_type == "TICKET":
+                    info["currency"] = "play"
+                else:
+                    # Extract currency from buyin amount
+                    buyin = mg.get("BUYIN", "")
+                    if buyin.startswith("$"):
+                        info["currency"] = "USD"
+                    elif buyin.startswith("€"):
+                        info["currency"] = "EUR"
+                    elif buyin.startswith("£"):
+                        info["currency"] = "GBP"
+                    else:
+                        info["currency"] = "USD"
+
+                # Tournament specific fields
+                if mg.get("BUYIN"):
+                    info["buyin"] = self.clearMoneyString(mg["BUYIN"])
+                if mg.get("FEE"):
+                    info["fee"] = self.clearMoneyString(mg["FEE"])
+
+            # Common tournament fields
+            if mg.get("TOURNO"):
+                info["tourNo"] = mg["TOURNO"]
         else:
             info["type"] = "ring"
+            # Determine currency from cash game format
+            currency = mg.get("CURRENCY") or mg.get("CURRENCY2") or ""
+            info["currency"] = self.currencies.get(currency, "USD")
 
-        # If play money game, set currency to 'play'
-        if "TABLE" in mg and "Play Money" in mg["TABLE"]:
-            info["currency"] = "play"
+            # If play money game, set currency to 'play'
+            if "TABLE" in mg and "Play Money" in mg["TABLE"]:
+                info["currency"] = "play"
 
-        # If limit type is 'fl' and big blind is not None
-        if info["limitType"] == "fl" and info["bb"] is not None:
-            # If game type is 'ring'
-            if info["type"] == "ring":
-                try:
-                    # Determine small blind and big blind and store in info dictionary
-                    info["sb"] = self.Lim_Blinds[info["bb"]][0]
-                    info["bb"] = self.Lim_Blinds[info["bb"]][1]
-                except KeyError as e:
-                    tmp = handText[:200]
-                    log.error(f"Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'")
-                    raise FpdbParseError from e
-            # If game type is not 'ring'
-            else:
-                # Calculate small blind and big blind and store in info dictionary
-                info["sb"] = str((old_div(Decimal(info["sb"]), 2)).quantize(Decimal("0.01")))
-                info["bb"] = str(Decimal(info["sb"]).quantize(Decimal("0.01")))
+        # For FL games, use the lim_blinds lookup if available
+        if info.get("limitType") == "fl" and info.get("bb"):
+            try:
+                info["sb"] = self.lim_blinds[info["bb"]][0]
+                info["bb"] = self.lim_blinds[info["bb"]][1]
+            except KeyError:
+                # Keep the original values if not in lookup table
+                pass
 
         return info
 
-    def readHandInfo(self, hand):
-        """
-        Reads information from a hand history string and updates the corresponding Hand object.
+    def readHandInfo(self, hand: "Hand") -> None:  # noqa: C901
+        """Reads information from a hand history string and updates the corresponding Hand object.
 
-        Parameters:
+        Parameters
+        ----------
         hand (Hand): The Hand object to update.
 
         Returns:
+        -------
         None
-        """
 
+        """
         # trim off malformatted text from partially written hands
-        if not self.re_Trim.match(hand.handText):
-            hand.handText = "".join(self.re_Trim.split(hand.handText)[1:])
+        if not self.re_trim.match(hand.handText):
+            hand.handText = "".join(self.re_trim.split(hand.handText)[1:])
 
         info = {}
-        m = self.re_GameInfo.search(hand.handText)
+        # Try tournament formats first
+        m = self.re_game_info_tournament.search(hand.handText)
+        if m is None:
+            # Try simple tournament format
+            m = self.re_game_info_tournament_simple.search(hand.handText)
+        if m is None:
+            # If no tournament format matches, try cash game format
+            m = self.re_game_info_cash.search(hand.handText)
+
         if m is None:
             tmp = hand.handText[:200]
-            log.error(f"readHandInfo not found: '{tmp}'")
+            log.error("readHandInfo not found: '%s'", tmp)
             raise FpdbParseError
 
         info |= m.groupdict()
@@ -346,143 +435,98 @@ class Cake(HandHistoryConverter):
         for key in info:
             # extract datetime information and convert to UTC timezone
             if key == "DATETIME":
-                m1 = self.re_DateTime.finditer(info[key])
+                m1 = self.re_date_time.finditer(info[key])
                 datetimestr = "2000/01/01 00:00:00"  # default used if time not found
                 for a in m1:
                     datetimestr = (
                         f"{a.group('Y')}/{a.group('M')}/{a.group('D')} {a.group('H')}:{a.group('MIN')}:{a.group('S')}"
                     )
-                hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
-                hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
+                hand.startTime = datetime.datetime.strptime(  # noqa: DTZ007
+                    datetimestr,
+                    "%Y/%m/%d %H:%M:%S",
+                )
+                hand.startTime = HandHistoryConverter.changeTimezone(
+                    hand.startTime,
+                    "ET",
+                    "UTC",
+                )
 
             # extract hand ID
             elif key == "HID":
                 hand.handid = re.sub("[A-Z]+", "", info[key])
 
-            # extract table name for ring games
-            if key == "TABLE" and hand.gametype["type"] == "ring":
+            # extract table name
+            if key == "TABLE":
                 hand.tablename = info[key]
 
-            # extract table name for tournament games
-            if key == "TABLENO" and hand.gametype["type"] == "tour":
+            # extract table number
+            if key == "TABLENO":
                 hand.tablename = info[key]
 
-            # extract button position
-            if key == "BUTTON":
-                hand.buttonpos = info[key]
 
-            # extract maximum number of seats
-            if key == "MAX" and info[key]:
-                hand.maxseats = int(info[key])
-
-            # extract tournament number
-            if key == "TOURNO" and info[key]:
-                hand.tourNo = info[key].replace("T", "")
-
-            # extract maximum number of seats for tournament games
-            if key == "TMAX" and info[key]:
-                hand.maxseats = int(info[key])
-            if key == "TMAX1" and info[key]:
-                hand.maxseats = int(info[key])
-
-            # extract buy-in information
-            if key in ["BUYIN", "BUYIN1"] and info[key] and hand.tourNo is not None:
-                if info[key].find("$") != -1:
-                    hand.buyinCurrency = "USD"
-                elif info[key].find("£") != -1:
-                    hand.buyinCurrency = "GBP"
-                elif info[key].find("€") != -1:
-                    hand.buyinCurrency = "EUR"
-                elif re.match("^[0-9+]*$", info[key]):
-                    hand.buyinCurrency = "play"
-                else:
-                    # FIXME: handle other currencies, play money
-                    log.error(f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'")
-                    raise FpdbParseError
-
-                # extract buy-in amount and rake amount
-                if key == "BUYIN1":
-                    info["BIAMT1"] = self.clearMoneyString(info["BIAMT1"].strip("$€£"))
-                    hand.buyin = int(100 * Decimal(info["BIAMT1"]))
-                    hand.fee = 0
-                else:
-                    info["BIAMT"] = self.clearMoneyString(info["BIAMT"].strip("$€£"))
-                    info["BIRAKE"] = self.clearMoneyString(info["BIRAKE"].strip("$€£"))
-                    hand.buyin = int(100 * Decimal(info["BIAMT"]))
-                    hand.fee = int(100 * Decimal(info["BIRAKE"]))
-
-        if hand.gametype["type"] == "tour" and not hand.buyin:
-            hand.buyin = 0
-            hand.fee = 0
-            hand.buyinCurrency = "NA"
-
-    def readButton(self, hand):
-        """
-        Parses a hand for the button position and updates the hand object.
+    def readButton(self, hand: "Hand") -> None:
+        """Parses a hand for the button position and updates the hand object.
 
         Args:
             hand (Hand): The hand object to update.
 
         Returns:
             None
+
         """
         # Search for the button position in the hand text
-        if m := self.re_Button.search(hand.handText):
+        if m := self.re_button.search(hand.handText):
             # If found, update the button position in the hand object
             hand.buttonpos = int(m.group("BUTTON"))
         else:
             # If not found, log an info message
             log.info("readButton: not found")
 
-    def readPlayerStacks(self, hand):
-        """
-        Reads player stacks from the given `hand` object and adds them to the `hand` object.
+    def readPlayerStacks(self, hand: "Hand") -> None:
+        """Reads player stacks from the given `hand` object and adds them to the `hand` object.
 
         Args:
             hand (Hand): The `Hand` object to read player stacks from.
 
         Returns:
             None
+
         """
         # Find each player's stack information in the hand text
-        m = self.re_PlayerInfo.finditer(hand.handText)
+        m = self.re_player_info.finditer(hand.handText)
 
         # Check if there was a coinflip in the hand
-        coinflip = bool(self.re_CoinFlip.search(hand.handText))
+        coinflip = bool(self.re_coin_flip.search(hand.handText))
 
         # Iterate over each player's stack information
         for a in m:
-            # Check if the stack information has a EUROVALUE and set the roundPenny flag accordingly
-            if a.group("EUROVALUE"):
-                hand.roundPenny = True
+            # Get cash value from CASH group
             cash_value = a.group("CASH")
-            cash_value = cash_value.encode("utf-8")
-            cash_value = cash_value.replace(b"\xe2\x80\xaf", b"")
-            cash_value = cash_value.decode("utf-8")
-            log.debug(f"value: {cash_value}")
-            log.debug(f"type: {type(cash_value)}")
-            # Add the player's stack information to the `hand` object
-            hand.addPlayer(int(a.group("SEAT")), a.group("PNAME"), cash_value)
+            if cash_value:
+                cash_value = cash_value.encode("utf-8")
+                cash_value = cash_value.replace(b"\xe2\x80\xaf", b"")
+                cash_value = cash_value.decode("utf-8")
+                # Clean the money string to remove spaces and other formatting
+                cash_value = self.clearMoneyString(cash_value)
+                log.debug("cleaned value: %s", cash_value)
+                log.debug("type: %s", type(cash_value))
+                # Add the player's stack information to the `hand` object
+                hand.addPlayer(int(a.group("SEAT")), a.group("PNAME"), cash_value)
 
-            # Add the player's stack information to the `hand` object
-            # hand.addPlayer(int(a.group('SEAT')), a.group('PNAME'), self.convertMoneyString('CASH', a))
+                # If there was a coinflip, add the ante for the player
+                if coinflip:
+                    hand.addAnte(a.group("PNAME"), self.convertMoneyString("CASH", a))
 
-            # If there was a coinflip, add the ante for the player
-            if coinflip:
-                hand.addAnte(a.group("PNAME"), self.convertMoneyString("CASH", a))
-
-    def markStreets(self, hand):
-        """
-        Given a Hand object, extract the street information from its handText attribute
-        and update the Hand object with the street information.
+    def markStreets(self, hand: "Hand") -> None:
+        """Extract street information from hand text and update the hand object.
 
         Args:
-        - hand: a Hand object to extract street information from
+            hand: a Hand object to extract street information from
 
         Returns:
-        - None
-        """
+            None
 
+        """
         # The following regex matches the different streets in a hand history and captures the information
         # in named groups: PREFLOP, FLOP, TURN, RIVER.
         # It first matches everything up to the FLOP street, then optionally matches the FLOP street,
@@ -501,9 +545,8 @@ class Cake(HandHistoryConverter):
         # Add the street information to the Hand object
         hand.addStreets(m)
 
-    def readCommunityCards(self, hand, street):
-        """
-        Reads the community cards for a given street of the current hand and sets them in the hand object.
+    def readCommunityCards(self, hand: "Hand", street: str) -> None:
+        """Reads the community cards for a given street of the current hand and sets them in the hand object.
 
         Args:
             hand (Hand): The current hand object.
@@ -511,99 +554,110 @@ class Cake(HandHistoryConverter):
 
         Returns:
             None
+
         """
         if street in ("FLOP", "TURN", "RIVER"):
             # Parse the community cards from the hand object's streets dictionary
-            m = self.re_Board.search(hand.streets[street])
+            m = self.re_board.search(hand.streets[street])
             # Set the community cards in the hand object
             hand.setCommunityCards(street, m.group("CARDS").split(","))
 
-    def readAntes(self, hand):
-        """
-        Reads the antes from the hand and adds them to the Hand object.
+    def readAntes(self, hand: "Hand") -> None:
+        """Reads the antes from the hand and adds them to the Hand object.
 
         Args:
             hand: The Hand object to add the antes to.
 
         Returns:
             None
+
         """
-        log.debug(("reading antes"))
-        m = self.re_Antes.finditer(hand.handText)
+        log.debug("reading antes")
+        m = self.re_antes.finditer(hand.handText)
         for player in m:
             # Uncomment the following line to enable logging
-            log.debug(f"hand.addAnte({player.group('PNAME')},{player.group('ANTE')})")
+            log.debug("hand.addAnte(%s,%s)", player.group("PNAME"), player.group("ANTE"))
             hand.addAnte(player.group("PNAME"), self.convertMoneyString("ANTE", player))
 
-    def readBringIn(self, hand):
-        """
-        Reads the BringIn information from the hand's handText and adds it to the hand object.
+    def readBringIn(self, hand: "Hand") -> None:
+        """Reads the BringIn information from the hand's handText and adds it to the hand object.
 
         Args:
             hand (Hand): The Hand object to add the BringIn information to.
 
         Returns:
             None
+
         """
-        if m := self.re_BringIn.search(hand.handText, re.DOTALL):
+        if m := self.re_bring_in.search(hand.handText, re.DOTALL):
             # The BringIn information was found, add it to the hand object.
-            # logging.debug("readBringIn: %s for %s" %(m.group('PNAME'),  m.group('BRINGIN')))
             hand.addBringIn(m.group("PNAME"), self.convertMoneyString("BRINGIN", m))
 
-    def readBlinds(self, hand):
-        """
-        Parses the hand text and extracts the blinds information.
+    def readBlinds(self, hand: "Hand") -> None:
+        """Parses the hand text and extracts the blinds information.
 
         Args:
             hand: An instance of the Hand class representing the hand being parsed.
 
         Returns:
             None
-        """
 
+        """
         # Flag to keep track of whether the small blind is still live.
-        liveBlind = True
+        live_blind = True
 
         # If no bets were returned, set the uncalled bets flag to True.
-        if not self.re_ReturnBet.search(hand.handText):
+        if not self.re_return_bet.search(hand.handText):
             hand.setUncalledBets(True)
 
         # Find all instances of the small blind and add them to the Hand object.
-        for a in self.re_PostSB.finditer(hand.handText):
-            if liveBlind:
-                hand.addBlind(a.group("PNAME"), "small blind", self.convertMoneyString("SB", a))
-                liveBlind = False
+        for a in self.re_post_sb.finditer(hand.handText):
+            if live_blind:
+                hand.addBlind(
+                    a.group("PNAME"),
+                    "small blind",
+                    self.convertMoneyString("SB", a),
+                )
+                live_blind = False
             else:
                 # Post dead blinds as ante
-                hand.addBlind(a.group("PNAME"), "secondsb", self.convertMoneyString("SB", a))
+                hand.addBlind(
+                    a.group("PNAME"),
+                    "secondsb",
+                    self.convertMoneyString("SB", a),
+                )
 
         # Find all instances of the big blind and add them to the Hand object.
-        for a in self.re_PostBB.finditer(hand.handText):
-            hand.addBlind(a.group("PNAME"), "big blind", self.convertMoneyString("BB", a))
+        for a in self.re_post_bb.finditer(hand.handText):
+            hand.addBlind(
+                a.group("PNAME"),
+                "big blind",
+                self.convertMoneyString("BB", a),
+            )
 
         # Find all instances of both blinds being posted and add them to the Hand object.
-        for a in self.re_PostBoth.finditer(hand.handText):
+        for a in self.re_post_both.finditer(hand.handText):
             sb = Decimal(self.clearMoneyString(a.group("SB")))
             bb = Decimal(self.clearMoneyString(a.group("BB")))
             sbbb = sb + bb
             hand.addBlind(a.group("PNAME"), "both", str(sbbb))
 
-    def readHoleCards(self, hand):
-        """
-        Reads the hero's hole cards from the given hand object and adds them to the corresponding streets.
+    def readHoleCards(self, hand: "Hand") -> None:
+        """Reads the hero's hole cards from the given hand object and adds them to the corresponding streets.
 
         Args:
             hand (Hand): The hand object containing the streets and player information.
 
         Returns:
             None
+
         """
         # Iterate through the streets where hole cards can be found
         for street in ("PREFLOP", "DEAL"):
             # Check if the street is present in the hand object
             if street in list(hand.streets.keys()):
                 # Use regex to find hero's cards in the street
-                m = self.re_HeroCards.finditer(hand.streets[street])
+                m = self.re_hero_cards.finditer(hand.streets[street])
                 # Iterate through each match found
                 for found in m:
                     # Save the hero's name
@@ -611,103 +665,108 @@ class Cake(HandHistoryConverter):
                     # Split the hole cards string into individual cards
                     newcards = found.group("NEWCARDS").split(",")
                     # Add the hole cards to the corresponding street
-                    hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
+                    hand.addHoleCards(
+                        street,
+                        hand.hero,
+                        closed=newcards,
+                        shown=False,
+                        mucked=False,
+                        dealt=True,
+                    )
 
-    def readAction(self, hand, street):
-        """
-        Given a Hand object and a street string, reads the actions from the hand
-        and updates the Hand object with the appropriate information.
+    def readAction(self, hand: "Hand", street: str) -> None:
+        """Read actions from the hand and update the Hand object.
 
         Args:
-        - hand: Hand object representing the current state of the hand
-        - street: string representing the current betting round of the hand
-
-        Returns:
-        None
+            hand: Hand object representing the current state of the hand.
+            street: String representing the current betting round of the hand.
         """
         # Find all the actions in the current street of the hand
-        m = self.re_Action.finditer(hand.streets[street])
+        m = self.re_action.finditer(hand.streets[street])
 
         # Loop through each action and update the Hand object accordingly
         for action in m:
-            # acts = action.groupdict()
-            # print "DEBUG: acts: %s" %acts
             bet = self.convertMoneyString("BET", action)
-            actionType = action.group("ATYPE")
+            action_type = action.group("ATYPE")
 
             # If the current action is a fold and not in preflop, add a fold to the Hand object
-            if street != "PREFLOP" or actionType != " folds":
+            if street != "PREFLOP" or action_type != " folds":
                 hand.setUncalledBets(False)
-            if actionType == " folds":
+            if action_type == " folds":
                 hand.addFold(street, action.group("PNAME"))
 
             # If the current action is a check, add a check to the Hand object
-            elif actionType == " checks":
+            elif action_type == " checks":
                 hand.addCheck(street, action.group("PNAME"))
 
             # If the current action is a call, add a call to the Hand object
-            elif actionType == " calls":
+            elif action_type == " calls":
                 hand.addCall(street, action.group("PNAME"), bet)
 
             # If the current action is a raise, add a raise to the Hand object
-            elif actionType == " raises":
+            elif action_type == " raises":
                 hand.setUncalledBets(None)
                 hand.addRaiseTo(street, action.group("PNAME"), bet)
 
             # If the current action is a bet, add a bet to the Hand object
-            elif actionType == " bets":
+            elif action_type == " bets":
                 hand.addBet(street, action.group("PNAME"), bet)
 
             # If the current action is an all-in, add an all-in to the Hand object
-            elif actionType == " is all in":
+            elif action_type == " is all in":
                 hand.addAllIn(street, action.group("PNAME"), bet)
 
             # If the current action is not one of the above types, log an error
             else:
-                log.error(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
+                log.error(
+                    "Unimplemented readAction: '%s' '%s'",
+                    action.group("PNAME"),
+                    action.group("ATYPE"),
+                )
 
-    def readShowdownActions(self, hand):
-        """
-        Parses a hand of cards and returns the best possible action to take in a game of poker.
+    def readShowdownActions(self, hand: "Hand") -> None:
+        """Parses a hand of cards and returns the best possible action to take in a game of poker.
 
         Args:
             hand (list): A list of cards in the hand.
 
         Returns:
             str: The best possible action to take.
-        """
-        pass
 
-    def readCollectPot(self, hand):
         """
-        Finds the collect pot for a given hand and adds it to the Hand object.
+
+    def readCollectPot(self, hand: "Hand") -> None:
+        """Finds the collect pot for a given hand and adds it to the Hand object.
 
         Args:
             hand (Hand): The Hand object to which the collect pot will be added.
 
         Returns:
             None
+
         """
         # Find all instances of the collect pot in the hand text.
-        for m in self.re_CollectPot.finditer(hand.handText):
+        for m in self.re_collect_pot.finditer(hand.handText):
             # Only consider the collect pot if it is not part of a tournament hand.
-            if not re.search("Tournament:\s", m.group("PNAME")):
+            if not re.search(r"Tournament:\s", m.group("PNAME")):
                 # Add the collect pot to the Hand object.
-                hand.addCollectPot(player=m.group("PNAME"), pot=self.convertMoneyString("POT", m))
+                hand.addCollectPot(
+                    player=m.group("PNAME"),
+                    pot=self.convertMoneyString("POT", m),
+                )
 
-    def readShownCards(self, hand):
-        """
-        Finds shown cards in a hand text and adds them to the Hand object.
+    def readShownCards(self, hand: "Hand") -> None:
+        """Finds shown cards in a hand text and adds them to the Hand object.
 
         Args:
             hand: The Hand object to which shown cards will be added.
 
         Returns:
             None
-        """
 
+        """
         # Find shown cards using regular expression.
-        for m in self.re_ShownCards.finditer(hand.handText):
+        for m in self.re_shown_cards.finditer(hand.handText):
             if m.group("CARDS") is not None:
                 cards = m.group("CARDS")
                 string = m.group("STRING")
@@ -732,38 +791,106 @@ class Cake(HandHistoryConverter):
                     player = m.group("PNAME").replace("_", " ")
 
                 # Add shown cards to the hand.
-                hand.addShownCards(cards=cards, player=player, shown=shown, mucked=mucked, string=string)
+                hand.addShownCards(
+                    cards=cards,
+                    player=player,
+                    shown=shown,
+                    mucked=mucked,
+                    string=string,
+                )
 
-    def convertMoneyString(self, type, match):
-        """
-        Converts a string of money to a float value.
+    def convertMoneyString(self, currency_type: str, match: Match[str]) -> str:
+        """Converts a string of money to a float value.
 
         Args:
-        - type: string type of currency (e.g. "USD", "GBP", etc.)
-        - match: string to be converted
+            currency_type: string type of currency (e.g. "USD", "GBP", etc.)
+            match: string to be converted
 
         Returns:
-        - float value of the money string or None if no match found
-        """
+            float value of the money string or "0" if no match found
 
-        if match.group("EUROVALUE"):
-            # if the match is in EUROVALUE format, return the cleared money string
-            return self.clearMoneyString(match.group("EUROVALUE"))
-        elif match.group(type):
+        """
+        if match.group(currency_type):
             # if the match is in the specified currency format, return the cleared money string
-            return self.clearMoneyString(match.group(type))
-        else:
-            # if no match found, return None
-            return None
+            return self.clearMoneyString(match.group(currency_type))
+        # if no match found, return "0"
+        return "0"
 
     @staticmethod
-    def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
-        log.info(f"table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'")
+    def getTableTitleRe(
+        _game_type: str,
+        _table_name: str | None = None,
+        tournament: str | None = None,
+        table_number: str | None = None,
+    ) -> str:
+        """Generate a regex to match a table title.
+
+        Note: This implementation is specific to tournament tables.
+
+        Args:
+            _game_type: The type of game (unused).
+            _table_name: The name of the table (unused).
+            tournament: The tournament ID.
+            table_number: The table number in the tournament.
+
+        Returns:
+            A regex string to match the table title.
+        """
+        log.info(
+            "table_name='%s' tournament='%s' table_number='%s'",
+            _table_name,
+            tournament,
+            table_number,
+        )
         regex = ""
-        log.debug(f"regex get table cash title: {regex}")
+        log.debug("regex get table cash title: %s", regex)
         if tournament:
-            regex = f"Tournament:\s{tournament}\sBuy\-In\s\w+\s:\sTable\s{table_number}"
+            regex = rf"Tournament:\s{tournament}\sBuy\-In\s\w+\s:\sTable\s{table_number}"
             # Tournament: 17106061 Buy-In Freeroll : Table 10 - No Limit Holdem - 15/30
-            log.debug(f"regex get mtt sng expresso cash title: {regex}")
-        log.info(f"Seals.getTableTitleRe: returns: '{regex}'")
+            log.debug("regex get mtt sng expresso cash title: %s", regex)
+        log.info("Seals.getTableTitleRe: returns: '%s'", regex)
         return regex
+
+    def readSTP(self, hand: "Hand") -> None:
+        """Read STP (sit and go tournament) information from hand.
+
+        Args:
+            hand: The Hand object to read STP information from.
+
+        Returns:
+            None
+
+        """
+
+    def readSummaryInfo(self, summary_info_list: list) -> None:
+        """Read summary information from the provided list.
+
+        Args:
+            summary_info_list: List containing summary information to parse.
+
+        Returns:
+            None
+
+        """
+
+    def readTourneyResults(self, hand: "Hand") -> None:
+        """Read tournament results directly from a hand.
+
+        Args:
+            hand: The Hand object to read tournament results from.
+
+        Returns:
+            None
+
+        """
+
+    def readOther(self, hand: "Hand") -> None:
+        """Read other information from hand that doesn't fit standard categories.
+
+        Args:
+            hand: The Hand object to read other information from.
+
+        Returns:
+            None
+
+        """

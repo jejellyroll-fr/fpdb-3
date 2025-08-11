@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright 2008-2011 Steffen Schaumburg
 # This program is free software: you can redistribute it and/or modify
@@ -15,16 +14,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
-from __future__ import print_function
-from __future__ import division
-
-
-from past.utils import old_div
-# import L10n
-# _ = L10n.get_translation()
 
 from time import time
 
+from past.utils import old_div
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import (
@@ -48,10 +41,22 @@ import Database
 import Filters
 from loggingFpdb import get_logger
 
-log = get_logger("ringplayerstats")
+# import L10n
+# _ = L10n.get_translation()
+
+
+log = get_logger("gui_ring_player_stats")
 # import Charset
 
-colalias, colheading, colshowsumm, colshowposn, colformat, coltype, colxalign = 0, 1, 2, 3, 4, 5, 6
+colalias, colheading, colshowsumm, colshowposn, colformat, coltype, colxalign = (
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+)
 ranks = {
     "x": 0,
     "2": 2,
@@ -68,7 +73,18 @@ ranks = {
     "K": 13,
     "A": 14,
 }
-fast_names = {"PokerStars": "Zoom", "Bovada": "Zone", "PacificPoker": "Snap", "Winamax": "Go Fast"}
+fast_names = {
+    "PokerStars": "Zoom",
+    "PokerStars.COM": "Zoom",
+    "PokerStars.FR": "Zoom",
+    "PokerStars.IT": "Zoom",
+    "PokerStars.ES": "Zoom",
+    "PokerStars.PT": "Zoom",
+    "PokerStars.EU": "Zoom",
+    "Bovada": "Zone",
+    "PacificPoker": "Snap",
+    "Winamax": "Go Fast",
+}
 onlinehelp = {
     "Game": ("Type of Game"),
     "Hand": ("Hole Cards"),
@@ -107,7 +123,7 @@ onlinehelp = {
 
 
 class GuiRingPlayerStats(QSplitter):
-    def __init__(self, config, querylist, mainwin, debug=True):
+    def __init__(self, config, querylist, mainwin, debug=True) -> None:
         QSplitter.__init__(self, None)
         self.debug = debug
         self.conf = config
@@ -153,16 +169,16 @@ class GuiRingPlayerStats(QSplitter):
         }
 
         self.filters = Filters.Filters(self.db, display=filters_display)
-        self.filters.registerButton1Name(("Filters"))
+        self.filters.registerButton1Name("Filters")
         self.filters.registerButton1Callback(self.showDetailFilter)
-        self.filters.registerButton2Name(("Refresh Stats"))
+        self.filters.registerButton2Name("Refresh Stats")
         self.filters.registerButton2Callback(self.refreshStats)
 
         scroll = QScrollArea()
         scroll.setWidget(self.filters)
 
-        # ToDo: store in config
-        # ToDo: create popup to adjust column config
+        # TODO: store in config
+        # TODO: create popup to adjust column config
         # columns to display, keys match column name returned by sql, values in tuple are:
         #     is column displayed(summary then position), column heading, xalignment, formatting, celltype
         self.columns = self.conf.get_gui_cash_stat_params()
@@ -170,20 +186,22 @@ class GuiRingPlayerStats(QSplitter):
         # Detail filters:  This holds the data used in the popup window, extra values are
         # added at the end of these lists during processing
         #                  sql test,              screen description,        min, max
-        self.handtests = [  # already in filter class : ['h.seats', 'Number of Players', 2, 10]
-            ["gt.maxSeats", "Size of Table", 2, 10],
-            ["h.playersVpi", "Players who VPI", 0, 10],
-            ["h.playersAtStreet1", "Players at Flop", 0, 10],
-            ["h.playersAtStreet2", "Players at Turn", 0, 10],
-            ["h.playersAtStreet3", "Players at River", 0, 10],
-            ["h.playersAtStreet4", "Players at Street7", 0, 10],
-            ["h.playersAtShowdown", "Players at Showdown", 0, 10],
-            ["h.street0Raises", "Bets to See Flop", 0, 5],
-            ["h.street1Raises", "Bets to See Turn", 0, 5],
-            ["h.street2Raises", "Bets to See River", 0, 5],
-            ["h.street3Raises", "Bets to See Street7", 0, 5],
-            ["h.street4Raises", "Bets to See Showdown", 0, 5],
-        ]
+        self.handtests = (
+            [  # already in filter class : ['h.seats', 'Number of Players', 2, 10]
+                ["gt.maxSeats", "Size of Table", 2, 10],
+                ["h.playersVpi", "Players who VPI", 0, 10],
+                ["h.playersAtStreet1", "Players at Flop", 0, 10],
+                ["h.playersAtStreet2", "Players at Turn", 0, 10],
+                ["h.playersAtStreet3", "Players at River", 0, 10],
+                ["h.playersAtStreet4", "Players at Street7", 0, 10],
+                ["h.playersAtShowdown", "Players at Showdown", 0, 10],
+                ["h.street0Raises", "Bets to See Flop", 0, 5],
+                ["h.street1Raises", "Bets to See Turn", 0, 5],
+                ["h.street2Raises", "Bets to See River", 0, 5],
+                ["h.street3Raises", "Bets to See Street7", 0, 5],
+                ["h.street4Raises", "Bets to See Showdown", 0, 5],
+            ]
+        )
 
         self.cardstests = [
             [Card.DATABASE_FILTERS["pair"], ("Pocket pairs")],
@@ -209,23 +227,21 @@ class GuiRingPlayerStats(QSplitter):
         self.setStretchFactor(1, 1)
 
         # Make sure Hand column is not displayed.
-        hand_column = next((x for x in self.columns if x[0] == "hand"))
+        hand_column = next(x for x in self.columns if x[0] == "hand")
         hand_column[colshowsumm] = hand_column[colshowposn] = False
 
         # If rfi and steal both on for summaries, turn rfi off.
         rfi_column = next((x for x in self.columns if x[0] == "rfi"), None)
         steals_column = next((x for x in self.columns if x[0] == "steals"), None)
 
-        if rfi_column and steals_column:
-            if rfi_column[colshowsumm] and steals_column[colshowsumm]:
-                rfi_column[colshowsumm] = False
+        if rfi_column and steals_column and rfi_column[colshowsumm] and steals_column[colshowsumm]:
+            rfi_column[colshowsumm] = False
 
         # If rfi and steal both on for position breakdowns, turn steals off.
-        if rfi_column and steals_column:
-            if rfi_column[colshowposn] and steals_column[colshowposn]:
-                steals_column[colshowposn] = False
+        if rfi_column and steals_column and rfi_column[colshowposn] and steals_column[colshowposn]:
+            steals_column[colshowposn] = False
 
-    def refreshStats(self, checkState):
+    def refreshStats(self, checkState) -> None:
         self.liststore = []
         self.listcols = []
         self.stats_frame.layout().removeWidget(self.stats_vbox)
@@ -240,7 +256,7 @@ class GuiRingPlayerStats(QSplitter):
             self.stats_vbox.setStretchFactor(0, 0)
             self.stats_vbox.setStretchFactor(1, 1)
 
-    def fillStatsFrame(self, vbox):
+    def fillStatsFrame(self, vbox) -> None:
         sites = self.filters.getSites()
         heroes = self.filters.getHeroes()
         siteids = self.filters.getSiteIds()
@@ -258,25 +274,30 @@ class GuiRingPlayerStats(QSplitter):
             sitenos.append(siteids[site])
             _hname = heroes.get(site, "")
             if not _hname:
-                raise ValueError(f"Hero name not found for site {site}")
+                msg = f"Hero name not found for site {site}"
+                raise ValueError(msg)
             result = self.db.get_player_id(self.conf, site, _hname)
             if result is not None:
                 playerids.append(int(result))
 
         if not sitenos:
             # Should probably pop up here.
-            log.debug(("No sites selected - defaulting to PokerStars"))
+            log.debug("No sites selected - defaulting to PokerStars")
             sitenos = [2]
         if not playerids:
-            log.debug(("No player ids found"))
+            log.debug("No player ids found")
             return
         if not limits:
-            log.debug(("No limits found"))
+            log.debug("No limits found")
             return
 
-        self.createStatsTable(vbox, playerids, sitenos, limits, seats, groups, dates, games, currencies)
+        self.createStatsTable(
+            vbox, playerids, sitenos, limits, seats, groups, dates, games, currencies,
+        )
 
-    def createStatsTable(self, vbox, playerids, sitenos, limits, seats, groups, dates, games, currencies):
+    def createStatsTable(
+        self, vbox, playerids, sitenos, limits, seats, groups, dates, games, currencies,
+    ) -> None:
         startTime = time()
         show_detail = True
 
@@ -287,7 +308,17 @@ class GuiRingPlayerStats(QSplitter):
         #        #   gridnum   - index for grid data structures
         flags = [False, self.filters.getNumHands(), 0]
         self.addGrid(
-            vbox, "playerDetailedStats", flags, playerids, sitenos, limits, seats, groups, dates, games, currencies
+            vbox,
+            "playerDetailedStats",
+            flags,
+            playerids,
+            sitenos,
+            limits,
+            seats,
+            groups,
+            dates,
+            games,
+            currencies,
         )
 
         if "allplayers" in groups:
@@ -309,13 +340,36 @@ class GuiRingPlayerStats(QSplitter):
             flags[0] = True
             flags[2] = 1
             self.addGrid(
-                vbox2, "playerDetailedStats", flags, playerids, sitenos, limits, seats, groups, dates, games, currencies
+                vbox2,
+                "playerDetailedStats",
+                flags,
+                playerids,
+                sitenos,
+                limits,
+                seats,
+                groups,
+                dates,
+                games,
+                currencies,
             )
 
         self.db.rollback()
         log.debug(f"Stats page displayed in {time() - startTime:.2f} seconds")
 
-    def addGrid(self, vbox, query, flags, playerids, sitenos, limits, seats, groups, dates, games, currencies):
+    def addGrid(
+        self,
+        vbox,
+        query,
+        flags,
+        playerids,
+        sitenos,
+        limits,
+        seats,
+        groups,
+        dates,
+        games,
+        currencies,
+    ) -> None:
         sqlrow = 0
         if not flags:
             holecards, grid = False, 0
@@ -323,7 +377,18 @@ class GuiRingPlayerStats(QSplitter):
             holecards, grid = flags[0], flags[2]
 
         tmp = self.sql.query[query]
-        tmp = self.refineQuery(tmp, flags, playerids, sitenos, limits, seats, groups, dates, games, currencies)
+        tmp = self.refineQuery(
+            tmp,
+            flags,
+            playerids,
+            sitenos,
+            limits,
+            seats,
+            groups,
+            dates,
+            games,
+            currencies,
+        )
         self.cursor.execute(tmp)
         result = self.cursor.fetchall()
         colnames = [desc[0].lower() for desc in self.cursor.description]
@@ -335,7 +400,9 @@ class GuiRingPlayerStats(QSplitter):
         self.cols_to_show = [x for x in self.columns if x[colshow]]
         hgametypeid_idx = colnames.index("hgametypeid")
 
-        assert len(self.liststore) == grid, "len(self.liststore)=" + str(len(self.liststore)) + " grid-1=" + str(grid)
+        assert len(self.liststore) == grid, (
+            "len(self.liststore)=" + str(len(self.liststore)) + " grid-1=" + str(grid)
+        )
         view = QTableView()
         self.liststore.append(QStandardItemModel(0, len(self.cols_to_show), view))
         self.liststore[grid].setSortRole(Qt.UserRole)
@@ -347,7 +414,7 @@ class GuiRingPlayerStats(QSplitter):
         # Create header row   eg column: ("game",     True, "Game",     0.0, "%s")
         for col, column in enumerate(self.cols_to_show):
             if column[colalias] == "game" and holecards:
-                s = [x for x in self.columns if x[colalias] == "hand"][0][colheading]
+                s = next(x for x in self.columns if x[colalias] == "hand")[colheading]
             else:
                 s = column[colheading]
             self.listcols[grid].append(s)
@@ -367,41 +434,44 @@ class GuiRingPlayerStats(QSplitter):
                             value = "SB"
                         elif value == "0":
                             value = "Btn"
-                else:
-                    if column[colalias] == "game":
-                        if holecards:
-                            value = Card.decodeStartHandValue(
-                                result[sqlrow][colnames.index("category")], result[sqlrow][hgametypeid_idx]
-                            )
-                        else:
-                            minbb = result[sqlrow][colnames.index("minbigblind")]
-                            maxbb = result[sqlrow][colnames.index("maxbigblind")]
-                            value = (
-                                result[sqlrow][colnames.index("limittype")]
-                                + " "
-                                + result[sqlrow][colnames.index("category")].title()
-                                + " "
-                                + result[sqlrow][colnames.index("name")]
-                                + " "
-                                + result[sqlrow][colnames.index("currency")]
-                                + " "
-                            )
-                            if 100 * int(old_div(minbb, 100.0)) != minbb:
-                                value += "%.2f" % (old_div(minbb, 100.0))
-                            else:
-                                value += "%.0f" % (old_div(minbb, 100.0))
-                            if minbb != maxbb:
-                                if 100 * int(old_div(maxbb, 100.0)) != maxbb:
-                                    value += " - %.2f" % (old_div(maxbb, 100.0))
-                                else:
-                                    value += " - %.0f" % (old_div(maxbb, 100.0))
-                            ante = result[sqlrow][colnames.index("ante")]
-                            if ante > 0:
-                                value += " ante: %.2f" % (old_div(ante, 100.0))
-                            if result[sqlrow][colnames.index("fast")] == 1:
-                                value += " " + fast_names[result[sqlrow][colnames.index("name")]]
+                elif column[colalias] == "game":
+                    if holecards:
+                        value = Card.decodeStartHandValue(
+                            result[sqlrow][colnames.index("category")],
+                            result[sqlrow][hgametypeid_idx],
+                        )
                     else:
-                        continue
+                        minbb = result[sqlrow][colnames.index("minbigblind")]
+                        maxbb = result[sqlrow][colnames.index("maxbigblind")]
+                        value = (
+                            result[sqlrow][colnames.index("limittype")]
+                            + " "
+                            + result[sqlrow][colnames.index("category")].title()
+                            + " "
+                            + result[sqlrow][colnames.index("name")]
+                            + " "
+                            + result[sqlrow][colnames.index("currency")]
+                            + " "
+                        )
+                        if 100 * int(old_div(minbb, 100.0)) != minbb:
+                            value += f"{old_div(minbb, 100.0):.2f}"
+                        else:
+                            value += f"{old_div(minbb, 100.0):.0f}"
+                        if minbb != maxbb:
+                            if 100 * int(old_div(maxbb, 100.0)) != maxbb:
+                                value += f" - {old_div(maxbb, 100.0):.2f}"
+                            else:
+                                value += f" - {old_div(maxbb, 100.0):.0f}"
+                        ante = result[sqlrow][colnames.index("ante")]
+                        if ante > 0:
+                            value += f" ante: {old_div(ante, 100.0):.2f}"
+                        if result[sqlrow][colnames.index("fast")] == 1:
+                            value += (
+                                " "
+                                + fast_names[result[sqlrow][colnames.index("name")]]
+                            )
+                else:
+                    continue
                 item = QStandardItem("")
                 sortValue = -1e9
                 if value is not None and value != -999:
@@ -418,7 +488,18 @@ class GuiRingPlayerStats(QSplitter):
                     elif column[colalias] in ("game", "pname"):
                         sortValue = value
                     elif column[colalias] == "plposition":
-                        sortValue = ["BB", "SB", "Btn", "1", "2", "3", "4", "5", "6", "7"].index(value)
+                        sortValue = [
+                            "BB",
+                            "SB",
+                            "Btn",
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                        ].index(value)
                     else:
                         sortValue = float(value)
                 item.setData(sortValue, Qt.UserRole)
@@ -427,8 +508,7 @@ class GuiRingPlayerStats(QSplitter):
                     item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
                 if column[colalias] != "game":
                     item.setToolTip(
-                        "<big>%s for %s</big><br/><i>%s</i>"
-                        % (column[colheading], treerow[0].text(), onlinehelp[column[colheading]])
+                        f"<big>{column[colheading]} for {treerow[0].text()}</big><br/><i>{onlinehelp[column[colheading]]}</i>",
                     )
                 treerow.append(item)
             self.liststore[grid].appendRow(treerow)
@@ -436,12 +516,26 @@ class GuiRingPlayerStats(QSplitter):
 
         view.resizeColumnsToContents()
         view.setSortingEnabled(
-            True
+            True,
         )  # do this after resizing columns, otherwise it leaves room for the sorting triangle in every heading
-        view.resizeColumnToContents(0)  # we want room for the sorting triangle in column 0 where it starts.
+        view.resizeColumnToContents(
+            0,
+        )  # we want room for the sorting triangle in column 0 where it starts.
         view.resizeRowsToContents()
 
-    def refineQuery(self, query, flags, playerids, sitenos, limits, seats, groups, dates, games, currencies):
+    def refineQuery(
+        self,
+        query,
+        flags,
+        playerids,
+        sitenos,
+        limits,
+        seats,
+        groups,
+        dates,
+        games,
+        currencies,
+    ):
         having = ""
         if not flags:
             holecards = False
@@ -453,7 +547,7 @@ class GuiRingPlayerStats(QSplitter):
         if "posn" in groups:
             colshow = colshowposn
 
-        pname_column = next((x for x in self.columns if x[0] == "pname"))
+        pname_column = next(x for x in self.columns if x[0] == "pname")
         if "allplayers" in groups:
             nametest = "(hp.playerId)"
             if holecards or "posn" in groups:
@@ -491,7 +585,7 @@ class GuiRingPlayerStats(QSplitter):
                     gametest = gametest.replace("L", "")
                     gametest = gametest.replace(",)", ")")
                     gametest = gametest.replace("u'", "'")
-                    gametest = "and gt.category in %s" % gametest
+                    gametest = f"and gt.category in {gametest}"
                 else:
                     gametest = "and gt.category IS NULL"
         query = query.replace("<game_test>", gametest)
@@ -499,7 +593,7 @@ class GuiRingPlayerStats(QSplitter):
         currencytest = str(tuple(currencies))
         currencytest = currencytest.replace(",)", ")")
         currencytest = currencytest.replace("u'", "'")
-        currencytest = "AND gt.currency in %s" % currencytest
+        currencytest = f"AND gt.currency in {currencytest}"
         query = query.replace("<currency_test>", currencytest)
 
         sitetest = ""
@@ -510,13 +604,16 @@ class GuiRingPlayerStats(QSplitter):
                     sitetest = sitetest.replace("L", "")
                     sitetest = sitetest.replace(",)", ")")
                     sitetest = sitetest.replace("u'", "'")
-                    sitetest = "and gt.siteId in %s" % sitetest
+                    sitetest = f"and gt.siteId in {sitetest}"
                 else:
                     sitetest = "and gt.siteId IS NULL"
         query = query.replace("<site_test>", sitetest)
 
         if seats:
-            query = query.replace("<seats_test>", "between " + str(seats["from"]) + " and " + str(seats["to"]))
+            query = query.replace(
+                "<seats_test>",
+                "between " + str(seats["from"]) + " and " + str(seats["to"]),
+            )
             if "seats" in groups:
                 query = query.replace("<groupbyseats>", ",h.seats")
                 query = query.replace("<orderbyseats>", ",h.seats")
@@ -537,14 +634,16 @@ class GuiRingPlayerStats(QSplitter):
             query = query.replace(
                 "<orderbyhgametypeId>",
                 ",case when floor((hp.startcards-1)/13) >= mod((hp.startcards-1),13) then hp.startcards + 0.1 "
-                + " else 13*mod((hp.startcards-1),13) + floor((hp.startcards-1)/13) + 1 "
-                + " end desc ",
+                 " else 13*mod((hp.startcards-1),13) + floor((hp.startcards-1)/13) + 1 "
+                 " end desc ",
             )
         else:
             query = query.replace("<orderbyhgametypeId>", "")
             groupLevels = "limits" not in groups
             if groupLevels:
-                query = query.replace("<hgametypeId>", "p.name")  # need to use p.name for sqlite posn stats to work
+                query = query.replace(
+                    "<hgametypeId>", "p.name",
+                )  # need to use p.name for sqlite posn stats to work
             else:
                 query = query.replace("<hgametypeId>", "h.gametypeId")
 
@@ -554,7 +653,7 @@ class GuiRingPlayerStats(QSplitter):
             for f in self.detailFilters:
                 if len(f) == 3:
                     # X between Y and Z
-                    flagtest += " and %s between %s and %s " % (f[0], str(f[1]), str(f[2]))
+                    flagtest += f" and {f[0]} between {f[1]!s} and {f[2]!s} "
         query = query.replace("<flagtest>", flagtest)
         if self.cardsFilters:
             cardstests = []
@@ -572,10 +671,12 @@ class GuiRingPlayerStats(QSplitter):
             query = query.replace("<signed>", "")
 
         # Filter on dates
-        query = query.replace("<datestest>", " between '" + dates[0] + "' and '" + dates[1] + "'")
+        query = query.replace(
+            "<datestest>", " between '" + dates[0] + "' and '" + dates[1] + "'",
+        )
 
         # Group by position?
-        plposition_column = next((x for x in self.columns if x[0] == "plposition"))
+        plposition_column = next(x for x in self.columns if x[0] == "plposition")
         if "posn" in groups:
             query = query.replace("<position>", "hp.position")
             plposition_column[colshow] = True
@@ -585,14 +686,14 @@ class GuiRingPlayerStats(QSplitter):
         # print(query)
         return query
 
-    def showDetailFilter(self, checkState):
+    def showDetailFilter(self, checkState) -> None:
         detailDialog = QDialog(self.main_window)
-        detailDialog.setWindowTitle(("Detailed Filters"))
+        detailDialog.setWindowTitle("Detailed Filters")
 
         handbox = QVBoxLayout()
         detailDialog.setLayout(handbox)
 
-        label = QLabel(("Hand Filters:"))
+        label = QLabel("Hand Filters:")
         handbox.addWidget(label)
         label.setAlignment(Qt.AlignCenter)
 
@@ -601,8 +702,8 @@ class GuiRingPlayerStats(QSplitter):
         for row, htest in enumerate(self.handtests):
             cb = QCheckBox()
             lbl_from = QLabel(htest[1])
-            lbl_tween = QLabel(("between"))
-            lbl_to = QLabel(("and"))
+            lbl_tween = QLabel("between")
+            lbl_to = QLabel("and")
             sb1 = QSpinBox()
             sb1.setRange(0, 10)
             sb1.setValue(htest[2])
@@ -624,7 +725,7 @@ class GuiRingPlayerStats(QSplitter):
 
             htest[4:7] = [cb, sb1, sb2]
 
-        label = QLabel(("Restrict to hand types:"))
+        label = QLabel("Restrict to hand types:")
         handbox.addWidget(label)
         for ctest in self.cardstests:
             hbox = QHBoxLayout()

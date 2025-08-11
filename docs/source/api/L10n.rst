@@ -1,0 +1,7 @@
+L10n module
+===========
+
+.. automodule:: L10n
+   :members:
+   :undoc-members:
+   :show-inheritance:

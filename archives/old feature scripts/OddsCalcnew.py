@@ -1,4 +1,5 @@
 from unittest import result
+
 from ploev.calc import *
 from ploev.ppt import *
 
@@ -39,5 +40,5 @@ test = odds_oracle.pql(pql)
 print(test.results_list)
 print(type(test))
 
-#odd1 = OddsCalc('oh','As8s4d9d','AK','89','','','','','')        
-#odd1.calcBaseHoldem()
+# odd1 = OddsCalc('oh','As8s4d9d','AK','89','','','','','')
+# odd1.calcBaseHoldem()

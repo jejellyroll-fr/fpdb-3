@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 #    Copyright 2008-2011, Carl Gherardi
 #
@@ -23,14 +22,15 @@
 
 # TODO: straighten out discards for draw games
 
-from HandHistoryConverter import HandHistoryConverter, FpdbParseError, FpdbHandPartial
-from decimal import Decimal
-import re
-from loggingFpdb import get_logger
 import datetime
+import re
+from decimal import Decimal
+
+from HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
+from loggingFpdb import get_logger
 
 # Unibet HH Format
-log = get_logger("parser")
+log = get_logger("unibet_parser")
 
 
 class Unibet(HandHistoryConverter):
@@ -41,20 +41,20 @@ class Unibet(HandHistoryConverter):
     codepage = ("utf8", "cp1252", "ISO-8859-1")
     siteId = 30  # Needs to match id entry in Sites database
     sym = {
-        "USD": "\$",
-        "CAD": "\$",
+        "USD": r"\$",
+        "CAD": r"\$",
         "T$": "",
         "EUR": "\xe2\x82\xac",
-        "GBP": "\£",
+        "GBP": r"\£",
         "play": "",
-        "INR": "\₹",
-        "CNY": "\¥",
+        "INR": r"\₹",
+        "CNY": r"\¥",
     }  # ADD Euro, Sterling, etc HERE
     substitutions = {
         "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP|SC|INR|CNY",  # legal ISO currency codes
-        "LS": "\$|\xe2\x82\xac|\u20ac|\£|\u20b9|\¥|",  # legal currency symbols - Euro(cp1252, utf-8)
+        "LS": "\\$|\xe2\x82\xac|\u20ac|\\£|\u20b9|\\¥|",  # legal currency symbols - Euro(cp1252, utf-8)
         "PLYR": r"\s?(?P<PNAME>.+?)",
-        "CUR": "(\$|\xe2\x82\xac|\u20ac||\£|\u20b9|\¥|)",
+        "CUR": "(\\$|\xe2\x82\xac|\u20ac||\\£|\u20b9|\\¥|)",
         "BRKTS": r"(\(button\) |\(small blind\) |\(big blind\) |\(button blind\) |\(button\) \(small blind\) |\(small blind/button\) |\(button\) \(big blind\) )?",
     }
 
@@ -131,156 +131,170 @@ class Unibet(HandHistoryConverter):
     # Static regexes
     re_GameInfo = re.compile(
         """
-          Game\s\#(?P<HID>[0-9]+):\s+Table\s(?P<CURRENCY>€|$|£)[0-9]+\s(?P<LIMIT>PL|NL|FL)\s-\s(?P<SB>[.0-9]+)/(?P<BB>[.0-9]+)\s-\s(?P<GAME>Pot\sLimit\sOmaha|No\sLimit\sHold\'Em\sBanzai)\s-\s(?P<DATETIME>.*$)
-        """
-        % substitutions,
+          Game\\s\\#(?P<HID>[0-9]+):\\s+Table\\s(?P<CURRENCY>€|$|£)[0-9]+\\s(?P<LIMIT>PL|NL|FL)\\s-\\s(?P<SB>[.0-9]+)/(?P<BB>[.0-9]+)\\s-\\s(?P<GAME>Pot\\sLimit\\sOmaha|No\\sLimit\\sHold\'Em\\sBanzai)\\s-\\s(?P<DATETIME>.*$)
+        """.format(),
         re.MULTILINE | re.VERBOSE,
     )
 
     re_PlayerInfo = re.compile(
-        """
-          Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>\w+)\s\((€|$|£)(?P<CASH>[,.0-9]+)\)"""
-        % substitutions,
+        r"""
+          Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>\w+)\s\((€|$|£)(?P<CASH>[,.0-9]+)\)""".format(),
         re.MULTILINE | re.VERBOSE,
     )
 
     re_PlayerInfo2 = re.compile(
-        """
-          (?P<SITOUT>\w+)\s\((€|$|£)[,.0-9]+\)\s\(sitting\sout\)"""
-        % substitutions,
+        r"""
+          (?P<SITOUT>\w+)\s\((€|$|£)[,.0-9]+\)\s\(sitting\sout\)""".format(),
         re.MULTILINE | re.VERBOSE,
     )
 
     re_HandInfo = re.compile(
-        """
+        r"""
           (?P<TABLE>\sTable\s(€|$|£)[0-9]+\s(PL|NL|FL))""",
         re.MULTILINE | re.VERBOSE,
     )
 
-    re_Identify = re.compile("Game\s\#\d+:\sTable\s(€|$|£)[0-9]+\s(PL|NL|FL)")
-    re_SplitHands = re.compile("(?:\s?\n){2,}")
+    re_identify = re.compile(r"Game\s\#\d+:\sTable\s(€|$|£)[0-9]+\s(PL|NL|FL)")
+    re_SplitHands = re.compile("(?:\\s?\n){2,}")
     re_TailSplitHands = re.compile("(\n\n\n+)")
-    re_Button = re.compile("(?P<BUTTON>\w+)\shas\sthe\sbutton", re.MULTILINE)
+    re_Button = re.compile(r"(?P<BUTTON>\w+)\shas\sthe\sbutton", re.MULTILINE)
     re_Board = re.compile(r"\[(?P<CARDS>.+)\]")
     re_Board2 = re.compile(r"\[(?P<C1>\S\S)\] \[(\S\S)?(?P<C2>\S\S) (?P<C3>\S\S)\]")
     re_DateTime1 = re.compile(
-        """(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)\s(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})""",
+        r"""(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)\s(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})""",
         re.MULTILINE,
     )
     re_DateTime2 = re.compile(
-        """(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+)""", re.MULTILINE
+        r"""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+)""",
+        re.MULTILINE,
     )
     # revised re including timezone (not currently used):
     # re_DateTime     = re.compile("""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+) \(?(?P<TZ>[A-Z0-9]+)""", re.MULTILINE)
 
     # These used to be compiled per player, but regression tests say
     # we don't have to, and it makes life faster.
-    re_PostSB = re.compile(r"%(PLYR)s:\sposts\ssmall\sblind\s%(CUR)s(?P<SB>[,.0-9]+)" % substitutions, re.MULTILINE)
-    re_PostBB = re.compile(r"%(PLYR)s:\sposts\sbig\sblind\s%(CUR)s(?P<BB>[,.0-9]+)" % substitutions, re.MULTILINE)
-    re_PostBUB = re.compile(r"%(PLYR)s:\sposts\sbutton\sblind\s%(CUR)s(?P<BUB>[,.0-9]+)" % substitutions, re.MULTILINE)
-    re_Antes = re.compile(r"%(PLYR)s:\sposts\sthe\sant\s%(CUR)s(?P<ANTE>[,.0-9]+)" % substitutions, re.MULTILINE)
+    re_PostSB = re.compile(
+        r"{PLYR}:\sposts\ssmall\sblind\s{CUR}(?P<SB>[,.0-9]+)".format(**substitutions),
+        re.MULTILINE,
+    )
+    re_PostBB = re.compile(
+        r"{PLYR}:\sposts\sbig\sblind\s{CUR}(?P<BB>[,.0-9]+)".format(**substitutions),
+        re.MULTILINE,
+    )
+    re_PostBUB = re.compile(
+        r"{PLYR}:\sposts\sbutton\sblind\s{CUR}(?P<BUB>[,.0-9]+)".format(**substitutions),
+        re.MULTILINE,
+    )
+    re_Antes = re.compile(
+        r"{PLYR}:\sposts\sthe\sant\s{CUR}(?P<ANTE>[,.0-9]+)".format(**substitutions),
+        re.MULTILINE,
+    )
     re_BringIn = re.compile(
-        r"%(PLYR)s:\sbrings[- ]in(\slow|)\sfo/%(CUR)s(?P<BRINGIN>[,.0-9]+)" % substitutions, re.MULTILINE
+        r"{PLYR}:\sbrings[- ]in(\slow|)\sfo/{CUR}(?P<BRINGIN>[,.0-9]+)".format(**substitutions),
+        re.MULTILINE,
     )
     re_PostBoth = re.compile(
-        r"%(PLYR)s:\sposts\ssmall\s\&\sbig\sblinds\s%(CUR)s(?P<SBBB>[,.0-9]+)" % substitutions, re.MULTILINE
+        r"{PLYR}:\sposts\ssmall\s\&\sbig\sblinds\s{CUR}(?P<SBBB>[,.0-9]+)".format(**substitutions),
+        re.MULTILINE,
     )
     re_PostStraddle = re.compile(
-        r"%(PLYR)s:\sposts\sstraddle\s%(CUR)s(?P<STRADDLE>[,.0-9]+)" % substitutions, re.MULTILINE
+        r"{PLYR}:\sposts\sstraddle\s{CUR}(?P<STRADDLE>[,.0-9]+)".format(**substitutions),
+        re.MULTILINE,
     )
     re_Action = re.compile(
         r"""
-                        %(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)
-                        (\s%(CUR)s(?P<BET>[,.\d]+))?(\sto\s%(CUR)s(?P<BETTO>[,.\d]+))? 
+                        {PLYR}:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)
+                        (\s{CUR}(?P<BET>[,.\d]+))?(\sto\s{CUR}(?P<BETTO>[,.\d]+))?
                         \s*(and\sis\sall.in)?
-                        (and\shas\sreached\sthe\s[%(CUR)s\d\.,]+\scap)?
+                        (and\shas\sreached\sthe\s[{CUR}\d\.,]+\scap)?
                         (\son|\scards?)?
                         (\s\(disconnect\))?
-                        (\s\[(?P<CARDS>.+?)\])?\s*$"""
-        % substitutions,
+                        (\s\[(?P<CARDS>.+?)\])?\s*$""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
-    re_ShowdownAction = re.compile(r"%s: shows \[(?P<CARDS>.*)\]" % substitutions["PLYR"], re.MULTILINE)
-    re_sitsOut = re.compile("^%s sits out" % substitutions["PLYR"], re.MULTILINE)
+    re_ShowdownAction = re.compile(
+        r"{}: shows \[(?P<CARDS>.*)\]".format(substitutions["PLYR"]), re.MULTILINE,
+    )
+    re_sitsOut = re.compile("^{} sits out".format(substitutions["PLYR"]), re.MULTILINE)
     re_HeroCards = re.compile(
-        r"Dealt\sto\s%(PLYR)s\s(?:\[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % substitutions, re.MULTILINE
+        r"Dealt\sto\s{PLYR}\s(?:\[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])".format(**substitutions),
+        re.MULTILINE,
     )
     # re_ShownCards       = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % substitutions, re.MULTILINE)
     # re_CollectPot       = re.compile(r"Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(collected|showed \[.*\] and (won|collected)) \(?%(CUR)s(?P<POT>[,.\d]+)\)?(, mucked| with.*|)" %  substitutions, re.MULTILINE)
     re_CollectPot = re.compile(
-        r"Seat (?P<SEAT>[0-9]+):\s%(PLYR)s:\sbet\s(€|$|£)(?P<BET>[,.\d]+)\sand\swon\s(€|$|£)[\.0-9]+\W\snet\sresult:\s(€|$|£)(?P<POT>[,.\d]+)"
-        % substitutions,
+        r"Seat (?P<SEAT>[0-9]+):\s{PLYR}:\sbet\s(€|$|£)(?P<BET>[,.\d]+)\sand\swon\s(€|$|£)[\.0-9]+\W\snet\sresult:\s(€|$|£)(?P<POT>[,.\d]+)".format(**substitutions),
         re.MULTILINE,
     )
     # Vinsand88 cashed out the hand for $2.19 | Cash Out Fee $0.02
     re_CollectPot2 = re.compile(
-        "%(PLYR)s (collected|cashed out the hand for) %(CUR)s(?P<POT>[,.\d]+)" % substitutions, re.MULTILINE
+        r"{PLYR} (collected|cashed out the hand for) {CUR}(?P<POT>[,.\d]+)".format(**substitutions),
+        re.MULTILINE,
     )
     re_CashedOut = re.compile(r"cashed\sout\sthe\shand")
     re_WinningRankOne = re.compile(
-        "%(PLYR)s wins the tournament and receives %(CUR)s(?P<AMT>[,\.0-9]+) - congratulations!$" % substitutions,
+        r"{PLYR} wins the tournament and receives {CUR}(?P<AMT>[,\.0-9]+) - congratulations!$".format(**substitutions),
         re.MULTILINE,
     )
     re_WinningRankOther = re.compile(
-        "%(PLYR)s finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place and received %(CUR)s(?P<AMT>[,.0-9]+)\.$"
-        % substitutions,
+        r"{PLYR} finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place and received {CUR}(?P<AMT>[,.0-9]+)\.$".format(**substitutions),
         re.MULTILINE,
     )
     re_RankOther = re.compile(
-        "%(PLYR)s finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place$" % substitutions, re.MULTILINE
+        "{PLYR} finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place$".format(**substitutions),
+        re.MULTILINE,
     )
-    re_Cancelled = re.compile("Hand\scancelled", re.MULTILINE)
-    re_Uncalled = re.compile("Uncalled\sbet\s\(%(CUR)s(?P<BET>[,.\d]+)\)\sreturned\sto" % substitutions, re.MULTILINE)
+    re_Cancelled = re.compile(r"Hand\scancelled", re.MULTILINE)
+    re_Uncalled = re.compile(
+        r"Uncalled\sbet\s\({CUR}(?P<BET>[,.\d]+)\)\sreturned\sto".format(**substitutions),
+        re.MULTILINE,
+    )
     # APTEM-89 wins the $0.27 bounty for eliminating Hero
     # ChazDazzle wins the 22000 bounty for eliminating berkovich609
     # JKuzja, vecenta split the $50 bounty for eliminating ODYSSES
     re_Bounty = re.compile(
-        "%(PLYR)s (?P<SPLIT>split|wins) the %(CUR)s(?P<AMT>[,\.0-9]+) bounty for eliminating (?P<ELIMINATED>.+?)$"
-        % substitutions,
+        r"{PLYR} (?P<SPLIT>split|wins) the {CUR}(?P<AMT>[,\.0-9]+) bounty for eliminating (?P<ELIMINATED>.+?)$".format(**substitutions),
         re.MULTILINE,
     )
     # Amsterdam71 wins $19.90 for eliminating MuKoJla and their own bounty increases by $19.89 to $155.32
     # Amsterdam71 wins $4.60 for splitting the elimination of Frimble11 and their own bounty increases by $4.59 to $41.32
     # Amsterdam71 wins the tournament and receives $230.36 - congratulations!
     re_Progressive = re.compile(
-        """
-                        %(PLYR)s\swins\s%(CUR)s(?P<AMT>[,\.0-9]+)\s
+        r"""
+                        {PLYR}\swins\s{CUR}(?P<AMT>[,\.0-9]+)\s
                         for\s(splitting\sthe\selimination\sof|eliminating)\s(?P<ELIMINATED>.+?)\s
-                        and\stheir\sown\sbounty\sincreases\sby\s%(CUR)s(?P<INCREASE>[\.0-9]+)\sto\s%(CUR)s(?P<ENDAMT>[\.0-9]+)$"""
-        % substitutions,
+                        and\stheir\sown\sbounty\sincreases\sby\s{CUR}(?P<INCREASE>[\.0-9]+)\sto\s{CUR}(?P<ENDAMT>[\.0-9]+)$""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
     re_Rake = re.compile(
-        """
-                        Total\spot\s%(CUR)s(?P<POT>[,\.0-9]+)(.+?)?\s\|\sRake\s%(CUR)s(?P<RAKE>[,\.0-9]+)"""
-        % substitutions,
+        r"""
+                        Total\spot\s{CUR}(?P<POT>[,\.0-9]+)(.+?)?\s\|\sRake\s{CUR}(?P<RAKE>[,\.0-9]+)""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
     re_STP = re.compile(
-        """
-                        STP\sadded:\s%(CUR)s(?P<AMOUNT>[,\.0-9]+)"""
-        % substitutions,
+        r"""
+                        STP\sadded:\s{CUR}(?P<AMOUNT>[,\.0-9]+)""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
-    def compilePlayerRegexs(self, hand):
-        players = set([player[1] for player in hand.players])
+    def compilePlayerRegexs(self, hand) -> None:
+        players = {player[1] for player in hand.players}
         if not players <= self.compiledPlayers:  # x <= y means 'x is subset of y'
             self.compiledPlayers = players
             player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
             subst = {
                 "PLYR": player_re,
                 "BRKTS": r"(\(button\) |\(small\sblind\) |\(big\blind\) |\(button\) \(small\sblind\) |\(button\) \(big\sblind\) )?",
-                "CUR": "(\$|\xe2\x82\xac|\u20ac||\£|)",
+                "CUR": "(\\$|\xe2\x82\xac|\u20ac||\\£|)",
             }
 
             self.re_HeroCards = re.compile(
-                r"Dealt\sto\s%(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % subst, re.MULTILINE
+                r"Dealt\sto\s{PLYR}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])".format(**subst),
+                re.MULTILINE,
             )
             self.re_ShownCards = re.compile(
-                "Seat\s(?P<SEAT>[0-9]+):\s%(PLYR)s\s%(BRKTS)s(?P<SHOWED>showed|mucked)\s\[(?P<CARDS>.*)\](\sand\s(lost|(won|collected)\s \(%(CUR)s(?P<POT>[,\.\d]+)\))\swith\s(?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$"
-                % subst,
+                r"Seat\s(?P<SEAT>[0-9]+):\s{PLYR}\s{BRKTS}(?P<SHOWED>showed|mucked)\s\[(?P<CARDS>.*)\](\sand\s(lost|(won|collected)\s \({CUR}(?P<POT>[,\.\d]+)\))\swith\s(?P<STRING>.+?)(,\sand\s(won\s\({CUR}[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$".format(**subst),
                 re.MULTILINE,
             )
 
@@ -396,7 +410,7 @@ class Unibet(HandHistoryConverter):
                     info["bb"] = self.Lim_Blinds[mg["BB"]][1]
                 except KeyError:
                     tmp = handText[0:200]
-                    log.error(f"Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'")
+                    log.exception(f"Lim_Blinds has no lookup for '{mg['BB']}' - '{tmp}'")
                     raise FpdbParseError
             else:
                 info["sb"] = str((Decimal(mg["SB"]) / 2).quantize(Decimal("0.01")))
@@ -404,10 +418,13 @@ class Unibet(HandHistoryConverter):
         log.info(f"determine Game Type failed: '{info}'")
         return info
 
-    def readHandInfo(self, hand):
+    def readHandInfo(self, hand) -> None:
         # First check if partial
         if hand.handText.count("*** Summary ***") != 1:
-            raise FpdbHandPartial(("Hand is not cleanly split into pre and post Summary"))
+            msg = "Hand is not cleanly split into pre and post Summary"
+            raise FpdbHandPartial(
+                (msg),
+            )
 
         info = {}
         m = self.re_HandInfo.search(hand.handText, re.DOTALL)
@@ -433,14 +450,26 @@ class Unibet(HandHistoryConverter):
                 else:
                     m1 = self.re_DateTime1.finditer(info[key])
                     for a in m1:
-                        datetimestr1 = str(a.group("H")) + ":" + str(a.group("MIN")) + ":" + str(a.group("S"))
-                        datetimestr2 = str(a.group("Y")) + "/" + str(a.group("M")) + "/" + str(a.group("D"))
+                        datetimestr1 = (
+                            str(a.group("H"))
+                            + ":"
+                            + str(a.group("MIN"))
+                            + ":"
+                            + str(a.group("S"))
+                        )
+                        datetimestr2 = (
+                            str(a.group("Y"))
+                            + "/"
+                            + str(a.group("M"))
+                            + "/"
+                            + str(a.group("D"))
+                        )
                         datetimestr = datetimestr2 + " " + datetimestr1
                         # print("datetimestr", datetimestr)
                         # tz = a.group('TZ')  # just assume ET??
                         # print ("   tz = ", tz, " datetime =", datetimestr)
                     hand.startTime = datetime.datetime.strptime(
-                        datetimestr, "%Y/%m/%d %H:%M:%S"
+                        datetimestr, "%Y/%m/%d %H:%M:%S",
                     )  # also timezone at end, e.g. " ET"
                     # hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
 
@@ -448,72 +477,75 @@ class Unibet(HandHistoryConverter):
                 hand.handid = info[key]
             if key == "TOURNO":
                 hand.tourNo = info[key]
-            if key == "BUYIN":
-                if hand.tourNo is not None:
-                    log.debug(f"info['BUYIN']: {info['BUYIN']}")
-                    log.debug(f"info['BIAMT']: {info['BIAMT']}")
-                    log.debug(f"info['BIRAKE']: {info['BIRAKE']}")
-                    log.debug(f"info['BOUNTY']: {info['BOUNTY']}")
+            if key == "BUYIN" and hand.tourNo is not None:
+                log.debug(f"info['BUYIN']: {info['BUYIN']}")
+                log.debug(f"info['BIAMT']: {info['BIAMT']}")
+                log.debug(f"info['BIRAKE']: {info['BIRAKE']}")
+                log.debug(f"info['BOUNTY']: {info['BOUNTY']}")
 
-                    if info[key].strip() == "Freeroll":
-                        hand.buyin = 0
-                        hand.fee = 0
-                        hand.buyinCurrency = "FREE"
-                    elif info[key].strip() == "":
-                        hand.buyin = 0
-                        hand.fee = 0
-                        hand.buyinCurrency = "NA"
+                if info[key].strip() == "Freeroll":
+                    hand.buyin = 0
+                    hand.fee = 0
+                    hand.buyinCurrency = "FREE"
+                elif info[key].strip() == "":
+                    hand.buyin = 0
+                    hand.fee = 0
+                    hand.buyinCurrency = "NA"
+                else:
+                    if info[key].find("$") != -1:
+                        hand.buyinCurrency = "USD"
+                    elif info[key].find("£") != -1:
+                        hand.buyinCurrency = "GBP"
+                    elif info[key].find("€") != -1:
+                        hand.buyinCurrency = "EUR"
+                    elif info[key].find("₹") != -1:
+                        hand.buyinCurrency = "INR"
+                    elif info[key].find("¥") != -1:
+                        hand.buyinCurrency = "CNY"
+                    elif info[key].find("FPP") != -1 or info[key].find("SC") != -1:
+                        hand.buyinCurrency = "PSFP"
+                    elif re.match("^[0-9+]*$", info[key].strip()):
+                        hand.buyinCurrency = "play"
                     else:
-                        if info[key].find("$") != -1:
-                            hand.buyinCurrency = "USD"
-                        elif info[key].find("£") != -1:
-                            hand.buyinCurrency = "GBP"
-                        elif info[key].find("€") != -1:
-                            hand.buyinCurrency = "EUR"
-                        elif info[key].find("₹") != -1:
-                            hand.buyinCurrency = "INR"
-                        elif info[key].find("¥") != -1:
-                            hand.buyinCurrency = "CNY"
-                        elif info[key].find("FPP") != -1:
-                            hand.buyinCurrency = "PSFP"
-                        elif info[key].find("SC") != -1:
-                            hand.buyinCurrency = "PSFP"
-                        elif re.match("^[0-9+]*$", info[key].strip()):
-                            hand.buyinCurrency = "play"
+                        # FIXME: handle other currencies, play money
+                        log.error(
+                            f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'",
+                        )
+                        raise FpdbParseError
+
+                    info["BIAMT"] = info["BIAMT"].strip("$€£FPPSC₹")
+
+                    if hand.buyinCurrency != "PSFP":
+                        if info["BOUNTY"] is not None:
+                            # There is a bounty, Which means we need to switch BOUNTY and BIRAKE values
+                            tmp = info["BOUNTY"]
+                            info["BOUNTY"] = info["BIRAKE"]
+                            info["BIRAKE"] = tmp
+                            info["BOUNTY"] = info["BOUNTY"].strip(
+                                "$€£₹",
+                            )  # Strip here where it isn't 'None'
+                            hand.koBounty = int(100 * Decimal(info["BOUNTY"]))
+                            hand.isKO = True
                         else:
-                            # FIXME: handle other currencies, play money
-                            log.error(f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'")
-                            raise FpdbParseError
+                            hand.isKO = False
 
-                        info["BIAMT"] = info["BIAMT"].strip("$€£FPPSC₹")
+                        info["BIRAKE"] = info["BIRAKE"].strip("$€£₹")
 
-                        if hand.buyinCurrency != "PSFP":
-                            if info["BOUNTY"] is not None:
-                                # There is a bounty, Which means we need to switch BOUNTY and BIRAKE values
-                                tmp = info["BOUNTY"]
-                                info["BOUNTY"] = info["BIRAKE"]
-                                info["BIRAKE"] = tmp
-                                info["BOUNTY"] = info["BOUNTY"].strip("$€£₹")  # Strip here where it isn't 'None'
-                                hand.koBounty = int(100 * Decimal(info["BOUNTY"]))
-                                hand.isKO = True
-                            else:
-                                hand.isKO = False
-
-                            info["BIRAKE"] = info["BIRAKE"].strip("$€£₹")
-
-                            hand.buyin = int(100 * Decimal(info["BIAMT"])) + hand.koBounty
-                            hand.fee = int(100 * Decimal(info["BIRAKE"]))
-                        else:
-                            hand.buyin = int(100 * Decimal(info["BIAMT"]))
-                            hand.fee = 0
-                    if "Zoom" in info["TITLE"] or "Rush" in info["TITLE"]:
-                        hand.isFast = True
+                        hand.buyin = (
+                            int(100 * Decimal(info["BIAMT"])) + hand.koBounty
+                        )
+                        hand.fee = int(100 * Decimal(info["BIRAKE"]))
                     else:
-                        hand.isFast = False
-                    if "Home" in info["TITLE"]:
-                        hand.isHomeGame = True
-                    else:
-                        hand.isHomeGame = False
+                        hand.buyin = int(100 * Decimal(info["BIAMT"]))
+                        hand.fee = 0
+                if "Zoom" in info["TITLE"] or "Rush" in info["TITLE"]:
+                    hand.isFast = True
+                else:
+                    hand.isFast = False
+                if "Home" in info["TITLE"]:
+                    hand.isHomeGame = True
+                else:
+                    hand.isHomeGame = False
             if key == "LEVEL":
                 hand.level = info[key]
             if key == "SHOOTOUT" and info[key] is not None:
@@ -532,9 +564,10 @@ class Unibet(HandHistoryConverter):
                 hand.maxseats = int(info[key])
         log.info(f"read Hand Info: {hand}")
         if self.re_Cancelled.search(hand.handText):
-            raise FpdbHandPartial(("Hand '%s' was cancelled.") % hand.handid)
+            msg = (f"Hand '{hand.handid}' was cancelled.")
+            raise FpdbHandPartial(msg)
 
-    def readButton(self, hand):
+    def readButton(self, hand) -> None:
         pre, post = hand.handText.split("*** Summary ***")
         m = self.re_Button.search(hand.handText)
         m2 = self.re_PlayerInfo.finditer(pre)
@@ -546,7 +579,7 @@ class Unibet(HandHistoryConverter):
         else:
             log.info("readButton: not found")
 
-    def readPlayerStacks(self, hand):
+    def readPlayerStacks(self, hand) -> None:
         pre, post = hand.handText.split("*** Summary ***")
         m = self.re_PlayerInfo.finditer(pre)
         m2 = self.re_PlayerInfo2.finditer(pre)
@@ -562,10 +595,10 @@ class Unibet(HandHistoryConverter):
                         # self.clearMoneyString(a.group('BOUNTY'))
                     )
                     log.info(
-                        f"read Player Stacks: '{int(a.group('SEAT'))}' '{a.group('PNAME')}' '{self.clearMoneyString(a.group('CASH'))}' '{None}' '{int(a.group('SEAT'))}'"
+                        f"read Player Stacks: '{int(a.group('SEAT'))}' '{a.group('PNAME')}' '{self.clearMoneyString(a.group('CASH'))}' '{None}' '{int(a.group('SEAT'))}'",
                     )
                     break
-                elif a.group("PNAME") != b.group("SITOUT"):
+                if a.group("PNAME") != b.group("SITOUT"):
                     hand.addPlayer(
                         int(a.group("SEAT")),
                         a.group("PNAME"),
@@ -573,10 +606,10 @@ class Unibet(HandHistoryConverter):
                         None,
                     )
                     log.info(
-                        f"read Player Stacks: '{int(a.group('SEAT'))}' '{a.group('PNAME')}' '{self.clearMoneyString(a.group('CASH'))}' '{None}'"
+                        f"read Player Stacks: '{int(a.group('SEAT'))}' '{a.group('PNAME')}' '{self.clearMoneyString(a.group('CASH'))}' '{None}'",
                     )
 
-    def markStreets(self, hand):
+    def markStreets(self, hand) -> None:
         # There is no marker between deal and draw in Stars single draw games
         #  this upsets the accounting, incorrectly sets handsPlayers.cardxx and
         #  in consequence the mucked-display is incorrect.
@@ -594,7 +627,9 @@ class Unibet(HandHistoryConverter):
         hand.addStreets(m)
         log.info(f"read hand add streets: {hand}")
 
-    def readCommunityCards(self, hand, street):  # street has been matched by markStreets, so exists in this hand
+    def readCommunityCards(
+        self, hand, street,
+    ) -> None:  # street has been matched by markStreets, so exists in this hand
         m = self.re_Board.search(hand.streets[street])
         if m:
             hand.setCommunityCards(street, m.group("CARDS").split(" "))
@@ -602,54 +637,90 @@ class Unibet(HandHistoryConverter):
         else:
             log.error("read set Community Cards: none")
 
-    def readAntes(self, hand):
-        log.debug(("reading antes"))
+    def readAntes(self, hand) -> None:
+        log.debug("reading antes")
         m = self.re_Antes.finditer(hand.handText)
         for player in m:
             log.info(f"hand add Ante({player.group('PNAME')},{player.group('ANTE')})")
-            hand.addAnte(player.group("PNAME"), self.clearMoneyString(player.group("ANTE")))
+            hand.addAnte(
+                player.group("PNAME"), self.clearMoneyString(player.group("ANTE")),
+            )
 
-    def readBringIn(self, hand):
+    def readBringIn(self, hand) -> None:
         m = self.re_BringIn.search(hand.handText, re.DOTALL)
         if m:
             log.info(f"readBringIn: {m.group('PNAME')} for {m.group('BRINGIN')}")
             hand.addBringIn(m.group("PNAME"), self.clearMoneyString(m.group("BRINGIN")))
 
-    def readBlinds(self, hand):
+    def readBlinds(self, hand) -> None:
         liveBlind = True
         for a in self.re_PostSB.finditer(hand.handText):
             if liveBlind:
-                hand.addBlind(a.group("PNAME"), "small blind", self.clearMoneyString(a.group("SB")))
-                log.info(f"read Blinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('SB'))}'")
+                hand.addBlind(
+                    a.group("PNAME"),
+                    "small blind",
+                    self.clearMoneyString(a.group("SB")),
+                )
+                log.info(
+                    f"read Blinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('SB'))}'",
+                )
                 liveBlind = False
             else:
                 names = [p[1] for p in hand.players]
                 if "Big Blind" in names or "Small Blind" in names or "Dealer" in names:
-                    hand.addBlind(a.group("PNAME"), "small blind", self.clearMoneyString(a.group("SB")))
-                    log.info(f"read Blinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('SB'))}'")
+                    hand.addBlind(
+                        a.group("PNAME"),
+                        "small blind",
+                        self.clearMoneyString(a.group("SB")),
+                    )
+                    log.info(
+                        f"read Blinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('SB'))}'",
+                    )
                 else:
                     # Post dead blinds as ante
-                    hand.addBlind(a.group("PNAME"), "secondsb", self.clearMoneyString(a.group("SB")))
-                    log.info(f"read Blinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('SB'))}'")
+                    hand.addBlind(
+                        a.group("PNAME"),
+                        "secondsb",
+                        self.clearMoneyString(a.group("SB")),
+                    )
+                    log.info(
+                        f"read Blinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('SB'))}'",
+                    )
         for a in self.re_PostBB.finditer(hand.handText):
-            hand.addBlind(a.group("PNAME"), "big blind", self.clearMoneyString(a.group("BB")))
-            log.info(f"readBlinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('BB'))}'")
+            hand.addBlind(
+                a.group("PNAME"), "big blind", self.clearMoneyString(a.group("BB")),
+            )
+            log.info(
+                f"readBlinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('BB'))}'",
+            )
         for a in self.re_PostBoth.finditer(hand.handText):
-            hand.addBlind(a.group("PNAME"), "both", self.clearMoneyString(a.group("SBBB")))
-            log.info(f"readBlinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('SBBB'))}'")
+            hand.addBlind(
+                a.group("PNAME"), "both", self.clearMoneyString(a.group("SBBB")),
+            )
+            log.info(
+                f"readBlinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('SBBB'))}'",
+            )
 
         for a in self.re_PostStraddle.finditer(hand.handText):
-            hand.addBlind(a.group("PNAME"), "straddle", self.clearMoneyString(a.group("STRADDLE")))
-            log.info(f"read Blinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('STRADDLE'))}'")
+            hand.addBlind(
+                a.group("PNAME"), "straddle", self.clearMoneyString(a.group("STRADDLE")),
+            )
+            log.info(
+                f"read Blinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('STRADDLE'))}'",
+            )
         for a in self.re_PostBUB.finditer(hand.handText):
-            hand.addBlind(a.group("PNAME"), "button blind", self.clearMoneyString(a.group("BUB")))
-            log.info(f"read Blinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('BUB'))}'")
+            hand.addBlind(
+                a.group("PNAME"), "button blind", self.clearMoneyString(a.group("BUB")),
+            )
+            log.info(
+                f"read Blinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('BUB'))}'",
+            )
 
-    def readHoleCards(self, hand):
+    def readHoleCards(self, hand) -> None:
         #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
         #    we need to grab hero's cards
         for street in ("PREFLOP", "DEAL"):
-            if street in hand.streets.keys():
+            if street in hand.streets:
                 log.debug(f"Processing street: {street}")
                 m = self.re_HeroCards.finditer(hand.streets[street])
                 log.debug(f"Match object for street {street}: {m}")
@@ -662,13 +733,17 @@ class Unibet(HandHistoryConverter):
                     log.info(f"read HoleCards: '{found.group('PNAME')}'")
                     if "cards" not in found.group("NEWCARDS"):
                         newcards = found.group("NEWCARDS").split(" ")
-                        hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
+                        hand.addHoleCards(
+                            street,
+                            hand.hero,
+                            closed=newcards,
+                            shown=False,
+                            mucked=False,
+                            dealt=True,
+                        )
 
-    def readAction(self, hand, street):
-        if hand.gametype["split"] and street in hand.communityStreets:
-            s = street + "2"
-        else:
-            s = street
+    def readAction(self, hand, street) -> None:
+        s = street + "2" if hand.gametype["split"] and street in hand.communityStreets else street
         if not hand.streets[s]:
             return
         m = self.re_Action.finditer(hand.streets[s])
@@ -680,41 +755,67 @@ class Unibet(HandHistoryConverter):
             elif action.group("ATYPE") == " checks":
                 hand.addCheck(street, action.group("PNAME"))
             elif action.group("ATYPE") == " calls":
-                hand.addCall(street, action.group("PNAME"), self.clearMoneyString(action.group("BET")))
+                hand.addCall(
+                    street,
+                    action.group("PNAME"),
+                    self.clearMoneyString(action.group("BET")),
+                )
             elif action.group("ATYPE") == " raises":
                 if action.group("BETTO") is not None:
-                    hand.addRaiseTo(street, action.group("PNAME"), self.clearMoneyString(action.group("BETTO")))
+                    hand.addRaiseTo(
+                        street,
+                        action.group("PNAME"),
+                        self.clearMoneyString(action.group("BETTO")),
+                    )
                 elif action.group("BET") is not None:
-                    hand.addCallandRaise(street, action.group("PNAME"), self.clearMoneyString(action.group("BET")))
+                    hand.addCallandRaise(
+                        street,
+                        action.group("PNAME"),
+                        self.clearMoneyString(action.group("BET")),
+                    )
             elif action.group("ATYPE") == " bets":
-                hand.addBet(street, action.group("PNAME"), self.clearMoneyString(action.group("BET")))
+                hand.addBet(
+                    street,
+                    action.group("PNAME"),
+                    self.clearMoneyString(action.group("BET")),
+                )
             elif action.group("ATYPE") == " discards":
-                hand.addDiscard(street, action.group("PNAME"), action.group("BET"), action.group("CARDS"))
+                hand.addDiscard(
+                    street,
+                    action.group("PNAME"),
+                    action.group("BET"),
+                    action.group("CARDS"),
+                )
             elif action.group("ATYPE") == " stands pat":
                 hand.addStandsPat(street, action.group("PNAME"), action.group("CARDS"))
             else:
-                log.info(f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'")
+                log.info(
+                    f"Unimplemented readAction: '{action.group('PNAME')}' '{action.group('ATYPE')}'",
+                )
 
-    def readShowdownActions(self, hand):
+    def readShowdownActions(self, hand) -> None:
         for shows in self.re_ShowdownAction.finditer(hand.handText):
             cards = shows.group("CARDS").split(" ")
             log.debug(f"read Showdown Actions('{cards}','{shows.group('PNAME')}')")
             hand.addShownCards(cards, shows.group("PNAME"))
             log.info(f"read Showdown Actions('{cards}','{shows.group('PNAME')}')")
 
-    def readTourneyResults(self, hand):
-        """Reads knockout bounties and add them to the koCounts dict"""
-        pass
+    def readTourneyResults(self, hand) -> None:
+        """Reads knockout bounties and add them to the koCounts dict."""
 
-    def readCollectPot(self, hand):
+    def readCollectPot(self, hand) -> None:
         hand.setUncalledBets(True)
         for m in self.re_CollectPot.finditer(hand.handText):
-            hand.addCollectPot(player=m.group("PNAME"), pot=str(Decimal((m.group("POT")))))
-            log.info(f"read Collect Pot: '{m.group('PNAME')}' for '{str(Decimal(m.group('POT')))}'")
+            hand.addCollectPot(
+                player=m.group("PNAME"), pot=str(Decimal(m.group("POT"))),
+            )
+            log.info(
+                f"read Collect Pot: '{m.group('PNAME')}' for '{Decimal(m.group('POT'))!s}'",
+            )
 
-    def readShownCards(self, hand):
+    def readShownCards(self, hand) -> None:
         pass
 
     @staticmethod
-    def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
+    def getTableTitleRe(type, table_name=None, tournament=None, table_number=None) -> None:
         pass

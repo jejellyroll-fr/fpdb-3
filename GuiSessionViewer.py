@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright 2008-2011 Steffen Schaumburg
 # This program is free software: you can redistribute it and/or modify
@@ -15,61 +14,64 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
-from __future__ import print_function
-from __future__ import division
-
-from past.utils import old_div
-# import L10n
-# _ = L10n.get_translation()
 
 import sys
 import traceback
-from time import time, strftime, localtime, gmtime
-from loggingFpdb import get_logger
+from time import gmtime, localtime, strftime, time
 
-
+import matplotlib as mpl
+from matplotlib.backends.backend_qt5agg import FigureCanvas
+from matplotlib.figure import Figure
+from mplfinance.original_flavor import candlestick_ochl
+from numpy import append, cumsum, diff, max, min, nonzero, sum
+from past.utils import old_div
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QFrame, QLabel, QScrollArea, QSplitter, QTableView, QVBoxLayout
-
-import matplotlib
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt5agg import FigureCanvas
-from mplfinance.original_flavor import candlestick_ochl
-from numpy import diff, nonzero, sum, cumsum, max, min, append
-
+from PyQt5.QtWidgets import (
+    QFrame,
+    QLabel,
+    QScrollArea,
+    QSplitter,
+    QTableView,
+    QVBoxLayout,
+)
 
 import Database
 import Filters
+import GuiHandViewer
+from loggingFpdb import get_logger
+
+# import L10n
+# _ = L10n.get_translation()
+
+
 # import Charset
 
-import GuiHandViewer
 
-log = get_logger("sessionViewer")
+log = get_logger("gui_session_viewer")
 DEBUG = False
 
 try:
     calluse = not "matplotlib" in sys.modules
-    import matplotlib
+    import matplotlib as mpl
 
     if calluse:
         try:
-            matplotlib.use("qt5agg")
+            mpl.use("qt5agg")
         except ValueError as e:
-            log.error(f"error importing matplotlib: {e}")
-    from matplotlib.figure import Figure
+            log.exception(f"error importing matplotlib: {e}")
     from matplotlib.backends.backend_qt5agg import FigureCanvas
+    from matplotlib.figure import Figure
     from mplfinance.original_flavor import candlestick_ochl
-
-    from numpy import diff, nonzero, sum, cumsum, max, min, append
+    from numpy import append, cumsum, diff, max, min, nonzero, sum
 
 except ImportError as inst:
-    log.error(("Failed to load numpy and/or matplotlib in Session Viewer"))
-    log.error(f"ImportError: {inst.args}")
+    log.exception("Failed to load numpy and/or matplotlib in Session Viewer")
+    log.exception(f"ImportError: {inst.args}")
 
 
 class GuiSessionViewer(QSplitter):
-    def __init__(self, config, querylist, mainwin, owner, colors, debug=True):
+    def __init__(self, config, querylist, mainwin, owner, colors, debug=True) -> None:
         QSplitter.__init__(self, mainwin)
         self.debug = debug
         self.conf = config
@@ -163,13 +165,13 @@ class GuiSessionViewer(QSplitter):
         self.main_vbox.addWidget(self.graphBox)
         self.main_vbox.addWidget(self.stats_frame)
 
-    def refreshStats(self, checkState):
+    def refreshStats(self, checkState) -> None:
         if self.view:
             self.stats_frame.layout().removeWidget(self.view)
             self.view.setParent(None)
         self.fillStatsFrame(self.stats_frame)
 
-    def fillStatsFrame(self, frame):
+    def fillStatsFrame(self, frame) -> None:
         sites = self.filters.getSites()
         heroes = self.filters.getHeroes()
         siteids = self.filters.getSiteIds()
@@ -203,12 +205,18 @@ class GuiSessionViewer(QSplitter):
             # print(("No limits found"))
             return
 
-        self.createStatsPane(frame, playerids, sitenos, games, currencies, limits, seats)
+        self.createStatsPane(
+            frame, playerids, sitenos, games, currencies, limits, seats,
+        )
 
-    def createStatsPane(self, frame, playerids, sitenos, games, currencies, limits, seats):
+    def createStatsPane(
+        self, frame, playerids, sitenos, games, currencies, limits, seats,
+    ) -> None:
         starttime = time()
 
-        (results, quotes) = self.generateDatasets(playerids, sitenos, games, currencies, limits, seats)
+        (results, quotes) = self.generateDatasets(
+            playerids, sitenos, games, currencies, limits, seats,
+        )
 
         if DEBUG:
             for x in quotes:
@@ -229,7 +237,9 @@ class GuiSessionViewer(QSplitter):
 
         q = self.sql.query["sessionStats"]
         start_date, end_date = self.filters.getDates()
-        q = q.replace("<datestest>", " BETWEEN '" + start_date + "' AND '" + end_date + "'")
+        q = q.replace(
+            "<datestest>", " BETWEEN '" + start_date + "' AND '" + end_date + "'",
+        )
 
         for m in list(self.filters.display.items()):
             if m[0] == "Games" and m[1]:
@@ -238,7 +248,7 @@ class GuiSessionViewer(QSplitter):
                     gametest = gametest.replace("L", "")
                     gametest = gametest.replace(",)", ")")
                     gametest = gametest.replace("u'", "'")
-                    gametest = "AND gt.category in %s" % gametest
+                    gametest = f"AND gt.category in {gametest}"
                 else:
                     gametest = "AND gt.category IS NULL"
         q = q.replace("<game_test>", gametest)
@@ -249,11 +259,17 @@ class GuiSessionViewer(QSplitter):
         currencytest = str(tuple(currencies))
         currencytest = currencytest.replace(",)", ")")
         currencytest = currencytest.replace("u'", "'")
-        currencytest = "AND gt.currency in %s" % currencytest
+        currencytest = f"AND gt.currency in {currencytest}"
         q = q.replace("<currency_test>", currencytest)
 
         if seats:
-            q = q.replace("<seats_test>", "AND h.seats BETWEEN " + str(seats["from"]) + " AND " + str(seats["to"]))
+            q = q.replace(
+                "<seats_test>",
+                "AND h.seats BETWEEN "
+                + str(seats["from"])
+                + " AND "
+                + str(seats["to"]),
+            )
         else:
             q = q.replace("<seats_test>", "AND h.seats BETWEEN 0 AND 100")
 
@@ -326,7 +342,6 @@ class GuiSessionViewer(QSplitter):
             pass
         else:
             index = [[0]]
-            pass
 
         first_idx = 1
         quotes = []
@@ -347,7 +362,9 @@ class GuiSessionViewer(QSplitter):
             if hds > 0:
                 stime = strftime("%d/%m/%Y %H:%M", localtime(times[first_idx]))
                 etime = strftime("%d/%m/%Y %H:%M", localtime(times[last_idx]))
-                self.times.append((times[first_idx] - PADDING * 60, times[last_idx] + PADDING * 60))
+                self.times.append(
+                    (times[first_idx] - PADDING * 60, times[last_idx] + PADDING * 60),
+                )
                 minutesplayed = old_div((times[last_idx] - times[first_idx]), 60)
                 minutesplayed = minutesplayed + PADDING
                 if minutesplayed == 0:
@@ -377,13 +394,13 @@ class GuiSessionViewer(QSplitter):
                         stime,
                         etime,
                         hph,
-                        "%.2f" % open,
-                        "%.2f" % close,
-                        "%.2f" % lwm,
-                        "%.2f" % hwm,
+                        f"{open:.2f}",
+                        f"{close:.2f}",
+                        f"{lwm:.2f}",
+                        f"{hwm:.2f}",
                         "%.2f" % (hwm - lwm),
-                        "%.2f" % won,
-                    ]
+                        f"{won:.2f}",
+                    ],
                 )
                 quotes.append((sid, open, close, hwm, lwm))
                 first_idx = end_idx
@@ -400,18 +417,18 @@ class GuiSessionViewer(QSplitter):
                 global_stime,
                 global_etime,
                 total_hands * 60 // total_time,
-                "%.2f" % global_open,
-                "%.2f" % global_close,
-                "%.2f" % global_lwm,
-                "%.2f" % global_hwm,
+                f"{global_open:.2f}",
+                f"{global_close:.2f}",
+                f"{global_lwm:.2f}",
+                f"{global_hwm:.2f}",
                 "%.2f" % (global_hwm - global_lwm),
                 "%.2f" % (global_close - global_open),
-            ]
+            ],
         )
 
         return (results, quotes)
 
-    def clearGraphData(self):
+    def clearGraphData(self) -> None:
         try:
             try:
                 if self.canvas:
@@ -419,8 +436,7 @@ class GuiSessionViewer(QSplitter):
                     self.canvas.setParent(None)
             except (AttributeError, RuntimeError) as e:
                 # Handle specific exceptions here if you expect them
-                log.error(f"Error during canvas cleanup: {e}")
-                pass
+                log.exception(f"Error during canvas cleanup: {e}")
 
             if self.fig is not None:
                 self.fig.clear()
@@ -435,10 +451,10 @@ class GuiSessionViewer(QSplitter):
         except Exception as e:
             # Catch all other exceptions and log for better debugging
             err = traceback.extract_tb(sys.exc_info()[2])[-1]
-            log.error(f"Error: {err[2]}({err[1]}): {e}")
+            log.exception(f"Error: {err[2]}({err[1]}): {e}")
             raise
 
-    def generateGraph(self, quotes):
+    def generateGraph(self, quotes) -> None:
         self.clearGraphData()
         sitenos = []
         playerids = []
@@ -456,7 +472,8 @@ class GuiSessionViewer(QSplitter):
             sitenos.append(siteids[site])
             _hname = heroes.get(site, "")
             if not _hname:
-                raise ValueError(f"Hero name not found for site {site}")
+                msg = f"Hero name not found for site {site}"
+                raise ValueError(msg)
             result = self.db.get_player_id(self.conf, site, _hname)
             if result is not None:
                 playerids.append(int(result))
@@ -484,23 +501,32 @@ class GuiSessionViewer(QSplitter):
         self.ax.spines["right"].set_color(self.colors["foreground"])
         self.ax.spines["top"].set_color(self.colors["foreground"])
         self.ax.spines["bottom"].set_color(self.colors["foreground"])
-        self.ax.set_title((("Session graph for ring games") + names), color=self.colors["foreground"])
+        self.ax.set_title(
+            (("Session graph for ring games") + names), color=self.colors["foreground"],
+        )
         self.ax.set_facecolor(self.colors["background"])
         self.ax.set_xlabel(("Sessions"), fontsize=12, color=self.colors["foreground"])
         self.ax.set_ylabel("$", color=self.colors["foreground"])
         self.ax.grid(color=self.colors["grid"], linestyle=":", linewidth=0.2)
 
         candlestick_ochl(
-            self.ax, quotes, width=0.50, colordown=self.colors["line_down"], colorup=self.colors["line_up"], alpha=1.00
+            self.ax,
+            quotes,
+            width=0.50,
+            colordown=self.colors["line_down"],
+            colorup=self.colors["line_up"],
+            alpha=1.00,
         )
         self.graphBox.layout().addWidget(self.canvas)
         self.canvas.draw()
 
-    def addTable(self, frame, results):
+    def addTable(self, frame, results) -> None:
         colxalign, colheading = list(range(2))
 
         self.liststore = QStandardItemModel(0, len(self.columns))
-        self.liststore.setHorizontalHeaderLabels([column[colheading] for column in self.columns])
+        self.liststore.setHorizontalHeaderLabels(
+            [column[colheading] for column in self.columns],
+        )
         for row in results:
             listrow = [QStandardItem(str(r)) for r in row]
             for item in listrow:
@@ -514,7 +540,7 @@ class GuiSessionViewer(QSplitter):
         frame.layout().addWidget(self.view)
         self.view.doubleClicked.connect(self.row_activated)
 
-    def row_activated(self, index):
+    def row_activated(self, index) -> None:
         if index.row() < len(self.times):
             replayer = None
             for tabobject in self.owner.threads:
@@ -530,7 +556,8 @@ class GuiSessionViewer(QSplitter):
                         break
             reformat = lambda t: strftime("%Y-%m-%d %H:%M:%S+00:00", gmtime(t))
             handids = replayer.get_hand_ids_from_date_range(
-                reformat(self.times[index.row()][0]), reformat(self.times[index.row()][1])
+                reformat(self.times[index.row()][0]),
+                reformat(self.times[index.row()][1]),
             )
             log.debug(f"handids: {handids}")
 

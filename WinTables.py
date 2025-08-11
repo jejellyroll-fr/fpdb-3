@@ -1,19 +1,21 @@
+"""Windows specific methods for TableWindows Class."""
 import ctypes
 import re
-from loggingFpdb import get_logger
-from ctypes import wintypes
-from PyQt5.QtGui import QWindow
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication
 import sys
 import time
+from ctypes import wintypes
 
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QWindow
+from PyQt5.QtWidgets import QApplication
+
+from loggingFpdb import get_logger
 from TableWindow import Table_Window
 
 app = QApplication(sys.argv)
 
 # logging setup
-log = get_logger("hud")
+log = get_logger("win_tables")
 
 # Definition of Windows API constants
 GW_OWNER = 4
@@ -25,7 +27,9 @@ SM_CYCAPTION = 4
 
 # Windows functions via ctypes
 EnumWindows = ctypes.windll.user32.EnumWindows
-EnumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.wintypes.HWND, ctypes.wintypes.LPARAM)
+EnumWindowsProc = ctypes.WINFUNCTYPE(
+    ctypes.c_bool, ctypes.wintypes.HWND, ctypes.wintypes.LPARAM,
+)
 GetWindowText = ctypes.windll.user32.GetWindowTextW
 GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
 IsWindowVisible = ctypes.windll.user32.IsWindowVisible
@@ -43,13 +47,13 @@ tb_height = 29
 
 # Class for temporarily storing securities
 class WindowInfoTemp:
-    def __init__(self):
+    def __init__(self) -> None:
         self.titles = {}
         # print("WindowInfo initialized with an empty dictionary.")
 
 
 # Function for listing windows and retrieving titles
-def win_enum_handler(hwnd, lParam):
+def win_enum_handler(hwnd, lParam) -> bool:
     # print(f"Handler called for hwnd: {hwnd}")
     window_info = ctypes.cast(lParam, ctypes.py_object).value
     length = GetWindowTextLength(hwnd)
@@ -65,24 +69,28 @@ def win_enum_handler(hwnd, lParam):
 class Table(Table_Window):
     # In find_table_parameters of WinTables.py
 
-    def find_table_parameters(self):
+    def find_table_parameters(self) -> None:
         """Find a poker client window with the given table name."""
         window_info = WindowInfoTemp()
 
         try:
             log.debug("before EnumWindows")
-            EnumWindows(EnumWindowsProc(win_enum_handler), ctypes.py_object(window_info))
+            EnumWindows(
+                EnumWindowsProc(win_enum_handler), ctypes.py_object(window_info),
+            )
             log.debug(f"after EnumWindows found {len(window_info.titles)} windows")
         except Exception as e:
-            log.error(f"Error during EnumWindows: {e}")
+            log.exception(f"Error during EnumWindows: {e}")
 
         time_limit = 10  # Limite de temps en secondes
-        start_time = time.time()  # Enregistre l'heure de début
+        start_time = time.time()  # Record start time
 
         for hwnd in window_info.titles:
             try:
                 if time.time() - start_time > time_limit:
-                    log.error(f"Time limit of {time_limit} seconds reached. Exiting loop.")
+                    log.error(
+                        f"Time limit of {time_limit} seconds reached. Exiting loop.",
+                    )
                     break
 
                 title = window_info.titles[hwnd]
@@ -100,7 +108,7 @@ class Table(Table_Window):
                 if title.split(" ", 1)[0] == "Winamax":
                     self.search_string = self.search_string.split(" ", 3)[0]
 
-                if re.search(self.search_string, title, re.I):
+                if re.search(self.search_string, title, re.IGNORECASE):
                     if self.check_bad_words(title):
                         continue
                     self.number = hwnd
@@ -108,13 +116,15 @@ class Table(Table_Window):
                     log.debug(f"Found table in hwnd {self.number} title {self.title}")
                     break
 
-            except IOError as e:
+            except OSError as e:
                 if "closed file" in str(e):
-                    log.warning(f"Logging to a closed file for hwnd {hwnd}. Skipping this log entry.")
+                    log.warning(
+                        f"Logging to a closed file for hwnd {hwnd}. Skipping this log entry.",
+                    )
                 else:
-                    log.error(f"IOError for hwnd {hwnd}: {e}")
+                    log.exception(f"IOError for hwnd {hwnd}: {e}")
             except Exception as e:
-                log.error(f"Unexpected error for hwnd {hwnd}: {e}")
+                log.exception(f"Unexpected error for hwnd {hwnd}: {e}")
 
         if self.number is None:
             log.error(f"Window {self.search_string} not found.")
@@ -144,14 +154,14 @@ class Table(Table_Window):
                         "height": int(height) - 2 * self.b_width - self.tb_height,
                         "width": int(width) - 2 * self.b_width,
                     }
-                else:
-                    log.error(f"Failed to retrieve GetWindowRect for hwnd: {self.number}")
-                    return None
-            else:
-                log.error(f"The window {self.number} is not valid.")
+                log.error(
+                    f"Failed to retrieve GetWindowRect for hwnd: {self.number}",
+                )
                 return None
+            log.error(f"The window {self.number} is not valid.")
+            return None
         except Exception as e:
-            log.error(f"Error retrieving geometry: {e}")
+            log.exception(f"Error retrieving geometry: {e}")
             return None
 
     def get_window_title(self):
@@ -162,7 +172,7 @@ class Table(Table_Window):
         log.debug(f"title {buff.value}")
         return buff.value
 
-    def move_and_resize_window(self, x, y, width, height):
+    def move_and_resize_window(self, x, y, width, height) -> None:
         """Move and resize the specified window."""
         if self.number:
             # print(f"Moving and resizing window {self.number}")
@@ -171,14 +181,19 @@ class Table(Table_Window):
         else:
             log.info("No window to move.")
 
-    def topify(self, window):
+    def topify(self, window) -> None:
         """Make the specified Qt window 'always on top' under Windows."""
         if self.gdkhandle is None:
             self.gdkhandle = QWindow.fromWinId(int(self.number))
 
         qwindow = window.windowHandle()
         qwindow.setTransientParent(self.gdkhandle)
-        qwindow.setFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus | Qt.WindowStaysOnTopHint)
+        qwindow.setFlags(
+            Qt.Tool
+            | Qt.FramelessWindowHint
+            | Qt.WindowDoesNotAcceptFocus
+            | Qt.WindowStaysOnTopHint,
+        )
 
     def check_bad_words(self, title):
         """Check if the title contains any bad words."""

@@ -1,22 +1,22 @@
-import pytest
-from xml.dom.minidom import Document
 import sys
 from pathlib import Path
+from xml.dom.minidom import Document
 
+import pytest
 
 sys.path.append(str(Path(__file__).parent.parent))
 from Configuration import Config
 
 
 # Test for increment_position
-def test_increment_position_valid():
+def test_increment_position_valid() -> None:
     config = Config()
     assert config.increment_position("(0,0)") == "(1,1)"
     assert config.increment_position("(2,3)") == "(3,4)"
     assert config.increment_position("(5,5)") == "(6,6)"
 
 
-def test_increment_position_invalid_format():
+def test_increment_position_invalid_format() -> None:
     config = Config()
     with pytest.raises(AssertionError):
         config.increment_position("0,0")
@@ -26,7 +26,7 @@ def test_increment_position_invalid_format():
         config.increment_position("0,0)")
 
 
-def test_increment_position_negative_values():
+def test_increment_position_negative_values() -> None:
     config = Config()
     with pytest.raises(AssertionError):
         config.increment_position("(-1,0)")
@@ -56,7 +56,7 @@ def config():
     return config
 
 
-def test_edit_hud(config):
+def test_edit_hud(config) -> None:
     # call function edit_hud with test data
     config.edit_hud(
         hud_name="hud_test",

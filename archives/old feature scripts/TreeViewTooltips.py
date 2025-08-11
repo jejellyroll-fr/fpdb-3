@@ -1,5 +1,5 @@
 # Copyright (c) 2006, Daniel J. Popowich
-# 
+#
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
 # (the "Software"), to deal in the Software without restriction,
@@ -7,10 +7,10 @@
 # publish, distribute, sublicense, and/or sell copies of the Software,
 # and to permit persons to whom the Software is furnished to do so,
 # subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -26,7 +26,7 @@
 #
 # This version of the file is part of fpdb, contact: fpdb-main@lists.sourceforge.net
 
-'''
+"""
 TreeViewTooltips.py
 
 Provides TreeViewTooltips, a class which presents tooltips for cells,
@@ -69,7 +69,7 @@ get_tooltip() with the following arguments:
 
 where,
 
-    view:   the gtk.TreeView instance. 
+    view:   the gtk.TreeView instance.
     column: the gtk.TreeViewColumn instance that the mouse is
             currently over.
     path:   the path to the row that the mouse is currently over.
@@ -92,36 +92,35 @@ centered and just below the pointer and will remain shown until the
 pointer leaves the cell (or column, or row, or view, depending on how
 get_tooltip() is implemented).
 
-'''
+"""
 from __future__ import division
 
-
-
-
-from past.utils import old_div
 import pygtk
-pygtk.require('2.0')
+from past.utils import old_div
 
+pygtk.require("2.0")
+
+import gobject
 import gtk
 import gtk.gdk
-import gobject
 
 if gtk.gtk_version < (2, 8):
     import warnings
 
-    msg = (('''This module was developed and tested with version 2.8.18 of gtk.  You are using version %d.%d.%d.  Your milage may vary.''')
-           % gtk.gtk_version)
+    msg = (
+        """This module was developed and tested with version 2.8.18 of gtk.  You are using version %d.%d.%d.  Your milage may vary."""
+    ) % gtk.gtk_version
     warnings.warn(msg)
 
 
 # major, minor, patch
 version = 1, 0, 0
 
+
 class TreeViewTooltips(object):
 
     def __init__(self):
-        
-        '''
+        """
         Initialize the tooltip.  After initialization there are two
         attributes available for advanced control:
 
@@ -134,16 +133,15 @@ class TreeViewTooltips(object):
 
         Be default, the tooltip is enabled.  See the enabled/disabled
         methods.
-        '''
+        """
 
         # create the window
         self.window = window = gtk.Window(gtk.WINDOW_POPUP)
-        window.set_name('gtk-tooltips')
+        window.set_name("gtk-tooltips")
         window.set_resizable(False)
         window.set_border_width(4)
         window.set_app_paintable(True)
         window.connect("expose-event", self.__on_expose_event)
-
 
         # create the label
         self.label = label = gtk.Label()
@@ -163,69 +161,67 @@ class TreeViewTooltips(object):
         self.__shown = False
 
     def enable(self):
-        'Enable the tooltip'
-        
+        "Enable the tooltip"
+
         self.__enabled = True
-        
+
     def disable(self):
-        'Disable the tooltip'
-        
+        "Disable the tooltip"
+
         self.__enabled = False
 
     def __show(self, tooltip, x, y):
-
-        '''show the tooltip popup with the text/markup given by
+        """show the tooltip popup with the text/markup given by
         tooltip.
 
         tooltip: the text/markup for the tooltip.
         x, y:  the coord. (root window based) of the pointer.
-        '''
+        """
 
         window = self.window
-        
+
         # set label
         self.label.set_label(tooltip)
         # resize window
         w, h = window.size_request()
-        # move the window 
-        window.move(*self.location(x,y,w,h))
+        # move the window
+        window.move(*self.location(x, y, w, h))
         # show it
         window.show()
         self.__shown = True
 
     def __hide(self):
-        'hide the tooltip'
+        "hide the tooltip"
 
         self.__queue_next()
         self.window.hide()
         self.__shown = False
 
     def __leave_handler(self, view, event):
-        'when the pointer leaves the view, hide the tooltip'
-        
+        "when the pointer leaves the view, hide the tooltip"
+
         self.__hide()
 
     def __motion_handler(self, view, event):
-        'As the pointer moves across the view, show a tooltip.'
+        "As the pointer moves across the view, show a tooltip."
 
         path = view.get_path_at_pos(int(event.x), int(event.y))
-        
+
         if self.__enabled and path:
             path, col, x, y = path
             tooltip = self.get_tooltip(view, col, path)
             if tooltip is not None:
                 tooltip = str(tooltip).strip()
                 if tooltip:
-                    self.__queue_next((path, col), tooltip,
-                                      int(event.x_root),
-                                      int(event.y_root))
+                    self.__queue_next(
+                        (path, col), tooltip, int(event.x_root), int(event.y_root)
+                    )
                     return
 
         self.__hide()
 
     def __queue_next(self, *args):
-
-        'queue next request to show a tooltip'
+        "queue next request to show a tooltip"
 
         # if args is non-empty it means a request was made to show a
         # tooltip.  if empty, no request is being made, but any
@@ -254,12 +250,10 @@ class TreeViewTooltips(object):
                 self.__show(tooltip, x, y)
             # else queue it up in 1/2 second
             else:
-                self.__next = gobject.timeout_add(500, self.__show,
-                                                  tooltip, x, y)
+                self.__next = gobject.timeout_add(500, self.__show, tooltip, x, y)
 
         # save this cell
         self.__save = cell
-
 
     def __on_expose_event(self, window, event):
 
@@ -267,40 +261,47 @@ class TreeViewTooltips(object):
         # black border (default gtk Style).  This code is a
         # transliteration of the C implementation of gtk.Tooltips.
         w, h = window.size_request()
-        window.style.paint_flat_box(window.window, gtk.STATE_NORMAL,
-                                    gtk.SHADOW_OUT, None, window,
-                                    'tooltip', 0, 0, w, h)
+        window.style.paint_flat_box(
+            window.window,
+            gtk.STATE_NORMAL,
+            gtk.SHADOW_OUT,
+            None,
+            window,
+            "tooltip",
+            0,
+            0,
+            w,
+            h,
+        )
 
     def location(self, x, y, w, h):
-
-        '''Given the x,y coordinates of the pointer and the width and
+        """Given the x,y coordinates of the pointer and the width and
         height (w,h) demensions of the tooltip window, return the x, y
         coordinates of the tooltip window.
 
         The default location is to center the window on the pointer
         and 4 pixels below it.
-        '''
+        """
 
-        return x - old_div(w,2), y + 4
+        return x - old_div(w, 2), y + 4
 
     def add_view(self, view):
+        "add a gtk.TreeView to the tooltip"
 
-        'add a gtk.TreeView to the tooltip'
-        
-        assert isinstance(view, gtk.TreeView), \
-               ('This handler should only be connected to '
-                'instances of gtk.TreeView')
+        assert isinstance(view, gtk.TreeView), (
+            "This handler should only be connected to " "instances of gtk.TreeView"
+        )
 
         view.connect("motion-notify-event", self.__motion_handler)
         view.connect("leave-notify-event", self.__leave_handler)
 
     def get_tooltip(self, view, column, path):
-        'See the module doc string for a description of this method'
-        
-        raise NotImplemented('Subclass must implement get_tooltip()')
+        "See the module doc string for a description of this method"
+
+        raise NotImplemented("Subclass must implement get_tooltip()")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     ############################################################
     # DEMO
@@ -331,13 +332,17 @@ if __name__ == '__main__':
                 # cell-based tooltip.
                 model = view.get_model()
                 customer = model[path][2]
-                return '<big>%s %s</big>\n<i>%s</i>' % (customer.fname,
-                                                        customer.lname,
-                                                        customer.notes)
+                return "<big>%s %s</big>\n<i>%s</i>" % (
+                    customer.fname,
+                    customer.lname,
+                    customer.notes,
+                )
             # phone
             else:
-                return ('<big><u>Generic Column Tooltip</u></big>\n'
-                        'Unless otherwise noted, all\narea codes are 888')
+                return (
+                    "<big><u>Generic Column Tooltip</u></big>\n"
+                    "Unless otherwise noted, all\narea codes are 888"
+                )
 
         def XX_location(self, x, y, w, h):
             # rename me to "location" so I override the base class
@@ -360,32 +365,31 @@ if __name__ == '__main__':
     # create a bunch of customers
     customers = []
     for fname, lname, phone, notes in [
-        ('Joe', 'Schmoe', '555-1212', 'Likes to Morris dance.'),
-        ('Jane', 'Doe', '555-2323',
-         'Wonders what the hell\nMorris dancing is.'),
-        ('Phred', 'Phantastic', '900-555-1212', 'Dreams of Betty.'),
-        ('Betty', 'Boop', '555-3434', 'Dreams in b&amp;w.'),
-        ('Red Sox', 'Fan', '555-4545',
-         "Still livin' 2004!\nEspecially after 2006.")]:
+        ("Joe", "Schmoe", "555-1212", "Likes to Morris dance."),
+        ("Jane", "Doe", "555-2323", "Wonders what the hell\nMorris dancing is."),
+        ("Phred", "Phantastic", "900-555-1212", "Dreams of Betty."),
+        ("Betty", "Boop", "555-3434", "Dreams in b&amp;w."),
+        ("Red Sox", "Fan", "555-4545", "Still livin' 2004!\nEspecially after 2006."),
+    ]:
         customers.append(Customer(fname, lname, phone, notes))
 
     # Build our model and view
     model = gtk.ListStore(str, str, object)
     for c in customers:
-        model.append(['%s %s' % (c.fname, c.lname), c.phone, c])
+        model.append(["%s %s" % (c.fname, c.lname), c.phone, c])
 
     view = gtk.TreeView(model)
     view.get_selection().set_mode(gtk.SELECTION_NONE)
 
     # two columns, name and phone
     cell = gtk.CellRendererText()
-    cell.set_property('xpad', 20)
-    namecol = gtk.TreeViewColumn('Customer Name', cell, text=0)
+    cell.set_property("xpad", 20)
+    namecol = gtk.TreeViewColumn("Customer Name", cell, text=0)
     namecol.set_min_width(200)
     view.append_column(namecol)
 
     cell = gtk.CellRendererText()
-    phonecol = gtk.TreeViewColumn('Phone', cell, text=1)
+    phonecol = gtk.TreeViewColumn("Phone", cell, text=1)
     view.append_column(phonecol)
 
     # finally, connect the tooltip, specifying the name column as the
@@ -402,27 +406,28 @@ if __name__ == '__main__':
             tips.enable()
 
     # create a checkbutton and connect our handler
-    check = gtk.CheckButton('Check to disable view tooltips')
-    check.connect('toggled', toggle)
+    check = gtk.CheckButton("Check to disable view tooltips")
+    check.connect("toggled", toggle)
 
     # a standard gtk.Tooltips to compare to
     tt = gtk.Tooltips()
-    tt.set_tip(check, ('This is a standard gtk tooltip.\n'
-                       'Compare me to the tooltips above.'))
-    
+    tt.set_tip(
+        check, ("This is a standard gtk tooltip.\n" "Compare me to the tooltips above.")
+    )
+
     # create a VBox to pack the view and checkbutton
     vbox = gtk.VBox()
     vbox.pack_start(view)
     vbox.pack_start(check, False)
     vbox.show_all()
-    
+
     # pack the vbox into a simple dialog and run it
-    dialog = gtk.Dialog('TreeViewTooltips Demo')
+    dialog = gtk.Dialog("TreeViewTooltips Demo")
     close = dialog.add_button(gtk.STOCK_CLOSE, gtk.RESPONSE_NONE)
 
     # add a tooltip for the close button
-    tt.set_tip(close, 'Click to end the demo.')
-                              
-    dialog.set_default_size(400,400)
+    tt.set_tip(close, "Click to end the demo.")
+
+    dialog.set_default_size(400, 400)
     dialog.vbox.pack_start(vbox)
     dialog.run()

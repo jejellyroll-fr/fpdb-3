@@ -1,20 +1,11 @@
-from pevalpy.treys import Card, Evaluator, Deck
+from pevalpy.treys import Card, Deck, Evaluator
 
 # create a card
-card = Card.new('Qh')
+card = Card.new("Qh")
 
 # create a board and hole cards
-board = [
-    Card.new('8h'),
-    Card.new('8s'),
-    Card.new('Jc'),
-    Card.new('As'),
-    Card.new('Kc')
-]
-hand = [
-    Card.new('Qs'),
-    Card.new('Th')
-]
+board = [Card.new("8h"), Card.new("8s"), Card.new("Jc"), Card.new("As"), Card.new("Kc")]
+hand = [Card.new("Qs"), Card.new("Th")]
 
 # pretty print cards to console
 Card.print_pretty_cards(board)
@@ -59,9 +50,15 @@ p2_class = evaluator.get_rank_class(p2_score)
 p3_class = evaluator.get_rank_class(p3_score)
 
 # or get a human-friendly string to describe the score
-print("Player 1 hand rank = {} {}".format(p1_score, evaluator.class_to_string(p1_class)))
-print("Player 2 hand rank = {} {}".format(p2_score, evaluator.class_to_string(p2_class)))
-print("Player 3 hand rank = {} {}".format(p3_score, evaluator.class_to_string(p3_class)))
+print(
+    "Player 1 hand rank = {} {}".format(p1_score, evaluator.class_to_string(p1_class))
+)
+print(
+    "Player 2 hand rank = {} {}".format(p2_score, evaluator.class_to_string(p2_class))
+)
+print(
+    "Player 3 hand rank = {} {}".format(p3_score, evaluator.class_to_string(p3_class))
+)
 
 # or just a summary of the entire hand
 hands = [player1_hand, player2_hand, player3_hand]
