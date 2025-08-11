@@ -72,6 +72,11 @@ def main() -> None:
             # sys.exit(1)
 
     try:
+        # Debug: Print environment info for CI troubleshooting
+        if args.debug:
+            print(f"Home directory: {os.path.expanduser('~')}", file=sys.stderr)
+            print(f"Current working directory: {os.getcwd()}", file=sys.stderr)
+            print(f"Config file: {config_file}", file=sys.stderr)
         config = Configuration.Config(file=config_file)
     except Exception as e:
         print(f"Error loading configuration: {e}", file=sys.stderr)
@@ -79,18 +84,30 @@ def main() -> None:
 
     # Setup database
     try:
+        if args.debug:
+            print(f"Setting up database connection", file=sys.stderr)
         db = Database.Database(config)
+        if args.debug:
+            print(f"Database connection established", file=sys.stderr)
         # Ensure database is ready for import (creates tables if needed)
         if hasattr(db, 'create_tables'):
             try:
+                if args.debug:
+                    print(f"Creating database tables if needed", file=sys.stderr)
                 db.create_tables()
+                if args.debug:
+                    print(f"Database tables setup completed", file=sys.stderr)
             except Exception as e:
                 # Tables may already exist - this is OK for CLI usage
                 error_msg = str(e).lower()
+                if args.debug:
+                    print(f"Database table creation error: {e}", file=sys.stderr)
                 if "already exists" not in error_msg and "table" not in error_msg:
                     # Re-raise if it's not a table-related error
                     print(f"Database setup warning: {e}", file=sys.stderr)
                     raise
+                elif args.debug:
+                    print(f"Tables already exist - continuing", file=sys.stderr)
                 # Otherwise, silently continue - tables exist and that's fine
     except Exception as e:
         print(f"Error connecting to database: {e}", file=sys.stderr)

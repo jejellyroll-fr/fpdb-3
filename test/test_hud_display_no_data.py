@@ -9,6 +9,9 @@ import os
 import sys
 from unittest.mock import Mock
 
+# Set Qt to use offscreen platform for headless CI environments
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
 import pytest
 from PyQt5.QtWidgets import QLabel
 
