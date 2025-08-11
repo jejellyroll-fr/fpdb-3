@@ -1,12 +1,9 @@
 import sqlite3
 import sys
-
-
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 import Configuration
-
 
 DATABASE = Path(Configuration.CONFIG_PATH, "database", "fpdb.db3")
 
@@ -120,7 +117,14 @@ def get_handsStove():
 
 
 def get_RingProfitAllHandsPlayerIdSite(
-    site=None, player=None, limit=None, bigBlind=None, currency=None, category=None, startdate=None, enddate=None
+    site=None,
+    player=None,
+    limit=None,
+    bigBlind=None,
+    currency=None,
+    category=None,
+    startdate=None,
+    enddate=None,
 ):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -136,7 +140,7 @@ def get_RingProfitAllHandsPlayerIdSite(
         AND (:site IS NULL OR pl.siteId = :site)
         AND (h.startTime > :startdate OR :startdate IS NULL)
         AND (h.startTime < :enddate OR :enddate IS NULL)
-        AND (gt.limitType = :limit OR :limit IS NULL) 
+        AND (gt.limitType = :limit OR :limit IS NULL)
         AND (gt.bigBlind IN (:bigBlind) OR :bigBlind IS NULL)
         AND (gt.category IN (:category) OR :category IS NULL)
         AND (gt.currency = :currency OR :currency IS NULL)
@@ -164,7 +168,14 @@ def get_RingProfitAllHandsPlayerIdSite(
 
 
 def get_tourneysProfitPlayerIdSite(
-    site=None, player=None, limit=None, buyin=None, currency=None, category=None, startdate=None, enddate=None
+    site=None,
+    player=None,
+    limit=None,
+    buyin=None,
+    currency=None,
+    category=None,
+    startdate=None,
+    enddate=None,
 ):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -222,23 +233,23 @@ def get_players(name=None, site=None, page=1, per_page=10):
 
     # SQL query string
     sql = """
-        SELECT 
+        SELECT
         p.id, p.name AS player_name , s.name AS site, p.hero, p.siteId,
         COUNT(hp.id) AS total_hands,
-        SUM(CASE WHEN hp.tourneysPlayersId IS NULL THEN 1 ELSE 0 END) AS cash_hands, 
+        SUM(CASE WHEN hp.tourneysPlayersId IS NULL THEN 1 ELSE 0 END) AS cash_hands,
         SUM(CASE WHEN hp.tourneysPlayersId IS NOT NULL THEN 1 ELSE 0 END) AS tournament_hands
         FROM Players p
-        LEFT JOIN Sites s ON p.siteId = s.id 
+        LEFT JOIN Sites s ON p.siteId = s.id
         LEFT JOIN HandsPlayers hp ON hp.playerId = p.id
         WHERE
-        (:name IS NULL OR p.name LIKE :name) 
+        (:name IS NULL OR p.name LIKE :name)
         AND
         (:site IS NULL OR s.name = :site)
-        GROUP BY 
-        p.id, p.name, s.name, p.hero 
+        GROUP BY
+        p.id, p.name, s.name, p.hero
         LIMIT
         :per_page
-        OFFSET 
+        OFFSET
         :offset
   """
 
@@ -265,13 +276,15 @@ def get_players(name=None, site=None, page=1, per_page=10):
 def get_heroes():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
                         SELECT p.name AS hero_name, s.name AS site_name, p.id, p.siteId
                         FROM Players p
                         JOIN Sites s ON p.siteId = s.id
                         WHERE p.hero = 1;
-                      
-                   """)
+
+                   """,
+    )
     heroes = cursor.fetchall()
     conn.close()
     return heroes
@@ -324,9 +337,11 @@ def get_handscount():
 def get_handscount_cg():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    cursor.execute("""SELECT COUNT(*) AS handCount
+    cursor.execute(
+        """SELECT COUNT(*) AS handCount
                         FROM Hands
-                        WHERE tourneyId IS NULL""")
+                        WHERE tourneyId IS NULL""",
+    )
     handscount_cg = cursor.fetchall()
     conn.close()
     return handscount_cg
@@ -335,9 +350,11 @@ def get_handscount_cg():
 def get_handscount_tour():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    cursor.execute("""SELECT COUNT(*) AS handCount
+    cursor.execute(
+        """SELECT COUNT(*) AS handCount
                         FROM Hands
-                        WHERE tourneyId IS NOT NULL""")
+                        WHERE tourneyId IS NOT NULL""",
+    )
     handscount_tour = cursor.fetchall()
     conn.close()
     return handscount_tour
@@ -346,8 +363,10 @@ def get_handscount_tour():
 def get_playerscount():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    cursor.execute("""SELECT COUNT(DISTINCT playerId) AS distinctPlayerCount FROM HandsPlayers;
-    """)
+    cursor.execute(
+        """SELECT COUNT(DISTINCT playerId) AS distinctPlayerCount FROM HandsPlayers;
+    """,
+    )
     playerscount = cursor.fetchall()
     conn.close()
     return playerscount
@@ -356,9 +375,11 @@ def get_playerscount():
 def get_playerscount_cg():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    cursor.execute("""SELECT COUNT(DISTINCT playerId) AS distinctPlayerCount FROM HandsPlayers
-                    WHERE tourneysPlayersId IS NULL 
-                    """)
+    cursor.execute(
+        """SELECT COUNT(DISTINCT playerId) AS distinctPlayerCount FROM HandsPlayers
+                    WHERE tourneysPlayersId IS NULL
+                    """,
+    )
     playerscount_cg = cursor.fetchall()
     conn.close()
     return playerscount_cg
@@ -367,16 +388,25 @@ def get_playerscount_cg():
 def get_playerscount_tour():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    cursor.execute("""SELECT COUNT(DISTINCT playerId) AS distinctPlayerCount FROM HandsPlayers
+    cursor.execute(
+        """SELECT COUNT(DISTINCT playerId) AS distinctPlayerCount FROM HandsPlayers
                     WHERE tourneysPlayersId IS NOT NULL
-                    """)
+                    """,
+    )
     playerscount_tour = cursor.fetchall()
     conn.close()
     return playerscount_tour
 
 
 def get_statsplayers(
-    site=None, player=None, limit=None, bigBlind=None, currency=None, category=None, startdate=None, enddate=None
+    site=None,
+    player=None,
+    limit=None,
+    bigBlind=None,
+    currency=None,
+    category=None,
+    startdate=None,
+    enddate=None,
 ):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()

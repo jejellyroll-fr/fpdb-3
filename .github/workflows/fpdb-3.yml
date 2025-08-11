@@ -14,45 +14,123 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-and-coverage:
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
-    runs-on: windows-latest
+  lint:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python 3.11
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-    
-    - name: Install uv and project dependencies
+
+    - name: Install uv and ruff
+      run: |
+        pip install uv
+        uv venv
+        uv pip install ruff>=0.12.8
+
+    - name: Lint code (excluding tests)
+      run: |
+        uv run ruff check . --exclude=test --exclude=test_*.py
+
+    - name: Lint tests
+      run: |
+        uv run ruff check test/ --select=ALL --ignore=E712,S101,SLF001,PLR2004
+
+    - name: Check formatting
+      run: |
+        uv run ruff format --check .
+
+  test-and-coverage:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.10', '3.11']
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install uv and dependencies (Windows)
+      if: runner.os == 'Windows'
       run: |
         python -m pip install --upgrade pip
-        pip install uv ruff
+        pip install uv
         uv venv
-        uv pip install .
+        uv pip install --only-binary :all: "PyQt5==5.15.11"
+        uv pip install pytest>=8.3.2 pytest-qt>=4.0.2 pytest-cov>=5.0.0 ruff>=0.12.8
+        uv pip install -e .[windows]
 
-    - name: Run Ruff for linting
+    - name: Install uv and dependencies (Linux)
+      if: runner.os == 'Linux'
       run: |
-        ruff check . --exclude .\archives\,.\regression-test-files\,.\pypoker-eval\
+        python -m pip install --upgrade pip
+        pip install uv
+        uv venv
+        uv pip install --only-binary :all: "PyQt5==5.15.11"
+        uv pip install pytest>=8.3.2 pytest-qt>=4.0.2 pytest-cov>=5.0.0 ruff>=0.12.8
+        uv pip install xcffib==1.5.0
+        uv pip install -e .
+
+    - name: Install uv and dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        python -m pip install --upgrade pip
+        pip install uv
+        uv venv
+        uv pip install --only-binary :all: "PyQt5==5.15.11"
+        uv pip install pytest>=8.3.2 pytest-qt>=4.0.2 pytest-cov>=5.0.0 ruff>=0.12.8
+        uv pip install -e .[macos]
 
 
-    - name: Create necessary directories
+    - name: Create necessary directories (Windows)
+      if: runner.os == 'Windows'
       run: mkdir -p C:/Users/runneradmin/AppData/Roaming/fpdb
-      
-    - name: Copy HUD_config.xml
-      run: |
-        cp HUD_config.xml C:/Users/runneradmin/AppData/Roaming/fpdb/HUD_config.xml
 
-    - name: Run tests with pytest
-      run: |
-        uv venv && uv pip install .[test]
-        $env:Path += ";$env:pythonLocation\Scripts"
-        .\.venv\Scripts\Activate.ps1
-        pytest --cov=. --cov-report=html .\test\
+    - name: Copy HUD_config.xml (Windows)
+      if: runner.os == 'Windows'
+      run: cp HUD_config.xml C:/Users/runneradmin/AppData/Roaming/fpdb/HUD_config.xml
+
+    - name: Create necessary directories (Unix)
+      if: runner.os != 'Windows'
+      run: mkdir -p ~/.fpdb ~/.fpdb/database
+
+    - name: Copy HUD_config.xml (Unix)
+      if: runner.os != 'Windows'
+      run: cp HUD_config.xml ~/.fpdb/HUD_config.xml
+
+    - name: Make test scripts executable
+      run: chmod +x run_tests.sh
+
+    - name: Run tests with unified script (Windows)
+      if: runner.os == 'Windows'
       shell: pwsh
+      run: ./run_tests.ps1
 
-    - name: Check if htmlcov directory exists and list contents
+    - name: Install xvfb (Linux)
+      if: runner.os == 'Linux'
+      run: sudo apt-get update && sudo apt-get install -y xvfb
+
+    - name: Run tests with unified script (Linux with Xvfb)
+      if: runner.os == 'Linux'
+      env:
+        QT_QPA_PLATFORM: offscreen
+      run: xvfb-run -a --server-args="-screen 0 1024x768x24" ./run_tests.sh
+
+    - name: Run tests with unified script (macOS)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: ./run_tests.sh
+
+    - name: Check if htmlcov directory exists and list contents (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
       run: |
         if (Test-Path htmlcov) {
           Get-ChildItem htmlcov -Recurse
@@ -60,20 +138,56 @@ jobs:
           Write-Output "htmlcov directory does not exist"
         }
 
+    - name: Check if htmlcov directory exists and list contents (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        if [ -d htmlcov ]; then
+          ls -la htmlcov
+        else
+          echo "htmlcov directory does not exist"
+        fi
+
+    - name: Prepare coverage deployment
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      run: |
+        # Backup coverage files before cleaning
+        if [ -d htmlcov ]; then
+          cp -r htmlcov /tmp/htmlcov-backup
+          echo "Coverage files backed up to /tmp/htmlcov-backup"
+        else
+          echo "No htmlcov directory found to backup"
+          exit 1
+        fi
+
     - name: Deploy coverage to GitHub Pages (gh-pages branch)
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
-        git fetch origin gh-pages
+
+        # Clean up any uncommitted changes from test runs
+        git add . || true
+        git stash || true
+        git clean -fd || true
+
+        # Fetch and switch to gh-pages branch
+        git fetch origin gh-pages || true
         git checkout gh-pages || git checkout --orphan gh-pages
-        if (Test-Path coverage) {
-          Remove-Item -Recurse -Force coverage
-        }
-        New-Item -ItemType Directory -Path coverage/${{ github.sha }} 
-        Copy-Item -Recurse htmlcov/* coverage/${{ github.sha }}/
-        git add coverage/${{ github.sha }}/* -f  # Forcer l'ajout des fichiers dans coverage/
-        git commit -m "Deploy coverage report for commit ${{ github.sha }}"
-        git push origin gh-pages
+        git pull origin gh-pages || echo "Branch is orphan or already up to date"
+
+        # Deploy coverage files from backup
+        rm -rf coverage/${{ github.sha }} || true
+        mkdir -p coverage/${{ github.sha }}
+        cp -r /tmp/htmlcov-backup/* coverage/${{ github.sha }}/ || echo "No coverage backup found"
+
+        # Commit and push if there are changes
+        git add coverage/${{ github.sha }}/* -f || true
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Deploy coverage report for commit ${{ github.sha }}"
+          git push origin gh-pages
+        fi
 
     - name: Comment PR with coverage link
       if: github.event_name == 'pull_request'
@@ -85,20 +199,12 @@ jobs:
           const repoOwner = context.repo.owner;
           const sha = context.sha;
           const url = `https://${repoOwner}.github.io/${repoName}/coverage/${sha}/`;
-          console.log('Attempting to create PR comment');
-          console.log('Coverage URL:', url);
-          try {
-            const response = await github.rest.issues.createComment({
-              owner: repoOwner,
-              repo: repoName,
-              issue_number: context.issue.number,
-              body: `Coverage report for this PR: ${url}`
-            });
-            console.log('Comment created successfully:', response.data.html_url);
-          } catch (error) {
-            console.error('Error creating comment:', error);
-            console.error('Error response:', error.response);
-          }
+          await github.rest.issues.createComment({
+            owner: repoOwner,
+            repo: repoName,
+            issue_number: context.issue.number,
+            body: `Coverage report for this PR: ${url}`
+          });
 
     - name: Comment commit with coverage link
       if: github.event_name == 'push'
@@ -110,20 +216,12 @@ jobs:
           const repoOwner = context.repo.owner;
           const sha = context.sha;
           const url = `https://${repoOwner}.github.io/${repoName}/coverage/${sha}/`;
-          console.log('Attempting to create commit comment');
-          console.log('Coverage URL:', url);
-          try {
-            const response = await github.rest.repos.createCommitComment({
-              owner: repoOwner,
-              repo: repoName,
-              commit_sha: sha,
-              body: `Coverage report for this commit: ${url}`
-            });
-            console.log('Comment created successfully:', response.data.html_url);
-          } catch (error) {
-            console.error('Error creating comment:', error);
-            console.error('Error response:', error.response);
-          }
+          await github.rest.repos.createCommitComment({
+            owner: repoOwner,
+            repo: repoName,
+            commit_sha: sha,
+            body: `Coverage report for this commit: ${url}`
+          });
 
 
 
@@ -154,38 +252,41 @@ jobs:
           path: dist/*
 
   build-macos-intel:
-    if: github.event_name == 'push'
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          brew info pyqt@5
-          brew install pyqt@5
-          python -m pip install sip==6.6.2 
-          python -m pip install -e .[build,macos] -vvv
-          
-      - name: List directory contents
-        run: ls -la
-      - name: Make build script executable
-        run: chmod +x ./build_fpdb-osx.sh
-      - name: Run build script
-        run: ./build_fpdb-osx.sh
+      if: github.event_name == 'push'
+      runs-on: macos-latest
+      steps:
+        - uses: actions/checkout@v3
 
-      - name: Build project
-        shell: bash
-        run: |
-          ./build_fpdb-osx.sh
-      - name: Archive build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts-macos-intel
-          path: dist/*
+        - name: Set up Python 3.11
+          uses: actions/setup-python@v4
+          with:
+            python-version: '3.11'
+
+        - name: Install Homebrew dependencies
+          run: |
+            brew install pyqt@5
+            echo "QMAKE=$(brew --prefix qt@5)/bin/qmake" >> $GITHUB_ENV
+
+        - name: Install Python dependencies (without PyQt5)
+          run: |
+            python -m pip install --upgrade pip setuptools wheel
+            python -m pip install sip==6.6.2
+            python -m pip install -e .[build,macos] -vvv
+
+        - name: List directory contents
+          run: ls -la
+
+        - name: Make build script executable
+          run: chmod +x ./build_fpdb-osx.sh
+
+        - name: Run build script
+          run: ./build_fpdb-osx.sh
+
+        - name: Archive build artifacts
+          uses: actions/upload-artifact@v4
+          with:
+            name: build-artifacts-macos-intel
+            path: dist/*
 
   build-macos-arm:
     if: github.event_name == 'push'

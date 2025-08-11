@@ -1,0 +1,27 @@
+[run]
+source = .
+omit = 
+    */test/*
+    */tests/*
+    */__pycache__/*
+    */site-packages/*
+    */venv/*
+    */.venv/*
+    */archives/*
+    */regression-test-files/*
+    */pypoker-eval/*
+    */build/*
+    */dist/*
+    setup.py
+    */migrations/*
+
+[report]
+precision = 2
+show_missing = True
+skip_covered = False
+
+[html]
+directory = htmlcov
+
+[xml]
+output = coverage.xml

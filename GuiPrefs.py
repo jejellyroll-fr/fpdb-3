@@ -1,29 +1,31 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+"""GuiPrefs module for FPDB preferences dialog.
 
-# Copyright 2008-2011 Carl Gherardi
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, version 3 of the License.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-# In the "official" distribution you can find the license in agpl-3.0.txt.
+Copyright 2008-2011 Carl Gherardi
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, version 3 of the License.
 
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
 
-# import L10n
-# _ = L10n.get_translation()
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+In the "official" distribution you can find the license in agpl-3.0.txt.
+"""
 
+from typing import Any
 
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QTreeWidget, QTreeWidgetItem
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+)
 
-# from pyfpdb import Configuration
 import Configuration
 
 rewrite = {
@@ -55,7 +57,9 @@ rewrite = {
 
 
 class GuiPrefs(QDialog):
-    def __init__(self, config, parentwin):
+    """Preferences dialog for FPDB configuration."""
+    def __init__(self, config: Any, parentwin: Any) -> None:
+        """Initialize preferences dialog."""
         QDialog.__init__(self, parentwin)
         self.resize(600, 350)
         self.config = config
@@ -65,7 +69,9 @@ class GuiPrefs(QDialog):
 
         self.configView = QTreeWidget()
         self.configView.setColumnCount(2)
-        self.configView.setHeaderLabels([("Setting"), ("Value (double-click to change)")])
+        self.configView.setHeaderLabels(
+            [("Setting"), ("Value (double-click to change)")],
+        )
 
         if self.doc.documentElement.tagName == "FreePokerToolsConfig":
             self.root = QTreeWidgetItem(["fpdb", None])
@@ -82,34 +88,44 @@ class GuiPrefs(QDialog):
         btns.rejected.connect(self.reject)
         self.layout().addWidget(btns)
 
-    def updateConf(self, item, column):
+    def updateConf(self, item: Any, column: int) -> None:
+        """Update configuration item."""
         if column != 1:
             return
         item.data(1, Qt.UserRole).value = item.data(1, Qt.DisplayRole)
 
-    def rewriteText(self, s):
+    def rewriteText(self, s: str) -> tuple[str, bool]:
+        """Rewrite text using the rewrite dictionary."""
         upd = False
         if s in rewrite:
             s = rewrite[s]
             upd = True
         return (s, upd)
 
-    def addTreeRows(self, parent, node):
+    def addTreeRows(self, parent: Any, node: Any) -> None:
+        """Add tree rows to the configuration view."""
         if node.nodeType == node.ELEMENT_NODE:
             (setting, value) = (node.nodeName, None)
         elif node.nodeType == node.TEXT_NODE:
             # text nodes hold the whitespace (or whatever) between the xml elements, not used here
-            (setting, value) = ("TEXT: [" + node.nodeValue + "|" + node.nodeValue + "]", node.data)
+            (setting, value) = (
+                "TEXT: [" + node.nodeValue + "|" + node.nodeValue + "]",
+                node.data,
+            )
         else:
             (setting, value) = ("?? " + node.nodeValue, "type=" + str(node.nodeType))
 
-        if node.nodeType != node.TEXT_NODE and node.nodeType != node.COMMENT_NODE:
+        if node.nodeType not in (node.TEXT_NODE, node.COMMENT_NODE):
             name = ""
             item = QTreeWidgetItem(parent, [setting, value])
             if node.hasAttributes():
                 for i in range(node.attributes.length):
-                    localName, updated = self.rewriteText(node.attributes.item(i).localName)
-                    attritem = QTreeWidgetItem(item, [localName, node.attributes.item(i).value])
+                    local_name, updated = self.rewriteText(
+                        node.attributes.item(i).localName,
+                    )
+                    attritem = QTreeWidgetItem(
+                        item, [local_name, node.attributes.item(i).value],
+                    )
                     attritem.setData(1, Qt.UserRole, node.attributes.item(i))
                     attritem.setFlags(attritem.flags() | Qt.ItemIsEditable)
 

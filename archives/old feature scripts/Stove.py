@@ -11,21 +11,23 @@
 #
 # TODO gettextify usage print
 
-from __future__ import print_function
-from __future__ import division
+from __future__ import division, print_function
+
+import random
+import re
+import sys
+
+import pokereval
 from past.utils import old_div
 
-#import L10n
-#_ = L10n.get_translation()
+# import L10n
+# _ = L10n.get_translation()
 
-import sys, random
-import re
-import pokereval
 
-SUITS = ['h', 'd', 's', 'c']
+SUITS = ["h", "d", "s", "c"]
 
-CONNECTORS = ['32', '43', '54', '65', '76', '87', '98', 'T9', 'JT', 'QJ', 'KQ', 'AK']
-CARDS = ['2','3','4','5','6','7','8','9','T','J','Q','K','A']
+CONNECTORS = ["32", "43", "54", "65", "76", "87", "98", "T9", "JT", "QJ", "KQ", "AK"]
+CARDS = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"]
 
 ANY = 0
 SUITED = 1
@@ -70,7 +72,7 @@ class Stove(object):
     def set_villain_range_string(self, string):
         # Villain's range
         h_range = Range()
-        hands_in_range = string.strip().split(',')
+        hands_in_range = string.strip().split(",")
         for h in hands_in_range:
             _h = h.strip()
             h_range.expand(expand_hands(_h, self.hand, self.board))
@@ -85,6 +87,7 @@ class Cards(object):
 
     def get(self):
         return [self.c1, self.c2]
+
 
 class Board(object):
     def __init__(self, b1=None, b2=None, b3=None, b4=None, b5=None):
@@ -115,6 +118,7 @@ class Board(object):
 
         return b
 
+
 class Range(object):
     def __init__(self):
         self.__hands = set()
@@ -127,7 +131,6 @@ class Range(object):
 
     def get(self):
         return sorted(self.__hands)
-
 
 
 class EV(object):
@@ -156,37 +159,49 @@ class SumEV(object):
         win_pct = 100 * (old_div(float(self.n_wins), float(self.n_hands)))
         lose_pct = 100 * (old_div(float(self.n_losses), float(self.n_hands)))
         tie_pct = 100 * (old_div(float(self.n_ties), float(self.n_hands)))
-        equity = win_pct + old_div(tie_pct, 2.)
+        equity = win_pct + old_div(tie_pct, 2.0)
         self.output = """
 Enumerated %d possible plays.
 Your hand: (%s %s)
 Against the range: %s
 Equity       Win         Lose         Tie
 %5.2f%%    %5.2f%%    %5.2f%%    %5.2f%%
-""" % (self.n_hands, hand.c1, hand.c2, cards_from_range(h_range), equity, win_pct, lose_pct, tie_pct)
+""" % (
+            self.n_hands,
+            hand.c1,
+            hand.c2,
+            cards_from_range(h_range),
+            equity,
+            win_pct,
+            lose_pct,
+            tie_pct,
+        )
 
         print(self.output)
 
 
 # Expands hand abbreviations such as JJ and AK to full hand ranges.
 # Takes into account cards already known to be in player's hand and/or
-# board. 
+# board.
 def expand_hands(abbrev, hand, board):
     selection = -1
     known_cards = set()
     known_cards.update(set([hand.c1, hand.c2]))
     known_cards.update(set([board.b1, board.b2, board.b3, board.b4, board.b5]))
 
-    re.search('[2-9TJQKA]{2}(s|o)',abbrev)
+    re.search("[2-9TJQKA]{2}(s|o)", abbrev)
 
-    if re.search('^[2-9TJQKA]{2}(s|o)?$',abbrev): #AKs, AKo or AK
+    if re.search("^[2-9TJQKA]{2}(s|o)?$", abbrev):  # AKs, AKo or AK
         return standard_expand(abbrev, hand, known_cards)
-    elif re.search('^[2-9TJQKA]{2}(s|o)?\+$',abbrev): #76s+ or 76o+
+    elif re.search("^[2-9TJQKA]{2}(s|o)?\+$", abbrev):  # 76s+ or 76o+
         return iterative_expand(abbrev, hand, known_cards)
+
+
 #     elif re.search('^[2-9TJQKA]{2}', abbrev): #AK or KK
 #         return standard_expand(abbrev, hand, known_cards)
-    #elif: AhXh
-    #elif: Ah6h+A
+# elif: AhXh
+# elif: Ah6h+A
+
 
 def iterative_expand(abbrev, hand, known_cards):
     r1 = abbrev[0]
@@ -195,28 +210,28 @@ def iterative_expand(abbrev, hand, known_cards):
     c2 = CARDS.index(r2)
     h_range = []
     considered = set()
-    if r1 == r2: #pocket pair
+    if r1 == r2:  # pocket pair
         for c in CARDS[c1:]:
-            h_range += standard_expand(c+c, hand, known_cards)
-            
+            h_range += standard_expand(c + c, hand, known_cards)
+
     else:
-        c_hi = max(c1,c2)
-        c_low = min(c1,c2)
-        if len(abbrev.strip('+')) == 3:
+        c_hi = max(c1, c2)
+        c_low = min(c1, c2)
+        if len(abbrev.strip("+")) == 3:
             ltr = abbrev[2]
         else:
-            ltr = ''
+            ltr = ""
         for idx, c in enumerate(CARDS[c_hi:]):
-            h_range += standard_expand(c+CARDS[c_low+idx]+ltr, hand, known_cards)
-#     idx = CONNECTORS.index('%s%s' % (r1, r2))
-# 
-#     ltr = abbrev[2]
-# 
-#     
-#     for h in CONNECTORS[idx:]:
-#         abr = "%s%s" % (h, ltr)
-#         h_range += standard_expand(abr, hand, known_cards)
-# 
+            h_range += standard_expand(c + CARDS[c_low + idx] + ltr, hand, known_cards)
+    #     idx = CONNECTORS.index('%s%s' % (r1, r2))
+    #
+    #     ltr = abbrev[2]
+    #
+    #
+    #     for h in CONNECTORS[idx:]:
+    #         abr = "%s%s" % (h, ltr)
+    #         h_range += standard_expand(abr, hand, known_cards)
+    #
     return h_range
 
 
@@ -227,9 +242,9 @@ def standard_expand(abbrev, hand, known_cards):
     # There may be a specifier: 's' for 'suited'; 'o' for 'off-suit'
     if len(abbrev) == 3:
         ltr = abbrev[2]
-        if ltr == 'o':
+        if ltr == "o":
             selection = OFFSUIT
-        elif ltr == 's':
+        elif ltr == "s":
             selection = SUITED
     else:
         selection = ANY
@@ -265,22 +280,20 @@ def parse_args(args, container):
 
 
 def odds_for_hand(hand1, hand2, board, iterations):
-    res = ev.poker_eval(game='holdem',
-        pockets = [
-            hand1,
-            hand2
-        ],
-        dead = [],
-        board = board,
-        iterations = iterations
-        )
+    res = ev.poker_eval(
+        game="holdem",
+        pockets=[hand1, hand2],
+        dead=[],
+        board=board,
+        iterations=iterations,
+    )
 
-    plays = int(res['info'][0])
-    eval = res['eval'][0]
+    plays = int(res["info"][0])
+    eval = res["eval"][0]
 
-    win  = int(eval['winhi'])
-    lose = int(eval['losehi'])
-    tie  = int(eval['tiehi'])
+    win = int(eval["winhi"])
+    lose = int(eval["losehi"])
+    tie = int(eval["tiehi"])
 
     _ev = EV(plays, win, tie, lose)
     return _ev
@@ -296,7 +309,7 @@ def odds_for_range(holder):
     if board.b3 is not None:
         b.extend([board.b1, board.b2, board.b3])
     else:
-        b.extend(['__', '__', '__'])
+        b.extend(["__", "__", "__"])
         monte_carlo = True
     if board.b4 is not None:
         b.append(board.b4)
@@ -308,42 +321,45 @@ def odds_for_range(holder):
         b.append("__")
 
     if monte_carlo:
-        print(('No board given. Using Monte-Carlo simulation...'))
+        print(("No board given. Using Monte-Carlo simulation..."))
         iters = random.randint(25000, 125000)
     else:
         iters = -1
     for h in holder.h_range.get():
         e = odds_for_hand(
-            [holder.hand.c1, holder.hand.c2],
-            [h.c1, h.c2],
-            b,
-            iterations=iters
-            )
+            [holder.hand.c1, holder.hand.c2], [h.c1, h.c2], b, iterations=iters
+        )
         sev.add(e)
 
     sev.show(holder.hand, holder.h_range.get())
     return sev
 
+
 def usage(me):
-    print("""Texas Hold'Em odds calculator
+    print(
+        """Texas Hold'Em odds calculator
 Calculates odds against a range of hands.
 
 To use: %s '<board cards>' '<your hand>' '<opponent's range>' [...]
 
 Separate cards with space.
 Separate hands in range with commas.
-""" % me)
+"""
+        % me
+    )
+
 
 def cards_from_range(h_range):
-    s = '{'
+    s = "{"
     for h in h_range:
-        if h.c1 == '__' and h.c2 == '__':
-            s += 'random, '
+        if h.c1 == "__" and h.c2 == "__":
+            s += "random, "
         else:
-            s += '%s%s, ' % (h.c1, h.c2)
-    s = s.rstrip(', ')
-    s += '}'
+            s += "%s%s, " % (h.c1, h.c2)
+    s = s.rstrip(", ")
+    s += "}"
     return s
+
 
 def main(argv=None):
     stove = Stove()
@@ -352,5 +368,6 @@ def main(argv=None):
         sys.exit(2)
     odds_for_range(stove)
 
-if __name__  == '__main__':
+
+if __name__ == "__main__":
     sys.exit(main())

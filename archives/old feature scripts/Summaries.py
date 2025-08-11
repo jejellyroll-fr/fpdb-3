@@ -18,12 +18,15 @@
 """This file is to fetch summaries through IMAP and pass them on to the appropriate parser"""
 
 from __future__ import print_function
-# see http://docs.python.org/library/imaplib.html for the python interface
-# see http://tools.ietf.org/html/rfc2060#section-6.4.4 for IMAP4 search criteria
 
 import sys
 from imaplib import IMAP4_SSL
+
 import PokerStarsSummary
+
+# see http://docs.python.org/library/imaplib.html for the python interface
+# see http://tools.ietf.org/html/rfc2060#section-6.4.4 for IMAP4 search criteria
+
 
 # TODO: move all these into the config file. until then usage is: ./ImapSummaries.py YourImapHost YourImapUser YourImapPw
 configHost = sys.argv[1]
@@ -41,13 +44,20 @@ if response[0] != "OK":
     raise error  # TODO: show error message
 
 neededMessages = []
-response, searchData = server.search(None, "SUBJECT", "PokerStars Tournament History Request")
+response, searchData = server.search(
+    None, "SUBJECT", "PokerStars Tournament History Request"
+)
 for messageNumber in searchData[0].split(" "):
-    response, headerData = server.fetch(messageNumber, "(BODY[HEADER.FIELDS (SUBJECT)])")
+    response, headerData = server.fetch(
+        messageNumber, "(BODY[HEADER.FIELDS (SUBJECT)])"
+    )
     # print "response to fetch subject:",response
     if response != "OK":
         raise error  # TODO: show error message
-    if headerData[1].find("Subject: PokerStars Tournament History Request - Last x") != 1:
+    if (
+        headerData[1].find("Subject: PokerStars Tournament History Request - Last x")
+        != 1
+    ):
         neededMessages.append(messageNumber, "PS")
 
 tourneys = []

@@ -459,64 +459,64 @@
         The parameter elements for each <game> can be extended 
         without changing Configuration.Config()
         -->
-        <game game_name="holdem" aux="Classic_HUD, mucked">
+        <game game_name="holdem" aux="ClassicHud, mucked">
             <game_stat_set game_type="tour" stat_set="holdem_tour"/>
             <game_stat_set game_type="ring" stat_set="holdem_ring"/>
         </game>
-        <game game_name="2_holdem" aux="Classic_HUD, mucked">
+        <game game_name="2_holdem" aux="ClassicHud, mucked">
             <game_stat_set game_type="tour" stat_set="holdem_tour"/>
             <game_stat_set game_type="ring" stat_set="holdem_ring"/>
         </game>
-        <game game_name="irish" aux="Classic_HUD, mucked">
+        <game game_name="irish" aux="ClassicHud, mucked">
             <game_stat_set game_type="tour" stat_set="holdem_tour"/>
             <game_stat_set game_type="ring" stat_set="holdem_ring"/>
         </game>
-        <game game_name="razz" aux="stud_mucked, Classic_HUD">
+        <game game_name="razz" aux="stud_mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
-        <game game_name="omahahi" aux="Classic_HUD, mucked">
+        <game game_name="omahahi" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
-        <game game_name="omahahilo" aux="Classic_HUD, mucked">
+        <game game_name="omahahilo" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
-        <game game_name="5_omahahi" aux="Classic_HUD, mucked">
+        <game game_name="5_omahahi" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
-        <game game_name="5_omaha8" aux="Classic_HUD, mucked">
+        <game game_name="5_omaha8" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
-        <game game_name="cour_hi" aux="Classic_HUD, mucked">
+        <game game_name="cour_hi" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
-        <game game_name="cour_hilo" aux="Classic_HUD, mucked">
+        <game game_name="cour_hilo" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
-        <game game_name="studhi" aux="stud_mucked, Classic_HUD">
+        <game game_name="studhi" aux="stud_mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
-        <game game_name="5_studhi" aux="stud_mucked, Classic_HUD">
+        <game game_name="5_studhi" aux="stud_mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
-        <game game_name="studhilo" aux="stud_mucked, Classic_HUD">
+        <game game_name="studhilo" aux="stud_mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
-        <game game_name="27_3draw" aux="Classic_HUD, mucked">
+        <game game_name="27_3draw" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="draw_default"/>
         </game>
-        <game game_name="27_1draw" aux="Classic_HUD, mucked">
+        <game game_name="27_1draw" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="draw_default"/>
         </game>
-        <game game_name="badugi" aux="Classic_HUD, mucked">
+        <game game_name="badugi" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="draw_default"/>
         </game>
-        <game game_name="fivedraw" aux="Classic_HUD, mucked">
+        <game game_name="fivedraw" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set ="draw_default"/>
         </game>
-        <game game_name="a5_3draw" aux="Classic_HUD, mucked">
+        <game game_name="a5_3draw" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set ="draw_default"/>
         </game>  
-        <game game_name="6_omahahi" aux="Classic_HUD, mucked" >
+        <game game_name="6_omahahi" aux="ClassicHud, mucked" >
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
     </supported_games>
@@ -532,7 +532,7 @@
         <!-- HUD aux's -->
         <aw name="Simple_HUD" module="Aux_Hud" class="Simple_HUD"  
                 bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
-        <aw name="Classic_HUD" module="Aux_Classic_Hud" class="Classic_HUD" 
+        <aw name="ClassicHud" module="Aux_Classic_Hud" class="ClassicHud"
                 bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
 
         <!-- Mucked card aux's -->
