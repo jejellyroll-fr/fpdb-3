@@ -138,7 +138,7 @@ class GuiBulkImport(QWidget):
 
         for site_name, site in self.config.supported_sites.items():
             if site.enabled:
-                icon_path = f"/Users/jdenis/fpdb-3/icons/{site_name.lower()}.png"
+                icon_path = f"icons/{site_name.lower()}.png"
                 icon = QIcon(icon_path) if Path(icon_path).exists() else QIcon()
 
                 if site.HH_path and site.HH_path not in ["", "0"]:
@@ -161,13 +161,13 @@ class GuiBulkImport(QWidget):
         self.importDir = QLineEdit(self.settings.get("bulkImport-defaultPath", ""))
         custom_dir_layout.addWidget(self.importDir)
         self.chooseButton = QPushButton("Browse...")
-        self.chooseButton.setIcon(QIcon("/Users/jdenis/fpdb-3/icons/16x16/cil-folder-open.png"))
+        self.chooseButton.setIcon(QIcon("icons/16x16/cil-folder-open.png"))
         self.chooseButton.clicked.connect(self.browseClicked)
         custom_dir_layout.addWidget(self.chooseButton)
         self.layout().addLayout(custom_dir_layout)
 
         self.load_button = QPushButton("Bulk Import")
-        self.load_button.setIcon(QIcon("/Users/jdenis/fpdb-3/icons/16x16/cil-cloud-download.png"))
+        self.load_button.setIcon(QIcon("icons/16x16/cil-cloud-download.png"))
         self.load_button.clicked.connect(self.load_clicked)
         self.layout().addWidget(self.load_button)
 
