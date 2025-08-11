@@ -92,7 +92,7 @@ class BovadaRegressionTests(unittest.TestCase):
         # Test import without actually modifying the database
         # Security: Using validated paths and controlled arguments with shell=False
         result = subprocess.run( # noqa: S603
-            [sys.executable, str(importer_cli), "--site", "Bovada", "--no-progress", str(test_file)],
+            [sys.executable, str(importer_cli), "--site", "Bovada", "--no-progress", "--debug", str(test_file)],
             cwd=base_dir,
             capture_output=True,
             text=True,

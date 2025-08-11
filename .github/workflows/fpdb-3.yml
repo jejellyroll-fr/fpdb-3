@@ -77,7 +77,7 @@ jobs:
 
     - name: Create necessary directories (Unix)
       if: runner.os != 'Windows'
-      run: mkdir -p ~/.fpdb
+      run: mkdir -p ~/.fpdb ~/.fpdb/database
 
     - name: Copy HUD_config.xml (Unix)
       if: runner.os != 'Windows'
@@ -97,6 +97,8 @@ jobs:
 
     - name: Run tests with unified script (Linux with Xvfb)
       if: runner.os == 'Linux'
+      env:
+        QT_QPA_PLATFORM: offscreen
       run: xvfb-run -a --server-args="-screen 0 1024x768x24" ./run_tests.sh
 
     - name: Run tests with unified script (macOS)
