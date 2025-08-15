@@ -893,7 +893,34 @@ class Importer:
 
                 # Report parsing issues if HandDataReporter is enabled
                 if self.hand_data_reporter:
-                    self.hand_data_reporter.report_hand_failure(fpdbfile.path, Exception(issue))
+                    # Extract the actual hand content from the error message
+                    hand_context = ""
+                    if "Hand starting with" in str(issue):
+                        # Try to extract the hand snippet from the error message
+                        import re
+                        match = re.search(r"Hand starting with '([^']+)'", str(issue))
+                        if match:
+                            hand_snippet = match.group(1)
+                            # Read directly a portion of the file for more context
+                            try:
+                                with open(fpdbfile.path, 'r', encoding='utf-8') as f:
+                                    file_content = f.read()
+                                    # Search for the snippet in the file to get more context
+                                    if hand_snippet.replace('...', '') in file_content:
+                                        start_pos = file_content.find(hand_snippet.replace('...', ''))
+                                        if start_pos != -1:
+                                            hand_context = file_content[start_pos:start_pos+1000]  # 1000 characters of context
+                            except Exception:
+                                hand_context = hand_snippet
+                        else:
+                            hand_context = str(issue)[:500]
+                    else:
+                        hand_context = str(issue)[:500]
+                        
+                    # Create an enriched error for parsing issues
+                    parsing_error = Exception(str(issue))
+                    parsing_error.full_traceback = f"Parsing issue in {fpdbfile.path}: {issue}"
+                    self.hand_data_reporter.report_hand_failure(fpdbfile.path, parsing_error, hand_context)
 
             # Capture the detected sitename from the parser (for iPoker skin detection)
             detected_sitename = getattr(hhc, "sitename", None)
@@ -975,24 +1002,36 @@ class Importer:
                             self.hand_data_reporter.report_hand_failure(fpdbfile.path, e, hand.handText[:200] if hasattr(hand, "handText") else "")
 
                     except FpdbHandPartial as e:
+                        import traceback
                         partial += 1
                         self.import_issues.append(f"[PARTIAL] In {fpdbfile.path}: Hand starting with '{hand.handText[:30]}...' - {e}")
 
-                        # Report partial hand
+                        # Report partial hand with traceback
                         if self.hand_data_reporter:
-                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, e, hand.handText[:200] if hasattr(hand, "handText") else "", hand)
+                            # Capturer la stack trace pour les mains partielles aussi
+                            full_traceback = traceback.format_exc()
+                            enriched_error = Exception(f"[PARTIAL] Hand starting with '{hand.handText[:30] if hasattr(hand, 'handText') else 'Unknown'}...': '{e}'")
+                            enriched_error.full_traceback = full_traceback
+                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, enriched_error, hand.handText[:500] if hasattr(hand, "handText") else "", hand)
 
                     except Exception as e:
+                        import traceback
                         errors += 1
                         self.import_issues.append(f"[ERROR] In {fpdbfile.path}: Hand starting with '{hand.handText[:30]}...' - {e}")
                         log.exception(
                             f"Importer._import_hh_file: '{fpdbfile.path}' Fatal error: '{e}'",
                         )
 
-                        # Report error hand
+                        # Report error hand with full traceback
                         if self.hand_data_reporter:
-                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, e, hand.handText[:200] if hasattr(hand, "handText") else "")
-                        log.exception(f"'{hand.handText[0:200]}'")
+                            # Capturer la stack trace ici où elle est disponible
+                            full_traceback = traceback.format_exc()
+                            # Créer un objet d'erreur enrichi avec la stack trace
+                            enriched_error = Exception(str(e))
+                            enriched_error.full_traceback = full_traceback
+                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, enriched_error, hand.handText[:500] if hasattr(hand, "handText") else "")
+                        else:
+                            log.exception(f"'{hand.handText[0:200]}'")
                         if doinsert and ihands:
                             backtrack = True
 
