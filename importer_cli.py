@@ -31,7 +31,7 @@ def main() -> None:
                         help="Enable verbose logging (INFO level).")
 
     # Hand data reporting options
-    parser.add_argument("--report-level", choices=["summary", "detailed", "full", "hierarchy"], default="summary",
+    parser.add_argument("--report-level", choices=["summary", "detailed", "full", "hierarchy", "debug"], default="summary",
                         help="Level of hand data reporting detail. Default: summary")
     parser.add_argument("--report-file", type=str,
                         help="Generate detailed report for specific file path")
@@ -43,7 +43,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Setup logging based on debug/verbose flags
-    if args.debug:
+    if args.debug or args.report_level == "debug":
         logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(name)s:%(funcName)s] [%(levelname)s] %(message)s")
     elif args.verbose:
         logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s:%(funcName)s] [%(levelname)s] %(message)s")
