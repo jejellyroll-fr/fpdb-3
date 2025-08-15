@@ -1,4 +1,4 @@
-"""Hand Data Reporter pour analyser la qualité du parsing des mains."""
+"""Hand Data Reporter for analyzing hand parsing quality."""
 
 import contextlib
 import json
@@ -7,7 +7,7 @@ from typing import Any
 
 
 class HandDataReporter:
-    """Reporter pour capturer et analyser les données extraites des mains."""
+    """Reporter for capturing and analyzing data extracted from hands."""
 
     def __init__(self, report_level: str = "detailed") -> None:
         self.report_level = report_level
@@ -34,7 +34,7 @@ class HandDataReporter:
         }
 
     def start_file(self, filepath: str) -> None:
-        """Initialiser le tracking pour un fichier."""
+        """Initialize tracking for a file."""
         self.files_stats[filepath] = {
             "hands_processed": 0,
             "hands_successful": 0,
@@ -46,7 +46,7 @@ class HandDataReporter:
         self.session_stats["total_files"] += 1
 
     def report_hand_success(self, filepath: str, hand_obj: Any) -> None:
-        """Capturer toutes les données extraites d'une main réussie."""
+        """Capture all data extracted from a successful hand."""
         if filepath not in self.files_stats:
             self.start_file(filepath)
 
@@ -56,20 +56,20 @@ class HandDataReporter:
         self.session_stats["successful_hands"] += 1
         self.session_stats["total_hands"] += 1
 
-        # Classifier le type de jeu
+        # Classify game type
         try:
             game_category = self._classify_game_type(hand_obj)
             self._update_game_type_stats(game_category)
         except Exception:
             game_category = {"format": "cash_games", "family": "unknown", "subtype": "unknown"}
 
-        # Extraire les données selon le niveau de détail
+        # Extract data according to detail level
         if self.report_level in ["detailed", "full"]:
             hand_data = self._extract_hand_data(hand_obj)
             hand_data["game_classification"] = game_category
             file_stats["hands_data"].append(hand_data)
         elif self.report_level == "hierarchy":
-            # Niveau léger : juste la classification et infos de base
+            # Light level: just classification and basic info
             hand_data = {
                 "hand_id": getattr(hand_obj, "handid", None),
                 "table_name": getattr(hand_obj, "tablename", None),
@@ -81,7 +81,9 @@ class HandDataReporter:
             file_stats["hands_data"].append(hand_data)
 
     def report_hand_failure(self, filepath: str, error: Exception, hand_text_snippet: str = "", hand_obj: Any = None) -> None:
-        """Enregistrer les échecs de parsing."""
+        """Record parsing failures."""
+        import traceback
+        
         if filepath not in self.files_stats:
             self.start_file(filepath)
 
@@ -96,10 +98,14 @@ class HandDataReporter:
             self.session_stats["parser_errors"][error_type] = 0
         self.session_stats["parser_errors"][error_type] += 1
 
+        # Capture complete stack trace (from enriched error or default)
+        full_traceback = getattr(error, 'full_traceback', None) or traceback.format_exc() if hasattr(error, '__traceback__') and error.__traceback__ else "No traceback available"
+
         error_info = {
             "error_type": error_type,
             "error_message": str(error),
-            "hand_snippet": hand_text_snippet[:200] if hand_text_snippet else "No text available",
+            "full_traceback": full_traceback,
+            "hand_snippet": hand_text_snippet[:500] if hand_text_snippet else "No text available",  # Plus de contexte
             "timestamp": datetime.now().isoformat(),
             "is_partial": "[PARTIAL]" in str(error),
             "severity": self._categorize_error_severity(error),
@@ -108,21 +114,21 @@ class HandDataReporter:
         file_stats["errors"].append(error_info)
 
     def _categorize_error_severity(self, error: Exception) -> str:
-        """Catégoriser la sévérité des erreurs pour un meilleur diagnostic."""
+        """Categorize error severity for better diagnosis."""
         error_msg = str(error).lower()
 
         if "[partial]" in error_msg:
-            return "info"  # Mains partielles - info seulement
+            return "info"  # Partial hands - info only
         if "no small blind posted" in error_msg or "no big blind posted" in error_msg:
-            return "warning"  # Problèmes de blinds - warning
+            return "warning"  # Blind problems - warning
         if "keyerror" in error_msg or "attributeerror" in error_msg:
-            return "error"  # Erreurs de parsing - erreur
+            return "error"  # Parsing errors - error
         if "malformed" in error_msg or "invalid" in error_msg:
-            return "critical"  # Format invalide - critique
-        return "unknown"  # Autres erreurs
+            return "critical"  # Invalid format - critical
+        return "unknown"  # Other errors
 
     def _analyze_failed_hand_object(self, hand_obj: Any) -> dict[str, Any]:
-        """Analyser spécifiquement un objet Hand qui a échoué pour le debug."""
+        """Specifically analyze a failed Hand object for debugging."""
         if not hand_obj:
             return {"status": "no_hand_object", "reason": "Hand object was not created (early parsing failure)"}
 
@@ -134,7 +140,7 @@ class HandDataReporter:
             "parsing_stage": "unknown",
         }
 
-        # Informations de base toujours présentes
+        # Basic information always present
         basic_attrs = {
             "handid": getattr(hand_obj, "handid", None),
             "siteHandNo": getattr(hand_obj, "siteHandNo", None),
@@ -146,17 +152,17 @@ class HandDataReporter:
 
         for attr, value in basic_attrs.items():
             if value is not None:
-                analysis["basic_info"][attr] = str(value)[:100]  # Limiter la taille
+                analysis["basic_info"][attr] = str(value)[:100]  # Limit size
 
-        # Éléments de parsing progressif
+        # Progressive parsing elements
         parsing_elements = {
-            "players": "Liste des joueurs",
-            "actions": "Actions par street",
-            "holecards": "Cartes des joueurs",
-            "board": "Cartes du board",
+            "players": "Player list",
+            "actions": "Actions per street",
+            "holecards": "Player cards",
+            "board": "Board cards",
             "collected": "Collections",
-            "bets": "Structure des mises",
-            "posted": "Blinds/Antes postés",
+            "bets": "Bet structure",
+            "posted": "Posted blinds/antes",
         }
 
         for attr, description in parsing_elements.items():
@@ -178,7 +184,7 @@ class HandDataReporter:
             else:
                 analysis["missing_elements"].append(f"{attr} ({description})")
 
-        # Déterminer le stade de parsing atteint
+        # Determine the parsing stage reached
         if hasattr(hand_obj, "players") and hand_obj.players:
             if hasattr(hand_obj, "actions") and hand_obj.actions:
                 if hasattr(hand_obj, "holecards") and hand_obj.holecards:
@@ -193,13 +199,13 @@ class HandDataReporter:
         return analysis
 
     def _analyze_object_structure(self, obj: Any, max_depth: int = 2) -> dict[str, Any]:
-        """Analyser la structure complète d'un objet pour debugging."""
+        """Analyze the complete structure of an object for debugging."""
         analysis = {}
 
         if max_depth <= 0:
             return {"type": str(type(obj)), "value": str(obj)[:100]}
 
-        # Attributs de l'objet
+        # Object attributes
         if hasattr(obj, "__dict__"):
             analysis["attributes"] = {}
             for attr_name in dir(obj):
@@ -212,7 +218,7 @@ class HandDataReporter:
                                 "value": str(attr_value)[:200] if not isinstance(attr_value, (dict, list)) else len(attr_value),
                             }
 
-                            # Pour les attributs importants, capturer la structure détaillée
+                            # For important attributes, capture detailed structure
                             if attr_name in ["actions", "holecards", "board", "posted", "collected", "bets"]:
                                 if isinstance(attr_value, dict):
                                     attr_info["dict_structure"] = {}
@@ -230,7 +236,7 @@ class HandDataReporter:
                                             }
                                 elif isinstance(attr_value, list):
                                     attr_info["list_content"] = []
-                                    for i, item in enumerate(attr_value[:5]):  # Premier 5 éléments
+                                    for i, item in enumerate(attr_value[:5]):  # First 5 elements
                                         attr_info["list_content"].append({
                                             "index": i,
                                             "type": str(type(item)),
@@ -244,12 +250,12 @@ class HandDataReporter:
         return analysis
 
     def _classify_game_type(self, hand_obj: Any) -> dict[str, str]:
-        """Classifier le type de jeu pour l'organisation hiérarchique."""
+        """Classify game type for hierarchical organization."""
         gametype = getattr(hand_obj, "gametype", {})
         category = gametype.get("category", "unknown").lower()
         limit_type = gametype.get("limitType", "unknown").lower()
 
-        # Déterminer la famille de jeu
+        # Determine game family
         if "hold" in category or "omaha" in category:
             game_family = "holdem"
         elif "stud" in category:
@@ -259,7 +265,7 @@ class HandDataReporter:
         else:
             game_family = "unknown"
 
-        # Déterminer le sous-type
+        # Determine subtype
         if game_family == "holdem":
             if limit_type == "nl":
                 game_subtype = "nl"
@@ -275,7 +281,7 @@ class HandDataReporter:
             elif "hilo" in category or "hi/lo" in category:
                 game_subtype = "hi_lo"
             else:
-                game_subtype = "7_card"  # Par défaut pour studhi
+                game_subtype = "7_card"  # Default for studhi
         elif game_family == "draw":
             if "2-7" in category or "27" in category:
                 game_subtype = "2_7"
@@ -286,7 +292,7 @@ class HandDataReporter:
         else:
             game_subtype = "unknown"
 
-        # Déterminer si c'est cash ou tournoi
+        # Determine if cash or tournament
         is_tournament = getattr(hand_obj, "tourNo", None) is not None
         game_format = "tournaments" if is_tournament else "cash_games"
 
@@ -299,7 +305,7 @@ class HandDataReporter:
         }
 
     def _update_game_type_stats(self, classification: dict[str, str]) -> None:
-        """Mettre à jour les statistiques par type de jeu."""
+        """Update statistics by game type."""
         game_format = classification["format"]
         game_family = classification["family"]
         game_subtype = classification["subtype"]
@@ -310,8 +316,8 @@ class HandDataReporter:
             self.session_stats["game_types"][game_format][game_family][game_subtype] += 1
 
     def _extract_hand_data(self, hand_obj: Any) -> dict[str, Any]:
-        """Extraire les données importantes d'un objet Hand."""
-        # Analyse complète de la structure de l'objet pour debugging
+        """Extract important data from a Hand object."""
+        # Complete analysis of object structure for debugging
         hand_structure = self._analyze_object_structure(hand_obj) if self.report_level == "full" else {}
 
         hand_data = {
@@ -331,14 +337,14 @@ class HandDataReporter:
             "category": getattr(hand_obj, "gametype", {}).get("category", "unknown"),
             "object_structure": hand_structure,  # Pour debugging
 
-            # Informations enrichies pour analyses avancées
+            # Enriched information for advanced analyses
             "ante": str(getattr(hand_obj, "gametype", {}).get("ante", 0)),
             "small_blind": str(getattr(hand_obj, "gametype", {}).get("sb", 0)),
             "big_blind": str(getattr(hand_obj, "gametype", {}).get("bb", 0)),
             "site_name": getattr(hand_obj, "sitename", None),
             "total_collected": str(getattr(hand_obj, "totalcollected", 0)),
 
-            # Nouvelles informations enrichies depuis debug logs
+            # New enriched information from debug logs
             "final_stacks": {},
             "bets_by_street": {},
             "pot_details": {},
@@ -346,7 +352,7 @@ class HandDataReporter:
             "winners": {},
         }
 
-        # Données des joueurs - TOUS les joueurs
+        # Player data - ALL players
         if hasattr(hand_obj, "players") and hand_obj.players:
             hand_data["players"] = {}
             hand_data["all_players_list"] = []
@@ -356,7 +362,7 @@ class HandDataReporter:
                     player_name = player[1]
                     stack = player[2]
 
-                    # Déterminer la position spéciale (SB, BB, Dealer)
+                    # Determine special position (SB, BB, Dealer)
                     position = getattr(hand_obj, "positions", {}).get(player_name, "unknown")
                     special_pos = ""
                     if hasattr(hand_obj, "buttonpos") and hand_obj.buttonpos == seat_no:
@@ -369,21 +375,21 @@ class HandDataReporter:
                                 elif "big" in str(post[1]).lower():
                                     special_pos = " (BB)"
 
-                    # Cartes du joueur (hole cards)
+                    # Player cards (hole cards)
                     hole_cards = ""
                     if hasattr(hand_obj, "holecards") and hand_obj.holecards:
-                        # Structure Hold'em : {'PREFLOP': {'Hero': [[], ['2s', '4c']], ...}}
+                        # Hold'em structure: {'PREFLOP': {'Hero': [[], ['2s', '4c']], ...}}
                         if "PREFLOP" in hand_obj.holecards:
                             preflop_cards = hand_obj.holecards["PREFLOP"]
                             if isinstance(preflop_cards, dict) and player_name in preflop_cards:
                                 player_cards = preflop_cards[player_name]
                                 if isinstance(player_cards, list) and len(player_cards) >= 2:
-                                    # Les cartes sont dans le 2ème élément : [[], ['2s', '4c']]
+                                    # Cards are in the 2nd element: [[], ['2s', '4c']]
                                     cards_list = player_cards[1] if len(player_cards[1]) > 0 else player_cards[0]
                                     if cards_list:
                                         hole_cards = " ".join(cards_list)
 
-                        # Structure Stud : {'THIRD': {'Hero': [['2s', '4c', '7h'], []], ...}}
+                        # Stud structure: {'THIRD': {'Hero': [['2s', '4c', '7h'], []], ...}}
                         else:
                             all_cards = []
                             stud_streets = ["THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"]
@@ -393,7 +399,7 @@ class HandDataReporter:
                                     if isinstance(street_cards, dict) and player_name in street_cards:
                                         player_cards = street_cards[player_name]
                                         if isinstance(player_cards, list) and len(player_cards) >= 1:
-                                            # Les cartes visibles sont dans le premier élément
+                                            # Visible cards are in the first element
                                             visible_cards = player_cards[0] if player_cards[0] else []
                                             all_cards.extend(visible_cards)
 
@@ -412,7 +418,7 @@ class HandDataReporter:
                     hand_data["players"][player_name] = player_info
                     hand_data["all_players_list"].append(f"Seat {seat_no}: {player_name}{special_pos} (${stack})")
 
-        # Actions par street (summary ET détails)
+        # Actions per street (summary AND details)
         if hasattr(hand_obj, "actions"):
             hand_data["actions_summary"] = {}
             hand_data["detailed_actions"] = {}
@@ -425,14 +431,14 @@ class HandDataReporter:
                             player = action[0]
                             action_type = action[1]
 
-                            # Meilleure conversion des montants en utilisant les vraies données
+                            # Better amount conversion using real data
                             amount = "0"
                             total_bet = "0"
 
                             if len(action) > 2 and action[2] is not None:
-                                # Gestion des Decimal, float, int
+                                # Handle Decimal, float, int
                                 try:
-                                    if hasattr(action[2], "__float__"):  # Decimal ou float
+                                    if hasattr(action[2], "__float__"):  # Decimal or float
                                         amount = str(float(action[2]))
                                     else:
                                         amount = str(action[2])
@@ -441,7 +447,7 @@ class HandDataReporter:
 
                             if len(action) > 3 and action[3] is not None and action[3] is not False:
                                 try:
-                                    if hasattr(action[3], "__float__"):  # Decimal ou float
+                                    if hasattr(action[3], "__float__"):  # Decimal or float
                                         total_bet = str(float(action[3]))
                                     else:
                                         total_bet = str(action[3])
@@ -450,20 +456,20 @@ class HandDataReporter:
 
                             action_detail = {
                                 "player": player,
-                                "action": action_type,  # Maintenant on a les vrais types !
+                                "action": action_type,  # Now we have the real types!
                                 "amount": amount,
                                 "total_bet": total_bet,
                             }
                             hand_data["detailed_actions"][street].append(action_detail)
 
-        # Cartes du board
+        # Board cards
         if hasattr(hand_obj, "board") and hand_obj.board:
             hand_data["board_cards"] = {}
             for street, cards in hand_obj.board.items():
                 if cards and cards != []:
                     hand_data["board_cards"][street] = cards if isinstance(cards, list) else [cards]
 
-        # Collections (gains des joueurs)
+        # Collections (player winnings)
         hand_data["collections"] = []
         if hasattr(hand_obj, "collected") and hand_obj.collected:
             for collection in hand_obj.collected:
@@ -475,21 +481,21 @@ class HandDataReporter:
                     # Populate winners dictionary
                     hand_data["winners"][collection[0]] = str(collection[1])
 
-        # Stacks finaux des joueurs depuis debug logs
+        # Final player stacks from debug logs
         if hasattr(hand_obj, "stacks") and hand_obj.stacks:
             for player, stack in hand_obj.stacks.items():
                 hand_data["final_stacks"][player] = str(stack)
 
-        # Structure détaillée des mises par street
+        # Detailed bet structure per street
         if hasattr(hand_obj, "bets") and hand_obj.bets:
             for street, player_bets in hand_obj.bets.items():
-                if player_bets:  # Si il y a des mises sur cette street
+                if player_bets:  # If there are bets on this street
                     hand_data["bets_by_street"][street] = {}
                     for player, bets_list in player_bets.items():
-                        if bets_list:  # Si ce joueur a misé sur cette street
+                        if bets_list:  # If this player bet on this street
                             hand_data["bets_by_street"][street][player] = [str(bet) for bet in bets_list]
 
-        # Informations sur le pot
+        # Pot information
         if hasattr(hand_obj, "pot") and hand_obj.pot:
             try:
                 pot_obj = hand_obj.pot
@@ -510,7 +516,7 @@ class HandDataReporter:
                     "side_pots": "[]",
                 }
 
-        # Informations de tournoi si applicable
+        # Tournament information if applicable
         if hasattr(hand_obj, "tourNo") and hand_obj.tourNo:
             hand_data["tournament_info"] = {
                 "tourney_no": str(hand_obj.tourNo),
@@ -527,15 +533,15 @@ class HandDataReporter:
                 "speed": getattr(hand_obj, "speed", ""),
             }
 
-        # Statut base de données
+        # Database status
         hand_data["database_ready"] = hasattr(hand_obj, "hands") and bool(getattr(hand_obj, "hands", None))
 
         if self.report_level == "full":
-            # Données complètes pour niveau "full"
+            # Complete data for "full" level
             if hasattr(hand_obj, "handsplayers") and hand_obj.handsplayers:
                 hand_data["players_statistics"] = {}
                 for player, stats in hand_obj.handsplayers.items():
-                    # Sélectionner les stats les plus importantes
+                    # Select the most important stats
                     key_stats = {}
                     important_fields = [
                         "position", "seatNo", "startCash", "winnings",
@@ -547,47 +553,153 @@ class HandDataReporter:
                             key_stats[field] = stats[field]
                     hand_data["players_statistics"][player] = key_stats
 
-            # Actions détaillées déjà traitées dans la section principale
+            # Detailed actions already processed in main section
 
         return hand_data
 
     def finish_file(self, filepath: str) -> None:
-        """Finaliser les stats du fichier."""
+        """Finalize file stats."""
         if filepath in self.files_stats:
             self.files_stats[filepath]["end_time"] = datetime.now()
             duration = self.files_stats[filepath]["end_time"] - self.files_stats[filepath]["start_time"]
             self.files_stats[filepath]["processing_time_seconds"] = duration.total_seconds()
 
     def generate_report(self) -> None:
-        """Générer le rapport selon le niveau configuré."""
+        """Generate report according to configured level."""
         total_hands = self.session_stats["successful_hands"] + self.session_stats["failed_hands"]
-        (self.session_stats["successful_hands"] / total_hands * 100) if total_hands > 0 else 0
+        success_rate = (self.session_stats["successful_hands"] / total_hands * 100) if total_hands > 0 else 0
 
+        print("\n" + "="*80)
+        print("📊 DETAILED IMPORT REPORT")
+        print("="*80)
+        print(f"📁 Total files: {self.session_stats['total_files']}")
+        print(f"🃏 Total hands: {total_hands}")
+        print(f"✅ Success: {self.session_stats['successful_hands']} ({success_rate:.1f}%)")
+        print(f"❌ Failures: {self.session_stats['failed_hands']}")
 
-
-        # Affichage hiérarchique par type de jeu
+        # Hierarchical display by game type
         self._display_game_type_hierarchy()
 
         if self.session_stats["parser_errors"]:
-            for error_type in self.session_stats["parser_errors"]:
-                pass
+            print("\n🔥 PARSING ERRORS:")
+            total_errors = sum(self.session_stats["parser_errors"].values())
+            for error_type, count in self.session_stats["parser_errors"].items():
+                percentage = (count / total_errors * 100) if total_errors > 0 else 0
+                print(f"   • {error_type}: {count} errors ({percentage:.1f}%)")
+                
+            # Display some common error descriptions
+            if self.report_level == "full":
+                print("\n   📝 COMMON ERROR DESCRIPTIONS:")
+                error_descriptions = {
+                    "FpdbHandDuplicateError": "Hands already imported in database",
+                    "FpdbHandPartial": "Incomplete hands or incorrect format",
+                    "FpdbParseError": "Hand data parsing errors",
+                    "Exception": "Various errors (see details per file)",
+                    "ValueError": "Invalid values in data",
+                    "KeyError": "Missing fields in data"
+                }
+                for error_type, count in self.session_stats["parser_errors"].items():
+                    desc = error_descriptions.get(error_type, "Undocumented error")
+                    print(f"      • {error_type}: {desc}")
 
-        # Détails par fichier
-        for stats in self.files_stats.values():
-            (stats["hands_successful"] / stats["hands_processed"] * 100) if stats["hands_processed"] > 0 else 0
+        # Display most problematic files
+        if self.report_level == "full":
+            problematic_files = [(filepath, stats) for filepath, stats in self.files_stats.items() 
+                               if stats["hands_failed"] > 0]
+            if problematic_files:
+                # Sort by decreasing failure count
+                problematic_files.sort(key=lambda x: x[1]["hands_failed"], reverse=True)
+                top_problematic = problematic_files[:5]  # Top 5 problematic files
+                
+                print(f"\n⚠️  MOST PROBLEMATIC FILES (Top {len(top_problematic)}):")
+                for i, (filepath, stats) in enumerate(top_problematic, 1):
+                    filename = filepath.split('/')[-1]  # Just the filename
+                    failure_rate = (stats["hands_failed"] / stats["hands_processed"] * 100) if stats["hands_processed"] > 0 else 0
+                    print(f"   {i}. {filename}")
+                    print(f"      📊 {stats['hands_failed']}/{stats['hands_processed']} failures ({failure_rate:.1f}%)")
 
+        # Details per file
+        print(f"\n📋 DETAILS PER FILE ({len(self.files_stats)} files):")
+        for filepath, stats in self.files_stats.items():
+            file_success_rate = (stats["hands_successful"] / stats["hands_processed"] * 100) if stats["hands_processed"] > 0 else 0
+            print(f"\n📄 {filepath}")
+            print(f"   🃏 Hands processed: {stats['hands_processed']}")
+            print(f"   ✅ Success: {stats['hands_successful']} ({file_success_rate:.1f}%)")
+            print(f"   ❌ Failures: {stats['hands_failed']}")
 
             if "processing_time_seconds" in stats:
-                pass
+                print(f"   ⏱️  Time: {stats['processing_time_seconds']:.2f}s")
+
+            # Display error details for this file
+            if stats["errors"] and self.report_level in ["detailed", "full"]:
+                print(f"   🔥 DETAILED ERRORS:")
+                error_counts = {}
+                for error in stats["errors"]:
+                    error_type = error.get("error_type", "Exception")
+                    if error_type not in error_counts:
+                        error_counts[error_type] = 0
+                    error_counts[error_type] += 1
+                
+                for error_type, count in error_counts.items():
+                    print(f"      • {error_type}: {count}")
+                    
+                # Display detailed errors
+                if self.report_level in ["full", "debug"]:
+                    level_label = "ULTRA-DETAILED DEBUG" if self.report_level == "debug" else "COMPLETE ERROR MESSAGES"
+                    print(f"      🔍 {level_label}:")
+                    for i, error in enumerate(stats["errors"], 1):
+                        error_msg = error.get("error_message", "Message inconnu")
+                        error_type = error.get("error_type", "Exception")
+                        hand_snippet = error.get("hand_snippet", "")
+                        
+                        print(f"         ─── Error #{i} ───")
+                        print(f"         Type: {error_type}")
+                        print(f"         Message: {error_msg}")
+                        
+                        # Display complete stack trace
+                        full_traceback = error.get("full_traceback", "")
+                        if full_traceback and full_traceback != "No traceback available":
+                            print(f"         🔥 COMPLETE STACK TRACE:")
+                            # Indent each line of traceback
+                            for line in full_traceback.strip().split('\n'):
+                                print(f"           {line}")
+                            print()
+                        
+                        if hand_snippet and hand_snippet != "No text available":
+                            # In debug mode, show more context
+                            context_length = "first 1000 characters" if self.report_level == "debug" else "first 500 characters"
+                            print(f"         📄 HAND CONTEXT ({context_length}):")
+                            displayed_snippet = hand_snippet[:1000] if self.report_level == "debug" else hand_snippet[:500]
+                            # Display line by line for better readability in debug mode
+                            if self.report_level == "debug":
+                                for line_num, line in enumerate(displayed_snippet.split('\n'), 1):
+                                    if line.strip():
+                                        print(f"           {line_num:2d}: {line}")
+                                    if line_num > 50:  # Limiter à 50 lignes max
+                                        print(f"           ... (content truncated)")
+                                        break
+                            else:
+                                print(f"           {displayed_snippet}")
+                        print()
+                elif self.report_level == "detailed":
+                    # In detailed mode, show just the first 5 errors with complete messages
+                    shown_errors = stats["errors"][:5]
+                    for i, error in enumerate(shown_errors, 1):
+                        error_msg = error.get("error_message", "Message inconnu")
+                        error_type = error.get("error_type", "Exception")
+                        print(f"         [{i}] {error_type}: {error_msg}")
+                    
+                    if len(stats["errors"]) > 5:
+                        print(f"         ... and {len(stats['errors']) - 5} other errors")
 
             if self.report_level == "hierarchy" and stats["hands_data"]:
                 total_hands = len(stats["hands_data"])
-                # Logique adaptative : afficher toutes les mains si <= 10, sinon échantillon
+                # Adaptive logic: show all hands if <= 10, otherwise sample
                 if total_hands <= 10:
                     display_hands = stats["hands_data"]
                 else:
-                    display_hands = stats["hands_data"][:5] + stats["hands_data"][-2:]  # 5 premières + 2 dernières
-                    f"\n   🃏 MAINS TRAITÉES (échantillon {len(display_hands)}/{total_hands}):"
+                    display_hands = stats["hands_data"][:5] + stats["hands_data"][-2:]  # 5 first + 2 last
+                    f"\n   🃏 PROCESSED HANDS (sample {len(display_hands)}/{total_hands}):"
 
                 for i, hand in enumerate(display_hands, 1):
                     game_class = hand.get("game_classification", {})
@@ -597,15 +709,15 @@ class HandDataReporter:
                         pass
             elif self.report_level in ["detailed", "full"] and stats["hands_data"]:
                 if self.report_level == "full":
-                    hands_to_show = stats["hands_data"]  # Toutes les mains en mode full
+                    hands_to_show = stats["hands_data"]  # All hands in full mode
                 else:
-                    hands_to_show = stats["hands_data"][:2]  # Première 2 mains en mode detailed
+                    hands_to_show = stats["hands_data"][:2]  # First 2 hands in detailed mode
 
 
                 for i, hand in enumerate(hands_to_show, 1):
 
                     if self.report_level == "full":
-                        # Informations enrichies
+                        # Enriched information
                         if hand.get("ante", "0") != "0" or hand.get("ante", "0") != "0":
                             pass
 
@@ -620,7 +732,7 @@ class HandDataReporter:
                         if hand.get("total_collected", "0") != "0":
                             pass
 
-                        # Informations de table
+                        # Table information
                         if hand.get("button_pos") is not None:
                             pass
 
@@ -630,10 +742,10 @@ class HandDataReporter:
                                     player_info.get("name", "Unknown")
                                     player_info.get("final_stack", "0")
                                 else:
-                                    # player_info est une chaîne (nom du joueur)
+                                    # player_info is a string (player name)
                                     pass
 
-                        # Afficher les cartes des joueurs
+                        # Display player cards
                         if hand.get("players"):
                             players_with_cards = [p for p, info in hand["players"].items() if info.get("hole_cards")]
                             if players_with_cards:
@@ -641,15 +753,15 @@ class HandDataReporter:
                                     cards = hand["players"][player]["hole_cards"]
                                     # Remplacer les cartes "0x" par "[cachées]"
                                     if "0x" in cards:
-                                        cards = cards.replace("0x", "X").replace("X X X X", "[cachées]")
+                                        cards = cards.replace("0x", "X").replace("X X X X", "[hidden]")
 
-                        # Afficher le board
+                        # Display board
                         if hand.get("board_cards"):
                             board_str = ", ".join([f"{street}: {' '.join(cards)}" for street, cards in hand["board_cards"].items() if cards])
                             if board_str:
                                 pass
 
-                        # Afficher les actions détaillées par street
+                        # Display detailed actions per street
                         if hand.get("detailed_actions"):
                             for actions in hand["detailed_actions"].values():
                                 if actions:
@@ -662,12 +774,12 @@ class HandDataReporter:
                                         else:
                                             pass
 
-                        # Afficher les collections (qui a gagné combien)
+                        # Display collections (who won how much)
                         if hand.get("winners"):
                             for player in hand["winners"]:
                                 pass
 
-                        # Nouvelles informations enrichies
+                        # New enriched information
                         if hand.get("final_stacks"):
                             for player in hand["final_stacks"]:
                                 pass
@@ -711,7 +823,7 @@ class HandDataReporter:
                             if features:
                                 pass
 
-                            # Affichage des informations lottery uniquement pour les SNGs lottery
+                            # Display lottery information only for lottery SNGs
                             if info.get("is_lottery"):
                                 multiplier = info.get("tourney_multiplier", 1)
                                 if multiplier and str(multiplier) not in ("1", "None", None, ""):
@@ -720,7 +832,7 @@ class HandDataReporter:
                                 if speed:
                                     pass
 
-                        # Informations sur les bugs détectés
+                        # Information about detected bugs
                         if hand.get("site_hand_no") == hand.get("hand_id") or not hand.get("site_hand_no"):
                             pass
                         if not hand.get("database_hand_id"):
@@ -728,7 +840,7 @@ class HandDataReporter:
                         if hand.get("rake", "0") == "0":
                             pass
 
-                        # Vérification des cartes
+                        # Card verification
                         players_with_cards = [p for p, info in hand.get("players", {}).items() if info.get("hole_cards")]
                         if not players_with_cards:
                             pass
@@ -738,9 +850,9 @@ class HandDataReporter:
                         if "stud" not in game_category and not hand.get("board_cards"):
                             pass
 
-                        # Structure de l'objet Hand pour debugging (mode debug uniquement)
-                        # Cette section est désactivée car elle est trop technique pour l'utilisateur final
-                        # Pour la réactiver, décommenter les lignes suivantes
+                        # Hand object structure for debugging (debug mode only)
+                        # This section is disabled as it's too technical for end user
+                        # To reactivate, uncomment the following lines
                         # if hand.get('object_structure') and hand['object_structure'].get('attributes'):
                         #     print(f"         🔍 Structure de l'objet Hand (échantillon):")
                         #     attrs = hand['object_structure']['attributes']
@@ -768,44 +880,44 @@ class HandDataReporter:
                         #     print(f"            - Tous les attributs: {', '.join(sorted(attrs.keys())[:20])}...")
 
             if stats["errors"]:
-                # Séparer les erreurs par sévérité
+                # Separate errors by severity
                 partial_errors = [e for e in stats["errors"] if e.get("is_partial", False)]
                 real_errors = [e for e in stats["errors"] if not e.get("is_partial", False)]
 
                 if partial_errors and self.report_level in ["detailed", "full"]:
                     for i, error in enumerate(partial_errors[:2], 1):
-                        # Extraire des infos plus utiles pour les mains partielles
+                        # Extract more useful info for partial hands
                         snippet = error.get("hand_snippet", "")
                         if "Hand #" in snippet:
                             with contextlib.suppress(IndexError, AttributeError):
                                 snippet.split("Hand #")[1].split()[0]
 
 
-                        # Afficher le contenu de la main partielle (plus de contexte)
+                        # Display partial hand content (more context)
                         if snippet and len(snippet) > 50:
-                            # Diviser le snippet en lignes pour un meilleur affichage
-                            lines = snippet.replace("\\n", "\n").split("\n")[:8]  # Premières 8 lignes
+                            # Split snippet into lines for better display
+                            lines = snippet.replace("\\n", "\n").split("\n")[:8]  # First 8 lines
                             for line in lines:
                                 if line.strip():
                                     pass
                             if len(snippet) > 500:
                                 pass
 
-                        # En mode debug, afficher encore plus d'infos
+                        # In debug mode, show even more info
                         if hasattr(self, "_debug_mode") and self._debug_mode:
 
-                            # Analyse de l'objet Hand si disponible
+                            # Hand object analysis if available
                             hand_analysis = error.get("hand_object_analysis")
                             if hand_analysis:
                                 if hand_analysis.get("status") == "hand_object_available":
 
-                                    # Informations de base capturées
+                                    # Basic captured information
                                     basic_info = hand_analysis.get("basic_info", {})
                                     if basic_info:
                                         for key in basic_info:
                                             pass
 
-                                    # Éléments parsés avec succès
+                                    # Successfully parsed elements
                                     parsed = hand_analysis.get("parsed_elements", {})
                                     if parsed:
                                         for key, info in parsed.items():
@@ -814,10 +926,10 @@ class HandDataReporter:
                                             else:
                                                 pass
 
-                                    # Éléments manquants
+                                    # Missing elements
                                     missing = hand_analysis.get("missing_elements", [])
                                     if missing:
-                                        for _element in missing[:5]:  # Limiter à 5 pour éviter trop d'output
+                                        for _element in missing[:5]:  # Limit to 5 to avoid too much output
                                             pass
                                         if len(missing) > 5:
                                             pass
@@ -841,89 +953,98 @@ class HandDataReporter:
                             severity = error.get("severity", "unknown")
                             {"critical": "🔥", "error": "❌", "warning": "⚠️", "unknown": "❓"}.get(severity, "❓")
 
-        # Debug: confirmation de fin de rapport
+        # Debug: end of report confirmation
 
     def _display_game_type_hierarchy(self) -> None:
-        """Afficher la hiérarchie des types de jeux."""
+        """Display game type hierarchy."""
         game_types = self.session_stats["game_types"]
 
+        print("\n🎮 DISTRIBUTION BY GAME TYPE:")
 
         # Cash Games
         cash_total = sum(sum(variants.values()) for variants in game_types["cash_games"].values())
         if cash_total > 0:
+            print(f"\n💰 CASH GAMES (Total: {cash_total})")
 
             # Hold'em
             holdem_cash = game_types["cash_games"]["holdem"]
             holdem_total = sum(holdem_cash.values())
             if holdem_total > 0:
+                print(f"   🃏 Hold'em: {holdem_total}")
                 if holdem_cash["nl"] > 0:
-                    pass
+                    print(f"      • No Limit: {holdem_cash['nl']}")
                 if holdem_cash["pl"] > 0:
-                    pass
+                    print(f"      • Pot Limit: {holdem_cash['pl']}")
                 if holdem_cash["fl"] > 0:
-                    pass
+                    print(f"      • Fixed Limit: {holdem_cash['fl']}")
 
             # Stud
             stud_cash = game_types["cash_games"]["stud"]
             stud_total = sum(stud_cash.values())
             if stud_total > 0:
+                print(f"   🎯 Stud: {stud_total}")
                 if stud_cash["7_card"] > 0:
-                    pass
+                    print(f"      • 7-Card Stud: {stud_cash['7_card']}")
                 if stud_cash["5_card"] > 0:
-                    pass
+                    print(f"      • 5-Card Stud: {stud_cash['5_card']}")
                 if stud_cash["hi_lo"] > 0:
-                    pass
+                    print(f"      • Hi-Lo: {stud_cash['hi_lo']}")
 
             # Draw
             draw_cash = game_types["cash_games"]["draw"]
             draw_total = sum(draw_cash.values())
             if draw_total > 0:
+                print(f"   🎨 Draw: {draw_total}")
                 if draw_cash["5_card"] > 0:
-                    pass
+                    print(f"      • 5-Card Draw: {draw_cash['5_card']}")
                 if draw_cash["2_7"] > 0:
-                    pass
+                    print(f"      • 2-7 Triple Draw: {draw_cash['2_7']}")
                 if draw_cash["badugi"] > 0:
-                    pass
+                    print(f"      • Badugi: {draw_cash['badugi']}")
 
         # Tournaments
         tourney_total = sum(sum(variants.values()) for variants in game_types["tournaments"].values())
         if tourney_total > 0:
+            print(f"\n🏆 TOURNOIS (Total: {tourney_total})")
 
             # Hold'em
             holdem_tourney = game_types["tournaments"]["holdem"]
             holdem_total = sum(holdem_tourney.values())
             if holdem_total > 0:
+                print(f"   🃏 Hold'em: {holdem_total}")
                 if holdem_tourney["nl"] > 0:
-                    pass
+                    print(f"      • No Limit: {holdem_tourney['nl']}")
                 if holdem_tourney["pl"] > 0:
-                    pass
+                    print(f"      • Pot Limit: {holdem_tourney['pl']}")
                 if holdem_tourney["fl"] > 0:
-                    pass
+                    print(f"      • Fixed Limit: {holdem_tourney['fl']}")
 
             # Stud
             stud_tourney = game_types["tournaments"]["stud"]
             stud_total = sum(stud_tourney.values())
             if stud_total > 0:
+                print(f"   🎯 Stud: {stud_total}")
                 if stud_tourney["7_card"] > 0:
-                    pass
+                    print(f"      • 7-Card Stud: {stud_tourney['7_card']}")
                 if stud_tourney["5_card"] > 0:
-                    pass
+                    print(f"      • 5-Card Stud: {stud_tourney['5_card']}")
                 if stud_tourney["hi_lo"] > 0:
-                    pass
+                    print(f"      • Hi-Lo: {stud_tourney['hi_lo']}")
 
             # Draw
             draw_tourney = game_types["tournaments"]["draw"]
             draw_total = sum(draw_tourney.values())
             if draw_total > 0:
+                print(f"   🎨 Draw: {draw_total}")
                 if draw_tourney["5_card"] > 0:
-                    pass
+                    print(f"      • 5-Card Draw: {draw_tourney['5_card']}")
                 if draw_tourney["2_7"] > 0:
-                    pass
+                    print(f"      • 2-7 Triple Draw: {draw_tourney['2_7']}")
                 if draw_tourney["badugi"] > 0:
-                    pass
+                    print(f"      • Badugi: {draw_tourney['badugi']}")
 
     def _get_game_type_icon(self, classification: dict[str, str]) -> str:
-        """Retourner l'icône appropriée pour le type de jeu."""
+        """Return appropriate icon for game type."""
         base_icon = "🏆" if classification["format"] == "tournaments" else "💰"
 
         if classification["family"] == "holdem":
@@ -935,7 +1056,7 @@ class HandDataReporter:
         return base_icon
 
     def export_json(self, output_file: str) -> None:
-        """Exporter les données en JSON."""
+        """Export data to JSON."""
         self.session_stats["end_time"] = datetime.now()
         self.session_stats["total_duration_seconds"] = (
             self.session_stats["end_time"] - self.session_stats["start_time"]
