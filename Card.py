@@ -15,8 +15,6 @@
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 from typing import Any
 
-from past.utils import old_div
-
 from loggingFpdb import get_logger
 
 log = get_logger("card")
@@ -825,7 +823,7 @@ def twoStartCardString(card: int) -> str:
     ret = "xx"
     if 0 < card < HOLDEM_UNKNOWN_HAND:
         s = ("2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A")
-        x = old_div((card - 1), 13)
+        x = (card - 1) / 13
         y = (card - 1) - 13 * x
         if x == y:
             ret = s[x] + s[y]
