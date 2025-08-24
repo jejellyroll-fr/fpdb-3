@@ -1,5 +1,5 @@
 <?xml version="1.0" ?><FreePokerToolsConfig>
-    <general version="83" config_wrap_len="-1" day_start="5" ui_language="fr_FR" config_difficulty="expert" qt_material_theme="dracula_theme.xml" popup_theme="material_dark"/>
+    <general version="83" config_wrap_len="-1" day_start="5" ui_language="fr_FR" config_difficulty="expert" qt_material_theme="dark_pink.xml" popup_theme="material_dark"/>
     <site_ids>
         <site_id site="Full Tilt Poker" id="1"/>
         <site_id site="PokerStars" id="2"/>

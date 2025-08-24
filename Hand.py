@@ -717,6 +717,25 @@ class Hand:
             self.setCommunityCards("RIVER", [cards[4]])
 
         if res["runittwice"] or self.gametype["split"]:
+            # Set runItTimes and extend streets for run-it-twice scenarios
+            self.runItTimes = 2
+            run_it_streets = ["FLOP1", "TURN1", "RIVER1", "FLOP2", "TURN2", "RIVER2"]
+            for street in run_it_streets:
+                if street not in self.actionStreets:
+                    self.actionStreets.append(street)
+                    self.bets[street] = {}
+                    self.lastBet[street] = 0
+                    self.actions[street] = []
+                    self.board[street] = []
+                    # Add existing players to new street
+                    for player_info in self.players:
+                        player_name = player_info[1]  # player name is at index 1
+                        self.bets[street][player_name] = []
+                if street not in self.allStreets:
+                    self.allStreets.append(street)
+                if street not in self.streets:
+                    self.streets[street] = ""
+            
             # Get runItTwice boards
             q = db.sql.query["singleHandBoards"]
             q = q.replace("%s", db.sql.query["placeholder"])
@@ -1721,6 +1740,27 @@ class HoldemOmahaHand(Hand):
                     street != "PREFLOP"
                 ):  # TODO: the except PREFLOP shouldn't be necessary, but regression-test-files/cash/Everleaf/Flop/NLHE-10max-USD-0.01-0.02-201008.2Way.All-in.pre.txt fails without it
                     hhc.readCommunityCards(self, street)
+            
+            # Update actionStreets if runItTimes was set during readCommunityCards
+            if self.runItTimes == 2:
+                run_it_streets = ["FLOP1", "TURN1", "RIVER1", "FLOP2", "TURN2", "RIVER2"]
+                for street in run_it_streets:
+                    if street not in self.actionStreets:
+                        self.actionStreets.append(street)
+                        self.bets[street] = {}
+                        self.lastBet[street] = 0
+                        self.actions[street] = []
+                        self.board[street] = []
+                        # Add existing players to new street
+                        for player_info in self.players:
+                            player_name = player_info[1]  # player name is at index 1
+                            self.bets[street][player_name] = []
+                    # Also add to allStreets and streets if not present
+                    if street not in self.allStreets:
+                        self.allStreets.append(street)
+                    if street not in self.streets:
+                        self.streets[street] = ""
+            
             for street in self.actionStreets:
                 if self.streets[street] or gametype["split"]:
                     hhc.readAction(self, street)
