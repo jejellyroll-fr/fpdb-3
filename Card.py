@@ -748,23 +748,18 @@ def StartCardRank(idx: int) -> tuple[str, int, int]:
 
 
 def twoStartCards(value1: int, suit1: str, value2: int, suit2: str) -> int:
-    """Convert 2 value,suit pairs into a Holdem style starting hand e.g. AQo.
+    """Calculates the integer representation of a Holdem starting hand.
 
-    Incoming values should be ints 2-14 (2,3,...K,A), suits are 'd'/'h'/'c'/'s'
-    Hand is stored as an int 13 * x + y + 1 where (x+2) represents rank of 1st card and
-    (y+2) represents rank of second card (2=2 .. 14=Ace)
-    If x > y then pair is suited, if x < y then unsuited
-    Examples:
-       1  22
-       2  32o
-       3  42o
-          ...
-      14  32s
-      15  33
-      16  42o
-          ...
-     169  AA
-     170  Unknown / Illegal cards.
+    Returns a unique integer for the given two card values and suits, or a constant for unknown hands.
+
+    Args:
+        value1: The integer rank of the first card (2-14).
+        suit1: The suit of the first card as a string ('h', 'd', 'c', 's').
+        value2: The integer rank of the second card (2-14).
+        suit2: The suit of the second card as a string ('h', 'd', 'c', 's').
+
+    Returns:
+        int: The integer representation of the starting hand, or a constant for unknown hands.
     """
     if (
         value1 is None
@@ -785,46 +780,89 @@ def twoStartCards(value1: int, suit1: str, value2: int, suit2: str) -> int:
 
 
 def is_suited(cards: list[tuple[str, str]]) -> bool:
-    """Check if all cards have the same suit."""
+    """Checks if all cards in the list share the same suit.
+
+    Returns True if every card in the list has the same suit, indicating a 'suited' hand.
+
+    Args:
+        cards: A list of card tuples, each containing rank and suit.
+
+    Returns:
+        bool: True if all cards are suited, False otherwise.
+    """
     return all(card[1] == cards[0][1] for card in cards)
 
 
 def is_double_suited(cards: list[tuple[str, str]]) -> bool:
-    """Check if there are exactly two unique suits."""
+    """Checks if the cards are distributed among exactly two suits.
+
+    Returns True if the list of cards contains cards from two suits only, indicating a 'double suited' hand.
+
+    Args:
+        cards: A list of card tuples, each containing rank and suit.
+
+    Returns:
+        bool: True if the cards are double suited, False otherwise.
+    """
     suits = {card[1] for card in cards}
     return len(suits) == DOUBLE_SUITED_COUNT
 
 
 def is_rainbow(cards: list[tuple[str, str]]) -> bool:
-    """Check if all cards have different suits."""
+    """Determines if all cards in the list have different suits.
+
+    Returns True if the cards are all of different suits, indicating a 'rainbow' hand.
+
+    Args:
+        cards: A list of card tuples, each containing rank and suit.
+
+    Returns:
+        bool: True if all cards have unique suits, False otherwise.
+    """
     suits = {card[1] for card in cards}
     return len(suits) == RAINBOW_SUIT_COUNT
 
 
 def fourStartCards(cards: list[tuple[str, str]]) -> str:
-    """Determine the suit combination of four starting cards."""
+    """Classifies a set of four cards based on their suit distribution.
+
+    Returns a string describing the suit pattern of the four cards, such as 'Monotone', 'Double Suited', 'Rainbow', or 'Suited'.
+
+    Args:
+        cards: A list of four tuples, each containing the rank and suit of a card.
+
+    Returns:
+        str: A description of the suit distribution among the four cards.
+    """
     if len(cards) != FOUR_CARDS:
         return "Invalid input: You must provide exactly four cards."
 
     if is_suited(cards):
-        return "Suited"
-    if is_double_suited(cards):
-        return "Double Suited"
-    if is_rainbow(cards):
-        return "Rainbow"
-    return "Neither Suited nor Rainbow"
+        return "Monotone"          # All 4 cards same suit
+    elif is_double_suited(cards):
+        return "Double Suited"     # Exactly 2 suits
+    elif is_rainbow(cards):
+        return "Rainbow"           # All 4 different suits (weak for flushes)
+    else:
+        return "Suited"            # 3 different suits, 2 of same suit (standard)
 
 
 def twoStartCardString(card: int) -> str:
-    """Convert an int representing 2 holdem hole cards into a string like AQo.
+    """Converts a Holdem starting hand integer to its string representation.
 
-    (as created by twoStartCards)
+    Returns the string format (e.g., 'AKs', 'QJo') for a given starting hand integer value.
+
+    Args:
+        card: The integer value representing the Holdem starting hand.
+
+    Returns:
+        str: The string representation of the starting hand.
     """
     ret = "xx"
     if 0 < card < HOLDEM_UNKNOWN_HAND:
         s = ("2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A")
-        x = (card - 1) / 13
-        y = (card - 1) - 13 * x
+        x = (card - 1) // 13
+        y = (card - 1) % 13
         if x == y:
             ret = s[x] + s[y]
         elif x > y:
@@ -837,16 +875,27 @@ def twoStartCardString(card: int) -> str:
 
 
 def cardFromValueSuit(value: int, suit: str) -> int:
-    """0=none, 1-13=2-Ah 14-26=2-Ad 27-39=2-Ac 40-52=2-As."""
+    """Converts a card's value and suit into its integer representation.
+
+    Returns the integer value for a card given its rank and suit, or 0 if the suit is invalid.
+
+    Args:
+        value: The integer rank of the card (2-14).
+        suit: The suit of the card as a string ('h', 'd', 'c', 's').
+
+    Returns:
+        int: The integer representation of the card, or 0 if the suit is invalid.
+    """
     if suit == "h":
         return value - 1
-    if suit == "d":
+    elif suit == "d":
         return value + 12
-    if suit == "c":
+    elif suit == "c":
         return value + 25
-    if suit == "s":
+    elif suit == "s":
         return value + 38
-    return 0
+    else:
+        return 0
 
 
 SUIT_FROM_CARD_LIST = [
@@ -907,9 +956,15 @@ SUIT_FROM_CARD_LIST = [
 
 
 def valueSuitFromCard(card: int) -> str:
-    """Convert a card stored in the database (int 0-52) into value and suit.
+    """Converts an integer card value to its string representation.
 
-    e.g. 9s, 4c etc.
+    Returns the string format (e.g., 'Ah', '2d') for a given card integer, or an empty string if invalid.
+
+    Args:
+        card: The integer value of the card.
+
+    Returns:
+        str: The string representation of the card, or an empty string if the card is invalid.
     """
     return "" if card < 0 or card > SUIT_CARD_COUNT or not card else SUIT_FROM_CARD_LIST[card]
 
@@ -972,12 +1027,30 @@ ENCODE_CARD_LIST = {
 
 
 def encodeCard(card_string: str) -> int:
-    """Take a card string (Ah) and convert it to the db card code (1)."""
+    """Encodes a card string into its corresponding integer value.
+
+    Converts a card in string format (e.g., 'Ah', '2d') to its integer representation for database storage.
+
+    Args:
+        card_string: The string representation of the card.
+
+    Returns:
+        int: The integer value corresponding to the card, or 0 if not found.
+    """
     return ENCODE_CARD_LIST.get(card_string, 0)
 
 
 def decodeRazzStartHand(idx: int) -> str:
-    """Decode a Razz starting hand index into a string."""
+    """Decodes a Razz starting hand index into its string representation.
+
+    Returns the string format of a Razz hand for the given index, using poker notation.
+
+    Args:
+        idx: The integer index representing the Razz starting hand.
+
+    Returns:
+        str: The string representation of the Razz starting hand.
+    """
     decode_razz_list = {
         -13: "(00)A",
         -12: "(00)2",
@@ -2181,7 +2254,16 @@ def decodeRazzStartHand(idx: int) -> str:
 
 
 def encodeRazzStartHand(cards: list[tuple[str, str]]) -> int:
-    """Take Razz starting hand and return an integer index for storing in db."""
+    """Encodes a Razz starting hand into a unique integer identifier.
+
+    This function takes a list of three card tuples and returns an integer representing the hand.
+    
+    Args:
+        cards: A list of three tuples, each containing the rank and suit of a card.
+
+    Returns:
+        int: The encoded integer value for the Razz starting hand.
+    """
     start_hand = ""
     if card_map_low[cards[0][0]] > card_map_low[cards[1][0]]:
         start_hand = f"({cards[0][0]}{cards[1][0]}){cards[2][0]}"
@@ -3415,12 +3497,241 @@ def decodeStartHandValue(game: str, value: int) -> str:
 
 
 if __name__ == "__main__":
+    """Interactive CLI for testing Card functions."""
     import contextlib
-    with contextlib.suppress(ValueError, EOFError):
-        s = int(input("--> "))
-        if s == 1:
-            while True:
-                cardid = int(input("Enter list ID: "))
-        elif s == CARD_INPUT_OPTION:
-            while True:
-                cardid = int(input("Enter card: "))
+    
+    def show_menu():
+        """Display the main menu options."""
+        print("\n" + "="*50)
+        print("FPDB Card Utilities - Interactive CLI")
+        print("="*50)
+        print("1. Test StartCardRank function")
+        print("2. Test Card encoding/decoding")
+        print("3. Test twoStartCards function")
+        print("4. Test suit functions")
+        print("5. Test Razz functions")
+        print("0. Exit")
+        print("-"*50)
+    
+    def test_start_card_rank():
+        """Test StartCardRank function interactively."""
+        print("\nTesting StartCardRank function:")
+        print("Enter card rank indices (0-169, or negative to return to menu)")
+        
+        while True:
+            try:
+                idx = int(input("Enter rank index: "))
+                if idx < 0:
+                    break
+                
+                try:
+                    result = StartCardRank(idx)
+                    print(f"StartCardRank({idx}) = {result}")
+                    print(f"  Hand: {result[0]}, Rank: {result[1]}, Combinations: {result[2]}")
+                except IndexError:
+                    print(f"Index {idx} is out of range")
+                    
+            except ValueError:
+                print("Please enter a valid number")
+            except KeyboardInterrupt:
+                break
+    
+    def test_card_encoding():
+        """Test card encoding/decoding functions."""
+        print("\nTesting Card encoding/decoding:")
+        print("Enter card strings (e.g., 'As', '2h') or card numbers (1-52)")
+        print("Type 'help' for examples, or 'back' to return")
+        
+        while True:
+            try:
+                user_input = input("Enter card: ").strip()
+                
+                if user_input.lower() in ['back', 'exit']:
+                    break
+                elif user_input.lower() == 'help':
+                    print("Examples:")
+                    print("  Card strings: As, Kh, Qd, Jc, Ts, 9s, 2h")
+                    print("  Card numbers: 1-52 (1=2h, 13=Ah, 26=Ad, 39=Ac, 52=As)")
+                    continue
+                
+                # Try as card string first
+                if len(user_input) == 2:
+                    encoded = encodeCard(user_input)
+                    print(f"encodeCard('{user_input}') = {encoded}")
+                    if encoded > 0:
+                        decoded = valueSuitFromCard(encoded)
+                        print(f"valueSuitFromCard({encoded}) = '{decoded}'")
+                else:
+                    # Try as number
+                    card_num = int(user_input)
+                    if 1 <= card_num <= 52:
+                        decoded = valueSuitFromCard(card_num)
+                        print(f"valueSuitFromCard({card_num}) = '{decoded}'")
+                        if decoded:
+                            encoded = encodeCard(decoded)
+                            print(f"encodeCard('{decoded}') = {encoded}")
+                    else:
+                        print("Card number must be between 1 and 52")
+                        
+            except ValueError:
+                print("Invalid input. Type 'help' for examples.")
+            except KeyboardInterrupt:
+                break
+    
+    def test_two_start_cards():
+        """Test twoStartCards function."""
+        print("\nTesting twoStartCards function:")
+        print("Enter two cards as: value1 suit1 value2 suit2")
+        print("Values: 2-14 (14=Ace), Suits: h,d,c,s")
+        print("Example: 14 h 13 s  (for Ah Ks)")
+        print("Type 'back' to return")
+        
+        while True:
+            try:
+                user_input = input("Enter cards: ").strip()
+                
+                if user_input.lower() in ['back', 'exit']:
+                    break
+                
+                parts = user_input.split()
+                if len(parts) != 4:
+                    print("Please enter exactly 4 values: value1 suit1 value2 suit2")
+                    continue
+                
+                value1, suit1, value2, suit2 = int(parts[0]), parts[1], int(parts[2]), parts[3]
+                
+                result = twoStartCards(value1, suit1, value2, suit2)
+                print(f"twoStartCards({value1}, '{suit1}', {value2}, '{suit2}') = {result}")
+                
+                if result != HOLDEM_UNKNOWN_HAND:
+                    hand_str = twoStartCardString(result)
+                    print(f"twoStartCardString({result}) = '{hand_str}'")
+                else:
+                    print("Result indicates unknown/invalid hand")
+                    
+            except ValueError:
+                print("Invalid input. Use format: value1 suit1 value2 suit2")
+            except KeyboardInterrupt:
+                break
+    
+    def test_suit_functions():
+        """Test suit functions for Holdem (2 cards)."""
+        print("\nTesting Holdem suit functions:")
+        print("Enter 2 cards as: Ah Ks  (space separated)")
+        print("Examples:")
+        print("  Suited: Ah Kh, Qs Js")
+        print("  Offsuit: Ah Ks, Qh Jd")
+        print("Type 'back' to return")
+        
+        while True:
+            try:
+                user_input = input("Enter 2 cards: ").strip()
+                
+                if user_input.lower() in ['back', 'exit']:
+                    break
+                
+                card_strings = user_input.split()
+                if len(card_strings) != 2:
+                    print("Please enter exactly 2 cards for Holdem")
+                    continue
+                
+                # Convert to (value, suit) tuples
+                cards = []
+                for card_str in card_strings:
+                    if len(card_str) == 2:
+                        cards.append((card_str[0], card_str[1]))
+                    else:
+                        print(f"Invalid card format: {card_str}")
+                        break
+                else:
+                    print(f"Cards: {cards}")
+                    suited = is_suited(cards)
+                    print(f"is_suited: {suited}")
+                    
+                    if suited:
+                        print("Result: SUITED ")
+                    else:
+                        print("Result: OFFSUIT ")
+                    
+            except KeyboardInterrupt:
+                break
+    
+    def test_razz_functions():
+        """Test Razz-related functions."""
+        print("\nTesting Razz functions:")
+        print("Enter 3 cards as: Ah 2s 3d  (space separated)")
+        print("Type 'back' to return")
+        
+        while True:
+            try:
+                user_input = input("Enter razz cards: ").strip()
+                
+                if user_input.lower() in ['back', 'exit']:
+                    break
+                
+                card_strings = user_input.split()
+                if len(card_strings) != 3:
+                    print("Please enter exactly 3 cards for Razz")
+                    continue
+                
+                # Convert to (value, suit) tuples
+                cards = []
+                for card_str in card_strings:
+                    if len(card_str) == 2:
+                        cards.append((card_str[0], card_str[1]))
+                    else:
+                        print(f"Invalid card format: {card_str}")
+                        break
+                else:
+                    print(f"Cards: {cards}")
+                    
+                    try:
+                        encoded = encodeRazzStartHand(cards)
+                        print(f"encodeRazzStartHand: {encoded}")
+                        
+                        decoded = decodeRazzStartHand(encoded)
+                        print(f"decodeRazzStartHand({encoded}): {decoded}")
+                        
+                        # Test with game value
+                        game_value = encoded + 184
+                        decoded_game = decodeStartHandValue("razz", game_value)
+                        print(f"decodeStartHandValue('razz', {game_value}): {decoded_game}")
+                        
+                    except Exception as e:
+                        print(f"Error processing Razz hand: {e}")
+                    
+            except KeyboardInterrupt:
+                break
+    
+    # Main CLI loop
+    try:
+        while True:
+            show_menu()
+            
+            try:
+                choice = input("Select option (0-5): ").strip()
+                
+                if choice == '0':
+                    print("Goodbye!")
+                    break
+                elif choice == '1':
+                    test_start_card_rank()
+                elif choice == '2':
+                    test_card_encoding()
+                elif choice == '3':
+                    test_two_start_cards()
+                elif choice == '4':
+                    test_suit_functions()
+                elif choice == '5':
+                    test_razz_functions()
+                else:
+                    print(f"Invalid option: {choice}")
+                    
+            except ValueError:
+                print("Please enter a valid number")
+            except KeyboardInterrupt:
+                print("\nGoodbye!")
+                break
+                
+    except KeyboardInterrupt:
+        print("\nGoodbye!")
