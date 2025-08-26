@@ -772,25 +772,26 @@ class fpdb(QMainWindow):
         helpMenu.addSeparator()
         helpMenu.addAction(self.makeAction("Infos", self.dia_about, "About the program"))
 
-        themes = [
-            "dark_purple.xml",
-            "dark_teal.xml",
-            "dark_blue.xml",
-            "dark_cyan.xml",
-            "dark_pink.xml",
-            "dark_red.xml",
-            "dark_lime.xml",
-            "light_purple.xml",
-            "light_teal.xml",
-            "light_blue.xml",
-            "light_cyan.xml",
-            "light_pink.xml",
-            "light_red.xml",
-            "light_lime.xml",
-        ]
+        # Get available themes from ThemeManager
+        try:
+            from ThemeManager import ThemeManager
+            theme_manager = ThemeManager()
+            themes = theme_manager.get_available_qt_themes()
+        except ImportError:
+            # Fallback theme list if ThemeManager not available
+            themes = [
+                "dark_purple.xml", "dark_teal.xml", "dark_blue.xml", "dark_cyan.xml",
+                "dark_pink.xml", "dark_red.xml", "light_purple.xml", "light_teal.xml",
+                "light_blue.xml", "light_cyan.xml", "light_pink.xml", "light_red.xml"
+            ]
 
         for theme in themes:
             themeMenu.addAction(QAction(theme, self, triggered=partial(self.change_theme, theme)))
+        
+        # Add separator and theme creation option
+        themeMenu.addSeparator()
+        themeMenu.addAction(self.makeAction("Create Custom Theme...", self.show_theme_creator, 
+                                           tip="Create a new custom theme"))
 
     def makeAction(self, name, callback, shortcut=None, tip=None, checkable=False):
         action = QAction(name, self)
@@ -814,6 +815,53 @@ class fpdb(QMainWindow):
         except Exception as e:
             log.exception(f"Error opening Logger Dev Tool: {e}")
             self.statusBar().showMessage(f"Error: {e}")
+    
+    def show_theme_creator(self) -> None:
+        """Open the custom theme creator dialog."""
+        try:
+            from ThemeCreatorDialog import show_theme_creator
+            result = show_theme_creator(self)
+            if result:  # Dialog was accepted (theme created)
+                # Refresh the themes menu to include the new theme
+                self.refresh_themes_menu()
+                self.statusBar().showMessage("Custom theme created successfully")
+            else:
+                self.statusBar().showMessage("Theme creation cancelled")
+        except Exception as e:
+            log.exception(f"Error opening Theme Creator: {e}")
+            self.statusBar().showMessage(f"Error: {e}")
+    
+    def refresh_themes_menu(self) -> None:
+        """Refresh the themes menu to include new custom themes."""
+        try:
+            # Find and clear the themes menu
+            menu_bar = self.menuBar()
+            themes_menu = None
+            for action in menu_bar.actions():
+                if action.text() == "Themes":
+                    themes_menu = action.menu()
+                    break
+            
+            if themes_menu:
+                themes_menu.clear()
+                
+                # Get updated theme list from ThemeManager
+                from ThemeManager import ThemeManager
+                theme_manager = ThemeManager()
+                themes = theme_manager.get_available_qt_themes()
+                
+                # Re-add all themes
+                for theme in themes:
+                    themes_menu.addAction(QAction(theme, self, triggered=partial(self.change_theme, theme)))
+                
+                # Re-add separator and theme creator
+                themes_menu.addSeparator()
+                themes_menu.addAction(self.makeAction("Create Custom Theme...", self.show_theme_creator, 
+                                                    tip="Create a new custom theme"))
+                
+                log.info(f"Themes menu refreshed with {len(themes)} themes")
+        except Exception as e:
+            log.exception(f"Error refreshing themes menu: {e}")
 
 
     def load_profile(self, create_db=False) -> None:
@@ -1152,9 +1200,24 @@ class fpdb(QMainWindow):
 
     def change_theme(self, theme) -> None:
         try:
-            from qt_material import apply_stylesheet
+            from ThemeManager import ThemeManager
 
-            apply_stylesheet(QApplication.instance(), theme=theme)
+            # Use ThemeManager to handle theme change and persistence
+            theme_manager = ThemeManager()
+            if theme_manager.initialized:
+                # Use ThemeManager for persistent theme changes (apply_to_ui=False to avoid recursion)
+                success = theme_manager.set_qt_material_theme(theme, save=True, apply_to_ui=False)
+                if success:
+                    # Let ThemeManager handle the application of the theme (built-in or custom)
+                    theme_manager._apply_theme_to_application(theme)
+                else:
+                    log.warning(f"ThemeManager failed to set theme {theme}")
+            else:
+                # Fallback to direct application if ThemeManager not initialized
+                log.warning("ThemeManager not initialized, applying theme directly without persistence")
+                from qt_material import apply_stylesheet
+                apply_stylesheet(QApplication.instance(), theme=theme)
+                
             self.update_title_bar_theme()
         except ImportError:
             log.warning("qt_material not available, cannot change theme")
@@ -1383,7 +1446,7 @@ class CustomTitleBar(QWidget):
 if __name__ == "__main__":
     import time
 
-    from qt_material import apply_stylesheet
+    # qt_material import moved to ThemeManager
 
     # IMPORTANT: Initialize configuration BEFORE creating the application
     # This ensures all required files (HUD_config.xml, directories) exist
@@ -1399,8 +1462,20 @@ if __name__ == "__main__":
 
     try:
         app = QApplication([])
-        apply_stylesheet(app, theme="dark_purple.xml")
+        
+        # Initialize ThemeManager and apply saved theme
+        from ThemeManager import ThemeManager
+        theme_manager = ThemeManager()
+        theme_manager.initialize(config=config)
+        saved_theme = theme_manager.get_qt_material_theme()
+        
+        # Apply theme using ThemeManager to handle both built-in and custom themes
+        theme_manager._apply_theme_to_application(saved_theme)
         me = fpdb()
+        
+        # Register main window with theme manager for future theme changes
+        theme_manager._main_window = me
+        
         app.exec_()
     finally:
         profiler.disable()

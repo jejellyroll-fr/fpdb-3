@@ -843,6 +843,9 @@ class General(dict):
         self["config_difficulty"] = "expert"
         self["config_wrap_len"] = "-1"
         self["day_start"] = "5"
+        # Theme settings for global theme persistence
+        self["qt_material_theme"] = "dark_purple.xml"
+        self["popup_theme"] = "material_dark"
 
     def __str__(self) -> str:
         s = ""
