@@ -1104,7 +1104,9 @@ class Sql:
                         street3Discards TINYINT,
 
                         handString TEXT,
-                        actionString VARCHAR(15))
+                        actionString VARCHAR(15),
+                        cashOutFee BIGINT DEFAULT 0,
+                        isCashOut BOOLEAN DEFAULT FALSE)
                         ENGINE=INNODB"""
         elif db_server == "postgresql":
             self.query[
@@ -1290,7 +1292,9 @@ class Sql:
                         street3Discards SMALLINT,
 
                         handString TEXT,
-                        actionString VARCHAR(15))"""
+                        actionString VARCHAR(15),
+                        cashOutFee BIGINT DEFAULT 0,
+                        isCashOut BOOLEAN DEFAULT FALSE)"""
         elif db_server == "sqlite":
             self.query[
                 "createHandsPlayersTable"
@@ -1475,7 +1479,9 @@ class Sql:
                         street3Discards INT,
 
                         handString TEXT,
-                        actionString VARCHAR(15))
+                        actionString VARCHAR(15),
+                        cashOutFee INT DEFAULT 0,
+                        isCashOut BOOLEAN DEFAULT 0)
                         """
 
         ################################
@@ -6737,7 +6743,8 @@ class Sql:
                         hp.card16,hp.card17,hp.card18,hp.card19,hp.card20,
                         hp.position,
                         round(hp.startBounty / 100.0,2) as bounty,
-                        hp.sitout
+                        hp.sitout,
+                        hp.isCashOut
                     FROM
                         HandsPlayers as hp,
                         Players as p
@@ -9969,7 +9976,9 @@ class Sql:
                 street1Discards,
                 street2Discards,
                 street3Discards,
-                handString
+                handString,
+                cashOutFee,
+                isCashOut
                )
                values (
                     %s, %s, %s, %s, %s,
@@ -10004,7 +10013,7 @@ class Sql:
                     %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s,
-                    %s
+                    %s, %s, %s
                 )"""
 
         self.query[
