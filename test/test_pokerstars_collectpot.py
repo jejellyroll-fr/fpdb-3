@@ -176,14 +176,14 @@ Total pot $1.10 | Rake $0.05
         self.parser.re_cashed_out = Mock()
         self.parser.re_cashed_out.search = Mock(return_value=None)
         self.parser._calculateBovadaAdjustments = Mock(return_value=(False, False, 0, 0))
-        self.parser._addCollectPotWithAdjustment = Mock()
+        self.parser._addCashOutPotWithAdjustment = Mock()
         
         self.parser.readCollectPot(hand)
         
         # Check that cash out fee is stored
         assert hasattr(hand, 'cashOutFees')
         assert hand.cashOutFees["Hero"] == Decimal("0.05")
-        self.parser._addCollectPotWithAdjustment.assert_called_once_with(hand, fee_collect_match, (False, False, 0, 0))
+        self.parser._addCashOutPotWithAdjustment.assert_called_once_with(hand, fee_collect_match, (False, False, 0, 0))
 
     def test_walk_scenario_detection(self):
         """Test walk scenario detection and handling."""
@@ -342,7 +342,7 @@ Total pot $1,250.00 | Rake $0.05
         self.parser.re_cashed_out = Mock()
         self.parser.re_cashed_out.search = Mock(return_value=None)
         self.parser._calculateBovadaAdjustments = Mock(return_value=(False, False, 0, 0))
-        self.parser._addCollectPotWithAdjustment = Mock()
+        self.parser._addCashOutPotWithAdjustment = Mock()
         
         self.parser.readCollectPot(hand)
         
