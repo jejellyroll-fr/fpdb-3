@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feature/add-skins 
+
 
 permissions:
   contents: read

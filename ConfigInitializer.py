@@ -84,24 +84,31 @@ class ConfigInitializer:
             config_path = cls._find_config_path(config_file)
 
             # Initialize configuration
-            cls._config = Configuration.get_config(config_path, fallback_to_default)
-            cls._config_file = config_path
+            config_path_result = Configuration.get_config(config_path, fallback_to_default)
+            if isinstance(config_path_result, tuple):
+                # get_config returns (config_path, example_copy, example_path)
+                actual_config_path = config_path_result[0]
+            else:
+                actual_config_path = config_path_result
+                
+            # Create the actual Configuration object
+            cls._config = Configuration.Config(file=actual_config_path)
+            cls._config_file = actual_config_path
             cls._initialized = True
 
         except Exception:
             log.exception("Error during configuration initialization")
-            if fallback_to_default:
-                try:
-                    # Try to create a minimal configuration
-                    import Configuration
+            if not fallback_to_default:
+                raise
+            try:
+                # Try to create a minimal configuration
+                import Configuration
 
-                    cls._config = Configuration.Config()
-                    cls._initialized = True
-                    log.warning("Minimal configuration created following error")
-                except (ImportError, AttributeError):
-                    log.exception("Unable to create minimal configuration")
-                    raise
-            else:
+                cls._config = Configuration.Config()
+                cls._initialized = True
+                log.warning("Minimal configuration created following error")
+            except (ImportError, AttributeError):
+                log.exception("Unable to create minimal configuration")
                 raise
         else:
             log.info("Configuration initialized from: %s", config_path)

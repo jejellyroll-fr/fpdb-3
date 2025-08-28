@@ -95,6 +95,8 @@ class ConfigurationManager:
         "supported_sites.*.HH_path",  # Hand history path
         "supported_sites.*.TS_path",  # Tournament summary path
         "hud_ui.*",  # HUD UI settings
+        "general.qt_material_theme",  # Qt material theme
+        "general.popup_theme",  # Popup theme
     ]
 
     def __new__(cls):
@@ -582,7 +584,7 @@ class ConfigurationManager:
 
     def _capture_current_state(self) -> None:
         """Captures the current configuration state for future comparison."""
-        self._last_saved_state = {"sites": {}, "import": {}, "database": {}, "hud_ui": {}}
+        self._last_saved_state = {"sites": {}, "import": {}, "database": {}, "hud_ui": {}, "general": {}}
 
         # Capture site state
         if hasattr(self._config, "supported_sites"):
@@ -617,6 +619,18 @@ class ConfigurationManager:
                 log.debug(f"Captured HUD UI state: {len(self._last_saved_state['hud_ui'])} parameters")
         except Exception as e:
             log.warning("Error capturing HUD UI parameters: %s", e)
+            
+        # Capture theme state
+        try:
+            if hasattr(self._config, "general"):
+                general = self._config.general
+                self._last_saved_state["general"] = {
+                    "qt_material_theme": general.get("qt_material_theme", "dark_purple.xml"),
+                    "popup_theme": general.get("popup_theme", "material_dark"),
+                }
+                log.debug(f"Captured theme state: {self._last_saved_state['general']}")
+        except Exception as e:
+            log.warning("Error capturing theme state: %s", e)
 
     def detect_changes_from_saved_state(self, current_config) -> list[ConfigChange]:
         """Detects configuration changes by comparing the current state to the last saved state.
@@ -742,5 +756,44 @@ class ConfigurationManager:
                         log.debug(f"HUD UI change detected: {key}: {saved_value} -> {current_value}")
         except Exception as e:
             log.warning("Error comparing HUD UI parameters: %s", e)
+            
+        # Compare theme parameters
+        try:
+            if hasattr(current_config, "general"):
+                current_general = current_config.general
+                saved_general = self._last_saved_state.get("general", {})
+                
+                # Compare qt_material_theme
+                current_qt_theme = current_general.get("qt_material_theme", "dark_purple.xml")
+                saved_qt_theme = saved_general.get("qt_material_theme", "dark_purple.xml")
+                
+                if current_qt_theme != saved_qt_theme:
+                    changes.append(
+                        ConfigChange(
+                            ChangeType.THEME_SETTINGS,
+                            "general.qt_material_theme",
+                            saved_qt_theme,
+                            current_qt_theme,
+                        ),
+                    )
+                    log.debug(f"Qt material theme change detected: {saved_qt_theme} -> {current_qt_theme}")
+                
+                # Compare popup_theme
+                current_popup_theme = current_general.get("popup_theme", "material_dark")
+                saved_popup_theme = saved_general.get("popup_theme", "material_dark")
+                
+                if current_popup_theme != saved_popup_theme:
+                    changes.append(
+                        ConfigChange(
+                            ChangeType.THEME_SETTINGS,
+                            "general.popup_theme",
+                            saved_popup_theme,
+                            current_popup_theme,
+                        ),
+                    )
+                    log.debug(f"Popup theme change detected: {saved_popup_theme} -> {current_popup_theme}")
+                    
+        except Exception as e:
+            log.warning("Error comparing theme parameters: %s", e)
 
         return changes

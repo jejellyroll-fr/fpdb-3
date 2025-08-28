@@ -162,6 +162,10 @@ def _buildStatsInitializer() -> dict:  # noqa: PLR0915
         init["foldToStreet%dCBChance" % i] = False
         init["foldToStreet%dCBDone" % i] = False
         init["wonWhenSeenStreet%d" % i] = False
+    
+    # Cash out fees (stored in cents) and cash out flag
+    init["cashOutFee"] = 0
+    init["isCashOut"] = False
     return init
 
 
@@ -481,6 +485,15 @@ class DerivedStats:
                 player_stats["tourneysPlayersId"] = None
             if player_name in hand.shown:
                 player_stats["showed"] = True
+            
+            # Cash out fees - convert from Decimal to cents for database storage
+            # and set cash out flag
+            if hasattr(hand, 'cashOutFees') and player_name in hand.cashOutFees:
+                player_stats["cashOutFee"] = int(CENTS_MULTIPLIER * hand.cashOutFees[player_name])
+                player_stats["isCashOut"] = True
+            else:
+                player_stats["cashOutFee"] = 0
+                player_stats["isCashOut"] = False
 
         #### seen now processed in playersAtStreetX()
 
@@ -987,6 +1000,12 @@ class DerivedStats:
             street_actions = hand.actions.get(street_name, [])
 
             if preflop_aggressor in self.handsplayers:
+                # Initialize street stats if they don't exist (for run-it-twice scenarios)
+                if f"street{i}CBChance" not in self.handsplayers[preflop_aggressor]:
+                    self.handsplayers[preflop_aggressor][f"street{i}CBChance"] = False
+                if f"street{i}CBDone" not in self.handsplayers[preflop_aggressor]:
+                    self.handsplayers[preflop_aggressor][f"street{i}CBDone"] = False
+                    
                 self.handsplayers[preflop_aggressor][f"street{i}CBChance"] = True
 
                 # Check if they bet first on this street
@@ -1042,6 +1061,14 @@ class DerivedStats:
                 if len(player_actions) >= MIN_ACTIONS_FOR_CHECK_CALL_RAISE:
                     first_action = player_actions[0]
                     if first_action[1] == "checks":
+                        # Initialize street stats if they don't exist (for run-it-twice scenarios)
+                        if f"street{i}CheckCallRaiseChance" not in self.handsplayers[player]:
+                            self.handsplayers[player][f"street{i}CheckCallRaiseChance"] = False
+                        if f"street{i}CheckCallDone" not in self.handsplayers[player]:
+                            self.handsplayers[player][f"street{i}CheckCallDone"] = False
+                        if f"street{i}CheckRaiseDone" not in self.handsplayers[player]:
+                            self.handsplayers[player][f"street{i}CheckRaiseDone"] = False
+                            
                         self.handsplayers[player][f"street{i}CheckCallRaiseChance"] = True
 
                         # Look for subsequent action
@@ -1356,10 +1383,16 @@ class DerivedStats:
 
         for player in hand.players:
             if player[1] in aggrers:
+                # Initialize street stats if they don't exist (for run-it-twice scenarios)
+                if f"street{i}Aggr" not in self.handsplayers[player[1]]:
+                    self.handsplayers[player[1]][f"street{i}Aggr"] = False
                 self.handsplayers[player[1]][f"street{i}Aggr"] = True
 
         if len(aggrers) > 0 and i > 0:
             for playername in others:
+                # Initialize street stats if they don't exist (for run-it-twice scenarios)
+                if f"otherRaisedStreet{i}" not in self.handsplayers[playername]:
+                    self.handsplayers[playername][f"otherRaisedStreet{i}"] = False
                 self.handsplayers[playername][f"otherRaisedStreet{i}"] = True
                 # print "otherRaised detected on handid "+str(hand.handid)+" for "+playername+" on street "+str(i)
 
@@ -1374,6 +1407,9 @@ class DerivedStats:
         for act in hand.actions[hand.actionStreets[i + 1]]:
             if act[1] in ("calls"):
                 player_stats = self.handsplayers.get(act[0])
+                # Initialize street stats if they don't exist (for run-it-twice scenarios)
+                if f"street{i}Calls" not in player_stats:
+                    player_stats[f"street{i}Calls"] = 0
                 player_stats[f"street{i}Calls"] = 1 + player_stats[f"street{i}Calls"]
 
     def bets(self, hand: Any, i: int) -> None:
@@ -1381,6 +1417,9 @@ class DerivedStats:
         for act in hand.actions[hand.actionStreets[i + 1]]:
             if act[1] in ("bets"):
                 player_stats = self.handsplayers.get(act[0])
+                # Initialize street stats if they don't exist (for run-it-twice scenarios)
+                if f"street{i}Bets" not in player_stats:
+                    player_stats[f"street{i}Bets"] = 0
                 player_stats[f"street{i}Bets"] = 1 + player_stats[f"street{i}Bets"]
 
     def raises(self, hand: Any, i: int) -> None:
@@ -1388,6 +1427,9 @@ class DerivedStats:
         for act in hand.actions[hand.actionStreets[i + 1]]:
             if act[1] in ("completes", "raises"):
                 player_stats = self.handsplayers.get(act[0])
+                # Initialize street stats if they don't exist (for run-it-twice scenarios)
+                if f"street{i}Raises" not in player_stats:
+                    player_stats[f"street{i}Raises"] = 0
                 player_stats[f"street{i}Raises"] = 1 + player_stats[f"street{i}Raises"]
 
     def folds(self, hand: Any, i: int) -> None:
@@ -1395,6 +1437,11 @@ class DerivedStats:
         for act in hand.actions[hand.actionStreets[i + 1]]:
             if act[1] in ("folds"):
                 player_stats = self.handsplayers.get(act[0])
+                # Initialize street stats if they don't exist (for run-it-twice scenarios)
+                if f"otherRaisedStreet{i}" not in player_stats:
+                    player_stats[f"otherRaisedStreet{i}"] = False
+                if f"foldToOtherRaisedStreet{i}" not in player_stats:
+                    player_stats[f"foldToOtherRaisedStreet{i}"] = False
                 if player_stats[f"otherRaisedStreet{i}"]:
                     player_stats[f"foldToOtherRaisedStreet{i}"] = True
                     # print "DEBUG: fold detected on handid %s for %s on actionStreet[%s]: %s"

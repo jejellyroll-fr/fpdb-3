@@ -448,7 +448,11 @@ class PokerStars(HandHistoryConverter):
     )
     # Vinsand88 cashed out the hand for $2.19 | Cash Out Fee $0.02
     re_collect_pot2 = re.compile(
-        r"{PLYR} (collected|cashed out the hand for) {CUR}(?P<POT>[,.\d]+)".format(**substitutions),
+        r"{PLYR} collected {CUR}(?P<POT>[,.\d]+)".format(**substitutions),
+        re.MULTILINE,
+    )
+    re_collect_pot3 = re.compile(
+        r"{PLYR} cashed out the hand for {CUR}(?P<POT>[,.\d]+) \| Cash Out Fee {CUR}(?P<FEE>[,.\d]+)".format(**substitutions),
         re.MULTILINE,
     )
     re_cashed_out = re.compile(r"cashed\sout\sthe\shand")
@@ -519,7 +523,13 @@ class PokerStars(HandHistoryConverter):
     re_pokerstars_com = re.compile(r"PokerStars\.com", re.IGNORECASE)
 
     def loadHeroMappings(self) -> dict[str, str]:
-        """Load hero -> skins mappings from the configuration file."""
+        """Loads hero-to-skin mappings from configuration file.
+
+        Reads the 'pokerstars_skin_mapping.conf' file and returns a dictionary mapping hero names to PokerStars skin names.
+
+        Returns:
+            dict[str, str]: Mapping of hero names (lowercase) to skin names.
+        """
         import configparser
 
         mappings = {}
@@ -538,12 +548,21 @@ class PokerStars(HandHistoryConverter):
         return mappings
 
     def _detectSkinByHero(self, hand_text: str) -> tuple[str, int] | None:
-        """Detect skin based on hero name mapping."""
+        """Detects PokerStars skin using hero name mapping.
+
+        Checks the hand text for the hero name and returns the corresponding skin and site ID if a mapping exists.
+
+        Args:
+            hand_text (str): The hand history text to search for the hero name.
+
+        Returns:
+            tuple[str, int] | None: The skin name and site ID if found, otherwise None.
+        """
         hero_match = re.search(r"Dealt to ([^\[]+)", hand_text[:500])
         if not hero_match:
             return None
 
-        hero_name = hero_match.group(1).strip()
+        hero_name = hero_match[1].strip()
 
         # Load mappings if not already done
         if not hasattr(self, "_hero_mappings"):
@@ -558,34 +577,63 @@ class PokerStars(HandHistoryConverter):
         return None
 
     def _detectSkinByPath(self, file_path: str) -> tuple[str, int] | None:
-        """Detect skin based on file path patterns."""
+        """Detects PokerStars skin using the file path.
+
+        Searches the file path for known patterns to identify the PokerStars skin and its site ID.
+
+        Args:
+            file_path (str): The file path to check for skin patterns.
+
+        Returns:
+            tuple[str, int] | None: The skin name and site ID if found, otherwise None.
+        """
         # Normalise the path for comparison
         path_lower = file_path.lower().replace("\\", "/")
 
         # Search for typical path patterns for each skin
-        for pattern, skin_name in POKERSTARS_PATH_PATTERNS:
-            if pattern in path_lower:
-                return skin_name, POKERSTARS_SKIN_IDS[skin_name]
-        return None
+        try:
+            return next(
+                (skin_name, POKERSTARS_SKIN_IDS[skin_name])
+                for pattern, skin_name in POKERSTARS_PATH_PATTERNS
+                if pattern in path_lower
+            )
+        except StopIteration:
+            return None
 
     def detectPokerStarsSkin(self, hand_text: str, file_path: str | None = None) -> tuple[str, int]:
-        """Detects specific PokerStars skin based on file path and/or content."""
+        """Detects the PokerStars skin and site ID from hand text and file path.
+
+        Determines the PokerStars skin by checking hero mappings, file path patterns, and hand text content.
+
+        Args:
+            hand_text (str): The hand history text to analyze.
+            file_path (str | None): The file path to check for skin patterns.
+
+        Returns:
+            tuple[str, int]: The detected skin name and site ID.
+        """
         # First, check whether the hero has a mapping configured
-        hero_result = self._detectSkinByHero(hand_text)
-        if hero_result:
+        if hero_result := self._detectSkinByHero(hand_text):
             return hero_result
 
         # Then try to detect the path
-        if file_path:
-            path_result = self._detectSkinByPath(file_path)
-            if path_result:
-                return path_result
+        if file_path and (path_result := self._detectSkinByPath(file_path)):
+            return path_result
 
         # Finally, analyze content
         return self._detectSkinByContent(hand_text)
 
     def _detectSkinByContent(self, hand_text: str) -> tuple[str, int]:
-        """Detect skin based on hand text content."""
+        """Detects PokerStars skin using hand text content.
+
+        Analyzes the hand text for country-specific IDs, hero name clues, regex patterns, and currency to determine the PokerStars skin and site ID.
+
+        Args:
+            hand_text (str): The hand history text to analyze.
+
+        Returns:
+            tuple[str, int]: The detected skin name and site ID.
+        """
         search_text = hand_text[:2000]
 
         # Verification of AAMS/ADM ID for Italy
@@ -593,9 +641,8 @@ class PokerStars(HandHistoryConverter):
             return "PokerStars.IT", SITE_POKERSTARS_IT
 
         # Try to detect via hero name if it contains clues
-        hero_match = re.search(r"Dealt to ([^\[]+)", hand_text[:500])
-        if hero_match:
-            hero_name = hero_match.group(1).strip()
+        if hero_match := re.search(r"Dealt to ([^\[]+)", hand_text[:500]):
+            hero_name = hero_match[1].strip()
             hero_lower = hero_name.lower()
             # CSome players include the skin in their name.
             for suffix1, suffix2, skin_name in POKERSTARS_HERO_SUFFIXES:
@@ -613,9 +660,9 @@ class PokerStars(HandHistoryConverter):
             (self.re_pokerstars_com, "PokerStars.COM"),
         ]
 
-        for regex, skin_name in regex_tests:
-            if regex.search(search_text):
-                return skin_name, POKERSTARS_SKIN_IDS[skin_name]
+        if match := next(((regex, skin_name) for regex, skin_name in regex_tests if regex.search(search_text)), None):
+            regex, skin_name = match
+            return skin_name, POKERSTARS_SKIN_IDS[skin_name]
 
         # As a last resort, use the currency
         if "€" in search_text or "EUR" in search_text:
@@ -627,17 +674,38 @@ class PokerStars(HandHistoryConverter):
         """Read other information from hand text."""
 
     def allHandsAsList(self) -> list[str]:
-        """Override parent method to clean up PokerStars archive formats."""
+        """Returns a cleaned list of all hand texts.
+
+        Processes the raw hand list to remove empty hands, split multiple hands, and clean up archive formats.
+
+        Returns:
+            list[str]: A list of cleaned hand history texts.
+        """
         # Call parent implementation first
         handlist = super().allHandsAsList()
 
         # Log what we got
         log.info("PokerStars allHandsAsList: got %d hands", len(handlist))
 
-        # Clean up archive formats if detected
+        # Clean up archive formats and handle multiple hands
         cleaned_handlist = []
         for i, hand_text in enumerate(handlist):
             log.debug("Processing hand %d/%d", i+1, len(handlist))
+            
+            # Skip empty hands
+            if not hand_text.strip():
+                log.debug("Skipping empty hand %d", i+1)
+                continue
+            
+            # Check for multiple hands in a single text block (common with partial files)
+            summary_count = hand_text.count("*** SUMMARY ***")
+            if summary_count > 1:
+                log.info(f"Hand {i+1} contains {summary_count} summaries, attempting to split...")
+                # Try to split multiple hands more intelligently
+                sub_hands = self._split_multiple_hands(hand_text)
+                cleaned_handlist.extend(sub_hands)
+                continue
+                
             # Check if this hand has the problematic archive format with stars
             if "*" * 10 in hand_text:
                 log.info("Found archive format in hand %d, cleaning...", i+1)
@@ -653,8 +721,7 @@ class PokerStars(HandHistoryConverter):
                     if cleaned_line.startswith(" ") and not cleaned_line.startswith("  "):
                         cleaned_line = cleaned_line[1:]
                     cleaned_lines.append(cleaned_line)
-                cleaned_text = "\n".join(cleaned_lines).strip()
-                if cleaned_text:  # Only add non-empty hands
+                if cleaned_text := "\n".join(cleaned_lines).strip():
                     cleaned_handlist.append(cleaned_text)
             else:
                 cleaned_handlist.append(hand_text)
@@ -662,8 +729,59 @@ class PokerStars(HandHistoryConverter):
         log.info("PokerStars allHandsAsList: returning %d cleaned hands", len(cleaned_handlist))
         return cleaned_handlist
 
+    def _split_multiple_hands(self, text: str) -> list[str]:
+        """Splits a text block containing multiple PokerStars hands into individual hand texts.
+
+        Finds hand boundaries using PokerStars hand headers and returns a list of complete hand texts containing a summary.
+
+        Args:
+            text (str): The raw hand history text block to split.
+
+        Returns:
+            list[str]: A list of individual hand history texts with summaries.
+        """
+        hands = []
+        
+        # Find all hand starts
+        hand_pattern = r'PokerStars (Game|Hand) #\d+'
+        hand_starts = list(re.finditer(hand_pattern, text))
+        
+        if len(hand_starts) <= 1:
+            # Only one or no hand headers found, return as is
+            return [text.strip()] if text.strip() else []
+        
+        # Split based on hand boundaries
+        for i, match in enumerate(hand_starts):
+            start_pos = match.start()
+            if i + 1 < len(hand_starts):
+                # Not the last hand
+                end_pos = hand_starts[i + 1].start()
+                hand_text = text[start_pos:end_pos].strip()
+            else:
+                # Last hand
+                hand_text = text[start_pos:].strip()
+            
+            if hand_text and "*** SUMMARY ***" in hand_text:
+                hands.append(hand_text)
+                log.debug(f"Extracted hand: {hand_text[:50]}...")
+            elif hand_text:
+                # Hand without summary - might be incomplete
+                log.warning(f"Found hand without summary, skipping: {hand_text[:50]}...")
+        
+        log.info(f"Split multiple hands: {len(hands)} valid hands extracted")
+        return hands
+
     def compilePlayerRegexs(self, hand: "Hand") -> None:
-        """Compile regex patterns for all players in the hand."""
+        """Compiles player-specific regular expressions for parsing hand text.
+
+        Generates and stores regex patterns for hero cards and shown cards based on the current set of players in the hand.
+
+        Args:
+            hand ("Hand"): The hand object containing player information.
+
+        Returns:
+            None
+        """
         players = {player[1] for player in hand.players}
         if not players <= self.compiledPlayers:  # x <= y means 'x is subset of y'
             self.compiledPlayers = players
@@ -705,7 +823,13 @@ class PokerStars(HandHistoryConverter):
                 )
 
     def readSupportedGames(self) -> list[list[str]]:
-        """Return list of supported game types."""
+        """Returns a list of supported game types for PokerStars.
+
+        Provides all combinations of game format, base game, and limit type that are supported for parsing.
+
+        Returns:
+            list[list[str]]: A list of supported game type descriptors.
+        """
         return [
             ["ring", "hold", "nl"],
             ["ring", "hold", "pl"],
@@ -726,7 +850,16 @@ class PokerStars(HandHistoryConverter):
         ]
 
     def _parseBasicGameInfo(self, mg: dict) -> dict[str, str]:
-        """Parse basic game information from regex groups."""
+        """Parses basic game information from regex match groups.
+
+        Extracts limit type, base game, category, blinds, currency, and mix type from the provided match group dictionary.
+
+        Args:
+            mg (dict): Dictionary of regex match groups containing game info.
+
+        Returns:
+            dict[str, str]: Dictionary of parsed basic game information.
+        """
         info = {}
 
         if "LIMIT" in mg:
@@ -750,22 +883,36 @@ class PokerStars(HandHistoryConverter):
         return info
 
     def _parseGameFlags(self, mg: dict) -> dict[str, bool]:
-        """Parse game flags from regex groups."""
-        flags = {}
+        """Parses game flags from match group dictionary.
 
-        flags["fast"] = "Zoom" in mg["TITLE"] or "Rush" in mg["TITLE"]
-        flags["homeGame"] = "Home" in mg["TITLE"]
-        flags["split"] = "SPLIT" in mg and mg["SPLIT"] == "Split"
+        Determines game attributes such as fast format, home game, split game, and buyin type from the provided match group.
 
-        if "CAP" in mg and mg["CAP"] is not None:
-            flags["buyinType"] = "cap"
-        else:
-            flags["buyinType"] = "regular"
+        Args:
+            mg (dict): Dictionary of regex match groups containing game info.
 
-        return flags
+        Returns:
+            dict[str, bool]: Dictionary of parsed game flags.
+        """
+        return {
+            "fast": "Zoom" in mg["TITLE"] or "Rush" in mg["TITLE"],
+            "homeGame": "Home" in mg["TITLE"],
+            "split": "SPLIT" in mg and mg["SPLIT"] == "Split",
+            "buyinType": "cap" if "CAP" in mg and mg["CAP"] is not None else "regular"
+        }
 
     def _detectSiteType(self, mg: dict, hand_text: str, info: dict) -> None:
-        """Detect and set site type information."""
+        """Detects the poker site type and updates site information.
+
+        Sets the sitename and site_id based on the SITE value in the match group, and updates game category for specific sites.
+
+        Args:
+            mg (dict): Dictionary of regex match groups containing site info.
+            hand_text (str): The hand history text to analyze.
+            info (dict): Dictionary to update with site-specific game info.
+
+        Returns:
+            None
+        """
         if mg["SITE"] == "PokerMaster":
             self.sitename = "PokerMaster"
             self.site_id = 25
@@ -781,7 +928,7 @@ class PokerStars(HandHistoryConverter):
         elif mg["SITE"] == "PokerBros":
             self.sitename = "PokerBros"
             self.site_id = 29
-        elif mg["SITE"] == "PokerStars" or mg["SITE"] == "POKERSTARS":
+        elif mg["SITE"] in ("PokerStars", "POKERSTARS"):
             # Detection of specific PokerStars skin
             self.sitename, self.site_id = self.detectPokerStarsSkin(
                 hand_text,
@@ -789,10 +936,19 @@ class PokerStars(HandHistoryConverter):
             )
 
     def determineGameType(self, hand_text: str) -> dict[str, str]:
-        """Parse hand text to determine game type information."""
+        """Determines the game type and related attributes from hand text.
+
+        Parses the hand text to extract game type, site, format, currency, and blind information for the current hand.
+
+        Args:
+            hand_text (str): The hand history text to analyze.
+
+        Returns:
+            dict[str, str]: Dictionary containing parsed game type and related attributes.
+        """
         m = self.re_game_info.search(hand_text)
         if not m:
-            tmp = hand_text[0:200]
+            tmp = hand_text[:200]
             log.error("determine Game Type failed: %r", tmp)
             raise FpdbParseError
 
@@ -813,16 +969,37 @@ class PokerStars(HandHistoryConverter):
         return info
 
     def _determineGameFormat(self, mg: dict, info: dict) -> None:
-        """Determine if this is a tournament or ring game."""
+        """Determines the game format as ring or tournament.
+
+        Sets the game type in the info dictionary based on match group values, and marks fast format for Zoom tournaments.
+
+        Args:
+            mg (dict): Dictionary of regex match groups containing game info.
+            info (dict): Dictionary to update with game format information.
+
+        Returns:
+            None
+        """
         if "TOURNO" in mg and mg["TOURNO"] is None:
             info["type"] = "ring"
         else:
             info["type"] = "tour"
-            if "ZOOM" in mg["TOUR"]:
+            if "TOUR" in mg and "ZOOM" in mg["TOUR"]:
                 info["fast"] = True
 
     def _adjustCurrencyAndBlinds(self, mg: dict, info: dict, hand_text: str) -> None:
-        """Adjust currency and blind values based on game type."""
+        """Adjusts currency and blind values based on game information.
+
+        Updates the currency and small/big blind values in the info dictionary according to game type, limit type, and match group data.
+
+        Args:
+            mg (dict): Dictionary of regex match groups containing game info.
+            info (dict): Dictionary to update with currency and blind information.
+            hand_text (str): The hand history text for error reporting.
+
+        Returns:
+            None
+        """
         if info.get("currency") in ("T$", None) and info["type"] == "ring":
             info["currency"] = "play"
 
@@ -832,7 +1009,7 @@ class PokerStars(HandHistoryConverter):
                     info["sb"] = self.lim_blinds[mg["BB"]][0]
                     info["bb"] = self.lim_blinds[mg["BB"]][1]
                 except KeyError:
-                    tmp = hand_text[0:200]
+                    tmp = hand_text[:200]
                     log.exception("Lim_Blinds has no lookup for %r - %r", mg["BB"], tmp)
                     raise FpdbParseError from None
             else:
@@ -842,7 +1019,17 @@ class PokerStars(HandHistoryConverter):
                 info["bb"] = str(bb_decimal.quantize(Decimal("0.01")))
 
     def _processDateTime(self, datetime_str: str, hand: "Hand") -> None:
-        """Process datetime information from hand text."""
+        """Processes and sets the hand start time from a date-time string.
+
+        Parses the date-time string from the hand text and sets the hand's start time, converting to UTC if necessary.
+
+        Args:
+            datetime_str (str): The date-time string extracted from hand text.
+            hand ("Hand"): The hand object to update with the parsed start time.
+
+        Returns:
+            None
+        """
         # 2008/11/12 10:00:48 CET [2008/11/12 4:00:48 ET]
         # (both dates are parsed so ET date overrides the other)
         # 2008/08/17 - 01:14:43 (ET)
@@ -852,14 +1039,7 @@ class PokerStars(HandHistoryConverter):
         if self.siteId == SITE_MERGE:
             m2 = self.re_date_time2.finditer(datetime_str)
             for a in m2:
-                datetimestr = "{}/{}/{} {}:{}:{}".format(
-                    a.group("Y"),
-                    a.group("M"),
-                    a.group("D"),
-                    a.group("H"),
-                    a.group("MIN"),
-                    "00",
-                )
+                datetimestr = f"{a.group('Y')}/{a.group('M')}/{a.group('D')} {a.group('H')}:{a.group('MIN')}:00"
             hand.startTime = datetime.datetime.strptime(  # noqa: DTZ007
                 datetimestr,
                 "%Y/%m/%d %H:%M:%S",
@@ -867,14 +1047,7 @@ class PokerStars(HandHistoryConverter):
         else:
             m1 = self.re_date_time1.finditer(datetime_str)
             for a in m1:
-                datetimestr = "{}/{}/{} {}:{}:{}".format(
-                    a.group("Y"),
-                    a.group("M"),
-                    a.group("D"),
-                    a.group("H"),
-                    a.group("MIN"),
-                    a.group("S"),
-                )
+                datetimestr = f"{a.group('Y')}/{a.group('M')}/{a.group('D')} {a.group('H')}:{a.group('MIN')}:{a.group('S')}"
             hand.startTime = datetime.datetime.strptime(  # noqa: DTZ007
                 datetimestr,
                 "%Y/%m/%d %H:%M:%S",
@@ -885,17 +1058,39 @@ class PokerStars(HandHistoryConverter):
                 "UTC",
             )
 
+    def _setFreeBuyin(self, hand: "Hand", currency: str) -> None:
+        """Sets buyin and fee to zero for freeroll tournaments.
+
+        Updates the hand object to reflect a free buyin and fee, and sets the buyin currency.
+
+        Args:
+            hand ("Hand"): The hand object to update.
+            currency (str): The currency to set for the buyin.
+
+        Returns:
+            None
+        """
+        hand.buyin = 0
+        hand.fee = 0
+        hand.buyinCurrency = currency
+
     def _processBuyinInfo(self, info: dict, hand: "Hand") -> None:
-        """Process tournament buyin information."""
+        """Processes buyin information and updates the hand object.
+
+        Determines buyin type, currency, bounty, and fee details from the info dictionary and sets relevant attributes on the hand object.
+
+        Args:
+            info (dict): Dictionary containing buyin and tournament information.
+            hand ("Hand"): The hand object to update with buyin details.
+
+        Returns:
+            None
+        """
         key = "BUYIN"
         if info[key].strip() == "Freeroll":
-            hand.buyin = 0
-            hand.fee = 0
-            hand.buyinCurrency = "FREE"
+            self._setFreeBuyin(hand, "FREE")
         elif info[key].strip() == "":
-            hand.buyin = 0
-            hand.fee = 0
-            hand.buyinCurrency = "NA"
+            self._setFreeBuyin(hand, "NA")
         else:
             # Detect currency
             self._detectBuyinCurrency(info[key], hand)
@@ -911,18 +1106,31 @@ class PokerStars(HandHistoryConverter):
         hand.isHomeGame = "Home" in info["TITLE"]
 
     def _detectBuyinCurrency(self, buyin_str: str, hand: "Hand") -> None:
-        """Detect currency from buyin string."""
-        if buyin_str.find("$") != -1:
+        """Detects the buyin currency from the buyin string and updates the hand object.
+
+        Analyzes the buyin string for currency symbols or keywords and sets the buyinCurrency attribute on the hand object.
+
+        Args:
+            buyin_str (str): The buyin string to analyze for currency.
+            hand ("Hand"): The hand object to update with detected currency.
+
+        Returns:
+            None
+
+        Raises:
+            FpdbParseError: If the currency cannot be detected from the buyin string.
+        """
+        if "$" in buyin_str:
             hand.buyinCurrency = "USD"
-        elif buyin_str.find("£") != -1:
+        elif "£" in buyin_str:
             hand.buyinCurrency = "GBP"
-        elif buyin_str.find("€") != -1:
+        elif "€" in buyin_str:
             hand.buyinCurrency = "EUR"
-        elif buyin_str.find("₹") != -1 or buyin_str.find("Rs. ") != -1:
+        elif "₹" in buyin_str or "Rs. " in buyin_str:
             hand.buyinCurrency = "INR"
-        elif buyin_str.find("¥") != -1:
+        elif "¥" in buyin_str:
             hand.buyinCurrency = "CNY"
-        elif buyin_str.find("FPP") != -1 or buyin_str.find("SC") != -1:
+        elif "FPP" in buyin_str or "SC" in buyin_str:
             hand.buyinCurrency = "PSFP"
         elif re.match("[0-9+]*$", buyin_str.strip()):
             hand.buyinCurrency = "play"
@@ -930,14 +1138,34 @@ class PokerStars(HandHistoryConverter):
             log.error("Failed to detect currency. Hand ID: %s: %r", hand.handid, buyin_str)
             raise FpdbParseError
 
+    def _swapBountyAndRake(self, info: dict) -> None:
+        """Swaps the values of bounty and rake in the info dictionary.
+
+        Exchanges the values of the 'BOUNTY' and 'BIRAKE' keys in the provided info dictionary.
+
+        Args:
+            info (dict): Dictionary containing bounty and rake information.
+
+        Returns:
+            None
+        """
+        info["BOUNTY"], info["BIRAKE"] = info["BIRAKE"], info["BOUNTY"]
+
     def _processBountyAndFees(self, info: dict, hand: "Hand") -> None:
-        """Process bounty and fee information."""
+        """Processes bounty and fee information for a hand.
+
+        Calculates and sets the bounty, buyin, and fee values on the hand object based on the provided info dictionary.
+
+        Args:
+            info (dict): Dictionary containing bounty, rake, and buyin information.
+            hand ("Hand"): The hand object to update with bounty and fee details.
+
+        Returns:
+            None
+        """
         if hand.buyinCurrency != "PSFP":
             if info["BOUNTY"] is not None:
-                # There is a bounty, which means we need to switch BOUNTY and BIRAKE values
-                tmp = info["BOUNTY"]
-                info["BOUNTY"] = info["BIRAKE"]
-                info["BIRAKE"] = tmp
+                self._swapBountyAndRake(info)
                 info["BOUNTY"] = info["BOUNTY"].strip("$€£₹")
                 hand.koBounty = int(100 * float(info["BOUNTY"]))
                 hand.isKO = True
@@ -952,21 +1180,53 @@ class PokerStars(HandHistoryConverter):
             hand.fee = 0
 
     def _processHandInfo(self, info: dict, hand: "Hand") -> None:
-        """Process all hand information from parsed data."""
+        """Processes extracted hand information and updates the hand object.
+
+        Iterates through the info dictionary and delegates processing of each key to the appropriate handler.
+
+        Args:
+            info (dict): Dictionary containing extracted hand information.
+            hand ("Hand"): The hand object to update with processed information.
+
+        Returns:
+            None
+        """
         for key in info:
             self._processHandInfoKey(key, info, hand)
 
     def _processHandInfoKey(self, key: str, info: dict, hand: "Hand") -> None:
-        """Process a single key from hand info data."""
-        if key in ("DATETIME", "HID", "TOURNO"):
+        """Processes a single key from the hand info dictionary and updates the hand object.
+
+        Delegates processing of the key to the appropriate handler based on its type (basic, tournament, or table field).
+
+        Args:
+            key (str): The key from the hand info dictionary to process.
+            info (dict): Dictionary containing extracted hand information.
+            hand ("Hand"): The hand object to update with processed information.
+
+        Returns:
+            None
+        """
+        if key in {"DATETIME", "HID", "TOURNO"}:
             self._processBasicHandFields(key, info, hand)
-        elif key in ("BUYIN", "LEVEL", "SHOOTOUT"):
+        elif key in {"BUYIN", "LEVEL", "SHOOTOUT"}:
             self._processTournamentFields(key, info, hand)
-        elif key in ("TABLE", "BUTTON", "MAX"):
+        elif key in {"TABLE", "BUTTON", "MAX"}:
             self._processTableFields(key, info, hand)
 
     def _processBasicHandFields(self, key: str, info: dict, hand: "Hand") -> None:
-        """Process basic hand identification fields."""
+        """Processes basic hand fields and updates the hand object.
+
+        Handles the DATETIME, HID, and TOURNO keys by setting the corresponding attributes on the hand object.
+
+        Args:
+            key (str): The key from the hand info dictionary to process.
+            info (dict): Dictionary containing extracted hand information.
+            hand ("Hand"): The hand object to update with processed information.
+
+        Returns:
+            None
+        """
         if key == "DATETIME":
             self._processDateTime(info[key], hand)
         elif key == "HID":
@@ -975,7 +1235,18 @@ class PokerStars(HandHistoryConverter):
             hand.tourNo = info[key][-18:]
 
     def _processTournamentFields(self, key: str, info: dict, hand: "Hand") -> None:
-        """Process tournament-specific fields."""
+        """Processes tournament-specific fields and updates the hand object.
+
+        Handles the BUYIN, LEVEL, and SHOOTOUT keys by setting the corresponding tournament attributes on the hand object.
+
+        Args:
+            key (str): The key from the hand info dictionary to process.
+            info (dict): Dictionary containing extracted hand information.
+            hand ("Hand"): The hand object to update with processed tournament information.
+
+        Returns:
+            None
+        """
         if key == "BUYIN" and hand.tourNo is not None:
             self._processBuyinInfo(info, hand)
         elif key == "LEVEL":
@@ -984,7 +1255,18 @@ class PokerStars(HandHistoryConverter):
             hand.isShootout = True
 
     def _processTableFields(self, key: str, info: dict, hand: "Hand") -> None:
-        """Process table-related fields."""
+        """Processes table-related fields and updates the hand object.
+
+        Handles the TABLE, BUTTON, and MAX keys by setting the corresponding table attributes on the hand object.
+
+        Args:
+            key (str): The key from the hand info dictionary to process.
+            info (dict): Dictionary containing extracted hand information.
+            hand ("Hand"): The hand object to update with processed table information.
+
+        Returns:
+            None
+        """
         if key == "TABLE":
             self._processTableInfo(info, hand)
         elif key == "BUTTON":
@@ -993,7 +1275,17 @@ class PokerStars(HandHistoryConverter):
             hand.maxseats = int(info[key])
 
     def _processTableInfo(self, info: dict, hand: "Hand") -> None:
-        """Process table name information."""
+        """Processes table information and updates the hand object.
+
+        Sets the table name on the hand object based on tournament and table info fields.
+
+        Args:
+            info (dict): Dictionary containing extracted hand information.
+            hand ("Hand"): The hand object to update with table information.
+
+        Returns:
+            None
+        """
         tablesplit = re.split(" ", info["TABLE"])
         if info["TOURNO"] is not None and info["HIVETABLE"] is not None:
             hand.tablename = info["HIVETABLE"]
@@ -1003,24 +1295,57 @@ class PokerStars(HandHistoryConverter):
             hand.tablename = info["TABLE"]
 
     def readHandInfo(self, hand: "Hand") -> None:
-        """Extract hand information from hand text."""
-        # First check if partial
-        if hand.handText.count("*** SUMMARY ***") != 1:
-            msg = "Hand is not cleanly split into pre and post Summary"
-            raise FpdbHandPartial(
-                (msg),
-            )
+        """Reads and processes hand information from the hand text.
+
+        Extracts summary, game, and table information from the hand text, checks for partial or malformed hands, and updates the hand object with parsed details.
+
+        Args:
+            hand ("Hand"): The hand object to update with extracted information.
+
+        Returns:
+            None
+
+        Raises:
+            FpdbHandPartial: If the hand is incomplete, contains multiple summaries, or is cancelled.
+            FpdbParseError: If hand information cannot be parsed from the hand text.
+        """
+        # First check if partial or malformed
+        summary_count = hand.handText.count("*** SUMMARY ***")
+        
+        if summary_count == 0:
+            msg = f"Hand '{hand.handid}' has no SUMMARY section - likely incomplete"
+            raise FpdbHandPartial(msg)
+        elif summary_count > 1:
+            # Multiple summaries suggest multiple hands in one string
+            # Try to extract just the first complete hand
+            if summaries := list(re.finditer(r'\*\*\* SUMMARY \*\*\*', hand.handText)):
+                # Find the end of the first hand (after its summary section)
+                first_summary_end = summaries[0].end()
+                # Look for the next hand start or end of string
+                remaining_text = hand.handText[first_summary_end:]
+                if next_hand_match := re.search(r'\n\n+PokerStars (Game|Hand) #', remaining_text):
+                    # Truncate to just the first hand
+                    truncate_pos = first_summary_end + next_hand_match.start()
+                    original_text = hand.handText
+                    hand.handText = original_text[:truncate_pos].rstrip()
+                    log.info(f"Hand '{hand.handid}' contained multiple hands, extracted first hand only")
+                else:
+                    # No clear next hand boundary, treat as partial
+                    msg = f"Hand '{hand.handid}' contains {summary_count} SUMMARY sections - appears to contain multiple incomplete hands"
+                    raise FpdbHandPartial(msg)
+            else:
+                msg = f"Hand '{hand.handid}' is not cleanly split into pre and post Summary"
+                raise FpdbHandPartial(msg)
 
         info = {}
         m = self.re_hand_info.search(hand.handText, re.DOTALL)
         m2 = self.re_game_info.search(hand.handText)
         if m is None or m2 is None:
-            tmp = hand.handText[0:200]
+            tmp = hand.handText[:200]
             log.error("read Hand Info failed: %r", tmp)
             raise FpdbParseError
 
-        info.update(m.groupdict())
-        info.update(m2.groupdict())
+        info |= m.groupdict() | m2.groupdict()
 
         # Process the extracted information
         self._processHandInfo(info, hand)
@@ -1036,15 +1361,32 @@ class PokerStars(HandHistoryConverter):
         self._parseRakeAndPot(hand)
 
     def readButton(self, hand: "Hand") -> None:
-        """Identify the dealer button position."""
-        m = self.re_button.search(hand.handText)
-        if m:
+        """Reads the button position from the hand text and updates the hand object.
+
+        Searches for the button position in the hand text and sets it on the hand object, logging if not found.
+
+        Args:
+            hand ("Hand"): The hand object to update with button position.
+
+        Returns:
+            None
+        """
+        if m := self.re_button.search(hand.handText):
             hand.buttonpos = int(m.group("BUTTON"))
         else:
             log.info("readButton: not found")
 
     def readPlayerStacks(self, hand: "Hand") -> None:
-        """Extract player stack sizes and positions."""
+        """Reads player stack information from the hand text and updates the hand object.
+
+        Extracts seat, player name, cash, sitout status, and bounty for each player before the summary section.
+
+        Args:
+            hand ("Hand"): The hand object to update with player stack information.
+
+        Returns:
+            None
+        """
         pre, post = hand.handText.split("*** SUMMARY ***")
         m = self.re_player_info.finditer(pre)
         for a in m:
@@ -1058,7 +1400,16 @@ class PokerStars(HandHistoryConverter):
             )
 
     def markStreets(self, hand: "Hand") -> None:
-        """Mark street boundaries in hand text."""
+        """Reads player stack information from the hand text and updates the hand object.
+
+        Extracts seat, player name, cash, sitout status, and bounty for each player before the summary section.
+
+        Args:
+            hand ("Hand"): The hand object to update with player stack information.
+
+        Returns:
+            None
+        """
         # There is no marker between deal and draw in Stars single draw games
         #  this upsets the accounting, incorrectly sets handsPlayers.cardxx and
         #  in consequence the mucked-display is incorrect.
@@ -1071,10 +1422,7 @@ class PokerStars(HandHistoryConverter):
                 hand.handText,
                 flags=re.DOTALL,
             )
-            if len(hand.handText) == len(discard_split[0]):
-                # hand_text was not split, no DRAW street occurred
-                pass
-            else:
+            if len(hand.handText) != len(discard_split[0]):
                 # DRAW street found, reassemble, with DRAW marker added
                 discard_split[0] += "*** DRAW ***\r\n"
                 hand.handText = ""
@@ -1147,15 +1495,28 @@ class PokerStars(HandHistoryConverter):
         hand: "Hand",
         street: str,
     ) -> None:
-        """Read community cards for each street."""  # street has been matched by markStreets, so exists in this hand
+        """Reads and sets community cards for a given street in the hand.
+
+        Extracts community cards from the hand text for the specified street and updates the hand object, handling run-it-twice scenarios.
+
+        Args:
+            hand ("Hand"): The hand object to update with community cards.
+            street (str): The street name to extract community cards for.
+
+        Returns:
+            None
+
+        Raises:
+            FpdbHandPartial: If a blank community card is detected.
+        """
+        # street has been matched by markStreets, so exists in this hand
         if self.re_empty_card.search(hand.streets[street]):
             msg = "Blank community card"
             raise FpdbHandPartial(msg)
         if (
             street != "FLOPET" or hand.streets.get("FLOP") is None
         ):  # a list of streets which get dealt community cards (i.e. all but PREFLOP)
-            m2 = self.re_board2.search(hand.streets[street])
-            if m2:
+            if (m2 := self.re_board2.search(hand.streets[street])):
                 hand.setCommunityCards(
                     street,
                     [m2.group("C1"), m2.group("C2"), m2.group("C3")],
@@ -1163,17 +1524,34 @@ class PokerStars(HandHistoryConverter):
             else:
                 m = self.re_board.search(hand.streets[street])
                 hand.setCommunityCards(street, m.group("CARDS").split(" "))
-        if street in ("FLOP1", "TURN1", "RIVER1", "FLOP2", "TURN2", "RIVER2"):
+        if street in {"FLOP1", "TURN1", "RIVER1", "FLOP2", "TURN2", "RIVER2"}:
             hand.runItTimes = 2
 
     def readSTP(self, hand: "Hand") -> None:
-        """Read Splash the Pot information."""
-        m = self.re_stp.search(hand.handText)
-        if m:
+        """Reads STP (Side Pot) information from the hand text and updates the hand object.
+
+        Searches for the STP amount in the hand text and adds it to the hand object if found.
+
+        Args:
+            hand ("Hand"): The hand object to update with STP information.
+
+        Returns:
+            None
+        """
+        if m := self.re_stp.search(hand.handText):
             hand.addSTP(m.group("AMOUNT"))
 
     def readAntes(self, hand: "Hand") -> None:
-        """Extract ante information from hand text."""
+        """Reads ante information from the hand text and updates the hand object.
+
+        Extracts ante amounts for each player and adds them to the hand object.
+
+        Args:
+            hand ("Hand"): The hand object to update with ante information.
+
+        Returns:
+            None
+        """
         log.debug("reading antes")
         m = self.re_antes.finditer(hand.handText)
         for player in m:
@@ -1183,13 +1561,30 @@ class PokerStars(HandHistoryConverter):
             )
 
     def readBringIn(self, hand: "Hand") -> None:
-        """Extract bring-in bet information."""
-        m = self.re_bring_in.search(hand.handText, re.DOTALL)
-        if m:
+        """Reads bring-in bet information from the hand text and updates the hand object.
+
+        Searches for the bring-in bet in the hand text and adds it to the hand object if found.
+
+        Args:
+            hand ("Hand"): The hand object to update with bring-in information.
+
+        Returns:
+            None
+        """
+        if m := self.re_bring_in.search(hand.handText, re.DOTALL):
             hand.addBringIn(m.group("PNAME"), self.clearMoneyString(m.group("BRINGIN")))
 
     def readBlinds(self, hand: "Hand") -> None:
-        """Extract blind bet information."""
+        """Reads blind and straddle information from the hand text and updates the hand object.
+
+        Extracts small blind, big blind, dead blinds, straddle, and button blind postings from the hand text and adds them to the hand object.
+
+        Args:
+            hand ("Hand"): The hand object to update with blind information.
+
+        Returns:
+            None
+        """
         live_blind = True
         for a in self.re_post_sb.finditer(hand.handText):
             if live_blind:
@@ -1240,7 +1635,16 @@ class PokerStars(HandHistoryConverter):
             )
 
     def readHoleCards(self, hand: "Hand") -> None:
-        """Extract hole cards for all players."""
+        """Reads and sets hole cards for each player from the hand text.
+
+        Extracts hero and player hole cards for each street, handling special cases for stud games and updating the hand object accordingly.
+
+        Args:
+            hand ("Hand"): The hand object to update with hole card information.
+
+        Returns:
+            None
+        """
         #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
         #    we need to grab hero's cards
         for street in ("PREFLOP", "DEAL"):
@@ -1277,7 +1681,7 @@ class PokerStars(HandHistoryConverter):
                     hand.addHoleCards(
                         street,
                         player,
-                        closed=newcards[0:2],
+                        closed=newcards[:2],
                         open=[newcards[2]],
                         shown=False,
                         mucked=False,
@@ -1295,37 +1699,70 @@ class PokerStars(HandHistoryConverter):
                     )
 
     def _processAction(self, action: re.Match, hand: "Hand", street: str) -> None:
-        """Process a single poker action."""
-        atype = action.group("ATYPE")
-        pname = action.group("PNAME")
+        """Processes a single betting action and updates the hand object.
+
+        Interprets the action type and delegates to the appropriate hand method to record the action for the specified street.
+
+        Args:
+            action (re.Match): The regex match object containing action details.
+            hand ("Hand"): The hand object to update with the action.
+            street (str): The street name where the action occurred.
+
+        Returns:
+            None
+        """
+        atype = action["ATYPE"]
+        pname = action["PNAME"]
 
         if atype == " folds":
             hand.addFold(street, pname)
         elif atype == " checks":
             hand.addCheck(street, pname)
         elif atype == " calls":
-            hand.addCall(street, pname, self.clearMoneyString(action.group("BET")))
+            hand.addCall(street, pname, self.clearMoneyString(action["BET"]))
         elif atype == " raises":
             self._processRaise(action, hand, street, pname)
         elif atype == " bets":
-            hand.addBet(street, pname, self.clearMoneyString(action.group("BET")))
+            hand.addBet(street, pname, self.clearMoneyString(action["BET"]))
         elif atype == " discards":
-            hand.addDiscard(street, pname, action.group("BET"), action.group("CARDS"))
+            hand.addDiscard(street, pname, action["BET"], action["CARDS"])
         elif atype == " stands pat":
-            hand.addStandsPat(street, pname, action.group("CARDS"))
+            hand.addStandsPat(street, pname, action["CARDS"])
         else:
             log.debug("Unimplemented readAction: %r %r", pname, atype)
 
     def _processRaise(self, action: re.Match, hand: "Hand", street: str, pname: str) -> None:
-        """Process a raise action."""
-        if action.group("BETTO") is not None:
-            hand.addRaiseTo(street, pname, self.clearMoneyString(action.group("BETTO")))
-        elif action.group("BET") is not None:
-            hand.addCallandRaise(street, pname, self.clearMoneyString(action.group("BET")))
+        """Processes a raise action and updates the hand object.
+
+        Determines the type of raise (to amount or call and raise) and records it for the specified street and player.
+
+        Args:
+            action (re.Match): The regex match object containing raise details.
+            hand ("Hand"): The hand object to update with the raise action.
+            street (str): The street name where the raise occurred.
+            pname (str): The player name performing the raise.
+
+        Returns:
+            None
+        """
+        if action["BETTO"] is not None:
+            hand.addRaiseTo(street, pname, self.clearMoneyString(action["BETTO"]))
+        elif action["BET"] is not None:
+            hand.addCallandRaise(street, pname, self.clearMoneyString(action["BET"]))
 
     def readAction(self, hand: "Hand", street: str) -> None:
-        """Parse betting actions for a specific street."""
-        s = street + "2" if hand.gametype["split"] and street in hand.communityStreets else street
+        """Reads and processes betting actions for a given street in the hand.
+
+        Extracts and records all player actions for the specified street, including folds, checks, calls, raises, bets, discards, and stands pat. Also detects and handles uncalled bets and walk scenarios.
+
+        Args:
+            hand ("Hand"): The hand object to update with action information.
+            street (str): The street name to process actions for.
+
+        Returns:
+            None
+        """
+        s = f"{street}2" if hand.gametype["split"] and street in hand.communityStreets else street
         if not hand.streets[s]:
             return
 
@@ -1335,8 +1772,7 @@ class PokerStars(HandHistoryConverter):
             self._processAction(action, hand, street)
 
         # Process uncalled bets
-        m = self.re_uncalled.search(hand.streets[s])
-        if m:
+        if m := self.re_uncalled.search(hand.streets[s]):
             uncalled_player = m.group("PNAME").strip()  # Remove leading/trailing spaces
             uncalled_amount = m.group("BET")
             log.info("Processing uncalled bet: %s -> %s", uncalled_player, uncalled_amount)
@@ -1378,16 +1814,33 @@ class PokerStars(HandHistoryConverter):
             hand.addUncalled(street, uncalled_player, uncalled_amount)
 
     def readShowdownActions(self, hand: "Hand") -> None:
-        """Extract showdown actions and revealed cards."""
+        """Reads showdown actions from the hand text and updates the hand object.
+
+        Extracts shown cards for each player at showdown and adds them to the hand object.
+
+        Args:
+            hand ("Hand"): The hand object to update with showdown card information.
+
+        Returns:
+            None
+        """
         # TODO(@fpdb): pick up mucks also??
         for shows in self.re_showdown_action.finditer(hand.handText):
             cards = shows.group("CARDS").split(" ")
             hand.addShownCards(cards, shows.group("PNAME"))
 
     def _processProgressiveBounties(self, hand: "Hand") -> None:
-        """Process progressive knockout bounties."""
+        """Processes progressive knockout bounties and updates the hand object.
+
+        Calculates progressive bounty amounts for each player, sets end bounty values, and updates the hand's progressive status and koCounts.
+
+        Args:
+            hand ("Hand"): The hand object to update with progressive bounty information.
+
+        Returns:
+            None
+        """
         ko_amounts = {}
-        winner = None
 
         for a in self.re_progressive.finditer(hand.handText):
             if a.group("PNAME") not in ko_amounts:
@@ -1396,11 +1849,10 @@ class PokerStars(HandHistoryConverter):
             hand.endBounty[a.group("PNAME")] = 100 * float(a.group("ENDAMT"))
             hand.isProgressive = True
 
-        m = self.re_winning_rank_one.search(hand.handText)
-        if m:
-            winner = m.group("PNAME")
-
         if hand.koBounty > 0:
+            m = self.re_winning_rank_one.search(hand.handText)
+            winner = m.group("PNAME") if m else None
+            
             for pname, amount in list(ko_amounts.items()):
                 if pname == winner:
                     hand.koCounts[pname] = (amount + hand.endBounty[pname]) / float(hand.koBounty)
@@ -1408,37 +1860,84 @@ class PokerStars(HandHistoryConverter):
                     hand.koCounts[pname] = amount / float(hand.koBounty)
 
     def _processRegularBounties(self, hand: "Hand") -> None:
-        """Process regular knockout bounties."""
+        """Processes regular knockout bounties and updates the hand object.
+
+        Iterates through bounty matches in the hand text, handling split and single bounties, and updates the koCounts for each player.
+
+        Args:
+            hand ("Hand"): The hand object to update with regular bounty information.
+
+        Returns:
+            None
+        """
         for a in self.re_bounty.finditer(hand.handText):
-            if a.group("SPLIT") == "split":
+            if a["SPLIT"] == "split":
                 self._processSplitBounty(hand, a)
             else:
                 self._processSingleBounty(hand, a)
 
     def _processSplitBounty(self, hand: "Hand", match: re.Match) -> None:
-        """Process a split bounty between multiple players."""
-        pnames = match.group("PNAME").split(", ")
+        """Processes split knockout bounties and updates the hand object.
+
+        Splits the bounty among multiple players listed in the match and updates their koCounts accordingly.
+
+        Args:
+            hand ("Hand"): The hand object to update with split bounty information.
+            match (re.Match): The regex match object containing player names.
+
+        Returns:
+            None
+        """
+        pnames = match["PNAME"].split(", ")
         for pname in pnames:
             if pname not in hand.koCounts:
                 hand.koCounts[pname] = 0
             hand.koCounts[pname] += 1 / float(len(pnames))
 
     def _processSingleBounty(self, hand: "Hand", match: re.Match) -> None:
-        """Process a single player bounty."""
-        pname = match.group("PNAME")
+        """Processes a single knockout bounty and updates the hand object.
+
+        Increments the koCounts for the player listed in the match to reflect a single bounty win.
+
+        Args:
+            hand ("Hand"): The hand object to update with single bounty information.
+            match (re.Match): The regex match object containing the player name.
+
+        Returns:
+            None
+        """
+        pname = match["PNAME"]
         if pname not in hand.koCounts:
             hand.koCounts[pname] = 0
         hand.koCounts[pname] += 1
 
     def readTourneyResults(self, hand: "Hand") -> None:
-        """Reads knockout bounties and add them to the koCounts dict."""
+        """Reads tournament results and updates bounty information for the hand.
+
+        Determines whether the hand contains progressive or regular bounties and processes them accordingly to update player KO counts.
+
+        Args:
+            hand ("Hand"): The hand object to update with tournament results.
+
+        Returns:
+            None
+        """
         if self.re_bounty.search(hand.handText) is None:
             self._processProgressiveBounties(hand)
         else:
             self._processRegularBounties(hand)
 
     def _calculateBovadaAdjustments(self, hand: "Hand") -> tuple[bool, bool, float, float]:
-        """Calculate Bovada-specific adjustments for walks."""
+        """Calculates Bovada-specific adjustments for pot collection scenarios.
+
+        Determines if a hand contains Bovada walk scenarios and calculates necessary adjustments for blinds and pot amounts.
+
+        Args:
+            hand ("Hand"): The hand object to analyze for Bovada adjustments.
+
+        Returns:
+            tuple[bool, bool, float, float]: Flags and adjustment values for Bovada walk scenarios.
+        """
         acts = hand.actions.get("PREFLOP")
         bovada_uncalled_v1, bovada_uncalled_v2, blindsantes, adjustment = False, False, 0, 0
 
@@ -1446,16 +1945,16 @@ class PokerStars(HandHistoryConverter):
         if (
             ("Big Blind" in names or "Small Blind" in names or "Dealer" in names or self.siteId == SITE_MERGE)
             and acts is not None
-            and len([a for a in acts if a[1] != "folds"]) == 0
+            and all(a[1] == "folds" for a in acts)
         ):
             m0 = self.re_uncalled.search(hand.handText)
             if m0 and float(m0.group("BET")) == float(hand.bb):
                 bovada_uncalled_v2 = True
             elif m0 is None:
                 bovada_uncalled_v1 = True
-                has_sb = len([a[2] for a in hand.actions.get("BLINDSANTES") if a[1] == "small blind"]) > 0
+                has_sb = any(a[1] == "small blind" for a in hand.actions.get("BLINDSANTES"))
                 adjustment = (float(hand.bb) - float(hand.sb)) if has_sb else float(hand.bb)
-                blindsantes = sum([a[2] for a in hand.actions.get("BLINDSANTES")])
+                blindsantes = sum(a[2] for a in hand.actions.get("BLINDSANTES"))
 
         return bovada_uncalled_v1, bovada_uncalled_v2, blindsantes, adjustment
 
@@ -1465,10 +1964,21 @@ class PokerStars(HandHistoryConverter):
         match: re.Match,
         adjustments: tuple[bool, bool, float, float],
     ) -> None:
-        """Add collect pot with Bovada adjustments."""
+        """Adds pot collection information to the hand object, applying Bovada-specific adjustments.
+
+        Adjusts the collected pot amount for Bovada walk scenarios and updates the hand object with the correct value.
+
+        Args:
+            hand ("Hand"): The hand object to update with pot collection information.
+            match (re.Match): The regex match object containing pot and player details.
+            adjustments (tuple[bool, bool, float, float]): Flags and adjustment values for Bovada walk scenarios.
+
+        Returns:
+            None
+        """
         bovada_uncalled_v1, bovada_uncalled_v2, blindsantes, adjustment = adjustments
-        pot = self.clearMoneyString(match.group("POT"))
-        player = match.group("PNAME")
+        pot = self.clearMoneyString(match["POT"])
+        player = match["PNAME"]
 
         if bovada_uncalled_v1 and float(pot) == (blindsantes + hand.pot.stp):
             hand.addCollectPot(player=player, pot=str(float(pot) - adjustment))
@@ -1476,9 +1986,46 @@ class PokerStars(HandHistoryConverter):
             hand.addCollectPot(player=player, pot=str(float(pot) * 2))
         else:
             hand.addCollectPot(player=player, pot=pot)
+    
+    def _addCashOutPotWithAdjustment(
+        self,
+        hand: "Hand", 
+        match: re.Match,
+        adjustments: tuple[bool, bool, float, float],
+    ) -> None:
+        """Adds cash out pot collection information to the hand object, applying adjustments.
+        
+        Uses addCashOutPot instead of addCollectPot to avoid affecting totalcollected
+        and breaking rake calculations.
+        
+        Args:
+            hand ("Hand"): The hand object to update with cash out collection information.
+            match (re.Match): The regex match object containing pot and player details.
+            adjustments (tuple[bool, bool, float, float]): Flags and adjustment values for walk scenarios.
+        Returns:
+            None
+        """
+        bovada_uncalled_v1, bovada_uncalled_v2, blindsantes, adjustment = adjustments
+        pot = self.clearMoneyString(match["POT"])
+        player = match["PNAME"]
+        if bovada_uncalled_v1 and float(pot) == (blindsantes + hand.pot.stp):
+            hand.addCashOutPot(player=player, pot=str(float(pot) - adjustment))
+        elif bovada_uncalled_v2:
+            hand.addCashOutPot(player=player, pot=str(float(pot) * 2))
+        else:
+            hand.addCashOutPot(player=player, pot=pot)
 
     def readCollectPot(self, hand: "Hand") -> None:
-        """Extract pot collection information."""
+        """Reads pot collection information from the hand text and updates the hand object.
+
+        Processes all pot collections for the hand, applying Bovada-specific adjustments and handling walk scenarios and cash out fees.
+
+        Args:
+            hand ("Hand"): The hand object to update with pot collection information.
+
+        Returns:
+            None
+        """
         # Bovada walks are calculated incorrectly in converted PokerStars hands
         adjustments = self._calculateBovadaAdjustments(hand)
 
@@ -1488,7 +2035,9 @@ class PokerStars(HandHistoryConverter):
 
         # Walk scenarios are already detected in readAction
 
-        if hand.runItTimes == 0 and hand.cashedOut is False:
+        if hand.runItTimes == 0:
+            # Process normal pot collections even for cash out hands
+            # The cash out itself doesn't affect the main pot calculation
             for m in self.re_collect_pot.finditer(post):
                 self._addCollectPotWithAdjustment(hand, m, adjustments)
                 i += 1
@@ -1505,9 +2054,35 @@ class PokerStars(HandHistoryConverter):
                     log.info("Walk scenario confirmed for %s", player)
 
                 self._addCollectPotWithAdjustment(hand, m, adjustments)
+                i += 1
+            
+        # Handle cash out with fee pattern (always check, regardless of i)
+        for m in self.re_collect_pot3.finditer(pre):
+            player = m.group("PNAME")
+            pot_amount = Decimal(m.group("POT").replace(",", ""))
+            fee_amount = Decimal(m.group("FEE").replace(",", ""))
+            log.info("Found cash out collection: %s -> %s (fee: %s)", player, pot_amount, fee_amount)
+            
+            # Store cash out fee information for statistics/logging
+            # Fee is not added to collected pot as it's taken by the site
+            if not hasattr(hand, 'cashOutFees'):
+                hand.cashOutFees = {}
+            hand.cashOutFees[player] = fee_amount
+            
+            self._addCashOutPotWithAdjustment(hand, m, adjustments)
+            i += 1
 
     def readShownCards(self, hand: "Hand") -> None:
-        """Parse cards shown at showdown."""
+        """Reads shown and mucked cards from the hand text and updates the hand object.
+
+        Extracts revealed cards for each player, including shown and mucked cards, and adds them to the hand object with appropriate flags.
+
+        Args:
+            hand ("Hand"): The hand object to update with shown and mucked card information.
+
+        Returns:
+            None
+        """
         if self.siteId == SITE_MERGE:
             re_revealed_cards = re.compile(
                 r"Dealt to {PLYR}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])".format(**self.substitutions),
@@ -1549,18 +2124,25 @@ class PokerStars(HandHistoryConverter):
                 )
 
     def _parseRakeAndPot(self, hand: "Hand") -> None:
-        """Parse rake and total pot information from hand text if available."""
+        """Parses rake and total pot information from the hand text and updates the hand object.
+
+        Searches for explicit rake and pot values in the summary section, parses them, and sets them on the hand object. Marks rake as parsed to avoid recalculation.
+
+        Args:
+            hand ("Hand"): The hand object to update with rake and pot information.
+
+        Returns:
+            None
+        """
         # Look for rake information in the summary section
-        rake_match = self.re_rake.search(hand.handText)
-        if rake_match:
+        if rake_match := self.re_rake.search(hand.handText):
             # Extract pot and rake values
             total_pot_str = rake_match.group("POT").replace(",", "")
             rake_str = rake_match.group("RAKE").replace(",", "")
 
             try:
-                total_pot = Decimal(total_pot_str)
-                rake = Decimal(rake_str)
-
+                total_pot, rake = self._parse_decimal_values(total_pot_str, rake_str)
+                
                 # Set the values on the hand object
                 hand.totalpot = total_pot
                 hand.rake = rake
@@ -1575,6 +2157,22 @@ class PokerStars(HandHistoryConverter):
         else:
             log.debug("No explicit rake information found in hand text")
 
+    def _parse_decimal_values(self, total_pot_str: str, rake_str: str) -> tuple[Decimal, Decimal]:
+        """Parses string representations of total pot and rake into Decimal values.
+
+        Converts the provided pot and rake strings to Decimal objects for accurate financial calculations.
+
+        Args:
+            total_pot_str (str): String representation of the total pot amount.
+            rake_str (str): String representation of the rake amount.
+
+        Returns:
+            tuple[Decimal, Decimal]: The total pot and rake as Decimal values.
+        """
+        total_pot = Decimal(total_pot_str)
+        rake = Decimal(rake_str)
+        return total_pot, rake
+
     def readSummaryInfo(self, summary_info_list: list[str]) -> bool:  # noqa: ARG002
         """Implement the abstract method from HandHistoryConverter."""
         # Add the actual implementation here, or use a placeholder if not needed
@@ -1588,12 +2186,24 @@ class PokerStars(HandHistoryConverter):
         tournament: str | None = None,
         table_number: str | None = None,
     ) -> str:
-        """Returns string to search in windows titles."""
+        """Generates a regular expression for matching PokerStars table titles.
+
+        Returns a regex string for cash game or tournament table titles based on the provided game type and identifiers.
+
+        Args:
+            game_type (str): The type of game ("ring" or "tour").
+            table_name (str | None): The name of the table for cash games.
+            tournament (str | None): The tournament name for tournament games.
+            table_number (str | None): The table number for tournament games.
+
+        Returns:
+            str: The regular expression string for matching table titles.
+        """
         regex = re.escape(str(table_name))
         log.debug("Regex for cash game: %s", regex)
 
         if game_type == "tour":
-            regex = re.escape(str(tournament)) + " (Table|Tisch) " + re.escape(str(table_number))
+            regex = f"{re.escape(str(tournament))} (Table|Tisch) {re.escape(str(table_number))}"
             log.debug("Regex for tournament: %s", regex)
             log.info(
                 "Stars table_name=%r, tournament=%r, table_number=%r",
