@@ -113,6 +113,7 @@ class Hand:
         self.checkForUncalled = False
         self.adjustCollected = False
         self.cashedOut = False
+        self.cashOutFees = {}  # Dict to store cash out fees per player
         self.endTime = None
         self.pot = Pot()  # Initialize the Pot instance
         self.roundPenny = False
@@ -649,7 +650,11 @@ class Hand:
                         dealt=dealt,
                     )
             if row["winnings"] > 0:
-                self.addCollectPot(row["name"], str(row["winnings"]))
+                # Use addCashOutPot for cash outs to avoid adding to totalcollected
+                if row.get("iscashout", False):  # Handle case where column might not exist yet
+                    self.addCashOutPot(row["name"], str(row["winnings"]))
+                else:
+                    self.addCollectPot(row["name"], str(row["winnings"]))
             if row["position"] == "0":
                 # position 0 is the button, heads-up there is no position 0
                 self.buttonpos = row["seatno"]
@@ -1170,6 +1175,29 @@ class Hand:
         # update collected pot
         self.totalcollected += amount
         log.debug(f"Updated totalcollected: {self.totalcollected}")
+
+    def addCashOutPot(self, player, pot) -> None:
+        """Records a cash out event for a player in the current hand.
+
+        This method updates the collected and collectees data structures for the player, but does not modify the totalcollected value.
+        
+        Args:
+            player: The name of the player cashing out.
+            pot: The amount the player cashed out.
+
+        Returns:
+            None
+        """
+        log.debug(f"{player} cashed out for {pot}")
+        self.checkPlayerExists(player, "addCashOutPot")
+        self.collected.append([player, pot])
+        amount = Decimal(pot)
+        if player not in self.collectees:
+            self.collectees[player] = amount
+        else:
+            self.collectees[player] += amount
+        # NOTE: Do NOT add to totalcollected for cash outs
+        log.debug(f"Cash out recorded, totalcollected unchanged: {self.totalcollected}")
 
     def addUncalled(self, street, player, amount) -> None:
         log.debug(f"{street} {player} uncalled {amount}")

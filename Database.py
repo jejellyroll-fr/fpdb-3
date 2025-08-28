@@ -287,6 +287,8 @@ HANDS_PLAYERS_KEYS = [
     "street2Discards",
     "street3Discards",
     "handString",
+    "cashOutFee",
+    "isCashOut",
 ]
 
 # Just like STATS_KEYS, this lets us efficiently add data at the
