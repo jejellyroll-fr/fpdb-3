@@ -24,6 +24,7 @@
 
 from functools import partial
 from io import StringIO
+from decimal import Decimal
 
 from PyQt5.QtCore import QCoreApplication, QSortFilterProxyModel, Qt
 from PyQt5.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
@@ -281,7 +282,7 @@ class GuiHandViewer(QSplitter):
         totalpot = hand.totalpot
         log.debug(f"Total pot: {totalpot}")
 
-        rake = (totalpot / nbplayers) - net
+        rake = hand.rake if hand.rake is not None else Decimal("0.00")
         log.debug(f"Rake: {rake}")
 
         sitehandid = hand.handid
