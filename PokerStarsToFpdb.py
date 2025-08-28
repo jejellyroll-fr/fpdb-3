@@ -1986,6 +1986,34 @@ class PokerStars(HandHistoryConverter):
             hand.addCollectPot(player=player, pot=str(float(pot) * 2))
         else:
             hand.addCollectPot(player=player, pot=pot)
+    
+    def _addCashOutPotWithAdjustment(
+        self,
+        hand: "Hand", 
+        match: re.Match,
+        adjustments: tuple[bool, bool, float, float],
+    ) -> None:
+        """Adds cash out pot collection information to the hand object, applying adjustments.
+        
+        Uses addCashOutPot instead of addCollectPot to avoid affecting totalcollected
+        and breaking rake calculations.
+        
+        Args:
+            hand ("Hand"): The hand object to update with cash out collection information.
+            match (re.Match): The regex match object containing pot and player details.
+            adjustments (tuple[bool, bool, float, float]): Flags and adjustment values for walk scenarios.
+        Returns:
+            None
+        """
+        bovada_uncalled_v1, bovada_uncalled_v2, blindsantes, adjustment = adjustments
+        pot = self.clearMoneyString(match["POT"])
+        player = match["PNAME"]
+        if bovada_uncalled_v1 and float(pot) == (blindsantes + hand.pot.stp):
+            hand.addCashOutPot(player=player, pot=str(float(pot) - adjustment))
+        elif bovada_uncalled_v2:
+            hand.addCashOutPot(player=player, pot=str(float(pot) * 2))
+        else:
+            hand.addCashOutPot(player=player, pot=pot)
 
     def readCollectPot(self, hand: "Hand") -> None:
         """Reads pot collection information from the hand text and updates the hand object.
@@ -2007,7 +2035,9 @@ class PokerStars(HandHistoryConverter):
 
         # Walk scenarios are already detected in readAction
 
-        if hand.runItTimes == 0 and not hand.cashedOut:
+        if hand.runItTimes == 0:
+            # Process normal pot collections even for cash out hands
+            # The cash out itself doesn't affect the main pot calculation
             for m in self.re_collect_pot.finditer(post):
                 self._addCollectPotWithAdjustment(hand, m, adjustments)
                 i += 1
@@ -2026,21 +2056,21 @@ class PokerStars(HandHistoryConverter):
                 self._addCollectPotWithAdjustment(hand, m, adjustments)
                 i += 1
             
-            # Handle cash out with fee pattern
-            for m in self.re_collect_pot3.finditer(pre):
-                player = m.group("PNAME")
-                pot_amount = Decimal(m.group("POT").replace(",", ""))
-                fee_amount = Decimal(m.group("FEE").replace(",", ""))
-                log.info("Found cash out collection: %s -> %s (fee: %s)", player, pot_amount, fee_amount)
-                
-                # Store cash out fee information for statistics/logging
-                # Fee is not added to collected pot as it's taken by the site
-                if not hasattr(hand, 'cashOutFees'):
-                    hand.cashOutFees = {}
-                hand.cashOutFees[player] = fee_amount
-                
-                self._addCollectPotWithAdjustment(hand, m, adjustments)
-                i += 1
+        # Handle cash out with fee pattern (always check, regardless of i)
+        for m in self.re_collect_pot3.finditer(pre):
+            player = m.group("PNAME")
+            pot_amount = Decimal(m.group("POT").replace(",", ""))
+            fee_amount = Decimal(m.group("FEE").replace(",", ""))
+            log.info("Found cash out collection: %s -> %s (fee: %s)", player, pot_amount, fee_amount)
+            
+            # Store cash out fee information for statistics/logging
+            # Fee is not added to collected pot as it's taken by the site
+            if not hasattr(hand, 'cashOutFees'):
+                hand.cashOutFees = {}
+            hand.cashOutFees[player] = fee_amount
+            
+            self._addCashOutPotWithAdjustment(hand, m, adjustments)
+            i += 1
 
     def readShownCards(self, hand: "Hand") -> None:
         """Reads shown and mucked cards from the hand text and updates the hand object.
@@ -2112,7 +2142,7 @@ class PokerStars(HandHistoryConverter):
 
             try:
                 total_pot, rake = self._parse_decimal_values(total_pot_str, rake_str)
-
+                
                 # Set the values on the hand object
                 hand.totalpot = total_pot
                 hand.rake = rake

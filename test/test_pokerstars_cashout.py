@@ -120,7 +120,7 @@ Seat 6: Player6 folded before Flop (didn't bet)"""
         # Player1 collected $25.96 from pot
         assert collected_dict['Player1'] == Decimal('25.96'), f"Player1 should collect 25.96, got {collected_dict.get('Player1')}"
         
-        # Player3 cashed out for $22.77 (fee is not included in collection)
+        # Player3 cashed out for $22.77 (also counted as a collection)
         assert collected_dict['Player3'] == Decimal('22.77'), f"Player3 should collect 22.77, got {collected_dict.get('Player3')}"
         
         # Check that cash out fee is captured
@@ -137,6 +137,7 @@ Seat 6: Player6 folded before Flop (didn't bet)"""
         # Test cash out with fee pattern
         test_text = "Player3 cashed out the hand for $22.77 | Cash Out Fee $0.46"
         match = self.parser.re_collect_pot3.search(test_text)
+        
         assert match is not None
         assert match.group('PNAME') == 'Player3'
         assert match.group('POT') == '22.77'
