@@ -265,13 +265,21 @@ class GuiHandViewer(QSplitter):
             won = hand.collectees[hero]
         log.debug(f"Hero winnings (won): {won}")
 
+        # Calculate net_collected if not already done
+        if not hasattr(hand, 'net_collected') or not hand.net_collected:
+            hand.calculate_net_collected()
+
         bet = 0
         if hero in list(hand.pot.committed.keys()):
-            bet = hand.pot.committed[hero]
+            committed = hand.pot.committed[hero]
+            returned = hand.pot.returned.get(hero, Decimal('0'))
+            bet = committed - returned  # Actual amount bet (excluding returned)
         log.debug(f"Hero committed (bet): {bet}")
 
-        net = won
-        log.debug(f"Net calculated (won): {net}")
+        net = 0
+        if hero in hand.net_collected:
+            net = hand.net_collected[hero]
+        log.debug(f"Net calculated: {net}")
 
         pos = hand.get_player_position(hero)
         log.debug(f"Hero position: {pos}")
