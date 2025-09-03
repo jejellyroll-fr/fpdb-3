@@ -172,6 +172,11 @@ class AddStatDialog(QDialog):
         self.setWindowTitle("Add/Edit Statistic")
         self.setMinimumWidth(600)
 
+        # Initialize color values
+        self.locolor = "#ff0000"
+        self.midcolor = "#ffff00"
+        self.hicolor = "#00ff00"
+
         # Main layout
         main_layout = QVBoxLayout(self)
         main_layout.setSpacing(10)
@@ -389,11 +394,6 @@ class AddStatDialog(QDialog):
         button_layout.addWidget(btn_box)
 
         main_layout.addLayout(button_layout)
-
-        # Initialize color values
-        self.locolor = "#ff0000"
-        self.midcolor = "#ffff00"
-        self.hicolor = "#00ff00"
 
         if stat:
             self.row_input.setCurrentText(str(stat["row"]))
