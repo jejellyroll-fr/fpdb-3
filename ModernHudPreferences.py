@@ -171,7 +171,6 @@ class AddStatDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Add/Edit Statistic")
         self.setMinimumWidth(600)
-        self.setMaximumHeight(650)
 
         # Main layout
         main_layout = QVBoxLayout(self)
