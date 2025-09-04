@@ -403,9 +403,9 @@ class AddStatDialog(QDialog):
             self.popup_input.setText(stat.get("popup", ""))
 
             # Load color settings if available
-            if "stat_loth" in stat:
+            if "stat_loth" in stat and stat["stat_loth"]:
                 self.loth_input.setValue(int(float(stat["stat_loth"])))
-            if "stat_hith" in stat:
+            if "stat_hith" in stat and stat["stat_hith"]:
                 self.hith_input.setValue(int(float(stat["stat_hith"])))
             if stat.get("stat_locolor"):
                 self.locolor = stat["stat_locolor"]
