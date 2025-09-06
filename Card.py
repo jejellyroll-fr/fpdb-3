@@ -746,18 +746,35 @@ def StartCardRank(idx: int) -> tuple[str, int, int]:
 
 
 def twoStartCards(value1: int, suit1: str, value2: int, suit2: str) -> int:
-    """Calculates the integer representation of a Holdem starting hand.
+    """Return the canonical integer for a Hold'em starting hand.
 
-    Returns a unique integer for the given two card values and suits, or a constant for unknown hands.
+    Encoding summary
+    ----------------
+    Let x = (rank_hi - 2), y = (rank_lo - 2) with ranks in [2..14].
+    The hand id is: 13*x + y + 1, with a convention on (x,y):
+      • Pair:           x == y                       (e.g. 22 → x=y=0 → 1)
+      • Suited:         x > y  (higher rank first)   (e.g. AsKs → x=12,y=11)
+      • Offsuit:        x < y  (lower rank first)    (e.g. AsKh → x=11,y=12)
+
+    This convention is relied upon by DATABASE_FILTERS to derive pair/suited/offsuit
+    and gap filters by simple arithmetic on the stored id.
 
     Args:
-        value1: The integer rank of the first card (2-14).
-        suit1: The suit of the first card as a string ('h', 'd', 'c', 's').
-        value2: The integer rank of the second card (2-14).
-        suit2: The suit of the second card as a string ('h', 'd', 'c', 's').
+        value1: Rank of first card (2–14).
+        suit1:  Suit of first card in {'h','d','c','s'}.
+        value2: Rank of second card (2–14).
+        suit2:  Suit of second card in {'h','d','c','s'}.
 
     Returns:
-        int: The integer representation of the starting hand, or a constant for unknown hands.
+        int: Unique id in [1..169] for known hands, or HOLDEM_UNKNOWN_HAND.
+
+    Examples:
+        >>> twoStartCards(2, 'h', 2, 'd')      # 22 (pair on diagonal)
+        1
+        >>> twoStartCards(14, 's', 13, 's')    # AKs (suited → x>y)
+        4
+        >>> twoStartCards(14, 's', 13, 'h')    # AKo (offsuit → x<y)
+        10
     """
     if (
         value1 is None
