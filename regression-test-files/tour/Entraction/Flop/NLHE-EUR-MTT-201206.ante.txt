@@ -27,13 +27,13 @@ Big Blind:                  Player3   (400.00)
 Hero was dealt:          6h - 2s
 
 Player4                     Raise       (980.00)
-Player5                     Fold        
-Player6                     Fold        
-Hero                        Fold        
-Player0                     Fold        
-Player1                     Fold        
-Player2                     Fold        
-Player3                     Fold        
+Player5                     Fold
+Player6                     Fold
+Hero                        Fold
+Player0                     Fold
+Player1                     Fold
+Player2                     Fold
+Player3                     Fold
 Player4                     Payback     (580.00)
 
 Player4 didn't show hand

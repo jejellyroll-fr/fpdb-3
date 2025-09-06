@@ -56,6 +56,3 @@ Seat 6: Player5 showed [2c 2d] and lost with a pair of Twos
 Seat 7: Player6 showed [3d Qh] and lost with Queen Ten high
 Seat 8: Player7 showed [Jc Jh] and lost with a pair of Jacks
 Seat 9: Hero (button) showed [Tc 9d] and lost with a pair of Tens
-
-
-

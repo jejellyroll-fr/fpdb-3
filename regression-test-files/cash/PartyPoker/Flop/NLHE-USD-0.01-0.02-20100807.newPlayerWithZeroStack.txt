@@ -1,11 +1,11 @@
 Game #9507514114 starts.
 
-#Game No : 9507514114 
+#Game No : 9507514114
 ***** Hand History for Game 9507514114 *****
 $2 USD NL Texas Hold'em - Saturday, August 07, 17:05:05 CEST 2010
 Table Table  178053 (Real Money)
 Seat 3 is the button
-Total number of players : 9/9 
+Total number of players : 9/9
 Seat 9: Player1 ( $1.60 USD )
 Seat 4: Player2 ( $1.98 USD )
 Seat 7: Hero ( $2.90 USD )

@@ -59,11 +59,10 @@ echo. Folder %cd% is invalid for fpdb
 echo.
 echo. TO FIX
 echo. - Move the fpdb folder to a path which is 100%% American-English characters
-echo. - for example : 
+echo. - for example :
 echo. c:\fpdb or c:\mylocalprogrammes\fpdb would be valid for fpdb.
 pause
 
 :end
 
 cd ..
-

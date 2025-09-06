@@ -9,11 +9,11 @@ Seat 6: gpelle (3000)
 Seat 7: aruna.d27 (3000)
 Seat 8: pichou69 (3000)
 Seat 9: karnajh71 (3000)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 aruna.d27 posts small blind 10
 pichou69 posts big blind 20
 Dealt to gpelle [7c Ts]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 karnajh71 calls 20
 CYRANO32 calls 20
 cardsjacker raises 20 to 40
@@ -68,11 +68,11 @@ Seat 6: gpelle (3000)
 Seat 7: aruna.d27 (2990)
 Seat 8: pichou69 (2980)
 Seat 9: karnajh71 (2960)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 pichou69 posts small blind 10
 karnajh71 posts big blind 20
 Dealt to gpelle [5h Ah]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 CYRANO32 folds
 Bud74200 folds
 croket32x calls 20
@@ -120,10 +120,10 @@ Seat 6: gpelle (2900)
 Seat 7: elo_85 (2960)
 Seat 8: jpg45 (3000)
 Seat 9: KalisTa (2920)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 elo_85 posts small blind 15
 jpg45 posts big blind 30
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 KalisTa calls 30
 Hcalagan folds
 lafrig50 calls 30
@@ -167,11 +167,11 @@ Seat 6: gpelle (2900)
 Seat 7: elo_85 (2945)
 Seat 8: jpg45 (2970)
 Seat 9: KalisTa (2890)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 jpg45 posts small blind 15
 KalisTa posts big blind 30
 Dealt to gpelle [8c 2d]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Hcalagan folds
 lafrig50 calls 30
 mamine21 calls 30
@@ -226,11 +226,11 @@ Seat 6: jay36_x (2955)
 Seat 7: nico-du-29 (3660)
 Seat 8: JFK-64 (2945)
 Seat 9: dies irae 76 (6900)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 xphil69x posts small blind 20
 fabien0076 posts big blind 40
 Dealt to gpelle [9d 4d]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 gpelle calls 40
 jay36_x folds
 nico-du-29 folds
@@ -266,11 +266,11 @@ Seat 6: jay36_x (2955)
 Seat 7: nico-du-29 (3660)
 Seat 8: JFK-64 (2945)
 Seat 9: dies irae 76 (6900)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 fabien0076 posts small blind 20
 gpelle posts big blind 40
 Dealt to gpelle [2h Qh]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 jay36_x folds
 nico-du-29 folds
 JFK-64 folds
@@ -318,11 +318,11 @@ Seat 6: jay36_x (2955)
 Seat 7: nico-du-29 (3660)
 Seat 8: JFK-64 (2945)
 Seat 9: dies irae 76 (9614)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 gpelle posts small blind 20
 jay36_x posts big blind 40
 Dealt to gpelle [7h 9s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 nico-du-29 folds
 JFK-64 folds
 dies irae 76 calls 40
@@ -358,11 +358,11 @@ Seat 6: jay36_x (2915)
 Seat 7: nico-du-29 (3660)
 Seat 8: JFK-64 (2945)
 Seat 9: dies irae 76 (9574)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 jay36_x posts small blind 20
 nico-du-29 posts big blind 40
 Dealt to gpelle [5h Tc]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 JFK-64 folds
 dies irae 76 folds
 x Razhiel folds
@@ -402,11 +402,11 @@ Seat 6: jay36_x (2895)
 Seat 7: nico-du-29 (3460)
 Seat 8: JFK-64 (2945)
 Seat 9: dies irae 76 (9574)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 nico-du-29 posts small blind 20
 JFK-64 posts big blind 40
 Dealt to gpelle [2h 5h]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 dies irae 76 calls 40
 x Razhiel folds
 peri_20 raises 440 to 480
@@ -454,11 +454,11 @@ Seat 6: jay36_x (2895)
 Seat 7: nico-du-29 (3440)
 Seat 8: JFK-64 (2905)
 Seat 9: dies irae 76 (12090)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 JFK-64 posts small blind 20
 dies irae 76 posts big blind 40
 Dealt to gpelle [5s 9s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 x Razhiel folds
 Gief77 calls 40
 xphil69x folds
@@ -502,11 +502,11 @@ Seat 6: jay36_x (2895)
 Seat 7: nico-du-29 (3440)
 Seat 8: JFK-64 (2885)
 Seat 9: dies irae 76 (12190)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 dies irae 76 posts small blind 20
 x Razhiel posts big blind 40
 Dealt to gpelle [8h Ks]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Gief77 folds
 xphil69x calls 40
 fabien0076 folds
@@ -563,11 +563,11 @@ Seat 6: jay36_x (2895)
 Seat 7: nico-du-29 (2779)
 Seat 8: JFK-64 (2885)
 Seat 9: dies irae 76 (12017)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 x Razhiel posts small blind 20
 Gief77 posts big blind 40
 Dealt to gpelle [8d Qc]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 xphil69x folds
 fabien0076 calls 40
 gpelle folds
@@ -627,11 +627,11 @@ Seat 6: jay36_x (2895)
 Seat 7: nico-du-29 (2539)
 Seat 8: JFK-64 (2885)
 Seat 9: dies irae 76 (11977)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 Gief77 posts small blind 30
 xphil69x posts big blind 60
 Dealt to gpelle [Qs 6c]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 fabien0076 raises 60 to 120
 gpelle folds
 jay36_x calls 120
@@ -677,11 +677,11 @@ Seat 6: jay36_x (2775)
 Seat 7: nico-du-29 (2539)
 Seat 8: JFK-64 (2885)
 Seat 9: dies irae 76 (11857)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 xphil69x posts small blind 30
 fabien0076 posts big blind 60
 Dealt to gpelle [2s 9s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 gpelle calls 60
 jay36_x folds
 nico-du-29 raises 120 to 180
@@ -723,11 +723,11 @@ Seat 6: jay36_x (2775)
 Seat 7: nico-du-29 (1639)
 Seat 8: JFK-64 (2885)
 Seat 9: dies irae 76 (11677)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 fabien0076 posts small blind 30
 gpelle posts big blind 60
 Dealt to gpelle [Tc Jd]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 jay36_x calls 60
 nico-du-29 folds
 JFK-64 folds
@@ -783,11 +783,11 @@ Seat 6: jay36_x (2475)
 Seat 7: nico-du-29 (1639)
 Seat 8: JFK-64 (2885)
 Seat 9: dies irae 76 (16197)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 gpelle posts small blind 30
 jay36_x posts big blind 60
 Dealt to gpelle [2s 4d]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 nico-du-29 calls 60
 JFK-64 folds
 dies irae 76 folds
@@ -833,11 +833,11 @@ Seat 6: jay36_x (2415)
 Seat 7: nico-du-29 (2104)
 Seat 8: JFK-64 (2885)
 Seat 9: dies irae 76 (16197)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 jay36_x posts small blind 40
 nico-du-29 posts big blind 80
 Dealt to gpelle [5h 7h]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 JFK-64 folds
 dies irae 76 folds
 x Razhiel folds
@@ -890,11 +890,11 @@ Seat 6: jay36_x (2375)
 Seat 7: nico-du-29 (2204)
 Seat 8: JFK-64 (2885)
 Seat 9: dies irae 76 (16197)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 nico-du-29 posts small blind 40
 JFK-64 posts big blind 80
 Dealt to gpelle [5d 6s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 dies irae 76 folds
 x Razhiel folds
 Gief77 folds
@@ -945,11 +945,11 @@ Seat 6: jay36_x (2375)
 Seat 7: nico-du-29 (1244)
 Seat 8: JFK-64 (2805)
 Seat 9: dies irae 76 (16197)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 JFK-64 posts small blind 40
 dies irae 76 posts big blind 80
 Dealt to gpelle [Tc 4h]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 x Razhiel calls 80
 Gief77 folds
 xphil69x folds
@@ -990,11 +990,11 @@ Seat 6: jay36_x (2295)
 Seat 7: nico-du-29 (1244)
 Seat 8: JFK-64 (2765)
 Seat 9: dies irae 76 (16117)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 dies irae 76 posts small blind 40
 x Razhiel posts big blind 80
 Dealt to gpelle [3c Ah]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Gief77 folds
 xphil69x calls 80
 beretta49 folds
@@ -1043,11 +1043,11 @@ Seat 6: jay36_x (2295)
 Seat 7: nico-du-29 (604)
 Seat 8: JFK-64 (2765)
 Seat 9: dies irae 76 (16037)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 x Razhiel posts small blind 40
 Gief77 posts big blind 80
 Dealt to gpelle [Jh 7d]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 xphil69x calls 80
 beretta49 calls 80
 gpelle folds
@@ -1102,11 +1102,11 @@ Seat 6: jay36_x (2215)
 Seat 7: nico-du-29 (604)
 Seat 8: JFK-64 (2765)
 Seat 9: dies irae 76 (16037)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 Gief77 posts small blind 40
 xphil69x posts big blind 80
 Dealt to gpelle [9d As]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 beretta49 calls 80
 gpelle calls 80
 jay36_x calls 80
@@ -1166,11 +1166,11 @@ Seat 6: jay36_x (2055)
 Seat 7: nico-du-29 (604)
 Seat 8: JFK-64 (2765)
 Seat 9: dies irae 76 (15877)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 xphil69x posts small blind 60
 beretta49 posts big blind 120
 Dealt to gpelle [Th 4h]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 gpelle calls 120
 jay36_x calls 120
 nico-du-29 folds
@@ -1214,11 +1214,11 @@ Seat 6: jay36_x (2415)
 Seat 7: nico-du-29 (604)
 Seat 8: JFK-64 (2765)
 Seat 9: dies irae 76 (15877)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 beretta49 posts small blind 60
 gpelle posts big blind 120
 Dealt to gpelle [Ac 9s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 jay36_x calls 120
 nico-du-29 raises 484 to 604 and is all-in
 JFK-64 folds
@@ -1268,11 +1268,11 @@ Seat 5: gpelle (866)
 Seat 6: jay36_x (3803)
 Seat 8: JFK-64 (2765)
 Seat 9: dies irae 76 (15877)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 gpelle posts small blind 60
 jay36_x posts big blind 120
 Dealt to gpelle [8s 6h]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 JFK-64 folds
 dies irae 76 folds
 x Razhiel calls 120
@@ -1310,11 +1310,11 @@ Seat 6: jay36_x (3683)
 Seat 7: vince62210 (2805)
 Seat 8: JFK-64 (2765)
 Seat 9: dies irae 76 (15877)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 jay36_x posts small blind 60
 vince62210 posts big blind 120
 Dealt to gpelle [6d 7h]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 JFK-64 folds
 dies irae 76 folds
 x Razhiel folds
@@ -1364,11 +1364,11 @@ Seat 6: jay36_x (3443)
 Seat 7: vince62210 (2685)
 Seat 8: JFK-64 (2765)
 Seat 9: dies irae 76 (15877)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 vince62210 posts small blind 60
 JFK-64 posts big blind 120
 Dealt to gpelle [5d 5s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 dies irae 76 folds
 x Razhiel folds
 Gief77 folds
@@ -1398,5 +1398,3 @@ Seat 6: jay36_x (button) folded on the pre-flop
 Seat 7: vince62210 (small blind) folded on the pre-flop
 Seat 8: JFK-64 (big blind) folded on the pre-flop
 Seat 9: dies irae 76 folded on the pre-flop
-
-

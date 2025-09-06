@@ -13,10 +13,10 @@ Player0: Raise to $250.00
 Hero: Raise to $800.00
 Player0: Call $600.00
 *** FLOP *** [C6 DK D7]
-Hero: Check 
+Hero: Check
 Player0: Bet $1,200.00
 Hero: Raise to $5,400.00
-Player0: Fold 
+Player0: Fold
 *** SUMMARY ***
 Total pot $8,398.00 Rake $2.00
 Hero: wins $8,398.00
@@ -36,15 +36,15 @@ Dealt to Hero [D7 H2 HA C7]
 Hero: Raise to $250.00
 Player0: Call $200.00
 *** FLOP *** [D3 SK C3]
-Player0: Check 
-Hero: Check 
+Player0: Check
+Hero: Check
 *** TURN *** [D3 SK C3 DQ]
-Player0: Check 
-Hero: Check 
+Player0: Check
+Hero: Check
 *** RIVER *** [D3 SK C3 DQ C10]
-Player0: Check 
+Player0: Check
 Hero: Bet $420.00
-Player0: Fold 
+Player0: Fold
 *** SUMMARY ***
 Total pot $1,018.00 Rake $2.00
 Hero: wins $1,018.00

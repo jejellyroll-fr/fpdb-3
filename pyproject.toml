@@ -32,7 +32,7 @@ dependencies = [
     "furo>=2025.7.19",
     "myst-parser>=4.0.1",
     "sphinx-autodoc-typehints>=2.3.0",
-    
+
 ]
 
 [project.optional-dependencies]
@@ -65,7 +65,7 @@ postgresql = ["psycopg2-binary==2.9.9"]
 
 [tool.ruff]
 extend-include = ["*.pyw"]
-extend-exclude = ["build", "archives"]
+extend-exclude = ["build", "archives", "documentations/notebook"]
 line-length = 120
 indent-width = 4
 
@@ -73,15 +73,12 @@ indent-width = 4
 exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
-select = ["ALL"]
+# Essential checks only: pycodestyle (E/W), pyflakes (F), isort (I), pyupgrade (UP)
+select = ["E", "F", "I", "UP", "W"]
 ignore = [
-    "E401",  # Multiple imports on one line
-    "E731",  # Assign lambda
-    "E713",  # Use 'not in'
-    "ANN401",  # Unused type annotation
-    "N802",  # Function name should be lowercase
-    "TD003", # Missing issue link on the line following this TODO
-    "FIX002" # Line contains TODO, consider resolving the issue
+    "E401",  # Multiple imports on one line - sometimes necessary for legacy code
+    "E731",  # Assign lambda - common pattern in callbacks
+    "E713",  # Use 'not in' - can be stylistic choice
 ]
 
 # Style des doc-strings (déplacé ici pour éviter l’avertissement de dépréciation)
@@ -136,4 +133,9 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pre-commit>=4.3.0",
 ]

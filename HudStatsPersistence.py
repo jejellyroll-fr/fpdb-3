@@ -99,9 +99,11 @@ class HudStatsPersistence:
             current_time = time.time()
             file_timestamp = cache_data.get("timestamp", 0)
             time_diff = current_time - file_timestamp
-            
-            log.debug(f"Checking expiration for {table_key}: current_time={current_time}, file_timestamp={file_timestamp}, time_diff={time_diff}, ttl={self.stats_ttl}")
-            
+
+            log.debug(
+                f"Checking expiration for {table_key}: current_time={current_time}, file_timestamp={file_timestamp}, time_diff={time_diff}, ttl={self.stats_ttl}"
+            )
+
             # Special case: if TTL is 0, always consider expired (used by tests)
             if self.stats_ttl == 0 or time_diff >= self.stats_ttl:  # Use >= instead of > for edge cases
                 log.debug(f"Cached stats expired for table {table_key} (time_diff={time_diff} >= ttl={self.stats_ttl})")
@@ -112,6 +114,7 @@ class HudStatsPersistence:
                     log.warning(f"File still exists after removal attempt on Windows: {cache_file}")
                     # Force removal with retry logic
                     import platform
+
                     if platform.system() == "Windows":
                         for i in range(3):  # Try up to 3 times
                             try:
@@ -157,9 +160,11 @@ class HudStatsPersistence:
                 cache_file.unlink()
                 # On Windows, verify file is actually deleted
                 import platform
+
                 if platform.system() == "Windows":
                     # Small delay to ensure Windows filesystem operations complete
                     import time
+
                     time.sleep(0.01)
                     if cache_file.exists():
                         log.warning(f"File deletion delayed on Windows for {cache_file}")
@@ -186,7 +191,7 @@ class HudStatsPersistence:
                     file_timestamp = cache_data.get("timestamp", 0)
                     time_diff = current_time - file_timestamp
                     log.debug(f"Cleanup check for {cache_file.name}: time_diff={time_diff}, ttl={self.stats_ttl}")
-                    
+
                     # Special case: if TTL is 0, always consider expired (used by tests)
                     if self.stats_ttl == 0 or time_diff >= self.stats_ttl:  # Use >= for consistency
                         # Enhanced Windows-compatible file removal
@@ -195,6 +200,7 @@ class HudStatsPersistence:
                             removed_count += 1
                             # Verify removal on Windows
                             import platform
+
                             if platform.system() == "Windows" and cache_file.exists():
                                 log.warning(f"File still exists after cleanup on Windows: {cache_file}")
                                 # Force retry
@@ -270,6 +276,7 @@ class HudStatsPersistence:
 
 # Global instance for easy usage
 _persistence_instance = None
+
 
 def get_hud_stats_persistence() -> HudStatsPersistence:
     """Return global instance of persistence manager."""

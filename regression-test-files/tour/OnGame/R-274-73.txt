@@ -32,7 +32,7 @@ thyann12 raises 1480 to 1500 [all in]
 Eiizan13 calls 1450 [all in]
 mopper calls 1320 [all in]
 HRBATYK calls 1320 [all in]
---- 
+---
 --- Dealing flop [Ad, Js, 2c]
 --- Dealing turn [Jd]
 --- Dealing river [4s]
@@ -191,7 +191,7 @@ Eiizan13 folds
 lavalise13 folds
 VEGAS80 folds
 kingdude calls 1430 [all in]
---- 
+---
 --- Dealing flop [9s, Ad, 8d]
 --- Dealing turn [Kh]
 --- Dealing river [7c]
@@ -297,7 +297,7 @@ Vitola29 folds
 moumoune folds
 ZZZZZ folds
 Eiizan13 calls 1270
---- 
+---
 --- Dealing flop [3d, Th, Js]
 --- Dealing turn [Jh]
 --- Dealing river [Ts]
@@ -601,7 +601,7 @@ Eiizan13 raises 5338 to 5388 [all in]
 lavalise13 folds
 Loren1 folds
 berna27 folds
---- 
+---
 --- Dealing flop [3s, 7c, 4d]
 --- Dealing turn [Js]
 --- Dealing river [Qh]
@@ -716,7 +716,7 @@ lavalise13 folds
 LAROG62 folds
 Vitola29 calls 890 [all in]
 moumoune calls 1523
---- 
+---
 --- Dealing flop [Ac, Kh, 5c]
 --- Dealing turn [Jd]
 --- Dealing river [Tc]
@@ -765,7 +765,7 @@ LAROG62 folds
 Loren1 folds
 berna27 raises 1045 to 1125 [all in]
 besac025 calls 645
---- 
+---
 --- Dealing flop [Ac, 2d, Jc]
 --- Dealing turn [8d]
 --- Dealing river [8c]
@@ -1159,7 +1159,7 @@ mirthorn folds
 berna27 raises 1330 to 1450 [all in]
 john74 folds
 moumoune calls 850
---- 
+---
 --- Dealing flop [Qs, 9d, 5c]
 --- Dealing turn [Js]
 --- Dealing river [8s]
@@ -1462,7 +1462,7 @@ besac025 folds
 storm7 folds
 KINGMISOBO calls 4930 [all in]
 granleon142 folds
---- 
+---
 --- Dealing flop [Qs, 3d, Th]
 --- Dealing turn [5c]
 --- Dealing river [Jc]

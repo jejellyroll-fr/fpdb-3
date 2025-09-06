@@ -21,10 +21,18 @@ class TestPopupBasics(unittest.TestCase):
         """Set up mocks for this test class only."""
         cls._original_modules = {}
         modules_to_mock = [
-            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets",
-            "AppKit", "Stats", "loggingFpdb", "ModernPopup", "past", "past.utils"
+            "PyQt5",
+            "PyQt5.QtCore",
+            "PyQt5.QtGui",
+            "PyQt5.QtWidgets",
+            "AppKit",
+            "Stats",
+            "loggingFpdb",
+            "ModernPopup",
+            "past",
+            "past.utils",
         ]
-        
+
         for module_name in modules_to_mock:
             if module_name in sys.modules:
                 cls._original_modules[module_name] = sys.modules[module_name]
@@ -34,10 +42,18 @@ class TestPopupBasics(unittest.TestCase):
     def tearDownClass(cls):
         """Clean up mocks after this test class."""
         modules_to_mock = [
-            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets",
-            "AppKit", "Stats", "loggingFpdb", "ModernPopup", "past", "past.utils"
+            "PyQt5",
+            "PyQt5.QtCore",
+            "PyQt5.QtGui",
+            "PyQt5.QtWidgets",
+            "AppKit",
+            "Stats",
+            "loggingFpdb",
+            "ModernPopup",
+            "past",
+            "past.utils",
         ]
-        
+
         for module_name in modules_to_mock:
             if module_name in cls._original_modules:
                 sys.modules[module_name] = cls._original_modules[module_name]
@@ -58,10 +74,10 @@ class TestPopupBasics(unittest.TestCase):
         # Create a popup instance and mock the destroy_pop method
         popup = Mock()
         popup.destroy_pop = Mock()
-        
+
         # Simulate what mousePressEvent does: calls self.destroy_pop()
         popup.destroy_pop()
-        
+
         # Verify it was called
         popup.destroy_pop.assert_called_once()
 

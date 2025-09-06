@@ -29,6 +29,7 @@ from PyQt5.QtWidgets import (
 # Import qt_material for theming
 try:
     from qt_material import apply_stylesheet
+
     QT_MATERIAL_AVAILABLE = True
 except ImportError:
     QT_MATERIAL_AVAILABLE = False
@@ -297,7 +298,6 @@ class GuiAutoImport(QWidget):
 
     #   end of GuiAutoImport.__init__
 
-
     def do_import(self) -> bool:
         """Callback for timer to do an import iteration."""
         if self.doAutoImportBool:
@@ -336,9 +336,7 @@ class GuiAutoImport(QWidget):
         }
         if site == "PokerStars":
             directory = os.path.expanduser(defaults[site])
-            for file in [
-                file for file in os.listdir(directory) if file not in [".", ".."]
-            ]:
+            for file in [file for file in os.listdir(directory) if file not in [".", ".."]]:
                 log.debug(file)
         return False
 
@@ -377,33 +375,22 @@ class GuiAutoImport(QWidget):
                             bs = 0
 
                         elif self.config.install_method == "app":
-                            base_path = (
-                                sys._MEIPASS
-                                if getattr(sys, "frozen", False)
-                                else sys.path[0]
-                            )
+                            base_path = sys._MEIPASS if getattr(sys, "frozen", False) else sys.path[0]
                             command = os.path.join(base_path, "HUD_main")
                             if not os.path.isfile(command):
                                 msg = f"HUD_main not found at {command}"
                                 raise FileNotFoundError(msg)
                             bs = 1
 
-                        elif os.name == "nt":      # Windows installation source
+                        elif os.name == "nt":  # Windows installation source
                             path = to_raw(sys.path[0])
                             use_pythonw = win32console.GetConsoleWindow() == 0
                             interpreter = "pythonw" if use_pythonw else "python"
-                            command = (
-                                f'{interpreter} "{path}\\HUD_main.pyw" '
-                                f"{self.settings['cl_options']}"
-                            )
+                            command = f'{interpreter} "{path}\\HUD_main.pyw" ' f"{self.settings['cl_options']}"
                             bs = 0
 
-                        else:                      # Linux & macOS installation source
-                            base_path = (
-                                sys._MEIPASS
-                                if getattr(sys, "frozen", False)
-                                else sys.path[0] or os.getcwd()
-                            )
+                        else:  # Linux & macOS installation source
+                            base_path = sys._MEIPASS if getattr(sys, "frozen", False) else sys.path[0] or os.getcwd()
                             command = os.path.join(base_path, "HUD_main.pyw")
                             if not os.path.isfile(command):
                                 self.addText(f"\n*** {command} was not found", "error")
@@ -457,19 +444,24 @@ class GuiAutoImport(QWidget):
                                 paths = self.config.get_default_paths(site)
                                 if paths.get("hud-defaultPath"):
                                     self.importer.addImportDirectory(
-                                        paths["hud-defaultPath"], monitor=True, site=(site, "hh"),
+                                        paths["hud-defaultPath"],
+                                        monitor=True,
+                                        site=(site, "hh"),
                                     )
                                     self.addText(
-                                        f"\n * Add {site} hand history directory: "
-                                        f"{paths['hud-defaultPath']}", "folder",
+                                        f"\n * Add {site} hand history directory: " f"{paths['hud-defaultPath']}",
+                                        "folder",
                                     )
                                 if paths.get("hud-defaultTSPath"):
                                     self.importer.addImportDirectory(
-                                        paths["hud-defaultTSPath"], monitor=True, site=(site, "ts"),
+                                        paths["hud-defaultTSPath"],
+                                        monitor=True,
+                                        site=(site, "ts"),
                                     )
                                     self.addText(
                                         f"\n * Add {site} tournament summary directory: "
-                                        f"{paths['hud-defaultTSPath']}", "folder",
+                                        f"{paths['hud-defaultTSPath']}",
+                                        "folder",
                                     )
 
                         self.do_import()
@@ -507,7 +499,6 @@ class GuiAutoImport(QWidget):
         return self.mainVBox
 
     # end def get_vbox
-
 
     def _setup_config_observer(self) -> None:
         """Configure the configuration observer for auto-import."""

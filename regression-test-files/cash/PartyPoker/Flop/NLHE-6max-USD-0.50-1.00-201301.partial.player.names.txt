@@ -19,10 +19,10 @@ Player4 folds
 ** Dealing Flop ** :  [ 9h, Kh, Qc ]
 Hero checks
 Player2 checks
-** Dealing Turn ** :  [ 9d ] 
+** Dealing Turn ** :  [ 9d ]
 Hero checks
 Player2 checks
-** Dealing River ** :  [ 2d ] 
+** Dealing River ** :  [ 2d ]
 Hero checks
 Player2 checks
 ** Summary **

@@ -139,7 +139,7 @@ bibzah2727 folds
 TFOUTOOA folds
 eddydonc54 folds
 JOB13200 folds
---- 
+---
 --- Dealing flop [2s, Qd, 9c]
 --- Dealing turn [Ks]
 --- Dealing river [8s]
@@ -563,7 +563,7 @@ karmelo59 raises 985 to 985 [all in]
 bibzah2727 folds
 TFOUTOOA folds
 JOB13200 calls 685
---- 
+---
 --- Dealing flop [Qs, 6d, As]
 --- Dealing turn [Kd]
 --- Dealing river [2h]

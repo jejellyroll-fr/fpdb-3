@@ -21,29 +21,32 @@ from Aux_Hud import SimpleStat
 class HUDManualTestWindow(QMainWindow):
     """Manual test window for HUD display verification."""
 
-    def _create_styled_label(self, text: str, font_size: int, margin: int = 5, 
-                           color: str = "#333333", font_weight: str = "normal",
-                           font_style: str = "normal", alignment: str = "left") -> QLabel:
+    def _create_styled_label(
+        self,
+        text: str,
+        font_size: int,
+        margin: int = 5,
+        color: str = "#333333",
+        font_weight: str = "normal",
+        font_style: str = "normal",
+        alignment: str = "left",
+    ) -> QLabel:
         """Create a styled QLabel with common styling patterns."""
         label = QLabel(text)
-        style_parts = [
-            f"font-size: {font_size}px",
-            f"margin: {margin}px", 
-            f"color: {color}"
-        ]
-        
+        style_parts = [f"font-size: {font_size}px", f"margin: {margin}px", f"color: {color}"]
+
         if font_weight != "normal":
             style_parts.append(f"font-weight: {font_weight}")
         if font_style != "normal":
             style_parts.append(f"font-style: {font_style}")
         if alignment == "center":
             style_parts.append("text-align: center")
-            
+
         label.setStyleSheet("; ".join(style_parts) + ";")
-        
+
         if alignment == "center":
             label.setAlignment(Qt.AlignCenter)
-            
+
         return label
 
     def __init__(self) -> None:
@@ -59,7 +62,10 @@ class HUDManualTestWindow(QMainWindow):
         # Add title
         title = self._create_styled_label(
             "FPDB HUD Manual Test - Verify '-' vs '0' Display",
-            font_size=20, font_weight="bold", margin=10, alignment="center"
+            font_size=20,
+            font_weight="bold",
+            margin=10,
+            alignment="center",
         )
         layout.addWidget(title)
 
@@ -204,21 +210,16 @@ class HUDManualTestWindow(QMainWindow):
         scenario_layout = QVBoxLayout(scenario_widget)
 
         # Add title
-        title_label = self._create_styled_label(
-            scenario["title"], font_size=16, font_weight="bold"
-        )
+        title_label = self._create_styled_label(scenario["title"], font_size=16, font_weight="bold")
         scenario_layout.addWidget(title_label)
 
         # Add description
-        desc_label = self._create_styled_label(
-            scenario["description"], font_size=12, color="#666666"
-        )
+        desc_label = self._create_styled_label(scenario["description"], font_size=12, color="#666666")
         scenario_layout.addWidget(desc_label)
 
         # Add expected result
         expected_label = self._create_styled_label(
-            f"Expected: {scenario['expected']}", font_size=11, 
-            color="#444444", font_style="italic"
+            f"Expected: {scenario['expected']}", font_size=11, color="#444444", font_style="italic"
         )
         scenario_layout.addWidget(expected_label)
 
@@ -282,35 +283,38 @@ import pytest
 def qapp():
     """Ensure QApplication exists for tests."""
     from PyQt5.QtWidgets import QApplication
+
     app = QApplication.instance()
     if app is None:
         app = QApplication([])
     return app
 
 
-@pytest.mark.parametrize("scenario_name,data,stat_name,expected_value", [
-    ("no_data", {1: {"vpip": 0, "vpip_opp": 0, "pfr": 0, "pfr_opp": 0}}, "vpip", "-"),
-    ("no_data", {1: {"vpip": 0, "vpip_opp": 0, "pfr": 0, "pfr_opp": 0}}, "pfr", "-"),
-    ("zero_actions", {1: {"vpip": 0, "vpip_opp": 25, "pfr": 0, "pfr_opp": 25}}, "vpip", "0.0"),
-    ("zero_actions", {1: {"vpip": 0, "vpip_opp": 25, "pfr": 0, "pfr_opp": 25}}, "pfr", "0.0"),
-    ("normal_values", {1: {"vpip": 12, "vpip_opp": 50, "pfr": 8, "pfr_opp": 50}}, "vpip", "24.0"),
-    ("normal_values", {1: {"vpip": 12, "vpip_opp": 50, "pfr": 8, "pfr_opp": 50}}, "pfr", "16.0"),
-])
+@pytest.mark.parametrize(
+    "scenario_name,data,stat_name,expected_value",
+    [
+        ("no_data", {1: {"vpip": 0, "vpip_opp": 0, "pfr": 0, "pfr_opp": 0}}, "vpip", "-"),
+        ("no_data", {1: {"vpip": 0, "vpip_opp": 0, "pfr": 0, "pfr_opp": 0}}, "pfr", "-"),
+        ("zero_actions", {1: {"vpip": 0, "vpip_opp": 25, "pfr": 0, "pfr_opp": 25}}, "vpip", "0.0"),
+        ("zero_actions", {1: {"vpip": 0, "vpip_opp": 25, "pfr": 0, "pfr_opp": 25}}, "pfr", "0.0"),
+        ("normal_values", {1: {"vpip": 12, "vpip_opp": 50, "pfr": 8, "pfr_opp": 50}}, "vpip", "24.0"),
+        ("normal_values", {1: {"vpip": 12, "vpip_opp": 50, "pfr": 8, "pfr_opp": 50}}, "pfr", "16.0"),
+    ],
+)
 def test_hud_stat_display_scenarios(qapp, scenario_name, data, stat_name, expected_value):
     """Test HUD stat display for different data scenarios."""
     from Aux_Hud import SimpleStat
-    
+
     # Create mock AuxWindow
     aw = _create_mock_auxwindow()
-    
+
     # Create and test the stat
     stat = SimpleStat(stat_name, 1, "default", aw)
     stat.update(1, data)
-    
+
     actual_value = stat.lab.text()
     assert actual_value == expected_value, (
-        f"Scenario '{scenario_name}': {stat_name} expected '{expected_value}', "
-        f"got '{actual_value}'"
+        f"Scenario '{scenario_name}': {stat_name} expected '{expected_value}', " f"got '{actual_value}'"
     )
 
 

@@ -6,7 +6,7 @@ Seat 2: Hero (207.96€)
 Player0 posts small blind 1€
 Hero posts big blind 2€
 Dealt to Hero [3h Ah Jc Ts 9s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player0 raises 4€ to 6€
 Hero raises 12€ to 18€
 Player0 raises 36€ to 54€

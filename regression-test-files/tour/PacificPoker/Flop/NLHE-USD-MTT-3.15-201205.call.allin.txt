@@ -39,5 +39,3 @@ Player0 shows [ 4d, 8c ]
 Player1 shows [ Jh, 5c ]
 Player1 collected [ $2,898 ]
 Player1 collected [ $651 ]
-
-

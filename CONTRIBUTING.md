@@ -117,21 +117,21 @@ log = get_logger("module_name")
 
 def parse_hand_history(content: str, site: str) -> Optional[Dict[str, Any]]:
     """Parse hand history content from specified poker site.
-    
+
     Args:
         content: Raw hand history text
         site: Poker site identifier
-        
+
     Returns:
         Parsed hand data or None if parsing fails
-        
+
     Raises:
         ValueError: If site is not supported
     """
     if not content.strip():
         log.warning("Empty hand history content")
         return None
-    
+
     # Implementation here
     return parsed_data
 ```

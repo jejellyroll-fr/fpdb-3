@@ -165,7 +165,7 @@ generate_pyinstaller_command() {
 
     command+=" --add-data=\"$(python -c 'import qt_material; print(qt_material.__path__[0])'):qt_material\""
     command+=" --add-data=\"$(python -c 'import xcffib; print(xcffib.__path__[0])'):xcffib\""
-    
+
     command+=" --collect-submodules=xcffib"
     command+=" --collect-all xcffib"
 

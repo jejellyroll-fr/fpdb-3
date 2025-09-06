@@ -137,21 +137,21 @@ Step 5 - Test python and get fpdb sourcecode
 >>> import winpaths
 
 
-5.2/ go to Step 7 now, ignore step 6 
+5.2/ go to Step 7 now, ignore step 6
 
 
-6/ Numpy Developer install 
+6/ Numpy Developer install
 --------------------------
 
 Numpy needs special handling, as by default it will install an optimised version
  for the SSE level of your CPU (SSE3, SSE2 or noSSE).
-This means that the completed package will not run on an older CPU.  
+This means that the completed package will not run on an older CPU.
 
-For this reason, do not just run the installer.  
+For this reason, do not just run the installer.
 We will force a nosse version, to maximise compatibility on older client PC's
 
 6.1/ download the package to the Desktop
- 
+
 numpy 1.6.1 ... http://sourceforge.net/projects/numpy/files/NumPy/1.6.1/numpy-1.6.1-win32-superpack-python2.7.exe/download
 
 6.2/ You are normally wanting to build a package which works on all CPU's, so install for noSSE as follows:
@@ -174,7 +174,7 @@ Step 7 Optional database installation
 -------------------------------------
 
 #*******************************************************************************************#
-# Most people can STOP NOW, This step is only needed if you do not want to use the standard # 
+# Most people can STOP NOW, This step is only needed if you do not want to use the standard #
 # database, or if you are a developer wanting to build an executable package !!!!           #
 #*******************************************************************************************#
 
@@ -248,7 +248,7 @@ The py2exe script copies the timezone datafiles into the package folder pyfpdb/z
 
 Thanks to Jeff Peck <peck.jeff <at> gmail.com> on the py2exe mailing list for documenting this problem and solution.
 
-11.1/ dos> write C:\Python27\Lib\site-packages\pytz\__init__.py 
+11.1/ dos> write C:\Python27\Lib\site-packages\pytz\__init__.py
 11.2/ At about line 94 replace the following line(s):
 
     filename = os.path.join(os.path.dirname(__file__),
@@ -259,7 +259,7 @@ with this section of code (which supports exe-building _and_ sourcecode running 
     #py2exe installs need this syntax
     #
     filename = os.path.join(os.getcwd(), 'zoneinfo', *name_parts)
-    
+
     #sourcecode installs need this syntax
     #
     if not os.path.exists(filename):
@@ -329,9 +329,9 @@ Step 16 basic testing
 ---------------------
 
 16.1/ Open the Desktop\fpdb-n.nn.nnn  folder
-16.2/ In explorer...tools...folder options...View uncheck "Hide extensions for known file types" 
+16.2/ In explorer...tools...folder options...View uncheck "Hide extensions for known file types"
 16.3/ Double click run_fpdb.bat
-16.4/ hopefully, fpdb will run 
+16.4/ hopefully, fpdb will run
 
 16.5/ check the contents of pyfpdb\fpdb.exe.log
 16.6/ check the contents of fpdb_prerun.txt

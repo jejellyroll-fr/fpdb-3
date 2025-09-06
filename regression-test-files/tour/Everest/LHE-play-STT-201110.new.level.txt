@@ -75,4 +75,3 @@
   <SHOW position="4">Kh, 6h</SHOW>
   <WIN position="3" amount="35000" pot="0" potAmount="35000"/>
 </HAND>
-

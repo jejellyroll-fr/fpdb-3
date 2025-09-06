@@ -1,11 +1,11 @@
 ﻿Game #9864152000 starts.
 
-#Game No : 9864152000 
+#Game No : 9864152000
 ***** Hand History for Game 9864152000 *****
 €10 EUR NL Texas Hold'em - Sunday, November 21, 19:00:00 CET 2010
 Table Table  183347 (Real Money)
 Seat 1 is the button
-Total number of players : 5/6 
+Total number of players : 5/6
 Seat 3: Hero ( €10 EUR )
 Seat 6: Player6 ( €16.49 EUR )
 Seat 4: Player4 ( €10.73 EUR )

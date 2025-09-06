@@ -1,4 +1,4 @@
-free poker database 
+free poker database
 [('Actions',), ('Autorates',), ('Backings',), ('Boards',), ('CardsCache',), ('Files',), ('Gametypes',), ('Hands',), ('HandsActions',), ('HandsPlayers',), ('HandsPots',), ('HandsStove',), ('HudCache',), ('Months',), ('Players',), ('PositionsCache',), ('Rank',), ('RawHands',), ('RawTourneys',), ('Sessions',), ('SessionsCache',), ('Settings',), ('Sites',), ('StartCards',), ('TourneyTypes',), ('Tourneys',), ('TourneysCache',), ('TourneysPlayers',), ('Weeks',), ('sqlite_stat1',)]
 
 Actions:

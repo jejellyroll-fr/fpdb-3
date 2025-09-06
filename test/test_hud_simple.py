@@ -21,7 +21,7 @@ class TestImportName(unittest.TestCase):
         """Set up mocks for this test class only."""
         cls._original_modules = {}
         modules_to_mock = ["Database", "Hand", "loggingFpdb"]
-        
+
         for module_name in modules_to_mock:
             if module_name in sys.modules:
                 cls._original_modules[module_name] = sys.modules[module_name]
@@ -31,7 +31,7 @@ class TestImportName(unittest.TestCase):
     def tearDownClass(cls):
         """Clean up mocks after this test class."""
         modules_to_mock = ["Database", "Hand", "loggingFpdb"]
-        
+
         for module_name in modules_to_mock:
             if module_name in cls._original_modules:
                 sys.modules[module_name] = cls._original_modules[module_name]

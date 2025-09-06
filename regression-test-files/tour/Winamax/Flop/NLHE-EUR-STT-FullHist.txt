@@ -10,11 +10,11 @@ Seat 7: Player4 (1500)
 Seat 8: Player2 (1500)
 Seat 9: Player5 (1500)
 Seat 10: Player8 (1500)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 Player1 posts small blind 10
 Player0 posts big blind 20
 Dealt to Hero [Jd 7h]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player7 folds
 Player4 folds
 Player2 folds
@@ -75,11 +75,11 @@ Seat 7: Player4 (1500)
 Seat 8: Player2 (1500)
 Seat 9: Player5 (1480)
 Seat 10: Player8 (1500)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 Player0 posts small blind 10
 Player7 posts big blind 20
 Dealt to Hero [7h 3s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player4 folds
 Player2 folds
 Player5 calls 20
@@ -138,11 +138,11 @@ Seat 7: Player4 (1500)
 Seat 8: Player2 (1500)
 Seat 9: Player5 (1880)
 Seat 10: Player8 (1460)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 Player7 posts small blind 10
 Player4 posts big blind 20
 Dealt to Hero [4h 3d]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player2 folds
 Player5 calls 20
 Player8 calls 20
@@ -189,11 +189,11 @@ Seat 7: Player4 (1480)
 Seat 8: Player2 (1500)
 Seat 9: Player5 (1840)
 Seat 10: Player8 (1420)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 Player4 posts small blind 10
 Player2 posts big blind 20
 Dealt to Hero [Qc 7d]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player5 calls 20
 Player8 folds
 Hero folds
@@ -257,11 +257,11 @@ Seat 7: Player4 (1440)
 Seat 8: Player2 (1480)
 Seat 9: Player5 (1820)
 Seat 10: Player8 (1420)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 Player2 posts small blind 10
 Player5 posts big blind 20
 Dealt to Hero [Kd Ah]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player8 calls 20
 Hero raises 70 to 90
 Player3 folds
@@ -305,6 +305,3 @@ Seat 7: Player4 (button) folded on the flop
 Seat 8: Player2 (small blind) folded on the pre-flop
 Seat 9: Player5 (big blind) folded on the flop
 Seat 10: Player8 folded on the flop
-
-
-

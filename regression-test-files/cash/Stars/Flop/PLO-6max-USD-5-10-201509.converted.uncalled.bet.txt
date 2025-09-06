@@ -25,4 +25,3 @@ Seat 3: PLR_7755822SI (button) mucked [8h As 4d 3d]
 Seat 4: PLR_8634721NK (small blind) mucked [Qs 2d 7c 3h]
 Seat 5: PLR_7233719GD (big blind) showed [Qd 6h 6s 7d] and won ($15)
 Seat 6: bodogJS mucked [2h 5c 8s Kc]
-

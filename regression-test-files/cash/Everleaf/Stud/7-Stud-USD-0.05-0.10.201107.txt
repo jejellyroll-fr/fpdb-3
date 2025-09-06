@@ -96,7 +96,7 @@ Player4 calls [$ 0.10 USD]
 **** dealing 6th street ****
 Player2: bets [$ 0.10 USD]
 Player4 calls [$ 0.10 USD]
-**** dealing river **** 
+**** dealing river ****
 Player2: bets [$ 0.10 USD]
 Player4 calls [$ 0.10 USD]
 Player2 shows [ 5d, 8d, Kd, 7d, 9d, Jh, Qc ] a flush, king high
@@ -163,7 +163,7 @@ Player4 folds
 **** dealing 6th street ****
 Player1: bets [$ 0.10 USD]
 Player3 calls [$ 0.10 USD]
-**** dealing river **** 
+**** dealing river ****
 Player1: bets [$ 0.10 USD]
 Player3 raises [$ 0.20 USD]
 Player1 folds
@@ -224,7 +224,7 @@ Player4 checks
 **** dealing 6th street ****
 Player4: bets [$ 0.10 USD]
 Player3 calls [$ 0.10 USD]
-**** dealing river **** 
+**** dealing river ****
 Player4: bets [$ 0.10 USD]
 Player3 raises [$ 0.20 USD]
 Player4 calls [$ 0.10 USD]
@@ -413,7 +413,7 @@ Player3 calls [$ 0.10 USD]
 **** dealing 6th street ****
 Player2: bets [$ 0.10 USD]
 Player3 calls [$ 0.10 USD]
-**** dealing river **** 
+**** dealing river ****
 Player2 checks
 Player3 checks
 Player2 shows [ 9h, 7c, 3s, Ac, 3h, 6s, 2s ] a pair of threes
@@ -464,7 +464,7 @@ Player2 checks
 **** dealing 6th street ****
 Player3 checks
 Player2 checks
-**** dealing river **** 
+**** dealing river ****
 Player3: bets [$ 0.10 USD]
 Player2 calls [$ 0.10 USD]
 Player3 shows [ 6c, Kd, Ac, 5h, Ah, Qc, As ] three of a kind, aces
@@ -529,10 +529,9 @@ Player3 calls [$ 0.10 USD]
 **** dealing 6th street ****
 Player2 checks
 Player3 checks
-**** dealing river **** 
+**** dealing river ****
 Player2 checks
 Player3 checks
 Player2 shows [ 4h, Th, 2s, 3s, 3c, Jd, 6h ] a pair of threes
 Player3 shows [ 4c, Ah, Qc, As, Kh, Ts, 8c ] a pair of aces
 Player3 wins $ 0.24 USD from main pot with a pair of aces [ As, Ah, Kh, Qc, Ts ]
-

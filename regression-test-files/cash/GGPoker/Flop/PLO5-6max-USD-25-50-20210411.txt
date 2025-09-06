@@ -9,12 +9,12 @@ Seat 6: 3366123a ($6,775 in chips)
 43be033f: posts small blind $25
 1d878394: posts big blind $50
 *** HOLE CARDS ***
-Dealt to 6f4c716f 
-Dealt to 6017cffc 
-Dealt to 43be033f 
-Dealt to 1d878394 
+Dealt to 6f4c716f
+Dealt to 6017cffc
+Dealt to 43be033f
+Dealt to 1d878394
 Dealt to Hero [2h 8h 2d 6c 8c]
-Dealt to 3366123a 
+Dealt to 3366123a
 Hero: raises $60 to $110
 3366123a: folds
 6f4c716f: folds

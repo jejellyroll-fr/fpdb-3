@@ -22,7 +22,7 @@ Player7: ante processed 0.00
 Player8: ante processed 0.00
 Player4: posts small blind 0.01
 Hero: posts big blind 0.02
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [Jd 8s]
 Player2: folds
 Player3 has left the table
@@ -39,7 +39,7 @@ Hero: bets 0.03
 Player4: folds
 Uncalled bet (0.03) returned to Hero
 Hero shows Jd 8s
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 0.04 | Rake 0.00
 Board [Kc 8d Ad]
 Seat 8: Player0 folded before Flop

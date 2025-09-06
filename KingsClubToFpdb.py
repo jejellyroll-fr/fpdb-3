@@ -213,7 +213,8 @@ class KingsClub(HandHistoryConverter):
         re.MULTILINE,
     )
     re_Antes = re.compile(
-        r"^{PLYR}: posts ante {CUR}(?P<ANTE>[,.0-9]+)".format(**substitutions), re.MULTILINE,
+        r"^{PLYR}: posts ante {CUR}(?P<ANTE>[,.0-9]+)".format(**substitutions),
+        re.MULTILINE,
     )
     re_BringIn = re.compile(
         r"^{PLYR} brings[- ]in( low|) for {CUR}(?P<BRINGIN>[,.0-9]+)".format(**substitutions),
@@ -228,11 +229,14 @@ class KingsClub(HandHistoryConverter):
         re.MULTILINE,
     )
     re_Action = re.compile(
-        r"""^{PLYR}(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat|\sdraws)(\s{CUR}(?P<BET>[,.\d]+))?(\sto\s{CUR}(?P<BETTO>[,.\d]+))?\s*(,\sand\sis\sall.in)?(and\shas\sreached\sthe\s\[{CUR}\d\.,]+\scap)?(\son|\scards?)?(\s\(disconnect\))?(\s\[(?P<CARDS>.+?)\]\sdraws\s\[(?P<DRAWS1>.+?)\](\s\[(?P<DRAWS2>.+?)\])?)?\s*$""".format(**substitutions),
+        r"""^{PLYR}(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat|\sdraws)(\s{CUR}(?P<BET>[,.\d]+))?(\sto\s{CUR}(?P<BETTO>[,.\d]+))?\s*(,\sand\sis\sall.in)?(and\shas\sreached\sthe\s\[{CUR}\d\.,]+\scap)?(\son|\scards?)?(\s\(disconnect\))?(\s\[(?P<CARDS>.+?)\]\sdraws\s\[(?P<DRAWS1>.+?)\](\s\[(?P<DRAWS2>.+?)\])?)?\s*$""".format(
+            **substitutions
+        ),
         re.MULTILINE | re.VERBOSE,
     )
     re_ShowdownAction = re.compile(
-        r"^{} shows \[(?P<CARDS>.*)\]".format(substitutions["PLYR"]), re.MULTILINE,
+        r"^{} shows \[(?P<CARDS>.*)\]".format(substitutions["PLYR"]),
+        re.MULTILINE,
     )
     re_sitsOut = re.compile("^{} sits out".format(substitutions["PLYR"]), re.MULTILINE)
     # re_ShownCards       = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % substitutions, re.MULTILINE)
@@ -247,7 +251,9 @@ class KingsClub(HandHistoryConverter):
         re.MULTILINE,
     )
     re_WinningRankOther = re.compile(
-        r"^{PLYR} finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place and received {CUR}(?P<AMT>[,.0-9]+)\.$".format(**substitutions),
+        r"^{PLYR} finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place and received {CUR}(?P<AMT>[,.0-9]+)\.$".format(
+            **substitutions
+        ),
         re.MULTILINE,
     )
     re_RankOther = re.compile(
@@ -263,7 +269,9 @@ class KingsClub(HandHistoryConverter):
     # ChazDazzle wins the 22000 bounty for eliminating berkovich609
     # JKuzja, vecenta split the $50 bounty for eliminating ODYSSES
     re_Bounty = re.compile(
-        r"^{PLYR} (?P<SPLIT>split|wins) the {CUR}(?P<AMT>[,\.0-9]+) bounty for eliminating (?P<ELIMINATED>.+?)$".format(**substitutions),
+        r"^{PLYR} (?P<SPLIT>split|wins) the {CUR}(?P<AMT>[,\.0-9]+) bounty for eliminating (?P<ELIMINATED>.+?)$".format(
+            **substitutions
+        ),
         re.MULTILINE,
     )
     # Amsterdam71 wins $19.90 for eliminating MuKoJla and their own bounty increases by $19.89 to $155.32
@@ -273,7 +281,9 @@ class KingsClub(HandHistoryConverter):
         r"""
                         ^{PLYR}\swins\s{CUR}(?P<AMT>[,\.0-9]+)\s
                         for\s(splitting\sthe\selimination\sof|eliminating)\s(?P<ELIMINATED>.+?)\s
-                        and\stheir\sown\sbounty\sincreases\sby\s{CUR}(?P<INCREASE>[\.0-9]+)\sto\s{CUR}(?P<ENDAMT>[\.0-9]+)$""".format(**substitutions),
+                        and\stheir\sown\sbounty\sincreases\sby\s{CUR}(?P<INCREASE>[\.0-9]+)\sto\s{CUR}(?P<ENDAMT>[\.0-9]+)$""".format(
+            **substitutions
+        ),
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -286,7 +296,8 @@ class KingsClub(HandHistoryConverter):
     re_Rake = re.compile(r"^Rake\s(?P<RAKE>[,.0-9]+)$", re.MULTILINE)
     re_Split = re.compile(r"\*\*\* BOARD 1 - FLOP \*\*\*")
     re_Table = re.compile(
-        r"^\s?Table\s(ID\s)?\'(?P<TABLE>.+?)\'\s", re.MULTILINE | re.VERBOSE,
+        r"^\s?Table\s(ID\s)?\'(?P<TABLE>.+?)\'\s",
+        re.MULTILINE | re.VERBOSE,
     )
 
     def compilePlayerRegexs(self, hand) -> None:
@@ -428,10 +439,13 @@ class KingsClub(HandHistoryConverter):
             # tz = a.group('TZ')  # just assume ET??
             # print "   tz = ", tz, " datetime =", datetimestr
         hand.startTime = datetime.datetime.strptime(
-            datetimestr, "%Y/%m/%d %H:%M:%S",
+            datetimestr,
+            "%Y/%m/%d %H:%M:%S",
         )  # also timezone at end, e.g. " ET"
         hand.startTime = HandHistoryConverter.changeTimezone(
-            hand.startTime, "ET", "UTC",
+            hand.startTime,
+            "ET",
+            "UTC",
         )
 
         # log.debug("readHandInfo: %s" % info)
@@ -448,7 +462,7 @@ class KingsClub(HandHistoryConverter):
             if key == "BUTTON":
                 hand.buttonpos = info[key]
         if self.re_Cancelled.search(hand.handText):
-            msg = (f"Hand '{hand.handid}' was cancelled.")
+            msg = f"Hand '{hand.handid}' was cancelled."
             raise FpdbHandPartial(msg)
 
     def readButton(self, hand) -> None:
@@ -481,7 +495,9 @@ class KingsClub(HandHistoryConverter):
         if hand.gametype["category"] == "a5_1draw":
             # isolate the first discard/stand pat line (thanks Carl for the regex)
             discard_split = re.split(
-                r"(?:(.+(?: stands pat| discards| draws).+))", hand.handText, re.DOTALL,
+                r"(?:(.+(?: stands pat| discards| draws).+))",
+                hand.handText,
+                re.DOTALL,
             )
             if len(hand.handText) == len(discard_split[0]):
                 # handText was not split, no DRAW street occurred
@@ -565,8 +581,7 @@ class KingsClub(HandHistoryConverter):
                 )
             elif hand.gametype["category"] == "a5_1draw":
                 m = re.search(
-                    r"(?P<DEAL>.+(?=\*\*\* 1ST DRAW \*\*\*)|.+)"
-                    r"(\*\*\* 1ST DRAW \*\*\*(?P<DRAWONE>.+))?",
+                    r"(?P<DEAL>.+(?=\*\*\* 1ST DRAW \*\*\*)|.+)" r"(\*\*\* 1ST DRAW \*\*\*(?P<DRAWONE>.+))?",
                     hand.handText,
                     re.DOTALL,
                 )
@@ -614,15 +629,14 @@ class KingsClub(HandHistoryConverter):
                     hand.streets.update({"RIVER": m2.group("RIVER")})
 
     def readCommunityCards(
-        self, hand, street,
+        self,
+        hand,
+        street,
     ) -> None:  # street has been matched by markStreets, so exists in this hand
         if (
             street != "FLOPET" or hand.streets.get("FLOP") is None
         ):  # a list of streets which get dealt community cards (i.e. all but PREFLOP)
-            if (
-                street in ("FLOP1", "TURN1", "FLOP2", "TURN2")
-                and not hand.gametype["split"]
-            ):
+            if street in ("FLOP1", "TURN1", "FLOP2", "TURN2") and not hand.gametype["split"]:
                 hand.setCommunityCards(street, hand.streets[street].split(" "))
             else:
                 m = self.re_Board.search(hand.streets[street])
@@ -645,10 +659,7 @@ class KingsClub(HandHistoryConverter):
         pnames = set()
         for player in m:
             # ~ logging.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
-            if (
-                player.group("PNAME") in pnames
-                and hand.gametype["category"] == "6_holdem"
-            ):
+            if player.group("PNAME") in pnames and hand.gametype["category"] == "6_holdem":
                 hand.addBlind(
                     player.group("PNAME"),
                     "button blind",
@@ -734,16 +745,10 @@ class KingsClub(HandHistoryConverter):
                     #                    if m == None:
                     #                        hand.involved = False
                     #                    else:
-                    newcards = [
-                        x for x in found.group("NEWCARDS").split(" ") if x != "X"
-                    ]
+                    newcards = [x for x in found.group("NEWCARDS").split(" ") if x != "X"]
                     if len(newcards) > 0:
                         hand.hero = found.group("PNAME")
-                        _street = (
-                            "FLOP"
-                            if hand.gametype["category"] == "aof_omaha"
-                            else street
-                        )
+                        _street = "FLOP" if hand.gametype["category"] == "aof_omaha" else street
                         hand.addHoleCards(
                             _street,
                             hand.hero,
@@ -762,15 +767,11 @@ class KingsClub(HandHistoryConverter):
                 if found.group("NEWCARDS") is None:
                     newcards = []
                 else:
-                    newcards = [
-                        x for x in found.group("NEWCARDS").split(" ") if x != "X"
-                    ]
+                    newcards = [x for x in found.group("NEWCARDS").split(" ") if x != "X"]
                 if found.group("OLDCARDS") is None:
                     oldcards = []
                 else:
-                    oldcards = [
-                        x for x in found.group("OLDCARDS").split(" ") if x != "X"
-                    ]
+                    oldcards = [x for x in found.group("OLDCARDS").split(" ") if x != "X"]
 
                 if street == "THIRD" and len(newcards) == 3:  # hero in stud game
                     hand.hero = player
@@ -829,8 +830,7 @@ class KingsClub(HandHistoryConverter):
                         action.group("PNAME"),
                         (
                             str(
-                                Decimal(self.clearMoneyString(action.group("BETTO")))
-                                * 100,
+                                Decimal(self.clearMoneyString(action.group("BETTO"))) * 100,
                             )
                             if hand.tourNo is not None
                             else self.clearMoneyString(action.group("BETTO"))
@@ -842,8 +842,7 @@ class KingsClub(HandHistoryConverter):
                         action.group("PNAME"),
                         (
                             str(
-                                Decimal(self.clearMoneyString(action.group("BET")))
-                                * 100,
+                                Decimal(self.clearMoneyString(action.group("BET"))) * 100,
                             )
                             if hand.tourNo is not None
                             else self.clearMoneyString(action.group("BET"))
@@ -856,8 +855,7 @@ class KingsClub(HandHistoryConverter):
                         action.group("PNAME"),
                         (
                             str(
-                                Decimal(self.clearMoneyString(action.group("BET")))
-                                * 100,
+                                Decimal(self.clearMoneyString(action.group("BET"))) * 100,
                             )
                             if hand.tourNo is not None
                             else self.clearMoneyString(action.group("BET"))
@@ -869,8 +867,7 @@ class KingsClub(HandHistoryConverter):
                         action.group("PNAME"),
                         (
                             str(
-                                Decimal(self.clearMoneyString(action.group("BET")))
-                                * 100,
+                                Decimal(self.clearMoneyString(action.group("BET"))) * 100,
                             )
                             if hand.tourNo is not None
                             else self.clearMoneyString(action.group("BET"))
@@ -885,16 +882,10 @@ class KingsClub(HandHistoryConverter):
                 )
                 if action.group("DRAWS1") is not None:
                     player = action.group("PNAME")
-                    newcards = [
-                        x for x in action.group("DRAWS1").split(" ") if x != "X"
-                    ]
+                    newcards = [x for x in action.group("DRAWS1").split(" ") if x != "X"]
                     discards = action.group("CARDS").split(" ")
                     laststreet = hand.allStreets[hand.allStreets.index(street) - 1]
-                    oldcards = [
-                        x
-                        for x in hand.join_holecards(player, True, laststreet)
-                        if x not in discards
-                    ]
+                    oldcards = [x for x in hand.join_holecards(player, True, laststreet) if x not in discards]
                     hand.addHoleCards(
                         street,
                         player,
@@ -926,10 +917,9 @@ class KingsClub(HandHistoryConverter):
         return True
 
     def readCollectPot(self, hand) -> None:
-        if (
-            hand.gametype["category"] == "27_1draw"
-            and hand.gametype["limitType"] == "nl"
-        ) or hand.gametype["base"] == "stud":
+        if (hand.gametype["category"] == "27_1draw" and hand.gametype["limitType"] == "nl") or hand.gametype[
+            "base"
+        ] == "stud":
             hand.adjustCollected = False
         else:
             hand.adjustCollected = True

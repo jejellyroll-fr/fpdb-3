@@ -8022,6 +8022,3 @@ Player62: Shows [S10 HQ]
 Player48: Shows [H2 D4]
 Player69: Shows [H7 CA]
 Player62: wins $5,345.00
-
-
-

@@ -1,14 +1,14 @@
-#Game No : 18512107436 
+#Game No : 18512107436
 ***** Hand History for Game 18512107436 *****
 $1/$2 USD NL Short Deck - Tuesday, April 16, 18:04:52 CEST 2019
 Table Short Deck NLH 100 4 (Real Money)
 Seat 5 is the button
-Total number of players : 2/6 
+Total number of players : 2/6
 Seat 2: Lamar_Odom37 ( $451.20 USD )
 Seat 5: Player5 ( $2,290.68 USD )
 Lamar_Odom37 posts ante [$1 USD]
 Player5 posts ante [$1 USD]
-Player5 posts button blind  [$1 USD] 
+Player5 posts button blind  [$1 USD]
 ** Dealing down cards **
 Dealt to Lamar_Odom37 [  Ah Qs ]
 Lamar_Odom37 raises [$5 USD]

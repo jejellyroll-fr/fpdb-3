@@ -24,4 +24,3 @@ Seat 3: Player6 (button) didn't bet (folded)
 Seat 4: Player4 (small blind) folded before the draw
 Seat 5: Player3 (big blind) folded before the draw
 Seat 6: Hero is sitting out
-

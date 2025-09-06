@@ -43,6 +43,7 @@ class PokerStarsSummary(TourneySummary):
     - Excel/XLS formats
     - Special formats (Super Satellite, Run It Once)
     """
+
     hhtype = "summary"
     limits: ClassVar[dict[str, str]] = {
         "No Limit": "nl",

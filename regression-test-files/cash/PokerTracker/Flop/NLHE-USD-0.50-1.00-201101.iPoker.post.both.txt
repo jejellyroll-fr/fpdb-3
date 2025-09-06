@@ -37,4 +37,3 @@ Player3: Shows [dQ c10]
 Player1: Shows [hK hQ]
 Player1: wins $146.20
 Player3: wins $99.60
-

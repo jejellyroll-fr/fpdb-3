@@ -104,7 +104,7 @@ Your theme XML must include these color definitions:
 ### Installing Themes
 
 1. **Using Theme Creator**: Themes are installed automatically
-2. **Manual installation**: 
+2. **Manual installation**:
    - Place `.xml` file in `~/.fpdb/themes/`
    - Restart fpdb
    - Theme appears in Themes menu

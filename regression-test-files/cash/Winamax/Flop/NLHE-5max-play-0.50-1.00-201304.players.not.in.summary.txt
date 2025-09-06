@@ -8,7 +8,7 @@ Seat 5: Player4 (168.47)
 *** ANTE/BLINDS ***
 Player2 posts small blind 0.50
 Player3 posts big blind 1
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player4 calls 1
 Player0 raises 11.29 to 12.29
 Player2 folds

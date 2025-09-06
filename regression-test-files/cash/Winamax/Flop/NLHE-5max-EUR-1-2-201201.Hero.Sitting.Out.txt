@@ -17,4 +17,4 @@ Player2 collected 3€ from pot
 Total pot 3€ | No rake
 Seat 1: Player1 (small blind) folded on the pre-flop
 Seat 3: Player2 (big blind) won 3€
-Seat 5: Player3 (button) folded on the pre-flop 
+Seat 5: Player3 (button) folded on the pre-flop

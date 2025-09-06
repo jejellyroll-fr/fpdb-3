@@ -304,9 +304,9 @@ Player2 shows [A c][Q c]
 Player4 shows [K d][T h]
 Dealing River [6 c]
 Pot sizes: 13,800
-Player4 has Straight, King high 
-Player2 has Flush, Ace high 
-Player2 wins 13,800 with: Flush, Ace high 
+Player4 has Straight, King high
+Player2 has Flush, Ace high
+Player2 wins 13,800 with: Flush, Ace high
 Player0 says Boom!
 Seat 1: Player8 - 9,800
 Seat 2: Player5 - 8,450
@@ -763,5 +763,3 @@ Seat 6: Player0 - 10,100
 Seat 9: Player9 - 9,450
 Seat 10: Player7 - 8,950
 End of Hand #2072801992
-
-

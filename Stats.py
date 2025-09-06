@@ -305,9 +305,7 @@ def _calculate_end_stack(stat_dict, player, hand_instance):
     for street in hand_instance.bets:
         for item in hand_instance.bets[street]:
             if item == stat_dict[player]["screen_name"]:
-                for amount in hand_instance.bets[street][
-                    stat_dict[player]["screen_name"]
-                ]:
+                for amount in hand_instance.bets[street][stat_dict[player]["screen_name"]]:
                     stack -= float(amount)
 
     # Next, add back any money returned
@@ -366,9 +364,7 @@ def m_ratio(stat_dict, player):
 
     stack = _calculate_end_stack(stat_dict, player, hand_instance)
 
-    if (
-        compulsory_bets != 0
-    ):  # Check if compulsory_bets is non-zero to avoid division by zero
+    if compulsory_bets != 0:  # Check if compulsory_bets is non-zero to avoid division by zero
         stat = stack / compulsory_bets
     else:
         stat = 0  # Default to 0 if compulsory_bets is zero
@@ -1041,10 +1037,12 @@ def f_steal(stat_dict, player):
     stat = 0.0
     try:
         folded_blind = stat_dict[player].get("sbnotdef", 0) + stat_dict[player].get(
-            "bbnotdef", 0,
+            "bbnotdef",
+            0,
         )
         blind_stolen = stat_dict[player].get("sbstolen", 0) + stat_dict[player].get(
-            "bbstolen", 0,
+            "bbstolen",
+            0,
         )
 
         # No steal attempts = no data available
@@ -1229,12 +1227,8 @@ def fbr(stat_dict, player):
         fb_opp_0 = float(stat_dict[player].get("fb_opp_0", 0))  # Ensure key exists
         pfr_opp = float(stat_dict[player].get("n", 0))  # Ensure key exists
 
-        if (
-            fb_opp_0 != 0 and pfr_opp != 0
-        ):  # Check both values to avoid division by zero
-            stat = (float(stat_dict[player]["fb_0"]) / fb_opp_0) * (
-                float(stat_dict[player]["pfr"]) / pfr_opp
-            )
+        if fb_opp_0 != 0 and pfr_opp != 0:  # Check both values to avoid division by zero
+            stat = (float(stat_dict[player]["fb_0"]) / fb_opp_0) * (float(stat_dict[player]["pfr"]) / pfr_opp)
         else:
             stat = 0  # Default to 0 if any of the values is zero
 
@@ -1290,9 +1284,7 @@ def ctb(stat_dict, player):
             "call3B=%3.1f%%" % (100.0 * stat),
             "(%d/%d)"
             % (
-                float(stat_dict[player]["f3b_opp_0"])
-                - stat_dict[player]["fb_0"]
-                - stat_dict[player]["f3b_0"],
+                float(stat_dict[player]["f3b_opp_0"]) - stat_dict[player]["fb_0"] - stat_dict[player]["f3b_0"],
                 stat_dict[player]["fb_opp_0"],
             ),
             "% call 3 bet",
@@ -2011,14 +2003,10 @@ def a_freq_123(stat_dict, player):
     try:
         # Sum up aggression and seen stats
         total_aggr = (
-            stat_dict[player].get("aggr_1", 0)
-            + stat_dict[player].get("aggr_2", 0)
-            + stat_dict[player].get("aggr_3", 0)
+            stat_dict[player].get("aggr_1", 0) + stat_dict[player].get("aggr_2", 0) + stat_dict[player].get("aggr_3", 0)
         )
         total_saw = (
-            stat_dict[player].get("saw_1", 0)
-            + stat_dict[player].get("saw_2", 0)
-            + stat_dict[player].get("saw_3", 0)
+            stat_dict[player].get("saw_1", 0) + stat_dict[player].get("saw_2", 0) + stat_dict[player].get("saw_3", 0)
         )
 
         # Check to avoid division by zero
@@ -2928,11 +2916,7 @@ def game_abbr(stat_dict, player):
             # If hand_instance is None, return default empty values
             return ("NA", "NA", "game=NA", "game_abbr=NA", "(NA)", "Game abbreviation")
 
-        cat_plus_limit = (
-            hand_instance.gametype["category"]
-            + "."
-            + hand_instance.gametype["limitType"]
-        )
+        cat_plus_limit = hand_instance.gametype["category"] + "." + hand_instance.gametype["limitType"]
         stat = {
             # ftp's 10-game with official abbreviations
             "holdem.fl": "H",
@@ -2958,7 +2942,8 @@ def game_abbr(stat_dict, player):
             "holdem.pl": "Hp",
             "studhi.nl": "Sn",
         }.get(
-            cat_plus_limit, "Unknown",
+            cat_plus_limit,
+            "Unknown",
         )  # Default to "Unknown" if not found
         return (
             stat,
@@ -4326,9 +4311,7 @@ def check_raise_frequency(stat_dict, player):
     try:
         # Sum the total check-raises and opportunities
         total_cr = (
-            stat_dict[player].get("cr_1", 0)
-            + stat_dict[player].get("cr_2", 0)
-            + stat_dict[player].get("cr_3", 0)
+            stat_dict[player].get("cr_1", 0) + stat_dict[player].get("cr_2", 0) + stat_dict[player].get("cr_3", 0)
         )
         total_opp = (
             stat_dict[player].get("ccr_opp_1", 0)
@@ -4364,10 +4347,12 @@ def check_raise_frequency(stat_dict, player):
 def river_call_efficiency(stat_dict, player):
     try:
         river_calls = stat_dict[player].get(
-            "call_3", 0,
+            "call_3",
+            0,
         )  # Safely get river calls, defaulting to 0
         showdowns_won = stat_dict[player].get(
-            "wmsd", 0,
+            "wmsd",
+            0,
         )  # Safely get showdowns won, defaulting to 0
 
         # Calculate the efficiency, ensuring no division by zero
@@ -4454,36 +4439,36 @@ def starthands(stat_dict, player):
 
     query = (
         "SELECT distinct startCards, street0Aggr, street0CalledRaiseDone, "
-         "case when HandsPlayers.position = 'B' then 'b' "
-         "when HandsPlayers.position = 'S' then 'b' "
-         "when HandsPlayers.position = '0' then 'l' "
-         "when HandsPlayers.position = '1' then 'l' "
-         "when HandsPlayers.position = '2' then 'm' "
-         "when HandsPlayers.position = '3' then 'm' "
-         "when HandsPlayers.position = '4' then 'm' "
-         "when HandsPlayers.position = '5' then 'e' "
-         "when HandsPlayers.position = '6' then 'e' "
-         "when HandsPlayers.position = '7' then 'e' "
-         "when HandsPlayers.position = '8' then 'e' "
-         "when HandsPlayers.position = '9' then 'e' "
-         "else 'X' end "
-         "FROM Hands, HandsPlayers, Gametypes "
-         "WHERE HandsPlayers.handId = Hands.id "
-         " AND Gametypes.id = Hands.gametypeid "
-         " AND Gametypes.type = "
-         "   (SELECT Gametypes.type FROM Gametypes, Hands   "
-         "  WHERE Hands.gametypeid = Gametypes.id and Hands.id = %d) "
-         " AND Gametypes.Limittype =  "
-         "   (SELECT Gametypes.limitType FROM Gametypes, Hands  "
-         " WHERE Hands.gametypeid = Gametypes.id and Hands.id = %d) "
-         "AND Gametypes.category = 'holdem' "
-         "AND fileId = (SELECT fileId FROM Hands "
-         " WHERE Hands.id = %d) "
-         "AND HandsPlayers.playerId = %d "
-         "AND street0VPI "
-         "AND startCards > 0 AND startCards <> 170 "
-         "ORDER BY startCards DESC "
-         ";"
+        "case when HandsPlayers.position = 'B' then 'b' "
+        "when HandsPlayers.position = 'S' then 'b' "
+        "when HandsPlayers.position = '0' then 'l' "
+        "when HandsPlayers.position = '1' then 'l' "
+        "when HandsPlayers.position = '2' then 'm' "
+        "when HandsPlayers.position = '3' then 'm' "
+        "when HandsPlayers.position = '4' then 'm' "
+        "when HandsPlayers.position = '5' then 'e' "
+        "when HandsPlayers.position = '6' then 'e' "
+        "when HandsPlayers.position = '7' then 'e' "
+        "when HandsPlayers.position = '8' then 'e' "
+        "when HandsPlayers.position = '9' then 'e' "
+        "else 'X' end "
+        "FROM Hands, HandsPlayers, Gametypes "
+        "WHERE HandsPlayers.handId = Hands.id "
+        " AND Gametypes.id = Hands.gametypeid "
+        " AND Gametypes.type = "
+        "   (SELECT Gametypes.type FROM Gametypes, Hands   "
+        "  WHERE Hands.gametypeid = Gametypes.id and Hands.id = %d) "
+        " AND Gametypes.Limittype =  "
+        "   (SELECT Gametypes.limitType FROM Gametypes, Hands  "
+        " WHERE Hands.gametypeid = Gametypes.id and Hands.id = %d) "
+        "AND Gametypes.category = 'holdem' "
+        "AND fileId = (SELECT fileId FROM Hands "
+        " WHERE Hands.id = %d) "
+        "AND HandsPlayers.playerId = %d "
+        "AND street0VPI "
+        "AND startCards > 0 AND startCards <> 170 "
+        "ORDER BY startCards DESC "
+        ";"
     ) % (int(handid), int(handid), int(handid), int(player))
 
     # print query
@@ -4513,9 +4498,7 @@ def starthands(stat_dict, player):
                 PFlimp = PFlimp + "\n"
     sc.close()
 
-    returnstring = (
-        PFlimp + "\n" + PFaggr + "\n" + PFcar + "\n" + PFdefendBB
-    )  # + "\n" + str(handid)
+    returnstring = PFlimp + "\n" + PFaggr + "\n" + PFcar + "\n" + PFdefendBB  # + "\n" + str(handid)
 
     return (
         (returnstring),

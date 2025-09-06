@@ -17,36 +17,39 @@ def main() -> None:
     warnings.simplefilter(action="ignore", category=FutureWarning)
 
     parser = argparse.ArgumentParser(description="Import hand history files into fpdb.")
-    parser.add_argument("paths", metavar="PATH", type=str, nargs="+",
-                        help="File or directory paths to import.")
-    parser.add_argument("--site", type=str, default="auto",
-                        help="Poker site name (e.g., PokerStars). Default: auto-detect.")
-    parser.add_argument("--no-progress", action="store_true",
-                        help="Disable progress reporting.")
-    parser.add_argument("--config", type=str,
-                        help="Path to fpdb.toml configuration file.")
-    parser.add_argument("--debug", action="store_true",
-                        help="Enable debug logging to see detailed import information.")
-    parser.add_argument("--verbose", "-v", action="store_true",
-                        help="Enable verbose logging (INFO level).")
+    parser.add_argument("paths", metavar="PATH", type=str, nargs="+", help="File or directory paths to import.")
+    parser.add_argument(
+        "--site", type=str, default="auto", help="Poker site name (e.g., PokerStars). Default: auto-detect."
+    )
+    parser.add_argument("--no-progress", action="store_true", help="Disable progress reporting.")
+    parser.add_argument("--config", type=str, help="Path to fpdb.toml configuration file.")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging to see detailed import information.")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging (INFO level).")
 
     # Hand data reporting options
-    parser.add_argument("--report-level", choices=["summary", "detailed", "full", "hierarchy", "debug"], default="summary",
-                        help="Level of hand data reporting detail. Default: summary")
-    parser.add_argument("--report-file", type=str,
-                        help="Generate detailed report for specific file path")
-    parser.add_argument("--export-json", type=str,
-                        help="Export detailed hand data to JSON file")
-    parser.add_argument("--enable-hand-reporting", action="store_true",
-                        help="Enable detailed hand data reporting and analysis")
+    parser.add_argument(
+        "--report-level",
+        choices=["summary", "detailed", "full", "hierarchy", "debug"],
+        default="summary",
+        help="Level of hand data reporting detail. Default: summary",
+    )
+    parser.add_argument("--report-file", type=str, help="Generate detailed report for specific file path")
+    parser.add_argument("--export-json", type=str, help="Export detailed hand data to JSON file")
+    parser.add_argument(
+        "--enable-hand-reporting", action="store_true", help="Enable detailed hand data reporting and analysis"
+    )
 
     args = parser.parse_args()
 
     # Setup logging based on debug/verbose flags
     if args.debug or args.report_level == "debug":
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(name)s:%(funcName)s] [%(levelname)s] %(message)s")
+        logging.basicConfig(
+            level=logging.DEBUG, format="%(asctime)s [%(name)s:%(funcName)s] [%(levelname)s] %(message)s"
+        )
     elif args.verbose:
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s:%(funcName)s] [%(levelname)s] %(message)s")
+        logging.basicConfig(
+            level=logging.INFO, format="%(asctime)s [%(name)s:%(funcName)s] [%(levelname)s] %(message)s"
+        )
     else:
         # Silence all logs except CRITICAL (quiet mode for normal usage)
         # Capture and disable all logging immediately
@@ -85,18 +88,18 @@ def main() -> None:
     # Setup database
     try:
         if args.debug:
-            print(f"Setting up database connection", file=sys.stderr)
+            print("Setting up database connection", file=sys.stderr)
         db = Database.Database(config)
         if args.debug:
-            print(f"Database connection established", file=sys.stderr)
+            print("Database connection established", file=sys.stderr)
         # Ensure database is ready for import (creates tables if needed)
-        if hasattr(db, 'create_tables'):
+        if hasattr(db, "create_tables"):
             try:
                 if args.debug:
-                    print(f"Creating database tables if needed", file=sys.stderr)
+                    print("Creating database tables if needed", file=sys.stderr)
                 db.create_tables()
                 if args.debug:
-                    print(f"Database tables setup completed", file=sys.stderr)
+                    print("Database tables setup completed", file=sys.stderr)
             except Exception as e:
                 # Tables may already exist - this is OK for CLI usage
                 error_msg = str(e).lower()
@@ -107,7 +110,7 @@ def main() -> None:
                     print(f"Database setup warning: {e}", file=sys.stderr)
                     raise
                 elif args.debug:
-                    print(f"Tables already exist - continuing", file=sys.stderr)
+                    print("Tables already exist - continuing", file=sys.stderr)
                 # Otherwise, silently continue - tables exist and that's fine
     except Exception as e:
         print(f"Error connecting to database: {e}", file=sys.stderr)
@@ -124,7 +127,7 @@ def main() -> None:
     # Setup importer
     importer = Importer(caller=None, settings={}, config=config, sql=db.sql, parent=None)
     if args.no_progress:
-        importer.parent = "CLI_NO_PROGRESS" # Special value to completely silence progress dialog
+        importer.parent = "CLI_NO_PROGRESS"  # Special value to completely silence progress dialog
 
     # Pass reporter to importer if enabled
     if hand_reporter:
@@ -161,8 +164,6 @@ def main() -> None:
         BOLD = "\033[1m"
         END = "\033[0m"
 
-
-
     if importer.import_issues:
         for issue in importer.import_issues:
             if issue.startswith("[ERROR]"):
@@ -190,5 +191,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"CLI importer error: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)

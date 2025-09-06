@@ -6,7 +6,7 @@ Seat 2: Player0 (1€)
 Player0 posts small blind 0.02€
 Hero posts big blind 0.05€
 Dealt to Hero [7s Kd]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player0 calls 0.03€
 Hero checks
 *** FLOP *** [Qc 4d 4s]

@@ -6,7 +6,7 @@ Seat 3: vilou_12 (250€)
 LeChangement posts small blind 5€
 vilou_12 posts big blind 10€
 Dealt to vilou_12 [Jh 9h 7s 9d 8c]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 LeChangement raises 20€ to 30€
 vilou_12 raises 60€ to 90€
 LeChangement calls 60€

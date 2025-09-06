@@ -1,7 +1,7 @@
 PokerStars Hand #97007286518:  Courchevel Hi/Lo Pot Limit ($1/$2 USD) - 2013/04/11 11:57:19 CT [2013/04/11 12:57:19 ET]
 Table 'Lagrangea IV' 6-max Seat #3 is the button
-Seat 3: Player0 ($81.75 in chips) 
-Seat 4: Hero ($353.48 in chips) 
+Seat 3: Player0 ($81.75 in chips)
+Seat 4: Hero ($353.48 in chips)
 Player0: posts small blind $1
 Hero: posts big blind $2
 *** HOLE CARDS ***
@@ -31,7 +31,7 @@ Player0 collected $40.75 from pot
 Hero collected $20.38 from pot
 Player0 collected $20.37 from pot
 *** SUMMARY ***
-Total pot $163.50 | Rake $0.50 
+Total pot $163.50 | Rake $0.50
 Hand was run twice
 FIRST Board [7h 5d 3s 7s Ts]
 SECOND Board [7h 5d 3s 2s 4h]

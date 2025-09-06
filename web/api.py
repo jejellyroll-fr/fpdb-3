@@ -106,7 +106,10 @@ async def get_torneys_profit_api(
 
 @app.get("/players")
 async def get_players_api(
-    name: str | None = None, site: str | None = None, page: int = 1, per_page: int = 10,
+    name: str | None = None,
+    site: str | None = None,
+    page: int = 1,
+    per_page: int = 10,
 ):
     # Call get_players() and unpack players and total
     players, total = get_players(name=name, site=site, page=page, per_page=per_page)
@@ -135,7 +138,10 @@ def get_player_hands_api(
     sort_by: str | None = None,  # Default to None
 ):
     handsPlayers = get_hands_players(
-        playerId, tourney=tourney, cash=cash, sort_by=sort_by,
+        playerId,
+        tourney=tourney,
+        cash=cash,
+        sort_by=sort_by,
     )
     return JSONResponse(content=handsPlayers)
 

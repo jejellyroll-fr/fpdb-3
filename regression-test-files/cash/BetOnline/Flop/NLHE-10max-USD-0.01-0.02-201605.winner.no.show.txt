@@ -22,7 +22,7 @@ Player7: ante processed 0.00
 Player8: ante processed 0.00
 Player2: posts small blind 0.01
 Player7: posts big blind 0.02
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [8s Ac]
 Player4: calls 0.02
 Player5: calls 0.02
@@ -50,7 +50,7 @@ Player5: folds
 Uncalled bet (0.71) returned to Player2
 Total pot 0.42 | Rake 0.04
 Player4 shows Kh Kc
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 0.29 | Rake 0.04
 Board [7d 8c 3h 5d 10s]
 Seat 0: Player2 collected (0.42)

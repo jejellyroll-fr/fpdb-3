@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-	<session sessioncode="3758683751">  
-			<general>  
+	<session sessioncode="3758683751">
+			<general>
 	    	<mode>real</mode>
-	      		<gametype>Holdem L $10/$20</gametype>  
-	          <tablename>Lauterbach, 669831861</tablename>  
-	          <duration>01:34</duration>  
-	          <gamecount>47</gamecount>  
-	          <startdate>20-Apr-2012 20:42:31</startdate>  
-	          <currency>USD</currency>  
-	          <nickname>Player0</nickname>  
-	          <bets>$1,855</bets>  
-	          <wins>$2,504.66</wins>  
+	      		<gametype>Holdem L $10/$20</gametype>
+	          <tablename>Lauterbach, 669831861</tablename>
+	          <duration>01:34</duration>
+	          <gamecount>47</gamecount>
+	          <startdate>20-Apr-2012 20:42:31</startdate>
+	          <currency>USD</currency>
+	          <nickname>Player0</nickname>
+	          <bets>$1,855</bets>
+	          <wins>$2,504.66</wins>
 	          <chipsin>$341</chipsin>
 			  		<chipsout>$990.66</chipsout>
 			  		<ipoints>701.80</ipoints>
         		<statuspoints>501.26</statuspoints>
 			  		<awardpoints>701.80</awardpoints>
-	            
-	    </general>  
+
+	    </general>
 	    <game gamecode="3256372946">
 		 <general>
-		  <startdate>20-Apr-2012 20:42:31</startdate>		  
+		  <startdate>20-Apr-2012 20:42:31</startdate>
 		  <players>
 		   <player seat="4" name="Player1" chips="$200" dealer="0" win="$0" bet="$70" rebuy="0" addon="0"/><player seat="7" name="Player0" chips="$100" dealer="1" win="$139" bet="$70" rebuy="0" addon="0"/>
 		  </players>

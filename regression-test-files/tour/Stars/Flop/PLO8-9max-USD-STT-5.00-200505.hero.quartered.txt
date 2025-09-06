@@ -1,37 +1,37 @@
 PokerStars Game #1676150046: Tournament #7817460, $5.00+$0.50 USD Omaha Hi/Lo Pot Limit - Level III (25/50) - 2005/05/11 1:29:15 ET
 Table '7817460 1' Seat #3 is the button
-Seat 1: Player0 (1436 in chips) 
-Seat 2: Player1 (646 in chips) 
-Seat 3: Player2 (1555 in chips) 
-Seat 4: Player3 (1527 in chips) 
-Seat 5: Player4 (1483 in chips) 
-Seat 6: Player5 (3400 in chips) 
-Seat 7: Player6 (1855 in chips) 
-Seat 9: Hero (1598 in chips) 
+Seat 1: Player0 (1436 in chips)
+Seat 2: Player1 (646 in chips)
+Seat 3: Player2 (1555 in chips)
+Seat 4: Player3 (1527 in chips)
+Seat 5: Player4 (1483 in chips)
+Seat 6: Player5 (3400 in chips)
+Seat 7: Player6 (1855 in chips)
+Seat 9: Hero (1598 in chips)
 Player3: posts small blind 25
 Player4: posts big blind 50
 *** HOLE CARDS ***
 Dealt to Hero [6h 3h 2h 4s]
 Player5: calls 50
-Player6: folds 
+Player6: folds
 Hero: calls 50
-Player0: folds 
-Player1: folds 
+Player0: folds
+Player1: folds
 Player2: calls 50
 Player3: calls 25
-Player4: checks 
+Player4: checks
 *** FLOP *** [3d Ad As]
-Player3: checks 
-Player4: checks 
-Player5: checks 
-Hero: checks 
+Player3: checks
+Player4: checks
+Player5: checks
+Hero: checks
 Player2: bets 100
-Player3: folds 
-Player4: folds 
+Player3: folds
+Player4: folds
 Player5: calls 100
 Hero: calls 100
 *** TURN *** [3d Ad As] [5c]
-Player5: checks 
+Player5: checks
 Player5 said, "This one is too damned tempting"
 Hero: bets 300
 Player2: calls 300
@@ -50,7 +50,7 @@ Player2 collected 2383 from main pot
 Player5 collected 1191 from main pot
 Hero collected 1191 from main pot
 *** SUMMARY ***
-Total pot 4851 Main pot 4765. Side pot 86. | Rake 0 
+Total pot 4851 Main pot 4765. Side pot 86. | Rake 0
 Board [3d Ad As 5c 7c]
 Seat 1: Player0 folded before Flop (didn't bet)
 Seat 2: Player1 folded before Flop (didn't bet)

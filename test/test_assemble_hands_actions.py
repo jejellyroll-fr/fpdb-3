@@ -256,6 +256,3 @@ class TestAssembleHandsActions:
         assert self.derived_stats.handsactions[1]["amount"] == 250  # 2.50 * 100
         assert self.derived_stats.handsactions[1]["raiseTo"] == 250
         assert self.derived_stats.handsactions[1]["amountCalled"] == 100
-
-
-

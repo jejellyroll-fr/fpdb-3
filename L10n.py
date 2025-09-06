@@ -42,7 +42,9 @@ def get_system_language() -> str | None:
         locale_cmd = shutil.which("locale")
         if locale_cmd:
             process = subprocess.Popen(  # noqa: S603
-                [locale_cmd, "-b"], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                [locale_cmd, "-b"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )
         else:
             return None
@@ -159,7 +161,9 @@ def set_locale_translation() -> None:
 
     try:
         fr_translation = gettext.translation(
-            "fpdb", path_string, languages=[ui_language],
+            "fpdb",
+            path_string,
+            languages=[ui_language],
         )
         fr_translation.install()
     except FileNotFoundError:

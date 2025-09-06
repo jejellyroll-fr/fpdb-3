@@ -21,7 +21,6 @@ and convert them to FPDB format.
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
 
-
 import datetime
 import re
 from decimal import Decimal
@@ -462,7 +461,6 @@ class Cake(HandHistoryConverter):
             # extract table number
             if key == "TABLENO":
                 hand.tablename = info[key]
-
 
     def readButton(self, hand: "Hand") -> None:
         """Parses a hand for the button position and updates the hand object.
