@@ -4,7 +4,6 @@
 Parses HandHistory xml files and returns requested objects.
 """
 
-
 import xml.dom.minidom
 from xml.dom.minidom import Node
 
@@ -72,9 +71,7 @@ class Player:
         else:
             self.allin = True
 
-        if (
-            self.sitting_out in ("", "0") or self.sitting_out.upper() == "FALSE"
-        ):
+        if self.sitting_out in ("", "0") or self.sitting_out.upper() == "FALSE":
             self.sitting_out = False
         else:
             self.sitting_out = True
@@ -161,7 +158,7 @@ class Post:
         self.live = node.getAttribute("LIVE")
 
     def __str__(self) -> str:
-        return (f"{self.player} posted {self.amount} {self.posted} {self.live}")
+        return f"{self.player} posted {self.amount} {self.posted} {self.live}"
 
 
 class Betting:

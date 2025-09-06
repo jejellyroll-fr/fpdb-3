@@ -247,34 +247,34 @@ class GuiPrefsObserver(ConfigObserver):
         try:
             # Import ThemeManager here to avoid circular imports
             from ThemeManager import ThemeManager
-            
+
             theme_manager = ThemeManager()
-            
+
             if change.path == "general.qt_material_theme":
                 # Use ThemeManager to set qt_material theme (also auto-syncs popup theme)
                 success = theme_manager.set_qt_material_theme(change.new_value, save=True)
                 if success:
                     log.info("Qt material theme updated: %s", change.new_value)
                 return success
-                
+
             elif change.path == "general.popup_theme":
                 # Set popup theme only
                 success = theme_manager.set_popup_theme(change.new_value, save=True)
                 if success:
                     log.info("Popup theme updated: %s", change.new_value)
                 return success
-                
+
             else:
                 # Fallback to original behavior for backward compatibility
                 if hasattr(self.main_window, "change_theme"):
                     self.main_window.change_theme(change.new_value)
                     log.info("Theme updated (legacy): %s", change.new_value)
                     return True
-                    
+
         except Exception:
             log.exception("Error changing theme")
             return False
-            
+
         return False
 
     def _update_gui_settings(self, change: ConfigChange) -> bool:  # noqa: ARG002

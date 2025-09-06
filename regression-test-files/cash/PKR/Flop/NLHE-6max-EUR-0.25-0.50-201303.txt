@@ -51,4 +51,3 @@ Seat 3: Player2 - €110.40
 Seat 4: Hero - €49.75
 Seat 6: Player3 - €56.09
 End of Hand #2293443778
-

@@ -46,8 +46,8 @@ Pot sizes: $0.06
 Taking Rake of $0.02 from pot 1
 Player2 has Two Pairs: Aces, 8s
 Player2 wins $0.06 from side pot #1 with: Two Pairs: Aces, 8s
-Player4 has Straight, Jack high 
-Player4 wins $0.13 with: Straight, Jack high 
+Player4 has Straight, Jack high
+Player4 wins $0.13 with: Straight, Jack high
 Player2 cheers.
 Seat 1: Player0 - $4.06
 Seat 2: Player1 - $2.88

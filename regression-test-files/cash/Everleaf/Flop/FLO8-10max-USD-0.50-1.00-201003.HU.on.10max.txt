@@ -1900,6 +1900,3 @@ Hero checks
 Villain shows [ Js, 4s, 8d, 6c ] a pair of jacks
 Hero shows [ 6s, Kd, 3c, Qd ] a straight, king high
 Hero wins  high ($ 2.85 USD) from main pot with a straight, king high [ Kd, Qd, Jh, Th, 9h ]
-
-
-

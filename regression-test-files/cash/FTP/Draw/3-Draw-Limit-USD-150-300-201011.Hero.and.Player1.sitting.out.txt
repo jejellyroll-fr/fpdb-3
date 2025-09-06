@@ -22,5 +22,3 @@ Seat 2: Player1 is sitting out
 Seat 3: Player2 (big blind) collected ($150)
 Seat 5: Player3 (button) didn't bet (folded)
 Seat 6: Player4 (small blind) folded before the draw
-
-

@@ -778,6 +778,3 @@ snklzona shows [ 6d, Td ] high card jack
 willy2105 shows [ Ts, Th ] a pair of tens
 willy2105 wins 8673 chips from main pot with a pair of tens [ Jh, Ts, Th, 8s, 7h ]
 willy2105 wins 18 chips from side pot with a pair of tens [ Jh, Ts, Th, 8s, 7h ]
-
-
-

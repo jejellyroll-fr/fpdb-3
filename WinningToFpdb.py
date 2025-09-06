@@ -278,7 +278,8 @@ class Winning(HandHistoryConverter):
         re.MULTILINE,
     )
     re_Posts1 = re.compile(
-        r"^Player {PLYR} posts \((?P<SBBB>[{NUM}]+)\)".format(**substitutions), re.MULTILINE,
+        r"^Player {PLYR} posts \((?P<SBBB>[{NUM}]+)\)".format(**substitutions),
+        re.MULTILINE,
     )
     re_Antes1 = re.compile(
         r"^Player {PLYR} (posts )?ante \((?P<ANTE>[{NUM}]+)\)".format(**substitutions),
@@ -302,13 +303,16 @@ class Winning(HandHistoryConverter):
         re.MULTILINE,
     )
     re_PostBoth2 = re.compile(
-        r"^{PLYR} posts dead {CUR}(?P<SBBB>[,.0-9]+)".format(**substitutions), re.MULTILINE,
+        r"^{PLYR} posts dead {CUR}(?P<SBBB>[,.0-9]+)".format(**substitutions),
+        re.MULTILINE,
     )
     re_Posts2 = re.compile(
-        r"^{PLYR} posts {CUR}(?P<SBBB>[,.0-9]+)".format(**substitutions), re.MULTILINE,
+        r"^{PLYR} posts {CUR}(?P<SBBB>[,.0-9]+)".format(**substitutions),
+        re.MULTILINE,
     )
     re_Antes2 = re.compile(
-        r"^{PLYR} posts ante {CUR}(?P<ANTE>[,.0-9]+)".format(**substitutions), re.MULTILINE,
+        r"^{PLYR} posts ante {CUR}(?P<ANTE>[,.0-9]+)".format(**substitutions),
+        re.MULTILINE,
     )
     re_BringIn2 = re.compile(
         r"^{PLYR} brings[- ]in( low|) {CUR}(?P<BRINGIN>[,.0-9]+)".format(**substitutions),
@@ -392,7 +396,8 @@ class Winning(HandHistoryConverter):
     )
     # AssFungus collected $92.25 from main pot 1
     re_CollectPot3 = re.compile(
-        r"^{PLYR} collected {CUR}(?P<POT>[,.\d]+)".format(**substitutions), re.MULTILINE,
+        r"^{PLYR} collected {CUR}(?P<POT>[,.\d]+)".format(**substitutions),
+        re.MULTILINE,
     )
 
     def compilePlayerRegexs(self, hand) -> None:
@@ -644,7 +649,9 @@ class Winning(HandHistoryConverter):
 
         hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
         hand.startTime = HandHistoryConverter.changeTimezone(
-            hand.startTime, self.import_parameters["timezone"], "UTC",
+            hand.startTime,
+            self.import_parameters["timezone"],
+            "UTC",
         )
         log.debug(f"Converted startTime: {hand.startTime}")
 
@@ -749,9 +756,7 @@ class Winning(HandHistoryConverter):
                 # Parse buyin type for cash games
                 buyin_type = self.re_buyinType.search(info["TABLE"])
                 if buyin_type:
-                    hand.gametype["buyinType"] = self.buyin[
-                        buyin_type.group("BUYINTYPE")
-                    ]
+                    hand.gametype["buyinType"] = self.buyin[buyin_type.group("BUYINTYPE")]
                     log.debug(f"Buyin type: {hand.gametype['buyinType']}")
         else:
             # Set default table values for cash games
@@ -807,7 +812,8 @@ class Winning(HandHistoryConverter):
                         a.group("S"),
                     )
                 hand.startTime = datetime.datetime.strptime(
-                    datetimestr, "%Y/%m/%d %H:%M:%S",
+                    datetimestr,
+                    "%Y/%m/%d %H:%M:%S",
                 )
                 log.debug(f"Parsed startTime: {hand.startTime}")
             if key == "HID":
@@ -1338,16 +1344,8 @@ class Winning(HandHistoryConverter):
             m = self.re_HeroCards2.finditer(hand.streets[street])
             for found in m:
                 player = found.group("PNAME")
-                newcards = (
-                    found.group("NEWCARDS").split(" ")
-                    if found.group("NEWCARDS")
-                    else []
-                )
-                oldcards = (
-                    found.group("OLDCARDS").split(" ")
-                    if found.group("OLDCARDS")
-                    else []
-                )
+                newcards = found.group("NEWCARDS").split(" ") if found.group("NEWCARDS") else []
+                oldcards = found.group("OLDCARDS").split(" ") if found.group("OLDCARDS") else []
                 log.debug(
                     f"Player: {player}, New cards: {newcards}, Old cards: {oldcards}",
                 )
@@ -1440,7 +1438,8 @@ class Winning(HandHistoryConverter):
                     log.debug(f"Disconnected all-in, using player's stack: {amount}")
                 else:
                     amount = self.clearMoneyString(action.group("BET")).replace(
-                        ",", "",
+                        ",",
+                        "",
                     )  # Some sites use commas
                     log.debug(f"All-in amount: {amount}")
 
@@ -1563,19 +1562,11 @@ class Winning(HandHistoryConverter):
                     log.debug("Detected Bovada uncalled bet version 1")
                     has_sb = (
                         len(
-                            [
-                                a[2]
-                                for a in hand.actions.get("BLINDSANTES")
-                                if a[1] == "small blind"
-                            ],
+                            [a[2] for a in hand.actions.get("BLINDSANTES") if a[1] == "small blind"],
                         )
                         > 0
                     )
-                    adjustment = (
-                        (Decimal(hand.bb) - Decimal(hand.sb))
-                        if has_sb
-                        else Decimal(hand.bb)
-                    )
+                    adjustment = (Decimal(hand.bb) - Decimal(hand.sb)) if has_sb else Decimal(hand.bb)
                     blindsantes = sum([a[2] for a in hand.actions.get("BLINDSANTES")])
                     log.debug(
                         f"Adjustment calculated: {adjustment}, Blinds/Antes total: {blindsantes}",
@@ -1725,20 +1716,13 @@ class Winning(HandHistoryConverter):
 
         regex = re.escape(str(table_name))
         if type == "tour":
-            regex = (
-                ", Table "
-                + re.escape(str(table_number))
-                + r"\s\-.*\s\("
-                + re.escape(str(tournament))
-                + r"\)"
-            )
+            regex = ", Table " + re.escape(str(table_number)) + r"\s\-.*\s\(" + re.escape(str(tournament)) + r"\)"
             log.debug(f"Constructed regex for tournament: '{regex}'")
         else:
             log.debug(f"Constructed regex for non-tournament table: '{regex}'")
 
         log.info(f"Generated Table Title regex: '{regex}'")
         return regex
-
 
     def readOther(self, hand: "Hand") -> None:
         """Read other information from hand that doesn't fit standard categories.

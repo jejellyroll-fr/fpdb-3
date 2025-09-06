@@ -7,7 +7,7 @@ Test suite for the AddStatDialog class focusing on stat_loth and stat_hith valid
 import os
 import sys
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock
 
 # Add the parent directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -21,9 +21,12 @@ class TestAddStatDialog(unittest.TestCase):
         """Set up mocks for PyQt5 and other dependencies."""
         cls._original_modules = {}
         modules_to_mock = [
-            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets",
+            "PyQt5",
+            "PyQt5.QtCore",
+            "PyQt5.QtGui",
+            "PyQt5.QtWidgets",
         ]
-        
+
         for module_name in modules_to_mock:
             if module_name in sys.modules:
                 cls._original_modules[module_name] = sys.modules[module_name]
@@ -50,11 +53,9 @@ class TestAddStatDialog(unittest.TestCase):
         """Restore original modules."""
         for module_name, original_module in cls._original_modules.items():
             sys.modules[module_name] = original_module
-        
+
         # Remove mocked modules that weren't originally present
-        modules_to_remove = [
-            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets"
-        ]
+        modules_to_remove = ["PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets"]
         for module_name in modules_to_remove:
             if module_name not in cls._original_modules and module_name in sys.modules:
                 del sys.modules[module_name]
@@ -63,6 +64,7 @@ class TestAddStatDialog(unittest.TestCase):
         """Set up test fixtures."""
         # Import here after mocking
         from ModernHudPreferences import AddStatDialog
+
         self.AddStatDialog = AddStatDialog
 
     def test_init_with_empty_stat_loth_string(self):
@@ -70,89 +72,77 @@ class TestAddStatDialog(unittest.TestCase):
         # Create a stat dict with empty stat_loth
         stat = {
             "row": "0",
-            "col": "0", 
+            "col": "0",
             "stat": "vpip",
             "click": "",
             "popup": "",
             "stat_loth": "",  # Empty string - should not cause ValueError
             "stat_hith": "40",
             "stat_locolor": "#408000",
-            "stat_hicolor": "#F05000"
+            "stat_hicolor": "#F05000",
         }
-        
+
         # Mock the setValue method to verify it's not called for empty string
         mock_loth_input = Mock()
         mock_hith_input = Mock()
-        
+
         # Create a mock dialog object
         dialog = Mock()
         dialog.loth_input = mock_loth_input
         dialog.hith_input = mock_hith_input
-        
+
         # Manually call the problematic code section with the fix
         if "stat_loth" in stat and stat["stat_loth"]:
             dialog.loth_input.setValue(int(float(stat["stat_loth"])))
         if "stat_hith" in stat and stat["stat_hith"]:
             dialog.hith_input.setValue(int(float(stat["stat_hith"])))
-        
+
         # Verify loth_input.setValue was NOT called (empty string)
         mock_loth_input.setValue.assert_not_called()
-        
+
         # Verify hith_input.setValue WAS called (valid value)
         mock_hith_input.setValue.assert_called_once_with(40)
 
     def test_init_with_none_stat_loth(self):
         """Test AddStatDialog initialization with None stat_loth."""
-        stat = {
-            "row": "0",
-            "col": "0",
-            "stat": "vpip", 
-            "stat_loth": None,
-            "stat_hith": "35"
-        }
-        
+        stat = {"row": "0", "col": "0", "stat": "vpip", "stat_loth": None, "stat_hith": "35"}
+
         mock_loth_input = Mock()
         mock_hith_input = Mock()
-        
+
         # Create a mock dialog object
         dialog = Mock()
         dialog.loth_input = mock_loth_input
         dialog.hith_input = mock_hith_input
-        
+
         # Test the validation logic
         if "stat_loth" in stat and stat["stat_loth"]:
             dialog.loth_input.setValue(int(float(stat["stat_loth"])))
         if "stat_hith" in stat and stat["stat_hith"]:
             dialog.hith_input.setValue(int(float(stat["stat_hith"])))
-            
+
         # loth_input should NOT be called for None value
         mock_loth_input.setValue.assert_not_called()
         mock_hith_input.setValue.assert_called_once_with(35)
 
     def test_init_with_valid_stat_loth(self):
         """Test AddStatDialog initialization with valid stat_loth values."""
-        stat = {
-            "row": "0", 
-            "col": "0",
-            "stat": "vpip",
-            "stat_loth": "25",
-            "stat_hith": "40"
-        }
-        
+        stat = {"row": "0", "col": "0", "stat": "vpip", "stat_loth": "25", "stat_hith": "40"}
+
         mock_loth_input = Mock()
         mock_hith_input = Mock()
-        
+
         # Create a mock dialog object
         dialog = Mock()
         dialog.loth_input = mock_loth_input
         dialog.hith_input = mock_hith_input
-        
+
         # Test the validation logic
         if "stat_loth" in stat and stat["stat_loth"]:
             dialog.loth_input.setValue(int(float(stat["stat_loth"])))
         if "stat_hith" in stat and stat["stat_hith"]:
             dialog.hith_input.setValue(int(float(stat["stat_hith"])))
-        
+
         # Both should be called with valid values
         mock_loth_input.setValue.assert_called_once_with(25)
         mock_hith_input.setValue.assert_called_once_with(40)
@@ -162,24 +152,24 @@ class TestAddStatDialog(unittest.TestCase):
         # This test verifies that the fix prevents the original ValueError
         stat = {
             "stat_loth": "",  # This was causing ValueError: could not convert string to float: ''
-            "stat_hith": ""
+            "stat_hith": "",
         }
-        
+
         # The old code would do: int(float(stat["stat_loth"]))
         # The new code should check: if "stat_loth" in stat and stat["stat_loth"]:
-        
+
         # Test old logic would fail
         with self.assertRaises(ValueError):
             int(float(stat["stat_loth"]))
-            
-        # Test new logic succeeds 
+
+        # Test new logic succeeds
         if "stat_loth" in stat and stat["stat_loth"]:
             value = int(float(stat["stat_loth"]))
         else:
             value = None
-            
+
         self.assertIsNone(value)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

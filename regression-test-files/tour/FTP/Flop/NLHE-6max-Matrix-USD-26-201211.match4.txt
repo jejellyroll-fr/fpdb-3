@@ -903,6 +903,3 @@ Total pot 1,260 | Rake 0
 Board: [7s 4h Td 8s 9d]
 Seat 1: Player1 (small blind) showed [Ks 3c] and lost with King Ten high
 Seat 6: Hero (big blind) showed [Js Kh] and won (1,260) with a straight, Jack high
-
-
-

@@ -45,4 +45,3 @@ Seat 6: Player6 Is Sitting Out
 Seat 7: Player7 Folded before Flop
 Seat 8: Player8 Folded before Flop
 Seat 9: Player9 (Big Blind)  showed [5S 4H ] and lost.
-

@@ -1,7 +1,7 @@
 pypokereval build for windows stepbystep guide
 ----------------------------------------------
 
-Created by Gimick on 3rd December 2010 
+Created by Gimick on 3rd December 2010
 Updated for py27 by Gimick 27th Feb 2011
 
 This walkthrough is derived with the assistance of EricBlade and the build notes
@@ -30,7 +30,7 @@ This package will run 30 days before registration is needed
 2. Python runtime
 -----------------
 
-2.1/ Install python runtime from here ... 
+2.1/ Install python runtime from here ...
 
 Python 2.7 ... http://python.org/ftp/python/2.7/python-2.7.msi
 
@@ -66,7 +66,7 @@ to be this:
 #define VERSION_NAME(W) W##2_7
 #define PYTHON_VERSION "2_7"
 
-- - - - - - 
+- - - - - -
 
 Move this block of code:
 
@@ -84,7 +84,7 @@ To be after this line:
 
 4.2/ save and exit
 
-- - - - - 
+- - - - -
 
 4.3/ dos> write c:/pypoker-eval/pokereval.py
 
@@ -129,7 +129,7 @@ import _pokereval_2_7 as _pokereval
 
 6.2.4 In the solution explorer window, hilight pythonpoker-eval / right mouse / properties...
 
-6.2.5 In the pythonpoker-eval properties dialog, 
+6.2.5 In the pythonpoker-eval properties dialog,
 
 change references to "python24" to "python27" in the following:
 
@@ -175,7 +175,7 @@ Change the following
 9. Wrap-up
 ----------
 
-9.1 Navigate to c:/pypoker-eval/release 
+9.1 Navigate to c:/pypoker-eval/release
 9.2 the output file is pypokereval.dll
 9.3 rename this file to _pokereval_2_7.pyd
 
@@ -207,4 +207,3 @@ Python 2.7 must be installed
 -------------
 
 Please follow pypokereval-win32-packaging-walkthrough.txt in the same directory as this walkthrough.
-

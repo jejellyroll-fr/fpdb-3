@@ -9,11 +9,11 @@ Seat 6: Player6 (2€)
 Seat 7: Hero (5.96€)
 Seat 8: Player8 (2.98€)
 Seat 9: Player9 (5€)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 Player5 posts small blind 0.02€
 Player6 posts big blind 0.05€
 Dealt to Hero [Kd Kh]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Hero raises 0.10€ to 0.15€
 Player8 calls 0.15€
 Player9 folds
@@ -48,5 +48,3 @@ Seat 6: Player6 (big blind) folded on the pre-flop
 Seat 7: Hero showed [Kd Kh] and won 4.34€ with Full of Kings and Queens
 Seat 8: Player8 showed [Qs Qd] and won 8.56€ with Quads of Queens
 Seat 9: Player9 folded on the pre-flop
-
-

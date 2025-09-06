@@ -8,7 +8,7 @@ IMMAREALOG - Posts small blind $15
 DWAYNE38157 - Posts big blind $25
 P0KEHER - Posts dead $40 dead $15
 *** POCKET CARDS ***
-Dealt to LIVELETDIE22 [7h 8c] 
+Dealt to LIVELETDIE22 [7h 8c]
 P0KEHER - Raises $25 to $50
 LIVELETDIE22 - Folds
 IMMAREALOG - Calls $35
@@ -27,6 +27,6 @@ P0KEHER Collects $162 from main pot
 Total Pot($165) | Rake ($3)
 Board [Ac Qd Js]
 Seat 1: DWAYNE38157 (big blind) Folded on the FLOP
-Seat 3: P0KEHER collected Total ($162) HI:($162) [Does not show] 
+Seat 3: P0KEHER collected Total ($162) HI:($162) [Does not show]
 Seat 4: LIVELETDIE22 (dealer) Folded on the POCKET CARDS
 Seat 5: IMMAREALOG (small blind) Folded on the FLOP

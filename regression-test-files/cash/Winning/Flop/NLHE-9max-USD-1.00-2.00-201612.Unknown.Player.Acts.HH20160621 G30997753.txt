@@ -88,7 +88,7 @@ Player Hero calls (5.22)
 *** RIVER ***: [5s Jc Kc 2s] [7s]
 Player  bets (10.18)
 Player Hero folds
-Uncalled bet (10.18) returned to 
+Uncalled bet (10.18) returned to
 Player  mucks cards
 ------ Summary ------
 Pot: 20.37. Rake 0.83. JP fee 0.24

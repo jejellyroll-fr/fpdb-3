@@ -6647,4 +6647,3 @@ Tournament finished 2013/05/26 18:55:18 ET
   6641: pompa1973 (Brazil),
   6642: sidecar18 (Israel),
   6643: 8upstr (Russia),
-  

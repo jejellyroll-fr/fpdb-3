@@ -1,7 +1,7 @@
 PokerStars Hand #96318916658:  5 Card Omaha Pot Limit ($3/$6 USD) - 2013/03/29 3:47:12 ET
 Table 'Armida III' 6-max Seat #4 is the button
-Seat 1: Hero ($958.50 in chips) 
-Seat 4: Player0 ($2037.50 in chips) 
+Seat 1: Hero ($958.50 in chips)
+Seat 4: Player0 ($2037.50 in chips)
 Player0: posts small blind $3
 Hero: posts big blind $6
 *** HOLE CARDS ***
@@ -34,7 +34,7 @@ Hero: shows [Td 9c 7d 8c Qd] (a straight, Six to Ten)
 Player0: shows [4c Jc 4s Kc Jd] (a pair of Jacks)
 Hero collected $1916.50 from pot
 *** SUMMARY ***
-Total pot $1917 | Rake $0.50 
+Total pot $1917 | Rake $0.50
 Board [Tc 7s 8h 6d 9h]
 Seat 1: Hero (big blind) showed [Td 9c 7d 8c Qd] and won ($1916.50) with a straight, Six to Ten
 Seat 4: Player0 (button) (small blind) showed [4c Jc 4s Kc Jd] and lost with a pair of Jacks

@@ -15,7 +15,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 In the "official" distribution you can find the license in agpl-3.0.txt.
 """
 
-
 import sys
 from optparse import OptionParser
 
@@ -36,7 +35,10 @@ def fpdb_options() -> tuple:
     )
     # Option to specify database name
     parser.add_option(
-        "-d", "--databaseName", dest="dbname", help=("Specifies a database name."),
+        "-d",
+        "--databaseName",
+        dest="dbname",
+        help=("Specifies a database name."),
     )
     # Option to specify configuration file path
     parser.add_option(
@@ -51,9 +53,7 @@ def fpdb_options() -> tuple:
         "-r",
         "--rerunPython",
         action="store_true",
-        help=(
-            "Indicates program was restarted with a different path (only allowed once)."
-        ),
+        help=("Indicates program was restarted with a different path (only allowed once)."),
     )
     # Option to specify hand history converter module name
     parser.add_option(
@@ -65,7 +65,11 @@ def fpdb_options() -> tuple:
     )
     # Option to specify a site name
     parser.add_option(
-        "-s", "--sitename", dest="sitename", default=None, help=("A sitename"),
+        "-s",
+        "--sitename",
+        dest="sitename",
+        default=None,
+        help=("A sitename"),
     )
     # Option to set the logging level
     parser.add_option(
@@ -180,11 +184,17 @@ def fpdb_options() -> tuple:
     )
     # Option to start minimized
     parser.add_option(
-        "--minimized", action="store_true", dest="minimized", help=("Start Minimized"),
+        "--minimized",
+        action="store_true",
+        dest="minimized",
+        help=("Start Minimized"),
     )
     # Option to start hidden
     parser.add_option(
-        "--hidden", action="store_true", dest="hidden", help=("Start Hidden"),
+        "--hidden",
+        action="store_true",
+        dest="hidden",
+        help=("Start Hidden"),
     )
 
     (options, argv) = parser.parse_args()
@@ -240,6 +250,5 @@ def site_alias(alias: str) -> str | bool:
 
 if __name__ == "__main__":
     (options, argv) = fpdb_options()
-
 
     sys.stdin.readline()

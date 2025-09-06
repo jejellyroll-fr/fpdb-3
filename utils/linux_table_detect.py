@@ -18,7 +18,12 @@ utf8atom = getAtom("UTF8_STRING")
 
 def get_window_title(window_id):
     reply = xconn.core.GetProperty(
-        False, window_id, wnameatom, utf8atom, 0, (2**32) - 1,
+        False,
+        window_id,
+        wnameatom,
+        utf8atom,
+        0,
+        (2**32) - 1,
     ).reply()
     if reply.value_len > 0:
         return reply.value.to_string()

@@ -5,34 +5,34 @@ Seat 3: Big Blind [ME] ($50 in chips)
 Seat 4: UTG ($71.23 in chips)
 Seat 5: UTG+1 ($73.92 in chips)
 Seat 6: UTG+2 ($50.25 in chips)
-Dealer : Set dealer [1] 
-Small Blind : Small Blind $0.25 
-Big Blind  [ME] : Big blind $0.50 
+Dealer : Set dealer [1]
+Small Blind : Small Blind $0.25
+Big Blind  [ME] : Big blind $0.50
 *** HOLE CARDS ***
-Dealer : Card dealt to a spot [8h 5c] 
-Small Blind : Card dealt to a spot [7s 3s] 
-Big Blind  [ME] : Card dealt to a spot [Td 8d] 
-UTG : Card dealt to a spot [6d 8s] 
-UTG+1 : Card dealt to a spot [Kh 2h] 
-UTG+2 : Card dealt to a spot [Jd Tc] 
+Dealer : Card dealt to a spot [8h 5c]
+Small Blind : Card dealt to a spot [7s 3s]
+Big Blind  [ME] : Card dealt to a spot [Td 8d]
+UTG : Card dealt to a spot [6d 8s]
+UTG+1 : Card dealt to a spot [Kh 2h]
+UTG+2 : Card dealt to a spot [Jd Tc]
 UTG : Folds
-UTG+1 : Calls $0.50 
+UTG+1 : Calls $0.50
 UTG+2 : Raises $1.50 to $1.50
 Dealer : Folds
 Small Blind : Folds
 Big Blind  [ME] : Folds
-UTG+1 : Calls $1 
+UTG+1 : Calls $1
 *** FLOP *** [2c Qc 7h]
 UTG+1 : Checks
-UTG+2 : Bets $2 
-UTG+1 : Calls $2 
+UTG+2 : Bets $2
+UTG+1 : Calls $2
 *** TURN *** [2c Qc 7h] [Ac]
 UTG+1 : Checks
-UTG+2 : Bets $5.75 
+UTG+2 : Bets $5.75
 UTG+1 : Folds
-UTG+2 : Return uncalled portion of bet $5.75 
+UTG+2 : Return uncalled portion of bet $5.75
 UTG+2 : Does not show [Jd Tc] (High Card)
-UTG+2 : Hand result $7.37 
+UTG+2 : Hand result $7.37
 UTG : Seat sit out
 *** SUMMARY ***
 Total Pot($7.75)
@@ -42,4 +42,4 @@ Seat+2: Small Blind Folded before the FLOP
 Seat+3: Big Blind Folded before the FLOP
 Seat+4: UTG Folded before the FLOP
 Seat+5: UTG+1 Folded on the TURN
-Seat+6: UTG+2 $7.37 [Does not show]  
+Seat+6: UTG+2 $7.37 [Does not show]

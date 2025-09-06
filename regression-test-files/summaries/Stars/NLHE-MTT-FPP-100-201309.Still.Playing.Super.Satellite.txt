@@ -2,8 +2,8 @@ PokerStars Tournament #783127276, No Limit Hold'em
 Super Satellite
 Buy-In: 100 FPP
 36 players
-Total Prize Pool: 3600 FPP 
-Target Tournament #821010003 
+Total Prize Pool: 3600 FPP
+Target Tournament #821010003
 Tournament started 2013/09/03 15:21:56 ET
 
   1: #Lager-1991 (Sweden), still playing
@@ -34,15 +34,13 @@ Tournament started 2013/09/03 15:21:56 ET
   26: wallerking (Germany), still playing
   27: woddiehase (Germany), still playing
   28: zuwa (Germany), still playing
-  29: NoFlaVor (Germany), 
-  30: widukindx (Germany), 
-  31: IFShielder (Laos), 
-  32: 76muchomor76 (Russia), 
-  33: Dghostik (Russia), 
-  34: isbab (Kazakhstan), 
-  35: rici_hozak (Czech Republic), 
-  36: Takemychippy (United Kingdom), 
+  29: NoFlaVor (Germany),
+  30: widukindx (Germany),
+  31: IFShielder (Laos),
+  32: 76muchomor76 (Russia),
+  33: Dghostik (Russia),
+  34: isbab (Kazakhstan),
+  35: rici_hozak (Czech Republic),
+  36: Takemychippy (United Kingdom),
 
 You finished in 29th place (eliminated at hand #103621021365).
-
-

@@ -80,7 +80,8 @@ async def index(request: Request):
 async def get_hands_api(request: Request):
     hands = get_hands()
     return templates.TemplateResponse(
-        "hands.html", {"request": request, "hands": hands},
+        "hands.html",
+        {"request": request, "hands": hands},
     )
 
 
@@ -88,7 +89,8 @@ async def get_hands_api(request: Request):
 async def get_handsPlayers_api(request: Request):
     handsPlayers = get_handsPlayers()
     return templates.TemplateResponse(
-        "handsPlayers.html", {"request": request, "handsPlayers": handsPlayers},
+        "handsPlayers.html",
+        {"request": request, "handsPlayers": handsPlayers},
     )
 
 
@@ -190,7 +192,8 @@ async def replay_hand(request: Request, handId: int, hero: str | None = None):
     # Serialize the dictionary to JSON
     hand = json.dumps(hand_dict, cls=CustomEncoder)
     return templates.TemplateResponse(
-        "replayer.html", {"request": request, "hand": hand},
+        "replayer.html",
+        {"request": request, "hand": hand},
     )
 
 
@@ -210,7 +213,10 @@ async def get_hands_players_api(
     conn.close()
 
     handsPlayers = get_hands_players(
-        playerId, tourney=tourney, cash=cash, sort_by=sort_by,
+        playerId,
+        tourney=tourney,
+        cash=cash,
+        sort_by=sort_by,
     )
     decodeCardList = {
         1: "2h",
@@ -392,7 +398,8 @@ async def get_statsplayers_api(
     )  # Call the get_statsplayers() function to retrieve the statistics
 
     return templates.TemplateResponse(
-        "statsplayers.html", {"request": request, "result": result},
+        "statsplayers.html",
+        {"request": request, "result": result},
     )
 
 

@@ -13,26 +13,26 @@ Big Blind:                  Player3     (0.20)
 
 Hero was dealt:             Qs - 7d - 8c - 9s - 5h
 
-Player0                     Fold        
+Player0                     Fold
 Player2                     Raise       (0.57)
-Hero                        Fold        
+Hero                        Fold
 Player3                     Call        (0.37)
 
 Flop                        Kc - 2s - 2d
 
-Player3                     Check       
+Player3                     Check
 Player2                     Bet         (0.93)
 Player3                     Call        (0.93)
 
 Turn                        Kc - 2s - 2d - 8d
 
-Player3                     Check       
-Player2                     Check       
+Player3                     Check
+Player2                     Check
 
 River                       Kc - 2s - 2d - 8d - 5d
 
-Player3                     Check       
-Player2                     Check       
+Player3                     Check
+Player2                     Check
 
 Player3 shows:              Tc - 7s - 2h - Js - 9d (three of a kind, Deuces)
 

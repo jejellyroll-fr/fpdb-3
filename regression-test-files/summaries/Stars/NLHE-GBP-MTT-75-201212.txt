@@ -2,7 +2,7 @@ PokerStars Tournament #661361197, No Limit Hold'em
 Super Satellite
 Buy-In: £75.00/£7.00 GBP
 43 players
-Total Prize Pool: £3225.00 GBP 
+Total Prize Pool: £3225.00 GBP
 Target Tournament #637573140 Buy-In: £1850.00 GBP
 Tournament started 2012/12/30 23:32:00 CET [2012/12/30 17:32:00 ET]
 
@@ -34,22 +34,20 @@ Tournament started 2012/12/30 23:32:00 CET [2012/12/30 17:32:00 ET]
   26: billybathgat (United Kingdom), still playing
   27: TheDudes777 (Germany), still playing
   28: Titanocen (Germany), still playing
-  29: iapetus (Sweden), 
-  30: nzvr4poker (New Zealand), 
-  31: kevlar1991 (United Kingdom), 
-  32: Evil_Borje (Sweden), 
-  33: remboy44 (Russia), 
-  34: Granite (United Kingdom), 
-  35: Rowniwn (Ireland), 
-  36: AceSweaty (United Kingdom), 
-  37: Firaldo87 (United Kingdom), 
-  38: TheChase1872 (United Kingdom), 
-  39: swordfish007 (United Kingdom), 
-  40: 4ththistle (United Kingdom), 
-  41: SlowDoke (Ireland), 
-  42: woody1234321 (United Kingdom), 
-  43: HITMANHUMPY (United Kingdom), 
+  29: iapetus (Sweden),
+  30: nzvr4poker (New Zealand),
+  31: kevlar1991 (United Kingdom),
+  32: Evil_Borje (Sweden),
+  33: remboy44 (Russia),
+  34: Granite (United Kingdom),
+  35: Rowniwn (Ireland),
+  36: AceSweaty (United Kingdom),
+  37: Firaldo87 (United Kingdom),
+  38: TheChase1872 (United Kingdom),
+  39: swordfish007 (United Kingdom),
+  40: 4ththistle (United Kingdom),
+  41: SlowDoke (Ireland),
+  42: woody1234321 (United Kingdom),
+  43: HITMANHUMPY (United Kingdom),
 
 You finished in 29th place (eliminated at hand #91570010120).
-
-

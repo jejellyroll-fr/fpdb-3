@@ -11,7 +11,7 @@ Player3 posts big blind 2€
 Player4 posts small blind 3€ out of position
 Player4 posts big blind 0€ out of position
 Dealt to Hero [Qs 5s 3s Tc]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player4 checks
 Hero folds
 Player1 calls 2€

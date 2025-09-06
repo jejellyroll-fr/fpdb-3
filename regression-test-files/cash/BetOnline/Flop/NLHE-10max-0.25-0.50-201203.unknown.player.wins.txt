@@ -11,7 +11,7 @@ Seat 5: Player5 (38.00 in chips)
 Seat 2: Player8 (50.00 in chips) - Big Blind
 Player7: posts small blind 0.25
 Player8: posts big blind 0.50
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Player0 [3h 10c]
 Player6: folds
 Player0: folds
@@ -27,7 +27,7 @@ Player2: raises 11.00 to 12.00
 Unknown player: raises 15.75 to 18.75 and is all in
 Player2: calls 6.75
 Player2 shows As Kc
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 36.34 | Rake 1.91
 Board [2h 4c 3d 7c 4d]
 Seat 7: Player2 showed [As Kc] but did not win
@@ -37,4 +37,3 @@ Seat 0: Player1 folded before Flop
 Seat 6: Player3 folded before Flop
 Seat 5: Player5 collected (0.00)
 Seat 2: Player8 folded before Flop
-

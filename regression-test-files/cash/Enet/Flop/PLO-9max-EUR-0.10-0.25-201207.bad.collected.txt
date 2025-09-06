@@ -1,5 +1,5 @@
-Game #6404139: Omaha (€0,10/€0,25) - 16:40:41 23.7.2012 - %6 
-Table 'Reunion 1 - Pot Limit' 9-max Seat #4 is the button 
+Game #6404139: Omaha (€0,10/€0,25) - 16:40:41 23.7.2012 - %6
+Table 'Reunion 1 - Pot Limit' 9-max Seat #4 is the button
 Seat 1: Player0 (€5 in chips)
 Seat 2: Player1 (€1,95 in chips)
 Seat 3: Player2 (€3,69 in chips)
@@ -40,9 +40,9 @@ Player1: shows [9h3cAsAh] (Two Pairs, Aces and Twos)
 Player3: shows [Ac9cJsTc] (Two Pairs, Tens and Twos)
 Player4: shows [KsJdKh7h] (Two Pairs, Kings and Twos)
 Player4: collected (€4,39) from pot
-*** SUMMARY *** 
-Total pot €0 | Rake €0,27 
-Board [8h2sTd2c6s] 
+*** SUMMARY ***
+Total pot €0 | Rake €0,27
+Board [8h2sTd2c6s]
 Seat 1: Player0  showed [2h4sJh4c] and won (€7,88) with Three of a kind, Twos
 Seat 2: Player1  showed [9h3cAsAh] and lost with Two Pairs, Aces and Twos
 Seat 3: Player2  folded

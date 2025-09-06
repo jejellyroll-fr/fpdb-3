@@ -1,4 +1,4 @@
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+
 Stage #525691746 Tourney ID 5945889 Holdem Multi Normal Tournament No Limit 10 - 2011-01-16 17:03:29 (ET)
 Table: 15 (Real Money) Seat #9 is the dealer
 Seat 1 - SHUSWAPER (1,440 in chips)
@@ -13,7 +13,7 @@ Seat 9 - GREGORY37 (1,485 in chips)
 SHUSWAPER - Posts small blind 5
 MARSHMAN5984 - Posts big blind 10
 *** POCKET CARDS ***
-Dealt to EKDIKEO [8h 2s] 
+Dealt to EKDIKEO [8h 2s]
 METOLIGIST - Folds
 EKDIKEO - Folds
 57MAVERICK - Folds
@@ -35,7 +35,7 @@ MARSHMAN5984 Collects 60 from main pot
 Total Pot(60)
 Board [9h 7h 2h]
 Seat 1: SHUSWAPER (small blind) Folded on the FLOP
-Seat 2: MARSHMAN5984 (big blind) collected Total (60) HI:(60)  [Does not show] 
+Seat 2: MARSHMAN5984 (big blind) collected Total (60) HI:(60)  [Does not show]
 Seat 3: METOLIGIST Folded on the POCKET CARDS
 Seat 4: EKDIKEO Folded on the POCKET CARDS
 Seat 5: 57MAVERICK Folded on the POCKET CARDS
@@ -60,7 +60,7 @@ Seat 9 - GREGORY37 (1,485 in chips)
 MARSHMAN5984 - Posts small blind 5
 METOLIGIST - Posts big blind 10
 *** POCKET CARDS ***
-Dealt to EKDIKEO [4c 8c] 
+Dealt to EKDIKEO [4c 8c]
 EKDIKEO - Folds
 57MAVERICK - Folds
 89YOTA - Folds
@@ -84,7 +84,7 @@ Total Pot(80)
 Board [9s 6c 9d]
 Seat 1: SHUSWAPER (dealer) Folded on the POCKET CARDS
 Seat 2: MARSHMAN5984 (small blind) Folded on the FLOP
-Seat 3: METOLIGIST (big blind) collected Total (80) HI:(80)  [Does not show] 
+Seat 3: METOLIGIST (big blind) collected Total (80) HI:(80)  [Does not show]
 Seat 4: EKDIKEO Folded on the POCKET CARDS
 Seat 5: 57MAVERICK Folded on the POCKET CARDS
 Seat 6: 89YOTA Folded on the POCKET CARDS
@@ -108,7 +108,7 @@ Seat 9 - GREGORY37 (1,485 in chips)
 METOLIGIST - Posts small blind 5
 EKDIKEO - Posts big blind 10
 *** POCKET CARDS ***
-Dealt to EKDIKEO [4d 8h] 
+Dealt to EKDIKEO [4d 8h]
 57MAVERICK - Folds
 89YOTA - Folds
 DOKTORRRR - Folds
@@ -134,7 +134,7 @@ SHUSWAPER Collects 50 from main pot
 *** SUMMARY ***
 Total Pot(50)
 Board [6s 2h 9h]
-Seat 1: SHUSWAPER collected Total (50) HI:(50)  [Does not show] 
+Seat 1: SHUSWAPER collected Total (50) HI:(50)  [Does not show]
 Seat 2: MARSHMAN5984 (dealer) Folded on the FLOP
 Seat 3: METOLIGIST (small blind) Folded on the FLOP
 Seat 4: EKDIKEO (big blind) Folded on the FLOP
@@ -160,7 +160,7 @@ Seat 9 - GREGORY37 (1,475 in chips)
 EKDIKEO - Posts small blind 5
 57MAVERICK - Posts big blind 10
 *** POCKET CARDS ***
-Dealt to EKDIKEO [9h 2h] 
+Dealt to EKDIKEO [9h 2h]
 89YOTA - Folds
 DOKTORRRR - Folds
 ZALDIVAR - Folds
@@ -183,7 +183,7 @@ Board [5s Qh 9d]
 Seat 1: SHUSWAPER Folded on the POCKET CARDS
 Seat 2: MARSHMAN5984 Folded on the FLOP
 Seat 3: METOLIGIST (dealer) Folded on the POCKET CARDS
-Seat 4: EKDIKEO (small blind) collected Total (30) HI:(30)  [Does not show] 
+Seat 4: EKDIKEO (small blind) collected Total (30) HI:(30)  [Does not show]
 Seat 5: 57MAVERICK (big blind) Folded on the POCKET CARDS
 Seat 6: 89YOTA Folded on the POCKET CARDS
 Seat 7: DOKTORRRR Folded on the POCKET CARDS
@@ -206,7 +206,7 @@ Seat 9 - GREGORY37 (1,475 in chips)
 57MAVERICK - Posts small blind 5
 89YOTA - Posts big blind 10
 *** POCKET CARDS ***
-Dealt to EKDIKEO [9s 6s] 
+Dealt to EKDIKEO [9s 6s]
 DOKTORRRR - Folds
 ZALDIVAR - Raises 25 to 25
 GREGORY37 - Calls 25
@@ -240,7 +240,7 @@ Seat 5: 57MAVERICK (small blind) Folded on the POCKET CARDS
 Seat 6: 89YOTA (big blind) Folded on the POCKET CARDS
 Seat 7: DOKTORRRR Folded on the POCKET CARDS
 Seat 8: ZALDIVAR Folded on the TURN
-Seat 9: GREGORY37 collected Total (90) HI:(90)  [Does not show] 
+Seat 9: GREGORY37 collected Total (90) HI:(90)  [Does not show]
 
 
 
@@ -258,7 +258,7 @@ Seat 9 - GREGORY37 (1,540 in chips)
 89YOTA - Posts small blind 5
 DOKTORRRR - Posts big blind 10
 *** POCKET CARDS ***
-Dealt to EKDIKEO [6s Qh] 
+Dealt to EKDIKEO [6s Qh]
 ZALDIVAR - Folds
 GREGORY37 - Calls 10
 SHUSWAPER - Folds
@@ -287,7 +287,7 @@ Seat 5: 57MAVERICK (dealer) Folded on the POCKET CARDS
 Seat 6: 89YOTA (small blind) Folded on the POCKET CARDS
 Seat 7: DOKTORRRR (big blind) Folded on the FLOP
 Seat 8: ZALDIVAR Folded on the POCKET CARDS
-Seat 9: GREGORY37 collected Total (25) HI:(25)  [Does not show] 
+Seat 9: GREGORY37 collected Total (25) HI:(25)  [Does not show]
 
 
 
@@ -305,7 +305,7 @@ Seat 9 - GREGORY37 (1,555 in chips)
 DOKTORRRR - Posts small blind 5
 ZALDIVAR - Posts big blind 10
 *** POCKET CARDS ***
-Dealt to EKDIKEO [6c 7h] 
+Dealt to EKDIKEO [6c 7h]
 GREGORY37 - Folds
 SHUSWAPER - Calls 10
 MARSHMAN5984 - Raises 100 to 100
@@ -323,7 +323,7 @@ MARSHMAN5984 Collects 35 from main pot
 *** SUMMARY ***
 Total Pot(35)
 Seat 1: SHUSWAPER Folded on the POCKET CARDS
-Seat 2: MARSHMAN5984 collected Total (35) 
+Seat 2: MARSHMAN5984 collected Total (35)
 Seat 3: METOLIGIST Folded on the POCKET CARDS
 Seat 4: EKDIKEO Folded on the POCKET CARDS
 Seat 5: 57MAVERICK Folded on the POCKET CARDS
@@ -348,7 +348,7 @@ Seat 9 - GREGORY37 (1,555 in chips)
 ZALDIVAR - Posts small blind 5
 GREGORY37 - Posts big blind 10
 *** POCKET CARDS ***
-Dealt to EKDIKEO [5d 10c] 
+Dealt to EKDIKEO [5d 10c]
 SHUSWAPER - Folds
 MARSHMAN5984 - Folds
 METOLIGIST - Folds
@@ -375,7 +375,7 @@ Seat 4: EKDIKEO Folded on the POCKET CARDS
 Seat 5: 57MAVERICK Folded on the POCKET CARDS
 Seat 6: 89YOTA Folded on the POCKET CARDS
 Seat 7: DOKTORRRR (dealer) Folded on the POCKET CARDS
-Seat 8: ZALDIVAR (small blind) collected Total (60) HI:(60)  [Does not show] 
+Seat 8: ZALDIVAR (small blind) collected Total (60) HI:(60)  [Does not show]
 Seat 9: GREGORY37 (big blind) Folded on the FLOP
 
 
@@ -394,7 +394,7 @@ Seat 9 - GREGORY37 (1,525 in chips)
 GREGORY37 - Posts small blind 5
 SHUSWAPER - Posts big blind 10
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Ah 8h] 
+Dealt to EKDIKEO [Ah 8h]
 MARSHMAN5984 - Calls 10
 METOLIGIST - Folds
 EKDIKEO - Raises 45 to 45
@@ -427,7 +427,7 @@ Seat 5: 57MAVERICK Folded on the POCKET CARDS
 Seat 6: 89YOTA Folded on the POCKET CARDS
 Seat 7: DOKTORRRR Folded on the POCKET CARDS
 Seat 8: ZALDIVAR (dealer) Folded on the POCKET CARDS
-Seat 9: GREGORY37 (small blind) collected Total (250) All-In HI:(250)  [Does not show] 
+Seat 9: GREGORY37 (small blind) collected Total (250) All-In HI:(250)  [Does not show]
 
 
 
@@ -445,7 +445,7 @@ Seat 9 - GREGORY37 (1,695 in chips)
 SHUSWAPER - Posts small blind 5
 MARSHMAN5984 - Posts big blind 10
 *** POCKET CARDS ***
-Dealt to EKDIKEO [As 4d] 
+Dealt to EKDIKEO [As 4d]
 METOLIGIST - Folds
 EKDIKEO - Folds
 57MAVERICK - Calls 10
@@ -462,7 +462,7 @@ SHUSWAPER - Does not show
 SHUSWAPER Collects 30 from main pot
 *** SUMMARY ***
 Total Pot(30)
-Seat 1: SHUSWAPER (small blind) collected Total (30) 
+Seat 1: SHUSWAPER (small blind) collected Total (30)
 Seat 2: MARSHMAN5984 (big blind) Folded on the POCKET CARDS
 Seat 3: METOLIGIST Folded on the POCKET CARDS
 Seat 4: EKDIKEO Folded on the POCKET CARDS
@@ -488,7 +488,7 @@ Seat 9 - GREGORY37 (1,695 in chips)
 MARSHMAN5984 - Posts small blind 5
 METOLIGIST - Posts big blind 10
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Jc Kc] 
+Dealt to EKDIKEO [Jc Kc]
 EKDIKEO - Raises 35 to 35
 57MAVERICK - Folds
 89YOTA - Folds
@@ -520,7 +520,7 @@ Seat 4: EKDIKEO Folded on the FLOP
 Seat 5: 57MAVERICK Folded on the POCKET CARDS
 Seat 6: 89YOTA Folded on the POCKET CARDS
 Seat 7: DOKTORRRR Folded on the POCKET CARDS
-Seat 8: ZALDIVAR collected Total (140) HI:(140)  [Does not show] 
+Seat 8: ZALDIVAR collected Total (140) HI:(140)  [Does not show]
 Seat 9: GREGORY37 Folded on the POCKET CARDS
 
 
@@ -538,7 +538,7 @@ Seat 9 - GREGORY37 (1,695 in chips)
 METOLIGIST - Posts small blind 10
 EKDIKEO - Posts big blind 20
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Kc Ah] 
+Dealt to EKDIKEO [Kc Ah]
 57MAVERICK - Folds
 DOKTORRRR - Raises 60 to 60
 ZALDIVAR - Folds
@@ -560,18 +560,18 @@ DOKTORRRR - returned (30) : not called
 *** TURN *** [9s Jh Js] [8c]
 *** RIVER *** [9s Jh Js 8c] [3d]
 *** SHOW DOWN ***
-METOLIGIST - Shows [Jc As] (Three of a kind, jacks) 
-DOKTORRRR - Shows [7h 7d] (Two Pair, jacks and sevens) 
+METOLIGIST - Shows [Jc As] (Three of a kind, jacks)
+DOKTORRRR - Shows [7h 7d] (Two Pair, jacks and sevens)
 METOLIGIST Collects 3,240 from main pot
 *** SUMMARY ***
 Total Pot(3,240)
 Board [9s Jh Js 8c 3d]
 Seat 1: SHUSWAPER Folded on the POCKET CARDS
 Seat 2: MARSHMAN5984 (dealer) Folded on the POCKET CARDS
-Seat 3: METOLIGIST (small blind) won Total (3,240) All-In HI:(3,240) with Three of a kind, jacks [Jc As - B:Js,B:Jh,P:Jc,P:As,B:9s] 
+Seat 3: METOLIGIST (small blind) won Total (3,240) All-In HI:(3,240) with Three of a kind, jacks [Jc As - B:Js,B:Jh,P:Jc,P:As,B:9s]
 Seat 4: EKDIKEO (big blind) Folded on the FLOP
 Seat 5: 57MAVERICK Folded on the POCKET CARDS
-Seat 7: DOKTORRRR HI:lost with Two Pair, jacks and sevens [7h 7d - B:Js,B:Jh,P:7h,P:7d,B:9s] 
+Seat 7: DOKTORRRR HI:lost with Two Pair, jacks and sevens [7h 7d - B:Js,B:Jh,P:7h,P:7d,B:9s]
 Seat 8: ZALDIVAR Folded on the POCKET CARDS
 Seat 9: GREGORY37 Folded on the POCKET CARDS
 
@@ -591,7 +591,7 @@ Seat 9 - GREGORY37 (1,695 in chips)
 EKDIKEO - Posts small blind 10
 57MAVERICK - Posts big blind 20
 *** POCKET CARDS ***
-Dealt to EKDIKEO [3s 4d] 
+Dealt to EKDIKEO [3s 4d]
 BRIANB49 - Calls 20
 DOKTORRRR - Folds
 ZALDIVAR - Calls 20
@@ -630,7 +630,7 @@ Seat 1: SHUSWAPER Folded on the POCKET CARDS
 Seat 2: MARSHMAN5984 Folded on the POCKET CARDS
 Seat 3: METOLIGIST (dealer) Folded on the RIVER
 Seat 4: EKDIKEO (small blind) Folded on the POCKET CARDS
-Seat 5: 57MAVERICK (big blind) collected Total (390) HI:(390)  [Does not show] 
+Seat 5: 57MAVERICK (big blind) collected Total (390) HI:(390)  [Does not show]
 Seat 6: BRIANB49 Folded on the FLOP
 Seat 7: DOKTORRRR Folded on the POCKET CARDS
 Seat 8: ZALDIVAR Folded on the FLOP
@@ -652,7 +652,7 @@ Seat 9 - GREGORY37 (1,675 in chips)
 57MAVERICK - Posts small blind 10
 BRIANB49 - Posts big blind 20
 *** POCKET CARDS ***
-Dealt to EKDIKEO [4c Jd] 
+Dealt to EKDIKEO [4c Jd]
 DOKTORRRR - All-In(Raise) 30 to 30
 ZALDIVAR - Folds
 GREGORY37 - Raises 120 to 120
@@ -667,8 +667,8 @@ GREGORY37 - returned (90) : not called
 *** TURN *** [3c Ks 9c] [10h]
 *** RIVER *** [3c Ks 9c 10h] [Kc]
 *** SHOW DOWN ***
-DOKTORRRR - Shows [Js Qc] (Straight, nine to king) 
-GREGORY37 - Shows [Ac 10s] (Two Pair, kings and tens) 
+DOKTORRRR - Shows [Js Qc] (Straight, nine to king)
+GREGORY37 - Shows [Ac 10s] (Two Pair, kings and tens)
 DOKTORRRR Collects 90 from main pot
 *** SUMMARY ***
 Total Pot(90)
@@ -679,9 +679,9 @@ Seat 3: METOLIGIST Folded on the POCKET CARDS
 Seat 4: EKDIKEO (dealer) Folded on the POCKET CARDS
 Seat 5: 57MAVERICK (small blind) Folded on the POCKET CARDS
 Seat 6: BRIANB49 (big blind) Folded on the POCKET CARDS
-Seat 7: DOKTORRRR won Total (90) All-In HI:(90) with Straight, nine to king [Js Qc - B:Ks,P:Qc,P:Js,B:10h,B:9c] 
+Seat 7: DOKTORRRR won Total (90) All-In HI:(90) with Straight, nine to king [Js Qc - B:Ks,P:Qc,P:Js,B:10h,B:9c]
 Seat 8: ZALDIVAR Folded on the POCKET CARDS
-Seat 9: GREGORY37 HI:lost with Two Pair, kings and tens [Ac 10s - B:Ks,B:Kc,P:10s,B:10h,P:Ac] 
+Seat 9: GREGORY37 HI:lost with Two Pair, kings and tens [Ac 10s - B:Ks,B:Kc,P:10s,B:10h,P:Ac]
 
 
 
@@ -699,7 +699,7 @@ Seat 9 - GREGORY37 (1,645 in chips)
 BRIANB49 - Posts small blind 10
 DOKTORRRR - Posts big blind 20
 *** POCKET CARDS ***
-Dealt to EKDIKEO [10s Ks] 
+Dealt to EKDIKEO [10s Ks]
 ZALDIVAR - Folds
 GREGORY37 - Folds
 SHUSWAPER - Calls 20
@@ -723,8 +723,8 @@ EKDIKEO - All-In 245
 57MAVERICK - Calls 245
 *** RIVER *** [4d 10h 10d Kd] [2d]
 *** SHOW DOWN ***
-EKDIKEO - Shows [10s Ks] (Full house, tens full of kings) 
-57MAVERICK - Shows [As Ac] (Two Pair, aces and tens) 
+EKDIKEO - Shows [10s Ks] (Full house, tens full of kings)
+57MAVERICK - Shows [As Ac] (Two Pair, aces and tens)
 EKDIKEO Collects 2,330 from main pot
 *** SUMMARY ***
 Total Pot(2,330)
@@ -732,8 +732,8 @@ Board [4d 10h 10d Kd 2d]
 Seat 1: SHUSWAPER Folded on the POCKET CARDS
 Seat 2: MARSHMAN5984 Folded on the FLOP
 Seat 3: METOLIGIST Folded on the POCKET CARDS
-Seat 4: EKDIKEO won Total (2,330) All-In HI:(2,330) with Full house, tens full of kings [10s Ks - P:10s,B:10h,B:10d,P:Ks,B:Kd] 
-Seat 5: 57MAVERICK (dealer) HI:lost with Two Pair, aces and tens [As Ac - P:As,P:Ac,B:10h,B:10d,B:Kd] 
+Seat 4: EKDIKEO won Total (2,330) All-In HI:(2,330) with Full house, tens full of kings [10s Ks - P:10s,B:10h,B:10d,P:Ks,B:Kd]
+Seat 5: 57MAVERICK (dealer) HI:lost with Two Pair, aces and tens [As Ac - P:As,P:Ac,B:10h,B:10d,B:Kd]
 Seat 6: BRIANB49 (small blind) Folded on the POCKET CARDS
 Seat 7: DOKTORRRR (big blind) Folded on the POCKET CARDS
 Seat 8: ZALDIVAR Folded on the POCKET CARDS
@@ -755,7 +755,7 @@ Seat 9 - GREGORY37 (1,645 in chips)
 DOKTORRRR - Posts small blind 10
 ZALDIVAR - Posts big blind 20
 *** POCKET CARDS ***
-Dealt to EKDIKEO [5h Jh] 
+Dealt to EKDIKEO [5h Jh]
 GREGORY37 - Folds
 SHUSWAPER - Calls 20
 MARSHMAN5984 - Folds
@@ -771,8 +771,8 @@ ZALDIVAR - returned (160) : not called
 *** TURN *** [2c Ac 3h] [7h]
 *** RIVER *** [2c Ac 3h 7h] [4s]
 *** SHOW DOWN ***
-DOKTORRRR - Shows [Ad Kc] (One pair, aces) 
-ZALDIVAR - Shows [Qh Qs] (One pair, queens) 
+DOKTORRRR - Shows [Ad Kc] (One pair, aces)
+ZALDIVAR - Shows [Qh Qs] (One pair, queens)
 DOKTORRRR Collects 160 from main pot
 *** SUMMARY ***
 Total Pot(160)
@@ -783,8 +783,8 @@ Seat 3: METOLIGIST Folded on the POCKET CARDS
 Seat 4: EKDIKEO Folded on the POCKET CARDS
 Seat 5: 57MAVERICK Folded on the POCKET CARDS
 Seat 6: BRIANB49 (dealer) Folded on the POCKET CARDS
-Seat 7: DOKTORRRR (small blind) won Total (160) All-In HI:(160) with One pair, aces [Ad Kc - P:Ad,B:Ac,P:Kc,B:7h,B:4s] 
-Seat 8: ZALDIVAR (big blind) HI:lost with One pair, queens [Qh Qs - P:Qs,P:Qh,B:Ac,B:7h,B:4s] 
+Seat 7: DOKTORRRR (small blind) won Total (160) All-In HI:(160) with One pair, aces [Ad Kc - P:Ad,B:Ac,P:Kc,B:7h,B:4s]
+Seat 8: ZALDIVAR (big blind) HI:lost with One pair, queens [Qh Qs - P:Qs,P:Qh,B:Ac,B:7h,B:4s]
 Seat 9: GREGORY37 Folded on the POCKET CARDS
 
 
@@ -803,7 +803,7 @@ Seat 9 - GREGORY37 (1,645 in chips)
 ZALDIVAR - Posts small blind 10
 GREGORY37 - Posts big blind 20
 *** POCKET CARDS ***
-Dealt to EKDIKEO [4d Ac] 
+Dealt to EKDIKEO [4d Ac]
 SHUSWAPER - Folds
 MARSHMAN5984 - Raises 80 to 80
 METOLIGIST - Folds
@@ -818,19 +818,19 @@ MARSHMAN5984 - Calls 80
 *** TURN *** [Qs 2d Kc] [Kh]
 *** RIVER *** [Qs 2d Kc Kh] [7s]
 *** SHOW DOWN ***
-MARSHMAN5984 - Shows [Ah Jd] (One pair, kings) 
-DOKTORRRR - Shows [Jh 8s] (One pair, kings) 
+MARSHMAN5984 - Shows [Ah Jd] (One pair, kings)
+DOKTORRRR - Shows [Jh 8s] (One pair, kings)
 MARSHMAN5984 Collects 350 from main pot
 *** SUMMARY ***
 Total Pot(350)
 Board [Qs 2d Kc Kh 7s]
 Seat 1: SHUSWAPER Folded on the POCKET CARDS
-Seat 2: MARSHMAN5984 won Total (350) HI:(350) with One pair, kings(ace kicker) [Ah Jd - B:Kh,B:Kc,P:Ah,B:Qs,P:Jd] 
+Seat 2: MARSHMAN5984 won Total (350) HI:(350) with One pair, kings(ace kicker) [Ah Jd - B:Kh,B:Kc,P:Ah,B:Qs,P:Jd]
 Seat 3: METOLIGIST Folded on the POCKET CARDS
 Seat 4: EKDIKEO Folded on the POCKET CARDS
 Seat 5: 57MAVERICK Folded on the POCKET CARDS
 Seat 6: BRIANB49 Folded on the POCKET CARDS
-Seat 7: DOKTORRRR (dealer) HI:lost with One pair, kings [Jh 8s - B:Kh,B:Kc,B:Qs,P:Jh,P:8s] 
+Seat 7: DOKTORRRR (dealer) HI:lost with One pair, kings [Jh 8s - B:Kh,B:Kc,B:Qs,P:Jh,P:8s]
 Seat 8: ZALDIVAR (small blind) Folded on the POCKET CARDS
 Seat 9: GREGORY37 (big blind) Folded on the POCKET CARDS
 
@@ -849,7 +849,7 @@ Seat 9 - GREGORY37 (1,625 in chips)
 GREGORY37 - Posts small blind 10
 SHUSWAPER - Posts big blind 20
 *** POCKET CARDS ***
-Dealt to EKDIKEO [5d 2c] 
+Dealt to EKDIKEO [5d 2c]
 MARSHMAN5984 - Calls 20
 METOLIGIST - Raises 60 to 60
 EKDIKEO - Folds
@@ -882,7 +882,7 @@ MARSHMAN5984 Collects 370 from main pot
 Total Pot(370)
 Board [2d Js Qs 8c 7s]
 Seat 1: SHUSWAPER (big blind) Folded on the RIVER
-Seat 2: MARSHMAN5984 collected Total (370) HI:(370)  [Does not show] 
+Seat 2: MARSHMAN5984 collected Total (370) HI:(370)  [Does not show]
 Seat 3: METOLIGIST Folded on the RIVER
 Seat 4: EKDIKEO Folded on the POCKET CARDS
 Seat 5: 57MAVERICK Folded on the POCKET CARDS
@@ -906,7 +906,7 @@ Seat 9 - GREGORY37 (1,615 in chips)
 SHUSWAPER - Posts small blind 10
 MARSHMAN5984 - Posts big blind 20
 *** POCKET CARDS ***
-Dealt to EKDIKEO [2h Jh] 
+Dealt to EKDIKEO [2h Jh]
 METOLIGIST - Folds
 EKDIKEO - Folds
 57MAVERICK - Folds
@@ -932,23 +932,23 @@ MARSHMAN5984 - Checks
 MAKMOJARTU - Checks
 GREGORY37 - Checks
 *** SHOW DOWN ***
-SHUSWAPER - Shows [8s Qs] (One pair, kings) 
-MARSHMAN5984 - Shows [5s 6d] (Two Pair, kings and fives) 
+SHUSWAPER - Shows [8s Qs] (One pair, kings)
+MARSHMAN5984 - Shows [5s 6d] (Two Pair, kings and fives)
 MAKMOJARTU - Mucks
 GREGORY37 - Mucks
 MARSHMAN5984 Collects 80 from main pot
 *** SUMMARY ***
 Total Pot(80)
 Board [As Kc 3d Kh 5h]
-Seat 1: SHUSWAPER (small blind) HI:lost with One pair, kings [8s Qs - B:Kh,B:Kc,B:As,P:Qs,P:8s] 
-Seat 2: MARSHMAN5984 (big blind) won Total (80) HI:(80) with Two Pair, kings and fives [5s 6d - B:Kh,B:Kc,P:5s,B:5h,B:As] 
+Seat 1: SHUSWAPER (small blind) HI:lost with One pair, kings [8s Qs - B:Kh,B:Kc,B:As,P:Qs,P:8s]
+Seat 2: MARSHMAN5984 (big blind) won Total (80) HI:(80) with Two Pair, kings and fives [5s 6d - B:Kh,B:Kc,P:5s,B:5h,B:As]
 Seat 3: METOLIGIST Folded on the POCKET CARDS
 Seat 4: EKDIKEO Folded on the POCKET CARDS
 Seat 5: 57MAVERICK Folded on the POCKET CARDS
 Seat 6: BRIANB49 Folded on the POCKET CARDS
-Seat 7: MAKMOJARTU HI: [Mucked] [8d Jd] 
+Seat 7: MAKMOJARTU HI: [Mucked] [8d Jd]
 Seat 8: ZALDIVAR Folded on the POCKET CARDS
-Seat 9: GREGORY37 (dealer) HI: [Mucked] [10s 2s] 
+Seat 9: GREGORY37 (dealer) HI: [Mucked] [10s 2s]
 
 
 
@@ -966,7 +966,7 @@ Seat 9 - GREGORY37 (1,595 in chips)
 MARSHMAN5984 - Posts small blind 10
 METOLIGIST - Posts big blind 20
 *** POCKET CARDS ***
-Dealt to EKDIKEO [9s 2h] 
+Dealt to EKDIKEO [9s 2h]
 EKDIKEO - Folds
 57MAVERICK - Folds
 BRIANB49 - Folds
@@ -990,20 +990,20 @@ ZALDIVAR - Calls 100
 MARSHMAN5984 - Bets 100
 ZALDIVAR - Calls 100
 *** SHOW DOWN ***
-MARSHMAN5984 - Shows [10h Jh] (Three of a kind, jacks) 
+MARSHMAN5984 - Shows [10h Jh] (Three of a kind, jacks)
 ZALDIVAR - Mucks
 MARSHMAN5984 Collects 875 from main pot
 *** SUMMARY ***
 Total Pot(875)
 Board [3d 5d Jc Jd 6c]
 Seat 1: SHUSWAPER (dealer) Folded on the FLOP
-Seat 2: MARSHMAN5984 (small blind) won Total (875) HI:(875) with Three of a kind, jacks [10h Jh - P:Jh,B:Jd,B:Jc,P:10h,B:6c] 
+Seat 2: MARSHMAN5984 (small blind) won Total (875) HI:(875) with Three of a kind, jacks [10h Jh - P:Jh,B:Jd,B:Jc,P:10h,B:6c]
 Seat 3: METOLIGIST (big blind) Folded on the FLOP
 Seat 4: EKDIKEO Folded on the POCKET CARDS
 Seat 5: 57MAVERICK Folded on the POCKET CARDS
 Seat 6: BRIANB49 Folded on the POCKET CARDS
 Seat 7: MAKMOJARTU Folded on the FLOP
-Seat 8: ZALDIVAR HI: [Mucked] [6d 7s] 
+Seat 8: ZALDIVAR HI: [Mucked] [6d 7s]
 Seat 9: GREGORY37 Folded on the POCKET CARDS
 
 
@@ -1022,7 +1022,7 @@ Seat 9 - GREGORY37 (1,595 in chips)
 METOLIGIST - Posts small blind 10
 EKDIKEO - Posts big blind 20
 *** POCKET CARDS ***
-Dealt to EKDIKEO [3s 4h] 
+Dealt to EKDIKEO [3s 4h]
 57MAVERICK - Folds
 BRIANB49 - Folds
 MAKMOJARTU - Calls 20
@@ -1046,7 +1046,7 @@ Total Pot(80)
 Board [10c 10s As]
 Seat 1: SHUSWAPER Folded on the POCKET CARDS
 Seat 2: MARSHMAN5984 (dealer) Folded on the FLOP
-Seat 3: METOLIGIST (small blind) collected Total (80) HI:(80)  [Does not show] 
+Seat 3: METOLIGIST (small blind) collected Total (80) HI:(80)  [Does not show]
 Seat 4: EKDIKEO (big blind) Folded on the FLOP
 Seat 5: 57MAVERICK Folded on the POCKET CARDS
 Seat 6: BRIANB49 Folded on the POCKET CARDS
@@ -1070,7 +1070,7 @@ Seat 9 - GREGORY37 (1,595 in chips)
 EKDIKEO - Posts small blind 10
 57MAVERICK - Posts big blind 20
 *** POCKET CARDS ***
-Dealt to EKDIKEO [7c 5d] 
+Dealt to EKDIKEO [7c 5d]
 BRIANB49 - Folds
 MAKMOJARTU - Folds
 ZALDIVAR - Raises 70 to 70
@@ -1093,7 +1093,7 @@ Seat 4: EKDIKEO (small blind) Folded on the POCKET CARDS
 Seat 5: 57MAVERICK (big blind) Folded on the POCKET CARDS
 Seat 6: BRIANB49 Folded on the POCKET CARDS
 Seat 7: MAKMOJARTU Folded on the POCKET CARDS
-Seat 8: ZALDIVAR collected Total (50) 
+Seat 8: ZALDIVAR collected Total (50)
 Seat 9: GREGORY37 Folded on the POCKET CARDS
 
 
@@ -1112,7 +1112,7 @@ Seat 9 - GREGORY37 (1,595 in chips)
 57MAVERICK - Posts small blind 15
 BRIANB49 - Posts big blind 30
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Js 6s] 
+Dealt to EKDIKEO [Js 6s]
 MAKMOJARTU - Folds
 ZALDIVAR - Raises 60 to 60
 GREGORY37 - Folds
@@ -1147,7 +1147,7 @@ Seat 2: MARSHMAN5984 Folded on the POCKET CARDS
 Seat 3: METOLIGIST Folded on the RIVER
 Seat 4: EKDIKEO (dealer) Folded on the POCKET CARDS
 Seat 5: 57MAVERICK (small blind) Folded on the POCKET CARDS
-Seat 6: BRIANB49 (big blind) collected Total (555) HI:(555)  [Does not show] 
+Seat 6: BRIANB49 (big blind) collected Total (555) HI:(555)  [Does not show]
 Seat 7: MAKMOJARTU Folded on the POCKET CARDS
 Seat 8: ZALDIVAR Folded on the RIVER
 Seat 9: GREGORY37 Folded on the POCKET CARDS
@@ -1168,7 +1168,7 @@ Seat 9 - GREGORY37 (1,595 in chips)
 BRIANB49 - Posts small blind 15
 MAKMOJARTU - Posts big blind 30
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Jd 8c] 
+Dealt to EKDIKEO [Jd 8c]
 ZALDIVAR - Folds
 GREGORY37 - Calls 30
 SHUSWAPER - Folds
@@ -1199,7 +1199,7 @@ Seat 5: 57MAVERICK (dealer) Folded on the POCKET CARDS
 Seat 6: BRIANB49 (small blind) Folded on the FLOP
 Seat 7: MAKMOJARTU (big blind) Folded on the FLOP
 Seat 8: ZALDIVAR Folded on the POCKET CARDS
-Seat 9: GREGORY37 collected Total (90) HI:(90)  [Does not show] 
+Seat 9: GREGORY37 collected Total (90) HI:(90)  [Does not show]
 
 
 
@@ -1217,7 +1217,7 @@ Seat 9 - GREGORY37 (1,655 in chips)
 MAKMOJARTU - Posts small blind 15
 ZALDIVAR - Posts big blind 30
 *** POCKET CARDS ***
-Dealt to EKDIKEO [3s 2h] 
+Dealt to EKDIKEO [3s 2h]
 GREGORY37 - Folds
 SHUSWAPER - Folds
 MARSHMAN5984 - Folds
@@ -1235,8 +1235,8 @@ ZALDIVAR - Calls 380
 *** TURN *** [8c Qs Jh] [3h]
 *** RIVER *** [8c Qs Jh 3h] [Kd]
 *** SHOW DOWN ***
-57MAVERICK - Shows [Ad Jd] (One pair, jacks) 
-ZALDIVAR - Shows [Ks 10d] (One pair, kings) 
+57MAVERICK - Shows [Ad Jd] (One pair, jacks)
+ZALDIVAR - Shows [Ks 10d] (One pair, kings)
 ZALDIVAR Collects 1,200 from main pot
 *** SUMMARY ***
 Total Pot(1,200)
@@ -1245,10 +1245,10 @@ Seat 1: SHUSWAPER Folded on the POCKET CARDS
 Seat 2: MARSHMAN5984 Folded on the POCKET CARDS
 Seat 3: METOLIGIST Folded on the POCKET CARDS
 Seat 4: EKDIKEO Folded on the POCKET CARDS
-Seat 5: 57MAVERICK HI:lost with One pair, jacks [Ad Jd - B:Jh,P:Jd,P:Ad,B:Kd,B:Qs] 
+Seat 5: 57MAVERICK HI:lost with One pair, jacks [Ad Jd - B:Jh,P:Jd,P:Ad,B:Kd,B:Qs]
 Seat 6: BRIANB49 (dealer) Folded on the POCKET CARDS
 Seat 7: MAKMOJARTU (small blind) Folded on the POCKET CARDS
-Seat 8: ZALDIVAR (big blind) won Total (1,200) HI:(1,200) with One pair, kings [Ks 10d - P:Ks,B:Kd,B:Qs,B:Jh,P:10d] 
+Seat 8: ZALDIVAR (big blind) won Total (1,200) HI:(1,200) with One pair, kings [Ks 10d - P:Ks,B:Kd,B:Qs,B:Jh,P:10d]
 Seat 9: GREGORY37 Folded on the POCKET CARDS
 
 
@@ -1266,7 +1266,7 @@ Seat 9 - GREGORY37 (1,655 in chips)
 ZALDIVAR - Posts small blind 15
 GREGORY37 - Posts big blind 30
 *** POCKET CARDS ***
-Dealt to EKDIKEO [3h 4c] 
+Dealt to EKDIKEO [3h 4c]
 SHUSWAPER - Raises 90 to 90
 MARSHMAN5984 - Calls 90
 METOLIGIST - Folds
@@ -1287,21 +1287,21 @@ MAKMOJARTU - returned (4,170) : not called
 *** TURN *** [Ah 6s 7h] [Qc]
 *** RIVER *** [Ah 6s 7h Qc] [8h]
 *** SHOW DOWN ***
-SHUSWAPER - Shows [Ad Kh] (One pair, aces) 
-MARSHMAN5984 - Shows [8s 9h] (One pair, eights) 
-MAKMOJARTU - Shows [As Ks] (One pair, aces) 
+SHUSWAPER - Shows [Ad Kh] (One pair, aces)
+MARSHMAN5984 - Shows [8s 9h] (One pair, eights)
+MAKMOJARTU - Shows [As Ks] (One pair, aces)
 MAKMOJARTU Collects 1,730 from side pot-1
 SHUSWAPER Collects 1,875 from main pot
 MAKMOJARTU Collects 1,875 from main pot
 *** SUMMARY ***
 Total Pot(5,480:3,750,1,730)
 Board [Ah 6s 7h Qc 8h]
-Seat 1: SHUSWAPER won Total (1,875) All-In HI:(1,875) with One pair, aces [Ad Kh - B:Ah,P:Ad,P:Kh,B:Qc,B:8h] 
-Seat 2: MARSHMAN5984 HI:lost with One pair, eights [8s 9h - P:8s,B:8h,B:Ah,B:Qc,P:9h] 
+Seat 1: SHUSWAPER won Total (1,875) All-In HI:(1,875) with One pair, aces [Ad Kh - B:Ah,P:Ad,P:Kh,B:Qc,B:8h]
+Seat 2: MARSHMAN5984 HI:lost with One pair, eights [8s 9h - P:8s,B:8h,B:Ah,B:Qc,P:9h]
 Seat 3: METOLIGIST Folded on the POCKET CARDS
 Seat 4: EKDIKEO Folded on the POCKET CARDS
 Seat 6: BRIANB49 Folded on the POCKET CARDS
-Seat 7: MAKMOJARTU (dealer) won Total (3,605) All-In HI:(3,605) with One pair, aces [As Ks - P:As,B:Ah,P:Ks,B:Qc,B:8h] 
+Seat 7: MAKMOJARTU (dealer) won Total (3,605) All-In HI:(3,605) with One pair, aces [As Ks - P:As,B:Ah,P:Ks,B:Qc,B:8h]
 Seat 8: ZALDIVAR (small blind) Folded on the POCKET CARDS
 Seat 9: GREGORY37 (big blind) Folded on the FLOP
 
@@ -1320,7 +1320,7 @@ Seat 9 - GREGORY37 (1,565 in chips)
 GREGORY37 - Posts small blind 15
 SHUSWAPER - Posts big blind 30
 *** POCKET CARDS ***
-Dealt to EKDIKEO [8d Ks] 
+Dealt to EKDIKEO [8d Ks]
 METOLIGIST - Folds
 EKDIKEO - Folds
 LEEDOG4200 - Folds
@@ -1344,7 +1344,7 @@ SHUSWAPER Collects 720 from main pot
 *** SUMMARY ***
 Total Pot(720)
 Board [Ah 9d 9s]
-Seat 1: SHUSWAPER (big blind) collected Total (720) All-In HI:(720)  [Does not show] 
+Seat 1: SHUSWAPER (big blind) collected Total (720) All-In HI:(720)  [Does not show]
 Seat 3: METOLIGIST Folded on the POCKET CARDS
 Seat 4: EKDIKEO Folded on the POCKET CARDS
 Seat 5: LEEDOG4200 Folded on the POCKET CARDS
@@ -1368,7 +1368,7 @@ Seat 9 - GREGORY37 (1,475 in chips)
 SHUSWAPER - Posts small blind 15
 METOLIGIST - Posts big blind 30
 *** POCKET CARDS ***
-Dealt to EKDIKEO [3d 8d] 
+Dealt to EKDIKEO [3d 8d]
 EKDIKEO - Folds
 LEEDOG4200 - Folds
 BRIANB49 - Calls 30
@@ -1407,7 +1407,7 @@ Seat 5: LEEDOG4200 Folded on the POCKET CARDS
 Seat 6: BRIANB49 Folded on the FLOP
 Seat 7: MAKMOJARTU Folded on the POCKET CARDS
 Seat 8: ZALDIVAR Folded on the TURN
-Seat 9: GREGORY37 (dealer) collected Total (1,290) All-In HI:(1,290)  [Does not show] 
+Seat 9: GREGORY37 (dealer) collected Total (1,290) All-In HI:(1,290)  [Does not show]
 
 
 
@@ -1424,7 +1424,7 @@ Seat 9 - GREGORY37 (2,345 in chips)
 METOLIGIST - Posts small blind 15
 EKDIKEO - Posts big blind 30
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Qd 8c] 
+Dealt to EKDIKEO [Qd 8c]
 LEEDOG4200 - Folds
 BRIANB49 - Folds
 MAKMOJARTU - Calls 30
@@ -1459,7 +1459,7 @@ Seat 3: METOLIGIST (small blind) Folded on the RIVER
 Seat 4: EKDIKEO (big blind) Folded on the RIVER
 Seat 5: LEEDOG4200 Folded on the POCKET CARDS
 Seat 6: BRIANB49 Folded on the POCKET CARDS
-Seat 7: MAKMOJARTU collected Total (90) HI:(90)  [Does not show] 
+Seat 7: MAKMOJARTU collected Total (90) HI:(90)  [Does not show]
 Seat 8: ZALDIVAR Folded on the POCKET CARDS
 Seat 9: GREGORY37 Folded on the POCKET CARDS
 
@@ -1479,7 +1479,7 @@ Seat 9 - GREGORY37 (2,345 in chips)
 EKDIKEO - Posts small blind 15
 LEEDOG4200 - Posts big blind 30
 *** POCKET CARDS ***
-Dealt to EKDIKEO [2c 9d] 
+Dealt to EKDIKEO [2c 9d]
 BRIANB49 - Folds
 MAKMOJARTU - Folds
 ZALDIVAR - Folds
@@ -1501,13 +1501,13 @@ SHUSWAPER - Checks
 GREGORY37 - Checks
 SHUSWAPER - Checks
 *** SHOW DOWN ***
-GREGORY37 - Shows [7s 3s] (One pair, threes) 
+GREGORY37 - Shows [7s 3s] (One pair, threes)
 SHUSWAPER - Mucks
 GREGORY37 Collects 405 from main pot
 *** SUMMARY ***
 Total Pot(405)
 Board [5h 3h 10s 9s 4h]
-Seat 1: SHUSWAPER HI: [Mucked] [Jh Ac] 
+Seat 1: SHUSWAPER HI: [Mucked] [Jh Ac]
 Seat 2: ECHOES_1 Folded on the POCKET CARDS
 Seat 3: METOLIGIST (dealer) Folded on the POCKET CARDS
 Seat 4: EKDIKEO (small blind) Folded on the POCKET CARDS
@@ -1515,7 +1515,7 @@ Seat 5: LEEDOG4200 (big blind) Folded on the POCKET CARDS
 Seat 6: BRIANB49 Folded on the POCKET CARDS
 Seat 7: MAKMOJARTU Folded on the POCKET CARDS
 Seat 8: ZALDIVAR Folded on the POCKET CARDS
-Seat 9: GREGORY37 won Total (405) HI:(405) with One pair, threes [7s 3s - P:3s,B:3h,B:10s,B:9s,P:7s] 
+Seat 9: GREGORY37 won Total (405) HI:(405) with One pair, threes [7s 3s - P:3s,B:3h,B:10s,B:9s,P:7s]
 
 
 
@@ -1533,7 +1533,7 @@ Seat 9 - GREGORY37 (2,570 in chips)
 LEEDOG4200 - Posts small blind 15
 BRIANB49 - Posts big blind 30
 *** POCKET CARDS ***
-Dealt to EKDIKEO [6d 3s] 
+Dealt to EKDIKEO [6d 3s]
 MAKMOJARTU - Folds
 ZALDIVAR - Folds
 GREGORY37 - Folds
@@ -1552,7 +1552,7 @@ Seat 2: ECHOES_1 Folded on the POCKET CARDS
 Seat 3: METOLIGIST Folded on the POCKET CARDS
 Seat 4: EKDIKEO (dealer) Folded on the POCKET CARDS
 Seat 5: LEEDOG4200 (small blind) Folded on the POCKET CARDS
-Seat 6: BRIANB49 (big blind) collected Total (45) 
+Seat 6: BRIANB49 (big blind) collected Total (45)
 Seat 7: MAKMOJARTU Folded on the POCKET CARDS
 Seat 8: ZALDIVAR Folded on the POCKET CARDS
 Seat 9: GREGORY37 Folded on the POCKET CARDS
@@ -1573,7 +1573,7 @@ Seat 9 - GREGORY37 (2,570 in chips)
 BRIANB49 - Posts small blind 15
 MAKMOJARTU - Posts big blind 30
 *** POCKET CARDS ***
-Dealt to EKDIKEO [10c Kc] 
+Dealt to EKDIKEO [10c Kc]
 ZALDIVAR - Folds
 GREGORY37 - Raises 105 to 105
 SHUSWAPER - Folds
@@ -1603,7 +1603,7 @@ Seat 5: LEEDOG4200 (dealer) Folded on the POCKET CARDS
 Seat 6: BRIANB49 (small blind) Folded on the FLOP
 Seat 7: MAKMOJARTU (big blind) Folded on the POCKET CARDS
 Seat 8: ZALDIVAR Folded on the POCKET CARDS
-Seat 9: GREGORY37 collected Total (345) HI:(345)  [Does not show] 
+Seat 9: GREGORY37 collected Total (345) HI:(345)  [Does not show]
 
 
 
@@ -1621,7 +1621,7 @@ Seat 9 - GREGORY37 (2,810 in chips)
 MAKMOJARTU - Posts small blind 15
 ZALDIVAR - Posts big blind 30
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Ac 6c] 
+Dealt to EKDIKEO [Ac 6c]
 GREGORY37 - Calls 30
 SHUSWAPER - Folds
 ECHOES_1 - Folds
@@ -1657,7 +1657,7 @@ Seat 4: EKDIKEO Folded on the FLOP
 Seat 5: LEEDOG4200 Folded on the POCKET CARDS
 Seat 6: BRIANB49 (dealer) Folded on the POCKET CARDS
 Seat 7: MAKMOJARTU (small blind) Folded on the FLOP
-Seat 8: ZALDIVAR (big blind) collected Total (270) HI:(270)  [Does not show] 
+Seat 8: ZALDIVAR (big blind) collected Total (270) HI:(270)  [Does not show]
 Seat 9: GREGORY37 Folded on the RIVER
 
 
@@ -1676,7 +1676,7 @@ Seat 9 - GREGORY37 (2,705 in chips)
 ZALDIVAR - Posts small blind 15
 GREGORY37 - Posts big blind 30
 *** POCKET CARDS ***
-Dealt to EKDIKEO [9d 9c] 
+Dealt to EKDIKEO [9d 9c]
 SHUSWAPER - Calls 30
 ECHOES_1 - Raises 60 to 60
 METOLIGIST - Folds
@@ -1702,7 +1702,7 @@ Board [8d Qd 7c]
 Seat 1: SHUSWAPER Folded on the POCKET CARDS
 Seat 2: ECHOES_1 Folded on the FLOP
 Seat 3: METOLIGIST Folded on the POCKET CARDS
-Seat 4: EKDIKEO collected Total (585) HI:(585)  [Does not show] 
+Seat 4: EKDIKEO collected Total (585) HI:(585)  [Does not show]
 Seat 5: LEEDOG4200 Folded on the POCKET CARDS
 Seat 6: BRIANB49 Folded on the POCKET CARDS
 Seat 7: MAKMOJARTU (dealer) Folded on the POCKET CARDS
@@ -1725,7 +1725,7 @@ Seat 9 - GREGORY37 (2,675 in chips)
 GREGORY37 - Posts small blind 20
 SHUSWAPER - Posts big blind 40
 *** POCKET CARDS ***
-Dealt to EKDIKEO [9c Jh] 
+Dealt to EKDIKEO [9c Jh]
 ECHOES_1 - Folds
 METOLIGIST - Raises 120 to 120
 EKDIKEO - Folds
@@ -1744,20 +1744,20 @@ ZALDIVAR - All-In(Raise) 1,305 to 1,305
 METOLIGIST - Calls 865
 *** RIVER *** [Ac 6s 8d Qd] [9s]
 *** SHOW DOWN ***
-METOLIGIST - Shows [Qc Ad] (Two Pair, aces and queens) 
-ZALDIVAR - Shows [9d Kd] (One pair, nines) 
+METOLIGIST - Shows [Qc Ad] (Two Pair, aces and queens)
+ZALDIVAR - Shows [9d Kd] (One pair, nines)
 METOLIGIST Collects 3,230 from main pot
 *** SUMMARY ***
 Total Pot(3,230)
 Board [Ac 6s 8d Qd 9s]
 Seat 1: SHUSWAPER (big blind) Folded on the POCKET CARDS
 Seat 2: ECHOES_1 Folded on the POCKET CARDS
-Seat 3: METOLIGIST won Total (3,230) HI:(3,230) with Two Pair, aces and queens [Qc Ad - P:Ad,B:Ac,B:Qd,P:Qc,B:9s] 
+Seat 3: METOLIGIST won Total (3,230) HI:(3,230) with Two Pair, aces and queens [Qc Ad - P:Ad,B:Ac,B:Qd,P:Qc,B:9s]
 Seat 4: EKDIKEO Folded on the POCKET CARDS
 Seat 5: LEEDOG4200 Folded on the POCKET CARDS
 Seat 6: BRIANB49 Folded on the POCKET CARDS
 Seat 7: MAKMOJARTU Folded on the POCKET CARDS
-Seat 8: ZALDIVAR (dealer) HI:lost with One pair, nines [9d Kd - B:9s,P:9d,B:Ac,P:Kd,B:Qd] 
+Seat 8: ZALDIVAR (dealer) HI:lost with One pair, nines [9d Kd - B:9s,P:9d,B:Ac,P:Kd,B:Qd]
 Seat 9: GREGORY37 (small blind) Folded on the POCKET CARDS
 
 
@@ -1776,7 +1776,7 @@ Seat 9 - CUBICDUCHESS (1,351 in chips)
 GAYBOX - Posts small blind 20
 DADOFMENY - Posts big blind 40
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Jc 5s] 
+Dealt to EKDIKEO [Jc 5s]
 MJ_FOX - Folds
 CUBICDUCHESS - Folds
 EKDIKEO - Folds
@@ -1806,7 +1806,7 @@ Seat 2: GMONEY420024 Folded on the POCKET CARDS
 Seat 3: STACKS Folded on the TURN
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER (dealer) Folded on the POCKET CARDS
-Seat 6: GAYBOX (small blind) collected Total (120) HI:(120)  [Does not show] 
+Seat 6: GAYBOX (small blind) collected Total (120) HI:(120)  [Does not show]
 Seat 7: DADOFMENY (big blind) Folded on the TURN
 Seat 8: MJ_FOX Folded on the POCKET CARDS
 Seat 9: CUBICDUCHESS Folded on the POCKET CARDS
@@ -1827,7 +1827,7 @@ Seat 9 - CUBICDUCHESS (1,351 in chips)
 DADOFMENY - Posts small blind 20
 MJ_FOX - Posts big blind 40
 *** POCKET CARDS ***
-Dealt to EKDIKEO [7s 8c] 
+Dealt to EKDIKEO [7s 8c]
 CUBICDUCHESS - Folds
 EKDIKEO - Folds
 GMONEY420024 - Calls 40
@@ -1846,7 +1846,7 @@ STACKS Collects 140 from main pot
 Total Pot(140)
 Seat 1: EKDIKEO Folded on the POCKET CARDS
 Seat 2: GMONEY420024 Folded on the POCKET CARDS
-Seat 3: STACKS collected Total (140) 
+Seat 3: STACKS collected Total (140)
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX (dealer) Folded on the POCKET CARDS
@@ -1870,7 +1870,7 @@ Seat 9 - CUBICDUCHESS (1,351 in chips)
 MJ_FOX - Posts small blind 20
 CUBICDUCHESS - Posts big blind 40
 *** POCKET CARDS ***
-Dealt to EKDIKEO [8h 6d] 
+Dealt to EKDIKEO [8h 6d]
 EKDIKEO - Folds
 GMONEY420024 - Calls 40
 STACKS - Calls 40
@@ -1904,7 +1904,7 @@ Seat 2: GMONEY420024 Folded on the FLOP
 Seat 3: STACKS Folded on the FLOP
 Seat 4: EOFNORTH Folded on the FLOP
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
-Seat 6: GAYBOX collected Total (1,320) All-In HI:(1,320)  [Does not show] 
+Seat 6: GAYBOX collected Total (1,320) All-In HI:(1,320)  [Does not show]
 Seat 7: DADOFMENY (dealer) Folded on the POCKET CARDS
 Seat 8: MJ_FOX (small blind) Folded on the POCKET CARDS
 Seat 9: CUBICDUCHESS (big blind) Folded on the FLOP
@@ -1925,7 +1925,7 @@ Seat 9 - CUBICDUCHESS (1,231 in chips)
 CUBICDUCHESS - Posts small blind 20
 EKDIKEO - Posts big blind 40
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Ad 9d] 
+Dealt to EKDIKEO [Ad 9d]
 GMONEY420024 - Calls 40
 STACKS - Folds
 EOFNORTH - Calls 40
@@ -1957,18 +1957,18 @@ GAYBOX - Bets 600
 CUBICDUCHESS - Folds
 GMONEY420024 - Calls 600
 *** SHOW DOWN ***
-GAYBOX - Shows [10h Kh] (Two Pair, kings and tens) 
+GAYBOX - Shows [10h Kh] (Two Pair, kings and tens)
 GMONEY420024 - Mucks
 GAYBOX Collects 1,800 from main pot
 *** SUMMARY ***
 Total Pot(1,800)
 Board [2s Qh 10s 9h Kc]
 Seat 1: EKDIKEO (big blind) Folded on the FLOP
-Seat 2: GMONEY420024 HI: [Mucked] [Qd Ah] 
+Seat 2: GMONEY420024 HI: [Mucked] [Qd Ah]
 Seat 3: STACKS Folded on the POCKET CARDS
 Seat 4: EOFNORTH Folded on the FLOP
 Seat 5: FLHTCIRIDER Folded on the FLOP
-Seat 6: GAYBOX won Total (1,800) HI:(1,800) with Two Pair, kings and tens [10h Kh - P:Kh,B:Kc,B:10s,P:10h,B:Qh] 
+Seat 6: GAYBOX won Total (1,800) HI:(1,800) with Two Pair, kings and tens [10h Kh - P:Kh,B:Kc,B:10s,P:10h,B:Qh]
 Seat 7: DADOFMENY Folded on the POCKET CARDS
 Seat 8: MJ_FOX (dealer) Folded on the POCKET CARDS
 Seat 9: CUBICDUCHESS (small blind) Folded on the RIVER
@@ -1989,7 +1989,7 @@ Seat 9 - CUBICDUCHESS (1,071 in chips)
 EKDIKEO - Posts small blind 20
 GMONEY420024 - Posts big blind 40
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Kh 6s] 
+Dealt to EKDIKEO [Kh 6s]
 STACKS - Raises 120 to 120
 EOFNORTH - Folds
 FLHTCIRIDER - Folds
@@ -2021,7 +2021,7 @@ Total Pot(380)
 Board [6d 4s Jc As Qs]
 Seat 1: EKDIKEO (small blind) Folded on the POCKET CARDS
 Seat 2: GMONEY420024 (big blind) Folded on the RIVER
-Seat 3: STACKS collected Total (380) HI:(380)  [Does not show] 
+Seat 3: STACKS collected Total (380) HI:(380)  [Does not show]
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
@@ -2045,7 +2045,7 @@ Seat 9 - CUBICDUCHESS (951 in chips)
 GMONEY420024 - Posts small blind 20
 STACKS - Posts big blind 40
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Kd Qh] 
+Dealt to EKDIKEO [Kd Qh]
 EOFNORTH - Folds
 FLHTCIRIDER - Folds
 GAYBOX - Calls 40
@@ -2070,22 +2070,22 @@ GAYBOX - Checks
 CUBICDUCHESS - Checks
 EKDIKEO - Checks
 *** SHOW DOWN ***
-GAYBOX - Shows [Ac 6c] (One pair, threes) 
+GAYBOX - Shows [Ac 6c] (One pair, threes)
 CUBICDUCHESS - Mucks
 EKDIKEO - Mucks
 GAYBOX Collects 720 from main pot
 *** SUMMARY ***
 Total Pot(720)
 Board [8d 2s 10c 3h 3d]
-Seat 1: EKDIKEO (dealer) HI: [Mucked] [Kd Qh] 
+Seat 1: EKDIKEO (dealer) HI: [Mucked] [Kd Qh]
 Seat 2: GMONEY420024 (small blind) Folded on the POCKET CARDS
 Seat 3: STACKS (big blind) Folded on the POCKET CARDS
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
-Seat 6: GAYBOX won Total (720) HI:(720) with One pair, threes(ace kicker) [Ac 6c - B:3h,B:3d,P:Ac,B:10c,B:8d] 
+Seat 6: GAYBOX won Total (720) HI:(720) with One pair, threes(ace kicker) [Ac 6c - B:3h,B:3d,P:Ac,B:10c,B:8d]
 Seat 7: DADOFMENY Folded on the POCKET CARDS
 Seat 8: MJ_FOX Folded on the POCKET CARDS
-Seat 9: CUBICDUCHESS HI: [Mucked] [4c 5c] 
+Seat 9: CUBICDUCHESS HI: [Mucked] [4c 5c]
 
 
 
@@ -2103,7 +2103,7 @@ Seat 9 - CUBICDUCHESS (731 in chips)
 STACKS - Posts small blind 20
 EOFNORTH - Posts big blind 40
 *** POCKET CARDS ***
-Dealt to EKDIKEO [5d Js] 
+Dealt to EKDIKEO [5d Js]
 FLHTCIRIDER - Calls 40
 GAYBOX - Calls 40
 DADOFMENY - Folds
@@ -2133,7 +2133,7 @@ STACKS - Bets 120
 FLHTCIRIDER - Folds
 GAYBOX - Calls 120
 *** SHOW DOWN ***
-STACKS - Shows [Qh Kc] (Full house, kings full of queens) 
+STACKS - Shows [Qh Kc] (Full house, kings full of queens)
 GAYBOX - Mucks
 STACKS Collects 560 from main pot
 *** SUMMARY ***
@@ -2141,10 +2141,10 @@ Total Pot(560)
 Board [Ks Qs Kh Jc Jh]
 Seat 1: EKDIKEO Folded on the POCKET CARDS
 Seat 2: GMONEY420024 (dealer) Folded on the POCKET CARDS
-Seat 3: STACKS (small blind) won Total (560) HI:(560) with Full house, kings full of queens [Qh Kc - B:Ks,B:Kh,P:Kc,B:Qs,P:Qh] 
+Seat 3: STACKS (small blind) won Total (560) HI:(560) with Full house, kings full of queens [Qh Kc - B:Ks,B:Kh,P:Kc,B:Qs,P:Qh]
 Seat 4: EOFNORTH (big blind) Folded on the TURN
 Seat 5: FLHTCIRIDER Folded on the RIVER
-Seat 6: GAYBOX HI: [Mucked] [Ac 3c] 
+Seat 6: GAYBOX HI: [Mucked] [Ac 3c]
 Seat 7: DADOFMENY Folded on the POCKET CARDS
 Seat 8: MJ_FOX Folded on the POCKET CARDS
 Seat 9: CUBICDUCHESS Folded on the TURN
@@ -2165,7 +2165,7 @@ Seat 9 - CUBICDUCHESS (691 in chips)
 EOFNORTH - Posts small blind 20
 FLHTCIRIDER - Posts big blind 40
 *** POCKET CARDS ***
-Dealt to EKDIKEO [10h Js] 
+Dealt to EKDIKEO [10h Js]
 GAYBOX - Folds
 DADOFMENY - Raises 120 to 120
 MJ_FOX - Folds
@@ -2187,16 +2187,16 @@ GMONEY420024 - Calls 85
 *** TURN *** [2c 8h 6h] [5h]
 *** RIVER *** [2c 8h 6h 5h] [Kc]
 *** SHOW DOWN ***
-GMONEY420024 - Shows [8d Ah] (One pair, eights) 
-EOFNORTH - Shows [9h 9d] (One pair, nines) 
+GMONEY420024 - Shows [8d Ah] (One pair, eights)
+EOFNORTH - Shows [9h 9d] (One pair, nines)
 EOFNORTH Collects 2,570 from main pot
 *** SUMMARY ***
 Total Pot(2,570)
 Board [2c 8h 6h 5h Kc]
 Seat 1: EKDIKEO Folded on the POCKET CARDS
-Seat 2: GMONEY420024 HI:lost with One pair, eights [8d Ah - B:8h,P:8d,P:Ah,B:Kc,B:6h] 
+Seat 2: GMONEY420024 HI:lost with One pair, eights [8d Ah - B:8h,P:8d,P:Ah,B:Kc,B:6h]
 Seat 3: STACKS (dealer) Folded on the POCKET CARDS
-Seat 4: EOFNORTH (small blind) won Total (2,570) All-In HI:(2,570) with One pair, nines [9h 9d - P:9h,P:9d,B:Kc,B:8h,B:6h] 
+Seat 4: EOFNORTH (small blind) won Total (2,570) All-In HI:(2,570) with One pair, nines [9h 9d - P:9h,P:9d,B:Kc,B:8h,B:6h]
 Seat 5: FLHTCIRIDER (big blind) Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
 Seat 7: DADOFMENY Folded on the FLOP
@@ -2219,7 +2219,7 @@ Seat 9 - CUBICDUCHESS (691 in chips)
 FLHTCIRIDER - Posts small blind 20
 GAYBOX - Posts big blind 40
 *** POCKET CARDS ***
-Dealt to EKDIKEO [8h 4h] 
+Dealt to EKDIKEO [8h 4h]
 DADOFMENY - Folds
 MJ_FOX - Folds
 CUBICDUCHESS - Calls 40
@@ -2251,7 +2251,7 @@ Seat 1: EKDIKEO Folded on the POCKET CARDS
 Seat 2: GMONEY420024 Folded on the POCKET CARDS
 Seat 3: STACKS Folded on the POCKET CARDS
 Seat 4: EOFNORTH (dealer) Folded on the POCKET CARDS
-Seat 5: FLHTCIRIDER (small blind) collected Total (1,680) All-In HI:(1,680)  [Does not show] 
+Seat 5: FLHTCIRIDER (small blind) collected Total (1,680) All-In HI:(1,680)  [Does not show]
 Seat 6: GAYBOX (big blind) Folded on the RIVER
 Seat 7: DADOFMENY Folded on the POCKET CARDS
 Seat 8: MJ_FOX Folded on the POCKET CARDS
@@ -2273,7 +2273,7 @@ Seat 9 - CUBICDUCHESS (611 in chips)
 GAYBOX - Posts small blind 20
 DADOFMENY - Posts big blind 40
 *** POCKET CARDS ***
-Dealt to EKDIKEO [3s 5h] 
+Dealt to EKDIKEO [3s 5h]
 MJ_FOX - Calls 40
 CUBICDUCHESS - Calls 40
 EKDIKEO - Folds
@@ -2293,7 +2293,7 @@ STACKS Collects 180 from main pot
 Total Pot(180)
 Seat 1: EKDIKEO Folded on the POCKET CARDS
 Seat 2: GMONEY420024 Folded on the POCKET CARDS
-Seat 3: STACKS collected Total (180) 
+Seat 3: STACKS collected Total (180)
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER (dealer) Folded on the POCKET CARDS
 Seat 6: GAYBOX (small blind) Folded on the POCKET CARDS
@@ -2317,7 +2317,7 @@ Seat 9 - CUBICDUCHESS (571 in chips)
 DADOFMENY - Posts small blind 20
 MJ_FOX - Posts big blind 40
 *** POCKET CARDS ***
-Dealt to EKDIKEO [6d Jh] 
+Dealt to EKDIKEO [6d Jh]
 CUBICDUCHESS - Folds
 EKDIKEO - Folds
 GMONEY420024 - Folds
@@ -2338,7 +2338,7 @@ Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX (dealer) Folded on the POCKET CARDS
 Seat 7: DADOFMENY (small blind) Folded on the POCKET CARDS
-Seat 8: MJ_FOX (big blind) collected Total (60) 
+Seat 8: MJ_FOX (big blind) collected Total (60)
 Seat 9: CUBICDUCHESS Folded on the POCKET CARDS
 
 
@@ -2357,7 +2357,7 @@ Seat 9 - CUBICDUCHESS (571 in chips)
 MJ_FOX - Posts small blind 20
 CUBICDUCHESS - Posts big blind 40
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Ad 4h] 
+Dealt to EKDIKEO [Ad 4h]
 EKDIKEO - Folds
 GMONEY420024 - Folds
 STACKS - Folds
@@ -2382,7 +2382,7 @@ Board [5h 2c Jh]
 Seat 1: EKDIKEO Folded on the POCKET CARDS
 Seat 2: GMONEY420024 Folded on the POCKET CARDS
 Seat 3: STACKS Folded on the POCKET CARDS
-Seat 4: EOFNORTH collected Total (140) HI:(140)  [Does not show] 
+Seat 4: EOFNORTH collected Total (140) HI:(140)  [Does not show]
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the FLOP
 Seat 7: DADOFMENY (dealer) Folded on the POCKET CARDS
@@ -2405,7 +2405,7 @@ Seat 9 - CUBICDUCHESS (531 in chips)
 CUBICDUCHESS - Posts small blind 20
 EKDIKEO - Posts big blind 40
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Ad 3c] 
+Dealt to EKDIKEO [Ad 3c]
 GMONEY420024 - Calls 40
 STACKS - Raises 98 to 98
 EOFNORTH - Folds
@@ -2420,7 +2420,7 @@ STACKS - Calls 58
 *** FLOP *** [6h 9c 8s]
 STACKS - Bets 40
 DADOFMENY - All-In(Raise) 3,409 to 3,409
-STACKS - Folds (Fold & Show [5c 5d]) 
+STACKS - Folds (Fold & Show [5c 5d])
 DADOFMENY - returned (3,369) : not called
 *** SHOW DOWN ***
 DADOFMENY - Does not show
@@ -2434,7 +2434,7 @@ Seat 3: STACKS Folded on the FLOP
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
-Seat 7: DADOFMENY collected Total (492) All-In HI:(492)  [Does not show] 
+Seat 7: DADOFMENY collected Total (492) All-In HI:(492)  [Does not show]
 Seat 8: MJ_FOX (dealer) Folded on the POCKET CARDS
 Seat 9: CUBICDUCHESS (small blind) Folded on the POCKET CARDS
 
@@ -2454,7 +2454,7 @@ Seat 9 - CUBICDUCHESS (511 in chips)
 EKDIKEO - Posts small blind 30
 GMONEY420024 - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Qh Qc] 
+Dealt to EKDIKEO [Qh Qc]
 STACKS - Folds
 EOFNORTH - Calls 60
 FLHTCIRIDER - Folds
@@ -2470,13 +2470,13 @@ EKDIKEO - returned (451) : not called
 *** TURN *** [7s 2c 9h] [Ks]
 *** RIVER *** [7s 2c 9h Ks] [5d]
 *** SHOW DOWN ***
-EKDIKEO - Shows [Qh Qc] (One pair, queens) 
-CUBICDUCHESS - Shows [Jh Jc] (One pair, jacks) 
+EKDIKEO - Shows [Qh Qc] (One pair, queens)
+CUBICDUCHESS - Shows [Jh Jc] (One pair, jacks)
 EKDIKEO Collects 1,142 from main pot
 *** SUMMARY ***
 Total Pot(1,142)
 Board [7s 2c 9h Ks 5d]
-Seat 1: EKDIKEO (small blind) won Total (1,142) HI:(1,142) with One pair, queens [Qh Qc - P:Qh,P:Qc,B:Ks,B:9h,B:7s] 
+Seat 1: EKDIKEO (small blind) won Total (1,142) HI:(1,142) with One pair, queens [Qh Qc - P:Qh,P:Qc,B:Ks,B:9h,B:7s]
 Seat 2: GMONEY420024 (big blind) Folded on the POCKET CARDS
 Seat 3: STACKS Folded on the POCKET CARDS
 Seat 4: EOFNORTH Folded on the POCKET CARDS
@@ -2484,7 +2484,7 @@ Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
 Seat 7: DADOFMENY Folded on the POCKET CARDS
 Seat 8: MJ_FOX Folded on the POCKET CARDS
-Seat 9: CUBICDUCHESS (dealer) HI:lost with One pair, jacks [Jh Jc - P:Jh,P:Jc,B:Ks,B:9h,B:7s] 
+Seat 9: CUBICDUCHESS (dealer) HI:lost with One pair, jacks [Jh Jc - P:Jh,P:Jc,B:Ks,B:9h,B:7s]
 
 
 
@@ -2501,7 +2501,7 @@ Seat 8 - MJ_FOX (194 in chips)
 GMONEY420024 - Posts small blind 30
 STACKS - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [9d As] 
+Dealt to EKDIKEO [9d As]
 EOFNORTH - Folds
 FLHTCIRIDER - Folds
 GAYBOX - Folds
@@ -2515,20 +2515,20 @@ EKDIKEO - returned (134) : not called
 *** TURN *** [Qc Ac Qh] [5s]
 *** RIVER *** [Qc Ac Qh 5s] [6c]
 *** SHOW DOWN ***
-EKDIKEO - Shows [9d As] (Two Pair, aces and queens) 
-MJ_FOX - Shows [Ad 3d] (Two Pair, aces and queens) 
+EKDIKEO - Shows [9d As] (Two Pair, aces and queens)
+MJ_FOX - Shows [Ad 3d] (Two Pair, aces and queens)
 EKDIKEO Collects 478 from main pot
 *** SUMMARY ***
 Total Pot(478)
 Board [Qc Ac Qh 5s 6c]
-Seat 1: EKDIKEO (dealer) won Total (478) HI:(478) with Two Pair, aces and queens(nine kicker) [9d As - P:As,B:Ac,B:Qh,B:Qc,P:9d] 
+Seat 1: EKDIKEO (dealer) won Total (478) HI:(478) with Two Pair, aces and queens(nine kicker) [9d As - P:As,B:Ac,B:Qh,B:Qc,P:9d]
 Seat 2: GMONEY420024 (small blind) Folded on the POCKET CARDS
 Seat 3: STACKS (big blind) Folded on the POCKET CARDS
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
 Seat 7: DADOFMENY Folded on the POCKET CARDS
-Seat 8: MJ_FOX HI:lost with Two Pair, aces and queens [Ad 3d - P:Ad,B:Ac,B:Qh,B:Qc,B:6c] 
+Seat 8: MJ_FOX HI:lost with Two Pair, aces and queens [Ad 3d - P:Ad,B:Ac,B:Qh,B:Qc,B:6c]
 
 
 
@@ -2545,7 +2545,7 @@ Seat 9 - EARS04 (8,008 in chips)
 STACKS - Posts small blind 30
 EOFNORTH - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [2d 4s] 
+Dealt to EKDIKEO [2d 4s]
 FLHTCIRIDER - Calls 60
 GAYBOX - Folds
 DADOFMENY - Folds
@@ -2559,7 +2559,7 @@ STACKS - Bets 120
 EOFNORTH - Folds
 FLHTCIRIDER - Raises 600 to 600
 EARS04 - Folds
-STACKS - Folds (Fold & Show [3s 8c]) 
+STACKS - Folds (Fold & Show [3s 8c])
 FLHTCIRIDER - returned (480) : not called
 *** SHOW DOWN ***
 FLHTCIRIDER - Does not show
@@ -2571,7 +2571,7 @@ Seat 1: EKDIKEO Folded on the POCKET CARDS
 Seat 2: GMONEY420024 (dealer) Folded on the POCKET CARDS
 Seat 3: STACKS (small blind) Folded on the FLOP
 Seat 4: EOFNORTH (big blind) Folded on the FLOP
-Seat 5: FLHTCIRIDER collected Total (480) HI:(480)  [Does not show] 
+Seat 5: FLHTCIRIDER collected Total (480) HI:(480)  [Does not show]
 Seat 6: GAYBOX Folded on the POCKET CARDS
 Seat 7: DADOFMENY Folded on the POCKET CARDS
 Seat 9: EARS04 Folded on the FLOP
@@ -2591,7 +2591,7 @@ Seat 9 - EARS04 (7,948 in chips)
 EOFNORTH - Posts small blind 30
 FLHTCIRIDER - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [4s Qh] 
+Dealt to EKDIKEO [4s Qh]
 GAYBOX - Calls 60
 DADOFMENY - Folds
 EARS04 - Folds
@@ -2618,7 +2618,7 @@ Seat 2: GMONEY420024 Folded on the POCKET CARDS
 Seat 3: STACKS (dealer) Folded on the POCKET CARDS
 Seat 4: EOFNORTH (small blind) Folded on the FLOP
 Seat 5: FLHTCIRIDER (big blind) Folded on the FLOP
-Seat 6: GAYBOX collected Total (180) HI:(180)  [Does not show] 
+Seat 6: GAYBOX collected Total (180) HI:(180)  [Does not show]
 Seat 7: DADOFMENY Folded on the POCKET CARDS
 Seat 9: EARS04 Folded on the POCKET CARDS
 
@@ -2637,7 +2637,7 @@ Seat 9 - EARS04 (7,948 in chips)
 FLHTCIRIDER - Posts small blind 30
 GAYBOX - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [5h 3h] 
+Dealt to EKDIKEO [5h 3h]
 DADOFMENY - Folds
 EARS04 - Folds
 EKDIKEO - Folds
@@ -2659,18 +2659,18 @@ STACKS - Calls 180
 GAYBOX - Checks
 STACKS - Checks
 *** SHOW DOWN ***
-GAYBOX - Shows [8h 8c] (Flush, ace high) 
-STACKS - Shows [9s 9h] (Flush, ace high) 
+GAYBOX - Shows [8h 8c] (Flush, ace high)
+STACKS - Shows [9s 9h] (Flush, ace high)
 STACKS Collects 1,230 from main pot
 *** SUMMARY ***
 Total Pot(1,230)
 Board [5s As 7s 3s Js]
 Seat 1: EKDIKEO Folded on the POCKET CARDS
 Seat 2: GMONEY420024 Folded on the POCKET CARDS
-Seat 3: STACKS won Total (1,230) HI:(1,230) with Flush, ace high [9s 9h - B:As,B:Js,P:9s,B:7s,B:5s] 
+Seat 3: STACKS won Total (1,230) HI:(1,230) with Flush, ace high [9s 9h - B:As,B:Js,P:9s,B:7s,B:5s]
 Seat 4: EOFNORTH (dealer) Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER (small blind) Folded on the POCKET CARDS
-Seat 6: GAYBOX (big blind) HI:lost with Flush, ace high [8h 8c - B:As,B:Js,B:7s,B:5s,B:3s] 
+Seat 6: GAYBOX (big blind) HI:lost with Flush, ace high [8h 8c - B:As,B:Js,B:7s,B:5s,B:3s]
 Seat 7: DADOFMENY Folded on the POCKET CARDS
 Seat 9: EARS04 Folded on the POCKET CARDS
 
@@ -2690,7 +2690,7 @@ Seat 9 - EARS04 (7,948 in chips)
 GAYBOX - Posts small blind 30
 DADOFMENY - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [3h 3d] 
+Dealt to EKDIKEO [3h 3d]
 ANDRON_1982 - Folds
 EARS04 - Folds
 EKDIKEO - Raises 210 to 210
@@ -2706,7 +2706,7 @@ EKDIKEO - Does not show
 EKDIKEO Collects 150 from main pot
 *** SUMMARY ***
 Total Pot(150)
-Seat 1: EKDIKEO collected Total (150) 
+Seat 1: EKDIKEO collected Total (150)
 Seat 2: GMONEY420024 Folded on the POCKET CARDS
 Seat 3: STACKS Folded on the POCKET CARDS
 Seat 4: EOFNORTH Folded on the POCKET CARDS
@@ -2732,7 +2732,7 @@ Seat 9 - EARS04 (7,948 in chips)
 DADOFMENY - Posts small blind 30
 ANDRON_1982 - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [5d 9d] 
+Dealt to EKDIKEO [5d 9d]
 EARS04 - Folds
 EKDIKEO - Folds
 GMONEY420024 - Calls 60
@@ -2753,15 +2753,15 @@ STACKS - Checks
 GMONEY420024 - Checks
 STACKS - Checks
 *** SHOW DOWN ***
-GMONEY420024 - Shows [Ah 4s] (One pair, jacks) 
-STACKS - Shows [Kd Ad] (One pair, jacks) 
+GMONEY420024 - Shows [Ah 4s] (One pair, jacks)
+STACKS - Shows [Kd Ad] (One pair, jacks)
 STACKS Collects 450 from main pot
 *** SUMMARY ***
 Total Pot(450)
 Board [6c Jc 3d Jd 8c]
 Seat 1: EKDIKEO Folded on the POCKET CARDS
-Seat 2: GMONEY420024 HI:lost with One pair, jacks [Ah 4s - B:Jd,B:Jc,P:Ah,B:8c,B:6c] 
-Seat 3: STACKS won Total (450) HI:(450) with One pair, jacks(king kicker) [Kd Ad - B:Jd,B:Jc,P:Ad,P:Kd,B:8c] 
+Seat 2: GMONEY420024 HI:lost with One pair, jacks [Ah 4s - B:Jd,B:Jc,P:Ah,B:8c,B:6c]
+Seat 3: STACKS won Total (450) HI:(450) with One pair, jacks(king kicker) [Kd Ad - B:Jd,B:Jc,P:Ad,P:Kd,B:8c]
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX (dealer) Folded on the POCKET CARDS
@@ -2785,7 +2785,7 @@ Seat 9 - EARS04 (7,948 in chips)
 ANDRON_1982 - Posts small blind 30
 EARS04 - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [3s 3c] 
+Dealt to EKDIKEO [3s 3c]
 EKDIKEO - Calls 60
 GMONEY420024 - Calls 60
 STACKS - Folds
@@ -2804,22 +2804,22 @@ DADOFMENY - Folds
 *** TURN *** [5c 2c 6d] [Jc]
 *** RIVER *** [5c 2c 6d Jc] [Ks]
 *** SHOW DOWN ***
-GMONEY420024 - Shows [Qh As] (ace high) 
-GAYBOX - Shows [Qs Qc] (One pair, queens) 
-ANDRON_1982 - Shows [Kc Ad] (One pair, kings) 
+GMONEY420024 - Shows [Qh As] (ace high)
+GAYBOX - Shows [Qs Qc] (One pair, queens)
+ANDRON_1982 - Shows [Kc Ad] (One pair, kings)
 ANDRON_1982 Collects 1,072 from side pot-1
 ANDRON_1982 Collects 2,532 from main pot
 *** SUMMARY ***
 Total Pot(3,604:2,532,1,072)
 Board [5c 2c 6d Jc Ks]
 Seat 1: EKDIKEO Folded on the POCKET CARDS
-Seat 2: GMONEY420024 HI:lost with ace high [Qh As - P:As,B:Ks,P:Qh,B:Jc,B:6d] 
+Seat 2: GMONEY420024 HI:lost with ace high [Qh As - P:As,B:Ks,P:Qh,B:Jc,B:6d]
 Seat 3: STACKS Folded on the POCKET CARDS
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
-Seat 6: GAYBOX HI:lost with One pair, queens [Qs Qc - P:Qs,P:Qc,B:Ks,B:Jc,B:6d] 
+Seat 6: GAYBOX HI:lost with One pair, queens [Qs Qc - P:Qs,P:Qc,B:Ks,B:Jc,B:6d]
 Seat 7: DADOFMENY (dealer) Folded on the POCKET CARDS
-Seat 8: ANDRON_1982 (small blind) won Total (3,604) All-In HI:(3,604) with One pair, kings [Kc Ad - B:Ks,P:Kc,P:Ad,B:Jc,B:6d] 
+Seat 8: ANDRON_1982 (small blind) won Total (3,604) All-In HI:(3,604) with One pair, kings [Kc Ad - B:Ks,P:Kc,P:Ad,B:Jc,B:6d]
 Seat 9: EARS04 (big blind) Folded on the POCKET CARDS
 
 
@@ -2837,7 +2837,7 @@ Seat 9 - EARS04 (7,888 in chips)
 EARS04 - Posts small blind 30
 EKDIKEO - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Ad Jd] 
+Dealt to EKDIKEO [Ad Jd]
 STACKS - Folds
 EOFNORTH - Folds
 FLHTCIRIDER - Folds
@@ -2866,7 +2866,7 @@ Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
 Seat 7: DADOFMENY Folded on the POCKET CARDS
-Seat 8: ANDRON_1982 (dealer) collected Total (450) HI:(450)  [Does not show] 
+Seat 8: ANDRON_1982 (dealer) collected Total (450) HI:(450)  [Does not show]
 Seat 9: EARS04 (small blind) Folded on the POCKET CARDS
 
 
@@ -2884,7 +2884,7 @@ Seat 9 - EARS04 (7,858 in chips)
 EKDIKEO - Posts small blind 30
 STACKS - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Ac 3d] 
+Dealt to EKDIKEO [Ac 3d]
 EOFNORTH - Calls 60
 FLHTCIRIDER - Calls 60
 GAYBOX - Folds
@@ -2906,7 +2906,7 @@ Seat 3: STACKS (big blind) Folded on the POCKET CARDS
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
-Seat 7: DADOFMENY collected Total (270) 
+Seat 7: DADOFMENY collected Total (270)
 Seat 8: ANDRON_1982 Folded on the POCKET CARDS
 Seat 9: EARS04 (dealer) Folded on the POCKET CARDS
 
@@ -2925,7 +2925,7 @@ Seat 9 - EARS04 (7,858 in chips)
 STACKS - Posts small blind 30
 EOFNORTH - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [6c 6s] 
+Dealt to EKDIKEO [6c 6s]
 FLHTCIRIDER - Folds
 GAYBOX - Folds
 DADOFMENY - Folds
@@ -2946,19 +2946,19 @@ ANDRON_1982 - Checks
 STACKS - Bets 120
 ANDRON_1982 - Calls 120
 *** SHOW DOWN ***
-STACKS - Shows [Js 9d] (One pair, jacks) 
+STACKS - Shows [Js 9d] (One pair, jacks)
 ANDRON_1982 - Mucks
 STACKS Collects 960 from main pot
 *** SUMMARY ***
 Total Pot(960)
 Board [Jc 5d 2d Qh 3c]
 Seat 1: EKDIKEO (dealer) Folded on the FLOP
-Seat 3: STACKS (small blind) won Total (960) HI:(960) with One pair, jacks [Js 9d - P:Js,B:Jc,B:Qh,P:9d,B:5d] 
+Seat 3: STACKS (small blind) won Total (960) HI:(960) with One pair, jacks [Js 9d - P:Js,B:Jc,B:Qh,P:9d,B:5d]
 Seat 4: EOFNORTH (big blind) Folded on the FLOP
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
 Seat 7: DADOFMENY Folded on the POCKET CARDS
-Seat 8: ANDRON_1982 HI: [Mucked] [7h 7d] 
+Seat 8: ANDRON_1982 HI: [Mucked] [7h 7d]
 Seat 9: EARS04 Folded on the POCKET CARDS
 
 
@@ -2976,7 +2976,7 @@ Seat 9 - EARS04 (7,858 in chips)
 EOFNORTH - Posts small blind 30
 FLHTCIRIDER - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Jh 10c] 
+Dealt to EKDIKEO [Jh 10c]
 GAYBOX - Folds
 DADOFMENY - Folds
 ANDRON_1982 - Raises 210 to 210
@@ -2997,7 +2997,7 @@ Seat 4: EOFNORTH (small blind) Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER (big blind) Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
 Seat 7: DADOFMENY Folded on the POCKET CARDS
-Seat 8: ANDRON_1982 collected Total (150) 
+Seat 8: ANDRON_1982 collected Total (150)
 Seat 9: EARS04 Folded on the POCKET CARDS
 
 
@@ -3015,7 +3015,7 @@ Seat 9 - EARS04 (7,858 in chips)
 FLHTCIRIDER - Posts small blind 30
 GAYBOX - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [4s Jd] 
+Dealt to EKDIKEO [4s Jd]
 DADOFMENY - Folds
 ANDRON_1982 - Folds
 EARS04 - Folds
@@ -3037,7 +3037,7 @@ FLHTCIRIDER - Checks
 STACKS - Checks
 EOFNORTH - Checks
 *** SHOW DOWN ***
-FLHTCIRIDER - Shows [Jc Ks] (One pair, eights) 
+FLHTCIRIDER - Shows [Jc Ks] (One pair, eights)
 STACKS - Mucks
 EOFNORTH - Mucks
 FLHTCIRIDER Collects 240 from main pot
@@ -3045,9 +3045,9 @@ FLHTCIRIDER Collects 240 from main pot
 Total Pot(240)
 Board [8h 5s Qd 8c Ah]
 Seat 1: EKDIKEO Folded on the POCKET CARDS
-Seat 3: STACKS HI: [Mucked] [6h 4h] 
-Seat 4: EOFNORTH (dealer) HI: [Mucked] [9d 7s] 
-Seat 5: FLHTCIRIDER (small blind) won Total (240) HI:(240) with One pair, eights(king kicker) [Jc Ks - B:8h,B:8c,B:Ah,P:Ks,B:Qd] 
+Seat 3: STACKS HI: [Mucked] [6h 4h]
+Seat 4: EOFNORTH (dealer) HI: [Mucked] [9d 7s]
+Seat 5: FLHTCIRIDER (small blind) won Total (240) HI:(240) with One pair, eights(king kicker) [Jc Ks - B:8h,B:8c,B:Ah,P:Ks,B:Qd]
 Seat 6: GAYBOX (big blind) Folded on the POCKET CARDS
 Seat 7: DADOFMENY Folded on the POCKET CARDS
 Seat 8: ANDRON_1982 Folded on the POCKET CARDS
@@ -3069,7 +3069,7 @@ Seat 9 - EARS04 (7,858 in chips)
 GAYBOX - Posts small blind 30
 DADOFMENY - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [9c 10d] 
+Dealt to EKDIKEO [9c 10d]
 ANDRON_1982 - Folds
 EARS04 - Calls 60
 EKDIKEO - Folds
@@ -3098,7 +3098,7 @@ Seat 1: EKDIKEO Folded on the POCKET CARDS
 Seat 2: NELSON3949 Folded on the POCKET CARDS
 Seat 3: STACKS Folded on the FLOP
 Seat 4: EOFNORTH Folded on the POCKET CARDS
-Seat 5: FLHTCIRIDER (dealer) collected Total (270) HI:(270)  [Does not show] 
+Seat 5: FLHTCIRIDER (dealer) collected Total (270) HI:(270)  [Does not show]
 Seat 6: GAYBOX (small blind) Folded on the POCKET CARDS
 Seat 7: DADOFMENY (big blind) Folded on the FLOP
 Seat 8: ANDRON_1982 Folded on the POCKET CARDS
@@ -3120,7 +3120,7 @@ Seat 9 - EARS04 (7,798 in chips)
 DADOFMENY - Posts small blind 30
 ANDRON_1982 - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Qd 8h] 
+Dealt to EKDIKEO [Qd 8h]
 EARS04 - Folds
 EKDIKEO - Folds
 NELSON3949 - Folds
@@ -3139,7 +3139,7 @@ Total Pot(150)
 Seat 1: EKDIKEO Folded on the POCKET CARDS
 Seat 2: NELSON3949 Folded on the POCKET CARDS
 Seat 3: STACKS Folded on the POCKET CARDS
-Seat 4: EOFNORTH collected Total (150) 
+Seat 4: EOFNORTH collected Total (150)
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX (dealer) Folded on the POCKET CARDS
 Seat 7: DADOFMENY (small blind) Folded on the POCKET CARDS
@@ -3162,7 +3162,7 @@ Seat 9 - EARS04 (7,798 in chips)
 ANDRON_1982 - Posts small blind 30
 EARS04 - Posts big blind 60
 *** POCKET CARDS ***
-Dealt to EKDIKEO [10d 8d] 
+Dealt to EKDIKEO [10d 8d]
 EKDIKEO - Folds
 NELSON3949 - Calls 60
 STACKS - Folds
@@ -3185,19 +3185,19 @@ DADOFMENY - All-In 3,321
 NELSON3949 - Calls 3,321
 *** RIVER *** [Ah 7c Js 4h] [6d]
 *** SHOW DOWN ***
-NELSON3949 - Shows [As 7s] (Two Pair, aces and sevens) 
-DADOFMENY - Shows [9d Ad] (One pair, aces) 
+NELSON3949 - Shows [As 7s] (Two Pair, aces and sevens)
+DADOFMENY - Shows [9d Ad] (One pair, aces)
 NELSON3949 Collects 7,812 from main pot
 *** SUMMARY ***
 Total Pot(7,812)
 Board [Ah 7c Js 4h 6d]
 Seat 1: EKDIKEO Folded on the POCKET CARDS
-Seat 2: NELSON3949 won Total (7,812) HI:(7,812) with Two Pair, aces and sevens [As 7s - P:As,B:Ah,P:7s,B:7c,B:Js] 
+Seat 2: NELSON3949 won Total (7,812) HI:(7,812) with Two Pair, aces and sevens [As 7s - P:As,B:Ah,P:7s,B:7c,B:Js]
 Seat 3: STACKS Folded on the POCKET CARDS
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
-Seat 7: DADOFMENY (dealer) HI:lost with One pair, aces [9d Ad - B:Ah,P:Ad,B:Js,P:9d,B:7c] 
+Seat 7: DADOFMENY (dealer) HI:lost with One pair, aces [9d Ad - B:Ah,P:Ad,B:Js,P:9d,B:7c]
 Seat 8: ANDRON_1982 (small blind) Folded on the POCKET CARDS
 Seat 9: EARS04 (big blind) Folded on the FLOP
 
@@ -3216,7 +3216,7 @@ Seat 9 - EARS04 (7,678 in chips)
 EARS04 - Posts small blind 50
 EKDIKEO - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [10s 8c] 
+Dealt to EKDIKEO [10s 8c]
 NELSON3949 - Folds
 STACKS - Folds
 EOFNORTH - Folds
@@ -3236,7 +3236,7 @@ EKDIKEO Collects 200 from main pot
 *** SUMMARY ***
 Total Pot(200)
 Board [As 10d 5h]
-Seat 1: EKDIKEO (big blind) collected Total (200) HI:(200)  [Does not show] 
+Seat 1: EKDIKEO (big blind) collected Total (200) HI:(200)  [Does not show]
 Seat 2: NELSON3949 Folded on the POCKET CARDS
 Seat 3: STACKS Folded on the POCKET CARDS
 Seat 4: EOFNORTH Folded on the POCKET CARDS
@@ -3260,7 +3260,7 @@ Seat 9 - EARS04 (7,578 in chips)
 EKDIKEO - Posts small blind 50
 NELSON3949 - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Kd 9c] 
+Dealt to EKDIKEO [Kd 9c]
 STACKS - Folds
 EOFNORTH - Raises 300 to 300
 FLHTCIRIDER - Folds
@@ -3286,7 +3286,7 @@ Seat 3: STACKS Folded on the POCKET CARDS
 Seat 4: EOFNORTH Folded on the FLOP
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
-Seat 8: ANDRON_1982 collected Total (750) HI:(750)  [Does not show] 
+Seat 8: ANDRON_1982 collected Total (750) HI:(750)  [Does not show]
 Seat 9: EARS04 (dealer) Folded on the POCKET CARDS
 
 
@@ -3304,7 +3304,7 @@ Seat 9 - EARS04 (7,578 in chips)
 NELSON3949 - Posts small blind 50
 STACKS - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [3s 2h] 
+Dealt to EKDIKEO [3s 2h]
 EOFNORTH - Folds
 FLHTCIRIDER - Folds
 GAYBOX - Folds
@@ -3324,7 +3324,7 @@ NELSON3949 Collects 200 from main pot
 Total Pot(200)
 Board [10d 4c 8h]
 Seat 1: EKDIKEO (dealer) Folded on the POCKET CARDS
-Seat 2: NELSON3949 (small blind) collected Total (200) HI:(200)  [Does not show] 
+Seat 2: NELSON3949 (small blind) collected Total (200) HI:(200)  [Does not show]
 Seat 3: STACKS (big blind) Folded on the FLOP
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
@@ -3347,7 +3347,7 @@ Seat 9 - EARS04 (7,578 in chips)
 STACKS - Posts small blind 50
 EOFNORTH - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Jh Kd] 
+Dealt to EKDIKEO [Jh Kd]
 FLHTCIRIDER - Folds
 GAYBOX - Folds
 ANDRON_1982 - Folds
@@ -3363,7 +3363,7 @@ EKDIKEO - Does not show
 EKDIKEO Collects 350 from main pot
 *** SUMMARY ***
 Total Pot(350)
-Seat 1: EKDIKEO collected Total (350) 
+Seat 1: EKDIKEO collected Total (350)
 Seat 2: NELSON3949 (dealer) Folded on the POCKET CARDS
 Seat 3: STACKS (small blind) Folded on the POCKET CARDS
 Seat 4: EOFNORTH (big blind) Folded on the POCKET CARDS
@@ -3387,7 +3387,7 @@ Seat 9 - EARS04 (7,478 in chips)
 EOFNORTH - Posts small blind 50
 FLHTCIRIDER - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [3d Kc] 
+Dealt to EKDIKEO [3d Kc]
 GAYBOX - Folds
 ANDRON_1982 - Folds
 EARS04 - Folds
@@ -3411,7 +3411,7 @@ NELSON3949 Collects 400 from main pot
 Total Pot(400)
 Board [6c 10s 5s]
 Seat 1: EKDIKEO Folded on the POCKET CARDS
-Seat 2: NELSON3949 collected Total (400) HI:(400)  [Does not show] 
+Seat 2: NELSON3949 collected Total (400) HI:(400)  [Does not show]
 Seat 3: STACKS (dealer) Folded on the FLOP
 Seat 4: EOFNORTH (small blind) Folded on the FLOP
 Seat 5: FLHTCIRIDER (big blind) Folded on the FLOP
@@ -3435,7 +3435,7 @@ Seat 9 - EARS04 (7,478 in chips)
 FLHTCIRIDER - Posts small blind 50
 GAYBOX - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [5c 4c] 
+Dealt to EKDIKEO [5c 4c]
 TOONPLAYER - Raises 350 to 350
 ANDRON_1982 - Folds
 EARS04 - Folds
@@ -3457,7 +3457,7 @@ Seat 3: STACKS Folded on the POCKET CARDS
 Seat 4: EOFNORTH (dealer) Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER (small blind) Folded on the POCKET CARDS
 Seat 6: GAYBOX (big blind) Folded on the POCKET CARDS
-Seat 7: TOONPLAYER collected Total (250) 
+Seat 7: TOONPLAYER collected Total (250)
 Seat 8: ANDRON_1982 Folded on the POCKET CARDS
 Seat 9: EARS04 Folded on the POCKET CARDS
 
@@ -3477,7 +3477,7 @@ Seat 9 - EARS04 (7,478 in chips)
 GAYBOX - Posts small blind 50
 TOONPLAYER - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [4s 8d] 
+Dealt to EKDIKEO [4s 8d]
 ANDRON_1982 - Folds
 EARS04 - Folds
 EKDIKEO - Folds
@@ -3502,7 +3502,7 @@ Seat 1: EKDIKEO Folded on the POCKET CARDS
 Seat 2: NELSON3949 Folded on the POCKET CARDS
 Seat 3: STACKS Folded on the POCKET CARDS
 Seat 4: EOFNORTH Folded on the POCKET CARDS
-Seat 5: FLHTCIRIDER (dealer) collected Total (450) HI:(450)  [Does not show] 
+Seat 5: FLHTCIRIDER (dealer) collected Total (450) HI:(450)  [Does not show]
 Seat 6: GAYBOX (small blind) Folded on the POCKET CARDS
 Seat 7: TOONPLAYER (big blind) Folded on the FLOP
 Seat 8: ANDRON_1982 Folded on the POCKET CARDS
@@ -3524,7 +3524,7 @@ Seat 9 - EARS04 (7,478 in chips)
 TOONPLAYER - Posts small blind 50
 ANDRON_1982 - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Jc 5d] 
+Dealt to EKDIKEO [Jc 5d]
 EARS04 - Folds
 EKDIKEO - Folds
 NELSON3949 - Folds
@@ -3545,7 +3545,7 @@ Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX (dealer) Folded on the POCKET CARDS
 Seat 7: TOONPLAYER (small blind) Folded on the POCKET CARDS
-Seat 8: ANDRON_1982 (big blind) collected Total (150) 
+Seat 8: ANDRON_1982 (big blind) collected Total (150)
 Seat 9: EARS04 Folded on the POCKET CARDS
 
 
@@ -3564,7 +3564,7 @@ Seat 9 - EARS04 (7,478 in chips)
 ANDRON_1982 - Posts small blind 50
 EARS04 - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Qh 9d] 
+Dealt to EKDIKEO [Qh 9d]
 EKDIKEO - Folds
 NELSON3949 - Folds
 STACKS - Folds
@@ -3594,7 +3594,7 @@ Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
 Seat 7: TOONPLAYER (dealer) Folded on the POCKET CARDS
 Seat 8: ANDRON_1982 (small blind) Folded on the POCKET CARDS
-Seat 9: EARS04 (big blind) collected Total (900) HI:(900)  [Does not show] 
+Seat 9: EARS04 (big blind) collected Total (900) HI:(900)  [Does not show]
 
 
 
@@ -3612,7 +3612,7 @@ Seat 9 - EARS04 (7,953 in chips)
 EARS04 - Posts small blind 50
 EKDIKEO - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [10d 10s] 
+Dealt to EKDIKEO [10d 10s]
 NELSON3949 - Calls 100
 STACKS - Folds
 EOFNORTH - Folds
@@ -3636,7 +3636,7 @@ NELSON3949 Collects 900 from main pot
 Total Pot(900)
 Board [Kh Qh 9c]
 Seat 1: EKDIKEO (big blind) Folded on the FLOP
-Seat 2: NELSON3949 collected Total (900) HI:(900)  [Does not show] 
+Seat 2: NELSON3949 collected Total (900) HI:(900)  [Does not show]
 Seat 3: STACKS Folded on the POCKET CARDS
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
@@ -3661,7 +3661,7 @@ Seat 9 - EARS04 (7,853 in chips)
 EKDIKEO - Posts small blind 50
 NELSON3949 - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Kh 9c] 
+Dealt to EKDIKEO [Kh 9c]
 STACKS - Calls 100
 EOFNORTH - Folds
 FLHTCIRIDER - Folds
@@ -3694,7 +3694,7 @@ Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
 Seat 7: TOONPLAYER Folded on the POCKET CARDS
 Seat 8: ANDRON_1982 Folded on the POCKET CARDS
-Seat 9: EARS04 (dealer) collected Total (400) HI:(400)  [Does not show] 
+Seat 9: EARS04 (dealer) collected Total (400) HI:(400)  [Does not show]
 
 
 
@@ -3712,7 +3712,7 @@ Seat 9 - EARS04 (8,153 in chips)
 NELSON3949 - Posts small blind 50
 STACKS - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [10h 4c] 
+Dealt to EKDIKEO [10h 4c]
 EOFNORTH - Folds
 FLHTCIRIDER - Calls 100
 GAYBOX - Folds
@@ -3742,7 +3742,7 @@ NELSON3949 Collects 300 from main pot
 Total Pot(300)
 Board [5s 7s 2h 8c 6c]
 Seat 1: EKDIKEO (dealer) Folded on the POCKET CARDS
-Seat 2: NELSON3949 (small blind) collected Total (300) HI:(300)  [Does not show] 
+Seat 2: NELSON3949 (small blind) collected Total (300) HI:(300)  [Does not show]
 Seat 3: STACKS (big blind) Folded on the RIVER
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the RIVER
@@ -3767,7 +3767,7 @@ Seat 9 - EARS04 (8,153 in chips)
 STACKS - Posts small blind 50
 EOFNORTH - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Jc 9h] 
+Dealt to EKDIKEO [Jc 9h]
 FLHTCIRIDER - Folds
 GAYBOX - Folds
 TOONPLAYER - Folds
@@ -3784,16 +3784,16 @@ NELSON3949 - Folds
 *** TURN *** [6s 10s Jd] [3d]
 *** RIVER *** [6s 10s Jd 3d] [8c]
 *** SHOW DOWN ***
-EKDIKEO - Shows [Jc 9h] (One pair, jacks) 
-EOFNORTH - Shows [8h Jh] (Two Pair, jacks and eights) 
+EKDIKEO - Shows [Jc 9h] (One pair, jacks)
+EOFNORTH - Shows [8h Jh] (Two Pair, jacks and eights)
 EOFNORTH Collects 3,050 from main pot
 *** SUMMARY ***
 Total Pot(3,050)
 Board [6s 10s Jd 3d 8c]
-Seat 1: EKDIKEO HI:lost with One pair, jacks [Jc 9h - B:Jd,P:Jc,B:10s,P:9h,B:8c] 
+Seat 1: EKDIKEO HI:lost with One pair, jacks [Jc 9h - B:Jd,P:Jc,B:10s,P:9h,B:8c]
 Seat 2: NELSON3949 (dealer) Folded on the FLOP
 Seat 3: STACKS (small blind) Folded on the POCKET CARDS
-Seat 4: EOFNORTH (big blind) won Total (3,050) All-In HI:(3,050) with Two Pair, jacks and eights [8h Jh - P:Jh,B:Jd,P:8h,B:8c,B:10s] 
+Seat 4: EOFNORTH (big blind) won Total (3,050) All-In HI:(3,050) with Two Pair, jacks and eights [8h Jh - P:Jh,B:Jd,P:8h,B:8c,B:10s]
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
 Seat 7: TOONPLAYER Folded on the POCKET CARDS
@@ -3816,7 +3816,7 @@ Seat 9 - EARS04 (8,153 in chips)
 EOFNORTH - Posts small blind 50
 FLHTCIRIDER - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [4c Jc] 
+Dealt to EKDIKEO [4c Jc]
 GAYBOX - Folds
 TOONPLAYER - Folds
 ANDRON_1982 - Folds
@@ -3834,13 +3834,13 @@ EOFNORTH - Folds
 FLHTCIRIDER - Folds
 NELSON3949 - returned (300) : not called
 *** SHOW DOWN ***
-NELSON3949 - Shows [8h 8c] (One pair, eights) 
+NELSON3949 - Shows [8h 8c] (One pair, eights)
 NELSON3949 Collects 300 from main pot
 *** SUMMARY ***
 Total Pot(300)
 Board [2d 4d 3d]
 Seat 1: EKDIKEO Folded on the POCKET CARDS
-Seat 2: NELSON3949 collected Total (300) HI:(300) with One pair, eights [8h 8c - P:8h,P:8c,B:4d,B:3d,B:2d] 
+Seat 2: NELSON3949 collected Total (300) HI:(300) with One pair, eights [8h 8c - P:8h,P:8c,B:4d,B:3d,B:2d]
 Seat 3: STACKS (dealer) Folded on the POCKET CARDS
 Seat 4: EOFNORTH (small blind) Folded on the FLOP
 Seat 5: FLHTCIRIDER (big blind) Folded on the FLOP
@@ -3865,7 +3865,7 @@ Seat 9 - EARS04 (8,153 in chips)
 FLHTCIRIDER - Posts small blind 50
 GAYBOX - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [6d 2c] 
+Dealt to EKDIKEO [6d 2c]
 TOONPLAYER - Folds
 ANDRON_1982 - Folds
 EARS04 - Folds
@@ -3883,7 +3883,7 @@ STACKS Collects 250 from main pot
 Total Pot(250)
 Seat 1: EKDIKEO Folded on the POCKET CARDS
 Seat 2: NELSON3949 Folded on the POCKET CARDS
-Seat 3: STACKS collected Total (250) 
+Seat 3: STACKS collected Total (250)
 Seat 4: EOFNORTH (dealer) Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER (small blind) Folded on the POCKET CARDS
 Seat 6: GAYBOX (big blind) Folded on the POCKET CARDS
@@ -3907,7 +3907,7 @@ Seat 9 - EARS04 (8,153 in chips)
 GAYBOX - Posts small blind 50
 TOONPLAYER - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [3s 10s] 
+Dealt to EKDIKEO [3s 10s]
 ANDRON_1982 - Folds
 EARS04 - Folds
 EKDIKEO - Folds
@@ -3927,7 +3927,7 @@ Seat 3: STACKS Folded on the POCKET CARDS
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER (dealer) Folded on the POCKET CARDS
 Seat 6: GAYBOX (small blind) Folded on the POCKET CARDS
-Seat 7: TOONPLAYER (big blind) collected Total (150) 
+Seat 7: TOONPLAYER (big blind) collected Total (150)
 Seat 8: ANDRON_1982 Folded on the POCKET CARDS
 Seat 9: EARS04 Folded on the POCKET CARDS
 
@@ -3947,7 +3947,7 @@ Seat 9 - EARS04 (8,153 in chips)
 TOONPLAYER - Posts small blind 50
 ANDRON_1982 - Posts big blind 100
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Jh 10h] 
+Dealt to EKDIKEO [Jh 10h]
 EARS04 - Calls 100
 EKDIKEO - Folds
 NELSON3949 - Calls 100
@@ -3981,7 +3981,7 @@ NELSON3949 Collects 1,800 from main pot
 Total Pot(1,800)
 Board [Kd 8h 8d 5h 7s]
 Seat 1: EKDIKEO Folded on the POCKET CARDS
-Seat 2: NELSON3949 collected Total (1,800) All-In HI:(1,800)  [Does not show] 
+Seat 2: NELSON3949 collected Total (1,800) All-In HI:(1,800)  [Does not show]
 Seat 3: STACKS Folded on the POCKET CARDS
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
@@ -4005,7 +4005,7 @@ Seat 8 - ANDRON_1982 (3,834 in chips)
 ANDRON_1982 - Posts small blind 75
 EKDIKEO - Posts big blind 150
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Qh 9c] 
+Dealt to EKDIKEO [Qh 9c]
 NELSON3949 - Folds
 STACKS - Calls 150
 EOFNORTH - Folds
@@ -4033,7 +4033,7 @@ Total Pot(375)
 Board [3h 8s 5d 3c Kc]
 Seat 1: EKDIKEO (big blind) Folded on the RIVER
 Seat 2: NELSON3949 Folded on the POCKET CARDS
-Seat 3: STACKS collected Total (375) HI:(375)  [Does not show] 
+Seat 3: STACKS collected Total (375) HI:(375)  [Does not show]
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
@@ -4055,7 +4055,7 @@ Seat 8 - ANDRON_1982 (3,759 in chips)
 EKDIKEO - Posts small blind 75
 NELSON3949 - Posts big blind 150
 *** POCKET CARDS ***
-Dealt to EKDIKEO [Jd 3s] 
+Dealt to EKDIKEO [Jd 3s]
 STACKS - Folds
 EOFNORTH - Folds
 FLHTCIRIDER - Folds
@@ -4076,7 +4076,7 @@ Seat 3: STACKS Folded on the POCKET CARDS
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the POCKET CARDS
 Seat 6: GAYBOX Folded on the POCKET CARDS
-Seat 7: TOONPLAYER collected Total (375) All-In 
+Seat 7: TOONPLAYER collected Total (375) All-In
 Seat 8: ANDRON_1982 (dealer) Folded on the POCKET CARDS
 
 
@@ -4094,7 +4094,7 @@ Seat 8 - ANDRON_1982 (3,759 in chips)
 NELSON3949 - Posts small blind 75
 STACKS - Posts big blind 150
 *** POCKET CARDS ***
-Dealt to EKDIKEO [8h Ad] 
+Dealt to EKDIKEO [8h Ad]
 EOFNORTH - Folds
 FLHTCIRIDER - Calls 150
 GAYBOX - Folds
@@ -4119,7 +4119,7 @@ NELSON3949 Collects 450 from main pot
 Total Pot(450)
 Board [8c Jd 10d 10h]
 Seat 1: EKDIKEO (dealer) Folded on the POCKET CARDS
-Seat 2: NELSON3949 (small blind) collected Total (450) HI:(450)  [Does not show] 
+Seat 2: NELSON3949 (small blind) collected Total (450) HI:(450)  [Does not show]
 Seat 3: STACKS (big blind) Folded on the TURN
 Seat 4: EOFNORTH Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER Folded on the TURN
@@ -4142,7 +4142,7 @@ Seat 8 - ANDRON_1982 (3,759 in chips)
 STACKS - Posts small blind 75
 EOFNORTH - Posts big blind 150
 *** POCKET CARDS ***
-Dealt to EKDIKEO [6c 6h] 
+Dealt to EKDIKEO [6c 6h]
 FLHTCIRIDER - Raises 300 to 300
 GAYBOX - Folds
 TOONPLAYER - Folds
@@ -4166,7 +4166,7 @@ FLHTCIRIDER - Folds
 EOFNORTH - Checks
 ANDRON_1982 - Checks
 *** SHOW DOWN ***
-EOFNORTH - Shows [5h As] (One pair, aces) 
+EOFNORTH - Shows [5h As] (One pair, aces)
 ANDRON_1982 - Mucks
 EOFNORTH Collects 2,325 from main pot
 *** SUMMARY ***
@@ -4175,11 +4175,11 @@ Board [Ah 6d 7s 3d 8d]
 Seat 1: EKDIKEO Folded on the POCKET CARDS
 Seat 2: NELSON3949 (dealer) Folded on the POCKET CARDS
 Seat 3: STACKS (small blind) Folded on the POCKET CARDS
-Seat 4: EOFNORTH (big blind) won Total (2,325) HI:(2,325) with One pair, aces [5h As - P:As,B:Ah,B:8d,B:7s,B:6d] 
+Seat 4: EOFNORTH (big blind) won Total (2,325) HI:(2,325) with One pair, aces [5h As - P:As,B:Ah,B:8d,B:7s,B:6d]
 Seat 5: FLHTCIRIDER Folded on the TURN
 Seat 6: GAYBOX Folded on the POCKET CARDS
 Seat 7: TOONPLAYER Folded on the POCKET CARDS
-Seat 8: ANDRON_1982 HI: [Mucked] [10s Ks] 
+Seat 8: ANDRON_1982 HI: [Mucked] [10s Ks]
 
 
 
@@ -4196,7 +4196,7 @@ Seat 8 - ANDRON_1982 (2,859 in chips)
 EOFNORTH - Posts small blind 75
 FLHTCIRIDER - Posts big blind 150
 *** POCKET CARDS ***
-Dealt to EKDIKEO [4d 2s] 
+Dealt to EKDIKEO [4d 2s]
 GAYBOX - Folds
 TOONPLAYER - Folds
 ANDRON_1982 - Folds
@@ -4215,8 +4215,8 @@ FLHTCIRIDER - Calls 150
 EOFNORTH - Bets 300
 FLHTCIRIDER - Calls 300
 *** SHOW DOWN ***
-EOFNORTH - Shows [7h 6c] (Three of a kind, sixes) 
-FLHTCIRIDER - Shows [3c 4h] (Straight, two to six) 
+EOFNORTH - Shows [7h 6c] (Three of a kind, sixes)
+FLHTCIRIDER - Shows [3c 4h] (Straight, two to six)
 FLHTCIRIDER Collects 1,500 from main pot
 *** SUMMARY ***
 Total Pot(1,500)
@@ -4224,8 +4224,8 @@ Board [2d 3h 5h 6h 6s]
 Seat 1: EKDIKEO Folded on the POCKET CARDS
 Seat 2: NELSON3949 Folded on the POCKET CARDS
 Seat 3: STACKS (dealer) Folded on the POCKET CARDS
-Seat 4: EOFNORTH (small blind) HI:lost with Three of a kind, sixes [7h 6c - B:6s,B:6h,P:6c,P:7h,B:5h] 
-Seat 5: FLHTCIRIDER (big blind) won Total (1,500) HI:(1,500) with Straight, two to six [3c 4h - B:6s,B:5h,P:4h,B:3h,B:2d] 
+Seat 4: EOFNORTH (small blind) HI:lost with Three of a kind, sixes [7h 6c - B:6s,B:6h,P:6c,P:7h,B:5h]
+Seat 5: FLHTCIRIDER (big blind) won Total (1,500) HI:(1,500) with Straight, two to six [3c 4h - B:6s,B:5h,P:4h,B:3h,B:2d]
 Seat 6: GAYBOX Folded on the POCKET CARDS
 Seat 7: TOONPLAYER Folded on the POCKET CARDS
 Seat 8: ANDRON_1982 Folded on the POCKET CARDS
@@ -4245,7 +4245,7 @@ Seat 8 - ANDRON_1982 (2,859 in chips)
 FLHTCIRIDER - Posts small blind 75
 GAYBOX - Posts big blind 150
 *** POCKET CARDS ***
-Dealt to EKDIKEO [10s 9h] 
+Dealt to EKDIKEO [10s 9h]
 TOONPLAYER - Folds
 ANDRON_1982 - Folds
 EKDIKEO - All-In(Raise) 965 to 965
@@ -4258,20 +4258,17 @@ GAYBOX - Folds
 *** TURN *** [2s 6d 4c] [5h]
 *** RIVER *** [2s 6d 4c 5h] [9d]
 *** SHOW DOWN ***
-EKDIKEO - Shows [10s 9h] (One pair, nines) 
-NELSON3949 - Shows [Qh Qc] (One pair, queens) 
+EKDIKEO - Shows [10s 9h] (One pair, nines)
+NELSON3949 - Shows [Qh Qc] (One pair, queens)
 NELSON3949 Collects 2,155 from main pot
 *** SUMMARY ***
 Total Pot(2,155)
 Board [2s 6d 4c 5h 9d]
-Seat 1: EKDIKEO HI:lost with One pair, nines [10s 9h - P:9h,B:9d,P:10s,B:6d,B:5h] 
-Seat 2: NELSON3949 won Total (2,155) HI:(2,155) with One pair, queens [Qh Qc - P:Qh,P:Qc,B:9d,B:6d,B:5h] 
+Seat 1: EKDIKEO HI:lost with One pair, nines [10s 9h - P:9h,B:9d,P:10s,B:6d,B:5h]
+Seat 2: NELSON3949 won Total (2,155) HI:(2,155) with One pair, queens [Qh Qc - P:Qh,P:Qc,B:9d,B:6d,B:5h]
 Seat 3: STACKS Folded on the POCKET CARDS
 Seat 4: EOFNORTH (dealer) Folded on the POCKET CARDS
 Seat 5: FLHTCIRIDER (small blind) Folded on the POCKET CARDS
 Seat 6: GAYBOX (big blind) Folded on the POCKET CARDS
 Seat 7: TOONPLAYER Folded on the POCKET CARDS
 Seat 8: ANDRON_1982 Folded on the POCKET CARDS
-
-
-

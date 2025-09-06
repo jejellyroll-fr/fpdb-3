@@ -159,9 +159,9 @@ def test_create_hud(hud_main) -> None:
             poker_game="poker_game",
             game_type="cash",
             stat_dict={},
-            cards={}
+            cards={},
         )
-        
+
         hud_main.create_HUD(args)
 
         assert "temp_key" in hud_main.hud_dict
@@ -520,7 +520,7 @@ def test_idle_create(import_path, hud_main) -> None:
         table = MagicMock()
         table.site = "test_site"
         table.number = 123
-        
+
         args = HUD_main.HUDCreationArgs(
             new_hand_id="new_hand_id",
             table=table,
@@ -529,7 +529,7 @@ def test_idle_create(import_path, hud_main) -> None:
             poker_game="holdem",
             game_type="cash",
             stat_dict={},
-            cards={}
+            cards={},
         )
 
         with (

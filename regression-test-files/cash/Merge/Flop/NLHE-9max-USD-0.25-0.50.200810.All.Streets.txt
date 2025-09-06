@@ -50,4 +50,3 @@
 		<winner amount="1.83" uncalled="true" potnumber="2" player="1" hand="Full House - Threes over Kings" pottype="n"/>
 	</round>
 </game>
-

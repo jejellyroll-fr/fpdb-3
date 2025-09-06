@@ -4,7 +4,6 @@
 Mucked cards display for FreePokerTools HUD.
 """
 
-
 from past.utils import old_div
 from PyQt5.QtCore import QObject
 from PyQt5.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
@@ -332,13 +331,13 @@ class Flop_Mucked(Aux_Base.AuxSeats, QObject):
 
     def save_layout(self, *args) -> None:
         """Save new common position back to the layout element in the config file."""
-        new_locs = {
-            i: ((pos[0]), (pos[1]))
-            for i, pos in list(self.positions.items())
-            if i == "common"
-        }
+        new_locs = {i: ((pos[0]), (pos[1])) for i, pos in list(self.positions.items()) if i == "common"}
         self.config.save_layout_set(
-            self.hud.layout_set, self.hud.max, new_locs, width=None, height=None,
+            self.hud.layout_set,
+            self.hud.max,
+            new_locs,
+            width=None,
+            height=None,
         )
 
     def update_gui(self, new_hand_id) -> None:
@@ -378,7 +377,10 @@ class Flop_Mucked(Aux_Base.AuxSeats, QObject):
             # determined by aux_hud, not mucked card display
             window = widget.get_parent()
             window.begin_move_drag(
-                event.button, int(event.x_root), int(event.y_root), event.time,
+                event.button,
+                int(event.x_root),
+                int(event.y_root),
+                event.time,
             )
 
     def expose_all(self) -> None:

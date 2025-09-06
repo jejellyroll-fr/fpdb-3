@@ -9,7 +9,7 @@ Seat 6: Player5 (2100)
 Seat 7: Player6 (7780)
 Seat 8: Player7 (2047)
 Seat 9: Hero (2700)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 Player0 posts ante 15
 Player1 posts ante 15
 Player2 posts ante 15
@@ -22,7 +22,7 @@ Hero posts ante 15
 Player3 posts small blind 75
 Player4 posts big blind 150
 Dealt to Hero [3s 5d]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player5 folds
 Player6 raises 450 to 600
 Player7 folds

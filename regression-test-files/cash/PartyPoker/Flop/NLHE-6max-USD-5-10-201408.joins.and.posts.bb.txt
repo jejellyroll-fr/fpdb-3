@@ -1,9 +1,9 @@
-#Game No : 14017581513 
+#Game No : 14017581513
 ***** Hand History for Game 14017581513 *****
 $5/$10 USD NL Texas Hold'em - Friday, August 01, 22:45:59 CEST 2014
 Table Bourges (Real Money)
 Seat 2 is the button
-Total number of players : 3/6 
+Total number of players : 3/6
 Seat 4: Player0 ( $1,000 USD )
 Seat 2: Hero ( $1,534.96 USD )
 Seat 5: Player1 ( $1,041 USD )

@@ -86,9 +86,6 @@ ensure_config_initialized()
 # import GuiStove
 
 
-
-
-
 cl_options = ".".join(sys.argv[1:])
 (options, argv) = Options.fpdb_options()
 
@@ -174,12 +171,11 @@ class fpdb(QMainWindow):
             self,
             f"FPDB{VERSION!s}",
             "Copyright 2008-2023. See contributors.txt for details"
-             "You are free to change, and distribute original or changed versions "
+            "You are free to change, and distribute original or changed versions "
             "of fpdb within the rules set out by the license"
-             "https://github.com/jejellyroll-fr/fpdb-3"
-             "\n"
-             "Your config file is: "
-            + self.config.file,
+            "https://github.com/jejellyroll-fr/fpdb-3"
+            "\n"
+            "Your config file is: " + self.config.file,
         )
 
     def dia_advanced_preferences(self, widget, data=None) -> None:
@@ -226,7 +222,6 @@ class fpdb(QMainWindow):
 
             self.config.save()
             self.reload_config()
-
 
     def dia_manage_hud_sites(self, widget, data=None) -> None:
         """Dialog to manage HUD sites - enable/disable sites."""
@@ -346,7 +341,11 @@ class fpdb(QMainWindow):
                     # Use the edit_site method to properly update the XML
                     current_site = self.config.supported_sites[site_name]
                     self.config.edit_site(
-                        site_name, enabled_str, current_site.screen_name, current_site.HH_path, current_site.TS_path,
+                        site_name,
+                        enabled_str,
+                        current_site.screen_name,
+                        current_site.HH_path,
+                        current_site.TS_path,
                     )
                 else:
                     # Create a new site entry if it doesn't exist
@@ -506,7 +505,8 @@ class fpdb(QMainWindow):
                 log.info("Rebuilding HUD Cache ...")
 
                 self.db.rebuild_cache(
-                    self.h_start_date.date().toString("yyyy-MM-dd"), self.start_date.date().toString("yyyy-MM-dd"),
+                    self.h_start_date.date().toString("yyyy-MM-dd"),
+                    self.start_date.date().toString("yyyy-MM-dd"),
                 )
             else:
                 log.info("User cancelled rebuilding hud cache")
@@ -690,8 +690,7 @@ class fpdb(QMainWindow):
                 sys.exit()
         else:
             self.warning_box(
-                "The updated preferences have not been loaded because windows are open. "
-                "Restart fpdb to load them.",
+                "The updated preferences have not been loaded because windows are open. " "Restart fpdb to load them.",
             )
 
     def process_close_messages(self) -> None:
@@ -745,8 +744,9 @@ class fpdb(QMainWindow):
         )
         configMenu.addAction(self.makeAction("Import filters", self.dia_import_filters))
         # Add the Logger Dev Tool action
-        self.logger_dev_tool_action = self.makeAction("Logger Dev Tool", self.show_logger_dev_tool,
-                                                     tip="Advanced logger manager")
+        self.logger_dev_tool_action = self.makeAction(
+            "Logger Dev Tool", self.show_logger_dev_tool, tip="Advanced logger manager"
+        )
         configMenu.addAction(self.logger_dev_tool_action)
         configMenu.addSeparator()
         configMenu.addAction(self.makeAction("Close Fpdb", self.quit, "Ctrl+Q", "Quit the Program"))
@@ -775,23 +775,34 @@ class fpdb(QMainWindow):
         # Get available themes from ThemeManager
         try:
             from ThemeManager import ThemeManager
+
             theme_manager = ThemeManager()
             themes = theme_manager.get_available_qt_themes()
         except ImportError:
             # Fallback theme list if ThemeManager not available
             themes = [
-                "dark_purple.xml", "dark_teal.xml", "dark_blue.xml", "dark_cyan.xml",
-                "dark_pink.xml", "dark_red.xml", "light_purple.xml", "light_teal.xml",
-                "light_blue.xml", "light_cyan.xml", "light_pink.xml", "light_red.xml"
+                "dark_purple.xml",
+                "dark_teal.xml",
+                "dark_blue.xml",
+                "dark_cyan.xml",
+                "dark_pink.xml",
+                "dark_red.xml",
+                "light_purple.xml",
+                "light_teal.xml",
+                "light_blue.xml",
+                "light_cyan.xml",
+                "light_pink.xml",
+                "light_red.xml",
             ]
 
         for theme in themes:
             themeMenu.addAction(QAction(theme, self, triggered=partial(self.change_theme, theme)))
-        
+
         # Add separator and theme creation option
         themeMenu.addSeparator()
-        themeMenu.addAction(self.makeAction("Create Custom Theme...", self.show_theme_creator, 
-                                           tip="Create a new custom theme"))
+        themeMenu.addAction(
+            self.makeAction("Create Custom Theme...", self.show_theme_creator, tip="Create a new custom theme")
+        )
 
     def makeAction(self, name, callback, shortcut=None, tip=None, checkable=False):
         action = QAction(name, self)
@@ -810,16 +821,18 @@ class fpdb(QMainWindow):
         """Open the advanced logger development tool."""
         try:
             from loggingFpdb import show_logger_dev_tool
+
             show_logger_dev_tool(self)
             self.statusBar().showMessage("Logger Dev Tool open")
         except Exception as e:
             log.exception(f"Error opening Logger Dev Tool: {e}")
             self.statusBar().showMessage(f"Error: {e}")
-    
+
     def show_theme_creator(self) -> None:
         """Open the custom theme creator dialog."""
         try:
             from ThemeCreatorDialog import show_theme_creator
+
             result = show_theme_creator(self)
             if result:  # Dialog was accepted (theme created)
                 # Refresh the themes menu to include the new theme
@@ -830,7 +843,7 @@ class fpdb(QMainWindow):
         except Exception as e:
             log.exception(f"Error opening Theme Creator: {e}")
             self.statusBar().showMessage(f"Error: {e}")
-    
+
     def refresh_themes_menu(self) -> None:
         """Refresh the themes menu to include new custom themes."""
         try:
@@ -841,28 +854,29 @@ class fpdb(QMainWindow):
                 if action.text() == "Themes":
                     themes_menu = action.menu()
                     break
-            
+
             if themes_menu:
                 themes_menu.clear()
-                
+
                 # Get updated theme list from ThemeManager
                 from ThemeManager import ThemeManager
+
                 theme_manager = ThemeManager()
                 themes = theme_manager.get_available_qt_themes()
-                
+
                 # Re-add all themes
                 for theme in themes:
                     themes_menu.addAction(QAction(theme, self, triggered=partial(self.change_theme, theme)))
-                
+
                 # Re-add separator and theme creator
                 themes_menu.addSeparator()
-                themes_menu.addAction(self.makeAction("Create Custom Theme...", self.show_theme_creator, 
-                                                    tip="Create a new custom theme"))
-                
+                themes_menu.addAction(
+                    self.makeAction("Create Custom Theme...", self.show_theme_creator, tip="Create a new custom theme")
+                )
+
                 log.info(f"Themes menu refreshed with {len(themes)} themes")
         except Exception as e:
             log.exception(f"Error refreshing themes menu: {e}")
-
 
     def load_profile(self, create_db=False) -> None:
         """Loads profile from the provided path name.
@@ -1216,8 +1230,9 @@ class fpdb(QMainWindow):
                 # Fallback to direct application if ThemeManager not initialized
                 log.warning("ThemeManager not initialized, applying theme directly without persistence")
                 from qt_material import apply_stylesheet
+
                 apply_stylesheet(QApplication.instance(), theme=theme)
-                
+
             self.update_title_bar_theme()
         except ImportError:
             log.warning("qt_material not available, cannot change theme")
@@ -1453,6 +1468,7 @@ if __name__ == "__main__":
     # before any component tries to use them - fixes issue #22
     try:
         from ConfigInitializer import ConfigInitializer
+
         config = ConfigInitializer.initialize()
         if config:
             log.info("Configuration initialized successfully")
@@ -1462,20 +1478,21 @@ if __name__ == "__main__":
 
     try:
         app = QApplication([])
-        
+
         # Initialize ThemeManager and apply saved theme
         from ThemeManager import ThemeManager
+
         theme_manager = ThemeManager()
         theme_manager.initialize(config=config)
         saved_theme = theme_manager.get_qt_material_theme()
-        
+
         # Apply theme using ThemeManager to handle both built-in and custom themes
         theme_manager._apply_theme_to_application(saved_theme)
         me = fpdb()
-        
+
         # Register main window with theme manager for future theme changes
         theme_manager._main_window = me
-        
+
         app.exec_()
     finally:
         profiler.disable()

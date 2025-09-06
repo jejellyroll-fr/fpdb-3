@@ -9,7 +9,7 @@ Seat 6: Player5 (2255)
 Seat 7: Player6 (1220)
 Seat 8: Player7 (2232)
 Seat 9: Hero (2525)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 Player0 posts ante 10
 Player1 posts ante 10
 Player2 posts ante 10
@@ -22,7 +22,7 @@ Hero posts ante 10
 Player5 posts small blind 60
 Player6 posts big blind 120
 Dealt to Hero [Jh 5c]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player7 folds
 Hero folds
 Player0 folds

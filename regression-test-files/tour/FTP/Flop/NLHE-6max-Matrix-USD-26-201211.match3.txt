@@ -1104,6 +1104,3 @@ Total pot 1,630 | Rake 0
 Board: [2d Ac 7d Tc 8c]
 Seat 1: Player3 (small blind) showed [Kd Ts] and lost with a pair of Tens
 Seat 2: Hero (big blind) showed [Qh As] and won (1,630) with a pair of Aces
-
-
-

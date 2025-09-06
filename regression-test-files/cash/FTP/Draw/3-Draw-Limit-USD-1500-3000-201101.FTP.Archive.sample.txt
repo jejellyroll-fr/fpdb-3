@@ -62,6 +62,3 @@ Seat 1: Player1 (small blind) folded before the draw
 Seat 2: Player2 (big blind) showed [8s 6d 4s 3d 2c] and lost with 8,6,4,3,2
 Seat 4: Hero showed [8d 5s 4c 3h 2h] and won ($42,748) with 8,5,4,3,2
 Seat 6: Player6 (button) folded after the 3rd Draw
-
-
-

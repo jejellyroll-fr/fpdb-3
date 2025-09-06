@@ -14,7 +14,6 @@
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
 
-
 # import L10n
 # _ = L10n.get_translation()
 
@@ -84,7 +83,14 @@ class TourneySummary:
     }
 
     def __init__(
-        self, db, config, siteName, summaryText, in_path="-", builtFrom="HHC", header="",
+        self,
+        db,
+        config,
+        siteName,
+        summaryText,
+        in_path="-",
+        builtFrom="HHC",
+        header="",
     ) -> None:
         self.db = db
         self.config = config
@@ -291,7 +297,9 @@ class TourneySummary:
         self.db.set_printdata(printtest)
 
         self.playerIds = self.db.getSqlPlayerIDs(
-            self.players.keys(), self.siteId, self.hero,
+            self.players.keys(),
+            self.siteId,
+            self.hero,
         )
         # for player in self.players:
         #    id=self.db.get_player_id(self.config, self.siteName, player)
@@ -300,9 +308,7 @@ class TourneySummary:
         #    self.playerIds.update({player:id})
 
         # print "TS.insert players",self.players,"playerIds",self.playerIds
-        self.dbid_pids = (
-            self.playerIds
-        )  # TODO:rename this field in Hand so this silly renaming can be removed
+        self.dbid_pids = self.playerIds  # TODO:rename this field in Hand so this silly renaming can be removed
 
         # print "TS.self before starting insert",self
         self.tourneyTypeId = self.db.createOrUpdateTourneyType(self)

@@ -36,4 +36,3 @@ Player primo4 does not show cards.Bets: 0.05. Collects: 0. Loses: 0.05.
 Player validraize does not show cards.Bets: 0.22. Collects: 0. Loses: 0.22.
 Player WhatAcrock420 does not show cards.Bets: 0.02. Collects: 0. Loses: 0.02.
 Game ended at: 2019/2/16 8:37:46
-

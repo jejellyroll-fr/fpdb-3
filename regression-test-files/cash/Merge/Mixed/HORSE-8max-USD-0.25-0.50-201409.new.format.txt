@@ -200,4 +200,3 @@
         <winner amount="2.09" uncalled="false" potnumber="1" player="0" pottype="l" hand="7-6-5-4-A" />
     </round>
 </game>
-

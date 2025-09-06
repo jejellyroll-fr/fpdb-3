@@ -3,7 +3,7 @@ Super Satellite
 Buy-In: $0.50/$0.05 USD
 44 players
 $11.00 USD added to the prize pool by PokerStars
-Total Prize Pool: $33.00 USD 
+Total Prize Pool: $33.00 USD
 Target Tournament #406766547 Buy-In: $11.00 USD
 Tournament started 2011/07/26 21:30:00 WET [2011/07/26 16:30:00 ET]
 
@@ -44,12 +44,12 @@ Tournament started 2011/07/26 21:30:00 WET [2011/07/26 16:30:00 ET]
   35: moose_hunt40 (Canada), still playing
   36: jackie6162 (United Kingdom), still playing
   37: Ubora86 (Argentina), still playing
-  38: Hero (United Kingdom), 
-  39: tando01 (Australia), 
-  40: SteakSndwich (Austria), 
-  41: Evolnomar (United Kingdom), 
-  42: KRAKENUP (United Kingdom), 
-  43: Ganorb (Canada), 
-  44: kprobly (Canada), 
+  38: Hero (United Kingdom),
+  39: tando01 (Australia),
+  40: SteakSndwich (Austria),
+  41: Evolnomar (United Kingdom),
+  42: KRAKENUP (United Kingdom),
+  43: Ganorb (Canada),
+  44: kprobly (Canada),
 
 You finished in 38th place (eliminated at hand #65113060125).

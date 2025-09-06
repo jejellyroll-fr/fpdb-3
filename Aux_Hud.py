@@ -234,7 +234,14 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         """
         widget = self.childAt(event.pos())
 
-        if widget and hasattr(widget, "stat_dict") and widget.stat_dict and self.popup_count == 0 and hasattr(widget, "aw_popup") and widget.aw_popup:
+        if (
+            widget
+            and hasattr(widget, "stat_dict")
+            and widget.stat_dict
+            and self.popup_count == 0
+            and hasattr(widget, "aw_popup")
+            and widget.aw_popup
+        ):
             # do not popup on empty blocks or if one is already active
             pu = Popup.popup_factory(
                 seat=widget.aw_seat,

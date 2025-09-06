@@ -1,16 +1,16 @@
 Game #15414973533 starts.
 
-#Game No : 15414973533 
+#Game No : 15414973533
 ***** Hand History for Game 15414973533 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:32:00 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 3 is the button
-Total number of players : 4/4 
+Total number of players : 4/4
 Seat 4: Hero ( 500 )
 Seat 3: Player0 ( 500 )
 Seat 2: Player1 ( 500 )
 Seat 1: Player2 ( 500 )
-Trny: 128487129 Level: 1 
+Trny: 128487129 Level: 1
 Blinds(10/20)
 Hero posts small blind [10].
 Player2 posts big blind [20].
@@ -24,17 +24,17 @@ Player1 does not show cards.
 Player1 wins 90 chips
 Game #15414973928 starts.
 
-#Game No : 15414973928 
+#Game No : 15414973928
 ***** Hand History for Game 15414973928 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:32:16 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 4 is the button
-Total number of players : 4/4 
+Total number of players : 4/4
 Seat 4: Hero ( 490 )
 Seat 3: Player0 ( 500 )
 Seat 2: Player1 ( 530 )
 Seat 1: Player2 ( 480 )
-Trny: 128487129 Level: 1 
+Trny: 128487129 Level: 1
 Blinds(10/20)
 Player2 posts small blind [10].
 Player1 posts big blind [20].
@@ -48,17 +48,17 @@ Player0 does not show cards.
 Player0 wins 70 chips
 Game #15414975130 starts.
 
-#Game No : 15414975130 
+#Game No : 15414975130
 ***** Hand History for Game 15414975130 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:32:36 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 1 is the button
-Total number of players : 4/4 
+Total number of players : 4/4
 Seat 4: Hero ( 490 )
 Seat 3: Player0 ( 530 )
 Seat 2: Player1 ( 510 )
 Seat 1: Player2 ( 470 )
-Trny: 128487129 Level: 1 
+Trny: 128487129 Level: 1
 Blinds(10/20)
 Player1 posts small blind [10].
 Player0 posts big blind [20].
@@ -71,17 +71,17 @@ Player0 does not show cards.
 Player0 wins 30 chips
 Game #15414975422 starts.
 
-#Game No : 15414975422 
+#Game No : 15414975422
 ***** Hand History for Game 15414975422 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:32:46 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 2 is the button
-Total number of players : 4/4 
+Total number of players : 4/4
 Seat 4: Hero ( 490 )
 Seat 3: Player0 ( 540 )
 Seat 2: Player1 ( 500 )
 Seat 1: Player2 ( 470 )
-Trny: 128487129 Level: 1 
+Trny: 128487129 Level: 1
 Blinds(10/20)
 Player0 posts small blind [10].
 Hero posts big blind [20].
@@ -96,17 +96,17 @@ Player1 does not show cards.
 Player1 wins 170 chips
 Game #15414976156 starts.
 
-#Game No : 15414976156 
+#Game No : 15414976156
 ***** Hand History for Game 15414976156 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:33:07 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 3 is the button
-Total number of players : 4/4 
+Total number of players : 4/4
 Seat 4: Hero ( 470 )
 Seat 3: Player0 ( 530 )
 Seat 2: Player1 ( 570 )
 Seat 1: Player2 ( 430 )
-Trny: 128487129 Level: 1 
+Trny: 128487129 Level: 1
 Blinds(10/20)
 Hero posts small blind [10].
 Player2 posts big blind [20].
@@ -119,17 +119,17 @@ Player2 does not show cards.
 Player2 wins 30 chips
 Game #15414976579 starts.
 
-#Game No : 15414976579 
+#Game No : 15414976579
 ***** Hand History for Game 15414976579 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:33:19 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 4 is the button
-Total number of players : 4/4 
+Total number of players : 4/4
 Seat 4: Hero ( 460 )
 Seat 3: Player0 ( 530 )
 Seat 2: Player1 ( 570 )
 Seat 1: Player2 ( 440 )
-Trny: 128487129 Level: 1 
+Trny: 128487129 Level: 1
 Blinds(10/20)
 Player2 posts small blind [10].
 Player1 posts big blind [20].
@@ -142,17 +142,17 @@ Player1 does not show cards.
 Player1 wins 30 chips
 Game #15414977083 starts.
 
-#Game No : 15414977083 
+#Game No : 15414977083
 ***** Hand History for Game 15414977083 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:33:33 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 1 is the button
-Total number of players : 4/4 
+Total number of players : 4/4
 Seat 4: Hero ( 460 )
 Seat 3: Player0 ( 530 )
 Seat 2: Player1 ( 580 )
 Seat 1: Player2 ( 430 )
-Trny: 128487129 Level: 1 
+Trny: 128487129 Level: 1
 Blinds(10/20)
 Player1 posts small blind [10].
 Player0 posts big blind [20].
@@ -176,17 +176,17 @@ Player1 does not show cards.
 Player1 wins 300 chips
 Game #15414979501 starts.
 
-#Game No : 15414979501 
+#Game No : 15414979501
 ***** Hand History for Game 15414979501 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:34:17 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 2 is the button
-Total number of players : 4/4 
+Total number of players : 4/4
 Seat 4: Hero ( 420 )
 Seat 3: Player0 ( 430 )
 Seat 2: Player1 ( 720 )
 Seat 1: Player2 ( 430 )
-Trny: 128487129 Level: 1 
+Trny: 128487129 Level: 1
 Blinds(10/20)
 Player0 posts small blind [10].
 Hero posts big blind [20].
@@ -201,17 +201,17 @@ Player2 does not show cards.
 Player2 wins 70 chips
 Game #15414980530 starts.
 
-#Game No : 15414980530 
+#Game No : 15414980530
 ***** Hand History for Game 15414980530 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:34:33 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 3 is the button
-Total number of players : 4/4 
+Total number of players : 4/4
 Seat 4: Hero ( 400 )
 Seat 3: Player0 ( 420 )
 Seat 2: Player1 ( 720 )
 Seat 1: Player2 ( 460 )
-Trny: 128487129 Level: 1 
+Trny: 128487129 Level: 1
 Blinds(10/20)
 Hero posts small blind [10].
 Player2 posts big blind [20].
@@ -236,17 +236,17 @@ Player0 doesn't show [ Kh, 6h ]a pair of Threes.
 Player1 wins 550 chips from the main pot with a pair of Threes with Ace kicker.
 Game #15414982283 starts.
 
-#Game No : 15414982283 
+#Game No : 15414982283
 ***** Hand History for Game 15414982283 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:35:09 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 4 is the button
-Total number of players : 4/4 
+Total number of players : 4/4
 Seat 4: Hero ( 390 )
 Seat 3: Player0 ( 160 )
 Seat 2: Player1 ( 1,010 )
 Seat 1: Player2 ( 440 )
-Trny: 128487129 Level: 2 
+Trny: 128487129 Level: 2
 Blinds(15/30)
 Player2 posts small blind [15].
 Player1 posts big blind [30].
@@ -265,16 +265,16 @@ Player1 wins 880 chips from the main pot with two pairs, Jacks and Fours.
 Player Player2 finished in 4.
 Game #15414983078 starts.
 
-#Game No : 15414983078 
+#Game No : 15414983078
 ***** Hand History for Game 15414983078 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:35:33 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 4 is the button
-Total number of players : 3/4 
+Total number of players : 3/4
 Seat 4: Hero ( 390 )
 Seat 3: Player0 ( 160 )
 Seat 2: Player1 ( 1,450 )
-Trny: 128487129 Level: 2 
+Trny: 128487129 Level: 2
 Blinds(15/30)
 Player1 posts small blind [15].
 Player0 posts big blind [30].
@@ -294,15 +294,15 @@ Hero wins 335 chips from the main pot with a pair of Fives.
 Player Player0 finished in 3.
 Game #15414983847 starts.
 
-#Game No : 15414983847 
+#Game No : 15414983847
 ***** Hand History for Game 15414983847 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:35:55 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 2 is the button
-Total number of players : 2/4 
+Total number of players : 2/4
 Seat 4: Hero ( 565 )
 Seat 2: Player1 ( 1,435 )
-Trny: 128487129 Level: 2 
+Trny: 128487129 Level: 2
 Blinds(15/30)
 Player1 posts small blind [15].
 Hero posts big blind [30].
@@ -318,15 +318,15 @@ Player1 does not show cards.
 Player1 wins 210 chips
 Game #15414984716 starts.
 
-#Game No : 15414984716 
+#Game No : 15414984716
 ***** Hand History for Game 15414984716 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:36:21 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 4 is the button
-Total number of players : 2/4 
+Total number of players : 2/4
 Seat 4: Hero ( 505 )
 Seat 2: Player1 ( 1,495 )
-Trny: 128487129 Level: 2 
+Trny: 128487129 Level: 2
 Blinds(15/30)
 Hero posts small blind [15].
 Player1 posts big blind [30].
@@ -350,15 +350,15 @@ Hero shows [ 5h, As ]three of a kind, Tens with Ace kicker.
 Hero wins 240 chips from the main pot with three of a kind, Tens with Ace kicker.
 Game #15414986449 starts.
 
-#Game No : 15414986449 
+#Game No : 15414986449
 ***** Hand History for Game 15414986449 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:36:57 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 2 is the button
-Total number of players : 2/4 
+Total number of players : 2/4
 Seat 4: Hero ( 625 )
 Seat 2: Player1 ( 1,375 )
-Trny: 128487129 Level: 2 
+Trny: 128487129 Level: 2
 Blinds(15/30)
 Player1 posts small blind [15].
 Hero posts big blind [30].
@@ -374,15 +374,15 @@ Player1 does not show cards.
 Player1 wins 270 chips
 Game #15414987250 starts.
 
-#Game No : 15414987250 
+#Game No : 15414987250
 ***** Hand History for Game 15414987250 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:37:21 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 4 is the button
-Total number of players : 2/4 
+Total number of players : 2/4
 Seat 4: Hero ( 565 )
 Seat 2: Player1 ( 1,435 )
-Trny: 128487129 Level: 2 
+Trny: 128487129 Level: 2
 Blinds(15/30)
 Hero posts small blind [15].
 Player1 posts big blind [30].
@@ -404,15 +404,15 @@ Hero shows [ Tc, 8s ]a pair of Aces with Ten kicker.
 Hero wins 60 chips from the main pot with a pair of Aces with Ten kicker.
 Game #15414988068 starts.
 
-#Game No : 15414988068 
+#Game No : 15414988068
 ***** Hand History for Game 15414988068 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:37:44 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 2 is the button
-Total number of players : 2/4 
+Total number of players : 2/4
 Seat 4: Hero ( 595 )
 Seat 2: Player1 ( 1,405 )
-Trny: 128487129 Level: 2 
+Trny: 128487129 Level: 2
 Blinds(15/30)
 Player1 posts small blind [15].
 Hero posts big blind [30].
@@ -434,15 +434,15 @@ Player1 does not show cards.
 Player1 wins 300 chips
 Game #15414990457 starts.
 
-#Game No : 15414990457 
+#Game No : 15414990457
 ***** Hand History for Game 15414990457 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:38:40 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 4 is the button
-Total number of players : 2/4 
+Total number of players : 2/4
 Seat 4: Hero ( 475 )
 Seat 2: Player1 ( 1,525 )
-Trny: 128487129 Level: 3 
+Trny: 128487129 Level: 3
 Blinds(20/40)
 Hero posts small blind [20].
 Player1 posts big blind [40].
@@ -453,15 +453,15 @@ Player1 does not show cards.
 Player1 wins 60 chips
 Game #15414990733 starts.
 
-#Game No : 15414990733 
+#Game No : 15414990733
 ***** Hand History for Game 15414990733 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:38:47 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 2 is the button
-Total number of players : 2/4 
+Total number of players : 2/4
 Seat 4: Hero ( 455 )
 Seat 2: Player1 ( 1,545 )
-Trny: 128487129 Level: 3 
+Trny: 128487129 Level: 3
 Blinds(20/40)
 Player1 posts small blind [20].
 Hero posts big blind [40].
@@ -478,15 +478,15 @@ Hero shows [ Ks, 4c ]four of a kind, Kings.
 Hero wins 910 chips from the main pot with four of a kind, Kings.
 Game #15414991326 starts.
 
-#Game No : 15414991326 
+#Game No : 15414991326
 ***** Hand History for Game 15414991326 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:39:05 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 4 is the button
-Total number of players : 2/4 
+Total number of players : 2/4
 Seat 4: Hero ( 910 )
 Seat 2: Player1 ( 1,090 )
-Trny: 128487129 Level: 3 
+Trny: 128487129 Level: 3
 Blinds(20/40)
 Hero posts small blind [20].
 Player1 posts big blind [40].
@@ -498,15 +498,15 @@ Player1 does not show cards.
 Player1 wins 60 chips
 Game #15414992623 starts.
 
-#Game No : 15414992623 
+#Game No : 15414992623
 ***** Hand History for Game 15414992623 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:39:13 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 2 is the button
-Total number of players : 2/4 
+Total number of players : 2/4
 Seat 4: Hero ( 890 )
 Seat 2: Player1 ( 1,110 )
-Trny: 128487129 Level: 3 
+Trny: 128487129 Level: 3
 Blinds(20/40)
 Player1 posts small blind [20].
 Hero posts big blind [40].
@@ -519,15 +519,15 @@ Player1 does not show cards.
 Player1 wins 160 chips
 Game #15414993106 starts.
 
-#Game No : 15414993106 
+#Game No : 15414993106
 ***** Hand History for Game 15414993106 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:39:27 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 4 is the button
-Total number of players : 2/4 
+Total number of players : 2/4
 Seat 4: Hero ( 850 )
 Seat 2: Player1 ( 1,150 )
-Trny: 128487129 Level: 3 
+Trny: 128487129 Level: 3
 Blinds(20/40)
 Hero posts small blind [20].
 Player1 posts big blind [40].
@@ -543,15 +543,15 @@ Player1 does not show cards.
 Player1 wins 240 chips
 Game #15414993773 starts.
 
-#Game No : 15414993773 
+#Game No : 15414993773
 ***** Hand History for Game 15414993773 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:39:45 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 2 is the button
-Total number of players : 2/4 
+Total number of players : 2/4
 Seat 4: Hero ( 770 )
 Seat 2: Player1 ( 1,230 )
-Trny: 128487129 Level: 3 
+Trny: 128487129 Level: 3
 Blinds(20/40)
 Player1 posts small blind [20].
 Hero posts big blind [40].
@@ -568,15 +568,15 @@ Hero does not show cards.
 Hero wins 890 chips
 Game #15414994411 starts.
 
-#Game No : 15414994411 
+#Game No : 15414994411
 ***** Hand History for Game 15414994411 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:40:04 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 4 is the button
-Total number of players : 2/4 
+Total number of players : 2/4
 Seat 4: Hero ( 890 )
 Seat 2: Player1 ( 1,110 )
-Trny: 128487129 Level: 3 
+Trny: 128487129 Level: 3
 Blinds(20/40)
 Hero posts small blind [20].
 Player1 posts big blind [40].
@@ -588,15 +588,15 @@ Player1 does not show cards.
 Player1 wins 60 chips
 Game #15414994772 starts.
 
-#Game No : 15414994772 
+#Game No : 15414994772
 ***** Hand History for Game 15414994772 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:40:15 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 2 is the button
-Total number of players : 2/4 
+Total number of players : 2/4
 Seat 4: Hero ( 870 )
 Seat 2: Player1 ( 1,130 )
-Trny: 128487129 Level: 3 
+Trny: 128487129 Level: 3
 Blinds(20/40)
 Player1 posts small blind [20].
 Hero posts big blind [40].
@@ -614,15 +614,15 @@ Hero shows [ Qs, 2d ]two pairs, Queens and Twos.
 Hero wins 1,740 chips from the main pot with two pairs, Queens and Twos.
 Game #15414995953 starts.
 
-#Game No : 15414995953 
+#Game No : 15414995953
 ***** Hand History for Game 15414995953 *****
 NL Texas Hold'em $1 USD Buy-in  - Sunday, July 24, 19:40:35 CEST 2016
 Table $1 Sit & Go Hero (128487129) Table #1 (Real Money)
 Seat 4 is the button
-Total number of players : 2/4 
+Total number of players : 2/4
 Seat 4: Hero ( 1,740 )
 Seat 2: Player1 ( 260 )
-Trny: 128487129 Level: 3 
+Trny: 128487129 Level: 3
 Blinds(20/40)
 Hero posts small blind [20].
 Player1 posts big blind [40].
@@ -640,4 +640,4 @@ Player1 shows [ 6c, As ]two pairs, Sixes and Threes.
 Hero wins 520 chips from the main pot with two pairs, Kings and Threes.
 Congratulations to player Hero for winning tournament $1 Sit & Go Hero
 Player Player1 finished in 2.
-Player Hero finished in 1 place and received $3 USD 
+Player Hero finished in 1 place and received $3 USD

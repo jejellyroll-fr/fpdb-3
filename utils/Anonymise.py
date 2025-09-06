@@ -135,7 +135,8 @@ def anonymize_hand_history(file_path, hero_name) -> None:
 
         for i, name in enumerate(uniq):
             filecontents = filecontents.replace(
-                name, "Hero" if name == hero_name else f"Player{i}",
+                name,
+                "Hero" if name == hero_name else f"Player{i}",
             )
 
         # print(filecontents.encode('utf-8').decode())
