@@ -1696,12 +1696,12 @@ class Hand:
         return table_string
 
 
-def writeHand(self, fh=sys.__stdout__) -> None:
-    # Format PokerStars.
-    log.info(f"Writing game line: {self.writeGameLine()}")
-    log.info(f"Writing table line: {self.writeTableLine()}")
-    fh.write(f"{self.writeGameLine()}\n")
-    fh.write(f"{self.writeTableLine()}\n")
+    def writeHand(self, fh=sys.__stdout__) -> None:
+        # Format PokerStars.
+        log.info(f"Writing game line: {self.writeGameLine()}")
+        log.info(f"Writing table line: {self.writeTableLine()}")
+        fh.write(f"{self.writeGameLine()}\n")
+        fh.write(f"{self.writeTableLine()}\n")
 
 
 class HoldemOmahaHand(Hand):
@@ -2806,9 +2806,25 @@ class Pot:
         if self.sym is None:
             self.sym = "C"
         if self.total is None:
-            # NB if I'm sure end() is idempotent, call it here.
-            log.error("Error in printing Hand object")
-            raise FpdbParseError
+            # NB: Original comment suggested calling end() here if idempotent,
+            # but end() requires totalcollected parameter and may modify state.
+            # Instead, calculate total for display without modifying self.total
+            log.debug("Total pot not calculated, computing from committed amounts for display")
+            calculated_total = sum(self.committed.values()) + sum(self.common.values()) + self.stp
+            if calculated_total == 0:
+                return f"Total pot {self.sym}0.00"
+            # Use calculated_total for display instead of self.total
+            ret = f"Total pot {self.sym}{calculated_total:.2f}"
+            if len(self.pots) < 2:
+                return ret
+            if self.pots and len(self.pots) > 0:
+                ret += f" Main pot {self.sym}{self.pots[0][0]:.2f}"
+                if len(self.pots) > 1:
+                    ret += "".join([
+                        f" Side pot {self.sym}{self.pots[x][0]:.2f}."
+                        for x in range(1, len(self.pots))
+                    ])
+            return ret
 
         ret = f"Total pot {self.sym}{self.total:.2f}"
         if len(self.pots) < 2:
