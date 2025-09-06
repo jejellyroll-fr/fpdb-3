@@ -40,5 +40,3 @@
 </Game>
 
 ExtendedTableName: Turbo: Deal 36 - €10 Max [199492]
-
-

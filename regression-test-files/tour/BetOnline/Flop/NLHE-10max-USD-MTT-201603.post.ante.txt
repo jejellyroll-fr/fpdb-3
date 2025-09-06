@@ -22,7 +22,7 @@ Player8: ante processed 10.00
 Player9: ante processed 10.00
 Player0: posts small blind 50.00
 Player9: posts big blind 100.00
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Player8 [Jh 9s]
 Player8: folds
 Player7: folds
@@ -46,7 +46,7 @@ Player0: checks
 Player1: bets 400.00
 Player0: folds
 Uncalled bet (400.00) returned to Player1
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 1200.00
 Board [Qh 2h 3s 7h 4h]
 Seat 9: Player0 folded on the River

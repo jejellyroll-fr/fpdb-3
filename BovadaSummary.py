@@ -68,7 +68,7 @@ class BovadaSummary(TourneySummary):
         Returns:
             re.Pattern[str]: The compiled regular expression for splitting summaries.
         """
-        return re.compile("PokerStars Tournament ") # This is a placeholder for the actual split regex.
+        return re.compile("PokerStars Tournament ")  # This is a placeholder for the actual split regex.
 
     def _get_summary_excerpt(self) -> str:
         """Return a short excerpt from the tournament summary text.
@@ -204,14 +204,16 @@ class BovadaSummary(TourneySummary):
         datetimestr = "2000/01/01 00:00:00"  # default used if time not found
         for a in m1:
             datetimestr = (
-                f"{a.group('Y')}/{a.group('M')}/{a.group('D')} "
-                f"{a.group('H')}:{a.group('MIN')}:{a.group('S')}"
+                f"{a.group('Y')}/{a.group('M')}/{a.group('D')} " f"{a.group('H')}:{a.group('MIN')}:{a.group('S')}"
             )
         self.startTime = datetime.datetime.strptime(
-            datetimestr, "%Y/%m/%d %H:%M:%S",
+            datetimestr,
+            "%Y/%m/%d %H:%M:%S",
         ).replace(tzinfo=datetime.timezone.utc)
         self.startTime = HandHistoryConverter.changeTimezone(
-            self.startTime, "ET", "UTC",
+            self.startTime,
+            "ET",
+            "UTC",
         )
 
     def _initialize_base_properties(self) -> None:
@@ -262,7 +264,13 @@ class BovadaSummary(TourneySummary):
             rank_id = i + 1 if len(win) > 1 else None
             if i == 0:
                 self.addPlayer(
-                    win[0], "Hero", win[1], self.currency, rebuys, addons, rank_id,
+                    win[0],
+                    "Hero",
+                    win[1],
+                    self.currency,
+                    rebuys,
+                    addons,
+                    rank_id,
                 )
             else:
                 self.addPlayer(win[0], "Hero", win[1], self.currency, 0, 0, rank_id)

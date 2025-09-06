@@ -95,11 +95,7 @@ class LoggerRegistry:
             logger: The logger instance to register.
         """
         # Store original level only if not already registered
-        original_level = (
-            logger.level
-            if name not in self._loggers
-            else self._loggers[name].original_level
-        )
+        original_level = logger.level if name not in self._loggers else self._loggers[name].original_level
 
         # Always check if we have saved configuration for this logger
         if name in self._saved_config:
@@ -288,8 +284,7 @@ class LoggerRegistry:
             # Check if root logger has console handlers
             root_logger = logging.getLogger()
             root_has_console_handler = any(
-                isinstance(h, logging.StreamHandler) and not hasattr(h, "baseFilename")
-                for h in root_logger.handlers
+                isinstance(h, logging.StreamHandler) and not hasattr(h, "baseFilename") for h in root_logger.handlers
             )
 
             # If logger propagates, ensure root logger and its handlers allow the new level
@@ -301,16 +296,19 @@ class LoggerRegistry:
                 # Update existing root handlers to allow the new level
                 handlers_updated = 0
                 for handler in root_logger.handlers:
-                    if isinstance(handler, logging.StreamHandler) and not hasattr(
-                        handler, "baseFilename",
-                    ) and handler.level > level:
+                    if (
+                        isinstance(handler, logging.StreamHandler)
+                        and not hasattr(
+                            handler,
+                            "baseFilename",
+                        )
+                        and handler.level > level
+                    ):
                         handler.setLevel(level)
                         handlers_updated += 1
 
                 # If no handlers were found or updated, add a new console handler
                 if not root_has_console_handler and handlers_updated == 0:
-
-
                     console_handler = logging.StreamHandler()
                     console_handler.setLevel(
                         logging.DEBUG,
@@ -326,7 +324,9 @@ class LoggerRegistry:
                     log_format = "%(log_color)s%(asctime)s [%(name)s:%(module)s:%(funcName)s] [%(levelname)s] %(message)s%(reset)s"
                     date_format = "%Y-%m-%d %H:%M:%S"
                     formatter = ColoredFormatter(
-                        fmt=log_format, datefmt=date_format, log_colors=log_colors,
+                        fmt=log_format,
+                        datefmt=date_format,
+                        log_colors=log_colors,
                     )
                     console_handler.setFormatter(formatter)
 
@@ -335,14 +335,11 @@ class LoggerRegistry:
             # If logger doesn't propagate, add handler directly to it
             elif level < logging.ERROR and not actual_python_logger.propagate:
                 has_console_handler = any(
-                    isinstance(h, logging.StreamHandler)
-                    and not hasattr(h, "baseFilename")
+                    isinstance(h, logging.StreamHandler) and not hasattr(h, "baseFilename")
                     for h in actual_python_logger.handlers
                 )
 
                 if not has_console_handler:
-
-
                     console_handler = logging.StreamHandler()
                     console_handler.setLevel(level)
 
@@ -356,7 +353,9 @@ class LoggerRegistry:
                     log_format = "%(log_color)s%(asctime)s [%(name)s:%(module)s:%(funcName)s] [%(levelname)s] %(message)s%(reset)s"
                     date_format = "%Y-%m-%d %H:%M:%S"
                     formatter = ColoredFormatter(
-                        fmt=log_format, datefmt=date_format, log_colors=log_colors,
+                        fmt=log_format,
+                        datefmt=date_format,
+                        log_colors=log_colors,
                     )
                     console_handler.setFormatter(formatter)
 
@@ -388,11 +387,7 @@ class LoggerRegistry:
             logger_info = self._loggers[name]
             if enable:
                 # Restore to original level or INFO if was NOTSET
-                level = (
-                    logger_info.original_level
-                    if logger_info.original_level != logging.NOTSET
-                    else logging.INFO
-                )
+                level = logger_info.original_level if logger_info.original_level != logging.NOTSET else logging.INFO
                 logger_info.logger.setLevel(level)
                 logger_info.current_level = level
             else:
@@ -419,7 +414,9 @@ class LoggerRegistry:
         return self._loggers.get(name)
 
     def filter_loggers(
-        self, pattern: str = "", level_filter: int | None = None,
+        self,
+        pattern: str = "",
+        level_filter: int | None = None,
     ) -> dict[str, LoggerInfo]:
         """Filter registered loggers by name pattern and/or logging level.
 
@@ -796,13 +793,15 @@ class LoggerDevTool:
             level_combo.setCurrentText(logging.getLevelName(info.current_level))
             level_combo.currentTextChanged.connect(
                 lambda level, logger_name=name: self._change_logger_level(
-                    logger_name, level,
+                    logger_name,
+                    level,
                 ),
             )
             # Ensure the combo inherits parent styling and fits properly
             level_combo.setStyleSheet("")  # Clear any default styling to inherit parent
             level_combo.setSizePolicy(
-                level_combo.sizePolicy().Expanding, level_combo.sizePolicy().Fixed,
+                level_combo.sizePolicy().Expanding,
+                level_combo.sizePolicy().Fixed,
             )
             self.tree.setItemWidget(item, 1, level_combo)
 
@@ -898,15 +897,13 @@ class LoggerDevTool:
 
         if reply == QMessageBox.Yes:
             for name, info in self.registry.get_all_loggers().items():
-                default_level = (
-                    info.original_level
-                    if info.original_level != logging.NOTSET
-                    else logging.INFO
-                )
+                default_level = info.original_level if info.original_level != logging.NOTSET else logging.INFO
                 self.registry.set_logger_level(name, default_level)
             self._refresh_loggers()
             QMessageBox.information(
-                self.dialog, "Success", "All loggers have been reset to default values.",
+                self.dialog,
+                "Success",
+                "All loggers have been reset to default values.",
             )
 
     def _save_config(self) -> None:
@@ -923,7 +920,9 @@ class LoggerDevTool:
 
         if success:
             QMessageBox.information(
-                self.dialog, "Success", "Configuration saved successfully!",
+                self.dialog,
+                "Success",
+                "Configuration saved successfully!",
             )
         else:
             QMessageBox.warning(self.dialog, "Error", "Failed to save configuration.")
@@ -950,11 +949,15 @@ class LoggerDevTool:
 
             if success:
                 QMessageBox.information(
-                    self.dialog, "Success", f"Configuration exported to:\n{filename}",
+                    self.dialog,
+                    "Success",
+                    f"Configuration exported to:\n{filename}",
                 )
             else:
                 QMessageBox.warning(
-                    self.dialog, "Error", "Failed to export configuration.",
+                    self.dialog,
+                    "Error",
+                    "Failed to export configuration.",
                 )
 
     def _import_config(self) -> None:
@@ -972,12 +975,16 @@ class LoggerDevTool:
         if filename:
             if self.config.import_config(self.registry, filename):
                 QMessageBox.information(
-                    self.dialog, "Success", "Configuration imported successfully!",
+                    self.dialog,
+                    "Success",
+                    "Configuration imported successfully!",
                 )
                 self._refresh_loggers()
             else:
                 QMessageBox.warning(
-                    self.dialog, "Error", "Failed to import configuration.",
+                    self.dialog,
+                    "Error",
+                    "Failed to import configuration.",
                 )
 
 
@@ -1012,8 +1019,7 @@ def set_default_logging() -> None:
     # Also update console handler if it exists
     for handler in root_logger.handlers:
         if (
-            isinstance(handler, logging.StreamHandler)
-            and not hasattr(handler, "stream")
+            isinstance(handler, logging.StreamHandler) and not hasattr(handler, "stream")
         ) or handler.stream.name == "<stderr>":
             handler.setLevel(logging.ERROR)
 
@@ -1100,7 +1106,6 @@ class FpdbLogFormatter(colorlog.ColoredFormatter):
 
         """
         if not isinstance(message, str):
-
             return message  # If the message is not a string, return it as is
 
         # Define a regex pattern to capture strings enclosed in single or double quotes
@@ -1265,7 +1270,8 @@ class TimedSizedRotatingFileHandler(TimedRotatingFileHandler):
                 dfn,
             )  # Remove the file if it already exists to avoid conflicts
         os.rename(
-            self.baseFilename, dfn,
+            self.baseFilename,
+            dfn,
         )  # Rename the current log file to the new name
 
         # Delete old log files if necessary
@@ -1280,9 +1286,7 @@ class TimedSizedRotatingFileHandler(TimedRotatingFileHandler):
         # Calculate the next rollover time based on the current time
         new_rollover_at = self.computeRollover(current_time)
         while new_rollover_at <= current_time:
-            new_rollover_at += (
-                self.interval
-            )  # Add the interval until rolloverAt is in the future
+            new_rollover_at += self.interval  # Add the interval until rolloverAt is in the future
         self.rolloverAt = new_rollover_at  # Update rolloverAt
 
     def getFilesToDelete(self) -> list[str]:
@@ -1358,9 +1362,14 @@ def ensure_console_handlers_configured() -> None:
 
             # Update existing console handlers
             for handler in root_logger.handlers:
-                if isinstance(handler, logging.StreamHandler) and not hasattr(
-                    handler, "baseFilename",
-                ) and handler.level > min_level:
+                if (
+                    isinstance(handler, logging.StreamHandler)
+                    and not hasattr(
+                        handler,
+                        "baseFilename",
+                    )
+                    and handler.level > min_level
+                ):
                     handler.setLevel(min_level)
 
     except Exception as e:
@@ -1392,8 +1401,7 @@ def setup_logging(log_dir: str | None = None, *, console_only: bool = False) -> 
             "ERROR": "red",
         }
         log_format = (
-            "%(log_color)s%(asctime)s [%(name)s:%(module)s:%(funcName)s] "
-            "[%(levelname)s] %(message)s%(reset)s"
+            "%(log_color)s%(asctime)s [%(name)s:%(module)s:%(funcName)s] " "[%(levelname)s] %(message)s%(reset)s"
         )
         date_format = "%Y-%m-%d %H:%M:%S"
         formatter = colorlog.ColoredFormatter(
@@ -1419,7 +1427,8 @@ def setup_logging(log_dir: str | None = None, *, console_only: bool = False) -> 
             # Set the log directory if not specified
             if log_dir is None:
                 log_dir = os.path.join(
-                    os.path.expanduser("~"), "fpdb_logs",
+                    os.path.expanduser("~"),
+                    "fpdb_logs",
                 )
             log_dir = os.path.normpath(log_dir)  # Normalize the directory path
             os.makedirs(  # noqa: PTH103
@@ -1500,9 +1509,7 @@ class FpdbLogger:
             **kwargs: Keyword arguments for message formatting.
 
         """
-        stacklevel = (
-            self._get_stacklevel()
-        )  # Calculate stack level for accurate information
+        stacklevel = self._get_stacklevel()  # Calculate stack level for accurate information
         self.logger.debug(msg, *args, stacklevel=stacklevel, **kwargs)
 
     def info(self, msg: str, *args: Any, **kwargs: Any) -> None:

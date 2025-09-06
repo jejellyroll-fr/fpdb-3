@@ -1,10 +1,10 @@
 Hand#2589013774000145 - New Castle (Turbo 6-max) 13774 -- $0.02/$0.04 FL Hold'em -- 2011/05/08 - 10:21:06
-Seat 1: Play***1 ($16.69 in chips) 
-Seat 2: Play***2 ($0.95 in chips) 
-Seat 3: Vill***1 ($0.29 in chips) 
+Seat 1: Play***1 ($16.69 in chips)
+Seat 2: Play***2 ($0.95 in chips)
+Seat 3: Vill***1 ($0.29 in chips)
 Seat 8: Hero ($1.97 in chips) DEALER
-Seat 9: Play***3 ($1.35 in chips) 
-Seat 10: Play***4 ($4.54 in chips) 
+Seat 9: Play***3 ($1.35 in chips)
+Seat 10: Play***4 ($4.54 in chips)
 Play***3: posts small blind $0.01
 Play***4: posts big blind $0.02
 Dealt to Hero [5s,Kd]
@@ -34,7 +34,5 @@ Play***3: calls $0.04
 ***SHOW DOWN***
 Play***4: shows [7d Qh] (Three of a Kind Sevens  )
 Play***3: mucks
-Play***4 wins $0.66 with Three of a Kind Sevens   
+Play***4 wins $0.66 with Three of a Kind Sevens
 Play***3: mucks [9h,As] (TwoPair) .
-
-

@@ -11,7 +11,7 @@ Player4 posts small blind 2€
 Player0 posts big blind 4€
 Player2 posts small blind 2€ out of position
 Dealt to Hero [8h 5d 2h 7h 4c]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player1 folds
 Hero folds
 Player2 calls 4€

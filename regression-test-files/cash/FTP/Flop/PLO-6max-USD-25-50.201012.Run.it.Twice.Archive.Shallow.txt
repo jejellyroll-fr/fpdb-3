@@ -55,5 +55,3 @@ Seat 1: Player1 (big blind) folded before the Flop
 Seat 3: Player3 showed [2s 9c Ac 5s] and won ($1,859) with two pair, Nines and Sixes
 Seat 4: Player4 (button) didn't bet (folded)
 Seat 6: Hero (small blind) showed [9s Jc 8c 7s] and lost with two pair, Nines and Sixes
-
-

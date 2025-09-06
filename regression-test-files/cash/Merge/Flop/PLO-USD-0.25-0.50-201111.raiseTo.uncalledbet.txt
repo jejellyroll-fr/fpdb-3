@@ -44,4 +44,3 @@
 	<round id="END_OF_GAME" sequence="6">
 	</round>
 </game>
-

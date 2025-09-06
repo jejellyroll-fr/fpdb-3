@@ -26,7 +26,7 @@ Player5 folds
 Player6 folds
 Player7 folds
 Player0 calls 1480 [all in]
---- 
+---
 --- Dealing flop [3s, 6s, 7s]
 --- Dealing turn [6h]
 --- Dealing river [5s]

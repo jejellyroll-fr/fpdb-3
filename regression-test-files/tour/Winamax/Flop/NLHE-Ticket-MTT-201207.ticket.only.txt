@@ -14,7 +14,7 @@ Seat 10: Hero (1500)
 Player6 posts small blind 10
 Player7 posts big blind 20
 Dealt to Hero [Qc 8c]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player8 folds
 Hero folds
 Player0 raises 40 to 60

@@ -38,4 +38,3 @@ Seat 5: Player2 (12.88)
 Seat 6: Hero (14.18)
 Seat 8: Player4 (8.60), net: -0.40
 ***** End of hand R5-73910684-276 *****
-

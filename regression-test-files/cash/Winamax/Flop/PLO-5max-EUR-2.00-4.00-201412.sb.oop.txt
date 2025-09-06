@@ -10,7 +10,7 @@ Incognito 4 posts small blind 2€
 Hero posts big blind 4€
 Incognito 2 posts small blind 2€ out of position
 Dealt to Hero [4c Qc 4h Qd]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Incognito 1 folds
 Incognito 2 folds
 Incognito 3 raises 8€ to 12€

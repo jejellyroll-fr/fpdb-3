@@ -8,7 +8,6 @@ Tests all branches and edge cases of the markStreets method including:
 - Edge cases and error conditions
 """
 
-import re
 import unittest
 from unittest.mock import Mock, patch
 
@@ -17,18 +16,18 @@ from PokerStarsToFpdb import PokerStars
 
 class TestPokerStarsMarkStreets(unittest.TestCase):
     """Test suite for PokerStars markStreets method."""
-    
+
     def setUp(self):
         """Set up test fixtures."""
         # Mock the config to avoid file reading errors
         mock_config = Mock()
-        
+
         # Create parser with dummy path to avoid None path error
-        self.parser = PokerStars(config=mock_config, in_path='dummy_test_file.txt')
-        
+        self.parser = PokerStars(config=mock_config, in_path="dummy_test_file.txt")
+
         # Set site_id (not siteId - it's a property)
         self.parser.site_id = 32  # Default PokerStars site ID
-        
+
     def _create_mock_hand(self, game_type=None, hand_text=""):
         """Create a mock hand object with specified properties."""
         hand = Mock()
@@ -45,33 +44,27 @@ Player1: discards 2 cards
 Hero: stands pat
 Player2: discards 1 card
 *** SUMMARY ***"""
-        
-        hand = self._create_mock_hand(
-            {"category": "27_1draw", "base": "draw", "split": False},
-            hand_text
-        )
-        
+
+        hand = self._create_mock_hand({"category": "27_1draw", "base": "draw", "split": False}, hand_text)
+
         self.parser.markStreets(hand)
-        
+
         # Should add DRAW marker
         self.assertIn("*** DRAW ***", hand.handText)
         hand.addStreets.assert_called_once()
-        
+
     def test_markstreets_27_1draw_no_discard(self):
         """Test markStreets for 27_1draw without discard action."""
         hand_text = """*** DEALING HANDS ***
 Dealt to Hero [As Ks Qh Jh Ts]
 All players fold
 *** SUMMARY ***"""
-        
-        hand = self._create_mock_hand(
-            {"category": "27_1draw", "base": "draw", "split": False},
-            hand_text
-        )
-        
+
+        hand = self._create_mock_hand({"category": "27_1draw", "base": "draw", "split": False}, hand_text)
+
         original_text = hand_text
         self.parser.markStreets(hand)
-        
+
         # Should not modify hand text if no discard pattern found
         self.assertEqual(hand.handText, original_text)
         hand.addStreets.assert_called_once()
@@ -83,14 +76,11 @@ Dealt to Hero [2s 3h 4d 5c 6s]
 Player1: discards 3 cards [2h 7d 8c]
 Hero: discards 1 card [6s]
 *** SUMMARY ***"""
-        
-        hand = self._create_mock_hand(
-            {"category": "fivedraw", "base": "draw", "split": False},
-            hand_text
-        )
-        
+
+        hand = self._create_mock_hand({"category": "fivedraw", "base": "draw", "split": False}, hand_text)
+
         self.parser.markStreets(hand)
-        
+
         # Should add DRAW marker
         self.assertIn("*** DRAW ***", hand.handText)
         hand.addStreets.assert_called_once()
@@ -105,12 +95,9 @@ Dealt to Hero [As Ks]
 *** FIRST RIVER *** [Qh Jh Ts 9h] [7h]
 *** SECOND RIVER *** [Qh Jh Ts 8h] [6h]
 *** SUMMARY ***"""
-        
-        hand = self._create_mock_hand(
-            {"base": "hold", "split": True, "category": "holdem"},
-            hand_text
-        )
-        
+
+        hand = self._create_mock_hand({"base": "hold", "split": True, "category": "holdem"}, hand_text)
+
         self.parser.markStreets(hand)
         hand.addStreets.assert_called_once()
 
@@ -122,12 +109,9 @@ Dealt to Hero [As Ks]
 *** TURN *** [Qh Jh Ts] [9h]
 *** RIVER *** [Qh Jh Ts 9h] [8s]
 *** SUMMARY ***"""
-        
-        hand = self._create_mock_hand(
-            {"base": "hold", "split": False, "category": "holdem"},
-            hand_text
-        )
-        
+
+        hand = self._create_mock_hand({"base": "hold", "split": False, "category": "holdem"}, hand_text)
+
         self.parser.markStreets(hand)
         hand.addStreets.assert_called_once()
 
@@ -139,16 +123,13 @@ Dealt to Hero [As Ks]
 *** TURN *** [Qh Jh Ts] [9h]
 *** RIVER *** [Qh Jh Ts 9h] [8s]
 *** SUMMARY ***"""
-        
+
         # Mock SITE_BOVADA constant
-        with patch('PokerStarsToFpdb.SITE_BOVADA', 12):
+        with patch("PokerStarsToFpdb.SITE_BOVADA", 12):
             self.parser.site_id = 12  # SITE_BOVADA
-            
-            hand = self._create_mock_hand(
-                {"base": "hold", "split": False, "category": "holdem"},
-                hand_text
-            )
-            
+
+            hand = self._create_mock_hand({"base": "hold", "split": False, "category": "holdem"}, hand_text)
+
             self.parser.markStreets(hand)
             hand.addStreets.assert_called_once()
 
@@ -172,12 +153,9 @@ Dealt to Hero [Qh Jh 9h] [Th]
 Dealt to Player1 [8s]
 Dealt to Hero [Kh]
 *** SUMMARY ***"""
-        
-        hand = self._create_mock_hand(
-            {"base": "stud", "split": False, "category": "studhi"},
-            hand_text
-        )
-        
+
+        hand = self._create_mock_hand({"base": "stud", "split": False, "category": "studhi"}, hand_text)
+
         self.parser.markStreets(hand)
         hand.addStreets.assert_called_once()
 
@@ -189,12 +167,9 @@ Dealt to Player1 [Xx Xx] [3c]
 *** 4th STREET ***
 Dealt to Player1 [3c] [7h]
 *** SUMMARY ***"""
-        
-        hand = self._create_mock_hand(
-            {"base": "stud", "split": False, "category": "studhi"},
-            hand_text
-        )
-        
+
+        hand = self._create_mock_hand({"base": "stud", "split": False, "category": "studhi"}, hand_text)
+
         self.parser.markStreets(hand)
         hand.addStreets.assert_called_once()
 
@@ -212,12 +187,9 @@ Hero: stands pat
 Player1: stands pat
 Hero: stands pat
 *** SUMMARY ***"""
-        
-        hand = self._create_mock_hand(
-            {"base": "draw", "split": False, "category": "triple_draw"},
-            hand_text
-        )
-        
+
+        hand = self._create_mock_hand({"base": "draw", "split": False, "category": "triple_draw"}, hand_text)
+
         self.parser.markStreets(hand)
         hand.addStreets.assert_called_once()
 
@@ -228,12 +200,9 @@ Dealt to Hero [2s 3h 4d 5c 6s]
 *** FIRST DRAW ***
 Player1: discards 3 cards
 *** SUMMARY ***"""
-        
-        hand = self._create_mock_hand(
-            {"base": "draw", "split": False, "category": "triple_draw"},
-            hand_text
-        )
-        
+
+        hand = self._create_mock_hand({"base": "draw", "split": False, "category": "triple_draw"}, hand_text)
+
         self.parser.markStreets(hand)
         hand.addStreets.assert_called_once()
 
@@ -243,12 +212,9 @@ Player1: discards 3 cards
 Dealt to Hero [As Ks]
 *** FLOP *** [Qh Jh Ts]
 *** SUMMARY ***"""
-        
-        hand = self._create_mock_hand(
-            {"base": "hold", "split": False, "category": "holdem"},
-            hand_text
-        )
-        
+
+        hand = self._create_mock_hand({"base": "hold", "split": False, "category": "holdem"}, hand_text)
+
         self.parser.markStreets(hand)
         hand.addStreets.assert_called_once()
 
@@ -259,25 +225,19 @@ Dealt to Hero [As Ks Qh Jh Ts]
 Player1: stands pat
 Hero: discards 1 card
 *** SUMMARY ***"""
-        
-        hand = self._create_mock_hand(
-            {"category": "27_1draw", "base": "draw", "split": False},
-            hand_text
-        )
-        
+
+        hand = self._create_mock_hand({"category": "27_1draw", "base": "draw", "split": False}, hand_text)
+
         self.parser.markStreets(hand)
-        
+
         # Should add DRAW marker
         self.assertIn("*** DRAW ***", hand.handText)
         hand.addStreets.assert_called_once()
 
     def test_markstreets_empty_hand_text(self):
         """Test markStreets with empty hand text."""
-        hand = self._create_mock_hand(
-            {"base": "hold", "split": False, "category": "holdem"},
-            ""
-        )
-        
+        hand = self._create_mock_hand({"base": "hold", "split": False, "category": "holdem"}, "")
+
         # Empty text will cause regex to return None, expect this to raise an error
         with self.assertRaises(AttributeError):
             self.parser.markStreets(hand)
@@ -285,12 +245,9 @@ Hero: discards 1 card
     def test_markstreets_unknown_game_type(self):
         """Test markStreets with unknown game type."""
         hand_text = """Some unknown game format"""
-        
-        hand = self._create_mock_hand(
-            {"base": "unknown", "split": False, "category": "unknown"},
-            hand_text
-        )
-        
+
+        hand = self._create_mock_hand({"base": "unknown", "split": False, "category": "unknown"}, hand_text)
+
         # Unknown game type will cause 'm' to be undefined, expect error
         with self.assertRaises(UnboundLocalError):
             self.parser.markStreets(hand)
@@ -300,20 +257,17 @@ Hero: discards 1 card
         # Test different game types to ensure correct patterns are applied
         # Use realistic hand texts that will match the patterns
         test_cases = [
-            ({"base": "hold", "split": False, "category": "holdem"}, 
-             "*** HOLE CARDS ***\nTest\n*** SUMMARY ***"),
-            ({"base": "hold", "split": True, "category": "holdem"}, 
-             "*** HOLE CARDS ***\nTest\n*** SUMMARY ***"),
-            ({"base": "stud", "split": False, "category": "studhi"}, 
-             "*** 3rd STREET ***\nTest\n*** SUMMARY ***"),
-            ({"base": "draw", "split": False, "category": "27_1draw"}, 
-             "*** DEALING HANDS ***\nTest\n*** SUMMARY ***"),
-            ({"base": "draw", "split": False, "category": "fivedraw"}, 
-             "*** DEALING HANDS ***\nTest\n*** SUMMARY ***"),
-            ({"base": "draw", "split": False, "category": "triple_draw"}, 
-             "*** DEALING HANDS ***\nTest\n*** SUMMARY ***"),
+            ({"base": "hold", "split": False, "category": "holdem"}, "*** HOLE CARDS ***\nTest\n*** SUMMARY ***"),
+            ({"base": "hold", "split": True, "category": "holdem"}, "*** HOLE CARDS ***\nTest\n*** SUMMARY ***"),
+            ({"base": "stud", "split": False, "category": "studhi"}, "*** 3rd STREET ***\nTest\n*** SUMMARY ***"),
+            ({"base": "draw", "split": False, "category": "27_1draw"}, "*** DEALING HANDS ***\nTest\n*** SUMMARY ***"),
+            ({"base": "draw", "split": False, "category": "fivedraw"}, "*** DEALING HANDS ***\nTest\n*** SUMMARY ***"),
+            (
+                {"base": "draw", "split": False, "category": "triple_draw"},
+                "*** DEALING HANDS ***\nTest\n*** SUMMARY ***",
+            ),
         ]
-        
+
         for game_type, hand_text in test_cases:
             with self.subTest(game_type=game_type):
                 hand = self._create_mock_hand(game_type, hand_text)
@@ -327,14 +281,11 @@ Hero: discards 1 card
 Dealt to Hero [As Ks Qh Jh Ts]
 Player1: discards 2 cards
 *** SUMMARY ***"""
-        
-        hand = self._create_mock_hand(
-            {"category": "27_1draw", "base": "draw", "split": False},
-            hand_text
-        )
-        
+
+        hand = self._create_mock_hand({"category": "27_1draw", "base": "draw", "split": False}, hand_text)
+
         self.parser.markStreets(hand)
-        
+
         # Should add DRAW marker with \r\n
         self.assertIn("*** DRAW ***\r\n", hand.handText)
 
@@ -345,20 +296,17 @@ Dealt to Hero [As Ks Qh Jh Ts]
 Player1: discards 2 cards
 More text after discard
 *** SUMMARY ***"""
-        
-        hand = self._create_mock_hand(
-            {"category": "27_1draw", "base": "draw", "split": False},
-            hand_text
-        )
-        
+
+        hand = self._create_mock_hand({"category": "27_1draw", "base": "draw", "split": False}, hand_text)
+
         original_length = len(hand_text)
         self.parser.markStreets(hand)
-        
+
         # Text should be longer due to added DRAW marker
         self.assertGreater(len(hand.handText), original_length)
         # Should contain all original text
         self.assertIn("More text after discard", hand.handText)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

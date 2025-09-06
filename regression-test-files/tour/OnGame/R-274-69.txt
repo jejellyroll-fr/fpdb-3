@@ -31,7 +31,7 @@ besac025 folds
 Chanel777 folds
 sergio92 folds
 slbseia calls 1380 [all in]
---- 
+---
 --- Dealing flop [Tc, 6s, Jc]
 --- Dealing turn [2h]
 --- Dealing river [Kc]
@@ -80,7 +80,7 @@ besac025 folds
 Chanel777 folds
 sergio92 folds
 luciano12 calls 1480 [all in]
---- 
+---
 --- Dealing flop [Ah, 9h, 2d]
 --- Dealing turn [8d]
 --- Dealing river [8s]
@@ -128,7 +128,7 @@ Chanel777 folds
 sergio92 folds
 purdey02 folds
 TIT42 folds
---- 
+---
 --- Dealing flop [Js, Kh, 2c]
 --- Dealing turn [9d]
 --- Dealing river [Tc]

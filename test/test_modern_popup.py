@@ -7,10 +7,11 @@ Comprehensive test suite for the modern popup system.
 import os
 import sys
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock
 
 # Add the parent directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 class TestModernStatRow(unittest.TestCase):
     """Test the ModernStatRow widget."""
@@ -19,11 +20,8 @@ class TestModernStatRow(unittest.TestCase):
     def setUpClass(cls):
         """Set up mocks for modern popup tests."""
         cls._original_modules = {}
-        modules_to_mock = [
-            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets",
-            "Stats", "Popup"
-        ]
-        
+        modules_to_mock = ["PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets", "Stats", "Popup"]
+
         for module_name in modules_to_mock:
             if module_name in sys.modules:
                 cls._original_modules[module_name] = sys.modules[module_name]
@@ -63,7 +61,13 @@ class TestModernStatRow(unittest.TestCase):
         sys.modules["Popup"].Popup = Mock()
 
         # Import modules after mocks are set up
-        global MODERN_POPUP_CLASSES, ModernSectionWidget, ModernStatRow, ModernSubmenu, ModernSubmenuClassic, ModernSubmenuLight
+        global \
+            MODERN_POPUP_CLASSES, \
+            ModernSectionWidget, \
+            ModernStatRow, \
+            ModernSubmenu, \
+            ModernSubmenuClassic, \
+            ModernSubmenuLight
         global EmojiIconProvider, TextIconProvider, ClassicTheme, MaterialDarkTheme, MaterialLightTheme
         from ModernPopup import (
             MODERN_POPUP_CLASSES,
@@ -79,11 +83,8 @@ class TestModernStatRow(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """Clean up mocks after modern popup tests."""
-        modules_to_mock = [
-            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets",
-            "Stats", "Popup"
-        ]
-        
+        modules_to_mock = ["PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets", "Stats", "Popup"]
+
         for module_name in modules_to_mock:
             if module_name in cls._original_modules:
                 sys.modules[module_name] = cls._original_modules[module_name]
@@ -94,13 +95,14 @@ class TestModernStatRow(unittest.TestCase):
         """Test ModernStatRow class exists and has expected structure."""
         # Import without mocking to check real class structure
         import inspect
+
         assert ModernStatRow is not None
-        assert hasattr(ModernStatRow, '__init__')
-        
+        assert hasattr(ModernStatRow, "__init__")
+
         # Check if we can get the real class methods by checking if it's a real class
-        if inspect.isclass(ModernStatRow) and not str(ModernStatRow).startswith('<Mock'):
-            assert hasattr(ModernStatRow, 'setup_ui')
-            assert hasattr(ModernStatRow, 'setup_style')
+        if inspect.isclass(ModernStatRow) and not str(ModernStatRow).startswith("<Mock"):
+            assert hasattr(ModernStatRow, "setup_ui")
+            assert hasattr(ModernStatRow, "setup_style")
         else:
             # If it's mocked, just verify the class exists
             assert ModernStatRow is not None
@@ -125,13 +127,14 @@ class TestModernSectionWidget(unittest.TestCase):
     def test_initialization(self) -> None:
         """Test ModernSectionWidget class structure."""
         import inspect
+
         assert ModernSectionWidget is not None
-        assert hasattr(ModernSectionWidget, '__init__')
-        
+        assert hasattr(ModernSectionWidget, "__init__")
+
         # Check real class methods if not mocked
-        if inspect.isclass(ModernSectionWidget) and not str(ModernSectionWidget).startswith('<Mock'):
-            assert hasattr(ModernSectionWidget, 'setup_ui')
-            assert hasattr(ModernSectionWidget, 'add_stat_row')
+        if inspect.isclass(ModernSectionWidget) and not str(ModernSectionWidget).startswith("<Mock"):
+            assert hasattr(ModernSectionWidget, "setup_ui")
+            assert hasattr(ModernSectionWidget, "add_stat_row")
         else:
             # If mocked, just verify class exists
             assert ModernSectionWidget is not None
@@ -145,8 +148,9 @@ class TestModernSectionWidget(unittest.TestCase):
     def test_add_stat_row(self) -> None:
         """Test add_stat_row method exists."""
         import inspect
-        if inspect.isclass(ModernSectionWidget) and not str(ModernSectionWidget).startswith('<Mock'):
-            assert hasattr(ModernSectionWidget, 'add_stat_row')
+
+        if inspect.isclass(ModernSectionWidget) and not str(ModernSectionWidget).startswith("<Mock"):
+            assert hasattr(ModernSectionWidget, "add_stat_row")
             assert callable(ModernSectionWidget.add_stat_row)
         else:
             # If mocked, just verify class is callable
@@ -159,12 +163,13 @@ class TestModernSubmenu(unittest.TestCase):
     def test_initialization(self) -> None:
         """Test ModernSubmenu class structure."""
         import inspect
+
         assert ModernSubmenu is not None
-        assert hasattr(ModernSubmenu, '__init__')
-        
+        assert hasattr(ModernSubmenu, "__init__")
+
         # Check real class methods if not mocked
-        if inspect.isclass(ModernSubmenu) and not str(ModernSubmenu).startswith('<Mock'):
-            assert hasattr(ModernSubmenu, 'create')
+        if inspect.isclass(ModernSubmenu) and not str(ModernSubmenu).startswith("<Mock"):
+            assert hasattr(ModernSubmenu, "create")
         else:
             assert ModernSubmenu is not None
 
@@ -183,8 +188,9 @@ class TestModernSubmenu(unittest.TestCase):
     def test_create_content(self) -> None:
         """Test create method exists."""
         import inspect
-        if inspect.isclass(ModernSubmenu) and not str(ModernSubmenu).startswith('<Mock'):
-            assert hasattr(ModernSubmenu, 'create')
+
+        if inspect.isclass(ModernSubmenu) and not str(ModernSubmenu).startswith("<Mock"):
+            assert hasattr(ModernSubmenu, "create")
             assert callable(ModernSubmenu.create)
         else:
             # If mocked, just verify class exists
@@ -215,12 +221,17 @@ class TestModernSubmenuVariants(unittest.TestCase):
     def test_modern_submenu_light(self) -> None:
         """Test ModernSubmenuLight exists."""
         import inspect
+
         assert ModernSubmenuLight is not None
         assert callable(ModernSubmenuLight)
-        
+
         # Only check inheritance if both are real classes
-        if (inspect.isclass(ModernSubmenuLight) and inspect.isclass(ModernSubmenu) and
-            not str(ModernSubmenuLight).startswith('<Mock') and not str(ModernSubmenu).startswith('<Mock')):
+        if (
+            inspect.isclass(ModernSubmenuLight)
+            and inspect.isclass(ModernSubmenu)
+            and not str(ModernSubmenuLight).startswith("<Mock")
+            and not str(ModernSubmenu).startswith("<Mock")
+        ):
             assert issubclass(ModernSubmenuLight, ModernSubmenu)
         else:
             # If mocked, just verify they exist
@@ -229,12 +240,17 @@ class TestModernSubmenuVariants(unittest.TestCase):
     def test_modern_submenu_classic(self) -> None:
         """Test ModernSubmenuClassic exists."""
         import inspect
+
         assert ModernSubmenuClassic is not None
         assert callable(ModernSubmenuClassic)
-        
+
         # Only check inheritance if both are real classes
-        if (inspect.isclass(ModernSubmenuClassic) and inspect.isclass(ModernSubmenu) and
-            not str(ModernSubmenuClassic).startswith('<Mock') and not str(ModernSubmenu).startswith('<Mock')):
+        if (
+            inspect.isclass(ModernSubmenuClassic)
+            and inspect.isclass(ModernSubmenu)
+            and not str(ModernSubmenuClassic).startswith("<Mock")
+            and not str(ModernSubmenu).startswith("<Mock")
+        ):
             assert issubclass(ModernSubmenuClassic, ModernSubmenu)
         else:
             # If mocked, just verify they exist
@@ -302,7 +318,9 @@ class TestPopupIntegration(unittest.TestCase):
         for stat_name, value, expected_color_key in test_cases:
             color = get_stat_color(theme, stat_name, value)
             expected_color = theme.get_color(expected_color_key)
-            assert color == expected_color, f"Stat {stat_name} with value {value} should have {expected_color_key} color"
+            assert (
+                color == expected_color
+            ), f"Stat {stat_name} with value {value} should have {expected_color_key} color"
 
     def test_theme_icon_provider_compatibility(self) -> None:
         """Test theme and icon provider compatibility."""
@@ -366,13 +384,14 @@ class TestPerformanceConsiderations(unittest.TestCase):
     def test_large_number_of_stats(self) -> None:
         """Test large stats handling."""
         import inspect
+
         # Test that ModernSectionWidget exists and is callable
         assert ModernSectionWidget is not None
         assert callable(ModernSectionWidget)
-        
+
         # Check method exists if not mocked
-        if inspect.isclass(ModernSectionWidget) and not str(ModernSectionWidget).startswith('<Mock'):
-            assert hasattr(ModernSectionWidget, 'add_stat_row')
+        if inspect.isclass(ModernSectionWidget) and not str(ModernSectionWidget).startswith("<Mock"):
+            assert hasattr(ModernSectionWidget, "add_stat_row")
         else:
             # If mocked, just verify class exists
             assert ModernSectionWidget is not None
@@ -383,8 +402,8 @@ class TestPerformanceConsiderations(unittest.TestCase):
         theme1 = MaterialDarkTheme()
         theme2 = MaterialDarkTheme()
         # Both should be valid theme instances
-        assert hasattr(theme1, 'get_color')
-        assert hasattr(theme2, 'get_color')
+        assert hasattr(theme1, "get_color")
+        assert hasattr(theme2, "get_color")
 
 
 class TestThemeIconProviders(unittest.TestCase):
@@ -395,34 +414,34 @@ class TestThemeIconProviders(unittest.TestCase):
         dark_theme = MaterialDarkTheme()
         light_theme = MaterialLightTheme()
         classic_theme = ClassicTheme()
-        
+
         # All themes should have required methods
         for theme in [dark_theme, light_theme, classic_theme]:
-            assert hasattr(theme, 'get_color')
+            assert hasattr(theme, "get_color")
             assert callable(theme.get_color)
 
     def test_icon_provider_creation(self) -> None:
         """Test that icon providers can be created."""
         emoji_provider = EmojiIconProvider()
         text_provider = TextIconProvider()
-        
+
         # All providers should have required methods
         for provider in [emoji_provider, text_provider]:
-            assert hasattr(provider, 'get_icon')
+            assert hasattr(provider, "get_icon")
             assert callable(provider.get_icon)
-            
+
     def test_icon_provider_returns_strings(self) -> None:
         """Test that icon providers return strings."""
         emoji_provider = EmojiIconProvider()
         text_provider = TextIconProvider()
-        
+
         # Test some common stats
         test_stats = ["vpip", "pfr", "hands", "playername"]
-        
+
         for stat in test_stats:
             emoji_icon = emoji_provider.get_icon(stat)
             text_icon = text_provider.get_icon(stat)
-            
+
             assert isinstance(emoji_icon, str), f"Emoji icon for {stat} should be string"
             assert isinstance(text_icon, str), f"Text icon for {stat} should be string"
             assert len(emoji_icon) > 0, f"Emoji icon for {stat} should not be empty"

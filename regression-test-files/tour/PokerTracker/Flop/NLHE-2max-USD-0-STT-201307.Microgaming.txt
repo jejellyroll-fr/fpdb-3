@@ -140,5 +140,3 @@ Player0 shows: 6 of h, 2 of h
 Player0 wins 720.00 from the main pot
 
 End of game 4962893417
-
-

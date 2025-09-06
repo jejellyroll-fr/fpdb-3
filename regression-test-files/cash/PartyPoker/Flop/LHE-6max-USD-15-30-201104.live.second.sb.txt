@@ -1,11 +1,11 @@
 Game #10398176832 starts.
 
-#Game No : 10398176832 
+#Game No : 10398176832
 ***** Hand History for Game 10398176832 *****
 $15/$30 USD Texas Hold'em - Monday, April 25, 09:42:13 BST 2011
 Table Table  125413 (Real Money)
 Seat 3 is the button
-Total number of players : 4/6 
+Total number of players : 4/6
 Seat 3: Player0 ( $964 USD )
 Seat 5: Hero ( $905 USD )
 Seat 6: Player1 ( $150 USD )

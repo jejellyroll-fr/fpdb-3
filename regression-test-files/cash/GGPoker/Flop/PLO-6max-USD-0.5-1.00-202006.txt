@@ -10,11 +10,11 @@ Seat 6: 22a29098 ($41.71 in chips)
 Hero: posts big blind $1
 *** HOLE CARDS ***
 Dealt to Hero [As 7s 7h 7d]
-Dealt to 677d2b55 
-Dealt to 2f51798b 
-Dealt to 725ec8c4 
-Dealt to 33236e1c 
-Dealt to 22a29098 
+Dealt to 677d2b55
+Dealt to 2f51798b
+Dealt to 725ec8c4
+Dealt to 33236e1c
+Dealt to 22a29098
 677d2b55: raises $2.5 to $3.5
 2f51798b: calls $3.5
 725ec8c4: calls $3.5
@@ -64,11 +64,11 @@ Hero: posts small blind $0.5
 677d2b55: posts big blind $1
 *** HOLE CARDS ***
 Dealt to Hero [Qs 9h 6c 4s]
-Dealt to 677d2b55 
-Dealt to 2f51798b 
-Dealt to 725ec8c4 
-Dealt to 33236e1c 
-Dealt to 22a29098 
+Dealt to 677d2b55
+Dealt to 2f51798b
+Dealt to 725ec8c4
+Dealt to 33236e1c
+Dealt to 22a29098
 2f51798b: raises $2 to $3
 725ec8c4: folds
 33236e1c: calls $3
@@ -104,11 +104,11 @@ Seat 6: 22a29098 ($35.26 in chips)
 2f51798b: posts big blind $1
 *** HOLE CARDS ***
 Dealt to Hero [Ac Kc 7h 2d]
-Dealt to 677d2b55 
-Dealt to 2f51798b 
-Dealt to 725ec8c4 
-Dealt to 33236e1c 
-Dealt to 22a29098 
+Dealt to 677d2b55
+Dealt to 2f51798b
+Dealt to 725ec8c4
+Dealt to 33236e1c
+Dealt to 22a29098
 725ec8c4: folds
 33236e1c: folds
 22a29098: folds
@@ -140,11 +140,11 @@ Seat 6: 22a29098 ($35.26 in chips)
 725ec8c4: posts big blind $1
 *** HOLE CARDS ***
 Dealt to Hero [Qd Jc 8h 4d]
-Dealt to 677d2b55 
-Dealt to 2f51798b 
-Dealt to 725ec8c4 
-Dealt to 33236e1c 
-Dealt to 22a29098 
+Dealt to 677d2b55
+Dealt to 2f51798b
+Dealt to 725ec8c4
+Dealt to 33236e1c
+Dealt to 22a29098
 33236e1c: folds
 22a29098: calls $1
 Hero: folds
@@ -188,11 +188,11 @@ Seat 6: 22a29098 ($31.76 in chips)
 33236e1c: posts big blind $1
 *** HOLE CARDS ***
 Dealt to Hero [Jd 9s 9h 6c]
-Dealt to 677d2b55 
-Dealt to 2f51798b 
-Dealt to 725ec8c4 
-Dealt to 33236e1c 
-Dealt to 22a29098 
+Dealt to 677d2b55
+Dealt to 2f51798b
+Dealt to 725ec8c4
+Dealt to 33236e1c
+Dealt to 22a29098
 22a29098: folds
 Hero: folds
 677d2b55: folds
@@ -229,11 +229,11 @@ Seat 6: 22a29098 ($31.76 in chips)
 22a29098: posts big blind $1
 *** HOLE CARDS ***
 Dealt to Hero [Qh 8h 6d 5s]
-Dealt to 677d2b55 
-Dealt to 2f51798b 
-Dealt to 725ec8c4 
-Dealt to 33236e1c 
-Dealt to 22a29098 
+Dealt to 677d2b55
+Dealt to 2f51798b
+Dealt to 725ec8c4
+Dealt to 33236e1c
+Dealt to 22a29098
 Hero: folds
 677d2b55: folds
 2f51798b: folds
@@ -265,11 +265,11 @@ Seat 6: 22a29098 ($30.76 in chips)
 Hero: posts big blind $1
 *** HOLE CARDS ***
 Dealt to Hero [Ad Qh Ts 7s]
-Dealt to 677d2b55 
-Dealt to 2f51798b 
-Dealt to 725ec8c4 
-Dealt to 33236e1c 
-Dealt to 22a29098 
+Dealt to 677d2b55
+Dealt to 2f51798b
+Dealt to 725ec8c4
+Dealt to 33236e1c
+Dealt to 22a29098
 677d2b55: folds
 2f51798b: folds
 725ec8c4: raises $2.5 to $3.5
@@ -311,10 +311,10 @@ Hero: posts small blind $0.5
 677d2b55: posts big blind $1
 *** HOLE CARDS ***
 Dealt to Hero [Qd 8d 7h 5s]
-Dealt to 677d2b55 
-Dealt to 2f51798b 
-Dealt to 33236e1c 
-Dealt to 22a29098 
+Dealt to 677d2b55
+Dealt to 2f51798b
+Dealt to 33236e1c
+Dealt to 22a29098
 2f51798b: raises $2.5 to $3.5
 33236e1c: folds
 22a29098: folds
@@ -343,10 +343,10 @@ Seat 6: 22a29098 ($54.92 in chips)
 2f51798b: posts big blind $1
 *** HOLE CARDS ***
 Dealt to Hero [Jh 5s 5h 3d]
-Dealt to 677d2b55 
-Dealt to 2f51798b 
-Dealt to 33236e1c 
-Dealt to 22a29098 
+Dealt to 677d2b55
+Dealt to 2f51798b
+Dealt to 33236e1c
+Dealt to 22a29098
 33236e1c: folds
 22a29098: calls $1
 Hero: folds
@@ -382,11 +382,11 @@ Seat 6: 22a29098 ($65.75 in chips)
 725ec8c4: posts big blind $1
 *** HOLE CARDS ***
 Dealt to Hero [As Kc Qd 6c]
-Dealt to 677d2b55 
-Dealt to 2f51798b 
-Dealt to 725ec8c4 
-Dealt to 33236e1c 
-Dealt to 22a29098 
+Dealt to 677d2b55
+Dealt to 2f51798b
+Dealt to 725ec8c4
+Dealt to 33236e1c
+Dealt to 22a29098
 33236e1c: folds
 22a29098: folds
 Hero: raises $2.5 to $3.5
@@ -425,10 +425,10 @@ Seat 6: 22a29098 ($65.75 in chips)
 22a29098: posts big blind $1
 *** HOLE CARDS ***
 Dealt to Hero [7d 7c 5h 3h]
-Dealt to 677d2b55 
-Dealt to 2f51798b 
-Dealt to 33236e1c 
-Dealt to 22a29098 
+Dealt to 677d2b55
+Dealt to 2f51798b
+Dealt to 33236e1c
+Dealt to 22a29098
 Hero: folds
 677d2b55: folds
 2f51798b: folds
@@ -456,10 +456,10 @@ Seat 5: 33236e1c ($100 in chips)
 Hero: posts big blind $1
 *** HOLE CARDS ***
 Dealt to Hero [Ad Qc Tc 5d]
-Dealt to 677d2b55 
-Dealt to 2f51798b 
-Dealt to e30a96d3 
-Dealt to 33236e1c 
+Dealt to 677d2b55
+Dealt to 2f51798b
+Dealt to e30a96d3
+Dealt to 33236e1c
 677d2b55: folds
 2f51798b: raises $2.5 to $3.5
 e30a96d3: folds
@@ -490,10 +490,10 @@ Hero: posts small blind $0.5
 677d2b55: posts big blind $1
 *** HOLE CARDS ***
 Dealt to Hero [Jd Jc 4s 2h]
-Dealt to 677d2b55 
-Dealt to 2f51798b 
-Dealt to e30a96d3 
-Dealt to 33236e1c 
+Dealt to 677d2b55
+Dealt to 2f51798b
+Dealt to e30a96d3
+Dealt to 33236e1c
 2f51798b: folds
 e30a96d3: calls $1
 33236e1c: raises $3.5 to $4.5
@@ -515,5 +515,3 @@ Seat 2: 677d2b55 (big blind) folded on the Flop
 Seat 3: 2f51798b folded before Flop (didn't bet)
 Seat 4: e30a96d3 folded before Flop
 Seat 5: 33236e1c (button) won ($10.5)
-
-

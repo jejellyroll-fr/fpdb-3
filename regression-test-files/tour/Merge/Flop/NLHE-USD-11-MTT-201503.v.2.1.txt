@@ -487,4 +487,3 @@
         <winner amount="4590.00" uncalled="false" potnumber="2" player="6" pottype="n" hand="Three of a Kind Jacks" />
     </round>
 </game>
-

@@ -1,9 +1,9 @@
-#Game No : 11792805420 
+#Game No : 11792805420
 ***** Hand History for Game 11792805420 *****
 FL 7 Card Stud $6 USD Buy-in Trny:69784932 Level:2  Stakes-Antes(60/120-10) - Wednesday, May 30, 14:41:43 EDT 2012
 Table Regular (2629813) Table #2 (Real Money)
 Seat 0 is the button
-Total number of players : 8/8 
+Total number of players : 8/8
 Seat 1: Hero ( 2,930 )
 Seat 4: Player0 ( 3,955 )
 Seat 6: Player1 ( 3,510 )
@@ -12,7 +12,7 @@ Seat 5: Player3 ( 2,420 )
 Seat 8: Player4 ( 2,910 )
 Seat 3: Player5 ( 2,515 )
 Seat 7: Player6 ( 2,330 )
-Trny:69784932 Level:2 
+Trny:69784932 Level:2
 Stakes-Antes(60/120-10)
 Hero posts ante [10]
 Player2 posts ante [10]

@@ -182,7 +182,8 @@ class WinamaxSummary(TourneySummary):
                     self.entries = value
                 elif label == "D\xc3\xa9but du tournoi":
                     self.startTime = datetime.datetime.strptime(
-                        value, "%d-%m-%Y %H:%M",
+                        value,
+                        "%d-%m-%Y %H:%M",
                     ).replace(tzinfo=datetime.timezone.utc)
 
     def _parse_buyin(self, value: str) -> None:
@@ -359,6 +360,7 @@ class WinamaxSummary(TourneySummary):
 
         """
         import re
+
         level_match = re.search(r"\[([^,\]]+)", levels_str)
         if not level_match:
             return ""
@@ -426,7 +428,8 @@ class WinamaxSummary(TourneySummary):
             self.prizepool = int(100 * self.convert_to_decimal(mg["PRIZEPOOL2"]))
         if "DATETIME" in mg:
             self.startTime = datetime.datetime.strptime(
-                mg["DATETIME"], "%Y/%m/%d %H:%M:%S UTC",
+                mg["DATETIME"],
+                "%Y/%m/%d %H:%M:%S UTC",
             ).replace(tzinfo=datetime.timezone.utc)
         if "TOURNO" in mg:
             self.tourNo = mg["TOURNO"]
@@ -580,16 +583,18 @@ class WinamaxSummary(TourneySummary):
             winnings += int(100 * self.convert_to_decimal(mg["TICKET"]))
 
         if "BOUNTY" in mg and mg["BOUNTY"] is not None:
-            ko_count = (
-                100
-                * self.convert_to_decimal(mg["BOUNTY"])
-                / Decimal(self.koBounty)
-            )
+            ko_count = 100 * self.convert_to_decimal(mg["BOUNTY"]) / Decimal(self.koBounty)
             if winnings == 0:
                 self.currency = self._determine_currency(mg["BOUNTY"])
 
         self.addPlayer(
-            rank, name, winnings, self.currency, rebuy_count, add_on_count, ko_count,
+            rank,
+            name,
+            winnings,
+            self.currency,
+            rebuy_count,
+            add_on_count,
+            ko_count,
         )
 
     def parseSummaryFile(self) -> None:
@@ -654,18 +659,23 @@ class WinamaxSummary(TourneySummary):
                     # Convert to same units (both should be in centimes)
                     multiplier = self.prizepool / total_buyin
                     self.tourneyMultiplier = round(multiplier)
-                    log.info("Calculated multiplier: prizepool=%s, total_buyin=%s, multiplier=%sx",
-                            self.prizepool, total_buyin, self.tourneyMultiplier)
+                    log.info(
+                        "Calculated multiplier: prizepool=%s, total_buyin=%s, multiplier=%sx",
+                        self.prizepool,
+                        total_buyin,
+                        self.tourneyMultiplier,
+                    )
                 else:
                     self.tourneyMultiplier = 1
-                    log.debug("Cannot calculate multiplier: prizepool=%s, buyin=%s, fee=%s",
-                            getattr(self, "prizepool", None),
-                            getattr(self, "buyin", None),
-                            getattr(self, "fee", None))
+                    log.debug(
+                        "Cannot calculate multiplier: prizepool=%s, buyin=%s, fee=%s",
+                        getattr(self, "prizepool", None),
+                        getattr(self, "buyin", None),
+                        getattr(self, "fee", None),
+                    )
             else:
                 self.tourneyMultiplier = 1
 
-            log.info("Lottery tournament: lottery=%s, multiplier=%s",
-                    self.isLottery, self.tourneyMultiplier)
+            log.info("Lottery tournament: lottery=%s, multiplier=%s", self.isLottery, self.tourneyMultiplier)
         else:
             log.debug("Not an Expresso tournament: %s", tournament_name)

@@ -1,9 +1,9 @@
-#Game No : 13290328324 
+#Game No : 13290328324
 ***** Hand History for Game 13290328324 *****
 $0.10/$0.25 USD NL Texas Hold'em - Saturday, September 21, 16:06:03 EDT 2013
 Table Le Mans (Real Money)
 Seat 5 is the button
-Total number of players : 5/6 
+Total number of players : 5/6
 Seat 2: Player0 ( $41.38 USD )
 Seat 3: Player1 ( $25 USD )
 Seat 1: Hero ( $57.18 USD )

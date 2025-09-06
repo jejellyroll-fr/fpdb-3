@@ -9,12 +9,12 @@ Seat 6: Player6 (1.98€)
 Seat 7: Player7 (2.95€)
 Seat 8: Player8 (6.43€)
 Seat 9: Player9 (6.52€)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 Player6 posts small blind 0.02€
 Player7 posts big blind 0.05€
 Player1 posts big blind 0.05€ out of position
 Dealt to Hero [8d 8h]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player8 raises 0.17€ to 0.22€
 Player9 calls 0.22€
 Player1 folds
@@ -54,5 +54,3 @@ Seat 6: Player6 (small blind) folded on the pre-flop
 Seat 7: Player7 (big blind) folded on the pre-flop
 Seat 8: Player8 showed [Ac 7c] and won 1.29€ with High card : Ace
 Seat 9: Player9 folded on the river
-
-

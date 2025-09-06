@@ -73,7 +73,7 @@ The project uses unified test scripts for consistent behavior across platforms:
 ### pytest.ini
 ```ini
 [pytest]
-addopts = 
+addopts =
     -v
     --tb=short
     --strict-markers

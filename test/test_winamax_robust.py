@@ -103,8 +103,9 @@ class TestWinamaxRobust(unittest.TestCase):
         assert len(supported) > 0
 
         # Check format - verify all games are lists with 3 elements
-        assert all(isinstance(game, list) and len(game) == 3 for game in supported), \
-            "All games should be lists with 3 elements [type, base, limit]"
+        assert all(
+            isinstance(game, list) and len(game) == 3 for game in supported
+        ), "All games should be lists with 3 elements [type, base, limit]"
 
         # Check that hold games exist
         hold_games = [g for g in supported if "hold" in g]

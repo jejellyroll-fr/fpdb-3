@@ -60,13 +60,13 @@ Pot sizes: $0.32
 Pot sizes: $1.02
 Pot sizes: $0.38
 Taking Rake of $0.17 from pot 2
-Player3 has Straight, 7 high 
-Player3 wins $0.38 from side pot #2 with: Straight, 7 high 
-Player0 has Straight, 7 high 
-Player3 ties side pot #1, and wins $0.43 with: Straight, 7 high 
-Player0 ties side pot #1, and wins $0.42 with: Straight, 7 high 
-Player3 ties, and wins $0.16 with: Straight, 7 high 
-Player0 ties, and wins $0.16 with: Straight, 7 high 
+Player3 has Straight, 7 high
+Player3 wins $0.38 from side pot #2 with: Straight, 7 high
+Player0 has Straight, 7 high
+Player3 ties side pot #1, and wins $0.43 with: Straight, 7 high
+Player0 ties side pot #1, and wins $0.42 with: Straight, 7 high
+Player3 ties, and wins $0.16 with: Straight, 7 high
+Player0 ties, and wins $0.16 with: Straight, 7 high
 Seat 1: Player0 - $0.58
 Seat 2: Hero - $6.09
 Seat 3: Player1 - $4.08

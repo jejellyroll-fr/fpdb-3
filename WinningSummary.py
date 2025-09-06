@@ -15,7 +15,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 In the "official" distribution you can find the license in agpl-3.0.txt.
 """
 
-
 import datetime
 import re
 from decimal import Decimal
@@ -54,7 +53,8 @@ class WinningSummary(TourneySummary):
     re_identify = re.compile(r'<link\sid="ctl00_CalendarTheme"')
 
     re_html_player = re.compile(
-        r"Player\sDetails:\s{PLYR}</a>".format(**substitutions), re.IGNORECASE,
+        r"Player\sDetails:\s{PLYR}</a>".format(**substitutions),
+        re.IGNORECASE,
     )
 
     re_html_tourney_info = re.compile(
@@ -160,17 +160,11 @@ class WinningSummary(TourneySummary):
         if info["FEE"] is not None:
             self.fee = int(100 * Decimal(self.clearMoneyString(info["FEE"])))
 
-        if (
-            "REBUYS" in info
-            and Decimal(self.clearMoneyString(info["REBUYS"].replace(" ", ""))) > 0
-        ):
+        if "REBUYS" in info and Decimal(self.clearMoneyString(info["REBUYS"].replace(" ", ""))) > 0:
             self.isRebuy = True
             self.rebuyCost = self.buyin
 
-        if (
-            "ADDONS" in info
-            and Decimal(self.clearMoneyString(info["ADDONS"].replace(" ", ""))) > 0
-        ):
+        if "ADDONS" in info and Decimal(self.clearMoneyString(info["ADDONS"].replace(" ", ""))) > 0:
             self.isAddOn = True
             self.addOnCost = self.buyin
 
@@ -213,10 +207,13 @@ class WinningSummary(TourneySummary):
                     a.group("AMPM"),
                 )
                 self.startTime = datetime.datetime.strptime(
-                    datetimestr, "%Y/%m/%d %I:%M:%S %p",
+                    datetimestr,
+                    "%Y/%m/%d %I:%M:%S %p",
                 ).replace(tzinfo=datetime.timezone.utc)  # also timezone at end, e.g. " ET"
                 self.startTime = HandHistoryConverter.changeTimezone(
-                    self.startTime, self.import_parameters["timezone"], "UTC",
+                    self.startTime,
+                    self.import_parameters["timezone"],
+                    "UTC",
                 )
 
         if "TOURNEYEND" in info:
@@ -233,10 +230,13 @@ class WinningSummary(TourneySummary):
                     a.group("AMPM"),
                 )
                 self.endTime = datetime.datetime.strptime(
-                    datetimestr, "%Y/%m/%d %I:%M:%S %p",
+                    datetimestr,
+                    "%Y/%m/%d %I:%M:%S %p",
                 ).replace(tzinfo=datetime.timezone.utc)  # also timezone at end, e.g. " ET"
                 self.endTime = HandHistoryConverter.changeTimezone(
-                    self.endTime, self.import_parameters["timezone"], "UTC",
+                    self.endTime,
+                    self.import_parameters["timezone"],
+                    "UTC",
                 )
 
         self.currency = "USD"

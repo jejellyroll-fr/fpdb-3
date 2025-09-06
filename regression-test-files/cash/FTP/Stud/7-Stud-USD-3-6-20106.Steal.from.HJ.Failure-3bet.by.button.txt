@@ -76,6 +76,3 @@ Seat 5: Hero showed [Jd Td As Jc Js 7h 2s] and won ($72.50) with three of a kind
 Seat 6: arjun1111 folded on 4th St.
 Seat 7: thebear666 mucked [Kd 7c Kc 2h 3s 4d 5h] - a pair of Kings
 Seat 8: shasatipu folded on 4th St.
-
-
-

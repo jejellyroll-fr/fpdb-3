@@ -99,10 +99,10 @@ class Importer:
     #Set functions
     def setMode(self, value):
         self.mode = value
-        
+
     def setCallHud(self, value):
         self.callHud = value
-        
+
     def setCacheSessions(self, value):
         self.cacheSessions = value
 
@@ -157,7 +157,7 @@ class Importer:
         ttime100 = ttime * 100
         self.database.updateFile([type, now, now, hands, stored, dups, partial, skipped, errs, ttime100, True, id])
         self.database.commit()
-    
+
     def addFileToList(self, fpdbfile):
         """FPDBFile"""
         file = os.path.splitext(os.path.basename(fpdbfile.path))[0]
@@ -170,7 +170,7 @@ class Importer:
             now = datetime.datetime.utcnow()
             fpdbfile.fileId = self.database.storeFile([file, fpdbfile.site.name, now, now, 0, 0, 0, 0, 0, 0, 0, False])
             self.database.commit()
-            
+
     #Add an individual file to filelist
     def addImportFile(self, filename, site = "auto"):
         #print "addimportfile: filename is a", filename.__class__
@@ -184,7 +184,7 @@ class Importer:
         else:
             log.error("Importer.addImportFile: siteId Failed for: '%s'" % filename)
             return False
-        
+
         self.addFileToList(fpdbfile)
         self.filelist[filename] = fpdbfile
         if site not in self.siteIds:
@@ -267,7 +267,7 @@ class Importer:
         endtime = time()
         return (totstored, totdups, totpartial, totskipped, toterrors, endtime-starttime)
     # end def runImport
-    
+
     def runPostImport(self):
         self.database.cleanUpTourneyTypes()
         self.database.cleanUpWeeksMonths()
@@ -286,12 +286,12 @@ class Importer:
         fileerrorcount = 0
         moveimportedfiles = False #TODO need to wire this into GUI and make it prettier
         movefailedfiles = False #TODO and this too
-        
+
         #prepare progress popup window
         ProgressDialog = ImportProgressDialog(len(self.filelist), self.parent)
         ProgressDialog.resize(500, 200)
         ProgressDialog.show()
-        
+
         for f in self.filelist:
             filecount = filecount + 1
             ProgressDialog.progress_update(f, str(self.database.getHandCount()))
@@ -311,12 +311,12 @@ class Importer:
                     fileerrorcount = fileerrorcount + 1
                     if movefailedfiles:
                         shutil.move(file, "c:\\fpdbfailed\\%d-%s" % (fileerrorcount, os.path.basename(file[3:]) ) )
-            
+
             self.logImport('bulk', f, stored, duplicates, partial, skipped, errors, ttime, self.filelist[f].fileId)
 
         ProgressDialog.accept()
         del ProgressDialog
-        
+
         return (totstored, totdups, totpartial, totskipped, toterrors)
     # end def importFiles
 
@@ -420,22 +420,22 @@ class Importer:
 
         # Load filter, process file, pass returned filename to import_fpdb_file
         log.info(_("Converting %s") % fpdbfile.path)
-            
+
         filter_name = fpdbfile.site.filter_name
         mod = __import__(fpdbfile.site.hhc_fname)
         obj = getattr(mod, filter_name, None)
         if callable(obj):
-            
+
             if fpdbfile.path in self.pos_in_file:  idx = self.pos_in_file[fpdbfile.path]
             else: self.pos_in_file[fpdbfile.path], idx = 0, 0
-                
+
             hhc = obj( self.config, in_path = fpdbfile.path, index = idx, autostart=False
                       ,starsArchive = fpdbfile.archive
                       ,ftpArchive   = fpdbfile.archive
                       ,sitename     = fpdbfile.site.name)
             hhc.setAutoPop(self.mode=='auto')
             hhc.start()
-            
+
             self.pos_in_file[file] = hhc.getLastCharacterRead()
             #Tally the results
             partial  = getattr(hhc, 'numPartial')
@@ -445,7 +445,7 @@ class Importer:
             stored -= errors
             stored -= partial
             stored -= skipped
-            
+
             if stored > 0:
                 if self.caller: self.progressNotify()
                 handlist = hhc.getProcessedHands()
@@ -453,18 +453,18 @@ class Importer:
                 self.pos_in_file[fpdbfile.path] = hhc.getLastCharacterRead()
                 (phands, ahands, ihands, to_hud) = ([], [], [], [])
                 self.database.resetBulkCache()
-                
+
                 ####Lock Placeholder####
                 for hand in handlist:
                     hand.prepInsert(self.database, printtest = self.settings['testData'])
                     ahands.append(hand)
                 self.database.commit()
                 ####Lock Placeholder####
-                
+
                 for hand in ahands:
                     hand.assembleHand()
                     phands.append(hand)
-                
+
                 ####Lock Placeholder####
                 backtrack = False
                 id = self.database.nextHandId()
@@ -476,7 +476,7 @@ class Importer:
                         hand.updateSessionsCache(self.database, None, doinsert)
                         hand.insertHands(self.database, fpdbfile.fileId, doinsert, self.settings['testData'])
                         hand.updateCardsCache(self.database, None, doinsert)
-                        hand.updatePositionsCache(self.database, None, doinsert) 
+                        hand.updatePositionsCache(self.database, None, doinsert)
                         hand.updateHudCache(self.database, doinsert)
                         hand.updateTourneyResults(self.database)
                         ihands.append(hand)
@@ -509,7 +509,7 @@ class Importer:
                 #log.debug("DEBUG: hand.updateHudCache: %s" % (t7tot))
                 self.database.commit()
                 ####Lock Placeholder####
-                
+
                 for i in range(len(ihands)):
                     doinsert = len(ihands)==i+1
                     hand = ihands[i]
@@ -532,16 +532,16 @@ class Importer:
                     self.handhistoryconverter = hhc
         elif (self.mode=='auto'):
             return (0, 0, partial, skipped, errors, time() - ttime)
-        
+
         stored -= duplicates
-        
+
         if stored>0 and ihands[0].gametype['type']=='tour':
             if hhc.summaryInFile:
                 fpdbfile.ftype = "both"
 
         ttime = time() - ttime
         return (stored, duplicates, partial, skipped, errors, ttime)
-    
+
     def autoSummaryGrab(self, force = False):
         for f, fpdbfile in self.filelist.items():
             stat_info = os.stat(f)
@@ -581,7 +581,7 @@ class Importer:
     def progressNotify(self):
         "A callback to the interface while events are pending"
         QCoreApplication.processEvents()
-            
+
     def readFile(self, obj, filename, site):
         if filename.endswith('.xls') or filename.endswith('.xlsx') and xlrd:
             obj.hhtype = "xls"
@@ -605,42 +605,42 @@ class Importer:
                 if len(summaryTexts) > 1 and len(summaryTexts[0]) <= 150:
                     del summaryTexts[0]
                     log.warn(_("TourneyImport: Removing text < 150 characters from start of file"))
-                    
+
                 # Sometimes the summary files also have a footer
-                # Remove the last entry if it has < 100 characters   
+                # Remove the last entry if it has < 100 characters
                 if len(summaryTexts) > 1 and len(summaryTexts[-1]) <= 100:
                     summaryTexts.pop()
                     log.warn(_("TourneyImport: Removing text < 100 characters from end of file"))
-        return summaryTexts 
-        
+        return summaryTexts
+
 class ImportProgressDialog(QDialog):
 
     """
     Popup window to show progress
-    
+
     Init method sets up total number of expected iterations
     If no parent is passed to init, command line
     mode assumed, and does not create a progress bar
     """
-    
+
     def __del__(self):
-        
+
         if self.parent:
             self.progress.destroy()
 
 
     def progress_update(self, filename, handcount):
-            
+
         self.fraction += 1
         #update total if fraction exceeds expected total number of iterations
         if self.fraction > self.total:
             self.total = self.fraction
             self.pbar.setRange(0,self.total)
-        
+
         self.pbar.setValue(self.fraction)
-        
+
         self.handcount.setText(_("Database Statistics") + " - " + _("Number of Hands:") + " " + handcount)
-        
+
         now = datetime.datetime.now()
         now_formatted = now.strftime("%H:%M:%S")
         self.progresstext.setText(now_formatted + " - " + _("Importing") + " " +filename+"\n")
@@ -650,7 +650,7 @@ class ImportProgressDialog(QDialog):
         if parent is None:
             return
         QDialog.__init__(self, parent)
-        
+
         self.fraction = 0
         self.total = total
         self.setWindowTitle(_("Importing"))

@@ -63,9 +63,9 @@ Dealing River [Q d]
 Pot sizes: 4,940
 Player3 has Two Pairs: Aces, 6s
 Player3 has no qualifying low hand
-Player6 has Straight, 7 high 
+Player6 has Straight, 7 high
 Player6 has low hand: A2345
-Player6 wins 2,470 with high hand: Straight, 7 high 
+Player6 wins 2,470 with high hand: Straight, 7 high
 Player6 wins 2,470 with low hand: A2345
 Player6 says thank you.
 Seat 1: Player0 - 0
@@ -140,13 +140,13 @@ Pot sizes: 4,450
 Pot sizes: 270
 Player2 has Two Pairs: 8s, 4s
 Player2 has low hand: A3478
-Hero has Straight, 8 high 
+Hero has Straight, 8 high
 Hero has low hand: A4567
-Hero wins 135 from side pot #1 with high hand: Straight, 8 high 
+Hero wins 135 from side pot #1 with high hand: Straight, 8 high
 Hero wins 135 from side pot #1 with low hand: A4567
 Player9 has One Pair: 4s
 Player9 has low hand: A2347
-Hero wins 2,225 with high hand: Straight, 8 high 
+Hero wins 2,225 with high hand: Straight, 8 high
 Player9 wins 2,225 with low hand: A2347
 Seat 1: Player9 - 2,225
 Seat 2: Player10 - 655
@@ -227,9 +227,9 @@ Hero has no qualifying low hand
 Player5 mucks
 Player10 mucks
 Player11 shows [8 h][K h][8 d][3 d]
-Player11 has Flush, King high 
+Player11 has Flush, King high
 Player11 has no qualifying low hand
-Player11 wins 600 with high hand: Flush, King high 
+Player11 wins 600 with high hand: Flush, King high
 There is no qualifying low hand
 Seat 1: Player9 - 2,205
 Seat 2: Player10 - 515
@@ -396,4 +396,3 @@ Seat 8: Player6 - 3,480
 Seat 9: Player7 - 1,190
 Seat 10: Player8 - 1,170
 End of Hand #2087127467
-

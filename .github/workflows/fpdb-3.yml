@@ -302,7 +302,7 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           brew info pyqt@5
           brew install pyqt@5
-          python -m pip install sip==6.6.2 
+          python -m pip install sip==6.6.2
           python -m pip install -e .[build,macos] -vvv
 
       - name: List directory contents

@@ -25,7 +25,7 @@ Player6: posts big blind 0.02
 Player7 has left the table
 Player2: post now 0.02
 Player0: post now 0.02
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero []
 Player5: folds
 Player3: folds
@@ -39,7 +39,7 @@ Player6: bets 0.04
 Player2: folds
 Player0: folds
 Uncalled bet (0.04) returned to Player6
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 0.07 | Rake 0.00
 Board [As 3s 6d]
 Seat 9: Player8 folded before Flop

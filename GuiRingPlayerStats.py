@@ -186,22 +186,20 @@ class GuiRingPlayerStats(QSplitter):
         # Detail filters:  This holds the data used in the popup window, extra values are
         # added at the end of these lists during processing
         #                  sql test,              screen description,        min, max
-        self.handtests = (
-            [  # already in filter class : ['h.seats', 'Number of Players', 2, 10]
-                ["gt.maxSeats", "Size of Table", 2, 10],
-                ["h.playersVpi", "Players who VPI", 0, 10],
-                ["h.playersAtStreet1", "Players at Flop", 0, 10],
-                ["h.playersAtStreet2", "Players at Turn", 0, 10],
-                ["h.playersAtStreet3", "Players at River", 0, 10],
-                ["h.playersAtStreet4", "Players at Street7", 0, 10],
-                ["h.playersAtShowdown", "Players at Showdown", 0, 10],
-                ["h.street0Raises", "Bets to See Flop", 0, 5],
-                ["h.street1Raises", "Bets to See Turn", 0, 5],
-                ["h.street2Raises", "Bets to See River", 0, 5],
-                ["h.street3Raises", "Bets to See Street7", 0, 5],
-                ["h.street4Raises", "Bets to See Showdown", 0, 5],
-            ]
-        )
+        self.handtests = [  # already in filter class : ['h.seats', 'Number of Players', 2, 10]
+            ["gt.maxSeats", "Size of Table", 2, 10],
+            ["h.playersVpi", "Players who VPI", 0, 10],
+            ["h.playersAtStreet1", "Players at Flop", 0, 10],
+            ["h.playersAtStreet2", "Players at Turn", 0, 10],
+            ["h.playersAtStreet3", "Players at River", 0, 10],
+            ["h.playersAtStreet4", "Players at Street7", 0, 10],
+            ["h.playersAtShowdown", "Players at Showdown", 0, 10],
+            ["h.street0Raises", "Bets to See Flop", 0, 5],
+            ["h.street1Raises", "Bets to See Turn", 0, 5],
+            ["h.street2Raises", "Bets to See River", 0, 5],
+            ["h.street3Raises", "Bets to See Street7", 0, 5],
+            ["h.street4Raises", "Bets to See Showdown", 0, 5],
+        ]
 
         self.cardstests = [
             [Card.DATABASE_FILTERS["pair"], ("Pocket pairs")],
@@ -292,11 +290,28 @@ class GuiRingPlayerStats(QSplitter):
             return
 
         self.createStatsTable(
-            vbox, playerids, sitenos, limits, seats, groups, dates, games, currencies,
+            vbox,
+            playerids,
+            sitenos,
+            limits,
+            seats,
+            groups,
+            dates,
+            games,
+            currencies,
         )
 
     def createStatsTable(
-        self, vbox, playerids, sitenos, limits, seats, groups, dates, games, currencies,
+        self,
+        vbox,
+        playerids,
+        sitenos,
+        limits,
+        seats,
+        groups,
+        dates,
+        games,
+        currencies,
     ) -> None:
         startTime = time()
         show_detail = True
@@ -400,9 +415,7 @@ class GuiRingPlayerStats(QSplitter):
         self.cols_to_show = [x for x in self.columns if x[colshow]]
         hgametypeid_idx = colnames.index("hgametypeid")
 
-        assert len(self.liststore) == grid, (
-            "len(self.liststore)=" + str(len(self.liststore)) + " grid-1=" + str(grid)
-        )
+        assert len(self.liststore) == grid, "len(self.liststore)=" + str(len(self.liststore)) + " grid-1=" + str(grid)
         view = QTableView()
         self.liststore.append(QStandardItemModel(0, len(self.cols_to_show), view))
         self.liststore[grid].setSortRole(Qt.UserRole)
@@ -466,10 +479,7 @@ class GuiRingPlayerStats(QSplitter):
                         if ante > 0:
                             value += f" ante: {old_div(ante, 100.0):.2f}"
                         if result[sqlrow][colnames.index("fast")] == 1:
-                            value += (
-                                " "
-                                + fast_names[result[sqlrow][colnames.index("name")]]
-                            )
+                            value += " " + fast_names[result[sqlrow][colnames.index("name")]]
                 else:
                     continue
                 item = QStandardItem("")
@@ -634,15 +644,16 @@ class GuiRingPlayerStats(QSplitter):
             query = query.replace(
                 "<orderbyhgametypeId>",
                 ",case when floor((hp.startcards-1)/13) >= mod((hp.startcards-1),13) then hp.startcards + 0.1 "
-                 " else 13*mod((hp.startcards-1),13) + floor((hp.startcards-1)/13) + 1 "
-                 " end desc ",
+                " else 13*mod((hp.startcards-1),13) + floor((hp.startcards-1)/13) + 1 "
+                " end desc ",
             )
         else:
             query = query.replace("<orderbyhgametypeId>", "")
             groupLevels = "limits" not in groups
             if groupLevels:
                 query = query.replace(
-                    "<hgametypeId>", "p.name",
+                    "<hgametypeId>",
+                    "p.name",
                 )  # need to use p.name for sqlite posn stats to work
             else:
                 query = query.replace("<hgametypeId>", "h.gametypeId")
@@ -672,7 +683,8 @@ class GuiRingPlayerStats(QSplitter):
 
         # Filter on dates
         query = query.replace(
-            "<datestest>", " between '" + dates[0] + "' and '" + dates[1] + "'",
+            "<datestest>",
+            " between '" + dates[0] + "' and '" + dates[1] + "'",
         )
 
         # Group by position?

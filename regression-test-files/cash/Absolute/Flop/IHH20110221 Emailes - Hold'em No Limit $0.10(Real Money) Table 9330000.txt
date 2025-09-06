@@ -51,4 +51,3 @@ Seat 5: PLAYER5 collected Total ($5.70) HI:($5.70) with Two Pair, jacks and five
 Seat 6: PLAYER6 (dealer) Folded on the TURN
 Seat 7: PLAYER7 (small blind) Folded on the POCKET CARDS
 Seat 9: PLAYER9 (big blind) Folded on the TURN
-

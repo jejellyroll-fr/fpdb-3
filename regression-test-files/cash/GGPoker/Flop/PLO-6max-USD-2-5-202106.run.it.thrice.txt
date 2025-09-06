@@ -8,11 +8,11 @@ Seat 6: da026df8 ($183.9 in chips)
 ead75598: posts small blind $2
 d6f789f: posts big blind $5
 *** HOLE CARDS ***
-Dealt to ead75598 
-Dealt to d6f789f 
-Dealt to fe10ec6d 
+Dealt to ead75598
+Dealt to d6f789f
+Dealt to fe10ec6d
 Dealt to Hero [Kh 8s 6h Ks]
-Dealt to da026df8 
+Dealt to da026df8
 fe10ec6d: folds
 Hero: raises $12 to $17
 da026df8: folds

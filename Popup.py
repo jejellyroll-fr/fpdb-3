@@ -3,7 +3,6 @@
 Popup windows for the HUD.
 """
 
-
 import ctypes
 
 from past.utils import old_div
@@ -80,9 +79,7 @@ class Popup(QWidget):
         self.hand_instance = hand_instance
         self.config = config
         self.parent_popup = parent_popup  # parent's instance only used if this popup is a child of another popup
-        self.submenu_count = (
-            0  # used to keep track of active submenus - only one at once allowed
-        )
+        self.submenu_count = 0  # used to keep track of active submenus - only one at once allowed
 
         self.create()
         self.show()
@@ -97,7 +94,8 @@ class Popup(QWidget):
             parentcvp = ctypes.c_void_p(int(parentwinid))
             parentview = NSView(c_void_p=parentcvp)
             parentview.window().addChildWindow_ordered_(
-                selfview.window(), NSWindowAbove,
+                selfview.window(),
+                NSWindowAbove,
             )
         else:
             self.windowHandle().setTransientParent(self.parent().windowHandle())
@@ -226,7 +224,11 @@ class Submenu(Popup):
                     self.grid.addWidget(grid_line[row]["arrow_object"], row - 1, 1)
                 else:
                     self.grid.addWidget(
-                        grid_line[row]["arrow_object"], row - 1, 1, 1, 2,
+                        grid_line[row]["arrow_object"],
+                        row - 1,
+                        1,
+                        1,
+                        2,
                     )
 
             self.grid.addWidget(grid_line[row]["lab"], row - 1, 0)
@@ -340,6 +342,7 @@ def popup_factory(
     if class_to_return is None:
         try:
             import ModernPopup
+
             # Try direct attribute access
             class_to_return = getattr(ModernPopup, pop.pu_class, None)
             if class_to_return is None:
@@ -355,6 +358,11 @@ def popup_factory(
         class_to_return = default
 
     return class_to_return(
-        seat, stat_dict, win, pop, hand_instance, config, parent_popup,
+        seat,
+        stat_dict,
+        win,
+        pop,
+        hand_instance,
+        config,
+        parent_popup,
     )
-

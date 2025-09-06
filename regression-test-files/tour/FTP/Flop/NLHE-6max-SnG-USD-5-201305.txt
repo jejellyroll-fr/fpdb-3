@@ -697,4 +697,3 @@ Seat 1: Player0 (button) didn't bet (folded)
 Seat 3: Player2 (small blind) showed [5s 5c] and won (120) with three of a kind, Fives
 Seat 4: Player3 (big blind) folded before the Flop
 Seat 6: Hero showed [Qh 3s] and lost with a pair of Threes
-

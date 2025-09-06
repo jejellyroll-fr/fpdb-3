@@ -1826,6 +1826,3 @@ Player0 shows [Qs As]
 Player0 collects $7,270.00
 Player6 finished in place 2 and won 0,03 €
 Player0 finished in place 1 and won 0,05 €
-
-
-

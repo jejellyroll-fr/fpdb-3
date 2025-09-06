@@ -1,4 +1,3 @@
-
 # Code from http://ender.snowburst.org:4747/~jjohns/interlocks.py
 # Thanks JJ!
 
@@ -99,7 +98,8 @@ class InterProcessLockFcntl(InterProcessLockBase):
         InterProcessLockBase.__init__(self, name)
         self.lockfd = 0
         self.lock_file_name = os.path.join(
-            LOCK_FILE_DIRECTORY, self.getHashedName() + ".lck",
+            LOCK_FILE_DIRECTORY,
+            self.getHashedName() + ".lck",
         )
         assert os.path.isdir(LOCK_FILE_DIRECTORY)
 
@@ -294,7 +294,6 @@ def test_construct() -> None:
     >>> lock1.release()
 
     """
-
 
 
 if __name__ == "__main__":

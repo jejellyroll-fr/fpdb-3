@@ -65,7 +65,7 @@ class TestWinamaxSummary:
             assert summary.tourNo == "13828726"
             assert summary.entries == "10"
             assert summary.buyin == 46  # 0.46€ in cents
-            assert summary.fee == 4     # 0.04€ in cents
+            assert summary.fee == 4  # 0.04€ in cents
             assert summary.prizepool == 460  # 4.60€ in cents
             assert summary.currency == "EUR"
             assert summary.buyinCurrency == "EUR"
@@ -77,7 +77,13 @@ class TestWinamaxSummary:
 
             # Verify player was added
             summary.addPlayer.assert_called_once_with(
-                3, "Hero", 92, "EUR", None, None, None,
+                3,
+                "Hero",
+                92,
+                "EUR",
+                None,
+                None,
+                None,
             )
 
     def test_rebuy_addon_tournament(self) -> None:
@@ -111,13 +117,19 @@ class TestWinamaxSummary:
             assert summary.isAddOn is True
             assert summary.rebuyCost == 1000  # (9€ + 1€) in cents
             assert summary.addOnCost == 1000  # (9€ + 1€) in cents
-            assert summary.buyin == 900      # 9€ in cents
-            assert summary.fee == 100        # 1€ in cents
+            assert summary.buyin == 900  # 9€ in cents
+            assert summary.fee == 100  # 1€ in cents
             assert summary.prizepool == 30000  # 300€ in cents
 
             # Verify player info with rebuy/addon counts
             summary.addPlayer.assert_called_once_with(
-                9, "Hero", 0, "EUR", 4, 2, None,
+                9,
+                "Hero",
+                0,
+                "EUR",
+                4,
+                2,
+                None,
             )
 
     def test_freeroll_tournament(self) -> None:
@@ -148,7 +160,13 @@ class TestWinamaxSummary:
             assert summary.entries == "100"
 
             summary.addPlayer.assert_called_once_with(
-                5, "Hero", 0, "FREE", None, None, None,
+                5,
+                "Hero",
+                0,
+                "FREE",
+                None,
+                None,
+                None,
             )
 
     def test_levels_gametype_parsing(self) -> None:
@@ -178,7 +196,7 @@ class TestWinamaxSummary:
             assert summary.gametype["limitType"] == "nl"
             assert summary.gametype["category"] == "holdem"
             assert summary.speed == "Hyper"  # turbo -> Hyper
-            assert summary.isSng is True     # Mode contains "sng"
+            assert summary.isSng is True  # Mode contains "sng"
 
     def test_omaha_tournament(self) -> None:
         """Test parsing an Omaha tournament."""
@@ -210,8 +228,8 @@ class TestWinamaxSummary:
             assert summary.gametype["limitType"] == "pl"  # Pot Limit
             assert summary.gametype["category"] == "omahahi"  # Omaha
             assert summary.entries == "25"
-            assert summary.buyin == 450   # 4.50€ in cents
-            assert summary.fee == 50      # 0.50€ in cents
+            assert summary.buyin == 450  # 4.50€ in cents
+            assert summary.fee == 50  # 0.50€ in cents
 
     def test_html_summary_parsing(self) -> None:
         """Test parsing HTML format summary."""
@@ -243,8 +261,8 @@ class TestWinamaxSummary:
             # Verify KO tournament parsing
             assert summary.isKO is True
             assert summary.koBounty == 30  # 0.30€ in cents (rake becomes bounty)
-            assert summary.buyin == 220   # 2.20€ in cents
-            assert summary.fee == 50      # 0.50€ in cents (bounty moved to fee)
+            assert summary.buyin == 220  # 2.20€ in cents
+            assert summary.fee == 50  # 0.50€ in cents (bounty moved to fee)
 
     def test_currency_detection(self) -> None:
         """Test different currency detection."""
@@ -278,8 +296,8 @@ class TestWinamaxSummary:
             summary = WinamaxSummary()
             summary.tourneyName = "Expresso Super High Roller"
             summary.prizepool = 500  # 5€ in cents
-            summary.buyin = 100      # 1€ in cents
-            summary.fee = 20         # 0.20€ in cents
+            summary.buyin = 100  # 1€ in cents
+            summary.fee = 20  # 0.20€ in cents
 
             summary._detect_expresso_lottery()
 
@@ -288,6 +306,7 @@ class TestWinamaxSummary:
 
     def test_gametype_from_levels_parsing(self) -> None:
         """Test parsing gametype from levels string."""
+
         def create_summary() -> WinamaxSummary:
             summary = WinamaxSummary(
                 config=self.config,
@@ -454,7 +473,6 @@ You finished in 50th place
             # Should use the second (final) prizepool
             assert summary.prizepool == 7500  # 75€ in cents
 
-
     def test_convert_to_decimal(self) -> None:
         """Test the convert_to_decimal method."""
         with patch("TourneySummary.TourneySummary.__init__", return_value=None):
@@ -537,7 +555,7 @@ You finished in 50th place
             }
             summary._parse_buyin_info(mg_regular)
             assert summary.buyin == 550  # 5.50€ in cents
-            assert summary.fee == 50    # 0.50€ in cents
+            assert summary.fee == 50  # 0.50€ in cents
             assert summary.buyinCurrency == "EUR"
             assert summary.currency == "EUR"
 
@@ -636,7 +654,13 @@ You finished in 50th place
             # winnings: 15.50€ + 5.00€ ticket = 20.50€ = 2050 cents
             # ko_count: 1.50€ * 100 / 0.50€ = 3.00 KOs (as Decimal)
             summary.addPlayer.assert_called_once_with(
-                3, "TestPlayer", 2050, "EUR", 2, 1, Decimal("3.00"),
+                3,
+                "TestPlayer",
+                2050,
+                "EUR",
+                2,
+                1,
+                Decimal("3.00"),
             )
 
     def test_set_default_gametype(self) -> None:
@@ -786,7 +810,10 @@ You finished in 50th place
         """Test Expresso lottery detection edge cases."""
 
         def _test_lottery_detection(
-            summary: WinamaxSummary, *, expected_is_lottery: bool, expected_multiplier: int = 1,
+            summary: WinamaxSummary,
+            *,
+            expected_is_lottery: bool,
+            expected_multiplier: int = 1,
         ) -> None:
             """Helper method to test lottery detection and assert results."""
             summary._detect_expresso_lottery()
@@ -898,8 +925,8 @@ You finished in 50th place
 
             assert summary.isKO is True
             assert summary.koBounty == 30  # 0.30€ in cents (rake becomes bounty)
-            assert summary.buyin == 220   # 2.20€ in cents
-            assert summary.fee == 50      # 0.50€ in cents (bounty moved to fee)
+            assert summary.buyin == 220  # 2.20€ in cents
+            assert summary.fee == 50  # 0.50€ in cents (bounty moved to fee)
 
     def test_player_info_edge_cases(self) -> None:
         """Test _parse_player_info edge cases."""
@@ -1026,5 +1053,3 @@ You finished in 50th place
             # Verify lottery fields are initialized
             assert summary.isLottery is False
             assert summary.tourneyMultiplier == 1
-
-

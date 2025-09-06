@@ -9,6 +9,7 @@ from loggingFpdb import get_logger
 
 log = get_logger("popup_themes")
 
+
 class PopupTheme:
     """Base class for popup themes."""
 
@@ -44,23 +45,19 @@ class MaterialDarkTheme(PopupTheme):
             "section_bg": "#383838",
             "row_bg_even": "#2E2E2E",
             "row_bg_odd": "#343434",
-
             # Text colors
             "text_primary": "#FFFFFF",
             "text_secondary": "#B0B0B0",
             "text_accent": "#03DAC6",
-
             # Element colors
             "border": "#555555",
             "hover": "#4A4A4A",
             "selected": "#6200EE",
-
             # Status colors
-            "stat_high": "#F44336",     # Red for high values
-            "stat_medium": "#FF9800",   # Orange for medium
-            "stat_low": "#4CAF50",      # Green for low values
+            "stat_high": "#F44336",  # Red for high values
+            "stat_medium": "#FF9800",  # Orange for medium
+            "stat_low": "#4CAF50",  # Green for low values
             "stat_neutral": "#9E9E9E",  # Gray for neutral
-
             # Close button
             "close_bg": "#F44336",
             "close_text": "#FFFFFF",
@@ -96,23 +93,19 @@ class MaterialLightTheme(PopupTheme):
             "section_bg": "#FFFFFF",
             "row_bg_even": "#FFFFFF",
             "row_bg_odd": "#F8F8F8",
-
             # Text colors
             "text_primary": "#212121",
             "text_secondary": "#757575",
             "text_accent": "#6200EE",
-
             # Element colors
             "border": "#E0E0E0",
             "hover": "#EEEEEE",
             "selected": "#E1F5FE",
-
             # Status colors
             "stat_high": "#D32F2F",
             "stat_medium": "#F57C00",
             "stat_low": "#388E3C",
             "stat_neutral": "#616161",
-
             # Close button
             "close_bg": "#D32F2F",
             "close_text": "#FFFFFF",
@@ -147,20 +140,16 @@ class ClassicTheme(PopupTheme):
             "section_bg": "#FFFFFF",
             "row_bg_even": "#FFFFFF",
             "row_bg_odd": "#F0F0F0",
-
             "text_primary": "#000000",
             "text_secondary": "#666666",
             "text_accent": "#0066CC",
-
             "border": "#CCCCCC",
             "hover": "#E0E0E0",
             "selected": "#CCE5FF",
-
             "stat_high": "#CC0000",
             "stat_medium": "#FF6600",
             "stat_low": "#009900",
             "stat_neutral": "#666666",
-
             "close_bg": "#CC0000",
             "close_text": "#FFFFFF",
         }

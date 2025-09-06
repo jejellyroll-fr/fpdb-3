@@ -38,4 +38,3 @@ Seat 6: Player5 collected (400), mucked
 Seat 7: Player6 didn't bet (folded)
 Seat 8: Hero didn't bet (folded)
 Seat 9: Player7 didn't bet (folded)
-

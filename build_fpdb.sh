@@ -206,13 +206,13 @@ copy_hudmain() {
     local hud_main_exe="$source_dir/HUD_main.exe"
     local target_exe="$target_dir/HUD_main.exe"
 
-   
+
     if [ ! -e "$target_exe" ]; then
         echo "Copie de HUD_main.exe de $hud_main_exe à $target_exe"
         cp "$hud_main_exe" "$target_exe"
     fi
 
-   
+
     local source_internal="$source_dir/_internal"
     local target_internal="$target_dir/_internal"
 

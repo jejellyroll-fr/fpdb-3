@@ -48,6 +48,7 @@ def clamp_to_screen(x: int, y: int, width: int = 200, height: int = 100) -> tupl
         tuple[int, int]: The clamped (x, y) coordinates within the screen bounds.
     """
     from loggingFpdb import get_logger
+
     log = get_logger("hud")
 
     app = QApplication.instance()
@@ -69,8 +70,13 @@ def clamp_to_screen(x: int, y: int, width: int = 200, height: int = 100) -> tupl
         return max(0, x), max(0, y)
 
     geometry = screen.geometry()
-    log.info("Screen geometry: X=%d, Y=%d, Width=%d, Height=%d",
-            geometry.x(), geometry.y(), geometry.width(), geometry.height())
+    log.info(
+        "Screen geometry: X=%d, Y=%d, Width=%d, Height=%d",
+        geometry.x(),
+        geometry.y(),
+        geometry.width(),
+        geometry.height(),
+    )
 
     # Clamp to the actual screen boundaries (including offset for extended screens)
     min_x = geometry.x()
@@ -82,8 +88,17 @@ def clamp_to_screen(x: int, y: int, width: int = 200, height: int = 100) -> tupl
     clamped_y = max(min_y, min(y, max_y))
 
     if clamped_x != x or clamped_y != y:
-        log.info("CLAMPING: Original (%d,%d) -> Clamped (%d,%d) [Screen bounds: %d-%d, %d-%d]",
-                x, y, clamped_x, clamped_y, min_x, max_x, min_y, max_y)
+        log.info(
+            "CLAMPING: Original (%d,%d) -> Clamped (%d,%d) [Screen bounds: %d-%d, %d-%d]",
+            x,
+            y,
+            clamped_x,
+            clamped_y,
+            min_x,
+            max_x,
+            min_y,
+            max_y,
+        )
 
     return clamped_x, clamped_y
 
@@ -130,13 +145,11 @@ class AuxWindow:
         This method is a placeholder for updating the window's data.
         """
 
-
     def update_gui(self, *args: Any) -> None:
         """Update the graphical user interface for the auxiliary window.
 
         This method is a placeholder for updating the window's GUI elements.
         """
-
 
     def create(self, *args: Any) -> None:
         """Create the auxiliary window.
@@ -144,20 +157,17 @@ class AuxWindow:
         This method is a placeholder for creating the window and its resources.
         """
 
-
     def save_layout(self, *args: Any) -> None:
         """Save the layout of the auxiliary window.
 
         This method is a placeholder for saving the current layout configuration.
         """
 
-
     def move_windows(self, *args: Any) -> None:
         """Move all auxiliary windows to their correct positions.
 
         This method is a placeholder for moving windows and should be overridden in subclasses.
         """
-
 
     def destroy(self) -> None:
         """Destroy the window and release its resources.
@@ -264,7 +274,6 @@ class SeatWindow(QWidget):
             event: The mouse event containing button and position information.
         """
 
-
     def button_press_right(self, event: QMouseEvent) -> None:
         """Handle right mouse button press.
 
@@ -273,7 +282,6 @@ class SeatWindow(QWidget):
         Args:
             event: The mouse event containing button and position information.
         """
-
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         """Handle mouse move events for the seat window.
@@ -307,7 +315,6 @@ class SeatWindow(QWidget):
             event: The mouse event containing button and position information.
         """
 
-
     def button_release_right(self, event: QMouseEvent) -> None:
         """Handle right mouse button release.
 
@@ -317,20 +324,17 @@ class SeatWindow(QWidget):
             event: The mouse event containing button and position information.
         """
 
-
     def create_contents(self, *args: Any) -> None:
         """Create the contents of the seat window.
 
         This method is a placeholder for populating the window with its contents.
         """
 
-
     def update_contents(self, *args: Any) -> None:
         """Update the contents of the seat window.
 
         This method is a placeholder for updating the window's contents.
         """
-
 
 
 class AuxSeats(AuxWindow):
@@ -360,7 +364,6 @@ class AuxSeats(AuxWindow):
         This method is a placeholder and should be overridden to populate each seat window with its contents.
         """
 
-
     def create_common(self, x: int, y: int) -> None:
         """Create the common window at the specified position.
 
@@ -371,13 +374,11 @@ class AuxSeats(AuxWindow):
             y: The y-coordinate for the common window.
         """
 
-
     def update_contents(self) -> None:
         """Update the contents for each seat window.
 
         This method is a placeholder and should be overridden to update the contents of each seat window.
         """
-
 
     def resize_windows(self) -> None:
         """Resize and reposition all HUD windows.
@@ -391,12 +392,23 @@ class AuxSeats(AuxWindow):
         for i in list(range(1, self.hud.max + 1)):
             old_pos = self.positions.get(i, (0, 0))
             self.positions[i] = self.hud.layout.location[self.adj[i]]
-            log.debug("Seat %d position updated: (%d,%d) -> (%d,%d)",
-                    i, old_pos[0], old_pos[1], self.positions[i][0], self.positions[i][1])
+            log.debug(
+                "Seat %d position updated: (%d,%d) -> (%d,%d)",
+                i,
+                old_pos[0],
+                old_pos[1],
+                self.positions[i][0],
+                self.positions[i][1],
+            )
         old_common = self.positions.get("common", (0, 0))
         self.positions["common"] = self.hud.layout.common
-        log.debug("Common position updated: (%d,%d) -> (%d,%d)",
-                old_common[0], old_common[1], self.positions["common"][0], self.positions["common"][1])
+        log.debug(
+            "Common position updated: (%d,%d) -> (%d,%d)",
+            old_common[0],
+            old_common[1],
+            self.positions["common"][0],
+            self.positions["common"][1],
+        )
         # and then move everything to the new places
         self.move_windows()
 
@@ -410,25 +422,47 @@ class AuxSeats(AuxWindow):
         table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
         table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
 
-        log.debug("MOVING HUD WINDOWS - Table position: X=%d, Y=%d (from table.x=%s, table.y=%s)",
-                table_x, table_y, self.hud.table.x, self.hud.table.y)
+        log.debug(
+            "MOVING HUD WINDOWS - Table position: X=%d, Y=%d (from table.x=%s, table.y=%s)",
+            table_x,
+            table_y,
+            self.hud.table.x,
+            self.hud.table.y,
+        )
 
         for i in list(range(1, self.hud.max + 1)):
             pos_x = self.positions[i][0] + table_x
             pos_y = self.positions[i][1] + table_y
             clamped_x, clamped_y = clamp_to_screen(pos_x, pos_y)
-            log.debug("Moving seat %d window: Layout pos (%d,%d) + Table pos (%d,%d) = "
-                    "Final pos (%d,%d) -> Clamped (%d,%d)",
-                    i, self.positions[i][0], self.positions[i][1], table_x, table_y,
-                    pos_x, pos_y, clamped_x, clamped_y)
+            log.debug(
+                "Moving seat %d window: Layout pos (%d,%d) + Table pos (%d,%d) = "
+                "Final pos (%d,%d) -> Clamped (%d,%d)",
+                i,
+                self.positions[i][0],
+                self.positions[i][1],
+                table_x,
+                table_y,
+                pos_x,
+                pos_y,
+                clamped_x,
+                clamped_y,
+            )
             self.m_windows[i].move(clamped_x, clamped_y)
 
         common_x = self.hud.layout.common[0] + table_x
         common_y = self.hud.layout.common[1] + table_y
         clamped_common_x, clamped_common_y = clamp_to_screen(common_x, common_y)
-        log.debug("Moving common window: Layout pos (%d,%d) + Table pos (%d,%d) = Final pos (%d,%d) -> Clamped (%d,%d)",
-                self.hud.layout.common[0], self.hud.layout.common[1], table_x, table_y, common_x, common_y,
-                clamped_common_x, clamped_common_y)
+        log.debug(
+            "Moving common window: Layout pos (%d,%d) + Table pos (%d,%d) = Final pos (%d,%d) -> Clamped (%d,%d)",
+            self.hud.layout.common[0],
+            self.hud.layout.common[1],
+            table_x,
+            table_y,
+            common_x,
+            common_y,
+            clamped_common_x,
+            clamped_common_y,
+        )
         self.m_windows["common"].move(clamped_common_x, clamped_common_y)
 
     def create(self) -> None:
@@ -458,13 +492,27 @@ class AuxSeats(AuxWindow):
                 table_y = self.hud.table.y if self.hud.table.y is not None else 0
                 pos_x = max(0, self.positions[i][0] + table_x)
                 pos_y = max(0, self.positions[i][1] + table_y)
-                log.debug("=== AUX_BASE POSITIONING === Seat %s: table(%s, %s) + relative(%s, %s) = final(%s, %s)",
-                        i, table_x, table_y, self.positions[i][0], self.positions[i][1], pos_x, pos_y)
+                log.debug(
+                    "=== AUX_BASE POSITIONING === Seat %s: table(%s, %s) + relative(%s, %s) = final(%s, %s)",
+                    i,
+                    table_x,
+                    table_y,
+                    self.positions[i][0],
+                    self.positions[i][1],
+                    pos_x,
+                    pos_y,
+                )
                 self.m_windows[i].move(pos_x, pos_y)
                 # Verify position after move
                 actual_pos = self.m_windows[i].pos()
-                log.debug("=== POSITION AFTER MOVE === Seat %s: requested(%s, %s) -> actual(%s, %s)",
-                        i, pos_x, pos_y, actual_pos.x(), actual_pos.y())
+                log.debug(
+                    "=== POSITION AFTER MOVE === Seat %s: requested(%s, %s) -> actual(%s, %s)",
+                    i,
+                    pos_x,
+                    pos_y,
+                    actual_pos.x(),
+                    actual_pos.y(),
+                )
                 self.hud.layout.location[self.adj[i]] = self.positions[i]
                 if "opacity" in self.params:
                     self.m_windows[i].setWindowOpacity(float(self.params["opacity"]))
@@ -475,8 +523,12 @@ class AuxSeats(AuxWindow):
             self.create_contents(self.m_windows[i], i)
 
             self.m_windows[i].create()  # ensure there is a native window handle for topify
-            log.debug("=== AUX_BASE CALLING TOPIFY === window[%d]=%s, table=%s", i, self.m_windows[i],
-                    self.hud.table.title if hasattr(self.hud.table, "title") else "NO_TITLE")
+            log.debug(
+                "=== AUX_BASE CALLING TOPIFY === window[%d]=%s, table=%s",
+                i,
+                self.m_windows[i],
+                self.hud.table.title if hasattr(self.hud.table, "title") else "NO_TITLE",
+            )
             self.hud.table.topify(self.m_windows[i])
             if not self.uses_timer:
                 self.m_windows[i].show()
@@ -500,14 +552,25 @@ class AuxSeats(AuxWindow):
             msg = "Layout width/height cannot be zero when scaling positions"
             raise ValueError(msg)
 
-        x_scale = self.hud.table.width  / lw
+        x_scale = self.hud.table.width / lw
         y_scale = self.hud.table.height / lh
 
         scaled_x = int(x * x_scale)
         scaled_y = int(y * y_scale)
 
-        log.debug("=== SCALING DEBUG === Original(%d,%d) Layout(%dx%d) Table(%dx%d) Scale(%.2f,%.2f) Result(%d,%d)",
-                x, y, lw, lh, self.hud.table.width, self.hud.table.height, x_scale, y_scale, scaled_x, scaled_y)
+        log.debug(
+            "=== SCALING DEBUG === Original(%d,%d) Layout(%dx%d) Table(%dx%d) Scale(%.2f,%.2f) Result(%d,%d)",
+            x,
+            y,
+            lw,
+            lh,
+            self.hud.table.width,
+            self.hud.table.height,
+            x_scale,
+            y_scale,
+            scaled_x,
+            scaled_y,
+        )
 
         return scaled_x, scaled_y
 
@@ -573,9 +636,16 @@ class AuxSeats(AuxWindow):
                 new_abs_position.x() - table_x,
                 new_abs_position.y() - table_y,
             )
-            log.debug("Seat %s: Position updated - abs(%s, %s) - table(%s, %s) = relative(%s, %s)",
-                      i, new_abs_position.x(), new_abs_position.y(), table_x, table_y,
-                      new_position[0], new_position[1])
+            log.debug(
+                "Seat %s: Position updated - abs(%s, %s) - table(%s, %s) = relative(%s, %s)",
+                i,
+                new_abs_position.x(),
+                new_abs_position.y(),
+                table_x,
+                table_y,
+                new_position[0],
+                new_position[1],
+            )
             self.positions[i] = new_position  # write this back to our map
             if i != "common":
                 self.hud.layout.location[self.adj[i]] = new_position  # update the hud-level dict,

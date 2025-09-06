@@ -34,6 +34,3 @@ Seat 2: Player2 showed [2c As] and won (500) with a pair of Twos
 Seat 5: Hero (button) didn't bet (folded)
 Seat 6: Player6 (small blind) showed [7c 5s] and won (150) with two pair, Sevens and Fives
 Seat 8: Player8 (big blind) showed [Ts 4c] and lost with Queen Ten high
-
-
-

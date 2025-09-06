@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-	<session sessioncode="5992848794">  
-			<general>  
+	<session sessioncode="5992848794">
+			<general>
 	    	<mode>real</mode>
-	      		<gametype>Holdem NL</gametype>  
+	      		<gametype>Holdem NL</gametype>
 	          <tablename>Irish Open 2013 B SuperSat R/A, 799557276</tablename>
-	          <tournamentcurrency></tournamentcurrency>  
-	          <duration>00:57</duration>  
-	          <gamecount>64</gamecount>  
-	          <startdate>2013-02-04 22:12:37</startdate>  
-	          <currency>EUR</currency>  
-	          <nickname>Hero</nickname>  
-	          <bets>16,023</bets>  
-	          <wins>11,523</wins>  
+	          <tournamentcurrency></tournamentcurrency>
+	          <duration>00:57</duration>
+	          <gamecount>64</gamecount>
+	          <startdate>2013-02-04 22:12:37</startdate>
+	          <currency>EUR</currency>
+	          <nickname>Hero</nickname>
+	          <bets>16,023</bets>
+	          <wins>11,523</wins>
 	          <chipsin>0</chipsin>
 			  		<chipsout>0</chipsout>
 			  		<ipoints>283.50</ipoints>
         		<statuspoints>81</statuspoints>
 			  		<awardpoints>283.50</awardpoints>
 			  		<is_asian>0</is_asian>
-	          <tournamentname>Irish Open 2013 B SuperSat R/A</tournamentname><place>26</place><buyin>€30.00+€3.00</buyin> <totalbuyin></totalbuyin> <ipoints>283.50</ipoints> <win>€0.00</win> <statuspoints>81</statuspoints> <awardpoints>283.50</awardpoints>  
-	    </general>  
+	          <tournamentname>Irish Open 2013 B SuperSat R/A</tournamentname><place>26</place><buyin>€30.00+€3.00</buyin> <totalbuyin></totalbuyin> <ipoints>283.50</ipoints> <win>€0.00</win> <statuspoints>81</statuspoints> <awardpoints>283.50</awardpoints>
+	    </general>
 	    <game gamecode="4528040825">
 		 <general>
-		  <startdate>2013-02-04 22:12:37</startdate>		  
+		  <startdate>2013-02-04 22:12:37</startdate>
 		  <players>
 		   <player seat="1" name="Player0" chips="5,350" dealer="0" win="0" bet="100" rebuy="0" addon="1"/><player seat="2" name="Player1" chips="11,454" dealer="0" win="0" bet="0" rebuy="0" addon="1"/><player seat="3" name="Player2" chips="915" dealer="1" win="0" bet="0" rebuy="0" addon="0"/><player seat="4" name="Player3" chips="950" dealer="0" win="0" bet="50" rebuy="0" addon="0"/><player seat="5" name="Player4" chips="6,990" dealer="0" win="550" bet="400" rebuy="0" addon="1"/><player seat="6" name="Player5" chips="975" dealer="0" win="0" bet="0" rebuy="0" addon="0"/><player seat="8" name="Player6" chips="10,626" dealer="0" win="0" bet="0" rebuy="0" addon="1"/><player seat="9" name="Player7" chips="7,175" dealer="0" win="0" bet="0" rebuy="0" addon="1"/><player seat="10" name="Hero" chips="4,500" dealer="0" win="0" bet="0" rebuy="0" addon="1"/>
 		  </players>

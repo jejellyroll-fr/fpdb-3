@@ -44,6 +44,7 @@ log = get_logger("osx_tables")
 
 class Table(Table_Window):
     """OSX-specific table window implementation."""
+
     def find_table_parameters(self) -> str | None:
         """Find the poker table window of interest.
 
@@ -55,9 +56,7 @@ class Table(Table_Window):
             The window title if found, None otherwise.
         """
         self.number = None
-        curr_pid = NSWorkspace.sharedWorkspace().activeApplication()[
-            "NSApplicationProcessIdentifier"
-        ]
+        curr_pid = NSWorkspace.sharedWorkspace().activeApplication()["NSApplicationProcessIdentifier"]
         options = kCGWindowListOptionOnScreenOnly
         window_list = CGWindowListCopyWindowInfo(options, kCGNullWindowID)
 
@@ -71,7 +70,11 @@ class Table(Table_Window):
             if curr_pid == pid:
                 log.info(
                     "%s - %s (PID: %s, WID: %s): %s",
-                    owner_name, window_title, pid, window_number, geometry,
+                    owner_name,
+                    window_title,
+                    pid,
+                    window_number,
+                    geometry,
                 )
 
                 title = window_title
@@ -94,7 +97,11 @@ class Table(Table_Window):
             if self.search_string and self.search_string in window_title:
                 log.info(
                     "Found matching window: %s - %s (PID: %s, WID: %s): %s",
-                    owner_name, window_title, pid, window_number, geometry,
+                    owner_name,
+                    window_title,
+                    pid,
+                    window_number,
+                    geometry,
                 )
 
                 title = window_title
@@ -141,9 +148,7 @@ class Table(Table_Window):
 
         win_list_dict = CGWindowListCreateDescriptionFromArray((self.number,))
         for d in win_list_dict:
-            if (
-                d[kCGWindowNumber] == self.number
-            ):  # and b[kCGWindowNumber] == self.number :
+            if d[kCGWindowNumber] == self.number:  # and b[kCGWindowNumber] == self.number :
                 log.debug("kCGWindowOwnerName: %s", d.get(kCGWindowOwnerName, ""))
                 return d[kCGWindowOwnerName]
         return None

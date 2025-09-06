@@ -8,7 +8,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
-
 def _test_theme_methods(theme) -> None:
     """Test that the theme has the required methods."""
     assert hasattr(theme, "get_color"), "Theme should have get_color method"
@@ -35,6 +34,7 @@ def _get_theme_and_icon_provider():
     """Import and return theme and icon provider functions."""
     from PopupIcons import get_icon_provider
     from PopupThemes import get_theme
+
     return get_theme, get_icon_provider
 
 
@@ -88,8 +88,3 @@ def test_initialization_order() -> None:
     ]
 
     # Steps are documented above for reference
-
-
-
-
-

@@ -311,7 +311,9 @@ class ModernSiteCard(QFrame):
                 matching_skin = None
                 for skin_data in all_party_skins:
                     skin_name = skin_data.get("skin", "")
-                    if skin_name == self.site_name or (self.site_name == "PMU Poker (PartyPoker)" and skin_name == "PMU Poker (PartyPoker)"):
+                    if skin_name == self.site_name or (
+                        self.site_name == "PMU Poker (PartyPoker)" and skin_name == "PMU Poker (PartyPoker)"
+                    ):
                         matching_skin = skin_data
                         break
 
@@ -405,8 +407,7 @@ class ModernSiteCard(QFrame):
         QMessageBox.information(
             self,
             "iPoker Detection",
-            f"Detected iPoker skins: {', '.join(skin_names)}\n"
-            f"Applied configuration from the first skin found.",
+            f"Detected iPoker skins: {', '.join(skin_names)}\n" f"Applied configuration from the first skin found.",
         )
 
     def show_detection_info_party(self, skins) -> None:

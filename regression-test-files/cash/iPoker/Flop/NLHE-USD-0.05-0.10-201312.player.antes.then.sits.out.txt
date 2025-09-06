@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-	<session sessioncode="6166981835">  
-			<general>  
+	<session sessioncode="6166981835">
+			<general>
 	    	<mode>real</mode>
-	      		<gametype>Holdem NL $0.05/$0.10</gametype>  
+	      		<gametype>Holdem NL $0.05/$0.10</gametype>
 	          <tablename>"Ante" Acropoli, 766490881</tablename>
-	          <tablecurrency>USD</tablecurrency>  
-	          <duration>N/A</duration>  
-	          <gamecount>N/A</gamecount>  
-	          <startdate>2013-12-19 19:37:15</startdate>  
-	          <currency>GBP</currency>  
-	          <nickname>Hero</nickname>  
-	          <bets>N/A</bets>  
-	          <wins>N/A</wins>  
+	          <tablecurrency>USD</tablecurrency>
+	          <duration>N/A</duration>
+	          <gamecount>N/A</gamecount>
+	          <startdate>2013-12-19 19:37:15</startdate>
+	          <currency>GBP</currency>
+	          <nickname>Hero</nickname>
+	          <bets>N/A</bets>
+	          <wins>N/A</wins>
 	          <chipsin>N/A</chipsin>
 			  		<chipsout>N/A</chipsout>
 			  		<ipoints>N/A</ipoints>
         		<statuspoints>N/A</statuspoints>
 			  		<awardpoints>N/A</awardpoints>
-	            
-	    </general>  
+
+	    </general>
 	    <game gamecode="5338624766">
 		 <general>
-		  <startdate>2013-12-19 20:00:35</startdate>		  
+		  <startdate>2013-12-19 20:00:35</startdate>
 		  <players>
 		   <player seat="1" name="Player0" chips="$0" dealer="0" win="$0" bet="$0" rebuy="0" addon="0" reg_code="-"/><player seat="3" name="Player1" chips="$21.12" dealer="0" win="$0" bet="$0" rebuy="0" addon="0" reg_code="-"/><player seat="5" name="Player2" chips="$20" dealer="0" win="$0" bet="$0.07" rebuy="0" addon="0" reg_code="-"/><player seat="6" name="Player3" chips="$11.76" dealer="0" win="$0" bet="$0.02" rebuy="0" addon="0" reg_code="-"/><player seat="8" name="Hero" chips="$22.45" dealer="0" win="$0.31" bet="$0.12" rebuy="0" addon="0" reg_code="-"/><player seat="10" name="bf411509" chips="$5.66" dealer="1" win="$0" bet="$0.12" rebuy="0" addon="0" reg_code="-"/>
 		  </players>

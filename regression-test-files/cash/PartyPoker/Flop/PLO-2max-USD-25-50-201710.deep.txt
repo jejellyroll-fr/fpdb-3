@@ -1,11 +1,11 @@
 Game #16537340703 starts.
 
-#Game No : 16537340703 
+#Game No : 16537340703
 ***** Hand History for Game 16537340703 *****
 $10,000 USD PL Omaha - Wednesday, October 11, 17:27:53 CEST 2017
 Table Aria Heads Up 3 (Real Money)
 Seat 2 is the button
-Total number of players : 2/2 
+Total number of players : 2/2
 Seat 2: Player0 ( $5,000 USD )
 Seat 1: Player1 ( $7,496 USD )
 Player0 posts small blind [$25 USD].

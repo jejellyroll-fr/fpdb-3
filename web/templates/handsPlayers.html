@@ -287,7 +287,7 @@
             <th>commentTs</th>
         </tr>
     </thead>
-    <tbody> 
+    <tbody>
         {% for handsPlayer in handsPlayers %}
         <tr>
             <td>{{ handsPlayer[0] }}</td>
@@ -305,88 +305,88 @@
                         {% set card_str = decodeCardList[handsPlayer[10]] %}
                         {% set rank = card_str[:-1] %}
                         {% set suit = card_str[-1] %}
-                    
+
                         {% set card_image_url10 = "/static/colour/" + suit + "_" + rank + ".svg" %}
                         <img src="{{ card_image_url10 }}" class="card-image" >
-                   
+
                     {% else %}
-                    
+
                     {% endif %}
-                
+
 
                 {% if handsPlayer[11] in decodeCardList %}
                         {% set card_str = decodeCardList[handsPlayer[11]] %}
                         {% set rank = card_str[:-1] %}
                         {% set suit = card_str[-1] %}
-                    
+
                         {% set card_image_url11 = "/static/colour/" + suit + "_" + rank + ".svg" %}
                         <img src="{{ card_image_url11 }}" class="card-image" >
-                   
+
                     {% else %}
-                    
+
                     {% endif %}
-                
+
                 {% if handsPlayer[12] in decodeCardList %}
                         {% set card_str = decodeCardList[handsPlayer[12]] %}
                         {% set rank = card_str[:-1] %}
                         {% set suit = card_str[-1] %}
-                    
+
                         {% set card_image_url12 = "/static/colour/" + suit + "_" + rank + ".svg" %}
                         <img src="{{ card_image_url12 }}" class="card-image" >
-                   
+
                     {% else %}
-                    
+
                     {% endif %}
-                
+
                 {% if handsPlayer[13] in decodeCardList %}
                         {% set card_str = decodeCardList[handsPlayer[13]] %}
                         {% set rank = card_str[:-1] %}
                         {% set suit = card_str[-1] %}
-                    
+
                         {% set card_image_url13 = "/static/colour/" + suit + "_" + rank + ".svg" %}
                         <img src="{{ card_image_url13 }}" class="card-image" >
-                   
+
                     {% else %}
-                    
+
                     {% endif %}
-                
+
                 {% if handsPlayer[14] in decodeCardList %}
                         {% set card_str = decodeCardList[handsPlayer[14]] %}
                         {% set rank = card_str[:-1] %}
                         {% set suit = card_str[-1] %}
-                    
+
                         {% set card_image_url14 = "/static/colour/" + suit + "_" + rank + ".svg" %}
                         <img src="{{ card_image_url14 }}" class="card-image" >
-                   
+
                     {% else %}
-                    
+
                     {% endif %}
-                
-            
+
+
                 {% if handsPlayer[15] in decodeCardList %}
                         {% set card_str = decodeCardList[handsPlayer[15]] %}
                         {% set rank = card_str[:-1] %}
                         {% set suit = card_str[-1] %}
-                    
+
                         {% set card_image_url15 = "/static/colour/" + suit + "_" + rank + ".svg" %}
                         <img src="{{ card_image_url15 }}" class="card-image" >
-                   
+
                     {% else %}
-                    
+
                     {% endif %}
-                
+
                 {% if handsPlayer[16] in decodeCardList %}
                         {% set card_str = decodeCardList[handsPlayer[16]] %}
                         {% set rank = card_str[:-1] %}
                         {% set suit = card_str[-1] %}
-                    
+
                         {% set card_image_url = "/static/colour/" + suit + "_" + rank + ".svg" %}
                         <img src="{{ card_image_url16 }}" class="card-image" >
-                   
+
                     {% else %}
-                    
+
                     {% endif %}
-                           
+
         </div></td>
             <td>{{ handsPlayer[17] }}</td>
             <td>{{ handsPlayer[18] }}</td>
@@ -592,7 +592,7 @@
             <td>{{ handsPlayer[218] }}</td>
             <td>{{ handsPlayer[219] }}</td>
 
-         
+
         </tr>
         {% endfor %}
     </tbody>

@@ -92,13 +92,25 @@ class GuiTourneyPlayerStats(QSplitter):
         self.setStretchFactor(1, 1)
 
     def addGrid(
-        self, vbox, query_name, numTourneys, tourneyTypes, playerids, sitenos, seats,
+        self,
+        vbox,
+        query_name,
+        numTourneys,
+        tourneyTypes,
+        playerids,
+        sitenos,
+        seats,
     ) -> None:
         grid = 0
 
         query = self.sql.query[query_name]
         query = self.refineQuery(
-            query, numTourneys, tourneyTypes, playerids, sitenos, seats,
+            query,
+            numTourneys,
+            tourneyTypes,
+            playerids,
+            sitenos,
+            seats,
         )
         self.cursor.execute(query)
         result = self.cursor.fetchall()
@@ -126,18 +138,13 @@ class GuiTourneyPlayerStats(QSplitter):
                 if column[colalias] == "siteName" and row_data[colnames.index("speed")] != "Normal":
                     if (
                         row_data[colnames.index("speed")] == "Hyper"
-                        and row_data[colnames.index("siteName")]
-                        == "Full Tilt Poker"
+                        and row_data[colnames.index("siteName")] == "Full Tilt Poker"
                     ):
                         value = value + " " + "Super Turbo"
                     else:
                         value = value + " " + row_data[colnames.index("speed")]
                 if column[colalias] in ["knockout", "reEntry"]:
-                    value = (
-                        "Yes"
-                        if row_data[colnames.index(column[colalias])] == 1
-                        else "No"
-                    )
+                    value = "Yes" if row_data[colnames.index(column[colalias])] == 1 else "No"
                 item = QStandardItem("")
                 if value is not None and value != -999:
                     item = QStandardItem(column[colformat] % value)
@@ -244,7 +251,6 @@ class GuiTourneyPlayerStats(QSplitter):
         start_date, end_date = self.filters.getDates()
         query = query.replace("<startdate_test>", start_date)
         return query.replace("<enddate_test>", end_date)
-
 
     def refreshStats(self) -> None:
         for i in reversed(range(self.stats_frame.layout().count())):

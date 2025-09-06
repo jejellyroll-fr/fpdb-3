@@ -13,7 +13,7 @@ Seat 7: Player5 (48.25 in chips) - Big Blind
 Player1: posts small blind 0.25
 Player5: posts big blind 0.50
 Player0: post dead 0.50
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Player6 [2h 3c]
 Player6: folds
 Player4: folds
@@ -36,7 +36,7 @@ Player1: folds
 Player5: bets 11.12
 Player0: folds
 Uncalled bet (11.12) returned to Player5
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 14.83 | Rake 0.78
 Board [6c 7s Qc 10d]
 Seat 4: Player9 folded on the Flop
@@ -49,4 +49,3 @@ Seat 0: Player2 folded before Flop
 Seat 1: Player7 folded before Flop
 Seat 3: Player0 folded on the Turn
 Seat 7: Player5 collected (14.83)
-

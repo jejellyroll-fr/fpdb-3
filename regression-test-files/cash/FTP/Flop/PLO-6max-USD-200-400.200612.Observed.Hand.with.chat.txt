@@ -60,6 +60,3 @@ Seat 3: sbrugby didn't bet (folded)
 Seat 4: Phil Ivey (button) folded on the Turn
 Seat 5: Son-in-Law (small blind) collected ($4,597), mucked
 Seat 6: Gus Hansen (big blind) folded before the Flop
-
-
-

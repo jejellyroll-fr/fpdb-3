@@ -15,7 +15,6 @@
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
 
-
 import os
 import sys
 from time import time
@@ -183,7 +182,8 @@ class GuiTourneyGraphViewer(QSplitter):
         self.ax.grid(color=self.colors["grid"], linestyle=":", linewidth=0.2)
         if green is None or len(green) == 0:
             self.ax.set_title(
-                "No Data for Player(s) Found", color=self.colors["foreground"],
+                "No Data for Player(s) Found",
+                color=self.colors["foreground"],
             )
             green = [
                 0.0,
@@ -254,7 +254,8 @@ class GuiTourneyGraphViewer(QSplitter):
             self.canvas.draw()
         else:
             self.ax.set_title(
-                "Tournament Results" + names, color=self.colors["foreground"],
+                "Tournament Results" + names,
+                color=self.colors["foreground"],
             )
             self.ax.plot(
                 green,
@@ -302,9 +303,7 @@ class GuiTourneyGraphViewer(QSplitter):
                 return str(tuple(values))
             return str(tuple(int(v) for v in values))
 
-        currencytest = (
-            f"AND tt.currency in {make_in_clause_sql(currencies.values(), 'str')}"
-        )
+        currencytest = f"AND tt.currency in {make_in_clause_sql(currencies.values(), 'str')}"
         tourneysCattest = make_in_clause_sql(tourneysCat, "str")
         tourneysLimtest = make_in_clause_sql(tourneysLim, "str")
 

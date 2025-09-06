@@ -8,11 +8,11 @@ Seat 6: 9be70104 ($2,050 in chips)
 Hero: posts small blind $25
 6babca1: posts big blind $50
 *** HOLE CARDS ***
-Dealt to d6e0299a 
+Dealt to d6e0299a
 Dealt to Hero [6c Ts 7c 3s 2h]
-Dealt to 6babca1 
-Dealt to 18cc49f9 
-Dealt to 9be70104 
+Dealt to 6babca1
+Dealt to 18cc49f9
+Dealt to 9be70104
 18cc49f9: folds
 9be70104: folds
 d6e0299a: folds

@@ -58,4 +58,3 @@ Seat 4: allout96 - $3.99
 Seat 5: Player4 - $0
 Seat 6: Hero - $3.08
 End Of Hand #746382682
-

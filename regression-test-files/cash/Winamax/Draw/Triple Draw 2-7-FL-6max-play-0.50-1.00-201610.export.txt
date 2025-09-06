@@ -12,7 +12,7 @@ Hero posts big blind 0.50
 Player4 posts big blind 0.50 out of position
 Player3 posts big blind 0.50 out of position
 Player2 posts big blind 0.50 out of position
-*** FIRST-BET *** 
+*** FIRST-BET ***
 Player4 checks
 Player3 checks
 Player2 raises 0.50 to 1
@@ -21,13 +21,13 @@ Player0 calls 0.75
 Hero calls 0.50
 Player4 calls 0.50
 Player3 calls 0.50
-*** FIRST-DRAW *** 
+*** FIRST-DRAW ***
 Player0 discard 2 cards
 Hero discard 2 cards
 Player4 discard 4 cards
 Player3 discard 2 cards
 Player2 discard 0 card
-*** SECOND-BET *** 
+*** SECOND-BET ***
 Player0 checks
 Hero checks
 Player4 checks
@@ -37,22 +37,22 @@ Player0 folds
 Hero calls 0.50
 Player4 calls 0.50
 Player3 calls 0.50
-*** SECOND-DRAW *** 
+*** SECOND-DRAW ***
 Hero discard 2 cards
 Player4 discard 2 cards
 Player3 discard 1 card
 Player2 discard 0 card
-*** THIRD-BET *** 
+*** THIRD-BET ***
 Hero checks
 Player4 bets 1
 Player3 calls 1
 Player2 calls 1
 Hero folds
-*** THIRD-DRAW *** 
+*** THIRD-DRAW ***
 Player4 discard 1 card
 Player3 discard 1 card
 Player2 discard 0 card
-*** FOURTH-BET *** 
+*** FOURTH-BET ***
 Player4 bets 1
 Player3 calls 1
 Player2 calls 1

@@ -55,4 +55,3 @@
 </Game>
 
 ExtendedTableName: VIP €10,000 Quarterly Freeroll [4685921]:Table 1 [4685921]
-
