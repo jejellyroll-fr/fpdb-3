@@ -48,12 +48,16 @@ test = [
     "pytest-cov>=5.0.0",
     "PyQt5==5.15.11",
     "ruff>=0.12.8",
+    "syrupy>=4.0.0",
+    "hypothesis>=6.0.0",
 ]
 test-no-pyqt = [
     "pytest>=8.3.2",
     "pytest-qt>=4.0.2",
     "pytest-cov>=5.0.0",
     "ruff>=0.12.8",
+    "syrupy>=4.0.0",
+    "hypothesis>=6.0.0",
 ]
 build = ["pyinstaller>=6.9.0", "wheel>=0.42.0"]
 build-linux = ["python-appimage==1.2.7"]

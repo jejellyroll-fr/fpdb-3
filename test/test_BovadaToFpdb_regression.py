@@ -77,22 +77,22 @@ class BovadaRegressionTests(unittest.TestCase):
             base_dir / "regression-test-files/cash/Bovada/Flop/"
             "NLHE-USD-0.10-0.25-201208.raise.to.format.change.txt"
         )
-        importer_cli = base_dir / "importer_cli.py"
+        gui_bulk_import = base_dir / "GuiBulkImport.py"
 
         # Validate that all required files exist
         if not test_file.exists():
             self.skipTest(f"Test file {test_file} not available")
 
-        if not importer_cli.exists():
-            self.skipTest(f"CLI importer script not found: {importer_cli}")
+        if not gui_bulk_import.exists():
+            self.skipTest(f"GUI Bulk Import script not found: {gui_bulk_import}")
 
         if not Path(sys.executable).exists():
             self.fail(f"Python executable not found: {sys.executable}")
 
-        # Test import without actually modifying the database
+        # Test import using new CLI functionality in GuiBulkImport.py
         # Security: Using validated paths and controlled arguments with shell=False
         result = subprocess.run( # noqa: S603
-            [sys.executable, str(importer_cli), "--site", "Bovada", "--no-progress", "--debug", str(test_file)],
+            [sys.executable, str(gui_bulk_import), "-c", "Bovada", "-f", str(test_file), "-q"],
             cwd=base_dir,
             capture_output=True,
             text=True,
@@ -105,7 +105,7 @@ class BovadaRegressionTests(unittest.TestCase):
         assert result.returncode == 0, (
             f"CLI importer fails - regression detected:\n"
             f"Exit code: {result.returncode}\n"
-            f"Command: {' '.join([sys.executable, str(importer_cli), '--site', 'Bovada', '--no-progress', str(test_file)])}\n"
+            f"Command: {' '.join([sys.executable, str(gui_bulk_import), '-c', 'Bovada', '-f', str(test_file), '-q'])}\n"
             f"Working directory: {base_dir}\n"
             f"Test file exists: {test_file.exists()}\n"
             f"STDOUT:\n{result.stdout}\n"

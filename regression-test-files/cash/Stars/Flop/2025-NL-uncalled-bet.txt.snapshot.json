@@ -1,0 +1,166 @@
+{
+  "serialized_snapshot_name": "snapshot_2025-NL-uncalled-bet.txt.snapshot",
+  "snapshot": [
+    {
+      "actions": [
+        {
+          "actionId": 8,
+          "actionNo": 15,
+          "allIn": false,
+          "amount": 254,
+          "amountCalled": 0,
+          "cardsDiscarded": null,
+          "numDiscarded": 0,
+          "player": "Hero",
+          "raiseTo": 0,
+          "street": 3,
+          "streetActionNo": 1
+        },
+        {
+          "actionId": 6,
+          "actionNo": 16,
+          "allIn": true,
+          "amount": 220,
+          "amountCalled": 0,
+          "cardsDiscarded": null,
+          "numDiscarded": 0,
+          "player": "Player5",
+          "raiseTo": 0,
+          "street": 3,
+          "streetActionNo": 2
+        }
+      ],
+      "board_cards": {
+        "FLOP": [
+          "Kh",
+          "7c",
+          "5d"
+        ],
+        "RIVER": [
+          "3c"
+        ],
+        "TURN": [
+          "Ad"
+        ]
+      },
+      "datetime_utc": "2025-04-24 15:21:34+00:00",
+      "final_pot": 5.86,
+      "game_type": "holdem",
+      "hand_text_id": "255867983097",
+      "limit_type": "nl",
+      "max_seats": 6,
+      "players": [
+        {
+          "cards": null,
+          "eff_stack": 5.97,
+          "name": "Player1",
+          "net_winnings": 0.0,
+          "position": "B",
+          "rake_paid": 0.0,
+          "saw_showdown": false,
+          "seat": 1,
+          "stack_end": 5.97,
+          "stack_start": 6.02,
+          "street0_vpi": false,
+          "total_profit": -0.05,
+          "went_all_in": false
+        },
+        {
+          "cards": null,
+          "eff_stack": 5.0,
+          "name": "Player2",
+          "net_winnings": 0.0,
+          "position": 3,
+          "rake_paid": 0.0,
+          "saw_showdown": false,
+          "seat": 2,
+          "stack_end": 5.0,
+          "stack_start": 5.0,
+          "street0_vpi": false,
+          "total_profit": 0.0,
+          "went_all_in": false
+        },
+        {
+          "cards": null,
+          "eff_stack": 5.97,
+          "name": "Player3",
+          "net_winnings": 0.0,
+          "position": 2,
+          "rake_paid": 0.0,
+          "saw_showdown": false,
+          "seat": 3,
+          "stack_end": 8.69,
+          "stack_start": 8.84,
+          "street0_vpi": true,
+          "total_profit": -0.15,
+          "went_all_in": false
+        },
+        {
+          "cards": null,
+          "eff_stack": 2.98,
+          "name": "Player4",
+          "net_winnings": 0.0,
+          "position": 1,
+          "rake_paid": 0.0,
+          "saw_showdown": false,
+          "seat": 4,
+          "stack_end": 2.98,
+          "stack_start": 2.98,
+          "street0_vpi": false,
+          "total_profit": 0.0,
+          "went_all_in": false
+        },
+        {
+          "cards": null,
+          "eff_stack": 2.83,
+          "name": "Player5",
+          "net_winnings": 0.0,
+          "position": 0,
+          "rake_paid": 0.0,
+          "saw_showdown": true,
+          "seat": 5,
+          "stack_end": 0.0,
+          "stack_start": 2.83,
+          "street0_vpi": true,
+          "total_profit": -2.83,
+          "went_all_in": true
+        },
+        {
+          "cards": null,
+          "eff_stack": 2.94,
+          "name": "Hero",
+          "net_winnings": 5.5,
+          "position": "S",
+          "rake_paid": 0.36,
+          "saw_showdown": true,
+          "seat": 6,
+          "stack_end": 8.44,
+          "stack_start": 5.77,
+          "street0_vpi": true,
+          "total_profit": 2.67,
+          "went_all_in": false
+        }
+      ],
+      "pots_collected": {
+        "Hero": 5.5
+      },
+      "rake": 0.36,
+      "showdown": true,
+      "site": "PokerStars.COM",
+      "stakes": "$0.02/0.05",
+      "street0_pot": 0.5,
+      "street1_pot": 0.5,
+      "street2_pot": 1.46,
+      "street3_pot": 5.86,
+      "street4_pot": null,
+      "total_pot": 5.86,
+      "uncalled_bets": {
+        "Hero": 0.34
+      },
+      "winners": [
+        "Player5",
+        "Hero"
+      ]
+    }
+  ]
+}
