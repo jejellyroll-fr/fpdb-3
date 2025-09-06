@@ -24,5 +24,3 @@ Total pot 3,386,836 | Rake 0
 Board: [Ac Th Kd Kc 3c]
 Seat 1: Hero (small blind) showed [Tc Kh] and won (3,386,836) with a full house, Kings full of Tens
 Seat 6: Player0 (big blind) showed [6s 6c] and lost with two pair, Kings and Sixes
-
-

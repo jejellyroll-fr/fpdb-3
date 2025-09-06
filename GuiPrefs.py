@@ -58,6 +58,7 @@ rewrite = {
 
 class GuiPrefs(QDialog):
     """Preferences dialog for FPDB configuration."""
+
     def __init__(self, config: Any, parentwin: Any) -> None:
         """Initialize preferences dialog."""
         QDialog.__init__(self, parentwin)
@@ -124,7 +125,8 @@ class GuiPrefs(QDialog):
                         node.attributes.item(i).localName,
                     )
                     attritem = QTreeWidgetItem(
-                        item, [local_name, node.attributes.item(i).value],
+                        item,
+                        [local_name, node.attributes.item(i).value],
                     )
                     attritem.setData(1, Qt.UserRole, node.attributes.item(i))
                     attritem.setFlags(attritem.flags() | Qt.ItemIsEditable)

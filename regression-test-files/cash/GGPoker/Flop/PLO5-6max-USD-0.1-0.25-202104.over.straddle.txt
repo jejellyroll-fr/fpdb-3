@@ -8,8 +8,8 @@ f279d709: posts big blind $0.25
 9e7f64d4: straddle $0.5
 9e7f64d4: straddle $15.35 and is all-in
 *** HOLE CARDS ***
-Dealt to f279d709 
-Dealt to 9e7f64d4 
+Dealt to f279d709
+Dealt to 9e7f64d4
 Dealt to Hero [2s 3c 9d 9h Ad]
 Hero: folds
 f279d709: folds

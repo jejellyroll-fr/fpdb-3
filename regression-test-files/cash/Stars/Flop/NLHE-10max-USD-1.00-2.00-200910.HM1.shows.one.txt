@@ -6,7 +6,7 @@ Seat 3: Hero ($568.28 in chips)
 Seat 4: Player2 ($202.75 in chips)
 Seat 5: Player3 ($478.15 in chips)
 Seat 6: Player4 ($104.55 in chips)
-Player2: posts small blind $1 
+Player2: posts small blind $1
 Player3: posts big blind $2
 *** HOLE CARDS ***
 Dealt to Hero [Qh Th]

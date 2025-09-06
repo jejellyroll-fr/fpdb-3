@@ -30,7 +30,7 @@ Winamax now supported
 Translation progress:
     Complete: English, Hungarian. If you notice an untranslated string in any output please let us know.
     Partial: French (85%), German (32%), Polish (27%), Spanish (17%), Russian (6%).
-    
+
 
 Significant work on the underlying HUD code, including hud dragging and table closing
 Problems where some stats became > 100% are now fixed
@@ -107,6 +107,6 @@ Code/translations: Worros, Donoban, Nutomatic, Steffen, Chaz Littlejohn, Scott W
 Special shoutout to Eleatic Stranger who has written an initial converter for Carbon poker, without ever having played on the site!
 Documentation: RSOAndrew, Buggernaut, ChazDazzle
 Testers and everyone answering forum questions - xaviax, Dog, uncooper etc. You know who you are.
-Hand History donations: Quite a few people on this list now. Every donation for alternate sites and various corner cases is appreciated. 
+Hand History donations: Quite a few people on this list now. Every donation for alternate sites and various corner cases is appreciated.
 
 And a particular thanks to all the libraries, interpreters etc. that we use to create fpdb!

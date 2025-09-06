@@ -16,15 +16,15 @@ F4UXR34L was dealt:         8s - Qd - 3d - 5c
 
 ditemelovoi                 Call        (0.04)
 LihavaLapsi                 Raise       (0.18)
-kikekake                    Fold        
-RealFish82                  Fold        
-lukasp2                     Fold        
-F4UXR34L                    Fold        
+kikekake                    Fold
+RealFish82                  Fold
+lukasp2                     Fold
+F4UXR34L                    Fold
 ditemelovoi                 Call        (0.14)
 
 Flop                        Kh - 6d - 3c
 
-ditemelovoi                 Check       
+ditemelovoi                 Check
 LihavaLapsi                 Bet         (0.36)
 ditemelovoi                 Raise       (1.50)
 LihavaLapsi                 All-In      (1.54)
@@ -57,19 +57,19 @@ Big Blind:                  ditemelovoi (0.04)
 
 F4UXR34L was dealt:         Td - 5h - Kc - 3d
 
-LihavaLapsi                 Fold        
-kikekake                    Fold        
-RealFish82                  Fold        
+LihavaLapsi                 Fold
+kikekake                    Fold
+RealFish82                  Fold
 lukasp2                     Raise       (0.14)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 ditemelovoi                 Call        (0.10)
 
 Flop                        Qs - 4c - Jh
 
-ditemelovoi                 Check       
+ditemelovoi                 Check
 lukasp2                     Bet         (0.22)
 ditemelovoi                 Raise       (0.96)
-lukasp2                     Fold        
+lukasp2                     Fold
 ditemelovoi                 Payback     (0.74)
 
 ditemelovoi didn't show hand
@@ -96,19 +96,19 @@ Big Blind:                  LihavaLapsi (0.04)
 F4UXR34L was dealt:         8s - 5c - 8c - 6d
 
 kikekake                    Raise       (0.14)
-RealFish82                  Fold        
-lukasp2                     Fold        
-F4UXR34L                    Fold        
+RealFish82                  Fold
+lukasp2                     Fold
+F4UXR34L                    Fold
 ditemelovoi                 Call        (0.12)
 LihavaLapsi                 Call        (0.10)
 
 Flop                        6h - Js - 5s
 
-ditemelovoi                 Check       
-LihavaLapsi                 Check       
+ditemelovoi                 Check
+LihavaLapsi                 Check
 kikekake                    Bet         (0.42)
-ditemelovoi                 Fold        
-LihavaLapsi                 Fold        
+ditemelovoi                 Fold
+LihavaLapsi                 Fold
 kikekake                    Payback     (0.42)
 
 kikekake didn't show hand
@@ -134,20 +134,20 @@ Big Blind:                  kikekake    (0.04)
 
 F4UXR34L was dealt:         3s - 7h - Th - Jc
 
-RealFish82                  Fold        
+RealFish82                  Fold
 lukasp2                     Raise       (0.14)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 ditemelovoi                 Call        (0.14)
-LihavaLapsi                 Fold        
+LihavaLapsi                 Fold
 kikekake                    Call        (0.10)
 
 Flop                        2h - 8d - 8s
 
-kikekake                    Check       
-lukasp2                     Check       
+kikekake                    Check
+lukasp2                     Check
 ditemelovoi                 Bet         (0.44)
-kikekake                    Fold        
-lukasp2                     Fold        
+kikekake                    Fold
+lukasp2                     Fold
 ditemelovoi                 Payback     (0.44)
 
 ditemelovoi didn't show hand
@@ -173,12 +173,12 @@ Big Blind:                  RealFish82  (0.04)
 
 F4UXR34L was dealt:         3c - Ah - 4s - 9c
 
-lukasp2                     Fold        
-F4UXR34L                    Fold        
-ditemelovoi                 Fold        
-LihavaLapsi                 Fold        
+lukasp2                     Fold
+F4UXR34L                    Fold
+ditemelovoi                 Fold
+LihavaLapsi                 Fold
 kikekake                    Call        (0.02)
-RealFish82                  Check       
+RealFish82                  Check
 
 Flop                        7s - 5s - Jd
 
@@ -219,31 +219,31 @@ Big Blind:                  lukasp2     (0.04)
 
 F4UXR34L was dealt:         5s - 2h - Ad - 2s
 
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 ditemelovoi                 Call        (0.04)
 LihavaLapsi                 Call        (0.04)
 kikekake                    Call        (0.04)
 RealFish82                  Call        (0.02)
-lukasp2                     Check       
+lukasp2                     Check
 
 Flop                        7d - 2c - 8h
 
-RealFish82                  Check       
-lukasp2                     Check       
-ditemelovoi                 Check       
+RealFish82                  Check
+lukasp2                     Check
+ditemelovoi                 Check
 LihavaLapsi                 Bet         (0.15)
 kikekake                    Call        (0.15)
-RealFish82                  Fold        
+RealFish82                  Fold
 lukasp2                     Call        (0.15)
 ditemelovoi                 Call        (0.15)
 
 Turn                        7d - 2c - 8h - 4d
 
-lukasp2                     Check       
+lukasp2                     Check
 ditemelovoi                 Bet         (0.80)
-LihavaLapsi                 Fold        
+LihavaLapsi                 Fold
 kikekake                    All-In      (1.36)
-lukasp2                     Fold        
+lukasp2                     Fold
 ditemelovoi                 Call        (0.56)
 
 River                       7d - 2c - 8h - 4d - 4h
@@ -255,4 +255,3 @@ ditemelovoi wins:           EUR 3.35 (with a full house, Fours full of Eights)
 Rake:                       EUR 0.17
 
 Game ended 2011-03-21 16:50:35 GMT
-

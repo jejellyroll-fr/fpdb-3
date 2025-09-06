@@ -291,9 +291,7 @@ class GuiLogView(QWidget):
         self.logfile_combo.setCurrentIndex(selected_index)
         self.logfile_combo.blockSignals(False)
         if self.logfile_paths:
-            self.logfile = self.logfile_paths[
-                selected_index
-            ]  # Keep the selected log file
+            self.logfile = self.logfile_paths[selected_index]  # Keep the selected log file
         else:
             self.logfile = None
 
@@ -322,7 +320,8 @@ class GuiLogView(QWidget):
             row_data = []
             for column in range(self.proxy_model.columnCount()):
                 data = self.proxy_model.data(
-                    self.proxy_model.index(index.row(), column), Qt.DisplayRole,
+                    self.proxy_model.index(index.row(), column),
+                    Qt.DisplayRole,
                 )
                 row_data.append(str(data))
             text += "\t".join(row_data) + "\n"

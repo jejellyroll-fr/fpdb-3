@@ -1,9 +1,9 @@
-#Game No : 2621679197 
+#Game No : 2621679197
 ***** Hand History for Game 2621679197 *****
 NL Texas Hold'em $30 Buy-in  + $3 Entry Fee  Trny:15286975 Level:4 Blinds(50/100) - Tuesday, August 30, 00:26:01 EDT 2005
 Table Table  11277 (Real Money)
 Seat 4 is the button
-Total number of players : 8 
+Total number of players : 8
 Seat 2: Player0 ( $1902 )
 Seat 3: Player1 ( $1255 )
 Seat 4: Player2 ( $1260 )

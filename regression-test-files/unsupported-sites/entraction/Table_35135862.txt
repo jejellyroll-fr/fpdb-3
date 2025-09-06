@@ -16,13 +16,13 @@ Blind out of turn:          Makesdy     (0.04)
 F4UXR34L was dealt:         9s - Jh - Ah - 8h
 
 Re46                        Call        (0.04)
-Makesdy                     Check       
+Makesdy                     Check
 _tiburon_                   Call        (0.04)
 l4oo9od                     Call        (0.04)
 pupazzzo                    Raise       (0.10)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.08)
-Makesdy                     Fold        
+Makesdy                     Fold
 _tiburon_                   Call        (0.08)
 l4oo9od                     Call        (0.08)
 
@@ -30,21 +30,21 @@ Flop                        Th - 6d - 5d
 
 pupazzzo                    Bet         (0.16)
 Re46                        Call        (0.16)
-_tiburon_                   Fold        
+_tiburon_                   Fold
 l4oo9od                     Call        (0.16)
 
 Turn                        Th - 6d - 5d - 4s
 
-pupazzzo                    Check       
+pupazzzo                    Check
 Re46                        All-In      (0.40)
 l4oo9od                     Call        (0.40)
 pupazzzo                    Call        (0.40)
 
 River                       Th - 6d - 5d - 4s - 2s
 
-pupazzzo                    Check       
+pupazzzo                    Check
 l4oo9od                     Bet         (1.12)
-pupazzzo                    Fold        
+pupazzzo                    Fold
 l4oo9od                     Payback     (1.12)
 
 l4oo9od shows:              5s - 3s - 6c - Ad (a straight, Six high)
@@ -71,25 +71,25 @@ Big Blind:                  Re46        (0.04)
 
 F4UXR34L was dealt:         Qh - 9d - 7c - Tc
 
-Makesdy                     Fold        
+Makesdy                     Fold
 _tiburon_                   Raise       (0.14)
 l4oo9od                     Call        (0.14)
 pupazzzo                    Call        (0.14)
-F4UXR34L                    Fold        
-Re46                        Fold        
+F4UXR34L                    Fold
+Re46                        Fold
 
 Flop                        Th - Kc - Jd
 
-_tiburon_                   Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
+_tiburon_                   Check
+l4oo9od                     Check
+pupazzzo                    Check
 
 Turn                        Th - Kc - Jd - Ks
 
-_tiburon_                   Check       
+_tiburon_                   Check
 l4oo9od                     Bet         (0.48)
-pupazzzo                    Fold        
-_tiburon_                   Fold        
+pupazzzo                    Fold
+_tiburon_                   Fold
 l4oo9od                     Payback     (0.48)
 
 l4oo9od didn't show hand
@@ -116,31 +116,31 @@ Big Blind:                  l4oo9od     (0.04)
 F4UXR34L was dealt:         Jh - 8c - Jd - 3d
 
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.04)
-Makesdy                     Fold        
+Makesdy                     Fold
 _tiburon_                   Call        (0.02)
-l4oo9od                     Check       
+l4oo9od                     Check
 
 Flop                        7s - Th - Ts
 
-_tiburon_                   Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+_tiburon_                   Check
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 
 Turn                        7s - Th - Ts - 9s
 
-_tiburon_                   Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+_tiburon_                   Check
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 
 River                       7s - Th - Ts - 9s - 8s
 
 _tiburon_                   Bet         (0.12)
 l4oo9od                     Call        (0.12)
-pupazzzo                    Fold        
+pupazzzo                    Fold
 Re46                        Call        (0.12)
 
 _tiburon_ shows:            Qs - 8d - 6s - 2c (a flush, Queen high)
@@ -169,33 +169,33 @@ Big Blind:                  pupazzzo    (0.04)
 
 F4UXR34L was dealt:         8s - Jc - Ad - 5c
 
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.04)
 Makesdy                     Call        (0.04)
-_tiburon_                   Fold        
+_tiburon_                   Fold
 l4oo9od                     Call        (0.02)
-pupazzzo                    Check       
+pupazzzo                    Check
 
 Flop                        9d - 3s - 2c
 
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
-Makesdy                     Check       
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
+Makesdy                     Check
 
 Turn                        9d - 3s - 2c - 5h
 
-l4oo9od                     Check       
-pupazzzo                    Check       
+l4oo9od                     Check
+pupazzzo                    Check
 Re46                        Bet         (0.16)
-Makesdy                     Fold        
+Makesdy                     Fold
 l4oo9od                     Call        (0.16)
-pupazzzo                    Fold        
+pupazzzo                    Fold
 
 River                       9d - 3s - 2c - 5h - 6s
 
-l4oo9od                     Check       
-Re46                        Check       
+l4oo9od                     Check
+Re46                        Check
 
 l4oo9od shows:              Tc - 2h - Qs - 3d (two pairs, Threes and Deuces)
 Re46 shows:                 8c - Ac - 6d - 4d (a straight, Six high)
@@ -222,25 +222,25 @@ Big Blind:                  F4UXR34L    (0.04)
 F4UXR34L was dealt:         2c - 9s - Jd - Jh
 
 Re46                        Call        (0.04)
-Makesdy                     Fold        
+Makesdy                     Fold
 _tiburon_                   Raise       (0.18)
 l4oo9od                     Call        (0.18)
 pupazzzo                    Call        (0.16)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.14)
 
 Flop                        Ac - As - 6d
 
-pupazzzo                    Check       
-Re46                        Check       
+pupazzzo                    Check
+Re46                        Check
 _tiburon_                   Bet         (0.57)
-l4oo9od                     Fold        
+l4oo9od                     Fold
 pupazzzo                    Call        (0.57)
-Re46                        Fold        
+Re46                        Fold
 
 Turn                        Ac - As - 6d - 7s
 
-pupazzzo                    Check       
+pupazzzo                    Check
 _tiburon_                   Bet         (1.90)
 pupazzzo                    All-In      (1.05)
 _tiburon_                   Payback     (0.85)
@@ -271,18 +271,18 @@ Big Blind:                  Re46        (0.04)
 
 F4UXR34L was dealt:         Qc - 8s - 3d - 2s
 
-Makesdy                     Fold        
-_tiburon_                   Fold        
+Makesdy                     Fold
+_tiburon_                   Fold
 l4oo9od                     Call        (0.04)
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
-Re46                        Check       
+F4UXR34L                    Fold
+Re46                        Check
 
 Flop                        Jh - 2d - 2h
 
 Re46                        Bet         (0.04)
 l4oo9od                     Call        (0.04)
-pupazzzo                    Fold        
+pupazzzo                    Fold
 
 Turn                        Jh - 2d - 2h - 3c
 
@@ -321,33 +321,33 @@ F4UXR34L was dealt:         8c - Qc - 8s - 5h
 _tiburon_                   Call        (0.04)
 l4oo9od                     Call        (0.04)
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.02)
-Makesdy                     Check       
+Makesdy                     Check
 
 Flop                        5s - Kd - 7s
 
-Re46                        Check       
-Makesdy                     Check       
-_tiburon_                   Check       
-l4oo9od                     Check       
+Re46                        Check
+Makesdy                     Check
+_tiburon_                   Check
+l4oo9od                     Check
 pupazzzo                    Bet         (0.08)
-Re46                        Fold        
-Makesdy                     Fold        
-_tiburon_                   Fold        
+Re46                        Fold
+Makesdy                     Fold
+_tiburon_                   Fold
 l4oo9od                     Call        (0.08)
 
 Turn                        5s - Kd - 7s - Tc
 
-l4oo9od                     Check       
+l4oo9od                     Check
 pupazzzo                    Bet         (0.12)
 l4oo9od                     Call        (0.12)
 
 River                       5s - Kd - 7s - Tc - 3s
 
-l4oo9od                     Check       
+l4oo9od                     Check
 pupazzzo                    Bet         (0.60)
-l4oo9od                     Fold        
+l4oo9od                     Fold
 pupazzzo                    Payback     (0.60)
 
 pupazzzo didn't show hand
@@ -377,27 +377,27 @@ l4oo9od                     Call        (0.04)
 pupazzzo                    Call        (0.04)
 F4UXR34L                    Call        (0.04)
 Re46                        Call        (0.04)
-Makesdy                     Fold        
-_tiburon_                   Check       
+Makesdy                     Fold
+_tiburon_                   Check
 
 Flop                        4d - 5c - Qd
 
-_tiburon_                   Check       
+_tiburon_                   Check
 l4oo9od                     Bet         (0.22)
-pupazzzo                    Fold        
-F4UXR34L                    Fold        
+pupazzzo                    Fold
+F4UXR34L                    Fold
 Re46                        Call        (0.22)
-_tiburon_                   Fold        
+_tiburon_                   Fold
 
 Turn                        4d - 5c - Qd - Qs
 
-l4oo9od                     Check       
-Re46                        Check       
+l4oo9od                     Check
+Re46                        Check
 
 River                       4d - 5c - Qd - Qs - 4s
 
 l4oo9od                     Bet         (0.49)
-Re46                        Fold        
+Re46                        Fold
 l4oo9od                     Payback     (0.49)
 
 l4oo9od didn't show hand
@@ -424,7 +424,7 @@ Big Blind:                  l4oo9od     (0.04)
 F4UXR34L was dealt:         Qd - 7s - As - 3d
 
 pupazzzo                    Raise       (0.08)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.08)
 Makesdy                     Call        (0.08)
 _tiburon_                   Call        (0.06)
@@ -432,27 +432,27 @@ l4oo9od                     Call        (0.04)
 
 Flop                        4d - 8d - 5c
 
-_tiburon_                   Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
-Makesdy                     Check       
+_tiburon_                   Check
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
+Makesdy                     Check
 
 Turn                        4d - 8d - 5c - 6s
 
-_tiburon_                   Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
-Makesdy                     Check       
+_tiburon_                   Check
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
+Makesdy                     Check
 
 River                       4d - 8d - 5c - 6s - Qh
 
-_tiburon_                   Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
-Makesdy                     Check       
+_tiburon_                   Check
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
+Makesdy                     Check
 
 _tiburon_ shows:            Jc - 7c - Kc - 9d (a straight, Nine high)
 
@@ -482,9 +482,9 @@ Big Blind:                  pupazzzo    (0.04)
 
 F4UXR34L was dealt:         6h - 9d - Qs - Ts
 
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.04)
-Makesdy                     Fold        
+Makesdy                     Fold
 _tiburon_                   Raise       (0.18)
 l4oo9od                     Call        (0.16)
 pupazzzo                    Call        (0.14)
@@ -492,27 +492,27 @@ Re46                        Call        (0.14)
 
 Flop                        8h - 2d - 4d
 
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 _tiburon_                   Bet         (0.54)
-l4oo9od                     Fold        
+l4oo9od                     Fold
 pupazzzo                    Call        (0.54)
 Re46                        Call        (0.54)
 
 Turn                        8h - 2d - 4d - Th
 
-pupazzzo                    Check       
+pupazzzo                    Check
 Re46                        Bet         (0.12)
 _tiburon_                   Call        (0.12)
 pupazzzo                    Call        (0.12)
 
 River                       8h - 2d - 4d - Th - 5h
 
-pupazzzo                    Check       
+pupazzzo                    Check
 Re46                        Bet         (0.20)
 _tiburon_                   Raise       (3.30)
-pupazzzo                    Fold        
+pupazzzo                    Fold
 Re46                        All-In      (0.57)
 _tiburon_                   Payback     (2.53)
 
@@ -541,22 +541,22 @@ Big Blind:                  F4UXR34L    (0.04)
 F4UXR34L was dealt:         6s - Kc - 8d - Qc
 
 Re46                        Call        (0.04)
-Makesdy                     Fold        
+Makesdy                     Fold
 _tiburon_                   Call        (0.04)
 l4oo9od                     Call        (0.04)
 pupazzzo                    Call        (0.02)
-F4UXR34L                    Check       
+F4UXR34L                    Check
 
 Flop                        2h - 3c - 5s
 
-pupazzzo                    Check       
-F4UXR34L                    Check       
-Re46                        Check       
+pupazzzo                    Check
+F4UXR34L                    Check
+Re46                        Check
 _tiburon_                   Bet         (0.15)
-l4oo9od                     Fold        
+l4oo9od                     Fold
 pupazzzo                    Raise       (0.65)
-F4UXR34L                    Fold        
-Re46                        Fold        
+F4UXR34L                    Fold
+Re46                        Fold
 _tiburon_                   Call        (0.50)
 
 Turn                        2h - 3c - 5s - 8s
@@ -567,7 +567,7 @@ _tiburon_                   Call        (1.50)
 River                       2h - 3c - 5s - 8s - Kd
 
 pupazzzo                    All-In      (1.14)
-_tiburon_                   Fold        
+_tiburon_                   Fold
 pupazzzo                    Payback     (1.14)
 
 pupazzzo didn't show hand
@@ -593,32 +593,32 @@ Big Blind:                  Re46        (0.04)
 
 F4UXR34L was dealt:         6d - 5c - Th - Qc
 
-Makesdy                     Fold        
-_tiburon_                   Fold        
+Makesdy                     Fold
+_tiburon_                   Fold
 l4oo9od                     Call        (0.04)
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
-Re46                        Check       
+F4UXR34L                    Fold
+Re46                        Check
 
 Flop                        Ac - 7d - 3s
 
-Re46                        Check       
+Re46                        Check
 l4oo9od                     Bet         (0.04)
 pupazzzo                    Call        (0.04)
 Re46                        Call        (0.04)
 
 Turn                        Ac - 7d - 3s - Ts
 
-Re46                        Check       
+Re46                        Check
 l4oo9od                     Bet         (0.04)
 pupazzzo                    Call        (0.04)
 Re46                        Call        (0.04)
 
 River                       Ac - 7d - 3s - Ts - 6s
 
-Re46                        Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
+Re46                        Check
+l4oo9od                     Check
+pupazzzo                    Check
 
 Re46 shows:                 Jd - Kd - 9c - Ks (a pair of Kings)
 l4oo9od shows:              Td - 9h - 7h - 3c (two pairs, Tens and Sevens)
@@ -649,34 +649,34 @@ F4UXR34L was dealt:         Tc - 2d - 5c - 7h
 _tiburon_                   Call        (0.04)
 l4oo9od                     Call        (0.04)
 pupazzzo                    Raise       (0.08)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.06)
-Makesdy                     Fold        
+Makesdy                     Fold
 _tiburon_                   Call        (0.04)
 l4oo9od                     Call        (0.04)
 
 Flop                        4c - Ad - 9s
 
-Re46                        Check       
-_tiburon_                   Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
+Re46                        Check
+_tiburon_                   Check
+l4oo9od                     Check
+pupazzzo                    Check
 
 Turn                        4c - Ad - 9s - 8d
 
-Re46                        Check       
+Re46                        Check
 _tiburon_                   Bet         (0.27)
 l4oo9od                     Call        (0.27)
 pupazzzo                    Raise       (0.54)
-Re46                        Fold        
+Re46                        Fold
 _tiburon_                   Call        (0.27)
 l4oo9od                     Call        (0.27)
 
 River                       4c - Ad - 9s - 8d - 6d
 
-_tiburon_                   Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
+_tiburon_                   Check
+l4oo9od                     Check
+pupazzzo                    Check
 
 _tiburon_ shows:            3d - Kh - 4h - 9d (a flush, Ace high)
 
@@ -706,31 +706,31 @@ F4UXR34L was dealt:         Qs - 9c - 5h - Js
 
 l4oo9od                     Call        (0.04)
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.04)
-Makesdy                     Fold        
-_tiburon_                   Check       
+Makesdy                     Fold
+_tiburon_                   Check
 
 Flop                        8d - 7c - 4d
 
-_tiburon_                   Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+_tiburon_                   Check
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 
 Turn                        8d - 7c - 4d - Kh
 
-_tiburon_                   Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+_tiburon_                   Check
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 
 River                       8d - 7c - 4d - Kh - 7s
 
-_tiburon_                   Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+_tiburon_                   Check
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 
 _tiburon_ shows:            9h - Qh - 3h - 8c (two pairs, Eights and Sevens)
 l4oo9od shows:              Qc - Ts - Ks - 4c (two pairs, Kings and Sevens)
@@ -761,34 +761,34 @@ Big Blind:                  l4oo9od     (0.04)
 F4UXR34L was dealt:         8d - 6h - 4h - Td
 
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.04)
-Makesdy                     Fold        
+Makesdy                     Fold
 _tiburon_                   Call        (0.02)
-l4oo9od                     Check       
+l4oo9od                     Check
 
 Flop                        2c - 6s - 4s
 
-_tiburon_                   Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+_tiburon_                   Check
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 
 Turn                        2c - 6s - 4s - 2h
 
-_tiburon_                   Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+_tiburon_                   Check
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 
 River                       2c - 6s - 4s - 2h - 5d
 
-_tiburon_                   Check       
-l4oo9od                     Check       
+_tiburon_                   Check
+l4oo9od                     Check
 pupazzzo                    Bet         (0.04)
 Re46                        Call        (0.04)
-_tiburon_                   Fold        
-l4oo9od                     Fold        
+_tiburon_                   Fold
+l4oo9od                     Fold
 
 pupazzzo shows:             Ad - 3s - Qd - 9s (a straight, Five high)
 Re46 shows:                 3d - Ah - 3h - Kd (a straight, Five high)
@@ -817,22 +817,22 @@ F4UXR34L was dealt:         Jc - 9c - Qs - Th
 
 F4UXR34L                    Call        (0.04)
 Re46                        Call        (0.04)
-Makesdy                     Fold        
+Makesdy                     Fold
 _tiburon_                   Call        (0.04)
-l4oo9od                     Fold        
-pupazzzo                    Check       
+l4oo9od                     Fold
+pupazzzo                    Check
 
 Flop                        3d - 2d - Td
 
 pupazzzo                    Bet         (0.04)
-F4UXR34L                    Fold        
-Re46                        Fold        
+F4UXR34L                    Fold
+Re46                        Fold
 _tiburon_                   Call        (0.04)
 
 Turn                        3d - 2d - Td - 3c
 
 pupazzzo                    Bet         (0.04)
-_tiburon_                   Fold        
+_tiburon_                   Fold
 pupazzzo                    Payback     (0.04)
 
 pupazzzo didn't show hand
@@ -859,25 +859,25 @@ Big Blind:                  F4UXR34L    (0.04)
 F4UXR34L was dealt:         6d - 8h - 7h - 6h
 
 Re46                        Call        (0.04)
-Makesdy                     Fold        
+Makesdy                     Fold
 _tiburon_                   Call        (0.04)
 l4oo9od                     Call        (0.04)
 pupazzzo                    Call        (0.02)
-F4UXR34L                    Check       
+F4UXR34L                    Check
 
 Flop                        5s - Ac - Ks
 
-pupazzzo                    Check       
-F4UXR34L                    Check       
+pupazzzo                    Check
+F4UXR34L                    Check
 Re46                        Bet         (0.04)
 _tiburon_                   Call        (0.04)
 l4oo9od                     Call        (0.04)
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 
 Turn                        5s - Ac - Ks - 7c
 
-pupazzzo                    Check       
+pupazzzo                    Check
 Re46                        Bet         (0.04)
 _tiburon_                   Call        (0.04)
 l4oo9od                     Call        (0.04)
@@ -885,11 +885,11 @@ pupazzzo                    Call        (0.04)
 
 River                       5s - Ac - Ks - 7c - Jc
 
-pupazzzo                    Check       
+pupazzzo                    Check
 Re46                        Bet         (0.12)
-_tiburon_                   Fold        
+_tiburon_                   Fold
 l4oo9od                     Call        (0.12)
-pupazzzo                    Fold        
+pupazzzo                    Fold
 
 Re46 shows:                 Ts - 2d - Qh - Jd (a straight, Ace high)
 l4oo9od shows:              8d - 5d - 6c - 9c (a flush, Ace high)
@@ -915,11 +915,11 @@ Big Blind:                  Re46        (0.04)
 
 F4UXR34L was dealt:         3s - 3d - 7h - Qs
 
-Makesdy                     Fold        
-l4oo9od                     Fold        
+Makesdy                     Fold
+l4oo9od                     Fold
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
-Re46                        Check       
+F4UXR34L                    Fold
+Re46                        Check
 
 Flop                        Jd - 8h - Qd
 
@@ -960,29 +960,29 @@ Big Blind:                  Makesdy     (0.04)
 
 F4UXR34L was dealt:         5h - As - 6c - 5c
 
-l4oo9od                     Fold        
+l4oo9od                     Fold
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.02)
-Makesdy                     Check       
+Makesdy                     Check
 
 Flop                        9s - 4s - 9d
 
-Re46                        Check       
-Makesdy                     Check       
-pupazzzo                    Check       
+Re46                        Check
+Makesdy                     Check
+pupazzzo                    Check
 
 Turn                        9s - 4s - 9d - 3d
 
-Re46                        Check       
-Makesdy                     Check       
-pupazzzo                    Check       
+Re46                        Check
+Makesdy                     Check
+pupazzzo                    Check
 
 River                       9s - 4s - 9d - 3d - Ac
 
-Re46                        Check       
-Makesdy                     Check       
-pupazzzo                    Check       
+Re46                        Check
+Makesdy                     Check
+pupazzzo                    Check
 
 Re46 shows:                 Ad - Js - 8c - Qs (two pairs, Aces and Nines)
 Makesdy shows:              Kh - 2s - 2c - 9h (three of a kind, Nines)
@@ -1011,28 +1011,28 @@ Big Blind:                  l4oo9od     (0.04)
 F4UXR34L was dealt:         Kh - Kd - 3c - 2h
 
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.04)
-Makesdy                     Fold        
-l4oo9od                     Check       
+Makesdy                     Fold
+l4oo9od                     Check
 
 Flop                        Qs - 5s - 6s
 
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 
 Turn                        Qs - 5s - 6s - 8s
 
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 
 River                       Qs - 5s - 6s - 8s - Jh
 
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 
 l4oo9od shows:              Qh - As - Ac - Kc (a pair of Aces)
 
@@ -1061,30 +1061,30 @@ Big Blind:                  pupazzzo    (0.04)
 
 F4UXR34L was dealt:         5d - 3d - 4c - 7s
 
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.04)
-Makesdy                     Fold        
+Makesdy                     Fold
 l4oo9od                     Call        (0.02)
-pupazzzo                    Check       
+pupazzzo                    Check
 
 Flop                        9h - 2c - Kc
 
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 
 Turn                        9h - 2c - Kc - Ah
 
-l4oo9od                     Check       
+l4oo9od                     Check
 pupazzzo                    Bet         (0.04)
 Re46                        Call        (0.04)
 l4oo9od                     Call        (0.04)
 
 River                       9h - 2c - Kc - Ah - 4d
 
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 
 l4oo9od shows:              Jd - 2s - 4s - Kd (two pairs, Kings and Fours)
 
@@ -1113,31 +1113,31 @@ Big Blind:                  F4UXR34L    (0.04)
 F4UXR34L was dealt:         Ac - 8c - 2h - Qh
 
 Re46                        Call        (0.04)
-Makesdy                     Fold        
+Makesdy                     Fold
 l4oo9od                     Call        (0.04)
 pupazzzo                    Call        (0.02)
-F4UXR34L                    Check       
+F4UXR34L                    Check
 
 Flop                        5h - 4d - 6c
 
-pupazzzo                    Check       
-F4UXR34L                    Check       
-Re46                        Check       
-l4oo9od                     Check       
+pupazzzo                    Check
+F4UXR34L                    Check
+Re46                        Check
+l4oo9od                     Check
 
 Turn                        5h - 4d - 6c - 4h
 
-pupazzzo                    Check       
-F4UXR34L                    Check       
-Re46                        Check       
-l4oo9od                     Check       
+pupazzzo                    Check
+F4UXR34L                    Check
+Re46                        Check
+l4oo9od                     Check
 
 River                       5h - 4d - 6c - 4h - Tc
 
-pupazzzo                    Check       
-F4UXR34L                    Check       
-Re46                        Check       
-l4oo9od                     Check       
+pupazzzo                    Check
+F4UXR34L                    Check
+Re46                        Check
+l4oo9od                     Check
 
 pupazzzo shows:             Td - 2d - Jh - 7h (two pairs, Tens and Fours)
 
@@ -1168,31 +1168,31 @@ Big Blind:                  Re46        (0.04)
 
 F4UXR34L was dealt:         Js - Ad - 7d - 4c
 
-Makesdy                     Fold        
+Makesdy                     Fold
 l4oo9od                     Call        (0.04)
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
-Re46                        Check       
+F4UXR34L                    Fold
+Re46                        Check
 
 Flop                        Ks - 3c - 8h
 
-Re46                        Check       
-l4oo9od                     Check       
+Re46                        Check
+l4oo9od                     Check
 pupazzzo                    Bet         (0.04)
 Re46                        Call        (0.04)
 l4oo9od                     Call        (0.04)
 
 Turn                        Ks - 3c - 8h - Qd
 
-Re46                        Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
+Re46                        Check
+l4oo9od                     Check
+pupazzzo                    Check
 
 River                       Ks - 3c - 8h - Qd - 2s
 
-Re46                        Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
+Re46                        Check
+l4oo9od                     Check
+pupazzzo                    Check
 
 Re46 shows:                 6s - 9d - 7h - Tc (high card King)
 l4oo9od shows:              4d - 5h - Qc - As (a pair of Queens)
@@ -1221,30 +1221,30 @@ F4UXR34L was dealt:         8d - 2s - Qc - Ah
 
 l4oo9od                     Call        (0.04)
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.02)
-Makesdy                     Check       
+Makesdy                     Check
 
 Flop                        2c - 5h - 7h
 
-Re46                        Check       
-Makesdy                     Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
+Re46                        Check
+Makesdy                     Check
+l4oo9od                     Check
+pupazzzo                    Check
 
 Turn                        2c - 5h - 7h - 6c
 
-Re46                        Check       
-Makesdy                     Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
+Re46                        Check
+Makesdy                     Check
+l4oo9od                     Check
+pupazzzo                    Check
 
 River                       2c - 5h - 7h - 6c - 5c
 
-Re46                        Check       
-Makesdy                     Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
+Re46                        Check
+Makesdy                     Check
+l4oo9od                     Check
+pupazzzo                    Check
 
 Re46 shows:                 Qd - Jd - 7d - Kd (two pairs, Sevens and Fives)
 Makesdy shows:              Ac - 7c - Qh - 9s (a flush, Ace high)
@@ -1273,24 +1273,24 @@ Big Blind:                  l4oo9od     (0.04)
 
 F4UXR34L was dealt:         Th - Qs - Ah - 7s
 
-pupazzzo                    Fold        
+pupazzzo                    Fold
 F4UXR34L                    Raise       (0.14)
 Re46                        Call        (0.14)
-Makesdy                     Fold        
+Makesdy                     Fold
 l4oo9od                     Call        (0.10)
 
 Flop                        As - Ks - Kh
 
-l4oo9od                     Check       
+l4oo9od                     Check
 F4UXR34L                    Bet         (0.33)
 Re46                        Call        (0.33)
 l4oo9od                     Call        (0.33)
 
 Turn                        As - Ks - Kh - 2d
 
-l4oo9od                     Check       
+l4oo9od                     Check
 F4UXR34L                    Bet         (1.04)
-Re46                        Fold        
+Re46                        Fold
 l4oo9od                     All-In      (0.57)
 F4UXR34L                    Payback     (0.47)
 
@@ -1321,29 +1321,29 @@ Big Blind:                  pupazzzo    (0.04)
 
 F4UXR34L was dealt:         7h - Qd - Kd - 4c
 
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.04)
-Makesdy                     Fold        
+Makesdy                     Fold
 l4oo9od                     Call        (0.02)
-pupazzzo                    Check       
+pupazzzo                    Check
 
 Flop                        Jd - Ad - 2s
 
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 
 Turn                        Jd - Ad - 2s - Ac
 
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 
 River                       Jd - Ad - 2s - Ac - 7c
 
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
 
 l4oo9od shows:              7s - 5h - 6d - 9c (two pairs, Aces and Sevens)
 
@@ -1375,24 +1375,24 @@ Re46                        Call        (0.04)
 Makesdy                     Call        (0.04)
 l4oo9od                     Call        (0.04)
 pupazzzo                    Call        (0.02)
-F4UXR34L                    Check       
+F4UXR34L                    Check
 
 Flop                        Qs - 2h - 4d
 
-pupazzzo                    Check       
-F4UXR34L                    Check       
-Re46                        Check       
+pupazzzo                    Check
+F4UXR34L                    Check
+Re46                        Check
 Makesdy                     Bet         (0.20)
-l4oo9od                     Fold        
-pupazzzo                    Fold        
-F4UXR34L                    Fold        
+l4oo9od                     Fold
+pupazzzo                    Fold
+F4UXR34L                    Fold
 Re46                        Call        (0.20)
 
 Turn                        Qs - 2h - 4d - 3h
 
-Re46                        Check       
+Re46                        Check
 Makesdy                     Bet         (0.60)
-Re46                        Fold        
+Re46                        Fold
 Makesdy                     Payback     (0.60)
 
 Makesdy didn't show hand
@@ -1418,31 +1418,31 @@ Big Blind:                  Re46        (0.04)
 
 F4UXR34L was dealt:         8d - 4c - Qh - 7d
 
-Makesdy                     Fold        
+Makesdy                     Fold
 l4oo9od                     Call        (0.04)
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
-Re46                        Check       
+F4UXR34L                    Fold
+Re46                        Check
 
 Flop                        9d - 5h - 2c
 
-Re46                        Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
+Re46                        Check
+l4oo9od                     Check
+pupazzzo                    Check
 
 Turn                        9d - 5h - 2c - 8s
 
-Re46                        Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
+Re46                        Check
+l4oo9od                     Check
+pupazzzo                    Check
 
 River                       9d - 5h - 2c - 8s - 7c
 
-Re46                        Check       
-l4oo9od                     Check       
+Re46                        Check
+l4oo9od                     Check
 pupazzzo                    Bet         (0.14)
-Re46                        Fold        
-l4oo9od                     Fold        
+Re46                        Fold
+l4oo9od                     Fold
 pupazzzo                    Payback     (0.14)
 
 pupazzzo didn't show hand
@@ -1472,7 +1472,7 @@ l4oo9od                     Call        (0.04)
 pupazzzo                    Raise       (0.08)
 F4UXR34L                    Call        (0.08)
 Re46                        Call        (0.06)
-Makesdy                     Fold        
+Makesdy                     Fold
 l4oo9od                     Call        (0.04)
 
 Flop                        5c - Jc - 6s
@@ -1484,18 +1484,18 @@ F4UXR34L                    Call        (0.04)
 
 Turn                        5c - Jc - 6s - Kc
 
-Re46                        Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
-F4UXR34L                    Check       
+Re46                        Check
+l4oo9od                     Check
+pupazzzo                    Check
+F4UXR34L                    Check
 
 River                       5c - Jc - 6s - Kc - Ac
 
-Re46                        Check       
+Re46                        Check
 l4oo9od                     Bet         (0.04)
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
-Re46                        Fold        
+F4UXR34L                    Fold
+Re46                        Fold
 
 l4oo9od shows:              Ts - Qh - 7d - 3d (a straight, Ace high)
 
@@ -1524,28 +1524,28 @@ F4UXR34L was dealt:         2d - Th - 8d - As
 
 l4oo9od                     Call        (0.04)
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.04)
-Makesdy                     Fold        
-smorek99                    Check       
+Makesdy                     Fold
+smorek99                    Check
 
 Flop                        Qc - 7s - 6s
 
 smorek99                    Bet         (0.18)
 l4oo9od                     Call        (0.18)
-pupazzzo                    Fold        
+pupazzzo                    Fold
 Re46                        Call        (0.18)
 
 Turn                        Qc - 7s - 6s - 8h
 
-smorek99                    Check       
+smorek99                    Check
 l4oo9od                     Bet         (0.36)
 Re46                        Call        (0.36)
 smorek99                    Call        (0.36)
 
 River                       Qc - 7s - 6s - 8h - Jd
 
-smorek99                    Check       
+smorek99                    Check
 l4oo9od                     Bet         (0.04)
 Re46                        Call        (0.04)
 smorek99                    Call        (0.04)
@@ -1576,32 +1576,32 @@ Big Blind:                  l4oo9od     (0.04)
 
 F4UXR34L was dealt:         Ad - 5h - Js - 9c
 
-pupazzzo                    Fold        
-F4UXR34L                    Fold        
+pupazzzo                    Fold
+F4UXR34L                    Fold
 Re46                        Call        (0.04)
-Makesdy                     Fold        
+Makesdy                     Fold
 smorek99                    Call        (0.02)
-l4oo9od                     Check       
+l4oo9od                     Check
 
 Flop                        3d - Ah - Td
 
-smorek99                    Check       
-l4oo9od                     Check       
-Re46                        Check       
+smorek99                    Check
+l4oo9od                     Check
+Re46                        Check
 
 Turn                        3d - Ah - Td - Kd
 
-smorek99                    Check       
-l4oo9od                     Check       
+smorek99                    Check
+l4oo9od                     Check
 Re46                        Bet         (0.08)
-smorek99                    Fold        
+smorek99                    Fold
 l4oo9od                     Call        (0.08)
 
 River                       3d - Ah - Td - Kd - 2c
 
-l4oo9od                     Check       
+l4oo9od                     Check
 Re46                        Bet         (0.28)
-l4oo9od                     Fold        
+l4oo9od                     Fold
 Re46                        Payback     (0.28)
 
 Re46 didn't show hand
@@ -1627,26 +1627,26 @@ Big Blind:                  pupazzzo    (0.04)
 
 F4UXR34L was dealt:         Td - Kh - 5h - Ts
 
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.04)
-Makesdy                     Fold        
+Makesdy                     Fold
 smorek99                    Call        (0.04)
 l4oo9od                     Call        (0.02)
-pupazzzo                    Check       
+pupazzzo                    Check
 
 Flop                        2s - 6h - 4h
 
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
-smorek99                    Check       
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
+smorek99                    Check
 
 Turn                        2s - 6h - 4h - 3c
 
 l4oo9od                     Bet         (0.16)
-pupazzzo                    Fold        
+pupazzzo                    Fold
 Re46                        Call        (0.16)
-smorek99                    Fold        
+smorek99                    Fold
 
 River                       2s - 6h - 4h - 3c - 6s
 
@@ -1679,18 +1679,18 @@ Big Blind:                  F4UXR34L    (0.04)
 F4UXR34L was dealt:         3c - 2h - Ad - Kd
 
 Re46                        Call        (0.04)
-Makesdy                     Fold        
+Makesdy                     Fold
 smorek99                    Call        (0.04)
-l4oo9od                     Fold        
-pupazzzo                    Fold        
-F4UXR34L                    Check       
+l4oo9od                     Fold
+pupazzzo                    Fold
+F4UXR34L                    Check
 
 Flop                        9c - 8s - 9s
 
-F4UXR34L                    Check       
+F4UXR34L                    Check
 Re46                        Bet         (0.14)
-smorek99                    Fold        
-F4UXR34L                    Fold        
+smorek99                    Fold
+F4UXR34L                    Fold
 Re46                        Payback     (0.14)
 
 Re46 didn't show hand
@@ -1717,26 +1717,26 @@ Big Blind:                  Re46        (0.04)
 F4UXR34L was dealt:         2s - Tc - Jh - Ts
 
 Makesdy                     Call        (0.04)
-smorek99                    Fold        
+smorek99                    Fold
 l4oo9od                     Call        (0.04)
 pupazzzo                    Call        (0.04)
-F4UXR34L                    Fold        
-Re46                        Check       
+F4UXR34L                    Fold
+Re46                        Check
 
 Flop                        7s - As - 3d
 
-Re46                        Check       
-Makesdy                     Check       
-l4oo9od                     Check       
+Re46                        Check
+Makesdy                     Check
+l4oo9od                     Check
 pupazzzo                    Bet         (0.18)
 Re46                        Call        (0.18)
-Makesdy                     Fold        
+Makesdy                     Fold
 l4oo9od                     Call        (0.18)
 
 Turn                        7s - As - 3d - Jd
 
-Re46                        Check       
-l4oo9od                     Check       
+Re46                        Check
+l4oo9od                     Check
 pupazzzo                    Bet         (0.12)
 Re46                        Call        (0.12)
 l4oo9od                     Call        (0.12)
@@ -1745,8 +1745,8 @@ River                       7s - As - 3d - Jd - 4c
 
 Re46                        Bet         (0.08)
 l4oo9od                     Raise       (1.32)
-pupazzzo                    Fold        
-Re46                        Fold        
+pupazzzo                    Fold
+Re46                        Fold
 l4oo9od                     Payback     (1.24)
 
 l4oo9od didn't show hand
@@ -1772,33 +1772,33 @@ Big Blind:                  Makesdy     (0.04)
 
 F4UXR34L was dealt:         Kc - 9h - 5c - 8d
 
-smorek99                    Fold        
+smorek99                    Fold
 l4oo9od                     Call        (0.04)
 pupazzzo                    Raise       (0.18)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.16)
-Makesdy                     Fold        
+Makesdy                     Fold
 l4oo9od                     Call        (0.14)
 
 Flop                        9c - 4h - Ts
 
-Re46                        Check       
-l4oo9od                     Check       
+Re46                        Check
+l4oo9od                     Check
 pupazzzo                    Bet         (0.08)
 Re46                        Call        (0.08)
 l4oo9od                     Call        (0.08)
 
 Turn                        9c - 4h - Ts - 6c
 
-Re46                        Check       
-l4oo9od                     Check       
-pupazzzo                    Check       
+Re46                        Check
+l4oo9od                     Check
+pupazzzo                    Check
 
 River                       9c - 4h - Ts - 6c - 2s
 
 Re46                        Bet         (0.12)
 l4oo9od                     Call        (0.12)
-pupazzzo                    Fold        
+pupazzzo                    Fold
 
 Re46 shows:                 As - 3d - 5s - Ks (a straight, Six high)
 
@@ -1825,9 +1825,9 @@ Big Blind:                  smorek99    (0.04)
 
 F4UXR34L was dealt:         6h - 7s - Th - Kh
 
-l4oo9od                     Fold        
-pupazzzo                    Fold        
-F4UXR34L                    Fold        
+l4oo9od                     Fold
+pupazzzo                    Fold
+F4UXR34L                    Fold
 Re46                        Call        (0.04)
 Makesdy                     Raise       (0.11)
 smorek99                    Call        (0.09)
@@ -1835,10 +1835,10 @@ Re46                        Call        (0.09)
 
 Flop                        Js - 8d - Ks
 
-Makesdy                     Check       
+Makesdy                     Check
 smorek99                    Bet         (0.39)
-Re46                        Fold        
-Makesdy                     Fold        
+Re46                        Fold
+Makesdy                     Fold
 smorek99                    Payback     (0.39)
 
 smorek99 didn't show hand
@@ -1864,28 +1864,28 @@ Big Blind:                  l4oo9od     (0.04)
 
 F4UXR34L was dealt:         Ah - 7s - 3h - Qs
 
-pupazzzo                    Fold        
-F4UXR34L                    Fold        
+pupazzzo                    Fold
+F4UXR34L                    Fold
 Re46                        Call        (0.04)
-Makesdy                     Fold        
-smorek99                    Fold        
-l4oo9od                     Check       
+Makesdy                     Fold
+smorek99                    Fold
+l4oo9od                     Check
 
 Flop                        4h - 2s - Ts
 
-l4oo9od                     Check       
-Re46                        Check       
+l4oo9od                     Check
+Re46                        Check
 
 Turn                        4h - 2s - Ts - 6h
 
-l4oo9od                     Check       
+l4oo9od                     Check
 Re46                        Bet         (0.10)
 l4oo9od                     Call        (0.10)
 
 River                       4h - 2s - Ts - 6h - 4s
 
-l4oo9od                     Check       
-Re46                        Check       
+l4oo9od                     Check
+Re46                        Check
 
 l4oo9od shows:              Qh - As - 7c - 5d (a pair of Fours)
 Re46 shows:                 3d - 3s - Kc - 5c (a straight, Six high)
@@ -1911,31 +1911,31 @@ Big Blind:                  pupazzzo    (0.04)
 
 F4UXR34L was dealt:         Js - Kh - 2s - Jh
 
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Re46                        Call        (0.04)
-Makesdy                     Fold        
+Makesdy                     Fold
 smorek99                    Call        (0.04)
 l4oo9od                     Call        (0.02)
-pupazzzo                    Check       
+pupazzzo                    Check
 
 Flop                        As - 2h - Ad
 
-l4oo9od                     Check       
-pupazzzo                    Check       
-Re46                        Check       
-smorek99                    Check       
+l4oo9od                     Check
+pupazzzo                    Check
+Re46                        Check
+smorek99                    Check
 
 Turn                        As - 2h - Ad - 6s
 
 l4oo9od                     Bet         (0.16)
 pupazzzo                    Raise       (0.32)
-Re46                        Fold        
-smorek99                    Fold        
+Re46                        Fold
+smorek99                    Fold
 l4oo9od                     Call        (0.16)
 
 River                       As - 2h - Ad - 6s - 6h
 
-l4oo9od                     Check       
+l4oo9od                     Check
 pupazzzo                    Bet         (0.80)
 l4oo9od                     Call        (0.80)
 
@@ -1947,4 +1947,3 @@ pupazzzo wins:              EUR 2.28 (with three of a kind, Aces)
 Rake:                       EUR 0.12
 
 Game ended 2011-03-21 17:23:07 GMT
-

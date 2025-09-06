@@ -446,7 +446,12 @@ class AddStatDialog(QDialog):
         use_mid_color = self.use_midcolor.isChecked()
 
         self.color_preview.set_colors(
-            self.locolor, self.midcolor, self.hicolor, low_threshold, high_threshold, use_mid_color,
+            self.locolor,
+            self.midcolor,
+            self.hicolor,
+            low_threshold,
+            high_threshold,
+            use_mid_color,
         )
 
     def get_stat(self):

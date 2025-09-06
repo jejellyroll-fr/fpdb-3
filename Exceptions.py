@@ -60,10 +60,8 @@ class FpdbDatabaseError(FpdbError):
     """Exception for database errors."""
 
 
-
 class FpdbMySQLError(FpdbDatabaseError):
     """Exception for MySQL database errors."""
-
 
 
 class FpdbMySQLAccessDeniedError(FpdbDatabaseError):
@@ -142,25 +140,20 @@ class FpdbHandError(FpdbError):
     """Exception for hand processing errors."""
 
 
-
 class FpdbHandDuplicateError(FpdbHandError):
     """Exception for duplicate hand errors."""
-
 
 
 class FpdbHandPartialError(FpdbParseError):
     """Exception for partial hand errors."""
 
 
-
 class FpdbHandSkippedError(FpdbParseError):
     """Exception for skipped hand errors."""
 
 
-
 class FpdbEndOfFileError(FpdbHandError):
     """Exception for end of file errors."""
-
 
 
 # Aliases for backward compatibility

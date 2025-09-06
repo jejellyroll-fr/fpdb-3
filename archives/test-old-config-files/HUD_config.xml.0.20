@@ -5,8 +5,8 @@
     <!-- config_wrap_len  is preferred max line length in this file, -1 means no max
          day_start        is time that logical day starts, e.g. 5 means that any play
                           between 00:00 and 04:59:59 counts as being on the previous day -->
-    <general config_wrap_len="-1"   
-             day_start="5"          
+    <general config_wrap_len="-1"
+             day_start="5"
              />
 
     <import callFpdbHud = "True" interval = "10"  fastStoreHudCache="False" hhArchiveBase="~/.fpdb/HandHistories/" saveActions="True"></import>
@@ -65,7 +65,7 @@
 
     hero_stat_days :
         - a numeric value
-        - if hero_stat_range is set to 'T', this value tells how many days are 
+        - if hero_stat_range is set to 'T', this value tells how many days are
           included in the stat calculation
         - defaults to 30
         - value not used by default as it depends on hero_stat_range setting
@@ -86,7 +86,7 @@
         - if value is M, stats for blind levels are combined if the higher level
           is less than or equal to M times the lower blind level
         - defaults to 1, meaning only stats from current blind level are included
-        - e.g. if set to 3 and current big blind is 50, stats for blind levels from 
+        - e.g. if set to 3 and current big blind is 50, stats for blind levels from
           16.7 (50 divided by 3) to big blind of 150 (50 times 3) are included
 -->
     <hud_ui
@@ -645,4 +645,3 @@ Left-Drag to Move"
     </supported_databases>
 
 </FreePokerToolsConfig>
-

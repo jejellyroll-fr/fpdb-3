@@ -1,9 +1,9 @@
-#Game No : 13165152578 
+#Game No : 13165152578
 ***** Hand History for Game 13165152578 *****
 NL Texas Hold'em $ 530 USD Buy-in Trny:3282980 Level:18  Blinds-Antes(1,250/2,500 -250) - Sunday, July 28, 21:01:39  2013
 Table $100,000 Gtd High Roller (3282980) Table #7 (Real Money)
 Seat 2 is the button
-Total number of players : 8/10 
+Total number of players : 8/10
 Seat 9: Player0 ( 86,425 )
 Seat 7: Player1 ( 191,706 )
 Seat 3: Player2 ( 65,173 )
@@ -12,7 +12,7 @@ Seat 10: Player4 ( 51,166 )
 Seat 4: Hero ( 172,173 )
 Seat 8: Player5 ( 169,642 )
 Seat 2: Player6 ( 92,248 )
-Trny:3282980 Level:18 
+Trny:3282980 Level:18
 Blinds-Antes(1,250/2,500 -250)
 Player6 posts ante [250]
 Player2 posts ante [250]

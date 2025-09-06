@@ -24,7 +24,7 @@ Player8 posts ante 50
 Hero posts small blind 200
 Player2 posts big blind 119 and is all-in
 Dealt to Hero [7h 4c]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player3 folds
 Player4 raises 1676 to 1795 and is all-in
 Player5 folds

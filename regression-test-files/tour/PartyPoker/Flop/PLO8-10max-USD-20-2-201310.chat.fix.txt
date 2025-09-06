@@ -1,9 +1,9 @@
-#Game No : 13387439135 
+#Game No : 13387439135
 ***** Hand History for Game 13387439135 *****
 PL Omaha Hi-Lo $22 USD Buy-in Trny: 105411156 Level: 2  Blinds(20/40) - Thursday, October 31, 16:04:15 EDT 2013
 Table $1,000 Gtd (105411156) Table #2 (Real Money)
 Seat 6 is the button
-Total number of players : 9/10 
+Total number of players : 9/10
 Seat 2: Player0 ( 2,910 )
 Seat 4: Player1 ( 2,330 )
 Seat 5: Player2 ( 8,422 )
@@ -13,7 +13,7 @@ Seat 7: Player5 ( 3,050 )
 Seat 8: Player6 ( 1,967 )
 Seat 6: Hero ( 4,445 )
 Seat 9: Player7 ( 2,840 )
-Trny: 105411156 Level: 2 
+Trny: 105411156 Level: 2
 Blinds(20/40)
 Player5 posts small blind [20].
 Player6 posts big blind [40].

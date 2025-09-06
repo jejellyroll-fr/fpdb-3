@@ -411,6 +411,3 @@ zlodeu123 calls [$ 2 USD]
 gabitzatoade shows [ 8s, 7s ] two pairs, tens and sevens
 zlodeu123 shows [ Kd, Ad ] two pairs, kings and tens
 zlodeu123 wins $ 6.08 USD from main pot with two pairs, kings and tens [ Ad, Kd, Ks, Tc, Ts ]
-
-
-

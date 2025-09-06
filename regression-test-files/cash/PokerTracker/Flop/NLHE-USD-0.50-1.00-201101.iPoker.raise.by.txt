@@ -36,4 +36,3 @@ Total pot $62.50 Rake $3.00
 Player1: Shows [sA cQ]
 Player7: Shows [d6 c6]
 Player7: wins $62.50
-

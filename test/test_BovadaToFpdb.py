@@ -50,7 +50,9 @@ class MockHand:
         self.antes = {}
         self.bringIn = {}
         self.blinds = []
-        self.streets = dict.fromkeys(["PREFLOP", "FLOP", "TURN", "RIVER", "SHOWDOWN", "DEAL", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"], "")
+        self.streets = dict.fromkeys(
+            ["PREFLOP", "FLOP", "TURN", "RIVER", "SHOWDOWN", "DEAL", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"], ""
+        )
         self.actionStreets = ["PREFLOP", "FLOP", "TURN", "RIVER", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"]
         self.community_cards = {"FLOP": [], "TURN": [], "RIVER": []}
         self.hole_cards = {}
@@ -133,7 +135,7 @@ class MockHand:
 
 class MockConfig:
     """Mock configuration object for testing."""
-    
+
     def get_import_parameters(self) -> dict:
         return {}
 

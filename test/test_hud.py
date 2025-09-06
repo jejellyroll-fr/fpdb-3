@@ -13,6 +13,7 @@ from unittest.mock import Mock, patch
 # Add the parent directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+
 class TestImportName(unittest.TestCase):
     """Test the importName utility function."""
 
@@ -21,7 +22,7 @@ class TestImportName(unittest.TestCase):
         """Set up mocks for HUD tests."""
         cls._original_modules = {}
         modules_to_mock = ["Database", "Hand", "loggingFpdb"]
-        
+
         for module_name in modules_to_mock:
             if module_name in sys.modules:
                 cls._original_modules[module_name] = sys.modules[module_name]
@@ -35,7 +36,7 @@ class TestImportName(unittest.TestCase):
     def tearDownClass(cls):
         """Clean up mocks after HUD tests."""
         modules_to_mock = ["Database", "Hand", "loggingFpdb"]
-        
+
         for module_name in modules_to_mock:
             if module_name in cls._original_modules:
                 sys.modules[module_name] = cls._original_modules[module_name]
@@ -201,7 +202,9 @@ class TestHudInitialization(unittest.TestCase):
             # Check that aux was imported and instantiated
             mock_import.assert_called_once_with("Aux_Classic_Hud", "Hud")
             mock_aux_class.assert_called_once_with(
-                hud, self.mock_config, self.mock_config.get_aux_parameters.return_value,
+                hud,
+                self.mock_config,
+                self.mock_config.get_aux_parameters.return_value,
             )
             assert mock_aux_instance in hud.aux_windows
 

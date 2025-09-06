@@ -80,10 +80,12 @@ class HandDataReporter:
             }
             file_stats["hands_data"].append(hand_data)
 
-    def report_hand_failure(self, filepath: str, error: Exception, hand_text_snippet: str = "", hand_obj: Any = None) -> None:
+    def report_hand_failure(
+        self, filepath: str, error: Exception, hand_text_snippet: str = "", hand_obj: Any = None
+    ) -> None:
         """Record parsing failures."""
         import traceback
-        
+
         if filepath not in self.files_stats:
             self.start_file(filepath)
 
@@ -99,7 +101,11 @@ class HandDataReporter:
         self.session_stats["parser_errors"][error_type] += 1
 
         # Capture complete stack trace (from enriched error or default)
-        full_traceback = getattr(error, 'full_traceback', None) or traceback.format_exc() if hasattr(error, '__traceback__') and error.__traceback__ else "No traceback available"
+        full_traceback = (
+            getattr(error, "full_traceback", None) or traceback.format_exc()
+            if hasattr(error, "__traceback__") and error.__traceback__
+            else "No traceback available"
+        )
 
         error_info = {
             "error_type": error_type,
@@ -215,7 +221,9 @@ class HandDataReporter:
                         if attr_value is not None:
                             attr_info = {
                                 "type": str(type(attr_value)),
-                                "value": str(attr_value)[:200] if not isinstance(attr_value, (dict, list)) else len(attr_value),
+                                "value": str(attr_value)[:200]
+                                if not isinstance(attr_value, (dict, list))
+                                else len(attr_value),
                             }
 
                             # For important attributes, capture detailed structure
@@ -227,7 +235,9 @@ class HandDataReporter:
                                             attr_info["dict_structure"][str(key)] = {
                                                 "type": "list",
                                                 "length": len(value),
-                                                "content": str(value)[:300] if len(str(value)) <= 300 else str(value)[:300] + "...",
+                                                "content": str(value)[:300]
+                                                if len(str(value)) <= 300
+                                                else str(value)[:300] + "...",
                                             }
                                         else:
                                             attr_info["dict_structure"][str(key)] = {
@@ -237,11 +247,13 @@ class HandDataReporter:
                                 elif isinstance(attr_value, list):
                                     attr_info["list_content"] = []
                                     for i, item in enumerate(attr_value[:5]):  # First 5 elements
-                                        attr_info["list_content"].append({
-                                            "index": i,
-                                            "type": str(type(item)),
-                                            "value": str(item)[:100],
-                                        })
+                                        attr_info["list_content"].append(
+                                            {
+                                                "index": i,
+                                                "type": str(type(item)),
+                                                "value": str(item)[:100],
+                                            }
+                                        )
 
                             analysis["attributes"][attr_name] = attr_info
                     except:
@@ -310,9 +322,11 @@ class HandDataReporter:
         game_family = classification["family"]
         game_subtype = classification["subtype"]
 
-        if (game_format in self.session_stats["game_types"] and
-            game_family in self.session_stats["game_types"][game_format] and
-            game_subtype in self.session_stats["game_types"][game_format][game_family]):
+        if (
+            game_format in self.session_stats["game_types"]
+            and game_family in self.session_stats["game_types"][game_format]
+            and game_subtype in self.session_stats["game_types"][game_format][game_family]
+        ):
             self.session_stats["game_types"][game_format][game_family][game_subtype] += 1
 
     def _extract_hand_data(self, hand_obj: Any) -> dict[str, Any]:
@@ -336,14 +350,12 @@ class HandDataReporter:
             "limit_type": getattr(hand_obj, "gametype", {}).get("limitType", "unknown"),
             "category": getattr(hand_obj, "gametype", {}).get("category", "unknown"),
             "object_structure": hand_structure,  # Pour debugging
-
             # Enriched information for advanced analyses
             "ante": str(getattr(hand_obj, "gametype", {}).get("ante", 0)),
             "small_blind": str(getattr(hand_obj, "gametype", {}).get("sb", 0)),
             "big_blind": str(getattr(hand_obj, "gametype", {}).get("bb", 0)),
             "site_name": getattr(hand_obj, "sitename", None),
             "total_collected": str(getattr(hand_obj, "totalcollected", 0)),
-
             # New enriched information from debug logs
             "final_stacks": {},
             "bets_by_street": {},
@@ -474,10 +486,12 @@ class HandDataReporter:
         if hasattr(hand_obj, "collected") and hand_obj.collected:
             for collection in hand_obj.collected:
                 if isinstance(collection, list) and len(collection) >= 2:
-                    hand_data["collections"].append({
-                        "player": collection[0],
-                        "amount": str(collection[1]),
-                    })
+                    hand_data["collections"].append(
+                        {
+                            "player": collection[0],
+                            "amount": str(collection[1]),
+                        }
+                    )
                     # Populate winners dictionary
                     hand_data["winners"][collection[0]] = str(collection[1])
 
@@ -544,9 +558,16 @@ class HandDataReporter:
                     # Select the most important stats
                     key_stats = {}
                     important_fields = [
-                        "position", "seatNo", "startCash", "winnings",
-                        "street0VPI", "street0Aggr", "wonWhenSeenStreet1",
-                        "sawShowdown", "street1Seen", "street2Seen",
+                        "position",
+                        "seatNo",
+                        "startCash",
+                        "winnings",
+                        "street0VPI",
+                        "street0Aggr",
+                        "wonWhenSeenStreet1",
+                        "sawShowdown",
+                        "street1Seen",
+                        "street2Seen",
                     ]
                     for field in important_fields:
                         if field in stats and stats[field] is not None:
@@ -569,9 +590,9 @@ class HandDataReporter:
         total_hands = self.session_stats["successful_hands"] + self.session_stats["failed_hands"]
         success_rate = (self.session_stats["successful_hands"] / total_hands * 100) if total_hands > 0 else 0
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("📊 DETAILED IMPORT REPORT")
-        print("="*80)
+        print("=" * 80)
         print(f"📁 Total files: {self.session_stats['total_files']}")
         print(f"🃏 Total hands: {total_hands}")
         print(f"✅ Success: {self.session_stats['successful_hands']} ({success_rate:.1f}%)")
@@ -586,7 +607,7 @@ class HandDataReporter:
             for error_type, count in self.session_stats["parser_errors"].items():
                 percentage = (count / total_errors * 100) if total_errors > 0 else 0
                 print(f"   • {error_type}: {count} errors ({percentage:.1f}%)")
-                
+
             # Display some common error descriptions
             if self.report_level == "full":
                 print("\n   📝 COMMON ERROR DESCRIPTIONS:")
@@ -596,7 +617,7 @@ class HandDataReporter:
                     "FpdbParseError": "Hand data parsing errors",
                     "Exception": "Various errors (see details per file)",
                     "ValueError": "Invalid values in data",
-                    "KeyError": "Missing fields in data"
+                    "KeyError": "Missing fields in data",
                 }
                 for error_type, count in self.session_stats["parser_errors"].items():
                     desc = error_descriptions.get(error_type, "Undocumented error")
@@ -604,24 +625,29 @@ class HandDataReporter:
 
         # Display most problematic files
         if self.report_level == "full":
-            problematic_files = [(filepath, stats) for filepath, stats in self.files_stats.items() 
-                               if stats["hands_failed"] > 0]
+            problematic_files = [
+                (filepath, stats) for filepath, stats in self.files_stats.items() if stats["hands_failed"] > 0
+            ]
             if problematic_files:
                 # Sort by decreasing failure count
                 problematic_files.sort(key=lambda x: x[1]["hands_failed"], reverse=True)
                 top_problematic = problematic_files[:5]  # Top 5 problematic files
-                
+
                 print(f"\n⚠️  MOST PROBLEMATIC FILES (Top {len(top_problematic)}):")
                 for i, (filepath, stats) in enumerate(top_problematic, 1):
-                    filename = filepath.split('/')[-1]  # Just the filename
-                    failure_rate = (stats["hands_failed"] / stats["hands_processed"] * 100) if stats["hands_processed"] > 0 else 0
+                    filename = filepath.split("/")[-1]  # Just the filename
+                    failure_rate = (
+                        (stats["hands_failed"] / stats["hands_processed"] * 100) if stats["hands_processed"] > 0 else 0
+                    )
                     print(f"   {i}. {filename}")
                     print(f"      📊 {stats['hands_failed']}/{stats['hands_processed']} failures ({failure_rate:.1f}%)")
 
         # Details per file
         print(f"\n📋 DETAILS PER FILE ({len(self.files_stats)} files):")
         for filepath, stats in self.files_stats.items():
-            file_success_rate = (stats["hands_successful"] / stats["hands_processed"] * 100) if stats["hands_processed"] > 0 else 0
+            file_success_rate = (
+                (stats["hands_successful"] / stats["hands_processed"] * 100) if stats["hands_processed"] > 0 else 0
+            )
             print(f"\n📄 {filepath}")
             print(f"   🃏 Hands processed: {stats['hands_processed']}")
             print(f"   ✅ Success: {stats['hands_successful']} ({file_success_rate:.1f}%)")
@@ -632,17 +658,17 @@ class HandDataReporter:
 
             # Display error details for this file
             if stats["errors"] and self.report_level in ["detailed", "full"]:
-                print(f"   🔥 DETAILED ERRORS:")
+                print("   🔥 DETAILED ERRORS:")
                 error_counts = {}
                 for error in stats["errors"]:
                     error_type = error.get("error_type", "Exception")
                     if error_type not in error_counts:
                         error_counts[error_type] = 0
                     error_counts[error_type] += 1
-                
+
                 for error_type, count in error_counts.items():
                     print(f"      • {error_type}: {count}")
-                    
+
                 # Display detailed errors
                 if self.report_level in ["full", "debug"]:
                     level_label = "ULTRA-DETAILED DEBUG" if self.report_level == "debug" else "COMPLETE ERROR MESSAGES"
@@ -651,32 +677,36 @@ class HandDataReporter:
                         error_msg = error.get("error_message", "Message inconnu")
                         error_type = error.get("error_type", "Exception")
                         hand_snippet = error.get("hand_snippet", "")
-                        
+
                         print(f"         ─── Error #{i} ───")
                         print(f"         Type: {error_type}")
                         print(f"         Message: {error_msg}")
-                        
+
                         # Display complete stack trace
                         full_traceback = error.get("full_traceback", "")
                         if full_traceback and full_traceback != "No traceback available":
-                            print(f"         🔥 COMPLETE STACK TRACE:")
+                            print("         🔥 COMPLETE STACK TRACE:")
                             # Indent each line of traceback
-                            for line in full_traceback.strip().split('\n'):
+                            for line in full_traceback.strip().split("\n"):
                                 print(f"           {line}")
                             print()
-                        
+
                         if hand_snippet and hand_snippet != "No text available":
                             # In debug mode, show more context
-                            context_length = "first 1000 characters" if self.report_level == "debug" else "first 500 characters"
+                            context_length = (
+                                "first 1000 characters" if self.report_level == "debug" else "first 500 characters"
+                            )
                             print(f"         📄 HAND CONTEXT ({context_length}):")
-                            displayed_snippet = hand_snippet[:1000] if self.report_level == "debug" else hand_snippet[:500]
+                            displayed_snippet = (
+                                hand_snippet[:1000] if self.report_level == "debug" else hand_snippet[:500]
+                            )
                             # Display line by line for better readability in debug mode
                             if self.report_level == "debug":
-                                for line_num, line in enumerate(displayed_snippet.split('\n'), 1):
+                                for line_num, line in enumerate(displayed_snippet.split("\n"), 1):
                                     if line.strip():
                                         print(f"           {line_num:2d}: {line}")
                                     if line_num > 50:  # Limiter à 50 lignes max
-                                        print(f"           ... (content truncated)")
+                                        print("           ... (content truncated)")
                                         break
                             else:
                                 print(f"           {displayed_snippet}")
@@ -688,7 +718,7 @@ class HandDataReporter:
                         error_msg = error.get("error_message", "Message inconnu")
                         error_type = error.get("error_type", "Exception")
                         print(f"         [{i}] {error_type}: {error_msg}")
-                    
+
                     if len(stats["errors"]) > 5:
                         print(f"         ... and {len(stats['errors']) - 5} other errors")
 
@@ -713,9 +743,7 @@ class HandDataReporter:
                 else:
                     hands_to_show = stats["hands_data"][:2]  # First 2 hands in detailed mode
 
-
                 for i, hand in enumerate(hands_to_show, 1):
-
                     if self.report_level == "full":
                         # Enriched information
                         if hand.get("ante", "0") != "0" or hand.get("ante", "0") != "0":
@@ -757,7 +785,13 @@ class HandDataReporter:
 
                         # Display board
                         if hand.get("board_cards"):
-                            board_str = ", ".join([f"{street}: {' '.join(cards)}" for street, cards in hand["board_cards"].items() if cards])
+                            board_str = ", ".join(
+                                [
+                                    f"{street}: {' '.join(cards)}"
+                                    for street, cards in hand["board_cards"].items()
+                                    if cards
+                                ]
+                            )
                             if board_str:
                                 pass
 
@@ -841,7 +875,9 @@ class HandDataReporter:
                             pass
 
                         # Card verification
-                        players_with_cards = [p for p, info in hand.get("players", {}).items() if info.get("hole_cards")]
+                        players_with_cards = [
+                            p for p, info in hand.get("players", {}).items() if info.get("hole_cards")
+                        ]
                         if not players_with_cards:
                             pass
 
@@ -892,7 +928,6 @@ class HandDataReporter:
                             with contextlib.suppress(IndexError, AttributeError):
                                 snippet.split("Hand #")[1].split()[0]
 
-
                         # Display partial hand content (more context)
                         if snippet and len(snippet) > 50:
                             # Split snippet into lines for better display
@@ -905,12 +940,10 @@ class HandDataReporter:
 
                         # In debug mode, show even more info
                         if hasattr(self, "_debug_mode") and self._debug_mode:
-
                             # Hand object analysis if available
                             hand_analysis = error.get("hand_object_analysis")
                             if hand_analysis:
                                 if hand_analysis.get("status") == "hand_object_available":
-
                                     # Basic captured information
                                     basic_info = hand_analysis.get("basic_info", {})
                                     if basic_info:
@@ -1075,4 +1108,3 @@ class HandDataReporter:
 
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(export_data, f, indent=2, default=str, ensure_ascii=False)
-

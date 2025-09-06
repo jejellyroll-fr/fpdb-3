@@ -6,7 +6,7 @@ Seat 2: Player0 (10)
 Player0 posts small blind 0.05
 Hero posts big blind 0.10
 Dealt to Hero [5s Qd 2s 3s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player0 calls 0.05
 Hero checks
 *** FLOP *** [3h 4s 5h]

@@ -222,7 +222,6 @@ class TestWinamaxParserComprehensive(unittest.TestCase):
         assert game_info.get("base") == expected["base"], f"Base failed for {filepath.name}"
         assert game_info.get("limitType") == expected["limitType"], f"LimitType failed for {filepath.name}"
 
-
     def _test_game_type_plo_cash(self) -> None:
         """Test PLO cash game type determination."""
         filepath = self.cash_path / "Flop" / "PLO-5max-EUR-1.00-2.00-201407.ante.raise.txt"
@@ -237,7 +236,6 @@ class TestWinamaxParserComprehensive(unittest.TestCase):
         assert game_info.get("category") == expected["category"], f"Category failed for {filepath.name}"
         assert game_info.get("base") == expected["base"], f"Base failed for {filepath.name}"
         assert game_info.get("limitType") == expected["limitType"], f"LimitType failed for {filepath.name}"
-
 
     def _test_game_type_nlhe_tournament(self) -> None:
         """Test NLHE tournament game type determination."""
@@ -293,7 +291,6 @@ class TestWinamaxParserComprehensive(unittest.TestCase):
         assert hand.tablename is not None
         assert hand.maxseats > 0
         assert hand.buttonpos is not None
-
 
     def _setup_hand_for_testing(self, filepath: Path) -> MockHand:
         """Setup and return a hand object ready for testing."""
@@ -353,7 +350,6 @@ class TestWinamaxParserComprehensive(unittest.TestCase):
         # Should have at least PREFLOP marked
         assert "PREFLOP" in hand.streets
 
-
     def test_read_button(self) -> None:
         """Test readButton method."""
         filepath = self.cash_path / "Flop" / "NLHE-5max-EUR-1-2-201201.Hero.Sitting.Out.txt"
@@ -406,7 +402,6 @@ class TestWinamaxParserComprehensive(unittest.TestCase):
         # Method should exist and be callable
         assert hasattr(self.parser, "readAntes")
 
-
     def test_read_bringin(self) -> None:
         """Test readBringIn method with stud game context."""
         # Create hand with bring-in text for stud games
@@ -444,7 +439,6 @@ class TestWinamaxParserComprehensive(unittest.TestCase):
         board_streets = [street for street in streets if hand.board.get(street)]
         for street in board_streets:
             assert isinstance(hand.board[street], list)
-
 
     def test_read_hole_cards(self) -> None:
         """Test readHoleCards method with hole card text."""
@@ -488,8 +482,6 @@ class TestWinamaxParserComprehensive(unittest.TestCase):
         # Actions list should still be accessible
         assert isinstance(hand.actions["PREFLOP"], list)
         assert len(hand.actions["PREFLOP"]) >= initial_action_count
-
-
 
     def test_read_showdown_actions(self) -> None:
         """Test readShowdownActions method with showdown text."""
@@ -592,11 +584,9 @@ class TestWinamaxParserComprehensive(unittest.TestCase):
         # Test that the action was processed
         assert hasattr(hand, "addRaiseTo")
 
-
         # Test raise by amount (different format)
         mock_action_by = self._create_mock_action("50", {"BET": "50"})
         self.parser._process_raise_action(hand, "PREFLOP", "Player1", mock_action_by)
-
 
     def test_process_bet_action(self) -> None:
         """Test _process_bet_action method with different bet scenarios."""

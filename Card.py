@@ -521,8 +521,6 @@ names = {
 ITER_MAP = {0: 50000, 1: 0, 2: 0, 3: 0}
 
 
-
-
 def calcStartCards(hand: Any, player: Any) -> int:
     """Calculate the integer representation of a player's starting cards.
 
@@ -838,13 +836,13 @@ def fourStartCards(cards: list[tuple[str, str]]) -> str:
         return "Invalid input: You must provide exactly four cards."
 
     if is_suited(cards):
-        return "Monotone"          # All 4 cards same suit
+        return "Monotone"  # All 4 cards same suit
     elif is_double_suited(cards):
-        return "Double Suited"     # Exactly 2 suits
+        return "Double Suited"  # Exactly 2 suits
     elif is_rainbow(cards):
-        return "Rainbow"           # All 4 different suits (weak for flushes)
+        return "Rainbow"  # All 4 different suits (weak for flushes)
     else:
-        return "Suited"            # 3 different suits, 2 of same suit (standard)
+        return "Suited"  # 3 different suits, 2 of same suit (standard)
 
 
 def twoStartCardString(card: int) -> str:
@@ -2257,7 +2255,7 @@ def encodeRazzStartHand(cards: list[tuple[str, str]]) -> int:
     """Encodes a Razz starting hand into a unique integer identifier.
 
     This function takes a list of three card tuples and returns an integer representing the hand.
-    
+
     Args:
         cards: A list of three tuples, each containing the rank and suit of a card.
 
@@ -3480,6 +3478,7 @@ _DECODERS = {
     "27_razz": decodeRazzStartHand,
 }
 
+
 def decodeStartHandValue(game: str, value: int) -> str:
     """Return a string representation of a starting hand value for a given game.
 
@@ -3495,65 +3494,63 @@ def decodeStartHandValue(game: str, value: int) -> str:
     return _DECODERS.get(game, lambda _v: "xx")(value)
 
 
-
 if __name__ == "__main__":
     """Interactive CLI for testing Card functions."""
-    import contextlib
-    
+
     def show_menu():
         """Display the main menu options."""
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("FPDB Card Utilities - Interactive CLI")
-        print("="*50)
+        print("=" * 50)
         print("1. Test StartCardRank function")
         print("2. Test Card encoding/decoding")
         print("3. Test twoStartCards function")
         print("4. Test suit functions")
         print("5. Test Razz functions")
         print("0. Exit")
-        print("-"*50)
-    
+        print("-" * 50)
+
     def test_start_card_rank():
         """Test StartCardRank function interactively."""
         print("\nTesting StartCardRank function:")
         print("Enter card rank indices (0-169, or negative to return to menu)")
-        
+
         while True:
             try:
                 idx = int(input("Enter rank index: "))
                 if idx < 0:
                     break
-                
+
                 try:
                     result = StartCardRank(idx)
                     print(f"StartCardRank({idx}) = {result}")
                     print(f"  Hand: {result[0]}, Rank: {result[1]}, Combinations: {result[2]}")
                 except IndexError:
                     print(f"Index {idx} is out of range")
-                    
+
             except ValueError:
                 print("Please enter a valid number")
             except KeyboardInterrupt:
                 break
-    
+
     def test_card_encoding():
         """Test card encoding/decoding functions."""
         print("\nTesting Card encoding/decoding:")
         print("Enter card strings (e.g., 'As', '2h') or card numbers (1-52)")
         print("Type 'help' for examples, or 'back' to return")
-        
+
         while True:
             try:
                 user_input = input("Enter card: ").strip()
-                
-                if user_input.lower() in ['back', 'exit']:
+
+                if user_input.lower() in ["back", "exit"]:
                     break
-                elif user_input.lower() == 'help':
+                elif user_input.lower() == "help":
                     print("Examples:")
                     print("  Card strings: As, Kh, Qd, Jc, Ts, 9s, 2h")
                     print("  Card numbers: 1-52 (1=2h, 13=Ah, 26=Ad, 39=Ac, 52=As)")
                     continue
-                
+
                 # Try as card string first
                 if len(user_input) == 2:
                     encoded = encodeCard(user_input)
@@ -3572,12 +3569,12 @@ if __name__ == "__main__":
                             print(f"encodeCard('{decoded}') = {encoded}")
                     else:
                         print("Card number must be between 1 and 52")
-                        
+
             except ValueError:
                 print("Invalid input. Type 'help' for examples.")
             except KeyboardInterrupt:
                 break
-    
+
     def test_two_start_cards():
         """Test twoStartCards function."""
         print("\nTesting twoStartCards function:")
@@ -3585,35 +3582,35 @@ if __name__ == "__main__":
         print("Values: 2-14 (14=Ace), Suits: h,d,c,s")
         print("Example: 14 h 13 s  (for Ah Ks)")
         print("Type 'back' to return")
-        
+
         while True:
             try:
                 user_input = input("Enter cards: ").strip()
-                
-                if user_input.lower() in ['back', 'exit']:
+
+                if user_input.lower() in ["back", "exit"]:
                     break
-                
+
                 parts = user_input.split()
                 if len(parts) != 4:
                     print("Please enter exactly 4 values: value1 suit1 value2 suit2")
                     continue
-                
+
                 value1, suit1, value2, suit2 = int(parts[0]), parts[1], int(parts[2]), parts[3]
-                
+
                 result = twoStartCards(value1, suit1, value2, suit2)
                 print(f"twoStartCards({value1}, '{suit1}', {value2}, '{suit2}') = {result}")
-                
+
                 if result != HOLDEM_UNKNOWN_HAND:
                     hand_str = twoStartCardString(result)
                     print(f"twoStartCardString({result}) = '{hand_str}'")
                 else:
                     print("Result indicates unknown/invalid hand")
-                    
+
             except ValueError:
                 print("Invalid input. Use format: value1 suit1 value2 suit2")
             except KeyboardInterrupt:
                 break
-    
+
     def test_suit_functions():
         """Test suit functions for Holdem (2 cards)."""
         print("\nTesting Holdem suit functions:")
@@ -3622,19 +3619,19 @@ if __name__ == "__main__":
         print("  Suited: Ah Kh, Qs Js")
         print("  Offsuit: Ah Ks, Qh Jd")
         print("Type 'back' to return")
-        
+
         while True:
             try:
                 user_input = input("Enter 2 cards: ").strip()
-                
-                if user_input.lower() in ['back', 'exit']:
+
+                if user_input.lower() in ["back", "exit"]:
                     break
-                
+
                 card_strings = user_input.split()
                 if len(card_strings) != 2:
                     print("Please enter exactly 2 cards for Holdem")
                     continue
-                
+
                 # Convert to (value, suit) tuples
                 cards = []
                 for card_str in card_strings:
@@ -3647,33 +3644,33 @@ if __name__ == "__main__":
                     print(f"Cards: {cards}")
                     suited = is_suited(cards)
                     print(f"is_suited: {suited}")
-                    
+
                     if suited:
                         print("Result: SUITED ")
                     else:
                         print("Result: OFFSUIT ")
-                    
+
             except KeyboardInterrupt:
                 break
-    
+
     def test_razz_functions():
         """Test Razz-related functions."""
         print("\nTesting Razz functions:")
         print("Enter 3 cards as: Ah 2s 3d  (space separated)")
         print("Type 'back' to return")
-        
+
         while True:
             try:
                 user_input = input("Enter razz cards: ").strip()
-                
-                if user_input.lower() in ['back', 'exit']:
+
+                if user_input.lower() in ["back", "exit"]:
                     break
-                
+
                 card_strings = user_input.split()
                 if len(card_strings) != 3:
                     print("Please enter exactly 3 cards for Razz")
                     continue
-                
+
                 # Convert to (value, suit) tuples
                 cards = []
                 for card_str in card_strings:
@@ -3684,54 +3681,54 @@ if __name__ == "__main__":
                         break
                 else:
                     print(f"Cards: {cards}")
-                    
+
                     try:
                         encoded = encodeRazzStartHand(cards)
                         print(f"encodeRazzStartHand: {encoded}")
-                        
+
                         decoded = decodeRazzStartHand(encoded)
                         print(f"decodeRazzStartHand({encoded}): {decoded}")
-                        
+
                         # Test with game value
                         game_value = encoded + 184
                         decoded_game = decodeStartHandValue("razz", game_value)
                         print(f"decodeStartHandValue('razz', {game_value}): {decoded_game}")
-                        
+
                     except Exception as e:
                         print(f"Error processing Razz hand: {e}")
-                    
+
             except KeyboardInterrupt:
                 break
-    
+
     # Main CLI loop
     try:
         while True:
             show_menu()
-            
+
             try:
                 choice = input("Select option (0-5): ").strip()
-                
-                if choice == '0':
+
+                if choice == "0":
                     print("Goodbye!")
                     break
-                elif choice == '1':
+                elif choice == "1":
                     test_start_card_rank()
-                elif choice == '2':
+                elif choice == "2":
                     test_card_encoding()
-                elif choice == '3':
+                elif choice == "3":
                     test_two_start_cards()
-                elif choice == '4':
+                elif choice == "4":
                     test_suit_functions()
-                elif choice == '5':
+                elif choice == "5":
                     test_razz_functions()
                 else:
                     print(f"Invalid option: {choice}")
-                    
+
             except ValueError:
                 print("Please enter a valid number")
             except KeyboardInterrupt:
                 print("\nGoodbye!")
                 break
-                
+
     except KeyboardInterrupt:
         print("\nGoodbye!")

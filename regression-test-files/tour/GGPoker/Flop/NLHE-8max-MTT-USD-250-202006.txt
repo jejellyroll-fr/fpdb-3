@@ -8,7 +8,7 @@ Hero: posts small blind 60
 a9055bd5: posts big blind 120
 *** HOLE CARDS ***
 Dealt to Hero [Qh Jh]
-Dealt to a9055bd5 
+Dealt to a9055bd5
 Hero: raises 156 to 276
 a9055bd5: calls 156
 *** FLOP *** [4h Ts Qs]
@@ -35,7 +35,7 @@ a9055bd5: posts small blind 60
 Hero: posts big blind 120
 *** HOLE CARDS ***
 Dealt to Hero [8h 3h]
-Dealt to a9055bd5 
+Dealt to a9055bd5
 a9055bd5: raises 120 to 240
 Hero: calls 120
 *** FLOP *** [6d 3s 9d]
@@ -76,11 +76,11 @@ a9055bd5: posts small blind 60
 5d46d288: posts big blind 120
 *** HOLE CARDS ***
 Dealt to Hero [Jd 4s]
-Dealt to a9055bd5 
-Dealt to 5d46d288 
-Dealt to 326ed8a3 
-Dealt to d6d937c9 
-Dealt to ae0045c4 
+Dealt to a9055bd5
+Dealt to 5d46d288
+Dealt to 326ed8a3
+Dealt to d6d937c9
+Dealt to ae0045c4
 326ed8a3: folds
 d6d937c9: folds
 ae0045c4: raises 180 to 300
@@ -123,11 +123,11 @@ Hero: posts the ante 18
 326ed8a3: posts big blind 120
 *** HOLE CARDS ***
 Dealt to Hero [Ks Qd]
-Dealt to a9055bd5 
-Dealt to 5d46d288 
-Dealt to 326ed8a3 
-Dealt to d6d937c9 
-Dealt to ae0045c4 
+Dealt to a9055bd5
+Dealt to 5d46d288
+Dealt to 326ed8a3
+Dealt to d6d937c9
+Dealt to ae0045c4
 d6d937c9: folds
 ae0045c4: folds
 Hero: raises 180 to 300
@@ -177,11 +177,11 @@ Hero: posts the ante 18
 d6d937c9: posts big blind 120
 *** HOLE CARDS ***
 Dealt to Hero [Td 5c]
-Dealt to a9055bd5 
-Dealt to 5d46d288 
-Dealt to 326ed8a3 
-Dealt to d6d937c9 
-Dealt to ae0045c4 
+Dealt to a9055bd5
+Dealt to 5d46d288
+Dealt to 326ed8a3
+Dealt to d6d937c9
+Dealt to ae0045c4
 ae0045c4: folds
 Hero: folds
 a9055bd5: folds
@@ -234,13 +234,13 @@ d6d937c9: posts small blind 60
 ae0045c4: posts big blind 120
 *** HOLE CARDS ***
 Dealt to Hero [Jc 9d]
-Dealt to a9055bd5 
-Dealt to 5d46d288 
-Dealt to 326ed8a3 
-Dealt to d6d937c9 
-Dealt to ae0045c4 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to a9055bd5
+Dealt to 5d46d288
+Dealt to 326ed8a3
+Dealt to d6d937c9
+Dealt to ae0045c4
+Dealt to c4607254
+Dealt to 4e885360
 c4607254: folds
 4e885360: raises 180 to 300
 Hero: folds
@@ -294,11 +294,11 @@ c4607254: posts small blind 60
 4e885360: posts big blind 120
 *** HOLE CARDS ***
 Dealt to Hero [9h 5c]
-Dealt to 5d46d288 
-Dealt to 326ed8a3 
-Dealt to d6d937c9 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 5d46d288
+Dealt to 326ed8a3
+Dealt to d6d937c9
+Dealt to c4607254
+Dealt to 4e885360
 Hero: folds
 5d46d288: raises 180 to 300
 326ed8a3: folds
@@ -347,11 +347,11 @@ Hero: posts the ante 25
 Hero: posts big blind 160
 *** HOLE CARDS ***
 Dealt to Hero [Kd Jh]
-Dealt to 5d46d288 
-Dealt to 326ed8a3 
-Dealt to d6d937c9 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 5d46d288
+Dealt to 326ed8a3
+Dealt to d6d937c9
+Dealt to c4607254
+Dealt to 4e885360
 5d46d288: raises 320 to 480
 326ed8a3: folds
 d6d937c9: folds
@@ -402,11 +402,11 @@ Hero: posts small blind 80
 5d46d288: posts big blind 160
 *** HOLE CARDS ***
 Dealt to Hero [Th 8h]
-Dealt to 5d46d288 
-Dealt to 326ed8a3 
-Dealt to d6d937c9 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 5d46d288
+Dealt to 326ed8a3
+Dealt to d6d937c9
+Dealt to c4607254
+Dealt to 4e885360
 326ed8a3: raises 160 to 320
 d6d937c9: folds
 c4607254: folds
@@ -444,11 +444,11 @@ Hero: posts the ante 25
 326ed8a3: posts big blind 160
 *** HOLE CARDS ***
 Dealt to Hero [5s 3h]
-Dealt to 5d46d288 
-Dealt to 326ed8a3 
-Dealt to d6d937c9 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 5d46d288
+Dealt to 326ed8a3
+Dealt to d6d937c9
+Dealt to c4607254
+Dealt to 4e885360
 d6d937c9: folds
 c4607254: folds
 4e885360: folds
@@ -486,11 +486,11 @@ Hero: posts the ante 25
 d6d937c9: posts big blind 160
 *** HOLE CARDS ***
 Dealt to Hero [7d 6s]
-Dealt to 5d46d288 
-Dealt to 326ed8a3 
-Dealt to d6d937c9 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 5d46d288
+Dealt to 326ed8a3
+Dealt to d6d937c9
+Dealt to c4607254
+Dealt to 4e885360
 c4607254: folds
 4e885360: raises 208 to 368
 Hero: folds
@@ -540,11 +540,11 @@ c4607254: posts small blind 80
 4e885360: posts big blind 160
 *** HOLE CARDS ***
 Dealt to Hero [9h 3s]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to 326ed8a3 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to 326ed8a3
+Dealt to c4607254
+Dealt to 4e885360
 Hero: folds
 841f9992: raises 176 to 336
 5d46d288: folds
@@ -596,12 +596,12 @@ Hero: posts the ante 25
 Hero: posts big blind 160
 *** HOLE CARDS ***
 Dealt to Hero [Kc 3d]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to 326ed8a3 
-Dealt to ae0045c4 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to 326ed8a3
+Dealt to ae0045c4
+Dealt to c4607254
+Dealt to 4e885360
 841f9992: folds
 5d46d288: folds
 326ed8a3: raises 160 to 320
@@ -650,13 +650,13 @@ Hero: posts small blind 80
 841f9992: posts big blind 160
 *** HOLE CARDS ***
 Dealt to Hero [7d 3c]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to 326ed8a3 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to 326ed8a3
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 5d46d288: folds
 326ed8a3: folds
 ae0045c4: folds
@@ -713,13 +713,13 @@ Hero: posts the ante 25
 5d46d288: posts big blind 160
 *** HOLE CARDS ***
 Dealt to Hero [Ks Kc]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to 326ed8a3 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to 326ed8a3
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 326ed8a3: raises 160 to 320
 ae0045c4: folds
 4c7cfe42: folds
@@ -778,13 +778,13 @@ Hero: posts the ante 30
 326ed8a3: posts big blind 180
 *** HOLE CARDS ***
 Dealt to Hero [Tc 3h]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to 326ed8a3 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to 326ed8a3
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 ae0045c4: folds
 4c7cfe42: folds
 c4607254: folds
@@ -829,13 +829,13 @@ Hero: posts the ante 30
 ae0045c4: posts big blind 180
 *** HOLE CARDS ***
 Dealt to Hero [5h 4h]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to 326ed8a3 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to 326ed8a3
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 4c7cfe42: folds
 c4607254: folds
 4e885360: folds
@@ -879,12 +879,12 @@ Hero: posts the ante 30
 c4607254: posts big blind 180
 *** HOLE CARDS ***
 Dealt to Hero [Td 3c]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 4e885360: folds
 Hero: folds
 841f9992: folds
@@ -925,12 +925,12 @@ c4607254: posts small blind 90
 4e885360: posts big blind 180
 *** HOLE CARDS ***
 Dealt to Hero [4s 2d]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 Hero: folds
 841f9992: folds
 5d46d288: folds
@@ -980,12 +980,12 @@ Hero: posts the ante 30
 Hero: posts big blind 180
 *** HOLE CARDS ***
 Dealt to Hero [8d 4h]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 841f9992: folds
 5d46d288: raises 270 to 450
 ae0045c4: folds
@@ -1027,12 +1027,12 @@ Hero: posts small blind 90
 841f9992: posts big blind 180
 *** HOLE CARDS ***
 Dealt to Hero [8c 4s]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 5d46d288: folds
 ae0045c4: folds
 4c7cfe42: raises 180 to 360
@@ -1082,12 +1082,12 @@ Hero: posts the ante 30
 5d46d288: posts big blind 180
 *** HOLE CARDS ***
 Dealt to Hero [8c 4h]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 ae0045c4: folds
 4c7cfe42: folds
 c4607254: folds
@@ -1131,13 +1131,13 @@ Hero: posts the ante 30
 c1468789: posts big blind 180
 *** HOLE CARDS ***
 Dealt to Hero [Qh 2c]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 ae0045c4: folds
 4c7cfe42: raises 180 to 360
 c4607254: folds
@@ -1183,13 +1183,13 @@ c1468789: posts small blind 90
 ae0045c4: posts big blind 180
 *** HOLE CARDS ***
 Dealt to Hero [9d 2s]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 4c7cfe42: raises 216 to 396
 c4607254: folds
 4e885360: folds
@@ -1248,13 +1248,13 @@ ae0045c4: posts small blind 90
 4c7cfe42: posts big blind 180
 *** HOLE CARDS ***
 Dealt to Hero [As 3s]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 c4607254: folds
 4e885360: folds
 Hero: raises 2,524 to 2,704 and is all-in
@@ -1306,13 +1306,13 @@ Hero: posts the ante 30
 c4607254: posts big blind 180
 *** HOLE CARDS ***
 Dealt to Hero [9s 7s]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 4e885360: folds
 Hero: folds
 841f9992: folds
@@ -1365,13 +1365,13 @@ c4607254: posts small blind 90
 4e885360: posts big blind 180
 *** HOLE CARDS ***
 Dealt to Hero [5h 5c]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 Hero: raises 270 to 450
 841f9992: folds
 5d46d288: folds
@@ -1431,13 +1431,13 @@ Hero: posts the ante 36
 Hero: posts big blind 200
 *** HOLE CARDS ***
 Dealt to Hero [Ad 5c]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 841f9992: folds
 5d46d288: raises 300 to 500
 c1468789: calls 500
@@ -1496,13 +1496,13 @@ Hero: posts small blind 100
 841f9992: posts big blind 200
 *** HOLE CARDS ***
 Dealt to Hero [Qc 4d]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 5d46d288: folds
 c1468789: folds
 ae0045c4: folds
@@ -1549,13 +1549,13 @@ Hero: posts the ante 36
 5d46d288: posts big blind 200
 *** HOLE CARDS ***
 Dealt to Hero [Kd 7h]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 c1468789: folds
 ae0045c4: folds
 4c7cfe42: folds
@@ -1601,13 +1601,13 @@ Hero: posts the ante 36
 c1468789: posts big blind 200
 *** HOLE CARDS ***
 Dealt to Hero [Th 2d]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 ae0045c4: folds
 4c7cfe42: raises 200 to 400
 c4607254: folds
@@ -1653,13 +1653,13 @@ c1468789: posts small blind 100
 ae0045c4: posts big blind 200
 *** HOLE CARDS ***
 Dealt to Hero [Jd 6d]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 4c7cfe42: folds
 c4607254: folds
 4e885360: folds
@@ -1709,13 +1709,13 @@ ae0045c4: posts small blind 100
 4c7cfe42: posts big blind 200
 *** HOLE CARDS ***
 Dealt to Hero [8c 3s]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 c4607254: folds
 4e885360: raises 259 to 459
 Hero: folds
@@ -1773,13 +1773,13 @@ Hero: posts the ante 36
 c4607254: posts big blind 200
 *** HOLE CARDS ***
 Dealt to Hero [Qd Jc]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 4e885360: folds
 Hero: folds
 841f9992: folds
@@ -1826,13 +1826,13 @@ c4607254: posts small blind 100
 4e885360: posts big blind 200
 *** HOLE CARDS ***
 Dealt to Hero [9s 2c]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 Hero: folds
 841f9992: folds
 5d46d288: folds
@@ -1893,13 +1893,13 @@ Hero: posts the ante 36
 Hero: posts big blind 200
 *** HOLE CARDS ***
 Dealt to Hero [2d 2c]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 841f9992: folds
 5d46d288: raises 300 to 500
 c1468789: folds
@@ -1950,13 +1950,13 @@ Hero: posts small blind 125
 841f9992: posts big blind 250
 *** HOLE CARDS ***
 Dealt to Hero [5c 4s]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 5d46d288: folds
 c1468789: raises 325 to 575
 ae0045c4: folds
@@ -2013,13 +2013,13 @@ Hero: posts the ante 38
 5d46d288: posts big blind 250
 *** HOLE CARDS ***
 Dealt to Hero [8c 2c]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 c1468789: folds
 ae0045c4: folds
 4c7cfe42: folds
@@ -2070,13 +2070,13 @@ Hero: posts the ante 38
 c1468789: posts big blind 250
 *** HOLE CARDS ***
 Dealt to Hero [Kd Th]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 ae0045c4: folds
 4c7cfe42: folds
 c4607254: folds
@@ -2133,13 +2133,13 @@ c1468789: posts small blind 125
 ae0045c4: posts big blind 250
 *** HOLE CARDS ***
 Dealt to Hero [8s 2d]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 4c7cfe42: folds
 c4607254: folds
 4e885360: folds
@@ -2192,13 +2192,13 @@ ae0045c4: posts small blind 125
 4c7cfe42: posts big blind 250
 *** HOLE CARDS ***
 Dealt to Hero [Qd 9s]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 c4607254: folds
 4e885360: folds
 Hero: folds
@@ -2250,13 +2250,13 @@ Hero: posts the ante 38
 c4607254: posts big blind 250
 *** HOLE CARDS ***
 Dealt to Hero [9c 2s]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 4e885360: folds
 Hero: folds
 841f9992: folds
@@ -2302,13 +2302,13 @@ c4607254: posts small blind 125
 4e885360: posts big blind 250
 *** HOLE CARDS ***
 Dealt to Hero [7c 6c]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 Hero: folds
 841f9992: folds
 5d46d288: folds
@@ -2362,13 +2362,13 @@ Hero: posts the ante 38
 Hero: posts big blind 250
 *** HOLE CARDS ***
 Dealt to Hero [9h 7c]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 841f9992: folds
 5d46d288: folds
 c1468789: raises 325 to 575
@@ -2415,13 +2415,13 @@ Hero: posts small blind 125
 841f9992: posts big blind 250
 *** HOLE CARDS ***
 Dealt to Hero [8s 3s]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 5d46d288: folds
 c1468789: folds
 ae0045c4: folds
@@ -2478,13 +2478,13 @@ Hero: posts the ante 45
 5d46d288: posts big blind 300
 *** HOLE CARDS ***
 Dealt to Hero [Kh 7c]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 c1468789: raises 390 to 690
 ae0045c4: folds
 4c7cfe42: folds
@@ -2535,13 +2535,13 @@ Hero: posts the ante 45
 c1468789: posts big blind 300
 *** HOLE CARDS ***
 Dealt to Hero [Kh 9s]
-Dealt to 841f9992 
-Dealt to 5d46d288 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to 5d46d288
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 ae0045c4: folds
 4c7cfe42: folds
 c4607254: folds
@@ -2585,12 +2585,12 @@ ae0045c4: posts small blind 150
 4c7cfe42: posts big blind 300
 *** HOLE CARDS ***
 Dealt to Hero [4d 2h]
-Dealt to 841f9992 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 c4607254: raises 300 to 600
 4e885360: folds
 Hero: folds
@@ -2634,13 +2634,13 @@ Hero: posts the ante 45
 c4607254: posts big blind 300
 *** HOLE CARDS ***
 Dealt to Hero [Th 9h]
-Dealt to 841f9992 
-Dealt to cf859ba5 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to cf859ba5
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 4e885360: folds
 Hero: raises 360 to 660
 841f9992: folds
@@ -2686,13 +2686,13 @@ c4607254: posts small blind 150
 4e885360: posts big blind 300
 *** HOLE CARDS ***
 Dealt to Hero [Th 5c]
-Dealt to 841f9992 
-Dealt to cf859ba5 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to cf859ba5
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 Hero: folds
 841f9992: raises 330 to 630
 cf859ba5: raises 1,230 to 1,860
@@ -2740,13 +2740,13 @@ Hero: posts the ante 45
 Hero: posts big blind 300
 *** HOLE CARDS ***
 Dealt to Hero [Jh 9c]
-Dealt to 841f9992 
-Dealt to cf859ba5 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to cf859ba5
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 841f9992: folds
 cf859ba5: raises 390 to 690
 c1468789: folds
@@ -2806,13 +2806,13 @@ Hero: posts small blind 150
 841f9992: posts big blind 300
 *** HOLE CARDS ***
 Dealt to Hero [Qh 3s]
-Dealt to 841f9992 
-Dealt to cf859ba5 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to cf859ba5
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 cf859ba5: folds
 c1468789: folds
 ae0045c4: folds
@@ -2858,13 +2858,13 @@ Hero: posts the ante 45
 cf859ba5: posts big blind 300
 *** HOLE CARDS ***
 Dealt to Hero [8d 6s]
-Dealt to 841f9992 
-Dealt to cf859ba5 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to cf859ba5
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 c1468789: folds
 ae0045c4: folds
 4c7cfe42: raises 300 to 600
@@ -2910,13 +2910,13 @@ cf859ba5: posts small blind 150
 c1468789: posts big blind 300
 *** HOLE CARDS ***
 Dealt to Hero [Qd Qc]
-Dealt to 841f9992 
-Dealt to cf859ba5 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to cf859ba5
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 ae0045c4: folds
 4c7cfe42: folds
 c4607254: raises 300 to 600
@@ -2969,13 +2969,13 @@ c1468789: posts small blind 150
 ae0045c4: posts big blind 300
 *** HOLE CARDS ***
 Dealt to Hero [6h 5c]
-Dealt to 841f9992 
-Dealt to cf859ba5 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to cf859ba5
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 4c7cfe42: raises 300 to 600
 c4607254: folds
 4e885360: folds
@@ -3023,13 +3023,13 @@ ae0045c4: posts small blind 150
 4c7cfe42: posts big blind 300
 *** HOLE CARDS ***
 Dealt to Hero [Ad 6h]
-Dealt to 841f9992 
-Dealt to cf859ba5 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to cf859ba5
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 c4607254: folds
 4e885360: folds
 Hero: raises 116 to 416 and is all-in
@@ -3080,13 +3080,13 @@ Hero: posts the ante 45
 c4607254: posts big blind 300
 *** HOLE CARDS ***
 Dealt to Hero [Qd 2d]
-Dealt to 841f9992 
-Dealt to cf859ba5 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to cf859ba5
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 4e885360: raises 390 to 690
 Hero: folds
 841f9992: folds
@@ -3136,13 +3136,13 @@ c4607254: posts small blind 200
 4e885360: posts big blind 400
 *** HOLE CARDS ***
 Dealt to Hero [Qc Jc]
-Dealt to 841f9992 
-Dealt to cf859ba5 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to cf859ba5
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 Hero: raises 837 to 1,237 and is all-in
 841f9992: folds
 cf859ba5: folds
@@ -3193,13 +3193,13 @@ Hero: posts the ante 60
 Hero: posts big blind 400
 *** HOLE CARDS ***
 Dealt to Hero [Ks Jh]
-Dealt to 841f9992 
-Dealt to cf859ba5 
-Dealt to c1468789 
-Dealt to ae0045c4 
-Dealt to 4c7cfe42 
-Dealt to c4607254 
-Dealt to 4e885360 
+Dealt to 841f9992
+Dealt to cf859ba5
+Dealt to c1468789
+Dealt to ae0045c4
+Dealt to 4c7cfe42
+Dealt to c4607254
+Dealt to 4e885360
 841f9992: folds
 cf859ba5: folds
 c1468789: folds
@@ -3227,5 +3227,3 @@ Seat 5: ae0045c4 folded before Flop
 Seat 6: 4c7cfe42 folded before Flop
 Seat 7: c4607254 (button) folded before Flop
 Seat 8: 4e885360 (small blind) showed [As 3d] and won (6,668) with Pair of Aces and Pair of Tens
-
-

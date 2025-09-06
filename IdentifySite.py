@@ -74,7 +74,9 @@ class Site:
         if summary:
             self.summary = summary
             self.re_SumIdentify = getattr(
-                __import__(summary), summary, None,
+                __import__(summary),
+                summary,
+                None,
             ).re_identify
         else:
             self.summary = None
@@ -240,17 +242,25 @@ class IdentifySite:
                 obj = getattr(mod, filter_name, None)
                 site_id = getattr(obj, "site_id", getattr(obj, "siteId", None))
                 self.sitelist[site_id] = Site(
-                    site, filter, filter_name, summary, obj,
+                    site,
+                    filter,
+                    filter_name,
+                    summary,
+                    obj,
                 )
             except ModuleNotFoundError:
                 log.warning(f"Could not find module {filter}, skipping.")
             except Exception as e:
                 log.exception(f"Failed to load HH importer: {filter_name}. {e}")
         self.re_Identify_PT = getattr(
-            __import__("PokerTrackerToFpdb"), "PokerTracker", None,
+            __import__("PokerTrackerToFpdb"),
+            "PokerTracker",
+            None,
         ).re_identify
         self.re_SumIdentify_PT = getattr(
-            __import__("PokerTrackerSummary"), "PokerTrackerSummary", None,
+            __import__("PokerTrackerSummary"),
+            "PokerTrackerSummary",
+            None,
         ).re_identify
 
     def walkDirectory(self, dir, sitelist) -> None:

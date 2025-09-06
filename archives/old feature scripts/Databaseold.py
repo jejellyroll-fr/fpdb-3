@@ -2812,14 +2812,14 @@ class Database(object):
                 ,startCards"""
 
             select = """s.weekId
-                      ,s.monthId 
+                      ,s.monthId
                       ,h.gametypeId
                       <tourney_select_clause>
                       ,hp.playerId
                       ,hp.startCards"""
 
             group = """s.weekId
-                        ,s.monthId 
+                        ,s.monthId
                         ,h.gametypeId
                         <tourney_group_clause>
                         ,hp.playerId
@@ -2857,7 +2857,7 @@ class Database(object):
                 ,position"""
 
             select = """s.weekId
-                      ,s.monthId 
+                      ,s.monthId
                       ,h.gametypeId
                       <tourney_select_clause>
                       ,hp.playerId
@@ -2866,7 +2866,7 @@ class Database(object):
                       ,hp.position"""
 
             group = """s.weekId
-                        ,s.monthId 
+                        ,s.monthId
                         ,h.gametypeId
                         <tourney_group_clause>
                         ,hp.playerId

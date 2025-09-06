@@ -8,12 +8,13 @@ This module tests the fixes applied to resolve:
 Issue: https://github.com/user/fpdb-3/issues/97
 """
 
-import pytest
 from io import StringIO
 from unittest.mock import patch
 
-from Hand import Hand, HoldemOmahaHand, Pot
+import pytest
+
 from Exceptions import FpdbParseError
+from Hand import Hand, HoldemOmahaHand, Pot
 
 
 class TestCopyToClipboardFix:
@@ -22,7 +23,7 @@ class TestCopyToClipboardFix:
     def test_pot_str_handles_none_total(self):
         """
         Test that Pot.__str__ no longer raises FpdbParseError when total=None.
-        
+
         Before fix: FpdbParseError was raised
         After fix: automatically calculates total and returns a string
         """
@@ -32,10 +33,10 @@ class TestCopyToClipboardFix:
         pot.stp = 2.0
         pot.sym = "$"
         # pot.total remains None (state that caused the error)
-        
+
         # Should no longer raise FpdbParseError
         result = str(pot)
-        
+
         # Should calculate: 10 + 20 + 5 + 2 = 37.00
         assert result == "Total pot $37.00"
 
@@ -47,7 +48,7 @@ class TestCopyToClipboardFix:
         pot.stp = 0
         pot.sym = "€"
         # pot.total remains None
-        
+
         result = str(pot)
         assert result == "Total pot €0.00"
 
@@ -59,34 +60,34 @@ class TestCopyToClipboardFix:
         pot.stp = 0
         pot.sym = "£"
         pot.total = 25.0  # Explicitly defined total
-        
+
         result = str(pot)
         # Should use the defined total, not calculate from committed
         assert result == "Total pot £25.00"
 
     def test_hand_writehand_method_exists(self):
         """Test that Hand.writeHand exists and is a method."""
-        assert hasattr(Hand, 'writeHand')
-        assert callable(getattr(Hand, 'writeHand'))
+        assert hasattr(Hand, "writeHand")
+        assert callable(getattr(Hand, "writeHand"))
 
     def test_holdem_hand_writehand_exists(self):
-        """Test that HoldemOmahaHand.writeHand exists.""" 
-        assert hasattr(HoldemOmahaHand, 'writeHand')
-        assert callable(getattr(HoldemOmahaHand, 'writeHand'))
+        """Test that HoldemOmahaHand.writeHand exists."""
+        assert hasattr(HoldemOmahaHand, "writeHand")
+        assert callable(getattr(HoldemOmahaHand, "writeHand"))
 
-    @patch.object(Hand, 'writeGameLine')
-    @patch.object(Hand, 'writeTableLine')
+    @patch.object(Hand, "writeGameLine")
+    @patch.object(Hand, "writeTableLine")
     def test_hand_writehand_basic_functionality(self, mock_table_line, mock_game_line):
         """Test basic functionality of Hand.writeHand."""
         mock_game_line.return_value = "Test Game Line"
         mock_table_line.return_value = "Test Table Line"
-        
+
         hand = Hand.__new__(Hand)  # Create without __init__ to avoid dependencies
         output = StringIO()
-        
+
         hand.writeHand(output)
         result = output.getvalue()
-        
+
         assert "Test Game Line\n" in result
         assert "Test Table Line\n" in result
         # The methods are called both for logging and for output
@@ -96,24 +97,24 @@ class TestCopyToClipboardFix:
     def test_inheritance_chain_complete(self):
         """
         Test that the inheritance chain is complete for writeHand.
-        
+
         Verifies that HoldemOmahaHand can call super().writeHand()
         without raising AttributeError.
         """
         # Verify that Hand has writeHand
-        assert hasattr(Hand, 'writeHand')
-        
+        assert hasattr(Hand, "writeHand")
+
         # Verify that HoldemOmahaHand inherits correctly
         assert issubclass(HoldemOmahaHand, Hand)
-        
+
         # Verify that HoldemOmahaHand has its own writeHand that can call super()
-        assert hasattr(HoldemOmahaHand, 'writeHand')
-        
-        # HoldemOmahaHand's writeHand method should be able to see 
+        assert hasattr(HoldemOmahaHand, "writeHand")
+
+        # HoldemOmahaHand's writeHand method should be able to see
         # Hand's writeHand method via super()
-        holdem_method = getattr(HoldemOmahaHand, 'writeHand')
-        hand_method = getattr(Hand, 'writeHand')
-        
+        holdem_method = getattr(HoldemOmahaHand, "writeHand")
+        hand_method = getattr(Hand, "writeHand")
+
         # They should not be identical (HoldemOmahaHand overrides Hand)
         assert holdem_method != hand_method
 
@@ -125,15 +126,15 @@ class TestCopyToClipboardFix:
         pot.stp = 0
         pot.sym = "$"
         pot.total = 30.0
-        
+
         # Simulate multiple pots
         pot.pots = [
             (20.0, {"Player1", "Player2"}),  # Main pot
-            (10.0, {"Player2"})              # Side pot
+            (10.0, {"Player2"}),  # Side pot
         ]
-        
+
         result = str(pot)
-        
+
         # Should mention main pot and side pot
         assert "Total pot $30.00" in result
         assert "Main pot $20.00" in result
@@ -146,25 +147,26 @@ class TestRegressionPrevention:
     def test_original_attributeerror_fixed(self):
         """
         Regression test for the original AttributeError.
-        
+
         Simulates the exact scenario that caused:
         AttributeError: 'super' object has no attribute 'writeHand'
         """
         # Before the fix, this failed because Hand didn't have a writeHand method
         # and HoldemOmahaHand.writeHand() called super().writeHand()
-        
+
         # Verify that Hand now has writeHand
-        assert hasattr(Hand, 'writeHand')
-        
+        assert hasattr(Hand, "writeHand")
+
         # Verify that it's actually a class method
         import types
-        method = getattr(Hand, 'writeHand')
+
+        method = getattr(Hand, "writeHand")
         assert isinstance(method, types.FunctionType)
 
     def test_original_fpdbparseerror_fixed(self):
         """
         Regression test for the original FpdbParseError.
-        
+
         Simulates the exact scenario that caused:
         FpdbParseError in Pot.__str__ when total=None
         """
@@ -173,7 +175,7 @@ class TestRegressionPrevention:
         pot.common = {}
         pot.stp = 0
         # pot.total = None (default)
-        
+
         # Before fix: FpdbParseError
         # After fix: automatic calculation and string return
         try:

@@ -14,7 +14,7 @@ Seat 10: Player10 (1500)
 Player8 posts small blind 10
 Player9 posts big blind 20
 Dealt to Hero [Kh 2d]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player10 calls 20
 Player1 folds
 Player2 folds
@@ -46,5 +46,3 @@ Seat 7: Player7 (button) folded on the flop
 Seat 8: Player8 (small blind) folded on the pre-flop
 Seat 9: Player9 (big blind) folded on the flop
 Seat 10: Player10 won 165
-
-

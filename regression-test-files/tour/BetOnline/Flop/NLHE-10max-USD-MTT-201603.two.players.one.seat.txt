@@ -22,7 +22,7 @@ Player8: ante processed 0.00
 Player9: ante processed 0.00
 Player8: posts small blind 30.00
 Player4: posts big blind 60.00
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Player9 [5h Qs]
 Player3: folds
 Player10 joins the table at seat #3
@@ -37,10 +37,10 @@ Player4: folds
 *** FLOP *** [3h 4h 2c]
 Player2: bets 2522.50
 Player5: calls 2522.50
-*** SHOW DOWN *** 
+*** SHOW DOWN ***
 Player2 shows Jc Jd
 Player5 shows 4s 5s
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 5375.00
 Board [3h 4h 2c 3s Jh]
 Seat 9: Player0 folded before Flop

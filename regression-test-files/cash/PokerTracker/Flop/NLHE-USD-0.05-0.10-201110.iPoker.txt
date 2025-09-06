@@ -1201,6 +1201,3 @@ Total pot $4.25 Rake $0.30
 Player2: Shows [D10 H10]
 Player15: Shows [C6 H6]
 Player15: wins $4.25
-
-
-

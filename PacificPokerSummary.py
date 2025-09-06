@@ -168,7 +168,13 @@ class PacificPokerSummary(TourneySummary):
             add_on_count = int(mg["PADDONS"])
 
         self.addPlayer(
-            rank, player, winnings, self.currency, rebuy_count, add_on_count, ko_count,
+            rank,
+            player,
+            winnings,
+            self.currency,
+            rebuy_count,
+            add_on_count,
+            ko_count,
         )
 
     def convert_to_decimal(self, string: str) -> Decimal:

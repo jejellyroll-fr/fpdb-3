@@ -15,17 +15,17 @@ Small + Big Blind:          Player2     (1.50)
 
 Hero was dealt:             Ad - Td - 7s - 8h
 
-Player6                     Fold        
+Player6                     Fold
 Hero                        Raise       (5.00)
 Player2                     Call        (4.00)
-Player3                     Fold        
-Player4                     Fold        
-Player5                     Fold        
+Player3                     Fold
+Player4                     Fold
+Player5                     Fold
 
 Flop                        Kh - 8s - Ks
 
 Hero                        Bet         (7.50)
-Player2                     Fold        
+Player2                     Fold
 Hero                        Payback     (7.50)
 
 Hero didn't show hand
@@ -34,5 +34,3 @@ Hero wins:                  EUR 11.40
 Rake:                       EUR 0.60
 
 Game ended 2011-07-20 23:45:00 CEST
-
-

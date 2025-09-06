@@ -15,7 +15,5 @@ Total rebuys : 1717
 Total addons : 912
 Prizepool : 39348€
 Tournament started 2017/04/11 20:00:02 UTC
-You played 1h 11min 5s 
+You played 1h 11min 5s
 You finished in 845th place
-
-

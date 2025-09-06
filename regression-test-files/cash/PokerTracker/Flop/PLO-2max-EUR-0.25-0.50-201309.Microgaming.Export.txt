@@ -14,7 +14,7 @@ Player0 called - €1.00
 Player0 checked
 Hero bet - €1.50
 Player0 folded
-Hero mucks: 
+Hero mucks:
 Hero wins €4.35 from the main pot
 
 Rake: €0.15

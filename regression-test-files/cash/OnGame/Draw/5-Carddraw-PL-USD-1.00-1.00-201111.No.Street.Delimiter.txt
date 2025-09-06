@@ -31,4 +31,3 @@ Seat 3: Player0 ($27.85), net: +$5.45
 Seat 6: Player3 ($33.74), net: -$1
 Seat 9: Player1 ($67.27), net: -$5
 ***** End of hand R5-192626403-203 *****
-

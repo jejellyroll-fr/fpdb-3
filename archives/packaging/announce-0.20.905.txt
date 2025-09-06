@@ -4,7 +4,7 @@ This version brings many improvements and bugfixes, updating is recommended for 
 
 We are still looking for translators! You can find some information about what languages we are still missing here: http://sourceforge.net/apps/mediawiki/fpdb/index.php?title=Translation
 
-188 changesets (excl. merges) have gone in since 0.20.904. 
+188 changesets (excl. merges) have gone in since 0.20.904.
 Please note that you will have to either recreate your database or use a new one if you're updating from 0.20.904 or older.
 Config files from 0.20 and later should work. Please report if you have problems with config files from that version or later.
 

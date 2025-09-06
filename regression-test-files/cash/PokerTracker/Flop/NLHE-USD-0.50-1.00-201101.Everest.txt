@@ -3868,6 +3868,3 @@ Player3 folds
 Uncalled bet of $5.00 returned to Player5
 *** SUMMARY ***
 Player5 collects $4.75
-
-
-

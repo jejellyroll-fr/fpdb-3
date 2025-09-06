@@ -51,7 +51,9 @@ class TestPopupTheme(unittest.TestCase):
         assert self.theme.get_color("text_primary") == "#FFFFFF"
         assert self.theme.get_color("nonexistent") == "#FFFFFF"  # Default
 
-    def _assert_font_properties(self, font: dict, expected_family: str, expected_size: int, expected_weight: str = None) -> None:
+    def _assert_font_properties(
+        self, font: dict, expected_family: str, expected_size: int, expected_weight: str = None
+    ) -> None:
         """Helper method to assert font properties."""
         assert font["family"] == expected_family
         assert font["size"] == expected_size
@@ -81,7 +83,9 @@ class TestMaterialDarkTheme(unittest.TestCase):
         """Set up Material Dark theme."""
         self.theme = MaterialDarkTheme()
 
-    def _assert_font_properties(self, font: dict, expected_family: str, expected_size: int, expected_weight: str = None) -> None:
+    def _assert_font_properties(
+        self, font: dict, expected_family: str, expected_size: int, expected_weight: str = None
+    ) -> None:
         """Helper method to assert font properties."""
         assert font["family"] == expected_family
         assert font["size"] == expected_size
@@ -326,7 +330,9 @@ class TestThemeConsistency(unittest.TestCase):
             theme = get_theme(theme_name)
             for color_key, color_value in theme.colors.items():
                 assert isinstance(color_value, str), f"Color {color_key} in {theme_name} is not a string"
-                assert hex_pattern.match(color_value), f"Color {color_key} in {theme_name} is not valid hex: {color_value}"
+                assert hex_pattern.match(
+                    color_value
+                ), f"Color {color_key} in {theme_name} is not valid hex: {color_value}"
 
     def test_font_values_format(self) -> None:
         """Test that font values have required properties."""

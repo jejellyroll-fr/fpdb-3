@@ -1,9 +1,9 @@
-#Game No : 11960068174 
+#Game No : 11960068174
 ***** Hand History for Game 11960068174 *****
 NL Texas Hold'em  Trny: 71487580 Level: 1  Blinds(20/40) - Friday, July 27, 23:00:33 MSKS 2012
 Table $50 Freeroll (2695506) Table #173 (Real Money)
 Seat 10 is the button
-Total number of players : 10/10 
+Total number of players : 10/10
 Seat 10: 0Player0 ( 3,000 )
 Seat 5: Player1 ( 3,000 )
 Seat 8: Player2 ( 3,000 )
@@ -14,7 +14,7 @@ Seat 9: Player6 ( 3,000 )
 Seat 3: Hero ( 3,000 )
 Seat 2: Player7 ( 3,000 )
 Seat 6: Player8 ( 3,000 )
-Trny: 71487580 Level: 1 
+Trny: 71487580 Level: 1
 Blinds(20/40)
 ** Dealing down cards **
 Dealt to Hero [  9c 3c ]

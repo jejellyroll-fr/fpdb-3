@@ -11,11 +11,9 @@ Dealer: folds
 Small Blind: folds
 HOOP: shows [7c Th]
 HOOP collected $9 from pot
-Small Blind: Table deposit $347.50 
+Small Blind: Table deposit $347.50
 *** SUMMARY ***
 Total pot $9 | Rake $0.00
 Seat 3: HOOP (big blind) won ($9)
 Seat 4: Dealer (button) mucked [3s 8d]
 Seat 5: Small Blind (small blind) mucked [6c 2c]
-
-

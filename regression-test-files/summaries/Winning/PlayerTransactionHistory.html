@@ -13,7 +13,7 @@
 		var site =  'https://americascardroomcom.pokermanagement.com/';
 		window.location = site + 'Default.aspx?HistoryURL=' + '%2fPlayer%2fUsers%2fPokerReports%2fTournaments.aspx%3ftpc%3dJThldiU2MHIlYTElMTclOTElMGIlYzYlZGIlZTlWJWQyJTBhJTkyJTljJWFlJWE1JTliV1glODBUJThjZCU5MCVmMyVhY2RZIWZOJWZlJTAzQiVlMCUxZSVlZSVmMSUxZiUxMyVhMiUxNCU5NyVjYzFsTCUwMCVjZUUlYTklZTh5YyViMSU0MCUxN3AlYTYlYTcqJTkzNSVlYiUwOCVhM3llJTlhJWJmJWFlJTA5WHQlMDEqJWUyTA%253d%253d';
 	}
-		
+
 	function Anthem_PreCallBack() {
         document.getElementById("loadingDiv").style.visibility = "visible";
         document.getElementById("loadingDiv").style.display = "";
@@ -23,7 +23,7 @@
         document.getElementById("loadingDiv").style.visibility = "hidden";
         document.getElementById("loadingDiv").style.display = "none";
     }
-    
+
 </script></head>
 
 
@@ -58,7 +58,7 @@ function __doPostBack(eventTarget, eventArgument) {
 
 <script src="./WebResource(1).axd" type="text/javascript"></script>
 
-<script language="JavaScript"> 
+<script language="JavaScript">
 parent.frames['Actions'].location.replace('https://americascardroomcom.pokermanagement.com/ActionsMain.aspx?ca=/Player/Users/PokerReports/Tournaments.aspx&tpc=JWMwJWQwSSVkMyU5MCVmOCU5YyViZTklZTklZTl4S3MlM2ElZmIlZjElYWElYTUlZTclNWUlNWUlYzklYzQlZDAlYWQlOWNXJyVmMiVmZiUyMyU3YyU5ZCVhNiUyYyVmOHhIJWJmJWNhJTk0JWVkJTdmJWJkJWExbiUxNGUlMDElMDElZDAlOTc3JTAwTSVkNiU4YVQlZmYlZTglM2ElYTklZTUlMDclZWIlOGYlZGQlOTUlYzUlN2YlZjAlODMlZWYlMmMlNWIlYmUlZDglZTQlMjUlYzklMDklZmQlMGElMTBhJWIxJTg4JWUxJWY0JWYyJWZiZCU2MCVkNiVkYyUwNCUxMm4lN2Y1JWQyJWNiMSU4NGslYjVQJTE5JWJiciVjZCVjNyVlMiViNyUxOSU4OSVlNSViMEElY2MlZTQlY2IlZTMlODclZjEzJWJjdjYlYjglODYlOTElMGUlYzglYTlsJWM5JTg4JWYwJWQzJTE4RHNiJWEyJWNlJWY5JTI0dmglYzdWJTE2JWM3NSUyZiU5ZiU5MiU3Yw==');
 </script><script type="text/javascript">
 //<![CDATA[
@@ -177,7 +177,7 @@ $find(textBox2.id).set_Text(selected.substring(index + 1, endIndex));
 	}
 }
 }
-function DateText_DateRangeTypeSelect() { 
+function DateText_DateRangeTypeSelect() {
 var ddlType = document.getElementById('DateText_dateRangeType');
 var textBoxNumValue = document.getElementById('DateText_numValue');
 if(textBoxNumValue.value == '') { return; }
@@ -193,13 +193,13 @@ case "1":
 date.setHours(date.getHours() - Number(textBoxNumValue.value));
 break;
 case "2":
-date.setDate(date.getDate() - Number(textBoxNumValue.value)); 
+date.setDate(date.getDate() - Number(textBoxNumValue.value));
 break;
 case "3":
-date.setDate(date.getDate() - (Number(textBoxNumValue.value) * 7)); 
+date.setDate(date.getDate() - (Number(textBoxNumValue.value) * 7));
 break;
 case "4":
-date.setMonth(date.getMonth() - Number(textBoxNumValue.value)); 
+date.setMonth(date.getMonth() - Number(textBoxNumValue.value));
 break;
 		}
 var localDate = Sys.CultureInfo.CurrentCulture.dateTimeFormat.ShortDatePattern;var localTime = Sys.CultureInfo.CurrentCulture.dateTimeFormat.LongTimePattern;$find(textBox1.id).set_Text(date.localeFormat(localDate + ' ' + localTime));
@@ -222,7 +222,7 @@ if(key == 8 || key == 0) {if(window.event){window.event.returnValue = true;} ret
 if(numberofchars == numberchars) {if(window.event){window.event.returnValue = false;} return false;}
 if((textBoxNumValue.value.length == 0 && key >=49 && key <= 57) || (textBoxNumValue.value.length != 0 && key >=48 && key <= 57)){
 if(window.event){window.event.returnValue = true;} return true;}
-else{ 
+else{
 if(window.event){window.event.returnValue = false;}return false;}
 }
 function DateText_NumbersOnly(e) {
@@ -262,7 +262,7 @@ Sys.WebForms.PageRequestManager.getInstance()._updateControls([], [], [], 90);
             	<span id="ctl00_SitePath" style="font-family:Verdana;font-size:12px;"><a href="https://americascardroomcom.pokermanagement.com/Player/Users/PokerReports/Tournaments.aspx?tpc=JThldiU2MHIlYTElMTclOTElMGIlYzYlZGIlZTlWJWQyJTBhJTkyJTljJWFlJWE1JTliV1glODBUJThjZCU5MCVmMyVhY2RZIWZOJWZlJTAzQiVlMCUxZSVlZSVmMSUxZiUxMyVhMiUxNCU5NyVjYzFsTCUwMCVjZUUlYTklZTh5YyViMSU0MCUxN3AlYTYlYTcqJTkzNSVlYiUwOCVhM3llJTlhJWJmJWFlJTA5WHQlMDEqJWUyTA%3d%3d#ctl00_SitePath_SkipLink"><img alt="Skip Navigation Links" height="0" width="0" src="./WebResource(3).axd" style="border-width:0px;"></a><span><a class="menu" href="https://americascardroomcom.pokermanagement.com/player/default.aspx" style="font-size:12px;font-weight:bold;">Home</a></span><span class="menu" style="font-size:12px;font-weight:bold;"> &gt;&gt; </span><span><a class="menu" style="font-size:12px;font-weight:bold;">Personal Info</a></span><span class="menu" style="font-size:12px;font-weight:bold;"> &gt;&gt; </span><span><a class="menu" href="https://americascardroomcom.pokermanagement.com/player/users/playerinfoscreen/playerinfoscreen.aspx?tpc=JTA1QSVmZW4lMjUlYTJFJWYxJWEyJWRkJWFhJTEwJWQycVUlODMlMDQlMDUlMjUlMWRHJTA2JTk2JTg0" style="font-size:12px;font-weight:bold;">Player Details: ChazDazzle</a></span><span class="menu" style="font-size:12px;font-weight:bold;"> &gt;&gt; </span><span><a class="menu" style="font-size:12px;font-weight:bold;">Poker Statistics</a></span><span class="menu" style="font-size:12px;font-weight:bold;"> &gt;&gt; </span><span class="menu" style="font-size:12px;font-weight:bold;">Tournaments</span><a id="ctl00_SitePath_SkipLink"></a></span>
 	</div>
             <br>
-            
+
 	<span id="ctl00_DetailContent_MyControl_SearchConsole"><span><br><table cellspacing="0" cellpadding="5" align="Center" rules="all" viewmode="Details" border="1" style="width:90%;border-collapse:collapse;">
 	<tbody><tr>
 		<td class="console_group" style="white-space:nowrap;"><span id="ctl00_DetailContent_MyControl_SearchConsole_ctl00_CollapserControl"><input type="image" name="ctl00$DetailContent$MyControl$SearchConsole$ctl00$CollapserControl$ctl00" src="./WebResource(4).axd" align="absmiddle" onclick="javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions(&quot;ctl00$DetailContent$MyControl$SearchConsole$ctl00$CollapserControl$ctl00&quot;, &quot;&quot;, true, &quot;&quot;, &quot;&quot;, false, false))" style="border-width:0px;height:11px;width:11px;">&nbsp;<span class="common-text">Individual Menu          Login Name:  ChazDazzle / UserID:  343595</span></span></td>
@@ -423,7 +423,7 @@ Sys.WebForms.PageRequestManager.getInstance()._updateControls([], [], [], 90);
 
             <br>
             <br>
-        
+
 <script type="text/javascript">
 //<![CDATA[
 var MetaBuilders_WebControls_ExpandingButtons =  new Array('ctl00_DetailContent_MyControl_SearchConsole_Grp1EIM_clicker','ctl00_DetailContent_MyControl_SearchConsole_Grp1ROW','ctl00_DetailContent_MyControl_SearchConsole_Grp1EIM_tracker','Click to collapse.____/WebResource.axd?d=JAcu3amsZWXo0jlNYLzleb_hqKaZ8wOHVBEXTGZJsHHGId03KDUSgkrJ0YKZx-9-siAmUZi5HMY9Nf9nZlNJ5dltOUftf_jxCqHTdzXXnP6yspTnqp7sS3G4jOXd5rzDK7LcNPS96JZHWFEO5yBgjPoB3qTRG-eUEJIlLDxwhDWInZiC0&amp;t=636057541360000000','Click to expand.____/WebResource.axd?d=NmNEsJQx5WigayrKtJSzrnr5RS0wFHVFZcGFUpDk7m1FhrQnVCRVpQ3CTJqhoYPBBo7ASFNUTAhaJMEk4P5NhKjf8y-R80vZRb8r5geU1qrq0PB9q0YEkd3FPRnNGlJyYE3jpvmi3jZY_JfSO_ziN76HOkCX8mw9_NPqX7gjC_W3c-ay0&amp;t=636057541360000000','i', 'ctl00_DetailContent_MyControl_SearchConsole_ResultOptionsGrpEIM_clicker','ctl00_DetailContent_MyControl_SearchConsole_ResultOptionsGrpROW','ctl00_DetailContent_MyControl_SearchConsole_ResultOptionsGrpEIM_tracker','Click to collapse.____/WebResource.axd?d=JAcu3amsZWXo0jlNYLzleb_hqKaZ8wOHVBEXTGZJsHHGId03KDUSgkrJ0YKZx-9-siAmUZi5HMY9Nf9nZlNJ5dltOUftf_jxCqHTdzXXnP6yspTnqp7sS3G4jOXd5rzDK7LcNPS96JZHWFEO5yBgjPoB3qTRG-eUEJIlLDxwhDWInZiC0&amp;t=636057541360000000','Click to expand.____/WebResource.axd?d=NmNEsJQx5WigayrKtJSzrnr5RS0wFHVFZcGFUpDk7m1FhrQnVCRVpQ3CTJqhoYPBBo7ASFNUTAhaJMEk4P5NhKjf8y-R80vZRb8r5geU1qrq0PB9q0YEkd3FPRnNGlJyYE3jpvmi3jZY_JfSO_ziN76HOkCX8mw9_NPqX7gjC_W3c-ay0&amp;t=636057541360000000','i');
@@ -441,7 +441,7 @@ ctl00_DetailContent_MyControl_SearchConsole_ctl07.display = "Dynamic";
 </script>
 
 <script type="text/javascript">
-<!--  
+<!--
 var startDateCalendar_From;
 var endDateCalendar_To;
 var ONEDAY = 3600 * 24 * 1000;
@@ -457,20 +457,20 @@ function filterCalendar_To(cal) {
 function disallowCalendar_To(date) {
 	date = date.getTime();
 	if ((typeof(window['startDateCalendar_From']) != "undefined") && (startDateCalendar_From != null) && (date < (startDateCalendar_From))) {
-	return true; 
+	return true;
 	}
 	return false;
 }
 function disallowCalendar_From(date) {
 	date = date.getTime();
 	if ((typeof(window['endDateCalendar_To']) != "undefined") && (endDateCalendar_To != null) && (date > (endDateCalendar_To))) {
-	return true; 
+	return true;
 	}
 	return false;
 }
 function Calendar_From_show(cal) {
 	if ((typeof(window['endDateCalendar_To']) != "undefined") && (endDateCalendar_To != null)) {
-		if (disallowCalendar_From(cal.date)) { 
+		if (disallowCalendar_From(cal.date)) {
 			var startDate = new Date(endDateCalendar_To);
 			startDate.setHours(0);
 			startDate.setMinutes(0);
@@ -481,7 +481,7 @@ function Calendar_From_show(cal) {
 }
 function Calendar_To_show(cal) {
 	if ((typeof(window['startDateCalendar_From']) != "undefined") && (startDateCalendar_From != null)) {
-		if (disallowCalendar_To(cal.date)) { 
+		if (disallowCalendar_To(cal.date)) {
 			var endDate = new Date(startDateCalendar_From);
 			endDate.setHours(23);
 			endDate.setMinutes(59);

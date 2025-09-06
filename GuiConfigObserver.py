@@ -195,15 +195,11 @@ class GuiConfigObserver(ConfigObserver):
             if "window_size" in change.path:
                 # Resize window
                 window_size_components = 2
-                if (
-                    isinstance(change.new_value, list | tuple)
-                    and len(change.new_value) == window_size_components
-                ):
+                if isinstance(change.new_value, list | tuple) and len(change.new_value) == window_size_components:
                     self.main_window.resize(change.new_value[0], change.new_value[1])
 
             elif "window_position" in change.path and (
-                isinstance(change.new_value, list | tuple)
-                and len(change.new_value) == window_size_components
+                isinstance(change.new_value, list | tuple) and len(change.new_value) == window_size_components
             ):
                 # Move window
                 self.main_window.move(change.new_value[0], change.new_value[1])

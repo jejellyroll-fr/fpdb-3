@@ -10,11 +10,11 @@ Seat 6: Hero ($440.91 in chips)
 Hero: posts big blind $10
 6bf5ff85: straddle $20
 *** HOLE CARDS ***
-Dealt to 305cb110 
-Dealt to 59c39d07 
-Dealt to 54de9dcd 
-Dealt to 6bf5ff85 
-Dealt to 22129698 
+Dealt to 305cb110
+Dealt to 59c39d07
+Dealt to 54de9dcd
+Dealt to 6bf5ff85
+Dealt to 22129698
 Dealt to Hero [Ks 3c 4s 2s 9s]
 22129698: folds
 Hero: folds

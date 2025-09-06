@@ -1551,6 +1551,3 @@ Hero: gg
 Total pot 130 | Rake 0
 Seat 1: Hero (small blind) mucked [Kd 8s 7s 4d 3c] - K,8,7,4,3
 Seat 2: Player0 (big blind) showed [9s 8h 6s 5h 3d] and won (130) with 9,8,6,5,3
-
-
-

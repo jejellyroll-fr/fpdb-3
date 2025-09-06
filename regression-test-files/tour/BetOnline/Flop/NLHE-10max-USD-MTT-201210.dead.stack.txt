@@ -13,7 +13,7 @@ Seat 0: Player8 (13700.00 in chips)
 : posts small blind 100.00
 Hero said "KQ?"
 Player7: posts big blind 400.00
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [Js Ad]
 Player2: folds
 Player0: folds
@@ -30,10 +30,10 @@ Player8: folds
 Player4: folds
 Uncalled bet (1200.00) returned to Hero
 Total pot 1200.00
-*** SHOW DOWN *** 
+*** SHOW DOWN ***
  shows 8h 7s
 Hero shows Js Ad
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 500.00
 Board [2h As 9c 2d Jh]
 Seat 7: Player0 folded before Flop
