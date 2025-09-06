@@ -84,7 +84,6 @@ FILES=(
     "HUD_config.xml.example"
     "HUD_main.pyw"
     "IdentifySite.py"
-    "importer_cli.py"
     "Importer.py"
     "ImprovedErrorHandler.py"
     "interlocks.py"
