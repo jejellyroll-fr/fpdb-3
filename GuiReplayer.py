@@ -2438,7 +2438,11 @@ class Player:
         self.y = 0.8 * sin(2 * self.seat * pi / hand.maxseats)
 
 
-if __name__ == "__main__":
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    # Launch the replayer GUI like the original
     config = Configuration.Config()
     db = Database.Database(config)
     sql = SQL.Sql(db_server=config.get_db_parameters()["db-server"])
@@ -2451,3 +2455,10 @@ if __name__ == "__main__":
     replayer.play_hand(0)
 
     app.exec_()
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(main())

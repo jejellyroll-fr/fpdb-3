@@ -49,13 +49,13 @@ uv pip install .[linux][postgresql][test]  # Adjust for your platform
 
 ```bash
 # For Linux users with postgresql
-uv pip install .[linux][postgresql][test]
+uv pip install ".[linux,postgresql,test]"
 
 # For Windows users with postgresql
 uv pip install .[windows][postgresql][test]
 
 # For macOS users with postgresql
-uv pip install ".[macos][postgresql][test]"
+uv pip install ".[macos,postgresql,test]"
 
 # Minimal installation without database support
 uv pip install .[test]

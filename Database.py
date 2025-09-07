@@ -5299,46 +5299,114 @@ class Database:
 
 # end class Database
 
+
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description="FPDB Database utility")
+    parser.add_argument("--test-connection", action="store_true", help="Test database connection")
+    parser.add_argument("--rebuild-indexes", action="store_true", help="Drop and recreate all database indexes")
+    parser.add_argument("--show-stats", action="store_true", help="Show statistics for last hand")
+    parser.add_argument("--show-info", action="store_true", help="Show database information")
+    parser.add_argument("--interactive", action="store_true", help="Run original interactive test")
+
+    args = parser.parse_args(argv)
+
+    if not any(vars(args).values()):
+        parser.print_help()
+        return 0
+
+    Configuration.set_logfile("fpdb-log.txt")
+
+    try:
+        c = Configuration.Config()
+        sql = SQL.Sql(db_server="sqlite")
+        db_connection = Database(c)
+    except Exception as e:
+        print(f"Error connecting to database: {e}")
+        return 1
+
+    if args.test_connection:
+        print("Database connection successful ✓")
+        print(f"Backend: {db_connection.backend}")
+        print(f"Connection: {db_connection.connection}")
+
+    if args.show_info:
+        print("\n=== Database Information ===")
+        print(f"Backend type: {db_connection.backend}")
+        print(f"Database name: {db_connection.database}")
+        print(f"Host: {db_connection.host}")
+
+    if args.rebuild_indexes:
+        print("Dropping all indexes...")
+        db_connection.dropAllIndexes()
+        print("Recreating all indexes...")
+        db_connection.createAllIndexes()
+        print("Index rebuild complete ✓")
+
+    if args.show_stats:
+        try:
+            h = db_connection.get_last_hand()
+            if h:
+                print(f"\n=== Statistics for Hand {h} ===")
+                t0 = time()
+                stat_dict = db_connection.get_stats_from_hand(h, "ring")
+                t1 = time()
+
+                for p in sorted(stat_dict.keys()):
+                    print(f"  {p}: {stat_dict[p]}")
+
+                print(f"\nQuery took: {t1 - t0:4.3f} seconds")
+
+                cards = db_connection.get_cards("1")
+                if cards:
+                    print(f"Cards for player 1: {cards}")
+            else:
+                print("No hands found in database")
+        except Exception as e:
+            print(f"Error retrieving statistics: {e}")
+
+    if args.interactive:
+        print("Running original interactive test...")
+        log.debug(f"database connection object = {db_connection.connection}")
+        db_connection.dropAllIndexes()
+        db_connection.createAllIndexes()
+
+        h = db_connection.get_last_hand()
+        log.debug(f"last hand = {h}")
+
+        hero = db_connection.get_player_id(c, "PokerStars", "nutOmatic")
+        if hero:
+            log.debug(f"nutOmatic player_id {hero}")
+
+        if db_connection.backend == 4:
+            c = db_connection.get_cursor()
+            c.execute("explain query plan " + sql.query["get_table_name"], (h,))
+            for row in c.fetchall():
+                log.debug(f"Query plan: {row}")
+
+        t0 = time()
+        stat_dict = db_connection.get_stats_from_hand(h, "ring")
+        t1 = time()
+        for p in list(stat_dict.keys()):
+            log.debug(f"{p}  {stat_dict[p]}")
+
+        log.debug(f"cards = {db_connection.get_cards('1')}")
+        db_connection.close_connection
+
+        log.debug(f"get_stats took: {t1 - t0:4.3f} seconds")
+
+        print("Press ENTER to continue...")
+        sys.stdin.readline()
+
+    return 0
+
+
 if __name__ == "__main__":
-    c = Configuration.Config()
-    sql = SQL.Sql(db_server="sqlite")
-
-    db_connection = Database(c)  # mysql fpdb holdem
-    #    db_connection = Database(c, 'fpdb-p', 'test') # mysql fpdb holdem
-    #    db_connection = Database(c, 'PTrackSv2', 'razz') # mysql razz
-    #    db_connection = Database(c, 'ptracks', 'razz') # postgres
-    log.debug(f"database connection object = {db_connection.connection}")
-    # db_connection.recreate_tables()
-    db_connection.dropAllIndexes()
-    db_connection.createAllIndexes()
-
-    h = db_connection.get_last_hand()
-    log.debug(f"last hand = {h}")
-
-    hero = db_connection.get_player_id(c, "PokerStars", "nutOmatic")
-    if hero:
-        log.debug(f"nutOmatic player_id {hero}")
-
-    # example of displaying query plan in sqlite:
-    if db_connection.backend == 4:
-        c = db_connection.get_cursor()
-        c.execute("explain query plan " + sql.query["get_table_name"], (h,))
-        for row in c.fetchall():
-            log.debug(f"Query plan: {row}")
-
-    t0 = time()
-    stat_dict = db_connection.get_stats_from_hand(h, "ring")
-    t1 = time()
-    for p in list(stat_dict.keys()):
-        log.debug(f"{p}  {stat_dict[p]}")
-
-    log.debug(f"cards = {db_connection.get_cards('1')}")
-    db_connection.close_connection
-
-    log.debug(f"get_stats took: {t1 - t0:4.3f} seconds")
-
-    log.debug("Press ENTER to continue.")
-    sys.stdin.readline()
+    sys.exit(main())
 
 
 # Code borrowed from http://push.cx/2008/caching-dictionaries-in-python-vs-ruby

@@ -526,7 +526,11 @@ class GuiAutoImport(QWidget):
         log.debug("Updating import paths in interface")
 
 
-if __name__ == "__main__":
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    # Parse command line options
     parser = OptionParser()
     parser.add_option(
         "-q",
@@ -536,7 +540,7 @@ if __name__ == "__main__":
         default=True,
         help="don't start gui",
     )
-    (options, argv) = parser.parse_args()
+    (options, remaining_argv) = parser.parse_args(argv)
 
     config = Configuration.Config()
 
@@ -550,7 +554,7 @@ if __name__ == "__main__":
     settings.update(config.get_import_parameters())
     settings.update(config.get_default_paths())
     settings["global_lock"] = interlocks.InterProcessLock(name="fpdb_global_lock")
-    settings["cl_options"] = ".".join(sys.argv[1:])
+    settings["cl_options"] = ".".join(argv)
 
     if options.gui is True:
         from PyQt5.QtWidgets import QApplication, QMainWindow
@@ -563,3 +567,11 @@ if __name__ == "__main__":
         app.exec_()
     else:
         i = GuiAutoImport(settings, config, cli=True)
+
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(main())
