@@ -2,6 +2,7 @@
 """Returns a dict of SQL statements used in fpdb."""
 
 import re
+import sys
 
 #    Copyright 2008-2011, Ray E. Barker
 #
@@ -9618,8 +9619,54 @@ class Sql:
                 self.query[k] = re.sub("%s", "?", q)
 
 
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description="FPDB SQL utility")
+    parser.add_argument("--list-queries", action="store_true", help="List all available SQL queries")
+    parser.add_argument("--show-query", metavar="QUERY_NAME", help="Show a specific SQL query")
+    parser.add_argument("--interactive", action="store_true", help="Run original interactive test")
+
+    args = parser.parse_args(argv)
+
+    if not any(vars(args).values()):
+        parser.print_help()
+        return 0
+
+    try:
+        s = Sql()
+    except Exception as e:
+        print(f"Error initializing SQL: {e}")
+        return 1
+
+    if args.list_queries:
+        print("=== Available SQL Queries ===")
+        print(f"Total queries: {len(s.query)}")
+        for i, query_name in enumerate(sorted(s.query.keys()), 1):
+            print(f"  {i:3}. {query_name}")
+
+    if args.show_query:
+        query_name = args.show_query
+        if query_name in s.query:
+            print(f"\n=== Query: {query_name} ===")
+            print(s.query[query_name])
+        else:
+            print(f"Query '{query_name}' not found")
+            print("Use --list-queries to see available queries")
+            return 1
+
+    if args.interactive:
+        print("Running original interactive test...")
+        s = Sql()
+        for _key in s.query:
+            pass
+        print("Interactive test complete.")
+
+    return 0
+
+
 if __name__ == "__main__":
-    #    just print the default queries and exit
-    s = Sql()
-    for _key in s.query:
-        pass
+    sys.exit(main())
