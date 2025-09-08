@@ -1,0 +1,15 @@
+pytest-cov.pth,sha256=9HRGpg_fWQXoTn18iSuvkvjVoyJtDaFZm5wBTqtsfds,377
+pytest_cov-6.3.0.dist-info/INSTALLER,sha256=5hhM4Q4mYTT9z6QB6PGpUAW81PGNFrYrdXMj4oM_6ak,2
+pytest_cov-6.3.0.dist-info/METADATA,sha256=CebxmaPRK33yHtuhNWz1xVt_N3S3ZWL_273UVJjw6EQ,30380
+pytest_cov-6.3.0.dist-info/RECORD,,
+pytest_cov-6.3.0.dist-info/REQUESTED,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0
+pytest_cov-6.3.0.dist-info/WHEEL,sha256=_zCd3N1l69ArxyTb8rzEoP9TpbYXkqRFSNOD5OuxnTs,91
+pytest_cov-6.3.0.dist-info/entry_points.txt,sha256=1Wx3pjYCY2v4ATD5dhlQN6Ta-C4LKmBa1fXhiEX6C8A,42
+pytest_cov-6.3.0.dist-info/licenses/AUTHORS.rst,sha256=HHODCKNTkvKNhvIQ1zpN30WQudJee03E5AvyI6VaJvI,2995
+pytest_cov-6.3.0.dist-info/licenses/LICENSE,sha256=g1WGrhVnZqJOPBA_vFXZr2saFt9XypMsl0gqJzf9g9U,1071
+pytest_cov-6.3.0.dist-info/top_level.txt,sha256=HvYHsAFV4MeTUNUwhawY_DKvrpE2lYratTHX_U45oBU,11
+pytest_cov/__init__.py,sha256=wA1OxokzL0_0sTqZalw9x3RfMAB71KA4sUdFSNawd68,908
+pytest_cov/compat.py,sha256=u6pVozx0EVDbuNKMsUjT1cgDCla6zO7DwhN8RTIfrXQ,425
+pytest_cov/embed.py,sha256=H0ZMCjrgxERrmpRML5SCmB43hmNIZPe0RvcMUedVi64,3615
+pytest_cov/engine.py,sha256=XppfEUMRPDysWlXE_aZCXVtr_lbl8PfMgYd1OlsV5Q8,19312
+pytest_cov/plugin.py,sha256=rA9yWZa0kujpltIurm8Tgie5j0JYmZm5g15uUqiiYKo,17832
