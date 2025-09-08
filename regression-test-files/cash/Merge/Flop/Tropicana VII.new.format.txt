@@ -45,4 +45,3 @@
         <winner amount="0.91" uncalled="false" potnumber="1" player="4" pottype="n" hand="Pair of Queens" />
     </round>
 </game>
-

@@ -67,4 +67,3 @@ Player1 wins 40 with: Two Pairs: 9s, 6s
 Seat 1: Hero - 0
 Seat 2: Player1 - 40
 End of Hand #2682824016
-

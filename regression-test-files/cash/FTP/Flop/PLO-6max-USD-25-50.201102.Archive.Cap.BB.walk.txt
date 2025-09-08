@@ -25,4 +25,3 @@ Seat 2: Player2 didn't bet (folded)
 Seat 3: Player3 (button) didn't bet (folded)
 Seat 5: Player5 (small blind) folded before the Flop
 Seat 6: Hero (big blind) collected ($50)
-

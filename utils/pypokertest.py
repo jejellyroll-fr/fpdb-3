@@ -1,4 +1,3 @@
-
 #
 # Copyright (C) 2007, 2008 Loic Dachary <loic@dachary.org>
 # Copyright (C) 2004, 2005, 2006 Mekensleep
@@ -53,10 +52,6 @@ pockets = [
 pockets = [[22, 18, 21, 3, 41, 1, 30], [39, 255, 255, 15, 13, 17, 255]]
 
 
-
-
-
-
 hand = ["Ac", "As", "Td", "7s", "7h", "3s", "2c"]
 best_hand = pokereval.best_hand("hi", hand)
 
@@ -99,13 +94,6 @@ hand = ["2d", "6c", "Ac", "5c"]
 best_hand = pokereval.best_hand("low", hand, board)
 
 if len(sys.argv) > 2:
-
-
-
-
-
-
-
     pass
 
 hand = ["As", "Ad"]

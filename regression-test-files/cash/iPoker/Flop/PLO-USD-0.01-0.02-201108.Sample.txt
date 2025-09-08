@@ -1,20 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?><session sessioncode="3301205231">  
-	     <general>  
+<?xml version="1.0" encoding="utf-8"?><session sessioncode="3301205231">
+	     <general>
 	     <mode>real</mode>
-	          <gametype>Omaha PL $0.01/$0.02</gametype>  
-	          <tablename>Pemuco</tablename>  
-	          <duration>00:43</duration>  
-	          <gamecount>28</gamecount>  
-	          <startdate>2011-08-04 04:49:36</startdate>  
-	          <currency>USD</currency>  
-	          <nickname>Hero</nickname>  
-	          <bets>$0.31</bets>  
-	          <wins>$0</wins>  
+	          <gametype>Omaha PL $0.01/$0.02</gametype>
+	          <tablename>Pemuco</tablename>
+	          <duration>00:43</duration>
+	          <gamecount>28</gamecount>
+	          <startdate>2011-08-04 04:49:36</startdate>
+	          <currency>USD</currency>
+	          <nickname>Hero</nickname>
+	          <bets>$0.31</bets>
+	          <wins>$0</wins>
 	          <chipsin>2</chipsin>
 			  <chipsout>1.69</chipsout>
 			  <ipoints>4.30</ipoints>
-	            
-	     </general>  
+
+	     </general>
 	     <game gamecode="2874216438">
 	 <general>
 	  <startdate>2011-08-04 04:49:36</startdate>
@@ -37,7 +37,7 @@
 	<round no="4">
 	 <cards type="River" player="">S2</cards><action no="21" player="Player2" type="3" sum="$0.02" cards=""/><action no="20" player="Player4" type="5" sum="$0.02" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874218654">
 	 <general>
 	  <startdate>2011-08-04 04:50:50</startdate>
@@ -60,7 +60,7 @@
 	<round no="4">
 	 <cards type="River" player="">C8</cards>
 	</round>
-	
+
 	</game><game gamecode="2874221167">
 	 <general>
 	  <startdate>2011-08-04 04:52:14</startdate>
@@ -80,7 +80,7 @@
 	<round no="3">
 	 <cards type="Turn" player="">C4</cards><action no="20" player="Player2" type="0" sum="$0" cards=""/><action no="21" player="Player4" type="0" sum="$0" cards=""/><action no="22" player="Player5" type="0" sum="$0" cards=""/><action no="17" player="Player6" type="5" sum="$0.12" cards=""/><action no="18" player="Player7" type="0" sum="$0" cards=""/><action no="19" player="Player10" type="0" sum="$0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874223984">
 	 <general>
 	  <startdate>2011-08-04 04:53:48</startdate>
@@ -103,7 +103,7 @@
 	<round no="4">
 	 <cards type="River" player="">SQ</cards><action no="22" player="Player2" type="4" sum="$0" cards=""/><action no="27" player="Player2" type="0" sum="$0" cards=""/><action no="23" player="Player3" type="4" sum="$0" cards=""/><action no="28" player="Player3" type="0" sum="$0" cards=""/><action no="24" player="Player6" type="5" sum="$0.11" cards=""/><action no="20" player="Player8" type="4" sum="$0" cards=""/><action no="25" player="Player8" type="0" sum="$0" cards=""/><action no="21" player="Player10" type="4" sum="$0" cards=""/><action no="26" player="Player10" type="0" sum="$0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874228115">
 	 <general>
 	  <startdate>2011-08-04 04:56:06</startdate>
@@ -126,7 +126,7 @@
 	<round no="4">
 	 <cards type="River" player="">C2</cards><action no="22" player="Player4" type="5" sum="$0.64" cards=""/><action no="23" player="Player6" type="0" sum="$0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874231134">
 	 <general>
 	  <startdate>2011-08-04 04:57:44</startdate>
@@ -149,7 +149,7 @@
 	<round no="4">
 	 <cards type="River" player="">C4</cards><action no="24" player="Player11" type="4" sum="$0" cards=""/><action no="25" player="Player2" type="4" sum="$0" cards=""/><action no="22" player="Hero" type="4" sum="$0" cards=""/><action no="23" player="Player10" type="4" sum="$0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874234418">
 	 <general>
 	  <startdate>2011-08-04 04:59:32</startdate>
@@ -169,7 +169,7 @@
 	<round no="3">
 	 <cards type="Turn" player="">H7</cards><action no="17" player="Player4" type="5" sum="$0.81" cards=""/><action no="18" player="Player6" type="0" sum="$0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874237516">
 	 <general>
 	  <startdate>2011-08-04 05:01:16</startdate>
@@ -186,7 +186,7 @@
 	<round no="2">
 	 <cards type="Flop" player="">H7 C2 C6</cards><action no="12" player="Player11" type="4" sum="$0" cards=""/><action no="14" player="Player11" type="0" sum="$0" cards=""/><action no="13" player="Player7" type="5" sum="$0.16" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874239614">
 	 <general>
 	  <startdate>2011-08-04 05:02:25</startdate>
@@ -209,7 +209,7 @@
 	<round no="4">
 	 <cards type="River" player="">CA</cards><action no="22" player="Player4" type="4" sum="$0" cards=""/><action no="24" player="Player4" type="3" sum="$0.68" cards=""/><action no="23" player="Player6" type="5" sum="$0.68" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874242077">
 	 <general>
 	  <startdate>2011-08-04 05:03:46</startdate>
@@ -232,7 +232,7 @@
 	<round no="4">
 	 <cards type="River" player="">H7</cards><action no="22" player="Player2" type="3" sum="$0.02" cards=""/><action no="20" player="Player4" type="5" sum="$0.02" cards=""/><action no="21" player="Player6" type="0" sum="$0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874245000">
 	 <general>
 	  <startdate>2011-08-04 05:05:26</startdate>
@@ -249,7 +249,7 @@
 	<round no="2">
 	 <cards type="Flop" player="">SJ C5 C9</cards><action no="16" player="Player11" type="0" sum="$0" cards=""/><action no="17" player="Player4" type="0" sum="$0" cards=""/><action no="13" player="Player5" type="4" sum="$0" cards=""/><action no="18" player="Player5" type="0" sum="$0" cards=""/><action no="14" player="Player6" type="4" sum="$0" cards=""/><action no="19" player="Player6" type="0" sum="$0" cards=""/><action no="15" player="Player8" type="5" sum="$0.26" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874248242">
 	 <general>
 	  <startdate>2011-08-04 05:07:15</startdate>
@@ -266,7 +266,7 @@
 	<round no="2">
 	 <cards type="Flop" player="">C8 D6 C6</cards><action no="13" player="Player4" type="23" sum="$0.58" cards=""/><action no="11" player="Player8" type="4" sum="$0" cards=""/><action no="14" player="Player8" type="0" sum="$0" cards=""/><action no="12" player="Hero" type="5" sum="$0.12" cards=""/><action no="15" player="Hero" type="0" sum="$0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874250851">
 	 <general>
 	  <startdate>2011-08-04 05:08:43</startdate>
@@ -286,7 +286,7 @@
 	<round no="3">
 	 <cards type="Turn" player="">H2</cards><action no="18" player="Player2" type="4" sum="$0" cards=""/><action no="20" player="Player2" type="0" sum="$0" cards=""/><action no="19" player="Player6" type="5" sum="$0.24" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874254494">
 	 <general>
 	  <startdate>2011-08-04 05:10:44</startdate>
@@ -309,7 +309,7 @@
 	<round no="4">
 	 <cards type="River" player="">C10</cards>
 	</round>
-	
+
 	</game><game gamecode="2874256630">
 	 <general>
 	  <startdate>2011-08-04 05:11:55</startdate>
@@ -332,7 +332,7 @@
 	<round no="4">
 	 <cards type="River" player="">H6</cards>
 	</round>
-	
+
 	</game><game gamecode="2874260179">
 	 <general>
 	  <startdate>2011-08-04 05:13:54</startdate>
@@ -355,7 +355,7 @@
 	<round no="4">
 	 <cards type="River" player="">H8</cards><action no="21" player="Player4" type="5" sum="$0.42" cards=""/><action no="22" player="Player6" type="0" sum="$0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874262545">
 	 <general>
 	  <startdate>2011-08-04 05:15:11</startdate>
@@ -378,7 +378,7 @@
 	<round no="4">
 	 <cards type="River" player="">CK</cards><action no="19" player="Player4" type="5" sum="$0.41" cards=""/><action no="20" player="Player6" type="0" sum="$0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874265526">
 	 <general>
 	  <startdate>2011-08-04 05:16:47</startdate>
@@ -401,7 +401,7 @@
 	<round no="4">
 	 <cards type="River" player="">H7</cards>
 	</round>
-	
+
 	</game><game gamecode="2874268144">
 	 <general>
 	  <startdate>2011-08-04 05:18:12</startdate>
@@ -418,7 +418,7 @@
 	<round no="2">
 	 <cards type="Flop" player="">SJ SA D5</cards><action no="20" player="Player11" type="0" sum="$0" cards=""/><action no="21" player="Player4" type="0" sum="$0" cards=""/><action no="18" player="Player6" type="4" sum="$0" cards=""/><action no="22" player="Player6" type="0" sum="$0" cards=""/><action no="19" player="Player13" type="5" sum="$0.70" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874271447">
 	 <general>
 	  <startdate>2011-08-04 05:20:00</startdate>
@@ -438,7 +438,7 @@
 	<round no="3">
 	 <cards type="Turn" player="">S8</cards><action no="15" player="Player2" type="0" sum="$0" cards=""/><action no="14" player="Player13" type="5" sum="$0.18" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874273179">
 	 <general>
 	  <startdate>2011-08-04 05:20:57</startdate>
@@ -461,7 +461,7 @@
 	<round no="4">
 	 <cards type="River" player="">C5</cards><action no="15" player="Player5" type="4" sum="$0" cards=""/><action no="16" player="Player13" type="4" sum="$0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874275452">
 	 <general>
 	  <startdate>2011-08-04 05:22:12</startdate>
@@ -481,7 +481,7 @@
 	<round no="3">
 	 <cards type="Turn" player="">HJ</cards><action no="16" player="Player4" type="5" sum="$2.70" cards=""/><action no="17" player="Player5" type="0" sum="$0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874277570">
 	 <general>
 	  <startdate>2011-08-04 05:23:20</startdate>
@@ -504,7 +504,7 @@
 	<round no="4">
 	 <cards type="River" player="">HQ</cards>
 	</round>
-	
+
 	</game><game gamecode="2874279502">
 	 <general>
 	  <startdate>2011-08-04 05:24:21</startdate>
@@ -527,7 +527,7 @@
 	<round no="4">
 	 <cards type="River" player="">S8</cards><action no="17" player="Player4" type="4" sum="$0" cards=""/><action no="18" player="Player6" type="4" sum="$0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="2874281906">
 	 <general>
 	  <startdate>2011-08-04 05:25:38</startdate>
@@ -550,7 +550,7 @@
 	<round no="4">
 	 <cards type="River" player="">DQ</cards>
 	</round>
-	
+
 	</game><game gamecode="2874284005">
 	 <general>
 	  <startdate>2011-08-04 05:26:45</startdate>
@@ -573,7 +573,7 @@
 	<round no="4">
 	 <cards type="River" player="">SK</cards>
 	</round>
-	
+
 	</game><game gamecode="2874287150">
 	 <general>
 	  <startdate>2011-08-04 05:28:26</startdate>
@@ -596,7 +596,7 @@
 	<round no="4">
 	 <cards type="River" player="">DJ</cards>
 	</round>
-	
+
 	</game><game gamecode="2874289673">
 	 <general>
 	  <startdate>2011-08-04 05:29:50</startdate>
@@ -613,6 +613,6 @@
 	<round no="2">
 	 <cards type="Flop" player="">C3 C6 D3</cards><action no="17" player="Player11" type="4" sum="$0" cards=""/><action no="22" player="Player11" type="0" sum="$0" cards=""/><action no="18" player="Player2" type="4" sum="$0" cards=""/><action no="23" player="Player2" type="0" sum="$0" cards=""/><action no="19" player="Player4" type="4" sum="$0" cards=""/><action no="24" player="Player4" type="0" sum="$0" cards=""/><action no="20" player="Player5" type="5" sum="$0.74" cards=""/><action no="25" player="Player5" type="0" sum="$0" cards=""/><action no="21" player="Player6" type="23" sum="$2.96" cards=""/>
 	</round>
-	
-	</game>  
+
+	</game>
 	</session>

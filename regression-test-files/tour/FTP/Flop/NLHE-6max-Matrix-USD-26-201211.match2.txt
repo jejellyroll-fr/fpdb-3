@@ -1281,5 +1281,3 @@ Total pot 1,560 | Rake 0
 Board: [Jd Ah Kd 6c 3h]
 Seat 2: Player0 (small blind) showed [Td Qd] and won (1,560) with a straight, Ace high
 Seat 5: Hero (big blind) showed [As 2s] and lost with a pair of Aces
-
-

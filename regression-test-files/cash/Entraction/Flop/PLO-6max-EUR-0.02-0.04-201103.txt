@@ -14,33 +14,33 @@ Big Blind:                  Player1     (0.04)
 
 Hero was dealt:         5d - 9h - 4d - Kh
 
-Hero                        Fold        
+Hero                        Fold
 Player2                     Raise       (0.11)
 Player3                     Call        (0.11)
-Player4                     Fold        
+Player4                     Fold
 Player0                     Call        (0.09)
 Player1                     Call        (0.07)
 
 Flop                        3d - Ah - 8h
 
-Player0                     Check       
-Player1                     Check       
-Player2                     Check       
-Player3                     Check       
+Player0                     Check
+Player1                     Check
+Player2                     Check
+Player3                     Check
 
 Turn                        3d - Ah - 8h - Jd
 
-Player0                     Check       
-Player1                     Check       
-Player2                     Check       
-Player3                     Check       
+Player0                     Check
+Player1                     Check
+Player2                     Check
+Player3                     Check
 
 River                       3d - Ah - 8h - Jd - 6s
 
-Player0                     Check       
-Player1                     Check       
-Player2                     Check       
-Player3                     Check       
+Player0                     Check
+Player1                     Check
+Player2                     Check
+Player3                     Check
 
 Player0 shows:              Qc - Qs - 4h - 7d (a pair of Queens)
 
@@ -53,4 +53,3 @@ Player3 wins:               EUR 0.42 (with two pairs, Sixes and Threes)
 Rake:                       EUR 0.02
 
 Game ended 2011-03-21 17:10:04 GMT
-

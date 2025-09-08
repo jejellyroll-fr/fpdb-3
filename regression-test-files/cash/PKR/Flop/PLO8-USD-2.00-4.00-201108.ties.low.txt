@@ -35,13 +35,13 @@ Player0 calls $42
 Pot sizes: $140
 Taking Rake of $1 from pot 1
 Hero shows [9 d][5 d][7 h][3 s]
-Hero has Straight, 5 high 
+Hero has Straight, 5 high
 Hero has low hand: A2345
 Player0 shows [A h][K d][7 d][5 h]
-Player0 has Straight, 5 high 
+Player0 has Straight, 5 high
 Player0 has low hand: A2345
-Hero ties, and wins $34.75 with high hand: Straight, 5 high 
-Player0 ties, and wins $34.75 with high hand: Straight, 5 high 
+Hero ties, and wins $34.75 with high hand: Straight, 5 high
+Player0 ties, and wins $34.75 with high hand: Straight, 5 high
 Hero ties $34.75 with low hand: A2345
 Player0 ties $34.75 with low hand: A2345
 Seat 1: Hero - $401.50

@@ -519,6 +519,3 @@ Player8: Shows [7h Ac]
 Player6: Shows [Th As]
 Player6: wins $450.00
 Player6: wins $2,550.00
-
-
-

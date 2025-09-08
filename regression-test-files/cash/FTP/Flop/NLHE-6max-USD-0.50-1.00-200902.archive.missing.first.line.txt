@@ -124,4 +124,3 @@ Seat 2: Player1 showed [6h Th] and lost with a pair of Tens
 Seat 3: Player5 is sitting out
 Seat 4: Player3 (button) didn't bet (folded)
 Seat 5: Hero (small blind) folded before the Flop
-

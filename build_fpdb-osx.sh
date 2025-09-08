@@ -62,6 +62,7 @@ FILES=(
     "GGPokerToFpdb.py"
     "GuiAutoImport.py"
     "GuiBulkImport.py"
+    "GuiConfigObserver.py"
     "GuiGraphViewer.py"
     "GuiHandViewer.py"
     "GuiLogView.py"
@@ -69,6 +70,7 @@ FILES=(
     "GuiReplayer.py"
     "GuiRingPlayerStats.py"
     "GuiSessionViewer.py"
+    "GuiTourHandViewer.py"
     "GuiTourneyGraphViewer.py"
     "GuiTourneyPlayerStats.py"
     "Hand.py"
@@ -82,7 +84,6 @@ FILES=(
     "HUD_config.xml.example"
     "HUD_main.pyw"
     "IdentifySite.py"
-    "importer_cli.py"
     "Importer.py"
     "ImprovedErrorHandler.py"
     "interlocks.py"
@@ -123,6 +124,8 @@ FILES=(
     "PopupIcons.py"
     "PopupThemes.py"
     "SmartHudManager.py"
+    "ThemeCreatorDialog.py"
+    "ThemeManager.py"
 )
 
 FOLDERS=(

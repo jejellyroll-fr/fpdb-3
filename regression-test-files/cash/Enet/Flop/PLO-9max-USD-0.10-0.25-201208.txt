@@ -1,5 +1,5 @@
-Game #12056513: Omaha (€0,10/€0,25) - 21:50:56 23.8.2012 - %6 
-Table 'Reunion 1 - Pot Limit' 9-max Seat #4 is the button 
+Game #12056513: Omaha (€0,10/€0,25) - 21:50:56 23.8.2012 - %6
+Table 'Reunion 1 - Pot Limit' 9-max Seat #4 is the button
 Seat 1: Player0 (€72,89 in chips)
 Seat 2: Player1 (€52,29 in chips)
 Seat 3: Player2 (€122,17 in chips)
@@ -34,9 +34,9 @@ Player4: shows [Jd8sAd2s] (Straight, Fives high)
 Player4: collected (€12,74) from pot
 Player5: shows [3sKs8cAh] (Straight, Fives high)
 Player5: collected (€12,74) from pot
-*** SUMMARY *** 
-Total pot €0 | Rake €1,62 
-Board [4s2d3h5hQc] 
+*** SUMMARY ***
+Total pot €0 | Rake €1,62
+Board [4s2d3h5hQc]
 Seat 1: Player0  folded
 Seat 2: Player1  folded
 Seat 3: Player2  folded

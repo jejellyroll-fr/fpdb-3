@@ -34,7 +34,9 @@ script = """
 
 # Execute AppleScript
 proc = subprocess.Popen(
-    ["osascript", "-e", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    ["osascript", "-e", script],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
 )
 output, error = proc.communicate()
 

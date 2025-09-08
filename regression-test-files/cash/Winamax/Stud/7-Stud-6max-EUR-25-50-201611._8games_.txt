@@ -1,5 +1,5 @@
 Winamax Poker - CashGame - HandId: #9250793-470-1478990787 - 7-Card Stud fixed limit (5€/25€/50€) - 2016/11/12 22:46:27 UTC
-Table: 'Pampelune' 6-max (real money) 
+Table: 'Pampelune' 6-max (real money)
 Seat 1: Hero (1749.22€)
 Seat 4: Player0 (426.06€)
 *** ANTE/BLINDS ***

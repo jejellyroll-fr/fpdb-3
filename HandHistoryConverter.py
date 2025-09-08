@@ -115,7 +115,9 @@ in_path   (default '-' = sys.stdin)
 
         self.status = True
 
-        self.parsedObjectType = "HH"  # default behaviour : parsing HH files, can be "Summary" if the parsing encounters a Summary File
+        self.parsedObjectType = (
+            "HH"  # default behaviour : parsing HH files, can be "Summary" if the parsing encounters a Summary File
+        )
 
         if autostart:
             self.start()
@@ -126,14 +128,12 @@ in_path   (default '-' = sys.stdin)
         return getattr(self, "site_id", None)
 
     def __str__(self) -> str:
-        return (
-            """
+        return """
 HandHistoryConverter: '{sitename}'
     filetype    '{filetype}'
     in_path     '{in_path}'
     out_path    '{out_path}'
     """.format(**locals())
-        )
 
     def start(self) -> None:
         """Process a hand at a time from the input specified by in_path."""
@@ -162,7 +162,10 @@ HandHistoryConverter: '{sitename}'
                     self.numPartial += 1
                     lastParsed = "partial"
                     error_info = self.error_handler.record_error(
-                        self.in_path, "partial", str(e), handText,
+                        self.in_path,
+                        "partial",
+                        str(e),
+                        handText,
                     )
                     self.parsing_issues.append(f"[PARTIAL] Hand starting with '{handText[:30]}...': {e}")
                     log.warning(f"partial {e}")
@@ -173,7 +176,10 @@ HandHistoryConverter: '{sitename}'
                     self.numErrors += 1
                     lastParsed = "error"
                     error_info = self.error_handler.record_error(
-                        self.in_path, "error", str(e), handText,
+                        self.in_path,
+                        "error",
+                        str(e),
+                        handText,
                     )
                     self.parsing_issues.append(f"[ERROR] Hand starting with '{handText[:30]}...': {e}")
                     log.exception(f"FpdbParseError for file '{self.in_path}'")
@@ -184,12 +190,18 @@ HandHistoryConverter: '{sitename}'
                 should_reset = False
                 if lastParsed == "partial":
                     error_info = self.error_handler.record_error(
-                        self.in_path, "partial", "Partial hand detected", handsList[-1],
+                        self.in_path,
+                        "partial",
+                        "Partial hand detected",
+                        handsList[-1],
                     )
                     should_reset = self.error_handler.should_reset_file_position(self.in_path, error_info)
                 elif lastParsed == "error":
                     error_info = self.error_handler.record_error(
-                        self.in_path, "error", "Parse error detected", handsList[-1],
+                        self.in_path,
+                        "error",
+                        "Parse error detected",
+                        handsList[-1],
                     )
                     should_reset = self.error_handler.should_reset_file_position(self.in_path, error_info)
 
@@ -273,7 +285,8 @@ HandHistoryConverter: '{sitename}'
 
         if self.copyGameHeader:
             gametype = self.parseHeader(
-                handText, self.whole_file.replace("\r\n", "\n").replace("\xa0", " "),
+                handText,
+                self.whole_file.replace("\r\n", "\n").replace("\xa0", " "),
             )
         else:
             gametype = self.determineGameType(handText)
@@ -309,15 +322,27 @@ HandHistoryConverter: '{sitename}'
         if game_details in self.readSupportedGames():
             if gametype["base"] == "hold":
                 hand = Hand.HoldemOmahaHand(
-                    self.config, self, self.sitename, gametype, handText,
+                    self.config,
+                    self,
+                    self.sitename,
+                    gametype,
+                    handText,
                 )
             elif gametype["base"] == "stud":
                 hand = Hand.StudHand(
-                    self.config, self, self.sitename, gametype, handText,
+                    self.config,
+                    self,
+                    self.sitename,
+                    gametype,
+                    handText,
                 )
             elif gametype["base"] == "draw":
                 hand = Hand.DrawHand(
-                    self.config, self, self.sitename, gametype, handText,
+                    self.config,
+                    self,
+                    self.sitename,
+                    gametype,
+                    handText,
                 )
         else:
             log.error(f"{self.sitename} Unsupported game type: {gametype}")
@@ -539,9 +564,7 @@ or None if we fail to get the info """
         if hand.totalcollected > hand.totalpot:
             log.debug("collected pot>total pot")
         if hand.rake is None:
-            hand.rake = (
-                hand.totalpot - hand.totalcollected
-            )  #  * Decimal('0.05') # probably not quite right
+            hand.rake = hand.totalpot - hand.totalcollected  #  * Decimal('0.05') # probably not quite right
         if self.site_id == 9 and hand.gametype["type"] == "tour":
             round = -5  # round up to 10
         elif hand.gametype["type"] == "tour":
@@ -551,18 +574,9 @@ or None if we fail to get the info """
         if self.site_id == 15 and hand.totalcollected > hand.totalpot:
             hand.rake = old_div(hand.totalpot, 10)
             log.debug(hand.rake)
-        if (
-            hand.rake < 0
-            and (not hand.roundPenny or hand.rake < round)
-            and not hand.cashedOut
-        ):
+        if hand.rake < 0 and (not hand.roundPenny or hand.rake < round) and not hand.cashedOut:
             if self.site_id == 28 and (
-                (
-                    hand.rake
-                    + Decimal(str(hand.sb))
-                    - (0 if hand.rakes.get("rake") is None else hand.rakes["rake"])
-                )
-                == 0
+                (hand.rake + Decimal(str(hand.sb)) - (0 if hand.rakes.get("rake") is None else hand.rakes["rake"])) == 0
                 or (
                     hand.rake
                     + Decimal(str(hand.sb))
@@ -817,8 +831,8 @@ or None if we fail to get the info """
             givenTZ = timezone(givenTimezone)
         else:
             timezone_lookup = {
-                pytz.timezone(x).localize(datetime.datetime.now()).tzname(): x
-                    for x in pytz.all_timezones}
+                pytz.timezone(x).localize(datetime.datetime.now()).tzname(): x for x in pytz.all_timezones
+            }
             if givenTimezone in timezone_lookup:
                 givenTZ = timezone(timezone_lookup[givenTimezone])
 
@@ -840,9 +854,7 @@ or None if we fail to get the info """
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
         """Returns string to search in windows titles."""
         if type == "tour":
-            return (
-                re.escape(str(tournament)) + ".+\\Table " + re.escape(str(table_number))
-            )
+            return re.escape(str(tournament)) + ".+\\Table " + re.escape(str(table_number))
         return re.escape(table_name)
 
     @staticmethod

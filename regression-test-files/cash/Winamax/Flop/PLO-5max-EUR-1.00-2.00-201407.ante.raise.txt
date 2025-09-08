@@ -10,7 +10,7 @@ Player3 raises 1€ to 3€
 Player3 posts small blind 1€
 Hero posts big blind 2€
 Dealt to Hero [2h Tc 5d 5c]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player2 calls 2€
 Player3 checks
 Player0 calls 2€
@@ -51,7 +51,7 @@ Player3 raises 1€ to 3€
 Player3 posts small blind 1€
 Hero posts big blind 2€
 Dealt to Hero [Ac Qs Jd Kc]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player2 folds
 Player3 checks
 Player0 folds
@@ -62,4 +62,3 @@ Hero collected 12€ from pot
 *** SUMMARY ***
 Total pot 12€ | No rake
 Seat 3: Hero (big blind) won 12€
-

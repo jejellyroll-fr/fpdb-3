@@ -10,7 +10,3 @@ Player0 posts small blind [$5]
 Player1 folds
 ** Summary **
 Player0 collected [ $5 ]
-
-
-
-

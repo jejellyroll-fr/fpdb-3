@@ -36,4 +36,3 @@ Hero folds
 Player2 folds
 Player7 does not show cards.
 Player7 wins $0.28 USD
-

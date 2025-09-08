@@ -124,7 +124,8 @@ class iPokerSummary(TourneySummary):  # noqa: N801
     )
 
     re_buyin = re.compile(
-        r"""(?P<BUYIN>[{NUM}]+)""".format(**substitutions), re.MULTILINE | re.VERBOSE,
+        r"""(?P<BUYIN>[{NUM}]+)""".format(**substitutions),
+        re.MULTILINE | re.VERBOSE,
     )
     re_tour_no = re.compile(r"(?P<TOURNO>\d+)$", re.MULTILINE)
     re_total_buyin = re.compile(
@@ -144,7 +145,8 @@ class iPokerSummary(TourneySummary):  # noqa: N801
         re.MULTILINE,
     )
     re_place = re.compile(
-        r"""(<place>(?P<PLACE>.+?)</place>)""".format(), re.VERBOSE,
+        r"""(<place>(?P<PLACE>.+?)</place>)""".format(),
+        re.VERBOSE,
     )
     re_fpp = re.compile(r"Pts\s")
 
@@ -183,11 +185,11 @@ class iPokerSummary(TourneySummary):  # noqa: N801
                 self.info["base"], self.info["category"] = ("hold", "5_omahahi")
                 log.debug("No CATEGORY found, defaulting to hold/5_omahahi.")
             else:
-                self.gametype["base"], self.gametype["category"] = self.games[
-                    mg["CATEGORY"]
-                ]
+                self.gametype["base"], self.gametype["category"] = self.games[mg["CATEGORY"]]
                 log.debug(
-                    "Set base/category to: %s/%s", self.gametype["base"], self.gametype["category"],
+                    "Set base/category to: %s/%s",
+                    self.gametype["base"],
+                    self.gametype["category"],
                 )
 
         if "LIMIT" in mg:
@@ -200,24 +202,22 @@ class iPokerSummary(TourneySummary):  # noqa: N801
             sec = m2.group("S") or "00"
             datetimestr = f"{m2.group('Y')}/{month}/{m2.group('D')} {m2.group('H')}:{m2.group('MIN')}:{sec}"
             self.startTime = datetime.datetime.strptime(
-                datetimestr, "%Y/%m/%d %H:%M:%S",
+                datetimestr,
+                "%Y/%m/%d %H:%M:%S",
             ).replace(tzinfo=datetime.timezone.utc)
             log.debug("Parsed startTime with re_date_time1: %s", self.startTime)
         else:
             try:
                 self.startTime = datetime.datetime.strptime(
-                    mg["DATETIME"], "%Y-%m-%d %H:%M:%S",
+                    mg["DATETIME"],
+                    "%Y-%m-%d %H:%M:%S",
                 ).replace(tzinfo=datetime.timezone.utc)
                 log.debug("Parsed startTime with default format: %s", self.startTime)
             except ValueError:
                 log.debug("Default format failed, trying alternative date formats.")
                 date_match = self.re_date_time2.search(mg["DATETIME"])
                 if date_match is not None:
-                    datestr = (
-                        "%d/%m/%Y %H:%M:%S"
-                        if "/" in mg["DATETIME"]
-                        else "%d.%m.%Y %H:%M:%S"
-                    )
+                    datestr = "%d/%m/%Y %H:%M:%S" if "/" in mg["DATETIME"] else "%d.%m.%Y %H:%M:%S"
                     if date_match.group("S") is None:
                         datestr = "%d/%m/%Y %H:%M"
                 else:
@@ -229,7 +229,8 @@ class iPokerSummary(TourneySummary):  # noqa: N801
                     if date_match1.group("S") is None:
                         datestr = "%Y/%m/%d %H:%M"
                 self.startTime = datetime.datetime.strptime(
-                    mg["DATETIME"], datestr,
+                    mg["DATETIME"],
+                    datestr,
                 ).replace(tzinfo=datetime.timezone.utc)
                 log.debug("Parsed startTime with fallback format: %s", self.startTime)
 
@@ -265,10 +266,13 @@ class iPokerSummary(TourneySummary):  # noqa: N801
             min_matches = 6  # Keep at 6 since REWARDDRAWN is optional
             if len(matches) < min_matches:
                 log.error(
-                    "Not enough matches for tournament info: found %d, need at least %d.", len(matches), min_matches,
+                    "Not enough matches for tournament info: found %d, need at least %d.",
+                    len(matches),
+                    min_matches,
                 )
                 log.debug(
-                    "Summary text snippet for debugging:\n%s", self.summaryText[:500],
+                    "Summary text snippet for debugging:\n%s",
+                    self.summaryText[:500],
                 )
                 msg = "Not enough matches for tournament info."
                 raise FpdbParseError(msg)
@@ -325,7 +329,8 @@ class iPokerSummary(TourneySummary):  # noqa: N801
                         mg2["BIAMT"] = stripped_tot
                         mg2["BIRAKE"] = "0"
                         log.debug(
-                            "Converted Token buy-in: BIAMT=%s and set BIRAKE=0.", mg2["BIAMT"],
+                            "Converted Token buy-in: BIAMT=%s and set BIRAKE=0.",
+                            mg2["BIAMT"],
                         )
                     else:
                         log.debug(
@@ -357,14 +362,16 @@ class iPokerSummary(TourneySummary):  # noqa: N801
                     self.buyin = int(100 * self.convert_to_decimal(mg2["BIAMT"]))
                 except (ValueError, TypeError):
                     log.debug(
-                        "Failed to parse BIAMT='%s', setting buyin=0.", mg2["BIAMT"],
+                        "Failed to parse BIAMT='%s', setting buyin=0.",
+                        mg2["BIAMT"],
                     )
                     self.buyin = 0
                 try:
                     self.fee = int(100 * self.convert_to_decimal(mg2["BIRAKE"]))
                 except (ValueError, TypeError):
                     log.debug(
-                        "Failed to parse BIRAKE='%s', setting fee=0.", mg2["BIRAKE"],
+                        "Failed to parse BIRAKE='%s', setting fee=0.",
+                        mg2["BIRAKE"],
                     )
                     self.fee = 0
                 log.debug("Set buyin=%s, fee=%s", self.buyin, self.fee)
@@ -425,13 +432,21 @@ class iPokerSummary(TourneySummary):  # noqa: N801
                             if multiplier > 1:
                                 self.isLottery = True
                                 self.tourneyMultiplier = int(multiplier)
-                                log.info("Twister detected: lottery=%s, multiplier=%s (rewarddrawn=%s, buyin=%s)",
-                                         self.isLottery, self.tourneyMultiplier, rewarddrawn, buyin)
+                                log.info(
+                                    "Twister detected: lottery=%s, multiplier=%s (rewarddrawn=%s, buyin=%s)",
+                                    self.isLottery,
+                                    self.tourneyMultiplier,
+                                    rewarddrawn,
+                                    buyin,
+                                )
                             else:
                                 log.debug("Multiplier <= 1, not a lottery: %s", multiplier)
                         else:
-                            log.debug("Invalid amounts for multiplier calculation: rewarddrawn=%s, buyin=%s",
-                                     rewarddrawn, buyin)
+                            log.debug(
+                                "Invalid amounts for multiplier calculation: rewarddrawn=%s, buyin=%s",
+                                rewarddrawn,
+                                buyin,
+                            )
                     except (ValueError, TypeError, decimal.InvalidOperation) as e:
                         log.debug("Error calculating Twister multiplier: %s", e)
                 else:
@@ -477,12 +492,15 @@ class iPokerSummary(TourneySummary):  # noqa: N801
                 log.debug("Converted string '%s' to decimal %s", string, dec)
             except (ValueError, TypeError, decimal.InvalidOperation) as e:
                 log.debug(
-                    "Failed to convert '%s' to decimal: %s, defaulting to 0.", string, e,
+                    "Failed to convert '%s' to decimal: %s, defaulting to 0.",
+                    string,
+                    e,
                 )
                 dec = Decimal(0)
         else:
             log.debug(
-                "No numeric buyin match found in string '%s', defaulting to 0.", string,
+                "No numeric buyin match found in string '%s', defaulting to 0.",
+                string,
             )
             dec = Decimal(0)
         return dec

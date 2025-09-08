@@ -45,7 +45,7 @@ def importName(module_name: str, name: str) -> Any:
     except Exception:
         log.exception("Could not load hud module %s", module_name)
         return None
-    
+
     try:
         return getattr(module, name)
     except AttributeError:
@@ -116,7 +116,9 @@ class Hud:
         self.layout = copy.deepcopy(
             self.layout_set.layout[self.max],
         )  # deepcopy required here, because self.layout is used
-        log.debug(f"HUD layout created for {self.max}-max table. Positions: {[self.layout.location[i] for i in range(1, self.max + 1) if self.layout.location[i] is not None]}")
+        log.debug(
+            f"HUD layout created for {self.max}-max table. Positions: {[self.layout.location[i] for i in range(1, self.max + 1) if self.layout.location[i] is not None]}"
+        )
         # to propagate block moves from hud to mucked display
         # (needed because there is only 1 layout for all aux)
         #
@@ -171,8 +173,15 @@ class Hud:
         x_scale = 1.0 * self.table.width / self.layout.width
         y_scale = 1.0 * self.table.height / self.layout.height
 
-        log.info("HUD RESIZE - Table: %dx%d, Layout: %dx%d, Scale: %.2fx%.2f",
-                self.table.width, self.table.height, self.layout.width, self.layout.height, x_scale, y_scale)
+        log.info(
+            "HUD RESIZE - Table: %dx%d, Layout: %dx%d, Scale: %.2fx%.2f",
+            self.table.width,
+            self.table.height,
+            self.layout.width,
+            self.layout.height,
+            x_scale,
+            y_scale,
+        )
 
         for i in list(range(1, self.max + 1)):
             if self.layout.location[i]:
@@ -181,20 +190,31 @@ class Hud:
                     (int(self.layout.location[i][0] * x_scale)),
                     (int(self.layout.location[i][1] * y_scale)),
                 )
-                log.debug("Seat %d layout scaled: (%d,%d) -> (%d,%d)",
-                        i, old_pos[0], old_pos[1], self.layout.location[i][0], self.layout.location[i][1])
+                log.debug(
+                    "Seat %d layout scaled: (%d,%d) -> (%d,%d)",
+                    i,
+                    old_pos[0],
+                    old_pos[1],
+                    self.layout.location[i][0],
+                    self.layout.location[i][1],
+                )
 
         old_common = self.layout.common
         self.layout.common = (
             int(self.layout.common[0] * x_scale),
             int(self.layout.common[1] * y_scale),
         )
-        log.info("Common layout scaled: (%d,%d) -> (%d,%d)",
-                old_common[0], old_common[1], self.layout.common[0], self.layout.common[1])
+        log.info(
+            "Common layout scaled: (%d,%d) -> (%d,%d)",
+            old_common[0],
+            old_common[1],
+            self.layout.common[0],
+            self.layout.common[1],
+        )
 
         self.layout.width = self.table.width
         self.layout.height = self.table.height
-        
+
         # Call resize_windows on all aux windows
         for aux in self.aux_windows:
             try:
@@ -239,7 +259,7 @@ class Hud:
         self.db_hud_connection.connection.rollback()
 
         log.info("Creating hud from hand %d", hand)
-        
+
         # Call create on all aux windows
         for aux in self.aux_windows:
             try:
@@ -254,10 +274,10 @@ class Hud:
             self.hand_instance = Hand.hand_factory(hand, config, self.db_hud_connection)
             log.info("hud update after hand_factory")
             self.db_hud_connection.connection.rollback()
-        
+
         # Get updated cards
         self.cards = self.get_cards(hand)
-        
+
         # Call update on all aux windows
         for aux in self.aux_windows:
             try:
@@ -269,7 +289,7 @@ class Hud:
         """Get the cards for a given hand."""
         if self.db_hud_connection is None:
             return {}
-        
+
         try:
             cards = self.db_hud_connection.get_cards(hand)
             if self.poker_game in ["holdem", "omahahi", "omahahilo"]:

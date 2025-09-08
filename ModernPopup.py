@@ -448,9 +448,7 @@ class ModernSubmenu(Popup):
 
     def mouseMoveEvent(self, event) -> None:
         """Handle mouse move for dragging."""
-        if (event.buttons() == Qt.LeftButton and
-            self.drag_start_position is not None):
-
+        if event.buttons() == Qt.LeftButton and self.drag_start_position is not None:
             # Calculate drag distance
             diff = event.globalPos() - self.drag_start_position
 

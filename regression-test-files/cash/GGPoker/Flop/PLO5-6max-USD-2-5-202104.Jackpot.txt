@@ -8,10 +8,10 @@ Seat 6: Hero ($175.08 in chips)
 90ab8144: posts small blind $2
 Hero: posts big blind $5
 *** HOLE CARDS ***
-Dealt to 3a59c1a9 
-Dealt to 410b1ede 
-Dealt to c7d4f4d8 
-Dealt to 90ab8144 
+Dealt to 3a59c1a9
+Dealt to 410b1ede
+Dealt to c7d4f4d8
+Dealt to 90ab8144
 Dealt to Hero [4d 9d 5s 4s 9c]
 3a59c1a9: raises $10 to $15
 410b1ede: raises $37 to $52

@@ -2,6 +2,7 @@
 """Test script for the iPoker parser."""
 
 import logging
+
 import pytest
 
 from PokerTrackerToFpdb import PokerTracker
@@ -11,9 +12,7 @@ logging.basicConfig(level=logging.DEBUG, format="%(name)s - %(levelname)s - %(me
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.parametrize("file_path", [
-    "regression-test-files/cash/iPoker/Flop/6+Holdem-EUR-0.25-0.50-201702.txt"
-])
+@pytest.mark.parametrize("file_path", ["regression-test-files/cash/iPoker/Flop/6+Holdem-EUR-0.25-0.50-201702.txt"])
 def test_ipoker_file(file_path) -> bool | None:
     """Test one iPoker file."""
     try:
@@ -24,7 +23,6 @@ def test_ipoker_file(file_path) -> bool | None:
         except UnicodeDecodeError:
             with open(file_path, encoding="cp1252") as f:
                 content = f.read()
-
 
         # Create the parser
         from Configuration import Config
@@ -54,5 +52,3 @@ def test_ipoker_file(file_path) -> bool | None:
 
         traceback.print_exc()
         return False
-
-

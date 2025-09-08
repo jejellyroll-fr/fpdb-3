@@ -1,0 +1,43 @@
+PokerStars Hand #255867983097:  Hold'em No Limit ($0.02/$0.05 USD) - 2025/04/24 17:21:34 CET [2025/04/24 11:21:34 ET]
+Table 'Olga' 6-max Seat #5 is the button
+Seat 1: Player1 ($6.02 in chips)
+Seat 2: Player2 ($5 in chips)
+Seat 3: Player3 ($8.84 in chips)
+Seat 4: Player4 ($2.98 in chips)
+Seat 5: Player5 ($2.83 in chips)
+Seat 6: Hero ($5.77 in chips)
+Hero: posts small blind $0.02
+Player1: posts big blind $0.05
+*** HOLE CARDS ***
+Dealt to Hero [As Kc]
+Player2: folds
+Player3: raises $0.10 to $0.15
+Player4: folds
+Player5: calls $0.15
+Hero: calls $0.13
+Player1: folds
+*** FLOP *** [Kh 7c 5d]
+Hero: checks
+Player3: checks
+Player5: checks
+*** TURN *** [Kh 7c 5d] [Ad]
+Hero: bets $0.48
+Player3: folds
+Player5: calls $0.48
+*** RIVER *** [Kh 7c 5d Ad] [3c]
+Hero: bets $2.54
+Player5: calls $2.20 and is all-in
+Uncalled bet ($0.34) returned to Hero
+*** SHOW DOWN ***
+Hero: shows [As Kc] (two pair, Aces and Kings)
+Player5: shows [Ac 9c] (a pair of Aces)
+Hero collected $5.50 from pot
+*** SUMMARY ***
+Total pot $5.86 | Rake $0.36
+Board [Kh 7c 5d Ad 3c]
+Seat 1: Player1 (big blind) folded before Flop
+Seat 2: Player2 folded before Flop (didn't bet)
+Seat 3: Player3 folded on the Turn
+Seat 4: Player4 folded before Flop (didn't bet)
+Seat 5: Player5 (button) showed [Ac 9c] and lost with a pair of Aces
+Seat 6: Hero (small blind) showed [As Kc] and won ($5.50) with two pair, Aces and Kings

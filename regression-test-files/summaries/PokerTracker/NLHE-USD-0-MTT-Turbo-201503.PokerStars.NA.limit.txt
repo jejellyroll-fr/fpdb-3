@@ -6,7 +6,7 @@ Started: 2015/03/29 17:11:17
 Finished: 2015/03/29 17:11:17
 Buyin: $0.00
 Fee: $0.00
-Table Type: MTT Turbo 
+Table Type: MTT Turbo
 Tourney Type: N/A
 Players: 1933
 

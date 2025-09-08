@@ -101,7 +101,7 @@
 
     hero_stat_days :
         - a numeric value
-        - if hero_stat_range is set to 'T', this value tells how many days are 
+        - if hero_stat_range is set to 'T', this value tells how many days are
           included in the stat calculation
         - defaults to 30
         - value not used by default as it depends on hero_stat_range setting
@@ -122,7 +122,7 @@
         - if value is M, stats for blind levels are combined if the higher level
           is less than or equal to M times the lower blind level
         - defaults to 1, meaning only stats from current blind level are included
-        - e.g. if set to 3 and current big blind is 50, stats for blind levels from 
+        - e.g. if set to 3 and current big blind is 50, stats for blind levels from
           16.7 (50 divided by 3) to big blind of 150 (50 times 3) are included
 -->
     <hud_ui
@@ -309,7 +309,7 @@ Left-Drag to Move"
 	        	<location seat="1" x="651" y="288"> </location>
 	        	<location seat="2" x="10" y="288"> </location>
 	        </layout>
-	      
+
 	    </site>
 
         <site enabled="True"
@@ -929,7 +929,7 @@ Left-Drag to Move"
     </hhcs>
 
     <raw_hands save="none" compression="none"/>
-    
+
     <raw_tourneys save="none" compression="none"/>
 
     <supported_databases>
@@ -937,5 +937,5 @@ Left-Drag to Move"
         <database db_ip="localhost" db_server="sqlite" db_name="fpdb.db3" db_user="fpdb" db_pass="fpdb"/>
     </supported_databases>
 </FreePokerToolsConfig>
-<!-- IMPORTANT: Please note that fpdb stores your email password in clear text. 
+<!-- IMPORTANT: Please note that fpdb stores your email password in clear text.
 So do not post a config containing a password on the Internet or anywhere else without removing the password! -->

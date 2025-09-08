@@ -40,5 +40,3 @@ zip -r ../fpdb_$1.zip pyfpdb
 # now make the fpdb_$1.tar.bz2 file for linux
 echo "*** making tar.bz2 file"
 tar --recursion -cjf ../fpdb_$1.tar.bz2 *
-
-

@@ -3,7 +3,7 @@ aux to write fpdb data to player notes on Full Tilt
 
 by Gimick 30th Dec 2010
 
-RushNotesAux - auxillary processed attached to the full tilt hud 
+RushNotesAux - auxillary processed attached to the full tilt hud
                 builds up fpdb notes "queue" for each villain met while the autoimport is running
                 uses HUD aggregation stats to do this
 
@@ -15,17 +15,17 @@ Important info:
 The Merge process can only be run when ftp client is shutdown
  - otherwise ftp overwrites the xml on exit.
 
-Existing ftp notes _SHOULD_ be preserved, but this isn't guaranteed, 
+Existing ftp notes _SHOULD_ be preserved, but this isn't guaranteed,
  you have been warned!
- 
-Existing colour codings should be preserved, 
+
+Existing colour codings should be preserved,
  this process does not change or set colourcodings.
 
 Copies of the live ftp notes file should be preserved everytime
   RushNotesAux (i.e. the HUD is started).  If you play at different
   rush tables, the backup will be created several times.
 
-The AW is hard-coded with just the table names of Micro Rush Poker, 
+The AW is hard-coded with just the table names of Micro Rush Poker,
   and should ignore all other hands.
 
 What might not work?
@@ -35,11 +35,11 @@ This should work with windows sourcecode version, but will not work with the exe
 Hasn't been tested for co-existance with other sites, feedback welcome.
 Whenever FTP change their notes file format, this will all break rather spectacularly,
     you have been warned!
-    
+
 Getting started:
 ---------------
 
-1. Set the Hero aggregation to alltime.  hero_stat_range="A" 
+1. Set the Hero aggregation to alltime.  hero_stat_range="A"
  This overcomes a sqlite "bug" which has nothing to do with auxillary windows
   not doing this will slow processing down to about 1 hand per minute.
 
@@ -77,14 +77,14 @@ If you are happy with it, replace the existing (myname.xml file) and delete the 
 
 
 Since the updates aren't real time, it would be ok to play the rush
-    session with fpdb inactive, but before quitting any of the tables, 
+    session with fpdb inactive, but before quitting any of the tables,
     start the HUD and wait for it to catch-up processing all the hands played.
 
 
 Summary
 -------
 
-This is very rough and ready, but it does what I set-out to achieve.  
+This is very rough and ready, but it does what I set-out to achieve.
 
 All feedback welcome, and if this is useful as a basis for general notes
  processing in future, then thats great.
@@ -98,21 +98,21 @@ Much more information below:
 Background
 ----------
 
-When playing rush poker, some sort of rudimentary HUD would answer simple questions 
-like "is this allin overbet being made by a nit, or a maniac".  Although some 
+When playing rush poker, some sort of rudimentary HUD would answer simple questions
+like "is this allin overbet being made by a nit, or a maniac".  Although some
 notes may have been made previously, some statistics would help to backup the decision.
 
-Currently fpdb cannot support rush because the HUD is always 1 hand or more 
+Currently fpdb cannot support rush because the HUD is always 1 hand or more
 behind the current action.
 
-The only way to do this at the moment is to switch to GuiPlayerStats and make a quick 
-enquiry by player name.  However, this effectively times you out of all other 
+The only way to do this at the moment is to switch to GuiPlayerStats and make a quick
+enquiry by player name.  However, this effectively times you out of all other
 action if multitabling.
 
 Full Tilt situation
 -------------------
 
-Full Tilt notes are stored in xml format ("hero.xml").  Previously these could 
+Full Tilt notes are stored in xml format ("hero.xml").  Previously these could
 be updated while the game was in progress, however, FullTilt now cache the
 notes and write them out when the application exits.  This makes it impossible
 to use the notes as a real-time HUD, and therefore real-time huds are now
@@ -128,7 +128,7 @@ Preamble
 --------
 
 Note that this implementation was written purely to be "good enough" to work
-for the author, and is not intended as package or production quality.  It 
+for the author, and is not intended as package or production quality.  It
 is contributed as a starting point for others, or for experimental use.
 
 Thanks to Ray Barker who gave a great deal of help throughout.
@@ -141,7 +141,7 @@ RushNotesAux is an fpdb auxilliary process, and is called for every hand
 processed by autoimport.  Each villain has a note prepared based on the current
 fpdb data, and this note (in XML format) is stored in a queue file.
 
-Auxilliary windows were chosen because 
+Auxilliary windows were chosen because
 a) the author has limited fpdb and programming skill
 b) the auxillary windows handler is well documented and supported
 c) any code created has access to the full range of stats with little or no extra work
@@ -151,12 +151,12 @@ d) runs within the HUD, so the aggregation parameters are already available
 Limitations
 -----------
 
-The notes are only regenerated if a hand is played against the villain.  The 
+The notes are only regenerated if a hand is played against the villain.  The
 process does not "bulk load" notes based upon all the player stats in FPDB.
 
 It is hoped that due to the relatively large hand volume and relatively small
  player pools, this limitation will be largely overcome after a few sessions
-although there will obviously be a number of players with no fpdb note. 
+although there will obviously be a number of players with no fpdb note.
 
 The aggregation parameters used for the notes are based upon the HUD parameters.
  (with the exception of the hand-ranges, which uses its' own criteria (see source)
@@ -171,8 +171,8 @@ probably happily update notes of all cash and tournament players.
 Process overview
 ----------------
 
-1/ The HUD process is started.  
-1.1/ when the first hand is received, a queue file is created if not already there, and 
+1/ The HUD process is started.
+1.1/ when the first hand is received, a queue file is created if not already there, and
 a copy of the current live xml note file is created as a security backup.
 2/ For every hand played, the auxillary window is called
 3/ Based upon the players in the hand, fpdb will be interrogated
@@ -183,7 +183,7 @@ and key stats are formatted in xml-style and written out to a holding file.
 6/ A process is begun to "merge" the holding file into the existing player notes
 7/ A new "merged" file is created.  The process attempts to preserve any
 existing notes, but this cannot be guaranteed.
-8/ The user can review this merged file, and if they are happy, 
+8/ The user can review this merged file, and if they are happy,
 they replace the existing note file.
 9/ Note that this process never updates the live notes file in situ, but
 there is a risk that something goes wrong, and that existing notes could be destroyed.

@@ -1,4 +1,4 @@
-from Card import StartCardRank, decodeStartHandValue, twoStartCards, encodeCard, valueSuitFromCard, cardFromValueSuit
+from Card import StartCardRank, cardFromValueSuit, decodeStartHandValue, encodeCard, twoStartCards, valueSuitFromCard
 
 
 def test_twoStartCards() -> None:
@@ -64,19 +64,19 @@ def test_encodeCard() -> None:
     # Test hearts
     assert encodeCard("2h") == 1
     assert encodeCard("Ah") == 13
-    
-    # Test diamonds  
+
+    # Test diamonds
     assert encodeCard("2d") == 14
     assert encodeCard("Ad") == 26
-    
+
     # Test clubs
     assert encodeCard("2c") == 27
     assert encodeCard("Ac") == 39
-    
+
     # Test spades
     assert encodeCard("2s") == 40
     assert encodeCard("As") == 52
-    
+
     # Test invalid
     assert encodeCard("Xx") == 0
     assert encodeCard("  ") == 0
@@ -89,7 +89,7 @@ def test_valueSuitFromCard() -> None:
     assert valueSuitFromCard(13) == "Ah"
     assert valueSuitFromCard(26) == "Ad"
     assert valueSuitFromCard(52) == "As"
-    
+
     # Test invalid cards
     assert valueSuitFromCard(0) == ""
     assert valueSuitFromCard(-1) == ""
@@ -103,6 +103,6 @@ def test_cardFromValueSuit() -> None:
     assert cardFromValueSuit(2, "d") == 14
     assert cardFromValueSuit(2, "c") == 27
     assert cardFromValueSuit(2, "s") == 40
-    
+
     # Test invalid suit
     assert cardFromValueSuit(10, "x") == 0

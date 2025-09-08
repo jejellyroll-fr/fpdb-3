@@ -659,7 +659,3 @@ Seat 4: Player3 folded on 3rd St.
 Seat 5: Player8 folded on 3rd St.
 Seat 7: Player6 folded on 3rd St.
 Seat 8: Player7 folded on 6th St.
-
-
-
-

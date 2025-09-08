@@ -619,7 +619,7 @@ class ConfigurationManager:
                 log.debug(f"Captured HUD UI state: {len(self._last_saved_state['hud_ui'])} parameters")
         except Exception as e:
             log.warning("Error capturing HUD UI parameters: %s", e)
-            
+
         # Capture theme state
         try:
             if hasattr(self._config, "general"):
@@ -756,17 +756,17 @@ class ConfigurationManager:
                         log.debug(f"HUD UI change detected: {key}: {saved_value} -> {current_value}")
         except Exception as e:
             log.warning("Error comparing HUD UI parameters: %s", e)
-            
+
         # Compare theme parameters
         try:
             if hasattr(current_config, "general"):
                 current_general = current_config.general
                 saved_general = self._last_saved_state.get("general", {})
-                
+
                 # Compare qt_material_theme
                 current_qt_theme = current_general.get("qt_material_theme", "dark_purple.xml")
                 saved_qt_theme = saved_general.get("qt_material_theme", "dark_purple.xml")
-                
+
                 if current_qt_theme != saved_qt_theme:
                     changes.append(
                         ConfigChange(
@@ -777,11 +777,11 @@ class ConfigurationManager:
                         ),
                     )
                     log.debug(f"Qt material theme change detected: {saved_qt_theme} -> {current_qt_theme}")
-                
+
                 # Compare popup_theme
                 current_popup_theme = current_general.get("popup_theme", "material_dark")
                 saved_popup_theme = saved_general.get("popup_theme", "material_dark")
-                
+
                 if current_popup_theme != saved_popup_theme:
                     changes.append(
                         ConfigChange(
@@ -792,7 +792,7 @@ class ConfigurationManager:
                         ),
                     )
                     log.debug(f"Popup theme change detected: {saved_popup_theme} -> {current_popup_theme}")
-                    
+
         except Exception as e:
             log.warning("Error comparing theme parameters: %s", e)
 

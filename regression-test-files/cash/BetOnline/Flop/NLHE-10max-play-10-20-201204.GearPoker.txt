@@ -40,7 +40,7 @@ Seat 4: Player3 Folded before Flop
 Seat 5: Player4 Folded on the River
 Seat 6: Player5 Folded before Flop
 Seat 7: Player6 (Big Blind)  collected (90.00) from the Pot.
-Seat 8: Player7 (Small Blind) Seat 9: Player8 (Button) 
+Seat 8: Player7 (Small Blind) Seat 9: Player8 (Button)
 
 
 Gear Poker Game #1014850775: Hold'em - 2012-04-09 12:15:46
@@ -78,4 +78,3 @@ Seat 5: Player4 (Big Blind)  showed [JH 10D QS KC AS ] and won (1850.00)
 Seat 7: Player6 (Small Blind)  Folded before Flop
 Seat 8: Player7 (Button)  Folded before Flop
 Seat 9: Player8 Folded before Flop
-

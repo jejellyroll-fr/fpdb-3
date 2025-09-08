@@ -20,4 +20,3 @@ Main Pot: 654
 Board: [ 4d, 8c, 8s, 6d, Kd ]
 Player1 balance 654, bet 327, collected 654, net +327[ 8h, 3d ] [ three of a kind, eights -- Kd,8h,8c,8s,6d ]
 Hero balance 846, lost 327[ Ah, Ks ] [ two pairs, kings and eights -- Ah,Ks,Kd,8c,8s ]
-

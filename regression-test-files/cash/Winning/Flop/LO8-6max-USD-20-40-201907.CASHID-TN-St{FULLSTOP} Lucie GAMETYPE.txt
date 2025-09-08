@@ -31,4 +31,3 @@ Total pot $199.00 | Rake $0.96 | JP Fee $0.04
 Board [5d 4h As Js 2h]
 Seat 1: Hero (button) mucked [Kd 4c 9s 6s]
 Seat 4: Player0 (big blind) showed [Tc 4s 3h Qd] and won $199.00 with HI - a straight, Five high [5d 4s 3h 2h As] | LO - [5,4,3,2,1]
-

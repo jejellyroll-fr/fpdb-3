@@ -11,4 +11,3 @@
 		<event sequence="2" type="GAME_CANCELLED" timestamp="1297913362578"/>
 	</round>
 </game>
-

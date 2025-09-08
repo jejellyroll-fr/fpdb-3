@@ -56,6 +56,7 @@ log = get_logger("x_tables")
 
 class Table(Table_Window):
     """X11/Linux specific table window implementation."""
+
     def find_table_parameters(self) -> None:
         """Find table parameters using X11 properties."""
         #    This is called by __init__(). Find the poker table window of interest,
@@ -66,8 +67,12 @@ class Table(Table_Window):
 
         wins = (
             xconn.core.GetProperty(
-                delete=False, window=root, property=nclatom, type=winatom,
-                long_offset=0, long_length=(2**32) - 1,
+                delete=False,
+                window=root,
+                property=nclatom,
+                type=winatom,
+                long_offset=0,
+                long_length=(2**32) - 1,
             )
             .reply()
             .value.to_atoms()
@@ -77,8 +82,12 @@ class Table(Table_Window):
         for win in wins:
             w_title = (
                 xconn.core.GetProperty(
-                    delete=False, window=win, property=wnameatom, type=utf8atom,
-                    long_offset=0, long_length=(2**32) - 1,
+                    delete=False,
+                    window=win,
+                    property=wnameatom,
+                    type=utf8atom,
+                    long_offset=0,
+                    long_length=(2**32) - 1,
                 )
                 .reply()
                 .value.to_utf8()
@@ -101,10 +110,18 @@ class Table(Table_Window):
                 try:
                     geo = xconn.core.GetGeometry(self.number).reply()
                     absxy = xconn.core.TranslateCoordinates(
-                        self.number, root, geo.x, geo.y,
+                        self.number,
+                        root,
+                        geo.x,
+                        geo.y,
                     ).reply()
-                    log.info("Initial window geometry - X: %d, Y: %d, Width: %d, Height: %d",
-                            absxy.dst_x, absxy.dst_y, geo.width, geo.height)
+                    log.info(
+                        "Initial window geometry - X: %d, Y: %d, Width: %d, Height: %d",
+                        absxy.dst_x,
+                        absxy.dst_y,
+                        geo.width,
+                        geo.height,
+                    )
                 except xcffib.xproto.DrawableError:
                     log.exception("Failed to get initial geometry")
 
@@ -125,8 +142,12 @@ class Table(Table_Window):
 
         wins = (
             xconn.core.GetProperty(
-                delete=False, window=root, property=nclatom, type=winatom,
-                long_offset=0, long_length=(2**32) - 1,
+                delete=False,
+                window=root,
+                property=nclatom,
+                type=winatom,
+                long_offset=0,
+                long_length=(2**32) - 1,
             )
             .reply()
             .value.to_atoms()
@@ -139,7 +160,10 @@ class Table(Table_Window):
         try:
             geo = xconn.core.GetGeometry(self.number).reply()
             absxy = xconn.core.TranslateCoordinates(
-                self.number, root, geo.x, geo.y,
+                self.number,
+                root,
+                geo.x,
+                geo.y,
             ).reply()
         except xcffib.xproto.DrawableError:
             log.warning("DrawableError getting geometry for window %s - window may be destroyed", self.number)
@@ -151,16 +175,26 @@ class Table(Table_Window):
                 "width": geo.width,
                 "height": geo.height,
             }
-            log.info("CURRENT GEOMETRY for window %s: X=%d, Y=%d, Width=%d, Height=%d",
-                    self.number, geometry["x"], geometry["y"], geometry["width"], geometry["height"])
+            log.info(
+                "CURRENT GEOMETRY for window %s: X=%d, Y=%d, Width=%d, Height=%d",
+                self.number,
+                geometry["x"],
+                geometry["y"],
+                geometry["width"],
+                geometry["height"],
+            )
             return geometry
 
     def get_window_title(self) -> str:
         """Get window title string."""
         return (
             xconn.core.GetProperty(
-                delete=False, window=self.number, property=wnameatom, type=utf8atom,
-                long_offset=0, long_length=(2**32) - 1,
+                delete=False,
+                window=self.number,
+                property=wnameatom,
+                type=utf8atom,
+                long_offset=0,
+                long_length=(2**32) - 1,
             )
             .reply()
             .value.to_string()
@@ -193,5 +227,10 @@ class Table(Table_Window):
 
         # Log HUD window position after setup
         hud_geometry = window.geometry()
-        log.info("HUD FINAL POSITION: X=%d, Y=%d, Width=%d, Height=%d",
-                hud_geometry.x(), hud_geometry.y(), hud_geometry.width(), hud_geometry.height())
+        log.info(
+            "HUD FINAL POSITION: X=%d, Y=%d, Width=%d, Height=%d",
+            hud_geometry.x(),
+            hud_geometry.y(),
+            hud_geometry.width(),
+            hud_geometry.height(),
+        )

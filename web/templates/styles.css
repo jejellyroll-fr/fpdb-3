@@ -5,32 +5,32 @@
     background-color: #343a40;
     color: #fff;
   }
-  
+
   /* Style table headers */
   .table-dark thead th {
     border-color: #454d55;
   }
-  
+
   /* Style table rows */
   .table-dark tbody tr {
     border-color: #454d55;
   }
-  
+
   /* Alternate row background color */
   .table-dark tbody tr:nth-of-type(even) {
     background-color: #2c3138;
   }
-  
+
   /* Style table cell text alignment */
   .table-dark td, .table-dark th {
     text-align: center;
   }
-  
+
   /* Add responsive styles */
   .table-responsive {
     overflow-x: auto;
   }
-  
+
   /* Style the container */
   .container {
     margin-top: 20px;
@@ -39,5 +39,3 @@
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
   }
-
-    

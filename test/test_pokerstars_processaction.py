@@ -1,6 +1,5 @@
 """Tests for PokerStars _processAction method."""
 
-import re
 import unittest
 from unittest.mock import MagicMock, Mock
 
@@ -23,9 +22,9 @@ class TestPokerStarsProcessAction(unittest.TestCase):
         data = {"ATYPE": " folds", "PNAME": "Player1"}
         mock_action.group.side_effect = lambda key: data.get(key)
         mock_action.__getitem__ = Mock(side_effect=lambda key: data.get(key))
-        
+
         self.parser._processAction(mock_action, self.mock_hand, self.street)
-        
+
         self.mock_hand.addFold.assert_called_once_with(self.street, "Player1")
 
     def test_process_check_action(self):
@@ -34,9 +33,9 @@ class TestPokerStarsProcessAction(unittest.TestCase):
         data = {"ATYPE": " checks", "PNAME": "Player2"}
         mock_action.group.side_effect = lambda key: data.get(key)
         mock_action.__getitem__ = Mock(side_effect=lambda key: data.get(key))
-        
+
         self.parser._processAction(mock_action, self.mock_hand, self.street)
-        
+
         self.mock_hand.addCheck.assert_called_once_with(self.street, "Player2")
 
     def test_process_call_action(self):
@@ -45,11 +44,11 @@ class TestPokerStarsProcessAction(unittest.TestCase):
         data = {"ATYPE": " calls", "PNAME": "Player3", "BET": "$10.00"}
         mock_action.group.side_effect = lambda key: data.get(key)
         mock_action.__getitem__ = Mock(side_effect=lambda key: data.get(key))
-        
+
         self.parser.clearMoneyString = Mock(return_value="10.00")
-        
+
         self.parser._processAction(mock_action, self.mock_hand, self.street)
-        
+
         self.mock_hand.addCall.assert_called_once_with(self.street, "Player3", "10.00")
         self.parser.clearMoneyString.assert_called_once_with("$10.00")
 
@@ -59,11 +58,11 @@ class TestPokerStarsProcessAction(unittest.TestCase):
         data = {"ATYPE": " raises", "PNAME": "Player4"}
         mock_action.group.side_effect = lambda key: data.get(key)
         mock_action.__getitem__ = Mock(side_effect=lambda key: data.get(key))
-        
+
         self.parser._processRaise = Mock()
-        
+
         self.parser._processAction(mock_action, self.mock_hand, self.street)
-        
+
         self.parser._processRaise.assert_called_once_with(mock_action, self.mock_hand, self.street, "Player4")
 
     def test_process_bet_action(self):
@@ -72,11 +71,11 @@ class TestPokerStarsProcessAction(unittest.TestCase):
         data = {"ATYPE": " bets", "PNAME": "Player5", "BET": "$25.50"}
         mock_action.group.side_effect = lambda key: data.get(key)
         mock_action.__getitem__ = Mock(side_effect=lambda key: data.get(key))
-        
+
         self.parser.clearMoneyString = Mock(return_value="25.50")
-        
+
         self.parser._processAction(mock_action, self.mock_hand, self.street)
-        
+
         self.mock_hand.addBet.assert_called_once_with(self.street, "Player5", "25.50")
         self.parser.clearMoneyString.assert_called_once_with("$25.50")
 
@@ -86,9 +85,9 @@ class TestPokerStarsProcessAction(unittest.TestCase):
         data = {"ATYPE": " discards", "PNAME": "Player6", "BET": "2", "CARDS": "[7h 2s]"}
         mock_action.group.side_effect = lambda key: data.get(key)
         mock_action.__getitem__ = Mock(side_effect=lambda key: data.get(key))
-        
+
         self.parser._processAction(mock_action, self.mock_hand, self.street)
-        
+
         self.mock_hand.addDiscard.assert_called_once_with(self.street, "Player6", "2", "[7h 2s]")
 
     def test_process_stands_pat_action(self):
@@ -97,9 +96,9 @@ class TestPokerStarsProcessAction(unittest.TestCase):
         data = {"ATYPE": " stands pat", "PNAME": "Player7", "CARDS": "[Kc Qd Jh Ts 9c]"}
         mock_action.group.side_effect = lambda key: data.get(key)
         mock_action.__getitem__ = Mock(side_effect=lambda key: data.get(key))
-        
+
         self.parser._processAction(mock_action, self.mock_hand, self.street)
-        
+
         self.mock_hand.addStandsPat.assert_called_once_with(self.street, "Player7", "[Kc Qd Jh Ts 9c]")
 
     def test_process_unknown_action(self):
@@ -108,10 +107,10 @@ class TestPokerStarsProcessAction(unittest.TestCase):
         data = {"ATYPE": " unknown", "PNAME": "Player8"}
         mock_action.group.side_effect = lambda key: data.get(key)
         mock_action.__getitem__ = Mock(side_effect=lambda key: data.get(key))
-        
-        with self.assertLogs('pokerstars_parser', level='DEBUG') as cm:
+
+        with self.assertLogs("pokerstars_parser", level="DEBUG") as cm:
             self.parser._processAction(mock_action, self.mock_hand, self.street)
-            
+
         self.assertIn("Unimplemented readAction", cm.output[0])
         self.assertIn("Player8", cm.output[0])
         self.assertIn("unknown", cm.output[0])
@@ -122,7 +121,7 @@ class TestPokerStarsProcessAction(unittest.TestCase):
         data = {"ATYPE": " folds", "PNAME": "Player1"}
         mock_action.group.side_effect = lambda key: data.get(key)
         mock_action.__getitem__ = Mock(side_effect=lambda key: data.get(key))
-        
+
         for street in ["PREFLOP", "FLOP", "TURN", "RIVER"]:
             with self.subTest(street=street):
                 self.mock_hand.reset_mock()
@@ -135,9 +134,9 @@ class TestPokerStarsProcessAction(unittest.TestCase):
         data = {"ATYPE": " checks", "PNAME": "Player_123-$"}
         mock_action.group.side_effect = lambda key: data.get(key)
         mock_action.__getitem__ = Mock(side_effect=lambda key: data.get(key))
-        
+
         self.parser._processAction(mock_action, self.mock_hand, self.street)
-        
+
         self.mock_hand.addCheck.assert_called_once_with(self.street, "Player_123-$")
 
     def test_process_multiple_actions_sequence(self):
@@ -146,19 +145,19 @@ class TestPokerStarsProcessAction(unittest.TestCase):
             (" folds", "Player1", None),
             (" checks", "Player2", None),
             (" calls", "Player3", "$10.00"),
-            (" bets", "Player4", "$20.00")
+            (" bets", "Player4", "$20.00"),
         ]
-        
+
         self.parser.clearMoneyString = Mock(side_effect=lambda x: x.replace("$", ""))
-        
+
         for atype, pname, bet in actions_data:
             mock_action = Mock()
             data = {"ATYPE": atype, "PNAME": pname, "BET": bet}
             mock_action.group.side_effect = lambda key, d=data: d.get(key)
             mock_action.__getitem__ = Mock(side_effect=lambda key, d=data: d.get(key))
-            
+
             self.parser._processAction(mock_action, self.mock_hand, self.street)
-        
+
         # Verify all actions were called
         self.mock_hand.addFold.assert_called_once_with(self.street, "Player1")
         self.mock_hand.addCheck.assert_called_once_with(self.street, "Player2")
@@ -166,5 +165,5 @@ class TestPokerStarsProcessAction(unittest.TestCase):
         self.mock_hand.addBet.assert_called_once_with(self.street, "Player4", "20.00")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

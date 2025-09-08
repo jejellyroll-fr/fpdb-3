@@ -40,9 +40,7 @@ class BovadaRegressionTests(unittest.TestCase):
             timeout=60,  # Add timeout for security
         )
 
-        assert result.returncode == 0, (
-            f"Original tests fail - regression detected:\n{result.stdout}\n{result.stderr}"
-        )
+        assert result.returncode == 0, f"Original tests fail - regression detected:\n{result.stdout}\n{result.stderr}"
 
         # Verify that the exact number of tests pass (23 tests)
         assert "23 passed" in result.stdout
@@ -74,8 +72,7 @@ class BovadaRegressionTests(unittest.TestCase):
         # Security: Validate all paths before subprocess execution
         base_dir = Path(__file__).parent.parent
         test_file = (
-            base_dir / "regression-test-files/cash/Bovada/Flop/"
-            "NLHE-USD-0.10-0.25-201208.raise.to.format.change.txt"
+            base_dir / "regression-test-files/cash/Bovada/Flop/" "NLHE-USD-0.10-0.25-201208.raise.to.format.change.txt"
         )
         importer_cli = base_dir / "importer_cli.py"
 
@@ -91,7 +88,7 @@ class BovadaRegressionTests(unittest.TestCase):
 
         # Test import without actually modifying the database
         # Security: Using validated paths and controlled arguments with shell=False
-        result = subprocess.run( # noqa: S603
+        result = subprocess.run(  # noqa: S603
             [sys.executable, str(importer_cli), "--site", "Bovada", "--no-progress", "--debug", str(test_file)],
             cwd=base_dir,
             capture_output=True,

@@ -205,10 +205,10 @@ No board given. Using Monte-Carlo simulation...
 Enumerated 2053443 possible plays.
 Your hand: (Ad Ac)
 Against the range: {
-                    AhAd, AhAs, AdAs, KhKd, KhKs, 
-                    KhKc, KdKs, KdKc, KsKc, QhQd, 
-                    QhQs, QhQc, QdQs, QdQc, QsQc, 
-                    JhJd, JhJs, JhJc, JdJs, JdJc, 
+                    AhAd, AhAs, AdAs, KhKd, KhKs,
+                    KhKc, KdKs, KdKc, KsKc, QhQd,
+                    QhQs, QhQc, QdQs, QdQc, QsQc,
+                    JhJd, JhJs, JhJc, JdJs, JdJc,
                     JsJc
                    }
 

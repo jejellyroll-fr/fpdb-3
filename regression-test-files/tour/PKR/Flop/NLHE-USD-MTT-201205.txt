@@ -1,4 +1,4 @@
-Player1 wins 12,450 with: Flush, Ace high 
+Player1 wins 12,450 with: Flush, Ace high
 Seat 1: Player7 - 29,448
 Seat 2: Player0 - 111,468
 Seat 3: Player5 - 18,750
@@ -407,7 +407,7 @@ Player1 raises to 74,414 (all-in)
 Player8 folds
 Player4 folds
 Hero has requested more time
-Hero  is using the time bank 
+Hero  is using the time bank
 Hero has 20 seconds remaining in the time bank
 Hero folds
 Player7 folds
@@ -423,8 +423,8 @@ Pot sizes: 43,700
 Dealing River [2 h]
 Pot sizes: 43,700
 Player1 has One Pair: 5s
-Player5 has Straight, 5 high 
-Player5 wins 43,700 with: Straight, 5 high 
+Player5 has Straight, 5 high
+Player5 wins 43,700 with: Straight, 5 high
 Seat 1: Player7 - 19,725
 Seat 2: Player0 - 119,014
 Seat 3: Player5 - 43,700
@@ -734,8 +734,8 @@ Pot sizes: 41,150
 Dealing River [K h]
 Pot sizes: 41,150
 Player8 has Two Pairs: Kings, Queens
-Player7 has Straight, Ace high 
-Player7 wins 41,150 with: Straight, Ace high 
+Player7 has Straight, Ace high
+Player7 wins 41,150 with: Straight, Ace high
 Seat 1: Player7 - 41,150
 Seat 2: Player0 - 88,858
 Seat 3: Player5 - 145,428
@@ -794,8 +794,8 @@ Pot sizes: 4,100
 Pot sizes: 11,675
 Player5 has High Card: Ace
 Player5 wins 11,675 from side pot #1 with: High Card: Ace
-Player8 has Flush, Ace high 
-Player8 wins 4,100 with: Flush, Ace high 
+Player8 has Flush, Ace high
+Player8 wins 4,100 with: Flush, Ace high
 Seat 1: Player7 - 35,650
 Seat 2: Player0 - 88,358
 Seat 3: Player5 - 151,603
@@ -1157,7 +1157,7 @@ Player4 folds
 Hero raises to 15,000
 Player0 folds
 Pot sizes: 15,000
-Hero shows [J c][XX] 
+Hero shows [J c][XX]
 Hero wins 15,000
 Seat 2: Player0 - 73,508
 Seat 3: Player5 - 188,603
@@ -1257,8 +1257,8 @@ Pot sizes: 22,600
 Pot sizes: 3,600
 Player5 has Two Pairs: Queens, Tens
 Player5 wins 3,600 from side pot #1 with: Two Pairs: Queens, Tens
-Player8 has Straight, Ace high 
-Player8 wins 22,600 with: Straight, Ace high 
+Player8 has Straight, Ace high
+Player8 wins 22,600 with: Straight, Ace high
 Seat 2: Player0 - 67,908
 Seat 3: Player5 - 174,603
 Seat 5: Player8 - 22,600
@@ -1349,7 +1349,7 @@ Player0 folds
 Player5 folds
 Player8 folds
 Player4 raises to 42,788 (all-in)
-Hero folds and shows [5 d][XX] 
+Hero folds and shows [5 d][XX]
 Pot sizes: 20,000
 Player4 doesn't show
 Player4 wins 20,000
@@ -1416,5 +1416,3 @@ Seat 5: Player8 - 54,000
 Seat 6: Player4 - 53,988
 Seat 8: Hero - 0
 End of Hand #2083050846
-
-

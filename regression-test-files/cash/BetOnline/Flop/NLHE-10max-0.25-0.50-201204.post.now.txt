@@ -14,7 +14,7 @@ Player0: posts small blind 0.25
 Player7: posts big blind 0.50
 Player1: post now 0.50
 Player3: post now 0.50
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Player0 [Qd Ac]
 Player9: folds
 Player1: checks
@@ -37,10 +37,10 @@ Player6: calls 5.75
 *** TURN *** [7h Kh 9d][6h]
 Player0: bets 14.75
 Player6: calls 14.75
-*** SHOW DOWN *** 
+*** SHOW DOWN ***
 Player0 shows Qd Ac
 Player6 shows 9s Qh
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 47.98 | Rake 2.52
 Board [7h Kh 9d 6h Js]
 Seat 7: Player2 folded before Flop
@@ -53,4 +53,3 @@ Seat 8: Player0 showed [Qd Ac] but did not win
 Seat 9: Player7 folded before Flop
 Seat 5: Player3 folded before Flop
 Seat 1: Player1 folded before Flop
-

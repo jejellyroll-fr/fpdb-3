@@ -135,9 +135,11 @@ class TestClassicStat(unittest.TestCase):
                 mock_set_color.assert_called()
 
     def test_comment_dialog_setup(self) -> None:
-        with patch("Aux_Classic_Hud.QInputDialog") as mock_dialog, \
-             patch.object(self.classic_stat, "get_player_name", return_value="TestPlayer"), \
-             patch.object(self.classic_stat, "get_current_comment", return_value="Existing"):
+        with (
+            patch("Aux_Classic_Hud.QInputDialog") as mock_dialog,
+            patch.object(self.classic_stat, "get_player_name", return_value="TestPlayer"),
+            patch.object(self.classic_stat, "get_current_comment", return_value="Existing"),
+        ):
             self.classic_stat.stat = "playershort"
             self.classic_stat.lab.aw_seat = 2
             self.classic_stat.stat_dict = {123: {"seat": 2, "screen_name": "TestPlayer"}}
@@ -188,7 +190,8 @@ class TestClassicStat(unittest.TestCase):
 
     @patch("Aux_Classic_Hud.Database.Database")
     def test_get_player_name(self, mock_db_class) -> None:
-        mock_db = Mock(); mock_cur = Mock()
+        mock_db = Mock()
+        mock_cur = Mock()
         mock_db.cursor = mock_cur
         mock_db.sql.query = {"get_player_name": "SELECT screen_name FROM players WHERE id = %s"}
         mock_cur.fetchone.return_value = ("TestPlayer",)
@@ -198,7 +201,8 @@ class TestClassicStat(unittest.TestCase):
 
     @patch("Aux_Classic_Hud.Database.Database")
     def test_get_player_name_not_found(self, mock_db_class) -> None:
-        mock_db = Mock(); mock_cur = Mock()
+        mock_db = Mock()
+        mock_cur = Mock()
         mock_db.cursor = mock_cur
         mock_db.sql.query = {"get_player_name": "SELECT screen_name FROM players WHERE id = %s"}
         mock_cur.fetchone.return_value = None
@@ -208,7 +212,8 @@ class TestClassicStat(unittest.TestCase):
 
     @patch("Aux_Classic_Hud.Database.Database")
     def test_has_comment_false(self, mock_db_class) -> None:
-        mock_db = Mock(); mock_cur = Mock()
+        mock_db = Mock()
+        mock_cur = Mock()
         mock_db.cursor = mock_cur
         mock_db.sql.query = {"get_player_comment": "SELECT comment FROM players WHERE id = %s"}
         mock_cur.fetchone.return_value = None
@@ -218,7 +223,8 @@ class TestClassicStat(unittest.TestCase):
 
     @patch("Aux_Classic_Hud.Database.Database")
     def test_has_comment_true(self, mock_db_class) -> None:
-        mock_db = Mock(); mock_cur = Mock()
+        mock_db = Mock()
+        mock_cur = Mock()
         mock_db.cursor = mock_cur
         mock_db.sql.query = {"get_player_comment": "SELECT comment FROM players WHERE id = %s"}
         mock_cur.fetchone.return_value = ("Some note",)
@@ -227,9 +233,11 @@ class TestClassicStat(unittest.TestCase):
         mock_db.close_connection.assert_called_once()
 
     def test_open_comment_dialog_playershort(self) -> None:
-        with patch("Aux_Classic_Hud.QInputDialog") as mock_dialog, \
-             patch.object(self.classic_stat, "get_player_name", return_value="TestPlayer"), \
-             patch.object(self.classic_stat, "get_current_comment", return_value=""):
+        with (
+            patch("Aux_Classic_Hud.QInputDialog") as mock_dialog,
+            patch.object(self.classic_stat, "get_player_name", return_value="TestPlayer"),
+            patch.object(self.classic_stat, "get_current_comment", return_value=""),
+        ):
             self.classic_stat.stat = "playershort"
             self.classic_stat.stat_dict = {123: {"seat": 2, "screen_name": "TestPlayer"}}
             self.classic_stat.lab.aw_seat = 2
@@ -247,8 +255,10 @@ class TestClassicStat(unittest.TestCase):
             mock_dialog.getMultiLineText.assert_not_called()
 
     def test_update_no_number(self) -> None:
-        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None), \
-             patch("Aux_Classic_Hud.log") as mock_log:
+        with (
+            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
+            patch("Aux_Classic_Hud.log") as mock_log,
+        ):
             self.classic_stat.stat_loth = "20"
             self.classic_stat.stat_hith = "35"
             self.classic_stat.number = ("", "not_a_number", "", "", "", "")
@@ -269,7 +279,8 @@ class TestClassicStat(unittest.TestCase):
 
     @patch("Aux_Classic_Hud.Database.Database")
     def test_save_comment(self, mock_db_class) -> None:
-        mock_db = Mock(); mock_cur = Mock()
+        mock_db = Mock()
+        mock_cur = Mock()
         mock_db.cursor = mock_cur
         mock_db.sql.query = {"update_player_comment": "UPDATE players SET comment = %s WHERE id = %s"}
         mock_db_class.return_value = mock_db
@@ -281,7 +292,8 @@ class TestClassicStat(unittest.TestCase):
 
     @patch("Aux_Classic_Hud.Database.Database")
     def test_update_player_note_with_comment(self, mock_db_class) -> None:
-        mock_db = Mock(); mock_cur = Mock()
+        mock_db = Mock()
+        mock_cur = Mock()
         mock_db.cursor = mock_cur
         mock_db.sql.query = {"get_player_comment": "SELECT comment FROM players WHERE id = %s"}
         mock_cur.fetchone.return_value = ("Has note",)
@@ -297,7 +309,8 @@ class TestClassicStat(unittest.TestCase):
 
     @patch("Aux_Classic_Hud.Database.Database")
     def test_update_player_note_without_comment(self, mock_db_class) -> None:
-        mock_db = Mock(); mock_cur = Mock()
+        mock_db = Mock()
+        mock_cur = Mock()
         mock_db.cursor = mock_cur
         mock_db.sql.query = {"get_player_comment": "SELECT comment FROM players WHERE id = %s"}
         mock_cur.fetchone.return_value = None
@@ -333,6 +346,7 @@ class TestClassicLabel(unittest.TestCase):
 class TestClassicTableMw(unittest.TestCase):
     def test_initialization(self) -> None:
         from Aux_Classic_Hud import ClassicTableMw
+
         assert ClassicTableMw is not None
 
 
@@ -342,7 +356,8 @@ class TestClassicTableMw(unittest.TestCase):
 class TestClassicHudIntegration(unittest.TestCase):
     @patch("Aux_Classic_Hud.Database.Database")
     def test_comment_system_integration(self, mock_db_class) -> None:
-        mock_db = Mock(); mock_cur = Mock()
+        mock_db = Mock()
+        mock_cur = Mock()
         mock_db.cursor = mock_cur
         mock_db.sql.query = {
             "get_player_comment": "SELECT comment FROM players WHERE id = %s",
@@ -350,10 +365,11 @@ class TestClassicHudIntegration(unittest.TestCase):
         }
         mock_db_class.return_value = mock_db
 
-        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "__init__", return_value=None), \
-             patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None), \
-             patch("Aux_Classic_Hud.QInputDialog") as mock_dialog:
-
+        with (
+            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "__init__", return_value=None),
+            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
+            patch("Aux_Classic_Hud.QInputDialog") as mock_dialog,
+        ):
             mock_aw = Mock()
             mock_hud = Mock()
             mock_aw.hud = mock_hud
@@ -372,15 +388,18 @@ class TestClassicHudIntegration(unittest.TestCase):
             stat.stat_dict = {123: {"seat": 2, "screen_name": "TestPlayer"}}
 
             mock_dialog.getMultiLineText.return_value = ("New comment", True)
-            with patch.object(stat, "get_player_name", return_value="TestPlayer"), \
-                 patch.object(stat, "get_current_comment", return_value=""), \
-                 patch.object(stat, "save_comment") as mock_save:
+            with (
+                patch.object(stat, "get_player_name", return_value="TestPlayer"),
+                patch.object(stat, "get_current_comment", return_value=""),
+                patch.object(stat, "save_comment") as mock_save,
+            ):
                 stat.open_comment_dialog(Mock())
                 mock_save.assert_called()
 
     @patch("Aux_Classic_Hud.Database.Database")
     def test_full_stat_lifecycle(self, mock_db_class) -> None:
-        mock_db = Mock(); mock_cur = Mock()
+        mock_db = Mock()
+        mock_cur = Mock()
         mock_db.cursor = mock_cur
         mock_db.sql.query = {
             "get_player_comment": "SELECT comment FROM players WHERE id = %s",
@@ -389,10 +408,11 @@ class TestClassicHudIntegration(unittest.TestCase):
         mock_cur.fetchone.return_value = ("Initial comment",)
         mock_db_class.return_value = mock_db
 
-        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "__init__", return_value=None), \
-             patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None), \
-             patch("Aux_Classic_Hud.QInputDialog") as mock_dialog:
-
+        with (
+            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "__init__", return_value=None),
+            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
+            patch("Aux_Classic_Hud.QInputDialog") as mock_dialog,
+        ):
             mock_aw = Mock()
             mock_hud = Mock()
             mock_aw.hud = mock_hud
@@ -418,9 +438,11 @@ class TestClassicHudIntegration(unittest.TestCase):
 
             # Open comment dialog
             mock_dialog.getMultiLineText.return_value = ("Updated comment", True)
-            with patch.object(stat, "get_player_name", return_value="Player"), \
-                 patch.object(stat, "get_current_comment", return_value=""), \
-                 patch.object(stat, "save_comment") as mock_save:
+            with (
+                patch.object(stat, "get_player_name", return_value="Player"),
+                patch.object(stat, "get_current_comment", return_value=""),
+                patch.object(stat, "save_comment") as mock_save,
+            ):
                 stat.open_comment_dialog(Mock())
                 mock_save.assert_called()
 
@@ -436,10 +458,12 @@ class TestErrorHandling(unittest.TestCase):
         mock_db.sql.query = {"update_player_comment": "UPDATE players SET comment = %s WHERE id = %s"}
         mock_db_class.return_value = mock_db
 
-        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "__init__", return_value=None), \
-             patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None), \
-             patch("Aux_Classic_Hud.log") as mock_log, \
-             patch("Aux_Classic_Hud.QMessageBox"):
+        with (
+            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "__init__", return_value=None),
+            patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
+            patch("Aux_Classic_Hud.log") as mock_log,
+            patch("Aux_Classic_Hud.QMessageBox"),
+        ):
             mock_aw = Mock()
             mock_hud = Mock()
             mock_aw.hud = mock_hud

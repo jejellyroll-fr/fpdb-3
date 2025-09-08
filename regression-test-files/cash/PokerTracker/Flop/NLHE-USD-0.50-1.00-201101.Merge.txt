@@ -1340,6 +1340,3 @@ Player4: Bet $3.50
 Player1: Fold
 *** SUMMARY ***
 Player4: wins $9.65
-
-
-

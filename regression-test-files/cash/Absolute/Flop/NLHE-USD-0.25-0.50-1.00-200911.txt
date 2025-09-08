@@ -15,7 +15,7 @@ CAPTAIN_HADOK - Ante $0.25
 CAPTAIN_HADOK - Posts small blind $0.50
 INVERTIBLE - Posts big blind $1
 *** POCKET CARDS ***
-Dealt to INVERTIBLE [7h Qd] 
+Dealt to INVERTIBLE [7h Qd]
 PUREGAMBLER - Folds
 CISK - Folds
 KWOKMAN007 - Raises $2 to $2
@@ -31,6 +31,6 @@ Total Pot($4)
 Seat 1: INVERTIBLE (big blind) Folded on the POCKET CARDS
 Seat 2: PUREGAMBLER Folded on the POCKET CARDS
 Seat 3: CISK Folded on the POCKET CARDS
-Seat 4: KWOKMAN007 collected Total ($4) 
+Seat 4: KWOKMAN007 collected Total ($4)
 Seat 5: RABIATOR (dealer) Folded on the POCKET CARDS
 Seat 6: CAPTAIN_HADOK (small blind) Folded on the POCKET CARDS

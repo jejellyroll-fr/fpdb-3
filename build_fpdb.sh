@@ -62,6 +62,7 @@ FILES=(
     "GGPokerToFpdb.py"
     "GuiAutoImport.py"
     "GuiBulkImport.py"
+    "GuiConfigObserver.py"
     "GuiGraphViewer.py"
     "GuiHandViewer.py"
     "GuiLogView.py"
@@ -69,6 +70,7 @@ FILES=(
     "GuiReplayer.py"
     "GuiRingPlayerStats.py"
     "GuiSessionViewer.py"
+    "GuiTourHandViewer.py"
     "GuiTourneyGraphViewer.py"
     "GuiTourneyPlayerStats.py"
     "Hand.py"
@@ -82,7 +84,6 @@ FILES=(
     "HUD_config.xml.example"
     "HUD_main.pyw"
     "IdentifySite.py"
-    "importer_cli.py"
     "Importer.py"
     "ImprovedErrorHandler.py"
     "interlocks.py"
@@ -123,6 +124,8 @@ FILES=(
     "PopupIcons.py"
     "PopupThemes.py"
     "SmartHudManager.py"
+    "ThemeCreatorDialog.py"
+    "ThemeManager.py"
 )
 
 FOLDERS=(
@@ -206,13 +209,13 @@ copy_hudmain() {
     local hud_main_exe="$source_dir/HUD_main.exe"
     local target_exe="$target_dir/HUD_main.exe"
 
-   
+
     if [ ! -e "$target_exe" ]; then
         echo "Copie de HUD_main.exe de $hud_main_exe à $target_exe"
         cp "$hud_main_exe" "$target_exe"
     fi
 
-   
+
     local source_internal="$source_dir/_internal"
     local target_internal="$target_dir/_internal"
 
