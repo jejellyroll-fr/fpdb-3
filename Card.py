@@ -753,9 +753,10 @@ def twoStartCards(value1: int, suit1: str, value2: int, suit2: str) -> int:
     ----------------
     Let x = (rank_hi - 2), y = (rank_lo - 2) with ranks in [2..14].
     The hand id is: 13*x + y + 1, with a convention on (x,y):
-      • Pair:           x == y                       (e.g. 22 → x=y=0 → 1)
-      • Suited:         x > y  (higher rank first)   (e.g. AsKs → x=12,y=11)
-      • Offsuit:        x < y  (lower rank first)    (e.g. AsKh → x=11,y=12)
+
+    * Pair:     x == y                       (e.g. 22 → x=y=0 → 1)
+    * Suited:   x > y  (higher rank first)   (e.g. AsKs → x=12,y=11)
+    * Offsuit:  x < y  (lower rank first)    (e.g. AsKh → x=11,y=12)
 
     This convention is relied upon by DATABASE_FILTERS to derive pair/suited/offsuit
     and gap filters by simple arithmetic on the stored id.
