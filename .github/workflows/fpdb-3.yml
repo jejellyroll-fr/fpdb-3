@@ -212,10 +212,11 @@ jobs:
         mkdir -p _site/docs _site/coverage
 
         # Deploy documentation
-        if [ -d /tmp/docs-backup/docs/build ]; then
-          cp -r /tmp/docs-backup/docs/build/* _site/docs/
+        if [ -d docs/build ]; then
+          cp -r docs/build/* _site/docs/
+          echo "Documentation deployed from docs/build"
         else
-          echo "No documentation backup found"
+          echo "No documentation build found"
         fi
 
         # Deploy coverage files
