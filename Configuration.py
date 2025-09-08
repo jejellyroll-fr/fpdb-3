@@ -483,14 +483,21 @@ class Stat:
 
 
 class Stat_sets:
-    """Representation of a HUD display configuration
-    - stats: Dict of Tuples (position in HUD) -> Configuration.Stat
-             Exemple: {
-                (0,0): Stat(stat_name = 'vpip', stat_hicolor ='#F44336', ...),
-                (0,1): Stat(stat_name = 'pfr', stat_hicolor ='#F44336', ...),
-                ...
-             }
-    - rows, cols: siez of the HUD.
+    """Representation of a HUD display configuration.
+
+    Attributes:
+        stats: Dict of Tuples (position in HUD) -> Configuration.Stat.
+
+            Exemple::
+
+                {
+                    (0,0): Stat(stat_name = 'vpip', stat_hicolor ='#F44336', ...),
+                    (0,1): Stat(stat_name = 'pfr', stat_hicolor ='#F44336', ...),
+                    ...
+                }
+
+        rows: Size of the HUD rows.
+        cols: Size of the HUD columns.
     """
 
     def __init__(self, node) -> None:
