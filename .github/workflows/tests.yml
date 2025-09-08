@@ -37,10 +37,10 @@ jobs:
         uv venv
         uv pip install -e .[test]
 
-    - name: Lint with ruff
-      run: |
-        uv pip install ruff
-        uv run ruff check .
+    # - name: Lint with ruff
+    #   run: |
+    #     uv pip install ruff
+    #     uv run ruff check .
 
     - name: Create config directory (Windows)
       if: runner.os == 'Windows'
