@@ -2,7 +2,7 @@ name: Deploy Documentation to GitHub Pages
 
 on:
   workflow_run:
-    workflows: ["Tests"]
+    workflows: ["Fpdb3"]
     types:
       - completed
     branches:
