@@ -18,30 +18,35 @@ app = QApplication(sys.argv)
 # logging setup
 log = get_logger("win_tables")
 
-# Definition of Windows API constants
-GW_OWNER = 4
-GWL_EXSTYLE = -20
-WS_EX_TOOLWINDOW = 0x00000080
-WS_EX_APPWINDOW = 0x00040000
-SM_CXSIZEFRAME = 32
-SM_CYCAPTION = 4
+# Windows-specific code - only load on Windows platform
+if sys.platform != "win32":
+    log.warning("WinTables.py imported on non-Windows platform")
+    # Provide dummy implementations or exit early
+else:
+    # Definition of Windows API constants
+    GW_OWNER = 4
+    GWL_EXSTYLE = -20
+    WS_EX_TOOLWINDOW = 0x00000080
+    WS_EX_APPWINDOW = 0x00040000
+    SM_CXSIZEFRAME = 32
+    SM_CYCAPTION = 4
 
-# Windows functions via ctypes
-EnumWindows = ctypes.windll.user32.EnumWindows
-EnumWindowsProc = ctypes.WINFUNCTYPE(
-    ctypes.c_bool,
-    ctypes.wintypes.HWND,
-    ctypes.wintypes.LPARAM,
-)
-GetWindowText = ctypes.windll.user32.GetWindowTextW
-GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
-IsWindowVisible = ctypes.windll.user32.IsWindowVisible
-GetParent = ctypes.windll.user32.GetParent
-GetWindowRect = ctypes.windll.user32.GetWindowRect
-GetWindowLong = ctypes.windll.user32.GetWindowLongW
-GetSystemMetrics = ctypes.windll.user32.GetSystemMetrics
-IsWindow = ctypes.windll.user32.IsWindow
-MoveWindow = ctypes.windll.user32.MoveWindow
+    # Windows functions via ctypes
+    EnumWindows = ctypes.windll.user32.EnumWindows
+    EnumWindowsProc = ctypes.WINFUNCTYPE(
+        ctypes.c_bool,
+        ctypes.wintypes.HWND,
+        ctypes.wintypes.LPARAM,
+    )
+    GetWindowText = ctypes.windll.user32.GetWindowTextW
+    GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
+    IsWindowVisible = ctypes.windll.user32.IsWindowVisible
+    GetParent = ctypes.windll.user32.GetParent
+    GetWindowRect = ctypes.windll.user32.GetWindowRect
+    GetWindowLong = ctypes.windll.user32.GetWindowLongW
+    GetSystemMetrics = ctypes.windll.user32.GetSystemMetrics
+    IsWindow = ctypes.windll.user32.IsWindow
+    MoveWindow = ctypes.windll.user32.MoveWindow
 
 # Global variables
 b_width = 3

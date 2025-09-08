@@ -271,6 +271,7 @@ jobs:
         script: |
           const repoName = context.repo.repo;
           const repoOwner = context.repo.owner;
+          const sha = context.sha;
           const url = `https://${repoOwner}.github.io/${repoName}/coverage/`;
           await github.rest.repos.createCommitComment({
             owner: repoOwner,
