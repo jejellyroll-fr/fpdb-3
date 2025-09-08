@@ -581,7 +581,11 @@ class GuiSessionViewer(QSplitter):
             replayer.reload_hands(handids)
 
 
-if __name__ == "__main__":
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    # Launch the session viewer GUI like the original
     import Configuration
 
     config = Configuration.Config()
@@ -617,3 +621,10 @@ if __name__ == "__main__":
     main_window.show()
     main_window.resize(1400, 800)
     app.exec_()
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(main())

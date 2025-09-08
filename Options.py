@@ -248,7 +248,136 @@ def site_alias(alias: str) -> str | bool:
     return tmp
 
 
-if __name__ == "__main__":
-    (options, argv) = fpdb_options()
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
 
-    sys.stdin.readline()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="FPDB Options utility and command line parser")
+
+    # Add all the standard FPDB options that are in fpdb_options()
+    parser.add_argument(
+        "-x",
+        "--errorsToConsole",
+        action="store_true",
+        help="Send error messages to the console rather than the log file",
+    )
+    parser.add_argument("-d", "--databaseName", dest="dbname", help="Specifies a database name")
+    parser.add_argument("-c", "--configFile", dest="config", help="Specifies the full path to a configuration file")
+    parser.add_argument(
+        "-r",
+        "--rerunPython",
+        action="store_true",
+        help="Indicates program was restarted with a different path (only allowed once)",
+    )
+    parser.add_argument(
+        "-k", "--konverter", dest="hhc", default="PokerStarsToFpdb", help="Module name for Hand History Converter"
+    )
+    parser.add_argument("-s", "--sitename", dest="sitename", help="A sitename")
+    parser.add_argument(
+        "-l",
+        "--logging",
+        dest="log_level",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL", "EMPTY"],
+        default="EMPTY",
+        help="Error logging level: (DEBUG, INFO, WARNING, ERROR, CRITICAL, EMPTY)",
+    )
+    parser.add_argument("-v", "--version", action="store_true", help="Print version information and exit")
+    parser.add_argument("-i", "--initialrun", action="store_true", dest="initialRun", help="Force initial-run dialog")
+    parser.add_argument("-u", "--usage", action="store_true", help="Print some useful one liners")
+    parser.add_argument("-f", "--file", dest="filename", metavar="FILE", help="Input file")
+    parser.add_argument("-D", "--directory", dest="directory", metavar="DIR", help="Input directory")
+    parser.add_argument("-o", "--outpath", dest="outpath", metavar="PATH", help="Out path in quiet mode")
+    parser.add_argument(
+        "-a", "--archive", action="store_true", help="File to be split is a PokerStars or Full Tilt Poker archive file"
+    )
+    parser.add_argument(
+        "-t", "--testdata", action="store_true", dest="testData", help="Developer option to print regression test data"
+    )
+
+    # Add testing/utility options
+    parser.add_argument("--test-parsing", action="store_true", help="Test FPDB option parsing with legacy OptionParser")
+    parser.add_argument("--test-aliases", action="store_true", help="Show poker site aliases")
+    parser.add_argument("--interactive", action="store_true", help="Run original interactive test")
+
+    args = parser.parse_args(argv)
+
+    # Handle version flag
+    if args.version:
+        print("FPDB Options Parser - Part of Free Poker DataBase")
+        print("Version information would go here")
+        return 0
+
+    # Handle usage flag
+    if args.usage:
+        print("\n=== Useful FPDB Command Line Examples ===")
+        print("fpdb.py -c /path/to/config.xml")
+        print("fpdb.py -d mydatabase -l DEBUG")
+        print("HUD_main.py -x -c /path/to/config.xml")
+        return 0
+
+    # If no specific action requested, show help
+    if not any(
+        [
+            args.test_parsing,
+            args.test_aliases,
+            args.interactive,
+            args.errorsToConsole,
+            args.dbname,
+            args.config,
+            args.rerunPython,
+            args.hhc != "PokerStarsToFpdb",
+            args.sitename,
+            args.log_level != "EMPTY",
+            args.initialRun,
+            args.filename,
+            args.directory,
+            args.outpath,
+            args.archive,
+            args.testData,
+        ]
+    ):
+        parser.print_help()
+        return 0
+
+    if args.test_parsing:
+        print("Testing FPDB option parsing...")
+        try:
+            # Test with empty args to avoid conflicts
+            original_argv = sys.argv[:]
+            sys.argv = ["Options.py"]  # Reset sys.argv temporarily
+            (options, remaining_argv) = fpdb_options()
+            sys.argv = original_argv  # Restore original argv
+            print("✓ Option parsing successful")
+            print(f"Parsed options: {options}")
+            print(f"Remaining args: {remaining_argv}")
+        except Exception as e:
+            sys.argv = original_argv if "original_argv" in locals() else sys.argv
+            print(f"✗ Option parsing failed: {e}")
+            return 1
+
+    if args.test_aliases:
+        print("\n=== Poker Site Aliases ===")
+        test_aliases = ["Stars", "Party", "FTP", "Bovada", "PKR", "UB", "Cake", "PT"]
+        for alias in test_aliases:
+            try:
+                site = site_alias(alias)
+                if site:
+                    print(f"  {alias} → {site}")
+                else:
+                    print(f"  {alias} → (unknown)")
+            except Exception as e:
+                print(f"  {alias} → Error: {e}")
+
+    if args.interactive:
+        print("Running original interactive test...")
+        (options, argv_parsed) = fpdb_options()
+        print("Press ENTER to continue...")
+        sys.stdin.readline()
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

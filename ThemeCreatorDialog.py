@@ -447,13 +447,19 @@ def show_theme_creator(parent=None):
     return dialog.exec_()
 
 
-if __name__ == "__main__":
-    # Test the dialog
-    import sys
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
 
+    # Simple - just launch the theme creator dialog like the original
+    print("Launching theme creator dialog...")
     app = QApplication(sys.argv)
-
     result = show_theme_creator()
     print(f"Dialog result: {result}")
+    return 0
 
-    sys.exit()
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(main())
