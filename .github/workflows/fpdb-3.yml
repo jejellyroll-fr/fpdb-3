@@ -156,7 +156,6 @@ jobs:
           echo "Coverage files backed up to /tmp/htmlcov-backup"
         else
           echo "No htmlcov directory found to backup"
-          exit 1
         fi
 
         # Backup documentation files
@@ -165,7 +164,6 @@ jobs:
           echo "Documentation files backed up to /tmp/docs-backup"
         else
           echo "No docs directory found to backup"
-          exit 1
         fi
 
         # Backup site index
@@ -175,7 +173,6 @@ jobs:
           echo "Site index backed up to /tmp/site-backup"
         else
           echo "No site_index.html found to backup"
-          exit 1
         fi
 
     - name: Build Sphinx documentation
