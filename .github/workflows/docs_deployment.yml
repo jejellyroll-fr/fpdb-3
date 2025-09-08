@@ -1,7 +1,10 @@
 name: Deploy Documentation to GitHub Pages
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Tests"]
+    types:
+      - completed
     branches:
       - main
 
@@ -14,12 +17,21 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-html
+          path: coverage-html/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -37,10 +49,19 @@ jobs:
       - name: Build Sphinx documentation
         run: uv run sphinx-build -b html docs/source docs/build
 
+      - name: Create dual documentation structure
+        run: |
+          mkdir -p site_root/docs
+          mkdir -p site_root/coverage
+          cp -r docs/build/* site_root/docs/
+          cp -r coverage-html/* site_root/coverage/
+          cp site_index.html site_root/index.html
+          touch site_root/.nojekyll
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/build
+          path: site_root
 
       - name: Deploy to GitHub Pages
         id: deployment
