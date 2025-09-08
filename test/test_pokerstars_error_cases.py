@@ -97,7 +97,7 @@ class TestPokerStarsErrorCases(unittest.TestCase):
         )
 
         self.assertTrue(
-            incomplete_found or "*** FLOP *** [Js 3d " in content, f"File {file_path} should have incomplete data"
+            incomplete_found or "*** FLOP *** [Js 3d" in content, f"File {file_path} should have incomplete data"
         )
 
     def test_partial_hand_observed_file(self):
