@@ -1,11 +1,11 @@
 Game #11491869882 starts.
 
-#Game No : 11491869882 
+#Game No : 11491869882
 ***** Hand History for Game 11491869882 *****
 $2 USD NL Texas Hold'em - Thursday, March 01, 05:18:55 EST 2012
 Table Speed #2409913 (No DP) (Real Money)
 Seat 8 is the button
-Total number of players : 7/9 
+Total number of players : 7/9
 Seat 2: Player0 ( $1.76 USD )
 Seat 1: Player4 ( $2.15 USD )
 Seat 9: Player6 ( $1.98 USD )

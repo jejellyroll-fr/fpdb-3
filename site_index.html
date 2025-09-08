@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPDB-3 Documentation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .doc-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .doc-card {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #dee2e6;
+        }
+        .doc-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            text-decoration: none;
+        }
+        .doc-card h2 {
+            color: #495057;
+            margin-bottom: 1rem;
+        }
+        .doc-card p {
+            color: #6c757d;
+            margin: 0;
+        }
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 600px) {
+            .doc-links {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>FPDB-3 Documentation</h1>
+        <p style="text-align: center; color: #6c757d; margin-bottom: 3rem;">
+            Welcome to the FPDB-3 documentation portal. Choose the documentation you need:
+        </p>
+
+        <div class="doc-links">
+            <a href="docs/" class="doc-card">
+                <div class="icon">📚</div>
+                <h2>API Documentation</h2>
+                <p>Complete API reference, user guides, and developer documentation generated with Sphinx</p>
+            </a>
+
+            <a href="coverage/" class="doc-card">
+                <div class="icon">📊</div>
+                <h2>Test Coverage</h2>
+                <p>Detailed test coverage reports showing code coverage statistics and uncovered lines</p>
+            </a>
+        </div>
+
+        <footer style="text-align: center; margin-top: 3rem; color: #6c757d; font-size: 0.9rem;">
+            <p>Generated automatically by GitHub Actions</p>
+        </footer>
+    </div>
+</body>
+</html>

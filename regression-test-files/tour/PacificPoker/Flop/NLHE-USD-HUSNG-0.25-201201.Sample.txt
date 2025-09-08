@@ -249,6 +249,3 @@ Hero calls [$664]
 Hero shows [ 9h, 9c ]
 Villain shows [ 8c, Qh ]
 Villain collected [ $1,860 ]
-
-
-

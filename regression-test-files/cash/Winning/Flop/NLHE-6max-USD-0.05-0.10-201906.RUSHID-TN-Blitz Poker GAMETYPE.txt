@@ -26,4 +26,3 @@ Seat 3: Hero (big blind) folded on the Pre-Flop
 Seat 4: Player2 folded on the Pre-Flop and did not bet
 Seat 5: Player3 did not show and won $0.25
 Seat 6: Player4 folded on the Pre-Flop and did not bet
-

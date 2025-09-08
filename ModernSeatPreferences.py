@@ -280,7 +280,8 @@ class ModernSeatCard(QFrame):
                     if isinstance(self.site_config.fav_seat, dict):
                         # If it's a dictionary
                         current_fav = self.site_config.fav_seat.get(
-                            str(max_seats), self.site_config.fav_seat.get(max_seats, 0),
+                            str(max_seats),
+                            self.site_config.fav_seat.get(max_seats, 0),
                         )
                     elif isinstance(self.site_config.fav_seat, list) and len(self.site_config.fav_seat) > max_seats:
                         # If it's a list
@@ -830,7 +831,10 @@ class ModernSeatPreferencesDialog(QDialog):
     def import_settings(self) -> None:
         """Import seat settings from a JSON file."""
         filename, _ = QFileDialog.getOpenFileName(
-            self, "Import Seat Settings", os.path.expanduser("~"), "JSON Files (*.json)",
+            self,
+            "Import Seat Settings",
+            os.path.expanduser("~"),
+            "JSON Files (*.json)",
         )
 
         if filename:

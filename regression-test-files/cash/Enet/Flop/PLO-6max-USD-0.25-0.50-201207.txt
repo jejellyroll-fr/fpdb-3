@@ -1,5 +1,5 @@
-Game #7732310: Omaha (€0,25/€0,50) - 23:31:54 29.7.2012 - %6 
-Table 'SantElena 1 - Pot Limit' 6-max Seat #4 is the button 
+Game #7732310: Omaha (€0,25/€0,50) - 23:31:54 29.7.2012 - %6
+Table 'SantElena 1 - Pot Limit' 6-max Seat #4 is the button
 Seat 1: Player0 (€41,87 in chips)
 Seat 2: Hero (€88,05 in chips)
 Seat 3: Player1 (€36,79 in chips)
@@ -32,9 +32,9 @@ Player2: mucked
 Player2: mucks hand
 Player4: shows [9dJd2dTd] (Straight, Queens high)
 Player4: collected (€10,57) from pot
-*** SUMMARY *** 
-Total pot €0 | Rake €0,67 
-Board [9c2cQd8sAc] 
+*** SUMMARY ***
+Total pot €0 | Rake €0,67
+Board [9c2cQd8sAc]
 Seat 1: Player0 (big blind) folded
 Seat 2: Hero  folded
 Seat 3: Player1  folded

@@ -86,4 +86,4 @@ Devs and contributors - Steffen123, Sqlcoder, Eric Blade, Eratosthenes, Bostik, 
 Special shoutout to Eleatic Stranger who has written an initial converter for Carbon poker, without ever having played on the site!
 Documentation: RSOAndrew, Buggernaut, ChazDazzle
 Testers and everyone answering forum questions - xaviax, Dog, uncooper etc. You know who you are.
-Hand History donations: Quite a few people on this list now. Every donation for alternate sites and various corner cases is appreciated. 
+Hand History donations: Quite a few people on this list now. Every donation for alternate sites and various corner cases is appreciated.

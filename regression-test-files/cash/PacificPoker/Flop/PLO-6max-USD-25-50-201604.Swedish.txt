@@ -50,4 +50,3 @@ Hero folds
 ** Summary **
 Player0 did not show his hand
 Player0 collected [ 899 $ ]
-

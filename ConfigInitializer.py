@@ -90,7 +90,7 @@ class ConfigInitializer:
                 actual_config_path = config_path_result[0]
             else:
                 actual_config_path = config_path_result
-                
+
             # Create the actual Configuration object
             cls._config = Configuration.Config(file=actual_config_path)
             cls._config_file = actual_config_path
@@ -125,7 +125,6 @@ class ConfigInitializer:
             The initialized Configuration object.
         """
         return cls._config if cls._initialized and cls._config else cls.initialize()
-
 
     @classmethod
     def reload_config(cls) -> Any:
@@ -183,4 +182,3 @@ def ensure_config_initialized(config_file: str = "HUD_config.xml") -> Any:
         The initialized Configuration object.
     """
     return ConfigInitializer.initialize(config_file)
-

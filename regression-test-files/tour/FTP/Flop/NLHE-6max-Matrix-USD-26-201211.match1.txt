@@ -938,5 +938,3 @@ Board: [2d 9h Js 7s Ks]
 Seat 1: Hero (big blind) showed [Ah 2c] and lost with a pair of Twos
 Seat 5: Player1 (button) showed [9d 6d] and won (470) with a pair of Nines
 Seat 6: Player0 (small blind) folded before the Flop
-
-

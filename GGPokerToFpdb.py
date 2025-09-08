@@ -261,7 +261,8 @@ class GGPoker(HandHistoryConverter):
         re.MULTILINE | re.VERBOSE,
     )
     re_showdown_action = re.compile(
-        r"^{}: shows \[(?P<CARDS>.*)\]".format(substitutions["PLYR"]), re.MULTILINE,
+        r"^{}: shows \[(?P<CARDS>.*)\]".format(substitutions["PLYR"]),
+        re.MULTILINE,
     )
     re_sits_out = re.compile("^{} sits out".format(substitutions["PLYR"]), re.MULTILINE)
     re_collect_pot = re.compile(
@@ -271,7 +272,8 @@ class GGPoker(HandHistoryConverter):
     )
     # Vinsand88 cashed out the hand for $2.19 | Cash Out Fee $0.02
     re_collect_pot2 = re.compile(
-        r"^{PLYR} collected {CUR}(?P<POT>[,.\d]+)".format(**substitutions), re.MULTILINE,
+        r"^{PLYR} collected {CUR}(?P<POT>[,.\d]+)".format(**substitutions),
+        re.MULTILINE,
     )
     re_collect_pot3 = re.compile(
         r"^{PLYR}: Receives Cashout \({CUR}(?P<POT>[,.\d]+)\)".format(**substitutions),
@@ -316,7 +318,9 @@ class GGPoker(HandHistoryConverter):
         r"""
                         ^{PLYR}\swins\s{CUR}(?P<AMT>[,\.0-9]+)\s
                         for\s(splitting\sthe\selimination\sof|eliminating)\s(?P<ELIMINATED>.+?)\s
-                        and\stheir\sown\sbounty\sincreases\sby\s{CUR}(?P<INCREASE>[\.0-9]+)\sto\s{CUR}(?P<ENDAMT>[\.0-9]+)$""".format(**substitutions),
+                        and\stheir\sown\sbounty\sincreases\sby\s{CUR}(?P<INCREASE>[\.0-9]+)\sto\s{CUR}(?P<ENDAMT>[\.0-9]+)$""".format(
+            **substitutions
+        ),
         re.MULTILINE | re.VERBOSE,
     )
     re_rake = re.compile(
@@ -338,8 +342,10 @@ class GGPoker(HandHistoryConverter):
             player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
             subst = {
                 "PLYR": player_re,
-                "BRKTS": (r"(\(button\) |\(small blind\) |\(big blind\) |"
-                         r"\(button\) \(small blind\) |\(button\) \(big blind\) )?"),
+                "BRKTS": (
+                    r"(\(button\) |\(small blind\) |\(big blind\) |"
+                    r"\(button\) \(small blind\) |\(button\) \(big blind\) )?"
+                ),
                 "CUR": "(\\$|\xe2\x82\xac|\u20ac||\\£|)",
             }
             self.re_HeroCards = re.compile(
@@ -476,18 +482,27 @@ class GGPoker(HandHistoryConverter):
         m1 = self.re_date_time1.finditer(datetime_str)
         for a in m1:
             datetimestr = "{}/{}/{} {}:{}:{}".format(
-                a.group("Y"), a.group("M"), a.group("D"),
-                a.group("H"), a.group("MIN"), a.group("S"),
+                a.group("Y"),
+                a.group("M"),
+                a.group("D"),
+                a.group("H"),
+                a.group("MIN"),
+                a.group("S"),
             )
         hand.startTime = datetime.datetime.strptime(  # noqa: DTZ007
-            datetimestr, "%Y/%m/%d %H:%M:%S",
+            datetimestr,
+            "%Y/%m/%d %H:%M:%S",
         )
         hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
 
     def _detect_currency(self, buyin_str: str, hand: "Hand") -> None:
         """Detect and set currency from buyin string."""
         currency_mapping = {
-            "$": "USD", "£": "GBP", "€": "EUR", "₹": "INR", "¥": "CNY",
+            "$": "USD",
+            "£": "GBP",
+            "€": "EUR",
+            "₹": "INR",
+            "¥": "CNY",
         }
 
         for symbol, currency in currency_mapping.items():
@@ -675,7 +690,9 @@ class GGPoker(HandHistoryConverter):
                 )
 
     def readCommunityCards(
-        self, hand: "Hand", street: str,
+        self,
+        hand: "Hand",
+        street: str,
     ) -> None:  # street has been matched by markStreets, so exists in this hand
         """Read and set community cards for a given street."""
         if (
@@ -776,7 +793,12 @@ class GGPoker(HandHistoryConverter):
             self._add_hole_cards_by_game_type(hand, street, player, newcards, oldcards)
 
     def _add_hole_cards_by_game_type(
-        self, hand: "Hand", street: str, player: str, newcards: list[str], oldcards: list[str],
+        self,
+        hand: "Hand",
+        street: str,
+        player: str,
+        newcards: list[str],
+        oldcards: list[str],
     ) -> None:
         """Add hole cards based on game type and street."""
         stud_initial_cards = 3
@@ -787,8 +809,13 @@ class GGPoker(HandHistoryConverter):
         elif (street == "PREFLOP" and hand.gametype["category"] == "holdem") or street == "DEAL":
             if hand.gametype["category"] in ("studhi", "studhilo") and street == "DEAL":
                 hand.addHoleCards(
-                    street, player, closed=oldcards, open=newcards,
-                    shown=False, mucked=False, dealt=True,
+                    street,
+                    player,
+                    closed=oldcards,
+                    open=newcards,
+                    shown=False,
+                    mucked=False,
+                    dealt=True,
                 )
             else:
                 hand.addHoleCards(street, player, closed=newcards, shown=False, mucked=False, dealt=True)
@@ -798,7 +825,10 @@ class GGPoker(HandHistoryConverter):
         if hand.gametype["category"] in ("27_1draw", "fivedraw"):
             # isolate the first discard/stand pat line (thanks Carl for the regex)
             discard_split = re.split(
-                r"(?:(.+(?: stands pat|: discards).+))", hand.handText, maxsplit=0, flags=re.DOTALL,
+                r"(?:(.+(?: stands pat|: discards).+))",
+                hand.handText,
+                maxsplit=0,
+                flags=re.DOTALL,
             )
             if len(hand.handText) != len(discard_split[0]):
                 # DRAW street found, reassemble, with DRAW marker added
@@ -858,9 +888,7 @@ class GGPoker(HandHistoryConverter):
                 (
                     shown,
                     mucked,
-                ) = (
-                    (True, False) if shows.group("SHOWED") == "showed" else (False, True)
-                )
+                ) = (True, False) if shows.group("SHOWED") == "showed" else (False, True)
 
                 if (
                     hand.gametype["category"] in ("holdem")
@@ -871,16 +899,18 @@ class GGPoker(HandHistoryConverter):
                 elif len(cards) > 0:
                     hand.addShownCards(cards=cards, player=shows.group("PNAME"), shown=shown, mucked=mucked)
 
-                if (shows.group("STRING") is not None
+                if (
+                    shows.group("STRING") is not None
                     and hand.gametype["category"] in ("holdem", "omahahi", "omahahilo")
-                    and len(cards) > 0):
-                        hand.addShownCards(
-                            cards=cards,
-                            player=shows.group("PNAME"),
-                            shown=shown,
-                            mucked=mucked,
-                            string=shows.group("STRING"),
-                        )
+                    and len(cards) > 0
+                ):
+                    hand.addShownCards(
+                        cards=cards,
+                        player=shows.group("PNAME"),
+                        shown=shown,
+                        mucked=mucked,
+                        string=shows.group("STRING"),
+                    )
 
         if self.re_bounty.search(hand.handText) is None:
             m = self.re_winning_rank_one.search(hand.handText)
@@ -952,14 +982,12 @@ class GGPoker(HandHistoryConverter):
         """Returns string to search in windows titles."""
         regex = re.escape(str(table_name))
         if type_ == "tour":
-            regex = (
-                re.escape(str(tournament))
-                + ".* (Table|Tisch) "
-                + re.escape(str(table_number))
-            )
+            regex = re.escape(str(tournament)) + ".* (Table|Tisch) " + re.escape(str(table_number))
         log.info(
             "table_name='%s' tournament='%s' table_number='%s'",
-            table_name, tournament, table_number,
+            table_name,
+            tournament,
+            table_number,
         )
         log.info("returns: '%s'", regex)
         return regex

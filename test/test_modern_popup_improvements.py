@@ -91,11 +91,11 @@ def test_partial_progress_characters() -> bool:
     """Test partial characters for better precision."""
     # Test cases with values that give remainders
     test_cases = [
-        (23, "██▎▒▒▒▒▒▒▒"),  # 23% 
-        (27, "██▌▒▒▒▒▒▒▒"),  # 27% 
-        (29, "██▉▒▒▒▒▒▒▒"),  # 29% 
-        (67, "██████▌▒▒▒"),  # 67% 
-        (95, "█████████▌"),  # 95% 
+        (23, "██▎▒▒▒▒▒▒▒"),  # 23%
+        (27, "██▌▒▒▒▒▒▒▒"),  # 27%
+        (29, "██▉▒▒▒▒▒▒▒"),  # 29%
+        (67, "██████▌▒▒▒"),  # 67%
+        (95, "█████████▌"),  # 95%
     ]
 
     for percentage, _expected_bar in test_cases:
@@ -131,12 +131,7 @@ def test_drag_and_drop_attributes() -> bool | None:
 
         # Verify that attributes would be initialized
 
-
         return True
 
     except Exception:
         return False
-
-
-
-

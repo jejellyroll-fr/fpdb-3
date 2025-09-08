@@ -12,11 +12,11 @@ Hero: posts small blind $2
 3b7dff87: posts big blind $5
 *** HOLE CARDS ***
 Dealt to Hero [Ad Jd Jc Ks]
-Dealt to 21e21aa8 
-Dealt to e0cf801d 
-Dealt to 3b7dff87 
-Dealt to a45e9ced 
-Dealt to 657a57ac 
+Dealt to 21e21aa8
+Dealt to e0cf801d
+Dealt to 3b7dff87
+Dealt to a45e9ced
+Dealt to 657a57ac
 e0cf801d: folds
 3b7dff87: raises $14 to $19
 a45e9ced: folds

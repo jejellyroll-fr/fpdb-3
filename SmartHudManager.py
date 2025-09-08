@@ -17,6 +17,7 @@ log = get_logger("smart_hud_manager")
 
 class RestartReason(Enum):
     """Reasons for HUD restart."""
+
     TABLE_CLOSED = "table_closed"
     GAME_TYPE_CHANGE = "game_type_change"
     MAX_SEATS_CHANGE = "max_seats_change"
@@ -28,6 +29,7 @@ class RestartReason(Enum):
 @dataclass
 class TableState:
     """Current state of a poker table."""
+
     table_key: str
     poker_game: str
     game_type: str
@@ -51,11 +53,17 @@ class SmartHudManager:
 
         # Settings that require restart vs those that don't
         self.restart_required_changes = {
-            "poker_game", "game_type", "max_seats", "site_name",
+            "poker_game",
+            "game_type",
+            "max_seats",
+            "site_name",
         }
 
         self.update_only_changes = {
-            "hud_params", "stat_dict", "cards", "positions",
+            "hud_params",
+            "stat_dict",
+            "cards",
+            "positions",
         }
 
     def should_restart_hud(
@@ -222,7 +230,9 @@ class SmartHudManager:
         if table_key in self.table_states:
             self.table_states[table_key].restart_count += 1
             self.table_states[table_key].last_update = time.time()
-            log.info(f"HUD restart recorded for {table_key}: {reason} (restart #{self.table_states[table_key].restart_count})")
+            log.info(
+                f"HUD restart recorded for {table_key}: {reason} (restart #{self.table_states[table_key].restart_count})"
+            )
 
     def _cleanup_table_state(self, table_key: str) -> None:
         """Clean up state for closed table."""
@@ -251,6 +261,7 @@ class SmartHudManager:
         def normalize_title(title: str) -> str:
             # Remove numbers that commonly change (blinds, player counts, etc.)
             import re
+
             normalized = re.sub(r"\d+/\d+", "", title)  # Remove blinds
             normalized = re.sub(r"\(\d+\s+players?\)", "", normalized)  # Remove player counts like "(6 players)"
             normalized = re.sub(r"\(\d+\)", "", normalized)  # Remove simple numbers in parentheses
@@ -281,6 +292,7 @@ class SmartHudManager:
 
 # Global instance for easy usage
 _smart_hud_manager_instance = None
+
 
 def get_smart_hud_manager() -> SmartHudManager:
     """Return global instance of smart HUD manager."""

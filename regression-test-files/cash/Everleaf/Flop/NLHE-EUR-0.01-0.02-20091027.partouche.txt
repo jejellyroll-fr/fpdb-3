@@ -44,5 +44,3 @@ player5 calls [ € 0.55 EUR]
 player4 shows [ 5s, 4s ]a pair of tens
 player5 shows [ Qh, Ad ]two pairs, queens and tens
 player5 wins  € 2.72 EUR from main pot with two pairs, queens and tens [ Ad, Qh, Qs, Th, Tc ]
-
-

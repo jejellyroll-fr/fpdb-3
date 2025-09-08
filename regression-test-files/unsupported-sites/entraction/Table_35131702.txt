@@ -13,11 +13,11 @@ Big Blind:                  F4UXR34L    (0.04)
 
 F4UXR34L was dealt:         5d - 8h - 9d - 5s
 
-akilim                      Fold        
+akilim                      Fold
 Makesdy                     Raise       (0.14)
 kos081                      Call        (0.14)
-lukasp2                     Fold        
-F4UXR34L                    Fold        
+lukasp2                     Fold
+F4UXR34L                    Fold
 
 Flop                        2c - Th - Kc
 
@@ -26,13 +26,13 @@ kos081                      Call        (0.25)
 
 Turn                        2c - Th - Kc - 2h
 
-Makesdy                     Check       
-kos081                      Check       
+Makesdy                     Check
+kos081                      Check
 
 River                       2c - Th - Kc - 2h - 6h
 
-Makesdy                     Check       
-kos081                      Check       
+Makesdy                     Check
+kos081                      Check
 
 Makesdy shows:              Jd - Qd - Qc - Td (two pairs, Queens and Deuces)
 kos081 shows:               7h - 4s - As - Ks (two pairs, Kings and Deuces)
@@ -58,26 +58,26 @@ Big Blind:                  akilim      (0.04)
 
 F4UXR34L was dealt:         6s - 7c - Tc - Kh
 
-Makesdy                     Fold        
+Makesdy                     Fold
 kos081                      Call        (0.04)
-lukasp2                     Fold        
-F4UXR34L                    Fold        
-akilim                      Check       
+lukasp2                     Fold
+F4UXR34L                    Fold
+akilim                      Check
 
 Flop                        Jc - 7d - 2c
 
-akilim                      Check       
-kos081                      Check       
+akilim                      Check
+kos081                      Check
 
 Turn                        Jc - 7d - 2c - 9h
 
-akilim                      Check       
-kos081                      Check       
+akilim                      Check
+kos081                      Check
 
 River                       Jc - 7d - 2c - 9h - 3c
 
-akilim                      Check       
-kos081                      Check       
+akilim                      Check
+kos081                      Check
 
 akilim shows:               Qh - 6c - 5s - Qd (a pair of Queens)
 kos081 shows:               As - Kd - Ac - 2h (a pair of Aces)
@@ -105,10 +105,10 @@ F4UXR34L was dealt:         9s - 7s - 9d - 4c
 
 kos081                      Call        (0.04)
 lukasp2                     Raise       (0.18)
-F4UXR34L                    Fold        
-akilim                      Fold        
-Makesdy                     Fold        
-kos081                      Fold        
+F4UXR34L                    Fold
+akilim                      Fold
+Makesdy                     Fold
+kos081                      Fold
 lukasp2                     Payback     (0.14)
 
 lukasp2 didn't show hand
@@ -134,16 +134,16 @@ Big Blind:                  kos081      (0.04)
 
 F4UXR34L was dealt:         Kc - Kh - 3d - 7d
 
-lukasp2                     Fold        
-F4UXR34L                    Fold        
+lukasp2                     Fold
+F4UXR34L                    Fold
 akilim                      Raise       (0.11)
-Makesdy                     Fold        
+Makesdy                     Fold
 kos081                      Call        (0.07)
 
 Flop                        5d - Qc - 7s
 
-kos081                      Check       
-akilim                      Check       
+kos081                      Check
+akilim                      Check
 
 Turn                        5d - Qc - 7s - 8s
 
@@ -153,7 +153,7 @@ akilim                      Call        (0.24)
 River                       5d - Qc - 7s - 8s - Ts
 
 kos081                      Bet         (0.24)
-akilim                      Fold        
+akilim                      Fold
 kos081                      Payback     (0.24)
 
 kos081 didn't show hand
@@ -179,29 +179,29 @@ Big Blind:                  lukasp2     (0.04)
 
 F4UXR34L was dealt:         5c - Jc - 7d - Ts
 
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 akilim                      Raise       (0.11)
-Makesdy                     Fold        
+Makesdy                     Fold
 kos081                      Call        (0.09)
 lukasp2                     Call        (0.07)
 
 Flop                        4h - 4c - Kc
 
-kos081                      Check       
-lukasp2                     Check       
+kos081                      Check
+lukasp2                     Check
 akilim                      Bet         (0.16)
 kos081                      Call        (0.16)
-lukasp2                     Fold        
+lukasp2                     Fold
 
 Turn                        4h - 4c - Kc - 8c
 
-kos081                      Check       
-akilim                      Check       
+kos081                      Check
+akilim                      Check
 
 River                       4h - 4c - Kc - 8c - 4s
 
 kos081                      Bet         (0.65)
-akilim                      Fold        
+akilim                      Fold
 kos081                      Payback     (0.65)
 
 kos081 didn't show hand
@@ -227,29 +227,29 @@ Big Blind:                  Vokha       (0.04)
 
 F4UXR34L was dealt:         2h - 3s - Kd - 5s
 
-F4UXR34L                    Fold        
-akilim                      Fold        
-Makesdy                     Fold        
+F4UXR34L                    Fold
+akilim                      Fold
+Makesdy                     Fold
 kos081                      Call        (0.04)
 lukasp2                     Call        (0.02)
-Vokha                       Check       
+Vokha                       Check
 
 Flop                        8h - Ah - 9h
 
-lukasp2                     Check       
-Vokha                       Check       
-kos081                      Check       
+lukasp2                     Check
+Vokha                       Check
+kos081                      Check
 
 Turn                        8h - Ah - 9h - Th
 
-lukasp2                     Check       
+lukasp2                     Check
 Vokha                       Bet         (0.12)
-kos081                      Fold        
+kos081                      Fold
 lukasp2                     Call        (0.12)
 
 River                       8h - Ah - 9h - Th - 8c
 
-lukasp2                     Check       
+lukasp2                     Check
 Vokha                       Bet         (0.04)
 lukasp2                     Call        (0.04)
 
@@ -278,18 +278,18 @@ Big Blind:                  F4UXR34L    (0.04)
 
 F4UXR34L was dealt:         Ac - Td - Tc - 2d
 
-akilim                      Fold        
-Makesdy                     Fold        
+akilim                      Fold
+Makesdy                     Fold
 kos081                      Call        (0.04)
 lukasp2                     Raise       (0.18)
-Vokha                       Fold        
-F4UXR34L                    Fold        
+Vokha                       Fold
+F4UXR34L                    Fold
 kos081                      Call        (0.14)
 
 Flop                        3h - 9h - Jh
 
-kos081                      Check       
-lukasp2                     Check       
+kos081                      Check
+lukasp2                     Check
 
 Turn                        3h - 9h - Jh - 6d
 
@@ -326,26 +326,26 @@ Big Blind:                  akilim      (0.04)
 
 F4UXR34L was dealt:         7c - Kd - Ac - 6c
 
-Makesdy                     Fold        
+Makesdy                     Fold
 kos081                      Call        (0.04)
 lukasp2                     Call        (0.04)
-Vokha                       Fold        
-F4UXR34L                    Fold        
-akilim                      Check       
+Vokha                       Fold
+F4UXR34L                    Fold
+akilim                      Check
 
 Flop                        Js - 6d - Kc
 
-akilim                      Check       
-kos081                      Check       
+akilim                      Check
+kos081                      Check
 lukasp2                     Bet         (0.14)
 akilim                      Call        (0.14)
-kos081                      Fold        
+kos081                      Fold
 
 Turn                        Js - 6d - Kc - Jc
 
-akilim                      Check       
+akilim                      Check
 lukasp2                     Bet         (0.42)
-akilim                      Fold        
+akilim                      Fold
 lukasp2                     Payback     (0.42)
 
 lukasp2 didn't show hand
@@ -372,27 +372,27 @@ Big Blind:                  Makesdy     (0.04)
 F4UXR34L was dealt:         6s - Th - Kc - Qs
 
 kos081                      Call        (0.04)
-lukasp2                     Fold        
-Vokha                       Fold        
-F4UXR34L                    Fold        
+lukasp2                     Fold
+Vokha                       Fold
+F4UXR34L                    Fold
 akilim                      Call        (0.02)
-Makesdy                     Check       
+Makesdy                     Check
 
 Flop                        3s - 2h - 2c
 
-akilim                      Check       
-Makesdy                     Check       
+akilim                      Check
+Makesdy                     Check
 kos081                      Bet         (0.12)
 akilim                      Call        (0.12)
-Makesdy                     Fold        
+Makesdy                     Fold
 
 Turn                        3s - 2h - 2c - 8c
 
-akilim                      Check       
+akilim                      Check
 kos081                      Bet         (0.36)
 akilim                      Raise       (0.72)
 kos081                      Raise       (2.16)
-akilim                      Fold        
+akilim                      Fold
 kos081                      Payback     (1.80)
 
 kos081 didn't show hand
@@ -419,18 +419,18 @@ Big Blind:                  kos081      (0.04)
 F4UXR34L was dealt:         Kc - 5h - 5d - 8d
 
 lukasp2                     Raise       (0.14)
-Vokha                       Fold        
-F4UXR34L                    Fold        
+Vokha                       Fold
+F4UXR34L                    Fold
 akilim                      Call        (0.14)
-Makesdy                     Fold        
+Makesdy                     Fold
 kos081                      Call        (0.10)
 
 Flop                        As - 4c - Jh
 
-kos081                      Check       
+kos081                      Check
 lukasp2                     Bet         (0.44)
-akilim                      Fold        
-kos081                      Fold        
+akilim                      Fold
+kos081                      Fold
 lukasp2                     Payback     (0.44)
 
 lukasp2 didn't show hand
@@ -456,23 +456,23 @@ Big Blind:                  lukasp2     (0.04)
 
 F4UXR34L was dealt:         Qc - 8c - Qd - 7d
 
-Vokha                       Fold        
+Vokha                       Fold
 F4UXR34L                    Call        (0.04)
-akilim                      Fold        
-Makesdy                     Fold        
+akilim                      Fold
+Makesdy                     Fold
 kos081                      Call        (0.02)
-lukasp2                     Check       
+lukasp2                     Check
 
 Flop                        Kh - Kd - 5h
 
-kos081                      Check       
-lukasp2                     Check       
-F4UXR34L                    Check       
+kos081                      Check
+lukasp2                     Check
+F4UXR34L                    Check
 
 Turn                        Kh - Kd - 5h - Kc
 
 kos081                      Bet         (0.08)
-lukasp2                     Fold        
+lukasp2                     Fold
 F4UXR34L                    Call        (0.08)
 
 River                       Kh - Kd - 5h - Kc - 8s
@@ -504,18 +504,18 @@ Big Blind:                  Vokha       (0.04)
 
 F4UXR34L was dealt:         8s - 4c - 7d - Ah
 
-F4UXR34L                    Fold        
-akilim                      Fold        
+F4UXR34L                    Fold
+akilim                      Fold
 Makesdy                     Call        (0.04)
-kos081                      Fold        
+kos081                      Fold
 lukasp2                     Call        (0.02)
-Vokha                       Check       
+Vokha                       Check
 
 Flop                        2h - 6h - 4d
 
 lukasp2                     Bet         (0.12)
 Vokha                       Call        (0.12)
-Makesdy                     Fold        
+Makesdy                     Fold
 
 Turn                        2h - 6h - 4d - Jd
 
@@ -525,7 +525,7 @@ Vokha                       Call        (0.36)
 River                       2h - 6h - 4d - Jd - 9c
 
 lukasp2                     All-In      (0.60)
-Vokha                       Fold        
+Vokha                       Fold
 lukasp2                     Payback     (0.60)
 
 lukasp2 didn't show hand
@@ -551,30 +551,30 @@ Big Blind:                  F4UXR34L    (0.04)
 
 F4UXR34L was dealt:         Jc - Td - 8d - 7s
 
-akilim                      Fold        
+akilim                      Fold
 Makesdy                     Raise       (0.14)
 kos081                      Call        (0.14)
-lukasp2                     Fold        
-Vokha                       Fold        
+lukasp2                     Fold
+Vokha                       Fold
 F4UXR34L                    Call        (0.10)
 
 Flop                        Qh - Ks - Tc
 
-F4UXR34L                    Check       
-Makesdy                     Check       
-kos081                      Check       
+F4UXR34L                    Check
+Makesdy                     Check
+kos081                      Check
 
 Turn                        Qh - Ks - Tc - 6c
 
-F4UXR34L                    Check       
-Makesdy                     Check       
-kos081                      Check       
+F4UXR34L                    Check
+Makesdy                     Check
+kos081                      Check
 
 River                       Qh - Ks - Tc - 6c - Qd
 
-F4UXR34L                    Check       
-Makesdy                     Check       
-kos081                      Check       
+F4UXR34L                    Check
+Makesdy                     Check
+kos081                      Check
 
 F4UXR34L shows:             Jc - Td - 8d - 7s (two pairs, Queens and Tens)
 Makesdy shows:              2h - Ah - 2d - Ad (two pairs, Aces and Queens)
@@ -602,12 +602,12 @@ Big Blind:                  akilim      (0.04)
 
 F4UXR34L was dealt:         9c - 6s - Ad - Kc
 
-Makesdy                     Fold        
+Makesdy                     Fold
 kos081                      Call        (0.04)
-lukasp2                     Fold        
-Vokha                       Fold        
-F4UXR34L                    Fold        
-akilim                      Check       
+lukasp2                     Fold
+Vokha                       Fold
+F4UXR34L                    Fold
+akilim                      Check
 
 Flop                        Qd - 2h - Jc
 
@@ -616,12 +616,12 @@ kos081                      Call        (0.07)
 
 Turn                        Qd - 2h - Jc - Ts
 
-akilim                      Check       
-kos081                      Check       
+akilim                      Check
+kos081                      Check
 
 River                       Qd - 2h - Jc - Ts - 7h
 
-akilim                      Check       
+akilim                      Check
 kos081                      Bet         (0.18)
 akilim                      Call        (0.18)
 
@@ -650,22 +650,22 @@ Big Blind:                  Makesdy     (0.04)
 
 F4UXR34L was dealt:         Th - Tc - Qs - 5d
 
-kos081                      Fold        
-lukasp2                     Fold        
+kos081                      Fold
+lukasp2                     Fold
 Vokha                       Call        (0.04)
-F4UXR34L                    Fold        
-akilim                      Fold        
-Makesdy                     Check       
+F4UXR34L                    Fold
+akilim                      Fold
+Makesdy                     Check
 
 Flop                        9h - 6h - Js
 
-Makesdy                     Check       
-Vokha                       Check       
+Makesdy                     Check
+Vokha                       Check
 
 Turn                        9h - 6h - Js - 2d
 
 Makesdy                     Bet         (0.10)
-Vokha                       Fold        
+Vokha                       Fold
 Makesdy                     Payback     (0.10)
 
 Makesdy didn't show hand
@@ -690,10 +690,10 @@ Big Blind:                  lukasp2     (0.04)
 
 F4UXR34L was dealt:         5h - 7d - Ks - 2d
 
-Vokha                       Fold        
-F4UXR34L                    Fold        
-akilim                      Fold        
-Makesdy                     Fold        
+Vokha                       Fold
+F4UXR34L                    Fold
+akilim                      Fold
+Makesdy                     Fold
 lukasp2                     Payback     (0.02)
 
 lukasp2 didn't show hand
@@ -718,9 +718,9 @@ Big Blind:                  Vokha       (0.04)
 
 F4UXR34L was dealt:         6s - 7s - Ah - Jd
 
-F4UXR34L                    Fold        
-akilim                      Fold        
-Makesdy                     Fold        
+F4UXR34L                    Fold
+akilim                      Fold
+Makesdy                     Fold
 lukasp2                     Raise       (0.10)
 Vokha                       Call        (0.08)
 
@@ -756,11 +756,11 @@ Big Blind:                  F4UXR34L    (0.04)
 
 F4UXR34L was dealt:         As - Ks - 9s - 2h
 
-akilim                      Fold        
-Makesdy                     Fold        
-lukasp2                     Fold        
+akilim                      Fold
+Makesdy                     Fold
+lukasp2                     Fold
 Vokha                       Raise       (0.10)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Vokha                       Payback     (0.08)
 
 Vokha didn't show hand
@@ -784,10 +784,10 @@ Big Blind:                  akilim      (0.04)
 
 F4UXR34L was dealt:         4c - 2d - 7d - Kc
 
-Makesdy                     Fold        
+Makesdy                     Fold
 Vokha                       Raise       (0.14)
-F4UXR34L                    Fold        
-akilim                      Fold        
+F4UXR34L                    Fold
+akilim                      Fold
 Vokha                       Payback     (0.10)
 
 Vokha didn't show hand
@@ -811,20 +811,20 @@ Big Blind:                  Makesdy     (0.04)
 
 F4UXR34L was dealt:         6h - 3d - 6c - 4c
 
-Vokha                       Fold        
-F4UXR34L                    Fold        
+Vokha                       Fold
+F4UXR34L                    Fold
 akilim                      Call        (0.02)
-Makesdy                     Check       
+Makesdy                     Check
 
 Flop                        7s - 9c - 3h
 
-akilim                      Check       
-Makesdy                     Check       
+akilim                      Check
+Makesdy                     Check
 
 Turn                        7s - 9c - 3h - Ac
 
 akilim                      Bet         (0.06)
-Makesdy                     Fold        
+Makesdy                     Fold
 akilim                      Payback     (0.06)
 
 akilim didn't show hand
@@ -848,9 +848,9 @@ Big Blind:                  Vokha       (0.04)
 
 F4UXR34L was dealt:         5s - Qd - 9c - Js
 
-F4UXR34L                    Fold        
-akilim                      Fold        
-Makesdy                     Fold        
+F4UXR34L                    Fold
+akilim                      Fold
+Makesdy                     Fold
 Vokha                       Payback     (0.02)
 
 Vokha didn't show hand
@@ -875,9 +875,9 @@ Big Blind:                  F4UXR34L    (0.04)
 F4UXR34L was dealt:         4c - Tc - Ad - 4h
 
 akilim                      Raise       (0.11)
-Makesdy                     Fold        
-Vokha                       Fold        
-F4UXR34L                    Fold        
+Makesdy                     Fold
+Vokha                       Fold
+F4UXR34L                    Fold
 akilim                      Payback     (0.07)
 
 akilim didn't show hand
@@ -901,8 +901,8 @@ Big Blind:                  Makesdy     (0.04)
 
 F4UXR34L was dealt:         Jd - 8d - 6s - 2s
 
-Vokha                       Fold        
-F4UXR34L                    Fold        
+Vokha                       Fold
+F4UXR34L                    Fold
 Makesdy                     Payback     (0.02)
 
 Makesdy didn't show hand
@@ -926,8 +926,8 @@ Big Blind:                  Vokha       (0.04)
 F4UXR34L was dealt:         Jd - 9s - Jh - 9h
 
 F4UXR34L                    Raise       (0.14)
-Makesdy                     Fold        
-Vokha                       Fold        
+Makesdy                     Fold
+Vokha                       Fold
 F4UXR34L                    Payback     (0.10)
 
 F4UXR34L didn't show hand
@@ -951,8 +951,8 @@ Big Blind:                  F4UXR34L    (0.04)
 F4UXR34L was dealt:         4h - 3s - 6s - Ac
 
 Makesdy                     Raise       (0.14)
-Vokha                       Fold        
-F4UXR34L                    Fold        
+Vokha                       Fold
+F4UXR34L                    Fold
 Makesdy                     Payback     (0.10)
 
 Makesdy didn't show hand
@@ -977,18 +977,18 @@ Big Blind:                  espanico8   (0.04)
 F4UXR34L was dealt:         5h - Td - 6s - 3d
 
 Vokha                       Call        (0.04)
-F4UXR34L                    Fold        
-espanico8                   Check       
+F4UXR34L                    Fold
+espanico8                   Check
 
 Flop                        Ac - Qh - 5s
 
-espanico8                   Check       
-Vokha                       Check       
+espanico8                   Check
+Vokha                       Check
 
 Turn                        Ac - Qh - 5s - 2c
 
 espanico8                   Bet         (0.04)
-Vokha                       Fold        
+Vokha                       Fold
 espanico8                   Payback     (0.04)
 
 espanico8 didn't show hand
@@ -1012,14 +1012,14 @@ Big Blind:                  Vokha       (0.04)
 
 F4UXR34L was dealt:         3c - Td - 2s - Js
 
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 espanico8                   Raise       (0.10)
 Vokha                       Call        (0.08)
 
 Flop                        4h - 7h - 6s
 
 espanico8                   Bet         (0.24)
-Vokha                       Fold        
+Vokha                       Fold
 espanico8                   Payback     (0.24)
 
 espanico8 didn't show hand
@@ -1046,15 +1046,15 @@ Blind out of turn:          -Juhave-    (0.04)
 
 F4UXR34L was dealt:         6c - 7c - Th - 5d
 
-opasa                       Check       
--Juhave-                    Check       
+opasa                       Check
+-Juhave-                    Check
 espanico8                   Call        (0.04)
-Vokha                       Fold        
-F4UXR34L                    Check       
+Vokha                       Fold
+F4UXR34L                    Check
 
 Flop                        Kd - 5h - 9d
 
-F4UXR34L                    Check       
+F4UXR34L                    Check
 opasa                       Bet         (0.04)
 -Juhave-                    Call        (0.04)
 espanico8                   Call        (0.04)
@@ -1062,12 +1062,12 @@ F4UXR34L                    Call        (0.04)
 
 Turn                        Kd - 5h - 9d - 8c
 
-F4UXR34L                    Check       
+F4UXR34L                    Check
 opasa                       Bet         (0.04)
--Juhave-                    Fold        
+-Juhave-                    Fold
 espanico8                   Raise       (0.46)
 F4UXR34L                    Raise       (1.76)
-opasa                       Fold        
+opasa                       Fold
 espanico8                   All-In      (1.62)
 F4UXR34L                    Call        (0.32)
 
@@ -1101,29 +1101,29 @@ F4UXR34L was dealt:         Tc - Kd - 8s - 2d
 
 -Juhave-                    Call        (0.04)
 espanico8                   Call        (0.04)
-Makesdy                     Check       
-Vokha                       Fold        
-F4UXR34L                    Fold        
-opasa                       Check       
+Makesdy                     Check
+Vokha                       Fold
+F4UXR34L                    Fold
+opasa                       Check
 
 Flop                        4s - 5d - Th
 
-opasa                       Check       
--Juhave-                    Check       
+opasa                       Check
+-Juhave-                    Check
 espanico8                   Bet         (0.13)
-Makesdy                     Fold        
+Makesdy                     Fold
 opasa                       Call        (0.13)
--Juhave-                    Fold        
+-Juhave-                    Fold
 
 Turn                        4s - 5d - Th - Ts
 
-opasa                       Check       
-espanico8                   Check       
+opasa                       Check
+espanico8                   Check
 
 River                       4s - 5d - Th - Ts - Jh
 
 opasa                       Bet         (0.44)
-espanico8                   Fold        
+espanico8                   Fold
 opasa                       Payback     (0.44)
 
 opasa didn't show hand
@@ -1150,20 +1150,20 @@ Big Blind:                  -Juhave-    (0.04)
 F4UXR34L was dealt:         Js - Jh - 3s - 9d
 
 espanico8                   Call        (0.04)
-Makesdy                     Fold        
+Makesdy                     Fold
 Vokha                       Call        (0.04)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 opasa                       Call        (0.02)
--Juhave-                    Check       
+-Juhave-                    Check
 
 Flop                        4s - Kd - 7c
 
-opasa                       Check       
--Juhave-                    Check       
+opasa                       Check
+-Juhave-                    Check
 espanico8                   Bet         (0.16)
-Vokha                       Fold        
-opasa                       Fold        
--Juhave-                    Fold        
+Vokha                       Fold
+opasa                       Fold
+-Juhave-                    Fold
 espanico8                   Payback     (0.16)
 
 espanico8 didn't show hand
@@ -1189,9 +1189,9 @@ Big Blind:                  espanico8   (0.04)
 
 F4UXR34L was dealt:         2c - Qd - 6h - 4c
 
-Makesdy                     Fold        
-Vokha                       Fold        
-F4UXR34L                    Fold        
+Makesdy                     Fold
+Vokha                       Fold
+F4UXR34L                    Fold
 opasa                       Call        (0.04)
 -Juhave-                    Call        (0.02)
 espanico8                   Raise       (0.12)
@@ -1200,14 +1200,14 @@ opasa                       Call        (0.12)
 
 Flop                        8h - Ac - Qh
 
--Juhave-                    Check       
+-Juhave-                    Check
 espanico8                   Bet         (0.48)
-opasa                       Fold        
+opasa                       Fold
 -Juhave-                    Call        (0.48)
 
 Turn                        8h - Ac - Qh - Jd
 
--Juhave-                    Check       
+-Juhave-                    Check
 espanico8                   Bet         (1.44)
 -Juhave-                    All-In      (1.20)
 espanico8                   Payback     (0.24)
@@ -1238,12 +1238,12 @@ Big Blind:                  Makesdy     (0.04)
 
 F4UXR34L was dealt:         Ad - 5h - 2s - 7d
 
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 opasa                       Call        (0.04)
 -Juhave-                    Call        (0.04)
 espanico8                   Raise       (0.18)
-Makesdy                     Fold        
-opasa                       Fold        
+Makesdy                     Fold
+opasa                       Fold
 -Juhave-                    Call        (0.16)
 
 Flop                        7c - 7h - Qd
@@ -1278,22 +1278,22 @@ Big Blind:                  F4UXR34L    (0.04)
 
 F4UXR34L was dealt:         4d - Kd - Qd - 2c
 
-opasa                       Fold        
--Juhave-                    Fold        
+opasa                       Fold
+-Juhave-                    Fold
 espanico8                   Raise       (0.08)
 Makesdy                     Call        (0.06)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 
 Flop                        Jh - 2s - 2d
 
-Makesdy                     Check       
-espanico8                   Check       
+Makesdy                     Check
+espanico8                   Check
 
 Turn                        Jh - 2s - 2d - 5h
 
-Makesdy                     Check       
+Makesdy                     Check
 espanico8                   Bet         (0.20)
-Makesdy                     Fold        
+Makesdy                     Fold
 espanico8                   Payback     (0.20)
 
 espanico8 didn't show hand
@@ -1321,9 +1321,9 @@ F4UXR34L was dealt:         Th - 3d - 7h - Jc
 
 -Juhave-                    Call        (0.04)
 espanico8                   Call        (0.04)
-Makesdy                     Fold        
-F4UXR34L                    Fold        
-opasa                       Check       
+Makesdy                     Fold
+F4UXR34L                    Fold
+opasa                       Check
 
 Flop                        6d - Ts - As
 
@@ -1333,11 +1333,11 @@ espanico8                   Call        (0.04)
 
 Turn                        6d - Ts - As - 4s
 
-opasa                       Check       
--Juhave-                    Check       
+opasa                       Check
+-Juhave-                    Check
 espanico8                   Bet         (0.26)
-opasa                       Fold        
--Juhave-                    Fold        
+opasa                       Fold
+-Juhave-                    Fold
 espanico8                   Payback     (0.26)
 
 espanico8 didn't show hand
@@ -1364,28 +1364,28 @@ Big Blind:                  -Juhave-    (0.04)
 F4UXR34L was dealt:         9c - Qs - 7d - Ah
 
 espanico8                   Call        (0.04)
-Makesdy                     Fold        
-F4UXR34L                    Fold        
+Makesdy                     Fold
+F4UXR34L                    Fold
 opasa                       Call        (0.02)
--Juhave-                    Check       
+-Juhave-                    Check
 
 Flop                        4c - Th - As
 
-opasa                       Check       
--Juhave-                    Check       
-espanico8                   Check       
+opasa                       Check
+-Juhave-                    Check
+espanico8                   Check
 
 Turn                        4c - Th - As - 4h
 
-opasa                       Check       
--Juhave-                    Check       
-espanico8                   Check       
+opasa                       Check
+-Juhave-                    Check
+espanico8                   Check
 
 River                       4c - Th - As - 4h - 7h
 
-opasa                       Check       
--Juhave-                    Check       
-espanico8                   Check       
+opasa                       Check
+-Juhave-                    Check
+espanico8                   Check
 
 opasa shows:                3s - 5c - 3h - Tc (two pairs, Tens and Fours)
 
@@ -1396,4 +1396,3 @@ opasa wins:                 EUR 0.12 (with two pairs, Tens and Fours)
 Rake:                       EUR 0.00
 
 Game ended 2011-03-21 17:24:52 GMT
-

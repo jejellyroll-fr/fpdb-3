@@ -58,6 +58,7 @@ rewrite = {
 
 class GuiPrefs(QDialog):
     """Preferences dialog for FPDB configuration."""
+
     def __init__(self, config: Any, parentwin: Any) -> None:
         """Initialize preferences dialog."""
         QDialog.__init__(self, parentwin)
@@ -124,7 +125,8 @@ class GuiPrefs(QDialog):
                         node.attributes.item(i).localName,
                     )
                     attritem = QTreeWidgetItem(
-                        item, [local_name, node.attributes.item(i).value],
+                        item,
+                        [local_name, node.attributes.item(i).value],
                     )
                     attritem.setData(1, Qt.UserRole, node.attributes.item(i))
                     attritem.setFlags(attritem.flags() | Qt.ItemIsEditable)
@@ -149,9 +151,12 @@ class GuiPrefs(QDialog):
                     self.addTreeRows(item, elem)
 
 
-if __name__ == "__main__":
-    Configuration.set_logfile("fpdb-log.txt")
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
 
+    # Simple - just launch the preferences GUI like the original
+    Configuration.set_logfile("fpdb-log.txt")
     config = Configuration.Config()
 
     from PyQt5.QtWidgets import QApplication, QMainWindow
@@ -162,3 +167,10 @@ if __name__ == "__main__":
     prefs = GuiPrefs(config, main_window)
     prefs.exec_()
     app.exec_()
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(main())

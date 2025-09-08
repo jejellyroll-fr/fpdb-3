@@ -19,9 +19,8 @@ ALTER TABLE `fpdb`.`HandsActions` DROP INDEX `id`;
 ALTER TABLE `fpdb`.`HudCache` DROP INDEX `id`;
 
 select '2. Adding extra indexes on useful fields' as ' ';
-select 'Duplicate key name messages indicate new indexes already there' as ' '; 
+select 'Duplicate key name messages indicate new indexes already there' as ' ';
 
 ALTER TABLE `fpdb`.`tourneys` ADD INDEX `siteTourneyNo`(`siteTourneyNo`);
 ALTER TABLE `fpdb`.`hands` ADD INDEX `siteHandNo`(`siteHandNo`);
 ALTER TABLE `fpdb`.`players` ADD INDEX `name`(`name`);
-

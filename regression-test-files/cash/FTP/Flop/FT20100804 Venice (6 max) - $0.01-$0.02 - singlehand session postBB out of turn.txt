@@ -47,6 +47,3 @@ Seat 3: player1 (small blind) folded on the Flop
 Seat 4: player3 (big blind) folded on the River
 Seat 5: player4 didn't bet (folded)
 Seat 6: player5 collected ($0.15), mucked
-
-
-

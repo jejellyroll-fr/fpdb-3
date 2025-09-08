@@ -39,4 +39,3 @@
   <XSHOW position="1"/>
   <WIN position="1" amount="10" pot="0" potAmount="10"/>
 </HAND>
-

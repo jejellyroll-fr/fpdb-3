@@ -740,7 +740,7 @@ BdaWinner raises 1260 to 1380 [all in]
 jaber2 calls 1260
 klubb folds
 juniorgaty folds
---- 
+---
 --- Dealing flop [7s, 4s, 7c]
 --- Dealing turn [Kc]
 --- Dealing river [Jh]
@@ -847,7 +847,7 @@ besac025 folds
 jaber2 folds
 husk calls 1525
 klubb folds
---- 
+---
 --- Dealing flop [Kh, 3h, 7c]
 --- Dealing turn [Kd]
 --- Dealing river [7s]
@@ -1110,7 +1110,7 @@ jaber2 folds
 carail folds
 husk folds
 klubb folds
---- 
+---
 --- Dealing flop [2d, 3d, Ac]
 --- Dealing turn [3h]
 --- Dealing river [Td]
@@ -1214,7 +1214,7 @@ klubb folds
 STIW folds
 MIKE21WIN folds
 bobby71000 calls 1115 [all in]
---- 
+---
 --- Dealing flop [5s, 4h, Th]
 --- Dealing turn [8s]
 --- Dealing river [9h]
@@ -1424,7 +1424,7 @@ CyRILLOS78 raises 1300 to 1500
 STIW folds
 MIKE21WIN raises 2200 to 2600
 CyRILLOS78 calls 240 [all in]
---- 
+---
 --- Dealing flop [Th, 5c, 9d]
 --- Dealing turn [9c]
 --- Dealing river [7h]
@@ -1604,7 +1604,7 @@ carail folds
 husk folds
 STIW calls 710
 MIKE21WIN folds
---- 
+---
 --- Dealing flop [Ah, As, 6d]
 --- Dealing turn [2s]
 --- Dealing river [4h]

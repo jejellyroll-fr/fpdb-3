@@ -346,7 +346,9 @@ class TestIconConsistency(unittest.TestCase):
         for stat in predefined_stats:
             icon = provider.get_icon(stat)
             if icon != "📊":  # Skip default fallback
-                assert icon.startswith("[") and icon.endswith("]"), f"Text icon '{icon}' for {stat} should be in [brackets]"
+                assert icon.startswith("[") and icon.endswith(
+                    "]"
+                ), f"Text icon '{icon}' for {stat} should be in [brackets]"
 
     def test_unicode_provider_uses_symbols(self) -> None:
         """Test that unicode provider uses symbol characters."""

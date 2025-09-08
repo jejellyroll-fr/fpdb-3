@@ -2752,38 +2752,86 @@ class Config:
         return self.gui_tour_stats
 
 
-if __name__ == "__main__":
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description="FPDB Configuration utility")
+    parser.add_argument("--validate", action="store_true", help="Validate configuration file")
+    parser.add_argument("--show-sites", action="store_true", help="Show configured poker sites")
+    parser.add_argument("--show-games", action="store_true", help="Show supported games")
+    parser.add_argument("--show-databases", action="store_true", help="Show database configurations")
+    parser.add_argument("--show-all", action="store_true", help="Show all configuration sections")
+    parser.add_argument("--interactive", action="store_true", help="Run original interactive test")
+
+    args = parser.parse_args(argv)
+
+    if not any(vars(args).values()):
+        parser.print_help()
+        return 0
+
     set_logfile("fpdb-log.txt")
-    c = Config()
 
-    for _s in list(c.supported_sites.keys()):
-        pass
+    try:
+        c = Config()
+    except Exception as e:
+        print(f"Error loading configuration: {e}")
+        return 1
 
-    for _game in list(c.supported_games.keys()):
-        pass
+    if args.validate:
+        print("Configuration loaded successfully ✓")
+        print(
+            f"Sites: {len(c.supported_sites)}, Games: {len(c.supported_games)}, Databases: {len(c.supported_databases)}"
+        )
 
-    for _db in list(c.supported_databases.keys()):
-        pass
+    if args.show_sites or args.show_all:
+        print("\n=== Configured Sites ===")
+        for site_name in sorted(c.supported_sites.keys()):
+            site = c.supported_sites[site_name]
+            status = "✓ enabled" if site.enabled else "✗ disabled"
+            print(f"  {site_name}: {status}")
 
-    for _w in list(c.aux_windows.keys()):
-        pass
+    if args.show_games or args.show_all:
+        print("\n=== Supported Games ===")
+        for game_name in sorted(c.supported_games.keys()):
+            print(f"  {game_name}")
 
-    for _w in list(c.layout_sets.keys()):
-        pass
+    if args.show_databases or args.show_all:
+        print("\n=== Database Configurations ===")
+        for db_name in sorted(c.supported_databases.keys()):
+            db = c.supported_databases[db_name]
+            status = "✓ default" if db.db_selected else ""
+            print(f"  {db_name}: {db.db_server} ({db.db_desc}) {status}")
 
-    for _w in list(c.stat_sets.keys()):
-        pass
+    if args.interactive:
+        print("Running original interactive test...")
+        for _s in list(c.supported_sites.keys()):
+            pass
+        for _game in list(c.supported_games.keys()):
+            pass
+        for _db in list(c.supported_databases.keys()):
+            pass
+        for _w in list(c.aux_windows.keys()):
+            pass
+        for _w in list(c.layout_sets.keys()):
+            pass
+        for _w in list(c.stat_sets.keys()):
+            pass
+        for _w in list(c.hhcs.keys()):
+            pass
+        for _w in list(c.popup_windows.keys()):
+            pass
+        for _hud_param, _value in list(c.get_hud_ui_parameters().items()):
+            pass
+        for _s in list(c.supported_sites.keys()):
+            pass
+        print("Press ENTER to continue...")
+        sys.stdin.readline()
 
-    for _w in list(c.hhcs.keys()):
-        pass
+    return 0
 
-    for _w in list(c.popup_windows.keys()):
-        pass
 
-    for _hud_param, _value in list(c.get_hud_ui_parameters().items()):
-        pass
-
-    for _s in list(c.supported_sites.keys()):
-        pass
-
-    sys.stdin.readline()
+if __name__ == "__main__":
+    sys.exit(main())

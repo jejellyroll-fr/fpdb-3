@@ -22,7 +22,7 @@ Player7: ante processed 0.00
 Player8: ante processed 0.00
 Player8: posts small blind 0.01
 Player4: posts big blind 0.02
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [7h 10c]
 Player6: raises 0.04 to 0.04
 Player5: calls 0.04
@@ -42,11 +42,11 @@ Player1: calls 1.48
 Player8: folds
 Player4: folds
 Total pot 1.26 | Rake 0.22
-*** SHOW DOWN *** 
+*** SHOW DOWN ***
 Player5 shows Qh Ac
 Player6 shows 9d 8d
 Player1 shows 5s 4s
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 2.49 | Rake 0.22
 Board [5d Ad 4h 5c 9s]
 Seat 4: Player0 folded before Flop
@@ -58,4 +58,3 @@ Seat 6: Player4 folded on the Flop
 Seat 9: Player5 showed [Qh Ac] but did not win
 Seat 7: Player6 showed [9d 8d] but did not win
 Seat 5: Player8 folded on the Flop
-

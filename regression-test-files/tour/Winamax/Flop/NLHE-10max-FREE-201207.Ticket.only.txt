@@ -14,7 +14,7 @@ Seat 10: francemy45 (500)
 bordiquenel posts small blind 10
 tonio01278 posts big blind 20
 Dealt to gpelle [9c 9s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 sebloulou25 raises 480 to 500 and is all-in
 gpelle calls 500 and is all-in
 BZH974 folds
@@ -46,4 +46,3 @@ Seat 7: evgueni88 folded on the pre-flop
 Seat 8: AmericRlines folded on the pre-flop
 Seat 9: wilele folded on the pre-flop
 Seat 10: francemy45 (button) folded on the pre-flop
-

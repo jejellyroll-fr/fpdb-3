@@ -11,13 +11,13 @@ from unittest.mock import Mock, patch
 # Add repo root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-class TestAuxClassicHudBasics(unittest.TestCase):
 
+class TestAuxClassicHudBasics(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up mocks and stubs for Aux tests."""
         cls._original_modules = {}
-        
+
         # Mock PyQt5 modules
         modules_to_mock = ["PyQt5", "PyQt5.QtGui", "PyQt5.QtCore", "PyQt5.QtWidgets"]
         for module_name in modules_to_mock:
@@ -28,8 +28,9 @@ class TestAuxClassicHudBasics(unittest.TestCase):
         # loggingFpdb stub with proper interface
         if "loggingFpdb" in sys.modules:
             cls._original_modules["loggingFpdb"] = sys.modules["loggingFpdb"]
-        
+
         loggingFpdb = types.ModuleType("loggingFpdb")
+
         def _get_logger(_name: str):
             m = Mock()
             m.exception = Mock()
@@ -38,14 +39,16 @@ class TestAuxClassicHudBasics(unittest.TestCase):
             m.warning = Mock()
             m.error = Mock()
             return m
+
         loggingFpdb.get_logger = _get_logger
         sys.modules["loggingFpdb"] = loggingFpdb
 
         # Database stub with proper interface
         if "Database" in sys.modules:
             cls._original_modules["Database"] = sys.modules["Database"]
-        
+
         Database = types.ModuleType("Database")
+
         class _DB:
             def __init__(self, _config):
                 self.sql = types.SimpleNamespace(query={"get_player_comment": "SELECT 1"})
@@ -53,16 +56,17 @@ class TestAuxClassicHudBasics(unittest.TestCase):
                     execute=lambda *a, **kw: None,
                     fetchone=lambda *a, **kw: (None,),
                 )
+
             def close_connection(self):  # pragma: no cover
                 pass
+
         Database.Database = _DB
         sys.modules["Database"] = Database
 
         # Import after stubbing
         global ClassicHud, ClassicStatWindow, ClassicStat, ClassicLabel, ClassicTableMw, Aux_Classic_Hud
-        import Aux_Hud  # noqa: E402
         import Aux_Classic_Hud  # noqa: E402
-        
+
         ClassicHud = Aux_Classic_Hud.ClassicHud
         ClassicStatWindow = Aux_Classic_Hud.ClassicStatWindow
         ClassicStat = Aux_Classic_Hud.ClassicStat
@@ -73,12 +77,13 @@ class TestAuxClassicHudBasics(unittest.TestCase):
     def tearDownClass(cls):
         """Clean up mocks after Aux tests."""
         modules_to_cleanup = ["PyQt5", "PyQt5.QtGui", "PyQt5.QtCore", "PyQt5.QtWidgets", "loggingFpdb", "Database"]
-        
+
         for module_name in modules_to_cleanup:
             if module_name in cls._original_modules:
                 sys.modules[module_name] = cls._original_modules[module_name]
             elif module_name in sys.modules:
                 del sys.modules[module_name]
+
     def _make_aw_minimal(self, seat_idx: int = 2):
         """Build a minimal 'aw' structure accepted by ClassicStat/SimpleStat."""
         aw = Mock()
@@ -120,9 +125,10 @@ class TestAuxClassicHudBasics(unittest.TestCase):
         stat = ClassicStat("vpip", 2, Mock(), mock_aw)
 
         # Patch ON ClassicStat (not on Aux_Hud.SimpleStat, which doesn't define these)
-        with patch.object(Aux_Classic_Hud.ClassicStat, "get_current_comment", return_value="Test comment") as p_get, \
-             patch.object(Aux_Classic_Hud.ClassicStat, "has_comment", return_value=True) as p_has:
-
+        with (
+            patch.object(Aux_Classic_Hud.ClassicStat, "get_current_comment", return_value="Test comment") as p_get,
+            patch.object(Aux_Classic_Hud.ClassicStat, "has_comment", return_value=True) as p_has,
+        ):
             comment = stat.get_current_comment(123)
             assert comment == "Test comment"
             p_get.assert_called_with(123)

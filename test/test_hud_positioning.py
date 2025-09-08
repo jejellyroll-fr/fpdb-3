@@ -276,7 +276,9 @@ class TestHudStatSetSwitching(unittest.TestCase):
 
             # Should log failure and restart
             mock_log.info.assert_called_with(
-                "Refreshing HUD failed, restarting to apply stat set '%s': %s", "StatSet1", unittest.mock.ANY,
+                "Refreshing HUD failed, restarting to apply stat set '%s': %s",
+                "StatSet1",
+                unittest.mock.ANY,
             )
             self.hud.parent.kill_hud.assert_called_once_with("kill", "test_table")
 

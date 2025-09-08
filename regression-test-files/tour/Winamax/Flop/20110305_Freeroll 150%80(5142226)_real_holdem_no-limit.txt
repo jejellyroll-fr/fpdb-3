@@ -6,11 +6,11 @@ Seat 3: Djuzaam (3000)
 Seat 4: MANU1963 (3000)
 Seat 5: MALBAKONE (3000)
 Seat 6: fashion13 (3000)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 MANU1963 posts small blind 10
 MALBAKONE posts big blind 20
 Dealt to besancon2500 [8c 3h]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 fashion13 folds
 besancon2500 folds
 KeanZ folds
@@ -43,11 +43,11 @@ Seat 3: Djuzaam (6020)
 Seat 4: Flush67 (3030)
 Seat 5: MALBAKONE (2980)
 Seat 6: fashion13 (3000)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 MALBAKONE posts small blind 10
 fashion13 posts big blind 20
 Dealt to besancon2500 [4h 8h]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 besancon2500 raises 20 to 40
 KeanZ folds
 Djuzaam raises 5980 to 6020 and is all-in
@@ -73,11 +73,11 @@ Seat 3: Djuzaam (6090)
 Seat 4: Flush67 (3030)
 Seat 5: MALBAKONE (2970)
 Seat 6: fashion13 (2980)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 fashion13 posts small blind 10
 besancon2500 posts big blind 20
 Dealt to besancon2500 [Th 8h]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 KeanZ folds
 Djuzaam calls 20
 Flush67 folds
@@ -109,11 +109,11 @@ Seat 3: Djuzaam (6290)
 Seat 4: Flush67 (3030)
 Seat 5: MALBAKONE (2970)
 Seat 6: fashion13 (2970)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 besancon2500 posts small blind 10
 KeanZ posts big blind 20
 Dealt to besancon2500 [3s 6s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Djuzaam folds
 Flush67 folds
 MALBAKONE folds
@@ -139,11 +139,11 @@ Seat 3: Djuzaam (6290)
 Seat 4: Flush67 (3030)
 Seat 5: MALBAKONE (2970)
 Seat 6: fashion13 (2970)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 KeanZ posts small blind 10
 Djuzaam posts big blind 20
 Dealt to besancon2500 [3d 5s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Flush67 folds
 MALBAKONE folds
 fashion13 folds
@@ -168,11 +168,11 @@ Seat 3: Djuzaam (6300)
 Seat 4: Flush67 (3030)
 Seat 5: MALBAKONE (2970)
 Seat 6: fashion13 (2970)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 Djuzaam posts small blind 15
 Flush67 posts big blind 30
 Dealt to besancon2500 [Js 5d]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 MALBAKONE folds
 fashion13 folds
 besancon2500 folds
@@ -197,11 +197,11 @@ Seat 3: Djuzaam (6285)
 Seat 4: Flush67 (3045)
 Seat 5: MALBAKONE (2970)
 Seat 6: fashion13 (2970)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 Flush67 posts small blind 15
 MALBAKONE posts big blind 30
 Dealt to besancon2500 [As Kh]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 fashion13 folds
 besancon2500 raises 30 to 60
 KeanZ folds
@@ -227,11 +227,11 @@ Seat 3: Djuzaam (6285)
 Seat 4: Flush67 (3030)
 Seat 5: MALBAKONE (2940)
 Seat 6: fashion13 (2970)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 MALBAKONE posts small blind 15
 fashion13 posts big blind 30
 Dealt to besancon2500 [3s 5s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 besancon2500 raises 30 to 60
 KeanZ folds
 Djuzaam folds
@@ -257,10 +257,10 @@ Seat 3: AXELEO (3000)
 Seat 4: besancon2500 (2880)
 Seat 5: fashion13 (2940)
 Seat 6: tchoup31100 (2965)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 philcoura posts small blind 15
 yokat posts big blind 30
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 AXELEO folds
 tchoup31100 folds
 philcoura calls 15
@@ -285,11 +285,11 @@ Seat 3: AXELEO (3000)
 Seat 4: besancon2500 (2880)
 Seat 5: fashion13 (2940)
 Seat 6: tchoup31100 (2965)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 yokat posts small blind 15
 AXELEO posts big blind 30
 Dealt to besancon2500 [9c 8c]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 besancon2500 raises 30 to 60
 fashion13 folds
 tchoup31100 calls 60
@@ -335,11 +335,11 @@ Seat 3: AXELEO (2940)
 Seat 4: besancon2500 (2820)
 Seat 5: fashion13 (2940)
 Seat 6: tchoup31100 (2905)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 AXELEO posts small blind 20
 besancon2500 posts big blind 40
 Dealt to besancon2500 [8s Ks]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 fashion13 folds
 tchoup31100 calls 40
 philcoura calls 40
@@ -376,11 +376,11 @@ Seat 3: AXELEO (2900)
 Seat 4: besancon2500 (3130)
 Seat 5: fashion13 (2940)
 Seat 6: tchoup31100 (2865)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 besancon2500 posts small blind 20
 fashion13 posts big blind 40
 Dealt to besancon2500 [Ts Ad]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 tchoup31100 folds
 philcoura folds
 yokat calls 40
@@ -422,11 +422,11 @@ Seat 3: AXELEO (6040)
 Seat 4: besancon2500 (230)
 Seat 5: fashion13 (2900)
 Seat 6: tchoup31100 (2865)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 fashion13 posts small blind 20
 tchoup31100 posts big blind 40
 Dealt to besancon2500 [Ks 4d]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 philcoura calls 40
 yokat folds
 AXELEO raises 6000 to 6040 and is all-in
@@ -453,11 +453,11 @@ Seat 3: AXELEO (6140)
 Seat 4: besancon2500 (230)
 Seat 5: fashion13 (2880)
 Seat 6: tchoup31100 (2825)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 tchoup31100 posts small blind 30
 philcoura posts big blind 60
 Dealt to besancon2500 [2s Kc]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 yokat raises 180 to 240
 AXELEO folds
 besancon2500 folds
@@ -493,11 +493,11 @@ Seat 3: AXELEO (6140)
 Seat 4: besancon2500 (230)
 Seat 5: fashion13 (2880)
 Seat 6: tchoup31100 (2795)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 philcoura posts small blind 30
 yokat posts big blind 60
 Dealt to besancon2500 [Kh 2c]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 AXELEO folds
 besancon2500 folds
 fashion13 calls 60
@@ -537,11 +537,11 @@ Seat 3: AXELEO (6140)
 Seat 4: besancon2500 (230)
 Seat 5: fashion13 (8640)
 Seat 6: tchoup31100 (2795)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 yokat posts small blind 30
 AXELEO posts big blind 60
 Dealt to besancon2500 [4h 4s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 besancon2500 raises 170 to 230 and is all-in
 fashion13 folds
 tchoup31100 folds
@@ -567,11 +567,11 @@ Seat 3: AXELEO (6080)
 Seat 4: besancon2500 (320)
 Seat 5: fashion13 (8640)
 Seat 6: tchoup31100 (2795)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 AXELEO posts small blind 40
 besancon2500 posts big blind 80
 Dealt to besancon2500 [8s 3s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 fashion13 calls 80
 tchoup31100 folds
 philcoura folds
@@ -595,5 +595,3 @@ Seat 3: AXELEO (small blind) folded on the pre-flop
 Seat 4: besancon2500 (big blind) showed [8s 3s] and lost with One pair : 2
 Seat 5: fashion13 folded on the pre-flop
 Seat 6: tchoup31100 folded on the pre-flop
-
-

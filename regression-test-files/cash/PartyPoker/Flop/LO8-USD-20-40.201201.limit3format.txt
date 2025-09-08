@@ -1,11 +1,11 @@
 Game #11354414824 starts.
 
-#Game No : 11354414824 
+#Game No : 11354414824
 ***** Hand History for Game 11354414824 *****
 $20/$40 USD FL Omaha Hi-Lo - Thursday, January 26, 18:13:53 EST 2012
 Table Table  125516 (Real Money)
 Seat 9 is the button
-Total number of players : 2/10 
+Total number of players : 2/10
 Seat 10: Player0 ( $200 USD )
 Seat 9: Player1 ( $300 USD )
 Player1 posts small blind [$10 USD].

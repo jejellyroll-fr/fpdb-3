@@ -787,7 +787,11 @@ class Bovada(HandHistoryConverter):
         return "THIRD", "THIRD"
 
     def _process_street_action(
-        self, action: "re.Match[str]", streetno: int, contenders: int, bets: int,
+        self,
+        action: "re.Match[str]",
+        streetno: int,
+        contenders: int,
+        bets: int,
     ) -> tuple[int, int, int, int]:
         """Process a single action and update street and player state.
 
@@ -840,8 +844,7 @@ class Bovada(HandHistoryConverter):
             bool: True if the action should be counted, False otherwise.
         """
         atype = action.group("ATYPE")
-        return (atype != " Card dealt to a spot" and
-                (atype != " Big blind/Bring in" or hand.gametype["base"] == "stud"))
+        return atype != " Card dealt to a spot" and (atype != " Big blind/Bring in" or hand.gametype["base"] == "stud")
 
     def _process_board_cards(self, hand: "Hand") -> None:
         """Process and assign board cards for the hand.
@@ -883,9 +886,9 @@ class Bovada(HandHistoryConverter):
             # Map sections to streets based on position in split
             street_mapping = {
                 2: "PREFLOP",  # Section after HOLE CARDS
-                4: "FLOP",     # Section after FLOP
-                6: "TURN",     # Section after TURN
-                8: "RIVER",    # Section after RIVER
+                4: "FLOP",  # Section after FLOP
+                6: "TURN",  # Section after TURN
+                8: "RIVER",  # Section after RIVER
             }
 
             for section_idx, street in street_mapping.items():
@@ -912,7 +915,12 @@ class Bovada(HandHistoryConverter):
         m = self.re_action.finditer(self.re_hole_third.split(hand.handText)[-1])
         dealt_in = len(hand.players) - allinblind
         streetactions, streetno, players, contenders, bets, acts = (
-            0, 1, dealt_in, 0, dealt_in, None,
+            0,
+            1,
+            dealt_in,
+            0,
+            dealt_in,
+            None,
         )
 
         for action in m:
@@ -921,7 +929,10 @@ class Bovada(HandHistoryConverter):
 
                 # Process the action
                 new_streetactions, new_players, contenders, bets = self._process_street_action(
-                    action, streetno, contenders, bets,
+                    action,
+                    streetno,
+                    contenders,
+                    bets,
                 )
                 if new_streetactions == 0:  # Action resets street
                     streetactions, players = new_streetactions, new_players
@@ -1148,8 +1159,9 @@ class Bovada(HandHistoryConverter):
                                 self.clearMoneyString(acts["BET"]),
                             )
                             self.allInBlind(hand, "PREFLOP", a)
-                        elif (acts["PNAME"] == "Small Blind" or
-                                self._is_heads_up_dealer_small_blind(acts["PNAME"], hand)):
+                        elif acts["PNAME"] == "Small Blind" or self._is_heads_up_dealer_small_blind(
+                            acts["PNAME"], hand
+                        ):
                             hand.addBlind(
                                 player,
                                 "small blind",
@@ -1443,10 +1455,7 @@ class Bovada(HandHistoryConverter):
             hand: The Hand object to update with uncalled bet information.
             action: The regex match object representing the current action.
         """
-        if (
-            action.group("ATYPE") not in self.ACTION_NO_UNCALLED_BETS
-            and not hand.allInBlind
-        ):
+        if action.group("ATYPE") not in self.ACTION_NO_UNCALLED_BETS and not hand.allInBlind:
             hand.setUncalledBets(False)
 
     def _process_action(self, hand: "Hand", street: str, player: str, action: re.Match[str]) -> None:
@@ -1481,7 +1490,6 @@ class Bovada(HandHistoryConverter):
             self._handle_allin_action(hand, street, player, action)
         else:
             log.debug("Unimplemented readAction: '%s' '%s'", action.group("PNAME"), action_type)
-
 
     def _handle_call_action(self, hand: "Hand", street: str, player: str, action: re.Match[str]) -> None:
         """Handle call actions for a player on a given street.

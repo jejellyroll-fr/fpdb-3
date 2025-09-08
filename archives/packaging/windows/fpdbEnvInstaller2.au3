@@ -2,12 +2,12 @@
 ; This program is free software: you can redistribute it and/or modify
 ; it under the terms of the GNU Affero General Public License as published by
 ; the Free Software Foundation, version 3 of the License.
-; 
+;
 ; This program is distributed in the hope that it will be useful,
 ; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 ; GNU General Public License for more details.
-; 
+;
 ; You should have received a copy of the GNU Affero General Public License
 ; along with this program. If not, see <http://www.gnu.org/licenses/>.
 ; In the "official" distribution you can find the license in agpl-3.0.txt.
@@ -25,7 +25,7 @@ Dim	$fpdbUserPwd = ""
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Welcome message and option to abort. Change of working dir to \fpdbEnv
-Dim $welcomeBox = MsgBox(4100, "fpdb environment installation", "This installer will automatically create the environment which is needed to run fpdb." & @CRLF & @CRLF & _ 
+Dim $welcomeBox = MsgBox(4100, "fpdb environment installation", "This installer will automatically create the environment which is needed to run fpdb." & @CRLF & @CRLF & _
 "This means installing and configuring MySQL and Python including some special modules," & @CRLF & "creating a directory for your fpdb user profile and adding gtk to your path." & @CRLF & @CRLF & _
 "You are advised to close all aplications before you proceed." & @CRLF & @CRLF & _
 "DON'T use the keyboard or the mouse during installation unless you are asked to! Just WAIT until the message box 'End of Installation' pops up!" & @CRLF & @CRLF & _
@@ -36,7 +36,7 @@ EndIf
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Ask user for mysql root password
-GUICreate("FPDB Environment Installation", 600, 400) 
+GUICreate("FPDB Environment Installation", 600, 400)
 GUICtrlCreateLabel("For the installation of the FPDB Environment the MySQL root password and your poker database password are needed.",	 20,  25)
 GUICtrlCreateLabel("In case MySQL and/or your fpdb poker database aren't installed on your computer, just pick a password.",			 20,  50)
 GUICtrlCreateLabel("MySQL Root Password:", 														 										 20, 100)

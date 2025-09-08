@@ -178,17 +178,13 @@ class Hand:
         self.bets = {}
         self.lastBet = {}
         self.streets = {}
-        self.actions = (
-            {}
-        )  # [['mct','bets','$10'],['mika','folds'],['carlg','raises','$20']]
+        self.actions = {}  # [['mct','bets','$10'],['mika','folds'],['carlg','raises','$20']]
         self.board = {}  # dict from street names to community cards
         self.holecards = {}
         self.discards = {}
         self.showdownStrings = {}
         for street in self.allStreets:
-            self.streets[street] = (
-                ""  # portions of the handText, filled by markStreets()
-            )
+            self.streets[street] = ""  # portions of the handText, filled by markStreets()
             self.actions[street] = []
         for street in self.actionStreets:
             self.bets[street] = {}
@@ -197,9 +193,9 @@ class Hand:
         for street in self.holeStreets:
             self.holecards[street] = {}  # dict from player names to holecards
         for street in self.discardStreets:
-            self.discards[street] = (
-                {}
-            )  # dict from player names to dicts by street ... of tuples ... of discarded holecards
+            self.discards[
+                street
+            ] = {}  # dict from player names to dicts by street ... of tuples ... of discarded holecards
         # Collections indexed by player names
         self.rakes = {}
         self.stacks = {}
@@ -224,9 +220,7 @@ class Hand:
         self.roundPenny = False
         self.fastFold = False
         # currency symbol for this hand
-        self.sym = self.SYMBOL[
-            self.gametype["currency"]
-        ]  # save typing! delete this attr when done
+        self.sym = self.SYMBOL[self.gametype["currency"]]  # save typing! delete this attr when done
         self.pot.setSym(self.sym)
         self.is_duplicate = False  # i.e. don't update hudcache if true
 
@@ -295,7 +289,14 @@ class Hand:
         return result
 
     def addHoleCards(
-        self, street, player, open=None, closed=None, shown=False, mucked=False, dealt=False,
+        self,
+        street,
+        player,
+        open=None,
+        closed=None,
+        shown=False,
+        mucked=False,
+        dealt=False,
     ) -> None:
         """Assigns observed holecards to a player.
         cards   list of card bigrams e.g. ['2h','Jc']
@@ -336,16 +337,18 @@ class Hand:
         # These functions are intended for prep insert eventually
         #####
         if self.gametype.get("maxSeats") is None:
-            self.gametype["maxSeats"] = (
-                self.maxseats
-            )  # TODO: move up to individual parsers
+            self.gametype["maxSeats"] = self.maxseats  # TODO: move up to individual parsers
         else:
             self.maxseats = self.gametype["maxSeats"]
         self.dbid_pids = db.getSqlPlayerIDs(
-            [p[1] for p in self.players], self.siteId, self.hero,
+            [p[1] for p in self.players],
+            self.siteId,
+            self.hero,
         )
         self.dbid_gt = db.getSqlGameTypeId(
-            self.siteId, self.gametype, printdata=printtest,
+            self.siteId,
+            self.gametype,
+            printdata=printtest,
         )
 
         # Gametypes
@@ -389,19 +392,20 @@ class Hand:
 
     def getHandId(self, db, id):
         if db.isDuplicate(
-            self.siteId, self.hands["siteHandNo"], self.hands["heroSeat"], self.publicDB,
+            self.siteId,
+            self.hands["siteHandNo"],
+            self.hands["heroSeat"],
+            self.publicDB,
         ):
             log.debug(
                 f"Hand.insert(): hid #: {self.hands['siteHandNo']} is a duplicate",
             )
             self.is_duplicate = True  # i.e. don't update hudcache
             if self.publicDB:
-                msg = (
-                    "{}-{}-{}".format(
-                        str(self.siteId),
-                        str(self.hands["siteHandNo"]),
-                        self.hands["heroSeat"],
-                    )
+                msg = "{}-{}-{}".format(
+                    str(self.siteId),
+                    str(self.hands["siteHandNo"]),
+                    self.hands["heroSeat"],
                 )
                 raise FpdbHandDuplicate(
                     msg,
@@ -433,7 +437,11 @@ class Hand:
         try:
             log.debug("Calling storeHandsPlayers for player data.")
             db.storeHandsPlayers(
-                self.dbid_hands, self.dbid_pids, self.handsplayers, doinsert, printtest,
+                self.dbid_hands,
+                self.dbid_pids,
+                self.handsplayers,
+                doinsert,
+                printtest,
             )
         except Exception as e:
             log.exception(f"Error in storeHandsPlayers: {e}")
@@ -465,7 +473,11 @@ class Hand:
         """Function to inserts HandsActions into database."""
         if self.saveActions:
             db.storeHandsActions(
-                self.dbid_hands, self.dbid_pids, self.handsactions, doinsert, printtest,
+                self.dbid_hands,
+                self.dbid_pids,
+                self.handsactions,
+                doinsert,
+                printtest,
             )
 
     def insertHandsStove(self, db, doinsert=False) -> None:
@@ -575,8 +587,7 @@ class Hand:
         res = [
             dict(line)
             for line in [
-                list(zip([column[0].lower() for column in c.description], row, strict=False))
-                for row in c.fetchall()
+                list(zip([column[0].lower() for column in c.description], row, strict=False)) for row in c.fetchall()
             ]
         ]
         for row in res:
@@ -680,8 +691,7 @@ class Hand:
         res = [
             dict(line)
             for line in [
-                list(zip([column[0].lower() for column in c.description], row, strict=False))
-                for row in c.fetchall()
+                list(zip([column[0].lower() for column in c.description], row, strict=False)) for row in c.fetchall()
             ]
         ]
         res = res[0]
@@ -699,7 +709,8 @@ class Hand:
         #    self.startTime = datetime.datetime.strptime(res['starttime'], "%Y-%m-%d %H:%M:%S")
         # However a startTime is needed for a valid output by writeHand:
         self.startTime = datetime.datetime.strptime(
-            "1970-01-01 12:00:00", "%Y-%m-%d %H:%M:%S",
+            "1970-01-01 12:00:00",
+            "%Y-%m-%d %H:%M:%S",
         )
 
         cards = list(
@@ -740,7 +751,7 @@ class Hand:
                     self.allStreets.append(street)
                 if street not in self.streets:
                     self.streets[street] = ""
-            
+
             # Get runItTwice boards
             q = db.sql.query["singleHandBoards"]
             q = q.replace("%s", db.sql.query["placeholder"])
@@ -801,8 +812,7 @@ class Hand:
         res = [
             dict(line)
             for line in [
-                list(zip([column[0].lower() for column in c.description], row, strict=False))
-                for row in c.fetchall()
+                list(zip([column[0].lower() for column in c.description], row, strict=False)) for row in c.fetchall()
             ]
         ]
         for row in res:
@@ -866,9 +876,7 @@ class Hand:
         """
         if len(self.players) > 0 and seat in [p[0] for p in self.players]:
             raise FpdbHandPartial(
-                "addPlayer: "
-                + ("Can't have 2 players in the same seat!")
-                + f": '{self.handid}'",
+                "addPlayer: " + ("Can't have 2 players in the same seat!") + f": '{self.handid}'",
             )
 
         log.debug(f"add Player: {seat} {name} ({chips})")
@@ -1027,10 +1035,7 @@ class Hand:
             self.checkPlayerExists(player, "addCall")
             amount = Decimal(amount)
             self.bets[street][player].append(amount)
-            if (
-                street in ("PREFLOP", "DEAL", "THIRD")
-                and self.lastBet.get(street) < amount
-            ):
+            if street in ("PREFLOP", "DEAL", "THIRD") and self.lastBet.get(street) < amount:
                 self.lastBet[street] = amount
             self.stacks[player] -= amount
             act = (player, "calls", amount, self.stacks[player] == 0)
@@ -1180,7 +1185,7 @@ class Hand:
         """Records a cash out event for a player in the current hand.
 
         This method updates the collected and collectees data structures for the player, but does not modify the totalcollected value.
-        
+
         Args:
             player: The name of the player cashing out.
             pot: The amount the player cashed out.
@@ -1207,9 +1212,11 @@ class Hand:
         self.stacks[player] += amount
 
         # Check if this is part of a walk scenario
-        is_walk = (hasattr(self, "walk_adjustments") and
-                  player in self.walk_adjustments and
-                  self.walk_adjustments[player] == amount)
+        is_walk = (
+            hasattr(self, "walk_adjustments")
+            and player in self.walk_adjustments
+            and self.walk_adjustments[player] == amount
+        )
 
         if is_walk:
             log.info(f"Walk detected: not removing uncalled bet from pot for {player}")
@@ -1234,7 +1241,7 @@ class Hand:
                 else:
                     self.removePlayer(p[1])
         if len(self.players) < 2:
-            msg = (f"Less than 2 players - Assuming hand '{self.handid}' was cancelled.")
+            msg = f"Less than 2 players - Assuming hand '{self.handid}' was cancelled."
             raise FpdbHandPartial(
                 msg,
             )
@@ -1304,11 +1311,7 @@ class Hand:
 
         # Convert and filter out non-positive commits
         try:
-            commitsall = [
-                (Decimal(v), k)
-                for (k, v) in self.pot.committed.items()
-                if Decimal(v) > 0
-            ]
+            commitsall = [(Decimal(v), k) for (k, v) in self.pot.committed.items() if Decimal(v) > 0]
         except Exception as e:
             log.exception(f"Error while preparing commitsall: {e}")
             msg = f"Invalid data in self.pot.committed: {e}"
@@ -1373,9 +1376,7 @@ class Hand:
                 return []
             # Surplus must be returned to the player as uncalled bet
             player = calls[0][1]
-            self.pot.returned[player] = (
-                self.pot.returned.get(player, Decimal("0.00")) + leftover_sum
-            )
+            self.pot.returned[player] = self.pot.returned.get(player, Decimal("0.00")) + leftover_sum
             log.debug(f"Uncalled bet returned to {player}: {leftover_sum}")
             return []
 
@@ -1440,10 +1441,13 @@ class Hand:
                 return self.totalpot
             # totalcollected > totalpot is an error scenario
             # Exception for special cases and hand viewing
-            if (self.sitename == "Bovada" and hasattr(self, "isZonePoker") and self.isZonePoker) or \
-               (hasattr(self, "rake") and self.rake is not None):
+            if (self.sitename == "Bovada" and hasattr(self, "isZonePoker") and self.isZonePoker) or (
+                hasattr(self, "rake") and self.rake is not None
+            ):
                 # For Zone Poker hands or hands with pre-set rake, use collected amount as the pot total
-                log.warning(f"Hand {self.handid}: collected amount exceeds calculated pot, using collected amount as pot total")
+                log.warning(
+                    f"Hand {self.handid}: collected amount exceeds calculated pot, using collected amount as pot total"
+                )
                 self.totalpot = self.totalcollected
                 if not hasattr(self, "rake") or self.rake is None:
                     self.rake = Decimal("0.00")  # Rake already deducted or calculated elsewhere
@@ -1590,11 +1594,7 @@ class Hand:
                 act[0],
                 act[2],
                 "card" if act[2] == 1 else "cards",
-                (
-                    " [" + " ".join(self.discards[street][act[0]]) + "]"
-                    if self.hero == act[0]
-                    else ""
-                ),
+                (" [" + " ".join(self.discards[street][act[0]]) + "]" if self.hero == act[0] else ""),
             )
         if act[1] == "stands pat":
             return f"{act[0]}: stands pat"
@@ -1627,9 +1627,7 @@ class Hand:
         result = []
         for street in streets:
             action = self.get_actions_short(player, street)
-            if (
-                len(action) > 0
-            ):  # if there is no action on later streets, nothing is added.
+            if len(action) > 0:  # if there is no action on later streets, nothing is added.
                 result.append(action)
         return ",".join(result)
 
@@ -1660,9 +1658,15 @@ class Hand:
         gs = f"PokerStars Game #{self.handid}: "
 
         if self.tourNo is not None and self.mixed is not None:  # mixed tournament
-            gs = gs + f"Tournament #{self.tourNo}, {self.buyin} {self.MS[self.mixed]} ({self.getGameTypeAsString()}) - Level {self.level} ({self.getStakesAsString()}) - "
+            gs = (
+                gs
+                + f"Tournament #{self.tourNo}, {self.buyin} {self.MS[self.mixed]} ({self.getGameTypeAsString()}) - Level {self.level} ({self.getStakesAsString()}) - "
+            )
         elif self.tourNo is not None:  # all other tournaments
-            gs = gs + f"Tournament #{self.tourNo}, {self.buyin} {self.getGameTypeAsString()} - Level {self.level} ({self.getStakesAsString()}) - "
+            gs = (
+                gs
+                + f"Tournament #{self.tourNo}, {self.buyin} {self.getGameTypeAsString()} - Level {self.level} ({self.getStakesAsString()}) - "
+            )
         elif self.mixed is not None:  # all other mixed games
             gs = gs + f" {self.MS[self.mixed]} ({self.getGameTypeAsString()}, {self.getStakesAsString()}) - "
         else:  # non-mixed cash games
@@ -1695,18 +1699,24 @@ class Hand:
             table_string = table_string + f" Seat #{self.buttonpos} is the button"
         return table_string
 
-
-def writeHand(self, fh=sys.__stdout__) -> None:
-    # Format PokerStars.
-    log.info(f"Writing game line: {self.writeGameLine()}")
-    log.info(f"Writing table line: {self.writeTableLine()}")
-    fh.write(f"{self.writeGameLine()}\n")
-    fh.write(f"{self.writeTableLine()}\n")
+    def writeHand(self, fh=sys.__stdout__) -> None:
+        # Format PokerStars.
+        log.info(f"Writing game line: {self.writeGameLine()}")
+        log.info(f"Writing table line: {self.writeTableLine()}")
+        fh.write(f"{self.writeGameLine()}\n")
+        fh.write(f"{self.writeTableLine()}\n")
 
 
 class HoldemOmahaHand(Hand):
     def __init__(
-        self, config, hhc, sitename, gametype, handText, builtFrom="HHC", handid=None,
+        self,
+        config,
+        hhc,
+        sitename,
+        gametype,
+        handText,
+        builtFrom="HHC",
+        handid=None,
     ) -> None:
         self.config = config
         if gametype["base"] != "hold":
@@ -1764,11 +1774,11 @@ class HoldemOmahaHand(Hand):
             hhc.readShowdownActions(self)
             # Read actions in street order
             for street, text in list(self.streets.items()):
-                if text and (
-                    street != "PREFLOP"
+                if (
+                    text and (street != "PREFLOP")
                 ):  # TODO: the except PREFLOP shouldn't be necessary, but regression-test-files/cash/Everleaf/Flop/NLHE-10max-USD-0.01-0.02-201008.2Way.All-in.pre.txt fails without it
                     hhc.readCommunityCards(self, street)
-            
+
             # Update actionStreets if runItTimes was set during readCommunityCards
             if self.runItTimes == 2:
                 run_it_streets = ["FLOP1", "TURN1", "RIVER1", "FLOP2", "TURN2", "RIVER2"]
@@ -1788,7 +1798,7 @@ class HoldemOmahaHand(Hand):
                         self.allStreets.append(street)
                     if street not in self.streets:
                         self.streets[street] = ""
-            
+
             for street in self.actionStreets:
                 if self.streets[street] or gametype["split"]:
                     hhc.readAction(self, street)
@@ -1797,9 +1807,7 @@ class HoldemOmahaHand(Hand):
             hhc.readShownCards(self)
             # readOther is used by some converters like Bovada for special handling before totalPot
             hhc.readOther(self)
-            self.pot.handid = (
-                self.handid
-            )  # This is only required so Pot can throw it in totalPot
+            self.pot.handid = self.handid  # This is only required so Pot can throw it in totalPot
             self.totalPot()  # Finalize it (total the pot)
             log.debug(f"self.totalpot {self.totalpot}")
             log.debug(f" type self.totalpot {type(self.totalpot)}")
@@ -1825,7 +1833,13 @@ class HoldemOmahaHand(Hand):
             log.warning("Neither HHC nor DB+handID provided")
 
     def addShownCards(
-        self, cards, player, shown=True, mucked=False, dealt=False, string=None,
+        self,
+        cards,
+        player,
+        shown=True,
+        mucked=False,
+        dealt=False,
+        string=None,
     ) -> None:
         if player == self.hero:  # we have hero's cards just update shown/mucked
             if shown:
@@ -1862,12 +1876,7 @@ class HoldemOmahaHand(Hand):
         elif len(cards) == 5:  # cards holds a winning hand, not hole cards
             # filter( lambda x: x not in b, a )             # calcs a - b where a and b are lists
             # so diff is set to the winning hand minus the board cards, if we're lucky that leaves the hole cards
-            diff = [
-                x
-                for x in cards
-                if x
-                not in self.board["FLOP"] + self.board["TURN"] + self.board["RIVER"]
-            ]
+            diff = [x for x in cards if x not in self.board["FLOP"] + self.board["TURN"] + self.board["RIVER"]]
             if len(diff) == 2 and self.gametype["category"] in ("holdem"):
                 self.addHoleCards(
                     "PREFLOP",
@@ -1934,10 +1943,7 @@ class HoldemOmahaHand(Hand):
         super().writeHand(fh)
 
         players_who_act_preflop = set(
-            (
-                [x[0] for x in self.actions["PREFLOP"]]
-                + [x[0] for x in self.actions["BLINDSANTES"]]
-            ),
+            ([x[0] for x in self.actions["PREFLOP"]] + [x[0] for x in self.actions["BLINDSANTES"]]),
         )
         log.debug(self.actions["PREFLOP"])
         for player in [x for x in self.players if x[1] in players_who_act_preflop]:
@@ -2063,7 +2069,14 @@ class HoldemOmahaHand(Hand):
 
 class DrawHand(Hand):
     def __init__(
-        self, config, hhc, sitename, gametype, handText, builtFrom="HHC", handid=None,
+        self,
+        config,
+        hhc,
+        sitename,
+        gametype,
+        handText,
+        builtFrom="HHC",
+        handid=None,
     ) -> None:
         self.config = config
         if gametype["base"] != "draw":
@@ -2122,9 +2135,7 @@ class DrawHand(Hand):
             hhc.readShownCards(self)
             # readOther is used by some converters like Bovada for special handling before totalPot
             hhc.readOther(self)
-            self.pot.handid = (
-                self.handid
-            )  # This is only required so Pot can throw it in totalPot
+            self.pot.handid = self.handid  # This is only required so Pot can throw it in totalPot
             self.totalPot()  # finalise it (total the pot)
             hhc.getRake(self)
             if self.maxseats is None:
@@ -2138,7 +2149,13 @@ class DrawHand(Hand):
             self.maxseats = 10
 
     def addShownCards(
-        self, cards, player, shown=True, mucked=False, dealt=False, string=None,
+        self,
+        cards,
+        player,
+        shown=True,
+        mucked=False,
+        dealt=False,
+        string=None,
     ) -> None:
         # if player == self.hero: # we have hero's cards just update shown/mucked
         #    if shown:  self.shown.add(player)
@@ -2172,10 +2189,7 @@ class DrawHand(Hand):
 
         for i, _street in enumerate(self.holeStreets):
             if player in list(self.holecards[_street].keys()):
-                allhole = (
-                    self.holecards[_street][player][1]
-                    + self.holecards[_street][player][0]
-                )
+                allhole = self.holecards[_street][player][1] + self.holecards[_street][player][0]
                 allhole = allhole[:handsize]
                 for c in range(len(allhole)):
                     idx = c + i * 5
@@ -2201,8 +2215,7 @@ class DrawHand(Hand):
         super().writeHand(fh)
 
         players_who_act_ondeal = set(
-            [x[0] for x in self.actions["DEAL"]]
-            + [x[0] for x in self.actions["BLINDSANTES"]],
+            [x[0] for x in self.actions["DEAL"]] + [x[0] for x in self.actions["BLINDSANTES"]],
         )
 
         for player in [x for x in self.players if x[1] in players_who_act_ondeal]:
@@ -2217,9 +2230,7 @@ class DrawHand(Hand):
 
         if "DEAL" in self.actions:
             fh.write("*** DEALING HANDS ***\n")
-            for player in [
-                x[1] for x in self.players if x[1] in players_who_act_ondeal
-            ]:
+            for player in [x[1] for x in self.players if x[1] in players_who_act_ondeal]:
                 if "DEAL" in self.holecards and player in self.holecards["DEAL"]:
                     nc = self.holecards["DEAL"][player][0]
                     fh.write(f"Dealt to {player}: [{' '.join(nc)}]\n")
@@ -2274,7 +2285,14 @@ class DrawHand(Hand):
 
 class StudHand(Hand):
     def __init__(
-        self, config, hhc, sitename, gametype, handText, builtFrom="HHC", handid=None,
+        self,
+        config,
+        hhc,
+        sitename,
+        gametype,
+        handText,
+        builtFrom="HHC",
+        handid=None,
     ) -> None:
         self.config = config
         if gametype["base"] != "stud":
@@ -2353,9 +2371,7 @@ class StudHand(Hand):
             hhc.readShownCards(self)  # not done yet
             # readOther is used by some converters like Bovada for special handling before totalPot
             hhc.readOther(self)
-            self.pot.handid = (
-                self.handid
-            )  # This is only required so Pot can throw it in totalPot
+            self.pot.handid = self.handid  # This is only required so Pot can throw it in totalPot
             self.totalPot()  # finalise it (total the pot)
             hhc.getRake(self)
             if self.maxseats is None:
@@ -2369,7 +2385,13 @@ class StudHand(Hand):
             self.maxseats = 10
 
     def addShownCards(
-        self, cards, player, shown=True, mucked=False, dealt=False, string=None,
+        self,
+        cards,
+        player,
+        shown=True,
+        mucked=False,
+        dealt=False,
+        string=None,
     ) -> None:
         if player == self.hero:  # we have hero's cards just update shown/mucked
             if shown:
@@ -2520,9 +2542,7 @@ class StudHand(Hand):
         def write_street(street, label) -> None:
             if street in self.actions:
                 dealt = 0
-                for player in [
-                    x[1] for x in self.players if x[1] in players_who_post_antes
-                ]:
+                for player in [x[1] for x in self.players if x[1] in players_who_post_antes]:
                     if player in self.holecards[street]:
                         dealt += 1
                         if dealt == 1:
@@ -2538,9 +2558,7 @@ class StudHand(Hand):
 
         if "SEVENTH" in self.actions:
             fh.write("*** RIVER ***\n")
-            for player in [
-                x[1] for x in self.players if x[1] in players_who_post_antes
-            ]:
+            for player in [x[1] for x in self.players if x[1] in players_who_post_antes]:
                 if player in self.holecards["SEVENTH"]:
                     cards = self.writeHoleCards("SEVENTH", player)
                     if cards:
@@ -2609,11 +2627,7 @@ class StudHand(Hand):
         if street == "SEVENTH" and player != self.hero:
             return None  # only write 7th st line for hero, LDO
         return (
-            hc
-            + " ".join(self.holecards[street][player][1])
-            + "] ["
-            + " ".join(self.holecards[street][player][0])
-            + "]"
+            hc + " ".join(self.holecards[street][player][1]) + "] [" + " ".join(self.holecards[street][player][0]) + "]"
         )
 
     def join_holecards(self, player, asList=False):
@@ -2626,11 +2640,7 @@ class StudHand(Hand):
                 if (self.gametype["category"] == "5_studhi" and street == "SECOND") or (
                     self.gametype["category"] != "5_studhi" and street == "THIRD"
                 ):
-                    holecards = (
-                        holecards
-                        + self.holecards[street][player][1]
-                        + self.holecards[street][player][0]
-                    )
+                    holecards = holecards + self.holecards[street][player][1] + self.holecards[street][player][0]
                 elif street == "SEVENTH":
                     if player == self.hero:
                         holecards = holecards + self.holecards[street][player][0]
@@ -2719,9 +2729,7 @@ class Pot:
         self.stp = amount
 
     def markTotal(self, street) -> None:
-        self.streettotals[street] = (
-            sum(self.committed.values()) + sum(self.common.values()) + self.stp
-        )
+        self.streettotals[street] = sum(self.committed.values()) + sum(self.common.values()) + self.stp
 
     def getTotalAtStreet(self, street):
         if street in self.streettotals:
@@ -2806,19 +2814,29 @@ class Pot:
         if self.sym is None:
             self.sym = "C"
         if self.total is None:
-            # NB if I'm sure end() is idempotent, call it here.
-            log.error("Error in printing Hand object")
-            raise FpdbParseError
+            # NB: Original comment suggested calling end() here if idempotent,
+            # but end() requires totalcollected parameter and may modify state.
+            # Instead, calculate total for display without modifying self.total
+            log.debug("Total pot not calculated, computing from committed amounts for display")
+            calculated_total = sum(self.committed.values()) + sum(self.common.values()) + self.stp
+            if calculated_total == 0:
+                return f"Total pot {self.sym}0.00"
+            # Use calculated_total for display instead of self.total
+            ret = f"Total pot {self.sym}{calculated_total:.2f}"
+            if len(self.pots) < 2:
+                return ret
+            if self.pots and len(self.pots) > 0:
+                ret += f" Main pot {self.sym}{self.pots[0][0]:.2f}"
+                if len(self.pots) > 1:
+                    ret += "".join([f" Side pot {self.sym}{self.pots[x][0]:.2f}." for x in range(1, len(self.pots))])
+            return ret
 
         ret = f"Total pot {self.sym}{self.total:.2f}"
         if len(self.pots) < 2:
             return ret
         ret += f" Main pot {self.sym}{self.pots[0][0]:.2f}"
         return ret + "".join(
-            [
-                (f" Side pot {self.sym}{self.pots[x][0]:.2f}.")
-                for x in range(1, len(self.pots))
-            ],
+            [(f" Side pot {self.sym}{self.pots[x][0]:.2f}.") for x in range(1, len(self.pots))],
         )
 
 
@@ -2871,9 +2889,7 @@ def hand_factory(hand_id, config, db_connection):
 
     log.debug(f"selecting info from db for hand {hand_id}")
     hand_instance.select(db_connection, hand_id)
-    hand_instance.handid_selected = (
-        hand_id  # hand_instance does not supply this, create it here
-    )
+    hand_instance.handid_selected = hand_id  # hand_instance does not supply this, create it here
     log.debug(f"exiting hand_factory for hand {hand_id}")
 
     return hand_instance

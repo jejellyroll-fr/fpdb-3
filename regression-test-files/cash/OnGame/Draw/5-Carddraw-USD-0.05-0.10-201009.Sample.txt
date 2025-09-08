@@ -68,7 +68,7 @@ velabianca bets $0.10
 grommek folds
 Hero folds
 x Diabolo666 folds
---- 
+---
 ---
 Summary:
 Main pot: $0.27 won by velabianca ($0.26)

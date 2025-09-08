@@ -238,4 +238,3 @@ Rake taken: $0
 Seat 1: Hero ($85.45), net: +$1
 Seat 4: Player4 ($21.30), net: -$1
 ***** End of hand R5-174428515-257 *****
-

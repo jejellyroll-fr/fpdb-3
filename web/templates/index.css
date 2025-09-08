@@ -2,14 +2,13 @@ body {
     background-color: #222; /* Dark mode background */
     color: #fff; /* Dark mode text color */
   }
-  
+
   h1,
   p,
   a {
     color: inherit; /* Inherit text color from body */
   }
-  
+
   a:hover {
     color: #aaa; /* Link hover color */
   }
-  

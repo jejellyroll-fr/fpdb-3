@@ -14,7 +14,7 @@ Seat 10: Player8 (1500)
 Player2 posts small blind 10
 Player3 posts big blind 20
 Dealt to Hero [2d 8c]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player4 folds
 Hero folds
 Player5 calls 20

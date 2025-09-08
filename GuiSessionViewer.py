@@ -206,16 +206,34 @@ class GuiSessionViewer(QSplitter):
             return
 
         self.createStatsPane(
-            frame, playerids, sitenos, games, currencies, limits, seats,
+            frame,
+            playerids,
+            sitenos,
+            games,
+            currencies,
+            limits,
+            seats,
         )
 
     def createStatsPane(
-        self, frame, playerids, sitenos, games, currencies, limits, seats,
+        self,
+        frame,
+        playerids,
+        sitenos,
+        games,
+        currencies,
+        limits,
+        seats,
     ) -> None:
         starttime = time()
 
         (results, quotes) = self.generateDatasets(
-            playerids, sitenos, games, currencies, limits, seats,
+            playerids,
+            sitenos,
+            games,
+            currencies,
+            limits,
+            seats,
         )
 
         if DEBUG:
@@ -238,7 +256,8 @@ class GuiSessionViewer(QSplitter):
         q = self.sql.query["sessionStats"]
         start_date, end_date = self.filters.getDates()
         q = q.replace(
-            "<datestest>", " BETWEEN '" + start_date + "' AND '" + end_date + "'",
+            "<datestest>",
+            " BETWEEN '" + start_date + "' AND '" + end_date + "'",
         )
 
         for m in list(self.filters.display.items()):
@@ -265,10 +284,7 @@ class GuiSessionViewer(QSplitter):
         if seats:
             q = q.replace(
                 "<seats_test>",
-                "AND h.seats BETWEEN "
-                + str(seats["from"])
-                + " AND "
-                + str(seats["to"]),
+                "AND h.seats BETWEEN " + str(seats["from"]) + " AND " + str(seats["to"]),
             )
         else:
             q = q.replace("<seats_test>", "AND h.seats BETWEEN 0 AND 100")
@@ -502,7 +518,8 @@ class GuiSessionViewer(QSplitter):
         self.ax.spines["top"].set_color(self.colors["foreground"])
         self.ax.spines["bottom"].set_color(self.colors["foreground"])
         self.ax.set_title(
-            (("Session graph for ring games") + names), color=self.colors["foreground"],
+            (("Session graph for ring games") + names),
+            color=self.colors["foreground"],
         )
         self.ax.set_facecolor(self.colors["background"])
         self.ax.set_xlabel(("Sessions"), fontsize=12, color=self.colors["foreground"])
@@ -564,7 +581,11 @@ class GuiSessionViewer(QSplitter):
             replayer.reload_hands(handids)
 
 
-if __name__ == "__main__":
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    # Launch the session viewer GUI like the original
     import Configuration
 
     config = Configuration.Config()
@@ -600,3 +621,10 @@ if __name__ == "__main__":
     main_window.show()
     main_window.resize(1400, 800)
     app.exec_()
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(main())

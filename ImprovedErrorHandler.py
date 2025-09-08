@@ -16,6 +16,7 @@ log = get_logger("improved_error_handler")
 
 class ErrorSeverity(Enum):
     """Classification of error severity levels."""
+
     TEMPORARY = "temporary"  # Retry possible, don't reset file position
     RECOVERABLE = "recoverable"  # Minor adjustment needed
     PERMANENT = "permanent"  # File position reset required
@@ -24,6 +25,7 @@ class ErrorSeverity(Enum):
 @dataclass
 class ParseError:
     """Container for parse error information."""
+
     error_type: str
     message: str
     severity: ErrorSeverity
@@ -115,8 +117,7 @@ class ImprovedErrorHandler:
         if file_path not in self.error_history:
             self.error_history[file_path] = []
 
-        recent_errors = [e for e in self.error_history[file_path]
-                        if time.time() - e.timestamp < 300]  # Last 5 minutes
+        recent_errors = [e for e in self.error_history[file_path] if time.time() - e.timestamp < 300]  # Last 5 minutes
 
         if len(recent_errors) >= self.temporary_error_threshold:
             log.warning(f"Too many recent errors for {file_path}, treating as permanent")
@@ -153,10 +154,7 @@ class ImprovedErrorHandler:
 
         # Cleanup old errors (older than 1 hour)
         cutoff_time = time.time() - 3600
-        self.error_history[file_path] = [
-            e for e in self.error_history[file_path]
-            if e.timestamp > cutoff_time
-        ]
+        self.error_history[file_path] = [e for e in self.error_history[file_path] if e.timestamp > cutoff_time]
 
         log.debug(f"Recorded {severity.value} error for {file_path}: {message}")
         return error
@@ -211,6 +209,7 @@ class ImprovedErrorHandler:
 
 # Global instance for easy usage
 _error_handler_instance = None
+
 
 def get_improved_error_handler() -> ImprovedErrorHandler:
     """Return global instance of improved error handler."""

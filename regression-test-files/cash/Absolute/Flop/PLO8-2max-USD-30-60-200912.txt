@@ -20,4 +20,4 @@ Player0 Collects $119.25 from main pot
 Total Pot($120) | Rake ($0.75)
 Board [Jc 5h 2c]
 Seat 4: Hero (big blind) Folded on the FLOP
-Seat 6: Player0 (dealer) (small blind) collected Total ($119.25) HI:($119.25)  [Does not show] 
+Seat 6: Player0 (dealer) (small blind) collected Total ($119.25) HI:($119.25)  [Does not show]

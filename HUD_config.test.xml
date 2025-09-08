@@ -135,14 +135,14 @@
     aggregate_tourney_stats="True"
     aggregation_level_multiplier="3"
 
-    hero_stat_range="A" 
+    hero_stat_range="A"
     hero_stat_days="30"
     aggregate_hero_ring_game_stats="False"
     aggregate_hero_tourney_stats="False"
     hero_aggregation_level_multiplier="1"
 
     label="FPDBmenu"
-    
+
     card_ht="39"
     card_wd="28"
     deck_type="colour"
@@ -211,9 +211,9 @@
         </site>
 
         <site site_name="Merge"
-                enabled="False" 
-                HH_path="C:/Program Files/Carbon Poker/HandHistory/YOUR SCREEN NAME HERE/" 
-                screen_name="Hero" 
+                enabled="False"
+                HH_path="C:/Program Files/Carbon Poker/HandHistory/YOUR SCREEN NAME HERE/"
+                screen_name="Hero"
                 site_path="C:/Program Files/Merge/"
                 aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="merge_default"/>
@@ -231,9 +231,9 @@
 
 
         <site site_name="Winamax"
-                enabled="False" 
-                HH_path="C:/Program Files/Winamax/HandHistory/YOUR SCREEN NAME HERE/" 
-                screen_name="Hero" 
+                enabled="False"
+                HH_path="C:/Program Files/Winamax/HandHistory/YOUR SCREEN NAME HERE/"
+                screen_name="Hero"
                 site_path="C:/Program Files/Winamax/"
                 aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="winamax_default"/>
@@ -250,8 +250,8 @@
 
         <site site_name="PacificPoker"
                 enabled="False"
-                HH_path="C:/Program Files/PacificPoker/HandHistory/YOUR SCREEN NAME HERE/" 
-                screen_name="Hero" 
+                HH_path="C:/Program Files/PacificPoker/HandHistory/YOUR SCREEN NAME HERE/"
+                screen_name="Hero"
                 site_path="C:/Program Files/PacificPoker/"
                 aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="pacific_default"/>
@@ -265,9 +265,9 @@
         </site>
 
         <site site_name="Cake"
-                enabled="False" 
-                HH_path="C:/Program Files/Cake/HandHistory/YOUR SCREEN NAME HERE/" 
-                screen_name="Hero" 
+                enabled="False"
+                HH_path="C:/Program Files/Cake/HandHistory/YOUR SCREEN NAME HERE/"
+                screen_name="Hero"
                 site_path="C:/Program Files/Cake/"
                 aux_enabled="False" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="default"/>
@@ -282,10 +282,10 @@
 
 
 
-        <site site_name="iPoker" 
-                enabled="False" 
-                HH_path="C:/Program Files/iPoker/HandHistory/YOUR SCREEN NAME HERE/" 
-                screen_name="Hero" 
+        <site site_name="iPoker"
+                enabled="False"
+                HH_path="C:/Program Files/iPoker/HandHistory/YOUR SCREEN NAME HERE/"
+                screen_name="Hero"
                 site_path="C:/Program Files/iPoker/"
                 aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="ipoker_default"/>
@@ -300,7 +300,7 @@
 
         <site site_name="BetOnline"
                 enabled="False"
-                screen_name="Hero" 
+                screen_name="Hero"
                 site_path="C:/Program Files/BetOnline/"
                 HH_path="C:/Program Files/BetOnline/HandHistory/Hero/"
                 aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
@@ -317,7 +317,7 @@
 
         <site site_name="Bovada"
                 enabled="False"
-                screen_name="Hero" 
+                screen_name="Hero"
                 site_path="C:/Bovada/"
                 HH_path="C:/Bovada/"
                 aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
@@ -331,12 +331,12 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        
 
-        
+
+
         <site site_name="SealsWithClubs"
                 enabled="False"
-                screen_name="YOUR SCREEN NAME HERE" 
+                screen_name="YOUR SCREEN NAME HERE"
                 site_path="C:/Program Files/SealsWithClubs/handhistories"
                 HH_path="C:/Program Files/SealsWithClubs/handhistories"
                 aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
@@ -353,7 +353,7 @@
 
         <site site_name="WinningPoker"
                 enabled="False"
-                screen_name="Hero" 
+                screen_name="Hero"
                 site_path="C:/AmericasCardroom/"
                 HH_path="C:/AmericasCardroom/"
                 aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
@@ -373,7 +373,7 @@
     <supported_games>
         <!--
         Mapping of games to aux-handlers
-        The parameter elements for each <game> can be extended 
+        The parameter elements for each <game> can be extended
         without changing Configuration.Config()
         -->
         <game game_name="holdem" aux="ClassicHud, mucked">
@@ -416,9 +416,9 @@
         The parameter elements for each <aw> are specific to that handler
         and can be extended without changing Configuration.Config()
         -->
-        
+
         <!-- HUD aux's -->
-        <aw name="Simple_HUD" module="Aux_Hud" class="Simple_HUD"  
+        <aw name="Simple_HUD" module="Aux_Hud" class="Simple_HUD"
                 bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
         <aw name="ClassicHud" module="Aux_Classic_Hud" class="ClassicHud"
                 bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
@@ -430,7 +430,7 @@
         <!-- testing aux's -->
         <aw name="Hello" module="Hello" class="Hello"/>
         <aw name="Hello_plus" module="Hello" class="Hello_plus"/>
-        
+
     </aux_windows>
 
 
@@ -439,7 +439,7 @@
         shared layouts used for stats, mucked cards and any other aux
         - all layouts MUST include a "common" element
 
-        The parameter elements for each <ls> can be extended without 
+        The parameter elements for each <ls> can be extended without
         changing Configuration.Config()
         -->
 
@@ -512,7 +512,7 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
-        
+
         <ls name="ps_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -1081,9 +1081,9 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
-        
 
-        
+
+
         <ls name="sealswithclubs_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -1153,7 +1153,7 @@
                 <location common="1" x="316" y="237"/>
             </layout>
         </ls>
-        
+
         <ls name="winning_default">
             <layout max="2" height="546" width="792">
                 <location seat="1" x="681" y="221"/>
@@ -1234,7 +1234,7 @@
             <stat _rowcol="(2,2)" _stat_name="wtsd" popup="default" tip="" click=""/>
             <stat _rowcol="(2,3)" _stat_name="wmsd" popup="default" tip="" click=""/>
         </ss>
-        
+
         <ss name="stud_default" rows="3" cols="2" xpad="1" ypad="0">
             <stat  _rowcol="(1,1)" _stat_name="playershort" popup="default" tip="" click="" hudcolor="#98FFB0" hudprefix="" hudsuffix=""/>
             <stat  _rowcol="(1,2)" _stat_name="n" popup="default" tip="" click=""/>
@@ -1243,7 +1243,7 @@
             <stat  _rowcol="(3,1)" _stat_name="saw_f" popup="default" tip="" click=""/>
             <stat  _rowcol="(3,2)" _stat_name="ffreq1" popup="default" tip="" click=""/>
         </ss>
-        
+
         <ss name="omaha_default" rows="3" cols="2" xpad="1" ypad="0">
             <stat  _rowcol="(1,1)" _stat_name="playershort" popup="default" tip="" click="" hudcolor="#98FFB0" hudprefix="" hudsuffix=""/>
             <stat  _rowcol="(1,2)" _stat_name="n" popup="default" tip="" click=""/>
@@ -1252,7 +1252,7 @@
             <stat  _rowcol="(3,1)" _stat_name="saw_f" popup="default" tip="" click=""/>
             <stat  _rowcol="(3,2)" _stat_name="ffreq1" popup="default" tip="" click=""/>
         </ss>
-        
+
         <ss name="holdem_default" rows="3" cols="3" xpad="1" ypad="0">
             <stat  _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="" click="" stat_hicolor="#F05000" stat_hith="40" stat_locolor="#408000" stat_loth="25"/>
             <stat  _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="" click="" stat_hicolor="#F05000" stat_hith="35" stat_locolor="#408000" stat_loth="20"/>
@@ -1292,7 +1292,7 @@
             <stat _rowcol="(4,2)" _stat_name="f_cb1_0" hudcolor = "#ECEBD0" popup="popsteal" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" hudprefix="fcb:" tip=""/>
             <stat _rowcol="(4,3)" _stat_name="a_freq_123_0" hudcolor = "#ECEBD0" popup="popagg" stat_hicolor="#D86C1D" stat_hith="65" stat_locolor="#5ec265" stat_loth="20" hudprefix="afr:" hudsuffix="%" tip=""/>
         </ss>
-        
+
         <ss cols="3" name="holdem_tour_classic" rows="3" xpad="1" ypad="0">
             <stat  _rowcol="(1,1)" _stat_name="vpip" popup="default" stat_hicolor="#F05000" stat_hith="40" stat_locolor="#408000" stat_loth="25" tip="" click=""/>
             <stat  _rowcol="(1,2)" _stat_name="pfr" popup="default" stat_hicolor="#F05000" stat_hith="35" stat_locolor="#408000" stat_loth="20" tip="" click=""/>
@@ -1324,23 +1324,23 @@
 
         <pu pu_name="holdring_main" pu_class="Submenu">
             <pu_stat pu_stat_name="playername"/>
-            <pu_stat pu_stat_name="general" pu_stat_submenu="default"/>            
+            <pu_stat pu_stat_name="general" pu_stat_submenu="default"/>
             <pu_stat pu_stat_name="preflop" pu_stat_submenu="hold_pre"/>
             <pu_stat pu_stat_name="flop" pu_stat_submenu="hold_flop"/>
             <pu_stat pu_stat_name="turn" pu_stat_submenu="hold_turn"/>
             <pu_stat pu_stat_name="river" pu_stat_submenu="hold_river"/>
             <pu_stat pu_stat_name="hands seen" pu_stat_submenu="hold_starthands"/>
-        </pu>       
+        </pu>
 
         <pu pu_name="holdtour_main" pu_class="Submenu">
             <pu_stat pu_stat_name="playername"/>
-            <pu_stat pu_stat_name="general" pu_stat_submenu="default"/>            
+            <pu_stat pu_stat_name="general" pu_stat_submenu="default"/>
             <pu_stat pu_stat_name="preflop" pu_stat_submenu="hold_pre"/>
             <pu_stat pu_stat_name="flop" pu_stat_submenu="hold_flop"/>
             <pu_stat pu_stat_name="turn" pu_stat_submenu="hold_turn"/>
             <pu_stat pu_stat_name="river" pu_stat_submenu="hold_river"/>
             <pu_stat pu_stat_name="hands seen" pu_stat_submenu="hold_starthands"/>
-        </pu>    
+        </pu>
 
         <pu pu_name="hold_starthands" pu_class="Submenu">
             <pu_stat pu_stat_name="~Preflop action seen"/>
@@ -1353,9 +1353,9 @@
             <pu_stat pu_stat_name="vpip"/>
             <pu_stat pu_stat_name="pfr"/>
             <pu_stat pu_stat_name="car0"/>
-            <pu_stat pu_stat_name="saw_f"/>         
+            <pu_stat pu_stat_name="saw_f"/>
             <pu_stat pu_stat_name="Steal" pu_stat_submenu="hold_steal"/>
-            <pu_stat pu_stat_name="3/4 betting" pu_stat_submenu="hold_34bet"/>            
+            <pu_stat pu_stat_name="3/4 betting" pu_stat_submenu="hold_34bet"/>
         </pu>
 
         <pu pu_name="hold_steal" pu_class="Submenu">
@@ -1364,10 +1364,10 @@
             <pu_stat pu_stat_name="steal"/>
             <pu_stat pu_stat_name="s_steal"/>
             <pu_stat pu_stat_name="f_steal"/>
-            <pu_stat pu_stat_name="f_SB_steal"/>         
+            <pu_stat pu_stat_name="f_SB_steal"/>
             <pu_stat pu_stat_name="f_BB_steal"/>
-            <pu_stat pu_stat_name="raiseToSteal"/>         
-            <pu_stat pu_stat_name="squeeze"/>                      
+            <pu_stat pu_stat_name="raiseToSteal"/>
+            <pu_stat pu_stat_name="squeeze"/>
         </pu>
 
         <pu pu_name="hold_34bet" pu_class="Submenu">
@@ -1377,14 +1377,14 @@
             <pu_stat pu_stat_name="four_B"/>
             <pu_stat pu_stat_name="cfour_B"/>
             <pu_stat pu_stat_name="fbr"/>
-            <pu_stat pu_stat_name="ctb"/>                     
+            <pu_stat pu_stat_name="ctb"/>
             <pu_stat pu_stat_name="f_3bet"/>
             <pu_stat pu_stat_name="f_4bet"/>
-            <pu_stat pu_stat_name="blank"/>                    
+            <pu_stat pu_stat_name="blank"/>
             <pu_stat pu_stat_name="raiseToSteal"/>
-            <pu_stat pu_stat_name="squeeze"/> 
+            <pu_stat pu_stat_name="squeeze"/>
         </pu>
-        
+
         <pu pu_name="hold_flop" pu_class="Submenu">
             <pu_stat pu_stat_name="~Flop"/>
             <pu_stat pu_stat_name="n"/>
@@ -1393,9 +1393,9 @@
             <pu_stat pu_stat_name="dbr1"/>
             <pu_stat pu_stat_name="ffreq1"/>
             <pu_stat pu_stat_name="f_cb1"/>
-            <pu_stat pu_stat_name="f_dbr1"/> 
+            <pu_stat pu_stat_name="f_dbr1"/>
         </pu>
-  
+
         <pu pu_name="hold_turn" pu_class="Submenu">
             <pu_stat pu_stat_name="~Turn"/>
             <pu_stat pu_stat_name="n"/>
@@ -1404,7 +1404,7 @@
             <pu_stat pu_stat_name="dbr2"/>
             <pu_stat pu_stat_name="ffreq2"/>
             <pu_stat pu_stat_name="f_cb2"/>
-            <pu_stat pu_stat_name="f_dbr2"/> 
+            <pu_stat pu_stat_name="f_dbr2"/>
         </pu>
 
         <pu pu_name="hold_river" pu_class="Submenu">
@@ -1415,11 +1415,11 @@
             <pu_stat pu_stat_name="dbr3"/>
             <pu_stat pu_stat_name="ffreq3"/>
             <pu_stat pu_stat_name="f_cb3"/>
-            <pu_stat pu_stat_name="f_dbr3"/> 
-            <pu_stat pu_stat_name="wtsd"/> 
-            <pu_stat pu_stat_name="wmsd"/> 
+            <pu_stat pu_stat_name="f_dbr3"/>
+            <pu_stat pu_stat_name="wtsd"/>
+            <pu_stat pu_stat_name="wmsd"/>
         </pu>
-                    
+
         <pu pu_name="default" pu_class="default">
             <pu_stat pu_stat_name="playername"/>
             <pu_stat pu_stat_name="n"/>
@@ -1460,14 +1460,14 @@
             <pu_stat pu_stat_name="ffreq3"/>
             <pu_stat pu_stat_name="ffreq4"/>
         </pu>
-        
+
         <pu pu_name="pophands" pu_class="default">
             <pu_stat pu_stat_name="n"/>
             <pu_stat pu_stat_name="totalprofit"/>
             <pu_stat pu_stat_name="profit100"/>
             <pu_stat pu_stat_name="bbper100"/>
         </pu>
-        
+
         <pu pu_name="poppreflop" pu_class="default">
             <pu_stat pu_stat_name="n"/>
             <pu_stat pu_stat_name="vpip"/>
@@ -1475,7 +1475,7 @@
             <pu_stat pu_stat_name="car0"/>
             <pu_stat pu_stat_name="agg_fact"/>
         </pu>
-        
+
         <pu pu_name="pop3bet" pu_class="default">
             <pu_stat pu_stat_name="n"/>
             <pu_stat pu_stat_name="three_B"/>
@@ -1483,13 +1483,13 @@
             <pu_stat pu_stat_name="f_3bet"/>
             <pu_stat pu_stat_name="f_4bet"/>
         </pu>
-        
+
         <pu pu_name="popwtsd" pu_class="default">
             <pu_stat pu_stat_name="n"/>
             <pu_stat pu_stat_name="wtsd"/>
             <pu_stat pu_stat_name="wmsd"/>
         </pu>
-        
+
         <pu pu_class="default" pu_name="popagg">
             <pu_stat pu_stat_name="n"/>
             <pu_stat pu_stat_name="agg_fact"/>
@@ -1499,7 +1499,7 @@
             <pu_stat pu_stat_name="a_freq4"/>
             <pu_stat pu_stat_name="agg_freq"/>
         </pu>
-           
+
         <pu pu_class="default" pu_name="popcb">
             <pu_stat pu_stat_name="n"/>
             <pu_stat pu_stat_name="cbet"/>

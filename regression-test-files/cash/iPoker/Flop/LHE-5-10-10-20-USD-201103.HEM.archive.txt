@@ -1,20 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?><session sessioncode="2980394251">  
-	     <general>  
+<?xml version="1.0" encoding="utf-8"?><session sessioncode="2980394251">
+	     <general>
 	     <mode>real</mode>
-	          <gametype>Holdem L $5/$10</gametype>  
-	          <tablename>Mino</tablename>  
-	          <duration>N/A</duration>  
-	          <gamecount>N/A</gamecount>  
-	          <startdate>22-Jan-2011 20:11:15</startdate>  
-	          <currency>USD</currency>  
-	          <nickname>Player0</nickname>  
-	          <bets>N/A</bets>  
-	          <wins>N/A</wins>  
+	          <gametype>Holdem L $5/$10</gametype>
+	          <tablename>Mino</tablename>
+	          <duration>N/A</duration>
+	          <gamecount>N/A</gamecount>
+	          <startdate>22-Jan-2011 20:11:15</startdate>
+	          <currency>USD</currency>
+	          <nickname>Player0</nickname>
+	          <bets>N/A</bets>
+	          <wins>N/A</wins>
 	          <chipsin>N/A</chipsin>
 			  <chipsout>N/A</chipsout>
 			  <ipoints>N/A</ipoints>
-	            
-	     </general>  
+
+	     </general>
 	     <game gamecode="2606454888">
 	 <general>
 	  <startdate>22-Jan-2011 21:25:31</startdate>
@@ -37,26 +37,26 @@
 	<round no="4">
 	 <cards type="River" player="">DA</cards><action no="16" player="Player5" type="4" sum="$0" cards=""/><action no="17" player="Player0" type="4" sum="$0" cards=""/>
 	</round>
-	
+
 	</game></session>
-	
-<?xml version="1.0" encoding="utf-8"?><session sessioncode="2981358901">  
-	     <general>  
+
+<?xml version="1.0" encoding="utf-8"?><session sessioncode="2981358901">
+	     <general>
 	     <mode>real</mode>
-	          <gametype>Holdem L $10/$20</gametype>  
-	          <tablename>Clocolan</tablename>  
-	          <duration>N/A</duration>  
-	          <gamecount>N/A</gamecount>  
-	          <startdate>23-Jan-2011 12:53:53</startdate>  
-	          <currency>USD</currency>  
-	          <nickname>Player0</nickname>  
-	          <bets>N/A</bets>  
-	          <wins>N/A</wins>  
+	          <gametype>Holdem L $10/$20</gametype>
+	          <tablename>Clocolan</tablename>
+	          <duration>N/A</duration>
+	          <gamecount>N/A</gamecount>
+	          <startdate>23-Jan-2011 12:53:53</startdate>
+	          <currency>USD</currency>
+	          <nickname>Player0</nickname>
+	          <bets>N/A</bets>
+	          <wins>N/A</wins>
 	          <chipsin>N/A</chipsin>
 			  <chipsout>N/A</chipsout>
 			  <ipoints>N/A</ipoints>
-	            
-	     </general>  
+
+	     </general>
 	     <game gamecode="2607167283">
 	 <general>
 	  <startdate>23-Jan-2011 12:57:40</startdate>
@@ -73,6 +73,5 @@
 	<round no="2">
 	 <cards type="Flop" player="">C3 D5 H4</cards><action no="6" player="Player5" type="5" sum="$10" cards=""/><action no="5" player="Player0" type="4" sum="$0" cards=""/><action no="7" player="Player0" type="0" sum="$0" cards=""/>
 	</round>
-	
-	</game></session>
 
+	</game></session>

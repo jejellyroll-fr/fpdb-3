@@ -111,7 +111,9 @@ class TestAssembleHands:
             assert stats.hands[board_key] == expected_value
 
     def _setup_and_assemble_hand(
-        self, stats: DerivedStats, hand_modifier: Callable[[MockHand], None] | None = None,
+        self,
+        stats: DerivedStats,
+        hand_modifier: Callable[[MockHand], None] | None = None,
     ) -> MockHand:
         """Helper method to create and assemble a hand with optional modifications.
 
@@ -186,6 +188,7 @@ class TestAssembleHands:
 
     def test_tournament_hand(self, stats: DerivedStats) -> None:
         """Test hand assembly for tournament hand."""
+
         def modify_for_tournament(hand: MockHand) -> None:
             hand.gametype["type"] = "tour"
             hand.tourneyId = 999
@@ -198,6 +201,7 @@ class TestAssembleHands:
 
     def test_no_hero_hand(self, stats: DerivedStats) -> None:
         """Test hand assembly when no hero is present."""
+
         def remove_hero(hand: MockHand) -> None:
             hand.hero = None
 
@@ -207,6 +211,7 @@ class TestAssembleHands:
 
     def test_incomplete_board(self, stats: DerivedStats) -> None:
         """Test hand assembly with incomplete board (e.g., all-in preflop)."""
+
         def set_incomplete_board(hand: MockHand) -> None:
             hand.board = {
                 "FLOP": ["As", "Kh", "Qd"],
@@ -221,6 +226,7 @@ class TestAssembleHands:
 
     def test_run_it_twice(self, stats: DerivedStats) -> None:
         """Test hand assembly for run it twice scenario."""
+
         def setup_run_it_twice(hand: MockHand) -> None:
             hand.runItTimes = 2
             hand.board["FLOP2"] = ["2s", "2h", "2d"]
@@ -244,6 +250,7 @@ class TestAssembleHands:
 
     def test_split_pot_game(self, stats: DerivedStats) -> None:
         """Test hand assembly for split pot games."""
+
         def setup_split_pot(hand: MockHand) -> None:
             hand.gametype["split"] = True
             hand.gametype["category"] = "omaha8"
@@ -256,6 +263,7 @@ class TestAssembleHands:
 
     def test_empty_actions(self, stats: DerivedStats) -> None:
         """Test hand assembly with no actions."""
+
         def clear_actions(hand: MockHand) -> None:
             hand.actions = {
                 "BLINDSANTES": [],
@@ -274,6 +282,7 @@ class TestAssembleHands:
 
     def test_special_board_cards(self, stats: DerivedStats) -> None:
         """Test encoding of special board situations."""
+
         def setup_special_board(hand: MockHand) -> None:
             hand.board = {
                 "FLOPET": ["As", "Kh"],  # Special flop key

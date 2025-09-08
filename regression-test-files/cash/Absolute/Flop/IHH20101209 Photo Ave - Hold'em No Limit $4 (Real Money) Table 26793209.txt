@@ -20,6 +20,6 @@ PLAYER2 Collects $6 from main pot
 Total Pot($6)
 Seat 1: PLAYER1 (dealer) Folded on the POCKET CARDS
 Seat 2: HERO (small blind) Folded on the POCKET CARDS
-Seat 3: PLAYER2 (big blind) collected Total ($6) 
+Seat 3: PLAYER2 (big blind) collected Total ($6)
 Seat 5: PLAYER3 Folded on the POCKET CARDS
 Seat 6: PLAYER4 Folded on the POCKET CARDS

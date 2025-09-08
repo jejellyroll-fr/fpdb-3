@@ -23,14 +23,14 @@ desc = """
 +-------------+---------------------+------+-----+---------+----------------+
 | Field       | Type                | Null | Key | Default | Extra          |
 +-------------+---------------------+------+-----+---------+----------------+
-| id          | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment | 
-| tourneyId   | int(10) unsigned    | NO   | MUL | NULL    |                | 
-| playerId    | int(10) unsigned    | NO   | MUL | NULL    |                | 
-| payinAmount | int(11)             | NO   |     | NULL    |                | 
-| rank        | int(11)             | NO   |     | NULL    |                | 
-| winnings    | int(11)             | NO   |     | NULL    |                | 
-| comment     | text                | YES  |     | NULL    |                | 
-| commentTs   | datetime            | YES  |     | NULL    |                | 
+| id          | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| tourneyId   | int(10) unsigned    | NO   | MUL | NULL    |                |
+| playerId    | int(10) unsigned    | NO   | MUL | NULL    |                |
+| payinAmount | int(11)             | NO   |     | NULL    |                |
+| rank        | int(11)             | NO   |     | NULL    |                |
+| winnings    | int(11)             | NO   |     | NULL    |                |
+| comment     | text                | YES  |     | NULL    |                |
+| commentTs   | datetime            | YES  |     | NULL    |                |
 +-------------+---------------------+------+-----+---------+----------------+
 """
 

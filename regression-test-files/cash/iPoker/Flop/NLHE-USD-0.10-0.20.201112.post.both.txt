@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-	<session sessioncode="3514765711">  
-			<general>  
+	<session sessioncode="3514765711">
+			<general>
 	    	<mode>real</mode>
-	      		<gametype>Holdem NL $0.10/$0.20</gametype>  
-	          <tablename>Memphis, 98641631</tablename>  
-	          <duration>01:05</duration>  
-	          <gamecount>62</gamecount>  
-	          <startdate>2011-12-02 20:16:43</startdate>  
-	          <currency>USD</currency>  
-	          <nickname>Player3</nickname>  
-	          <bets>$23.09</bets>  
-	          <wins>$30.18</wins>  
+	      		<gametype>Holdem NL $0.10/$0.20</gametype>
+	          <tablename>Memphis, 98641631</tablename>
+	          <duration>01:05</duration>
+	          <gamecount>62</gamecount>
+	          <startdate>2011-12-02 20:16:43</startdate>
+	          <currency>USD</currency>
+	          <nickname>Player3</nickname>
+	          <bets>$23.09</bets>
+	          <wins>$30.18</wins>
 	          <chipsin>$20.80</chipsin>
 			  		<chipsout>$27.89</chipsout>
 			  		<ipoints>18.30</ipoints>
@@ -19,7 +19,7 @@
 	    </general>
 		<game gamecode="3056022611">
 		 <general>
-		  <startdate>2011-12-02 20:44:59</startdate>		  
+		  <startdate>2011-12-02 20:44:59</startdate>
 		  <players>
 		   <player seat="1" name="Player1" chips="$17.03" dealer="0" win="$0" bet="$0" rebuy="0" addon="0"/><player seat="2" name="Player3" chips="$25.82" dealer="0" win="$0" bet="$0" rebuy="0" addon="0"/><player seat="3" name="Player0" chips="$27.38" dealer="0" win="$0" bet="$0" rebuy="0" addon="0"/><player seat="4" name="Player5" chips="$3.81" dealer="0" win="$0" bet="$0" rebuy="0" addon="0"/><player seat="5" name="Player8" chips="$16" dealer="0" win="$0" bet="$0.70" rebuy="0" addon="0"/><player seat="6" name="Player4" chips="$35.82" dealer="1" win="$0" bet="$0" rebuy="0" addon="0"/><player seat="7" name="Player9" chips="$22.40" dealer="0" win="$0" bet="$0.10" rebuy="0" addon="0"/><player seat="8" name="Player6" chips="$4.50" dealer="0" win="$1.33" bet="$0.60" rebuy="0" addon="0"/><player seat="9" name="Player7" chips="$6.14" dealer="0" win="$0" bet="$0" rebuy="0" addon="0"/><player seat="10" name="Player2" chips="$19.80" dealer="0" win="$0" bet="$0" rebuy="0" addon="0"/>
 		  </players>

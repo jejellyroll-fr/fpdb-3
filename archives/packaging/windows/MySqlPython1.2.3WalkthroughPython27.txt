@@ -52,7 +52,7 @@ Step 4, grab Mysql server Source
 4.1/ Download ... http://downloads.mysql.com/archives/mysql-5.1/mysql-noinstall-5.1.34-win32.zip
 4.2/ Unpacking Desktop\mysqlsource (use 7zip)
 4.3/ Copy the following source directories to the MySql installation:
- 
+
 dos> xcopy Desktop\mysqlsource\mysql-5.1.34-win32\data\* "c:\Program Files\MySQL\MySQL Server 5.1\data" /I/E/F/H
 dos> xcopy Desktop\mysqlsource\mysql-5.1.34-win32\Embedded\* "c:\Program Files\MySQL\MySQL Server 5.1\Embedded" /I/E/F/H
 dos> xcopy Desktop\mysqlsource\mysql-5.1.34-win32\include\* "c:\Program Files\MySQL\MySQL Server 5.1\include" /I/E/F/H
@@ -66,7 +66,7 @@ dos> xcopy Desktop\mysqlsource\mysql-5.1.34-win32\sql-bench\* "c:\Program Files\
 Step 5, grab Mysql-python source
 --------------------------------
 
-5.1/ get download 
+5.1/ get download
 MySql for python ... http://sourceforge.net/projects/mysql-python/files/mysql-python/1.2.3/MySQL-python-1.2.3.tar.gz/download
 
 5.2/ extract MySQL-python-1.2.3 directory to the Desktop using 7zip
@@ -113,7 +113,7 @@ dos> cd Desktop\MySQL-python-1.2.3
 9.1/ dos> c:\python27\python.exe setup.py build
 
 * Note: You will probably get a bunch of warnings and maybe a manifest error status 31, these are ok as long as there are no errors in compiling or linking.
-* Note: This will generate the "MySQL-python-1.2.3/build" folder 
+* Note: This will generate the "MySQL-python-1.2.3/build" folder
 
 9.2/ dos> c:\python27\python.exe setup.py bdist_wininst
 

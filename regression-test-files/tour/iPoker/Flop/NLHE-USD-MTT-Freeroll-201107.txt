@@ -1,20 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?><session sessioncode="4842854461">  
-	     <general>  
+<?xml version="1.0" encoding="utf-8"?><session sessioncode="4842854461">
+	     <general>
 	     <mode>real</mode>
-	          <gametype>Holdem NL</gametype>  
-	          <tablename>SPF $100 Daily Tournament, 611669111</tablename>  
-	          <duration>N/V</duration>  
-	          <gamecount>9</gamecount>  
-	          <startdate>2011-07-31 20:00:42</startdate>  
-	          <currency>USD</currency>  
-	          <nickname>Player6</nickname>  
-	          <bets>1,500</bets>  
-	          <wins>0</wins>  
+	          <gametype>Holdem NL</gametype>
+	          <tablename>SPF $100 Daily Tournament, 611669111</tablename>
+	          <duration>N/V</duration>
+	          <gamecount>9</gamecount>
+	          <startdate>2011-07-31 20:00:42</startdate>
+	          <currency>USD</currency>
+	          <nickname>Player6</nickname>
+	          <bets>1,500</bets>
+	          <wins>0</wins>
 	          <chipsin>0</chipsin>
 			  <chipsout>0</chipsout>
 			  <ipoints>0</ipoints>
-	          <tournamentname>SPF $100 Daily Tournament</tournamentname><place>1015</place><buyin>Einladung</buyin> <totalbuyin>$0</totalbuyin> <ipoints>0</ipoints> <win>$0</win>  
-	     </general>  
+	          <tournamentname>SPF $100 Daily Tournament</tournamentname><place>1015</place><buyin>Einladung</buyin> <totalbuyin>$0</totalbuyin> <ipoints>0</ipoints> <win>$0</win>
+	     </general>
 	     <game gamecode="3681845627">
 	 <general>
 	  <startdate>2011-07-31 20:00:42</startdate>
@@ -37,7 +37,7 @@
 	<round no="4">
 	 <cards type="River" player="">D2</cards><action no="22" player="Player1" type="4" sum="0" cards=""/><action no="23" player="Player2" type="4" sum="0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="3681845824">
 	 <general>
 	  <startdate>2011-07-31 20:02:23</startdate>
@@ -57,7 +57,7 @@
 	<round no="3">
 	 <cards type="Turn" player="">S4</cards><action no="21" player="Player7" type="4" sum="0" cards=""/><action no="23" player="Player7" type="0" sum="0" cards=""/><action no="22" player="Player1" type="5" sum="510" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="3681863780">
 	 <general>
 	  <startdate>2011-07-31 20:03:21</startdate>
@@ -80,7 +80,7 @@
 	<round no="4">
 	 <cards type="River" player="">CK</cards><action no="24" player="Player7" type="0" sum="0" cards=""/><action no="22" player="Player9" type="4" sum="0" cards=""/><action no="25" player="Player9" type="0" sum="0" cards=""/><action no="23" player="Player8" type="5" sum="260" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="3681864243">
 	 <general>
 	  <startdate>2011-07-31 20:04:37</startdate>
@@ -103,7 +103,7 @@
 	<round no="4">
 	 <cards type="River" player="">C10</cards><action no="22" player="Player3" type="4" sum="0" cards=""/><action no="23" player="Player5" type="4" sum="0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="3681864554">
 	 <general>
 	  <startdate>2011-07-31 20:05:21</startdate>
@@ -126,7 +126,7 @@
 	<round no="4">
 	 <cards type="River" player="">DA</cards><action no="21" player="Player7" type="4" sum="0" cards=""/><action no="20" player="Player8" type="4" sum="0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="3681864991">
 	 <general>
 	  <startdate>2011-07-31 20:06:06</startdate>
@@ -146,7 +146,7 @@
 	<round no="3">
 	 <cards type="Turn" player="">SQ</cards><action no="17" player="Player1" type="5" sum="585" cards=""/><action no="18" player="Player9" type="0" sum="0" cards=""/>
 	</round>
-	
+
 	</game><game gamecode="3681865663">
 	 <general>
 	  <startdate>2011-07-31 20:07:14</startdate>
@@ -169,7 +169,7 @@
 	<round no="4">
 	 <cards type="River" player="">D5</cards>
 	</round>
-	
+
 	</game><game gamecode="3681866037">
 	 <general>
 	  <startdate>2011-07-31 20:07:56</startdate>
@@ -192,7 +192,7 @@
 	<round no="4">
 	 <cards type="River" player="">CQ</cards>
 	</round>
-	
+
 	</game><game gamecode="3681866566">
 	 <general>
 	  <startdate>2011-07-31 20:08:39</startdate>
@@ -215,6 +215,6 @@
 	<round no="4">
 	 <cards type="River" player="">S3</cards>
 	</round>
-	
-	</game>  
+
+	</game>
 	</session>

@@ -1,11 +1,11 @@
 ﻿Hand#2964A95039000045 - $2 NLH Double-up T11096121 -- CASH -- $2 + $0,2 -- 10 Max -- Table 1 -- 20/100/200 NL Hold'em -- 2012.05.17 - 22:49:18
 Dealer: Seat 6
-Seat 1: Player0 (2 477 in chips) 
-Seat 2: Player1 (1 928 in chips) 
-Seat 4: Player2 (4 647 in chips) 
-Seat 5: Player3 (778 in chips) 
-Seat 6: Player4 (1 657 in chips) 
-Seat 9: Hero (3 513 in chips) 
+Seat 1: Player0 (2 477 in chips)
+Seat 2: Player1 (1 928 in chips)
+Seat 4: Player2 (4 647 in chips)
+Seat 5: Player3 (778 in chips)
+Seat 6: Player4 (1 657 in chips)
+Seat 9: Hero (3 513 in chips)
 Player0: posts ante of 20
 Player1: posts ante of 20
 Player2: posts ante of 20
@@ -27,7 +27,7 @@ Hero: shows [Th Kh]
 *** TURN *** [5s]
 *** RIVER *** [9h]
 ***SHOW DOWN***
-Hero wins 1 836 with Flush King high 
+Hero wins 1 836 with Flush King high
 
 
 Hero finished 1 out of 10 players.

@@ -51,4 +51,3 @@
 		<winner amount="1.43" uncalled="false" potnumber="1" player="0" hand="King High Straight" pottype="n"/>
 	</round>
 </game>
-

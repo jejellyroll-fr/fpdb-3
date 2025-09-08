@@ -462,7 +462,6 @@ class Filters(QWidget):
             return {site: hero}
         return {}
 
-
     def getLimits(self) -> list[str]:
         """Get selected limits."""
         return [
@@ -637,6 +636,7 @@ class Filters(QWidget):
         self.heroList.setStyleSheet("background-color: #455364")
 
         from pathlib import Path
+
         ico_path = str(Path(__file__).parent) + "\\" if os.name == "nt" else ""
 
         for _count, site in enumerate(self.conf.get_supported_sites(), start=1):
@@ -1238,23 +1238,28 @@ class Filters(QWidget):
         limit_suffix_length = 2  # Length of limit type suffix (e.g., "fl", "pl", "nl")
         where = ""
         lims = [
-            int(x[0:-limit_suffix_length]) for x in limits
+            int(x[0:-limit_suffix_length])
+            for x in limits
             if len(x) > limit_suffix_length and x[-limit_suffix_length:] == "fl"
         ]
         potlims = [
-            int(x[0:-limit_suffix_length]) for x in limits
+            int(x[0:-limit_suffix_length])
+            for x in limits
             if len(x) > limit_suffix_length and x[-limit_suffix_length:] == "pl"
         ]
         nolims = [
-            int(x[0:-limit_suffix_length]) for x in limits
+            int(x[0:-limit_suffix_length])
+            for x in limits
             if len(x) > limit_suffix_length and x[-limit_suffix_length:] == "nl"
         ]
         capnolims = [
-            int(x[0:-limit_suffix_length]) for x in limits
+            int(x[0:-limit_suffix_length])
+            for x in limits
             if len(x) > limit_suffix_length and x[-limit_suffix_length:] == "cn"
         ]
         hpnolims = [
-            int(x[0:-limit_suffix_length]) for x in limits
+            int(x[0:-limit_suffix_length])
+            for x in limits
             if len(x) > limit_suffix_length and x[-limit_suffix_length:] == "hp"
         ]
 

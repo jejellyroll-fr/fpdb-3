@@ -14,34 +14,34 @@ Big Blind:                  F4UXR34L    (0.04)
 
 F4UXR34L was dealt:         2d - 4h - 6s - Qs
 
-akilim                      Fold        
+akilim                      Fold
 ReyyyJr                     Call        (0.04)
 kobi59                      Raise       (0.18)
 aceto01                     Call        (0.18)
-marcol                      Fold        
-F4UXR34L                    Fold        
+marcol                      Fold
+F4UXR34L                    Fold
 ReyyyJr                     Call        (0.14)
 
 Flop                        Jh - Th - 3c
 
-ReyyyJr                     Check       
+ReyyyJr                     Check
 kobi59                      Bet         (0.12)
 aceto01                     Call        (0.12)
 ReyyyJr                     Call        (0.12)
 
 Turn                        Jh - Th - 3c - 6c
 
-ReyyyJr                     Check       
-kobi59                      Check       
-aceto01                     Check       
+ReyyyJr                     Check
+kobi59                      Check
+aceto01                     Check
 
 River                       Jh - Th - 3c - 6c - Qc
 
-ReyyyJr                     Check       
-kobi59                      Check       
+ReyyyJr                     Check
+kobi59                      Check
 aceto01                     Bet         (0.96)
 ReyyyJr                     Call        (0.96)
-kobi59                      Fold        
+kobi59                      Fold
 
 aceto01 shows:              Ac - 5c - 2c - As (a flush, Ace high)
 
@@ -69,18 +69,18 @@ Big Blind:                  akilim      (0.04)
 F4UXR34L was dealt:         Td - 6c - As - 5d
 
 ReyyyJr                     Raise       (0.14)
-kobi59                      Fold        
+kobi59                      Fold
 aceto01                     Call        (0.14)
 marcol                      Call        (0.14)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 akilim                      Call        (0.10)
 
 Flop                        3d - Ts - 7s
 
 akilim                      Bet         (0.43)
-ReyyyJr                     Fold        
+ReyyyJr                     Fold
 aceto01                     Call        (0.43)
-marcol                      Fold        
+marcol                      Fold
 
 Turn                        3d - Ts - 7s - Qh
 
@@ -119,21 +119,21 @@ F4UXR34L was dealt:         7c - 3c - 8h - 4s
 kobi59                      Call        (0.04)
 aceto01                     Call        (0.04)
 marcol                      Call        (0.04)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 akilim                      Call        (0.02)
-ReyyyJr                     Check       
+ReyyyJr                     Check
 
 Flop                        5c - Kc - Kd
 
-akilim                      Check       
-ReyyyJr                     Check       
-kobi59                      Check       
-aceto01                     Check       
+akilim                      Check
+ReyyyJr                     Check
+kobi59                      Check
+aceto01                     Check
 marcol                      Bet         (0.20)
-akilim                      Fold        
-ReyyyJr                     Fold        
-kobi59                      Fold        
-aceto01                     Fold        
+akilim                      Fold
+ReyyyJr                     Fold
+kobi59                      Fold
+aceto01                     Fold
 marcol                      Payback     (0.20)
 
 marcol didn't show hand
@@ -161,20 +161,20 @@ F4UXR34L was dealt:         4d - Qd - 4c - 7c
 
 aceto01                     Raise       (0.14)
 marcol                      Call        (0.14)
-F4UXR34L                    Fold        
-akilim                      Fold        
-ReyyyJr                     Fold        
-kobi59                      Fold        
+F4UXR34L                    Fold
+akilim                      Fold
+ReyyyJr                     Fold
+kobi59                      Fold
 
 Flop                        9h - Jh - 9c
 
-aceto01                     Check       
-marcol                      Check       
+aceto01                     Check
+marcol                      Check
 
 Turn                        9h - Jh - 9c - 2h
 
 aceto01                     Bet         (0.34)
-marcol                      Fold        
+marcol                      Fold
 aceto01                     Payback     (0.34)
 
 aceto01 didn't show hand
@@ -201,17 +201,17 @@ Big Blind:                  aceto01     (0.04)
 F4UXR34L was dealt:         4c - 7c - 2s - Jd
 
 marcol                      Call        (0.04)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 akilim                      Raise       (0.14)
-ReyyyJr                     Fold        
-kobi59                      Fold        
+ReyyyJr                     Fold
+kobi59                      Fold
 aceto01                     Call        (0.10)
 marcol                      Call        (0.10)
 
 Flop                        Kh - 5d - 3h
 
 aceto01                     Bet         (0.44)
-marcol                      Fold        
+marcol                      Fold
 akilim                      Call        (0.44)
 
 Turn                        Kh - 5d - 3h - 8d
@@ -251,7 +251,7 @@ akilim                      Raise       (0.11)
 ReyyyJr                     Call        (0.11)
 kobi59                      Call        (0.11)
 marcol                      Call        (0.09)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 
 Flop                        7c - Ah - 6c
 
@@ -262,9 +262,9 @@ kobi59                      Call        (0.24)
 
 Turn                        7c - Ah - 6c - 5h
 
-marcol                      Check       
-akilim                      Check       
-ReyyyJr                     Check       
+marcol                      Check
+akilim                      Check
+ReyyyJr                     Check
 kobi59                      Bet         (0.38)
 marcol                      Call        (0.38)
 akilim                      Call        (0.38)
@@ -272,11 +272,11 @@ ReyyyJr                     Call        (0.38)
 
 River                       7c - Ah - 6c - 5h - 9d
 
-marcol                      Check       
+marcol                      Check
 akilim                      Bet         (1.48)
 ReyyyJr                     Call        (1.48)
 kobi59                      All-In      (0.90)
-marcol                      Fold        
+marcol                      Fold
 
 akilim shows:               Kd - Ad - 8s - 6s (a straight, Nine high)
 
@@ -310,16 +310,16 @@ F4UXR34L was dealt:         4h - 6s - 3h - Tc
 ReyyyJr                     Call        (0.04)
 kobi59                      Call        (0.04)
 marcol                      Call        (0.04)
-F4UXR34L                    Fold        
-akilim                      Check       
+F4UXR34L                    Fold
+akilim                      Check
 
 Flop                        2d - Ac - 4d
 
-akilim                      Check       
+akilim                      Check
 ReyyyJr                     Bet         (0.18)
 kobi59                      Call        (0.18)
-marcol                      Fold        
-akilim                      Fold        
+marcol                      Fold
+akilim                      Fold
 
 Turn                        2d - Ac - 4d - 9c
 
@@ -355,8 +355,8 @@ Big Blind:                  kobi59      (0.04)
 F4UXR34L was dealt:         3c - 2s - Qs - 8h
 
 marcol                      Call        (0.04)
-F4UXR34L                    Fold        
-akilim                      Fold        
+F4UXR34L                    Fold
+akilim                      Fold
 kobi59                      Raise       (0.10)
 marcol                      Call        (0.10)
 
@@ -368,9 +368,9 @@ kobi59                      Call        (0.22)
 
 Turn                        8s - 7d - 9s - As
 
-kobi59                      Check       
+kobi59                      Check
 marcol                      All-In      (0.98)
-kobi59                      Fold        
+kobi59                      Fold
 marcol                      Payback     (0.98)
 
 marcol didn't show hand
@@ -396,19 +396,19 @@ Big Blind:                  F4UXR34L    (0.04)
 
 F4UXR34L was dealt:         Qc - 5h - Qd - 4d
 
-akilim                      Fold        
+akilim                      Fold
 marcol                      Call        (0.02)
-F4UXR34L                    Check       
+F4UXR34L                    Check
 
 Flop                        7s - 4c - Jh
 
-marcol                      Check       
-F4UXR34L                    Check       
+marcol                      Check
+F4UXR34L                    Check
 
 Turn                        7s - 4c - Jh - Jc
 
 marcol                      Bet         (0.04)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 marcol                      Payback     (0.04)
 
 marcol didn't show hand
@@ -433,8 +433,8 @@ Big Blind:                  akilim      (0.04)
 
 F4UXR34L was dealt:         2s - 9h - 5d - 3s
 
-marcol                      Fold        
-F4UXR34L                    Fold        
+marcol                      Fold
+F4UXR34L                    Fold
 akilim                      Payback     (0.02)
 
 akilim didn't show hand
@@ -460,14 +460,14 @@ Big Blind:                  ReyyyJr     (0.04)
 F4UXR34L was dealt:         6d - 5c - 5s - 8s
 
 marcol                      Call        (0.04)
-F4UXR34L                    Fold        
-akilim                      Fold        
+F4UXR34L                    Fold
+akilim                      Fold
 ReyyyJr                     Raise       (0.10)
 marcol                      Call        (0.10)
 
 Flop                        Ts - 2d - Js
 
-ReyyyJr                     Check       
+ReyyyJr                     Check
 marcol                      Bet         (0.30)
 ReyyyJr                     Raise       (1.20)
 marcol                      Call        (0.90)
@@ -505,8 +505,8 @@ Big Blind:                  NutRage     (0.04)
 F4UXR34L was dealt:         4h - 9d - Qs - Td
 
 marcol                      Call        (0.04)
-F4UXR34L                    Fold        
-akilim                      Fold        
+F4UXR34L                    Fold
+akilim                      Fold
 ReyyyJr                     Call        (0.02)
 NutRage                     Raise       (0.12)
 marcol                      Call        (0.12)
@@ -514,15 +514,15 @@ ReyyyJr                     Call        (0.12)
 
 Flop                        6h - 7c - Qc
 
-ReyyyJr                     Check       
-NutRage                     Check       
+ReyyyJr                     Check
+NutRage                     Check
 marcol                      Bet         (0.48)
 ReyyyJr                     Call        (0.48)
-NutRage                     Fold        
+NutRage                     Fold
 
 Turn                        6h - 7c - Qc - 7h
 
-ReyyyJr                     Check       
+ReyyyJr                     Check
 marcol                      All-In      (1.36)
 ReyyyJr                     Call        (1.36)
 
@@ -552,11 +552,11 @@ Big Blind:                  nananinee   (0.04)
 
 F4UXR34L was dealt:         9s - Qd - 9c - As
 
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 akilim                      Raise       (0.11)
 ReyyyJr                     Call        (0.11)
 NutRage                     Raise       (0.32)
-nananinee                   Fold        
+nananinee                   Fold
 akilim                      Call        (0.23)
 ReyyyJr                     Call        (0.23)
 
@@ -568,16 +568,16 @@ ReyyyJr                     Call        (0.60)
 
 Turn                        6d - 3h - Th - Kh
 
-NutRage                     Check       
-akilim                      Check       
-ReyyyJr                     Check       
+NutRage                     Check
+akilim                      Check
+ReyyyJr                     Check
 
 River                       6d - 3h - Th - Kh - Ks
 
-NutRage                     Check       
-akilim                      Check       
+NutRage                     Check
+akilim                      Check
 ReyyyJr                     Bet         (1.43)
-NutRage                     Fold        
+NutRage                     Fold
 akilim                      Call        (1.43)
 
 ReyyyJr shows:              Qh - 8c - Jd - 7h (a flush, King high)
@@ -605,11 +605,11 @@ Big Blind:                  marcol      (0.04)
 
 F4UXR34L was dealt:         Ac - 2h - Jd - 6c
 
-F4UXR34L                    Fold        
-akilim                      Fold        
-ReyyyJr                     Fold        
+F4UXR34L                    Fold
+akilim                      Fold
+ReyyyJr                     Fold
 NutRage                     Raise       (0.11)
-nananinee                   Fold        
+nananinee                   Fold
 marcol                      Call        (0.07)
 
 Flop                        7d - 7h - Ah
@@ -651,20 +651,20 @@ Big Blind:                  F4UXR34L    (0.04)
 
 F4UXR34L was dealt:         4d - Jd - 4c - Th
 
-akilim                      Fold        
+akilim                      Fold
 ReyyyJr                     Call        (0.04)
-NutRage                     Fold        
-nananinee                   Fold        
+NutRage                     Fold
+nananinee                   Fold
 marcol                      Call        (0.02)
-F4UXR34L                    Check       
+F4UXR34L                    Check
 
 Flop                        6c - 5h - 8s
 
-marcol                      Check       
-F4UXR34L                    Check       
+marcol                      Check
+F4UXR34L                    Check
 ReyyyJr                     Bet         (0.12)
-marcol                      Fold        
-F4UXR34L                    Fold        
+marcol                      Fold
+F4UXR34L                    Fold
 ReyyyJr                     Payback     (0.12)
 
 ReyyyJr didn't show hand
@@ -690,12 +690,12 @@ Big Blind:                  akilim      (0.04)
 
 F4UXR34L was dealt:         2d - Jd - Tc - 6s
 
-ReyyyJr                     Fold        
+ReyyyJr                     Fold
 NutRage                     Raise       (0.14)
-nananinee                   Fold        
-marcol                      Fold        
-F4UXR34L                    Fold        
-akilim                      Fold        
+nananinee                   Fold
+marcol                      Fold
+F4UXR34L                    Fold
+akilim                      Fold
 NutRage                     Payback     (0.10)
 
 NutRage didn't show hand
@@ -722,15 +722,15 @@ Big Blind:                  ReyyyJr     (0.04)
 F4UXR34L was dealt:         4h - As - 9h - 8c
 
 NutRage                     Raise       (0.14)
-nananinee                   Fold        
+nananinee                   Fold
 marcol                      Call        (0.14)
-F4UXR34L                    Fold        
-akilim                      Fold        
+F4UXR34L                    Fold
+akilim                      Fold
 ReyyyJr                     Call        (0.10)
 
 Flop                        8s - Ks - 2c
 
-ReyyyJr                     Check       
+ReyyyJr                     Check
 NutRage                     Bet         (0.24)
 marcol                      All-In      (0.39)
 ReyyyJr                     Call        (0.39)
@@ -738,13 +738,13 @@ NutRage                     Call        (0.15)
 
 Turn                        8s - Ks - 2c - Ac
 
-ReyyyJr                     Check       
-NutRage                     Check       
+ReyyyJr                     Check
+NutRage                     Check
 
 River                       8s - Ks - 2c - Ac - 5h
 
 ReyyyJr                     Bet         (1.61)
-NutRage                     Fold        
+NutRage                     Fold
 ReyyyJr                     Payback     (1.61)
 
 ReyyyJr shows:              4s - 3s - 4d - Ad (a straight, Five high)
@@ -770,29 +770,29 @@ Big Blind:                  NutRage     (0.04)
 
 F4UXR34L was dealt:         6h - 7c - Ks - Ah
 
-nananinee                   Fold        
-F4UXR34L                    Fold        
+nananinee                   Fold
+F4UXR34L                    Fold
 akilim                      Raise       (0.11)
-ReyyyJr                     Fold        
+ReyyyJr                     Fold
 NutRage                     Raise       (0.31)
 akilim                      Call        (0.24)
 
 Flop                        6d - Qs - Kc
 
-NutRage                     Check       
+NutRage                     Check
 akilim                      Bet         (0.54)
 NutRage                     Call        (0.54)
 
 Turn                        6d - Qs - Kc - Js
 
-NutRage                     Check       
-akilim                      Check       
+NutRage                     Check
+akilim                      Check
 
 River                       6d - Qs - Kc - Js - 9d
 
-NutRage                     Check       
+NutRage                     Check
 akilim                      Bet         (1.35)
-NutRage                     Fold        
+NutRage                     Fold
 akilim                      Payback     (1.35)
 
 akilim didn't show hand
@@ -819,29 +819,29 @@ Blind out of turn:          Rooney7     (0.04)
 
 F4UXR34L was dealt:         6c - Qc - 5c - 2s
 
-Rooney7                     Check       
-F4UXR34L                    Fold        
-akilim                      Fold        
+Rooney7                     Check
+F4UXR34L                    Fold
+akilim                      Fold
 ReyyyJr                     Call        (0.04)
-NutRage                     Fold        
-nananinee                   Check       
+NutRage                     Fold
+nananinee                   Check
 
 Flop                        Ks - 6s - Ah
 
-nananinee                   Check       
+nananinee                   Check
 Rooney7                     Bet         (0.14)
 ReyyyJr                     Call        (0.14)
-nananinee                   Fold        
+nananinee                   Fold
 
 Turn                        Ks - 6s - Ah - 9s
 
-Rooney7                     Check       
-ReyyyJr                     Check       
+Rooney7                     Check
+ReyyyJr                     Check
 
 River                       Ks - 6s - Ah - 9s - 8s
 
-Rooney7                     Check       
-ReyyyJr                     Check       
+Rooney7                     Check
+ReyyyJr                     Check
 
 Rooney7 shows:              2h - Kc - Qd - Kd (three of a kind, Kings)
 
@@ -868,12 +868,12 @@ Big Blind:                  Rooney7     (0.04)
 
 F4UXR34L was dealt:         6h - Kc - 7s - Th
 
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 akilim                      Raise       (0.11)
 ReyyyJr                     Call        (0.11)
-NutRage                     Fold        
-nananinee                   Fold        
-Rooney7                     Fold        
+NutRage                     Fold
+nananinee                   Fold
+Rooney7                     Fold
 
 Flop                        7h - Td - Jd
 
@@ -887,8 +887,8 @@ ReyyyJr                     Call        (0.35)
 
 River                       7h - Td - Jd - 7c - Jc
 
-akilim                      Check       
-ReyyyJr                     Check       
+akilim                      Check
+ReyyyJr                     Check
 
 akilim shows:               Ks - 6d - Kh - 5s (two pairs, Kings and Jacks)
 
@@ -915,17 +915,17 @@ Big Blind:                  F4UXR34L    (0.04)
 
 F4UXR34L was dealt:         3c - 6d - Ks - As
 
-akilim                      Fold        
-ReyyyJr                     Fold        
-NutRage                     Fold        
-nananinee                   Fold        
+akilim                      Fold
+ReyyyJr                     Fold
+NutRage                     Fold
+nananinee                   Fold
 Rooney7                     Call        (0.02)
-F4UXR34L                    Check       
+F4UXR34L                    Check
 
 Flop                        8c - Qd - 4c
 
 Rooney7                     Bet         (0.06)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 Rooney7                     Payback     (0.06)
 
 Rooney7 didn't show hand
@@ -951,12 +951,12 @@ Big Blind:                  akilim      (0.04)
 
 F4UXR34L was dealt:         2d - Ah - 8c - 7h
 
-ReyyyJr                     Fold        
-NutRage                     Fold        
-nananinee                   Fold        
+ReyyyJr                     Fold
+NutRage                     Fold
+nananinee                   Fold
 Rooney7                     Raise       (0.14)
-F4UXR34L                    Fold        
-akilim                      Fold        
+F4UXR34L                    Fold
+akilim                      Fold
 Rooney7                     Payback     (0.10)
 
 Rooney7 didn't show hand
@@ -982,24 +982,24 @@ Big Blind:                  ReyyyJr     (0.04)
 
 F4UXR34L was dealt:         Th - 4d - 8h - Kd
 
-NutRage                     Fold        
-nananinee                   Fold        
+NutRage                     Fold
+nananinee                   Fold
 Rooney7                     Raise       (0.11)
-F4UXR34L                    Fold        
-akilim                      Fold        
+F4UXR34L                    Fold
+akilim                      Fold
 ReyyyJr                     Call        (0.07)
 
 Flop                        Ac - 7s - 9h
 
-ReyyyJr                     Check       
+ReyyyJr                     Check
 Rooney7                     Bet         (0.18)
 ReyyyJr                     Call        (0.18)
 
 Turn                        Ac - 7s - 9h - Ad
 
-ReyyyJr                     Check       
+ReyyyJr                     Check
 Rooney7                     Bet         (0.34)
-ReyyyJr                     Fold        
+ReyyyJr                     Fold
 Rooney7                     Payback     (0.34)
 
 Rooney7 didn't show hand
@@ -1025,18 +1025,18 @@ Big Blind:                  NutRage     (0.04)
 
 F4UXR34L was dealt:         8d - Ac - Ks - 5s
 
-nananinee                   Fold        
-Rooney7                     Fold        
-F4UXR34L                    Fold        
+nananinee                   Fold
+Rooney7                     Fold
+F4UXR34L                    Fold
 akilim                      Raise       (0.11)
 ReyyyJr                     Call        (0.09)
 NutRage                     Call        (0.07)
 
 Flop                        Js - 8h - Jc
 
-ReyyyJr                     Check       
-NutRage                     Check       
-akilim                      Check       
+ReyyyJr                     Check
+NutRage                     Check
+akilim                      Check
 
 Turn                        Js - 8h - Jc - Ts
 
@@ -1046,9 +1046,9 @@ akilim                      Call        (0.04)
 
 River                       Js - 8h - Jc - Ts - Kc
 
-ReyyyJr                     Check       
-NutRage                     Check       
-akilim                      Check       
+ReyyyJr                     Check
+NutRage                     Check
+akilim                      Check
 
 ReyyyJr shows:              Qd - 7s - 8s - 3d (two pairs, Jacks and Eights)
 NutRage shows:              3c - Qc - Ah - Kd (a straight, Ace high)
@@ -1077,16 +1077,16 @@ Big Blind:                  nananinee   (0.04)
 F4UXR34L was dealt:         Js - Jc - 5s - 6d
 
 Rooney7                     Raise       (0.11)
-F4UXR34L                    Fold        
-akilim                      Fold        
+F4UXR34L                    Fold
+akilim                      Fold
 ReyyyJr                     Call        (0.11)
-NutRage                     Fold        
-nananinee                   Fold        
+NutRage                     Fold
+nananinee                   Fold
 
 Flop                        9h - Ac - Kd
 
-Rooney7                     Check       
-ReyyyJr                     Check       
+Rooney7                     Check
+ReyyyJr                     Check
 
 Turn                        9h - Ac - Kd - 4h
 
@@ -1095,8 +1095,8 @@ ReyyyJr                     Call        (0.21)
 
 River                       9h - Ac - Kd - 4h - 7c
 
-Rooney7                     Check       
-ReyyyJr                     Check       
+Rooney7                     Check
+ReyyyJr                     Check
 
 Rooney7 shows:              Qs - Kh - Tc - 9c (two pairs, Kings and Nines)
 
@@ -1123,11 +1123,11 @@ Big Blind:                  Rooney7     (0.04)
 
 F4UXR34L was dealt:         Kd - 7s - 5d - Tc
 
-F4UXR34L                    Fold        
-akilim                      Fold        
-ReyyyJr                     Fold        
-NutRage                     Fold        
-nananinee                   Fold        
+F4UXR34L                    Fold
+akilim                      Fold
+ReyyyJr                     Fold
+NutRage                     Fold
+nananinee                   Fold
 Rooney7                     Payback     (0.02)
 
 Rooney7 didn't show hand
@@ -1153,12 +1153,12 @@ Big Blind:                  F4UXR34L    (0.04)
 
 F4UXR34L was dealt:         3s - 8c - 8h - Td
 
-akilim                      Fold        
+akilim                      Fold
 ReyyyJr                     Raise       (0.14)
-NutRage                     Fold        
-nananinee                   Fold        
-Rooney7                     Fold        
-F4UXR34L                    Fold        
+NutRage                     Fold
+nananinee                   Fold
+Rooney7                     Fold
+F4UXR34L                    Fold
 ReyyyJr                     Payback     (0.10)
 
 ReyyyJr didn't show hand
@@ -1185,21 +1185,21 @@ Big Blind:                  akilim      (0.04)
 F4UXR34L was dealt:         4h - 3s - Jc - Ac
 
 ReyyyJr                     Call        (0.04)
-NutRage                     Fold        
-nananinee                   Fold        
-Rooney7                     Fold        
-F4UXR34L                    Fold        
-akilim                      Check       
+NutRage                     Fold
+nananinee                   Fold
+Rooney7                     Fold
+F4UXR34L                    Fold
+akilim                      Check
 
 Flop                        Tc - 7h - 3d
 
-akilim                      Check       
-ReyyyJr                     Check       
+akilim                      Check
+ReyyyJr                     Check
 
 Turn                        Tc - 7h - 3d - 9c
 
 akilim                      Bet         (0.07)
-ReyyyJr                     Fold        
+ReyyyJr                     Fold
 akilim                      Payback     (0.07)
 
 akilim didn't show hand
@@ -1225,22 +1225,22 @@ Big Blind:                  ReyyyJr     (0.04)
 
 F4UXR34L was dealt:         5s - 8d - 4c - Kd
 
-NutRage                     Fold        
+NutRage                     Fold
 Rooney7                     Raise       (0.11)
-F4UXR34L                    Fold        
-akilim                      Fold        
+F4UXR34L                    Fold
+akilim                      Fold
 ReyyyJr                     Raise       (0.31)
 Rooney7                     Call        (0.24)
 
 Flop                        Jh - 2s - 6d
 
-ReyyyJr                     Check       
-Rooney7                     Check       
+ReyyyJr                     Check
+Rooney7                     Check
 
 Turn                        Jh - 2s - 6d - Jc
 
 ReyyyJr                     Bet         (0.36)
-Rooney7                     Fold        
+Rooney7                     Fold
 ReyyyJr                     Payback     (0.36)
 
 ReyyyJr didn't show hand
@@ -1266,8 +1266,8 @@ Big Blind:                  NutRage     (0.04)
 
 F4UXR34L was dealt:         Th - 3s - 7s - As
 
-Rooney7                     Fold        
-F4UXR34L                    Fold        
+Rooney7                     Fold
+F4UXR34L                    Fold
 akilim                      Raise       (0.11)
 ReyyyJr                     Call        (0.09)
 NutRage                     Call        (0.07)
@@ -1275,8 +1275,8 @@ NutRage                     Call        (0.07)
 Flop                        Ts - 5d - 4d
 
 ReyyyJr                     Bet         (0.33)
-NutRage                     Fold        
-akilim                      Fold        
+NutRage                     Fold
+akilim                      Fold
 ReyyyJr                     Payback     (0.33)
 
 ReyyyJr didn't show hand
@@ -1302,25 +1302,25 @@ Big Blind:                  Rooney7     (0.04)
 
 F4UXR34L was dealt:         5s - 9h - Js - 2h
 
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 akilim                      Call        (0.04)
 ReyyyJr                     Call        (0.04)
-NutRage                     Fold        
-Rooney7                     Check       
+NutRage                     Fold
+Rooney7                     Check
 
 Flop                        7d - Qs - 8c
 
-Rooney7                     Check       
+Rooney7                     Check
 akilim                      Bet         (0.10)
 ReyyyJr                     Raise       (0.44)
-Rooney7                     Fold        
+Rooney7                     Fold
 akilim                      Call        (0.34)
 
 Turn                        7d - Qs - 8c - 3d
 
-akilim                      Check       
+akilim                      Check
 ReyyyJr                     Bet         (1.02)
-akilim                      Fold        
+akilim                      Fold
 ReyyyJr                     Payback     (1.02)
 
 ReyyyJr didn't show hand
@@ -1345,28 +1345,28 @@ Big Blind:                  F4UXR34L    (0.04)
 
 F4UXR34L was dealt:         8s - Th - 5h - 2c
 
-akilim                      Fold        
+akilim                      Fold
 ReyyyJr                     Call        (0.04)
 NutRage                     Raise       (0.14)
-Rooney7                     Fold        
-F4UXR34L                    Fold        
+Rooney7                     Fold
+F4UXR34L                    Fold
 ReyyyJr                     Call        (0.10)
 
 Flop                        4h - Qd - 3h
 
-ReyyyJr                     Check       
+ReyyyJr                     Check
 NutRage                     Bet         (0.25)
 ReyyyJr                     Call        (0.25)
 
 Turn                        4h - Qd - 3h - Qs
 
-ReyyyJr                     Check       
-NutRage                     Check       
+ReyyyJr                     Check
+NutRage                     Check
 
 River                       4h - Qd - 3h - Qs - Td
 
 ReyyyJr                     Bet         (0.84)
-NutRage                     Fold        
+NutRage                     Fold
 ReyyyJr                     Payback     (0.84)
 
 ReyyyJr didn't show hand
@@ -1392,28 +1392,28 @@ Big Blind:                  akilim      (0.04)
 
 F4UXR34L was dealt:         Qh - 9c - 2d - Kd
 
-ReyyyJr                     Fold        
+ReyyyJr                     Fold
 NutRage                     Call        (0.04)
 Rooney7                     Call        (0.04)
-F4UXR34L                    Fold        
-akilim                      Check       
+F4UXR34L                    Fold
+akilim                      Check
 
 Flop                        6c - Ah - 2s
 
-akilim                      Check       
+akilim                      Check
 NutRage                     Bet         (0.10)
-Rooney7                     Fold        
+Rooney7                     Fold
 akilim                      Call        (0.10)
 
 Turn                        6c - Ah - 2s - 6d
 
-akilim                      Check       
-NutRage                     Check       
+akilim                      Check
+NutRage                     Check
 
 River                       6c - Ah - 2s - 6d - Qd
 
-akilim                      Check       
-NutRage                     Check       
+akilim                      Check
+NutRage                     Check
 
 akilim shows:               Kh - 4d - As - 9h (two pairs, Aces and Sixes)
 
@@ -1441,17 +1441,17 @@ Blind out of turn:          genip       (0.04)
 
 F4UXR34L was dealt:         9c - 4d - 7h - 7s
 
-NutRage                     Fold        
-genip                       Check       
-Rooney7                     Fold        
-F4UXR34L                    Fold        
-akilim                      Fold        
-ReyyyJr                     Check       
+NutRage                     Fold
+genip                       Check
+Rooney7                     Fold
+F4UXR34L                    Fold
+akilim                      Fold
+ReyyyJr                     Check
 
 Flop                        8c - Qs - 3s
 
-ReyyyJr                     Check       
-genip                       Check       
+ReyyyJr                     Check
+genip                       Check
 
 Turn                        8c - Qs - 3s - Jh
 
@@ -1461,7 +1461,7 @@ genip                       Call        (0.04)
 River                       8c - Qs - 3s - Jh - 8d
 
 ReyyyJr                     Bet         (0.18)
-genip                       Fold        
+genip                       Fold
 ReyyyJr                     Payback     (0.18)
 
 ReyyyJr didn't show hand
@@ -1489,17 +1489,17 @@ F4UXR34L was dealt:         Td - 9s - 3h - 7d
 
 genip                       Raise       (0.08)
 Rooney7                     Raise       (0.30)
-F4UXR34L                    Fold        
-akilim                      Fold        
+F4UXR34L                    Fold
+akilim                      Fold
 ReyyyJr                     Call        (0.28)
-NutRage                     Fold        
+NutRage                     Fold
 genip                       Call        (0.22)
 
 Flop                        9d - 3s - Jc
 
-ReyyyJr                     Check       
+ReyyyJr                     Check
 genip                       Bet         (0.94)
-Rooney7                     Fold        
+Rooney7                     Fold
 ReyyyJr                     Raise       (1.88)
 genip                       All-In      (0.68)
 ReyyyJr                     Payback     (0.26)
@@ -1532,30 +1532,30 @@ Big Blind:                  genip       (0.04)
 F4UXR34L was dealt:         Jh - 4h - 8c - Js
 
 Rooney7                     Raise       (0.14)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 akilim                      Call        (0.14)
 ReyyyJr                     Call        (0.14)
-NutRage                     Fold        
+NutRage                     Fold
 genip                       Call        (0.10)
 
 Flop                        3h - 3c - 8h
 
-genip                       Check       
-Rooney7                     Check       
+genip                       Check
+Rooney7                     Check
 akilim                      Bet         (0.29)
-ReyyyJr                     Fold        
+ReyyyJr                     Fold
 genip                       Call        (0.29)
-Rooney7                     Fold        
+Rooney7                     Fold
 
 Turn                        3h - 3c - 8h - 9h
 
-genip                       Check       
+genip                       Check
 akilim                      Bet         (0.58)
 genip                       Call        (0.58)
 
 River                       3h - 3c - 8h - 9h - 4s
 
-genip                       Check       
+genip                       Check
 akilim                      Bet         (1.16)
 genip                       Call        (1.16)
 
@@ -1583,20 +1583,20 @@ Big Blind:                  Rooney7     (0.04)
 
 F4UXR34L was dealt:         3d - 8c - Kc - Ts
 
-F4UXR34L                    Fold        
-akilim                      Fold        
+F4UXR34L                    Fold
+akilim                      Fold
 ReyyyJr                     Raise       (0.14)
-NutRage                     Fold        
+NutRage                     Fold
 genip                       Call        (0.12)
 Rooney7                     Call        (0.10)
 
 Flop                        Qs - Qd - 7h
 
-genip                       Check       
-Rooney7                     Check       
+genip                       Check
+Rooney7                     Check
 ReyyyJr                     Bet         (0.42)
-genip                       Fold        
-Rooney7                     Fold        
+genip                       Fold
+Rooney7                     Fold
 ReyyyJr                     Payback     (0.42)
 
 ReyyyJr didn't show hand
@@ -1625,17 +1625,17 @@ F4UXR34L was dealt:         3c - 5c - Jc - 7s
 akilim                      Call        (0.04)
 ReyyyJr                     Call        (0.04)
 NutRage                     Raise       (0.22)
-genip                       Fold        
-Rooney7                     Fold        
-F4UXR34L                    Fold        
-akilim                      Fold        
+genip                       Fold
+Rooney7                     Fold
+F4UXR34L                    Fold
+akilim                      Fold
 ReyyyJr                     Call        (0.18)
 
 Flop                        9h - Th - 6s
 
-ReyyyJr                     Check       
+ReyyyJr                     Check
 NutRage                     Bet         (0.40)
-ReyyyJr                     Fold        
+ReyyyJr                     Fold
 NutRage                     Payback     (0.40)
 
 NutRage didn't show hand
@@ -1662,10 +1662,10 @@ Big Blind:                  ReyyyJr     (0.04)
 F4UXR34L was dealt:         4s - 6c - Qs - 4h
 
 NutRage                     Raise       (0.14)
-genip                       Fold        
+genip                       Fold
 Rooney7                     Call        (0.14)
-F4UXR34L                    Fold        
-ReyyyJr                     Fold        
+F4UXR34L                    Fold
+ReyyyJr                     Fold
 
 Flop                        Ks - 5c - 2d
 
@@ -1674,9 +1674,9 @@ Rooney7                     Call        (0.25)
 
 Turn                        Ks - 5c - 2d - Ac
 
-NutRage                     Check       
+NutRage                     Check
 Rooney7                     Bet         (0.63)
-NutRage                     Fold        
+NutRage                     Fold
 Rooney7                     Payback     (0.63)
 
 Rooney7 didn't show hand
@@ -1702,30 +1702,30 @@ Big Blind:                  NutRage     (0.04)
 
 F4UXR34L was dealt:         5h - 9s - Qs - Jd
 
-genip                       Fold        
+genip                       Fold
 Rooney7                     Raise       (0.11)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 ReyyyJr                     Call        (0.09)
 NutRage                     Call        (0.07)
 
 Flop                        8d - 6c - 9c
 
-ReyyyJr                     Check       
+ReyyyJr                     Check
 NutRage                     Bet         (0.24)
 Rooney7                     Call        (0.24)
 ReyyyJr                     Call        (0.24)
 
 Turn                        8d - 6c - 9c - 6d
 
-ReyyyJr                     Check       
+ReyyyJr                     Check
 NutRage                     Bet         (0.56)
 Rooney7                     Call        (0.56)
-ReyyyJr                     Fold        
+ReyyyJr                     Fold
 
 River                       8d - 6c - 9c - 6d - 2c
 
 NutRage                     Bet         (1.62)
-Rooney7                     Fold        
+Rooney7                     Fold
 NutRage                     Payback     (1.62)
 
 NutRage didn't show hand
@@ -1751,26 +1751,26 @@ Big Blind:                  genip       (0.04)
 
 F4UXR34L was dealt:         6h - Td - 7s - Ah
 
-Rooney7                     Fold        
-F4UXR34L                    Fold        
-ReyyyJr                     Fold        
+Rooney7                     Fold
+F4UXR34L                    Fold
+ReyyyJr                     Fold
 NutRage                     Raise       (0.10)
 genip                       Call        (0.08)
 
 Flop                        9h - 7c - Ts
 
-NutRage                     Check       
-genip                       Check       
+NutRage                     Check
+genip                       Check
 
 Turn                        9h - 7c - Ts - 6c
 
-NutRage                     Check       
-genip                       Check       
+NutRage                     Check
+genip                       Check
 
 River                       9h - 7c - Ts - 6c - 5h
 
-NutRage                     Check       
-genip                       Check       
+NutRage                     Check
+genip                       Check
 
 NutRage shows:              Kd - 2h - Ad - Kh (a pair of Kings)
 
@@ -1797,19 +1797,19 @@ Big Blind:                  Rooney7     (0.04)
 
 F4UXR34L was dealt:         3d - Qs - Jc - 2h
 
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 ReyyyJr                     Raise       (0.14)
-NutRage                     Fold        
+NutRage                     Fold
 genip                       Call        (0.12)
 Rooney7                     Call        (0.10)
 
 Flop                        9s - Qd - 7c
 
-genip                       Check       
-Rooney7                     Check       
+genip                       Check
+Rooney7                     Check
 ReyyyJr                     Bet         (0.42)
-genip                       Fold        
-Rooney7                     Fold        
+genip                       Fold
+Rooney7                     Fold
 ReyyyJr                     Payback     (0.42)
 
 ReyyyJr didn't show hand
@@ -1835,17 +1835,17 @@ Big Blind:                  F4UXR34L    (0.04)
 
 F4UXR34L was dealt:         9c - 3s - Qd - Kc
 
-ReyyyJr                     Fold        
+ReyyyJr                     Fold
 NutRage                     Raise       (0.14)
-genip                       Fold        
+genip                       Fold
 Rooney7                     Raise       (0.36)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 NutRage                     Call        (0.24)
 
 Flop                        Ks - 4h - Kd
 
 Rooney7                     Bet         (0.80)
-NutRage                     Fold        
+NutRage                     Fold
 Rooney7                     Payback     (0.80)
 
 Rooney7 didn't show hand
@@ -1874,21 +1874,21 @@ F4UXR34L was dealt:         Ks - Jd - 8d - 2d
 ReyyyJr                     Call        (0.04)
 NutRage                     Raise       (0.14)
 genip                       Call        (0.14)
-Rooney7                     Fold        
-F4UXR34L                    Fold        
+Rooney7                     Fold
+F4UXR34L                    Fold
 smorek99                    Call        (0.10)
 ReyyyJr                     Call        (0.10)
 
 Flop                        7h - 8c - 6d
 
-smorek99                    Check       
-ReyyyJr                     Check       
+smorek99                    Check
+ReyyyJr                     Check
 NutRage                     Bet         (0.43)
-genip                       Fold        
+genip                       Fold
 smorek99                    Call        (0.43)
 ReyyyJr                     Raise       (0.86)
 NutRage                     Raise       (3.16)
-smorek99                    Fold        
+smorek99                    Fold
 ReyyyJr                     All-In      (8.85)
 NutRage                     All-In      (1.15)
 ReyyyJr                     Payback     (4.97)
@@ -1920,20 +1920,20 @@ Big Blind:                  ReyyyJr     (0.04)
 
 F4UXR34L was dealt:         6c - Qh - 7s - 5c
 
-NutRage                     Fold        
+NutRage                     Fold
 genip                       Call        (0.04)
-Rooney7                     Fold        
-F4UXR34L                    Fold        
+Rooney7                     Fold
+F4UXR34L                    Fold
 smorek99                    Call        (0.02)
 ReyyyJr                     Raise       (0.12)
-genip                       Fold        
+genip                       Fold
 smorek99                    Call        (0.12)
 
 Flop                        3h - Ah - Kd
 
-smorek99                    Check       
+smorek99                    Check
 ReyyyJr                     Bet         (0.18)
-smorek99                    Fold        
+smorek99                    Fold
 ReyyyJr                     Payback     (0.18)
 
 ReyyyJr didn't show hand
@@ -1961,32 +1961,32 @@ F4UXR34L was dealt:         8s - Th - 2h - 2c
 
 genip                       Call        (0.04)
 Rooney7                     Call        (0.04)
-F4UXR34L                    Fold        
-smorek99                    Fold        
+F4UXR34L                    Fold
+smorek99                    Fold
 ReyyyJr                     Call        (0.02)
-NutRage                     Check       
+NutRage                     Check
 
 Flop                        7h - Td - 3c
 
-ReyyyJr                     Check       
-NutRage                     Check       
-genip                       Check       
+ReyyyJr                     Check
+NutRage                     Check
+genip                       Check
 Rooney7                     Bet         (0.12)
 ReyyyJr                     Call        (0.12)
-NutRage                     Fold        
+NutRage                     Fold
 genip                       Call        (0.12)
 
 Turn                        7h - Td - 3c - 8h
 
-ReyyyJr                     Check       
-genip                       Check       
-Rooney7                     Check       
+ReyyyJr                     Check
+genip                       Check
+Rooney7                     Check
 
 River                       7h - Td - 3c - 8h - 7c
 
 ReyyyJr                     Bet         (0.52)
-genip                       Fold        
-Rooney7                     Fold        
+genip                       Fold
+Rooney7                     Fold
 ReyyyJr                     Payback     (0.52)
 
 ReyyyJr didn't show hand
@@ -2013,28 +2013,28 @@ Big Blind:                  genip       (0.04)
 F4UXR34L was dealt:         7h - Ts - 7c - 6h
 
 Rooney7                     Call        (0.04)
-F4UXR34L                    Fold        
+F4UXR34L                    Fold
 smorek99                    Call        (0.04)
-ReyyyJr                     Fold        
+ReyyyJr                     Fold
 NutRage                     Call        (0.02)
-genip                       Check       
+genip                       Check
 
 Flop                        Jd - 9c - 3d
 
-NutRage                     Check       
-genip                       Check       
-Rooney7                     Check       
-smorek99                    Check       
+NutRage                     Check
+genip                       Check
+Rooney7                     Check
+smorek99                    Check
 
 Turn                        Jd - 9c - 3d - Jh
 
-NutRage                     Check       
-genip                       Check       
-Rooney7                     Check       
+NutRage                     Check
+genip                       Check
+Rooney7                     Check
 smorek99                    Bet         (0.16)
-NutRage                     Fold        
-genip                       Fold        
-Rooney7                     Fold        
+NutRage                     Fold
+genip                       Fold
+Rooney7                     Fold
 smorek99                    Payback     (0.16)
 
 smorek99 didn't show hand
@@ -2043,4 +2043,3 @@ smorek99 wins:              EUR 0.16
 Rake:                       EUR 0.00
 
 Game ended 2011-03-21 17:24:28 GMT
-

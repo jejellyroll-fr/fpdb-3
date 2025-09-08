@@ -45,4 +45,3 @@ Seat 6: Player4 folded on the Pre-Flop and did not bet
 Seat 7: Player5 folded on the Pre-Flop and did not bet
 Seat 8: Player6 (button) folded on the Pre-Flop
 Seat 9: Player7 did not show and won 1585.00
-

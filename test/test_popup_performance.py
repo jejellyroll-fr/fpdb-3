@@ -13,6 +13,7 @@ from unittest.mock import Mock
 # Add the parent directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+
 class TestPopupPerformance(unittest.TestCase):
     """Test performance characteristics of the popup system."""
 
@@ -20,11 +21,8 @@ class TestPopupPerformance(unittest.TestCase):
     def setUpClass(cls):
         """Set up mocks for performance tests."""
         cls._original_modules = {}
-        modules_to_mock = [
-            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets",
-            "Stats", "Popup"
-        ]
-        
+        modules_to_mock = ["PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets", "Stats", "Popup"]
+
         for module_name in modules_to_mock:
             if module_name in sys.modules:
                 cls._original_modules[module_name] = sys.modules[module_name]
@@ -53,11 +51,8 @@ class TestPopupPerformance(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """Clean up mocks after performance tests."""
-        modules_to_mock = [
-            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets",
-            "Stats", "Popup"
-        ]
-        
+        modules_to_mock = ["PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets", "Stats", "Popup"]
+
         for module_name in modules_to_mock:
             if module_name in cls._original_modules:
                 sys.modules[module_name] = cls._original_modules[module_name]
@@ -421,7 +416,9 @@ class TestPopupScalability(unittest.TestCase):
             count_ratio = stat_counts[-1] / stat_counts[0]  # 20x more stats
 
             # Performance should scale reasonably (within 50x of linear - adjusted for current system)
-            assert time_ratio < count_ratio * 50, f"Performance scaling poor: {time_ratio:.2f}x time for {count_ratio}x stats"
+            assert (
+                time_ratio < count_ratio * 50
+            ), f"Performance scaling poor: {time_ratio:.2f}x time for {count_ratio}x stats"
 
     def test_theme_complexity_scalability(self) -> None:
         """Test performance with complex theme configurations."""
@@ -516,6 +513,3 @@ try:
     import gc
 except ImportError:
     gc = None
-
-
-

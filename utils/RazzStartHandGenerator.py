@@ -2,7 +2,6 @@
 
 """Generate Razz startCards encoding and decoding for Card.py."""
 
-
 import re
 
 re_space = re.compile(r"([\(\)AKQJT0-9]+)\s+", re.MULTILINE)
@@ -145,5 +144,3 @@ for a in re_space.finditer(razzlist):
     count += 1
     if count % 10 == 0:
         string = string + "\n"
-
-
