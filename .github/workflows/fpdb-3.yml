@@ -16,6 +16,8 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
     - uses: actions/checkout@v3
 
@@ -44,6 +46,12 @@ jobs:
 
   test-and-coverage:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+      pull-requests: write
+      issues: write
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -197,74 +205,69 @@ jobs:
         name: coverage-html
         path: htmlcov/
 
-    - name: Deploy unified documentation and coverage to GitHub Pages
+    - name: Prepare unified site for GitHub Pages
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       run: |
-        git config --global user.name 'GitHub Actions'
-        git config --global user.email 'actions@github.com'
-
-        # Clean up any uncommitted changes from test runs
-        git add . || true
-        git stash || true
-        git clean -fd || true
-
-        # Fetch and switch to gh-pages branch
-        git fetch origin gh-pages || true
-        git checkout gh-pages || git checkout --orphan gh-pages
-        git pull origin gh-pages || echo "Branch is orphan or already up to date"
-
         # Create unified site structure
-        rm -rf docs coverage index.html .nojekyll || true
-        mkdir -p docs coverage
+        mkdir -p _site/docs _site/coverage
 
         # Deploy documentation
         if [ -d /tmp/docs-backup/docs/build ]; then
-          cp -r /tmp/docs-backup/docs/build/* docs/
+          cp -r /tmp/docs-backup/docs/build/* _site/docs/
         else
           echo "No documentation backup found"
         fi
 
         # Deploy coverage files
         if [ -d /tmp/htmlcov-backup ]; then
-          cp -r /tmp/htmlcov-backup/* coverage/
+          cp -r /tmp/htmlcov-backup/* _site/coverage/
         else
           echo "No coverage backup found"
         fi
 
         # Copy site index
-        cp /tmp/site-backup/site_index.html index.html || echo "No site index found"
-
-        # Create .nojekyll file
-        touch .nojekyll
-
-        # Commit and push if there are changes
-        git add . -f || true
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
+        if [ -f /tmp/site-backup/site_index.html ]; then
+          cp /tmp/site-backup/site_index.html _site/index.html
         else
-          git commit -m "Deploy unified docs and coverage for commit ${{ github.sha }}"
-          git push origin gh-pages
+          echo "No site_index.html found"
         fi
 
+        # Create .nojekyll file
+        touch _site/.nojekyll
+
+    - name: Setup Pages
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      uses: actions/configure-pages@v4
+
+    - name: Upload to GitHub Pages
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: _site
+
+    - name: Deploy to GitHub Pages
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      id: deployment
+      uses: actions/deploy-pages@v4
+
     - name: Comment PR with coverage link
-      if: github.event_name == 'pull_request'
+      if: github.event_name == 'pull_request' && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       uses: actions/github-script@v6
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const repoName = context.repo.repo;
           const repoOwner = context.repo.owner;
-          const sha = context.sha;
-          const url = `https://${repoOwner}.github.io/${repoName}/coverage/${sha}/`;
+          const url = `https://${repoOwner}.github.io/${repoName}/coverage/`;
           await github.rest.issues.createComment({
             owner: repoOwner,
             repo: repoName,
             issue_number: context.issue.number,
-            body: `Coverage report for this PR: ${url}`
+            body: `Coverage report for this PR: ${url}\n Documentation: https://${repoOwner}.github.io/${repoName}/docs/`
           });
 
     - name: Comment commit with coverage link
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       uses: actions/github-script@v6
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -272,12 +275,12 @@ jobs:
           const repoName = context.repo.repo;
           const repoOwner = context.repo.owner;
           const sha = context.sha;
-          const url = `https://${repoOwner}.github.io/${repoName}/coverage/${sha}/`;
+          const url = `https://${repoOwner}.github.io/${repoName}/coverage/`;
           await github.rest.repos.createCommitComment({
             owner: repoOwner,
             repo: repoName,
             commit_sha: sha,
-            body: `Coverage report for this commit: ${url}`
+            body: `Coverage report for this commit: ${url}\n Documentation: https://${repoOwner}.github.io/${repoName}/docs/`
           });
 
 
@@ -285,6 +288,8 @@ jobs:
   build-windows:
     if: github.event_name == 'push'
     runs-on: windows-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
@@ -311,6 +316,8 @@ jobs:
   build-macos-intel:
       if: github.event_name == 'push'
       runs-on: macos-latest
+      permissions:
+        contents: read
       steps:
         - uses: actions/checkout@v3
 
@@ -348,6 +355,8 @@ jobs:
   build-macos-arm:
     if: github.event_name == 'push'
     runs-on: macos-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
@@ -383,6 +392,8 @@ jobs:
   build-linux:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
