@@ -16,6 +16,8 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
     - uses: actions/checkout@v3
 
@@ -45,10 +47,11 @@ jobs:
   test-and-coverage:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
       pull-requests: write
+      issues: write
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -285,6 +288,8 @@ jobs:
   build-windows:
     if: github.event_name == 'push'
     runs-on: windows-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
@@ -311,6 +316,8 @@ jobs:
   build-macos-intel:
       if: github.event_name == 'push'
       runs-on: macos-latest
+      permissions:
+        contents: read
       steps:
         - uses: actions/checkout@v3
 
@@ -348,6 +355,8 @@ jobs:
   build-macos-arm:
     if: github.event_name == 'push'
     runs-on: macos-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
@@ -383,6 +392,8 @@ jobs:
   build-linux:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
