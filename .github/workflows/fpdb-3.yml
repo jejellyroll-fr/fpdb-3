@@ -188,7 +188,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       run: |
         uv pip install -e .[docs]
-        uv run sphinx-build -b html docs/source docs/build
+        xvfb-run -a uv run sphinx-build -b html docs/source docs/build
 
     - name: Upload coverage HTML artifacts
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
