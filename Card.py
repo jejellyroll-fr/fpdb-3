@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
+import sys
 from typing import Any
 
 from loggingFpdb import get_logger
@@ -3511,7 +3512,148 @@ def decodeStartHandValue(game: str, value: int) -> str:
     return _DECODERS.get(game, lambda _v: "xx")(value)
 
 
-if __name__ == "__main__":
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description="FPDB Card utilities")
+    parser.add_argument("--test-rank", action="store_true", help="Test StartCardRank function")
+    parser.add_argument("--test-encoding", action="store_true", help="Test card encoding/decoding")
+    parser.add_argument("--test-two-cards", action="store_true", help="Test twoStartCards function")
+    parser.add_argument("--test-suits", action="store_true", help="Test suit functions")
+    parser.add_argument("--test-razz", action="store_true", help="Test Razz functions")
+    parser.add_argument("--interactive", action="store_true", help="Run interactive menu")
+    parser.add_argument("--demo", action="store_true", help="Run quick demos of all functions")
+
+    args = parser.parse_args(argv)
+
+    if not any(vars(args).values()):
+        parser.print_help()
+        return 0
+
+    if args.demo:
+        print("=== FPDB Card Functions Demo ===")
+
+        print("\n1. StartCardRank examples:")
+        for idx in [0, 1, 50, 100, 168]:
+            try:
+                result = StartCardRank(idx)
+                print(f"  StartCardRank({idx}) = {result}")
+            except Exception as e:
+                print(f"  StartCardRank({idx}) = Error: {e}")
+
+        print("\n2. Card encoding examples:")
+        for card in ["As", "Kh", "2c", "7d"]:
+            try:
+                encoded = encodeCard(card)
+                decoded = valueSuitFromCard(encoded)
+                print(f"  '{card}' -> {encoded} -> '{decoded}'")
+            except Exception as e:
+                print(f"  '{card}' -> Error: {e}")
+
+        print("\n3. twoStartCards examples:")
+        try:
+            # Test twoStartCards with valid parameters
+            example_cards = [
+                (14, "s", 14, "h"),  # Ace-spades, Ace-hearts
+                (13, "c", 13, "d"),  # King-clubs, King-diamonds
+                (12, "h", 11, "h"),  # Queen-hearts, Jack-hearts (suited)
+            ]
+            for value1, suit1, value2, suit2 in example_cards:
+                try:
+                    result = twoStartCards(value1, suit1, value2, suit2)
+                    print(f"  twoStartCards({value1}{suit1}, {value2}{suit2}) = {result}")
+                except Exception as e:
+                    print(f"  twoStartCards({value1}{suit1}, {value2}{suit2}) = Error: {e}")
+        except Exception as e:
+            print(f"  Error: {e}")
+
+        print("\n4. Suit functions:")
+        try:
+            # Test is_suited function
+            test_hands = [
+                [("A", "s"), ("K", "s")],  # Suited
+                [("A", "s"), ("K", "h")],  # Not suited
+            ]
+            for hand in test_hands:
+                try:
+                    result = is_suited(hand)
+                    print(f"  is_suited({hand}) = {result}")
+                except Exception as e:
+                    print(f"  is_suited({hand}) = Error: {e}")
+        except Exception as e:
+            print(f"  Error: {e}")
+
+        return 0
+
+    if args.test_rank:
+        print("StartCardRank function test:")
+        print("Note: Use --interactive for full interactive testing")
+        for idx in [0, 1, 50, 100, 168]:
+            try:
+                result = StartCardRank(idx)
+                print(f"  StartCardRank({idx}) = {result}")
+            except Exception as e:
+                print(f"  StartCardRank({idx}) = Error: {e}")
+
+    if args.test_encoding:
+        print("Card encoding/decoding test:")
+        for card in ["As", "Kh", "2c", "7d", "Tc", "Jh"]:
+            try:
+                encoded = encodeCard(card)
+                decoded = valueSuitFromCard(encoded)
+                print(f"  '{card}' -> {encoded} -> '{decoded}'")
+            except Exception as e:
+                print(f"  '{card}' -> Error: {e}")
+
+    if args.test_two_cards:
+        print("twoStartCards function test:")
+        example_cards = [
+            (14, "s", 14, "h"),  # AA
+            (13, "c", 13, "d"),  # KK
+            (12, "h", 11, "h"),  # QJs
+            (10, "c", 9, "d"),  # T9o
+        ]
+        for value1, suit1, value2, suit2 in example_cards:
+            try:
+                result = twoStartCards(value1, suit1, value2, suit2)
+                print(f"  twoStartCards({value1}{suit1}, {value2}{suit2}) = {result}")
+            except Exception as e:
+                print(f"  twoStartCards({value1}{suit1}, {value2}{suit2}) = Error: {e}")
+
+    if args.test_suits:
+        print("Suit functions test:")
+        test_hands = [
+            [("A", "s"), ("K", "s")],  # Suited
+            [("A", "s"), ("K", "h")],  # Not suited
+            [("Q", "d"), ("J", "d")],  # Suited
+        ]
+        for hand in test_hands:
+            try:
+                result = is_suited(hand)
+                print(f"  is_suited({hand}) = {result}")
+            except Exception as e:
+                print(f"  is_suited({hand}) = Error: {e}")
+
+    if args.test_razz:
+        print("Razz functions test:")
+        print("Note: Use --interactive for full interactive testing")
+        for idx in [0, 1, 10, 50]:
+            try:
+                result = decodeRazzStartHand(idx)
+                print(f"  decodeRazzStartHand({idx}) = '{result}'")
+            except Exception as e:
+                print(f"  decodeRazzStartHand({idx}) = Error: {e}")
+
+    if args.interactive:
+        run_interactive_menu()
+
+    return 0
+
+
+def run_interactive_menu():
     """Interactive CLI for testing Card functions."""
 
     def show_menu():
@@ -3749,3 +3891,7 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         print("\nGoodbye!")
+
+
+if __name__ == "__main__":
+    sys.exit(main())

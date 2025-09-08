@@ -351,7 +351,11 @@ class GuiLogView(QWidget):
         self.loadLog()
 
 
-if __name__ == "__main__":
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    # Launch the log viewer GUI like the original
     config = Configuration.Config()
 
     app = QApplication([])
@@ -365,3 +369,10 @@ if __name__ == "__main__":
     main_window.setWindowTitle("Log Viewer")
     main_window.show()
     app.exec_()
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(main())

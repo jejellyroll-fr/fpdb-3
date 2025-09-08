@@ -491,7 +491,11 @@ class TourHandViewer(QSplitter):
         return pixbuf
 
 
-if __name__ == "__main__":
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    # Launch the tournament hand viewer GUI like the original
     config = Configuration.Config()
 
     settings = {}
@@ -514,3 +518,10 @@ if __name__ == "__main__":
     main_window.show()
     main_window.resize(1400, 800)
     app.exec_()
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(main())

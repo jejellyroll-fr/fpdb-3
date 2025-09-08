@@ -199,12 +199,35 @@ class Action:
         return self.player + " " + self.action + " " + self.amount + " " + self.allin
 
 
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    # Simple test - just parse test.xml like the original
+    try:
+        with open("test.xml", "r") as file:
+            xml_string = file.read()
+
+        print("Parsing test.xml...")
+        h = HandHistory(xml_string, ("ALL"))
+
+        print("✓ XML parsing completed successfully")
+
+        for _p in list(h.PLAYERS.keys()):
+            pass
+
+        return 0
+
+    except FileNotFoundError:
+        print("✗ Error: test.xml not found")
+        print("Note: No test.xml file exists in the codebase - this is expected behavior")
+        return 1
+    except Exception as e:
+        print(f"✗ Error parsing XML: {e}")
+        return 1
+
+
 if __name__ == "__main__":
-    file = open("test.xml")
-    xml_string = file.read()
-    file.close()
+    import sys
 
-    h = HandHistory(xml_string, ("ALL"))
-
-    for _p in list(h.PLAYERS.keys()):
-        pass
+    sys.exit(main())
