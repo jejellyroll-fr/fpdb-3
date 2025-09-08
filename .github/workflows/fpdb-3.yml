@@ -159,6 +159,13 @@ jobs:
           exit 1
         fi
 
+    - name: Upload coverage HTML artifacts
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-html
+        path: htmlcov/
+
     - name: Deploy coverage to GitHub Pages (gh-pages branch)
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       run: |
