@@ -147,7 +147,7 @@ jobs:
           echo "htmlcov directory does not exist"
         fi
 
-    - name: Prepare coverage deployment
+    - name: Prepare coverage and docs deployment
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       run: |
         # Backup coverage files before cleaning
@@ -159,6 +159,31 @@ jobs:
           exit 1
         fi
 
+        # Backup documentation files
+        if [ -d docs ]; then
+          cp -r docs /tmp/docs-backup
+          echo "Documentation files backed up to /tmp/docs-backup"
+        else
+          echo "No docs directory found to backup"
+          exit 1
+        fi
+
+        # Backup site index
+        if [ -f site_index.html ]; then
+          mkdir -p /tmp/site-backup
+          cp site_index.html /tmp/site-backup/
+          echo "Site index backed up to /tmp/site-backup"
+        else
+          echo "No site_index.html found to backup"
+          exit 1
+        fi
+
+    - name: Build Sphinx documentation
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      run: |
+        uv pip install -e .[docs]
+        uv run sphinx-build -b html docs/source docs/build
+
     - name: Upload coverage HTML artifacts
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       uses: actions/upload-artifact@v4
@@ -166,7 +191,7 @@ jobs:
         name: coverage-html
         path: htmlcov/
 
-    - name: Deploy coverage to GitHub Pages (gh-pages branch)
+    - name: Deploy unified documentation and coverage to GitHub Pages
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       run: |
         git config --global user.name 'GitHub Actions'
@@ -182,17 +207,36 @@ jobs:
         git checkout gh-pages || git checkout --orphan gh-pages
         git pull origin gh-pages || echo "Branch is orphan or already up to date"
 
-        # Deploy coverage files from backup
-        rm -rf coverage/${{ github.sha }} || true
-        mkdir -p coverage/${{ github.sha }}
-        cp -r /tmp/htmlcov-backup/* coverage/${{ github.sha }}/ || echo "No coverage backup found"
+        # Create unified site structure
+        rm -rf docs coverage index.html .nojekyll || true
+        mkdir -p docs coverage
+
+        # Deploy documentation
+        if [ -d /tmp/docs-backup/docs/build ]; then
+          cp -r /tmp/docs-backup/docs/build/* docs/
+        else
+          echo "No documentation backup found"
+        fi
+
+        # Deploy coverage files
+        if [ -d /tmp/htmlcov-backup ]; then
+          cp -r /tmp/htmlcov-backup/* coverage/
+        else
+          echo "No coverage backup found"
+        fi
+
+        # Copy site index
+        cp /tmp/site-backup/site_index.html index.html || echo "No site index found"
+
+        # Create .nojekyll file
+        touch .nojekyll
 
         # Commit and push if there are changes
-        git add coverage/${{ github.sha }}/* -f || true
+        git add . -f || true
         if git diff --staged --quiet; then
           echo "No changes to commit"
         else
-          git commit -m "Deploy coverage report for commit ${{ github.sha }}"
+          git commit -m "Deploy unified docs and coverage for commit ${{ github.sha }}"
           git push origin gh-pages
         fi
 
