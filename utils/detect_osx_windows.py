@@ -1,7 +1,19 @@
-import Quartz
+import sys
+
+try:
+    import Quartz
+except ImportError:
+    if sys.platform == "darwin":
+        raise ImportError("Quartz module required on macOS. Install with: pip install pyobjc-framework-Quartz")
+    else:
+        # On non-macOS platforms, provide dummy implementation or skip
+        Quartz = None
 
 
 def get_window_info() -> None:
+    if Quartz is None:
+        print("Quartz not available on this platform")
+        return
     # Obtenir toutes les fenêtres sur l'écran
     window_list = Quartz.CGWindowListCopyWindowInfo(
         Quartz.kCGWindowListOptionOnScreenOnly,

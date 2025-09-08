@@ -53,6 +53,10 @@ autodoc_mock_imports = [
     "zmq",
     "base_model",
     "sql_request",
+    "Quartz",
+    "importer_cli",
+    "web",
+    "api",
 ]
 
 # Ignore import errors for problematic modules
