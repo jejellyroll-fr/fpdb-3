@@ -72,9 +72,9 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y libxcb1 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
-          libxcb-shape0 libxcb-xinerama0 libxkbcommon-x11-0 libxcb-xfixes0 \
+          libxcb-shape0 libxcb-xinerama0 libxkbcommon-x11-0 libxcb-xfixes0 libxcb-util1 \
           libxrender1 libsm6 libxext6 libx11-xcb1 \
-          qt5-default qtbase5-dev qtbase5-dev-tools
+          qtbase5-dev qtbase5-dev-tools
 
     - name: Install uv and dependencies (Linux)
       if: runner.os == 'Linux'
@@ -393,9 +393,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libxcb1 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
-            libxcb-shape0 libxcb-xinerama0 libxkbcommon-x11-0 libxcb-xfixes0 \
+            libxcb-shape0 libxcb-xinerama0 libxkbcommon-x11-0 libxcb-xfixes0 libxcb-util1 \
             libxrender1 libsm6 libxext6 libx11-xcb1 \
-            qt5-default qtbase5-dev qtbase5-dev-tools \
+            qtbase5-dev qtbase5-dev-tools \
             fuse libfuse2
           sudo modprobe fuse
           sudo groupadd fuse
