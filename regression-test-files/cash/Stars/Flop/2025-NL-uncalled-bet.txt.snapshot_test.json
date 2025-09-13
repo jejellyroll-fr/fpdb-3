@@ -1,5 +1,5 @@
 {
-  "serialized_snapshot_name": "snapshot_2025-NL-uncalled-bet.txt.snapshot",
+  "serialized_snapshot_name": "snapshot_2025-NL-uncalled-bet.txt.snapshot_test",
   "snapshot": [
     {
       "actions": [
@@ -260,6 +260,7 @@
       "datetime_utc": "2025-04-24 15:21:34+00:00",
       "final_pot": 5.86,
       "game_type": "holdem",
+      "game_variant": "hold'em",
       "hand_text_id": "255867983097",
       "limit_type": "nl",
       "max_seats": 6,
