@@ -28,8 +28,6 @@
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
 
-from __future__ import print_function
-
 import codecs
 import datetime
 import os
@@ -56,115 +54,45 @@ DEBUG = True
 class FpdbError(object):
     expected = {  # Site     : { path: (stored, dups, partial, errs) }
         "Absolute Poker": {},
-        "Betfair": {},
-        "BetOnline": {
-            "regression-test-files/cash/BetOnline/Flop/NLHE-10max-USD-0.25-0.05-201108.txt": (
-                19,
-                0,
-                1,
-                0,
-            ),
-            "regression-test-files/tour/BetOnline/Flop/NLHE-10max-USD-MTT-2011-08.nobuyinfee.txt": (
-                17,
-                0,
-                1,
-                0,
-            ),
-            "regression-test-files/cash/BetOnline/Flop/NLHE-10max-0.25-0.50-201203.unknown.player.wins.txt": (
-                0,
-                0,
-                0,
-                1,
-            ),  # This file really is broken
-        },
+        # "Betfair": {},
+        # "BetOnline": {
+        #     "regression-test-files/cash/BetOnline/Flop/NLHE-10max-USD-0.25-0.05-201108.txt":                 (19, 0, 1, 0,),
+        #     "regression-test-files/tour/BetOnline/Flop/NLHE-10max-USD-MTT-2011-08.nobuyinfee.txt":           (17, 0, 1, 0,),
+        #     "regression-test-files/cash/BetOnline/Flop/NLHE-10max-0.25-0.50-201203.unknown.player.wins.txt": ( 0, 0, 0, 1,),  # This file really is broken
+        # },
         "Boss": {},
         "Bovada": {},
         "Cake": {
-            "regression-test-files/tour/Cake/Flop/NLHE-USD-2-STT-201205.thousand.delimiter.txt": (
-                1,
-                0,
-                1,
-                0,
-            )
+            "regression-test-files/tour/Cake/Flop/NLHE-USD-2-STT-201205.thousand.delimiter.txt": ( 1, 0, 1, 0,)
         },
         "Enet": {},
         "Entraction": {},
-        "Everleaf": {},
+        # "Everleaf Poker": {},
         "Everest Poker": {},
         "Full Tilt Poker": {
-            "regression-test-files/cash/FTP/Draw/3-Draw-Limit-USD-20-40-201101.Partial.txt": (
-                0,
-                0,
-                1,
-                0,
-            ),
-            "regression-test-files/cash/FTP/Draw/3-Draw-Limit-USD-10-20-201101.Dead.hand.txt": (
-                0,
-                0,
-                1,
-                0,
-            ),
-            "regression-test-files/cash/FTP/Flop/NLHE-6max-USD-25-50.200610.Observed.No.player.stacks.txt": (
-                0,
-                0,
-                1,
-                0,
-            ),
+            "regression-test-files/cash/FTP/Draw/3-Draw-Limit-USD-20-40-201101.Partial.txt":                ( 0, 0, 1, 0,),
+            "regression-test-files/cash/FTP/Draw/3-Draw-Limit-USD-10-20-201101.Dead.hand.txt":              ( 0, 0, 1, 0,),
+            "regression-test-files/cash/FTP/Flop/NLHE-6max-USD-25-50.200610.Observed.No.player.stacks.txt": ( 0, 0, 1, 0,),
         },
         "iPoker": {},
-        "Merge": {
-            "regression-test-files/cash/Merge/Draw/3-Draw-PL-USD-0.05-0.10-201102.Cancelled.hand.txt": (
-                0,
-                0,
-                1,
-                0,
-            ),
-            "regression-test-files/cash/Merge/Flop/NLHE-6max-USD-0.02-0.04.201107.no.community.xml": (
-                0,
-                0,
-                1,
-                0,
-            ),
-            "regression-test-files/cash/Merge/Flop/FLHE-9max-USD-0.02-0.04.20110416.xml": (
-                9,
-                0,
-                1,
-                0,
-            ),
-        },
+        # "Merge": {
+        #     "regression-test-files/cash/Merge/Draw/3-Draw-PL-USD-0.05-0.10-201102.Cancelled.hand.txt": ( 0, 0, 1, 0,),
+        #     "regression-test-files/cash/Merge/Flop/NLHE-6max-USD-0.02-0.04.201107.no.community.xml":   ( 0, 0, 1, 0,),
+        #     "regression-test-files/cash/Merge/Flop/FLHE-9max-USD-0.02-0.04.20110416.xml":              ( 9, 0, 1, 0,),
+        # },
         "Microgaming": {},
         "OnGame": {},
         "PKR": {},
         "PacificPoker": {
-            "regression-test-files/cash/PacificPoker/Flop/888-LHE-HU-USD-10-20-201202.cancelled.hand.txt": (
-                0,
-                0,
-                1,
-                0,
-            ),
+            "regression-test-files/cash/PacificPoker/Flop/888-LHE-HU-USD-10-20-201202.cancelled.hand.txt": ( 0, 0, 1, 0,),
         },
         "Party Poker": {},
         "PokerStars": {
-            "regression-test-files/cash/Stars/Flop/LO8-6max-USD-0.05-0.10-20090315.Hand-cancelled.txt": (
-                0,
-                0,
-                1,
-                0,
-            ),
-            "regression-test-files/cash/Stars/Draw/3-Draw-Limit-USD-1-2-200809.Hand.cancelled.txt": (
-                0,
-                0,
-                1,
-                0,
-            ),
+            "regression-test-files/cash/Stars/Flop/LO8-6max-USD-0.05-0.10-20090315.Hand-cancelled.txt": ( 0, 0, 1, 0,),
+            "regression-test-files/cash/Stars/Draw/3-Draw-Limit-USD-1-2-200809.Hand.cancelled.txt":     ( 0, 0, 1, 0,),
         },
         "PokerTracker": {
-            "regression-test-files/tour/PokerTracker/Flop/T#3407415859 - €0.23+€0.02 - 20220605 - Summary.txt": (
-                0,
-                0,
-                1,
-                0,
-            ),
+            "regression-test-files/tour/PokerTracker/Flop/T#3407415859 - €0.23+€0.02 - 20220605 - Summary.txt": ( 0, 0, 1, 0,),
         },
         "Winamax": {},
     }
@@ -407,14 +335,14 @@ def compare(leaf, importer, errors, site):
         importer.clearFileList()
 
 
-def walk_testfiles(dir, function, importer, errors, site):
+def walk_testfiles(_dir, function, importer, errors, site):
     """Walks a directory, and executes a callback on each file"""
-    dir = os.path.abspath(dir)
+    _dir = os.path.abspath(_dir)
 
-    print("dir:", dir)
+    print("DEBUG: _dir:", _dir)
 
     try:
-        for root, dirs, files in os.walk(dir):
+        for root, dirs, files in os.walk(_dir):
             for file in files:
                 if file in [".", ".."]:
                     continue
@@ -426,9 +354,10 @@ def walk_testfiles(dir, function, importer, errors, site):
                     function(nfile, importer, errors, site)
     except OSError as xxx_todo_changeme:
         (errno, strerror) = xxx_todo_changeme.args
+        print("DEBUG: except OSError: errno = '%s' : '%s'" %(errno, strerror))
         if errno == 20:
             # Error 20 is 'not a directory'
-            function(dir, importer, errors, site)
+            function(_dir, importer, errors, site)
         else:
             raise OSError(errno, strerror)
 
@@ -441,6 +370,8 @@ def usage():
     print("\t./TestHandsPlayers -s <Sitename>")
     print("Run tests for a sinlge file in a site:")
     print("\t./TestHandsPlayers -s <Sitename> -f <filename>")
+    print("Run tests for a directory tree :")
+    print("\t./TestHandsPlayers -s <Sitename> -d <path>")
     sys.exit(0)
 
 
@@ -463,10 +394,10 @@ def main(argv=None):
         if options.sitename == False:
             usage()
         if options.filename:
-            print("Testing single hand: '%s'" % options.filename)
+            print("options: Testing single hand: '%s'" % options.filename)
             single_file_test = True
         else:
-            print("Only regression testing '%s' files" % (options.sitename))
+            print("options: Only regression testing '%s' files" % (options.sitename))
         test_all_sites = False
 
     config = Configuration.Config(file="HUD_config.test.xml")
@@ -482,40 +413,37 @@ def main(argv=None):
     importer.setCallHud(False)
     importer.setFakeCacheHHC(True)
 
-    AbsoluteErrors = FpdbError("Absolute Poker")
-    BetfairErrors = FpdbError("Betfair")
-    BetOnlineErrors = FpdbError("BetOnline")
-    BossErrors = FpdbError("Boss")
-    BovadaErrors = FpdbError("Bovada")
-    CakeErrors = FpdbError("Cake")
-    EnetErrors = FpdbError("Enet")
-    EntractionErrors = FpdbError("Entraction")
-    EverleafErrors = FpdbError("Everleaf Poker")
-    EverestErrors = FpdbError("Everest Poker")
-    FTPErrors = FpdbError("Full Tilt Poker")
-    iPokerErrors = FpdbError("iPoker")
-    MergeErrors = FpdbError("Merge")
-    MicrogamingErrors = FpdbError("Microgaming")
-    OnGameErrors = FpdbError("OnGame")
+    AbsoluteErrors     = FpdbError("Absolute Poker")
+    BossErrors         = FpdbError("Boss")
+    BovadaErrors       = FpdbError("Bovada")
+    CakeErrors         = FpdbError("Cake")
+    EnetErrors         = FpdbError("Enet")
+    EntractionErrors   = FpdbError("Entraction")
+    # EverleafErrors     = FpdbError("Everleaf Poker")
+    EverestErrors      = FpdbError("Everest Poker")
+    FTPErrors          = FpdbError("Full Tilt Poker")
+    iPokerErrors       = FpdbError("iPoker")
+    MicrogamingErrors  = FpdbError("Microgaming")
+    OnGameErrors       = FpdbError("OnGame")
     PacificPokerErrors = FpdbError("PacificPoker")
-    PartyPokerErrors = FpdbError("Party Poker")
-    PokerStarsErrors = FpdbError("PokerStars")
-    PKRErrors = FpdbError("PKR")
-    PTErrors = FpdbError("PokerTracker")
-    WinamaxErrors = FpdbError("Winamax")
+    PartyPokerErrors   = FpdbError("Party Poker")
+    PokerStarsErrors   = FpdbError("PokerStars")
+    PKRErrors          = FpdbError("PKR")
+    PTErrors           = FpdbError("PokerTracker")
+    WinamaxErrors      = FpdbError("Winamax")
+    # BetfairErrors = FpdbError("Betfair")
+    # BetOnlineErrors = FpdbError("BetOnline")
+    # MergeErrors = FpdbError("Merge")
 
     ErrorsList = [
         AbsoluteErrors,
-        BetfairErrors,
-        BetOnlineErrors,
         BossErrors,
         CakeErrors,
         EntractionErrors,
-        EverleafErrors,
+        # EverleafErrors,
         EverestErrors,
         FTPErrors,
         iPokerErrors,
-        MergeErrors,
         MicrogamingErrors,
         OnGameErrors,
         PacificPokerErrors,
@@ -526,30 +454,33 @@ def main(argv=None):
         WinamaxErrors,
         BovadaErrors,
         EnetErrors,
+        # BetfairErrors,
+        # BetOnlineErrors,
+        # MergeErrors,
     ]
 
     sites = {
-        "Absolute": False,
-        "Betfair": False,
-        "BetOnline": False,
-        "Boss": False,
-        "Bovada": False,
-        "Cake": False,
-        "Enet": False,
-        "Entraction": False,
-        "Everleaf": False,
-        "Everest": False,
-        "Full Tilt Poker": False,
-        "iPoker": False,
-        "Merge": False,
-        "Microgaming": False,
-        "OnGame": False,
-        "Pkr": False,
-        "PacificPoker": False,
-        "PartyPoker": False,
-        "PokerStars": False,
-        "PokerTracker": False,
-        "Winamax": False,
+        "Absolute"       :  False,
+        "Boss"           :  False,
+        "Bovada"         :  False,
+        "Cake"           :  False,
+        "Enet"           :  False,
+        "Entraction"     :  False,
+        "Everleaf"       :  False,
+        "Everest"        :  False,
+        "Full Tilt Poker":  False,
+        "iPoker"         :  False,
+        "Microgaming"    :  False,
+        "OnGame"         :  False,
+        "Pkr"            :  False,
+        "PacificPoker"   :  False,
+        "PartyPoker"     :  False,
+        "PokerStars"     :  False,
+        "PokerTracker"   :  False,
+        "Winamax"        :  False,
+        # "Betfair"        :  False,  # Moved to archives/obsolete_parsers/
+        # "BetOnline"      :  False,  # Moved to archives/obsolete_parsers/
+        # "Merge"          :  False,  # Moved to archives/obsolete_parsers/
     }
 
     if test_all_sites == True:
@@ -558,333 +489,113 @@ def main(argv=None):
     else:
         # Only enable the requested site and disable problematic ones
         sites[options.sitename] = True
-        if options.sitename != "PokerStars":
-            # For legacy compatibility, only allow PokerStars to avoid crashes
-            print(f"Warning: Legacy system only supports PokerStars. Switching to PokerStars tests.")
-            sites[options.sitename] = False
-            sites["PokerStars"] = True
 
     # Skip PacificPoker - it's broken and has abstract class issues
-    if False:  # Disabled PacificPoker tests
-        pass
+    # if False:  # Disabled PacificPoker tests
+        # pass
 
     if sites["PokerStars"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/Stars/",
-            compare,
-            importer,
-            PokerStarsErrors,
-            "PokerStars",
-        )
-        walk_testfiles(
-            "regression-test-files/tour/Stars/",
-            compare,
-            importer,
-            PokerStarsErrors,
-            "PokerStars",
-        )
-        walk_testfiles(
-            "regression-test-files/summaries/Stars/",
-            compare,
-            importer,
-            PokerStarsErrors,
-            "PokerStars",
-        )
+        walk_testfiles("regression-test-files/cash/Stars/", compare, importer, PokerStarsErrors, "PokerStars",)
+        walk_testfiles("regression-test-files/tour/Stars/", compare, importer, PokerStarsErrors, "PokerStars",)
+        walk_testfiles("regression-test-files/summaries/Stars/", compare, importer, PokerStarsErrors, "PokerStars",)
     elif sites["PokerStars"] == True and single_file_test:
-        walk_testfiles(
-            options.filename, compare, importer, PokerStarsErrors, "PokerStars"
-        )
+        compare(options.filename, importer, PokerStarsErrors, "PokerStars")
 
     if sites["Full Tilt Poker"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/FTP/",
-            compare,
-            importer,
-            FTPErrors,
-            "Full Tilt Poker",
-        )
-        walk_testfiles(
-            "regression-test-files/tour/FTP/",
-            compare,
-            importer,
-            FTPErrors,
-            "Full Tilt Poker",
-        )
-        walk_testfiles(
-            "regression-test-files/summaries/FTP/",
-            compare,
-            importer,
-            FTPErrors,
-            "Full Tilt Poker",
-        )
+        walk_testfiles( "regression-test-files/cash/FTP/", compare, importer, FTPErrors, "Full Tilt Poker",)
+        walk_testfiles( "regression-test-files/tour/FTP/", compare, importer, FTPErrors, "Full Tilt Poker",)
+        walk_testfiles( "regression-test-files/summaries/FTP/", compare, importer, FTPErrors, "Full Tilt Poker",)
     elif sites["Full Tilt Poker"] == True and single_file_test:
-        walk_testfiles(
-            options.filename, compare, importer, FTPErrors, "Full Tilt Poker"
-        )
+        compare(options.filename, importer, FTPErrors, "Full Tilt Poker")
+
     if sites["PartyPoker"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/PartyPoker/",
-            compare,
-            importer,
-            PartyPokerErrors,
-            "PartyPoker",
-        )
-        walk_testfiles(
-            "regression-test-files/tour/PartyPoker/",
-            compare,
-            importer,
-            PartyPokerErrors,
-            "PartyPoker",
-        )
+        walk_testfiles( "regression-test-files/cash/PartyPoker/", compare, importer, PartyPokerErrors, "PartyPoker",)
+        walk_testfiles( "regression-test-files/tour/PartyPoker/", compare, importer, PartyPokerErrors, "PartyPoker",)
     elif sites["PartyPoker"] == True and single_file_test:
-        walk_testfiles(
-            options.filename, compare, importer, PartyPokerErrors, "PartyPoker"
-        )
-    if sites["Betfair"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/Betfair/",
-            compare,
-            importer,
-            BetfairErrors,
-            "Betfair",
-        )
-    elif sites["Betfair"] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, BetfairErrors, "Betfair")
+        compare(options.filename, importer, PartyPokerErrors, "PartyPoker")
+
     if sites["OnGame"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/OnGame/",
-            compare,
-            importer,
-            OnGameErrors,
-            "OnGame",
-        )
-        walk_testfiles(
-            "regression-test-files/tour/OnGame/",
-            compare,
-            importer,
-            OnGameErrors,
-            "OnGame",
-        )
+        walk_testfiles( "regression-test-files/cash/OnGame/", compare, importer, OnGameErrors, "OnGame",)
+        walk_testfiles( "regression-test-files/tour/OnGame/", compare, importer, OnGameErrors, "OnGame",)
     elif sites["OnGame"] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, OnGameErrors, "OnGame")
+        compare(options.filename, importer, OnGameErrors, "OnGame")
+
     if sites["Absolute"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/Absolute/",
-            compare,
-            importer,
-            AbsoluteErrors,
-            "Absolute",
-        )
-        walk_testfiles(
-            "regression-test-files/tour/Absolute/",
-            compare,
-            importer,
-            AbsoluteErrors,
-            "Absolute",
-        )
+        walk_testfiles( "regression-test-files/cash/Absolute/", compare, importer, AbsoluteErrors, "Absolute",)
+        walk_testfiles( "regression-test-files/tour/Absolute/", compare, importer, AbsoluteErrors, "Absolute",)
     elif sites["Absolute"] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, AbsoluteErrors, "Absolute")
-    if sites["Everleaf"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/Everleaf/",
-            compare,
-            importer,
-            EverleafErrors,
-            "Everleaf",
-        )
-        walk_testfiles(
-            "regression-test-files/tour/Everleaf/",
-            compare,
-            importer,
-            EverleafErrors,
-            "Everleaf",
-        )
-    elif sites["Everleaf"] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, EverleafErrors, "Everleaf")
+        compare(options.filename, importer, AbsoluteErrors, "Absolute")
+
+    # if sites["Everleaf"] == True and not single_file_test:
+    #     walk_testfiles( "regression-test-files/cash/verleaf/", compare, importer, EverleafErrors, "Everleaf",)
+    #     walk_testfiles( "regression-test-files/tour/Everleaf/", compare, importer, EverleafErrors, "Everleaf",)
+    # elif sites["Everleaf"] == True and single_file_test:
+    #     compare(options.filename, importer, EverleafErrors, "Everleaf")
+
     if sites["Everest"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/Everest/",
-            compare,
-            importer,
-            EverestErrors,
-            "Everest",
-        )
-        walk_testfiles(
-            "regression-test-files/tour/Everest/",
-            compare,
-            importer,
-            EverestErrors,
-            "Everest",
-        )
+        walk_testfiles( "regression-test-files/cash/Everest/", compare, importer, EverestErrors, "Everest",)
+        walk_testfiles( "regression-test-files/tour/Everest/", compare, importer, EverestErrors, "Everest",)
     elif sites["Everest"] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, EverestErrors, "Everest")
-    if sites["Merge"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/Merge/", compare, importer, MergeErrors, "Merge"
-        )
-        walk_testfiles(
-            "regression-test-files/tour/Merge/", compare, importer, MergeErrors, "Merge"
-        )
-    elif sites["Merge"] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, MergeErrors, "Merge")
+        compare(options.filename, importer, EverestErrors, "Everest")
+
     if sites["Pkr"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/PKR/", compare, importer, PKRErrors, "PKR"
-        )
-        walk_testfiles(
-            "regression-test-files/tour/PKR/", compare, importer, PKRErrors, "PKR"
-        )
+        walk_testfiles( "regression-test-files/cash/PKR/", compare, importer, PKRErrors, "PKR")
+        walk_testfiles( "regression-test-files/tour/PKR/", compare, importer, PKRErrors, "PKR")
     elif sites["Pkr"] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, PKRErrors, "PKR")
+        compare(options.filename, importer, PKRErrors, "PKR")
+
     if sites["iPoker"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/iPoker/",
-            compare,
-            importer,
-            iPokerErrors,
-            "iPoker",
-        )
-        walk_testfiles(
-            "regression-test-files/tour/iPoker/",
-            compare,
-            importer,
-            iPokerErrors,
-            "iPoker",
-        )
+        walk_testfiles( "regression-test-files/cash/iPoker/", compare, importer, iPokerErrors, "iPoker",)
+        walk_testfiles( "regression-test-files/tour/iPoker/", compare, importer, iPokerErrors, "iPoker",)
     elif sites["iPoker"] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, iPokerErrors, "iPoker")
+        compare(options.filename, importer, iPokerErrors, "iPoker",)
+
     if sites["Boss"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/Boss/", compare, importer, BossErrors, "Boss"
-        )
-        walk_testfiles(
-            "regression-test-files/tour/Boss/", compare, importer, BossErrors, "Boss"
-        )
+        walk_testfiles( "regression-test-files/cash/Boss/", compare, importer, BossErrors, "Boss")
+        walk_testfiles( "regression-test-files/tour/Boss/", compare, importer, BossErrors, "Boss")
     elif sites["Boss"] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, BossErrors, "Boss")
+        compare(options.filename, importer, BossErrors, "Boss")
+
     if sites["Entraction"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/Entraction/",
-            compare,
-            importer,
-            EntractionErrors,
-            "Entraction",
-        )
-        walk_testfiles(
-            "regression-test-files/tour/Entraction/",
-            compare,
-            importer,
-            EntractionErrors,
-            "Entraction",
-        )
+        walk_testfiles( "regression-test-files/cash/Entraction/", compare, importer, EntractionErrors, "Entraction",)
+        walk_testfiles( "regression-test-files/tour/Entraction/", compare, importer, EntractionErrors, "Entraction",)
     elif sites["Entraction"] == True and single_file_test:
-        walk_testfiles(
-            options.filename, compare, importer, EntractionErrors, "Entraction"
-        )
-    if sites["BetOnline"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/BetOnline/",
-            compare,
-            importer,
-            BetOnlineErrors,
-            "BetOnline",
-        )
-        walk_testfiles(
-            "regression-test-files/tour/BetOnline/",
-            compare,
-            importer,
-            BetOnlineErrors,
-            "BetOnline",
-        )
-    elif sites["BetOnline"] == True and single_file_test:
-        walk_testfiles(
-            options.filename, compare, importer, BetOnlineErrors, "BetOnline"
-        )
+        compare( options.filename, importer, EntractionErrors, "Entraction")
+
     if sites["Microgaming"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/Microgaming/",
-            compare,
-            importer,
-            MicrogamingErrors,
-            "Microgaming",
-        )
-        walk_testfiles(
-            "regression-test-files/tour/Microgaming/",
-            compare,
-            importer,
-            MicrogamingErrors,
-            "Microgaming",
-        )
+        walk_testfiles( "regression-test-files/cash/Microgaming/", compare, importer, MicrogamingErrors, "Microgaming",)
+        walk_testfiles( "regression-test-files/tour/Microgaming/", compare, importer, MicrogamingErrors, "Microgaming",)
     elif sites["Microgaming"] == True and single_file_test:
-        walk_testfiles(
-            options.filename, compare, importer, MicrogamingErrors, "Microgaming"
-        )
+        compare(options.filename, importer, MicrogamingErrors, "Microgaming")
+
     if sites["Cake"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/Cake/", compare, importer, CakeErrors, "Cake"
-        )
-        walk_testfiles(
-            "regression-test-files/tour/Cake/", compare, importer, CakeErrors, "Cake"
-        )
+        walk_testfiles( "regression-test-files/cash/Cake/", compare, importer, CakeErrors, "Cake")
+        walk_testfiles( "regression-test-files/tour/Cake/", compare, importer, CakeErrors, "Cake")
     elif sites["Cake"] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, CakeErrors, "Cake")
+        compare(options.filename, importer, CakeErrors, "Cake")
+
     if sites["PokerTracker"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/PokerTracker/",
-            compare,
-            importer,
-            PTErrors,
-            "PokerTracker",
-        )
-        walk_testfiles(
-            "regression-test-files/tour/PokerTracker/",
-            compare,
-            importer,
-            PTErrors,
-            "PokerTracker",
-        )
+        walk_testfiles( "regression-test-files/cash/PokerTracker/", compare, importer, PTErrors, "PokerTracker",)
+        walk_testfiles( "regression-test-files/tour/PokerTracker/", compare, importer, PTErrors, "PokerTracker",)
     elif sites["PokerTracker"] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, PTErrors, "PokerTracker")
+        compare(options.filename, importer, PTErrors, "PokerTracker")
+
     if sites["Winamax"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/Winamax/",
-            compare,
-            importer,
-            WinamaxErrors,
-            "Winamax",
-        )
-        walk_testfiles(
-            "regression-test-files/tour/Winamax/",
-            compare,
-            importer,
-            WinamaxErrors,
-            "Winamax",
-        )
+        walk_testfiles( "regression-test-files/cash/Winamax/", compare, importer, WinamaxErrors, "Winamax",)
+        walk_testfiles( "regression-test-files/tour/Winamax/", compare, importer, WinamaxErrors, "Winamax",)
     elif sites["Winamax"] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, WinamaxErrors, "Winamax")
+        compare(options.filename, importer, WinamaxErrors, "Winamax")
+
     if sites["Bovada"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/Bovada/",
-            compare,
-            importer,
-            BovadaErrors,
-            "Bovada",
-        )
-        walk_testfiles(
-            "regression-test-files/tour/Bovada/",
-            compare,
-            importer,
-            BovadaErrors,
-            "Bovada",
-        )
+        walk_testfiles( "regression-test-files/cash/Bovada/", compare, importer, BovadaErrors, "Bovada",)
+        walk_testfiles( "regression-test-files/tour/Bovada/", compare, importer, BovadaErrors, "Bovada",)
     elif sites["Bovada"] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, BovadaErrors, "Bovada")
+        compare(options.filename, importer, BovadaErrors, "Bovada")
+
     if sites["Enet"] == True and not single_file_test:
-        walk_testfiles(
-            "regression-test-files/cash/Enet/", compare, importer, EnetErrors, "Enet"
-        )
+        walk_testfiles( "regression-test-files/cash/Enet/", compare, importer, EnetErrors, "Enet")
     elif sites["Enet"] == True and single_file_test:
-        walk_testfiles(options.filename, compare, importer, EnetErrors, "Enet")
+        compare(options.filename, importer, EnetErrors, "Enet")
 
     totalerrors = 0
 
