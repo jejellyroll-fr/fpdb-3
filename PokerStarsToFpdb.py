@@ -191,7 +191,7 @@ class PokerStars(HandHistoryConverter):
         "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP|SC|INR|CNY",  # legal ISO currency codes
         "LS": r"\$|\xe2\x82\xac|\u20ac|\£|\u20b9|\¥|Rs\.\s|",  # legal currency symbols - Euro(cp1252, utf-8)
         "PLYR": r"\s?(?P<PNAME>.+?)",
-        "CUR": r"(\$|\xe2\x82\xac|\u20ac||\£|\u20b9|\¥|Rs\.\s|)",
+        "CUR": r"(\$|\xe2\x82\xac|\u20ac|\£|\u20b9|\¥|Rs\.\s|)",
         "BRKTS": (
             r"(\(button\) |\(small blind\) |\(big blind\) |\(button blind\) |"
             r"\(button\) \(small blind\) |\(small blind\) \(button\) |"

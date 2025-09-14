@@ -150,7 +150,7 @@ class IdentifySite:
             "williamhill": "William Hill Poker",
             "paddy power": "Paddy Power Poker",
             "paddypower": "Paddy Power Poker",
-            "betfair": "Betfair Poker",
+            # "betfair": "Betfair Poker",
             "coral": "Coral Poker",
             "genting": "Genting Poker",
             "mansion": "Mansion Poker",

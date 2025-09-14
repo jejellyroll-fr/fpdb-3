@@ -848,13 +848,15 @@ class Importer:
     def _import_hh_file(self, fpdbfile):
         """Import a hand history file and process its contents.
 
-        Loads the appropriate hand history converter, processes the file, updates the database, and handles HUD and summary processing as needed.
+        Loads the appropriate hand history converter, processes the file, updates the database, and
+        handles HUD and summary processing as needed.
 
         Args:
             fpdbfile: The file object representing the hand history file to import.
 
         Returns:
-            tuple: A tuple containing the number of stored, duplicate, partial, skipped, and error hands, the import time, and the detected site name.
+            tuple: A tuple containing the number of stored, duplicate, partial, skipped, and error
+                   hands, the import time, and the detected site name.
         """
         (stored, duplicates, partial, skipped, errors, ttime) = (0, 0, 0, 0, 0, time())
         detected_sitename = None  # Will store the sitename detected by the parser
@@ -1109,12 +1111,13 @@ class Importer:
             if gametype.get("type") == "tour" and getattr(hhc, "summaryInFile", False):
                 fpdbfile.ftype = "both"
                 log.info(f"File {fpdbfile.path} marked as 'both' for summary processing")
-            else:
-                log.warning(f"File {fpdbfile.path} NOT marked for summary processing")
-                log.warning(f"   - type is '{gametype.get('type')}' (expected 'tour')")
-                log.warning(f"   - summaryInFile is '{getattr(hhc, 'summaryInFile', False)}' (expected True)")
+            # Removing: All cash gametypes being caught
+            # else:
+            #     log.warning(f"File {fpdbfile.path} NOT marked for summary processing")
+            #     log.warning(f"   - type is '{gametype.get('type')}' (expected 'tour')")
+            #     log.warning(f"   - summaryInFile is '{getattr(hhc, 'summaryInFile', False)}' (expected True)")
         else:
-            log.warning("No phands available for summary checking")
+            log.debug("_import_hh_file: No phands available for summary checking, suspect duplicates")
 
         ttime = time() - ttime
 
