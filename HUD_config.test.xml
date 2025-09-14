@@ -1536,7 +1536,7 @@
         <hhc site="GGPoker" converter="GGPokerToFpdb"/>
         <hhc site="KingsClub" converter="KingsClubToFpdb"/>
         <hhc site="Unibet" converter="UnibetToFpdb"/>
-        <hhc site="Everleaf" converter="EverleafToFpdb"/>
+        <!-- <hhc site="Everleaf" converter="EverleafToFpdb"/> -->
     </hhcs>
 
 

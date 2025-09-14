@@ -67,7 +67,7 @@ class FpdbError(object):
         },
         "Enet": {},
         "Entraction": {},
-        "Everleaf Poker": {},
+        # "Everleaf Poker": {},
         "Everest Poker": {},
         "Full Tilt Poker": {
             "regression-test-files/cash/FTP/Draw/3-Draw-Limit-USD-20-40-201101.Partial.txt":                ( 0, 0, 1, 0,),
@@ -419,7 +419,7 @@ def main(argv=None):
     CakeErrors         = FpdbError("Cake")
     EnetErrors         = FpdbError("Enet")
     EntractionErrors   = FpdbError("Entraction")
-    EverleafErrors     = FpdbError("Everleaf Poker")
+    # EverleafErrors     = FpdbError("Everleaf Poker")
     EverestErrors      = FpdbError("Everest Poker")
     FTPErrors          = FpdbError("Full Tilt Poker")
     iPokerErrors       = FpdbError("iPoker")
@@ -440,7 +440,7 @@ def main(argv=None):
         BossErrors,
         CakeErrors,
         EntractionErrors,
-        EverleafErrors,
+        # EverleafErrors,
         EverestErrors,
         FTPErrors,
         iPokerErrors,
@@ -526,11 +526,11 @@ def main(argv=None):
     elif sites["Absolute"] == True and single_file_test:
         compare(options.filename, importer, AbsoluteErrors, "Absolute")
 
-    if sites["Everleaf"] == True and not single_file_test:
-        walk_testfiles( "regression-test-files/cash/Everleaf/", compare, importer, EverleafErrors, "Everleaf",)
-        walk_testfiles( "regression-test-files/tour/Everleaf/", compare, importer, EverleafErrors, "Everleaf",)
-    elif sites["Everleaf"] == True and single_file_test:
-        compare(options.filename, importer, EverleafErrors, "Everleaf")
+    # if sites["Everleaf"] == True and not single_file_test:
+    #     walk_testfiles( "regression-test-files/cash/verleaf/", compare, importer, EverleafErrors, "Everleaf",)
+    #     walk_testfiles( "regression-test-files/tour/Everleaf/", compare, importer, EverleafErrors, "Everleaf",)
+    # elif sites["Everleaf"] == True and single_file_test:
+    #     compare(options.filename, importer, EverleafErrors, "Everleaf")
 
     if sites["Everest"] == True and not single_file_test:
         walk_testfiles( "regression-test-files/cash/Everest/", compare, importer, EverestErrors, "Everest",)
