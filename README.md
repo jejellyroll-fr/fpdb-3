@@ -94,6 +94,7 @@ See our [Compatibility Guide](https://github.com/jejellyroll-fr/fpdb-3/wiki/Comp
 - **HUD Setup**: [How to configure the HUD](https://github.com/jejellyroll-fr/fpdb-3/wiki/How-to-Set-Up-and-Use-the-HUD-with-fpdb%E2%80%903-by-editing-HUD_config.xml)
 - **Linux Guide**: [Distribution-specific setup](https://github.com/jejellyroll-fr/fpdb-3/wiki/FPDB%E2%80%903-and-Different-Linux-Distributions,-X11-or-Wayland-Support-and-different-desktop-environment-(WIP))
 - **API Documentation**: [Sphinx docs](https://jejellyroll-fr.github.io/fpdb-3/)
+- **CLI Usage** [CLI_USAGE.md](./CLI_USAGE.md)
 
 ## 🐛 Bug Reports and Support
 
