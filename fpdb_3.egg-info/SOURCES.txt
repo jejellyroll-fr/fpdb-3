@@ -1,0 +1,192 @@
+LICENSE
+README.md
+pyproject.toml
+archive/cli-importer-obsolete/importer_cli.py
+archives/obsolete_parsers/BetOnlineToFpdb.py
+archives/obsolete_parsers/BetfairToFpdb.py
+archives/obsolete_parsers/MergeStructures.py
+archives/obsolete_parsers/MergeSummary.py
+archives/obsolete_parsers/MergeToFpdb.py
+archives/old feature scripts/Cardold.py
+archives/old feature scripts/Charset.py
+archives/old feature scripts/Databaseold.py
+archives/old feature scripts/DerivedStats_old.py
+archives/old feature scripts/GuiDatabase.py
+archives/old feature scripts/GuiOddsCalc.py
+archives/old feature scripts/GuiPositionalStats.py
+archives/old feature scripts/GuiStove.py
+archives/old feature scripts/GuiTourneyImport.py
+archives/old feature scripts/GuiTourneyViewer.py
+archives/old feature scripts/HUD_run_me.py
+archives/old feature scripts/Hello.py
+archives/old feature scripts/Importer-old.py
+archives/old feature scripts/ImporterLight.py
+archives/old feature scripts/OddsCalc.py
+archives/old feature scripts/OddsCalcNew2.py
+archives/old feature scripts/OddsCalcPQL.py
+archives/old feature scripts/OddsCalcnew.py
+archives/old feature scripts/P5sResultsParser.py
+archives/old feature scripts/RushNotesAux.py
+archives/old feature scripts/RushNotesMerge.py
+archives/old feature scripts/ScriptAddStatToRegression.py
+archives/old feature scripts/ScriptFetchMergeResults.py
+archives/old feature scripts/ScriptFetchWinamaxResults.py
+archives/old feature scripts/ScriptGenerateWikiPage.py
+archives/old feature scripts/SitenameSummary.py
+archives/old feature scripts/SplitHandHistory.py
+archives/old feature scripts/Stove.py
+archives/old feature scripts/Summaries.py
+archives/old feature scripts/TournamentTracker.py
+archives/old feature scripts/TreeViewTooltips.py
+archives/old feature scripts/UnibetToFpdb_old.py
+archives/old feature scripts/files_rc.py
+archives/old feature scripts/fix_table_desc.py
+archives/old feature scripts/fpdb_prerun.py
+archives/old feature scripts/montecarlo.py
+archives/old feature scripts/ppt.py
+archives/old feature scripts/run_fpdb.py
+archives/old feature scripts/sim.py
+archives/old feature scripts/sim2.py
+archives/old feature scripts/simulation.py
+archives/old feature scripts/windows_make_bats.py
+archives/old tests scripts/TestDetectInstalledSites.py
+archives/old tests scripts/TestHandsPlayers.py
+archives/old tests scripts/bug-1823.py
+archives/old tests scripts/test_Database.py
+archives/old tests scripts/test_Everleaf.py
+archives/old tests scripts/test_FullTilt.py
+archives/old tests scripts/test_PokerStars.py
+archives/old tests scripts/test_charset.py
+archives/old tests scripts/test_party.py
+archives/old tests scripts/test_pokereval.py
+archives/old tests scripts/testodd.py
+archives/old tests scripts/xlib_tester.py
+archives/packaging/windows/py2exe_setup.py
+docs/source/conf.py
+fpdb_3.egg-info/PKG-INFO
+fpdb_3.egg-info/SOURCES.txt
+fpdb_3.egg-info/dependency_links.txt
+fpdb_3.egg-info/requires.txt
+fpdb_3.egg-info/top_level.txt
+regression-test-files/cash/TheBigGame/TBG-grabber.py
+regression-tests/TestHandsPlayers_legacy.py
+regression-tests/test_hypothesis_properties.py
+regression-tests/test_invariants.py
+regression-tests/test_snapshots.py
+regression-tests/test_thp_param.py
+test/__init__.py
+test/test_BovadaToFpdb.py
+test/test_BovadaToFpdb_comprehensive.py
+test/test_BovadaToFpdb_regression.py
+test/test_HUD_main.py
+test/test_Star.py
+test/test_action_counting.py
+test/test_aggr.py
+test/test_assemble_hands.py
+test/test_assemble_hands_actions.py
+test/test_aux_classic_hud.py
+test/test_aux_simple.py
+test/test_calc_cbets.py
+test/test_calc_check_call_raise.py
+test/test_card.py
+test/test_card_comprehensive.py
+test/test_cashout_fees_migration.py
+test/test_cashout_fees_storage.py
+test/test_config_initializer.py
+test/test_configuration.py
+test/test_custom_themes.py
+test/test_guihandviewer_rake_display.py
+test/test_guihandviewer_uncalled_bet.py
+test/test_hand.py
+test/test_hand_cashout_pot.py
+test/test_hud.py
+test/test_hud_display_no_data.py
+test/test_hud_display_simplified.py
+test/test_hud_interactive_manual.py
+test/test_hud_popup_complete.py
+test/test_hud_popup_tooltips.py
+test/test_hud_positioning.py
+test/test_hud_regression_prevention.py
+test/test_hud_restart_remediation.py
+test/test_hud_simple.py
+test/test_hud_stat_set_switching.py
+test/test_hud_visual_display.py
+test/test_importer_errors.py
+test/test_ipoker_parser.py
+test/test_ipokertofpdb.py
+test/test_juicy.py
+test/test_modern_popup.py
+test/test_modern_popup_improvements.py
+test/test_modern_popup_initialization.py
+test/test_pokerstars.py
+test/test_pokerstars_addcollectpot_adjustments.py
+test/test_pokerstars_bovada_adjustments.py
+test/test_pokerstars_cashout.py
+test/test_pokerstars_cashout_rake.py
+test/test_pokerstars_collectpot.py
+test/test_pokerstars_error_cases.py
+test/test_pokerstars_markstreets.py
+test/test_pokerstars_parse_rake_and_pot.py
+test/test_pokerstars_process_hand_info_key.py
+test/test_pokerstars_process_split_bounty.py
+test/test_pokerstars_processaction.py
+test/test_pokerstars_processraise.py
+test/test_pokerstars_progressive_bounties.py
+test/test_pokerstars_readaction.py
+test/test_pokerstars_readbutton.py
+test/test_pokerstars_readcommunity.py
+test/test_pokerstars_readhandinfo.py
+test/test_pokerstars_readholecards.py
+test/test_pokerstars_readplayerstacks.py
+test/test_pokerstars_regular_bounties.py
+test/test_pokerstars_showdown.py
+test/test_popup.py
+test/test_popup_icons.py
+test/test_popup_performance.py
+test/test_popup_simple.py
+test/test_popup_themes.py
+test/test_popup_xml_config.py
+test/test_pot.py
+test/test_pt4_ipoker.py
+test/test_rake_fixes_integration.py
+test/test_set_positions.py
+test/test_site_identification.py
+test/test_stats_advanced.py
+test/test_stats_continuation_donk.py
+test/test_stats_final.py
+test/test_stats_fold_checkraise.py
+test/test_stats_new_preflop.py
+test/test_stats_no_data_additional.py
+test/test_stats_no_data_extended.py
+test/test_stats_no_data_feature.py
+test/test_stats_postflop_new.py
+test/test_stats_regression.py
+test/test_stats_winrate_frequency.py
+test/test_stud_34bet.py
+test/test_stud_positions.py
+test/test_stud_steals.py
+test/test_swc.py
+test/test_theme_config_integration.py
+test/test_theme_creator_dialog.py
+test/test_theme_manager.py
+test/test_utils.py
+test/test_winamax.py
+test/test_winamax_complete.py
+test/test_winamax_isolated.py
+test/test_winamax_parser.py
+test/test_winamax_parser_comprehensive.py
+test/test_winamax_parser_errors.py
+test/test_winamax_robust.py
+test/test_winamax_summary.py
+test/test_xml_theme_persistence.py
+tools/make_snapshot.py
+utils/Anonymise.py
+utils/Archive.py
+utils/OSXtablesApplescript.py
+utils/Pokenum_api_call.py
+utils/RazzStartHandGenerator.py
+utils/detect_osx_windows.py
+utils/linux_table_detect.py
+utils/pokenum_example.py
+utils/pypokertest.py
+utils/win_table_detect.py

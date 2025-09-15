@@ -91,7 +91,7 @@ The project uses unified test scripts for consistent behavior across platforms:
 
 ```ini
 [pytest]
-addopts = 
+addopts =
     -v
     --tb=short
     --strict-markers
@@ -215,7 +215,7 @@ FPDB uses a modern pytest-based regression testing system:
 **Current Version: v1.0** - Foundation established, ready for refactoring iterations
 
 - **serialize_hand_for_snapshot.py**: Base serialization system implemented
-- **test_snapshots.py**: First iteration snapshot testing with syrupy  
+- **test_snapshots.py**: First iteration snapshot testing with syrupy
 - **test_thp_param.py**: Migration from legacy system, performance optimizations needed
 - **test_invariants.py**: Basic invariants implemented, more game-specific rules needed
 - **OSXTables.py**: AppKit import issues fixed for macOS compatibility
@@ -330,7 +330,7 @@ pip install pytest
 # Snapshot testing
 pip install syrupy
 
-# Property-based testing  
+# Property-based testing
 pip install hypothesis
 
 # Install all at once
@@ -404,5 +404,369 @@ fpdb-3/
 - **Property-based testing**: Comprehensive edge case coverage with Hypothesis
 - **CI/CD integration**: Seamless integration with continuous integration systems
 - **Consistent commands**: All tests use `uv run pytest` prefix
+
+## 🔧 Debugging Workflow for  Issues
+
+### The Problem
+
+PokerStars and other sites sometimes provide **minimal hand history information**, making it difficult to:
+- Calculate correct pot sizes
+- Track side pots properly
+- Handle complex all-in scenarios (Run It Twice, cash-outs)
+- Validate rake calculations
+
+### The Solution: Systematic Debugging Workflow
+
+This workflow allows you to:
+1. **Establish baselines** for known-good data
+2. **Manually correct** problematic hands with accurate financial data
+3. **Test code changes** against verified snapshots
+4. **Prevent regressions** across multiple poker sites
+
+---
+
+## 📋 Step-by-Step Workflow
+
+### Step 1.0: Establish Baseline (Regression Test)
+
+**Purpose**: Create a reference point of current behavior before making changes.
+
+```bash
+# Test all Stars cash FLOP games to establish current state
+uv run python tools/make_snapshot.py --directory regression-test-files/Stars/cash/Flop --site PokerStars --regression-mode
+```
+
+**What this does**:
+- Processes all hand history files in the directory
+- Generates `.temp.snapshot.json` files for each hand
+- Compares against existing `.snapshot.json` baselines (if they exist)
+- Reports any differences found
+
+**Expected output**:
+```
+Found 45 files to process
+Setting up test environment...
+Processing: regression-test-files/Stars/cash/Flop/hand1.txt
+Successfully processed 3 hands from hand1.txt
+...
+✅ No regressions detected
+```
+
+### Step 2.0: Isolate Problematic Hand
+
+**Purpose**: Generate an editable snapshot of a specific hand with issues.
+
+```bash
+# Process the problematic hand and create editable JSON
+uv run python tools/make_snapshot.py ~/Downloads/AnonymisedHand.txt --site PokerStars --output Anon-corrected.json
+```
+
+**What this does**:
+- Parses the hand history file
+- Extracts **direct database values** (no calculations)
+- Creates human-readable JSON with financial data
+- Generates summary file for quick review
+
+**Example output structure**:
+```json
+{
+  "site": "PokerStars",
+  "hand_text_id": "12345678",
+  "total_pot": 45.50,
+  "rake": 1.25,
+  "players": [
+    {
+      "name": "Hero",
+      "net_winnings": 44.25,
+      "total_profit": -12.50,
+      "went_all_in": true
+    }
+  ]
+}
+```
+
+### Step 3.0: Add to Regression Test Suite (Manual)
+
+**Purpose**: Integrate the corrected hand into the permanent test suite.
+
+```bash
+# Copy hand history to regression test directory
+cp ~/Downloads/AnonymisedHand.txt regression-test-files/Stars/cash/Flop/Anon-allInEV-fix.txt
+
+# Copy snapshot as baseline (you'll edit this next)
+cp Anon-corrected.json regression-test-files/Stars/cash/Flop/Anon-allInEV-fix.txt.snapshot.json
+```
+
+**File naming convention**:
+- **Descriptive names**: `Anon-allInEV-fix.txt` (not `hand123.txt`)
+- **Matching pairs**: `file.txt` and `file.txt.snapshot.json`
+- **Organized by issue**: Group related test cases together
+
+### Step 4.0: Manual Correction (The Critical Step)
+
+**Purpose**: Edit the JSON snapshot with the **correct** financial values.
+
+```bash
+# Edit the snapshot file with your preferred editor
+code regression-test-files/Stars/cash/Flop/Anon-allInEV-fix.txt.snapshot.json
+```
+
+**What to correct**:
+1. **Pot sizes**: Ensure `total_pot` matches actual pot
+2. **Rake**: Verify rake calculation is correct
+3. **Winnings**: Set `net_winnings` to actual amounts won
+4. **AllInEV**: Calculate expected winnings vs actual
+5. **Side pots**: Handle complex multi-way all-ins
+
+**Example correction**:
+```json
+// BEFORE (incorrect from database)
+"total_pot": 45.50,
+"rake": 1.25,
+"net_winnings": 44.25,
+
+// AFTER (manually verified correct values)
+"total_pot": 47.80,
+"rake": 1.30,
+"net_winnings": 46.50,
+```
+
+### Step 5.0: Validate Corrections
+
+**Purpose**: Compare your manual corrections against the current parser output.
+
+```bash
+# Generate current snapshot for comparison
+uv run python tools/make_snapshot.py regression-test-files/Stars/cash/Flop/Anon-allInEV-fix.txt --output current.json
+
+# Compare corrected vs current
+uv run python tools/make_snapshot.py --compare regression-test-files/Stars/cash/Flop/Anon-allInEV-fix.txt.snapshot.json current.json
+```
+
+**Expected output if issues exist**:
+```
+❌ Hand 12345678: total_pot changed
+   Before: 47.80  (your correction)
+   After:  45.50  (current parser)
+
+❌ Hand 12345678: net_winnings changed
+   Before: 46.50  (your correction)
+   After:  44.25  (current parser)
+
+❌ Differences found - regression detected!
+```
+
+### Step 6.0: Fix Code and Test
+
+**Purpose**: Modify the parser code to match your corrected values, then verify the fix.
+
+```bash
+# After making code changes to fix the AllInEV calculation...
+
+# Re-run regression test on the directory
+uv run python tools/make_snapshot.py --directory regression-test-files/Stars/cash/Flop --site PokerStars --regression-mode
+```
+
+**Success looks like**:
+```
+✅ No regression in Anon-allInEV-fix.txt
+✅ No regression in existing-hand-1.txt
+✅ No regression in existing-hand-2.txt
+...
+✅ No regressions detected
+```
+
+**Failure looks like**:
+```
+❌ Regression detected in existing-hand-1.txt
+   Before: total_pot = 25.00
+   After:  total_pot = 25.50
+```
+
+### Step 7.0: Multi-Site Validation
+
+**Purpose**: Ensure your PokerStars fix doesn't break other poker sites.
+
+```bash
+# Test all FLOP cash games across all sites
+uv run python tools/make_snapshot.py --directory regression-test-files --filter-game FLOP --type cash --regression-mode
+
+# Test specific sites if needed
+uv run python tools/make_snapshot.py --directory regression-test-files/Winamax --regression-mode
+uv run python tools/make_snapshot.py --directory regression-test-files/PartyPoker --regression-mode
+```
+
+**What to watch for**:
+- No regressions in existing Winamax/Party/888 files
+- Only improvements in PokerStars files
+- Clean test suite across all supported sites
+
+---
+
+## 🎯 Advanced Filtering Examples
+
+### Game Type Filtering
+```bash
+# Only Hold'em and Omaha variants
+uv run python tools/make_snapshot.py --directory regression-test-files --filter-game FLOP --regression-mode
+
+# Only Stud variants (7-Stud, Razz, etc.)
+uv run python tools/make_snapshot.py --directory regression-test-files --filter-game STUD --regression-mode
+
+# Only Draw variants (5-Card Draw, Badugi, etc.)
+uv run python tools/make_snapshot.py --directory regression-test-files --filter-game DRAW --regression-mode
+```
+
+### Format Filtering
+```bash
+# Only cash games
+uv run python tools/make_snapshot.py --directory regression-test-files --type cash --regression-mode
+
+# Only tournaments
+uv run python tools/make_snapshot.py --directory regression-test-files --type tourney --regression-mode
+
+# Combined: Only tournament Hold'em/Omaha games
+uv run python tools/make_snapshot.py --directory regression-test-files --filter-game FLOP --type tourney --regression-mode
+```
+
+### Site-Specific Testing
+```bash
+# Test only PokerStars files
+uv run python tools/make_snapshot.py --directory regression-test-files/Stars --site PokerStars --regression-mode
+
+# Test only files with "side-pot" in the name
+uv run python tools/make_snapshot.py regression-test-files/**/*side-pot*.txt --regression-mode
+```
+
+---
+
+## 🚨 Troubleshooting Common Issues
+
+### Issue 1: "No files match the specified filters"
+
+**Cause**: Filter criteria too restrictive or wrong directory structure.
+
+**Solution**:
+```bash
+# Check what files exist
+ls -la regression-test-files/Stars/cash/Flop/
+
+# Remove filters temporarily to see all files
+uv run python tools/make_snapshot.py --directory regression-test-files/Stars/cash/Flop --regression-mode
+```
+
+### Issue 2: "Error setting up test environment"
+
+**Cause**: Database configuration issues or missing dependencies.
+
+**Solution**:
+```bash
+# Ensure test config exists
+ls -la HUD_config.test.xml
+
+# Check database connectivity
+uv run python -c "import Configuration; print('Config OK')"
+```
+
+### Issue 3: "Multiple regressions detected after fix"
+
+**Cause**: Your fix changed behavior for other hands (expected if old behavior was wrong).
+
+**Solution**:
+```bash
+# Review each regression individually
+uv run python tools/make_snapshot.py --compare old.json new.json
+
+# If changes are correct, update the baselines:
+cp new.json old.json  # For each affected file
+```
+
+### Issue 4: JSON editing errors
+
+**Cause**: Invalid JSON syntax after manual editing.
+
+**Solution**:
+```bash
+# Validate JSON syntax
+python -c "import json; print(json.load(open('file.json')))"
+
+# Use a proper JSON editor/linter
+# Common errors: trailing commas, unquoted strings, missing brackets
+```
+
+### Issue 5: Invariant violations
+
+**Cause**: Manual corrections don't follow poker rules (e.g., winnings + rake ≠ pot).
+
+**Example error**:
+```
+Invariant violations in hand 12345678:
+  - Money conservation failed: winnings(45.00) + rake(1.25) != pot(47.80)
+```
+
+**Solution**:
+```bash
+# Check poker math in your corrections:
+# total_pot = sum(all_winnings) + rake
+# Example: 47.80 = 46.50 + 1.30 ✓
+
+# Use verify-only mode to check without saving
+uv run python tools/make_snapshot.py file.txt --verify-only
+```
+
+---
+
+## 💡 Best Practices
+
+### Naming Conventions
+- **Use descriptive names**: `Stars-AllIn-SidePot-Bug123.txt`
+- **Include issue numbers**: Reference GitHub issues or forum posts
+- **Group related tests**: Put similar issues in same directory
+
+### Documentation
+- **Add comments in snapshots**: Document why specific values are correct
+- **Keep issue links**: Reference 2+2 forum posts, GitHub issues
+- **Note manual corrections**: Mark fields that were manually verified
+
+### Workflow Efficiency
+- **Start small**: Fix one hand at a time before batch processing
+- **Use verify-only**: Check invariants without generating files
+- **Test incrementally**: Run regression tests after each code change
+
+### Example Snapshot Documentation
+```json
+{
+  "_metadata": {
+    "issue": "https://github.com/user/fpdb/issues/123",
+    "forum_post": "https://forumserver.twoplustwo.com/123",
+    "manually_verified": ["total_pot", "rake", "net_winnings"],
+    "verification_date": "2024-09-14",
+    "notes": "Side pot calculation was incorrect in original parser"
+  },
+  "total_pot": 47.80,
+  "rake": 1.30
+}
+```
+
+---
+
+## 🔄 Integration with CI/CD
+
+Add regression testing to your continuous integration:
+
+```bash
+# In your CI script (.github/workflows/test.yml)
+- name: Run AllInEV Regression Tests
+  run: |
+    uv run python tools/make_snapshot.py --directory regression-test-files --regression-mode
+    if [ $? -ne 0 ]; then
+      echo "❌ Regressions detected in AllInEV calculations"
+      exit 1
+    fi
+```
+
+This ensures any code changes are automatically tested against your verified baselines.
+
+---
 
 For questions about testing, see existing test files for patterns and examples.

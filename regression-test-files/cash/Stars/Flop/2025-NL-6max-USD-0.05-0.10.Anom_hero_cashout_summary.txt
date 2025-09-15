@@ -1,0 +1,14 @@
+Snapshot Summary for cashout-analysis.json
+==================================================
+
+Total hands: 1
+
+Hand 1:
+  Site: PokerStars.COM
+  Hand ID: 198361245189
+  Game: holdem
+  Stakes: $0.05/0.10
+  Players: 5
+  Total Pot: $20.89
+  Rake: $1.00
+
