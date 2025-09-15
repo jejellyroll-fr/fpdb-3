@@ -1,0 +1,17 @@
+archive
+archives
+build
+docs
+documentations
+gfx
+htmlcov
+icons
+locale
+pypoker-eval
+regression-test-files
+regression-tests
+resources
+test
+tools
+utils
+web

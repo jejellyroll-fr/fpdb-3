@@ -141,3 +141,8 @@ exclude_lines = [
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
 ]
+
+[tool.uv]
+dev-dependencies = [
+    "pre-commit>=4.3.0",
+]
