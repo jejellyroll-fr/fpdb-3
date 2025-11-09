@@ -23,16 +23,27 @@ from __future__ import annotations
 import ctypes
 from typing import Any
 
-from AppKit import NSView, NSWindowAbove, NSWorkspace
-from Quartz.CoreGraphics import (
-    CGWindowListCopyWindowInfo,
-    CGWindowListCreateDescriptionFromArray,
-    kCGNullWindowID,
-    kCGWindowBounds,
-    kCGWindowListOptionOnScreenOnly,
-    kCGWindowNumber,
-    kCGWindowOwnerName,
-)
+# macOS-specific imports - only available on macOS with PyObjC
+try:
+    from AppKit import NSView, NSWindowAbove, NSWorkspace
+    from Quartz.CoreGraphics import (
+        CGWindowListCopyWindowInfo,
+        CGWindowListCreateDescriptionFromArray,
+        kCGNullWindowID,
+        kCGWindowBounds,
+        kCGWindowListOptionOnScreenOnly,
+        kCGWindowNumber,
+        kCGWindowOwnerName,
+    )
+    APPKIT_AVAILABLE = True
+except ImportError:
+    # AppKit not available - probably not on macOS or PyObjC not installed
+    APPKIT_AVAILABLE = False
+    # Define dummy values to avoid NameError
+    NSView = NSWindowAbove = NSWorkspace = None
+    CGWindowListCopyWindowInfo = CGWindowListCreateDescriptionFromArray = None
+    kCGNullWindowID = kCGWindowBounds = kCGWindowListOptionOnScreenOnly = None
+    kCGWindowNumber = kCGWindowOwnerName = None
 
 from loggingFpdb import get_logger
 
@@ -55,6 +66,10 @@ class Table(Table_Window):
         Returns:
             The window title if found, None otherwise.
         """
+        if not APPKIT_AVAILABLE:
+            log.warning("AppKit not available - OSX table detection disabled")
+            return None
+            
         self.number = None
         curr_pid = NSWorkspace.sharedWorkspace().activeApplication()["NSApplicationProcessIdentifier"]
         options = kCGWindowListOptionOnScreenOnly
@@ -120,6 +135,10 @@ class Table(Table_Window):
         Returns:
             Dictionary with x, y, width, height coordinates or None if not found.
         """
+        if not APPKIT_AVAILABLE:
+            log.warning("AppKit not available - cannot get geometry")
+            return None
+            
         if self.number is None:
             log.warning("Cannot get geometry: window number is None")
             return None
@@ -142,6 +161,10 @@ class Table(Table_Window):
         Returns:
             The window title string or None if not found.
         """
+        if not APPKIT_AVAILABLE:
+            log.warning("AppKit not available - cannot get window title")
+            return None
+            
         if self.number is None:
             log.warning("Cannot get window title: window number is None")
             return None
@@ -159,6 +182,10 @@ class Table(Table_Window):
         Args:
             window: The Qt widget window to bring to front.
         """
+        if not APPKIT_AVAILABLE:
+            log.warning("AppKit not available - cannot topify window")
+            return
+            
         if self.number is None:
             log.warning("Cannot topify window: window number is None")
             return

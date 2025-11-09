@@ -60,6 +60,8 @@ class TestPokerStarsReadAction(unittest.TestCase):
         self.hand.addUncalled = Mock()
         # Allow walk_adjustments attribute assignment
         self.hand.walk_adjustments = {}
+        # Configure pot.returned as a real dict (not Mock) for uncalled bet tracking
+        self.hand.pot.returned = {}
 
     def test_readaction_empty_street(self) -> None:
         """Test readAction with empty street."""
