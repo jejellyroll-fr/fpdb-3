@@ -44,6 +44,9 @@ STREET3_IDX = 3
 STREET4_IDX = 4
 FINAL_POT_IDX = 5
 
+# Constants for PokerEval
+MONTE_CARLO_ITERATIONS = 100000
+
 # Constants for action indices
 ACTION_PLAYER_IDX = 0
 ACTION_TYPE_IDX = 1
@@ -85,6 +88,8 @@ def _buildStatsInitializer() -> dict:  # noqa: PLR0915
     init["committed"] = 0
     init["winnings"] = 0
     init["rake"] = 0
+    init["cashout"] = 0  # Cashout amount (separate from winnings)
+    init["cashoutFee"] = 0  # Cashout fee paid to PokerStars
     init["rakeDealt"] = 0
     init["rakeContributed"] = 0
     init["rakeWeighted"] = 0
@@ -193,12 +198,14 @@ class DerivedStats:
             self.handsplayers[player[1]] = _INIT_STATS.copy()
 
         self.assembleHands(hand)
-        self.assembleHandsPlayers(hand)
         self.assembleHandsActions(hand)
 
         if pokereval and hand.gametype["category"] in Card.games:
             self.assembleHandsStove(hand)
             self.assembleHandsPots(hand)
+
+        # Run assembleHandsPlayers after PokerEval to avoid overriding AllInEV values
+        self.assembleHandsPlayers(hand)
 
     def getHands(self) -> dict:
         """Get hands statistics."""
@@ -379,6 +386,32 @@ class DerivedStats:
                 if isinstance(totals, Mock):
                     totals = [0, 0, 0, 0, 0, 0]
                 if totals and hasattr(totals, "__iter__") and not isinstance(totals, str):
+                    # Subtract uncalled bets from all street totals
+                    # Uncalled bets are amounts committed but returned to players
+                    # They should NOT be included in pot totals
+                    total_uncalled = 0
+                    if hasattr(hand, 'pot') and hasattr(hand.pot, 'returned') and hand.pot.returned:
+                        # Convert Decimal values to float for calculation
+                        total_uncalled = float(sum(hand.pot.returned.values()))
+                        log.debug(f"Hand {hand.handid}: Total uncalled bets: ${total_uncalled}")
+
+                    if total_uncalled > 0:
+                        # Convert totals to floats first
+                        totals = [float(t) for t in totals]
+                        final_pot_before = totals[-1] if totals else 0
+
+                        # Edge case: If uncalled > final_pot, it means the uncalled bet was on a side pot
+                        # that was never contested (e.g., player bet after everyone else folded/all-in)
+                        # In this case, don't subtract it as it was never in the disputed pot
+                        if total_uncalled > final_pot_before:
+                            log.debug(f"Hand {hand.handid}: Uncalled ({total_uncalled}) > pot ({final_pot_before}) - side pot edge case, not subtracting")
+                        else:
+                            # Subtract uncalled bets from all street pots
+                            # This is because markTotal() includes committed amounts (including uncalled)
+                            for i in range(len(totals)):
+                                totals[i] = max(0, totals[i] - total_uncalled)
+                            log.debug(f"Street totals after subtracting uncalled: {totals}")
+
                     totals = [int(CENTS_MULTIPLIER * i) for i in totals]
                     self.hands["street0Pot"] = totals[STREET0_IDX] if len(totals) > STREET0_IDX else 0
                     self.hands["street1Pot"] = totals[STREET1_IDX] if len(totals) > STREET1_IDX else 0
@@ -510,6 +543,8 @@ class DerivedStats:
         num_collectees, i = len(hand.collectees), 0
         even_split = hand.totalpot / num_collectees if num_collectees > 0 else 0
         unraked = [c for c in hand.collectees.values() if even_split == c]
+
+        # Process normal pot collections
         for player, winnings in hand.collectees.items():
             collectee_stats = self.handsplayers.get(player)
             collectee_stats["winnings"] = int(CENTS_MULTIPLIER * winnings)
@@ -539,6 +574,25 @@ class DerivedStats:
                 collectee_stats["wonAtSD"] = True
             i += 1
 
+        # Process cashouts (players who sold their share to PokerStars)
+        # Cashouts are separate from normal pot collections
+        if hasattr(hand, 'cashouts') and hand.cashouts:
+            for player, cashout_amount in hand.cashouts.items():
+                player_stats = self.handsplayers.get(player)
+
+                # If player collected normally, winnings already set above
+                # If player did NOT collect, cashout IS their winnings
+                if player not in hand.collectees:
+                    player_stats["winnings"] = int(CENTS_MULTIPLIER * cashout_amount)
+                    player_stats["rake"] = 0  # No rake paid on cashout
+
+                # Store cashout amount separately for analysis/reporting
+                player_stats["cashout"] = int(CENTS_MULTIPLIER * cashout_amount)
+
+                # Store cashout fee if available
+                if hasattr(hand, 'cashOutFees') and player in hand.cashOutFees:
+                    player_stats["cashoutFee"] = int(CENTS_MULTIPLIER * hand.cashOutFees[player])
+
         contributed, i = [], 0
         for player, money_committed in hand.pot.committed.items():
             committed_player_stats = self.handsplayers.get(player)
@@ -546,7 +600,12 @@ class DerivedStats:
             committed_player_stats["common"] = int(100 * hand.pot.common[player])
             committed_player_stats["committed"] = int(100 * money_committed)
             committed_player_stats["totalProfit"] = int(committed_player_stats["winnings"] - paid)
-            committed_player_stats["allInEV"] = committed_player_stats["totalProfit"]
+            # Don't override AllInEV if it was already calculated by PokerEval
+            # PokerEval sets correct equity-based values, while legacy code incorrectly used totalProfit
+            if committed_player_stats["allInEV"] == 0:
+                # Only set to 0 if not calculated by PokerEval (leave existing values intact)
+                pass
+            log.debug(f"Player {player} AllInEV: {committed_player_stats['allInEV']}")
             committed_player_stats["rakeDealt"] = 100 * hand.rake / len(hand.players)
             committed_player_stats["rakeWeighted"] = (
                 100 * hand.rake * paid / (100 * hand.totalpot) if hand.rake > 0 else 0
@@ -1475,8 +1534,8 @@ class DerivedStats:
                             board_id = (n + 1) if (len(board["board"]) > 1) else n
                             cards += board["board"][n] if (board["board"][n] and "omaha" not in evalgame) else []
                             bcards = board["board"][n] if (board["board"][n] and "omaha" in evalgame) else []
-                            cards = [str(c) if Card.encodeCardList.get(c) else "0x" for c in cards]
-                            bcards = [str(b) if Card.encodeCardList.get(b) else "0x" for b in bcards]
+                            cards = [str(c) if Card.ENCODE_CARD_LIST.get(c) else "0x" for c in cards]
+                            bcards = [str(b) if Card.ENCODE_CARD_LIST.get(b) else "0x" for b in bcards]
                             holecards[pname]["hole"] = cards[hrange[street_idx][0] : hrange[street_idx][1]]
                             holecards[pname]["cards"] += [cards]
                             notnull = ("0x" not in cards) and ("0x" not in bcards)
@@ -1534,8 +1593,12 @@ class DerivedStats:
                     street_id = streets[last]
                 self.handsstove.append([hand.dbid_hands, hand.dbid_pids[player[1]], street_id, 0, hl, 1, 0, None, 0])
 
+        log.debug(f"Check getAllInEV conditions: base='{base}', evalgame='{evalgame}'")
         if base == "hold" and evalgame:
+            log.debug(f"Calling getAllInEV for hand {hand.handid}")
             self.getAllInEV(hand, evalgame, holeplayers, boards, streets, holecards)
+        else:
+            log.debug(f"NOT calling getAllInEV: base='{base}', evalgame='{evalgame}'")
 
     def assembleHandsPots(self, hand: Any) -> None:  # noqa: C901, PLR0912, PLR0915
         """Assemble hands pots data and calculate winnings."""
@@ -1587,7 +1650,9 @@ class DerivedStats:
             if not hand.cashedOut:
                 for p in hand.players:
                     self.handsplayers[p[1]]["rake"] = 0
-                hand.rake = 0
+                # Only reset rake if not explicitly parsed from hand text
+                if not (hasattr(hand, "rake_parsed") and hand.rake_parsed):
+                    hand.rake = 0
             for pot_id, (pot, players) in enumerate(hand.pot.pots):
                 if pot_id == 0:
                     pot += sum(hand.pot.common.values()) + hand.pot.stp  # noqa: PLW2901
@@ -1604,7 +1669,7 @@ class DerivedStats:
                         holes = [
                             str(c)
                             for c in hcs[hrange[-1][0] : hrange[-1][1]]
-                            if Card.encodeCardList.get(c) is not None or c == "0x"
+                            if Card.ENCODE_CARD_LIST.get(c) is not None or c == "0x"
                         ]
                         board = [str(c) for c in b if "omaha" in evalgame]
                         if "omaha" not in evalgame:
@@ -1715,9 +1780,18 @@ class DerivedStats:
                         allin = False
                         if street_name in hand.actions:
                             street_actions = hand.actions[street_name]
+                            log.debug(f"Checking {street_name} for all-in: {street_actions}")
+                            # Check if any action is all-in
+                            for action in street_actions:
+                                if len(action) >= 4 and action[3] == True:  # allIn flag
+                                    log.debug(f"Found all-in action on {street_name}: {action}")
+                                    allin = True
+                                    break
                             # If no actions on street, might be all-in
                             if not street_actions:
+                                log.debug(f"No actions on {street_name}, setting allin=True")
                                 allin = True
+                        log.debug(f"Street {street_name} allin status: {allin}")
 
                         boards[street_name] = {"board": [board_cards], "allin": allin}
                         log.debug("Added board for %s: %s", street_name, boards[street_name])
@@ -1793,9 +1867,12 @@ class DerivedStats:
             if not hasattr(self, "handsstove"):
                 self.handsstove = []
 
-            # Calculate equity for each all-in situation
+            # Calculate equity for the first all-in situation (preflop all-in)
+            # AllInEV should be calculated only for the street where all-in occurred
+            allin_calculated = False
             for street_name, street_data in boards.items():
-                if street_data.get("allin", False):
+                if street_data.get("allin", False) and not allin_calculated:
+                    allin_calculated = True
                     try:
                         # Use pokereval to calculate equity
                         if pokereval:
@@ -1809,16 +1886,44 @@ class DerivedStats:
 
                             if len(player_hands) >= MIN_PLAYERS_FOR_GAME:
                                 board_cards = street_data["board"][0] if street_data["board"] else []
+                                
+                                # For preflop calculation, use placeholder cards
+                                if not board_cards:
+                                    board_cards = ["__", "__", "__", "__", "__"]
 
-                                # Calculate equity using pokereval
-                                result = pokereval.poker_eval(game=game_type, pockets=player_hands, board=board_cards)
+                                # Calculate equity using pokereval with Monte Carlo
+                                result = pokereval.poker_eval(
+                                    game=game_type, 
+                                    pockets=player_hands, 
+                                    board=board_cards,
+                                    iterations=MONTE_CARLO_ITERATIONS
+                                )
 
-                                # Store results
+                                # Calculate AllInEV for each player
+                                # AllInEV = (equity% × total_pot) - player_investment
+                                total_pot = float(hand.totalpot)
+
                                 for i, player in enumerate(valid_players[: len(player_hands)]):
                                     if i < len(result["eval"]):
-                                        equity = result["eval"][i]["ev"]
-                                        self.handsplayers[player]["allInEV"] = int(100 * equity)
-                                        log.debug("Player %s all-in EV: %s", player, equity)
+                                        # ev is in format 0-1000, convert to 0-1
+                                        equity_pct = result["eval"][i]["ev"] / 1000.0
+                                        # Utiliser hand.pot.committed pour obtenir la vraie valeur
+                                        if hasattr(hand, 'pot') and hasattr(hand.pot, 'committed') and player in hand.pot.committed:
+                                            committed_value = hand.pot.committed[player]
+                                        else:
+                                            # Fallback: calculer manuellement à partir des BETS
+                                            committed_value = 0
+                                            for street in hand.actionStreets:
+                                                if player in hand.bets.get(street, {}):
+                                                    committed_value += sum(hand.bets[street][player])
+
+                                        player_investment = float(committed_value) / 100.0
+                                        expected_return = equity_pct * total_pot
+                                        allin_ev = expected_return - player_investment
+
+                                        self.handsplayers[player]["allInEV"] = int(100 * allin_ev)
+                                        log.debug("Player %s: equity=%.1f%%, investment=%.2f, expected=%.2f, AllInEV=%.2f",
+                                                player, equity_pct*100, player_investment, expected_return, allin_ev)
 
                     except RuntimeError:
                         log.exception("RuntimeError in pokereval calculation")

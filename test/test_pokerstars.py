@@ -1247,6 +1247,8 @@ Seat 1: Hero showed [As Ks] and won ($10.50) with a pair of Aces"""
         collect_matches[0].__getitem__ = lambda self, x: {
             "SEAT": "1", "PNAME": "Hero", "POT": "10.50"
         }.get(x)
+        # Mock start() method for finding line boundaries
+        collect_matches[0].start.return_value = 0
         
         self.parser.re_collect_pot = Mock()
         self.parser.re_collect_pot.finditer = Mock(return_value=collect_matches)

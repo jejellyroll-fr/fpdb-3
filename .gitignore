@@ -7,4 +7,11 @@ __pycache__/
 .vs/
 build/
 dist/
-*.spec
+*.spec/.home/
+/.hypothesis/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*

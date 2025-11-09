@@ -318,7 +318,7 @@ class Importer:
         Returns:
             The cached hand history converter instance.
         """
-        return self.handhistoryconverter
+        return getattr(self, "handhistoryconverter", None)
 
     #   def setWatchTime(self):
     #       self.updated = time()
@@ -1467,4 +1467,3 @@ class ImportProgressDialog(QDialog):
         if self.parent is None or self.parent == "CLI_NO_PROGRESS":
             return
         super().show()
-

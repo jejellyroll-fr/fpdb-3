@@ -3618,7 +3618,13 @@ class Database:
                 # Add line to the old line in the hudcache.
                 if hud is not None:
                     for idx, val in enumerate(line):
-                        hud[idx] += val
+                        # Convert to Decimal to avoid TypeError with mixed Decimal/Float
+                        if isinstance(hud[idx], Decimal) and not isinstance(val, Decimal):
+                            hud[idx] += Decimal(str(val))
+                        elif isinstance(val, Decimal) and not isinstance(hud[idx], Decimal):
+                            hud[idx] = Decimal(str(hud[idx])) + val
+                        else:
+                            hud[idx] += val
                 else:
                     self.hcbulk[k] = line
 

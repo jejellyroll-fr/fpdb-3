@@ -6,7 +6,7 @@ import os
 # Add the parent directory to the path to import the module
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from PokerStarsToFpdb import PokerStars, SITE_MERGE
+from PokerStarsToFpdb import PokerStars, SITE_MERGE, SITE_BOVADA
 
 
 class TestCalculateBovadaAdjustments(unittest.TestCase):
@@ -16,7 +16,11 @@ class TestCalculateBovadaAdjustments(unittest.TestCase):
         """Set up test fixtures."""
         self.config = Mock()
         self.parser = PokerStars(self.config, "PokerStars", "USD")
-        
+
+        # Mock the site_id to be Bovada so the Bovada adjustments are applied
+        # siteId is a property that reads site_id
+        self.parser.site_id = SITE_BOVADA
+
         # Mock the regex pattern
         self.parser.re_uncalled = Mock()
         

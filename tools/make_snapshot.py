@@ -7,11 +7,12 @@ Helps developers create baseline snapshots for new hand histories.
 NOTE: v1.0 - Migration from legacy system, will need performance optimizations
 """
 
+import argparse
+import json
 import os
 import sys
-import argparse
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 # Add the project root to path for imports
 project_root = Path(__file__).parent.parent
@@ -20,10 +21,65 @@ sys.path.insert(0, str(project_root))
 import Configuration
 import Database
 import Importer
-from serialize_hand_for_snapshot import serialize_hands_batch, verify_hand_invariants
-import json
-import glob
-from pathlib import Path
+from tools.serialize_hand_for_snapshot import (
+    serialize_hands_batch,
+    verify_hand_invariants,
+    print_hand_to_stdout,
+    save_raw_hand_objects,
+    compare_raw_hand_objects,
+    validate_snapshot_for_db,
+)
+
+
+def hand_label(hand_data: Dict[str, Any], default: str) -> str:
+    """Human-readable identifier for a serialized hand."""
+    details = hand_data.get("hand_details") or {}
+    label = details.get("siteHandNo") or details.get("tableName")
+    if label is None:
+        return default
+    return str(label)
+
+
+def cents_to_dollars(value: Any) -> str:
+    """Format integer cents as a dollar string."""
+    if value is None:
+        return "n/a"
+    try:
+        cents = int(value)
+    except (TypeError, ValueError):
+        return str(value)
+    return f"${cents / 100:.2f}"
+
+
+def format_stakes(gametype: Dict[str, Any]) -> str:
+    """Return a human-readable stakes string from gametype metadata."""
+    if not gametype:
+        return "n/a"
+    sb = gametype.get("sb")
+    bb = gametype.get("bb")
+    if sb is None or bb is None:
+        return "n/a"
+    try:
+        sb_value = float(sb)
+        bb_value = float(bb)
+        return f"${sb_value:.2f}/${bb_value:.2f}"
+    except (TypeError, ValueError):
+        return f"{sb}/{bb}"
+
+
+def read_text_preview_with_fallback(file_path: str, chars: int = 1000) -> tuple[str, str]:
+    """Read a small portion of a file with UTF-8 first, then fall back to CP1252."""
+    try:
+        with open(file_path, "r", encoding="utf-8") as fh:
+            return fh.read(chars), "utf-8"
+    except UnicodeDecodeError:
+        try:
+            with open(file_path, "r", encoding="cp1252") as fh:
+                preview = fh.read(chars)
+            print(f"Decoded {file_path} using cp1252 fallback")
+            return preview, "cp1252"
+        except UnicodeDecodeError:
+            raise
 
 
 def setup_test_environment():
@@ -49,8 +105,8 @@ def setup_test_environment():
     return importer, db, config
 
 
-def parse_hand_history(file_path: str, site_name: str, importer) -> List[Dict[str, Any]]:
-    """Parse a hand history file and return serialized hands."""
+def parse_hand_history(file_path: str, site_name: str, importer, args=None) -> tuple:
+    """Parse a hand history file and return both raw hands and serialized data."""
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Hand history file not found: {file_path}")
 
@@ -75,35 +131,58 @@ def parse_hand_history(file_path: str, site_name: str, importer) -> List[Dict[st
     # Get processed hands
     hhc = importer.getCachedHHC()
     if not hhc:
+        if stored == 0:
+            print(f"No hand history converter available for {file_path} – writing empty snapshot")
+            return [], []
         raise RuntimeError("No HHC (Hand History Converter) available")
 
-    handlist = hhc.getProcessedHands()
+    handlist = hhc.getProcessedHands() or []
     if not handlist:
+        if stored == 0:
+            print(f"No hands were processed for {file_path} – writing empty snapshot")
+            return [], []
         raise RuntimeError("No hands were processed")
 
     print(f"Successfully processed {len(handlist)} hands from {file_path}")
 
-    # Serialize hands
-    serialized_hands = serialize_hands_batch(handlist)
+    # Handle print-hand-stdout mode
+    if args and args.print_hand_stdout:
+        for hand in handlist:
+            print_hand_to_stdout(hand)
+        return handlist, []
 
-    # Verify invariants
-    total_violations = 0
-    for i, hand_data in enumerate(serialized_hands):
-        if 'error' not in hand_data:
-            violations = verify_hand_invariants(hand_data)
-            if violations:
-                hand_id = hand_data.get('hand_text_id', f'hand_{i}')
-                print(f"Warning: Invariant violations in hand {hand_id}:")
-                for violation in violations:
-                    print(f"  - {violation}")
-                total_violations += len(violations)
+    # Process hands according to format options
+    serialized_hands = []
+    if not args or not args.raw_hand_objects or args.both_formats:
+        # Generate snapshot format
+        serialized_hands = serialize_hands_batch(handlist)
 
-    if total_violations > 0:
-        print(f"Total invariant violations: {total_violations}")
-    else:
-        print("All hands pass invariant checks")
+        # Verify invariants for snapshot format
+        total_violations = 0
+        for i, hand_data in enumerate(serialized_hands):
+            if "error" not in hand_data:
+                hand_id = hand_label(hand_data, f"hand_{i}")
 
-    return serialized_hands
+                invariant_violations = verify_hand_invariants(hand_data)
+                if invariant_violations:
+                    print(f"Warning: Invariant violations in hand {hand_id}:")
+                    for violation in invariant_violations:
+                        print(f"  - {violation}")
+                    total_violations += len(invariant_violations)
+
+                schema_violations = validate_snapshot_for_db(hand_data)
+                if schema_violations:
+                    print(f"Warning: Schema violations in hand {hand_id}:")
+                    for violation in schema_violations:
+                        print(f"  - {violation}")
+                    total_violations += len(schema_violations)
+
+        if total_violations > 0:
+            print(f"Total invariant violations: {total_violations}")
+        else:
+            print("All hands pass invariant checks")
+
+    return handlist, serialized_hands
 
 
 def detect_site_name(file_path: str) -> str:
@@ -132,10 +211,8 @@ def detect_site_name(file_path: str) -> str:
 
     # Try to detect from file content
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            first_lines = f.read(1000)  # Read first 1000 chars
-
-        first_lines_lower = first_lines.lower()
+        preview, _encoding = read_text_preview_with_fallback(file_path)
+        first_lines_lower = preview.lower()
 
         if 'pokerstars' in first_lines_lower:
             return 'PokerStars'
@@ -152,16 +229,42 @@ def detect_site_name(file_path: str) -> str:
         elif 'bovada' in first_lines_lower:
             return 'Bovada'
 
-    except Exception:
-        pass
+    except UnicodeDecodeError as exc:
+        print(f"Unable to decode {file_path}: {exc}")
 
     # Default fallback
     print("Warning: Could not auto-detect site, defaulting to PokerStars")
     return 'PokerStars'
 
 
+def _exclude_db_ids(data: Any, exclude_keys: set = None) -> Any:
+    """Recursively remove database-generated IDs from data structures for comparison.
+
+    Args:
+        data: The data to filter (dict, list, or scalar)
+        exclude_keys: Set of keys to exclude (defaults to database ID fields)
+
+    Returns:
+        Filtered copy of the data
+    """
+    if exclude_keys is None:
+        # Database-generated fields that should not be compared
+        exclude_keys = {'id', 'fileId', 'gametypeId', 'sessionId', 'gameId'}
+
+    if isinstance(data, dict):
+        return {
+            key: _exclude_db_ids(value, exclude_keys)
+            for key, value in data.items()
+            if key not in exclude_keys
+        }
+    elif isinstance(data, list):
+        return [_exclude_db_ids(item, exclude_keys) for item in data]
+    else:
+        return data
+
+
 def compare_snapshots(before_path: str, after_path: str):
-    """Compare two snapshot files and report differences."""
+    """Compare two snapshot files and report differences, excluding database IDs."""
     try:
         with open(before_path, 'r', encoding='utf-8') as f:
             before_data = json.load(f)
@@ -190,24 +293,29 @@ def compare_snapshots(before_path: str, after_path: str):
     differences_found = False
 
     for i, (before_hand, after_hand) in enumerate(zip(before_snapshot, after_snapshot)):
-        hand_id = before_hand.get('hand_text_id', f'hand_{i}')
+        hand_id = hand_label(before_hand, f"hand_{i}")
 
-        # Compare critical fields
-        critical_fields = ['total_pot', 'rake', 'players']
-        for field in critical_fields:
-            if before_hand.get(field) != after_hand.get(field):
+        # Filter out database IDs before comparison
+        before_filtered = _exclude_db_ids(before_hand)
+        after_filtered = _exclude_db_ids(after_hand)
+
+        sections = [
+            ("hand_details", before_filtered.get("hand_details", {}), after_filtered.get("hand_details", {})),
+            ("players", before_filtered.get("players", []), after_filtered.get("players", [])),
+            ("actions", before_filtered.get("actions", []), after_filtered.get("actions", [])),
+        ]
+
+        for section_name, before_section, after_section in sections:
+            if before_section != after_section:
                 differences_found = True
-                print(f"Hand {hand_id}: {field} changed")
-                print(f"   Before: {before_hand.get(field)}")
-                print(f"   After:  {after_hand.get(field)}")
-                print()
+                print(f"Hand {hand_id}: {section_name} changed")
 
     if not differences_found:
-        print("No differences found in critical fields")
+        print("No differences found in canonical snapshot sections (database IDs excluded)")
         return 0
-    else:
-        print(f"Differences found - regression detected!")
-        return 1
+
+    print("Differences found - regression detected!")
+    return 1
 
 
 def filter_files_by_game_type(files: List[str], filter_game: str = None, filter_type: str = None) -> List[str]:
@@ -280,29 +388,6 @@ def save_snapshot_file(serialized_hands: List[Dict[str, Any]], output_path: str)
 
     print(f"Snapshot data saved to: {output_path}")
 
-    # Also save a human-readable summary
-    summary_path = output_path.replace('.json', '_summary.txt')
-    with open(summary_path, 'w', encoding='utf-8') as f:
-        f.write(f"Snapshot Summary for {output_path}\n")
-        f.write("=" * 50 + "\n\n")
-        f.write(f"Total hands: {len(serialized_hands)}\n\n")
-
-        for i, hand in enumerate(serialized_hands):
-            if 'error' in hand:
-                f.write(f"Hand {i+1}: ERROR - {hand['error']}\n")
-            else:
-                f.write(f"Hand {i+1}:\n")
-                f.write(f"  Site: {hand.get('site', 'Unknown')}\n")
-                f.write(f"  Hand ID: {hand.get('hand_text_id', 'Unknown')}\n")
-                f.write(f"  Game: {hand.get('game_type', 'Unknown')}\n")
-                f.write(f"  Stakes: {hand.get('stakes', 'Unknown')}\n")
-                f.write(f"  Players: {len(hand.get('players', []))}\n")
-                f.write(f"  Total Pot: ${hand.get('total_pot', 0):.2f}\n")
-                f.write(f"  Rake: ${hand.get('rake', 0):.2f}\n")
-                f.write("\n")
-
-    print(f"Summary saved to: {summary_path}")
-
 
 def main():
     """Main entry point for the make_snapshot tool."""
@@ -351,6 +436,28 @@ Advanced Filtering:
 
   # Verify hands only (no snapshot generation)
   python tools/make_snapshot.py hands/*.txt --verify-only
+
+Legacy/Raw Hand Object Examples:
+  # Generate raw Hand objects for Worros legacy workflow
+  python tools/make_snapshot.py hand.txt --raw-hand-objects --output hand.raw.json
+  
+  # Print Hand objects to stdout for piping
+  python tools/make_snapshot.py hand.txt --print-hand-stdout | grep "Hero"
+  
+  # Generate PokerStars format for web posting
+  python tools/make_snapshot.py hand.txt --stars-format --output hand.stars.txt
+  
+  # Save as pickle for complete object preservation
+  python tools/make_snapshot.py hand.txt --raw-hand-objects --raw-format pickle
+  
+  # Both snapshot and raw formats (hybrid workflow)
+  python tools/make_snapshot.py hand.txt --both-formats
+  
+  # Compare raw Hand object files
+  python tools/make_snapshot.py --compare-raw before.raw.json after.raw.json
+  
+  # Regression testing with raw objects
+  python tools/make_snapshot.py --directory test-files/ --raw-hand-objects --regression-mode
         """
     )
 
@@ -416,19 +523,61 @@ Advanced Filtering:
         action='store_true',
         help='Regression testing mode - process directory and compare against existing snapshots'
     )
+    
+    # Legacy/Raw Hand object options
+    parser.add_argument(
+        '--raw-hand-objects',
+        action='store_true',
+        help='Save raw Hand objects for legacy Worros workflow (JSON format)'
+    )
+    
+    parser.add_argument(
+        '--raw-format',
+        choices=['json', 'pickle', 'stars'],
+        default='json',
+        help='Format for raw hand objects: json (default), pickle, or stars'
+    )
+    
+    parser.add_argument(
+        '--print-hand-stdout',
+        action='store_true',
+        help='Print Hand objects to stdout for piping/debugging'
+    )
+    
+    parser.add_argument(
+        '--stars-format',
+        action='store_true',  
+        help='Generate PokerStars-format hand history for web posting'
+    )
+    
+    parser.add_argument(
+        '--both-formats',
+        action='store_true',
+        help='Generate both snapshot JSON and raw Hand objects'
+    )
+    
+    parser.add_argument(
+        '--compare-raw',
+        nargs=2,
+        metavar=('BEFORE', 'AFTER'),
+        help='Compare two raw Hand object files'
+    )
 
     args = parser.parse_args()
 
     # Handle special modes first
     if args.compare:
         return compare_snapshots(args.compare[0], args.compare[1])
+    
+    if args.compare_raw:
+        return compare_raw_hand_objects(args.compare_raw[0], args.compare_raw[1])
 
     # Validate arguments
     if args.directory and args.files:
         parser.error("Cannot specify both --directory and individual files")
 
-    if not args.directory and not args.files and not args.compare:
-        parser.error("Must specify either --directory or individual files (unless using --compare)")
+    if not args.directory and not args.files and not args.compare and not args.compare_raw:
+        parser.error("Must specify either --directory or individual files (unless using --compare or --compare-raw)")
 
     if len(args.files or []) > 1 and args.output:
         parser.error("Cannot specify --output with multiple input files. Use --output-dir instead.")
@@ -479,24 +628,58 @@ Advanced Filtering:
             print(f"Site: {site_name}")
 
             # Parse hands
-            serialized_hands = parse_hand_history(file_path, site_name, importer)
-            total_processed += len(serialized_hands)
+            handlist, serialized_hands = parse_hand_history(file_path, site_name, importer, args)
+            total_processed += len(handlist)
+            
+            # Handle raw hand object modes
+            if args.print_hand_stdout:
+                # Already handled in parse_hand_history
+                continue
 
             if not args.verify_only:
-                # Determine output path
-                if args.output:
-                    output_path = args.output
-                elif args.output_dir:
-                    base_name = Path(file_path).stem
-                    output_path = os.path.join(args.output_dir, f"{base_name}.snapshot.json")
-                elif args.regression_mode:
-                    # In regression mode, use temp files for comparison
-                    output_path = f"{file_path}.temp.snapshot.json"
-                else:
-                    output_path = f"{file_path}.snapshot.json"
-
-                # Save snapshot
-                save_snapshot_file(serialized_hands, output_path)
+                # Handle different output modes
+                if args.raw_hand_objects or args.both_formats:
+                    # Save raw Hand objects
+                    if args.output:
+                        raw_output_path = args.output.replace('.json', f'.raw.{args.raw_format}')
+                    elif args.output_dir:
+                        base_name = Path(file_path).stem
+                        raw_output_path = os.path.join(args.output_dir, f"{base_name}.raw.{args.raw_format}")
+                    elif args.regression_mode:
+                        raw_output_path = f"{file_path}.temp.raw.{args.raw_format}"
+                    else:
+                        raw_output_path = f"{file_path}.raw.{args.raw_format}"
+                    
+                    save_raw_hand_objects(handlist, raw_output_path, args.raw_format)
+                
+                if args.stars_format or (args.raw_format == 'stars'):
+                    # Save in Stars format
+                    if args.output:
+                        stars_output_path = args.output.replace('.json', '.stars.txt')
+                    elif args.output_dir:
+                        base_name = Path(file_path).stem
+                        stars_output_path = os.path.join(args.output_dir, f"{base_name}.stars.txt")
+                    else:
+                        stars_output_path = f"{file_path}.stars.txt"
+                    
+                    save_raw_hand_objects(handlist, stars_output_path, 'stars')
+                
+                # Save standard snapshot format (unless raw-only mode)
+                if not args.raw_hand_objects or args.both_formats:
+                    # Determine output path
+                    if args.output:
+                        output_path = args.output
+                    elif args.output_dir:
+                        base_name = Path(file_path).stem
+                        output_path = os.path.join(args.output_dir, f"{base_name}.snapshot.json")
+                    elif args.regression_mode:
+                        # In regression mode, use temp files for comparison
+                        output_path = f"{file_path}.temp.snapshot.json"
+                    else:
+                        output_path = f"{file_path}.snapshot.json"
+                    
+                    # Save snapshot
+                    save_snapshot_file(serialized_hands, output_path)
 
         except Exception as e:
             print(f"Error processing {file_path}: {e}")

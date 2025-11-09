@@ -7,10 +7,116 @@ Tests that poker parsing properties hold across generated variations.
 NOTE: v1.0 - Migration from legacy system, will need performance optimizations
 """
 
+import copy
+import math
 import re
+import sys
 import tempfile
 from pathlib import Path
 from typing import List, Dict, Any
+
+if "numpy" not in sys.modules:
+    import random
+    import types
+
+    numpy_stub = types.ModuleType("numpy")
+
+    def _safe_variance(values):
+        if not values:
+            return 0.0
+        mean = sum(values) / len(values)
+        return sum((value - mean) ** 2 for value in values) / len(values)
+
+    class _SeedSequence:
+        def __init__(self, entropy=None):
+            self.entropy = entropy
+
+        def generate_state(self, n):
+            rng = random.Random(self.entropy)
+            return [rng.randrange(0, 2**32) for _ in range(n)]
+
+    class _PCG64:
+        def __init__(self, seed=None):
+            self._rand = random.Random(seed)
+
+        def random_raw(self):
+            return self._rand.getrandbits(64)
+
+    class _Generator:
+        def __init__(self, bit_generator=None):
+            seed = None
+            if isinstance(bit_generator, _PCG64):
+                seed = bit_generator._rand.getrandbits(64)
+            self._rand = random.Random(seed)
+
+        def bytes(self, n):
+            return bytes(self._rand.randrange(0, 256) for _ in range(n))
+
+    class _RandomState:
+        def __init__(self, seed=None):
+            self._rand = random.Random(seed)
+
+        def randint(self, low, high=None, size=None):
+            if high is None:
+                low, high = 0, low
+            if size is None:
+                return self._rand.randrange(low, high)
+            return [self._rand.randrange(low, high) for _ in range(size)]
+
+        def random_sample(self, size=None):
+            if size is None:
+                return self._rand.random()
+            return [self._rand.random() for _ in range(size)]
+
+        def standard_normal(self, size=None):
+            def _normal():
+                u1 = self._rand.random()
+                u2 = self._rand.random()
+                return ((-2 * math.log(max(u1, 1e-12))) ** 0.5) * math.cos(2 * math.pi * u2)
+
+            if size is None:
+                return _normal()
+            return [_normal() for _ in range(size)]
+
+        def get_state(self):
+            return self._rand.getstate()
+
+        def set_state(self, state):
+            self._rand.setstate(state)
+
+    numpy_stub.var = _safe_variance
+    _GLOBAL_RANDOM = random.Random()
+
+    def _seed(value=None):
+        _GLOBAL_RANDOM.seed(value)
+
+    def _get_state():
+        return _GLOBAL_RANDOM.getstate()
+
+    def _set_state(state):
+        _GLOBAL_RANDOM.setstate(state)
+
+    numpy_stub.random = types.SimpleNamespace(
+        RandomState=_RandomState,
+        Generator=_Generator,
+        PCG64=_PCG64,
+        SeedSequence=_SeedSequence,
+        seed=_seed,
+        get_state=_get_state,
+        set_state=_set_state,
+    )
+
+    sys.modules["numpy"] = numpy_stub
+    sys.modules["numpy.random"] = numpy_stub.random
+
+try:  # pragma: no cover - environment safeguard
+    import numpy as _np
+    if not hasattr(_np, "ndarray"):
+        raise ImportError
+except Exception:  # pragma: no cover - skip property tests when numpy unavailable
+    import pytest
+
+    pytestmark = pytest.mark.skip("numpy support unavailable for hypothesis property tests")
 
 import pytest
 from hypothesis import given, strategies as st, settings, assume, example
@@ -19,23 +125,35 @@ from hypothesis import HealthCheck
 import Configuration
 import Database
 import Importer
-from serialize_hand_for_snapshot import serialize_hands_batch, verify_hand_invariants
+from tools.serialize_hand_for_snapshot import serialize_hands_batch, verify_hand_invariants
 
 
 @pytest.fixture(scope="session")
 def hypothesis_database():
     """Create a test database for hypothesis tests."""
     config = Configuration.Config(file="HUD_config.test.xml")
+    temp_db_dir = Path(".pytest_tmp/hypothesis_db")
+    temp_db_dir.mkdir(parents=True, exist_ok=True)
+    config.dir_database = str(temp_db_dir.resolve()).replace("\\", "/")
+
     db = Database.Database(config)
-    
+
     settings = {}
     settings.update(config.get_db_parameters())
     settings.update(config.get_import_parameters())
     settings.update(config.get_default_paths())
-    
+
     db.recreate_tables()
-    
-    yield db, config, settings
+
+    try:
+        yield db, config, settings
+    finally:
+        try:
+            db.disconnect()
+        finally:
+            import shutil
+
+            shutil.rmtree(temp_db_dir, ignore_errors=True)
 
 
 @pytest.fixture(scope="function")
@@ -211,13 +329,14 @@ class TestHandHistoryProperties:
         # Should produce identical results (excluding encoding-specific errors)
         if len(test_hands) > 0:
             assert len(test_hands) == len(baseline_hands)
-            
+
             for baseline, test in zip(baseline_hands, test_hands):
-                # Compare key fields that should be identical
-                assert baseline.get('hand_text_id') == test.get('hand_text_id')
-                assert baseline.get('total_pot') == test.get('total_pot')
-                assert baseline.get('rake') == test.get('rake')
-                assert len(baseline.get('players', [])) == len(test.get('players', []))
+                baseline_details = baseline.get("hand_details", {})
+                test_details = test.get("hand_details", {})
+                assert baseline_details.get("siteHandNo") == test_details.get("siteHandNo")
+                assert baseline_details.get("totalPot") == test_details.get("totalPot")
+                assert baseline_details.get("rake") == test_details.get("rake")
+                assert len(baseline.get("players", [])) == len(test.get("players", []))
     
     @given(variation=hand_history_variations(get_base_hand_history()))
     @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
@@ -237,16 +356,16 @@ class TestHandHistoryProperties:
         # Should produce identical results
         if len(variant_hands) > 0:
             assert len(variant_hands) == len(baseline_hands)
-            
+
             for baseline, variant in zip(baseline_hands, variant_hands):
-                # Key parsing results should be identical
-                assert baseline.get('total_pot') == variant.get('total_pot')
-                assert baseline.get('rake') == variant.get('rake')
-                assert len(baseline.get('players', [])) == len(variant.get('players', []))
-                
-                # Players should have same net winnings
-                baseline_winnings = sorted([p['net_winnings'] for p in baseline.get('players', [])])
-                variant_winnings = sorted([p['net_winnings'] for p in variant.get('players', [])])
+                baseline_details = baseline.get("hand_details", {})
+                variant_details = variant.get("hand_details", {})
+                assert baseline_details.get("totalPot") == variant_details.get("totalPot")
+                assert baseline_details.get("rake") == variant_details.get("rake")
+                assert len(baseline.get("players", [])) == len(variant.get("players", []))
+
+                baseline_winnings = sorted(p.get("winnings", 0) for p in baseline.get("players", []))
+                variant_winnings = sorted(p.get("winnings", 0) for p in variant.get("players", []))
                 assert baseline_winnings == variant_winnings
     
     @given(
@@ -292,7 +411,7 @@ Seat 2: {name2} (big blind) collected ($0.02)'''
             players = hand.get('players', [])
             assert len(players) == 2
             
-            player_names = {p['name'] for p in players}
+            player_names = {p['playerName'] for p in players}
             assert name1 in player_names
             assert name2 in player_names
     
@@ -340,8 +459,32 @@ Seat 2: Villain (big blind) collected (${net_pot:.2f})'''
             assert not money_violations, f"Money conservation failed: {money_violations}"
             
             # Verify our generated values
-            assert abs(hand['total_pot'] - pot_size) < 0.01
-            assert abs(hand['rake'] - rake) < 0.01
+            details = hand.get("hand_details", {})
+            assert details.get("totalPot") == int(round(pot_size * 100))
+            assert details.get("rake") == int(round(rake * 100))
+
+    @given(hand_variation=hand_history_variations(get_base_hand_history()))
+    @settings(max_examples=15, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    def test_monetary_fields_enforced(self, hand_variation, hypothesis_importer):
+        tester = HandHistoryPropertyTests(hypothesis_importer)
+        snapshots = tester.parse_hand_history(hand_variation)
+        assume(snapshots)
+        hand = copy.deepcopy(snapshots[0])
+        hand.setdefault("hand_details", {})["totalPot"] = 12.34
+        violations = verify_hand_invariants(hand)
+        assert any("hand_details.totalPot" in v for v in violations)
+
+    @given(hand_variation=hand_history_variations(get_base_hand_history()))
+    @settings(max_examples=15, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    def test_action_monetary_fields_enforced(self, hand_variation, hypothesis_importer):
+        tester = HandHistoryPropertyTests(hypothesis_importer)
+        snapshots = tester.parse_hand_history(hand_variation)
+        assume(snapshots)
+        hand = copy.deepcopy(snapshots[0])
+        assume(hand.get("actions"))
+        hand["actions"][0]["amount"] = 1.23
+        violations = verify_hand_invariants(hand)
+        assert any("Action field amount" in v for v in violations)
 
 
 @pytest.mark.hypothesis

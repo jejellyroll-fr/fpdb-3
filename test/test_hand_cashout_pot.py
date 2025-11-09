@@ -57,15 +57,18 @@ class TestHandCashOutPot(unittest.TestCase):
     def test_addCashOutPot_basic_functionality(self):
         """Test basic cash out pot functionality."""
         self.hand.addCashOutPot("TestPlayer", "22.77")
-        
-        # Check that collection was recorded
+
+        # Check that collection was recorded (for display)
         self.assertEqual(len(self.hand.collected), 1)
         self.assertEqual(self.hand.collected[0], ["TestPlayer", "22.77"])
-        
-        # Check that collectees was updated
-        self.assertIn("TestPlayer", self.hand.collectees)
-        self.assertEqual(self.hand.collectees["TestPlayer"], Decimal("22.77"))
-        
+
+        # Check that cashouts was updated (NOT collectees!)
+        self.assertIn("TestPlayer", self.hand.cashouts)
+        self.assertEqual(self.hand.cashouts["TestPlayer"], Decimal("22.77"))
+
+        # Check that collectees was NOT updated (cashouts are separate)
+        self.assertNotIn("TestPlayer", self.hand.collectees)
+
         # CRITICAL: Check that totalcollected was NOT updated
         self.assertEqual(self.hand.totalcollected, Decimal("0"))
 
@@ -100,10 +103,19 @@ class TestHandCashOutPot(unittest.TestCase):
         
         # Cash out collection should NOT update totalcollected
         self.assertEqual(hand2.totalcollected, Decimal("0"))
-        
-        # But both should have same collected and collectees
+
+        # Both should have same collected (for display)
         self.assertEqual(hand1.collected, hand2.collected)
-        self.assertEqual(hand1.collectees, hand2.collectees)
+
+        # But collectees should be DIFFERENT
+        # hand1 (regular collection) should have collectees
+        self.assertIn("TestPlayer", hand1.collectees)
+        self.assertEqual(hand1.collectees["TestPlayer"], Decimal("22.77"))
+
+        # hand2 (cashout) should have cashouts, NOT collectees
+        self.assertNotIn("TestPlayer", hand2.collectees)
+        self.assertIn("TestPlayer", hand2.cashouts)
+        self.assertEqual(hand2.cashouts["TestPlayer"], Decimal("22.77"))
 
     def test_multiple_cash_outs(self):
         """Test multiple cash outs from same player."""
@@ -116,11 +128,14 @@ class TestHandCashOutPot(unittest.TestCase):
         
         # Check collections recorded
         self.assertEqual(len(self.hand.collected), 3)
-        
-        # Check collectees accumulated correctly
-        self.assertEqual(self.hand.collectees["TestPlayer"], Decimal("22.77"))
-        self.assertEqual(self.hand.collectees["Player2"], Decimal("5.50"))
-        
+
+        # Check cashouts accumulated correctly (NOT collectees!)
+        self.assertEqual(self.hand.cashouts["TestPlayer"], Decimal("22.77"))
+        self.assertEqual(self.hand.cashouts["Player2"], Decimal("5.50"))
+
+        # collectees should be empty for cashouts
+        self.assertEqual(len(self.hand.collectees), 0)
+
         # Total collected should still be 0
         self.assertEqual(self.hand.totalcollected, Decimal("0"))
 
@@ -142,9 +157,12 @@ class TestHandCashOutPot(unittest.TestCase):
         self.assertEqual(len(self.hand.collected), 2)
         self.assertEqual(self.hand.collected[0], ["TestPlayer", "25.00"])
         self.assertEqual(self.hand.collected[1], ["TestPlayer", "22.77"])
-        
-        # Both amounts should be in collectees (for display)
-        self.assertEqual(self.hand.collectees["TestPlayer"], Decimal("47.77"))
+
+        # Regular collection should be in collectees
+        self.assertEqual(self.hand.collectees["TestPlayer"], Decimal("25.00"))
+
+        # Cash out should be in cashouts (separate from collectees)
+        self.assertEqual(self.hand.cashouts["TestPlayer"], Decimal("22.77"))
 
 if __name__ == '__main__':
     unittest.main()

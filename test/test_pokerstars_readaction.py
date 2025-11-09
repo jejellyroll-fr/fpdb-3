@@ -49,6 +49,8 @@ class TestPokerStarsReadAction(unittest.TestCase):
         self.hand.addUncalled = Mock()
         # Allow walk_adjustments attribute assignment
         self.hand.walk_adjustments = {}
+        # Configure pot.returned as a real dict (not Mock) for uncalled bet tracking
+        self.hand.pot.returned = {}
 
     def test_readaction_empty_street(self) -> None:
         """Test readAction with empty street."""
@@ -366,11 +368,11 @@ Player2: stands pat"""
     def test_readaction_existing_walk_adjustments(self) -> None:
         """Test readAction when hand already has walk_adjustments."""
         street_text = "Uncalled bet ($1.00) returned to Player1"
-        
+
         self.hand.streets = {"PREFLOP": street_text}
         self.hand.handText = "*** PREFLOP ***\nPlayer1 collected $1.00\n*** SUMMARY ***"
         self.hand.walk_adjustments = {"ExistingPlayer": Decimal("0.50")}
-        
+
         # Mock action processing
         self.parser.re_action = Mock()
         self.parser.re_action.finditer = Mock(return_value=[])

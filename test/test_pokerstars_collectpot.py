@@ -70,7 +70,9 @@ Seat 1: Hero showed [As Ks] and won ($1.05) with a pair of Aces
         collect_match.group.side_effect = lambda x: {
             "SEAT": "1", "PNAME": "Hero", "POT": "1.05"
         }.get(x)
-        
+        # Mock start() method for finding line boundaries
+        collect_match.start.return_value = 0
+
         self.parser.re_collect_pot = Mock()
         self.parser.re_collect_pot.finditer = Mock(return_value=[collect_match])
         self.parser.re_cashed_out = Mock()
@@ -264,11 +266,13 @@ Seat 2: Villain showed [Qh Qd] and won ($1.05) with a pair of Queens
         collect_match1.group.side_effect = lambda x: {
             "SEAT": "1", "PNAME": "Hero", "POT": "1.05"
         }.get(x)
-        
+        collect_match1.start.return_value = 0
+
         collect_match2 = Mock()
         collect_match2.group.side_effect = lambda x: {
             "SEAT": "2", "PNAME": "Villain", "POT": "1.05"
         }.get(x)
+        collect_match2.start.return_value = 50
         
         self.parser.re_collect_pot = Mock()
         self.parser.re_collect_pot.finditer = Mock(return_value=[collect_match1, collect_match2])
@@ -297,12 +301,13 @@ Seat 1: Hero showed [As Ks] and won ($1.05) with a pair of Aces
         collect_match.group.side_effect = lambda x: {
             "SEAT": "1", "PNAME": "Hero", "POT": "1.05"
         }.get(x)
-        
+        collect_match.start.return_value = 0
+
         self.parser.re_collect_pot = Mock()
         self.parser.re_collect_pot.finditer = Mock(return_value=[collect_match])
         self.parser.re_cashed_out = Mock()
         self.parser.re_cashed_out.search = Mock(return_value=None)
-        
+
         # Mock specific Bovada adjustments
         bovada_adjustments = (True, True, 0.5, 1.0)
         self.parser._calculateBovadaAdjustments = Mock(return_value=bovada_adjustments)
