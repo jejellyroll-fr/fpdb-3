@@ -75,7 +75,6 @@ fpdb-3
    card_path
    iPokerSummary
    iPokerToFpdb
-   importer_cli
    interlocks
    loggingFpdb
    web

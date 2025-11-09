@@ -1779,3 +1779,7 @@ class PartyPoker(HandHistoryConverter):
         )
 
         return rendered_cards
+
+    def readOther(self, hand) -> None:
+        """Additional parsing not needed for PartyPoker."""
+        pass

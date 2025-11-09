@@ -1,0 +1,35 @@
+PokerStars Hand #198361245189: Hold'em No Limit ($0.05/$0.10 USD) - 2024/11/15 18:22:15 ET
+Table 'Humboldt IV' 6-max Seat #5 is the button
+Seat 2: Player2 ($10.17 in chips) is sitting out
+Seat 1: Player1 ($10.42 in chips)
+Seat 3: Player3 ($11.44 in chips)
+Seat 4: Player4 ($10.24 in chips)
+Seat 5: Hero ($10.79 in chips)
+Seat 6: Player6 ($13.28 in chips)
+Player4: posts small blind $0.05
+Hero: posts big blind $0.10
+*** HOLE CARDS ***
+Dealt to Hero [Ad As]
+Player6: folds
+Player1: raises $0.20 to $0.30
+Player3: folds
+Player4: folds
+Hero: raises $0.85 to $1.15
+Player1: raises $9.27 to $10.42 and is all-in
+Hero: calls $9.27
+*** FLOP *** [7c 3s Ac]
+*** TURN *** [7c 3s Ac] [Jh]
+*** RIVER *** [7c 3s Ac Jh] [Jd]
+*** SHOW DOWN ***
+Hero: shows [Ad As] (a full house, Aces full of Jacks)
+Player1: shows [8d 8s] (two pair, Jacks and Eights)
+Hero cashed out the hand for $15.82 | Cash Out Fee $0.32
+*** SUMMARY ***
+Total pot $20.89 | Rake $1
+Board [7c 3s Ac Jh Jd]
+Seat 2: Player2
+Seat 1: Player1 showed [8d 8s] and lost with two pair, Jacks and Eights
+Seat 3: Player3 (button) folded before Flop (didn't bet)
+Seat 4: Player4 (small blind) folded before Flop
+Seat 5: Hero (big blind) showed [Ad As] and won ($19.89) with a full house, Aces full of Jacks (pot not awarded as player cashed out)
+Seat 6: Player6 folded before Flop (didn't bet)
