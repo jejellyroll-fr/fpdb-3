@@ -640,6 +640,3 @@ Borr_09 calls [68]
 Borr_09 shows [ Jh, Jd ]
 bigboppa74 shows [ 6c, 8d ]
 Borr_09 collected [ 404 ]
-
-
-

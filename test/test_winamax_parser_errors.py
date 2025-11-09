@@ -1,4 +1,5 @@
 """Test module for Winamax parser error handling."""
+
 from __future__ import annotations
 
 import sys

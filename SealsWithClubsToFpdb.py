@@ -82,10 +82,12 @@ class SealsWithClubs(HandHistoryConverter):
     re_identify = re.compile(r"SwCPoker\sHand\s")
     re_SplitHands = re.compile("(?:\\s?\n){2,}")
     re_ButtonName = re.compile(
-        r"""^(?P<BUTTONNAME>.*) has the dealer button""", re.MULTILINE,
+        r"""^(?P<BUTTONNAME>.*) has the dealer button""",
+        re.MULTILINE,
     )
     re_ButtonPos = re.compile(
-        r"""Seat\s+\#(?P<BUTTON>\d+)\sis\sthe\sbutton""", re.MULTILINE,
+        r"""Seat\s+\#(?P<BUTTON>\d+)\sis\sthe\sbutton""",
+        re.MULTILINE,
     )
     re_Board = re.compile(r"\[(?P<CARDS>.+)\]")
     re_DateTime = re.compile(
@@ -96,13 +98,16 @@ class SealsWithClubs(HandHistoryConverter):
     # These used to be compiled per player, but regression tests say
     # we don't have to, and it makes life faster.
     re_PostSB = re.compile(
-        r"^{PLYR}: posts small blind (?P<SB>[.0-9]+)".format(**substitutions), re.MULTILINE,
+        r"^{PLYR}: posts small blind (?P<SB>[.0-9]+)".format(**substitutions),
+        re.MULTILINE,
     )
     re_PostBB = re.compile(
-        r"^{PLYR}: posts big blind (?P<BB>[.0-9]+)".format(**substitutions), re.MULTILINE,
+        r"^{PLYR}: posts big blind (?P<BB>[.0-9]+)".format(**substitutions),
+        re.MULTILINE,
     )
     re_Antes = re.compile(
-        r"^{PLYR}: posts the ante (?P<ANTE>[.0-9]+)".format(**substitutions), re.MULTILINE,
+        r"^{PLYR}: posts the ante (?P<ANTE>[.0-9]+)".format(**substitutions),
+        re.MULTILINE,
     )
     re_PostBoth = re.compile(
         r"^{PLYR}: posts small \& big blind (?P<SBBB>[.0-9]+)".format(**substitutions),
@@ -113,7 +118,9 @@ class SealsWithClubs(HandHistoryConverter):
         re.MULTILINE,
     )
     re_Action = re.compile(
-        r"""^{PLYR}:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)(?:\s(?P<BET>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?(?:\sto\s(?P<POT>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?(?:\sand\sis\sall-in)?.*?$""".format(**substitutions),
+        r"""^{PLYR}:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sdiscards|\sstands\spat)(?:\s(?P<BET>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?(?:\sto\s(?P<POT>\d{{1,3}}(,\d{{3}})*(\.\d+)?))?(?:\sand\sis\sall-in)?.*?$""".format(
+            **substitutions
+        ),
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -122,7 +129,9 @@ class SealsWithClubs(HandHistoryConverter):
         re.MULTILINE,
     )
     re_CollectPot = re.compile(
-        r"^Seat (?P<SEAT>[0-9]+): {PLYR} (({BRKTS}(((((?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \((?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(\s\sand\s(won\s\([.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$)|collected\s\((?P<POT2>[.\d]+)\)))|folded ((on the (Flop|Turn|River))|before Flop)))|folded before Flop \(didn't bet\))".format(**substitutions),
+        r"^Seat (?P<SEAT>[0-9]+): {PLYR} (({BRKTS}(((((?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \((?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(\s\sand\s(won\s\([.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$)|collected\s\((?P<POT2>[.\d]+)\)))|folded ((on the (Flop|Turn|River))|before Flop)))|folded before Flop \(didn't bet\))".format(
+            **substitutions
+        ),
         re.MULTILINE,
     )
     re_Cancelled = re.compile(r"Hand\scancelled", re.MULTILINE)
@@ -179,7 +188,9 @@ class SealsWithClubs(HandHistoryConverter):
             # Compile a regular expression to match the cards shown by the player
             # The regular expression is of the form "^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$"
             self.re_ShownCards = re.compile(
-                r"^Seat (?P<SEAT>[0-9]+): {PLYR} {BRKTS}(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \({CUR}(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\({CUR}[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$".format(**subst),
+                r"^Seat (?P<SEAT>[0-9]+): {PLYR} {BRKTS}(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \({CUR}(?P<POT>[,\.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\({CUR}[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$".format(
+                    **subst
+                ),
                 re.MULTILINE,
             )
 
@@ -284,10 +295,13 @@ class SealsWithClubs(HandHistoryConverter):
                         a.group("S"),
                     )
                 hand.startTime = datetime.datetime.strptime(
-                    datetimestr, "%Y-%m-%d %H:%M:%S",
+                    datetimestr,
+                    "%Y-%m-%d %H:%M:%S",
                 )
                 hand.startTime = HandHistoryConverter.changeTimezone(
-                    hand.startTime, "ET", "UTC",
+                    hand.startTime,
+                    "ET",
+                    "UTC",
                 )
             if key == "HID":
                 hand.handid = info[key]

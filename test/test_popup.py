@@ -21,10 +21,18 @@ class TestPopupBase(unittest.TestCase):
         """Set up mocks for all popup test classes."""
         cls._original_modules = {}
         modules_to_mock = [
-            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets",
-            "AppKit", "Stats", "loggingFpdb", "ModernPopup", "past", "past.utils"
+            "PyQt5",
+            "PyQt5.QtCore",
+            "PyQt5.QtGui",
+            "PyQt5.QtWidgets",
+            "AppKit",
+            "Stats",
+            "loggingFpdb",
+            "ModernPopup",
+            "past",
+            "past.utils",
         ]
-        
+
         for module_name in modules_to_mock:
             if module_name in sys.modules:
                 cls._original_modules[module_name] = sys.modules[module_name]
@@ -58,10 +66,18 @@ class TestPopupBase(unittest.TestCase):
     def tearDownClass(cls):
         """Clean up mocks after all popup test classes."""
         modules_to_mock = [
-            "PyQt5", "PyQt5.QtCore", "PyQt5.QtGui", "PyQt5.QtWidgets", 
-            "AppKit", "Stats", "loggingFpdb", "ModernPopup", "past", "past.utils"
+            "PyQt5",
+            "PyQt5.QtCore",
+            "PyQt5.QtGui",
+            "PyQt5.QtWidgets",
+            "AppKit",
+            "Stats",
+            "loggingFpdb",
+            "ModernPopup",
+            "past",
+            "past.utils",
         ]
-        
+
         for module_name in modules_to_mock:
             if module_name in cls._original_modules:
                 sys.modules[module_name] = cls._original_modules[module_name]
@@ -116,7 +132,7 @@ class TestPopupBase(unittest.TestCase):
 
         popup = Mock()
         popup.parent_popup = mock_parent_popup
-        
+
         assert popup.parent_popup == mock_parent_popup
 
     def test_popup_mac_initialization(self) -> None:
@@ -125,31 +141,33 @@ class TestPopupBase(unittest.TestCase):
         popup = Mock()
         popup.config = Mock()
         popup.config.os_family = "Mac"
-        
+
         # Just verify the attribute can be set
         assert popup.config.os_family == "Mac"
 
     def test_mouse_press_event(self) -> None:
         """Test mouse press event handling."""
+
         # Create a simple object with the method we need to test
         class TestPopup:
             def __init__(self):
                 self.destroy_pop = Mock()
-            
+
             def mousePressEvent(self, event):
                 self.destroy_pop()
-        
+
         popup = TestPopup()
         popup.mousePressEvent(Mock())
         popup.destroy_pop.assert_called_once()
 
     def test_create_method(self) -> None:
         """Test create method increments popup count."""
+
         class TestPopup:
             def __init__(self, win, parent_popup=None):
                 self.win = win
                 self.parent_popup = parent_popup
-            
+
             def create(self):
                 if self.parent_popup:
                     self.parent_popup.submenu_count += 1
@@ -170,7 +188,7 @@ class TestPopupBase(unittest.TestCase):
             def __init__(self, win, parent_popup=None):
                 self.win = win
                 self.parent_popup = parent_popup
-            
+
             def create(self):
                 if self.parent_popup:
                     self.parent_popup.submenu_count += 1
@@ -184,12 +202,13 @@ class TestPopupBase(unittest.TestCase):
 
     def test_destroy_pop_method(self) -> None:
         """Test destroy_pop method decrements popup count."""
+
         class TestPopup:
             def __init__(self, win, parent_popup=None):
                 self.win = win
                 self.parent_popup = parent_popup
                 self.destroy = Mock()
-            
+
             def destroy_pop(self):
                 if self.parent_popup:
                     self.parent_popup.submenu_count -= 1
@@ -214,7 +233,7 @@ class TestPopupBase(unittest.TestCase):
                 self.win = win
                 self.parent_popup = parent_popup
                 self.destroy = Mock()
-            
+
             def destroy_pop(self):
                 if self.parent_popup:
                     self.parent_popup.submenu_count -= 1
@@ -269,7 +288,7 @@ class TestDefaultPopup(unittest.TestCase):
 
         # Just verify create can be called
         popup.create()
-        
+
         # Verify it was called
         popup.create.assert_called()
 
@@ -281,7 +300,7 @@ class TestDefaultPopup(unittest.TestCase):
         popup.pop = self.mock_pop
         popup.create = Mock()
         popup.destroy_pop = Mock()
-        
+
         popup.create()
         popup.create.assert_called_once()
 
@@ -307,7 +326,7 @@ class TestDefaultPopup(unittest.TestCase):
 
         # Just verify create can be called
         popup.create()
-        
+
         # Should include both valid and NA stats - simplified check
         popup.create.assert_called_once()
 
@@ -347,7 +366,7 @@ class TestSubmenuPopup(unittest.TestCase):
 
         # Just verify create can be called
         popup.create()
-        
+
         # Should create grid layout and add stats - simplified check
         popup.create.assert_called_once()
 
@@ -359,7 +378,7 @@ class TestSubmenuPopup(unittest.TestCase):
         popup.pop = self.mock_pop
         popup.create = Mock()
         popup.destroy_pop = Mock()
-        
+
         popup.create()
         popup.create.assert_called_once()
 
@@ -404,7 +423,7 @@ class TestMulticolPopup(unittest.TestCase):
 
         # Just verify create can be called
         popup.create()
-        
+
         # Should create grid layout and organize stats in columns - simplified check
         popup.create.assert_called_once()
 
@@ -568,7 +587,12 @@ class TestPopupIntegration(unittest.TestCase):
 
             # 1. Create popup
             popup = default(
-                seat=2, stat_dict=stat_dict, win=mock_win, pop=mock_pop, hand_instance=Mock(), config=mock_config,
+                seat=2,
+                stat_dict=stat_dict,
+                win=mock_win,
+                pop=mock_pop,
+                hand_instance=Mock(),
+                config=mock_config,
             )
 
             # Verify popup was created and shown
@@ -615,11 +639,11 @@ class TestPopupIntegration(unittest.TestCase):
         popup = Mock()
         popup.mousePressEvent = Mock()
         popup.create = Mock()
-        
+
         # Test creation
         popup.create()
         popup.create.assert_called_once()
-        
+
         # Test mouse event
         popup.mousePressEvent(Mock())
         popup.mousePressEvent.assert_called_once()

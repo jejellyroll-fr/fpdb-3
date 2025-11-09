@@ -127,7 +127,6 @@ class MockHand:
         """Add collected pot."""
 
 
-
 class ComprehensiveBovadaTest(unittest.TestCase):
     """Exhaustive tests of the Bovada parser with all archive files."""
 
@@ -149,7 +148,6 @@ class ComprehensiveBovadaTest(unittest.TestCase):
                 for file in files:
                     if file.endswith(".txt"):
                         cls.bovada_files.append(Path(root) / file)
-
 
     def setUp(self) -> None:
         """Configuration for each test."""
@@ -229,10 +227,7 @@ class ComprehensiveBovadaTest(unittest.TestCase):
         """Validates hand actions."""
         errors = []
         if not filename.endswith(".partial.txt"):
-            total_actions = sum(
-                len([a for a in hand.actions if a[0] == street])
-                for street in hand.actionStreets
-            )
+            total_actions = sum(len([a for a in hand.actions if a[0] == street]) for street in hand.actionStreets)
             if total_actions == 0:
                 errors.append("No actions found")
         return errors
@@ -247,9 +242,11 @@ class ComprehensiveBovadaTest(unittest.TestCase):
     def _validate_streets(self, hand: Hand, filename: str) -> list[str]:
         """Validates street-specific data."""
         errors = []
-        if (hand.gametype and
-            hand.gametype.get("base") == "hold" and
-            any(hand.streets.get(street) for street in ["FLOP", "TURN", "RIVER"])):
+        if (
+            hand.gametype
+            and hand.gametype.get("base") == "hold"
+            and any(hand.streets.get(street) for street in ["FLOP", "TURN", "RIVER"])
+        ):
             post_flop_actions = [a for a in hand.actions if a[0] in ["FLOP", "TURN", "RIVER"]]
             if not post_flop_actions and not filename.endswith(".partial.txt"):
                 errors.append("Post-flop streets present but no post-flop actions")
@@ -451,8 +448,7 @@ class ComprehensiveBovadaTest(unittest.TestCase):
     def test_data_consistency(self) -> None:
         """Test the consistency of extracted data."""
         test_file = next(
-            (f for f in self.bovada_files
-                if "NLHE-6max-USD - $0.25-$0.50 - 201804.bodog.eu.txt" in str(f)),
+            (f for f in self.bovada_files if "NLHE-6max-USD - $0.25-$0.50 - 201804.bodog.eu.txt" in str(f)),
             None,
         )
 
@@ -497,7 +493,6 @@ class ComprehensiveBovadaTest(unittest.TestCase):
         # Check that we have the expected raise
         raise_actions = [a for a in hand.actions if a[2] == "raise"]
         assert raise_actions
-
 
 
 if __name__ == "__main__":

@@ -9,12 +9,12 @@ Seat 6: Player6 (3.20€)
 Seat 7: Player7 (6.61€)
 Seat 8: Player8 (3.37€)
 Seat 9: Player9 (4.76€)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 Player3 posts small blind 0.02€
 Player4 posts big blind 0.05€
 Hero posts big blind 0.05€ out of position
 Dealt to Hero [Ks Th]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player5 folds
 Player6 folds
 Player7 folds
@@ -55,5 +55,3 @@ Seat 6: Player6 folded on the pre-flop
 Seat 7: Player7 folded on the pre-flop
 Seat 8: Player8 showed [7d 8d] and lost with Two pairs : 9 and 7
 Seat 9: Player9 folded on the pre-flop
-
-

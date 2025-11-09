@@ -1,7 +1,7 @@
 PokerStars Tournament #515491291, Mixed PLH/PLO
 Buy-In: $2.00/$0.20 USD
 73 players
-Total Prize Pool: $146.00 USD 
+Total Prize Pool: $146.00 USD
 Tournament started 2012/02/18 23:10:00 WET [2012/02/18 18:10:00 ET]
 
   1: djibzibi (Bulgaria), still playing
@@ -43,41 +43,39 @@ Tournament started 2012/02/18 23:10:00 WET [2012/02/18 18:10:00 ET]
   37: Mobydick8555 (Spain), still playing
   38: Dthrast (Greece), still playing
   39: larou503 (Canada), still playing
-  40: caribou2020 (United Kingdom), 
-  41: acdd (Netherlands), 
-  42: Kitchenmen (Germany), 
-  43: 18bremen99 (Germany), 
-  44: terryc6475 (United Kingdom), 
-  45: TheLastAct (Canada), 
-  46: hansaz777 (Norway), 
-  47: zizi7501 (Moldova), 
-  48: Claymore66 (United Kingdom), 
-  49: ZKgracz (Poland), 
-  50: lsds39123 (Canada), 
-  51: alex1987800 (Russia), 
-  52: miax7 (Spain), 
-  53: crantock (United Kingdom), 
-  54: Maillard (Canada), 
-  55: fox012345 (Norway), 
-  56: ffclouds (United Kingdom), 
-  57: jussi65 (Sweden), 
-  58: blaehingbull (Germany), 
-  59: pajaro46 (Ecuador), 
-  60: vrana68 (Czech Republic), 
-  61: mamacorita (Uruguay), 
-  62: quadstar1 (New Zealand), 
-  63: orion pagan (New Zealand), 
-  64: felek8228 (Poland), 
-  65: MetallicA307 (Spain), 
-  66: voyager2606 (Belgium), 
-  67: RShevel (Russia), 
-  68: korobok1983 (Russia), 
-  69: T@mal'er (Russia), 
-  70: MarsManiac (Germany), 
-  71: dasio313 (Spain), 
-  72: Veter013 (Russia), 
-  73: dimas1107 (Russia), 
+  40: caribou2020 (United Kingdom),
+  41: acdd (Netherlands),
+  42: Kitchenmen (Germany),
+  43: 18bremen99 (Germany),
+  44: terryc6475 (United Kingdom),
+  45: TheLastAct (Canada),
+  46: hansaz777 (Norway),
+  47: zizi7501 (Moldova),
+  48: Claymore66 (United Kingdom),
+  49: ZKgracz (Poland),
+  50: lsds39123 (Canada),
+  51: alex1987800 (Russia),
+  52: miax7 (Spain),
+  53: crantock (United Kingdom),
+  54: Maillard (Canada),
+  55: fox012345 (Norway),
+  56: ffclouds (United Kingdom),
+  57: jussi65 (Sweden),
+  58: blaehingbull (Germany),
+  59: pajaro46 (Ecuador),
+  60: vrana68 (Czech Republic),
+  61: mamacorita (Uruguay),
+  62: quadstar1 (New Zealand),
+  63: orion pagan (New Zealand),
+  64: felek8228 (Poland),
+  65: MetallicA307 (Spain),
+  66: voyager2606 (Belgium),
+  67: RShevel (Russia),
+  68: korobok1983 (Russia),
+  69: T@mal'er (Russia),
+  70: MarsManiac (Germany),
+  71: dasio313 (Spain),
+  72: Veter013 (Russia),
+  73: dimas1107 (Russia),
 
 You finished in 40th place (eliminated at hand #75828331861).
-
-

@@ -18,15 +18,15 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 In the "official" distribution you can find the license in agpl-3.0.txt.
 */
 
-/* 
+/*
 To compile this function, install mingw then DOS>fpdb_folder_check.c -o fpdb_folder_check.exe
 */
 
-/*	
- Function needed because py2exe python apps crashes horribly if the application is 
+/*
+ Function needed because py2exe python apps crashes horribly if the application is
   in a non-us-ascii folder.  (this is actually a windows python problem with "import")
 
-  this function is not coded to cleanly handle codepage/locale/UTF.  
+  this function is not coded to cleanly handle codepage/locale/UTF.
   The value of argv is not necessarily exactly what was passed....instead.....
  We will make two checks instead (yes, it is a hack):
  1  a char-by-char examination of the passed parameter to ensure 32 >= char <= 127
@@ -34,7 +34,7 @@ To compile this function, install mingw then DOS>fpdb_folder_check.c -o fpdb_fol
     with accented chars but will obviously NOT fail if an accented and non-accented
     folder actually exists.
 
- In summary, this function is a hack and not 100% reliable, but hopefully will be 
+ In summary, this function is a hack and not 100% reliable, but hopefully will be
   good enough to identify problems for most first-time users.
 */
 
@@ -67,7 +67,7 @@ for(i=0; c[i]; i++) {
 /* this loop finishes when c[i]<>true which is end of string (null \0) */
     if (debugmode) {printf(" %d ", c[i]);}
     if ((c[i] < 32)||(c[i] > 127)) {
-        if (debugmode) {printf ("\nInvalid ASCII");} 
+        if (debugmode) {printf ("\nInvalid ASCII");}
         return 1;
         }
     if (i > MAX_PATH-1) {

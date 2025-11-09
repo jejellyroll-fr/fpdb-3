@@ -149,7 +149,9 @@ class TestStatsBase:
         assert result[1] == expected_display
         assert result[4] == expected_fraction
 
-    def _assert_stat_result_with_description(self, result, expected_display: str, expected_fraction: str, expected_description: str) -> None:
+    def _assert_stat_result_with_description(
+        self, result, expected_display: str, expected_fraction: str, expected_description: str
+    ) -> None:
         """Helper to assert stat result with description."""
         self._assert_stat_result_basic(result, expected_display, expected_fraction)
         assert result[5] == expected_description
@@ -386,8 +388,8 @@ class TestStatsPerformanceForHUD(TestStatsBase):
 
     def test_stats_performance_multiple_stats(self) -> None:
         """Test performance of multiple stat calculations."""
-        import time
         import itertools
+        import time
 
         stat_dict = self._create_comprehensive_normal_player_stat_dict()
 
@@ -405,8 +407,8 @@ class TestStatsPerformanceForHUD(TestStatsBase):
 
     def test_stats_performance_no_data(self) -> None:
         """Test performance with no data stats."""
-        import time
         import itertools
+        import time
 
         stat_dict = self._create_comprehensive_no_data_stat_dict()
 

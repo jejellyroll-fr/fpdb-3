@@ -20,7 +20,7 @@ Write-Output "Detected OS: $OS"
 # define path to base
 $BASE_PATH = Get-Location
 
-# path to base 
+# path to base
 $BASE_PATH2 = $BASE_PATH
 
 Write-Output "Adjusted BASE_PATH2 for OS: $BASE_PATH2"

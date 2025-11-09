@@ -29,19 +29,19 @@ rem
 :: Automatically check & get admin rights
 :::::::::::::::::::::::::::::::::::::::::
 @echo off
-CLS 
+CLS
 ECHO.
 ECHO =============================
 ECHO Running Admin shell
 ECHO =============================
 
-:checkPrivileges 
+:checkPrivileges
 NET FILE 1>NUL 2>NUL
-if '%errorlevel%' == '0' ( goto gotPrivileges ) else ( goto getPrivileges ) 
+if '%errorlevel%' == '0' ( goto gotPrivileges ) else ( goto getPrivileges )
 
-:getPrivileges 
-if '%1'=='ELEV' (shift & goto gotPrivileges)  
-ECHO. 
+:getPrivileges
+if '%1'=='ELEV' (shift & goto gotPrivileges)
+ECHO.
 ECHO **************************************
 ECHO Invoking UAC for Privilege Escalation
 ECHO.
@@ -54,12 +54,12 @@ ECHO **************************************
 setlocal DisableDelayedExpansion
 set "batchPath=%~0"
 setlocal EnableDelayedExpansion
-ECHO Set UAC = CreateObject^("Shell.Application"^) > "%temp%\OEgetPrivileges.vbs" 
-ECHO UAC.ShellExecute "!batchPath!", "ELEV", "", "runas", 1 >> "%temp%\OEgetPrivileges.vbs" 
-"%temp%\OEgetPrivileges.vbs" 
-exit /B 
+ECHO Set UAC = CreateObject^("Shell.Application"^) > "%temp%\OEgetPrivileges.vbs"
+ECHO UAC.ShellExecute "!batchPath!", "ELEV", "", "runas", 1 >> "%temp%\OEgetPrivileges.vbs"
+"%temp%\OEgetPrivileges.vbs"
+exit /B
 
-:gotPrivileges 
+:gotPrivileges
 ::::::::::::::::::::::::::::
 :START
 ::::::::::::::::::::::::::::
@@ -114,11 +114,10 @@ echo. Folder %cd% is invalid for fpdb
 echo.
 echo. TO FIX
 echo. - Move the fpdb folder to a path which is 100%% American-English characters
-echo. - for example : 
+echo. - for example :
 echo. c:\fpdb or c:\mylocalprogrammes\fpdb would be valid for fpdb.
 pause
 
 :end
 
 cd ..
-

@@ -1,5 +1,5 @@
 Winamax Poker - CashGame - HandId: #9250793-444-1478990340 - Razz fixed limit (5€/25€/50€) - 2016/11/12 22:39:00 UTC
-Table: 'Pampelune' 6-max (real money) 
+Table: 'Pampelune' 6-max (real money)
 Seat 1: Hero (1546.72€)
 Seat 4: Player0 (664.56€)
 *** ANTE/BLINDS ***

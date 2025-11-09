@@ -40,15 +40,18 @@ class Winamax(HandHistoryConverter):
 
     This class provides methods to extract game, player, and hand information from Winamax hand history text. It supports parsing various game types, extracting player actions, blinds, community cards, and tournament details, and converting them into a standardized format for further processing.
     """
+
     EXPECTED_SUMMARY_PARTS = 2
     MIN_PLAYERS = 2
     STUD_HOLE_CARDS_COUNT = 3
+
     def Trace(self) -> Callable[..., Any]:
         """Decorator that logs function entry and exit for debugging purposes.
 
         Returns:
             A wrapped function that logs entry/exit and preserves original behavior.
         """
+
         def my_f(*args: Any, **kwds: Any) -> Any:
             log.debug("entering %s", self.__class__.__name__)
             result = self(*args, **kwds)
@@ -438,13 +441,13 @@ class Winamax(HandHistoryConverter):
 
         """
         handlers = {
-            "DATETIME": lambda h, v, i: self._parse_datetime(h, v), # noqa: ARG005
-            "HID1": lambda h, v, i: self._parse_hand_id(h, i), # noqa: ARG005
-            "TOURNO": lambda h, v, i: setattr(h, "tourNo", v), # noqa: ARG005
+            "DATETIME": lambda h, v, i: self._parse_datetime(h, v),  # noqa: ARG005
+            "HID1": lambda h, v, i: self._parse_hand_id(h, i),  # noqa: ARG005
+            "TOURNO": lambda h, v, i: setattr(h, "tourNo", v),  # noqa: ARG005
             "TABLE": lambda h, v, i: self._parse_table_info(h, v, i),
-            "MAXPLAYER": lambda h, v, i: setattr(h, "maxseats", int(v)) if v is not None else None, # noqa: ARG005
+            "MAXPLAYER": lambda h, v, i: setattr(h, "maxseats", int(v)) if v is not None else None,  # noqa: ARG005
             "BUYIN": lambda h, v, i: self._parse_buyin_info(h, v, i) if i.get("TOURNO") is not None else None,
-            "LEVEL": lambda h, v, i: setattr(h, "level", v), # noqa: ARG005
+            "LEVEL": lambda h, v, i: setattr(h, "level", v),  # noqa: ARG005
         }
         return handlers.get(key)
 
@@ -470,8 +473,7 @@ class Winamax(HandHistoryConverter):
         """
         if a := self.re_date_time.search(value):
             datetimestr = (
-                f"{a.group('Y')}/{a.group('M')}/{a.group('D')}"
-                f" {a.group('H')}:{a.group('MIN')}:{a.group('S')}"
+                f"{a.group('Y')}/{a.group('M')}/{a.group('D')}" f" {a.group('H')}:{a.group('MIN')}:{a.group('S')}"
             )
         else:
             datetimestr = "2010/Jan/01 01:01:01"
@@ -593,9 +595,7 @@ class Winamax(HandHistoryConverter):
             hand.buyinCurrency = self._determine_buyin_currency(value, info)
 
             info["BIAMT"] = (
-                info["BIAMT"].replace("$", "").replace("€", "").replace("FPP", "")
-                if info["BIAMT"] is not None
-                else 0
+                info["BIAMT"].replace("$", "").replace("€", "").replace("FPP", "") if info["BIAMT"] is not None else 0
             )
 
             if hand.buyinCurrency != "WIFP":
@@ -742,7 +742,6 @@ class Winamax(HandHistoryConverter):
         else:
             log.info("read Button: not found")
 
-
     def readCommunityCards(
         self,
         hand: "Hand",
@@ -791,13 +790,16 @@ class Winamax(HandHistoryConverter):
         for a in self.re_post_dead.finditer(hand.handText):
             log.debug(
                 "Found dead blind: addBlind(%s, 'secondsb', %s)",
-                a.group("PNAME"), a.group("DEAD"),
+                a.group("PNAME"),
+                a.group("DEAD"),
             )
             hand.addBlind(a.group("PNAME"), "secondsb", a.group("DEAD"))
         for a in self.re_post_second_sb.finditer(hand.handText):
             log.debug(
                 "Found dead blind: addBlind(%s, 'secondsb/both', %s, %s)",
-                a.group("PNAME"), a.group("SB"), hand.sb,
+                a.group("PNAME"),
+                a.group("SB"),
+                hand.sb,
             )
             if Decimal(a.group("SB")) > Decimal(hand.sb):
                 hand.addBlind(a.group("PNAME"), "both", a.group("SB"))
@@ -902,7 +904,11 @@ class Winamax(HandHistoryConverter):
             None
         """
         log.debug(
-            "DEBUG: %s addHoleCards(%s, %s, %s)", hand.handid, street, hand.hero, newcards,
+            "DEBUG: %s addHoleCards(%s, %s, %s)",
+            hand.handid,
+            street,
+            hand.hero,
+            newcards,
         )
         hand.addHoleCards(
             street,
@@ -1000,7 +1006,12 @@ class Winamax(HandHistoryConverter):
         )
 
     def _add_regular_hole_cards(
-        self, hand: "Hand", street: str, player: str, newcards: list[str], oldcards: list[str],
+        self,
+        hand: "Hand",
+        street: str,
+        player: str,
+        newcards: list[str],
+        oldcards: list[str],
     ) -> None:
         """Adds a player's regular hole cards for a given street to the hand object.
 
@@ -1055,7 +1066,12 @@ class Winamax(HandHistoryConverter):
             log.debug("committed %s", hand.pot.committed)
 
     def _process_action(
-        self, hand: "Hand", street: str, action_type: str, player_name: str, action: Match[str],
+        self,
+        hand: "Hand",
+        street: str,
+        action_type: str,
+        player_name: str,
+        action: Match[str],
     ) -> None:
         """Processes a single player action for a given street.
 
@@ -1113,9 +1129,7 @@ class Winamax(HandHistoryConverter):
         Returns:
             None
         """
-        if bringin := [
-            act[2] for act in hand.actions[street] if act[0] == player_name and act[1] == "bringin"
-        ]:
+        if bringin := [act[2] for act in hand.actions[street] if act[0] == player_name and act[1] == "bringin"]:
             betto = str(Decimal(action.group("BETTO")) + bringin[0])
         else:
             betto = action.group("BETTO")

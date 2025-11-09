@@ -1,5 +1,5 @@
-Game #12036770: Omaha (€0,10/€0,25) - 20:22:42 23.8.2012 - %6 
-Table 'Reunion 1 - Pot Limit' 9-max Seat #0 is the button 
+Game #12036770: Omaha (€0,10/€0,25) - 20:22:42 23.8.2012 - %6
+Table 'Reunion 1 - Pot Limit' 9-max Seat #0 is the button
 Seat 2: Player0 (€25,11 in chips)
 Seat 3: Player1 (€18,67 in chips)
 Seat 4: Hero (€41,28 in chips)
@@ -38,9 +38,9 @@ Player6: folds
 Uncalled bet (€0,82) returned to Player0
 Player0 collected (€0,82) from pot
 Player0: mucked
-*** SUMMARY *** 
-Total pot €0 | Rake €0,06 
-Board [4d2h8sQsTs] 
+*** SUMMARY ***
+Total pot €0 | Rake €0,06
+Board [4d2h8sQsTs]
 Seat 2: Player0 (small blind) collected (€1,04) from pot
 Seat 3: Player1 (big blind) folded
 Seat 4: Hero  folded

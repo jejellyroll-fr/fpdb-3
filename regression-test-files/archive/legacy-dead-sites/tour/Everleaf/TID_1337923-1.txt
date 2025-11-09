@@ -43,7 +43,7 @@ Player3: yes
 Player2 folds
 Player3 checks
 ** Dealing Flop ** [ Ks, 8s, 6c ]
-Player8: i have a buddy from there 
+Player8: i have a buddy from there
 Player3: bets [ 5,500 Chips]
 Player4 folds
 Player3: last name
@@ -239,7 +239,7 @@ Player4 folds
 Player6 calls [ 600 Chips]
 Player7 checks
 ** Dealing Flop ** [ 2h, Jh, 9d ]
-Player8: i take it u dont know them 
+Player8: i take it u dont know them
 Player6 checks
 Player7 checks
 Player1: bets [ 4,600 Chips]
@@ -284,7 +284,7 @@ Player3 folds
 Player4 folds
 Player6 folds
 Player7 calls [ 600 Chips]
-Player8: cant remember his parents first names 
+Player8: cant remember his parents first names
 Player8 raises [ 2,400 Chips]
 Player7 folds
 Player8 does not show cards
@@ -360,7 +360,7 @@ Player1: posts big blind [ 1600 Chips]
 ** Dealing down cards **
 Dealt to Hero [ 8s, Jc ]
 Player2 folds
-Player3: big bear 
+Player3: big bear
 Player3 folds
 Player4 calls [ 1,600 Chips]
 Player6 folds
@@ -373,7 +373,7 @@ Player1 checks
 ** Dealing Flop ** [ 8d, 4s, 4h ]
 Player1 checks
 Player4: bets [ 1,600 Chips]
-Player8: grocery store in town there 
+Player8: grocery store in town there
 Player1 folds
 Player4 does not show cards
 Player4 wins 5200 chips from main pot
@@ -419,9 +419,9 @@ Player2 checks
 ** Dealing Flop ** [ 3s, 7s, Ac ]
 Player3: chief
 Player1 checks
-Player8: might be it 
+Player8: might be it
 Player2: bets [ 1,600 Chips]
-Player8: not kroger 
+Player8: not kroger
 Player3 folds
 Player4 calls [ 1,600 Chips]
 Player6 folds
@@ -1888,7 +1888,3 @@ Hero calls [ 13,612 Chips]
 Player7 shows [ Jc, Jh ] a pair of jacks
 Hero shows [ 8c, Qs ] a pair of eights
 Player7 wins 52024 chips from main pot with a pair of jacks [ Jc, Jh, Tc, 8s, 7c ]
-
-
-
-

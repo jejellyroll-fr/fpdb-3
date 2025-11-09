@@ -10,7 +10,5 @@ Total rebuys : 9
 Total addons : 3
 Prizepool : 300€
 Tournament started 2011/05/28 19:10:00 UTC
-You played 36min 15s 
+You played 36min 15s
 You finished in 9th place
-
-

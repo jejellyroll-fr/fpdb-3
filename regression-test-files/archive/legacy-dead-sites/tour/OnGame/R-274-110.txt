@@ -748,7 +748,7 @@ fatal29 calls 905 [all in]
 SYL1 folds
 RABOLIOT56 raises 2985 to 3465 [all in]
 danys calls 2340
---- 
+---
 --- Dealing flop [2c, 6s, 9s]
 --- Dealing turn [8s]
 --- Dealing river [7h]
@@ -800,7 +800,7 @@ Noosby_ folds
 x_KIKI folds
 choupy7777 folds
 ABLAKAJAKA folds
---- 
+---
 --- Dealing flop [Qs, Td, Jd]
 --- Dealing turn [4c]
 --- Dealing river [6d]
@@ -903,7 +903,7 @@ choupy7777 folds
 ABLAKAJAKA folds
 toti18 folds
 besac025 folds
---- 
+---
 --- Dealing flop [8h, Qc, 7d]
 --- Dealing turn [8c]
 --- Dealing river [3c]
@@ -1287,7 +1287,7 @@ COLONEL38 folds
 sylvain_22 folds
 besac025 folds
 kikobrasil99 calls 1600
---- 
+---
 --- Dealing flop [2c, 9s, Ts]
 --- Dealing turn [8d]
 --- Dealing river [5c]
@@ -1338,7 +1338,7 @@ sylvain_22 folds
 besac025 folds
 buga folds
 kikobrasil99 calls 3600
---- 
+---
 --- Dealing flop [Tc, 7c, 5h]
 --- Dealing turn [4c]
 --- Dealing river [Qd]
@@ -1389,7 +1389,7 @@ besac025 folds
 buga folds
 kikobrasil99 folds
 PASCALD calls 7600
---- 
+---
 --- Dealing flop [Ks, 2s, 6d]
 --- Dealing turn [4h]
 --- Dealing river [3c]
@@ -1439,7 +1439,7 @@ besac025 raises 960 to 960
 buga folds
 kikobrasil99 calls 820 [all in]
 PASCALD folds
---- 
+---
 --- Dealing flop [Ts, 3s, 4s]
 --- Dealing turn [Jh]
 --- Dealing river [Td]
@@ -1492,7 +1492,7 @@ Mungo92 folds
 nikof folds
 besac025 raises 2690 to 3650 [all in]
 PASCALD calls 765 [all in]
---- 
+---
 --- Dealing flop [Th, 8h, 6s]
 --- Dealing turn [Ts]
 --- Dealing river [2c]
@@ -2645,7 +2645,7 @@ romainb62 folds
 minou59 folds
 MagicMaestro folds
 besac025 folds
---- 
+---
 --- Dealing flop [7d, 4d, 6c]
 --- Dealing turn [Ks]
 --- Dealing river [4c]
@@ -2767,7 +2767,7 @@ benetlolo raises 875 to 1000
 nikof folds
 COLONEL38 raises 1175 to 1425 [all in]
 benetlolo calls 425
---- 
+---
 --- Dealing flop [Qh, 6d, 4c]
 --- Dealing turn [4h]
 --- Dealing river [Ac]
@@ -2937,7 +2937,7 @@ nikof folds
 toff0087 folds
 besac025 folds
 obiwan72x folds
---- 
+---
 --- Dealing flop [7s, 3h, 8s]
 --- Dealing turn [6d]
 --- Dealing river [Ad]
@@ -2996,7 +2996,7 @@ obiwan72x folds
 poluxux raises 18735 to 18985 [all in]
 romainb62 folds
 benetlolo calls 17330 [all in]
---- 
+---
 --- Dealing flop [Ac, 4d, 7d]
 --- Dealing turn [Jd]
 --- Dealing river [2s]

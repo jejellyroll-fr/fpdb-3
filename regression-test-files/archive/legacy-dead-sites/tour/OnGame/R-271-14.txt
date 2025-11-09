@@ -30,7 +30,7 @@ lasvegas84 folds
 purdey02 folds
 SADAMARDICO calls 1480 [all in]
 WARIO KASH calls 1380 [all in]
---- 
+---
 --- Dealing flop [9s, 4s, 8h]
 --- Dealing turn [5h]
 --- Dealing river [7h]
@@ -271,7 +271,7 @@ besac025 folds
 sylduc folds
 WARIO KASH folds
 Turnlast_ folds
---- 
+---
 --- Dealing flop [Tc, 6d, 4c]
 --- Dealing turn [2h]
 --- Dealing river [3h]

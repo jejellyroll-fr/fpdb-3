@@ -25,11 +25,13 @@ from loggingFpdb import get_logger
 
 log = get_logger("deck")
 
+
 class Deck:
     """Card deck for mucked card display.
 
     Loads SVG card images and provides access to card pixmaps.
     """
+
     def __init__(
         self,
         config: Any,
@@ -103,9 +105,19 @@ class Deck:
         sd = {}
         _p = self.__cardspath
         for rank, rank_str in [
-            (2, "2"), (3, "3"), (4, "4"), (5, "5"), (6, "6"),
-            (7, "7"), (8, "8"), (9, "9"), (10, "10"),
-            (11, "j"), (12, "q"), (13, "k"), (14, "a"),
+            (2, "2"),
+            (3, "3"),
+            (4, "4"),
+            (5, "5"),
+            (6, "6"),
+            (7, "7"),
+            (8, "8"),
+            (9, "9"),
+            (10, "10"),
+            (11, "j"),
+            (12, "q"),
+            (13, "k"),
+            (14, "a"),
         ]:
             sd[rank] = self.__load_svg(
                 str(Path(_p) / f"{suit_key}_{rank_str}.svg"),

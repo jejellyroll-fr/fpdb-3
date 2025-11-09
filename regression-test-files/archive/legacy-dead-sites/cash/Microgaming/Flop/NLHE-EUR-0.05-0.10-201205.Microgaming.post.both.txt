@@ -28,5 +28,3 @@ Player1 mucks:
 Player1 wins €0.44 from the main pot
 
 End of game 4416401541
-
-

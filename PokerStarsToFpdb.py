@@ -96,61 +96,47 @@ POKERSTARS_HERO_SUFFIXES = [
 
 # Regex patterns for parsing poker hand phases
 PREFLOP_PATTERN = (
-    r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>(.+(?P<FLOPET>\[\S\S\]))?"
-    r".+(?=\*\*\* (FIRST\s)?FLOP \*\*\*)|.+)"
+    r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>(.+(?P<FLOPET>\[\S\S\]))?" r".+(?=\*\*\* (FIRST\s)?FLOP \*\*\*)|.+)"
 )
 FLOP_PATTERN = (
-    r"(\*\*\* FLOP \*\*\*(?P<FLOP> (\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\]"
-    r".+(?=\*\*\* (FIRST\s)?TURN \*\*\*)|.+))?"
+    r"(\*\*\* FLOP \*\*\*(?P<FLOP> (\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\]" r".+(?=\*\*\* (FIRST\s)?TURN \*\*\*)|.+))?"
 )
-TURN_PATTERN = (
-    r"(\*\*\* TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN>\[\S\S\]"
-    r".+(?=\*\*\* (FIRST\s)?RIVER \*\*\*)|.+))?"
-)
+TURN_PATTERN = r"(\*\*\* TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN>\[\S\S\]" r".+(?=\*\*\* (FIRST\s)?RIVER \*\*\*)|.+))?"
 RIVER_PATTERN = r"(\*\*\* RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER>\[\S\S\].+))?"
 FIRST_FLOP_PATTERN = (
-    r"(\*\*\* FIRST FLOP \*\*\*(?P<FLOP1> (\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\]"
-    r".+(?=\*\*\* FIRST TURN \*\*\*)|.+))?"
+    r"(\*\*\* FIRST FLOP \*\*\*(?P<FLOP1> (\[\S\S\] )?\[(\S\S ?)?\S\S \S\S\]" r".+(?=\*\*\* FIRST TURN \*\*\*)|.+))?"
 )
 FIRST_TURN_PATTERN = (
-    r"(\*\*\* FIRST TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN1>\[\S\S\]"
-    r".+(?=\*\*\* FIRST RIVER \*\*\*)|.+))?"
+    r"(\*\*\* FIRST TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN1>\[\S\S\]" r".+(?=\*\*\* FIRST RIVER \*\*\*)|.+))?"
 )
 FIRST_RIVER_PATTERN = (
     r"(\*\*\* FIRST RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER1>\[\S\S\]"
     r".+?(?=\*\*\* SECOND (FLOP|TURN|RIVER) \*\*\*)|.+))?"
 )
 SECOND_FLOP_PATTERN = (
-    r"(\*\*\* SECOND FLOP \*\*\*(?P<FLOP2> (\[\S\S\] )?\[\S\S ?\S\S \S\S\]"
-    r".+(?=\*\*\* SECOND TURN \*\*\*)|.+))?"
+    r"(\*\*\* SECOND FLOP \*\*\*(?P<FLOP2> (\[\S\S\] )?\[\S\S ?\S\S \S\S\]" r".+(?=\*\*\* SECOND TURN \*\*\*)|.+))?"
 )
 SECOND_TURN_PATTERN = (
-    r"(\*\*\* SECOND TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN2>\[\S\S\]"
-    r".+(?=\*\*\* SECOND RIVER \*\*\*)|.+))?"
+    r"(\*\*\* SECOND TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN2>\[\S\S\]" r".+(?=\*\*\* SECOND RIVER \*\*\*)|.+))?"
 )
 SECOND_RIVER_PATTERN = r"(\*\*\* SECOND RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER2>\[\S\S\].+))?"
 
 # Run-it-twice patterns for split pots
 RIT_PREFLOP_PATTERN = r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>.+(?=\*\*\* FIRST\sFLOP \*\*\*)|.+)"
 RIT_FIRST_FLOP_PATTERN = (
-    r"(\*\*\* FIRST FLOP \*\*\* (?P<FLOP1>\[(\S\S ?)?\S\S \S\S\]"
-    r".+(?=\*\*\* SECOND\sFLOP \*\*\*)|.+))?"
+    r"(\*\*\* FIRST FLOP \*\*\* (?P<FLOP1>\[(\S\S ?)?\S\S \S\S\]" r".+(?=\*\*\* SECOND\sFLOP \*\*\*)|.+))?"
 )
 RIT_SECOND_FLOP_PATTERN = (
-    r"(\*\*\* SECOND FLOP \*\*\* (?P<FLOP2>\[(\S\S ?)?\S\S \S\S\]"
-    r".+(?=\*\*\* FIRST\sTURN \*\*\*)|.+))?"
+    r"(\*\*\* SECOND FLOP \*\*\* (?P<FLOP2>\[(\S\S ?)?\S\S \S\S\]" r".+(?=\*\*\* FIRST\sTURN \*\*\*)|.+))?"
 )
 RIT_FIRST_TURN_PATTERN = (
-    r"(\*\*\* FIRST TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN1>\[\S\S\]"
-    r".+(?=\*\*\* SECOND TURN \*\*\*)|.+))?"
+    r"(\*\*\* FIRST TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN1>\[\S\S\]" r".+(?=\*\*\* SECOND TURN \*\*\*)|.+))?"
 )
 RIT_SECOND_TURN_PATTERN = (
-    r"(\*\*\* SECOND TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN2>\[\S\S\]"
-    r".+(?=\*\*\* FIRST RIVER \*\*\*)|.+))?"
+    r"(\*\*\* SECOND TURN \*\*\* \[\S\S \S\S \S\S] (?P<TURN2>\[\S\S\]" r".+(?=\*\*\* FIRST RIVER \*\*\*)|.+))?"
 )
 RIT_FIRST_RIVER_PATTERN = (
-    r"(\*\*\* FIRST RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER1>\[\S\S\]"
-    r".+?(?=\*\*\* SECOND RIVER \*\*\*)|.+))?"
+    r"(\*\*\* FIRST RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER1>\[\S\S\]" r".+?(?=\*\*\* SECOND RIVER \*\*\*)|.+))?"
 )
 RIT_SECOND_RIVER_PATTERN = r"(\*\*\* SECOND RIVER \*\*\* \[\S\S \S\S \S\S \S\S] (?P<RIVER2>\[\S\S\].+))?"
 
@@ -171,6 +157,7 @@ class PokerStars(HandHistoryConverter):
         substitutions: Regex substitution patterns
         Lim_Blinds: Blind level mappings
     """
+
     # Class Variables
 
     sitename = "PokerStars"
@@ -452,7 +439,9 @@ class PokerStars(HandHistoryConverter):
         re.MULTILINE,
     )
     re_collect_pot3 = re.compile(
-        r"{PLYR} cashed out the hand for {CUR}(?P<POT>[,.\d]+) \| Cash Out Fee {CUR}(?P<FEE>[,.\d]+)".format(**substitutions),
+        r"{PLYR} cashed out the hand for {CUR}(?P<POT>[,.\d]+) \| Cash Out Fee {CUR}(?P<FEE>[,.\d]+)".format(
+            **substitutions
+        ),
         re.MULTILINE,
     )
     re_cashed_out = re.compile(r"cashed\sout\sthe\shand")
@@ -690,13 +679,13 @@ class PokerStars(HandHistoryConverter):
         # Clean up archive formats and handle multiple hands
         cleaned_handlist = []
         for i, hand_text in enumerate(handlist):
-            log.debug("Processing hand %d/%d", i+1, len(handlist))
-            
+            log.debug("Processing hand %d/%d", i + 1, len(handlist))
+
             # Skip empty hands
             if not hand_text.strip():
-                log.debug("Skipping empty hand %d", i+1)
+                log.debug("Skipping empty hand %d", i + 1)
                 continue
-            
+
             # Check for multiple hands in a single text block (common with partial files)
             summary_count = hand_text.count("*** SUMMARY ***")
             if summary_count > 1:
@@ -705,10 +694,10 @@ class PokerStars(HandHistoryConverter):
                 sub_hands = self._split_multiple_hands(hand_text)
                 cleaned_handlist.extend(sub_hands)
                 continue
-                
+
             # Check if this hand has the problematic archive format with stars
             if "*" * 10 in hand_text:
-                log.info("Found archive format in hand %d, cleaning...", i+1)
+                log.info("Found archive format in hand %d, cleaning...", i + 1)
                 # Remove the star line and clean up leading spaces
                 lines = hand_text.split("\n")
                 cleaned_lines = []
@@ -741,15 +730,15 @@ class PokerStars(HandHistoryConverter):
             list[str]: A list of individual hand history texts with summaries.
         """
         hands = []
-        
+
         # Find all hand starts
-        hand_pattern = r'PokerStars (Game|Hand) #\d+'
+        hand_pattern = r"PokerStars (Game|Hand) #\d+"
         hand_starts = list(re.finditer(hand_pattern, text))
-        
+
         if len(hand_starts) <= 1:
             # Only one or no hand headers found, return as is
             return [text.strip()] if text.strip() else []
-        
+
         # Split based on hand boundaries
         for i, match in enumerate(hand_starts):
             start_pos = match.start()
@@ -760,14 +749,14 @@ class PokerStars(HandHistoryConverter):
             else:
                 # Last hand
                 hand_text = text[start_pos:].strip()
-            
+
             if hand_text and "*** SUMMARY ***" in hand_text:
                 hands.append(hand_text)
                 log.debug(f"Extracted hand: {hand_text[:50]}...")
             elif hand_text:
                 # Hand without summary - might be incomplete
                 log.warning(f"Found hand without summary, skipping: {hand_text[:50]}...")
-        
+
         log.info(f"Split multiple hands: {len(hands)} valid hands extracted")
         return hands
 
@@ -897,7 +886,7 @@ class PokerStars(HandHistoryConverter):
             "fast": "Zoom" in mg["TITLE"] or "Rush" in mg["TITLE"],
             "homeGame": "Home" in mg["TITLE"],
             "split": "SPLIT" in mg and mg["SPLIT"] == "Split",
-            "buyinType": "cap" if "CAP" in mg and mg["CAP"] is not None else "regular"
+            "buyinType": "cap" if "CAP" in mg and mg["CAP"] is not None else "regular",
         }
 
     def _detectSiteType(self, mg: dict, hand_text: str, info: dict) -> None:
@@ -1047,7 +1036,9 @@ class PokerStars(HandHistoryConverter):
         else:
             m1 = self.re_date_time1.finditer(datetime_str)
             for a in m1:
-                datetimestr = f"{a.group('Y')}/{a.group('M')}/{a.group('D')} {a.group('H')}:{a.group('MIN')}:{a.group('S')}"
+                datetimestr = (
+                    f"{a.group('Y')}/{a.group('M')}/{a.group('D')} {a.group('H')}:{a.group('MIN')}:{a.group('S')}"
+                )
             hand.startTime = datetime.datetime.strptime(  # noqa: DTZ007
                 datetimestr,
                 "%Y/%m/%d %H:%M:%S",
@@ -1311,19 +1302,19 @@ class PokerStars(HandHistoryConverter):
         """
         # First check if partial or malformed
         summary_count = hand.handText.count("*** SUMMARY ***")
-        
+
         if summary_count == 0:
             msg = f"Hand '{hand.handid}' has no SUMMARY section - likely incomplete"
             raise FpdbHandPartial(msg)
         elif summary_count > 1:
             # Multiple summaries suggest multiple hands in one string
             # Try to extract just the first complete hand
-            if summaries := list(re.finditer(r'\*\*\* SUMMARY \*\*\*', hand.handText)):
+            if summaries := list(re.finditer(r"\*\*\* SUMMARY \*\*\*", hand.handText)):
                 # Find the end of the first hand (after its summary section)
                 first_summary_end = summaries[0].end()
                 # Look for the next hand start or end of string
                 remaining_text = hand.handText[first_summary_end:]
-                if next_hand_match := re.search(r'\n\n+PokerStars (Game|Hand) #', remaining_text):
+                if next_hand_match := re.search(r"\n\n+PokerStars (Game|Hand) #", remaining_text):
                     # Truncate to just the first hand
                     truncate_pos = first_summary_end + next_hand_match.start()
                     original_text = hand.handText
@@ -1433,9 +1424,13 @@ class PokerStars(HandHistoryConverter):
         # This re fails if,  say, river is missing; then we don't get the ** that starts the river.
         if hand.gametype["split"]:
             rit_pattern = (
-                RIT_PREFLOP_PATTERN + RIT_FIRST_FLOP_PATTERN + RIT_SECOND_FLOP_PATTERN +
-                RIT_FIRST_TURN_PATTERN + RIT_SECOND_TURN_PATTERN + RIT_FIRST_RIVER_PATTERN +
-                RIT_SECOND_RIVER_PATTERN
+                RIT_PREFLOP_PATTERN
+                + RIT_FIRST_FLOP_PATTERN
+                + RIT_SECOND_FLOP_PATTERN
+                + RIT_FIRST_TURN_PATTERN
+                + RIT_SECOND_TURN_PATTERN
+                + RIT_FIRST_RIVER_PATTERN
+                + RIT_SECOND_RIVER_PATTERN
             )
             m = re.search(rit_pattern, hand.handText, re.DOTALL)
         elif hand.gametype["base"] in ("hold"):
@@ -1450,9 +1445,16 @@ class PokerStars(HandHistoryConverter):
                 )
             else:
                 pattern = (
-                    PREFLOP_PATTERN + FLOP_PATTERN + TURN_PATTERN + RIVER_PATTERN +
-                    FIRST_FLOP_PATTERN + FIRST_TURN_PATTERN + FIRST_RIVER_PATTERN +
-                    SECOND_FLOP_PATTERN + SECOND_TURN_PATTERN + SECOND_RIVER_PATTERN
+                    PREFLOP_PATTERN
+                    + FLOP_PATTERN
+                    + TURN_PATTERN
+                    + RIVER_PATTERN
+                    + FIRST_FLOP_PATTERN
+                    + FIRST_TURN_PATTERN
+                    + FIRST_RIVER_PATTERN
+                    + SECOND_FLOP_PATTERN
+                    + SECOND_TURN_PATTERN
+                    + SECOND_RIVER_PATTERN
                 )
                 m = re.search(pattern, hand.handText, re.DOTALL)
         elif hand.gametype["base"] in ("stud"):
@@ -1516,7 +1518,7 @@ class PokerStars(HandHistoryConverter):
         if (
             street != "FLOPET" or hand.streets.get("FLOP") is None
         ):  # a list of streets which get dealt community cards (i.e. all but PREFLOP)
-            if (m2 := self.re_board2.search(hand.streets[street])):
+            if m2 := self.re_board2.search(hand.streets[street]):
                 hand.setCommunityCards(
                     street,
                     [m2.group("C1"), m2.group("C2"), m2.group("C3")],
@@ -1799,7 +1801,9 @@ class PokerStars(HandHistoryConverter):
                 if uncalled_decimal == collection_amount:
                     log.info(
                         "True walk scenario detected (equal): %s uncalled=%s collected=%s",
-                        uncalled_player, uncalled_amount, collection_amount,
+                        uncalled_player,
+                        uncalled_amount,
+                        collection_amount,
                     )
                     if not hasattr(hand, "walk_adjustments"):
                         hand.walk_adjustments = {}
@@ -1808,7 +1812,9 @@ class PokerStars(HandHistoryConverter):
                     # This is likely a BB walk: BB gets only SB contribution, BB bet returned
                     log.info(
                         "True walk scenario detected (BB walk): %s uncalled=%s collected=%s",
-                        uncalled_player, uncalled_amount, collection_amount,
+                        uncalled_player,
+                        uncalled_amount,
+                        collection_amount,
                     )
                     if not hasattr(hand, "walk_adjustments"):
                         hand.walk_adjustments = {}
@@ -1816,7 +1822,9 @@ class PokerStars(HandHistoryConverter):
                 else:
                     log.info(
                         "Not a walk - uncalled bet (%s) < collection (%s) for %s",
-                        uncalled_amount, collection_amount, uncalled_player,
+                        uncalled_amount,
+                        collection_amount,
+                        uncalled_player,
                     )
 
             hand.addUncalled(street, uncalled_player, uncalled_amount)
@@ -1860,7 +1868,7 @@ class PokerStars(HandHistoryConverter):
         if hand.koBounty > 0:
             m = self.re_winning_rank_one.search(hand.handText)
             winner = m.group("PNAME") if m else None
-            
+
             for pname, amount in list(ko_amounts.items()):
                 if pname == winner:
                     hand.koCounts[pname] = (amount + hand.endBounty[pname]) / float(hand.koBounty)
@@ -1999,18 +2007,18 @@ class PokerStars(HandHistoryConverter):
             hand.addCollectPot(player=player, pot=str(float(pot) * 2))
         else:
             hand.addCollectPot(player=player, pot=pot)
-    
+
     def _addCashOutPotWithAdjustment(
         self,
-        hand: "Hand", 
+        hand: "Hand",
         match: re.Match,
         adjustments: tuple[bool, bool, float, float],
     ) -> None:
         """Adds cash out pot collection information to the hand object, applying adjustments.
-        
+
         Uses addCashOutPot instead of addCollectPot to avoid affecting totalcollected
         and breaking rake calculations.
-        
+
         Args:
             hand ("Hand"): The hand object to update with cash out collection information.
             match (re.Match): The regex match object containing pot and player details.
@@ -2086,20 +2094,20 @@ class PokerStars(HandHistoryConverter):
 
                 self._addCollectPotWithAdjustment(hand, m, adjustments)
                 i += 1
-            
+
         # Handle cash out with fee pattern (always check, regardless of i)
         for m in self.re_collect_pot3.finditer(pre):
             player = m.group("PNAME")
             pot_amount = Decimal(m.group("POT").replace(",", ""))
             fee_amount = Decimal(m.group("FEE").replace(",", ""))
             log.info("Found cash out collection: %s -> %s (fee: %s)", player, pot_amount, fee_amount)
-            
+
             # Store cash out fee information for statistics/logging
             # Fee is not added to collected pot as it's taken by the site
-            if not hasattr(hand, 'cashOutFees'):
+            if not hasattr(hand, "cashOutFees"):
                 hand.cashOutFees = {}
             hand.cashOutFees[player] = fee_amount
-            
+
             self._addCashOutPotWithAdjustment(hand, m, adjustments)
             i += 1
 
@@ -2252,7 +2260,9 @@ class PokerStars(HandHistoryConverter):
             log.debug("Regex for tournament: %s", regex)
             log.info(
                 "Stars table_name=%r, tournament=%r, table_number=%r",
-                table_name, tournament, table_number,
+                table_name,
+                tournament,
+                table_number,
             )
             log.info("Stars returns: %r", regex)
 

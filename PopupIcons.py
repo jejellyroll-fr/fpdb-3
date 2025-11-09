@@ -51,102 +51,88 @@ class EmojiIconProvider(IconProvider):
             "playername": "👤",
             "player_note": "📝",
             "n": "🔢",
-
             # Preflop stats
-            "vpip": "💰",        # Voluntarily Put money In Pot
-            "pfr": "📈",         # Preflop Raise
-            "three_B": "⬆️",      # 3-Bet
-            "four_B": "⏫",      # 4-Bet
-            "limp": "🚶",        # Limp
-            "cold_call": "❄️",   # Cold Call
-            "rfi": "🚀",         # Raise First In
-
+            "vpip": "💰",  # Voluntarily Put money In Pot
+            "pfr": "📈",  # Preflop Raise
+            "three_B": "⬆️",  # 3-Bet
+            "four_B": "⏫",  # 4-Bet
+            "limp": "🚶",  # Limp
+            "cold_call": "❄️",  # Cold Call
+            "rfi": "🚀",  # Raise First In
             # Position stats
             "rfi_early_position": "🌅",
             "rfi_middle_position": "☀️",
             "rfi_late_position": "🌆",
             "sb_steal": "🥷",
             "bb_defend": "🛡️",
-
             # Flop stats
-            "cb1": "➡️",         # Continuation Bet Flop
-            "f_cb1": "🛡️",       # Fold to CB Flop
-            "raise_cb1": "⬆️",   # Raise CB Flop
+            "cb1": "➡️",  # Continuation Bet Flop
+            "f_cb1": "🛡️",  # Fold to CB Flop
+            "raise_cb1": "⬆️",  # Raise CB Flop
             "check_call_flop": "✅",
             "donk_bet": "🎲",
             "float_bet": "🎈",
-
             # Turn stats
-            "cb2": "➡️",         # Continuation Bet Turn
-            "f_cb2": "🛡️",       # Fold to CB Turn
+            "cb2": "➡️",  # Continuation Bet Turn
+            "f_cb2": "🛡️",  # Fold to CB Turn
             "turn_aggression": "⚔️",
             "turn_check_call": "✅",
-
             # River stats
-            "cb3": "➡️",         # Continuation Bet River
-            "f_cb3": "🛡️",       # Fold to CB River
+            "cb3": "➡️",  # Continuation Bet River
+            "f_cb3": "🛡️",  # Fold to CB River
             "river_aggression": "⚔️",
             "value_bet": "💎",
             "bluff": "🎭",
-
             # Steal & positional
-            "steal": "🥷",       # Steal attempt
-            "f_steal": "🛡️",     # Fold to steal
+            "steal": "🥷",  # Steal attempt
+            "f_steal": "🛡️",  # Fold to steal
             "call_vs_steal": "☎️",
             "three_B_vs_steal": "⬆️",
             "resteal": "🔄",
-
             # Aggression
-            "agg_fact": "⚔️",    # Aggression factor
-            "agg_freq": "🎯",    # Aggression frequency
-            "agg_pct": "📊",     # Aggression percentage
+            "agg_fact": "⚔️",  # Aggression factor
+            "agg_freq": "🎯",  # Aggression frequency
+            "agg_pct": "📊",  # Aggression percentage
             "bet_freq": "💸",
             "raise_freq": "📈",
-
             # Showdown
-            "wtsd": "👁️",        # Went to showdown
-            "wmsd": "🏆",        # Won money at showdown
-            "show_aggr": "💪",   # Showdown aggression
-
+            "wtsd": "👁️",  # Went to showdown
+            "wmsd": "🏆",  # Won money at showdown
+            "show_aggr": "💪",  # Showdown aggression
             # General stats
-            "hands": "🤝",       # Total hands
-            "totalprofit": "💰", # Total profit
-            "profit100": "📊",   # BB/100
+            "hands": "🤝",  # Total hands
+            "totalprofit": "💰",  # Total profit
+            "profit100": "📊",  # BB/100
             "vpip_pfr_ratio": "⚖️",
-            "gap": "📏",         # Gap concept
-
+            "gap": "📏",  # Gap concept
             # Tournament specific
-            "m_ratio": "📊",     # M-ratio
-            "push_fold": "⚡",   # Push/fold
+            "m_ratio": "📊",  # M-ratio
+            "push_fold": "⚡",  # Push/fold
             "steal_success": "✅",
-
             # Advanced stats
-            "fold_3B": "🛡️",     # Fold to 3-bet
-            "fold_4B": "🛡️",     # Fold to 4-bet
-            "squeeze": "🤏",     # Squeeze play
-            "isolation": "🎯",   # Isolation
+            "fold_3B": "🛡️",  # Fold to 3-bet
+            "fold_4B": "🛡️",  # Fold to 4-bet
+            "squeeze": "🤏",  # Squeeze play
+            "isolation": "🎯",  # Isolation
             "limped_pot": "🚶",  # Limped pot
-            "multiway": "👥",    # Multiway pot
-
+            "multiway": "👥",  # Multiway pot
             # Street-specific
-            "saw_f": "👁️",       # Saw flop
-            "saw_t": "👁️",       # Saw turn
-            "saw_r": "👁️",       # Saw river
-            "f_freq1": "🛡️",     # Fold frequency flop
-            "f_freq2": "🛡️",     # Fold frequency turn
-            "f_freq3": "🛡️",     # Fold frequency river
-
+            "saw_f": "👁️",  # Saw flop
+            "saw_t": "👁️",  # Saw turn
+            "saw_r": "👁️",  # Saw river
+            "f_freq1": "🛡️",  # Fold frequency flop
+            "f_freq2": "🛡️",  # Fold frequency turn
+            "f_freq3": "🛡️",  # Fold frequency river
             # Betting patterns
-            "check_raise": "🔄", # Check-raise
-            "donk": "🎲",        # Donk bet
-            "probe": "🔍",       # Probe bet
-            "blocking": "🚧",    # Blocking bet
-
+            "check_raise": "🔄",  # Check-raise
+            "donk": "🎲",  # Donk bet
+            "probe": "🔍",  # Probe bet
+            "blocking": "🚧",  # Blocking bet
             # Special situations
-            "blind_def": "🛡️",   # Blind defense
-            "blind_att": "⚔️",   # Blind attack
-            "heads_up": "👥",    # Heads up
-            "vs_missed_cb": "❌", # Vs missed CB
+            "blind_def": "🛡️",  # Blind defense
+            "blind_att": "⚔️",  # Blind attack
+            "heads_up": "👥",  # Heads up
+            "vs_missed_cb": "❌",  # Vs missed CB
         }
 
 
@@ -161,7 +147,6 @@ class UnicodeIconProvider(IconProvider):
             "playername": "◆",
             "player_note": "✎",
             "n": "#",
-
             # Preflop stats
             "vpip": "♦",
             "pfr": "▲",
@@ -169,34 +154,27 @@ class UnicodeIconProvider(IconProvider):
             "four_B": "⇑",
             "limp": "○",
             "cold_call": "◯",
-
             # Flop stats
             "cb1": "→",
             "f_cb1": "⌐",
             "raise_cb1": "↗",
-
             # Turn stats
             "cb2": "⇒",
             "f_cb2": "⌐⌐",
-
             # River stats
             "cb3": "⟹",
             "f_cb3": "⌐⌐⌐",
-
             # Steal & positional
             "steal": "※",
             "f_steal": "⌐",
             "resteal": "↻",
-
             # Aggression
             "agg_fact": "⚡",
             "agg_freq": "◈",
-
             # General
             "hands": "∑",
             "totalprofit": "$",
             "profit100": "¢",
-
             # Advanced
             "fold_3B": "⌐",
             "squeeze": "⊂⊃",

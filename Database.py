@@ -19,7 +19,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 Create and manage the database objects.
 """
 
-
 import csv
 import math
 
@@ -64,7 +63,8 @@ from loggingFpdb import get_logger
 
 re_char = re.compile("[^a-zA-Z]")
 re_insert = re.compile(
-    r"insert\sinto\s(?P<TABLENAME>[A-Za-z]+)\s(?P<COLUMNS>\(.+?\))\s+values", re.DOTALL,
+    r"insert\sinto\s(?P<TABLENAME>[A-Za-z]+)\s(?P<COLUMNS>\(.+?\))\s+values",
+    re.DOTALL,
 )
 
 #    FreePokerTools modules
@@ -1072,9 +1072,7 @@ class Database:
             self.h_date_ndays_ago = "d000000"  # date N days ago ('d' + YYMMDD) for hero
             self.date_nhands_ago = {}  # dates N hands ago per player - not used yet
 
-            self.saveActions = (
-                self.import_options["saveActions"] is not False
-            )
+            self.saveActions = self.import_options["saveActions"] is not False
 
             if self.is_connected():
                 if not self.wrongDbVersion:
@@ -1125,13 +1123,7 @@ class Database:
                         if columnNames[columnNumber][0] == "importTime" or columnNames[columnNumber][0] == "styleKey":
                             result += "  " + columnNames[columnNumber][0] + "=ignore\n"
                         else:
-                            result += (
-                                "  "
-                                + columnNames[columnNumber][0]
-                                + "="
-                                + str(row[columnNumber])
-                                + "\n"
-                            )
+                            result += "  " + columnNames[columnNumber][0] + "=" + str(row[columnNumber]) + "\n"
                     result += "\n"
             result += "\n"
         return result
@@ -1214,9 +1206,7 @@ class Database:
             except MySQLdb.Error as ex:
                 if ex.args[0] == 1045:
                     raise FpdbMySQLAccessDenied(ex.args[0], ex.args[1])
-                if (
-                    ex.args[0] == 2002 or ex.args[0] == 2003
-                ):  # 2002 is no unix socket, 2003 is no tcp socket
+                if ex.args[0] == 2002 or ex.args[0] == 2003:  # 2002 is no unix socket, 2003 is no tcp socket
                     raise FpdbMySQLNoDatabase(ex.args[0], ex.args[1])
                 log.exception("UNKNOWN MYSQL ERROR: {ex}")
             c = self.get_cursor()
@@ -1261,9 +1251,7 @@ class Database:
                         raise FpdbPostgresqlNoDatabase(errmsg=ex.args[0])
                     if "password authentication" in ex.args[0]:
                         raise FpdbPostgresqlAccessDenied(errmsg=ex.args[0])
-                    if (
-                        'role "' in ex.args[0] and '" does not exist' in ex.args[0]
-                    ):  # role "fpdb" does not exist
+                    if 'role "' in ex.args[0] and '" does not exist' in ex.args[0]:  # role "fpdb" does not exist
                         raise FpdbPostgresqlAccessDenied(errmsg=ex.args[0])
                     msg = ex.args[0]
                     log.exception(f"error postgreslq: {msg}")
@@ -1283,7 +1271,8 @@ class Database:
                     log.info(f"Creating directory: '{self.config.dir_database}'")
                     os.makedirs(self.config.dir_database)
                 database = os.path.join(self.config.dir_database, database).replace(
-                    "\\", "/",
+                    "\\",
+                    "/",
                 )
             self.db_path = database
             log.info(f"Connecting to SQLite: {self.db_path}")
@@ -1636,7 +1625,18 @@ class Database:
         num_seats=6,
     ):
         if hud_params is None:
-            hud_params = {"stat_range": "A", "agg_bb_mult": 1000, "seats_style": "A", "seats_cust_nums_low": 1, "seats_cust_nums_high": 10, "h_stat_range": "S", "h_agg_bb_mult": 1000, "h_seats_style": "A", "h_seats_cust_nums_low": 1, "h_seats_cust_nums_high": 10}
+            hud_params = {
+                "stat_range": "A",
+                "agg_bb_mult": 1000,
+                "seats_style": "A",
+                "seats_cust_nums_low": 1,
+                "seats_cust_nums_high": 10,
+                "h_stat_range": "S",
+                "h_agg_bb_mult": 1000,
+                "h_seats_style": "A",
+                "h_seats_cust_nums_low": 1,
+                "h_seats_cust_nums_high": 10,
+            }
         stat_range = hud_params["stat_range"]
         agg_bb_mult = hud_params["agg_bb_mult"]
         seats_style = hud_params["seats_style"]
@@ -1745,9 +1745,7 @@ class Database:
         colnames = [desc[0] for desc in c.description]
         for row in c.fetchall():
             playerid = row[0]
-            if (playerid == hero_id and h_stat_range != "S") or (
-                playerid != hero_id and stat_range != "S"
-            ):
+            if (playerid == hero_id and h_stat_range != "S") or (playerid != hero_id and stat_range != "S"):
                 t_dict = {}
                 for name, val in zip(colnames, row, strict=False):
                     t_dict[name.lower()] = val
@@ -1801,9 +1799,7 @@ class Database:
             # Loop through stats adding them to appropriate stat_dict:
             while row:
                 playerid = row[0]
-                if (playerid == hero_id and h_stat_range == "S") or (
-                    playerid != hero_id and stat_range == "S"
-                ):
+                if (playerid == hero_id and h_stat_range == "S") or (playerid != hero_id and stat_range == "S"):
                     for name, val in zip(colnames, row, strict=False):
                         if playerid not in stat_dict:
                             stat_dict[playerid] = {}
@@ -1847,7 +1843,8 @@ class Database:
         c = self.get_cursor()
         # conversion to UTF-8 in Python 3 is not needed
         c.execute(
-            self.sql.query["get_player_names"], (like_player_name, site_id, site_id),
+            self.sql.query["get_player_names"],
+            (like_player_name, site_id, site_id),
         )
         return c.fetchall()
 
@@ -1925,13 +1922,12 @@ class Database:
                 if self.backend == self.MYSQL_INNODB:
                     c.execute(
                         "SELECT constraint_name "
-                         "FROM information_schema.KEY_COLUMN_USAGE "
-
+                        "FROM information_schema.KEY_COLUMN_USAGE "
                         # "WHERE REFERENCED_TABLE_SCHEMA = 'fpdb'
                         "WHERE 1=1 "
-                         "AND table_name = %s AND column_name = %s "
-                         "AND referenced_table_name = %s "
-                         "AND referenced_column_name = %s ",
+                        "AND table_name = %s AND column_name = %s "
+                        "AND referenced_table_name = %s "
+                        "AND referenced_column_name = %s ",
                         (fk["fktab"], fk["fkcol"], fk["rtab"], fk["rcol"]),
                     )
                     cons = c.fetchone()
@@ -1942,10 +1938,7 @@ class Database:
                         )
                         try:
                             c.execute(
-                                "alter table "
-                                + fk["fktab"]
-                                + " drop foreign key "
-                                + cons[0],
+                                "alter table " + fk["fktab"] + " drop foreign key " + cons[0],
                             )
                         except Exception:
                             log.exception(f"    drop failed: {sys.exc_info()}")
@@ -1965,7 +1958,9 @@ class Database:
                         # print "alter table %s drop constraint %s_%s_fkey" % (fk['fktab'], fk['fktab'], fk['fkcol'])
                         try:
                             c.execute(
-                                "alter table {} drop constraint {}_{}_fkey".format(fk["fktab"], fk["fktab"], fk["fkcol"]),
+                                "alter table {} drop constraint {}_{}_fkey".format(
+                                    fk["fktab"], fk["fktab"], fk["fkcol"]
+                                ),
                             )
                             log.debug(f"dropping pg fk {fk['fktab']} {fk['fkcol']}")
                         except Exception:
@@ -1989,7 +1984,8 @@ class Database:
                         # apparently nowait is not implemented in mysql so this just hangs if there are locks
                         # preventing the index drop :-(
                         c.execute(
-                            "alter table %s drop index %s;", (idx["tab"], idx["col"]),
+                            "alter table %s drop index %s;",
+                            (idx["tab"], idx["col"]),
                         )
                     except Exception:
                         log.exception(f"    drop index failed: {sys.exc_info()}")
@@ -2053,13 +2049,12 @@ class Database:
                 if self.backend == self.MYSQL_INNODB:
                     c.execute(
                         "SELECT constraint_name "
-                         "FROM information_schema.KEY_COLUMN_USAGE "
-
+                        "FROM information_schema.KEY_COLUMN_USAGE "
                         # "WHERE REFERENCED_TABLE_SCHEMA = 'fpdb'
                         "WHERE 1=1 "
-                         "AND table_name = %s AND column_name = %s "
-                         "AND referenced_table_name = %s "
-                         "AND referenced_column_name = %s ",
+                        "AND table_name = %s AND column_name = %s "
+                        "AND referenced_table_name = %s "
+                        "AND referenced_column_name = %s ",
                         (fk["fktab"], fk["fkcol"], fk["rtab"], fk["rcol"]),
                     )
                     cons = c.fetchone()
@@ -2223,7 +2218,8 @@ class Database:
         c.execute(self.sql.query["addTourneyIndex"])
         c.execute(
             self.sql.query["addHandsIndex"].replace(
-                "<heroseat>", ", heroSeat" if self.publicDB else "",
+                "<heroseat>",
+                ", heroSeat" if self.publicDB else "",
             ),
         )
         c.execute(self.sql.query["addPlayersIndex"])
@@ -2334,7 +2330,8 @@ class Database:
                 log.debug(f"Dropping index: {idx['tab']} {idx['col']}")
                 try:
                     self.get_cursor().execute(
-                        "alter table %s drop index %s", (idx["tab"], idx["col"]),
+                        "alter table %s drop index %s",
+                        (idx["tab"], idx["col"]),
                     )
                 except Exception:
                     log.exception(f"Drop index failed: {sys.exc_info()}")
@@ -2379,13 +2376,12 @@ class Database:
             if self.backend == self.MYSQL_INNODB:
                 c.execute(
                     "SELECT constraint_name "
-                     "FROM information_schema.KEY_COLUMN_USAGE "
-
+                    "FROM information_schema.KEY_COLUMN_USAGE "
                     # "WHERE REFERENCED_TABLE_SCHEMA = 'fpdb'
                     "WHERE 1=1 "
-                     "AND table_name = %s AND column_name = %s "
-                     "AND referenced_table_name = %s "
-                     "AND referenced_column_name = %s ",
+                    "AND table_name = %s AND column_name = %s "
+                    "AND referenced_table_name = %s "
+                    "AND referenced_column_name = %s ",
                     (fk["fktab"], fk["fkcol"], fk["rtab"], fk["rcol"]),
                 )
                 cons = c.fetchone()
@@ -2461,13 +2457,12 @@ class Database:
             if self.backend == self.MYSQL_INNODB:
                 c.execute(
                     "SELECT constraint_name "
-                     "FROM information_schema.KEY_COLUMN_USAGE "
-
+                    "FROM information_schema.KEY_COLUMN_USAGE "
                     # "WHERE REFERENCED_TABLE_SHEMA = 'fpdb'
                     "WHERE 1=1 "
-                     "AND table_name = %s AND column_name = %s "
-                     "AND referenced_table_name = %s "
-                     "AND referenced_column_name = %s ",
+                    "AND table_name = %s AND column_name = %s "
+                    "AND referenced_table_name = %s "
+                    "AND referenced_column_name = %s ",
                     (fk["fktab"], fk["fkcol"], fk["rtab"], fk["rcol"]),
                 )
                 cons = c.fetchone()
@@ -2478,10 +2473,7 @@ class Database:
                     )
                     try:
                         c.execute(
-                            "alter table "
-                            + fk["fktab"]
-                            + " drop foreign key "
-                            + cons[0],
+                            "alter table " + fk["fktab"] + " drop foreign key " + cons[0],
                         )
                     except Exception:
                         log.exception(
@@ -2860,7 +2852,8 @@ class Database:
         c.execute("INSERT INTO Rank (id,name) VALUES ('10', 'StFlush')")
         # Fill StartCards
         sql = "INSERT INTO StartCards (category, name, rank, combinations) VALUES (%s, %s, %s, %s)".replace(
-            "%s", self.sql.query["placeholder"],
+            "%s",
+            self.sql.query["placeholder"],
         )
         for i in range(170):
             (name, rank, combinations) = Card.StartCardRank(i)
@@ -2928,10 +2921,12 @@ class Database:
                 )
                 if self.backend == self.PGSQL:
                     query = query.replace(
-                        "<styleKey>", ",'d' || to_char(h.startTime, 'YYMMDD')",
+                        "<styleKey>",
+                        ",'d' || to_char(h.startTime, 'YYMMDD')",
                     )
                     query = query.replace(
-                        "<styleKeyGroup>", ",to_char(h.startTime, 'YYMMDD')",
+                        "<styleKeyGroup>",
+                        ",to_char(h.startTime, 'YYMMDD')",
                     )
                 elif self.backend == self.SQLITE:
                     query = query.replace(
@@ -2944,10 +2939,12 @@ class Database:
                     )
                 elif self.backend == self.MYSQL_INNODB:
                     query = query.replace(
-                        "<styleKey>", ",date_format(h.startTime, 'd%y%m%d')",
+                        "<styleKey>",
+                        ",date_format(h.startTime, 'd%y%m%d')",
                     )
                     query = query.replace(
-                        "<styleKeyGroup>", ",date_format(h.startTime, 'd%y%m%d')",
+                        "<styleKeyGroup>",
+                        ",date_format(h.startTime, 'd%y%m%d')",
                     )
             else:
                 query = query.replace("<hc_position>", ",'0' as hc_position")
@@ -3061,7 +3058,12 @@ class Database:
         return query
 
     def rebuild_cache(
-        self, h_start=None, v_start=None, table="HudCache", ttid=None, wmid=None,
+        self,
+        h_start=None,
+        v_start=None,
+        table="HudCache",
+        ttid=None,
+        wmid=None,
     ) -> None:
         """Clears hudcache and rebuilds from the individual handsplayers records."""
         # stime = time()
@@ -3098,9 +3100,7 @@ class Database:
         if not ttid:
             if self.hero_ids is None:
                 if wmid:
-                    where = (
-                        "WHERE g.type = 'ring' AND weekId = {} and monthId = {}<hero_where>".format(*wmid)
-                    )
+                    where = "WHERE g.type = 'ring' AND weekId = {} and monthId = {}<hero_where>".format(*wmid)
                 else:
                     where = "WHERE g.type = 'ring'<hero_where>"
             else:
@@ -3118,7 +3118,8 @@ class Database:
                     + "   AND hp.tourneysPlayersId IS NULL)"
                 )
             rebuild_sql_cash = self.sql.query["rebuildCache"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             rebuild_sql_cash = rebuild_sql_cash.replace("<tourney_join_clause>", "")
             rebuild_sql_cash = rebuild_sql_cash.replace("<where_clause>", where)
@@ -3132,9 +3133,7 @@ class Database:
             where = f"WHERE t.tourneyTypeId = {ttid}<hero_where>"
         elif self.hero_ids is None:
             if wmid:
-                where = (
-                    "WHERE g.type = 'tour' AND weekId = {} and monthId = {}<hero_where>".format(*wmid)
-                )
+                where = "WHERE g.type = 'tour' AND weekId = {} and monthId = {}<hero_where>".format(*wmid)
             else:
                 where = "WHERE g.type = 'tour'<hero_where>"
         else:
@@ -3152,14 +3151,18 @@ class Database:
                 + "   AND hp.tourneysPlayersId >= 0)"
             )
         rebuild_sql_tourney = self.sql.query["rebuildCache"].replace(
-            "%s", self.sql.query["placeholder"],
+            "%s",
+            self.sql.query["placeholder"],
         )
         rebuild_sql_tourney = rebuild_sql_tourney.replace(
-            "<tourney_join_clause>", """INNER JOIN Tourneys t ON (t.id = h.tourneyId)""",
+            "<tourney_join_clause>",
+            """INNER JOIN Tourneys t ON (t.id = h.tourneyId)""",
         )
         rebuild_sql_tourney = rebuild_sql_tourney.replace("<where_clause>", where)
         rebuild_sql_tourney = self.replace_statscache(
-            "tour", table, rebuild_sql_tourney,
+            "tour",
+            table,
+            rebuild_sql_tourney,
         )
         # print rebuild_sql_tourney
         self.get_cursor().execute(rebuild_sql_tourney)
@@ -3170,19 +3173,24 @@ class Database:
 
     def update_timezone(self, tz_name) -> None:
         select_W = self.sql.query["select_W"].replace(
-            "%s", self.sql.query["placeholder"],
+            "%s",
+            self.sql.query["placeholder"],
         )
         select_M = self.sql.query["select_M"].replace(
-            "%s", self.sql.query["placeholder"],
+            "%s",
+            self.sql.query["placeholder"],
         )
         insert_W = self.sql.query["insert_W"].replace(
-            "%s", self.sql.query["placeholder"],
+            "%s",
+            self.sql.query["placeholder"],
         )
         insert_M = self.sql.query["insert_M"].replace(
-            "%s", self.sql.query["placeholder"],
+            "%s",
+            self.sql.query["placeholder"],
         )
         update_WM_S = self.sql.query["update_WM_S"].replace(
-            "%s", self.sql.query["placeholder"],
+            "%s",
+            self.sql.query["placeholder"],
         )
         c = self.get_cursor()
         c.execute("SELECT id, sessionStart, weekId wid, monthId mid FROM Sessions")
@@ -3192,7 +3200,8 @@ class Database:
             tz = pytz.timezone(tz_name)
             loc_tz = utc_start.astimezone(tz).strftime("%z")
             offset = timedelta(
-                hours=int(loc_tz[:-2]), minutes=int(loc_tz[0] + loc_tz[-2:]),
+                hours=int(loc_tz[:-2]),
+                minutes=int(loc_tz[0] + loc_tz[-2:]),
             )
             local = s["sessionStart"] + offset
             monthStart = datetime(local.year, local.month, 1)
@@ -3230,7 +3239,8 @@ class Database:
                         self.hero_ids[site_id] = int(p_id)
 
             q = self.sql.query["get_hero_hudcache_start"].replace(
-                "<playerid_list>", str(tuple(self.hero_ids.values())),
+                "<playerid_list>",
+                str(tuple(self.hero_ids.values())),
             )
             c = self.get_cursor()
             c.execute(q)
@@ -3347,25 +3357,21 @@ class Database:
         if self.backend == self.PGSQL and self.import_options["hhBulkPath"] != "":
             # COPY much faster under postgres. Requires superuser privileges
             m = re_insert.match(q)
-            rand = "".join(
-                random.SystemRandom().choice(string.ascii_uppercase + string.digits)
-                for _ in range(5)
-            )
+            rand = "".join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
             bulk_file = os.path.join(
-                self.import_options["hhBulkPath"], m.group("TABLENAME") + "_" + rand,
+                self.import_options["hhBulkPath"],
+                m.group("TABLENAME") + "_" + rand,
             )
             with open(bulk_file, "wb") as csvfile:
                 writer = csv.writer(
-                    csvfile, delimiter="\t", quotechar='"', quoting=csv.QUOTE_MINIMAL,
+                    csvfile,
+                    delimiter="\t",
+                    quotechar='"',
+                    quoting=csv.QUOTE_MINIMAL,
                 )
                 writer.writerows(w for w in values)
             q_insert = (
-                "COPY "
-                + m.group("TABLENAME")
-                + m.group("COLUMNS")
-                + " FROM '"
-                + bulk_file
-                + "' DELIMITER '\t' CSV"
+                "COPY " + m.group("TABLENAME") + m.group("COLUMNS") + " FROM '" + bulk_file + "' DELIMITER '\t' CSV"
             )
             c.execute(q_insert)
             os.remove(bulk_file)
@@ -3457,7 +3463,8 @@ class Database:
     def updateTourneysSessions(self) -> None:
         if self.tbulk:
             q_update_sessions = self.sql.query["updateTourneysSessions"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             c = self.get_cursor()
             for t, sid in list(self.tbulk.items()):
@@ -3591,8 +3598,7 @@ class Database:
         for p in pdata:
             player_stats = pdata.get(p)
             garbageTourneyTypes = (
-                player_stats["tourneyTypeId"] in self.ttnew
-                or player_stats["tourneyTypeId"] in self.ttold
+                player_stats["tourneyTypeId"] in self.ttnew or player_stats["tourneyTypeId"] in self.ttold
             )
             if self.import_options["hhBulkPath"] == "" or not garbageTourneyTypes:
                 position = pos[player_stats["position"]]
@@ -3606,12 +3612,7 @@ class Database:
                 )
                 player_stats["n"] = 1
                 line = [
-                    (
-                        int(player_stats[s])
-                        if isinstance(player_stats[s], bool)
-                        else player_stats[s]
-                    )
-                    for s in CACHE_KEYS
+                    (int(player_stats[s]) if isinstance(player_stats[s], bool) else player_stats[s]) for s in CACHE_KEYS
                 ]
 
                 hud = self.hcbulk.get(k)
@@ -3631,20 +3632,24 @@ class Database:
         if doinsert:
             update_hudcache = self.sql.query["update_hudcache"]
             update_hudcache = update_hudcache.replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             insert_hudcache = self.sql.query["insert_hudcache"]
             insert_hudcache = insert_hudcache.replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
 
             select_hudcache_ring = self.sql.query["select_hudcache_ring"]
             select_hudcache_ring = select_hudcache_ring.replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             select_hudcache_tour = self.sql.query["select_hudcache_tour"]
             select_hudcache_tour = select_hudcache_tour.replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             inserts = []
             c = self.get_cursor()
@@ -3679,7 +3684,8 @@ class Database:
             tz = pytz.timezone(tz_name)
             loc_tz = utc_start.astimezone(tz).strftime("%z")
             offset = timedelta(
-                hours=int(loc_tz[:-2]), minutes=int(loc_tz[0] + loc_tz[-2:]),
+                hours=int(loc_tz[:-2]),
+                minutes=int(loc_tz[0] + loc_tz[-2:]),
             )
             local = naive + offset
             monthStart = datetime(local.year, local.month, 1)
@@ -3712,10 +3718,9 @@ class Database:
             lower = hand["startTime"] - THRESHOLD
             upper = hand["startTime"] + THRESHOLD
             for i in range(len(self.s["bk"])):
-                if (
-                    (lower <= self.s["bk"][i]["sessionEnd"])
-                    and (upper >= self.s["bk"][i]["sessionStart"])
-                ) or (tid in self.s["bk"][i]["tourneys"]):
+                if ((lower <= self.s["bk"][i]["sessionEnd"]) and (upper >= self.s["bk"][i]["sessionStart"])) or (
+                    tid in self.s["bk"][i]["tourneys"]
+                ):
                     if (hand["startTime"] <= self.s["bk"][i]["sessionEnd"]) and (
                         hand["startTime"] >= self.s["bk"][i]["sessionStart"]
                     ):
@@ -3741,17 +3746,11 @@ class Database:
                     merged["tourneys"].add(tid)
                 for n in id:
                     h = self.s["bk"][n]
-                    if (
-                        not merged.get("sessionStart")
-                        or merged.get("sessionStart") > h["sessionStart"]
-                    ):
+                    if not merged.get("sessionStart") or merged.get("sessionStart") > h["sessionStart"]:
                         merged["sessionStart"] = h["sessionStart"]
                         merged["weekStart"] = h["weekStart"]
                         merged["monthStart"] = h["monthStart"]
-                    if (
-                        not merged.get("sessionEnd")
-                        or merged.get("sessionEnd") < h["sessionEnd"]
-                    ):
+                    if not merged.get("sessionEnd") or merged.get("sessionEnd") < h["sessionEnd"]:
                         merged["sessionEnd"] = h["sessionEnd"]
                     merged["ids"] += h["ids"]
                     merged["tourneys"].union(h["tourneys"])
@@ -3770,40 +3769,52 @@ class Database:
 
         if doinsert:
             select_S = self.sql.query["select_S"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             select_W = self.sql.query["select_W"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             select_M = self.sql.query["select_M"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             update_S = self.sql.query["update_S"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             insert_W = self.sql.query["insert_W"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             insert_M = self.sql.query["insert_M"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             insert_S = self.sql.query["insert_S"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             update_S_SC = self.sql.query["update_S_SC"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             update_S_TC = self.sql.query["update_S_TC"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             update_S_T = self.sql.query["update_S_T"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             update_S_H = self.sql.query["update_S_H"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             delete_S = self.sql.query["delete_S"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             c = self.get_cursor()
             for i in range(len(self.s["bk"])):
@@ -3811,8 +3822,8 @@ class Database:
                 upper = self.s["bk"][i]["sessionEnd"] + THRESHOLD
                 tourneys = self.s["bk"][i]["tourneys"]
                 if self.s["bk"][i]["tourneys"]:
-                    toursql = (
-                        "OR SC.id in (SELECT DISTINCT sessionId FROM Tourneys T WHERE T.id in ({}))".format(", ".join(str(t) for t in tourneys))
+                    toursql = "OR SC.id in (SELECT DISTINCT sessionId FROM Tourneys T WHERE T.id in ({}))".format(
+                        ", ".join(str(t) for t in tourneys)
                     )
                     q = select_S.replace("<TOURSELECT>", toursql)
                 else:
@@ -3848,11 +3859,19 @@ class Database:
                         end, update = self.s["bk"][i]["sessionEnd"], True
                     if updateW:
                         wid = self.insertOrUpdate(
-                            "weeks", c, (week,), select_W, insert_W,
+                            "weeks",
+                            c,
+                            (week,),
+                            select_W,
+                            insert_W,
                         )
                     if updateM:
                         mid = self.insertOrUpdate(
-                            "months", c, (month,), select_M, insert_M,
+                            "months",
+                            c,
+                            (month,),
+                            select_M,
+                            insert_M,
                         )
                     if updateW or updateM:
                         self.wmnew.add((wid, mid))
@@ -3914,7 +3933,15 @@ class Database:
             self.commit()
 
     def storeSessionsCache(
-        self, hid, pids, startTime, gametypeId, gametype, pdata, heroes, doinsert=False,
+        self,
+        hid,
+        pids,
+        startTime,
+        gametypeId,
+        gametype,
+        pdata,
+        heroes,
+        doinsert=False,
     ) -> None:
         """Update cached cash sessions. If no record exists, do an insert."""
         THRESHOLD = timedelta(seconds=int(self.sessionTimeout * 60))
@@ -3926,20 +3953,14 @@ class Database:
                 hp["hid"] = hid
                 hp["ids"] = []
                 pdata[p]["n"] = 1
-                hp["line"] = [
-                    int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s]
-                    for s in CACHE_KEYS
-                ]
+                hp["line"] = [int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in CACHE_KEYS]
                 id = []
                 sessionplayer = self.sc.get(k)
                 if sessionplayer is not None:
                     lower = hp["startTime"] - THRESHOLD
                     upper = hp["startTime"] + THRESHOLD
                     for i in range(len(sessionplayer)):
-                        if (
-                            lower <= sessionplayer[i]["endTime"]
-                            and upper >= sessionplayer[i]["startTime"]
-                        ):
+                        if lower <= sessionplayer[i]["endTime"] and upper >= sessionplayer[i]["startTime"]:
                             if len(id) == 0:
                                 for idx, val in enumerate(hp["line"]):
                                     sessionplayer[i]["line"][idx] += val
@@ -3979,16 +4000,20 @@ class Database:
 
         if doinsert:
             select_SC = self.sql.query["select_SC"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             update_SC = self.sql.query["update_SC"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             insert_SC = self.sql.query["insert_SC"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             delete_SC = self.sql.query["delete_SC"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             c = self.get_cursor()
             for k, sessionplayer in list(self.sc.items()):
@@ -4000,16 +4025,14 @@ class Database:
                     row = [lower, upper, *list(k[:2])]
                     c.execute(select_SC, row)
                     r = self.fetchallDict(
-                        c, ["id", "sessionId", "startTime", "endTime", *CACHE_KEYS],
+                        c,
+                        ["id", "sessionId", "startTime", "endTime", *CACHE_KEYS],
                     )
                     num = len(r)
                     d = [0] * num
                     for z in range(num):
                         d[z] = {}
-                        d[z]["line"] = [
-                            int(r[z][s]) if isinstance(r[z][s], bool) else r[z][s]
-                            for s in CACHE_KEYS
-                        ]
+                        d[z]["line"] = [int(r[z][s]) if isinstance(r[z][s], bool) else r[z][s] for s in CACHE_KEYS]
                         d[z]["id"] = r[z]["id"]
                         d[z]["sessionId"] = r[z]["sessionId"]
                         d[z]["startTime"] = r[z]["startTime"]
@@ -4031,11 +4054,7 @@ class Database:
                             start = min(start, n["startTime"]) if start else n["startTime"]
                             end = max(end, n["endTime"]) if end else n["endTime"]
                             for idx in range(len(CACHE_KEYS)):
-                                line[idx] += (
-                                    int(n["line"][idx])
-                                    if isinstance(n["line"][idx], bool)
-                                    else n["line"][idx]
-                                )
+                                line[idx] += int(n["line"][idx]) if isinstance(n["line"][idx], bool) else n["line"][idx]
                         row = [sid, start, end, *list(k[:2]), *line]
                         c.execute(insert_SC, row)
                         id = self.get_last_insert_id(c)
@@ -4051,17 +4070,22 @@ class Database:
             self.commit()
 
     def storeTourneysCache(
-        self, hid, pids, startTime, tid, gametype, pdata, heroes, doinsert=False,
+        self,
+        hid,
+        pids,
+        startTime,
+        tid,
+        gametype,
+        pdata,
+        heroes,
+        doinsert=False,
     ) -> None:
         """Update cached tour sessions. If no record exists, do an insert."""
         if gametype["type"] == "tour" and pdata:
             for p in pdata:
                 k = (tid, pids[p])
                 pdata[p]["n"] = 1
-                line = [
-                    int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s]
-                    for s in CACHE_KEYS
-                ]
+                line = [int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in CACHE_KEYS]
                 tourplayer = self.tc.get(k)
                 # Add line to the old line in the tourcache.
                 if tourplayer is not None:
@@ -4088,13 +4112,16 @@ class Database:
 
         if doinsert:
             update_TC = self.sql.query["update_TC"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             insert_TC = self.sql.query["insert_TC"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             select_TC = self.sql.query["select_TC"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
 
             inserts = []
@@ -4108,14 +4135,9 @@ class Database:
                 num = len(r)
                 if num == 1:
                     update = not r[0]["startTime"] or not r[0]["endTime"]
-                    if update or (
-                        tc["startTime"] < r[0]["startTime"]
-                        and tc["endTime"] > r[0]["endTime"]
-                    ):
+                    if update or (tc["startTime"] < r[0]["startTime"] and tc["endTime"] > r[0]["endTime"]):
                         q = update_TC.replace("<UPDATE>", "startTime=%s, endTime=%s,")
-                        row = (
-                            [tc["startTime"], tc["endTime"]] + tc["line"] + list(k[:2])
-                        )
+                        row = [tc["startTime"], tc["endTime"]] + tc["line"] + list(k[:2])
                     elif tc["startTime"] < r[0]["startTime"]:
                         q = update_TC.replace("<UPDATE>", "startTime=%s, ")
                         row = [tc["startTime"]] + tc["line"] + list(k[:2])
@@ -4127,11 +4149,7 @@ class Database:
                         row = tc["line"] + list(k[:2])
                     c.execute(q, row)
                 elif num == 0:
-                    row = (
-                        [sc["id"], tc["startTime"], tc["endTime"]]
-                        + list(k[:2])
-                        + tc["line"]
-                    )
+                    row = [sc["id"], tc["startTime"], tc["endTime"]] + list(k[:2]) + tc["line"]
                     # append to the bulk inserts
                     inserts.append(row)
 
@@ -4155,24 +4173,25 @@ class Database:
         for p in pdata:
             k = (hid, gametypeId, tourneyTypeId, pids[p], pdata[p]["startCards"])
             pdata[p]["n"] = 1
-            line = [
-                int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s]
-                for s in CACHE_KEYS
-            ]
+            line = [int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in CACHE_KEYS]
             self.dcbulk[k] = line
 
         if doinsert:
             update_cardscache = self.sql.query["update_cardscache"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             insert_cardscache = self.sql.query["insert_cardscache"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             select_cardscache_ring = self.sql.query["select_cardscache_ring"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             select_cardscache_tour = self.sql.query["select_cardscache_tour"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
 
             # Removed unused variables
@@ -4190,9 +4209,7 @@ class Database:
                         sc["mid"],
                     ) in self.wmold
                     garbageTourneyTypes = k[2] in self.ttnew or k[2] in self.ttold
-                    if self.import_options["hhBulkPath"] == "" or (
-                        not garbageWeekMonths and not garbageTourneyTypes
-                    ):
+                    if self.import_options["hhBulkPath"] == "" or (not garbageWeekMonths and not garbageTourneyTypes):
                         n = (sc["wid"], sc["mid"], k[1], k[2], k[3], k[4])
                         startCards = dccache.get(n)
                         # Add line to the old line in the hudcache.
@@ -4250,25 +4267,24 @@ class Database:
                 position,
             )
             pdata[p]["n"] = 1
-            line = [
-                int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s]
-                for s in CACHE_KEYS
-            ]
+            line = [int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in CACHE_KEYS]
             self.pcbulk[k] = line
 
         if doinsert:
             update_positionscache = self.sql.query["update_positionscache"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             insert_positionscache = self.sql.query["insert_positionscache"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
-            select_positionscache_ring = self.sql.query[
-                "select_positionscache_ring"
-            ].replace("%s", self.sql.query["placeholder"])
-            select_positionscache_tour = self.sql.query[
-                "select_positionscache_tour"
-            ].replace("%s", self.sql.query["placeholder"])
+            select_positionscache_ring = self.sql.query["select_positionscache_ring"].replace(
+                "%s", self.sql.query["placeholder"]
+            )
+            select_positionscache_tour = self.sql.query["select_positionscache_tour"].replace(
+                "%s", self.sql.query["placeholder"]
+            )
 
             # Removed unused variables:
             # select_W = self.sql.query["select_W"].replace("%s", self.sql.query["placeholder"])
@@ -4285,9 +4301,7 @@ class Database:
                         sc["mid"],
                     ) in self.wmold
                     garbageTourneyTypes = k[2] in self.ttnew or k[2] in self.ttold
-                    if self.import_options["hhBulkPath"] == "" or (
-                        not garbageWeekMonths and not garbageTourneyTypes
-                    ):
+                    if self.import_options["hhBulkPath"] == "" or (not garbageWeekMonths and not garbageTourneyTypes):
                         n = (sc["wid"], sc["mid"], k[1], k[2], k[3], k[4], k[5], k[6])
                         positions = position_cache.get(n)
                         # Add line to the old line in the hudcache.
@@ -4399,7 +4413,8 @@ class Database:
         if publicDB:
             key = (siteHandNo, siteId, heroSeat)
             q = q.replace("<heroSeat>", " AND heroSeat=%s").replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
         else:
             key = (siteHandNo, siteId)
@@ -4434,9 +4449,7 @@ class Database:
         return result
 
     def insertPlayer(self, name, site_id, hero):
-        insert_player = (
-            "INSERT INTO Players (name, siteId, hero, chars) VALUES (%s, %s, %s, %s)"
-        )
+        insert_player = "INSERT INTO Players (name, siteId, hero, chars) VALUES (%s, %s, %s, %s)"
         insert_player = insert_player.replace("%s", self.sql.query["placeholder"])
         _name = name[:32]
         if re_char.match(_name[0]):
@@ -4533,7 +4546,6 @@ class Database:
         #    self.pcache[player] = self.insertPlayer(player, siteid)
         # result[player] = self.pcache[player]
 
-
     def insertGameTypes(self, gtinfo, gtinsert):
         result = None
         c = self.get_cursor()
@@ -4552,7 +4564,8 @@ class Database:
 
             c.execute(
                 self.sql.query["insertGameTypes"].replace(
-                    "%s", self.sql.query["placeholder"],
+                    "%s",
+                    self.sql.query["placeholder"],
                 ),
                 gtinsert,
             )
@@ -4564,7 +4577,8 @@ class Database:
     def getTourneyInfo(self, siteName, tourneyNo):
         c = self.get_cursor()
         q = self.sql.query["getTourneyInfo"].replace(
-            "%s", self.sql.query["placeholder"],
+            "%s",
+            self.sql.query["placeholder"],
         )
         c.execute(q, (siteName, tourneyNo))
         columnNames = c.description
@@ -4597,16 +4611,24 @@ class Database:
             hand,
         )  # self.ttcache[(hand.tourNo, hand.siteId, tourneydata)]
 
-
     def defaultTourneyTypeValue(self, value1, value2, field) -> bool:
-        return bool(not value1 or (field == "maxseats" and value1 > value2) or (field == "limitType" and value2 == "mx") or (field, value1) == ("buyinCurrency", "NA") or (field, value1) == ("stack", "Regular") or (field, value1) == ("speed", "Normal") or (field == "koBounty" and value1))
+        return bool(
+            not value1
+            or (field == "maxseats" and value1 > value2)
+            or (field == "limitType" and value2 == "mx")
+            or (field, value1) == ("buyinCurrency", "NA")
+            or (field, value1) == ("stack", "Regular")
+            or (field, value1) == ("speed", "Normal")
+            or (field == "koBounty" and value1)
+        )
 
     def createOrUpdateTourneyType(self, obj):
         ttid, _ttid, updateDb = None, None, False
         obj.limitType = obj.gametype["limitType"]
         cursor = self.get_cursor()
         q = self.sql.query["getTourneyTypeIdByTourneyNo"].replace(
-            "%s", self.sql.query["placeholder"],
+            "%s",
+            self.sql.query["placeholder"],
         )
         cursor.execute(q, (obj.tourNo, obj.siteId))
         result = cursor.fetchone()
@@ -4723,7 +4745,8 @@ class Database:
             )
             cursor.execute(
                 self.sql.query["getTourneyTypeId"].replace(
-                    "%s", self.sql.query["placeholder"],
+                    "%s",
+                    self.sql.query["placeholder"],
                 ),
                 row,
             )
@@ -4740,7 +4763,8 @@ class Database:
                     log.debug("###### End Tourneys ########")
                 cursor.execute(
                     self.sql.query["insertTourneyType"].replace(
-                        "%s", self.sql.query["placeholder"],
+                        "%s",
+                        self.sql.query["placeholder"],
                     ),
                     row,
                 )
@@ -4748,7 +4772,8 @@ class Database:
             if updateDb:
                 # print 'DEBUG createOrUpdateTourneyType:', 'old', oldttid, 'new', ttid, row
                 q = self.sql.query["updateTourneyTypeId"].replace(
-                    "%s", self.sql.query["placeholder"],
+                    "%s",
+                    self.sql.query["placeholder"],
                 )
                 cursor.execute(q, (ttid, obj.siteId, obj.tourNo))
                 self.ttold.add(oldttid)
@@ -4766,17 +4791,20 @@ class Database:
             else:
                 tables = set()
             select = self.sql.query["selectTourneyWithTypeId"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             delete = self.sql.query["deleteTourneyTypeId"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             cursor = self.get_cursor()
             for ttid in self.ttold:
                 for t in tables:
                     statement = f"clear{t}TourneyType"
                     clear = self.sql.query[statement].replace(
-                        "%s", self.sql.query["placeholder"],
+                        "%s",
+                        self.sql.query["placeholder"],
                     )
                     cursor.execute(clear, (ttid,))
                 self.commit()
@@ -4789,14 +4817,16 @@ class Database:
                 for t in tables:
                     statement = f"clear{t}TourneyType"
                     clear = self.sql.query[statement].replace(
-                        "%s", self.sql.query["placeholder"],
+                        "%s",
+                        self.sql.query["placeholder"],
                     )
                     cursor.execute(clear, (ttid,))
                 self.commit()
             for t in tables:
                 statement = f"fetchNew{t}TourneyTypeIds"
                 fetch = self.sql.query[statement].replace(
-                    "%s", self.sql.query["placeholder"],
+                    "%s",
+                    self.sql.query["placeholder"],
                 )
                 cursor.execute(fetch)
                 for id in cursor.fetchall():
@@ -4805,16 +4835,20 @@ class Database:
     def cleanUpWeeksMonths(self) -> None:
         if self.cacheSessions and self.wmold:
             selectWeekId = self.sql.query["selectSessionWithWeekId"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             selectMonthId = self.sql.query["selectSessionWithMonthId"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             deleteWeekId = self.sql.query["deleteWeekId"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             deleteMonthId = self.sql.query["deleteMonthId"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             )
             cursor = self.get_cursor()
             weeks, months, wmids = set(), set(), set()
@@ -4822,7 +4856,8 @@ class Database:
                 for t in ("CardsCache", "PositionsCache"):
                     statement = f"clear{t}WeeksMonths"
                     clear = self.sql.query[statement].replace(
-                        "%s", self.sql.query["placeholder"],
+                        "%s",
+                        self.sql.query["placeholder"],
                     )
                     cursor.execute(clear, (wid, mid))
                 self.commit()
@@ -4847,7 +4882,8 @@ class Database:
                 for t in ("CardsCache", "PositionsCache"):
                     statement = f"clear{t}WeeksMonths"
                     clear = self.sql.query[statement].replace(
-                        "%s", self.sql.query["placeholder"],
+                        "%s",
+                        self.sql.query["placeholder"],
                     )
                     cursor.execute(clear, (wid, mid))
                 self.commit()
@@ -4856,7 +4892,8 @@ class Database:
                 for t in ("CardsCache", "PositionsCache"):
                     statement = f"fetchNew{t}WeeksMonths"
                     fetch = self.sql.query[statement].replace(
-                        "%s", self.sql.query["placeholder"],
+                        "%s",
+                        self.sql.query["placeholder"],
                     )
                     cursor.execute(fetch)
                     for wid, mid in cursor.fetchall():
@@ -4899,7 +4936,8 @@ class Database:
         if tmp is None:
             c.execute(
                 self.sql.query["insertTourney"].replace(
-                    "%s", self.sql.query["placeholder"],
+                    "%s",
+                    self.sql.query["placeholder"],
                 ),
                 (
                     hand.tourneyTypeId,
@@ -4930,12 +4968,14 @@ class Database:
 
             if startTime is None or t < startTime:
                 q = self.sql.query["updateTourneyStart"].replace(
-                    "%s", self.sql.query["placeholder"],
+                    "%s",
+                    self.sql.query["placeholder"],
                 )
                 c.execute(q, (t, result))
             elif endTime is None or t > endTime:
                 q = self.sql.query["updateTourneyEnd"].replace(
-                    "%s", self.sql.query["placeholder"],
+                    "%s",
+                    self.sql.query["placeholder"],
                 )
                 c.execute(q, (t, result))
         return result
@@ -4943,7 +4983,8 @@ class Database:
     def createOrUpdateTourney(self, summary):
         cursor = self.get_cursor()
         q = self.sql.query["getTourneyByTourneyNo"].replace(
-            "%s", self.sql.query["placeholder"],
+            "%s",
+            self.sql.query["placeholder"],
         )
         cursor.execute(q, (summary.siteId, summary.tourNo))
 
@@ -4997,7 +5038,8 @@ class Database:
                 #        summary.startTime=resultDict[ev]
             if updateDb:
                 q = self.sql.query["updateTourney"].replace(
-                    "%s", self.sql.query["placeholder"],
+                    "%s",
+                    self.sql.query["placeholder"],
                 )
                 startTime, endTime = None, None
                 if summary.startTime is not None:
@@ -5050,7 +5092,8 @@ class Database:
                 log.debug("###### End Tourneys ########")
             cursor.execute(
                 self.sql.query["insertTourney"].replace(
-                    "%s", self.sql.query["placeholder"],
+                    "%s",
+                    self.sql.query["placeholder"],
                 ),
                 row,
             )
@@ -5062,7 +5105,8 @@ class Database:
     def getTourneyPlayerInfo(self, siteName, tourneyNo, playerName):
         c = self.get_cursor()
         c.execute(
-            self.sql.query["getTourneyPlayerInfo"], (siteName, tourneyNo, playerName),
+            self.sql.query["getTourneyPlayerInfo"],
+            (siteName, tourneyNo, playerName),
         )
         columnNames = c.description
 
@@ -5100,7 +5144,8 @@ class Database:
         if tmp is None:  # new player
             c.execute(
                 self.sql.query["insertTourneysPlayer"].replace(
-                    "%s", self.sql.query["placeholder"],
+                    "%s",
+                    self.sql.query["placeholder"],
                 ),
                 (tourneyId, playerId, entryId, None, None, None, None, None, None),
             )
@@ -5115,12 +5160,14 @@ class Database:
         updateDb = False
         cursor = self.get_cursor()
         q = self.sql.query["updateTourneysPlayerBounties"].replace(
-            "%s", self.sql.query["placeholder"],
+            "%s",
+            self.sql.query["placeholder"],
         )
         for player, tourneysPlayersId in list(hand.tourneysPlayersIds.items()):
             if player in hand.koCounts:
                 cursor.execute(
-                    q, (hand.koCounts[player], hand.koCounts[player], tourneysPlayersId),
+                    q,
+                    (hand.koCounts[player], hand.koCounts[player], tourneysPlayersId),
                 )
                 updateDb = True
         if updateDb:
@@ -5131,7 +5178,8 @@ class Database:
         cursor = self.get_cursor()
         cursor.execute(
             self.sql.query["getTourneysPlayersByTourney"].replace(
-                "%s", self.sql.query["placeholder"],
+                "%s",
+                self.sql.query["placeholder"],
             ),
             (summary.tourneyId,),
         )
@@ -5145,7 +5193,8 @@ class Database:
                 if (playerId, entryId) in tplayers:
                     cursor.execute(
                         self.sql.query["getTourneysPlayersByIds"].replace(
-                            "%s", self.sql.query["placeholder"],
+                            "%s",
+                            self.sql.query["placeholder"],
                         ),
                         (summary.tourneyId, playerId, entryId),
                     )
@@ -5178,19 +5227,18 @@ class Database:
                             summaryAttribute += "s"
                         summaryDict = getattr(summary, summaryAttribute)
                         if (
-                            summaryDict[player][entryIdx] is None
-                            and resultDict[ev[1]] is not None
+                            summaryDict[player][entryIdx] is None and resultDict[ev[1]] is not None
                         ):  # DB has this value but object doesnt, so update object
                             summaryDict[player][entryIdx] = resultDict[ev[1]]
                             setattr(summary, summaryAttribute, summaryDict)
                         elif (
-                            summaryDict[player][entryIdx] is not None
-                            and not resultDict[ev[1]]
+                            summaryDict[player][entryIdx] is not None and not resultDict[ev[1]]
                         ):  # object has this value but DB doesnt, so update DB
                             updateDb = True
                     if updateDb:
                         q = self.sql.query["updateTourneysPlayer"].replace(
-                            "%s", self.sql.query["placeholder"],
+                            "%s",
+                            self.sql.query["placeholder"],
                         )
                         inputs = (
                             summary.ranks[player][entryIdx],
@@ -5223,7 +5271,8 @@ class Database:
             self.executemany(
                 cursor,
                 self.sql.query["insertTourneysPlayer"].replace(
-                    "%s", self.sql.query["placeholder"],
+                    "%s",
+                    self.sql.query["placeholder"],
                 ),
                 inserts,
             )
@@ -5256,46 +5305,114 @@ class Database:
 
 # end class Database
 
+
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description="FPDB Database utility")
+    parser.add_argument("--test-connection", action="store_true", help="Test database connection")
+    parser.add_argument("--rebuild-indexes", action="store_true", help="Drop and recreate all database indexes")
+    parser.add_argument("--show-stats", action="store_true", help="Show statistics for last hand")
+    parser.add_argument("--show-info", action="store_true", help="Show database information")
+    parser.add_argument("--interactive", action="store_true", help="Run original interactive test")
+
+    args = parser.parse_args(argv)
+
+    if not any(vars(args).values()):
+        parser.print_help()
+        return 0
+
+    Configuration.set_logfile("fpdb-log.txt")
+
+    try:
+        c = Configuration.Config()
+        sql = SQL.Sql(db_server="sqlite")
+        db_connection = Database(c)
+    except Exception as e:
+        print(f"Error connecting to database: {e}")
+        return 1
+
+    if args.test_connection:
+        print("Database connection successful ✓")
+        print(f"Backend: {db_connection.backend}")
+        print(f"Connection: {db_connection.connection}")
+
+    if args.show_info:
+        print("\n=== Database Information ===")
+        print(f"Backend type: {db_connection.backend}")
+        print(f"Database name: {db_connection.database}")
+        print(f"Host: {db_connection.host}")
+
+    if args.rebuild_indexes:
+        print("Dropping all indexes...")
+        db_connection.dropAllIndexes()
+        print("Recreating all indexes...")
+        db_connection.createAllIndexes()
+        print("Index rebuild complete ✓")
+
+    if args.show_stats:
+        try:
+            h = db_connection.get_last_hand()
+            if h:
+                print(f"\n=== Statistics for Hand {h} ===")
+                t0 = time()
+                stat_dict = db_connection.get_stats_from_hand(h, "ring")
+                t1 = time()
+
+                for p in sorted(stat_dict.keys()):
+                    print(f"  {p}: {stat_dict[p]}")
+
+                print(f"\nQuery took: {t1 - t0:4.3f} seconds")
+
+                cards = db_connection.get_cards("1")
+                if cards:
+                    print(f"Cards for player 1: {cards}")
+            else:
+                print("No hands found in database")
+        except Exception as e:
+            print(f"Error retrieving statistics: {e}")
+
+    if args.interactive:
+        print("Running original interactive test...")
+        log.debug(f"database connection object = {db_connection.connection}")
+        db_connection.dropAllIndexes()
+        db_connection.createAllIndexes()
+
+        h = db_connection.get_last_hand()
+        log.debug(f"last hand = {h}")
+
+        hero = db_connection.get_player_id(c, "PokerStars", "nutOmatic")
+        if hero:
+            log.debug(f"nutOmatic player_id {hero}")
+
+        if db_connection.backend == 4:
+            c = db_connection.get_cursor()
+            c.execute("explain query plan " + sql.query["get_table_name"], (h,))
+            for row in c.fetchall():
+                log.debug(f"Query plan: {row}")
+
+        t0 = time()
+        stat_dict = db_connection.get_stats_from_hand(h, "ring")
+        t1 = time()
+        for p in list(stat_dict.keys()):
+            log.debug(f"{p}  {stat_dict[p]}")
+
+        log.debug(f"cards = {db_connection.get_cards('1')}")
+        db_connection.close_connection
+
+        log.debug(f"get_stats took: {t1 - t0:4.3f} seconds")
+
+        print("Press ENTER to continue...")
+        sys.stdin.readline()
+
+    return 0
+
+
 if __name__ == "__main__":
-    c = Configuration.Config()
-    sql = SQL.Sql(db_server="sqlite")
-
-    db_connection = Database(c)  # mysql fpdb holdem
-    #    db_connection = Database(c, 'fpdb-p', 'test') # mysql fpdb holdem
-    #    db_connection = Database(c, 'PTrackSv2', 'razz') # mysql razz
-    #    db_connection = Database(c, 'ptracks', 'razz') # postgres
-    log.debug(f"database connection object = {db_connection.connection}")
-    # db_connection.recreate_tables()
-    db_connection.dropAllIndexes()
-    db_connection.createAllIndexes()
-
-    h = db_connection.get_last_hand()
-    log.debug(f"last hand = {h}")
-
-    hero = db_connection.get_player_id(c, "PokerStars", "nutOmatic")
-    if hero:
-        log.debug(f"nutOmatic player_id {hero}")
-
-    # example of displaying query plan in sqlite:
-    if db_connection.backend == 4:
-        c = db_connection.get_cursor()
-        c.execute("explain query plan " + sql.query["get_table_name"], (h,))
-        for row in c.fetchall():
-            log.debug(f"Query plan: {row}")
-
-    t0 = time()
-    stat_dict = db_connection.get_stats_from_hand(h, "ring")
-    t1 = time()
-    for p in list(stat_dict.keys()):
-        log.debug(f"{p}  {stat_dict[p]}")
-
-    log.debug(f"cards = {db_connection.get_cards('1')}")
-    db_connection.close_connection
-
-    log.debug(f"get_stats took: {t1 - t0:4.3f} seconds")
-
-    log.debug("Press ENTER to continue.")
-    sys.stdin.readline()
+    sys.exit(main())
 
 
 # Code borrowed from http://push.cx/2008/caching-dictionaries-in-python-vs-ruby

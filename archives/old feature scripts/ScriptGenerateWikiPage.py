@@ -296,7 +296,7 @@ sitemasks["PokerStars"]["omahahilo"] = {"nl": None, "pl": None, "fl": None}
 print(
     """{| border=0<br>
 |-
-| Site || colspan=3 style='background:%s' | Holdem || colspan=3 style='background:%s' | Omaha || colspan=3 style='background:%s' | O8 || colspan=2 style='background:%s' | 5CS ||           style='background:%s' | 7CS ||           style='background:%s' | 7CS H/L ||           style='background:%s' | Razz || colspan=3 style='background:%s' | 5CD ||           style='background:%s' | 27SD || colspan=2 style='background:%s' | 27TD || colspan=2 style='background:%s' | A5TD || colspan=2 style='background:%s' | Badugi 
+| Site || colspan=3 style='background:%s' | Holdem || colspan=3 style='background:%s' | Omaha || colspan=3 style='background:%s' | O8 || colspan=2 style='background:%s' | 5CS ||           style='background:%s' | 7CS ||           style='background:%s' | 7CS H/L ||           style='background:%s' | Razz || colspan=3 style='background:%s' | 5CD ||           style='background:%s' | 27SD || colspan=2 style='background:%s' | 27TD || colspan=2 style='background:%s' | A5TD || colspan=2 style='background:%s' | Badugi
 |-"""
     % col_colours
 )

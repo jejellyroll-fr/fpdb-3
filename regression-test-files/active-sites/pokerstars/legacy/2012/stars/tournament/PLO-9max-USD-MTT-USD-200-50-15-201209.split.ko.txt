@@ -1,32 +1,32 @@
 PokerStars Hand #85723676180: Tournament #2012090009, $200+$50+$15 USD Omaha Pot Limit - Level I (10/20) - 2012/09/05 12:59:52 EET [2012/09/05 5:59:52 ET]
 Table '2012090009 33' 9-max Seat #1 is the button
-Seat 1: Player0 (5000 in chips) 
-Seat 2: Player1 (5000 in chips) 
-Seat 3: Player2 (5000 in chips) 
-Seat 4: Player3 (5000 in chips) 
-Seat 5: Player4 (5000 in chips) 
-Seat 6: Player5 (5000 in chips) 
+Seat 1: Player0 (5000 in chips)
+Seat 2: Player1 (5000 in chips)
+Seat 3: Player2 (5000 in chips)
+Seat 4: Player3 (5000 in chips)
+Seat 5: Player4 (5000 in chips)
+Seat 6: Player5 (5000 in chips)
 Seat 7: Hero (5000 in chips) is sitting out
-Seat 8: Player6 (5000 in chips) 
-Seat 9: Player7 (5000 in chips) 
+Seat 8: Player6 (5000 in chips)
+Seat 9: Player7 (5000 in chips)
 Player1: posts small blind 10
 Player2: posts big blind 20
 *** HOLE CARDS ***
 Dealt to Hero [4h Jc 9c 2s]
-Player3: folds 
+Player3: folds
 Player4: calls 20
-Player5: folds 
-Hero: folds 
+Player5: folds
+Hero: folds
 Player6: raises 40 to 60
-Player7: folds 
-Player0: folds 
-Player1: folds 
+Player7: folds
+Player0: folds
+Player1: folds
 Player2: calls 40
 Player4: calls 40
 *** FLOP *** [Tc Qs 3s]
 Hero has returned
-Player2: checks 
-Player4: checks 
+Player2: checks
+Player4: checks
 Player6: bets 142
 Player2: calls 142
 Player4: calls 142
@@ -47,7 +47,7 @@ Player6 collected 7505 from pot
 Player4, Player6 split the $50 bounty for eliminating Player2
 Player2 finished the tournament in 397th place
 *** SUMMARY ***
-Total pot 15010 | Rake 0 
+Total pot 15010 | Rake 0
 Board [Tc Qs 3s Jd Ad]
 Seat 1: Player0 (button) folded before Flop (didn't bet)
 Seat 2: Player1 (small blind) folded before Flop

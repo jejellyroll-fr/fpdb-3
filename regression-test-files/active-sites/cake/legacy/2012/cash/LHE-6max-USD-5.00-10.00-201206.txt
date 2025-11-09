@@ -1,10 +1,10 @@
 Hand#2998011673000397 - Innsbruck (6-max) 11673 -- $5/$10 FL Hold'em -- 2012-06-20 - 23:10:52
 Dealer: Seat 9
-Seat 1: Hero ($115 in chips) 
-Seat 3: Player0 ($250,50 in chips) 
-Seat 8: Player1 ($67,50 in chips) 
-Seat 9: Player2 ($311,50 in chips) 
-Seat 10: Player3 ($269,50 in chips) 
+Seat 1: Hero ($115 in chips)
+Seat 3: Player0 ($250,50 in chips)
+Seat 8: Player1 ($67,50 in chips)
+Seat 9: Player2 ($311,50 in chips)
+Seat 10: Player3 ($269,50 in chips)
 Player3: posts small blind $2,50
 Hero: posts big blind $5
 Dealt to Hero [7h,8h]
@@ -27,4 +27,4 @@ Hero: folds
 Player0: returns uncalled bet $10
 ***SHOW DOWN***
 Player0: mucks
-Player0 wins $50,50 
+Player0 wins $50,50

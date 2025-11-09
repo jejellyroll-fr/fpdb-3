@@ -88,7 +88,12 @@ bad_words = ("History for table:", "HUD:", "Chat:", "FPDBHUD", "Lobby")
 
 class Table_Window:
     def __init__(
-        self, config, site, table_name=None, tournament=None, table_number=None,
+        self,
+        config,
+        site,
+        table_name=None,
+        tournament=None,
+        table_number=None,
     ) -> None:
         self.config = config
         self.site = site
@@ -98,7 +103,6 @@ class Table_Window:
 
         # Decode values if they are in bytes
         if isinstance(table_name, bytes):
-
             log.debug(f"Decoding table_name to UTF-8: {table_name}")
             table_name = table_name.decode("utf-8")
         if isinstance(tournament, bytes):
@@ -110,7 +114,6 @@ class Table_Window:
 
         # Handle tournament and table number
         if tournament is not None and table_number is not None:
-
             log.debug(f"Tournament: {tournament}")
             self.tournament = int(tournament)
             log.debug(f"Converted tournament: {self.tournament}")
@@ -122,6 +125,7 @@ class Table_Window:
             except ValueError:
                 # Try to extract table number from string like "Twister 0.25€, 1091614818"
                 import re
+
                 match = re.search(r"(\d+)$", str(table_number))
                 if match:
                     self.table = int(match.group(1))
@@ -138,12 +142,13 @@ class Table_Window:
             self.type = "tour"
             table_kwargs = {"tournament": self.tournament, "table_number": self.table}
             self.tableno_re = getTableNoRe(
-                self.config, self.site, tournament=self.tournament,
+                self.config,
+                self.site,
+                tournament=self.tournament,
             )
 
         # Handle cash game tables
         elif table_name is not None:
-
             log.debug(f"Cash table name type: {type(table_name)}, value: {table_name}")
 
             self.name = table_name
@@ -164,7 +169,10 @@ class Table_Window:
             return
 
         self.search_string = getTableTitleRe(
-            self.config, self.site, self.type, **table_kwargs,
+            self.config,
+            self.site,
+            self.type,
+            **table_kwargs,
         )
         log.debug(f"search string: {self.search_string}")
         # make a small delay otherwise Xtables.root.get_windows()
@@ -187,9 +195,7 @@ class Table_Window:
         log.debug(f"X coordinate: {self.x}")
         self.y = geo["y"]
         log.debug(f"Y coordinate: {self.y}")
-        self.oldx = (
-            self.x
-        )  # Attention: Remove these two lines and update Hud.py::update_table_position()
+        self.oldx = self.x  # Attention: Remove these two lines and update Hud.py::update_table_position()
         log.debug(f"Old X coordinate: {self.oldx}")
         self.oldy = self.y
         log.debug(f"Old Y coordinate: {self.oldy}")
@@ -281,9 +287,7 @@ class Table_Window:
         if new_geo is None:  # window destroyed
             return "client_destroyed"
 
-        if (
-            self.width != new_geo["width"] or self.height != new_geo["height"]
-        ):  # window resized
+        if self.width != new_geo["width"] or self.height != new_geo["height"]:  # window resized
             self.oldwidth = self.width
             self.width = new_geo["width"]
             self.oldheight = self.height

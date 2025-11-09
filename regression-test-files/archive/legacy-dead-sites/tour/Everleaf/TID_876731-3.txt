@@ -344,6 +344,3 @@ Player7 folds
 Player8 folds
 Hero does not show cards
 Hero wins 375 chips from main pot
-
-
-

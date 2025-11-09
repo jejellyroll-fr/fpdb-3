@@ -33,4 +33,3 @@ Board [Js Tc 7d 9h]
 Seat 1: Lyle N (small blind) folded before River
 Seat 3: Doc (big blind) folded before River
 Seat 5: Vance K (button) mucked hand and won 120
-

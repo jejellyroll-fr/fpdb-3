@@ -1,0 +1,39 @@
+repos:
+  # Automatic cleanup of common formatting issues
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      # Remove trailing whitespace
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      # Ensure files end with newline
+      - id: end-of-file-fixer
+      # Fix mixed line endings
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      # Check for large files that shouldn't be committed
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      # Check for merge conflicts
+      - id: check-merge-conflict
+      # Check YAML files for syntax
+      - id: check-yaml
+      # Check TOML files for syntax
+      - id: check-toml
+        exclude: ^fpdb\.toml$
+      # Check JSON files for syntax
+      - id: check-json
+
+  # Ruff linting and formatting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.8
+    hooks:
+      # Run the linter
+      # - id: ruff
+      #   args: [--fix, --exit-non-zero-on-fix, --ignore=E501]
+      # Run the formatter
+      - id: ruff-format
+
+# Configuration
+default_stages: [pre-commit]
+fail_fast: false

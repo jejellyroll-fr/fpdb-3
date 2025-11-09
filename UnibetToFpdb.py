@@ -213,7 +213,8 @@ class Unibet(HandHistoryConverter):
         re.MULTILINE | re.VERBOSE,
     )
     re_ShowdownAction = re.compile(
-        r"{}: shows \[(?P<CARDS>.*)\]".format(substitutions["PLYR"]), re.MULTILINE,
+        r"{}: shows \[(?P<CARDS>.*)\]".format(substitutions["PLYR"]),
+        re.MULTILINE,
     )
     re_sitsOut = re.compile("^{} sits out".format(substitutions["PLYR"]), re.MULTILINE)
     re_HeroCards = re.compile(
@@ -223,7 +224,9 @@ class Unibet(HandHistoryConverter):
     # re_ShownCards       = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % substitutions, re.MULTILINE)
     # re_CollectPot       = re.compile(r"Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(collected|showed \[.*\] and (won|collected)) \(?%(CUR)s(?P<POT>[,.\d]+)\)?(, mucked| with.*|)" %  substitutions, re.MULTILINE)
     re_CollectPot = re.compile(
-        r"Seat (?P<SEAT>[0-9]+):\s{PLYR}:\sbet\s(€|$|£)(?P<BET>[,.\d]+)\sand\swon\s(€|$|£)[\.0-9]+\W\snet\sresult:\s(€|$|£)(?P<POT>[,.\d]+)".format(**substitutions),
+        r"Seat (?P<SEAT>[0-9]+):\s{PLYR}:\sbet\s(€|$|£)(?P<BET>[,.\d]+)\sand\swon\s(€|$|£)[\.0-9]+\W\snet\sresult:\s(€|$|£)(?P<POT>[,.\d]+)".format(
+            **substitutions
+        ),
         re.MULTILINE,
     )
     # Vinsand88 cashed out the hand for $2.19 | Cash Out Fee $0.02
@@ -237,7 +240,9 @@ class Unibet(HandHistoryConverter):
         re.MULTILINE,
     )
     re_WinningRankOther = re.compile(
-        r"{PLYR} finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place and received {CUR}(?P<AMT>[,.0-9]+)\.$".format(**substitutions),
+        r"{PLYR} finished the tournament in (?P<RANK>[0-9]+)(st|nd|rd|th) place and received {CUR}(?P<AMT>[,.0-9]+)\.$".format(
+            **substitutions
+        ),
         re.MULTILINE,
     )
     re_RankOther = re.compile(
@@ -253,7 +258,9 @@ class Unibet(HandHistoryConverter):
     # ChazDazzle wins the 22000 bounty for eliminating berkovich609
     # JKuzja, vecenta split the $50 bounty for eliminating ODYSSES
     re_Bounty = re.compile(
-        r"{PLYR} (?P<SPLIT>split|wins) the {CUR}(?P<AMT>[,\.0-9]+) bounty for eliminating (?P<ELIMINATED>.+?)$".format(**substitutions),
+        r"{PLYR} (?P<SPLIT>split|wins) the {CUR}(?P<AMT>[,\.0-9]+) bounty for eliminating (?P<ELIMINATED>.+?)$".format(
+            **substitutions
+        ),
         re.MULTILINE,
     )
     # Amsterdam71 wins $19.90 for eliminating MuKoJla and their own bounty increases by $19.89 to $155.32
@@ -263,12 +270,16 @@ class Unibet(HandHistoryConverter):
         r"""
                         {PLYR}\swins\s{CUR}(?P<AMT>[,\.0-9]+)\s
                         for\s(splitting\sthe\selimination\sof|eliminating)\s(?P<ELIMINATED>.+?)\s
-                        and\stheir\sown\sbounty\sincreases\sby\s{CUR}(?P<INCREASE>[\.0-9]+)\sto\s{CUR}(?P<ENDAMT>[\.0-9]+)$""".format(**substitutions),
+                        and\stheir\sown\sbounty\sincreases\sby\s{CUR}(?P<INCREASE>[\.0-9]+)\sto\s{CUR}(?P<ENDAMT>[\.0-9]+)$""".format(
+            **substitutions
+        ),
         re.MULTILINE | re.VERBOSE,
     )
     re_Rake = re.compile(
         r"""
-                        Total\spot\s{CUR}(?P<POT>[,\.0-9]+)(.+?)?\s\|\sRake\s{CUR}(?P<RAKE>[,\.0-9]+)""".format(**substitutions),
+                        Total\spot\s{CUR}(?P<POT>[,\.0-9]+)(.+?)?\s\|\sRake\s{CUR}(?P<RAKE>[,\.0-9]+)""".format(
+            **substitutions
+        ),
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -294,7 +305,9 @@ class Unibet(HandHistoryConverter):
                 re.MULTILINE,
             )
             self.re_ShownCards = re.compile(
-                r"Seat\s(?P<SEAT>[0-9]+):\s{PLYR}\s{BRKTS}(?P<SHOWED>showed|mucked)\s\[(?P<CARDS>.*)\](\sand\s(lost|(won|collected)\s \({CUR}(?P<POT>[,\.\d]+)\))\swith\s(?P<STRING>.+?)(,\sand\s(won\s\({CUR}[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$".format(**subst),
+                r"Seat\s(?P<SEAT>[0-9]+):\s{PLYR}\s{BRKTS}(?P<SHOWED>showed|mucked)\s\[(?P<CARDS>.*)\](\sand\s(lost|(won|collected)\s \({CUR}(?P<POT>[,\.\d]+)\))\swith\s(?P<STRING>.+?)(,\sand\s(won\s\({CUR}[\.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$".format(
+                    **subst
+                ),
                 re.MULTILINE,
             )
 
@@ -450,26 +463,15 @@ class Unibet(HandHistoryConverter):
                 else:
                     m1 = self.re_DateTime1.finditer(info[key])
                     for a in m1:
-                        datetimestr1 = (
-                            str(a.group("H"))
-                            + ":"
-                            + str(a.group("MIN"))
-                            + ":"
-                            + str(a.group("S"))
-                        )
-                        datetimestr2 = (
-                            str(a.group("Y"))
-                            + "/"
-                            + str(a.group("M"))
-                            + "/"
-                            + str(a.group("D"))
-                        )
+                        datetimestr1 = str(a.group("H")) + ":" + str(a.group("MIN")) + ":" + str(a.group("S"))
+                        datetimestr2 = str(a.group("Y")) + "/" + str(a.group("M")) + "/" + str(a.group("D"))
                         datetimestr = datetimestr2 + " " + datetimestr1
                         # print("datetimestr", datetimestr)
                         # tz = a.group('TZ')  # just assume ET??
                         # print ("   tz = ", tz, " datetime =", datetimestr)
                     hand.startTime = datetime.datetime.strptime(
-                        datetimestr, "%Y/%m/%d %H:%M:%S",
+                        datetimestr,
+                        "%Y/%m/%d %H:%M:%S",
                     )  # also timezone at end, e.g. " ET"
                     # hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
 
@@ -531,9 +533,7 @@ class Unibet(HandHistoryConverter):
 
                         info["BIRAKE"] = info["BIRAKE"].strip("$€£₹")
 
-                        hand.buyin = (
-                            int(100 * Decimal(info["BIAMT"])) + hand.koBounty
-                        )
+                        hand.buyin = int(100 * Decimal(info["BIAMT"])) + hand.koBounty
                         hand.fee = int(100 * Decimal(info["BIRAKE"]))
                     else:
                         hand.buyin = int(100 * Decimal(info["BIAMT"]))
@@ -564,7 +564,7 @@ class Unibet(HandHistoryConverter):
                 hand.maxseats = int(info[key])
         log.info(f"read Hand Info: {hand}")
         if self.re_Cancelled.search(hand.handText):
-            msg = (f"Hand '{hand.handid}' was cancelled.")
+            msg = f"Hand '{hand.handid}' was cancelled."
             raise FpdbHandPartial(msg)
 
     def readButton(self, hand) -> None:
@@ -628,7 +628,9 @@ class Unibet(HandHistoryConverter):
         log.info(f"read hand add streets: {hand}")
 
     def readCommunityCards(
-        self, hand, street,
+        self,
+        hand,
+        street,
     ) -> None:  # street has been matched by markStreets, so exists in this hand
         m = self.re_Board.search(hand.streets[street])
         if m:
@@ -643,7 +645,8 @@ class Unibet(HandHistoryConverter):
         for player in m:
             log.info(f"hand add Ante({player.group('PNAME')},{player.group('ANTE')})")
             hand.addAnte(
-                player.group("PNAME"), self.clearMoneyString(player.group("ANTE")),
+                player.group("PNAME"),
+                self.clearMoneyString(player.group("ANTE")),
             )
 
     def readBringIn(self, hand) -> None:
@@ -688,14 +691,18 @@ class Unibet(HandHistoryConverter):
                     )
         for a in self.re_PostBB.finditer(hand.handText):
             hand.addBlind(
-                a.group("PNAME"), "big blind", self.clearMoneyString(a.group("BB")),
+                a.group("PNAME"),
+                "big blind",
+                self.clearMoneyString(a.group("BB")),
             )
             log.info(
                 f"readBlinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('BB'))}'",
             )
         for a in self.re_PostBoth.finditer(hand.handText):
             hand.addBlind(
-                a.group("PNAME"), "both", self.clearMoneyString(a.group("SBBB")),
+                a.group("PNAME"),
+                "both",
+                self.clearMoneyString(a.group("SBBB")),
             )
             log.info(
                 f"readBlinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('SBBB'))}'",
@@ -703,14 +710,18 @@ class Unibet(HandHistoryConverter):
 
         for a in self.re_PostStraddle.finditer(hand.handText):
             hand.addBlind(
-                a.group("PNAME"), "straddle", self.clearMoneyString(a.group("STRADDLE")),
+                a.group("PNAME"),
+                "straddle",
+                self.clearMoneyString(a.group("STRADDLE")),
             )
             log.info(
                 f"read Blinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('STRADDLE'))}'",
             )
         for a in self.re_PostBUB.finditer(hand.handText):
             hand.addBlind(
-                a.group("PNAME"), "button blind", self.clearMoneyString(a.group("BUB")),
+                a.group("PNAME"),
+                "button blind",
+                self.clearMoneyString(a.group("BUB")),
             )
             log.info(
                 f"read Blinds: '{a.group('PNAME')}' for '{self.clearMoneyString(a.group('BUB'))}'",
@@ -807,7 +818,8 @@ class Unibet(HandHistoryConverter):
         hand.setUncalledBets(True)
         for m in self.re_CollectPot.finditer(hand.handText):
             hand.addCollectPot(
-                player=m.group("PNAME"), pot=str(Decimal(m.group("POT"))),
+                player=m.group("PNAME"),
+                pot=str(Decimal(m.group("POT"))),
             )
             log.info(
                 f"read Collect Pot: '{m.group('PNAME')}' for '{Decimal(m.group('POT'))!s}'",

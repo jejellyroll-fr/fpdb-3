@@ -121,7 +121,6 @@ class TestWinamaxComplete(unittest.TestCase):
         self.parser._parse_limit_info(mg, info, "sample hand text")
         assert info["limitType"] == "fl"
 
-
     def test_parse_additional_info_detailed(self) -> None:
         """Test _parse_additional_info with game types and stakes."""
         test_cases = [
@@ -476,7 +475,6 @@ class TestWinamaxComplete(unittest.TestCase):
 
         for regex_name in player_regexes:
             assert hasattr(self.parser, regex_name), f"Parser should have {regex_name} after compilePlayerRegexs"
-
 
     def test_tournament_specific_parsing(self) -> None:
         """Test tournament-specific parsing methods."""

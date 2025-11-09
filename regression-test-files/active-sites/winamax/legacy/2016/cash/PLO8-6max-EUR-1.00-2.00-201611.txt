@@ -6,7 +6,7 @@ Seat 2: Hero (212.91€)
 Player0 posts small blind 1€
 Hero posts big blind 2€
 Dealt to Hero [4d 9h 7h 2s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player0 calls 1€
 Hero checks
 *** FLOP *** [Ac 5s 4h]

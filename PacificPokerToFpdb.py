@@ -182,11 +182,14 @@ class PacificPoker(HandHistoryConverter):
         re.MULTILINE,
     )
     re_PostBoth = re.compile(
-        r"^{PLYR} posts dead blind \[({CUR})?\s?(?P<SB>[{NUM}]+)\s?({CUR})?\s\+\s({CUR})?\s?(?P<BB>[{NUM}]+)\s?({CUR})?\]".format(**substitutions),
+        r"^{PLYR} posts dead blind \[({CUR})?\s?(?P<SB>[{NUM}]+)\s?({CUR})?\s\+\s({CUR})?\s?(?P<BB>[{NUM}]+)\s?({CUR})?\]".format(
+            **substitutions
+        ),
         re.MULTILINE,
     )
     re_HeroCards = re.compile(
-        r"^Dealt to {PLYR}( \[\s(?P<NEWCARDS>.+?)\s\])".format(**substitutions), re.MULTILINE,
+        r"^Dealt to {PLYR}( \[\s(?P<NEWCARDS>.+?)\s\])".format(**substitutions),
+        re.MULTILINE,
     )
     re_Action = re.compile(
         r"""
@@ -198,7 +201,8 @@ class PacificPoker(HandHistoryConverter):
         re.MULTILINE | re.VERBOSE,
     )
     re_ShowdownAction = re.compile(
-        r"^{} shows \[(?P<CARDS>.*)\]".format(substitutions["PLYR"]), re.MULTILINE,
+        r"^{} shows \[(?P<CARDS>.*)\]".format(substitutions["PLYR"]),
+        re.MULTILINE,
     )
     re_sitsOut = re.compile("^{} sits out".format(substitutions["PLYR"]), re.MULTILINE)
     re_ShownCards = re.compile(
@@ -304,16 +308,22 @@ class PacificPoker(HandHistoryConverter):
                         a.group("S"),
                     )
                 hand.startTime = datetime.datetime.strptime(
-                    datetimestr, "%Y/%m/%d %H:%M:%S",
+                    datetimestr,
+                    "%Y/%m/%d %H:%M:%S",
                 )
                 hand.startTime = HandHistoryConverter.changeTimezone(
-                    hand.startTime, "ET", "UTC",
+                    hand.startTime,
+                    "ET",
+                    "UTC",
                 )
                 hand.newFormat = datetime.datetime.strptime(
-                    "20220908000000", "%Y%m%d%H%M%S",
+                    "20220908000000",
+                    "%Y%m%d%H%M%S",
                 )  # this is a guess
                 hand.newFormat = HandHistoryConverter.changeTimezone(
-                    hand.newFormat, "ET", "UTC",
+                    hand.newFormat,
+                    "ET",
+                    "UTC",
                 )
             if key == "HID":
                 hand.handid = info[key]
@@ -330,11 +340,7 @@ class PacificPoker(HandHistoryConverter):
                         hand.buyinCurrency = "USD"
                     elif info["BUYIN"].find("€") != -1:
                         hand.buyinCurrency = "EUR"
-                    elif (
-                        "PLAY" in info
-                        and info["PLAY"] != "Practice Play"
-                        and info["PLAY"] != "Play Money"
-                    ):
+                    elif "PLAY" in info and info["PLAY"] != "Practice Play" and info["PLAY"] != "Play Money":
                         hand.buyinCurrency = "FREE"
                     else:
                         # FIXME: handle other currencies, FPP, play money
@@ -418,7 +424,9 @@ class PacificPoker(HandHistoryConverter):
         hand.addStreets(m)
 
     def readCommunityCards(
-        self, hand, street,
+        self,
+        hand,
+        street,
     ) -> None:  # street has been matched by markStreets, so exists in this hand
         if street in (
             "FLOP",
@@ -435,7 +443,8 @@ class PacificPoker(HandHistoryConverter):
         for player in m:
             # ~ logging.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
             hand.addAnte(
-                player.group("PNAME"), self.clearMoneyString(player.group("ANTE")),
+                player.group("PNAME"),
+                self.clearMoneyString(player.group("ANTE")),
             )
             self.allInBlind(hand, "PREFLOP", player, "ante")
 
@@ -474,7 +483,9 @@ class PacificPoker(HandHistoryConverter):
         for a in self.re_PostBB.finditer(hand.handText):
             if a.group("PNAME") in hand.stacks:
                 hand.addBlind(
-                    a.group("PNAME"), "big blind", self.clearMoneyString(a.group("BB")),
+                    a.group("PNAME"),
+                    "big blind",
+                    self.clearMoneyString(a.group("BB")),
                 )
                 self.allInBlind(hand, "PREFLOP", a, "big blind")
             else:
@@ -562,11 +573,7 @@ class PacificPoker(HandHistoryConverter):
             if street not in ("PREFLOP", "DEAL"):
                 hand.setUncalledBets(False)
             # print "DEBUG: acts: %s" %acts
-            bet = (
-                self.clearMoneyString(action.group("BET"))
-                if action.group("BET")
-                else None
-            )
+            bet = self.clearMoneyString(action.group("BET")) if action.group("BET") else None
             if action.group("PNAME") in hand.stacks:
                 if action.group("ATYPE") == " folds":
                     hand.addFold(street, action.group("PNAME"))
@@ -580,7 +587,10 @@ class PacificPoker(HandHistoryConverter):
                     hand.addBet(street, action.group("PNAME"), bet)
                 elif action.group("ATYPE") == " discards":
                     hand.addDiscard(
-                        street, action.group("PNAME"), bet, action.group("DISCARDED"),
+                        street,
+                        action.group("PNAME"),
+                        bet,
+                        action.group("DISCARDED"),
                     )
                 elif action.group("ATYPE") == " stands pat":
                     hand.addStandsPat(street, action.group("PNAME"))
@@ -590,15 +600,9 @@ class PacificPoker(HandHistoryConverter):
                     )
 
                 if action.group("ATYPE") not in (" checks", " folds") and not hand.allInBlind:
-                    if not (
-                        hand.stacks[action.group("PNAME")] == 0
-                        and action.group("ATYPE") == " calls"
-                    ):
+                    if not (hand.stacks[action.group("PNAME")] == 0 and action.group("ATYPE") == " calls"):
                         hand.setUncalledBets(False)
-                    if (
-                        hand.stacks[action.group("PNAME")] == 0
-                        and action.group("ATYPE") == " raises"
-                    ):
+                    if hand.stacks[action.group("PNAME")] == 0 and action.group("ATYPE") == " raises":
                         hand.checkForUncalled = True
             else:
                 log.error(
@@ -632,7 +636,8 @@ class PacificPoker(HandHistoryConverter):
         for m in self.re_CollectPot.finditer(hand.handText):
             # print "DEBUG: hand.addCollectPot(player=", m.group('PNAME'), ", pot=", m.group('POT'), ")"
             hand.addCollectPot(
-                player=m.group("PNAME"), pot=self.clearMoneyString(m.group("POT")),
+                player=m.group("PNAME"),
+                pot=self.clearMoneyString(m.group("POT")),
             )
 
     def readShownCards(self, hand) -> None:
@@ -649,7 +654,10 @@ class PacificPoker(HandHistoryConverter):
 
                 # print "DEBUG: hand.addShownCards(%s, %s, %s, %s)" %(cards, m.group('PNAME'), shown, mucked)
                 hand.addShownCards(
-                    cards=cards, player=m.group("PNAME"), shown=shown, mucked=mucked,
+                    cards=cards,
+                    player=m.group("PNAME"),
+                    shown=shown,
+                    mucked=mucked,
                 )
 
     def splitCards(self, cards):

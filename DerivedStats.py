@@ -167,7 +167,7 @@ def _buildStatsInitializer() -> dict:  # noqa: PLR0915
         init["foldToStreet%dCBChance" % i] = False
         init["foldToStreet%dCBDone" % i] = False
         init["wonWhenSeenStreet%d" % i] = False
-    
+
     # Cash out fees (stored in cents) and cash out flag
     init["cashOutFee"] = 0
     init["isCashOut"] = False
@@ -518,10 +518,10 @@ class DerivedStats:
                 player_stats["tourneysPlayersId"] = None
             if player_name in hand.shown:
                 player_stats["showed"] = True
-            
+
             # Cash out fees - convert from Decimal to cents for database storage
             # and set cash out flag
-            if hasattr(hand, 'cashOutFees') and player_name in hand.cashOutFees:
+            if hasattr(hand, "cashOutFees") and player_name in hand.cashOutFees:
                 player_stats["cashOutFee"] = int(CENTS_MULTIPLIER * hand.cashOutFees[player_name])
                 player_stats["isCashOut"] = True
             else:
@@ -1064,7 +1064,7 @@ class DerivedStats:
                     self.handsplayers[preflop_aggressor][f"street{i}CBChance"] = False
                 if f"street{i}CBDone" not in self.handsplayers[preflop_aggressor]:
                     self.handsplayers[preflop_aggressor][f"street{i}CBDone"] = False
-                    
+
                 self.handsplayers[preflop_aggressor][f"street{i}CBChance"] = True
 
                 # Check if they bet first on this street
@@ -1127,7 +1127,7 @@ class DerivedStats:
                             self.handsplayers[player][f"street{i}CheckCallDone"] = False
                         if f"street{i}CheckRaiseDone" not in self.handsplayers[player]:
                             self.handsplayers[player][f"street{i}CheckRaiseDone"] = False
-                            
+
                         self.handsplayers[player][f"street{i}CheckCallRaiseChance"] = True
 
                         # Look for subsequent action

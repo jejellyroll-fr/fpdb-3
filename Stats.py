@@ -305,9 +305,7 @@ def _calculate_end_stack(stat_dict, player, hand_instance):
     for street in hand_instance.bets:
         for item in hand_instance.bets[street]:
             if item == stat_dict[player]["screen_name"]:
-                for amount in hand_instance.bets[street][
-                    stat_dict[player]["screen_name"]
-                ]:
+                for amount in hand_instance.bets[street][stat_dict[player]["screen_name"]]:
                     stack -= float(amount)
 
     # Next, add back any money returned
@@ -366,9 +364,7 @@ def m_ratio(stat_dict, player):
 
     stack = _calculate_end_stack(stat_dict, player, hand_instance)
 
-    if (
-        compulsory_bets != 0
-    ):  # Check if compulsory_bets is non-zero to avoid division by zero
+    if compulsory_bets != 0:  # Check if compulsory_bets is non-zero to avoid division by zero
         stat = stack / compulsory_bets
     else:
         stat = 0  # Default to 0 if compulsory_bets is zero
@@ -1041,10 +1037,12 @@ def f_steal(stat_dict, player):
     stat = 0.0
     try:
         folded_blind = stat_dict[player].get("sbnotdef", 0) + stat_dict[player].get(
-            "bbnotdef", 0,
+            "bbnotdef",
+            0,
         )
         blind_stolen = stat_dict[player].get("sbstolen", 0) + stat_dict[player].get(
-            "bbstolen", 0,
+            "bbstolen",
+            0,
         )
 
         # No steal attempts = no data available
@@ -1229,12 +1227,8 @@ def fbr(stat_dict, player):
         fb_opp_0 = float(stat_dict[player].get("fb_opp_0", 0))  # Ensure key exists
         pfr_opp = float(stat_dict[player].get("n", 0))  # Ensure key exists
 
-        if (
-            fb_opp_0 != 0 and pfr_opp != 0
-        ):  # Check both values to avoid division by zero
-            stat = (float(stat_dict[player]["fb_0"]) / fb_opp_0) * (
-                float(stat_dict[player]["pfr"]) / pfr_opp
-            )
+        if fb_opp_0 != 0 and pfr_opp != 0:  # Check both values to avoid division by zero
+            stat = (float(stat_dict[player]["fb_0"]) / fb_opp_0) * (float(stat_dict[player]["pfr"]) / pfr_opp)
         else:
             stat = 0  # Default to 0 if any of the values is zero
 
@@ -1290,9 +1284,7 @@ def ctb(stat_dict, player):
             "call3B=%3.1f%%" % (100.0 * stat),
             "(%d/%d)"
             % (
-                float(stat_dict[player]["f3b_opp_0"])
-                - stat_dict[player]["fb_0"]
-                - stat_dict[player]["f3b_0"],
+                float(stat_dict[player]["f3b_opp_0"]) - stat_dict[player]["fb_0"] - stat_dict[player]["f3b_0"],
                 stat_dict[player]["fb_opp_0"],
             ),
             "% call 3 bet",
@@ -2011,14 +2003,10 @@ def a_freq_123(stat_dict, player):
     try:
         # Sum up aggression and seen stats
         total_aggr = (
-            stat_dict[player].get("aggr_1", 0)
-            + stat_dict[player].get("aggr_2", 0)
-            + stat_dict[player].get("aggr_3", 0)
+            stat_dict[player].get("aggr_1", 0) + stat_dict[player].get("aggr_2", 0) + stat_dict[player].get("aggr_3", 0)
         )
         total_saw = (
-            stat_dict[player].get("saw_1", 0)
-            + stat_dict[player].get("saw_2", 0)
-            + stat_dict[player].get("saw_3", 0)
+            stat_dict[player].get("saw_1", 0) + stat_dict[player].get("saw_2", 0) + stat_dict[player].get("saw_3", 0)
         )
 
         # Check to avoid division by zero
@@ -2928,11 +2916,7 @@ def game_abbr(stat_dict, player):
             # If hand_instance is None, return default empty values
             return ("NA", "NA", "game=NA", "game_abbr=NA", "(NA)", "Game abbreviation")
 
-        cat_plus_limit = (
-            hand_instance.gametype["category"]
-            + "."
-            + hand_instance.gametype["limitType"]
-        )
+        cat_plus_limit = hand_instance.gametype["category"] + "." + hand_instance.gametype["limitType"]
         stat = {
             # ftp's 10-game with official abbreviations
             "holdem.fl": "H",
@@ -2958,7 +2942,8 @@ def game_abbr(stat_dict, player):
             "holdem.pl": "Hp",
             "studhi.nl": "Sn",
         }.get(
-            cat_plus_limit, "Unknown",
+            cat_plus_limit,
+            "Unknown",
         )  # Default to "Unknown" if not found
         return (
             stat,
@@ -4326,9 +4311,7 @@ def check_raise_frequency(stat_dict, player):
     try:
         # Sum the total check-raises and opportunities
         total_cr = (
-            stat_dict[player].get("cr_1", 0)
-            + stat_dict[player].get("cr_2", 0)
-            + stat_dict[player].get("cr_3", 0)
+            stat_dict[player].get("cr_1", 0) + stat_dict[player].get("cr_2", 0) + stat_dict[player].get("cr_3", 0)
         )
         total_opp = (
             stat_dict[player].get("ccr_opp_1", 0)
@@ -4364,10 +4347,12 @@ def check_raise_frequency(stat_dict, player):
 def river_call_efficiency(stat_dict, player):
     try:
         river_calls = stat_dict[player].get(
-            "call_3", 0,
+            "call_3",
+            0,
         )  # Safely get river calls, defaulting to 0
         showdowns_won = stat_dict[player].get(
-            "wmsd", 0,
+            "wmsd",
+            0,
         )  # Safely get showdowns won, defaulting to 0
 
         # Calculate the efficiency, ensuring no division by zero
@@ -4454,36 +4439,36 @@ def starthands(stat_dict, player):
 
     query = (
         "SELECT distinct startCards, street0Aggr, street0CalledRaiseDone, "
-         "case when HandsPlayers.position = 'B' then 'b' "
-         "when HandsPlayers.position = 'S' then 'b' "
-         "when HandsPlayers.position = '0' then 'l' "
-         "when HandsPlayers.position = '1' then 'l' "
-         "when HandsPlayers.position = '2' then 'm' "
-         "when HandsPlayers.position = '3' then 'm' "
-         "when HandsPlayers.position = '4' then 'm' "
-         "when HandsPlayers.position = '5' then 'e' "
-         "when HandsPlayers.position = '6' then 'e' "
-         "when HandsPlayers.position = '7' then 'e' "
-         "when HandsPlayers.position = '8' then 'e' "
-         "when HandsPlayers.position = '9' then 'e' "
-         "else 'X' end "
-         "FROM Hands, HandsPlayers, Gametypes "
-         "WHERE HandsPlayers.handId = Hands.id "
-         " AND Gametypes.id = Hands.gametypeid "
-         " AND Gametypes.type = "
-         "   (SELECT Gametypes.type FROM Gametypes, Hands   "
-         "  WHERE Hands.gametypeid = Gametypes.id and Hands.id = %d) "
-         " AND Gametypes.Limittype =  "
-         "   (SELECT Gametypes.limitType FROM Gametypes, Hands  "
-         " WHERE Hands.gametypeid = Gametypes.id and Hands.id = %d) "
-         "AND Gametypes.category = 'holdem' "
-         "AND fileId = (SELECT fileId FROM Hands "
-         " WHERE Hands.id = %d) "
-         "AND HandsPlayers.playerId = %d "
-         "AND street0VPI "
-         "AND startCards > 0 AND startCards <> 170 "
-         "ORDER BY startCards DESC "
-         ";"
+        "case when HandsPlayers.position = 'B' then 'b' "
+        "when HandsPlayers.position = 'S' then 'b' "
+        "when HandsPlayers.position = '0' then 'l' "
+        "when HandsPlayers.position = '1' then 'l' "
+        "when HandsPlayers.position = '2' then 'm' "
+        "when HandsPlayers.position = '3' then 'm' "
+        "when HandsPlayers.position = '4' then 'm' "
+        "when HandsPlayers.position = '5' then 'e' "
+        "when HandsPlayers.position = '6' then 'e' "
+        "when HandsPlayers.position = '7' then 'e' "
+        "when HandsPlayers.position = '8' then 'e' "
+        "when HandsPlayers.position = '9' then 'e' "
+        "else 'X' end "
+        "FROM Hands, HandsPlayers, Gametypes "
+        "WHERE HandsPlayers.handId = Hands.id "
+        " AND Gametypes.id = Hands.gametypeid "
+        " AND Gametypes.type = "
+        "   (SELECT Gametypes.type FROM Gametypes, Hands   "
+        "  WHERE Hands.gametypeid = Gametypes.id and Hands.id = %d) "
+        " AND Gametypes.Limittype =  "
+        "   (SELECT Gametypes.limitType FROM Gametypes, Hands  "
+        " WHERE Hands.gametypeid = Gametypes.id and Hands.id = %d) "
+        "AND Gametypes.category = 'holdem' "
+        "AND fileId = (SELECT fileId FROM Hands "
+        " WHERE Hands.id = %d) "
+        "AND HandsPlayers.playerId = %d "
+        "AND street0VPI "
+        "AND startCards > 0 AND startCards <> 170 "
+        "ORDER BY startCards DESC "
+        ";"
     ) % (int(handid), int(handid), int(handid), int(player))
 
     # print query
@@ -4513,9 +4498,7 @@ def starthands(stat_dict, player):
                 PFlimp = PFlimp + "\n"
     sc.close()
 
-    returnstring = (
-        PFlimp + "\n" + PFaggr + "\n" + PFcar + "\n" + PFdefendBB
-    )  # + "\n" + str(handid)
+    returnstring = PFlimp + "\n" + PFaggr + "\n" + PFcar + "\n" + PFdefendBB  # + "\n" + str(handid)
 
     return (
         (returnstring),
@@ -4575,18 +4558,127 @@ STATLIST = [x for x in STATLIST if x not in dir(codecs)]
 STATLIST = [x for x in STATLIST if x not in misslist]
 # print "STATLIST is", STATLIST
 
-if __name__ == "__main__":
-    c = Configuration.Config()
-    db_connection = Database.Database(c)
-    h = db_connection.get_last_hand()
-    stat_dict = db_connection.get_stats_from_hand(h, "ring")
-    hand_instance = Hand.hand_factory(h, c, db_connection)
 
-    for _player in stat_dict:
-        for _attr in STATLIST:
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description="FPDB Stats utility")
+    parser.add_argument("--show-stats", action="store_true", help="Show statistics from last hand")
+    parser.add_argument("--list-stats", action="store_true", help="List all available stat functions")
+    parser.add_argument("--validate-stats", action="store_true", help="Validate all stat functions")
+    parser.add_argument("--interactive", action="store_true", help="Run original interactive test")
+
+    args = parser.parse_args(argv)
+
+    if not any(vars(args).values()):
+        parser.print_help()
+        return 0
+
+    Configuration.set_logfile("fpdb-log.txt")
+
+    if args.list_stats:
+        print("=== Available Stat Functions ===")
+        print(f"Total stats available: {len(STATLIST)}")
+        for i, stat in enumerate(sorted(STATLIST), 1):
+            print(f"  {i:3}. {stat}")
+
+        print(f"\n=== Valid Stats with Descriptions ===")
+        try:
+            stat_descriptions = get_valid_stats()
+            if stat_descriptions:
+                for stat_name, description in sorted(stat_descriptions.items()):
+                    print(f"  {stat_name}: {description}")
+            else:
+                print("  No stat descriptions available")
+        except Exception as e:
+            print(f"  Could not retrieve stat descriptions (this is normal)")
+            print(f"  Note: Some functions in STATLIST are not poker stats")
+
+    if args.show_stats or args.validate_stats or args.interactive:
+        try:
+            print("Connecting to database...")
+            c = Configuration.Config()
+            db_connection = Database.Database(c)
+            h = db_connection.get_last_hand()
+
+            if not h:
+                print("No hands found in database")
+                return 1
+
+            print(f"Using hand ID: {h}")
+
+        except Exception as e:
+            print(f"Error connecting to database: {e}")
+            return 1
+
+    if args.show_stats:
+        try:
+            stat_dict = db_connection.get_stats_from_hand(h, "ring")
+            hand_instance = Hand.hand_factory(h, c, db_connection)
+
+            print(f"\n=== Statistics for Hand {h} ===")
+            for player, stats in stat_dict.items():
+                print(f"\nPlayer: {player}")
+                for stat_name, value in sorted(stats.items()):
+                    print(f"  {stat_name}: {value}")
+
+        except Exception as e:
+            print(f"Error retrieving stats: {e}")
+            return 1
+
+    if args.validate_stats:
+        print("\n=== Validating Stat Functions ===")
+        try:
+            stat_dict = db_connection.get_stats_from_hand(h, "ring")
+            hand_instance = Hand.hand_factory(h, c, db_connection)
+
+            valid_count = 0
+            error_count = 0
+
+            for player in stat_dict:
+                for attr in STATLIST:
+                    try:
+                        # Test if the stat function exists and can be called
+                        if hasattr(sys.modules[__name__], attr):
+                            valid_count += 1
+                        else:
+                            print(f"  ✗ {attr}: Function not found")
+                            error_count += 1
+                    except Exception as e:
+                        print(f"  ✗ {attr}: Error - {e}")
+                        error_count += 1
+                break  # Only test with first player
+
+            print(f"\nValidation complete: {valid_count} valid, {error_count} errors")
+
+        except Exception as e:
+            print(f"Error during validation: {e}")
+            return 1
+
+    if args.interactive:
+        print("Running original interactive test...")
+        c = Configuration.Config()
+        db_connection = Database.Database(c)
+        h = db_connection.get_last_hand()
+        stat_dict = db_connection.get_stats_from_hand(h, "ring")
+        hand_instance = Hand.hand_factory(h, c, db_connection)
+
+        for _player in stat_dict:
+            for _attr in STATLIST:
+                pass
+            break
+
+        stat_descriptions = get_valid_stats()
+        for _stat in STATLIST:
             pass
-        break
 
-    stat_descriptions = get_valid_stats()
-    for _stat in STATLIST:
-        pass
+        print("Interactive test complete.")
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

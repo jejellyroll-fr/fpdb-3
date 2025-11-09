@@ -7,7 +7,7 @@ Seat 5: Player1 (17.38)
 Player1 posts small blind 0.10
 Hero posts big blind 0.20
 Dealt to Hero [Kh 2s]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player0 raises 0.20 to 0.40
 Player1 raises 1.60 to 2
 Hero folds

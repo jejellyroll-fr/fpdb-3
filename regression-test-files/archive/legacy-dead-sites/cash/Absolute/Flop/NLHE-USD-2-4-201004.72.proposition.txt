@@ -8,7 +8,7 @@ Seat 2 - PLAYER3 ($547 in chips)
 PLAYER1 - Posts small blind $2
 PLAYER2 - Posts big blind $4
 *** POCKET CARDS ***
-Dealt to HERO [10h Kd] 
+Dealt to HERO [10h Kd]
 HERO - Folds
 PLAYER3 - Folds
 PLAYER0 - Raises $12 to $12
@@ -20,7 +20,7 @@ PLAYER0 - Bets $20
 PLAYER2 - Folds
 PLAYER0 - returned ($20) : not called
 *** SHOW DOWN ***
-PLAYER0 - Shows [2c 7c] (ace high) 
+PLAYER0 - Shows [2c 7c] (ace high)
 PLAYER0 Collects $40 from 72 proposition pot
 PLAYER0 Collects $24.20 from main pot
 *** SUMMARY ***

@@ -1,7 +1,7 @@
 pypokereval packaging for fpdb project
 --------------------------------------
 
-Created by Gimick on 11th December 2010 
+Created by Gimick on 11th December 2010
 Content is available under the the GNU Affero General Public License version 3
 
 Background
@@ -10,7 +10,7 @@ Background
 The walktrough builds an unoffical python installer package for pypokereval.
 
 In a previous walkthrough, the pypokereval dll(pyd) was built from source.
-In this walkthrough, we are going to generate a windows package which will allow 
+In this walkthrough, we are going to generate a windows package which will allow
 the sources to be installed through distutils onto a client computer
 
 The current situation is that there is no windows build or windows installer provided
@@ -20,7 +20,7 @@ Until a package is available, the fpdb project needs some method of providing a 
 installation for the pypokereval module.  This walkthrough will therefore be obsolete once
 an official package becomes available.
 
-Actually, for windows fpdb users, the majority will use a pre-built fpdb executable (which contains the  
+Actually, for windows fpdb users, the majority will use a pre-built fpdb executable (which contains the
 pypokereval package)  Therefore, pypokereval installation will only be needed for two groups of people:
  i) anyone wanting to build an fpdb package using py2exe
  ii) anyone wanting to run fpdb on windows from source
@@ -47,7 +47,7 @@ The underlying package was not built with sse enabled, and therefore should work
 
 System used for building is winXP home
 
-1.1/ Install python runtime from here ... 
+1.1/ Install python runtime from here ...
 
 Python 2.6.5 ... http://www.python.org/ftp/python/2.6.5/python-2.6.5.msi
 
@@ -77,7 +77,7 @@ dos>cd ..
 
 The next step is to rename the pokereval.py file to __init__.py.  The reason for doing this
 is that site-packages require an __init__ file to be found when the module is imported at runtime
-Inserting a dummy __init__.py which simply imports pokereval does not work, the reason being that the 
+Inserting a dummy __init__.py which simply imports pokereval does not work, the reason being that the
 PokerEval class is not seen by the caller.  Syntax such as "from pokereval import PokerEval"
 does not work unless the pokereval.py (which defines the PokerEval class) is renamed to __init__.py.
 
@@ -129,7 +129,7 @@ temp
        |--__init__.py
        |--utils
             |--test.py
-        
+
 
 3.3 Build
 ---------
@@ -154,6 +154,3 @@ Navigate to c:\python26\lib\site-packages\pokereval\test
 execute dos>c:\Python26\python.exe test.py
 
 Output should scroll down the screen
-
-
-

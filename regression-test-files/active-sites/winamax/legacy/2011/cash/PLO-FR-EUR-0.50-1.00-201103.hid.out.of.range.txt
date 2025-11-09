@@ -5,11 +5,11 @@ Seat 2: Hero (102.13€)
 Seat 3: Player1 (315.82€)
 Seat 4: Player2 (99.50€)
 Seat 5: Player3 (112.97€)
-*** ANTE/BLINDS *** 
+*** ANTE/BLINDS ***
 Player3 posts small blind 0.50€
 Player0 posts big blind 1€
 Dealt to Hero [Jd 6s 7d Kh]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Hero folds
 Player1 folds
 Player2 folds
