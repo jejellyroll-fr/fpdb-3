@@ -267,11 +267,14 @@ class PartyPoker(HandHistoryConverter):
     )
 
     re_NewLevel = re.compile(
-        r"Blinds(-Antes)?\((?P<SB>[{NUM} ]+)/(?P<BB>[{NUM} ]+)(?:\s*-\s*(?P<ANTE>[{NUM} ]+))?\)".format(**substitutions),
+        r"Blinds(-Antes)?\((?P<SB>[{NUM} ]+)/(?P<BB>[{NUM} ]+)(?:\s*-\s*(?P<ANTE>[{NUM} ]+))?\)".format(
+            **substitutions
+        ),
         re.VERBOSE | re.MULTILINE | re.DOTALL,
     )
     re_CountedSeats = re.compile(
-        r"Total\s+number\s+of\s+players\s*:\s*(?P<COUNTED_SEATS>\d+)", re.MULTILINE,
+        r"Total\s+number\s+of\s+players\s*:\s*(?P<COUNTED_SEATS>\d+)",
+        re.MULTILINE,
     )
     re_identify = re.compile(r"\*{5}\sHand\sHistory\s[fF]or\sGame\s\d+\w+?\s")
     re_SplitHands = re.compile("Game\\s*\\#\\d+\\s*starts.\n\n+\\#Game\\s*No\\s*\\:\\s*\\d+\\s*")
@@ -280,14 +283,14 @@ class PartyPoker(HandHistoryConverter):
     re_Button = re.compile(r"Seat (?P<BUTTON>\d+) is the button", re.MULTILINE)
     re_Board = re.compile(r"\[(?P<CARDS>.+)\]")
     re_NoSmallBlind = re.compile(
-        "^There is no Small Blind in this hand as the Big Blind "
-        "of the previous hand left the table",
+        "^There is no Small Blind in this hand as the Big Blind " "of the previous hand left the table",
         re.MULTILINE,
     )
     re_20BBmin = re.compile(r"Table 20BB Min")
     re_Cancelled = re.compile(r"Table\sClosed\s?", re.MULTILINE)
     re_Disconnected = re.compile(
-        r"Connection\sLost\sdue\sto\ssome\sreason\s?", re.MULTILINE,
+        r"Connection\sLost\sdue\sto\ssome\sreason\s?",
+        re.MULTILINE,
     )
     re_GameStartLine = re.compile(r"Game\s\#\d+\sstarts", re.MULTILINE)
     re_emailedHand = re.compile(r"\*\*\sSummary\s\*\*")
@@ -557,7 +560,8 @@ class PartyPoker(HandHistoryConverter):
         # Set game type
         if mg.get("GAME"):
             info["base"], info["category"] = self.games.get(
-                mg["GAME"], ("hold", "holdem"),
+                mg["GAME"],
+                ("hold", "holdem"),
             )
             log.debug(
                 f"Game type determined base: {info['base']}, category: {info['category']}",
@@ -575,7 +579,8 @@ class PartyPoker(HandHistoryConverter):
             try:
                 if m_20BBmin:
                     info["sb"], info["bb"] = self.NLim_Blinds_20bb.get(
-                        mg["CASHBI"], ("0.01", "0.02"),
+                        mg["CASHBI"],
+                        ("0.01", "0.02"),
                     )
                     info["buyinType"] = "shallow"
                     log.debug(
@@ -591,7 +596,8 @@ class PartyPoker(HandHistoryConverter):
                         info["buyinType"] = "regular"
 
                     info["sb"], info["bb"] = self.Lim_Blinds.get(
-                        nl_bb, ("0.01", "0.02"),
+                        nl_bb,
+                        ("0.01", "0.02"),
                     )
                     log.debug(
                         f"Blinds determined from cash buyin small_blind: {info['sb']}, big_blind: {info['bb']}, buyin_type: {info['buyinType']}",
@@ -649,7 +655,8 @@ class PartyPoker(HandHistoryConverter):
             if info["type"] == "ring":
                 try:
                     info["sb"], info["bb"] = self.Lim_Blinds.get(
-                        mg["BB"], ("0.01", "0.02"),
+                        mg["BB"],
+                        ("0.01", "0.02"),
                     )
                     log.debug(
                         f"Fixed limit ring game blinds small_blind: {info['sb']}, big_blind: {info['bb']}",
@@ -823,10 +830,13 @@ class PartyPoker(HandHistoryConverter):
 
         try:
             hand.startTime = datetime.datetime.strptime(
-                datetime_str, "%Y/%m/%d %H:%M:%S",
+                datetime_str,
+                "%Y/%m/%d %H:%M:%S",
             )
             hand.startTime = HandHistoryConverter.changeTimezone(
-                hand.startTime, timezone, "UTC",
+                hand.startTime,
+                timezone,
+                "UTC",
             )
             log.debug(
                 f"Set start time time: {hand.startTime!s}, timezone: {timezone}",
@@ -1070,7 +1080,8 @@ class PartyPoker(HandHistoryConverter):
         # Compile regex patterns
         re_JoiningPlayers = re.compile(r"(?P<PLAYERNAME>.+?) has joined the table")
         re_BBPostingPlayers = re.compile(
-            r"(?P<PLAYERNAME>.+?) posts big blind", re.MULTILINE,
+            r"(?P<PLAYERNAME>.+?) posts big blind",
+            re.MULTILINE,
         )
         re_LeavingPlayers = re.compile(r"(?P<PLAYERNAME>.+?) has left the table")
 
@@ -1085,7 +1096,11 @@ class PartyPoker(HandHistoryConverter):
 
         # Process zero stack players
         self._processZeroStackPlayers(
-            hand, zeroStackPlayers, joining_players, leaving_players, maxKnownStack,
+            hand,
+            zeroStackPlayers,
+            joining_players,
+            leaving_players,
+            maxKnownStack,
         )
 
         # Get current seated players
@@ -1117,7 +1132,12 @@ class PartyPoker(HandHistoryConverter):
         return seat
 
     def _processZeroStackPlayers(
-        self, hand, zero_stack_players, joining, leaving, max_stack,
+        self,
+        hand,
+        zero_stack_players,
+        joining,
+        leaving,
+        max_stack,
     ) -> None:
         """Process players with zero stacks."""
         log.debug(f"Processing zero stack players count: {len(zero_stack_players)}")
@@ -1323,10 +1343,7 @@ class PartyPoker(HandHistoryConverter):
             if hand.buttonpos == 0:
                 self.readButton(hand)
 
-            playersMap = {
-                f[0]: f[1:3]
-                    for f in hand.players
-                    if f[1] in hand.handText.split("Trny:")[-1]}
+            playersMap = {f[0]: f[1:3] for f in hand.players if f[1] in hand.handText.split("Trny:")[-1]}
             maxSeat = max(playersMap)
 
             def findFirstNonEmptySeat(startSeat):
@@ -1344,9 +1361,7 @@ class PartyPoker(HandHistoryConverter):
                 log.warning("No small blind in this hand method PartyPoker:readBlinds")
             else:
                 smallBlindSeat = (
-                    int(hand.buttonpos)
-                    if len(hand.players) == 2
-                    else findFirstNonEmptySeat(int(hand.buttonpos) + 1)
+                    int(hand.buttonpos) if len(hand.players) == 2 else findFirstNonEmptySeat(int(hand.buttonpos) + 1)
                 )
                 blind = smartMin(hand.sb, playersMap[smallBlindSeat][1])
                 player = playersMap[smallBlindSeat][0]
@@ -1452,11 +1467,7 @@ class PartyPoker(HandHistoryConverter):
             if self.playerMap.get(playerName):
                 playerName = self.playerMap.get(playerName)
 
-            amount = (
-                self.clearMoneyString(action.group("BET"))
-                if action.group("BET")
-                else None
-            )
+            amount = self.clearMoneyString(action.group("BET")) if action.group("BET") else None
             actionType = action.group("ATYPE")
 
             # Handle different action types

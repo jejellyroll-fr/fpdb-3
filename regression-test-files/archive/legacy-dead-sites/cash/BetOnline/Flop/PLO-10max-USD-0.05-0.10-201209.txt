@@ -13,7 +13,7 @@ Seat 5: Player8 (3.00 in chips)
 Player0: posts small blind 0.05
 Player6: posts big blind 0.10
 Player8: post now 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [Jh 9d 7d Kh]
 Hero: calls 0.10
 Player4: folds
@@ -33,7 +33,7 @@ Player8: folds
 Player7: checks
 Player2: bets 0.95
 Player7: folds
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 1.90 | Rake 0.00
 Board [5d Jd 9h]
 Seat 8: Player0 folded before Flop
@@ -63,7 +63,7 @@ Seat 2: Player7 (5.10 in chips)
 Seat 5: Player8 (2.90 in chips)
 Player6: posts small blind 0.05
 Hero: posts big blind 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [9h Kd As 6s]
 Player4: folds
 Player7: folds
@@ -87,7 +87,7 @@ Player8: calls 1.31
 *** TURN *** [7s 7h 10s][6c]
 Player2: bets 1.18
 Player8: folds
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 4.22 | Rake 0.00
 Board [7s 7h 10s 6c]
 Seat 8: Player0 folded before Flop
@@ -117,7 +117,7 @@ Seat 2: Player7 (5.10 in chips)
 Seat 5: Player8 (1.14 in chips)
 Hero: posts small blind 0.05
 Player4: posts big blind 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [3s Jd 8s 4d]
 Player7: calls 0.10
 Player5: folds
@@ -143,13 +143,13 @@ Player7 said "there u go..lol"
 Player7: calls 1.65
 Player2: calls 6.68
 Player0: calls 3.05
-*** SHOW DOWN *** 
+*** SHOW DOWN ***
 Player6 shows 5s Kc Qh 6c
 Player0 shows Ah 2s Qd As
 Player2 shows Jc 10c Ks 2h
 Player7 shows Kd 5c Ac 8h
 Player4 shows 7h 8c 6s 9h
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 6.91 | Rake 1.35
 Total pot 3.95 | Rake 1.10
 Total pot 10.30 | Rake 0.60
@@ -183,7 +183,7 @@ Seat 9: Player6 (0.00 in chips)
 Seat 2: Player7 (0.00 in chips) - Small Blind
 Seat 5: Player8 (1.14 in chips)
 Player7: posts big blind 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [As Qh 7c 7d]
 Player4 has left the table
 Player3: folds
@@ -207,7 +207,7 @@ Player6: folds
 *** TURN *** [Ks 9h 2s][5d]
 Player7: bets 5.55
 Player2: folds
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 5.55 | Rake 0.00
 Board [Ks 9h 2s 5d]
 Seat 8: Player0 folded on the Flop
@@ -233,7 +233,7 @@ Seat 2: Player7 (13.25 in chips) - Small Blind
 Seat 5: Player8 (0.74 in chips)
 Player7: posts small blind 0.05
 Player3: posts big blind 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [3h 5s Jd As]
 Player8: calls 0.10
 Player2: raises 0.45 to 0.45
@@ -246,10 +246,10 @@ Player7: folds
 Player3: folds
 Player8: raises 0.64 to 0.74 and is all in
 Player2: calls 0.29
-*** SHOW DOWN *** 
+*** SHOW DOWN ***
 Player2 shows 2s 2c 9h Js
 Player8 shows 10d Kd Qh 2d
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 1.58 | Rake 0.05
 Board [Qd Jh 9c 8d 7h]
 Seat 8: Player0 folded before Flop
@@ -274,7 +274,7 @@ Seat 9: Player6 (2.60 in chips)
 Seat 2: Player7 (13.20 in chips) - The button
 Seat 5: Player8 (1.58 in chips) - Small Blind
 Player8: posts big blind 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [5h 9d 3s 9s]
 Player2: raises 0.30 to 0.30
 Player1: folds
@@ -291,7 +291,7 @@ Player6: checks
 Player2: bets 0.10
 Player6: calls 0.10
 Player2 shows Qd 8s 7c As
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 0.90 | Rake 0.00
 Board [Ks 3c 9c 4c Qs]
 Seat 8: Player0 folded before Flop
@@ -316,7 +316,7 @@ Seat 2: Player7 (13.20 in chips) - The button
 Seat 5: Player8 (1.48 in chips) - Small Blind
 Player8: posts small blind 0.05
 Player2: posts big blind 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [8h 8s Qs 5d]
 Player1: calls 0.10
 Player0: calls 0.10
@@ -347,7 +347,7 @@ Player2 said "lol"
 Player6: folds
 Player7: folds
 Player1 has left the table
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 3.15 | Rake 0.00
 Board [3d Kc 3s Kd 7c]
 Seat 8: Player0 folded on the River
@@ -374,7 +374,7 @@ Player2: posts small blind 0.05
 Player0: posts big blind 0.10
 Player10: post now 0.10
 Player9: post now 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [3d 7h 6h 6c]
 Player6: calls 0.10
 Hero: folds
@@ -390,10 +390,10 @@ Player7: raises 5.30 to 5.75
 Player2: folds
 Player0: folds
 Player8 has left the table
-*** SHOW DOWN *** 
+*** SHOW DOWN ***
 Player6 shows As 4d 6d Ad
 Player7 shows Jc Qh 9d Jh
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 4.00 | Rake 0.20
 Board [3h 5s Js Qs 7c]
 Seat 8: Player0 folded before Flop
@@ -421,7 +421,7 @@ Seat 7: Player11 (22.00 in chips) - Sitting out
 Player0: posts small blind 0.05
 Player6: posts big blind 0.10
 Player3: post now 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [Ad 5s 9s 8c]
 Hero: folds
 Player10: calls 0.10
@@ -450,7 +450,7 @@ Player10: calls 0.20
 Player10: bets 0.62
 Player3: folds
 Player10 shows Ks Qh 10h 8h
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 1.25 | Rake 0.00
 Board [Kh Kd 5h 9c 9h]
 Seat 8: Player0 folded on the Flop
@@ -479,7 +479,7 @@ Player6: posts small blind 0.05
 Hero: posts big blind 0.10
 Player10 said "win big?"
 Player11: post now 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [4c Qs 7h 8c]
 Player10: calls 0.10
 Player7: folds
@@ -512,7 +512,7 @@ Player9: folds
 Player2: folds
 Player11: folds
 Player0: folds
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 3.80 | Rake 0.00
 Board [3d Kh Ad 9c]
 Seat 8: Player0 folded on the Turn
@@ -544,7 +544,7 @@ Player10: posts big blind 0.10
 Player10 said "i rarely bet sports but i like blackjack"
 Player7 said "you probably go to different site in BOL if you were playin"
 Player12: post now 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [5c 8h 5d 8c]
 Player7 said "casino games"
 Player10 said "yep"
@@ -579,11 +579,11 @@ Player2: folds
 Player11: raises 11.50 to 11.50
 Player6: folds
 Hero: folds
-*** SHOW DOWN *** 
+*** SHOW DOWN ***
 Player11 shows 4h As 4d Ad
 Player12 shows 3c 3s Qs Qc
 Player10 shows 9s 9c 7c 4s
-*** SUMMARY *** 
+*** SUMMARY ***
 Player10 said " lots of out"
 Total pot 1.85 | Rake 0.50
 Total pot 9.55 | Rake 0.50
@@ -616,7 +616,7 @@ Seat 1: Player10 (11.40 in chips) - Small Blind
 Seat 7: Player11 (18.30 in chips)
 Player10: posts small blind 0.05
 Player7: posts big blind 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [2d Ks 9h 10s]
 Player9: calls 0.10
 Player3: folds
@@ -642,10 +642,10 @@ Player9: folds
 *** TURN *** [2h Kd 4c][3h]
 Player2: bets 3.77
 Player6: calls 3.25
-*** SHOW DOWN *** 
+*** SHOW DOWN ***
 Player6 shows 8h 3d 7c 5c
 Player2 shows 5d Qh 2c 6s
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 13.70 | Rake 0.70
 Board [2h Kd 4c 3h Qs]
 Seat 8: Player0 folded before Flop
@@ -673,7 +673,7 @@ Seat 1: Player10 (10.95 in chips) - The button
 Seat 7: Player11 (17.85 in chips)
 Player7: posts small blind 0.05
 Player9: posts big blind 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [9h 5s 7d 2c]
 Player3: folds
 Player2: raises 0.35 to 0.35
@@ -700,7 +700,7 @@ Player2: folds
 Player11: folds
 Player6: folds
 Player10: folds
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 2.00 | Rake 0.00
 Board [6d 9s 9c 4s]
 Seat 8: Player0 folded before Flop
@@ -730,7 +730,7 @@ Seat 5: Player12 (10.00 in chips)
 Player9: posts small blind 0.05
 Player3: posts big blind 0.10
 Player12: post now 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [9c 7d Kh Qc]
 Player12: checks
 Player2: calls 0.10
@@ -768,11 +768,11 @@ Player11: calls 2.25
 Player9: bets 3.51
 Player11: folds
 Player7: folds
-*** SHOW DOWN *** 
+*** SHOW DOWN ***
 Player6 shows Ah 5h 9s 5d
 Player0 shows Kd 10c Ac 10h
 Player9 shows As 8c Qd 2d
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 4.20 | Rake 0.70
 Total pot 13.55 | Rake 0.70
 Board [Jd 6h Ad 2h 2c]
@@ -803,7 +803,7 @@ Seat 7: Player11 (13.75 in chips)
 Seat 5: Player12 (9.90 in chips) - Big Blind
 Player3: posts small blind 0.05
 Player12: posts big blind 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [6s 3d Js Jc]
 Player7 said "where the heck the 2 game from..lol"
 Player2: calls 0.10
@@ -841,11 +841,11 @@ Player10: folds
 *** TURN *** [2s Kh 5s][6h]
 Player2: bets 3.59
 Player7: calls 3.59
-*** SHOW DOWN *** 
+*** SHOW DOWN ***
 Player6 shows 2c 4d As Jd
 Player2 shows 4s 3s Ad 2h
 Player7 shows 10s 8s 9s 8h
-*** SUMMARY *** 
+*** SUMMARY ***
 Player10 said "ARG 3-4 hearts"
 Total pot 8.75 | Rake 0.55
 Total pot 10.75 | Rake 0.55
@@ -875,7 +875,7 @@ Seat 7: Player11 (13.75 in chips)
 Seat 5: Player12 (9.15 in chips) - Small Blind
 Player12: posts small blind 0.05
 Player2: posts big blind 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [4h Kd Qh 9h]
 Player11: calls 0.10
 Player0: calls 0.10
@@ -903,11 +903,11 @@ Player10: folds
 Player7: folds
 Player12: folds
 Player2: calls 8.00
-*** SHOW DOWN *** 
+*** SHOW DOWN ***
 Player6 shows 2h Ac 9c 8c
 Player11 shows 8s As 10h 5c
 Player2 shows 2c Ah 4d 4c
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 20.45 | Rake 0.60
 Total pot 11.40 | Rake 0.60
 Board [Ad 8h 3c Jh 3h]
@@ -936,7 +936,7 @@ Seat 7: Player11 (26.15 in chips) - Big Blind
 Seat 5: Player12 (8.40 in chips) - The button
 Player2: posts small blind 0.05
 Player11: posts big blind 0.10
-*** HOLE CARDS *** 
+*** HOLE CARDS ***
 Dealt to Hero [3h 5s Qs Kh]
 Player0: calls 0.10
 Player6: calls 0.10
@@ -966,11 +966,11 @@ Player2: folds
 *** TURN *** [Ad 9h 10h][4c]
 Player11: bets 15.80
 Player7: calls 3.75
-*** SHOW DOWN *** 
+*** SHOW DOWN ***
 Player0 shows 9c 6c 9s 8d
 Player11 shows 8c 9d Ac Kd
 Player7 shows Qd 4s 7c Jc
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot 10.90 | Rake 0.60
 Total pot 12.00 | Rake 0.60
 Board [Ad 9h 10h 4c 5d]

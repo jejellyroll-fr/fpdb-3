@@ -13,11 +13,11 @@ Hero: posts the ante 30
 7067fd75: posts small blind 90
 442b49d7: posts big blind 180
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Ac 8h 7c 2c]
-Dealt to bd16e59d 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to 7067fd75
 2a1934a5: raises 600 to 780
 Hero: folds
 bd16e59d: folds
@@ -50,11 +50,11 @@ Hero: posts the ante 30
 442b49d7: posts small blind 90
 2a1934a5: posts big blind 180
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Js Jc 5s 5h]
-Dealt to bd16e59d 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to 7067fd75
 Hero: raises 216 to 396
 bd16e59d: folds
 7067fd75: folds
@@ -102,11 +102,11 @@ Hero: posts the ante 30
 2a1934a5: posts small blind 90
 Hero: posts big blind 180
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Jc Tc 8d 2c]
-Dealt to bd16e59d 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to 7067fd75
 bd16e59d: folds
 7067fd75: raises 306 to 486
 442b49d7: calls 486
@@ -144,11 +144,11 @@ Hero: posts the ante 30
 Hero: posts small blind 90
 bd16e59d: posts big blind 180
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Kc Tc 7s 3s]
-Dealt to bd16e59d 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to 7067fd75
 7067fd75: folds
 442b49d7: folds
 2a1934a5: folds
@@ -185,11 +185,11 @@ Hero: posts the ante 30
 bd16e59d: posts small blind 90
 7067fd75: posts big blind 180
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Ks 6d 3c 2s]
-Dealt to bd16e59d 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to 7067fd75
 442b49d7: raises 210 to 390
 2a1934a5: folds
 Hero: folds
@@ -227,11 +227,11 @@ Hero: posts the ante 30
 7067fd75: posts small blind 90
 442b49d7: posts big blind 180
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Qs Jc Ts 5d]
-Dealt to bd16e59d 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to 7067fd75
 2a1934a5: calls 180
 Hero: folds
 bd16e59d: folds
@@ -279,11 +279,11 @@ Hero: posts the ante 30
 442b49d7: posts small blind 90
 2a1934a5: posts big blind 180
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Ac Qd Th 5c]
-Dealt to bd16e59d 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to 7067fd75
 Hero: raises 270 to 450
 bd16e59d: folds
 7067fd75: calls 450
@@ -330,11 +330,11 @@ Hero: posts the ante 30
 2a1934a5: posts small blind 90
 Hero: posts big blind 180
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Ac Qh Jd Td]
-Dealt to bd16e59d 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to 7067fd75
 bd16e59d: raises 180 to 360
 7067fd75: calls 360
 442b49d7: calls 360
@@ -377,11 +377,11 @@ Hero: posts the ante 36
 Hero: posts small blind 100
 bd16e59d: posts big blind 200
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Qd 8d 5s 4h]
-Dealt to bd16e59d 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to 7067fd75
 7067fd75: raises 340 to 540
 442b49d7: calls 540
 2a1934a5: folds
@@ -420,11 +420,11 @@ Hero: posts the ante 36
 bd16e59d: posts small blind 100
 7067fd75: posts big blind 200
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Ts 9d 5h 4s]
-Dealt to bd16e59d 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to 7067fd75
 442b49d7: raises 200 to 400
 2a1934a5: folds
 Hero: folds
@@ -464,11 +464,11 @@ Hero: posts the ante 36
 7067fd75: posts small blind 100
 442b49d7: posts big blind 200
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Qh 7c 6c 2s]
-Dealt to bd16e59d 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to 7067fd75
 2a1934a5: calls 200
 Hero: folds
 bd16e59d: calls 200
@@ -521,12 +521,12 @@ Hero: posts the ante 36
 442b49d7: posts small blind 100
 2a1934a5: posts big blind 200
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [As Kc Jh Jc]
-Dealt to bd16e59d 
-Dealt to ab0b03f2 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to ab0b03f2
+Dealt to 7067fd75
 Hero: raises 240 to 440
 bd16e59d: folds
 ab0b03f2: folds
@@ -574,12 +574,12 @@ Hero: posts the ante 36
 2a1934a5: posts small blind 100
 Hero: posts big blind 200
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Jd 9h 4c 3c]
-Dealt to bd16e59d 
-Dealt to ab0b03f2 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to ab0b03f2
+Dealt to 7067fd75
 bd16e59d: raises 716 to 916
 ab0b03f2: folds
 7067fd75: folds
@@ -625,12 +625,12 @@ Hero: posts the ante 36
 Hero: posts small blind 100
 bd16e59d: posts big blind 200
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Kd Kc Qh 2s]
-Dealt to bd16e59d 
-Dealt to ab0b03f2 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to ab0b03f2
+Dealt to 7067fd75
 ab0b03f2: folds
 7067fd75: raises 340 to 540
 442b49d7: calls 540
@@ -682,12 +682,12 @@ Hero: posts the ante 36
 bd16e59d: posts small blind 100
 ab0b03f2: posts big blind 200
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Qd 7h 7d 5d]
-Dealt to bd16e59d 
-Dealt to ab0b03f2 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to ab0b03f2
+Dealt to 7067fd75
 7067fd75: folds
 442b49d7: raises 300 to 500
 2a1934a5: folds
@@ -734,12 +734,12 @@ Hero: posts the ante 36
 ab0b03f2: posts small blind 100
 7067fd75: posts big blind 200
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [7d 4h 4c 2s]
-Dealt to bd16e59d 
-Dealt to ab0b03f2 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to ab0b03f2
+Dealt to 7067fd75
 442b49d7: raises 200 to 400
 2a1934a5: folds
 Hero: folds
@@ -786,12 +786,12 @@ Hero: posts the ante 36
 7067fd75: posts small blind 100
 442b49d7: posts big blind 200
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Ks 3s 3c 2h]
-Dealt to bd16e59d 
-Dealt to ab0b03f2 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to ab0b03f2
+Dealt to 7067fd75
 2a1934a5: folds
 Hero: folds
 bd16e59d: folds
@@ -840,12 +840,12 @@ Hero: posts the ante 38
 442b49d7: posts small blind 125
 2a1934a5: posts big blind 250
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [7d 4h 3s 3h]
-Dealt to bd16e59d 
-Dealt to ab0b03f2 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to ab0b03f2
+Dealt to 7067fd75
 Hero: folds
 bd16e59d: calls 250
 ab0b03f2: folds
@@ -889,12 +889,12 @@ Hero: posts the ante 38
 2a1934a5: posts small blind 125
 Hero: posts big blind 250
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Js 9s 9d 8d]
-Dealt to bd16e59d 
-Dealt to ab0b03f2 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to ab0b03f2
+Dealt to 7067fd75
 bd16e59d: folds
 ab0b03f2: folds
 7067fd75: raises 425 to 675
@@ -944,12 +944,12 @@ Hero: posts the ante 38
 Hero: posts small blind 125
 bd16e59d: posts big blind 250
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Ac Qc Js 4h]
-Dealt to bd16e59d 
-Dealt to ab0b03f2 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to ab0b03f2
+Dealt to 7067fd75
 ab0b03f2: raises 375 to 625
 7067fd75: folds
 442b49d7: calls 625
@@ -1000,12 +1000,12 @@ Hero: posts the ante 38
 bd16e59d: posts small blind 125
 ab0b03f2: posts big blind 250
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Jc Ts 8h 3s]
-Dealt to bd16e59d 
-Dealt to ab0b03f2 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to ab0b03f2
+Dealt to 7067fd75
 7067fd75: folds
 442b49d7: folds
 2a1934a5: folds
@@ -1041,12 +1041,12 @@ Hero: posts the ante 38
 ab0b03f2: posts small blind 125
 7067fd75: posts big blind 250
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Kc Qd 7s 2c]
-Dealt to bd16e59d 
-Dealt to ab0b03f2 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to ab0b03f2
+Dealt to 7067fd75
 442b49d7: folds
 2a1934a5: folds
 Hero: folds
@@ -1083,12 +1083,12 @@ Hero: posts the ante 38
 7067fd75: posts small blind 125
 442b49d7: posts big blind 250
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Qc 5h 4d 4c]
-Dealt to bd16e59d 
-Dealt to ab0b03f2 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to ab0b03f2
+Dealt to 7067fd75
 2a1934a5: folds
 Hero: folds
 bd16e59d: folds
@@ -1132,12 +1132,12 @@ Hero: posts the ante 38
 442b49d7: posts small blind 125
 2a1934a5: posts big blind 250
 *** HOLE CARDS ***
-Dealt to 442b49d7 
-Dealt to 2a1934a5 
+Dealt to 442b49d7
+Dealt to 2a1934a5
 Dealt to Hero [Ad 9h 8h 7s]
-Dealt to bd16e59d 
-Dealt to ab0b03f2 
-Dealt to 7067fd75 
+Dealt to bd16e59d
+Dealt to ab0b03f2
+Dealt to 7067fd75
 Hero: folds
 bd16e59d: folds
 ab0b03f2: raises 375 to 625
@@ -1180,10 +1180,10 @@ b59f4585: posts small blind 250
 5c6388de: posts big blind 500
 *** HOLE CARDS ***
 Dealt to Hero [Jd Td 7c 2c]
-Dealt to 87ed49bb 
-Dealt to 78390f35 
-Dealt to b59f4585 
-Dealt to 5c6388de 
+Dealt to 87ed49bb
+Dealt to 78390f35
+Dealt to b59f4585
+Dealt to 5c6388de
 Hero: folds
 87ed49bb: folds
 78390f35: raises 1,000 to 1,500
@@ -1217,10 +1217,10 @@ Hero: posts the ante 75
 Hero: posts big blind 500
 *** HOLE CARDS ***
 Dealt to Hero [Ac Jc 5d 3h]
-Dealt to 87ed49bb 
-Dealt to 78390f35 
-Dealt to b59f4585 
-Dealt to 5c6388de 
+Dealt to 87ed49bb
+Dealt to 78390f35
+Dealt to b59f4585
+Dealt to 5c6388de
 87ed49bb: folds
 78390f35: folds
 b59f4585: raises 1,000 to 1,500
@@ -1259,10 +1259,10 @@ Hero: posts small blind 250
 87ed49bb: posts big blind 500
 *** HOLE CARDS ***
 Dealt to Hero [6s 6h 5c 2d]
-Dealt to 87ed49bb 
-Dealt to 78390f35 
-Dealt to b59f4585 
-Dealt to 5c6388de 
+Dealt to 87ed49bb
+Dealt to 78390f35
+Dealt to b59f4585
+Dealt to 5c6388de
 78390f35: calls 500
 b59f4585: calls 500
 5c6388de: folds
@@ -1310,10 +1310,10 @@ Hero: posts the ante 75
 78390f35: posts big blind 500
 *** HOLE CARDS ***
 Dealt to Hero [Qd 9h 7s 5c]
-Dealt to 87ed49bb 
-Dealt to 78390f35 
-Dealt to b59f4585 
-Dealt to 5c6388de 
+Dealt to 87ed49bb
+Dealt to 78390f35
+Dealt to b59f4585
+Dealt to 5c6388de
 b59f4585: raises 1,000 to 1,500
 5c6388de: folds
 Hero: folds
@@ -1347,10 +1347,10 @@ Hero: posts the ante 75
 b59f4585: posts big blind 500
 *** HOLE CARDS ***
 Dealt to Hero [Ah Jh 4c 2s]
-Dealt to 87ed49bb 
-Dealt to 78390f35 
-Dealt to b59f4585 
-Dealt to 5c6388de 
+Dealt to 87ed49bb
+Dealt to 78390f35
+Dealt to b59f4585
+Dealt to 5c6388de
 5c6388de: raises 650 to 1,150
 Hero: folds
 87ed49bb: folds
@@ -1395,10 +1395,10 @@ b59f4585: posts small blind 250
 5c6388de: posts big blind 500
 *** HOLE CARDS ***
 Dealt to Hero [Th 9c 4s 2s]
-Dealt to 87ed49bb 
-Dealt to 78390f35 
-Dealt to b59f4585 
-Dealt to 5c6388de 
+Dealt to 87ed49bb
+Dealt to 78390f35
+Dealt to b59f4585
+Dealt to 5c6388de
 Hero: folds
 87ed49bb: folds
 78390f35: folds
@@ -1439,10 +1439,10 @@ Hero: posts the ante 75
 Hero: posts big blind 500
 *** HOLE CARDS ***
 Dealt to Hero [Jc 8c 4d 2c]
-Dealt to 87ed49bb 
-Dealt to 78390f35 
-Dealt to b59f4585 
-Dealt to 5c6388de 
+Dealt to 87ed49bb
+Dealt to 78390f35
+Dealt to b59f4585
+Dealt to 5c6388de
 87ed49bb: folds
 78390f35: folds
 b59f4585: raises 1,000 to 1,500
@@ -1476,10 +1476,10 @@ Hero: posts small blind 250
 87ed49bb: posts big blind 500
 *** HOLE CARDS ***
 Dealt to Hero [Js 7d 6c 2c]
-Dealt to 87ed49bb 
-Dealt to 78390f35 
-Dealt to b59f4585 
-Dealt to 5c6388de 
+Dealt to 87ed49bb
+Dealt to 78390f35
+Dealt to b59f4585
+Dealt to 5c6388de
 78390f35: folds
 b59f4585: raises 1,000 to 1,500
 5c6388de: folds
@@ -1525,10 +1525,10 @@ Hero: posts the ante 75
 78390f35: posts big blind 500
 *** HOLE CARDS ***
 Dealt to Hero [9s 7s 4s 3h]
-Dealt to 87ed49bb 
-Dealt to 78390f35 
-Dealt to b59f4585 
-Dealt to 5c6388de 
+Dealt to 87ed49bb
+Dealt to 78390f35
+Dealt to b59f4585
+Dealt to 5c6388de
 b59f4585: raises 1,000 to 1,500
 5c6388de: folds
 Hero: folds
@@ -1573,10 +1573,10 @@ Hero: posts the ante 75
 b59f4585: posts big blind 500
 *** HOLE CARDS ***
 Dealt to Hero [Ad Qs Js 3h]
-Dealt to 87ed49bb 
-Dealt to 78390f35 
-Dealt to b59f4585 
-Dealt to 5c6388de 
+Dealt to 87ed49bb
+Dealt to 78390f35
+Dealt to b59f4585
+Dealt to 5c6388de
 5c6388de: folds
 Hero: raises 1,377 to 1,877 and is all-in
 87ed49bb: folds
@@ -1615,10 +1615,10 @@ b59f4585: posts small blind 250
 5c6388de: posts big blind 500
 *** HOLE CARDS ***
 Dealt to Hero [Jh Jd 9c 7h]
-Dealt to 87ed49bb 
-Dealt to 78390f35 
-Dealt to b59f4585 
-Dealt to 5c6388de 
+Dealt to 87ed49bb
+Dealt to 78390f35
+Dealt to b59f4585
+Dealt to 5c6388de
 Hero: raises 1,625 to 2,125
 87ed49bb: folds
 78390f35: folds
@@ -1652,10 +1652,10 @@ Hero: posts the ante 75
 Hero: posts big blind 500
 *** HOLE CARDS ***
 Dealt to Hero [Qd 9s 8s 3h]
-Dealt to 87ed49bb 
-Dealt to 78390f35 
-Dealt to b59f4585 
-Dealt to 5c6388de 
+Dealt to 87ed49bb
+Dealt to 78390f35
+Dealt to b59f4585
+Dealt to 5c6388de
 87ed49bb: folds
 78390f35: folds
 b59f4585: raises 1,000 to 1,500
@@ -1699,12 +1699,12 @@ Hero: posts the ante 38
 ab0b03f2: posts small blind 125
 442b49d7: posts big blind 250
 *** HOLE CARDS ***
-Dealt to c0b3f67b 
-Dealt to ab0b03f2 
-Dealt to 442b49d7 
-Dealt to bd16e59d 
+Dealt to c0b3f67b
+Dealt to ab0b03f2
+Dealt to 442b49d7
+Dealt to bd16e59d
 Dealt to Hero [Kc Qh Qc 5c]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 bd16e59d: folds
 Hero: raises 300 to 550
 7067fd75: calls 550
@@ -1748,12 +1748,12 @@ Hero: posts the ante 38
 442b49d7: posts small blind 125
 bd16e59d: posts big blind 250
 *** HOLE CARDS ***
-Dealt to c0b3f67b 
-Dealt to ab0b03f2 
-Dealt to 442b49d7 
-Dealt to bd16e59d 
+Dealt to c0b3f67b
+Dealt to ab0b03f2
+Dealt to 442b49d7
+Dealt to bd16e59d
 Dealt to Hero [Ts Th 7h 2h]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 Hero: folds
 7067fd75: folds
 c0b3f67b: raises 375 to 625
@@ -1807,12 +1807,12 @@ Hero: posts the ante 38
 bd16e59d: posts small blind 125
 Hero: posts big blind 250
 *** HOLE CARDS ***
-Dealt to c0b3f67b 
-Dealt to ab0b03f2 
-Dealt to 442b49d7 
-Dealt to bd16e59d 
+Dealt to c0b3f67b
+Dealt to ab0b03f2
+Dealt to 442b49d7
+Dealt to bd16e59d
 Dealt to Hero [Ah Js Tc 7c]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 7067fd75: folds
 c0b3f67b: folds
 ab0b03f2: folds
@@ -1855,12 +1855,12 @@ Hero: posts the ante 38
 Hero: posts small blind 125
 7067fd75: posts big blind 250
 *** HOLE CARDS ***
-Dealt to c0b3f67b 
-Dealt to ab0b03f2 
-Dealt to 442b49d7 
-Dealt to bd16e59d 
+Dealt to c0b3f67b
+Dealt to ab0b03f2
+Dealt to 442b49d7
+Dealt to bd16e59d
 Dealt to Hero [Jc Td 7h 2c]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 c0b3f67b: raises 250 to 500
 ab0b03f2: folds
 442b49d7: folds
@@ -1912,12 +1912,12 @@ Hero: posts the ante 45
 7067fd75: posts small blind 150
 c0b3f67b: posts big blind 300
 *** HOLE CARDS ***
-Dealt to c0b3f67b 
-Dealt to ab0b03f2 
-Dealt to 442b49d7 
-Dealt to bd16e59d 
+Dealt to c0b3f67b
+Dealt to ab0b03f2
+Dealt to 442b49d7
+Dealt to bd16e59d
 Dealt to Hero [Qh Qc 7c 6d]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 ab0b03f2: folds
 442b49d7: folds
 bd16e59d: folds
@@ -1959,12 +1959,12 @@ Hero: posts the ante 45
 c0b3f67b: posts small blind 150
 ab0b03f2: posts big blind 300
 *** HOLE CARDS ***
-Dealt to c0b3f67b 
-Dealt to ab0b03f2 
-Dealt to 442b49d7 
-Dealt to bd16e59d 
+Dealt to c0b3f67b
+Dealt to ab0b03f2
+Dealt to 442b49d7
+Dealt to bd16e59d
 Dealt to Hero [Jh Jc Ts 9d]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 442b49d7: raises 450 to 750
 bd16e59d: folds
 Hero: folds
@@ -2005,12 +2005,12 @@ Hero: posts the ante 45
 ab0b03f2: posts small blind 150
 442b49d7: posts big blind 300
 *** HOLE CARDS ***
-Dealt to c0b3f67b 
-Dealt to ab0b03f2 
-Dealt to 442b49d7 
-Dealt to bd16e59d 
+Dealt to c0b3f67b
+Dealt to ab0b03f2
+Dealt to 442b49d7
+Dealt to bd16e59d
 Dealt to Hero [Qd Js 9d 2c]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 bd16e59d: folds
 Hero: folds
 7067fd75: raises 510 to 810
@@ -2053,12 +2053,12 @@ Hero: posts the ante 45
 442b49d7: posts small blind 150
 bd16e59d: posts big blind 300
 *** HOLE CARDS ***
-Dealt to c0b3f67b 
-Dealt to ab0b03f2 
-Dealt to 442b49d7 
-Dealt to bd16e59d 
+Dealt to c0b3f67b
+Dealt to ab0b03f2
+Dealt to 442b49d7
+Dealt to bd16e59d
 Dealt to Hero [Kc Jd 4s 2c]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 Hero: folds
 7067fd75: folds
 c0b3f67b: folds
@@ -2108,11 +2108,11 @@ Hero: posts the ante 45
 bd16e59d: posts small blind 150
 Hero: posts big blind 300
 *** HOLE CARDS ***
-Dealt to ab0b03f2 
-Dealt to 442b49d7 
-Dealt to bd16e59d 
+Dealt to ab0b03f2
+Dealt to 442b49d7
+Dealt to bd16e59d
 Dealt to Hero [Ah Ad Jd 9c]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 7067fd75: folds
 ab0b03f2: raises 450 to 750
 442b49d7: folds
@@ -2154,11 +2154,11 @@ Hero: posts the ante 45
 Hero: posts small blind 150
 7067fd75: posts big blind 300
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [6d 5s 5h 2h]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 c2c59063: folds
 ab0b03f2: folds
 bd16e59d: folds
@@ -2192,11 +2192,11 @@ Hero: posts the ante 45
 7067fd75: posts small blind 150
 c2c59063: posts big blind 300
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [As 8h 7s 6s]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 ab0b03f2: folds
 bd16e59d: folds
 Hero: raises 360 to 660
@@ -2234,11 +2234,11 @@ Hero: posts the ante 45
 c2c59063: posts small blind 150
 ab0b03f2: posts big blind 300
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [Ah Js 9s 4s]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 bd16e59d: calls 300
 Hero: folds
 7067fd75: raises 1,275 to 1,575
@@ -2282,11 +2282,11 @@ Hero: posts the ante 45
 ab0b03f2: posts small blind 150
 bd16e59d: posts big blind 300
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [9d 6s 5d 3c]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 Hero: folds
 7067fd75: folds
 c2c59063: folds
@@ -2325,11 +2325,11 @@ Hero: posts the ante 45
 bd16e59d: posts small blind 150
 Hero: posts big blind 300
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [Qd Js 9s 8c]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 7067fd75: folds
 c2c59063: folds
 ab0b03f2: folds
@@ -2361,11 +2361,11 @@ Hero: posts the ante 45
 Hero: posts small blind 150
 7067fd75: posts big blind 300
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [Ah Ts Tc 6s]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 c2c59063: calls 300
 ab0b03f2: folds
 bd16e59d: folds
@@ -2405,11 +2405,11 @@ Hero: posts the ante 45
 7067fd75: posts small blind 150
 c2c59063: posts big blind 300
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [Qc 7s 7d 3s]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 ab0b03f2: folds
 bd16e59d: raises 600 to 900
 Hero: folds
@@ -2442,11 +2442,11 @@ Hero: posts the ante 45
 c2c59063: posts small blind 150
 ab0b03f2: posts big blind 300
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [As Ad Ac 6d]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 bd16e59d: folds
 Hero: raises 975 to 1,275
 7067fd75: folds
@@ -2479,11 +2479,11 @@ Hero: posts the ante 45
 ab0b03f2: posts small blind 150
 bd16e59d: posts big blind 300
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [Jh 7h 4d 2h]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 Hero: folds
 7067fd75: folds
 c2c59063: folds
@@ -2526,11 +2526,11 @@ Hero: posts the ante 60
 bd16e59d: posts small blind 200
 Hero: posts big blind 400
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [Kc Js 7s 5d]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 7067fd75: folds
 c2c59063: folds
 ab0b03f2: folds
@@ -2574,11 +2574,11 @@ Hero: posts the ante 60
 Hero: posts small blind 200
 7067fd75: posts big blind 400
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [As Ac Jc 9d]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 c2c59063: folds
 ab0b03f2: folds
 bd16e59d: folds
@@ -2616,11 +2616,11 @@ Hero: posts the ante 60
 7067fd75: posts small blind 200
 c2c59063: posts big blind 400
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [Kh Jd 6d 3h]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 ab0b03f2: raises 600 to 1,000
 bd16e59d: folds
 Hero: folds
@@ -2665,11 +2665,11 @@ Hero: posts the ante 60
 c2c59063: posts small blind 200
 ab0b03f2: posts big blind 400
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [As Qd 5h 4d]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 bd16e59d: folds
 Hero: folds
 7067fd75: folds
@@ -2708,11 +2708,11 @@ Hero: posts the ante 60
 ab0b03f2: posts small blind 200
 bd16e59d: posts big blind 400
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [Ac Ks Qs 3s]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 Hero: raises 480 to 880
 7067fd75: folds
 c2c59063: folds
@@ -2757,11 +2757,11 @@ Hero: posts the ante 60
 bd16e59d: posts small blind 200
 Hero: posts big blind 400
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [Ts 8c 6c 2d]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 7067fd75: folds
 c2c59063: folds
 ab0b03f2: raises 600 to 1,000
@@ -2806,11 +2806,11 @@ Hero: posts the ante 60
 Hero: posts small blind 200
 7067fd75: posts big blind 400
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [Ah 8d 5h 4d]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 c2c59063: folds
 ab0b03f2: folds
 bd16e59d: calls 400
@@ -2855,11 +2855,11 @@ Hero: posts the ante 60
 7067fd75: posts small blind 200
 c2c59063: posts big blind 400
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [8h 7s 4s 2c]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 ab0b03f2: raises 600 to 1,000
 bd16e59d: folds
 Hero: folds
@@ -2897,11 +2897,11 @@ Hero: posts the ante 60
 c2c59063: posts small blind 200
 ab0b03f2: posts big blind 400
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [Qs Jd 9c 5c]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 bd16e59d: folds
 Hero: folds
 7067fd75: folds
@@ -2933,11 +2933,11 @@ Hero: posts the ante 60
 ab0b03f2: posts small blind 200
 bd16e59d: posts big blind 400
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [Ac Jh 8s 3h]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 Hero: folds
 7067fd75: folds
 c2c59063: calls 400
@@ -2975,11 +2975,11 @@ Hero: posts the ante 60
 bd16e59d: posts small blind 200
 Hero: posts big blind 400
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to bd16e59d
 Dealt to Hero [Ad Qd 8h 4d]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 7067fd75: folds
 c2c59063: folds
 ab0b03f2: raises 600 to 1,000
@@ -3024,12 +3024,12 @@ Hero: posts the ante 75
 Hero: posts small blind 250
 7067fd75: posts big blind 500
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to fa90e96a 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to fa90e96a
+Dealt to bd16e59d
 Dealt to Hero [Jd 7c 3d 2s]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 c2c59063: folds
 ab0b03f2: folds
 fa90e96a: folds
@@ -3065,12 +3065,12 @@ Hero: posts the ante 75
 7067fd75: posts small blind 250
 c2c59063: posts big blind 500
 *** HOLE CARDS ***
-Dealt to c2c59063 
-Dealt to ab0b03f2 
-Dealt to fa90e96a 
-Dealt to bd16e59d 
+Dealt to c2c59063
+Dealt to ab0b03f2
+Dealt to fa90e96a
+Dealt to bd16e59d
 Dealt to Hero [Ac Jc 6c 3s]
-Dealt to 7067fd75 
+Dealt to 7067fd75
 ab0b03f2: folds
 fa90e96a: folds
 bd16e59d: folds
@@ -3099,5 +3099,3 @@ Seat 3: fa90e96a folded before Flop
 Seat 4: bd16e59d folded before Flop
 Seat 5: Hero (button) folded before Flop
 Seat 6: 7067fd75 (small blind) showed [Qh Js 9s 5c] and lost with Pair of Tens
-
-

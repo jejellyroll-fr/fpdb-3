@@ -94,7 +94,6 @@ class ClassicStatWindow(Aux_Hud.SimpleStatWindow):
         """
         return default if value is None else value
 
-
     def update_contents(self, seat: int | str) -> None:
         """Updates the contents of the stat window for the given seat.
 
@@ -116,7 +115,6 @@ class ClassicStatWindow(Aux_Hud.SimpleStatWindow):
         # active seat → position and display
         self._position_and_show_block(seat)
 
-
     def _position_and_show_block(self, seat: int) -> None:
         """Positions and shows the stat window for the specified seat.
 
@@ -132,16 +130,19 @@ class ClassicStatWindow(Aux_Hud.SimpleStatWindow):
         pos_y = max(0, self.aw.positions[seat][1] + table_y)
 
         log.info(
-            "CLASSIC HUD - Moving seat %d stat window: Layout pos (%d,%d) + "
-            "Table pos (%d,%d) = Final pos (%d,%d)",
-            seat, self.aw.positions[seat][0], self.aw.positions[seat][1],
-            table_x, table_y, pos_x, pos_y,
+            "CLASSIC HUD - Moving seat %d stat window: Layout pos (%d,%d) + " "Table pos (%d,%d) = Final pos (%d,%d)",
+            seat,
+            self.aw.positions[seat][0],
+            self.aw.positions[seat][1],
+            table_x,
+            table_y,
+            pos_x,
+            pos_y,
         )
 
         self.move(pos_x, pos_y)
         self.setWindowOpacity(float(self.aw.params["opacity"]))
         self.show()  # in case the user has hidden it
-
 
     def button_press_middle(self, _event: Any) -> None:
         """Handles the middle mouse button press event.
@@ -268,8 +269,9 @@ class ClassicStat(Aux_Hud.SimpleStat):
         Returns:
             int | None: The player ID if found, otherwise None.
         """
-        return next((player_id_ for player_id_, data in self.stat_dict.items()
-                    if data["seat"] == self.lab.aw_seat), None)
+        return next(
+            (player_id_ for player_id_, data in self.stat_dict.items() if data["seat"] == self.lab.aw_seat), None
+        )
 
     def get_player_name(self, player_id: int) -> str:
         """Returns the player name for the given player ID.

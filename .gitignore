@@ -15,3 +15,4 @@ dist/
 .AppleDouble
 .LSOverride
 ._*
+*.spec

@@ -11,10 +11,10 @@ f1da9c5a: posts the ante $0.02
 Hero: posts button blind $0.02
 27925b27: straddle $0.04
 *** HOLE CARDS ***
-Dealt to f1da9c5a 
-Dealt to 27925b27 
+Dealt to f1da9c5a
+Dealt to 27925b27
 Dealt to Hero [Tc Ac]
-Dealt to 11294517 
+Dealt to 11294517
 Hero: calls $0.02
 11294517: folds
 f1da9c5a: calls $0.04
@@ -54,10 +54,10 @@ Hero: posts the ante $0.02
 27925b27: straddle $0.04
 27925b27: straddle $0.08
 *** HOLE CARDS ***
-Dealt to f1da9c5a 
-Dealt to 27925b27 
+Dealt to f1da9c5a
+Dealt to 27925b27
 Dealt to Hero [6s 9c]
-Dealt to 11294517 
+Dealt to 11294517
 Hero: folds
 11294517: folds
 f1da9c5a: calls $0.08
@@ -100,10 +100,10 @@ f1da9c5a: posts button blind $0.02
 27925b27: straddle $0.08
 27925b27: straddle $0.16
 *** HOLE CARDS ***
-Dealt to f1da9c5a 
-Dealt to 27925b27 
+Dealt to f1da9c5a
+Dealt to 27925b27
 Dealt to Hero [Ac Tc]
-Dealt to 11294517 
+Dealt to 11294517
 Hero: folds
 11294517: folds
 f1da9c5a: folds
@@ -132,10 +132,10 @@ f1da9c5a: posts the ante $0.02
 11294517: posts button blind $0.02
 27925b27: straddle $0.04
 *** HOLE CARDS ***
-Dealt to f1da9c5a 
-Dealt to 27925b27 
+Dealt to f1da9c5a
+Dealt to 27925b27
 Dealt to Hero [7c Td]
-Dealt to 11294517 
+Dealt to 11294517
 Hero: folds
 11294517: folds
 f1da9c5a: folds
@@ -148,5 +148,3 @@ Seat 1: f1da9c5a folded before Flop
 Seat 2: 27925b27 collected ($0.12)
 Seat 3: Hero folded before Flop
 Seat 5: 11294517 (button) folded before Flop
-
-

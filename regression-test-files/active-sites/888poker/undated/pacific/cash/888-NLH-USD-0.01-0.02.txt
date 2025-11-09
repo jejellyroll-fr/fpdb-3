@@ -1350,6 +1350,3 @@ wwmm7468 calls [$0.08]
 wwmm7468 shows [ Ah, 6c ]
 Borr_09 shows [ Jh, 8h ]
 wwmm7468 collected [ $0.42 ]
-
-
-

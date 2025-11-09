@@ -15,10 +15,10 @@ Big Blind:                  Hero       (0.20)
 hero was dealt:             4c - 5c
 
 Player1                     All-In      (4.32)
-Player2                     Fold        
-Player4                     Fold        
-Player0                     Fold        
-Hero                        Fold        
+Player2                     Fold
+Player4                     Fold
+Player0                     Fold
+Hero                        Fold
 Player1                     Payback     (4.12)
 
 Player1 didn't show hand
@@ -27,5 +27,3 @@ Player1 wins:               EUR 0.50
 Rake:                       EUR 0.00
 
 Game ended 2010-09-08 00:14:25 BST
-
-

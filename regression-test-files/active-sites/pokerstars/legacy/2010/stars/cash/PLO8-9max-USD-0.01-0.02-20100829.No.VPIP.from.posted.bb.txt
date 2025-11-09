@@ -59,6 +59,3 @@ Seat 6: jthegreat (button) folded on the Turn
 Seat 7: CoinJock (small blind) folded on the Turn
 Seat 8: ros-r-reed (big blind) folded on the Turn
 Seat 9: skinner1947 folded before Flop (didn't bet)
-
-
-

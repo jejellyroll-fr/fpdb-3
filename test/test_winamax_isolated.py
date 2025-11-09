@@ -50,7 +50,6 @@ class TestWinamaxIsolated(unittest.TestCase):
         assert info["type"] == expected_type
         assert info["currency"] == expected_currency
 
-
     def _read_test_file(self, filepath: str | Path) -> str:
         """Read a test hand history file."""
         path_obj = Path(filepath)
@@ -79,7 +78,6 @@ class TestWinamaxIsolated(unittest.TestCase):
         result = self.parser._extract_cards("Ac  Ks   Qh")
         expected = [c for c in ["Ac", "", "Ks", "", "", "Qh"] if c != "X"]
         assert result == expected
-
 
     def test_determine_buyin_currency(self) -> None:
         """Test _determine_buyin_currency method."""
@@ -114,7 +112,6 @@ class TestWinamaxIsolated(unittest.TestCase):
         min_game_components = 2
         assert all(isinstance(game, list) and len(game) > min_game_components for game in supported)
 
-
     def test_game_type_parsing_components(self) -> None:
         """Test individual components of game type parsing."""
         # Test _parse_game_type_info with tournament
@@ -132,7 +129,6 @@ class TestWinamaxIsolated(unittest.TestCase):
         self.parser._parse_limit_info(mg, info, hand_text)
         assert info["limitType"] == "nl"
 
-
     def test_additional_info_parsing(self) -> None:
         """Test _parse_additional_info method."""
         mg = {"GAME": "Holdem", "SB": "1", "BB": "2"}
@@ -144,14 +140,10 @@ class TestWinamaxIsolated(unittest.TestCase):
         assert info["sb"] == "1"
         assert info["bb"] == "2"
 
-
-
     def test_log_parse_error(self) -> None:
         """Test _log_parse_error method."""
         # Should not raise exceptions
         self.parser._log_parse_error("test hand", 100, "test error")
-
-
 
     def test_regex_compilation_no_errors(self) -> None:
         """Test that regex patterns compile without errors."""
@@ -174,7 +166,6 @@ class TestWinamaxIsolated(unittest.TestCase):
         # Player-specific regex patterns are not available until compilePlayerRegexs is called
         assert not hasattr(self.parser, "re_post_sb")
         assert not hasattr(self.parser, "re_post_bb")
-
 
     def test_table_title_regex_generation(self) -> None:
         """Test getTableTitleRe method for different game types."""
@@ -223,7 +214,6 @@ class TestWinamaxIsolated(unittest.TestCase):
         assert result.get("limitType") == "nl", f"Failed for {filename}, key limitType"
         assert result.get("currency") == "EUR", f"Failed for {filename}, key currency"
 
-
     def test_datetime_parsing_components(self) -> None:
         """Test datetime parsing without full hand processing."""
         mock_hand = Mock()
@@ -233,7 +223,6 @@ class TestWinamaxIsolated(unittest.TestCase):
         self.parser._parse_datetime(mock_hand, "2012/01/19 12:03:46 UTC")
         assert mock_hand.startTime is not None
 
-
     def test_hand_id_parsing(self) -> None:
         """Test _parse_hand_id method."""
         mock_hand = Mock()
@@ -241,8 +230,6 @@ class TestWinamaxIsolated(unittest.TestCase):
 
         self.parser._parse_hand_id(mock_hand, info)
         assert mock_hand.handid == "23348984361326123"
-
-
 
     def test_table_info_parsing(self) -> None:
         """Test _parse_table_info method."""
@@ -313,7 +300,6 @@ class TestWinamaxIsolated(unittest.TestCase):
         info = {}
         self.parser._parse_additional_info(mg, info)
         assert info.get("currency", "USD") == "USD"
-
 
     def test_mixed_game_categories(self) -> None:
         """Test recognition of mixed game categories."""

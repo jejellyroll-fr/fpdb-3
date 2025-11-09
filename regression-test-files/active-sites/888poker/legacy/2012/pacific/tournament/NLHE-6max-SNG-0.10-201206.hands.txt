@@ -29,4 +29,3 @@ Player1 folds
 ** Summary **
 Player3 did not show his hand
 Player3 collected [ 105 € ]
-

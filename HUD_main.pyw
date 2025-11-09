@@ -188,6 +188,7 @@ class HudMain(QObject):
 
             # Add console handler using FPDB's colored formatter
             import colorlog
+
             log_colors = {
                 "DEBUG": "green",
                 "INFO": "blue",
@@ -195,12 +196,13 @@ class HudMain(QObject):
                 "ERROR": "red",
             }
             log_format = (
-                "%(log_color)s%(asctime)s [%(name)s:%(module)s:%(funcName)s] "
-                "[%(levelname)s] %(message)s%(reset)s"
+                "%(log_color)s%(asctime)s [%(name)s:%(module)s:%(funcName)s] " "[%(levelname)s] %(message)s%(reset)s"
             )
             date_format = "%Y-%m-%d %H:%M:%S"
             console_formatter = colorlog.ColoredFormatter(
-                fmt=log_format, datefmt=date_format, log_colors=log_colors,
+                fmt=log_format,
+                datefmt=date_format,
+                log_colors=log_colors,
             )
 
             console_handler = logging.StreamHandler()
@@ -217,6 +219,7 @@ class HudMain(QObject):
         except Exception as e:
             log.exception(f"Failed to setup HUD logging: {e}")
             import traceback
+
             traceback.print_exc()
 
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
@@ -250,8 +253,11 @@ class HudMain(QObject):
             log.info("HudMain starting")
 
         log.info("HudMain.__init__ starting")
-        log.info("HUD DEBUG - Options: errorsToConsole=%s, logging_level=%s",
-                options.errorsToConsole, getattr(options, "logging_level", "Not set"))
+        log.info(
+            "HUD DEBUG - Options: errorsToConsole=%s, logging_level=%s",
+            options.errorsToConsole,
+            getattr(options, "logging_level", "Not set"),
+        )
         try:
             # Connecting to the database
             log.info("Connecting to database...")
@@ -400,7 +406,8 @@ class HudMain(QObject):
         # Use smart manager to determine if title change is significant
         if self.smart_hud_manager.has_table_title_changed(table_key, new_title):
             should_restart, reason = self.smart_hud_manager.should_restart_hud(
-                table_key, RestartReason.TABLE_CLOSED,
+                table_key,
+                RestartReason.TABLE_CLOSED,
             )
 
             if should_restart:
@@ -544,7 +551,10 @@ class HudMain(QObject):
                 new_state["max_seats"] = newmax
 
                 should_restart, reason = self.smart_hud_manager.should_restart_hud(
-                    temp_key, RestartReason.MAX_SEATS_CHANGE, current_state, new_state,
+                    temp_key,
+                    RestartReason.MAX_SEATS_CHANGE,
+                    current_state,
+                    new_state,
                 )
 
                 if should_restart:
@@ -563,7 +573,10 @@ class HudMain(QObject):
             new_state["poker_game"] = poker_game
 
             should_restart, reason = self.smart_hud_manager.should_restart_hud(
-                temp_key, RestartReason.GAME_TYPE_CHANGE, current_state, new_state,
+                temp_key,
+                RestartReason.GAME_TYPE_CHANGE,
+                current_state,
+                new_state,
             )
 
             if should_restart:
@@ -656,7 +669,12 @@ class HudMain(QObject):
 
         # Register table state with smart HUD manager
         self.smart_hud_manager.update_table_state(
-            temp_key, poker_game, game_type, max_seats, site_name, table_name,
+            temp_key,
+            poker_game,
+            game_type,
+            max_seats,
+            site_name,
+            table_name,
         )
 
         if hasattr(tablewindow, "number"):
@@ -695,8 +713,12 @@ class HudMain(QObject):
             site for site in enabled_sites if not self.config.get_site_parameters(site)["aux_enabled"]
         ]
         if fast or site_name in aux_disabled_sites or site_name not in enabled_sites:
-            log.debug("HUD creation skipped: fast=%s, site_disabled=%s, site_enabled=%s",
-                      fast, site_name in aux_disabled_sites, site_name in enabled_sites)
+            log.debug(
+                "HUD creation skipped: fast=%s, site_disabled=%s, site_enabled=%s",
+                fast,
+                site_name in aux_disabled_sites,
+                site_name in enabled_sites,
+            )
             return
 
         temp_key = self._get_temp_key(game_type, tour_number, tab_number, table_name)

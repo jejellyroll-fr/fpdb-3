@@ -1312,14 +1312,176 @@ class DetectInstalledSites:
         return self.supported_sites
 
 
-# For backward compatibility
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description="FPDB Detect Installed Poker Sites utility")
+    parser.add_argument("--list-detected", action="store_true", help="List all detected poker sites")
+    parser.add_argument("--show-info", type=str, metavar="SITE", help="Show detailed information for specific site")
+    parser.add_argument("--show-paths", action="store_true", help="Show installation paths for detected sites")
+    parser.add_argument("--test-detection", action="store_true", help="Test site detection and show results")
+    parser.add_argument("--supported-sites", action="store_true", help="List all sites that can be detected")
+    parser.add_argument("--interactive", action="store_true", help="Run interactive site detection menu")
+
+    args = parser.parse_args(argv)
+
+    if not any(vars(args).values()):
+        parser.print_help()
+        return 0
+
+    if args.interactive:
+        return run_interactive_menu()
+
+    # Initialize detector
+    try:
+        detector = DetectInstalledSites()
+
+        if args.supported_sites:
+            print("=== Supported Sites ===")
+            supported = detector.supported_sites
+            for site in supported:
+                print(f"- {site}")
+            print(f"\nTotal: {len(supported)} sites supported")
+            return 0
+
+        if args.test_detection or args.list_detected or args.show_paths:
+            print("=== Detecting Installed Sites ===")
+            detected_sites = detector.get_detected_sites()
+
+            if detected_sites:
+                print(f"Found {len(detected_sites)} installed sites:")
+                for site in detected_sites:
+                    print(f"✓ {site}")
+                    if args.show_paths:
+                        info = detector.get_site_info(site)
+                        if info:
+                            # Try different path keys that might exist
+                            path = info.get("path") or info.get("Hhpath") or info.get("hhpath")
+                            if path:
+                                print(f"  Path: {path}")
+                            else:
+                                print(f"  Path: Not available")
+                        else:
+                            print(f"  Path: Not available")
+            else:
+                print("No poker sites detected on this system")
+
+            return 0
+
+        if args.show_info:
+            print(f"=== Site Information: {args.show_info} ===")
+            detected_sites = detector.get_detected_sites()
+
+            if args.show_info in detected_sites:
+                info = detector.get_site_info(args.show_info)
+                if info:
+                    for key, value in info.items():
+                        print(f"{key.title()}: {value}")
+                else:
+                    print(f"No detailed information available for {args.show_info}")
+            else:
+                print(f"Site '{args.show_info}' not detected on this system")
+                print("Use --list-detected to see available sites")
+
+            return 0
+
+        return 0
+
+    except Exception as e:
+        print(f"✗ Error during site detection: {e}")
+        return 1
+
+
+def run_interactive_menu():
+    """Interactive site detection menu."""
+    try:
+        detector = DetectInstalledSites()
+
+        while True:
+            print("\n=== Site Detection Interactive Menu ===")
+            print("1. Detect all installed sites")
+            print("2. Show supported sites")
+            print("3. Get site information")
+            print("4. Show detection paths")
+            print("5. Exit")
+
+            try:
+                choice = input("\nEnter your choice (1-5): ").strip()
+
+                if choice == "1":
+                    print("\nDetecting installed poker sites...")
+                    detected_sites = detector.get_detected_sites()
+
+                    if detected_sites:
+                        print(f"\n✓ Found {len(detected_sites)} sites:")
+                        for site in detected_sites:
+                            print(f"  - {site}")
+                    else:
+                        print("\nNo poker sites detected")
+
+                elif choice == "2":
+                    print(f"\nSupported sites ({len(detector.supported_sites)}):")
+                    for site in detector.supported_sites:
+                        print(f"  - {site}")
+
+                elif choice == "3":
+                    detected_sites = detector.get_detected_sites()
+                    if not detected_sites:
+                        print("\nNo sites detected. Run detection first.")
+                        continue
+
+                    print(f"\nDetected sites: {', '.join(detected_sites)}")
+                    site_name = input("Enter site name for details: ").strip()
+
+                    if site_name in detected_sites:
+                        info = detector.get_site_info(site_name)
+                        if info:
+                            print(f"\nInformation for {site_name}:")
+                            for key, value in info.items():
+                                print(f"  {key.title()}: {value}")
+                        else:
+                            print(f"No detailed info available for {site_name}")
+                    else:
+                        print(f"Site '{site_name}' not in detected sites")
+
+                elif choice == "4":
+                    print("\nDetection paths and results:")
+                    detected_sites = detector.get_detected_sites()
+
+                    for site in detected_sites:
+                        info = detector.get_site_info(site)
+                        print(f"\n{site}:")
+                        if info:
+                            path = info.get("path") or info.get("Hhpath") or info.get("hhpath")
+                            if path:
+                                print(f"  Path: {path}")
+                            else:
+                                print("  Path: Not available")
+                        else:
+                            print("  Path: Not available")
+
+                elif choice == "5":
+                    print("Exiting...")
+                    break
+
+                else:
+                    print("Invalid choice. Please enter 1-5.")
+
+            except KeyboardInterrupt:
+                print("\nExiting...")
+                break
+
+        return 0
+
+    except Exception as e:
+        print(f"✗ Error in interactive menu: {e}")
+        return 1
+
+
 if __name__ == "__main__":
-    # Test the detection
-    detector = DetectInstalledSites()
-    detected_sites = detector.get_detected_sites()
+    import sys
 
-    for site in detected_sites:
-        info = detector.get_site_info(site)
-
-    if not detected_sites:
-        pass
+    sys.exit(main())

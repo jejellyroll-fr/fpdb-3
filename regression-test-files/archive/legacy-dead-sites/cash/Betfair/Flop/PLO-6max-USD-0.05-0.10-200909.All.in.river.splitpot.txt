@@ -42,7 +42,7 @@ Player2 folds
 Player4 goes all-in
 Player4 bets [$3.03]
 Player1 calls [$3.03]
-** Showdown ** 
+** Showdown **
 Hero shows [ 7c, 6c, 5h, Jh ] a straight, Seven to Three
 Player4 shows [ 7d, 8c, 3d, 6h ] a straight flush, Seven to Three
 Player1 shows [ 3h, 4h, Td, 4s ] four of a kind, Fours
@@ -50,6 +50,3 @@ Player1 shows [ 3h, 4h, Td, 4s ] four of a kind, Fours
 Player4 wins $6.26 from side pot #1 with a straight flush, Seven to Three
 Player4 wins $4.44 from main pot with a straight flush, Seven to Three
 ************  Game 100000000 ends  ************
-
-
-

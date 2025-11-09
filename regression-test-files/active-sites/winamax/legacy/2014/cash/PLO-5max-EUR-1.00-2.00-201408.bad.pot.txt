@@ -9,7 +9,7 @@ Seat 5: Player3 (133.01€)
 Player2 posts small blind 1€
 Player0 posts big blind 2€
 Dealt to Hero [5s 3s 9h Js]
-*** PRE-FLOP *** 
+*** PRE-FLOP ***
 Player1 raises 4€ to 6€
 Player2 folds
 Player3 folds

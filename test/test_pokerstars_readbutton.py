@@ -2,6 +2,7 @@
 
 import unittest
 from unittest.mock import Mock, patch
+
 from PokerStarsToFpdb import PokerStars
 
 
@@ -11,13 +12,25 @@ class MockConfig:
     def get_import_parameters(self) -> dict:
         """Return import parameters for testing."""
         return {
-            "saveActions": True, 
-            "callFpdbHud": False, 
-            "cacheSessions": False, 
+            "saveActions": True,
+            "callFpdbHud": False,
+            "cacheSessions": False,
             "publicDB": False,
-            "importFilters": ["holdem", "omahahi", "omahahilo", "studhi", "studlo", "razz", "27_1draw", "27_3draw", "fivedraw", "badugi", "baduci"],
+            "importFilters": [
+                "holdem",
+                "omahahi",
+                "omahahilo",
+                "studhi",
+                "studlo",
+                "razz",
+                "27_1draw",
+                "27_3draw",
+                "fivedraw",
+                "badugi",
+                "baduci",
+            ],
             "handCount": 0,
-            "fastFold": False
+            "fastFold": False,
         }
 
     def get_site_id(self, sitename: str) -> int:
@@ -40,7 +53,7 @@ class TestPokerStarsReadButton(unittest.TestCase):
 Table 'Test' 6-max Seat #3 is the button
 Seat 1: Player1 ($10.00 in chips)
 Seat 3: Hero ($10.00 in chips)"""
-        
+
         self.parser.readButton(hand)
         self.assertEqual(hand.buttonpos, 3)
 
@@ -52,12 +65,12 @@ Seat 3: Hero ($10.00 in chips)"""
             (6, "Seat #6 is the button"),
             (9, "Seat #9 is the button"),
         ]
-        
+
         for expected_pos, button_text in test_cases:
             with self.subTest(position=expected_pos):
                 hand = Mock()
                 hand.handText = f"PokerStars Game #123: Hold'em No Limit\nTable 'Test' 6-max {button_text}\n"
-                
+
                 self.parser.readButton(hand)
                 self.assertEqual(hand.buttonpos, expected_pos)
 
@@ -71,7 +84,7 @@ Seat 2: Player2 ($2.00 in chips)
 Seat 4: Hero ($2.00 in chips)
 Seat 5: Player5 ($2.00 in chips)
 Hero: posts small blind $0.01"""
-        
+
         self.parser.readButton(hand)
         self.assertEqual(hand.buttonpos, 4)
 
@@ -79,7 +92,7 @@ Hero: posts small blind $0.01"""
         """Test readButton with extra spaces around button text."""
         hand = Mock()
         hand.handText = "Table 'Test'   Seat #5 is the button   "
-        
+
         self.parser.readButton(hand)
         self.assertEqual(hand.buttonpos, 5)
 
@@ -87,22 +100,22 @@ Hero: posts small blind $0.01"""
         """Test readButton when button information is not found."""
         hand = Mock()
         hand.handText = "No button information in this text"
-        
-        with patch('PokerStarsToFpdb.log') as mock_log:
+
+        with patch("PokerStarsToFpdb.log") as mock_log:
             self.parser.readButton(hand)
             mock_log.info.assert_called_once_with("readButton: not found")
-        
+
         # buttonpos should not be set when button is not found
         # Since Mock objects auto-create attributes when accessed, we check if buttonpos was actually set by readButton
-        buttonpos_value = getattr(hand, 'buttonpos', 'NOT_SET')
+        buttonpos_value = getattr(hand, "buttonpos", "NOT_SET")
         self.assertNotIsInstance(buttonpos_value, int)
 
     def test_readButton_empty_hand_text(self):
         """Test readButton with empty hand text."""
         hand = Mock()
         hand.handText = ""
-        
-        with patch('PokerStarsToFpdb.log') as mock_log:
+
+        with patch("PokerStarsToFpdb.log") as mock_log:
             self.parser.readButton(hand)
             mock_log.info.assert_called_once_with("readButton: not found")
 
@@ -114,13 +127,13 @@ Hero: posts small blind $0.01"""
             "Seat is the button",  # Missing #
             "Seat #10 is not the button",  # Different text
         ]
-        
+
         for malformed_text in test_cases:
             with self.subTest(text=malformed_text):
                 hand = Mock()
                 hand.handText = malformed_text
-                
-                with patch('PokerStarsToFpdb.log') as mock_log:
+
+                with patch("PokerStarsToFpdb.log") as mock_log:
                     self.parser.readButton(hand)
                     mock_log.info.assert_called_once_with("readButton: not found")
 
@@ -131,7 +144,7 @@ Hero: posts small blind $0.01"""
 Table 'Test' 6-max Seat #2 is the button
 Previous hand: Seat #1 was the button
 Seat #2 is the button"""
-        
+
         self.parser.readButton(hand)
         # Should match the first occurrence
         self.assertEqual(hand.buttonpos, 2)
@@ -143,21 +156,21 @@ Seat #2 is the button"""
             "SEAT #3 IS THE BUTTON",
             "seat #3 is the button",
         ]
-        
+
         for button_text in test_cases:
             with self.subTest(text=button_text):
                 hand = Mock()
                 hand.handText = button_text
-                
+
                 # The regex is case-sensitive, so only the first should work
                 if button_text == "Seat #3 is the button":
                     self.parser.readButton(hand)
                     self.assertEqual(hand.buttonpos, 3)
                 else:
-                    with patch('PokerStarsToFpdb.log'):
+                    with patch("PokerStarsToFpdb.log"):
                         self.parser.readButton(hand)
                         # For non-matching cases, buttonpos shouldn't be set to an integer
-                        buttonpos_value = getattr(hand, 'buttonpos', 'NOT_SET')
+                        buttonpos_value = getattr(hand, "buttonpos", "NOT_SET")
                         self.assertNotIsInstance(buttonpos_value, int)
 
     def test_readButton_tournament_format(self):
@@ -168,7 +181,7 @@ Level I (10/20) - 2023/01/01 12:00:00 ET
 Table '987654321 1' 9-max Seat #7 is the button
 Seat 1: Player1 (1500 in chips)
 Seat 7: Hero (1500 in chips)"""
-        
+
         self.parser.readButton(hand)
         self.assertEqual(hand.buttonpos, 7)
 
@@ -179,21 +192,21 @@ Seat 7: Hero (1500 in chips)"""
 Table 'Procyon V' 6-max Seat #8 is the button
 Seat 2: Player2 ($50.00 in chips)
 Seat 8: Hero ($100.00 in chips)"""
-        
+
         self.parser.readButton(hand)
         self.assertEqual(hand.buttonpos, 8)
 
     def test_readButton_regex_pattern(self):
         """Test that the regex pattern is correctly compiled."""
         # Verify the regex pattern exists and is compiled
-        self.assertTrue(hasattr(self.parser, 're_button'))
+        self.assertTrue(hasattr(self.parser, "re_button"))
         self.assertIsNotNone(self.parser.re_button)
-        
+
         # Test the pattern directly
         pattern = r"Seat #(?P<BUTTON>\d+) is the button"
         test_text = "Seat #5 is the button"
         match = self.parser.re_button.search(test_text)
-        
+
         self.assertIsNotNone(match)
         self.assertEqual(match.group("BUTTON"), "5")
 
@@ -202,12 +215,12 @@ Seat 8: Hero ($100.00 in chips)"""
         hand = Mock()
         hand.handText = "Table 'Test' Seat #2 is the button"
         hand.existing_attr = "preserved_value"
-        
+
         self.parser.readButton(hand)
-        
+
         self.assertEqual(hand.buttonpos, 2)
         self.assertEqual(hand.existing_attr, "preserved_value")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

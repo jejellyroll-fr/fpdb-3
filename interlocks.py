@@ -1,4 +1,3 @@
-
 # Code from http://ender.snowburst.org:4747/~jjohns/interlocks.py
 # Thanks JJ!
 
@@ -85,7 +84,7 @@ class InterProcessLockBase:
         self.heldBy = None
 
     def locked(self) -> bool:
-        if self.acquire():
+        if self.acquire("locked_check"):
             self.release()
             return False
         return True
@@ -99,7 +98,8 @@ class InterProcessLockFcntl(InterProcessLockBase):
         InterProcessLockBase.__init__(self, name)
         self.lockfd = 0
         self.lock_file_name = os.path.join(
-            LOCK_FILE_DIRECTORY, self.getHashedName() + ".lck",
+            LOCK_FILE_DIRECTORY,
+            self.getHashedName() + ".lck",
         )
         assert os.path.isdir(LOCK_FILE_DIRECTORY)
 
@@ -196,36 +196,37 @@ except ImportError:
 
 def test_construct() -> None:
     r"""# Making the name of the test unique so it can be executed my multiple users on the same machine.
-    >>> test_name = 'InterProcessLockTest' +str(os.getpid()) + str(time.time()).
+    >>> import subprocess
+    >>> test_name = 'InterProcessLockTest' +str(os.getpid()) + str(time.time())
 
     >>> lock1 = InterProcessLock(name=test_name)
-    >>> lock1.acquire()
+    >>> lock1.acquire("test")
     True
 
     >>> lock2 = InterProcessLock(name=test_name)
     >>> lock3 = InterProcessLock(name=test_name)
 
     # Since lock1 is locked, other attempts to acquire it fail.
-    >>> lock2.acquire()
+    >>> lock2.acquire("test")
     False
 
-    >>> lock3.acquire()
+    >>> lock3.acquire("test")
     False
 
     # Release the lock and let lock2 have it.
     >>> lock1.release()
-    >>> lock2.acquire()
+    >>> lock2.acquire("test")
     True
 
-    >>> lock3.acquire()
+    >>> lock3.acquire("test")
     False
 
     # Release it and give it back to lock1
     >>> lock2.release()
-    >>> lock1.acquire()
+    >>> lock1.acquire("test")
     True
 
-    >>> lock2.acquire()
+    >>> lock2.acquire("test")
     False
 
     # Test lock status
@@ -267,37 +268,117 @@ def test_construct() -> None:
     ...    time.sleep(2) # quick hack, but we test synchronization in the end
     ...    return pid
 
-    >>> pid = execute('import interlocks;a=interlocks.InterProcessLock(name=\\''+test_name+ '\\');a.acquire();')
+    >>> pid = execute('import interlocks;a=interlocks.InterProcessLock(name=\"'+test_name+ '\");a.acquire(\"test\");')
 
-    >>> lock1.acquire()
+    >>> lock1.acquire("test")
     False
 
     >>> os_independent_kill(pid)
 
     >>> time.sleep(1)
 
-    >>> lock1.acquire()
+    >>> lock1.acquire("test")
     True
     >>> lock1.release()
 
     # Testing wait
 
-    >>> pid = execute('import interlocks;a=interlocks.InterProcessLock(name=\\''+test_name+ '\\');a.acquire();')
+    >>> pid = execute('import interlocks;a=interlocks.InterProcessLock(name=\"'+test_name+ '\");a.acquire(\"test\");')
 
-    >>> lock1.acquire()
+    >>> lock1.acquire("test")
     False
 
     >>> os_independent_kill(pid)
 
-    >>> lock1.acquire(True)
+    >>> lock1.acquire("test", True)
     True
     >>> lock1.release()
 
     """
 
 
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
 
-if __name__ == "__main__":
+    import argparse
     import doctest
 
-    doctest.testmod(optionflags=doctest.IGNORE_EXCEPTION_DETAIL)
+    parser = argparse.ArgumentParser(description="FPDB Inter-process locks utility")
+    parser.add_argument("--test", action="store_true", help="Run doctest suite")
+    parser.add_argument("--demo", action="store_true", help="Demo inter-process lock functionality")
+    parser.add_argument("--list-locks", action="store_true", help="List active lock files (if any)")
+    parser.add_argument("--interactive", action="store_true", help="Run original doctest (same as --test)")
+
+    args = parser.parse_args(argv)
+
+    if not any(vars(args).values()):
+        parser.print_help()
+        return 0
+
+    if args.test or args.interactive:
+        print("Running doctest suite for interlocks module...")
+        try:
+            result = doctest.testmod(optionflags=doctest.IGNORE_EXCEPTION_DETAIL)
+            if result.failed == 0:
+                print(f"✓ All {result.attempted} doctests passed")
+                return 0
+            else:
+                print(f"✗ {result.failed}/{result.attempted} doctests failed")
+                return 1
+        except Exception as e:
+            print(f"✗ Doctests crashed: {e}")
+            return 1
+
+    if args.demo:
+        print("=== Inter-Process Lock Demo ===")
+        try:
+            print("Creating test lock 'demo_lock'...")
+            lock = InterProcessLock("demo_lock")
+
+            print("Attempting to acquire lock...")
+            if lock.acquire("demo", wait=False):
+                print("✓ Lock acquired successfully")
+                print("Lock is now held. Other processes would wait.")
+                time.sleep(1)
+                print("Releasing lock...")
+                lock.release()
+                print("✓ Lock released")
+            else:
+                print("✗ Could not acquire lock (may be held by another process)")
+
+        except Exception as e:
+            print(f"Error during demo: {e}")
+            return 1
+
+    if args.list_locks:
+        print("=== Active Lock Files ===")
+        # Look for lock files in common locations
+        import tempfile
+
+        temp_dir = tempfile.gettempdir()
+        lock_files = []
+
+        try:
+            for filename in os.listdir(temp_dir):
+                if "fpdb" in filename.lower() and ("lock" in filename.lower() or filename.endswith(".lock")):
+                    full_path = os.path.join(temp_dir, filename)
+                    if os.path.isfile(full_path):
+                        lock_files.append(full_path)
+
+            if lock_files:
+                for lock_file in lock_files:
+                    stat = os.stat(lock_file)
+                    mtime = time.ctime(stat.st_mtime)
+                    print(f"  {lock_file} (modified: {mtime})")
+            else:
+                print("  No FPDB lock files found in temp directory")
+
+        except Exception as e:
+            print(f"Error listing locks: {e}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

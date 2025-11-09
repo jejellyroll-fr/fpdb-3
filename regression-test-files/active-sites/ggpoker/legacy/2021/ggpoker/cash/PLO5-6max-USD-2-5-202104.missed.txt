@@ -9,10 +9,10 @@ Hero: posts small blind $2
 512ea5fb: posts big blind $5
 22c0851a: posts missed blind $2
 *** HOLE CARDS ***
-Dealt to 512ea5fb 
-Dealt to d4f0076d 
-Dealt to 22c0851a 
-Dealt to 46ac401e 
+Dealt to 512ea5fb
+Dealt to d4f0076d
+Dealt to 22c0851a
+Dealt to 46ac401e
 Dealt to Hero [Kh Ac 8c 6c 7c]
 d4f0076d: folds
 22c0851a: folds

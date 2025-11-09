@@ -105,14 +105,14 @@ $(document).ready(function() {
                         <th data-sortable data-filter>gametype</th>
                         <th>replay</th>
                     </tr>
-                   
+
                 </thead>
-    <tbody> 
+    <tbody>
         {% for handsPlayer in handsPlayers %}
         <tr>
-            
+
             <td>{{ handsPlayer[1] }}</td>
-            
+
             <td>{{ handsPlayer[7] }}</td>
 
             {% if handsPlayer[227] == "fusion" or handsPlayer[227] == "holdem" or handsPlayer[227] == "6_holdem" or handsPlayer[227] == "5_studhi" %}
@@ -124,15 +124,15 @@ $(document).ready(function() {
             {% elif handsPlayer[227] == "5_omahahi" or handsPlayer[227] == "5_omaha8"  or handsPlayer[227] == "5_omahahi" or handsPlayer[227] == "cour_hi" or handsPlayer[227] == "cour_hilo" or handsPlayer[227] == "27_3draw" or handsPlayer[227] == "fivedraw" or handsPlayer[227] == "27_1draw" or handsPlayer[227] == "a5_3draw" or handsPlayer[227] == "a5_1draw" or handsPlayer[227] == "badacey" or handsPlayer[227] == "badeucey" or handsPlayer[227] == "drawmaha" %}
                 {% set numCards = 5 %}
             {% elif handsPlayer[227] == "6_omaha8" or handsPlayer[227] == "6_omahahi" %}
-                {% set numCards = 6 %}            
+                {% set numCards = 6 %}
             {% endif %}
-        
+
             <td>
                 <div class="card-images-row">
                     {% for i in range(numCards+1) %}
                         {% if handsPlayer[9+i] in decodeCardList %}
                             {% set card_str = decodeCardList[handsPlayer[9+i]] %}
-                        
+
                             {% set rank = card_str[:-1] %}
                             {% set suit = card_str[-1] %}
                             {% set card_image_url = "/static/fourcolor/" + rank + "_" + suit + ".svg" %}
@@ -140,91 +140,91 @@ $(document).ready(function() {
                         {% endif %}
 
                     {% endfor %}
-                    
+
                 </div>
             </td>
-        
-          
 
-           
+
+
+
         <td>{{ handsPlayer[33] / 100 }}</td>
 
 
 
-            
+
             <td>{{ handsPlayer[186] }}</td>
 
             <td style="display: none;">{{ handsPlayer[188] }}</td>
 
-           
+
             <td>{{ handsPlayer[191] }}</td>
-           
+
             <td>{{ handsPlayer[193] }}</td>
-          
-           
+
+
             <td><div class="card-images-row">
                 {% if handsPlayer[196] in decodeCardList %}
                         {% set card_str = decodeCardList[handsPlayer[196]] %}
                         {% set rank = card_str[:-1] %}
                         {% set suit = card_str[-1] %}
-                    
+
                         {% set card_image_url196 = "/static/fourcolor/" + rank + "_" + suit + ".svg" %}
                         <img src="{{ card_image_url196 }}" class="card-image" >
-                   
+
                     {% else %}
-                    
+
                     {% endif %}
                 {% if handsPlayer[197] in decodeCardList %}
                     {% set card_str = decodeCardList[handsPlayer[197]] %}
                     {% set rank = card_str[:-1] %}
                     {% set suit = card_str[-1] %}
-                
+
                     {% set card_image_url197 = "/static/fourcolor/" + rank + "_" + suit + ".svg" %}
                     <img src="{{ card_image_url197 }}" class="card-image" >
-               
+
                 {% else %}
-                
-                {% endif %}    
+
+                {% endif %}
                 {% if handsPlayer[198] in decodeCardList %}
                     {% set card_str = decodeCardList[handsPlayer[198]] %}
                     {% set rank = card_str[:-1] %}
                     {% set suit = card_str[-1] %}
-                
+
                     {% set card_image_url198 = "/static/fourcolor/" + rank + "_" + suit + ".svg" %}
                     <img src="{{ card_image_url198 }}" class="card-image" >
-               
+
                 {% else %}
-                
-                {% endif %}                 
+
+                {% endif %}
                 {% if handsPlayer[199] in decodeCardList %}
                     {% set card_str = decodeCardList[handsPlayer[199]] %}
                     {% set rank = card_str[:-1] %}
                     {% set suit = card_str[-1] %}
-                
+
                     {% set card_image_url199 = "/static/fourcolor/" + rank + "_" + suit + ".svg" %}
                     <img src="{{ card_image_url199 }}" class="card-image" >
-               
+
                 {% else %}
-                
-                {% endif %}                 
+
+                {% endif %}
                 {% if handsPlayer[200] in decodeCardList %}
                     {% set card_str = decodeCardList[handsPlayer[200]] %}
                     {% set rank = card_str[:-1] %}
                     {% set suit = card_str[-1] %}
-                
+
                     {% set card_image_url200 = "/static/fourcolor/" + rank + "_" + suit + ".svg" %}
                     <img src="{{ card_image_url200 }}" class="card-image" >
-               
-                {% else %}
-                
-                {% endif %}                    
-                
-                
 
-            
+                {% else %}
+
+                {% endif %}
+
+
+
+
             </div></td>
-            
-            
+
+
 
 
 
@@ -235,9 +235,9 @@ $(document).ready(function() {
                 {% else %}
                     {% set runit2 = 'Yes' %}
                     {{ runit2 }}
-                {% endif %}  
+                {% endif %}
             </td>
-          
+
             <td>{{ handsPlayer[217] / 100}}</td>
             <td>
                 {% if handsPlayer[228] == 'pl' %}
@@ -286,7 +286,7 @@ $(document).ready(function() {
                 {% elif handsPlayer[227] == 'studhilo' %}
                     Stud Hi-Lo
                 {% elif handsPlayer[227] == '27_3draw' %}
-                    2-7 Triple Draw 
+                    2-7 Triple Draw
                 {% elif handsPlayer[227] == '27_1draw' %}
                     2-7 Single Draw
                 {% elif handsPlayer[227] == 'fivedraw' %}
@@ -311,8 +311,8 @@ $(document).ready(function() {
 
             </td>
             <td><a href="/hands/{{ handsPlayer[1] }}?hero={{ name }}"><i class="bi bi-caret-right-square"></i></a></td>
-            
-         
+
+
         </tr>
         {% endfor %}
     </tbody>

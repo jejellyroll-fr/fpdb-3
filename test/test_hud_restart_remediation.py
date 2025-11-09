@@ -198,7 +198,10 @@ class TestSmartHudManager:
         new_state = {"poker_game": "omaha", "max_seats": 6}
 
         should_restart, reason = hud_manager.should_restart_hud(
-            table_key, RestartReason.GAME_TYPE_CHANGE, current_state, new_state,
+            table_key,
+            RestartReason.GAME_TYPE_CHANGE,
+            current_state,
+            new_state,
         )
 
         assert should_restart is True
@@ -212,7 +215,10 @@ class TestSmartHudManager:
         new_state = {"poker_game": "holdem", "max_seats": 7}  # Minor change
 
         should_restart, reason = hud_manager.should_restart_hud(
-            table_key, RestartReason.MAX_SEATS_CHANGE, current_state, new_state,
+            table_key,
+            RestartReason.MAX_SEATS_CHANGE,
+            current_state,
+            new_state,
         )
 
         assert should_restart is False
@@ -225,7 +231,10 @@ class TestSmartHudManager:
         new_state = {"poker_game": "holdem", "max_seats": 10}  # Major change
 
         should_restart, reason = hud_manager.should_restart_hud(
-            table_key, RestartReason.MAX_SEATS_CHANGE, current_state, new_state,
+            table_key,
+            RestartReason.MAX_SEATS_CHANGE,
+            current_state,
+            new_state,
         )
 
         assert should_restart is True

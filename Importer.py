@@ -57,6 +57,7 @@ log = get_logger("importer")
 
 class ZMQSender:
     """ZMQ sender for sending hand IDs to the HUD."""
+
     def __init__(self, port="5555") -> None:
         """Initialize the ZMQSender and connect to the specified port.
 
@@ -107,6 +108,7 @@ class ZMQSender:
 
 class Importer:
     """Importer class for handling file imports and processing."""
+
     def __init__(self, caller, settings, config, sql=None, parent=None) -> None:
         """Initialize the Importer for handling file imports and processing.
 
@@ -465,7 +467,11 @@ class Importer:
     # dirlist is a hash of lists:
     # dirlist{ 'PokerStars' => ["/path/to/import/", "filtername"] }
     def addImportDirectory(
-        self, dir, monitor=False, site=("default", "hh"), filter="passthrough",
+        self,
+        dir,
+        monitor=False,
+        site=("default", "hh"),
+        filter="passthrough",
     ) -> None:
         """Add all files from a directory to the import list, optionally enabling monitoring.
 
@@ -493,9 +499,7 @@ class Importer:
                     if os.path.islink(filename):
                         log.info(f"Ignoring symlink {filename}")
                         continue
-                    if (
-                        time() - os.stat(filename).st_mtime
-                    ) <= 43200:  # look all files modded in the last 12 hours
+                    if (time() - os.stat(filename).st_mtime) <= 43200:  # look all files modded in the last 12 hours
                         # need long time because FTP in Win does not
                         # update the timestamp on the HH during session
                         self.addImportFile(filename, "auto")
@@ -520,11 +524,15 @@ class Importer:
         )
         if self.settings["dropIndexes"] == "auto":
             self.settings["dropIndexes"] = self.calculate_auto2(
-                self.database, 12.0, 500.0,
+                self.database,
+                12.0,
+                500.0,
             )
         if "dropHudCache" in self.settings and self.settings["dropHudCache"] == "auto":
             self.settings["dropHudCache"] = self.calculate_auto2(
-                self.database, 25.0, 500.0,
+                self.database,
+                25.0,
+                500.0,
             )  # returns "drop"/"don't drop"
 
         (totstored, totdups, totpartial, totskipped, toterrors) = self.importFiles(None)
@@ -576,9 +584,7 @@ class Importer:
         toterrors = 0
         filecount = 0
         fileerrorcount = 0
-        moveimportedfiles = (
-            False  # TODO need to wire this into GUI and make it prettier
-        )
+        moveimportedfiles = False  # TODO need to wire this into GUI and make it prettier
         movefailedfiles = False  # TODO and this too
 
         # prepare progress popup window
@@ -591,9 +597,7 @@ class Importer:
             ProgressDialog.progress_update(f, str(self.database.getHandCount()))
 
             try:
-                (stored, duplicates, partial, skipped, errors, ttime, _) = (
-                    self._import_despatch(self.filelist[f])
-                )
+                (stored, duplicates, partial, skipped, errors, ttime, _) = self._import_despatch(self.filelist[f])
                 totstored += stored
                 totdups += duplicates
                 totpartial += partial
@@ -621,8 +625,7 @@ class Importer:
                     if moveimportedfiles:
                         shutil.move(
                             f,
-                            "c:\\fpdbimported\\%d-%s"
-                            % (filecount, os.path.basename(f[3:])),
+                            "c:\\fpdbimported\\%d-%s" % (filecount, os.path.basename(f[3:])),
                         )
                 except (shutil.Error, OSError) as e:
                     fileerrorcount += 1
@@ -631,8 +634,7 @@ class Importer:
                         try:
                             shutil.move(
                                 f,
-                                "c:\\fpdbfailed\\%d-%s"
-                                % (fileerrorcount, os.path.basename(f[3:])),
+                                "c:\\fpdbfailed\\%d-%s" % (fileerrorcount, os.path.basename(f[3:])),
                             )
                         except (shutil.Error, OSError) as e:
                             log.exception(f"Error moving failed file {f}: {e}")
@@ -658,13 +660,9 @@ class Importer:
         stored, duplicates, partial, skipped, errors, ttime = 0, 0, 0, 0, 0, 0
         detected_sitename = None
         if fpdbfile.ftype in ("hh", "both"):
-            (stored, duplicates, partial, skipped, errors, ttime, detected_sitename) = (
-                self._import_hh_file(fpdbfile)
-            )
+            (stored, duplicates, partial, skipped, errors, ttime, detected_sitename) = self._import_hh_file(fpdbfile)
         if fpdbfile.ftype == "summary":
-            (stored, duplicates, partial, skipped, errors, ttime) = (
-                self._import_summary_file(fpdbfile)
-            )
+            (stored, duplicates, partial, skipped, errors, ttime) = self._import_summary_file(fpdbfile)
         if fpdbfile.ftype == "both" and fpdbfile.path not in self.updatedsize:
             self._import_summary_file(fpdbfile)
         #    pass
@@ -709,10 +707,7 @@ class Importer:
         # if hands_in_db is zero or very low, we want to drop indexes, otherwise compare
         # import size with db size somehow:
         ret = "don't drop"
-        if (
-            self.settings["handsInDB"]
-            < scale * (old_div(total_size, size_per_hand)) + increment
-        ):
+        if self.settings["handsInDB"] < scale * (old_div(total_size, size_per_hand)) + increment:
             ret = "drop"
         # print "auto2: handsindb =", self.settings['handsInDB'], "total_size =", total_size, "size_per_hand =", \
         #      size_per_hand, "inc =", increment, "return:", ret
@@ -735,20 +730,20 @@ class Importer:
         for f in self.filelist:
             if os.path.exists(f):
                 stat_info = os.stat(f)
-                if (
-                    f in self.updatedsize
-                ):  # we should be able to assume that if we're in size, we're in time as well
-                    if (
-                        stat_info.st_size > self.updatedsize[f]
-                        or stat_info.st_mtime > self.updatedtime[f]
-                    ):
+                if f in self.updatedsize:  # we should be able to assume that if we're in size, we're in time as well
+                    if stat_info.st_size > self.updatedsize[f] or stat_info.st_mtime > self.updatedtime[f]:
                         try:
                             if not os.path.isdir(f):
                                 # Extract site name from the file object
-                                site_name = self.filelist[f].site.name if self.filelist[f] and self.filelist[f].site else "Unknown"
+                                site_name = (
+                                    self.filelist[f].site.name
+                                    if self.filelist[f] and self.filelist[f].site
+                                    else "Unknown"
+                                )
 
                                 # Extract hand number from filename (assuming it's in the filename)
                                 import re
+
                                 hand_match = re.search(r"(\d{6,})", os.path.basename(f))
                                 hand_number = hand_match.group(1) if hand_match else "N/A"
 
@@ -776,10 +771,15 @@ class Importer:
                         try:
                             if not os.path.isdir(f):
                                 # Use detected sitename if available, otherwise fall back to config sitename
-                                site_name = detected_sitename or (self.filelist[f].site.name if self.filelist[f] and self.filelist[f].site else "Unknown")
+                                site_name = detected_sitename or (
+                                    self.filelist[f].site.name
+                                    if self.filelist[f] and self.filelist[f].site
+                                    else "Unknown"
+                                )
 
                                 # Extract hand number from filename
                                 import re
+
                                 hand_match = re.search(r"(\d{6,})", os.path.basename(f))
                                 hand_number = hand_match.group(1) if hand_match else os.path.basename(f)[:20]
 
@@ -820,9 +820,7 @@ class Importer:
                                 self.caller.addText(f"\n{event_text}", status)
 
                                 log.debug(f"self.caller2: {self.caller}")
-                        except (
-                            KeyError
-                        ):  # TODO: Again, what error happens here? fix when we find out ..
+                        except KeyError:  # TODO: Again, what error happens here? fix when we find out ..
                             log.exception(
                                 f"KeyError encountered while processing file: {f}",
                             )
@@ -900,25 +898,28 @@ class Importer:
                     if "Hand starting with" in str(issue):
                         # Try to extract the hand snippet from the error message
                         import re
+
                         match = re.search(r"Hand starting with '([^']+)'", str(issue))
                         if match:
                             hand_snippet = match.group(1)
                             # Read directly a portion of the file for more context
                             try:
-                                with open(fpdbfile.path, 'r', encoding='utf-8') as f:
+                                with open(fpdbfile.path, encoding="utf-8") as f:
                                     file_content = f.read()
                                     # Search for the snippet in the file to get more context
-                                    if hand_snippet.replace('...', '') in file_content:
-                                        start_pos = file_content.find(hand_snippet.replace('...', ''))
+                                    if hand_snippet.replace("...", "") in file_content:
+                                        start_pos = file_content.find(hand_snippet.replace("...", ""))
                                         if start_pos != -1:
-                                            hand_context = file_content[start_pos:start_pos+1000]  # 1000 characters of context
+                                            hand_context = file_content[
+                                                start_pos : start_pos + 1000
+                                            ]  # 1000 characters of context
                             except Exception:
                                 hand_context = hand_snippet
                         else:
                             hand_context = str(issue)[:500]
                     else:
                         hand_context = str(issue)[:500]
-                        
+
                     # Create an enriched error for parsing issues
                     parsing_error = Exception(str(issue))
                     parsing_error.full_traceback = f"Parsing issue in {fpdbfile.path}: {issue}"
@@ -1001,25 +1002,40 @@ class Importer:
 
                         # Report duplicate hand
                         if self.hand_data_reporter:
-                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, e, hand.handText[:200] if hasattr(hand, "handText") else "")
+                            self.hand_data_reporter.report_hand_failure(
+                                fpdbfile.path, e, hand.handText[:200] if hasattr(hand, "handText") else ""
+                            )
 
                     except FpdbHandPartial as e:
                         import traceback
+
                         partial += 1
-                        self.import_issues.append(f"[PARTIAL] In {fpdbfile.path}: Hand starting with '{hand.handText[:30]}...' - {e}")
+                        self.import_issues.append(
+                            f"[PARTIAL] In {fpdbfile.path}: Hand starting with '{hand.handText[:30]}...' - {e}"
+                        )
 
                         # Report partial hand with traceback
                         if self.hand_data_reporter:
                             # Capturer la stack trace pour les mains partielles aussi
                             full_traceback = traceback.format_exc()
-                            enriched_error = Exception(f"[PARTIAL] Hand starting with '{hand.handText[:30] if hasattr(hand, 'handText') else 'Unknown'}...': '{e}'")
+                            enriched_error = Exception(
+                                f"[PARTIAL] Hand starting with '{hand.handText[:30] if hasattr(hand, 'handText') else 'Unknown'}...': '{e}'"
+                            )
                             enriched_error.full_traceback = full_traceback
-                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, enriched_error, hand.handText[:500] if hasattr(hand, "handText") else "", hand)
+                            self.hand_data_reporter.report_hand_failure(
+                                fpdbfile.path,
+                                enriched_error,
+                                hand.handText[:500] if hasattr(hand, "handText") else "",
+                                hand,
+                            )
 
                     except Exception as e:
                         import traceback
+
                         errors += 1
-                        self.import_issues.append(f"[ERROR] In {fpdbfile.path}: Hand starting with '{hand.handText[:30]}...' - {e}")
+                        self.import_issues.append(
+                            f"[ERROR] In {fpdbfile.path}: Hand starting with '{hand.handText[:30]}...' - {e}"
+                        )
                         log.exception(
                             f"Importer._import_hh_file: '{fpdbfile.path}' Fatal error: '{e}'",
                         )
@@ -1031,7 +1047,9 @@ class Importer:
                             # Créer un objet d'erreur enrichi avec la stack trace
                             enriched_error = Exception(str(e))
                             enriched_error.full_traceback = full_traceback
-                            self.hand_data_reporter.report_hand_failure(fpdbfile.path, enriched_error, hand.handText[:500] if hasattr(hand, "handText") else "")
+                            self.hand_data_reporter.report_hand_failure(
+                                fpdbfile.path, enriched_error, hand.handText[:500] if hasattr(hand, "handText") else ""
+                            )
                         else:
                             log.exception(f"'{hand.handText[0:200]}'")
                         if doinsert and ihands:
@@ -1045,9 +1063,7 @@ class Importer:
                             self.database.hbulk[:-1],
                             [],
                         )  # making sure we don't insert data from this hand
-                        self.database.bbulk = [
-                            b for b in self.database.bbulk if hand.dbid_hands != b[0]
-                        ]
+                        self.database.bbulk = [b for b in self.database.bbulk if hand.dbid_hands != b[0]]
                         hand.updateSessionsCache(self.database, None, doinsert)
                         hand.insertHands(
                             self.database,
@@ -1067,10 +1083,14 @@ class Importer:
                     doinsert = len(ihands) == i + 1
                     hand = ihands[i]
                     hand.insertHandsPlayers(
-                        self.database, doinsert, self.settings["testData"],
+                        self.database,
+                        doinsert,
+                        self.settings["testData"],
                     )
                     hand.insertHandsActions(
-                        self.database, doinsert, self.settings["testData"],
+                        self.database,
+                        doinsert,
+                        self.settings["testData"],
                     )
                     hand.insertHandsStove(self.database, doinsert)
                 self.database.commit()
@@ -1213,11 +1233,15 @@ class Importer:
                     conv.insertOrUpdate(printtest=self.settings["testData"])
                 except FpdbHandPartial:
                     partial += 1
-                    self.import_issues.append(f"[PARTIAL] In {fpdbfile.path}: Summary starting with '{summaryText[:30]}...'")
+                    self.import_issues.append(
+                        f"[PARTIAL] In {fpdbfile.path}: Summary starting with '{summaryText[:30]}...'"
+                    )
                 except FpdbParseError:
                     log.exception(f"Summary import parse error in file: {fpdbfile.path}")
                     errors += 1
-                    self.import_issues.append(f"[ERROR] In {fpdbfile.path}: Summary starting with '{summaryText[:30]}...'")
+                    self.import_issues.append(
+                        f"[ERROR] In {fpdbfile.path}: Summary starting with '{summaryText[:30]}...'"
+                    )
                 if j != 1:
                     log.info(
                         f"Finished importing {j}/{len(summaryTexts)} tournament summaries",
@@ -1268,9 +1292,7 @@ class Importer:
             if len(summaryTexts) > 1 and len(summaryTexts[0]) <= 150:
                 del summaryTexts[0]
                 log.warning(
-                    (
-                        "TourneyImport: Removing text < 150 characters from start of file"
-                    ),
+                    ("TourneyImport: Removing text < 150 characters from start of file"),
                 )
 
             # Sometimes the summary files also have a footer
@@ -1278,9 +1300,7 @@ class Importer:
             if len(summaryTexts) > 1 and len(summaryTexts[-1]) <= 100:
                 summaryTexts.pop()
                 log.warning(
-                    (
-                        "TourneyImport: Removing text < 100 characters from end of file"
-                    ),
+                    ("TourneyImport: Removing text < 100 characters from end of file"),
                 )
         return summaryTexts
 
@@ -1415,10 +1435,10 @@ class ImportProgressDialog(QDialog):
                     sys.stdout.write(f"\rProgress: |{bar}| {percentage}% Complete - {os.path.basename(filename)}")
                     sys.stdout.flush()
                 except (ZeroDivisionError, ValueError):
-                    pass # Avoid errors if total is 0 for some reason
+                    pass  # Avoid errors if total is 0 for some reason
             return
         if self.parent == "CLI_NO_PROGRESS":
-            return # No output at all
+            return  # No output at all
 
         # GUI mode
         # update total if fraction exceeds expected total number of iterations
@@ -1444,7 +1464,7 @@ class ImportProgressDialog(QDialog):
         Handles both command line and GUI modes, ensuring proper cleanup and display behavior.
         """
         if self.parent is None:
-            sys.stdout.write("\n") # Newline after progress bar finishes
+            sys.stdout.write("\n")  # Newline after progress bar finishes
             return
         if self.parent == "CLI_NO_PROGRESS":
             return

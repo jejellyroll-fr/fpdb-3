@@ -139,7 +139,9 @@ class TestStatSetSwitching(unittest.TestCase):
 
             # Should log failure and restart
             mock_log.info.assert_called_with(
-                "Refreshing HUD failed, restarting to apply stat set '%s': %s", "NewStatSet", unittest.mock.ANY,
+                "Refreshing HUD failed, restarting to apply stat set '%s': %s",
+                "NewStatSet",
+                unittest.mock.ANY,
             )
             self.hud.parent.kill_hud.assert_called_once_with("kill", "test_table")
 
@@ -283,10 +285,10 @@ class TestStatSetSwitching(unittest.TestCase):
 
         # Mock current stat set
         self.popup_menu._get_current_stat_set = Mock(return_value="Advanced")
-        
+
         mock_combo = self._create_mock_combo_box()
-        
-        with patch('Aux_Hud.QComboBox', return_value=mock_combo):
+
+        with patch("Aux_Hud.QComboBox", return_value=mock_combo):
             combo = self.popup_menu.build_stat_set_combo(stat_sets_dict)
             self._verify_combo_box_setup(combo, mock_combo)
 

@@ -581,14 +581,9 @@ class iPoker(HandHistoryConverter):  # noqa: N801
 
         # Parse gametype string - handle both formats
         gametype_pattern_with_blinds = (
-            r"(\w+(?:\s+\w+)*)\s+"
-            r"(NL|PL|L|SL|БЛ|LP|No\s+limit|Pot\s+limit|Limit)\s*"
-            r"\$?([0-9.,]+)/\$?([0-9.,]+)"
+            r"(\w+(?:\s+\w+)*)\s+" r"(NL|PL|L|SL|БЛ|LP|No\s+limit|Pot\s+limit|Limit)\s*" r"\$?([0-9.,]+)/\$?([0-9.,]+)"
         )
-        gametype_pattern_no_blinds = (
-            r"(\w+(?:\s+\w+)*)\s+"
-            r"(NL|PL|L|SL|БЛ|LP|No\s+limit|Pot\s+limit|Limit)\s*$"
-        )
+        gametype_pattern_no_blinds = r"(\w+(?:\s+\w+)*)\s+" r"(NL|PL|L|SL|БЛ|LP|No\s+limit|Pot\s+limit|Limit)\s*$"
 
         gametype_match = re.match(gametype_pattern_with_blinds, gametype_text)
         if not gametype_match:
@@ -1061,7 +1056,9 @@ class iPoker(HandHistoryConverter):  # noqa: N801
         else:
             self.tinfo["multiplier"] = Decimal(0)
             log.debug(
-                "Cannot calculate multiplier: rewarddrawn=%s, buyin=%s", self.tinfo["rewarddrawn"], self.tinfo["buyin"],
+                "Cannot calculate multiplier: rewarddrawn=%s, buyin=%s",
+                self.tinfo["rewarddrawn"],
+                self.tinfo["buyin"],
             )
 
         # Player performance data
@@ -2060,7 +2057,9 @@ class iPoker(HandHistoryConverter):  # noqa: N801
                 # Check if player exists before adding ante
                 if player_name not in player_names:
                     log.warning(
-                        "Player %s not found in hand players list: %s. Skipping ante.", player_name, player_names,
+                        "Player %s not found in hand players list: %s. Skipping ante.",
+                        player_name,
+                        player_names,
                     )
                     continue
 
@@ -2107,7 +2106,9 @@ class iPoker(HandHistoryConverter):  # noqa: N801
                 # Check if player exists before adding blind
                 if player_name not in player_names:
                     log.warning(
-                        "Player %s not found in hand players list: %s. Skipping small blind.", player_name, player_names,
+                        "Player %s not found in hand players list: %s. Skipping small blind.",
+                        player_name,
+                        player_names,
                     )
                     continue
 

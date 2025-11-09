@@ -25,12 +25,12 @@ Dealt to 559023 [8c 7d]
 951600 collected $1,354 from pot
 *** SECOND SHOW DOWN ***
 951600 collected $1,354 from pot
-*** SUMMARY *** 
+*** SUMMARY ***
 Total pot $2,768 | Rake $60
 Hand was run two times
-FIRST 
+FIRST
 Board [Tc 8h Ah 6h Jd]
-SECOND 
+SECOND
 Board [9h 9c Kc 6s As]
 Seat 1: 951600 showed [Qs Ks] and won ($1,354) with Aces-High Straight, and won ($1,354) with Pair of Kings and Pair of Nines
 Seat 4: 559023 folded before Flop

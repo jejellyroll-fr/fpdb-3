@@ -16,9 +16,9 @@ Hero                        Call        (10.00)
 
 Flop                        2c - Ad - 4h
 
-Hero                        Check       
+Hero                        Check
 Player0                     Bet         (10.00)
-Hero                        Fold        
+Hero                        Fold
 Player0                     Payback     (10.00)
 
 Player0 didn't show hand

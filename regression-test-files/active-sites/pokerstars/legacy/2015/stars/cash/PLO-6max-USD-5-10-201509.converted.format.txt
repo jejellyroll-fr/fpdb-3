@@ -13,16 +13,16 @@ PLR_8776433RL: folds
 Table leave user
 PLR_6438005HF: folds
 PLR_4409555EF: raises $30 to $30
-bodogJS: calls $25 
-PLR_4509439ZS: calls $20 
+bodogJS: calls $25
+PLR_4509439ZS: calls $20
 *** FLOP *** [8h 7h 4d]
 bodogJS: checks
-PLR_4509439ZS: bets $90 
+PLR_4509439ZS: bets $90
 PLR_4409555EF: folds
-bodogJS: calls $90 
+bodogJS: calls $90
 *** TURN *** [8h 7h 4d] [As]
 bodogJS: checks
-PLR_4509439ZS: bets $135 
+PLR_4509439ZS: bets $135
 bodogJS: raises $675 to $675
 PLR_4509439ZS: calls $273.42 and is all-in
 *** RIVER *** [8h 7h 4d As] [9d]
@@ -39,5 +39,3 @@ Seat 2: PLR_6438005HF mucked [Jd Ks 3s 7c]
 Seat 3: PLR_4409555EF (button) mucked [Qc Kc 9h Ac]
 Seat 4: bodogJS (small blind) showed [6d 3c 5s 3d] and lost with a straight, Nine to Six
 Seat 5: PLR_4509439ZS (big blind) showed [7s 6h Td 9c] and won ($1084.84) with a straight, Nine to Six
-
-

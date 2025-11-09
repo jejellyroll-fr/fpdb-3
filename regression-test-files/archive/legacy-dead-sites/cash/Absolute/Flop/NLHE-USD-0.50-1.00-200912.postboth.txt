@@ -9,7 +9,7 @@ Player1 - Posts small blind $0.50
 Hero - Posts big blind $1
 Player2 - Posts $1 dead $0.50
 *** POCKET CARDS ***
-Dealt to Hero [Ac 3h] 
+Dealt to Hero [Ac 3h]
 Player2 - Checks
 Player3 - Folds
 Player0 - Folds
@@ -29,5 +29,5 @@ Board [9d Ad 3s]
 Seat 2: Player2 Folded on the FLOP
 Seat 3: Player3 Folded on the POCKET CARDS
 Seat 4: Player0 (dealer) Folded on the POCKET CARDS
-Seat 5: Player1 (small blind) collected Total ($8.55) HI:($8.55)  [Does not show] 
+Seat 5: Player1 (small blind) collected Total ($8.55) HI:($8.55)  [Does not show]
 Seat 6: Hero (big blind) Folded on the POCKET CARDS

@@ -197,7 +197,8 @@ class PokerTrackerSummary(TourneySummary):
             datetimestr = "2000/01/01 00:00:00"  # default used if time not found
 
         self.startTime = datetime.datetime.strptime(
-            datetimestr, "%Y/%m/%d %H:%M:%S",
+            datetimestr,
+            "%Y/%m/%d %H:%M:%S",
         ).replace(tzinfo=datetime.timezone.utc)  # also timezone at end, e.g. " ET"
 
         if mg["CURRENCY"] == "$":
@@ -212,11 +213,7 @@ class PokerTrackerSummary(TourneySummary):
             self.buyinCurrency = "FREE"
         self.currency = self.buyinCurrency
 
-        if (
-            self.buyinCurrency not in ("FREE", "PSFP")
-            and "ENTRIES" in mg
-            and self.prizepool == 0
-        ):
+        if self.buyinCurrency not in ("FREE", "PSFP") and "ENTRIES" in mg and self.prizepool == 0:
             self.prizepool = int(Decimal(self.clearMoneyString(mg["BUYIN"]))) * int(
                 self.entries,
             )
@@ -259,5 +256,11 @@ class PokerTrackerSummary(TourneySummary):
                     log.debug("a.groupdict(): %s", mg)
 
                 self.addPlayer(
-                    rank, name, winnings, self.currency, rebuy_count, add_on_count, ko_count,
+                    rank,
+                    name,
+                    winnings,
+                    self.currency,
+                    rebuy_count,
+                    add_on_count,
+                    ko_count,
                 )

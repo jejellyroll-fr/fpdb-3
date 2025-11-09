@@ -24,7 +24,7 @@ git remote add upstream https://github.com/jejellyroll-fr/fpdb-3.git
 # Install UV if not already installed
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Create virtual environment
+# Create virtual environment (ONE-TIME setup per repository clone)
 uv venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
@@ -32,7 +32,34 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 uv pip install .[linux][postgresql][test]  # Adjust for your platform
 ```
 
+**Important Notes about Virtual Environment Lifecycle:**
 
+- **Creating the venv**: `uv venv` is a **one-time operation** per repository clone. You only need to run this once after cloning.
+
+- **Activating the venv**: `source .venv/bin/activate` (or `.venv\Scripts\activate` on Windows) must be run **every time** you open a new terminal session to work on the project.
+
+- **Installing dependencies**: `uv pip install .[linux][postgresql][test]` only needs to be re-run when:
+  - The `pyproject.toml` file changes (new dependencies added/updated)
+  - You delete and recreate your virtual environment
+  - You encounter import errors suggesting missing packages
+
+- **Switching branches**: Generally does **NOT** require reinstalling dependencies unless that specific branch has different dependencies in `pyproject.toml`.
+
+**Platform-specific dependency installation:**
+
+```bash
+# For Linux users with postgresql
+uv pip install ".[linux,postgresql,test]"
+
+# For Windows users with postgresql
+uv pip install .[windows][postgresql][test]
+
+# For macOS users with postgresql
+uv pip install ".[macos,postgresql,test]"
+
+# Minimal installation without database support
+uv pip install .[test]
+```
 
 ## 🏗️ Project Architecture
 
@@ -117,21 +144,21 @@ log = get_logger("module_name")
 
 def parse_hand_history(content: str, site: str) -> Optional[Dict[str, Any]]:
     """Parse hand history content from specified poker site.
-    
+
     Args:
         content: Raw hand history text
         site: Poker site identifier
-        
+
     Returns:
         Parsed hand data or None if parsing fails
-        
+
     Raises:
         ValueError: If site is not supported
     """
     if not content.strip():
         log.warning("Empty hand history content")
         return None
-    
+
     # Implementation here
     return parsed_data
 ```

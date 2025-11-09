@@ -11,12 +11,12 @@ Hero: posts big blind $10
 d379b979: posts missed blind $5
 d379b979: posts big blind $10
 *** HOLE CARDS ***
-Dealt to f4ed9d 
-Dealt to 23012d0d 
-Dealt to ecb5631c 
-Dealt to 2d761070 
+Dealt to f4ed9d
+Dealt to 23012d0d
+Dealt to ecb5631c
+Dealt to 2d761070
 Dealt to Hero [4h 3h 7c Kh]
-Dealt to d379b979 
+Dealt to d379b979
 d379b979: raises $30 to $40
 f4ed9d: folds
 23012d0d: folds

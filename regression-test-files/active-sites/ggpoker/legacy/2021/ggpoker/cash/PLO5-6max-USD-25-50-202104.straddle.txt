@@ -10,8 +10,8 @@ Hero: posts small blind $25
 ce67ea41: posts big blind $50
 ce67ea41: straddle $100
 *** HOLE CARDS ***
-Dealt to ce67ea41 
-Dealt to 2a287edc 
+Dealt to ce67ea41
+Dealt to 2a287edc
 Dealt to Hero [Kd 2h 3h Qc Tc]
 2a287edc: raises $225 to $325
 Hero: folds

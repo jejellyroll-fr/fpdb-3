@@ -732,6 +732,3 @@ snowcat420 folds
 kelero shows [ Qc, Jc ]
 Hero shows [ Kc, Ah ]
 kelero collected [ 6,284 ]
-
-
-

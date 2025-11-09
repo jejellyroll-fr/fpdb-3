@@ -88,7 +88,9 @@ class TestPopupXMLConfiguration(unittest.TestCase):
             pu_class = pu.get("pu_class")
 
             if pu_name in modern_popup_names:
-                assert pu_class in modern_classes, f"Modern popup '{pu_name}' should use ModernSubmenu class, got '{pu_class}'"
+                assert (
+                    pu_class in modern_classes
+                ), f"Modern popup '{pu_name}' should use ModernSubmenu class, got '{pu_class}'"
 
     def test_popup_stat_elements(self) -> None:
         """Test that popup stat elements are properly configured."""
@@ -132,7 +134,9 @@ class TestPopupXMLConfiguration(unittest.TestCase):
                     assert required_stat in stat_names, f"Popup '{pu_name}' missing required stat '{required_stat}'"
 
                 # Check minimum number of stats
-                assert len(stat_names) >= config["min_stats"], f"Popup '{pu_name}' should have at least {config['min_stats']} stats, got {len(stat_names)}"
+                assert (
+                    len(stat_names) >= config["min_stats"]
+                ), f"Popup '{pu_name}' should have at least {config['min_stats']} stats, got {len(stat_names)}"
 
     def test_tournament_popups_have_m_ratio(self) -> None:
         """Test that tournament popups include M-ratio stat."""
@@ -166,7 +170,9 @@ class TestPopupXMLConfiguration(unittest.TestCase):
 
                 # Most should have player_note (some basic ones might not)
                 if "complete" in pu_name or "specialist" in pu_name:
-                    assert "player_note" in stat_names, f"Comprehensive popup '{pu_name}' should include player_note stat"
+                    assert (
+                        "player_note" in stat_names
+                    ), f"Comprehensive popup '{pu_name}' should include player_note stat"
 
     def test_no_duplicate_popup_names(self) -> None:
         """Test that popup names are unique."""
@@ -174,7 +180,9 @@ class TestPopupXMLConfiguration(unittest.TestCase):
         popup_names = [pu.get("pu_name") for pu in popup_windows.findall("pu")]
 
         unique_names = set(popup_names)
-        assert len(popup_names) == len(unique_names), f"Duplicate popup names found: {[name for name in popup_names if popup_names.count(name) > 1]}"
+        assert len(popup_names) == len(
+            unique_names
+        ), f"Duplicate popup names found: {[name for name in popup_names if popup_names.count(name) > 1]}"
 
     def test_stat_sets_use_modern_popups(self) -> None:
         """Test that stat sets are updated to use modern popups."""
@@ -201,7 +209,9 @@ class TestPopupXMLConfiguration(unittest.TestCase):
 
                 for stat in playershort_stats:
                     popup = stat.get("popup")
-                    assert popup == expected_popup, f"Stat set '{ss_name}' playershort should use popup '{expected_popup}', got '{popup}'"
+                    assert (
+                        popup == expected_popup
+                    ), f"Stat set '{ss_name}' playershort should use popup '{expected_popup}', got '{popup}'"
 
 
 class TestPopupStatValidation(unittest.TestCase):
@@ -346,11 +356,15 @@ class TestPopupStatValidation(unittest.TestCase):
 
                 # Check expected categories
                 for expected_cat in test_config["expected_categories"]:
-                    assert expected_cat in stat_categories, f"Popup '{pu_name}' should contain stats from category '{expected_cat}'"
+                    assert (
+                        expected_cat in stat_categories
+                    ), f"Popup '{pu_name}' should contain stats from category '{expected_cat}'"
 
                 # Check forbidden categories
                 for forbidden_cat in test_config["forbidden_categories"]:
-                    assert forbidden_cat not in stat_categories, f"Popup '{pu_name}' should not contain stats from category '{forbidden_cat}'"
+                    assert (
+                        forbidden_cat not in stat_categories
+                    ), f"Popup '{pu_name}' should not contain stats from category '{forbidden_cat}'"
 
     def test_variant_specific_popups(self) -> None:
         """Test that variant-specific popups contain appropriate stats."""
@@ -379,10 +393,14 @@ class TestPopupStatValidation(unittest.TestCase):
                 stat_names = [stat.get("pu_stat_name") for stat in pu.findall("pu_stat")]
 
                 for should_have_stat in test_config["should_have"]:
-                    assert should_have_stat in stat_names, f"Variant popup '{pu_name}' should include stat '{should_have_stat}'"
+                    assert (
+                        should_have_stat in stat_names
+                    ), f"Variant popup '{pu_name}' should include stat '{should_have_stat}'"
 
                 for should_not_have_stat in test_config["should_not_have"]:
-                    assert should_not_have_stat not in stat_names, f"Variant popup '{pu_name}' should not include stat '{should_not_have_stat}'"
+                    assert (
+                        should_not_have_stat not in stat_names
+                    ), f"Variant popup '{pu_name}' should not include stat '{should_not_have_stat}'"
 
 
 class TestPopupUsageInStatSets(unittest.TestCase):
@@ -486,7 +504,11 @@ class TestPopupUsageInStatSets(unittest.TestCase):
             if "playershort" in stats:
                 popup = stats["playershort"]
                 # Should either be a modern popup or 'holdring_main' (legacy)
-                assert popup.startswith(("cash_", "tournament_")) or popup in ["holdring_main", "holdring_modern", "holdtour_main"], f"Holdem stat set '{ss_name}' uses unexpected popup for playershort: '{popup}'"
+                assert popup.startswith(("cash_", "tournament_")) or popup in [
+                    "holdring_main",
+                    "holdring_modern",
+                    "holdtour_main",
+                ], f"Holdem stat set '{ss_name}' uses unexpected popup for playershort: '{popup}'"
 
 
 if __name__ == "__main__":

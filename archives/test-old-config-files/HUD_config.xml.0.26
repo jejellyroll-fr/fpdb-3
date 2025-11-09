@@ -179,7 +179,7 @@ Left-Drag to Move"
                 <location seat="4" x="113" y="402"> </location>
                 <location seat="5" x="19" y="291"> </location>
                 <location seat="6" x="110" y="87"> </location>
-                
+
             </layout>
             <layout max="10" width="792" height="546" fav_seat="0">
                 <location seat="1" x="633" y="26">  </location>
@@ -192,7 +192,7 @@ Left-Drag to Move"
                 <location seat="8" x="3" y="281">  </location>
                 <location seat="9" x="0" y="64">  </location>
                 <location seat="10" x="52" y="27">  </location>
-                
+
             </layout>
             <layout max="9" width="792" height="546" fav_seat="0">
                 <location seat="1" x="560" y="0">  </location>
@@ -1151,10 +1151,10 @@ Left-Drag to Move"
             2/3 size:  card_ht="28"
             half size: card_ht="21"
             Double size: card_ht="84"
-            
+
         Card height cannot be set for stud games
         -->
-        
+
         <aw class="Stud_mucked" cols="11" deck="Cards01.png" module="Mucked" name="stud_mucked" rows="8"> </aw>
         <aw class="Hello" module="Hello" name="Hello"> </aw>
         <aw class="Hello_Menu" module="Hello" name="Hello_menu"> </aw>

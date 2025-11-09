@@ -7,25 +7,25 @@ Seat 6: Player2 (1.48)
 Player1 posts ante 0.01
 Player2 posts ante 0.01
 Player0 posts ante 0.01
-*** THIRD *** 
+*** THIRD ***
 Player1 bring-in 0.02
 Player2 calls 0.02
 Player0 calls 0.02
-*** FOURTH *** 
+*** FOURTH ***
 Player1 checks
 Player2 checks
 Player0 checks
-*** FIFTH *** 
+*** FIFTH ***
 Player0 checks
 Player1 checks
 Player2 bets 0.10
 Player0 calls 0.10
 Player1 folds
-*** SIXTH *** 
+*** SIXTH ***
 Player0 checks
 Player2 bets 0.10
 Player0 calls 0.10
-*** SEVENTH *** 
+*** SEVENTH ***
 Player0 checks
 Player2 bets 0.10
 Player0 calls 0.10

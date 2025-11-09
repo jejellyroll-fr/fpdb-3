@@ -193,7 +193,9 @@ class TestHUDTooltips:
         assert "(-/-)" in tooltip
         assert "Voluntarily put in preflop" in tooltip
 
-    def _update_stat_and_verify_tooltip(self, stat, player_id: int, stat_dict: dict, tooltip_text: str, expected_pattern: str) -> None:
+    def _update_stat_and_verify_tooltip(
+        self, stat, player_id: int, stat_dict: dict, tooltip_text: str, expected_pattern: str
+    ) -> None:
         """Helper method to update stat and verify tooltip content."""
         stat.update(player_id, stat_dict)
         stat.lab.setToolTip(tooltip_text)
@@ -215,9 +217,15 @@ class TestHUDTooltips:
         stat = SimpleStat("vpip", 1, "default", mock_aw)
 
         # Test progression
-        self._update_stat_and_verify_tooltip(stat, 1, stat_dict_no_data, "Player\nvpip: (-/-)\nVoluntarily put in preflop", "(-/-)")
-        self._update_stat_and_verify_tooltip(stat, 1, stat_dict_tight, "Player\nvpip: (0/20)\nVoluntarily put in preflop", "(0/20)")
-        self._update_stat_and_verify_tooltip(stat, 1, stat_dict_regular, "Player\nvpip: (10/50)\nVoluntarily put in preflop", "(10/50)")
+        self._update_stat_and_verify_tooltip(
+            stat, 1, stat_dict_no_data, "Player\nvpip: (-/-)\nVoluntarily put in preflop", "(-/-)"
+        )
+        self._update_stat_and_verify_tooltip(
+            stat, 1, stat_dict_tight, "Player\nvpip: (0/20)\nVoluntarily put in preflop", "(0/20)"
+        )
+        self._update_stat_and_verify_tooltip(
+            stat, 1, stat_dict_regular, "Player\nvpip: (10/50)\nVoluntarily put in preflop", "(10/50)"
+        )
 
 
 class TestHUDPopups:
@@ -251,19 +259,19 @@ class TestHUDPopups:
     def mock_window(self, mock_config, qapp):
         """Mock window for popup tests."""
         from PyQt5.QtWidgets import QWidget
-        
+
         # Create a real QWidget to avoid Mock issues with QWidget parent
         window = QWidget()
         window.config = mock_config
         window.params = {"popup_fgcolor": "#000000", "popup_bgcolor": "#FFFFFF", "font": "Arial", "font_size": 10}
         window.popup_count = 0  # Required for popup creation
-        
+
         # Add aw mock for Submenu popup requirements
         aw_mock = Mock()
         aw_mock.fgcolor = "#000000"
         aw_mock.bgcolor = "#FFFFFF"
         window.aw = aw_mock
-        
+
         return window
 
     def test_popup_displays_dash_for_no_data_stats(self, qapp, mock_window, mock_popup_params) -> None:
@@ -358,8 +366,25 @@ class TestHUDPopups:
         multicol_params = Mock()
         multicol_params.pu_class = "Multicol"
         # Need at least 16 stats to avoid division by zero in old_div(number_of_items, 16)
-        multicol_params.pu_stats = ["vpip", "pfr", "three_B", "steal", "cbet", "a_freq1", "agg_fact", "wtsd", "wmsd", 
-                                   "fold_1", "fold_2", "fold_3", "fold_4", "call_1", "call_2", "call_3", "raise_1"]
+        multicol_params.pu_stats = [
+            "vpip",
+            "pfr",
+            "three_B",
+            "steal",
+            "cbet",
+            "a_freq1",
+            "agg_fact",
+            "wtsd",
+            "wmsd",
+            "fold_1",
+            "fold_2",
+            "fold_3",
+            "fold_4",
+            "call_1",
+            "call_2",
+            "call_3",
+            "raise_1",
+        ]
         multicol_params.pu_stat_dict = {}
 
         stat_dict = {
@@ -548,7 +573,11 @@ class TestHUDPopupInteraction:
 
             # Simulate mouse click
             click_event = QMouseEvent(
-                QMouseEvent.MouseButtonPress, QPoint(0, 0), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier,
+                QMouseEvent.MouseButtonPress,
+                QPoint(0, 0),
+                Qt.LeftButton,
+                Qt.LeftButton,
+                Qt.NoModifier,
             )
 
             # Test that stat handles click

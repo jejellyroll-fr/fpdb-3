@@ -16,6 +16,8 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
     - uses: actions/checkout@v3
 
@@ -44,6 +46,12 @@ jobs:
 
   test-and-coverage:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+      pull-requests: write
+      issues: write
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -66,6 +74,15 @@ jobs:
         uv pip install --only-binary :all: "PyQt5==5.15.11"
         uv pip install pytest>=8.3.2 pytest-qt>=4.0.2 pytest-cov>=5.0.0 ruff>=0.12.8
         uv pip install -e .[windows]
+
+    - name: Install system dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libxcb1 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
+          libxcb-shape0 libxcb-xinerama0 libxkbcommon-x11-0 libxcb-xfixes0 libxcb-util1 \
+          libxrender1 libsm6 libxext6 libx11-xcb1 \
+          qtbase5-dev qtbase5-dev-tools
 
     - name: Install uv and dependencies (Linux)
       if: runner.os == 'Linux'
@@ -147,7 +164,7 @@ jobs:
           echo "htmlcov directory does not exist"
         fi
 
-    - name: Prepare coverage deployment
+    - name: Prepare coverage and docs deployment
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       run: |
         # Backup coverage files before cleaning
@@ -156,58 +173,102 @@ jobs:
           echo "Coverage files backed up to /tmp/htmlcov-backup"
         else
           echo "No htmlcov directory found to backup"
-          exit 1
         fi
 
-    - name: Deploy coverage to GitHub Pages (gh-pages branch)
+        # Backup documentation files
+        if [ -d docs ]; then
+          cp -r docs /tmp/docs-backup
+          echo "Documentation files backed up to /tmp/docs-backup"
+        else
+          echo "No docs directory found to backup"
+        fi
+
+        # Backup site index
+        if [ -f site_index.html ]; then
+          mkdir -p /tmp/site-backup
+          cp site_index.html /tmp/site-backup/
+          echo "Site index backed up to /tmp/site-backup"
+        else
+          echo "No site_index.html found to backup"
+        fi
+
+    - name: Build Sphinx documentation
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       run: |
-        git config --global user.name 'GitHub Actions'
-        git config --global user.email 'actions@github.com'
+        uv pip install -e .[docs]
+        xvfb-run -a uv run sphinx-build -b html docs/source docs/build
 
-        # Clean up any uncommitted changes from test runs
-        git add . || true
-        git stash || true
-        git clean -fd || true
+    - name: Upload coverage HTML artifacts
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-html
+        path: htmlcov/
 
-        # Fetch and switch to gh-pages branch
-        git fetch origin gh-pages || true
-        git checkout gh-pages || git checkout --orphan gh-pages
-        git pull origin gh-pages || echo "Branch is orphan or already up to date"
+    - name: Prepare unified site for GitHub Pages
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      run: |
+        # Create unified site structure
+        mkdir -p _site/docs _site/coverage
 
-        # Deploy coverage files from backup
-        rm -rf coverage/${{ github.sha }} || true
-        mkdir -p coverage/${{ github.sha }}
-        cp -r /tmp/htmlcov-backup/* coverage/${{ github.sha }}/ || echo "No coverage backup found"
-
-        # Commit and push if there are changes
-        git add coverage/${{ github.sha }}/* -f || true
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
+        # Deploy documentation
+        if [ -d docs/build ]; then
+          cp -r docs/build/* _site/docs/
+          echo "Documentation deployed from docs/build"
         else
-          git commit -m "Deploy coverage report for commit ${{ github.sha }}"
-          git push origin gh-pages
+          echo "No documentation build found"
         fi
 
+        # Deploy coverage files
+        if [ -d /tmp/htmlcov-backup ]; then
+          cp -r /tmp/htmlcov-backup/* _site/coverage/
+        else
+          echo "No coverage backup found"
+        fi
+
+        # Copy site index
+        if [ -f /tmp/site-backup/site_index.html ]; then
+          cp /tmp/site-backup/site_index.html _site/index.html
+        else
+          echo "No site_index.html found"
+        fi
+
+        # Create .nojekyll file
+        touch _site/.nojekyll
+
+    - name: Setup Pages
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      uses: actions/configure-pages@v4
+
+    - name: Upload to GitHub Pages
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: _site
+
+    - name: Deploy to GitHub Pages
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      id: deployment
+      uses: actions/deploy-pages@v4
+
     - name: Comment PR with coverage link
-      if: github.event_name == 'pull_request'
+      if: github.event_name == 'pull_request' && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       uses: actions/github-script@v6
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const repoName = context.repo.repo;
           const repoOwner = context.repo.owner;
-          const sha = context.sha;
-          const url = `https://${repoOwner}.github.io/${repoName}/coverage/${sha}/`;
+          const url = `https://${repoOwner}.github.io/${repoName}/coverage/`;
           await github.rest.issues.createComment({
             owner: repoOwner,
             repo: repoName,
             issue_number: context.issue.number,
-            body: `Coverage report for this PR: ${url}`
+            body: `Coverage report for this PR: ${url}\n Documentation: https://${repoOwner}.github.io/${repoName}/docs/`
           });
 
     - name: Comment commit with coverage link
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       uses: actions/github-script@v6
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -215,12 +276,12 @@ jobs:
           const repoName = context.repo.repo;
           const repoOwner = context.repo.owner;
           const sha = context.sha;
-          const url = `https://${repoOwner}.github.io/${repoName}/coverage/${sha}/`;
+          const url = `https://${repoOwner}.github.io/${repoName}/coverage/`;
           await github.rest.repos.createCommitComment({
             owner: repoOwner,
             repo: repoName,
             commit_sha: sha,
-            body: `Coverage report for this commit: ${url}`
+            body: `Coverage report for this commit: ${url}\n Documentation: https://${repoOwner}.github.io/${repoName}/docs/`
           });
 
 
@@ -228,6 +289,8 @@ jobs:
   build-windows:
     if: github.event_name == 'push'
     runs-on: windows-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
@@ -254,6 +317,8 @@ jobs:
   build-macos-intel:
       if: github.event_name == 'push'
       runs-on: macos-latest
+      permissions:
+        contents: read
       steps:
         - uses: actions/checkout@v3
 
@@ -291,6 +356,8 @@ jobs:
   build-macos-arm:
     if: github.event_name == 'push'
     runs-on: macos-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
@@ -302,7 +369,7 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           brew info pyqt@5
           brew install pyqt@5
-          python -m pip install sip==6.6.2 
+          python -m pip install sip==6.6.2
           python -m pip install -e .[build,macos] -vvv
 
       - name: List directory contents
@@ -326,6 +393,8 @@ jobs:
   build-linux:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
@@ -335,7 +404,11 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libxcb1 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 libxkbcommon-x11-0 libxcb-xfixes0 fuse libfuse2
+          sudo apt-get install -y libxcb1 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
+            libxcb-shape0 libxcb-xinerama0 libxkbcommon-x11-0 libxcb-xfixes0 libxcb-util1 \
+            libxrender1 libsm6 libxext6 libx11-xcb1 \
+            qtbase5-dev qtbase5-dev-tools \
+            fuse libfuse2
           sudo modprobe fuse
           sudo groupadd fuse
           sudo usermod -a -G fuse $USER

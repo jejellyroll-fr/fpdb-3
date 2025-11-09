@@ -2,10 +2,10 @@
 Comprehensive tests for PokerStarsToFpdb.readPlayerStacks method.
 """
 
-import unittest
-from unittest.mock import Mock, patch
-import sys
 import os
+import sys
+import unittest
+from unittest.mock import Mock
 
 # Add parent directory to path to import modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -15,14 +15,27 @@ from PokerStarsToFpdb import PokerStars
 
 class MockConfig:
     """Mock configuration for testing."""
+
     def get_import_parameters(self) -> dict:
         """Return import parameters for testing."""
         return {
-            "saveActions": True, 
-            "callFpdbHud": False, 
-            "cacheSessions": False, 
+            "saveActions": True,
+            "callFpdbHud": False,
+            "cacheSessions": False,
             "publicDB": False,
-            "importFilters": ["holdem", "omahahi", "omahahilo", "studhi", "studlo", "razz", "27_1draw", "27_3draw", "fivedraw", "badugi", "baduci"],
+            "importFilters": [
+                "holdem",
+                "omahahi",
+                "omahahilo",
+                "studhi",
+                "studlo",
+                "razz",
+                "27_1draw",
+                "27_3draw",
+                "fivedraw",
+                "badugi",
+                "baduci",
+            ],
         }
 
 
@@ -46,13 +59,13 @@ Total pot $5.00
         hand = Mock()
         hand.handText = hand_text
         hand.addPlayer = Mock()
-        
+
         self.parser.clearMoneyString = Mock(side_effect=lambda x: x if x else None)
-        
+
         self.parser.readPlayerStacks(hand)
-        
+
         self.assertEqual(hand.addPlayer.call_count, 3)
-        
+
         # Check calls
         calls = hand.addPlayer.call_args_list
         self.assertEqual(calls[0][0], (1, "Player1", "10.50", None, None, None))
@@ -70,13 +83,13 @@ Total pot $100
         hand = Mock()
         hand.handText = hand_text
         hand.addPlayer = Mock()
-        
+
         self.parser.clearMoneyString = Mock(side_effect=lambda x: x if x else None)
-        
+
         self.parser.readPlayerStacks(hand)
-        
+
         self.assertEqual(hand.addPlayer.call_count, 2)
-        
+
         calls = hand.addPlayer.call_args_list
         self.assertEqual(calls[0][0], (1, "Player1", "1000", None, None, "0.50"))
         self.assertEqual(calls[1][0], (2, "Hero", "2000", None, None, "1.00"))
@@ -93,13 +106,13 @@ Total pot $5.00
         hand = Mock()
         hand.handText = hand_text
         hand.addPlayer = Mock()
-        
+
         self.parser.clearMoneyString = Mock(side_effect=lambda x: x if x else None)
-        
+
         self.parser.readPlayerStacks(hand)
-        
+
         self.assertEqual(hand.addPlayer.call_count, 3)
-        
+
         calls = hand.addPlayer.call_args_list
         self.assertEqual(calls[0][0], (1, "Player1", "10.50", None, None, None))
         self.assertEqual(calls[1][0], (2, "Hero", "25.75", None, " is sitting out", None))
@@ -117,13 +130,13 @@ Total pot €5.00
         hand = Mock()
         hand.handText = hand_text
         hand.addPlayer = Mock()
-        
+
         self.parser.clearMoneyString = Mock(side_effect=lambda x: x if x else None)
-        
+
         self.parser.readPlayerStacks(hand)
-        
+
         self.assertEqual(hand.addPlayer.call_count, 3)
-        
+
         calls = hand.addPlayer.call_args_list
         self.assertEqual(calls[0][0], (1, "Player1", "10.50", None, None, None))
         self.assertEqual(calls[1][0], (2, "Hero", "25.75", None, None, "2.50"))
@@ -138,9 +151,9 @@ Seat 2: Hero ($25.75 in chips)
         hand = Mock()
         hand.handText = hand_text
         hand.addPlayer = Mock()
-        
+
         self.parser.clearMoneyString = Mock(side_effect=lambda x: x if x else None)
-        
+
         with self.assertRaises(ValueError):
             self.parser.readPlayerStacks(hand)
 
@@ -150,9 +163,9 @@ Seat 2: Hero ($25.75 in chips)
         hand = Mock()
         hand.handText = hand_text
         hand.addPlayer = Mock()
-        
+
         self.parser.clearMoneyString = Mock(side_effect=lambda x: x if x else None)
-        
+
         with self.assertRaises(ValueError):
             self.parser.readPlayerStacks(hand)
 
@@ -165,11 +178,11 @@ Total pot $5.00
         hand = Mock()
         hand.handText = hand_text
         hand.addPlayer = Mock()
-        
+
         self.parser.clearMoneyString = Mock(side_effect=lambda x: x if x else None)
-        
+
         self.parser.readPlayerStacks(hand)
-        
+
         self.assertEqual(hand.addPlayer.call_count, 0)
 
     def test_large_stacks(self):
@@ -183,13 +196,13 @@ Total pot $50000
         hand = Mock()
         hand.handText = hand_text
         hand.addPlayer = Mock()
-        
+
         self.parser.clearMoneyString = Mock(side_effect=lambda x: x if x else None)
-        
+
         self.parser.readPlayerStacks(hand)
-        
+
         self.assertEqual(hand.addPlayer.call_count, 2)
-        
+
         calls = hand.addPlayer.call_args_list
         self.assertEqual(calls[0][0], (1, "HighRoller", "1000000.00", None, None, None))
         self.assertEqual(calls[1][0], (2, "BigStack", "999999.99", None, None, None))
@@ -206,13 +219,13 @@ Total pot $5.00
         hand = Mock()
         hand.handText = hand_text
         hand.addPlayer = Mock()
-        
+
         self.parser.clearMoneyString = Mock(side_effect=lambda x: x if x else None)
-        
+
         self.parser.readPlayerStacks(hand)
-        
+
         self.assertEqual(hand.addPlayer.call_count, 3)
-        
+
         calls = hand.addPlayer.call_args_list
         self.assertEqual(calls[0][0], (1, "Player-123", "10.50", None, None, None))
         self.assertEqual(calls[1][0], (2, "Hero_999", "25.75", None, None, None))
@@ -231,13 +244,13 @@ Total pot $200
         hand = Mock()
         hand.handText = hand_text
         hand.addPlayer = Mock()
-        
+
         self.parser.clearMoneyString = Mock(side_effect=lambda x: x if x else None)
-        
+
         self.parser.readPlayerStacks(hand)
-        
+
         self.assertEqual(hand.addPlayer.call_count, 4)
-        
+
         calls = hand.addPlayer.call_args_list
         self.assertEqual(calls[0][0], (1, "Player1", "1500", None, None, "2.50"))
         self.assertEqual(calls[1][0], (2, "Hero", "3000", None, " is sitting out", "5.00"))
