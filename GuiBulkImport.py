@@ -1,6 +1,6 @@
 """GuiBulkImport module for FPDB bulk import functionality.
 
-Copyright 2008-2011 Steffen Schaumburg
+Copyright 2008-2011 Steffen Schaumburg add cli based on Carl's proposal.
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
 the Free Software Foundation, version 3 of the License.
@@ -18,6 +18,7 @@ In the "official" distribution you can find the license in agpl-3.0.txt.
 #    Standard Library modules
 import os
 import sys
+from optparse import OptionParser
 from pathlib import Path
 from time import time
 from typing import Any
@@ -190,18 +191,131 @@ class GuiBulkImport(QWidget):
             self.importDir.setText(newdir)
 
 
-if __name__ == "__main__":
-    config = Configuration.Config()
+def main(argv=None):
+    """Main function for CLI usage, compatible with TestHandsPlayers regression tests."""
+    if argv is None:
+        argv = sys.argv[1:]
+    
+    parser = OptionParser()
+    parser.add_option(
+        "-C", "--config", dest="config", default=None,
+        help="Configuration file to use (default: HUD_config.xml)"
+    )
+    parser.add_option(
+        "-c", "--converter", dest="converter", default="auto",
+        help="Site converter to use (default: auto)"
+    )
+    parser.add_option(
+        "-f", "--file", dest="filename", default=None,
+        help="Hand history file or directory to import"
+    )
+    parser.add_option(
+        "-q", "--quiet", action="store_true", dest="quiet", default=False,
+        help="Reduce output verbosity"
+    )
+    
+    (options, args) = parser.parse_args(argv)
+    
+    if not options.filename:
+        if args:
+            options.filename = args[0]
+        else:
+            parser.error("You must specify a file or directory to import with -f or as an argument")
+    
+    # Initialize configuration
+    config_file = options.config or "HUD_config.xml"
+    config = Configuration.Config(file=config_file)
+    
+    # Set up settings similar to GUI mode
     settings = {}
     if os.name == "nt":
         settings["os"] = "windows"
     else:
         settings["os"] = "linuxmac"
-
+    
     settings.update(config.get_db_parameters())
     settings.update(config.get_import_parameters())
     settings.update(config.get_default_paths())
+    
     import interlocks
-
     settings["global_lock"] = interlocks.InterProcessLock(name="fpdb_global_lock")
-    settings["cl_options"] = ".".join(sys.argv[1:])
+    settings["cl_options"] = ".".join(argv)
+    
+    if not options.quiet:
+        log.info(f"Starting bulk import with config: {config_file}")
+        log.info(f"Import target: {options.filename}")
+        log.info(f"Converter: {options.converter}")
+    
+    # Initialize importer
+    importer = Importer.Importer(False, settings, config, None)
+    
+    # Acquire lock and perform import
+    if settings["global_lock"].acquire(wait=False, source="GuiBulkImport-CLI"):
+        try:
+            # Count existing hands
+            tcursor = importer.database.cursor
+            tcursor.execute("Select count(1) from Hands")
+            row = tcursor.fetchone()
+            tcursor.close()
+            importer.database.rollback()
+            n_hands_in_db = row[0]
+            
+            importer.setHandsInDB(n_hands_in_db)
+            importer.setMode("bulk")
+            importer.addBulkImportImportFileOrDir(options.filename, site=options.converter)
+            importer.setCallHud(False)
+            
+            starttime = time()
+            (stored, dups, partial, skipped, errs, ttime) = importer.runImport()
+            ttime = time() - starttime
+            
+            if ttime == 0:
+                ttime = 1
+            
+            if not options.quiet:
+                completion_message = (
+                    f"CLI bulk import completed: Stored: {stored}, Duplicates: {dups}, "
+                    f"Partial: {partial}, Skipped: {skipped}, Errors: {errs}, "
+                    f"Time: {ttime:.2f} seconds, Stored/second: {(stored + 0.0) / ttime:.0f}"
+                )
+                log.info(completion_message)
+                print(completion_message)
+            
+            importer.clearFileList()
+            
+            # Return results for testing purposes
+            return (stored, dups, partial, skipped, errs, ttime)
+            
+        finally:
+            settings["global_lock"].release()
+    else:
+        error_msg = "CLI bulk import aborted - global lock not available"
+        log.warning(error_msg)
+        print(error_msg, file=sys.stderr)
+        return (0, 0, 0, 0, 1, 0)
+
+
+if __name__ == "__main__":
+    # Check if we have command line arguments (CLI mode) or should run GUI
+    if len(sys.argv) > 1:
+        # CLI mode
+        main()
+    else:
+        # GUI mode - original code
+        config = Configuration.Config()
+        settings = {}
+        if os.name == "nt":
+            settings["os"] = "windows"
+        else:
+            settings["os"] = "linuxmac"
+
+        settings.update(config.get_db_parameters())
+        settings.update(config.get_import_parameters())
+        settings.update(config.get_default_paths())
+        import interlocks
+
+        settings["global_lock"] = interlocks.InterProcessLock(name="fpdb_global_lock")
+        settings["cl_options"] = ".".join(sys.argv[1:])
+        
+        # GUI mode would continue here with QApplication setup if needed
+        print("GUI mode not implemented in standalone script. Use from main FPDB application.")

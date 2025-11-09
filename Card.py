@@ -535,6 +535,15 @@ def calcStartCards(hand: Any, player: Any) -> int:
         An integer representing the starting hand value, or a constant for unknown hands.
     """
     hcs = hand.join_holecards(player, asList=True)
+
+    # If player has no hole cards (e.g., folded preflop without showing), return 0
+    # Check for empty list, or dummy cards like [('0', 'x'), ('0', 'x')]
+    if not hcs or len(hcs) < 2:
+        return 0
+    # Check if cards are dummy/unknown cards ('0' or 'x')
+    if hcs[0][0] == '0' or hcs[0][1] == 'x':
+        return 0
+
     if hand.gametype["category"] in ("holdem", "6_holdem"):
         value1 = card_map.get(hcs[0][0])
         value2 = card_map.get(hcs[1][0])

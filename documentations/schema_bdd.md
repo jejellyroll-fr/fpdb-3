@@ -1,13 +1,6 @@
-# Schéma de la base **fpdb.db3**
+# Schéma de la base **fpdb**
 
-_Généré le 2025-08-03 08:40:00_
-
-## Dernières modifications
-
-### 2025-08-03 : Ajout du support Bomb Pot
-- **Nouveau champ `bombPot`** dans la table `Hands` : Stocke le montant du bomb pot en centimes (0 = pas de bomb pot)
-- **Support ESCAPE Winamax** : Détection automatique des mains "Escape to Pot" de Winamax
-- **Performances optimisées** : Index et requêtes SQL directes sur les mains bomb pot
+_Généré le 2025-10-26 11:53:35_
 
 ## Actions
 
@@ -520,6 +513,8 @@ _Généré le 2025-08-03 08:40:00_
 | street3Discards | INT | Non |  |  |
 | handString | TEXT | Non |  |  |
 | actionString | VARCHAR(15) | Non |  |  |
+| cashOutFee | INT | Non |  | 0 |
+| isCashOut | BOOLEAN | Non |  | 0 |
 
 ### Index
 
@@ -1416,7 +1411,7 @@ ORDER BY mains_bomb_pot DESC;
 
 - **bombPot** : Stocké en centimes (INT)
   - `0` = Pas de bomb pot
-  - `10` = 0.10€ de bomb pot  
+  - `10` = 0.10€ de bomb pot
   - `100` = 1.00€ de bomb pot
   - `500` = 5.00€ de bomb pot
 

@@ -176,9 +176,9 @@ class PokerStars(HandHistoryConverter):
     }  # ADD Euro, Sterling, etc HERE
     substitutions: ClassVar[dict[str, str]] = {
         "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP|SC|INR|CNY",  # legal ISO currency codes
-        "LS": r"\$|\xe2\x82\xac|\u20ac|\£|\u20b9|\¥|Rs\.\s|",  # legal currency symbols - Euro(cp1252, utf-8)
+        "LS": r"\$|€|\xe2\x82\xac|\u20ac|\£|\u20b9|\¥|Rs\.\s|",  # legal currency symbols - Euro(cp1252→€, utf-8)
         "PLYR": r"\s?(?P<PNAME>.+?)",
-        "CUR": r"(\$|\xe2\x82\xac|\u20ac||\£|\u20b9|\¥|Rs\.\s|)",
+        "CUR": r"(\$|€|\xe2\x82\xac|\u20ac|\£|\u20b9|\¥|Rs\.\s|)",
         "BRKTS": (
             r"(\(button\) |\(small blind\) |\(big blind\) |\(button blind\) |"
             r"\(button\) \(small blind\) |\(small blind\) \(button\) |"
@@ -1779,6 +1779,14 @@ class PokerStars(HandHistoryConverter):
             uncalled_amount = m.group("BET")
             log.info("Processing uncalled bet: %s -> %s", uncalled_player, uncalled_amount)
 
+            # IMPORTANT: Store uncalled bet in hand.pot.returned
+            # This is needed because when totalpot is pre-set by parser,
+            # totalPot() skips calculation and doesn't fill pot.returned
+            from decimal import Decimal
+            uncalled_decimal = Decimal(uncalled_amount.replace(",", ""))
+            hand.pot.returned[uncalled_player] = hand.pot.returned.get(uncalled_player, Decimal("0.00")) + uncalled_decimal
+            log.debug(f"Added to pot.returned: {uncalled_player} -> {uncalled_decimal}")
+
             # Check if this could be a walk scenario by looking for collection by same player
             pre, post = hand.handText.split("*** SUMMARY ***")
             collection_match = self.re_collect_pot2.search(pre)
@@ -1949,6 +1957,11 @@ class PokerStars(HandHistoryConverter):
         acts = hand.actions.get("PREFLOP")
         bovada_uncalled_v1, bovada_uncalled_v2, blindsantes, adjustment = False, False, 0, 0
 
+        # Only apply Bovada adjustments for Bovada/Merge sites
+        # PokerStars converted hands may have anonymous names but should NOT use Bovada logic
+        if self.siteId not in (SITE_BOVADA, SITE_MERGE):
+            return bovada_uncalled_v1, bovada_uncalled_v2, blindsantes, adjustment
+
         names = [p[1] for p in hand.players]
         if (
             ("Big Blind" in names or "Small Blind" in names or "Dealer" in names or self.siteId == SITE_MERGE)
@@ -2044,9 +2057,27 @@ class PokerStars(HandHistoryConverter):
         # Walk scenarios are already detected in readAction
 
         if hand.runItTimes == 0:
-            # Process normal pot collections even for cash out hands
-            # The cash out itself doesn't affect the main pot calculation
+            # Process normal pot collections
+            # Skip lines that say "pot not awarded" (cashout hands)
             for m in self.re_collect_pot.finditer(post):
+                # Get the full line to check for "pot not awarded"
+                line_start = m.start()
+                line_end = post.find('\n', line_start)
+                if line_end == -1:
+                    line_end = len(post)
+                full_line = post[line_start:line_end]
+
+                # If line says "and won" but "pot not awarded", this player won the poker hand
+                # but cashed out instead of collecting. Store them as poker winner.
+                if "pot not awarded" in full_line:
+                    log.info("Skipping collection line (pot not awarded): %s", full_line[:80])
+                    # Extract player name from the line to mark as poker winner
+                    if "and won" in full_line:
+                        player_name = m.group('PNAME')
+                        hand.pokerWinners.add(player_name)
+                        log.info("Marking %s as poker winner (won but cashed out)", player_name)
+                    continue
+
                 self._addCollectPotWithAdjustment(hand, m, adjustments)
                 i += 1
 
@@ -2150,6 +2181,20 @@ class PokerStars(HandHistoryConverter):
 
             try:
                 total_pot, rake = self._parse_decimal_values(total_pot_str, rake_str)
+
+                # Some HM1/HM2 exports have incorrect "Total pot" values (showing collected instead of pot)
+                # Detect by:
+                #   1. File uses "PokerStars Game #" format AND
+                #   2. Filename contains "HM1", "HM2", or "export" (case insensitive)
+                # This avoids false positives on normal PokerStars files that happen to use "Game #"
+                uses_game_format = hand.handText.startswith("PokerStars Game #")
+                filename_lower = getattr(self, 'in_path', '').lower()
+                is_likely_hm_export = any(marker in filename_lower for marker in ['hm1', 'hm2', 'export', '.pt'])
+
+                if uses_game_format and is_likely_hm_export and rake > 0:
+                    log.info("HM1/HM2 export detected: Correcting total pot from %s to %s (adding rake %s)",
+                            total_pot, total_pot + rake, rake)
+                    total_pot = total_pot + rake
 
                 # Set the values on the hand object
                 hand.totalpot = total_pot
