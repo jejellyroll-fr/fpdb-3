@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "fpdb-3"
 version = "3.0.0-alpha2"
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.11,<4.0"
 dependencies = [
     "aiohttp==3.10.5",
     "beautifulsoup4==4.12.3",
@@ -48,18 +48,22 @@ test = [
     "pytest-cov>=5.0.0",
     "PyQt5==5.15.11",
     "ruff>=0.12.8",
+    "syrupy>=4.0.0",
+    "hypothesis>=6.0.0",
 ]
 test-no-pyqt = [
     "pytest>=8.3.2",
     "pytest-qt>=4.0.2",
     "pytest-cov>=5.0.0",
     "ruff>=0.12.8",
+    "syrupy>=4.0.0",
+    "hypothesis>=6.0.0",
 ]
 build = ["pyinstaller>=6.9.0", "wheel>=0.42.0"]
 build-linux = ["python-appimage==1.2.7"]
 windows = ["pywin32==306", "configparser", "PyQt5==5.15.11"]
 linux = ["xcffib==1.5.0", "PyQt5==5.15.11"]
-macos = ["pyobjc==10.3.1"]
+macos = ["pyobjc==10.3.1", "PyQt5==5.15.11"]
 mysql = ["mysqlclient==2.2.4"]
 postgresql = ["psycopg2-binary==2.9.9"]
 

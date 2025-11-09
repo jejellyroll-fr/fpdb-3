@@ -1,8 +1,8 @@
 # Testing Guide for fpdb-3
 
-This document explains how to run tests in the fpdb-3 project.
+This document explains how to run tests in the fpdb-3 project, including the new regression testing system and snapshot-based validation.
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Run main test suite (recommended)
@@ -15,17 +15,30 @@ uv run pytest
 make test-all
 # Or
 ./run_tests.sh
+
+# Run new regression & snapshot tests
+pytest regression-tests/
 ```
 
-## 📁 Test Structure
+## Test Structure
+
+### Legacy Test Suite
 
 - **947 main tests** - All tests except GUI tests
 - **35 GUI tests** - `test_HUD_main.py` (run separately due to Qt/GUI issues)
-- **Test categories**: Unit tests, integration tests, performance tests, regression tests
+- **Test categories**: Unit tests, integration tests, performance tests
 
-## 🔧 Available Commands
+### New Regression Testing System
+
+- **regression-tests/test_thp_param.py** - Modernized regression tests (replaces TestHandsPlayers.py)
+- **regression-tests/test_snapshots.py** - Snapshot-based testing with syrupy
+- **regression-tests/test_invariants.py** - Poker rules validation
+- **regression-tests/test_hypothesis_properties.py** - Property-based testing with Hypothesis
+
+## Available Commands
 
 ### Installation Options
+
 ```bash
 # Install test dependencies only (without PyQt5 - useful in CI)
 uv pip install .[test-no-pyqt]
@@ -35,6 +48,7 @@ uv pip install .[test]
 ```
 
 ### Make Commands
+
 ```bash
 make test              # Main test suite (excludes GUI)
 make test-all          # All tests including GUI
@@ -46,6 +60,7 @@ make debug-test        # Verbose output for debugging
 ```
 
 ### Direct pytest Commands
+
 ```bash
 uv run pytest                              # Main tests (default config)
 uv run pytest test/test_HUD_main.py       # GUI tests only
@@ -57,6 +72,7 @@ uv run pytest --cov=. --cov-report=html   # With coverage report
 ## 🏗️ CI/CD Integration
 
 ### GitHub Actions
+
 The project uses unified test scripts for consistent behavior across platforms:
 
 - **Linux/macOS**: Uses `run_tests.sh`
@@ -64,6 +80,7 @@ The project uses unified test scripts for consistent behavior across platforms:
 - **Configuration**: `pytest.ini` with GUI tests excluded by default
 
 ### Test Matrix
+
 - **OS**: Ubuntu, Windows, macOS
 - **Python**: 3.10, 3.11
 - **Coverage**: Generated on Ubuntu 3.11
@@ -71,6 +88,7 @@ The project uses unified test scripts for consistent behavior across platforms:
 ## 🎯 Test Configuration
 
 ### pytest.ini
+
 ```ini
 [pytest]
 addopts =
@@ -84,21 +102,22 @@ addopts =
 ### Why GUI Tests are Separate
 
 GUI tests (`test_HUD_main.py`) can cause segfaults in headless environments due to:
+
 - Qt/PyQt5 issues on headless systems
 - Display server problems
 - Memory management with GUI components
 
 **Solution**: Run GUI tests separately with error tolerance.
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
-1. **Mock pollution between tests** ✅ **FIXED**
+1. **Mock pollution between tests**  **FIXED**
    - Problem: `sys.modules` mocks affecting other tests
    - Solution: Isolated mocks using `setUpClass`/`tearDownClass`
 
-2. **PyQt5 installation issues** ✅ **FIXED**
+2. **PyQt5 installation issues**  **FIXED**
    - Problem: Version conflicts between CI and local installations
    - Solution: Smart detection in scripts + `test-no-pyqt` option
    - CI installs PyQt5 first, then scripts use `test-no-pyqt` to avoid conflicts
@@ -114,13 +133,15 @@ GUI tests (`test_HUD_main.py`) can cause segfaults in headless environments due 
 ### Test Isolation
 
 Tests are properly isolated using:
+
 - Class-level mock setup/teardown
 - Module-level import isolation
 - Proper cleanup of Qt objects
 
-## 📊 Coverage Reports
+## Coverage Reports
 
 Coverage reports are generated in multiple formats:
+
 - **Terminal**: Summary during test run
 - **HTML**: `htmlcov/index.html`
 - **XML**: For CI integration
@@ -133,7 +154,7 @@ make test-main
 open htmlcov/index.html
 ```
 
-## 🔍 Debugging Tests
+## Debugging Tests
 
 ```bash
 # Verbose output with full tracebacks
@@ -146,23 +167,26 @@ uv run pytest test/specific_test.py::TestClass::test_method -v -s
 uv run pytest test/failing_test.py --pdb
 ```
 
-## ✅ Test Status
+## Test Status
 
 Current test suite status:
+
 - ✅ 947/947 main tests passing
 - ⚠️ GUI tests run separately (may show Qt warnings - normal)
 - ✅ Mock isolation issues resolved
 - ✅ CI/CD integration working
 - ✅ Coverage reporting enabled
 
-## 🛠️ Development Workflow
+## Development Workflow
 
 1. **Before making changes**:
+
    ```bash
    make test  # Ensure tests pass
    ```
 
 2. **After making changes**:
+
    ```bash
    make test           # Run tests
    make lint           # Check code style
@@ -170,11 +194,12 @@ Current test suite status:
    ```
 
 3. **Before committing**:
+
    ```bash
    make ci-test  # Run full CI-style test suite
    ```
 
-## 📝 Adding New Tests
+## Adding New Tests
 
 - Place tests in `test/` directory
 - Follow naming convention: `test_*.py`
