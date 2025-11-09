@@ -696,3 +696,15 @@ class PacificPoker(HandHistoryConverter):
     def readSummaryInfo(self, summaryInfoList):
         self.status = True
         return self.status
+
+    def readSTP(self, hand) -> None:
+        """STP (Sit and Go/Tournament Play) functionality not implemented for PacificPoker."""
+        pass
+
+    def readTourneyResults(self, hand) -> None:
+        """Tourney results functionality not implemented for PacificPoker."""
+        pass
+
+    def readOther(self, hand) -> None:
+        """Additional parsing not needed for PacificPoker."""
+        pass

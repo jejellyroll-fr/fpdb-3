@@ -93,9 +93,12 @@ class TestCalcStartCards:
         """Test calcStartCards for unknown game categories."""
         mock_hand = Mock()
         mock_hand.gametype = {"category": "unknown_game"}
-        
+        # Configure join_holecards to return valid cards (not dummy cards)
+        # so the code reaches the unknown category return statement
+        mock_hand.join_holecards.return_value = [("A", "h"), ("K", "s")]
+
         result = calcStartCards(mock_hand, "player1")
-        
+
         assert result == HOLDEM_UNKNOWN_HAND
 
 

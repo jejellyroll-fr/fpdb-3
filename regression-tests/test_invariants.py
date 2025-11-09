@@ -16,7 +16,7 @@ import pytest
 import Configuration
 import Database  
 import Importer
-from serialize_hand_for_snapshot import serialize_hand_for_snapshot, serialize_hands_batch
+from tools.serialize_hand_for_snapshot import serialize_hand_for_snapshot, serialize_hands_batch
 
 
 @pytest.fixture(scope="session")

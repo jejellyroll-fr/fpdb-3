@@ -94,6 +94,7 @@ class Hand:
         self.siteId = self.config.get_site_id(sitename)
         self.stats = DerivedStats.DerivedStats()
         self.gametype = gametype
+        self.limitType = gametype.get('limitType') if gametype else None  # Sync with gametype
         self.startTime = 0
         self.handText = handText
         self.handid = 0
@@ -113,7 +114,9 @@ class Hand:
         self.checkForUncalled = False
         self.adjustCollected = False
         self.cashedOut = False
+        self.cashouts = {}  # Dict to store cashout amounts per player (separate from collections)
         self.cashOutFees = {}  # Dict to store cash out fees per player
+        self.pokerWinners = set()  # Set of players who won the poker hand (showed best hand at showdown)
         self.endTime = None
         self.pot = Pot()  # Initialize the Pot instance
         self.roundPenny = False
@@ -161,6 +164,9 @@ class Hand:
         self.isFlighted = False
         self.isGuarantee = False
         self.guaranteeAmt = 0
+        self.isLottery = False
+        self.tourneyMultiplier = 1
+        self.limitType = None  # Will be set from gametype['limitType']
         self.added = None
         self.addedCurrency = None
         self.entryId = 1
@@ -854,7 +860,9 @@ class Hand:
                 log.warning(f"unknown action: '{act}'")
 
         self.totalPot()
-        self.rake = self.totalpot - self.totalcollected
+        # Only calculate rake if not already parsed from hand text
+        if not (hasattr(self, "rake_parsed") and self.rake_parsed):
+            self.rake = self.totalpot - self.totalcollected
 
     def addPlayer(self, seat, name, chips, position=None, sitout=False, bounty=None) -> None:
         """Adds a player to the hand, and initialises data structures indexed by player.
@@ -1179,8 +1187,9 @@ class Hand:
     def addCashOutPot(self, player, pot) -> None:
         """Records a cash out event for a player in the current hand.
 
-        This method updates the collected and collectees data structures for the player, but does not modify the totalcollected value.
-        
+        Cash outs are when a player SELLS their share of the pot to PokerStars
+        to avoid variance. This is a separate transaction from normal pot collections.
+
         Args:
             player: The name of the player cashing out.
             pot: The amount the player cashed out.
@@ -1190,14 +1199,18 @@ class Hand:
         """
         log.debug(f"{player} cashed out for {pot}")
         self.checkPlayerExists(player, "addCashOutPot")
-        self.collected.append([player, pot])
+        self.collected.append([player, pot])  # For display only
         amount = Decimal(pot)
-        if player not in self.collectees:
-            self.collectees[player] = amount
+
+        # Add to cashouts dict (NOT collectees!)
+        # Cashouts are separate from normal pot collections
+        if player not in self.cashouts:
+            self.cashouts[player] = amount
         else:
-            self.collectees[player] += amount
-        # NOTE: Do NOT add to totalcollected for cash outs
-        log.debug(f"Cash out recorded, totalcollected unchanged: {self.totalcollected}")
+            self.cashouts[player] += amount
+
+        # NOTE: Do NOT add to totalcollected or collectees for cash outs
+        log.debug(f"Cash out recorded in self.cashouts, totalcollected unchanged: {self.totalcollected}")
 
     def addUncalled(self, street, player, amount) -> None:
         log.debug(f"{street} {player} uncalled {amount}")
@@ -1647,12 +1660,19 @@ class Hand:
         return f"{self.sym}{self.sb}/{self.sym}{self.bb}"
 
     def getStreetTotals(self):
-        tmp, i = [0, 0, 0, 0, 0, 0], 0
+        # Count non-BLINDSANTES streets for dynamic sizing (handles Run It Twice)
+        num_streets = sum(1 for street in self.allStreets if street != "BLINDSANTES")
+        # Ensure at least 6 elements for compatibility
+        tmp = [0] * max(6, num_streets + 1)
+
+        i = 0
         for street in self.allStreets:
             if street != "BLINDSANTES":
                 tmp[i] = self.pot.getTotalAtStreet(street)
                 i += 1
-        tmp[5] = sum(self.pot.committed.values()) + sum(self.pot.common.values())
+
+        # Total committed + common at the last index
+        tmp[-1] = sum(self.pot.committed.values()) + sum(self.pot.common.values())
         return tmp
 
     def writeGameLine(self):
