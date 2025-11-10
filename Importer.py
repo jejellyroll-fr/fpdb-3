@@ -32,6 +32,8 @@ from PyQt5.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout
 import Configuration
 import Database
 import IdentifySite
+import HHTailer
+import StreamingParser
 from Exceptions import FpdbHandDuplicate, FpdbHandPartial, FpdbParseError
 from loggingFpdb import get_logger
 
@@ -167,6 +169,12 @@ class Importer:
         # HandDataReporter for quality analysis
         self.hand_data_reporter = None
 
+        # Streaming mode support (HHTailer + StreamingParser)
+        self.streaming_enabled = False
+        self.streaming_tailers = {}  # {filepath: HHTailer}
+        self.streaming_parsers = {}  # {filepath: StreamingParser}
+        self.pending_hands = {}  # {filepath: [complete_hands]}
+
         process_time()  # init clock in windows
 
     # Set functions
@@ -301,6 +309,311 @@ class Importer:
             value: The value to set for the testData setting.
         """
         self.settings["testData"] = value
+
+    # Streaming mode methods (HHTailer + StreamingParser)
+
+    def enableStreaming(self) -> None:
+        """Enable streaming mode for real-time hand history processing.
+
+        Switches from polling-based batch import to event-driven streaming
+        using HHTailer for file monitoring and StreamingParser for incremental parsing.
+        """
+        self.streaming_enabled = True
+        log.info("Streaming mode enabled")
+
+    def disableStreaming(self) -> None:
+        """Disable streaming mode and clean up resources."""
+        self.streaming_enabled = False
+
+        # Stop all active tailers
+        for filepath, tailer in self.streaming_tailers.items():
+            try:
+                tailer.stop()
+            except Exception as e:
+                log.warning(f"Error stopping tailer for {filepath}: {e}")
+
+        self.streaming_tailers = {}
+        self.streaming_parsers = {}
+        self.pending_hands = {}
+
+        log.info("Streaming mode disabled and cleaned up")
+
+    def startStreamingFile(self, filepath: str, site_name: str) -> bool:
+        """Start streaming a hand history file in real-time.
+
+        Args:
+            filepath: Path to the hand history file to stream
+            site_name: Name of the poker site (for parser configuration)
+
+        Returns:
+            True if streaming started successfully, False otherwise
+        """
+        if not self.streaming_enabled:
+            log.warning(
+                "Cannot start streaming: streaming mode not enabled. Call enableStreaming() first."
+            )
+            return False
+
+        if filepath in self.streaming_tailers:
+            log.warning(f"File already being streamed: {filepath}")
+            return False
+
+        try:
+            # Determine encoding from site configuration
+            encoding = "cp1252"  # Default for most poker sites
+            if site_name in ["GGPoker", "Winamax"]:
+                encoding = "utf-8"
+
+            # Create and start HHTailer
+            tailer = HHTailer.HHTailer(filepath, encoding=encoding, poll_interval=0.1)
+
+            # Create StreamingParser
+            parser = StreamingParser.StreamingParser(site_name=site_name)
+
+            # Register callbacks
+            tailer.register_callback("line", self._on_tailer_line)
+            parser.register_callback(
+                "hand_complete", self._on_hand_complete(filepath)
+            )
+            parser.register_callback(
+                "parsing_error", self._on_parser_error(filepath)
+            )
+
+            # Start monitoring
+            tailer.start()
+
+            # Store references
+            self.streaming_tailers[filepath] = tailer
+            self.streaming_parsers[filepath] = parser
+            self.pending_hands[filepath] = []
+
+            log.info(
+                f"Streaming started for {filepath} (site: {site_name}, encoding: {encoding})"
+            )
+            return True
+
+        except Exception as e:
+            log.exception(f"Failed to start streaming for {filepath}: {e}")
+            return False
+
+    def stopStreamingFile(self, filepath: str) -> bool:
+        """Stop streaming a hand history file.
+
+        Args:
+            filepath: Path to the hand history file to stop streaming
+
+        Returns:
+            True if streaming was stopped, False if file was not being streamed
+        """
+        if filepath not in self.streaming_tailers:
+            return False
+
+        try:
+            tailer = self.streaming_tailers[filepath]
+            tailer.stop()
+
+            # Flush any pending partial hands
+            parser = self.streaming_parsers[filepath]
+            partial = parser.flush()
+            if partial:
+                self.pending_hands[filepath].append(partial)
+
+            # Clean up
+            del self.streaming_tailers[filepath]
+            del self.streaming_parsers[filepath]
+            del self.pending_hands[filepath]
+
+            log.info(f"Streaming stopped for {filepath}")
+            return True
+
+        except Exception as e:
+            log.exception(f"Error stopping streaming for {filepath}: {e}")
+            return False
+
+    def _on_tailer_line(self, filepath: str, line: str) -> None:
+        """Callback when HHTailer receives a new line.
+
+        Args:
+            filepath: Path to the file
+            line: The new line of text
+        """
+        if filepath in self.streaming_parsers:
+            parser = self.streaming_parsers[filepath]
+            parser.process_line(line)
+
+    def _on_hand_complete(self, filepath: str) -> Callable:
+        """Create a callback for when a complete hand is parsed.
+
+        Args:
+            filepath: Path to the file being parsed
+
+        Returns:
+            Callback function
+        """
+
+        def callback(hand_lines: list) -> None:
+            """Handle a complete hand.
+
+            Args:
+                hand_lines: List of lines forming the complete hand
+            """
+            if filepath in self.pending_hands:
+                self.pending_hands[filepath].append(hand_lines)
+
+                log.debug(
+                    f"Hand {len(self.pending_hands[filepath])} queued for {filepath}"
+                )
+
+                # Try to process immediately (without blocking)
+                self._process_pending_hands(filepath)
+
+        return callback
+
+    def _on_parser_error(self, filepath: str) -> Callable:
+        """Create a callback for parser errors.
+
+        Args:
+            filepath: Path to the file being parsed
+
+        Returns:
+            Callback function
+        """
+
+        def callback(error_msg: str) -> None:
+            """Handle a parser error.
+
+            Args:
+                error_msg: Error message from parser
+            """
+            log.warning(f"Parser error in {filepath}: {error_msg}")
+            if self.hand_data_reporter:
+                self.hand_data_reporter.log_error(filepath, error_msg)
+
+        return callback
+
+    def _process_pending_hands(self, filepath: str) -> None:
+        """Process any pending complete hands for a file.
+
+        Args:
+            filepath: Path to the file
+        """
+        if filepath not in self.pending_hands:
+            return
+
+        pending = self.pending_hands[filepath]
+
+        while pending:
+            hand_lines = pending.pop(0)
+            hand_text = "\n".join(hand_lines)
+
+            try:
+                self._process_streaming_hand(filepath, hand_text, hand_lines)
+            except Exception as e:
+                log.exception(f"Error processing streaming hand from {filepath}: {e}")
+                if self.hand_data_reporter:
+                    self.hand_data_reporter.log_error(filepath, str(e))
+
+    def _process_streaming_hand(
+        self, filepath: str, hand_text: str, hand_lines: list
+    ) -> None:
+        """Process a single complete hand from streaming.
+
+        This is a lightweight version of _import_hh_file designed for
+        single-hand processing from the streaming parser.
+
+        Args:
+            filepath: Path to source file
+            hand_text: Full hand text
+            hand_lines: Lines forming the hand
+        """
+        if filepath not in self.filelist:
+            log.warning(f"File not in filelist: {filepath}")
+            return
+
+        fpdbfile = self.filelist[filepath]
+
+        try:
+            # Load the site-specific parser
+            filter_name = fpdbfile.site.filter_name
+            mod = __import__(fpdbfile.site.hhc_fname)
+            obj = getattr(mod, filter_name, None)
+
+            if not callable(obj):
+                log.error(f"Cannot load parser for {fpdbfile.site.name}")
+                return
+
+            # Create parser instance (for single-hand parsing)
+            hhc = obj(
+                self.config,
+                in_path="-",  # stdin mode
+                autostart=False,
+                starsArchive=fpdbfile.archive,
+                ftpArchive=fpdbfile.archive,
+                sitename=fpdbfile.site.name,
+            )
+
+            # Parse the single hand
+            hand = hhc.processHand(hand_text)
+
+            if hand is None:
+                log.debug(f"Hand parsing returned None")
+                return
+
+            # Prepare and insert into database
+            hand.prepInsert()
+            hand.assembleHand()
+            hid = hand.getHandId(self.database)
+
+            if hid is not None:
+                hand.insertHands(self.database)
+                hand.insertHandsPlayers(self.database)
+                hand.insertHandsActions(self.database)
+
+                # Notify HUD via ZMQ
+                if self.callHud and self.zmq_sender:
+                    self.zmq_sender.send_hand_id(hid)
+
+                log.debug(f"Streamed hand {hid} inserted from {filepath}")
+
+                # Report to HandDataReporter if enabled
+                if self.hand_data_reporter:
+                    self.hand_data_reporter.log_hand(filepath, hid, hand)
+
+        except FpdbHandPartial as e:
+            log.debug(f"Partial hand from streaming: {e}")
+        except FpdbHandDuplicate as e:
+            log.debug(f"Duplicate hand in streaming: {e}")
+        except FpdbParseError as e:
+            log.warning(f"Parse error in streaming hand: {e}")
+            if self.hand_data_reporter:
+                self.hand_data_reporter.log_error(filepath, str(e))
+        except Exception as e:
+            log.exception(f"Unexpected error processing streaming hand: {e}")
+            if self.hand_data_reporter:
+                self.hand_data_reporter.log_error(filepath, str(e))
+
+    def runStreaming(self) -> None:
+        """Start streaming mode for all monitored files.
+
+        Activates streaming for all files in the current filelist that support
+        real-time streaming. Falls back to polling for unsupported sites.
+        """
+        if not self.streaming_enabled:
+            log.info("Streaming mode not enabled")
+            return
+
+        log.info(f"Starting streaming for {len(self.filelist)} files")
+
+        for filepath, fpdbfile in self.filelist.items():
+            if not os.path.isdir(filepath):
+                self.startStreamingFile(filepath, fpdbfile.site.name)
+
+        # Also start HUD communication if needed
+        if self.callHud and self.zmq_sender is None:
+            try:
+                self.zmq_sender = ZMQSender()
+            except Exception as e:
+                log.warning(f"Failed to initialize ZMQ sender: {e}")
 
     def setFakeCacheHHC(self, value) -> None:
         """Set the cacheHHC setting for the importer.
