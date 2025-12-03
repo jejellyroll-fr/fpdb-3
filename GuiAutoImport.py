@@ -385,8 +385,9 @@ class GuiAutoImport(QWidget):
                         elif os.name == "nt":  # Windows installation source
                             path = to_raw(sys.path[0])
                             use_pythonw = win32console.GetConsoleWindow() == 0
-                            interpreter = "pythonw" if use_pythonw else "python"
-                            command = f'{interpreter} "{path}\\HUD_main.pyw" ' f"{self.settings['cl_options']}"
+                            # Use sys.executable to get the current Python interpreter path
+                            interpreter = sys.executable.replace("python.exe", "pythonw.exe") if use_pythonw else sys.executable
+                            command = f'"{interpreter}" "{path}\\HUD_main.pyw" ' f"{self.settings['cl_options']}"
                             bs = 0
 
                         else:  # Linux & macOS installation source
