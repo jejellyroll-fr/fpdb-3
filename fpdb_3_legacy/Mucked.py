@@ -1,0 +1,457 @@
+#!/usr/bin/env python
+from __future__ import annotations
+"""Mucked.py.
+
+Mucked cards display for FreePokerTools HUD.
+"""
+
+from PySide6.QtCore import QObject, Qt
+from PySide6.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
+from PySide6.QtWidgets import QGridLayout, QLabel, QTableView, QVBoxLayout, QWidget
+
+from fpdb_3_legacy import Aux_Base
+
+#    FreePokerTools modules
+from fpdb_3_legacy import Card
+
+#    Standard Library modules
+from fpdb_3_legacy.loggingFpdb import get_logger
+
+#    Copyright 2008-2012,  Ray E. Barker
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+########################################################################
+
+
+# import L10n
+# _ = L10n.init_translation()
+
+
+# Utility routine to get the number of valid cards in the card tuple
+
+# logging has been set up in fpdb.py or HUD_main.py, use their settings:
+log = get_logger("mucked_hud")
+
+
+def valid_cards(ct):
+    return sum(c != 0 for c in ct)
+
+
+class Stud_mucked(Aux_Base.AuxWindow):
+    def __init__(self, hud, config, params) -> None:
+        self.hud = hud  # hud object that this aux window supports
+        self.config = config  # Configuration object for this aux window to use
+        self.params = params  # hash aux params from config
+
+        try:
+            site_params = self.config.get_site_parameters(self.hud.site)
+            self.hero = site_params["screen_name"]
+        except (AttributeError, KeyError, TypeError):
+            self.hero = ""
+
+        self.mucked_list = Stud_list(self, params, config, self.hero)
+        self.mucked_cards = Stud_cards(self, params, config)
+        self.mucked_list.mucked_cards = self.mucked_cards
+
+    def create(self) -> None:
+        self.container = QWidget()
+        self.vbox = QVBoxLayout()
+        self.container.setLayout(self.vbox)
+        self.container.setWindowTitle(self.hud.table.name)
+
+        self.mucked_list.create(self.vbox)
+        self.mucked_cards.create(self.vbox)
+        self.container.show()
+
+    def update_data(self, new_hand_id, db_connection) -> None:
+        # uncomment next line when action is available in the db
+        # self.mucked_cards.update_data(new_hand_id, db_connection)
+        self.mucked_list.update_data(new_hand_id, db_connection)
+
+    def update_gui(self, new_hand_id) -> None:
+        self.mucked_cards.update_gui(new_hand_id)
+        self.mucked_list.update_gui(new_hand_id)
+
+
+class Stud_list:
+    def __init__(self, parent, params, config, hero) -> None:
+        self.parent = parent
+        self.params = params
+        self.config = config
+        self.hero = hero
+
+    def create(self, container) -> None:
+        self.container = container
+        self.treeview = QTableView()
+        self.liststore = QStandardItemModel(0, 4, self.treeview)
+        self.treeview.setModel(self.liststore)
+        self.liststore.setHorizontalHeaderLabels(["HandID", "Cards", "Net", "Winner"])
+        self.treeview.verticalHeader().hide()
+        self.container.addWidget(self.treeview)
+
+    def update_data(self, new_hand_id, db_connection) -> None:
+        """Updates the data needed for the list box."""
+        #        db_connection = Database.Database(self.config, 'fpdb', '')
+        self.winners = db_connection.get_winners_from_hand(new_hand_id)
+        pot = 0
+        winners = ""
+        for player in list(self.winners.keys()):
+            pot = pot + int(self.winners[player])
+            if winners != "":
+                winners = f"{winners}, "
+            winners = winners + player
+        pot_dec = f"{(float(pot)) // (100):.2f}"
+
+        hero_cards = self.get_hero_cards(self.parent.hero)
+        self.info_row = ((new_hand_id, hero_cards, pot_dec, winners),)
+
+    def get_hero_cards(self, hero):
+        """Formats the hero cards for inclusion in the table."""
+        if hero == "":
+            return "xxxxxx"
+        return next(
+            (
+                Card.valueSuitFromCard(self.parent.hud.cards[stat["seat"]][0])
+                + Card.valueSuitFromCard(self.parent.hud.cards[stat["seat"]][1])
+                + Card.valueSuitFromCard(self.parent.hud.cards[stat["seat"]][2])
+                for stat in list(self.parent.hud.stat_dict.values())
+                if self._is_hero(stat["screen_name"], hero)
+            ),
+            "xxxxxx",
+        )
+
+    def _is_hero(self, screen_name, hero) -> bool:
+        """Match a seat to the hero by primary name or any configured alias."""
+        if screen_name == hero:
+            return True
+        config = getattr(self.parent, "config", None)
+        site = getattr(getattr(self.parent, "hud", None), "site", None)
+        if config is not None and site is not None and hasattr(config, "is_hero_name"):
+            return config.is_hero_name(site, screen_name)
+        return False
+
+    def update_gui(self, new_hand_id) -> None:
+        self.liststore.appendRow(list(map(QStandardItem, self.info_row[0])))
+        self.treeview.resizeColumnsToContents()
+        self.treeview.horizontalHeader().setStretchLastSection(True)
+
+
+class Stud_cards:
+    def __init__(self, parent, params, config) -> None:
+        self.parent = parent
+        self.params = params
+        self.config = config
+
+        self.card_images = self.parent.hud.parent.deck.get_all_card_images()
+        self.grid_contents = {}
+        self.eb = {}
+
+        self.rows = 8
+        self.cols = 7
+
+    def create(self, container) -> None:
+        self.container = container
+        self.grid = QGridLayout()
+
+        for r in range(self.rows):
+            for c in range(self.cols):
+                # Start by creating a box of nothing but card backs
+                self.eb[(c, r)] = QLabel()
+                self.eb[(c, r)].setPixmap(self.card_images[0])
+
+        #    set up the contents for the cells
+        for r in range(self.rows):
+            self.grid_contents[(0, r)] = QLabel("%d" % (r + 1))
+            self.grid_contents[(1, r)] = QLabel("player %d" % (r + 1))
+            self.grid_contents[(4, r)] = QLabel("-")
+            self.grid_contents[(9, r)] = QLabel("-")
+            self.grid_contents[(2, r)] = self.eb[(0, r)]
+            self.grid_contents[(3, r)] = self.eb[(1, r)]
+            self.grid_contents[(5, r)] = self.eb[(2, r)]
+            self.grid_contents[(6, r)] = self.eb[(3, r)]
+            self.grid_contents[(7, r)] = self.eb[(4, r)]
+            self.grid_contents[(8, r)] = self.eb[(5, r)]
+            self.grid_contents[(10, r)] = self.eb[(6, r)]
+
+        #    add the cell contents to the table
+        for c in range(self.cols + 4):
+            for r in range(self.rows):
+                self.grid.addWidget(self.grid_contents[(c, r)], r, c)
+
+        self.container.addLayout(self.grid)
+
+    def update_data(self, new_hand_id, db_connection) -> None:
+        self.tips = []
+        action = db_connection.get_action_from_hand(new_hand_id)
+        # print(action)
+        for street in action:
+            temp = ""
+            for act in street:
+                temp = temp + act[0] + " " + act[1] + "s "
+                if act[2] > 0:
+                    if act[2] % 100 > 0:
+                        temp = temp + f"{(float(act[2])) // (100):4.2f}\n"
+                    else:
+                        temp = temp + "%d\n" % ((act[2]) // (100))
+                else:
+                    temp = temp + "\n"
+            self.tips.append(temp)
+
+    def update_gui(self, new_hand_id) -> None:
+        self.clear()
+        for c, cards in list(self.parent.hud.cards.items()):
+            if c == "common":
+                continue
+            self.grid_contents[(1, c - 1)].setText(self.get_screen_name(c))
+            for i in (
+                (0, cards[0]),
+                (1, cards[1]),
+                (2, cards[2]),
+                (3, cards[3]),
+                (4, cards[4]),
+                (5, cards[5]),
+                (6, cards[6]),
+            ):
+                if i[1] != 0:
+                    # Pixmaps are stored in dict with rank+suit keys
+                    (_rank, _suit) = Card.valueSuitFromCard(i[1])
+                    _rank = Card.card_map[_rank]
+                    self.eb[(i[0], c - 1)].setPixmap(self.card_images[_suit][_rank])
+        #    action in tools tips for later streets
+        # round_to_col = (0, 3, 4, 5, 6)
+        # for round in range(1, len(self.tips)):
+        #    for r in range(0, self.rows):
+        #        self.eb[(round_to_col[round], r)].set_tooltip_text(self.tips[round])
+
+    def get_screen_name(self, seat_no):
+        """Gets and returns the screen name from stat_dict, given seat number."""
+        return next(
+            (
+                self.parent.hud.stat_dict[k]["screen_name"]
+                for k in list(self.parent.hud.stat_dict.keys())
+                if self.parent.hud.stat_dict[k]["seat"] == seat_no
+            ),
+            "No Name",
+        )
+
+    def clear(self) -> None:
+        for r in range(self.rows):
+            self.grid_contents[(1, r)].setText("             ")
+            for c in range(7):
+                # Start by creating a box of nothing but card backs
+                self.eb[(c, r)].setPixmap(self.card_images[0])
+
+
+class Flop_Mucked(Aux_Base.AuxSeats, QObject):
+    """AuxWindow class for displaying mucked cards for flop games."""
+
+    def __init__(self, hud, config, params) -> None:
+        super().__init__(hud, config, params)
+        QObject.__init__(self)
+        self.card_images = self.hud.parent.deck.get_all_card_images()
+        
+        # Get card dimensions and scale them (default scale to 70% if not specified)
+        try:
+            scale_param = self.params.get("scale") or self.hud.parent.hud_params.get("mucked_cards_size") or 70
+            self.card_scale = float(scale_param) / 100.0
+        except (ValueError, TypeError):
+            self.card_scale = 0.7
+            
+        self.card_height = int(float(self.hud.parent.hud_params["card_ht"]) * self.card_scale)
+        self.card_width = int(float(self.hud.parent.hud_params["card_wd"]) * self.card_scale)
+        self.uses_timer = True  # this Aux_seats object uses a timer to control hiding
+
+    def _hud_anchor_window(self, i):
+        """Return the stat HUD window for this seat/common position, if available."""
+        own_windows = getattr(self, "m_windows", {})
+        for aux in getattr(self.hud, "aux_windows", []):
+            if aux is self or getattr(aux, "uses_timer", False):
+                continue
+
+            window = getattr(aux, "m_windows", {}).get(i)
+            if window is None or window is own_windows.get(i):
+                continue
+            if window.windowTitle() == "HUD - stats":
+                return window
+        return None
+
+    def _table_position(self, i):
+        table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
+        table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
+        return max(0, self.positions[i][0] + table_x), max(0, self.positions[i][1] + table_y)
+
+    def _move_next_to_hud(self, container, i, width=None, height=None) -> None:
+        anchor = self._hud_anchor_window(i)
+        if width is None or height is None:
+            hint = container.sizeHint()
+            width = width or max(container.width(), hint.width(), int(self.card_width))
+            height = height or max(container.height(), hint.height(), int(self.card_height))
+
+        margin = 6
+        if anchor is None:
+            x, y = self._table_position(i)
+        else:
+            geometry = anchor.frameGeometry()
+            x = geometry.right() + margin
+            y = geometry.top()
+
+            screen = container.screen() or anchor.screen()
+            if screen is not None:
+                available = screen.availableGeometry()
+                if x + width > available.right():
+                    x = geometry.left() - width - margin
+                y = max(available.top(), min(y, available.bottom() - height + 1))
+
+        x, y = Aux_Base.clamp_to_screen(x, y, width, height)
+        container.move(x, y)
+
+    def move_windows(self) -> None:
+        """Keep mucked cards adjacent to HUD stat blocks during table/layout refreshes."""
+        for i, window in list(getattr(self, "m_windows", {}).items()):
+            if window is not None:
+                self._move_next_to_hud(window, i)
+
+    def create_common(self, x, y):
+        """Create the window for the board cards and do the initial population."""
+        w = self.aw_class_window(self, "common")
+        self.positions["common"] = self.create_scale_position(x, y)
+        self._move_next_to_hud(w, "common")
+        if "opacity" in self.params:
+            w.setWindowOpacity(float(self.params["opacity"]))
+        return w
+
+    def create_contents(self, container, i) -> None:
+        """Create the widgets for showing the contents of the Aux_seats window."""
+        container.seen_cards = QLabel()
+        container.seen_cards.setPixmap(self.card_images[0])
+        container.setLayout(QVBoxLayout())
+        container.layout().setContentsMargins(0, 0, 0, 0)
+        container.layout().addWidget(container.seen_cards)
+
+    # NOTE: self.hud.cards is a dictionary of:
+    # { seat_num: (card, card, [...]) }
+    #
+    # Thus the individual hands (cards for seat) are tuples
+    def update_contents(self, container, i) -> None:
+        hist_seat = self.hud.layout.hh_seats[i] if type(i) is int else i
+        if hist_seat not in self.hud.cards:
+            return
+
+        cards = self.hud.cards[hist_seat]
+        # Here we want to know how many cards the given seat showed;
+        # board is considered a seat, and has the id 'common'
+        # 'cards' on the other hand is a tuple. The format is:
+        # (card_num, card_num, ...)
+        n_cards = valid_cards(cards)
+        if n_cards > 1:
+            # scratch is a working pixmap, used to assemble the image
+            scratch = QPixmap(int(self.card_width) * n_cards, int(self.card_height))
+            painter = QPainter(scratch)
+            x = 0  # x coord where the next card starts in scratch
+            for card in cards:
+                # concatenate each card image to scratch
+                # flop game never(?) has unknown cards.
+                # FIXME: if "show one and fold" ever becomes an option,
+                # this needs to be changed
+                if card is None or card == 0:
+                    break
+
+                # This gives us the card symbol again
+                (_rank, _suit) = Card.valueSuitFromCard(card)
+                _rank = Card.card_map[_rank]
+                px = self.card_images[_suit][_rank]
+                if self.card_scale != 1.0:
+                    px = px.scaled(
+                        int(self.card_width),
+                        int(self.card_height),
+                        Qt.KeepAspectRatio,
+                        Qt.SmoothTransformation,
+                    )
+                painter.drawPixmap(x, 0, px)
+                x += px.width()
+
+            painter.end()
+            if container is not None:
+                container.seen_cards.setPixmap(scratch)
+                container.adjustSize()
+                self._move_next_to_hud(container, i, scratch.width(), scratch.height())
+                container.show()
+
+            self.displayed = True
+            if i != "common" and self.get_id_from_seat(i) is not None:
+                self.m_windows[i].setToolTip(
+                    self.hud.stat_dict[self.get_id_from_seat(i)]["screen_name"],
+                )
+
+    def save_layout(self, *args) -> None:
+        """Save new common position back to the layout element in the config file."""
+        new_locs = {i: ((pos[0]), (pos[1])) for i, pos in list(self.positions.items()) if i == "common"}
+        self.config.save_layout_set(
+            self.hud.layout_set,
+            self.hud.max,
+            new_locs,
+            width=None,
+            height=None,
+        )
+
+    def update_gui(self, new_hand_id) -> None:
+        """Prepare and show the mucked cards."""
+        if self.displayed:
+            self.hide()
+        #   See how many players showed a hand. Skip if only 1 shows (= hero)
+        n_sd = self.count_seats_with_cards(self.hud.cards)
+        if n_sd < 2:
+            return
+
+        super().update_gui(new_hand_id)
+
+        if self.displayed and float(self.params["timeout"]) > 0:
+            self.timer_on = True
+            self.startTimer(int(1000 * float(self.params["timeout"])))
+
+    def timerEvent(self, event) -> None:
+        self.killTimer(event.timerId())
+        if self.timer_on:
+            self.hide()
+
+    def button_press_cb(self, widget, event, i, *args) -> None:
+        """Handle button clicks in the event boxes."""
+        if event.button == 2:  # middle button event, hold display (do not timeout)
+            if self.timer_on:
+                self.timer_on = False
+            else:
+                self.timer_on = False
+                self.hide()
+        elif event.button == 1 and i == "common":  # left button event (move)
+            # firstly, cancel timer, otherwise block becomes locked if move event
+            #   is happening when timer eventually times-out
+            if self.timer_on:
+                self.timer_on = False
+            # only allow move on "common" element - seat block positions are
+            # determined by aux_hud, not mucked card display
+            window = widget.get_parent()
+            window.begin_move_drag(
+                event.button,
+                int(event.x_root),
+                int(event.y_root),
+                event.time,
+            )
+
+    def expose_all(self) -> None:
+        for i in self.hud.cards:
+            self.m_windows[i].show()
+            self._move_next_to_hud(self.m_windows[i], i)
+            self.displayed = True

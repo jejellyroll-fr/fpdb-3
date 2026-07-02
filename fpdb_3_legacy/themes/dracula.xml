@@ -1,0 +1,15 @@
+<!--?xml version="1.0" encoding="UTF-8"?-->
+<!--
+Custom Theme: Dracula Dark Theme
+Author: Based on Dracula Theme (https://github.com/dracula/dracula-theme)
+Created with fpdb Theme Creator
+-->
+<resources>
+  <color name="primaryColor">#bd93f9</color>
+  <color name="primaryLightColor">#d4b5ff</color>
+  <color name="secondaryColor">#282a36</color>
+  <color name="secondaryLightColor">#44475a</color>
+  <color name="secondaryDarkColor">#21222c</color>
+  <color name="primaryTextColor">#f8f8f2</color>
+  <color name="secondaryTextColor">#f8f8f2</color>
+</resources>

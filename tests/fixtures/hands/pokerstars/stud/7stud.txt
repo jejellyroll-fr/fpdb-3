@@ -1,0 +1,50 @@
+PokerStars Hand #3234567890:  7 Card Stud Limit ($1/$2 USD) - 2023/10/27 14:00:00 ET
+Table 'Stud Table' 8-max Seat #1 is the button
+Seat 1: Player1 ($100.00 in chips)
+Seat 2: Player2 ($100.00 in chips)
+Seat 3: Player3 ($100.00 in chips)
+Player1: posts the ante $0.10
+Player2: posts the ante $0.10
+Player3: posts the ante $0.10
+*** 3rd STREET ***
+Dealt to Player1 [2d]
+Dealt to Player2 [3d]
+Dealt to Player3 [7s]
+Player1: brings-in low for $0.25
+Player2: calls $0.25
+Player3: calls $0.25
+*** 4th STREET ***
+Dealt to Player1 [2d] [4d]
+Dealt to Player2 [3d] [5d]
+Dealt to Player3 [7s] [8s]
+Player3: bets $1.00
+Player1: calls $1.00
+Player2: calls $1.00
+*** 5th STREET ***
+Dealt to Player1 [2d 4d] [Ad]
+Dealt to Player2 [3d 5d] [Kd]
+Dealt to Player3 [7s 8s] [9s]
+Player3: bets $2.00
+Player1: calls $2.00
+Player2: folds
+*** 6th STREET ***
+Dealt to Player1 [2d 4d Ad] [Ah]
+Dealt to Player3 [7s 8s 9s] [Th]
+Player3: checks
+Player1: bets $2.00
+Player3: calls $2.00
+*** RIVER ***
+Dealt to Player1 [2d 4d Ad Ah] [As]
+Dealt to Player3 [7s 8s 9s Th] [Ts]
+Player3: checks
+Player1: bets $2.00
+Player3: calls $2.00
+*** SHOW DOWN ***
+Player1: shows [2h 2s 2d 4d Ad Ah As] (four of a kind, Aces)
+Player3: mucks
+Player1 collected $15.55 from pot
+*** SUMMARY ***
+Total pot $15.55 | Rake $0.50
+Seat 1: Player1 (button) showed [2h 2s 2d 4d Ad Ah As] and won ($15.55) with four of a kind, Aces
+Seat 2: Player2 folded on 5th Street
+Seat 3: Player3 mucked

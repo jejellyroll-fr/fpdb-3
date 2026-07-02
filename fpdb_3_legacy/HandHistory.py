@@ -1,0 +1,223 @@
+#!/usr/bin/env python
+from __future__ import annotations
+"""HandHistory.py.
+
+Parses HandHistory xml files and returns requested objects.
+"""
+
+import xml.dom.minidom
+from xml.dom.minidom import Node
+from xml.parsers.expat import ExpatError
+
+from fpdb_3_legacy.loggingFpdb import get_logger
+
+#    Copyright 2008-2011, Ray E. Barker
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+########################################################################
+#    Standard Library modules
+
+
+log = get_logger("hand_history")
+
+
+class HandHistory:
+    def __init__(self, xml_string, elements=("ALL")) -> None:
+        doc = xml.dom.minidom.parseString(xml_string)
+        if elements == ("ALL"):
+            elements = ("BETTING", "AWARDS", "POSTS", "PLAYERS", "GAME")
+
+        if "BETTING" in elements:
+            self.BETTING = Betting(doc.getElementsByTagName("BETTING")[0])
+        if "AWARDS" in elements:
+            self.AWARDS = Awards(doc.getElementsByTagName("AWARDS")[0])
+        if "POSTS" in elements:
+            self.POSTS = Posts(doc.getElementsByTagName("POSTS")[0])
+        if "GAME" in elements:
+            self.GAME = Game(doc.getElementsByTagName("GAME")[0])
+        if "PLAYERS" in elements:
+            self.PLAYERS = {}
+            p_n = doc.getElementsByTagName("PLAYERS")[0]
+            for p in p_n.getElementsByTagName("PLAYER"):
+                a_player = Player(p)
+                self.PLAYERS[a_player.name] = a_player
+
+
+class Player:
+    def __init__(self, node) -> None:
+        self.name = node.getAttribute("NAME")
+        self.seat = node.getAttribute("SEAT")
+        self.stack = node.getAttribute("STACK")
+        self.showed_hand = node.getAttribute("SHOWED_HAND")
+        self.cards = node.getAttribute("CARDS")
+        self.allin = node.getAttribute("ALLIN")
+        self.sitting_out = node.getAttribute("SITTING_OUT")
+        self.hand = node.getAttribute("HAND")
+        self.start_cards = node.getAttribute("START_CARDS")
+
+        if self.allin in ("", "0") or self.allin.upper() == "FALSE":
+            self.allin = False
+        else:
+            self.allin = True
+
+        if self.sitting_out in ("", "0") or self.sitting_out.upper() == "FALSE":
+            self.sitting_out = False
+        else:
+            self.sitting_out = True
+
+    def __str__(self) -> str:
+        temp = f"{self.name}\n    seat = {self.seat}\n    stack = {self.stack}\n    cards = {self.cards}\n"
+        temp = temp + f"    showed_hand = {self.showed_hand}\n    allin = {self.allin}\n"
+        return temp + f"    hand = {self.hand}\n    start_cards = {self.start_cards}\n"
+
+
+class Awards:
+    def __init__(self, node) -> None:
+        self.awards = []  # just an array of award objects
+        for a in node.getElementsByTagName("AWARD"):
+            self.awards.append(Award(a))
+
+    def __str__(self) -> str:
+        return "".join(f"{a}\n" for a in self.awards)
+
+
+class Award:
+    def __init__(self, node) -> None:
+        self.player = node.getAttribute("PLAYER")
+        self.amount = node.getAttribute("AMOUNT")
+        self.pot = node.getAttribute("POT")
+
+    def __str__(self) -> str:
+        return self.player + " won " + self.amount + " from " + self.pot
+
+
+class Game:
+    def __init__(self, node) -> None:
+        # print(node)
+        self.tags = {}
+        for tag in (
+            ("GAME_NAME", "game_name"),
+            ("MAX", "max"),
+            ("HIGHLOW", "high_low"),
+            ("STRUCTURE", "structure"),
+            ("MIXED", "mixed"),
+        ):
+            L = node.getElementsByTagName(tag[0])
+            if not L:
+                continue
+            # print(L)
+            for node2 in L:
+                title = ""
+                for node3 in node2.childNodes:
+                    if node3.nodeType == Node.TEXT_NODE:
+                        title += node3.data
+                self.tags[tag[1]] = title
+
+    def __str__(self) -> str:
+        return "{} {} {}, ({} max), {}".format(
+            self.tags["structure"],
+            self.tags["game_name"],
+            self.tags["game_name"],
+            self.tags["max"],
+            self.tags["game_name"],
+        )
+
+
+class Posts:
+    def __init__(self, node) -> None:
+        self.posts = []  # just an array of post objects
+        for p in node.getElementsByTagName("POST"):
+            self.posts.append(Post(p))
+
+    def __str__(self) -> str:
+        return "".join(f"{p}\n" for p in self.posts)
+
+
+class Post:
+    def __init__(self, node) -> None:
+        self.player = node.getAttribute("PLAYER")
+        self.amount = node.getAttribute("AMOUNT")
+        self.posted = node.getAttribute("POSTED")
+        self.live = node.getAttribute("LIVE")
+
+    def __str__(self) -> str:
+        return f"{self.player} posted {self.amount} {self.posted} {self.live}"
+
+
+class Betting:
+    def __init__(self, node) -> None:
+        self.rounds = []  # a Betting object is just an array of rounds
+        for r in node.getElementsByTagName("ROUND"):
+            self.rounds.append(Round(r))
+
+    def __str__(self) -> str:
+        return "".join(f"{r}\n" for r in self.rounds)
+
+
+class Round:
+    def __init__(self, node) -> None:
+        self.name = node.getAttribute("ROUND_NAME")
+        self.action = []
+        for a in node.getElementsByTagName("ACTION"):
+            self.action.append(Action(a))
+
+    def __str__(self) -> str:
+        return self.name + "\n" + "".join(f"    {a}\n" for a in self.action)
+
+
+class Action:
+    def __init__(self, node) -> None:
+        self.player = node.getAttribute("PLAYER")
+        self.action = node.getAttribute("ACT")
+        self.amount = node.getAttribute("AMOUNT")
+        self.allin = node.getAttribute("ALLIN")
+
+    def __str__(self) -> str:
+        return self.player + " " + self.action + " " + self.amount + " " + self.allin
+
+
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    # Simple test - just parse test.xml like the original
+    try:
+        with open("test.xml", "r") as file:
+            xml_string = file.read()
+
+        print("Parsing test.xml...")
+        h = HandHistory(xml_string, ("ALL"))
+
+        print("✓ XML parsing completed successfully")
+
+        for _p in list(h.PLAYERS.keys()):
+            pass
+
+        return 0
+
+    except FileNotFoundError:
+        print("✗ Error: test.xml not found")
+        print("Note: No test.xml file exists in the codebase - this is expected behavior")
+        return 1
+    except (ExpatError, AttributeError, KeyError, TypeError, ValueError) as e:
+        print(f"✗ Error parsing XML: {e}")
+        return 1
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(main())

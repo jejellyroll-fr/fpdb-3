@@ -1,0 +1,21 @@
+PokerStars Hand #170983530791: Tournament #1918472490, $3.41+$3.41+$0.68 USD Courchevel Hi/Lo Pot Limit - Level I (15/30) - 2017/05/27 18:14:16 EET [2017/05/27 11:14:16 ET]
+Table '1918472490 1' 6-max Seat #1 is the button
+Seat 1: Player1 (1500 in chips)
+Seat 2: Player2 (1500 in chips)
+Player1: posts small blind 15
+Player2: posts big blind 30
+*** HOLE CARDS ***
+Dealt to Player1 [As 2s 3s 4s 5s]
+*** PRE-FLOP *** [8h]
+Player1: raises 60 to 90
+Player2: calls 60
+*** FLOP *** [8h 9h Th]
+Player2: checks
+Player1: bets 180
+Player2: folds
+Uncalled bet (180) returned to Player1
+Player1 collected 180 from pot
+*** SUMMARY ***
+Total pot 180 | Rake 0
+Seat 1: Player1 (small blind) collected (180)
+Seat 2: Player2 (big blind) folded on the Flop

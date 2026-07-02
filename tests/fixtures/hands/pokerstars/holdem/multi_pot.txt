@@ -1,0 +1,27 @@
+PokerStars Hand #111111111111: Hold'em No Limit ($0.50/$1.00 USD) - 2023/10/27 12:00:00 ET
+Table 'Table Name' 6-max Seat #1 is the button
+Seat 1: Player1 ($100 in chips)
+Seat 2: Player2 ($50 in chips)
+Seat 3: Player3 ($25 in chips)
+Player2: posts small blind $0.50
+Player3: posts big blind $1.00
+*** HOLE CARDS ***
+Player1: raises $99 to $100 and is all-in
+Player2: calls $49.50 and is all-in
+Player3: calls $24 and is all-in
+*** FLOP *** [As Ks Qs]
+*** TURN *** [As Ks Qs] [Js]
+*** RIVER *** [As Ks Qs Js] [Ts]
+*** SHOW DOWN ***
+Player1: shows [Ad Kd] (a Royal Flush)
+Player2: shows [Ah Kh] (a Royal Flush)
+Player3: shows [Ac Kc] (a Royal Flush)
+Player3 collected $75 from main pot
+Player2 collected $50 from side pot
+Player1 collected $50 from side pot-1
+*** SUMMARY ***
+Total pot $175 | Rake $0
+Board [As Ks Qs Js Ts]
+Seat 1: Player1 (button) showed [Ad Kd] and won ($50) with a Royal Flush
+Seat 2: Player2 (small blind) showed [Ah Kh] and won ($50) with a Royal Flush
+Seat 3: Player3 (big blind) showed [Ac Kc] and won ($75) with a Royal Flush

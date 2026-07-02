@@ -1,0 +1,44 @@
+PokerStars Hand #258721013274:  5 Card Omaha Hi/Lo Pot Limit ($0.10/$0.25 USD) - 2025/11/30 15:42:16 PT [2025/11/30 18:42:16 ET]
+Table 'Latona V' 6-max Seat #6 is the button
+Seat 1: Player1 ($24.02 in chips)
+Seat 2: Player2 ($17.93 in chips)
+Seat 3: Player3 ($18.52 in chips)
+Seat 4: Player4 ($61.60 in chips)
+Seat 5: Player5 ($31.95 in chips)
+Seat 6: Player6 ($25 in chips)
+Player1: posts small blind $0.10
+Player2: posts big blind $0.25
+*** HOLE CARDS ***
+Dealt to Player6 [8s Qs 3s 2c Qc]
+Player3: folds
+Player4: raises $0.60 to $0.85
+Player5: folds
+Player6: calls $0.85
+Player1: folds
+Player2: calls $0.60
+*** FLOP *** [Td Qd 5s]
+Player2: checks
+Player4: checks
+Player6: bets $1.68
+Player2: calls $1.68
+Player4: folds
+*** TURN *** [Td Qd 5s] [Ad]
+Player2: checks
+Player6: checks
+*** RIVER *** [Td Qd 5s Ad] [5h]
+Player2: checks
+Player6: bets $5.75
+Player2: folds
+Uncalled bet ($5.75) returned to Player6
+Player6 collected $5.75 from pot
+Player6: doesn't show hand
+*** SUMMARY ***
+Total pot $6.01 | Rake $0.26
+Board [Td Qd 5s Ad 5h]
+Seat 1: Player1 (small blind) folded before Flop
+Seat 2: Player2 (big blind) folded on the River
+Seat 3: Player3 folded before Flop (didn't bet)
+Seat 4: Player4 folded on the Flop
+Seat 5: Player5 folded before Flop (didn't bet)
+Seat 6: Player6 (button) collected ($5.75)
+

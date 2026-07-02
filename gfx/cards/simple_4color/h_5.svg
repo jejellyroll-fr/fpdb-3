@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="140" height="190" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Card Background -->
+    <rect x="2" y="2" width="136" height="186" rx="12" ry="12" fill="white" stroke="black" stroke-width="2"/>
+    
+    <!-- Top Left -->
+    <g id="corner">
+        <text x="12" y="38" font-family="Arial, Sans" font-size="36" font-weight="bold" fill="#ff0000" text-anchor="start">5</text>
+        <text x="12" y="75" font-family="Arial, Sans" font-size="36" fill="#ff0000" text-anchor="start">♥</text>
+    </g>
+
+    <!-- Center -->
+    <text x="70" y="118" font-family="Arial, Sans" font-size="90" fill="#ff0000" text-anchor="middle" dominant-baseline="middle">♥</text>
+
+    <!-- Bottom Right (Rotated) -->
+    <g transform="rotate(180, 70, 95)">
+        <use xlink:href="#corner"/>
+    </g>
+</svg>

@@ -1,0 +1,137 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fpdb-3"
+version = "3.0.0-alpha2"
+description = "Free Poker Database (FPDB-3) - Legacy Python Implementation"
+readme = "README.md"
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSE"]
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "beautifulsoup4==4.12.3",
+    "chardet==5.2.0",
+    "matplotlib>=3.10.7",
+    "pandas>=2.2.2",
+    "psutil>=5.9.0",
+    "pyobjc==10.3.1; sys_platform == 'darwin'",
+    "PySide6>=6.8.1",
+    "colorlog==6.9.0",
+    "pyzmq>=26.0.3",
+    "qt-material==2.14",
+    "numpy>=2.1.0",
+    "pytz==2024.1",
+    "aiohttp>=3.13.2",
+    "cachetools==5.5.0",
+    "mplfinance>=0.12.10b0",
+    "xlrd==2.0.1",
+    "playwright>=1.40.0",
+]
+
+[project.optional-dependencies]
+build = [
+    "pyinstaller>=6.9.0",
+    "wheel>=0.42.0",
+]
+test = [
+    "pytest>=8.3.2",
+    "pytest-qt>=4.0.2",
+    "pytest-cov>=5.0.0",
+    "httpx>=0.28.0",
+    "hypothesis>=6.100.0",
+    "psycopg[binary]>=3.1.0",
+    "PySide6>=6.8.1",
+    "ruff>=0.12.8",
+]
+test-no-gui = [
+    "pytest>=8.3.2",
+    "pytest-qt>=4.0.2",
+    "pytest-cov>=5.0.0",
+    "httpx>=0.28.0",
+    "hypothesis>=6.100.0",
+    "psycopg[binary]>=3.1.0",
+    "ruff>=0.12.8",
+]
+windows = ["pywin32==306", "configparser", "PySide6>=6.8.1"]
+linux = ["xcffib==1.5.0", "PySide6>=6.8.1"]
+macos = ["PySide6>=6.8.1"]
+postgresql = ["psycopg[binary]>=3.1.0"]
+mysql = ["mysqlclient==2.2.4"]
+
+[project.scripts]
+fpdb_3_legacy = "fpdb_3_legacy.legacy_launcher:main"
+
+[tool.ruff]
+extend-include = ["*.pyw"]
+extend-exclude = ["build", "archives"]
+line-length = 120
+indent-width = 4
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "W"]
+ignore = [
+    "E401",
+    "E731",
+    "E713",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["fpdb_3_legacy", "fpdb_3_legacy.*", "fpdb", "fpdb.*"]
+
+[tool.coverage.run]
+source = ["fpdb_3_legacy"]
+branch = true
+omit = [
+    "*/test/*",
+    "*/tests/*",
+    "*/__pycache__/*",
+    "fpdb_3_legacy/test_*.py",
+    "fpdb_3_legacy/migrate_*.py",
+    "fpdb_3_legacy/validate_*.py",
+]
+
+[tool.briefcase]
+project_name = "Free Poker Database 3"
+bundle = "org.fpdb"
+version = "3.0.0-alpha2"
+
+[tool.briefcase.app.fpdb]
+formal_name = "FPDB"
+description = "Free Poker Database 3 - Legacy Edition"
+sources = ["fpdb_3_legacy", "fpdb"]
+requires = [
+    "PySide6>=6.8.1",
+    "matplotlib>=3.10.7",
+    "pandas>=2.2.2",
+    "psutil>=5.9.0",
+    "colorlog==6.9.0",
+    "pyzmq>=26.0.3",
+    "qt-material==2.14",
+    "numpy>=2.1.0",
+    "pytz==2024.1",
+    "aiohttp>=3.13.2",
+    "cachetools==5.5.0",
+    "mplfinance>=0.12.10b0",
+    "xlrd==2.0.1",
+    "playwright>=1.40.0"
+]
+
+[tool.briefcase.app.fpdb.macOS]
+universal_build = false
+min_os_version = "12.0"
+requires = [
+    "pyobjc-framework-Cocoa==10.3.1"
+]
+
+[tool.briefcase.app.fpdb.windows]
+requires = [
+    "pywin32==306"
+]
+
+[tool.briefcase.app.fpdb.linux]
+requires = [
+    "xcffib==1.5.0"
+]

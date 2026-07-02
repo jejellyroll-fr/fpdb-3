@@ -1,0 +1,776 @@
+#    Copyright 2008-2012,  Ray E. Barker
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+"""Base classes for auxiliary HUD elements like Mucked cards."""
+from __future__ import annotations
+
+import contextlib
+from typing import TYPE_CHECKING, Any
+
+from PySide6.QtCore import QPoint, Qt
+from PySide6.QtWidgets import QApplication, QWidget
+
+if TYPE_CHECKING:
+    from PySide6.QtGui import QMouseEvent
+
+#    Standard Library modules
+from fpdb_3_legacy.loggingFpdb import get_logger
+
+# logging has been set up in fpdb.py or HUD_main.py, use their settings:
+log = get_logger("hud_main")
+
+
+def _nearest_screen(app: Any, x: int, y: int) -> Any:
+    """Return the screen whose geometry is closest to the point (x, y).
+
+    Used as a fallback when a point falls outside every screen, so a window can
+    still be clamped back onto a visible monitor instead of staying off-screen.
+    """
+    screens = app.screens()
+    if not screens:
+        return None
+
+    def distance(screen: Any) -> int:
+        g = screen.geometry()
+        # Distance from the point to the screen rectangle (0 if inside).
+        dx = max(g.left() - x, 0, x - g.right())
+        dy = max(g.top() - y, 0, y - g.bottom())
+        return dx * dx + dy * dy
+
+    return min(screens, key=distance)
+
+
+def clamp_to_screen(x: int, y: int, width: int = 200, height: int = 100) -> tuple[int, int]:
+    """Clamp a window position to fit within the visible screen area.
+
+    Ensures that the given coordinates and window size do not extend beyond the boundaries of the screen.
+
+    Args:
+        x: The x-coordinate of the window.
+        y: The y-coordinate of the window.
+        width: The width of the window (default is 200).
+        height: The height of the window (default is 100).
+
+    Returns:
+        tuple[int, int]: The clamped (x, y) coordinates within the screen bounds.
+    """
+    from fpdb_3_legacy.loggingFpdb import get_logger
+
+    log = get_logger("hud")
+
+    app = QApplication.instance()
+    if app is None:
+        log.warning("No QApplication instance for screen clamping")
+        return max(0, x), max(0, y)
+
+    # Try to find the screen containing the point
+    screen = app.screenAt(QPoint(x, y))
+    if screen is None:
+        # Point is off every screen. Don't leave the window stranded off-screen:
+        # fall back to the geometrically nearest screen and clamp onto it. This
+        # keeps multi-monitor setups working (a point on a secondary screen is
+        # returned by screenAt above) while pulling truly off-screen windows back.
+        screen = _nearest_screen(app, x, y)
+        if screen is None:
+            log.warning("No screen available for clamping point (%d,%d)", x, y)
+            return max(0, x), max(0, y)
+        log.warning(
+            "Point (%d,%d) not on any screen, clamping to nearest screen: %s",
+            x,
+            y,
+            screen.name(),
+        )
+    else:
+        log.debug("Point (%d,%d) found on screen: %s", x, y, screen.name())
+
+    geometry = screen.geometry()
+    log.info(
+        "Screen geometry: X=%d, Y=%d, Width=%d, Height=%d",
+        geometry.x(),
+        geometry.y(),
+        geometry.width(),
+        geometry.height(),
+    )
+
+    # Clamp to the actual screen boundaries (including offset for extended screens)
+    min_x = geometry.x()
+    max_x = geometry.x() + geometry.width() - width
+    min_y = geometry.y()
+    max_y = geometry.y() + geometry.height() - height
+
+    clamped_x = max(min_x, min(x, max_x))
+    clamped_y = max(min_y, min(y, max_y))
+
+    if clamped_x != x or clamped_y != y:
+        log.info(
+            "CLAMPING: Original (%d,%d) -> Clamped (%d,%d) [Screen bounds: %d-%d, %d-%d]",
+            x,
+            y,
+            clamped_x,
+            clamped_y,
+            min_x,
+            max_x,
+            min_y,
+            max_y,
+        )
+
+    return clamped_x, clamped_y
+
+
+### Aux_Base.py
+# Some base classes for Aux_Hud, Mucked, and other aux-handlers.
+# These classes were previously in Mucked, and have been split away
+# for clarity
+###
+
+# FPDB
+
+
+# This holds all card images in a nice lookup table. One instance is
+# populated on the first run of AuxWindow.get_card_images() and all
+# subsequent uses will have the same instance available.
+deck = None
+
+# This allows for a performance gain. Loading and parsing 53 SVG cards
+# takes some time. If that is done at the first access of
+# AuxWindow.get_card_images(), it can add a delay of several seconds.
+# A pre-populated deck on the other hand grants instant access.
+
+
+class AuxWindow:
+    """Base class for an auxiliary window in the HUD."""
+
+    def __init__(self, hud: Any, params: dict, config: Any) -> None:
+        """Initialize the AuxWindow.
+
+        Args:
+            hud: The main HUD object.
+            params: A dictionary of parameters for this window.
+            config: The main configuration object.
+        """
+        self.hud = hud
+        self.params = params
+        self.config = config
+
+    #   Override these methods as needed
+    def update_data(self, *args: Any) -> None:
+        """Update the data for the auxiliary window.
+
+        This method is a placeholder for updating the window's data.
+        """
+
+    def update_gui(self, *args: Any) -> None:
+        """Update the graphical user interface for the auxiliary window.
+
+        This method is a placeholder for updating the window's GUI elements.
+        """
+
+    def create(self, *args: Any) -> None:
+        """Create the auxiliary window.
+
+        This method is a placeholder for creating the window and its resources.
+        """
+
+    def save_layout(self, *args: Any) -> None:
+        """Save the layout of the auxiliary window.
+
+        This method is a placeholder for saving the current layout configuration.
+        """
+
+    def move_windows(self, *args: Any) -> None:
+        """Move all auxiliary windows to their correct positions.
+
+        This method is a placeholder for moving windows and should be overridden in subclasses.
+        """
+
+    def destroy(self) -> None:
+        """Destroy the window and release its resources.
+
+        Attempts to destroy the window container, suppressing any exceptions that may occur.
+        """
+        with contextlib.suppress(Exception):
+            self.container.destroy()
+
+    def kill(self) -> None:
+        """Kill this auxiliary window.
+
+        HUD_main historically calls ``kill`` on aux handlers, while the base
+        class exposed ``destroy``. Keep both names so profile/stat-set switches
+        can reliably tear down old windows.
+        """
+        self.destroy()
+
+    ############################################################################
+    #    Some utility routines useful for Aux_Windows
+    #
+    # Returns the number of places where cards were shown. This can be N
+    # players + common cards
+    def count_seats_with_cards(self, cards: dict) -> int:
+        """Return the number of seats with shown cards in the list.
+
+        'cards' is a dictionary with EVERY INVOLVED SEAT included;
+        in addition, the unknown/unshown cards are marked with
+        zeroes, not None.
+        """
+        return sum(seat != "common" and cards_tuple[0] != 0 for seat, cards_tuple in list(cards.items()))
+
+    def get_id_from_seat(self, seat: int) -> str | None:
+        """Determine player id from seat number, given stat_dict.
+
+        hh_seats is a list of the actual seat numbers used in the hand history.
+        Some sites (e.g. iPoker) miss out some seat numbers if max is <10,
+        e.g. iPoker 6-max uses seats 1,3,5,6,8,10 NOT 1,2,3,4,5,6.
+        """
+        seat = self.hud.layout.hh_seats[seat]
+        return next(
+            (player_id for player_id, player_data in list(self.hud.stat_dict.items()) if seat == player_data["seat"]),
+            None,
+        )
+
+
+class SeatWindow(QWidget):
+    """A window for a single seat at the table."""
+
+    def __init__(self, aw: AuxWindow | None = None, seat: int | None = None) -> None:
+        """Initialize the SeatWindow.
+
+        Args:
+            aw: The parent AuxWindow.
+            seat: The seat number for this window.
+        """
+        super().__init__(
+            None,
+            Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowDoesNotAcceptFocus | Qt.WindowType.WindowStaysOnTopHint,
+        )
+        self.lastPos = None
+        # True while the OS is handling the drag via startSystemMove(); used to
+        # skip the manual move() fallback so the window is not moved twice.
+        self._system_move_active = False
+        self.aw = aw
+        self.seat = seat
+        self.resize(10, 10)
+        self.setAttribute(Qt.WidgetAttribute.WA_AlwaysShowToolTips)
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        """Handle mouse press events for the seat window.
+
+        Responds to left, middle, and right mouse button presses by calling the corresponding handler methods.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.button_press_left(event)
+        elif event.button() == Qt.MouseButton.MiddleButton:
+            self.button_press_middle(event)
+        elif event.button() == Qt.MouseButton.RightButton:
+            self.button_press_right(event)
+
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        """Handle mouse release events for the seat window.
+
+        Calls the appropriate handler method based on which mouse button was released.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.button_release_left(event)
+        elif event.button() == Qt.MouseButton.MiddleButton:
+            self.button_release_middle(event)
+        elif event.button() == Qt.MouseButton.RightButton:
+            self.button_release_right(event)
+
+    def button_press_left(self, event: QMouseEvent) -> None:
+        """Handle left mouse button press.
+
+        Records the global position of the mouse when the left button is pressed.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
+        # Qt6: globalPos() is deprecated; globalPosition() returns a QPointF with
+        # correct high-DPI/Retina coordinates, which we round to a QPoint. This is
+        # kept only as a fallback for the manual drag in mouseMoveEvent.
+        self.lastPos = event.globalPosition().toPoint()
+
+        # Preferred path: delegate to the OS native window move. On macOS/Qt6 the
+        # manual move() inside mouseMoveEvent loses the mouse grab after the first
+        # event (the window stops following the cursor), so the native move is the
+        # robust way to drag a frameless window. When this succeeds the platform
+        # drives the drag; the manual fallback in mouseMoveEvent must then be
+        # skipped, otherwise the window is moved twice (native + manual) and flies
+        # off the table on Windows.
+        self._system_move_active = False
+        handle = self.windowHandle()
+        if handle is not None and handle.startSystemMove():
+            self._system_move_active = True
+
+    def button_press_middle(self, event: QMouseEvent) -> None:
+        """Handle middle mouse button press.
+
+        This method is a placeholder for handling middle mouse button press events.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
+
+    def button_press_right(self, event: QMouseEvent) -> None:
+        """Handle right mouse button press.
+
+        This method is a placeholder for handling right mouse button press events.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
+
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        """Handle mouse move events for the seat window.
+
+        Moves the window according to the mouse movement if a drag is in progress.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
+        # Fallback manual drag (used only on platforms where startSystemMove() is
+        # unavailable). When the OS is already driving the drag, do nothing here,
+        # otherwise the window would be moved twice and jump off the table.
+        if self._system_move_active:
+            return
+        if self.lastPos is not None:
+            global_pos = event.globalPosition().toPoint()
+            self.move(self.pos() + global_pos - self.lastPos)
+            self.lastPos = global_pos
+
+    def button_release_left(self, _event: QMouseEvent) -> None:
+        """Handle left mouse button release.
+
+        Resets the last mouse position and triggers the configuration event callback.
+
+        Args:
+            _event: The mouse event containing button and position information.
+        """
+        self.lastPos = None
+        self._system_move_active = False
+        self.aw.configure_event_cb(self, self.seat)
+
+    def button_release_middle(self, event: QMouseEvent) -> None:
+        """Handle middle mouse button release.
+
+        This method is a placeholder for handling middle mouse button release events.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
+
+    def button_release_right(self, event: QMouseEvent) -> None:
+        """Handle right mouse button release.
+
+        This method is a placeholder for handling right mouse button release events.
+
+        Args:
+            event: The mouse event containing button and position information.
+        """
+
+    def create_contents(self, *args: Any) -> None:
+        """Create the contents of the seat window.
+
+        This method is a placeholder for populating the window with its contents.
+        """
+
+    def update_contents(self, *args: Any) -> None:
+        """Update the contents of the seat window.
+
+        This method is a placeholder for updating the window's contents.
+        """
+
+
+class AuxSeats(AuxWindow):
+    """A super class to display an aux_window or a stat block at each seat."""
+
+    def __init__(self, hud: Any, config: Any, params: dict) -> None:
+        """Initialize the AuxSeats.
+
+        Args:
+            hud: The main HUD object.
+            config: The main configuration object.
+            params: A dictionary of parameters for this window.
+        """
+        super().__init__(hud, params, config)
+        self.positions = {}  # dict of window positions. normalised for favourite seat and offset
+        # but _not_ offset to the absolute screen position
+        self.displayed = False  # the seat windows are displayed
+        self.uses_timer = False  # the Aux_seats object uses a timer to control hiding
+        self.timer_on = False  # bool = True if the timeout for removing the cards is on
+
+        self.aw_class_window = SeatWindow  # classname to be used by the aw_class_window
+
+    #    placeholders that should be overridden--so we don't throw errors
+    def create_contents(self) -> None:
+        """Create the contents for each seat window.
+
+        This method is a placeholder and should be overridden to populate each seat window with its contents.
+        """
+
+    def create_common(self, x: int, y: int) -> None:
+        """Create the common window at the specified position.
+
+        This method is a placeholder and should be overridden to create the common window at the given coordinates.
+
+        Args:
+            x: The x-coordinate for the common window.
+            y: The y-coordinate for the common window.
+        """
+
+    def update_contents(self) -> None:
+        """Update the contents for each seat window.
+
+        This method is a placeholder and should be overridden to update the contents of each seat window.
+        """
+
+    def resize_windows(self) -> None:
+        """Resize and reposition all HUD windows.
+
+        Updates the internal map of window positions based on the latest table and layout dimensions,
+        then moves all windows accordingly.
+        """
+        log.debug("RESIZING HUD WINDOWS - Table dimensions: %dx%d", self.hud.table.width, self.hud.table.height)
+        # Resize calculation has already happened in HUD_main&hud.py
+        # refresh our internal map to reflect these changes
+        for i in list(range(1, self.hud.max + 1)):
+            old_pos = self.positions.get(i, (0, 0))
+            self.positions[i] = self.hud.layout.location[self.adj[i]]
+            log.debug(
+                "Seat %d position updated: (%d,%d) -> (%d,%d)",
+                i,
+                old_pos[0],
+                old_pos[1],
+                self.positions[i][0],
+                self.positions[i][1],
+            )
+        old_common = self.positions.get("common", (0, 0))
+        self.positions["common"] = self.hud.layout.common
+        log.debug(
+            "Common position updated: (%d,%d) -> (%d,%d)",
+            old_common[0],
+            old_common[1],
+            self.positions["common"][0],
+            self.positions["common"][1],
+        )
+        # and then move everything to the new places
+        self.move_windows()
+
+    def move_windows(self) -> None:
+        """Move all seat and common windows to their correct positions.
+
+        Calculates the absolute positions for each window based on the table's current coordinates and layout,
+        clamps them to the screen, and moves the windows accordingly.
+        """
+        # Ensure table coordinates are valid (not negative or off-screen)
+        table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
+        table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
+
+        log.debug(
+            "MOVING HUD WINDOWS - Table position: X=%d, Y=%d (from table.x=%s, table.y=%s)",
+            table_x,
+            table_y,
+            self.hud.table.x,
+            self.hud.table.y,
+        )
+
+        for i in list(range(1, self.hud.max + 1)):
+            pos_x = self.positions[i][0] + table_x
+            pos_y = self.positions[i][1] + table_y
+            clamped_x, clamped_y = clamp_to_screen(pos_x, pos_y)
+            log.debug(
+                "Moving seat %d window: Layout pos (%d,%d) + Table pos (%d,%d) = Final pos (%d,%d) -> Clamped (%d,%d)",
+                i,
+                self.positions[i][0],
+                self.positions[i][1],
+                table_x,
+                table_y,
+                pos_x,
+                pos_y,
+                clamped_x,
+                clamped_y,
+            )
+            self.m_windows[i].move(clamped_x, clamped_y)
+
+        common_x = self.hud.layout.common[0] + table_x
+        common_y = self.hud.layout.common[1] + table_y
+        clamped_common_x, clamped_common_y = clamp_to_screen(common_x, common_y)
+        log.debug(
+            "Moving common window: Layout pos (%d,%d) + Table pos (%d,%d) = Final pos (%d,%d) -> Clamped (%d,%d)",
+            self.hud.layout.common[0],
+            self.hud.layout.common[1],
+            table_x,
+            table_y,
+            common_x,
+            common_y,
+            clamped_common_x,
+            clamped_common_y,
+        )
+        self.m_windows["common"].move(clamped_common_x, clamped_common_y)
+
+    def create(self) -> None:
+        """Create and initialize all seat and common windows for the HUD.
+
+        Sets up the window objects for each seat and the common area,
+        positions them according to the current layout and table size, and displays them as needed.
+        """
+        log.debug("=== AUX_BASE CREATE() METHOD CALLED ===")
+        self.adj = self.adj_seats()
+        self.m_windows = {}  # windows to put the card/hud items in
+        for i in [*list(range(1, self.hud.max + 1)), "common"]:
+            if i == "common":
+                #    The common window is different from the others. Note that it needs to
+                #    get realized, shown, topified, etc. in create_common
+                #    self.hud.layout.xxxxx is updated here after scaling, to ensure
+                #    layout and positions are in sync
+                (x, y) = self.hud.layout.common
+                self.m_windows[i] = self.create_common(x, y)
+                self.hud.layout.common = self.create_scale_position(x, y)
+            else:
+                (x, y) = self.hud.layout.location[self.adj[i]]
+                log.debug("Seat %s: Loading position from layout: (%s, %s)", i, x, y)
+                self.m_windows[i] = self.aw_class_window(self, i)
+                self.positions[i] = self.create_scale_position(x, y)
+                table_x = self.hud.table.x if self.hud.table.x is not None else 0
+                table_y = self.hud.table.y if self.hud.table.y is not None else 0
+                pos_x = max(0, self.positions[i][0] + table_x)
+                pos_y = max(0, self.positions[i][1] + table_y)
+                clamped_x, clamped_y = clamp_to_screen(pos_x, pos_y)
+                log.debug(
+                    "=== AUX_BASE POSITIONING === Seat %s: table(%s, %s) + relative(%s, %s) = final(%s, %s) -> Clamped(%s, %s)",
+                    i,
+                    table_x,
+                    table_y,
+                    self.positions[i][0],
+                    self.positions[i][1],
+                    pos_x,
+                    pos_y,
+                    clamped_x,
+                    clamped_y,
+                )
+                self.m_windows[i].move(clamped_x, clamped_y)
+                # Verify position after move
+                actual_pos = self.m_windows[i].pos()
+                log.debug(
+                    "=== POSITION AFTER MOVE === Seat %s: requested(%s, %s) -> actual(%s, %s)",
+                    i,
+                    pos_x,
+                    pos_y,
+                    actual_pos.x(),
+                    actual_pos.y(),
+                )
+                self.hud.layout.location[self.adj[i]] = self.positions[i]
+                if "opacity" in self.params:
+                    self.m_windows[i].setWindowOpacity(float(self.params["opacity"]))
+
+            # main action below - fill the created window with content
+            #    the create_contents method is supplied by the subclass
+            #      for hud's this is probably Aux_Hud.stat_window
+            self.create_contents(self.m_windows[i], i)
+
+            self.m_windows[i].create()  # ensure there is a native window handle for topify
+            log.debug(
+                "=== AUX_BASE CALLING TOPIFY === window[%d]=%s, table=%s",
+                i,
+                self.m_windows[i],
+                self.hud.table.title if hasattr(self.hud.table, "title") else "NO_TITLE",
+            )
+            self.hud.table.topify(self.m_windows[i])
+            if not self.uses_timer:
+                self.m_windows[i].show()
+
+        self.hud.layout.height = self.hud.table.height
+        self.hud.layout.width = self.hud.table.width
+
+    def create_scale_position(self, x: int, y: int) -> tuple[int, int]:
+        """Scale a position according to the current table size.
+
+        For a given x/y, scale according to current height/width vs. reference
+        height/width. This method is needed for create (because the table may not be
+        the same size as the layout in config).
+
+        Any subsequent resizing of this table will be handled through
+        hud_main.idle_resize.
+        """
+        lw, lh = self.hud.layout.width, self.hud.layout.height
+
+        if lw == 0 or lh == 0:
+            msg = "Layout width/height cannot be zero when scaling positions"
+            raise ValueError(msg)
+
+        x_scale = self.hud.table.width / lw
+        y_scale = self.hud.table.height / lh
+
+        scaled_x = int(x * x_scale)
+        scaled_y = int(y * y_scale)
+
+        log.debug(
+            "=== SCALING DEBUG === Original(%d,%d) Layout(%dx%d) Table(%dx%d) Scale(%.2f,%.2f) Result(%d,%d)",
+            x,
+            y,
+            lw,
+            lh,
+            self.hud.table.width,
+            self.hud.table.height,
+            x_scale,
+            y_scale,
+            scaled_x,
+            scaled_y,
+        )
+
+        return scaled_x, scaled_y
+
+    def update_gui(self, _new_hand_id: Any) -> None:
+        """Update the graphical user interface for all seat windows.
+
+        Calls the update_contents method for each seat window and
+        resizes windows to reflect any changes in block positions.
+        """
+        for i in list(self.m_windows.keys()):
+            self.update_contents(self.m_windows[i], i)
+        # reload latest block positions, in case another aux has changed them
+        # these lines allow the propagation of block-moves across
+        # the hud and mucked handlers for this table
+        self.resize_windows()
+
+    #   Methods likely to be of use for any SeatWindow implementation
+    def destroy(self) -> None:
+        """Destroy all seat and common windows for the HUD.
+
+        Iterates through all managed windows, destroys each one, and removes it from the internal dictionary.
+        """
+        with contextlib.suppress(AttributeError):
+            for i, window in list(self.m_windows.items()):
+                if window is not None:
+                    with contextlib.suppress(Exception):
+                        window.hide()
+                    with contextlib.suppress(Exception):
+                        window.close()
+                    with contextlib.suppress(Exception):
+                        window.destroy()
+                    with contextlib.suppress(Exception):
+                        window.deleteLater()
+                del self.m_windows[i]
+        self.displayed = False
+        self.timer_on = False
+
+    def kill(self) -> None:
+        """Kill all managed seat/common windows."""
+        self.destroy()
+
+    #   Methods likely to be useful for mucked card windows (or similar) only
+    def hide(self) -> None:
+        """Hide all seat and common windows for the HUD.
+
+        Iterates through all managed windows and hides each one, updating the displayed state.
+        """
+        for _i, w in list(self.m_windows.items()):
+            if w is not None:
+                w.hide()
+        self.displayed = False
+
+    def save_layout(self, *_args: Any) -> None:
+        """Save new layout back to the aux element in the config file.
+
+        This method is overridden in the specific aux because
+        the HUD's controlling stat boxes set the seat positions and
+        the mucked card aux's control the common location.
+        This class method would only be valid for an aux which has full control
+        over all seat and common locations.
+        """
+        log.warning("AuxSeats.save_layout called - save_layout method should be handled in the aux")
+
+    def configure_event_cb(self, widget: SeatWindow, i: int | str) -> None:
+        """Update the current location for each statblock.
+
+        This method is needed to record moves for an individual block.
+        Move/resize also end up in here due to it being a configure.
+        This is not optimal, but isn't easy to work around. fixme.
+        """
+        if i:
+            new_abs_position = widget.pos()  # absolute value of the new position
+            # Use the exact same table reference as move_windows() so the saved
+            # relative position round-trips back to where the user dropped it.
+            # (A mismatch here shifted the block off the table on redisplay.)
+            table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
+            table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
+            new_position = (
+                new_abs_position.x() - table_x,
+                new_abs_position.y() - table_y,
+            )
+            log.debug(
+                "Seat %s: Position updated - abs(%s, %s) - table(%s, %s) = relative(%s, %s)",
+                i,
+                new_abs_position.x(),
+                new_abs_position.y(),
+                table_x,
+                table_y,
+                new_position[0],
+                new_position[1],
+            )
+            self.positions[i] = new_position  # write this back to our map
+            if i != "common":
+                self.hud.layout.location[self.adj[i]] = new_position  # update the hud-level dict,
+                # so other aux can be told
+            else:
+                self.hud.layout.common = new_position
+
+    def adj_seats(self) -> list[int]:
+        """Determine how to adjust seating arrangements.
+
+        If a "preferred seat" is set in the hud layout configuration.
+        Need range here, not xrange -> need the actual list.
+        """
+        adj = list(range(self.hud.max + 1))  # default seat adjustments = no adjustment
+
+        #   does the user have a fav_seat? if so, just get out now
+        if self.hud.site_parameters["fav_seat"][self.hud.max] == 0:
+            return adj
+
+        # find the hero's actual seat
+
+        actual_seat = None
+        for key in self.hud.stat_dict:
+            if self.config.is_hero_name(self.hud.site, self.hud.stat_dict[key]["screen_name"]):
+                # Seat from stat_dict is the seat num recorded in the hand history and database
+                # For tables <10-max, some sites omit some seat nums (e.g. iPoker 6-max uses 1,3,5,6,8,10)
+                # The seat nums in the hh from the site are recorded in config file for each layout, and available
+                # here as the self.layout.hh_seats list
+                #    (e.g. for iPoker - [None,1,3,5,6,8,10];
+                #      for most sites-  [None, 1,2,3,4,5,6]
+                # we need to match 'seat' from hand history with the postion in the list, as the hud
+                #  always numbers its stat_windows using consecutive numbers (e.g. 1-6)
+
+                for i in range(1, self.hud.max + 1):
+                    if self.hud.layout.hh_seats[i] == self.hud.stat_dict[key]["seat"]:
+                        actual_seat = i
+                        break
+
+        if not actual_seat:  # this shouldn't happen because we don't create huds if the hero isn't seated.
+            log.error("Error finding hero seat.")
+            return adj
+
+        for i in range(self.hud.max):
+            j = actual_seat + i
+            if j > self.hud.max:
+                j = j - self.hud.max
+            adj[j] = self.hud.site_parameters["fav_seat"][self.hud.max] + i
+            if adj[j] > self.hud.max:
+                adj[j] = adj[j] - self.hud.max
+
+        return adj

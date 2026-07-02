@@ -1,0 +1,24 @@
+PokerStars Hand #4234567890:  5 Card Draw Limit ($1/$2 USD) - 2023/10/27 15:00:00 ET
+Table 'Draw Table' 6-max Seat #1 is the button
+Seat 1: Player1 ($100.00 in chips)
+Seat 2: Player2 ($100.00 in chips)
+Player1: posts small blind $0.50
+Player2: posts big blind $1.00
+*** DEALING HANDS ***
+Dealt to Player1 [Ah Kh Qh Jh Th]
+Player1: raises $1.00 to $2.00
+Player2: calls $1.00
+*** DRAW ***
+Player1: stands pat
+Player2: discards 3 cards
+Player2: checks
+Player1: bets $1.00
+Player2: calls $1.00
+*** SHOW DOWN ***
+Player1: shows [Ah Kh Qh Jh Th] (a Royal Flush)
+Player2: mucks
+Player1 collected $5.80 from pot
+*** SUMMARY ***
+Total pot $5.80 | Rake $0.20
+Seat 1: Player1 (button) (small blind) showed [Ah Kh Qh Jh Th] and won ($5.80) with a Royal Flush
+Seat 2: Player2 (big blind) mucked
