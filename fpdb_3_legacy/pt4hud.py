@@ -898,7 +898,7 @@ def import_to_config(
             placed, brows = _flow_items(pcells, cols)
             blk = doc.createElement("block")
             blk.setAttribute("label", label)
-            blk.setAttribute("position", panel_position(label))
+            blk.setAttribute("position", "")
             for attr, value in panel_style(label).items():
                 blk.setAttribute(attr, value)
             blk.setAttribute("rows", str(brows))

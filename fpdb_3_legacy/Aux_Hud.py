@@ -642,21 +642,35 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             return
         player_id = self.aw.get_id_from_seat(i)
         if player_id is None:
+            self.hide()
             return
-        player_pos = ""
         pdata = self.aw.hud.stat_dict.get(player_id) if self.aw.hud.stat_dict else None
         if pdata is not None:
+            screen_name = pdata.get("screen_name", "")
+            if self.aw.config.is_hero_name(self.aw.hud.site, screen_name):
+                self.hide()
+                return
+
+        self.show()
+
+        player_pos = ""
+        if pdata is not None:
             player_pos = pdata.get("position", "")
+        has_visible_block = False
         for box, (container, block_pos) in zip(self.stat_boxes, self.block_widgets, strict=False):
             visible = block_visible(block_pos, player_pos)
             container.setVisible(visible)
             if not visible:
                 continue
+            has_visible_block = True
             for row in box:
                 for stat in row:
                     if stat is not None:
                         stat.update(player_id, self.aw.hud.stat_dict)
-        self.adjustSize()
+        if not has_visible_block:
+            self.hide()
+        else:
+            self.adjustSize()
 
 
 class SimpleStat:
