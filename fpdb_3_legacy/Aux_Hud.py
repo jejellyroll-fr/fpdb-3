@@ -335,8 +335,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
                 self.create_contents(window, seat)
                 window.create()
                 self.hud.table.topify(window)
-                if not self.uses_timer:
-                    window.show()
+                self.update_contents(window, seat)
 
         self.m_windows["common"].create()
         self.hud.table.topify(self.m_windows["common"])
