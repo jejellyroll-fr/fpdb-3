@@ -647,9 +647,27 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         pdata = self.aw.hud.stat_dict.get(player_id) if self.aw.hud.stat_dict else None
         if pdata is not None:
             screen_name = pdata.get("screen_name", "")
-            if self.aw.config.is_hero_name(self.aw.hud.site, screen_name):
-                self.hide()
-                return
+            is_hero = self.aw.config.is_hero_name(self.aw.hud.site, screen_name)
+            if not is_hero and self.aw.hud.hand_instance is not None:
+                hand_hero = getattr(self.aw.hud.hand_instance, "hero", None)
+                if hand_hero and screen_name.lower() == hand_hero.lower():
+                    is_hero = True
+            if not is_hero and screen_name.lower() == "hero":
+                is_hero = True
+
+            if is_hero:
+                show_hero = True
+                stat_set_name = self.aw.game_params.name
+                stat_set = self.aw.config.stat_sets.get(stat_set_name)
+                if stat_set is not None:
+                    show_hero_attr = getattr(stat_set, "show_hero_hud", "")
+                    if show_hero_attr.lower() in ("false", "no", "0"):
+                        show_hero = False
+                if stat_set_name and "GenerationPoker 3H" in stat_set_name:
+                    show_hero = False
+                if not show_hero:
+                    self.hide()
+                    return
 
         self.show()
 

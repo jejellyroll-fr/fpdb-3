@@ -662,6 +662,7 @@ class Stat_sets:
 
     def __init__(self, node) -> None:
         self.name = node.getAttribute("name")
+        self.show_hero_hud = node.getAttribute("show_hero_hud")
         self.rows = int(node.getAttribute("rows"))
         self.cols = int(node.getAttribute("cols"))
         self.xpad = node.getAttribute("xpad")
