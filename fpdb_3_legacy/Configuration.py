@@ -1914,6 +1914,11 @@ class Config:
         ``[screen_name]``.
         """
         site = self.supported_sites.get(site_name)
+        if site is None and site_name:
+            for k, v in self.supported_sites.items():
+                if k.lower() == site_name.lower():
+                    site = v
+                    break
         if site is None:
             return []
         return list(getattr(site, "hero_aliases", []) or ([site.screen_name] if site.screen_name else []))
@@ -1954,7 +1959,8 @@ class Config:
         """True if ``name`` is one of the hero aliases configured for a site."""
         if not name:
             return False
-        return name in set(self.get_hero_aliases(site_name))
+        aliases = [a.lower() for a in self.get_hero_aliases(site_name)]
+        return name.lower() in aliases
 
     def get_hero_profiles(self):
         """Return ``{name: HeroProfile}`` for all configured multiroom profiles."""
