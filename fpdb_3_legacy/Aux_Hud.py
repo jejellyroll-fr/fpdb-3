@@ -380,10 +380,11 @@ class SimpleHUD(Aux_Base.AuxSeats):
         self.resize_windows()
 
     def configure_event_cb(self, widget: Aux_Base.SeatWindow, i: int | str | tuple[int, int]) -> None:
-        if not isinstance(i, tuple):
+        block_index = getattr(widget, "block_index", None)
+        if block_index is None:
             super().configure_event_cb(widget, i)
             return
-        seat, block_index = i
+        seat = widget.seat
         table_x = self.hud.table.x if self.hud.table.x is not None else 0
         table_y = self.hud.table.y if self.hud.table.y is not None else 0
         new_abs_position = widget.pos()
@@ -392,7 +393,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
         offset = (relative[0] - base_pos[0], relative[1] - base_pos[1])
         self.block_layouts[block_index]["x"] = offset[0]
         self.block_layouts[block_index]["y"] = offset[1]
-        self.block_positions[i] = relative
+        self.block_positions[(seat, block_index)] = relative
         with suppress(Exception):
             block = self.game_params.blocks[block_index]
             block.x = offset[0]
@@ -646,7 +647,18 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         pdata = self.aw.hud.stat_dict.get(player_id) if self.aw.hud.stat_dict else None
         if pdata is not None:
             screen_name = pdata.get("screen_name", "")
-            is_hero = self.aw.config.is_hero_name(self.aw.hud.site, screen_name)
+            is_hero = False
+            if self.aw.hud.site:
+                is_hero = self.aw.config.is_hero_name(self.aw.hud.site, screen_name)
+            if not is_hero:
+                for site_cfg in self.aw.config.supported_sites.values():
+                    if site_cfg.screen_name and screen_name.lower() == site_cfg.screen_name.lower():
+                        is_hero = True
+                        break
+                    for alias in getattr(site_cfg, "hero_aliases", []):
+                        if alias and screen_name.lower() == alias.lower():
+                            is_hero = True
+                            break
             if not is_hero and self.aw.hud.hand_instance is not None:
                 hand_hero = getattr(self.aw.hud.hand_instance, "hero", None)
                 if hand_hero and screen_name.lower() == hand_hero.lower():
