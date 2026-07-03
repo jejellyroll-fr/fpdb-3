@@ -182,6 +182,27 @@ class TestWinamaxIsolated(unittest.TestCase):
         result = self.parser.getTableTitleRe("cash", "stud", "fl")
         assert isinstance(result, str)
 
+        # Test Darwin patterns matching actual titles
+        import platform
+        sys_platform = platform.system()
+        if sys_platform == "Darwin":
+            # Test Cash Game
+            cash_re = self.parser.getTableTitleRe(table_name="Aalen 14")
+            assert re.search(cash_re, "Winamax Aalen 14") is not None
+            assert re.search(cash_re, "Winamax Casablanca 02") is None
+            
+            # Test Expresso / Tournament
+            expresso_re = self.parser.getTableTitleRe(tournament="1142290368", table_number="1")
+            assert re.search(expresso_re, "Winamax Expresso Nitro(1142290368)(#0)") is not None
+            assert re.search(expresso_re, "Winamax Expresso Nitro(1142290368)(#1)") is not None
+            assert re.search(expresso_re, "Winamax Expresso Nitro(999999999)(#0)") is None
+
+            # Test Tournament with specific table number
+            tour_re = self.parser.getTableTitleRe(tournament="123456789", table_number="5")
+            assert re.search(tour_re, "Winamax TournamentName(123456789)(#5)") is not None
+            assert re.search(tour_re, "Winamax TournamentName(123456789)(#0)") is not None
+            assert re.search(tour_re, "Winamax TournamentName(123456789)(#6)") is None
+
     def test_detect_lottery_tournaments(self) -> None:
         """Test _detect_lottery_tournaments method."""
         mock_hand = Mock()
