@@ -73,6 +73,23 @@ def test_block_parses_position_binding():
     assert ss.blocks[1].position == ""  # unbound
 
 
+def test_block_layout_keeps_empty_position_unbound():
+    ss = _ss('<ss name="t" rows="1" cols="1">'
+             '<block label="SB 3h"><stat _rowcol="(1,1)" _stat_name="vpip"/></block>'
+             '<block label="BB 3h"><stat _rowcol="(1,1)" _stat_name="pfr"/></block>'
+             '<block label="BU 3h"><stat _rowcol="(1,1)" _stat_name="n"/></block>'
+             '<block label="Villain Info 3H"><stat _rowcol="(1,1)" _stat_name="playershort"/></block>'
+             '</ss>')
+    aw = Aux_Hud.SimpleHUD.__new__(Aux_Hud.SimpleHUD)
+    aw.game_params = ss
+    aw.nrows = ss.rows
+    aw.ncols = ss.cols
+    aw.block_layouts = []
+    aw._build_block_layouts()
+
+    assert [b["position"] for b in aw.block_layouts] == ["", "", "", ""]
+
+
 def test_block_parses_text_label_items():
     ss = _ss('<ss name="t" rows="0" cols="0">'
              '<block label="BB 3h" position="BB">'
@@ -140,6 +157,7 @@ def _fake_aw(block_layouts, position=""):
     )
     aw._show_hero_hud = types.MethodType(Aux_Hud.SimpleHUD._show_hero_hud, aw)
     aw._is_hero_player = types.MethodType(Aux_Hud.SimpleHUD._is_hero_player, aw)
+    aw._hide_seat_for_villain_only = types.MethodType(Aux_Hud.SimpleHUD._hide_seat_for_villain_only, aw)
     return aw
 
 
@@ -281,6 +299,21 @@ def test_position_conditional_blocks_show_only_matching():
     assert visible == [True, False, True]  # SB shown, BB hidden, Info always shown
 
 
+def test_empty_position_pt4_blocks_all_show_for_each_villain():
+    blocks = [
+        _block("SB 3h", [["vpip"]]),
+        _block("BB 3h", [["pfr"]]),
+        _block("BU 3h", [["n"]]),
+        _block("Villain Info 3H", [["profit100"]]),
+    ]
+    win = Aux_Hud.SimpleStatWindow(aw=_fake_aw(blocks, position="S"), seat=1)
+    win.create_contents(1)
+    win.update_contents(1)
+
+    visible = [not container.isHidden() for container, _pos in win.block_widgets]
+    assert visible == [True, True, True, True]
+
+
 def test_multiblock_hides_hero_by_default():
     blocks = [_block("SB 3h", [["vpip"]]), _block("BB 3h", [["pfr"]])]
     aw = _fake_aw(blocks)
@@ -315,7 +348,7 @@ def test_show_hero_hud_true_overrides_multiblock_default():
     assert not win.isHidden()
 
 
-def test_villain_only_multiblock_uses_physical_seat_mapping():
+def test_villain_only_multiblock_keeps_favorite_seat_mapping():
     class DummyWindow:
         def __init__(self, _aw=None, seat=None):
             self.seat = seat
@@ -349,6 +382,8 @@ def test_villain_only_multiblock_uses_physical_seat_mapping():
     aw.adj_seats = lambda: [0, 3, 1, 2]
     aw.hud = types.SimpleNamespace(
         max=3,
+        stat_dict={},
+        site_parameters={"fav_seat": {3: 3}},
         layout=types.SimpleNamespace(
             common=(0, 0),
             location=[None, (100, 100), (200, 200), (300, 300)],
@@ -360,8 +395,27 @@ def test_villain_only_multiblock_uses_physical_seat_mapping():
 
     aw.create()
 
-    assert aw.adj == [0, 1, 2, 3]
-    assert aw.positions == {1: (100, 100), 2: (200, 200), 3: (300, 300)}
+    assert aw.adj == [0, 3, 1, 2]
+    assert aw.positions == {1: (300, 300), 2: (100, 100), 3: (200, 200)}
+
+
+def test_multiblock_update_does_not_resize_every_hand():
+    aw = Aux_Hud.SimpleHUD.__new__(Aux_Hud.SimpleHUD)
+    aw.block_layouts = [{"label": "Info", "position": ""}, {"label": "SB", "position": "SB"}]
+    calls = []
+    aw._uses_block_windows = lambda: True
+    aw.resize_windows = lambda: calls.append("resize")
+    aw.update_contents = lambda *_args: None
+    aw._log_block_window_position = lambda *_args, **_kwargs: None
+    aw.positions = {1: (100, 100)}
+    aw.block_positions = {(1, 0): (100, 100)}
+    aw.m_windows = {
+        (1, 0): types.SimpleNamespace(pos=lambda: types.SimpleNamespace(x=lambda: 100, y=lambda: 100), isVisible=lambda: True),
+    }
+
+    aw.update_gui("hand-2")
+
+    assert calls == []
 
 
 # ---------------------------------------------------------------------------

@@ -342,6 +342,63 @@ class SimpleHUD(Aux_Base.AuxSeats):
         blk = self.block_layouts[block_index]
         return int(blk.get("x", 0) or 0), int(blk.get("y", 0) or 0)
 
+    def _hero_display_seat(self) -> int | None:
+        fav_seat = self.hud.site_parameters["fav_seat"].get(self.hud.max, 0)
+        for key in self.hud.stat_dict:
+            if self._is_hero_player(self.hud.stat_dict[key]):
+                for seat in range(1, self.hud.max + 1):
+                    if self.get_id_from_seat(seat) == key:
+                        return seat
+        if fav_seat and hasattr(self, "adj"):
+            for seat in range(1, self.hud.max + 1):
+                if self.adj[seat] == fav_seat:
+                    return seat
+        return None
+
+    def _hide_seat_for_villain_only(self, seat: int, pdata: dict[str, Any] | None) -> bool:
+        if self._show_hero_hud():
+            return False
+        if self._is_hero_player(pdata):
+            return True
+        return getattr(self, "hero_display_seat", None) == seat
+
+    def _seat_player_debug(self, seat: int) -> tuple[Any, str, Any]:
+        try:
+            player_id = self.get_id_from_seat(seat)
+        except Exception:
+            return None, "", ""
+        pdata = self.hud.stat_dict.get(player_id, {}) if player_id is not None and self.hud.stat_dict else {}
+        return player_id, str(pdata.get("screen_name", "") or ""), pdata.get("position", "")
+
+    def _log_block_window_position(
+        self,
+        reason: str,
+        seat: int,
+        block_index: int,
+        rel_pos: tuple[int, int],
+        abs_pos: tuple[int, int],
+        visible: bool | None = None,
+    ) -> None:
+        player_id, screen_name, player_pos = self._seat_player_debug(seat)
+        block = self.block_layouts[block_index]
+        log.warning(
+            "HUD BOX %s table=%s display_seat=%s layout_seat=%s player_id=%s player=%r hand_pos=%r "
+            "block=%s label=%r block_pos=%r rel=%s abs=%s visible=%s",
+            reason,
+            getattr(self.hud.table, "key", ""),
+            seat,
+            self.adj[seat] if hasattr(self, "adj") and seat < len(self.adj) else seat,
+            player_id,
+            screen_name,
+            player_pos,
+            block_index,
+            block.get("label", ""),
+            block.get("position", ""),
+            rel_pos,
+            abs_pos,
+            visible,
+        )
+
     def create(self) -> None:
         """Create classic one-window seats or PT4-style one-window-per-block seats."""
         if not self._uses_block_windows():
@@ -349,10 +406,8 @@ class SimpleHUD(Aux_Base.AuxSeats):
             return
 
         log.debug("=== SIMPLEHUD MULTI-BLOCK CREATE() METHOD CALLED ===")
-        # Villain-only PT4 layouts should stay anchored to physical seats. If we
-        # apply preferred-seat rotation, the remaining villain windows appear to
-        # jump whenever the hero seat changes between hands.
-        self.adj = list(range(self.hud.max + 1)) if not self._show_hero_hud() else self.adj_seats()
+        self.adj = self.adj_seats()
+        self.hero_display_seat = self._hero_display_seat()
         self.m_windows = {}
         self.block_positions = {}
 
@@ -380,6 +435,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
                 pos_y = max(0, block_pos[1] + table_y)
                 clamped_x, clamped_y = Aux_Base.clamp_to_screen(pos_x, pos_y)
                 window.move(clamped_x, clamped_y)
+                self._log_block_window_position("create", seat, block_index, block_pos, (clamped_x, clamped_y))
                 if "opacity" in self.params:
                     window.setWindowOpacity(float(self.params["opacity"]))
                 self.create_contents(window, seat)
@@ -411,6 +467,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
             self.block_positions[key] = block_pos
             clamped_x, clamped_y = Aux_Base.clamp_to_screen(block_pos[0] + table_x, block_pos[1] + table_y)
             window.move(clamped_x, clamped_y)
+            self._log_block_window_position("move", seat, block_index, block_pos, (clamped_x, clamped_y))
 
     def resize_windows(self) -> None:
         if not self._uses_block_windows():
@@ -427,7 +484,11 @@ class SimpleHUD(Aux_Base.AuxSeats):
             return
         for key, window in list(self.m_windows.items()):
             self.update_contents(window, key if key == "common" else key[0])
-        self.resize_windows()
+            if key != "common":
+                seat, block_index = key
+                rel_pos = self.block_positions.get(key, self.positions.get(seat, (0, 0)))
+                abs_pos = (window.pos().x(), window.pos().y())
+                self._log_block_window_position("update", seat, block_index, rel_pos, abs_pos, window.isVisible())
 
     def configure_event_cb(self, widget: Aux_Base.SeatWindow, i: int | str | tuple[int, int]) -> None:
         block_index = getattr(widget, "block_index", None)
@@ -448,6 +509,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
             block = self.game_params.blocks[block_index]
             block.x = offset[0]
             block.y = offset[1]
+        self._log_block_window_position("drag-save", seat, block_index, relative, (new_abs_position.x(), new_abs_position.y()))
 
     def save_layout(self, *_args: Any) -> None:
         """Save the current HUD layout configuration.
@@ -695,10 +757,9 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             self.hide()
             return
         pdata = self.aw.hud.stat_dict.get(player_id) if self.aw.hud.stat_dict else None
-        if pdata is not None:
-            if self.aw._is_hero_player(pdata) and not self.aw._show_hero_hud():
-                self.hide()
-                return
+        if self.aw._hide_seat_for_villain_only(i, pdata):
+            self.hide()
+            return
 
         self.show()
 
