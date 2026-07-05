@@ -893,12 +893,13 @@ def import_to_config(
     panels = _panel_groups(place_cells)
     n_blocks = 0
     if multiblock and len([p for p in panels if p[0]]) > 1:
+        ss.setAttribute("show_hero_hud", "false")
         total_rows = 0
         for label, pcells in panels:
             placed, brows = _flow_items(pcells, cols)
             blk = doc.createElement("block")
             blk.setAttribute("label", label)
-            blk.setAttribute("position", "")
+            blk.setAttribute("position", panel_position(label))
             for attr, value in panel_style(label).items():
                 blk.setAttribute(attr, value)
             blk.setAttribute("rows", str(brows))

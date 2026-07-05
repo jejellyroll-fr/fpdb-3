@@ -108,6 +108,9 @@ class ClassicStatWindow(Aux_Hud.SimpleStatWindow):
         if seat == "common":
             return
 
+        if self.isHidden():
+            return
+
         # seat inactive → hide window
         if self.aw.get_id_from_seat(seat) is None:
             self.hide()

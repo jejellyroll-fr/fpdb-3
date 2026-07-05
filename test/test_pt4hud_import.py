@@ -52,6 +52,7 @@ def test_import_to_config_roundtrip(tmp_path):
     assert summary["blocks"] >= 3
     imported = cfg2.stat_sets[summary["name"]]
     assert imported.is_multiblock
+    assert imported.show_hero_hud == "false"
     assert len(imported.blocks) == summary["blocks"]
     # position-conditional bindings carried through from PT4 panel labels
     positions = {b.label.split()[0]: b.position for b in imported.blocks if b.label}

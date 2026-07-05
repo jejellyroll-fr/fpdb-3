@@ -88,6 +88,16 @@ def block_visible(block_position: str, player_position: Any) -> bool:
     return normalize_position(block_position) == normalize_position(player_position)
 
 
+def false_attr(value: Any) -> bool:
+    """Return True for XML/config values that explicitly mean false."""
+    return str(value).strip().lower() in ("false", "no", "0", "off")
+
+
+def true_attr(value: Any) -> bool:
+    """Return True for XML/config values that explicitly mean true."""
+    return str(value).strip().lower() in ("true", "yes", "1", "on")
+
+
 class SimpleHUD(Aux_Base.AuxSeats):
     """A simple HUD class based on the Aux_Window interface."""
 
@@ -152,6 +162,43 @@ class SimpleHUD(Aux_Base.AuxSeats):
             )
 
         self._build_block_layouts()
+
+    def _show_hero_hud(self) -> bool:
+        """Whether this stat-set should display hero stat windows."""
+        config_stat_set = getattr(self.config, "stat_sets", {}).get(self.game_params.name)
+        for stat_set in (self.game_params, config_stat_set):
+            show_hero = getattr(stat_set, "show_hero_hud", "") if stat_set is not None else ""
+            if false_attr(show_hero):
+                return False
+            if true_attr(show_hero):
+                return True
+        if getattr(self.game_params, "is_multiblock", False):
+            return False
+        return True
+
+    def _is_hero_player(self, pdata: dict[str, Any] | None) -> bool:
+        """Best-effort hero detection across config aliases and loaded hands."""
+        if not pdata:
+            return False
+
+        screen_name = str(pdata.get("screen_name", "") or "")
+        if not screen_name:
+            return False
+        screen_name_l = screen_name.lower()
+
+        is_hero_name = getattr(self.config, "is_hero_name", None)
+        site_name = getattr(self.hud, "site", "")
+        if site_name and is_hero_name is not None and is_hero_name(site_name, screen_name):
+            return True
+
+        for site_cfg in getattr(self.config, "supported_sites", {}).values():
+            if site_cfg.screen_name and screen_name_l == site_cfg.screen_name.lower():
+                return True
+            if any(alias and screen_name_l == alias.lower() for alias in getattr(site_cfg, "hero_aliases", [])):
+                return True
+
+        hand_hero = getattr(self.hud.hand_instance, "hero", None)
+        return bool(hand_hero and screen_name_l == str(hand_hero).lower()) or screen_name_l == "hero"
 
     def _build_block_layouts(self) -> None:
         """Build per-block 2D stat/popup/tip arrays for multi-panel rendering.
@@ -302,7 +349,10 @@ class SimpleHUD(Aux_Base.AuxSeats):
             return
 
         log.debug("=== SIMPLEHUD MULTI-BLOCK CREATE() METHOD CALLED ===")
-        self.adj = self.adj_seats()
+        # Villain-only PT4 layouts should stay anchored to physical seats. If we
+        # apply preferred-seat rotation, the remaining villain windows appear to
+        # jump whenever the hero seat changes between hands.
+        self.adj = list(range(self.hud.max + 1)) if not self._show_hero_hud() else self.adj_seats()
         self.m_windows = {}
         self.block_positions = {}
 
@@ -646,39 +696,9 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             return
         pdata = self.aw.hud.stat_dict.get(player_id) if self.aw.hud.stat_dict else None
         if pdata is not None:
-            screen_name = pdata.get("screen_name", "")
-            is_hero = False
-            if self.aw.hud.site:
-                is_hero = self.aw.config.is_hero_name(self.aw.hud.site, screen_name)
-            if not is_hero:
-                for site_cfg in self.aw.config.supported_sites.values():
-                    if site_cfg.screen_name and screen_name.lower() == site_cfg.screen_name.lower():
-                        is_hero = True
-                        break
-                    for alias in getattr(site_cfg, "hero_aliases", []):
-                        if alias and screen_name.lower() == alias.lower():
-                            is_hero = True
-                            break
-            if not is_hero and self.aw.hud.hand_instance is not None:
-                hand_hero = getattr(self.aw.hud.hand_instance, "hero", None)
-                if hand_hero and screen_name.lower() == hand_hero.lower():
-                    is_hero = True
-            if not is_hero and screen_name.lower() == "hero":
-                is_hero = True
-
-            if is_hero:
-                show_hero = True
-                stat_set_name = self.aw.game_params.name
-                stat_set = self.aw.config.stat_sets.get(stat_set_name)
-                if stat_set is not None:
-                    show_hero_attr = getattr(stat_set, "show_hero_hud", "")
-                    if show_hero_attr.lower() in ("false", "no", "0"):
-                        show_hero = False
-                if stat_set_name and "GenerationPoker 3H" in stat_set_name:
-                    show_hero = False
-                if not show_hero:
-                    self.hide()
-                    return
+            if self.aw._is_hero_player(pdata) and not self.aw._show_hero_hud():
+                self.hide()
+                return
 
         self.show()
 

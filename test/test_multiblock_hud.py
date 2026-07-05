@@ -26,7 +26,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QApplication, QGridLayout, QLabel
 
-from fpdb_3_legacy import Aux_Hud, Configuration as Conf
+from fpdb_3_legacy import Aux_Classic_Hud, Aux_Hud, Configuration as Conf
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -123,13 +123,24 @@ def _fake_aw(block_layouts, position=""):
         stat_dict={1: {"screen_name": "p", "seat": 1, "n": 0, "position": position}},
         hand_instance=None,
         layout=types.SimpleNamespace(hh_seats={1: 1}),
+        site="TestSite",
     )
-    return types.SimpleNamespace(
+    game_params = types.SimpleNamespace(name="test", show_hero_hud="", is_multiblock=len(block_layouts) > 1)
+    config = types.SimpleNamespace(
+        stat_sets={},
+        supported_sites={},
+        is_hero_name=lambda _site, name: str(name).lower() == "hero",
+    )
+    aw = types.SimpleNamespace(
         bgcolor="#000000", fgcolor="#ffffff", font=QFont(), aux_params={},
         aw_class_stat=Aux_Hud.SimpleStat, aw_class_label=Aux_Hud.SimpleLabel,
         block_layouts=block_layouts, hud=hud, nrows=1, ncols=1,
+        game_params=game_params, config=config,
         get_id_from_seat=lambda _s: 1,
     )
+    aw._show_hero_hud = types.MethodType(Aux_Hud.SimpleHUD._show_hero_hud, aw)
+    aw._is_hero_player = types.MethodType(Aux_Hud.SimpleHUD._is_hero_player, aw)
+    return aw
 
 
 def _block(label, stats2d, position="", texts=None, colorranges=None):
@@ -268,6 +279,89 @@ def test_position_conditional_blocks_show_only_matching():
     win.update_contents(1)
     visible = [not container.isHidden() for container, _pos in win.block_widgets]
     assert visible == [True, False, True]  # SB shown, BB hidden, Info always shown
+
+
+def test_multiblock_hides_hero_by_default():
+    blocks = [_block("SB 3h", [["vpip"]]), _block("BB 3h", [["pfr"]])]
+    aw = _fake_aw(blocks)
+    aw.hud.stat_dict[1]["screen_name"] = "Hero"
+    win = Aux_Hud.SimpleStatWindow(aw=aw, seat=1)
+    win.create_contents(1)
+    win.update_contents(1)
+    assert win.isHidden()
+
+
+def test_classic_stat_window_does_not_reshow_hidden_hero():
+    blocks = [_block("SB 3h", [["vpip"]]), _block("BB 3h", [["pfr"]])]
+    aw = _fake_aw(blocks)
+    aw.positions = {1: (100, 100)}
+    aw.params = {"opacity": "0.8"}
+    aw.hud.table = types.SimpleNamespace(x=0, y=0)
+    aw.hud.stat_dict[1]["screen_name"] = "Hero"
+    win = Aux_Classic_Hud.ClassicStatWindow(aw=aw, seat=1)
+    win.create_contents(1)
+    win.update_contents(1)
+    assert win.isHidden()
+
+
+def test_show_hero_hud_true_overrides_multiblock_default():
+    blocks = [_block("SB 3h", [["vpip"]]), _block("BB 3h", [["pfr"]])]
+    aw = _fake_aw(blocks)
+    aw.game_params.show_hero_hud = "true"
+    aw.hud.stat_dict[1]["screen_name"] = "Hero"
+    win = Aux_Hud.SimpleStatWindow(aw=aw, seat=1)
+    win.create_contents(1)
+    win.update_contents(1)
+    assert not win.isHidden()
+
+
+def test_villain_only_multiblock_uses_physical_seat_mapping():
+    class DummyWindow:
+        def __init__(self, _aw=None, seat=None):
+            self.seat = seat
+
+        def move(self, *_args):
+            pass
+
+        def setWindowOpacity(self, *_args):
+            pass
+
+        def create(self):
+            pass
+
+        def show(self):
+            pass
+
+    aw = Aux_Hud.SimpleHUD.__new__(Aux_Hud.SimpleHUD)
+    aw.game_params = types.SimpleNamespace(name="pt4", show_hero_hud="", is_multiblock=True)
+    aw.config = types.SimpleNamespace(stat_sets={})
+    aw.block_layouts = [
+        {"x": 0, "y": 0},
+        {"x": 10, "y": 10},
+    ]
+    aw.positions = {}
+    aw.params = {}
+    aw.uses_timer = False
+    aw.aw_class_window = DummyWindow
+    aw.create_common = lambda *_args: DummyWindow(aw, "common")
+    aw.create_contents = lambda *_args: None
+    aw.update_contents = lambda *_args: None
+    aw.adj_seats = lambda: [0, 3, 1, 2]
+    aw.hud = types.SimpleNamespace(
+        max=3,
+        layout=types.SimpleNamespace(
+            common=(0, 0),
+            location=[None, (100, 100), (200, 200), (300, 300)],
+            width=800,
+            height=600,
+        ),
+        table=types.SimpleNamespace(x=0, y=0, width=800, height=600, topify=lambda _w: None),
+    )
+
+    aw.create()
+
+    assert aw.adj == [0, 1, 2, 3]
+    assert aw.positions == {1: (100, 100), 2: (200, 200), 3: (300, 300)}
 
 
 # ---------------------------------------------------------------------------
