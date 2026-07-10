@@ -71,6 +71,13 @@ class Hud:
         self.max = max_players
         self.type = game_type
         self.cards: dict[str, Any] | None = None
+        # Table-scope stats (e.g. live_min_stack_bb), refreshed once per hand by
+        # HUD_main._set_table_stats; read by table-scope stat widgets.
+        self.table_stats: dict[str, Any] = {}
+        # Bumped on every real table geometry change (resize/move). Block windows
+        # remember the generation they were last placed at and only re-move when
+        # it changes, so per-hand refreshes never reposition (see Aux_Hud).
+        self.geometry_generation: int = 0
         self.site = table.site
         self.hud_params = dict.copy(
             parent.hud_params,
@@ -170,25 +177,31 @@ class Hud:
         # resize self.layout object; this will then be picked-up
         # by all attached aux's when called by hud_main.idle_update
 
-        x_scale = 1.0 * self.table.width / self.layout.width
-        y_scale = 1.0 * self.table.height / self.layout.height
+        if not hasattr(self, "ref_layout_width") or not self.ref_layout_width:
+            self.ref_layout_width = self.layout.width or 792
+            self.ref_layout_height = self.layout.height or 546
+            self.ref_layout_locations = copy.deepcopy(self.layout.location)
+            self.ref_layout_common = self.layout.common
+
+        x_scale = 1.0 * self.table.width / self.ref_layout_width
+        y_scale = 1.0 * self.table.height / self.ref_layout_height
 
         log.info(
-            "HUD RESIZE - Table: %dx%d, Layout: %dx%d, Scale: %.2fx%.2f",
+            "HUD RESIZE - Table: %dx%d, Reference: %dx%d, Scale: %.2fx%.2f",
             self.table.width,
             self.table.height,
-            self.layout.width,
-            self.layout.height,
+            self.ref_layout_width,
+            self.ref_layout_height,
             x_scale,
             y_scale,
         )
 
         for i in list(range(1, self.max + 1)):
-            if self.layout.location[i]:
+            if self.ref_layout_locations[i]:
                 old_pos = self.layout.location[i]
                 self.layout.location[i] = (
-                    (int(self.layout.location[i][0] * x_scale)),
-                    (int(self.layout.location[i][1] * y_scale)),
+                    int(self.ref_layout_locations[i][0] * x_scale),
+                    int(self.ref_layout_locations[i][1] * y_scale),
                 )
                 log.debug(
                     "Seat %d layout scaled: (%d,%d) -> (%d,%d)",
@@ -199,18 +212,19 @@ class Hud:
                     self.layout.location[i][1],
                 )
 
-        old_common = self.layout.common
-        self.layout.common = (
-            int(self.layout.common[0] * x_scale),
-            int(self.layout.common[1] * y_scale),
-        )
-        log.info(
-            "Common layout scaled: (%d,%d) -> (%d,%d)",
-            old_common[0],
-            old_common[1],
-            self.layout.common[0],
-            self.layout.common[1],
-        )
+        if self.ref_layout_common:
+            old_common = self.layout.common
+            self.layout.common = (
+                int(self.ref_layout_common[0] * x_scale),
+                int(self.ref_layout_common[1] * y_scale),
+            )
+            log.info(
+                "Common layout scaled: (%d,%d) -> (%d,%d)",
+                old_common[0],
+                old_common[1],
+                self.layout.common[0],
+                self.layout.common[1],
+            )
 
         self.layout.width = self.table.width
         self.layout.height = self.table.height

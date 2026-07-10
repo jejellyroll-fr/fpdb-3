@@ -179,6 +179,49 @@ def _descriptor_stat(stat_dict, player, statname):
         return None
 
 
+# --- Table-scope stats ----------------------------------------------------
+#
+# Table stats describe the table, not a player, so they cannot go through
+# do_stat() (which indexes stat_dict by an integer player id). Their value is
+# computed once per hand upstream (HUD_main via Database) and handed here as a
+# small dict; these helpers only format it into the standard 6-tuple.
+
+
+def live_min_stack_bb(table_stats):
+    """PT4 "Live Min Stack BB": smallest end-of-hand stack in big blinds."""
+    val = (table_stats or {}).get("live_min_stack_bb")
+    if val is None:
+        return None
+    return (
+        val,
+        f"{val:.1f}",
+        f"minM={val:.1f}",
+        f"live_min_stack_bb={val:.1f}",
+        f"{val:.1f}",
+        "Live Min Stack (BB)",
+    )
+
+
+_TABLE_STAT_FUNCTIONS = {
+    "live_min_stack_bb": live_min_stack_bb,
+}
+
+
+def do_table_stat(table_stats, stat):
+    """Format a precomputed table-scope stat into the standard 6-tuple.
+
+    ``table_stats`` is the per-hand table data cached on the hud; ``stat`` is the
+    stat name. Returns None for unknown stats or missing data, so the HUD shows
+    its placeholder rather than crashing.
+    """
+    if not isinstance(stat, str) or not stat:
+        return None
+    fn = _TABLE_STAT_FUNCTIONS.get(stat)
+    if fn is None:
+        return None
+    return fn(table_stats or {})
+
+
 def do_stat(stat_dict, player=24, stat="vpip", hand_instance=None):
     """Calculates a specific statistic for a given player in a hand.
 

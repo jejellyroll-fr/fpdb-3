@@ -244,12 +244,25 @@ class HudStatsPersistence:
             Merged statistics
         """
         try:
-            # Start with new stats as base
+            # Normalize both sides to native int player-id keys. Fresh DB stats
+            # are int-keyed; cached stats have round-tripped through JSON, which
+            # forces object keys to strings. do_stat() and every stat function
+            # index stat_dict[int], so the merged result must be int-keyed too.
+            def _int_keys(d: dict) -> dict:
+                out = {}
+                for k, v in d.items():
+                    try:
+                        out[int(k)] = v
+                    except (ValueError, TypeError):
+                        out[k] = v
+                return out
+
+            new_stat_dict = _int_keys(new_stats.get("stat_dict", {}))
             merged = new_stats.copy()
+            merged["stat_dict"] = new_stat_dict.copy()
 
             # Merge stat_dict while preserving historical data
-            cached_stat_dict = cached_stats.get("stat_dict", {})
-            new_stat_dict = new_stats.get("stat_dict", {})
+            cached_stat_dict = _int_keys(cached_stats.get("stat_dict", {}))
 
             # For each player in cached stats
             for player_id, cached_player_stats in cached_stat_dict.items():
@@ -265,8 +278,6 @@ class HudStatsPersistence:
                     merged["stat_dict"][player_id] = merged_player_stats
                 else:
                     # Player only in cache: preserve
-                    if "stat_dict" not in merged:
-                        merged["stat_dict"] = {}
                     merged["stat_dict"][player_id] = cached_player_stats
 
             log.debug("Successfully merged cached and new HUD stats")

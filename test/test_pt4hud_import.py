@@ -592,8 +592,10 @@ def test_group_panel_list_select_rename_delete(tmp_path):
     d.profile_combo.setCurrentText(summary["name"])
     d.on_profile_selected(d.profile_combo.currentIndex())
 
-    assert d.group_list.count() == 4
-    assert [d.group_list.item(i).text() for i in range(4)] == ["SB 3h", "BB 3h", "BU 3h", "Villain Info 3H"]
+    assert d.group_list.count() == 5
+    assert [d.group_list.item(i).text() for i in range(5)] == [
+        "SB 3h", "BB 3h", "BU 3h", "Villain Info 3H", "Min Stack (Table)",
+    ]
 
     d.group_list.setCurrentRow(1)
     assert d.gp_name.text() == "BB 3h"
@@ -615,7 +617,7 @@ def test_group_panel_list_select_rename_delete(tmp_path):
     # delete a panel
     d._current_block_index = 3
     d._group_delete()
-    assert len(d.hud_profiles[summary["name"]]["blocks"]) == 3
+    assert len(d.hud_profiles[summary["name"]]["blocks"]) == 4
 
 
 @pytest.mark.skipif(not (os.path.exists(FIXTURE) and os.path.exists(EXAMPLE)), reason="fixtures missing")
@@ -758,7 +760,7 @@ def test_full_dialog_pt4_layout_smoke(tmp_path):
     dlg.on_profile_selected(idx)
 
     # PT4 zones present
-    assert dlg.group_list.count() == 4               # Panels
+    assert dlg.group_list.count() == 5               # Panels (SB/BB/BU/Villain/Min Stack)
     assert dlg.group_props_box is not None           # Group Properties
     assert dlg.item_props_tabs.count() == 2          # Item Properties + Color Ranges
     assert not dlg.stat_table.isVisibleTo(dlg)       # flat table hidden in PT4 layout
@@ -995,8 +997,12 @@ def test_delete_profile_and_popup_persist_through_save(tmp_path):
     c.reload()
 
     dlg = M.ModernHudPreferences(c, None)
+    # Patch every blocking modal, incl. warning/critical: an unpatched error
+    # dialog runs a modal exec() that hangs the headless suite instead of failing.
     with mk.patch.object(QMessageBox, "question", return_value=QMessageBox.Yes), \
-         mk.patch.object(QMessageBox, "information", lambda *a, **k: None):
+         mk.patch.object(QMessageBox, "information", lambda *a, **k: None), \
+         mk.patch.object(QMessageBox, "warning", lambda *a, **k: None), \
+         mk.patch.object(QMessageBox, "critical", lambda *a, **k: None):
         idx = dlg.profile_combo.findText(summary["name"])
         dlg.profile_combo.setCurrentIndex(idx)
         dlg.delete_profile()
@@ -1052,3 +1058,107 @@ def test_popup_item_properties_edit_persists(tmp_path):
     data = json.load(open(dlg._popup_group_source, encoding="utf-8"))
     grp = next(g for g in data["popup_groups"] if g["name"] == dlg._popup_group["name"])
     assert any(cell["text"] == "ZZZ" for cell in grp["cells"])   # edit persisted to JSON
+
+
+@pytest.mark.skipif(not (os.path.exists(FIXTURE) and os.path.exists(EXAMPLE)), reason="fixtures missing")
+def test_pt4_hierarchical_import_metadata(tmp_path):
+    from fpdb_3_legacy import Configuration as Conf
+    from fpdb_3_legacy import pt4hud
+
+    cfg = tmp_path / "HUD_config.xml"
+    shutil.copy(EXAMPLE, cfg)
+    c = Conf.Config(file=str(cfg))
+    summary = pt4hud.import_to_config(FIXTURE, c)
+    c.save()
+    c.reload()
+
+    ss = c.stat_sets[summary["name"]]
+    assert ss is not None
+    assert len(ss.blocks) > 0
+
+    min_stack_block = next((b for b in ss.blocks if b.label == "Min Stack (Table)"), None)
+    assert min_stack_block is not None
+    assert min_stack_block.scope == "table"
+    assert min_stack_block.audience == "everyone"
+    assert min_stack_block.id == "min_stack__table"
+
+    villain_block = next((b for b in ss.blocks if b.label == "Villain Info 3H"), None)
+    assert villain_block is not None
+    assert villain_block.scope == "player"
+    assert villain_block.audience == "opponents"
+    assert villain_block.id == "villain_info_3h"
+
+    bu_block = next((b for b in ss.blocks if b.label == "BU 3h"), None)
+    assert bu_block is not None
+    assert bu_block.scope == "player"
+    assert bu_block.audience == "everyone"
+    assert bu_block.id == "bu_3h"
+
+    assert len(villain_block.hlines) > 0
+
+
+@pytest.mark.skipif(not (os.path.exists(FIXTURE) and os.path.exists(EXAMPLE)), reason="fixtures missing")
+def test_pt4_min_stack_table_has_no_phantom_stat(tmp_path):
+    """Min Stack (Table) must import exactly its PT4 items: 5 in total, and a
+    single stat (live_min_stack_bb). The trailing colourless GP 2X definition
+    record must not become a phantom cell."""
+    from fpdb_3_legacy import Configuration as Conf
+    from fpdb_3_legacy import pt4hud
+
+    cfg = tmp_path / "HUD_config.xml"
+    shutil.copy(EXAMPLE, cfg)
+    c = Conf.Config(file=str(cfg))
+    summary = pt4hud.import_to_config(FIXTURE, c)
+    c.save()
+    c.reload()
+
+    block = next(b for b in c.stat_sets[summary["name"]].blocks if b.label == "Min Stack (Table)")
+    stat_names = [s.stat_name for s in block.stats.values()]
+    assert stat_names == ["live_min_stack_bb"]
+    total_items = len(block.stats) + len(block.texts) + len(block.hlines)
+    assert total_items == 5, f"expected 5 PT4 items, got {total_items}"
+    assert "gp_2x" not in stat_names
+
+
+@pytest.mark.skipif(not (os.path.exists(FIXTURE) and os.path.exists(EXAMPLE)), reason="fixtures missing")
+def test_pt4_villain_tips_align_by_column(tmp_path):
+    """Each villain stat's tooltip is the header directly above it in the grid,
+    not an index-rotated neighbour (vpip -> VP, not vpip -> AFq)."""
+    from fpdb_3_legacy import Configuration as Conf
+    from fpdb_3_legacy import pt4hud
+
+    cfg = tmp_path / "HUD_config.xml"
+    shutil.copy(EXAMPLE, cfg)
+    c = Conf.Config(file=str(cfg))
+    summary = pt4hud.import_to_config(FIXTURE, c)
+    c.save()
+    c.reload()
+
+    block = next(b for b in c.stat_sets[summary["name"]].blocks if b.label == "Villain Info 3H")
+    tip_by_stat = {s.stat_name: s.tip for s in block.stats.values()}
+    assert tip_by_stat["vpip"] == "VP"
+    assert tip_by_stat["pfr"] == "PFR"
+    assert tip_by_stat["agg_fact_pct"] == "AFq"
+    assert tip_by_stat["squeeze"] == "SQ"
+
+
+@pytest.mark.skipif(not (os.path.exists(FIXTURE) and os.path.exists(EXAMPLE)), reason="fixtures missing")
+def test_pt4_black_on_black_headers_made_legible(tmp_path):
+    """PT4 exports the villain VP/PFR/AFq/SQ headers as black-on-black; the
+    importer must give them a contrasting (white) foreground so they render."""
+    from fpdb_3_legacy import Configuration as Conf
+    from fpdb_3_legacy import pt4hud
+
+    cfg = tmp_path / "HUD_config.xml"
+    shutil.copy(EXAMPLE, cfg)
+    c = Conf.Config(file=str(cfg))
+    summary = pt4hud.import_to_config(FIXTURE, c)
+    c.save()
+    c.reload()
+
+    block = next(b for b in c.stat_sets[summary["name"]].blocks if b.label == "Villain Info 3H")
+    header_labels = {"VP", "PFR", "AFq", "SQ"}
+    headers = [t for t in block.texts if t.get("label") in header_labels]
+    assert headers, "villain column headers not found"
+    for t in headers:
+        assert t.get("fgcolor", "").lower() != t.get("bgcolor", "").lower()

@@ -1960,10 +1960,82 @@ class Database:
             c = self.connection.cursor()
             c.execute(q, (hand,))
             for row in c.fetchall():
+                # int keys, so `pid in stat_dict` in _merge_positions matches.
                 positions[row[0]] = row[1]
         except Exception:
             log.exception("get_hand_positions failed for hand %s", hand)
         return positions
+
+    def get_seat_players(self, hand_id: str) -> dict[int, dict[str, object]]:
+        """Return seatNo -> {player_id, screen_name} dict for a hand.
+
+        player_id is a native int to match the keys of the stat_dict built by
+        get_stats_from_hand; get_id_from_seat() feeds it straight into
+        stat_dict[player_id] lookups.
+        """
+        players = {}
+        try:
+            ph = self.sql.query.get("placeholder", "%s")
+            q = (
+                "SELECT hp.seatNo, hp.playerId, p.name "
+                "FROM HandsPlayers hp "
+                "INNER JOIN Players p ON hp.playerId = p.id "
+                "WHERE hp.handId = %s"
+            ).replace("%s", ph)
+            c = self.connection.cursor()
+            c.execute(q, (hand_id,))
+            for row in c.fetchall():
+                players[int(row[0])] = {"player_id": int(row[1]), "screen_name": row[2]}
+        except Exception:
+            log.exception("get_seat_players failed for hand %s", hand_id)
+        return players
+
+    def get_table_min_stack_bb(self, hand_id: str) -> float | None:
+        """Smallest end-of-hand stack at the table, in big blinds (PT4 live stat).
+
+        From the given (most recently imported) hand, take each seated player's
+        end-of-hand stack (startCash - committed + winnings), drop eliminated
+        players (stack <= 0), and divide the minimum by the big blind. Returns
+        None when it cannot be computed.
+
+        Note: the big blind comes from Gametypes, so for multi-level tournaments
+        this is the gametype's blind, not necessarily the current level's.
+        """
+        try:
+            ph = self.sql.query.get("placeholder", "%s")
+            c = self.get_cursor()
+            c.execute(
+                (
+                    "SELECT gt.bigBlind FROM Hands h "
+                    "INNER JOIN Gametypes gt ON h.gametypeId = gt.id "
+                    "WHERE h.id = %s"
+                ).replace("%s", ph),
+                (hand_id,),
+            )
+            row = c.fetchone()
+            if not row or not row[0]:
+                return None
+            big_blind = float(row[0])
+            if big_blind <= 0:
+                return None
+            c.execute(
+                (
+                    "SELECT startCash, committed, winnings FROM HandsPlayers "
+                    "WHERE handId = %s AND sitout = 0"
+                ).replace("%s", ph),
+                (hand_id,),
+            )
+            stacks = []
+            for start_cash, committed, winnings in c.fetchall():
+                end_cash = float(start_cash) - float(committed) + float(winnings)
+                if end_cash > 0:
+                    stacks.append(end_cash)
+            if not stacks:
+                return None
+            return min(stacks) / big_blind
+        except Exception:
+            log.exception("get_table_min_stack_bb failed for hand %s", hand_id)
+            return None
 
     def get_common_cards(self, hand):
         """Get and return the community cards for the specified hand."""
@@ -2189,8 +2261,18 @@ class Database:
         )
         colnames = [desc[0] for desc in c.description]
         for row in c.fetchall():
+            # Keep player ids as native DB integers: do_stat() coerces the player
+            # to int and every stat function indexes stat_dict[int]. Coercing keys
+            # to str here silently makes all stat lookups miss. String ids only
+            # appear at the JSON persistence boundary (see merge_stats).
             playerid = row[0]
-            if (playerid == hero_id and h_stat_range != "S") or (playerid != hero_id and stat_range != "S"):
+            is_hero = False
+            if hero_id is not None:
+                try:
+                    is_hero = int(playerid) == int(hero_id)
+                except (ValueError, TypeError):
+                    is_hero = str(playerid) == str(hero_id)
+            if (is_hero and h_stat_range != "S") or (not is_hero and stat_range != "S"):
                 t_dict = {}
                 for name, val in zip(colnames, row, strict=False):
                     t_dict[name.lower()] = val
@@ -2243,8 +2325,16 @@ class Database:
         if colnames[0].lower() == "player_id":
             # Loop through stats adding them to appropriate stat_dict:
             while row:
+                # Native int keys, matching do_stat()/stat functions. See the
+                # aggregated loop above for why str coercion breaks stat lookups.
                 playerid = row[0]
-                if (playerid == hero_id and h_stat_range == "S") or (playerid != hero_id and stat_range == "S"):
+                is_hero = False
+                if hero_id is not None:
+                    try:
+                        is_hero = int(playerid) == int(hero_id)
+                    except (ValueError, TypeError):
+                        is_hero = str(playerid) == str(hero_id)
+                if (is_hero and h_stat_range == "S") or (not is_hero and stat_range == "S"):
                     for name, val in zip(colnames, row, strict=False):
                         if playerid not in stat_dict:
                             stat_dict[playerid] = {}

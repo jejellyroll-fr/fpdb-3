@@ -70,7 +70,12 @@ class TestStatSetSwitching(unittest.TestCase):
         assert stat_sets_dict == expected
 
     def _verify_successful_refresh(self, new_game_params, stat_set_name, mock_log):
-        """Helper method to verify successful stat set refresh operations."""
+        """Helper method to verify successful stat set refresh operations.
+
+        The switch rebuilds the aux window (destroy -> refresh layout -> create ->
+        update_gui) rather than refreshing stats in place, so a block-structure
+        change is applied cleanly.
+        """
         # Verify sequence of operations
         self.popup_menu._update_stat_set_in_config.assert_called_once_with(stat_set_name)
         self.config.save.assert_called_once()
@@ -79,16 +84,15 @@ class TestStatSetSwitching(unittest.TestCase):
         # Verify refresh attempt
         self.config.get_supported_games_parameters.assert_called_once_with("holdem", "ring")
         assert self.aux_window.game_params == new_game_params
+
+        # Verify the rebuild sequence
+        self.aux_window.destroy.assert_called_once()
         self.aux_window.refresh_stats_layout.assert_called_once()
-
-        # Verify window recreation
-        for window in self.aux_window.stat_windows.values():
-            window.create_contents.assert_called()
-
-        self.aux_window.update.assert_called_once_with(self.hud.stat_dict)
+        self.aux_window.create.assert_called_once()
+        self.aux_window.update_gui.assert_called_once_with(None)
 
         # Should log success
-        mock_log.info.assert_called_with("HUD refreshed with new stat set: %s", stat_set_name)
+        mock_log.info.assert_called_with("HUD rebuilt with new stat set: %s", stat_set_name)
 
         # Should NOT restart HUD
         self.hud.parent.kill_hud.assert_not_called()
@@ -141,7 +145,7 @@ class TestStatSetSwitching(unittest.TestCase):
 
             # Should log failure and restart
             mock_log.info.assert_called_with(
-                "Refreshing HUD failed, restarting to apply stat set '%s': %s",
+                "Rebuilding HUD failed, restarting to apply stat set '%s': %s",
                 "NewStatSet",
                 unittest.mock.ANY,
             )
@@ -167,11 +171,19 @@ class TestStatSetSwitching(unittest.TestCase):
         game_params.cols = 2
         game_params.xpad = 5
         game_params.ypad = 7
+        # Stat_sets.stats is keyed by (row, col) -> Stat (see Configuration.py).
+        def _stat(rc, name, popup, tip):
+            return Mock(rowcol=rc, stat_name=name, popup=popup, tip=tip,
+                        colspan=1, align="", stat_loth="", stat_hith="")
+
         game_params.stats = {
-            "stat1": Mock(rowcol=(0, 0), stat_name="vpip", popup="popup1", tip="tip1"),
-            "stat2": Mock(rowcol=(1, 1), stat_name="pfr", popup="popup2", tip="tip2"),
-            "stat3": Mock(rowcol=(2, 0), stat_name="aggr", popup="popup3", tip="tip3"),
+            (0, 0): _stat((0, 0), "vpip", "popup1", "tip1"),
+            (1, 1): _stat((1, 1), "pfr", "popup2", "tip2"),
+            (2, 0): _stat((2, 0), "aggr", "popup3", "tip3"),
         }
+        # A real StatSet exposes a blocks list; None routes _build_block_layouts
+        # to its single-grid fallback (this stat set is not multi-block).
+        game_params.blocks = None
         simple_hud.game_params = game_params
 
         # Call refresh_stats_layout
@@ -352,7 +364,7 @@ class TestStatSetSwitchingIntegration(unittest.TestCase):
         popup_menu.delete_event.assert_called_once()
         config.get_supported_games_parameters.assert_called_once()
         aux_window.refresh_stats_layout.assert_called_once()
-        aux_window.update.assert_called_once()
+        aux_window.update_gui.assert_called_once_with(None)
 
         # HUD should not restart on successful refresh
         hud.parent.kill_hud.assert_not_called()

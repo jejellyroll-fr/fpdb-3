@@ -33,6 +33,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from fpdb_3_legacy import Configuration
 from fpdb_3_legacy.Aux_Hud import SimpleLabel
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -2163,6 +2164,9 @@ class ModernHudPreferences(QDialog):
                     bstats.append(self._stat_to_dict(stat, pos[0], pos[1], blk.label))
                 block_meta.append({
                     "label": blk.label,
+                    "id": getattr(blk, "id", ""),
+                    "scope": getattr(blk, "scope", "player"),
+                    "audience": getattr(blk, "audience", "everyone"),
                     "position": getattr(blk, "position", ""),
                     "rows": blk.rows,
                     "cols": blk.cols,
@@ -3838,8 +3842,9 @@ class ModernHudPreferences(QDialog):
             for block in blocks:
                 stat_set_node.appendChild(self.config.doc.createTextNode("\n            "))
                 block_node = self.config.doc.createElement("block")
-                for attr in ("label", "position", "title_bgcolor", "title_fgcolor", "bordercolor"):
-                    block_node.setAttribute(attr, str(block.get(attr, "")))
+                for attr in ("label", "id", "scope", "audience", "position", "title_bgcolor", "title_fgcolor", "bordercolor"):
+                    if block.get(attr) is not None:
+                        block_node.setAttribute(attr, str(block.get(attr, "")))
                 block_node.setAttribute("rows", str(block.get("rows", 1)))
                 block_node.setAttribute("cols", str(block.get("cols", cols)))
                 block_node.setAttribute("x", str(block.get("x", 0)))
@@ -3924,41 +3929,9 @@ class ModernHudPreferences(QDialog):
 
                 # Also update the config.stat_sets for consistency
                 self.config.stat_sets = {}
-                for profile_name, profile_data in self.hud_profiles.items():
-                    # Create a new stat set
-                    stat_set = type("StatSet", (), {})()
-                    stat_set.name = profile_name
-
-                    # Handle both old and new format
-                    if isinstance(profile_data, list):
-                        stats = profile_data
-                        stat_set.rows = 5
-                        stat_set.cols = 5
-                    else:
-                        stats = profile_data.get("stats", [])
-                        stat_set.rows = profile_data.get("rows", 5)
-                        stat_set.cols = profile_data.get("cols", 5)
-
-                    # Convert stats to config format
-                    stat_set.stats = {}
-                    for stat in stats:
-                        pos = (stat["row"], stat["col"])
-                        stat_obj = type("Stat", (), {})()
-                        stat_obj.stat_name = stat["stat"]
-                        stat_obj.click = stat.get("click", "")
-                        stat_obj.popup = stat.get("popup", "")
-                        stat_obj.tip = stat.get("tip", "")
-                        stat_obj.hudprefix = stat.get("hudprefix", "")
-                        stat_obj.hudsuffix = stat.get("hudsuffix", "")
-                        stat_obj.hudcolor = stat.get("hudcolor", "")
-                        stat_obj.stat_loth = stat.get("stat_loth", "")
-                        stat_obj.stat_hith = stat.get("stat_hith", "")
-                        stat_obj.stat_locolor = stat.get("stat_locolor", "")
-                        stat_obj.stat_hicolor = stat.get("stat_hicolor", "")
-                        stat_obj.stat_midcolor = stat.get("stat_midcolor", "")
-                        stat_set.stats[pos] = stat_obj
-
-                    self.config.stat_sets[profile_name] = stat_set
+                for ss_node in stat_sets_node.getElementsByTagName("ss"):
+                    profile_name = ss_node.getAttribute("name")
+                    self.config.stat_sets[profile_name] = Configuration.Stat_sets(ss_node)
 
                 # Prune <ss> nodes (and the parsed cache) for deleted profiles so
                 # deletions actually persist instead of leaving orphan stat-sets.

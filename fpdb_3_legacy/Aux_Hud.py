@@ -43,10 +43,57 @@ from fpdb_3_legacy import Aux_Base
 from fpdb_3_legacy import Configuration
 from fpdb_3_legacy import Popup
 from fpdb_3_legacy import Stats
-from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("hud_main")
+
+import json
+import os
+import logging
+
+class HUDLayoutPositionsStore:
+    def __init__(self) -> None:
+        self.path = os.path.join(os.path.expanduser("~"), ".fpdb", "HUD_layout_positions.json")
+        self.data = {"version": 1, "positions": {}}
+        self.load()
+
+    def load(self) -> None:
+        if os.path.exists(self.path):
+            try:
+                with open(self.path, "r", encoding="utf-8") as f:
+                    self.data = json.load(f)
+            except Exception:
+                log.exception("Error loading HUD layout positions JSON")
+
+    def save(self) -> None:
+        try:
+            os.makedirs(os.path.dirname(self.path), exist_ok=True)
+            temp_path = self.path + ".tmp"
+            with open(temp_path, "w", encoding="utf-8") as f:
+                json.dump(self.data, f, indent=2)
+            os.replace(temp_path, self.path)
+        except Exception:
+            log.exception("Error saving HUD layout positions JSON")
+
+    def get_position(self, site: str, layout: str, stat_set: str, max_seats: int, seat: str | int, block_id: str | int) -> tuple[int, int] | None:
+        key = f"{site}/{layout}/{stat_set}/{max_seats}/{seat}/{block_id}"
+        pos = self.data.setdefault("positions", {}).get(key)
+        if pos:
+            return int(pos.get("x", 0)), int(pos.get("y", 0))
+        return None
+
+    def set_position(self, site: str, layout: str, stat_set: str, max_seats: int, seat: str | int, block_id: str | int, x: int, y: int) -> None:
+        key = f"{site}/{layout}/{stat_set}/{max_seats}/{seat}/{block_id}"
+        self.data.setdefault("positions", {})[key] = {"x": x, "y": y}
+        self.save()
+
+_positions_store = None
+def get_positions_store():
+    global _positions_store
+    if _positions_store is None:
+        _positions_store = HUDLayoutPositionsStore()
+    return _positions_store
 
 # PT4-style item alignment names -> Qt flags.
 _ALIGN = {
@@ -335,6 +382,28 @@ class SimpleHUD(Aux_Base.AuxSeats):
         # to control menu position
         self.table_mw.move_windows()
 
+    def get_id_from_seat(self, seat: int | str) -> int | None:
+        """Player id (native int) seated at a visual seat, or None if empty.
+
+        Returns an int so callers can index stat_dict[player_id] directly; the
+        dict is int-keyed (see Database.get_stats_from_hand).
+        """
+        if seat == "common" or seat == "table":
+            return None
+        # Convert visual seat index to physical seat number
+        physical_seat = self.hud.layout.hh_seats[seat]
+        # Check authoritative seat_players dictionary first
+        if hasattr(self.hud, "seat_players") and self.hud.seat_players:
+            player_info = self.hud.seat_players.get(physical_seat)
+            if player_info:
+                return player_info["player_id"]
+        # Fallback to stat_dict
+        if self.hud.stat_dict:
+            for player_id, player_data in list(self.hud.stat_dict.items()):
+                if physical_seat == player_data.get("seat"):
+                    return player_id
+        return None
+
     def _uses_block_windows(self) -> bool:
         return len(getattr(self, "block_layouts", [])) > 1
 
@@ -373,7 +442,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
     def _log_block_window_position(
         self,
         reason: str,
-        seat: int,
+        seat: int | str,
         block_index: int,
         rel_pos: tuple[int, int],
         abs_pos: tuple[int, int],
@@ -381,23 +450,105 @@ class SimpleHUD(Aux_Base.AuxSeats):
     ) -> None:
         player_id, screen_name, player_pos = self._seat_player_debug(seat)
         block = self.block_layouts[block_index]
-        log.warning(
-            "HUD BOX %s table=%s display_seat=%s layout_seat=%s player_id=%s player=%r hand_pos=%r "
-            "block=%s label=%r block_pos=%r rel=%s abs=%s visible=%s",
-            reason,
-            getattr(self.hud.table, "key", ""),
-            seat,
-            self.adj[seat] if hasattr(self, "adj") and seat < len(self.adj) else seat,
-            player_id,
-            screen_name,
-            player_pos,
-            block_index,
-            block.get("label", ""),
-            block.get("position", ""),
-            rel_pos,
-            abs_pos,
-            visible,
+        msg = (
+            f"HUD BOX {reason} table={getattr(self.hud.table, 'key', '')} display_seat={seat} "
+            f"layout_seat={self.adj[seat] if (hasattr(self, 'adj') and isinstance(seat, int) and seat < len(self.adj)) else seat} "
+            f"player_id={player_id} player={screen_name!r} hand_pos={player_pos!r} "
+            f"block={block_index} label={block.get('label', '')!r} block_pos={block.get('position', '')!r} "
+            f"rel={rel_pos} abs={abs_pos} visible={visible}"
         )
+        log.warning(msg)
+
+        # Log to the dedicated trace log if active
+        trace_logger = logging.getLogger("hud_trace")
+        if trace_logger.handlers:
+            trace_logger.info(msg)
+
+    # -- Single coordinate model -------------------------------------------
+    #
+    # Block windows are stored in ONE space: "canonical" = unscaled coordinates
+    # in the reference-layout space, measured from the table's top-left corner.
+    # block_positions[key] and the on-disk positions store both hold canonical
+    # values. The only scaling happens at display time, through the single
+    # converter _canonical_to_screen(); its inverse is _screen_to_canonical().
+    # Because the reference dimensions are frozen once (never the live, mutated
+    # layout size), a resize A->B->A round-trips a window back to exactly A.
+
+    def _ensure_reference(self) -> None:
+        """Freeze the reference layout size once, from the config layout.
+
+        Shared with Hud.resize_windows via hud.ref_layout_*, so both the resize
+        path and the block windows divide by the same stable denominator.
+        """
+        if not getattr(self.hud, "ref_layout_width", None):
+            self.hud.ref_layout_width = self.hud.layout.width or 792
+            self.hud.ref_layout_height = self.hud.layout.height or 546
+
+    @property
+    def scale_factors(self) -> tuple[float, float]:
+        self._ensure_reference()
+        ref_w = self.hud.ref_layout_width or 792
+        ref_h = self.hud.ref_layout_height or 546
+        table_w = self.hud.table.width or ref_w
+        table_h = self.hud.table.height or ref_h
+        return float(table_w) / ref_w, float(table_h) / ref_h
+
+    def _table_origin(self) -> tuple[int, int]:
+        table_x = self.hud.table.x if self.hud.table.x is not None else 0
+        table_y = self.hud.table.y if self.hud.table.y is not None else 0
+        return max(0, table_x), max(0, table_y)
+
+    def _canonical_to_screen(self, canon: tuple[int, int]) -> tuple[int, int]:
+        """Convert a canonical block position to an absolute screen position.
+
+        The screen clamp here is display-only and is never fed back into the
+        stored canonical value.
+        """
+        x_scale, y_scale = self.scale_factors
+        table_x, table_y = self._table_origin()
+        screen_x = int(round(canon[0] * x_scale)) + table_x
+        screen_y = int(round(canon[1] * y_scale)) + table_y
+        return Aux_Base.clamp_to_screen(screen_x, screen_y)
+
+    def _screen_to_canonical(self, abs_x: int, abs_y: int) -> tuple[int, int]:
+        """Inverse of _canonical_to_screen, without the display-only clamp."""
+        x_scale, y_scale = self.scale_factors
+        table_x, table_y = self._table_origin()
+        return (
+            int(round((abs_x - table_x) / x_scale)),
+            int(round((abs_y - table_y) / y_scale)),
+        )
+
+    def _default_canonical(self, key: tuple[int | str, int]) -> tuple[int, int]:
+        """Layout-default canonical position for a block that has never moved."""
+        seat, block_index = key
+        offset_x, offset_y = self._block_offset(block_index)
+        if seat == "table":
+            return (offset_x, offset_y)
+        anchor_x, anchor_y = getattr(self, "_seat_anchor_ref", {}).get(seat, (0, 0))
+        return (anchor_x + offset_x, anchor_y + offset_y)
+
+    def _canonical_for(self, key: tuple[int | str, int]) -> tuple[int, int]:
+        """Canonical position for a block window.
+
+        Priority: a user drag saved to the positions store, then the value
+        computed at create time, then the layout default. A saved position for
+        one (seat, block) key can never affect another key.
+        """
+        seat, block_index = key
+        stored = get_positions_store().get_position(
+            self.hud.site,
+            getattr(self.hud.layout, "name", "default"),
+            getattr(self.game_params, "name", "default"),
+            self.hud.max,
+            seat,
+            block_index,
+        )
+        if stored is not None:
+            return stored
+        if key in self.block_positions:
+            return self.block_positions[key]
+        return self._default_canonical(key)
 
     def create(self) -> None:
         """Create classic one-window seats or PT4-style one-window-per-block seats."""
@@ -410,49 +561,71 @@ class SimpleHUD(Aux_Base.AuxSeats):
         self.hero_display_seat = self._hero_display_seat()
         self.m_windows = {}
         self.block_positions = {}
+        # Unscaled reference seat anchors, captured once. Kept separate from the
+        # live layout.location (which Hud.resize_windows rescales) so canonical
+        # defaults stay stable across resizes.
+        self._seat_anchor_ref = {}
+        self._ensure_reference()
 
         x, y = self.hud.layout.common
         self.m_windows["common"] = self.create_common(x, y)
         self.hud.layout.common = self.create_scale_position(x, y)
 
-        table_x = self.hud.table.x if self.hud.table.x is not None else 0
-        table_y = self.hud.table.y if self.hud.table.y is not None else 0
+        # Create player seat windows
         for seat in range(1, self.hud.max + 1):
-            x, y = self.hud.layout.location[self.adj[seat]]
-            base_pos = self.create_scale_position(x, y)
-            self.positions[seat] = base_pos
-            self.hud.layout.location[self.adj[seat]] = base_pos
-            for block_index, _blk in enumerate(self.block_layouts):
-                key = (seat, block_index)
-                offset_x, offset_y = self._block_offset(block_index)
-                block_pos = (base_pos[0] + offset_x, base_pos[1] + offset_y)
-                self.block_positions[key] = block_pos
-                window = self.aw_class_window(self, seat)
-                window.block_index = block_index
-                window.block_key = key
-                self.m_windows[key] = window
-                pos_x = max(0, block_pos[0] + table_x)
-                pos_y = max(0, block_pos[1] + table_y)
-                clamped_x, clamped_y = Aux_Base.clamp_to_screen(pos_x, pos_y)
-                window.move(clamped_x, clamped_y)
-                self._log_block_window_position("create", seat, block_index, block_pos, (clamped_x, clamped_y))
-                if "opacity" in self.params:
-                    window.setWindowOpacity(float(self.params["opacity"]))
-                self.create_contents(window, seat)
-                window.create()
-                self.hud.table.topify(window)
-                self.update_contents(window, seat)
+            anchor = self.hud.layout.location[self.adj[seat]]
+            self._seat_anchor_ref[seat] = anchor
+            self.positions[seat] = self.create_scale_position(*anchor)
+            for block_index, blk in enumerate(self.block_layouts):
+                if blk.get("scope") == "table":
+                    continue
+                self._create_block_window((seat, block_index), seat)
+
+        # Create table-scoped windows
+        for block_index, blk in enumerate(self.block_layouts):
+            if blk.get("scope") != "table":
+                continue
+            self._create_block_window(("table", block_index), "table")
 
         self.m_windows["common"].create()
         self.hud.table.topify(self.m_windows["common"])
         if not self.uses_timer:
             self.m_windows["common"].show()
-        self.hud.layout.height = self.hud.table.height
-        self.hud.layout.width = self.hud.table.width
+
+    def _create_block_window(self, key: tuple[int | str, int], seat: int | str) -> None:
+        """Create one block window and place it via the single coordinate model."""
+        block_index = key[1]
+        blk = self.block_layouts[block_index]
+        canon = self._canonical_for(key)
+        self.block_positions[key] = canon
+
+        window = self.aw_class_window(self, seat)
+        window.block_index = block_index
+        window.block_key = key
+        self.m_windows[key] = window
+
+        screen_x, screen_y = self._canonical_to_screen(canon)
+        window.move(screen_x, screen_y)
+        window._pos_gen = getattr(self.hud, "geometry_generation", 0)
+        reason = "create-table" if seat == "table" else "create"
+        self._log_block_window_position(reason, seat, block_index, canon, (screen_x, screen_y))
+        if "opacity" in self.params:
+            window.setWindowOpacity(float(self.params["opacity"]))
+        try:
+            self.create_contents(window, seat)
+            window.create()
+            self.hud.table.topify(window)
+            self.update_contents(window, seat)
+        except Exception:
+            # Isolate a failing block so the other windows still get built.
+            log.exception(
+                "HUD create: block key=%r label=%r failed; skipping it",
+                key,
+                blk.get("label", ""),
+            )
 
     def _move_block_windows(self) -> None:
-        table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
-        table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
+        table_x, table_y = self._table_origin()
         for key, window in list(self.m_windows.items()):
             if key == "common":
                 common_x = self.hud.layout.common[0] + table_x
@@ -460,14 +633,13 @@ class SimpleHUD(Aux_Base.AuxSeats):
                 clamped_x, clamped_y = Aux_Base.clamp_to_screen(common_x, common_y)
                 window.move(clamped_x, clamped_y)
                 continue
+
             seat, block_index = key
-            base_pos = self.positions[seat]
-            offset_x, offset_y = self._block_offset(block_index)
-            block_pos = (base_pos[0] + offset_x, base_pos[1] + offset_y)
-            self.block_positions[key] = block_pos
-            clamped_x, clamped_y = Aux_Base.clamp_to_screen(block_pos[0] + table_x, block_pos[1] + table_y)
-            window.move(clamped_x, clamped_y)
-            self._log_block_window_position("move", seat, block_index, block_pos, (clamped_x, clamped_y))
+            canon = self._canonical_for(key)
+            screen_x, screen_y = self._canonical_to_screen(canon)
+            window.move(screen_x, screen_y)
+            window._pos_gen = getattr(self.hud, "geometry_generation", 0)
+            self._log_block_window_position("move", seat, block_index, canon, (screen_x, screen_y))
 
     def resize_windows(self) -> None:
         if not self._uses_block_windows():
@@ -478,17 +650,49 @@ class SimpleHUD(Aux_Base.AuxSeats):
         self.positions["common"] = self.hud.layout.common
         self.move_windows()
 
+    def _block_label(self, key: str | tuple[int | str, int]) -> str:
+        """Human-readable name for an m_windows key, for diagnostics."""
+        if key == "common":
+            return "common"
+        with suppress(Exception):
+            return self.block_layouts[key[1]].get("label", "") or f"block#{key[1]}"
+        return str(key)
+
     def update_gui(self, _new_hand_id: Any) -> None:
         if not self._uses_block_windows():
             super().update_gui(_new_hand_id)
             return
-        for key, window in list(self.m_windows.items()):
-            self.update_contents(window, key if key == "common" else key[0])
-            if key != "common":
-                seat, block_index = key
-                rel_pos = self.block_positions.get(key, self.positions.get(seat, (0, 0)))
-                abs_pos = (window.pos().x(), window.pos().y())
-                self._log_block_window_position("update", seat, block_index, rel_pos, abs_pos, window.isVisible())
+        windows = list(self.m_windows.items())
+        expected = len(windows)
+        updated = 0
+        failed = 0
+        for key, window in windows:
+            try:
+                self.update_contents(window, key if key == "common" else key[0])
+                if key != "common":
+                    seat, block_index = key
+                    rel_pos = self.block_positions.get(key, self.positions.get(seat, (0, 0)))
+                    abs_pos = (window.pos().x(), window.pos().y())
+                    self._log_block_window_position("update", seat, block_index, rel_pos, abs_pos, window.isVisible())
+                updated += 1
+            except Exception:
+                # Isolate the failing window: name it, then carry on so one bad
+                # block can't stop every other window from refreshing (which is
+                # what made stats and names look frozen across the whole table).
+                failed += 1
+                log.exception(
+                    "HUD update_gui: window key=%r label=%r failed for hand %s; skipping it",
+                    key,
+                    self._block_label(key),
+                    _new_hand_id,
+                )
+        hud_trace(
+            "update_gui: %d/%d windows updated (%d failed) for hand %s",
+            updated,
+            expected,
+            failed,
+            _new_hand_id,
+        )
 
     def configure_event_cb(self, widget: Aux_Base.SeatWindow, i: int | str | tuple[int, int]) -> None:
         block_index = getattr(widget, "block_index", None)
@@ -496,20 +700,21 @@ class SimpleHUD(Aux_Base.AuxSeats):
             super().configure_event_cb(widget, i)
             return
         seat = widget.seat
-        table_x = self.hud.table.x if self.hud.table.x is not None else 0
-        table_y = self.hud.table.y if self.hud.table.y is not None else 0
         new_abs_position = widget.pos()
-        relative = (new_abs_position.x() - table_x, new_abs_position.y() - table_y)
-        base_pos = self.positions.get(seat, (0, 0))
-        offset = (relative[0] - base_pos[0], relative[1] - base_pos[1])
-        self.block_layouts[block_index]["x"] = offset[0]
-        self.block_layouts[block_index]["y"] = offset[1]
-        self.block_positions[(seat, block_index)] = relative
-        with suppress(Exception):
-            block = self.game_params.blocks[block_index]
-            block.x = offset[0]
-            block.y = offset[1]
-        self._log_block_window_position("drag-save", seat, block_index, relative, (new_abs_position.x(), new_abs_position.y()))
+        # Persist the canonical position derived from the actual (unclamped) drop
+        # point, via the single inverse converter. Only this (seat, block) key is
+        # written, so dragging one window never disturbs another seat's blocks.
+        canonical_x, canonical_y = self._screen_to_canonical(new_abs_position.x(), new_abs_position.y())
+
+        store = get_positions_store()
+        layout_name = getattr(self.hud.layout, "name", "default")
+        stat_set = getattr(self.game_params, "name", "default")
+        store.set_position(
+            self.hud.site, layout_name, stat_set, self.hud.max, seat, block_index, canonical_x, canonical_y
+        )
+
+        self.block_positions[(seat, block_index)] = (canonical_x, canonical_y)
+        self._log_block_window_position("drag-save", seat, block_index, (canonical_x, canonical_y), (new_abs_position.x(), new_abs_position.y()))
 
     def save_layout(self, *_args: Any) -> None:
         """Save the current HUD layout configuration.
@@ -741,7 +946,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         # Legacy alias: keep self.stat_box pointing at the first block's grid.
         self.stat_box = self.stat_boxes[0] if self.stat_boxes else []
 
-    def update_contents(self, i: int) -> None:
+    def update_contents(self, i: int | str) -> None:
         """Update the stat widgets for the specified seat.
 
         Refreshes all stat widgets and, for position-bound blocks, shows only the
@@ -752,6 +957,23 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         """
         if i == "common":
             return
+
+        if i == "table":
+            self.show()
+            has_visible_block = False
+            for box, (container, block_pos) in zip(self.stat_boxes, self.block_widgets, strict=False):
+                container.setVisible(True)
+                has_visible_block = True
+                for row in box:
+                    for stat in row:
+                        if stat is not None:
+                            stat.update(None, self.aw.hud.stat_dict)
+            if not has_visible_block:
+                self.hide()
+            else:
+                self.adjustSize()
+            return
+
         player_id = self.aw.get_id_from_seat(i)
         if player_id is None:
             self.hide()
@@ -786,7 +1008,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
 class SimpleStat:
     """A simple class for displaying a single stat."""
 
-    def __init__(self, stat: str, seat: int, popup: str, aw: Any, colors: dict | None = None) -> None:
+    def __init__(self, stat: str, seat: int | str, popup: str, aw: Any, colors: dict | None = None) -> None:
         """Initializes a SimpleStat instance for displaying a single statistic.
 
         This constructor sets up the label, associates it with the correct seat and popup,
@@ -805,7 +1027,13 @@ class SimpleStat:
             "---",
         )  # --- is used as initial value because longer labels don't shrink
         self.lab.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lab.aw_seat = aw.hud.layout.hh_seats[seat]
+        if seat == "table" or seat == "common":
+            self.lab.aw_seat = seat
+        else:
+            try:
+                self.lab.aw_seat = aw.hud.layout.hh_seats[seat]
+            except (KeyError, IndexError, TypeError):
+                self.lab.aw_seat = seat
         self.lab.aw_popup = popup
         self.lab.stat_dict = None
         self.widget = self.lab
@@ -815,7 +1043,7 @@ class SimpleStat:
         self.colors = colors or {}
         self._bg = ""
 
-    def update(self, player_id: str, stat_dict: dict) -> None:
+    def update(self, player_id: str | None, stat_dict: dict) -> None:
         """Update the statistic display for a given player.
 
         This method recalculates the statistic value and updates the label text for the specified player.
@@ -826,12 +1054,24 @@ class SimpleStat:
         """
         self.stat_dict = stat_dict  # So the Simple_stat obj always has a fresh stat_dict
         self.lab.stat_dict = stat_dict
-        self.number = Stats.do_stat(
-            stat_dict,
-            player_id,
-            self.stat,
-            self.hud.hand_instance,
-        )
+
+        # Two scopes, both computed in Stats (the single source of truth), never
+        # with inline SQL here (this runs on the UI thread, once per label).
+        #  - player scope: do_stat, indexed by player id.
+        #  - table scope (player_id is None): do_table_stat, reading the value
+        #    HUD_main precomputed once for this hand onto hud.table_stats.
+        # Earlier revisions inlined SQL/name-shortening here; that duplicated
+        # logic, broke the 6-tuple contract (ClassicStat's number[5] tooltip),
+        # and hard-coded a %s placeholder that fails on SQLite.
+        if player_id is None:
+            self.number = Stats.do_table_stat(getattr(self.hud, "table_stats", {}), self.stat)
+        else:
+            self.number = Stats.do_stat(
+                stat_dict,
+                player_id,
+                self.stat,
+                self.hud.hand_instance,
+            )
         if self.number:
             self.lab.setText(str(self.number[1]))
         self._apply_color_range()

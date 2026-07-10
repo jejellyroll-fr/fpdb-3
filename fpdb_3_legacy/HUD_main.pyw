@@ -37,7 +37,7 @@ from qt_material import apply_stylesheet
 
 from fpdb_3_legacy import Configuration, Database, Deck, Hud, Options
 from fpdb_3_legacy.HudStatsPersistence import get_hud_stats_persistence
-from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 from fpdb_3_legacy.SmartHudManager import RestartReason, get_smart_hud_manager
 
 # Logging configuration
@@ -290,6 +290,11 @@ class HudMain(QObject):
 
             # HUD dictionary and parameters
             self.hud_dict: dict[str, Hud.Hud] = {}
+            # Last hand id processed per table. The ZMQ producer (auto-import
+            # re-scanning growing files) can deliver the same Hands.id more than
+            # once; this makes read_stdin idempotent so each hand refreshes the
+            # HUD exactly once, without re-running create/update on a duplicate.
+            self._last_processed_hands: dict[str, str] = {}
             self.blacklist: list[Any] = []
             self.hud_params = self.config.get_hud_ui_parameters()
             self.deck = Deck.Deck(
@@ -729,6 +734,8 @@ class HudMain(QObject):
             log.exception("hud_dict[%s] was not found", temp_key)
             return
 
+        hud.seat_players = self.db_connection.get_seat_players(new_hand_id)
+        self._set_table_stats(hud, new_hand_id)
         hud.cards = self.get_cards(new_hand_id, hud.poker_game)
         for aw in hud.aux_windows:
             aw.update_data(new_hand_id, self.db_connection)
@@ -826,6 +833,9 @@ class HudMain(QObject):
                 cards=cards,
             )
             self.create_HUD(args)
+            if args.temp_key in self.hud_dict:
+                self.hud_dict[args.temp_key].seat_players = self.db_connection.get_seat_players(new_hand_id)
+                self._set_table_stats(self.hud_dict[args.temp_key], new_hand_id)
         else:
             log.error('Table "%s" no longer exists', table_name)
 
@@ -866,6 +876,13 @@ class HudMain(QObject):
         temp_key = self._get_temp_key(game_type, tour_number, tab_number, table_name)
         log.debug("Generated temp_key: %s for table: %s", temp_key, table_name)
 
+        # Idempotency: skip a hand already processed for this table (duplicate
+        # ZMQ delivery), so create/update runs exactly once per hand.
+        if self._last_processed_hands.get(temp_key) == new_hand_id:
+            log.debug("Skipping already processed hand ID %s for table %s", new_hand_id, temp_key)
+            return
+        self._last_processed_hands[temp_key] = new_hand_id
+
         if self._handle_tournament_table_changes(game_type, temp_key, tour_number):
             return  # Stale table was handled
 
@@ -882,6 +899,20 @@ class HudMain(QObject):
         else:
             log.debug("Creating new HUD for temp_key: %s", temp_key)
             self._create_new_hud(new_hand_id, temp_key, table_info, site_id, num_seats, hud_site_name)
+
+    def _set_table_stats(self, hud: Hud.Hud, hand_id: str) -> None:
+        """Compute table-scope stats once per hand and cache them on the hud.
+
+        Keeps the per-label HUD update off the database: the table stat widgets
+        read hud.table_stats instead of querying on the UI thread.
+        """
+        try:
+            hud.table_stats = {
+                "live_min_stack_bb": self.db_connection.get_table_min_stack_bb(hand_id),
+            }
+        except Exception:
+            log.exception("could not compute table stats for hand %s", hand_id)
+            hud.table_stats = {}
 
     def _merge_positions(self, stat_dict: dict, hand_id: str) -> None:
         """Attach each player's current-hand position to stat_dict.
@@ -910,6 +941,8 @@ class HudMain(QObject):
     def idle_move(self, hud: Hud.Hud) -> None:
         """Handle the idle move event."""
         try:
+            # Real geometry change: bump the generation so block windows re-place.
+            hud.geometry_generation += 1
             hud.move_table_position()
             for aw in hud.aux_windows:
                 aw.move_windows()
@@ -919,6 +952,8 @@ class HudMain(QObject):
     def idle_resize(self, hud: Hud.Hud) -> None:
         """Handle the idle resize event."""
         try:
+            # Real geometry change: bump the generation so block windows re-place.
+            hud.geometry_generation += 1
             hud.resize_windows()
             for aw in hud.aux_windows:
                 aw.resize_windows()
@@ -965,27 +1000,69 @@ class HudMain(QObject):
             self.hud_dict[args.temp_key].tablehudlabel = newlabel
             self.hud_dict[args.temp_key].tablenumber = args.table.number
             self.hud_dict[args.temp_key].create(args.new_hand_id, self.config, args.stat_dict)
-            for m in self.hud_dict[args.temp_key].aux_windows:
-                m.create()
-                log.debug("idle_create new_hand_id %s", args.new_hand_id)
-                m.update_gui(args.new_hand_id)
+            for aux_index, m in enumerate(self.hud_dict[args.temp_key].aux_windows):
+                try:
+                    m.create()
+                    log.debug("idle_create new_hand_id %s", args.new_hand_id)
+                    m.update_gui(args.new_hand_id)
+                except Exception:
+                    # Isolate a failing aux window so the others still get built.
+                    log.exception(
+                        "HUD create: aux_window index=%d class=%s failed (table=%s, hand=%s); skipping it",
+                        aux_index,
+                        type(m).__name__,
+                        args.temp_key,
+                        args.new_hand_id,
+                    )
+            hud_trace("idle_create OK: table=%s hand=%s", args.temp_key, args.new_hand_id)
 
         except Exception:
             log.exception("Error creating HUD for hand %s.", args.new_hand_id)
 
     def idle_update(self, new_hand_id: str, table_name: str, config: Configuration.Config) -> None:
         """Handle the idle update event."""
+        aux_index = -1
         try:
             log.debug("idle_update entered for %s %s", table_name, new_hand_id)
             self.hud_dict[table_name].update(new_hand_id, config)
             log.debug("idle_update update_gui %s", new_hand_id)
-            for aw in self.hud_dict[table_name].aux_windows:
+            for aux_index, aw in enumerate(self.hud_dict[table_name].aux_windows):
                 aw.update_gui(new_hand_id)
+            hud_trace("idle_update OK: table=%s hand=%s aux_windows=%d", table_name, new_hand_id, aux_index + 1)
         except Exception:
-            log.exception("Error updating HUD for hand %s.", new_hand_id)
+            log.exception(
+                "Error updating HUD for hand %s (table=%s, failing aux_window index=%d, class=%s).",
+                new_hand_id,
+                table_name,
+                aux_index,
+                type(self.hud_dict[table_name].aux_windows[aux_index]).__name__
+                if 0 <= aux_index < len(self.hud_dict[table_name].aux_windows)
+                else "?",
+            )
 
 
 if __name__ == "__main__":
+    if os.getenv("FPDB_HUD_TRACE") == "1":
+        import logging
+        trace_log = logging.getLogger("hud_trace")
+        trace_log.setLevel(logging.DEBUG)
+        if not trace_log.handlers:
+            log_dir = os.path.join(os.path.expanduser("~"), ".fpdb")
+            os.makedirs(log_dir, exist_ok=True)
+            log_path = os.path.join(log_dir, "HUD_trace.log")
+            handler = logging.FileHandler(log_path, encoding="utf-8")
+            handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+            trace_log.addHandler(handler)
+            trace_log.propagate = False
+            trace_log.info("HUD Trace Log Initialized")
+
+            # NB: diagnostics go through this "hud_trace" logger, never through
+            # "hud_main". get_logger() re-applies the level saved in
+            # ~/fpdb_logs/logger_config.json on every call, and "hud_main" is saved
+            # at ERROR -- which is why the HUD's INFO/WARNING traces never reached
+            # HUD-log.txt. "hud_trace" is unregistered, so this handler survives.
+            trace_log.info("HUD trace channel active (bypasses fpdb logger registry)")
+
     (options, argv) = Options.fpdb_options()
 
     app = QApplication([])

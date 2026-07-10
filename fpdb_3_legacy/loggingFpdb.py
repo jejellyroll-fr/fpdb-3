@@ -1619,6 +1619,23 @@ class FpdbLogger:
         return stacklevel  # Return the calculated stack level
 
 
+# Diagnostic channel used by the HUD when FPDB_HUD_TRACE=1.
+#
+# It deliberately sits outside the registry above. register_logger() re-applies the
+# level persisted in ~/fpdb_logs/logger_config.json on every get_logger() call, so a
+# setLevel() here would be undone by the next lazily imported module. That file is
+# also why HUD diagnostics went missing: HUD_main, Aux_Hud and Aux_Classic_Hud all
+# log to "hud_main", which is persisted at ERROR, so their INFO/WARNING traces were
+# dropped. "hud_trace" is never registered, so HUD_main's handler stays put.
+_hud_trace_log = logging.getLogger("hud_trace")
+
+
+def hud_trace(msg: str, *args: object) -> None:
+    """Emit a HUD diagnostic line when trace mode is active; a no-op otherwise."""
+    if _hud_trace_log.handlers:
+        _hud_trace_log.info(msg, *args)
+
+
 def get_logger(name: str) -> FpdbLogger:
     """Return a configured FPDB logger.
 

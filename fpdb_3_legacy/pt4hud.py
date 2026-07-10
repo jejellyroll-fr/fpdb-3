@@ -122,6 +122,7 @@ PT4_TO_FPDB: dict[str, str] = {
     "GENPOKER_C/M FOLD TO PROBE RIVER": "fold_river",
     "GenPoker Att To Steal": "steal",
     "GenPoker Fold to Steal": "f_steal",
+    "Live Min Stack BB": "live_min_stack_bb",
 }
 
 # Position/info panel headers (e.g. "SB 3h", "BB 3h", "BU 3h", "Villain Info 3H")
@@ -232,6 +233,8 @@ class Cell:
     hudbgcolor: str = ""
     kind: str = "stat"
     full_width: bool = False
+    row: int = 0
+    col: int = 0
 
 
 @dataclass
@@ -260,12 +263,26 @@ class PopupGroup:
 
 
 @dataclass
+class Group:
+    """A PT4 visual group/panel (e.g. BU 3h, Villain Info 3H)."""
+
+    id: str
+    name: str
+    scope: str  # "player" / "table" / "popup"
+    audience: str  # "everyone" / "opponents" / "hero"
+    cells: list[Cell] = field(default_factory=list)
+    rows: int = 0
+    cols: int = 0
+
+
+@dataclass
 class Layout:
     name: str = ""
     cells: list[Cell] = field(default_factory=list)
     popups: list[str] = field(default_factory=list)
     charts: list[Chart] = field(default_factory=list)
     popup_groups: list[PopupGroup] = field(default_factory=list)
+    groups: list[Group] = field(default_factory=list)
 
     @property
     def supported(self) -> list[Cell]:
@@ -414,92 +431,187 @@ def _is_visual_panel(record: dict) -> bool:
         return True
     if upper in {p.upper() for p in _KNOWN_VISUAL_PANEL_TITLES}:
         return True
+    if "TABLE" in upper or "MIN STACK" in upper:
+        return True
     return upper.startswith("VILLAIN")
+
+
+def _assign_stat_tips(cells: list[Cell]) -> None:
+    """Give each stat cell a tooltip label aligned by grid column.
+
+    PT4 lays a header row and its stat row in the same columns, so a stat at
+    column c takes the nearest non-empty header text cell directly above it in
+    column c (never crossing a full-width section caption like "POST FLOP").
+    A row-label at column 0 (F/T/R) is prefixed, giving tips like "F CB".
+
+    This replaces an index-based header cycle that drifted whenever earlier
+    stats or intervening New Line records advanced the counter, producing the
+    rotated tips (vpip -> "AFq") seen in the villain panel. Stats with no header
+    above them keep an empty label and fall back to their PT4 name.
+    """
+    text_at = {(c.row, c.col): c for c in cells if c.kind == "text"}
+    caption_rows = {c.row for c in cells if c.kind == "text" and c.full_width}
+    for c in cells:
+        if c.kind != "stat" or c.label:
+            continue
+        header = ""
+        for rr in range(c.row - 1, -1, -1):
+            if rr in caption_rows:
+                break
+            above = text_at.get((rr, c.col))
+            if above is not None and above.label and not above.full_width:
+                header = above.label
+                break
+        row_label_cell = text_at.get((c.row, 0))
+        row_label = (
+            row_label_cell.label
+            if row_label_cell is not None and not row_label_cell.full_width
+            else ""
+        )
+        if row_label in {"F", "T", "R"} and header:
+            c.label = f"{row_label} {header}"
+        elif header:
+            c.label = header
+        elif row_label:
+            c.label = row_label
+
+
+def extract_hud_groups(data: bytes) -> list[Group]:
+    recs = sorted(_visual_records(data), key=lambda r: r["offset"])
+
+    def _is_named_container(r) -> bool:
+        return (r["kind"] == 2 and bool(r["text"].strip())
+                and r["text"].strip() not in _DECORATIVE_CONTAINER_TITLES)
+
+    boundaries = sorted({
+        i for i, r in enumerate(recs)
+        if _is_named_container(r) or r["text"].strip() in _CHART_NAMES
+    })
+
+    groups: list[Group] = []
+    for si in boundaries:
+        r0 = recs[si]
+        if not _is_visual_panel(r0):
+            continue
+
+        name = r0["text"].strip()
+        end = next((b for b in boundaries if b > si), len(recs))
+
+        scope = "player"
+        if "Table" in name or "(Table)" in name:
+            scope = "table"
+        else:
+            pos = panel_position(name)
+            if not pos and name.upper().startswith("MIN STACK"):
+                scope = "table"
+
+        audience = "everyone"
+        if "Villain" in name:
+            audience = "opponents"
+        elif "Hero" in name:
+            audience = "hero"
+
+        group_id = re.sub(r"[^a-zA-Z0-9_]", "_", name.lower()).strip("_")
+
+        cells: list[Cell] = []
+        row = col = 0
+        street = ""
+
+        for r in recs[si + 1 : end]:
+            t = r["text"].strip()
+            if r["kind"] == 2:
+                if t == "New Line":
+                    if col > 0:
+                        row, col = row + 1, 0
+                elif t == "Note Editor":
+                    cells.append(
+                        Cell(
+                            pt4_name="Note Editor", label="", section=name, street=street,
+                            fpdb_stat="player_note", kind="stat", hudcolor=r["fg"], hudbgcolor=r["bg"],
+                            row=row, col=col
+                        )
+                    )
+                    col += 1
+                elif t == "Horizontal Line":
+                    cells.append(
+                        Cell(
+                            pt4_name="Horizontal Line", label="", section=name, street=street,
+                            fpdb_stat=None, kind="hline", hudcolor=r["fg"], hudbgcolor=r["bg"],
+                            row=row, col=col
+                        )
+                    )
+                    col += 1
+                continue
+
+            if r["kind"] == 4:
+                txt = t[5:].strip() if t.startswith("_TXT:") else t
+                is_section = bool(_STREET_RE.match(txt))
+                cells.append(
+                    Cell(
+                        pt4_name=txt, label=txt, section=name, street=street,
+                        kind="text", full_width=is_section, hudcolor=r["fg"], hudbgcolor=r["bg"],
+                        row=row, col=col
+                    )
+                )
+                col += 1
+                if is_section:
+                    street = txt
+                continue
+
+            if r["kind"] == 1:
+                # A kind=1 record with no rendering colours is a stat *definition*
+                # (its full formula catalogue, ~60+ strings), not a displayed
+                # cell — e.g. a trailing group "source" stat. Every real display
+                # cell carries an fg/bg colour, so skip the colourless ones rather
+                # than inventing a phantom cell (the old GP 2X next to STACK, or
+                # Winnings 3H next to a player name).
+                if not r["fg"] and not r["bg"]:
+                    continue
+                stat_name = t
+                mapped_stat = PT4_TO_FPDB.get(stat_name)
+                if mapped_stat:
+                    cells.append(
+                        Cell(
+                            pt4_name=stat_name, label="", section=name, street=street,
+                            fpdb_stat=mapped_stat, kind="stat", hudcolor=r["fg"], hudbgcolor=r["bg"],
+                            row=row, col=col
+                        )
+                    )
+                else:
+                    cells.append(
+                        Cell(
+                            pt4_name="", label="", section=name, street=street,
+                            kind="text", hudcolor=r["fg"], hudbgcolor=r["bg"],
+                            row=row, col=col
+                        )
+                    )
+                col += 1
+
+        _assign_stat_tips(cells)
+
+        if not cells:
+            continue
+
+        groups.append(
+            Group(
+                id=group_id,
+                name=name,
+                scope=scope,
+                audience=audience,
+                cells=cells,
+                rows=max((c.row for c in cells), default=0) + 1,
+                cols=max((c.col for c in cells), default=0) + 1,
+            )
+        )
+    return groups
 
 
 def _map_visual_records(data: bytes) -> list[Cell]:
     """Map visual PT4 records to fpdb cells with usable headers/colours."""
-    records = _visual_records(data)
-    panels = [r for r in records if _is_visual_panel(r)]
+    groups = extract_hud_groups(data)
     cells: list[Cell] = []
-    for panel_idx, panel in enumerate(panels):
-        if panel_idx + 1 < len(panels):
-            panel_end = panels[panel_idx + 1]["offset"]
-        else:
-            next_containers = [
-                r["offset"]
-                for r in records
-                if r["offset"] > panel["offset"]
-                and r["kind"] == 2
-                and r["text"].strip() not in _DECORATIVE_CONTAINER_TITLES
-            ]
-            panel_end = min(next_containers, default=10**12)
-        section = panel["text"].strip()
-        position_caption = section.split()[0].upper()
-        street = ""
-        headers: list[str] = []  # current column headers, for stat tooltips
-        row_label = ""
-        row_stat_index = 0
-        saw_stat_since_header = False
-        for rec in records:
-            if not (panel["offset"] < rec["offset"] < panel_end):
-                continue
-            text = rec["text"]
-            stripped = text.strip()
-            if rec["kind"] == 4:
-                if stripped in {"New Line", "--"}:
-                    continue
-                # Section caption (POST FLOP / Preflop) takes its own full-width
-                # row; other text items are column/row headers placed in the grid.
-                is_section = bool(_STREET_RE.match(stripped))
-                cells.append(
-                    Cell(pt4_name=stripped, label=stripped, section=section, street=street,
-                         kind="text", full_width=is_section, hudcolor=rec["fg"], hudbgcolor=rec["bg"]),
-                )
-                # Maintain header/row-label tracking so stat cells keep a useful
-                # folded tooltip (e.g. "F FvCB") alongside the standalone labels.
-                if is_section:
-                    street = stripped
-                    headers = []
-                    row_label = ""
-                    row_stat_index = 0
-                elif stripped in {"TOTAL", "F", "T", "R"}:
-                    row_label = stripped
-                    row_stat_index = 0
-                    saw_stat_since_header = False
-                elif stripped and stripped.upper() != position_caption:
-                    if saw_stat_since_header:
-                        headers = []
-                        row_stat_index = 0
-                        saw_stat_since_header = False
-                    headers.append(stripped)
-                continue
-            if rec["kind"] != 1:
-                continue
-            # Some PT4 records embed a companion stat as a secondary string
-            # ("Player Name Short" embeds "Winnings 3H").
-            stat_names = [text, *(s for s in rec["strings"][1:] if s in PT4_TO_FPDB)]
-            mapped = [(n, PT4_TO_FPDB[n]) for n in stat_names if n in PT4_TO_FPDB]
-            if mapped:
-                label = headers[row_stat_index % len(headers)] if headers else ""
-                if row_label in {"F", "T", "R"} and label:
-                    label = f"{row_label} {label}"
-                elif not label:
-                    label = row_label
-                for stat_name, fpdb_stat in mapped:
-                    cells.append(
-                        Cell(pt4_name=stat_name, label=label, section=section, street=street,
-                             fpdb_stat=fpdb_stat, kind="stat", hudcolor=rec["fg"], hudbgcolor=rec["bg"]),
-                    )
-            else:
-                # A stat with no fpdb equivalent (e.g. "Raise F CBet") becomes an
-                # empty placeholder so the surrounding grid stays aligned.
-                cells.append(
-                    Cell(pt4_name="", label="", section=section, street=street, kind="text",
-                         hudcolor=rec["fg"], hudbgcolor=rec["bg"]),
-                )
-            row_stat_index += 1
-            saw_stat_since_header = True
+    for g in groups:
+        cells.extend(g.cells)
     return cells
 
 
@@ -616,6 +728,7 @@ def parse(source: str | bytes) -> Layout:
 
     layout = Layout(name=strings[1] if len(strings) > 1 else "")
     layout.cells = _map_visual_records(data)
+    layout.groups = extract_hud_groups(data)
     layout.popup_groups = extract_popup_groups(data)
     # The record-tree path (above) carries headers/colours and is preferred. When
     # it yields nothing (older or differently-structured exports), fall back to the
@@ -814,6 +927,14 @@ def _panel_groups(cells: list[Cell]) -> list[tuple[str, list[Cell]]]:
     return [(k, groups[k]) for k in order]
 
 
+def _hline_el(doc, c: Cell, r: int, col: int):
+    h = doc.createElement("hline")
+    h.setAttribute("_rowcol", f"({r + 1},{col + 1})")
+    if c.hudcolor:
+        h.setAttribute("color", c.hudcolor)
+    return h
+
+
 def _stat_el(doc, c: Cell, r: int, col: int):
     st = doc.createElement("stat")
     st.setAttribute("_rowcol", f"({r + 1},{col + 1})")
@@ -828,14 +949,33 @@ def _stat_el(doc, c: Cell, r: int, col: int):
     return st
 
 
+def _legible_fg(fg: str, bg: str) -> str:
+    """Keep ``fg`` unless it is invisible against ``bg`` (identical colours).
+
+    PT4 occasionally exports a header as black-on-black (e.g. VP/PFR/AFq/SQ in
+    the villain panel). Reproducing that faithfully yields an unreadable label,
+    so when foreground equals background pick a contrasting colour from the
+    background's luminance instead.
+    """
+    if not fg or not bg or fg.lower() != bg.lower():
+        return fg
+    try:
+        r_, g_, b_ = int(bg[1:3], 16), int(bg[3:5], 16), int(bg[5:7], 16)
+    except (ValueError, IndexError):
+        return fg
+    luminance = 0.299 * r_ + 0.587 * g_ + 0.114 * b_
+    return "#000000" if luminance > 140 else "#ffffff"
+
+
 def _text_el(doc, c: Cell, r: int, col: int, span: int):
     t = doc.createElement("text")
     t.setAttribute("_rowcol", f"({r + 1},{col + 1})")
     t.setAttribute("label", c.label or c.pt4_name)
     if span > 1:
         t.setAttribute("colspan", str(span))
-    if c.hudcolor:
-        t.setAttribute("fgcolor", c.hudcolor)
+    fg = _legible_fg(c.hudcolor, c.hudbgcolor)
+    if fg:
+        t.setAttribute("fgcolor", fg)
     if c.hudbgcolor:
         t.setAttribute("bgcolor", c.hudbgcolor)
     return t
@@ -892,27 +1032,37 @@ def import_to_config(
     ss.setAttribute("cols", str(cols))
     panels = _panel_groups(place_cells)
     n_blocks = 0
-    if multiblock and len([p for p in panels if p[0]]) > 1:
+    if multiblock and layout.groups:
         ss.setAttribute("show_hero_hud", "false")
         total_rows = 0
-        for label, pcells in panels:
-            placed, brows = _flow_items(pcells, cols)
+        max_cols = 4
+        for g in layout.groups:
             blk = doc.createElement("block")
-            blk.setAttribute("label", label)
-            blk.setAttribute("position", panel_position(label))
-            for attr, value in panel_style(label).items():
+            blk.setAttribute("id", g.id)
+            blk.setAttribute("label", g.name)
+            blk.setAttribute("scope", g.scope)
+            blk.setAttribute("audience", g.audience)
+            blk.setAttribute("position", panel_position(g.name))
+            for attr, value in panel_style(g.name).items():
                 blk.setAttribute(attr, value)
-            blk.setAttribute("rows", str(brows))
-            blk.setAttribute("cols", str(cols))
-            for c, r, col, span in placed:
+            blk.setAttribute("rows", str(g.rows))
+            blk.setAttribute("cols", str(g.cols))
+            
+            for c in g.cells:
+                r, col = c.row, c.col
                 if c.kind == "text":
+                    span = g.cols if c.full_width else 1
                     blk.appendChild(_text_el(doc, c, r, col, span))
+                elif c.kind == "hline":
+                    blk.appendChild(_hline_el(doc, c, r, col))
                 else:
                     blk.appendChild(_stat_el(doc, c, r, col))
             ss.appendChild(blk)
-            total_rows += brows
+            total_rows += g.rows
+            max_cols = max(max_cols, g.cols)
             n_blocks += 1
         ss.setAttribute("rows", str(max(total_rows, 1)))
+        ss.setAttribute("cols", str(max_cols))
     else:
         stat_cells = [c for c in place_cells if c.fpdb_stat]
         placements, rows = grouped_placements(stat_cells, cols)

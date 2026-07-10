@@ -105,7 +105,7 @@ class ClassicStatWindow(Aux_Hud.SimpleStatWindow):
         """
         super().update_contents(seat)
 
-        if seat == "common":
+        if seat == "common" or seat == "table":
             return
 
         if self.isHidden():
@@ -120,31 +120,40 @@ class ClassicStatWindow(Aux_Hud.SimpleStatWindow):
         self._position_and_show_block(seat)
 
     def _position_and_show_block(self, seat: int) -> None:
-        """Positions and shows the stat window for the specified seat.
+        """Show the stat window, repositioning only on a real geometry change.
 
-        This method calculates the window position based on the seat and table coordinates, then displays the window.
+        Windows are placed at create() and re-placed on resize/move; a plain
+        per-hand refresh must not move them. We gate the move on the hud's
+        geometry generation: the window remembers the generation it was last
+        placed at and only re-moves when it differs, so nothing drifts between
+        hands. Multiblock windows use their own canonical position (never the
+        shared seat anchor); classic single-window seats use the seat anchor.
 
         Args:
-            seat: The seat number for which to position and show the stat window.
+            seat: The seat number for which to show the stat window.
         """
-        table_x = self._nz(self.aw.hud.table.x)
-        table_y = self._nz(self.aw.hud.table.y)
+        gen = getattr(self.aw.hud, "geometry_generation", 0)
+        if getattr(self, "_pos_gen", None) != gen:
+            block_key = getattr(self, "block_key", None)
+            if block_key is not None:
+                canon = self.aw._canonical_for(block_key)
+                pos_x, pos_y = self.aw._canonical_to_screen(canon)
+                log.debug(
+                    "MULTIBLOCK HUD - seat %s block %s: canonical %s -> screen (%d,%d)",
+                    seat, block_key, canon, pos_x, pos_y,
+                )
+            else:
+                table_x = self._nz(self.aw.hud.table.x)
+                table_y = self._nz(self.aw.hud.table.y)
+                pos_x = max(0, self.aw.positions[seat][0] + table_x)
+                pos_y = max(0, self.aw.positions[seat][1] + table_y)
+                log.info(
+                    "CLASSIC HUD - Moving seat %d stat window to (%d,%d)",
+                    seat, pos_x, pos_y,
+                )
+            self.move(pos_x, pos_y)
+            self._pos_gen = gen
 
-        pos_x = max(0, self.aw.positions[seat][0] + table_x)
-        pos_y = max(0, self.aw.positions[seat][1] + table_y)
-
-        log.info(
-            "CLASSIC HUD - Moving seat %d stat window: Layout pos (%d,%d) + Table pos (%d,%d) = Final pos (%d,%d)",
-            seat,
-            self.aw.positions[seat][0],
-            self.aw.positions[seat][1],
-            table_x,
-            table_y,
-            pos_x,
-            pos_y,
-        )
-
-        self.move(pos_x, pos_y)
         self.setWindowOpacity(float(self.aw.params["opacity"]))
         self.show()  # in case the user has hidden it
 
@@ -488,7 +497,8 @@ class ClassicStat(Aux_Hud.SimpleStat):
         self.set_color(fg=fg, bg=None)
         self.lab.setText(statstring)
 
-        tip = f"{stat_dict[player_id]['screen_name']}\n{self.number[5]}\n{self.number[3]}, {self.number[4]}"
+        screen_name = stat_dict.get(player_id, {}).get("screen_name") or f"Player {player_id}"
+        tip = f"{screen_name}\n{self.number[5]}\n{self.number[3]}, {self.number[4]}"
         try:
             from fpdb_3_legacy.PlayerProfiler import classify_player
             profile, icon, color = classify_player(stat_dict, player_id)

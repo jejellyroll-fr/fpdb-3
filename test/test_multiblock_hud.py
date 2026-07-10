@@ -383,12 +383,14 @@ def test_villain_only_multiblock_keeps_favorite_seat_mapping():
     aw.hud = types.SimpleNamespace(
         max=3,
         stat_dict={},
+        site="TestSite",
         site_parameters={"fav_seat": {3: 3}},
         layout=types.SimpleNamespace(
             common=(0, 0),
             location=[None, (100, 100), (200, 200), (300, 300)],
             width=800,
             height=600,
+            name="TestLayout",
         ),
         table=types.SimpleNamespace(x=0, y=0, width=800, height=600, topify=lambda _w: None),
     )

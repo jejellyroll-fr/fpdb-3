@@ -554,6 +554,9 @@ class StatBlock:
         style = style or {}
         if node is not None:
             self.label = node.getAttribute("label")
+            self.id = node.getAttribute("id") or ""
+            self.scope = node.getAttribute("scope") or "player"
+            self.audience = node.getAttribute("audience") or "everyone"
             # Optional position binding: when set, the block is only shown for a
             # player in that position this hand (e.g. "SB"/"BB"/"BTN"); empty
             # means always shown.
@@ -578,6 +581,9 @@ class StatBlock:
             self.cols = int(node.getAttribute("cols")) if node.getAttribute("cols") else 0
         else:
             self.label = label
+            self.id = style.get("id", "")
+            self.scope = style.get("scope", "player")
+            self.audience = style.get("audience", "everyone")
             self.position = position
             self.bgcolor = style.get("bgcolor", "")
             self.fgcolor = style.get("fgcolor", "")
