@@ -698,7 +698,6 @@ class PacificPoker(HandHistoryConverter):
                 hand.allInBlind = True
 
     def readShowdownActions(self, hand) -> None:
-        # TODO: pick up mucks also??
         for shows in self.re_ShowdownAction.finditer(hand.handText):
             cards = shows.group("CARDS").split(", ")
             hand.addShownCards(cards, shows.group("PNAME"))

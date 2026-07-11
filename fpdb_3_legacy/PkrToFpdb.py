@@ -416,7 +416,6 @@ class Pkr(HandHistoryConverter):
                 )
 
     def readShowdownActions(self, hand):
-        # TODO: pick up mucks also??
         for shows in self.re_ShowdownAction.finditer(hand.handText):
             if re.search(r"\]\s?\[", shows.group("CARDS")):
                 m2 = self.re_Cards.finditer(shows.group("CARDS"))

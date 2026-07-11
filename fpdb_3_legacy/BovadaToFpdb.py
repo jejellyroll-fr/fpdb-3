@@ -17,7 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 """
 
-# TODO(fpdb): straighten out discards for draw games
 
 import datetime
 import re
@@ -1619,7 +1618,6 @@ class Bovada(HandHistoryConverter):
         Args:
             hand: The Hand object to update with showdown card information.
         """
-        # TODO(fpdb): pick up mucks also??
         if hand.gametype["base"] in ("hold"):
             for shows in self.re_showdown_action.finditer(hand.handText):
                 cards = shows.group("CARDS").split(" ")

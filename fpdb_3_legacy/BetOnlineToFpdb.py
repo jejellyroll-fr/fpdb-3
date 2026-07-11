@@ -25,7 +25,6 @@ from typing import Any, ClassVar
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
 
-# TODO(fpdb): straighten out discards for draw games
 
 
 log = get_logger("parser")
@@ -915,7 +914,6 @@ class BetOnline(HandHistoryConverter):
 
     def readShowdownActions(self, hand: Any) -> None:
         """Read showdown actions from hand text."""
-        # TODO(fpdb): pick up mucks also??
         for shows in self.re_showdown_action.finditer(hand.handText):
             cards = shows.group("CARDS").split(" ")
             cards = [c[:-1].replace("10", "T") + c[-1].lower() for c in cards]
