@@ -493,10 +493,9 @@ class IdentifySite:
     def fetchGameTypes(self) -> None:
         for name, f in list(self.filelist.items()):
             if f.ftype is not None and f.ftype == "hh":
-                try:  # TODO: this is a dirty hack. Borrowed from fpdb_import
-                    name = str(name, "utf8", "replace")
-                except TypeError:
-                    log.exception(TypeError)
+                # Filenames are str on Python 3; decode only if a bytes path slips in.
+                if isinstance(name, bytes):
+                    name = name.decode("utf8", "replace")
                 obj = get_parser_class(f.site.filter_name)
                 hhc = obj(
                     self.config,
