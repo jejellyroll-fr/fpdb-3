@@ -1,5 +1,5 @@
 """iPoker hand history converter for FPDB.
-from __future__ import annotations
+
 This module provides functionality to parse iPoker network hand histories
 and convert them to FPDB format, including support for multiple skins.
 """
@@ -22,26 +22,31 @@ and convert them to FPDB format, including support for multiple skins.
 
 ########################################################################
 
-# This code is based on CarbonToFpdb.py by Matthew Boss
+# This code is based on CarbonToFpdb.py by Matthew Boss.
 #
-# TODO(@author): Implement missing features:
+# The original Carbon converter carried a long list of unimplemented features.
+# Most of them have since been implemented for the iPoker XML format:
+#   - Tournaments: readSupportedGames() advertises "tour"; tourNo, buyin, fee
+#     and buyinCurrency are parsed from the session <general> header
+#     (hand_info / xml_format mixins) and surfaced to TourneySummary.
+#   - Currency: multi-currency support ($, €, £, RSD, kr, ...) via the LS symbol
+#     set and the <currency>/<tablecurrency>/<tournamentcurrency> XML tags -
+#     ring games are no longer assumed to be USD.
+#   - Antes and bring-in: readAntes() and readBringIn() are implemented, with
+#     action types "16" (bring-in) and "7" (all-in) handled in streets_actions.
+#   - maxseats: parsed from the <tablesize> XML tag rather than guessed.
+#   - All-in in the blinds: handled by the tournament blind fix-up in
+#     streets_actions (previously the blocker that made tournaments unparseable).
+#   - Hand IDs are stored directly from the <game gamecode="..."> attribute.
 #
-# -- No support for tournaments (see also the last item below)
-# -- Assumes that the currency of ring games is USD
-# -- No support for a bring-in or for antes (is the latter in fact unnecessary
-#    for hold 'em on Carbon?)
-# -- hand.maxseats can only be guessed at
-# -- The last hand in a history file will often be incomplete and is therefore
-#    rejected
-# -- Is behaviour currently correct when someone shows an uncalled hand?
-# -- Information may be lost when the hand ID is converted from the native form
-#    handid-yyy(y*) to handidyyy(y*) (in principle this should be stored as
-#    a string, but the database does not support this). Is there a possibility
-#    of collision between hand IDs that ought to be distinct?
-# -- Cannot parse tables that run it twice (nor is this likely ever to be
-#    possible)
-# -- Cannot parse hands in which someone is all in in one of the blinds. Until
-#    this is corrected tournaments will be unparseable
+# Known remaining limitations:
+#   - Run-it-twice tables are not supported (iPoker does not expose this).
+#   - Tournament game-type detection currently falls back to "ring" when
+#     _process_tournament_info() cannot extract the tournament fields; this path
+#     lacks end-to-end regression coverage - see the iPoker tournament fixtures
+#     under regression-test-files/tour/iPoker/.
+
+from __future__ import annotations
 
 import datetime
 import decimal
@@ -891,6 +896,19 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
         mg["TOTBUYIN"] = tourney_info.get("TOTBUYIN", mg.get("TOTBUYIN"))
         mg["WIN"] = tourney_info.get("WIN")
 
+        # Fallbacks for the common iPoker layout that has no <tournamentcode> tag
+        # and whose <totalbuyin> only matches the permissive re_buyin pattern:
+        #   - tourNo is already parsed from the table name by
+        #     _extract_tournament_number (stored in self.tinfo),
+        #   - the total buy-in can still be read with re_buyin.
+        # Without these, tournaments were misdetected as ring games.
+        if not mg.get("TOURNO"):
+            mg["TOURNO"] = self.tinfo.get("tourNo")
+        if not mg.get("TOTBUYIN"):
+            total_buyin_match = self.re_buyin.search(hand_text)
+            if total_buyin_match:
+                mg["TOTBUYIN"] = total_buyin_match.group("TOTBUYIN")
+
         # Handle case where only TOTBUYIN present
         if mg["BIAMT"] is None and mg["BIRAKE"] is None and mg["TOTBUYIN"]:
             total_buyin_str = self.cleanIPokerMoney(mg["TOTBUYIN"])
@@ -903,8 +921,13 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
                 mg["BIRAKE"] = "0"
                 log.debug("No BIAMT/BIRAKE found, fallback with TOTBUYIN only.")
 
-        # Check essential info
-        if not mg.get("TOURNO") or not mg.get("NAME") or not mg.get("PLACE") or not mg.get("TOTBUYIN"):
+        # Check essential info. TOTBUYIN is intentionally not required: this method
+        # is only reached once the hand is already known to be a tournament (a
+        # <tournamentname>/<place> was found), and satellites/reward entries can
+        # have an empty <totalbuyin>. The buy-in amount is resolved separately by
+        # _process_buyin_info (defaulting to FREE/0), so its absence must not
+        # demote a genuine tournament back to a ring game.
+        if not mg.get("TOURNO") or not mg.get("NAME") or not mg.get("PLACE"):
             log.error("Missing essential tournament info: %s", tourney_info)
             log.debug(hand_text[:500])
             return False

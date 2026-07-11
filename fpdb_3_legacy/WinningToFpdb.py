@@ -1733,10 +1733,15 @@ class Winning(HandHistoryConverter):
         log.debug(f"Starting readSTP for Hand ID: {hand.handid}")
         log.warning(f"STP functionality not implemented for Hand ID: {hand.handid}")
 
-    def readTourneyResults(self, hand) -> None:
-        log.debug(f"Starting readTourneyResults for Hand ID: {hand.handid}")
-        log.info("Reading tournament result info for Winamax.")
-        # TODO: Implement tournament results reading logic
+    def readTourneyResults(self, hand: Hand) -> None:  # noqa: ARG002
+        """Read tournament results embedded in the hand text.
+
+        Winning Poker hand histories carry no per-hand tournament result data:
+        the ``*** SUMMARY ***`` section only reports per-seat fold/showdown
+        status, and there are no bounty/knockout lines to populate
+        ``hand.koCounts``. Finishing positions and payouts come from the tourney
+        summary parser instead, so this hook is intentionally a no-op.
+        """
 
     def readShownCards(self, hand) -> None:
         log.debug("Starting readShownCards")
