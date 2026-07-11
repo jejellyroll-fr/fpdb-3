@@ -1433,6 +1433,13 @@ class ModernHudPreferences(QDialog):
         self.positional_mode_combo.currentIndexChanged.connect(self._on_positional_mode_changed)
         profile_bar.addWidget(self.positional_mode_combo)
 
+        # Whether the hero's own stat windows are drawn (multi-block HUDs are
+        # usually hero-hidden; this exposes the toggle per profile).
+        profile_bar.addSpacing(20)
+        self.show_hero_checkbox = QCheckBox("Show hero HUD")
+        self.show_hero_checkbox.toggled.connect(self._on_show_hero_changed)
+        profile_bar.addWidget(self.show_hero_checkbox)
+
         profile_bar.addSpacing(20)
 
         # Profile action buttons with better styling
@@ -2207,6 +2214,9 @@ class ModernHudPreferences(QDialog):
                 # "all" = show every position panel stacked; "current" = only the
                 # panel matching the last imported position. Editable in the UI.
                 "positional_mode": getattr(stat_set, "positional_mode", "all") or "all",
+                # "" (default), "true" or "false": whether the hero's own stat
+                # windows are drawn. Multi-block HUDs default to hidden.
+                "show_hero_hud": getattr(stat_set, "show_hero_hud", "") or "",
                 "blocks": block_meta,
                 "stats": stats,
             }
@@ -2545,6 +2555,13 @@ class ModernHudPreferences(QDialog):
         if isinstance(profile, dict):
             profile["positional_mode"] = self.positional_mode_combo.currentData() or "all"
 
+    def _on_show_hero_changed(self, checked: bool) -> None:
+        """Store the hero-HUD visibility on the current profile."""
+        name = self.profile_combo.currentText()
+        profile = self.hud_profiles.get(name) if self.hud_profiles else None
+        if isinstance(profile, dict):
+            profile["show_hero_hud"] = "true" if checked else "false"
+
     def on_profile_selected(self, index) -> None:
         if index < 0 or index >= self.profile_combo.count():
             self.stat_table.setRowCount(0)
@@ -2565,6 +2582,20 @@ class ModernHudPreferences(QDialog):
             self.positional_mode_combo.blockSignals(True)
             self.positional_mode_combo.setCurrentIndex(max(0, self.positional_mode_combo.findData(mode)))
             self.positional_mode_combo.blockSignals(False)
+
+        if getattr(self, "show_hero_checkbox", None) is not None:
+            # Interpret the stored value; empty defaults to hidden for multi-block
+            # HUDs (their convention) and shown otherwise.
+            raw = str(profile.get("show_hero_hud", "")).strip().lower() if isinstance(profile, dict) else ""
+            if raw in ("true", "yes", "1", "on"):
+                show_hero = True
+            elif raw in ("false", "no", "0", "off"):
+                show_hero = False
+            else:
+                show_hero = not (isinstance(profile, dict) and profile.get("multiblock"))
+            self.show_hero_checkbox.blockSignals(True)
+            self.show_hero_checkbox.setChecked(show_hero)
+            self.show_hero_checkbox.blockSignals(False)
 
         # Handle both old format (list) and new format (dict with rows/cols/stats)
         if isinstance(profile, list):
@@ -3958,6 +3989,9 @@ class ModernHudPreferences(QDialog):
                             stat_set_node.setAttribute(
                                 "positional_mode", profile_data.get("positional_mode", "all") or "all"
                             )
+                        # Persist hero-HUD visibility when explicitly set.
+                        if profile_data.get("show_hero_hud"):
+                            stat_set_node.setAttribute("show_hero_hud", profile_data["show_hero_hud"])
 
                     self._write_profile_stats(stat_set_node, profile_data, rows, cols)
 
