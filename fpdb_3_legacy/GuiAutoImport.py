@@ -9,6 +9,7 @@ if os.getenv("FPDB_FORCE_X11") == "1":
 
 import subprocess
 import sys
+import time
 import traceback
 from optparse import OptionParser
 
@@ -91,6 +92,8 @@ class GuiAutoImport(QWidget):
         self.pipe_to_hud = None
         self.doAutoImportBool = False
 
+        self.cli = cli
+
         self.importer = Importer.Importer(self, self.settings, self.config, self.sql)
 
         self.importer.setCallHud(True)
@@ -106,11 +109,8 @@ class GuiAutoImport(QWidget):
         if cli is False:
             self.setupGui()
             self._setup_config_observer()
-        else:
-            # TODO: Separate the code that grabs the directories from config
-            #       Separate the calls to the Importer API
-            #       Create a timer interface that doesn't rely on GTK
-            raise NotImplementedError
+        # In headless (cli) mode there is no GUI to build and no config observer
+        # to attach; the caller drives the import loop via run_headless().
 
     def setupGui(self) -> None:
         self.setWindowTitle("FPDB Auto Import")
@@ -200,6 +200,12 @@ class GuiAutoImport(QWidget):
             self.addText(f"Unable to apply theme {theme_name}\n", "warning")
 
     def addText(self, text, level="info") -> None:
+        if getattr(self, "cli", False):
+            # Headless mode: no GUI log view — route to the logger instead.
+            message = text.strip()
+            if message:
+                {"error": log.error, "warning": log.warning}.get(level, log.info)(message)
+            return
         try:
             self.log_message.emit(text, level)
         except RuntimeError:
@@ -341,6 +347,87 @@ class GuiAutoImport(QWidget):
         log.error(f"AutoImport: background import cycle failed: {error_msg}")
         self.addText(f"Auto Import Error: {error_msg}\n", "error")
 
+    def run_headless(self, interval: int | None = None, launch_hud: bool = True) -> int:
+        """Run the auto-import loop without a GUI (used by the ``-q``/``--quiet`` mode).
+
+        Watches the hand-history and tournament-summary directories configured for
+        the enabled sites and imports new/updated files on a fixed interval — the
+        same engine the GUI auto-import tab drives, but stepped by a plain
+        ``time.sleep`` loop instead of a Qt timer. Runs until interrupted
+        (Ctrl+C / SIGTERM).
+
+        Like the GUI "Start Auto Import" button, this launches the HUD subprocess
+        (``launch_hud=True``) and feeds it the imported hands over ZMQ. Note the
+        HUD is itself a GUI overlay, so a display must be available.
+
+        Args:
+            interval: Seconds between import cycles. Defaults to the ``interval``
+                import parameter from the configuration.
+            launch_hud: Whether to spawn the HUD_main subprocess. Set False to run
+                a pure background importer with no HUD.
+
+        Returns:
+            int: Process exit code (0 on clean shutdown, 1 if the global lock is
+            unavailable).
+        """
+        if interval is None:
+            try:
+                interval = int(self.config.get_import_parameters().get("interval"))
+            except (TypeError, ValueError):
+                interval = 10
+        interval = max(1, interval)
+
+        lock = self.settings.get("global_lock")
+        if lock is not None and not lock.acquire(wait=False, source="AutoImport"):
+            log.error("Auto Import aborted: global lock not available (another fpdb import running?).")
+            return 1
+
+        log.info("Headless auto-import started (interval: %ss). Press Ctrl+C to stop.", interval)
+        self.doAutoImportBool = True
+
+        if launch_hud and self.pipe_to_hud is None:
+            # HUD_main uses fpdb's shared option parser and rejects the
+            # auto-import's own -q flag, so hand it HUD-appropriate options (the
+            # config path) instead of whatever this process was invoked with.
+            config_file = getattr(self.config, "file", None)
+            self.settings["cl_options"] = f"-c {config_file}" if config_file else ""
+            try:
+                self._launch_hud()
+                log.info("HUD launched.")
+            except (OSError, ValueError):
+                # A missing HUD must not stop imports; log and carry on headless.
+                log.warning("Could not launch HUD; continuing without it: %s", traceback.format_exc())
+
+        try:
+            self.updatePaths()
+            while True:
+                try:
+                    self.importer.autoSummaryGrab()
+                    self.importer.runUpdated()
+                except Exception:
+                    # One bad cycle must not kill the daemon; log and keep watching.
+                    log.exception("Auto-import cycle failed; continuing.")
+                time.sleep(interval)
+        except KeyboardInterrupt:
+            log.info("Stopping headless auto-import (interrupt received).")
+        finally:
+            self.doAutoImportBool = False
+            try:
+                self.importer.autoSummaryGrab(force=True)
+            except Exception:
+                log.exception("Final tournament-summary grab failed.")
+            if self.pipe_to_hud is not None:
+                try:
+                    self.pipe_to_hud.terminate()
+                except OSError:
+                    log.debug("HUD subprocess already gone.")
+                self.pipe_to_hud = None
+                log.info("HUD subprocess stopped.")
+            if lock is not None:
+                lock.release()
+                log.info("Global lock released.")
+        return 0
+
     def reset_startbutton(self) -> bool:
         if self.pipe_to_hud is not None:
             self.startButton.set_label("Stop Auto Import")
@@ -374,6 +461,100 @@ class GuiAutoImport(QWidget):
                 log.debug(file)
         return False
 
+    @staticmethod
+    def _hud_base_path() -> str:
+        """Return the directory that contains HUD_main(.pyw), resolved robustly.
+
+        Frozen builds unpack their resources next to ``sys._MEIPASS``. Otherwise
+        HUD_main lives next to this module (both in ``fpdb_3_legacy``), so resolve
+        it relative to ``__file__`` rather than ``sys.path[0]``/CWD, which depend
+        on how the process was launched (e.g. ``python -m ...`` vs the installed
+        entry point).
+        """
+        if getattr(sys, "frozen", False):
+            return sys._MEIPASS
+        return os.path.dirname(os.path.abspath(__file__))
+
+    def _launch_hud(self) -> None:
+        """Build the HUD_main command for the current install method and spawn it.
+
+        Sets ``self.pipe_to_hud`` to the launched subprocess. Raises OSError or
+        ValueError on failure (callers decide how to surface it). Shared by the
+        GUI auto-import (startClicked) and the headless mode (run_headless).
+        """
+        # ------------------------------------------------------------------
+        # 1) build command line
+        # ------------------------------------------------------------------
+        if getattr(sys, "frozen", False) == "pyoxidizer":
+            command = [sys.executable, "--hud", *self.settings["cl_options"].split()]
+            bs = 1
+
+        elif self.config.install_method == "exe":
+            command = "HUD_main.exe"
+            bs = 0
+
+        elif self.config.install_method == "app":
+            base_path = self._hud_base_path()
+            command = os.path.join(base_path, "HUD_main")
+            if not os.path.isfile(command):
+                msg = f"HUD_main not found at {command}"
+                raise FileNotFoundError(msg)
+            bs = 1
+
+        elif os.name == "nt":  # Windows installation source
+            path = to_raw(self._hud_base_path())
+            use_pythonw = win32console.GetConsoleWindow() == 0
+            # Use the current interpreter (e.g. the uv/venv python) so the
+            # HUD subprocess shares the same environment and installed
+            # packages (zmq, PyQt, ...). Falling back to a bare
+            # "python"/"pythonw" from PATH would pick a different
+            # interpreter that may lack our dependencies.
+            interpreter = sys.executable
+            if use_pythonw:
+                pythonw = os.path.join(os.path.dirname(interpreter), "pythonw.exe")
+                if os.path.isfile(pythonw):
+                    interpreter = pythonw
+            command = f'"{interpreter}" "{path}\\HUD_main.pyw" {self.settings["cl_options"]}'
+            bs = 0
+
+        else:  # Linux & macOS installation source
+            base_path = self._hud_base_path()
+            command = os.path.join(base_path, "HUD_main.pyw")
+            if not os.path.isfile(command):
+                self.addText(f"\n*** {command} was not found", "error")
+            command = [command, *self.settings["cl_options"].split()]
+            bs = 1
+
+        # ------------------------------------------------------------------
+        # 2) prepare env for sub process
+        # ------------------------------------------------------------------
+        env = None  # default
+
+        if sys.platform.startswith("linux") and os.getenv("FPDB_FORCE_X11") == "1":
+            env = os.environ.copy()
+            env.setdefault("QT_QPA_PLATFORM", "xcb")
+            env.setdefault("FPDB_FORCE_X11", "1")
+
+        log.info("opening pipe to HUD")
+        log.debug(f"Running {command!r} with bs={bs}")
+
+        # ------------------------------------------------------------------
+        # 3) launch HUD
+        # ------------------------------------------------------------------
+        popen_kwargs = {
+            "bufsize": bs,
+            "stdin": subprocess.PIPE,
+            "universal_newlines": True,
+        }
+        # Capture stdout/err for windows « exe »
+        if self.config.install_method == "exe" or (os.name == "nt" and win32console.GetConsoleWindow() == 0):
+            popen_kwargs.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        if env is not None:
+            popen_kwargs["env"] = env
+
+        self.pipe_to_hud = subprocess.Popen(command, **popen_kwargs)
+
     def startClicked(self) -> None:
         """Runs when user clicks start on auto import tab."""
         # Check to see if we have an open file handle to the HUD and open one if we do not.
@@ -401,88 +582,14 @@ class GuiAutoImport(QWidget):
                 if self.pipe_to_hud is None:
                     log.debug("start hud - pipe_to_hud is none:")
                     try:
-                        # ------------------------------------------------------------------
-                        # 1) build command line
-                        # ------------------------------------------------------------------
-                        if getattr(sys, "frozen", False) == "pyoxidizer":
-                            command = [sys.executable, "--hud", *self.settings["cl_options"].split()]
-                            bs = 1
-
-                        elif self.config.install_method == "exe":
-                            command = "HUD_main.exe"
-                            bs = 0
-
-                        elif self.config.install_method == "app":
-                            base_path = sys._MEIPASS if getattr(sys, "frozen", False) else sys.path[0]
-                            command = os.path.join(base_path, "HUD_main")
-                            if not os.path.isfile(command):
-                                msg = f"HUD_main not found at {command}"
-                                raise FileNotFoundError(msg)
-                            bs = 1
-
-                        elif os.name == "nt":  # Windows installation source
-                            path = to_raw(sys.path[0])
-                            use_pythonw = win32console.GetConsoleWindow() == 0
-                            # Use the current interpreter (e.g. the uv/venv python) so the
-                            # HUD subprocess shares the same environment and installed
-                            # packages (zmq, PyQt, ...). Falling back to a bare
-                            # "python"/"pythonw" from PATH would pick a different
-                            # interpreter that may lack our dependencies.
-                            interpreter = sys.executable
-                            if use_pythonw:
-                                pythonw = os.path.join(os.path.dirname(interpreter), "pythonw.exe")
-                                if os.path.isfile(pythonw):
-                                    interpreter = pythonw
-                            command = f'"{interpreter}" "{path}\\HUD_main.pyw" {self.settings["cl_options"]}'
-                            bs = 0
-
-                        else:  # Linux & macOS installation source
-                            base_path = sys._MEIPASS if getattr(sys, "frozen", False) else sys.path[0] or os.getcwd()
-                            command = os.path.join(base_path, "HUD_main.pyw")
-                            if not os.path.isfile(command):
-                                self.addText(f"\n*** {command} was not found", "error")
-                            command = [command, *self.settings["cl_options"].split()]
-                            bs = 1
-
-                        # ------------------------------------------------------------------
-                        # 2) prepare env for sub process
-                        # ------------------------------------------------------------------
-                        env = None  # default
-
-                        if sys.platform.startswith("linux") and os.getenv("FPDB_FORCE_X11") == "1":
-                            env = os.environ.copy()
-                            env.setdefault("QT_QPA_PLATFORM", "xcb")
-                            env.setdefault("FPDB_FORCE_X11", "1")
-
-                        log.info("opening pipe to HUD")
-                        log.debug(f"Running {command!r} with bs={bs}")
-
-                        # ------------------------------------------------------------------
-                        # 3) launchHUD
-                        # ------------------------------------------------------------------
-                        popen_kwargs = {
-                            "bufsize": bs,
-                            "stdin": subprocess.PIPE,
-                            "universal_newlines": True,
-                        }
-                        # Capture stdout/err for windows « exe »
-                        if self.config.install_method == "exe" or (
-                            os.name == "nt" and win32console.GetConsoleWindow() == 0
-                        ):
-                            popen_kwargs.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-                        if env is not None:
-                            popen_kwargs["env"] = env
-
-                        self.pipe_to_hud = subprocess.Popen(command, **popen_kwargs)
-
+                        self._launch_hud()
                     except (OSError, ValueError):
                         error_msg = f"GuiAutoImport Error opening pipe: {traceback.format_exc()}"
                         log.warning(error_msg)
                         self.addText(f"\n*** {error_msg}", "error")
                     else:
                         # ------------------------------------------------------------------
-                        # 4) path config, timer, etc.
+                        # path config, timer, etc.
                         # ------------------------------------------------------------------
                         self.updatePaths()
 
@@ -664,6 +771,7 @@ def main(argv=None):
         app.exec()
     else:
         i = GuiAutoImport(settings, config, cli=True)
+        return i.run_headless()
 
     return 0
 

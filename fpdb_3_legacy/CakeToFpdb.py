@@ -235,17 +235,20 @@ class Cake(HandHistoryConverter):
         re.MULTILINE,
     )
 
-    def compilePlayerRegexs(self, hand: list[str]) -> None:
-        """Compiles regular expressions representing the cards in a player's hand.
+    def compilePlayerRegexs(self, hand: "Hand") -> None:  # noqa: ARG002
+        """Compile player-dependent regexes.
+
+        Cake's player-related regexes (``re_hero_cards``, ``re_shown_cards``,
+        ``re_action``, ``re_collect_pot`` ...) are compiled at class level with a
+        generic ``PLYR`` pattern that matches any player name, so there is nothing
+        to recompile per hand. This override is intentionally a no-op.
 
         Args:
-            hand (list[str]): The cards in the player's hand.
+            hand: The Hand object being parsed (unused).
 
         Returns:
-            list[re.Pattern]: A list of compiled regular expressions, one for each card in the player's hand.
-
+            None
         """
-        # TODO(maintainer): Implement this function.
 
     def readSupportedGames(self) -> list[list[str]]:
         """Returns a list of supported games.

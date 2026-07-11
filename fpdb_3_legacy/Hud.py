@@ -1,5 +1,5 @@
 """Hud.py.
-from __future__ import annotations
+
 Create and manage the hud overlays.
 """
 #    Copyright 2008-2012  Ray E. Barker
@@ -20,14 +20,14 @@ Create and manage the hud overlays.
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 ########################################################################
-# TODO(R Barker): Complete Hud implementation.
+
+from __future__ import annotations
 
 import copy
 from typing import Any
 
 #    FreePokerTools modules
-from fpdb_3_legacy import Database
-from fpdb_3_legacy import Hand
+from fpdb_3_legacy import Database, Hand
 
 #    Standard Library modules
 from fpdb_3_legacy.loggingFpdb import get_logger
